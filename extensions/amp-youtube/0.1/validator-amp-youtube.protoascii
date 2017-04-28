@@ -41,7 +41,7 @@ tags: {  # <amp-youtube>
   # <amp-bind>
   attrs: { name: "[data-videoid]" }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-youtube"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-youtube"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

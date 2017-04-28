@@ -1,4 +1,4 @@
 FAIL
-amp-ooyala-player/0.1/test/validator-amp-ooyala.html:51:4 The mandatory attribute 'data-pcode' is missing in tag 'amp-ooyala-player'. (see https://www.ampproject.org/docs/reference/components/media/amp-ooyala-player) [AMP_TAG_PROBLEM]
-amp-ooyala-player/0.1/test/validator-amp-ooyala.html:59:4 The mandatory attribute 'data-embedcode' is missing in tag 'amp-ooyala-player'. (see https://www.ampproject.org/docs/reference/components/media/amp-ooyala-player) [AMP_TAG_PROBLEM]
-amp-ooyala-player/0.1/test/validator-amp-ooyala.html:67:4 The mandatory attribute 'data-playerid' is missing in tag 'amp-ooyala-player'. (see https://www.ampproject.org/docs/reference/components/media/amp-ooyala-player) [AMP_TAG_PROBLEM]
+amp-ooyala-player/0.1/test/validator-amp-ooyala.html:51:4 The mandatory attribute 'data-pcode' is missing in tag 'amp-ooyala-player'. (see https://www.ampproject.org/docs/reference/components/amp-ooyala-player) [AMP_TAG_PROBLEM]
+amp-ooyala-player/0.1/test/validator-amp-ooyala.html:59:4 The mandatory attribute 'data-embedcode' is missing in tag 'amp-ooyala-player'. (see https://www.ampproject.org/docs/reference/components/amp-ooyala-player) [AMP_TAG_PROBLEM]
+amp-ooyala-player/0.1/test/validator-amp-ooyala.html:67:4 The mandatory attribute 'data-playerid' is missing in tag 'amp-ooyala-player'. (see https://www.ampproject.org/docs/reference/components/amp-ooyala-player) [AMP_TAG_PROBLEM]

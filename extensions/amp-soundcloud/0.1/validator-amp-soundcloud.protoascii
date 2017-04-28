@@ -50,7 +50,7 @@ tags: {  # <amp-soundcloud>
     value_regex: "true|false"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-soundcloud"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-soundcloud"
   amp_layout: {
     supported_layouts: FIXED_HEIGHT
   }

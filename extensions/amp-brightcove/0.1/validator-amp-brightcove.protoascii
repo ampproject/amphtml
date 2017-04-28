@@ -44,7 +44,7 @@ tags: {  # <amp-brightcove>
   attrs: { name: "[data-playlist-id]" }
   attrs: { name: "[data-video-id]" }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-brightcove"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-brightcove"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
