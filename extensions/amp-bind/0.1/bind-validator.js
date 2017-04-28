@@ -215,6 +215,7 @@ function createElementRules_() {
     },
     'AMP-CAROUSEL': {
       'slide': null,
+      'slide-count': null,
     },
     'AMP-IFRAME': {
       'src': null,

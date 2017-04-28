@@ -220,6 +220,22 @@ export class AmpSlideScroll extends BaseSlides {
     if (slide !== undefined) {
       this.showSlideWhenReady_(slide);
     }
+    let slideCount = Number(mutations['slide-count']);
+    if (isFinite(slideCount)) {
+      // Clamp count to between 0 and the total number of slides
+      slideCount = Math.max(Math.min(this.slides_.length, slideCount), 0);
+      this.noOfSlides_ = slideCount;
+      if (this.slideIndex_ !== null) {
+        if (this.slideIndex_ >= this.noOfSlides_) {
+          this.showSlide_(this.noOfSlides_ - 1);
+        } else {
+          const slideIndex = dev().assertNumber(this.slideIndex_);
+          const showIndexArr = this.calculateShownSlides_(slideIndex);
+          this.hideRestOfTheSlides_(showIndexArr);
+        }
+        this.setControlsState();
+      }
+    }
   }
 
   /**
@@ -296,7 +312,7 @@ export class AmpSlideScroll extends BaseSlides {
 
   /** @override */
   hasNext() {
-    return this.shouldLoop || this.slideIndex_ < this.slides_.length - 1;
+    return this.shouldLoop || this.slideIndex_ < this.noOfSlides_ - 1;
   }
 
   /** @override */
@@ -506,19 +522,13 @@ export class AmpSlideScroll extends BaseSlides {
   }
 
   /**
-   * Makes the slide corresponding to the given index and the slides surrounding
-   *     it available for display.
-   * @note Element must be laid out.
-   * @param {number} newIndex Index of the slide to be displayed.
+   * Calculate which slides should be shown.
+   * @param {number} newIndex Index of the slide to be displayed
+   * @return {!Array<number>}
    * @private
    */
-  showSlide_(newIndex) {
+  calculateShownSlides_(newIndex) {
     const noOfSlides_ = this.noOfSlides_;
-    if (newIndex < 0 ||
-        newIndex >= noOfSlides_ ||
-        this.slideIndex_ == newIndex) {
-      return;
-    }
     const prevIndex = (newIndex - 1 >= 0) ? newIndex - 1 :
         (this.shouldLoop) ? noOfSlides_ - 1 : null;
     const nextIndex = (newIndex + 1 < noOfSlides_) ? newIndex + 1 :
@@ -532,6 +542,23 @@ export class AmpSlideScroll extends BaseSlides {
     if (nextIndex != null) {
       showIndexArr.push(nextIndex);
     }
+    return showIndexArr;
+  }
+
+  /**
+   * Makes the slide corresponding to the given index and the slides surrounding
+   *     it available for display.
+   * @note Element must be laid out.
+   * @param {number} newIndex Index of the slide to be displayed.
+   * @private
+   */
+  showSlide_(newIndex) {
+    if (newIndex < 0 ||
+        newIndex >= this.noOfSlides_ ||
+        this.slideIndex_ == newIndex) {
+      return;
+    }
+    const showIndexArr = this.calculateShownSlides_(newIndex);
     if (this.slideIndex_ !== null) {
       this.updateInViewport(this.slides_[
           dev().assertNumber(this.slideIndex_)], false);
@@ -598,8 +625,8 @@ export class AmpSlideScroll extends BaseSlides {
    * @private
    */
   hideRestOfTheSlides_(indexArr) {
-    const noOfSlides_ = this.noOfSlides_;
-    for (let i = 0; i < noOfSlides_; i++) {
+    const totalNumSlides = this.slides_.length;
+    for (let i = 0; i < totalNumSlides; i++) {
       if (!this.slideWrappers_[i].classList.contains(SHOWN_CSS_CLASS)) {
         continue;
       }
