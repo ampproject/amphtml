@@ -70,14 +70,37 @@ function getCommentsContainer(global, data) {
 }
 
 /**
+ * Create DOM element for the Facebook like-button plugin:
+ * Reference: https://developers.facebook.com/docs/plugins/like-button
+ * @param {!Window} global
+ * @param {!Object} data The element data
+ * @return {!Element} div
+ */
+function getLikeContainer(global, data) {
+  const container = global.document.createElement('div');
+  container.className = 'fb-like';
+  container.setAttribute('data-action', data.action || 'like');
+  container.setAttribute('data-colorscheme', data.colorscheme || 'light');
+  container.setAttribute('data-href', data.href);
+  container.setAttribute('data-kd_site', data.kd_site || 'false');
+  container.setAttribute('data-layout', data.layout || 'standard');
+  container.setAttribute('data-ref', data.ref || '');
+  container.setAttribute('data-share', data.share || 'false');
+  container.setAttribute('data-show_faces', data.show_faces || 'false');
+  container.setAttribute('data-size', data.size || 'small');
+  return container;
+}
+
+/**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function facebook(global, data) {
   const extension = global.context.tagName;
   let container;
-
-  if (extension === 'AMP-FACEBOOK-COMMENTS') {
+  if (extension === 'AMP-FACEBOOK-LIKE') {
+    container = getLikeContainer(global, data);
+  } else if (extension === 'AMP-FACEBOOK-COMMENTS') {
     container = getCommentsContainer(global, data);
   } else /*AMP-FACEBOOK */ {
     container = getPostContainer(global, data);
