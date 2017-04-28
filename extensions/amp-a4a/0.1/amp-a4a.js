@@ -242,9 +242,6 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?AMP.AmpAdXOriginIframeHandler} */
     this.xOriginIframeHandler_ = null;
 
-    /** @private {boolean} whether layoutMeasure has been executed. */
-    this.layoutMeasureExecuted_ = false;
-
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
 
@@ -330,6 +327,12 @@ export class AmpA4A extends AMP.BaseElement {
      * {?HTMLIframeElement}
      */
     this.iframe = null;
+
+    /**
+     * @return whether most recent ad request was generated as part of resume
+     *    callback.
+     */
+    this.fromResumeCallback = false;
   }
 
   /** @override */
@@ -420,25 +423,38 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /** @override */
-  onLayoutMeasure() {
-    if (this.xOriginIframeHandler_) {
-      this.xOriginIframeHandler_.onLayoutMeasure();
+  resumeCallback() {
+    this.protectedEmitLifecycleEvent_('resumeCallback');
+    this.fromResumeCallback = true;
+    // If layout of page has not changed, onLayoutMeasure will not be called
+    // so do so explicitly.
+    const resource =
+      this.element.getResources().getResourceForElement(this.element);
+    if (resource.hasBeenMeasured() && !resource.isMeasureRequested()) {
+      this.onLayoutMeasure();
     }
-    if (this.layoutMeasureExecuted_ ||
-        !this.crypto_.isCryptoAvailable()) {
-      // onLayoutMeasure gets called multiple times.
-      return;
+  }
+
+  /**
+   * @return {boolean} whether environment/element should initialize ad request
+   *    promise chain.
+   * @private
+   */
+  shouldInitializePromiseChain_() {
+    if (!this.crypto_.isCryptoAvailable()) {
+      return false;
     }
     const slotRect = this.getIntersectionElementLayoutBox();
     if (slotRect.height == 0 || slotRect.width == 0) {
       dev().fine(
         TAG, 'onLayoutMeasure canceled due height/width 0', this.element);
-      return;
+      return false;
     }
-    user().assert(isAdPositionAllowed(this.element, this.win),
-        '<%s> is not allowed to be placed in elements with ' +
-        'position:fixed: %s', this.element.tagName, this.element);
-    this.layoutMeasureExecuted_ = true;
+    if (!isAdPositionAllowed(this.element, this.win)) {
+      user().warn(`<${this.element.tagName}> is not allowed to be placed in ` +
+        `elements with position:fixed: ${this.element}`);
+      return false;
+    }
     // OnLayoutMeasure can be called when page is in prerender so delay until
     // visible.  Assume that it is ok to call isValidElement as it should
     // only being looking at window, immutable properties (i.e. location) and
@@ -447,20 +463,20 @@ export class AmpA4A extends AMP.BaseElement {
       // TODO(kjwright): collapse?
       user().warn(TAG, this.element.getAttribute('type'),
           'Amp ad element ignored as invalid', this.element);
-      return;
+      return false;
+    }
+    return true;
+  }
+
+  /** @override */
+  onLayoutMeasure() {
+    if (this.xOriginIframeHandler_) {
+      this.xOriginIframeHandler_.onLayoutMeasure();
     }
 
-    // Increment unique promise ID so that if its value changes within the
-    // promise chain due to cancel from unlayout, the promise will be rejected.
-    this.promiseId_++;
-    const promiseId = this.promiseId_;
-    // Shorthand for: reject promise if current promise chain is out of date.
-    const checkStillCurrent = promiseId => {
-      if (promiseId != this.promiseId_) {
-        throw cancellation();
-      }
-    };
-
+    if (this.adPromise_ || !this.shouldInitializePromiseChain_()) {
+      return;
+    }
     // If in localDev `type=fake` Ad specifies `force3p`, it will be forced
     // to go via 3p.
     if (getMode().localDev &&
@@ -470,6 +486,16 @@ export class AmpA4A extends AMP.BaseElement {
       this.adPromise_ = Promise.resolve();
       return;
     }
+
+    // Increment unique promise ID so that if its value changes within the
+    // promise chain due to cancel from unlayout, the promise will be rejected.
+    const promiseId = ++this.promiseId_;
+    // Shorthand for: reject promise if current promise chain is out of date.
+    const checkStillCurrent = promiseId => {
+      if (promiseId != this.promiseId_) {
+        throw cancellation();
+      }
+    };
 
     // Return value from this chain: True iff rendering was "successful"
     // (i.e., shouldn't try to render later via iframe); false iff should
@@ -800,6 +826,9 @@ export class AmpA4A extends AMP.BaseElement {
   layoutCallback() {
     // Promise may be null if element was determined to be invalid for A4A.
     if (!this.adPromise_) {
+      if (this.shouldInitializePromiseChain_()) {
+        dev().error(TAG, 'Null promise in layoutCallback');
+      }
       return Promise.resolve();
     }
     // There's no real throttling with A4A, but this is the signal that is
@@ -844,6 +873,8 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override  */
   unlayoutCallback() {
+    // Increment promiseId to cause any pending promise to cancel.
+    this.promiseId_++;
     this.protectedEmitLifecycleEvent_('adSlotCleared');
     this.uiHandler.setDisplayState(AdDisplayState.NOT_LAID_OUT);
     this.isCollapsed_ = false;
@@ -852,11 +883,6 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.friendlyIframeEmbed_) {
       this.friendlyIframeEmbed_.destroy();
       this.friendlyIframeEmbed_ = null;
-    }
-
-    // Remove creative and reset to allow for creation of new ad.
-    if (!this.layoutMeasureExecuted_) {
-      return true;
     }
 
     // Remove rendering frame, if it exists.
@@ -869,15 +895,13 @@ export class AmpA4A extends AMP.BaseElement {
     this.adUrl_ = null;
     this.creativeBody_ = null;
     this.isVerifiedAmpCreative_ = false;
+    this.fromResumeCallback = false;
     this.experimentalNonAmpCreativeRenderMethod_ =
         platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.freeXOriginIframe();
       this.xOriginIframeHandler_ = null;
     }
-    this.layoutMeasureExecuted_ = false;
-    // Increment promiseId to cause any pending promise to cancel.
-    this.promiseId_++;
     return true;
   }
 
