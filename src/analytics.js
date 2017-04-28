@@ -21,6 +21,7 @@ import {
 import {createElementWithAttributes} from './dom';
 import {getAmpdoc} from './service';
 import {extensionsFor} from './services';
+import {dev} from './log';
 
 
 /**
