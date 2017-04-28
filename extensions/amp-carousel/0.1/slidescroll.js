@@ -684,10 +684,10 @@ export class AmpSlideScroll extends BaseSlides {
     }
     const fromSlide =
         this.slideIndex_ === null ?
-            'null': this.dataSlideIdArr_[dev().assertNumber(this.slideIndex_)];
+            'null' : this.dataSlideIdArr_[dev().assertNumber(this.slideIndex_)];
 
     const vars = {
-      'fromSlide': fromSlide,
+      fromSlide,
       'toSlide': this.dataSlideIdArr_[newSlideIndex],
     };
     this.analyticsEvent_('amp-carousel-change', vars);
