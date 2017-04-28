@@ -38,8 +38,9 @@ import {viewerForDoc} from '../../../src/services';
 import {cryptoFor} from '../../../src/crypto';
 import {tryParseJson} from '../../../src/json';
 import {timerFor} from '../../../src/services';
-import {user, rethrowAsync} from '../../../src/log';
+import {dev, user, rethrowAsync} from '../../../src/log';
 
+const TAG = 'cid';
 const ONE_DAY_MILLIS = 24 * 3600 * 1000;
 
 /**
@@ -313,8 +314,10 @@ export function viewerBaseCid(ampdoc, opt_data) {
     }
     const cidPromise = viewer.sendMessageAwaitResponse('cid', opt_data)
         .then(data => {
+          // TODO(dvoytenko, #9019): cleanup the legacy CID format.
           // For backward compatibility: #4029
           if (data && !tryParseJson(data)) {
+            dev().error(TAG, 'invalid cid format');
             return JSON.stringify({
               time: Date.now(), // CID returned from old API is always fresh
               cid: data,
