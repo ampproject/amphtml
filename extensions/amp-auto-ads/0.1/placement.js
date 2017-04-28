@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {getAttributesFromConfigObj} from './attributes';
 import {resourcesForDoc} from '../../../src/services';
 import {
@@ -217,7 +217,7 @@ export class Placement {
 export function getPlacementsFromConfigObj(win, configObj) {
   const placementObjs = configObj['placements'];
   if (!placementObjs) {
-    dev().warn(TAG, 'No placements in config');
+    user().warn(TAG, 'No placements in config');
     return [];
   }
   const placements = [];
@@ -237,18 +237,18 @@ export function getPlacementsFromConfigObj(win, configObj) {
 function getPlacementsFromObject(win, placementObj, placements) {
   const injector = INJECTORS[placementObj['pos']];
   if (!injector) {
-    dev().warn(TAG, 'No injector for position');
+    user().warn(TAG, 'No injector for position');
     return;
   }
   const anchor = placementObj['anchor'];
   if (!anchor) {
-    dev().warn(TAG, 'No anchor in placement');
+    user().warn(TAG, 'No anchor in placement');
     return;
   }
   const anchorElements =
       getAnchorElements(win.document.documentElement, anchor);
   if (!anchorElements.length) {
-    dev().warn(TAG, 'No anchor element found');
+    user().warn(TAG, 'No anchor element found');
     return;
   }
   let margins = undefined;
@@ -282,7 +282,7 @@ function getPlacementsFromObject(win, placementObj, placements) {
 function getAnchorElements(rootElement, anchorObj) {
   const selector = anchorObj['selector'];
   if (!selector) {
-    dev().warn(TAG, 'No selector in anchor');
+    user().warn(TAG, 'No selector in anchor');
     return [];
   }
   let elements = [].slice.call(scopedQuerySelectorAll(rootElement, selector));
@@ -323,13 +323,13 @@ function isPositionValid(anchorElement, position) {
       position == Position.BEFORE || position == Position.AFTER ?
           anchorElement.parentElement : anchorElement;
   if (!elementToCheckOrNull) {
-    dev().warn(TAG, 'Parentless anchor with BEFORE/AFTER position.');
+    user().warn(TAG, 'Parentless anchor with BEFORE/AFTER position.');
     return false;
   }
   const elementToCheck = dev().assertElement(elementToCheckOrNull);
   return !BLACKLISTED_ANCESTOR_TAGS.some(tagName => {
     if (closestByTag(elementToCheck, tagName)) {
-      dev().warn(TAG, 'Placement inside blacklisted ancestor: ' + tagName);
+      user().warn(TAG, 'Placement inside blacklisted ancestor: ' + tagName);
       return true;
     }
     return false;
