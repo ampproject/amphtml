@@ -27,7 +27,11 @@ import {isExperimentOn} from '../../../src/experiments';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isFiniteNumber} from '../../../src/types';
 import {reportError} from '../../../src/error';
-import {ampFormServiceForDoc, resourcesForDoc} from '../../../src/services';
+import {
+  ampFormServiceForDoc,
+  resourcesForDoc,
+  viewerForDoc,
+} from '../../../src/services';
 import {filterSplice} from '../../../src/utils/array';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
 
@@ -124,13 +128,17 @@ export class Bind {
       this.evaluator_ = new BindEvaluator();
     }
 
+    /** @const @private {!../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = viewerForDoc(this.ampdoc);
+
     /**
      * Resolved when the service is fully initialized.
      * @const @private {Promise}
      */
-    this.initializePromise_ = this.ampdoc.whenReady().then(() => {
-      return this.initialize_();
-    });
+    this.initializePromise_ = Promise.all([
+      this.ampdoc.whenReady(),
+      this.viewer_.whenFirstVisible(), // Don't initialize in prerender mode.
+    ]).then(() => this.initialize_());
 
     /**
      * @private {?Promise}
