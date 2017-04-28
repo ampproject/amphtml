@@ -674,12 +674,20 @@ export class AmpSlideScroll extends BaseSlides {
     if (direction == 0) {
       return;
     } else if (Math.abs(direction) !== 1) {
-      // When the direction is not +1 or -1 (happens with loops)
+      // When the direction is not +1 or -1 (happens with loops or when
+      // this.slideIndex_ is null (first slide))
       // Set the correct direction.
       direction = direction < 0 ? 1 : -1;
+      if (this.slideIndex_ === null) {
+        direction = 1;
+      }
     }
+    const fromSlide =
+        this.slideIndex_ === null ?
+            'null': this.dataSlideIdArr_[dev().assertNumber(this.slideIndex_)];
+
     const vars = {
-      'fromSlide': this.dataSlideIdArr_[dev().assertNumber(this.slideIndex_)],
+      'fromSlide': fromSlide,
       'toSlide': this.dataSlideIdArr_[newSlideIndex],
     };
     this.analyticsEvent_('amp-carousel-change', vars);
