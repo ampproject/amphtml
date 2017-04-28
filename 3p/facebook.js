@@ -88,7 +88,6 @@ function getLikeContainer(global, data) {
   container.setAttribute('data-share', data.share || 'false');
   container.setAttribute('data-show_faces', data.show_faces || 'false');
   container.setAttribute('data-size', data.size || 'small');
-  container.setAttribute('data-width', '100%');
   return container;
 }
 
