@@ -15,15 +15,12 @@
  */
 
 import {isJsonScriptTag} from '../../../src/dom';
-import {createElementWithAttributes} from '../../../src/dom';
-import {loadPromise} from '../../../src/event-helper';
 import {assertHttpsUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 import {dev, rethrowAsync, user} from '../../../src/log';
-import {expandTemplate, startsWith} from '../../../src/string';
-import {setStyles} from '../../../src/style';
+import {expandTemplate} from '../../../src/string';
 import {isArray, isObject} from '../../../src/types';
 import {hasOwn, map} from '../../../src/utils/object';
-import {sendRequest, sendRequestUsingIframe} from './transport';
+import {sendRequest, sendRequestUsingIframe, Transport} from './transport';
 import {urlReplacementsForDoc} from '../../../src/services';
 import {userNotificationManagerFor} from '../../../src/services';
 import {cryptoFor} from '../../../src/crypto';
@@ -223,7 +220,10 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.analyticsGroup_ =
         this.instrumentation_.createAnalyticsGroup(this.element);
 
-    this.handleRequestsFrameUrl_();
+    if (this.config_['transport'] && this.config_['transport']['iframe']) {
+      Transport.processCrossDomainIframe(this.getAmpDoc().win.document,
+        this.config_['transport']);
+    }
 
     const promises = [];
     // Trigger callback can be synchronous. Do the registration at the end.
@@ -282,42 +282,6 @@ export class AmpAnalytics extends AMP.BaseElement {
     return Promise.all(promises);
   }
 
-  /**
-   * If requestsFrameUrl (and optionally dataHash as well) are specified in
-   * config, check whether third-party iframe already exists, and if not,
-   * create it.
-   * @private
-   */
-  handleRequestsFrameUrl_() {
-    if (!this.config_['requestsFrameUrl']) {
-      return;
-    }
-    const requestsFrameKey = this.buildRequestsFrameUrlWithDataHash(
-      this.config_['requestsFrameUrl'], this.config_['dataHash']);
-    // TODO: Safety check requestsFrameKey!
-    // If frame doesn't exist for this requestsFrameKey, create it.
-    if (!AmpAnalytics.requestsFrames.has(requestsFrameKey)) {
-      const doc = this.getAmpDoc().win.document;
-      const frame = AmpAnalytics.requestsFrames.create(doc, requestsFrameKey);
-      doc.body.appendChild(frame);
-    }
-  }
-
-  /**
-   * Builds the full URL to a requestsFrame, from the base URL and the data
-   * hash. These are separate because while the base URL must be specified
-   * in vendors.js, the data hash may be specified from a static JSON block
-   * within the creative.
-   * @param {!string} requestsFrameUrl
-   * @param {string=} dataHash
-   */
-  buildRequestsFrameUrlWithDataHash(requestsFrameUrl, dataHash) {
-    if (dataHash) {
-      return requestsFrameUrl +
-          (startsWith(dataHash, '#') ? dataHash : '#' + dataHash);
-    }
-    return requestsFrameUrl;
-  }
   /**
    * Calls `AnalyticsGroup.addTrigger` and reports any errors. "NoInline" is
    * to avoid inlining this method so that `try/catch` does it veto
@@ -629,14 +593,7 @@ export class AmpAnalytics extends AMP.BaseElement {
             request, undefined, whiteList);
       })
       .then(request => {
-        if (this.config_['requestsFrameUrl']) {
-          const requestsFrameKey = this.buildRequestsFrameUrlWithDataHash(
-              this.config_['requestsFrameUrl'], this.config_['dataHash']);
-          AmpAnalytics.requestsFrames.send(requestsFrameKey,
-            request);
-        } else {
-          this.sendRequest_(request, trigger);
-        }
+        this.sendRequest_(request, trigger);
         return request;
       });
 */
@@ -871,96 +828,5 @@ export class AmpAnalytics extends AMP.BaseElement {
     return new ExpansionOptions(vars, opt_iterations, opt_noEncode);
   }
 }
-
-/**
- * Keeps track of the third-party vendors' cross-domain iframes. Only one
- * static instance will be created, which will keep and manage ALL amp-analytics
- * tags.
- */
-class AmpAnalyticsFrames {
-  constructor() {
-    this.requestsFrameMap = map();
-  }
-
-  /**
-   * Create a cross-domain iframe
-   * @param {!HTMLDocument} parent  The document node of the parent page
-   * @param {!string} requestsFrameUrl  The URL, including data hash if
-   * applicable, of the cross-domain iframe
-   * @return {!Element}
-   */
-  create(parent, requestsFrameUrl) {
-    // Warning: the scriptSrc URL below is only temporary. Don't check
-    // in before getting resolution on that.
-    const frame = createElementWithAttributes(parent, 'iframe', {
-      sandbox: 'allow-scripts',
-      name: JSON.stringify({
-        'scriptSrc': '/examples/analytics-3p-remote-frame-helper.js',
-      }),
-    });
-    loadPromise(frame).then(() => {
-      this.setIsReady(requestsFrameUrl);
-    });
-    frame.src = requestsFrameUrl; // Set AFTER loadPromise to avoid race
-    setStyles(frame, {width: 0,height: 0,visibility: 'hidden'});
-    this.requestsFrameMap[requestsFrameUrl] = {
-      frame,
-      isReady: false,
-      msgQueue: [],
-    };
-    return frame;
-  }
-
-  /**
-   * Returns whether a requestsFrameUrl is already known
-   * @param {!string} requestsFrameUrl
-   * @return {!boolean}
-   */
-  has(requestsFrameUrl) {
-    return hasOwn(this.requestsFrameMap, requestsFrameUrl);
-  }
-
-  /**
-   * Sends a message to a cross-domain frame, or queues the message if the
-   * frame is not yet ready to receive messages.
-   * TODO: Implement throttling if messages are sent too rapidly.
-   * @param {!string} requestsFrameUrl
-   * @param {!string} message
-   */
-  send(requestsFrameUrl, message) {
-    const requestsFrame = this.requestsFrameMap[requestsFrameUrl];
-    if (requestsFrame.isReady) {
-      this.send_(requestsFrame.frame, [message]);
-    } else {
-      requestsFrame.msgQueue.push(message);
-    }
-  }
-
-  /**
-   * Send an array of messages to a cross-domain iframe
-   * @param {!Element} frame  The cross-domain iframe
-   * @param {!Array<string>} messages  The messages to send
-   * @private
-   */
-  send_(frame, messages) {
-    // Warning: the following code is likely only temporary. Don't check
-    // in before getting resolution on that.
-    frame && frame.contentWindow &&
-      frame.contentWindow.postMessage({ampAnalyticsEvents: messages}, '*');
-  }
-
-  /**
-   * Indicate that a cross-domain frame is ready to receive messages, and
-   * send all messages that were previously queued for it.
-   * @param {!string} requestsFrameUrl
-   */
-  setIsReady(requestsFrameUrl) {
-    const requestsFrame = this.requestsFrameMap[requestsFrameUrl];
-    requestsFrame.isReady = true;
-    this.send_(requestsFrame.frame, requestsFrame.msgQueue);
-    requestsFrame.msgQueue = [];
-  }
-}
-AmpAnalytics.requestsFrames = new AmpAnalyticsFrames();
 
 AMP.registerElement('amp-analytics', AmpAnalytics);
