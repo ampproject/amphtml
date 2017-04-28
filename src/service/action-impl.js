@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Keycodes} from '../utils/keycodes';
 import {dev, user} from '../log';
 import {
   registerServiceBuilderForDoc,
@@ -180,8 +181,8 @@ export class ActionService {
         }
       });
       this.root_.addEventListener('keydown', event => {
-        if (event.keyCode == 13 /* enter */ ||
-            event.keyCode == 32 /* space */) {
+        const keyCode = event.keyCode;
+        if (keyCode == Keycodes.ENTER || keyCode == Keycodes.SPACE) {
           const element = dev().assertElement(event.target);
           if (!event.defaultPrevented &&
               element.getAttribute('role') == 'button') {
