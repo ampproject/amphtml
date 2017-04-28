@@ -218,4 +218,25 @@ describe('EventHelper', () => {
     expect(polyfilled.type).to.equal('foo');
     expect(polyfilled.detail).to.deep.equal({bar: 123});
   });
+
+  it('should create the correct custom event for IE11', () => {
+    const native = createCustomEvent(window, 'foo', {bar: 123});
+    expect(native.type).to.equal('foo');
+    expect(native.detail).to.deep.equal({bar: 123});
+
+    const initCustomEventSpy = sandbox.spy();
+    const win = {};
+    win.customEvent = {};
+    win.document = {};
+    win.document.createEvent = function(str) {
+      return {
+        initCustomEvent : function() {
+          initCustomEventSpy();
+        }
+      };
+    }
+    createCustomEvent(win, 'foo', {bar: 123});
+    expect(initCustomEventSpy).to.be.calledOnce;
+  });
+
 });
