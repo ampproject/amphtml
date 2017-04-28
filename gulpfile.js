@@ -385,7 +385,6 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
   var jsPath = path + '/' + name + '.js';
   var jsTestPath = path + '/test/' + 'test-' + name + '.js';
   if (argv.files && options.bundleOnlyIfListedInFiles) {
-    $$.util.log('in here?');
     const passedFiles = Array.isArray(argv.files) ? argv.files : [argv.files];
     const shouldBundle = passedFiles.some(glob => {
       return minimatch(jsPath, glob) || minimatch(jsTestPath, glob);
@@ -404,10 +403,7 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
     // Do not set watchers again when we get called by the watcher.
     var copy = Object.create(options);
     copy.watch = false;
-    $$.util.log('watching path ' + path);
     $$.watch(path + '/*', function() {
-      $$.util.log('name is ' + name);
-      $$.util.log('version is ' + version);
       buildExtension(name, version, hasCss, copy);
     });
   }
