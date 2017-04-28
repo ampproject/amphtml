@@ -69,6 +69,9 @@ module.exports = {
     process.env.TRAVIS ? 'Chrome_travis_ci' : 'Chrome_no_extensions',
   ],
 
+  // Number of sauce tests to start in parallel
+  concurrency: 6,
+
   customLaunchers: {
     /*eslint "google-camelcase/google-camelcase": 0*/
     Chrome_travis_ci: {
