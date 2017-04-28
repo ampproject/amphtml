@@ -53,7 +53,7 @@ class AmpFacebookLike extends AMP.BaseElement {
     this.applyFillContent(iframe);
     // Triggered by context.updateDimensions() inside the iframe.
     listenFor(iframe, 'embed-size', data => {
-      this./*OK*/changeHeight(data.height);
+      this.attemptChangeHeight(data.height).catch(() => { /* ignore failures */ });
     }, /* opt_is3P */true);
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
