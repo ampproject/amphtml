@@ -16,6 +16,7 @@
 
 import {CSS} from '../../../build/amp-lightbox-0.1.css';
 import {Gestures} from '../../../src/gesture';
+import {Keycodes} from '../../../src/utils/keycodes';
 import {Layout} from '../../../src/layout';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {childElementByTag} from '../../../src/dom.js';
@@ -300,7 +301,7 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   closeOnEscape_(event) {
-    if (event.keyCode == 27) {
+    if (event.keyCode == Keycodes.ESCAPE) {
       this.close();
     }
   }
