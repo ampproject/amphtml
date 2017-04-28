@@ -1,5 +1,5 @@
 #
-# Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+# Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,16 +29,20 @@ tags: {  # amp-facebook-like
 tags: {  # <amp-facebook-like>
   html_format: AMP
   tag_name: "AMP-FACEBOOK-LIKE"
-  disallowed_ancestor: "AMP-SIDEBAR"
   satisfies: "amp-facebook-like"
   requires: "amp-facebook-like extension .js script"
   # data-* is generally allowed, but it's not generally mandatory.
   attrs: {
     name: "data-href"
     mandatory: true
+    value_url: {
+      allowed_protocol: "http"
+      allowed_protocol: "https"
+      allow_relative: false
+    }
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/social/amp-facebook-like"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-facebook-like"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
