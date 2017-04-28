@@ -48,17 +48,17 @@ describe('AmpState', () => {
     sandbox.restore();
   });
 
-  it('should parse its child script if `src` is not present at build', () => {
+  it('should parse its child script if `src` is not present at init', () => {
     ampState.innerHTML = '<script type="application/json">' +
         '{"foo": "bar"}</script>';
-    ampState.implementation_.buildCallback();
+    ampState.implementation_.initialize_();
     expect(fetchStub).to.not.have.been.called;
     expect(updateStub).calledWithMatch({foo: 'bar'});
   });
 
-  it('should fetch json if `src` is present at build', () => {
+  it('should fetch json if `src` is present at init', () => {
     ampState.setAttribute('src', 'https://foo.com/bar?baz=1');
-    ampState.implementation_.buildCallback();
+    ampState.implementation_.initialize_();
     expect(fetchStub).calledWith(/* opt_isInit */ true);
     expect(updateStub).to.not.have.been.called;
   });
