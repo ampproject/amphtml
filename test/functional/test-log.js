@@ -61,6 +61,7 @@ describe('Logging', () => {
   afterEach(() => {
     sandbox.restore();
     sandbox = null;
+    window.AMP_MODE = undefined;
   });
 
   describe('Level', () => {
