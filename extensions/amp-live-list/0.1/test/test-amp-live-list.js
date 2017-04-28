@@ -255,6 +255,24 @@ describe('amp-live-list', () => {
     }).to.throw(/must have an "items" slot/);
   });
 
+  it('should have aria-live=polite by default', () => {
+    buildElement(elem, dftAttrs);
+    liveList.buildCallback();
+    expect(liveList.element.getAttribute('aria-live')).to.equal('polite');
+  });
+
+  it('should use explicitly defined aria-live attribute value', () => {
+    buildElement(elem, {
+      'aria-live': 'assertive',
+      'id': 'my-list',
+      'data-poll-interval': 2000,
+      'data-max-items-per-page': 5,
+      'data-sort-time': Date.now(),
+    });
+    liveList.buildCallback();
+    expect(liveList.element.getAttribute('aria-live')).to.equal('assertive');
+  });
+
   describe('#update', () => {
 
     beforeEach(() => {
