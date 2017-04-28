@@ -15,6 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-selector-0.1.css';
+import {Keycodes} from '../../../src/utils/keycodes';
 import {actionServiceForDoc} from '../../../src/services';
 import {closestBySelector, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
@@ -314,19 +315,19 @@ export class AmpSelector extends AMP.BaseElement {
     let dir = 0;
 
     switch (event.keyCode) {
-      case 37: // Left
+      case Keycodes.LEFT_ARROW:
         // Left is considered 'previous' in LTR and 'next' in RTL.
         dir = isLtr ? -1 : 1;
         break;
-      case 38: // Up
+      case Keycodes.UP_ARROW:
         // Up is considered 'previous' in both LTR and RTL.
         dir = -1;
         break;
-      case 39: // Right
+      case Keycodes.RIGHT_ARROW:
         // Right is considered 'next' in LTR and 'previous' in RTL.
         dir = isLtr ? 1 : -1;
         break;
-      case 40: // Down
+      case Keycodes.DOWN_ARROW:
         // Down is considered 'next' in both LTR and RTL.
         dir = 1;
         break;
