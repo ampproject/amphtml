@@ -19,7 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Embeds the Facebook like-button plugin.</td>
+    <td>Embeds the Facebook like button plugin.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
@@ -27,7 +27,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-facebook-comments" src="https://cdn.ampproject.org/v0/amp-facebook-like-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-facebook-like" src="https://cdn.ampproject.org/v0/amp-facebook-like-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
@@ -37,18 +37,14 @@ limitations under the License.
 
 ## Overview
 
-You can use the `amp-facebook-like` component to embed the [Facebook like-button plugin](https://developers.facebook.com/docs/plugins/like-button).
+You can use the `amp-facebook-like` component to embed the [Facebook like button plugin](https://developers.facebook.com/docs/plugins/like-button).
 
 **Example**
 
 ```html
-<amp-facebook-like width=120 height=30
-    layout="responsive"
+<amp-facebook-like width=90 height=20
+    layout="fixed"
     data-layout="button_count"
-    data-action="like"
-    data-size="large"
-    data-show-faces="false"
-    data-share="false"
     data-href="https://www.facebook.com/testesmegadivertidos/">
 </amp-facebook-like>
 ```
@@ -60,30 +56,37 @@ The absolute URL of the page that will be liked. For example, `https://www.faceb
 
 **data-action** (optional)
 
-The verb to display on the button. Can be either like or recommend.
+The verb to display on the button. Can be either `like` or `recommend`. The default is `like`.
 
 **data-colorscheme** (optional)
-The color scheme used by the plugin for any text outside of the button itself. Can be light or dark.
+
+The color scheme used by the plugin for any text outside of the button itself. Can be `light` or `dark`. The default is `light`.
 
 **data-kd_site** (*aka data-kid_directed_site in facebook sdk*) (optional)
-If your web site or online service, or a portion of your service, is directed to children under 13 you must enable this
+
+If your web site or online service, or a portion of your service, is directed to children under 13 you must enable this. The default is `false`.
 
 **data-layout** (optional)
-Selects one of the different layouts that are available for the plugin. Can be one of standard, button_count, button or box_count.
+
+Selects one of the different layouts that are available for the plugin. Can be one of `standard`, `button_count`, `button` or `box_count`. The default is `standard`.
 
 **data-ref** (optional)
+
 A label for tracking referrals which must be less than 50 characters and can contain alphanumeric characters and some punctuation.
 
 **data-share** (optional)
-Specifies whether to include a share button beside the Like button. This only works with the XFBML version.
+
+Specifies whether to include a share button beside the Like button. This only works with the XFBML version. The default is `false`.
 
 **data-show_faces** (optional)
-Specifies whether to display profile photos below the button (standard layout only). You must not enable this on child-directed sites.
+
+Specifies whether to display profile photos below the button (standard layout only). You must not enable this on child-directed sites. The default is `false`.
 
 **data-size** (optional)
-The button is offered in 2 sizes i.e. large and small.
 
-For details, see the [Facebook comments documentation](https://developers.facebook.com/docs/plugins/like-button?locale=en_US#settings).
+The size of the button, which can be one of two sizes, `large` or `small`. The default is `small`.
+
+For details, see the [Facebook comments documentation](https://developers.facebook.com/docs/plugins/like-button#settings).
 
 **common attributes**
 
