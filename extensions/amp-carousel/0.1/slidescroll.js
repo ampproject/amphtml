@@ -493,7 +493,7 @@ export class AmpSlideScroll extends BaseSlides {
    */
   showSlideWhenReady_(value) {
     const index = parseInt(value, 10);
-    if (isFinite(index)) {
+    if (isFinite(index) && index >= 0 && index < this.noOfSlides_) {
       // If we haven't been laid out yet, set `initialSlideIndex_` instead.
       if (this.slideIndex_ === null) {
         this.initialSlideIndex_ = index;
@@ -501,7 +501,7 @@ export class AmpSlideScroll extends BaseSlides {
         this.showSlide_(index);
       }
     } else {
-      user().warn(TAG, 'Invalid [slide] value: %s', value);
+      user().error(TAG, 'Invalid [slide] value: %s', value);
     }
   }
 
@@ -514,6 +514,7 @@ export class AmpSlideScroll extends BaseSlides {
    */
   showSlide_(newIndex) {
     const noOfSlides_ = this.noOfSlides_;
+    newIndex = dev().assertNumber(newIndex);
     if (newIndex < 0 ||
         newIndex >= noOfSlides_ ||
         this.slideIndex_ == newIndex) {
@@ -536,7 +537,19 @@ export class AmpSlideScroll extends BaseSlides {
       this.updateInViewport(this.slides_[
           dev().assertNumber(this.slideIndex_)], false);
     }
-    this.updateInViewport(this.slides_[newIndex], true);
+    const newSlideInView = this.slides_[newIndex];
+
+    if (newSlideInView === undefined) {
+      const error = new Error('Attempting to access a non-existant slide');
+      error.args = {
+        'index': newIndex,
+        'noOfSlides': noOfSlides_,
+      };
+      dev().error(TAG, error);
+      return;
+    }
+
+    this.updateInViewport(newSlideInView, true);
     showIndexArr.forEach((showIndex, loopIndex) => {
       if (this.shouldLoop) {
         setStyle(this.slideWrappers_[showIndex], 'order', loopIndex + 1);
@@ -661,12 +674,20 @@ export class AmpSlideScroll extends BaseSlides {
     if (direction == 0) {
       return;
     } else if (Math.abs(direction) !== 1) {
-      // When the direction is not +1 or -1 (happens with loops)
+      // When the direction is not +1 or -1 (happens with loops or when
+      // this.slideIndex_ is null (first slide))
       // Set the correct direction.
       direction = direction < 0 ? 1 : -1;
+      if (this.slideIndex_ === null) {
+        direction = 1;
+      }
     }
+    const fromSlide =
+        this.slideIndex_ === null ?
+            'null' : this.dataSlideIdArr_[dev().assertNumber(this.slideIndex_)];
+
     const vars = {
-      'fromSlide': this.dataSlideIdArr_[dev().assertNumber(this.slideIndex_)],
+      fromSlide,
       'toSlide': this.dataSlideIdArr_[newSlideIndex],
     };
     this.analyticsEvent_('amp-carousel-change', vars);
