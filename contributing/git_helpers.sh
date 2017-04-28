@@ -41,7 +41,7 @@ git_sync() {
   echo "Checking out your master branch"
   git checkout master
   echo "Updating your local master branch with the latest changes (pulling upstream/master)"
-  git pull upstream master
+  git pull --rebase upstream master
   git rebase -i
   echo "Updating your remote repository with the latest changes (pushing origin/master)"
   git push origin master -f
