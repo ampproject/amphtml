@@ -545,13 +545,14 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'documentLocation': 'SOURCE_URL',
       'clientId': 'CLIENT_ID(AMP_ECID_GOOGLE)',
       'dataSource': 'AMP',
+      'anonymizeIP': 'aip',
     },
     'requests': {
       'host': 'https://www.google-analytics.com',
       'basePrefix': 'v=1&' +
           '_v=a1&' +
           'ds=${dataSource}&' +
-          'aip=true&' +
+          '${anonymizeIP}&' +
           '_s=${requestCount}&' +
           'dt=${title}&' +
           'sr=${screenWidth}x${screenHeight}&' +
@@ -625,13 +626,14 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'documentLocation': 'SOURCE_URL',
       'clientId': 'CLIENT_ID(_ga)',
       'dataSource': 'AMP',
+      'anonymizeIP': 'aip',
     },
     'requests': {
       'host': 'https://www.google-analytics.com',
       'basePrefix': 'v=1&' +
       '_v=a1&' +
       'ds=${dataSource}&' +
-      'aip=true&' +
+      '${anonymizeIP}&' +
       '_s=${requestCount}&' +
       'dt=${title}&' +
       'sr=${screenWidth}x${screenHeight}&' +
