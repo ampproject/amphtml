@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Keycodes} from '../../../src/utils/keycodes';
 import {timerFor} from '../../../src/services';
 
 /**
@@ -73,7 +74,7 @@ export class BaseCarousel extends AMP.BaseElement {
     this.prevButton_.setAttribute('aria-label', 'Previous item in carousel');
     this.prevButton_.setAttribute('tabindex', 0);
     this.prevButton_.onkeydown = event => {
-      if (event.keyCode == 13 /* enter */ || event.keyCode == 32 /* space */) {
+      if (event.keyCode == Keycodes.ENTER || event.keyCode == Keycodes.SPACE) {
         if (!event.defaultPrevented) {
           event.preventDefault();
           this.interactionPrev();
@@ -92,7 +93,7 @@ export class BaseCarousel extends AMP.BaseElement {
     this.nextButton_.setAttribute('aria-label', 'Next item in carousel');
     this.nextButton_.setAttribute('tabindex', 0);
     this.nextButton_.onkeydown = event => {
-      if (event.keyCode == 13 /* enter */ || event.keyCode == 32 /* space */) {
+      if (event.keyCode == Keycodes.ENTER || event.keyCode == Keycodes.SPACE) {
         if (!event.defaultPrevented) {
           event.preventDefault();
           this.interactionNext();
