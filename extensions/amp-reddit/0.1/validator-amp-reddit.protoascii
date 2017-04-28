@@ -52,7 +52,7 @@ tags: {  # <amp-reddit>
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/social/amp-reddit"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-reddit"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

@@ -62,7 +62,7 @@ tags: {  # <amp-social-share>
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/social/amp-social-share"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-social-share"
   amp_layout: {
     supported_layouts: CONTAINER
     supported_layouts: FILL

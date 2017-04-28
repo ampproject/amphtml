@@ -1,4 +1,4 @@
 FAIL
-amp-vimeo/0.1/test/validator-amp-vimeo.html:45:0 The attribute 'data-videoid' in tag 'amp-vimeo' is set to the invalid value 'i don't think so'. (see https://www.ampproject.org/docs/reference/components/media/amp-vimeo) [AMP_TAG_PROBLEM]
-amp-vimeo/0.1/test/validator-amp-vimeo.html:48:0 The mandatory attribute 'data-videoid' is missing in tag 'amp-vimeo'. (see https://www.ampproject.org/docs/reference/components/media/amp-vimeo) [AMP_TAG_PROBLEM]
-amp-vimeo/0.1/test/validator-amp-vimeo.html:51:0 The attribute 'noloading' in tag 'amp-vimeo' is set to the invalid value 'foo'. (see https://www.ampproject.org/docs/reference/components/media/amp-vimeo) [AMP_TAG_PROBLEM]
+amp-vimeo/0.1/test/validator-amp-vimeo.html:45:0 The attribute 'data-videoid' in tag 'amp-vimeo' is set to the invalid value 'i don't think so'. (see https://www.ampproject.org/docs/reference/components/amp-vimeo) [AMP_TAG_PROBLEM]
+amp-vimeo/0.1/test/validator-amp-vimeo.html:48:0 The mandatory attribute 'data-videoid' is missing in tag 'amp-vimeo'. (see https://www.ampproject.org/docs/reference/components/amp-vimeo) [AMP_TAG_PROBLEM]
+amp-vimeo/0.1/test/validator-amp-vimeo.html:51:0 The attribute 'noloading' in tag 'amp-vimeo' is set to the invalid value 'foo'. (see https://www.ampproject.org/docs/reference/components/amp-vimeo) [AMP_TAG_PROBLEM]

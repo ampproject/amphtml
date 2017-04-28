@@ -1,6 +1,6 @@
 FAIL
 feature_tests/duplicate_attribute.html:30:2 The attribute 'custom-element' in tag 'script' is set to the invalid value 'duplicate'. [DISALLOWED_HTML]
 feature_tests/duplicate_attribute.html:31:2 The attribute 'custom-element' in tag 'script' is set to the invalid value 'duplicate'. [DISALLOWED_HTML]
-feature_tests/duplicate_attribute.html:37:3 The attribute 'width' in tag 'amp-img' is set to the invalid value '100%'. (see https://www.ampproject.org/docs/reference/components/media/amp-img) [AMP_LAYOUT_PROBLEM]
+feature_tests/duplicate_attribute.html:37:3 The attribute 'width' in tag 'amp-img' is set to the invalid value '100%'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_LAYOUT_PROBLEM]
 feature_tests/duplicate_attribute.html:41:3 The attribute 'type' in tag 'script' is set to the invalid value 'text/javascript'. [CUSTOM_JAVASCRIPT_DISALLOWED]
 feature_tests/duplicate_attribute.html:42:3 The attribute 'type' in tag 'script' is set to the invalid value 'text/javascript'. [CUSTOM_JAVASCRIPT_DISALLOWED]

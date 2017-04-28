@@ -39,7 +39,7 @@ tags: {  # <amp-kaltura-player>
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-kaltura-player"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-kaltura-player"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
