@@ -66,21 +66,26 @@ describe('rate-limit', () => {
     expect(callback).to.be.calledWith(7, 'another param');
   });
 
-  it('is re-entrant', () => {
-    let calls = 0;
+  it('should throttle recursive callback', () => {
+    let totalCalls = 0;
     let rateLimitedCallback;
-    function fn(call) {
-      if (calls++ < 1) {
-        rateLimitedCallback(calls);
+    function recursive(countdown) {
+      totalCalls++;
+      if (countdown > 0) {
+        rateLimitedCallback(countdown - 1);
       }
-      expect(call + 1).to.equal(calls);
     }
-    rateLimitedCallback = rateLimit(window, fn, 100);
+    rateLimitedCallback = rateLimit(window, recursive, 100);
 
-    rateLimitedCallback(calls);
-    expect(calls).to.equal(1);
-
+    // recursive 3 times
+    rateLimitedCallback(3);
+    // should immediately invoke callback only once.
+    expect(totalCalls).to.equal(1);
+    // 2nd invocation happen after the min interval
     clock.tick(100);
-    expect(calls).to.equal(2);
+    expect(totalCalls).to.equal(2);
+    // 3rd invocation
+    clock.tick(100);
+    expect(totalCalls).to.equal(3);
   });
 });
