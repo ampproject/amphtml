@@ -102,7 +102,7 @@ If present, will automatically loop the video back to the start upon reaching th
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Click-to-Play overlay
-Click-to-play is a common UX for video players on the web. `amp-video` supports
+Click-to-play is a common UX feature for video players on the web. `amp-video` supports
 `play` standard AMP action which allows us to implement this pattern overlays with ease.
 
 Please see [Click-to-play overlay for amp-video on AmpByExample.com](https://ampbyexample.com/advanced/click-to-play_overlay_for_amp-video/) for a sample.
