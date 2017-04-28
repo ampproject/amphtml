@@ -33,7 +33,8 @@ function execOrDie(cmd) {
   const p =
       child_process.spawnSync('/bin/sh', ['-c', cmd], {'stdio': 'inherit'});
   if (p.status != 0) {
-    console.error(`\n${fileLogPrefix}exiting due to failing command: ${cmd}`);
+    console/*OK*/.log(
+        `\n${fileLogPrefix}exiting due to failing command: ${cmd}`);
     process.exit(p.status)
   }
 }
