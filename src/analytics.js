@@ -71,6 +71,7 @@ export function triggerAnalyticsEvent(nodeOrDoc, eventType, opt_vars) {
  * @param {!Element} parentElement
  * @param {!JSONType} config
  * @param {boolean=} loadAnalytics
+ * @return {!Element} created analytics element
  */
 export function insertAnalyticsElement(
     parentElement, config, loadAnalytics = false) {
@@ -95,14 +96,11 @@ export function insertAnalyticsElement(
     // Get Extensions service and force load analytics extension.
     const extensions = extensionsFor(parentElement.ownerDocument.defaultView);
     extensions./*OK*/loadExtension('amp-analytics');
-    parentElement.appendChild(analyticsElem);
-    return;
+  } else {
+    analyticsForDocOrNull(parentElement).then(analytics => {
+      dev().assert(analytics);
+    });
   }
-
-  analyticsForDocOrNull(parentElement).then(analytics => {
-    if (!analytics) {
-      return;
-    }
-    parentElement.appendChild(analyticsElem);
-  });
+  parentElement.appendChild(analyticsElem);
+  return analyticsElem;
 }
