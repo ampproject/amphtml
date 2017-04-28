@@ -62,6 +62,7 @@ amp-embed iframe {
   color: #696969;
   background-color: transparent;
   border: 1px, solid, #696969;
+  padding: 3px 4px 1px;
 }
 
 amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"] > iframe,
