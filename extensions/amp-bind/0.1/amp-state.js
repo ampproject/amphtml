@@ -52,8 +52,6 @@ export class AmpState extends AMP.BaseElement {
     user().assert(isBindEnabledFor(this.win),
         `Experiment "amp-bind" is disabled.`);
 
-    const TAG = this.getName_();
-
     toggle(this.element, /* opt_display */ false);
     this.element.setAttribute('aria-hidden', 'true');
 
@@ -78,6 +76,8 @@ export class AmpState extends AMP.BaseElement {
 
   /** @private */
   initialize_() {
+    const TAG = this.getName_();
+
     // Fetch JSON from endpoint at `src` attribute if it exists,
     // otherwise parse child script tag.
     if (this.element.hasAttribute('src')) {
