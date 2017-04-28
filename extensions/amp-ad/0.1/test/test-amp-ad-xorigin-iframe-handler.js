@@ -258,15 +258,15 @@ describe('amp-ad-xorigin-iframe-handler', () => {
       iframeHandler.init(iframe);
     });
 
-    // TODO(#8965) unskip test
-    it.configure().skipOldChrome()
-    .run('should be able to use embed-state API', () => {
+    it('should be able to use embed-state API', () => {
+      sandbox.stub/*OK*/(iframeHandler.viewer_, 'isVisible', () => true);
       iframe.postMessageToParent({
         type: 'send-embed-state',
         sentinel: 'amp3ptest' + testIndex,
       });
       return iframe.expectMessageFromParent('embed-state').then(data => {
-        expect(data).to.jsonEqual({inViewport: false,
+        expect(data).to.jsonEqual({
+          inViewport: false,
           pageHidden: false,
           type: 'embed-state',
           sentinel: 'amp3ptest' + testIndex,
