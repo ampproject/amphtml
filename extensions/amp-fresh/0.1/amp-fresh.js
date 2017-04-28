@@ -59,8 +59,11 @@ export class AmpFresh extends AMP.BaseElement {
 
     installAmpFreshManagerForDoc(this.element);
     this.manager_ = ampFreshManagerForDoc(this.element);
-
     this.manager_.register(this.ampFreshId_, this);
+
+    if (!this.element.hasAttribute('aria-live')) {
+      this.element.setAttribute('aria-live', 'polite');
+    }
   }
 
   /**
