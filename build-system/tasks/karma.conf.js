@@ -91,11 +91,11 @@ module.exports = {
       base: 'SauceLabs',
       browserName: 'chrome',
     },
-    // SL_Chrome_45: {
-      // base: 'SauceLabs',
-      // browserName: 'chrome',
-      // version: '45',
-    // },
+    SL_Chrome_45: {
+      base: 'SauceLabs',
+      browserName: 'chrome',
+      version: '45',
+    },
     SL_iOS_8_4: {
       base: 'SauceLabs',
       browserName: 'iphone',
