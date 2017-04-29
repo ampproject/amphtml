@@ -30,7 +30,7 @@ const LOAD_FAILURE_PREFIX = 'Failed to load:';
 export function createCustomEvent(win, type, detail) {
   // win.CustomEvent is a function on Edge, Chrome, FF, Safari but
   // is an object on IE 11.
-  if (typeof(win.CustomEvent) == 'function') {
+  if (typeof win.CustomEvent == 'function') {
     return new win.CustomEvent(type, {detail});
   } else {
     // Deprecated fallback for IE.

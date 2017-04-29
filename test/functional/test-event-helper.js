@@ -226,15 +226,15 @@ describe('EventHelper', () => {
 
     const initCustomEventSpy = sandbox.spy();
     const win = {};
-    win.customEvent = {};
+    win.CustomEvent = {};
     win.document = {};
-    win.document.createEvent = function(str) {
+    win.document.createEvent = function() {
       return {
-        initCustomEvent : function() {
+        initCustomEvent: function() {
           initCustomEventSpy();
-        }
+        },
       };
-    }
+    };
     createCustomEvent(win, 'foo', {bar: 123});
     expect(initCustomEventSpy).to.be.calledOnce;
   });
