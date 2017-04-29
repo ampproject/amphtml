@@ -247,7 +247,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     it('should resolve directly if it is A4A', () => {
       return iframeHandler.init(iframe, true).then(() => {
         expect(iframe.style.visibility).to.equal('');
-        expect(iframe.readyState).to.equal('complete');
+        expect(iframe.readyState).to.not.equal('complete');
       });
     });
   });
