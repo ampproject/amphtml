@@ -167,7 +167,7 @@ export const LIFECYCLE_STAGES = {
   firstVisible: '24',
   visLoadAndOneSec: '25',
   iniLoad: '26',
-  resumeCallback: '27'
+  resumeCallback: '27',
 };
 
 /**
