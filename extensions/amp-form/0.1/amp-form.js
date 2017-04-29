@@ -50,6 +50,8 @@ import {
   getFormValidator,
   isCheckValiditySupported,
 } from './form-validators';
+import {getFormVerifier} from './form-verifiers';
+import {deepMerge, map} from '../../../src/utils/object';
 
 
 /** @type {string} */
@@ -67,6 +69,8 @@ const EXTERNAL_DEPS = [
 
 /** @const @enum {string} */
 const FormState_ = {
+  INITIAL: 'initial',
+  VERIFYING: 'verifying',
   SUBMITTING: 'submitting',
   SUBMIT_ERROR: 'submit-error',
   SUBMIT_SUCCESS: 'submit-success',
@@ -188,6 +192,10 @@ export class AmpForm {
     /** @const @private {!./form-validators.FormValidator} */
     this.validator_ = getFormValidator(this.form_);
 
+    /** @const @private {!./form-verifiers.FormVerifier} */
+    this.verifier_ = getFormVerifier(
+        this.form_, () => this.handleXhrVerify_());
+
     this.actions_.installActionHandler(
         this.form_, this.actionHandler_.bind(this));
     this.installEventHandlers_();
@@ -232,9 +240,16 @@ export class AmpForm {
       onInputInteraction_(e);
       this.validator_.onBlur(e);
     }, true);
+    this.form_.addEventListener('change', e => {
+      this.verifier_.onCommit(dev().assertElement(e.target), () => {
+        onInputInteraction_(e);
+        this.validator_.onBlur(e);
+      });
+    });
     this.form_.addEventListener('input', e => {
       onInputInteraction_(e);
       this.validator_.onInput(e);
+      this.verifier_.onMutate(dev().assertElement(e.target));
     });
   }
 
@@ -308,25 +323,27 @@ export class AmpForm {
    * @private
    */
   submit_() {
-    let varSubsFields = [];
-    // Only allow variable substitutions for inputs if the form action origin
-    // is the canonical origin.
-    // TODO(mkhatib, #7168): Consider relaxing this.
-    if (this.isSubmittingToCanonical_()) {
-      // Fields that support var substitutions.
-      varSubsFields = this.form_.querySelectorAll(
-          '[type="hidden"][data-amp-replace]');
-    } else {
-      user().warn(TAG, 'Variable substitutions disabled for non-canonical ' +
-          'origin submit action: %s', this.form_);
-    }
-
+    const varSubsFields = this.getVarSubsFields_();
     if (this.xhrAction_) {
       this.handleXhrSubmit_(varSubsFields);
     } else if (this.method_ == 'POST') {
       this.handleNonXhrPost_();
     } else if (this.method_ == 'GET') {
       this.handleNonXhrGet_(varSubsFields);
+    }
+  }
+
+  getVarSubsFields_() {
+    // Only allow variable substitutions for inputs if the form action origin
+    // is the canonical origin.
+    // TODO(mkhatib, #7168): Consider relaxing this.
+    if (this.isSubmittingToCanonical_()) {
+      // Fields that support var substitutions.
+      return this.form_.querySelectorAll('[type="hidden"][data-amp-replace]');
+    } else {
+      user().warn(TAG, 'Variable substitutions disabled for non-canonical ' +
+          'origin submit action: %s', this.form_);
+      return [];
     }
   }
 
@@ -346,6 +363,19 @@ export class AmpForm {
     return this.isCanonicalAction_ = parseUrl(url).origin == canonicalOrigin;
   }
 
+  handleXhrVerify_() {
+    if (this.state_ === FormState_.SUBMITTING) {
+      return;
+    }
+
+    this.setState_(FormState_.VERIFYING);
+    const verifyXhr = this.doVarSubs_(this.getVarSubsFields_()).then(
+        () => this.doXhr_(map({verify: true})));
+    const reset = () => this.setState_(FormState_.INITIAL);
+    verifyXhr.then(reset, reset);
+    return verifyXhr;
+  }
+
   /**
    * @param {IArrayLike<!HTMLInputElement>} varSubsFields
    * @private
@@ -353,60 +383,80 @@ export class AmpForm {
   handleXhrSubmit_(varSubsFields) {
     this.cleanupRenderedTemplate_();
     this.setState_(FormState_.SUBMITTING);
-    const isHeadOrGet = this.method_ == 'GET' || this.method_ == 'HEAD';
+
+    const p = this.doVarSubs_(varSubsFields)
+    .then(() => {
+      this.triggerFormSubmitInAnalytics_();
+      this.actions_.trigger(this.form_, 'submit', /*event*/ null);
+    })
+    .then(() => this.doXhr_())
+    .then(response => this.handleXhrSubmitSuccess_(response),
+        error => this.handleXhrSubmitFailure_(error));
+
+    if (getMode().test) {
+      this.xhrSubmitPromise_ = p;
+    }
+  }
+
+  doVarSubs_(varSubsFields) {
     const varSubPromises = [];
     for (let i = 0; i < varSubsFields.length; i++) {
       varSubPromises.push(
           this.urlReplacement_.expandInputValueAsync(varSubsFields[i]));
     }
+    return this.waitOnPromisesOrTimeout_(varSubPromises, 100);
+  }
 
-    // Wait until all variables have been substituted or 100ms timeout.
-    const p = this.waitOnPromisesOrTimeout_(varSubPromises, 100).then(() => {
-      this.triggerFormSubmitInAnalytics_();
-
-      let xhrUrl, body;
-      if (isHeadOrGet) {
-        xhrUrl = addParamsToUrl(
-            dev().assertString(this.xhrAction_), this.getFormAsObject_());
-      } else {
-        xhrUrl = this.xhrAction_;
-        body = new FormData(this.form_);
+  /**
+   * @param {!Object<string, string>=} opt_extraValues
+   */
+  doXhr_(opt_extraValues) {
+    const isHeadOrGet = this.method_ == 'GET' || this.method_ == 'HEAD';
+    let xhrUrl, body;
+    if (isHeadOrGet) {
+      xhrUrl = addParamsToUrl(dev().assertString(this.xhrAction_),
+          this.getFormAsObject_(opt_extraValues));
+    } else {
+      xhrUrl = this.xhrAction_;
+      body = new FormData(this.form_);
+      for (const key in opt_extraValues) {
+        body.append(key, opt_extraValues[key]);
       }
-      this.actions_.trigger(this.form_, 'submit', /*event*/ null);
-      return this.xhr_.fetch(dev().assertString(xhrUrl), {
-        body,
-        method: this.method_,
-        credentials: 'include',
-        headers: {
-          Accept: 'application/json',
-        },
-      }).then(response => {
-        return response.json().then(json => {
-          this.triggerAction_(/* success */ true, json);
-          this.analyticsEvent_('amp-form-submit-success');
-          this.setState_(FormState_.SUBMIT_SUCCESS);
-          this.renderTemplate_(json || {});
-          this.maybeHandleRedirect_(
-              /** @type {../../../src/service/xhr-impl.FetchResponse} */ (
-                  response));
-        }, error => {
-          rethrowAsync('Failed to parse response JSON:', error);
-        });
-      }, error => {
-        this.triggerAction_(
-            /* success */ false, error ? error.responseJson : null);
-        this.analyticsEvent_('amp-form-submit-error');
-        this.setState_(FormState_.SUBMIT_ERROR);
-        this.renderTemplate_(error.responseJson || {});
-        this.maybeHandleRedirect_(
-            /** @type {../../../src/service/xhr-impl.FetchResponse} */ (
-                error));
-        rethrowAsync('Form submission failed:', error);
-      });
-    });
-    if (getMode().test) {
-      this.xhrSubmitPromise_ = p;
     }
+    return this.xhr_.fetch(dev().assertString(xhrUrl), {
+      body,
+      method: this.method_,
+      credentials: 'include',
+      headers: {
+        Accept: 'application/json',
+      },
+    });
+  }
+
+  handleXhrSubmitSuccess_(response) {
+    return response.json().then(json => {
+      this.triggerAction_(/* success */ true, json);
+      this.analyticsEvent_('amp-form-submit-success');
+      this.setState_(FormState_.SUBMIT_SUCCESS);
+      this.renderTemplate_(json || {});
+      this.maybeHandleRedirect_(
+          /** @type {../../../src/service/xhr-impl.FetchResponse} */ (
+              response));
+    }, error => {
+      rethrowAsync('Failed to parse response JSON:', error);
+    });
+  }
+
+  handleXhrSubmitFailure_(error) {
+    this.triggerAction_(
+        /* success */ false, error ? error.responseJson : null);
+    this.analyticsEvent_('amp-form-submit-error');
+    this.setState_(FormState_.SUBMIT_ERROR);
+    this.renderTemplate_(error.responseJson || {});
+    this.maybeHandleRedirect_(
+        /** @type {../../../src/service/xhr-impl.FetchResponse} */ (
+            error));
+    rethrowAsync('Form submission failed:', error);
   }
 
   /** @private */
@@ -514,10 +564,11 @@ export class AmpForm {
 
   /**
    * Returns form data as an object.
+   * @param {!Object<string, string>=} opt_extraFields
    * @return {!Object}
    * @private
    */
-  getFormAsObject_() {
+  getFormAsObject_(opt_extraFields) {
     const data = {};
     const inputs = this.form_.elements;
     const submittableTagsRegex = /^(?:input|select|textarea)$/i;
@@ -536,6 +587,9 @@ export class AmpForm {
         data[input.name] = [];
       }
       data[input.name].push(input.value);
+    }
+    if (opt_extraFields) {
+      deepMerge(data, opt_extraFields);
     }
     return data;
   }

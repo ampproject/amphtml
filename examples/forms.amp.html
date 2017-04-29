@@ -57,6 +57,34 @@
             color: #dc4e41;
         }
 
+        .verification-form label {
+          display: block;
+        }
+
+        .spinner,
+        .spinner:after {
+          border-radius: 50%;
+          width: 18px;
+          height: 18px;
+        }
+
+        .spinner {
+          visibility: hidden;
+          margin: 5px;
+          border: 9px solid rgba(0, 0, 0, 0.3);
+          border-left-color: #fff;
+          animation: spin 1.1s infinite linear;
+        }
+
+        .amp-form-verifying .spinner {
+          visibility: visible;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
         .lightbox {
             background: rgba(0,0,0,.8);
         }
@@ -614,6 +642,76 @@
     <div submit-error>
         <template type="amp-mustache">
             Oops! {{name}}, We apologies something went wrong. Please try again later.
+        </template>
+    </div>
+</form>
+
+<h4>Asynchronous verification example</h4>
+
+<form
+  method="post"
+  action-xhr="/form/verify-search-json/post"
+  target="_blank"
+  class="verification-form"
+>
+    <script type="application/json">
+    {
+      "verificationGroups": [
+        {
+          "name": "coolName",
+          "elements": ["[name='name']"]
+        },
+        {
+          "name": "fullAddress",
+          "elements": ["[name='addressLine2']", "[name='city']", "[name='zip']"]
+        },
+        {
+          "name": "validCarrier",
+          "elements": ["[name='phone']"]
+        }
+      ]
+    }
+    </script>
+    <fieldset>
+        <label>
+            <span>Name</span>
+            <input type="text" name="name" id="nameId" required>
+        </label>
+        <label>
+            <span>Phone</span>
+            <input type="tel" name="phone" required>
+        </label>
+        <label>
+            <span>Address line 2 (optional)</span>
+            <input type="text" name="addressLine2">
+        </label>
+        <label>
+            <span>Zip Code</span>
+            <input type="tel" name="zip" required pattern="[0-9]{5}">
+        </label>
+        <label>
+            <span>City</span>
+            <input type="text" name="city" required>
+        </label>
+        <p>Throw an error?</p>
+        <label>Yes: <input type="radio" name="error" value="true" required></label>
+        <label>No: <input type="radio" name="error" value="false" required checked></label>
+        <div class="spinner"></div>
+        <input type="submit" value="Search">
+    </fieldset>
+    <div submit-success>
+        <template type="amp-mustache">
+            <h1>Here are your results:</h1>
+            <ul>
+                {{#results}}<li>{{title}}</li>{{/results}}
+            </ul>
+        </template>
+    </div>
+    <div submit-error>
+        <template type="amp-mustache">
+            {{#errors.0}}{{#errors}}
+                <p>{{#message}}{{.}}{{/message}}{{^message}}{{.}}{{/message}}</p>
+            {{/errors}}{{/errors.0}}
         </template>
     </div>
 </form>

@@ -22,6 +22,7 @@ var BBPromise = require('bluebird');
 var app = require('express')();
 var bacon = require('baconipsum');
 var bodyParser = require('body-parser');
+var csv = require('fast-csv');
 var fs = BBPromise.promisifyAll(require('fs'));
 var formidable = require('formidable');
 var jsdom = require('jsdom');
@@ -213,6 +214,74 @@ app.use('/form/search-json/get', function(req, res) {
   });
 });
 
+app.use('/form/verify-search-json/post', function(req, res) {
+  assertCors(req, res, ['POST']);
+  const form = new formidable.IncomingForm();
+  form.parse(req, function(err, fields) {
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+
+    const errors = [];
+    if (!fields.phone.match(/^650/)) {
+      errors.push({name: 'phone', message: 'Phone must start with 650'});
+    }
+    if (fields.name !== 'Frank') {
+      errors.push({name: 'name', message: 'Please set your name to be Frank'});
+    }
+    if (fields.error === 'true') {
+      errors.push('You asked for an error, you get an error.');
+    }
+    verifyAddress(fields.city, fields.zip).then(function(found) {
+      if (!found) {
+        errors.push({name: 'city', message: 'City doesn\'t match zip'});
+      }
+
+      if (errors.length === 0) {
+        res.end(JSON.stringify({
+          results: [
+            {title: 'Result 1'},
+            {title: 'Result 2'},
+            {title: 'Result 3'},
+          ],
+        }));
+      } else {
+        res.statusCode = 400;
+        res.end(JSON.stringify({errors: errors}));
+      }
+    }, function(error) {
+      res.statusCode = 500;
+      res.end({errors: [error]});
+    });
+  });
+});
+
+const ZIP_PATH = 'examples/form/zipcodes.csv';
+function verifyAddress(city, zip) {
+  return new Promise(function(resolve, reject) {
+    if (!city || !zip) {
+      resolve(false);
+    }
+
+    const fileStream = fs.createReadStream(ZIP_PATH);
+    const csvStream = csv({headers: true})
+    .on('data', function(row) {
+      if (equalsIgnoreCase(row.City, city) &&
+          equalsIgnoreCase(row.Zipcode, zip)) {
+        resolve(true);
+        fileStream.destroy();
+      }
+    })
+    .on('end', function() {
+      resolve(false);
+    })
+    .on('error', reject);
+
+    fileStream.pipe(csvStream);
+  });
+}
+
+function equalsIgnoreCase(a, b) {
+  return a.toUpperCase() === b.toUpperCase();
+}
 
 app.use('/share-tracking/get-outgoing-fragment', function(req, res) {
   res.setHeader('AMP-Access-Control-Allow-Source-Origin',
