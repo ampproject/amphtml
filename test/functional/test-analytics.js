@@ -103,7 +103,7 @@ describes.realWin('analytics', {amp: true}, env => {
         },
       };
       expect(baseEle.element.querySelector('amp-analytics')).to.be.null;
-      insertAnalyticsElement(baseEle.element, config, true);
+      expect(insertAnalyticsElement(baseEle.element, config, true)).to.be.ok;
       return timer.promise(50).then(() => {
         const analyticsEle = baseEle.element.querySelector('amp-analytics');
         expect(analyticsEle).to.not.be.null;

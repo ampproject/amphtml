@@ -224,7 +224,8 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       const ampAnalyticsElement = impl.element.querySelector('amp-analytics');
       expect(ampAnalyticsElement).to.be.ok;
       expect(ampAnalyticsElement.CONFIG).jsonEqual(impl.ampAnalyticsConfig_);
-      expect(ampAnalyticsElement.getAttribute('sandbox')).to.equal('true');;
+      expect(ampAnalyticsElement.getAttribute('sandbox')).to.equal('true');
+      expect(impl.ampAnalyticsElement_).to.be.ok;
       // Exact format of amp-analytics element covered in
       // test/functional/test-analytics.js.
       // Just ensure extensions is loaded, and analytics element appended.
