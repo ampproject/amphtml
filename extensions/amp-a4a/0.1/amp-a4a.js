@@ -331,7 +331,7 @@ export class AmpA4A extends AMP.BaseElement {
 
     /**
      * TODO(keithwrightbos) - remove once resume behavior is verified.
-     * @return {boolean} whether most recent ad request was generated as part
+     * {boolean} whether most recent ad request was generated as part
      *    of resume callback.
      */
     this.fromResumeCallback = false;
