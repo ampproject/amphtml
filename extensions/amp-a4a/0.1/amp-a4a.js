@@ -167,6 +167,7 @@ export const LIFECYCLE_STAGES = {
   firstVisible: '24',
   visLoadAndOneSec: '25',
   iniLoad: '26',
+  resumeCallback: '27'
 };
 
 /**
@@ -329,8 +330,9 @@ export class AmpA4A extends AMP.BaseElement {
     this.iframe = null;
 
     /**
-     * @return whether most recent ad request was generated as part of resume
-     *    callback.
+     * TODO(keithwrightbos) - remove once resume behavior is verified.
+     * @return {boolean} whether most recent ad request was generated as part
+     *    of resume callback.
      */
     this.fromResumeCallback = false;
   }
