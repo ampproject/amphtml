@@ -453,8 +453,8 @@ export class AmpA4A extends AMP.BaseElement {
       return false;
     }
     if (!isAdPositionAllowed(this.element, this.win)) {
-      user().warn(`<${this.element.tagName}> is not allowed to be placed in ` +
-        `elements with position:fixed: ${this.element}`);
+      user().warn(TAG, `<${this.element.tagName}> is not allowed to be ` +
+        `placed in elements with position:fixed: ${this.element}`);
       return false;
     }
     // OnLayoutMeasure can be called when page is in prerender so delay until
