@@ -45,6 +45,7 @@ import {resetScheduledElementForTesting} from '../../../../src/custom-element';
 import {urlReplacementsForDoc} from '../../../../src/services';
 import {incrementLoadingAds} from '../../../amp-ad/0.1/concurrent-load';
 import {platformFor} from '../../../../src/services';
+import {Resource} from '../../../../src/service/resource';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {dev, user} from '../../../../src/log';
 import {createElementWithAttributes} from '../../../../src/dom';
@@ -641,6 +642,55 @@ describe('amp-a4a', () => {
   });
 
   describe('#onLayoutMeasure', () => {
+    it('resumeCallback calls onLayoutMeasure', () => {
+      xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        const a4aElement = createA4aElement(doc);
+        const s = doc.createElement('style');
+        s.textContent = '.fixed {position:fixed;}';
+        doc.head.appendChild(s);
+        const a4a = new MockA4AImpl(a4aElement);
+        const renderAmpCreativeSpy = sandbox.spy(a4a, 'renderAmpCreative_');
+        a4a.onLayoutMeasure();
+        expect(a4a.adPromise_).to.be.ok;
+        a4a.layoutCallback().then(() => {
+          expect(renderAmpCreativeSpy.calledOnce,
+              'renderAmpCreative_ called exactly once').to.be.true;
+          a4a.unlayoutCallback();
+          const onLayoutMeasureSpy = sandbox.spy(a4a, 'onLayoutMeasure');
+          a4a.resumeCallback();
+          expect(onLayoutMeasureSpy).to.be.calledOnce;
+          expect(a4a.fromResumeCallback).to.be.true;
+        });
+      });
+    });
+    it('resumeCallback w/ measure required no onLayoutMeasure', () => {
+      xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        const a4aElement = createA4aElement(doc);
+        const s = doc.createElement('style');
+        s.textContent = '.fixed {position:fixed;}';
+        doc.head.appendChild(s);
+        const a4a = new MockA4AImpl(a4aElement);
+        const renderAmpCreativeSpy = sandbox.spy(a4a, 'renderAmpCreative_');
+        a4a.onLayoutMeasure();
+        expect(a4a.adPromise_).to.be.ok;
+        a4a.layoutCallback().then(() => {
+          expect(renderAmpCreativeSpy.calledOnce,
+              'renderAmpCreative_ called exactly once').to.be.true;
+          a4a.unlayoutCallback();
+          const onLayoutMeasureSpy = sandbox.spy(a4a, 'onLayoutMeasure');
+          sandbox.stub(Resource, 'hasBeenMeasured').returns(false);
+          a4a.resumeCallback();
+          expect(onLayoutMeasureSpy).to.never.be.called;
+          expect(a4a.fromResumeCallback).to.be.true;
+        });
+      });
+    });
     it('should run end-to-end and render in friendly iframe', () => {
       xhrMock.withArgs(TEST_URL, {
         mode: 'cors',
@@ -718,7 +768,8 @@ describe('amp-a4a', () => {
         doc.head.appendChild(s);
         a4aElement.className = 'fixed';
         const a4a = new MockA4AImpl(a4aElement);
-        expect(a4a.onLayoutMeasure.bind(a4a)).to.throw(/fixed/);
+        a4a.onLayoutMeasure();
+        expect(a4a.adPromise_).to.not.be.ok;
       });
     });
     it('does not initialize promise chain 0 height/width', () => {
