@@ -62,7 +62,7 @@ Same as `srcset` attribute on the `img` tag. The behavior will be polyfilled whe
 
 **sizes**
 
-Same as `srcset` attribute on the `img` tag. For more information see the [common `sizes` attribute docs](../spec/amp-html-layout.md#sizes).
+Same as `sizes` attribute on the `img` tag. For more information see the [common `sizes` attribute docs](../spec/amp-html-layout.md#sizes).
 
 **alt**
 
