@@ -127,7 +127,7 @@ export class FormVerifier {
    * Called when the user has fully set a value to be verified,
    * e.g. the input's 'change' event
    * @param {!Element} unusedInput
-   * @param {!function()} unusedAfterVerify
+   * @param {!function(!Array<!Element>)} unusedAfterVerify
    */
   onCommit(unusedInput, unusedAfterVerify) {}
 }
@@ -161,7 +161,7 @@ export class AsyncVerifier extends FormVerifier {
 
   /**
    * Sends the verify request if any group is ready to verify.
-   * @param {!function()} afterVerify
+   * @param {!function(!Array<!Element>)} afterVerify
    */
   maybeVerify_(afterVerify) {
     if (this.shouldVerify_()) {
@@ -171,7 +171,7 @@ export class AsyncVerifier extends FormVerifier {
         return getResponseErrorData(/** @type {!Error} */ (error));
       })
       .then(errors => this.verify_(errors))
-      .then(() => afterVerify());
+      .then(updatedElements => afterVerify(updatedElements));
     }
   }
 
@@ -182,6 +182,7 @@ export class AsyncVerifier extends FormVerifier {
    */
   verify_(errors) {
     const errorElements = [];
+    let updatedElements = [];
 
     // Set the error message on each element that caused an error.
     for (let i = 0; i < errors.length; i++) {
@@ -198,8 +199,11 @@ export class AsyncVerifier extends FormVerifier {
       const group = this.groups_[i];
       if (group.isFilledOut() && group.containsNoElementOf(errorElements)) {
         group.setDirty(false);
+        updatedElements = updatedElements.concat(group.getElements());
       }
     }
+
+    return errorElements.concat(updatedElements);
   }
 
   /**
@@ -251,6 +255,14 @@ class VerificationGroup {
 
     /** @private */
     this.dirty_ = false;
+  }
+
+  /**
+   * Get the list of elements in this verification group
+   * @return {!Array<!Element>}
+   */
+  getElements() {
+    return this.elements_;
   }
 
   /**

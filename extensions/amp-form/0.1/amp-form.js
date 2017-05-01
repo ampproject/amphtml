@@ -237,17 +237,20 @@ export class AmpForm {
     this.form_.addEventListener(
         'submit', this.handleSubmitEvent_.bind(this), true);
     this.form_.addEventListener('blur', e => {
-      onInputInteraction_(e);
+      checkUserValidityAfterInteraction_(dev().assertElement(e.target));
       this.validator_.onBlur(e);
     }, true);
     this.form_.addEventListener('change', e => {
-      this.verifier_.onCommit(dev().assertElement(e.target), () => {
-        onInputInteraction_(e);
+      const input = dev().assertElement(e.target);
+      this.verifier_.onCommit(input, updatedElements => {
+        updatedElements.forEach(updatedElement => {
+          checkUserValidityAfterInteraction_(updatedElement);
+        });
         this.validator_.onBlur(e);
       });
     });
     this.form_.addEventListener('input', e => {
-      onInputInteraction_(e);
+      checkUserValidityAfterInteraction_(dev().assertElement(e.target));
       this.validator_.onInput(e);
       this.verifier_.onMutate(dev().assertElement(e.target));
     });
@@ -803,11 +806,10 @@ function checkUserValidity(element, propagate = false) {
 /**
  * Responds to user interaction with an input by checking user validity of the input
  * and possibly its input-related ancestors (e.g. feildset, form).
- * @param {!Event} e
+ * @param {!Element} input
  * @private visible for testing.
  */
-export function onInputInteraction_(e) {
-  const input = dev().assertElement(e.target);
+export function checkUserValidityAfterInteraction_(input) {
   checkUserValidity(input, /* propagate */ true);
 }
 

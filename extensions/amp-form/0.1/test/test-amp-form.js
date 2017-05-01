@@ -17,7 +17,7 @@
 import {
   AmpForm,
   AmpFormService,
-  onInputInteraction_,
+  checkUserValidityAfterInteraction_,
 } from '../amp-form';
 import {
   setReportValiditySupportedForTesting,
@@ -994,7 +994,7 @@ describes.repeated('', {
           sandbox.spy(fieldset, 'checkValidity');
           sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
 
-          onInputInteraction_({target: emailInput});
+          checkUserValidityAfterInteraction_(emailInput);
           expect(form.checkValidity).to.be.called;
           expect(emailInput.checkValidity).to.be.called;
           expect(fieldset.checkValidity).to.be.called;
@@ -1008,7 +1008,7 @@ describes.repeated('', {
 
 
           emailInput.value = 'cool@bea.ns';
-          onInputInteraction_({target: emailInput});
+          checkUserValidityAfterInteraction_(emailInput);
           expect(emailInput.className).to.contain('user-valid');
           expect(form.className).to.contain('user-invalid');
 
@@ -1018,7 +1018,7 @@ describes.repeated('', {
 
           // Both inputs back to invalid.
           emailInput.value = 'invalid-value';
-          onInputInteraction_({target: emailInput});
+          checkUserValidityAfterInteraction_(emailInput);
           expect(emailInput.className).to.contain('user-invalid');
           expect(form.className).to.contain('user-invalid');
 
@@ -1028,14 +1028,14 @@ describes.repeated('', {
 
           // Only email input is invalid now.
           usernameInput.value = 'coolbeans';
-          onInputInteraction_({target: usernameInput});
+          checkUserValidityAfterInteraction_(usernameInput);
           expect(emailInput.className).to.contain('user-invalid');
           expect(form.className).to.contain('user-invalid');
           expect(usernameInput.className).to.contain('user-valid');
 
           // Both input are finally valid.
           emailInput.value = 'cool@bea.ns';
-          onInputInteraction_({target: emailInput});
+          checkUserValidityAfterInteraction_(emailInput);
           expect(emailInput.className).to.contain('user-valid');
           expect(usernameInput.className).to.contain('user-valid');
           expect(form.className).to.contain('user-valid');
@@ -1059,8 +1059,7 @@ describes.repeated('', {
           sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
 
           emailInput.value = 'cool@bea.ns';
-          const event = {target: emailInput};
-          onInputInteraction_(event);
+          checkUserValidityAfterInteraction_(emailInput);
 
           expect(emailInput.checkValidity).to.be.called;
           expect(form.checkValidity).to.not.be.called;
