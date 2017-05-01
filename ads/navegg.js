@@ -27,6 +27,7 @@ export function navegg(global, data) {
   let seg, nvg = function() {};
   delete data.acc;
   nvg.prototype.getProfile = function() {};
+  data.targeting = data.targeting || {};
   loadScript(global, 'https://tag.navdmp.com/amp.1.0.0.min.js', () => {
     nvg = global[`nvg${acc}`] = new global['AMPNavegg']({
       acc,

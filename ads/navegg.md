@@ -19,13 +19,14 @@ limitations under the License.
 If you want to serve ads with Navegg data you need to use this adapter.
 
 The Navegg adapter only supports Doubleclick for now.
+For the most up-to-date list of Doubleclick supported parameters and usage please refer to Doubleclick reference guide [here](google/doubleclick.md).
 
 ## Example
 
 ```html
 <amp-ad width=320 height=50
   type="navegg"
-  data-acc="XXXXX"
+  data-acc="10"
   data-slot="/4119129/mobile_ad_banner"
   json='{"targeting":{"sport":["rugby","cricket"]}}'>
 </amp-ad>
@@ -40,6 +41,3 @@ You need to specify the 'data-acc' with your Navegg Account ID:
 ```
 For any help, please contact
 [us](https://www.navegg.com/en/institutional/#contact)
-
-
-For the most up-to-date list of Doubleclick supported parameters and usage please refer to Doubleclick reference guide [here](google/doubleclick.md).
