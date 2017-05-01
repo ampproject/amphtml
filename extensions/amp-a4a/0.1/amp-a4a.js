@@ -935,10 +935,11 @@ export class AmpA4A extends AMP.BaseElement {
     const encodedSignatureInfo =
         responseHeaders.get('AMP-Fast-Fetch-Signature');
     if (encodedSignatureInfo) {
-      const match = new RegExp(
-          '^([A-Za-z0-9._-]+):([A-Za-z0-9._-]+):' +
-          '([A-Za-z0-9+/]{4}*(?:[A-Za-z0-9+/]{2}[A-Za-z0-9+/=]=)?)$');
-      .match(encodedSignatureInfo);
+      const match =
+          new RegExp(
+              '^([A-Za-z0-9._-]+):([A-Za-z0-9._-]+):' +
+              '([A-Za-z0-9+/]{4}*(?:[A-Za-z0-9+/]{2}[A-Za-z0-9+/=]=)?)$')
+              .match(encodedSignatureInfo);
       if (match) {
         adResponse.signatureInfo = {
           signingServiceName: match.group(1),
