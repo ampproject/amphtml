@@ -137,18 +137,18 @@ describe('amp-ad-xorigin-iframe-handler', () => {
           sentinel: 'amp3ptest' + testIndex,
         });
         const expectResponsePromise = iframe.expectMessageFromParent(
-            'amp-' + JSON.stringify({
-              requestedWidth: 114,
-              requestedHeight: 217,
-              type: 'embed-size-changed',
-              sentinel: 'amp3ptest' + testIndex,
-            }));
+            'embed-size-changed');
         const renderStartPromise = signals.whenSignal('render-start');
         return Promise.all([renderStartPromise, initPromise]).then(() => {
-          return initPromise;
-        }).then(() => {
           expect(iframe.style.visibility).to.equal('');
           return expectResponsePromise;
+        }).then(data => {
+          expect(data).to.jsonEqual({
+            requestedWidth: 114,
+            requestedHeight: 217,
+            type: 'embed-size-changed',
+            sentinel: 'amp3ptest' + testIndex,
+          });
         });
       });
 
@@ -259,16 +259,19 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     });
 
     it('should be able to use embed-state API', () => {
+      sandbox.stub/*OK*/(iframeHandler.viewer_, 'isVisible', () => true);
       iframe.postMessageToParent({
         type: 'send-embed-state',
         sentinel: 'amp3ptest' + testIndex,
       });
-      return iframe.expectMessageFromParent('amp-' + JSON.stringify({
-        inViewport: false,
-        pageHidden: false,
-        type: 'embed-state',
-        sentinel: 'amp3ptest' + testIndex,
-      }));
+      return iframe.expectMessageFromParent('embed-state').then(data => {
+        expect(data).to.jsonEqual({
+          inViewport: false,
+          pageHidden: false,
+          type: 'embed-state',
+          sentinel: 'amp3ptest' + testIndex,
+        });
+      });
     });
 
     it('should be able to use embed-size API, change size deny', () => {
@@ -285,12 +288,14 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         type: 'embed-size',
         sentinel: 'amp3ptest' + testIndex,
       });
-      return iframe.expectMessageFromParent('amp-' + JSON.stringify({
-        requestedWidth: 114,
-        requestedHeight: 217,
-        type: 'embed-size-denied',
-        sentinel: 'amp3ptest' + testIndex,
-      }));
+      return iframe.expectMessageFromParent('embed-size-denied').then(data => {
+        expect(data).to.jsonEqual({
+          requestedWidth: 114,
+          requestedHeight: 217,
+          type: 'embed-size-denied',
+          sentinel: 'amp3ptest' + testIndex,
+        });
+      });
     });
 
     it('should be able to use embed-size API, change size succeed', () => {
@@ -307,12 +312,14 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         type: 'embed-size',
         sentinel: 'amp3ptest' + testIndex,
       });
-      return iframe.expectMessageFromParent('amp-' + JSON.stringify({
-        requestedWidth: 114,
-        requestedHeight: 217,
-        type: 'embed-size-changed',
-        sentinel: 'amp3ptest' + testIndex,
-      }));
+      return iframe.expectMessageFromParent('embed-size-changed').then(data => {
+        expect(data).to.jsonEqual({
+          requestedWidth: 114,
+          requestedHeight: 217,
+          type: 'embed-size-changed',
+          sentinel: 'amp3ptest' + testIndex,
+        });
+      });
     });
 
     it('should be able to use embed-size API to resize height only', () => {
@@ -328,12 +335,14 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         type: 'embed-size',
         sentinel: 'amp3ptest' + testIndex,
       });
-      return iframe.expectMessageFromParent('amp-' + JSON.stringify({
-        requestedWidth: undefined,
-        requestedHeight: 217,
-        type: 'embed-size-changed',
-        sentinel: 'amp3ptest' + testIndex,
-      }));
+      return iframe.expectMessageFromParent('embed-size-changed').then(data => {
+        expect(data).to.jsonEqual({
+          requestedWidth: undefined,
+          requestedHeight: 217,
+          type: 'embed-size-changed',
+          sentinel: 'amp3ptest' + testIndex,
+        });
+      });
     });
   });
 });
