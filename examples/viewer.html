@@ -239,7 +239,8 @@
       this.container.appendChild(this.iframe);
 
       this.ampViewerHost_ = new AmpViewerHost(window, this.iframe,
-        this.frameOrigin_, false /* startPolling */, this.id /* logs id */);
+        this.frameOrigin_, this.processRequest_.bind(this), 
+        this.id /* logs id */);
 
       this.iframe.onload = this.loaded_.bind(this);
       setTimeout(function() {
@@ -259,29 +260,40 @@
       if (updateToggle) {
         this.updateVisibilityToggle_();
       }
-    };
-
-
+    };    
+    
     Viewer.prototype.loaded_ = function() {
       if (this.alreadyLoaded_) {
         return;
       }
       log('AMP Loaded');
       this.alreadyLoaded_ = true;
-
       var waiter = this.container.querySelector('.wait');
       if (waiter) {
         waiter.parentElement.removeChild(waiter);
       }
-
       this.iframe.style.display = '';
       this.iframe.style.visibility = '';
-
       this.iframe.contentWindow.onbeforeunload = (function() {
         this.container.style.paddingTop = '120px';
         this.container.textContent =
             'Unload of the AMP iframe is not allowed!';
       }).bind(this);
+    };
+
+
+    Viewer.prototype.documentReady_ = function() {
+      log('AMP document ready');
+      this.loaded_();
+      return Promise.resolve();
+    };
+
+
+    Viewer.prototype.onScroll_ = function() {
+      log('Viewer.prototype.onScroll_');
+      this.ampViewerHost_.sendRequest('viewport', {
+        scrollTop: this.container./*OK*/scrollTop
+      }, false);
     };
 
 
@@ -296,6 +308,44 @@
         height: this.container./*OK*/offsetHeight,
         paddingTop: this.header./*OK*/offsetHeight
       }, false);
+    };
+
+
+    Viewer.prototype.requestFullOverlay_ = function() {
+      log('requestFullOverlay');
+      this.header.style.opacity = 0;
+      return Promise.resolve();
+    };
+
+
+    Viewer.prototype.cancelFullOverlay_ = function() {
+      log('cancelFullOverlay');
+      this.header.style.opacity = 1;
+      return Promise.resolve();
+    };
+
+
+    Viewer.prototype.pushHistory_ = function(stackIndex) {
+      log('push history to ', stackIndex);
+      // Super trivial. Only one step allowed.
+      if (stackIndex != this.stackIndex_ + 1) {
+        throw new Error('Only one step push allowed');
+      }
+      this.stackIndex_ = stackIndex;
+      window.history.pushState({}, '');
+      return Promise.resolve();
+    };
+
+
+    Viewer.prototype.popHistory_ = function(stackIndex) {
+      log('pop history at ', stackIndex);
+      // Super trivial. Only one step allowed.
+      if (stackIndex != this.stackIndex_) {
+        throw new Error('Only one step pop allowed');
+      }
+      this.stackIndex_ = stackIndex;
+      window.history.go(-1);
+      return Promise.resolve();
     };
 
 
@@ -316,9 +366,73 @@
     };
 
 
+    Viewer.prototype.broadcast_ = function(message) {
+      log('broadcast: ', message);
+      var self = this;
+      allViewers.forEach(function(viewer) {
+        if (viewer != self) {
+          viewer.messaging_.sendRequest('broadcast', message, false);
+        }
+      });
+    };
+
+
     Viewer.prototype.scrollAmpDoc = function(scrollTop) {
       log('viewer scroll amp doc: ', scrollTop);
       this.ampViewerHost_.sendRequest('scroll', {scrollTop}, true);
+    };
+
+
+    Viewer.prototype.processRequest_ = function(type, data, awaitResponse) {
+      log('Viewer.prototype.processRequest_', type);
+      switch(type) {
+        case 'documentLoaded':
+          return this.documentReady_();
+        case 'requestFullOverlay':
+          return this.requestFullOverlay_();
+        case 'cancelFullOverlay':
+          return this.cancelFullOverlay_();
+        case 'pushHistory':
+          return this.pushHistory_(data.stackIndex);
+        case 'popHistory':
+          return this.popHistory_(data.stackIndex);
+        case 'broadcast':
+          return this.broadcast_(data);
+        case 'unloaded':
+          log('unloaded');
+          return this.handleUnload_();
+        case 'tick':
+          log('[CSI] tick. label:', data.label);
+          return;
+        case 'a2a':
+          log('a2a navigation', data);
+          return;
+        case 'sendCsi':
+          log('[CSI] sendCsi.');
+          return;
+        case 'touchstart':
+        case 'touchmove':
+        case 'touchend':
+          log('touch event!', type);
+          return;
+        case 'documentHeight':
+        case 'setFlushParams':
+        case 'prerenderComplete':
+        case 'scroll':
+        case 'replaceHistory':
+          return;
+        default:
+          return Promise.reject('request not supported: ' + type);
+      }
+    };
+
+
+    Viewer.prototype.handleUnload_ = function(type, data, awaitResponse) {
+      log('Viewer.prototype.handleUnload_');
+      if (this.messaging_) {
+        this.messaging_ = null;
+      }
+      return Promise.resolve();
     };
 
 

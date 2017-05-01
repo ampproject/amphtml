@@ -29,15 +29,17 @@ export class AmpViewerHost {
    * @param {!Window} win
    * @param {!HTMLIFrameElement} ampIframe
    * @param {string} frameOrigin
-   * @param {boolean} startPolling
    * @param {string=} opt_logsId For dev logs so you know what ampdoc you're
    * looking at.
    */
-  constructor(win, ampIframe, frameOrigin, startPolling, opt_logsId) {
+  constructor(
+    win, ampIframe, frameOrigin, messageHandler, opt_logsId) {
     /** @const {!Window} */
     this.win = win;
     /** @const {!HTMLIFrameElement} */
     this.ampIframe_ = ampIframe;
+
+    this.messageHandler_ = messageHandler;
 
     /** @const {string} */
     this.logsId = opt_logsId;
@@ -68,7 +70,7 @@ export class AmpViewerHost {
         const port = new WindowPortEmulator(
           this.win, targetOrigin, target, this.logsId);
         this.messaging_ = new Messaging(this.win, port);
-        this.messaging_.setDefaultHandler(this.handleMessage_.bind(this));
+        this.messaging_.setDefaultHandler(this.messageHandler_);
 
         this.sendRequest('visibilitychange', {
           state: this.visibilityState_,
@@ -89,10 +91,6 @@ export class AmpViewerHost {
       return;
     }
     return this.messaging_.sendRequest(type, data, awaitResponse);
-  };
-
-  handleMessage_(type, data, awaitResponse) {
-    this.log('handleMessage_', type, data, awaitResponse);
   };
 
   log() {
