@@ -53,12 +53,15 @@ describe('Logging', () => {
         log: logSpy,
       },
       setTimeout: timeoutSpy,
+      reportError: error => error,
     };
+    sandbox.stub(self, 'reportError', error => error);
   });
 
   afterEach(() => {
     sandbox.restore();
     sandbox = null;
+    window.AMP_MODE = undefined;
   });
 
   describe('Level', () => {
@@ -292,8 +295,7 @@ describe('Logging', () => {
       log = new Log(win, RETURNS_FINE, USER_ERROR_SENTINEL);
     });
 
-    // TODO(amphtml): Unskip when #8387 is fixed.
-    it.skip('should fail', () => {
+    it('should fail', () => {
       expect(function() {
         log.assert(false, 'xyz');
       }).to.throw(/xyz/);
@@ -384,25 +386,21 @@ describe('Logging', () => {
       expect(error.expected).to.be.undefined;
       expect(error).to.be.instanceof(Error);
       expect(isUserErrorMessage(error.message)).to.be.true;
-      expect(error.message).to.contain('test');
+      expect(error.message).to.equal('test' + USER_ERROR_SENTINEL);
     });
 
     it('should create suffixed errors from error', () => {
       const error = log.createError(new Error('test'));
       expect(error).to.be.instanceof(Error);
       expect(isUserErrorMessage(error.message)).to.be.true;
-      expect(error.message).to.contain('test');
+      expect(error.message).to.equal('test' + USER_ERROR_SENTINEL);
     });
 
     it('should only add suffix once', () => {
       const error = log.createError(new Error('test' + USER_ERROR_SENTINEL));
+      expect(error).to.be.instanceof(Error);
       expect(isUserErrorMessage(error.message)).to.be.true;
-      expect(error.message).to.contain('test');
-
-      let message = error.message;
-      expect(message.indexOf(USER_ERROR_SENTINEL)).to.not.equal(-1);
-      message = message.replace(USER_ERROR_SENTINEL, '');
-      expect(message.indexOf(USER_ERROR_SENTINEL)).to.equal(-1);
+      expect(error.message).to.equal('test' + USER_ERROR_SENTINEL);
     });
 
     it('should strip suffix if not available', () => {
@@ -419,7 +417,7 @@ describe('Logging', () => {
       const error = log.createError('test');
       expect(error).to.be.instanceof(Error);
       expect(isUserErrorMessage(error.message)).to.be.false;
-      expect(error.message).to.contain('test-other');
+      expect(error.message).to.equal('test-other');
     });
 
     it('should pass for elements', () => {
