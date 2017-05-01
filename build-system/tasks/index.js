@@ -32,3 +32,4 @@ require('./size');
 require('./release-tagging');
 require('./runtime-test');
 require('./validator');
+require('./visual-diff');
