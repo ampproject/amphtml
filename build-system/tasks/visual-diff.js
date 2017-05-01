@@ -20,7 +20,7 @@ const gulp = require('gulp-help')(require('gulp'));
 const util = require('gulp-util');
 
 const percyCommand = 'percy snapshot';
-const defaultWidths = [750, 1080];  // iPhone: 750. Pixel: 1080.
+const defaultWidths = [375, 411];  // CSS widths: iPhone: 375, Pixel: 411.
 
 /**
  * Executes the provided command; terminates this program in case of failure.
@@ -154,7 +154,7 @@ gulp.task('visual-diff', 'Runs visual diff tests using Percy', runTests, {
   options: {
     'webpage': '  Path of the webpage being tested, relative to amphtml/.' +
         ' Used this as the baseurl while looking up snapshots on Percy.',
-    'widths': '  CSV with the widths to test. Defaults to '
-        + defaultWidths.toString() + '.'
+    'widths': '  CSV with the device CSS widths to test. Defaults to '
+        + defaultWidths.toString() + ' (iPhone and Pixel).'
   }
 });
