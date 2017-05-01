@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-
+import '../../../third_party/babel/custom-babel-helpers';
 import {listen} from '../../../src/event-helper';
 import {tryParseJson} from '../../../src/json';
 import {dev} from '../../../src/log';
