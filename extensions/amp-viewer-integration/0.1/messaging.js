@@ -72,17 +72,17 @@ export class WindowPortEmulator {
    * @param {!Window} win
    * @param {string} origin
    * @param {!Window} target
-   * @param {number} opt_id for dev logging.
+   * @param {string=} opt_logsId for dev logging.
    */
-  constructor(win, origin, target, opt_id) {
+  constructor(win, origin, target, opt_logsId) {
     /** @const {!Window} */
     this.win = win;
     /** @private {string} */
     this.origin_ = origin;
     /** @const {!Window} */
     this.target_ = target;
-    /** @private {number} */
-    this.id = opt_id;
+    /** @const {string|undefined} */
+    this.logsId = opt_logsId;
   }
 
   /**
@@ -93,11 +93,6 @@ export class WindowPortEmulator {
     listen(this.win, 'message', e => {
       if (e.origin == this.origin_ &&
           e.source == this.target_ && e.data.app == APP) {
-        this.log('got a message: ', e.data);
-        this.log(e.data.name);
-        if (e.data.name == 'scroll') {
-          debugger;
-        }
         handler(e);
       }
     });
@@ -113,7 +108,7 @@ export class WindowPortEmulator {
   }
   log() {
     const var_args = Array.prototype.slice.call(arguments, 0);
-    var_args.unshift('[PORT ' + this.id + ']');
+    var_args.unshift('[PORT ' + this.logsId + ']');
     console/*OK*/.log.apply(console, var_args);
   }
 }
@@ -189,8 +184,7 @@ export class Messaging {
    * @private
    */
   handleMessage_(event) {
-    // dev().fine(TAG, 'Got a message:', event.type, event.data);
-    console.log(TAG + ' Got a message:', event.type, event.data);
+    dev().fine(TAG, 'Got a message:', event.type, event.data);
     const message = parseMessage(event.data);
     if (!message) {
       return;
@@ -210,7 +204,7 @@ export class Messaging {
    * @return {!Promise<*>|undefined}
    */
   sendRequest(messageName, messageData, awaitResponse) {
-    // dev().fine(TAG, 'sendRequest, event name: ', messageName);
+    dev().fine(TAG, 'sendRequest, event name: ', messageName);
     const requestId = ++this.requestIdCounter_;
     let promise = undefined;
     if (awaitResponse) {
@@ -237,7 +231,7 @@ export class Messaging {
    * @private
    */
   sendResponse_(requestId, messageName, messageData) {
-    // dev().fine(TAG, 'sendResponse_');
+    dev().fine(TAG, 'sendResponse_');
     this.sendMessage_({
       app: APP,
       requestid: requestId,
@@ -284,7 +278,7 @@ export class Messaging {
    * @private
    */
   handleRequest_(message) {
-    // dev().fine(TAG, 'handleRequest_', message);
+    dev().fine(TAG, 'handleRequest_', message);
 
     let handler = this.messageHandlers_[message.name];
     if (!handler) {
@@ -321,7 +315,7 @@ export class Messaging {
    * @private
    */
   handleResponse_(message) {
-    // dev().fine(TAG, 'handleResponse_');
+    dev().fine(TAG, 'handleResponse_');
     const requestId = message.requestid;
     const pending = this.waitingForResponse_[requestId];
     if (pending) {

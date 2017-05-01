@@ -16,7 +16,6 @@
 
 import {APP, Messaging, MessageType, WindowPortEmulator} from '../messaging';
 import {listen} from '../../../../src/event-helper';
-import {dev} from '../../../../src/log';
 
 const CHANNEL_OPEN_MSG = 'channelOpen';
 
@@ -31,24 +30,25 @@ export class AmpViewerHost {
    * @param {!HTMLIFrameElement} ampIframe
    * @param {string} frameOrigin
    * @param {boolean} startPolling
+   * @param {string=} opt_logsId For dev logs so you know what ampdoc you're
+   * looking at.
    */
-  constructor(win, ampIframe, frameOrigin, startPolling, opt_id) {
+  constructor(win, ampIframe, frameOrigin, startPolling, opt_logsId) {
     /** @const {!Window} */
     this.win = win;
     /** @const {!HTMLIFrameElement} */
     this.ampIframe_ = ampIframe;
 
     /** @const {string} */
-    this.id = opt_id;
+    this.logsId = opt_logsId;
 
-    this.waitForHandshake_(frameOrigin, startPolling);
+    this.waitForHandshake_(frameOrigin);
   }
 
   /**
    * @param {string} targetOrigin
-   * @param {boolean} startPolling
    */
-  waitForHandshake_(targetOrigin, startPolling) {
+  waitForHandshake_(targetOrigin) {
     this.log('awaitHandshake_');
     const target = this.ampIframe_.contentWindow;
     const listener = function(event) {
@@ -66,7 +66,7 @@ export class AmpViewerHost {
         target./*OK*/postMessage(message, targetOrigin);
 
         const port = new WindowPortEmulator(
-          this.win, targetOrigin, target, this.id);
+          this.win, targetOrigin, target, this.logsId);
         this.messaging_ = new Messaging(this.win, port);
         this.messaging_.setDefaultHandler(this.handleMessage_.bind(this));
 
@@ -76,7 +76,7 @@ export class AmpViewerHost {
         }, true);
       }
     }.bind(this);
-    this.win.addEventListener('message', listener, false);
+    listen(this.win, 'message', listener);
   }
 
   isChannelOpen_(eventData) {
@@ -97,7 +97,7 @@ export class AmpViewerHost {
 
   log() {
     const var_args = Array.prototype.slice.call(arguments, 0);
-    var_args.unshift('[VIEWER ' + this.id + ']');
+    var_args.unshift('[VIEWER ' + this.logsId + ']');
     console/*OK*/.log.apply(console, var_args);
   }
 }
