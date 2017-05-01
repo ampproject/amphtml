@@ -40,35 +40,41 @@ function execOrDie(cmd) {
 }
 
 /**
- * Extracts Percy project keys from the environment.
+ * Extracts and verifies Percy project keys from the environment.
  *
  * @return {!Object} Object containing Percy project and token.
  */
 function extractPercyKeys() {
   // Repo slug to which to upload snapshots. Same as the Github repo slug.
-  let percyProject = '';
-  if (process.env.PERCY_PROJECT) {
-    percyProject = process.env.PERCY_PROJECT;
-  } else {
+  if (!process.env.PERCY_PROJECT) {
     util.log(util.colors.red(
-        'PERCY_PROJECT must be specified as an environment variable'));
-    done();
+        'Error: PERCY_PROJECT must be specified as an environment variable'));
+    process.exit(1);
+  }
+  const percyProject = process.env.PERCY_PROJECT;
+  if (!percyProject.includes('/')) {
+    util.log(util.colors.red(
+        'Error: PERCY_PROJECT doesn\'t look like a valid repo slug'));
+    process.exit(1);
   }
   util.log('Percy project: ', util.colors.magenta(percyProject));
 
   // Secret token for the percy project.
-  let percyToken = '';
-  if (process.env.PERCY_TOKEN) {
-    percyToken = process.env.PERCY_TOKEN;
-  } else {
+  if (!process.env.PERCY_TOKEN) {
     util.log(util.colors.red(
-        'PERCY_TOKEN must be specified as an environment variable'));
-    done();
+        'Error: PERCY_TOKEN must be specified as an environment variable'));
+    process.exit(1);
+  }
+  const percyToken = process.env.PERCY_TOKEN;
+  if (percyToken.length != 64) {
+    util.log(util.colors.red(
+        'Error: PERCY_TOKEN doesn\'t look like a valid Percy API key'));
+    process.exit(1);
   }
   util.log('Percy token: ', util.colors.magenta(percyToken));
   return {
     percyProject: percyProject,
-    percyToken: percyToken
+    percyToken: percyToken,
   };
 }
 
@@ -92,7 +98,7 @@ function extractPercyArgs() {
   // Smartphone screen widths to snapshot.
   let widths = defaultWidths;
   if (argv.widths) {
-    widths = JSON.parse("[" + argv.widths + "]");
+    widths = argv.widths.split(',');
   }
   util.log('Widths: ', util.colors.magenta(widths.toString()));
 
@@ -101,7 +107,7 @@ function extractPercyArgs() {
 
   return {
     webpage: webpage,
-    widths: widths
+    widths: widths,
   };
 }
 
@@ -109,14 +115,10 @@ function extractPercyArgs() {
  * Constructs the Percy command line with various args.
  *
  * @param {!Object} percyKeys Object containing access keys for the Percy repo.
- * @return {String} Full command line to be executed.
+ * @return {string} Full command line to be executed.
  */
 function constructCommandLine(percyKeys) {
   let commandLine = [];
-
-  // Percy project keys.
-  commandLine.push('PERCY_PROJECT=' + percyKeys.percyProject);
-  commandLine.push('PERCY_TOKEN=' + percyKeys.percyToken);
 
   // Main snapshot command.
   commandLine.push(percyCommand);
