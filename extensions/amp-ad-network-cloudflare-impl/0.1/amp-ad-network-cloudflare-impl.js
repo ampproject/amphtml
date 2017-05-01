@@ -15,19 +15,9 @@
  */
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
-import {dev} from '../../../src/log';
 import {startsWith} from '../../../src/string';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {NETWORKS} from './vendors';
-
-/**
- * Header that will contain Cloudflare generated signature
- *
- * @type {string}
- * @private
- */
-const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
 
 /**
  * This is a minimalistic AmpA4A implementation that primarily gets an Ad

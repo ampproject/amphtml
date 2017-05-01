@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import {VerificationFailure, signatureVerifierFor} from './signature-verifier';
 import {
   is3pThrottled,
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
 } from '../../amp-ad/0.1/concurrent-load';
 import {adConfig} from '../../../ads/_config';
-import {signingServerURLs} from '../../../ads/_a4a-config';
 import {createElementWithAttributes} from '../../../src/dom';
 import {cancellation, isCancellation} from '../../../src/error';
 import {
@@ -34,14 +35,11 @@ import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {dev, user, duplicateErrorIfNecessary} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, isEnumValue} from '../../../src/types';
-import {some} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
 import {viewerForDoc} from '../../../src/services';
 import {resourcesForDoc} from '../../../src/services';
 import {xhrFor} from '../../../src/services';
-import {endsWith} from '../../../src/string';
 import {platformFor} from '../../../src/services';
-import {cryptoFor} from '../../../src/crypto';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
 import {handleClick} from '../../../ads/alp/handler';
@@ -314,10 +312,10 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?Promise} */
     this.adUrlsPromise_ = null;
 
-    const signatureVerifier = signatureVerifierFor(this.win)
-    for (const signingServiceName of this.getSigningServiceNames()) {
+    const signatureVerifier = signatureVerifierFor(this.win);
+    this.getSigningServiceNames().forEach(signingServiceName => {
       signatureVerifier.loadKeyset(signingServiceName);
-    }
+    });
   }
 
   /** @override */
@@ -626,7 +624,7 @@ export class AmpA4A extends AMP.BaseElement {
               .verify(
                   signingServiceName, keypairId, signature,
                   creativeParts.creative)
-              .then((failure) => {
+              .then(failure => {
                 switch (failure) {
                   case VerificationFailure.KEY_NOT_FOUND:
                     user().error(

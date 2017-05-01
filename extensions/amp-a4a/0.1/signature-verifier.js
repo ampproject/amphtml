@@ -74,10 +74,7 @@ export function signatureVerifierFor(win) {
  * download or import attempts and should not be attempted again.
  */
 class SignatureVerifier {
-  /**
-   * @param {!Window} win
-   * @private
-   */
+  /** @param {!Window} win */
   constructor(win) {
     /** @private {!Window} */
     this.win_ = win;
@@ -163,7 +160,7 @@ class SignatureVerifier {
   verify(signingServiceName, keypairId, signature, creative) {
     if (this.signers_) {
       const signer = this.signers_[signingServiceName];
-      return signer.promise.then((success) => {
+      return signer.promise.then(success => {
         if (success) {
           const keyPromise = signer.keys[keypairId];
           if (keyPromise === undefined) {
@@ -171,7 +168,7 @@ class SignatureVerifier {
             // cachebusting.
             signer.promise = this.fetchAndAddKeys_(
                                      signer.keys, signingServiceName, keypairId)
-                                 .then((success) => {
+                                 .then(success => {
                                    if (signer.keys[keypairId] === undefined) {
                                      // We still don't have this key; make sure
                                      // we never try again.
@@ -186,19 +183,19 @@ class SignatureVerifier {
             // We tried cachebusting and still don't have this key.
             return VerificationFailure.KEY_NOT_FOUND;
           } else {
-            return keyPromise.then((key) => {
+            return keyPromise.then(key => {
               if (key) {
                 return cryptoFor(this.win_)
                     .verifyPkcs(key, signature, creative)
                     .then(
-                        (result) => {
+                        result => {
                           if (result) {
                             return null;  // Success!
                           } else {
                             return VerificationFailure.SIGNATURE_MISMATCH;
                           }
                         },
-                        (err) => {
+                        err => {
                           // Web Cryptography rejected the verification attempt.
                           // This hopefully won't happen in the wild, but
                           // browsers can be weird about this, so we need to
@@ -244,7 +241,7 @@ class SignatureVerifier {
    * @private
    */
   fetchAndAddKeys_(keys, signingServiceName, keypairId) {
-    let url = signingServices[signingServiceName].url;
+    let url = signingServerURLs[signingServiceName].url;
     if (keypairId != null) {
       url += '?' + encodeURIComponent(keypairId);
     }
@@ -253,7 +250,7 @@ class SignatureVerifier {
             url,
             {mode: 'cors', method: 'GET', ampCors: false, credentials: 'omit'})
         .then(
-            (response) => {
+            response => {
               if (response.status == 200) {
                 // The signing service spec requires this, but checking it at
                 // runtime in production isn't worth it.
@@ -261,19 +258,19 @@ class SignatureVerifier {
                     response.headers.get('Content-Type') ==
                     'application/jwk-set+json');
                 return response.json().then(
-                    (jwkSet) => {
+                    jwkSet => {
                       // This is supposed to be a JSON Web Key Set, as defined
                       // in Section 5 of RFC 7517. However, the signing service
                       // could misbehave and send an arbitrary JSON value, so we
                       // have to type-check at runtime.
                       if (jwkSet && Array.isArray(jwkSet['keys'])) {
-                        for (const jwk of jwkSet['keys']) {
+                        jwkSet['keys'].forEach(jwk => {
                           if (jwk && typeof jwk['kid'] == 'string') {
-                            if (keyset[jwk['kid']] === undefined) {
+                            if (keys[jwk['kid']] === undefined) {
                               // We haven't seen this keypair ID before.
-                              keyset[jwk['kid']] =
+                              keys[jwk['kid']] =
                                   cryptoFor(this.win_).importPkcsKey(jwk).catch(
-                                      (err) => {
+                                      err => {
                                         // Web Cryptography rejected the key
                                         // import attempt. Either the signing
                                         // service sent a malformed key or the
@@ -298,7 +295,7 @@ class SignatureVerifier {
                                 signingServiceName,
                                 `Key (${JSON.stringify(jwk)}) has no "kid"`);
                           }
-                        }
+                        });
                         return true;
                       } else {
                         // The entire JSON Web Key Set is malformed.
@@ -310,7 +307,7 @@ class SignatureVerifier {
                         return false;
                       }
                     },
-                    (err) => {
+                    err => {
                       // The signing service didn't send valid JSON.
                       signingServiceError(
                           `Failed to parse JSON: ${err && err.response}`);
@@ -323,7 +320,7 @@ class SignatureVerifier {
                 return false;
               }
             },
-            (err) => {
+            err => {
               // Some kind of error occurred during the XHR. This could be a lot
               // of things (and we have no type information), but if there's no
               // `response` it's probably a network connectivity failure, so we

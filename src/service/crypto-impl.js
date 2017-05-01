@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import {extensionsFor} from '../extensions';
+import {registerServiceBuilder, getService} from '../service';
 import {dev} from '../log';
-import {fromClass} from '../service';
-import {getExistingServiceForWindow} from '../service';
-import {base64UrlDecodeToBytes, base64UrlEncodeFromBytes} from '../utils/base64';
+import {extensionsFor} from '../services';
 import {stringToBytes, utf8EncodeSync} from '../utils/bytes';
+import {base64UrlEncodeFromBytes} from '../utils/base64';
 
 /** @const {string} */
 const TAG = 'Crypto';
