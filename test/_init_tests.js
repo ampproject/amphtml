@@ -106,6 +106,12 @@ class TestConfig {
     return this.skip(this.platform.isChrome.bind(this.platform));
   }
 
+  skipOldChrome() {
+    return this.skip(() => {
+      return this.platform.isChrome() && this.platform.getMajorVersion() < 48;
+    });
+  }
+
   skipEdge() {
     return this.skip(this.platform.isEdge.bind(this.platform));
   }

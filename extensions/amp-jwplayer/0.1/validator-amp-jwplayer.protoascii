@@ -47,7 +47,7 @@ tags: {  # <amp-jwplayer>
     mandatory_oneof: "data-media-id or data-playlist-id"
     value_regex_casei: "[0-9a-z]{8}"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-jwplayer"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-jwplayer"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

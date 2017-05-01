@@ -39,6 +39,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Behavior
 
 The `amp-form` extension allows the usage of forms and input fields in an AMP document. The extension allows polyfilling some of the missing behaviors in browsers.
@@ -115,7 +117,7 @@ See the [Custom Validation](#custom-validations) section for more details.
 
 **Allowed**:
 
-* Other form-related elements, including: `<textarea>`, `<select>`, `<option>`, `<fieldset>`, and `<label>`.
+* Other form-related elements, including: `<textarea>`, `<select>`, `<option>`, `<fieldset>`, `<label>`, `<input type=text>`, `<input type=submit>`, and so on.
 * [`amp-selector`](https://www.ampproject.org/docs/reference/components/amp-selector)
 
 **Not Allowed**:
@@ -123,7 +125,9 @@ See the [Custom Validation](#custom-validations) section for more details.
 * `<input type=button>`, `<input type=file>`, `<input type=image>` and `<input type=password>`
 * Most of the form-related attributes on inputs including: `form`, `formaction`, `formtarget`, `formmethod` and others.
 
-(Relaxing some of these rules might be reconsidered in the future - please let us know if you require these and provide use cases).
+(Relaxing some of these rules might be reconsidered in the future - [please let us know](https://www.ampproject.org/support/developer/) if you require these and provide use cases).
+
+For details on valid inputs and fields, see [amp-form rules](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii) in the AMP validator specification.
 
 ## Actions
 `amp-form` exposes one action: `submit`. This allows you to trigger the form submission on a specific action, for example, tapping a link, or [submitting a form on input change](#input-events). You can [read more about Actions and Events in AMP in the spec](../../spec/amp-actions-and-events.md).

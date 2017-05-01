@@ -218,7 +218,7 @@ const command = {
     // All unit tests with an old chrome (best we can do right now to pass tests
     // and not start relying on new features).
     // Disabled because it regressed. Better to run the other saucelabs tests.
-    execOrDie(`${gulp} test --nobuild --saucelabs --oldchrome --compiled`);
+    // execOrDie(`${gulp} test --nobuild --saucelabs --oldchrome --compiled`);
   },
   presubmit: function() {
     execOrDie(`${gulp} presubmit`);
@@ -264,7 +264,11 @@ function main(argv) {
       if (!isFlagConfig(file)) {
         console.log('A pull request may not contain a mix of flag-config and ' +
             'non-flag-config files. Please make your changes in separate ' +
-            'pull requests. First offending file: ' + file);
+            'pull requests.');
+        console.log('If you see a long list of unrelated files below, you ' +
+            'may need to sync your branch to master.');
+        console.log('\nFull list of files in this PR:');
+        files.forEach((file) => { console.log('\t' + file); });
         stopTimer('pr-check.js', startTime);
         process.exit(1);
       }

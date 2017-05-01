@@ -22,12 +22,16 @@ import {dev, user} from '../../../src/log';
 import {deepMerge} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {formOrNullForElement} from '../../../src/form';
-import {isArray, toArray} from '../../../src/types';
+import {isArray, isObject, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isFiniteNumber} from '../../../src/types';
 import {reportError} from '../../../src/error';
-import {ampFormServiceForDoc, resourcesForDoc} from '../../../src/services';
+import {
+  ampFormServiceForDoc,
+  resourcesForDoc,
+  viewerForDoc,
+} from '../../../src/services';
 import {filterSplice} from '../../../src/utils/array';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
 
@@ -124,13 +128,17 @@ export class Bind {
       this.evaluator_ = new BindEvaluator();
     }
 
+    /** @const @private {!../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = viewerForDoc(this.ampdoc);
+
     /**
      * Resolved when the service is fully initialized.
      * @const @private {Promise}
      */
-    this.initializePromise_ = this.ampdoc.whenReady().then(() => {
-      return this.initialize_();
-    });
+    this.initializePromise_ = Promise.all([
+      this.ampdoc.whenReady(),
+      this.viewer_.whenFirstVisible(), // Don't initialize in prerender mode.
+    ]).then(() => this.initialize_());
 
     /**
      * @private {?Promise}
@@ -139,7 +147,7 @@ export class Bind {
 
     // Expose for testing on dev.
     if (getMode().localDev) {
-      AMP.reinitializeBind = this.initialize_.bind(this);
+      AMP.printState = this.printState_.bind(this);
     }
   }
 
@@ -590,51 +598,72 @@ export class Bind {
     });
   }
 
+
+  /**
+   * Determines which properties to update based on results of evaluation
+   * of all bound expression strings with the current scope. This method
+   * will only return properties that need to be updated along with their
+   * new value.
+   * @param {!Array<!BoundPropertyDef>} boundProperties
+   * @param {Object<string, ./bind-expression.BindExpressionResultDef>} results
+   * @return {
+   *   !Array<{
+   *     boundProperty: !BoundPropertyDef,
+   *     newValue: !./bind-expression.BindExpressionResultDef,
+   *   }>
+   * }
+   * @private
+   */
+  calculateUpdates_(boundProperties, results) {
+    const updates = [];
+    boundProperties.forEach(boundProperty => {
+      const {expressionString, previousResult} = boundProperty;
+      const newValue = results[expressionString];
+      if (newValue === undefined ||
+          this.shallowEquals_(newValue, previousResult)) {
+        user().fine(TAG, `Expression result unchanged or missing: ` +
+            `"${expressionString}"`);
+      } else {
+        boundProperty.previousResult = newValue;
+        user().fine(TAG, `New expression result: ` +
+            `"${expressionString}" -> ${newValue}`);
+        updates.push({boundProperty, newValue});
+      }
+    });
+    return updates;
+  }
+
   /**
    * Applies expression results to DOM.
    * @param {Object<string, ./bind-expression.BindExpressionResultDef>} results
    * @private
    */
   apply_(results) {
-    const applyPromises = this.boundElements_.map(boundElement => {
-      const {element, boundProperties} = boundElement;
+    const applyPromises = [];
+    this.boundElements_.forEach(boundElement => {
 
-      // TODO(choumx): We should avoid triggering a mutation if the expression
-      // results don't affect this element.
-      const applyPromise = this.resources_.mutateElement(element, () => {
+      const {element, boundProperties} = boundElement;
+      const updates = this.calculateUpdates_(boundProperties, results);
+
+      if (updates.length == 0) {
+        return;
+      }
+
+      const promise = this.resources_.mutateElement(element, () => {
         const mutations = {};
         let width, height;
 
-        boundProperties.forEach(boundProperty => {
-          const {property, expressionString, previousResult} =
-              boundProperty;
-
-          const newValue = results[expressionString];
-
-          // Don't apply if the result hasn't changed or is missing.
-          if (newValue === undefined ||
-              this.shallowEquals_(newValue, previousResult)) {
-            user().fine(TAG, `Expression result unchanged or missing: ` +
-                `"${expressionString}"`);
-            return;
-          } else {
-            boundProperty.previousResult = newValue;
-          }
-          user().fine(TAG, `New expression result: ` +
-              `"${expressionString}" -> ${newValue}`);
-
+        updates.forEach(update => {
+          const {boundProperty, newValue} = update;
           const mutation = this.applyBinding_(boundProperty, element, newValue);
           if (mutation) {
             mutations[mutation.name] = mutation.value;
-          }
-
-          switch (property) {
-            case 'width':
+            const property = boundProperty.property;
+            if (property == 'width') {
               width = isFiniteNumber(newValue) ? Number(newValue) : width;
-              break;
-            case 'height':
+            } else if (property == 'height') {
               height = isFiniteNumber(newValue) ? Number(newValue) : height;
-              break;
+            }
           }
         });
 
@@ -657,7 +686,7 @@ export class Bind {
           }
         }
       });
-      return applyPromise;
+      applyPromises.push(promise);
     });
     return Promise.all(applyPromises);
   }
@@ -920,6 +949,25 @@ export class Bind {
     }
 
     return false;
+  }
+
+  /**
+   * Print out the current state in the console.
+   * @private
+   */
+  printState_() {
+    const seen = [];
+    const s = JSON.stringify(this.scope_, (key, value) => {
+      if (isObject(value)) {
+        if (seen.includes(value)) {
+          return '[Circular]';
+        } else {
+          seen.push(value);
+        }
+      }
+      return value;
+    });
+    dev().info(TAG, s);
   }
 
   /**

@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import {Keycodes} from '../../../../src/utils/keycodes';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 import {platformFor} from '../../../../src/services';
@@ -270,8 +271,8 @@ describe('amp-sidebar', () => {
       if (eventObj.initEvent) {
         eventObj.initEvent('keydown', true, true);
       }
-      eventObj.keyCode = 27;
-      eventObj.which = 27;
+      eventObj.keyCode = Keycodes.ESCAPE;
+      eventObj.which = Keycodes.ESCAPE;
       const el = iframe.doc.documentElement;
       el.dispatchEvent ?
           el.dispatchEvent(eventObj) : el.fireEvent('onkeydown', eventObj);
