@@ -1203,6 +1203,145 @@ describe('amp-analytics', function() {
     });
   });
 
+ describe('enabled', () => {
+    function getConfig() {
+      return {
+        'requests': {
+          'pageview1': '/test1=${requestCount}',
+        },
+        'triggers': {
+          'conditional': {
+            'on': 'visible',
+            'request': 'pageview1',
+            'vars': {},
+          },
+        },
+        'vars': {}
+      };
+    }
+
+    it('allows a request through', () => {
+      const analytics = getAnalyticsTag(getConfig());
+
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy).to.be.calledOnce;
+      });
+    });
+
+    it('allows a request based on a variable', () => {
+      const config = getConfig();
+      config.triggers.conditional.enabled = '${foo}';
+      config.triggers.conditional.vars.foo = 'bar';
+      const analytics = getAnalyticsTag(config);
+
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy).to.be.calledOnce;
+      });
+    });
+
+    it('allows a request based on url-replacements', () => {
+      const config = getConfig();
+      config.triggers.conditional.enabled = '${pageViewId}';
+      const analytics = getAnalyticsTag(config);
+
+      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(0);
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy).to.be.calledOnce;
+      });
+    });
+
+    it('does not allow a request through', () => {
+      const config = getConfig();
+      config.triggers.conditional.enabled = '';
+      const analytics = getAnalyticsTag(config);
+
+      return waitForNoSendRequest(analytics).then(() => {
+        expect(sendRequestSpy).to.have.not.been.called;
+      });
+    });
+
+    it('does not allow a request through based on missing variable', () => {
+      const config = getConfig();
+      config.triggers.conditional.enabled = '${undefinedParam}';
+      const analytics = getAnalyticsTag(config);
+
+      return waitForNoSendRequest(analytics).then(() => {
+        expect(sendRequestSpy).to.have.not.been.called;
+      });
+    });
+
+    it('does not allow a request through based on missing request param', () => {
+      const config = getConfig();
+      config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
+      const analytics = getAnalyticsTag(config);
+
+      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(null);
+
+      return waitForNoSendRequest(analytics).then(() => {
+        expect(sendRequestSpy).to.have.not.been.called;
+      });
+    });
+
+
+    it('allows a request based on a variable if enabled on tag level', () => {
+      const config = getConfig();
+      config.enabled = '${foo}';
+      config.vars.foo = 'bar';
+      const analytics = getAnalyticsTag(config);
+
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy).to.be.calledOnce;
+      });
+    });
+
+    it('allows a request based on url-replacements if enabled on tag level', () => {
+      const config = getConfig();
+      config.enabled = '${pageViewId}';
+      const analytics = getAnalyticsTag(config);
+
+      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(0);
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy).to.be.calledOnce;
+      });
+    });
+
+    it('does not allow a request through if enabled on tag level', () => {
+      const config = getConfig();
+      config.enabled = '';
+      const analytics = getAnalyticsTag(config);
+
+      return waitForNoSendRequest(analytics).then(() => {
+        expect(sendRequestSpy).to.have.not.been.called;
+      });
+    });
+
+    it('does not allow a request through based on missing variable on tag level', () => {
+      const config = getConfig();
+      config.enabled = '${undefinedParam}';
+      const analytics = getAnalyticsTag(config);
+
+      return waitForNoSendRequest(analytics).then(() => {
+        expect(sendRequestSpy).to.have.not.been.called;
+      });
+    });
+
+    it('does not allow a request through based on missing request param on tag level', () => {
+      const config = getConfig();
+      config.enabled = '${queryParam(undefinedParam)}';
+      const analytics = getAnalyticsTag(config);
+
+      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(null);
+
+      return waitForNoSendRequest(analytics).then(() => {
+        expect(sendRequestSpy).to.have.not.been.called;
+      });
+    });
+  });
+
   describe('iframePing', () => {
     it('fails for iframePing config outside of vendor config', function() {
       const analytics = getAnalyticsTag({

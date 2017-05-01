@@ -252,27 +252,27 @@ export class AmpAnalytics extends AMP.BaseElement {
         this.processExtraUrlParams_(trigger['extraUrlParams'],
             this.config_['extraUrlParamsReplaceMap']);
         promises.push(this.isSampledIn_(trigger).then(result => {
-          if (!result) {
-            return;
-          }
-          // replace selector and selectionMethod
-          if (this.isSandbox_) {
-            // Only support selection of parent element for analytics in scope
-            trigger['selector'] = this.element.parentElement.tagName;
-            trigger['selectionMethod'] = 'closest';
-            this.addTriggerNoInline_(trigger);
-          } else if (trigger['selector']) {
-            // Expand the selector using variable expansion.
-            return this.variableService_.expandTemplate(
-                trigger['selector'], expansionOptions)
-              .then(selector => {
-                trigger['selector'] = selector;
+              if (!result) {
+                return;
+              }
+              // replace selector and selectionMethod
+              if (this.isSandbox_) {
+                // Only support selection of parent element for analytics in scope
+                trigger['selector'] = this.element.parentElement.tagName;
+                trigger['selectionMethod'] = 'closest';
                 this.addTriggerNoInline_(trigger);
-              });
-          } else {
-            this.addTriggerNoInline_(trigger);
-          }
-        }));
+              } else if (trigger['selector']) {
+                // Expand the selector using variable expansion.
+                return this.variableService_.expandTemplate(
+                    trigger['selector'], expansionOptions)
+                    .then(selector => {
+                      trigger['selector'] = selector;
+                      this.addTriggerNoInline_(trigger);
+                    });
+              } else {
+                this.addTriggerNoInline_(trigger);
+              }
+            }));
       }
     }
     return Promise.all(promises);
@@ -546,23 +546,29 @@ export class AmpAnalytics extends AMP.BaseElement {
       }
     }
 
-    return Promise.all(requestPromises)
-      .then(() => {
-        request = this.addParamsToUrl_(request, params);
-        this.config_['vars']['requestCount']++;
-        const expansionOptions = this.expansionOptions_(event, trigger);
-        return this.variableService_.expandTemplate(request, expansionOptions);
-      })
-      .then(request => {
-        const whiteList = this.isSandbox_ ? SANDBOX_AVAILABLE_VARS : undefined;
-        // For consistency with amp-pixel we also expand any url replacements.
-        return urlReplacementsForDoc(this.element).expandAsync(
-            request, undefined, whiteList);
-      })
-      .then(request => {
-        this.sendRequest_(request, trigger);
-        return request;
-      });
+    return this.checkTriggerEnabled_(trigger, event)
+        .then(enabled => {
+          if (!enabled) {
+            return;
+          }
+          return Promise.all(requestPromises)
+              .then(() => {
+                request = this.addParamsToUrl_(request, params);
+                this.config_['vars']['requestCount']++;
+                const expansionOptions = this.expansionOptions_(event, trigger);
+                return this.variableService_.expandTemplate(request, expansionOptions);
+              })
+              .then(request => {
+                const whiteList = this.isSandbox_ ? SANDBOX_AVAILABLE_VARS : undefined;
+                // For consistency with amp-pixel we also expand any url replacements.
+                return urlReplacementsForDoc(this.element).expandAsync(
+                    request, undefined, whiteList);
+              })
+              .then(request => {
+                this.sendRequest_(request, trigger);
+                return request;
+              });
+        });
   }
 
   /**
@@ -579,21 +585,67 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (!spec) {
       return resolve;
     }
-    if (!spec['sampleOn']) {
+    let sampleOn = spec['sampleOn'];
+    if (!sampleOn) {
       user().error(TAG, 'Invalid sampleOn value.');
       return resolve;
     }
     const threshold = parseFloat(spec['threshold']); // Threshold can be NaN.
     if (threshold >= 0 && threshold <= 100) {
-      const keyPromise = this.variableService_.expandTemplate(
-          spec['sampleOn'], this.expansionOptions_({}, trigger))
-        .then(key => urlReplacementsForDoc(this.element).expandAsync(key));
-      return keyPromise
+      return this.expandTemplateWithUrlParams_(sampleOn, this.expansionOptions_({}, trigger))
           .then(key => this.cryptoService_.uniform(key))
           .then(digest => digest * 100 < spec['threshold']);
     }
     user()./*OK*/error(TAG, 'Invalid threshold for sampling.');
     return resolve;
+  }
+
+  /**
+   * Checks if request for a trigger is enabled.
+   * @param {!JSONType} trigger The config to use to determine sampling.
+   * @param {!Object} event Object with details about the event.
+   * @return {!Promise<boolean>} Whether trigger must be called.
+   * @private
+   */
+  checkTriggerEnabled_(trigger, event) {
+    let expansionOptions = this.expansionOptions_(event, trigger);
+    let enabledOnTagLevel = this.checkSpecEnabled_(this.config_['enabled'], expansionOptions);
+    let enabledOnTriggerLevel = this.checkSpecEnabled_(trigger['enabled'], expansionOptions);
+
+    return Promise.all([enabledOnTagLevel, enabledOnTriggerLevel]).then(enabled => {
+      dev().assert(enabled.length === 2);
+      return enabled[0] && enabled[1];
+    });
+  }
+
+  /**
+   * Checks result of 'enabled' spec evaluation. Returns false if spec is provided and value
+   * resolves to empty string.
+   * @param {string} spec Expression that will be evaluated.
+   * @param {!ExpansionOptions} expansionOptions Expansion options.
+   * @return {!Promise<boolean>} False only if spec is provided and value is empty string.
+   * @private
+   */
+  checkSpecEnabled_(spec, expansionOptions) {
+    // Spec absence always resolves to true.
+    if (spec === undefined) {
+      return Promise.resolve(true);
+    }
+
+    return this.expandTemplateWithUrlParams_(spec, expansionOptions)
+        .then(val => Boolean(val));
+  }
+
+  /**
+   * Expands spec using provided expansion options and applies url replacement if necessary.
+   * @param {string} spec Expression that needs to be expanded.
+   * @param {!ExpansionOptions} expansionOptions Expansion options.
+   * @return {!Promise<!Object>} expanded spec.
+   * @private
+   */
+  expandTemplateWithUrlParams_(spec, expansionOptions) {
+    return this.variableService_.expandTemplate(spec, expansionOptions)
+        .then(key => urlReplacementsForDoc(this.element).expandUrlAsync(key));
   }
 
   /**
