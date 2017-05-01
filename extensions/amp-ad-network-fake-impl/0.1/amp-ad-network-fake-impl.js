@@ -65,7 +65,7 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
             signatureInfo: {
               signingServiceName: 'FAKESERVICE',
               keypairId: 'FAKEKEY',
-              signature: new Uint8Array(),
+              signature: new Uint8Array(0),
             },
           };
         }

@@ -123,30 +123,29 @@ export class Crypto {
   }
 
   /**
-   * Checks whether Web Cryptography is available. This is not needed for
-   * SHA-384 operations, because there's a polyfill for that, but it is needed
-   * for PKCS operations. This could be false if the browser does not support
-   * Web Cryptography, or if the current browsing context is not secure (e.g.,
-   * because it is on an insecure HTTP page, or an HTTPS iframe embedded in an
-   * insecure HTTP page).
+   * Checks whether Web Cryptography is available, which is required for PKCS 1
+   * operations. SHA-384 operations do not need this because there's a polyfill.
+   * This could be false if the browser does not support Web Cryptography, or if
+   * the current browsing context is not secure (e.g., it's on an insecure HTTP
+   * page, or an HTTPS iframe embedded in an insecure HTTP page).
    *
    * @return {boolean} whether Web Cryptography is available
    */
-  isCryptoAvailable() {
+  isPkcsAvailable() {
     return Boolean(this.subtle_) && this.win_.isSecureContext !== false;
   }
 
   /**
    * Converts an RSA JSON Web Key object to a browser-native cryptographic key.
-   * As a precondition, `isCryptoAvailable()` must be `true`.
+   * As a precondition, `isPkcsAvailable()` must be `true`.
    *
    * @param {!Object} jwk a deserialized RSA JSON Web Key, as specified in
-   *     Section 6.3 of RSA 7518
+   *     Section 6.3 of RFC 7518
    * @return {!Promise<!webCrypto.CryptoKey>}
    * @throws {TypeError} if `jwk` is not an RSA JSON Web Key
    */
   importPkcsKey(jwk) {
-    dev().assert(this.isCryptoAvailable());
+    dev().assert(this.isPkcsAvailable());
     return this.subtle_.importKey(
         'jwk',
         // WebKit wants this as an ArrayBufferView.
@@ -156,7 +155,7 @@ export class Crypto {
 
   /**
    * Verifies an RSASSA-PKCS1-v1_5 signature with a SHA-256 hash. As a
-   * precondition, `isCryptoAvailable()` must be `true`.
+   * precondition, `isPkcsAvailable()` must be `true`.
    *
    * @param {!webCrypto.CryptoKey} key an RSA public key
    * @param {!Uint8Array} signature an RSASSA-PKCS1-v1_5 signature
@@ -165,7 +164,7 @@ export class Crypto {
    *     data and public key
    */
   verifyPkcs(key, signature, data) {
-    dev().assert(this.isCryptoAvailable());
+    dev().assert(this.isPkcsAvailable());
     return this.subtle_.verify(
         {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}}, key, signature,
         data);

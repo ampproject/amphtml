@@ -242,7 +242,7 @@ class SignatureVerifier {
    * @private
    */
   fetchAndAddKeys_(keys, signingServiceName, keypairId) {
-    let url = signingServerURLs[signingServiceName].url;
+    let url = signingServerURLs[signingServiceName];
     if (keypairId != null) {
       url += '?' + encodeURIComponent(keypairId);
     }
@@ -311,13 +311,15 @@ class SignatureVerifier {
                     err => {
                       // The signing service didn't send valid JSON.
                       signingServiceError(
+                          signingServiceName,
                           `Failed to parse JSON: ${err && err.response}`);
                       return false;
                     });
               } else {
                 // The signing service sent a non-200 HTTP status code. The
                 // signing service spec forbids this.
-                signingServiceError(`Status code ${response.status}`);
+                signingServiceError(
+                    signingServiceName, `Status code ${response.status}`);
                 return false;
               }
             },
@@ -329,7 +331,8 @@ class SignatureVerifier {
               // problem.
               if (err && err.response) {
                 // This probably indicates a non-2xx HTTP status code.
-                signingServiceError(`Status code ${err.response.status}`);
+                signingServiceError(
+                    signingServiceName, `Status code ${err.response.status}`);
               }
               return false;
             });

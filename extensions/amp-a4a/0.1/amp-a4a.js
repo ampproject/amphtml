@@ -35,7 +35,8 @@ import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {dev, user, duplicateErrorIfNecessary} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, isEnumValue} from '../../../src/types';
-import {base64DecodeToBytes, utf8Decode} from '../../../src/utils/bytes';
+import {base64DecodeToBytes} from '../../../src/utils/base64';
+import {utf8Decode} from '../../../src/utils/bytes';
 import {viewerForDoc} from '../../../src/services';
 import {resourcesForDoc} from '../../../src/services';
 import {xhrFor} from '../../../src/services';
@@ -634,7 +635,7 @@ export class AmpA4A extends AMP.BaseElement {
                               }) for signing service (${
                                                         signingServiceName
                                                       }) not found`);
-                  case VerificationFailure.MISMATCHED_SIGNATURE:
+                  case VerificationFailure.SIGNATURE_MISMATCH:
                     user().error(
                         TAG, this.element.getAttribute('type'),
                         'Invalid signature for key (' + keypairId +
