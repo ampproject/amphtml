@@ -132,7 +132,7 @@ export class Crypto {
    * @return {boolean} whether Web Cryptography is available
    */
   isPkcsAvailable() {
-    return Boolean(this.subtle_) && this.win_.isSecureContext !== false;
+    return Boolean(this.subtle_) && this.win_['isSecureContext'] !== false;
   }
 
   /**
