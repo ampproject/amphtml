@@ -142,7 +142,7 @@ export class Crypto {
    *
    * @param {!Object} jwk a deserialized RSA JSON Web Key, as specified in
    *     Section 6.3 of RSA 7518
-   * @return {!Promise<!CryptoKey>}
+   * @return {!Promise<!webCrypto.CryptoKey>}
    * @throws {TypeError} if `jwk` is not an RSA JSON Web Key
    */
   importPkcsKey(jwk) {
@@ -158,7 +158,7 @@ export class Crypto {
    * Verifies an RSASSA-PKCS1-v1_5 signature with a SHA-256 hash. As a
    * precondition, `isCryptoAvailable()` must be `true`.
    *
-   * @param {!CryptoKey} key an RSA public key
+   * @param {!webCrypto.CryptoKey} key an RSA public key
    * @param {!Uint8Array} signature an RSASSA-PKCS1-v1_5 signature
    * @param {!ArrayBuffer} data the data that was signed
    * @return {!Promise<boolean>} whether the signature is correct for the given

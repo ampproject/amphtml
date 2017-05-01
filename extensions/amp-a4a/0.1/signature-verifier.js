@@ -113,7 +113,7 @@ class SignatureVerifier {
      *    successfully; this most likely indicates signing service misbehavior.
      *    The success case is a `Promise` that resolves to a `CryptoKey`.
      *
-     * @private {?Object<string, {promise: !Promise<boolean>, keys: !Object<string, ?Promise<?CryptoKey>>}>}
+     * @private {?Object<string, {promise: !Promise<boolean>, keys: !Object<string, ?Promise<?webCrypto.CryptoKey>>}>}
      */
     this.signers_ = cryptoFor(win).isPkcsAvailable() ? {} : null;
   }
@@ -229,8 +229,9 @@ class SignatureVerifier {
    * Try to download the keyset for the named signing service and add a promise
    * for each key to the `keys` object.
    *
-   * @param {!Object<string, ?Promise<?CryptoKey>>} keys the object to add each
-   *     key promise to. This is mutated while the returned promise is pending.
+   * @param {!Object<string, ?Promise<?webCrypto.CryptoKey>>} keys the object to
+   *     add each key promise to. This is mutated while the returned promise is
+   *     pending.
    * @param {string} signingServiceName
    * @param {?string} keypairId the keypair ID to include in the query string
    *     for cachebusting purposes, or `null` if no cachebusting is needed
