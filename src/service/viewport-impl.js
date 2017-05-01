@@ -985,14 +985,8 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   connect() {
-    this.win.addEventListener('scroll', this.bla);
+    this.win.addEventListener('scroll', this.boundScrollEventListener_)
     this.win.addEventListener('resize', this.boundResizeEventListener_);
-  }
-
-  /** @override */
-  bla(e) {
-    console.log('@@@@@@ bla @@@@@@@');
-    this.boundScrollEventListener_(e);
   }
 
   /** @override */

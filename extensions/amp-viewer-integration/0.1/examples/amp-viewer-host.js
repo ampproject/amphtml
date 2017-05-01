@@ -45,18 +45,17 @@ export class AmpViewerHost {
   }
 
   /**
-   * @param {string} frameOrigin
+   * @param {string} targetOrigin
    * @param {boolean} startPolling
    */
-  waitForHandshake_(frameOrigin, startPolling) {
+  waitForHandshake_(targetOrigin, startPolling) {
     this.log('awaitHandshake_');
-    const viewerId = this.id;
     const target = this.ampIframe_.contentWindow;
     const listener = function(event) {
-      if (event.origin == frameOrigin &&
+      if (event.origin == targetOrigin &&
               this.isChannelOpen_(event.data) &&
               (!event.source || event.source == target)) {
-        this.log(' messaging established with ', frameOrigin);
+        this.log(' messaging established with ', targetOrigin);
         this.win.removeEventListener('message', listener, false);
         const message = {
           app: APP,
@@ -64,14 +63,14 @@ export class AmpViewerHost {
           data: {},
           type: MessageType.RESPONSE,
         };
-        target./*OK*/postMessage(message, frameOrigin);
+        target./*OK*/postMessage(message, targetOrigin);
 
         const port = new WindowPortEmulator(
-          this.win, frameOrigin, target, this.id);
+          this.win, targetOrigin, target, this.id);
         this.messaging_ = new Messaging(this.win, port);
         this.messaging_.setDefaultHandler(this.handleMessage_.bind(this));
 
-        this.sendRequest_('visibilitychange', {
+        this.sendRequest('visibilitychange', {
           state: this.visibilityState_,
           prerenderSize: this.prerenderSize,
         }, true);
@@ -84,8 +83,8 @@ export class AmpViewerHost {
     return eventData.app == APP && eventData.name == CHANNEL_OPEN_MSG;
   };
 
-  sendRequest_(type, data, awaitResponse) {
-    this.log('sendRequest_');
+  sendRequest(type, data, awaitResponse) {
+    this.log('sendRequest');
     if (!this.messaging_) {
       return;
     }
