@@ -32,18 +32,17 @@ export class AmpViewerHost {
    * @param {!Window} win
    * @param {!HTMLIFrameElement} ampIframe
    * @param {string} frameOrigin
+   * @param {function(string, *, boolean):(!Promise<*>|undefined)} messageHandler
    * @param {string=} opt_logsId For dev logs so you know what ampdoc you're
    * looking at.
    */
-  constructor(
-    win, ampIframe, frameOrigin, messageHandler, opt_logsId) {
+  constructor(win, ampIframe, frameOrigin, messageHandler, opt_logsId) {
     /** @const {!Window} */
     this.win = win;
-    /** @const {!HTMLIFrameElement} */
+    /** @private {!HTMLIFrameElement} */
     this.ampIframe_ = ampIframe;
-
+    /** @private {function(string, *, boolean):(!Promise<*>|undefined)} */
     this.messageHandler_ = messageHandler;
-
     /** @const {string} */
     this.logsId = opt_logsId;
 
@@ -52,6 +51,7 @@ export class AmpViewerHost {
 
   /**
    * @param {string} targetOrigin
+   * @private
    */
   waitForHandshake_(targetOrigin) {
     this.log('awaitHandshake_');
@@ -70,8 +70,7 @@ export class AmpViewerHost {
         };
         target./*OK*/postMessage(message, targetOrigin);
 
-        const port = new WindowPortEmulator(
-          this.win, targetOrigin, target, this.logsId);
+        const port = new WindowPortEmulator(this.win, targetOrigin, target);
         this.messaging_ = new Messaging(this.win, port);
         this.messaging_.setDefaultHandler(this.messageHandler_);
         this.sendRequest('visibilitychange', {
@@ -86,6 +85,7 @@ export class AmpViewerHost {
   /**
    * @param {*} eventData
    * @return {boolean}
+   * @private
    */
   isChannelOpen_(eventData) {
     return eventData.app == APP && eventData.name == CHANNEL_OPEN_MSG;
@@ -107,7 +107,7 @@ export class AmpViewerHost {
 
   log() {
     const var_args = Array.prototype.slice.call(arguments, 0);
-    var_args.unshift('[VIEWER ' + this.logsId + ']');
+    var_args.unshift('[ViewerHost ' + this.logsId + ']');
     console/*OK*/.log.apply(console, var_args);
   }
 }

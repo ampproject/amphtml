@@ -403,24 +403,24 @@
           return this.handleUnload_();
         case 'tick':
           log('[CSI] tick. label:', data.label);
-          return;
+          return Promise.resolve();
         case 'a2a':
           log('a2a navigation', data);
-          return;
+          return Promise.resolve();
         case 'sendCsi':
           log('[CSI] sendCsi.');
-          return;
+          return Promise.resolve();
         case 'touchstart':
         case 'touchmove':
         case 'touchend':
           log('touch event!', type);
-          return;
+          return Promise.resolve();
         case 'documentHeight':
         case 'setFlushParams':
         case 'prerenderComplete':
         case 'scroll':
         case 'replaceHistory':
-          return;
+          return Promise.resolve();
         default:
           return Promise.reject('request not supported: ' + type);
       }

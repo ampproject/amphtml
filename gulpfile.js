@@ -250,7 +250,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
       'amp-viewer-host.js', './dist/v0/examples', {
         toName: 'amp-viewer-host.max.js',
         minifiedName: 'amp-viewer-host.js',
-        incudePolyfills: false,
+        incudePolyfills: true,
         watch: watch,
         extraGlobs: ['extensions/amp-viewer-integration/**/*.js'],
         compilationLevel: 'WHITESPACE_ONLY',

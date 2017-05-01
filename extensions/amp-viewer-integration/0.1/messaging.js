@@ -71,17 +71,14 @@ export class WindowPortEmulator {
    * @param {!Window} win
    * @param {string} origin
    * @param {!Window} target
-   * @param {string=} opt_logsId for dev logging.
    */
-  constructor(win, origin, target, opt_logsId) {
+  constructor(win, origin, target) {
     /** @const {!Window} */
     this.win = win;
     /** @private {string} */
     this.origin_ = origin;
     /** @const {!Window} */
     this.target_ = target;
-    /** @const {string|undefined} */
-    this.logsId = opt_logsId;
   }
 
   /**
@@ -104,11 +101,6 @@ export class WindowPortEmulator {
     this.target_./*OK*/postMessage(data, this.origin_);
   }
   start() {
-  }
-  log() {
-    const var_args = Array.prototype.slice.call(arguments, 0);
-    var_args.unshift('[PORT ' + this.logsId + ']');
-    console/*OK*/.log.apply(console, var_args);
   }
 }
 
