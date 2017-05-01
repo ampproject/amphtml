@@ -25,27 +25,30 @@
  * @returns {function()}
  */
 export function rateLimit(win, callback, minInterval) {
-  let locker = null;
+  let locker = 0;
   let nextCallArgs = null;
 
-  const fire = args => {
-    callback.apply(null, args);
-
+  function fire(args) {
     nextCallArgs = null;
     // Lock the fire for minInterval milliseconds
-    locker = win.setTimeout(() => {
-      locker = null;
-      // If during the period there're invocations queued up, fire once.
-      if (nextCallArgs !== null) {
-        fire(nextCallArgs);
-      }
-    }, minInterval);
-  };
+    locker = win.setTimeout(waiter, minInterval);
+
+    callback.apply(null, args);
+  }
+
+  function waiter() {
+    locker = 0;
+    // If during the period there're invocations queued up, fire once.
+    if (nextCallArgs) {
+      fire(nextCallArgs);
+    }
+  }
+
   return function() {
     if (locker) {
       nextCallArgs = arguments;
-      return;
+    } else {
+      fire(arguments);
     }
-    fire(arguments);
   };
 }
