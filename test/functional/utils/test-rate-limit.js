@@ -65,4 +65,27 @@ describe('rate-limit', () => {
     expect(callback).to.be.calledOnce;
     expect(callback).to.be.calledWith(7, 'another param');
   });
+
+  it('should throttle recursive callback', () => {
+    let totalCalls = 0;
+    let rateLimitedCallback;
+    function recursive(countdown) {
+      totalCalls++;
+      if (countdown > 0) {
+        rateLimitedCallback(countdown - 1);
+      }
+    }
+    rateLimitedCallback = rateLimit(window, recursive, 100);
+
+    // recursive 3 times
+    rateLimitedCallback(3);
+    // should immediately invoke callback only once.
+    expect(totalCalls).to.equal(1);
+    // 2nd invocation happen after the min interval
+    clock.tick(100);
+    expect(totalCalls).to.equal(2);
+    // 3rd invocation
+    clock.tick(100);
+    expect(totalCalls).to.equal(3);
+  });
 });
