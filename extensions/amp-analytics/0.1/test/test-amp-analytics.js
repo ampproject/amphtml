@@ -1207,15 +1207,15 @@ describe('amp-analytics', function() {
     function getConfig() {
       return {
         'requests': {
-         'pageview1': '/test1=${requestCount}',
-       },
+          'pageview1': '/test1=${requestCount}',
+        },
         'triggers': {
-         'conditional': {
-            'on': 'visible',
-            'request': 'pageview1',
-            'vars': {},
-          },
-       },
+          'conditional': {
+           'on': 'visible',
+           'request': 'pageview1',
+           'vars': {},
+         },
+        },
         'vars': {},
       };
     }
