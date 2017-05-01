@@ -46,7 +46,6 @@
     "eslint": "3.14.1",
     "eslint-plugin-google-camelcase": "0.0.2",
     "express": "4.14.0",
-    "fast-csv": "2.4.0",
     "formidable": "1.0.17",
     "fs-extra": "0.27.0",
     "gulp": "3.9.1",

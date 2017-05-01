@@ -18,7 +18,6 @@ import {dev} from '../../../src/log';
 import {
   childElementByTag,
   isJsonScriptTag,
-  scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
@@ -192,7 +191,7 @@ export class AsyncVerifier extends FormVerifier {
     // Set the error message on each element that caused an error.
     for (let i = 0; i < errors.length; i++) {
       const error = errors[i];
-      const element = scopedQuerySelector(this.form_, `[name="${error.name}"]`);
+      const element = this.form_./*OK*/querySelector(`[name="${error.name}"]`);
       if (element && element.checkValidity()) {
         element.setCustomValidity(error.message);
         errorElements.push(element);
