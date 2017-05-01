@@ -153,77 +153,76 @@ export class AmpAdXOriginIframeHandler {
       this.baseInstance_.signals().signal(CommonSignals.INI_LOAD);
     });
 
+    // Calculate render-start and no-content signals.
+    let renderStartResolve;
+    const renderStartPromise = new Promise(resolve => {
+      renderStartResolve = resolve;
+    });
+    let noContentResolve;
+    const noContentPromise = new Promise(resolve => {
+      noContentResolve = resolve;
+    });
+    if (this.baseInstance_.config &&
+      this.baseInstance_.config.renderStartImplemented) {
+      // When `render-start` is supported, these signals are mutually
+      // exclusive. Whichever arrives first wins.
+      listenForOncePromise(this.iframe,
+          ['render-start', 'no-content'], true).then(info => {
+            const data = info.data;
+            if (data.type == 'render-start') {
+              this.renderStart_(info);
+              renderStartResolve();
+            } else {
+              this.noContent_();
+              noContentResolve();
+            }
+          });
+    } else {
+      // If `render-start` is not supported, listen to `bootstrap-loaded`.
+      // This will avoid keeping the Ad empty until it's fully loaded, which
+      // could be a long time.
+      listenForOncePromise(this.iframe, 'bootstrap-loaded', true).then(() => {
+        this.renderStart_();
+        renderStartResolve();
+      });
+      // Likewise, no-content is observed here. However, it's impossible to
+      // assure exclusivity between `no-content` and `bootstrap-loaded` b/c
+      // `bootstrap-loaded` always arrives first.
+      listenForOncePromise(this.iframe, 'no-content', true).then(() => {
+        this.noContent_();
+        noContentResolve();
+      });
+    }
+    this.element_.appendChild(this.iframe);
     if (opt_isA4A) {
       // A4A writes creative frame directly to page once creative is received
       // and therefore does not require render start message so attach and
       // impose no loader delay.  Network is using renderStart or
       // bootstrap-loaded to indicate ad request was sent, either way we know
       // that occurred for Fast Fetch.
-      this.element_.appendChild(this.iframe);
-      return Promise.resolve();
+      this.renderStart_();
+      renderStartResolve();
     } else {
-      // Calculate render-start and no-content signals.
-      let renderStartResolve;
-      const renderStartPromise = new Promise(resolve => {
-        renderStartResolve = resolve;
-      });
-      let noContentResolve;
-      const noContentPromise = new Promise(resolve => {
-        noContentResolve = resolve;
-      });
-      if (this.baseInstance_.config &&
-              this.baseInstance_.config.renderStartImplemented) {
-        // When `render-start` is supported, these signals are mutually
-        // exclusive. Whichever arrives first wins.
-        listenForOncePromise(this.iframe,
-            ['render-start', 'no-content'], true).then(info => {
-              const data = info.data;
-              if (data.type == 'render-start') {
-                this.renderStart_(info);
-                renderStartResolve();
-              } else {
-                this.noContent_();
-                noContentResolve();
-              }
-            });
-      } else {
-        // If `render-start` is not supported, listen to `bootstrap-loaded`.
-        // This will avoid keeping the Ad empty until it's fully loaded, which
-        // could be a long time.
-        listenForOncePromise(this.iframe, 'bootstrap-loaded', true).then(() => {
-          this.renderStart_();
-          renderStartResolve();
-        });
-        // Likewise, no-content is observed here. However, it's impossible to
-        // assure exclusivity between `no-content` and `bootstrap-loaded` b/c
-        // `bootstrap-loaded` always arrives first.
-        listenForOncePromise(this.iframe, 'no-content', true).then(() => {
-          this.noContent_();
-          noContentResolve();
-        });
-      }
-      this.baseInstance_.lifecycleReporter.addPingsForVisibility(this.element_);
-
       // Set iframe initially hidden which will be removed on render-start or
       // load, whichever is earlier.
       setStyle(this.iframe, 'visibility', 'hidden');
-      this.element_.appendChild(this.iframe);
-      Promise.race([
-        renderStartPromise,
-        iframeLoadPromise,
-        timer.promise(VISIBILITY_TIMEOUT),
-      ]).then(() => {
-        if (this.iframe) {
-          setStyle(this.iframe, 'visibility', '');
-          if (this.baseInstance_.emitLifecycleEvent) {
-            this.baseInstance_.emitLifecycleEvent('adSlotUnhidden');
-          }
-        }
-      });
-
-      // The actual ad load is eariliest of iframe.onload event and no-content.
-      return Promise.race([iframeLoadPromise, noContentPromise]);
+      this.baseInstance_.lifecycleReporter.addPingsForVisibility(this.element_);
     }
+    Promise.race([
+      renderStartPromise,
+      iframeLoadPromise,
+      timer.promise(VISIBILITY_TIMEOUT),
+    ]).then(() => {
+      if (this.iframe) {
+        setStyle(this.iframe, 'visibility', '');
+        if (this.baseInstance_.emitLifecycleEvent) {
+          this.baseInstance_.emitLifecycleEvent('adSlotUnhidden');
+        }
+      }
+    });
+
+    // The actual ad load is eariliest of iframe.onload event and no-content.
+    return Promise.race([iframeLoadPromise, noContentPromise]);
   }
 
   /**
