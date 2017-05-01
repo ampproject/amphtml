@@ -129,6 +129,10 @@ function constructCommandLine(percyKeys) {
   commandLine.push('--baseurl /' + percyArgs.webpage);
   commandLine.push('--widths ' + percyArgs.widths);
 
+  // Other args.
+  commandLine.push('--enable_javascript');
+  commandLine.push('--include_all');
+
   // The webpage being tested is typically the last arg.
   commandLine.push(percyArgs.webpage);
 
