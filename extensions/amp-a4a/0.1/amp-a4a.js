@@ -942,11 +942,10 @@ export class AmpA4A extends AMP.BaseElement {
               '([A-Za-z0-9+/]{4}*(?:[A-Za-z0-9+/]{2}[A-Za-z0-9+/=]=)?)$')
               .exec(encodedSignatureInfo);
       if (match) {
-        const [_, signingServiceName, keypairId, base64Signature] = match;
         adResponse.signatureInfo = {
-          signingServiceName,
-          keypairId,
-          signature: base64DecodeToBytes(base64Signature),
+          signingServiceName: match[1],
+          keypairId: match[2],
+          signature: base64DecodeToBytes(match[3]),
         };
       }
     }
