@@ -1318,7 +1318,7 @@ describe('amp-analytics', function() {
       });
     });
 
-    it('does not allow a request through based on missing variable on tag level', () => {
+    it('does not allow a request through based on missing variable if enabled on tag level', () => {
       const config = getConfig();
       config.enabled = '${undefinedParam}';
       const analytics = getAnalyticsTag(config);
@@ -1328,7 +1328,7 @@ describe('amp-analytics', function() {
       });
     });
 
-    it('does not allow a request through based on missing request param on tag level', () => {
+    it('does not allow a request through based on missing request param if enabled on tag level', () => {
       const config = getConfig();
       config.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
