@@ -252,27 +252,27 @@ export class AmpAnalytics extends AMP.BaseElement {
         this.processExtraUrlParams_(trigger['extraUrlParams'],
             this.config_['extraUrlParamsReplaceMap']);
         promises.push(this.isSampledIn_(trigger).then(result => {
-              if (!result) {
-                return;
-              }
-              // replace selector and selectionMethod
-              if (this.isSandbox_) {
-                // Only support selection of parent element for analytics in scope
-                trigger['selector'] = this.element.parentElement.tagName;
-                trigger['selectionMethod'] = 'closest';
+          if (!result) {
+            return;
+          }
+          // replace selector and selectionMethod
+          if (this.isSandbox_) {
+            // Only support selection of parent element for analytics in scope
+            trigger['selector'] = this.element.parentElement.tagName;
+            trigger['selectionMethod'] = 'closest';
+            this.addTriggerNoInline_(trigger);
+          } else if (trigger['selector']) {
+            // Expand the selector using variable expansion.
+            return this.variableService_.expandTemplate(
+                trigger['selector'], expansionOptions)
+              .then(selector => {
+                trigger['selector'] = selector;
                 this.addTriggerNoInline_(trigger);
-              } else if (trigger['selector']) {
-                // Expand the selector using variable expansion.
-                return this.variableService_.expandTemplate(
-                    trigger['selector'], expansionOptions)
-                    .then(selector => {
-                      trigger['selector'] = selector;
-                      this.addTriggerNoInline_(trigger);
-                    });
-              } else {
-                this.addTriggerNoInline_(trigger);
-              }
-            }));
+              });
+          } else {
+            this.addTriggerNoInline_(trigger);
+          }
+        }));
       }
     }
     return Promise.all(promises);
