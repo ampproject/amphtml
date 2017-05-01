@@ -313,6 +313,7 @@ export class AmpA4A extends AMP.BaseElement {
 
     /** @private {?Promise} */
     this.adUrlsPromise_ = null;
+
     const signatureVerifier = signatureVerifierFor(this.win)
     for (const signingServiceName of this.getSigningServiceNames()) {
       signatureVerifier.loadKeyset(signingServiceName);
@@ -432,9 +433,6 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   shouldInitializePromiseChain_() {
-    if (!this.crypto_.isCryptoAvailable()) {
-      return false;
-    }
     const slotRect = this.getIntersectionElementLayoutBox();
     if (slotRect.height == 0 || slotRect.width == 0) {
       dev().fine(
@@ -647,14 +645,8 @@ export class AmpA4A extends AMP.BaseElement {
                                                                               signingServiceName
                                                                             })`);
                 }
-
-                user().error(TAG, this.element.getAttribute('type'),
-                    'Unable to validate AMP creative against key providers');
-                // Attempt to re-fetch the keys in case our locally cached
-                // batch has expired.
-                this.win.ampA4aValidationKeys = this.getKeyInfoSets_();
-                return this.verifyCreativeSignature_(
-                    creativeParts.creative, creativeParts.signature);
+                this.protectedEmitLifecycleEvent_('adResponseValidateEnd');
+                return failure ? null : creativeParts.creative;
               });
         })
         .then(creative => {
