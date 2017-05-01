@@ -238,8 +238,7 @@
       this.iframe.style.display = 'none';
       this.container.appendChild(this.iframe);
 
-      // this.awaitHandshake_();
-      const ampViewerHost = new AmpViewerHost(window, this.iframe, this.frameOrigin_, false /* startPolling */, this.id);
+      this.ampViewerHost_ = new AmpViewerHost(window, this.iframe, this.frameOrigin_, false /* startPolling */, this.id);
 
       this.iframe.onload = this.loaded_.bind(this);
       setTimeout(function() {
@@ -249,51 +248,10 @@
       }.bind(this));
     };
 
-
-    Viewer.prototype.awaitHandshake_ = function() {
-      log('Viewer.prototype.awaitHandshake_', this.iframe.id);
-      var targetId = this.iframe.id;
-      var target = this.iframe.contentWindow;
-      var targetOrigin = this.frameOrigin_;
-      var listener = function(event) {
-        if (event.origin == targetOrigin &&
-                this.isChannelOpen_(event.data) &&
-                (!event.source || event.source == target)) {
-          log('messaging established with ', this.frameOrigin_, this.iframe.id);
-          log('event: ',event, this.iframe.id);
-          log('Viewer ' + this.id + ' messaging established with ',
-              targetOrigin);
-          window.removeEventListener('message', listener, false);
-
-          const message = {
-            app: APP,
-            requestid: event.data.requestid,
-            data: {},
-            type: MessageType.RESPONSE,
-          };
-          target./*OK*/postMessage(message, targetOrigin);
-
-          this.messaging_ = new ViewerMessaging(target, targetOrigin,
-              this.processRequest_.bind(this), targetId);
-          this.sendRequest_('visibilitychange', {
-            state: this.visibilityState_,
-            prerenderSize: this.prerenderSize
-          }, true);
-        }
-      }.bind(this);
-      window.addEventListener('message', listener, false);
-    };
-
-    Viewer.prototype.isChannelOpen_ = function(eventData) {
-      return eventData.app == APP &&
-        eventData.name == 'channelOpen';
-    };
-
-
     Viewer.prototype.toggleVisibility = function(visible, updateToggle) {
       log('Viewer ' + this.id + ' visibility -> ', visible);
       this.visibilityState_ = visible ? 'visible' : 'hidden';
-      this.sendRequest_('visibilitychange', {
+      this.ampViewerHost_.sendRequest('visibilitychange', {
         state: this.visibilityState_,
         prerenderSize: this.prerenderSize
       }, true);
@@ -326,27 +284,12 @@
     };
 
 
-    Viewer.prototype.documentReady_ = function() {
-      log('AMP document ready');
-      this.loaded_();
-      return Promise.resolve();
-    };
-
-
-    Viewer.prototype.onScroll_ = function() {
-      log('Viewer.prototype.onScroll_');
-      this.sendRequest_('viewport', {
-        scrollTop: this.container./*OK*/scrollTop
-      }, false);
-    };
-
-
     Viewer.prototype.onResize_ = function() {
       log('Resized to ', this.container./*OK*/offsetWidth,
           this.container./*OK*/offsetHeight,
           this.header./*OK*/offsetHeight,
           this.container./*OK*/scrollTop);
-      this.sendRequest_('viewport', {
+      this.ampViewerHost_.sendRequest('viewport', {
         scrollTop: this.container./*OK*/scrollTop,
         width: this.container./*OK*/offsetWidth,
         height: this.container./*OK*/offsetHeight,
@@ -355,49 +298,11 @@
     };
 
 
-    Viewer.prototype.requestFullOverlay_ = function() {
-      log('requestFullOverlay');
-      this.header.style.opacity = 0;
-      return Promise.resolve();
-    };
-
-
-    Viewer.prototype.cancelFullOverlay_ = function() {
-      log('cancelFullOverlay');
-      this.header.style.opacity = 1;
-      return Promise.resolve();
-    };
-
-
-    Viewer.prototype.pushHistory_ = function(stackIndex) {
-      log('push history to ', stackIndex);
-      // Super trivial. Only one step allowed.
-      if (stackIndex != this.stackIndex_ + 1) {
-        throw new Error('Only one step push allowed');
-      }
-      this.stackIndex_ = stackIndex;
-      window.history.pushState({}, '');
-      return Promise.resolve();
-    };
-
-
-    Viewer.prototype.popHistory_ = function(stackIndex) {
-      log('pop history at ', stackIndex);
-      // Super trivial. Only one step allowed.
-      if (stackIndex != this.stackIndex_) {
-        throw new Error('Only one step pop allowed');
-      }
-      this.stackIndex_ = stackIndex;
-      window.history.go(-1);
-      return Promise.resolve();
-    };
-
-
     Viewer.prototype.onPopState_ = function() {
       // Even more trivial. Always assumes that only one step was popped in
       // history.
       this.stackIndex_--;
-      this.sendRequest_('historyPopped', {
+      this.ampViewerHost_.sendRequest('historyPopped', {
         newStackIndex: this.stackIndex_
       }, false);
       log('history popped to ', this.stackIndex_);
@@ -409,78 +314,10 @@
           'Visible' : 'Prerendering';
     };
 
-    Viewer.prototype.broadcast_ = function(message) {
-      log('broadcast: ', message);
-      var self = this;
-      allViewers.forEach(function(viewer) {
-        if (viewer != self) {
-          viewer.messaging_.sendRequest('broadcast', message, false);
-        }
-      });
-    };
 
     Viewer.prototype.scrollAmpDoc = function(scrollTop) {
       log('viewer scroll amp doc: ', scrollTop);
-      this.sendRequest_('scroll', {scrollTop}, true);
-    };
-
-    Viewer.prototype.processRequest_ = function(type, data, awaitResponse) {
-      log('Viewer.prototype.processRequest_', type, data, awaitResponse, this.iframe.id);
-      switch(type) {
-        case 'documentLoaded':
-          return this.documentReady_();
-        case 'requestFullOverlay':
-          return this.requestFullOverlay_();
-        case 'cancelFullOverlay':
-          return this.cancelFullOverlay_();
-        case 'pushHistory':
-          return this.pushHistory_(data.stackIndex);
-        case 'popHistory':
-          return this.popHistory_(data.stackIndex);
-        case 'broadcast':
-          return this.broadcast_(data);
-        case 'unloaded':
-          log('unloaded');
-          return this.handleUnload_();
-        case 'tick':
-          log('[CSI] tick. label:', data.label);
-          return;
-        case 'a2a':
-          log('a2a navigation', data);
-          return;
-        case 'sendCsi':
-          log('[CSI] sendCsi.');
-          return;
-        case 'touchstart':
-        case 'touchmove':
-        case 'touchend':
-          log('touch event!', type);
-          return;
-        case 'documentHeight':
-        case 'setFlushParams':
-        case 'prerenderComplete':
-        case 'scroll':
-        case 'replaceHistory':
-          return;
-        default:
-          return Promise.reject('request not supported: ' + type);
-      }
-    };
-
-    Viewer.prototype.handleUnload_ = function(type, data, awaitResponse) {
-      log('Viewer.prototype.handleUnload_');
-      if (this.messaging_) {
-        this.messaging_ = null;
-      }
-      return Promise.resolve();
-    };
-
-    Viewer.prototype.sendRequest_ = function(type, data, awaitResponse) {
-      log('Viewer.prototype.sendRequest_');
-      if (!this.messaging_) {
-        return;
-      }
-      return this.messaging_.sendRequest(type, data, awaitResponse);
+      this.ampViewerHost_.sendRequest('scroll', {scrollTop}, true);
     };
 
 
@@ -539,7 +376,6 @@
           false).start();
       addShowContainer('2');
 
-<<<<<<< HEAD
       new Viewer(
           'container3',
           '3',
@@ -560,28 +396,6 @@
           './article-fixed-header.amp.html?amp_js_v=0.1',
           false).start();
       addShowContainer('5');
-=======
-      // new Viewer(
-      //     'container3',
-      //     '3',
-      //     './article-access.amp.max.html?amp_js_v=0.1',
-      //     false).start();
-      // addShowContainer('3');
-
-      // new Viewer(
-      //     'container4',
-      //     '4',
-      //     './alp.amp.max.html',
-      //     false).start();
-      // addShowContainer('4');
-
-      // new Viewer(
-      //     'container5',
-      //     '5',
-      //     './article-fixed-header.amp.max.html?amp_js_v=0.1',
-      //     false).start();
-      // addShowContainer('5');
->>>>>>> this
 
       showContainer('1');
     }
