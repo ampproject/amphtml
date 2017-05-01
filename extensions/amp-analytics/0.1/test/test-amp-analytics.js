@@ -1203,20 +1203,20 @@ describe('amp-analytics', function() {
     });
   });
 
- describe('enabled', () => {
+  describe('enabled', () => {
     function getConfig() {
       return {
         'requests': {
-          'pageview1': '/test1=${requestCount}',
-        },
+         'pageview1': '/test1=${requestCount}',
+       },
         'triggers': {
-          'conditional': {
+         'conditional': {
             'on': 'visible',
             'request': 'pageview1',
             'vars': {},
           },
-        },
-        'vars': {}
+       },
+        'vars': {},
       };
     }
 
@@ -1261,7 +1261,7 @@ describe('amp-analytics', function() {
       });
     });
 
-    it('does not allow a request through based on missing variable', () => {
+    it('does not allow a request through if a variable is missing', () => {
       const config = getConfig();
       config.triggers.conditional.enabled = '${undefinedParam}';
       const analytics = getAnalyticsTag(config);
@@ -1271,7 +1271,7 @@ describe('amp-analytics', function() {
       });
     });
 
-    it('does not allow a request through based on missing request param', () => {
+    it('does not allow a request through if a request param is missing', () => {
       const config = getConfig();
       config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
@@ -1285,7 +1285,7 @@ describe('amp-analytics', function() {
     });
 
 
-    it('allows a request based on a variable if enabled on tag level', () => {
+    it('allows a request based on a variable when enabled on tag level', () => {
       const config = getConfig();
       config.enabled = '${foo}';
       config.vars.foo = 'bar';
@@ -1296,7 +1296,8 @@ describe('amp-analytics', function() {
       });
     });
 
-    it('allows a request based on url-replacements if enabled on tag level', () => {
+    it('allows a request based on url-replacements ' +
+    'when enabled on tag level', () => {
       const config = getConfig();
       config.enabled = '${pageViewId}';
       const analytics = getAnalyticsTag(config);
@@ -1308,7 +1309,7 @@ describe('amp-analytics', function() {
       });
     });
 
-    it('does not allow a request through if enabled on tag level', () => {
+    it('does not allow a request through when enabled on tag level', () => {
       const config = getConfig();
       config.enabled = '';
       const analytics = getAnalyticsTag(config);
@@ -1318,7 +1319,8 @@ describe('amp-analytics', function() {
       });
     });
 
-    it('does not allow a request through based on missing variable if enabled on tag level', () => {
+    it('does not allow a request through if a variable is missing ' +
+    'when enabled on tag level', () => {
       const config = getConfig();
       config.enabled = '${undefinedParam}';
       const analytics = getAnalyticsTag(config);
@@ -1328,7 +1330,8 @@ describe('amp-analytics', function() {
       });
     });
 
-    it('does not allow a request through based on missing request param if enabled on tag level', () => {
+    it('does not allow a request through if a request param is missing ' +
+    'when enabled on tag level', () => {
       const config = getConfig();
       config.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);

@@ -564,10 +564,12 @@ export class AmpAnalytics extends AMP.BaseElement {
                 request = this.addParamsToUrl_(request, params);
                 this.config_['vars']['requestCount']++;
                 const expansionOptions = this.expansionOptions_(event, trigger);
-                return this.variableService_.expandTemplate(request, expansionOptions);
+                return this.variableService_
+                  .expandTemplate(request, expansionOptions);
               })
               .then(request => {
-                const whiteList = this.isSandbox_ ? SANDBOX_AVAILABLE_VARS : undefined;
+                const whiteList =
+                  this.isSandbox_ ? SANDBOX_AVAILABLE_VARS : undefined;
                 // For consistency with amp-pixel we also expand any url replacements.
                 return urlReplacementsForDoc(this.element).expandAsync(
                     request, undefined, whiteList);
@@ -593,14 +595,15 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (!spec) {
       return resolve;
     }
-    let sampleOn = spec['sampleOn'];
+    const sampleOn = spec['sampleOn'];
     if (!sampleOn) {
       user().error(TAG, 'Invalid sampleOn value.');
       return resolve;
     }
     const threshold = parseFloat(spec['threshold']); // Threshold can be NaN.
     if (threshold >= 0 && threshold <= 100) {
-      return this.expandTemplateWithUrlParams_(sampleOn, this.expansionOptions_({}, trigger))
+      const expansionOptions = this.expansionOptions_({}, trigger);
+      return this.expandTemplateWithUrlParams_(sampleOn, expansionOptions)
           .then(key => this.cryptoService_.uniform(key))
           .then(digest => digest * 100 < spec['threshold']);
     }
@@ -616,14 +619,17 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   checkTriggerEnabled_(trigger, event) {
-    let expansionOptions = this.expansionOptions_(event, trigger);
-    let enabledOnTagLevel = this.checkSpecEnabled_(this.config_['enabled'], expansionOptions);
-    let enabledOnTriggerLevel = this.checkSpecEnabled_(trigger['enabled'], expansionOptions);
+    const expansionOptions = this.expansionOptions_(event, trigger);
+    const enabledOnTagLevel =
+        this.checkSpecEnabled_(this.config_['enabled'], expansionOptions);
+    const enabledOnTriggerLevel =
+        this.checkSpecEnabled_(trigger['enabled'], expansionOptions);
 
-    return Promise.all([enabledOnTagLevel, enabledOnTriggerLevel]).then(enabled => {
-      dev().assert(enabled.length === 2);
-      return enabled[0] && enabled[1];
-    });
+    return Promise.all([enabledOnTagLevel, enabledOnTriggerLevel])
+        .then(enabled => {
+          dev().assert(enabled.length === 2);
+          return enabled[0] && enabled[1];
+        });
   }
 
   /**
