@@ -21,6 +21,9 @@ const util = require('gulp-util');
 
 const percyCommand = 'percy snapshot';
 const defaultWidths = [375, 411];  // CSS widths: iPhone: 375, Pixel: 411.
+const percyProjectSeparator = '/';  // Standard format of repo slug: "foo/bar".
+const percyTokenLength = 64;  // Standard Percy API key length.
+
 
 /**
  * Executes the provided command; terminates this program in case of failure.
@@ -52,7 +55,7 @@ function extractPercyKeys() {
     process.exit(1);
   }
   const percyProject = process.env.PERCY_PROJECT;
-  if (!percyProject.includes('/')) {
+  if (!percyProject.includes(percyProjectSeparator)) {
     util.log(util.colors.red(
         'Error: PERCY_PROJECT doesn\'t look like a valid repo slug'));
     process.exit(1);
@@ -66,7 +69,7 @@ function extractPercyKeys() {
     process.exit(1);
   }
   const percyToken = process.env.PERCY_TOKEN;
-  if (percyToken.length != 64) {
+  if (percyToken.length != percyTokenLength) {
     util.log(util.colors.red(
         'Error: PERCY_TOKEN doesn\'t look like a valid Percy API key'));
     process.exit(1);
