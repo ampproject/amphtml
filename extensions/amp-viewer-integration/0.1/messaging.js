@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import '../../../third_party/babel/custom-babel-helpers';
 import {listen} from '../../../src/event-helper';
 import {tryParseJson} from '../../../src/json';
 import {dev} from '../../../src/log';
@@ -185,6 +184,7 @@ export class Messaging {
    */
   handleMessage_(event) {
     dev().fine(TAG, 'Got a message:', event.type, event.data);
+    console.log(TAG, 'Got a message:', event.type, event.data);
     const message = parseMessage(event.data);
     if (!message) {
       return;

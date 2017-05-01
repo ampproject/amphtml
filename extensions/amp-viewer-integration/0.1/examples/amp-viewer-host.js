@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+import '../../../../third_party/babel/custom-babel-helpers';
+import {initLogConstructor} from '../../../../src/log';
 import {APP, Messaging, MessageType, WindowPortEmulator} from '../messaging';
 import {listen} from '../../../../src/event-helper';
 
+initLogConstructor();
 const CHANNEL_OPEN_MSG = 'channelOpen';
 
 /**
@@ -58,7 +61,7 @@ export class AmpViewerHost {
               this.isChannelOpen_(event.data) &&
               (!event.source || event.source == target)) {
         this.log(' messaging established with ', targetOrigin);
-        this.win.removeEventListener('message', listener, false);
+        unlisten();
         const message = {
           app: APP,
           requestid: event.data.requestid,
@@ -71,14 +74,13 @@ export class AmpViewerHost {
           this.win, targetOrigin, target, this.logsId);
         this.messaging_ = new Messaging(this.win, port);
         this.messaging_.setDefaultHandler(this.messageHandler_);
-
         this.sendRequest('visibilitychange', {
           state: this.visibilityState_,
           prerenderSize: this.prerenderSize,
         }, true);
       }
     }.bind(this);
-    listen(this.win, 'message', listener);
+    const unlisten = listen(this.win, 'message', listener);
   }
 
   isChannelOpen_(eventData) {

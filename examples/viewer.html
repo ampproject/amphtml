@@ -384,7 +384,7 @@
 
 
     Viewer.prototype.processRequest_ = function(type, data, awaitResponse) {
-      log('Viewer.prototype.processRequest_', type);
+      log(this.id + ': Viewer.prototype.processRequest_', type);
       switch(type) {
         case 'documentLoaded':
           return this.documentReady_();
@@ -441,7 +441,6 @@
       var_args.unshift('[VIEWER]');
       console/*OK*/.log.apply(console, var_args);
     }
-
 
     function parseUrl(urlString) {
       var a = document.createElement('a');
