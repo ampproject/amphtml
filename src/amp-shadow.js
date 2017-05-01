@@ -45,8 +45,6 @@ installDocService(self, /* isSingleDoc */ false);
 // Core services.
 installRuntimeServices(self);
 
-maybeTrackImpression(self);
-
 // Builtins.
 installBuiltins(self);
 
