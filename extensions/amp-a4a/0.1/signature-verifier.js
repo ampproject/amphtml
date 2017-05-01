@@ -17,7 +17,7 @@
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {cryptoFor} from '../../../src/crypto';
 import {dev} from '../../../src/log';
-import {xhrFor} from '../../../src/xhr';
+import {xhrFor} from '../../../src/services';
 
 /**
  * Potential reasons why an attempt to verify a Fast Fetch signature might not
