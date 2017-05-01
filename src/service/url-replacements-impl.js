@@ -20,7 +20,10 @@ import {variantForOrNull} from '../services';
 import {shareTrackingForOrNull} from '../services';
 import {dev, user, rethrowAsync} from '../log';
 import {documentInfoForDoc} from '../services';
-import {getServiceForDoc, installServiceInEmbedScope} from '../service';
+import {
+  installServiceInEmbedScope,
+  registerServiceBuilderForDoc,
+} from '../service';
 import {isSecureUrl, parseUrl, removeFragment, parseQueryString} from '../url';
 import {viewerForDoc} from '../services';
 import {viewportForDoc} from '../services';
@@ -956,12 +959,15 @@ export function extractClientIdFromGaCookie(gaCookie) {
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @return {!UrlReplacements}
  */
 export function installUrlReplacementsServiceForDoc(ampdoc) {
-  return getServiceForDoc(ampdoc, 'url-replace', doc => {
-    return new UrlReplacements(doc, new GlobalVariableSource(doc));
-  });
+  registerServiceBuilderForDoc(
+      ampdoc,
+      'url-replace',
+      /* opt_ctor */ undefined,
+      doc => {
+        return new UrlReplacements(doc, new GlobalVariableSource(doc));
+      });
 }
 
 /**
