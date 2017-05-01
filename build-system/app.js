@@ -230,7 +230,9 @@ app.use('/form/verify-search-json/post', function(req, res) {
     if (fields.error === 'true') {
       errors.push('You asked for an error, you get an error.');
     }
-    verifyAddress(fields.city, fields.zip).then(function(found) {
+    const addressPromise = fields.city && fields.zip ?
+        verifyAddress(fields.city, fields.zip) : Promise.resolve(false);
+    addressPromise.then(function(found) {
       if (!found) {
         errors.push({name: 'city', message: 'City doesn\'t match zip'});
       }
