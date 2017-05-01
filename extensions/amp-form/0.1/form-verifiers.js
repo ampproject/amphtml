@@ -59,6 +59,7 @@ export function getFormVerifier(form, xhr) {
 /**
  * @param {!HTMLFormElement} form
  * @return {?Element}
+ * @private
  */
 function getConfig_(form) {
   return form.getElementsByTagName('script')[0];
@@ -67,6 +68,7 @@ function getConfig_(form) {
 /**
  * @param {!Element} script
  * @return {!Array<!VerificationGroup>}
+ * @private
  */
 function parseConfig_(script) {
   if (isJsonScriptTag(script)) {
@@ -162,13 +164,14 @@ export class AsyncVerifier extends FormVerifier {
   /**
    * Sends the verify request if any group is ready to verify.
    * @param {!function(!Array<!Element>)} afterVerify
+   * @private
    */
   maybeVerify_(afterVerify) {
     if (this.shouldVerify_()) {
       this.doXhr_().then(() => {
         return [];
       }, error => {
-        return getResponseErrorData(/** @type {!Error} */ (error));
+        return getResponseErrorData_(/** @type {!Error} */ (error));
       })
       .then(errors => this.verify_(errors))
       .then(updatedElements => afterVerify(updatedElements));
@@ -179,6 +182,7 @@ export class AsyncVerifier extends FormVerifier {
    * Set errors on elements that failed verification, and clear any
    * verification state for elements that passed verification.
    * @param {!Array<!VerificationErrorDef>} errors
+   * @private
    */
   verify_(errors) {
     const errorElements = [];
@@ -209,6 +213,7 @@ export class AsyncVerifier extends FormVerifier {
   /**
    * Check if any group in the form needs to be verified.
    * @return {boolean}
+   * @private
    */
   shouldVerify_() {
     return this.groups_.some(group => group.shouldVerify());
@@ -218,6 +223,7 @@ export class AsyncVerifier extends FormVerifier {
    * Check if an element is a member of a verification group.
    * @param {!Element} element
    * @return {boolean}
+   * @private
    */
   isVerificationElement_(element) {
     return !!this.getGroup_(element);
@@ -227,6 +233,7 @@ export class AsyncVerifier extends FormVerifier {
    * Get the group that contains the given element.
    * @param {!Element} element
    * @return {?VerificationGroup}
+   * @private
    */
   getGroup_(element) {
     for (let i = 0; i < this.groups_.length; i++) {
@@ -326,8 +333,9 @@ class VerificationGroup {
 /**
  * @param {!Error} error
  * @return {!Array<VerificationErrorDef>}
+ * @private
  */
-function getResponseErrorData(error) {
+function getResponseErrorData_(error) {
   const json = /** @type {?VerificationErrorResponseDef} */ (
       error.responseJson && error.responseJson);
   if (json && json.errors) {
