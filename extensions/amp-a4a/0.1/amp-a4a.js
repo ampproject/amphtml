@@ -102,15 +102,21 @@ const SHARED_IFRAME_PROPERTIES = {
   marginheight: '0',
 };
 
+/**
+ * @typedef {{
+ *    signingServiceName: string,
+ *    keypairId: string,
+ *    signature: !Uint8Array,
+ * }}
+ */
+let SignatureInfoDef;
+
 /** @typedef {{
  *    creative: !ArrayBuffer,
- *    signatureInfo: ?{
- *        signingServiceName: string,
- *        keypairId: string,
- *        signature: !Uint8Array
- *    },
+ *    signatureInfo: ?SignatureInfoDef,
  *    size: ?{width: number, height: number}
- *  }} */
+ *  }}
+ */
 export let AdResponseDef;
 
 /** @typedef {{
@@ -942,11 +948,11 @@ export class AmpA4A extends AMP.BaseElement {
               '([A-Za-z0-9+/]{4}*(?:[A-Za-z0-9+/]{2}[A-Za-z0-9+/=]=)?)$')
               .exec(encodedSignatureInfo);
       if (match) {
-        adResponse.signatureInfo = {
+        adResponse.signatureInfo = /** @type {?SignatureInfoDef} */ ({
           signingServiceName: match[1],
           keypairId: match[2],
           signature: base64DecodeToBytes(match[3]),
-        };
+        });
       }
     }
     const sizeHeader = responseHeaders.get('X-Creativesize');
