@@ -155,9 +155,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   extractCreativeAndSignature(responseText, responseHeaders) {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
-    this.ampAnalyticsConfig = extractAmpAnalyticsConfig(responseHeaders);
-    return super.extractCreativeAndSignature(responseText, responseHeaders)
-        .then((adResponse) => extractSize(adResponse, responseHeaders));
+    this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(
+        this, responseHeaders, this.lifecycleReporter_.getDeltaTime(),
+        this.lifecycleReporter_.getInitTime());
+    return super.extractCreativeAndSignature(responseText, responseHeaders);
   }
 
   /** @override */

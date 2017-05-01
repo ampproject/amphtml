@@ -614,12 +614,12 @@ export class AmpA4A extends AMP.BaseElement {
           }
           this.protectedEmitLifecycleEvent_('adResponseValidateStart');
           const {signingServiceName, keypairId, signature} =
-              creativeparts.signatureInfo;
+              creativeParts.signatureInfo;
           if (getMode().localDev) {
-            // localDev mode allows "FAKESIG" signature for the "fake" network.
-            if (signature == 'FAKESIG' &&
+            // localDev mode allows fake signature for the "fake" network.
+            if (signingServiceName == 'FAKESERVICE' &&
                 this.element.getAttribute('type') == 'fake') {
-              return creative;
+              return creativeParts.creative;
             }
           }
           return signatureVerifierFor(this.win)
@@ -949,6 +949,12 @@ export class AmpA4A extends AMP.BaseElement {
           signature: base64DecodeToBytes(match.group(3))
         };
       }
+    }
+    const sizeHeader = responseHeaders.get('X-Creativesize');
+    if (sizeHeader) {
+      dev().assert(new RegExp('[0-9]+x[0-9]+').test(sizeHeader));
+      const sizeArr = sizeHeader.split('x').map(Number);
+      adResponse.size = {width: sizeArr[0], height: sizeArr[1]};
     }
     return Promise.resolve(adResponse);
   }
