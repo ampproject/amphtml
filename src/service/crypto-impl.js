@@ -149,7 +149,8 @@ export class Crypto {
     return this.subtle_.importKey(
         'jwk',
         // WebKit wants this as an ArrayBufferView.
-        this.isWebkit_ ? utf8EncodeSync(JSON.stringify(jwk)) : jwk,
+        this.isWebkit_ ? utf8EncodeSync(JSON.stringify(jwk)) :
+                         /** webCrypto.JsonWebKey */ (jwk),
         {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}}, true, ['verify']);
   }
 
@@ -165,9 +166,9 @@ export class Crypto {
    */
   verifyPkcs(key, signature, data) {
     dev().assert(this.isPkcsAvailable());
-    return this.subtle_.verify(
+    return /** !Promise<boolean> */ (this.subtle_.verify(
         {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}}, key, signature,
-        data);
+        data));
   }
 }
 

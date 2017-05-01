@@ -940,12 +940,13 @@ export class AmpA4A extends AMP.BaseElement {
           new RegExp(
               '^([A-Za-z0-9._-]+):([A-Za-z0-9._-]+):' +
               '([A-Za-z0-9+/]{4}*(?:[A-Za-z0-9+/]{2}[A-Za-z0-9+/=]=)?)$')
-              .match(encodedSignatureInfo);
+              .exec(encodedSignatureInfo);
       if (match) {
+        const [_, signingServiceName, keypairId, base64Signature] = match;
         adResponse.signatureInfo = {
-          signingServiceName: match.group(1),
-          keypairId: match.group(2),
-          signature: base64DecodeToBytes(match.group(3)),
+          signingServiceName,
+          keypairId,
+          signature: base64DecodeToBytes(base64Signature),
         };
       }
     }
