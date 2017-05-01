@@ -83,10 +83,20 @@ export class AmpViewerHost {
     const unlisten = listen(this.win, 'message', listener);
   }
 
+  /**
+   * @param {*} eventData
+   * @return {boolean}
+   */
   isChannelOpen_(eventData) {
     return eventData.app == APP && eventData.name == CHANNEL_OPEN_MSG;
   };
 
+  /**
+   * @param {string} type
+   * @param {*} data
+   * @param {boolean} awaitResponse
+   * @return {!Promise<*>|undefined}
+   */
   sendRequest(type, data, awaitResponse) {
     this.log('sendRequest');
     if (!this.messaging_) {
