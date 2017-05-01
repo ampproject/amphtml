@@ -222,7 +222,7 @@ class SignatureVerifier {
     } else {
       // Web Cryptography isn't available.
       return Promise.resolve(
-          /** ?VerificationFailure */ (VerificationFailure.NO_FAULT));
+          /** @type {?VerificationFailure} */ (VerificationFailure.NO_FAULT));
     }
   }
 
