@@ -158,9 +158,9 @@ export class Crypto {
    * Verifies an RSASSA-PKCS1-v1_5 signature with a SHA-256 hash. As a
    * precondition, `isCryptoAvailable()` must be `true`.
    *
-   * @param {!CryptoKey} an RSA public key
-   * @param {!signature} an RSASSA-PKCS1-v1_5 signature
-   * @param {!data} the data that was signed
+   * @param {!CryptoKey} key an RSA public key
+   * @param {!Uint8Array} signature an RSASSA-PKCS1-v1_5 signature
+   * @param {!ArrayBuffer} data the data that was signed
    * @return {!Promise<boolean>} whether the signature is correct for the given
    *     data and public key
    */
