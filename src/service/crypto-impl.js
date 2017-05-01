@@ -123,21 +123,31 @@ export class Crypto {
         .then(() => getService(this.win_, 'crypto-polyfill'));
   }
 
-  isPkcsAvailable() {
+  /**
+   * Checks whether Web Cryptography is available. This is not needed for
+   * SHA-384 operations, because there's a polyfill for that, but it is needed
+   * for PKCS operations. This could be false if the browser does not support
+   * Web Cryptography, or if the current browsing context is not secure (e.g.,
+   * because it is on an insecure HTTP page, or an HTTPS iframe embedded in an
+   * insecure HTTP page).
+   *
+   * @return {boolean} whether Web Cryptography is available
+   */
+  isCryptoAvailable() {
     return Boolean(this.subtle_) && this.win_.isSecureContext !== false;
   }
 
   /**
-   * Convert a JSON Web Key object to a browser-native cryptographic key and
-   * compute a hash for it.  The caller must verify that Web Cryptography is
-   * available using isCryptoAvailable before calling this function.
+   * Converts an RSA JSON Web Key object to a browser-native cryptographic key.
+   * As a precondition, `isCryptoAvailable()` must be `true`.
    *
-   * @param {!Object} jwk An object which is hopefully an RSA JSON Web Key.  The
-   *     caller should verify that it is an object before calling this function.
+   * @param {!Object} jwk a deserialized RSA JSON Web Key, as specified in
+   *     Section 6.3 of RSA 7518
    * @return {!Promise<!CryptoKey>}
+   * @throws {TypeError} if `jwk` is not an RSA JSON Web Key
    */
   importPkcsKey(jwk) {
-    dev().assert(this.isPkcsAvailable());
+    dev().assert(this.isCryptoAvailable());
     return this.subtle_.importKey(
         'jwk',
         // WebKit wants this as an ArrayBufferView.
@@ -146,27 +156,20 @@ export class Crypto {
   }
 
   /**
-   * Verifies RSA signature corresponds to the data, given a public key.
-   * @param {!Uint8Array} data the data that was signed.
-   * @param {!Uint8Array} signature the RSA signature.
-   * @param {!PublicKeyInfoDef} publicKeyInfo the RSA public key.
-   * @return {!Promise<!boolean>} whether the signature is valid for
-   *     the public key.
+   * Verifies an RSASSA-PKCS1-v1_5 signature with a SHA-256 hash. As a
+   * precondition, `isCryptoAvailable()` must be `true`.
+   *
+   * @param {!CryptoKey} an RSA public key
+   * @param {!signature} an RSASSA-PKCS1-v1_5 signature
+   * @param {!data} the data that was signed
+   * @return {!Promise<boolean>} whether the signature is correct for the given
+   *     data and public key
    */
   verifyPkcs(key, signature, data) {
-    dev().assert(this.isPkcsAvailable());
+    dev().assert(this.isCryptoAvailable());
     return this.subtle_.verify(
         {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}}, key, signature,
         data);
-  }
-
-  /**
-   * Is this service actually available? For now, we use browser native
-   * crypto. So if that is not available, then this service is not available.
-   * @return {boolean}
-   */
-  isCryptoAvailable() {
-    return !!this.subtle_;
   }
 }
 
