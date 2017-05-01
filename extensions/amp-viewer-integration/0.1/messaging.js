@@ -184,7 +184,6 @@ export class Messaging {
    */
   handleMessage_(event) {
     dev().fine(TAG, 'Got a message:', event.type, event.data);
-    console.log(TAG, 'Got a message:', event.type, event.data);
     const message = parseMessage(event.data);
     if (!message) {
       return;
