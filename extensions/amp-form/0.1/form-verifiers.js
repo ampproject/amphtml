@@ -77,7 +77,7 @@ function parseConfig_(script) {
       throw new Error('Failed to parse amp-form config. Is it valid JSON?');
     });
     const config = json && json[CONFIG_KEY];
-    if (!config.length) {
+    if (!config || !config.length) {
       throw new Error(`The amp-form verification config should contain an array
         property ${CONFIG_KEY} with at least one element`);
     }
