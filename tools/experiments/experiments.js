@@ -187,11 +187,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
   },
   {
-    id: 'visibility-v2',
-    name: 'New visibility tracking using native IntersectionObserver',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6254',
-  },
-  {
     id: 'visibility-v3',
     name: 'Visibility tracking with FIE and in-a-box support',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8121',

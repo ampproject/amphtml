@@ -174,6 +174,7 @@ export function googleAdUrl(
         {name: 'isw', value: viewportSize.width},
         {name: 'ish', value: viewportSize.height},
         {name: 'pfx', value: pfx},
+        {name: 'rc', value: a4a.fromResumeCallback ? 1 : null},
       ],
       unboundedQueryParams,
       [

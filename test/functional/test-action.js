@@ -21,6 +21,7 @@ import {
   parseActionMap,
 } from '../../src/service/action-impl';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
+import {Keycodes} from '../../src/utils/keycodes';
 import {createCustomEvent} from '../../src/event-helper';
 import {setParentWindow} from '../../src/service';
 import * as sinon from 'sinon';
@@ -945,7 +946,7 @@ describe('Core events', () => {
     sandbox.restore();
   });
 
-  it('should trigger tap event', () => {
+  it('should trigger tap event on click', () => {
     expect(window.document.addEventListener).to.have.been.calledWith('click');
     const handler = window.document.addEventListener.getCall(0).args[1];
     const element = {tagName: 'target1', nodeType: 1};
@@ -954,9 +955,35 @@ describe('Core events', () => {
     expect(action.trigger).to.have.been.calledWith(element, 'tap', event);
   });
 
+  it('should trigger tap event on key press if focused element has ' +
+     'role=button', () => {
+    expect(window.document.addEventListener).to.have.been.calledWith('keydown');
+    const handler = window.document.addEventListener.getCall(1).args[1];
+    const element = document.createElement('div');
+    element.setAttribute('role', 'button');
+    const event = {
+      target: element,
+      keyCode: Keycodes.ENTER,
+      preventDefault: sandbox.stub()};
+    handler(event);
+    expect(event.preventDefault).to.have.been.called;
+    expect(action.trigger).to.have.been.calledWith(element, 'tap', event);
+  });
+
+  it('should NOT trigger tap event on key press if focused element DOES NOT ' +
+     'have role=button', () => {
+    expect(window.document.addEventListener).to.have.been.calledWith('keydown');
+    const handler = window.document.addEventListener.getCall(1).args[1];
+    const element = document.createElement('div');
+    element.setAttribute('role', 'not-a-button');
+    const event = {target: element, keyCode: Keycodes.ENTER};
+    handler(event);
+    expect(action.trigger).to.not.have.been.called;
+  });
+
   it('should trigger submit event', () => {
     expect(window.document.addEventListener).to.have.been.calledWith('submit');
-    const handler = window.document.addEventListener.getCall(1).args[1];
+    const handler = window.document.addEventListener.getCall(2).args[1];
     const element = {tagName: 'target1', nodeType: 1};
     const event = {target: element};
     handler(event);
@@ -965,7 +992,7 @@ describe('Core events', () => {
 
   it('should trigger change event', () => {
     expect(window.document.addEventListener).to.have.been.calledWith('change');
-    const handler = window.document.addEventListener.getCall(2).args[1];
+    const handler = window.document.addEventListener.getCall(3).args[1];
     const element = {tagName: 'target2', nodeType: 1};
     const event = {target: element};
     handler(event);
@@ -973,7 +1000,7 @@ describe('Core events', () => {
   });
 
   it('should trigger change event with details for whitelisted inputs', () => {
-    const handler = window.document.addEventListener.getCall(2).args[1];
+    const handler = window.document.addEventListener.getCall(3).args[1];
     const element = document.createElement('input');
     element.setAttribute('type', 'range');
     element.setAttribute('min', '0');
@@ -990,4 +1017,24 @@ describe('Core events', () => {
           return detail.min == 0 && detail.max == 10 && detail.value == 5;
         }));
   });
+
+  it('should trigger change event with details for select elements', () => {
+    const handler = window.document.addEventListener.getCall(3).args[1];
+    const element = document.createElement('select');
+    element.innerHTML =
+        `<option value="foo"></option>
+        <option value="bar"></option>
+        <option value="qux"></option>`;
+    element.selectedIndex = 2;
+    const event = {target: element};
+    handler(event);
+    expect(action.trigger).to.have.been.calledWith(
+        element,
+        'change',
+        sinon.match(object => {
+          const detail = object.detail;
+          return detail.value == 'qux';
+        }));
+  });
+
 });

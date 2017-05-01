@@ -274,8 +274,10 @@ export class Messaging {
       handler = this.defaultHandler_;
     }
     if (!handler) {
-      throw new Error(
+      const error = new Error(
         'Cannot handle request because handshake is not yet confirmed!');
+      error.args = message.name;
+      throw error;
     }
 
     const promise = handler(message.name, message.data, !!message.rsvp);
@@ -312,7 +314,7 @@ export class Messaging {
         pending.reject(
           new Error(`Request ${message.name} failed: ${message.error}`));
       } else {
-        pending.resolve(message);
+        pending.resolve(message.data);
       }
     }
   }
