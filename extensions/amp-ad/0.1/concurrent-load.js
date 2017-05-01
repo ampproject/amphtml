@@ -14,6 +14,7 @@
  */
 
 import {timerFor} from '../../../src/services';
+import {user} from '../../../src/log';
 
 /**
  * Store loading ads info within window to ensure it can be properly stored
@@ -36,13 +37,22 @@ export function is3pThrottled(win) {
  *    default should be used.
  */
 export function getAmpAdRenderOutsideViewport(element) {
+  const rawValue = element.getAttribute('data-loading-strategy');
+  if (rawValue == null) {
+    return null;
+  }
   // Ad opts into lazier loading strategy where we only load ads that are
-  // at closer than 1.25 viewports away.
-  if (element.getAttribute('data-loading-strategy') ==
-      'prefer-viewability-over-views') {
+  // at closer given number of viewports away.
+  if (rawValue == 'prefer-viewability-over-views' || rawValue == '') {
     return 1.25;
   }
-  return null;
+  const errorMessage =
+      'Value of data-loading-strategy should be a float number in range ' +
+      'of [0, 3], but got ' + rawValue;
+  const viewportNumber =
+      user().assertNumber(parseFloat(rawValue), errorMessage);
+  user().assert(viewportNumber >= 0 && viewportNumber <= 3, errorMessage);
+  return viewportNumber;
 }
 
 /**
