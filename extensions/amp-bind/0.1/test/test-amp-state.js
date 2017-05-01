@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import '../amp-bind';
-import {createIframePromise} from '../../../../testing/iframe';
 import {viewerForDoc} from '../../../../src/services';
 
 describes.realWin('AmpState', {
