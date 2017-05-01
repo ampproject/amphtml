@@ -1211,10 +1211,10 @@ describe('amp-analytics', function() {
         },
         'triggers': {
           'conditional': {
-           'on': 'visible',
-           'request': 'pageview1',
-           'vars': {},
-         },
+            'on': 'visible',
+            'request': 'pageview1',
+            'vars': {},
+          },
         },
         'vars': {},
       };
