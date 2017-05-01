@@ -64,25 +64,25 @@ By default, the local is set to <code>en</code>; however, you can specify one of
   <li>de (German)</li>
   <li>el (Greek)</li>
   <li>en (English)</li>
-  <li>en_short (English - short)</li>
+  <li>enShort (English - short)</li>
   <li>es (Spanish)</li>
   <li>eu (Basque)</li>
   <li>fi (Finnish)</li>
   <li>fr (French)</li>
   <li>he (Hebrew)</li>
   <li>hu (Hungarian)</li>
-  <li>in_BG (Bangla)</li>
-  <li>in_HI (Hindi)</li>
-  <li>in_ID (Malay)</li>
+  <li>inBG (Bangla)</li>
+  <li>inHI (Hindi)</li>
+  <li>inID (Malay)</li>
   <li>it (Italian)</li>
   <li>ja (Japanese)</li>
   <li>ko (Korean)</li>
   <li>ml (Malayalam)</li>
-  <li>nb_NO (Norwegian Bokmål)</li>
+  <li>nbNO (Norwegian Bokmål)</li>
   <li>nl (Dutch)</li>
-  <li>nn_NO (Norwegian Nynorsk)</li>
+  <li>nnNO (Norwegian Nynorsk)</li>
   <li>pl (Polish)</li>
-  <li>pt_BR (Portuguese)</li>
+  <li>ptBR (Portuguese)</li>
   <li>ro (Romanian)</li>
   <li>ru (Russian)</li>
   <li>sv (Swedish)</li>
@@ -90,7 +90,7 @@ By default, the local is set to <code>en</code>; however, you can specify one of
   <li>th (Thai)</li>
   <li>tr (Turkish)</li>
   <li>uk (Ukrainian)</li>
-  <li>vi (Vietnames)</li>
-  <li>zh_CN (Chinese)</li>
-  <li>zh_TW (Taiwanese)</li>
+  <li>vi (Vietnamese)</li>
+  <li>zhCN (Chinese)</li>
+  <li>zhTW (Taiwanese)</li>
 </ul>
