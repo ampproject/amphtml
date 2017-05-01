@@ -16,6 +16,7 @@
 
 import {dev} from '../../../src/log';
 import {
+  childElementByTag,
   isJsonScriptTag,
   scopedQuerySelector,
   scopedQuerySelectorAll,
@@ -62,7 +63,7 @@ export function getFormVerifier(form, xhr) {
  * @private
  */
 function getConfig_(form) {
-  return form.getElementsByTagName('script')[0];
+  return childElementByTag(form, 'script');
 }
 
 /**
@@ -104,15 +105,15 @@ function parseConfig_(script) {
 export class FormVerifier {
   /**
    * @param {!HTMLFormElement} form
-   * @param {!Array<!VerificationGroup>} config
+   * @param {!Array<!VerificationGroup>} groups
    * @param {function():Promise<!../../../src/service/xhr-impl.FetchResponse>} xhr
    */
-  constructor(form, config, xhr) {
+  constructor(form, groups, xhr) {
     /** @protected @const */
     this.form_ = form;
 
     /** @protected @const {!Array<!VerificationGroup>} */
-    this.groups_ = config;
+    this.groups_ = groups;
 
     /** @protected @const*/
     this.doXhr_ = xhr;
@@ -201,7 +202,7 @@ export class AsyncVerifier extends FormVerifier {
     // Remove the dirty flag from the successful groups that have values.
     for (let i = 0; i < this.groups_.length; i++) {
       const group = this.groups_[i];
-      if (group.isFilledOut() && group.containsNoElementOf(errorElements)) {
+      if (group.isFilledOut() && group.containsNone(errorElements)) {
         group.setDirty(false);
         updatedElements = updatedElements.concat(group.getElements());
       }
@@ -238,7 +239,7 @@ export class AsyncVerifier extends FormVerifier {
   getGroup_(element) {
     for (let i = 0; i < this.groups_.length; i++) {
       const group = this.groups_[i];
-      if (group.containsElement(element)) {
+      if (group.contains(element)) {
         return group;
       }
     }
@@ -294,7 +295,7 @@ class VerificationGroup {
    * @param {!Element} element
    * @return {boolean}
    */
-  containsElement(element) {
+  contains(element) {
     return this.elements_.includes(element);
   }
 
@@ -303,8 +304,8 @@ class VerificationGroup {
    * @param {!Array<!Element>} elements
    * @return {boolean}
    */
-  containsNoElementOf(elements) {
-    return !elements.some(element => this.containsElement(element));
+  containsNone(elements) {
+    return !elements.some(element => this.contains(element));
   }
 
   /**
