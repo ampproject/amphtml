@@ -35,7 +35,7 @@ import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {dev, user, duplicateErrorIfNecessary} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, isEnumValue} from '../../../src/types';
-import {utf8Decode} from '../../../src/utils/bytes';
+import {base64DecodeToBytes, utf8Decode} from '../../../src/utils/bytes';
 import {viewerForDoc} from '../../../src/services';
 import {resourcesForDoc} from '../../../src/services';
 import {xhrFor} from '../../../src/services';
@@ -634,14 +634,12 @@ export class AmpA4A extends AMP.BaseElement {
                               }) for signing service (${
                                                         signingServiceName
                                                       }) not found`);
-                  case VerificationFaliure.MISMATCHED_SIGNATURE:
+                  case VerificationFailure.MISMATCHED_SIGNATURE:
                     user().error(
                         TAG, this.element.getAttribute('type'),
-                        `Invalid signature for key (${
-                                                      keypairId
-                                                    }) for signing service (${
-                                                                              signingServiceName
-                                                                            })`);
+                        'Invalid signature for key (' + keypairId +
+                            ') for signing service (' + signingServiceName +
+                            ')');
                 }
                 this.protectedEmitLifecycleEvent_('adResponseValidateEnd');
                 return failure ? null : creativeParts.creative;
@@ -937,14 +935,15 @@ export class AmpA4A extends AMP.BaseElement {
     const encodedSignatureInfo =
         responseHeaders.get('AMP-Fast-Fetch-Signature');
     if (encodedSignatureInfo) {
-      const match =
-          /^([A-Za-z0-9._-]+):([A-Za-z0-9._-]+):([A-Za-z0-9+/]{4}*(?:[A-Za-z0-9+/]{2}[A-Za-z0-9+/=]=)?)$/
-              .match(encodedSignatureInfo);
+      const match = new RegExp(
+          '^([A-Za-z0-9._-]+):([A-Za-z0-9._-]+):' +
+          '([A-Za-z0-9+/]{4}*(?:[A-Za-z0-9+/]{2}[A-Za-z0-9+/=]=)?)$');
+      .match(encodedSignatureInfo);
       if (match) {
         adResponse.signatureInfo = {
           signingServiceName: match.group(1),
           keypairId: match.group(2),
-          signature: base64DecodeToBytes(match.group(3))
+          signature: base64DecodeToBytes(match.group(3)),
         };
       }
     }

@@ -180,41 +180,6 @@ function getSubtle(win) {
 }
 
 /**
- * Appends 4-byte endian data's length to the data itself.
- * @param {!Uint8Array} data
- * @return {!Uint8Array} the prepended 4-byte endian data's length together with
- *     the data itself.
- */
-function lenPrefix(data) {
-  const res = new Uint8Array(4 + data.length);
-  res[0] = (data.length >> 24) & 0xff;
-  res[1] = (data.length >> 16) & 0xff;
-  res[2] = (data.length >> 8) & 0xff;
-  res[3] = data.length & 0xff;
-  res.set(data, 4);
-  return res;
-}
-
-/**
- * Compare the hash field of the signature to keyHash.
- * Note that signature has a one-byte version, followed by 4-byte hash.
- * @param {?Uint8Array} signature
- * @param {?Uint8Array} keyHash
- * @return {boolean} signature[1..5] == keyHash
- */
-function hashesEqual(signature, keyHash) {
-  if (!signature || !keyHash) {
-    return false;
-  }
-  for (let i = 0; i < 4; i++) {
-    if (signature[i + 1] !== keyHash[i]) {
-      return false;
-    }
-  }
-  return true;
-}
-
-/**
  * @param {!Window} win
  */
 export function installCryptoService(win) {
