@@ -49,7 +49,7 @@ describe('amp-3q-player', function() {
         const iframe = player.querySelector('iframe');
         player.implementation_.sdnBridge_({
           source: iframe.contentWindow,
-          data: 'ready',
+          data: JSON.stringify({data: 'ready'}),
         });
       });
 
@@ -66,7 +66,6 @@ describe('amp-3q-player', function() {
         'c8dbe7f4-7f7f-11e6-a407-0cc47a188158').then(player => {
           const iframe = player.querySelector('iframe');
           expect(iframe).to.not.be.null;
-          expect(iframe.tagName).to.equal('IFRAME');
           expect(iframe.src).to.equal('https://playout.3qsdn.com/c8dbe7f4-7f7f-11e6-a407-0cc47a188158?autoplay=false&amp=true');
         });
   })
@@ -108,7 +107,7 @@ describe('amp-3q-player', function() {
 
   function sendFakeMessage(player, iframe, command) {
     player.implementation_.sdnBridge_(
-        {source: iframe.contentWindow, data: command});
+        {source: iframe.contentWindow, data: JSON.stringify({data: command})});
   }
 
 });
