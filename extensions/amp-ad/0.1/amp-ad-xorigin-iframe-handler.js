@@ -96,8 +96,6 @@ export class AmpAdXOriginIframeHandler {
           this.element_.creativeId = info.data.id;
         });
 
-    // TODO(keithwrightbos) - move to within not A4A else block to ensure this
-    // is only available to ad networks?
     this.unlisteners_.push(listenFor(this.iframe, 'get-html',
       (info, source, origin) => {
         if (!this.iframe) {
@@ -144,15 +142,6 @@ export class AmpAdXOriginIframeHandler {
       });
     }
 
-    // Wait for initial load signal. Notice that this signal is not
-    // used to resolve the final layout promise because iframe may still be
-    // consuming significant network and CPU resources.
-    listenForOncePromise(this.iframe, CommonSignals.INI_LOAD, true).then(() => {
-      // TODO(dvoytenko, #7788): ensure that in-a-box "ini-load" message is
-      // received here as well.
-      this.baseInstance_.signals().signal(CommonSignals.INI_LOAD);
-    });
-
     // Calculate render-start and no-content signals.
     let renderStartResolve;
     const renderStartPromise = new Promise(resolve => {
@@ -163,7 +152,7 @@ export class AmpAdXOriginIframeHandler {
       noContentResolve = resolve;
     });
     if (this.baseInstance_.config &&
-      this.baseInstance_.config.renderStartImplemented) {
+            this.baseInstance_.config.renderStartImplemented) {
       // When `render-start` is supported, these signals are mutually
       // exclusive. Whichever arrives first wins.
       listenForOncePromise(this.iframe,
@@ -193,6 +182,16 @@ export class AmpAdXOriginIframeHandler {
         noContentResolve();
       });
     }
+
+    // Wait for initial load signal. Notice that this signal is not
+    // used to resolve the final layout promise because iframe may still be
+    // consuming significant network and CPU resources.
+    listenForOncePromise(this.iframe, CommonSignals.INI_LOAD, true).then(() => {
+      // TODO(dvoytenko, #7788): ensure that in-a-box "ini-load" message is
+      // received here as well.
+      this.baseInstance_.signals().signal(CommonSignals.INI_LOAD);
+    });
+
     this.element_.appendChild(this.iframe);
     if (opt_isA4A) {
       // A4A writes creative frame directly to page once creative is received
