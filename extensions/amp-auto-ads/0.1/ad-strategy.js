@@ -15,7 +15,7 @@
  */
 
 import {DataAttributeDef, PlacementState} from './placement';
-import {dev} from '../../../src/log';
+import {user} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-auto-ads';
@@ -85,7 +85,7 @@ export class AdStrategy {
   placeNextAd_() {
     const nextPlacement = this.availablePlacements_.shift();
     if (!nextPlacement) {
-      dev().warn(TAG, 'unable to fulfill ad strategy');
+      user().warn(TAG, 'unable to fulfill ad strategy');
       return Promise.resolve(false);
     }
     return nextPlacement.placeAd(this.baseAttributes_, this.adTracker_)

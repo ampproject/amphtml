@@ -34,6 +34,10 @@ tags: {  # <amp-selector> for AMP (autoplay attribute allowed)
   disallowed_ancestor: "AMP-SIDEBAR"
   requires: "amp-selector extension .js script"
   attrs: {
+    name: "keyboard-select-mode"
+    value_regex_casei: "none|focus|select"
+  }
+  attrs: {
     name: "disabled"
     value: ""
   }
@@ -52,7 +56,7 @@ tags: {  # <amp-selector> for AMP (autoplay attribute allowed)
   }
   attr_lists: "extended-amp-global"
   attr_lists: "input-name-attr"
-  spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-selector"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-selector"
   amp_layout {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -80,7 +84,7 @@ tags: {
   attrs: { name: "option" mandatory: true }
   attrs: { name: "disabled" value: "" }
   attrs: { name: "selected" value: "" }
-  spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-selector"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-selector"
 }
 tags: {
   html_format: AMP

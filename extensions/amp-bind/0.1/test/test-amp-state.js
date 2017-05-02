@@ -14,60 +14,87 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import '../amp-bind';
-import {createIframePromise} from '../../../../testing/iframe';
+import {viewerForDoc} from '../../../../src/services';
 
-describe('AmpState', () => {
-  let sandbox;
+describes.realWin('AmpState', {
+  amp: {
+    runtimeOn: true,
+    extensions: ['amp-state:0.1'],
+  },
+}, env => {
   let ampState;
   let fetchStub;
   let updateStub;
 
+  // Viewer-related vars.
+  let viewer;
+  let whenFirstVisiblePromise;
+  let whenFirstVisiblePromiseResolve;
+
   function getAmpState() {
-    return createIframePromise(true).then(iframe => {
-      const el = iframe.doc.createElement('amp-state');
-      el.setAttribute('id', 'myAmpState');
-      return iframe.addElement(el);
-    });
+    const el = env.win.document.createElement('amp-state');
+    el.setAttribute('id', 'myAmpState');
+    env.win.document.body.appendChild(el);
+    return el;
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    viewer = viewerForDoc(env.win.document);
 
-    return getAmpState().then(element => {
-      ampState = element;
+    whenFirstVisiblePromise = new Promise(resolve => {
+      whenFirstVisiblePromiseResolve = resolve;
+    });
+    env.sandbox.stub(viewer, 'whenFirstVisible', () => whenFirstVisiblePromise);
 
-      const impl = ampState.implementation_;
-      fetchStub = sandbox.stub(impl, 'fetchSrcAndUpdateState_');
-      updateStub = sandbox.stub(impl, 'updateState_');
+    ampState = getAmpState();
+
+    const impl = ampState.implementation_;
+    fetchStub = sandbox.stub(impl, 'fetchSrcAndUpdateState_');
+    updateStub = sandbox.stub(impl, 'updateState_');
+  });
+
+  it('should fetch json if `src` attribute exists', () => {
+    ampState.setAttribute('src', 'https://foo.com/bar?baz=1');
+    ampState.build();
+
+    // IMPORTANT: No CORS fetch should happen until viewer is visible.
+    expect(fetchStub).to.not.have.been.called;
+    expect(updateStub).to.not.have.been.called;
+
+    whenFirstVisiblePromiseResolve();
+    return whenFirstVisiblePromise.then(() => {
+      expect(fetchStub).calledWith(/* opt_isInit */ true);
     });
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
-
-  it('should parse its child script if `src` is not present at build', () => {
+  it('should parse its child script if `src` attribute does not exist', () => {
     ampState.innerHTML = '<script type="application/json">' +
         '{"foo": "bar"}</script>';
-    ampState.implementation_.buildCallback();
-    expect(fetchStub).to.not.have.been.called;
-    expect(updateStub).calledWithMatch({foo: 'bar'});
-  });
+    ampState.build();
 
-  it('should fetch json if `src` is present at build', () => {
-    ampState.setAttribute('src', 'https://foo.com/bar?baz=1');
-    ampState.implementation_.buildCallback();
-    expect(fetchStub).calledWith(/* opt_isInit */ true);
+    // IMPORTANT: No parsing should happen until viewer is visible.
+    expect(fetchStub).to.not.have.been.called;
     expect(updateStub).to.not.have.been.called;
+
+    whenFirstVisiblePromiseResolve();
+    return whenFirstVisiblePromise.then(() => {
+      expect(updateStub).calledWithMatch({foo: 'bar'});
+    });
   });
 
   it('should fetch json if `src` is mutated', () => {
     ampState.setAttribute('src', 'https://foo.com/bar?baz=1');
-    ampState.mutatedAttributesCallback({
-      src: 'https://foo.com/bar?baz=1',
-    });
+    ampState.build();
+
+    // IMPORTANT: No CORS fetch should happen until viewer is visible.
+    const isVisibleStub = env.sandbox.stub(viewer, 'isVisible');
+    isVisibleStub.returns(false);
+    ampState.mutatedAttributesCallback({src: 'https://foo.com/bar?baz=1'});
+    expect(fetchStub).to.not.have.been.called;
+
+    isVisibleStub.returns(true);
+    ampState.mutatedAttributesCallback({src: 'https://foo.com/bar?baz=1'});
     expect(fetchStub).calledWith(/* opt_isInit */ false);
   });
 });

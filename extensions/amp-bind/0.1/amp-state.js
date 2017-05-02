@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {bindForDoc} from '../../../src/services';
+import {bindForDoc, viewerForDoc} from '../../../src/services';
 import {fetchBatchedJsonFor} from '../../../src/batched-json';
 import {isBindEnabledFor} from './bind-impl';
 import {isJsonScriptTag} from '../../../src/dom';
 import {toggle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
-import {user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 
 export class AmpState extends AMP.BaseElement {
   /** @override */
@@ -52,10 +52,37 @@ export class AmpState extends AMP.BaseElement {
     user().assert(isBindEnabledFor(this.win),
         `Experiment "amp-bind" is disabled.`);
 
-    const TAG = this.getName_();
-
     toggle(this.element, /* opt_display */ false);
     this.element.setAttribute('aria-hidden', 'true');
+
+    // Don't parse or fetch in prerender mode.
+    const viewer = viewerForDoc(this.getAmpDoc());
+    viewer.whenFirstVisible().then(() => this.initialize_());
+  }
+
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    const viewer = viewerForDoc(this.getAmpDoc());
+    if (!viewer.isVisible()) {
+      const TAG = this.getName_();
+      dev().error(TAG, 'Viewer must be visible before mutation.');
+      return;
+    }
+    const src = mutations['src'];
+    if (src !== undefined) {
+      this.fetchSrcAndUpdateState_(/* isInit */ false);
+    }
+  }
+
+  /** @override */
+  renderOutsideViewport() {
+    // We want the state data to be available wherever it is in the document.
+    return true;
+  }
+
+  /** @private */
+  initialize_() {
+    const TAG = this.getName_();
 
     // Fetch JSON from endpoint at `src` attribute if it exists,
     // otherwise parse child script tag.
@@ -81,20 +108,6 @@ export class AmpState extends AMP.BaseElement {
         user().error(TAG, 'Should contain only one <script> child.');
       }
     }
-  }
-
-  /** @override */
-  mutatedAttributesCallback(mutations) {
-    const src = mutations['src'];
-    if (src !== undefined) {
-      this.fetchSrcAndUpdateState_(/* isInit */ false);
-    }
-  }
-
-  /** @override */
-  renderOutsideViewport() {
-    // We want the state data to be available wherever it is in the document.
-    return true;
   }
 
   /**

@@ -25,7 +25,7 @@ min_validator_revision_required: 221
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 405
+spec_file_revision: 411
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 
@@ -420,7 +420,7 @@ tags: {
       allowed_protocol: "https"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/ads/amp-ad"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ad"
 }
 # AMP metadata, name=amp-link-variable-allowed-origin
 # https://github.com/ampproject/amphtml/issues/8132
@@ -1320,7 +1320,7 @@ tags: {
   tag_name: "IMG"
   mandatory_ancestor: "NOSCRIPT"
   mandatory_ancestor_suggested_alternative: "AMP-IMG"
-  spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-img"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-img"
   attrs: { name: "alt" }
   attrs: { name: "ismap" }
   attrs: {
@@ -1356,7 +1356,7 @@ tags: {
   tag_name: "IFRAME"
   mandatory_ancestor: "NOSCRIPT"
   mandatory_ancestor_suggested_alternative: "AMP-IFRAME"
-  spec_url: "https://www.ampproject.org/docs/reference/components/layout/amp-iframe"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-iframe"
   attrs: {
     name: "name"
   }
@@ -1411,7 +1411,7 @@ tags: {
   attrs: {
     name: "muted"
     deprecation: "autoplay"
-    deprecation_url: "https://www.ampproject.org/docs/reference/components/media/amp-video"
+    deprecation_url: "https://www.ampproject.org/docs/reference/components/amp-video"
   }
   attrs: { name: "playsinline" }
   attrs: { name: "poster" }
@@ -1426,7 +1426,7 @@ tags: {
     blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: { name: "width" }
-  spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-video"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-video"
 }
 # 4.7.7 The audio element
 # Only allowed in noscript tags. Otherwise use amp-audio.
@@ -1449,7 +1449,7 @@ tags: {
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-audio"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-audio"
 }
 # 4.7.8 The source element
 tags: {
@@ -1469,7 +1469,7 @@ tags: {
   # <amp-bind>
   attrs: { name: "[src]" }
   attrs: { name: "[type]" }
-  spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-video"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-video"
 }
 tags: {
   tag_name: "SOURCE"
@@ -1488,7 +1488,7 @@ tags: {
   # <amp-bind>
   attrs: { name: "[src]" }
   attrs: { name: "[type]" }
-  spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-audio"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-audio"
 }
 tags: {
   tag_name: "SOURCE"
@@ -1508,7 +1508,7 @@ tags: {
     mandatory: true
   }
   attrs: { name: "media" }
-  spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-audio"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-audio"
 }
 tags: {
   tag_name: "SOURCE"
@@ -1528,7 +1528,7 @@ tags: {
     mandatory: true
   }
   attrs: { name: "media" }
-  spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-video"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-video"
 }
 # 4.7.8 The track element
 # We have two attr_list variants to encode the requirement that if
@@ -1747,6 +1747,8 @@ attr_lists: {
   attrs: { name: "xlink:arcrole" }
   attrs: {
     name: "xlink:href"
+    # xlink:href is deprecated since SVG2 in favor of href.
+    alternative_names: "href"
     # Local (within document) URLs only for now.
     value_regex: "#.*"
   }
@@ -2463,7 +2465,7 @@ tags {  # <form method=GET ...>
     mandatory: true
     value_regex_casei: "(_blank|_top)"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-form"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
 tags {  # <form method=POST ...>
   tag_name: "FORM"
@@ -2506,7 +2508,7 @@ tags {  # <form method=POST ...>
     mandatory: true
     value_regex_casei: "(_blank|_top)"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-form"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
 tags {
   tag_name: "DIV"
@@ -2657,7 +2659,7 @@ attr_lists: {
 tags: {
   tag_name: "LABEL"
   attrs: { name: "for" }
-  spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-form"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
 # 4.10.5 The input element
 tags: {
@@ -2721,7 +2723,7 @@ tags: {
   attrs: { name: "[value]" }
   attrs: { name: "[width]" }
   attr_lists: "input-name-attr"
-  spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-form"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
 # 4.10.6 The button element
 tags: {
@@ -2784,12 +2786,12 @@ tags: {
   attrs: { name: "[required]" }
   attrs: { name: "[size]" }
   attr_lists: "input-name-attr"
-  spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-form"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
 # 4.10.8 The datalist element
 tags: {
   tag_name: "DATALIST"
-  spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-form"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
 # 4.10.9 The optgroup element
 tags: {
@@ -2800,7 +2802,7 @@ tags: {
   # <amp-bind>
   attrs: { name: "[disabled]" }
   attrs: { name: "[label]" }
-  spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-form"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
 # 4.10.10 The option element
 tags: {
@@ -2814,7 +2816,7 @@ tags: {
   attrs: { name: "[label]" }
   attrs: { name: "[selected]" }
   attrs: { name: "[value]" }
-  spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-form"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
 # 4.10.11 The textarea element
 tags: {
@@ -2851,7 +2853,7 @@ tags: {
   attrs: { name: "[spellcheck]" }
   attrs: { name: "[wrap]" }
   attr_lists: "input-name-attr"
-  spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-form"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
 # 4.10.13 The output element
 tags: {
@@ -3099,7 +3101,7 @@ tags: {  # <amp-img>
   attrs: { name: "[srcset]" }
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-src-or-srcset"
-  spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-img"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-img"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -3113,6 +3115,10 @@ tags: {  # <amp-pixel>
   tag_name: "AMP-PIXEL"
   disallowed_ancestor: "AMP-SIDEBAR"
   attrs: {
+    name: "referrerpolicy"
+    value: "no-referrer"
+  }
+  attrs: {
     name: "src"
     mandatory: true
     value_url: {
@@ -3123,7 +3129,7 @@ tags: {  # <amp-pixel>
     blacklisted_value_regex: "__amp_source_origin"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/ads/amp-pixel"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-pixel"
   amp_layout {
     defines_default_height: true
     defines_default_width: true
@@ -3375,7 +3381,7 @@ attr_lists: {
   attrs: { name: "lightbox" }
   attrs: { name: "overflow" }
   # amp-access specific attributes, see
-  # https://www.ampproject.org/docs/reference/components/dynamic/amp-access
+  # https://www.ampproject.org/docs/reference/components/amp-access
   # TODO(gregable): These should only be allowed on any tag inside BODY or HEAD.
   attrs: { name: "amp-access" }
   attrs: { name: "amp-access-behavior" }

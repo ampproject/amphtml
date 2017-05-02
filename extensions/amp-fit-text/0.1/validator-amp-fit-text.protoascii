@@ -34,7 +34,7 @@ tags: {  # <amp-fit-text>
   attrs: { name: "max-font-size" }
   attrs: { name: "min-font-size" }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/presentation/amp-fit-text"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-fit-text"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

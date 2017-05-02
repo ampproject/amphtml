@@ -16,6 +16,7 @@
 
 
 import {CSS} from '../../../build/amp-lightbox-viewer-0.1.css';
+import {Keycodes} from '../../../src/utils/keycodes';
 import {ampdocServiceFor} from '../../../src/ampdoc';
 import {ancestorElements} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
@@ -422,22 +423,13 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   handleKeyboardEvents_(event) {
-    // TODO(aghassemi): Add helper utility for keyboard events or an enum.
-    const code = event.keyCode;
-
-    // Escape
-    if (code == 27) {
-      this.close_();
-    }
-
     // TODO(aghassemi): RTL support
-    // Right arrow
-    if (code == 39) {
+    const code = event.keyCode;
+    if (code == Keycodes.ESCAPE) {
+      this.close_();
+    } else if (code == Keycodes.RIGHT_ARROW) {
       this.next_();
-    }
-
-    // Left arrow
-    if (code == 37) {
+    } else if (code == Keycodes.LEFT_ARROW) {
       this.previous_();
     }
   }
