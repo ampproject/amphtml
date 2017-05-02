@@ -204,7 +204,7 @@ const command = {
   testDocumentLinks: function(files) {
     files.forEach((file) => {
       if (isDocFile(file)) {
-        execOrDie('build-system/test-links.sh');
+        execOrDie('build-system/test-links.sh ' + file);
       }
     });
   },
