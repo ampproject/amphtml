@@ -204,7 +204,7 @@ const command = {
   testDocumentLinks: function(files) {
     files.forEach((file) => {
       if (isDocFile(file)) {
-        execOrDie('test-links');
+        execOrDie('./test-links.sh');
       }
     });
   },
