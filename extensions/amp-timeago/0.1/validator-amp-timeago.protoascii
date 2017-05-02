@@ -34,6 +34,7 @@ tags: {  # <amp-timeago>
   attrs: {
     name: "datetime"
     mandatory: true
+    value_regex: "\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d(:[0-5]\d(\.\d+)?)?"
   }
   attrs: { name: "locale" }
   attr_lists: "extended-amp-global"
