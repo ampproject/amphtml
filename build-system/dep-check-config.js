@@ -161,6 +161,8 @@ exports.rules = [
       'extensions/amp-a4a/0.1/amp-a4a.js->src/service/variable-source.js',
       'extensions/amp-nexxtv-player/0.1/amp-nexxtv-player.js->' +
           'src/service/video-manager-impl.js',
+      'extensions/amp-3q-player/0.1/amp-3q-player.js->' +
+        'src/service/video-manager-impl.js',
       'extensions/amp-fx-parallax/0.1/amp-fx-parallax.js->' +
           'src/service/parallax-impl.js',
     ],
