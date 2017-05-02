@@ -379,9 +379,12 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
   options.extraGlobs = opt_extraGlobs;
   var path = 'extensions/' + name + '/' + version;
   if (name == 'amp-sticky-ad' && version == '0.1') {
-    // Special case for sticky-ad upgrade.
+    // Special case for amp-sticky-ad force upgrade from v0.1 to v1.0
+    // to provide better UX. (related issue #6169).
     // To deprecate 0.1, replace the build path so that amp-sticky-ad-0.1.js
     // is built from extensions/amp-sticky-ad/1.0/amp-sticky-ad.js
+    // NOTE: The upgrade happens here to provide backward compatibility
+    // to existing pages with amp-sticky-ad 0.1 script.
     path = 'extensions/' + name + '/1.0';
   }
   var jsPath = path + '/' + name + '.js';
