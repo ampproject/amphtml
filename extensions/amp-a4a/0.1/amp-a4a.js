@@ -104,26 +104,32 @@ const SHARED_IFRAME_PROPERTIES = {
 
 /**
  * @typedef {{
- *    signingServiceName: string,
- *    keypairId: string,
- *    signature: !Uint8Array,
+ *   signingServiceName: string,
+ *   keypairId: string,
+ *   signature: !Uint8Array,
  * }}
  */
 let SignatureInfoDef;
 
-/** @typedef {{
- *    creative: !ArrayBuffer,
- *    signatureInfo: ?SignatureInfoDef,
- *    size: ?{width: number, height: number}
- *  }}
+/** @typedef {{width: number, height: number}} */
+let SizeInfoDef;
+
+/**
+ * @typedef {{
+ *   creative: !ArrayBuffer,
+ *   signatureInfo: ?SignatureInfoDef,
+ *   size: ?SizeInfoDef
+ * }}
  */
 export let AdResponseDef;
 
-/** @typedef {{
-      minifiedCreative: string,
-      customElementExtensions: !Array<string>,
-      customStylesheets: !Array<{href: string}>
-    }} */
+/**
+ * @typedef {{
+ *   minifiedCreative: string,
+ *   customElementExtensions: !Array<string>,
+ *   customStylesheets: !Array<{href: string}>
+ * }}
+ */
 let CreativeMetaDataDef;
 
 /** @private */
@@ -959,7 +965,8 @@ export class AmpA4A extends AMP.BaseElement {
     if (sizeHeader) {
       dev().assert(new RegExp('[0-9]+x[0-9]+').test(sizeHeader));
       const sizeArr = sizeHeader.split('x').map(Number);
-      adResponse.size = {width: sizeArr[0], height: sizeArr[1]};
+      adResponse.size =
+          /** @type {?SizeInfoDef} */ ({width: sizeArr[0], height: sizeArr[1]});
     }
     return Promise.resolve(adResponse);
   }
