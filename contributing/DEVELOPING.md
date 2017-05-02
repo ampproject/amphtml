@@ -187,7 +187,7 @@ Once started, the ngrok will print URLs for both `http` and `https`. E.g. `http:
 
 ### Testing with Heroku
 
-For deploying and testing local AMP builds on [HEROKU](https://www.heroku-invalid.com/) , please follow the steps outlined in this [document](https://docs.google.com/document/d/1LOr8SEBEpLkqnFjzTNIZGi2VA8AC8_aKmDVux6co63U/edit?usp=sharing).
+For deploying and testing local AMP builds on [HEROKU](https://www.heroku.com/) , please follow the steps outlined in this [document](https://docs.google.com/document/d/1LOr8SEBEpLkqnFjzTNIZGi2VA8AC8_aKmDVux6co63U/edit?usp=sharing).
 
 In the meantime you can also use our automatic build on Heroku [link](http://amphtml-nightly.herokuapp.com/), which is normally built with latest head on master branch (please allow delay). The first time load is normally slow due to Heroku's free account throttling policy.
 
@@ -232,7 +232,7 @@ In particular, we try to maintain "it might not be perfect but isn't broken"-sup
 ## Eng docs
 
 - [Life of an AMP *](https://docs.google.com/document/d/1WdNj3qNFDmtI--c2PqyRYrPrxSg2a-93z5iX0SzoQS0/edit#)
-- [AMP Layout system](spec/amp-html-layout.md)
+- [AMP Layout system](../spec/amp-html-layout.md)
 - [Building an AMP Extension](https://docs.google.com/document/d/19o7eDta6oqPGF4RQ17LvZ9CHVQN53whN-mCIeIMM8Qk/edit#)
 
 We also recommend scanning the [spec](../spec/). The non-element part should help understand some of the design aspects.
