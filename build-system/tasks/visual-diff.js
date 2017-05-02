@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-const argv = require('minimist')(process.argv.slice(2));
-const child_process = require('child_process');
-const gulp = require('gulp-help')(require('gulp'));
-const util = require('gulp-util');
+var argv = require('minimist')(process.argv.slice(2));
+var child_process = require('child_process');
+var gulp = require('gulp-help')(require('gulp'));
+var util = require('gulp-util');
 
-const percyCommand = 'percy snapshot';
-const defaultWidths = [375, 411];  // CSS widths: iPhone: 375, Pixel: 411.
-const percyProjectSeparator = '/';  // Standard format of repo slug: "foo/bar".
-const percyTokenLength = 64;  // Standard Percy API key length.
+var percyCommand = 'percy snapshot';
+var defaultWidths = [375, 411];  // CSS widths: iPhone: 375, Pixel: 411.
+var percyProjectSeparator = '/';  // Standard format of repo slug: "foo/bar".
+var percyTokenLength = 64;  // Standard Percy API key length.
 
 
 /**
@@ -33,7 +33,7 @@ const percyTokenLength = 64;  // Standard Percy API key length.
  * @param {string} cmd
  */
 function execOrDie(cmd) {
-  const p =
+  var p =
       child_process.spawnSync('/bin/sh', ['-c', cmd], {'stdio': 'inherit'});
   if (p.status != 0) {
     console/*OK*/.log(
@@ -54,8 +54,8 @@ function extractPercyKeys() {
         'Error: PERCY_PROJECT must be specified as an environment variable'));
     process.exit(1);
   }
-  const percyProject = process.env.PERCY_PROJECT;
-  if (!percyProject.includes(percyProjectSeparator)) {
+  var percyProject = process.env.PERCY_PROJECT;
+  if (percyProject.indexOf(percyProjectSeparator) == -1) {
     util.log(util.colors.red(
         'Error: PERCY_PROJECT doesn\'t look like a valid repo slug'));
     process.exit(1);
@@ -68,7 +68,7 @@ function extractPercyKeys() {
         'Error: PERCY_TOKEN must be specified as an environment variable'));
     process.exit(1);
   }
-  const percyToken = process.env.PERCY_TOKEN;
+  var percyToken = process.env.PERCY_TOKEN;
   if (percyToken.length != percyTokenLength) {
     util.log(util.colors.red(
         'Error: PERCY_TOKEN doesn\'t look like a valid Percy API key'));
@@ -130,7 +130,7 @@ function constructCommandLine(percyKeys) {
   commandLine.push('--repo ' + percyKeys.percyProject);
 
   // Percy args.
-  const percyArgs = extractPercyArgs();
+  var percyArgs = extractPercyArgs();
   commandLine.push('--baseurl /' + percyArgs.webpage);
   commandLine.push('--widths ' + percyArgs.widths);
 
@@ -153,8 +153,8 @@ function constructCommandLine(percyKeys) {
  */
 function runTests() {
   util.log(util.colors.yellow('Running visual diff tests...'));
-  const percyKeys = extractPercyKeys();
-  const commandLine = constructCommandLine(percyKeys);
+  var percyKeys = extractPercyKeys();
+  var commandLine = constructCommandLine(percyKeys);
   execOrDie(commandLine);
 }
 
