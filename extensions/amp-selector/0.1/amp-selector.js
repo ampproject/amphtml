@@ -325,7 +325,6 @@ export class AmpSelector extends AMP.BaseElement {
       case Keycodes.UP_ARROW: /* fallthrough */
       case Keycodes.RIGHT_ARROW: /* fallthrough */
       case Keycodes.DOWN_ARROW: /* fallthrough */
-      case Keycodes.TAB:
         if (this.kbSelectMode_ != KEYBOARD_SELECT_MODES.NONE) {
           this.navigationKeyDownHandler_(event);
         }
@@ -362,11 +361,6 @@ export class AmpSelector extends AMP.BaseElement {
         // Down is considered 'next' in both LTR and RTL.
         dir = 1;
         break;
-      case Keycodes.TAB:
-        // User has navigated away from the element.
-        // Reset focus for when the user returns and DO NOT preventDefault.
-        this.updateFocus_();
-        return;
       default:
         return;
     }
