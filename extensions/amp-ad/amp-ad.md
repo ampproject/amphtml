@@ -78,6 +78,127 @@ The `<amp-ad>` requires width and height values to be specified according to the
 </amp-embed>
 ```
 
+## Styling
+
+`<amp-ad>` elements may not themselves have or be placed in containers that have CSS `position: fixed` set (with the exception of `amp-lightbox`).
+This is due to the UX implications of full page overlay ads. It may be considered to allow similar ad formats in the future inside of AMP controlled containers that maintain certain UX invariants.
+
+## Attributes
+
+**type**
+
+An identifier for the ad network. This selects the template that is used for the ad tag.
+
+**src**
+
+An optional src value for a script tag loaded for this ad network. This can be used with ad networks that require exactly a single script tag to be inserted in the page. The src value must have a prefix that is white-listed for this ad network.
+
+**data-foo-bar**
+
+Most ad networks require further configuration. This can be passed to the network using HTML `data-` attributes. The parameter names are subject to standard data attribute dash to camel case conversion. For example, "data-foo-bar" is send to the ad for configuration as "fooBar".
+
+**json**
+
+An optional attribute to pass a configuration to the ad as an arbitrarily complex JSON object. The object is passed to the ad as-is with no mangling done on the names.
+
+**data-consent-notification-id**
+
+An optional attribute. If provided, will require confirming the [amp-user-notification](../amp-user-notification/amp-user-notification.md) with the given HTML-id until the "AMP client id" for the user (similar to a cookie) is passed to the ad. The means ad rendering is delayed until the user confirmed the notification.
+
+**data-loading-strategy**
+
+An optional attribute that takes a float value in range of [0, 3], which instructs the ad to start loading when it's within the given number of viewports away from the current viewport. Use a smaller value to gain higher degree of viewability, with the risk of generating fewer views. If the attribute is not used, the default value is 3. If the attribute is used but the value is left blank, then a float value is assigned by the system which optimizes for viewability without drastically impacting the views.
+
+**common attributes**
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+
+## Placeholder
+
+Optionally, `amp-ad` supports a child element with the `placeholder` attribute. If supported by the ad network, this element is shown until the ad is available for viewing.
+
+```html
+<amp-ad width=300 height=250
+    type="foo">
+  <div placeholder>Loading ...</div>
+</amp-ad>
+```
+
+## No Ad available
+- `amp-ad` supports a child element with the `fallback` attribute. If supported by the ad network, this element is shown if no ad is available for this slot.
+- If there is no fallback element available, the amp-ad tag will be collapsed (set to `display: none`) if the ad sends a message that the ad slot cannot be filled and AMP determines that this operation can be performed without affecting the user's scroll position.
+
+Example with fallback:
+
+```html
+<amp-ad width=300 height=250 type="foo">
+  <div fallback>No ad for you</div>
+</amp-ad>
+```
+
+## Serving video ads
+AMP natively supports a number video players like BrightCove, DailyMotion etc that can monetize ads. For a full list, see [here](https://www.ampproject.org/docs/reference/components#audio-video).
+
+If you use a player that is not supported in AMP, you can serve your custom player using [amp-iframe](https://ampbyexample.com/components/amp-iframe/).
+
+When using `amp-iframe` approach:
+ - Make sure there is a poster if loading the player in the first viewport. [Details](../amp-iframe/amp-iframe.md#iframe-with-placeholder).
+ - Video and poster have to be served over HTTPS.
+
+
+## Running ads from a custom domain
+
+AMP supports loading the bootstrap iframe that is used to load ads from a custom domain such as your own domain.
+
+To enable this, copy the file [remote.html](../../3p/remote.html) to your web server. Next up add the following meta tag to your AMP file(s):
+
+```html
+<meta name="amp-3p-iframe-src" content="https://assets.your-domain.com/path/to/remote.html">
+```
+
+The `content` attribute of the meta tag is the absolute URL to your copy of the remote.html file on your web server. This URL must use a "https" schema. It cannot reside on the same origin as your AMP files. For example, if you host AMP files on `www.example.com`, this URL must not be on `www.example.com` but `something-else.example.com` is OK. See ["Iframe origin policy"](../../spec/amp-iframe-origin-policy.md) for further details on allowed origins for iframes.
+
+### Security
+
+**Validate incoming data** before passing it on to the `draw3p` function, to make sure your iframe only does things it expects to do. This is true, in particular, for ad networks that allow custom JavaScript injection.
+
+Iframes should also enforce that they are only iframed into origins that they expect to be iframed into. The origins would be:
+
+- your own origins
+- https://cdn.ampproject.org for the AMP cache
+
+In the case of the AMP cache you also need to check that the "source origin" (origin of the document served by cdn.ampproject.org) is one of your origins.
+
+Enforcing origins can be done with the 3rd argument to `draw3p` and must additionally be done using the [allow-from](https://developer.mozilla.org/en-US/docs/Web/HTTP/X-Frame-Options) directive for full browser support.
+
+### Enhance incoming ad configuration
+
+This is completely optional: It is sometimes desired to further process the incoming iframe configuration before drawing the ad using AMP's built-in system.
+
+This is supported by passing a callback to the `draw3p` function call in the [remote.html](../../3p/remote.html) file. The callback receives the incoming configuration as first argument and then receives another callback as second argument (Called `done` in the example below). This callback must be called with the updated config in order for ad rendering to proceed.
+
+Example:
+
+```JS
+draw3p(function(config, done) {
+  config.targeting = Math.random() > 0.5 ? 'sport' : 'fashion';
+  // Don't actually call setTimeout here. This should only serve as an
+  // example that is OK to call the done callback asynchronously.
+  setTimeout(function() {
+    done(config);
+  }, 100)
+}, ['allowed-ad-type'], ['your-domain.com']);
+```
+
+## Validation
+
+See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad/0.1/validator-amp-ad.protoascii) in the AMP validator specification.
+
+## Notes
+
+To use `<amp-ad>` or `<amp-embed>`, the script to the `amp-ad` library is needed. It's recommended that you add the script manually; however, currently, it will be automatically fetched when `amp-ad` is used.
+
+
 ## Supported ad networks
 
 - [A8](../../ads/a8.md)
@@ -192,123 +313,3 @@ The `<amp-ad>` requires width and height values to be specified according to the
 - [Outbrain](../../ads/outbrain.md)
 - [Taboola](../../ads/taboola.md)
 - [ZergNet](../../ads/zergnet.md)
-
-## Styling
-
-`<amp-ad>` elements may not themselves have or be placed in containers that have CSS `position: fixed` set (with the exception of `amp-lightbox`).
-This is due to the UX implications of full page overlay ads. It may be considered to allow similar ad formats in the future inside of AMP controlled containers that maintain certain UX invariants.
-
-## Attributes
-
-**type**
-
-An identifier for the ad network. This selects the template that is used for the ad tag.
-
-**src**
-
-An optional src value for a script tag loaded for this ad network. This can be used with ad networks that require exactly a single script tag to be inserted in the page. The src value must have a prefix that is white-listed for this ad network.
-
-**data-foo-bar**
-
-Most ad networks require further configuration. This can be passed to the network using HTML `data-` attributes. The parameter names are subject to standard data attribute dash to camel case conversion. For example, "data-foo-bar" is send to the ad for configuration as "fooBar".
-
-**json**
-
-An optional attribute to pass a configuration to the ad as an arbitrarily complex JSON object. The object is passed to the ad as-is with no mangling done on the names.
-
-**data-consent-notification-id**
-
-An optional attribute. If provided, will require confirming the [amp-user-notification](../amp-user-notification/amp-user-notification.md) with the given HTML-id until the "AMP client id" for the user (similar to a cookie) is passed to the ad. The means ad rendering is delayed until the user confirmed the notification.
-
-**data-loading-strategy**
-
-An optional attribute that takes a float value in range of [0, 3], which instructs the ad to start loading when it's within the given number of viewports away from the current viewport. Use a smaller value to gain higher degree of viewability, with the risk of generating fewer views. If the attribute is not used, the default value is 3. If the attribute is used but the value is left blank, then a float value is assigned by the system which optimizes for viewability without drastically impacting the views.
-
-**common attributes**
-
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
-
-## Placeholder
-
-Optionally, `amp-ad` supports a child element with the `placeholder` attribute. If supported by the ad network, this element is shown until the ad is available for viewing.
-
-```html
-<amp-ad width=300 height=250
-    type="foo">
-  <div placeholder>Have a great day!</div>
-</amp-ad>
-```
-
-## No Ad available
-- `amp-ad` supports a child element with the `fallback` attribute. If supported by the ad network, this element is shown if no ad is available for this slot.
-- If there is no fallback element available, the amp-ad tag will be collapsed (set to `display: none`) if the ad sends a message that the ad slot cannot be filled and AMP determines that this operation can be performed without affecting the user's scroll position.
-
-Example with fallback:
-
-```html
-<amp-ad width=300 height=250 type="foo">
-  <div fallback>Have a great day!</div>
-</amp-ad>
-```
-
-## Serving video ads
-AMP natively supports a number video players like BrightCove, DailyMotion etc that can monetize ads. For a full list, see [here](https://www.ampproject.org/docs/reference/components#audio-video).
-
-If you use a player that is not supported in AMP, you can serve your custom player using [amp-iframe](https://ampbyexample.com/components/amp-iframe/).
-
-When using `amp-iframe` approach:
- - Make sure there is a poster if loading the player in the first viewport. [Details](../amp-iframe/amp-iframe.md#iframe-with-placeholder).
- - Video and poster have to be served over HTTPS.
-
-
-## Running ads from a custom domain
-
-AMP supports loading the bootstrap iframe that is used to load ads from a custom domain such as your own domain.
-
-To enable this, copy the file [remote.html](../../3p/remote.html) to your web server. Next up add the following meta tag to your AMP file(s):
-
-```html
-<meta name="amp-3p-iframe-src" content="https://assets.your-domain.com/path/to/remote.html">
-```
-
-The `content` attribute of the meta tag is the absolute URL to your copy of the remote.html file on your web server. This URL must use a "https" schema. It cannot reside on the same origin as your AMP files. For example, if you host AMP files on `www.example.com`, this URL must not be on `www.example.com` but `something-else.example.com` is OK. See ["Iframe origin policy"](../../spec/amp-iframe-origin-policy.md) for further details on allowed origins for iframes.
-
-### Security
-
-**Validate incoming data** before passing it on to the `draw3p` function, to make sure your iframe only does things it expects to do. This is true, in particular, for ad networks that allow custom JavaScript injection.
-
-Iframes should also enforce that they are only iframed into origins that they expect to be iframed into. The origins would be:
-
-- your own origins
-- https://cdn.ampproject.org for the AMP cache
-
-In the case of the AMP cache you also need to check that the "source origin" (origin of the document served by cdn.ampproject.org) is one of your origins.
-
-Enforcing origins can be done with the 3rd argument to `draw3p` and must additionally be done using the [allow-from](https://developer.mozilla.org/en-US/docs/Web/HTTP/X-Frame-Options) directive for full browser support.
-
-### Enhance incoming ad configuration
-
-This is completely optional: It is sometimes desired to further process the incoming iframe configuration before drawing the ad using AMP's built-in system.
-
-This is supported by passing a callback to the `draw3p` function call in the [remote.html](../../3p/remote.html) file. The callback receives the incoming configuration as first argument and then receives another callback as second argument (Called `done` in the example below). This callback must be called with the updated config in order for ad rendering to proceed.
-
-Example:
-
-```JS
-draw3p(function(config, done) {
-  config.targeting = Math.random() > 0.5 ? 'sport' : 'fashion';
-  // Don't actually call setTimeout here. This should only serve as an
-  // example that is OK to call the done callback asynchronously.
-  setTimeout(function() {
-    done(config);
-  }, 100)
-}, ['allowed-ad-type'], ['your-domain.com']);
-```
-
-## Validation
-
-See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad/0.1/validator-amp-ad.protoascii) in the AMP validator specification.
-
-## Notes
-
-To use `<amp-ad>` or `<amp-embed>`, the script to the `amp-ad` library is needed. It's recommended that you add the script manually; however, currently, it will be automatically fetched when `amp-ad` is used.
