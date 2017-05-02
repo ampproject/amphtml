@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-
 import {listen} from '../../../src/event-helper';
 import {tryParseJson} from '../../../src/json';
 import {dev} from '../../../src/log';
 
 const TAG = 'amp-viewer-messaging';
-const APP = '__AMPHTML__';
+export const APP = '__AMPHTML__';
 
 /**
  * @enum {string}
  */
-const MessageType = {
+export const MessageType = {
   REQUEST: 'q',
   RESPONSE: 's',
 };
@@ -71,12 +70,15 @@ export class WindowPortEmulator {
   /**
    * @param {!Window} win
    * @param {string} origin
+   * @param {!Window} target
    */
-  constructor(win, origin) {
+  constructor(win, origin, target) {
     /** @const {!Window} */
     this.win = win;
     /** @private {string} */
     this.origin_ = origin;
+    /** @const {!Window} */
+    this.target_ = target;
   }
 
   /**
@@ -86,7 +88,7 @@ export class WindowPortEmulator {
   addEventListener(eventType, handler) {
     listen(this.win, 'message', e => {
       if (e.origin == this.origin_ &&
-          e.source == this.win.parent && e.data.app == APP) {
+          e.source == this.target_ && e.data.app == APP) {
         handler(e);
       }
     });
@@ -96,7 +98,7 @@ export class WindowPortEmulator {
    * @param {Object} data
    */
   postMessage(data) {
-    this.win.parent./*OK*/postMessage(data, this.origin_);
+    this.target_./*OK*/postMessage(data, this.origin_);
   }
   start() {
   }
@@ -173,7 +175,7 @@ export class Messaging {
    * @private
    */
   handleMessage_(event) {
-    dev().fine(TAG, 'AMPDOC got a message:', event.type, event.data);
+    dev().fine(TAG, 'Got a message:', event.type, event.data);
     const message = parseMessage(event.data);
     if (!message) {
       return;

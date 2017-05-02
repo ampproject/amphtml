@@ -5,6 +5,7 @@
   <title>Viewer</title>
   <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
   <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <script src="/dist/v0/examples/amp-viewer-host.max.js"></script>
   <style>
     html, body {
       overflow: hidden;
@@ -161,8 +162,6 @@
     }
   </style>
 
-  <script src="./viewer-integr-messaging.js"></script>
-
   <script>
     var allViewers = [];
     var currentContainerId = null;
@@ -176,9 +175,6 @@
       this.visibilityState_ = visible ? 'visible' : 'hidden';
       this.prerenderSize_ = 1;
       this.csi_ = 1;
-      this.requestIdCounter_ = 0;
-      this.pollingIntervalIds_ = [];
-      this.intervalCtr = 0;
 
       this.isIos_ = /iPhone|iPad|iPod/i.test(window.navigator.userAgent);
 
@@ -240,8 +236,9 @@
       this.iframe.style.display = 'none';
       this.container.appendChild(this.iframe);
 
-      this.pollingIntervalIds_[this.intervalCtr] = setInterval(this.pollAMPDoc_.bind(this, this.intervalCtr) , 1000); //poll every second
-      this.intervalCtr++;
+      this.ampViewerHost_ = new AmpViewerHost(window, this.iframe,
+        this.frameOrigin_, this.processRequest_.bind(this),
+        /* logs id */ this.id, /* isWebview */ false, /* isHandshakePoll */ true);
 
       this.iframe.onload = this.loaded_.bind(this);
       setTimeout(function() {
@@ -251,55 +248,10 @@
       }.bind(this));
     };
 
-
-    Viewer.prototype.pollAMPDoc_ = function(intervalCtr) {
-      log('Viewer.prototype.pollAMPDoc_');
-      if (!this.iframe) {
-        return;
-      }
-      var listener = function(e){
-      if (this.isChannelOpen_(e)) {
-        window.clearInterval(this.pollingIntervalIds_[intervalCtr]); //stop polling
-        window.removeEventListener('message', listener, false);
-        this.completeHandshake_(e.data.requestid);
-      }
-      };
-      window.addEventListener('message', listener.bind(this));
-
-      var message = {
-        app: APP,
-        name: 'handshake-poll',
-      };
-      this.iframe.contentWindow./*OK*/postMessage(message, this.frameOrigin_);
-     };
-
-    Viewer.prototype.isChannelOpen_ = function(e) {
-      return e.data.app == APP && e.data.name == 'channelOpen';
-    };
-
-    Viewer.prototype.completeHandshake_ = function(requestId) {
-      log('Viewer ' + this.id + ' messaging established!');
-      var message = {
-          app: APP,
-          requestid: requestId,
-          type: MessageType.RESPONSE,
-      };
-      console.log('############## viewer posting Message', message);
-      this.iframe.contentWindow./*OK*/postMessage(message, this.frameOrigin_);
-
-      this.messaging_ = new ViewerMessaging(this.iframe.contentWindow,
-        this.frameOrigin_, this.processRequest_.bind(this), this.iframe.id);
-
-      this.sendRequest_('visibilitychange', {
-          state: this.visibilityState_,
-          prerenderSize: this.prerenderSize
-      }, true);
-    };
-
     Viewer.prototype.toggleVisibility = function(visible, updateToggle) {
       log('Viewer ' + this.id + ' visibility -> ', visible);
       this.visibilityState_ = visible ? 'visible' : 'hidden';
-      this.sendRequest_('visibilitychange', {
+      this.ampViewerHost_.sendRequest('visibilitychange', {
         state: this.visibilityState_,
         prerenderSize: this.prerenderSize
       }, true);
@@ -341,7 +293,7 @@
 
     Viewer.prototype.onScroll_ = function() {
       log('Viewer.prototype.onScroll_');
-      this.sendRequest_('viewport', {
+      this.ampViewerHost_.sendRequest('viewport', {
         scrollTop: this.container./*OK*/scrollTop
       }, false);
     };
@@ -352,7 +304,7 @@
           this.container./*OK*/offsetHeight,
           this.header./*OK*/offsetHeight,
           this.container./*OK*/scrollTop);
-      this.sendRequest_('viewport', {
+      this.ampViewerHost_.sendRequest('viewport', {
         scrollTop: this.container./*OK*/scrollTop,
         width: this.container./*OK*/offsetWidth,
         height: this.container./*OK*/offsetHeight,
@@ -403,7 +355,7 @@
       // Even more trivial. Always assumes that only one step was popped in
       // history.
       this.stackIndex_--;
-      this.sendRequest_('historyPopped', {
+      this.ampViewerHost_.sendRequest('historyPopped', {
         newStackIndex: this.stackIndex_
       }, false);
       log('history popped to ', this.stackIndex_);
@@ -427,12 +379,12 @@
 
     Viewer.prototype.scrollAmpDoc = function(scrollTop) {
       log('viewer scroll amp doc: ', scrollTop);
-      this.sendRequest_('scroll', {scrollTop}, true);
+      this.ampViewerHost_.sendRequest('scroll', {scrollTop}, true);
     };
 
-    Viewer.prototype.processRequest_ = function(type, data, awaitResponse) {
-      log('Viewer.prototype.processRequest_', type);
-      switch(type) {
+    Viewer.prototype.processRequest_ = function(name, data, awaitResponse) {
+      log(this.id + ': Viewer.prototype.processRequest_', name);
+      switch(name) {
         case 'documentLoaded':
           return this.documentReady_();
         case 'requestFullOverlay':
@@ -450,26 +402,27 @@
           return this.handleUnload_();
         case 'tick':
           log('[CSI] tick. label:', data.label);
-          return;
+          return Promise.resolve();
         case 'a2a':
           log('a2a navigation', data);
-          return;
+          return Promise.resolve();
         case 'sendCsi':
           log('[CSI] sendCsi.');
-          return;
+          return Promise.resolve();
         case 'touchstart':
         case 'touchmove':
         case 'touchend':
-          log('touch event!', type);
-          return;
+          log('touch event!', name);
+          return Promise.resolve();
         case 'documentHeight':
         case 'setFlushParams':
         case 'prerenderComplete':
         case 'scroll':
         case 'replaceHistory':
-          return;
+        case 'visibilitychange':
+          return Promise.resolve();
         default:
-          return Promise.reject('request not supported: ' + type);
+          return Promise.reject('request not supported: ', name);
       }
     };
 
@@ -478,15 +431,7 @@
       if (this.messaging_) {
         this.messaging_ = null;
       }
-      return goog.Promise.resolve();
-    };
-
-    Viewer.prototype.sendRequest_ = function(type, data, awaitResponse) {
-      log('Viewer.prototype.sendRequest_');
-      if (!this.messaging_) {
-        return;
-      }
-      return this.messaging_.sendRequest(type, data, awaitResponse);
+      return Promise.resolve();
     };
 
 
