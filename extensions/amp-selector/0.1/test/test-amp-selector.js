@@ -737,13 +737,11 @@ describes.realWin('amp-selector', {
         expect(ampSelector.children[0].tabIndex).to.equal(0);
         expect(ampSelector.children[1].tabIndex).to.equal(-1);
         expect(ampSelector.children[2].tabIndex).to.equal(-1);
-        // Left
-        keyPress(ampSelector, 37);
+        keyPress(ampSelector, Keycodes.LEFT_ARROW);
         expect(ampSelector.children[0].tabIndex).to.equal(-1);
         expect(ampSelector.children[1].tabIndex).to.equal(-1);
         expect(ampSelector.children[2].tabIndex).to.equal(0);
-        // Right
-        keyPress(ampSelector, 39);
+        keyPress(ampSelector, Keycodes.RIGHT_ARROW);
         expect(ampSelector.children[0].tabIndex).to.equal(0);
         expect(ampSelector.children[1].tabIndex).to.equal(-1);
         expect(ampSelector.children[2].tabIndex).to.equal(-1);
@@ -797,13 +795,11 @@ describes.realWin('amp-selector', {
         expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
         expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
         expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
-        // Down
-        keyPress(ampSelector, 40);
+        keyPress(ampSelector, Keycodes.DOWN_ARROW);
         expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
         expect(ampSelector.children[1].hasAttribute('selected')).to.be.true;
         expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
-        // Up
-        keyPress(ampSelector, 38);
+        keyPress(ampSelector, Keycodes.UP_ARROW);
         expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
         expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
         expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;

@@ -208,7 +208,6 @@ export class AmpSelector extends AMP.BaseElement {
         this.clearSelection_(option);
       }
       option.tabIndex = 0;
-
       this.options_.push(option);
     });
     this.updateFocus_();
@@ -339,11 +338,6 @@ export class AmpSelector extends AMP.BaseElement {
   navigationKeyDownHandler_(event) {
     const isLtr = this.win.document.body.getAttribute('dir') != 'rtl';
     let dir = 0;
-    // Should treat the keydown event as 'picking' an option if:
-    // 1: kbSelectMode_ is select on a single selector, and moving focus should
-    // always update the selection.
-    // 2: Either the enter key or the spacebar is pressed
-
     switch (event.keyCode) {
       case Keycodes.LEFT_ARROW:
         // Left is considered 'previous' in LTR and 'next' in RTL.
