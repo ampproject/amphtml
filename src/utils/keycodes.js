@@ -18,7 +18,6 @@
  * @enum {number}
  */
 export const Keycodes = {
-  TAB: 9,
   ENTER: 13,
   ESCAPE: 27,
   SPACE: 32,
