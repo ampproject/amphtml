@@ -20,7 +20,7 @@ import {isBindEnabledFor} from './bind-impl';
 import {isJsonScriptTag} from '../../../src/dom';
 import {toggle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
-import {user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 
 export class AmpState extends AMP.BaseElement {
   /** @override */
@@ -62,6 +62,12 @@ export class AmpState extends AMP.BaseElement {
 
   /** @override */
   mutatedAttributesCallback(mutations) {
+    const viewer = viewerForDoc(this.getAmpDoc());
+    if (!viewer.isVisible()) {
+      const TAG = this.getName_();
+      dev().error(TAG, 'Viewer must be visible before mutation.');
+      return;
+    }
     const src = mutations['src'];
     if (src !== undefined) {
       this.fetchSrcAndUpdateState_(/* isInit */ false);
