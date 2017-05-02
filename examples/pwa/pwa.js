@@ -102,7 +102,7 @@ class Shell {
       const url = new URL(a.href);
       if (url.origin == this.win.location.origin &&
               startsWith(url.pathname, '/pwa/') &&
-              url.pathname.indexOf('amp.max.html') != -1) {
+              url.pathname.indexOf('amp.html') != -1) {
         e.preventDefault();
         const newPage = url.pathname;
         log('Internal link to: ', newPage);
