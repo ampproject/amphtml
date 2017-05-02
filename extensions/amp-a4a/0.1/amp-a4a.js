@@ -896,7 +896,7 @@ export class AmpA4A extends AMP.BaseElement {
         .then(() => {
           this.originalSlotSize_ = null;
         })
-        .catch((err) => {
+        .catch(err => {
           // TODO(keithwrightbos): if we are unable to revert size, on next
           // trigger of promise chain the ad request may fail due to invalid
           // slot size.  Determine how to handle this case.
