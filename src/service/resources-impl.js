@@ -1806,21 +1806,30 @@ export class Resources {
    * @private
    */
   scheduleLayoutOrPreloadForSubresources_(parentResource, layout, subElements) {
-    const resources = [];
     this.discoverResourcesForArray_(parentResource, subElements, resource => {
       if (resource.getState() != ResourceState.NOT_BUILT) {
-        resources.push(resource);
+        this.measureAndScheduleIfAllowed_(resource, layout,
+            parentResource.getPriority());
+      } else {
+        resource.element.whenBuilt().then(() => {
+          this.measureAndScheduleIfAllowed_(resource, layout,
+              parentResource.getPriority());
+        });
       }
     });
-    if (resources.length > 0) {
-      resources.forEach(resource => {
-        resource.measure();
-        if (resource.getState() == ResourceState.READY_FOR_LAYOUT &&
-                resource.isDisplayed()) {
-          this.scheduleLayoutOrPreload_(resource, layout,
-              parentResource.getPriority());
-        }
-      });
+  }
+
+  /**
+   * @param {!Resource} resource
+   * @param {boolean} layout
+   * @param {number} parentPriority
+   * @private
+   */
+  measureAndScheduleIfAllowed_(resource, layout, parentPriority) {
+    resource.measure();
+    if (resource.getState() == ResourceState.READY_FOR_LAYOUT &&
+        resource.isDisplayed()) {
+      this.scheduleLayoutOrPreload_(resource, layout, parentPriority);
     }
   }
 
