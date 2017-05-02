@@ -191,6 +191,39 @@ describes.realWin('Events', {amp: 1}, env => {
       expect(handler2).to.be.calledOnce;
     });
 
+    it('should support selector', () => {
+      const handler2 = sandbox.spy();
+      const handler3 = sandbox.spy();
+      tracker.add(
+          analyticsElement, 'custom-event', {'selector': '.child'}, handler);
+      tracker.add(
+          analyticsElement, 'custom-event', {'selector': '.target'}, handler2);
+      tracker.add(
+          analyticsElement, 'custom-event', {}, handler3);
+      tracker.trigger(new AnalyticsEvent(target, 'custom-event'));
+      expect(handler).to.not.be.called;
+      expect(handler2).to.be.calledOnce;
+      expect(handler3).to.be.calledOnce;
+    });
+
+    it('should differ custom event with same name different selector', () => {
+      const child2 = win.document.createElement('div');
+      child2.classList.add('child2');
+      target.appendChild(child2);
+      const handler2 = sandbox.spy();
+      tracker.add(
+          analyticsElement, 'custom-event', {'selector': '.child'}, handler);
+      tracker.add(
+          analyticsElement, 'custom-event', {'selector': '.child2'}, handler2);
+      tracker.trigger(new AnalyticsEvent(child, 'custom-event'));
+      expect(handler).to.be.calledOnce;
+      expect(handler2).to.not.be.called;
+      handler.reset();
+      tracker.trigger(new AnalyticsEvent(child2, 'custom-event'));
+      expect(handler).to.not.be.called;
+      expect(handler2).to.be.calledOnce;
+    });
+
     it('should buffer custom events early on', () => {
       // Events before listeners added.
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-1'));

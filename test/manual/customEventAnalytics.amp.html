@@ -1,0 +1,141 @@
+<!-- DO NOT SUBMIT -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>Ad examples</title>
+  <link rel="canonical" href="http://nonblocking.io/" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-custom>
+    amp-ad {
+      border: 2px solid red;
+      padding: 0;
+      margin: 0;
+    }
+    .slide {
+      background: green;
+      width: 400px;
+      height: 300px;
+    }
+  </style>
+  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+
+</head>
+<body>
+
+  <amp-carousel id="id1" width="400"
+    height="300"
+    layout="responsive"
+    type="slides">
+    <div class="slide"
+      data-slide-id="slide1">Slide 1</div>
+    <div class="slide"
+      data-slide-id="slide2">Slide 2</div>
+    <div class="slide">Slide 3</div>
+  </amp-carousel>
+
+  <amp-carousel id="id2" width="400"
+    height="300"
+    layout="responsive"
+    type="slides">
+    <div class="slide"
+      data-slide-id="slide1">Slide 1</div>
+    <div class="slide"
+      data-slide-id="slide2">Slide 2</div>
+    <div class="slide">Slide 3</div>
+    <amp-analytics>
+    <script type="application/json">
+      {
+        "requests": {
+          "event": "www.fake.com"
+        },
+        "triggers": {
+          "ampCarouselChange": {
+            "on": "amp-carousel-change",
+            "request": "event",
+            "selector": "#id2",
+            "vars": {
+              "eventId": "carousel-change-${toSlide}"
+            }
+          }
+        }
+      }
+    </script>
+  </amp-analytics>
+
+  </amp-carousel>
+
+  <amp-analytics>
+    <script type="application/json">
+      {
+        "requests": {
+          "event": "https://amp-publisher-samples-staging.herokuapp.com/amp-analytics/ping?user=amp-UXiBe4z49qQQw5igOHkS1PwyOh0tDne0How41hBO3ChLIrwuQnIOXFZOoznhgXHb&account=ampbyexample&event=${eventId}"
+        },
+        "triggers": {
+          "ampCarouselChange": {
+            "on": "amp-carousel-change",
+            "request": "event",
+            "vars": {
+              "eventId": "carousel-change-${toSlide}"
+            }
+          }
+        }
+      }
+    </script>
+  </amp-analytics>
+
+  <ul>
+  <li>
+    <a>a link</a>
+  </li>
+  <li>
+    <a>another link</a>
+  </li>
+</ul>
+
+<amp-analytics>
+  <script type="application/json">
+    {
+      "requests": {
+        "event": "https://amp-publisher-samples-staging.herokuapp.com/amp-analytics/ping?user=amp-UXiBe4z49qQQw5igOHkS1PwyOh0tDne0How41hBO3ChLIrwuQnIOXFZOoznhgXHb&account=ampbyexample&event=${eventId}"
+      },
+      "triggers": {
+        "trackAnchorClicks": {
+          "on": "click",
+          "selector": "a",
+          "request": "event",
+          "vars": {
+            "eventId": "clickOnAnyAnchor"
+          }
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+
+<amp-analytics>
+  <script type="application/json">
+    {
+      "requests": {
+        "event": "https://amp-publisher-samples-staging.herokuapp.com/amp-analytics/ping?user=amp-UXiBe4z49qQQw5igOHkS1PwyOh0tDne0How41hBO3ChLIrwuQnIOXFZOoznhgXHb&account=ampbyexample&event=${eventId}"
+      },
+      "triggers": {
+        "trackAnchorClicks": {
+          "on": "click",
+          "selector": "li",
+          "request": "event",
+          "vars": {
+            "eventId": "clickOnAnyAnchor"
+          }
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+
+</body>
+</html>

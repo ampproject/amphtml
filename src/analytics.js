@@ -63,7 +63,7 @@ export function triggerAnalyticsEvent(nodeOrDoc, eventType, opt_vars) {
     if (!analytics) {
       return;
     }
-    analytics.triggerEvent(eventType, opt_vars);
+    analytics.triggerEventForTarget(nodeOrDoc, eventType, opt_vars);
   });
 }
 

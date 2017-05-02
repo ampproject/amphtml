@@ -138,13 +138,22 @@ export class CustomEventTracker extends EventTracker {
         });
       }, 1);
     }
-
+    let selector = config['selector'];
+    if (!selector) {
+      selector = ':root';
+    }
+    const selectionMethod = config['selectionMethod'] || null;
+    const target = this.root.getElement(context, selector, selectionMethod);
     let observers = this.observers_[eventType];
     if (!observers) {
       observers = new Observable();
       this.observers_[eventType] = observers;
     }
-    return observers.add(listener);
+    return observers.add(event => {
+      if (target.contains(event.target)) {
+        listener(event);
+      }
+    });
   }
 
   /**
