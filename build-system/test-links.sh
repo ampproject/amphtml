@@ -9,6 +9,6 @@
 # to whitelist a link or domain while running markdown-link-check.
 
 cat $1 \
-| sed 's/http:\/\/localhost:8000\///g\' \
->> $1_without_localhost_links \
+| sed 's/http:\/\/localhost:8000\///g' \
+> $1_without_localhost_links \
 && markdown-link-check $1_without_localhost_links
