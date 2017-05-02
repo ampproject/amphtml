@@ -165,10 +165,10 @@ export class AmpSelector extends AMP.BaseElement {
    * In multi-select selectors, focus should go to the first option.
    * In single-select selectors, focus should go to the initially selected
    * option, or to the first option if none are initially selected.
-   * @param {Element=} opt_focusOn Element to put focus on
+   * @param {Element=} opt_focusEl Element to put focus on
    * @private
    */
-  updateFocus_(opt_focusOn) {
+  updateFocus_(opt_focusEl) {
     if (this.kbSelectMode_ == KEYBOARD_SELECT_MODES.NONE) {
       // Don't manage focus.
       return;
@@ -178,7 +178,7 @@ export class AmpSelector extends AMP.BaseElement {
       option.tabIndex = -1;
     });
 
-    let focusElement = opt_focusOn;
+    let focusElement = opt_focusEl;
     if (!focusElement) {
       if (this.isMultiple_) {
         focusElement = this.options_[0];
