@@ -125,14 +125,7 @@ export function googleAdUrl(
     const iframeDepth = iframeNestingDepth(win);
     const viewportSize = viewport.getSize();
     // Detect container types.
-    const containerTypeSet = {};
-    for (let el = adElement.parentElement, counter = 0;
-        el && counter < 20; el = el.parentElement, counter++) {
-      const tagName = el.tagName.toUpperCase();
-      if (ValidAdContainerTypes[tagName]) {
-        containerTypeSet[ValidAdContainerTypes[tagName]] = true;
-      }
-    }
+    const containerTypeSet = getAllParentAdContainers(adElement);
     const pfx =
         (containerTypeSet[ValidAdContainerTypes['AMP-FX-FLYING-CARPET']]
          || containerTypeSet[ValidAdContainerTypes['AMP-STICKY-AD']])
@@ -359,6 +352,25 @@ export function additionalDimensions(win, viewportSize) {
           innerWidth,
           innerHeight].join();
 };
+
+/**
+ * Returns a map containing all ad containers that enclose the given ad
+ * element. The params of the map are restricted to the ValidAdContainerTypes,
+ * and the values are all true.
+ * @param {!Element} adElement
+ * @return {!Object<string, boolean>}
+ */
+export function getAllParentAdContainers(adElement) {
+  const containerTypeSet = {};
+  for (let el = adElement.parentElement, counter = 0;
+      el && counter < 20; el = el.parentElement, counter++) {
+    const tagName = el.tagName.toUpperCase();
+    if (ValidAdContainerTypes[tagName]) {
+      containerTypeSet[ValidAdContainerTypes[tagName]] = true;
+    }
+  }
+  return containerTypeSet;
+}
 
 /**
  * Extracts configuration used to build amp-analytics element for active view.
