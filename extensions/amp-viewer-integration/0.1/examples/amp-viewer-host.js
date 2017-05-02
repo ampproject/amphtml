@@ -52,7 +52,7 @@ export class AmpViewerHost {
     this.logsId = opt_logsId;
 
     if (this.isWebview_ || opt_isHandshakePoll) {
-      /** @private {string} */
+      /** @private {number} */
       this.pollingIntervalId_ = setInterval(
         this.initiateHandshake_.bind(this, this.intervalCtr) , 1000); //poll every second
     } else {
@@ -82,7 +82,7 @@ export class AmpViewerHost {
           this.log('messaging established!');
           this.completeHandshake_(channel.port1, data.requestid);
         } else {
-          this.messageHandler_(e);
+          this.messageHandler_(data.name, data.data, data.rsvp);
         }
       }.bind(this);
     }
@@ -94,6 +94,7 @@ export class AmpViewerHost {
    */
   waitForHandshake_(targetOrigin) {
     this.log('awaitHandshake_');
+    let unlisten = null;
     const target = this.ampIframe_.contentWindow;
     const listener = function(event) {
       if (event.origin == targetOrigin &&
@@ -105,7 +106,7 @@ export class AmpViewerHost {
         this.completeHandshake_(port, event.data.requestid);
       }
     }.bind(this);
-    const unlisten = listen(this.win, 'message', listener);
+    unlisten = listen(this.win, 'message', listener);
   }
 
   /**

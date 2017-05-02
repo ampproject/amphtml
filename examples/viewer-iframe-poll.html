@@ -238,7 +238,7 @@
 
       this.ampViewerHost_ = new AmpViewerHost(window, this.iframe,
         this.frameOrigin_, this.processRequest_.bind(this),
-        this.id /* logs id */, false /* isWebview */, true /* isHandshakePoll */);
+        /* logs id */ this.id, /* isWebview */ false, /* isHandshakePoll */ true);
 
       this.iframe.onload = this.loaded_.bind(this);
       setTimeout(function() {
@@ -293,7 +293,7 @@
 
     Viewer.prototype.onScroll_ = function() {
       log('Viewer.prototype.onScroll_');
-      this.ampViewerHost_('viewport', {
+      this.ampViewerHost_.sendRequest('viewport', {
         scrollTop: this.container./*OK*/scrollTop
       }, false);
     };
@@ -382,9 +382,9 @@
       this.ampViewerHost_.sendRequest('scroll', {scrollTop}, true);
     };
 
-    Viewer.prototype.processRequest_ = function(type, data, awaitResponse) {
-      log(this.id + ': Viewer.prototype.processRequest_', type);
-      switch(type) {
+    Viewer.prototype.processRequest_ = function(name, data, awaitResponse) {
+      log(this.id + ': Viewer.prototype.processRequest_', name);
+      switch(name) {
         case 'documentLoaded':
           return this.documentReady_();
         case 'requestFullOverlay':
@@ -412,16 +412,17 @@
         case 'touchstart':
         case 'touchmove':
         case 'touchend':
-          log('touch event!', type);
+          log('touch event!', name);
           return Promise.resolve();
         case 'documentHeight':
         case 'setFlushParams':
         case 'prerenderComplete':
         case 'scroll':
         case 'replaceHistory':
+        case 'visibilitychange':
           return Promise.resolve();
         default:
-          return Promise.reject('request not supported: ', type);
+          return Promise.reject('request not supported: ', name);
       }
     };
 
