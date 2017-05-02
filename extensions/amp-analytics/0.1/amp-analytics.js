@@ -543,7 +543,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           if (!enabled) {
             return;
           }
-          return this.expandExtraUrlParams(trigger, event)
+          return this.expandExtraUrlParams_(trigger, event)
               .then(params => {
                 request = this.addParamsToUrl_(request, params);
                 this.config_['vars']['requestCount']++;
@@ -570,8 +570,9 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @param {!Object} event Object with details about the event.
    * @return {!Promise<T>} Map of the resolved parameters.
    * @template T
+   * @private
    */
-  expandExtraUrlParams(trigger, event) {
+  expandExtraUrlParams_(trigger, event) {
     const requestPromises = [];
     const params = map();
     // Add any given extraUrlParams as query string param
