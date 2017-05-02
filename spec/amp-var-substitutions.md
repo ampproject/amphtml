@@ -102,6 +102,13 @@ Link substitution requires per-use opt-in as an added security measure and to af
 <a href="https://example.com?client_id=CLIENT_ID(bar)&abc=QUERY_PARAM(abc)" data-amp-replace="CLIENT_ID,QUERY_PARAM">Go to my site</a>
 ```
 
+#### Appending parameters to the href
+If you need to append dynamic parameters to the href, specify the parameters by using the `data-amp-addparams` attribute. Any substitution parameters that you specify in `data-amp-addparams` must also be specified in `data-amp-replace`, as in the following example
+
+``` text
+<a href="https://example.com?abc=QUERY_PARAM(abc)" data-amp-replace="CLIENT_ID,QUERY_PARAM" data-amp-addparams="client_id=CLIENT_ID(bar)&linkid=l123">Go to my site</a>
+```
+
 ### Whitelisted domains for link substitution
 
 Link substitutions are restricted and will only be fulfilled for URLs matching:
