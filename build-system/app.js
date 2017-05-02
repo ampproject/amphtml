@@ -607,7 +607,7 @@ app.use(['/dist/v0/amp-*.js'], function(req, res, next) {
   setTimeout(next, sleep);
 });
 
-app.get(['/examples/*', '/test/manual/*'], function(req, res, next) {
+app.get(['/examples/*.html', '/test/manual/*.html'], function(req, res, next) {
   var filePath = req.path;
   var mode = process.env.SERVE_MODE;
   const inabox = req.query['inabox'] == '1';
