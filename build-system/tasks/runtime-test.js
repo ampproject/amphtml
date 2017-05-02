@@ -220,6 +220,8 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     'files': 'Runs tests for specific files',
     'randomize': 'Runs entire test suite in random order',
     'testlist': 'Runs tests specified in JSON by supplied file',
+    'glob': 'Explicility expands test paths using glob before passing' +
+        'to Karma',
   }
 });
 
