@@ -17,39 +17,14 @@
 tags: {  # amp-graphiq
   html_format: AMP
   tag_name: "SCRIPT"
-  spec_name: "amp-graphiq extension .js script"
   satisfies: "amp-graphiq extension .js script"
-  mandatory_parent: "HEAD"
-  unique: true
-  extension_unused_unless_tag_present: "amp-graphiq"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  requires: "amp-graphiq"
+  extension_spec: {
+    name: "amp-graphiq"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-graphiq"
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-graphiq-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-graphiq"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-graphiq>
   html_format: AMP
@@ -65,6 +40,7 @@ tags: {  # <amp-graphiq>
     value_url: {
       allowed_protocol: "http"
       allowed_protocol: "https"
+      allow_relative: false
     }
   }
   attr_lists: "extended-amp-global"
