@@ -202,6 +202,7 @@ const command = {
     execOrDie('npm run ava');
   },
   testDocumentLinks: function(files) {
+    execOrDie(`${gulp} build`);  // Required for http://localhost links.
     files.forEach((file) => {
       if (isDocFile(file)) {
         execOrDie('markdown-link-check ' + file);
