@@ -38,7 +38,7 @@ import {viewerForDoc} from '../../../src/services';
 import {cryptoFor} from '../../../src/crypto';
 import {tryParseJson} from '../../../src/json';
 import {timerFor} from '../../../src/services';
-import {dev, user, rethrowAsync} from '../../../src/log';
+import {user, rethrowAsync} from '../../../src/log';
 
 const ONE_DAY_MILLIS = 24 * 3600 * 1000;
 
