@@ -88,7 +88,7 @@ function extractPercyKeys() {
  */
 function extractPercyArgs() {
   // Webpage to snapshot. This is a path, relative to amphtml/.
-  let webpage = '';
+  var webpage = '';
   if (argv.webpage) {
     webpage = argv.webpage;
   } else {
@@ -99,7 +99,7 @@ function extractPercyArgs() {
   util.log('Webpage: ', util.colors.magenta(webpage));
 
   // Smartphone screen widths to snapshot.
-  let widths = defaultWidths;
+  var widths = defaultWidths;
   if (argv.widths) {
     widths = argv.widths.split(',');
   }
@@ -121,7 +121,7 @@ function extractPercyArgs() {
  * @return {string} Full command line to be executed.
  */
 function constructCommandLine(percyKeys) {
-  let commandLine = [];
+  var commandLine = [];
 
   // Main snapshot command.
   commandLine.push(percyCommand);
