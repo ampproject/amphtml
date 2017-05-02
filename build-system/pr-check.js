@@ -205,10 +205,14 @@ const command = {
     files.forEach((file) => {
       if (isDocFile(file)) {
         // Check all links except those pointing to http://localhost:8000.
+        // This needs to be done by first stripping localhost links from the
+        // doc file and then checking links, as there's no way to whitelist
+        // a link or domain while checking links.
         execOrDie(
             'cat ' + file +
             ' | sed \'s/http:\\\/\\\/localhost:8000\\\///g\'' +
-            ' | markdown-link-check');
+            ' >> ' + file + '_without_localhost_links' +
+            ' && markdown-link-check ' + file + '_without_localhost_links');
       }
     });
   },
