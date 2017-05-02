@@ -880,7 +880,7 @@ export class AmpA4A extends AMP.BaseElement {
     // Store original size of slot in order to allow re-expansion on
     // unlayoutCallback so that it is reverted to original size in case
     // of resumeCallback.
-    this.originalSlotSize_ = this.getIntersectionElementLayoutBox();
+    this.originalSlotSize_ = this.originalSlotSize_ || this.getLayoutBox();
     super.attemptChangeSize(newHeight, newWidth).catch(() => {});
   }
 
@@ -891,18 +891,17 @@ export class AmpA4A extends AMP.BaseElement {
     this.protectedEmitLifecycleEvent_('adSlotCleared');
     this.uiHandler.setDisplayState(AdDisplayState.NOT_LAID_OUT);
     if (this.originalSlotSize_) {
-      // Attempt to revert any size change, this could fail but is unlikely as
-      // we can assume the document is no longer visible.
-      protectFunctionWrapper(
-        () => {
-          super.attemptChangeSize(
-            this.originalSlotSize_.height, this.originalSlotSize_.width);
-        }, this,
-        (err, varArgs) => {
-          dev().error(TAG, this.element.getAttribute('type'),
-              'Error attempting to revert resize', err, varArgs) ;
-        })();
-      this.originalSlotSize_ = null;
+      super.attemptChangeSize(
+        this.originalSlotSize_.height, this.originalSlotSize_.width)
+        .then(() => {
+          this.originalSlotSize_ = null;
+        })
+        .catch((err) => {
+          // TODO(keithwrightbos): if we are unable to revert size, on next
+          // trigger of promise chain the ad request may fail due to invalid
+          // slot size.  Determine how to handle this case.
+          dev().warn(TAG, 'unable to revert to original size', err);
+        });
     }
 
     this.isCollapsed_ = false;
@@ -986,7 +985,7 @@ export class AmpA4A extends AMP.BaseElement {
     dev().assert(this.uiHandler);
     // Store original size to allow for reverting on unlayoutCallback so that
     // subsequent pageview allows for ad request.
-    this.originalSlotSize_ = this.getIntersectionElementLayoutBox();
+    this.originalSlotSize_ = this.originalSlotSize_ || this.getLayoutBox();
     this.uiHandler.setDisplayState(AdDisplayState.LOADING);
     this.uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
     this.isCollapsed_ = true;
