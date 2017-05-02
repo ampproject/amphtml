@@ -33,10 +33,12 @@ export class AmpViewerHost {
    * @param {!HTMLIFrameElement} ampIframe
    * @param {string} frameOrigin
    * @param {function(string, *, boolean):(!Promise<*>|undefined)} messageHandler
+   * @param {boolean=} opt_isWebview Should viewer initiate handshake w/ polling
    * @param {string=} opt_logsId For dev logs so you know what ampdoc you're
    * looking at.
    */
-  constructor(win, ampIframe, frameOrigin, messageHandler, opt_logsId) {
+  constructor(
+      win, ampIframe, frameOrigin, messageHandler, opt_isWebview, opt_logsId) {
     /** @const {!Window} */
     this.win = win;
     /** @private {!HTMLIFrameElement} */
@@ -45,8 +47,45 @@ export class AmpViewerHost {
     this.messageHandler_ = messageHandler;
     /** @const {string} */
     this.logsId = opt_logsId;
+    /** @const {boolean} */
+    this.isWebview_ = opt_isWebview;
 
-    this.waitForHandshake_(frameOrigin);
+
+    if (this.isWebview_) {
+      /** @private {string} */
+      this.pollingIntervalId_ = setInterval(
+        this.initiateHandshake_.bind(this, this.intervalCtr) , 1000); //poll every second
+    } else {
+      this.waitForHandshake_(frameOrigin);
+    }
+  }
+
+  /**
+   * @private
+   */
+  initiateHandshake_() {
+    this.log('initiateHandshake_');
+    if (this.ampIframe_) {
+      const channel = new MessageChannel();
+      let message = {
+        app: APP,
+        name: 'handshake-poll',
+      };
+      message = this.isWebview_ ? JSON.stringify(message) : message;
+      this.ampIframe_.contentWindow./*OK*/postMessage(
+        message, '*', [channel.port2]);
+
+      channel.port1.onmessage = function(e) {
+        const data = this.isWebview_ ? JSON.parse(e.data) : e.data;
+        if (this.isChannelOpen_(data)) {
+          this.win.clearInterval(this.pollingIntervalId_); //stop polling
+          this.log('messaging established!');
+          this.completeHandshake_(channel.port1, data.requestid);
+        } else {
+          this.messageHandler_(e);
+        }
+      }.bind(this);
+    }
   }
 
   /**
@@ -62,25 +101,37 @@ export class AmpViewerHost {
               (!event.source || event.source == target)) {
         this.log(' messaging established with ', targetOrigin);
         unlisten();
-        const message = {
-          app: APP,
-          requestid: event.data.requestid,
-          data: {},
-          type: MessageType.RESPONSE,
-        };
-        target./*OK*/postMessage(message, targetOrigin);
-
         const port = new WindowPortEmulator(this.win, targetOrigin, target);
-        this.messaging_ = new Messaging(this.win, port);
-        this.messaging_.setDefaultHandler(this.messageHandler_);
-        this.sendRequest('visibilitychange', {
-          state: this.visibilityState_,
-          prerenderSize: this.prerenderSize,
-        }, true);
+        this.completeHandshake_(port, event.data.requestid);
       }
     }.bind(this);
     const unlisten = listen(this.win, 'message', listener);
   }
+
+  /**
+   * @param {!MessagePort|!WindowPortEmulator} port
+   * @param {string} requestId
+   * @private
+   */
+  completeHandshake_(port, requestId) {
+    let message = {
+      app: APP,
+      requestid: requestId,
+      type: MessageType.RESPONSE,
+    };
+
+    message = this.isWebview_ ? JSON.stringify(message) : message;
+    this.log('posting Message', message);
+    port./*OK*/postMessage(message);
+
+    this.messaging_ = new Messaging(this.win, port);
+    this.messaging_.setDefaultHandler(this.messageHandler_);
+
+    this.sendRequest('visibilitychange', {
+      state: this.visibilityState_,
+      prerenderSize: this.prerenderSize,
+    }, true);
+  };
 
   /**
    * @param {*} eventData

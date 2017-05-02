@@ -239,7 +239,7 @@
       this.container.appendChild(this.iframe);
 
       this.ampViewerHost_ = new AmpViewerHost(window, this.iframe,
-        this.frameOrigin_, this.processRequest_.bind(this), 
+        this.frameOrigin_, this.processRequest_.bind(this), false /* isPoll */,
         this.id /* logs id */);
 
       this.iframe.onload = this.loaded_.bind(this);
@@ -422,7 +422,7 @@
         case 'replaceHistory':
           return Promise.resolve();
         default:
-          return Promise.reject('request not supported: ' + type);
+          return Promise.reject('request not supported: ', type);
       }
     };
 
