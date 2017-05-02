@@ -86,7 +86,7 @@ describes.realWin('amp-selector', {
       const event = {
         keyCode: key,
         preventDefault: () => {},
-        target: opt_target
+        target: opt_target,
       };
       impl.keyDownHandler_(event);
     }

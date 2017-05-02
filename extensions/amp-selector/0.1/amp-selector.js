@@ -319,8 +319,8 @@ export class AmpSelector extends AMP.BaseElement {
    * @param {!Event} event
    */
   keyDownHandler_(event) {
-    let keyCode = event.keyCode;
-    switch(keyCode) {
+    const keyCode = event.keyCode;
+    switch (keyCode) {
       case Keycodes.LEFT_ARROW: /* fallthrough */
       case Keycodes.UP_ARROW: /* fallthrough */
       case Keycodes.RIGHT_ARROW: /* fallthrough */
