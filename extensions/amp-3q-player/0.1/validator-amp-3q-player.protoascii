@@ -59,6 +59,10 @@ tags: {  # <amp-3q-player>
     name: "data-id"
     mandatory: true
   }
+  attrs: {
+    name: "autoplay"
+    value: ""
+  }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-3q-player"
   amp_layout: {

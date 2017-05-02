@@ -106,6 +106,11 @@ class Amp3QPlayer extends AMP.BaseElement {
     if (this.unlistenMessage_) {
       this.unlistenMessage_();
     }
+
+    this.playerReadyPromise_ = new Promise(resolve => {
+      this.playerReadyResolver_ = resolve;
+    });
+
     return true;
   }
 
