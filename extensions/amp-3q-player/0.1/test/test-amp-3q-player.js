@@ -28,7 +28,7 @@ import * as sinon from 'sinon';
 adopt(window);
 
 describe('amp-3q-player', function() {
-  this.timeout(5000);
+  this.timeout(10000);
   let sandbox;
   const timer = timerFor(window);
 
@@ -44,20 +44,30 @@ describe('amp-3q-player', function() {
     return createIframePromise(true).then(iframe => {
       doNotLoadExternalResourcesInTest(iframe.win);
       const player = iframe.doc.createElement('amp-3q-player');
+
+      timer.promise(50).then(() => {
+        const iframe = player.querySelector('iframe');
+        player.implementation_.sdnBridge_({
+          source: iframe.contentWindow,
+          data: 'ready',
+        });
+      });
+
       if (playoutId) {
         player.setAttribute('data-id', playoutId);
       }
 
       return iframe.addElement(player);
     });
-  };
+  }
 
   it('renders', () => {
     return get3QElement(
         'c8dbe7f4-7f7f-11e6-a407-0cc47a188158').then(player => {
-          const playerIframe = player.querySelector('iframe');
-          expect(playerIframe).to.not.be.null;
-          expect(playerIframe.src).to.equal('https://playout.3qsdn.com/c8dbe7f4-7f7f-11e6-a407-0cc47a188158?autoplay=true&amp=true');
+          const iframe = player.querySelector('iframe');
+          expect(iframe).to.not.be.null;
+          expect(iframe.tagName).to.equal('IFRAME');
+          expect(iframe.src).to.equal('https://playout.3qsdn.com/c8dbe7f4-7f7f-11e6-a407-0cc47a188158?autoplay=false&amp=true');
         });
   })
 ;
@@ -71,30 +81,30 @@ describe('amp-3q-player', function() {
   it('should forward events from amp-3q-player to the amp element', () => {
     return get3QElement(
         'c8dbe7f4-7f7f-11e6-a407-0cc47a188158').then(player => {
+
           const iframe = player.querySelector('iframe');
 
           return Promise.resolve().then(() => {
-            const p = listenOncePromise(player, VideoEvents.PLAY);
-            sendFakeMessage(player, iframe, 'play');
+            const p = listenOncePromise(player, VideoEvents.MUTED);
+            sendFakeMessage(player, iframe, 'muted');
             return p;
           }).then(() => {
-            const p = listenOncePromise(player, VideoEvents.MUTED);
-            sendFakeMessage(player, iframe, 'mute');
+            const p = listenOncePromise(player, VideoEvents.PLAY);
+            sendFakeMessage(player, iframe, 'playing');
             return p;
           }).then(() => {
             const p = listenOncePromise(player, VideoEvents.PAUSE);
-            sendFakeMessage(player, iframe, 'pause');
+            sendFakeMessage(player, iframe, 'paused');
             return p;
           }).then(() => {
-            const p = listenOncePromise(player, VideoEvents.PAUSE).then(() => {
-              assert.fail('Should not have dispatch pause message twice');
-            });
-            sendFakeMessage(player, iframe, 'unmute');
+            const p = listenOncePromise(player, VideoEvents.UNMUTED);
+            sendFakeMessage(player, iframe, 'unmuted');
             const successTimeout = timer.timeoutPromise(10, true);
             return Promise.race([p, successTimeout]);
           });
         });
-  });
+  })
+;
 
   function sendFakeMessage(player, iframe, command) {
     player.implementation_.sdnBridge_(
