@@ -202,11 +202,13 @@ const command = {
     execOrDie('npm run ava');
   },
   testDocumentLinks: function(files) {
-    // First build and serve documents at http://localhost:8000.
-    execOrDie(`${gulp} serve`);
     files.forEach((file) => {
       if (isDocFile(file)) {
-        execOrDie('markdown-link-check ' + file);
+        // Check all links except those pointing to http://localhost:8000.
+        execOrDie(
+            'cat ' + file +
+            ' | sed \'s/http:\/\/localhost:8000\///g\'' +
+            ' | markdown-link-check');
       }
     });
   },
