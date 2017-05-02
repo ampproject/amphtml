@@ -36,8 +36,7 @@ function execOrDie(cmd) {
   var p =
       child_process.spawnSync('/bin/sh', ['-c', cmd], {'stdio': 'inherit'});
   if (p.status != 0) {
-    console/*OK*/.log(
-        `\n${fileLogPrefix}exiting due to failing command: ${cmd}`);
+    console/*OK*/.log('\nExiting due to failing command: ' + cmd);
     process.exit(p.status)
   }
 }
@@ -142,9 +141,10 @@ function constructCommandLine(percyKeys) {
   commandLine.push(percyArgs.webpage);
 
   util.log('Executing command line:');
-  commandLine.forEach((command) => {
+  commandLine.forEach(function(command) {
     util.log('\t', util.colors.cyan(command));
   });
+
   return commandLine.join(' ');
 }
 
