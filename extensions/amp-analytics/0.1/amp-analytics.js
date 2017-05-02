@@ -554,7 +554,8 @@ export class AmpAnalytics extends AMP.BaseElement {
               .then(request => {
                 const whiteList =
                   this.isSandbox_ ? SANDBOX_AVAILABLE_VARS : undefined;
-                // For consistency with amp-pixel we also expand any url replacements.
+                // For consistency with amp-pixel we also expand any url
+                // replacements.
                 return urlReplacementsForDoc(this.element).expandAsync(
                     request, undefined, whiteList);
               })
