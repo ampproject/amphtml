@@ -1220,7 +1220,7 @@ describe('amp-analytics', function() {
       };
     }
 
-    it('allows a request through', () => {
+    it('allows a request through for undefined "enabled" property', () => {
       const analytics = getAnalyticsTag(getConfig());
 
       return waitForSendRequest(analytics).then(() => {
@@ -1338,6 +1338,38 @@ describe('amp-analytics', function() {
 
       const urlReplacements = urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(null);
+
+      return waitForNoSendRequest(analytics).then(() => {
+        expect(sendRequestSpy).to.have.not.been.called;
+      });
+    });
+
+    it('does not allow a request through if a request param is missing ' +
+    'when enabled on tag level but enabled on trigger level', () => {
+      const config = getConfig();
+      config.enabled = '${queryParam(undefinedParam)}';
+      config.triggers.conditional.enabled = '${foo}';
+      config.triggers.conditional.vars.foo = 'bar';
+
+      const analytics = getAnalyticsTag(config);
+
+      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(null);
+
+      return waitForNoSendRequest(analytics).then(() => {
+        expect(sendRequestSpy).to.have.not.been.called;
+      });
+    });
+
+    it('does not allow a request through if enabled on tag level ' +
+    'but variable is missing on trigger level', () => {
+      const config = getConfig();
+      config.enabled = '${pageViewId}';
+      config.triggers.conditional.enabled = '${foo}';
+      const analytics = getAnalyticsTag(config);
+
+      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      sandbox.stub(urlReplacements.getVariableSource(), 'get').returns('page');
 
       return waitForNoSendRequest(analytics).then(() => {
         expect(sendRequestSpy).to.have.not.been.called;

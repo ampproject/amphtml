@@ -538,29 +538,13 @@ export class AmpAnalytics extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    const requestPromises = [];
-    const params = map();
-    // Add any given extraUrlParams as query string param
-    if (this.config_['extraUrlParams'] || trigger['extraUrlParams']) {
-      const expansionOptions = this.expansionOptions_(event, trigger);
-      Object.assign(params, this.config_['extraUrlParams'],
-          trigger['extraUrlParams']);
-      for (const k in params) {
-        if (typeof params[k] == 'string') {
-          requestPromises.push(
-              this.variableService_.expandTemplate(params[k], expansionOptions)
-                .then(value => { params[k] = value; }));
-        }
-      }
-    }
-
     return this.checkTriggerEnabled_(trigger, event)
         .then(enabled => {
           if (!enabled) {
             return;
           }
-          return Promise.all(requestPromises)
-              .then(() => {
+          return this.expandExtraUrlParams(trigger, event)
+              .then(params => {
                 request = this.addParamsToUrl_(request, params);
                 this.config_['vars']['requestCount']++;
                 const expansionOptions = this.expansionOptions_(event, trigger);
@@ -579,6 +563,33 @@ export class AmpAnalytics extends AMP.BaseElement {
                 return request;
               });
         });
+  }
+
+  /**
+   * @param {!JSONType} trigger JSON config block that resulted in this event.
+   * @param {!Object} event Object with details about the event.
+   * @return {!Promise<T>} The request that was sent out.
+   * @template T
+   */
+  expandExtraUrlParams(trigger, event) {
+    const requestPromises = [];
+    const params = map();
+    // Add any given extraUrlParams as query string param
+    if (this.config_['extraUrlParams'] || trigger['extraUrlParams']) {
+      const expansionOptions = this.expansionOptions_(event, trigger);
+      Object.assign(params, this.config_['extraUrlParams'],
+          trigger['extraUrlParams']);
+      for (const k in params) {
+        if (typeof params[k] == 'string') {
+          requestPromises.push(
+              this.variableService_.expandTemplate(params[k], expansionOptions)
+                  .then(value => {
+                    params[k] = value;
+                  }));
+        }
+      }
+    }
+    return Promise.all(requestPromises).then(() => params);
   }
 
   /**
@@ -613,7 +624,8 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /**
    * Checks if request for a trigger is enabled.
-   * @param {!JSONType} trigger The config to use to determine sampling.
+   * @param {!JSONType} trigger The config to use to determine if trigger is
+   * enabled.
    * @param {!Object} event Object with details about the event.
    * @return {!Promise<boolean>} Whether trigger must be called.
    * @private
