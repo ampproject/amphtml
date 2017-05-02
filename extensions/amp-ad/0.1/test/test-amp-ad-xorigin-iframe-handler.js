@@ -244,10 +244,12 @@ describe('amp-ad-xorigin-iframe-handler', () => {
       };
     });
 
-    it('should resolve directly if it is A4A', () => {
-      return iframeHandler.init(iframe, true).then(() => {
+    it('should be immediately visible if it is A4A', () => {
+      const initPromise = iframeHandler.init(iframe, true);
+      expect(iframe).to.be.visible;
+      initPromise.then(() => {
         expect(iframe.style.visibility).to.equal('');
-        expect(iframe.readyState).to.not.equal('complete');
+        expect(iframe.readyState).to.equal('complete');
       });
     });
   });
