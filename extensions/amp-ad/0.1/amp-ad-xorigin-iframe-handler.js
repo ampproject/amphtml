@@ -193,9 +193,6 @@ export class AmpAdXOriginIframeHandler {
     });
 
     this.element_.appendChild(this.iframe);
-    // Set iframe initially hidden which will be removed on render-start or
-    // load, whichever is earlier.
-    setStyle(this.iframe, 'visibility', 'hidden');
     if (opt_isA4A) {
       // A4A writes creative frame directly to page once creative is received
       // and therefore does not require render start message so attach and
@@ -204,10 +201,13 @@ export class AmpAdXOriginIframeHandler {
       // that occurred for Fast Fetch.
       this.renderStart_();
       renderStartResolve();
-    }
-    if (this.baseInstance_.lifecycleReporter) {
+    } else {
+      // Set iframe initially hidden which will be removed on render-start or
+      // load, whichever is earlier.
+      setStyle(this.iframe, 'visibility', 'hidden');
       this.baseInstance_.lifecycleReporter.addPingsForVisibility(this.element_);
     }
+
     Promise.race([
       renderStartPromise,
       iframeLoadPromise,
