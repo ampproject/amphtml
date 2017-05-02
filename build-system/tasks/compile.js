@@ -234,7 +234,7 @@ function compile(entryModuleFilenames, outputDir,
       continueWithWarnings: false,
       tieredCompilation: true,  // Magic speed up.
       compilerFlags: {
-        compilation_level: 'SIMPLE_OPTIMIZATIONS',
+        compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
         // Turns on more optimizations.
         assume_function_wrapper: true,
         // Transpile from ES6 to ES5.
