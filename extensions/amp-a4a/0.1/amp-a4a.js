@@ -944,7 +944,8 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {!Promise<!AdResponseDef>}
    */
   extractCreativeAndSignature(responseArrayBuffer, responseHeaders) {
-    const adResponse = {creative: responseArrayBuffer};
+    const adResponse = /** @type {!AdResponseDef} */ (
+        {creative: responseArrayBuffer, signatureInfo: null, sizeInfo: null});
     const encodedSignatureInfo =
         responseHeaders.get('AMP-Fast-Fetch-Signature');
     if (encodedSignatureInfo) {
