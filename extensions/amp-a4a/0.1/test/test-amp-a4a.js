@@ -253,6 +253,7 @@ describe('amp-a4a', () => {
       delete headers[SIGNATURE_HEADER];
       // If rendering type is safeframe, we SHOULD attach a SafeFrame.
       headers[RENDERING_TYPE_HEADER] = 'safeframe';
+      a4a.buildCallback();
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
         const child = a4aElement.querySelector('iframe[name]');
@@ -272,6 +273,7 @@ describe('amp-a4a', () => {
       // safeframe).
       delete headers[RENDERING_TYPE_HEADER];
       fixture.doc.body.appendChild(a4aElement);
+      a4a.buildCallback();
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
         // Force vsync system to run all queued tasks, so that DOM mutations
@@ -287,6 +289,7 @@ describe('amp-a4a', () => {
     it('for cached content iframe rendering case', () => {
       // Make sure there's no signature, so that we go down the 3p iframe path.
       delete headers[SIGNATURE_HEADER];
+      a4a.buildCallback();
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
         const child = a4aElement.querySelector('iframe[src]');
@@ -298,6 +301,7 @@ describe('amp-a4a', () => {
 
     it('for A4A friendly iframe rendering case', () => {
       expect(a4a.friendlyIframeEmbed_).to.not.exist;
+      a4a.buildCallback();
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
         const child = a4aElement.querySelector('iframe[srcdoc]');
@@ -626,6 +630,7 @@ describe('amp-a4a', () => {
         a4aElement.setAttribute('type', 'doubleclick');
         const a4a = new MockA4AImpl(a4aElement);
         doc.body.appendChild(a4aElement);
+        a4a.buildCallback();
         a4a.onLayoutMeasure();
         const renderPromise = a4a.layoutCallback();
         return renderPromise.then(() => {
@@ -815,6 +820,7 @@ describe('amp-a4a', () => {
           sandbox.stub(a4a, 'renderAmpCreative_').returns(
             Promise.reject('amp render failure'));
         }
+        a4a.buildCallback();
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         return a4a.adPromise_.then(promiseResult => {
@@ -929,13 +935,13 @@ describe('amp-a4a', () => {
         const lifecycleEventStub = sandbox.stub(
             a4a, 'protectedEmitLifecycleEvent_');
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
+        a4a.buildCallback();
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         return a4a.layoutCallback().then(() => {
           expect(getAdUrlSpy.calledOnce, 'getAdUrl called exactly once')
               .to.be.true;
           // Verify iframe presence and lack of visibility hidden
-          expect(a4aElement.children).to.have.lengthOf(1);
           const iframe = a4aElement.querySelector('iframe[src]');
           expect(iframe).to.be.ok;
           expect(iframe.src.indexOf(TEST_URL)).to.equal(0);
@@ -952,12 +958,12 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
+        a4a.buildCallback();
         a4a.onLayoutMeasure();
         return a4a.adPromise_.then(() => a4a.layoutCallback().then(() => {
           // Verify iframe presence and lack of visibility hidden
-          expect(a4aElement.children).to.have.lengthOf(1);
-          const iframe = a4aElement.children[0];
-          expect(iframe.tagName).to.equal('IFRAME');
+          expect(a4aElement.querySelectorAll('iframe').length).to.equal(1);
+          const iframe = a4aElement.querySelectorAll('iframe')[0];
           expect(iframe.src.indexOf(TEST_URL)).to.equal(0);
           expect(iframe).to.be.visible;
           expect(onCreativeRenderSpy.withArgs(false)).to.be.called;
@@ -974,16 +980,16 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
+        a4a.buildCallback();
         a4a.onLayoutMeasure();
         const layoutCallbackPromise = a4a.layoutCallback();
         rejectXhr(new Error('XHR Error'));
         return layoutCallbackPromise.then(() => {
           // Verify iframe presence and lack of visibility hidden
-          expect(a4aElement.children).to.have.lengthOf(1);
-          const iframe = a4aElement.children[0];
-          expect(iframe.tagName).to.equal('IFRAME');
+          expect(a4aElement.querySelectorAll('iframe').length).to.equal(1);
+          const iframe = a4aElement.querySelectorAll('iframe')[0];
           expect(iframe.src.indexOf(TEST_URL)).to.equal(0);
-          expect(iframe.style.visibility).to.equal('');
+          expect(iframe).to.be.visible;
           expect(onCreativeRenderSpy.withArgs(false)).to.be.called;
         });
       });

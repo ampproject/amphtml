@@ -192,20 +192,22 @@ export class AmpAdXOriginIframeHandler {
       this.baseInstance_.signals().signal(CommonSignals.INI_LOAD);
     });
 
+    this.element_.appendChild(this.iframe);
     if (opt_isA4A) {
-      // A4A writes creative frame directly to page therefore does not expect
-      // post message to unset visibility hidden
-      this.element_.appendChild(this.iframe);
-      // TODO(dvoytenko): if this is guaranteed to be a quasi-valid AMP creative
-      // then the `ini-load` message will work better here. Reconsider once
-      // `ini-load` message is supported in the in-a-box.
-      return iframeLoadPromise;
+      // A4A writes creative frame directly to page once creative is received
+      // and therefore does not require render start message so attach and
+      // impose no loader delay.  Network is using renderStart or
+      // bootstrap-loaded to indicate ad request was sent, either way we know
+      // that occurred for Fast Fetch.
+      this.renderStart_();
+      renderStartResolve();
+    } else {
+      // Set iframe initially hidden which will be removed on render-start or
+      // load, whichever is earlier.
+      setStyle(this.iframe, 'visibility', 'hidden');
+      this.baseInstance_.lifecycleReporter.addPingsForVisibility(this.element_);
     }
 
-    // Set iframe initially hidden which will be removed on render-start or
-    // load, whichever is earlier.
-    setStyle(this.iframe, 'visibility', 'hidden');
-    this.element_.appendChild(this.iframe);
     Promise.race([
       renderStartPromise,
       iframeLoadPromise,
@@ -218,8 +220,6 @@ export class AmpAdXOriginIframeHandler {
         }
       }
     });
-
-    this.baseInstance_.lifecycleReporter.addPingsForVisibility(this.element_);
 
     // The actual ad load is eariliest of iframe.onload event and no-content.
     return Promise.race([iframeLoadPromise, noContentPromise]);
