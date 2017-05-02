@@ -13,58 +13,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the license.
 #
-#extension_unused_unless_tag_present: "amp-3q-player"
 
 tags: {  # amp-3q-player
   html_format: AMP
   tag_name: "SCRIPT"
-  spec_name: "amp-3q-player extension .js script"
   satisfies: "amp-3q-player extension .js script"
-  mandatory_parent: "HEAD"
-  unique: true
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  requires: "amp-3q-player"
+  extension_spec: {
+    name: "amp-3q-player"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-3q-player"
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-3q-player-(latest|0\\.1)\\.js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-3q-player"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-3q-player>
   html_format: AMP
   tag_name: "AMP-3Q-PLAYER"
+  satisfies: "amp-3q-player"
   requires: "amp-3q-player extension .js script"
-  attrs: {
-    name: "data-id"
-    mandatory: true
-  }
   attrs: {
     name: "autoplay"
     value: ""
   }
+  attrs: {
+    name: "data-id"
+    mandatory: true
+  }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-3q-player"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-3q-player"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
