@@ -64,7 +64,9 @@ describes.realWin('AmpState', {
 
     whenFirstVisiblePromiseResolve();
     return whenFirstVisiblePromise.then(() => {
-      expect(fetchStub).calledWith(/* opt_isInit */ true);
+      expect(fetchStub).calledWithExactly(
+          /* isInit */ true, /* isMutation */ false);
+      expect(updateStub).to.not.have.been.called;
     });
   });
 
@@ -79,6 +81,7 @@ describes.realWin('AmpState', {
 
     whenFirstVisiblePromiseResolve();
     return whenFirstVisiblePromise.then(() => {
+      expect(fetchStub).to.not.have.been.called;
       expect(updateStub).calledWithMatch({foo: 'bar'});
     });
   });
@@ -95,6 +98,7 @@ describes.realWin('AmpState', {
 
     isVisibleStub.returns(true);
     ampState.mutatedAttributesCallback({src: 'https://foo.com/bar?baz=1'});
-    expect(fetchStub).calledWith(/* opt_isInit */ false);
+    expect(fetchStub).calledWithExactly(
+        /* isInit */ false, /* isMutation */ true);
   });
 });

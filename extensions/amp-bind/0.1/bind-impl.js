@@ -52,7 +52,7 @@ const MAX_MERGE_DEPTH = 10;
 
 /**
  * A bound property, e.g. [property]="expression".
- * `previousResult` is the result of this expression during the last digest.
+ * `previousResult` is the result of this expression during the last evaluation.
  * @typedef {{
  *   property: string,
  *   expressionString: string,
@@ -72,8 +72,7 @@ let BoundElementDef;
 
 /**
  * Bind is the service that handles the Bind lifecycle, from identifying
- * bindings in the document to scope mutations to reevaluating expressions
- * during a digest.
+ * bindings in the document to scope mutations to reevaluating expressions.
  */
 export class Bind {
   /**
@@ -152,13 +151,14 @@ export class Bind {
   }
 
   /**
-   * Merges `state` into the current scope and immediately triggers a digest
-   * unless `opt_skipDigest` is false.
+   * Merges `state` into the current scope and immediately triggers an
+   * evaluation unless `opt_skipEval` is false.
    * @param {!Object} state
-   * @param {boolean=} opt_skipDigest
+   * @param {boolean=} opt_skipEval
+   * @param {boolean=} opt_fromAmpState
    * @return {!Promise}
    */
-  setState(state, opt_skipDigest) {
+  setState(state, opt_skipEval, opt_fromAmpState) {
     user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);
 
     // TODO(choumx): What if `state` contains references to globals?
@@ -168,20 +168,21 @@ export class Bind {
       user().error(TAG, 'Failed to merge scope.', e);
     }
 
-    if (!opt_skipDigest) {
-      this.setStatePromise_ = this.initializePromise_.then(() => {
-        user().fine(TAG, 'State updated; re-evaluating expressions...');
-        return this.digest_();
-      });
-      if (getMode().test) {
-        this.setStatePromise_.then(() => {
-          this.dispatchEventForTesting_('amp:bind:setState');
-        });
-      }
-      return this.setStatePromise_;
-    } else {
+    if (opt_skipEval) {
       return Promise.resolve();
     }
+
+    const promise = this.initializePromise_.then(() => {
+      user().fine(TAG, 'State updated; re-evaluating expressions...');
+      return this.evaluate_().then(results =>
+          this.apply_(results, opt_fromAmpState));
+    });
+    if (getMode().test) {
+      promise.then(() => {
+        this.dispatchEventForTesting_('amp:bind:setState');
+      });
+    }
+    return this.setStatePromise_ = promise;
   }
 
   /**
@@ -225,13 +226,14 @@ export class Bind {
   initialize_() {
     dev().fine(TAG, 'Scanning DOM for bindings...');
     const promise = this.addBindingsForNode_(this.ampdoc.getBody());
-    // Check default values against initial expression results in development.
     if (getMode().development) {
+      // Check default values against initial expression results.
       promise.then(() => {
-        this.digest_(/* opt_verifyOnly */ true);
+        this.evaluate_().then(results => this.verify_(results));
       });
     }
     if (getMode().test) {
+      // Signal init completion for integration tests.
       promise.then(() => {
         this.dispatchEventForTesting_('amp:bind:initialize');
       });
@@ -537,14 +539,14 @@ export class Bind {
   }
 
   /**
-   * Asynchronously reevaluates all expressions and applies results to DOM.
-   * If `opt_verifyOnly` is true, does not apply results but verifies them
-   * against current element values instead.
-   * @param {boolean=} opt_verifyOnly
-   * @return {!Promise}
+   * Asynchronously reevaluates all expressions and returns a map of
+   * expression strings to evaluated results.
+   * @return {!Promise<
+   *     !Object<string, ./bind-expression.BindExpressionResultDef>
+   * >}
    * @private
    */
-  digest_(opt_verifyOnly) {
+  evaluate_() {
     let evaluatePromise;
     if (this.workerExperimentEnabled_) {
       user().fine(TAG, 'Asking worker to re-evaluate expressions...');
@@ -557,7 +559,6 @@ export class Bind {
 
     return evaluatePromise.then(returnValue => {
       const {results, errors} = returnValue;
-
       // Report evaluation errors.
       Object.keys(errors).forEach(expressionString => {
         const elements = this.expressionToElements_[expressionString];
@@ -570,14 +571,8 @@ export class Bind {
           reportError(userError, elements[0]);
         }
       });
-
-      if (opt_verifyOnly) {
-        this.verify_(results);
-      } else {
-        return this.apply_(results);
-      }
+      return results;
     });
-
   }
 
   /**
@@ -597,7 +592,6 @@ export class Bind {
       });
     });
   }
-
 
   /**
    * Determines which properties to update based on results of evaluation
@@ -634,21 +628,24 @@ export class Bind {
   }
 
   /**
-   * Applies expression results to DOM.
+   * Applies expression results to the DOM.
    * @param {Object<string, ./bind-expression.BindExpressionResultDef>} results
+   * @param {boolean=} opt_fromAmpState
    * @private
    */
-  apply_(results) {
+  apply_(results, opt_fromAmpState) {
     const applyPromises = [];
     this.boundElements_.forEach(boundElement => {
-
       const {element, boundProperties} = boundElement;
-      const updates = this.calculateUpdates_(boundProperties, results);
-
-      if (updates.length == 0) {
+      // If this "apply" round is triggered by an <amp-state> mutation,
+      // ignore updates to <amp-state> element to prevent update cycles.
+      if (opt_fromAmpState && element.tagName === 'AMP-STATE') {
         return;
       }
-
+      const updates = this.calculateUpdates_(boundProperties, results);
+      if (updates.length === 0) {
+        return;
+      }
       const promise = this.resources_.mutateElement(element, () => {
         const mutations = {};
         let width, height;
