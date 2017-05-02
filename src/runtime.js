@@ -57,6 +57,7 @@ import {extensionsFor} from './services';
 import {installHistoryServiceForDoc} from './service/history-impl';
 import {installPlatformService} from './service/platform-impl';
 import {installResourcesServiceForDoc} from './service/resources-impl';
+import {installLayersServiceForDoc} from './service/layers-impl';
 import {
   installShadowDoc,
   shadowDocHasBody,
@@ -141,6 +142,7 @@ export function installAmpdocServices(ampdoc, opt_initParams) {
   installViewerServiceForDoc(ampdoc, opt_initParams);
   installViewportServiceForDoc(ampdoc);
   installHistoryServiceForDoc(ampdoc);
+  installLayersServiceForDoc(ampdoc);
   installResourcesServiceForDoc(ampdoc);
   installUrlReplacementsServiceForDoc(ampdoc);
   installActionServiceForDoc(ampdoc);

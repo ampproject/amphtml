@@ -153,6 +153,15 @@ export function inputFor(win) {
 
 /**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @return {!./service/layers-impl.Layers}
+ */
+export function layersForDoc(nodeOrDoc) {
+  return /** @type {!./service/layers-impl.Layers} */ (
+      getServiceForDoc(nodeOrDoc, 'layers'));
+}
+
+/**
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!./service/parallax-impl.ParallaxService}
  */
 export function parallaxForDoc(nodeOrDoc) {

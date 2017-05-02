@@ -259,7 +259,13 @@ var forbiddenTerms = {
     whitelist: [
       'src/runtime.js',
       'src/service/resources-impl.js',
-      'src/service/standard-actions-impl.js',
+    ],
+  },
+  'installLayersServiceForDoc': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/runtime.js',
+      'src/service/layers-impl.js',
     ],
   },
   'installXhrService': {
