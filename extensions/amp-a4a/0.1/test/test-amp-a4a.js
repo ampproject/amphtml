@@ -44,7 +44,7 @@ import {utf8Encode} from '../../../../src/utils/bytes';
 import {resetScheduledElementForTesting} from '../../../../src/custom-element';
 import {urlReplacementsForDoc} from '../../../../src/services';
 import {incrementLoadingAds} from '../../../amp-ad/0.1/concurrent-load';
-import {platformFor} from '../../../../src/services';
+import {platformFor, timerFor} from '../../../../src/services';
 import {Resource} from '../../../../src/service/resource';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {dev, user} from '../../../../src/log';
@@ -1013,8 +1013,7 @@ describe('amp-a4a', () => {
         a4a.uiHandler = {
           setDisplayState: state => {expectStates.push(state);},
         };
-        sandbox.stub(a4a, 'getIntersectionElementLayoutBox').returns(
-          {width: 123, height: 456});
+        sandbox.stub(a4a, 'getLayoutBox').returns({width: 123, height: 456});
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.ok;
         return a4a.adPromise_.then(() => {
@@ -1028,9 +1027,18 @@ describe('amp-a4a', () => {
             // call unlayout callback and verify it attempts to revert the size
             expect(a4a.originalSlotSize_).to.deep
               .equal({width: 123, height: 456});
-            sandbox.stub(AMP.BaseElement.prototype, 'attemptChangeSize');
+            let attemptChangeSizeResolver;
+            const attemptChangeSizePromise = new Promise(resolve => {
+              attemptChangeSizeResolver = resolve;
+            });
+            sandbox.stub(AMP.BaseElement.prototype, 'attemptChangeSize')
+              .returns(attemptChangeSizePromise);
             a4a.unlayoutCallback();
-            expect(a4a.originalSlotSize_).to.not.be.ok;
+            expect(a4a.originalSlotSize_).to.be.ok;
+            attemptChangeSizeResolver();
+            return timerFor(a4a.win).promise(1).then(() => {
+              expect(a4a.originalSlotSize_).to.not.be.ok;
+            });
           });
         });
       });
@@ -1058,8 +1066,7 @@ describe('amp-a4a', () => {
         a4a.uiHandler = {
           setDisplayState: state => {expectStates.push(state);},
         };
-        sandbox.stub(a4a, 'getIntersectionElementLayoutBox').returns(
-          {width: 123, height: 456});
+        sandbox.stub(a4a, 'getLayoutBox').returns({width: 123, height: 456});
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.ok;
         return a4a.adPromise_.then(() => {
@@ -1073,9 +1080,18 @@ describe('amp-a4a', () => {
             // call unlayout callback and verify it attempts to revert the size
             expect(a4a.originalSlotSize_).to.deep
               .equal({width: 123, height: 456});
-            sandbox.stub(AMP.BaseElement.prototype, 'attemptChangeSize');
+            let attemptChangeSizeResolver;
+            const attemptChangeSizePromise = new Promise(resolve => {
+              attemptChangeSizeResolver = resolve;
+            });
+            sandbox.stub(AMP.BaseElement.prototype, 'attemptChangeSize')
+              .returns(attemptChangeSizePromise);
             a4a.unlayoutCallback();
-            expect(a4a.originalSlotSize_).to.not.be.ok;
+            expect(a4a.originalSlotSize_).to.be.ok;
+            attemptChangeSizeResolver();
+            return timerFor(a4a.win).promise(1).then(() => {
+              expect(a4a.originalSlotSize_).to.not.be.ok;
+            });
           });
         });
       });
