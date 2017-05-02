@@ -24,6 +24,7 @@ import {extensionsFor} from '../../../src/services';
 import {userNotificationManagerFor} from '../../../src/services';
 import {isExperimentOn} from '../../../src/experiments';
 import {hasOwn} from '../../../src/utils/object';
+import {getAllParentAdContainers} from './utils';
 
 
 /**
@@ -73,6 +74,11 @@ export class AmpAd extends AMP.BaseElement {
       window.ampAdSlotIdCounter = window.ampAdSlotIdCounter || 0;
       const slotId = window.ampAdSlotIdCounter++;
       this.element.setAttribute('data-amp-slot-index', slotId);
+
+      if (this.element.getAttribute('data-multi-size')
+          && Object.keys(getAllParentAdContainers(this.element)).length != 0) {
+        this.element.setAttribute('data-multi-size', '');
+      }
 
       // TODO(tdrl): Check amp-ad registry to see if they have this already.
       if (!a4aRegistry[type] ||

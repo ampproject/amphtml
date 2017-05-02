@@ -25,6 +25,10 @@ import {isProxyOrigin} from '../../../src/url';
 import {viewerForDoc} from '../../../src/services';
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 import {domFingerprint} from '../../../src/utils/dom-fingerprint';
+import {
+  getAllParentAdContainers,
+  ValidAdContainerTypes,
+} from '../../../extensions/amp-ad/0.1/utils';
 
 /** @const {string} */
 const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
@@ -42,13 +46,6 @@ const MAX_URL_LENGTH = 4096;
 const AmpAdImplementation = {
   AMP_AD_XHR_TO_IFRAME: '2',
   AMP_AD_XHR_TO_IFRAME_OR_AMP: '3',
-};
-
-/** @const {!Object} */
-export const ValidAdContainerTypes = {
-  'AMP-STICKY-AD': 'sa',
-  'AMP-FX-FLYING-CARPET': 'fc',
-  'AMP-LIGHTBOX': 'lb',
 };
 
 /** @const {string} */
@@ -352,25 +349,6 @@ export function additionalDimensions(win, viewportSize) {
           innerWidth,
           innerHeight].join();
 };
-
-/**
- * Returns a map containing all ad containers that enclose the given ad
- * element. The params of the map are restricted to the ValidAdContainerTypes,
- * and the values are all true.
- * @param {!Element} adElement
- * @return {!Object<string, boolean>}
- */
-export function getAllParentAdContainers(adElement) {
-  const containerTypeSet = {};
-  for (let el = adElement.parentElement, counter = 0;
-      el && counter < 20; el = el.parentElement, counter++) {
-    const tagName = el.tagName.toUpperCase();
-    if (ValidAdContainerTypes[tagName]) {
-      containerTypeSet[ValidAdContainerTypes[tagName]] = true;
-    }
-  }
-  return containerTypeSet;
-}
 
 /**
  * Extracts configuration used to build amp-analytics element for active view.

@@ -28,7 +28,6 @@ import {
   AmpAnalyticsConfigDef,
   extractAmpAnalyticsConfig,
   extractGoogleAdCreativeAndSignature,
-  getAllParentAdContainers,
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
 } from '../../../ads/google/a4a/utils';
@@ -113,10 +112,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const jsonParameters = rawJson ? JSON.parse(rawJson) : {};
     const tfcd = jsonParameters['tagForChildDirectedTreatment'];
     const adTestOn = isInManualExperiment(this.element);
-    // Detect container types.
     const multiSizeDataStr = this.element.getAttribute('data-multi-size');
-    if (multiSizeDataStr &&
-        Object.keys(getAllParentAdContainers(this.element)).length == 0) {
+    if (multiSizeDataStr) {
       const multiSizeValidation = this.element
           .getAttribute('data-multi-size-validation') || 'true';
       // The following call will check all specified multi-size dimensions,
