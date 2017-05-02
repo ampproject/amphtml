@@ -1,0 +1,53 @@
+<!doctype html>
+<html amp lang="en">
+  <head>
+    <meta charset="utf-8">
+    <script async src="/dist/amp.js"></script>
+    <script async custom-element="amp-ad" src="/dist/v0/amp-ad-0.1.max.js"></script>
+    <script async custom-element="amp-analytics" src="/dist/v0/amp-analytics-0.1.max.js"></script>
+    <title>Hello, AMPs Navegg</title>
+    <link rel="canonical" href="http://example.ampproject.org/article-metadata.html" />
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <script type="application/ld+json">
+      {
+        "@context": "http://schema.org",
+        "@type": "NewsArticle",
+        "headline": "Open-source framework for publishing content",
+        "datePublished": "2015-10-07T12:02:41Z",
+        "image": [
+          "logo.jpg"
+        ]
+      }
+    </script>
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  </head>
+  <body>
+    <amp-analytics>
+    <script type="application/json">
+    {
+      "requests": {
+        "pageview": "https://cdn.navdmp.com/cdn?url=${canonicalUrl}&title=${title}&acc=${account}&ref=DOCUMENT_REFERRER&amp=CLIENT_ID(nvg)"
+      },
+      "vars": {
+        "account": "XXXXX"
+      },
+      "triggers": {
+        "trackPageview": {
+          "on": "visible",
+          "request": "pageview"
+        }
+      }
+    }
+    </script>
+    </amp-analytics>
+    <amp-pixel src="https://cdn.navdmp.com/cus?acc=1&amp=CLIENT_ID(nvg)&img=1&cus=4454"></amp-pixel>
+    <h1>Welcome to the mobile web | Navegg + DFP Ad</h1>
+    <amp-ad width=320 height=50
+        type="navegg"
+        data-acc="1"
+        data-slot="/4119129/mobile_ad_banner"
+        json='{"targeting":{"sport":["rugby","cricket"]}}'
+    ></amp-ad>
+  </body>
+</html>
+
