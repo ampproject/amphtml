@@ -106,8 +106,6 @@ class AmpGraphiq extends AMP.BaseElement {
     //Add title to the iframe for better accessibility.
     iframe.setAttribute('title', 'Graphiq: ' +
         this.element.getAttribute('alt') || '');
-    iframe.setAttribute('height', initialHeight);
-    iframe.setAttribute('width', initialWidth);
     iframe.src = this.domain_ + '/w/' + encodeURIComponent(this.widgetId_) +
         '?data-width=' + encodeURIComponent(initialWidth) +
         '&data-height=' + encodeURIComponent(initialHeight) +
@@ -135,7 +133,8 @@ class AmpGraphiq extends AMP.BaseElement {
       return;
     }
     if (!event.data ||
-        !(isObject(event.data) || event.data.indexOf('{') == 0)) {
+        !(isObject(event.data) ||
+          (typeof event.data == 'string' && event.data.startsWith('{')))) {
       return;  // Doesn't look like JSON.
     }
     const data = isObject(event.data) ? event.data : tryParseJson(event.data);
