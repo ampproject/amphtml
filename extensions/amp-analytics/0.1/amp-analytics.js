@@ -568,7 +568,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   /**
    * @param {!JSONType} trigger JSON config block that resulted in this event.
    * @param {!Object} event Object with details about the event.
-   * @return {!Promise<T>} The request that was sent out.
+   * @return {!Promise<T>} Map of the resolved parameters.
    * @template T
    */
   expandExtraUrlParams(trigger, event) {
