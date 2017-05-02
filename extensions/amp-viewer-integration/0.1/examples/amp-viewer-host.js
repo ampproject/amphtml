@@ -33,12 +33,13 @@ export class AmpViewerHost {
    * @param {!HTMLIFrameElement} ampIframe
    * @param {string} frameOrigin
    * @param {function(string, *, boolean):(!Promise<*>|undefined)} messageHandler
-   * @param {boolean=} opt_isWebview Should viewer initiate handshake w/ polling
    * @param {string=} opt_logsId For dev logs so you know what ampdoc you're
+   * @param {boolean=} opt_isWebview Should viewer initiate handshake w/ polling
+   * @param {boolean=} opt_isHandshakePoll
    * looking at.
    */
-  constructor(
-      win, ampIframe, frameOrigin, messageHandler, opt_isWebview, opt_logsId) {
+  constructor(win, ampIframe, frameOrigin, messageHandler, opt_logsId,
+      opt_isWebview, opt_isHandshakePoll) {
     /** @const {!Window} */
     this.win = win;
     /** @private {!HTMLIFrameElement} */
@@ -50,7 +51,7 @@ export class AmpViewerHost {
     /** @const {string} */
     this.logsId = opt_logsId;
 
-    if (this.isWebview_) {
+    if (this.isWebview_ || opt_isHandshakePoll) {
       /** @private {string} */
       this.pollingIntervalId_ = setInterval(
         this.initiateHandshake_.bind(this, this.intervalCtr) , 1000); //poll every second

@@ -175,10 +175,6 @@
       this.visibilityState_ = visible ? 'visible' : 'hidden';
       this.prerenderSize_ = 1;
       this.csi_ = 1;
-      this.requestIdCounter_ = 0;
-      this.pollingIntervalIds_ = [];
-      this.intervalCtr = 0;
-      this.messageHandlers_ = [];
 
       this.isIos_ = /iPhone|iPad|iPod/i.test(window.navigator.userAgent);
 
@@ -242,8 +238,8 @@
       this.container.appendChild(this.iframe);
 
       this.ampViewerHost_ = new AmpViewerHost(window, this.iframe,
-        this.frameOrigin_, this.processRequest_.bind(this), true /* isWebview */,
-        this.id /* logs id */);
+        this.frameOrigin_, this.processRequest_.bind(this),
+        this.id /* logs id */, true /* isWebview */);
 
       this.iframe.onload = this.loaded_.bind(this);
       setTimeout(function() {
