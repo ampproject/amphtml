@@ -30,7 +30,7 @@ import {
 import {bodyAlwaysVisible} from './style-installer';
 import {deactivateChunking} from './chunk';
 import {stubElements} from './custom-element';
-import {maybeTrackImpression} from './impression';
+
 
 // PWA shell manages its own visibility and shadow ampdocs their own.
 bodyAlwaysVisible(self);
@@ -44,8 +44,6 @@ installDocService(self, /* isSingleDoc */ false);
 
 // Core services.
 installRuntimeServices(self);
-
-maybeTrackImpression(self);
 
 // Builtins.
 installBuiltins(self);
