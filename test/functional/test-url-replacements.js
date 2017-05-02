@@ -18,7 +18,6 @@ import {Observable} from '../../src/observable';
 import {ampdocServiceFor} from '../../src/ampdoc';
 import {createIframePromise} from '../../testing/iframe';
 import {user} from '../../src/log';
-import {urlReplacementsForDoc} from '../../src/services';
 import {
   markElementScheduledForTesting,
   resetScheduledElementForTesting,
@@ -39,7 +38,7 @@ import {
 import {getService} from '../../src/service';
 import {setCookie} from '../../src/cookies';
 import {parseUrl} from '../../src/url';
-import {viewerForDoc} from '../../src/services';
+import {urlReplacementsForDoc, viewerForDoc} from '../../src/services';
 import * as trackPromise from '../../src/impression';
 
 
@@ -149,6 +148,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
     const ampdoc = ampdocServiceFor(win).getAmpDoc();
     installDocumentInfoServiceForDoc(ampdoc);
     win.ampdoc = ampdoc;
+    installUrlReplacementsServiceForDoc(ampdoc);
     return win;
   }
 
@@ -249,7 +249,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
         resolve();
       });
     });
-    return installUrlReplacementsServiceForDoc(win.ampdoc)
+    return urlReplacementsForDoc(win.ampdoc)
       .expandAsync('?url=SOURCE_URL')
       .then(res => {
         expect(res).to.contain('example.com');
@@ -392,7 +392,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('should reject protocol changes', () => {
     const win = getFakeWindow();
-    const urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
+    const urlReplacements = urlReplacementsForDoc(win.ampdoc);
     return urlReplacements.expandAsync(
         'PROTOCOL://example.com/?r=RANDOM', {
           'PROTOCOL': Promise.resolve('abc'),
@@ -406,7 +406,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
     win.services.viewer = {
       obj: {isVisible: () => true},
     };
-    return installUrlReplacementsServiceForDoc(win.ampdoc)
+    return urlReplacementsForDoc(win.ampdoc)
       .expandAsync('?sh=BACKGROUND_STATE')
       .then(res => {
         expect(res).to.equal('?sh=0');
@@ -418,7 +418,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
     win.services.viewer = {
       obj: {isVisible: () => false},
     };
-    return installUrlReplacementsServiceForDoc(win.ampdoc)
+    return urlReplacementsForDoc(win.ampdoc)
       .expandAsync('?sh=BACKGROUND_STATE')
       .then(res => {
         expect(res).to.equal('?sh=1');
@@ -427,11 +427,9 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   describe('PAGE_LOAD_TIME', () => {
     let win;
-    let ampdoc;
     let eventListeners;
     beforeEach(() => {
       win = getFakeWindow();
-      ampdoc = win.ampdoc;
       eventListeners = {};
       win.document.readyState = 'loading';
       win.document.addEventListener = function(eventType, handler) {
@@ -446,7 +444,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
     it('is replaced if timing info is not available', () => {
       win.document.readyState = 'complete';
-      return installUrlReplacementsServiceForDoc(ampdoc)
+      return urlReplacementsForDoc(win.ampdoc)
           .expandAsync('?sh=PAGE_LOAD_TIME&s')
           .then(res => {
             expect(res).to.match(/sh=&s/);
@@ -454,7 +452,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
 
     it('is replaced if PAGE_LOAD_TIME is available within a delay', () => {
-      const urlReplacements = installUrlReplacementsServiceForDoc(ampdoc);
+      const urlReplacements = urlReplacementsForDoc(win.ampdoc);
       const validMetric = urlReplacements.expandAsync('?sh=PAGE_LOAD_TIME&s');
       urlReplacements.ampdoc.win.performance.timing.loadEventStart = 109;
       win.document.readyState = 'complete';
@@ -780,7 +778,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
         resolve();
       });
     });
-    return installUrlReplacementsServiceForDoc(win.ampdoc)
+    return urlReplacementsForDoc(win.ampdoc)
       .expandAsync('?sh=QUERY_PARAM(query_string_param1)&s')
       .then(res => {
         expect(res).to.match(/sh=foo&s/);
@@ -793,7 +791,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
     sandbox.stub(trackPromise, 'getTrackImpressionPromise', () => {
       return Promise.resolve();
     });
-    return installUrlReplacementsServiceForDoc(win.ampdoc)
+    return urlReplacementsForDoc(win.ampdoc)
       .expandAsync('?sh=QUERY_PARAM(query_string_param1)&s')
       .then(res => {
         expect(res).to.match(/sh=&s/);
@@ -806,7 +804,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
     sandbox.stub(trackPromise, 'getTrackImpressionPromise', () => {
       return Promise.resolve();
     });
-    return installUrlReplacementsServiceForDoc(win.ampdoc)
+    return urlReplacementsForDoc(win.ampdoc)
       .expandAsync('?sh=QUERY_PARAM(query_string_param1,default_value)&s')
       .then(res => {
         expect(res).to.match(/sh=default_value&s/);
@@ -819,7 +817,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
     sandbox.stub(trackPromise, 'getTrackImpressionPromise', () => {
       return Promise.resolve();
     });
-    return installUrlReplacementsServiceForDoc(win.ampdoc)
+    return urlReplacementsForDoc(win.ampdoc)
         .collectVars('?SOURCE_HOST&QUERY_PARAM(p1)&SIMPLE&FUNC&PROMISE', {
           'SIMPLE': 21,
           'FUNC': () => 22,
@@ -838,7 +836,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('should reject javascript protocol', () => {
     const win = getFakeWindow();
-    const urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
+    const urlReplacements = urlReplacementsForDoc(win.ampdoc);
     return urlReplacements.expandAsync(`javascript://example.com/?r=RANDOM`)
         .then(
           () => { throw new Error('never here'); },
@@ -851,7 +849,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
   describe('sync expansion', () => {
     it('should expand w/ collect vars (skip async macro)', () => {
       const win = getFakeWindow();
-      const urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
+      const urlReplacements = urlReplacementsForDoc(win.ampdoc);
       urlReplacements.ampdoc.win.performance.timing.loadEventStart = 109;
       const collectVars = {};
       const expanded = urlReplacements.expandSync(
@@ -873,7 +871,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
     it('should reject protocol changes', () => {
       const win = getFakeWindow();
-      const urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
+      const urlReplacements = urlReplacementsForDoc(win.ampdoc);
       let expanded = urlReplacements.expandSync(
           'PROTOCOL://example.com/?r=RANDOM', {
             'PROTOCOL': 'abc',
@@ -888,7 +886,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
     it('should reject javascript protocol', () => {
       const win = getFakeWindow();
-      const urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
+      const urlReplacements = urlReplacementsForDoc(win.ampdoc);
       expect(() => {
         urlReplacements.expandSync(`javascript://example.com/?r=RANDOM`);
       }).to.throw('Illegal javascript');
@@ -897,7 +895,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('should expand sync and respect white list', () => {
     const win = getFakeWindow();
-    const urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
+    const urlReplacements = urlReplacementsForDoc(win.ampdoc);
     const expanded = urlReplacements.expandSync(
       'r=RANDOM&c=CONST&f=FUNCT(hello,world)&a=b&d=PROM&e=PAGE_LOAD_TIME',
       {
@@ -990,7 +988,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       a = document.createElement('a');
       win = getFakeWindow();
       win.location = parseUrl('https://example.com/base?foo=bar&bar=abc');
-      urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
+      urlReplacements = urlReplacementsForDoc(win.ampdoc);
     });
 
     it('should replace href', () => {
@@ -1094,7 +1092,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
   describe('Expanding String', () => {
     it('should not reject protocol changes with expandStringSync', () => {
       const win = getFakeWindow();
-      const urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
+      const urlReplacements = urlReplacementsForDoc(win.ampdoc);
       let expanded = urlReplacements.expandStringSync(
           'PROTOCOL://example.com/?r=RANDOM', {
             'PROTOCOL': 'abc',
@@ -1109,7 +1107,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
     it('should not check protocol changes with expandStringAsync', () => {
       const win = getFakeWindow();
-      const urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
+      const urlReplacements = urlReplacementsForDoc(win.ampdoc);
       return urlReplacements.expandStringAsync(
           'RANDOM:X:Y', {
             'RANDOM': Promise.resolve('abc'),
@@ -1122,7 +1120,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
   describe('Expanding Input Value', () => {
     it('should fail for non-inputs', () => {
       const win = getFakeWindow();
-      const urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
+      const urlReplacements = urlReplacementsForDoc(win.ampdoc);
       const input = document.createElement('textarea');
       input.value = 'RANDOM';
       input.setAttribute('data-amp-replace', 'RANDOM');
@@ -1133,7 +1131,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
     it('should fail for non-hidden inputs', () => {
       const win = getFakeWindow();
-      const urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
+      const urlReplacements = urlReplacementsForDoc(win.ampdoc);
       const input = document.createElement('input');
       input.value = 'RANDOM';
       input.setAttribute('data-amp-replace', 'RANDOM');
@@ -1144,7 +1142,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
     it('should not replace not whitelisted vars', () => {
       const win = getFakeWindow();
-      const urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
+      const urlReplacements = urlReplacementsForDoc(win.ampdoc);
       const input = document.createElement('input');
       input.value = 'RANDOM';
       input.type = 'hidden';
@@ -1160,7 +1158,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
     it('should replace input value with var subs - sync', () => {
       const win = getFakeWindow();
-      const urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
+      const urlReplacements = urlReplacementsForDoc(win.ampdoc);
       const input = document.createElement('input');
       input.value = 'RANDOM';
       input.type = 'hidden';
@@ -1180,7 +1178,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
     it('should replace input value with var subs - sync', () => {
       const win = getFakeWindow();
-      const urlReplacements = installUrlReplacementsServiceForDoc(win.ampdoc);
+      const urlReplacements = urlReplacementsForDoc(win.ampdoc);
       const input = document.createElement('input');
       input.value = 'RANDOM';
       input.type = 'hidden';
