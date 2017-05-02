@@ -912,9 +912,6 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
         'date=${timestamp}&' +
         'ampid=${clientId(_parsely_visitor)}',
       'pageview': '${basePrefix}&action=pageview',
-      // TODO(#1612): client-side session support
-      // TODO(#1296): active engaged time support
-      // 'heartbeat': '${basePrefix}&action=heartbeat&inc=${engagedTime}'
     },
     'triggers': {
       'defaultPageview': {
