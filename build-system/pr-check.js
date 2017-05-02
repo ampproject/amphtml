@@ -207,7 +207,7 @@ const command = {
         // Check all links except those pointing to http://localhost:8000.
         execOrDie(
             'cat ' + file +
-            ' | sed \'s/http:\/\/localhost:8000\///g\'' +
+            ' | sed \'s/http:\\\/\\\/localhost:8000\\\///g\'' +
             ' | markdown-link-check');
       }
     });
