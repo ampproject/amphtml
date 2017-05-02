@@ -113,7 +113,7 @@ export class VideoManager {
     });
 
     listen(entry.video.element, VideoEvents.RELOAD, () => {
-      entry.handleReload();
+      entry.videoLoaded_();
     });
 
     // TODO(aghassemi, #4780): Create a new IntersectionObserver service.
@@ -404,10 +404,6 @@ class VideoEntry {
       measure,
       mutate,
     });
-  }
-
-  handleReload() {
-    this.videoLoaded_();
   }
 }
 
