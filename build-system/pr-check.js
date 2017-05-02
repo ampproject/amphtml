@@ -201,6 +201,13 @@ const command = {
   testBuildSystem: function() {
     execOrDie('npm run ava');
   },
+  testDocumentLinks: function(files) {
+    files.forEach((file) => {
+      if (isDocFile(file)) {
+        execOrDie('markdown-link-check ' + file);
+      }
+    });
+  },
   buildRuntime: function() {
     execOrDie(`${gulp} clean`);
     execOrDie(`${gulp} lint`);
@@ -234,6 +241,7 @@ const command = {
 
 function runAllCommands() {
   command.testBuildSystem();
+  command.testDocumentLinks();
   command.buildRuntime();
   command.presubmit();
   command.testRuntime();
@@ -280,12 +288,6 @@ function main(argv) {
     });
   }
 
-  if (buildTargets.length == 1 && buildTargets.has('DOCS')) {
-    console.log('Only docs were updated, stopping build process.');
-    stopTimer('pr-check.js', startTime);
-    return 0;
-  }
-
   //if (files.includes('package.json') ?
         //!files.includes('yarn.lock') : files.includes('yarn.lock')) {
     //console.error('pr-check.js - any update to package.json or yarn.lock ' +
@@ -305,6 +307,10 @@ function main(argv) {
 
   if (buildTargets.has('BUILD_SYSTEM')) {
     command.testBuildSystem();
+  }
+
+  if (buildTargets.has('DOCS')) {
+    command.testDocumentLinks(files);
   }
 
   if (buildTargets.has('RUNTIME')) {
