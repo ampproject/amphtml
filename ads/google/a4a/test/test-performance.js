@@ -35,24 +35,6 @@ function expectMatchesAll(address, matchList) {
   });
 }
 
-/**
- * Verify that `element` has at least one sibling DOM node that is an
- * `img` tag whose `src` matches all of the patterns in `matchList`.
- *
- * @param {!Element} element
- * @param {!Array<!RegExp>} matchList
- */
-function expectHasSiblingImgMatchingAll(element, matchList) {
-  const imgSiblings = toArray(element.parentElement.querySelectorAll('img'));
-  expect(imgSiblings).to.not.be.empty;
-  const result = imgSiblings.some(e => {
-    const src = e.getAttribute('src');
-    return matchList.map(m => m.test(src)).every(x => x);
-  });
-  expect(result, 'No element sibling of ' + element + ' matched all patterns')
-      .to.be.true;
-}
-
 describe('BaseLifecycleReporter', () => {
   describes.fakeWin('', {}, env => {
     let doc;
@@ -123,7 +105,7 @@ describe('GoogleAdLifecycleReporter', () => {
   });
 
   describe('#sendPing', () => {
-    it('should request a single ping and insert into DOM', () => {
+    it('should request a single ping', () => {
       return iframe.then(({viewer, elem, reporter}) => {
         const iniTime = reporter.initTime_;
         sandbox.stub(viewer, 'getFirstVisibleTime', () => iniTime + 11);
@@ -145,7 +127,6 @@ describe('GoogleAdLifecycleReporter', () => {
           /[&?]p_v2=12(&|$)/,
         ];
         expectMatchesAll(arg, expectations);
-        expectHasSiblingImgMatchingAll(elem, expectations);
       });
     });
 
@@ -183,7 +164,6 @@ describe('GoogleAdLifecycleReporter', () => {
           ];
           const arg = emitPingSpy.getCall(count++).args[0];
           expectMatchesAll(arg, expectations);
-          expectHasSiblingImgMatchingAll(elem, expectations);
         }
       });
     });
@@ -219,12 +199,10 @@ describe('GoogleAdLifecycleReporter', () => {
           }
         });
         expect(emitPingSpy.callCount).to.equal(nSlots * nStages);
-        const allImgNodes = toArray(doc.querySelectorAll('img'));
-        expect(allImgNodes.length).to.equal(nSlots * nStages);
         let commonCorrelator;
         const slotCounts = {};
-        allImgNodes.forEach(n => {
-          const src = n.getAttribute('src');
+        for (let i = 0; i < emitPingSpy.callCount; ++i) {
+          const src = emitPingSpy.getCall(i).args[0];
           expect(src).to.match(/[?&]s=test_foo(&|$)/);
           expect(src).to.match(/[?&]c=[0-9]+/);
           const corr = /[?&]c=([0-9]+)/.exec(src)[1];
@@ -233,7 +211,7 @@ describe('GoogleAdLifecycleReporter', () => {
           expect(corr).to.equal(commonCorrelator);
           slotCounts[slotId] = slotCounts[slotId] || 0;
           ++slotCounts[slotId];
-        });
+        };
         // SlotId 0 corresponds to unusedReporter, so ignore it.
         for (let s = 1; s <= nSlots; ++s) {
           expect(slotCounts[s], 'slotCounts[' + s + ']').to.equal(nStages);
@@ -258,7 +236,6 @@ describe('GoogleAdLifecycleReporter', () => {
           /gack=flubble/,
         ];
         expectMatchesAll(arg, expectations);
-        expectHasSiblingImgMatchingAll(elem, expectations);
       });
     });
 
@@ -294,7 +271,6 @@ describe('GoogleAdLifecycleReporter', () => {
           /baz=0/,
         ];
         expectMatchesAll(arg, expectations);
-        expectHasSiblingImgMatchingAll(elem, expectations);
       });
     });
 
@@ -333,7 +309,6 @@ describe('GoogleAdLifecycleReporter', () => {
           /zort=[0-9.]+/,
         ];
         expectMatchesAll(arg, expectations);
-        expectHasSiblingImgMatchingAll(elem, expectations);
       });
     });
   });
@@ -353,7 +328,6 @@ describe('GoogleAdLifecycleReporter', () => {
           /[&?]s=test_foo/,
         ];
         expectMatchesAll(arg, expectations);
-        expectHasSiblingImgMatchingAll(elem, expectations);
       });
     });
 
@@ -372,7 +346,6 @@ describe('GoogleAdLifecycleReporter', () => {
           /zort=12345/,
         ];
         expectMatchesAll(arg, expectations);
-        expectHasSiblingImgMatchingAll(elem, expectations);
       });
     });
 
@@ -393,7 +366,6 @@ describe('GoogleAdLifecycleReporter', () => {
           /flub=0/,
         ];
         expectMatchesAll(arg, expectations);
-        expectHasSiblingImgMatchingAll(elem, expectations);
       });
     });
   });
