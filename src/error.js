@@ -23,6 +23,7 @@ import {
 import {
   USER_ERROR_SENTINEL,
   isUserErrorMessage,
+  duplicateErrorIfNecessary,
 } from './log';
 import {isProxyOrigin} from './url';
 import {isCanary, experimentTogglesOrNull} from './experiments';
@@ -88,6 +89,7 @@ export function reportError(error, opt_associatedElement) {
     let isValidError;
     if (error) {
       if (error.message !== undefined) {
+        error = duplicateErrorIfNecessary(/** @type {!Error} */(error));
         isValidError = true;
       } else {
         const origError = error;
