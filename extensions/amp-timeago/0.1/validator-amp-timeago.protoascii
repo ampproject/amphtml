@@ -34,12 +34,16 @@ tags: {  # <amp-timeago>
   attrs: {
     name: "datetime"
     mandatory: true
-    value_regex: "\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d(:[0-5]\\d(\\.\\d+)\\?)\\?Z"
+    # Regex: \d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d(:[0-5]\d(\.\d+)?)?Z
+    # Values such as: 2017-04-11T00:37:33.809Z
+    value_regex: "\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d(:[0-5]\\d(\\.\\d+)\?)\?Z"
   }
   attrs: { name: "locale" }
   attr_lists: "extended-amp-global"
   cdata: {
-    cdata_regex: "\\w+"
+    # Regex: \s*[\w.]+(\s*[\w.]+)*\s*
+    # CDATA such as: Saturday 11 April 2017 00.37
+    cdata_regex: "\\s*[\\w\\.]+(\\s*[\\w\\.]+)*\\s*"
   }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-timeago"
   amp_layout: {
