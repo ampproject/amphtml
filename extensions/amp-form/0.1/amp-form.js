@@ -50,8 +50,11 @@ import {
   getFormValidator,
   isCheckValiditySupported,
 } from './form-validators';
-import {getFormVerifier} from './form-verifiers';
-import {deepMerge, map} from '../../../src/utils/object';
+import {
+  FORM_VERIFY_PARAM,
+  getFormVerifier,
+} from './form-verifiers';
+import {deepMerge} from '../../../src/utils/object';
 
 
 /** @type {string} */
@@ -184,9 +187,11 @@ export class AmpForm {
 
     const inputs = this.form_.elements;
     for (let i = 0; i < inputs.length; i++) {
-      user().assert(!inputs[i].name ||
-          inputs[i].name != SOURCE_ORIGIN_PARAM,
-          'Illegal input name, %s found: %s', SOURCE_ORIGIN_PARAM, inputs[i]);
+      const name = inputs[i].name;
+      user().assert(!name ||
+          (name != SOURCE_ORIGIN_PARAM &&
+          name != FORM_VERIFY_PARAM),
+          'Illegal input name, %s found: %s', name, inputs[i]);
     }
 
     /** @const @private {!./form-validators.FormValidator} */
@@ -336,6 +341,11 @@ export class AmpForm {
     }
   }
 
+  /**
+   * Get form fields that require variable substitutions
+   * @return {!IArrayLike<!HTMLInputElement>}
+   * @private
+   */
   getVarSubsFields_() {
     // Only allow variable substitutions for inputs if the form action origin
     // is the canonical origin.
@@ -366,21 +376,27 @@ export class AmpForm {
     return this.isCanonicalAction_ = parseUrl(url).origin == canonicalOrigin;
   }
 
+  /**
+   * Send the verify request and control the VERIFYING state.
+   * @return {!Promise}
+   * @private
+   */
   handleXhrVerify_() {
     if (this.state_ === FormState_.SUBMITTING) {
-      return;
+      return Promise.resolve();
     }
-
     this.setState_(FormState_.VERIFYING);
-    const verifyXhr = this.doVarSubs_(this.getVarSubsFields_()).then(
-        () => this.doXhr_(map({verify: true})));
+
+    const verifyXhr = this.doVarSubs_(this.getVarSubsFields_())
+        .then(() => this.doXhr_({[FORM_VERIFY_PARAM]: true}));
     const reset = () => this.setState_(FormState_.INITIAL);
     verifyXhr.then(reset, reset);
+
     return verifyXhr;
   }
 
   /**
-   * @param {IArrayLike<!HTMLInputElement>} varSubsFields
+   * @param {!IArrayLike<!HTMLInputElement>} varSubsFields
    * @private
    */
   handleXhrSubmit_(varSubsFields) {
@@ -388,19 +404,27 @@ export class AmpForm {
     this.setState_(FormState_.SUBMITTING);
 
     const p = this.doVarSubs_(varSubsFields)
-    .then(() => {
-      this.triggerFormSubmitInAnalytics_();
-      this.actions_.trigger(this.form_, 'submit', /*event*/ null);
-    })
-    .then(() => this.doXhr_())
-    .then(response => this.handleXhrSubmitSuccess_(response),
-        error => this.handleXhrSubmitFailure_(error));
+        .then(() => {
+          this.triggerFormSubmitInAnalytics_();
+          this.actions_.trigger(this.form_, 'submit', /*event*/ null);
+        })
+        .then(() => this.doXhr_())
+        .then(response => this.handleXhrSubmitSuccess_(response),
+            error => this.handleXhrSubmitFailure_(
+                /** @type {!../../../src/service/xhr-impl.FetchError} */ (
+                    error)));
 
     if (getMode().test) {
       this.xhrSubmitPromise_ = p;
     }
   }
 
+  /**
+   * Perform asynchronous variable substitution on the fields that require it.
+   * @param {!IArrayLike<!HTMLInputElement>} varSubsFields
+   * @return {!Promise}
+   * @private
+   */
   doVarSubs_(varSubsFields) {
     const varSubPromises = [];
     for (let i = 0; i < varSubsFields.length; i++) {
@@ -411,7 +435,9 @@ export class AmpForm {
   }
 
   /**
+   * Send a request to the form's action endpoint.
    * @param {!Object<string, string>=} opt_extraValues
+   * @private
    */
   doXhr_(opt_extraValues) {
     const isHeadOrGet = this.method_ == 'GET' || this.method_ == 'HEAD';
@@ -436,29 +462,36 @@ export class AmpForm {
     });
   }
 
+  /**
+   * Transition the form to the submit success state.
+   * @param {../../../src/service/xhr-impl.FetchResponse} response
+   * @return {!Promise}
+   * @private
+   */
   handleXhrSubmitSuccess_(response) {
     return response.json().then(json => {
       this.triggerAction_(/* success */ true, json);
       this.analyticsEvent_('amp-form-submit-success');
       this.setState_(FormState_.SUBMIT_SUCCESS);
       this.renderTemplate_(json || {});
-      this.maybeHandleRedirect_(
-          /** @type {../../../src/service/xhr-impl.FetchResponse} */ (
-              response));
+      this.maybeHandleRedirect_(response);
     }, error => {
       rethrowAsync('Failed to parse response JSON:', error);
     });
   }
 
+  /**
+   * Transition the form the the submit error state.
+   * @param {../../../src/service/xhr-impl.FetchError} error
+   * @private
+   */
   handleXhrSubmitFailure_(error) {
     this.triggerAction_(
         /* success */ false, error ? error.responseJson : null);
     this.analyticsEvent_('amp-form-submit-error');
     this.setState_(FormState_.SUBMIT_ERROR);
     this.renderTemplate_(error.responseJson || {});
-    this.maybeHandleRedirect_(
-        /** @type {../../../src/service/xhr-impl.FetchResponse} */ (
-            error));
+    this.maybeHandleRedirect_(error.response);
     rethrowAsync('Form submission failed:', error);
   }
 

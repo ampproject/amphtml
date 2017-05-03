@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
+import {LastAddedResolver} from '../../../src/utils/promise';
+import {dev, user} from '../../../src/log';
 import {
   childElementByTag,
   isJsonScriptTag,
-  scopedQuerySelectorAll,
 } from '../../../src/dom';
+import {getMode} from '../../../src/mode';
 import {tryParseJson} from '../../../src/json';
 
 /** @visibleForTesting */
 export const CONFIG_KEY = 'verificationGroups';
+
+export const FORM_VERIFY_PARAM = '__amp_form_verify';
 
 /**
  * @typedef {{
@@ -52,7 +55,7 @@ export function getFormVerifier(form, xhr) {
     const config = dev().assert(parseConfig_(configTag));
     return new AsyncVerifier(form, config, xhr);
   } else {
-    return new DefaultVerifier(form, [], xhr);
+    return new DefaultVerifier(form, []);
   }
 }
 
@@ -73,22 +76,20 @@ function getConfig_(form) {
 function parseConfig_(script) {
   if (isJsonScriptTag(script)) {
     const json = tryParseJson(script.textContent, () => {
-      throw new Error('Failed to parse amp-form config. Is it valid JSON?');
+      throw user().createError(
+          'Failed to parse amp-form config. Is it valid JSON?');
     });
     const config = json && json[CONFIG_KEY];
     if (!config || !config.length) {
-      throw new Error(`The amp-form verification config should contain an array
-        property ${CONFIG_KEY} with at least one element`);
+      throw user().createError('The amp-form verification config should ' +
+          `contain an array property ${CONFIG_KEY} with at least one element`);
     }
     return config.map(group => {
-      const selector = group.elements.join(',');
       const form = dev().assertElement(script.parentElement);
-      const elements = Array.prototype.slice.call(
-          scopedQuerySelectorAll(form, selector));
-      return new VerificationGroup(elements);
+      return new VerificationGroup(group.elements.map(name => form[name]));
     });
   } else {
-    throw new Error('The amp-form verification config should ' +
+    throw user().createError('The amp-form verification config should ' +
         'be put in a <script> tag with type="application/json"');
   }
 }
@@ -100,22 +101,19 @@ function parseConfig_(script) {
  * values against sets of data too large to fit in browser memory
  * e.g. ensuring zip codes match with cities.
  * @visibleForTesting
+ * @abstract
  */
 export class FormVerifier {
   /**
    * @param {!HTMLFormElement} form
    * @param {!Array<!VerificationGroup>} groups
-   * @param {function():Promise<!../../../src/service/xhr-impl.FetchResponse>} xhr
    */
-  constructor(form, groups, xhr) {
+  constructor(form, groups) {
     /** @protected @const */
     this.form_ = form;
 
     /** @protected @const {!Array<!VerificationGroup>} */
     this.groups_ = groups;
-
-    /** @protected @const*/
-    this.doXhr_ = xhr;
   }
 
   /**
@@ -145,6 +143,33 @@ export class DefaultVerifier extends FormVerifier { }
  * @visibleForTesting
  */
 export class AsyncVerifier extends FormVerifier {
+  /**
+   * @param {!HTMLFormElement} form
+   * @param {!Array<!VerificationGroup>} groups
+   * @param {function():Promise<!../../../src/service/xhr-impl.FetchResponse>} xhr
+   */
+  constructor(form, groups, xhr) {
+    super(form, groups);
+
+    /** @protected @const*/
+    this.doXhr_ = xhr;
+
+    /** @protected {?LastAddedResolver} */
+    this.xhrResolver_ = null;
+
+    /** @private {?Promise} */
+    this.xhrVerifyPromise_ = null;
+  }
+
+  /**
+   * Returns a promise that resolves when xhr verify finishes. the promise
+   * will be null if verify submit has not started.
+   * @visibleForTesting
+   */
+  xhrVerifyPromiseForTesting() {
+    return this.xhrVerifyPromise_;
+  }
+
   /** @override */
   onMutate(input) {
     const group = this.getGroup_(input);
@@ -168,14 +193,41 @@ export class AsyncVerifier extends FormVerifier {
    */
   maybeVerify_(afterVerify) {
     if (this.shouldVerify_()) {
-      this.doXhr_().then(() => {
+      const xhrConsumeErrors = this.doXhr_().then(() => {
         return [];
       }, error => {
-        return getResponseErrorData_(/** @type {!Error} */ (error));
-      })
-      .then(errors => this.verify_(errors))
-      .then(updatedElements => afterVerify(updatedElements));
+        // A 400 error response should be handled here.
+        return getResponseErrorData_(
+            /** @type {!../../../src/service/xhr-impl.FetchError} */ (error));
+      });
+
+      const p = this.addToResolver_(xhrConsumeErrors)
+          .then(errors => this.verify_(errors))
+          .then(updatedElements => afterVerify(updatedElements));
+
+      if (getMode().test) {
+        this.xhrVerifyPromise_ = p;
+      }
     }
+  }
+
+  /**
+   * Prevent race conditions from XHRs that arrive out of order by resolving
+   * only the most recently initiated XHR.
+   * TODO(cvializ): Replace this when the Fetch API adds cancelable fetches.
+   * @param {!Promise} promise
+   * @return {!Promise} The resolver result promise
+   */
+  addToResolver_(promise) {
+    if (!this.xhrResolver_) {
+      this.xhrResolver_ = new LastAddedResolver();
+      const cleanup = () => {
+        this.xhrResolver_ = null;
+      };
+      this.xhrResolver_.get().then(cleanup, cleanup);
+    }
+    this.xhrResolver_.add(promise);
+    return this.xhrResolver_.get();
   }
 
   /**
@@ -331,7 +383,7 @@ class VerificationGroup {
 }
 
 /**
- * @param {!Error} error
+ * @param {!../../../src/service/xhr-impl.FetchError} error
  * @return {!Array<VerificationErrorDef>}
  * @private
  */

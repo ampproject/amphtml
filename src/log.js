@@ -64,6 +64,27 @@ export function setReportError(fn) {
 }
 
 /**
+ * An extensible cross-browser error class that correctly supports messages,
+ * stack traces, and instanceof for subclasses.
+ * @abstract
+ */
+export class AbstractError extends Error {
+  /**
+   * @param {string} message
+   */
+  constructor(message) {
+    super(message);
+    this.message = message;
+    this.name = this.constructor.name;
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, this.constructor);
+    } else {
+      this.stack = (new Error(message)).stack;
+    }
+  }
+}
+
+/**
  * Logging class.
  * @final
  * @private Visible for testing only.
@@ -239,6 +260,18 @@ export class Log {
     const error = createErrorVargs.apply(null, arguments);
     this.prepareError_(error);
     return error;
+  }
+
+  /**
+   * A convenience wrapper around createError. Allows creating custom error
+   * types without needing to cast the result to the correct type.
+   * @param {!T} unusedError
+   * @param {...*} var_args
+   * @return {!T}
+   * @template T
+   */
+  createCustomError(unusedError, var_args) {
+    return this.createError.apply(this, arguments);
   }
 
   /**

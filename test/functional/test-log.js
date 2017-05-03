@@ -15,6 +15,7 @@
  */
 
 import {
+  AbstractError,
   Log,
   LogLevel,
   USER_ERROR_SENTINEL,
@@ -671,6 +672,22 @@ describe('Logging', () => {
       expect(duplicate.stack).to.equal(error.stack);
       expect(duplicate.args).to.equal(error.args);
       expect(duplicate.associatedElement).to.equal(error.associatedElement);
+    });
+  });
+
+  describe('AbstractError', () => {
+    it('should behave as a proper subclass of Error', () => {
+      class MyError extends AbstractError {}
+
+      const message = 'error!';
+      const myerror = new MyError(message);
+
+      expect(myerror).to.be.an.instanceof(Error);
+      expect(myerror).to.be.an.instanceof(AbstractError);
+      expect(myerror).to.be.an.instanceof(MyError);
+      expect(myerror.message).to.equal(message);
+      expect(myerror.name).to.equal('MyError');
+      expect(myerror.stack).to.contain('MyError');
     });
   });
 });

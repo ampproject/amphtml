@@ -26,11 +26,11 @@ describes.fakeWin('amp-form async verification', {}, env => {
     "${CONFIG_KEY}": [
       {
         "name": "uniqueEmail",
-        "elements": ["[name='email']"]
+        "elements": ["email"]
       },
       {
         "name": "fullAddress",
-        "elements": ["[name='addressLine2']", "[name='city']", "[name='zip']"]
+        "elements": ["addressLine2", "city", "zip"]
       }
     ]
   }`;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev, user} from '../log';
+import {AbstractError, dev, user} from '../log';
 import {registerServiceBuilder, getService} from '../service';
 import {
   getSourceOrigin,
@@ -43,6 +43,26 @@ import {utf8EncodeSync} from '../utils/bytes';
  * }}
  */
 export let FetchInitDef;
+
+/**
+ * A custom error that encapsulates an XHR error message
+ * with the corresponding response data.
+ */
+export class FetchError extends AbstractError {
+  /**
+   * @param {string} message
+   * @param {!FetchResponse} response
+   * @param {boolean} retriable
+   * @param {?JSONType=} opt_responseJson
+   */
+  constructor(message, response, retriable, opt_responseJson) {
+    super(message);
+    this.response = response;
+    this.retriable = retriable;
+    this.responseJson = opt_responseJson;
+  }
+}
+
 
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
@@ -407,13 +427,11 @@ function isRetriable(status) {
  */
 export function assertSuccess(response) {
   return new Promise((resolve, reject) => {
-    if (response.status < 200 || response.status >= 300) {
-      /** @const {!Error} */
-      const err = user().createError(`HTTP error ${response.status}`);
-      err.response = response;
-      if (isRetriable(response.status)) {
-        err.retriable = true;
-      }
+    const status = response.status;
+    if (status < 200 || status >= 300) {
+      const retriable = isRetriable(status);
+      const err = user().createCustomError(
+          new FetchError(`HTTP error ${status}`, response, retriable));
       const contentType = response.headers.get('Content-Type') || '';
       if (contentType.split(';')[0] == 'application/json') {
         response.json().then(json => {

@@ -243,6 +243,7 @@ app.use('/form/verify-search-json/post', function(req, res) {
           {title: 'Result 2'},
           {title: 'Result 3'},
         ],
+        committed: true
       }));
     } else {
       res.statusCode = 400;
