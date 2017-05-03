@@ -323,7 +323,7 @@ async@1.4.0, async@^1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/async/-/async-1.4.0.tgz#35f86f83c59e0421d099cd9a91d8278fb578c00d"
 
-async@^2.0.1:
+async@^2.0.1, async@^2.1.4:
   version "2.1.4"
   resolved "https://registry.yarnpkg.com/async/-/async-2.1.4.tgz#2d2160c7788032e4dd6cbe2502f1f9a2c8f6cde4"
   dependencies:
@@ -4115,6 +4115,12 @@ is-redirect@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/is-redirect/-/is-redirect-1.0.0.tgz#1d03dded53bd8db0f30c26e4f95d36fc7c87dc24"
 
+is-relative-url@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/is-relative-url/-/is-relative-url-2.0.0.tgz#72902d7fe04b3d4792e7db15f9db84b7204c9cef"
+  dependencies:
+    is-absolute-url "^2.0.0"
+
 is-relative@^0.2.1:
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/is-relative/-/is-relative-0.2.1.tgz#d27f4c7d516d175fb610db84bbeef23c3bc97aa5"
@@ -4178,6 +4184,10 @@ isarray@1.0.0, isarray@^1.0.0, isarray@~1.0.0:
 isbinaryfile@^3.0.0:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/isbinaryfile/-/isbinaryfile-3.0.2.tgz#4a3e974ec0cba9004d3fc6cde7209ea69368a621"
+
+isemail@^2.2.1:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/isemail/-/isemail-2.2.1.tgz#0353d3d9a62951080c262c2aa0a42b8ea8e9e2a6"
 
 isexe@^1.1.1:
   version "1.1.2"
@@ -4577,6 +4587,14 @@ line-numbers@0.2.0:
   resolved "https://registry.yarnpkg.com/line-numbers/-/line-numbers-0.2.0.tgz#6bc028149440e570d495ab509692aa08bd779c6e"
   dependencies:
     left-pad "0.0.3"
+
+link-check@^4.0.2:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/link-check/-/link-check-4.0.2.tgz#67b103865ea8b0a9d8070f3dec77b27c2715ef11"
+  dependencies:
+    is-relative-url "^2.0.0"
+    isemail "^2.2.1"
+    request "^2.79.0"
 
 load-json-file@^1.0.0, load-json-file@^1.1.0:
   version "1.1.0"
@@ -4983,7 +5001,7 @@ lodash@3.10.1, lodash@^3.1.0, lodash@^3.10.0, lodash@^3.10.1, lodash@^3.3.1, lod
   version "3.10.1"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-3.10.1.tgz#5bf45e8e49ba4189e17d482789dfd15bd140b7b6"
 
-lodash@^4.0.0, lodash@^4.13.1, lodash@^4.14.0, lodash@^4.2.0, lodash@^4.3.0:
+lodash@^4.0.0, lodash@^4.13.1, lodash@^4.14.0, lodash@^4.17.4, lodash@^4.2.0, lodash@^4.3.0:
   version "4.17.4"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.4.tgz#78203a4d1c328ae1d86dca6460e369b57f4055ae"
 
@@ -5071,6 +5089,28 @@ map-obj@^1.0.0, map-obj@^1.0.1:
 map-stream@~0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/map-stream/-/map-stream-0.1.0.tgz#e56aa94c4c8055a16404a0674b78f215f7c8e194"
+
+markdown-link-check@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/markdown-link-check/-/markdown-link-check-3.0.3.tgz#6e2357e822d1254deebfa44e83a1881be86889e2"
+  dependencies:
+    async "^2.1.4"
+    chalk "^1.1.3"
+    commander "^2.9.0"
+    link-check "^4.0.2"
+    lodash "^4.17.4"
+    markdown-link-extractor "^1.1.0"
+    request "^2.79.0"
+
+markdown-link-extractor@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/markdown-link-extractor/-/markdown-link-extractor-1.1.0.tgz#7029e812a449437502b7e507af243b54c225d86c"
+  dependencies:
+    marked "^0.3.5"
+
+marked@^0.3.5:
+  version "0.3.6"
+  resolved "https://registry.yarnpkg.com/marked/-/marked-0.3.6.tgz#b2c6c618fccece4ef86c4fc6cb8a7cbf5aeda8d7"
 
 matcher@^0.1.1:
   version "0.1.2"

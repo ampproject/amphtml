@@ -25,6 +25,7 @@
  */
 const child_process = require('child_process');
 const path = require('path');
+const markdownLinkCheck = require('markdown-link-check');
 const minimist = require('minimist');
 const util = require('gulp-util');
 
@@ -162,6 +163,24 @@ function isFlagConfig(filePath) {
 }
 
 /**
+ * Tests the links in the given file after filtering out localhost links, since
+ * they do not work on Travis.
+ * @param {string} file Path of file name relative to src root.
+ */
+function testLinks(file) {
+  console.log('Testing links in ' + file + '...');
+  markdownLinkCheck('[google](http://google.com)', function (err, results) {
+      if (err) {
+          console.error('Error', err);
+          return;
+      }
+      results.forEach(function (result) {
+          console.log('%s is %s', result.link, result.status);
+      });
+  });
+}
+
+/**
  * Determines the targets that will be executed by the main method of
  * this script. The order within this function matters.
  * @param {!Array<string>} filePaths
@@ -202,9 +221,9 @@ const command = {
     execOrDie('npm run ava');
   },
   testDocumentLinks: function(files) {
-    files.forEach((file) => {
+    files.forEach(file => {
       if (isDocFile(file)) {
-        execOrDie('build-system/test-links.sh ' + file);
+        testLinks(file);
       }
     });
   },
@@ -281,7 +300,7 @@ function main(argv) {
         console.log(util.colors.yellow(
             'A full sync to upstream/master should clear this error.'));
         console.log('\nFull list of files in this PR:');
-        files.forEach((file) => { console.log('\t' + file); });
+        files.forEach(file => { console.log('\t' + file); });
         stopTimer('pr-check.js', startTime);
         process.exit(1);
       }
