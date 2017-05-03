@@ -76,16 +76,14 @@ class AmpStickyAd extends AMP.BaseElement {
     const customApiPromise = new Promise(resolve => {
       customApiResolver = resolve;
     });
-    if (this.ad_.whenBuilt) {
+    if (false && this.ad_.whenBuilt) {
       customApiResolver();
     } else {
       // Give 1s for amp-ad to stub. Report 1% error.
       if (Math.random() < 0.01) {
         dev().error(TAG, 'race condition on customElement stubbing');
       }
-      timerFor(this.win).delay(() => {
-        customApiResolver();
-      }, 1000);
+      timerFor(this.win).delay(customApiResolver, 1000);
     }
     customApiPromise.then(() => {
       this.ad_.whenBuilt().then(() => {
