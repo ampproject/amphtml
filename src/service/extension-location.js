@@ -18,11 +18,6 @@ import {urls} from '../config';
 import {getMode} from '../mode';
 
 /**
- * The default extension version to use when none is specified.
- */
-export const DefaultExtensionVersion = '0.1';
-
-/**
  * Calculate the base url for any scripts.
  * @param {!Location} location The window's location
  * @param {boolean=} isLocalDev
@@ -44,7 +39,7 @@ function calculateScriptBaseUrl(location, isLocalDev) {
  * @return {string}
  */
 export function calculateExtensionScriptUrl(location, extensionId,
-    extensionVer = DefaultExtensionVersion, isLocalDev) {
+    extensionVer, isLocalDev) {
   const base = calculateScriptBaseUrl(location, isLocalDev);
   return `${base}/rtv/${getMode().rtvVersion}/v0/`
       + `${extensionId}-${extensionVer}.js`;

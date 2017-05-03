@@ -38,10 +38,7 @@ import {
 import {installImg} from '../../builtins/amp-img';
 import {installPixel} from '../../builtins/amp-pixel';
 import {installStyles} from '../style-installer';
-import {
-  calculateExtensionScriptUrl,
-  DefaultExtensionVersion,
-} from './extension-location';
+import {calculateExtensionScriptUrl} from './extension-location';
 
 const TAG = 'extensions';
 const UNKNOWN_EXTENSION = '_UNKNOWN_';
@@ -257,13 +254,11 @@ export class Extensions {
    * @param {boolean=} stubElement
    * @return {!Promise<!ExtensionDef>}
    */
-  loadExtension(extensionId,
-      extensionVer = DefaultExtensionVersion, stubElement = true) {
+  loadExtension(extensionId, extensionVer, stubElement = true) {
     if (extensionId == 'amp-embed') {
       extensionId = 'amp-ad';
     }
     const holder = this.getExtensionHolder_(extensionId);
-    extensionVer = extensionVer ? extensionVer : DefaultExtensionVersion;
     this.insertExtensionScriptIfNeeded_(
         extensionId, extensionVer, holder, stubElement);
     return this.waitFor_(holder);
