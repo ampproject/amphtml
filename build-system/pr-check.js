@@ -26,7 +26,6 @@
 const chalk = require('chalk');
 const child_process = require('child_process');
 const path = require('path');
-const markdownLinkCheck = require('markdown-link-check');
 const minimist = require('minimist');
 const util = require('gulp-util');
 

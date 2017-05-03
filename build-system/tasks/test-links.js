@@ -15,22 +15,29 @@
  */
 
 var argv = require('minimist')(process.argv.slice(2));
+var chalk = require('chalk');
 var child_process = require('child_process');
+var fs = require('fs-extra');
 var gulp = require('gulp-help')(require('gulp'));
+var markdownLinkCheck = require('markdown-link-check');
+var path = require('path');
 var util = require('gulp-util');
 
 /**
- * Executes the provided command, returning its stdout as an array of lines.
- * This will throw an exception if something goes wrong.
+ * Executes the provided command; terminates this program in case of failure.
+ * Copied from pr-check.js.
  * TODO(rsimha-amp): Refactor this into a shared library. Issue #9038.
- * 
+ *
  * @param {string} cmd
- * @return {!Array<string>}
  */
-function exec(cmd) {
-  return child_process.execSync(cmd, {'encoding': 'utf-8'}).trim().split('\n');
+function execOrDie(cmd) {
+  var p =
+      child_process.spawnSync('/bin/sh', ['-c', cmd], {'stdio': 'inherit'});
+  if (p.status != 0) {
+    console/*OK*/.log('\nExiting due to failing command: ' + cmd);
+    process.exit(p.status)
+  }
 }
-
 
 /**
  * Looks for dead links in the given list of files.
@@ -45,37 +52,35 @@ function testFiles() {
     process.exit(1);
   }
   util.log('Files: ', util.colors.magenta(files));
-  // files.split(',').forEach(testLinks);
+  files.split(',').forEach(function(file) {
+    var filtered_file = filterLocalhostLinks(file);
+    checkLinks(filtered_file);
+  });
 }
 
+/**
+ * Reads the raw contents in the given markdown file into a string, filters out
+ * localhost links (because they do not resolve on Travis), and rewrites the
+ * contents to a new file.
+ *
+ * @param {string} file Path of file, relative to src root.
+ * @return {string} Path of the newly created file, relative to src root.
+ */
+function filterLocalhostLinks(file) {
+  var contents = fs.readFileSync(file).toString();
+  var filtered_contents = contents.replace(/http:\/\/localhost:8000\//g, '');
+  var filtered_file = file + '_without_localhost_links';
+  fs.writeFile(filtered_file, filtered_contents);
+  return filtered_file;
+}
 
 /**
- * Tests the links in the given file after filtering out localhost links, since
- * they do not work on Travis.
- * @param {string} file Path of file name relative to src root.
+ * Tests the links in the given file.
+ * @param {string} file Path of file, relative to src root.
  */
-function testLinks() {
-  console.log('Testing links in ' + util.colors.magenta(file) + '...');
-  markdownLinkCheck('[example](http://example.com)', function (err, results) {
-    console.log('Processing results');
-    results.forEach(function (result) {
-      console.log('Testing ' + result.link);
-      if(result.link.startsWith('http://localhost:8000/')) {
-        console.log('[?] %s (Cannot test localhost links.)', result.link);
-        return;
-      }
-      if(result.status === 'dead') {
-        error = true;
-        console.log('[%s] %s', chalk.red('✖'), result.link);
-      } else {
-        console.log('[%s] %s', chalk.green('✓'), result.link);
-      }
-    });
-    if(error) {
-      console.error(chalk.red('\nERROR: dead links found!'));
-      process.exit(1);
-    }
-  });
+function checkLinks(file) {
+  util.log('Filtered file: ', file);
+  execOrDie('markdown-link-check ' + file);
 }
 
 gulp.task('test-links', 'Detects dead links in markdown files', testFiles, {
