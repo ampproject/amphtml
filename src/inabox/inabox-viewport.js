@@ -75,7 +75,7 @@ export class ViewportBindingInabox {
      */
     this.boxRect_ = layoutRectLtwh(0, boxHeight + 1, boxWidth, boxHeight);
 
-    /** @private @const {!IframeMessagingClient} */
+    /** @private @const {!../../3p/iframe-messaging-client.IframeMessagingClient} */
     this.iframeClient_ = iframeMessagingClientFor(win);
 
     dev().fine(TAG, 'initialized inabox viewport');
