@@ -163,36 +163,6 @@ function isFlagConfig(filePath) {
 }
 
 /**
- * Tests the links in the given file after filtering out localhost links, since
- * they do not work on Travis.
- * @param {string} file Path of file name relative to src root.
- */
-function testLinks(file) {
-  "use strict";
-  console.log('Testing links in ' + file + '...');
-  markdownLinkCheck('[example](http://example.com)', function (err, results) {
-    console.log('Processing results');
-    results.forEach(function (result) {
-      console.log('Testing ' + result.link);
-      if(result.link.startsWith('http://localhost:8000/')) {
-        console.log('[?] %s (Cannot test localhost links.)', result.link);
-        return;
-      }
-      if(result.status === 'dead') {
-        error = true;
-        console.log('[%s] %s', chalk.red('✖'), result.link);
-      } else {
-        console.log('[%s] %s', chalk.green('✓'), result.link);
-      }
-    });
-    if(error) {
-      console.error(chalk.red('\nERROR: dead links found!'));
-      process.exit(1);
-    }
-  });
-}
-
-/**
  * Determines the targets that will be executed by the main method of
  * this script. The order within this function matters.
  * @param {!Array<string>} filePaths
@@ -233,11 +203,13 @@ const command = {
     execOrDie('npm run ava');
   },
   testDocumentLinks: function(files) {
+    let docFiles = [];
     files.forEach(file => {
       if (isDocFile(file)) {
-        testLinks(file);
+        docFiles.push(file);
       }
     });
+    execOrDie(`${gulp} test-links --files ${docFiles.join(',')}`);
   },
   buildRuntime: function() {
     execOrDie(`${gulp} clean`);
