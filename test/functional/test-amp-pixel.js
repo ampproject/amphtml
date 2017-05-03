@@ -124,21 +124,6 @@ describes.realWin('amp-pixel', {amp: true}, env => {
     });
   });
 
-  it('should respect referrerpolicy=no-referrer', () => {
-    const url = 'https://pubads.g.doubleclick.net/activity';
-    createPixel(url, 'no-referrer');
-    return trigger(url).then(element => {
-      if (isReferrerPolicySupported()) {
-        expect(element.referrerPolicy).to.equal('no-referrer');
-      }
-      if (!element.src) {
-        // TODO(@lannka): Please remove the temporary fix
-        return;
-      }
-      expect(element.src).to.equal(url);
-    });
-  });
-
   it('should throw for referrerpolicy with value other than ' +
       'no-referrer', () => {
     expect(() => {
