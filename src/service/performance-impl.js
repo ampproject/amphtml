@@ -98,7 +98,7 @@ export class Performance {
     this.ampexp_ = '';
 
     // Add RTV version as experiment ID, so we can slice the data by version.
-    this.addEnabledExperiment(getMode(this.win).rtvVersion);
+    this.addEnabledExperiment('rtv-' + getMode(this.win).rtvVersion);
     if (isCanary(this.win)) {
       this.addEnabledExperiment('canary');
     }
