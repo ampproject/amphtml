@@ -314,7 +314,7 @@ export class AmpSelector extends AMP.BaseElement {
   }
 
   /**
-   * Handles keyboard events for the selectables.
+   * Handles keyboard events.
    * @param {!Event} event
    */
   keyDownHandler_(event) {
@@ -335,6 +335,11 @@ export class AmpSelector extends AMP.BaseElement {
     }
   }
 
+  /**
+   * Handles keyboard navigation events. Should not be called if
+   * keyboard selection is disabled.
+   * @param {!Event} event
+   */
   navigationKeyDownHandler_(event) {
     const isLtr = this.win.document.body.getAttribute('dir') != 'rtl';
     let dir = 0;
@@ -383,12 +388,17 @@ export class AmpSelector extends AMP.BaseElement {
     }
   }
 
+  /**
+   * Handles keyboard selection events.
+   * @param {!Event} event
+   */
   selectionKeyDownHandler_(event) {
     const keyCode = event.keyCode;
     if (keyCode == Keycodes.SPACE || keyCode == Keycodes.ENTER) {
-      event.preventDefault();
       if (this.options_.includes(event.target)) {
-        this.onOptionPicked_(event.target);
+        event.preventDefault();
+        const el = dev().assertElement(event.target);
+        this.onOptionPicked_(el);
       }
     }
   }
