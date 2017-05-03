@@ -536,7 +536,7 @@ describe.only('Logging', () => {
     let log;
     let reportedError;
 
-    beforeEach(function () {
+    beforeEach(function() {
       log = new Log(win, RETURNS_OFF);
       setReportError(function(e) {
         reportedError = e;
