@@ -46,7 +46,7 @@ function createIframeMessagingClient(win) {
   iframeClient.setSentinel(getRandom(win));
 
   // Bet the top window is the scrollable window and loads host script.
-  // TODOs:
+  // TODO(lannka,#9120):
   // 1) check window ancestor origin, if the top window is in same origin,
   // don't bother to use post messages.
   // 2) broadcast the request
