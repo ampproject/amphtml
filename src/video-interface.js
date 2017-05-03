@@ -208,4 +208,13 @@ export const VideoEvents = {
    * @property {boolean} visible Whether the video player is visible or not.
    */
   VISIBILITY: 'amp:video:visibility',
+
+  /**
+   * reload
+   *
+   * Fired when the video's src changes.
+   *
+   * @event reload
+   */
+  RELOAD: 'reloaded',
 };
