@@ -16,12 +16,29 @@
 
 var argv = require('minimist')(process.argv.slice(2));
 var chalk = require('chalk');
-var execSync = require('exec-sync');
+var child_process = require('child_process');
 var fs = require('fs-extra');
 var gulp = require('gulp-help')(require('gulp'));
 var markdownLinkCheck = require('markdown-link-check');
 var path = require('path');
 var util = require('gulp-util');
+
+
+/**
+ * Executes the provided command; terminates this program in case of failure.
+ * Copied from pr-check.js.
+ * TODO(rsimha-amp): Refactor this into a shared library. Issue #9038.
+ *
+ * @param {string} cmd
+ */
+function execOrDie(cmd) {
+  var p =
+      child_process.spawnSync('/bin/sh', ['-c', cmd], {'stdio': 'inherit'});
+  if (p.status != 0) {
+    console/*OK*/.log('\nExiting due to failing command: ' + cmd);
+    process.exit(p.status)
+  }
+}
 
 /**
  * Checks for dead links in the list of files.
@@ -37,7 +54,7 @@ function checkLinks() {
   }
   var markdownFiles = files.split(',');
   markdownFiles.forEach(function(markdownFile) {
-    util.log('Checking links in ', util.colors.magenta(files), '...');
+    util.log('Checking links in', util.colors.magenta(files), '...');
     var filteredMarkdownFile = filterLocalhostLinks(markdownFile);
     runLinkChecker(filteredMarkdownFile);
   });
@@ -54,10 +71,10 @@ function checkLinks() {
 function filterLocalhostLinks(markdownFile) {
   var contents = fs.readFileSync(markdownFile).toString();
   var filteredontents = contents.replace(/http:\/\/localhost:8000\//g, '');
-  var filteredMarkdownFile = markdownFile + '_without_localhost_links';
+  var filteredMarkdownFile = markdownFile + '.without_localhost_links';
   fs.writeFile(filteredMarkdownFile, filteredontents);
   util.log(
-      'Created copy without localhost links ',
+      'Created copy at',
       util.colors.magenta(filteredMarkdownFile));
   return filteredMarkdownFile;
 }
@@ -68,7 +85,7 @@ function filterLocalhostLinks(markdownFile) {
  */
 function runLinkChecker(filteredMarkdownFile) {
   var cmd = 'markdown-link-check ' + filteredMarkdownFile;
-  execSync(cmd);
+  execOrDie(cmd);
 }
 
 gulp.task('check-links', 'Detects dead links in markdown files', checkLinks, {
