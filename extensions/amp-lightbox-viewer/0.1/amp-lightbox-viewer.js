@@ -119,7 +119,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   buildCarousel_() {
     if (!this.carousel_) {
       dev().assert(this.container_);
-      extensionsFor(this.win)./*OK*/loadExtension('amp-carousel');
+      extensionsFor(this.win).loadExtension('amp-carousel');
       this.carousel_ = this.win.document.createElement('amp-carousel');
       this.carousel_.setAttribute('type', 'slides');
       this.carousel_.setAttribute('layout', 'fill');
@@ -129,13 +129,10 @@ export class AmpLightboxViewer extends AMP.BaseElement {
         this.vsync_.mutate(() => {
           let index = 0;
           lightboxableElements.forEach(element => {
-            element.setAttribute('amp-lbv-id', index++);
-            let nodeToClone;
-            if (element.classList.contains('i-amphtml-element')) {
-              nodeToClone = element.cloneNode(false);
-            } else {
-              nodeToClone = element.cloneNode(true);
-            }
+            element.lightboxItemId = index++;
+            const deepClone = !element.classList.contains(
+                'i-amphtml-element');
+            const nodeToClone = element.cloneNode(deepClone);
             this.carousel_.appendChild(nodeToClone);
           });
         });
@@ -244,8 +241,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.updateInViewport(this.container_, true);
     this.scheduleLayout(this.container_);
 
-    const index = Number(element.getAttribute('amp-lbv-id'));
-    this.carousel_.implementation_.showSlideWhenReady_(index);
+    this.carousel_.implementation_.showSlideWhenReady_(element.lightboxItemId);
 
     this.win.document.documentElement.addEventListener(
         'keydown', this.boundHandleKeyboardEvents_);

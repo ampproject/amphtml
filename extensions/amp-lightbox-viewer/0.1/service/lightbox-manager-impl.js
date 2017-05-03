@@ -165,15 +165,7 @@ export class LightboxManager {
    * @return {!Promise<?Array<!Element>>}
    */
   getElements() {
-    return this.maybeInit_().then(() => {
-      if (!this.elements_) {
-        this.scanLightboxables_().then(() => {
-          return this.elements_;
-        });
-      } else {
-        return this.elements_;
-      }
-    });
+    return this.maybeInit_().then(() => this.elements_);
   }
 
   /**
