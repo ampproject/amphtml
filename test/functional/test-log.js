@@ -27,7 +27,7 @@ import {
 } from '../../src/log';
 import * as sinon from 'sinon';
 
-describe('Logging', () => {
+describe.only('Logging', () => {
 
   const RETURNS_FINE = () => LogLevel.FINE;
   const RETURNS_INFO = () => LogLevel.INFO;
@@ -341,19 +341,6 @@ describe('Logging', () => {
       expect(error.messageArray).to.deep.equal([1, 'a', 2, 'b', 3]);
     });
 
-    it('reuse errors', () => {
-      expect(function() {
-        log.assert(false, 'should fail %s', 'XYZ', new Error('test'));
-      }).to.throw(/should fail XYZ: test/);
-
-      // #8917
-      if (typeof DOMException !== 'undefined') {
-        expect(function() {
-          log.assert(false, 'should fail %s', 'XYZ', new DOMException('test'));
-        }).to.throw(/should fail XYZ: test/);
-      }
-    });
-
     it('should add element and assert info', () => {
       const div = document.createElement('div');
       let error;
@@ -545,6 +532,45 @@ describe('Logging', () => {
     });
   });
 
+  describe('error', () => {
+    let log;
+    let reportedError;
+
+    beforeEach(function () {
+      log = new Log(win, RETURNS_OFF);
+      setReportError(function(e) {
+        reportedError = e;
+      });
+    });
+
+    it('reuse errors', () => {
+      let error = new Error('test');
+
+      log.error('TAG', error);
+      expect(reportedError).to.equal(error);
+      expect(error.message).to.equal('test');
+
+      log.error('TAG', 'should fail', 'XYZ', error);
+      expect(reportedError).to.equal(error);
+      expect(error.message).to.equal('should fail XYZ: test');
+
+      // #8917
+      try {
+        // This is an intentionally bad query selector
+        document.body.querySelector('#');
+      } catch (e) {
+        error = e;
+      }
+
+      log.error('TAG', error);
+      expect(reportedError).not.to.equal(error);
+      expect(reportedError.message).to.equal(error.message);
+
+      log.error('TAG', 'should fail', 'XYZ', error);
+      expect(reportedError).not.to.equal(error);
+      expect(reportedError.message).to.contain('should fail XYZ:');
+    });
+  });
 
   describe('rethrowAsync', () => {
     let clock;
