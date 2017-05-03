@@ -14,19 +14,37 @@
  * limitations under the License.
  */
 
+var app = module.exports = require('express').Router();
+
+app.get('/compose-doc', function(req, res) {
+  res.send(`
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="http://nonblocking.io/" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+${req.query.body}
+</body>
+</html>  
+`);
+});
+
 /**
  * A server side temporary request storage which is useful for testing
  * browser sent HTTP requests.
  */
-var app = require('express').Router();
-
 var bank = {};
 
 /**
  * Deposit a request. An ID has to be specified. Will override previous request
  * if the same ID already exists.
  */
-app.get('/deposit/:id', function(req, res) {
+app.get('/request-bank/deposit/:id', function(req, res) {
   if (typeof bank[req.params.id] === 'function') {
     bank[req.params.id](req);
   } else {
@@ -40,7 +58,7 @@ app.get('/deposit/:id', function(req, res) {
  * return it immediately. Otherwise wait until it gets deposited
  * The same request cannot be withdrawn twice at the same time.
  */
-app.get('/withdraw/:id', function(req, res) {
+app.get('/request-bank/withdraw/:id', function(req, res) {
   var result = bank[req.params.id];
   if (typeof result === 'function') {
     return res.status(500).send('another client is withdrawing this ID');
@@ -58,4 +76,3 @@ app.get('/withdraw/:id', function(req, res) {
   }
 });
 
-module.exports = app;

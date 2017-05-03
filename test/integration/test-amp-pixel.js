@@ -19,41 +19,22 @@ import {
   withdrawRequest,
 } from '../../testing/test-helper';
 
-describes.realWin('amp-pixel integration test', {
-  amp: {
-    runtimeOn: true,
-    ampdoc: 'single',
-  },
-  allowExternalResources: true,
+describes.integration('amp-pixel integration test', {
+  body: `<amp-pixel src="${depositRequestUrl('has-referrer')}">`,
 }, env => {
-
-  let win;
-  let doc;
-
-  beforeEach(() => {
-    win = env.win;
-    doc = win.document;
-  });
-
-  it.skip('should keep referrer', () => {
-    // TODO(@lannka): unskip this test
-    const pixel = doc.createElement('amp-pixel');
-    pixel.setAttribute('src', depositRequestUrl('has-referrer'));
-    doc.body.appendChild(pixel);
-
-    return withdrawRequest(win, 'has-referrer').then(request => {
+  it('should keep referrer if no referrerpolicy specified', () => {
+    return withdrawRequest(env.win, 'has-referrer').then(request => {
       expect(request.headers.referer).to.be.ok;
     });
   });
+});
 
-  it.skip('should remove referrer', () => {
-    // TODO(@lannka): unskip this test
-    const pixel = doc.createElement('amp-pixel');
-    pixel.setAttribute('src', depositRequestUrl('no-referrer'));
-    pixel.setAttribute('referrerpolicy', 'no-referrer');
-    doc.body.appendChild(pixel);
-
-    return withdrawRequest(win, 'no-referrer').then(request => {
+describes.integration('amp-pixel integration test', {
+  body: `<amp-pixel src="${depositRequestUrl('no-referrer')}" 
+             referrerpolicy="no-referrer">`,
+}, env => {
+  it('should remove referrer if referrerpolicy=no-referrer', () => {
+    return withdrawRequest(env.win, 'no-referrer').then(request => {
       expect(request.headers.referer).to.not.be.ok;
     });
   });
