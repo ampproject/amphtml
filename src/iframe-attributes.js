@@ -51,8 +51,7 @@ export function getContextMetadata(
 
   // TODO(alanorozco): Redesign data structure so that fields not exposed by
   // AmpContext are not part of this object.
-  const layoutRect = element.getPageLayoutBox ?
-      element.getPageLayoutBox() : element.getLayoutBox();
+  const layoutRect = element.getPageLayoutBox();
   attributes._context = {
     ampcontextVersion: '$internalRuntimeVersion$',
     ampcontextFilepath: urls.cdn + '/$internalRuntimeVersion$' +
