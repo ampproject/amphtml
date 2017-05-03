@@ -19,6 +19,7 @@ import {
     SIGNATURE_HEADER,
     TEST_URL,
 } from './utils';
+import {decodeSignatureHeader} from '../amp-a4a';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {createIframePromise} from '../../../../testing/iframe';
 import {
@@ -213,7 +214,7 @@ describe('integration test: a4a', () => {
         sandbox.stub(MockA4AImpl.prototype, 'extractCreativeAndSignature')
             .onFirstCall().returns({
               creative: null,
-              signature: validCSSAmp.signature,
+              signature: decodeSignatureHeader(validCSSAmp.signature),
               size: null,
             })
             .onSecondCall().throws(new Error(

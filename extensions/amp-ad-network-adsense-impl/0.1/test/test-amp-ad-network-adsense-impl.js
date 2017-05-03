@@ -27,7 +27,7 @@ import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-
 import {
   AmpAdXOriginIframeHandler,    // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
+import {base64DecodeToBytes} from '../../../../src/utils/base64';
 import {utf8Encode} from '../../../../src/utils/bytes';
 import {createIframePromise} from '../../../../testing/iframe';
 import {upgradeOrRegisterElement} from '../../../../src/custom-element';
@@ -344,53 +344,64 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
     });
     it('with signature', () => {
       return utf8Encode('some creative').then(creative => {
-        return impl.extractCreativeAndSignature(
-          creative,
-          {
-            get: function(name) {
-              return name == 'X-AmpAdSignature' ? 'AQAB' : undefined;
-            },
-            has: function(name) {
-              return name === 'X-AmpAdSignature';
-            },
-          }).then(adResponse => {
-            expect(adResponse).to.deep.equal(
-              {creative, signature: base64UrlDecodeToBytes('AQAB'),
-                size: null});
-            expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
-          });
+        return impl
+            .extractCreativeAndSignature(creative, {
+              get: function(name) {
+                return name == 'AMP-Fast-Fetch-Signature' ? 'google:test:AQAB' :
+                                                            undefined;
+              },
+              has: function(name) {
+                return name === 'AMP-Fast-Fetch-Signature';
+              },
+            })
+            .then(adResponse => {
+              expect(adResponse).to.deep.equal({
+                creative,
+                signatureInfo: {
+                  signingServiceName: 'google',
+                  keypairId: 'test',
+                  signature: base64DecodeToBytes('AQAB')
+                },
+                size: null,
+              });
+              expect(loadExtensionSpy.withArgs('amp-analytics'))
+                  .to.not.be.called;
+            });
       });
     });
     it('with analytics', () => {
       return utf8Encode('some creative').then(creative => {
         const url = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
-        return impl.extractCreativeAndSignature(
-          creative,
-          {
-            get: function(name) {
-              switch (name) {
-                case 'X-AmpAnalytics':
-                  return JSON.stringify({url});
-                case 'X-AmpAdSignature':
-                  return 'AQAB';
-                default:
-                  return undefined;
-              }
-            },
-            has: function(name) {
-              return !!this.get(name);
-            },
-          }).then(adResponse => {
-            expect(adResponse).to.deep.equal(
-              {
+        return impl
+            .extractCreativeAndSignature(creative, {
+              get: function(name) {
+                switch (name) {
+                  case 'X-AmpAnalytics':
+                    return JSON.stringify({url});
+                  case 'AMP-Fast-Fetch-Signature':
+                    return 'google:test:AQAB';
+                  default:
+                    return undefined;
+                }
+              },
+              has: function(name) {
+                return !!this.get(name);
+              },
+            })
+            .then(adResponse => {
+              expect(adResponse).to.deep.equal({
                 creative,
-                signature: base64UrlDecodeToBytes('AQAB'),
+                signatureInfo: {
+                  signingServiceName: 'google',
+                  keypairId: 'test',
+                  signature: base64DecodeToBytes('AQAB')
+                },
                 size: null,
               });
-            expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
-            // exact value of ampAnalyticsConfig_ covered in
-            // ads/google/test/test-utils.js
-          });
+              expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
+              // exact value of ampAnalyticsConfig_ covered in
+              // ads/google/test/test-utils.js
+            });
       });
     });
   });

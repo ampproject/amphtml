@@ -24,6 +24,7 @@ import {
   AmpA4A,
   RENDERING_TYPE_HEADER,
   SAFEFRAME_IMPL_PATH,
+  decodeSignatureHeader,
   protectFunctionWrapper,
 } from '../amp-a4a';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
@@ -911,7 +912,7 @@ describe('amp-a4a', () => {
             utf8Encode(validCSSAmp.reserialized).then(c => {
               return {
                 creative: c,
-                signature: base64UrlDecodeToBytes(validCSSAmp.signature),
+                signature: decodeSignatureHeader(validCSSAmp.signature),
               };
             }));
         a4a.onLayoutMeasure();
@@ -1458,93 +1459,6 @@ describe('amp-a4a', () => {
           expect(suffix).to.be.undefined;
           throw new Error('test fail within error fn');
         })('world')).to.be.undefined;
-      });
-    });
-
-    describe('verifyCreativeSignature_', () => {
-      let stubVerifySignature;
-      let a4a;
-      beforeEach(() => {
-        return createIframePromise().then(fixture => {
-          setupForAdTesting(fixture);
-          stubVerifySignature =
-              sandbox.stub(cryptoFor(fixture.win), 'verifySignature');
-          const a4aElement = createA4aElement(fixture.doc);
-          a4a = new MockA4AImpl(a4aElement);
-        });
-      });
-
-      it('properly handles all failures', () => {
-        // Single provider with first key fails but second key passes validation
-        a4a.win.ampA4aValidationKeys = (() => {
-          const providers = [];
-          for (let i = 0; i < 10; i++) {
-            const serviceName = `test-service${i}`;
-            providers[i] = Promise.resolve({serviceName, keys: [
-              Promise.resolve({serviceName}),
-              Promise.resolve({serviceName}),
-            ]});
-          }
-          return providers;
-        })();
-        stubVerifySignature.returns(Promise.resolve(false));
-        return a4a.verifyCreativeSignature_('some_creative', 'some_sig')
-          .then(() => {
-            throw new Error('should have triggered rejection');
-          })
-          .catch(err => {
-            expect(stubVerifySignature).to.be.callCount(20);
-            expect(err).to.equal('No validation service could verify this key');
-          });
-      });
-
-      it('properly handles multiple keys for one provider', () => {
-        // Single provider with first key fails but second key passes validation
-        const serviceName = 'test-service';
-        a4a.win.ampA4aValidationKeys = [
-          Promise.resolve({serviceName, keys: [
-            Promise.resolve({serviceName: '1'}),
-            Promise.resolve({serviceName: '2'}),
-          ]}),
-        ];
-        const creative = 'some_creative';
-        stubVerifySignature.onCall(0).returns(Promise.resolve(false));
-        stubVerifySignature.onCall(1).returns(Promise.resolve(true));
-        return a4a.verifyCreativeSignature_(creative, 'some_sig')
-          .then(verifiedCreative => {
-            expect(stubVerifySignature).to.be.calledTwice;
-            expect(verifiedCreative).to.equal(creative);
-          });
-      });
-
-      it('properly stops verification at first valid key', done => {
-        // Single provider where first key fails, second passes, and third
-        // never calls verifySignature.
-        const serviceName = 'test-service';
-        let keyInfoResolver;
-        a4a.win.ampA4aValidationKeys = [
-          Promise.resolve({serviceName, keys: [
-            Promise.resolve({}),
-            Promise.resolve({}),
-            new Promise(resolver => {
-              keyInfoResolver = resolver;
-            }),
-          ]}),
-        ];
-        const creative = 'some_creative';
-        const signature = 'some_signature';
-        stubVerifySignature.onCall(0).returns(Promise.resolve(false));
-        stubVerifySignature.onCall(1).returns(Promise.resolve(true));
-        a4a.verifyCreativeSignature_(creative, signature)
-          .then(verifiedCreative => {
-            expect(stubVerifySignature).to.be.calledTwice;
-            expect(verifiedCreative).to.equal(creative);
-            done();
-          });
-        // From testing have found that need to yield prior to calling last
-        // key info resolver to ensure previous keys have had a chance to
-        // execute.
-        setTimeout(() => {keyInfoResolver({}); }, 0);
       });
     });
   });

@@ -203,7 +203,9 @@ class SignatureVerifier {
                           // AMP Project so that we can understand why this
                           // occurred.
                           const message = err && err.message;
-                          dev().error(`Failed to verify signature: ${message}`);
+                          dev().error(
+                              'AMP-A4A',
+                              `Failed to verify signature: ${message}`);
                           return VerificationFailure.NO_FAULT;
                         });
               } else {
@@ -350,5 +352,6 @@ class SignatureVerifier {
  * @private
  */
 function signingServiceError(signingServiceName, message) {
-  dev().error(`Signing service error for ${signingServiceName}: ${message}`);
+  dev().error(
+      'AMP-A4A', `Signing service error for ${signingServiceName}: ${message}`);
 }

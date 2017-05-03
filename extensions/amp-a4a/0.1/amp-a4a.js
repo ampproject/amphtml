@@ -944,32 +944,12 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {!Promise<!AdResponseDef>}
    */
   extractCreativeAndSignature(responseArrayBuffer, responseHeaders) {
-    const adResponse = /** @type {!AdResponseDef} */ (
-        {creative: responseArrayBuffer, signatureInfo: null, sizeInfo: null});
-    const encodedSignatureInfo =
-        responseHeaders.get('AMP-Fast-Fetch-Signature');
-    if (encodedSignatureInfo) {
-      const match =
-          new RegExp(
-              '^([A-Za-z0-9._-]+):([A-Za-z0-9._-]+):' +
-              '([A-Za-z0-9+/]{4}*(?:[A-Za-z0-9+/]{2}[A-Za-z0-9+/=]=)?)$')
-              .exec(encodedSignatureInfo);
-      if (match) {
-        adResponse.signatureInfo = /** @type {?SignatureInfoDef} */ ({
-          signingServiceName: match[1],
-          keypairId: match[2],
-          signature: base64DecodeToBytes(match[3]),
-        });
-      }
-    }
-    const sizeHeader = responseHeaders.get('X-Creativesize');
-    if (sizeHeader) {
-      dev().assert(new RegExp('[0-9]+x[0-9]+').test(sizeHeader));
-      const sizeArr = sizeHeader.split('x').map(Number);
-      adResponse.size =
-          /** @type {?SizeInfoDef} */ ({width: sizeArr[0], height: sizeArr[1]});
-    }
-    return Promise.resolve(adResponse);
+    return Promise.resolve(/** @type {!AdResponseDef} */ ({
+      creative: responseArrayBuffer,
+      signatureInfo: decodeSignatureHeader(
+          responseHeaders.get('AMP-Fast-Fetch-Signature')),
+      sizeInfo: decodeSizeHeader(responseHeaders.get('X-Creativesize')),
+    }));
   }
 
   /**
@@ -1393,4 +1373,46 @@ export class AmpA4A extends AMP.BaseElement {
    * @param {!Object<string, string|number>=} opt_extraVariables
    */
   emitLifecycleEvent(unusedEventName, opt_extraVariables) {}
+}
+
+/**
+ * Decode the `AMP-Fast-Fetch-Signature` header, in its conventional format, to
+ * a signature info object.
+ *
+ * @param {?string} headerValue
+ * @return {?SignatureInfoDef}
+ */
+export function decodeSignatureHeader(headerValue) {
+  if (headerValue) {
+    const match =
+        new RegExp(
+            '^([A-Za-z0-9._-]+):([A-Za-z0-9._-]+):' +
+            '((?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}[A-Za-z0-9+/=]=)?)$')
+            .exec(headerValue);
+    if (match) {
+      return /** @type {?SignatureInfoDef} */ ({
+        signingServiceName: match[1],
+        keypairId: match[2],
+        signature: base64DecodeToBytes(match[3]),
+      });
+    }
+  }
+  return null;
+}
+
+/**
+ * Decode the `X-Creativesize` header, in its conventional format, to a size
+ * info object.
+ *
+ * @param {?string} headerValue
+ * @return {?SizeInfoDef}
+ */
+export function decodeSizeHeader(headerValue) {
+  if (headerValue) {
+    dev().assert(new RegExp('[0-9]+x[0-9]+').test(headerValue));
+    const sizeArr = sizeHeader.split('x').map(Number);
+    return /** @type {?SizeInfoDef} */ (
+        {width: sizeArr[0], height: sizeArr[1]});
+  }
+  return null;
 }
