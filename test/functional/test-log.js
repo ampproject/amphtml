@@ -27,7 +27,7 @@ import {
 } from '../../src/log';
 import * as sinon from 'sinon';
 
-describe.only('Logging', () => {
+describe('Logging', () => {
 
   const RETURNS_FINE = () => LogLevel.FINE;
   const RETURNS_INFO = () => LogLevel.INFO;
