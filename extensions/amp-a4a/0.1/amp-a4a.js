@@ -798,7 +798,7 @@ export class AmpA4A extends AMP.BaseElement {
     }
 
     if (error && error.message) {
-      error = duplicateErrorIfNecessary(error);
+      error = duplicateErrorIfNecessary(/** @type {!Error} */(error));
     } else {
       error = new Error('unknown error ' + error);
     }

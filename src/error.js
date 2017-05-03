@@ -89,7 +89,7 @@ export function reportError(error, opt_associatedElement) {
     let isValidError;
     if (error) {
       if (error.message !== undefined) {
-        error = duplicateErrorIfNecessary(error);
+        error = duplicateErrorIfNecessary(/** @type {!Error} */(error));
         isValidError = true;
       } else {
         const origError = error;

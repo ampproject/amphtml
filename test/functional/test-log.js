@@ -23,6 +23,7 @@ import {
   rethrowAsync,
   setReportError,
   user,
+  duplicateErrorIfNecessary,
 } from '../../src/log';
 import * as sinon from 'sinon';
 
