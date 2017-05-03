@@ -19,7 +19,7 @@ import {resourcesForDoc} from '../../../src/services';
 import {ViewportBindingInabox} from '../../../src/inabox/inabox-viewport';
 import {
   installIframeMessagingClient,
-} from '../../../src/inabox/inabox-iframe-client';
+} from '../../../src/inabox/inabox-iframe-messaging-client';
 
 describes.fakeWin('inabox-viewport', {amp: {}}, env => {
 
