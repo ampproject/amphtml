@@ -132,6 +132,9 @@ class AmpVideo extends AMP.BaseElement {
           attrs,
           dev().assertElement(this.video_),
           /* opt_removeMissingAttrs */ true);
+      if (mutations['src']) {
+        this.element.dispatchCustomEvent(VideoEvents.RELOAD);
+      }
     }
 
     /** @override */

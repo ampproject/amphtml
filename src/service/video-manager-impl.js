@@ -112,6 +112,10 @@ export class VideoManager {
       entry.updateVisibility();
     });
 
+    listen(entry.video.element, VideoEvents.RELOAD, () => {
+      entry.videoLoaded_();
+    });
+
     // TODO(aghassemi, #4780): Create a new IntersectionObserver service.
     if (!this.scrollListenerInstalled_) {
       const scrollListener = () => {
@@ -314,7 +318,6 @@ class VideoEntry {
       } else {
         this.video.pause();
       }
-
     });
   }
 
