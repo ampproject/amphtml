@@ -23,6 +23,7 @@
  * This script attempts to introduce some granularity for our
  * presubmit checking, via the determineBuildTargets method.
  */
+const chalk = require('chalk');
 const child_process = require('child_process');
 const path = require('path');
 const markdownLinkCheck = require('markdown-link-check');
@@ -36,7 +37,7 @@ const fileLogPrefix =
 /**
  * Starts a timer to measure the execution time of the given function.
  * @param {string} functionName
- * @return {DOMHighResTimeStamp}
+ * @return {Number}
  */
 function startTimer(functionName) {
   const startTime = Date.now();
@@ -49,7 +50,6 @@ function startTimer(functionName) {
 /**
  * Stops the timer for the given function and prints the execution time.
  * @param {string} functionName
- * @return {Number}
  */
 function stopTimer(functionName, startTime) {
   const endTime = Date.now();
@@ -169,14 +169,24 @@ function isFlagConfig(filePath) {
  */
 function testLinks(file) {
   console.log('Testing links in ' + file + '...');
-  markdownLinkCheck('[google](http://google.com)', function (err, results) {
-      if (err) {
-          console.error('Error', err);
-          return;
+  markdownLinkCheck('[example](http://example.com)', function (err, results) {
+    results.forEach(function (result) {
+      console.log('Testing ' + result.link);
+      if(result.link.startsWith('http://localhost:8000/')) {
+        console.log('[?] %s (Cannot test localhost links.)', result.link);
+        return;
       }
-      results.forEach(function (result) {
-          console.log('%s is %s', result.link, result.status);
-      });
+      if(result.status === 'dead') {
+        error = true;
+        console.log('[%s] %s', chalk.red('✖'), result.link);
+      } else {
+        console.log('[%s] %s', chalk.green('✓'), result.link);
+      }
+    });
+    if(error) {
+      console.error(chalk.red('\nERROR: dead links found!'));
+      process.exit(1);
+    }
   });
 }
 
