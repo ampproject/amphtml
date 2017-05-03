@@ -36,7 +36,7 @@ tags: {  # <amp-timeago>
     mandatory: true
     # Regex: \d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d(:[0-5]\d(\.\d+)?)?Z
     # Values such as: 2017-04-11T00:37:33.809Z
-    value_regex: "\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d(:[0-5]\\d(\\.\\d+)\?)\?Z"
+    value_regex: "\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d(:[0-5]\\d(\\.\\d+)?)?Z"
   }
   attrs: { name: "locale" }
   attr_lists: "extended-amp-global"
