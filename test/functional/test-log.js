@@ -340,6 +340,19 @@ describe('Logging', () => {
       expect(error.messageArray).to.deep.equal([1, 'a', 2, 'b', 3]);
     });
 
+    it('reuse errors', () => {
+      expect(function() {
+        log.assert(false, 'should fail %s', 'XYZ', new Error('test'));
+      }).to.throw(/should fail XYZ: test/);
+
+      // #8917
+      if (typeof DOMException !== 'undefined') {
+        expect(function() {
+          log.assert(false, 'should fail %s', 'XYZ', new DOMException('test'));
+        }).to.throw(/should fail XYZ: test/);
+      }
+    });
+
     it('should add element and assert info', () => {
       const div = document.createElement('div');
       let error;
@@ -595,6 +608,42 @@ describe('Logging', () => {
       }
       expect(error).to.equal(orig);
       expect(isUserErrorMessage(error.message)).to.be.true;
+    });
+  });
+
+  describe('duplicateErrorIfNecessary', () => {
+    it('should not duplicate if message is writeable', () => {
+      const error = {message: 'test'};
+
+      expect(duplicateErrorIfNecessary(error)).to.equal(error);
+    });
+
+    it('should duplicate if message is non-writable', () => {
+      const error = {};
+      Object.defineProperty(error, 'message', {
+        value: 'test',
+        writable: false,
+      });
+
+      expect(duplicateErrorIfNecessary(error)).to.not.equal(error);
+    });
+
+    it('copies all the tidbits', () => {
+      const error = {
+        stack: 'stack',
+        args: [1, 2, 3],
+        associatedElement: error,
+      };
+
+      Object.defineProperty(error, 'message', {
+        value: 'test',
+        writable: false,
+      });
+
+      const duplicate = duplicateErrorIfNecessary(error);
+      expect(duplicate.stack).to.equal(error.stack);
+      expect(duplicate.args).to.equal(error.args);
+      expect(duplicate.associatedElement).to.equal(error.associatedElement);
     });
   });
 });

@@ -31,7 +31,7 @@ import {
 } from '../../../src/friendly-iframe-embed';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
-import {dev, user} from '../../../src/log';
+import {dev, user, duplicateErrorIfNecessary} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, isEnumValue} from '../../../src/types';
 import {some} from '../../../src/utils/promise';
@@ -797,7 +797,9 @@ export class AmpA4A extends AMP.BaseElement {
       throw error;
     }
 
-    if (!error || !error.message) {
+    if (error && error.message) {
+      error = duplicateErrorIfNecessary(error);
+    } else {
       error = new Error('unknown error ' + error);
     }
     if (opt_ignoreStack) {
