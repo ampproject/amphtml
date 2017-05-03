@@ -40,9 +40,9 @@ function execOrDie(cmd) {
 }
 
 /**
- * Looks for dead links in the given list of files.
+ * Checks for dead links in the list of files.
  */
-function testFiles() {
+function checkLinks() {
   var files = '';
   if (argv.files) {
     files = argv.files;
@@ -52,9 +52,10 @@ function testFiles() {
     process.exit(1);
   }
   util.log('Files: ', util.colors.magenta(files));
-  files.split(',').forEach(function(file) {
-    var filtered_file = filterLocalhostLinks(file);
-    checkLinks(filtered_file);
+  var markdownFiles = files.split(',');
+  markdownFiles.forEach(function(markdownFile) {
+    var filteredMarkdownFile = filterLocalhostLinks(markdownFile);
+    runLinkChecker(filteredMarkdownFile);
   });
 }
 
@@ -63,27 +64,26 @@ function testFiles() {
  * localhost links (because they do not resolve on Travis), and rewrites the
  * contents to a new file.
  *
- * @param {string} file Path of file, relative to src root.
+ * @param {string} markdownFile Path of markdown file, relative to src root.
  * @return {string} Path of the newly created file, relative to src root.
  */
-function filterLocalhostLinks(file) {
-  var contents = fs.readFileSync(file).toString();
-  var filtered_contents = contents.replace(/http:\/\/localhost:8000\//g, '');
-  var filtered_file = file + '_without_localhost_links';
-  fs.writeFile(filtered_file, filtered_contents);
-  return filtered_file;
+function filterLocalhostLinks(markdownFile) {
+  var contents = fs.readFileSync(markdownFile).toString();
+  var filteredontents = contents.replace(/http:\/\/localhost:8000\//g, '');
+  var filteredMarkdownFile = markdownFile + '_without_localhost_links';
+  fs.writeFile(filteredMarkdownFile, filteredontents);
+  return filteredMarkdownFile;
 }
 
 /**
- * Tests the links in the given file.
- * @param {string} file Path of file, relative to src root.
+ * Tests the links in the given file, after localhost links have been removed.
+ * @param {string} filteredMarkdownFile Path of file, relative to src root.
  */
-function checkLinks(file) {
-  util.log('Filtered file: ', file);
-  execOrDie('markdown-link-check ' + file);
+function runLinkChecker(filteredMarkdownFile) {
+  execOrDie('markdown-link-check ' + filteredMarkdownFile);
 }
 
-gulp.task('test-links', 'Detects dead links in markdown files', testFiles, {
+gulp.task('check-links', 'Detects dead links in markdown files', checkLinks, {
   options: {
     'files': '  CSV list of files in which to check links'
   }

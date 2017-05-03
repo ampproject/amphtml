@@ -208,7 +208,7 @@ const command = {
         docFiles.push(file);
       }
     });
-    execOrDie(`${gulp} test-links --files ${docFiles.join(',')}`);
+    execOrDie(`${gulp} check-links --files ${docFiles.join(',')}`);
   },
   buildRuntime: function() {
     execOrDie(`${gulp} clean`);

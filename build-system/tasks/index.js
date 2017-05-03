@@ -16,6 +16,7 @@
 
 require('./babel-helpers');
 require('./changelog');
+require('./check-links');
 require('./clean');
 require('./compile');
 require('./compile-access-expr');
@@ -31,6 +32,5 @@ require('./release-tagging');
 require('./runtime-test');
 require('./serve');
 require('./size');
-require('./test-links');
 require('./validator');
 require('./visual-diff');
