@@ -430,7 +430,7 @@ describes.realWin('performance', {amp: true}, env => {
 
       it('should call the flush callback', () => {
         const payload = {
-          ampexp: getMode(win).rtvVersion,
+          ampexp: 'rtv-' + getMode(win).rtvVersion,
         };
         expect(viewerSendMessageStub.withArgs('sendCsi', payload,
             /* cancelUnsent */true)).to.have.callCount(0);
@@ -655,7 +655,7 @@ describes.realWin('performance with experiment', {amp: true}, env => {
       viewerSendMessageStub.reset();
       perf.flush();
       expect(viewerSendMessageStub).to.be.calledWith('sendCsi', {
-        ampexp: getMode(win).rtvVersion,
+        ampexp: 'rtv-' + getMode(win).rtvVersion,
       });
     });
   });
@@ -671,8 +671,11 @@ describes.realWin('performance with experiment', {amp: true}, env => {
           sandbox.match(payload => {
             const experiments = payload.ampexp.split(',');
             expect(experiments).to.have.length(3);
-            expect(experiments).to.have.members(
-                [getMode(win).rtvVersion, 'experiment-a', 'experiment-b']);
+            expect(experiments).to.have.members([
+              'rtv-' + getMode(win).rtvVersion,
+              'experiment-a',
+              'experiment-b',
+            ]);
             return true;
           }));
     });
