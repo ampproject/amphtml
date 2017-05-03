@@ -1245,7 +1245,8 @@ describe('amp-analytics', function() {
       const analytics = getAnalyticsTag(config);
 
       const urlReplacements = urlReplacementsForDoc(analytics.element);
-      sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(0);
+      sandbox.stub(urlReplacements.getVariableSource(), 'get')
+      .returns({sync: 1});
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy).to.be.calledOnce;
       });
@@ -1277,13 +1278,88 @@ describe('amp-analytics', function() {
       const analytics = getAnalyticsTag(config);
 
       const urlReplacements = urlReplacementsForDoc(analytics.element);
-      sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(null);
+      sandbox.stub(urlReplacements.getVariableSource(), 'get')
+          .returns(null);
 
       return waitForNoSendRequest(analytics).then(() => {
         expect(sendRequestSpy).to.have.not.been.called;
       });
     });
 
+    it('does not allow a request through ' +
+     'if a request param is falsey (0)', () => {
+      const config = getConfig();
+      config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
+      const analytics = getAnalyticsTag(config);
+
+      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      sandbox.stub(urlReplacements.getVariableSource(), 'get')
+          .returns({sync: 0});
+
+      return waitForNoSendRequest(analytics).then(() => {
+        expect(sendRequestSpy).to.have.not.been.called;
+      });
+    });
+
+    it('does not allow a request through ' +
+    'if a request param is falsey (false)', () => {
+      const config = getConfig();
+      config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
+      const analytics = getAnalyticsTag(config);
+
+      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      sandbox.stub(urlReplacements.getVariableSource(), 'get')
+          .returns({sync: false});
+
+      return waitForNoSendRequest(analytics).then(() => {
+        expect(sendRequestSpy).to.have.not.been.called;
+      });
+    });
+
+    it('does not allow a request through ' +
+     'if a request param is falsey (null)', () => {
+      const config = getConfig();
+      config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
+      const analytics = getAnalyticsTag(config);
+
+      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      sandbox.stub(urlReplacements.getVariableSource(), 'get')
+          .returns({sync: null});
+
+      return waitForNoSendRequest(analytics).then(() => {
+        expect(sendRequestSpy).to.have.not.been.called;
+      });
+    });
+
+    it('does not allow a request through ' +
+     'if a request param is falsey (NaN)', () => {
+      const config = getConfig();
+      config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
+      const analytics = getAnalyticsTag(config);
+
+      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      sandbox.stub(urlReplacements.getVariableSource(), 'get')
+          .returns({sync: NaN});
+
+      return waitForNoSendRequest(analytics).then(() => {
+        expect(sendRequestSpy).to.have.not.been.called;
+      });
+    });
+
+    it('does not allow a request through ' +
+     'if a request param is falsey (undefined)', () => {
+      const config = getConfig();
+      config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
+      const analytics = getAnalyticsTag(config);
+
+      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      sandbox.stub(urlReplacements.getVariableSource(), 'get')
+          .returns({sync: undefined});
+
+      return waitForNoSendRequest(analytics).then(() => {
+        expect(sendRequestSpy).to.have.not.been.called;
+      });
+    });
 
     it('allows a request based on a variable when enabled on tag level', () => {
       const config = getConfig();
@@ -1303,7 +1379,8 @@ describe('amp-analytics', function() {
       const analytics = getAnalyticsTag(config);
 
       const urlReplacements = urlReplacementsForDoc(analytics.element);
-      sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(0);
+      sandbox.stub(urlReplacements.getVariableSource(), 'get')
+          .returns({sync: 1});
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy).to.be.calledOnce;
       });

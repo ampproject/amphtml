@@ -30,9 +30,9 @@ import {isEnumValue} from '../../../src/types';
 import {Activity} from './activity-impl';
 import {Cid} from './cid-impl';
 import {
-    InstrumentationService,
-    instrumentationServicePromiseForDoc,
-    AnalyticsEventType,
+  InstrumentationService,
+  instrumentationServicePromiseForDoc,
+  AnalyticsEventType,
 } from './instrumentation';
 import {
   ExpansionOptions,
@@ -68,7 +68,6 @@ export class AmpAnalytics extends AMP.BaseElement {
      * @private
      */
     this.predefinedConfig_ = ANALYTICS_CONFIG;
-
 
     /** @private {!Promise} */
     this.consentPromise_ = Promise.resolve();
@@ -244,7 +243,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           if (isEnumValue(AnalyticsEventType, eventType) &&
               !WHITELIST_EVENT_IN_SANDBOX.includes(eventType)) {
             user().error(TAG, eventType + 'is not supported for amp-analytics' +
-            ' in scope');
+                ' in scope');
             continue;
           }
         }
@@ -265,10 +264,10 @@ export class AmpAnalytics extends AMP.BaseElement {
             // Expand the selector using variable expansion.
             return this.variableService_.expandTemplate(
                 trigger['selector'], expansionOptions)
-              .then(selector => {
-                trigger['selector'] = selector;
-                this.addTriggerNoInline_(trigger);
-              });
+                .then(selector => {
+                  trigger['selector'] = selector;
+                  this.addTriggerNoInline_(trigger);
+                });
           } else {
             this.addTriggerNoInline_(trigger);
           }
@@ -321,8 +320,8 @@ export class AmpAnalytics extends AMP.BaseElement {
 
         for (const extraUrlParamsKey in params) {
           const newkey = extraUrlParamsKey.replace(
-            replaceMapKey,
-            replaceMap[replaceMapKey]
+              replaceMapKey,
+              replaceMap[replaceMapKey]
           );
           if (extraUrlParamsKey != newkey) {
             const value = params[extraUrlParamsKey];
@@ -543,26 +542,37 @@ export class AmpAnalytics extends AMP.BaseElement {
           if (!enabled) {
             return;
           }
-          return this.expandExtraUrlParams_(trigger, event)
-              .then(params => {
-                request = this.addParamsToUrl_(request, params);
-                this.config_['vars']['requestCount']++;
-                const expansionOptions = this.expansionOptions_(event, trigger);
-                return this.variableService_
-                  .expandTemplate(request, expansionOptions);
-              })
-              .then(request => {
-                const whiteList =
-                  this.isSandbox_ ? SANDBOX_AVAILABLE_VARS : undefined;
-                // For consistency with amp-pixel we also expand any url
-                // replacements.
-                return urlReplacementsForDoc(this.element).expandAsync(
-                    request, undefined, whiteList);
-              })
-              .then(request => {
-                this.sendRequest_(request, trigger);
-                return request;
-              });
+          return this.expandAndSendRequest_(request, trigger, event);
+        });
+  }
+
+  /**
+   * @param {string} request The request to process.
+   * @param {!JSONType} trigger JSON config block that resulted in this event.
+   * @param {!Object} event Object with details about the event.
+   * @return {!Promise<string|undefined>} The request that was sent out.
+   * @private
+   */
+  expandAndSendRequest_(request, trigger, event) {
+    return this.expandExtraUrlParams_(trigger, event)
+        .then(params => {
+          request = this.addParamsToUrl_(request, params);
+          this.config_['vars']['requestCount']++;
+          const expansionOptions = this.expansionOptions_(event, trigger);
+          return this.variableService_
+              .expandTemplate(request, expansionOptions);
+        })
+        .then(request => {
+          const whiteList =
+              this.isSandbox_ ? SANDBOX_AVAILABLE_VARS : undefined;
+          // For consistency with amp-pixel we also expand any url
+          // replacements.
+          return urlReplacementsForDoc(this.element).expandAsync(
+              request, undefined, whiteList);
+        })
+        .then(request => {
+          this.sendRequest_(request, trigger);
+          return request;
         });
   }
 
@@ -661,7 +671,10 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
 
     return this.expandTemplateWithUrlParams_(spec, expansionOptions)
-        .then(val => Boolean(val));
+        .then(val => {
+          return val !== '' && val !== '0' && val !== 'false' &&
+              val !== 'null' && val !== 'NaN' && val !== 'undefined';
+        });
   }
 
   /**
