@@ -168,8 +168,10 @@ function isFlagConfig(filePath) {
  * @param {string} file Path of file name relative to src root.
  */
 function testLinks(file) {
+  "use strict";
   console.log('Testing links in ' + file + '...');
   markdownLinkCheck('[example](http://example.com)', function (err, results) {
+    console.log('Processing results');
     results.forEach(function (result) {
       console.log('Testing ' + result.link);
       if(result.link.startsWith('http://localhost:8000/')) {
