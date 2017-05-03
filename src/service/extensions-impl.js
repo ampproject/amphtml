@@ -43,6 +43,7 @@ import {calculateExtensionScriptUrl} from './extension-location';
 const TAG = 'extensions';
 const UNKNOWN_EXTENSION = '_UNKNOWN_';
 const LEGACY_ELEMENTS = ['amp-ad', 'amp-embed', 'amp-video'];
+const DEFAULT_EXTENSION_VERSION = '0.1';
 
 /**
  * The structure that contains the declaration of a custom element.
@@ -258,6 +259,7 @@ export class Extensions {
     if (extensionId == 'amp-embed') {
       extensionId = 'amp-ad';
     }
+    extensionVer = extensionVer ? extensionVer : DEFAULT_EXTENSION_VERSION;
     const holder = this.getExtensionHolder_(extensionId);
     this.insertExtensionScriptIfNeeded_(
         extensionId, extensionVer, holder, stubElement);
