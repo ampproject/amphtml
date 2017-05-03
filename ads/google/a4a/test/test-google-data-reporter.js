@@ -212,7 +212,6 @@ describe('#getLifecycleReporter', () => {
         const viewer = env.win.services.viewer.obj;
         viewer.firstVisibleTime_ = viewer.lastVisibleTime_ = Date.now();
         mockReporter.sendPing('renderFriendlyStart');
-        const pingElements = env.win.document.querySelectorAll('img');
         expect(emitPingStub).to.be.calledOnce;
         const pingUrl = emitPingStub.firstCall.args[0];
         const experimentId =
