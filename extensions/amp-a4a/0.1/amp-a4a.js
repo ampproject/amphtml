@@ -1539,7 +1539,7 @@ export class AmpA4A extends AMP.BaseElement {
     extensionList.forEach(extension => {
       const extensionId = extension['custom-element'];
       const extensionSrc = extension['src'];
-      const regex = /-(\d+\.\d+)\.js/;
+      const regex = /-(\d+\.\d+)\.js$/;
       const extensionVer = regex.exec(extensionSrc)[1];
       extensions.loadExtension(extensionId, extensionVer);
     });
