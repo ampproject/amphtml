@@ -23,7 +23,6 @@
  * This script attempts to introduce some granularity for our
  * presubmit checking, via the determineBuildTargets method.
  */
-const chalk = require('chalk');
 const child_process = require('child_process');
 const path = require('path');
 const minimist = require('minimist');
@@ -36,7 +35,7 @@ const fileLogPrefix =
 /**
  * Starts a timer to measure the execution time of the given function.
  * @param {string} functionName
- * @return {Number}
+ * @return {DOMHighResTimeStamp}
  */
 function startTimer(functionName) {
   const startTime = Date.now();
@@ -49,6 +48,7 @@ function startTimer(functionName) {
 /**
  * Stops the timer for the given function and prints the execution time.
  * @param {string} functionName
+ * @return {Number}
  */
 function stopTimer(functionName, startTime) {
   const endTime = Date.now();
