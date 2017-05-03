@@ -21,7 +21,11 @@
  * Experiments page: https://cdn.ampproject.org/experiments.html *
  */
 
+import {ampdocServiceFor} from './ampdoc';
+import {bytesToInt, stringToBytes, utf8DecodeSync} from './utils/bytes';
+import {cryptoFor} from './crypto';
 import {getCookie, setCookie} from './cookies';
+import {getSourceOrigin} from './url';
 import {parseQueryString} from './url';
 
 
@@ -54,6 +58,177 @@ export function isCanary(win) {
   return !!(win.AMP_CONFIG && win.AMP_CONFIG.canary);
 }
 
+
+function getExperimentsKey_(crypto) {
+  const publicKey = {};
+  if (crypto.isCryptoAvailable) {
+    return crypto.importPublicKey('experiments', publicKey);
+  } else {
+    return Promise.reject(new Error("Crypto is unavailable"));
+  }
+}
+
+/**
+ * Whether the specified experiment is on or off for origin trials. You should
+ * check if the experiment is already enabled before calling this function.
+ * @param {!Window} win
+ * @param {string} experimentId
+ * @return {!Promise<boolean>}
+ */
+export function isExperimentOnForOriginTrial(win, experimentId) {
+  const crypto = cryptoFor(win);
+  const meta =
+      win.document.head.querySelector('meta[name="amp-experiment-token"]');
+  if (!meta || !crypto.isCryptoAvailable()) {
+    return Promise.resolve(false);
+  }
+  const token = meta.getAttribute('content');
+  if (!token) {
+    return Promise.reject(new Error('Unable to read experiments token'));
+  }
+  /**
+   * token = encode64(version + length + config + sign(config, private_key))
+   * version = 1 byte version of the token format (starting at 0x0)
+   */
+  const bytes = stringToBytes(atob(token));
+  const version = bytes[0];
+  if (version === 0) {
+   /**
+    * Version 0:
+    * length = 4 bytes representing number of bytes in config
+    * config = string containing the experiment ID, origin URL, etc.
+    */
+    const configLen = bytesToInt(bytes.subarray(1,5));
+    if (configLen > bytes.length - 5) {
+      return Promise.reject(
+          new Error('Specified len extends past end of buffer'));
+    }
+    const configBytes = bytes.subarray(5, 5 + configLen);
+    const signatureBytes = bytes.subarray(5 + configLen);
+
+    return getExperimentsKey_(crypto).then(keyInfo => {
+      return crypto.verifySignature(configBytes, signatureBytes, keyInfo)
+    }).then(verified => {
+      if (!verified) {
+        throw new Error('Failed to verify config signature');
+      }
+      const configStr = utf8DecodeSync(configBytes);
+      const config = JSON.parse(configStr);
+
+      const approvedOrigin = config['origin'];
+      const url = ampdocServiceFor(win).getAmpDoc().getUrl();
+      const sourceOrigin = getSourceOrigin(url);
+      if (approvedOrigin !== sourceUrl) {
+        throw new Error('Config does not match current origin');;
+      }
+
+      const experiments = config['experiments'];
+      const experiment = experiments[experimentId];
+      if (!experiment) {
+        return false;
+      }
+
+      const expiration = experiment['expiration'];
+      const now = Date.now();
+      if (expiration < now) {
+        return false;
+      }
+
+      // TODO(kmh287): Transient experiment?
+      toggleExperiment(win,
+          experimentId,
+          /* opt_on */ true,
+          /* opt_transientExperiment */ true);
+      return true;
+    });
+  } else {
+    // Unrecognized version number.
+    Promise.reject(new Error('Unrecorgnized experiments token version'));
+  }
+}
+
+/**
+ * Whether the specified experiment is on or off for origin trials. You should
+ * check if the experiment is already enabled before calling this function.
+ * @param {!Window} win
+ * @param {string} experimentId
+ * @param {!Object} opt_publicJwk Used for testing only.
+ * @return {!Promise<boolean>}
+ */
+export function isExperimentOnForOriginTrial(win, experimentId, opt_publicJwk) {
+  const crypto = cryptoFor(win);
+  const meta =
+      win.document.head.querySelector('meta[name="amp-experiment-token"]');
+  if (!meta || !crypto.isCryptoAvailable()) {
+    return Promise.resolve(false);
+  }
+  const token = meta.getAttribute('content');
+  if (!token) {
+    return Promise.reject(new Error('Unable to read experiments token'));
+  }
+  /**
+   * token = encode64(version + length + config + sign(config, private_key))
+   * version = 1 byte version of the token format (starting at 0x0)
+   */
+  const bytes = stringToBytes(atob(token));
+  const version = bytes[0];
+  if (version === 0) {
+   /**
+    * Version 0:
+    * length = 4 bytes representing number of bytes in config
+    * config = string containing the experiment ID, origin URL, etc.
+    */
+    const configLen = bytesToInt(bytes.subarray(1,5));
+    if (configLen > bytes.length - 5) {
+      return Promise.reject(
+          new Error('Specified len extends past end of buffer'));
+    }
+    const configBytes = bytes.subarray(5, 5 + configLen);
+    const signatureBytes = bytes.subarray(5 + configLen);
+
+    // TODO(kmh287, choumx) fill in real public key
+    const publicJwk = opt_publicJwk || {};
+
+    return crypto.importPublicKey('experiments', publicJwk).then(keyInfo => {
+      return crypto.verifySignature(configBytes, signatureBytes, keyInfo);
+    }).then(verified => {
+      if (!verified) {
+        throw new Error('Failed to verify config signature');
+      }
+      const configStr = utf8DecodeSync(configBytes);
+      const config = JSON.parse(configStr);
+
+      const approvedOrigin = config['origin'];
+      const url = ampdocServiceFor(win).getAmpDoc().getUrl();
+      const sourceOrigin = getSourceOrigin(url);
+      if (approvedOrigin !== sourceOrigin) {
+        throw new Error('Config does not match current origin');;
+      }
+
+      const experiments = config['experiments'];
+      const experiment = experiments[experimentId];
+      if (!experiment) {
+        return false;
+      }
+
+      const expiration = experiment['expiration'];
+      const now = Date.now();
+      if (expiration < now) {
+        return false;
+      }
+
+      // TODO(kmh287): Transient experiment?
+      toggleExperiment(win,
+          experimentId,
+          /* opt_on */ true,
+          /* opt_transientExperiment */ true);
+      return true;
+    });
+  } else {
+    // Unrecognized version number.
+    return Promise.reject(new Error('Unrecorgnized experiments token version'));
+  }
+}
 
 /**
  * Whether the specified experiment is on or off.

@@ -115,6 +115,24 @@ export function bytesToString(bytes) {
 };
 
 /**
+ * Converts a 4-item byte array to an unsigned integer.
+ * Assumes bytes are big endian.
+ * @param {!Uint8Array} bytes
+ * @return {number}
+ */
+export function bytesToInt(bytes) {
+  if (bytes.length != 4) {
+    throw new Error('Received byte array with length != 4');
+  }
+  const val = (bytes[0] << 24) & 0xff000000 |
+      (bytes[1] << 16) & 0x00ff0000 |
+      (bytes[2] << 8) & 0x0000ff00 |
+      bytes[3] & 0x000000ff;
+  // Convert to unsigned
+  return val >>> 0;
+}
+
+/**
  * Generate a random bytes array with specific length using
  * win.crypto.getRandomValues. Return null if it is not available.
  * @param {!number} length

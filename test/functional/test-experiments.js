@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+import {cryptoFor} from '../../src/crypto';
+import {installCryptoService} from '../../src/service/crypto-impl';
 import {
   isCanary,
   isExperimentOn,
+  isExperimentOnForOriginTrial,
   experimentToggles,
   toggleExperiment,
   resetExperimentTogglesForTesting,
@@ -793,3 +796,182 @@ describe('experiment branch tests', () => {
   });
 });
 
+describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
+
+  let win;
+  let ampdoc;
+  let sandbox;
+  let crypto;
+  let publicJwk;
+
+  let correctToken;
+  let tokenWithBadVersion;
+  let tokenWithBadConfigLength;
+  let tokenWithBadSignature;
+
+  beforeEach(() => {
+    win = env.win;
+    ampdoc = env.ampdoc;
+    sandbox = sinon.sandbox.create();
+
+    installCryptoService(win);
+    crypto = cryptoFor(win);
+
+    publicJwk = {
+      alg: 'RS256',
+      e: 'AQAB',
+      ext: true,
+      /*eslint "google-camelcase/google-camelcase": 0*/
+      key_ops: ['verify'],
+      kty: 'RSA',
+      n: 'tekkGCYJK_BO0es6jiGXFpu5BcNLpnnRMr7GKcASW0Br_jo-uVd1qXOSM_wGWr-xzP4' +
+         'zCr89ENu8cxAbtjLWzzHCRzv9T4n4IM2SDu8DyyL2s_8c8VaNXlj8wWGtGxPQkRQeWn' +
+         'H-YxUWTm1TPvkI-DgeQX66-Qa_-eJpBhDl1uPQYe5MeqIkF2RzLAXHL9mZT6BQHTCCX' +
+         'rC5ihQBHWtcv15442p7cTk5UyEVeUmGI6_yPpwhxdOP0sw90D8oDvdV7L4bBfJNZj3n' +
+         'PNLfhfhr_Pxx41vUQD7jUDkd0vbHQksvv8qpc-So8XqzDg8jYdw2KxY0GMYBNKXDLE2' +
+         'emjClQw',
+    };
+    // Version: 0
+    // Size: 145
+    // {
+    //   origin: 'https://www.google.com',
+    //   experiments: {
+    //     'amp-expires-later': {expiration: 95617602000000},
+    //     'amp-expired-': {expiration: 1232427600000},
+    //   },
+    // }
+    // Signature: Correct
+    // amp-expires-later's expiration will be wrong in a few millenia, give or
+    // take a decade.
+    correctToken =
+        'AAAAAJF7Im9yaWdpbiI6Imh0dHBzOi8vd3d3Lmdvb2dsZS5jb20iLCJleHBlcmltZW50' +
+        'cyI6eyJhbXAtZXhwaXJlcy1sYXRlciI6eyJleHBpcmF0aW9uIjo5NTYxNzYwMjAwMDAw' +
+        'MH0sImFtcC1leHBpcmVkLSI6eyJleHBpcmF0aW9uIjoxMjMyNDI3NjAwMDAwfX19AC0Q' +
+        'XglvsXoxh8tpQN1/ZAQm/2c6O8JZwdcAylHhOn0tA6RiYtaQMycgqrvBOWIPWO10Nalm' +
+        '4xvi6BNPZRJCpVDsj4Bt8tCr2n6kZWuA0a5MqQTfpEZfTBLLB8UPlryGHXYSIHrtZahb' +
+        'AyQMs/AzLp/IotDsUEhPWJg5ApjnM1uw4djIq2lAUrlc4a8mM8s4i0h4Ung3RFkgmott' +
+        'JuM/w25iNA6Xo1mEMQDjuASrJheVErl3KRbZTi4++sbpY3Six2jyxUZlHgjQgYaz9e9/' +
+        'wP4RGg0a3FMHzKKNpmzFY7tTcsPbgeZ1EPkz4suyjl6vL2zkbDUgO/5GKD9A5oQNS6w1' +
+        '3NN7';
+
+    // Same as correctToken except Version: 47
+    tokenWithBadVersion =
+        'LwAAAJF7Im9yaWdpbiI6Imh0dHBzOi8vd3d3Lmdvb2dsZS5jb20iLCJleHBlcmltZW50' +
+        'cyI6eyJhbXAtZXhwaXJlcy1sYXRlciI6eyJleHBpcmF0aW9uIjo5NTYxNzYwMjAwMDAw' +
+        'MH0sImFtcC1leHBpcmVkLSI6eyJleHBpcmF0aW9uIjoxMjMyNDI3NjAwMDAwfX19AC0Q' +
+        'XglvsXoxh8tpQN1/ZAQm/2c6O8JZwdcAylHhOn0tA6RiYtaQMycgqrvBOWIPWO10Nalm' +
+        '4xvi6BNPZRJCpVDsj4Bt8tCr2n6kZWuA0a5MqQTfpEZfTBLLB8UPlryGHXYSIHrtZahb' +
+        'AyQMs/AzLp/IotDsUEhPWJg5ApjnM1uw4djIq2lAUrlc4a8mM8s4i0h4Ung3RFkgmott' +
+        'JuM/w25iNA6Xo1mEMQDjuASrJheVErl3KRbZTi4++sbpY3Six2jyxUZlHgjQgYaz9e9/' +
+        'wP4RGg0a3FMHzKKNpmzFY7tTcsPbgeZ1EPkz4suyjl6vL2zkbDUgO/5GKD9A5oQNS6w1' +
+        '3NN7';
+    // Same as correctToken except length = 999999
+    tokenWithBadConfigLength =
+        'AAAPQj97Im9yaWdpbiI6Imh0dHBzOi8vd3d3Lmdvb2dsZS5jb20iLCJleHBlcmltZW50' +
+        'cyI6eyJhbXAtZXhwaXJlcy1sYXRlciI6eyJleHBpcmF0aW9uIjo5NTYxNzYwMjAwMDAw' +
+        'MH0sImFtcC1leHBpcmVkLSI6eyJleHBpcmF0aW9uIjoxMjMyNDI3NjAwMDAwfX19AC0Q' +
+        'XglvsXoxh8tpQN1/ZAQm/2c6O8JZwdcAylHhOn0tA6RiYtaQMycgqrvBOWIPWO10Nalm' +
+        '4xvi6BNPZRJCpVDsj4Bt8tCr2n6kZWuA0a5MqQTfpEZfTBLLB8UPlryGHXYSIHrtZahb' +
+        'AyQMs/AzLp/IotDsUEhPWJg5ApjnM1uw4djIq2lAUrlc4a8mM8s4i0h4Ung3RFkgmott' +
+        'JuM/w25iNA6Xo1mEMQDjuASrJheVErl3KRbZTi4++sbpY3Six2jyxUZlHgjQgYaz9e9/' +
+        'wP4RGg0a3FMHzKKNpmzFY7tTcsPbgeZ1EPkz4suyjl6vL2zkbDUgO/5GKD9A5oQNS6w1' +
+        '3NN7';
+     // Same as correctToken except with a bad signature
+    tokenWithBadSignature =
+        'AAAAAJF7Im9yaWdpbiI6Imh0dHBzOi8vd3d3Lmdvb2dsZS5jb20iLCJleHBlcmltZW50' +
+        'cyI6eyJhbXAtZXhwaXJlcy1sYXRlciI6eyJleHBpcmF0aW9uIjo5NTYxNzYwMjAwMDAw' +
+        'MH0sImFtcC1leHBpcmVkLSI6eyJleHBpcmF0aW9uIjoxMjMyNDI3NjAwMDAwfX19YmFk' +
+        'c2lnbmF0dXJlISEhISEh';
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  function setupMetaTagWith(token) {
+    const meta = document.createElement('meta');
+    meta.setAttribute('name', 'amp-experiment-token');
+    if (token) {
+      meta.setAttribute('content', token);
+    }
+    win.document.head.appendChild(meta);
+  }
+
+  it('should return false if no token is found', () => {
+    // No meta tag ever added
+    const p = isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
+    return expect(p).to.eventually.be.false;
+  });
+
+  it('should return false if crypto is unavailable', () => {
+    sandbox.stub(crypto, 'isCryptoAvailable').returns(false);
+    const p = isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
+    return expect(p).to.eventually.be.false;
+  });
+
+  it('should throw for missing token', () => {
+    if (!crypto.isCryptoAvailable()) { return; }
+    setupMetaTagWith('');
+    const p = isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
+    return expect(p).to.eventually.be
+        .rejectedWith('Unable to read experiments token');
+  });
+
+  it('should throw for an unknown token version number', () => {
+    if (!crypto.isCryptoAvailable()) { return; }
+    setupMetaTagWith(tokenWithBadVersion);
+    const p = isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
+    return expect(p).to.eventually.be
+        .rejectedWith('Unrecorgnized experiments token version');
+  });
+
+  it('should throw if config length exceeds byte length', () => {
+    if (!crypto.isCryptoAvailable()) { return; }
+    setupMetaTagWith(tokenWithBadConfigLength);
+    const p = isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
+    return expect(p).to.eventually.be
+        .rejectedWith('Specified len extends past end of buffer');
+  });
+
+  it('should throw if signature cannot be verified', () => {
+    if (!crypto.isCryptoAvailable()) { return; }
+    setupMetaTagWith(tokenWithBadSignature);
+    const p = isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
+    return expect(p).to.eventually.be
+        .rejectedWith('Failed to verify config signature');
+  });
+
+  it('should throw if approved origin is not current origin', () => {
+    if (!crypto.isCryptoAvailable()) { return; }
+    setupMetaTagWith(correctToken);
+    sandbox.stub(ampdoc, 'getUrl').returns('https://www.not-google.com');
+    const p = isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
+    return expect(p).to.eventually.be
+        .rejectedWith('Config does not match current origin');
+  });
+
+  it('should return false if requested experiment is not in config', () => {
+    if (!crypto.isCryptoAvailable()) { return; }
+    setupMetaTagWith(correctToken);
+    sandbox.stub(ampdoc, 'getUrl').returns('https://www.google.com');
+    const p = isExperimentOnForOriginTrial(win, 'amp-not-in-config', publicJwk);
+    return expect(p).to.eventually.be.false;
+  });
+
+  it('should return false if trial has expired', () => {
+    if (!crypto.isCryptoAvailable()) { return; }
+    setupMetaTagWith(correctToken);
+    sandbox.stub(ampdoc, 'getUrl').returns('https://www.google.com');
+    const p = isExperimentOnForOriginTrial(win, 'amp-expired', publicJwk);
+    return expect(p).to.eventually.be.false;
+  });
+
+  it('should return true for a well-formed token for an experiment' +
+     'that has not yet expired', () => {
+    if (!crypto.isCryptoAvailable()) { return; }
+    setupMetaTagWith(correctToken);
+    sandbox.stub(ampdoc, 'getUrl').returns('https://www.google.com');
+    const p = isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
+    return expect(p).to.eventually.be.true;
+  });
+});
