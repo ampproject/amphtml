@@ -465,7 +465,7 @@ function createErrorVargs(var_args) {
 
   if (!error) {
     error = new Error(message);
-  } if (message) {
+  } else if (message) {
     error.message = message + ': ' + error.message;
   }
   return error;
