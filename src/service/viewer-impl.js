@@ -19,7 +19,7 @@ import {findIndex} from '../utils/array';
 import {map} from '../utils/object';
 import {documentStateFor} from './document-state';
 import {registerServiceBuilderForDoc} from '../service';
-import {dev} from '../log';
+import {dev, duplicateErrorIfNecessary} from '../log';
 import {isIframed} from '../dom';
 import {
   parseQueryString,
@@ -934,6 +934,7 @@ function parseParams_(str, allParams) {
  */
 function getChannelError(opt_reason) {
   if (opt_reason instanceof Error) {
+    opt_reason = duplicateErrorIfNecessary(opt_reason);
     opt_reason.message = 'No messaging channel: ' + opt_reason.message;
     return opt_reason;
   }
