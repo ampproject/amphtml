@@ -1,0 +1,3 @@
+FAIL
+amp-timeago/0.1/test/validator-amp-timeago.html:39:4 The attribute 'datetime' in tag 'amp-timeago' is set to the invalid value '2017/04/11'. (see https://www.ampproject.org/docs/reference/components/amp-timeago) [AMP_TAG_PROBLEM]
+amp-timeago/0.1/test/validator-amp-timeago.html:42:4 The mandatory attribute 'datetime' is missing in tag 'amp-timeago'. (see https://www.ampproject.org/docs/reference/components/amp-timeago) [AMP_TAG_PROBLEM]
