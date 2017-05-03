@@ -41,9 +41,9 @@ tags: {  # <amp-timeago>
   attrs: { name: "locale" }
   attr_lists: "extended-amp-global"
   cdata: {
-    # Regex: \s*[\w.]+(\s*[\w.]+)*\s*
+    # Regex: \s*[\w.,:/+-]+(\s*[\w.,:/+-]+)*\s*
     # CDATA such as: Saturday 11 April 2017 00.37
-    cdata_regex: "\\s*[\\w\\.]+(\\s*[\\w\\.]+)*\\s*"
+    cdata_regex: "\\s*[\\w\\.,:/+-]+(\\s*[\\w\\.,:/+-]+)*\\s*"
   }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-timeago"
   amp_layout: {
