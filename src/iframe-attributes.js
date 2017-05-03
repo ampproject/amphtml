@@ -24,7 +24,7 @@ import {domFingerprint} from './utils/dom-fingerprint';
 /**
  * Produces the attributes for the ad template.
  * @param {!Window} parentWindow
- * @param {!Element} element
+ * @param {!AmpElement} element
  * @param {!string} sentinel
  * @param {!Object<string, string>=} attributes
  * @return {!Object}
@@ -84,9 +84,4 @@ export function getContextMetadata(
     attributes.src = adSrc;
   }
   return attributes;
-}
-
-export function getNameAttribute(parentWindow, element, sentinel) {
-  const attributes = getContextMetadata(parentWindow, element, sentinel);
-  return encodeURIComponent(JSON.stringify(attributes));
 }
