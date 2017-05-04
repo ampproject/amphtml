@@ -98,3 +98,5 @@ gulp.task(
       'files': '  CSV list of files in which to check links'
     }
 });
+
+exports.checkLinksInFiles = checkLinksInFiles;
