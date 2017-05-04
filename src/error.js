@@ -419,11 +419,11 @@ export function resetAccumulatedErrorMessagesForTesting() {
  * @visibleForTesting
  */
 export function detectJsEngineFromStack() {
-  function Object() {}
-  Object.prototype.t = function() {
+  function Fn() {}
+  Fn.prototype.t = function() {
     throw new Error('message');
-  }
-  const object = new Object();
+  };
+  const object = new Fn();
   try {
     object.t();
   } catch (e) {
@@ -444,7 +444,6 @@ export function detectJsEngineFromStack() {
     // "    at Global code (https://example.com/app.js:1:200)" or
     // "    at Anonymous function (https://example.com/app.js:1:200)"
     // vs Chrome which has:
-    // "    at https://example.com/app.js:1:200" or
     // "    at https://example.com/app.js:1:200"
     const last = stack.split('\n').pop();
     if (/\bat .* \(/i.test(last)) {
