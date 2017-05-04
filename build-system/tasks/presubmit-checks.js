@@ -474,8 +474,15 @@ var forbiddenTerms = {
         ' string as the first parameter',
   },
   '\\.schedulePass\\(': {
-    message: 'schedulePass is heavy, thinking twice before using it',
+    message: 'schedulePass is heavy, think twice before using it',
     whitelist: [
+      'src/service/resources-impl.js',
+    ],
+  },
+  '\\.requireLayout\\(': {
+    message: 'requireLayout is restricted b/c it affects non-contained elements',
+    whitelist: [
+      'extensions/amp-animation/0.1/web-animations.js',
       'src/service/resources-impl.js',
     ],
   },
