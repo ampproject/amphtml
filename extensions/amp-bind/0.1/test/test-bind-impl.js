@@ -95,12 +95,12 @@ describes.realWin('Bind', {
   /**
    * Calls `callback` when digest that updates bind state to `state` completes.
    * @param {!Object} state
-   * @param {boolean=} opt_fromAmpState
+   * @param {boolean=} opt_isAmpStateMutation
    * @return {!Promise}
    */
-  function onBindReadyAndSetState(state, opt_fromAmpState) {
+  function onBindReadyAndSetState(state, opt_isAmpStateMutation) {
     return bind.initializePromiseForTesting().then(() => {
-      return bind.setState(state, opt_fromAmpState);
+      return bind.setState(state, opt_isAmpStateMutation);
     }).then(() => {
       env.flushVsync();
       return bind.setStatePromiseForTesting();
