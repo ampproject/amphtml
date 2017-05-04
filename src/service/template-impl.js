@@ -341,7 +341,7 @@ export class Templates {
  * @param {!Window} win
  */
 export function installTemplatesService(win) {
-  registerServiceBuilder(win, 'templates', win => new Template(win));
+  registerServiceBuilder(win, 'templates', win => new Templates(win));
 }
 
 /**

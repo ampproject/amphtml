@@ -872,4 +872,4 @@ export class AmpFormService {
 }
 
 
-AMP.registerServiceForDoc(TAG, AmpFormService);
+AMP.registerServiceForDoc(TAG, ampdoc => new AmpFormService(ampdoc));

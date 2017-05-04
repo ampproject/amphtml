@@ -135,7 +135,6 @@ export function installServiceInEmbedScope(embedWin, id, service) {
       embedWin,
       embedWin,
       id,
-      /* opt_ctor */ undefined,
       () => service);
   // Force service to build
   getServiceInternal(embedWin, id);
@@ -176,11 +175,14 @@ function getLocalExistingServiceForEmbedWinOrNull(embedWin, id) {
 export function getService(win, id, opt_factory) {
   win = getTopWindow(win);
   if (!isServiceRegistered(win, id)) {
-    dev().assert(opt_factory, 'Factory not given and service missing %s', id);
+    dev().assert(opt_factory,
+        'Factory not given and service missing %s', id);
+    const factory =
+        /** @type {function(!Window):!Object} */ (opt_factory);
     registerServiceBuilder(
         win,
         id,
-        opt_factory,
+        factory,
         /* opt_instantiate */ true);
   }
   return getServiceInternal(win, id);
@@ -267,11 +269,15 @@ export function getServiceForDoc(nodeOrDoc, id, opt_factory) {
   const ampdoc = getAmpdoc(nodeOrDoc);
   const holder = getAmpdocServiceHolder(ampdoc);
   if (!isServiceRegistered(holder, id)) {
-    dev().assert(opt_factory, 'Factory not given and service missing %s', id);
+    dev().assert(opt_factory,
+        'Factory not given and service missing %s', id);
+    const factory =
+        /** @type {function(!./service/ampdoc-impl.AmpDoc):!Object} */
+        (opt_factory);
     registerServiceBuilderForDoc(
         ampdoc,
         id,
-        opt_factory,
+        factory,
         /* opt_instantiate */ true);
   }
   return getServiceInternal(holder, id);

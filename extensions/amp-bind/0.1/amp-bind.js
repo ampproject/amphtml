@@ -17,5 +17,5 @@
 import {AmpState} from './amp-state';
 import {Bind} from './bind-impl';
 
-AMP.registerServiceForDoc('bind', Bind);
+AMP.registerServiceForDoc('bind', ampdoc => new Bind(ampdoc));
 AMP.registerElement('amp-state', AmpState);

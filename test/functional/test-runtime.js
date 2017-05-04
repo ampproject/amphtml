@@ -26,7 +26,6 @@ import {deactivateChunking} from '../../src/chunk';
 import {
   getServiceForDoc,
   getServicePromise,
-  getServicePromiseOrNullForDoc,
 } from '../../src/service';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
@@ -549,31 +548,6 @@ describes.fakeWin('runtime', {
         servicePromise]);
     });
 
-    it('should register doc-service as ctor and install it immediately', () => {
-      class Service1 {}
-      const ampdoc = new AmpDocSingle(win);
-      ampdocServiceMock.expects('getAmpDoc')
-          .returns(ampdoc)
-          .atLeast(1);
-      win.AMP.push({
-        n: 'amp-ext',
-        f: amp => {
-          amp.registerServiceForDoc('service1', Service1);
-        },
-      });
-      runChunksForTesting(win.document);
-
-      // No factories
-      const extHolder = extensions.extensions_['amp-ext'];
-      expect(extHolder.docFactories).to.have.length(0);
-
-      // Already installed.
-      expect(getServiceForDoc(ampdoc, 'service1')).to.be.instanceOf(Service1);
-
-      // The main top-level service is also pinged to unblock render.
-      return getServicePromise(win, 'service1');
-    });
-
     it('should register doc-service factory and install it immediately', () => {
       function factory() {
         return 'A';
@@ -703,31 +677,6 @@ describes.fakeWin('runtime', {
         extensions.waitForExtension('amp-ext'),
         servicePromise]);
     });
-
-    it('should register doc-service as ctor and defer install', () => {
-      class Service1 {}
-      win.AMP.push({
-        n: 'amp-ext',
-        f: amp => {
-          amp.registerServiceForDoc('service1', Service1);
-        },
-      });
-      runChunksForTesting(win.document);
-
-      // Factory recorded.
-      const extHolder = extensions.extensions_['amp-ext'];
-      expect(extHolder.docFactories).to.have.length(1);
-
-      const shadowRoot = document.createDocumentFragment();
-      const ampdoc = new AmpDocShadow(win, 'https://a.org/', shadowRoot);
-
-      // Not installed.
-      expect(getServicePromiseOrNullForDoc(ampdoc, 'service1')).to.be.null;
-
-      // Install.
-      extHolder.docFactories[0](ampdoc);
-      expect(getServiceForDoc(ampdoc, 'service1')).to.be.instanceOf(Service1);
-    });
   });
 });
 
@@ -809,7 +758,7 @@ describes.realWin('runtime multidoc', {
       win.AMP.push({
         n: 'amp-ext',
         f: amp => {
-          amp.registerServiceForDoc('service1', Service1);
+          amp.registerServiceForDoc('service1', () => new Service1());
         },
       });
 
