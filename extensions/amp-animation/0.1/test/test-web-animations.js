@@ -360,7 +360,9 @@ describes.sandboxed('MeasureScanner', {}, () => {
     });
 
     function waitForNextMicrotask() {
-      return Promise.resolve().then(() => Promise.resolve());
+      return Promise.resolve()
+          .then(() => Promise.resolve())
+          .then(() => Promise.all([Promise.resolve()]));
     }
 
     function createRunner(spec) {
@@ -387,6 +389,10 @@ describes.sandboxed('MeasureScanner', {}, () => {
     });
 
     it('should block AMP elements', () => {
+      const r1 = resources.getResourceForElement(amp1);
+      const r2 = resources.getResourceForElement(amp2);
+      sandbox.stub(r1, 'isDisplayed', () => true);
+      sandbox.stub(r2, 'isDisplayed', () => true);
       let runner;
       createRunner([
         {target: amp1, keyframes: {}},
@@ -396,11 +402,11 @@ describes.sandboxed('MeasureScanner', {}, () => {
       });
       return waitForNextMicrotask().then(() => {
         expect(runner).to.be.undefined;
-        resources.getResourceForElement(amp1).loadPromiseResolve_();
+        r1.loadPromiseResolve_();
         return waitForNextMicrotask();
       }).then(() => {
         expect(runner).to.be.undefined;
-        resources.getResourceForElement(amp2).loadPromiseResolve_();
+        r2.loadPromiseResolve_();
         return waitForNextMicrotask();
       }).then(() => {
         expect(runner).to.be.ok;
