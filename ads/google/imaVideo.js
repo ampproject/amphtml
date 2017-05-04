@@ -352,24 +352,24 @@ export function imaVideo(global, data) {
           false);
     }
 
-    adDisplayContainer = new google.ima.AdDisplayContainer(adContainerDiv,
-        videoPlayer);
+    adDisplayContainer =
+        new global.google.ima.AdDisplayContainer(adContainerDiv, videoPlayer);
 
-    adsLoader = new google.ima.AdsLoader(adDisplayContainer);
+    adsLoader = new global.google.ima.AdsLoader(adDisplayContainer);
     adsLoader.getSettings().setPlayerType('amp-ima');
     adsLoader.getSettings().setPlayerVersion('0.1');
     adsLoader.addEventListener(
-        google.ima.AdsManagerLoadedEvent.Type.ADS_MANAGER_LOADED,
+        global.google.ima.AdsManagerLoadedEvent.Type.ADS_MANAGER_LOADED,
         onAdsManagerLoaded,
         false);
     adsLoader.addEventListener(
-        google.ima.AdErrorEvent.Type.AD_ERROR,
+        global.google.ima.AdErrorEvent.Type.AD_ERROR,
         onAdsLoaderError,
         false);
 
     videoPlayer.addEventListener('ended', onContentEnded);
 
-    const adsRequest = new google.ima.AdsRequest();
+    const adsRequest = new global.google.ima.AdsRequest();
     adsRequest.adTagUrl = data.tag;
     adsRequest.linearAdSlotWidth = videoWidth;
     adsRequest.linearAdSlotHeight = videoHeight;
@@ -406,7 +406,8 @@ export function playAds() {
   if (adsManager) {
     // Ad request resolved.
     try {
-      adsManager.init(videoWidth, videoHeight, google.ima.ViewMode.NORMAL);
+      adsManager.init(
+          videoWidth, videoHeight, global.google.ima.ViewMode.NORMAL);
       window.parent.postMessage({event: VideoEvents.PLAY}, '*');
       adsManager.start();
     } catch (adError) {
@@ -439,18 +440,20 @@ export function onContentEnded() {
  * @visibleForTesting
  */
 export function onAdsManagerLoaded(adsManagerLoadedEvent) {
-  const adsRenderingSettings = new google.ima.AdsRenderingSettings();
+  const adsRenderingSettings = new global.google.ima.AdsRenderingSettings();
   adsRenderingSettings.restoreCustomPlaybackStateOnAdBreakComplete = true;
   adsRenderingSettings.uiElements =
-      [google.ima.UiElements.AD_ATTRIBUTION, google.ima.UiElements.COUNTDOWN];
+      [global.google.ima.UiElements.AD_ATTRIBUTION,
+       global.google.ima.UiElements.COUNTDOWN];
   adsManager = adsManagerLoadedEvent.getAdsManager(videoPlayer,
       adsRenderingSettings);
-  adsManager.addEventListener(google.ima.AdErrorEvent.Type.AD_ERROR,
+  adsManager.addEventListener(global.google.ima.AdErrorEvent.Type.AD_ERROR,
       onAdError);
-  adsManager.addEventListener(google.ima.AdEvent.Type.CONTENT_PAUSE_REQUESTED,
+  adsManager.addEventListener(
+      global.google.ima.AdEvent.Type.CONTENT_PAUSE_REQUESTED,
       onContentPauseRequested);
   adsManager.addEventListener(
-      google.ima.AdEvent.Type.CONTENT_RESUME_REQUESTED,
+      global.google.ima.AdEvent.Type.CONTENT_RESUME_REQUESTED,
       onContentResumeRequested);
   if (muteAdsManagerOnLoaded) {
     adsManager.setVolume(0);
@@ -491,7 +494,7 @@ export function onContentPauseRequested() {
     adsManager.resize(
       adsManagerWidthOnLoad,
       adsManagerHeightOnLoad,
-      google.ima.ViewMode.NORMAL);
+      global.google.ima.ViewMode.NORMAL);
     adsManagerWidthOnLoad = null;
     adsManagerHeightOnLoad = null;
   }
@@ -725,7 +728,8 @@ function onFullscreenClick() {
 function onFullscreenChange() {
   if (fullscreen) {
     // Resize the ad container
-    adsManager.resize(videoWidth, videoHeight, google.ima.ViewMode.NORMAL);
+    adsManager.resize(
+        videoWidth, videoHeight, global.google.ima.ViewMode.NORMAL);
     adsManagerWidthOnLoad = null;
     adsManagerHeightOnLoad = null;
     // Return the video to its original size and position
@@ -737,7 +741,8 @@ function onFullscreenChange() {
     if (!nativeFullscreen) {
       // Resize the ad container
       adsManager.resize(
-          fullscreenWidth, fullscreenHeight, google.ima.ViewMode.FULLSCREEN);
+          fullscreenWidth, fullscreenHeight,
+          global.google.ima.ViewMode.FULLSCREEN);
       adsManagerWidthOnLoad = null;
       adsManagerHeightOnLoad = null;
       // Make the video take up the entire screen
@@ -784,7 +789,10 @@ function onMessage(event) {
   if (msg.event && msg.func) {
     switch (msg.func) {
       case 'playVideo':
-        if (playbackStarted) {
+        if (adsActive) {
+          adsManager.resume();
+          window.parent.postMessage({event: VideoEvents.PLAY}, '*');
+        } else if (playbackStarted) {
           playVideo();
         } else {
           // Auto-play support
@@ -792,7 +800,10 @@ function onMessage(event) {
         }
         break;
       case 'pauseVideo':
-        if (playbackStarted) {
+        if (adsActive) {
+          adsManager.pause();
+          window.parent.postMessage({event: VideoEvents.PAUSE}, '*');
+        } else if (playbackStarted) {
           pauseVideo();
         }
         break;
@@ -823,7 +834,8 @@ function onMessage(event) {
         bigPlayDiv.style.height = msg.args.height + 'px';
         if (adsActive) {
           adsManager.resize(
-              msg.args.width, msg.args.height, google.ima.ViewMode.NORMAL);
+              msg.args.width, msg.args.height,
+              global.google.ima.ViewMode.NORMAL);
         } else {
           adsManagerWidthOnLoad = msg.args.width;
           adsManagerHeightOnLoad = msg.args.height;

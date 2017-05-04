@@ -16,6 +16,7 @@
 
 import {createIframePromise} from '../../../../testing/iframe';
 import {adopt} from '../../../../src/runtime';
+import {toggleExperiment} from '../../../../src/experiments';
 import * as imaVideoObj from '../../../../ads/google/imaVideo';
 import * as sinon from 'sinon';
 import '../amp-ima-video';
@@ -29,6 +30,7 @@ describe('amp-ima-video', () => {
   let sandbox;
 
   beforeEach(() => {
+    toggleExperiment(window, 'amp-ima-video', true);
     sandbox = sinon.sandbox.create();
   });
 
@@ -95,6 +97,8 @@ describe('amp-ima-video', () => {
       const videoPlayerMock = {load: function() {}};
       const loadSpy = sandbox.spy(videoPlayerMock, 'load');
       //const playAdsSpy = sandbox.spy(imaVideoObj, 'playAds');
+      //const playAdsFunc = imaVideoObj.playAds;
+      //const playAdsSpy = sandbox.spy(playAdsFunc);
       imaVideoObj.setBigPlayDivForTesting(bigPlayDivMock);
       imaVideoObj.setAdDisplayContainerForTesting(adDisplayContainerMock);
       imaVideoObj.setVideoPlayerForTesting(videoPlayerMock);
@@ -126,11 +130,6 @@ describe('amp-ima-video', () => {
         src: srcUrl,
         tag: adTagUrl,
       });
-      //let testPostMessage;
-      // TODO - How do I test messages posted back to the main window?
-      /*window.addEventListener('message', msg => {
-        testPostMessage = msg;
-      });*/
       window.google = {
         ima: {
           ViewMode: {
@@ -149,9 +148,6 @@ describe('amp-ima-video', () => {
       imaVideoObj.playAds();
 
       expect(initSpy).to.be.calledWith(100, 200, 'normal');
-      // TODO - How do I test messages posted back to the main window? This is
-      // being called before the event is thrown so it fails.
-      //expect(testPostMessage.data).to.have.property('event');
       expect(startSpy).to.be.called;
     });
   });
@@ -168,18 +164,10 @@ describe('amp-ima-video', () => {
         src: srcUrl,
         tag: adTagUrl,
       });
-      //let testPostMessage;
-      // TODO - How do I test messages posted back to the main window?
-      /*window.addEventListener('message', msg => {
-        testPostMessage = msg;
-      });*/
       //const playVideoSpy = sandbox.spy(imaVideoObj, 'playVideo');
 
       imaVideoObj.playAds();
 
-      // TODO - How do I test messages posted back to the main window? This is
-      // being called before the event is thrown so it fails.
-      //expect(testPostMessage.data).to.have.property('event');
       // TODO - Fix when I can spy on internals.
       //expect(playVideoSpy).to.be.called;
       // Just here so the test passes until I fix above issues
@@ -222,11 +210,6 @@ describe('amp-ima-video', () => {
         src: srcUrl,
         tag: adTagUrl,
       });
-      //let testPostMessage;
-      // TODO - How do I test messages posted back to the main window?
-      /*window.addEventListener('message', msg => {
-        testPostMessage = msg;
-      });*/
       const mockAdsRenderingSettings = {};
       window.google = {};
       window.google.ima = {};
@@ -274,9 +257,6 @@ describe('amp-ima-video', () => {
       expect(addEventListenerSpy).to.be.calledWith('aderror');
       expect(addEventListenerSpy).to.be.calledWith('cpr');
       expect(addEventListenerSpy).to.be.calledWith('crr');
-      // TODO - How do I test messages posted back to the main window? This is
-      // being called before the event is thrown so it fails.
-      //expect(testPostMessage.data).to.have.property('event');
     });
   });
 
@@ -292,11 +272,6 @@ describe('amp-ima-video', () => {
         src: srcUrl,
         tag: adTagUrl,
       });
-      //let testPostMessage;
-      // TODO - How do I test messages posted back to the main window?
-      /*window.addEventListener('message', msg => {
-        testPostMessage = msg;
-      });*/
       const mockAdsRenderingSettings = {};
       window.google = {};
       window.google.ima = {};
@@ -346,9 +321,6 @@ describe('amp-ima-video', () => {
       expect(addEventListenerSpy).to.be.calledWith('cpr');
       expect(addEventListenerSpy).to.be.calledWith('crr');
       expect(setVolumeSpy).to.be.calledWith(0);
-      // TODO - How do I test messages posted back to the main window? This is
-      // being called before the event is thrown so it fails.
-      //expect(testPostMessage.data).to.have.property('event');
     });
   });
 
@@ -364,11 +336,6 @@ describe('amp-ima-video', () => {
         src: srcUrl,
         tag: adTagUrl,
       });
-      //let testPostMessage;
-      // TODO - How do I test messages posted back to the main window?
-      /*window.addEventListener('message', msg => {
-        testPostMessage = msg;
-      });*/
       //const playVideoSpy = sandbox.spy(imaVideoObj, 'playVideo');
 
       imaVideoObj.onAdsLoaderError();
@@ -701,12 +668,6 @@ describe('amp-ima-video', () => {
         src: srcUrl,
         tag: adTagUrl,
       });
-      //const showControlsSpy = sandbox.spy(imaVideoObj, 'showControls');
-      //let testPostMessage;
-      // TODO - How do I test messages posted back to the main window?
-      /*window.addEventListener('message', msg => {
-        testPostMessage = msg;
-      });*/
       const videoMock = {};
       videoMock.play = function() {};
       const playSpy = sandbox.spy(videoMock, 'play');
@@ -725,9 +686,6 @@ describe('amp-ima-video', () => {
               .to.eql('1.4em');
       expect(imaVideoObj.getPropertiesForTesting().playPauseNode.textContent)
         .to.eql(imaVideoObj.getPropertiesForTesting().pauseChars);
-      // TODO - How do I test messages posted back to the main window? This is
-      // being called before the event is thrown so it fails.
-      //expect(testPostMessage.data).to.have.property('event');
       expect(playSpy).to.have.been.called;
     });
   });
@@ -751,11 +709,6 @@ describe('amp-ima-video', () => {
       //const showControlsSpy = sandbox.spy(imaVideoObj, 'showControls');
       imaVideoObj.getPropertiesForTesting().playerState =
           imaVideoObj.getPropertiesForTesting().PlayerStates.PLAYING;
-      //let testPostMessage;
-      // TODO - How do I test messages posted back to the main window?
-      /*window.addEventListener('message', msg => {
-        testPostMessage = msg;
-      });*/
 
       imaVideoObj.pauseVideo({});
 
@@ -769,9 +722,6 @@ describe('amp-ima-video', () => {
       expect(
           imaVideoObj.getPropertiesForTesting().playPauseDiv.style.lineHeight)
               .to.eql('');
-      // TODO - How do I test messages posted back to the main window? This is
-      // being called before the event is thrown so it fails.
-      //expect(testPostMessage.data).to.have.property('event');
     });
   });
 
@@ -797,11 +747,6 @@ describe('amp-ima-video', () => {
       //const showControlsSpy = sandbox.spy(imaVideoObj, 'showControls');
       imaVideoObj.getPropertiesForTesting().playerState =
           imaVideoObj.getPropertiesForTesting().PlayerStates.PLAYING;
-      //let testPostMessage;
-      // TODO - How do I test messages posted back to the main window?
-      /*window.addEventListener('message', msg => {
-        testPostMessage = msg;
-      });*/
 
       imaVideoObj.pauseVideo({type: 'webkitendfullscreen'});
 
@@ -815,9 +760,6 @@ describe('amp-ima-video', () => {
       expect(
           imaVideoObj.getPropertiesForTesting().playPauseDiv.style.lineHeight)
               .to.eql('');
-      // TODO - How do I test messages posted back to the main window? This is
-      // being called before the event is thrown so it fails.
-      //expect(testPostMessage.data).to.have.property('event');
       expect(removeEventListenerSpy).to.have.been.called;
     });
   });

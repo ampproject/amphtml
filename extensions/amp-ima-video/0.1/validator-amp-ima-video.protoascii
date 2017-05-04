@@ -14,49 +14,44 @@
 # limitations under the license.
 #
 
-tags: { #amp-ima-video
-  tag_name: "script"
-  spec_name: "amp-ima-video extension .js script"
-  mandatory_parent: "head"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+tags: {  # amp-ima-video
+  html_format: AMP
+  tag_name: "SCRIPT"
+  satisfies: "amp-ima-video extension .js script"
+  requires: "amp-ima-video"
+  extension_spec: {
+    name: "amp-ima-video"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-ima-video"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-ima-video-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-ima-video.html"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-ima-video>
-  tag_name: "amp-ima-video"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-ima-video extension .js script"
+  html_format: AMP
+  tag_name: "AMP-IMA-VIDEO"
+  disallowed_ancestor: "AMP-SIDEBAR"
+  satisfies: "amp-ima-video"
+  requires: "amp-ima-video extension .js script"
   # data-* is generally allowed, but it's not generally mandatory.
-  attrs: { name: "data-src" mandatory: true }
-  attrs: { name: "data-tag" mandatory: true }
-  attrs: { name: "data-poster" mandatory: false }
+  attrs: {
+    name: "data-src"
+    mandatory: true
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  attrs: {
+    name: "data-tag"
+    mandatory: true
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+  }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-ima-video.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-ima-video"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

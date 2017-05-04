@@ -1,14 +1,22 @@
+import {assertHttpsUrl} from '../../../src/url';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
+import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isObject} from '../../../src/types';
-import {listenFor} from '../../../src/iframe-helper';
-import {loadPromise} from '../../../src/event-helper';
+import {
+  listen,
+  loadPromise,
+} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
+import {user} from '../../../src/log';
 import {VideoEvents} from '../../../src/video-interface';
 import {videoManagerForDoc} from '../../../src/services';
+
+/** @const */
+const TAG = 'amp-ima-video';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -27,6 +35,24 @@ class AmpImaVideo extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.playerReadyResolver_ = null;
+
+    /** @private {?Function} */
+    this.unlistenMessage_ = null;
+  }
+
+  /** @override */
+  buildCallback() {
+    user().assert(isExperimentOn(this.win, TAG),
+        'Experiment ' + TAG + ' is disabled.');
+
+    assertHttpsUrl(this.element.getAttribute('data-tag'),
+        'The data-tag attribute is required for <amp-video-ima> and must be ' +
+            'https',
+        this.element);
+    assertHttpsUrl(this.element.getAttribute('data-src'),
+        'The data-src attribute is required for <amp-video-ima> and must be ' +
+            'https',
+        this.element);
   }
 
   /** @override */
@@ -47,13 +73,6 @@ class AmpImaVideo extends AMP.BaseElement {
         this.element, 'ima-video');
     iframe.setAttribute('allowfullscreen', 'true');
     this.applyFillContent(iframe);
-    listenFor(iframe, 'embed-size', data => {
-      iframe.height = data.height;
-      iframe.width = data.width;
-      const amp = iframe.parentElement;
-      amp.setAttribute('height', data.height);
-      amp.setAttribute('width', data.width);
-    }, /* opt_is3P */true);
     this.element.appendChild(iframe);
 
     this.iframe_ = iframe;
@@ -62,8 +81,11 @@ class AmpImaVideo extends AMP.BaseElement {
       this.playerReadyResolver_ = resolve;
     });
 
-    this.win.addEventListener(
-        'message', event => this.handlePlayerMessages_(event));
+    this.unlistenMessage_ = listen(
+      this.win,
+      'message',
+      this.handlePlayerMessages_.bind(this)
+    );
 
     installVideoManagerForDoc(this.element);
     videoManagerForDoc(this.win.document).register(this);
@@ -82,6 +104,13 @@ class AmpImaVideo extends AMP.BaseElement {
       removeElement(this.iframe_);
       this.iframe_ = null;
     }
+    if (this.unlistenMessage_) {
+      this.unlistenMessage_();
+    }
+
+    this.playerReadyPromise_ = new Promise(resolve => {
+      this.playerReadyResolver_ = resolve;
+    });
     return true;
   }
 
@@ -102,11 +131,13 @@ class AmpImaVideo extends AMP.BaseElement {
    * @private
    * */
   sendCommand_(command, opt_args) {
-    this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify({
-      'event': 'command',
-      'func': command,
-      'args': opt_args || '',
-    }), '*');
+    this.playerReadyPromise_.then(() => {
+      this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify({
+        'event': 'command',
+        'func': command,
+        'args': opt_args || '',
+      }), '*');
+    });
   }
 
   /** @private */
@@ -151,36 +182,28 @@ class AmpImaVideo extends AMP.BaseElement {
    * @override
    */
   play(unusedIsAutoplay) {
-    this.playerReadyPromise_.then(() => {
-      this.sendCommand_('playVideo');
-    });
+    this.sendCommand_('playVideo');
   }
 
   /**
    * @override
    */
   pause() {
-    this.playerReadyPromise_.then(() => {
-      this.sendCommand_('pauseVideo');
-    });
+    this.sendCommand_('pauseVideo');
   }
 
   /**
    * @override
    */
   mute() {
-    this.playerReadyPromise_.then(() => {
-      this.sendCommand_('mute');
-    });
+    this.sendCommand_('mute');
   }
 
   /**
    * @override
    */
   unmute() {
-    this.playerReadyPromise_.then(() => {
-      this.sendCommand_('unMute');
-    });
+    this.sendCommand_('unMute');
   }
 
   /**
