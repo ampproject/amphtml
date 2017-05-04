@@ -34,7 +34,7 @@ function calculateScriptBaseUrl(location, isLocalDev) {
  * Calculate script url for an extension.
  * @param {!Location} location The window's location
  * @param {string} extensionId
- * @param {string=} extensionVer
+ * @param {string} extensionVer
  * @param {boolean=} isLocalDev
  * @return {string}
  */
