@@ -202,12 +202,7 @@ const command = {
     execOrDie('npm run ava');
   },
   testDocumentLinks: function(files) {
-    let docFiles = [];
-    files.forEach(file => {
-      if (isDocFile(file)) {
-        docFiles.push(file);
-      }
-    });
+    let docFiles = files.filter(isDocFile);
     checkLinksInFiles(docFiles);
   },
   buildRuntime: function() {

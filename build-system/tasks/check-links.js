@@ -46,9 +46,7 @@ function checkLinks() {
  */
 function checkLinksInFiles(markdownFiles) {
   util.log('Checking links in', util.colors.magenta(markdownFiles), '...');
-  markdownFiles.forEach(function(markdownFile) {
-    runLinkChecker(markdownFile);
-  });
+  markdownFiles.forEach(runLinkChecker);
 }
 
 /**
