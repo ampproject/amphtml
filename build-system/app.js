@@ -227,7 +227,7 @@ app.use('/form/verify-search-json/post', function(req, res) {
       errors.push({name: 'name', message: 'Please set your name to be Frank'});
     }
     if (fields.error === 'true') {
-      errors.push('You asked for an error, you get an error.');
+      errors.push({message: 'You asked for an error, you get an error.'});
     }
     if (fields.city !== 'Mountain View' || fields.zip !== '94043') {
       errors.push({
@@ -243,13 +243,12 @@ app.use('/form/verify-search-json/post', function(req, res) {
           {title: 'Result 2'},
           {title: 'Result 3'},
         ],
-        committed: true
+        committed: true,
       }));
     } else {
       res.statusCode = 400;
-      res.end(JSON.stringify({errors: errors}));
+      res.end(JSON.stringify({verifyErrors: errors}));
     }
-
   });
 });
 

@@ -709,9 +709,12 @@
     </div>
     <div submit-error>
         <template type="amp-mustache">
-            {{#errors.0}}{{#errors}}
-                <p>{{#message}}{{.}}{{/message}}{{^message}}{{.}}{{/message}}</p>
-            {{/errors}}{{/errors.0}}
+            {{#verifyErrors}}
+                <p>{{message}}</p>
+            {{/verifyErrors}}
+            {{^verifyErrors}}
+                <p>Something went wrong. Try again later?</p>
+            {{/verifyErrors}}
         </template>
     </div>
 </form>

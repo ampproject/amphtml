@@ -412,8 +412,8 @@ class VerificationGroup {
 function getResponseErrorData_(error) {
   const json = /** @type {?VerificationErrorResponseDef} */ (
       error.responseJson && error.responseJson);
-  if (json && json.errors) {
-    return json.errors;
+  if (json && json.verifyErrors) {
+    return json.verifyErrors;
   } else {
     return [];
   }
