@@ -795,7 +795,7 @@ function createBaseCustomElementClass(win) {
           // Already in viewport - start showing loading.
           this.toggleLoading_(true);
         } else if (layoutBox.top < PREPARE_LOADING_THRESHOLD_ &&
-          layoutBox.top >= 0) {
+            layoutBox.top >= 0) {
           // Few top elements will also be pre-initialized with a loading
           // element.
           getVsync(this).mutate(() => {
