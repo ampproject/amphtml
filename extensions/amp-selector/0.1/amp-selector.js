@@ -20,7 +20,6 @@ import {actionServiceForDoc} from '../../../src/services';
 import {closestBySelector, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
-import {isEnumValue} from '../../../src/types';
 
 /**
  * Set of namespaces that can be set for lifecycle reporters.
@@ -92,15 +91,16 @@ export class AmpSelector extends AMP.BaseElement {
     }
 
     let kbSelectMode = this.element.getAttribute('keyboard-select-mode');
-    if (!kbSelectMode) {
-      kbSelectMode = KEYBOARD_SELECT_MODES.NONE;
-    }
-    user().assert(isEnumValue(KEYBOARD_SELECT_MODES, kbSelectMode),
-        'Invalid keyboard-select-mode');
-    user().assert(
+    if (kbSelectMode) {
+      kbSelectMode = kbSelectMode.toLowerCase();
+      user().assertEnumValue(KEYBOARD_SELECT_MODES, kbSelectMode);
+      user().assert(
         !(this.isMultiple_ && kbSelectMode == KEYBOARD_SELECT_MODES.SELECT),
         '[keyboard-select-mode=select] not supported for multiple ' +
         'selection amp-selector');
+    } else {
+      kbSelectMode = KEYBOARD_SELECT_MODES.NONE;
+    }
     this.kbSelectMode_ = kbSelectMode;
 
     this.init_();
