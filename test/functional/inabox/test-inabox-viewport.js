@@ -17,6 +17,9 @@
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {resourcesForDoc} from '../../../src/services';
 import {ViewportBindingInabox} from '../../../src/inabox/inabox-viewport';
+import {
+  installIframeMessagingClient,
+} from '../../../src/inabox/inabox-iframe-messaging-client';
 
 describes.fakeWin('inabox-viewport', {amp: {}}, env => {
 
@@ -38,6 +41,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     win.innerWidth = 200;
     win.innerHeight = 150;
 
+    installIframeMessagingClient(win);
     binding = new ViewportBindingInabox(win);
     measureSpy = sandbox.spy();
     element = {
