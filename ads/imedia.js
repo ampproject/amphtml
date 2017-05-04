@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,13 @@
 
 import {loadScript, computeInMasterFrame, validateData} from '../3p/3p';
 
-/* global im:false */
-
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function imedia(global, data) {
-  validateData(data, ['id','positions']);
+  validateData(data, ['id', 'positions']);
+
   let positions = null;
   if (data.positions) {
     positions = JSON.parse(data.positions);
@@ -35,40 +34,34 @@ export function imedia(global, data) {
   parentElement.id = data.id;
   global.document.getElementById('c').appendChild(parentElement);
 
-  // array of all ad elements throught all iframes
+  // array of all ad elements through all iframes
   if (!mW.elements) {
     mW.elements = [];
   }
   mW.elements.push(parentElement);
 
-  computeInMasterFrame(global, 'imedia-load', done => {
-    loadScript(global, 'https://i.imedia.cz/js/im3.js', () => {
-      let success = false;
-      if (im != null) {
-        success = true;
-        mW.im = im;
+  computeInMasterFrame(global, 'imedia-load', function(done) {
+    loadScript(this, 'https://i.imedia.cz/js/im3.js', () => {
+      if (this.im != null) {
+        mW.im = this.im;
         mW.im.conf.referer = context.location.href;
         // send request to get all ads
         mW.im.getAds(positions, {AMPcallback: ads => {
           mW.ads = ads;
-          done(success);
+          done(true);
         }});
       }});
-  },
-
-  success => {
-    if (success) {
-      mW.elements.forEach(element => {
-        positions.forEach((position, index) => {
-          // match right elemnent and zone to write advert from adserver
-          if (element.id == position.id) {
-            position.id = element; // right element "c" to position obj.
-            if (mW.im.writeAd) {
-              mW.im.writeAd(mW.ads[index], position);
-            }
+  }, () => {
+    mW.elements.forEach(element => {
+      positions.forEach((position, index) => {
+        // match right elemnent and zone to write advert from adserver
+        if (element.id == position.id) {
+          position.id = element; // right element "c" to position obj.
+          if (mW.im.writeAd) {
+            mW.im.writeAd(mW.ads[index], position);
           }
-        });
+        }
       });
-    }
+    });
   });
 };

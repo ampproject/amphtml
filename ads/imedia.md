@@ -1,5 +1,5 @@
 <!---
-Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,21 +20,21 @@ limitations under the License.
 
 ```html
 <amp-ad width=300 height=250
-	type="imedia"
-	data-id="p1"
-    data-positions='[
-      {"id":"p1", "zoneId":"seznam.novinky.ikona2"},
-      {"id":"p2", "zoneId":"seznam.novinky.ikona"}
-      ]'
+  type="imedia"
+  data-id="p1"
+  data-positions='[
+    {"id":"p1", "zoneId":"seznam.novinky.ikona2"},
+    {"id":"p2", "zoneId":"seznam.novinky.ikona"}
+  ]'
 </amp-ad>
 ```
 
 ## Configuration
 
-For semantics of configuration, please see [ad network documentation](https://iimedia.sbeta.cz/html/im3light/).
+For semantics of configuration, please see [ad network documentation](https://iimedia.sbeta.cz/html/navod-im3light/)
+or contact reklama-pozadavky@firma.seznam.cz
 
 Supported parameters:
 
-- width
-- height
-- json
+- data-id
+- data-positions
