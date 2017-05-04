@@ -144,8 +144,6 @@ describes.fakeWin.only('LayerElement', {amp: true}, (env) => {
   });
 
   describe('#getAbsoluteLayoutBox', () => {
-    let viewport;
-
     beforeEach(() => {
       element.isAlwaysFixed = () => false;
       layout.remeasure();
@@ -182,8 +180,6 @@ describes.fakeWin.only('LayerElement', {amp: true}, (env) => {
   });
 
   describe('#getPageLayoutBox', () => {
-    let viewport;
-
     beforeEach(() => {
       element.isAlwaysFixed = () => false;
       layout.remeasure();
@@ -197,12 +193,12 @@ describes.fakeWin.only('LayerElement', {amp: true}, (env) => {
 
       it('returns page relative rect', () => {
         expect(layout.getPageLayoutBox()).to.jsonEqual(
-            layoutRectLtwh(0, 30, 100, 100));
+            layoutRectLtwh(0, 10, 100, 100));
 
         viewport.top = 100;
         viewport.left = 10;
         expect(layout.getPageLayoutBox()).to.jsonEqual(
-            layoutRectLtwh(00, 30, 100, 100));
+            layoutRectLtwh(0, 10, 100, 100));
       });
     });
 
@@ -216,6 +212,70 @@ describes.fakeWin.only('LayerElement', {amp: true}, (env) => {
         expect(layout.getPageLayoutBox()).to.jsonEqual(
             layoutRectLtwh(0, 30, 100, 100));
       });
+    });
+  });
+
+  describe('#remeasure', () => {
+    beforeEach(() => {
+      element.isAlwaysFixed = () => false;
+    });
+
+    it('updates the elements rect based on viewport measurement', () => {
+      layout.remeasure();
+      expect(layout.getPageLayoutBox()).to.jsonEqual(
+          layoutRectLtwh(0, 30, 100, 100));
+
+      sandbox.stub(viewport, 'getLayoutRect', () => {
+        return layoutRectLtwh(10, 100, 100, 100);
+      });
+      layout.remeasure();
+      expect(layout.getPageLayoutBox()).to.jsonEqual(
+          layoutRectLtwh(10, 100, 100, 100));
+    });
+
+    it('returns the newly measured page layout rect', () => {
+      const ret = layout.remeasure();
+      expect(ret).to.jsonEqual(layoutRectLtwh(0, 30, 100, 100));
+    });
+
+    describe('when element is fixed', () => {
+      beforeEach(() => {
+        element.isAlwaysFixed = () => true;
+      });
+
+      it('sets isFixed', () => {
+        expect(layout.isFixed()).to.be.false;
+
+        layout.remeasure();
+        expect(layout.isFixed()).to.be.true;
+      });
+
+      it('updates elements rect to a viewport relative layout rect', () => {
+        layout.remeasure();
+        expect(layout.getPageLayoutBox()).to.jsonEqual(
+            layoutRectLtwh(0, 10, 100, 100));
+      });
+
+      it('returns the newly measured viewport relative layout rect', () => {
+        const ret = layout.remeasure();
+        expect(ret).to.jsonEqual(layoutRectLtwh(0, 10, 100, 100));
+      });
+    });
+  });
+
+  describe('#isFixed', () => {
+    it('returns whether element was last measured as fixed-position', () => {
+      element.isAlwaysFixed = () => false;
+      layout.remeasure();
+      expect(layout.isFixed()).to.be.false;
+
+      element.isAlwaysFixed = () => true;
+      layout.remeasure();
+      expect(layout.isFixed()).to.be.true;
+
+      element.isAlwaysFixed = () => false;
+      layout.remeasure();
+      expect(layout.isFixed()).to.be.false;
     });
   });
 });
