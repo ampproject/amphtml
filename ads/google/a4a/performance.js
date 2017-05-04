@@ -256,19 +256,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
    * @visibleForTesting
    */
   emitPing_(url) {
-    const pingElement = this.element_.ownerDocument.createElement('img');
-    pingElement.setAttribute('src', url);
-    // Styling is copied directly from amp-pixel's CSS.  This is a kludgy way
-    // to do this -- much better would be to invoke amp-pixel's styling directly
-    // or to add an additional style selector for these ping pixels.
-    // However, given that this is a short-term performance system, I'd rather
-    // not tamper with AMP-wide CSS just to create styling for this
-    // element.
-    pingElement.setAttribute('style',
-        'position:fixed!important;top:0!important;width:1px!important;' +
-        'height:1px!important;overflow:hidden!important;visibility:hidden');
-    pingElement.setAttribute('aria-hidden', 'true');
-    this.element_.parentNode.insertBefore(pingElement, this.element_);
+    new Image().src = url;
     dev().info('PING', url);
   }
 
