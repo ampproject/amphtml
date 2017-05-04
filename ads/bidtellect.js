@@ -21,8 +21,23 @@ import {writeScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function bidtellect(global, data) {
-  validateData(data, ['t','pid'], ['sid','sname','pubid','pubname','renderid','bestrender','autoplay','playbutton','videotypeid','videocloseicon','targetid','bustframe']);
-  let params = '?t=' + encodeURIComponent(data.t) + '&pid=' + encodeURIComponent(data.pid);
+  const requiredParams = ['t','pid'];
+  const optionalParams = [
+    'sid',
+    'sname',
+    'pubid',
+    'pubname',
+    'renderid',
+    'bestrender',
+    'autoplay',
+    'playbutton',
+    'videotypeid',
+    'videocloseicon',
+    'targetid',
+    'bustframe'];
+  validateData(data, requiredParams, optionalParams);
+  let params = '?t=' + encodeURIComponent(data.t);
+  params += '&pid=' + encodeURIComponent(data.pid);
   if (data.width) {
     params += '&w=' + encodeURIComponent(data.width);
   }
