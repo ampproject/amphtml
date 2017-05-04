@@ -27,12 +27,10 @@ var util = require('gulp-util');
  * Parses the list of files in argv and checks for dead links.
  */
 function checkLinks() {
-  var files = '';
-  if (argv.files) {
-    files = argv.files;
-  } else {
+  var files = argv.files;
+  if (!files) {
     console./*OK*/error(util.colors.red(
-        'Must specify a list of files via --files'));
+        'Error: A list of markdown files must be specified via --files'));
     process.exit(1);
   }
   var markdownFiles = files.split(',');
@@ -72,7 +70,7 @@ function runLinkChecker(markdownFile) {
   opts.baseUrl = 'file://' + path.dirname(path.resolve((markdownFile)));
 
   var filteredMarkdown = filterLocalhostLinks(markdownFile);
-  markdownLinkCheck(filteredMarkdown, opts, function (error, results) {
+  markdownLinkCheck(filteredMarkdown, opts, function(error, results) {
     results.forEach(function (result) {
       if(result.status === 'dead') {
         error = true;
