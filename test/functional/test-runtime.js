@@ -559,7 +559,7 @@ describes.fakeWin('runtime', {
       win.AMP.push({
         n: 'amp-ext',
         f: amp => {
-          amp.registerServiceForDoc('service1', undefined, factory);
+          amp.registerServiceForDoc('service1', factory);
         },
       });
       runChunksForTesting(win.document);
