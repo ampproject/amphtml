@@ -175,6 +175,10 @@ export const adConfig = {
     prefetch: 'https://s.ato.mx/p.js',
   },
 
+  bidtellect: {
+    renderStartImplemented: true,
+  },
+
   brainy: {},
 
   caajainfeed: {
