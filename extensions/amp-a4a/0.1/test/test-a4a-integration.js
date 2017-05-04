@@ -94,16 +94,27 @@ describe('integration test: a4a', () => {
     sandbox = sinon.sandbox.create();
     xhrMock = sandbox.stub(Xhr.prototype, 'fetch');
     // Expect key set fetches for signing services.
-    const fetchJsonMock = sandbox.stub(Xhr.prototype, 'fetchJson');
     for (const serviceName in signingServerURLs) {
-      fetchJsonMock.withArgs(signingServerURLs[serviceName],
-        {
-          mode: 'cors',
-          method: 'GET',
-          ampCors: false,
-          credentials: 'omit',
-        }).returns(
-          Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]}));
+      const keyHeaders = {'Content-Type': 'application/jwk-set+json'};
+      const mockKeyResponse = {
+        bodyUsed: false,
+        headers: new FetchResponseHeaders({
+          getResponseHeader(name) {
+            return keyHeaders[name];
+          },
+        }),
+        json: () =>
+            Promise.resolve({'keys': [JSON.parse(validCSSAmp.publicKey)]}),
+        status: 200,
+      };
+      xhrMock
+          .withArgs(signingServerURLs[serviceName], {
+            mode: 'cors',
+            method: 'GET',
+            ampCors: false,
+            credentials: 'omit',
+          })
+          .returns(Promise.resolve(mockKeyResponse));
     }
     // Expect ad request.
     headers = {};
@@ -116,6 +127,7 @@ describe('integration test: a4a', () => {
           return headers[name];
         },
       }),
+      status: 200,
     };
     xhrMock.withArgs(TEST_URL, {
       mode: 'cors',
@@ -160,7 +172,7 @@ describe('integration test: a4a', () => {
   it('should not send request if display none', () => {
     a4aElement.style.display = 'none';
     return fixture.addElement(a4aElement).then(element => {
-      expect(xhrMock).to.not.be.called;
+      expect(xhrMock).to.be.called.once;
       expect(element.querySelector('iframe')).to.not.be.ok;
     });
   });

@@ -614,7 +614,7 @@ export class AmpA4A extends AMP.BaseElement {
           if (!creativeParts) {
             return Promise.resolve();
           }
-          this.creativeSize_ = creativeParts.size || this.creativeSize_;
+          this.creativeSize_ = creativeParts.sizeInfo || this.creativeSize_;
           if (this.experimentalNonAmpCreativeRenderMethod_ !=
               XORIGIN_MODE.CLIENT_CACHE &&
               creativeParts.creative) {
@@ -1410,7 +1410,7 @@ export function decodeSignatureHeader(headerValue) {
 export function decodeSizeHeader(headerValue) {
   if (headerValue) {
     dev().assert(new RegExp('[0-9]+x[0-9]+').test(headerValue));
-    const sizeArr = sizeHeader.split('x').map(Number);
+    const sizeArr = headerValue.split('x').map(Number);
     return /** @type {?SizeInfoDef} */ (
         {width: sizeArr[0], height: sizeArr[1]});
   }

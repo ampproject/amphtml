@@ -25,7 +25,7 @@ export const data = {
    ]
 }
 </script>
-</body></html>`,
+</body></html>\0`,
 
   original: `<!--
   Copyright 2016 The AMP HTML Authors. All Rights Reserved.
@@ -63,7 +63,7 @@ export const data = {
 <body>Hello, world.</body>
 </html>`,
 
-  signature: `google-dev:initial:DniShXpNG/SwBlRQ7Fz7hiPHNZRUlH/slYFcrMB9IAQqGPY2njWZ8lqym0p9nzRqexf7buVxqpGs5D2rT0bFCEQCCNGiG6LookSvylHfn1/oDIjrLCR+ciwRLpADGOU3uKTUkjjtu7NLc3/34cfaJDltv9tzZIWs1fXBigF+o8ZTCkioE0Lmd6Ycpwt88stU859q9449RvcL2V1qp3sXrDnG3F/QUGBr5OcBk4y1BJQNUF6r4Xc0kIMsl/mo71gVDcFRRw0GkLFftlhsdA4R2l5rYBAVZxUo82oRCwT8B9ksax8yHxGQuEz/OlarjbgMHrV7pYcJ+VY5G0zkKAHrsA==`,
+  signature: `google:initial:DniShXpNG/SwBlRQ7Fz7hiPHNZRUlH/slYFcrMB9IAQqGPY2njWZ8lqym0p9nzRqexf7buVxqpGs5D2rT0bFCEQCCNGiG6LookSvylHfn1/oDIjrLCR+ciwRLpADGOU3uKTUkjjtu7NLc3/34cfaJDltv9tzZIWs1fXBigF+o8ZTCkioE0Lmd6Ycpwt88stU859q9449RvcL2V1qp3sXrDnG3F/QUGBr5OcBk4y1BJQNUF6r4Xc0kIMsl/mo71gVDcFRRw0GkLFftlhsdA4R2l5rYBAVZxUo82oRCwT8B9ksax8yHxGQuEz/OlarjbgMHrV7pYcJ+VY5G0zkKAHrsA==`,
 
   publicKey: `{
     "kid": "initial",

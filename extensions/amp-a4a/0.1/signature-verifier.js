@@ -180,7 +180,7 @@ class SignatureVerifier {
             return this.verify(
                 signingServiceName, keypairId, signature, creative);
           } else if (keyPromise === null) {
-            // We tried cachebusting and still don't have this key.
+            // We don't have this key and we already tried cachebusting.
             return VerificationFailure.KEY_NOT_FOUND;
           } else {
             return keyPromise.then(key => {
