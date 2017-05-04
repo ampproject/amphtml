@@ -437,7 +437,7 @@ describes.repeated('', {
       return formPromise.then(ampForm => {
         sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.reject({
           responseJson: {
-            errors: [{name: 'name', message: 'This name is just wrong.'}],
+            verifyErrors: [{name: 'name', message: 'This name is just wrong.'}],
           },
         }));
 
@@ -463,7 +463,7 @@ describes.repeated('', {
           setTimeout(() => {
             reject({
               responseJson: {
-                errors: [{name: 'name', message: 'First request error'}],
+                verifyErrors: [{name: 'name', message: 'First request error'}],
               },
             });
           }, 10);
@@ -472,7 +472,7 @@ describes.repeated('', {
           setTimeout(() => {
             reject({
               responseJson: {
-                errors: [{name: 'name', message: 'Second request error'}],
+                verifyErrors: [{name: 'name', message: 'Second request error'}],
               },
             });
           }, 20);

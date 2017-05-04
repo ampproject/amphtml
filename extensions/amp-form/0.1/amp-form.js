@@ -253,7 +253,9 @@ export class AmpForm {
         });
         this.validator_.onBlur(e);
         // Move from the VERIFYING state back to INITIAL
-        this.setState_(FormState_.INITIAL);
+        if (this.state_ === FormState_.VERIFYING) {
+          this.setState_(FormState_.INITIAL);
+        }
       });
     });
     this.form_.addEventListener('input', e => {

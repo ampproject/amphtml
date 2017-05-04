@@ -227,7 +227,7 @@ describes.fakeWin('amp-form async verification', {}, env => {
       const errorMessage = 'Zip code and city do not match';
       const errorResponse = {
         responseJson: {
-          errors: [{
+          verifyErrors: [{
             name: 'zip',
             message: errorMessage,
           }],
@@ -254,7 +254,7 @@ describes.fakeWin('amp-form async verification', {}, env => {
       const errorMessage = 'Zip code and city do not match';
       const errorResponse = {
         responseJson: {
-          errors: [{
+          verifyErrors: [{
             name: 'zip',
             message: errorMessage,
           }],
@@ -284,7 +284,7 @@ describes.fakeWin('amp-form async verification', {}, env => {
       const emailMessage = 'This email is already taken.';
       const errorResponse = {
         responseJson: {
-          errors: [{
+          verifyErrors: [{
             name: 'zip',
             message: zipMessage,
           },{

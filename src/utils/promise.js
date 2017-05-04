@@ -97,16 +97,13 @@ export class LastAddedResolver {
    */
   add(promise) {
     const countAtAdd = ++this.count_;
-    console.log('count', this.count_);
     Promise.resolve(promise).then(result => {
-      console.log('resolve', 'count', this.count_, 'countAtAdd', countAtAdd);
       if (this.count_ === countAtAdd) {
         this.resolve_(result);
       }
     }, error => {
       // Don't follow behavior of Promise.all and Promise.race error so that
       // this will only reject when most recently added promise fails.
-      console.log('reject', 'count', this.count_, 'countAtAdd', countAtAdd);
       if (this.count_ === countAtAdd) {
         this.reject_(error);
       }

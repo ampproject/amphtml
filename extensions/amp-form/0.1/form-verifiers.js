@@ -38,7 +38,7 @@ let VerificationErrorDef;
 
 /**
  * @typedef {{
- *    errors:!Array<!VerificationErrorDef>
+ *    verifyErrors:!Array<!VerificationErrorDef>
  *  }}
  */
 let VerificationErrorResponseDef;
