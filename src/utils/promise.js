@@ -111,13 +111,8 @@ export class LastAddedResolver {
     return this.promise_;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   then(opt_resolve, opt_reject) {
-    if (!opt_resolve && !opt_reject) {
-      return this.promise_;
-    }
     return this.promise_.then(opt_resolve, opt_reject);
   }
 }

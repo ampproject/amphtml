@@ -188,9 +188,7 @@ export class AmpForm {
     const inputs = this.form_.elements;
     for (let i = 0; i < inputs.length; i++) {
       const name = inputs[i].name;
-      user().assert(!name ||
-          (name != SOURCE_ORIGIN_PARAM &&
-          name != FORM_VERIFY_PARAM),
+      user().assert(name != SOURCE_ORIGIN_PARAM && name != FORM_VERIFY_PARAM,
           'Illegal input name, %s found: %s', name, inputs[i]);
     }
 
