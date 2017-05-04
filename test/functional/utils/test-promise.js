@@ -73,6 +73,20 @@ describes.sandboxed('PromiseUtils', {}, () => {
       ]);
     });
 
+    it('should support adding initial promises in the constructor', () => {
+      const one = getPromiseObject();
+      const two = getPromiseObject();
+      const resolver =
+          new PromiseUtils.LastAddedResolver([one.promise, two.promise]);
+
+      setTimeout(() => one.resolve('one'), 0);
+      setTimeout(() => two.resolve('two'), 10);
+
+      return resolver.get().then(result => {
+        expect(result).to.equal('two');
+      });
+    });
+
     it('should reject when the first promise rejects', () => {
       const one = getPromiseObject();
       const two = getPromiseObject();

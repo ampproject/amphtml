@@ -83,7 +83,7 @@ export class LastAddedResolver {
     this.count_ = 0;
 
     if (opt_promises) {
-      for (let i = 0; i > opt_promises.length; i++) {
+      for (let i = 0; i < opt_promises.length; i++) {
         this.add(opt_promises[i]);
       }
     }

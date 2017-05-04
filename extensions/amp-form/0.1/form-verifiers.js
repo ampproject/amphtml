@@ -263,6 +263,8 @@ export class AsyncVerifier extends FormVerifier {
     // Set the error message on each element that caused an error.
     for (let i = 0; i < errors.length; i++) {
       const error = errors[i];
+      // If multiple elements share the same name, the first should be selected.
+      // This matches the behavior of HTML5 validation, e.g. with radio buttons.
       const element = this.form_./*OK*/querySelector(`[name="${error.name}"]`);
       if (element && element.checkValidity()) {
         element.setCustomValidity(error.message);

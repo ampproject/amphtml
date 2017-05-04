@@ -252,6 +252,8 @@ export class AmpForm {
           checkUserValidityAfterInteraction_(updatedElement);
         });
         this.validator_.onBlur(e);
+        // Move from the VERIFYING state back to INITIAL
+        this.setState_(FormState_.INITIAL);
       });
     });
     this.form_.addEventListener('input', e => {
@@ -389,9 +391,6 @@ export class AmpForm {
 
     const verifyXhr = this.doVarSubs_(this.getVarSubsFields_())
         .then(() => this.doXhr_({[FORM_VERIFY_PARAM]: true}));
-    const reset = () => this.setState_(FormState_.INITIAL);
-    verifyXhr.then(reset, reset);
-
     return verifyXhr;
   }
 
@@ -545,7 +544,7 @@ export class AmpForm {
    * @private
    */
   maybeHandleRedirect_(response) {
-    if (!response.headers) {
+    if (!response || !response.headers) {
       return;
     }
     const redirectTo = response.headers.get(REDIRECT_TO_HEADER);
