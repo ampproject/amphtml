@@ -83,6 +83,9 @@ function runLinkChecker(markdownFile) {
       util.log(util.colors.red(
         'ERROR: Dead links found in ' + markdownFile + '. Please update it.'));
       process.exit(1);
+    } else {
+      util.log(util.colors.green(
+        'SUCCESS: All links in ' + markdownFile + ' are alive.'));
     }
   });
 }
