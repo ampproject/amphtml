@@ -64,7 +64,7 @@ export function assertScreenReaderElement(element) {
 // A server side temporary request storage which is useful for testing
 // browser sent HTTP requests.
 /////////////////
-const REQUEST_URL = '//localhost:9876/request-bank/';
+const REQUEST_URL = '//localhost:9876/amp4test/request-bank/';
 
 export function depositRequestUrl(id) {
   return REQUEST_URL + 'deposit/' + id;

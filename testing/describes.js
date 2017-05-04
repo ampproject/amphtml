@@ -33,6 +33,8 @@ import {
   installRuntimeServices,
   registerElementForTesting,
 } from '../src/runtime';
+import {createElementWithAttributes} from '../src/dom';
+import {addParamsToUrl} from '../src/url';
 import {cssText} from '../build/css';
 import {createAmpElementProto} from '../src/custom-element';
 import {installDocService} from '../src/service/ampdoc-impl';
@@ -149,6 +151,9 @@ export const realWin = describeEnv(spec => [
       new AmpFixture(spec),
     ]);
 
+export const integration = describeEnv(spec => [
+  new IntegrationFixture(spec),
+]);
 
 /**
  * A repeating test.
@@ -337,6 +342,42 @@ class SandboxFixture {
   }
 }
 
+/** @implements {Fixture} */
+class IntegrationFixture {
+  /** @param {!{body: string}} spec */
+  constructor(spec) {
+    /** @const */
+    this.spec = spec;
+  }
+
+  /** @override */
+  isOn() {
+    return true;
+  }
+
+  /** @override */
+  setup(env) {
+    const spec = this.spec;
+    return new Promise(function(resolve, reject) {
+      env.iframe = createElementWithAttributes(document, 'iframe', {
+        src: addParamsToUrl('/amp4test/compose-doc', spec),
+      });
+      env.iframe.onload = function() {
+        env.win = env.iframe.contentWindow;
+        resolve();
+      };
+      env.iframe.onerror = reject;
+      document.body.appendChild(env.iframe);
+    });
+  }
+
+  /** @override */
+  teardown(env) {
+    if (env.iframe.parentNode) {
+      env.iframe.parentNode.removeChild(env.iframe);
+    }
+  }
+}
 
 /** @implements {Fixture} */
 class FakeWinFixture {
