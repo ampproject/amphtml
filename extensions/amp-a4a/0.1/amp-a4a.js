@@ -830,13 +830,13 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    const promiseId = this.promiseId_;
     // Shorthand for: reject promise if current promise chain is out of date.
-    const checkStillCurrent = promiseId => {
+    const checkStillCurrent = () => {
       if (promiseId != this.promiseId_) {
         throw cancellation();
       }
     };
-    const promiseId = this.promiseId_;
     // Promise may be null if element was determined to be invalid for A4A.
     if (!this.adPromise_) {
       if (this.shouldInitializePromiseChain_()) {
@@ -850,7 +850,7 @@ export class AmpA4A extends AMP.BaseElement {
     const layoutCallbackStart = this.getNow_();
     // Promise chain will have determined if creative is valid AMP.
     return this.adPromise_.then(creativeMetaData => {
-      checkStillCurrent(promiseId);
+      checkStillCurrent();
       const delta = this.getNow_() - layoutCallbackStart;
       this.protectedEmitLifecycleEvent_('layoutAdPromiseDelay', {
         layoutAdPromiseDelay: Math.round(delta),
@@ -867,18 +867,18 @@ export class AmpA4A extends AMP.BaseElement {
       }
       if (!creativeMetaData) {
         // Non-AMP creative case, will verify ad url existence.
-        return this.renderNonAmpCreative_(checkStillCurrent, promiseId);
+        return this.renderNonAmpCreative_(checkStillCurrent);
       }
       // Must be an AMP creative.
-      return this.renderAmpCreative_(creativeMetaData, checkStillCurrent,
-                                    promiseId)
-        .catch(err => {
-          // Failed to render via AMP creative path so fallback to non-AMP
-          // rendering within cross domain iframe.
-          user().error(TAG, this.element.getAttribute('type'),
-            'Error injecting creative in friendly frame', err);
-          this.promiseErrorHandler_(err);
-          return this.renderNonAmpCreative_(checkStillCurrent, promiseId);
+      return this.renderAmpCreative_(creativeMetaData, checkStillCurrent)
+          .catch(err => {
+            checkStillCurrent();
+            // Failed to render via AMP creative path so fallback to non-AMP
+            // rendering within cross domain iframe.
+            user().error(TAG, this.element.getAttribute('type'),
+                         'Error injecting creative in friendly frame', err);
+            this.promiseErrorHandler_(err);
+            return this.renderNonAmpCreative_(checkStillCurrent);
         });
     }).catch(error => {
       this.promiseErrorHandler_(error);
@@ -1129,10 +1129,12 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * Render non-AMP creative within cross domain iframe.
+   * @param {Function} checkStillCurrent Checks whether the adPromise that
+   *   we are running within is still current. If not, throws cancellation.
    * @return {Promise<boolean>} Whether the creative was successfully rendered.
    * @private
    */
-  renderNonAmpCreative_(checkStillCurrent, promiseId) {
+  renderNonAmpCreative_(checkStillCurrent) {
     if (this.element.getAttribute('disable3pfallback') == 'true') {
       user().warn(TAG, this.element.getAttribute('type'),
         'fallback to 3p disabled');
@@ -1149,7 +1151,7 @@ export class AmpA4A extends AMP.BaseElement {
          method == XORIGIN_MODE.NAMEFRAME) &&
         this.creativeBody_) {
       const renderPromise = this.renderViaNameAttrOfXOriginIframe_(
-          this.creativeBody_, checkStillCurrent, promiseID);
+          this.creativeBody_, checkStillCurrent);
       this.creativeBody_ = null;  // Free resources.
       return renderPromise;
     } else if (this.adUrl_) {
@@ -1168,10 +1170,12 @@ export class AmpA4A extends AMP.BaseElement {
    * Render a validated AMP creative directly in the parent page.
    * @param {!CreativeMetaDataDef} creativeMetaData Metadata required to render
    *     AMP creative.
+   * @param {Function} checkStillCurrent Checks whether the adPromise that
+   *   we are running within is still current. If not, throws cancellation.
    * @return {!Promise} Whether the creative was successfully rendered.
    * @private
    */
-  renderAmpCreative_(creativeMetaData, checkStillCurrent, promiseId) {
+  renderAmpCreative_(creativeMetaData, checkStillCurrent) {
     dev().assert(creativeMetaData.minifiedCreative,
         'missing minified creative');
     dev().assert(!!this.element.ownerDocument, 'missing owner document?!');
@@ -1211,7 +1215,7 @@ export class AmpA4A extends AMP.BaseElement {
           installUrlReplacementsForEmbed(this.getAmpDoc(), embedWin,
             new A4AVariableSource(this.getAmpDoc(), embedWin));
         }).then(friendlyIframeEmbed => {
-          checkStillCurrent(promiseId);
+          checkStillCurrent();
           this.friendlyIframeEmbed_ = friendlyIframeEmbed;
           setFriendlyIframeEmbedVisible(
               friendlyIframeEmbed, this.isInViewport());
@@ -1228,7 +1232,7 @@ export class AmpA4A extends AMP.BaseElement {
           getTimingDataAsync(
               friendlyIframeEmbed.win,
               'navigationStart', 'loadEventEnd').then(delta => {
-                checkStillCurrent(promiseId);
+                checkStillCurrent();
                 this.protectedEmitLifecycleEvent_('friendlyIframeLoaded', {
                   'navStartToLoadEndDelta.AD_SLOT_ID': Math.round(delta),
                 });
@@ -1245,7 +1249,7 @@ export class AmpA4A extends AMP.BaseElement {
           // after the initial load.
           return friendlyIframeEmbed.whenIniLoaded();
         }).then(() => {
-          checkStillCurrent(promiseId);
+          checkStillCurrent();
           // Capture ini-load ping.
           this.protectedEmitLifecycleEvent_('friendlyIframeIniLoad');
         });
@@ -1313,18 +1317,19 @@ export class AmpA4A extends AMP.BaseElement {
    * NameFrame.
    *
    * @param {!ArrayBuffer} creativeBody
+   * @param {Function} checkStillCurrent Checks whether the adPromise that
+   *   we are running within is still current. If not, throws cancellation.
    * @return {!Promise} awaiting load event for ad frame
    * @private
    */
-  renderViaNameAttrOfXOriginIframe_(creativeBody, checkStillCurrent,
-                                   promiseId) {
+  renderViaNameAttrOfXOriginIframe_(creativeBody, checkStillCurrent) {
     const method = this.experimentalNonAmpCreativeRenderMethod_;
     dev().assert(method == XORIGIN_MODE.SAFEFRAME ||
         method == XORIGIN_MODE.NAMEFRAME,
         'Unrecognized A4A cross-domain rendering mode: %s', method);
     this.protectedEmitLifecycleEvent_('renderSafeFrameStart');
     return utf8Decode(creativeBody).then(creative => {
-      checkStillCurrent(promiseId);
+      checkStillCurrent();
       let srcPath;
       let name = '';
       switch (method) {
