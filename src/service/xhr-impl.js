@@ -554,17 +554,17 @@ export class FetchResponseHeaders {
 
 
 /**
- * @param {!Window} window
+ * @param {!Window} win
  * @return {!Xhr}
  */
-export function xhrServiceForTesting(window) {
-  installXhrService(window);
-  return getService(window, 'xhr');
+export function xhrServiceForTesting(win) {
+  installXhrService(win);
+  return getService(win, 'xhr');
 }
 
 /**
- * @param {!Window} window
+ * @param {!Window} win
  */
-export function installXhrService(window) {
-  registerServiceBuilder(window, 'xhr', Xhr);
+export function installXhrService(win) {
+  registerServiceBuilder(win, 'xhr', win => new Xhr(win));
 };

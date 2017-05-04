@@ -45,7 +45,7 @@ export function invokeWebWorker(win, method, opt_args) {
   if (!win.Worker) {
     return Promise.reject('Worker not supported in window.');
   }
-  registerServiceBuilder(win, 'amp-worker', AmpWorker);
+  registerServiceBuilder(win, 'amp-worker', win => new AmpWorker(win));
   const worker = getService(win, 'amp-worker');
   return worker.sendMessage_(method, opt_args || []);
 }
@@ -56,7 +56,7 @@ export function invokeWebWorker(win, method, opt_args) {
  * @visibleForTesting
  */
 export function ampWorkerForTesting(win) {
-  registerServiceBuilder(win, 'amp-worker', AmpWorker);
+  registerServiceBuilder(win, 'amp-worker', win => new AmpWorker(win));
   return getService(win, 'amp-worker');
 }
 

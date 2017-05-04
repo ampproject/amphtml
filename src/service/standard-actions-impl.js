@@ -190,7 +190,6 @@ export function installStandardActionsForDoc(ampdoc) {
   registerServiceBuilderForDoc(
       ampdoc,
       'standard-actions',
-      StandardActions,
-      /* opt_factory */ undefined,
+      ampdoc => new StandardActions(ampdoc),
       /* opt_instantiate */ true);
 };

@@ -438,10 +438,10 @@ export class UserNotificationManager {
 /**
  * @param {!Window} window
  */
-export function installUserNotificationManager(window) {
-  registerServiceBuilder(window,
+export function installUserNotificationManager(win) {
+  registerServiceBuilder(win,
       'userNotificationManager',
-      UserNotificationManager);
+      win => new UserNotificationManager(win));
 }
 
 installUserNotificationManager(AMP.win);

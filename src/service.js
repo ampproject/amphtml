@@ -180,7 +180,6 @@ export function getService(win, id, opt_factory) {
     registerServiceBuilder(
         win,
         id,
-        /* opt_ctor */undefined,
         opt_factory,
         /* opt_instantiate */ true);
   }
@@ -191,17 +190,15 @@ export function getService(win, id, opt_factory) {
  * Registers a service given a class to be used as implementation.
  * @param {!Window} win
  * @param {string} id of the service.
- * @param {function(new:Object, !Window)=} opt_constructor
- * @param {function(!Window):!Object=} opt_factory
+ * @param {function(!Window):!Object} factory
  * @param {boolean=} opt_instantiate Whether to immediately create the service
  */
 export function registerServiceBuilder(win,
                                        id,
-                                       opt_constructor,
-                                       opt_factory,
+                                       factory,
                                        opt_instantiate) {
   win = getTopWindow(win);
-  registerServiceInternal(win, win, id, opt_constructor, opt_factory);
+  registerServiceInternal(win, win, id, factory);
   if (opt_instantiate) {
     getServiceInternal(win, id);
   }
@@ -212,18 +209,16 @@ export function registerServiceBuilder(win,
  * implementation.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
- * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)=} opt_constructor
- * @param {function(!./service/ampdoc-impl.AmpDoc):Object=} opt_factory
+ * @param {function(!./service/ampdoc-impl.AmpDoc):Object} factory
  * @param {boolean=} opt_instantiate Whether to immediately create the service
  */
 export function registerServiceBuilderForDoc(nodeOrDoc,
                                              id,
-                                             opt_constructor,
-                                             opt_factory,
+                                             factory,
                                              opt_instantiate) {
   const ampdoc = getAmpdoc(nodeOrDoc);
   const holder = getAmpdocServiceHolder(ampdoc);
-  registerServiceInternal(holder, ampdoc, id, opt_constructor, opt_factory);
+  registerServiceInternal(holder, ampdoc, id, factory);
   if (opt_instantiate) {
     getServiceInternal(holder, id);
   }
@@ -276,7 +271,6 @@ export function getServiceForDoc(nodeOrDoc, id, opt_factory) {
     registerServiceBuilderForDoc(
         ampdoc,
         id,
-        /* opt_ctor */ undefined,
         opt_factory,
         /* opt_instantiate */ true);
   }
@@ -429,14 +423,10 @@ function getServiceInternal(holder, id) {
  * @param {!Object} holder Object holding the service instance.
  * @param {!Window|!./service/ampdoc-impl.AmpDoc} context Win or AmpDoc.
  * @param {string} id of the service.
- * @param {?function(new:Object, ?)=} opt_ctor
- *     Constructor function to new the service. Called with context.
- * @param {?function(?)=} opt_factory
- *     Factory function to create the new service. Called with context.
+ * @param {?function(?)} factory Factory function to create the new service.
+ *     Called with context.
  */
-function registerServiceInternal(holder, context, id, opt_ctor, opt_factory) {
-  dev().assert(!opt_factory != !opt_ctor,
-      `Provide a constructor or a factory, but not both for service ${id}`);
+function registerServiceInternal(holder, context, id, factory) {
   const services = getServices(holder);
   let s = services[id];
 
@@ -454,9 +444,7 @@ function registerServiceInternal(holder, context, id, opt_ctor, opt_factory) {
     return;
   }
 
-  s.build = () => {
-    return opt_ctor ? new opt_ctor(context) : opt_factory(context);
-  };
+  s.build = () => factory(context);
 
   // The service may have been requested already, in which case there is a
   // pending promise that needs to fulfilled.

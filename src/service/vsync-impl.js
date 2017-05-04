@@ -463,18 +463,18 @@ function callTaskNoInline(callback, state) {
 }
 
 /**
- * @param {!Window} window
+ * @param {!Window} win
  * @return {!Vsync}
  */
-export function vsyncForTesting(window) {
-  installVsyncService(window);
-  return getService(window, 'vsync');
+export function vsyncForTesting(win) {
+  installVsyncService(win);
+  return getService(win, 'vsync');
 }
 
 /**
- * @param {!Window} window
+ * @param {!Window} win
  */
-export function installVsyncService(window) {
-  installTimerService(window);
-  registerServiceBuilder(window, 'vsync', Vsync);
+export function installVsyncService(win) {
+  installTimerService(win);
+  registerServiceBuilder(win, 'vsync', win => new Vsync(win));
 }

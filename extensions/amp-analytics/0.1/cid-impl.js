@@ -431,6 +431,6 @@ function getEntropy(win) {
  * @private visible for testing
  */
 export function cidServiceForDocForTesting(ampdoc) {
-  registerServiceBuilderForDoc(ampdoc, 'cid', Cid);
+  registerServiceBuilderForDoc(ampdoc, 'cid', ampdoc => new Cid(ampdoc));
   return getServiceForDoc(ampdoc, 'cid');
 }

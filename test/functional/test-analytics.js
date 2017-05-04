@@ -61,10 +61,10 @@ describes.realWin('analytics', {amp: true}, env => {
     });
 
     it('should trigger analytics event if analytics is installed', () => {
-      registerServiceBuilderForDoc(
-        ampdoc, 'amp-analytics-instrumentation', MockInstrumentation);
-      // Force instantiation
-      getServiceForDoc(ampdoc, 'amp-analytics-instrumentation');
+      registerServiceBuilderForDoc(ampdoc,
+        'amp-analytics-instrumentation',
+        ampdoc => new MockInstrumentation(ampdoc),
+        /* opt_instantiate */ true);
       triggerAnalyticsEvent(ampdoc, 'hello');
       return timer.promise(50).then(() => {
         expect(triggerEventSpy).to.have.been.called;

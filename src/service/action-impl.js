@@ -921,7 +921,6 @@ export function installActionServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(
       ampdoc,
       'action',
-      ActionService,
-      /* opt_factory */ undefined,
+      ampdoc => new ActionService(ampdoc),
       /* opt_instantiate */ true);
 }
