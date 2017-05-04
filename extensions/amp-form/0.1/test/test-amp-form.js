@@ -27,13 +27,16 @@ import {
   CONFIG_KEY,
 } from '../form-verifiers';
 import * as sinon from 'sinon';
-import {timerFor} from '../../../../src/services';
 import '../../../amp-mustache/0.1/amp-mustache';
-import {actionServiceForDoc} from '../../../../src/services';
 import {
   cidServiceForDocForTesting,
 } from '../../../../extensions/amp-analytics/0.1/cid-impl';
-import {documentInfoForDoc} from '../../../../src/services';
+import {
+  actionServiceForDoc,
+  documentInfoForDoc,
+  timerFor,
+} from '../../../../src/services';
+import {FetchError} from '../../../../src/service/xhr-impl';
 import '../../../amp-selector/0.1/amp-selector';
 
 describes.repeated('', {
@@ -505,8 +508,10 @@ describes.repeated('', {
         errorContainer.appendChild(errorTemplate);
         let renderedTemplate = document.createElement('div');
         renderedTemplate.innerText = 'Error: hello there';
-        sandbox.stub(ampForm.xhr_, 'fetch')
-            .returns(Promise.reject({responseJson: {message: 'hello there'}}));
+        sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.reject({
+          response: {},
+          responseJson: {message: 'hello there'},
+        }));
         sandbox.stub(ampForm.templates_, 'findAndRenderTemplate')
             .returns(Promise.resolve(renderedTemplate));
         const event = {
@@ -1477,10 +1482,8 @@ describes.repeated('', {
         json: () => Promise.resolve(),
         headers: headersMock,
       });
-      const fetchRejectPromise = Promise.reject({
-        responseJson: null,
-        headers: headersMock,
-      });
+      const fetchRejectPromise = Promise.reject(
+          new FetchError('Error', {headers: headersMock}));
       fetchRejectPromise.catch(() => {
         // Just avoiding a global uncaught promise exception.
       });

@@ -464,7 +464,7 @@ export class AmpForm {
 
   /**
    * Transition the form to the submit success state.
-   * @param {../../../src/service/xhr-impl.FetchResponse} response
+   * @param {!../../../src/service/xhr-impl.FetchResponse} response
    * @return {!Promise}
    * @private
    */
@@ -541,7 +541,7 @@ export class AmpForm {
 
   /**
    * Handles response redirect throught the AMP-Redirect-To response header.
-   * @param {../../../src/service/xhr-impl.FetchResponse} response
+   * @param {!../../../src/service/xhr-impl.FetchResponse} response
    * @private
    */
   maybeHandleRedirect_(response) {

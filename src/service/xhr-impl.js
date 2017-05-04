@@ -52,13 +52,13 @@ export class FetchError extends AbstractError {
   /**
    * @param {string} message
    * @param {!FetchResponse} response
-   * @param {boolean} retriable
+   * @param {boolean=} opt_retriable
    * @param {?JSONType=} opt_responseJson
    */
-  constructor(message, response, retriable, opt_responseJson) {
+  constructor(message, response, opt_retriable, opt_responseJson) {
     super(message);
     this.response = response;
-    this.retriable = retriable;
+    this.retriable = opt_retriable;
     this.responseJson = opt_responseJson;
   }
 }
