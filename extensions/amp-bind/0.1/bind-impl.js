@@ -155,10 +155,10 @@ export class Bind {
    * evaluation unless `opt_skipEval` is false.
    * @param {!Object} state
    * @param {boolean=} opt_skipEval
-   * @param {boolean=} opt_fromAmpState
+   * @param {boolean=} opt_isAmpStateMutation
    * @return {!Promise}
    */
-  setState(state, opt_skipEval, opt_fromAmpState) {
+  setState(state, opt_skipEval, opt_isAmpStateMutation) {
     user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);
 
     // TODO(choumx): What if `state` contains references to globals?
@@ -176,7 +176,7 @@ export class Bind {
 
     const promise = this.initializePromise_
         .then(() => this.evaluate_())
-        .then(results => this.apply_(results, opt_fromAmpState));
+        .then(results => this.apply_(results, opt_isAmpStateMutation));
 
     if (getMode().test) {
       promise.then(() => {
@@ -632,16 +632,16 @@ export class Bind {
   /**
    * Applies expression results to the DOM.
    * @param {Object<string, ./bind-expression.BindExpressionResultDef>} results
-   * @param {boolean=} opt_fromAmpState
+   * @param {boolean=} opt_isAmpStateMutation
    * @private
    */
-  apply_(results, opt_fromAmpState) {
+  apply_(results, opt_isAmpStateMutation) {
     const applyPromises = [];
     this.boundElements_.forEach(boundElement => {
       const {element, boundProperties} = boundElement;
       // If this "apply" round is triggered by an <amp-state> mutation,
       // ignore updates to <amp-state> element to prevent update cycles.
-      if (opt_fromAmpState && element.tagName === 'AMP-STATE') {
+      if (opt_isAmpStateMutation && element.tagName === 'AMP-STATE') {
         return;
       }
       const updates = this.calculateUpdates_(boundProperties, results);

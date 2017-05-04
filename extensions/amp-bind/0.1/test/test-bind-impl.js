@@ -293,9 +293,9 @@ describes.realWin('Bind', {
     const element = createElementWithBinding(`[src]="foo"`, 'amp-state');
     expect(element.getAttribute('src')).to.be.null;
     const promise = onBindReadyAndSetState(
-        {foo: '/foo'}, /* opt_fromAmpState */ true);
+        {foo: '/foo'}, /* opt_isAmpStateMutation */ true);
     return promise.then(() => {
-      // <amp-state> should _not_ be updated if `opt_fromAmpState` is true.
+      // Should _not_ be updated if `opt_isAmpStateMutation` is true.
       expect(element.getAttribute('src')).to.be.null;
     });
   });
