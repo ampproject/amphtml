@@ -21,28 +21,33 @@ AMP ads bundle commonly used ad functionality which removes bloat.  Once on the 
 "Users can't tap on ads they can't see". Faster ads lead to higher viewability and therefore higher click through rates, which ultimately leads to higher advertiser conversions.
 
 ### Safer
-It's impossible to spread malware through advertising with AMP ads. Not only are visitors safer, but advertiser brand perception cannot be negative.
+It's impossible to spread malware through advertising with AMP ads. Not only are visitors safer, but advertiser brand perception cannot be negative.`
 
 ### More Flexible
 AMP ads are designed to work on both AMP and Non-AMP webpages,  including desktop where the ad tagging library supports it. (e.g. GPT)
 
 # Current status
 
-The AMP ads format spec has been [released](https://github.com/google/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md) and any creative developer can create AMP ads. In order for ads to get preferred treatment on AMP pages, ad server support is required. Advertisers using DoubleClick or  AdSense can  already deliverprogrammatic AMP ads to publisher AMP pages. Publishers using  DFP (DoubleClick for Publishers) can already deliver their own AMP ads. Advertisers or publishers using other ad providers  can implement AMP ads with the help of a signing service like CloudFlare. Cloudflare provides AMP ad verification services, enabling any independent ad provider to deliver faster, lighter, and more engaging ads.
+The AMP ads format spec has been [released](https://github.com/google/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md) and any creative developer can create AMP ads. A number of ad providers are working on automatically converting ads to AMP ads whenever possible. e.g. AdSense.
 
- 
-
-Here is how you can participate. If you are a:
+Here is how you can participate. If you are:
 
 ## Publishers
 
 If publishers want to serve their direct-sold ad formats they must create the ads in[ A4A format](https://github.com/google/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md) (or use a creative agency), and deliver them using an AMP ad supported ad server.
 
+The following adservers support serving AMP ads at the moment:
+1. DoubleClick for Publishers
+2. TripleLift 
+3. Dianomi
+
+
 ## Creative Agencies
 
 If you are a creative agency, please express interest via [this form](https://goo.gl/forms/P2zpQT3aIEU1UsWj2) so we can include you in any outreach that's AMP ads-related.
 
-## Ad Networks
+## Ad Networks/ Ad Servers
 
 Please refer to the [Network Implementation Guide](./Network-Impl-Guide.md)
+Ad networks and ad servers can integrate with [Cloudflare](https://blog.cloudflare.com/firebolt/) who provide an AMP ad verification services, enabling any independent ad provider to deliver faster, lighter, and more engaging ads.
 
