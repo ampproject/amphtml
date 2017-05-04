@@ -360,7 +360,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
                 signatureInfo: {
                   signingServiceName: 'google',
                   keypairId: 'test',
-                  signature: base64DecodeToBytes('AQAB')
+                  signature: base64DecodeToBytes('AQAB'),
                 },
                 sizeInfo: null,
               });
@@ -394,7 +394,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
                 signatureInfo: {
                   signingServiceName: 'google',
                   keypairId: 'test',
-                  signature: base64DecodeToBytes('AQAB')
+                  signature: base64DecodeToBytes('AQAB'),
                 },
                 sizeInfo: null,
               });

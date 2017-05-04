@@ -21,7 +21,6 @@ import {
   mergeExperimentIds,
 } from '../utils';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {
   installExtensionsService,
 } from '../../../../src/service/extensions-impl';

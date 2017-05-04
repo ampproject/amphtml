@@ -15,7 +15,6 @@
  */
 
 import {AmpA4A, decodeSignatureHeader, decodeSizeHeader} from '../amp-a4a';
-import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 
 /** @type {string} @private */
 export const SIGNATURE_HEADER = 'X-TestSignatureHeader';

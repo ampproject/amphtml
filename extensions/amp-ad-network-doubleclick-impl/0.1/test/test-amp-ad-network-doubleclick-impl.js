@@ -160,7 +160,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
                 signatureInfo: {
                   signingServiceName: 'google',
                   keypairId: 'test',
-                  signature: base64DecodeToBytes('AQAB')
+                  signature: base64DecodeToBytes('AQAB'),
                 },
                 sizeInfo,
               });
@@ -194,7 +194,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
                 signatureInfo: {
                   signingServiceName: 'google',
                   keypairId: 'test',
-                  signature: base64DecodeToBytes('AQAB')
+                  signature: base64DecodeToBytes('AQAB'),
                 },
                 sizeInfo,
               });

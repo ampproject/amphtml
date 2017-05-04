@@ -167,7 +167,7 @@ describes.realWin('crypto-impl', {}, env => {
             name: 'RSASSA-PKCS1-v1_5',
             modulusLength: 2048,
             publicExponent: Uint8Array.of(1, 0, 1),
-            hash: {name: 'SHA-256'},
+            hash: {name: 'SHA-256'}
           },
           true, ['sign', 'verify']);
       const data = stringToBytes('Hello');
