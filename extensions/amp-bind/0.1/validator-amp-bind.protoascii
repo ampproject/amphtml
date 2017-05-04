@@ -17,7 +17,6 @@ tags: {  # amp-bind
   html_format: AMP
   tag_name: "SCRIPT"
   satisfies: "amp-bind extension .js script"
-  requires: "amp-state"
   extension_spec: {
     name: "amp-bind"
     allowed_versions: "0.1"
