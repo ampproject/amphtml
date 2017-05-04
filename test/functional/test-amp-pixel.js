@@ -18,7 +18,6 @@ import {
   installUrlReplacementsForEmbed,
 } from '../../src/service/url-replacements-impl';
 import {VariableSource} from '../../src/service/variable-source';
-import {isReferrerPolicySupported} from '../../builtins/amp-pixel';
 
 describes.realWin('amp-pixel', {amp: true}, env => {
   let win;
@@ -121,21 +120,6 @@ describes.realWin('amp-pixel', {amp: true}, env => {
     return trigger(url).then(img => {
       expect(img.src).to.equal(
           'https://pubads.g.doubleclick.net/activity;r=111');
-    });
-  });
-
-  it('should respect referrerpolicy=no-referrer', () => {
-    const url = 'https://pubads.g.doubleclick.net/activity';
-    createPixel(url, 'no-referrer');
-    return trigger(url).then(element => {
-      if (isReferrerPolicySupported()) {
-        expect(element.referrerPolicy).to.equal('no-referrer');
-      }
-      if (!element.src) {
-        // TODO(@lannka): Please remove the temporary fix
-        return;
-      }
-      expect(element.src).to.equal(url);
     });
   });
 
