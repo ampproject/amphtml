@@ -15,47 +15,22 @@
 #
 tags: {  # amp-live-list
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
-  spec_name: "amp-live-list extension .js script"
+  satisfies: "amp-live-list extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
-  extension_unused_unless_tag_present: "amp-live-list"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  extension_spec: {
+    name: "amp-live-list"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    deprecated_recommends_usage_of_tag: "amp-live-list"
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-live-list"
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-live-list-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-live-list.html"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-live-list>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-LIVE-LIST"
-  also_requires_tag: "amp-live-list extension .js script"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-live-list.html"
+  requires: "amp-live-list extension .js script"
   attrs: {
     name: "data-max-items-per-page"
     mandatory: true
@@ -91,10 +66,10 @@ tags: {  # <amp-live-list>
     supported_layouts: CONTAINER
     supported_layouts: FIXED_HEIGHT
   }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-live-list"
 }
 tags: {
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "$REFERENCE_POINT"
   spec_name : "AMP-LIVE-LIST [update]"
   attrs: { name: "update" mandatory: true }
@@ -102,7 +77,6 @@ tags: {
 }
 tags: {
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-LIVE-LIST [items]"
   attrs: { name: "items" mandatory: true }
@@ -113,20 +87,18 @@ tags: {
 }
 tags: {
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "$REFERENCE_POINT"
   spec_name : "AMP-LIVE-LIST [pagination]"
   attrs: { name: "pagination" mandatory: true }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-live-list.html#pagination"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-live-list#pagination"
 }
 tags: {
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "$REFERENCE_POINT"
   spec_name : "AMP-LIVE-LIST [items] item"
   attrs: { name: "id" mandatory: true }
   attrs: { name: "data-sort-time" mandatory: true }
   attrs: { name: "data-update-time" }
   attrs: { name: "data-tombstone" }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-live-list.html#items"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-live-list#items"
 }

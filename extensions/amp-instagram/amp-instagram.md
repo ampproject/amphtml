@@ -51,6 +51,7 @@ Example:
 ```html
 <amp-instagram
     data-shortcode="fBwFP"
+    data-captioned
     width="400"
     height="400"
     layout="responsive">
@@ -68,6 +69,10 @@ When using non-responsive layout you will need to account for the extra space ad
 The instagram data-shortcode is found in every instagram photo URL.
 
 For example, in https://instagram.com/p/fBwFP, `fBwFP` is the data-shortcode.
+
+**data-captioned**
+
+Include the Instagram caption.  `amp-instagram` will attept to resize to the correct hight including the caption.
 
 **common attributes**
 

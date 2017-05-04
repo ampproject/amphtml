@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {timerFor} from '../../../src/timer';
+import {Keycodes} from '../../../src/utils/keycodes';
+import {timerFor} from '../../../src/services';
 
 /**
  * @abstract
@@ -39,7 +40,7 @@ export class BaseCarousel extends AMP.BaseElement {
     this.showControls_ = this.element.hasAttribute('controls');
 
     if (this.showControls_) {
-      this.element.classList.add('-amp-carousel-has-controls');
+      this.element.classList.add('i-amphtml-carousel-has-controls');
     }
     this.buildCarousel();
     this.buildButtons();
@@ -70,7 +71,16 @@ export class BaseCarousel extends AMP.BaseElement {
     this.prevButton_.setAttribute('role', 'button');
     // TODO(erwinm): Does label need i18n support in the future? or provide
     // a way to be overridden.
-    this.prevButton_.setAttribute('aria-label', 'previous');
+    this.prevButton_.setAttribute('aria-label', 'Previous item in carousel');
+    this.prevButton_.setAttribute('tabindex', 0);
+    this.prevButton_.onkeydown = event => {
+      if (event.keyCode == Keycodes.ENTER || event.keyCode == Keycodes.SPACE) {
+        if (!event.defaultPrevented) {
+          event.preventDefault();
+          this.interactionPrev();
+        }
+      }
+    };
     this.prevButton_.onclick = () => {
       this.interactionPrev();
     };
@@ -80,7 +90,16 @@ export class BaseCarousel extends AMP.BaseElement {
     this.nextButton_.classList.add('amp-carousel-button');
     this.nextButton_.classList.add('amp-carousel-button-next');
     this.nextButton_.setAttribute('role', 'button');
-    this.nextButton_.setAttribute('aria-label', 'next');
+    this.nextButton_.setAttribute('aria-label', 'Next item in carousel');
+    this.nextButton_.setAttribute('tabindex', 0);
+    this.nextButton_.onkeydown = event => {
+      if (event.keyCode == Keycodes.ENTER || event.keyCode == Keycodes.SPACE) {
+        if (!event.defaultPrevented) {
+          event.preventDefault();
+          this.interactionNext();
+        }
+      }
+    };
     this.nextButton_.onclick = () => {
       this.interactionNext();
     };
@@ -151,7 +170,7 @@ export class BaseCarousel extends AMP.BaseElement {
       return;
     }
     this.getVsync().mutate(() => {
-      const className = '-amp-carousel-button-start-hint';
+      const className = 'i-amphtml-carousel-button-start-hint';
       this.element.classList.add(className);
       timerFor(this.win).delay(() => {
         this.deferMutate(() => this.element.classList.remove(className));

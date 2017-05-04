@@ -237,6 +237,55 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End Cxense example -->
 
+<!-- dynatrace tracking -->
+<amp-analytics type="dynatrace" id="dynatrace">
+<script type="application/json">
+{
+  "vars": {
+    "app": "appid",
+    "tenant": "1"
+  }
+}
+</script>
+</amp-analytics>
+<!-- End dynatrace example -->
+
+<!-- Eulerian Analytics tracking -->
+<amp-analytics type="euleriananalytics" id="euleriananalytics">
+<script type="application/json">
+  {
+    "vars": {
+      "analyticsHost": "eulerian.mywebsite.com"
+    },
+    "triggers": {
+      "trackPageview": {
+        "on": "visible",
+        "request": "pageview"
+      },
+      "trackAction": {
+        "on": "click",
+        "selector": "#test1",
+        "request": "action",
+        "vars": {
+          "actionCode": "action_aes",
+          "actionRef": "action_reference"
+        }
+      },
+      "trackUserParam": {
+        "on": "click",
+        "selector": "#test2",
+        "request": "user",
+        "vars": {
+          "userParamKey": "user_param",
+          "userParamVal": "user_param_value"
+        }
+      }
+    }
+  }
+</script>
+</amp-analytics>
+<!-- End Eulerian Analytics example -->
+  
 <!-- Gemius Audience pageview tracking -->
 <amp-analytics type="gemius" id="gemius">
 <script type="application/json">
@@ -258,7 +307,8 @@ For complete documentation and additional examples please see: https://marketing
     "metric17": "10"
   },
   "vars": {
-    "account": "UA-YYYY-Y"
+    "account": "UA-YYYY-Y",
+    "anonymizeIP": ""
   },
   "triggers": {
     "defaultPageview": {
@@ -634,6 +684,45 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Webtrekk example -->
+
+<!-- Rakam tracking -->
+<amp-analytics type="rakam" id="rakam">
+<script type="application/json">
+{
+  "vars": {
+    "apiEndpoint": "myapiendpoint.getrakam.com",
+    "writeKey": "fhjk6hf37u2m20uvf36iig6r21cieqsclt2n2o0fsaun90sdu1aago7et04npmq8",
+    "pageViewName": "view_page"
+  },
+  "extraUrlParams": {
+    "prop._user_name": "Emre"
+  },
+  "triggers": {
+    "click": {
+      "on": "click",
+      "selector": "#test1",
+      "request": "custom",
+      "vars": {
+        "collection": "click"
+      }
+    }
+  }
+}
+</script>
+</amp-analytics>
+<!-- End Rakam example -->
+
+<!-- Ibeat Analytics pageview tracking -->
+<amp-analytics type="ibeatanalytics" id="ibeatanalytics">
+<script type="application/json">
+  {
+    "vars": {
+    "aid": "99999999",
+    }
+  }
+</script>
+</amp-analytics>
+<!-- End Ibeat Analytics example -->
 
 </div>
 

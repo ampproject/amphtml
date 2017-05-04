@@ -18,8 +18,11 @@ import {getCorrelator} from './utils';
 import {LIFECYCLE_STAGES} from '../../../extensions/amp-a4a/0.1/amp-a4a';
 import {dev} from '../../../src/log';
 import {serializeQueryString} from '../../../src/url';
-import {urlReplacementsForDoc} from '../../../src/url-replacements';
 import {getTimingDataSync} from '../../../src/service/variable-source';
+import {urlReplacementsForDoc} from '../../../src/services';
+import {viewerForDoc} from '../../../src/services';
+import {CommonSignals} from '../../../src/common-signals';
+import {analyticsForDoc} from '../../../src/analytics';
 
 /**
  * This module provides a fairly crude form of performance monitoring (or
@@ -48,6 +51,13 @@ export class BaseLifecycleReporter {
      */
     this.extraVariables_ = new Object(null);
   }
+
+  /**
+   * To be overridden.
+   *
+   * @param {!Element} unusedElement Amp ad element we are measuring.
+   */
+  addPingsForVisibility(unusedElement) {}
 
   /**
    * A beacon function that will be called at various stages of the lifecycle.
@@ -98,6 +108,18 @@ export class BaseLifecycleReporter {
   reset() {
     this.extraVariables_ = new Object(null);
   }
+
+  /**
+   * Returns the initialization time of this reporter.
+   * @return {number} The initialization time in ms.
+   */
+  getInitTime() {}
+
+  /**
+   * Returns the time delta between initialization and now.
+   * @return {number} The time delta in ms.
+   */
+  getDeltaTime() {}
 }
 
 export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
@@ -138,11 +160,11 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
     } else {
       initTime = Number(scratch);
     }
-    /** @private {number} @const */
+    /** @private {time} @const */
     this.initTime_ = initTime;
 
-    /** @private {!function():number} @const */
-    this.getDeltaTime_ = (win.performance && win.performance.now.bind(
+    /** @const {!function():number} */
+    this.getDeltaTime = (win.performance && win.performance.now.bind(
             win.performance)) || (() => {return Date.now() - this.initTime_;});
 
     /** (Not constant b/c this can be overridden for testing.) @private */
@@ -153,6 +175,9 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
      * @const
      */
     this.urlReplacer_ = urlReplacementsForDoc(element);
+
+    /** @const @private {!../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = viewerForDoc(element);
   }
 
   /**
@@ -188,7 +213,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
    */
   buildPingAddress_(name) {
     const stageId = LIFECYCLE_STAGES[name] || 9999;
-    const delta = Math.round(this.getDeltaTime_());
+    const delta = Math.round(this.getDeltaTime());
     // Note: extraParams can end up empty if (a) this.extraVariables_ is empty
     // or (b) if all values are themselves empty or null.
     let extraParams = serializeQueryString(this.extraVariables_);
@@ -213,6 +238,11 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
         AD_SLOT_EVENT_NAME: name,
         AD_SLOT_EVENT_ID: stageId,
         AD_PAGE_CORRELATOR: this.correlator_,
+        AD_PAGE_VISIBLE: this.viewer_.isVisible() ? 1 : 0,
+        AD_PAGE_FIRST_VISIBLE_TIME:
+            Math.round(this.viewer_.getFirstVisibleTime() - this.initTime_),
+        AD_PAGE_LAST_VISIBLE_TIME:
+            Math.round(this.viewer_.getLastVisibleTime() - this.initTime_),
       });
     }
     return extraParams ? `${this.pingbackAddress_}?${extraParams}` : '';
@@ -226,19 +256,66 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
    * @visibleForTesting
    */
   emitPing_(url) {
-    const pingElement = this.element_.ownerDocument.createElement('img');
-    pingElement.setAttribute('src', url);
-    // Styling is copied directly from amp-pixel's CSS.  This is a kludgy way
-    // to do this -- much better would be to invoke amp-pixel's styling directly
-    // or to add an additional style selector for these ping pixels.
-    // However, given that this is a short-term performance system, I'd rather
-    // not tamper with AMP-wide CSS just to create styling for this
-    // element.
-    pingElement.setAttribute('style',
-        'position:fixed!important;top:0!important;width:1px!important;' +
-        'height:1px!important;overflow:hidden!important;visibility:hidden');
-    pingElement.setAttribute('aria-hidden', 'true');
-    this.element_.parentNode.insertBefore(pingElement, this.element_);
+    new Image().src = url;
     dev().info('PING', url);
+  }
+
+  /**
+   * Returns the initialization time of this reporter.
+   * @return {number} The initialization time in ms.
+   */
+  getInitTime() {
+    return this.initTime_;
+  }
+
+  /**
+   * Adds CSI pings for various visibility measurements on element.
+   *
+   * @param {!Element} element Amp ad element we are measuring.
+   * @override
+   */
+  addPingsForVisibility(element) {
+    analyticsForDoc(element, true).then(analytics => {
+      const signals = element.signals();
+      const readyPromise = Promise.race([
+        signals.whenSignal(CommonSignals.INI_LOAD),
+        signals.whenSignal(CommonSignals.LOAD_END),
+      ]);
+      const vis = analytics.getAnalyticsRoot(element).getVisibilityManager();
+      // Can be any promise or `null`.
+      // Element must be an AMP element at this time.
+      // 50% vis w/o ini load
+      vis.listenElement(element, {visiblePercentageMin: 50}, null, null,
+                        () => {
+                          this.sendPing('visHalf');
+                        });
+      // 50% vis w ini load
+      vis.listenElement(element,
+                        {visiblePercentageMin: 50},
+                        readyPromise, null,
+                        () => {
+                          this.sendPing('visHalfIniLoad');
+                        });
+      // first visible
+      vis.listenElement(element, {visiblePercentageMin: 1}, null, null,
+                        () => {
+                          this.sendPing('firstVisible');
+                        });
+      // ini-load
+      vis.listenElement(element, {waitFor: 'ini-load'},
+                        readyPromise, null,
+                        () => {
+                          this.sendPing('iniLoad');
+                        });
+
+      // 50% vis, ini-load and 1 sec
+      vis.listenElement(element,
+                        {visiblePercentageMin: 1, waitFor: 'ini-load',
+                         totalTimeMin: 1000},
+                        readyPromise, null,
+                        () => {
+                          this.sendPing('visLoadAndOneSec');
+                        });
+    });
   }
 }

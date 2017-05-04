@@ -19,7 +19,7 @@ import {
 } from '../../../../testing/iframe';
 import '../amp-apester-media';
 import {adopt} from '../../../../src/runtime';
-import {xhrFor} from '../../../../src/xhr';
+import {xhrFor} from '../../../../src/services';
 import * as sinon from 'sinon';
 
 adopt(window);
@@ -90,7 +90,7 @@ describe('amp-apester-media', () => {
       expect(iframe).to.not.be.null;
       expect(iframe.src).to.equal(
           'https://renderer.qmerce.com/interaction/57a336dba187a2ca3005e826');
-      expect(changeSizeSpy.callCount).to.equal(1);
+      expect(changeSizeSpy).to.be.calledOnce;
       expect(changeSizeSpy.args[0][0]).to.equal('404');
     });
   });
@@ -103,7 +103,7 @@ describe('amp-apester-media', () => {
       expect(iframe).to.not.be.null;
       expect(iframe.src).to.equal(
           'https://renderer.qmerce.com/interaction/57a336dba187a2ca3005e826');
-      expect(attemptChangeSizeSpy.callCount).to.equal(1);
+      expect(attemptChangeSizeSpy).to.be.calledOnce;
       expect(attemptChangeSizeSpy.args[0][0]).to.equal('404');
     });
   });

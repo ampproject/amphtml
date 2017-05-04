@@ -17,6 +17,9 @@
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 import {dev} from '../../../src/log';
+import {startsWith} from '../../../src/string';
+import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
+import {NETWORKS} from './vendors';
 
 /**
  * Header that will contain Cloudflare generated signature
@@ -25,19 +28,6 @@ import {dev} from '../../../src/log';
  * @private
  */
 const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
-
-/**
- * Base URL of Ad server.  The extra /_a4a prefix signals Cloudflare
- * A4A header processing to generate a signature and CORS headers.
- *
- * @type {string}
- * @private
- */
-// This points to the internal "fake" cloudflare signed Ad server.
-// Remove and replace with the actual value, like:
-//   const CLOUDFLARE_BASE_URL = 'http://www.mycloudflaredomain.com/_a4a';
-const CLOUDFLARE_BASE_URL =
-  '/extensions/amp-ad-network-cloudflare-impl/0.1/data';
 
 /**
  * This is a minimalistic AmpA4A implementation that primarily gets an Ad
@@ -53,7 +43,23 @@ export class AmpAdNetworkCloudflareImpl extends AmpA4A {
    * @override
    */
   isValidElement() {
-    return this.element.hasAttribute('src') && this.isAmpAdElement();
+    const el = this.element;
+    if (!(this.isAmpAdElement() && el.hasAttribute('data-cf-network'))) {
+      return false;
+    }
+
+    const network = NETWORKS[el.getAttribute('data-cf-network')];
+    if (!network) {
+      return false;
+    }
+
+    const src = el.getAttribute('src') || network.src;
+    if (!(src && startsWith(src, network.base))) {
+      return false;
+    }
+    assertAbsoluteHttpOrHttpsUrl(src);
+
+    return true;
   }
 
   /** @override */
@@ -62,18 +68,60 @@ export class AmpAdNetworkCloudflareImpl extends AmpA4A {
     return ['cloudflare'];
   }
 
+  /**
+   * Handle variable replacements
+   *
+   * @param {string} str input string to process
+   * @param {?Object<string, string>} values to use in the replacements
+   * @return {string} result with replaced tokens
+   */
+  replacements(str, values) {
+    // allow injection of width and height as parameters
+    str = str.replace(/SLOT_WIDTH/g, values.slotWidth);
+    str = str.replace(/SLOT_HEIGHT/g, values.slotHeight);
+
+    return str;
+  }
+
   /** @override */
   getAdUrl() {
-    // You can optionally use data from this context to augment the URL,
-    // to pass data back to the network, to aid in ad selection.  For example:
-    //   const rect = this.getIntersectionElementLayoutBox();
-    // can extract the layout size and be used to pass layout hints to the server.
+    const rect = this.getIntersectionElementLayoutBox();
+    const el = this.element;
 
-    // If you don't want to use relative URL generation from your base url,
-    // be sure that this only generates urls to valid hosts, since it could
-    // allow cookie leaks, etc.
+    const network = NETWORKS[el.getAttribute('data-cf-network')];
+    const a4a = el.getAttribute('data-cf-a4a') !== 'false';
+    const base = network.base;
 
-    return CLOUDFLARE_BASE_URL + encodeURI(this.element.getAttribute('src'));
+    // Get URL for ad creative
+    let url = el.getAttribute('src') || network.src;
+
+    // optionally convert to a4a endpoint
+    if (a4a && url.substr(base.length, 6) != '/_a4a/') {
+      url = base + '/_a4a' + url.slice(base.length);
+    }
+
+    // compute replacement values
+    const values = {
+      slotWidth: (rect.width || 0).toString(),
+      slotHeight: (rect.height || 0).toString(),
+    };
+
+    // encode for safety
+    url = encodeURI(this.replacements(url, values));
+
+    // include other data attributes as query parameters
+    let pre = url.indexOf('?') < 0 ? '?' : '&';
+    for (let i = 0; i < el.attributes.length; i++) {
+      const attrib = el.attributes[i];
+      if (attrib.specified && startsWith(attrib.name, 'data-')
+          && !startsWith(attrib.name, 'data-cf-')) {
+        url += pre + encodeURIComponent(attrib.name.substring(5)) +
+          '=' + encodeURIComponent(this.replacements(attrib.value, values));
+        pre = '&';
+      }
+    }
+
+    return url;
   }
 
   /**

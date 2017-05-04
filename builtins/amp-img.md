@@ -60,6 +60,10 @@ This attribute is similar to the `src` attribute on the `img` tag. The value mus
 
 Same as `srcset` attribute on the `img` tag. The behavior will be polyfilled where not natively supported.
 
+**sizes**
+
+Same as `sizes` attribute on the `img` tag. For more information see the [common `sizes` attribute docs](../spec/amp-html-layout.md#sizes).
+
 **alt**
 
 A string of alternate text, similar to the `alt` attribute on `img`.
@@ -70,7 +74,7 @@ A string that indicates the attribution of the image. For example, `attribution=
 
 **height** and **width**
 
-An explicit size of the image, which is used by the AMP runtime to determine the aspect ratio without fetching the image. 
+An explicit size of the image, which is used by the AMP runtime to determine the aspect ratio without fetching the image.
 
 **common attributes**
 

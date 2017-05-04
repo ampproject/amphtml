@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {getServiceForDoc} from '../service';
+import {registerServiceBuilderForDoc} from '../service';
 import {getSourceOrigin} from '../url';
 import {dev} from '../log';
 import {recreateNonProtoObject} from '../json';
-import {viewerForDoc} from '../viewer';
+import {viewerForDoc} from '../services';
 
 /** @const */
 const TAG = 'Storage';
@@ -286,11 +286,33 @@ export class LocalStorageBinding {
     this.win = win;
 
     /** @private @const {boolean} */
-    this.isLocalStorageSupported_ = 'localStorage' in this.win;
+    this.isLocalStorageSupported_ = this.checkIsLocalStorageSupported_();
 
     if (!this.isLocalStorageSupported_) {
       const error = new Error('localStorage not supported.');
       dev().expectedError(TAG, error);
+    }
+  }
+
+  /**
+   * Determines whether localStorage API is supported by ensuring it is declared
+   * and does not throw an exception when used.
+   * @return {boolean}
+   * @private
+   */
+  checkIsLocalStorageSupported_() {
+    try {
+      if (!('localStorage' in this.win)) {
+        return false;
+      }
+
+      // We do not care about the value fetched from local storage; we only care
+      // whether the call throws an exception or not.  As such, we can look up
+      // any arbitrary key.
+      this.win.localStorage.getItem('test');
+      return true;
+    } catch (e) {
+      return false;
     }
   }
 
@@ -360,15 +382,19 @@ export class ViewerStorageBinding {
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @return {!Storage}
  */
 export function installStorageServiceForDoc(ampdoc) {
-  return /** @type {!Storage} */ (getServiceForDoc(ampdoc, 'storage', () => {
-    const viewer = viewerForDoc(ampdoc);
-    const overrideStorage = parseInt(viewer.getParam('storage'), 10);
-    const binding = overrideStorage ?
-        new ViewerStorageBinding(viewer) :
-        new LocalStorageBinding(ampdoc.win);
-    return new Storage(ampdoc, viewer, binding).start_();
-  }));
+  registerServiceBuilderForDoc(
+      ampdoc,
+      'storage',
+      /* opt_ctor */ undefined,
+      () => {
+        const viewer = viewerForDoc(ampdoc);
+        const overrideStorage = parseInt(viewer.getParam('storage'), 10);
+        const binding = overrideStorage ?
+            new ViewerStorageBinding(viewer) :
+            new LocalStorageBinding(ampdoc.win);
+        return new Storage(ampdoc, viewer, binding).start_();
+      },
+      /* opt_instantiate */ true);
 }

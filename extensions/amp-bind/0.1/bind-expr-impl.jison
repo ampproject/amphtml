@@ -9,40 +9,37 @@
 
 %%
 \s+                       /* skip whitespace */
-"+"                       return '+'
-"-"                       return '-'
-"*"                       return '*'
-"/"                       return '/'
-"%"                       return '%'
-"&&"                      return '&&'
-"||"                      return '||'
-"<="                      return '<='
-"<"                       return '<'
-">="                      return '>='
-">"                       return '>'
-"!="                      return '!='
-"=="                      return '=='
-"("                       return '('
-")"                       return ')'
-"["                       return '['
-"]"                       return ']'
-"{"                       return '{'
-"}"                       return '}'
-","                       return ','
-\.                        return '.'
-":"                       return ':'
-"?"                       return '?'
-"!"                       return '!'
 "null"                    return 'NULL'
-"NULL"                    return 'NULL'
-"TRUE"                    return 'TRUE'
 "true"                    return 'TRUE'
-"FALSE"                   return 'FALSE'
 "false"                   return 'FALSE'
 [0-9]+("."[0-9]+)?\b      return 'NUMBER'
 [a-zA-Z_][a-zA-Z0-9_]*    return 'NAME'
 \'[^\']*\'                return 'STRING'
 \"[^\"]*\"                return 'STRING'
+"+"                       return '+'
+"-"                       return '-'
+"*"                       return '*'
+"/"                       return '/'
+"&&"                      return '&&'
+"||"                      return '||'
+"!="                      return '!='
+"=="                      return '=='
+"<="                      return '<='
+"<"                       return '<'
+">="                      return '>='
+">"                       return '>'
+"!"                       return '!'
+"?"                       return '?'
+":"                       return ':'
+"%"                       return '%'
+"["                       return '['
+"]"                       return ']'
+"{"                       return '{'
+"}"                       return '}'
+"("                       return '('
+")"                       return ')'
+","                       return ','
+\.                        return '.'
 .                         return 'INVALID'
 <<EOF>>                   return 'EOF'
 
@@ -176,6 +173,11 @@ invocation:
       %{
         $$ = new AstNode(AstNodeType.INVOCATION, [$1, $4], $3);
       %}
+  |
+    NAME args
+      %{
+        $$ = new AstNode(AstNodeType.INVOCATION, [undefined, $2], $1)
+      %}
   ;
 
 args:
@@ -215,6 +217,21 @@ variable:
   ;
 
 literal:
+    primitive
+      ${
+        $$ = $1;
+      }
+  | object_literal
+      %{
+        $$ = $1;
+      %}
+  | array_literal
+      %{
+        $$ = $1;
+      %}
+  ;
+
+primitive:
     STRING
       %{
         const string = yytext.substr(1, yyleng - 2);
@@ -235,14 +252,6 @@ literal:
   | NULL
       %{
         $$ = new AstNode(AstNodeType.LITERAL, null, null);
-      %}
-  | object_literal
-      %{
-        $$ = $1;
-      %}
-  | array_literal
-      %{
-        $$ = $1;
       %}
   ;
 
@@ -293,8 +302,19 @@ object:
   ;
 
 key_value:
-  expr ':' expr
+  key ':' expr
       %{
         $$ = new AstNode(AstNodeType.KEY_VALUE, [$1, $3]);
+      %}
+  ;
+
+key:
+    NAME
+      %{
+        $$ = new AstNode(AstNodeType.LITERAL, null, $1);
+      %}
+  | primitive
+      %{
+        $$ = $1;
       %}
   ;

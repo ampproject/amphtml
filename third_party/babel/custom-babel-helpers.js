@@ -92,5 +92,6 @@
 
   babelHelpers.defineProperty = function(obj, key, value) {
       obj[key] = value;
+      return obj;
   };
 })(typeof global === "undefined" ? self : global);

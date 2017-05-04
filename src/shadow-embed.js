@@ -18,7 +18,7 @@ import {ShadowCSS} from '../third_party/webcomponentsjs/ShadowCSS';
 import {ampdocServiceFor} from './ampdoc';
 import {dev} from './log';
 import {closestNode, escapeCssSelectorIdent} from './dom';
-import {extensionsFor} from './extensions';
+import {extensionsFor} from './services';
 import {insertStyleElement} from './style-installer';
 import {setStyle} from './style';
 import {
@@ -78,8 +78,8 @@ function createShadowRootPolyfill(hostElement) {
   const shadowRoot = /** @type {!ShadowRoot} */ (
       // Cast to ShadowRoot even though it is an Element
       // TODO(@dvoytenko) Consider to switch to a type union instead.
-      /** @type {?}  */ (doc.createElement('i-amp-shadow-root')));
-  shadowRoot.id = 'i-amp-sd-' + Math.floor(win.Math.random() * 10000);
+      /** @type {?}  */ (doc.createElement('i-amphtml-shadow-root')));
+  shadowRoot.id = 'i-amphtml-sd-' + Math.floor(win.Math.random() * 10000);
   hostElement.appendChild(shadowRoot);
   hostElement.shadowRoot = hostElement.__AMP_SHADOW_ROOT = shadowRoot;
 
@@ -90,7 +90,7 @@ function createShadowRootPolyfill(hostElement) {
   shadowRoot.getElementById = function(id) {
     const escapedId = escapeCssSelectorIdent(win, id);
     return /** @type {HTMLElement|null} */ (
-        shadowRoot.querySelector(`#${escapedId}`));
+        shadowRoot./*OK*/querySelector(`#${escapedId}`));
   };
 
   return shadowRoot;
@@ -108,7 +108,7 @@ export function isShadowRoot(value) {
   }
   // Node.nodeType == DOCUMENT_FRAGMENT to speed up the tests. Unfortunately,
   // nodeType of DOCUMENT_FRAGMENT is used currently for ShadowRoot nodes.
-  if (value.tagName == 'I-AMP-SHADOW-ROOT') {
+  if (value.tagName == 'I-AMPHTML-SHADOW-ROOT') {
     return true;
   }
   return (value.nodeType == /* DOCUMENT_FRAGMENT */ 11 &&
@@ -243,7 +243,7 @@ export function transformShadowCss(shadowRoot, css) {
  * Transforms CSS to isolate AMP CSS within the shadow root and reduce the
  * possibility of high-level conflicts. There are two types of transformations:
  * 1. Root transformation: `body` -> `amp-body`, etc.
- * 2. Scoping: `a {}` -> `#i-amp-sd-123 a {}`.
+ * 2. Scoping: `a {}` -> `#i-amphtml-sd-123 a {}`.
  *
  * @param {!ShadowRoot} shadowRoot
  * @param {string} css

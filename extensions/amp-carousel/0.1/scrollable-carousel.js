@@ -17,7 +17,7 @@
 import {Animation} from '../../../src/animation';
 import {BaseCarousel} from './base-carousel';
 import {Layout} from '../../../src/layout';
-import {timerFor} from '../../../src/timer';
+import {timerFor} from '../../../src/services';
 import {numeric} from '../../../src/transition';
 import {dev} from '../../../src/log';
 
@@ -56,7 +56,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
     this.cells_ = this.getRealChildren();
 
     this.container_ = this.element.ownerDocument.createElement('div');
-    this.container_.classList.add('-amp-scrollable-carousel-container');
+    this.container_.classList.add('i-amphtml-scrollable-carousel-container');
     this.element.appendChild(this.container_);
 
     this.cells_.forEach(cell => {
@@ -231,7 +231,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
     });
     if (oldPos != newPos) {
       this.withinWindow_(oldPos, cell => {
-        if (seen.indexOf(cell) == -1) {
+        if (!seen.includes(cell)) {
           this.updateInViewport(cell, false);
           this.schedulePause(cell);
         }

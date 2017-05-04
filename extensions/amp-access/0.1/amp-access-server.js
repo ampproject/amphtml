@@ -18,10 +18,10 @@ import {AccessClientAdapter} from './amp-access-client';
 import {isExperimentOn} from '../../../src/experiments';
 import {isProxyOrigin, removeFragment} from '../../../src/url';
 import {dev} from '../../../src/log';
-import {timerFor} from '../../../src/timer';
-import {viewerForDoc} from '../../../src/viewer';
-import {vsyncFor} from '../../../src/vsync';
-import {xhrFor} from '../../../src/xhr';
+import {timerFor} from '../../../src/services';
+import {viewerForDoc} from '../../../src/services';
+import {vsyncFor} from '../../../src/services';
+import {xhrFor} from '../../../src/services';
 
 /** @const {string} */
 const TAG = 'amp-access-server';
@@ -59,49 +59,50 @@ const TAG = 'amp-access-server';
 export class AccessServerAdapter {
 
   /**
-   * @param {!Window} win
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JSONType} configJson
    * @param {!AccessTypeAdapterContextDef} context
    */
-  constructor(win, configJson, context) {
-    /** @const {!Window} */
-    this.win = win;
+  constructor(ampdoc, configJson, context) {
+    /** @const */
+    this.ampdoc = ampdoc;
 
     /** @const @private {!AccessTypeAdapterContextDef} */
     this.context_ = context;
 
     /** @private @const */
-    this.clientAdapter_ = new AccessClientAdapter(win, configJson, context);
+    this.clientAdapter_ = new AccessClientAdapter(ampdoc, configJson, context);
 
     /** @private @const {!Viewer} */
-    this.viewer_ = viewerForDoc(win.document);
+    this.viewer_ = viewerForDoc(ampdoc);
 
     /** @const @private {!Xhr} */
-    this.xhr_ = xhrFor(win);
+    this.xhr_ = xhrFor(ampdoc.win);
 
     /** @const @private {!Timer} */
-    this.timer_ = timerFor(win);
+    this.timer_ = timerFor(ampdoc.win);
 
     /** @const @private {!Vsync} */
-    this.vsync_ = vsyncFor(win);
+    this.vsync_ = vsyncFor(ampdoc.win);
 
-    const stateElement = this.win.document.querySelector(
-        'meta[name="i-amp-access-state"]');
+    const stateElement = ampdoc.getRootNode().querySelector(
+        'meta[name="i-amphtml-access-state"]');
 
     /** @private @const {?string} */
     this.serverState_ = stateElement ?
         stateElement.getAttribute('content') : null;
 
-    const isInExperiment = isExperimentOn(win, TAG);
+    const isInExperiment = isExperimentOn(ampdoc.win, TAG);
 
     /** @private @const {boolean} */
-    this.isProxyOrigin_ = isProxyOrigin(win.location) || isInExperiment;
+    this.isProxyOrigin_ = isProxyOrigin(ampdoc.win.location) || isInExperiment;
 
     const serviceUrlOverride = isInExperiment ?
         this.viewer_.getParam('serverAccessService') : null;
 
     /** @private @const {string} */
-    this.serviceUrl_ = serviceUrlOverride || removeFragment(win.location.href);
+    this.serviceUrl_ = serviceUrlOverride ||
+        removeFragment(ampdoc.win.location.href);
   }
 
   /** @override */
@@ -142,7 +143,7 @@ export class AccessServerAdapter {
         }
       }
       const request = {
-        'url': removeFragment(this.win.location.href),
+        'url': removeFragment(this.ampdoc.win.location.href),
         'state': this.serverState_,
         'vars': requestVars,
       };
@@ -159,15 +160,15 @@ export class AccessServerAdapter {
             },
             requireAmpResponseSourceOrigin: false,
           }));
-    }).then(response => {
-      dev().fine(TAG, 'Authorization response: ', response);
+    }).then(responseDoc => {
+      dev().fine(TAG, 'Authorization response: ', responseDoc);
       const accessDataString = dev().assert(
-          response.querySelector('script[id="amp-access-data"]'),
+          responseDoc.querySelector('script[id="amp-access-data"]'),
           'No authorization data available').textContent;
       const accessData = JSON.parse(accessDataString);
       dev().fine(TAG, '- access data: ', accessData);
 
-      return this.replaceSections_(response).then(() => {
+      return this.replaceSections_(responseDoc).then(() => {
         return accessData;
       });
     });
@@ -188,20 +189,20 @@ export class AccessServerAdapter {
    * @return {!Promise}
    */
   replaceSections_(doc) {
-    const sections = doc.querySelectorAll('[i-amp-access-id]');
+    const sections = doc.querySelectorAll('[i-amphtml-access-id]');
     dev().fine(TAG, '- access sections: ', sections);
     return this.vsync_.mutatePromise(() => {
       for (let i = 0; i < sections.length; i++) {
         const section = sections[i];
-        const sectionId = section.getAttribute('i-amp-access-id');
-        const target = this.win.document.querySelector(
-            '[i-amp-access-id="' + sectionId + '"]');
+        const sectionId = section.getAttribute('i-amphtml-access-id');
+        const target = this.ampdoc.getRootNode().querySelector(
+            '[i-amphtml-access-id="' + sectionId + '"]');
         if (!target) {
           dev().warn(TAG, 'Section not found: ', sectionId);
           continue;
         }
         target.parentElement.replaceChild(
-            this.win.document.importNode(section, /* deep */ true),
+            this.ampdoc.win.document.importNode(section, /* deep */ true),
             target);
       }
     });

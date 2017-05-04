@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+import {CommonSignals} from './common-signals';
 import {Layout, getLayoutClass, getLengthNumeral, getLengthUnits,
     isInternalElement, isLayoutSizeDefined, isLoadingAllowed,
     parseLayout, parseLength, getNaturalDimensions,
     hasNaturalDimensions} from './layout';
 import {ElementStub, stubbedElements} from './element-stub';
+import {Signals} from './utils/signals';
 import {ampdocServiceFor} from './ampdoc';
 import {createLoaderElement} from '../src/loader';
 import {dev, rethrowAsync, user} from './log';
@@ -27,15 +29,17 @@ import {
   getIntersectionChangeEntry,
 } from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
-import {map} from './utils/object';
 import {parseSizeList} from './size-list';
 import {reportError} from './error';
-import {resourcesForDoc} from './resources';
-import {timerFor} from './timer';
-import {vsyncFor} from './vsync';
+import {
+  resourcesForDoc,
+  performanceForOrNull,
+  timerFor,
+  vsyncFor,
+} from './services';
 import * as dom from './dom';
 import {setStyle, setStyles} from './style';
-
+import {LayoutDelayMeter} from './layout-delay-meter';
 
 const TAG_ = 'CustomElement';
 
@@ -533,9 +537,12 @@ function createBaseCustomElementClass(win) {
       /**
        * Action queue is initially created and kept around until the element
        * is ready to send actions directly to the implementation.
-       * @private {?Array<!./service/action-impl.ActionInvocation>}
+       * - undefined initially
+       * - array if used
+       * - null after unspun
+       * @private {?Array<!./service/action-impl.ActionInvocation>|undefined}
        */
-      this.actionQueue_ = [];
+      this.actionQueue_ = undefined;
 
       /**
        * Whether the element is in the template.
@@ -543,23 +550,15 @@ function createBaseCustomElementClass(win) {
        */
       this.isInTemplate_ = undefined;
 
-      /**
-       * A mapping from a signal name to the signal response: either time or
-       * an error.
-       * @private @const {!Object<string, (time|!Error)>}
-       */
-      this.signalMap_ = map();
+      /** @private @const */
+      this.signals_ = new Signals();
 
-      /**
-       * A mapping from a signal name to the signal promise, resolve and reject.
-       * Only allocated when promise has been requested.
-       * @private {?Object<string, {
-       *   promise: !Promise,
-       *   resolve: (function(time)|undefined),
-       *   reject: (function(!Error)|undefined)
-       * }>}
-       */
-      this.signalPromiseMap_ = null;
+      const perf = performanceForOrNull(win);
+      /** @private {boolean} */
+      this.perfOn_ = perf && perf.isPerformanceTrackingOn();
+
+      /** @private {?./layout-delay-meter.LayoutDelayMeter} */
+      this.layoutDelayMeter_ = null;
     }
 
     /**
@@ -568,6 +567,11 @@ function createBaseCustomElementClass(win) {
      * @return {string}
      */
     elementName() {
+    }
+
+    /** @return {!Signals} */
+    signals() {
+      return this.signals_;
     }
 
     /**
@@ -625,6 +629,10 @@ function createBaseCustomElementClass(win) {
       }
       this.implementation_ = new newImplClass(this);
       if (this.everAttached) {
+        // Usually, we do an implementation upgrade when the element is
+        // attached to the DOM. But, if it hadn't yet upgraded from
+        // ElementStub, we couldn't. Now that it's upgraded from a stub, go
+        // ahead and do the full upgrade.
         this.tryUpgrade_();
       }
     }
@@ -643,13 +651,9 @@ function createBaseCustomElementClass(win) {
       this.assertLayout_();
       this.implementation_.layout_ = this.layout_;
       this.implementation_.layoutWidth_ = this.layoutWidth_;
-      if (this.everAttached) {
-        this.implementation_.firstAttachedCallback();
-        this.dispatchCustomEventForTesting('amp:attached');
-        // For a never-added resource, the build will be done automatically
-        // via `resources.add` on the first attach.
-        this.getResources().upgraded(this);
-      }
+      this.implementation_.firstAttachedCallback();
+      this.dispatchCustomEventForTesting('amp:attached');
+      this.getResources().upgraded(this);
     }
 
     /* @private */
@@ -683,7 +687,7 @@ function createBaseCustomElementClass(win) {
      * @return {!Promise}
      */
     whenBuilt() {
-      return this.whenSignal('built');
+      return this.signals_.whenSignal(CommonSignals.BUILT);
     }
 
     /**
@@ -716,9 +720,9 @@ function createBaseCustomElementClass(win) {
         this.built_ = true;
         this.classList.remove('i-amphtml-notbuilt');
         this.classList.remove('amp-notbuilt');
-        this.signal('built');
+        this.signals_.signal(CommonSignals.BUILT);
       } catch (e) {
-        this.rejectSignal('built', e);
+        this.signals_.rejectSignal(CommonSignals.BUILT, e);
         reportError(e, this);
         throw e;
       }
@@ -726,116 +730,16 @@ function createBaseCustomElementClass(win) {
         this.updateInViewport_(true);
       }
       if (this.actionQueue_) {
-        if (this.actionQueue_.length > 0) {
-          // Only schedule when the queue is not empty, which should be
-          // the case 99% of the time.
-          timerFor(this.ownerDocument.defaultView)
+        // Only schedule when the queue is not empty, which should be
+        // the case 99% of the time.
+        timerFor(this.ownerDocument.defaultView)
             .delay(this.dequeueActions_.bind(this), 1);
-        } else {
-          this.actionQueue_ = null;
-        }
       }
       if (!this.getPlaceholder()) {
         const placeholder = this.createPlaceholder();
         if (placeholder) {
           this.appendChild(placeholder);
         }
-      }
-    }
-
-    /**
-     * Returns the promise that's resolved when the signal is triggered. The
-     * resolved value is the time of the signal.
-     * @param {string} name
-     * @return {!Promise<time>}
-     */
-    whenSignal(name) {
-      let promiseStruct = this.signalPromiseMap_ &&
-          this.signalPromiseMap_[name];
-      if (!promiseStruct) {
-        const result = this.signalMap_[name];
-        if (result != null) {
-          // Immediately resolve signal.
-          const promise = typeof result == 'number' ?
-              Promise.resolve(result) :
-              Promise.reject(result);
-          promiseStruct = {promise};
-        } else {
-          // Allocate the promise/resolver for when the signal arrives in the
-          // future.
-          let resolve, reject;
-          const promise = new Promise((aResolve, aReject) => {
-            resolve = aResolve;
-            reject = aReject;
-          });
-          promiseStruct = {promise, resolve, reject};
-        }
-        if (!this.signalPromiseMap_) {
-          this.signalPromiseMap_ = map();
-        }
-        this.signalPromiseMap_[name] = promiseStruct;
-      }
-      return promiseStruct.promise;
-    }
-
-    /**
-     * Returns a promise that's resolved when both signals are triggered with
-     * the delta of time between them.
-     * @param {string} fromSignal
-     * @param {string} toSignal
-     * @return {!Promise<number>}
-     */
-    signalDelta(fromSignal, toSignal) {
-      const fromPromise = this.whenSignal(fromSignal);
-      const toPromise = this.whenSignal(toSignal);
-      return Promise.all([fromPromise, toPromise]).then(times => {
-        const fromValue = times[0];
-        const toValue = times[1];
-        return toValue - fromValue;
-      });
-    }
-
-    /**
-     * Triggers the signal with the specified name on the element. The time is
-     * optional; if not provided, the current time is used. The associated
-     * promise is resolved with the resulting time.
-     * @param {string} name
-     * @param {time=} opt_time
-     */
-    signal(name, opt_time) {
-      if (this.signalMap_[name] != null) {
-        // Do not duplicate signals.
-        return;
-      }
-      const time = opt_time || Date.now();
-      this.signalMap_[name] = time;
-      const promiseStruct = this.signalPromiseMap_ &&
-          this.signalPromiseMap_[name];
-      if (promiseStruct && promiseStruct.resolve) {
-        promiseStruct.resolve(time);
-        promiseStruct.resolve = undefined;
-        promiseStruct.reject = undefined;
-      }
-    }
-
-    /**
-     * Rejects the signal. Indicates that the signal will never succeed. The
-     * associated signal is rejected.
-     * @param {string} name
-     * @param {!Error} error
-     */
-    rejectSignal(name, error) {
-      if (this.signalMap_[name] != null) {
-        // Do not duplicate signals.
-        return;
-      }
-      this.signalMap_[name] = error;
-      const promiseStruct = this.signalPromiseMap_ &&
-          this.signalPromiseMap_[name];
-      if (promiseStruct && promiseStruct.reject) {
-        promiseStruct.reject(error);
-        promiseStruct.resolve = undefined;
-        promiseStruct.reject = undefined;
       }
     }
 
@@ -878,9 +782,13 @@ function createBaseCustomElementClass(win) {
       if (this.isUpgraded()) {
         this.implementation_.layoutWidth_ = this.layoutWidth_;
       }
-      // TODO(malteubl): Forward for stubbed elements.
-      // TODO(jridgewell): We should pass the layoutBox down.
-      this.implementation_.onLayoutMeasure();
+      if (this.isBuilt()) {
+        try {
+          this.implementation_.onLayoutMeasure();
+        } catch (e) {
+          reportError(e, this);
+        }
+      }
 
       if (this.isLoadingEnabled_()) {
         if (this.isInViewport_) {
@@ -1010,6 +918,9 @@ function createBaseCustomElementClass(win) {
           setStyle(this, 'marginLeft', opt_newMargins.left, 'px');
         }
       }
+      if (this.isAwaitingSize_()) {
+        this.sizeProvided_();
+      }
     }
 
     /**
@@ -1039,35 +950,53 @@ function createBaseCustomElementClass(win) {
         // Resources can now be initialized since the ampdoc is now available.
         this.resources_ = resourcesForDoc(this.ampdoc_);
       }
-      if (!this.everAttached) {
+      this.getResources().add(this);
+
+      if (this.everAttached) {
+        const reconstruct = this.reconstructWhenReparented();
+        if (reconstruct) {
+          this.reset_();
+        }
+        if (this.isUpgraded()) {
+          if (reconstruct) {
+            this.getResources().upgraded(this);
+          }
+          this.dispatchCustomEventForTesting('amp:attached');
+        }
+      } else {
+        this.everAttached = true;
+
+        try {
+          this.layout_ = applyLayout_(this);
+        } catch (e) {
+          reportError(e, this);
+        }
         if (!isStub(this.implementation_)) {
           this.tryUpgrade_();
         }
         if (!this.isUpgraded()) {
           this.classList.add('amp-unresolved');
           this.classList.add('i-amphtml-unresolved');
+          // amp:attached is dispatched from the ElementStub class when it
+          // replayed the firstAttachedCallback call.
+          this.dispatchCustomEventForTesting('amp:stubbed');
         }
-        try {
-          this.layout_ = applyLayout_(this);
-          this.assertLayout_();
-          this.implementation_.layout_ = this.layout_;
-          this.implementation_.firstAttachedCallback();
-          if (!this.isUpgraded()) {
-            // amp:attached is dispatched from the ElementStub class when it
-            // replayed the firstAttachedCallback call.
-            this.dispatchCustomEventForTesting('amp:stubbed');
-          } else {
-            this.dispatchCustomEventForTesting('amp:attached');
-          }
-        } catch (e) {
-          reportError(e, this);
-        }
-
-        // It's important to have this flag set in the end to avoid
-        // `resources.add` called twice if upgrade happens immediately.
-        this.everAttached = true;
       }
-      this.getResources().add(this);
+    }
+
+    /**
+     * @return {boolean}
+     * @private
+     */
+    isAwaitingSize_() {
+      return this.classList.contains('i-amphtml-layout-awaiting-size');
+    }
+
+    /**
+     * @private
+     */
+    sizeProvided_() {
+      this.classList.remove('i-amphtml-layout-awaiting-size');
     }
 
     /** The Custom Elements V0 sibling to `connectedCallback`. */
@@ -1097,7 +1026,9 @@ function createBaseCustomElementClass(win) {
         this.completeUpgrade_(impl);
       } else if (typeof res.then == 'function') {
         // It's a promise: wait until it's done.
-        res.then(impl => this.completeUpgrade_(impl)).catch(reason => {
+        res.then(upgrade => {
+          this.completeUpgrade_(upgrade || impl);
+        }).catch(reason => {
           this.upgradeState_ = UpgradeState.UPGRADE_FAILED;
           rethrowAsync(reason);
         });
@@ -1183,11 +1114,24 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Returns a previously measured layout box adjusted to the viewport. This
+     * mainly affects fixed-position elements that are adjusted to be always
+     * relative to the document position in the viewport.
      * @return {!./layout-rect.LayoutRectDef}
      * @final @this {!Element}
      */
     getLayoutBox() {
       return this.getResources().getResourceForElement(this).getLayoutBox();
+    }
+
+    /**
+     * Returns a previously measured layout box relative to the page. The
+     * fixed-position elements are relative to the top of the document.
+     * @return {!./layout-rect.LayoutRectDef}
+     * @final @this {!Element}
+     */
+    getPageLayoutBox() {
+      return this.getResources().getResourceForElement(this).getPageLayoutBox();
     }
 
     /**
@@ -1252,14 +1196,17 @@ function createBaseCustomElementClass(win) {
       this.dispatchCustomEventForTesting('amp:load:start');
       const isLoadEvent = (this.layoutCount_ == 0);  // First layout is "load".
       if (isLoadEvent) {
-        this.signal('load-start');
+        this.signals_.signal(CommonSignals.LOAD_START);
+      }
+      if (this.perfOn_) {
+        this.getLayoutDelayMeter_().startLayout();
       }
       const promise = this.implementation_.layoutCallback();
       this.preconnect(/* onLayout */true);
       this.classList.add('i-amphtml-layout');
       return promise.then(() => {
         if (isLoadEvent) {
-          this.signal('load-end');
+          this.signals_.signal(CommonSignals.LOAD_END);
         }
         this.readyState = 'complete';
         this.layoutCount_++;
@@ -1269,12 +1216,15 @@ function createBaseCustomElementClass(win) {
         if (!this.isFirstLayoutCompleted_) {
           this.implementation_.firstLayoutCompleted();
           this.isFirstLayoutCompleted_ = true;
+          // TODO(dvoytenko, #7389): cleanup once amp-sticky-ad signals are
+          // in PROD.
           this.dispatchCustomEvent('amp:load:end');
         }
       }, reason => {
         // add layoutCount_ by 1 despite load fails or not
         if (isLoadEvent) {
-          this.rejectSignal('load-end', reason);
+          this.signals_.rejectSignal(
+              CommonSignals.LOAD_END, /** @type {!Error} */ (reason));
         }
         this.layoutCount_++;
         this.toggleLoading_(false, /* cleanup */ true);
@@ -1301,7 +1251,7 @@ function createBaseCustomElementClass(win) {
           // Set a minimum delay in case the element loads very fast or if it
           // leaves the viewport.
           timerFor(this.ownerDocument.defaultView).delay(() => {
-            if (this.layoutCount_ == 0 && this.isInViewport_) {
+            if (this.isInViewport_) {
               this.toggleLoading_(true);
             }
           }, 100);
@@ -1319,6 +1269,9 @@ function createBaseCustomElementClass(win) {
     updateInViewport_(inViewport) {
       this.implementation_.inViewport_ = inViewport;
       this.implementation_.viewportCallback(inViewport);
+      if (inViewport && this.perfOn_) {
+        this.getLayoutDelayMeter_().enterViewport();
+      }
     }
 
     /**
@@ -1367,10 +1320,19 @@ function createBaseCustomElementClass(win) {
       }
       const isReLayoutNeeded = this.implementation_.unlayoutCallback();
       if (isReLayoutNeeded) {
-        this.layoutCount_ = 0;
-        this.isFirstLayoutCompleted_ = false;
+        this.reset_();
       }
       return isReLayoutNeeded;
+    }
+
+    /** @private */
+    reset_() {
+      this.layoutCount_ = 0;
+      this.isFirstLayoutCompleted_ = false;
+      this.signals_.reset(CommonSignals.RENDER_START);
+      this.signals_.reset(CommonSignals.LOAD_START);
+      this.signals_.reset(CommonSignals.LOAD_END);
+      this.signals_.reset(CommonSignals.INI_LOAD);
     }
 
     /**
@@ -1400,7 +1362,6 @@ function createBaseCustomElementClass(win) {
     /**
      * Collapses the element, and notifies its owner (if there is one) that the
      * element is no longer present.
-     * @suppress {missingProperties}
      */
     collapse() {
       this.implementation_./*OK*/collapse();
@@ -1409,10 +1370,25 @@ function createBaseCustomElementClass(win) {
     /**
      * Called every time an owned AmpElement collapses itself.
      * @param {!AmpElement} element
-     * @suppress {missingProperties}
      */
     collapsedCallback(element) {
       this.implementation_.collapsedCallback(element);
+    }
+
+    /**
+     * Expands the element, and notifies its owner (if there is one) that the
+     * element is now present.
+     */
+    expand() {
+      this.implementation_./*OK*/expand();
+    }
+
+    /**
+     * Called every time an owned AmpElement expands itself.
+     * @param {!AmpElement} element
+     */
+    expandedCallback(element) {
+      this.implementation_.expandedCallback(element);
     }
 
     /**
@@ -1429,6 +1405,18 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Returns an array of elements in this element's subtree that this
+     * element owns that could have children added or removed dynamically.
+     * The array should not contain any ancestors of this element, but could
+     * contain this element itself.
+     * @return {Array<!Element>}
+     * @public
+     */
+    getDynamicElementContainers() {
+      return this.implementation_.getDynamicElementContainers();
+    }
+
+    /**
      * Enqueues the action with the element. If element has been upgraded and
      * built, the action is dispatched to the implementation right away.
      * Otherwise the invocation is enqueued until the implementation is ready
@@ -1439,6 +1427,9 @@ function createBaseCustomElementClass(win) {
     enqueAction(invocation) {
       assertNotTemplate(this);
       if (!this.isBuilt()) {
+        if (this.actionQueue_ === undefined) {
+          this.actionQueue_ = [];
+        }
         dev().assert(this.actionQueue_).push(invocation);
       } else {
         this.executionAction_(invocation, false);
@@ -1568,6 +1559,16 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * An implementation can call this method to signal to the element that
+     * it has started rendering.
+     * @package @final @this {!Element}
+     */
+    renderStarted() {
+      this.signals_.signal(CommonSignals.RENDER_START);
+      this.toggleLoading_(false);
+    }
+
+    /**
      * Whether the loading can be shown for this element.
      * @return {boolean}
      * @private @this {!Element}
@@ -1625,6 +1626,12 @@ function createBaseCustomElementClass(win) {
      */
     toggleLoading_(state, opt_cleanup) {
       assertNotTemplate(this);
+      if (state &&
+          (this.layoutCount_ > 0 ||
+              this.signals_.get(CommonSignals.RENDER_START))) {
+        // Loading has already been canceled. Ignore.
+        return;
+      }
       this.loadingState_ = state;
       if (!state && !this.loadingContainer_) {
         return;
@@ -1662,6 +1669,18 @@ function createBaseCustomElementClass(win) {
           });
         }
       });
+    }
+
+    /**
+     * Returns an optional overflow element for this custom element.
+     * @return {!./layout-delay-meter.LayoutDelayMeter}
+     */
+    getLayoutDelayMeter_() {
+      if (!this.layoutDelayMeter_) {
+        this.layoutDelayMeter_ = new LayoutDelayMeter(
+            this.ownerDocument.defaultView, this.getPriority());
+      }
+      return this.layoutDelayMeter_;
     }
 
     /**

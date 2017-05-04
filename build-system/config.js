@@ -57,6 +57,7 @@ var testPaths = commonTestPaths.concat([
 
 var integrationTestPaths = commonTestPaths.concat([
   'test/integration/**/*.js',
+  'test/functional/test-error.js',
   'extensions/**/test/integration/**/*.js',
 ]);
 

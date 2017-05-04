@@ -16,12 +16,13 @@
 
 import {
   doubleclickIsA4AEnabled,
-  DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
+  DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
   DOUBLECLICK_A4A_BETA_BRANCHES,
   BETA_ATTRIBUTE,
 } from '../doubleclick-a4a-config';
 import {
   isInManualExperiment,
+  isInExperiment,
 } from '../../../../ads/google/a4a/traffic-experiments';
 import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
 import {parseUrl} from '../../../../src/url';
@@ -82,17 +83,10 @@ describe('doubleclick-a4a-config', () => {
       expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
     });
 
-    it('should carve out remote.html, in spite of experiment override', () => {
-      const doc = testFixture.doc;
-      mockWin.location = parseUrl(
-          'https://cdn.ampproject.org/some/path/to/content.html');
-      mockWin.document.querySelector = doc.querySelector.bind(doc);
-      const remoteTag = doc.createElement('meta');
-      remoteTag.setAttribute('name', 'amp-3p-iframe-src');
-      doc.head.appendChild(remoteTag);
-      const elem = doc.createElement('div');
-      elem.setAttribute(BETA_ATTRIBUTE, 'true');
-      doc.body.appendChild(elem);
+    it('should not enable a4a if useSameDomainRenderingUntilDeprecated', () => {
+      const elem = testFixture.doc.createElement('div');
+      elem.setAttribute('useSameDomainRenderingUntilDeprecated', 'true');
+      testFixture.doc.body.appendChild(elem);
       expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.false;
       expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
     });
@@ -112,24 +106,13 @@ describe('doubleclick-a4a-config', () => {
           expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
         } else {
           expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.be.ok;
+          expect(isInExperiment(elem,
+              DOUBLECLICK_A4A_BETA_BRANCHES.experiment)).to.be.false;
+          expect(isInExperiment(elem,
+              DOUBLECLICK_A4A_BETA_BRANCHES.control)).to.be.false;
         }
       });
 
-      it(`should carve out remote.html, in spite of exp flag=${expFlagValue}`,
-          () => {
-            const doc = testFixture.doc;
-            mockWin.location = parseUrl(
-                'https://cdn.ampproject.org/some/path/to/content.html?exp=a4a:' +
-                String(expFlagValue));
-            mockWin.document.querySelector = doc.querySelector.bind(doc);
-            const remoteTag = doc.createElement('meta');
-            remoteTag.setAttribute('name', 'amp-3p-iframe-src');
-            doc.head.appendChild(remoteTag);
-            const elem = doc.createElement('div');
-            doc.body.appendChild(elem);
-            expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.false;
-            expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
-          });
     });
 
     [0, 1, 2].forEach(expFlagValue => {
@@ -146,7 +129,7 @@ describe('doubleclick-a4a-config', () => {
       });
     });
 
-    it('manual experiment should win over force a4a attribute', () => {
+    it('manual experiment should win over beta force a4a attribute', () => {
       mockWin.location = parseUrl(
           'https://cdn.ampproject.org/some/path/to/content.html?exp=a4a:-1');
       const elem = testFixture.doc.createElement('div');
@@ -154,6 +137,10 @@ describe('doubleclick-a4a-config', () => {
       testFixture.doc.body.appendChild(elem);
       expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
       expect(isInManualExperiment(elem)).to.be.true;
+      expect(isInExperiment(elem, DOUBLECLICK_A4A_BETA_BRANCHES.experiment))
+          .to.be.false;
+      expect(isInExperiment(elem, DOUBLECLICK_A4A_BETA_BRANCHES.control))
+          .to.be.false;
     });
 
     it('should not switch on other slot on page', () => {
@@ -185,8 +172,9 @@ describe('doubleclick-a4a-config', () => {
       expect(elem0.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
           DOUBLECLICK_A4A_BETA_BRANCHES.experiment);
       expect(doubleclickIsA4AEnabled(mockWin, elem1)).to.be.true;
-      expect(elem1.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment);
+      const experimentId =
+        DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment;
+      expect(isInExperiment(elem1, experimentId)).to.be.true;
     });
   });
 });

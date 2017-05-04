@@ -19,9 +19,11 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Cloudflare sample implementation of AMP Ad tag which integrates with
-    Cloudflare's transparent creative signing.  Ad networks can use this code
-    to build out their own libraries.</td>
+    <td>Cloudflare implementation of AMP Ad tag which integrates with
+    Cloudflare's transparent creative signing.  Cloudflare based Ad networks
+    can use this tag to have publishers point to signed AMP creatives on the
+    Ad network.
+    </td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
@@ -31,23 +33,34 @@ limitations under the License.
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js">&lt;/script></code></td>
   </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><code>&lt;amp-ad type="cloudflare" ...>&lt;/amp-ad></code></td>
-  </tr>
 </table>
 
 #### Examples
-Example - AdSense Ad
+Example - Simple Ad
 ```html
 <amp-ad width=300 height=200
     type="cloudflare"
-    data-a4a="true"
+    data-cf-network="my-ad-network"
     src="/ad.html?v=6">
+</amp-ad>
+```
+
+Example - Ad with additional parameters and replacements
+```html
+<amp-ad width=300 height=200
+    type="cloudflare"
+    data-cf-network="my-ad-network"
+    data-slot="slot_1"
+    data-format="panoramic"
+    src="/ad.html?v=6&w=SLOT_WIDTH">
 </amp-ad>
 ```
 
 #### Attributes
 
-* data-a4a - enables Amp4Ad, instead of normal Ad flow
-* src - path to ad creative
+* data-cf-network - ad network to use (contact Cloudflare to integrate new ones)
+* data-cf-a4a - disables Fast-Fetch Amp4Ads when false (still displays ad)
+* src - Path to the ad creative on a Ad network (can use the following replacement tokens)
+  * SLOT_WIDTH - width of the target slot
+  * SLOT_HEIGHT - height of the target slot
+* data-<param> - additional query parameters to the URL

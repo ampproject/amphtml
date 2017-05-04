@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {adoptServiceForEmbed, fromClass, setParentWindow} from '../service';
+import {
+  adoptServiceForEmbed,
+  registerServiceBuilder,
+  setParentWindow,
+} from '../service';
 import {
   copyElementToChildWindow,
   stubElementIfNotKnown,
@@ -35,9 +39,9 @@ import {installPixel} from '../../builtins/amp-pixel';
 import {installStyles} from '../style-installer';
 import {calculateExtensionScriptUrl} from './extension-location';
 
-
 const TAG = 'extensions';
 const UNKNOWN_EXTENSION = '_UNKNOWN_';
+const LEGACY_ELEMENTS = ['amp-ad', 'amp-embed', 'amp-video'];
 
 /**
  * The structure that contains the declaration of a custom element.
@@ -84,13 +88,11 @@ let ExtensionHolderDef;
 /**
  * Install extensions service.
  * @param {!Window} window
- * @return {!Extensions}
  * @restricted
  */
 export function installExtensionsService(window) {
-  return fromClass(window, 'extensions', Extensions);
+  registerServiceBuilder(window, 'extensions', Extensions);
 }
-
 
 /**
  * Register and process the specified extension. The factory is called
@@ -398,7 +400,9 @@ export class Extensions {
       // This will extend automatic upgrade of custom elements from top
       // window to the child window.
       stubElementIfNotKnown(topWin, extensionId);
-      stubElementInChildWindow(childWin, extensionId);
+      if (!LEGACY_ELEMENTS.includes(extensionId)) {
+        stubElementInChildWindow(childWin, extensionId);
+      }
 
       // Install CSS.
       const promise = this.loadExtension(extensionId).then(extension => {
@@ -523,7 +527,7 @@ export class Extensions {
       return false;
     }
     if (holder.scriptPresent === undefined) {
-      const scriptInHead = this.win.document.head.querySelector(
+      const scriptInHead = this.win.document.head./*OK*/querySelector(
           `[custom-element="${extensionId}"]`);
       holder.scriptPresent = !!scriptInHead;
     }
@@ -541,27 +545,17 @@ export class Extensions {
     scriptElement.async = true;
     scriptElement.setAttribute('custom-element', extensionId);
     scriptElement.setAttribute('data-script', extensionId);
+    scriptElement.setAttribute('i-amphtml-inserted', '');
     let loc = this.win.location;
     if (getMode().test && this.win.testLocation) {
       loc = this.win.testLocation;
     }
-    const useCompiledJs = shouldUseCompiledJs();
     const scriptSrc = calculateExtensionScriptUrl(loc, extensionId,
-        getMode().localDev, getMode().test, useCompiledJs);
+        getMode().localDev);
     scriptElement.src = scriptSrc;
     return scriptElement;
   }
 }
-
-
-/**
- * @return {boolean}
- */
-function shouldUseCompiledJs() {
-  return getMode().test && self.ampTestRuntimeConfig &&
-      self.ampTestRuntimeConfig.useCompiledJs;
-}
-
 
 /**
  * Install builtins.
@@ -589,9 +583,9 @@ function copyBuiltinElementsToChildWindow(parentWin, childWin) {
  * @param {!Window} win
  */
 export function stubLegacyElements(win) {
-  stubElementIfNotKnown(win, 'amp-ad');
-  stubElementIfNotKnown(win, 'amp-embed');
-  stubElementIfNotKnown(win, 'amp-video');
+  LEGACY_ELEMENTS.forEach(name => {
+    stubElementIfNotKnown(win, name);
+  });
 }
 
 
@@ -616,4 +610,5 @@ function adoptServicesForEmbed(childWin) {
   // to pass the "embeddable" flag if this set becomes too unwieldy.
   adoptServiceForEmbed(childWin, 'action');
   adoptServiceForEmbed(childWin, 'standard-actions');
+  adoptServiceForEmbed(childWin, 'clickhandler');
 }

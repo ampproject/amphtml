@@ -16,12 +16,13 @@
 
 import {buildUrl} from './url-builder';
 import {makeCorrelator} from '../correlator';
+import {isCanary} from '../../../src/experiments';
 import {getAdCid} from '../../../src/ad-cid';
-import {documentInfoForDoc} from '../../../src/document-info';
+import {documentInfoForDoc} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isProxyOrigin} from '../../../src/url';
-import {viewerForDoc} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/services';
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 import {domFingerprint} from '../../../src/utils/dom-fingerprint';
 
@@ -30,6 +31,9 @@ const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
 
 /** @const {string} */
 const CREATIVE_SIZE_HEADER = 'X-CreativeSize';
+
+/** @type {string}  */
+const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
 
 /** @const {number} */
 const MAX_URL_LENGTH = 4096;
@@ -41,10 +45,11 @@ const AmpAdImplementation = {
 };
 
 /** @const {!Object} */
-export const ValidAdContainerTypes = [
-  'AMP-STICKY-AD',
-  'AMP-FX-FLYING-CARPET',
-];
+export const ValidAdContainerTypes = {
+  'AMP-STICKY-AD': 'sa',
+  'AMP-FX-FLYING-CARPET': 'fc',
+  'AMP-LIGHTBOX': 'lb',
+};
 
 /** @const {string} */
 export const QQID_HEADER = 'X-QQID';
@@ -60,6 +65,10 @@ export const QQID_HEADER = 'X-QQID';
  * @visibleForTesting
  */
 export const EXPERIMENT_ATTRIBUTE = 'data-experiment-id';
+
+/** @typedef {{urls: !Array<string>}}
+ */
+export let AmpAnalyticsConfigDef;
 
 /**
  * Check whether Google Ads supports the A4A rendering pathway is valid for the
@@ -101,21 +110,36 @@ export function googleAdUrl(
   const referrerPromise = viewerForDoc(a4a.getAmpDoc()).getReferrerUrl();
   return getAdCid(a4a).then(clientId => referrerPromise.then(referrer => {
     const adElement = a4a.element;
-    const slotNumber = adElement.getAttribute('data-amp-slot-index');
+    window['ampAdGoogleIfiCounter'] = window['ampAdGoogleIfiCounter'] || 1;
+    const slotNumber = window['ampAdGoogleIfiCounter']++;
     const win = a4a.win;
     const documentInfo = documentInfoForDoc(adElement);
       // Read by GPT for GA/GPT integration.
     win.gaGlobal = win.gaGlobal ||
       {cid: clientId, hid: documentInfo.pageViewId};
-    const slotRect = a4a.getIntersectionElementLayoutBox();
+    const slotRect = a4a.getPageLayoutBox();
     const screen = win.screen;
     const viewport = a4a.getViewport();
     const viewportRect = viewport.getRect();
     const iframeDepth = iframeNestingDepth(win);
     const viewportSize = viewport.getSize();
-    if (ValidAdContainerTypes.indexOf(adElement.parentElement.tagName) >= 0) {
-      queryParams.push({name: 'amp_ct',
-                        value: adElement.parentElement.tagName});
+    // Detect container types.
+    const containerTypeSet = {};
+    for (let el = adElement.parentElement, counter = 0;
+        el && counter < 20; el = el.parentElement, counter++) {
+      const tagName = el.tagName.toUpperCase();
+      if (ValidAdContainerTypes[tagName]) {
+        containerTypeSet[ValidAdContainerTypes[tagName]] = true;
+      }
+    }
+    const pfx =
+        (containerTypeSet[ValidAdContainerTypes['AMP-FX-FLYING-CARPET']]
+         || containerTypeSet[ValidAdContainerTypes['AMP-STICKY-AD']])
+        ? '1' : '0';
+    queryParams.push({name: 'act', value:
+      Object.keys(containerTypeSet).join()});
+    if (isCanary(win)) {
+      queryParams.push({name: 'isc', value: '1'});
     }
     const allQueryParams = queryParams.concat(
       [
@@ -148,6 +172,8 @@ export function googleAdUrl(
         {name: 'brdim', value: additionalDimensions(win, viewportSize)},
         {name: 'isw', value: viewportSize.width},
         {name: 'ish', value: viewportSize.height},
+        {name: 'pfx', value: pfx},
+        {name: 'rc', value: a4a.fromResumeCallback ? 1 : null},
       ],
       unboundedQueryParams,
       [
@@ -167,7 +193,6 @@ export function googleAdUrl(
   }));
 }
 
-
 /**
  * @param {!ArrayBuffer} creative
  * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
@@ -184,10 +209,12 @@ export function extractGoogleAdCreativeAndSignature(
             responseHeaders.get(AMP_SIGNATURE_HEADER)));
     }
     if (responseHeaders.has(CREATIVE_SIZE_HEADER)) {
-      const sizeStr = responseHeaders.get(CREATIVE_SIZE_HEADER);
-      // We should trust that the server returns the size information in the
-      // form of a WxH string.
-      size = sizeStr.split('x').map(dim => Number(dim));
+      const sizeHeader = responseHeaders.get(CREATIVE_SIZE_HEADER);
+      dev().assert(new RegExp('[0-9]+x[0-9]+').test(sizeHeader));
+      const sizeArr = sizeHeader
+          .split('x')
+          .map(dim => Number(dim));
+      size = {width: sizeArr[0], height: sizeArr[1]};
     }
   } finally {
     return Promise.resolve(/** @type {
@@ -331,3 +358,94 @@ export function additionalDimensions(win, viewportSize) {
           innerWidth,
           innerHeight].join();
 };
+
+/**
+ * Extracts configuration used to build amp-analytics element for active view.
+ *
+ * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
+ * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
+ *   XHR service FetchResponseHeaders object containing the response
+ *   headers.
+ * @param {number=} opt_deltaTime The time difference, in ms, between the
+ *   lifecycle reporter's initialization and now.
+ * @param {number=} opt_initTime The initialization time, in ms, of the
+ *   lifecycle reporter.
+ *   TODO(levitzky) Remove the above two params once AV numbers stabilize.
+ * @return {?JSONType} config or null if invalid/missing.
+ */
+export function extractAmpAnalyticsConfig(
+    a4a, responseHeaders, opt_deltaTime = -1, opt_initTime = -1) {
+  if (!responseHeaders.has(AMP_ANALYTICS_HEADER)) {
+    return null;
+  }
+  try {
+    const analyticsConfig =
+      JSON.parse(responseHeaders.get(AMP_ANALYTICS_HEADER));
+    dev().assert(Array.isArray(analyticsConfig['url']));
+    const urls = analyticsConfig.url;
+    if (!urls.length) {
+      return null;
+    }
+
+    const config = /** @type {JSONType}*/ ({
+      'transport': {'beacon': false, 'xhrpost': false},
+      'triggers': {
+        'continuousVisible': {
+          'on': 'visible',
+          'visibilitySpec': {
+            'selector': 'amp-ad',
+            'selectionMethod': 'closest',
+            'visiblePercentageMin': 50,
+            'continuousTimeMin': 1000,
+          },
+        },
+        'continuousVisibleIniLoad': {
+          'on': 'ini-load',
+          'selector': 'amp-ad',
+          'selectionMethod': 'closest',
+        },
+        'continuousVisibleRenderStart': {
+          'on': 'render-start',
+          'selector': 'amp-ad',
+          'selectionMethod': 'closest',
+        },
+      },
+    });
+    const requests = {};
+    for (let idx = 1; idx <= urls.length; idx++) {
+      // TODO: Ensure url is valid and not freeform JS?
+      requests[`visibility${idx}`] = `${urls[idx - 1]}`;
+    }
+    // Security review needed here.
+    config['requests'] = requests;
+    config['triggers']['continuousVisible']['request'] =
+        Object.keys(requests);
+    // Add CSI pingbacks.
+    const correlator = getCorrelator(a4a.win);
+    const slotId = a4a.element.getAttribute('data-amp-slot-index');
+    const qqid = (responseHeaders && responseHeaders.has(QQID_HEADER))
+        ? responseHeaders.get(QQID_HEADER) : 'null';
+    const eids = encodeURIComponent(
+        a4a.element.getAttribute(EXPERIMENT_ATTRIBUTE));
+    const adType = a4a.element.getAttribute('type');
+    const baseCsiUrl = 'https://csi.gstatic.com/csi?s=a4a' +
+        `&c=${correlator}&slotId=${slotId}&qqid.${slotId}=${qqid}` +
+        `&dt=${opt_initTime}` +
+        (eids != 'null' ? `&e.${slotId}=${eids}` : ``) +
+        `&rls=$internalRuntimeVersion$&adt.${slotId}=${adType}`;
+    opt_deltaTime = Math.round(opt_deltaTime);
+    config['requests']['iniLoadCsi'] = baseCsiUrl +
+        `&met.a4a.${slotId}=iniLoadCsi.${opt_deltaTime}`;
+    config['requests']['renderStartCsi'] = baseCsiUrl +
+        `&met.a4a.${slotId}=renderStartCsi.${opt_deltaTime}`;
+    config['triggers']['continuousVisibleIniLoad']['request'] =
+        'iniLoadCsi';
+    config['triggers']['continuousVisibleRenderStart']['request'] =
+        'renderStartCsi';
+    return config;
+  } catch (err) {
+    dev().error('AMP-A4A', 'Invalid analytics', err,
+        responseHeaders.get(AMP_ANALYTICS_HEADER));
+  }
+  return null;
+}

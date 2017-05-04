@@ -1,71 +1,149 @@
-<!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+# Contributing to AMP HTML
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+The AMP HTML project strongly encourages technical [contributions](https://www.ampproject.org/contribute/)!
 
-      http://www.apache.org/licenses/LICENSE-2.0
+We hope you'll become an ongoing participant in our open source community but we also welcome one-off contributions for the issues you're particularly passionate about.
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
+- [Filing issues](#filing-issues)
+  * [Bugs](#bugs)
+  * [Suggestions](#suggestions)
+- [Contributing code](#contributing-code)
+  * [Tips for new open source contributors](#tips-for-new-open-source-contributors)
+  * [How to contribute code](#how-to-contribute-code)
+- [Contributing features](#contributing-features)
+- [Contributing extended components](#contributing-extended-components)
+- [Contributor License Agreement](#contributor-license-agreement)
+- [Ongoing participation](#ongoing-participation)
+  * [Discussion channels](#discussion-channels)
+  * [Weekly status updates](#weekly-status-updates)
+  * [Weekly design reviews](#weekly-design-reviews)
+  * [See Also](#see-also)
 
-## Contributing to AMP HTML
+## Filing issues
 
-### Filing Issues
+### Bugs
 
-**Suggestions**
+If you find a bug in AMP, please [file an issue](https://github.com/ampproject/amphtml/issues/new).  Members of the community are regularly monitoring issues and will try to fix open bugs quickly.
 
-The AMP HTML project is meant to evolve with feedback - the project and its users greatly appreciate any thoughts on ways to improve the design or features. Please use the `enhancement` tag to specifically denote issues that are suggestions - this helps us triage and respond appropriately.
+The best bug reports provide a detailed description of the issue (including screenshots if possible), step-by-step instructions for predictably reproducing the issue, and possibly even a working example that demonstrates the issue.
 
-**Bugs**
+If you want to learn more about our issues priorities and implementation guidelines check out [this document](https://github.com/ampproject/amphtml/blob/master/contributing/issue-priorities.md).
 
-As with all pieces of software, you may end up running into bugs. Please submit bugs as regular issues on GitHub - AMP HTML developers are regularly monitoring issues and will try to fix open bugs quickly.
+Please note that questions about how to use AMP or other general questions about AMP should be asked on [Stack Overflow under the AMP HTML tag](http://stackoverflow.com/questions/tagged/amp-html) instead of filing an issue here.  Questions/issues related to Google Search should be asked on [Google's AMP forum](https://goo.gl/utQ1KZ).
 
-The best bug reports include a detailed way to predictably reproduce the issue, and possibly even a working example that demonstrates the issue.
+### Suggestions
 
-### Contributing Code
+The AMP Project is meant to evolve with feedback.  The project and its users appreciate your thoughts on ways to improve the design or features.
 
-The AMP HTML project accepts and greatly appreciates contributions. The project follows the [fork & pull](https://help.github.com/articles/using-pull-requests/#fork--pull) model for accepting contributions.
+To make a suggestion [file an issue](https://github.com/ampproject/amphtml/issues/new).
 
-When contributing code, please also include appropriate tests as part of the pull request, and follow the same comment and coding style as the rest of the project. Take a look through the existing code for examples of the testing and style practices the project follows.
+If you are suggesting a feature that you are intending to implement, please see the [Contributing features](#contributing-features) section below for next steps.
 
-A key feature of the AMP HTML project is performance - all pull requests will be analyzed for any performance impact, and the project greatly appreciates ways it can get even faster. Please include any measured performance impact with substantial pull requests.
+## Contributing code
 
-* We follow [Google's JavaScript Style Guide](https://google.github.io/styleguide/jsguide.html).
+The AMP Project accepts and greatly appreciates code contributions!
 
-**Google Individual Contributor License**
+If you are contributing code to the AMP Project consider [joining the AMP Project on GitHub](https://goo.gl/forms/T65peVtfQfEoDWeD3).
 
-Code contributors to the AMP HTML project must sign a Contributor License Agreement, either for an [individual](https://developers.google.com/open-source/cla/individual) or [corporation](https://developers.google.com/open-source/cla/corporate). The CLA is meant to protect contributors, users of the AMP HTML runtime, and Google in issues of intellectual property.
+### Tips for new open source contributors
 
-### Contributing Features
+If you are new to contributing to an open source project, Git/GitHub, etc. welcome!  We are glad you're interested in contributing to the AMP Project.
 
-All pull requests for new features must go through the following process:
-* Please familiarize yourself with the [AMP Design Principles](DESIGN_PRINCIPLES.md)
-* Start an Intent-to-implement GitHub issue for discussion of the new feature.
-* LGTM from Tech Lead and one other core committer is required
-* Development occurs on a separate branch of a separate fork, noted in the intent-to-implement issue
-* A pull request is created, referencing the issue.
-* AMP HTML developers will provide feedback on pull requests, looking at code quality, style, tests, performance, and directional alignment with the goals of the project. That feedback should be discussed and incorporated
-* LGTM from Tech Lead and one other core committer, who confirm engineering quality and direction.
+The [Getting Started End-to-End Guide](contributing/getting-started-e2e.md) provides step-by-step instructions for everything from creating a GitHub account to getting your code reviewed and merged.  Even if you've never contributed to an open source project before you'll soon be building AMP, making improvements and seeing your code live across the web.
 
-#### Contributing Extended Components
+The community has created a list of [Great First Issues](https://github.com/ampproject/amphtml/milestone/25) specifically for new contributors to the project.  Feel free to find one that interests you and jump in!  Make sure to comment on the issue first so others know you are starting on it.
 
-A key feature of the AMP HTML project is its extensibility - it is meant to support “Extended Components” that provide first-class support for additional rich features. The project currently accepts pull requests to include these types of extended components.
+If you run into any problems we have plenty of people who are willing to help; see the [How to get help](contributing/getting-started-e2e.md#how-to-get-help) section of the Getting Started guide.
+
+### How to contribute code
+
+The [Getting Started Quick Start Guide](contributing/getting-started-quick.md) has installation steps and instructions for building/testing AMP.
+
+[DEVELOPING.md](contributing/DEVELOPING.md) has some more advanced instructions that may be necessary depending on the complexity of the changes you are making.
+
+A few things to note:
+
+* The AMP Project follows the [fork & pull](https://help.github.com/articles/using-pull-requests/#fork--pull) model for accepting contributions.
+* Familiarize yourself with our [Design Principles](contributing/DESIGN_PRINCIPLES.md).
+* We follow [Google's JavaScript Style Guide](https://google.github.io/styleguide/jsguide.html).  More generally make sure to follow the same comment and coding style as the rest of the project.
+* Include tests when contributing code.  There are plenty of tests that you can use as examples.
+* A key feature of AMP is performance.  All changes will be analyzed for any performance impact; we particularly appreciate changes that make things even faster.  Please include any measured performance impact with substantial pull requests.
+
+## Contributing features
+
+Follow this process for contributing new features:
+* Familiarize yourself with the [AMP Design Principles](contributing/DESIGN_PRINCIPLES.md)
+* [Create a new GitHub issue](https://github.com/ampproject/amphtml/issues/new) to start discussion of the new feature.
+* Before starting on the code get approval for your feature from an [OWNER](https://github.com/ampproject/amphtml/search?utf8=%E2%9C%93&q=filename%3AOWNERS.yaml&type=Code) of your feature's area and a [core committer](https://github.com/ampproject/amphtml/blob/master/GOVERNANCE.md#core-committers).  In most cases the people who can give this approval and are most familiar with your feature's area will get involved proactively or someone else in the community will add them.  If you are having trouble finding the right people add a comment on the issue or reach out on one of the channels in [How to get help](contributing/getting-started-e2e.md#how-to-get-help).
+* Consider bringing the eng design for your feature to our [weekly design review](#weekly-design-review).
+* Follow the guidelines for [Contributing code](#contributing-code) described above.
+
+## Contributing extended components
+
+A key feature of the AMP HTML project is its extensibility - it is meant to support “Extended Components” that provide first-class support for additional rich features.
 
 Because Extended Components may have significant impact on AMP HTML performance, security, and usage, Extended Component contributions will be very carefully analyzed and scrutinized.
 
 In particular we strive to design the overall component set, so that a large number of use cases can be composed from them. Instead of creating a new component it may thus be a better solution to combine existing components to a similar effect.
 
+We have a few additional resources that provide an introduction to contributing extended components:
+* ["Building an AMP Extension"](https://docs.google.com/document/d/19o7eDta6oqPGF4RQ17LvZ9CHVQN53whN-mCIeIMM8Qk/edit) has a detailed description of how to build an AMP component.
+* ["Creating your first AMP Component" codelab](https://codelabs.developers.google.com/codelabs/creating-your-first-amp-component/#0) provides a quick overview of the steps you need to go through to create a component with examples you can modify for your component.
+* The ["Building a new AMP component" talk at AMP Conf 2017](https://youtu.be/FJEhQFNKeaQ?list=PLXTOW_XMsIDTDXYO-NAi2OpEH0zyguvqX) provides an introduction to contributing AMP components.
+
 For further detail on integrating third party services, fonts, embeds, etc. see our [3p contribution guidelines](https://github.com/ampproject/amphtml/tree/master/3p).
+
+## Contributor License Agreement
+
+The AMP Project hosted at GitHub requires all contributors to sign a Contributor License Agreement ([individual](https://developers.google.com/open-source/cla/individual) or [corporation](https://developers.google.com/open-source/cla/corporate)) in order to protect contributors, users and Google in issues of intellectual property.
+
+When you create a Pull Request a check will be run to ensure that you have signed the CLA.  Make sure that you sign the CLA with the same email address you associate with your commits (likely via the `user.email` Git config as described on GitHub's [Set up Git](https://help.github.com/articles/set-up-git/) page).
+
+## Ongoing participation
+
+We actively encourage ongoing participation by community members.
+
+### Discussion channels
+
+Technical issues, designs, etc. are discussed on [GitHub issues](https://github.com/ampproject/amphtml/issues) and [pull requests](https://github.com/ampproject/amphtml/pulls),
+ the [amphtml-discuss Google Group](https://groups.google.com/forum/#!forum/amphtml-discuss) and the [amphtml Slack](https://docs.google.com/forms/d/1wAE8w3K5preZnBkRk-MD1QkX8FmlRDxd_vs4bFSeJlQ/viewform?fbzx=4406980310789882877).
+
+### Weekly status updates
+
+GitHub issues labeled [Type: Weekly Status](https://github.com/ampproject/amphtml/issues?q=label%3A%22Type%3A+Weekly+Status%22) are used to track weekly updates from members of the community.  We encourage everyone who is actively contributing to AMP to add a comment to the relevant Weekly Status issue.
+
+### Weekly design reviews
+
+The community holds weekly design reviews as video conferences via Google Hangouts on Wednesdays at [1pm Pacific](https://www.google.com/?#q=1pm+pacific+in+local+time).  If you have a design you would like to present but can never make this time (e.g. you are in a different time zone) please reach out on [Slack](https://amphtml.slack.com/messages/design-review/) ([sign up](https://docs.google.com/forms/d/1wAE8w3K5preZnBkRk-MD1QkX8FmlRDxd_vs4bFSeJlQ/viewform?fbzx=4406980310789882877)) and we will try to find a time that works for you.
+
+We use GitHub issues labeled [Type: Design Review](https://github.com/ampproject/amphtml/issues?q=label%3A%22Type%3A+Design+Review%22) to track design reviews.  The Design Review issue for a given week will have a link to the design docs being discussed that week as well as a link to the Hangout.  **When attending a design review please read through the design docs _before_ the review starts.**
+
+If the design for an issue/feature you are working on has a scope larger than you can cover in a discussion in the GitHub issue or one of the other discussion channels, consider bringing it to a design review:
+
+* Create a software design document in a shared Google Document open to public comments.
+  * A short design doc is fine as long as it covers your design in sufficient detail to allow for a review by other members of the community.
+  * Take a look at [Design docs - A design doc](https://medium.com/@cramforce/design-docs-a-design-doc-a152f4484c6b) for tips on putting together a good design doc.  [Phone call tracking in AMP](https://docs.google.com/document/d/1UDMYv0f2R9CvMUSBQhxjtkSnC4984t9dJeqwm_8WiAM/edit) and [New AMP Boilerplate](https://docs.google.com/document/d/1gZFaKvcDffceJNaI3bYfuYPtYU5u2y6UhE5wBPTsJ9w/edit) are examples of past AMP Project design docs.
+  * Add this license text to the top of your design doc before sharing it with anyone else in the community (updating the year if necessary):
+      ```
+      Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+
+      Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+      Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS-IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+
+      See the License for the specific language governing permissions and limitations under the License.
+      ```
+
+* Perform a design pre-review with at least one [core committer](https://github.com/ampproject/amphtml/blob/master/GOVERNANCE.md); you can request a pre-review in the [#design-review Slack channel](https://amphtml.slack.com/messages/design-review/).  It is fine to request a pre-review before your design doc is complete.
+
+* When your design is ready to be discussed at a design review add a comment on the appropriate Design Review GitHub issue.  Post a link to the design doc and a brief summary by **1pm Pacific Monday** on the week of your design review.
+
+* Update your design based on the feedback in the design review and any followup conversations in other channels.  Once your design is finalized, please provide a brief update at the start of a future design review (if you are able to attend) and submit a PDF version of your design doc in the [ampproject design-doc](https://github.com/ampproject/design-docs) repository.
 
 ### See Also
 
 * [Code of conduct](CODE_OF_CONDUCT.md)
-* [DEVELOPING](DEVELOPING.md) resources
 * [3p contribution guidelines](https://github.com/ampproject/amphtml/tree/master/3p)
 * The [GOVERNANCE](GOVERNANCE.md) model

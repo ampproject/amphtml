@@ -15,55 +15,27 @@
 #
 
 tags: {  # amp-anim
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
-  spec_name: "amp-anim extension .js script"
-  mandatory_parent: "HEAD"
-  unique_warning: true
-  extension_unused_unless_tag_present: "amp-anim"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  satisfies: "amp-anim extension .js script"
+  extension_spec: {
+    name: "amp-anim"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    deprecated_recommends_usage_of_tag: "amp-anim"
+    deprecated_allow_duplicates: true
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-anim"
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-anim-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-anim.html"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-anim>
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-ANIM"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-anim extension .js script"
+  requires: "amp-anim extension .js script"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
-  attrs: { name: "autoplay" value: "" }
   attrs: { name: "controls" }
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-src-or-srcset"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-anim.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-anim"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

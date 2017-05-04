@@ -16,10 +16,9 @@
 
 import PriorityQueue from './utils/priority-queue';
 import {dev} from './log';
-import {fromClassForDoc} from './service';
-import {isExperimentOnAllowUrlOverride} from './experiments';
+import {registerServiceBuilderForDoc, getServiceForDoc} from './service';
 import {makeBodyVisible} from './style-installer';
-import {viewerPromiseForDoc} from './viewer';
+import {viewerPromiseForDoc} from './services';
 
 /**
  * @const {string}
@@ -37,6 +36,16 @@ let deactivated = /nochunking=1/.test(self.location.hash);
 const resolved = Promise.resolve();
 
 /**
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
+ * @return {!Chunks}
+ * @private
+ */
+function getChunkServiceForDoc_(nodeOrAmpDoc) {
+  registerServiceBuilderForDoc(nodeOrAmpDoc, 'chunk', Chunks);
+  return getServiceForDoc(nodeOrAmpDoc, 'chunk');
+}
+
+/**
  * Run the given function. For visible documents the function will be
  * called in a micro task (Essentially ASAP). If the document is
  * not visible, tasks will yield to the event loop (to give the browser
@@ -51,9 +60,9 @@ export function startupChunk(nodeOrAmpDoc, fn) {
     resolved.then(fn);
     return;
   }
-  const service = fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
+  const service = getChunkServiceForDoc_(nodeOrAmpDoc);
   service.runForStartup_(fn);
-};
+}
 
 /**
  * Run the given function sometime in the future without blocking UI.
@@ -74,8 +83,8 @@ export function chunk(nodeOrAmpDoc, fn, priority) {
     resolved.then(fn);
     return;
   }
-  const service = fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
-  service.run_(fn, priority);
+  const service = getChunkServiceForDoc_(nodeOrAmpDoc);
+  service.run(fn, priority);
 }
 
 /**
@@ -83,7 +92,7 @@ export function chunk(nodeOrAmpDoc, fn, priority) {
  * @return {!Chunks}
  */
 export function chunkInstanceForTesting(nodeOrAmpDoc) {
-  return fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
+  return getChunkServiceForDoc_(nodeOrAmpDoc);
 }
 
 /**
@@ -107,7 +116,7 @@ export function activateChunkingForTesting() {
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
  */
 export function runChunksForTesting(nodeOrAmpDoc) {
-  const service = fromClassForDoc(nodeOrAmpDoc, 'chunk', Chunks);
+  const service = chunkInstanceForTesting(nodeOrAmpDoc);
   const errors = [];
   while (true) {
     try {
@@ -229,12 +238,6 @@ class StartupTask extends Task {
     /** @private {!Window} */
     this.win_ = win;
 
-    /** @private @const {boolean} */
-    this.active_ = isExperimentOnAllowUrlOverride(this.win_, 'chunked-amp');
-    if (!this.active_) {
-      return;
-    }
-
     /** @private {?./service/viewer-impl.Viewer} */
     this.viewer_ = null;
 
@@ -262,7 +265,7 @@ class StartupTask extends Task {
   immediateTriggerCondition_() {
     // Run in a micro task when the doc is visible. Otherwise, run after
     // having yielded to the event queue once.
-    return !this.active_ || this.isVisible_();
+    return this.isVisible_();
   }
 
   /** @override */
@@ -314,7 +317,7 @@ class Chunks {
     this.viewerPromise_ = viewerPromiseForDoc(ampDoc);
 
     this.win_.addEventListener('message', e => {
-      if (e.data = 'amp-macro-task') {
+      if (e.data == 'amp-macro-task') {
         this.execute_(/* idleDeadline */ null);
       }
     });
@@ -324,9 +327,8 @@ class Chunks {
    * Run fn as a "chunk".
    * @param {function(?IdleDeadline)} fn
    * @param {number} priority
-   * @private
    */
-  run_(fn, priority) {
+  run(fn, priority) {
     const t = new Task(fn);
     this.enqueueTask_(t, priority);
   }

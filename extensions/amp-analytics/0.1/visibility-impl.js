@@ -14,27 +14,31 @@
  * limitations under the License.
  */
 
-import {closestByTag, closestBySelector} from '../../../src/dom';
+import {
+  closestByTag,
+  closestBySelector,
+  scopedQuerySelector,
+} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
-import {resourcesForDoc} from '../../../src/resources';
+import {map} from '../../../src/utils/object';
+import {resourcesForDoc} from '../../../src/services';
 import {getParentWindowFrameElement} from '../../../src/service';
-import {timerFor} from '../../../src/timer';
-import {isFiniteNumber} from '../../../src/types';
-import {viewportForDoc} from '../../../src/viewport';
-import {viewerForDoc} from '../../../src/viewer';
-import {VisibilityState} from '../../../src/visibility-state';
+import {timerFor} from '../../../src/services';
+import {viewportForDoc} from '../../../src/services';
+import {viewerForDoc} from '../../../src/services';
 import {startsWith} from '../../../src/string';
-import {DEFAULT_THRESHOLD} from '../../../src/intersection-observer-polyfill';
-
-/** @const {number} */
-const LISTENER_INITIAL_RUN_DELAY_ = 20;
+import {
+  DEFAULT_THRESHOLD,
+  IntersectionObserverPolyfill,
+  nativeIntersectionObserverSupported,
+} from '../../../src/intersection-observer-polyfill';
 
 // Variables that are passed to the callback.
 const MAX_CONTINUOUS_TIME = 'maxContinuousVisibleTime';
 const TOTAL_VISIBLE_TIME = 'totalVisibleTime';
 const FIRST_SEEN_TIME = 'firstSeenTime';
 const LAST_SEEN_TIME = 'lastSeenTime';
-const FIRST_VISIBLE_TIME = 'fistVisibleTime';
+const FIRST_VISIBLE_TIME = 'firstVisibleTime';
 const LAST_VISIBLE_TIME = 'lastVisibleTime';
 const MIN_VISIBLE = 'minVisiblePercentage';
 const MAX_VISIBLE = 'maxVisiblePercentage';
@@ -53,7 +57,6 @@ const LAST_UPDATE = 'lU';
 const IN_VIEWPORT = 'iV';
 const TIME_LOADED = 'tL';
 const SCHEDULED_RUN_ID = 'schId';
-const LAST_CHANGE_ENTRY = 'lCE';
 
 // Keys used in VisibilitySpec
 const CONTINUOUS_TIME_MAX = 'continuousTimeMax';
@@ -168,16 +171,15 @@ export function getElement(ampdoc, selector, analyticsEl, selectionMethod) {
   const friendlyFrame = getParentWindowFrameElement(analyticsEl, ampdoc.win);
   // Special case for root selector.
   if (selector == ':host' || selector == ':root') {
-    // TODO(dvoytenko, #6794): Remove old `-amp-element` form after the new
-    // form is in PROD for 1-2 weeks.
     foundEl = friendlyFrame ?
         closestBySelector(
-            friendlyFrame, '.-amp-element,.i-amphtml-element') : null;
+            friendlyFrame, '.i-amphtml-element') : null;
   } else if (selectionMethod == 'closest') {
     // Only tag names are supported currently.
     foundEl = closestByTag(analyticsEl, selector);
   } else if (selectionMethod == 'scope') {
-    foundEl = analyticsEl.parentElement.querySelector(selector);
+    foundEl = scopedQuerySelector(
+        dev().assertElement(analyticsEl.parentElement), selector);
   } else if (selector[0] == '#') {
     const containerDoc = friendlyFrame ? analyticsEl.ownerDocument : ampdoc;
     foundEl = containerDoc.getElementById(selector.slice(1));
@@ -231,29 +233,14 @@ export class Visibility {
     /** @private {Array<!../../../src/service/resource.Resource>} */
     this.resources_ = [];
 
-    /** @private @const {function()} */
-    this.boundScrollListener_ = this.scrollListener_.bind(this);
-
-    /** @private @const {function()} */
-    this.boundVisibilityListener_ = this.visibilityListener_.bind(this);
-
-    /** @private {boolean} */
-    this.scrollListenerRegistered_ = false;
-
     /** @private {boolean} */
     this.visibilityListenerRegistered_ = false;
 
     /** @private {!../../../src/service/resources-impl.Resources} */
     this.resourcesService_ = resourcesForDoc(this.ampdoc);
 
-    /** @private {number|string|null} */
-    this.scheduledRunId_ = null;
-
     /** @private {number} Amount of time to wait for next calculation. */
     this.timeToWait_ = Infinity;
-
-    /** @private {boolean} */
-    this.scheduledLoadedPromises_ = false;
 
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = viewerForDoc(this.ampdoc);
@@ -263,37 +250,21 @@ export class Visibility {
 
     /** @private {boolean} */
     this.backgrounded_ = this.backgroundedAtStart_;
-  }
 
-  /** @private */
-  registerForVisibilityEvents_() {
-    if (!this.visibilityListenerRegistered_) {
-      this.viewer_.onVisibilityChanged(this.boundVisibilityListener_);
-      this.visibilityListenerRegistered_ = true;
-      this.visibilityListener_();
-    }
-  }
+    /** @private {!Object<number, number>} */
+    this.lastVisiblePercent_ = map();
 
-  /** @private */
-  registerForViewportEvents_() {
-    if (!this.scrollListenerRegistered_) {
-      const viewport = viewportForDoc(this.ampdoc);
-
-      // Currently unlistens are not being used. In the event that no resources
-      // are actively being monitored, the scrollListener should be very cheap.
-      viewport.onScroll(this.boundScrollListener_);
-      viewport.onChanged(this.boundScrollListener_);
-      this.scrollListenerRegistered_ = true;
-    }
+    /** @private {?IntersectionObserver|?IntersectionObserverPolyfill} */
+    this.intersectionObserver_ = null;
   }
 
   /**
    * @param {!Object} config
    * @param {function(!Object)} callback
    * @param {boolean} shouldBeVisible True if the element should be visible
-   *  when callback is called. False otherwise.
+   *   when callback is called. False otherwise.
    * @param {!Element} analyticsElement The amp-analytics element that the
-   *  config is associated with.
+   *   config is associated with.
    */
   listenOnce(config, callback, shouldBeVisible, analyticsElement) {
     const selector = config['selector'];
@@ -309,108 +280,89 @@ export class Visibility {
     user().assert(
         resource, 'Visibility tracking not supported on element: ', element);
 
-    this.registerForViewportEvents_();
-    this.registerForVisibilityEvents_();
-
-    const resId = resource.getId();
-    this.listeners_[resId] = (this.listeners_[resId] || []);
-    const state = {};
-    state[TIME_LOADED] = Date.now();
-    this.listeners_[resId].push({config, callback, state, shouldBeVisible});
-    this.resources_.push(resource);
-
-    if (this.scheduledRunId_ === null) {
-      this.scheduledRunId_ = this.timer_.delay(() => {
-        this.scrollListener_();
-      }, LISTENER_INITIAL_RUN_DELAY_);
-    }
-  }
-
-  /**
-   * @param {!Object} config
-   * @param {function(!Object)} callback
-   * @param {boolean} shouldBeVisible True if the element should be visible
-   *   when callback is called. False otherwise.
-   * @param {!Element} analyticsElement The amp-analytics element that the
-   *   config is associated with.
-   */
-  listenOnceV2(config, callback, shouldBeVisible, analyticsElement) {
-    const selector = config['selector'];
-    const element = user().assertElement(
-        getElement(this.ampdoc, selector,
-            dev().assertElement(analyticsElement),
-            config['selectionMethod']),
-        'Element not found for visibilitySpec: ' + selector);
-
-    const resource =
-        this.resourcesService_.getResourceForElementOptional(element);
-
-    user().assert(
-        resource, 'Visibility tracking not supported on element: ', element);
-
     if (!this.intersectionObserver_) {
-      const onIntersectionChange = this.onIntersectionChange_.bind(this);
-      /** @private {!IntersectionObserver} */
-      this.intersectionObserver_ =
-          // TODO: polyfill IntersectionObserver
-          new this.ampdoc.win.IntersectionObserver(entries => {
-            entries.forEach(onIntersectionChange);
-          }, {threshold: DEFAULT_THRESHOLD});
+      const onIntersectionChanges = entries => {
+        entries.forEach(change => {
+          this.onIntersectionChange_(
+              change.target,
+              change.intersectionRatio * 100,
+              /* docVisible */true);
+        });
+      };
+
+      if (nativeIntersectionObserverSupported(this.ampdoc.win)) {
+        this.intersectionObserver_ = new this.ampdoc.win.IntersectionObserver(
+            onIntersectionChanges, {threshold: DEFAULT_THRESHOLD});
+      } else {
+        this.intersectionObserver_ = new IntersectionObserverPolyfill(
+            onIntersectionChanges, {threshold: DEFAULT_THRESHOLD});
+        //TODO: eventually this is go into the proposed layoutManager.
+        const viewport = viewportForDoc(this.ampdoc);
+        const ticker = () => {
+          this.intersectionObserver_.tick(viewport.getRect());
+        };
+        viewport.onScroll(ticker);
+        viewport.onChanged(ticker);
+        // Tick in the next event loop. That's how native InOb works.
+        setTimeout(ticker);
+      }
     }
 
-    // Visible trigger
     resource.loadedOnce().then(() => {
-      this.intersectionObserver_.observe(element);
-
       const resId = resource.getId();
       this.listeners_[resId] = (this.listeners_[resId] || []);
       const state = {};
-      state[TIME_LOADED] = Date.now();
+      state[TIME_LOADED] = this.now_();
       this.listeners_[resId].push({config, callback, state, shouldBeVisible});
       this.resources_.push(resource);
+      this.intersectionObserver_.observe(element);
     });
 
-    // Hidden trigger
-    if (!shouldBeVisible && !this.visibilityListenerRegistered_) {
+    if (!this.visibilityListenerRegistered_) {
       this.viewer_.onVisibilityChanged(() => {
-        if (!this.viewer_.isVisible()) {
-          this.onDocumentHidden_();
-        }
+        this.onDocumentVisibilityChange_(this.viewer_.isVisible());
       });
       this.visibilityListenerRegistered_ = true;
     }
   }
 
-  /** @private */
-  onIntersectionChange_(change) {
-    const resource =
-        this.resourcesService_.getResourceForElement(change.target);
+  /**
+   * @param {!Element} target
+   * @param {number} visible
+   * @param {boolean} docVisible
+   * @private
+   **/
+  onIntersectionChange_(target, visible, docVisible) {
+    const resource = this.resourcesService_.getResourceForElement(target);
     const listeners = this.listeners_[resource.getId()];
+    if (docVisible) {
+      this.lastVisiblePercent_[resource.getId()] = visible;
+    } else {
+      visible = 0;
+    }
 
-    const visible = change.intersectionRatio * 100;
     for (let c = listeners.length - 1; c >= 0; c--) {
       const listener = listeners[c];
       const shouldBeVisible = !!listener.shouldBeVisible;
       const config = listener.config;
       const state = listener.state;
-      state[LAST_CHANGE_ENTRY] = change;
 
       // Update states and check if all conditions are satisfied
       const conditionsMet =
           this.updateCounters_(visible, listener, shouldBeVisible);
 
+      // Hidden trigger
       if (!shouldBeVisible) {
-        // For "hidden" trigger, only update state, don't trigger.
+        if (!docVisible && conditionsMet) {
+          this.triggerCallback_(listeners, listener, resource.getLayoutBox());
+        }
+        // done for hidden trigger
         continue;
       }
+
+      // Visible trigger
       if (conditionsMet) {
-        if (state[SCHEDULED_RUN_ID]) {
-          this.timer_.cancel(state[SCHEDULED_RUN_ID]);
-          state[SCHEDULED_RUN_ID] = null;
-        }
-        this.prepareStateForCallback_(state, resource.getLayoutBox());
-        listener.callback(state);
-        listeners.splice(c, 1);
+        this.triggerCallback_(listeners, listener, resource.getLayoutBox());
       } else if (state[IN_VIEWPORT] && !state[SCHEDULED_RUN_ID]) {
         // There is unmet duration condition, schedule a check
         const timeToWait = this.computeTimeToWait_(state, config);
@@ -419,14 +371,10 @@ export class Visibility {
         }
         state[SCHEDULED_RUN_ID] = this.timer_.delay(() => {
           dev().assert(state[IN_VIEWPORT], 'should have been in viewport');
-          const lastChange = state[LAST_CHANGE_ENTRY];
-
           if (this.updateCounters_(
-              lastChange.intersectionRatio * 100,
+              this.lastVisiblePercent_[resource.getId()],
               listener, /* shouldBeVisible */ true)) {
-            this.prepareStateForCallback_(state, resource.getLayoutBox());
-            listener.callback(state);
-            listeners.splice(listeners.indexOf(listener), 1);
+            this.triggerCallback_(listeners, listener, resource.getLayoutBox());
           }
         }, timeToWait);
       } else if (!state[IN_VIEWPORT] && state[SCHEDULED_RUN_ID]) {
@@ -437,105 +385,27 @@ export class Visibility {
 
     // Remove target that have no listeners.
     if (listeners.length == 0) {
-      this.intersectionObserver_.unobserve(change.target);
+      this.intersectionObserver_.unobserve(target);
     }
   }
 
-  /** @private */
-  onDocumentHidden_() {
+  /**
+   * @param {boolean} docVisible
+   * @private
+   */
+  onDocumentVisibilityChange_(docVisible) {
+    if (!docVisible) {
+      this.backgrounded_ = true;
+    }
     for (let i = 0; i < this.resources_.length; i++) {
       const resource = this.resources_[i];
       if (!resource.hasLoadedOnce()) {
         continue;
       }
-
-      const listeners = this.listeners_[resource.getId()];
-      for (let j = listeners.length - 1; j >= 0; j--) {
-        const listener = listeners[j];
-        if (listener.shouldBeVisible) {
-          continue;
-        }
-
-        const state = listener.state;
-        const lastChange = state[LAST_CHANGE_ENTRY];
-        const lastVisible = lastChange ? lastChange.intersectionRatio * 100 : 0;
-        if (this.updateCounters_(
-                lastVisible, listener, /* shouldBeVisible */ false)) {
-          this.prepareStateForCallback_(state, resource.getLayoutBox());
-          listener.callback(state);
-          listeners.splice(j, 1);
-        }
-      }
-    }
-  }
-
-  /** @private */
-  visibilityListener_() {
-    const state = this.viewer_.getVisibilityState();
-    if (state == VisibilityState.HIDDEN || state == VisibilityState.PAUSED ||
-        state == VisibilityState.INACTIVE) {
-      this.backgrounded_ = true;
-    }
-    this.scrollListener_();
-  }
-
-  /** @private */
-  scrollListener_() {
-    if (this.scheduledRunId_ != null) {
-      this.timer_.cancel(this.scheduledRunId_);
-      this.scheduledRunId_ = null;
-    }
-
-    const loadedPromises = [];
-
-    for (let r = this.resources_.length - 1; r >= 0; r--) {
-      const res = this.resources_[r];
-      if (!res.hasLoadedOnce()) {
-        loadedPromises.push(res.loadedOnce());
-        continue;
-      }
-
-      const change = res.element.getIntersectionChangeEntry();
-      const visible = !isFiniteNumber(change.intersectionRatio) ? 0
-          : change.intersectionRatio * 100;
-
-      const listeners = this.listeners_[res.getId()];
-      for (let c = listeners.length - 1; c >= 0; c--) {
-        const shouldBeVisible = !!listeners[c]['shouldBeVisible'];
-        if (this.updateCounters_(visible, listeners[c], shouldBeVisible) &&
-            this.viewer_.isVisible() == shouldBeVisible) {
-          this.prepareStateForCallback_(
-              listeners[c]['state'], res.getLayoutBox());
-          listeners[c].callback(listeners[c]['state']);
-          listeners.splice(c, 1);
-        } else {
-          this.computeTimeToWait_(
-              listeners[c]['state'], listeners[c]['config']);
-        }
-      }
-
-      // Remove resources that have no listeners.
-      if (listeners.length == 0) {
-        this.resources_.splice(r, 1);
-      }
-    }
-
-    // Schedule a calculation for the time when one of the conditions is
-    // expected to be satisfied.
-    if (this.scheduledRunId_ === null &&
-        this.timeToWait_ < Infinity && this.timeToWait_ > 0) {
-      this.scheduledRunId_ = this.timer_.delay(() => {
-        this.scrollListener_();
-      }, this.timeToWait_);
-    }
-
-    // Schedule a calculation for when a resource gets loaded.
-    if (loadedPromises.length > 0 && !this.scheduledLoadedPromises_) {
-      Promise.race(loadedPromises).then(() => {
-        this.scheduledLoadedPromises_ = false;
-        this.scrollListener_();
-      });
-      this.scheduledLoadedPromises_ = true;
+      this.onIntersectionChange_(
+          resource.element,
+          this.lastVisiblePercent_[resource.getId()] || 0,
+          docVisible);
     }
   }
 
@@ -554,7 +424,7 @@ export class Visibility {
     const state = listener['state'] || {};
 
     if (visible > 0) {
-      const timeElapsed = Date.now() - state[TIME_LOADED];
+      const timeElapsed = this.now_() - state[TIME_LOADED];
       state[FIRST_SEEN_TIME] = state[FIRST_SEEN_TIME] || timeElapsed;
       state[LAST_SEEN_TIME] = timeElapsed;
       // Consider it as load time visibility if this happens within 300ms of
@@ -565,7 +435,7 @@ export class Visibility {
     }
 
     const wasInViewport = state[IN_VIEWPORT];
-    const timeSinceLastUpdate = Date.now() - state[LAST_UPDATE];
+    const timeSinceLastUpdate = this.now_() - state[LAST_UPDATE];
     state[IN_VIEWPORT] = this.isInViewport_(visible,
         config[VISIBLE_PERCENTAGE_MIN], config[VISIBLE_PERCENTAGE_MAX]);
 
@@ -582,13 +452,13 @@ export class Visibility {
       state[LAST_UPDATE] = -1;
       state[TOTAL_VISIBLE_TIME] += timeSinceLastUpdate;
       state[CONTINUOUS_TIME] = 0;  // Clear only after max is calculated above.
-      state[LAST_VISIBLE_TIME] = Date.now() - state[TIME_LOADED];
+      state[LAST_VISIBLE_TIME] = this.now_() - state[TIME_LOADED];
     } else if (state[IN_VIEWPORT] && !wasInViewport) {
       // The resource came into view. start counting.
       dev().assert(state[LAST_UPDATE] == undefined ||
           state[LAST_UPDATE] == -1, 'lastUpdated time in weird state.');
       state[FIRST_VISIBLE_TIME] = state[FIRST_VISIBLE_TIME] ||
-          Date.now() - state[TIME_LOADED];
+          this.now_() - state[TIME_LOADED];
       this.setState_(state, visible, 0);
     }
 
@@ -652,7 +522,7 @@ export class Visibility {
    * @private
    */
   setState_(s, visible, sinceLast) {
-    s[LAST_UPDATE] = Date.now();
+    s[LAST_UPDATE] = this.now_();
     s[TOTAL_VISIBLE_TIME] = s[TOTAL_VISIBLE_TIME] !== undefined
         ? s[TOTAL_VISIBLE_TIME] + sinceLast : 0;
     s[CONTINUOUS_TIME] = s[CONTINUOUS_TIME] !== undefined
@@ -663,7 +533,26 @@ export class Visibility {
         s[MIN_VISIBLE] ? Math.min(s[MIN_VISIBLE], visible) : visible;
     s[MAX_VISIBLE] =
         s[MAX_VISIBLE] ? Math.max(s[MAX_VISIBLE], visible) : visible;
-    s[LAST_VISIBLE_TIME] = Date.now() - s[TIME_LOADED];
+    s[LAST_VISIBLE_TIME] = this.now_() - s[TIME_LOADED];
+  }
+
+  /**
+   * Trigger listener callback.
+   * @param {!Array<VisibilityListenerDef>} listeners
+   * @param {!VisibilityListenerDef} listener
+   * @param {!../../../src/layout-rect.LayoutRectDef} layoutBox The bounding rectangle
+   *     for the element
+   * @private
+   */
+  triggerCallback_(listeners, listener, layoutBox) {
+    const state = listener.state;
+    if (state[SCHEDULED_RUN_ID]) {
+      this.timer_.cancel(state[SCHEDULED_RUN_ID]);
+      state[SCHEDULED_RUN_ID] = null;
+    }
+    this.prepareStateForCallback_(state, layoutBox);
+    listener.callback(state);
+    listeners.splice(listeners.indexOf(listener), 1);
   }
 
   /**
@@ -698,7 +587,6 @@ export class Visibility {
     delete state[IN_VIEWPORT];
     delete state[TIME_LOADED];
     delete state[SCHEDULED_RUN_ID];
-    delete state[LAST_CHANGE_ENTRY];
 
     for (const k in state) {
       if (state.hasOwnProperty(k)) {
@@ -710,7 +598,11 @@ export class Visibility {
   getTotalTime_() {
     const perf = this.ampdoc.win.performance;
     return perf && perf.timing && perf.timing.domInteractive
-        ? Date.now() - perf.timing.domInteractive
+        ? this.now_() - perf.timing.domInteractive
         : null;
+  }
+
+  now_() {
+    return this.ampdoc.win.Date.now();
   }
 }

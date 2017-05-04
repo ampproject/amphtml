@@ -15,17 +15,21 @@
  */
 
 import {
+  FriendlyIframeEmbed,
   getFriendlyIframeEmbedOptional,
   installFriendlyIframeEmbed,
   mergeHtmlForTesting,
   setFriendlyIframeEmbedVisible,
   setSrcdocSupportedForTesting,
+  whenContentIniLoad,
 } from '../../src/friendly-iframe-embed';
+import {Signals} from '../../src/utils/signals';
 import {getStyle} from '../../src/style';
-import {extensionsFor} from '../../src/extensions';
+import {extensionsFor} from '../../src/services';
 import {installServiceInEmbedScope} from '../../src/service';
+import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
-import {resourcesForDoc} from '../../src/resources';
+import {resourcesForDoc} from '../../src/services';
 import * as sinon from 'sinon';
 
 
@@ -80,9 +84,12 @@ describe('friendly-iframe-embed', () => {
       expect(embed.win).to.equal(iframe.contentWindow);
       expect(embed.iframe).to.equal(iframe);
       expect(embed.spec.url).to.equal('https://acme.org/url1');
+      expect(embed.host).to.be.null;
+      expect(embed.signals()).to.be.ok;
       expect(getFriendlyIframeEmbedOptional(embed.iframe)).to.equal(embed);
 
-      // Iframe is made visible again.
+      // Iframe is rendered.
+      expect(embed.signals().get('render-start')).to.be.ok;
       expect(iframe.style.visibility).to.equal('');
       expect(embed.win.document.body.style.visibility).to.equal('visible');
       expect(String(embed.win.document.body.style.opacity)).to.equal('1');
@@ -223,6 +230,128 @@ describe('friendly-iframe-embed', () => {
     });
   });
 
+  it('should support host', () => {
+    const host = document.createElement('amp-host');
+    const hostSignals = new Signals();
+    host.signals = () => hostSignals;
+    host.renderStarted = sandbox.spy();
+    host.getLayoutBox = () => layoutRectLtwh(10, 10, 100, 200);
+    const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
+      url: 'https://acme.org/url1',
+      html: '<amp-test></amp-test>',
+      host,
+    });
+    return embedPromise.then(embed => {
+      expect(embed.host).to.equal(host);
+      expect(embed.signals()).to.equal(hostSignals);
+      expect(host.renderStarted).to.be.calledOnce;
+    });
+  });
+
+  it('should await initial load', () => {
+    resourcesMock
+        .expects('getResourcesInRect')
+        .withExactArgs(
+            sinon.match(arg => arg == iframe.contentWindow),
+            sinon.match(arg =>
+                arg.left == 0 &&
+                arg.top == 0 &&
+                arg.width == iframe.contentWindow.innerWidth &&
+                arg.height == iframe.contentWindow.innerHeight))
+        .returns(Promise.resolve([]))
+        .once();
+    const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
+      url: 'https://acme.org/url1',
+      html: '<amp-test></amp-test>',
+    });
+    let embed;
+    return embedPromise.then(em => {
+      embed = em;
+      return embed.whenIniLoaded();
+    }).then(() => {
+      expect(embed.signals().get('ini-load')).to.be.ok;
+      return embed.whenReady();  // `whenReady` should also be complete.
+    });
+  });
+
+  it('should await initial with host', () => {
+    const rect = layoutRectLtwh(10, 10, 100, 200);
+    const host = document.createElement('amp-host');
+    const hostSignals = new Signals();
+    host.signals = () => hostSignals;
+    host.renderStarted = function() {
+      hostSignals.signal('render-start');
+    };
+    host.getLayoutBox = () => rect;
+    resourcesMock
+        .expects('getResourcesInRect')
+        .withExactArgs(
+            sinon.match(arg => arg == iframe.contentWindow),
+            sinon.match(arg =>
+                arg.left == 10 &&
+                arg.top == 10 &&
+                arg.width == 100 &&
+                arg.height == 200))
+        .returns(Promise.resolve([]))
+        .once();
+    const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
+      url: 'https://acme.org/url1',
+      html: '<amp-test></amp-test>',
+      host,
+    });
+    let embed;
+    return embedPromise.then(em => {
+      embed = em;
+      return embed.whenIniLoaded();
+    }).then(() => {
+      expect(embed.signals().get('ini-load')).to.be.ok;
+      return embed.whenReady();  // `whenReady` should also be complete.
+    });
+  });
+
+  it('should find and await all content elements', () => {
+    function resource(tagName) {
+      const res = {
+        element: {
+          tagName: tagName.toUpperCase(),
+        },
+        loadedComplete: false,
+      };
+      res.loadedOnce = () => Promise.resolve().then(() => {
+        res.loadedComplete = true;
+      });
+      return res;
+    }
+
+    let content1;
+    let content2;
+    let blacklistedAd;
+    let blacklistedAnalytics;
+    let blacklistedPixel;
+
+    const context = document.createElement('div');
+    document.body.appendChild(context);
+    resourcesMock
+        .expects('getResourcesInRect')
+        .withArgs(sinon.match(arg => arg == window))
+        .returns(Promise.resolve([
+          content1 = resource('amp-img', 0),
+          content2 = resource('amp-video', 0),
+          blacklistedAd = resource('amp-ad', 0),
+          blacklistedAnalytics = resource('amp-analytics', 0),
+          blacklistedPixel = resource('amp-pixel', 0),
+        ]))
+        .once();
+
+    return whenContentIniLoad(context, window).then(() => {
+      expect(content1.loadedComplete).to.be.true;
+      expect(content2.loadedComplete).to.be.true;
+      expect(blacklistedAd.loadedComplete).to.be.false;
+      expect(blacklistedAnalytics.loadedComplete).to.be.false;
+      expect(blacklistedPixel.loadedComplete).to.be.false;
+    });
+  });
+
   describe('mergeHtml', () => {
     let spec;
 
@@ -337,7 +466,7 @@ describe('friendly-iframe-embed', () => {
         html: '<a id="a1"></a>',
       });
       return embedPromise.then(embed => {
-        return embed.whenLoaded();
+        return embed.whenWindowLoaded();
       });
     });
 
@@ -348,7 +477,7 @@ describe('friendly-iframe-embed', () => {
         html: '<a id="a1"></a>',
       });
       return embedPromise.then(embed => {
-        return embed.whenLoaded();
+        return embed.whenWindowLoaded();
       });
     });
   });
@@ -363,6 +492,7 @@ describe('friendly-iframe-embed', () => {
     let container;
     let loadListener, errorListener;
     let polls;
+    let renderStartStub;
 
     beforeEach(() => {
       setSrcdocSupportedForTesting(true);
@@ -394,6 +524,7 @@ describe('friendly-iframe-embed', () => {
       loadListener = undefined;
       iframe = {
         tagName: 'IFRAME',
+        nodeType: 1,
         ownerDocument: {defaultView: win},
         style: {},
         setAttribute: () => {},
@@ -412,6 +543,8 @@ describe('friendly-iframe-embed', () => {
       container = {
         appendChild: () => {},
       };
+      renderStartStub = sandbox.stub(
+          FriendlyIframeEmbed.prototype, 'startRender_');
     });
 
     afterEach(() => {
@@ -495,6 +628,7 @@ describe('friendly-iframe-embed', () => {
       loadListener();
       return embedPromise.then(() => {
         expect(polls).to.have.length(0);
+        expect(renderStartStub).to.be.calledOnce;
       });
     });
 

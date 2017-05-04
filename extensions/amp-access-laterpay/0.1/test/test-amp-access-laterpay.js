@@ -14,32 +14,36 @@
  * limitations under the License.
  */
 
-import {LaterpayVendor} from '../amp-access-laterpay';
+import {LaterpayVendor} from '../laterpay-impl';
 import {toggleExperiment} from '../../../../src/experiments';
-import * as sinon from 'sinon';
 
-describe('LaterpayVendor', () => {
+
+describes.fakeWin('LaterpayVendor', {
+  amp: true,
+  location: 'https://pub.com/doc1',
+}, env => {
+  let win, document, ampdoc;
   let accessService;
   let accessServiceMock;
   let xhrMock;
   let articleTitle;
   let laterpayConfig;
-  let sandbox;
   let vendor;
-  let win;
 
   beforeEach(() => {
-    win = window;
+    win = env.win;
+    ampdoc = env.ampdoc;
+    document = win.document;
+
     laterpayConfig = {
       articleTitleSelector: '#laterpay-test-title',
     };
     accessService = {
-      win,
+      ampdoc,
       getAdapterConfig: () => { return laterpayConfig; },
       buildUrl: () => {},
       loginWithUrl: () => {},
     };
-    sandbox = sinon.sandbox.create();
     accessServiceMock = sandbox.mock(accessService);
 
     articleTitle = document.createElement('h1');
@@ -57,7 +61,6 @@ describe('LaterpayVendor', () => {
     toggleExperiment(win, 'amp-access-laterpay', false);
     accessServiceMock.verify();
     xhrMock.verify();
-    sandbox.restore();
   });
 
   it('should fail without experiment', () => {
@@ -233,6 +236,4 @@ describe('LaterpayVendor', () => {
     });
 
   });
-
-
 });

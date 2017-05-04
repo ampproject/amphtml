@@ -21,7 +21,9 @@ import {
   dev,
   isUserErrorMessage,
   rethrowAsync,
+  setReportError,
   user,
+  duplicateErrorIfNecessary,
 } from '../../src/log';
 import * as sinon from 'sinon';
 
@@ -52,12 +54,15 @@ describe('Logging', () => {
         log: logSpy,
       },
       setTimeout: timeoutSpy,
+      reportError: error => error,
     };
+    sandbox.stub(self, 'reportError', error => error);
   });
 
   afterEach(() => {
     sandbox.restore();
     sandbox = null;
+    window.AMP_MODE = undefined;
   });
 
   describe('Level', () => {
@@ -105,12 +110,12 @@ describe('Logging', () => {
       log.warn('warn');
       log.error('error');
 
-      expect(logSpy.callCount).to.equal(4);
+      expect(logSpy).to.have.callCount(4);
       expect(logSpy.args[0][1]).to.equal('[fine]');
       expect(logSpy.args[1][1]).to.equal('[info]');
       expect(logSpy.args[2][1]).to.equal('[warn]');
       expect(logSpy.args[3][1]).to.equal('[error]');
-      expect(timeoutSpy.callCount).to.equal(0);
+      expect(timeoutSpy).to.have.not.been.called;
     });
 
     it('should log correctly for INFO', () => {
@@ -122,11 +127,11 @@ describe('Logging', () => {
       log.warn('warn');
       log.error('error');
 
-      expect(logSpy.callCount).to.equal(3);
+      expect(logSpy).to.have.callCount(3);
       expect(logSpy.args[0][1]).to.equal('[info]');
       expect(logSpy.args[1][1]).to.equal('[warn]');
       expect(logSpy.args[2][1]).to.equal('[error]');
-      expect(timeoutSpy.callCount).to.equal(0);
+      expect(timeoutSpy).to.have.not.been.called;
     });
 
     it('should log correctly for WARN', () => {
@@ -138,10 +143,10 @@ describe('Logging', () => {
       log.warn('warn');
       log.error('error');
 
-      expect(logSpy.callCount).to.equal(2);
+      expect(logSpy).to.have.callCount(2);
       expect(logSpy.args[0][1]).to.equal('[warn]');
       expect(logSpy.args[1][1]).to.equal('[error]');
-      expect(timeoutSpy.callCount).to.equal(0);
+      expect(timeoutSpy).to.have.not.been.called;
     });
 
     it('should log correctly for ERROR', () => {
@@ -153,105 +158,70 @@ describe('Logging', () => {
       log.warn('warn');
       log.error('error');
 
-      expect(logSpy.callCount).to.equal(1);
+      expect(logSpy).to.be.calledOnce;
       expect(logSpy.args[0][1]).to.equal('[error]');
-      expect(timeoutSpy.callCount).to.equal(0);
+      expect(timeoutSpy).to.have.not.been.called;
     });
 
     it('should report ERROR even when OFF and coallesce messages', () => {
       const log = new Log(win, RETURNS_OFF);
       expect(log.level_).to.equal(LogLevel.OFF);
-      win.setTimeout = () => {};
-      let timeoutCallback;
-      const timeoutStub = sandbox.stub(win, 'setTimeout', callback => {
-        timeoutCallback = callback;
+      let reportedError;
+      setReportError(function(e) {
+        reportedError = e;
       });
 
       log.error('TAG', 'intended', new Error('test'));
 
-      expect(logSpy.callCount).to.equal(0);
-      expect(timeoutStub.callCount).to.equal(1);
-      expect(timeoutCallback).to.exist;
-      try {
-        timeoutCallback();
-        throw new Error('must not be here');
-      } catch (e) {
-        expect(e).to.be.instanceof(Error);
-        expect(e.message).to.match(/intended\: test/);
-        expect(e.expected).to.be.undefined;
-        expect(isUserErrorMessage(e.message)).to.be.false;
-      }
+      expect(reportedError).to.be.instanceof(Error);
+      expect(reportedError.message).to.match(/intended\: test/);
+      expect(reportedError.expected).to.be.undefined;
+      expect(isUserErrorMessage(reportedError.message)).to.be.false;
     });
 
     it('should report ERROR and mark with expected flag', () => {
       const log = new Log(win, RETURNS_OFF);
       expect(log.level_).to.equal(LogLevel.OFF);
-      win.setTimeout = () => {};
-      let timeoutCallback;
-      const timeoutStub = sandbox.stub(win, 'setTimeout', callback => {
-        timeoutCallback = callback;
+      let reportedError;
+      setReportError(function(e) {
+        reportedError = e;
       });
 
       log.expectedError('TAG', 'intended', new Error('test'));
 
-      expect(logSpy.callCount).to.equal(0);
-      expect(timeoutStub.callCount).to.equal(1);
-      expect(timeoutCallback).to.exist;
-      try {
-        timeoutCallback();
-      } catch (e) {
-        expect(e).to.be.instanceof(Error);
-        expect(e.message).to.match(/intended\: test/);
-        expect(e.expected).to.be.true;
-      }
+      expect(reportedError).to.be.instanceof(Error);
+      expect(reportedError.message).to.match(/intended\: test/);
+      expect(reportedError.expected).to.be.true;
     });
 
     it('should report ERROR when OFF from a single message', () => {
       const log = new Log(win, RETURNS_OFF);
       expect(log.level_).to.equal(LogLevel.OFF);
-      win.setTimeout = () => {};
-      let timeoutCallback;
-      const timeoutStub = sandbox.stub(win, 'setTimeout', callback => {
-        timeoutCallback = callback;
+      let reportedError;
+      setReportError(function(e) {
+        reportedError = e;
       });
 
       log.error('TAG', 'intended');
 
-      expect(logSpy.callCount).to.equal(0);
-      expect(timeoutStub.callCount).to.equal(1);
-      expect(timeoutCallback).to.exist;
-      try {
-        timeoutCallback();
-        throw new Error('must not be here');
-      } catch (e) {
-        expect(e).to.be.instanceof(Error);
-        expect(e.message).to.match(/intended/);
-        expect(isUserErrorMessage(e.message)).to.be.false;
-      }
+      expect(reportedError).to.be.instanceof(Error);
+      expect(reportedError.message).to.match(/intended/);
+      expect(isUserErrorMessage(reportedError.message)).to.be.false;
     });
 
     it('should report ERROR when OFF from a single error object', () => {
       const log = new Log(win, RETURNS_OFF);
       expect(log.level_).to.equal(LogLevel.OFF);
-      win.setTimeout = () => {};
-      let timeoutCallback;
-      const timeoutStub = sandbox.stub(win, 'setTimeout', callback => {
-        timeoutCallback = callback;
+      let reportedError;
+      setReportError(function(e) {
+        reportedError = e;
       });
 
       log.error('TAG', new Error('test'));
 
-      expect(logSpy.callCount).to.equal(0);
-      expect(timeoutStub.callCount).to.equal(1);
-      expect(timeoutCallback).to.exist;
-      try {
-        timeoutCallback();
-        throw new Error('must not be here');
-      } catch (e) {
-        expect(e).to.be.instanceof(Error);
-        expect(e.message).to.match(/test/);
-        expect(isUserErrorMessage(e.message)).to.be.false;
-      }
+      expect(reportedError).to.be.instanceof(Error);
+      expect(reportedError.message).to.match(/test/);
+      expect(isUserErrorMessage(reportedError.message)).to.be.false;
     });
   });
 
@@ -417,25 +387,30 @@ describe('Logging', () => {
       expect(error.expected).to.be.undefined;
       expect(error).to.be.instanceof(Error);
       expect(isUserErrorMessage(error.message)).to.be.true;
-      expect(error.message).to.contain('test');
+      expect(error.message).to.equal('test' + USER_ERROR_SENTINEL);
     });
 
     it('should create suffixed errors from error', () => {
       const error = log.createError(new Error('test'));
       expect(error).to.be.instanceof(Error);
       expect(isUserErrorMessage(error.message)).to.be.true;
-      expect(error.message).to.contain('test');
+      expect(error.message).to.equal('test' + USER_ERROR_SENTINEL);
     });
 
     it('should only add suffix once', () => {
       const error = log.createError(new Error('test' + USER_ERROR_SENTINEL));
+      expect(error).to.be.instanceof(Error);
       expect(isUserErrorMessage(error.message)).to.be.true;
-      expect(error.message).to.contain('test');
+      expect(error.message).to.equal('test' + USER_ERROR_SENTINEL);
+    });
 
-      let message = error.message;
-      expect(message.indexOf(USER_ERROR_SENTINEL)).to.not.equal(-1);
-      message = message.replace(USER_ERROR_SENTINEL, '');
-      expect(message.indexOf(USER_ERROR_SENTINEL)).to.equal(-1);
+    it('should strip suffix if not available', () => {
+      const error = log.createError(new Error('test'));
+      expect(isUserErrorMessage(error.message)).to.be.true;
+
+      const noSuffixLog = new Log(win, RETURNS_FINE);
+      noSuffixLog.createError(error);
+      expect(isUserErrorMessage(error.message)).to.be.false;
     });
 
     it('should create other-suffixed errors', () => {
@@ -443,7 +418,7 @@ describe('Logging', () => {
       const error = log.createError('test');
       expect(error).to.be.instanceof(Error);
       expect(isUserErrorMessage(error.message)).to.be.false;
-      expect(error.message).to.contain('test-other');
+      expect(error.message).to.equal('test-other');
     });
 
     it('should pass for elements', () => {
@@ -557,6 +532,45 @@ describe('Logging', () => {
     });
   });
 
+  describe('error', () => {
+    let log;
+    let reportedError;
+
+    beforeEach(function() {
+      log = new Log(win, RETURNS_OFF);
+      setReportError(function(e) {
+        reportedError = e;
+      });
+    });
+
+    it('reuse errors', () => {
+      let error = new Error('test');
+
+      log.error('TAG', error);
+      expect(reportedError).to.equal(error);
+      expect(error.message).to.equal('test');
+
+      log.error('TAG', 'should fail', 'XYZ', error);
+      expect(reportedError).to.equal(error);
+      expect(error.message).to.equal('should fail XYZ: test');
+
+      // #8917
+      try {
+        // This is an intentionally bad query selector
+        document.body.querySelector('#');
+      } catch (e) {
+        error = e;
+      }
+
+      log.error('TAG', error);
+      expect(reportedError).not.to.equal(error);
+      expect(reportedError.message).to.equal(error.message);
+
+      log.error('TAG', 'should fail', 'XYZ', error);
+      expect(reportedError).not.to.equal(error);
+      expect(reportedError.message).to.contain('should fail XYZ:');
+    });
+  });
 
   describe('rethrowAsync', () => {
     let clock;
@@ -569,7 +583,7 @@ describe('Logging', () => {
       rethrowAsync('intended');
       expect(() => {
         clock.tick(1);
-      }).to.throw(Error, /^intended$/);
+      }).to.throw(Error, /^intended/);
     });
 
     it('should rethrow a single error', () => {
@@ -582,7 +596,7 @@ describe('Logging', () => {
         error = e;
       }
       expect(error).to.equal(orig);
-      expect(error.message).to.equal('intended');
+      expect(error.message).to.match(/^intended/);
     });
 
     it('should rethrow error with many messages', () => {
@@ -593,7 +607,7 @@ describe('Logging', () => {
       } catch (e) {
         error = e;
       }
-      expect(error.message).to.equal('first second third');
+      expect(error.message).to.match(/^first second third/);
     });
 
     it('should rethrow error with original error and messages', () => {
@@ -606,7 +620,7 @@ describe('Logging', () => {
         error = e;
       }
       expect(error).to.equal(orig);
-      expect(error.message).to.equal('first second third: intended');
+      expect(error.message).to.match(/^first second third: intended/);
     });
 
     it('should preserve error suffix', () => {
@@ -621,6 +635,42 @@ describe('Logging', () => {
       }
       expect(error).to.equal(orig);
       expect(isUserErrorMessage(error.message)).to.be.true;
+    });
+  });
+
+  describe('duplicateErrorIfNecessary', () => {
+    it('should not duplicate if message is writeable', () => {
+      const error = {message: 'test'};
+
+      expect(duplicateErrorIfNecessary(error)).to.equal(error);
+    });
+
+    it('should duplicate if message is non-writable', () => {
+      const error = {};
+      Object.defineProperty(error, 'message', {
+        value: 'test',
+        writable: false,
+      });
+
+      expect(duplicateErrorIfNecessary(error)).to.not.equal(error);
+    });
+
+    it('copies all the tidbits', () => {
+      const error = {
+        stack: 'stack',
+        args: [1, 2, 3],
+        associatedElement: error,
+      };
+
+      Object.defineProperty(error, 'message', {
+        value: 'test',
+        writable: false,
+      });
+
+      const duplicate = duplicateErrorIfNecessary(error);
+      expect(duplicate.stack).to.equal(error.stack);
+      expect(duplicate.args).to.equal(error.args);
+      expect(duplicate.associatedElement).to.equal(error.associatedElement);
     });
   });
 });

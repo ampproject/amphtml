@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-import {fromClass, getServiceForDoc} from '../service';
+import {
+  registerServiceBuilder,
+  registerServiceBuilderForDoc,
+  getService,
+} from '../service';
 import {getMode} from '../mode';
 import {dev} from '../log';
-import {timerFor} from '../timer';
-import {viewerForDoc} from '../viewer';
+import {timerFor} from '../services';
+import {viewerForDoc} from '../services';
 
 
 /** @private @const */
@@ -66,7 +70,13 @@ export class History {
     /** @private {!Array<!Function|undefined>} */
     this.stackOnPop_ = [];
 
-    /** @private {!Array<!{callback:function():!Promise, resolve:!Function,reject:!Function}>} */
+    /**
+     * @private {!Array<!{
+     *   callback: function():!Promise,
+     *   resolve: !Function,
+     *   reject: !Function,
+     *   trace: (!Error|undefined)
+     * }>} */
     this.queue_ = [];
 
     this.binding_.setOnStackIndexUpdated(this.onStackIndexUpdated_.bind(this));
@@ -92,7 +102,7 @@ export class History {
         }
         return stackIndex;
       });
-    });
+    }, 'push');
   }
 
   /**
@@ -107,7 +117,7 @@ export class History {
       return this.binding_.pop(stateId).then(stackIndex => {
         this.onStackIndexUpdated_(stackIndex);
       });
-    });
+    }, 'pop');
   }
 
   /**
@@ -127,7 +137,7 @@ export class History {
       return this.binding_.pop(this.stackIndex_).then(stackIndex => {
         this.onStackIndexUpdated_(stackIndex);
       });
-    });
+    }, 'goBack');
   }
 
   /**
@@ -158,13 +168,13 @@ export class History {
 
   /**
    * Update the page url fragment
-   * The fragment variable should contain leading '#'
    * @param {string} fragment
    * @return {!Promise}
    */
   updateFragment(fragment) {
-    dev().assert(fragment[0] == '#', 'Fragment to be updated ' +
-        'should start with #');
+    if (fragment[0] == '#') {
+      fragment = fragment.substr(1);
+    }
     return this.binding_.updateFragment(fragment);
   }
 
@@ -203,11 +213,12 @@ export class History {
 
   /**
    * @param {function():!Promise<RESULT>} callback
+   * @param {string} name
    * @return {!Promise<RESULT>}
    * @template RESULT
    * @private
    */
-  enque_(callback) {
+  enque_(callback, name) {
     let resolve;
     let reject;
     const promise = new Promise((aResolve, aReject) => {
@@ -215,11 +226,12 @@ export class History {
       reject = aReject;
     });
 
-    this.queue_.push({callback, resolve, reject});
+    // TODO(dvoytenko, #8785): cleanup after tracing.
+    const trace = new Error('history trace for ' + name + ': ');
+    this.queue_.push({callback, resolve, reject, trace});
     if (this.queue_.length == 1) {
       this.deque_();
     }
-
     return promise;
   }
 
@@ -243,6 +255,11 @@ export class History {
       task.resolve(result);
     }, reason => {
       dev().error(TAG_, 'failed to execute a task:', reason);
+      // TODO(dvoytenko, #8785): cleanup after tracing.
+      if (task.trace) {
+        task.trace.message += reason;
+        dev().error(TAG_, task.trace);
+      }
       task.reject(reason);
     }).then(() => {
       this.queue_.splice(0, 1);
@@ -300,7 +317,6 @@ class HistoryBindingInterface {
 
   /**
    * Update the page url fragment
-   * The fragment variable should contain leading '#'
    * @param {string} unusedFragment
    * @return {!Promise}
    */
@@ -368,7 +384,10 @@ export class HistoryBindingNatural_ {
           history.replaceState.bind(history);
       pushState = (state, opt_title, opt_url) => {
         this.unsupportedState_ = state;
-        this.origPushState_(state, opt_title, opt_url);
+        this.origPushState_(state, opt_title,
+            // A bug in edge causes paths to become undefined if URL is
+            // undefined, filed here: https://goo.gl/KlImZu
+            opt_url || null);
       };
       replaceState = (state, opt_title, opt_url) => {
         this.unsupportedState_ = state;
@@ -685,7 +704,7 @@ export class HistoryBindingNatural_ {
   /** @override */
   updateFragment(fragment) {
     if (this.win.history.replaceState) {
-      this.win.history.replaceState({}, '', fragment);
+      this.win.history.replaceState({}, '', '#' + fragment);
     }
     return Promise.resolve();
   }
@@ -791,16 +810,17 @@ export class HistoryBindingVirtual_ {
     if (!this.viewer_.hasCapability('fragment')) {
       return Promise.resolve('');
     }
-    return this.viewer_.sendMessageAwaitResponse('fragment', undefined,
+    return this.viewer_.sendMessageAwaitResponse('getFragment', undefined,
         /* cancelUnsent */true).then(
         hash => {
           if (!hash) {
             return '';
           }
-          dev().assert(hash[0] == '#', 'Url fragment received from viewer ' +
-              'should start with #');
-          /* Strip leading '#' */
-          return hash.substr(1);
+          /* Strip leading '#'*/
+          if (hash[0] == '#') {
+            hash = hash.substr(1);
+          }
+          return hash;
         });
   }
 
@@ -810,7 +830,7 @@ export class HistoryBindingVirtual_ {
       return Promise.resolve();
     }
     return /** @type {!Promise} */ (this.viewer_.sendMessageAwaitResponse(
-        'fragment', {fragment}, /* cancelUnsent */true));
+        'replaceHistory', {fragment}, /* cancelUnsent */true));
   }
 }
 
@@ -829,8 +849,11 @@ function createHistory(ampdoc) {
   } else {
     // Only one global "natural" binding is allowed since it works with the
     // global history stack.
-    binding = fromClass(ampdoc.win, 'global-history-binding',
+    registerServiceBuilder(
+        ampdoc.win,
+        'global-history-binding',
         HistoryBindingNatural_);
+    binding = getService(ampdoc.win, 'global-history-binding');
   }
   return new History(ampdoc, binding);
 }
@@ -838,9 +861,11 @@ function createHistory(ampdoc) {
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @return {!History}
  */
 export function installHistoryServiceForDoc(ampdoc) {
-  return /** @type {!History} */ (getServiceForDoc(ampdoc, 'history',
-      ampdoc => createHistory(ampdoc)));
+  registerServiceBuilderForDoc(
+      ampdoc,
+      'history',
+      /* opt_constructor */ undefined,
+      ampdoc => createHistory(ampdoc));
 }

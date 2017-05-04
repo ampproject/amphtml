@@ -119,7 +119,7 @@ describes.sandboxed('MeasureScanner', {}, () => {
     expect(scanTiming({duration: 0.1}).duration).to.equal(0.1);
     expect(scanTiming({delay: 0.1}).delay).to.equal(0.1);
     expect(scanTiming({endDelay: 0.1}).endDelay).to.equal(0.1);
-    expect(warnStub.callCount).to.equal(3);
+    expect(warnStub).to.have.callCount(3);
     expect(warnStub.args[0][1]).to.match(/"duration" is fractional/);
     expect(warnStub.args[1][1]).to.match(/"delay" is fractional/);
     expect(warnStub.args[2][1]).to.match(/"endDelay" is fractional/);

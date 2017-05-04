@@ -52,5 +52,8 @@ function sendPostMessage() {
 sendPostMessage();
 sendPostMessage(); // send twice to test no double registration
 
+// Send foreign message.
+ampWindow./*OK*/postMessage('amp-other', '*');
+
 </script>
 </body>

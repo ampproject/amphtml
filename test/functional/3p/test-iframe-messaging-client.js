@@ -15,7 +15,7 @@
  */
 
 import {IframeMessagingClient} from '../../../3p/iframe-messaging-client';
-import {serializeMessage} from '../../../src/3p-frame';
+import {serializeMessage} from '../../../src/3p-frame-messaging';
 
 describes.realWin('iframe-messaging-client', {}, env => {
 
@@ -64,6 +64,35 @@ describes.realWin('iframe-messaging-client', {}, env => {
         x: 1,
         y: 'abc',
       });
+    });
+
+    it('should invoke multiple callbacks on receiving a message of' +
+        ' expected response type', () => {
+      const callbackSpy1 = sandbox.spy();
+      const callbackSpy2 = sandbox.spy();
+      const irrelevantCallbackSpy = sandbox.spy();
+
+      const expectedResponseObject = {
+        type: 'response-type',
+        sentinel: 'sentinel-123',
+        x: 1,
+        y: 'abc',
+      };
+
+      client.registerCallback('response-type', callbackSpy1);
+      client.registerCallback('response-type', callbackSpy2);
+      client.registerCallback('irrelevant-response', irrelevantCallbackSpy);
+
+      postAmpMessage({
+        type: 'response-type',
+        sentinel: 'sentinel-123',
+        x: 1,
+        y: 'abc',
+      }, hostWindow);
+
+      expect(callbackSpy1).to.be.calledWith(expectedResponseObject);
+      expect(callbackSpy2).to.be.calledWith(expectedResponseObject);
+      expect(irrelevantCallbackSpy).to.not.be.called;
     });
 
     it('should not invoke callback on receiving a message of' +

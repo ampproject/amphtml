@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {actionServiceForDoc} from '../../src/action';
+import {actionServiceForDoc} from '../../src/services';
 import {onDocumentFormSubmit_} from '../../src/document-submit';
 import * as sinon from 'sinon';
 
@@ -51,7 +51,7 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
   it('should check target and action attributes', () => {
     tgt.removeAttribute('action');
     expect(() => onDocumentFormSubmit_(evt)).to.throw(
-        /form action attribute is required/);
+        /form action-xhr or action attribute is required for method=GET/);
 
     tgt.setAttribute('action', 'http://example.com');
     tgt.__AMP_INIT_ACTION__ = undefined;
@@ -66,8 +66,7 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
     tgt.setAttribute('action', 'https://valid.example.com');
     tgt.__AMP_INIT_ACTION__ = undefined;
     tgt.removeAttribute('target');
-    expect(() => onDocumentFormSubmit_(evt)).to.throw(
-        /form target attribute is required/);
+    expect(() => onDocumentFormSubmit_(evt)).to.not.throw();
 
     tgt.setAttribute('action', 'https://valid.example.com');
     tgt.__AMP_INIT_ACTION__ = undefined;
@@ -112,55 +111,54 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
     expect(preventDefaultSpy.callCount).to.equal(callCount + 1);
   });
 
-  it('should fail when action is provided for POST', () => {
-    evt.target.setAttribute('method', 'post');
-    expect(() => onDocumentFormSubmit_(evt))
-        .to.throw(/form action attribute is invalid for method=POST/);
-    expect(preventDefaultSpy).to.have.been.called;
-  });
-
   it('should do nothing if already prevented', () => {
     evt.defaultPrevented = true;
     onDocumentFormSubmit_(evt);
-    expect(preventDefaultSpy.callCount).to.equal(0);
-    expect(tgt.checkValidity.callCount).to.equal(0);
+    expect(preventDefaultSpy).to.have.not.been.called;
+    expect(tgt.checkValidity).to.have.not.been.called;
+  });
+
+  it('should default target to _top when missing', () => {
+    evt.target.removeAttribute('target');
+    onDocumentFormSubmit_(evt);
+    expect(evt.target.getAttribute('target')).to.equal('_top');
   });
 
   it('should throw if no target', () => {
     evt.target = null;
     expect(() => onDocumentFormSubmit_(evt)).to.throw(/Element expected/);
-    expect(preventDefaultSpy.callCount).to.equal(0);
-    expect(tgt.checkValidity.callCount).to.equal(0);
+    expect(preventDefaultSpy).to.have.not.been.called;
+    expect(tgt.checkValidity).to.have.not.been.called;
   });
 
   it('should prevent submit', () => {
     tgt.checkValidity = sandbox.stub().returns(false);
     onDocumentFormSubmit_(evt);
-    expect(preventDefaultSpy.callCount).to.equal(1);
-    expect(tgt.checkValidity.callCount).to.equal(1);
+    expect(preventDefaultSpy).to.be.calledOnce;
+    expect(tgt.checkValidity).to.be.calledOnce;
     sandbox.restore();
     preventDefaultSpy.reset();
     tgt.checkValidity.reset();
 
     tgt.checkValidity = sandbox.stub().returns(false);
     onDocumentFormSubmit_(evt);
-    expect(preventDefaultSpy.callCount).to.equal(1);
-    expect(tgt.checkValidity.callCount).to.equal(1);
+    expect(preventDefaultSpy).to.be.calledOnce;
+    expect(tgt.checkValidity).to.be.calledOnce;
   });
 
   it('should not check validity if novalidate provided', () => {
     tgt.setAttribute('novalidate', '');
     tgt.checkValidity = sandbox.stub().returns(false);
     onDocumentFormSubmit_(evt);
-    expect(preventDefaultSpy.callCount).to.equal(0);
-    expect(tgt.checkValidity.callCount).to.equal(0);
+    expect(preventDefaultSpy).to.have.not.been.called;
+    expect(tgt.checkValidity).to.have.not.been.called;
   });
 
   it('should not prevent default', () => {
     tgt.checkValidity = sandbox.stub().returns(true);
     onDocumentFormSubmit_(evt);
-    expect(preventDefaultSpy.callCount).to.equal(0);
-    expect(tgt.checkValidity.callCount).to.equal(1);
+    expect(preventDefaultSpy).to.have.not.been.called;
+    expect(tgt.checkValidity).to.be.calledOnce;
   });
 
   it('should delegate xhr submit through action service', () => {

@@ -79,7 +79,7 @@ The `src` attribute behaves mainly like on a standard iframe with one exception:
 source documents to know that they are embedded in the AMP context. This fragment is only added if the URL specified by `src` does
 not already have a fragment.
 
-**srcdoc, frameborder, allowfullscreen, allowtransparency, referrerpolicy**
+**srcdoc, frameborder, allowfullscreen, allowpaymentrequest, allowtransparency, referrerpolicy**
 
 The attributes above should all behave like they do on standard iframes.
 
@@ -192,6 +192,7 @@ window.addEventListener('message', function(event) {
     event.data.changes.forEach(function (change) {
       console.log(change);
     });
+  };
 });
 ```
 
@@ -208,3 +209,12 @@ Iframes are identified as tracking/analytics iframes if they appear to serve no 
 ## Validation
 
 See [amp-iframe rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-iframe/0.1/validator-amp-iframe.protoascii) in the AMP validator specification.
+
+## Guideline: prefer [specific AMP components](https://github.com/ampproject/amphtml/tree/master/extensions) to `amp-iframe`
+
+`amp-iframe` should be considered a fallback if the required user experience is not possible by other means in AMP. This is because there are many benefits to using a component tailored for a specific use-case instead, such as
+
+- Better resource management and performance
+- Custom components can provide built-in placeholder images in some cases. This means getting, say, the right video thumbnail before a video loads, and reduces the coding effort to add a placeholder manually.
+- Built-in resizing. This means that iframe content with unpredictable size can more often appear to the user as if it were native to the page, rather than in a scrollable frame
+- Other additional features  can be built in (for instance, auto-play for video players)

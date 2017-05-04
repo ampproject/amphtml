@@ -1,8 +1,8 @@
 FAIL
 amp4ads_feature_tests/noscript.html:30:2 The tag 'noscript' is disallowed. [DISALLOWED_HTML]
-amp4ads_feature_tests/noscript.html:32:2 The tag 'img' is disallowed. [DISALLOWED_HTML_WITH_AMP_EQUIVALENT]
+amp4ads_feature_tests/noscript.html:32:2 The tag 'img' is disallowed. [DISALLOWED_HTML]
 amp4ads_feature_tests/noscript.html:34:2 The tag 'noscript' is disallowed. [DISALLOWED_HTML]
-amp4ads_feature_tests/noscript.html:35:4 The tag 'img' is disallowed. [DISALLOWED_HTML_WITH_AMP_EQUIVALENT]
+amp4ads_feature_tests/noscript.html:35:4 The tag 'img' is disallowed. [DISALLOWED_HTML]
 amp4ads_feature_tests/noscript.html:37:2 The tag 'noscript' is disallowed. [DISALLOWED_HTML]
-amp4ads_feature_tests/noscript.html:38:4 The tag 'video' is disallowed. [DISALLOWED_HTML_WITH_AMP_EQUIVALENT]
-amp4ads_feature_tests/noscript.html:39:4 The tag 'audio' is disallowed. [DISALLOWED_HTML_WITH_AMP_EQUIVALENT]
+amp4ads_feature_tests/noscript.html:38:4 The tag 'video' is disallowed. [DISALLOWED_HTML]
+amp4ads_feature_tests/noscript.html:39:4 The tag 'audio' is disallowed. [DISALLOWED_HTML]

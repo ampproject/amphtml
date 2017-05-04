@@ -60,6 +60,14 @@ IntersectionObserverEntry.prototype.boundingClientRect;
 IntersectionObserverEntry.prototype.intersectionRect;
 
 /**
+ * The the ratio of the intersectionRect to the boundingClientRect.
+ * @see http://rawgit.com/WICG/IntersectionObserver/master/index.html#dom-intersectionobserverentry-intersectionrect
+ * @type {number}
+ * @const
+ */
+IntersectionObserverEntry.prototype.intersectionRatio;
+
+/**
  * This is the constructor for Intersection Observer objects.
  * @see http://rawgit.com/WICG/IntersectionObserver/master/index.html#dom-intersectionobserver-intersectionobserver
  * @param {function(!Array<!IntersectionObserverEntry>)} handler The callback for the observer.

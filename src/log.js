@@ -54,6 +54,14 @@ export const LogLevel = {
   FINE: 4,
 };
 
+/**
+ * Sets reportError function. Called from error.js to break cyclic
+ * dependency.
+ * @param {function(*, !Element=)|undefined} fn
+ */
+export function setReportError(fn) {
+  self.reportError = fn;
+}
 
 /**
  * Logging class.
@@ -202,7 +210,8 @@ export class Log {
   error(tag, var_args) {
     const error = this.error_.apply(this, arguments);
     if (error) {
-      this.win.setTimeout(() => {throw /** @type {!Error} */ (error);});
+      // reportError is installed globally per window in the entry point.
+      self.reportError(error);
     }
   }
 
@@ -216,7 +225,8 @@ export class Log {
     const error = this.error_.apply(this, arguments);
     if (error) {
       error.expected = true;
-      this.win.setTimeout(() => {throw /** @type {!Error} */ (error);});
+      // reportError is installed globally per window in the entry point.
+      self.reportError(error);
     }
   }
 
@@ -287,6 +297,8 @@ export class Log {
       e.associatedElement = firstElement;
       e.messageArray = messageArray;
       this.prepareError_(e);
+      // reportError is installed globally per window in the entry point.
+      self.reportError(e);
       throw e;
     }
     return shouldBeTrueish;
@@ -369,12 +381,15 @@ export class Log {
    * @private
    */
   prepareError_(error) {
+    error = duplicateErrorIfNecessary(error);
     if (this.suffix_) {
       if (!error.message) {
         error.message = this.suffix_;
       } else if (error.message.indexOf(this.suffix_) == -1) {
         error.message += this.suffix_;
       }
+    } else if (isUserErrorMessage(error.message)) {
+      error.message = error.message.replace(USER_ERROR_SENTINEL, '');
     }
   }
 }
@@ -385,10 +400,11 @@ export class Log {
  * @return {string}
  */
 function toString(val) {
-  if (val instanceof Element) {
+  // Do check equivalent to `val instanceof Element` without cross-window bug
+  if (val && val.nodeType == 1) {
     return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
   }
-  return val;
+  return /** @type {string} */ (val);
 }
 
 
@@ -402,6 +418,30 @@ function pushIfNonEmpty(array, val) {
   }
 }
 
+/**
+ * Some exceptions (DOMException, namely) have read-only message.
+ * @param {!Error} error
+ * @return {!Error};
+ */
+export function duplicateErrorIfNecessary(error) {
+  const message = error.message;
+  const test = String(Math.random());
+  error.message = test;
+
+  if (error.message === test) {
+    error.message = message;
+    return error;
+  }
+
+  const e = new Error(error.message);
+  // Copy all the extraneous things we attach.
+  for (const prop in error) {
+    e[prop] = error[prop];
+  }
+  // Ensure these are copied.
+  e.stack = error.stack;
+  return e;
+}
 
 /**
  * @param {...*} var_args
@@ -414,7 +454,7 @@ function createErrorVargs(var_args) {
   for (let i = 0; i < arguments.length; i++) {
     const arg = arguments[i];
     if (arg instanceof Error && !error) {
-      error = arg;
+      error = duplicateErrorIfNecessary(arg);
     } else {
       if (message) {
         message += ' ';
@@ -422,6 +462,7 @@ function createErrorVargs(var_args) {
       message += arg;
     }
   }
+
   if (!error) {
     error = new Error(message);
   } else if (message) {
@@ -438,7 +479,11 @@ function createErrorVargs(var_args) {
  */
 export function rethrowAsync(var_args) {
   const error = createErrorVargs.apply(null, arguments);
-  setTimeout(() => {throw error;});
+  setTimeout(() => {
+    // reportError is installed globally per window in the entry point.
+    self.reportError(error);
+    throw error;
+  });
 }
 
 

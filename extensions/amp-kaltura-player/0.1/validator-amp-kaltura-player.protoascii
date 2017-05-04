@@ -16,55 +16,30 @@
 
 tags: {  # amp-kaltura-player
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
-  spec_name: "amp-kaltura-player extension .js script"
-  mandatory_parent: "HEAD"
-  unique_warning: true
-  extension_unused_unless_tag_present: "amp-kaltura-player"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  satisfies: "amp-kaltura-player extension .js script"
+  extension_spec: {
+    name: "amp-kaltura-player"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    deprecated_recommends_usage_of_tag: "amp-kaltura-player"
+    deprecated_allow_duplicates: true
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-kaltura-player"
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-kaltura-player-(latest|0\\.1)\\.js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-kaltura-player.html"
+  attr_lists: "common-extension-attrs"
 }
 # amp-kaltura-player either comes with a video-id attribute, or with
 # a data-videoid attribute.
 tags: {  # <amp-kaltura-player>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-KALTURA-PLAYER"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-kaltura-player extension .js script"
+  requires: "amp-kaltura-player extension .js script"
   attrs: {
     name: "data-partner"
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-kaltura-player.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-kaltura-player"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
-import {resourcesForDoc} from '../../../src/resources';
-import {createElementWithAttributes} from '../../../src/dom';
+import {dev, user} from '../../../src/log';
+import {getAttributesFromConfigObj} from './attributes';
+import {resourcesForDoc} from '../../../src/services';
+import {
+  closestByTag,
+  createElementWithAttributes,
+  scopedQuerySelectorAll,
+} from '../../../src/dom';
 
 /** @const */
 const TAG = 'amp-auto-ads';
@@ -25,19 +30,7 @@ const TAG = 'amp-auto-ads';
  * TODO: Specify this via the configuration.
  * @const
  */
-const TARGET_AD_WIDTH_PX = 320;
-
-/**
- * TODO: Specify this via the configuration.
- * @const
- */
 const TARGET_AD_HEIGHT_PX = 100;
-
-/**
- * @export
- * @typedef {{name: string, value: (boolean|number|string)}}
- */
-export let DataAttributeDef;
 
 /**
  * @enum {number}
@@ -59,6 +52,16 @@ const Position = {
   LAST_CHILD: 3,  // Placement should be the last child of the anchor element.
   AFTER: 4,  // Placement should be the sibling after the anchor element.
 };
+
+/**
+ * Should be kept in sync with the disallowed_ancestors in
+ * extensions/amp-ad/.../validator-amp-ad.protoascii.
+ * @const {!Array<string>}
+ */
+const BLACKLISTED_ANCESTOR_TAGS = [
+  'AMP-SIDEBAR',
+  'AMP-APP-BANNER',
+];
 
 /**
  * @const {!Object<!Position, !function(!Element, !Element)>}
@@ -85,9 +88,11 @@ export class Placement {
    * @param {!Element} anchorElement
    * @param {!Position} position
    * @param {!function(!Element, !Element)} injector
+   * @param {!Object<string, string>} attributes
    * @param {!../../../src/layout-rect.LayoutMarginsChangeDef=} opt_margins
    */
-  constructor(win, resources, anchorElement, position, injector, opt_margins) {
+  constructor(win, resources, anchorElement, position, injector, attributes,
+      opt_margins) {
     /** @const @private {!Window} */
     this.win_ = win;
 
@@ -102,6 +107,9 @@ export class Placement {
 
     /** @const @private {!function(!Element, !Element)} */
     this.injector_ = injector;
+
+    /** @const @private {!Object<string, string>} */
+    this.attributes_ = attributes;
 
     /**
      * @const
@@ -156,22 +164,24 @@ export class Placement {
   }
 
   /**
-   * @param {string} type
-   * @param {!Array<!DataAttributeDef>} dataAttributes
+   * @param {!Object<string, string>} baseAttributes Any attributes to add to
+   *     injected <amp-ad>. Specific attributes will override defaults, but be
+   *     overridden by placement specific attributes defined in the
+   *     configuration.
    * @param {!./ad-tracker.AdTracker} adTracker
    * @return {!Promise<!PlacementState>}
    */
-  placeAd(type, dataAttributes, adTracker) {
+  placeAd(baseAttributes, adTracker) {
     return this.getEstimatedPosition().then(yPosition => {
       return adTracker.isTooNearAnAd(yPosition).then(tooNear => {
         if (tooNear) {
           this.state_ = PlacementState.TOO_NEAR_EXISTING_AD;
           return this.state_;
         }
-        this.adElement_ = this.createAdElement_(type, dataAttributes);
+        this.adElement_ = this.createAdElement_(baseAttributes);
         this.injector_(this.anchorElement_, this.adElement_);
         return this.resources_.attemptChangeSize(this.adElement_,
-            TARGET_AD_HEIGHT_PX, TARGET_AD_WIDTH_PX, this.margins_)
+            TARGET_AD_HEIGHT_PX, undefined, this.margins_)
                 .then(() => {
                   this.state_ = PlacementState.PLACED;
                   return this.state_;
@@ -184,21 +194,16 @@ export class Placement {
   }
 
   /**
-   * @param {string} type
-   * @param {!Array<!DataAttributeDef>} dataAttributes
+   * @param {!Object<string, string>} baseAttributes
    * @return {!Element}
    * @private
    */
-  createAdElement_(type, dataAttributes) {
-    const attributes = {
-      type,
-      'layout': 'responsive',
-      'width': '0',
+  createAdElement_(baseAttributes) {
+    const attributes = Object.assign({
+      'layout': 'fixed-height',
       'height': '0',
-    };
-    for (let i = 0; i < dataAttributes.length; ++i) {
-      attributes['data-' + dataAttributes[i].name] = dataAttributes[i].value;
-    }
+      'class': 'i-amphtml-layout-awaiting-size',
+    }, baseAttributes, this.attributes_);
     return createElementWithAttributes(
         this.win_.document, 'amp-ad', attributes);
   }
@@ -212,16 +217,13 @@ export class Placement {
 export function getPlacementsFromConfigObj(win, configObj) {
   const placementObjs = configObj['placements'];
   if (!placementObjs) {
-    dev().warn(TAG, 'No placements in config');
+    user().warn(TAG, 'No placements in config');
     return [];
   }
   const placements = [];
-  for (let i = 0; i < placementObjs.length; ++i) {
-    const placement = getPlacementFromObject(win, placementObjs[i]);
-    if (placement) {
-      placements.push(placement);
-    }
-  }
+  placementObjs.forEach(placementObj => {
+    getPlacementsFromObject(win, placementObj, placements);
+  });
   return placements;
 }
 
@@ -230,29 +232,24 @@ export function getPlacementsFromConfigObj(win, configObj) {
  * constructs and returns an instance of the Placement class for it.
  * @param {!Window} win
  * @param {!Object} placementObj
- * @return {?Placement}
+ * @param {!Array<!Placement>} placements
  */
-function getPlacementFromObject(win, placementObj) {
+function getPlacementsFromObject(win, placementObj, placements) {
   const injector = INJECTORS[placementObj['pos']];
   if (!injector) {
-    dev().warn(TAG, 'No injector for position');
-    return null;
+    user().warn(TAG, 'No injector for position');
+    return;
   }
   const anchor = placementObj['anchor'];
   if (!anchor) {
-    dev().warn(TAG, 'No anchor in placement');
-    return null;
+    user().warn(TAG, 'No anchor in placement');
+    return;
   }
-  const anchorElement = getAnchorElement(win, anchor);
-  if (!anchorElement) {
-    dev().warn(TAG, 'No anchor element found');
-    return null;
-  }
-  if ((placementObj['pos'] == Position.BEFORE ||
-       placementObj['pos'] == Position.AFTER) &&
-      !anchorElement.parentNode) {
-    dev().warn(TAG, 'Parentless anchor with BEFORE/AFTER position.');
-    return null;
+  const anchorElements =
+      getAnchorElements(win.document.documentElement, anchor);
+  if (!anchorElements.length) {
+    user().warn(TAG, 'No anchor element found');
+    return;
   }
   let margins = undefined;
   if (placementObj['style']) {
@@ -265,24 +262,76 @@ function getPlacementFromObject(win, placementObj) {
       };
     }
   }
-  return new Placement(win, resourcesForDoc(anchorElement), anchorElement,
-      placementObj['pos'], injector, margins);
+  anchorElements.forEach(anchorElement => {
+    if (!isPositionValid(anchorElement, placementObj['pos'])) {
+      return;
+    }
+    const attributes = getAttributesFromConfigObj(placementObj);
+    placements.push(new Placement(win, resourcesForDoc(anchorElement),
+        anchorElement, placementObj['pos'], injector, attributes, margins));
+  });
 }
 
 /**
- * @param {!Window} win
+ * Looks up the element(s) addresses by the anchorObj.
+ *
+ * @param {!Element} rootElement
  * @param {!Object} anchorObj
- * @return {?Element}
+ * @return {!Array<!Element>}
  */
-function getAnchorElement(win, anchorObj) {
+function getAnchorElements(rootElement, anchorObj) {
   const selector = anchorObj['selector'];
   if (!selector) {
-    dev().warn(TAG, 'No selector in anchor');
-    return null;
+    user().warn(TAG, 'No selector in anchor');
+    return [];
   }
-  const index = anchorObj['index'] || 0;
-  if (index == 0) {
-    return win.document.querySelector(selector);
+  let elements = [].slice.call(scopedQuerySelectorAll(rootElement, selector));
+
+  const minChars = anchorObj['min_c'] || 0;
+  if (minChars > 0) {
+    elements = elements.filter(el => {
+      return el.textContent.length >= minChars;
+    });
   }
-  return win.document.querySelectorAll(selector)[index] || null;
+
+  if (typeof anchorObj['index'] == 'number' || !anchorObj['all']) {
+    const element = elements[anchorObj['index'] || 0];
+    elements = element ? [element] : [];
+  }
+
+  if (elements.length == 0) {
+    return [];
+  }
+
+  if (anchorObj['sub']) {
+    let subElements = [];
+    elements.forEach(el => {
+      subElements = subElements.concat(getAnchorElements(el, anchorObj['sub']));
+    });
+    return subElements;
+  }
+  return elements;
+}
+
+/**
+ * @param {!Element} anchorElement
+ * @param {!Position} position
+ * @return {boolean}
+ */
+function isPositionValid(anchorElement, position) {
+  const elementToCheckOrNull =
+      position == Position.BEFORE || position == Position.AFTER ?
+          anchorElement.parentElement : anchorElement;
+  if (!elementToCheckOrNull) {
+    user().warn(TAG, 'Parentless anchor with BEFORE/AFTER position.');
+    return false;
+  }
+  const elementToCheck = dev().assertElement(elementToCheckOrNull);
+  return !BLACKLISTED_ANCESTOR_TAGS.some(tagName => {
+    if (closestByTag(elementToCheck, tagName)) {
+      user().warn(TAG, 'Placement inside blacklisted ancestor: ' + tagName);
+      return true;
+    }
+    return false;
+  });
 }

@@ -16,47 +16,22 @@
 
 tags: {  # amp-springboard-player
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
-  spec_name: "amp-springboard-player extension .js script"
-  mandatory_parent: "HEAD"
-  unique_warning: true
-  extension_unused_unless_tag_present: "amp-springboard-player"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  satisfies: "amp-springboard-player extension .js script"
+  extension_spec: {
+    name: "amp-springboard-player"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    deprecated_recommends_usage_of_tag: "amp-springboard-player"
+    deprecated_allow_duplicates: true
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-springboard-player"
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-springboard-player-(latest|0\\.1)\\.js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-springboard-player.html"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-springboard-player>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-SPRINGBOARD-PLAYER"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-springboard-player extension .js script"
+  requires: "amp-springboard-player extension .js script"
   attrs: {
     name: "data-content-id"
     mandatory: true
@@ -85,7 +60,7 @@ tags: {  # <amp-springboard-player>
     value_regex: "[0-9]+"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-springboard-player.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-springboard-player"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

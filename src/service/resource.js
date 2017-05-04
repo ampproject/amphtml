@@ -20,7 +20,8 @@ import {
   moveLayoutRect,
 } from '../layout-rect';
 import {dev} from '../log';
-import {toggle} from '../style';
+import {startsWith} from '../string';
+import {toggle, computedStyle} from '../style';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';
@@ -85,10 +86,10 @@ export class Resource {
 
   /**
    * @param {!Element} element
-   * @return {?Resource}
+   * @return {Resource}
    */
   static forElementOptional(element) {
-    return /** @type {!Resource} */ (element[RESOURCE_PROP_]);
+    return /** @type {Resource} */ (element[RESOURCE_PROP_]);
   }
 
   /**
@@ -134,8 +135,11 @@ export class Resource {
     /** @const {!Window} */
     this.hostWin = element.ownerDocument.defaultView;
 
-    /** @private {!./resources-impl.Resources} */
+    /** @const @private {!./resources-impl.Resources} */
     this.resources_ = resources;
+
+    /** @const @private {boolean} */
+    this.isPlaceholder_ = element.hasAttribute('placeholder');
 
     /** @private {boolean} */
     this.blacklisted_ = false;
@@ -278,7 +282,8 @@ export class Resource {
    * for details.
    */
   build() {
-    if (this.blacklisted_ || !this.element.isUpgraded()) {
+    if (this.blacklisted_ || !this.element.isUpgraded()
+        || !this.resources_.grantBuildPermission()) {
       return;
     }
     try {
@@ -291,9 +296,12 @@ export class Resource {
 
     if (this.hasBeenMeasured()) {
       this.state_ = ResourceState.READY_FOR_LAYOUT;
+      this.element.updateLayoutBox(this.layoutBox_);
     } else {
       this.state_ = ResourceState.NOT_LAID_OUT;
     }
+    // TODO(dvoytenko, #7389): cleanup once amp-sticky-ad signals are
+    // in PROD.
     this.element.dispatchCustomEvent('amp:built');
   }
 
@@ -313,6 +321,7 @@ export class Resource {
    */
   changeSize(newHeight, newWidth, opt_newMargins) {
     this.element./*OK*/changeSize(newHeight, newWidth, opt_newMargins);
+
     // Schedule for re-layout.
     if (this.state_ != ResourceState.NOT_BUILT) {
       this.state_ = ResourceState.NOT_LAID_OUT;
@@ -356,6 +365,21 @@ export class Resource {
    * transitioned to the "ready for layout" state.
    */
   measure() {
+    // Check if the element is ready to be measured.
+    // Placeholders are special. They are technically "owned" by parent AMP
+    // elements, sized by parents, but laid out independently. This means
+    // that placeholders need to at least wait until the parent element
+    // has been stubbed. We can tell whether the parent has been stubbed
+    // by whether a resource has been attached to it.
+    if (this.isPlaceholder_ &&
+        this.element.parentElement &&
+        // Use prefix to recognize AMP element. This is necessary because stub
+        // may not be attached yet.
+        startsWith(this.element.parentElement.tagName, 'AMP-') &&
+        !(RESOURCE_PROP_ in this.element.parentElement)) {
+      return;
+    }
+
     this.isMeasureRequested_ = false;
 
     let box = this.resources_.getViewport().getLayoutRect(this.element);
@@ -373,8 +397,8 @@ export class Resource {
           isFixed = true;
           break;
         }
-        if (viewport.isDeclaredFixed(n) &&
-                win./*OK*/getComputedStyle(n).position == 'fixed') {
+        if (viewport.isDeclaredFixed(n)
+            && computedStyle(win, n).position == 'fixed') {
           isFixed = true;
           break;
         }
@@ -423,6 +447,20 @@ export class Resource {
         0, 0);
     this.isFixed_ = false;
     this.element.updateLayoutBox(this.layoutBox_);
+    const owner = this.getOwner();
+    if (owner) {
+      owner.collapsedCallback(this.element);
+    }
+  }
+
+  /**
+   * Completes expand: ensures that the element is not `display:none` and
+   * updates measurements.
+   */
+  completeExpand() {
+    toggle(this.element, true);
+    this.element.removeAttribute('hidden');
+    this.requestMeasure();
   }
 
   /**
@@ -452,7 +490,9 @@ export class Resource {
   }
 
   /**
-   * Returns a previously measured layout box.
+   * Returns a previously measured layout box adjusted to the viewport. This
+   * mainly affects fixed-position elements that are adjusted to be always
+   * relative to the document position in the viewport.
    * @return {!../layout-rect.LayoutRectDef}
    */
   getLayoutBox() {
@@ -462,6 +502,15 @@ export class Resource {
     const viewport = this.resources_.getViewport();
     return moveLayoutRect(this.layoutBox_, viewport.getScrollLeft(),
         viewport.getScrollTop());
+  }
+
+  /**
+   * Returns a previously measured layout box relative to the page. The
+   * fixed-position elements are relative to the top of the document.
+   * @return {!../layout-rect.LayoutRectDef}
+   */
+  getPageLayoutBox() {
+    return this.layoutBox_;
   }
 
   /**

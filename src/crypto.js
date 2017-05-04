@@ -14,16 +14,26 @@
  * limitations under the License.
  */
 
-import {getElementService} from './element-service';
+import {getService} from './service';
+
+/**
+ * An object holding the public key and its hash.
+ *
+ * @typedef {{
+ *   serviceName: string,
+ *   hash: Uint8Array,
+ *   cryptoKey: !webCrypto.CryptoKey
+ * }}
+ */
+export let PublicKeyInfoDef;
 
 /**
  * @param {!Window} window
- * @return {!Promise<!../extensions/amp-analytics/0.1/crypto-impl.Crypto>}
+ * @return {!./service/crypto-impl.Crypto}
  */
 export function cryptoFor(window) {
-  return (/** @type {!Promise<
-      !../extensions/amp-analytics/0.1/crypto-impl.Crypto>} */ (
-      getElementService(window, 'crypto', 'amp-analytics')));
+  return (/** @type {!./service/crypto-impl.Crypto} */ (
+      getService(window, 'crypto')));
 }
 
 /**

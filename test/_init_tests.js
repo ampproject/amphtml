@@ -17,7 +17,9 @@
 // This must load before all other tests.
 import '../third_party/babel/custom-babel-helpers';
 import '../src/polyfills';
+import {ampdocServiceFor} from '../src/ampdoc';
 import {removeElement} from '../src/dom';
+import {setReportError} from '../src/log';
 import {
   adopt,
   installAmpdocServices,
@@ -25,11 +27,15 @@ import {
 } from '../src/runtime';
 import {activateChunkingForTesting} from '../src/chunk';
 import {installDocService} from '../src/service/ampdoc-impl';
-import {platformFor} from '../src/platform';
+import {platformFor, resourcesForDoc} from '../src/services';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
-import {resetAccumulatedErrorMessagesForTesting} from '../src/error';
+import {
+  resetAccumulatedErrorMessagesForTesting,
+  reportError,
+} from '../src/error';
 import {resetExperimentTogglesForTesting} from '../src/experiments';
 import * as describes from '../testing/describes';
+import stringify from 'json-stable-stringify';
 
 
 // All exposed describes.
@@ -78,28 +84,48 @@ class TestConfig {
      * @type {!Array<function():boolean>}
      */
     this.skipMatchers = [];
+
+    /**
+     * List of predicate functions that are called before running each test
+     * suite to check whether the suite should be skipped or not.
+     * If any of the functions return 'false', the suite will be skipped.
+     * @type {!Array<function():boolean>}
+     */
+    this.ifMatchers = [];
+
     /**
      * Called for each test suite (things created by `describe`).
      * @type {!Array<function(!TestSuite)>}
      */
     this.configTasks = [];
-    this.platform_ = platformFor(window);
+
+    this.platform = platformFor(window);
   }
 
   skipChrome() {
-    return this.skip(this.platform_.isChrome.bind(this.platform_));
+    return this.skip(this.platform.isChrome.bind(this.platform));
+  }
+
+  skipOldChrome() {
+    return this.skip(() => {
+      return this.platform.isChrome() && this.platform.getMajorVersion() < 48;
+    });
   }
 
   skipEdge() {
-    return this.skip(this.platform_.isEdge.bind(this.platform_));
+    return this.skip(this.platform.isEdge.bind(this.platform));
   }
 
   skipFirefox() {
-    return this.skip(this.platform_.isFirefox.bind(this.platform_));
+    return this.skip(this.platform.isFirefox.bind(this.platform));
   }
 
   skipSafari() {
-    return this.skip(this.platform_.isSafari.bind(this.platform_));
+    return this.skip(this.platform.isSafari.bind(this.platform));
+  }
+
+  skipIos() {
+    return this.skip(this.platform.isIos.bind(this.platform));
   }
 
   /**
@@ -107,6 +133,34 @@ class TestConfig {
    */
   skip(fn) {
     this.skipMatchers.push(fn);
+    return this;
+  }
+
+  ifChrome() {
+    return this.if(this.platform.isChrome.bind(this.platform));
+  }
+
+  ifEdge() {
+    return this.if(this.platform.isEdge.bind(this.platform));
+  }
+
+  ifFirefox() {
+    return this.if(this.platform.isFirefox.bind(this.platform));
+  }
+
+  ifSafari() {
+    return this.if(this.platform.isSafari.bind(this.platform));
+  }
+
+  ifIos() {
+    return this.if(this.platform.isIos.bind(this.platform));
+  }
+
+  /**
+   * @param {function():boolean} fn
+   */
+  if(fn) {
+    this.ifMatchers.push(fn);
     return this;
   }
 
@@ -126,7 +180,14 @@ class TestConfig {
    */
   run(desc, fn) {
     for (let i = 0; i < this.skipMatchers.length; i++) {
-      if (this.skipMatchers[i]()) {
+      if (this.skipMatchers[i].call(this)) {
+        this.runner.skip(desc, fn);
+        return;
+      }
+    }
+
+    for (let i = 0; i < this.ifMatchers.length; i++) {
+      if (!this.ifMatchers[i].call(this)) {
         this.runner.skip(desc, fn);
         return;
       }
@@ -175,15 +236,17 @@ beforeEach(function() {
 
 function beforeTest() {
   activateChunkingForTesting();
-  window.AMP_MODE = null;
+  window.AMP_MODE = undefined;
+  window.context = undefined;
   window.AMP_CONFIG = {
     canary: 'testSentinel',
   };
   window.AMP_TEST = true;
-  const ampdocService = installDocService(window, true);
-  const ampdoc = ampdocService.getAmpDoc(window.document);
+  installDocService(window, /* isSingleDoc */ true);
+  const ampdoc = ampdocServiceFor(window).getAmpDoc();
   installRuntimeServices(window);
   installAmpdocServices(ampdoc);
+  resourcesForDoc(ampdoc).ampInitComplete();
 }
 
 // Global cleanup of tags added during tests. Cool to add more
@@ -209,6 +272,8 @@ afterEach(function() {
   window.ENABLE_LOG = false;
   window.AMP_DEV_MODE = false;
   window.context = undefined;
+  window.AMP_MODE = undefined;
+
   const forgotGlobal = !!global.sandbox;
   if (forgotGlobal) {
     // The error will be thrown later to give possibly other sandboxes a
@@ -228,7 +293,8 @@ afterEach(function() {
   }
   setDefaultBootstrapBaseUrlForTesting(null);
   resetAccumulatedErrorMessagesForTesting();
-  resetExperimentTogglesForTesting();
+  resetExperimentTogglesForTesting(window);
+  setReportError(reportError);
 });
 
 chai.Assertion.addMethod('attribute', function(attr) {
@@ -306,8 +372,8 @@ chai.Assertion.addMethod('display', function(display) {
 
 chai.Assertion.addMethod('jsonEqual', function(compare) {
   const obj = this._obj;
-  const a = JSON.stringify(compare);
-  const b = JSON.stringify(obj);
+  const a = stringify(compare);
+  const b = stringify(obj);
   this.assert(
     a == b,
     'expected JSON to be equal.\nExp: #{exp}\nAct: #{act}',

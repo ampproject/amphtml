@@ -394,6 +394,95 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     },
   },
 
+  'dynatrace': {
+    'requests': {
+      'endpoint': '${protocol}://${tenant}.${environment}:${port}/ampbf',
+      'pageview': '${endpoint}?type=js&' +
+        'flavor=amp&' +
+        'v=1&' +
+        'a=1%7C1%7C_load_%7C_load_%7C-%7C${navTiming(navigationStart)}%7C' +
+		'${navTiming(domContentLoadedEventEnd)}%7C0%2C2%7C2%7C_onload_%7C' +
+		'_load_%7C-%7C${navTiming(domContentLoadedEventStart)}%7C' +
+		'${navTiming(domContentLoadedEventEnd)}%7C0&' +
+        'fId=${pageViewId}&' +
+        'vID=${clientId(rxVisitor)}&' +
+        'referer=${sourceUrl}&' +
+        'title=${title}&' +
+        'sw=${screenWidth}&' +
+        'sh=${screenHeight}&' +
+        'w=${viewportWidth}&' +
+        'h=${viewportHeight}&' +
+        'nt=a${navType}' +
+        'b${navTiming(navigationStart)}' +
+        'c${navTiming(navigationStart,redirectStart)}' +
+        'd${navTiming(navigationStart,redirectEnd)}' +
+        'e${navTiming(navigationStart,fetchStart)}' +
+        'f${navTiming(navigationStart,domainLookupStart)}' +
+        'g${navTiming(navigationStart,domainLookupEnd)}' +
+        'h${navTiming(navigationStart,connectStart)}' +
+        'i${navTiming(navigationStart,connectEnd)}' +
+        'j${navTiming(navigationStart,secureConnectionStart)}' +
+        'k${navTiming(navigationStart,requestStart)}' +
+        'l${navTiming(navigationStart,responseStart)}' +
+        'm${navTiming(navigationStart,responseEnd)}' +
+        'n${navTiming(navigationStart,domLoading)}' +
+        'o${navTiming(navigationStart,domInteractive)}' +
+        'p${navTiming(navigationStart,domContentLoadedEventStart)}' +
+        'q${navTiming(navigationStart,domContentLoadedEventEnd)}' +
+        'r${navTiming(navigationStart,domComplete)}' +
+        's${navTiming(navigationStart,loadEventStart)}' +
+        't${navTiming(navigationStart,loadEventEnd)}&' +
+        'app=${app}&' +
+        'time=${timestamp}',
+    },
+    'triggers': {
+      'trackPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+    'vars': {
+      'app': 'ampapp',
+      'protocol': 'https',
+      'tenant': '',
+      'environment': 'live.dynatrace.com',
+      'port': '443',
+    },
+  },
+
+  'euleriananalytics': {
+    'vars': {
+      'analyticsHost': '',
+      'documentLocation': 'SOURCE_URL',
+    },
+    'requests': {
+      'base': 'https://${analyticsHost}',
+      'basePrefix': '-/${random}?' +
+        'euid-amp=${clientId(etuix)}&' +
+        'url=${documentLocation}&',
+      'pageview': '${base}/col2/${basePrefix}' +
+        'rf=${documentReferrer}&' +
+        'sd=${screenWidth}x${screenHeight}&' +
+        'sd=${screenColorDepth}&' +
+        'elg=${browserLanguage}',
+      'action': '${base}/action/${basePrefix}' +
+        'eact=${actionCode}&' +
+        'actr=${actionRef}',
+      'user': '${base}/uparam/${basePrefix}' +
+        'euk${userParamKey}=${userParamVal}',
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
   'gemius': {
     'requests': {
       'base': 'https://${prefix}.hit.gemius.pl/_${timestamp}/redot.gif?l=91&id=${identifier}&screen=${screenWidth}x${screenHeight}&window=${viewportWidth}x${viewportHeight}&fr=1&href=${sourceUrl}&ref=${documentReferrer}&extra=gemamp%3D1%7Campid%3D${clientId(gemius)}%7C${extraparams}',
@@ -413,19 +502,57 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     },
   },
 
+  'googleadwords': {
+    'requests': {
+      'conversion_prefix': 'https://www.googleadservices.com/pagead/conversion/',
+      'remarketing_prefix':
+          'https://googleads.g.doubleclick.net/pagead/viewthroughconversion/',
+      'common_params': '${googleConversionId}/?' +
+          'cv=amp2&' +  // Increment when making changes.
+          'label=${googleConversionLabel}&' +
+          'random=${random}&' +
+          'url=${sourceUrl}&' +
+          'ref=${documentReferrer}&' +
+          'fst=${pageViewId}&' +
+          'num=${counter(googleadwords)}&' +
+          'fmt=3&' +
+          'async=1&' +
+          'u_h=${screenHeight}&u_w=${screenWidth}&' +
+          'u_ah=${availableScreenHeight}&u_aw=${availableScreenWidth}&' +
+          'u_cd=${screenColorDepth}&' +
+          'u_tz=${timezone}&' +
+          'tiba=${title}&' +
+          'guid=ON&script=0',
+      'conversion_params': 'value=${googleConversionValue}&' +
+          'currency_code=${googleConversionCurrency}&' +
+          'bg=${googleConversionColor}&' +
+          'hl=${googleConversionLanguage}',
+      'conversion': '${conversion_prefix}${common_params}&${conversion_params}',
+      'remarketing': '${remarketing_prefix}${common_params}',
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
+  // Important: please keep this in sync with the following config
+  // 'googleanalytics-alpha'.
   'googleanalytics': {
     'vars': {
       'eventValue': '0',
       'documentLocation': 'SOURCE_URL',
       'clientId': 'CLIENT_ID(AMP_ECID_GOOGLE)',
       'dataSource': 'AMP',
+      'anonymizeIP': 'aip',
     },
     'requests': {
       'host': 'https://www.google-analytics.com',
       'basePrefix': 'v=1&' +
           '_v=a1&' +
           'ds=${dataSource}&' +
-          'aip=true&' +
+          '${anonymizeIP}&' +
           '_s=${requestCount}&' +
           'dt=${title}&' +
           'sr=${screenWidth}x${screenHeight}&' +
@@ -489,33 +616,85 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     'optout': '_gaUserPrefs.ioo',
   },
 
-  'googleconversion': {
+  // USE WITH CAUTION (unless told by Google Analytics representatives)
+  // googleanalytics-alpha configuration is not planned to be supported
+  // long-term. Avoid use of this value for amp-analytics config attribute
+  // unless you plan to migrate before deprecation' #5761
+  'googleanalytics-alpha': {
+    'vars': {
+      'eventValue': '0',
+      'documentLocation': 'SOURCE_URL',
+      'clientId': 'CLIENT_ID(_ga)',
+      'dataSource': 'AMP',
+      'anonymizeIP': 'aip',
+    },
     'requests': {
-      'conversion': 'https://www.googleadservices.com/pagead/conversion/' +
-          '${google_conversion_id}/?' +
-          'cv=amp1&' +  // Increment when making changes.
-          'value=${google_conversion_value}&' +
-          'currency_code=${google_conversion_currency}&' +
-          'label=${google_conversion_label}&' +
-          'random=${random}&' +
-          'url=${sourceUrl}&' +
-          'fst=${pageViewId}&' +
-          'num=${counter(googleconversion)}&' +
-          'fmt=3&' +
-          'async=3&' +
-          'bg=${google_conversion_color}&' +
-          'u_h=${screenHeight}&u_w=${screenWidth}&' +
-          'u_ah=${viewportHeight}&u_aw=${viewportWidth}&' +
-          'u_cd=${screenColorDepth}&' +
-          'u_tz=${timezone}&' +
-          'tiba=${title}&' +
-          'guid=ON&script=0',
+      'host': 'https://www.google-analytics.com',
+      'basePrefix': 'v=1&' +
+      '_v=a1&' +
+      'ds=${dataSource}&' +
+      '${anonymizeIP}&' +
+      '_s=${requestCount}&' +
+      'dt=${title}&' +
+      'sr=${screenWidth}x${screenHeight}&' +
+      '_utmht=${timestamp}&' +
+      'cid=${clientId}&' +
+      'tid=${account}&' +
+      'dl=${documentLocation}&' +
+      'dr=${documentReferrer}&' +
+      'sd=${screenColorDepth}&' +
+      'ul=${browserLanguage}&' +
+      'de=${documentCharset}',
+      'baseSuffix': '&a=${pageViewId}&' +
+      'z=${random}',
+      'pageview': '${host}/r/collect?${basePrefix}&' +
+      't=pageview&' +
+      'jid=${random}&' +
+      '_r=1' +
+      '${baseSuffix}',
+      'event': '${host}/collect?${basePrefix}&' +
+      't=event&' +
+      'jid=&' +
+      'ec=${eventCategory}&' +
+      'ea=${eventAction}&' +
+      'el=${eventLabel}&' +
+      'ev=${eventValue}' +
+      '${baseSuffix}',
+      'social': '${host}/collect?${basePrefix}&' +
+      't=social&' +
+      'jid=&' +
+      'sa=${socialAction}&' +
+      'sn=${socialNetwork}&' +
+      'st=${socialTarget}' +
+      '${baseSuffix}',
+      'timing': '${host}/collect?${basePrefix}&' +
+      't=timing&' +
+      'jid=&' +
+      'plt=${pageLoadTime}&' +
+      'dns=${domainLookupTime}&' +
+      'tcp=${tcpConnectTime}&' +
+      'rrt=${redirectTime}&' +
+      'srt=${serverResponseTime}&' +
+      'pdt=${pageDownloadTime}&' +
+      'clt=${contentLoadTime}&' +
+      'dit=${domInteractiveTime}' +
+      '${baseSuffix}',
     },
-    'transport': {
-      'beacon': false,
-      'xhrpost': false,
-      'image': true,
+    'triggers': {
+      'performanceTiming': {
+        'on': 'visible',
+        'request': 'timing',
+        'sampleSpec': {
+          'sampleOn': '${clientId}',
+          'threshold': 1,
+        },
+      },
     },
+    'extraUrlParamsReplaceMap': {
+      'dimension': 'cd',
+      'metric': 'cm',
+    },
+    'optout': '_gaUserPrefs.ioo',
   },
 
   'krux': {
@@ -1157,6 +1336,62 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'beacon': false,
       'xhrpost': false,
       'image': true,
+    },
+  },
+  'rakam': {
+    'vars': {
+      'deviceId': 'CLIENT_ID(rakam_device_id)',
+    },
+    'requests': {
+      'base': '?api.api_key=${writeKey}' +
+        '&prop._platform=amp' +
+        '&prop._device_id=${deviceId}' +
+        '&prop.locale=${browserLanguage}' +
+        '&prop.path=${canonicalPath}' +
+        '&prop.url=${canonicalUrl}' +
+        '&prop.color_depth=${screenColorDepth}' +
+        '&prop._referrer=${documentReferrer}' +
+        '&prop.title=${title}' +
+        '&prop.timezone=${timezone}' +
+        '&prop._time=${timestamp}' +
+        '&prop.resolution=${screenWidth} × ${screenHeight}',
+      'pageview': 'https://${apiEndpoint}/event/pixel${base}&collection=${pageViewName}',
+      'custom': 'https://${apiEndpoint}/event/pixel${base}&collection=${collection}',
+    },
+  },
+  'ibeatanalytics': {
+    'requests': {
+      'host': 'https://ibeat.indiatimes.com',
+      'base': 'https://ibeat.indiatimes.com/iBeat/pageTrendlogAmp.html',
+      'pageview': '${base}?' +
+                '&h=${h}' +
+                '&d=${h}' +
+                '&url=${url}' +
+                '&k=${key}' +
+                '&ts=${time}' +
+                '&ch=${channel}' +
+                '&sid=${uid}' +
+                '&at=${agentType}' +
+                '&ref=${documentReferrer}' +
+                '&aid=${aid}' +
+                '&loc=1' +
+                '&ct=1' +
+                '&cat=${cat}' +
+                '&scat=${scat}' +
+                '&ac=1' +
+                '&tg=${tags}' +
+                '&ctids=${catIds}' +
+                '&pts=${pagePublishTime}' +
+                '&auth=${author}' +
+                '&pos=${position}' +
+                '&iBeatField=${ibeatFields}' +
+                '&cid=${clientId(MSCSAuthDetails)}',
+    },
+    'triggers': {
+      'defaultPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
     },
   },
 });

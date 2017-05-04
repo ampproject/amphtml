@@ -24,6 +24,7 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {
     data as validCSSAmp,
 } from './testdata/valid_css_at_rules_amp.reserialized';
+import {installCryptoService} from '../../../../src/service/crypto-impl';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {FetchResponseHeaders} from '../../../../src/service/xhr-impl';
 import {adConfig} from '../../../../ads/_config';
@@ -125,6 +126,7 @@ describe('integration test: a4a', () => {
     return createIframePromise().then(f => {
       fixture = f;
       installDocService(fixture.win, /* isSingleDoc */ true);
+      installCryptoService(fixture.win);
       upgradeOrRegisterElement(fixture.win, 'amp-a4a', MockA4AImpl);
       const doc = fixture.doc;
       a4aElement = doc.createElement('amp-a4a');
@@ -154,16 +156,27 @@ describe('integration test: a4a', () => {
     });
   });
 
+  it('should not send request if display none', () => {
+    a4aElement.style.display = 'none';
+    return fixture.addElement(a4aElement).then(element => {
+      expect(xhrMock).to.not.be.called;
+      expect(element.querySelector('iframe')).to.not.be.ok;
+    });
+  });
+
   it('should fall back to 3p when the XHR fails', () => {
     xhrMock.resetBehavior();
     xhrMock.throws(new Error('Testing network error'));
     // TODO(tdrl) Currently layoutCallback rejects, even though something *is*
     // rendered.  This should be fixed in a refactor, and we should change this
     // .catch to a .then.
+    const forceCollapseStub =
+        sandbox.spy(MockA4AImpl.prototype, 'forceCollapse');
     return fixture.addElement(a4aElement).catch(error => {
       expect(error.message).to.contain.string('Testing network error');
       expect(error.message).to.contain.string('AMP-A4A-');
       expectRenderedInXDomainIframe(a4aElement, TEST_URL);
+      expect(forceCollapseStub).to.be.notCalled;
     });
   });
 
@@ -234,22 +247,22 @@ describe('integration test: a4a', () => {
       credentials: 'include',
     }).onFirstCall().returns(Promise.resolve(mockResponse));
     const forceCollapseStub =
-        sandbox.stub(MockA4AImpl.prototype, 'forceCollapse');
-    return fixture.addElement(a4aElement).then(unusedElement => {
+        sandbox.spy(MockA4AImpl.prototype, 'forceCollapse');
+    return fixture.addElement(a4aElement).then(() => {
       expect(forceCollapseStub).to.be.calledOnce;
     });
   });
 
-  it('should collapse slot when creative response is null', () => {
+  it('should NOT collapse slot when creative response is null', () => {
     xhrMock.withArgs(TEST_URL, {
       mode: 'cors',
       method: 'GET',
       credentials: 'include',
     }).onFirstCall().returns(Promise.resolve(null));
     const forceCollapseStub =
-        sandbox.stub(MockA4AImpl.prototype, 'forceCollapse');
+        sandbox.spy(MockA4AImpl.prototype, 'forceCollapse');
     return fixture.addElement(a4aElement).then(unusedElement => {
-      expect(forceCollapseStub).to.be.calledOnce;
+      expect(forceCollapseStub).to.be.notCalled;
     });
   });
 
@@ -272,12 +285,37 @@ describe('integration test: a4a', () => {
       credentials: 'include',
     }).onFirstCall().returns(Promise.resolve(mockResponse));
     const forceCollapseStub =
-        sandbox.stub(MockA4AImpl.prototype, 'forceCollapse');
-    return fixture.addElement(a4aElement).then(unusedElement => {
+        sandbox.spy(MockA4AImpl.prototype, 'forceCollapse');
+    return fixture.addElement(a4aElement).then(() => {
       expect(forceCollapseStub).to.be.calledOnce;
     });
   });
 
+  it('should collapse slot when creative response.arrayBuffer() is empty',
+      () => {
+        headers = {};
+        headers[SIGNATURE_HEADER] = validCSSAmp.signature;
+        mockResponse = {
+          arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+          bodyUsed: false,
+          headers: new FetchResponseHeaders({
+            getResponseHeader(name) {
+              return headers[name];
+            },
+          }),
+          status: 200,
+        };
+        xhrMock.withArgs(TEST_URL, {
+          mode: 'cors',
+          method: 'GET',
+          credentials: 'include',
+        }).onFirstCall().returns(Promise.resolve(mockResponse));
+        const forceCollapseStub =
+            sandbox.spy(MockA4AImpl.prototype, 'forceCollapse');
+        return fixture.addElement(a4aElement).then(unusedElement => {
+          expect(forceCollapseStub).to.be.calledOnce;
+        });
+      });
 
   // TODO(@ampproject/a4a): Need a test that double-checks that thrown errors
   // are propagated out and printed to console and/or sent upstream to error

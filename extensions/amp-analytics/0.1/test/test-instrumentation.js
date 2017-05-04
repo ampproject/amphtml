@@ -21,6 +21,9 @@ import {
 import {
   ClickEventTracker,
   CustomEventTracker,
+  IniLoadTracker,
+  SignalTracker,
+  VisibilityTracker,
 } from '../events';
 import {VisibilityState} from '../../../../src/visibility-state';
 import * as sinon from 'sinon';
@@ -32,6 +35,7 @@ import {
     installResourcesServiceForDoc,
 } from '../../../../src/service/resources-impl';
 import {documentStateFor} from '../../../../src/service/document-state';
+import {toggleExperiment} from '../../../../src/experiments';
 
 
 describes.realWin('InstrumentationService', {amp: 1}, env => {
@@ -99,6 +103,10 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
       insStub = sandbox.stub(service, 'addListenerDepr_');
     });
 
+    afterEach(() => {
+      toggleExperiment(win, 'visibility-v3', false);
+    });
+
     it('should create group for the ampdoc root', () => {
       expect(group.root_).to.equal(root);
     });
@@ -131,7 +139,7 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
       expect(trackerStub).to.not.be.called;
       expect(group.listeners_).to.be.empty;
 
-      expect(insStub.callCount).to.equal(4);
+      expect(insStub).to.have.callCount(4);
 
       expect(insStub.args[0][0].on).to.equal('visible');
       expect(insStub.args[0][1]).to.equal(handler);
@@ -180,6 +188,83 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
       expect(group.listeners_).to.have.length(1);
       expect(group.listeners_[0]).to.equal(unlisten);
       expect(insStub).to.not.be.called;
+    });
+
+    it('should add "render-start" trigger', () => {
+      const config = {on: 'render-start'};
+      group.addTrigger(config, handler);
+      const tracker = root.getTrackerOptional('render-start');
+      expect(tracker).to.be.instanceOf(SignalTracker);
+
+      const unlisten = function() {};
+      const stub = sandbox.stub(tracker, 'add', () => unlisten);
+      const handler = function() {};
+      group.addTrigger(config, handler);
+      expect(stub).to.be.calledOnce;
+      expect(stub).to.be.calledWith(
+          analyticsElement, 'render-start', config, handler);
+    });
+
+    it('should add "ini-load" trigger', () => {
+      const config = {on: 'ini-load'};
+      group.addTrigger(config, handler);
+      const tracker = root.getTrackerOptional('ini-load');
+      expect(tracker).to.be.instanceOf(IniLoadTracker);
+
+      const unlisten = function() {};
+      const stub = sandbox.stub(tracker, 'add', () => unlisten);
+      const handler = function() {};
+      group.addTrigger(config, handler);
+      expect(stub).to.be.calledOnce;
+      expect(stub).to.be.calledWith(
+          analyticsElement, 'ini-load', config, handler);
+    });
+
+    it('should add "visible-v3" trigger', () => {
+      const config = {on: 'visible-v3'};
+      group.addTrigger(config, handler);
+      const tracker = root.getTrackerOptional('visible-v3');
+      expect(tracker).to.be.instanceOf(VisibilityTracker);
+
+      const unlisten = function() {};
+      const stub = sandbox.stub(tracker, 'add', () => unlisten);
+      const handler = function() {};
+      group.addTrigger(config, handler);
+      expect(stub).to.be.calledOnce;
+      expect(stub).to.be.calledWith(
+          analyticsElement, 'visible-v3', config, handler);
+    });
+
+    it('should add "visible-v3" trigger for hidden-v3', () => {
+      toggleExperiment(win, 'visibility-v3', true);
+      group = service.createAnalyticsGroup(analyticsElement);
+      const config = {on: 'hidden-v3'};
+      const getTrackerSpy = sandbox.spy(root, 'getTracker');
+      group.addTrigger(config, () => {});
+      expect(getTrackerSpy).to.be.calledWith('visible-v3');
+      const tracker = root.getTrackerOptional('visible-v3');
+      const unlisten = function() {};
+      const stub = sandbox.stub(tracker, 'add', () => unlisten);
+      group.addTrigger(config, () => {});
+      expect(stub).to.be.calledWith(analyticsElement, 'hidden-v3', config);
+    });
+
+    it('should use "visible-v3" for "visible" w/experiment', () => {
+      // TODO(dvoytenko, #8121): Cleanup visibility-v3 experiment.
+      toggleExperiment(win, 'visibility-v3', true);
+      group = service.createAnalyticsGroup(analyticsElement);
+      const config = {on: 'visible'};
+      group.addTrigger(config, handler);
+      const tracker = root.getTrackerOptional('visible-v3');
+      expect(tracker).to.be.instanceOf(VisibilityTracker);
+
+      const unlisten = function() {};
+      const stub = sandbox.stub(tracker, 'add', () => unlisten);
+      const handler = function() {};
+      group.addTrigger(config, handler);
+      expect(stub).to.be.calledOnce;
+      expect(stub).to.be.calledWith(
+          analyticsElement, 'visible-v3', config, handler);
     });
   });
 });
@@ -278,94 +363,97 @@ describe('amp-analytics.instrumentation OLD', function() {
     ins.addListenerDepr_({'on': 'hidden'}, fn);
     ins.viewer_.setVisibilityState_(VisibilityState.HIDDEN);
     expect(fn.calledOnce).to.be.true;
+
+    // remove the side effect. many other tests need viewer to be visible
+    ins.viewer_.setVisibilityState_(VisibilityState.VISIBLE);
   });
 
   it('only fires when the timer interval exceeds the minimum', () => {
     const fn1 = sandbox.stub();
     ins.addListenerDepr_({'on': 'timer', 'timerSpec': {'interval': 0}}, fn1);
-    expect(fn1.callCount).to.equal(0);
+    expect(fn1).to.have.not.been.called;
 
     const fn2 = sandbox.stub();
     ins.addListenerDepr_({'on': 'timer', 'timerSpec': {'interval': 1}}, fn2);
-    expect(fn2.callCount).to.equal(1);
+    expect(fn2).to.be.calledOnce;
   });
 
   it('never fires when the timer spec is malformed', () => {
     const fn1 = sandbox.stub();
     ins.addListenerDepr_({'on': 'timer'}, fn1);
-    expect(fn1.callCount).to.equal(0);
+    expect(fn1).to.have.not.been.called;
 
     const fn2 = sandbox.stub();
     ins.addListenerDepr_({'on': 'timer', 'timerSpec': 1}, fn2);
-    expect(fn2.callCount).to.equal(0);
+    expect(fn2).to.have.not.been.called;
 
     const fn3 = sandbox.stub();
     ins.addListenerDepr_({'on': 'timer', 'timerSpec': {'misc': 1}}, fn3);
-    expect(fn3.callCount).to.equal(0);
+    expect(fn3).to.have.not.been.called;
 
     const fn4 = sandbox.stub();
     ins.addListenerDepr_(
         {'on': 'timer', 'timerSpec': {'interval': 'two'}}, fn4);
-    expect(fn4.callCount).to.equal(0);
+    expect(fn4).to.have.not.been.called;
 
     const fn5 = sandbox.stub();
     ins.addListenerDepr_(
         {'on': 'timer', 'timerSpec': {'interval': null}}, fn5);
-    expect(fn5.callCount).to.equal(0);
+    expect(fn5).to.have.not.been.called;
 
     const fn6 = sandbox.stub();
     ins.addListenerDepr_({
       'on': 'timer',
       'timerSpec': {'interval': 2, 'maxTimerLength': 0},
     }, fn6);
-    expect(fn6.callCount).to.equal(0);
+    expect(fn6).to.have.not.been.called;
 
     const fn7 = sandbox.stub();
     ins.addListenerDepr_({
       'on': 'timer',
       'timerSpec': {'interval': 2, 'maxTimerLength': null},
     }, fn7);
-    expect(fn7.callCount).to.equal(0);
+    expect(fn7).to.have.not.been.called;
   });
 
   it('fires on the appropriate interval', () => {
     const fn1 = sandbox.stub();
     ins.addListenerDepr_({'on': 'timer', 'timerSpec': {'interval': 10}}, fn1);
-    expect(fn1.callCount).to.equal(1);
+    expect(fn1).to.be.calledOnce;
 
     const fn2 = sandbox.stub();
     ins.addListenerDepr_({'on': 'timer', 'timerSpec': {'interval': 15}}, fn2);
-    expect(fn2.callCount).to.equal(1);
+    expect(fn2).to.be.calledOnce;
 
     const fn3 = sandbox.stub();
     ins.addListenerDepr_({
       'on': 'timer', 'timerSpec': {'interval': 10, 'immediate': false},
     }, fn3);
-    expect(fn3.callCount).to.equal(0);
+    expect(fn3).to.have.not.been.called;
 
     const fn4 = sandbox.stub();
     ins.addListenerDepr_({
       'on': 'timer', 'timerSpec': {'interval': 15, 'immediate': false},
     }, fn4);
-    expect(fn4.callCount).to.equal(0);
+    expect(fn4).to.have.not.been.called;
 
     clock.tick(10 * 1000); // 10 seconds
-    expect(fn1.callCount).to.equal(2);
-    expect(fn2.callCount).to.equal(1);
-    expect(fn3.callCount).to.equal(1);
-    expect(fn4.callCount).to.equal(0);
+    expect(fn1).to.have.callCount(2);
+    expect(fn2).to.be.calledOnce;
+    expect(fn3).to.be.calledOnce;
+    expect(fn4).to.have.not.been.called;
 
     clock.tick(10 * 1000); // 20 seconds
-    expect(fn1.callCount).to.equal(3);
-    expect(fn2.callCount).to.equal(2);
-    expect(fn3.callCount).to.equal(2);
-    expect(fn4.callCount).to.equal(1);
+    expect(fn1).to.have.callCount(3);
+    expect(fn2).to.have.callCount(2);
+    expect(fn3).to.have.callCount(2);
+    expect(fn4).to.be.calledOnce;
 
     clock.tick(10 * 1000); // 30 seconds
-    expect(fn1.callCount).to.equal(4);
-    expect(fn2.callCount).to.equal(3);
-    expect(fn3.callCount).to.equal(3);
-    expect(fn4.callCount).to.equal(2);
+    expect(fn1).to.have.callCount(4);
+    expect(fn2).to.have.callCount(3);
+    expect(fn3).to.have.callCount(3);
+    expect(fn4).to.have.callCount(2);
   });
 
   it('stops firing after the maxTimerLength is exceeded', () => {
@@ -373,33 +461,33 @@ describe('amp-analytics.instrumentation OLD', function() {
     ins.addListenerDepr_({
       'on': 'timer', 'timerSpec': {'interval': 10, 'maxTimerLength': 15},
     }, fn1);
-    expect(fn1.callCount).to.equal(1);
+    expect(fn1).to.be.calledOnce;
 
     const fn2 = sandbox.stub();
     ins.addListenerDepr_({
       'on': 'timer', 'timerSpec': {'interval': 10, 'maxTimerLength': 20},
     }, fn2);
-    expect(fn2.callCount).to.equal(1);
+    expect(fn2).to.be.calledOnce;
 
     const fn3 = sandbox.stub();
     ins.addListenerDepr_({'on': 'timer', 'timerSpec': {'interval': 3600}}, fn3);
-    expect(fn3.callCount).to.equal(1);
+    expect(fn3).to.be.calledOnce;
 
     clock.tick(10 * 1000); // 10 seconds
-    expect(fn1.callCount).to.equal(2);
-    expect(fn2.callCount).to.equal(2);
+    expect(fn1).to.have.callCount(2);
+    expect(fn2).to.have.callCount(2);
 
     clock.tick(10 * 1000); // 20 seconds
-    expect(fn1.callCount).to.equal(2);
-    expect(fn2.callCount).to.equal(3);
+    expect(fn1).to.have.callCount(2);
+    expect(fn2).to.have.callCount(3);
 
     clock.tick(10 * 1000); // 30 seconds
-    expect(fn1.callCount).to.equal(2);
-    expect(fn2.callCount).to.equal(3);
+    expect(fn1).to.have.callCount(2);
+    expect(fn2).to.have.callCount(3);
 
     // Default maxTimerLength is 2 hours
     clock.tick(3 * 3600 * 1000); // 3 hours
-    expect(fn3.callCount).to.equal(3);
+    expect(fn3).to.have.callCount(3);
   });
 
   it('fires on scroll', () => {
@@ -421,22 +509,22 @@ describe('amp-analytics.instrumentation OLD', function() {
           actual.vars.verticalScrollBoundary === String(expected);
       };
     }
-    expect(fn1.callCount).to.equal(2);
+    expect(fn1).to.have.callCount(2);
     expect(fn1.getCall(0).calledWithMatch(sinon.match(matcher(0)))).to.be.true;
     expect(fn1.getCall(1).calledWithMatch(sinon.match(matcher(0)))).to.be.true;
-    expect(fn2.callCount).to.equal(0);
+    expect(fn2).to.have.not.been.called;
 
     // Scroll Down
     fakeViewport.getScrollTop.returns(500);
     fakeViewport.getScrollLeft.returns(500);
     ins.onScroll_({top: 500, left: 500, height: 250, width: 250});
 
-    expect(fn1.callCount).to.equal(4);
+    expect(fn1).to.have.callCount(4);
     expect(fn1.getCall(2).calledWithMatch(sinon.match(matcher(100)))).to.be
         .true;
     expect(fn1.getCall(3).calledWithMatch(sinon.match(matcher(100)))).to.be
         .true;
-    expect(fn2.callCount).to.equal(2);
+    expect(fn2).to.have.callCount(2);
     expect(fn2.getCall(0).calledWithMatch(sinon.match(matcher(90)))).to.be.true;
     expect(fn2.getCall(1).calledWithMatch(sinon.match(matcher(90)))).to.be.true;
   });
@@ -456,17 +544,17 @@ describe('amp-analytics.instrumentation OLD', function() {
     fakeViewport.getScrollLeft.returns(10);
     ins.onScroll_({top: 10, left: 10, height: 250, width: 250});
 
-    expect(fn1.callCount).to.equal(2);
+    expect(fn1).to.have.callCount(2);
   });
 
   it('fails gracefully on bad scroll config', () => {
     const fn1 = sandbox.stub();
 
     ins.addListenerDepr_({'on': 'scroll'}, fn1);
-    expect(fn1.callCount).to.equal(0);
+    expect(fn1).to.have.not.been.called;
 
     ins.addListenerDepr_({'on': 'scroll', 'scrollSpec': {}}, fn1);
-    expect(fn1.callCount).to.equal(0);
+    expect(fn1).to.have.not.been.called;
 
     ins.addListenerDepr_({
       'on': 'scroll',
@@ -474,13 +562,13 @@ describe('amp-analytics.instrumentation OLD', function() {
         'verticalBoundaries': undefined, 'horizontalBoundaries': undefined,
       }},
       fn1);
-    expect(fn1.callCount).to.equal(0);
+    expect(fn1).to.have.not.been.called;
 
     ins.addListenerDepr_({
       'on': 'scroll',
       'scrollSpec': {'verticalBoundaries': [], 'horizontalBoundaries': []}},
       fn1);
-    expect(fn1.callCount).to.equal(0);
+    expect(fn1).to.have.not.been.called;
 
     ins.addListenerDepr_({
       'on': 'scroll',
@@ -488,7 +576,7 @@ describe('amp-analytics.instrumentation OLD', function() {
         'verticalBoundaries': ['foo'], 'horizontalBoundaries': ['foo'],
       }},
       fn1);
-    expect(fn1.callCount).to.equal(0);
+    expect(fn1).to.have.not.been.called;
   });
 
   it('normalizes boundaries correctly.', () => {
@@ -513,7 +601,7 @@ describe('amp-analytics.instrumentation OLD', function() {
     ins.addListenerDepr_(
         {'on': 'scroll', 'scrollSpec': {'verticalBoundaries': [4]}},
         fn2);
-    expect(fn2.callCount).to.equal(1);
+    expect(fn2).to.be.calledOnce;
   });
 
 

@@ -14,9 +14,24 @@
  * limitations under the License.
  */
 
-import {closestBySelector, matches} from '../../../src/dom';
+import {
+  VisibilityManagerForDoc,
+  VisibilityManagerForEmbed,
+} from './visibility-manager';
+import {
+  closestBySelector,
+  matches,
+  scopedQuerySelector,
+} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
+import {layoutRectLtwh} from '../../../src/layout-rect';
 import {map} from '../../../src/utils/object';
+import {
+  viewerForDoc,
+  viewportForDoc,
+} from '../../../src/services';
+import {whenContentIniLoad} from '../../../src/friendly-iframe-embed';
 
 const TAG = 'amp-analytics';
 
@@ -45,6 +60,9 @@ export class AnalyticsRoot {
 
     /** @const */
     this.trackers_ = map();
+
+    /** @private {?./visibility-manager.VisibilityManager} */
+    this.visibilityManager_ = null;
   }
 
   /** @override */
@@ -52,6 +70,9 @@ export class AnalyticsRoot {
     for (const k in this.trackers_) {
       this.trackers_[k].dispose();
       delete this.trackers_[k];
+    }
+    if (this.visibilityManager_) {
+      this.visibilityManager_.dispose();
     }
   }
 
@@ -71,6 +92,14 @@ export class AnalyticsRoot {
   getRoot() {}
 
   /**
+   * The viewer of analytics root
+   * @return {!../../../src/service/viewer-impl.Viewer}
+   */
+  getViewer() {
+    return viewerForDoc(this.ampdoc);
+  }
+
+  /**
    * The root element within the analytics root.
    *
    * @return {!Element}
@@ -87,6 +116,14 @@ export class AnalyticsRoot {
    * @abstract
    */
   getHostElement() {}
+
+  /**
+   * The signals for the root.
+   *
+   * @return {!../../../src/utils/signals.Signals}
+   * @abstract
+   */
+  signals() {}
 
   /**
    * Whether this analytics root contains the specified node.
@@ -155,7 +192,7 @@ export class AnalyticsRoot {
     // Query search based on the selection method.
     let found;
     if (selectionMethod == 'scope') {
-      found = context.querySelector(selector);
+      found = scopedQuerySelector(context, selector);
     } else if (selectionMethod == 'closest') {
       found = closestBySelector(context, selector);
     } else {
@@ -167,6 +204,26 @@ export class AnalyticsRoot {
       return found;
     }
     return null;
+  }
+
+  /**
+   * Searches the AMP element that matches the selector within the scope of the
+   * analytics root in relationship to the specified context node.
+   *
+   * @param {!Element} context
+   * @param {string} selector DOM query selector.
+   * @param {?string=} selectionMethod Allowed values are `null`,
+   *   `'closest'` and `'scope'`.
+   * @return {?AmpElement} AMP element corresponding to the selector if found.
+   */
+  getAmpElement(context, selector, selectionMethod) {
+    const element = this.getElement(context, selector, selectionMethod);
+    if (element) {
+      user().assert(
+          element.classList.contains('i-amphtml-element'),
+          'Element "%s" is required to be an AMP element', selector);
+    }
+    return element;
   }
 
   /**
@@ -228,6 +285,34 @@ export class AnalyticsRoot {
       }
     };
   }
+
+  /**
+   * Returns the promise that will be resolved as soon as the elements within
+   * the root have been loaded inside the first viewport of the root.
+   * @return {!Promise}
+   * @abstract
+   */
+  whenIniLoaded() {}
+
+  /**
+   * Returns the visibility root corresponding to this analytics root (ampdoc
+   * or embed). The visibility root is created lazily as needed and takes
+   * care of all visibility tracking functions.
+   * @return {!./visibility-manager.VisibilityManager}
+   */
+  getVisibilityManager() {
+    if (!this.visibilityManager_) {
+      this.visibilityManager_ = this.createVisibilityManager();
+    }
+    return this.visibilityManager_;
+  }
+
+  /**
+   * @return {!./visibility-manager.VisibilityManager}
+   * @protected
+   * @abstract
+   */
+  createVisibilityManager() {}
 }
 
 
@@ -259,8 +344,37 @@ export class AmpdocAnalyticsRoot extends AnalyticsRoot {
   }
 
   /** @override */
+  signals() {
+    return this.ampdoc.signals();
+  }
+
+  /** @override */
   getElementById(id) {
     return this.ampdoc.getElementById(id);
+  }
+
+  /** @override */
+  whenIniLoaded() {
+    const viewport = viewportForDoc(this.ampdoc);
+    let rect;
+    if (getMode(this.ampdoc.win).runtime == 'inabox') {
+      // TODO(dvoytenko, #7971): This is currently addresses incorrect position
+      // calculations in a in-a-box viewport where all elements are offset
+      // to the bottom of the embed. The current approach, even if fixed, still
+      // creates a significant probability of risk condition.
+      // Once address, we can simply switch to the 0/0 approach in the `else`
+      // clause.
+      rect = viewport.getLayoutRect(this.getRootElement());
+    } else {
+      const size = viewport.getSize();
+      rect = layoutRectLtwh(0, 0, size.width, size.height);
+    }
+    return whenContentIniLoad(this.ampdoc, this.ampdoc.win, rect);
+  }
+
+  /** @override */
+  createVisibilityManager() {
+    return new VisibilityManagerForDoc(this.ampdoc);
   }
 }
 
@@ -296,8 +410,25 @@ export class EmbedAnalyticsRoot extends AnalyticsRoot {
   }
 
   /** @override */
+  signals() {
+    return this.embed.signals();
+  }
+
+  /** @override */
   getElementById(id) {
     return this.embed.win.document.getElementById(id);
+  }
+
+  /** @override */
+  whenIniLoaded() {
+    return this.embed.whenIniLoaded();
+  }
+
+  /** @override */
+  createVisibilityManager() {
+    return new VisibilityManagerForEmbed(
+        this.parent.getVisibilityManager(),
+        this.embed);
   }
 }
 

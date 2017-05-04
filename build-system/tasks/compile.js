@@ -141,12 +141,16 @@ function compile(entryModuleFilenames, outputDir,
       // Strange access/login related files.
       'build/all/v0/*.js',
       // A4A has these cross extension deps.
-      'extensions/**/*-config.js',
+      'extensions/amp-ad-network*/**/*-config.js',
       'extensions/amp-ad/**/*.js',
       'extensions/amp-a4a/**/*.js',
       // Currently needed for crypto.js and visibility.js.
       // Should consider refactoring.
       'extensions/amp-analytics/**/*.js',
+      // For amp-bind in the web worker (ww.js).
+      'extensions/amp-bind/**/*.js',
+      // Needed to access form impl from other extensions
+      'extensions/amp-form/**/*.js',
       'src/*.js',
       'src/!(inabox)*/**/*.js',
       '!third_party/babel/custom-babel-helpers.js',
@@ -157,6 +161,7 @@ function compile(entryModuleFilenames, outputDir,
       'third_party/closure-library/sha384-generated.js',
       'third_party/css-escape/css-escape.js',
       'third_party/mustache/**/*.js',
+      'third_party/timeagojs/**/*.js',
       'third_party/vega/**/*.js',
       'third_party/d3/**/*.js',
       'third_party/webcomponentsjs/ShadowCSS.js',
@@ -177,7 +182,7 @@ function compile(entryModuleFilenames, outputDir,
     // Instead of globbing all extensions, this will only add the actual
     // extension path for much quicker build times.
     entryModuleFilenames.forEach(function(filename) {
-      if (filename.indexOf('extensions/') == -1) {
+      if (!filename.includes('extensions/')) {
         return;
       }
       var path = filename.replace(/\/[^/]+\.js$/, '/**/*.js');
@@ -230,7 +235,7 @@ function compile(entryModuleFilenames, outputDir,
       continueWithWarnings: false,
       tieredCompilation: true,  // Magic speed up.
       compilerFlags: {
-        compilation_level: 'SIMPLE_OPTIMIZATIONS',
+        compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
         // Turns on more optimizations.
         assume_function_wrapper: true,
         // Transpile from ES6 to ES5.
