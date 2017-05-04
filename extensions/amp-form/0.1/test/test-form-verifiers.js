@@ -125,6 +125,46 @@ describes.fakeWin('amp-form async verification', {}, env => {
       const verifier = getFormVerifier(form, () => {});
       expect(verifier instanceof AsyncVerifier).to.be.true;
     });
+
+    it('should throw if an element is not in the form', () => {
+      const form = getForm(env.win.document, `{
+        "${CONFIG_KEY}": [
+          {
+            "name": "failGroup",
+            "elements": ["idontexist"]
+          }
+        ]
+      }`);
+      expect(() => getFormVerifier(form)).to.throw('no element named');
+    });
+
+    it('should throw if an element is not an allowed input', () => {
+      const form = getForm(env.win.document, `{
+        "${CONFIG_KEY}": [
+          {
+            "name": "failGroup",
+            "elements": ["invalid"]
+          }
+        ]
+      }`);
+      const nonInput = document.createElement('fieldset');
+      nonInput.name = 'invalid';
+      form.appendChild(nonInput);
+      expect(() => getFormVerifier(form)).to.throw('must be one of');
+    });
+
+    it('should throw if the list of groups is not an array ' +
+        'with at least one element', () => {
+      const form = getForm(env.win.document, `{
+        "${CONFIG_KEY}": ""
+      }`);
+      expect(() => getFormVerifier(form)).to.throw('at least one');
+
+      const form2 = getForm(env.win.document, `{
+        "${CONFIG_KEY}": []
+      }`);
+      expect(() => getFormVerifier(form2)).to.throw('at least one');
+    });
   });
 
   describes.realWin('AsyncVerifier', {

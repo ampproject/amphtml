@@ -86,12 +86,32 @@ function parseConfig_(script) {
     }
     return config.map(group => {
       const form = dev().assertElement(script.parentElement);
-      return new VerificationGroup(group.elements.map(name => form[name]));
+      return new VerificationGroup(group.elements.map(name => {
+        const element = form.elements[name];
+        if (!element) {
+          throw user().createError(
+              `Form %s has no element named "${name}" `, form);
+        } else if (!isSubmittable_(element)) {
+          throw user().createError('Verification elements must be one of ' +
+              submittableTagNames_.join(', '));
+        } else {
+          return element;
+        }
+      }));
     });
   } else {
     throw user().createError('The amp-form verification config should ' +
         'be put in a <script> tag with type="application/json"');
   }
+}
+
+const submittableTagNames_ = ['button', 'input', 'select', 'textarea'];
+/**
+ * @param {!Element} element
+ * @return {boolean}
+ */
+function isSubmittable_(element) {
+  return submittableTagNames_.includes(element.tagName.toLowerCase());
 }
 
 /**
