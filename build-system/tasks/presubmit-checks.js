@@ -660,6 +660,7 @@ var forbiddenTermsSrcInclusive = {
       'extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',
+      'extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.js',
     ],
   },
   'loadElementClass': {

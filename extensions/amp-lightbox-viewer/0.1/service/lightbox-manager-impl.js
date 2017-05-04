@@ -161,6 +161,14 @@ export class LightboxManager {
   }
 
   /**
+   * Return a list of lightboxable elements
+   * @return {!Promise<?Array<!Element>>}
+   */
+  getElements() {
+    return this.maybeInit_().then(() => this.elements_);
+  }
+
+  /**
    * The function is simplified for testing now.
    * Get the description for single lightboxed item.
    * @param {!Element} element

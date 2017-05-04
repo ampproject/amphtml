@@ -14,74 +14,21 @@
  * limitations under the License.
  */
 
-/**
- * .amp-lightboxed gets added to the element when displayed in the lightbox.
- * .amp-lightboxed is designed to provide a reasonable default behaviour for
- * lightboxing of arbitary elements.
- * Both components and page authors are free to customize the style of the
- * element when inside the lightbox.
- * Example:
- *    .myDiv {
- *       color: blue;
- *     }
- *
- *     .myDiv.amp-lightboxed {
- *       color: red;
- *     }
- */
-.amp-lightboxed {
+.i-amphtml-lbv {
   position: fixed !important;
-  z-index: 2147483643 !important;
-  width: 100%;
-  box-sizing: border-box;
-  margin: 0;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  object-fit: contain;
-}
-
-/**
- * The following rule is needed to reset the stacking context.
- * By resetting the properties that create new stacking context on the
- * ancestors of the item being lightboxed, we end up with a single stacking
- * context and therefore the z-index will be absolute. See https://goo.gl/uqY5CN
- * Code is copied from Webkit's FullScreen Css https://goo.gl/gjbKoI
- */
-.i-amphtml-lightboxed-ancestor {
-  z-index: auto !important;
-  position: static !important;
-  opacity: 1 !important;
-  transform: none !important;
-  clip: none !important;
-  transition: none !important;
-  will-change: auto !important;
-  mask: none !important;
-  filter: none !important;
-  perspective: none !important;
-  transform-style: flat !important;
-  /* Webkit specific, non-standard - not auto-prefixable */
-  -webkit-box-reflect: none !important;
-}
-
-:root.i-amphtml-lightboxed-ancestor {
-  overflow: hidden !important;
-}
-
-/* Page Mask, Gallery Viewer, Description Box */
-.i-amphtml-lbv-mask,
-.i-amphtml-lbv-gallery,
-.amp-lbv-desc-box {
-  position: fixed !important;
+  top: 0 !important;
   left: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
-  background-image: none !important;
+  z-index: 2147483642 !important;
 }
 
 .i-amphtml-lbv-mask,
 .i-amphtml-lbv-gallery {
-  top:0 !important;
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
   /*
    * For now we force a non-transparent shim until we find a good solution
    * for the background page shifting when items get lightboxed.
@@ -91,18 +38,20 @@
 }
 
 .i-amphtml-lbv-mask {
-  z-index: 2147483642 !important;
+  top:0 !important;
 }
 
 .i-amphtml-lbv-gallery {
   display: none;
-  z-index: 2147483645 !important;
   top: 50px !important;
   overflow: auto !important;
 }
 
-.amp-lbv-desc-box {
-  z-index: 2147483644 !important;
+.i-amphtml-lbv-desc-box {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
   max-height: 30vh !important;
   padding: 10px;
   overflow-x: hidden;
@@ -113,7 +62,7 @@
   transition: opacity 1s;
 }
 
-.amp-lbv-desc-box.hide {
+.i-amphtml-lbv-desc-box.hide {
   opacity: 0;
 }
 
@@ -138,36 +87,16 @@
 }
 
 /* Controls */
-.amp-lbv-button-next,
-.amp-lbv-button-prev,
 .amp-lbv-button-close,
 .amp-lbv-button-gallery,
 .amp-lbv-button-back{
-  z-index: 2147483646 !important;
-  position: fixed !important;
+  position: absolute !important;
   cursor: pointer;
   width: 50px;
   height: 50px;
   background-repeat: no-repeat;
   background-position: center center;
   background-color: rgba(0,0,0,0.7);
-}
-
-/* TODO(aghassemi): Polish the controls and add RTL support */
-.amp-lbv-button-next,
-.amp-lbv-button-prev {
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.amp-lbv-button-next {
-  right: 0;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#fff" viewBox="0 0 18 18"><path d="M9 3L7.94 4.06l4.19 4.19H3v1.5h9.13l-4.19 4.19L9 15l6-6z"/></svg>');
-}
-
-.amp-lbv-button-prev {
-  left: 0;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#fff" viewBox="0 0 18 18"><path d="M15 8.25H5.87l4.19-4.19L9 3 3 9l6 6 1.06-1.06-4.19-4.19H15v-1.5z"/></svg>');
 }
 
 .amp-lbv-button-close {
@@ -189,17 +118,7 @@
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" fill="#fff" height="24" viewBox="0 0 24 24" width="24"><path d="M0 0h24v24H0z" fill="none"/><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>');
 }
 
-.i-amphtml-lbv[no-next] .amp-lbv-button-next {
-  display: none;
-}
-
-.i-amphtml-lbv[no-prev] .amp-lbv-button-prev {
-  display: none;
-}
-
 .i-amphtml-lbv[gallery-view] .amp-lbv-button-close,
-.i-amphtml-lbv[gallery-view] .amp-lbv-button-next,
-.i-amphtml-lbv[gallery-view] .amp-lbv-button-prev,
 .i-amphtml-lbv[gallery-view] .amp-lbv-button-gallery {
   display: none;
 }
