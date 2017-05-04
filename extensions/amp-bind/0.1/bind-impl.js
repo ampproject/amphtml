@@ -172,16 +172,18 @@ export class Bind {
       return Promise.resolve();
     }
 
-    const promise = this.initializePromise_.then(() => {
-      user().fine(TAG, 'State updated; re-evaluating expressions...');
-      return this.evaluate_().then(results =>
-          this.apply_(results, opt_fromAmpState));
-    });
+    user().fine(TAG, 'State updated; re-evaluating expressions...');
+
+    const promise = this.initializePromise_
+        .then(() => this.evaluate_())
+        .then(results => this.apply_(results, opt_fromAmpState));
+
     if (getMode().test) {
       promise.then(() => {
         this.dispatchEventForTesting_('amp:bind:setState');
       });
     }
+
     return this.setStatePromise_ = promise;
   }
 

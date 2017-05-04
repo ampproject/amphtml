@@ -50,6 +50,10 @@ describes.realWin('AmpState', {
     ampState = getAmpState();
 
     const impl = ampState.implementation_;
+
+    // For simpler testing, stub the fetching and update call to Bind service.
+    // - `fetchStub should only be called when fetching remote JSON data
+    // - `updateStub` should only be called when parsing a child script
     fetchStub = sandbox.stub(impl, 'fetchSrcAndUpdateState_');
     updateStub = sandbox.stub(impl, 'updateState_');
   });
