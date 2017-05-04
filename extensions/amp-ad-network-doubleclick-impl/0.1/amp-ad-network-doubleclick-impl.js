@@ -165,12 +165,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         .then(adResponse => {
           // If the server returned a size, use that, otherwise use the size
           // that we sent in the ad request.
-          if (adResponse.size) {
-            this.size_ = adResponse.size;
+          if (adResponse.sizeInfo) {
+            this.size_ = adResponse.sizeInfo;
           } else {
-            adResponse.size = this.size_;
+            adResponse.sizeInfo = this.size_;
           }
-          this.handleResize_(adResponse.size.width, adResponse.size.height);
+          this.handleResize_(
+              adResponse.sizeInfo.width, adResponse.sizeInfo.height);
           return adResponse;
         });
   }

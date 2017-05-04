@@ -162,7 +162,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
                   keypairId: 'test',
                   signature: base64DecodeToBytes('AQAB')
                 },
-                sizeInfo: null,
+                sizeInfo,
               });
               expect(loadExtensionSpy.withArgs('amp-analytics'))
                   .to.not.be.called;
@@ -196,7 +196,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
                   keypairId: 'test',
                   signature: base64DecodeToBytes('AQAB')
                 },
-                sizeInfo: null,
+                sizeInfo,
               });
               expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
               // exact value of ampAnalyticsConfig covered in
