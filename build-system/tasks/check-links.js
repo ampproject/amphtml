@@ -29,7 +29,7 @@ var util = require('gulp-util');
 function checkLinks() {
   var files = argv.files;
   if (!files) {
-    console./*OK*/error(util.colors.red(
+    util.log(util.colors.red(
         'Error: A list of markdown files must be specified via --files'));
     process.exit(1);
   }
@@ -43,7 +43,6 @@ function checkLinks() {
  * @param {string} markdownFiles CSV list of markdown files to check.
  */
 function checkLinksInFiles(markdownFiles) {
-  util.log('Checking links in', util.colors.magenta(markdownFiles), '...');
   markdownFiles.forEach(runLinkChecker);
 }
 
@@ -70,17 +69,19 @@ function runLinkChecker(markdownFile) {
   opts.baseUrl = 'file://' + path.dirname(path.resolve((markdownFile)));
 
   var filteredMarkdown = filterLocalhostLinks(markdownFile);
+  util.log('Checking links in', util.colors.magenta(markdownFile), '...');
   markdownLinkCheck(filteredMarkdown, opts, function(error, results) {
     results.forEach(function (result) {
       if(result.status === 'dead') {
         error = true;
-        console.log('[%s] %s', chalk.red('✖'), result.link);
+        util.log('[%s] %s', chalk.red('✖'), result.link);
       } else {
-        console.log('[%s] %s', chalk.green('✓'), result.link);
+        util.log('[%s] %s', chalk.green('✓'), result.link);
       }
     });
     if(error) {
-      console.error('\nERROR: dead links found!');
+      util.log(util.colors.red(
+        'ERROR: Dead links found in ' + markdownFile + '. Please update it.'));
       process.exit(1);
     }
   });
