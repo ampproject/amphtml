@@ -30,7 +30,7 @@ var request = require('request');
 var url = require('url');
 
 app.use(bodyParser.json());
-app.use('/request-bank', require('./request-bank'));
+app.use('/amp4test', require('./amp4test'));
 
 // Append ?csp=1 to the URL to turn on the CSP header.
 // TODO: shall we turn on CSP all the time?
