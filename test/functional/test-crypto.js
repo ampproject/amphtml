@@ -163,12 +163,12 @@ describes.realWin('crypto-impl', {}, env => {
     describe('A4A crypto', () => {
       const subtle = window.crypto.subtle || window.crypto.webkitSubtle;
       const generateKeypair = () => subtle.generateKey(
-          {
-            name: 'RSASSA-PKCS1-v1_5',
-            modulusLength: 2048,
-            publicExponent: Uint8Array.of(1, 0, 1),
-            hash: {name: 'SHA-256'}
-          },
+        {
+          name: 'RSASSA-PKCS1-v1_5',
+          modulusLength: 2048,
+          publicExponent: Uint8Array.of(1, 0, 1),
+          hash: {name: 'SHA-256'}
+        },
           true, ['sign', 'verify']);
       const data = stringToBytes('Hello');
       const wrongData = stringToBytes('Hello0');
