@@ -18,7 +18,6 @@ import {
   installUrlReplacementsForEmbed,
 } from '../../src/service/url-replacements-impl';
 import {VariableSource} from '../../src/service/variable-source';
-import {isReferrerPolicySupported} from '../../builtins/amp-pixel';
 
 describes.realWin('amp-pixel', {amp: true}, env => {
   let win;
