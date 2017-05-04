@@ -244,10 +244,9 @@ export class AsyncVerifier extends FormVerifier {
       const cleanup = () => {
         this.xhrResolver_ = null;
       };
-      this.xhrResolver_.get().then(cleanup, cleanup);
+      this.xhrResolver_.then(cleanup, cleanup);
     }
-    this.xhrResolver_.add(promise);
-    return this.xhrResolver_.get();
+    return this.xhrResolver_.add(promise);
   }
 
   /**

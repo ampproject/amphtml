@@ -60,6 +60,7 @@ export function some(promises, count = 1) {
 
 /**
  * Resolves with the result of the last promise added.
+ * @implements {IThenable}
  */
 export class LastAddedResolver {
   /**
@@ -92,25 +93,34 @@ export class LastAddedResolver {
   /**
    * Add a promise to possibly be resolved.
    * @param {!Promise} promise
+   * @return {!Promise}
    */
   add(promise) {
     const countAtAdd = ++this.count_;
+    console.log('count', this.count_);
     Promise.resolve(promise).then(result => {
+      console.log('resolve', 'count', this.count_, 'countAtAdd', countAtAdd);
       if (this.count_ === countAtAdd) {
         this.resolve_(result);
       }
     }, error => {
-      // Match the behavior of standard functions by rejecting when an error
-      // occurs even if it's out of order. e.g. Promise.race and Promise.all
-      this.reject_(error);
+      // Don't follow behavior of Promise.all and Promise.race error so that
+      // this will only reject when most recently added promise fails.
+      console.log('reject', 'count', this.count_, 'countAtAdd', countAtAdd);
+      if (this.count_ === countAtAdd) {
+        this.reject_(error);
+      }
     });
+    return this.promise_;
   }
 
   /**
-   * Get the result promise.
-   * @return {!Promise}
+   * @override
    */
-  get() {
-    return this.promise_;
+  then(opt_resolve, opt_reject) {
+    if (!opt_resolve && !opt_reject) {
+      return this.promise_;
+    }
+    return this.promise_.then(opt_resolve, opt_reject);
   }
 }
