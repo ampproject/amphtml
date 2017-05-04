@@ -203,7 +203,7 @@ const command = {
   },
   testDocumentLinks: function(files) {
     let docFiles = files.filter(isDocFile);
-    checkLinksInFiles(docFiles);
+    execOrDie(`${gulp} check-links --files ${docFiles.join(',')}`);
   },
   buildRuntime: function() {
     execOrDie(`${gulp} clean`);
