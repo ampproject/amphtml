@@ -531,8 +531,7 @@ describe('detectJsEngineFromStack', () => {
     });
 
     it.configure().ifFirefox().run('detects firefox as firefox', () => {
-      // TODO(jridgewell,#9132): the test failed on FF 53.0.
-      // expect(detectJsEngineFromStack()).to.equal('Firefox');
+      expect(detectJsEngineFromStack()).to.equal('Firefox');
     });
 
     it.configure().ifEdge().run('detects edge as IE', () => {
