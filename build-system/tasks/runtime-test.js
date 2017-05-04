@@ -144,9 +144,9 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
   };
 
   if (argv.compiled) {
-    process.env.SERVE_MODE = 'min';
+    process.env.SERVE_MODE = 'compiled';
   } else {
-    process.env.SERVE_MODE = 'max';
+    process.env.SERVE_MODE = 'default';
   }
 
   if (argv.grep) {

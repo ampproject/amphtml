@@ -269,6 +269,10 @@ function describeEnv(factory) {
     return templateFunc(name, spec, fn, describe./*OK*/only);
   };
 
+  mainFunc.skip = function(name, variants, fn) {
+    return templateFunc(name, variants, fn, describe.skip);
+  };
+
   return mainFunc;
 }
 

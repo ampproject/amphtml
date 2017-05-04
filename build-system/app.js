@@ -969,29 +969,6 @@ function addViewerIntegrationScript(ampJsVersion, file) {
   return file;
 }
 
-/**
- * @param {string} path
- * @return {string}
- */
-function extractFilePathSuffix(path) {
-  return path.substr(-9);
-}
-
-/**
- * @param {string} path
- * @return {?string}
- */
-function getPathMode(path) {
-  var suffix = extractFilePathSuffix(path);
-  if (suffix == '.max.html') {
-    return 'default';
-  } else if (suffix == '.min.html') {
-    return 'compiled';
-  } else {
-    return null;
-  }
-}
-
 function getUrlPrefix(req) {
   return req.protocol + '://' + req.headers.host;
 }

@@ -15,6 +15,7 @@
  */
 
 import '../amp-selector';
+import {Keycodes} from '../../../../src/utils/keycodes';
 
 describes.realWin('amp-selector', {
   win: { /* window spec */
@@ -80,11 +81,12 @@ describes.realWin('amp-selector', {
       return ampSelector;
     }
 
-    function keyPress(ampSelector, key) {
+    function keyPress(ampSelector, key, opt_target) {
       const impl = ampSelector.implementation_;
       const event = {
         keyCode: key,
         preventDefault: () => {},
+        target: opt_target,
       };
       impl.keyDownHandler_(event);
     }
@@ -518,6 +520,89 @@ describes.realWin('amp-selector', {
       expect(clearSelectionSpy).to.not.have.been.called;
     });
 
+    it('should handle keyboard selection', () => {
+      let ampSelector = getSelector({
+        attributes: {
+          name: 'single_select',
+        },
+        config: {
+          count: 4,
+          selectedCount: 2,
+        },
+      });
+      let impl = ampSelector.implementation_;
+      impl.mutateElement = fn => fn();
+      ampSelector.build();
+      let clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
+      let setSelectionSpy = sandbox.spy(impl, 'setSelection_');
+      keyPress(ampSelector, Keycodes.ENTER, impl.options_[3]);
+      expect(impl.options_[3].hasAttribute('selected')).to.be.true;
+      expect(setSelectionSpy).to.have.been.calledWith(impl.options_[3]);
+      expect(clearSelectionSpy).to.have.been.calledWith(impl.options_[1]);
+      expect(setSelectionSpy).to.have.been.calledOnce;
+      expect(clearSelectionSpy).to.have.been.calledOnce;
+
+      keyPress(ampSelector, Keycodes.ENTER, impl.options_[3]);
+      expect(setSelectionSpy).to.have.been.calledOnce;
+      expect(clearSelectionSpy).to.have.been.calledOnce;
+
+      ampSelector = getSelector({
+        attributes: {
+          name: 'muti_select',
+          multiple: true,
+        },
+        config: {
+          count: 5,
+          selectedCount: 2,
+        },
+      });
+
+      impl = ampSelector.implementation_;
+      impl.mutateElement = fn => fn();
+      ampSelector.build();
+      clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
+      setSelectionSpy = sandbox.spy(impl, 'setSelection_');
+
+      keyPress(ampSelector, Keycodes.SPACE, impl.options_[4]);
+      expect(impl.options_[4].hasAttribute('selected')).to.be.true;
+      expect(setSelectionSpy).to.have.been.calledWith(impl.options_[4]);
+      expect(setSelectionSpy).to.have.been.calledOnce;
+      expect(clearSelectionSpy).to.not.have.been.called;
+
+      keyPress(ampSelector, Keycodes.SPACE, impl.options_[4]);
+      expect(impl.options_[4].hasAttribute('selected')).to.be.false;
+      expect(clearSelectionSpy).to.have.been.calledWith(impl.options_[4]);
+      expect(setSelectionSpy).to.have.been.calledOnce;
+      expect(clearSelectionSpy).to.have.been.calledOnce;
+
+      keyPress(ampSelector, Keycodes.ENTER, impl.options_[2]);
+      expect(impl.options_[2].hasAttribute('selected')).to.be.true;
+      expect(setSelectionSpy).to.have.been.calledWith(impl.options_[2]);
+      expect(setSelectionSpy).to.have.been.calledTwice;
+      expect(clearSelectionSpy).to.have.been.calledOnce;
+
+      ampSelector = getSelector({
+        attributes: {
+          name: 'muti_select',
+          multiple: true,
+        },
+        config: {
+          count: 5,
+          disabledCount: 2,
+        },
+      });
+
+      impl = ampSelector.implementation_;
+      impl.mutateElement = fn => fn();
+      ampSelector.build();
+      clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
+      setSelectionSpy = sandbox.spy(impl, 'setSelection_');
+
+      keyPress(ampSelector, Keycodes.SPACE, impl.element.children[0]);
+      expect(setSelectionSpy).to.not.have.been.called;
+      expect(clearSelectionSpy).to.not.have.been.called;
+    });
+
     it('should update selection when `selected` attribute is mutated', () => {
       const ampSelector = getSelector({
         config: {
@@ -630,10 +715,12 @@ describes.realWin('amp-selector', {
             count: 3,
           },
         });
-        const addEventSpy = sandbox.spy(ampSelector, 'addEventListener');
+        const spy = sandbox.spy(
+            ampSelector.implementation_,
+            'navigationKeyDownHandler_');
         ampSelector.build();
-        expect(addEventSpy.calledWith('click')).to.be.true;
-        expect(addEventSpy.calledWith('keydown')).to.be.false;
+        keyPress(ampSelector, Keycodes.RIGHT_ARROW);
+        expect(spy).to.not.have.been.called;
       });
 
       it('should update focus when the user presses the arrow keys when ' +
@@ -650,13 +737,11 @@ describes.realWin('amp-selector', {
         expect(ampSelector.children[0].tabIndex).to.equal(0);
         expect(ampSelector.children[1].tabIndex).to.equal(-1);
         expect(ampSelector.children[2].tabIndex).to.equal(-1);
-        // Left
-        keyPress(ampSelector, 37);
+        keyPress(ampSelector, Keycodes.LEFT_ARROW);
         expect(ampSelector.children[0].tabIndex).to.equal(-1);
         expect(ampSelector.children[1].tabIndex).to.equal(-1);
         expect(ampSelector.children[2].tabIndex).to.equal(0);
-        // Right
-        keyPress(ampSelector, 39);
+        keyPress(ampSelector, Keycodes.RIGHT_ARROW);
         expect(ampSelector.children[0].tabIndex).to.equal(0);
         expect(ampSelector.children[1].tabIndex).to.equal(-1);
         expect(ampSelector.children[2].tabIndex).to.equal(-1);
@@ -710,13 +795,11 @@ describes.realWin('amp-selector', {
         expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
         expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
         expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
-        // Down
-        keyPress(ampSelector, 40);
+        keyPress(ampSelector, Keycodes.DOWN_ARROW);
         expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
         expect(ampSelector.children[1].hasAttribute('selected')).to.be.true;
         expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
-        // Up
-        keyPress(ampSelector, 38);
+        keyPress(ampSelector, Keycodes.UP_ARROW);
         expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
         expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
         expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
