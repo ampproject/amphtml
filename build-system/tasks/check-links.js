@@ -16,7 +16,6 @@
 
 var argv = require('minimist')(process.argv.slice(2));
 var chalk = require('chalk');
-var child_process = require('child_process');
 var fs = require('fs-extra');
 var gulp = require('gulp-help')(require('gulp'));
 var markdownLinkCheck = require('markdown-link-check');
@@ -25,23 +24,7 @@ var util = require('gulp-util');
 
 
 /**
- * Executes the provided command; terminates this program in case of failure.
- * Copied from pr-check.js.
- * TODO(rsimha-amp): Refactor this into a shared library. Issue #9038.
- *
- * @param {string} cmd
- */
-function execOrDie(cmd) {
-  var p =
-      child_process.spawnSync('/bin/sh', ['-c', cmd], {'stdio': 'inherit'});
-  if (p.status != 0) {
-    console/*OK*/.log('\nExiting due to failing command: ' + cmd);
-    process.exit(p.status)
-  }
-}
-
-/**
- * Checks for dead links in the list of files.
+ * Parses the list of files in argv and checks for dead links.
  */
 function checkLinks() {
   var files = '';
@@ -53,43 +36,65 @@ function checkLinks() {
     process.exit(1);
   }
   var markdownFiles = files.split(',');
+  checkLinksInFiles(markdownFiles);
+}
+
+/**
+ * Checks for dead links in the given list of files.
+ *
+ * @param {string} markdownFiles CSV list of markdown files to check.
+ */
+function checkLinksInFiles(markdownFiles) {
+  util.log('Checking links in', util.colors.magenta(markdownFiles), '...');
   markdownFiles.forEach(function(markdownFile) {
-    util.log('Checking links in', util.colors.magenta(files), '...');
-    var filteredMarkdownFile = filterLocalhostLinks(markdownFile);
-    runLinkChecker(filteredMarkdownFile);
+    runLinkChecker(markdownFile);
   });
 }
 
 /**
  * Reads the raw contents in the given markdown file into a string, filters out
- * localhost links (because they do not resolve on Travis), and rewrites the
- * contents to a new file.
+ * localhost links (because they do not resolve on Travis), and returns the
+ * contents.
  *
  * @param {string} markdownFile Path of markdown file, relative to src root.
- * @return {string} Path of the newly created file, relative to src root.
+ * @return {string} Contents of markdown file after filtering localhost links.
  */
 function filterLocalhostLinks(markdownFile) {
-  var contents = fs.readFileSync(markdownFile).toString();
-  var filteredontents = contents.replace(/http:\/\/localhost:8000\//g, '');
-  var filteredMarkdownFile = markdownFile + '.without_localhost_links';
-  fs.writeFile(filteredMarkdownFile, filteredontents);
-  util.log(
-      'Created copy at',
-      util.colors.magenta(filteredMarkdownFile));
-  return filteredMarkdownFile;
+  var markdown = fs.readFileSync(markdownFile).toString();
+  var filteredMarkdown = markdown.replace(/http:\/\/localhost:8000\//g, '');
+  return filteredMarkdown;
 }
 
 /**
- * Tests the links in the given file, after localhost links have been removed.
- * @param {string} filteredMarkdownFile Path of file, relative to src root.
+ * Checks the links in the given markdown.
+ * @param {string} markdownFile Path of markdown file, relative to src root.
  */
-function runLinkChecker(filteredMarkdownFile) {
-  var cmd = 'markdown-link-check ' + filteredMarkdownFile;
-  execOrDie(cmd);
+function runLinkChecker(markdownFile) {
+  var opts = {};
+  opts.baseUrl = 'file://' + path.dirname(path.resolve((markdownFile)));
+
+  var filteredMarkdown = filterLocalhostLinks(markdownFile);
+  markdownLinkCheck(filteredMarkdown, opts, function (error, results) {
+    results.forEach(function (result) {
+      if(result.status === 'dead') {
+        error = true;
+        console.log('[%s] %s', chalk.red('✖'), result.link);
+      } else {
+        console.log('[%s] %s', chalk.green('✓'), result.link);
+      }
+    });
+    if(error) {
+      console.error('\nERROR: dead links found!');
+      process.exit(1);
+    }
+  });
 }
 
-gulp.task('check-links', 'Detects dead links in markdown files', checkLinks, {
-  options: {
-    'files': '  CSV list of files in which to check links'
-  }
+gulp.task(
+    'check-links',
+    'Detects dead links in markdown files',
+    checkLinks, {
+    options: {
+      'files': '  CSV list of files in which to check links'
+    }
 });

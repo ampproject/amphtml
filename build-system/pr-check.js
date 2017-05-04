@@ -208,7 +208,7 @@ const command = {
         docFiles.push(file);
       }
     });
-    execOrDie(`${gulp} check-links --files ${docFiles.join(',')}`);
+    checkLinksInFiles(docFiles);
   },
   buildRuntime: function() {
     execOrDie(`${gulp} clean`);
@@ -283,7 +283,7 @@ function main(argv) {
         console.log(util.colors.yellow(
             'A full sync to upstream/master should clear this error.'));
         console.log('\nFull list of files in this PR:');
-        files.forEach(file => { console.log('\t' + file); });
+        files.forEach((file) => { console.log('\t' + file); });
         stopTimer('pr-check.js', startTime);
         process.exit(1);
       }
