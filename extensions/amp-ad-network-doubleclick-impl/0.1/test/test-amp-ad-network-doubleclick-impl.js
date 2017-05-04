@@ -107,7 +107,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
 
   describe('#extractCreativeAndSignature', () => {
     let loadExtensionSpy;
-    const size = {width: 200, height: 50};
+    const sizeInfo = {width: 200, height: 50};
 
     beforeEach(() => {
       return createIframePromise().then(fixture => {
@@ -120,7 +120,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           'layout': 'fixed',
         });
         impl = new AmpAdNetworkDoubleclickImpl(element);
-        impl.size_ = size;
+        impl.size_ = sizeInfo;
         installExtensionsService(impl.win);
         const extensions = extensionsFor(impl.win);
         loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
@@ -136,7 +136,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
             has: function() { return false; },
           }).then(adResponse => {
             expect(adResponse).to.deep.equal(
-                  {creative, signature: null, size});
+                  {creative, signatureInfo: null, sizeInfo});
             expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
 
           });
@@ -162,7 +162,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
                   keypairId: 'test',
                   signature: base64DecodeToBytes('AQAB')
                 },
-                size: null,
+                sizeInfo: null,
               });
               expect(loadExtensionSpy.withArgs('amp-analytics'))
                   .to.not.be.called;
@@ -196,7 +196,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
                   keypairId: 'test',
                   signature: base64DecodeToBytes('AQAB')
                 },
-                size: null,
+                sizeInfo: null,
               });
               expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
               // exact value of ampAnalyticsConfig covered in

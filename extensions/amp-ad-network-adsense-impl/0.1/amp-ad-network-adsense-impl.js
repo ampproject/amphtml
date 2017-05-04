@@ -201,6 +201,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(
         this, responseHeaders, this.lifecycleReporter_.getDeltaTime(),
         this.lifecycleReporter_.getInitTime());
+    if (this.ampAnalyticsConfig_) {
+      // Load amp-analytics extensions
+      this.extensions_./*OK*/ loadExtension('amp-analytics');
+    }
     return super.extractCreativeAndSignature(responseText, responseHeaders);
   }
 
