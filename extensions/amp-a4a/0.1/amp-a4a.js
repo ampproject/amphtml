@@ -1376,8 +1376,9 @@ export class AmpA4A extends AMP.BaseElement {
 }
 
 /**
- * Decode the `AMP-Fast-Fetch-Signature` header, in its conventional format, to
- * a signature info object.
+ * Decode the `AMP-Fast-Fetch-Signature` header, in the format
+ * `{signingServiceName}:{keypairId}:{base64Signature}`, to a signature info
+ * object.
  *
  * @param {?string} headerValue
  * @return {?SignatureInfoDef}
@@ -1401,8 +1402,8 @@ export function decodeSignatureHeader(headerValue) {
 }
 
 /**
- * Decode the `X-Creativesize` header, in its conventional format, to a size
- * info object.
+ * Decode the `X-Creativesize` header, in the format `{width}x{height}`, to a
+ * size info object.
  *
  * @param {?string} headerValue
  * @return {?SizeInfoDef}
