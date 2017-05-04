@@ -419,38 +419,40 @@ export function resetAccumulatedErrorMessagesForTesting() {
  * @visibleForTesting
  */
 export function detectJsEngineFromStack() {
-  const object = Object.create({
-    // DO NOT rename this property.
-    // DO NOT transform into shorthand method syntax.
-    t: function() {
-      throw new Error('message');
-    },
-  });
+  /** @constructor */
+  function Fn() {}
+  Fn.prototype.t = function() {
+    throw new Error('message');
+  };
+  const object = new Fn();
   try {
     object.t();
   } catch (e) {
     const stack = e.stack;
-    // Firefox uses a "<." to show prototype method.
-    if (stack.indexOf('<.t@') > -1) {
-      return 'Firefox';
-    }
 
-    // Safari does not show the context ("object."), just the function name.
+    // Safari only mentions the method name.
     if (startsWith(stack, 't@')) {
       return 'Safari';
     }
 
+    // Firefox mentions "prototype".
+    if (stack.indexOf('.prototype.t@') > -1) {
+      return 'Firefox';
+    }
+
     // IE looks like Chrome, but includes a context for the base stack line.
     // Explicitly, we're looking for something like:
-    // "    at Global code https://example.com/app.js:1:200" or
-    // "    at Anonymous function https://example.com/app.js:1:200"
+    // "    at Global code (https://example.com/app.js:1:200)" or
+    // "    at Anonymous function (https://example.com/app.js:1:200)"
+    // vs Chrome which has:
+    // "    at https://example.com/app.js:1:200"
     const last = stack.split('\n').pop();
-    if (/\bat \w+ /i.test(last)) {
+    if (/\bat .* \(/i.test(last)) {
       return 'IE';
     }
 
     // Finally, chrome includes the error message in the stack.
-    if (stack.indexOf('message') > -1) {
+    if (startsWith(stack, 'Error: message')) {
       return 'Chrome';
     }
   }
