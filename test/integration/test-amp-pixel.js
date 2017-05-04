@@ -30,7 +30,7 @@ describes.integration('amp-pixel integration test', {
 });
 
 describes.integration('amp-pixel integration test', {
-  body: `<amp-pixel src="${depositRequestUrl('no-referrer')}" 
+  body: `<amp-pixel src="${depositRequestUrl('no-referrer')}"
              referrerpolicy="no-referrer">`,
 }, env => {
   it('should remove referrer if referrerpolicy=no-referrer', () => {
