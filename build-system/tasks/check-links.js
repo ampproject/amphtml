@@ -65,10 +65,11 @@ function filterLocalhostLinks(markdownFile) {
  * @param {string} markdownFile Path of markdown file, relative to src root.
  */
 function runLinkChecker(markdownFile) {
-  var opts = {};
-  opts.baseUrl = 'file://' + path.dirname(path.resolve((markdownFile)));
-
   var filteredMarkdown = filterLocalhostLinks(markdownFile);
+  var opts = {
+    baseUrl : 'file://' + path.dirname(path.resolve((markdownFile)))
+  };
+
   util.log('Checking links in', util.colors.magenta(markdownFile), '...');
   markdownLinkCheck(filteredMarkdown, opts, function(error, results) {
     results.forEach(function (result) {
