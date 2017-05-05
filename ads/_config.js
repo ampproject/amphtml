@@ -272,6 +272,14 @@ export const adConfig = {
 
   flite: {},
 
+  fluct: {
+    preconnect: [
+      'https://cdn-fluct.sh.adingo.jp',
+      'https://s.sh.adingo.jp',
+      'https://i.adingo.jp',
+    ],
+  },
+
   fusion: {
     prefetch: 'https://assets.adtomafusion.net/fusion/latest/fusion-amp.min.js',
   },
