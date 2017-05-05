@@ -269,7 +269,7 @@ function main(argv) {
         console.log('Please make your changes in separate pull requests.');
         console.log(util.colors.yellow(
             'NOTE: If you see a long list of unrelated files below, it is ' +
-            'likely because your branch is very old.'));
+            'likely because your branch is significantly out of sync.'));
         console.log(util.colors.yellow(
             'A full sync to upstream/master should clear this error.'));
         console.log('\nFull list of files in this PR:');
