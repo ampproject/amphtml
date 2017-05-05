@@ -31,7 +31,7 @@ import {
 } from '../../../src/friendly-iframe-embed';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
-import {dev, user} from '../../../src/log';
+import {dev, user, duplicateErrorIfNecessary} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, isEnumValue} from '../../../src/types';
 import {some} from '../../../src/utils/promise';
@@ -279,6 +279,9 @@ export class AmpA4A extends AMP.BaseElement {
       height: this.element.getAttribute('height'),
     };
 
+    /** @private {?../../../src/layout-rect.LayoutRectDef} */
+    this.originalSlotSize_ = null;
+
     /**
      * Note(keithwrightbos) - ensure the default here is null so that ios
      * uses safeframe when response header is not specified.
@@ -475,7 +478,6 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.onLayoutMeasure();
     }
-
     if (this.adPromise_ || !this.shouldInitializePromiseChain_()) {
       return;
     }
@@ -795,7 +797,9 @@ export class AmpA4A extends AMP.BaseElement {
       throw error;
     }
 
-    if (!error || !error.message) {
+    if (error && error.message) {
+      error = duplicateErrorIfNecessary(/** @type {!Error} */(error));
+    } else {
       error = new Error('unknown error ' + error);
     }
     if (opt_ignoreStack) {
@@ -873,12 +877,35 @@ export class AmpA4A extends AMP.BaseElement {
     });
   }
 
+  /** @override **/
+  attemptChangeSize(newHeight, newWidth) {
+    // Store original size of slot in order to allow re-expansion on
+    // unlayoutCallback so that it is reverted to original size in case
+    // of resumeCallback.
+    this.originalSlotSize_ = this.originalSlotSize_ || this.getLayoutBox();
+    return super.attemptChangeSize(newHeight, newWidth).catch(() => {});
+  }
+
   /** @override  */
   unlayoutCallback() {
     // Increment promiseId to cause any pending promise to cancel.
     this.promiseId_++;
     this.protectedEmitLifecycleEvent_('adSlotCleared');
     this.uiHandler.setDisplayState(AdDisplayState.NOT_LAID_OUT);
+    if (this.originalSlotSize_) {
+      super.attemptChangeSize(
+        this.originalSlotSize_.height, this.originalSlotSize_.width)
+        .then(() => {
+          this.originalSlotSize_ = null;
+        })
+        .catch(err => {
+          // TODO(keithwrightbos): if we are unable to revert size, on next
+          // trigger of promise chain the ad request may fail due to invalid
+          // slot size.  Determine how to handle this case.
+          dev().warn(TAG, 'unable to revert to original size', err);
+        });
+    }
+
     this.isCollapsed_ = false;
 
     // Allow embed to release its resources.
@@ -958,6 +985,9 @@ export class AmpA4A extends AMP.BaseElement {
    */
   forceCollapse() {
     dev().assert(this.uiHandler);
+    // Store original size to allow for reverting on unlayoutCallback so that
+    // subsequent pageview allows for ad request.
+    this.originalSlotSize_ = this.originalSlotSize_ || this.getLayoutBox();
     this.uiHandler.setDisplayState(AdDisplayState.LOADING);
     this.uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
     this.isCollapsed_ = true;

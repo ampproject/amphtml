@@ -50,6 +50,7 @@ var forbiddenTerms = {
   '(^-amp-|\\W-amp-)': {
     message: 'Switch to new internal class form',
     whitelist: [
+      'build-system/amp4test.js',
       'build-system/tasks/extension-generator/index.js',
       'css/amp.css',
       'extensions/amp-pinterest/0.1/amp-pinterest.css',
@@ -277,6 +278,7 @@ var forbiddenTerms = {
       'ads/inabox/inabox-host.js',
       'dist.3p/current/integration.js',
       'extensions/amp-access/0.1/amp-login-done.js',
+      'extensions/amp-viewer-integration/0.1/examples/amp-viewer-host.js',
       'src/runtime.js',
       'src/log.js',
       'src/web-worker/web-worker.js',
@@ -473,8 +475,15 @@ var forbiddenTerms = {
         ' string as the first parameter',
   },
   '\\.schedulePass\\(': {
-    message: 'schedulePass is heavy, thinking twice before using it',
+    message: 'schedulePass is heavy, think twice before using it',
     whitelist: [
+      'src/service/resources-impl.js',
+    ],
+  },
+  '\\.requireLayout\\(': {
+    message: 'requireLayout is restricted b/c it affects non-contained elements',
+    whitelist: [
+      'extensions/amp-animation/0.1/web-animations.js',
       'src/service/resources-impl.js',
     ],
   },
@@ -659,6 +668,7 @@ var forbiddenTermsSrcInclusive = {
       'extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',
+      'extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.js',
     ],
   },
   'loadElementClass': {
