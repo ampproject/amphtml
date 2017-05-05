@@ -75,9 +75,11 @@ class AmpWorker {
     /** @const @private {!../service/xhr-impl.Xhr} */
     this.xhr_ = xhrFor(win);
 
-    const url =
-        calculateEntryPointScriptUrl(location, 'ww', getMode().localDev);
-    dev().fine(TAG, 'Fetching web worker from:', url);
+    // Use RTV to make sure we fetch prod/canary/experiment correctly.
+    const useRtvUrl = !getMode().localDev;
+    const url = calculateEntryPointScriptUrl(
+        location, 'ww', getMode().localDev, useRtvUrl);
+    dev().fine(TAG, 'Fetching web worker from', url);
 
     /** @private {Worker} */
     this.worker_ = null;
