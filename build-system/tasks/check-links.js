@@ -29,6 +29,8 @@ var filesChecked = 0;
 
 /**
  * Parses the list of files in argv and checks for dead links.
+ *
+ * @return {Promise} Used to wait until all async link checkers finish.
  */
 function checkLinks() {
   var files = argv.files;
