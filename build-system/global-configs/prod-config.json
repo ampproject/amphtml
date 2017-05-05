@@ -6,7 +6,7 @@
   "pan-y": 1,
   "expAdsenseA4A": 0.1,
   "expDoubleclickA4A": 0.1,
-  "a4aProfilingRate": 1,
+  "a4aProfilingRate": 0.1,
   "ad-type-custom": 1,
   "amp-scrollable-carousel": 1,
   "ios-embed-wrapper": 1,

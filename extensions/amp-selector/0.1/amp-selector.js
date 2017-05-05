@@ -20,7 +20,6 @@ import {actionServiceForDoc} from '../../../src/services';
 import {closestBySelector, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
-import {isEnumValue} from '../../../src/types';
 
 /**
  * Set of namespaces that can be set for lifecycle reporters.
@@ -92,24 +91,22 @@ export class AmpSelector extends AMP.BaseElement {
     }
 
     let kbSelectMode = this.element.getAttribute('keyboard-select-mode');
-    if (!kbSelectMode) {
-      kbSelectMode = KEYBOARD_SELECT_MODES.NONE;
-    }
-    user().assert(isEnumValue(KEYBOARD_SELECT_MODES, kbSelectMode),
-        'Invalid keyboard-select-mode');
-    user().assert(
+    if (kbSelectMode) {
+      kbSelectMode = kbSelectMode.toLowerCase();
+      user().assertEnumValue(KEYBOARD_SELECT_MODES, kbSelectMode);
+      user().assert(
         !(this.isMultiple_ && kbSelectMode == KEYBOARD_SELECT_MODES.SELECT),
         '[keyboard-select-mode=select] not supported for multiple ' +
         'selection amp-selector');
+    } else {
+      kbSelectMode = KEYBOARD_SELECT_MODES.NONE;
+    }
     this.kbSelectMode_ = kbSelectMode;
 
     this.init_();
     if (!this.isDisabled_) {
       this.element.addEventListener('click', this.clickHandler_.bind(this));
-      if (this.kbSelectMode_ != KEYBOARD_SELECT_MODES.NONE) {
-        this.element.addEventListener('keydown',
-            this.keyDownHandler_.bind(this));
-      }
+      this.element.addEventListener('keydown', this.keyDownHandler_.bind(this));
     }
   }
 
@@ -157,15 +154,21 @@ export class AmpSelector extends AMP.BaseElement {
   }
 
   /**
-   * Determine which option should receive focus first and set tabIndex
-   * on all options accordingly. When kb-select-mode is not 'none',
-   * the selector's focus should behave like focus on a set of radio buttons.
-   * In multi-select selectors, focus should just go to the first option.
+   * Update focus such that only one option in the selector can receive focus.
+   * When keyboard-select-mode is not none, this function handles focus as if
+   * the selector options are set of radio buttons. Otherwise, this function
+   * is a no-op.
+   *
+   * If no element is provided, this function will determine which option should
+   * receive focus.
+   *
+   * In multi-select selectors, focus should go to the first option.
    * In single-select selectors, focus should go to the initially selected
    * option, or to the first option if none are initially selected.
+   * @param {Element=} opt_focusEl Element to put focus on
    * @private
    */
-  updateFocus_() {
+  updateFocus_(opt_focusEl) {
     if (this.kbSelectMode_ == KEYBOARD_SELECT_MODES.NONE) {
       // Don't manage focus.
       return;
@@ -175,15 +178,17 @@ export class AmpSelector extends AMP.BaseElement {
       option.tabIndex = -1;
     });
 
-    let initialFocusedElement;
-    if (this.isMultiple_) {
-      initialFocusedElement = this.options_[0];
-    } else {
-      initialFocusedElement = this.selectedOptions_[0] || this.options_[0];
+    let focusElement = opt_focusEl;
+    if (!focusElement) {
+      if (this.isMultiple_) {
+        focusElement = this.options_[0];
+      } else {
+        focusElement = this.selectedOptions_[0] || this.options_[0];
+      }
     }
-    if (initialFocusedElement) {
-      this.focusedIndex_ = this.options_.indexOf(initialFocusedElement);
-      initialFocusedElement.tabIndex = 0;
+    if (focusElement) {
+      this.focusedIndex_ = this.options_.indexOf(focusElement);
+      focusElement.tabIndex = 0;
     }
   }
 
@@ -274,7 +279,9 @@ export class AmpSelector extends AMP.BaseElement {
       // Don't trigger action or update focus if
       // selected values haven't changed.
       if (selectedValues) {
-        this.updateFocus_();
+        // Newly picked option should always have focus.
+        this.updateFocus_(el);
+
         // Trigger 'select' event with two data params:
         // 'targetOption' - option value of the selected or deselected element.
         // 'selectedOptions' - array of option values of selected elements.
@@ -307,13 +314,35 @@ export class AmpSelector extends AMP.BaseElement {
   }
 
   /**
-   * Handles keyboard events for the selectables.
+   * Handles keyboard events.
    * @param {!Event} event
    */
   keyDownHandler_(event) {
+    const keyCode = event.keyCode;
+    switch (keyCode) {
+      case Keycodes.LEFT_ARROW: /* fallthrough */
+      case Keycodes.UP_ARROW: /* fallthrough */
+      case Keycodes.RIGHT_ARROW: /* fallthrough */
+      case Keycodes.DOWN_ARROW: /* fallthrough */
+        if (this.kbSelectMode_ != KEYBOARD_SELECT_MODES.NONE) {
+          this.navigationKeyDownHandler_(event);
+        }
+        return;
+      case Keycodes.ENTER: /* fallthrough */
+      case Keycodes.SPACE:
+        this.selectionKeyDownHandler_(event);
+        return;
+    }
+  }
+
+  /**
+   * Handles keyboard navigation events. Should not be called if
+   * keyboard selection is disabled.
+   * @param {!Event} event
+   */
+  navigationKeyDownHandler_(event) {
     const isLtr = this.win.document.body.getAttribute('dir') != 'rtl';
     let dir = 0;
-
     switch (event.keyCode) {
       case Keycodes.LEFT_ARROW:
         // Left is considered 'previous' in LTR and 'next' in RTL.
@@ -331,11 +360,10 @@ export class AmpSelector extends AMP.BaseElement {
         // Down is considered 'next' in both LTR and RTL.
         dir = 1;
         break;
+      default:
+        return;
     }
 
-    if (dir == 0) {
-      return;
-    }
     event.preventDefault();
 
     // Make currently selected option unfocusable
@@ -353,8 +381,25 @@ export class AmpSelector extends AMP.BaseElement {
     const newSelectedOption = this.options_[this.focusedIndex_];
     newSelectedOption.tabIndex = 0;
     tryFocus(newSelectedOption);
+
+    const focusedOption = this.options_[this.focusedIndex_];
     if (this.kbSelectMode_ == KEYBOARD_SELECT_MODES.SELECT) {
-      this.onOptionPicked_(newSelectedOption);
+      this.onOptionPicked_(focusedOption);
+    }
+  }
+
+  /**
+   * Handles keyboard selection events.
+   * @param {!Event} event
+   */
+  selectionKeyDownHandler_(event) {
+    const keyCode = event.keyCode;
+    if (keyCode == Keycodes.SPACE || keyCode == Keycodes.ENTER) {
+      if (this.options_.includes(event.target)) {
+        event.preventDefault();
+        const el = dev().assertElement(event.target);
+        this.onOptionPicked_(el);
+      }
     }
   }
 

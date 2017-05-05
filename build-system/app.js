@@ -30,7 +30,7 @@ var request = require('request');
 var url = require('url');
 
 app.use(bodyParser.json());
-app.use('/request-bank', require('./request-bank'));
+app.use('/amp4test', require('./amp4test'));
 
 // Append ?csp=1 to the URL to turn on the CSP header.
 // TODO: shall we turn on CSP all the time?
@@ -967,29 +967,6 @@ function addViewerIntegrationScript(ampJsVersion, file) {
   }
   file = file.replace('</head>', viewerScript + '</head>');
   return file;
-}
-
-/**
- * @param {string} path
- * @return {string}
- */
-function extractFilePathSuffix(path) {
-  return path.substr(-9);
-}
-
-/**
- * @param {string} path
- * @return {?string}
- */
-function getPathMode(path) {
-  var suffix = extractFilePathSuffix(path);
-  if (suffix == '.max.html') {
-    return 'default';
-  } else if (suffix == '.min.html') {
-    return 'compiled';
-  } else {
-    return null;
-  }
 }
 
 function getUrlPrefix(req) {

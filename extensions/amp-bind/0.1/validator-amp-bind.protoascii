@@ -17,7 +17,6 @@ tags: {  # amp-bind
   html_format: AMP
   tag_name: "SCRIPT"
   satisfies: "amp-bind extension .js script"
-  requires: "amp-state"
   extension_spec: {
     name: "amp-bind"
     allowed_versions: "0.1"
@@ -51,7 +50,6 @@ tags: {  # <amp-state> with json child
   html_format: AMP
   tag_name: "AMP-STATE"
   spec_name: "amp-state"
-  satisfies: "amp-state"
   requires: "amp-bind extension .js script"
   requires: "amp-bind extension .json script"
   disallowed_ancestor: "AMP-SIDEBAR"
@@ -71,7 +69,6 @@ tags: {  # <amp-state> with src
   html_format: AMP
   tag_name: "AMP-STATE"
   spec_name: "amp-state[src]"
-  satisfies: "amp-state"
   requires: "amp-bind extension .js script"
   disallowed_ancestor: "AMP-SIDEBAR"
   attrs: {
