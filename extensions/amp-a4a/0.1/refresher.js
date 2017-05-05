@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {IntersectionObserverPolyFill} from '../../../src/intersection-observer-polyfill';
+import {IntersectionObserverPolyfill} from '../../../src/intersection-observer-polyfill';
+import {timerFor} from '../../../src/services';
 
 /**
  * Returns the singleton instance of the refresher from the window object, or
@@ -28,25 +29,87 @@ export function getRefresherFor(win) {
   return win[nameInWindow] || (win[nameInWindow] = new Refresher(win));
 }
 
-const VISIBILITY_THRESHOLD = 0.5;
+const DEFAULT_VISIBILITY_THRESHOLD = 0.5;
+const DEFAULT_MIN_ON_SCREEN_TIME = 1000;  // In ms.
+const ELEMENT_REFERENCE_ATTRIBUTE = 'data-amp-a4a-refresh-id';
 
-class Refresher {
+/**
+ * Bundles together all relevant state data concerning an individual element
+ * being monitored.
+ *
+ * @typedef {{
+ *   onScreenTimeoutId: {?(number|string)},
+ *   refreshTimeoutId: {?(number|string)},
+ *   visibilityThreshold: {number},
+ *   minOnScreenTime: {number},
+ *   refreshInterval: {number},
+ *   callback: {function},
+ *   state: {string}
+ * }} */
+let RefreshStateInfo;
+
+/**
+ * Defines the DFA states for the refresh cycle.
+ *
+ * (1) All newly registered elements begin in the INITIAL state.
+ * (2) Only when the element enters the viewport with the specified
+ *     intersection ratio does it transition into the VIEW_PENDING state.
+ * (3) If the element remains in the viewport for the specified duration, it
+ *     will then transition into the REFRESH_PENDING state, otherwise it will
+ *     transition back into the INITIAL state.
+ * (4) The element will remain in REFRESH_PENDING state until the refresh
+ *     interval expires.
+ * (5) Once the interval expires, the element will enter the REFRESHED state.
+ *     The element will remain in this state until reset() is called on the
+ *     element, at which point it will return to the INITIAL state.
+ *
+ * @enum {String}
+ */
+const REFRESH_STATE = {
+  // Element has been registered, but not yet seen on screen.
+  INITIAL: 'initial',
+  // The element has appeared in the viewport, but not yet for the required
+  // duration.
+  VIEW_PENDING: 'view_pending',
+  // The element has been in the viewport for the required duration; the
+  // refresh interval for the element has begun.
+  REFRESH_PENDING: 'refresh_pending',
+  // The refresh interval has elapsed; the element is in the process of being
+  // refreshed.
+  REFRESHED: 'refreshed',
+};
+
+export class Refresher {
 
   /**
-   * @param {!Window}
+   * @param {!Window} win
    */
   constructor(win) {
 
     /** @const @private {!Window} */
     this.win_ = win;
 
+    /** @const @private {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = timerFor(win);
+
     /**
-     * A mapping of amp-ad base elements to their respective
-     * IntersectionObservers.
+     * The Intersection Observer used for all monitored elements.
      *
-     * @const @private {!Object<string, !IntersectionObserver>}
+     * @const @private {!IntersectionObserver|!IntersectionObserverPolyfill}
      */
-    this.intersectionObservers_ = {};
+    this.intersectionObserver_ = 'IntersectionObserver' in win
+        ? new win['IntersectionObserver'](this.ioCallback_, ioConfig)
+        : new IntersectionObserverPolyfill(this.ioCallback_, ioConfig);
+
+
+    /**
+     * A an object containing the RefreshState of all elements currently being
+     * monitored, indexed by a unique ID stored as data-amp-a4a-refresh-id on
+     * the element.
+     *
+     * @const @private {!Object<string, RefreshStateInfo>}
+     */
+    this.refreshStateInfos_ = {};
 
     /**
      * Used to distinguish elements in this.intersectionObservers_. This is
@@ -57,15 +120,81 @@ class Refresher {
     this.elementReferenceId_ = 0;
   }
 
-  registerElement(element) {
-    const uniqueId = `elementReference.${this.elementReferenceId_++}`;
-    const ioConfig = {threshold: VISIBILITY_THRESHOLD};
-    const ioCallback = ioEntries => {
-      console.log(ioEntries);
+  ioCallback_(entries) {
+    for (entry of entries) {
+      const elementReference = entry.target.getAttribute(
+          ELEMENT_REFERENCE_ATTRIBUTE);
+      const refreshStateInfo = this.refreshStateInfos_[elementReference];
+      switch (refreshStateInfo.state) {
+        case INITIAL:
+          if (entry.intersectionRatio >=
+              refreshStateInfo.visibilityThreshold) {
+            refreshStateInfo.state = REFRESH_STATE.VIEW_PENDING;
+            refreshStateInfo.onScreenTimeoutId = this.timer_.delay(() => {
+              refreshStateInfo.state = REFRESH_STATE.REFRESH_PENDING;
+              this.startRefreshTimer_(refreshStateInfo);
+            }, refreshStateInfo.minOnScreenTime);
+          }
+          break;
+        case VIEW_PENDING:
+          // If the element goes off screen before the minimum on screen time
+          // duration elapses, place it back into INITIAL state.
+          if (entry.intersectionRatio < refreshStateInfo.visibilityThreshold) {
+            this.timer_.cancel(refreshStateInfo.onScreenTimeoutId);
+            refreshStateInfo.state = REFRESH_STATE.INITIAL;
+          }
+          break;
+        case REFRESH_PENDING:
+        case REFRESHED:
+        default:
+          break;
+      }
+    }
+  }
+
+  registerElement(element, callback, refreshInterval, opt_config) {
+    const refreshStateInfo = {
+      visibilityThreshold: (opt_config && opt_config['threshold'])
+          || DEFAULT_VISIBILITY_THRESHOLD,
+      minOnScreenTime: (opt_config && opt_config['minOnScreenTime'])
+          || DEFAULT_MIN_ON_SCREEN_TIME;
+      callback,
+      refreshInterval,
     };
-    const intersectionObserver = 'IntersectionObserver' in this.win_
-        ? this.win_['IntersectionObserver'](ioCallback, ioConfig)
-        : new IntersectionObserverPolyfill(ioCallback, ioConfig);
-    this.intersectionObservers_[uniqueId] = intersectionObserver;
+    const uniqueId = `elementReference.${this.elementReferenceId_++}`;
+    this.refreshStateInfos_[uniqueId] = /** @type {RefreshStateInfo} */
+        (refreshStateInfo);
+    element.setAttribute(ELEMENT_REFERENCE_ATTRIBUTE, uniqueId);
     intersectionObserver.observe(element);
   }
+
+  startRefreshTimer_(refreshStateInfo) {
+    this.timer_.delay(() => {
+      refreshStateInfo.state = REFRESH_STATE.REFRESHED;
+      refreshStateInfo.callback();
+    }, refreshStateInfo.refreshInterval);
+  }
+
+  getRefreshStateInfo_(element) {
+    // TODO(levitzky) assert that ELEMENT_REFERENCE_ATTRIBUTE exists.
+    const id = element.getAttribute(ELEMENT_REFERENCE_ATTRIBUTE);
+    // TODO(levitzky) assert that this.refreshStateInfos_ contains id.
+    return this.refreshStateInfos_[id];
+  }
+
+  reset(element) {
+    const info = this.getRefreshStateInfo_(element);
+    info.state = REFRESH_STATE.INITIAL;
+    info.onScreenTimeoutId = null;
+  }
+
+  restartRefreshTimer(element) {
+    const info = this.getRefreshStateInfo(element);
+    if (info.state != REFRESH_STATE.REFRESH_PENDING) {
+      return;
+    }
+    const refreshTimeoutId = info.refreshTimeoutId;
+    this.timer_.cancel(refreshTimeoutId);
+    startRefreshTimer_(info);
+  }
+}

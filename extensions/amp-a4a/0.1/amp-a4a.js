@@ -61,6 +61,11 @@ import {A4AVariableSource} from './a4a-variable-source';
 // TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {getContextMetadata} from '../../../src/iframe-attributes';
+<<<<<<< HEAD
+=======
+import {isInExperiment} from '../../../ads/google/a4a/traffic-experiments';
+import {getRefresherFor} from './refresher';
+>>>>>>> Work on refresher.
 
 /** @type {string} */
 const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
@@ -334,6 +339,16 @@ export class AmpA4A extends AMP.BaseElement {
 
     /** @private {string} */
     this.safeframeVersion_ = DEFAULT_SAFEFRAME_VERSION;
+
+    /**
+     * Refresher module.
+     *
+     * @const @private {!./refresher.Refresher}
+     */
+    this.refresher_ = getRefresherFor(this.win);
+    this.refresher_.registerElement(this.element, () => {
+      console.log('Eureka!');
+    });
   }
 
   /** @override */
