@@ -153,6 +153,16 @@ Here are some factors that affect whether the resize will be executed:
 - Whether the resize is requested for a currently active ad;
 - Whether the resize is requested for an ad below the viewport or above the viewport.
 
+You can specify an `overflow` element that is only shown when a resize request is declined. When the user clicks the overflow element, the resize will pass the "interaction" rule and will resize.
+
+Example: Using an `overflow` element
+
+```html
+<amp-ad type="...">
+  <div overflow>Click to resize</div>
+  <!-- whatever else -->
+</amp-ad>
+```
 
 ### Support for multi-size ad requests
 Allowing more than a single ad size to fill a slot improves ad server competition. Increased competition gives the publisher better monetization for the same slot, therefore increasing overall revenue earned by the publisher.
