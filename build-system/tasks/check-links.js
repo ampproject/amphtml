@@ -50,25 +50,14 @@ function checkLinks() {
 }
 
 /**
- * Reads the raw contents in the given markdown file into a string, filters out
- * localhost links (because they do not resolve on Travis), and returns the
- * contents.
+ * Reads the raw contents in the given markdown file, filters out localhost
+ * links (because they do not resolve on Travis), and checks for dead links.
  *
- * @param {string} markdownFile Path of markdown file, relative to src root.
- * @return {string} Contents of markdown file after filtering localhost links.
- */
-function filterLocalhostLinks(markdownFile) {
-  var markdown = fs.readFileSync(markdownFile).toString();
-  var filteredMarkdown = markdown.replace(/http:\/\/localhost:8000\//g, '');
-  return filteredMarkdown;
-}
-
-/**
- * Checks the links in the given markdown.
  * @param {string} markdownFile Path of markdown file, relative to src root.
  */
 function runLinkChecker(markdownFile) {
-  var filteredMarkdown = filterLocalhostLinks(markdownFile);
+  var markdown = fs.readFileSync(markdownFile).toString();
+  var filteredMarkdown = markdown.replace(/http:\/\/localhost:8000\//g, '');
   var opts = {
     baseUrl : 'file://' + path.dirname(path.resolve((markdownFile)))
   };
