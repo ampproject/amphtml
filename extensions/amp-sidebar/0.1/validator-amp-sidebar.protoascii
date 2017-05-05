@@ -30,7 +30,6 @@ tags: {  # amp-sidebar
 tags: {  # <amp-sidebar>
   html_format: AMP
   tag_name: "AMP-SIDEBAR"
-  unique: true
   mandatory_parent: "BODY"
   disallowed_ancestor: "AMP-SIDEBAR"
   requires: "amp-sidebar extension .js script"

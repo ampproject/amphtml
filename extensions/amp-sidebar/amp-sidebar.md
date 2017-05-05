@@ -43,7 +43,7 @@ limitations under the License.
 
 ## Behavior
 
-- There can be only one `<amp-sidebar>` in an AMP document. The `<amp-sidebar>` should be a direct child of the `<body>`.
+- The `<amp-sidebar>` should be a direct child of the `<body>`.
 - The sidebar can only appear on the left or right side of a page.
 - The `<amp-sidebar>` may contain any valid HTML elements (supported by AMP).
 - The `<amp-sidebar>` may not contain any AMP Elements except for:
