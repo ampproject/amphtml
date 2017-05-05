@@ -51,6 +51,7 @@ Example:
 ```html
 <amp-instagram
     data-shortcode="fBwFP"
+    data-captioned
     width="400"
     height="400"
     layout="responsive">
