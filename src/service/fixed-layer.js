@@ -183,6 +183,7 @@ export class FixedLayer {
    * @param {!Element} element
    * @param {boolean=} opt_forceTransfer If set to true , then the element needs
    *    to be forcefully transferred to the transfer layer.
+   * @return {!Promise}
    */
   addElement(element, opt_forceTransfer) {
     this.setupElement_(
@@ -191,7 +192,7 @@ export class FixedLayer {
         /* position */ 'fixed',
         opt_forceTransfer);
     this.sortInDomOrder_();
-    this.update();
+    return this.update();
   }
 
   /**
