@@ -45,9 +45,12 @@ describe('Resources', () => {
     element.classList.add('i-amphtml-element');
     element.whenBuilt = () => Promise.resolve();
     element.isBuilt = () => true;
+    element.build = () => {};
     element.isUpgraded = () => true;
     element.updateLayoutBox = () => {};
     element.getPlaceholder = () => null;
+    element.getPriority = () => 0;
+    element.dispatchCustomEvent = () => {};
     return element;
   }
 
@@ -451,6 +454,45 @@ describe('Resources', () => {
     return promise.then(() => {
       expect(scheduleStub).to.not.be.called;
       expect(measureSpy).to.not.be.called;
+    });
+  });
+
+  it('should schedule immediately when element is built', () => {
+    const parentElement = createAmpElement();
+    const element = createAmpElement();
+    parentElement.appendChild(element);
+    sandbox.stub(element, 'getBoundingClientRect',
+        () => layoutRectLtwh(0, 0, 10, 10));
+    sandbox.stub(element, 'isBuilt', () => true);
+    const parentResource = new Resource(1, parentElement, resources);
+    const resource = new Resource(2, element, resources);
+    const measureSpy = sandbox.spy(resource, 'measure');
+    const scheduleStub = sandbox.stub(resources, 'scheduleLayoutOrPreload_');
+    resources.scheduleLayoutOrPreloadForSubresources_(
+        parentResource, true, [element]);
+    expect(measureSpy).to.be.calledOnce;
+    expect(scheduleStub).to.be.calledOnce;
+  });
+
+  it('should schedule after build', () => {
+    const parentElement = createAmpElement();
+    const element = createAmpElement();
+    parentElement.appendChild(element);
+    sandbox.stub(element, 'getBoundingClientRect',
+        () => layoutRectLtwh(0, 0, 10, 10));
+    sandbox.stub(element, 'isBuilt', () => false);
+    const parentResource = new Resource(1, parentElement, resources);
+    const resource = new Resource(2, element, resources);
+    const measureSpy = sandbox.spy(resource, 'measure');
+    const scheduleStub = sandbox.stub(resources, 'scheduleLayoutOrPreload_');
+    resources.scheduleLayoutOrPreloadForSubresources_(
+        parentResource, true, [element]);
+    expect(measureSpy).to.not.be.called;
+    expect(scheduleStub).to.not.be.called;
+    resource.build();
+    return element.whenBuilt().then(() => {
+      expect(measureSpy).to.be.calledOnce;
+      expect(scheduleStub).to.be.calledOnce;
     });
   });
 
