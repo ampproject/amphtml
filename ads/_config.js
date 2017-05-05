@@ -293,9 +293,8 @@ export const adConfig = {
   },
 
   gumgum: {
-    prefetch: [
-      'https://g2.gumgum.com/javascripts/ad.js',
-    ],
+    prefetch: 'https://g2.gumgum.com/javascripts/ad.js',
+    renderStartImplemented: true,
   },
 
   holder: {

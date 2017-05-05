@@ -24,16 +24,16 @@ limitations under the License.
   type="gumgum"
   data-zone="ggumtest"
   data-slot="3883">
-  <div placeholder>A 300x100 placeholder</div>
-  <div fallback>300x100 fallback content</div>
 </amp-ad>
 ```
-
-Supported parameters:
-
-- data-zone: GumGum Zone ID
-- data-slot: GumGum Slot Ad ID
 
 ## Configuration
 
 For parameters, configuration or any question please contact [GumGum](http://gumgum.com/contact/).
+
+Supported parameters:
+
+__Required:__
+
+- `data-zone` GumGum Zone ID
+- `data-slot` GumGum Slot Ad ID

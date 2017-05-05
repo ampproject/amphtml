@@ -15,7 +15,7 @@
  */
 
 import {loadScript, validateData} from '../3p/3p';
-import {setStyle} from '../src/style';
+import {setStyles} from '../src/style';
 
 /**
  * @param {!Window} global
@@ -28,8 +28,8 @@ export function gumgum(global, data) {
     win = window,
     ctx = win.context,
     dom = global.document.getElementById('c'),
-    ampWidth = data.width,
-    ampHeight = data.height,
+    ampWidth = parseInt(data.width || '0', 10),
+    ampHeight = parseInt(data.height || '0', 10),
     ggevents = global.ggevents || [];
 
   const
@@ -39,8 +39,7 @@ export function gumgum(global, data) {
       return function(evt) {
         const
           ad = Object.assign({width: 0, height: 0}, evt.ad || {}),
-          identifier = ['GUMGUM',type,evt.id].join('_');
-        // console.log(evt, identifier);
+          identifier = ['GUMGUM', type, evt.id].join('_');
         ctx.reportRenderedEntityIdentifier(identifier);
         ctx.renderStart({
           width: max(ampWidth, ad.width),
@@ -61,9 +60,11 @@ export function gumgum(global, data) {
   if (slotId) {
     // Slot Ad
     const ins = global.document.createElement('div');
-    setStyle(ins, 'display', 'block');
-    setStyle(ins, 'width', '100%');
-    setStyle(ins, 'height', '100%');
+    setStyles(ins, {
+      display: 'block',
+      width: '100%',
+      height: '100%',
+    });
     ins.setAttribute('data-gg-slot', slotId);
     dom.appendChild(ins);
     // Events
