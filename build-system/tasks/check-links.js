@@ -70,8 +70,8 @@ function runLinkChecker(markdownFile) {
     baseUrl : 'file://' + path.dirname(path.resolve((markdownFile)))
   };
 
-  util.log('Checking links in', util.colors.magenta(markdownFile), '...');
   markdownLinkCheck(filteredMarkdown, opts, function(error, results) {
+    util.log('Checking links in', util.colors.magenta(markdownFile), '...');
     results.forEach(function (result) {
       if(result.status === 'dead') {
         error = true;
@@ -81,12 +81,14 @@ function runLinkChecker(markdownFile) {
       }
     });
     if(error) {
-      util.log(util.colors.red(
-        'ERROR: Dead links found in ' + markdownFile + '. Please update it.'));
+      util.log(
+          util.colors.red('ERROR'), 'Dead links found in',
+          util.colors.magenta(markdownFile), '(please update it).');
       process.exit(1);
     } else {
-      util.log(util.colors.green(
-        'SUCCESS: All links in ' + markdownFile + ' are alive.'));
+      util.log(
+          util.colors.green('SUCCESS'), 'All links in',
+          util.colors.magenta(markdownFile), 'are alive.');
     }
   });
 }
