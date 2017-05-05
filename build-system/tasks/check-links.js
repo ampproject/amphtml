@@ -37,20 +37,12 @@ function checkLinks() {
         'Error: A list of markdown files must be specified via --files'));
     process.exit(1);
   }
+
   var markdownFiles = files.split(',');
   deferred = Q.defer();
   fileCount = markdownFiles.length;
-  checkLinksInFiles(markdownFiles);
-  return deferred.promise;
-}
-
-/**
- * Checks for dead links in the given list of files.
- *
- * @param {string} markdownFiles CSV list of markdown files to check.
- */
-function checkLinksInFiles(markdownFiles) {
   markdownFiles.forEach(runLinkChecker);
+  return deferred.promise;
 }
 
 /**
