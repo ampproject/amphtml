@@ -355,6 +355,12 @@ describes.sandboxed('MeasureScanner', {}, () => {
       resources = env.win.services.resources.obj;
       amp1 = env.createAmpElement();
       amp2 = env.createAmpElement();
+      sandbox.stub(amp1, 'isUpgraded', () => true);
+      sandbox.stub(amp2, 'isUpgraded', () => true);
+      sandbox.stub(amp1, 'isBuilt', () => true);
+      sandbox.stub(amp2, 'isBuilt', () => true);
+      sandbox.stub(amp1, 'whenBuilt', () => Promise.resolve());
+      sandbox.stub(amp2, 'whenBuilt', () => Promise.resolve());
       resources.add(amp1);
       resources.add(amp2);
     });
@@ -407,7 +413,8 @@ describes.sandboxed('MeasureScanner', {}, () => {
       }).then(() => {
         expect(runner).to.be.undefined;
         r2.loadPromiseResolve_();
-        return waitForNextMicrotask();
+        return Promise.all([r1.loadedOnce(), r2.loadedOnce()])
+            .then(() => waitForNextMicrotask());
       }).then(() => {
         expect(runner).to.be.ok;
         expect(runner.requests_).to.have.length(2);
