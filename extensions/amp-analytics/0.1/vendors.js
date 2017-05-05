@@ -608,16 +608,16 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
           'threshold': 1,
         },
         'vars': {
-          'timingRequestType': 'timing'
-        }
+          'timingRequestType': 'timing',
+        },
       },
       'adwordsTiming': {
         'on': 'visible',
         'request': 'timing',
         'enabled': '${queryParam(gclid)}',
         'vars': {
-          'timingRequestType': 'adtiming'
-        }
+          'timingRequestType': 'adtiming',
+        },
       },
     },
     'extraUrlParamsReplaceMap': {
