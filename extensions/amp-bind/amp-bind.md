@@ -341,7 +341,7 @@ Only binding to the following components and attributes are allowed:
   <tr>
     <td><code>&lt;amp-state></code></td>
     <td><code>[src]</code></td>
-    <td>Fetches JSON from the new URL and merges it into the existing state. </td>
+    <td>Fetches JSON from the new URL and merges it into the existing state. <em>Note the following update will ignore <code>&lt;amp-state&gt;</code> elements to prevent cycles.</em></td>
   </tr>
   <tr>
     <td><code>&lt;amp-video></code></td>
