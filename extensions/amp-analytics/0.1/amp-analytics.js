@@ -595,7 +595,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         if (typeof params[k] == 'string') {
           requestPromises.push(
               this.variableService_.expandTemplate(params[k], expansionOptions)
-                  .then(value => { params[k] = value; }));
+                .then(value => { params[k] = value; }));
         }
       }
     }
