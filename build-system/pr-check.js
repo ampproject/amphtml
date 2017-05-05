@@ -267,10 +267,10 @@ function main(argv) {
             'It appears that your PR contains a mix of flag-config files ' +
             '(*config.json) and non-flag-config files.');
         console.log('Please make your changes in separate pull requests.');
-        console.log(util.colors.red(
+        console.log(util.colors.yellow(
             'NOTE: If you see a long list of unrelated files below, it is ' +
             'likely because your branch is very old.'));
-        console.log(util.colors.red(
+        console.log(util.colors.yellow(
             'A full sync to upstream/master should clear this error.'));
         console.log('\nFull list of files in this PR:');
         files.forEach((file) => { console.log('\t' + file); });
