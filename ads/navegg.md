@@ -18,8 +18,6 @@ limitations under the License.
 
 If you want to serve ads with Navegg data you need to use this adapter.
 
-The Navegg adapter only supports Doubleclick for now.
-For the most up-to-date list of Doubleclick supported parameters and usage please refer to Doubleclick reference guide [here](google/doubleclick.md).
 
 ## Example
 
@@ -35,7 +33,9 @@ For the most up-to-date list of Doubleclick supported parameters and usage pleas
 
 ### Configuration
 
-You need to specify the 'data-acc' with your Navegg Account ID:
+The Navegg adapter only supports Doubleclick for now.
+For the most up-to-date list of Doubleclick supported parameters and usage please refer to Doubleclick reference guide [here](google/doubleclick.md).
+To get Navegg integration working you only need to specify the 'data-acc' with your Navegg Account ID:
 ```html
   data-acc="NAVEGG_ACCOUNT_ID"
 ```
