@@ -529,7 +529,8 @@ export class Resource {
    * @return {boolean}
    */
   isDisplayed() {
-    return this.layoutBox_.height > 0 && this.layoutBox_.width > 0;
+    return (this.layoutBox_.height > 0 && this.layoutBox_.width > 0 &&
+        !!this.element.ownerDocument.defaultView);
   }
 
   /**
@@ -741,7 +742,10 @@ export class Resource {
    * @param {boolean} inViewport
    */
   setInViewport(inViewport) {
-    if (inViewport == this.isInViewport_) {
+    // TODO(dvoytenko, #9177): investigate/cleanup viewport signals for
+    // elements in dead iframes.
+    if (inViewport == this.isInViewport_ ||
+        !this.element.ownerDocument.defaultView) {
       return;
     }
     dev().fine(TAG, 'inViewport:', this.debugid, inViewport);
