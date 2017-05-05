@@ -126,7 +126,7 @@ function getMode_(win) {
 
 /**
  * Retrieve the `rtvVersion` which will have a numeric prefix
- * denoting canary/prod/experiment.
+ * denoting canary/prod/experiment (unless `isLocalDev` is true).
  *
  * @param {!Window} win
  * @param {boolean} isLocalDev
