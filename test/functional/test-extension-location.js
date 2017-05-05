@@ -96,6 +96,6 @@ describes.sandboxed('Extension Location', {}, () => {
       }, 'ww', /* isLocalDev */ false, /* opt_rtv */ true);
       expect(script).to.equal(
           'https://cdn.ampproject.org/rtv/123/ww.js');
-    })
+    });
   });
 });
