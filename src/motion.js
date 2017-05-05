@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {vsyncFor} from './vsync';
+import {vsyncFor} from './services';
 
 /** @const {function()} */
 const NOOP_CALLBACK_ = function() {};

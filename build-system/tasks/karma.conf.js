@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-var app = require('../server').app;
-
 /**
  * @param {!Object} config
  */
@@ -70,6 +68,9 @@ module.exports = {
   browsers: [
     process.env.TRAVIS ? 'Chrome_travis_ci' : 'Chrome_no_extensions',
   ],
+
+  // Number of sauce tests to start in parallel
+  concurrency: 6,
 
   customLaunchers: {
     /*eslint "google-camelcase/google-camelcase": 0*/
@@ -171,6 +172,7 @@ module.exports = {
     'karma-chai',
     'karma-chai-as-promised',
     'karma-chrome-launcher',
+    'karma-edge-launcher',
     'karma-firefox-launcher',
     'karma-fixture',
     'karma-html2js-preprocessor',
@@ -179,7 +181,9 @@ module.exports = {
     'karma-sauce-launcher',
     'karma-sinon-chai',
     {
-      'middleware:custom': ['factory', function() {return app;}],
+      'middleware:custom': ['factory', function() {
+        return require(require.resolve('../app.js'));
+      }],
     },
   ],
 };

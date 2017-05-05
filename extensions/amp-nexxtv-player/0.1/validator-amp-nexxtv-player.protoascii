@@ -17,44 +17,20 @@
 tags: {  # amp-nexxtv-player
   html_format: AMP
   tag_name: "SCRIPT"
-  spec_name: "amp-nexxtv-player extension .js script"
   satisfies: "amp-nexxtv-player extension .js script"
-  mandatory_parent: "HEAD"
-  unique: true
-  extension_unused_unless_tag_present: "amp-nexxtv-player"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  requires: "amp-nexxtv-player"
+  extension_spec: {
+    name: "amp-nexxtv-player"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-nexxtv-player"
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-nexxtv-player-(latest|0\\.1)\\.js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://github.com/nexxtv/amphtml/blob/nexxtv-player/extensions/amp-nexxtv-player/amp-nexxtv-player.md"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-nexxtv-player>
   html_format: AMP
   tag_name: "AMP-NEXXTV-PLAYER"
   disallowed_ancestor: "AMP-SIDEBAR"
+  satisfies: "amp-nexxtv-player"
   requires: "amp-nexxtv-player extension .js script"
   attrs: {
     name: "data-client"
@@ -73,7 +49,6 @@ tags: {  # <amp-nexxtv-player>
     name: "data-origin"
     value_url: {
       allow_empty: true
-      allow_relative: true
       allowed_protocol: "https"
       allowed_protocol: "http"
     }
@@ -86,7 +61,7 @@ tags: {  # <amp-nexxtv-player>
     value_regex: "album|audio|live|playlist|playlist-marked|video"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://github.com/nexxtv/amphtml/blob/nexxtv-player/extensions/amp-nexxtv-player/amp-nexxtv-player.md"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-nexxtv-player"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

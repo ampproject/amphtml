@@ -14,27 +14,33 @@
  * limitations under the License.
  */
 
+import {getMode} from '../../src/mode';
+import {
+  installPerformanceService,
+  performanceFor,
+} from '../../src/service/performance-impl';
+import {resourcesForDoc} from '../../src/services';
+import {viewerForDoc} from '../../src/services';
+import * as lolex from 'lolex';
 import * as sinon from 'sinon';
-import {installPerformanceService} from '../../src/service/performance-impl';
-import {resetServiceForTesting} from '../../src/service';
-import {resourcesForDoc} from '../../src/resources';
-import {viewerForDoc} from '../../src/viewer';
 
 
-describe('performance', () => {
+describes.realWin('performance', {amp: true}, env => {
   let sandbox;
   let perf;
   let clock;
+  let win;
+  let ampdoc;
+  let hasLoadTimes;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
-    perf = installPerformanceService(window);
-  });
-
-  afterEach(() => {
-    resetServiceForTesting(window, 'performance');
-    sandbox.restore();
+    win = env.win;
+    sandbox = env.sandbox;
+    ampdoc = env.ampdoc;
+    clock = lolex.install(win, 0, ['Date', 'setTimeout', 'clearTimeout']);
+    installPerformanceService(env.win);
+    perf = performanceFor(env.win);
+    hasLoadTimes = window.chrome && window.chrome.loadTimes;
   });
 
   describe('when viewer is not ready', () => {
@@ -52,18 +58,43 @@ describe('performance', () => {
       expect(perf.events_.length).to.equal(0);
 
       perf.tickDelta('test', 99);
-      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_.length).to.equal(1);
       expect(perf.events_[0])
           .to.be.jsonEqual({
-            label: '_test',
-            from: null,
-            value: perf.initTime_,
+            label: 'test',
+            delta: 99,
           });
-      expect(perf.events_[1]).to.be.jsonEqual({
-        label: 'test',
-        from: '_test',
-        value: perf.initTime_ + 99,
-      });
+    });
+
+    it('should map tickDelta to non-zero tick', () => {
+      let c = 0;
+      expect(perf.events_.length).to.equal(c);
+
+      perf.tickDelta('test1', 0);
+      expect(perf.events_.length).to.equal(c + 1);
+      expect(perf.events_[c])
+          .to.be.jsonEqual({
+            label: 'test1',
+            delta: 1,
+          });
+
+      c++;
+      perf.tickDelta('test2', -1);
+      expect(perf.events_.length).to.equal(c + 1);
+      expect(perf.events_[c])
+          .to.be.jsonEqual({
+            label: 'test2',
+            delta: 1,
+          });
+
+      c++;
+      perf.tickDelta('test3', 2);
+      expect(perf.events_.length).to.equal(c + 1);
+      expect(perf.events_[c])
+          .to.be.jsonEqual({
+            label: 'test3',
+            delta: 2,
+          });
     });
 
     it('should have max 50 queued events', () => {
@@ -83,19 +114,7 @@ describe('performance', () => {
 
       expect(perf.events_[0]).to.be.jsonEqual({
         label: 'start0',
-        from: null,
         value: 150,
-      });
-    });
-
-    it('should save all 3 arguments as queued tick event if present', () => {
-      clock.tick(150);
-      perf.tick('start0', 'start1', 300);
-
-      expect(perf.events_[0]).to.be.jsonEqual({
-        label: 'start0',
-        from: 'start1',
-        value: 300,
       });
     });
 
@@ -112,7 +131,6 @@ describe('performance', () => {
       expect(perf.events_.length).to.equal(50);
       expect(perf.events_[0]).to.be.jsonEqual({
         label: 'start0',
-        from: null,
         value: tickTime,
       });
 
@@ -121,12 +139,10 @@ describe('performance', () => {
 
       expect(perf.events_[0]).to.be.jsonEqual({
         label: 'start1',
-        from: null,
         value: tickTime,
       });
       expect(perf.events_[49]).to.be.jsonEqual({
         label: 'start50',
-        from: null,
         value: tickTime + 1,
       });
     });
@@ -137,7 +153,7 @@ describe('performance', () => {
     let viewerSendMessageStub;
 
     beforeEach(() => {
-      viewer = viewerForDoc(window.document);
+      viewer = viewerForDoc(ampdoc);
       viewerSendMessageStub = sandbox.stub(viewer, 'sendMessage');
     });
 
@@ -202,8 +218,18 @@ describe('performance', () => {
         expect(flushSpy).to.have.callCount(1);
         expect(perf.events_.length).to.equal(2);
 
+        perf.isPerformanceTrackingOn_ = true;
+        clock.tick(1);
         return promise.then(() => {
           expect(perf.isMessagingReady_).to.be.true;
+          const msrCalls = viewerSendMessageStub.withArgs(
+              'tick',
+              sinon.match(arg => arg.label == 'msr'));
+          expect(msrCalls).to.be.calledOnce;
+          expect(msrCalls.args[0][1]).to.be.jsonEqual({
+            label: 'msr',
+            delta: 1,
+          });
           expect(flushSpy).to.have.callCount(4);
           expect(perf.events_.length).to.equal(0);
         });
@@ -234,7 +260,8 @@ describe('performance', () => {
         return perf.coreServicesAvailable().then(() => {
           expect(flushSpy).to.have.callCount(3);
           expect(perf.isMessagingReady_).to.be.false;
-          expect(perf.events_.length).to.equal(4);
+          const count = hasLoadTimes ? 5 : 4;
+          expect(perf.events_.length).to.equal(count);
         });
       });
     });
@@ -346,21 +373,24 @@ describe('performance', () => {
       it('should forward all queued tick events', () => {
         perf.tick('start0');
         clock.tick(1);
-        perf.tick('start1', 'start0');
+        perf.tick('start1');
 
         expect(perf.events_.length).to.equal(2);
 
         return perf.coreServicesAvailable().then(() => {
           expect(viewerSendMessageStub.withArgs('tick').getCall(0).args[1])
               .to.be.jsonEqual({
-                label: 'start0',
-                from: null,
-                value: 0,
+                label: 'msr',
+                delta: 1,
               });
           expect(viewerSendMessageStub.withArgs('tick').getCall(1).args[1])
               .to.be.jsonEqual({
+                label: 'start0',
+                value: 0,
+              });
+          expect(viewerSendMessageStub.withArgs('tick').getCall(2).args[1])
+              .to.be.jsonEqual({
                 label: 'start1',
-                from: 'start0',
                 value: 1,
               });
         });
@@ -381,44 +411,45 @@ describe('performance', () => {
         return perf.coreServicesAvailable().then(() => {
           clock.tick(100);
           perf.tick('start0');
-          perf.tick('start1', 'start0', 300);
+          perf.tick('start1', 300);
 
-          expect(viewerSendMessageStub.withArgs('tick').getCall(2).args[1])
+          expect(viewerSendMessageStub.withArgs(
+              'tick', sinon.match(arg => arg.label == 'start0')).args[0][1])
               .to.be.jsonEqual({
                 label: 'start0',
-                from: null,
                 value: 100,
               });
-          expect(viewerSendMessageStub.withArgs('tick').getCall(3).args[1])
+          expect(viewerSendMessageStub.withArgs(
+              'tick', sinon.match(arg => arg.label == 'start1')).args[0][1])
               .to.be.jsonEqual({
                 label: 'start1',
-                from: 'start0',
-                value: 300,
+                delta: 300,
               });
         });
       });
 
       it('should call the flush callback', () => {
-        expect(viewerSendMessageStub.withArgs('sendCsi', undefined,
+        const payload = {
+          ampexp: 'rtv-' + getMode(win).rtvVersion,
+        };
+        expect(viewerSendMessageStub.withArgs('sendCsi', payload,
             /* cancelUnsent */true)).to.have.callCount(0);
         // coreServicesAvailable calls flush once.
         return perf.coreServicesAvailable().then(() => {
-          expect(viewerSendMessageStub.withArgs('sendCsi', undefined,
+          expect(viewerSendMessageStub.withArgs('sendCsi', payload,
               /* cancelUnsent */true)).to.have.callCount(1);
           perf.flush();
-          expect(viewerSendMessageStub.withArgs('sendCsi', undefined,
+          expect(viewerSendMessageStub.withArgs('sendCsi', payload,
               /* cancelUnsent */true)).to.have.callCount(2);
           perf.flush();
-          expect(viewerSendMessageStub.withArgs('sendCsi', undefined,
+          expect(viewerSendMessageStub.withArgs('sendCsi', payload,
               /* cancelUnsent */true)).to.have.callCount(3);
         });
       });
     });
   });
 
-  // TODO(dvoytenko, #7815): re-enable once the reporting regression is
-  // confirmed.
-  it.skip('should wait for visible resources', () => {
+  it('should wait for visible resources', () => {
     function resource() {
       const res = {
         loadedComplete: false,
@@ -429,7 +460,7 @@ describe('performance', () => {
       return res;
     }
 
-    const resources = resourcesForDoc(window.document);
+    const resources = resourcesForDoc(ampdoc);
     const resourcesMock = sandbox.mock(resources);
     perf.resources_ = resources;
 
@@ -470,7 +501,7 @@ describe('performance', () => {
     }
 
     beforeEach(() => {
-      viewer = viewerForDoc(window.document);
+      viewer = viewerForDoc(ampdoc);
       sandbox.stub(viewer, 'whenMessagingReady')
           .returns(Promise.resolve());
       viewerSendMessageStub = sandbox.stub(viewer,
@@ -488,9 +519,7 @@ describe('performance', () => {
 
       sandbox.stub(viewer, 'whenFirstVisible')
           .returns(whenFirstVisiblePromise);
-      // TODO(dvoytenko, #7815): switch back to the non-legacy version once the
-      // reporting regression is confirmed.
-      sandbox.stub(perf, 'whenViewportLayoutCompleteLegacy_')
+      sandbox.stub(perf, 'whenViewportLayoutComplete_')
           .returns(whenViewportLayoutCompletePromise);
       return viewer.whenMessagingReady();
     });
@@ -533,41 +562,39 @@ describe('performance', () => {
         });
       });
 
-      it('should tick `pc` with opt_value=400 when user request document ' +
+      it('should tick `pc` with delta=400 when user request document ' +
          'to be visible before before first viewport completion', () => {
         clock.tick(100);
         whenFirstVisibleResolve();
-        expect(tickSpy).to.have.callCount(1);
+        expect(tickSpy).to.have.callCount(hasLoadTimes ? 3 : 2);
         return viewer.whenFirstVisible().then(() => {
           clock.tick(400);
-          expect(tickSpy).to.have.callCount(2);
+          expect(tickSpy).to.have.callCount(hasLoadTimes ? 4 : 3);
           whenViewportLayoutCompleteResolve();
           return perf.whenViewportLayoutComplete_().then(() => {
-            expect(tickSpy).to.have.callCount(4);
-            expect(tickSpy.getCall(1).args[0]).to.equal('ofv');
-            expect(tickSpy.getCall(2).args[0]).to.equal('_pc');
-            expect(tickSpy.getCall(3).args[0]).to.equal('pc');
-            expect(tickSpy.getCall(3).args[1]).to.equal('_pc');
-            expect(Number(tickSpy.getCall(2).args[2])).to.equal(perf.initTime_);
-            expect(Number(tickSpy.getCall(3).args[2]))
-                .to.equal(perf.initTime_ + 400);
+            expect(tickSpy).to.have.callCount(hasLoadTimes ? 4 : 3);
+            expect(tickSpy.withArgs('ofv')).to.be.calledOnce;
+            return whenFirstVisiblePromise.then(() => {
+              expect(tickSpy).to.have.callCount(hasLoadTimes ? 5 : 4);
+              expect(tickSpy.withArgs('pc')).to.be.calledOnce;
+              expect(Number(tickSpy.withArgs('pc').args[0][1])).to.equal(400);
+            });
           });
         });
       });
 
-      it('should tick `pc` with `opt_value=0` when viewport is complete ' +
+      it('should tick `pc` with `delta=0` when viewport is complete ' +
          'before user request document to be visible', () => {
         clock.tick(300);
         whenViewportLayoutCompleteResolve();
         return perf.whenViewportLayoutComplete_().then(() => {
-          expect(tickSpy).to.have.callCount(3);
-          expect(tickSpy.firstCall.args[0]).to.equal('ol');
-          expect(tickSpy.secondCall.args[0]).to.equal('_pc');
-          expect(tickSpy.thirdCall.args[0]).to.equal('pc');
-          expect(tickSpy.thirdCall.args[1]).to.equal('_pc');
-          expect(Number(tickSpy.secondCall.args[2])).to.equal(perf.initTime_);
-          expect(Number(tickSpy.thirdCall.args[2])).to.equal(
-              perf.initTime_ + 1);
+          expect(tickSpy.withArgs('ol')).to.be.calledOnce;
+          expect(tickSpy.withArgs('pc')).to.have.callCount(0);
+          whenFirstVisibleResolve();
+          return whenFirstVisiblePromise.then(() => {
+            expect(tickSpy.withArgs('pc')).to.be.calledOnce;
+            expect(Number(tickSpy.withArgs('pc').args[0][1])).to.equal(0);
+          });
         });
       });
     });
@@ -595,46 +622,62 @@ describe('performance', () => {
         clock.tick(300);
         whenViewportLayoutCompleteResolve();
         return perf.whenViewportLayoutComplete_().then(() => {
-          expect(tickSpy).to.have.callCount(2);
-          expect(tickSpy.firstCall.args[0]).to.equal('ol');
-          expect(tickSpy.secondCall.args[0]).to.equal('pc');
-          expect(tickSpy.secondCall.args[2]).to.be.undefined;
+          expect(tickSpy.withArgs('ol')).to.be.calledOnce;
+          expect(tickSpy.withArgs('pc')).to.be.calledOnce;
+          expect(tickSpy.withArgs('pc').args[0][2]).to.be.undefined;
         });
       });
     });
   });
 });
 
-describes.fakeWin('performance with experiment', {amp: true}, env => {
+describes.realWin('performance with experiment', {amp: true}, env => {
 
   let win;
   let perf;
   let viewerSendMessageStub;
+  let sandbox;
 
   beforeEach(() => {
     win = env.win;
-    const viewer = viewerForDoc(win.document);
+    sandbox = env.sandbox;
+    const viewer = viewerForDoc(env.ampdoc);
     viewerSendMessageStub = sandbox.stub(viewer, 'sendMessage');
     sandbox.stub(viewer, 'whenMessagingReady').returns(Promise.resolve());
     sandbox.stub(viewer, 'getParam').withArgs('csi').returns('1');
     sandbox.stub(viewer, 'isEmbedded').returns(true);
-    perf = installPerformanceService(win);
+    installPerformanceService(win);
+    perf = performanceFor(win);
   });
 
-  it('legacy-cdn-domain experiment enabled', () => {
-    sandbox.stub(perf, 'getHostname_', () => 'cdn.ampproject.org');
+  it('rtvVersion experiment', () => {
     return perf.coreServicesAvailable().then(() => {
+      viewerSendMessageStub.reset();
       perf.flush();
-      expect(viewerSendMessageStub)
-          .to.be.calledWith('sendCsi', {ampexp: 'legacy-cdn-domain'});
+      expect(viewerSendMessageStub).to.be.calledWith('sendCsi', {
+        ampexp: 'rtv-' + getMode(win).rtvVersion,
+      });
     });
   });
 
-  it('no experiment', () => {
-    sandbox.stub(perf, 'getHostname_', () => 'curls.cdn.ampproject.org');
+  it('addEnabledExperiment should work', () => {
     return perf.coreServicesAvailable().then(() => {
+      perf.addEnabledExperiment('experiment-a');
+      perf.addEnabledExperiment('experiment-b');
+      perf.addEnabledExperiment('experiment-a'); // duplicated entry
+      viewerSendMessageStub.reset();
       perf.flush();
-      expect(viewerSendMessageStub).to.be.calledWith('sendCsi', undefined);
+      expect(viewerSendMessageStub).to.be.calledWith('sendCsi',
+          sandbox.match(payload => {
+            const experiments = payload.ampexp.split(',');
+            expect(experiments).to.have.length(3);
+            expect(experiments).to.have.members([
+              'rtv-' + getMode(win).rtvVersion,
+              'experiment-a',
+              'experiment-b',
+            ]);
+            return true;
+          }));
     });
   });
 });

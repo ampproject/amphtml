@@ -29,5 +29,7 @@ require('./prepend-global');
 require('./presubmit-checks');
 require('./serve');
 require('./size');
+require('./release-tagging');
 require('./runtime-test');
 require('./validator');
+require('./visual-diff');

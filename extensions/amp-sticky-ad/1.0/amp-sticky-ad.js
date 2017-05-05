@@ -21,6 +21,7 @@ import {dev,user} from '../../../src/log';
 import {removeElement} from '../../../src/dom';
 import {toggle, computedStyle} from '../../../src/style';
 import {isExperimentOn} from '../../../src/experiments';
+import {timerFor} from '../../../src/services';
 import {
   setStyle,
   removeAlphaFromColor,
@@ -28,6 +29,9 @@ import {
 
 /** @const */
 const EARLY_LOAD_EXPERIMENT = 'sticky-ad-early-load';
+
+/** @const */
+const TAG = 'amp-sticky-ad';
 
 class AmpStickyAd extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -58,15 +62,37 @@ class AmpStickyAd extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.viewport_ = this.getViewport();
-
-    toggle(this.element, true);
-    this.element.classList.add('-amp-sticky-ad-layout');
+    this.element.classList.add('i-amphtml-sticky-ad-layout');
     const children = this.getRealChildren();
     user().assert((children.length == 1 && children[0].tagName == 'AMP-AD'),
         'amp-sticky-ad must have a single amp-ad child');
 
     this.ad_ = children[0];
     this.setAsOwner(this.ad_);
+
+    // TODO(@zhouyx, #9126): cleanup once research
+    // on custom-element stubbing is complete.
+    let customApiResolver;
+    const customApiPromise = new Promise(resolve => {
+      customApiResolver = resolve;
+    });
+    if (this.ad_.whenBuilt) {
+      customApiResolver();
+    } else {
+      // Give 1s for amp-ad to stub. Report 1% error.
+      if (Math.random() < 0.01) {
+        dev().error(TAG, 'race condition on customElement stubbing');
+      }
+      timerFor(this.win).delay(customApiResolver, 1000);
+    }
+    customApiPromise.then(() => {
+      this.ad_.whenBuilt().then(() => {
+        this.mutateElement(() => {
+          toggle(this.element, true);
+        });
+      });
+    });
+
     const paddingBar = this.win.document.createElement(
          'amp-sticky-ad-top-padding');
     this.element.insertBefore(paddingBar, this.ad_);
@@ -163,11 +189,7 @@ class AmpStickyAd extends AMP.BaseElement {
    * @private
    */
   scheduleLayoutForAd_() {
-    if (this.ad_.isBuilt()) {
-      this.layoutAd_();
-    } else {
-      this.ad_.whenBuilt().then(this.layoutAd_.bind(this));
-    }
+    this.ad_.whenBuilt().then(this.layoutAd_.bind(this));
   }
 
   /**

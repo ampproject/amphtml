@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {deserializeMessage, isAmpMessage} from './3p-frame';
+import {deserializeMessage, isAmpMessage} from './3p-frame-messaging';
 import {dev} from './log';
 import {filterSplice} from './utils/array';
 import {parseUrl} from './url';
@@ -381,8 +381,9 @@ function getSentinel_(iframe, opt_is3P) {
  * @param {*} data
  * @returns {?Object} object message
  * @private
+ * @visibleForTesting
  */
-function parseIfNeeded(data) {
+export function parseIfNeeded(data) {
   if (typeof data == 'string') {
     if (data.charAt(0) == '{') {
       data = tryParseJson(data, e => {

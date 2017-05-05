@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {viewerForDoc} from '../viewer';
+import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
+import {viewerForDoc} from '../services';
 import {Viewport, ViewportBindingDef} from '../service/viewport-impl';
 import {getServiceForDoc} from '../service';
-import {resourcesForDoc} from '../../src/resources';
+import {resourcesForDoc} from '../services';
 import {
   nativeIntersectionObserverSupported,
 } from '../../src/intersection-observer-polyfill';
 import {layoutRectLtwh} from '../layout-rect';
 import {Observable} from '../observable';
-import {MessageType} from '../../src/3p-frame';
-import {IframeMessagingClient} from '../../3p/iframe-messaging-client';
+import {MessageType} from '../../src/3p-frame-messaging';
 import {dev} from '../log';
 
 /** @const {string} */
@@ -75,16 +75,8 @@ export class ViewportBindingInabox {
      */
     this.boxRect_ = layoutRectLtwh(0, boxHeight + 1, boxWidth, boxHeight);
 
-    /** @private @const {!IframeMessagingClient} */
-    this.iframeClient_ = new IframeMessagingClient(win);
-    this.iframeClient_.setSentinel(getRandom(win));
-
-    // Bet the top window is the scrollable window and loads host script.
-    // TODOs:
-    // 1) check window ancestor origin, if the top window is in same origin,
-    // don't bother to use post messages.
-    // 2) broadcast the request
-    this.iframeClient_.setHostWindow(win.top);
+    /** @private @const {!../../3p/iframe-messaging-client.IframeMessagingClient} */
+    this.iframeClient_ = iframeMessagingClientFor(win);
 
     dev().fine(TAG, 'initialized inabox viewport');
   }
@@ -176,6 +168,7 @@ export class ViewportBindingInabox {
   /** @override */ setScrollTop() {/* no-op */}
   /** @override */ getScrollWidth() {return 0;}
   /** @override */ getScrollHeight() {return 0;}
+  /** @override */ getBorderTop() {return 0;}
   /** @override */ requiresFixedLayerTransfer() {return false;}
 }
 
@@ -189,14 +182,6 @@ export function installInaboxViewportService(ampdoc) {
   const viewport = new Viewport(ampdoc, binding, viewer);
   return /** @type {!Viewport} */(getServiceForDoc(
       ampdoc, 'viewport', () => viewport));
-}
-
-/**
- * @param {!Window} win
- * @returns {string}
- */
-function getRandom(win) {
-  return String(win.Math.random()).substr(2);
 }
 
 /**

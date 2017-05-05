@@ -15,14 +15,10 @@
  */
 
 import {CSS} from '../../../build/amp-accordion-0.1.css';
-import {isExperimentOn} from '../../../src/experiments';
 import {Layout} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {removeFragment} from '../../../src/url';
 import {map} from '../../../src/utils/object';
-
-/** @const */
-const TAG = 'amp-accordion-session-state-optout';
 
 class AmpAccordion extends AMP.BaseElement {
 
@@ -52,9 +48,7 @@ class AmpAccordion extends AMP.BaseElement {
   buildCallback() {
     this.sections_ = this.getRealChildren();
 
-    if (isExperimentOn(this.win, TAG)) {
-      this.sessionOptOut_ = this.element.hasAttribute('disable-session-states');
-    }
+    this.sessionOptOut_ = this.element.hasAttribute('disable-session-states');
 
     this.element.setAttribute('role', 'tablist');
 
@@ -77,9 +71,9 @@ class AmpAccordion extends AMP.BaseElement {
           'amp-accordion/amp-accordion.md. Found in: %s', this.element);
       const header = sectionComponents_[0];
       const content = sectionComponents_[1];
-      header.classList.add('-amp-accordion-header');
+      header.classList.add('i-amphtml-accordion-header');
       header.setAttribute('role', 'tab');
-      content.classList.add('-amp-accordion-content');
+      content.classList.add('i-amphtml-accordion-content');
       content.setAttribute('role', 'tabpanel');
       let contentId = content.getAttribute('id');
       if (!contentId) {

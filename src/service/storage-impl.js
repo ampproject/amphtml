@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {getServiceForDoc} from '../service';
+import {registerServiceBuilderForDoc} from '../service';
 import {getSourceOrigin} from '../url';
 import {dev} from '../log';
 import {recreateNonProtoObject} from '../json';
-import {viewerForDoc} from '../viewer';
+import {viewerForDoc} from '../services';
 
 /** @const */
 const TAG = 'Storage';
@@ -382,15 +382,19 @@ export class ViewerStorageBinding {
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @return {!Storage}
  */
 export function installStorageServiceForDoc(ampdoc) {
-  return /** @type {!Storage} */ (getServiceForDoc(ampdoc, 'storage', () => {
-    const viewer = viewerForDoc(ampdoc);
-    const overrideStorage = parseInt(viewer.getParam('storage'), 10);
-    const binding = overrideStorage ?
-        new ViewerStorageBinding(viewer) :
-        new LocalStorageBinding(ampdoc.win);
-    return new Storage(ampdoc, viewer, binding).start_();
-  }));
+  registerServiceBuilderForDoc(
+      ampdoc,
+      'storage',
+      /* opt_ctor */ undefined,
+      () => {
+        const viewer = viewerForDoc(ampdoc);
+        const overrideStorage = parseInt(viewer.getParam('storage'), 10);
+        const binding = overrideStorage ?
+            new ViewerStorageBinding(viewer) :
+            new LocalStorageBinding(ampdoc.win);
+        return new Storage(ampdoc, viewer, binding).start_();
+      },
+      /* opt_instantiate */ true);
 }

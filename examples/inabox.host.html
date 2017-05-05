@@ -4,93 +4,61 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <title>amp-inabox-host example</title>
+  <style>
+    body {
+      font-size: 1.2em;
+    }
+  </style>
 </head>
 <body>
+  <h2>
+    This page tests amp-inabox. Follow the instructions and check points.
+  </h2>
+  <hr>
+  <h3>Inabox above the fold</h3>
   <iframe
-      src="//ads.localhost:8000/examples/inabox.amp.max.html"
+      name="inabox-atf"
+      src="//ads.localhost:8000/examples/inabox.amp.html"
       scrolling="no"
       width="300" height="200">
   </iframe>
-  <h2>Scroll down to see more ...</h2>
+  <div>
+    <strong>Check Point 1: Above the fold visibility tracking</strong><br/>
+    Before any scrolling, you should see 3 failed network requests: <code>visible</code>, <code>rootVisible</code> and <code>img2Visible</code>. Also check their URL params.
+  </div>
+  <hr>
+  <h3>Inabox below the fold, and nested in friendly iframe </h3>
+  <div>
+    Now scroll slowly...
+  </div>
   <div style="height: 100vh"></div>
-  <h2>Inabox nested in friendly iframe </h2>
   <iframe
-      srcdoc="<iframe src='//ads.localhost:8000/examples/inabox.amp.max.html' width='300' height='200' scrolling='no' frameborder=0></iframe>"
+      name="inabox-btf"
+      srcdoc="<iframe src='//ads.localhost:8000/examples/inabox.amp.html' width='300' height='200' scrolling='no' frameborder=0></iframe>"
       scrolling="no"
       marginwidth="0"
       marginheight="0"
       width="300" height="200">
   </iframe>
+  <div>
+    <strong>Check Point 2: Below the fold visibility tracking</strong><br/>
+    You should have seen another 2 failed network requests: <code>visible</code>, <code>rootVisible</code> when the 2nd iframe enters viewport.
+    Then followed by <code>img2Visible</code> when the 2nd image in this iframe enters viewport.
+  </div>
   <div style="height: 20vh"></div>
-  <h2>A huge doc inabox</h2>
+  <hr>
+  <h3>Everything inabox</h3>
+  <div>
+    <strong>Check Point 3: AMP elements rendering for inabox</strong><br/>
+    This is a long AMP document. You should see everything renders correctly. All check console errors.
+  </div>
   <iframe
-      src="//ads.localhost:8000/examples/inabox-more.amp.max.html"
+      name="inabox-article"
+      src="//ads.localhost:8000/examples/inabox-more.amp.html"
       scrolling="no"
       width="300" height="1000">
   </iframe>
 
-  <script>
-    initInaboxHost(window);
-    // Enable amp-inabox APIs for all iframes
-    Array.prototype.push.apply(
-        window.ampInaboxIframes, document.querySelectorAll('iframe'));
-
-    /**
-     * A sample bootstrap script that is to be run in ads tag.
-     *
-     * @param {!Window} win
-     */
-    function initInaboxHost(win) {
-      const hostScriptUrl = 'http://localhost:8000/dist/amp-inabox-host.js';
-      preloadScript(win, hostScriptUrl);
-      // Optional: preload a4a-v0.js as well.
-
-      // Keep all iframes that potentially can render AMP content in this array
-      win.ampInaboxIframes = win.ampInaboxIframes || [];
-      // Keep all amp-inabox post-messages in this array.
-      win.ampInaboxPendingMessages = win.ampInaboxPendingMessages || [];
-
-      let hostScriptRequested = false;
-
-      const listener = event => {
-        if (!isInaboxMessage(event.data)) {
-          return;
-        }
-        win.ampInaboxPendingMessages.push(event);
-
-        // Load and execute host script once.
-        if (hostScriptRequested) {
-          return;
-        }
-        hostScriptRequested = true;
-        // Load inabox-host.js when the 1st inabox message is received.
-        loadScript(win, hostScriptUrl, () => {
-          win.removeEventListener('message', listener);
-          console.log('a4a-host.js loaded.');
-        });
-      };
-      win.addEventListener('message', listener);
-      console.log('A4A host bootstrapped.');
-    }
-
-    function isInaboxMessage(message) {
-      return typeof message === 'string' && message.indexOf('amp-') == 0;
-    }
-
-    function preloadScript(win, url) {
-      const link = win.document.createElement('link');
-      link.rel = 'preload';
-      link.href = url;
-      link.as = 'script';
-      win.document.head.appendChild(link);
-    }
-
-    function loadScript(win, url, callback) {
-      const script = win.document.createElement('script');
-      script.src = url;
-      script.onload = callback;
-      win.document.body.appendChild(script);
-    }
-  </script>
+  <script src="./inabox-tag-integration.js"></script>
 </body>
 </html>

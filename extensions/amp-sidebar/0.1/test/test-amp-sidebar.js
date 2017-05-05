@@ -15,10 +15,11 @@
  * limitations under the License.
  */
 
+import {Keycodes} from '../../../../src/utils/keycodes';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
-import {platformFor} from '../../../../src/platform';
-import {timerFor} from '../../../../src/timer';
+import {platformFor} from '../../../../src/services';
+import {timerFor} from '../../../../src/services';
 import {assertScreenReaderElement} from '../../../../testing/test-helper';
 import * as sinon from 'sinon';
 import '../amp-sidebar';
@@ -96,7 +97,7 @@ describe('amp-sidebar', () => {
         callback();
       });
       impl.open_();
-      expect(iframe.doc.querySelectorAll('.-amp-sidebar-mask').length)
+      expect(iframe.doc.querySelectorAll('.i-amphtml-sidebar-mask').length)
           .to.equal(1);
     });
   });
@@ -270,8 +271,8 @@ describe('amp-sidebar', () => {
       if (eventObj.initEvent) {
         eventObj.initEvent('keydown', true, true);
       }
-      eventObj.keyCode = 27;
-      eventObj.which = 27;
+      eventObj.keyCode = Keycodes.ESCAPE;
+      eventObj.which = Keycodes.ESCAPE;
       const el = iframe.doc.documentElement;
       el.dispatchEvent ?
           el.dispatchEvent(eventObj) : el.fireEvent('onkeydown', eventObj);

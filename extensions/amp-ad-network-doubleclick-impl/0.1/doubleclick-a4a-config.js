@@ -27,6 +27,7 @@ import {
 import {EXPERIMENT_ATTRIBUTE} from '../../../ads/google/a4a/utils';
 import {getMode} from '../../../src/mode';
 import {isProxyOrigin} from '../../../src/url';
+import {isExperimentOn} from '../../../src/experiments';
 
 /** @const {string} */
 const DOUBLECLICK_A4A_EXPERIMENT_NAME = 'expDoubleclickA4A';
@@ -52,19 +53,41 @@ const DOUBLECLICK_A4A_EXPERIMENT_NAME = 'expDoubleclickA4A';
 // debug traffic profiling.  Once we have debugged the a4a implementation and
 // can disable profiling again, we can return these constants to being
 // private to this file.
-/** @const {!../../../ads/google/a4a/traffic-experiments.ExperimentInfo} */
-export const DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES = {
-  control: '117152660',
-  experiment: '117152661',
+/** @const {!../../../ads/google/a4a/traffic-experiments.A4aExperimentBranches} */
+export const DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH = {
+  control: '117152662',
+  experiment: '117152663',
+  controlMeasureOnRender: '2093327',
 };
 
-/** @const {!../../../ads/google/a4a/traffic-experiments.ExperimentInfo} */
-export const DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES = {
+/**
+ * @const {!../../../ads/google/a4a/traffic-experiments.A4aExperimentBranches}
+ */
+export const DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH = {
+  control: '2092619',
+  experiment: '2092620',
+  controlMeasureOnRender: '2093327',
+};
+
+/**
+ * @const {!../../../ads/google/a4a/traffic-experiments.A4aExperimentBranches}
+ */
+export const DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH = {
   control: '117152680',
   experiment: '117152681',
 };
 
-/** @const {!../../../ads/google/a4a/traffic-experiments.ExperimentInfo} */
+/**
+ * @const {!../../../ads/google/a4a/traffic-experiments.A4aExperimentBranches}
+ */
+export const DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH = {
+  control: '2092613',
+  experiment: '2092614',
+};
+
+/**
+ * @const {!../../../ads/google/a4a/traffic-experiments.A4aExperimentBranches}
+ */
 export const DOUBLECLICK_A4A_BETA_BRANCHES = {
   control: '2077830',
   experiment: '2077831',
@@ -78,6 +101,9 @@ export const BETA_ATTRIBUTE = 'data-use-beta-a4a-implementation';
  * @returns {boolean}
  */
 export function doubleclickIsA4AEnabled(win, element) {
+  if (element.hasAttribute('useSameDomainRenderingUntilDeprecated')) {
+    return false;
+  }
   const a4aRequested = element.hasAttribute(BETA_ATTRIBUTE);
   // Note: Under this logic, a4aRequested shortcuts googleAdsIsA4AEnabled and,
   // therefore, carves out of the experiment branches.  Any publisher using this
@@ -85,10 +111,17 @@ export function doubleclickIsA4AEnabled(win, element) {
   // TODO(tdrl): The "is this site eligible" logic has gotten scattered around
   // and is now duplicated.  It should be cleaned up and factored into a single,
   // shared location.
+  let externalBranches, internalBranches;
+  if (isExperimentOn(win, 'a4aFastFetchDoubleclickLaunched')) {
+    externalBranches = DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH;
+    internalBranches = DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH;
+  } else {
+    externalBranches = DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH;
+    internalBranches = DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH;
+  }
   const enableA4A = googleAdsIsA4AEnabled(
           win, element, DOUBLECLICK_A4A_EXPERIMENT_NAME,
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
-          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES) ||
+          externalBranches, internalBranches) ||
       (a4aRequested && (isProxyOrigin(win.location) ||
        getMode(win).localDev || getMode(win).test));
   if (enableA4A && a4aRequested && !isInManualExperiment(element)) {

@@ -1,5 +1,5 @@
 FAIL
-feature_tests/bad_viewport.html:25:2 The property 'foo' in attribute 'content' in tag 'meta name=viewport' is disallowed. (see https://www.ampproject.org/docs/reference/spec.html#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
-feature_tests/bad_viewport.html:25:2 The property 'minimum-scale' in attribute 'content' in tag 'meta name=viewport' is set to 'not-a-number', which is invalid. (see https://www.ampproject.org/docs/reference/spec.html#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
-feature_tests/bad_viewport.html:25:2 The property 'width' is missing from attribute 'content' in tag 'meta name=viewport'. (see https://www.ampproject.org/docs/reference/spec.html#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
-feature_tests/bad_viewport.html:32:7 The mandatory tag 'meta name=viewport' is missing or incorrect. (see https://www.ampproject.org/docs/reference/spec.html#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/bad_viewport.html:25:2 The property 'foo' in attribute 'content' in tag 'meta name=viewport' is disallowed. (see https://www.ampproject.org/docs/reference/spec#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/bad_viewport.html:25:2 The property 'minimum-scale' in attribute 'content' in tag 'meta name=viewport' is set to 'not-a-number', which is invalid. (see https://www.ampproject.org/docs/reference/spec#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/bad_viewport.html:25:2 The property 'width' is missing from attribute 'content' in tag 'meta name=viewport'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/bad_viewport.html:32:7 The mandatory tag 'meta name=viewport' is missing or incorrect. (see https://www.ampproject.org/docs/reference/spec#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]

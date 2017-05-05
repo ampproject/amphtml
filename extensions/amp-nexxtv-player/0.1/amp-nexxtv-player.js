@@ -21,11 +21,9 @@ import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {removeElement} from '../../../src/dom';
-import {isObject} from '../../../src/types';
-import {tryParseJson} from '../../../src/json';
 import {listen} from '../../../src/event-helper';
 import {VideoEvents} from '../../../src/video-interface';
-import {videoManagerForDoc} from '../../../src/video-manager';
+import {videoManagerForDoc} from '../../../src/services';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -71,15 +69,6 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
       this.playerReadyResolver_ = resolve;
     });
 
-    const iframe = this.element.ownerDocument.createElement('iframe');
-    this.iframe_ = iframe;
-
-    this.applyFillContent(iframe);
-    iframe.setAttribute('frameborder', '0');
-    iframe.setAttribute('allowfullscreen', 'true');
-
-    this.element.appendChild(iframe);
-
     installVideoManagerForDoc(this.element);
     videoManagerForDoc(this.element).register(this);
   }
@@ -98,22 +87,21 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
       'The data-client attribute is required for <amp-nexxtv-player> %s',
       this.element);
 
-    const start = this.element.getAttribute('data-seek-to') || 0;
+    const start = this.element.getAttribute('data-seek-to') || '0';
     const mode = this.element.getAttribute('data-mode') || 'static';
     const streamtype = this.element.getAttribute('data-streamtype') || 'video';
     const origin = this.element.getAttribute('data-origin')
       || 'https://embed.nexx.cloud/';
 
-    let src = '';
-    src += origin;
+    let src = origin;
 
     if (streamtype !== 'video') {
       src += `${encodeURIComponent(streamtype)}/`;
     }
 
     src += `${encodeURIComponent(client)}/`;
-    src += `${encodeURIComponent(mediaId)}`;
-    src += `?start=${encodeURIComponent(String(start))}`;
+    src += encodeURIComponent(mediaId);
+    src += `?start=${encodeURIComponent(start)}`;
     src += `&datamode=${encodeURIComponent(mode)}&amp=1`;
 
     this.videoIframeSrc_ = assertAbsoluteHttpOrHttpsUrl(src);
@@ -128,23 +116,37 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.iframe_.src = this.getVideoIframeSrc_();
+    const iframe = this.element.ownerDocument.createElement('iframe');
 
-    this.unlistenMessage_ = listen(this.iframe_,'message', event => {
+    this.applyFillContent(iframe);
+    iframe.setAttribute('frameborder', '0');
+    iframe.setAttribute('allowfullscreen', 'true');
+    iframe.src = this.getVideoIframeSrc_();
+
+    this.iframe_ = iframe;
+
+    this.unlistenMessage_ = listen(this.win, 'message', event => {
       this.handleNexxMessages_(event);
     });
 
-    return this.loadPromise(this.iframe_)
-      .then(() => {
-        this.element.dispatchCustomEvent(VideoEvents.LOAD);
-        this.playerReadyResolver_(this.iframe_);
-      });
+    this.element.appendChild(this.iframe_);
+    const loaded = this.loadPromise(this.iframe_).then(() => {
+      this.element.dispatchCustomEvent(VideoEvents.LOAD);
+    });
+    this.playerReadyResolver_(loaded);
+    return loaded;
   }
 
   pauseCallback() {
     if (this.iframe_) {
       this.pause();
     }
+  }
+
+  /** @override */
+  unlayoutOnPause() {
+    // TODO(aghassemi, #8264): Temp until #8264 is fixed.
+    return true;
   }
 
   /** @override */
@@ -158,60 +160,53 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
       this.unlistenMessage_();
     }
 
+    this.playerReadyPromise_ = new Promise(resolve => {
+      this.playerReadyResolver_ = resolve;
+    });
+
     return true;
   }
 
   sendCommand_(command) {
-    this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify({
-      'cmd': command,
-    }), '*');
+    this.playerReadyPromise_.then(() => {
+      if (this.iframe_ && this.iframe_.contentWindow) {
+        this.iframe_.contentWindow./*OK*/postMessage({cmd: command}, '*');
+      }
+    });
   };
 
   // emitter
   handleNexxMessages_(event) {
-    const data = isObject(event.data) ? event.data : tryParseJson(event.data);
-    if (data === undefined) {
-      return; // We only process valid JSON.
+    if (!event.data || event.source !== this.iframe_.contentWindow) {
+      return;
     }
 
-    if (data.cmd == 'onload') {
-      this.element.dispatchCustomEvent(VideoEvents.LOAD);
-      this.playerReadyResolver_(this.iframe_);
-    } else if (data.cmd == 'play') {
+    if (event.data == 'play') {
       this.element.dispatchCustomEvent(VideoEvents.PLAY);
-    } else if (data.cmd == 'pause') {
+    } else if (event.data == 'pause') {
       this.element.dispatchCustomEvent(VideoEvents.PAUSE);
-    } else if (data.cmd == 'mute') {
+    } else if (event.data == 'mute') {
       this.element.dispatchCustomEvent(VideoEvents.MUTED);
-    } else if (data.cmd == 'unmute') {
+    } else if (event.data == 'unmute') {
       this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
     }
   }
 
   // VideoInterface Implementation
-  // only send in json format
   play() {
-    this.playerReadyPromise_.then(() => {
-      this.sendCommand_('play');
-    });
+    this.sendCommand_('play');
   }
 
   pause() {
-    this.playerReadyPromise_.then(() => {
-      this.sendCommand_('pause');
-    });
+    this.sendCommand_('pause');
   }
 
   mute() {
-    this.playerReadyPromise_.then(() => {
-      this.sendCommand_('mute');
-    });
+    this.sendCommand_('mute');
   }
 
   unmute() {
-    this.playerReadyPromise_.then(() => {
-      this.sendCommand_('unmute');
-    });
+    this.sendCommand_('unmute');
   }
 
   supportsPlatform() {

@@ -30,7 +30,7 @@ import {
   setShadowDomSupportedVersionForTesting,
   ShadowDomVersion,
 } from '../../src/web-components';
-import {extensionsFor} from '../../src/extensions';
+import {extensionsFor} from '../../src/services';
 import * as sinon from 'sinon';
 
 
@@ -128,8 +128,8 @@ describe('shadow-embed', () => {
             if (scenario == ShadowDomVersion.NONE) {
               it('should add id for polyfill', () => {
                 const shadowRoot = createShadowRoot(hostElement);
-                expect(shadowRoot.tagName).to.equal('I-AMP-SHADOW-ROOT');
-                expect(shadowRoot.id).to.match(/i-amp-sd-\d+/);
+                expect(shadowRoot.tagName).to.equal('I-AMPHTML-SHADOW-ROOT');
+                expect(shadowRoot.id).to.match(/i-amphtml-sd-\d+/);
               });
             }
           });
@@ -200,7 +200,7 @@ describe('shadow-embed', () => {
 
     it('should yield true for polyfill', () => {
       expect(isShadowRoot(document.createElement(
-          'i-amp-shadow-root'))).to.be.true;
+          'i-amphtml-shadow-root'))).to.be.true;
     });
   });
 

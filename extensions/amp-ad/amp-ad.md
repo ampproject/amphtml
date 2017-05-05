@@ -50,8 +50,7 @@ custom element called `<amp-ad>`. No ad network provided JavaScript is allowed t
 different origin (via iframe sandbox) as the AMP document and executes the ad
 network’s JS inside that iframe sandbox.
 
-The `<amp-ad>` requires width and height values to be specified like all
-resources in AMP. It requires a `type` argument that select what ad network is displayed. All `data-*` attributes on the tag are automatically passed as arguments to the code that eventually renders the ad. What `data-` attributes are required for a given type of network depends and must be documented with the ad network.
+The `<amp-ad>` requires width and height values to be specified according to the [rule](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#tldr-summary-of-layout-requirements--behaviors) of its layout type. It requires a `type` argument that select what ad network is displayed. All `data-*` attributes on the tag are automatically passed as arguments to the code that eventually renders the ad. What `data-` attributes are required for a given type of network depends and must be documented with the ad network.
 
 ```html
 <amp-ad width=300 height=250
@@ -78,119 +77,6 @@ resources in AMP. It requires a `type` argument that select what ad network is d
     data-placement="Below Article Thumbnails">
 </amp-embed>
 ```
-
-## Supported ad networks
-
-- [A9](../../ads/a9.md)
-- [AccessTrade](../../ads/accesstrade.md)
-- [Adblade](../../ads/adblade.md)
-- [AdButler](../../ads/adbutler.md)
-- [Adform](../../ads/adform.md)
-- [Ad Generation](../../ads/adgeneration.md)
-- [Adhese](../../ads/adhese.md)
-- [ADITION](../../ads/adition.md)
-- [Adman](../../ads/adman.md)
-- [AdmanMedia](../../ads/admanmedia.md)
-- [AdReactor](../../ads/adreactor.md)
-- [AdSense](../../ads/google/adsense.md)
-- [AdsNative](../../ads/adsnative.md)
-- [AdSpirit](../../ads/adspirit.md)
-- [AdSpeed](../../ads/adspeed.md)
-- [AdStir](../../ads/adstir.md)
-- [AdTech](../../ads/adtech.md)
-- [AdThrive](../../ads/adthrive.md)
-- [Ad Up Technology](../../ads/aduptech.md)
-- [Adverline](../../ads/adverline.md)
-- [Adverticum](../../ads/adverticum.md)
-- [AdvertServe](../../ads/advertserve.md)
-- [Affiliate-B](../../ads/affiliateb.md)
-- [AMoAd](../../ads/amoad.md)
-- [AppNexus](../../ads/appnexus.md)
-- [Atomx](../../ads/atomx.md)
-- [brainy](../../ads/brainy.md)
-- [CA A.J.A. Infeed](../../ads/caajainfeed.md)
-- [CA-ProFit-X](../../ads/caprofitx.md)
-- [Chargeads](../../ads/chargeads.md)
-- [Colombia](../../ads/colombia.md)
-- [Content.ad](../../ads/contentad.md)
-- [Criteo](../../ads/criteo.md)
-- [CSA](../../ads/google/csa.md)
-- [CxenseDisplay](../../ads/eas.md)
-- [DistroScale](../../ads/distroscale.md)
-- [Dot and Media](../../ads/dotandads.md)
-- [Doubleclick](../../ads/google/doubleclick.md)
-- [E-Planning](../../ads/eplanning.md)
-- [Ezoic](../../ads/ezoic.md)
-- [FlexOneELEPHANT](../../ads/f1e.md)
-- [Felmat](../../ads/felmat.md)
-- [Flite](../../ads/flite.md)
-- [Fusion](../../ads/fusion.md) 
-- [GenieeSSP](../../ads/genieessp.md)
-- [GMOSSP](../../ads/gmossp.md)
-- [Holder](../../ads/holder.md)
-- [I-Mobile](../../ads/imobile.md)
-- [iBillboard](../../ads/ibillboard.md)
-- [Improve Digital](../../ads/improvedigital.md)
-- [Index Exchange](../../ads/ix.md)
-- [Industrybrains](../../ads/industrybrains.md)
-- [InMobi](../../ads/inmobi.md)
-- [Kargo](../../ads/kargo.md)
-- [Kiosked](../../ads/kiosked.md)
-- [Kixer](../../ads/kixer.md)
-- [Ligatus](../../ads/ligatus.md)
-- [LOKA](../../ads/loka.md)
-- [MADS](../../ads/mads.md)
-- [MANTIS](../../ads/mantis.md)
-- [MediaImpact](../../ads/mediaimpact.md)
-- [Media.net](../../ads/medianet.md)
-- [Mediavine](../../ads/mediavine.md)
-- [Meg](../../ads/meg.md)
-- [MicroAd](../../ads/microad.md)
-- [Mixpo](../../ads/mixpo.md)
-- [myWidget](../../ads/mywidget.md)
-- [Nativo](../../ads/nativo.md)
-- [Nend](../../ads/nend.md)
-- [Nokta](../../ads/nokta.md)
-- [Open AdStream (OAS)](../../ads/openadstream.md)
-- [OpenX](../../ads/openx.md)
-- [plista](../../ads/plista.md)
-- [popin](../../ads/popin.md)
-- [PubMatic](../../ads/pubmatic.md)
-- [Pubmine](../../ads/pubmine.md)
-- [PulsePoint](../../ads/pulsepoint.md)
-- [Purch](../../ads/purch.md)
-- [Rambler&Co](../../ads/capirs.md)
-- [Relap](../../ads/relap.md)
-- [Revcontent](../../ads/revcontent.md)
-- [Rubicon Project](../../ads/rubicon.md)
-- [Sharethrough](../../ads/sharethrough.md)
-- [Sklik](../../ads/sklik.md)
-- [SlimCut Media](../../ads/slimcutmedia.md)
-- [Smart AdServer](../../ads/smartadserver.md)
-- [smartclip](../../ads/smartclip.md)
-- [Sortable](../../ads/sortable.md)
-- [SOVRN](../../ads/sovrn.md)
-- [SunMedia](../../ads/sunmedia.md)
-- [Swoop](../../ads/swoop.md)
-- [Teads](../../ads/teads.md)
-- [TripleLift](../../ads/triplelift.md)
-- [ValueCommerce](../../ads/valuecommerce.md)
-- [Webediads](../../ads/webediads.md)
-- [Weborama](../../ads/weborama.md)
-- [Widespace](../../ads/widespace.md)
-- [Xlift](../../ads/xlift.md)
-- [Yahoo](../../ads/yahoo.md)
-- [YahooJP](../../ads/yahoojp.md)
-- [Yieldbot](../../ads/yieldbot.md)
-- [Yieldmo](../../ads/yieldmo.md)
-- [Yieldone](../../ads/yieldone.md)
-- [Zedo](../../ads/zedo.md)
-- [Zucks](../../ads/zucks.md)
-
-## Supported embed types
-
-- [Taboola](../../ads/taboola.md)
-- [ZergNet](../../ads/zergnet.md)
 
 ## Styling
 
@@ -221,7 +107,7 @@ An optional attribute. If provided, will require confirming the [amp-user-notifi
 
 **data-loading-strategy**
 
-Instructs AMP to load ads in a way that prefers a high degree of viewability, while sometimes loading too late to generate a view. Supported value: `prefer-viewability-over-views`. 
+An optional attribute that takes a float value in range of [0, 3], which instructs the ad to start loading when it's within the given number of viewports away from the current viewport. Use a smaller value to gain higher degree of viewability, with the risk of generating fewer views. If the attribute is not used, the default value is 3. If the attribute is used but the value is left blank, then a float value is assigned by the system which optimizes for viewability without drastically impacting the views.
 
 **common attributes**
 
@@ -234,7 +120,7 @@ Optionally, `amp-ad` supports a child element with the `placeholder` attribute. 
 ```html
 <amp-ad width=300 height=250
     type="foo">
-  <div placeholder>Have a great day!</div>
+  <div placeholder>Loading ...</div>
 </amp-ad>
 ```
 
@@ -246,7 +132,7 @@ Example with fallback:
 
 ```html
 <amp-ad width=300 height=250 type="foo">
-  <div fallback>Have a great day!</div>
+  <div fallback>No ad for you</div>
 </amp-ad>
 ```
 
@@ -311,3 +197,120 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 ## Notes
 
 To use `<amp-ad>` or `<amp-embed>`, the script to the `amp-ad` library is needed. It's recommended that you add the script manually; however, currently, it will be automatically fetched when `amp-ad` is used.
+
+
+## Supported ad networks
+
+- [A8](../../ads/a8.md)
+- [A9](../../ads/a9.md)
+- [AccessTrade](../../ads/accesstrade.md)
+- [Adblade](../../ads/adblade.md)
+- [AdButler](../../ads/adbutler.md)
+- [Adform](../../ads/adform.md)
+- [Ad Generation](../../ads/adgeneration.md)
+- [Adhese](../../ads/adhese.md)
+- [ADITION](../../ads/adition.md)
+- [Adman](../../ads/adman.md)
+- [AdmanMedia](../../ads/admanmedia.md)
+- [AdReactor](../../ads/adreactor.md)
+- [AdSense](../../ads/google/adsense.md)
+- [AdsNative](../../ads/adsnative.md)
+- [AdSpirit](../../ads/adspirit.md)
+- [AdSpeed](../../ads/adspeed.md)
+- [AdStir](../../ads/adstir.md)
+- [AdTech](../../ads/adtech.md)
+- [AdThrive](../../ads/adthrive.md)
+- [Ad Up Technology](../../ads/aduptech.md)
+- [Adverline](../../ads/adverline.md)
+- [Adverticum](../../ads/adverticum.md)
+- [AdvertServe](../../ads/advertserve.md)
+- [Affiliate-B](../../ads/affiliateb.md)
+- [AMoAd](../../ads/amoad.md)
+- [AppNexus](../../ads/appnexus.md)
+- [Atomx](../../ads/atomx.md)
+- [brainy](../../ads/brainy.md)
+- [CA A.J.A. Infeed](../../ads/caajainfeed.md)
+- [CA-ProFit-X](../../ads/caprofitx.md)
+- [Chargeads](../../ads/chargeads.md)
+- [Colombia](../../ads/colombia.md)
+- [Content.ad](../../ads/contentad.md)
+- [Criteo](../../ads/criteo.md)
+- [CSA](../../ads/google/csa.md)
+- [CxenseDisplay](../../ads/eas.md)
+- [Dianomi](../../ads/dianomi.md)
+- [DistroScale](../../ads/distroscale.md)
+- [Dot and Media](../../ads/dotandads.md)
+- [Doubleclick](../../ads/google/doubleclick.md)
+- [E-Planning](../../ads/eplanning.md)
+- [Ezoic](../../ads/ezoic.md)
+- [FlexOneELEPHANT](../../ads/f1e.md)
+- [Felmat](../../ads/felmat.md)
+- [Flite](../../ads/flite.md)
+- [Fusion](../../ads/fusion.md)
+- [GenieeSSP](../../ads/genieessp.md)
+- [GMOSSP](../../ads/gmossp.md)
+- [Holder](../../ads/holder.md)
+- [I-Mobile](../../ads/imobile.md)
+- [iBillboard](../../ads/ibillboard.md)
+- [Improve Digital](../../ads/improvedigital.md)
+- [Index Exchange](../../ads/ix.md)
+- [Industrybrains](../../ads/industrybrains.md)
+- [InMobi](../../ads/inmobi.md)
+- [Kargo](../../ads/kargo.md)
+- [Kiosked](../../ads/kiosked.md)
+- [Kixer](../../ads/kixer.md)
+- [Ligatus](../../ads/ligatus.md)
+- [LOKA](../../ads/loka.md)
+- [MADS](../../ads/mads.md)
+- [MANTIS](../../ads/mantis.md)
+- [MediaImpact](../../ads/mediaimpact.md)
+- [Media.net](../../ads/medianet.md)
+- [Mediavine](../../ads/mediavine.md)
+- [Meg](../../ads/meg.md)
+- [MicroAd](../../ads/microad.md)
+- [Mixpo](../../ads/mixpo.md)
+- [myWidget](../../ads/mywidget.md)
+- [Nativo](../../ads/nativo.md)
+- [Nend](../../ads/nend.md)
+- [Nokta](../../ads/nokta.md)
+- [Open AdStream (OAS)](../../ads/openadstream.md)
+- [OpenX](../../ads/openx.md)
+- [plista](../../ads/plista.md)
+- [popin](../../ads/popin.md)
+- [PubMatic](../../ads/pubmatic.md)
+- [Pubmine](../../ads/pubmine.md)
+- [PulsePoint](../../ads/pulsepoint.md)
+- [Purch](../../ads/purch.md)
+- [Rambler&Co](../../ads/capirs.md)
+- [Relap](../../ads/relap.md)
+- [Revcontent](../../ads/revcontent.md)
+- [Rubicon Project](../../ads/rubicon.md)
+- [Sharethrough](../../ads/sharethrough.md)
+- [Sklik](../../ads/sklik.md)
+- [SlimCut Media](../../ads/slimcutmedia.md)
+- [Smart AdServer](../../ads/smartadserver.md)
+- [smartclip](../../ads/smartclip.md)
+- [Sortable](../../ads/sortable.md)
+- [SOVRN](../../ads/sovrn.md)
+- [SunMedia](../../ads/sunmedia.md)
+- [Swoop](../../ads/swoop.md)
+- [Teads](../../ads/teads.md)
+- [TripleLift](../../ads/triplelift.md)
+- [ValueCommerce](../../ads/valuecommerce.md)
+- [Webediads](../../ads/webediads.md)
+- [Weborama](../../ads/weborama.md)
+- [Widespace](../../ads/widespace.md)
+- [Xlift](../../ads/xlift.md)
+- [Yahoo](../../ads/yahoo.md)
+- [YahooJP](../../ads/yahoojp.md)
+- [Yieldbot](../../ads/yieldbot.md)
+- [Yieldmo](../../ads/yieldmo.md)
+- [Yieldone](../../ads/yieldone.md)
+- [Zedo](../../ads/zedo.md)
+- [Zucks](../../ads/zucks.md)
+
+## Supported embed types
+
+- [Outbrain](../../ads/outbrain.md)
+- [Taboola](../../ads/taboola.md)
+- [ZergNet](../../ads/zergnet.md)

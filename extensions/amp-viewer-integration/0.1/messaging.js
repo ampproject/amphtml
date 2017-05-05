@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-
 import {listen} from '../../../src/event-helper';
+import {tryParseJson} from '../../../src/json';
 import {dev} from '../../../src/log';
 
 const TAG = 'amp-viewer-messaging';
-const APP = '__AMPHTML__';
+export const APP = '__AMPHTML__';
 
 /**
  * @enum {string}
  */
-const MessageType = {
+export const MessageType = {
   REQUEST: 'q',
   RESPONSE: 's',
 };
@@ -48,6 +48,20 @@ export let Message;
 export let RequestHandler;
 
 /**
+  * @param {*} message
+  * @return {?Message}
+  */
+export function parseMessage(message) {
+  if (typeof message != 'string') {
+    return /** @type {Message} */(message);
+  }
+  if (message.charAt(0) != '{') {
+    return null;
+  }
+  return /** @type {?Message} */ (tryParseJson(message) || null);
+}
+
+/**
  * @fileoverview This class is a de-facto implementation of MessagePort
  * from Channel Messaging API:
  * https://developer.mozilla.org/en-US/docs/Web/API/Channel_Messaging_API
@@ -56,12 +70,15 @@ export class WindowPortEmulator {
   /**
    * @param {!Window} win
    * @param {string} origin
+   * @param {!Window} target
    */
-  constructor(win, origin) {
+  constructor(win, origin, target) {
     /** @const {!Window} */
     this.win = win;
     /** @private {string} */
     this.origin_ = origin;
+    /** @const {!Window} */
+    this.target_ = target;
   }
 
   /**
@@ -71,7 +88,7 @@ export class WindowPortEmulator {
   addEventListener(eventType, handler) {
     listen(this.win, 'message', e => {
       if (e.origin == this.origin_ &&
-          e.source == this.win.parent && e.data.app == APP) {
+          e.source == this.target_ && e.data.app == APP) {
         handler(e);
       }
     });
@@ -81,7 +98,7 @@ export class WindowPortEmulator {
    * @param {Object} data
    */
   postMessage(data) {
-    this.win.parent./*OK*/postMessage(data, this.origin_);
+    this.target_./*OK*/postMessage(data, this.origin_);
   }
   start() {
   }
@@ -100,12 +117,15 @@ export class Messaging {
    * Conversation (messaging protocol) between me and Bob.
    * @param {!Window} win
    * @param {!MessagePort|!WindowPortEmulator} port
+   * @param {boolean} opt_isWebview
    */
-  constructor(win, port) {
+  constructor(win, port, opt_isWebview) {
     /** @const {!Window} */
     this.win = win;
     /** @const @private {!MessagePort|!WindowPortEmulator} */
     this.port_ = port;
+    /** @const @private */
+    this.isWebview_ = !!opt_isWebview;
     /** @private {!number} */
     this.requestIdCounter_ = 0;
     /** @private {!Object<number, {resolve: function(*), reject: function(!Error)}>} */
@@ -155,9 +175,11 @@ export class Messaging {
    * @private
    */
   handleMessage_(event) {
-    dev().fine(TAG, 'AMPDOC got a message:', event.type, event.data);
-    /** @type {Message} */
-    const message = event.data;
+    dev().fine(TAG, 'Got a message:', event.type, event.data);
+    const message = parseMessage(event.data);
+    if (!message) {
+      return;
+    }
     if (message.type == MessageType.REQUEST) {
       this.handleRequest_(message);
     } else if (message.type == MessageType.RESPONSE) {
@@ -235,7 +257,8 @@ export class Messaging {
    * @private
    */
   sendMessage_(message) {
-    this.port_./*OK*/postMessage(message);
+    this.port_./*OK*/postMessage(
+      this.isWebview_ ? JSON.stringify(message) : message);
   }
 
   /**
@@ -253,8 +276,10 @@ export class Messaging {
       handler = this.defaultHandler_;
     }
     if (!handler) {
-      throw new Error(
+      const error = new Error(
         'Cannot handle request because handshake is not yet confirmed!');
+      error.args = message.name;
+      throw error;
     }
 
     const promise = handler(message.name, message.data, !!message.rsvp);

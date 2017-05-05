@@ -20,8 +20,8 @@ import {
   resetTrackImpressionPromiseForTesting,
 } from '../../src/impression';
 import {toggleExperiment} from '../../src/experiments';
-import {viewerForDoc} from '../../src/viewer';
-import {xhrFor} from '../../src/xhr';
+import {viewerForDoc} from '../../src/services';
+import {xhrFor} from '../../src/services';
 import * as sinon from 'sinon';
 
 describe('impression', () => {

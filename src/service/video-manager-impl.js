@@ -17,14 +17,14 @@
 import {listen, listenOncePromise} from '../event-helper';
 import {dev} from '../log';
 import {getMode} from '../mode';
-import {platformFor} from '../platform';
-import {fromClassForDoc} from '../service';
+import {platformFor} from '../services';
+import {registerServiceBuilderForDoc} from '../service';
 import {setStyles} from '../style';
 import {isFiniteNumber} from '../types';
 import {VideoEvents, VideoAttributes} from '../video-interface';
-import {viewerForDoc} from '../viewer';
-import {viewportForDoc} from '../viewport';
-import {vsyncFor} from '../vsync';
+import {viewerForDoc} from '../services';
+import {viewportForDoc} from '../services';
+import {vsyncFor} from '../services';
 
 /**
  * @const {number} Percentage of the video that should be in viewport before it
@@ -110,6 +110,10 @@ export class VideoManager {
   maybeInstallVisibilityObserver_(entry) {
     listen(entry.video.element, VideoEvents.VISIBILITY, () => {
       entry.updateVisibility();
+    });
+
+    listen(entry.video.element, VideoEvents.RELOAD, () => {
+      entry.videoLoaded_();
     });
 
     // TODO(aghassemi, #4780): Create a new IntersectionObserver service.
@@ -314,7 +318,6 @@ class VideoEntry {
       } else {
         this.video.pause();
       }
-
     });
   }
 
@@ -325,7 +328,7 @@ class VideoEntry {
    */
   createAutoplayAnimation_() {
     const doc = this.ampdoc_.win.document;
-    const anim = doc.createElement('i-amp-video-eq');
+    const anim = doc.createElement('i-amphtml-video-eq');
     anim.classList.add('amp-video-eq');
     // Four columns for the equalizer.
     for (let i = 1; i <= 4; i++) {
@@ -362,11 +365,8 @@ class VideoEntry {
    */
   createAutoplayMask_() {
     const doc = this.ampdoc_.win.document;
-    const mask = doc.createElement('i-amp-video-mask');
-    // TODO(dvoytenko, #6794): Remove old `-amp-fill-content` form after the new
-    // form is in PROD for 1-2 weeks.
+    const mask = doc.createElement('i-amphtml-video-mask');
     mask.classList.add('i-amphtml-fill-content');
-    mask.classList.add('-amp-fill-content');
     return mask;
   }
 
@@ -484,8 +484,7 @@ export function clearSupportsAutoplayCacheForTesting() {
 
 /**
  * @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!VideoManager}
  */
 export function installVideoManagerForDoc(nodeOrDoc) {
-  return fromClassForDoc(nodeOrDoc, 'video-manager', VideoManager);
+  registerServiceBuilderForDoc(nodeOrDoc, 'video-manager', VideoManager);
 };

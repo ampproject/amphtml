@@ -17,44 +17,21 @@
 # Specific URL to reference for violations having to do with mustache
 # templates. These are specific to any particular tag, so must live at
 # the top level of this rules file.
-template_spec_url: "https://www.ampproject.org/docs/reference/extended/amp-mustache.html"
+template_spec_url: "https://www.ampproject.org/docs/reference/components/amp-mustache"
 
 tags: {  # amp-mustache
   html_format: AMP
   tag_name: "SCRIPT"
-  spec_name: "amp-mustache extension .js script"
   satisfies: "amp-mustache extension .js script"
-  mandatory_parent: "HEAD"
-  unique_warning: true
-  extension_unused_unless_tag_present: "template"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  extension_spec: {
+    name: "amp-mustache"
+    is_custom_template: true
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    deprecated_recommends_usage_of_tag: "template"
+    deprecated_allow_duplicates: true
   }
-  attrs: {
-    name: "custom-template"
-    mandatory: true
-    value: "amp-mustache"
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-mustache-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-mustache.html"
+  attr_lists: "common-extension-attrs"
 }
 
 # HTML5, 4.11.3 The template element
@@ -68,5 +45,5 @@ tags: {
     mandatory: true
     value: "amp-mustache"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-mustache.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-mustache"
 }

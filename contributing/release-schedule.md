@@ -1,14 +1,18 @@
 # Release Schedule
 
-We push a new release of AMP to all AMP pages every week on Thursday. The more detailed schedule is as follows:
+We push a new release of AMP to all AMP pages every week on Tuesday. The more detailed schedule is as follows:
 
-- Every Wednesday we cut a green release at the latest commit that passed all tests.
-- On Thursday this is pushed to users of AMP who opted into the [AMP Dev Channel](#amp-dev-channel).
-- On Monday we check error rates for opt-in users and bug reports and if everything looks fine, we push this new release to 1% of AMP pages.
-- We then continue to monitor error rates and bug reports throughout the week.
-- On Thursday the "Dev Channel" release from last Thursday is then pushed to all users.
+- Every Monday we cut a green release at the latest commit that passed all tests.
+- On Tuesday this is pushed to users of AMP who opted into the [AMP Dev Channel](#amp-dev-channel).
+- On Thursday we check error rates for opt-in users and bug reports and if everything looks fine, we push this new release to 1% of AMP pages.
+- We continue to monitor error rates and bug reports for a few days.
+- On the following Tuesday (a week after the cut was available on AMP Dev Channel) this release is pushed to all users.
+
+That is, it will typically be about a week between when a cut is made and it is pushed to all users.  During that week you can opt into the AMP Dev Channel to see how the new cut affects your AMP pages.
 
 You can always follow the current release state of AMP on our [releases page](https://github.com/ampproject/amphtml/releases). The release used by most users is marked as `Latest release` and the current Dev Channel release is marked as `Pre-release`.
+
+Announces regarding releases will be made on the [AMP Slack #release channel](https://amphtml.slack.com/messages/C4NVAR0H3/).  (You will need to [sign up for access](https://docs.google.com/forms/d/e/1FAIpQLSd83J2IZA6cdR6jPwABGsJE8YL4pkypAbKMGgUZZriU7Qu6Tg/viewform?fbzx=4406980310789882877) to AMP on Slack if you haven't done so already].)
 
 ### AMP Dev Channel
 

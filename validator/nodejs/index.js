@@ -293,7 +293,7 @@ var instanceByValidatorJs = {};
  * Provided a URL or a filename from which to fetch the validator.js
  * file, fetches, instantiates, and caches the validator instance
  * asynchronously.  If you prefer to implement your own fetching /
- * caching logic, you may want to consider createInstance() instead,
+ * caching logic, you may want to consider newInstance() instead,
  * which is synchronous and much simpler.
  *
  * @param {string=} opt_validatorJs
@@ -391,7 +391,7 @@ function main() {
   program
       .usage(
           '[options] <fileOrUrlOrMinus...>\n\n' +
-          '  Validates the files or urls provided as arguments. If "-" is ' +
+          '  Validates the files or urls provided as arguments. If "-" is\n' +
           '  specified, reads from stdin instead.')
       .option(
           '--validator_js <fileOrUrl>',
@@ -407,7 +407,7 @@ function main() {
           '--html_format <AMP|AMP4ADS>',
           'The input format to be validated.\n' +
               '  AMP by default. AMP4ADS is a format for ads creatives that is\n' +
-              '  still in draft; this requires specifying \n' +
+              '  still in draft; this requires specifying\n' +
               '  https://cdn.ampproject.org/v0/validator-canary.js as validator.js.',
           'AMP')
       .option(

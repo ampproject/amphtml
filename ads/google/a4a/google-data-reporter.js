@@ -17,20 +17,25 @@
 import {EXPERIMENT_ATTRIBUTE, QQID_HEADER} from './utils';
 import {BaseLifecycleReporter, GoogleAdLifecycleReporter} from './performance';
 import {getMode} from '../../../src/mode';
-import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
+import {
+  isExperimentOn,
+  toggleExperiment,
+  randomlySelectUnsetExperiments,
+} from '../../../src/experiments';
 
 import {
     parseExperimentIds,
     isInManualExperiment,
-    randomlySelectUnsetPageExperiments,
 } from './traffic-experiments';
 import {
     ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
     ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES,
 } from '../../../extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config';
 import {
-    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
-    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES,
+    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
+    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
+    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
+    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
 } from '../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config';  // eslint-disable-line max-len
 
 /**
@@ -39,16 +44,16 @@ import {
  * general traffic-experiments mechanism and is configured via the
  * a4aProfilingRate property of the global config(s),
  * build-system/global-configs/{canary,prod}-config.js.  This object is just
- * necessary for the traffic-experiments.js API, which expects a branch list
+ * necessary for the page-level-experiments.js API, which expects a branch list
  * for each experiment.  We assign all pages to the "control" branch
  * arbitrarily.
  *
- * @const {!Object<string,!./traffic-experiments.ExperimentInfo>}
+ * @const {!Object<string,!../../../src/experiments.ExperimentInfo>}
  */
 export const PROFILING_BRANCHES = {
   a4aProfilingRate: {
-    control: 'unused',
-    experiment: 'unused',
+    isTrafficEligible: () => true,
+    branches: ['unused', 'unused'],
   },
 };
 
@@ -77,14 +82,18 @@ function isInReportableBranch(ampElement, namespace) {
   const reportableA4AEids = {
     [ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment]: 1,
     [ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES.experiment]: 1,
-    [DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment]: 1,
-    [DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES.experiment]: 1,
+    [DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment]: 1,
+    [DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment]: 1,
+    [DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment]: 1,
+    [DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment]: 1,
   };
   const reportableControlEids = {
     [ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES.control]: 1,
     [ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES.control]: 1,
-    [DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.control]: 1,
-    [DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES.control]: 1,
+    [DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control]: 1,
+    [DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control]: 1,
+    [DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control]: 1,
+    [DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control]: 1,
   };
   switch (namespace) {
     case ReporterNamespace.A4A:
@@ -103,7 +112,8 @@ function isInReportableBranch(ampElement, namespace) {
  * @param {string} namespace
  * @param {number|string} slotId A unique numeric identifier in the page for
  *    the given element's slot.
- * @return {!GoogleAdLifecycleReporter|!BaseLifecycleReporter}
+ * @return {!./performance.BaseLifecycleReporter}
+ * @visibleForTesting
  */
 export function getLifecycleReporter(ampElement, namespace, slotId) {
   // Carve-outs: We only want to enable profiling pingbacks when:
@@ -123,7 +133,7 @@ export function getLifecycleReporter(ampElement, namespace, slotId) {
   if (getMode().localDev) {
     toggleExperiment(win, experimentName, true, true);
   }
-  randomlySelectUnsetPageExperiments(win, PROFILING_BRANCHES);
+  randomlySelectUnsetExperiments(win, PROFILING_BRANCHES);
   if ((type == 'doubleclick' || type == 'adsense') &&
       isInReportableBranch(ampElement, namespace) &&
       isExperimentOn(win, experimentName)) {
@@ -136,18 +146,23 @@ export function getLifecycleReporter(ampElement, namespace, slotId) {
 
 /**
  * Creates or reinitializes a lifecycle reporter for Google ad network
- * implementations.
+ * implementations.  (I.e., 'type="doubleclick"' and 'type="adsense"'.)  For
+ * non-Google networks, returns a BaseLifecycleReporter -- a stub reporter that
+ * generates no outputs.
  *
- * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4aElement
- * @return {!./performance.GoogleAdLifecycleReporter}
+ * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A|!../../../extensions/amp-ad/0.1/amp-ad-3p-impl.AmpAd3PImpl} baseInstance
+ * @param {string=} opt_namespace  CSI ping namespace.  For example, a key
+ *   of #ReporterNamespace.
+ * @return {!./performance.BaseLifecycleReporter}
  */
-export function googleLifecycleReporterFactory(a4aElement) {
+export function googleLifecycleReporterFactory(baseInstance, opt_namespace) {
+  const namespace = opt_namespace || ReporterNamespace.A4A;
   const reporter =
-      /** @type {!./performance.GoogleAdLifecycleReporter} */
-      (getLifecycleReporter(a4aElement, ReporterNamespace.A4A,
-          a4aElement.element.getAttribute('data-amp-slot-index')));
+      (getLifecycleReporter(baseInstance, namespace,
+          baseInstance.element.getAttribute('data-amp-slot-index')));
   reporter.setPingParameters({
     's': 'AD_SLOT_NAMESPACE',
+    'dt': 'NAV_TIMING(navigationStart)',
     'v': '2',
     'c': 'AD_PAGE_CORRELATOR',
     'rls': 'AMP_VERSION',
@@ -158,8 +173,8 @@ export function googleLifecycleReporterFactory(a4aElement) {
     'stageIdx': 'AD_SLOT_EVENT_ID',
     'met.AD_SLOT_NAMESPACE.AD_SLOT_ID':
         'AD_SLOT_EVENT_NAME.AD_SLOT_TIME_TO_EVENT',
-    'e.AD_SLOT_ID': a4aElement.element.getAttribute(EXPERIMENT_ATTRIBUTE),
-    'adt.AD_SLOT_ID': a4aElement.element.getAttribute('type'),
+    'e.AD_SLOT_ID': baseInstance.element.getAttribute(EXPERIMENT_ATTRIBUTE),
+    'adt.AD_SLOT_ID': baseInstance.element.getAttribute('type'),
     // Page-level visibility times: `firstVisibleTime.T,.lastVisibleTime.T`.
     'met.AD_SLOT_NAMESPACE':
         'firstVisibleTime.AD_PAGE_FIRST_VISIBLE_TIME' +

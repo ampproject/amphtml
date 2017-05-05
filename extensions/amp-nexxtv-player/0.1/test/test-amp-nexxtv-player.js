@@ -20,7 +20,7 @@ import {
 import '../amp-nexxtv-player';
 import {listenOncePromise} from '../../../../src/event-helper';
 import {adopt} from '../../../../src/runtime';
-import {timerFor} from '../../../../src/timer';
+import {timerFor} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
 import * as sinon from 'sinon';
 
@@ -120,9 +120,7 @@ describe('amp-nexxtv-player', () => {
     nexxtv.implementation_.handleNexxMessages_({
       origin: 'https://embed.nexx.cloud',
       source: iframe.contentWindow,
-      data: JSON.stringify({
-        cmd: command,
-      }),
+      data: command,
     });
   }
 });

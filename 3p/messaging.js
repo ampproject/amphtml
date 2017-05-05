@@ -25,7 +25,7 @@ export function nonSensitiveDataPostMessage(type, opt_object) {
   }
   const object = opt_object || {};
   object.type = type;
-  object.sentinel = window.context.sentinel || window.context.amp3pSentinel;
+  object.sentinel = window.context.sentinel;
   window.parent./*OK*/postMessage(object,
       window.context.location.origin);
 }
@@ -67,8 +67,6 @@ function startListening(win) {
   if (win.AMP_LISTENING) {
     return;
   }
-  win.context.sentinel = win.context.sentinel ||
-      win.context.amp3pSentinel;
   win.AMP_LISTENING = true;
   win.addEventListener('message', function(event) {
     // Cheap operations first, so we don't parse JSON unless we have to.

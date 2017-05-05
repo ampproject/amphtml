@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
+import {Keycodes} from '../utils/keycodes';
 import {dev, user} from '../log';
-import {fromClassForDoc, installServiceInEmbedScope} from '../service';
+import {
+  registerServiceBuilderForDoc,
+  installServiceInEmbedScope,
+} from '../service';
 import {getMode} from '../mode';
 import {isArray} from '../types';
 import {map} from '../utils/object';
-import {timerFor} from '../timer';
-import {vsyncFor} from '../vsync';
+import {timerFor} from '../services';
+import {vsyncFor} from '../services';
 
 /**
  * ActionInfoDef args key that maps to the an unparsed object literal string.
@@ -38,12 +42,36 @@ const ACTION_MAP_ = '__AMP_ACTION_MAP__' + Math.random();
 const ACTION_QUEUE_ = '__AMP_ACTION_QUEUE__';
 
 /** @const {string} */
+const ACTION_HANDLER_ = '__AMP_ACTION_HANDLER__';
+
+/** @const {string} */
 const DEFAULT_METHOD_ = 'activate';
 
 /** @const {!Object<string,!Array<string>>} */
 const ELEMENTS_ACTIONS_MAP_ = {
   'form': ['submit'],
   'AMP': ['setState'],
+};
+
+/** @enum {string} */
+const TYPE = {
+  NUMBER: 'number',
+  BOOLEAN: 'boolean',
+};
+
+/** @const {!Object<string, !Object<string, string>>} */
+const WHITELISTED_INPUT_DATA_ = {
+  'range': {
+    'min': TYPE.NUMBER,
+    'max': TYPE.NUMBER,
+    'value': TYPE.NUMBER,
+  },
+  'radio': {
+    'checked': TYPE.BOOLEAN,
+  },
+  'checkbox': {
+    'checked': TYPE.BOOLEAN,
+  },
 };
 
 /**
@@ -149,13 +177,65 @@ export class ActionService {
       // fast-click.
       this.root_.addEventListener('click', event => {
         if (!event.defaultPrevented) {
-          this.trigger(dev().assertElement(event.target), 'tap', event);
+          this.trigger(dev().assertElement(event.target), name, event);
         }
       });
-    } else if (name == 'submit' || name == 'change') {
+      this.root_.addEventListener('keydown', event => {
+        const keyCode = event.keyCode;
+        if (keyCode == Keycodes.ENTER || keyCode == Keycodes.SPACE) {
+          const element = dev().assertElement(event.target);
+          if (!event.defaultPrevented &&
+              element.getAttribute('role') == 'button') {
+            event.preventDefault();
+            this.trigger(element, name, event);
+          }
+        }
+      });
+    } else if (name == 'submit') {
       this.root_.addEventListener(name, event => {
         this.trigger(dev().assertElement(event.target), name, event);
       });
+    } else if (name == 'change') {
+      this.root_.addEventListener(name, event => {
+        this.addChangeDetails_(event);
+        this.trigger(dev().assertElement(event.target), name, event);
+      });
+    }
+  }
+
+  /**
+   * Given a browser 'change' event, add `details` property containing the
+   * relevant information for the change that generated the initial event.
+   * @param {!Event} event A `change` event.
+   */
+  addChangeDetails_(event) {
+    const detail = map();
+    const target = event.target;
+    const tagName = target.tagName.toLowerCase();
+    switch (tagName) {
+      case 'input':
+        const inputType = target.getAttribute('type');
+        const fieldsToInclude = WHITELISTED_INPUT_DATA_[inputType];
+        if (fieldsToInclude) {
+          Object.keys(fieldsToInclude).forEach(field => {
+            const expectedType = fieldsToInclude[field];
+            const value = target[field];
+            if (expectedType === 'number') {
+              detail[field] = Number(value);
+            } else if (expectedType === 'boolean') {
+              detail[field] = !!value;
+            } else {
+              detail[field] = String(value);
+            }
+          });
+        }
+        break;
+      case 'select':
+        detail.value = target.value;
+        break;
+    }
+    if (Object.keys(detail).length > 0) {
+      event.detail = detail;
     }
   }
 
@@ -212,21 +292,18 @@ export class ActionService {
         target.tagName.toLowerCase() in ELEMENTS_ACTIONS_MAP_,
         'AMP element or a whitelisted target element is expected: %s', debugid);
 
-    /** @const {!Array<!ActionInvocation>} */
-    const currentQueue = target[ACTION_QUEUE_];
-    if (currentQueue) {
-      dev().assert(
-        isArray(currentQueue),
-        'Expected queue to be an array: %s',
-        debugid
-      );
+    if (target[ACTION_HANDLER_]) {
+      dev().error(TAG_, `Action handler already installed for ${target}`);
+      return;
     }
 
-    // Override queue with the handler.
-    target[ACTION_QUEUE_] = {'push': handler};
+    /** @const {Array<!ActionInvocation>} */
+    const currentQueue = target[ACTION_QUEUE_];
+
+    target[ACTION_HANDLER_] = handler;
 
     // Dequeue the current queue.
-    if (currentQueue) {
+    if (isArray(currentQueue)) {
       timerFor(target.ownerDocument.defaultView).delay(() => {
         // TODO(dvoytenko, #1260): dedupe actions.
         currentQueue.forEach(invocation => {
@@ -236,6 +313,7 @@ export class ActionService {
             dev().error(TAG_, 'Action execution failed:', invocation, e);
           }
         });
+        target[ACTION_QUEUE_].length = 0;
       }, 1);
     }
   }
@@ -332,10 +410,13 @@ export class ActionService {
     const targetId = target.getAttribute('id') || '';
     if ((targetId && targetId.substring(0, 4) == 'amp-') ||
         (supportedActions && supportedActions.indexOf(method) != -1)) {
-      if (!target[ACTION_QUEUE_]) {
-        target[ACTION_QUEUE_] = [];
+      const handler = target[ACTION_HANDLER_];
+      if (handler) {
+        handler(invocation);
+      } else {
+        target[ACTION_QUEUE_] = target[ACTION_QUEUE_] || [];
+        target[ACTION_QUEUE_].push(invocation);
       }
-      target[ACTION_QUEUE_].push(invocation);
       return;
     }
 
@@ -629,10 +710,10 @@ function assertActionForParser(s, context, condition, opt_message) {
 function assertTokenForParser(s, context, tok, types, opt_value) {
   if (opt_value !== undefined) {
     assertActionForParser(s, context,
-        types.indexOf(tok.type) >= 0 && tok.value == opt_value,
+        types.includes(tok.type) && tok.value == opt_value,
         `; expected [${opt_value}]`);
   } else {
-    assertActionForParser(s, context, types.indexOf(tok.type) >= 0);
+    assertActionForParser(s, context, types.includes(tok.type));
   }
   return tok;
 }
@@ -719,7 +800,7 @@ class ParserTokenizer {
     if (WHITESPACE_SET.indexOf(c) != -1) {
       newIndex++;
       for (; newIndex < this.str_.length; newIndex++) {
-        if (WHITESPACE_SET.indexOf(this.str_.charAt(newIndex)) == -1) {
+        if (!WHITESPACE_SET.includes(this.str_.charAt(newIndex))) {
           break;
         }
       }
@@ -835,8 +916,12 @@ function isNum(c) {
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @return {!ActionService}
  */
 export function installActionServiceForDoc(ampdoc) {
-  return fromClassForDoc(ampdoc, 'action', ActionService);
+  registerServiceBuilderForDoc(
+      ampdoc,
+      'action',
+      ActionService,
+      /* opt_factory */ undefined,
+      /* opt_instantiate */ true);
 }

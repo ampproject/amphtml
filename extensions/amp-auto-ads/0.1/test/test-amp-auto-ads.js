@@ -16,8 +16,9 @@
 
 import {AmpAutoAds} from '../amp-auto-ads';
 import {toggleExperiment} from '../../../../src/experiments';
-import {xhrFor} from '../../../../src/xhr';
+import {xhrFor} from '../../../../src/services';
 import {waitForChild} from '../../../../src/dom';
+import {viewportForDoc} from '../../../../src/services';
 
 describes.realWin('amp-auto-ads', {
   amp: {
@@ -53,6 +54,10 @@ describes.realWin('amp-auto-ads', {
 
     toggleExperiment(env.win, 'amp-auto-ads', true);
     sandbox = env.sandbox;
+
+    const viewportMock = sandbox.mock(viewportForDoc(env.win.document));
+    viewportMock.expects('getSize').returns(
+        {width: 320, height: 500}).atLeast(1);
 
     container = env.win.document.createElement('div');
     env.win.document.body.appendChild(container);

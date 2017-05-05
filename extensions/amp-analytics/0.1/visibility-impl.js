@@ -21,11 +21,11 @@ import {
 } from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {map} from '../../../src/utils/object';
-import {resourcesForDoc} from '../../../src/resources';
+import {resourcesForDoc} from '../../../src/services';
 import {getParentWindowFrameElement} from '../../../src/service';
-import {timerFor} from '../../../src/timer';
-import {viewportForDoc} from '../../../src/viewport';
-import {viewerForDoc} from '../../../src/viewer';
+import {timerFor} from '../../../src/services';
+import {viewportForDoc} from '../../../src/services';
+import {viewerForDoc} from '../../../src/services';
 import {startsWith} from '../../../src/string';
 import {
   DEFAULT_THRESHOLD,
@@ -38,7 +38,7 @@ const MAX_CONTINUOUS_TIME = 'maxContinuousVisibleTime';
 const TOTAL_VISIBLE_TIME = 'totalVisibleTime';
 const FIRST_SEEN_TIME = 'firstSeenTime';
 const LAST_SEEN_TIME = 'lastSeenTime';
-const FIRST_VISIBLE_TIME = 'fistVisibleTime';
+const FIRST_VISIBLE_TIME = 'firstVisibleTime';
 const LAST_VISIBLE_TIME = 'lastVisibleTime';
 const MIN_VISIBLE = 'minVisiblePercentage';
 const MAX_VISIBLE = 'maxVisiblePercentage';
@@ -171,11 +171,9 @@ export function getElement(ampdoc, selector, analyticsEl, selectionMethod) {
   const friendlyFrame = getParentWindowFrameElement(analyticsEl, ampdoc.win);
   // Special case for root selector.
   if (selector == ':host' || selector == ':root') {
-    // TODO(dvoytenko, #6794): Remove old `-amp-element` form after the new
-    // form is in PROD for 1-2 weeks.
     foundEl = friendlyFrame ?
         closestBySelector(
-            friendlyFrame, '.-amp-element,.i-amphtml-element') : null;
+            friendlyFrame, '.i-amphtml-element') : null;
   } else if (selectionMethod == 'closest') {
     // Only tag names are supported currently.
     foundEl = closestByTag(analyticsEl, selector);
@@ -305,18 +303,19 @@ export class Visibility {
         };
         viewport.onScroll(ticker);
         viewport.onChanged(ticker);
+        // Tick in the next event loop. That's how native InOb works.
+        setTimeout(ticker);
       }
     }
 
     resource.loadedOnce().then(() => {
-      this.intersectionObserver_.observe(element);
-
       const resId = resource.getId();
       this.listeners_[resId] = (this.listeners_[resId] || []);
       const state = {};
       state[TIME_LOADED] = this.now_();
       this.listeners_[resId].push({config, callback, state, shouldBeVisible});
       this.resources_.push(resource);
+      this.intersectionObserver_.observe(element);
     });
 
     if (!this.visibilityListenerRegistered_) {

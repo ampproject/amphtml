@@ -53,7 +53,7 @@ limitations under the License.
     - `<amp-list>`
     - `<amp-live-list>`
     - `<amp-social-share>`
-- The max-height of the sidebar is 100vh, if the height exceeds 100vh then a vertical scrollbar appears. The default height is set to 100vw in CSS and is overridable in CSS.
+- The max-height of the sidebar is 100vh, if the height exceeds 100vh then a vertical scrollbar appears. The default height is set to 100vh in CSS and is overridable in CSS.
 - The width of the sidebar can be set and adjusted between 45px and 80vw using CSS.
 - Touch zoom is disabled on the `amp-sidebar` and it's mask when the sidebar is open.
 
@@ -78,7 +78,7 @@ Example:
 ### Opening and Closing the Sidebar
 Setting the `on` attribute on one or more elements within the page and setting it's method to `toggle` will toggle the sidebar when the element is tapped or clicked. Setting the element's method to `open` or `close` will open or close the sidebar.Tapping back on the partially-visible main content area closes the sidebar.
 
-Alternatively pressing the escape key on the keyboard will also close the lightbox.
+Alternatively pressing the escape key on the keyboard will also close the sidebar.
 
 Example:
 ```html

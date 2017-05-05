@@ -19,7 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Displays a media stream from nexxOMNIA platform</td>
+    <td>Displays a media stream from the nexxOMNIA platform.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
@@ -40,58 +40,50 @@ limitations under the License.
 With the responsive layout, the width and height from the example should yield correct layouts for 16:9 aspect ratio videos:
 
 ```html
-    <amp-nexxtv-player
-        data-mediaid="PTPFEC4U184674"
-        data-client="583"
-        data-streamtype="video"
-        data-start="2"
-        data-mode="static"
-        data-origin="https://embed.nexx.cloud/"
-        layout="responsive"
-        width="480" height="270"
-    ></amp-nexxtv-player>
-
+<amp-nexxtv-player
+    data-mediaid="PTPFEC4U184674"
+    data-client="583"
+    data-streamtype="video"
+    data-seek-to="2"
+    data-mode="static"
+    data-origin="https://embed.nexx.cloud/"
+    layout="responsive"
+    width="480" height="270"></amp-nexxtv-player>
 ```
 
 ## Attributes
 
-**mediaid**
+**data-mediaid** (required)
 
-* Required
-* ID of your media you want to play
+Represents the ID of the media you want to play.
 
-**client**
+**data-client** (required)
 
-* Required
-* your domain ID
+Your domain ID.
 
-**streamtype**
+**data-streamtype** (optional)
 
-* optional
-* default: video
-* possible values: [video | audio | playlist | playlist-masked | live | album]
-* playlist-masked: playlist without possibility to skip or choose video
-* album: is an audio playlist
+Indicates the media streaming type, which can be one of the following:
 
-**seek-to**
-
-Starting point of your media in seconds e.g. video starting 1:30min
-
-* optional
-
-**mode**
-
-* optional
-* default: static
-* possible values: [static | api]
+* `video` (default)
+* `audio`
+* `playlist`
+* `playlist-masked`: A playlist without the option to skip or choose video.
+* `live`
+* `album`: An audio playlist.
 
 
-**origin**
+**data-seek-to** (optional)
 
-Source from which embed domain media is played.
+Indicates the starting point of your media (in seconds).  For example, video starting 1:30min.
 
-* optional
-* default: https://embed.nexx.cloud/
+**data-mode** (optional)
+
+Indicates the data mode, which can be `static` (default) or `api`.
+
+**data-origin** (optional)
+
+Indicates the source from which the embedded domain media is played. By default this is set to `https://embed.nexx.cloud/`.
 
 
 **common attributes**

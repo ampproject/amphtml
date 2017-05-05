@@ -39,6 +39,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Behavior
 
 The `amp-form` extension allows the usage of forms and input fields in an AMP document. The extension allows polyfilling some of the missing behaviors in browsers.
@@ -115,7 +117,7 @@ See the [Custom Validation](#custom-validations) section for more details.
 
 **Allowed**:
 
-* Other form-related elements, including: `<textarea>`, `<select>`, `<option>`, `<fieldset>`, and `<label>`.
+* Other form-related elements, including: `<textarea>`, `<select>`, `<option>`, `<fieldset>`, `<label>`, `<input type=text>`, `<input type=submit>`, and so on.
 * [`amp-selector`](https://www.ampproject.org/docs/reference/components/amp-selector)
 
 **Not Allowed**:
@@ -123,7 +125,9 @@ See the [Custom Validation](#custom-validations) section for more details.
 * `<input type=button>`, `<input type=file>`, `<input type=image>` and `<input type=password>`
 * Most of the form-related attributes on inputs including: `form`, `formaction`, `formtarget`, `formmethod` and others.
 
-(Relaxing some of these rules might be reconsidered in the future - please let us know if you require these and provide use cases).
+(Relaxing some of these rules might be reconsidered in the future - [please let us know](https://www.ampproject.org/support/developer/) if you require these and provide use cases).
+
+For details on valid inputs and fields, see [amp-form rules](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii) in the AMP validator specification.
 
 ## Actions
 `amp-form` exposes one action: `submit`. This allows you to trigger the form submission on a specific action, for example, tapping a link, or [submitting a form on input change](#input-events). You can [read more about Actions and Events in AMP in the spec](../../spec/amp-actions-and-events.md).
@@ -164,7 +168,7 @@ For example, a common use case is to submit a form on input change (selecting a 
 See the [full example here](../../examples/forms.amp.html).
 
 ### Analytics Triggers
-`amp-form` triggers two events you can track in your `amp-analytics` config: `amp-form-submit-success` and `amp-form-submit-error`.
+`amp-form` triggers three events you can track in your `amp-analytics` config: `amp-form-submit`, `amp-form-submit-success`, and `amp-form-submit-error`.
 
 You can configure your analytics to send these events as in the example below.
 
@@ -173,9 +177,14 @@ You can configure your analytics to send these events as in the example below.
   <script type="application/json">
     {
       "requests": {
-        "event": "https://www.example.com/analytics/event?eid=${eventId}"
+        "event": "https://www.example.com/analytics/event?eid=${eventId}",
+        "searchEvent": "https://www.example.com/analytics/search?formId=${formId}&query=${formFields[query]}"
       },
       "triggers": {
+        "formSubmit": {
+          "on": "amp-form-submit",
+          "request": "searchEvent"
+        },
         "formSubmitSuccess": {
           "on": "amp-form-submit-success",
           "request": "event",
@@ -195,6 +204,23 @@ You can configure your analytics to send these events as in the example below.
   </script>
 </amp-analytics>
 ```
+
+The `amp-form-submit` event fires when a form request is initiated. The `amp-form-submit` event generates a set of variables that correspond to the specific form and the fields in the form. These variables can be used for analytics.
+
+For example, the following form has two fields:
+
+```html
+<form action-xhr="/register" method="POST" id="registration_form">
+  <input type="text" name="user_name" />
+  <input type="password" name="user_password" />
+  <input type="submit" value="Sign up" />
+</form>
+```
+When the `amp-form-submit` event fires, it generates the following variables containing the values that were specified in the form:
+
+* `formId`
+* `formFields[user_name]`
+* `formFields[user_password]`
 
 ## Success/Error Response Rendering
 `amp-form` allows publishers to render the responses using [Extended Templates](../../spec/amp-html-format.md#extended-templates).
@@ -254,7 +280,7 @@ The redirect URL must be absolute HTTPS URL otherwise AMP will throw an error an
 
 **Known Issue**: Due to an [issue in Safari iOS](https://bugs.webkit.org/show_bug.cgi?id=165627) redirecting to deep linked URLs (URLs that would actually end up opening a native app) might fail when the AMP document is embedded. This is [tracked in this issue](https://github.com/ampproject/amphtml/issues/6953).
 
-```
+```text
 AMP-Redirect-To: https://example.com/forms/thank-you
 Access-Control-Expose-Headers: AMP-Redirect-To, Another-Header, And-Some-More
 ```

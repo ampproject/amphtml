@@ -22,8 +22,8 @@ Before you start developing in AMP, check out these resources:
 * [CONTRIBUTING.md](../CONTRIBUTING.md) has details on various ways you can contribute to the AMP Project.
   * If you're developing in AMP, you should read the [Contributing code](../CONTRIBUTING.md#contributing-code) and [Contributing features](../CONTRIBUTING.md#contributing-features) sections.
   * The [Ongoing participation](../CONTRIBUTING.md#ongoing-participation) section has details on various ways of getting in touch with others in the community including email and Slack.
-  * **If you are new to open source projects, Git/GitHub, etc.**, check out the [Tips for new open source contributors](../CONTRIBUTING.md#tips-for-new-open-source-contributors) which includes information on getting help and finding your first bug to work on. 
-* The [Getting Started Quick Start Guide](getting-started-quick.md) has installation steps and basic instructions for [one-time setup](getting-started-quick.md#one-time-setup), how to [build AMP & run a local server](getting-started-quick.md#build-amp--run-a-local-server) and how to [test AMP](getting-started-quick.md#test-amp). 
+  * **If you are new to open source projects, Git/GitHub, etc.**, check out the [Tips for new open source contributors](../CONTRIBUTING.md#tips-for-new-open-source-contributors) which includes information on getting help and finding your first bug to work on.
+* The [Getting Started Quick Start Guide](getting-started-quick.md) has installation steps and basic instructions for [one-time setup](getting-started-quick.md#one-time-setup), how to [build AMP & run a local server](getting-started-quick.md#build-amp--run-a-local-server) and how to [test AMP](getting-started-quick.md#test-amp).
 
 
 ## Build & Test
@@ -52,11 +52,11 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `gulp test --nobuild`                                                   | Runs tests without re-build.                                          |
 | `gulp test --watch`<sup>[[1]](#footnote-1)</sup>                        | Watches for changes in files, runs corresponding test(s) in Chrome.   |
 | `gulp test --watch --verbose`<sup>[[1]](#footnote-1)</sup>              | Same as "watch" with logging enabled.                                 |
-| `gulp test --saucelabs`<sup>[[1]](#footnote-1)</sup>                    | Runs test on saucelabs (requires [setup](#saucelabs)).                |
+| `gulp test --saucelabs`<sup>[[1]](#footnote-1)</sup>                    | Runs test on saucelabs (requires [setup](#testing-on-sauce-labs)).                |
 | `gulp test --safari`<sup>[[1]](#footnote-1)</sup>                       | Runs tests in Safari.                                                 |
 | `gulp test --firefox`<sup>[[1]](#footnote-1)</sup>                      | Runs tests in Firefox.                                                |
 | `gulp test --files=<test-files-path-glob>`<sup>[[1]](#footnote-1)</sup> | Runs specific test files.                                             |
-| `gulp serve`                                                            | Serves content in repo root dir over http://localhost:8000/. Examples live in http://localhost:8000/examples/ |
+| `gulp serve`                                                            | Serves content in repo root dir over http://localhost:8000/. Examples live in http://localhost:8000/examples/. Serve unminified AMP by default. |
 | `npm run ava`<sup>[[1]](#footnote-1)</sup>                              | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava). |
 
 <a id="footnote-1">[1]</a> On Windows, this command must be run as administrator.
@@ -65,36 +65,36 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 
 For manual testing build AMP and start the Node.js server by running `gulp`.
 
+### Serve Mode
+There are 3 serving modes:
+- DEFAULT mode serves unminified AMP. You want to use this during normal dev.
+- COMPILED mode serves minified AMP. This is closer to the prod setup. This is only available after running `gulp dist --fortesting`. Serve MIN mode by adding `--compiled` to `gulp` command.
+- CDN mode serves prod. These remote files would not reflect your local changes. Serve CDN mode by adding `--cdn` to `gulp` command.
+
+To switch serving mode during runtime, go to http://localhost:8000/serve_mode=$mode and set the `$mode` to one of the following values: `default`, `compiled,` or `cdn`.
+
 ### Examples
 
 The content in the `examples` directory can be reached at: http://localhost:8000/examples/
-
-For each example there are 3 modes:
-
-- `/examples/abc.html` points to prod. This file would not reflect your local changes.
-- `/examples/abc.max.html` points to your local unminified AMP. You want to use this during normal dev.
-- `/examples/abc.min.html` points to a local minified AMP. This is closer to the prod setup. Only available after running `gulp dist --fortesting`.
-
 
 ### Document proxy
 
 AMP ships with a local proxy for testing production AMP documents with the local JS version.
 
-For any public AMP document like: http://output.jsbin.com/pegizoq/quiet
+For any public AMP document like: http://output.jsbin.com/pegizoq/quiet,
 
-You can access is with the local JS at
+You can access it with the local JS at
 
-- normal sources: http://localhost:8000/max/output.jsbin.com/pegizoq/quiet
-- minified: http://localhost:8000/min/output.jsbin.com/pegizoq/quiet
+http://localhost:8000/proxy/output.jsbin.com/pegizoq/quiet.
 
-When accessing `min` urls make sure you run `gulp dist` with the `--fortesting`
+**Note** The local proxy will serve minified or unminified JS based on the current serve mode. When serve mode is `cdn`, the local proxy will serve remote JS.
+When accessing minified JS make sure you run `gulp dist` with the `--fortesting`
 flag so that we do not strip out the localhost code paths. (We do some
 code elimination to trim down the file size for the file we deploy to production)
 
-If the origin resource is on HTTPS, the URLs are http://localhost:8000/max/s/output.jsbin.com/pegizoq/quiet and http://localhost:8000/min/s/output.jsbin.com/pegizoq/quiet
+If the origin resource is on HTTPS, the URLs are http://localhost:8000/proxy/s/output.jsbin.com/pegizoq/quiet
 
-
-### A4A envelope
+### A4A envelope (/a4a/, /a4a-3p/)
 
 If you are working on AMP 4 Ads (A4A), you can use the local A4A envelope for testing local and production AMP documents with the local JS version.
 
@@ -105,15 +105,14 @@ A4A can be run either of these two modes:
 
 The following forms are supported:
 
-- local document: http://localhost:8000/a4a[-3p]/examples/animations.amp.max.html
-- proxied document with normal sources: http://localhost:8000/a4a[-3p]/max/output.jsbin.com/pegizoq/quiet
-- proxied document with minified sources: http://localhost:8000/a4a[-3p]/min/output.jsbin.com/pegizoq/quiet
+- local document: http://localhost:8000/a4a[-3p]/examples/animations.amp.html
+- proxied document with local sources: http://localhost:8000/a4a[-3p]/proxy/output.jsbin.com/pegizoq/quiet
 
-When accessing `min` urls make sure you run `gulp dist` with the `--fortesting`
+When accessing minified JS make sure you run `gulp dist` with the `--fortesting`
 flag so that we do not strip out the localhost code paths. (We do some
 code elimination to trim down the file size for the file we deploy to production)
 
-If the origin resource is on HTTPS, the URLs are http://localhost:8000/a4a[-3p]/max/s/output.jsbin.com/pegizoq/quiet and http://localhost:8000/a4a[-3p]/min/s/output.jsbin.com/pegizoq/quiet
+If the origin resource is on HTTPS, the URLs are http://localhost:8000/a4a[-3p]/proxy/s/output.jsbin.com/pegizoq/quiet
 
 Notice that all documents are assumed to have a "fake" signature. Thus, this functionality is only available in the
 `localDev` mode.
@@ -122,6 +121,25 @@ Additionally, the following query parameters can be provided:
 
 - `width` - the width of the `amp-ad` (default "300")
 - `height` - the height of the `amp-ad` (default "250")
+- `offset` - the offset to push the `amp-ad` down the page (default "0px"). Can be used to push the Ad out of the viewport, e.g. using `offset=150vh`.
+
+
+### In-a-box envelope (/inabox/)
+
+If you are working on AMP In-a-box Ads, you can use the local in-a-box envelope for testing local and production AMP documents with the local JS version.
+
+Make sure to run gulp with `--with_inabox` flag.
+
+The following forms are supported:
+
+- local document: http://localhost:8000/inabox/examples/animations.amp.html
+- proxied document with local sources: http://localhost:8000/inabox/proxy/output.jsbin.com/pegizoq/quiet
+
+Additionally, the following query parameters can be provided:
+
+- `width` - the width of the `iframe` (default "300")
+- `height` - the height of the `iframe` (default "250")
+- `offset` - the offset to push the `iframe` down the page (default "0px"). Can be used to push the Ad out of the viewport, e.g. using `offset=150vh`.
 
 
 ### Chrome extension
@@ -151,10 +169,23 @@ To run the tests on Sauce Labs:
 
    # after seeing the "Sauce Connect is up" msg, run the tests
    gulp test --saucelabs
-   ``` 
-* It may take a few minutes for the tests to start.  You can see the status of your tests on the Sauce Labs [Automated Tests](https://saucelabs.com/beta/dashboard/tests) dashboard.  (You can also see the status of your proxy on the [Tunnels](https://saucelabs.com/beta/tunnels) dashboard. 
+   ```
+* It may take a few minutes for the tests to start.  You can see the status of your tests on the Sauce Labs [Automated Tests](https://saucelabs.com/beta/dashboard/tests) dashboard.  (You can also see the status of your proxy on the [Tunnels](https://saucelabs.com/beta/tunnels) dashboard.
 
-## Deploying AMP on Cloud for testing on devices
+
+## Testing on devices
+
+### Testing with ngrok
+
+It's much faster to debug with local build (`gulp` + `http://localhost:8000/`). In Chrome you can use [DevTools port forwarding](https://developers.google.com/web/tools/chrome-devtools/remote-debugging/local-server). However, iOS Safari does not give a similar option. Instead, you can use [ngrok](https://ngrok.com/). Just [download](https://ngrok.com/download) the ngrok binary for your platform and run it like this:
+```
+ngrok http 8000
+```
+
+Once started, the ngrok will print URLs for both `http` and `https`. E.g. `http://73774d8c.ngrok.io/` and `https://73774d8c.ngrok.io/`. These URLs can be used to debug on iOS and elsewhere.
+
+
+### Testing with Heroku
 
 For deploying and testing local AMP builds on [HEROKU](https://www.heroku.com/) , please follow the steps outlined in this [document](https://docs.google.com/document/d/1LOr8SEBEpLkqnFjzTNIZGi2VA8AC8_aKmDVux6co63U/edit?usp=sharing).
 
@@ -164,6 +195,7 @@ To correctly get ads and third party working when testing on hosted services
 you will need set the `AMP_TESTING_HOST` environment variable. (On heroku this
 is done through
 `heroku config:set AMP_TESTING_HOST=my-heroku-subdomain.herokuapp.com`)
+
 
 ## Repository Layout
 <pre>

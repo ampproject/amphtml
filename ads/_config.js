@@ -40,6 +40,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  a8: {
+    prefetch: 'https://statics.a8.net/amp/ad.js',
+    renderStartImplemented: true,
+  },
+
   a9: {
     prefetch: 'https://c.amazon-adsystem.com/aax2/assoc.js',
   },
@@ -253,6 +258,7 @@ export const adConfig = {
       'https://www.googletagservices.com/tag/js/gpt.js',
       'https://g.ezoic.net/ezoic/ampad.js',
     ],
+    clientIdScope: 'AMP_ECID_EZOIC',
   },
 
   f1e: {
@@ -445,6 +451,14 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  outbrain: {
+    renderStartImplemented: true,
+    prefetch: 'https://widgets.outbrain.com/widgetAMP/outbrainAMP.min.js',
+    preconnect: [
+      'https://odb.outbrain.com',
+    ],
+  },
+
   plista: {},
 
   popin: {
@@ -527,6 +541,7 @@ export const adConfig = {
       'https://securepubads.g.doubleclick.net',
       'https://tpc.googlesyndication.com',
     ],
+    renderStartImplemented: true,
   },
 
   sovrn: {

@@ -16,8 +16,9 @@
 
 import {AmpList} from '../amp-list';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
-import {templatesFor} from '../../../../src/template';
-import {xhrServiceForTesting} from '../../../../src/service/xhr-impl';
+import {batchedXhrServiceForTesting,} from
+    '../../../../src/service/batched-xhr-impl';
+import {templatesFor} from '../../../../src/services';
 import * as sinon from 'sinon';
 
 
@@ -38,7 +39,7 @@ describe('amp-list component', () => {
     templates = templatesFor(window);
     templatesMock = sandbox.mock(templates);
 
-    xhr = xhrServiceForTesting(window);
+    xhr = batchedXhrServiceForTesting(window);
     xhrMock = sandbox.mock(xhr);
 
     const ampdoc = ampdocServiceFor(window).getAmpDoc();
@@ -71,13 +72,13 @@ describe('amp-list component', () => {
     itemElement.style.height = newHeight + 'px';
     const xhrPromise = Promise.resolve({items});
     const renderPromise = Promise.resolve([itemElement]);
-    let measureFunc;
     xhrMock.expects('fetchJson').withExactArgs('https://data.com/list.json',
         sinon.match(opts => opts.credentials === undefined))
         .returns(xhrPromise).once();
     templatesMock.expects('findAndRenderTemplateArray').withExactArgs(
         element, items)
         .returns(renderPromise).once();
+    let measureFunc;
     listMock.expects('getVsync').returns({
       measure: func => {
         measureFunc = func;
@@ -86,11 +87,51 @@ describe('amp-list component', () => {
     listMock.expects('attemptChangeHeight').withExactArgs(newHeight).returns(
         Promise.resolve());
     return list.layoutCallback().then(() => {
-      return Promise.all([xhrPromise, renderPromise]).then(() => {
-        expect(list.container_.contains(itemElement)).to.be.true;
-        expect(measureFunc).to.exist;
-        measureFunc();
-      });
+      return Promise.all([xhrPromise, renderPromise]);
+    }).then(() => {
+      expect(list.container_.contains(itemElement)).to.be.true;
+      expect(measureFunc).to.exist;
+      measureFunc();
+    });
+  });
+
+  it('should reload data if the src attribute changes', () => {
+    const initialItems = [
+      {title: 'Title1'},
+    ];
+    const newItems = [
+      {title: 'Title2'}, {title: 'Title3'},
+    ];
+    const itemElement = document.createElement('div');
+    const itemElement2 = document.createElement('div');
+    const itemElement3 = document.createElement('div');
+    const xhrPromise = Promise.resolve({items: initialItems});
+    const renderPromise = Promise.resolve([itemElement]);
+    xhrMock.expects('fetchJson').withExactArgs('https://data.com/list.json',
+        sinon.match(opts => opts.credentials === undefined))
+        .returns(xhrPromise);
+    templatesMock.expects('findAndRenderTemplateArray').withExactArgs(
+        element, initialItems)
+        .returns(renderPromise);
+    listMock.expects('getVsync').returns({
+      measure: () => {},
+    }).twice();
+    return list.layoutCallback().then(() => {
+      return Promise.all([xhrPromise, renderPromise]);
+    }).then(() => {
+      expect(list.container_.contains(itemElement)).to.be.true;
+      const newXhrPromise = Promise.resolve({items: newItems});
+      const newRenderPromise = Promise.resolve([itemElement2, itemElement3]);
+      xhrMock.expects('fetchJson').withExactArgs('https://data2.com/list.json',
+          sinon.match(opts => opts.credentials === undefined))
+          .returns(newXhrPromise).once();
+      templatesMock.expects('findAndRenderTemplateArray').withExactArgs(
+          element, newItems)
+          .returns(newRenderPromise).once();
+      const spy = sandbox.spy(list, 'populateList_');
+      element.setAttribute('src', 'https://data2.com/list.json');
+      list.mutatedAttributesCallback({'src': 'https://data2.com/list.json'});
+      expect(spy).to.be.calledOnce;
     });
   });
 

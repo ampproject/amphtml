@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
-import {getAncestorBlacklist} from './ancestor-blacklist';
+import {dev, user} from '../../../src/log';
 import {getAttributesFromConfigObj} from './attributes';
-import {resourcesForDoc} from '../../../src/resources';
+import {resourcesForDoc} from '../../../src/services';
 import {
+  closestByTag,
   createElementWithAttributes,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
 
 /** @const */
 const TAG = 'amp-auto-ads';
-
-/**
- * TODO: Specify this via the configuration.
- * @const
- */
-const TARGET_AD_WIDTH_PX = 320;
 
 /**
  * TODO: Specify this via the configuration.
@@ -58,6 +52,16 @@ const Position = {
   LAST_CHILD: 3,  // Placement should be the last child of the anchor element.
   AFTER: 4,  // Placement should be the sibling after the anchor element.
 };
+
+/**
+ * Should be kept in sync with the disallowed_ancestors in
+ * extensions/amp-ad/.../validator-amp-ad.protoascii.
+ * @const {!Array<string>}
+ */
+const BLACKLISTED_ANCESTOR_TAGS = [
+  'AMP-SIDEBAR',
+  'AMP-APP-BANNER',
+];
 
 /**
  * @const {!Object<!Position, !function(!Element, !Element)>}
@@ -177,7 +181,7 @@ export class Placement {
         this.adElement_ = this.createAdElement_(baseAttributes);
         this.injector_(this.anchorElement_, this.adElement_);
         return this.resources_.attemptChangeSize(this.adElement_,
-            TARGET_AD_HEIGHT_PX, TARGET_AD_WIDTH_PX, this.margins_)
+            TARGET_AD_HEIGHT_PX, undefined, this.margins_)
                 .then(() => {
                   this.state_ = PlacementState.PLACED;
                   return this.state_;
@@ -196,9 +200,9 @@ export class Placement {
    */
   createAdElement_(baseAttributes) {
     const attributes = Object.assign({
-      'layout': 'responsive',
-      'width': '0',
+      'layout': 'fixed-height',
       'height': '0',
+      'class': 'i-amphtml-layout-awaiting-size',
     }, baseAttributes, this.attributes_);
     return createElementWithAttributes(
         this.win_.document, 'amp-ad', attributes);
@@ -213,7 +217,7 @@ export class Placement {
 export function getPlacementsFromConfigObj(win, configObj) {
   const placementObjs = configObj['placements'];
   if (!placementObjs) {
-    dev().warn(TAG, 'No placements in config');
+    user().warn(TAG, 'No placements in config');
     return [];
   }
   const placements = [];
@@ -233,18 +237,18 @@ export function getPlacementsFromConfigObj(win, configObj) {
 function getPlacementsFromObject(win, placementObj, placements) {
   const injector = INJECTORS[placementObj['pos']];
   if (!injector) {
-    dev().warn(TAG, 'No injector for position');
+    user().warn(TAG, 'No injector for position');
     return;
   }
   const anchor = placementObj['anchor'];
   if (!anchor) {
-    dev().warn(TAG, 'No anchor in placement');
+    user().warn(TAG, 'No anchor in placement');
     return;
   }
   const anchorElements =
       getAnchorElements(win.document.documentElement, anchor);
   if (!anchorElements.length) {
-    dev().warn(TAG, 'No anchor element found');
+    user().warn(TAG, 'No anchor element found');
     return;
   }
   let margins = undefined;
@@ -258,10 +262,8 @@ function getPlacementsFromObject(win, placementObj, placements) {
       };
     }
   }
-  const ancestorBlacklist = getAncestorBlacklist(win);
   anchorElements.forEach(anchorElement => {
-    if (!isPositionValid(anchorElement, placementObj['pos'],
-        ancestorBlacklist)) {
+    if (!isPositionValid(anchorElement, placementObj['pos'])) {
       return;
     }
     const attributes = getAttributesFromConfigObj(placementObj);
@@ -280,7 +282,7 @@ function getPlacementsFromObject(win, placementObj, placements) {
 function getAnchorElements(rootElement, anchorObj) {
   const selector = anchorObj['selector'];
   if (!selector) {
-    dev().warn(TAG, 'No selector in anchor');
+    user().warn(TAG, 'No selector in anchor');
     return [];
   }
   let elements = [].slice.call(scopedQuerySelectorAll(rootElement, selector));
@@ -314,26 +316,22 @@ function getAnchorElements(rootElement, anchorObj) {
 /**
  * @param {!Element} anchorElement
  * @param {!Position} position
- * @param {!./ancestor-blacklist.AncestorBlacklist} ancestorBlacklist
  * @return {boolean}
  */
-function isPositionValid(anchorElement, position, ancestorBlacklist) {
-  let ancestorBlacklisted = false;
-  if (position == Position.BEFORE || position == Position.AFTER) {
-    const parent = anchorElement.parentNode;
-    if (!parent) {
-      dev().warn(TAG, 'Parentless anchor with BEFORE/AFTER position.');
-      return false;
-    }
-    ancestorBlacklisted =
-        ancestorBlacklist.isOrDescendantOfBlacklistedElement(parent);
-  } else {
-    ancestorBlacklisted =
-        ancestorBlacklist.isOrDescendantOfBlacklistedElement(anchorElement);
-  }
-  if (ancestorBlacklisted) {
-    dev().warn(TAG, 'Placement inside blacklisted ancestor.');
+function isPositionValid(anchorElement, position) {
+  const elementToCheckOrNull =
+      position == Position.BEFORE || position == Position.AFTER ?
+          anchorElement.parentElement : anchorElement;
+  if (!elementToCheckOrNull) {
+    user().warn(TAG, 'Parentless anchor with BEFORE/AFTER position.');
     return false;
   }
-  return true;
+  const elementToCheck = dev().assertElement(elementToCheckOrNull);
+  return !BLACKLISTED_ANCESTOR_TAGS.some(tagName => {
+    if (closestByTag(elementToCheck, tagName)) {
+      user().warn(TAG, 'Placement inside blacklisted ancestor: ' + tagName);
+      return true;
+    }
+    return false;
+  });
 }

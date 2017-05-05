@@ -23,7 +23,7 @@ import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {VideoEvents} from '../../../src/video-interface';
-import {videoManagerForDoc} from '../../../src/video-manager';
+import {videoManagerForDoc} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 
 const TAG = 'amp-video';
@@ -132,6 +132,9 @@ class AmpVideo extends AMP.BaseElement {
           attrs,
           dev().assertElement(this.video_),
           /* opt_removeMissingAttrs */ true);
+      if (mutations['src']) {
+        this.element.dispatchCustomEvent(VideoEvents.RELOAD);
+      }
     }
 
     /** @override */
