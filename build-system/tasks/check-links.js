@@ -23,9 +23,6 @@ var markdownLinkCheck = BBPromise.promisify(require('markdown-link-check'));
 var path = require('path');
 var util = require('gulp-util');
 
-// var resolve;
-// var fileCount;
-// var filesChecked = 0;
 
 /**
  * Parses the list of files in argv and checks for dead links.
@@ -41,12 +38,11 @@ function checkLinks() {
   }
 
   var markdownFiles = files.split(',');
-  // var promise = new BBPromise(function (r) {
-  //   resolve = r;
-  // });
-  // fileCount = markdownFiles.length;
-  markdownFiles.forEach(runLinkChecker);
-  // return promise;
+  var linkCheckers = [];
+  markdownFiles.forEach(function(markdownFile) {
+    linkCheckers.push(runLinkChecker(markdownFile));
+  });
+  return BBPromise.all(linkCheckers);
 }
 
 /**
@@ -63,8 +59,9 @@ function runLinkChecker(markdownFile) {
   };
 
   return markdownLinkCheck(filteredMarkdown, opts)
-  .then(function(error, results) {
+  .then(function(results) {
     util.log('Checking links in', util.colors.magenta(markdownFile), '...');
+    var error = false;
     results.forEach(function (result) {
       if(result.status === 'dead') {
         error = true;
@@ -84,30 +81,6 @@ function runLinkChecker(markdownFile) {
           util.colors.magenta(markdownFile), 'are alive.');
     }
   });
-  // markdownLinkCheck(filteredMarkdown, opts, function(error, results) {
-  //   util.log('Checking links in', util.colors.magenta(markdownFile), '...');
-  //   results.forEach(function (result) {
-  //     if(result.status === 'dead') {
-  //       error = true;
-  //       util.log('[%s] %s', chalk.red('✖'), result.link);
-  //     } else {
-  //       util.log('[%s] %s', chalk.green('✓'), result.link);
-  //     }
-  //   });
-  //   if(error) {
-  //     util.log(
-  //         util.colors.red('ERROR'), 'Dead links found in',
-  //         util.colors.magenta(markdownFile), '(please update it).');
-  //     process.exit(1);
-  //   } else {
-  //     util.log(
-  //         util.colors.green('SUCCESS'), 'All links in',
-  //         util.colors.magenta(markdownFile), 'are alive.');
-  //   }
-  //   if (++filesChecked == fileCount) {
-  //     resolve();
-  //   }
-  // });
 }
 
 gulp.task(
