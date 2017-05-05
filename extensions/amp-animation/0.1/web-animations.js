@@ -313,10 +313,7 @@ export class MeasureScanner extends Scanner {
     const promises = [];
     for (let i = 0; i < this.targets_.length; i++) {
       const element = this.targets_[i];
-      if (element.classList.contains('i-amphtml-element')) {
-        const resource = resources.getResourceForElement(element);
-        promises.push(resource.loadedOnce());
-      }
+      promises.push(resources.requireLayout(element));
     }
     return Promise.all(promises);
   }
