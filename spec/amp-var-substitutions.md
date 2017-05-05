@@ -413,21 +413,22 @@ Provides a per document-source-origin (the origin of the website where you publi
 
 * **platform variable**: `CLIENT_ID`
   *  Example: <br>
+  
   ```html
   <amp-pixel src="https://foo.com/pixel?cid=CLIENT_ID(cid-scope-cookie-fallback-name)"></amp-pixel>
 
-<amp-user-notification
-    layout=nodisplay
-    id="user-consent"
-    data-show-if-href="https://foo.com/api/show"
-    data-dismiss-href="https://foo.com/api/dismissed">
-    This site uses cookies to personalize content.
-    <a href="">Learn more.</a>
-   <button on="tap:user-consent.dismiss">I accept</button>
-</amp-user-notification>
+  <amp-user-notification
+      layout=nodisplay
+      id="user-consent"
+      data-show-if-href="https://foo.com/api/show"
+      data-dismiss-href="https://foo.com/api/dismissed">
+      This site uses cookies to personalize content.
+      <a href="">Learn more.</a>
+     <button on="tap:user-consent.dismiss">I accept</button>
+  </amp-user-notification>
 
-<!-- cid is not provided until `user-consent` is dismissed -->
-<amp-pixel src="https://foo.com/pixel?cid=CLIENT_ID(cid-scope-cookie-fallback-name,user-consent-id)"></amp-pixel>
+  <!-- cid is not provided until `user-consent` is dismissed -->
+  <amp-pixel src="https://foo.com/pixel?cid=CLIENT_ID(cid-scope-cookie-fallback-name,user-consent-id)"></amp-pixel>
   ```
 * **amp-analytics variable**: `${clientId}`
   * Example usage: `${clientId(foo)}`
