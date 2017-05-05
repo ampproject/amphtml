@@ -30,9 +30,9 @@ import {isEnumValue} from '../../../src/types';
 import {Activity} from './activity-impl';
 import {Cid} from './cid-impl';
 import {
-  InstrumentationService,
-  instrumentationServicePromiseForDoc,
-  AnalyticsEventType,
+    InstrumentationService,
+    instrumentationServicePromiseForDoc,
+    AnalyticsEventType,
 } from './instrumentation';
 import {
   ExpansionOptions,
@@ -243,7 +243,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           if (isEnumValue(AnalyticsEventType, eventType) &&
               !WHITELIST_EVENT_IN_SANDBOX.includes(eventType)) {
             user().error(TAG, eventType + 'is not supported for amp-analytics' +
-                ' in scope');
+            ' in scope');
             continue;
           }
         }
@@ -264,10 +264,10 @@ export class AmpAnalytics extends AMP.BaseElement {
             // Expand the selector using variable expansion.
             return this.variableService_.expandTemplate(
                 trigger['selector'], expansionOptions)
-                .then(selector => {
-                  trigger['selector'] = selector;
-                  this.addTriggerNoInline_(trigger);
-                });
+              .then(selector => {
+                trigger['selector'] = selector;
+                this.addTriggerNoInline_(trigger);
+              });
           } else {
             this.addTriggerNoInline_(trigger);
           }
@@ -320,8 +320,8 @@ export class AmpAnalytics extends AMP.BaseElement {
 
         for (const extraUrlParamsKey in params) {
           const newkey = extraUrlParamsKey.replace(
-              replaceMapKey,
-              replaceMap[replaceMapKey]
+            replaceMapKey,
+            replaceMap[replaceMapKey]
           );
           if (extraUrlParamsKey != newkey) {
             const value = params[extraUrlParamsKey];
@@ -595,9 +595,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         if (typeof params[k] == 'string') {
           requestPromises.push(
               this.variableService_.expandTemplate(params[k], expansionOptions)
-                  .then(value => {
-                    params[k] = value;
-                  }));
+                  .then(value => { params[k] = value; }));
         }
       }
     }
