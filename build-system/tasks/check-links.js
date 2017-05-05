@@ -38,11 +38,49 @@ function checkLinks() {
   }
 
   var markdownFiles = files.split(',');
-  var linkCheckers = [];
-  markdownFiles.forEach(function(markdownFile) {
-    linkCheckers.push(runLinkChecker(markdownFile));
+  var linkCheckers = markdownFiles.map(function(markdownFile) {
+    return runLinkChecker(markdownFile);
   });
-  return BBPromise.all(linkCheckers);
+  return BBPromise.all(linkCheckers)
+  .then(function(allResults) {
+    var deadLinksFound = false;
+    var filesWithDeadLinks = [];
+    allResults.map(function(results, index) {
+      var deadLinksFoundInFile = false;
+      util.log(
+          'Checking links in',
+          util.colors.magenta(markdownFiles[index]), '...');
+      results.forEach(function (result) {
+        if(result.status === 'dead') {
+          deadLinksFound = true;
+          deadLinksFoundInFile = true;
+          util.log('[%s] %s', chalk.red('✖'), result.link);
+        } else {
+          util.log('[%s] %s', chalk.green('✓'), result.link);
+        }
+      });
+      if(deadLinksFoundInFile) {
+        util.log(
+            util.colors.red('ERROR'), 'Dead links found in',
+            util.colors.magenta(markdownFiles[index]), '(please update it).');
+            filesWithDeadLinks.push(markdownFiles[index]);
+      } else {
+        util.log(
+            util.colors.green('SUCCESS'), 'All links in',
+            util.colors.magenta(markdownFiles[index]), 'are alive.');
+      }
+    });
+    if (deadLinksFound) {
+        util.log(
+            util.colors.red('ERROR'), 'Dead links found. Please update',
+            util.colors.magenta(filesWithDeadLinks.join(',')));
+       process.exit(1);
+    } else {
+        util.log(
+            util.colors.green('SUCCESS'),
+            'All links in all markdown files in this PR are alive.');
+    }
+  });
 }
 
 /**
@@ -50,6 +88,7 @@ function checkLinks() {
  * links (because they do not resolve on Travis), and checks for dead links.
  *
  * @param {string} markdownFile Path of markdown file, relative to src root.
+ * @return {Promise} Used to wait until the async link checker is done.
  */
 function runLinkChecker(markdownFile) {
   var markdown = fs.readFileSync(markdownFile).toString();
@@ -57,30 +96,7 @@ function runLinkChecker(markdownFile) {
   var opts = {
     baseUrl : 'file://' + path.dirname(path.resolve((markdownFile)))
   };
-
-  return markdownLinkCheck(filteredMarkdown, opts)
-  .then(function(results) {
-    util.log('Checking links in', util.colors.magenta(markdownFile), '...');
-    var error = false;
-    results.forEach(function (result) {
-      if(result.status === 'dead') {
-        error = true;
-        util.log('[%s] %s', chalk.red('✖'), result.link);
-      } else {
-        util.log('[%s] %s', chalk.green('✓'), result.link);
-      }
-    });
-    if(error) {
-      util.log(
-          util.colors.red('ERROR'), 'Dead links found in',
-          util.colors.magenta(markdownFile), '(please update it).');
-      process.exit(1);
-    } else {
-      util.log(
-          util.colors.green('SUCCESS'), 'All links in',
-          util.colors.magenta(markdownFile), 'are alive.');
-    }
-  });
+  return markdownLinkCheck(filteredMarkdown, opts);
 }
 
 gulp.task(
