@@ -41,7 +41,8 @@ describes.sandboxed('Extension Location', {}, () => {
         host: 'localhost:8000',
         protocol: 'http:',
       }, 'amp-ad', true);
-      expect(script).to.equal('http://localhost:8000/dist/rtv/123/v0/amp-ad-0.1.js');
+      expect(script).to.equal(
+          'http://localhost:8000/dist/rtv/123/v0/amp-ad-0.1.js');
     });
 
     it('with remote mode', () => {
@@ -81,9 +82,20 @@ describes.sandboxed('Extension Location', {}, () => {
         pathname: 'examples/ads.amp.min.html',
         host: 'localhost:8000',
         protocol: 'http:',
-      }, 'sw', false);
+      }, 'sw', /* isLocalDev */ false);
       expect(script).to.equal(
           'https://cdn.ampproject.org/sw.js');
+    });
+
+    it('with remote mode & rtv', () => {
+      window.AMP_MODE = {rtvVersion: '123'};
+      const script = calculateEntryPointScriptUrl({
+        pathname: 'examples/ads.amp.min.html',
+        host: 'localhost:8000',
+        protocol: 'http:',
+      }, 'ww', /* isLocalDev */ false, /* opt_rtv */ true);
+      expect(script).to.equal(
+          'https://cdn.ampproject.org/rtv/123/ww.js');
     });
   });
 });

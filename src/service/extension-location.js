@@ -44,12 +44,18 @@ export function calculateExtensionScriptUrl(location, extensionId, isLocalDev) {
 
 /**
  * Calculate script url for an entry point.
+ * If `opt_rtv` is true, returns the URL matching the current RTV.
  * @param {!Location} location The window's location
  * @param {string} entryPoint
  * @param {boolean=} isLocalDev
+ * @param {boolean=} opt_rtv
  * @return {string}
  */
-export function calculateEntryPointScriptUrl(location, entryPoint, isLocalDev) {
+export function calculateEntryPointScriptUrl(
+    location, entryPoint, isLocalDev, opt_rtv) {
   const base = calculateScriptBaseUrl(location, isLocalDev);
+  if (opt_rtv) {
+    return `${base}/rtv/${getMode().rtvVersion}/${entryPoint}.js`;
+  }
   return `${base}/${entryPoint}.js`;
 }
