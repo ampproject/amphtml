@@ -40,11 +40,12 @@ export class AmpState extends AMP.BaseElement {
   }
 
   /** @override */
-  activate(invocation) {
-    const event = invocation.event;
-    if (event && event.detail) {
-      this.updateState_(event.detail.response, /* isInit */ false);
-    }
+  activate(unusedInvocation) {
+    // TODO(choumx): Remove this after a few weeks in production.
+    const TAG = this.getName_();
+    user().error(TAG,
+        'Please use AMP.setState() action explicitly, e.g. ' +
+        'on="submit-success:AMP.setState({myAmpState: event.response})"');
   }
 
   /** @override */
@@ -133,7 +134,8 @@ export class AmpState extends AMP.BaseElement {
     const state = Object.create(null);
     state[id] = json;
     bindForDoc(this.getAmpDoc()).then(bind => {
-      bind.setState(state, isInit);
+      bind.setState(state,
+          /* opt_skipEval */ isInit, /* opt_isAmpStateMutation */ !isInit);
     });
   }
 

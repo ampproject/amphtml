@@ -50,6 +50,10 @@ describes.realWin('AmpState', {
     ampState = getAmpState();
 
     const impl = ampState.implementation_;
+
+    // For simpler testing, stub the fetching and update call to Bind service.
+    // - `fetchStub should only be called when fetching remote JSON data
+    // - `updateStub` should only be called when parsing a child script
     fetchStub = sandbox.stub(impl, 'fetchSrcAndUpdateState_');
     updateStub = sandbox.stub(impl, 'updateState_');
   });
@@ -64,7 +68,8 @@ describes.realWin('AmpState', {
 
     whenFirstVisiblePromiseResolve();
     return whenFirstVisiblePromise.then(() => {
-      expect(fetchStub).calledWith(/* opt_isInit */ true);
+      expect(fetchStub).calledWithExactly(/* isInit */ true);
+      expect(updateStub).to.not.have.been.called;
     });
   });
 
@@ -79,6 +84,7 @@ describes.realWin('AmpState', {
 
     whenFirstVisiblePromiseResolve();
     return whenFirstVisiblePromise.then(() => {
+      expect(fetchStub).to.not.have.been.called;
       expect(updateStub).calledWithMatch({foo: 'bar'});
     });
   });
@@ -95,6 +101,6 @@ describes.realWin('AmpState', {
 
     isVisibleStub.returns(true);
     ampState.mutatedAttributesCallback({src: 'https://foo.com/bar?baz=1'});
-    expect(fetchStub).calledWith(/* opt_isInit */ false);
+    expect(fetchStub).calledWithExactly(/* isInit */ false);
   });
 });

@@ -95,14 +95,27 @@ describes.realWin('Bind', {
   /**
    * Calls `callback` when digest that updates bind state to `state` completes.
    * @param {!Object} state
+   * @param {boolean=} opt_isAmpStateMutation
    * @return {!Promise}
    */
-  function onBindReadyAndSetState(state) {
+  function onBindReadyAndSetState(state, opt_isAmpStateMutation) {
     return bind.initializePromiseForTesting().then(() => {
-      return bind.setState(state);
+      return bind.setState(state, opt_isAmpStateMutation);
     }).then(() => {
       env.flushVsync();
       return bind.setStatePromiseForTesting();
+    });
+  }
+
+  /**
+   * Calls `callback` when digest that updates bind state to `state` completes.
+   * @param {!Object} state
+   * @param {!Function} callback
+   * @return {!Promise}
+   */
+  function onBindReadyAndSetStateWithExpression(expression, scope) {
+    return bind.setStateWithExpression(expression, scope).then(() => {
+      env.flushVsync();
     });
   }
 
@@ -117,18 +130,6 @@ describes.realWin('Bind', {
         env.win.removeEventListener(callback);
       };
       env.win.addEventListener(name, callback);
-    });
-  }
-
-  /**
-   * Calls `callback` when digest that updates bind state to `state` completes.
-   * @param {!Object} state
-   * @param {!Function} callback
-   * @return {!Promise}
-   */
-  function onBindReadyAndSetStateWithExpression(expression, scope) {
-    return bind.setStateWithExpression(expression, scope).then(() => {
-      env.flushVsync();
     });
   }
 
@@ -285,6 +286,17 @@ describes.realWin('Bind', {
         '{"onePlusOne": one + one}', {one: 1});
     return promise.then(() => {
       expect(element.textContent).to.equal('2');
+    });
+  });
+
+  it('should ignore <amp-state> updates if specified in `setState`', () => {
+    const element = createElementWithBinding(`[src]="foo"`, 'amp-state');
+    expect(element.getAttribute('src')).to.be.null;
+    const promise = onBindReadyAndSetState(
+        {foo: '/foo'}, /* opt_isAmpStateMutation */ true);
+    return promise.then(() => {
+      // Should _not_ be updated if `opt_isAmpStateMutation` is true.
+      expect(element.getAttribute('src')).to.be.null;
     });
   });
 
