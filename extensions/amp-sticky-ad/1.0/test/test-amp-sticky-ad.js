@@ -331,7 +331,7 @@ describes.realWin('amp-sticky-ad 1.0 with real ad child', {
   let win;
   let ampStickyAd;
   let impl;
-  let addToFixedLayerStub, addToFixedLayerPromise;
+  let addToFixedLayerPromise;
   beforeEach(done => {
     win = env.win;
     ampStickyAd = win.document.createElement('amp-sticky-ad');
@@ -345,7 +345,7 @@ describes.realWin('amp-sticky-ad 1.0 with real ad child', {
     ampStickyAd.build();
     impl = ampStickyAd.implementation_;
     addToFixedLayerPromise = Promise.resolve();
-    addToFixedLayerStub = sandbox.stub(impl.viewport_, 'addToFixedLayer',
+    sandbox.stub(impl.viewport_, 'addToFixedLayer',
         () => addToFixedLayerPromise);
     return ampAd.implementation_.upgradeCallback().then(() => {
       done();
