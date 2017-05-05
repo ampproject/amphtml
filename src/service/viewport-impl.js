@@ -585,9 +585,10 @@ export class Viewport {
    * @param {!Element} element
    * @param {boolean=} opt_forceTransfer If set to true , then the element needs
    *    to be forcefully transferred to the fixed layer.
+   * @return {!Promise}
    */
   addToFixedLayer(element, opt_forceTransfer) {
-    this.fixedLayer_.addElement(element, opt_forceTransfer);
+    return this.fixedLayer_.addElement(element, opt_forceTransfer);
   }
 
   /**

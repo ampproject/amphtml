@@ -1,3 +1,4 @@
+
 /**
  * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
@@ -32,6 +33,7 @@ describes.realWin('amp-sticky-ad 1.0 version', {
   let win;
   let ampStickyAd;
   let impl;
+  let addToFixedLayerStub, addToFixedLayerPromise;
   describe('with valid child 1.0', () => {
     beforeEach(() => {
       win = env.win;
@@ -42,6 +44,9 @@ describes.realWin('amp-sticky-ad 1.0 version', {
       win.document.body.appendChild(ampStickyAd);
       ampStickyAd.build();
       impl = ampStickyAd.implementation_;
+      addToFixedLayerPromise = Promise.resolve();
+      addToFixedLayerStub = sandbox.stub(impl.viewport_, 'addToFixedLayer',
+          () => addToFixedLayerPromise);
     });
 
     it('should listen to scroll event', () => {
@@ -107,8 +112,13 @@ describes.realWin('amp-sticky-ad 1.0 version', {
       impl.onScroll_();
       expect(getScrollTopSpy).to.have.been.called;
       expect(getSizeSpy).to.have.been.called;
-      expect(scheduleLayoutSpy).to.have.been.called;
       expect(removeOnScrollListenerSpy).to.have.been.called;
+      // Layout on ad is called only after fixed layer is done.
+      expect(scheduleLayoutSpy).to.not.have.been.called;
+      expect(addToFixedLayerStub).to.have.been.calledOnce;
+      return addToFixedLayerPromise.then(() => {
+        expect(scheduleLayoutSpy).to.have.been.calledOnce;
+      });
     });
 
     it('experiment version, should display once user scroll', () => {
@@ -119,7 +129,7 @@ describes.realWin('amp-sticky-ad 1.0 version', {
           sandbox.spy(impl, 'removeOnScrollListener_');
 
       const getScrollTopStub = sandbox.stub(impl.viewport_, 'getScrollTop');
-      getScrollTopStub.returns(1);
+      getScrollTopStub.returns(2);
       const getSizeStub = sandbox.stub(impl.viewport_, 'getSize');
       getSizeStub.returns({
         height: 50,
@@ -136,9 +146,14 @@ describes.realWin('amp-sticky-ad 1.0 version', {
       };
 
       impl.onScroll_();
-      expect(scheduleLayoutSpy).to.have.been.called;
       expect(removeOnScrollListenerSpy).to.have.been.called;
       toggleExperiment(win, 'sticky-ad-early-load');
+      // Layout on ad is called only after fixed layer is done.
+      expect(scheduleLayoutSpy).to.not.have.been.called;
+      expect(addToFixedLayerStub).to.have.been.calledOnce;
+      return addToFixedLayerPromise.then(() => {
+        expect(scheduleLayoutSpy).to.have.been.calledOnce;
+      });
     });
 
     it('should set body borderBottom correctly', () => {
@@ -316,6 +331,7 @@ describes.realWin('amp-sticky-ad 1.0 with real ad child', {
   let win;
   let ampStickyAd;
   let impl;
+  let addToFixedLayerPromise;
   beforeEach(done => {
     win = env.win;
     ampStickyAd = win.document.createElement('amp-sticky-ad');
@@ -328,6 +344,9 @@ describes.realWin('amp-sticky-ad 1.0 with real ad child', {
     win.document.body.appendChild(ampStickyAd);
     ampStickyAd.build();
     impl = ampStickyAd.implementation_;
+    addToFixedLayerPromise = Promise.resolve();
+    sandbox.stub(impl.viewport_, 'addToFixedLayer',
+        () => addToFixedLayerPromise);
     return ampAd.implementation_.upgradeCallback().then(() => {
       done();
     });
@@ -358,7 +377,8 @@ describes.realWin('amp-sticky-ad 1.0 with real ad child', {
     impl.ad_.signals().signal('load-end');
     const layoutPromise = impl.layoutAd_();
     const bodyPromise = impl.viewport_.ampdoc.whenBodyAvailable();
-    return Promise.all([layoutPromise, bodyPromise]).then(() => {
+    const p = Promise.all([addToFixedLayerPromise, layoutPromise, bodyPromise]);
+    return p.then(() => {
       let borderWidth = win.getComputedStyle(win.document.body, null)
           .getPropertyValue('border-bottom-width');
       expect(borderWidth).to.equal('54px');
@@ -397,7 +417,8 @@ describes.realWin('amp-sticky-ad 1.0 with real ad child', {
     impl.ad_.signals().signal('load-end');
     const layoutPromise = impl.layoutAd_();
     const bodyPromise = impl.viewport_.ampdoc.whenBodyAvailable();
-    return Promise.all([layoutPromise, bodyPromise]).then(() => {
+    const p = Promise.all([addToFixedLayerPromise, layoutPromise, bodyPromise]);
+    return p.then(() => {
       let borderWidth = win.getComputedStyle(win.document.body, null)
           .getPropertyValue('border-bottom-width');
       expect(borderWidth).to.equal('54px');
