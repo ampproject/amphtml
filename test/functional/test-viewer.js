@@ -240,7 +240,7 @@ describe('Viewer', () => {
     it('should replace URL for the same non-proxy origin', () => {
       const fragment = '#replaceUrl=http://www.example.com/two&b=1';
       setUrl('http://www.example.com/one' + fragment);
-      const viewer = new Viewer(ampdoc);
+      new Viewer(ampdoc);
       expect(windowApi.history.replaceState).to.be.calledOnce;
       expect(windowApi.history.replaceState).to.be.calledWith({}, '',
           'http://www.example.com/two' + fragment);
@@ -253,7 +253,7 @@ describe('Viewer', () => {
     it('should ignore replacement fragment', () => {
       const fragment = '#replaceUrl=http://www.example.com/two%23b=2&b=1';
       setUrl('http://www.example.com/one' + fragment);
-      const viewer = new Viewer(ampdoc);
+      new Viewer(ampdoc);
       expect(windowApi.history.replaceState).to.be.calledOnce;
       expect(windowApi.history.replaceState).to.be.calledWith({}, '',
           'http://www.example.com/two' + fragment);
@@ -264,7 +264,7 @@ describe('Viewer', () => {
     it('should replace relative URL for the same non-proxy origin', () => {
       const fragment = '#replaceUrl=/two&b=1';
       setUrl(removeFragment(window.location.href) + fragment);
-      const viewer = new Viewer(ampdoc);
+      new Viewer(ampdoc);
       expect(windowApi.history.replaceState).to.be.calledOnce;
       expect(windowApi.history.replaceState).to.be.calledWith({}, '',
           window.location.origin + '/two' + fragment);
@@ -275,7 +275,7 @@ describe('Viewer', () => {
     it('should fail to replace URL for a wrong non-proxy origin', () => {
       const fragment = '#replaceUrl=http://other.example.com/two&b=1';
       setUrl('http://www.example.com/one' + fragment);
-      const viewer = new Viewer(ampdoc);
+      new Viewer(ampdoc);
       expect(windowApi.history.replaceState).to.not.be.called;
       expect(windowApi.location.originalHref).to.be.undefined;
     });
@@ -288,7 +288,7 @@ describe('Viewer', () => {
         throw new Error('intentional');
       });
       expect(() => {
-        new Viewer(ampdoc)
+        new Viewer(ampdoc);
       }).to.not.throw();
       expect(windowApi.location.originalHref).to.be.undefined;
     });
@@ -297,7 +297,7 @@ describe('Viewer', () => {
       const fragment =
           '#replaceUrl=https://cdn.ampproject.org/c/www.example.com/two&b=1';
       setUrl('https://cdn.ampproject.org/c/www.example.com/one' + fragment);
-      const viewer = new Viewer(ampdoc);
+      new Viewer(ampdoc);
       expect(windowApi.history.replaceState).to.be.calledOnce;
       expect(windowApi.history.replaceState).to.be.calledWith({}, '',
           'https://cdn.ampproject.org/c/www.example.com/two' + fragment);
@@ -310,7 +310,7 @@ describe('Viewer', () => {
       const fragment =
           '#replaceUrl=https://cdn.ampproject.org/c/other.example.com/two&b=1';
       setUrl('https://cdn.ampproject.org/c/www.example.com/one' + fragment);
-      const viewer = new Viewer(ampdoc);
+      new Viewer(ampdoc);
       expect(windowApi.history.replaceState).to.not.be.called;
       expect(windowApi.location.originalHref).to.be.undefined;
     });
@@ -319,7 +319,7 @@ describe('Viewer', () => {
       const fragment = '#replaceUrl=http://www.example.com/two&b=1';
       setUrl('http://www.example.com/one' + fragment);
       sandbox.stub(ampdoc, 'isSingleDoc', () => false);
-      const viewer = new Viewer(ampdoc);
+      new Viewer(ampdoc);
       expect(windowApi.history.replaceState).to.not.be.called;
     });
   });
