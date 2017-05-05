@@ -15,15 +15,15 @@
  */
 
 var argv = require('minimist')(process.argv.slice(2));
+var BBPromise = require('bluebird');
 var chalk = require('chalk');
 var fs = require('fs-extra');
 var gulp = require('gulp-help')(require('gulp'));
 var markdownLinkCheck = require('markdown-link-check');
 var path = require('path');
-var Q = require('q');
 var util = require('gulp-util');
 
-var deferred;
+var resolve;
 var fileCount;
 var filesChecked = 0;
 
@@ -41,10 +41,12 @@ function checkLinks() {
   }
 
   var markdownFiles = files.split(',');
-  deferred = Q.defer();
+  var promise = new BBPromise(function (r) {
+    resolve = r;
+  });
   fileCount = markdownFiles.length;
   markdownFiles.forEach(runLinkChecker);
-  return deferred.promise;
+  return promise;
 }
 
 /**
@@ -92,7 +94,7 @@ function runLinkChecker(markdownFile) {
           util.colors.magenta(markdownFile), 'are alive.');
     }
     if (++filesChecked == fileCount) {
-      deferred.resolve();
+      resolve();
     }
   });
 }
