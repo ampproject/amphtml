@@ -638,18 +638,19 @@ export class Resources {
         return;
       }
       if (resource.getState() != ResourceState.LAYOUT_SCHEDULED) {
-        resource.measure();
-        if (resource.isDisplayed()) {
-          resource.element.whenBuilt().then(() => {
-            this.scheduleLayoutOrPreload_(
-                resource,
-                /* layout */ true,
-                opt_parentPriority,
-                /* forceOutsideViewport */ true);
-          });
-        }
-      }
-      if (resource.isDisplayed()) {
+        promises.push(resource.element.whenBuilt().then(() => {
+          resource.measure();
+          if (!resource.isDisplayed()) {
+            return;
+          }
+          this.scheduleLayoutOrPreload_(
+              resource,
+              /* layout */ true,
+              opt_parentPriority,
+              /* forceOutsideViewport */ true);
+          return resource.loadedOnce();
+        }));
+      } else if (resource.isDisplayed()) {
         promises.push(resource.loadedOnce());
       }
     });
