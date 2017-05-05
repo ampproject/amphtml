@@ -377,6 +377,60 @@ describe('amp-a4a', () => {
       });
     });
   });
+  describe('layoutCallback cancels properly', () => {
+    let a4aElement;
+    let a4a;
+    let fixture;
+    beforeEach(() => {
+      xhrMock.withArgs(TEST_URL, {
+        mode: 'cors',
+        method: 'GET',
+        credentials: 'include',
+      }).onFirstCall().returns(Promise.resolve(mockResponse));
+      return createIframePromise().then(f => {
+        fixture = f;
+        setupForAdTesting(fixture);
+        a4aElement = createA4aElement(fixture.doc);
+        a4a = new MockA4AImpl(a4aElement);
+        return fixture;
+      });
+    });
+
+    it('when unlayoutCallback called after adPromise', () => {
+      a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      let promiseResolver;
+      a4a.adPromise_ = new Promise(resolver => {
+        promiseResolver = resolver;
+      });
+      const layoutCallbackPromise = a4a.layoutCallback();
+      a4a.unlayoutCallback();
+      const renderNonAmpCreativeSpy = sinon.spy(AmpA4A.prototype, 'renderNonAmpCreative_');
+      promiseResolver();
+      layoutCallbackPromise.catch(err => {
+        console.log(err);
+        console.log(JSON.stringify(err));
+        expect(renderNonAmpCreativeSpy).to.never.be.called;
+      });
+    });
+
+    it('when unlayoutCallback called before renderAmpCreative_', () => {
+      a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      let promiseResolver;
+      a4a.renderAmpCreative_ = new Promise(resolver => {
+        promiseResolver = resolver;
+      });
+      const layoutCallbackPromise = a4a.layoutCallback();
+      a4a.unlayoutCallback();
+
+      promiseResolver();
+      layoutCallbackPromise.catch(err => {
+        expect(err).to.be.ok;
+        console.log(err);
+      });
+    });
+  });
 
   describe('cross-domain rendering', () => {
     let a4aElement;
@@ -1266,6 +1320,7 @@ describe('amp-a4a', () => {
     const metaData = AmpA4A.prototype.getAmpAdMetadata_(buildCreativeString());
     let a4aElement;
     let a4a;
+    const checkStillCurrent = () => {return true;};
     beforeEach(() => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
@@ -1276,7 +1331,8 @@ describe('amp-a4a', () => {
       });
     });
     it('should render correctly', () => {
-      return a4a.renderAmpCreative_(metaData).then(() => {
+      return a4a.renderAmpCreative_(metaData, checkStillCurrent)
+          .then(() => {
         // Verify iframe presence.
         expect(a4aElement.children.length).to.equal(1);
         const friendlyIframe = a4aElement.children[0];
@@ -1297,7 +1353,7 @@ describe('amp-a4a', () => {
     });
 
     it('should handle click expansion correctly', () => {
-      return a4a.renderAmpCreative_(metaData).then(() => {
+      return a4a.renderAmpCreative_(metaData, checkStillCurrent).then(() => {
         const adBody = a4aElement.querySelector('iframe')
             .contentDocument.querySelector('body');
         let clickHandlerCalled = 0;
