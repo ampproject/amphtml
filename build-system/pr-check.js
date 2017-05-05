@@ -26,6 +26,7 @@
 const child_process = require('child_process');
 const path = require('path');
 const minimist = require('minimist');
+const util = require('gulp-util');
 
 const gulp = 'node_modules/gulp/bin/gulp.js';
 const fileLogPrefix =
