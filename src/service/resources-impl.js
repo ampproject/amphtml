@@ -1807,14 +1807,14 @@ export class Resources {
    */
   scheduleLayoutOrPreloadForSubresources_(parentResource, layout, subElements) {
     this.discoverResourcesForArray_(parentResource, subElements, resource => {
-      if (resource.getState() != ResourceState.NOT_BUILT) {
-        this.measureAndScheduleIfAllowed_(resource, layout,
-            parentResource.getPriority());
-      } else {
+      if (resource.getState() == ResourceState.NOT_BUILT) {
         resource.element.whenBuilt().then(() => {
           this.measureAndScheduleIfAllowed_(resource, layout,
               parentResource.getPriority());
         });
+      } else {
+        this.measureAndScheduleIfAllowed_(resource, layout,
+            parentResource.getPriority());
       }
     });
   }
