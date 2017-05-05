@@ -153,6 +153,8 @@ Here are some factors that affect whether the resize will be executed:
 - Whether the resize is requested for a currently active ad;
 - Whether the resize is requested for an ad below the viewport or above the viewport.
 
+#### Specifying an overflow element
+
 You can specify an `overflow` element that is only shown when a resize request is declined. When the user clicks the overflow element, the resize will pass the "interaction" rule and will resize.
 
 Example: Using an `overflow` element
