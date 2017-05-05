@@ -14,7 +14,7 @@
   "amp-accordion-session-state-optout": 1,
   "amp-playbuzz": 1,
   "make-body-relative": 1,
-  "chunked-amp": 0,
+  "chunked-amp": 1,
   "amp-selector": 1,
   "sticky-ad-early-load": 1,
   "amp-auto-ads": 1,
