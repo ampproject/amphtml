@@ -550,7 +550,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @param {string} request The request to process.
    * @param {!JSONType} trigger JSON config block that resulted in this event.
    * @param {!Object} event Object with details about the event.
-   * @return {!Promise<string|undefined>} The request that was sent out.
+   * @return {!Promise<string>} The request that was sent out.
    * @private
    */
   expandAndSendRequest_(request, trigger, event) {
@@ -628,7 +628,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       const expansionOptions = this.expansionOptions_({}, trigger);
       return this.expandTemplateWithUrlParams_(sampleOn, expansionOptions)
           .then(key => this.cryptoService_.uniform(key))
-          .then(digest => digest * 100 < spec['threshold']);
+          .then(digest => digest * 100 < threshold;
     }
     user()./*OK*/error(TAG, 'Invalid threshold for sampling.');
     return resolve;
