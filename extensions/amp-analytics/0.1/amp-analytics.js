@@ -628,7 +628,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       const expansionOptions = this.expansionOptions_({}, trigger);
       return this.expandTemplateWithUrlParams_(sampleOn, expansionOptions)
           .then(key => this.cryptoService_.uniform(key))
-          .then(digest => digest * 100 < threshold;
+          .then(digest => digest * 100 < threshold);
     }
     user()./*OK*/error(TAG, 'Invalid threshold for sampling.');
     return resolve;
