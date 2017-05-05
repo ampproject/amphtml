@@ -587,7 +587,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
           'st=${socialTarget}' +
           '${baseSuffix}',
       'timing': '${host}/collect?${basePrefix}&' +
-          't=timing&' +
+          't=${timingRequestType}&' +
           'jid=&' +
           'plt=${pageLoadTime}&' +
           'dns=${domainLookupTime}&' +
@@ -607,6 +607,17 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
           'sampleOn': '${clientId}',
           'threshold': 1,
         },
+        'vars': {
+          'timingRequestType': 'timing'
+        }
+      },
+      'adwordsTiming': {
+        'on': 'visible',
+        'request': 'timing',
+        'enabled': '${queryParam(gclid)}',
+        'vars': {
+          'timingRequestType': 'adtiming'
+        }
       },
     },
     'extraUrlParamsReplaceMap': {
