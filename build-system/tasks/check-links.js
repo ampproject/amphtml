@@ -20,8 +20,12 @@ var fs = require('fs-extra');
 var gulp = require('gulp-help')(require('gulp'));
 var markdownLinkCheck = require('markdown-link-check');
 var path = require('path');
+var Q = require('q');
 var util = require('gulp-util');
 
+var deferred;
+var fileCount;
+var filesChecked = 0;
 
 /**
  * Parses the list of files in argv and checks for dead links.
@@ -34,7 +38,10 @@ function checkLinks() {
     process.exit(1);
   }
   var markdownFiles = files.split(',');
+  deferred = Q.defer();
+  fileCount = markdownFiles.length;
   checkLinksInFiles(markdownFiles);
+  return deferred.promise;
 }
 
 /**
@@ -89,6 +96,9 @@ function runLinkChecker(markdownFile) {
       util.log(
           util.colors.green('SUCCESS'), 'All links in',
           util.colors.magenta(markdownFile), 'are alive.');
+    }
+    if (++filesChecked == fileCount) {
+      deferred.resolve();
     }
   });
 }
