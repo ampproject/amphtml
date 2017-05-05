@@ -404,13 +404,13 @@ class VerificationGroup {
 }
 
 /**
- * @param {!../../../src/service/xhr-impl.FetchError} error
+ * @param {!../../../src/service/xhr-impl.FetchError} fetchError
  * @return {!Array<VerificationErrorDef>}
  * @private
  */
-function getResponseErrorData_(error) {
+function getResponseErrorData_(fetchError) {
   const json = /** @type {?VerificationErrorResponseDef} */ (
-      error.responseJson && error.responseJson);
+      fetchError && fetchError.responseJson);
   if (json && json.verifyErrors) {
     return json.verifyErrors;
   } else {

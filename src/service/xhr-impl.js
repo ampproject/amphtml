@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AbstractError, dev, user} from '../log';
+import {dev, user} from '../log';
 import {registerServiceBuilder, getService} from '../service';
 import {
   getSourceOrigin,
@@ -48,15 +48,15 @@ export let FetchInitDef;
  * A custom error that encapsulates an XHR error message
  * with the corresponding response data.
  */
-export class FetchError extends AbstractError {
+export class FetchError {
   /**
-   * @param {string} message
+   * @param {!Error} error
    * @param {!FetchResponse} response
    * @param {boolean=} opt_retriable
    * @param {?JSONType=} opt_responseJson
    */
-  constructor(message, response, opt_retriable, opt_responseJson) {
-    super(message);
+  constructor(error, response, opt_retriable, opt_responseJson) {
+    this.error = error;
     this.response = response;
     this.retriable = opt_retriable;
     this.responseJson = opt_responseJson;
@@ -430,8 +430,8 @@ export function assertSuccess(response) {
     const status = response.status;
     if (status < 200 || status >= 300) {
       const retriable = isRetriable(status);
-      const err = user().createCustomError(
-          new FetchError(`HTTP error ${status}`, response, retriable));
+      const err = new FetchError(
+          user().createError(`HTTP error ${status}`), response, retriable);
       const contentType = response.headers.get('Content-Type') || '';
       if (contentType.split(';')[0] == 'application/json') {
         response.json().then(json => {

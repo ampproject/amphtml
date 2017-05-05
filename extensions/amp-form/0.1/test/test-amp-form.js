@@ -1483,7 +1483,7 @@ describes.repeated('', {
         headers: headersMock,
       });
       const fetchRejectPromise = Promise.reject(
-          new FetchError('Error', {headers: headersMock}));
+          new FetchError(new Error('Error'), {headers: headersMock}));
       fetchRejectPromise.catch(() => {
         // Just avoiding a global uncaught promise exception.
       });
