@@ -21,12 +21,16 @@ import {
   isJsonScriptTag,
 } from '../../../src/dom';
 import {getMode} from '../../../src/mode';
+import {isExperimentOn} from '../../../src/experiments';
 import {tryParseJson} from '../../../src/json';
 
 /** @visibleForTesting */
 export const CONFIG_KEY = 'verificationGroups';
 
+export const FORM_VERIFY_EXPERIMENT = 'amp-form-verifiers';
+
 export const FORM_VERIFY_PARAM = '__amp_form_verify';
+
 
 /**
  * @typedef {{
@@ -50,8 +54,11 @@ let VerificationErrorResponseDef;
  * @param {function():Promise<!../../../src/service/xhr-impl.FetchResponse>} xhr
  */
 export function getFormVerifier(form, xhr) {
+  const win = form.ownerDocument.defaultView;
   const configTag = getConfig_(form);
   if (configTag) {
+    user().assert(isExperimentOn(win, FORM_VERIFY_EXPERIMENT),
+        `Enable "${FORM_VERIFY_EXPERIMENT}" experiment to use form verifiers`);
     const config = dev().assert(parseConfig_(configTag));
     return new AsyncVerifier(form, config, xhr);
   } else {

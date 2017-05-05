@@ -17,9 +17,11 @@
 import {
   AsyncVerifier,
   CONFIG_KEY,
+  FORM_VERIFY_EXPERIMENT,
   DefaultVerifier,
   getFormVerifier,
 } from '../form-verifiers';
+import {toggleExperiment} from '../../../../src/experiments';
 
 describes.fakeWin('amp-form async verification', {}, env => {
   const DEFAULT_CONFIG = `{
@@ -113,6 +115,10 @@ describes.fakeWin('amp-form async verification', {}, env => {
   }
 
   describe('getFormVerifier', () => {
+    beforeEach(() => {
+      toggleExperiment(env.win, FORM_VERIFY_EXPERIMENT, true);
+    });
+
     it('returns a DefaultVerifier when no config is present', () => {
       const emptyConfig = '';
       const form = getForm(env.win.document, emptyConfig);
@@ -124,6 +130,12 @@ describes.fakeWin('amp-form async verification', {}, env => {
       const form = getForm(env.win.document);
       const verifier = getFormVerifier(form, () => {});
       expect(verifier instanceof AsyncVerifier).to.be.true;
+    });
+
+    it('should throw if the experiment is disabled and has a config', () => {
+      toggleExperiment(env.win, FORM_VERIFY_EXPERIMENT, false);
+      const form = getForm(env.win.document);
+      expect(() => getFormVerifier(form, () => {})).to.throw(/experiment/);
     });
 
     it('should throw if an element is not in the form', () => {
@@ -167,12 +179,10 @@ describes.fakeWin('amp-form async verification', {}, env => {
     });
   });
 
-  describes.realWin('AsyncVerifier', {
-    amp: true,
-    extensions: ['amp-form'],
-  }, env => {
+  describe('AsyncVerifier', () => {
     let sandbox;
     beforeEach(() => {
+      toggleExperiment(env.win, FORM_VERIFY_EXPERIMENT, true);
       sandbox = env.sandbox;
     });
 
