@@ -1449,7 +1449,7 @@ function createBaseCustomElementClass(win) {
       const actionQueue = dev().assert(this.actionQueue_);
       this.actionQueue_ = null;
 
-      // TODO(dvoytenko, #1260): dedupe actions.
+      // Notice, the actions are currently not de-duped.
       actionQueue.forEach(invocation => {
         this.executionAction_(invocation, true);
       });
