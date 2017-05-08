@@ -21,7 +21,7 @@ describe('analyaitcs vendors', () => {
       'expect the Client ID cookie name', () => {
     const gaConfig = ANALYTICS_CONFIG['googleanalytics'];
     expect(gaConfig).not.to
-        .deep.equal(ANALYTICS_CONFIG['alpha']);
+        .deep.equal(ANALYTICS_CONFIG['googleanalytics-alpha']);
 
     gaConfig.vars.clientId = 'CLIENT_ID(_ga)';
     expect(gaConfig).to
