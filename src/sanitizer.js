@@ -140,10 +140,6 @@ const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = {
 
 /** @const {!Array<string>} */
 const BLACKLISTED_FIELDS_ATTR = [
-  // TODO(#5539): Consider allowing these, the only reason to strip these is to be
-  // more inline with the validator rules. Consider allowing these if/when
-  // allowed in validator. Even without this blacklist, Caja or Mustache is
-  // removing the values for these attributes.
   'form',
   'formaction',
   'formmethod',

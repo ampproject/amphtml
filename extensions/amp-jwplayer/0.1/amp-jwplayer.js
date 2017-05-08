@@ -99,8 +99,6 @@ class AmpJWPlayer extends AMP.BaseElement {
 
   /** @override */
   createPlaceholderCallback() {
-    // TODO(#5328): Investigate if there's a calculable poster image for playlists or
-    // a default playlist placeholder image.
     if (!this.element.hasAttribute('data-media-id')) {
       return;
     }

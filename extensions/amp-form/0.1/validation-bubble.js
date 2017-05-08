@@ -75,7 +75,6 @@ export class ValidationBubble {
     this.currentTargetElement_ = null;
     this.currentMessage_ = '';
 
-    // TODO(#3776): Use .mutate method when it supports passing state.
     this.vsync_.run({
       measure: undefined,
       mutate: hideBubble,

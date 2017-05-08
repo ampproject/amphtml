@@ -441,7 +441,6 @@ export class AmpForm {
       // reporting and blocking submission on non-valid forms.
       const isValid = checkUserValidityOnSubmission(this.form_);
       if (this.shouldValidate_ && !isValid) {
-        // TODO(#3776): Use .mutate method when it supports passing state.
         this.vsync_.run({
           measure: undefined,
           mutate: reportValidity,
@@ -677,8 +676,6 @@ function getUserValidityStateFor(element) {
 /**
  * Updates class names on the element to reflect the active invalid types on it.
  *
- * TODO(#5005): Maybe propagate the invalid type classes to parents of the input as well.
- *
  * @param {!Element} element
  */
 function updateInvalidTypesClasses(element) {
@@ -702,9 +699,6 @@ function updateInvalidTypesClasses(element) {
  * The specs are still not fully specified. The current solution tries to follow a common
  * sense approach for when to apply these classes. As the specs gets clearer, we should
  * strive to match it as much as possible.
- *
- * TODO(#4317): Follow up on ancestor propagation behavior and understand the future
- *              specs for the :user-valid/:user-inavlid.
  *
  * @param {!Element} element
  * @param {boolean=} propagate Whether to propagate the user validity to ancestors.

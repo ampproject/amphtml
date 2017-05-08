@@ -340,13 +340,6 @@ export class AsYouGoValidator extends AbstractCustomValidator {
 /**
  * Returns the form validator instance.
  *
- * TODO(#5000): Consider allowing multiple custom validators to be registered to a form.
- *     This allows for example a form to have as-you-go AND show-all-on-submit
- *     validators instead of having to stick with one.
- *
- * TODO(#5004): Consider setting a form-level class to indicate that the form was blocked
- *    from submission after being invalid (like .amp-form-submit-invalid).
- *
  * @param {!HTMLFormElement} form
  * @return {!FormValidator}
  */

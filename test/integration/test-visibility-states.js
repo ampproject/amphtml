@@ -42,7 +42,7 @@ describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
 
   function noop() {}
 
-  // TODO(#3561): unmute the test.
+  // TODO(lannka, #3561): unmute the test.
   describe.configure().skipSafari().run('Element Transitions', () => {
     let fixture;
     let resources;
