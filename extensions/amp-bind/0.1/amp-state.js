@@ -26,11 +26,11 @@ import {dev, user} from '../../../src/log';
 export class AmpState extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
-  constructor(elemment) {
+  constructor(element) {
     super(element);
 
     /** @visibleForTesting {?Promise} */
-    this.initializePromise = null;
+    this.updateStatePromise = null;
   }
 
 
@@ -67,26 +67,9 @@ export class AmpState extends AMP.BaseElement {
     toggle(this.element, /* opt_display */ false);
     this.element.setAttribute('aria-hidden', 'true');
 
-<<<<<<< HEAD
     // Don't parse or fetch in prerender mode.
     const viewer = viewerForDoc(this.getAmpDoc());
     viewer.whenFirstVisible().then(() => this.initialize_());
-=======
-    // If both `src` and child script tag are provided,
-    // state fetched from `src` takes precedence.
-    const children = this.element.children;
-    if (children.length == 1) {
-      this.parseChildAndUpdateState_();
-    } else if (children.length > 1) {
-      user().error(TAG, 'Should contain only one <script> child.');
-    }
-    if (this.element.hasAttribute('src')) {
-      const p = this.fetchSrcAndUpdateState_(/* isInit */ true);
-      if (getmode().test) {
-        this.initializePromise = p;
-      }
-    }
->>>>>>> ecaba238... partial work on augmenting amp-state tests
   }
 
   /** @override */
@@ -100,6 +83,9 @@ export class AmpState extends AMP.BaseElement {
     const src = mutations['src'];
     if (src !== undefined) {
       this.fetchSrcAndUpdateState_(/* isInit */ false);
+      if (getMode().test) {
+        this.updateStatePromise = p;
+      }
     }
   }
 
@@ -124,7 +110,10 @@ export class AmpState extends AMP.BaseElement {
       user().error(TAG, 'Should contain only one <script> child.');
     }
     if (this.element.hasAttribute('src')) {
-      this.fetchSrcAndUpdateState_(/* isInit */ true);
+      const p = this.fetchSrcAndUpdateState_(/* isInit */ true);
+      if (getMode().test) {
+        this.updateStatePromise = p;
+      }
     }
   }
 
@@ -163,7 +152,7 @@ export class AmpState extends AMP.BaseElement {
    * @private
    */
   fetchSrcAndUpdateState_(isInit) {
-    const ampdoc = this.getAmpdoc();
+    const ampdoc = this.getAmpDoc();
     return this.fetchBatchedJsonFor_(ampdoc, this.element).then(json => {
       this.updateState_(json, isInit);
     });
