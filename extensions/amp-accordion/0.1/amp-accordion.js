@@ -49,8 +49,6 @@ class AmpAccordion extends AMP.BaseElement {
   buildCallback() {
     this.sessionOptOut_ = this.element.hasAttribute('disable-session-states');
 
-    this.element.setAttribute('role', 'tablist');
-
     // sessionStorage key: special created id for this element, this.sessionId_.
     // sessionStorage value: string that can convert to this.currentState_ obj.
     this.sessionId_ = this.getSessionStorageKey_();
@@ -86,7 +84,7 @@ class AmpAccordion extends AMP.BaseElement {
 
         const header = sectionComponents_[0];
         header.classList.add('i-amphtml-accordion-header');
-        header.setAttribute('role', 'button');
+        header.setAttribute('role', 'heading');
         header.setAttribute('aria-controls', contentId);
         header.setAttribute('aria-expanded',
             section.hasAttribute('expanded').toString());
