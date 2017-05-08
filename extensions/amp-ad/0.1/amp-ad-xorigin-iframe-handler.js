@@ -107,10 +107,10 @@ export class AmpAdXOriginIframeHandler {
         this.iframe, MessageType.SEND_POSITIONS_HIGH_FIDELITY, true, () => {
           const ampdoc = this.baseInstance_.getAmpDoc();
           installPositionObserverServiceForDoc(ampdoc);
-          this.positionObserver_ = getServiceForDoc(ampdoc,
+          const positionObserver = getServiceForDoc(ampdoc,
               'position-observer');
 
-          this.positionObserver_.observe(
+          positionObserver.observe(
             this.iframe,
             PositionObserverFidelity.HIGH, pos => {
               this.positionObserverHighFidelityApi_.send(

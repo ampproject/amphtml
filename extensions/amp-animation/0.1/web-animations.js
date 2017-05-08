@@ -47,7 +47,7 @@ const TAG = 'amp-animation';
  *   timing: !WebAnimationTimingDef,
  * }}
  */
-let InternalWebAnimationRequestDef;
+export let InternalWebAnimationRequestDef;
 
 /**
  * @private
@@ -118,7 +118,6 @@ export class WebAnimationRunner {
       } else {
         player = request.target.animate(request.keyframes, request.timing);
       }
-      player.ticker = request.timing.ticker;
       return player;
     });
     this.runningCount_ = this.players_.length;
@@ -194,7 +193,7 @@ export class WebAnimationRunner {
    */
   scrollTick(pos) {
     this.players_.forEach(player => {
-      if (player.ticker == Tickers.SCROLL) {
+      if (player instanceof ScrollboundPlayer) {
         player.tick(pos);
       }
     });
@@ -210,7 +209,7 @@ export class WebAnimationRunner {
     });
 
     this.players_.forEach(player => {
-      if (player.ticker == Tickers.SCROLL) {
+      if (player instanceof ScrollboundPlayer) {
         player.onScrollDurationChanged();
       }
     });

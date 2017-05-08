@@ -308,7 +308,7 @@ export class AmpAnimation extends AMP.BaseElement {
       sceneElement = this.win.document.documentElement;
     }
 
-    this.scene_ = new ScrollboundScene(
+    new ScrollboundScene(
       this.getAmpDoc(),
       sceneElement,
       this.runner_.scrollTick.bind(this.runner_), /* onScroll */

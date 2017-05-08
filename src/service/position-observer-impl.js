@@ -59,7 +59,6 @@ class AbstractPositionObserver {
    * @param {!Element} element
    * @param {PositionObserverFidelity} fidelity
    * @param {function(PositionInViewportEntryDef)} handler
-   * @return {?Object}
    */
   observe(element, fidelity, handler) {
     // make entry into a class
@@ -100,7 +99,6 @@ class AbstractPositionObserver {
       this.startCallback();
     }
     this.updateEntryPosition_(entry);
-    return entry;
   }
 
   /**
@@ -260,7 +258,7 @@ export class AmpPagePositionObserver extends AbstractPositionObserver {
     const elementBox = layoutRectFromDomRect(
       entry.element/*OK*/.getBoundingClientRect()
     );
-    const win = this.ampdoc_.getWin();
+    const win = this.ampdoc_.win;
 
     let viewportWidth = win./*OK*/innerWidth;
     let viewportHeight = win./*OK*/innerHeight;
@@ -303,7 +301,7 @@ export class InaboxPositionObserver extends AbstractPositionObserver {
     // TODO(@zhouyx) Should context or at least sentinel be already available
     // on an AMP page that is in a box?
     const context = new AmpContext(ampdoc.win);
-    this.iframeClient_.setSentinel(context.sentinel);
+    this.iframeClient_.setSentinel(dev().assertString(context.sentinel));
   }
 
   /** @override */
@@ -389,7 +387,7 @@ export class InaboxPositionObserver extends AbstractPositionObserver {
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  */
 export function installPositionObserverServiceForDoc(ampdoc) {
-  dev().assert(isExperimentOn(this.win, 'amp-animation'),
+  dev().assert(isExperimentOn(ampdoc.win, 'amp-animation'),
      'PositionObserver is experimental and used by amp-animation only for now');
 
   registerServiceBuilderForDoc(ampdoc, 'position-observer', () => {

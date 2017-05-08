@@ -14,12 +14,21 @@
  * limitations under the License.
  */
 
-//TODO(aghassemi): Add interface def for Web Animation player object
+
 export class ScrollboundPlayer {
 
   constructor(request) {
+    // TODO(aghassemi): Use {Animation} as typedef but looks like it is missing
+    // currentTime in the extern.
+    /** @private {?Object} */
+    this.animation_ = null;
+
+    /** @private {!./web-animations.InternalWebAnimationRequestDef} */
     this.request_ = request;
+
+    /** @private {!boolean} */
     this.paused_ = false;
+
     // If no duration, wait until duration arrives via onScrollDurationChanged
     if (request.timing.duration == 0) {
       return;

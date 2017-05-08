@@ -23,11 +23,17 @@ import {getServiceForDoc} from '../../../src/service';
 export class ScrollboundScene {
 
   constructor(ampdoc, element, onScroll, onDurationChanged) {
+
+    /** @private {!Element} */
     this.element_ = element;
 
+    /** @private {?number} */
     this.scrollDuration_ = null;
 
+    /** @private {!function(!number)} */
     this.onScroll_ = onScroll;
+
+    /** @private {!Function} */
     this.onDurationChanged_ = onDurationChanged;
 
     installPositionObserverServiceForDoc(ampdoc);
