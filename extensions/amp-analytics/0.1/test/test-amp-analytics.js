@@ -212,7 +212,18 @@ describe('amp-analytics', function() {
             sandbox.stub(urlReplacements.getVariableSource(), 'get',
               function(name) {
                 expect(this.replacements_).to.have.property(name);
-                return {sync: '_' + name.toLowerCase() + '_'};
+
+                const defaultValue = `_${name.toLowerCase()}_`;
+                const extraMapping = VENDOR_REQUESTS[vendor][name];
+                return {
+                  sync: paramName => {
+                    if (!extraMapping ||
+                        extraMapping[paramName] === undefined) {
+                      return defaultValue;
+                    }
+                    return extraMapping[paramName];
+                  },
+                };
               });
             const variables = variableServiceFor(analytics.win);
             const encodeVars = variables.encodeVars;
