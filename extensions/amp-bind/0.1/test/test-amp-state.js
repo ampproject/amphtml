@@ -86,16 +86,18 @@ describes.realWin('AmpState', {
     ampState.build();
 
     // IMPORTANT: No parsing should happen until viewer is visible.
+    expect(fetchSpy).to.not.have.been.called;
     expect(batchedJsonStub).to.not.have.been.called;
     expect(updateStub).to.not.have.been.called;
 
     whenFirstVisiblePromiseResolve();
     return whenFirstVisiblePromise.then(() => {
+      expect(fetchSpy).calledWithExactly(/* isInit */true);
       expect(updateStub).calledWithMatch({foo: 'bar'});
     });
   });
 
-  it('should parse child and fetch `src` if both proided at build', () => {
+  it('should parse child and fetch `src` if both provided at build', () => {
     ampState.innerHTML = '<script type="application/json">' +
         '{"foo": "bar"}</script>';
     ampState.setAttribute('src', 'https://foo.com/bar?baz=1');
@@ -124,6 +126,7 @@ describes.realWin('AmpState', {
     const isVisibleStub = env.sandbox.stub(viewer, 'isVisible');
     isVisibleStub.returns(false);
     ampState.mutatedAttributesCallback({src: 'https://foo.com/bar?baz=1'});
+    expect(fetchSpy).to.not.have.been.called;
     expect(batchedJsonStub).to.not.have.been.called;
 
     isVisibleStub.returns(true);
