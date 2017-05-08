@@ -46,7 +46,7 @@ tags: {  # <amp-state> (json)
   }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-bind"
 }
-tags: {  # <amp-state>
+tags: {  # <amp-state> with json child
   html_format: AMP
   tag_name: "AMP-STATE"
   spec_name: "amp-state"
@@ -68,5 +68,36 @@ tags: {  # <amp-state>
   }
   # <amp-bind>
   attrs: { name: "[src]" }
+  child_tags: {
+    mandatory_num_child_tags: 1
+    first_child_tag_name_oneof: "SCRIPT"
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-bind"
+}
+tags: {  # <amp-state> with src only
+  html_format: AMP
+  tag_name: "AMP-STATE"
+  spec_name: "amp-state[src]"
+  requires: "amp-bind extension .js script"
+  disallowed_ancestor: "AMP-SIDEBAR"
+  attrs: {
+    name: "id"
+    mandatory: true
+  }
+  attrs: { name: "credentials" }
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  # <amp-bind>
+  attrs: { name: "[src]" }
+  child_tags: {
+    mandatory_num_child_tags: 0
+  }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-bind"
 }
