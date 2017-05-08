@@ -541,17 +541,12 @@ function prepareAndRegisterServiceForDocShadowMode(global, extensions,
  * modes.
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {string} name
- * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)=} opt_ctor
- * @param {function(!./service/ampdoc-impl.AmpDoc):!Object=} opt_factory
+ * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)} ctor
  */
-function registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory) {
+function registerServiceForDoc(ampdoc, name, ctor) {
   // TODO(kmh287): Investigate removing the opt_instantiate arg after
   // all other services have been refactored.
-  registerServiceBuilderForDoc(ampdoc,
-                               name,
-                               opt_ctor,
-                               opt_factory,
-                               /* opt_instantiate */ true);
+  registerServiceBuilderForDoc(ampdoc, name, ctor, /* opt_instantiate */ true);
 }
 
 

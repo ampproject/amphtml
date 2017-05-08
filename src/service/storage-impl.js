@@ -387,7 +387,6 @@ export function installStorageServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(
       ampdoc,
       'storage',
-      /* opt_ctor */ undefined,
       () => {
         const viewer = viewerForDoc(ampdoc);
         const overrideStorage = parseInt(viewer.getParam('storage'), 10);
