@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Keycodes} from '../../../../src/utils/keycodes';
 import {createIframePromise} from '../../../../testing/iframe';
 import '../amp-accordion';
 
@@ -47,12 +48,12 @@ describes.sandboxed('amp-accordion', {}, () => {
       const headerElements = iframe.doc.querySelectorAll(
           'section > *:first-child');
       const clickEvent = {
-        currentTarget: headerElements[0],
+        target: headerElements[0],
         preventDefault: sandbox.spy(),
       };
       expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.false;
       expect(headerElements[0].getAttribute('aria-expanded')).to.equal('false');
-      obj.ampAccordion.implementation_.onHeaderClick_(clickEvent);
+      obj.ampAccordion.implementation_.clickHandler_(clickEvent);
       expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.true;
       expect(headerElements[0].getAttribute('aria-expanded')).to.equal('true');
       expect(clickEvent.preventDefault.called).to.be.true;
@@ -64,15 +65,18 @@ describes.sandboxed('amp-accordion', {}, () => {
       const iframe = obj.iframe;
       const headerElements = iframe.doc.querySelectorAll(
           'section > *:first-child');
+      const header = headerElements[0];
+      const child = iframe.doc.createElement('div');
+      header.appendChild(child);
       const clickEvent = {
-        currentTarget: headerElements[0],
+        target: child,
         preventDefault: sandbox.spy(),
       };
-      expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.false;
-      expect(headerElements[0].getAttribute('aria-expanded')).to.equal('false');
-      obj.ampAccordion.implementation_.onHeaderClick_(clickEvent);
-      expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.true;
-      expect(headerElements[0].getAttribute('aria-expanded')).to.equal('true');
+      expect(header.parentNode.hasAttribute('expanded')).to.be.false;
+      expect(header.getAttribute('aria-expanded')).to.equal('false');
+      obj.ampAccordion.implementation_.clickHandler_(clickEvent);
+      expect(header.parentNode.hasAttribute('expanded')).to.be.true;
+      expect(header.getAttribute('aria-expanded')).to.equal('true');
       expect(clickEvent.preventDefault.called).to.be.true;
     });
   });
@@ -83,15 +87,77 @@ describes.sandboxed('amp-accordion', {}, () => {
       const headerElements = iframe.doc.querySelectorAll(
           'section > *:first-child');
       const clickEvent = {
-        currentTarget: headerElements[1],
+        target: headerElements[1],
         preventDefault: sandbox.spy(),
       };
       expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.true;
       expect(headerElements[1].getAttribute('aria-expanded')).to.equal('true');
-      obj.ampAccordion.implementation_.onHeaderClick_(clickEvent);
+      obj.ampAccordion.implementation_.clickHandler_(clickEvent);
       expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.false;
       expect(headerElements[1].getAttribute('aria-expanded')).to.equal('false');
       expect(clickEvent.preventDefault.called).to.be.true;
+    });
+  });
+
+  it('should expand when header of a collapsed section is ' +
+     'activated via keyboard', () => {
+    return getAmpAccordion().then(obj => {
+      const iframe = obj.iframe;
+      const headerElements = iframe.doc.querySelectorAll(
+          'section > *:first-child');
+      const keyDownEvent = {
+        keyCode: Keycodes.SPACE,
+        target: headerElements[0],
+        preventDefault: sandbox.spy(),
+      };
+      expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.false;
+      expect(headerElements[0].getAttribute('aria-expanded')).to.equal('false');
+      obj.ampAccordion.implementation_.keyDownHandler_(keyDownEvent);
+      expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.true;
+      expect(headerElements[0].getAttribute('aria-expanded')).to.equal('true');
+      expect(keyDownEvent.preventDefault.called).to.be.true;
+    });
+  });
+
+  it('should NOT expand section when header\'s child is ' +
+     'activated via keyboard', () => {
+    return getAmpAccordion().then(obj => {
+      const iframe = obj.iframe;
+      const headerElements = iframe.doc.querySelectorAll(
+          'section > *:first-child');
+      const child = iframe.doc.createElement('div');
+      headerElements[0].appendChild(child);
+      const keyDownEvent = {
+        keyCode: Keycodes.ENTER,
+        target: child,
+        preventDefault: sandbox.spy(),
+      };
+      expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.false;
+      expect(headerElements[0].getAttribute('aria-expanded')).to.equal('false');
+      obj.ampAccordion.implementation_.keyDownHandler_(keyDownEvent);
+      expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.false;
+      expect(headerElements[0].getAttribute('aria-expanded')).to.equal('false');
+      expect(keyDownEvent.preventDefault.called).to.be.false;
+    });
+  });
+
+  it('should collapse when header of an expanded section is ' +
+     'activated via keyboard', () => {
+    return getAmpAccordion().then(obj => {
+      const iframe = obj.iframe;
+      const headerElements = iframe.doc.querySelectorAll(
+          'section > *:first-child');
+      const keyDownEvent = {
+        keyCode: Keycodes.ENTER,
+        target: headerElements[1],
+        preventDefault: sandbox.spy(),
+      };
+      expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.true;
+      expect(headerElements[1].getAttribute('aria-expanded')).to.equal('true');
+      obj.ampAccordion.implementation_.keyDownHandler_(keyDownEvent);
+      expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.false;
+      expect(headerElements[1].getAttribute('aria-expanded')).to.equal('false');
+      expect(keyDownEvent.preventDefault.called).to.be.true;
     });
   });
 
@@ -107,25 +173,25 @@ describes.sandboxed('amp-accordion', {}, () => {
     });
   });
 
-  it('should set sessionStorage on click', () => {
+  it('should set sessionStorage on change in expansion', () => {
     return getAmpAccordion().then(obj => {
       const iframe = obj.iframe;
       const impl = obj.ampAccordion.implementation_;
       const headerElements = iframe.doc.querySelectorAll(
           'section > *:first-child');
       const clickEventExpandElement = {
-        currentTarget: headerElements[0],
+        target: headerElements[0],
         preventDefault: sandbox.spy(),
       };
       const clickEventCollapseElement = {
-        currentTarget: headerElements[1],
+        target: headerElements[1],
         preventDefault: sandbox.spy(),
       };
       expect(Object.keys(impl.currentState_)).to.have.length(0);
-      impl.onHeaderClick_(clickEventExpandElement);
+      impl.clickHandler_(clickEventExpandElement);
       expect(Object.keys(impl.currentState_)).to.have.length(1);
       expect(impl.currentState_['test0']).to.be.true;
-      impl.onHeaderClick_(clickEventCollapseElement);
+      impl.clickHandler_(clickEventCollapseElement);
       expect(Object.keys(impl.currentState_)).to.have.length(2);
       expect(impl.currentState_['test0']).to.be.true;
       expect(impl.currentState_['test1']).to.be.false;
@@ -190,10 +256,10 @@ describes.sandboxed('amp-accordion', {}, () => {
       const headerElements = iframe.doc.querySelectorAll(
           'section > *:first-child');
       const clickEventExpandElement = {
-        currentTarget: headerElements[0],
+        target: headerElements[0],
         preventDefault: sandbox.spy(),
       };
-      impl.onHeaderClick_(clickEventExpandElement);
+      impl.clickHandler_(clickEventExpandElement);
       expect(getSessionStateSpy).to.not.have.been.called;
       expect(setSessionStateSpy).to.not.have.been.called;
       expect(Object.keys(impl.currentState_)).to.have.length(1);
@@ -218,10 +284,10 @@ describes.sandboxed('amp-accordion', {}, () => {
         const headerElements1 = ampAccordion1.querySelectorAll(
           'section > *:first-child');
         const clickEventElement = {
-          currentTarget: headerElements1[0],
+          target: headerElements1[0],
           preventDefault: sandbox.spy(),
         };
-        ampAccordion1.implementation_.onHeaderClick_(clickEventElement);
+        ampAccordion1.implementation_.clickHandler_(clickEventElement);
         ampAccordion2.implementation_.buildCallback();
         const headerElements2 = ampAccordion2.querySelectorAll(
           'section > *:first-child');

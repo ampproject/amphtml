@@ -179,9 +179,18 @@ class AmpAccordion extends AMP.BaseElement {
    */
   clickHandler_(event) {
     const target = event.target;
-    if (this.headers_.includes(target)) {
+    // Need to support clicks on any children of the header.
+    let header;
+    for (let i = 0; i < this.headers_.length; i++) {
+      const curr = this.headers_[i];
+      if (curr.contains(event.target)) {
+        header = curr;
+        break;
+      }
+    }
+    if (header) {
+      header = dev().assertElement(header);
       event.preventDefault();
-      const header = dev().assertElement(target);
       this.onHeaderPicked_(header);
     }
   }
@@ -194,6 +203,8 @@ class AmpAccordion extends AMP.BaseElement {
     const target = event.target;
     const keyCode = event.keyCode;
     if (keyCode == Keycodes.ENTER || keyCode == Keycodes.SPACE) {
+      // TODO(kmh287): Should we also support activation of children of the
+      // header?
       if (this.headers_.includes(target)) {
         event.preventDefault();
         const header = dev().assertElement(target);
