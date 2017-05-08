@@ -28,7 +28,7 @@ before_install:
   - sudo dpkg -i google-chrome*.deb
 before_script:
   - pip install --user protobuf
-script: node build-system/pr-check.js
+script: travis_wait 20 node build-system/pr-check.js
 branches:
   only:
     - master
