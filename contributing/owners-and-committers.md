@@ -2,7 +2,7 @@
 
 Contributions to the AMP Project require approval from an [Owner](#owners) of the affected code/document/etc. in addition to a [Core Committer](#core-committers).
 
-This system allows us to maintain security and consistent application of the [design principles](./DESIGN_PRINCIPLES.md) while also allowing for a stronger sense of ownership by the people who are most familiar with a given part of the AMP Project.
+This system allows us to maintain security and consistent application of the [design principles](DESIGN_PRINCIPLES.md) while also allowing for a stronger sense of ownership by the people who are most familiar with a given part of the AMP Project.
 
 ## OWNERS
 
@@ -16,5 +16,5 @@ This system allows us to maintain security and consistent application of the [de
 ## Core Committers
 
 * In addition to approval from an Owner of affected code, each pull request requires review and approval from an AMP Project [Core Committer](../GOVERNANCE.md#list-of-core-committers).
-* These additional reviews primarily ensure the security of the project and ensure uniform application of the [design principles](./DESIGN_PRINCIPLES.md).
+* These additional reviews primarily ensure the security of the project and ensure uniform application of the [design principles](DESIGN_PRINCIPLES.md).
 * Note that it is possible for a person to be both a Core Committer and an Owner for code in a given PR in which case the approval from that reviewer will suffice unless that reviewer indicates otherwise.
