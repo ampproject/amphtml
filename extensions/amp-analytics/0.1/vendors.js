@@ -836,13 +836,13 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       '_host': 'https://engagement-collector.mobify.net',
       '_dimensions': [
         '%22platform%22%3a%22AMP%22',
-        '%22client_id%22%3a%22${clientId(sandy-client-id)}}%22',
+        '%22client_id%22%3a%22${clientId(sandy-client-id)}%22',
         '%22title%22%3a%22${title}%22',
         '%22location%22%3a%22${sourceUrl}%22',
-        '%22path%22%3a%22${sourcePath}%22',
+        '%22page%22%3a%22${sourcePath}%22',
         '%22src_location%22%3a%22${ampdocUrl}%22',
         '%22referrer%22%3a%22${documentReferrer}%22',
-        '%22templatename%22%3a%22${templateName}%22'
+        '%22templateName%22%3a%22${templateName}%22'
       ].join('%2c'),
       '_basePrefix': '${_host}/s.gif?' +
         'slug=${projectSlug}&' +
