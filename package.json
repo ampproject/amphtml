@@ -90,7 +90,7 @@
     "morgan": "1.7.0",
     "nodemon": "1.11.0",
     "path": "0.12.7",
-    "postcss": "5.2.10",
+    "postcss": "5.2.15",
     "postcss-import": "9.1.0",
     "pretty-bytes": "2.0.1",
     "request": "2.73.0",
