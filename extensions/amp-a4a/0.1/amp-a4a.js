@@ -57,7 +57,7 @@ import {A4AVariableSource} from './a4a-variable-source';
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {isInExperiment} from '../../../ads/google/a4a/traffic-experiments';
-import {getRefresherFor} from './refresher';
+import {getRefreshManagerFor} from './refresh-manager';
 
 /** @type {string} */
 const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
@@ -345,9 +345,9 @@ export class AmpA4A extends AMP.BaseElement {
     /**
      * Refresher module.
      *
-     * @const @private {!./refresher.Refresher}
+     * @const @private {!./refresh-manager.RefreshManager}
      */
-    this.refresher_ = getRefresherFor(this.win);
+    this.refresher_ = getRefreshManagerFor(this.win);
     this.refresher_.registerElement(this.element, () => {
       console.log('Eureka!');
     });
