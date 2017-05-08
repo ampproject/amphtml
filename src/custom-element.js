@@ -1831,6 +1831,8 @@ function assertNotTemplate(element) {
  * @return {!./service/vsync-impl.Vsync}
  */
 function getVsync(element) {
+  // TODO(dvoytenko, #9177): consider removing this and always resolving via
+  // `createCustomElementClass(win)` object.
   return vsyncFor(element.ownerDocument.defaultView);
 };
 
