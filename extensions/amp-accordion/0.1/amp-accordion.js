@@ -15,6 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-accordion-0.1.css';
+import {Keycodes} from '../../../src/utils/keycodes';
 import {Layout} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {removeFragment} from '../../../src/url';
@@ -26,13 +27,13 @@ class AmpAccordion extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?NodeList} */
-    this.sections_ = null;
+    /** @private {!Array<!Node>} */
+    this.headers_ = [];
 
     /** @private {?string} */
     this.sessionId_ = null;
 
-    /** @private {?Object} */
+    /** @private {?Object<string,boolean>} */
     this.currentState_ = null;
 
     /** @private {boolean} */
@@ -46,8 +47,6 @@ class AmpAccordion extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.sections_ = this.getRealChildren();
-
     this.sessionOptOut_ = this.element.hasAttribute('disable-session-states');
 
     this.element.setAttribute('role', 'tablist');
@@ -57,7 +56,8 @@ class AmpAccordion extends AMP.BaseElement {
     this.sessionId_ = this.getSessionStorageKey_();
     this.currentState_ = this.getSessionState_();
 
-    this.sections_.forEach((section, index) => {
+    const sections = this.getRealChildren();
+    sections.forEach((section, index) => {
       user().assert(
           section.tagName.toLowerCase() == 'section',
           'Sections should be enclosed in a <section> tag, ' +
@@ -69,30 +69,36 @@ class AmpAccordion extends AMP.BaseElement {
           'Each section must have exactly two children. ' +
           'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
           'amp-accordion/amp-accordion.md. Found in: %s', this.element);
-
       this.mutateElement(() => {
         const header = sectionComponents_[0];
-        const content = sectionComponents_[1];
         header.classList.add('i-amphtml-accordion-header');
-        header.setAttribute('role', 'tab');
+        header.setAttribute('role', 'button');
+        header.setAttribute('aria-controls', contentId);
+        header.setAttribute('aria-expanded',
+            section.hasAttribute('expanded').toString());
+        if (!header.hasAttribute('tabindex')) {
+          header.setAttribute('tabindex', 0);
+        }
+        this.headers_.push(header);
+
+        const content = sectionComponents_[1];
         content.classList.add('i-amphtml-accordion-content');
-        content.setAttribute('role', 'tabpanel');
         let contentId = content.getAttribute('id');
         if (!contentId) {
           contentId = this.element.id + '_AMP_content_' + index;
           content.setAttribute('id', contentId);
         }
+
         if (this.currentState_[contentId]) {
           section.setAttribute('expanded', '');
         } else if (this.currentState_[contentId] == false) {
           section.removeAttribute('expanded');
         }
-        header.setAttribute('aria-controls', contentId);
-        header.setAttribute('aria-expanded',
-            section.hasAttribute('expanded').toString());
-        header.addEventListener('click', this.onHeaderClick_.bind(this));
       });
     });
+
+    this.element.addEventListener('click', this.clickHandler_.bind(this));
+    this.element.addEventListener('keydown', this.keyDownHandler_.bind(this));
   }
 
   /**
@@ -145,17 +151,9 @@ class AmpAccordion extends AMP.BaseElement {
     }
   }
 
-  /**
-   * Handles accordion headers clicks to expand/collapse its content.
-   * @param {!Event} event Click event.
-   * @private
-   */
-  onHeaderClick_(event) {
-    event.preventDefault();
-    /** @const {!Element} */
-    const section = event.currentTarget.parentNode;
+  onHeaderPicked_(header) {
+    const section = header.parentNode;
     const sectionComponents_ = section.children;
-    const header = sectionComponents_[0];
     const content = sectionComponents_[1];
     const contentId = content.getAttribute('id');
     const isSectionClosedAfterClick = section.hasAttribute('expanded');
@@ -170,6 +168,33 @@ class AmpAccordion extends AMP.BaseElement {
     }, section);
     this.currentState_[contentId] = !isSectionClosedAfterClick;
     this.setSessionState_();
+  }
+
+  /**
+   * Handles accordion headers clicks to expand/collapse its content.
+   * @param {!Event} event Click event.
+   * @private
+   */
+  clickHandler_(event) {
+    debugger;
+    /** @const {!Element} */
+    const target = event.target;
+    if (this.headers_.includes(target)) {
+      event.preventDefault();
+      this.onHeaderPicked_(target);
+    }
+  }
+
+  keyDownHandler_(event) {
+    debugger;
+    const target = event.target;
+    const keyCode = event.keyCode;
+    if (keyCode == Keycodes.ENTER || keyCode == Keycodes.SPACE) {
+      if (this.headers_.includes(target)) {
+        event.preventDefault();
+        this.onHeaderPicked_(target);
+      }
+    }
   }
 }
 
