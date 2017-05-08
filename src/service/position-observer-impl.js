@@ -83,7 +83,7 @@ class AbstractPositionObserver {
           // Only call handler if entry element overlap with viewport.
           try {
             entry.handler(position);
-          } catch(err) {}
+          } catch (err) {}
         } else if (entry.position) {
           // Need to notify that element gets outside viewport
           // NOTE: This is required for inabox position observer.
@@ -200,7 +200,7 @@ export class AmpPagePositionObserver extends AbstractPositionObserver {
 
   /* @override */
   stopCallback() {
-    while(this.unlisteners_.length) {
+    while (this.unlisteners_.length) {
       const unlisten = this.unlisteners_.pop();
       unlisten();
     }
@@ -357,7 +357,7 @@ export class InaboxPositionObserver extends AbstractPositionObserver {
 
   /** @private */
   pass_() {
-    for(let i = 0; i < this.entries_.length; i++) {
+    for (let i = 0; i < this.entries_.length; i++) {
       const entry = this.entries_[i];
       this.updateEntryPosition_(entry);
     }
