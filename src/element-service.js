@@ -85,7 +85,6 @@ export function getElementServiceIfAvailable(win, id, providedByElement) {
  */
 function isElementScheduled(win, elementName) {
   // Set in custom-element.js
-  // TODO(@dvoytenko, #5454): Why hasn't this been created yet.
   if (!win.ampExtendedElements) {
     return false;
   }
