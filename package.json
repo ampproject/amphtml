@@ -56,7 +56,7 @@
     "gulp-git": "1.7.2",
     "gulp-help": "1.6.1",
     "gulp-if": "2.0.0",
-    "gulp-load-plugins": "1.2.0",
+    "gulp-load-plugins": "1.5.0",
     "gulp-rename": "1.2.2",
     "gulp-replace": "0.5.4",
     "gulp-sourcemaps": "1.5.2",
