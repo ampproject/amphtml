@@ -18,27 +18,17 @@ import {dev} from '../../../src/log';
 import {IntersectionObserverPolyfill} from '../../../src/intersection-observer-polyfill';
 import {timerFor} from '../../../src/services';
 
-/**
- * Returns the singleton instance of the RefreshManager from the window object,
- * or creates and returns one, if one has not yet been constructed.
- *
- * @param {!Window} win
- * @return {!RefreshManager}
- */
-export function getRefreshManagerFor(win) {
-  const nameInWindow = 'AMP_A4A_REFRESHER';
-  return win[nameInWindow] || (win[nameInWindow] = new RefreshManager(win));
-}
-
 const DEFAULT_MIN_ON_SCREEN_PIXEL_RATIO = 0.5;
 const DEFAULT_MIN_ON_SCREEN_TIME = 1000;  // In ms.
 const DEFAULT_REFRESH_INTERVAL = 30;  // In sec.
-const ELEMENT_REFERENCE_ATTRIBUTE = 'data-amp-a4a-refresh-id';
+const NAME_IN_WINDOW = 'AMP_A4A_REFRESHER';
+
+export const REFRESH_REFERENCE_ATTRIBUTE = 'data-amp-a4a-refresh-id';
 
 /** @typedef {{
- *   minOnScreenPixelRatioThreshold: number,
- *   minOnScreenTimeThreshold: number,
- *   refreshInterval: number,
+ *   ?minOnScreenPixelRatioThreshold: number,
+ *   ?minOnScreenTimeThreshold: number,
+ *   ?refreshInterval: number,
  * }} */
 export let RefreshConfig;
 
@@ -48,7 +38,6 @@ const DEFAULT_CONFIG = {
   minOnScreenTimeThreshold: DEFAULT_MIN_ON_SCREEN_TIME,
   refreshInterval: DEFAULT_REFRESH_INTERVAL,
 };
-
 
 /**
  * Defines the DFA states for the refresh cycle.
@@ -81,6 +70,24 @@ const RefreshLifecycleState = {
   REFRESHED: 'refreshed',
 };
 
+/**
+ * Returns the singleton instance of the RefreshManager from the window object,
+ * or creates and returns one, if one has not yet been constructed.
+ *
+ * @param {!Window} win
+ * @return {!RefreshManager}
+ */
+export function getRefreshManagerFor(win) {
+  return win[NAME_IN_WINDOW] ||
+      (win[NAME_IN_WINDOW] = new RefreshManager(win));
+}
+
+/** Visible for testing */
+export function resetRefreshManagerFor(win) {
+  getRefreshManagerFor(win).resetManager();
+  win[NAME_IN_WINDOW] = null;
+}
+
 export class RefreshManager {
 
   /**
@@ -108,9 +115,9 @@ export class RefreshManager {
      * monitored, indexed by a unique ID stored as data-amp-a4a-refresh-id on
      * the element.
      *
-     * @const @private {!Object<string, MonitoredElementWrapper>}
+     * @private {!Object<string, RegisteredElementWrapper>}
      */
-    this.monitoredElementWrappers_ = {};
+    this.registeredElementWrappers_ = {};
 
     /**
      * Used to distinguish elements in this.intersectionObservers_. This is
@@ -127,8 +134,10 @@ export class RefreshManager {
    * including the transitions of the DFA.
    */
   ioCallback_(entries) {
-    entries.forEach(entry => {
-      const wrapper = this.getElementWrapper_(entry.target);
+    const refreshManager = getRefreshManagerFor(window);
+    for (const idx in entries) {
+      const entry = entries[idx];
+      const wrapper = refreshManager.getElementWrapper_(entry.target);
       switch (wrapper.getRefreshLifecycleState()) {
         case RefreshLifecycleState.INITIAL:
           // First check if the element qualifies as "being on screen", i.e.,
@@ -141,10 +150,10 @@ export class RefreshManager {
               wrapper.getMinOnScreenPixelRatioThreshold()) {
             wrapper.setRefreshLifecycleState(
                 RefreshLifecycleState.VIEW_PENDING);
-            const visibilityTimeoutId = this.timer_.delay(() => {
+            const visibilityTimeoutId = refreshManager.timer_.delay(() => {
               wrapper.setRefreshLifecycleState(
                   RefreshLifecycleState.REFRESH_PENDING);
-              this.startRefreshTimer_(wrapper);
+              refreshManager.startRefreshTimer_(wrapper);
             }, wrapper.getMinOnScreenTimeThreshold());
             wrapper.setVisibilityTimeoutId(visibilityTimeoutId);
           }
@@ -154,7 +163,7 @@ export class RefreshManager {
           // duration elapses, place it back into INITIAL state.
           if (entry.intersectionRatio <
               wrapper.getMinOnScreenPixelRatioThreshold()) {
-            this.timer_.cancel(wrapper.getVisibilityTimeoutId());
+            refreshManager.timer_.cancel(wrapper.getVisibilityTimeoutId());
             wrapper.setRefreshLifecycleState(RefreshLifecycleState.INITIAL);
           }
           break;
@@ -163,7 +172,7 @@ export class RefreshManager {
         default:
           break;
       }
-    });
+    }
   }
 
   /**
@@ -178,20 +187,22 @@ export class RefreshManager {
    *     refresh interval.
    */
   registerElement(element, callback, config = DEFAULT_CONFIG) {
-    const uniqueId = `elementReference.${this.elementReferenceId_++}`;
-    this.monitoredElementWrappers_[uniqueId] = new MonitoredElementWrapper(
+    const uniqueId = this.elementReferenceId_++;
+    this.registeredElementWrappers_[uniqueId] = new RegisteredElementWrapper(
+        element,
         callback,
-        config.minOnScreenPixelRatioThreshold,
-        config.minOnScreenTimeThreshold,
-        config.refreshInterval);
-    element.setAttribute(ELEMENT_REFERENCE_ATTRIBUTE, uniqueId);
+        config.minOnScreenPixelRatioThreshold ||
+            DEFAULT_MIN_ON_SCREEN_PIXEL_RATIO,
+        config.minOnScreenTimeThreshold || DEFAULT_MIN_ON_SCREEN_TIME,
+        config.refreshInterval || DEFAULT_REFRESH_INTERVAL);
+    element.setAttribute(REFRESH_REFERENCE_ATTRIBUTE, uniqueId);
     this.intersectionObserver_.observe(element);
   }
 
   /**
    * Starts the refresh timer for the given monitored element.
    *
-   * @param {!MonitoredElementWrapper} elementWrapper
+   * @param {!RegisteredElementWrapper} elementWrapper
    */
   startRefreshTimer_(elementWrapper) {
     this.timer_.delay(() => {
@@ -204,9 +215,9 @@ export class RefreshManager {
    * @param {!Element} element The element whose wrapper is to be returned.
    */
   getElementWrapper_(element) {
-    const id = element.getAttribute(ELEMENT_REFERENCE_ATTRIBUTE);
+    const id = element.getAttribute(REFRESH_REFERENCE_ATTRIBUTE);
     dev().assert(id);
-    const wrapper = this.monitoredElementWrappers_[id];
+    const wrapper = this.registeredElementWrappers_[id];
     dev().assert(wrapper);
     return wrapper;
   }
@@ -217,11 +228,28 @@ export class RefreshManager {
    *
    * @param {!Element} element
    */
-  reset(element) {
+  resetElement(element) {
     const wrapper = this.getElementWrapper_(element);
     this.timer_.cancel(wrapper.getRefreshTimeoutId());
     this.timer_.cancel(wrapper.getVisibilityTimeoutId());
     wrapper.reset();
+  }
+
+  /**
+   * Resets the entire RefreshManager to initial conditions. This entails
+   * resetting each registered element, and removing it from the refresh cycle
+   * completely.
+   */
+  resetManager() {
+    for (const id in this.registeredElementWrappers_) {
+      const wrapper = this.registeredElementWrappers_[id];
+      const element = wrapper.getElement();
+      this.resetElement(element);
+      element.removeAttribute(REFRESH_REFERENCE_ATTRIBUTE);
+      this.intersectionObserver_.unobserve(element);
+    }
+    this.registeredElementWrappers_ = {};
+    this.elementReferenceId_ = 0;
   }
 
   /**
@@ -242,9 +270,10 @@ export class RefreshManager {
   }
 }
 
-class MonitoredElementWrapper {
+class RegisteredElementWrapper {
 
   /**
+   * @param {!Element} element The element to be wrapped.
    * @param {!function()} callback The function to be invoked when the element
    *     is ready to be refreshed.
    * @param {number} minOnScreenPixelRatioThreshold The ratio of pixels of the
@@ -257,10 +286,18 @@ class MonitoredElementWrapper {
    *     invoking the callback function.
    */
   constructor(
+      element,
       callback,
       minOnScreenPixelRatioThreshold,
       minOnScreenTimeThreshold,
       refreshInterval) {
+
+    /**
+     * The wrapped element.
+     *
+     * @private @const {!Element}
+     */
+    this.element_ = element;
 
     /**
      * The function that will be invoked when the refreshInterval has expired.
@@ -331,6 +368,11 @@ class MonitoredElementWrapper {
     this.state_ = RefreshLifecycleState.INITIAL;
     this.refreshTimeoutId_ = null;
     this.visibilityTimeoutId_ = null;
+  }
+
+  /** @return {!Element} */
+  getElement() {
+    return this.element_;
   }
 
   /**
