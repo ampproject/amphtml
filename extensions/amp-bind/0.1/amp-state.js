@@ -137,7 +137,7 @@ export class AmpState extends AMP.BaseElement {
 
   /**
    * Wrapper to stub during testing.
-   * @param {!../../../service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!Element} element
    * @return {!Promise}
    * @visibleForTesting

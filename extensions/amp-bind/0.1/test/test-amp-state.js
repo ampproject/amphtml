@@ -24,7 +24,6 @@ describes.realWin('AmpState', {
   },
 }, env => {
   let ampState;
-  let fetchStub;
   let updateStub;
 
   // Viewer-related vars.
