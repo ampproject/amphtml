@@ -229,7 +229,7 @@ export class Bind {
     // Check default values against initial expression results in development.
     if (getMode().development) {
       // Check default values against initial expression results.
-      promise = promise.then(() => 
+      promise = promise.then(() =>
         this.evaluate_().then(results => this.verify_(results))
       );
     }
