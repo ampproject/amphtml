@@ -99,7 +99,7 @@ class AbstractPositionObserver {
           try {
             entry.handler(position);
           } catch (err) {
-            // TODO(@zhouyx) Throw error. QQQ dev or user?
+            // TODO(@zhouyx, #9208) Throw error. QQQ dev or user?
           }
         } else if (entry.position) {
           // Need to notify that element gets outside viewport
@@ -227,12 +227,8 @@ export class AmpDocPositionObserver extends AbstractPositionObserver {
 
   /** @param {boolean=} recursive */
   schedulePass_(recursive) {
-    // TODO:
+    // TODO (@zhouyx, #9208):
     // P1: account for effective fidelity using this.effectiveFidelity
-    // P1[done]: use every vsyn measure() for HIGH
-    // P2[done]: use every 1 in 3 vsyn measure() for LOW
-    // P1[done]: only do this while user is scrolling.
-    // P1: also do passes for onResize,
     // P2: do passes on onDomMutation (if available using MutationObserver)
     if (!recursive && this.measure_) {
       // call of schedulePass_ from viewport onScroll
@@ -305,7 +301,7 @@ export class InaboxPositionObserver extends AbstractPositionObserver {
     /** @private {!AmpDocPositionObserver} */
     this.positionObserver_ = new AmpDocPositionObserver(ampdoc);
 
-    // TODO(@zhouyx) support fidelity
+    // TODO(@zhouyx, #9208) support fidelity
     this.effectiveFidelity_ = PositionObserverFidelity.LOW;
 
     /** @private {?PositionInViewportEntryDef} */
@@ -338,7 +334,7 @@ export class InaboxPositionObserver extends AbstractPositionObserver {
 
   /** @override */
   startCallback() {
-    // TODO(@zhouyx) need to add support for AMP host
+    // TODO(@zhouyx, #9208) need to add support for AMP host
     this.unlistenHost_ = this.iframeClient_.makeRequest(
         MessageType.SEND_POSITIONS_HIGH_FIDELITY,
         MessageType.POSITION_HIGH_FIDELITY,
