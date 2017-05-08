@@ -180,16 +180,3 @@ export function areMarginsChanged(margins, change) {
       (change.bottom !== undefined && change.bottom != margins.bottom) ||
       (change.left !== undefined && change.left != margins.left);
 }
-
-/**
- * @param {!LayoutRectDef} r1
- * @param {!LayoutRectDef} r2
- * @return {boolean}
- */
-export function layoutRectEquals(r1, r2) {
-  if (!r1 || !r2) {
-    return false;
-  }
-  return r1.left == r2.left && r1.top == r2.top &&
-      r1.width == r2.width && r1.height == r2.height;
-}
