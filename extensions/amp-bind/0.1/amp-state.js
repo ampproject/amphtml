@@ -84,7 +84,7 @@ export class AmpState extends AMP.BaseElement {
     }
     const src = mutations['src'];
     if (src !== undefined) {
-      this.fetchSrcAndUpdateState_(/* isInit */ false);
+      const p = this.fetchSrcAndUpdateState_(/* isInit */ false);
       if (getMode().test) {
         this.updateStatePromise = p;
       }
