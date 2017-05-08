@@ -21,7 +21,7 @@ import {writeScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function polymorphicads(global, data) {
-  validateData(data, ['adunit', 'params']);
+  validateData(data, ['adUnitId', 'params']);
   global.polyParam = data;
   writeScript(global, 'https://www.polymorphicads.jp/js/amp.js');
 }
