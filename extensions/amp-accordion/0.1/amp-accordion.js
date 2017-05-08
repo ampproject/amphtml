@@ -20,6 +20,7 @@ import {Layout} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {removeFragment} from '../../../src/url';
 import {map} from '../../../src/utils/object';
+import {tryFocus} from '../../../src/dom';
 
 class AmpAccordion extends AMP.BaseElement {
 
@@ -176,7 +177,6 @@ class AmpAccordion extends AMP.BaseElement {
    * @private
    */
   clickHandler_(event) {
-    const target = event.target;
     // Need to support clicks on any children of the header.
     let header;
     for (let i = 0; i < this.headers_.length; i++) {
@@ -198,18 +198,56 @@ class AmpAccordion extends AMP.BaseElement {
    * @param {!Event} event keydown event.
    */
   keyDownHandler_(event) {
-    const target = event.target;
     const keyCode = event.keyCode;
-    if (keyCode == Keycodes.ENTER || keyCode == Keycodes.SPACE) {
-      // TODO(kmh287): Should we also support activation of children of the
-      // header?
-      if (this.headers_.includes(target)) {
-        event.preventDefault();
-        const header = dev().assertElement(target);
-        this.onHeaderPicked_(header);
-      }
+    switch (keyCode) {
+      case Keycodes.UP_ARROW: /* fallthrough */
+      case Keycodes.DOWN_ARROW:
+        this.navigationKeyDownHandler_(event);
+        return;
+      case Keycodes.ENTER: /* fallthrough */
+      case Keycodes.SPACE:
+        this.activationKeyDownHandler_(event);
+        return;
     }
   }
+
+  /**
+   * Handles keyboard navigation events.
+   * @param {!Event} event
+   * @private
+   */
+  navigationKeyDownHandler_(event) {
+    const target = event.target;
+    const index = this.headers_.indexOf(target);
+    if (index !== -1) {
+      // Up and down are the same regardless of locale direction.
+      const diff = event.keyCode == Keycodes.UP_ARROW ? -1 : 1;
+      // If user navigates one past the beginning or end, wrap around.
+      let newFocusIndex = (index + diff) % this.headers_.length;
+      if (newFocusIndex < 0) {
+        newFocusIndex = newFocusIndex + this.headers_.length;
+      }
+      const newFocusHeader = this.headers_[newFocusIndex];
+      tryFocus(newFocusHeader);
+    }
+  }
+
+  /**
+   * Handles keyboard navigation events.
+   * @param {!Event} event
+   * @private
+   */
+  activationKeyDownHandler_(event) {
+    const target = event.target;
+    // TODO(kmh287): Should we also support activation of children of the
+    // header?
+    if (this.headers_.includes(target)) {
+      event.preventDefault();
+      const header = dev().assertElement(target);
+      this.onHeaderPicked_(header);
+    }
+  }
+
 }
 
 AMP.registerElement('amp-accordion', AmpAccordion, CSS);
