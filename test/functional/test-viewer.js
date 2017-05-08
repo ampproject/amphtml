@@ -238,14 +238,14 @@ describe('Viewer', () => {
     }
 
     it('should replace URL for the same non-proxy origin', () => {
-      const fragment = '#replaceUrl=http://www.example.com/two&b=1';
+      const fragment = '#replaceUrl=http://www.example.com/two%3Fa%3D1&b=1';
       setUrl('http://www.example.com/one' + fragment);
       new Viewer(ampdoc);
       expect(windowApi.history.replaceState).to.be.calledOnce;
       expect(windowApi.history.replaceState).to.be.calledWith({}, '',
-          'http://www.example.com/two' + fragment);
+          'http://www.example.com/two?a=1' + fragment);
       expect(ampdoc.getUrl())
-          .to.equal('http://www.example.com/two' + fragment);
+          .to.equal('http://www.example.com/two?a=1' + fragment);
       expect(windowApi.location.originalHref)
           .to.equal('http://www.example.com/one' + fragment);
     });
