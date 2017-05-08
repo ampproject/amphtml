@@ -92,7 +92,7 @@ describes.realWin('AmpState', {
 
     whenFirstVisiblePromiseResolve();
     return whenFirstVisiblePromise.then(() => {
-      expect(fetchSpy).calledWithExactly(/* isInit */true);
+      expect(fetchSpy).to.not.have.been.called;
       expect(updateStub).calledWithMatch({foo: 'bar'});
     });
   });

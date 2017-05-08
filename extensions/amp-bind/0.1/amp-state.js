@@ -106,6 +106,9 @@ export class AmpState extends AMP.BaseElement {
     // If both `src` and child script tag are provided,
     // state fetched from `src` takes precedence.
     const children = this.element.children;
+    if (children.length == 0 && !this.element.hasAttribute('src')) {
+      user().error(TAG, 'Needs either a <script> child or src attribute');
+    }
     if (children.length == 1) {
       this.parseChildAndUpdateState_();
     } else if (children.length > 1) {
@@ -117,6 +120,7 @@ export class AmpState extends AMP.BaseElement {
         this.updateStatePromise = p;
       }
     }
+
   }
 
   /**
