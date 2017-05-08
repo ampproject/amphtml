@@ -25,6 +25,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {installWebAnimations} from 'web-animations-js/web-animations.install';
 import {listen} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
+import {toArray} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
 import {user} from '../../../src/log';
 import {viewerForDoc} from '../../../src/services';
@@ -246,6 +247,7 @@ export class AmpAnimation extends AMP.BaseElement {
     return readyPromise.then(() => {
       const measurer = new MeasureScanner(this.win, {
         resolveTarget: this.resolveTarget_.bind(this),
+        queryTargets: this.queryTargets_.bind(this),
       }, /* validate */ true);
       return vsync.measurePromise(() => {
         measurer.scan(configJson);
@@ -255,15 +257,36 @@ export class AmpAnimation extends AMP.BaseElement {
   }
 
   /**
+   * @return {!Document|!ShadowRoot}
+   * @private
+   */
+  getRootNode_() {
+    return this.embed_ ?
+        this.embed_.win.document :
+        this.getAmpDoc().getRootNode();
+  }
+
+  /**
    * @param {string} id
    * @return {?Element}
    * @private
+   * TODO(dvoytenko, #9129): cleanup deprecated string targets.
    */
   resolveTarget_(id) {
-    if (this.embed_) {
-      return this.embed_.win.document.getElementById(id);
+    return this.getRootNode_().getElementById(id);
+  }
+
+  /**
+   * @param {string} selector
+   * @return {!Array<!Element>}
+   * @private
+   */
+  queryTargets_(selector) {
+    try {
+      return toArray(this.getRootNode_().querySelectorAll(selector));
+    } catch (e) {
+      throw user().createError('Invalid selector: ', selector);
     }
-    return this.getAmpDoc().getElementById(id);
   }
 
   /** @private */
