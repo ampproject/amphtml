@@ -70,17 +70,6 @@ class AmpAccordion extends AMP.BaseElement {
           'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
           'amp-accordion/amp-accordion.md. Found in: %s', this.element);
       this.mutateElement(() => {
-        const header = sectionComponents_[0];
-        header.classList.add('i-amphtml-accordion-header');
-        header.setAttribute('role', 'button');
-        header.setAttribute('aria-controls', contentId);
-        header.setAttribute('aria-expanded',
-            section.hasAttribute('expanded').toString());
-        if (!header.hasAttribute('tabindex')) {
-          header.setAttribute('tabindex', 0);
-        }
-        this.headers_.push(header);
-
         const content = sectionComponents_[1];
         content.classList.add('i-amphtml-accordion-content');
         let contentId = content.getAttribute('id');
@@ -94,6 +83,14 @@ class AmpAccordion extends AMP.BaseElement {
         } else if (this.currentState_[contentId] == false) {
           section.removeAttribute('expanded');
         }
+
+        const header = sectionComponents_[0];
+        header.classList.add('i-amphtml-accordion-header');
+        header.setAttribute('role', 'button');
+        header.setAttribute('aria-controls', contentId);
+        header.setAttribute('aria-expanded',
+            section.hasAttribute('expanded').toString());
+        this.headers_.push(header);
       });
     });
 
@@ -151,8 +148,13 @@ class AmpAccordion extends AMP.BaseElement {
     }
   }
 
+  /**
+   * Handles user action on an accordion header, agnostic of input method.
+   * @param {!Element} header
+   * @private
+   */
   onHeaderPicked_(header) {
-    const section = header.parentNode;
+    const section = header.parentElement;
     const sectionComponents_ = section.children;
     const content = sectionComponents_[1];
     const contentId = content.getAttribute('id');
@@ -176,23 +178,26 @@ class AmpAccordion extends AMP.BaseElement {
    * @private
    */
   clickHandler_(event) {
-    debugger;
-    /** @const {!Element} */
     const target = event.target;
     if (this.headers_.includes(target)) {
       event.preventDefault();
-      this.onHeaderPicked_(target);
+      const header = dev().assertElement(target);
+      this.onHeaderPicked_(header);
     }
   }
 
+  /**
+   * Handles accordion key presses ot expand/collapse its content.
+   * @param {!Event} event keydown event.
+   */
   keyDownHandler_(event) {
-    debugger;
     const target = event.target;
     const keyCode = event.keyCode;
     if (keyCode == Keycodes.ENTER || keyCode == Keycodes.SPACE) {
       if (this.headers_.includes(target)) {
         event.preventDefault();
-        this.onHeaderPicked_(target);
+        const header = dev().assertElement(target);
+        this.onHeaderPicked_(header);
       }
     }
   }
