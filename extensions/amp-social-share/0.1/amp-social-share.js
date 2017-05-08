@@ -99,7 +99,7 @@ class AmpSocialShare extends AMP.BaseElement {
 
     this.element.setAttribute('role', 'button');
     this.element.addEventListener('click', () => this.handleClick_());
-    this.element.addEventListener('keydown', this.handleKeyDown_.bind(this));
+    this.element.addEventListener('keydown', this.handleKeyPress_.bind(this));
     this.element.classList.add(`amp-social-share-${typeAttr}`);
   }
 
@@ -108,9 +108,10 @@ class AmpSocialShare extends AMP.BaseElement {
    * @param {!Event} event
    * @private
    */
-  handleKeyDown_(event) {
-    let keyCode = event.keyCode;
+  handleKeyPress_(event) {
+    const keyCode = event.keyCode;
     if (keyCode == Keycodes.SPACE || keyCode == Keycodes.ENTER) {
+      event.preventDefault();
       this.handleActivation_();
     }
   }
