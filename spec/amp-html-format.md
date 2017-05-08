@@ -295,7 +295,7 @@ Authors may include stylesheets for custom fonts. The 2 supported methods are li
 Example:
 
 ```html
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tangerine">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tangerine" type="text/css">
 ```
 
 Font providers can be whitelisted if they support CSS-only integrations and serve over HTTPS. The following origins are currently allowed for font serving via link tags:
