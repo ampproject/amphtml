@@ -16,6 +16,7 @@
 
 import {Keycodes} from '../../../../src/utils/keycodes';
 import {createIframePromise} from '../../../../testing/iframe';
+import {tryFocus} from '../../../../src/dom';
 import '../amp-accordion';
 
 
@@ -28,7 +29,7 @@ describes.sandboxed('amp-accordion', {}, () => {
       ampAccordion.implementation_.mutateElement = fn => fn();
       for (let i = 0; i < 3; i++) {
         const section = iframe.doc.createElement('section');
-        section.innerHTML = '<h2>Section ' + i +
+        section.innerHTML = '<h2 tabindex="0">Section ' + i +
             '<span>nested stuff<span></h2><div id=\'test' + i +
             '\'>Loreum ipsum</div>';
         ampAccordion.appendChild(section);
@@ -158,6 +159,32 @@ describes.sandboxed('amp-accordion', {}, () => {
       expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.false;
       expect(headerElements[1].getAttribute('aria-expanded')).to.equal('false');
       expect(keyDownEvent.preventDefault.called).to.be.true;
+    });
+  });
+
+  it('should be navigable by up and down arrow keys when ' +
+     'any header has focus', () => {
+    return getAmpAccordion().then(obj => {
+      const iframe = obj.iframe;
+      const headerElements = iframe.doc.querySelectorAll(
+          'section > *:first-child');
+      // Focus the first header,
+      tryFocus(headerElements[0]);
+      const upArrowEvent = {
+        keyCode: Keycodes.UP_ARROW,
+        target: headerElements[0],
+        preventDefault: sandbox.spy(),
+      };
+      obj.ampAccordion.implementation_.keyDownHandler_(upArrowEvent);
+      expect(iframe.doc.activeElement)
+          .to.equal(headerElements[headerElements.length - 1]);
+      const downArrowEvent = {
+        keyCode: Keycodes.DOWN_ARROW,
+        target: headerElements[headerElements.length - 1],
+        preventDefault: sandbox.spy(),
+      };
+      obj.ampAccordion.implementation_.keyDownHandler_(downArrowEvent);
+      expect(iframe.doc.activeElement).to.equal(headerElements[0]);
     });
   });
 
