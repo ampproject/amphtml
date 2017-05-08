@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {AmpContext} from '../../3p/ampcontext';
 import {registerServiceBuilderForDoc} from '../service';
 import {viewportForDoc, vsyncFor} from '../services';
 import {getMode} from '../mode';
@@ -318,11 +317,8 @@ export class InaboxPositionObserver extends AbstractPositionObserver {
     /** @private {!IframeMessagingClient} */
     this.iframeClient_ = new IframeMessagingClient(ampdoc.win);
 
-    // TODO(@zhouyx): AmpContext is in experiment. Make sure use it correctly
-    // May need to create way to expose generated sentinel from inabox ampdoc.
-    const context = new AmpContext(ampdoc.win);
-    if (context.sentinel) {
-      this.iframeClient_.setSentinel(context.sentinel);
+    if (ampdoc.win.context.sentinel) {
+      this.iframeClient_.setSentinel(ampdoc.win.context.sentinel);
     }
   }
 
