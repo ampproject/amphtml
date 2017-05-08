@@ -52,6 +52,7 @@ tags: {  # <amp-state>
   spec_name: "amp-state"
   satisfies: "amp-state"
   requires: "amp-bind extension .js script"
+  requires: "amp-bind extension .json script"
   disallowed_ancestor: "AMP-SIDEBAR"
   attrs: { name: "credentials" }
   attrs: {
