@@ -361,6 +361,81 @@ The `show-all-on-submit` reporting option shows all validation errors on all inv
 #### As You Go
 The `as-you-go` reporting option allows your user to see validation messages as they're interacting with the input. For example, if the user types an invalid email address, the user will see the error right away.  Once they correct the value, the error goes away.
 
+## Verification
+
+You can give the user feedback that HTML5 validation alone cannot. For example, a form can use `amp-form` verification to check if an email address has already been registered. Another use-case is verifying that a City field and a Zip code field match each other.
+
+Here's an example:
+```html
+<h4>Verification example</h4>
+<form
+  method="post"
+  action-xhr="/form/verify-json/post"
+  target="_blank"
+>
+    <script type="application/json">
+    {
+      "verificationGroups": [
+        {
+          "name": "uniqueEmail",
+          "elements": ["email"]
+        },
+        {
+          "name": "fullAddress",
+          "elements": ["addressLine2", "city", "zip"]
+        },
+      ]
+    }
+    </script>
+    <fieldset>
+        <label>
+            <span>Email</span>
+            <input type="text" name="email" required>
+        </label>
+        <label>
+            <span>Zip Code</span>
+            <input type="tel" name="zip" required pattern="[0-9]{5}(-[0-9]{4})?">
+        </label>
+        <label>
+            <span>City</span>
+            <input type="text" name="city" required>
+        </label>
+        <div class="spinner"></div>
+        <input type="submit" value="Submit">
+    </fieldset>
+    <div submit-success>
+        <template type="amp-mustache">
+            <p>Congratulations! You are registered with {{email}}</p>
+        </template>
+    </div>
+    <div submit-error>
+        <template type="amp-mustache">
+            {{#verifyErrors}}
+                <p>{{message}}</p>
+            {{/verifyErrors}}
+            {{^verifyErrors}}
+                <p>Something went wrong. Try again later?</p>
+            {{/verifyErrors}}
+        </template>
+    </div>
+</form>
+
+The form sends a `__amp_form_verify` field as part of the form data to let the server know the request is a verify request and not a formal submit.
+
+```
+
+Here is how an error response should look for verification:
+```json
+{
+  "verifyErrors": [
+    {"name": "email", "message": "That email is already taken."},
+    {"name": "zip", "message": "The city and zip do not match."}
+  ]
+}
+```
+For more examples, see [examples/forms.amp.html](../../examples/forms.amp.html).
+
+
 ## Variable Substitutions
 `amp-form` allows [platform variable substitutions](../../spec/amp-var-substitutions.md) for inputs that are hidden and that have the `data-amp-replace` attribute. On each form submission, `amp-form` finds all `input[type=hidden][data-amp-replace]` inside the form and applies variable substitutions to its `value` attribute and replaces it with the result of the substitution.
 
