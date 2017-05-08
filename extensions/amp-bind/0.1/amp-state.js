@@ -87,36 +87,44 @@ export class AmpState extends AMP.BaseElement {
 
     // Fetch JSON from endpoint at `src` attribute if it exists,
     // otherwise parse child script tag.
+    // If both `src` and child script tag are provided,
+    // state fetched from `src` takes precedence.
+    const children = this.element.children;
+    if (children.length == 1) {
+      this.parseChildAndUpdateState_();
+    } else if (children.length > 1) {
+      user().error(TAG, 'Should contain only one <script> child.');
+    }
     if (this.element.hasAttribute('src')) {
       this.fetchSrcAndUpdateState_(/* isInit */ true);
-      if (this.element.children.length > 0) {
-        user().error(TAG, 'Should not have children if src attribute exists.');
-      }
+    }
+  }
+
+  /**
+   * @private
+   */
+  parseChildAndUpdateState_() {
+    const TAG = this.getName_();
+    const children = this.element.children;
+    const firstChild = children[0];
+    if (isJsonScriptTag(firstChild)) {
+      const json = tryParseJson(firstChild.textContent, e => {
+        user().error(TAG, 'Failed to parse state. Is it valid JSON?', e);
+      });
+      this.updateState_(json, /* isInit */ true);
     } else {
-      const children = this.element.children;
-      if (children.length == 1) {
-        const firstChild = children[0];
-        if (isJsonScriptTag(firstChild)) {
-          const json = tryParseJson(firstChild.textContent, e => {
-            user().error(TAG, 'Failed to parse state. Is it valid JSON?', e);
-          });
-          this.updateState_(json, /* isInit */ true);
-        } else {
-          user().error(TAG,
-              'State should be in a <script> tag with type="application/json"');
-        }
-      } else if (children.length > 1) {
-        user().error(TAG, 'Should contain only one <script> child.');
-      }
+      user().error(TAG,
+          'State should be in a <script> tag with type="application/json"');
     }
   }
 
   /**
    * @param {boolean} isInit
+   * @return {!Promise}
    * @private
    */
   fetchSrcAndUpdateState_(isInit) {
-    fetchBatchedJsonFor(this.getAmpDoc(), this.element).then(json => {
+    return fetchBatchedJsonFor(this.getAmpDoc(), this.element).then(json => {
       this.updateState_(json, isInit);
     });
   }

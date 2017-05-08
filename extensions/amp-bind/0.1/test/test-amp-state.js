@@ -89,6 +89,15 @@ describes.realWin('AmpState', {
     });
   });
 
+  it('should parse child and fetch `src` if both proided at build', () => {
+    ampState.innerHTML = '<script type="application/json">' +
+        '{"foo": "bar"}</script>';
+    ampState.setAttribute('src', 'https://foo.com/bar?baz=1');
+    ampState.implementation_.buildCallback();
+    expect(updateStub).calledWithMatch({foo: 'bar'});
+    expect(fetchStub).calledWith(/* opt_isInit */ true);
+  });
+
   it('should fetch json if `src` is mutated', () => {
     ampState.setAttribute('src', 'https://foo.com/bar?baz=1');
     ampState.build();
