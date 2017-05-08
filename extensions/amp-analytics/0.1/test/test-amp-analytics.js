@@ -213,16 +213,16 @@ describe('amp-analytics', function() {
               function(name) {
                 expect(this.replacements_).to.have.property(name);
 
-                let defaultValue = `_${name.toLowerCase()}_`;
-                let extraMapping = VENDOR_REQUESTS[vendor][name];
+                const defaultValue = `_${name.toLowerCase()}_`;
+                const extraMapping = VENDOR_REQUESTS[vendor][name];
                 return {
-                  sync: (paramName) => {
+                  sync: paramName => {
                     if (!extraMapping ||
                         extraMapping[paramName] === undefined) {
                       return defaultValue;
                     }
                     return extraMapping[paramName];
-                  }
+                  },
                 };
               });
             const variables = variableServiceFor(analytics.win);
