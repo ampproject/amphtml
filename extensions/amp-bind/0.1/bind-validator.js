@@ -233,6 +233,13 @@ function createElementRules_() {
         'alternativeName': 'src',
       },
     },
+    'AMP-LIST': {
+      'src': {
+        'allowedProtocols': {
+          'https': true,
+        },
+      },
+    },
     'AMP-SELECTOR': {
       'selected': null,
     },

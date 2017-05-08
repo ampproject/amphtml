@@ -313,10 +313,7 @@ export class MeasureScanner extends Scanner {
     const promises = [];
     for (let i = 0; i < this.targets_.length; i++) {
       const element = this.targets_[i];
-      if (element.classList.contains('i-amphtml-element')) {
-        const resource = resources.getResourceForElement(element);
-        promises.push(resource.loadedOnce());
-      }
+      promises.push(resources.requireLayout(element));
     }
     return Promise.all(promises);
   }
@@ -454,7 +451,7 @@ export class MeasureScanner extends Scanner {
             this.context_.resolveTarget(targetSpec) :
             targetSpec,
         `Target not found: "${targetSpec}"`);
-    if (this.targets_.indexOf(target) == -1) {
+    if (!this.targets_.includes(target)) {
       this.targets_.push(target);
     }
     return target;

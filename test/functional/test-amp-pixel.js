@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {installUrlReplacementsForEmbed,}
-    from '../../src/service/url-replacements-impl';
+import {
+  installUrlReplacementsForEmbed,
+} from '../../src/service/url-replacements-impl';
 import {VariableSource} from '../../src/service/variable-source';
-
 
 describes.realWin('amp-pixel', {amp: true}, env => {
   let win;
@@ -32,13 +32,19 @@ describes.realWin('amp-pixel', {amp: true}, env => {
       whenFirstVisibleResolver = resolve;
     });
     sandbox.stub(viewer, 'whenFirstVisible', () => whenFirstVisiblePromise);
+    createPixel('https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');
+  });
+
+  function createPixel(src, referrerPolicy) {
     pixel = win.document.createElement('amp-pixel');
-    pixel.setAttribute('src',
-        'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');
+    pixel.setAttribute('src', src);
+    if (referrerPolicy) {
+      pixel.setAttribute('referrerpolicy', referrerPolicy);
+    }
     win.document.body.appendChild(pixel);
     pixel.build();
     implementation = pixel.implementation_;
-  });
+  }
 
   /**
    * @param {string=} opt_src
@@ -115,6 +121,15 @@ describes.realWin('amp-pixel', {amp: true}, env => {
       expect(img.src).to.equal(
           'https://pubads.g.doubleclick.net/activity;r=111');
     });
+  });
+
+  it('should throw for referrerpolicy with value other than ' +
+      'no-referrer', () => {
+    expect(() => {
+      createPixel(
+          'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?',
+          'origin');
+    }).to.throw(/referrerpolicy/);
   });
 });
 

@@ -411,6 +411,7 @@ describes.realWin('Events', {amp: 1}, env => {
     let eventResolver, eventPromise;
     let saveCallback;
     let matchEmptySpec;
+    let matchFunc;
 
     beforeEach(() => {
       tracker = new VisibilityTracker(root);
@@ -428,6 +429,15 @@ describes.realWin('Events', {amp: 1}, env => {
 
       matchEmptySpec = sinon.match(arg => {
         return Object.keys(arg).length == 0;
+      });
+      matchFunc = sinon.match(arg => {
+        if (typeof arg == 'function') {
+          const promise = arg();
+          if (typeof promise.then == 'function') {
+            return true;
+          }
+        }
+        return false;
       });
       saveCallback = sinon.match(arg => {
         if (typeof arg == 'function') {
@@ -455,6 +465,7 @@ describes.realWin('Events', {amp: 1}, env => {
           .withExactArgs(
               matchEmptySpec,
               /* readyPromise */ null,
+              /* createReadyReportPromiseFunc */ null,
               saveCallback)
           .returns(unlisten)
           .once();
@@ -482,6 +493,7 @@ describes.realWin('Events', {amp: 1}, env => {
           .withExactArgs(
               matchEmptySpec,
               readyPromise,
+              null,
               saveCallback)
           .returns(unlisten)
           .once();
@@ -510,6 +522,7 @@ describes.realWin('Events', {amp: 1}, env => {
           .withExactArgs(
               config.visibilitySpec,
               readyPromise,
+              /* createReadyReportPromiseFunc */ null,
               saveCallback)
           .returns(unlisten)
           .once();
@@ -540,6 +553,7 @@ describes.realWin('Events', {amp: 1}, env => {
               target,
               config.visibilitySpec,
               readyPromise,
+              /* createReadyReportPromiseFunc */ null,
               saveCallback)
           .returns(unlisten)
           .once();
@@ -580,6 +594,7 @@ describes.realWin('Events', {amp: 1}, env => {
               target,
               matchEmptySpec,
               readyPromise,
+              /* createReadyReportPromiseFunc */ null,
               saveCallback)
           .returns(unlisten)
           .once();
@@ -589,6 +604,30 @@ describes.realWin('Events', {amp: 1}, env => {
         return eventPromise.then(event => {
           expect(event.vars.totalVisibleTime).to.equal(10);
           expect(event.vars.foo).to.equal('bar');
+        });
+      });
+    });
+
+    it('should pass func to get reportReady with "hidden" trigger', () => {
+      const config = {visibilitySpec: {selector: '.target', waitFor: 'none'}};
+      visibilityManagerMock
+        .expects('listenElement')
+        .withExactArgs(
+            target,
+            config.visibilitySpec,
+            /* readyPromise */ null,
+            /* createReadyReportPromiseFunc */ matchFunc,
+            saveCallback)
+        .returns(null)
+        .once();
+      tracker.add(analyticsElement, 'hidden-v3', config, eventResolver);
+      // NOTE: createReadyReportPromiseFunc is
+      // fully tested in test-visibility-manager
+      return root.ampdoc.whenReady().then(() => {
+        saveCallback.callback({totalVisibleTime: 10});
+        return eventPromise.then(event => {
+          expect(event.vars.totalVisibleTime).to.equal(10);
+          expect(event.type).to.equal('hidden-v3');
         });
       });
     });
@@ -675,6 +714,20 @@ describes.realWin('Events', {amp: 1}, env => {
                 tracker.getReadyPromise('render-start', selector, target);
             return promise2;
           });
+        });
+      });
+    });
+
+    describe('should create correct readyReportPromise', () => {
+      it('with viewer hidden', () => {
+        const stub = sandbox.stub(tracker.root, 'getViewer', () => {
+          return {
+            isVisible: () => {return false;},
+          };
+        });
+        const promise = tracker.createReportReadyPromise_();
+        return promise.then(() => {
+          expect(stub).to.be.calledOnce;
         });
       });
     });

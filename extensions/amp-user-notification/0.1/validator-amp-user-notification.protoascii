@@ -34,7 +34,7 @@ tags: {  # <amp-user-notification>
   requires: "amp-analytics extension .js script"
   requires: "amp-user-notification extension .js script"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-user-notification"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-user-notification"
   amp_layout: {
     supported_layouts: NODISPLAY
   }

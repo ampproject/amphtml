@@ -19,7 +19,7 @@ import {findIndex} from '../utils/array';
 import {map} from '../utils/object';
 import {documentStateFor} from './document-state';
 import {registerServiceBuilderForDoc} from '../service';
-import {dev} from '../log';
+import {dev, duplicateErrorIfNecessary} from '../log';
 import {isIframed} from '../dom';
 import {
   parseQueryString,
@@ -934,6 +934,7 @@ function parseParams_(str, allParams) {
  */
 function getChannelError(opt_reason) {
   if (opt_reason instanceof Error) {
+    opt_reason = duplicateErrorIfNecessary(opt_reason);
     opt_reason.message = 'No messaging channel: ' + opt_reason.message;
     return opt_reason;
   }
@@ -955,7 +956,9 @@ export function setViewerVisibilityState(viewer, state) {
  * @param {!Object<string, string>=} opt_initParams
  */
 export function installViewerServiceForDoc(ampdoc, opt_initParams) {
-  registerServiceBuilderForDoc(ampdoc, 'viewer', () => {
-    return new Viewer(ampdoc, opt_initParams);
-  });
+  registerServiceBuilderForDoc(ampdoc,
+      'viewer',
+      /* opt_ctor */ undefined,
+      () => new Viewer(ampdoc, opt_initParams),
+      /* opt_instantiate */ true);
 }

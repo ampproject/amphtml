@@ -42,6 +42,7 @@ import {endsWith} from '../src/string';
 import {parseUrl, getSourceUrl, isProxyOrigin} from '../src/url';
 import {dev, initLogConstructor, setReportError, user} from '../src/log';
 import {getMode} from '../src/mode';
+import {startsWith} from '../src/string.js';
 
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
@@ -95,6 +96,7 @@ import {eplanning} from '../ads/eplanning';
 import {f1e} from '../ads/f1e';
 import {felmat} from '../ads/felmat';
 import {flite} from '../ads/flite';
+import {fluct} from '../ads/fluct';
 import {fusion} from '../ads/fusion';
 import {genieessp} from '../ads/genieessp';
 import {gmossp} from '../ads/gmossp';
@@ -248,6 +250,7 @@ register('f1e', f1e);
 register('facebook', facebook);
 register('felmat', felmat);
 register('flite', flite);
+register('fluct', fluct);
 register('fusion', fusion);
 register('genieessp', genieessp);
 register('github', github);
@@ -741,7 +744,7 @@ export function parseFragment(fragment) {
     // Some browser, notably Firefox produce an encoded version of the fragment
     // while most don't. Since we know how the string should start, this is easy
     // to detect.
-    if (json.indexOf('{%22') == 0) {
+    if (startsWith(json, '{%22')) {
       json = decodeURIComponent(json);
     }
     return /** @type {!JSONType} */ (json ? JSON.parse(json) : {});

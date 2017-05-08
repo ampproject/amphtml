@@ -15,7 +15,6 @@
  */
 
 import {createIframePromise} from '../../../../testing/iframe';
-import {toggleExperiment} from '../../../../src/experiments';
 import '../amp-accordion';
 
 
@@ -185,7 +184,6 @@ describes.sandboxed('amp-accordion', {}, () => {
         getSessionStateSpy();
       };
 
-      toggleExperiment(iframe.win, 'amp-accordion-session-state-optout', true);
       ampAccordion.setAttribute('disable-session-states', null);
       impl.buildCallback();
       expect(Object.keys(impl.currentState_)).to.have.length(0);

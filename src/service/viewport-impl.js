@@ -585,9 +585,10 @@ export class Viewport {
    * @param {!Element} element
    * @param {boolean=} opt_forceTransfer If set to true , then the element needs
    *    to be forcefully transferred to the fixed layer.
+   * @return {!Promise}
    */
   addToFixedLayer(element, opt_forceTransfer) {
-    this.fixedLayer_.addElement(element, opt_forceTransfer);
+    return this.fixedLayer_.addElement(element, opt_forceTransfer);
   }
 
   /**
@@ -1538,6 +1539,13 @@ export class ViewportBindingIosEmbedWrapper_ {
     this.setupDone_ = false;
     waitForBody(this.win.document, this.setup_.bind(this));
 
+    // Set overscroll (`-webkit-overflow-scrolling: touch`) later to avoid
+    // iOS rendering bugs. See #8798 for details.
+    whenDocumentReady(this.win.document).then(() => {
+      this.win.document.documentElement.classList.add(
+          'i-amphtml-ios-overscroll');
+    });
+
     dev().fine(TAG_, 'initialized ios-embed-wrapper viewport');
   }
 
@@ -1886,7 +1894,8 @@ function getViewportType(win, viewer) {
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  */
 export function installViewportServiceForDoc(ampdoc) {
-  registerServiceBuilderForDoc(ampdoc, 'viewport', ampdoc => {
-    return createViewport(ampdoc);
-  });
+  registerServiceBuilderForDoc(ampdoc, 'viewport',
+      /* constructor */ undefined,
+      ampdoc => createViewport(ampdoc),
+      /* instantiate */ true);
 }

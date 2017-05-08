@@ -15,6 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
+import {Keycodes} from '../../../src/utils/keycodes';
 import {closestByTag, tryFocus} from '../../../src/dom';
 import {Layout} from '../../../src/layout';
 import {dev} from '../../../src/log';
@@ -112,7 +113,7 @@ export class AmpSidebar extends AMP.BaseElement {
 
     this.documentElement_.addEventListener('keydown', event => {
       // Close sidebar on ESC.
-      if (event.keyCode == 27) {
+      if (event.keyCode == Keycodes.ESCAPE) {
         this.close_();
       }
     });
@@ -203,8 +204,6 @@ export class AmpSidebar extends AMP.BaseElement {
       this.vsync_.mutate(() => {
         this.element.setAttribute('open', '');
         this.element.setAttribute('aria-hidden', 'false');
-        // Focus on the sidebar for a11y.
-        tryFocus(this.element);
         if (this.openOrCloseTimeOut_) {
           this.timer_.cancel(this.openOrCloseTimeOut_);
         }
@@ -212,6 +211,8 @@ export class AmpSidebar extends AMP.BaseElement {
           const children = this.getRealChildren();
           this.scheduleLayout(children);
           this.scheduleResume(children);
+          // Focus on the sidebar for a11y.
+          tryFocus(this.element);
         }, ANIMATION_TIMEOUT);
       });
     });

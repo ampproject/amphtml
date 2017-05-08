@@ -223,6 +223,10 @@ export class AmpLiveList extends AMP.BaseElement {
         this.itemsSlot_, true);
 
     this.registerAction('update', this.updateAction_.bind(this));
+
+    if (!this.element.hasAttribute('aria-live')) {
+      this.element.setAttribute('aria-live', 'polite');
+    }
   }
 
   /** @override */
@@ -375,13 +379,27 @@ export class AmpLiveList extends AMP.BaseElement {
    */
   insert_(parent, orphans) {
     let count = 0;
-    /** @const {!DocumentFragment} */
-    const fragment = this.win.document.createDocumentFragment();
-    orphans.forEach(elem => {
-      fragment.insertBefore(elem, fragment.firstElementChild);
-      count++;
+
+    orphans.forEach(orphan => {
+      if (this.itemsSlot_.childElementCount == 0) {
+        this.itemsSlot_.appendChild(orphan);
+      } else {
+        const orphanSortTime = this.getSortTime_(orphan);
+        for (let child = this.itemsSlot_.firstElementChild; child;
+            child = child.nextElementSibling) {
+          const childSortTime = this.getSortTime_(child);
+          if (orphanSortTime >= childSortTime) {
+            this.itemsSlot_.insertBefore(orphan, child);
+            count++;
+            break;
+          // We've exhausted the children list and the current orphan
+          // can be the last item.
+          } else if (!child.nextElementSibling) {
+            this.itemsSlot_.appendChild(orphan);
+          }
+        }
+      }
     });
-    parent.insertBefore(fragment, parent.firstElementChild);
     return count;
   }
 

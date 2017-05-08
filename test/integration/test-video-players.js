@@ -49,6 +49,14 @@ describe.configure().skipIos().run('amp-youtube', () => {
   });
 });
 
+describe.configure().skipIos().run('amp-3q-player', () => {
+  runVideoPlayerIntegrationTests(fixture => {
+    const video = fixture.doc.createElement('amp-3q-player');
+    video.setAttribute('data-id', 'c8dbe7f4-7f7f-11e6-a407-0cc47a188158');
+    return video;
+  });
+});
+
 //TODO(aghassemi,#8264): Unskip when integration is fixed.
 describe.skip('amp-nexxtv-player', () => {
   runVideoPlayerIntegrationTests(fixture => {

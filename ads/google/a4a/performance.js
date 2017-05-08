@@ -21,6 +21,8 @@ import {serializeQueryString} from '../../../src/url';
 import {getTimingDataSync} from '../../../src/service/variable-source';
 import {urlReplacementsForDoc} from '../../../src/services';
 import {viewerForDoc} from '../../../src/services';
+import {CommonSignals} from '../../../src/common-signals';
+import {analyticsForDoc} from '../../../src/analytics';
 
 /**
  * This module provides a fairly crude form of performance monitoring (or
@@ -49,6 +51,13 @@ export class BaseLifecycleReporter {
      */
     this.extraVariables_ = new Object(null);
   }
+
+  /**
+   * To be overridden.
+   *
+   * @param {!Element} unusedElement Amp ad element we are measuring.
+   */
+  addPingsForVisibility(unusedElement) {}
 
   /**
    * A beacon function that will be called at various stages of the lifecycle.
@@ -247,19 +256,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
    * @visibleForTesting
    */
   emitPing_(url) {
-    const pingElement = this.element_.ownerDocument.createElement('img');
-    pingElement.setAttribute('src', url);
-    // Styling is copied directly from amp-pixel's CSS.  This is a kludgy way
-    // to do this -- much better would be to invoke amp-pixel's styling directly
-    // or to add an additional style selector for these ping pixels.
-    // However, given that this is a short-term performance system, I'd rather
-    // not tamper with AMP-wide CSS just to create styling for this
-    // element.
-    pingElement.setAttribute('style',
-        'position:fixed!important;top:0!important;width:1px!important;' +
-        'height:1px!important;overflow:hidden!important;visibility:hidden');
-    pingElement.setAttribute('aria-hidden', 'true');
-    this.element_.parentNode.insertBefore(pingElement, this.element_);
+    new Image().src = url;
     dev().info('PING', url);
   }
 
@@ -269,5 +266,56 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
    */
   getInitTime() {
     return this.initTime_;
+  }
+
+  /**
+   * Adds CSI pings for various visibility measurements on element.
+   *
+   * @param {!Element} element Amp ad element we are measuring.
+   * @override
+   */
+  addPingsForVisibility(element) {
+    analyticsForDoc(element, true).then(analytics => {
+      const signals = element.signals();
+      const readyPromise = Promise.race([
+        signals.whenSignal(CommonSignals.INI_LOAD),
+        signals.whenSignal(CommonSignals.LOAD_END),
+      ]);
+      const vis = analytics.getAnalyticsRoot(element).getVisibilityManager();
+      // Can be any promise or `null`.
+      // Element must be an AMP element at this time.
+      // 50% vis w/o ini load
+      vis.listenElement(element, {visiblePercentageMin: 50}, null, null,
+                        () => {
+                          this.sendPing('visHalf');
+                        });
+      // 50% vis w ini load
+      vis.listenElement(element,
+                        {visiblePercentageMin: 50},
+                        readyPromise, null,
+                        () => {
+                          this.sendPing('visHalfIniLoad');
+                        });
+      // first visible
+      vis.listenElement(element, {visiblePercentageMin: 1}, null, null,
+                        () => {
+                          this.sendPing('firstVisible');
+                        });
+      // ini-load
+      vis.listenElement(element, {waitFor: 'ini-load'},
+                        readyPromise, null,
+                        () => {
+                          this.sendPing('iniLoad');
+                        });
+
+      // 50% vis, ini-load and 1 sec
+      vis.listenElement(element,
+                        {visiblePercentageMin: 1, waitFor: 'ini-load',
+                         totalTimeMin: 1000},
+                        readyPromise, null,
+                        () => {
+                          this.sendPing('visLoadAndOneSec');
+                        });
+    });
   }
 }

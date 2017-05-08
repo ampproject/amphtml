@@ -837,7 +837,7 @@ class ChildTagMatcher {
     this.numChildTagsSeen_++;  // Increment this first to allow early exit.
     if (childTags.childTagNameOneof.length > 0) {
       const names = childTags.childTagNameOneof;
-      if (names.indexOf(tagName) === -1) {
+      if (!names.includes(tagName)) {
         if (!amp.validator.LIGHT) {
           const allowedNames = '[\'' + names.join('\', \'') + '\']';
           context.addError(
@@ -859,7 +859,7 @@ class ChildTagMatcher {
     if (childTags.firstChildTagNameOneof.length > 0 &&
         (this.numChildTagsSeen_ - 1) === 0) {
       const names = childTags.firstChildTagNameOneof;
-      if (names.indexOf(tagName) === -1) {
+      if (!names.includes(tagName)) {
         if (!amp.validator.LIGHT) {
           const allowedNames = '[\'' + names.join('\', \'') + '\']';
           context.addError(
@@ -2806,7 +2806,7 @@ function validateLayout(parsedTagSpec, context, attrsByKey, result) {
   }
 
   // Does the tag support the computed layout?
-  if (spec.ampLayout.supportedLayouts.indexOf(layout) === -1) {
+  if (!spec.ampLayout.supportedLayouts.includes(layout)) {
     if (amp.validator.LIGHT) {
       result.status = amp.validator.ValidationResult.Status.FAIL;
     } else {
@@ -3026,12 +3026,21 @@ function validateAttributeInExtension(
 
   const extensionSpec = tagSpec.extensionSpec;
   // TagSpecs with extensions will only be evaluated if their dispatch_key
-  // matches, which is based on this custom-element/custom-template field.
+  // matches, which is based on this custom-element/custom-template field
+  // attribute value. The dispatch key matching is case-insensitive for
+  // faster lookups, so it still possible for the attribute value to not
+  // match if it contains upper-case letters.
   if (!extensionSpec.isCustomTemplate && attrName === 'custom-element') {
-    goog.asserts.assert(extensionSpec.name === attrValue);
+    if (extensionSpec.name !== attrValue) {
+      goog.asserts.assert(extensionSpec.name === attrValue.toLowerCase());
+      return false;
+    }
     return true;
   } else if (extensionSpec.isCustomTemplate && attrName === 'custom-template') {
-    goog.asserts.assert(extensionSpec.name === attrValue);
+    if (extensionSpec.name !== attrValue) {
+      goog.asserts.assert(extensionSpec.name === attrValue.toLowerCase());
+      return false;
+    }
     return true;
   } else if (attrName === 'src') {
     const srcUrlRe =
@@ -3287,7 +3296,7 @@ function validateAttributes(
   // The "at least 1" part of mandatory_oneof: If none of the
   // alternatives were present, we report that an attribute is missing.
   for (const mandatoryOneof of parsedTagSpec.getMandatoryOneofs()) {
-    if (mandatoryOneofsSeen.indexOf(mandatoryOneof) === -1) {
+    if (!mandatoryOneofsSeen.includes(mandatoryOneof)) {
       if (amp.validator.LIGHT) {
         result.status = amp.validator.ValidationResult.Status.FAIL;
         return;
@@ -3973,7 +3982,7 @@ class ParsedValidatorRules {
         continue;
       }
       const alternative = tagSpec.mandatoryAlternatives;
-      if (satisfied.indexOf(alternative) === -1) {
+      if (!satisfied.includes(alternative)) {
         if (amp.validator.LIGHT) {
           validationResult.status = amp.validator.ValidationResult.Status.FAIL;
           return;

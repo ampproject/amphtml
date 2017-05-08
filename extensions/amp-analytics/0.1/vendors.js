@@ -538,20 +538,21 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
   },
 
   // Important: please keep this in sync with the following config
-  // 'googleanalytics-v2'.
+  // 'googleanalytics-alpha'.
   'googleanalytics': {
     'vars': {
       'eventValue': '0',
       'documentLocation': 'SOURCE_URL',
       'clientId': 'CLIENT_ID(AMP_ECID_GOOGLE)',
       'dataSource': 'AMP',
+      'anonymizeIP': 'aip',
     },
     'requests': {
       'host': 'https://www.google-analytics.com',
       'basePrefix': 'v=1&' +
           '_v=a1&' +
           'ds=${dataSource}&' +
-          'aip=true&' +
+          '${anonymizeIP}&' +
           '_s=${requestCount}&' +
           'dt=${title}&' +
           'sr=${screenWidth}x${screenHeight}&' +
@@ -615,24 +616,24 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     'optout': '_gaUserPrefs.ioo',
   },
 
-  // CAUTION: DO NOT USE THIS NOW!
-  // 'googleanalytics-v2' is an exact copy of 'googleanalytics'
-  // except that it uses a different cookie name for CLIENT_ID
-  // We're in the middle of cookie migration, waiting for corresponding changes
-  // at GA side. #5761
-  'googleanalytics-v2': {
+  // USE WITH CAUTION (unless told by Google Analytics representatives)
+  // googleanalytics-alpha configuration is not planned to be supported
+  // long-term. Avoid use of this value for amp-analytics config attribute
+  // unless you plan to migrate before deprecation' #5761
+  'googleanalytics-alpha': {
     'vars': {
       'eventValue': '0',
       'documentLocation': 'SOURCE_URL',
       'clientId': 'CLIENT_ID(_ga)',
       'dataSource': 'AMP',
+      'anonymizeIP': 'aip',
     },
     'requests': {
       'host': 'https://www.google-analytics.com',
       'basePrefix': 'v=1&' +
       '_v=a1&' +
       'ds=${dataSource}&' +
-      'aip=true&' +
+      '${anonymizeIP}&' +
       '_s=${requestCount}&' +
       'dt=${title}&' +
       'sr=${screenWidth}x${screenHeight}&' +
@@ -1313,8 +1314,8 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
   },
   'ibeatanalytics': {
     'requests': {
-      'host': 'https://ibeats.indiatimes.com',
-      'base': 'https://ibeats.indiatimes.com/iBeat/pageTrendlogAmp.html',
+      'host': 'https://ibeat.indiatimes.com',
+      'base': 'https://ibeat.indiatimes.com/iBeat/pageTrendlogAmp.html',
       'pageview': '${base}?' +
                 '&h=${h}' +
                 '&d=${h}' +

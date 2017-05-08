@@ -68,6 +68,12 @@ export class VisibilityModel {
     /** @private {boolean} */
     this.ready_ = true;
 
+    /** @private {boolean} */
+    this.reportReady_ = true;
+
+    /** @private {?function():!Promise} */
+    this.createReportReadyPromise_ = null;
+
     /** @private {?number} */
     this.scheduledRunId_ = null;
 
@@ -154,6 +160,16 @@ export class VisibilityModel {
   }
 
   /**
+   * Sets that the model needs to wait on extra report ready promise
+   * after all visibility conditions have been met to call report handler
+   * @param {!function():!Promise} callback
+   */
+  setReportReady(callback) {
+    this.reportReady_ = false;
+    this.createReportReadyPromise_ = callback;
+  }
+
+  /**
    * @return {number}
    * @private
    */
@@ -207,8 +223,20 @@ export class VisibilityModel {
         clearTimeout(this.scheduledRunId_);
         this.scheduledRunId_ = null;
       }
-      this.eventResolver_();
-      this.eventResolver_ = null;
+      if (this.reportReady_) {
+        this.eventResolver_();
+        this.eventResolver_ = null;
+      } else if (this.createReportReadyPromise_) {
+        // Report when report ready promise resolve
+        const reportReadyPromise = this.createReportReadyPromise_();
+        this.createReportReadyPromise_ = null;
+        reportReadyPromise.then(() => {
+          this.reportReady_ = true;
+          // Need to update one more time in case time exceeds
+          // maxContinuousVisibleTime.
+          this.update();
+        });
+      }
     } else if (this.matchesVisibility_ && !this.scheduledRunId_) {
       // There is unmet duration condition, schedule a check
       const timeToWait = this.computeTimeToWait_();
@@ -230,6 +258,8 @@ export class VisibilityModel {
    * @private
    */
   updateCounters_(visibility) {
+    dev().assert(visibility >= 0 && visibility <= 1,
+        'invalid visibility value: %s', visibility);
     const now = Date.now();
 
     if (visibility > 0) {

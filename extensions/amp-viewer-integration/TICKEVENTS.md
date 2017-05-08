@@ -16,7 +16,7 @@ limitations under the License.
 
 ### Tick Events
 
-When implementing a viewer one can use the tick events for performance tracking. 
+When implementing a viewer one can use the tick events for performance tracking.
 
 We use very short string names as tick labels, so the table below
 further describes these labels.
@@ -32,3 +32,4 @@ As an example if we executed `perf.tick('label')` we assume we have a counterpar
 | Prerender Complete  | `pc`              | The runtime completes prerending a single document. |
 | Make Body Visible | `mbv` | Make Body Visible Executes. |
 | On First Visible | `ofv` | The first time the page has been turned visible. |
+| First paint time | `fp` | The time on the first non-blank paint of the page. |

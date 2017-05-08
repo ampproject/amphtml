@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Keycodes} from '../utils/keycodes';
 import {dev, user} from '../log';
 import {
   registerServiceBuilderForDoc,
@@ -176,7 +177,18 @@ export class ActionService {
       // fast-click.
       this.root_.addEventListener('click', event => {
         if (!event.defaultPrevented) {
-          this.trigger(dev().assertElement(event.target), 'tap', event);
+          this.trigger(dev().assertElement(event.target), name, event);
+        }
+      });
+      this.root_.addEventListener('keydown', event => {
+        const keyCode = event.keyCode;
+        if (keyCode == Keycodes.ENTER || keyCode == Keycodes.SPACE) {
+          const element = dev().assertElement(event.target);
+          if (!event.defaultPrevented &&
+              element.getAttribute('role') == 'button') {
+            event.preventDefault();
+            this.trigger(element, name, event);
+          }
         }
       });
     } else if (name == 'submit') {
@@ -197,25 +209,33 @@ export class ActionService {
    * @param {!Event} event A `change` event.
    */
   addChangeDetails_(event) {
-    const detail = {};
+    const detail = map();
     const target = event.target;
-    if (event.target.tagName.toLowerCase() === 'input') {
-      const inputType = target.getAttribute('type');
-      const fieldsToInclude = WHITELISTED_INPUT_DATA_[inputType];
-      if (fieldsToInclude) {
-        Object.keys(fieldsToInclude).forEach(field => {
-          const expectedType = fieldsToInclude[field];
-          const value = target[field];
-          if (expectedType === 'number') {
-            detail[field] = Number(value);
-          } else if (expectedType === 'boolean') {
-            detail[field] = !!value;
-          } else {
-            detail[field] = String(value);
-          }
-        });
-        event.detail = detail;
-      }
+    const tagName = target.tagName.toLowerCase();
+    switch (tagName) {
+      case 'input':
+        const inputType = target.getAttribute('type');
+        const fieldsToInclude = WHITELISTED_INPUT_DATA_[inputType];
+        if (fieldsToInclude) {
+          Object.keys(fieldsToInclude).forEach(field => {
+            const expectedType = fieldsToInclude[field];
+            const value = target[field];
+            if (expectedType === 'number') {
+              detail[field] = Number(value);
+            } else if (expectedType === 'boolean') {
+              detail[field] = !!value;
+            } else {
+              detail[field] = String(value);
+            }
+          });
+        }
+        break;
+      case 'select':
+        detail.value = target.value;
+        break;
+    }
+    if (Object.keys(detail).length > 0) {
+      event.detail = detail;
     }
   }
 
@@ -690,10 +710,10 @@ function assertActionForParser(s, context, condition, opt_message) {
 function assertTokenForParser(s, context, tok, types, opt_value) {
   if (opt_value !== undefined) {
     assertActionForParser(s, context,
-        types.indexOf(tok.type) >= 0 && tok.value == opt_value,
+        types.includes(tok.type) && tok.value == opt_value,
         `; expected [${opt_value}]`);
   } else {
-    assertActionForParser(s, context, types.indexOf(tok.type) >= 0);
+    assertActionForParser(s, context, types.includes(tok.type));
   }
   return tok;
 }
@@ -780,7 +800,7 @@ class ParserTokenizer {
     if (WHITESPACE_SET.indexOf(c) != -1) {
       newIndex++;
       for (; newIndex < this.str_.length; newIndex++) {
-        if (WHITESPACE_SET.indexOf(this.str_.charAt(newIndex)) == -1) {
+        if (!WHITESPACE_SET.includes(this.str_.charAt(newIndex))) {
           break;
         }
       }

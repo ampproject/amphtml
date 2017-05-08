@@ -189,12 +189,17 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
     });
 
     it('handleMessage_ should resolve', () => {
+      const data = {
+        time: 12345678,
+        id: 'abcdefg',
+      };
+
       const event = {
         source: window,
         origin: viewerOrigin,
         data: {
           app: '__AMPHTML__',
-          data: null,
+          data: JSON.stringify(data),
           name: 'messageName',
           requestid: 1,
           rsvp: true,
@@ -213,6 +218,36 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
       messaging.handleMessage_(event);
 
       expect(resolveSpy).to.have.been.calledOnce;
+      expect(resolveSpy).to.have.been.calledWith(JSON.stringify(data));
+    });
+
+    it('handleMessage_ should resolve with correct data', () => {
+      const data = 12345;
+
+      const event = {
+        source: window,
+        origin: viewerOrigin,
+        data: {
+          app: '__AMPHTML__',
+          data,
+          name: 'messageName',
+          requestid: 1,
+          rsvp: true,
+          type: 's',
+        },
+      };
+
+      const resolveSpy = sandbox.stub();
+      const rejectSpy = sandbox.stub();
+      const waitingForResponse = {'1': {
+        resolve: resolveSpy,
+        reject: rejectSpy,
+      }};
+
+      sandbox.stub(messaging, 'waitingForResponse_', waitingForResponse);
+      messaging.handleMessage_(event);
+
+      expect(resolveSpy).to.have.been.calledWith(data);
     });
 
     it('handleMessage_ should reject', () => {

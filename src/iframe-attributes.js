@@ -24,7 +24,7 @@ import {domFingerprint} from './utils/dom-fingerprint';
 /**
  * Produces the attributes for the ad template.
  * @param {!Window} parentWindow
- * @param {!Element} element
+ * @param {!AmpElement} element
  * @param {!string} sentinel
  * @param {!Object<string, string>=} attributes
  * @return {!Object}
@@ -51,6 +51,7 @@ export function getContextMetadata(
 
   // TODO(alanorozco): Redesign data structure so that fields not exposed by
   // AmpContext are not part of this object.
+  const layoutRect = element.getPageLayoutBox();
   attributes._context = {
     ampcontextVersion: '$internalRuntimeVersion$',
     ampcontextFilepath: urls.cdn + '/$internalRuntimeVersion$' +
@@ -67,6 +68,12 @@ export function getContextMetadata(
     mode: getModeObject(),
     canary: isCanary(parentWindow),
     hidden: !viewer.isVisible(),
+    initialLayoutRect: layoutRect ? {
+      left: layoutRect.left,
+      top: layoutRect.top,
+      width: layoutRect.width,
+      height: layoutRect.height,
+    } : null,
     initialIntersection: element.getIntersectionChangeEntry(),
     domFingerprint: domFingerprint(element),
     experimentToggles: experimentToggles(parentWindow),
@@ -77,9 +84,4 @@ export function getContextMetadata(
     attributes.src = adSrc;
   }
   return attributes;
-}
-
-export function getNameAttribute(parentWindow, element, sentinel) {
-  const attributes = getContextMetadata(parentWindow, element, sentinel);
-  return encodeURIComponent(JSON.stringify(attributes));
 }

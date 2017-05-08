@@ -235,6 +235,20 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
           analyticsElement, 'visible-v3', config, handler);
     });
 
+    it('should add "visible-v3" trigger for hidden-v3', () => {
+      toggleExperiment(win, 'visibility-v3', true);
+      group = service.createAnalyticsGroup(analyticsElement);
+      const config = {on: 'hidden-v3'};
+      const getTrackerSpy = sandbox.spy(root, 'getTracker');
+      group.addTrigger(config, () => {});
+      expect(getTrackerSpy).to.be.calledWith('visible-v3');
+      const tracker = root.getTrackerOptional('visible-v3');
+      const unlisten = function() {};
+      const stub = sandbox.stub(tracker, 'add', () => unlisten);
+      group.addTrigger(config, () => {});
+      expect(stub).to.be.calledWith(analyticsElement, 'hidden-v3', config);
+    });
+
     it('should use "visible-v3" for "visible" w/experiment', () => {
       // TODO(dvoytenko, #8121): Cleanup visibility-v3 experiment.
       toggleExperiment(win, 'visibility-v3', true);
