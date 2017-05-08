@@ -69,7 +69,7 @@
     "jison": "0.4.15",
     "jsdom": "9.2.1",
     "json-stable-stringify": "1.0.1",
-    "karma": "0.13.21",
+    "karma": "1.5.0",
     "karma-browserify": "5.1.1",
     "karma-chai": "0.1.0",
     "karma-chai-as-promised": "0.1.2",
