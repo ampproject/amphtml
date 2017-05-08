@@ -195,7 +195,7 @@ function maybeSetExperimentFromUrl(win, element, experimentName,
   const arg = a4aParam.split(':', 2)[1];
   const argMapping = {
     '-1': manualId,
-    '0': null, // TODO Ensure does not generate exp id
+    '0': null,
     '1': controlBranchId,
     '2': treatmentBranchId,
     '3': controlMeasureOnRender,
