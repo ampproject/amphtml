@@ -238,7 +238,7 @@ const command = {
 
 function runAllCommands() {
   command.testBuildSystem();
-  command.testDocumentLinks();
+  // Skip testDocumentLinks() during push builds.
   command.buildRuntime();
   command.presubmit();
   command.testRuntime();
