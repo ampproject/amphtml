@@ -272,6 +272,7 @@ To use `<amp-ad>` or `<amp-embed>`, the script to the `amp-ad` library is needed
 - [myWidget](../../ads/mywidget.md)
 - [Nativo](../../ads/nativo.md)
 - [Nend](../../ads/nend.md)
+- [NETLETIX](../../ads/netletix.md)
 - [Nokta](../../ads/nokta.md)
 - [Open AdStream (OAS)](../../ads/openadstream.md)
 - [OpenX](../../ads/openx.md)
