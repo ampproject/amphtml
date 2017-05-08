@@ -119,7 +119,7 @@ describes.sandboxed('MeasureScanner', {}, () => {
     expect(scanTiming({duration: 0.1}).duration).to.equal(0.1);
     expect(scanTiming({delay: 0.1}).delay).to.equal(0.1);
     expect(scanTiming({endDelay: 0.1}).endDelay).to.equal(0.1);
-    expect(warnStub.callCount).to.equal(3);
+    expect(warnStub).to.have.callCount(3);
     expect(warnStub.args[0][1]).to.match(/"duration" is fractional/);
     expect(warnStub.args[1][1]).to.match(/"delay" is fractional/);
     expect(warnStub.args[2][1]).to.match(/"endDelay" is fractional/);
@@ -355,12 +355,20 @@ describes.sandboxed('MeasureScanner', {}, () => {
       resources = env.win.services.resources.obj;
       amp1 = env.createAmpElement();
       amp2 = env.createAmpElement();
+      sandbox.stub(amp1, 'isUpgraded', () => true);
+      sandbox.stub(amp2, 'isUpgraded', () => true);
+      sandbox.stub(amp1, 'isBuilt', () => true);
+      sandbox.stub(amp2, 'isBuilt', () => true);
+      sandbox.stub(amp1, 'whenBuilt', () => Promise.resolve());
+      sandbox.stub(amp2, 'whenBuilt', () => Promise.resolve());
       resources.add(amp1);
       resources.add(amp2);
     });
 
     function waitForNextMicrotask() {
-      return Promise.resolve().then(() => Promise.resolve());
+      return Promise.resolve()
+          .then(() => Promise.resolve())
+          .then(() => Promise.all([Promise.resolve()]));
     }
 
     function createRunner(spec) {
@@ -387,6 +395,10 @@ describes.sandboxed('MeasureScanner', {}, () => {
     });
 
     it('should block AMP elements', () => {
+      const r1 = resources.getResourceForElement(amp1);
+      const r2 = resources.getResourceForElement(amp2);
+      sandbox.stub(r1, 'isDisplayed', () => true);
+      sandbox.stub(r2, 'isDisplayed', () => true);
       let runner;
       createRunner([
         {target: amp1, keyframes: {}},
@@ -396,12 +408,13 @@ describes.sandboxed('MeasureScanner', {}, () => {
       });
       return waitForNextMicrotask().then(() => {
         expect(runner).to.be.undefined;
-        resources.getResourceForElement(amp1).loadPromiseResolve_();
+        r1.loadPromiseResolve_();
         return waitForNextMicrotask();
       }).then(() => {
         expect(runner).to.be.undefined;
-        resources.getResourceForElement(amp2).loadPromiseResolve_();
-        return waitForNextMicrotask();
+        r2.loadPromiseResolve_();
+        return Promise.all([r1.loadedOnce(), r2.loadedOnce()])
+            .then(() => waitForNextMicrotask());
       }).then(() => {
         expect(runner).to.be.ok;
         expect(runner.requests_).to.have.length(2);

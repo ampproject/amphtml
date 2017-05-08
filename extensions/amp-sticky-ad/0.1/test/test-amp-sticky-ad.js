@@ -16,8 +16,9 @@
 
 import '../amp-sticky-ad';
 import '../../../amp-ad/0.1/amp-ad';
+import {poll} from '../../../../testing/iframe';
 
-describes.realWin('amp-sticky-ad 0.1 version', {
+describes.realWin.skip('amp-sticky-ad 0.1 version', {
   win: { /* window spec */
     location: '...',
     historyOff: false,
@@ -191,22 +192,48 @@ describes.realWin('amp-sticky-ad 0.1 version', {
       expect(impl.element.children[1].tagName).to.equal('BUTTON');
     });
 
-    it('should listen to amp:built, amp:load:end', () => {
-      impl.ad_.isBuilt = () => {
-        return false;
-      };
+    it('should wait for built and load-end signals', () => {
+      impl.ad_.isBuilt = () => false;
       impl.vsync_.mutate = function(callback) {
         callback();
       };
       const layoutAdSpy = sandbox.spy(impl, 'layoutAd_');
       impl.scheduleLayoutForAd_();
       expect(layoutAdSpy).to.not.been.called;
-      impl.ad_.dispatchEvent(new Event('amp:built'));
-      expect(layoutAdSpy).to.be.called;
-      impl.ad_.dispatchEvent(new Event('amp:load:end'));
-      expect(ampStickyAd).to.have.attribute('visible');
-      expect(ampStickyAd.classList.contains('amp-sticky-ad-loaded'))
-          .to.be.true;
+      impl.ad_.signals().signal('built');
+      return impl.ad_.signals().whenSignal('built').then(() => {
+        expect(layoutAdSpy).to.be.called;
+        expect(ampStickyAd).to.not.have.attribute('visible');
+        expect(ampStickyAd.classList.contains('amp-sticky-ad-loaded'))
+            .to.be.false;
+        impl.ad_.signals().signal('load-end');
+        return poll('visible attribute must be set', () => {
+          return (ampStickyAd.hasAttribute('visible') &&
+              ampStickyAd.classList.contains('amp-sticky-ad-loaded'));
+        });
+      });
+    });
+
+    it('should wait for built and render-start signals', () => {
+      impl.ad_.isBuilt = () => false;
+      impl.vsync_.mutate = function(callback) {
+        callback();
+      };
+      const layoutAdSpy = sandbox.spy(impl, 'layoutAd_');
+      impl.scheduleLayoutForAd_();
+      expect(layoutAdSpy).to.not.been.called;
+      impl.ad_.signals().signal('built');
+      return impl.ad_.signals().whenSignal('built').then(() => {
+        expect(layoutAdSpy).to.be.called;
+        expect(ampStickyAd).to.not.have.attribute('visible');
+        expect(ampStickyAd.classList.contains('amp-sticky-ad-loaded'))
+            .to.be.false;
+        impl.ad_.signals().signal('render-start');
+        return poll('visible attribute must be set', () => {
+          return (ampStickyAd.hasAttribute('visible') &&
+              ampStickyAd.classList.contains('amp-sticky-ad-loaded'));
+        });
+      });
     });
   });
 
@@ -257,7 +284,7 @@ describes.realWin('amp-sticky-ad 0.1 version', {
 });
 
 
-describes.realWin('amp-sticky-ad 0.1 with real ad child', {
+describes.realWin.skip('amp-sticky-ad 0.1 with real ad child', {
   win: { /* window spec */
     location: '...',
     historyOff: false,

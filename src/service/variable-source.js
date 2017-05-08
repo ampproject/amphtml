@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {dev} from '../log';
-import {whenDocumentComplete} from '../document-ready';
+import {loadPromise} from '../event-helper';
 import {isFiniteNumber} from '../types';
 
 /** @typedef {string|number|boolean|undefined|null} */
@@ -45,7 +45,7 @@ export function getTimingDataAsync(win, startEvent, endEvent) {
   const metric = getTimingDataSync(win, startEvent, endEvent);
   if (metric === '') {
     // Metric is not yet available. Retry after a delay.
-    return whenDocumentComplete(win.document).then(() => {
+    return loadPromise(win).then(() => {
       return getTimingDataSync(win, startEvent, endEvent);
     });
   }

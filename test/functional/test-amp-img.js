@@ -17,7 +17,7 @@
 import {createIframePromise} from '../../testing/iframe';
 import {BaseElement} from '../../src/base-element';
 import {installImg, AmpImg} from '../../builtins/amp-img';
-import {resourcesForDoc} from '../../src/resources';
+import {resourcesForDoc} from '../../src/services';
 import * as sinon from 'sinon';
 
 describe('amp-img', () => {
@@ -56,6 +56,7 @@ describe('amp-img', () => {
       width: 300,
       height: 200,
       alt: 'An image',
+      title: 'Image title',
       referrerpolicy: 'origin',
     }).then(ampImg => {
       const img = ampImg.querySelector('img');
@@ -63,6 +64,7 @@ describe('amp-img', () => {
       expect(img.getAttribute('src')).to.equal('/examples/img/sample.jpg');
       expect(ampImg.implementation_.getPriority()).to.equal(0);
       expect(img.getAttribute('alt')).to.equal('An image');
+      expect(img.getAttribute('title')).to.equal('Image title');
       expect(img.getAttribute('referrerpolicy')).to.equal('origin');
     });
   });
@@ -125,14 +127,14 @@ describe('amp-img', () => {
       const toggleSpy = sandbox.spy(impl, 'toggleFallback');
       impl.buildCallback();
 
-      expect(errorSpy.callCount).to.equal(0);
-      expect(toggleSpy.callCount).to.equal(0);
-      expect(toggleElSpy.callCount).to.equal(0);
+      expect(errorSpy).to.have.not.been.called;
+      expect(toggleSpy).to.have.not.been.called;
+      expect(toggleElSpy).to.have.not.been.called;
 
       return impl.layoutCallback().then(() => {
-        expect(errorSpy.callCount).to.equal(0);
-        expect(toggleSpy.callCount).to.equal(0);
-        expect(toggleElSpy.callCount).to.equal(0);
+        expect(errorSpy).to.have.not.been.called;
+        expect(toggleSpy).to.have.not.been.called;
+        expect(toggleElSpy).to.have.not.been.called;
       });
     });
 
@@ -141,13 +143,13 @@ describe('amp-img', () => {
       const errorSpy = sandbox.spy(impl, 'onImgLoadingError_');
       const toggleSpy = sandbox.spy(impl, 'toggleFallback');
       impl.buildCallback();
-      expect(errorSpy.callCount).to.equal(0);
-      expect(toggleSpy.callCount).to.equal(0);
-      expect(toggleElSpy.callCount).to.equal(0);
+      expect(errorSpy).to.have.not.been.called;
+      expect(toggleSpy).to.have.not.been.called;
+      expect(toggleElSpy).to.have.not.been.called;
 
       return impl.layoutCallback().catch(() => {
-        expect(errorSpy.callCount).to.equal(1);
-        expect(toggleSpy.callCount).to.equal(1);
+        expect(errorSpy).to.be.calledOnce;
+        expect(toggleSpy).to.be.calledOnce;
         expect(toggleSpy.firstCall.args[0]).to.be.true;
         expect(toggleElSpy.firstCall.args[0]).to.be.true;
       });
@@ -162,27 +164,27 @@ describe('amp-img', () => {
       const errorSpy = sandbox.spy(impl, 'onImgLoadingError_');
       const toggleSpy = sandbox.spy(impl, 'toggleFallback');
       impl.buildCallback();
-      expect(errorSpy.callCount).to.equal(0);
-      expect(toggleSpy.callCount).to.equal(0);
-      expect(toggleElSpy.callCount).to.equal(0);
+      expect(errorSpy).to.have.not.been.called;
+      expect(toggleSpy).to.have.not.been.called;
+      expect(toggleElSpy).to.have.not.been.called;
 
       return impl.layoutCallback().catch(() => {
-        expect(errorSpy.callCount).to.equal(1);
-        expect(toggleSpy.callCount).to.equal(1);
+        expect(errorSpy).to.be.calledOnce;
+        expect(toggleSpy).to.be.calledOnce;
         expect(toggleSpy.firstCall.args[0]).to.be.true;
-        expect(toggleElSpy.callCount).to.equal(1);
+        expect(toggleElSpy).to.be.calledOnce;
         expect(toggleElSpy.firstCall.args[0]).to.be.true;
-        expect(errorSpy.callCount).to.equal(1);
+        expect(errorSpy).to.be.calledOnce;
         return impl.layoutCallback();
       }).then(() => {
-        expect(errorSpy.callCount).to.equal(1);
-        expect(toggleSpy.callCount).to.equal(1);
-        expect(toggleElSpy.callCount).to.equal(1);
+        expect(errorSpy).to.be.calledOnce;
+        expect(toggleSpy).to.be.calledOnce;
+        expect(toggleElSpy).to.be.calledOnce;
         return impl.layoutCallback();
       }).then(() => {
-        expect(errorSpy.callCount).to.equal(1);
-        expect(toggleSpy.callCount).to.equal(1);
-        expect(toggleElSpy.callCount).to.equal(1);
+        expect(errorSpy).to.be.calledOnce;
+        expect(toggleSpy).to.be.calledOnce;
+        expect(toggleElSpy).to.be.calledOnce;
       });
     });
 
@@ -192,17 +194,17 @@ describe('amp-img', () => {
       loadStub.returns(Promise.resolve());
       impl.buildCallback();
 
-      expect(toggleElSpy.callCount).to.equal(0);
+      expect(toggleElSpy).to.have.not.been.called;
 
       return impl.layoutCallback().catch(() => {
-        expect(toggleElSpy.callCount).to.equal(1);
+        expect(toggleElSpy).to.be.calledOnce;
         expect(toggleElSpy.getCall(0).args[0]).to.be.true;
-        expect(impl.img_).to.have.class('-amp-ghost');
+        expect(impl.img_).to.have.class('i-amphtml-ghost');
         impl.img_.setAttribute('src', 'test-1000.jpg');
         return impl.layoutCallback().then(() => {
-          expect(toggleElSpy.callCount).to.equal(2);
+          expect(toggleElSpy).to.have.callCount(2);
           expect(toggleElSpy.getCall(1).args[0]).to.be.false;
-          expect(impl.img_).to.not.have.class('-amp-ghost');
+          expect(impl.img_).to.not.have.class('i-amphtml-ghost');
         });
       });
     });
@@ -213,15 +215,15 @@ describe('amp-img', () => {
       loadStub.returns(Promise.resolve());
       impl.buildCallback();
 
-      expect(el).to.not.have.class('-amp-ghost');
-      expect(toggleElSpy.callCount).to.equal(0);
+      expect(el).to.not.have.class('i-amphtml-ghost');
+      expect(toggleElSpy).to.have.not.been.called;
       return impl.layoutCallback().catch(() => {
-        expect(toggleElSpy.callCount).to.equal(1);
+        expect(toggleElSpy).to.be.calledOnce;
         expect(toggleElSpy.getCall(0).args[0]).to.be.true;
-        expect(impl.img_).to.have.class('-amp-ghost');
+        expect(impl.img_).to.have.class('i-amphtml-ghost');
         return impl.layoutCallback().then(() => {
-          expect(toggleElSpy.callCount).to.equal(1);
-          expect(impl.img_).to.have.class('-amp-ghost');
+          expect(toggleElSpy).to.be.calledOnce;
+          expect(impl.img_).to.have.class('i-amphtml-ghost');
         });
       });
     });
@@ -232,16 +234,16 @@ describe('amp-img', () => {
       loadStub.returns(Promise.reject());
       impl.buildCallback();
 
-      expect(el).to.not.have.class('-amp-ghost');
-      expect(toggleElSpy.callCount).to.equal(0);
+      expect(el).to.not.have.class('i-amphtml-ghost');
+      expect(toggleElSpy).to.have.not.been.called;
       return impl.layoutCallback().catch(() => {
-        expect(toggleElSpy.callCount).to.equal(1);
+        expect(toggleElSpy).to.be.calledOnce;
         expect(toggleElSpy.getCall(0).args[0]).to.be.true;
-        expect(impl.img_).to.have.class('-amp-ghost');
+        expect(impl.img_).to.have.class('i-amphtml-ghost');
         impl.img_.setAttribute('src', 'test-1000.jpg');
         return impl.layoutCallback().catch(() => {
-          expect(toggleElSpy.callCount).to.equal(1);
-          expect(impl.img_).to.have.class('-amp-ghost');
+          expect(toggleElSpy).to.be.calledOnce;
+          expect(impl.img_).to.have.class('i-amphtml-ghost');
         });
       });
     });

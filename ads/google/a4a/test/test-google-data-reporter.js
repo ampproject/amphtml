@@ -30,8 +30,10 @@ import {
     ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES,
 } from '../../../../extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config';  // eslint-disable-line max-len
 import {
-    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
-    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES,
+    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
+    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
+    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
+    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
 } from '../../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config';  // eslint-disable-line max-len
 
 /**
@@ -65,15 +67,19 @@ describe('#getLifecycleReporter', () => {
   const EXPERIMENT_BRANCH_EIDS = [
     ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment,
     ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES.experiment,
-    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment,
-    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES.experiment,
+    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment,
+    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment,
+    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment,
+    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment,
     '117152632',
   ];
   const CONTROL_BRANCH_EIDS = [
     ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES.control,
     ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES.control,
-    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.control,
-    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES.control,
+    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control,
+    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control,
+    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control,
+    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control,
   ];
 
   ['adsense', 'doubleclick'].forEach(type => {
@@ -150,6 +156,7 @@ describe('#getLifecycleReporter', () => {
       get: h => { return h in headerData ? headerData[h] : null; },
     };
     let mockReporter;
+    let emitPingStub;
     beforeEach(() => {
       const fakeElt = env.createAmpElement('div');
       env.win.Math = Math;
@@ -157,6 +164,7 @@ describe('#getLifecycleReporter', () => {
       mockReporter = new GoogleAdLifecycleReporter(
           env.win, fakeElt, 'test', 37);
       mockReporter.setPingAddress('http://localhost:9876/');
+      emitPingStub = sandbox.stub(mockReporter, 'emitPing_');
     });
 
     it('should pick up qqid from headers', () => {
@@ -164,11 +172,8 @@ describe('#getLifecycleReporter', () => {
       expect(mockReporter.extraVariables_).to.be.empty;
       setGoogleLifecycleVarsFromHeaders(headerMock, mockReporter);
       mockReporter.sendPing('preAdThrottle');
-      const pingElements = env.win.document.querySelectorAll('img');
-      expect(pingElements.length).to.equal(1);
-      const pingUrl = pingElements[0].getAttribute('src');
-      expect(pingUrl).to.be.ok;
-      expect(pingUrl).to.match(/[&?]qqid.37=test_qqid/);
+      expect(emitPingStub).to.be.calledOnce;
+      expect(emitPingStub).to.be.calledWithMatch(/[&?]qqid.37=test_qqid/);
     });
 
     it('should pick up rendering method from headers', () => {
@@ -176,23 +181,21 @@ describe('#getLifecycleReporter', () => {
       expect(mockReporter.extraVariables_).to.be.empty;
       setGoogleLifecycleVarsFromHeaders(headerMock, mockReporter);
       mockReporter.sendPing('preAdThrottle');
-      const pingElements = env.win.document.querySelectorAll('img');
-      expect(pingElements.length).to.equal(1);
-      const pingUrl = pingElements[0].getAttribute('src');
-      expect(pingUrl).to.be.ok;
-      expect(pingUrl).to.match(/[&?]rm.37=fnord/);
+      expect(emitPingStub).to.be.calledOnce;
+      expect(emitPingStub).to.be.calledWithMatch(/[&?]rm.37=fnord/);
     });
   });
 
   describes.sandboxed('#googleLifecycleReporterFactory', {}, () => {
     describes.fakeWin('default parameters', {amp: true}, env => {
       let mockReporter;
+      let emitPingStub;
       beforeEach(() => {
         const fakeElt = env.win.document.createElement('div');
         fakeElt.setAttribute('data-amp-slot-index', '22');
         fakeElt.setAttribute('type', 'doubleclick');
         fakeElt.setAttribute(EXPERIMENT_ATTRIBUTE,
-            DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment);
+            DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment);
         env.win.document.body.appendChild(fakeElt);
         env.win.ampAdPageCorrelator = 7777777;
         const a4aContainer = {
@@ -202,14 +205,17 @@ describe('#getLifecycleReporter', () => {
         mockReporter = googleLifecycleReporterFactory(a4aContainer);
         expect(mockReporter).to.be.instanceOf(GoogleAdLifecycleReporter);
         mockReporter.setPingAddress('http://localhost:9876/');
+        emitPingStub = sandbox.stub(mockReporter, 'emitPing_');
       });
 
       it('should generate a ping with known parameters', () => {
+        const viewer = env.win.services.viewer.obj;
+        viewer.firstVisibleTime_ = viewer.lastVisibleTime_ = Date.now();
         mockReporter.sendPing('renderFriendlyStart');
-        const pingElements = env.win.document.querySelectorAll('img');
-        expect(pingElements.length).to.equal(1);
-        const pingUrl = pingElements[0].getAttribute('src');
-        expect(pingUrl).to.be.ok;
+        expect(emitPingStub).to.be.calledOnce;
+        const pingUrl = emitPingStub.firstCall.args[0];
+        const experimentId =
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment;
         const expectedParams = [
           's=a4a',
           'c=7777777',
@@ -220,8 +226,9 @@ describe('#getLifecycleReporter', () => {
           'stageName=renderFriendlyStart',
           'stageIdx=6',
           'met.a4a.22=renderFriendlyStart.[0-9]+',
-          `e.22=${DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment}`,
+          `e.22=${experimentId}`,
           'adt.22=doubleclick',
+          'met.a4a=firstVisibleTime.[0-9]+%2ClastVisibleTime.[0-9]+',
         ];
         expectedParams.forEach(p => {
           expect(pingUrl, p).to.match(new RegExp(`[?&]${p}(&|$)`));

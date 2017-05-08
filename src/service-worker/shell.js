@@ -16,7 +16,9 @@
 
 import {getMode} from '../mode';
 import {calculateExtensionScriptUrl} from '../service/extension-location';
-import './error-reporting';
+import {installWorkerErrorReporting} from '../worker-error-reporting';
+
+installWorkerErrorReporting('sw');
 
 /**
  * Import the "core" entry point for the AMP CDN Service Worker. This shell

@@ -17,12 +17,19 @@
 
 import {getMode} from './mode';
 import {exponentialBackoff} from './exponential-backoff';
-import {isLoadErrorMessage} from './event-helper';
-import {USER_ERROR_SENTINEL, isUserErrorMessage} from './log';
-import {makeBodyVisible} from './style-installer';
-import {urls} from './config';
+import {
+  isLoadErrorMessage,
+} from './event-helper';
+import {
+  USER_ERROR_SENTINEL,
+  isUserErrorMessage,
+  duplicateErrorIfNecessary,
+} from './log';
 import {isProxyOrigin} from './url';
-import {isCanary} from './experiments';
+import {isCanary, experimentTogglesOrNull} from './experiments';
+import {makeBodyVisible} from './style-installer';
+import {startsWith} from './string';
+import {urls} from './config';
 
 
 /**
@@ -32,10 +39,10 @@ const CANCELLED = 'CANCELLED';
 
 
 /**
- * The threshold for throttling load errors. Currently at 0.1%.
+ * The threshold for throttled errors. Currently at 0.1%.
  * @const {number}
  */
-const LOAD_ERROR_THRESHOLD = 1e-3;
+const THROTTLED_ERROR_THRESHOLD = 1e-3;
 
 
 /**
@@ -59,6 +66,13 @@ let reportingBackoff = function(work) {
 };
 
 /**
+ * The true JS engine, as detected by inspecting an Error stack. This should be
+ * used with the userAgent to tell definitely. I.e., Chrome on iOS is really a
+ * Safari JS engine.
+ */
+let detectedJsEngine;
+
+/**
  * Reports an error. If the error has an "associatedElement" property
  * the element is marked with the `i-amphtml-element-error` and displays
  * the message itself. The message is always send to the console.
@@ -70,69 +84,73 @@ let reportingBackoff = function(work) {
  * @return {!Error}
  */
 export function reportError(error, opt_associatedElement) {
-  // Convert error to the expected type.
-  let isValidError;
-  if (error) {
-    if (error.message !== undefined) {
-      isValidError = true;
-    } else {
-      const origError = error;
-      error = new Error(String(origError));
-      error.origError = origError;
-    }
-  } else {
-    error = new Error('Unknown error');
-  }
-  // Report if error is not an expected type.
-  if (!isValidError && getMode().localDev) {
-    setTimeout(function() {
-      const rethrow = new Error(
-          '_reported_ Error reported incorrectly: ' + error);
-      throw rethrow;
-    });
-  }
-
-  if (error.reported) {
-    return /** @type {!Error} */ (error);
-  }
-  error.reported = true;
-
-  // Update element.
-  const element = opt_associatedElement || error.associatedElement;
-  if (element && element.classList) {
-    element.classList.add('i-amphtml-error');
-    if (getMode().development) {
-      element.classList.add('i-amphtml-element-error');
-      element.setAttribute('error-message', error.message);
-    }
-  }
-
-  // Report to console.
-  if (self.console) {
-    if (error.messageArray) {
-      (console.error || console.log).apply(console,
-          error.messageArray);
-    } else {
-      if (element) {
-        (console.error || console.log).call(console,
-            element.tagName.toLowerCase() +
-                (element.id ? ' with id ' + element.id : '') + ':',
-            error.message);
-      } else if (!getMode().minified) {
-        (console.error || console.log).call(console, error.stack);
+  try {
+    // Convert error to the expected type.
+    let isValidError;
+    if (error) {
+      if (error.message !== undefined) {
+        error = duplicateErrorIfNecessary(/** @type {!Error} */(error));
+        isValidError = true;
       } else {
-        (console.error || console.log).call(console, error.message);
+        const origError = error;
+        error = new Error(String(origError));
+        error.origError = origError;
+      }
+    } else {
+      error = new Error('Unknown error');
+    }
+    // Report if error is not an expected type.
+    if (!isValidError && getMode().localDev && !getMode().test) {
+      setTimeout(function() {
+        const rethrow = new Error(
+            '_reported_ Error reported incorrectly: ' + error);
+        throw rethrow;
+      });
+    }
+
+    if (error.reported) {
+      return /** @type {!Error} */ (error);
+    }
+    error.reported = true;
+
+    // Update element.
+    const element = opt_associatedElement || error.associatedElement;
+    if (element && element.classList) {
+      element.classList.add('i-amphtml-error');
+      if (getMode().development) {
+        element.classList.add('i-amphtml-element-error');
+        element.setAttribute('error-message', error.message);
       }
     }
-  }
-  if (element && element.dispatchCustomEventForTesting) {
-    element.dispatchCustomEventForTesting('amp:error', error.message);
-  }
 
-  // 'call' to make linter happy. And .call to make compiler happy
-  // that expects some @this.
-  reportErrorToServer['call'](undefined, undefined, undefined, undefined,
-      undefined, error);
+    // Report to console.
+    if (self.console) {
+      const output = (console.error || console.log);
+      if (error.messageArray) {
+        output.apply(console, error.messageArray);
+      } else {
+        if (element) {
+          output.call(console, error.message, element);
+        } else if (!getMode().minified) {
+          output.call(console, error.stack);
+        } else {
+          output.call(console, error.message);
+        }
+      }
+    }
+    if (element && element.dispatchCustomEventForTesting) {
+      element.dispatchCustomEventForTesting('amp:error', error.message);
+    }
+
+    // 'call' to make linter happy. And .call to make compiler happy
+    // that expects some @this.
+    reportErrorToServer['call'](undefined, undefined, undefined, undefined,
+        undefined, error);
+  } catch (errorReportingError) {
+    setTimeout(function() {
+      throw errorReportingError;
+    });
+  }
   return /** @type {!Error} */ (error);
 }
 
@@ -142,6 +160,23 @@ export function reportError(error, opt_associatedElement) {
  */
 export function cancellation() {
   return new Error(CANCELLED);
+}
+
+/**
+ * @param {*} errorOrMessage
+ * @return {boolean}
+ */
+export function isCancellation(errorOrMessage) {
+  if (!errorOrMessage) {
+    return false;
+  }
+  if (typeof errorOrMessage == 'string') {
+    return startsWith(errorOrMessage, CANCELLED);
+  }
+  if (typeof errorOrMessage.message == 'string') {
+    return startsWith(errorOrMessage.message, CANCELLED);
+  }
+  return false;
 }
 
 /**
@@ -238,15 +273,21 @@ export function getErrorReportUrl(message, filename, line, col, error,
     return;
   }
 
-  // Load errors are always "expected".
-  if (isLoadErrorMessage(message)) {
+  // We throttle load errors and generic "Script error." errors
+  // that have no information and thus cannot be acted upon.
+  if (isLoadErrorMessage(message) ||
+    // See https://github.com/ampproject/amphtml/issues/7353
+    // for context.
+    message == 'Script error.') {
     expected = true;
 
     // Throttle load errors.
-    if (Math.random() > LOAD_ERROR_THRESHOLD) {
+    if (Math.random() > THROTTLED_ERROR_THRESHOLD) {
       return;
     }
   }
+
+  const isUserError = isUserErrorMessage(message);
 
   // This is the App Engine app in
   // ../tools/errortracker
@@ -256,7 +297,7 @@ export function getErrorReportUrl(message, filename, line, col, error,
       '?v=' + encodeURIComponent('$internalRuntimeVersion$') +
       '&noAmp=' + (hasNonAmpJs ? 1 : 0) +
       '&m=' + encodeURIComponent(message.replace(USER_ERROR_SENTINEL, '')) +
-      '&a=' + (isUserErrorMessage(message) ? 1 : 0);
+      '&a=' + (isUserError ? 1 : 0);
   if (expected) {
     // Errors are tagged with "ex" ("expected") label to allow loggers to
     // classify these errors as benchmarks and not exceptions.
@@ -297,12 +338,34 @@ export function getErrorReportUrl(message, filename, line, col, error,
     }
   }
 
+  if (!detectedJsEngine) {
+    detectedJsEngine = detectJsEngineFromStack();
+  }
+  url += `&jse=${detectedJsEngine}`;
+
+  const exps = [];
+  const experiments = experimentTogglesOrNull();
+  for (const exp in experiments) {
+    const on = experiments[exp];
+    exps.push(`${exp}=${on ? '1' : '0'}`);
+  }
+  url += `&exps=${encodeURIComponent(exps.join(','))}`;
+
   if (error) {
     const tagName = error && error.associatedElement
-      ? error.associatedElement.tagName
-      : 'u';  // Unknown
-    url += '&el=' + encodeURIComponent(tagName) +
-        '&s=' + encodeURIComponent(error.stack || '');
+        ? error.associatedElement.tagName
+        : 'u';  // Unknown
+    url += `&el=${encodeURIComponent(tagName)}`;
+    if (error.args) {
+      url += `&args=${encodeURIComponent(JSON.stringify(error.args))}`;
+    }
+
+    if (!isUserError && !error.ignoreStack && error.stack) {
+      // Shorten
+      const stack = (error.stack || '').substr(0, 1000);
+      url += `&s=${encodeURIComponent(stack)}`;
+    }
+
     error.message += ' _reported_';
   } else {
     url += '&f=' + encodeURIComponent(filename || '') +
@@ -315,6 +378,14 @@ export function getErrorReportUrl(message, filename, line, col, error,
   url += '&fr=' + encodeURIComponent(self.location.originalHash
       || self.location.hash);
 
+  // Google App Engine maximum URL length.
+  if (url.length >= 2072) {
+    url = url.substr(0, 2072 - 8 /* length of suffix */)
+        // Full remove last URL encoded entity.
+        .replace(/\%[^&%]+$/, '')
+        // Sentinel
+        + '&SHORT=1';
+  }
   return url;
 }
 
@@ -322,6 +393,7 @@ export function getErrorReportUrl(message, filename, line, col, error,
  * Returns true if it appears like there is non-AMP JS on the
  * current page.
  * @param {!Window} win
+ * @return {boolean}
  * @visibleForTesting
  */
 export function detectNonAmpJs(win) {
@@ -336,4 +408,54 @@ export function detectNonAmpJs(win) {
 
 export function resetAccumulatedErrorMessagesForTesting() {
   accumulatedErrorMessages = [];
+}
+
+/**
+ * Does a series of checks on the stack of an thrown error to determine the
+ * JS engine that is currently running. This gives a bit more information than
+ * just the UserAgent, since browsers often allow overriding it to "emulate"
+ * mobile.
+ * @return {string}
+ * @visibleForTesting
+ */
+export function detectJsEngineFromStack() {
+  /** @constructor */
+  function Fn() {}
+  Fn.prototype.t = function() {
+    throw new Error('message');
+  };
+  const object = new Fn();
+  try {
+    object.t();
+  } catch (e) {
+    const stack = e.stack;
+
+    // Safari only mentions the method name.
+    if (startsWith(stack, 't@')) {
+      return 'Safari';
+    }
+
+    // Firefox mentions "prototype".
+    if (stack.indexOf('.prototype.t@') > -1) {
+      return 'Firefox';
+    }
+
+    // IE looks like Chrome, but includes a context for the base stack line.
+    // Explicitly, we're looking for something like:
+    // "    at Global code (https://example.com/app.js:1:200)" or
+    // "    at Anonymous function (https://example.com/app.js:1:200)"
+    // vs Chrome which has:
+    // "    at https://example.com/app.js:1:200"
+    const last = stack.split('\n').pop();
+    if (/\bat .* \(/i.test(last)) {
+      return 'IE';
+    }
+
+    // Finally, chrome includes the error message in the stack.
+    if (startsWith(stack, 'Error: message')) {
+      return 'Chrome';
+    }
+  }
+
+  return 'unknown';
 }

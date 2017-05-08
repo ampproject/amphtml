@@ -15,47 +15,20 @@
 #
 
 tags: {  # amp-social-share
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
-  spec_name: "amp-social-share extension .js script"
-  mandatory_parent: "HEAD"
-  unique_warning: true
-  extension_unused_unless_tag_present: "amp-social-share"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  satisfies: "amp-social-share extension .js script"
+  extension_spec: {
+    name: "amp-social-share"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    deprecated_recommends_usage_of_tag: "amp-social-share"
+    deprecated_allow_duplicates: true
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-social-share"
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-social-share-(latest|0\\.1)\\.js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-social-share.html"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-social-share>
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-SOCIAL-SHARE"
-  also_requires_tag: "amp-social-share extension .js script"
+  requires: "amp-social-share extension .js script"
   attrs: {
     name: "data-share-endpoint"
     value_url: {
@@ -89,7 +62,7 @@ tags: {  # <amp-social-share>
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-social-share.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-social-share"
   amp_layout: {
     supported_layouts: CONTAINER
     supported_layouts: FILL

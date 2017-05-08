@@ -155,6 +155,8 @@ describe('sanitizeHtml', () => {
 
   it('should NOT output security-sensitive attributes', () => {
     expect(sanitizeHtml('a<a onclick="alert">b</a>')).to.be.equal('a<a>b</a>');
+    expect(sanitizeHtml('a<a [onclick]="alert">b</a>')).to.be
+        .equal('a<a>b</a>');
   });
 
   it('should apply html4/caja restrictions', () => {
@@ -162,6 +164,51 @@ describe('sanitizeHtml', () => {
     expect(sanitizeHtml('a<dialog>b<img>d</dialog>c')).to.be.equal('ac');
     expect(sanitizeHtml('<div class="c" src="d">b</div>')).to.be
         .equal('<div class="c" src="">b</div>');
+  });
+
+  it('should output [text] and [class] attributes', () => {
+    expect(sanitizeHtml('<p [text]="foo" [class]="bar"></p>')).to.be
+        .equal('<p [text]="foo" [class]="bar"></p>');
+  });
+
+  it('should NOT output blacklisted values for class attributes', () => {
+    expect(sanitizeHtml('<p class="i-amphtml-">hello</p>')).to.be
+        .equal('<p>hello</p>');
+    expect(sanitizeHtml('<p class="i-amphtml-class">hello</p>')).to.be
+        .equal('<p>hello</p>');
+    expect(sanitizeHtml('<p class="foo-i-amphtml-bar">hello</p>')).to.be
+        .equal('<p>hello</p>');
+    expect(sanitizeHtml('<p [class]="i-amphtml-">hello</p>')).to.be
+        .equal('<p>hello</p>');
+    expect(sanitizeHtml('<p [class]="i-amphtml-class">hello</p>')).to.be
+        .equal('<p>hello</p>');
+    expect(sanitizeHtml('<p [class]="foo-i-amphtml-bar">hello</p>')).to.be
+        .equal('<p>hello</p>');
+  });
+
+  it('should NOT output security-sensitive amp-bind attributes', () => {
+    expect(sanitizeHtml('a<a [onclick]="alert">b</a>')).to.be.equal(
+        'a<a>b</a>');
+    expect(sanitizeHtml('a<a [style]="color: red;">b</a>')).to.be.equal(
+        'a<a>b</a>');
+    expect(sanitizeHtml('a<a [STYLE]="color: red;">b</a>')).to.be.equal(
+        'a<a>b</a>');
+    expect(sanitizeHtml('a<a [href]="javascript:alert">b</a>')).to.be.equal(
+        'a<a target="_top">b</a>');
+    expect(sanitizeHtml('a<a [href]="JAVASCRIPT:alert">b</a>')).to.be.equal(
+        'a<a target="_top">b</a>');
+    expect(sanitizeHtml('a<a [href]="vbscript:alert">b</a>')).to.be.equal(
+        'a<a target="_top">b</a>');
+    expect(sanitizeHtml('a<a [href]="VBSCRIPT:alert">b</a>')).to.be.equal(
+        'a<a target="_top">b</a>');
+    expect(sanitizeHtml('a<a [href]="data:alert">b</a>')).to.be.equal(
+        'a<a target="_top">b</a>');
+    expect(sanitizeHtml('a<a [href]="DATA:alert">b</a>')).to.be.equal(
+        'a<a target="_top">b</a>');
+    expect(sanitizeHtml('a<a [href]="<script">b</a>')).to.be.equal(
+        'a<a target="_top">b</a>');
+    expect(sanitizeHtml('a<a [href]="</script">b</a>')).to.be.equal(
+        'a<a target="_top">b</a>');
   });
 });
 

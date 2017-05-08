@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
+import {CommonSignals} from './common-signals';
 import {Observable} from './observable';
+import {Signals} from './utils/signals';
 import {dev, rethrowAsync} from './log';
 import {disposeServicesForEmbed, getTopWindow} from './service';
 import {escapeHtml} from './dom';
-import {extensionsFor} from './extensions';
+import {extensionsFor} from './services';
 import {isDocumentReady} from './document-ready';
+import {layoutRectLtwh} from './layout-rect';
 import {loadPromise} from './event-helper';
-import {resourcesForDoc} from './resources';
+import {resourcesForDoc} from './services';
 import {setStyle, setStyles} from './style';
 
 
 /** @const {string} */
 const EMBED_PROP = '__AMP_EMBED__';
+
+/** @const {!Array<string>} */
+const EXCLUDE_INI_LOAD = ['AMP-AD', 'AMP-ANALYTICS', 'AMP-PIXEL'];
 
 
 /**
@@ -39,6 +45,7 @@ const EMBED_PROP = '__AMP_EMBED__';
  * - fonts: An optional array of fonts used in this embed.
  *
  * @typedef {{
+ *   host: (?AmpElement|undefined),
  *   url: string,
  *   html: string,
  *   extensionIds: (?Array<string>|undefined),
@@ -188,14 +195,7 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
     extensions.installExtensionsInChildWindow(
         childWin, spec.extensionIds || [], opt_preinstallCallback);
     // Ready to be shown.
-    setStyle(iframe, 'visibility', '');
-    if (childWin.document && childWin.document.body) {
-      setStyles(dev().assertElement(childWin.document.body), {
-        opacity: 1,
-        visibility: 'visible',
-        animation: 'none',
-      });
-    }
+    embed.startRender_();
     return embed;
   });
 }
@@ -309,8 +309,11 @@ export class FriendlyIframeEmbed {
     /** @const {!FriendlyIframeSpec} */
     this.spec = spec;
 
-    /** @private @const {!Promise} */
-    this.loadedPromise_ = loadedPromise;
+    /** @const {?AmpElement} */
+    this.host = spec.host || null;
+
+    /** @const @private {time} */
+    this.startTime_ = Date.now();
 
     /**
      * Starts out as invisible. The interpretation of this flag is up to
@@ -321,6 +324,12 @@ export class FriendlyIframeEmbed {
 
     /** @private {!Observable<boolean>} */
     this.visibilityObservable_ = new Observable();
+
+    /** @private @const */
+    this.signals_ = this.host ? this.host.signals() : new Signals();
+
+    /** @private @const {!Promise} */
+    this.winLoadedPromise_ = Promise.all([loadedPromise, this.whenReady()]);
   }
 
   /**
@@ -332,12 +341,77 @@ export class FriendlyIframeEmbed {
   }
 
   /**
-   * Returns promise that will resolve when the child window has fully been
-   * loaded.
+   * @return {time}
+   */
+  getStartTime() {
+    return this.startTime_;
+  }
+
+  /** @return {!Signals} */
+  signals() {
+    return this.signals_;
+  }
+
+  /**
+   * Returns a promise that will resolve when the embed document is ready.
+   * Notice that this signal coincides with the embed's `render-start`.
    * @return {!Promise}
    */
-  whenLoaded() {
-    return this.loadedPromise_;
+  whenReady() {
+    return this.signals_.whenSignal(CommonSignals.RENDER_START);
+  }
+
+  /**
+   * Returns a promise that will resolve when the child window's `onload` event
+   * has been emitted. In friendly iframes this typically only includes font
+   * loading.
+   * @return {!Promise}
+   */
+  whenWindowLoaded() {
+    return this.winLoadedPromise_;
+  }
+
+  /**
+   * Returns a promise that will resolve when the initial load  of the embed's
+   * content has been completed.
+   * @return {!Promise}
+   */
+  whenIniLoaded() {
+    return this.signals_.whenSignal(CommonSignals.INI_LOAD);
+  }
+
+  /** @private */
+  startRender_() {
+    if (this.host) {
+      this.host.renderStarted();
+    } else {
+      this.signals_.signal(CommonSignals.RENDER_START);
+    }
+    setStyle(this.iframe, 'visibility', '');
+    if (this.win.document && this.win.document.body) {
+      setStyles(dev().assertElement(this.win.document.body), {
+        opacity: 1,
+        visibility: 'visible',
+        animation: 'none',
+      });
+    }
+
+    // Initial load signal signal.
+    let rect;
+    if (this.host) {
+      rect = this.host.getLayoutBox();
+    } else {
+      rect = layoutRectLtwh(
+          0, 0,
+          this.win./*OK*/innerWidth,
+          this.win./*OK*/innerHeight);
+    }
+    Promise.all([
+      this.whenReady(),
+      whenContentIniLoad(this.iframe, this.win, rect),
+    ]).then(() => {
+      this.signals_.signal(CommonSignals.INI_LOAD);
+    });
   }
 
   /**
@@ -370,4 +444,27 @@ export class FriendlyIframeEmbed {
       this.visibilityObservable_.fire(this.visible_);
     }
   }
+}
+
+
+/**
+ * Returns the promise that will be resolved when all content elements
+ * have been loaded in the initially visible set.
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} context
+ * @param {!Window} hostWin
+ * @param {!./layout-rect.LayoutRectDef} rect
+ * @return {!Promise}
+ */
+export function whenContentIniLoad(context, hostWin, rect) {
+  return resourcesForDoc(context)
+      .getResourcesInRect(hostWin, rect)
+      .then(resources => {
+        const promises = [];
+        resources.forEach(r => {
+          if (!EXCLUDE_INI_LOAD.includes(r.element.tagName)) {
+            promises.push(r.loadedOnce());
+          }
+        });
+        return Promise.all(promises);
+      });
 }

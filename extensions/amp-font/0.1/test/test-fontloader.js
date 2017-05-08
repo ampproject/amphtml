@@ -15,11 +15,7 @@
  */
 
 import {FontLoader} from '../fontloader';
-import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
-import * as sinon from 'sinon';
-
-adopt(window);
 
 /** @private @const {string} */
 const FONT_FACE_ = `
@@ -55,7 +51,7 @@ const FAILURE_FONT_CONFIG = {
   family: 'Comic BLAH',
 };
 
-describe('FontLoader', () => {
+describes.sandboxed('FontLoader', {}, env => {
 
   let sandbox;
   let fontloader;
@@ -63,14 +59,14 @@ describe('FontLoader', () => {
   let setupFontLoadSpy;
   let setupLoadWithPolyfillSpy;
   let setupDisposeSpy;
-  let setupCreateElementsSpy;
+  let setupCreateFontComparatorsSpy;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = env.sandbox;
     setupLoadWithPolyfillSpy =
         sandbox.spy(FontLoader.prototype, 'loadWithPolyfill_');
-    setupCreateElementsSpy =
-        sandbox.spy(FontLoader.prototype, 'createElements_');
+    setupCreateFontComparatorsSpy =
+        sandbox.spy(FontLoader.prototype, 'createFontComparators_');
     setupDisposeSpy = sandbox.spy(FontLoader.prototype, 'dispose_');
   });
 
@@ -98,9 +94,9 @@ describe('FontLoader', () => {
     return getIframe().then(iframe => {
       fontloader.load(FONT_CONFIG, 3000).then(() => {
         iframe.doc.documentElement.classList.add('comic-amp-font-loaded');
-        expect(setupFontCheckSpy.callCount).to.equal(1);
-        expect(setupFontLoadSpy.callCount).to.equal(1);
-        expect(setupDisposeSpy.callCount).to.equal(1);
+        expect(setupFontCheckSpy).to.be.calledOnce;
+        expect(setupFontLoadSpy).to.be.calledOnce;
+        expect(setupDisposeSpy).to.be.calledOnce;
       }).catch(() => {
         assert.fail('Font load failed');
       });
@@ -112,11 +108,11 @@ describe('FontLoader', () => {
       sandbox.stub(FontLoader.prototype, 'canUseNativeApis_').returns(false);
       fontloader.load(FONT_CONFIG, 3000).then(() => {
         iframe.doc.documentElement.classList.add('comic-amp-font-loaded');
-        expect(setupFontCheckSpy.callCount).to.equal(0);
-        expect(setupFontLoadSpy.callCount).to.equal(0);
-        expect(setupLoadWithPolyfillSpy.callCount).to.equal(1);
-        expect(setupCreateElementsSpy.callCount).to.equal(1);
-        expect(setupDisposeSpy.callCount).to.equal(1);
+        expect(setupFontCheckSpy).to.have.not.been.called;
+        expect(setupFontLoadSpy).to.have.not.been.called;
+        expect(setupLoadWithPolyfillSpy).to.be.calledOnce;
+        expect(setupCreateFontComparatorsSpy).to.be.calledOnce;
+        expect(setupDisposeSpy).to.be.calledOnce;
       }).catch(() => {
         assert.fail('Font load failed');
       });
@@ -128,9 +124,9 @@ describe('FontLoader', () => {
       fontloader.load(FAILURE_FONT_CONFIG, 3000).then(() => {
         assert.fail('Font loaded when it should have failed.');
       }).catch(() => {
-        expect(setupFontCheckSpy.callCount).to.equal(1);
-        expect(setupFontLoadSpy.callCount).to.equal(1);
-        expect(setupDisposeSpy.callCount).to.equal(1);
+        expect(setupFontCheckSpy).to.be.calledOnce;
+        expect(setupFontLoadSpy).to.be.calledOnce;
+        expect(setupDisposeSpy).to.be.calledOnce;
       });
     });
   });
@@ -142,11 +138,11 @@ describe('FontLoader', () => {
         iframe.doc.documentElement.classList.add('comic-amp-font-loaded');
         assert.fail('Font loaded when it should have failed.');
       }).catch(() => {
-        expect(setupFontCheckSpy.callCount).to.equal(0);
-        expect(setupFontLoadSpy.callCount).to.equal(0);
-        expect(setupLoadWithPolyfillSpy.callCount).to.equal(1);
-        expect(setupCreateElementsSpy.callCount).to.equal(1);
-        expect(setupDisposeSpy.callCount).to.equal(1);
+        expect(setupFontCheckSpy).to.have.not.been.called;
+        expect(setupFontLoadSpy).to.have.not.been.called;
+        expect(setupLoadWithPolyfillSpy).to.be.calledOnce;
+        expect(setupCreateFontComparatorsSpy).to.be.calledOnce;
+        expect(setupDisposeSpy).to.be.calledOnce;
       });
     });
   });
@@ -187,23 +183,10 @@ describe('FontLoader', () => {
   });
 
   it('should check compare elements', () => {
-    return getIframe().then(iframe => {
-      const defaultDiv = iframe.doc.createElement('div');
-      defaultDiv.style.fontFamily = 'serif';
-      defaultDiv.style.position = 'absolute';
-      defaultDiv.textContent = 'HelloWSSIENd2939Qq';
-      const fontDiv = iframe.doc.createElement('div');
-      fontDiv.style.fontFamily = 'Comic AMP';
-      fontDiv.style.position = 'absolute';
-      fontDiv.textContent = 'HelloWSSIENd2939Qq';
-      iframe.doc.body.appendChild(defaultDiv);
-      iframe.doc.body.appendChild(fontDiv);
-      fontloader.defaultFontElements_ = [defaultDiv];
-      fontloader.customFontElement_ = fontDiv;
+    return getIframe().then(() => {
       return fontloader.load(FONT_CONFIG, 3000).then(() => {
-        fontloader.defaultFontElements_ = [defaultDiv];
-        fontloader.customFontElement_ = fontDiv;
-        expect(fontloader.compareMeasurements_()).to.be.true;
+        const comparators = fontloader.createFontComparators_();
+        expect(comparators.some(c => c.compare())).to.be.true;
       }).catch(() => {
         assert.fail('Font load failed');
       });

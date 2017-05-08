@@ -18,8 +18,8 @@ import {Observable} from '../observable';
 import {findIndex} from '../utils/array';
 import {map} from '../utils/object';
 import {documentStateFor} from './document-state';
-import {getServiceForDoc} from '../service';
-import {dev} from '../log';
+import {registerServiceBuilderForDoc} from '../service';
+import {dev, duplicateErrorIfNecessary} from '../log';
 import {isIframed} from '../dom';
 import {
   parseQueryString,
@@ -27,7 +27,7 @@ import {
   removeFragment,
   isProxyOrigin,
 } from '../url';
-import {timerFor} from '../timer';
+import {timerFor} from '../services';
 import {reportError} from '../error';
 import {VisibilityState} from '../visibility-state';
 
@@ -148,6 +148,9 @@ export class Viewer {
 
     /** @private {?time} */
     this.firstVisibleTime_ = null;
+
+    /** @private {?time} */
+    this.lastVisibleTime_ = null;
 
     /** @private {?Function} */
     this.messagingReadyResolver_ = null;
@@ -386,9 +389,11 @@ export class Viewer {
    */
   onVisibilityChange_() {
     if (this.isVisible()) {
+      const now = Date.now();
       if (!this.firstVisibleTime_) {
-        this.firstVisibleTime_ = Date.now();
+        this.firstVisibleTime_ = now;
       }
+      this.lastVisibleTime_ = now;
       this.hasBeenVisible_ = true;
       this.whenFirstVisibleResolve_();
     }
@@ -577,6 +582,15 @@ export class Viewer {
   }
 
   /**
+   * Returns the time when the document has become visible for the last time.
+   * If document has not yet become visible, the returned value is `null`.
+   * @return {?time}
+   */
+  getLastVisibleTime() {
+    return this.lastVisibleTime_;
+  }
+
+  /**
    * How much the viewer has requested the runtime to prerender the document.
    * The values are in number of screens.
    * @return {number}
@@ -741,7 +755,7 @@ export class Viewer {
     if (this.messageDeliverer_) {
       throw new Error('message channel can only be initialized once');
     }
-    if (!origin) {
+    if (origin == null) {
       throw new Error('message channel must have an origin');
     }
     dev().fine(TAG_, 'message channel established with origin: ', origin);
@@ -752,7 +766,7 @@ export class Viewer {
     }
     if (this.trustedViewerResolver_) {
       this.trustedViewerResolver_(
-          origin ? this.isTrustedViewerOrigin_(origin) : false);
+        origin ? this.isTrustedViewerOrigin_(origin) : false);
     }
     if (this.viewerOriginResolver_) {
       this.viewerOriginResolver_(origin || '');
@@ -920,6 +934,7 @@ function parseParams_(str, allParams) {
  */
 function getChannelError(opt_reason) {
   if (opt_reason instanceof Error) {
+    opt_reason = duplicateErrorIfNecessary(opt_reason);
     opt_reason.message = 'No messaging channel: ' + opt_reason.message;
     return opt_reason;
   }
@@ -939,9 +954,11 @@ export function setViewerVisibilityState(viewer, state) {
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @param {!Object<string, string>=} opt_initParams
- * @return {!Viewer}
  */
 export function installViewerServiceForDoc(ampdoc, opt_initParams) {
-  return getServiceForDoc(ampdoc, 'viewer',
-      () => new Viewer(ampdoc, opt_initParams));
+  registerServiceBuilderForDoc(ampdoc,
+      'viewer',
+      /* opt_ctor */ undefined,
+      () => new Viewer(ampdoc, opt_initParams),
+      /* opt_instantiate */ true);
 }

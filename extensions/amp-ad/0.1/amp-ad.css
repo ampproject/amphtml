@@ -18,13 +18,14 @@
  * Force the layout box of the ad iframe to be exactly as big as the actual
  * iframe. The `amp-ad` tag itself can be freely styled.
  */
-amp-ad iframe {
+amp-ad iframe,
+amp-embed iframe {
   border: 0 !important;
   margin: 0 !important;
   padding: 0 !important;
 }
 
-.-amp-ad-default-holder {
+.i-amphtml-ad-default-holder {
   position: absolute;
   left: 0;
   right: 0;
@@ -36,13 +37,45 @@ amp-ad iframe {
   background-color: rgba(200, 200, 200, 0.5);
 }
 
-.-amp-ad-default-holder:after {
+.i-amphtml-ad-default-holder[experiment1] {
+  background-color: rgba(0, 0, 0, 0.01);
+}
+
+.i-amphtml-ad-default-holder[experiment2] {
+  background-color: rgba(200, 200, 200, 0.05);
+}
+
+.i-amphtml-ad-default-holder:after {
   content: "Ad";
   background-color: rgba(0, 0, 0, 0.5);
   border-radius: 2px;
   color: #fff;
   font-size: 16px;
-  line-height: 16px;
+  line-height: 1;
   font-family: Arial, sans-serif;
   padding: 2px 4px;
 }
+
+.i-amphtml-ad-default-holder[experiment1]:after,
+.i-amphtml-ad-default-holder[experiment2]:after {
+  font-size: 10px;
+  color: #696969;
+  background-color: transparent;
+  border: 1px, solid, #696969;
+  padding: 3px 4px 1px;
+}
+
+amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"] > iframe,
+amp-ad[type="adsense"] > iframe {
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%);
+}
+
+
+amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"] > iframe,
+amp-ad[data-a4a-upgrade-type="amp-ad-network-adsense-impl"] > iframe {
+  min-height: 0;
+  min-width: 0;
+}
+

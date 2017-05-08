@@ -1,3 +1,4 @@
+
 /**
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
@@ -14,9 +15,12 @@
  * limitations under the License.
  */
 
-import {ExpansionOptions, variableServiceFor} from '../variables';
+import {
+  ExpansionOptions,
+  installVariableService,
+  variableServiceFor,
+} from '../variables';
 import {adopt} from '../../../../src/runtime';
-import {cryptoFor} from '../../../../src/crypto';
 import * as sinon from 'sinon';
 
 adopt(window);
@@ -26,9 +30,8 @@ describe('amp-analytics.VariableService', function() {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    return cryptoFor(window).then(() => {
-      variables = variableServiceFor(window);
-    });
+    installVariableService(window);
+    variables = variableServiceFor(window);
   });
 
   afterEach(() => {
@@ -45,7 +48,15 @@ describe('amp-analytics.VariableService', function() {
   });
 
   describe('expandTemplate', () => {
-    const vars = {'1': '1${2}', '2': '2${3}', '3': '3${4}', '4': '4${1}'};
+    const vars = {
+      '1': '1${2}', '2': '2${3}', '3': '3${4}', '4': '4${1}', '5': 0};
+
+    it('expands zeros', () => {
+      return variables.expandTemplate('${5}', new ExpansionOptions(vars))
+        .then(actual =>
+          expect(actual).to.equal('0')
+      );
+    });
 
     it('expands nested vars', () => {
       return variables.expandTemplate('${1}', new ExpansionOptions(vars))

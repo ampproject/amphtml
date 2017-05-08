@@ -16,9 +16,13 @@
 
 import {getStyle} from '../../src/style';
 import * as rds from '../../src/render-delaying-services';
-import {installPerformanceService} from '../../src/service/performance-impl';
+import {
+  installPerformanceService,
+  performanceFor,
+} from '../../src/service/performance-impl';
 import {createIframePromise} from '../../testing/iframe';
 import {installResourcesServiceForDoc} from '../../src/service/resources-impl';
+import {resourcesForDoc} from '../../src/services';
 import * as sinon from 'sinon';
 import * as styles from '../../src/style-installer';
 
@@ -28,6 +32,8 @@ describe('Styles', () => {
   let sandbox;
   let win;
   let doc;
+  let resources;
+  let ampdoc;
   let tickSpy;
   let schedulePassSpy;
   let waitForServicesStub;
@@ -37,10 +43,12 @@ describe('Styles', () => {
       sandbox = sinon.sandbox.create();
       win = iframe.win;
       doc = win.document;
-      const perf = installPerformanceService(doc.defaultView);
+      installPerformanceService(doc.defaultView);
+      const perf = performanceFor(doc.defaultView);
       tickSpy = sandbox.spy(perf, 'tick');
-
-      const resources = installResourcesServiceForDoc(doc);
+      installResourcesServiceForDoc(doc);
+      resources = resourcesForDoc(doc);
+      ampdoc = resources.ampdoc;
       schedulePassSpy = sandbox.spy(resources, 'schedulePass');
       waitForServicesStub = sandbox.stub(rds, 'waitForServices');
     });
@@ -56,18 +64,29 @@ describe('Styles', () => {
       expect(getStyle(doc.body, 'opacity')).to.equal('');
       expect(getStyle(doc.body, 'visibility')).to.equal('');
       expect(getStyle(doc.body, 'animation')).to.equal('');
+      expect(ampdoc.signals().get('render-start')).to.be.null;
 
       styles.makeBodyVisible(doc);
       expect(doc.body).to.exist;
       expect(getStyle(doc.body, 'opacity')).to.equal('1');
       expect(getStyle(doc.body, 'visibility')).to.equal('visible');
       expect(getStyle(doc.body, 'animation')).to.equal('none');
+      expect(ampdoc.signals().get('render-start')).to.be.ok;
+    });
+
+    it('should ignore resources failures for render-start', () => {
+      sandbox.stub(resources, 'renderStarted', () => {
+        throw new Error('intentional');
+      });
+      styles.makeBodyVisible(doc);
+      expect(ampdoc.signals().get('render-start')).to.be.null;
     });
 
     it('should wait for render delaying services', done => {
       expect(getStyle(doc.body, 'opacity')).to.equal('');
       expect(getStyle(doc.body, 'visibility')).to.equal('');
       expect(getStyle(doc.body, 'animation')).to.equal('');
+      expect(ampdoc.signals().get('render-start')).to.be.null;
 
       waitForServicesStub.withArgs(win)
           .returns(Promise.resolve(['service1', 'service2']));
@@ -79,6 +98,7 @@ describe('Styles', () => {
         expect(getStyle(doc.body, 'animation')).to.equal('none');
         expect(tickSpy.withArgs('mbv')).to.be.calledOnce;
         expect(schedulePassSpy.withArgs(1, true)).to.be.calledOnce;
+        expect(ampdoc.signals().get('render-start')).to.be.ok;
         done();
       }, 0);
     });
@@ -89,6 +109,7 @@ describe('Styles', () => {
       setTimeout(() => {
         expect(tickSpy.withArgs('mbv')).to.be.calledOnce;
         expect(schedulePassSpy).to.not.be.calledWith(sinon.match.number, true);
+        expect(ampdoc.signals().get('render-start')).to.be.ok;
         done();
       }, 0);
     });

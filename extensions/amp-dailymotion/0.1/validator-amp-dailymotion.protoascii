@@ -15,47 +15,22 @@
 #
 tags: {  # amp-dailymotion
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
-  spec_name: "amp-dailymotion extension .js script"
-  mandatory_parent: "HEAD"
-  unique_warning: true
-  extension_unused_unless_tag_present: "amp-dailymotion"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  satisfies: "amp-dailymotion extension .js script"
+  extension_spec: {
+    name: "amp-dailymotion"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    deprecated_recommends_usage_of_tag: "amp-dailymotion"
+    deprecated_allow_duplicates: true
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-dailymotion"
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-dailymotion-(latest|0\\.1)\\.js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-dailymotion.html"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-dailymotion>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-DAILYMOTION"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-dailymotion extension .js script"
+  requires: "amp-dailymotion extension .js script"
   attrs: {
     name: "data-endscreen-enable"
     value_regex: "true|false"
@@ -90,7 +65,7 @@ tags: {  # <amp-dailymotion>
     value_regex_casei: "[a-z0-9]+"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-dailymotion.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-dailymotion"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

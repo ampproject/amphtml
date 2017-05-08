@@ -16,10 +16,9 @@
 
 # Specific script tags for custom elements and runtime imports.
 tags: {  # amp-analytics
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-analytics extension .js script"
+  satisfies: "amp-analytics extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
   # amp-analytics is required for amp access, so the presence of either of
@@ -29,7 +28,7 @@ tags: {  # amp-analytics
   # for the amp-analytics extension.
   #extension_unused_unless_tag_present: "amp-analytics"
   #extension_unused_unless_tag_present: "amp-access extension .json script"
-  #extension_unused_unless_tag_present: "amp-user-notificatin"
+  #extension_unused_unless_tag_present: "amp-user-notification"
   attrs: {
     name: "async"
     mandatory: true
@@ -57,11 +56,9 @@ tags: {  # amp-analytics
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-analytics.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-analytics"
 }
 tags: {  # amp-analytics (json)
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-analytics extension .json script"
   mandatory_parent: "AMP-ANALYTICS"
@@ -78,50 +75,21 @@ tags: {  # amp-analytics (json)
       error_message: "html comments"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-analytics.html"
-}
-# This tag isn't intended to be used by publishers directly, but may be
-# emitted by the AMP cache.
-tags: {  # amp-ad-metadata (json)
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "SCRIPT"
-  spec_name: "amp-ad-metadata .json script"
-  mandatory_parent: "BODY"
-  attrs: {
-    name: "amp-ad-metadata"
-    mandatory: true
-    value: ""
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "type"
-    mandatory: true
-    value_casei: "application/json"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "<!--"
-      error_message: "html comments"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-analytics.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-analytics"
 }
 tags: {  # <amp-analytics>
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-ANALYTICS"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-analytics extension .js script"
+  requires: "amp-analytics extension .js script"
   attrs: { name: "type" }
   attrs: {
     name: "config"
     value_url: {
       allowed_protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
+      allow_empty: true
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-analytics.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-analytics"
 }

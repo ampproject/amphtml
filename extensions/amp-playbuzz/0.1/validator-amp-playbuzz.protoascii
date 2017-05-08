@@ -16,49 +16,28 @@
 
 tags: {  # amp-playbuzz
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
-  spec_name: "amp-playbuzz extension .js script"
-  also_requires_tag: "amp-playbuzz"
-  mandatory_parent: "HEAD"
-  unique: true
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  satisfies: "amp-playbuzz extension .js script"
+  requires: "amp-playbuzz"
+  extension_spec: {
+    name: "amp-playbuzz"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-playbuzz"
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-playbuzz-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-playbuzz"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-playbuzz>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-PLAYBUZZ"
-  also_requires_tag: "amp-playbuzz extension .js script"
+  satisfies: "amp-playbuzz"
+  requires: "amp-playbuzz extension .js script"
   attrs: {
-    name: "data-comments"
-    value_regex_casei: "(false|true)"
+    name: "src"
+    mandatory_oneof: "['src', 'data-item']"
+  }
+  attrs: {
+    name: "data-item"
+    mandatory_oneof: "['src', 'data-item']"
   }
   attrs: {
     name: "data-item-info"
@@ -69,8 +48,8 @@ tags: {  # <amp-playbuzz>
     value_regex_casei: "(false|true)"
   }
   attrs: {
-    name: "src"
-    mandatory: true
+    name: "data-comments"
+    value_regex_casei: "(false|true)"
   }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-playbuzz"

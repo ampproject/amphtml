@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-import {viewerForDoc} from '../viewer';
+import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
+import {viewerForDoc} from '../services';
 import {Viewport, ViewportBindingDef} from '../service/viewport-impl';
 import {getServiceForDoc} from '../service';
-import {resourcesForDoc} from '../../src/resources';
+import {resourcesForDoc} from '../services';
 import {
   nativeIntersectionObserverSupported,
 } from '../../src/intersection-observer-polyfill';
-import {isExperimentOn} from '../../src/experiments';
 import {layoutRectLtwh} from '../layout-rect';
 import {Observable} from '../observable';
-import {MessageType} from '../../src/3p-frame';
-import {IframeMessagingClient} from '../../3p/iframe-messaging-client';
+import {MessageType} from '../../src/3p-frame-messaging';
 import {dev} from '../log';
 
 /** @const {string} */
@@ -68,35 +67,24 @@ export class ViewportBindingInabox {
 
     /**
      * The current layout rect of the iframe box.
-     * To not trigger amp-analytics visibility immediately,
-     * we start with an initial position right below the fold.
+     * TODO(lannka, #7971): The best way to stop visibility from firing
+     * is to move this functionality to the InOb polyfill.
+     * ~To not trigger amp-analytics visibility immediately,
+     * we start with an initial position right below the fold.~
      * @private {!../layout-rect.LayoutRectDef}
      */
     this.boxRect_ = layoutRectLtwh(0, boxHeight + 1, boxWidth, boxHeight);
 
-    /** @private @const {!IframeMessagingClient} */
-    this.iframeClient_ = new IframeMessagingClient(win);
-    this.iframeClient_.setSentinel(getRandom(win));
-
-    // Bet the top window is the scrollable window and loads host script.
-    // TODOs:
-    // 1) check window ancestor origin, if the top window is in same origin,
-    // don't bother to use post messages.
-    // 2) broadcast the request
-    this.iframeClient_.setHostWindow(win.top);
-
-    /** @private {boolean} */
-    this.visibilityV2Enabled_ =
-        nativeIntersectionObserverSupported(win) &&
-            isExperimentOn(win, 'visibility-v2');
+    /** @private @const {!../../3p/iframe-messaging-client.IframeMessagingClient} */
+    this.iframeClient_ = iframeMessagingClientFor(win);
 
     dev().fine(TAG, 'initialized inabox viewport');
   }
 
   /** @override */
   connect() {
-    if (this.visibilityV2Enabled_) {
-      // Visibility V2 uses native IntersectionObserver, no position data needed
+    if (nativeIntersectionObserverSupported(this.win)) {
+      // Using native IntersectionObserver, no position data needed
       // from host doc.
       return;
     }
@@ -173,11 +161,14 @@ export class ViewportBindingInabox {
   /** @override */ updatePaddingTop() {/* no-op */}
   /** @override */ hideViewerHeader() {/* no-op */}
   /** @override */ showViewerHeader() {/* no-op */}
+  /** @override */ disableScroll() {/* no-op */}
+  /** @override */ resetScroll() {/* no-op */}
   /** @override */ ensureReadyForElements() {/* no-op */}
   /** @override */ updateLightboxMode() {/* no-op */}
   /** @override */ setScrollTop() {/* no-op */}
   /** @override */ getScrollWidth() {return 0;}
   /** @override */ getScrollHeight() {return 0;}
+  /** @override */ getBorderTop() {return 0;}
   /** @override */ requiresFixedLayerTransfer() {return false;}
 }
 
@@ -191,14 +182,6 @@ export function installInaboxViewportService(ampdoc) {
   const viewport = new Viewport(ampdoc, binding, viewer);
   return /** @type {!Viewport} */(getServiceForDoc(
       ampdoc, 'viewport', () => viewport));
-}
-
-/**
- * @param {!Window} win
- * @returns {string}
- */
-function getRandom(win) {
-  return String(win.Math.random()).substr(2);
 }
 
 /**

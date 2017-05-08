@@ -25,13 +25,11 @@ limitations under the License.
     <td class="col-fourty"><strong>Availability</strong></td>
     <td>Stable</td>
   </tr>
-  <!--
-  Uncomment the script after validator changes are pushed to production.
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js">&lt;/script></code></td>
   </tr>
-  -->
+
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
     <td><a href="https://ampbyexample.com/components/amp-video/">Annotated code example for amp-video</a></td>
@@ -49,8 +47,6 @@ The `amp-video` component loads the video resource specified by its `src` attrib
 The `amp-video` component HTML accepts up to three unique types of HTML nodes as children - `source` tags, a placeholder for before the video starts, and a fallback if the browser doesn’t support HTML5 video.
 
 `source` tag children can be used in the same way as the standard `video` tag, to specify different source files to play.
-
-One or zero immediate child nodes can have the `placeholder` attribute. If present, this node and its children form a placeholder that will display instead of the video. A click or tap anywhere inside of the `amp-video` container will replace the placeholder with the video itself.
 
 One or zero immediate child nodes can have the `fallback` attribute. If present, this node and its children form the content that will be displayed if HTML5 video is not supported on the user’s browser.
 
@@ -86,7 +82,7 @@ If this attribute is present, and the browser supports autoplay:
 * when the video is scrolled out of view, the video is paused
 * when the video is scrolled into view, the video resumes playback
 * when the user taps the video, the video is unmuted
-* if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it.  For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused. 
+* if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it.  For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.
 
 **controls**
 
@@ -104,6 +100,12 @@ If present, will automatically loop the video back to the start upon reaching th
 **common attributes**
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+
+## Click-to-Play overlay
+Click-to-play is a common UX feature for video players on the web. `amp-video` supports
+the standard `play` AMP action, allowing you to implement click-to-play easily.
+
+Please see [Click-to-play overlay for amp-video on AmpByExample.com](https://ampbyexample.com/advanced/click-to-play_overlay_for_amp-video/) for a sample.
 
 ## Validation
 

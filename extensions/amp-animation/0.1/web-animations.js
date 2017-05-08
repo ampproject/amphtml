@@ -16,7 +16,7 @@
 
 import {Observable} from '../../../src/observable';
 import {dev, user} from '../../../src/log';
-import {getVendorJsPropertyName} from '../../../src/style';
+import {getVendorJsPropertyName, computedStyle} from '../../../src/style';
 import {isArray, isObject} from '../../../src/types';
 import {
   WebAnimationDef,
@@ -29,6 +29,7 @@ import {
   WebMultiAnimationDef,
   isWhitelistedProp,
 } from './web-animation-types';
+import {dashToCamelCase} from '../../../src/string';
 
 
 /** @const {string} */
@@ -289,7 +290,7 @@ export class MeasureScanner extends Scanner {
     /** @private {!Array<!Element> } */
     this.targets_ = [];
 
-    /** @private {!Array<!CSSStyleDeclaration>} */
+    /** @private {!Array<!Object<string, string>>} */
     this.computedStyleCache_ = [];
   }
 
@@ -312,13 +313,7 @@ export class MeasureScanner extends Scanner {
     const promises = [];
     for (let i = 0; i < this.targets_.length; i++) {
       const element = this.targets_[i];
-      // TODO(dvoytenko, #6794): Remove old `-amp-element` form after the new
-      // form is in PROD for 1-2 weeks.
-      if (element.classList.contains('-amp-element') ||
-          element.classList.contains('i-amphtml-element')) {
-        const resource = resources.getResourceForElement(element);
-        promises.push(resource.loadedOnce());
-      }
+      promises.push(resources.requireLayout(element));
     }
     return Promise.all(promises);
   }
@@ -456,7 +451,7 @@ export class MeasureScanner extends Scanner {
             this.context_.resolveTarget(targetSpec) :
             targetSpec,
         `Target not found: "${targetSpec}"`);
-    if (this.targets_.indexOf(target) == -1) {
+    if (!this.targets_.includes(target)) {
       this.targets_.push(target);
     }
     return target;
@@ -470,12 +465,11 @@ export class MeasureScanner extends Scanner {
   measure_(target, prop) {
     const index = this.targets_.indexOf(target);
     if (!this.computedStyleCache_[index]) {
-      this.computedStyleCache_[index] = /** @type {!CSSStyleDeclaration} */ (
-          this.win./*OK*/getComputedStyle(target));
+      this.computedStyleCache_[index] = computedStyle(this.win, target);
     }
-    const vendorName = getVendorJsPropertyName(
-        this.computedStyleCache_[index], prop);
-    return this.computedStyleCache_[index].getPropertyValue(vendorName);
+    const vendorName = getVendorJsPropertyName(this.computedStyleCache_[index],
+        dashToCamelCase(prop));
+    return this.computedStyleCache_[index][vendorName];
   }
 
   /**

@@ -89,12 +89,6 @@ requirement: {
   value: 'Array.prototype.findIndex'
 }
 
-requirement: {
-  type: BANNED_PROPERTY_CALL
-  error_message: 'Array.prototype.includes is not allowed'
-  value: 'Array.prototype.includes'
-}
-
 # Math
 
 requirement: {

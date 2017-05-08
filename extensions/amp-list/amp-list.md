@@ -42,7 +42,7 @@ using a supplied template.</td>
 
 ## Usage
 
-The `amp-list` defines data source using the following attributes:
+The `amp-list` defines its data source using the following attributes:
 
 - `src` defines a CORS URL. The URL's protocol must be HTTPS.
 - `credentials` defines a `credentials` option as specified by the
@@ -53,25 +53,25 @@ The response is expected to contain the array that will be rendered. The path to
 is specified using the optional `items` attribute. This attribute contains the dot-notated path
 to the array within the response object. The default value is "items". To indicate that the
 response itself is an array, the "." value can be used. The array can be nested within the
-response and accessed using, e.g. `items="field1.field2"` expression.
+response and accessed using an expression like `items="field1.field2"`.
 
 Thus, when `items="items"` is specified (the default) the response must be a JSON object that
-contains an array property "items":
+contains an array property called "items":
 ```text
 {
   "items": [...]
 }
 ```
 
-The template can be specified using either of the following two ways:
+The template can be specified in one of the following two ways:
 
-- `template` attribute that references an ID of an existing `template` element.
-- `template` element nested directly inside of this `amp-list` element.
+- a `template` attribute that references an ID of an existing `template` element.
+- a `template` element nested directly inside of this `amp-list` element.
 
 For more details on templates, see [AMP HTML Templates](../../spec/amp-html-templates.md).
 
-Optionally, `amp-list` element can contain an element with `overflow` attribute. This
-element will be shown if AMP Runtime cannot resize the `amp-list` element as requested.
+Optionally, the `amp-list` element can contain an element with an `overflow` attribute. This
+element will be shown if the AMP Runtime cannot resize the `amp-list` element as requested.
 
 Example: Using overflow
 ```html
@@ -90,7 +90,7 @@ Example: Using overflow
 ```
 
 ```css
-.list-overflow {
+.list-overflow[overflow] {
   position: absolute;
   bottom: 0;
 }
@@ -99,7 +99,7 @@ Example: Using overflow
 ## Substitutions
 
 The `amp-list` allows all standard URL variable substitutions.
-See [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
+See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
 
 For example:
 ```html
@@ -113,20 +113,20 @@ The request is always made from the client, even if the document was served from
 cache. Loading is triggered using normal AMP rules depending on how far the element is from
 the current viewport.
 
-If `amp-list` needs more space after loading it requests the AMP runtime to update its
-height using the normal AMP flow. If AMP Runtime cannot satisfy the request for new
-height, it will display `overflow` element when available. Notice however, the typical
+If `amp-list` needs more space after loading, it requests the AMP runtime to update its
+height using the normal AMP flow. If the AMP runtime cannot satisfy the request for the new
+height, it will display the `overflow` element when available. Notice however, that the typical
 placement of `amp-list` elements at the bottom of the document almost always guarantees
-that AMP Runtime can resize it.
+that the AMP runtime can resize them.
 
-By default, `amp-list` adds `list` ARIA role to the list element and `listitem` role to item
+By default, `amp-list` adds a `list` ARIA role to the list element and a `listitem` role to item
 elements rendered via the template.
 
 ## Attributes
 
 **src** (required)
 
-The URL location of the remote endpoint that will return the JSON that will be rendered
+The URL of the remote endpoint that will return the JSON that will be rendered
 within this `amp-list`. This must be a CORS HTTP service.
 
 **credentials** (optional)
@@ -144,7 +144,7 @@ expression that navigates via fields of the JSON response. Notice:
 
 - The default value is "items". The expected response: `{items: [...]}`.
 - If the response itself is the desired array, use the value of ".". The expected response is: `[...]`.
-- Nest navigation is permitted (e.g., "field1.field2"). The expected response is: `{field1: {field2: [...]}}`.
+- Nested navigation is permitted (e.g., "field1.field2"). The expected response is: `{field1: {field2: [...]}}`.
 
 **common attributes**
 

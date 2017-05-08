@@ -14,12 +14,32 @@
  * limitations under the License.
  */
 
-import {timerFor} from './timer';
+import {internalListenImplementation} from './event-helper-listen';
 import {user} from './log';
 
 /** @const {string}  */
 const LOAD_FAILURE_PREFIX = 'Failed to load:';
 
+/**
+ * Returns a CustomEvent with a given type and detail; supports fallback for IE.
+ * @param {!Window} win
+ * @param {string} type
+ * @param {Object} detail
+ * @return {!Event}
+ */
+export function createCustomEvent(win, type, detail) {
+  // win.CustomEvent is a function on Edge, Chrome, FF, Safari but
+  // is an object on IE 11.
+  if (typeof win.CustomEvent == 'function') {
+    return new win.CustomEvent(type, {detail});
+  } else {
+    // Deprecated fallback for IE.
+    const e = win.document.createEvent('CustomEvent');
+    e.initCustomEvent(
+        type, /* canBubble */ false, /* cancelable */ false, detail);
+    return e;
+  }
+}
 
 /**
  * Listens for the specified event on the element.
@@ -30,17 +50,8 @@ const LOAD_FAILURE_PREFIX = 'Failed to load:';
  * @return {!UnlistenDef}
  */
 export function listen(element, eventType, listener, opt_capture) {
-  let localElement = element;
-  let localListener = listener;
-  const capture = opt_capture || false;
-  localElement.addEventListener(eventType, localListener, capture);
-  return () => {
-    if (localElement) {
-      localElement.removeEventListener(eventType, localListener, capture);
-    }
-    localListener = null;
-    localElement = null;
-  };
+  return internalListenImplementation(
+      element, eventType, listener, opt_capture);
 }
 
 
@@ -54,44 +65,41 @@ export function listen(element, eventType, listener, opt_capture) {
  * @return {!UnlistenDef}
  */
 export function listenOnce(element, eventType, listener, opt_capture) {
-  let localElement = element;
   let localListener = listener;
-  const capture = opt_capture || false;
-  let unlisten;
-  let proxy = event => {
-    localListener(event);
-    unlisten();
-  };
-  unlisten = () => {
-    if (localElement) {
-      localElement.removeEventListener(eventType, proxy, capture);
+  const unlisten = internalListenImplementation(element, eventType, event => {
+    try {
+      localListener(event);
+    } finally {
+      // Ensure listener is GC'd
+      localListener = null;
+      unlisten();
     }
-    localElement = null;
-    proxy = null;
-    localListener = null;
-  };
-  localElement.addEventListener(eventType, proxy, capture);
+  }, opt_capture);
   return unlisten;
 }
 
 
 /**
  * Returns  a promise that will resolve as soon as the specified event has
- * fired on the element. Optionally, opt_timeout can be specified that will
- * reject the promise if the event has not fired by then.
+ * fired on the element.
  * @param {!EventTarget} element
  * @param {string} eventType
  * @param {boolean=} opt_capture
- * @param {number=} opt_timeout
+ * @param {function(!UnlistenDef)=} opt_cancel An optional function that, when
+ *     provided, will be called with the unlistener. This gives the caller
+ *     access to the unlistener, so it may be called manually when necessary.
  * @return {!Promise<!Event>}
  */
-export function listenOncePromise(element, eventType, opt_capture,
-    opt_timeout) {
+export function listenOncePromise(element, eventType, opt_capture, opt_cancel) {
   let unlisten;
-  const eventPromise = new Promise((resolve, unusedReject) => {
+  const eventPromise = new Promise(resolve => {
     unlisten = listenOnce(element, eventType, resolve, opt_capture);
   });
-  return racePromise_(eventPromise, unlisten, undefined, opt_timeout);
+  eventPromise.then(unlisten, unlisten);
+  if (opt_cancel) {
+    opt_cancel(unlisten);
+  }
+  return eventPromise;
 }
 
 
@@ -113,17 +121,16 @@ export function isLoaded(eleOrWindow) {
  * and 'error' events. Optionally this method takes a timeout, which will reject
  * the promise if the resource has not loaded by then.
  * @param {T} eleOrWindow Supports both Elements and as a special case Windows.
- * @param {number=} opt_timeout
  * @return {!Promise<T>}
  * @template T
  */
-export function loadPromise(eleOrWindow, opt_timeout) {
+export function loadPromise(eleOrWindow) {
   let unlistenLoad;
   let unlistenError;
   if (isLoaded(eleOrWindow)) {
     return Promise.resolve(eleOrWindow);
   }
-  let loadingPromise = new Promise((resolve, reject) => {
+  const loadingPromise = new Promise((resolve, reject) => {
     // Listen once since IE 5/6/7 fire the onload event continuously for
     // animated GIFs.
     const tagName = eleOrWindow.tagName;
@@ -137,19 +144,29 @@ export function loadPromise(eleOrWindow, opt_timeout) {
       unlistenError = listenOnce(eleOrWindow, 'error', reject);
     }
   });
-  loadingPromise = loadingPromise.then(() => eleOrWindow, failedToLoad);
-  return racePromise_(loadingPromise, unlistenLoad, unlistenError,
-      opt_timeout);
+
+  return loadingPromise.then(() => {
+    if (unlistenError) {
+      unlistenError();
+    }
+    return eleOrWindow;
+  }, () => {
+    if (unlistenLoad) {
+      unlistenLoad();
+    }
+    failedToLoad(eleOrWindow);
+  });
 }
 
 /**
  * Emit error on load failure.
- * @param {*} event
+ * @param {!Element|!Window} eleOrWindow Supports both Elements and as a special
+ *     case Windows.
  */
-function failedToLoad(event) {
+function failedToLoad(eleOrWindow) {
   // Report failed loads as user errors so that they automatically go
   // into the "document error" bucket.
-  let target = event.target;
+  let target = eleOrWindow;
   if (target && target.src) {
     target = target.src;
   }
@@ -163,30 +180,4 @@ function failedToLoad(event) {
  */
 export function isLoadErrorMessage(message) {
   return message.indexOf(LOAD_FAILURE_PREFIX) != -1;
-}
-
-/**
- * @param {!Promise<TYPE>} promise
- * @param {UnlistenDef|undefined} unlisten1
- * @param {UnlistenDef|undefined} unlisten2
- * @param {number|undefined} timeout
- * @return {!Promise<TYPE>}
- * @template TYPE
- */
-function racePromise_(promise, unlisten1, unlisten2, timeout) {
-  let racePromise;
-  if (timeout === undefined) {
-    // Timeout is not specified: return promise.
-    racePromise = promise;
-  } else {
-    // Timeout has been specified: add a timeout condition.
-    racePromise = timerFor(self).timeoutPromise(timeout || 0, promise);
-  }
-  if (unlisten1) {
-    racePromise.then(unlisten1, unlisten1);
-  }
-  if (unlisten2) {
-    racePromise.then(unlisten2, unlisten2);
-  }
-  return racePromise;
 }

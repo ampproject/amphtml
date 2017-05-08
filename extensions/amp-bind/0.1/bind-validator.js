@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
+import {map} from '../../../src/utils/object';
+import {parseSrcset} from '../../../src/srcset';
+import {startsWith} from '../../../src/string';
+import {user} from '../../../src/log';
+
+const TAG = 'amp-bind';
+
 /**
  * @typedef {{
  *   allowedProtocols: (!Object<string,boolean>|undefined),
- *   blockedURLs: (Array<string>|undefined),
+ *   alternativeName: (string|undefined),
  * }}
  */
 let PropertyRulesDef;
@@ -26,15 +33,21 @@ let PropertyRulesDef;
  * Property rules that apply to any and all tags.
  * @private {Object<string, ?PropertyRulesDef>}
  */
-const GLOBAL_PROPERTY_RULES = {
+const GLOBAL_PROPERTY_RULES = map({
+  'text': null,
   'class': {
     blacklistedValueRegex: '(^|\\W)i-amphtml-',
   },
-  // ARIA accessibility attributes.
-  'aria-describedby': null,
-  'aria-label': null,
-  'aria-labelledby': null,
-};
+});
+
+/**
+ * Property rules that apply to all AMP elements.
+ * @private {Object<string, Object<string, ?PropertyRulesDef>>}
+ */
+const AMP_PROPERTY_RULES = map({
+  'width': null,
+  'height': null,
+});
 
 /**
  * Maps tag names to property names to PropertyRulesDef.
@@ -43,6 +56,16 @@ const GLOBAL_PROPERTY_RULES = {
  * @private {Object<string, Object<string, ?PropertyRulesDef>>}}
  */
 const ELEMENT_RULES = createElementRules_();
+
+/**
+ * Map whose keys comprise all properties that contain URLs.
+ * @private {Object<string, boolean>}
+ */
+const URL_PROPERTIES = map({
+  'src': true,
+  'srcset': true,
+  'href': true,
+});
 
 /**
  * BindValidator performs runtime validation of Bind expression results.
@@ -72,54 +95,78 @@ export class BindValidator {
    * @return {boolean}
    */
   isResultValid(tag, property, value) {
-    const attrRules = this.rulesForTagAndProperty_(tag, property);
+    let rules = this.rulesForTagAndProperty_(tag, property);
+
+    // `alternativeName` is a reference to another property's rules.
+    if (rules && rules.alternativeName) {
+      rules = this.rulesForTagAndProperty_(tag, rules.alternativeName);
+    }
 
     // If binding to (tag, property) is not allowed, return false.
-    if (attrRules === undefined) {
+    if (rules === undefined) {
       return false;
     }
 
     // If binding is allowed but have no specific rules, return true.
-    if (attrRules === null) {
+    if (rules === null) {
       return true;
     }
 
-    // @see validator/engine/validator.ParsedUrlSpec.validateUrlAndProtocol()
-    const allowedProtocols = attrRules.allowedProtocols;
-    if (allowedProtocols && value) {
-      const re = /^([^:\/?#.]+):[\s\S]*$/;
-      const match = re.exec(value);
-
-      if (match !== null) {
-        const protocol = match[1].toLowerCase().trimLeft();
-        if (!allowedProtocols.hasOwnProperty(protocol)) {
-          return false;
-        }
-      }
-    }
-
-    // @see validator/engine/validator.ParsedTagSpec.validateAttributes()
-    const blockedURLs = attrRules.blockedURLs;
-    if (blockedURLs && value) {
-      for (let i = 0; i < blockedURLs.length; i++) {
-        let decodedURL;
+    // Validate URL(s) if applicable.
+    if (value && URL_PROPERTIES[property]) {
+      let urls;
+      if (property === 'srcset') {
+        let srcset;
         try {
-          decodedURL = decodeURIComponent(value);
+          srcset = parseSrcset(value);
         } catch (e) {
-          decodedURL = unescape(value);
+          user().error(TAG, 'Failed to parse srcset: ', e);
+          return false;
         }
-        if (decodedURL.trim() === blockedURLs[i]) {
+        const sources = srcset.getSources();
+        urls = sources.map(source => source.url);
+      } else {
+        urls = [value];
+      }
+
+      for (let i = 0; i < urls.length; i++) {
+        if (!this.isUrlValid_(urls[i], rules)) {
           return false;
         }
       }
     }
 
     // @see validator/engine/validator.ParsedTagSpec.validateAttributes()
-    const blacklistedValueRegex = attrRules.blacklistedValueRegex;
-    if (blacklistedValueRegex && value) {
+    const blacklistedValueRegex = rules.blacklistedValueRegex;
+    if (value && blacklistedValueRegex) {
       const re = new RegExp(blacklistedValueRegex, 'i');
       if (re.test(value)) {
         return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * Returns true if a url's value is valid within a property rules spec.
+   * @param {string} url
+   * @param {!PropertyRulesDef} rules
+   * @return {boolean}
+   * @private
+   */
+  isUrlValid_(url, rules) {
+    // @see validator/engine/validator.ParsedUrlSpec.validateUrlAndProtocol()
+    const allowedProtocols = rules.allowedProtocols;
+    if (allowedProtocols && url) {
+      const re = /^([^:\/?#.]+):[\s\S]*$/;
+      const match = re.exec(url);
+      if (match !== null) {
+        const protocol = match[1].toLowerCase().trimLeft();
+        // hasOwnProperty() needed since nested objects are not prototype-less.
+        if (!allowedProtocols.hasOwnProperty(protocol)) {
+          return false;
+        }
       }
     }
 
@@ -134,18 +181,19 @@ export class BindValidator {
    * @private
    */
   rulesForTagAndProperty_(tag, property) {
-    if (GLOBAL_PROPERTY_RULES.hasOwnProperty(property)) {
-      return GLOBAL_PROPERTY_RULES[property];
+    const globalPropertyRules = GLOBAL_PROPERTY_RULES[property];
+    if (globalPropertyRules !== undefined) {
+      return globalPropertyRules;
     }
-
-    let tagRules;
-    if (ELEMENT_RULES.hasOwnProperty(tag)) {
-      tagRules = ELEMENT_RULES[tag];
-    }
+    const tagRules = ELEMENT_RULES[tag];
+    // hasOwnProperty() needed since nested objects are not prototype-less.
     if (tagRules && tagRules.hasOwnProperty(property)) {
       return tagRules[property];
     }
-
+    const ampPropertyRules = AMP_PROPERTY_RULES[property];
+    if (startsWith(tag, 'AMP-') && ampPropertyRules !== undefined) {
+      return ampPropertyRules;
+    }
     return undefined;
   }
 }
@@ -156,198 +204,175 @@ export class BindValidator {
  */
 function createElementRules_() {
   // Initialize `rules` with tag-specific constraints.
-  const rules = {
+  const rules = map({
+    'AMP-BRIGHTCOVE': {
+      'data-account': null,
+      'data-embed': null,
+      'data-player': null,
+      'data-player-id': null,
+      'data-playlist-id': null,
+      'data-video-id': null,
+    },
     'AMP-CAROUSEL': {
-      slide: null,
+      'slide': null,
+    },
+    'AMP-IFRAME': {
+      'src': null,
     },
     'AMP-IMG': {
-      alt: null,
-      referrerpolicy: null,
-      src: {
-        allowedProtocols: {
-          data: true,
-          http: true,
-          https: true,
+      'alt': null,
+      'attribution': null,
+      'src': {
+        'allowedProtocols': {
+          'data': true,
+          'http': true,
+          'https': true,
         },
-        blockedURLs: ['__amp_source_origin'],
       },
-      // TODO: Support `srcset`.
+      'srcset': {
+        'alternativeName': 'src',
+      },
+    },
+    'AMP-LIST': {
+      'src': {
+        'allowedProtocols': {
+          'https': true,
+        },
+      },
     },
     'AMP-SELECTOR': {
-      selected: null,
+      'selected': null,
+    },
+    'AMP-STATE': {
+      'src': {
+        'allowedProtocols': {
+          'https': true,
+        },
+      },
     },
     'AMP-VIDEO': {
-      alt: null,
-      attribution: null,
-      autoplay: null,
-      controls: null,
-      loop: null,
-      muted: null,
-      placeholder: null,
-      poster: null,
-      preload: null,
-      src: {
-        allowedProtocols: {
-          https: true,
+      'alt': null,
+      'attribution': null,
+      'controls': null,
+      'loop': null,
+      'poster': null,
+      'preload': null,
+      'src': {
+        'allowedProtocols': {
+          'https': true,
         },
-        blockedURLs: ['__amp_source_origin'],
       },
-      // TODO: Support `srcset`.
     },
-    A: {
-      href: {
-        allowedProtocols: {
-          ftp: true,
-          http: true,
-          https: true,
-          mailto: true,
+    'AMP-YOUTUBE': {
+      'data-videoid': null,
+    },
+    'A': {
+      'href': {
+        'allowedProtocols': {
+          'ftp': true,
+          'http': true,
+          'https': true,
+          'mailto': true,
           'fb-messenger': true,
-          intent: true,
-          skype: true,
-          sms: true,
-          snapchat: true,
-          tel: true,
-          tg: true,
-          threema: true,
-          twitter: true,
-          viber: true,
-          whatsapp: true,
+          'intent': true,
+          'skype': true,
+          'sms': true,
+          'snapchat': true,
+          'tel': true,
+          'tg': true,
+          'threema': true,
+          'twitter': true,
+          'viber': true,
+          'whatsapp': true,
         },
-        blockedURLs: ['__amp_source_origin'],
       },
     },
-    BUTTON: {
-      disabled: null,
-      type: null,
-      value: null,
+    'BUTTON': {
+      'disabled': null,
+      'type': null,
+      'value': null,
     },
-    FIELDSET: {
-      disabled: null,
+    'FIELDSET': {
+      'disabled': null,
     },
-    INPUT: {
-      accept: null,
-      accesskey: null,
-      autocomplete: null,
-      checked: null,
-      disabled: null,
-      height: null,
-      inputmode: null,
-      max: null,
-      maxlength: null,
-      min: null,
-      minlength: null,
-      multiple: null,
-      name: {
-        blockedURLs: ['__amp_source_origin'],
-      },
-      pattern: null,
-      placeholder: null,
-      readonly: null,
-      required: null,
-      selectiondirection: null,
-      size: null,
-      spellcheck: null,
-      step: null,
-      type: {
+    'INPUT': {
+      'accept': null,
+      'accesskey': null,
+      'autocomplete': null,
+      'checked': null,
+      'disabled': null,
+      'height': null,
+      'inputmode': null,
+      'max': null,
+      'maxlength': null,
+      'min': null,
+      'minlength': null,
+      'multiple': null,
+      'pattern': null,
+      'placeholder': null,
+      'readonly': null,
+      'required': null,
+      'selectiondirection': null,
+      'size': null,
+      'spellcheck': null,
+      'step': null,
+      'type': {
         blacklistedValueRegex: '(^|\\s)(button|file|image|password|)(\\s|$)',
       },
-      value: null,
-      width: null,
+      'value': null,
+      'width': null,
     },
-    OPTION: {
-      disabled: null,
-      label: null,
-      selected: null,
-      value: null,
+    'OPTION': {
+      'disabled': null,
+      'label': null,
+      'selected': null,
+      'value': null,
     },
-    OPTGROUP: {
-      disabled: null,
-      label: null,
+    'OPTGROUP': {
+      'disabled': null,
+      'label': null,
     },
-    SELECT: {
-      disabled: null,
-      multiple: null,
-      name: null,
-      required: null,
-      size: null,
+    'SELECT': {
+      'autofocus': null,
+      'disabled': null,
+      'multiple': null,
+      'required': null,
+      'size': null,
     },
-    SOURCE: {
-      src: {
-        allowedProtocols: {
-          https: true,
+    'SOURCE': {
+      'src': {
+        'allowedProtocols': {
+          'https': true,
         },
-        blockedURLs: ['__amp_source_origin'],
       },
-      type: null,
+      'type': null,
     },
-    TRACK: {
-      label: null,
-      src: {
-        allowedProtocols: {
-          https: true,
+    'TRACK': {
+      'label': null,
+      'src': {
+        'allowedProtocols': {
+          'https': true,
         },
-        blockedURLs: ['__amp_source_origin'],
       },
-      srclang: null,
+      'srclang': null,
     },
-    TEXTAREA: {
-      autocomplete: null,
-      cols: null,
-      disabled: null,
-      maxlength: null,
-      minlength: null,
-      name: null,
-      placeholder: null,
-      readonly: null,
-      required: null,
-      rows: null,
-      selectiondirection: null,
-      selectionend: null,
-      selectionstart: null,
-      spellcheck: null,
-      wrap: null,
+    'TEXTAREA': {
+      'autocomplete': null,
+      'autofocus': null,
+      'cols': null,
+      'disabled': null,
+      'maxlength': null,
+      'minlength': null,
+      'placeholder': null,
+      'readonly': null,
+      'required': null,
+      'rows': null,
+      'selectiondirection': null,
+      'selectionend': null,
+      'selectionstart': null,
+      'spellcheck': null,
+      'wrap': null,
     },
-  };
-
-  // Collate all standard elements that should support [text] binding
-  // and add them to `rules` object.
-  // 4.3 Sections
-  const sectionTags = ['ASIDE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6',
-      'HEADER', 'FOOTER', 'ADDRESS'];
-  // 4.4 Grouping content
-  const groupingTags = ['P', 'PRE', 'BLOCKQUOTE', 'LI', 'DT', 'DD',
-      'FIGCAPTION', 'DIV'];
-  // 4.5 Text-level semantics
-  const textTags = ['A', 'EM', 'STRONG', 'SMALL', 'S', 'CITE', 'Q',
-      'DFN', 'ABBR', 'DATA', 'TIME', 'CODE', 'VAR', 'SAMP', 'KBD',
-      'SUB', 'SUP', 'I', 'B', 'U', 'MARK', 'RUBY', 'RB', 'RT', 'RTC',
-      'RP', 'BDI', 'BDO', 'SPAN'];
-  // 4.6 Edits
-  const editTags = ['INS', 'DEL'];
-  // 4.9 Tabular data
-  const tabularTags = ['CAPTION', 'THEAD', 'TFOOT', 'TD'];
-  // 4.10 Forms
-  const formTags = ['BUTTON', 'LABEL', 'LEGEND', 'OPTION',
-      'OUTPUT', 'PROGRESS', 'TEXTAREA'];
-  const allTextTags = sectionTags.concat(groupingTags).concat(textTags)
-      .concat(editTags).concat(tabularTags).concat(formTags);
-  allTextTags.forEach(tag => {
-    if (rules[tag] === undefined) {
-      rules[tag] = {};
-    }
-    rules[tag]['text'] = null;
   });
-
-  // AMP extensions support additional properties.
-  const ampExtensions = ['AMP-IMG'];
-  ampExtensions.forEach(tag => {
-    if (rules[tag] === undefined) {
-      rules[tag] = {};
-    }
-    const tagRule = rules[tag];
-    tagRule['width'] = null;
-    tagRule['height'] = null;
-  });
-
   return rules;
 }

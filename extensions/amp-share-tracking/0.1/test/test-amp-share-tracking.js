@@ -17,7 +17,7 @@
 import {AmpShareTracking} from '../amp-share-tracking';
 import {History} from '../../../../src/service/history-impl';
 import {Xhr} from '../../../../src/service/xhr-impl';
-import {shareTrackingForOrNull} from '../../../../src/share-tracking-service';
+import {shareTrackingForOrNull} from '../../../../src/services';
 import {toggleExperiment} from '../../../../src/experiments';
 import * as bytes from '../../../../src/utils/bytes';
 
@@ -108,7 +108,7 @@ describes.fakeWin('amp-share-tracking', {
       expect(historyGetFragmentStub).to.be.calledOnce;
       // the base64url of byte array [1, 2, 3, 4, 5, 6]
       expect(fragments.outgoingFragment).to.equal('AQIDBAUG');
-      expect(historyUpdateFragmentStub.withArgs('#.AQIDBAUG')).to.be
+      expect(historyUpdateFragmentStub.withArgs('.AQIDBAUG')).to.be
           .calledOnce;
     });
   });
@@ -123,7 +123,7 @@ describes.fakeWin('amp-share-tracking', {
       expect(historyGetFragmentStub).to.be.calledOnce;
       // the base64url of byte array [1, 2, 3, 4, 5, 6]
       expect(fragments.outgoingFragment).to.equal('AQIDBAUG');
-      expect(historyUpdateFragmentStub.withArgs('#.AQIDBAUG')).to.be
+      expect(historyUpdateFragmentStub.withArgs('.AQIDBAUG')).to.be
           .calledOnce;
     });
   });
@@ -140,7 +140,7 @@ describes.fakeWin('amp-share-tracking', {
       expect(historyGetFragmentStub).to.be.calledOnce;
       // the base64url of byte array [1, 2, 3, 4, 5, 6]
       expect(fragments.outgoingFragment).to.equal('AQIDBAUG');
-      expect(historyUpdateFragmentStub.withArgs('#.AQIDBAUG&key=value'))
+      expect(historyUpdateFragmentStub.withArgs('.AQIDBAUG&key=value'))
           .to.be.calledOnce;
     });
   });
@@ -154,7 +154,7 @@ describes.fakeWin('amp-share-tracking', {
     return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
       expect(historyGetFragmentStub).to.be.calledOnce;
       expect(fragments.outgoingFragment).to.equal('H5rdN8Eh');
-      expect(historyUpdateFragmentStub.withArgs('#.H5rdN8Eh')).to.be
+      expect(historyUpdateFragmentStub.withArgs('.H5rdN8Eh')).to.be
           .calledOnce;
     });
   });
@@ -168,7 +168,7 @@ describes.fakeWin('amp-share-tracking', {
     return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
       expect(historyGetFragmentStub).to.be.calledOnce;
       expect(fragments.outgoingFragment).to.equal('54321');
-      expect(historyUpdateFragmentStub.withArgs('#.54321')).to.be.calledOnce;
+      expect(historyUpdateFragmentStub.withArgs('.54321')).to.be.calledOnce;
     });
   });
 
@@ -198,7 +198,7 @@ describes.fakeWin('amp-share-tracking', {
     });
     return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
       expect(historyGetFragmentStub).to.be.calledOnce;
-      expect(historyUpdateFragmentStub.withArgs('#.54321')).to.be.calledOnce;
+      expect(historyUpdateFragmentStub.withArgs('.54321')).to.be.calledOnce;
       expect(fragments.outgoingFragment).to.equal('54321');
     });
   });

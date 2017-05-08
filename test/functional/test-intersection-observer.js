@@ -408,7 +408,7 @@ describe('IntersectionObserver', () => {
     const postMessageSpy = sinon/*OK*/.spy(testIframe.contentWindow,
         'postMessage');
     ioInstance.sendElementIntersection_();
-    expect(postMessageSpy.callCount).to.equal(0);
+    expect(postMessageSpy).to.have.not.been.called;
     expect(ioInstance.pendingChanges_).to.have.length(0);
   });
 
@@ -424,7 +424,7 @@ describe('IntersectionObserver', () => {
     ioInstance.postMessageApi_.clientWindows_ =
         [{win: testIframe.contentWindow, origin: '*'}];
     ioInstance.startSendingIntersectionChanges_();
-    expect(getIntersectionChangeEntrySpy.callCount).to.equal(1);
+    expect(getIntersectionChangeEntrySpy).to.be.calledOnce;
     expect(messages).to.have.length(1);
     expect(ioInstance.pendingChanges_).to.have.length(0);
     expect(messages[0].changes).to.have.length(1);
@@ -442,7 +442,7 @@ describe('IntersectionObserver', () => {
     ioInstance.postMessageApi_.clientWindows_ =
         [{win: testIframe.contentWindow, origin: '*'}];
     ioInstance.startSendingIntersectionChanges_();
-    expect(getIntersectionChangeEntrySpy.callCount).to.equal(1);
+    expect(getIntersectionChangeEntrySpy).to.be.calledOnce;
     expect(messages).to.have.length(1);
     expect(messages[0].changes).to.have.length(1);
     expect(messages[0].changes[0].time).to.equal(0);
@@ -481,9 +481,9 @@ describe('IntersectionObserver', () => {
     const ioInstance = new IntersectionObserver(element, testIframe);
     insert(testIframe);
     ioInstance.onViewportCallback(true);
-    expect(fireSpy.callCount).to.equal(1);
-    expect(onScrollSpy.callCount).to.equal(1);
-    expect(onChangeSpy.callCount).to.equal(1);
+    expect(fireSpy).to.be.calledOnce;
+    expect(onScrollSpy).to.be.calledOnce;
+    expect(onChangeSpy).to.be.calledOnce;
     expect(ioInstance.unlistenViewportChanges_).to.not.be.null;
   });
 
@@ -493,7 +493,7 @@ describe('IntersectionObserver', () => {
     insert(testIframe);
     ioInstance.onViewportCallback(true);
     ioInstance.onViewportCallback();
-    expect(fireSpy.callCount).to.equal(2);
+    expect(fireSpy).to.have.callCount(2);
     expect(ioInstance.unlistenViewportChanges_).to.be.null;
   });
 
@@ -502,9 +502,9 @@ describe('IntersectionObserver', () => {
     const ioInstance = new IntersectionObserver(element, testIframe);
     insert(testIframe);
     ioInstance.startSendingIntersectionChanges_();
-    expect(getIntersectionChangeEntrySpy.callCount).to.equal(2);
-    expect(onScrollSpy.callCount).to.equal(1);
-    expect(onChangeSpy.callCount).to.equal(1);
+    expect(getIntersectionChangeEntrySpy).to.have.callCount(2);
+    expect(onScrollSpy).to.be.calledOnce;
+    expect(onChangeSpy).to.be.calledOnce;
     expect(ioInstance.unlistenViewportChanges_).to.not.be.null;
   });
 

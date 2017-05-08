@@ -16,18 +16,21 @@
 
 import {AmpAdXOriginIframeHandler} from '../amp-ad-xorigin-iframe-handler';
 import {BaseElement} from '../../../../src/base-element';
+import {Signals} from '../../../../src/utils/signals';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {
   createIframeWithMessageStub,
   expectPostMessage,
 } from '../../../../testing/iframe';
 import {AmpAdUIHandler} from '../amp-ad-ui';
-import {timerFor} from '../../../../src/timer';
+import {timerFor} from '../../../../src/services';
 import * as sinon from 'sinon';
 
 describe('amp-ad-xorigin-iframe-handler', () => {
   let sandbox;
   let adImpl;
+  let signals;
+  let renderStartedSpy;
   let iframeHandler;
   let iframe;
   let testIndex = 0;
@@ -41,9 +44,19 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     adElement.isBuilt = () => {
       return true;
     };
+    signals = new Signals();
+    adElement.signals = () => signals;
+    renderStartedSpy = sandbox.spy();
+    adElement.renderStarted = () => {
+      renderStartedSpy();
+      signals.signal('render-start');
+    };
     adImpl = new BaseElement(adElement);
     adImpl.getFallback = () => {
       return null;
+    };
+    adImpl.lifecycleReporter = {
+      addPingsForVisibility: unusedElement => {},
     };
     document.body.appendChild(adElement);
     adImpl.uiHandler = new AmpAdUIHandler(adImpl);
@@ -69,15 +82,26 @@ describe('amp-ad-xorigin-iframe-handler', () => {
 
       beforeEach(() => {
         adImpl.config = {renderStartImplemented: true};
-        sandbox.stub(adImpl, 'attemptChangeSize', (height, width) => {
-          expect(height).to.equal(217);
-          expect(width).to.equal(114);
-          return Promise.resolve();
+        sandbox.stub(adImpl.uiHandler, 'updateSize', () => {
+          return Promise.resolve({
+            success: true,
+            newWidth: 114,
+            newHeight: 217,
+          });
         });
         noContentSpy =
             sandbox.spy/*OK*/(iframeHandler, 'freeXOriginIframe');
 
         initPromise = iframeHandler.init(iframe);
+      });
+
+      it('should resolve on iframe.onload', () => {
+        expect(iframe.style.visibility).to.equal('hidden');
+        return initPromise.then(() => {
+          expect(iframe.style.visibility).to.equal('');
+          expect(renderStartedSpy).to.not.be.called;
+          expect(signals.get('render-start')).to.be.null;
+        });
       });
 
       it('should resolve on message "render-start"', () => {
@@ -86,17 +110,19 @@ describe('amp-ad-xorigin-iframe-handler', () => {
           sentinel: 'amp3ptest' + testIndex,
           type: 'render-start',
         });
-        return initPromise.then(() => {
+        const renderStartPromise = signals.whenSignal('render-start');
+        return Promise.all([renderStartPromise, initPromise]).then(() => {
           expect(iframe.style.visibility).to.equal('');
+          expect(renderStartedSpy).to.be.calledOnce;
         }).then(() => {
-          iframe.postMessageToParent({
+          const message = {
             sentinel: 'amp3ptest' + testIndex,
             type: 'no-content',
-          });
-          return expectPostMessage(iframe.contentWindow, window, {
-            sentinel: 'amp3ptest' + testIndex,
-            type: 'no-content',
-          }).then(() => {
+          };
+          const promise = expectPostMessage(
+              iframe.contentWindow, window, message);
+          iframe.postMessageToParent(message);
+          return promise.then(() => {
             expect(noContentSpy).to.not.been.called;
           });
         });
@@ -110,14 +136,19 @@ describe('amp-ad-xorigin-iframe-handler', () => {
           type: 'render-start',
           sentinel: 'amp3ptest' + testIndex,
         });
-        return initPromise.then(() => {
+        const expectResponsePromise = iframe.expectMessageFromParent(
+            'embed-size-changed');
+        const renderStartPromise = signals.whenSignal('render-start');
+        return Promise.all([renderStartPromise, initPromise]).then(() => {
           expect(iframe.style.visibility).to.equal('');
-          return iframe.expectMessageFromParent('amp-' + JSON.stringify({
+          return expectResponsePromise;
+        }).then(data => {
+          expect(data).to.jsonEqual({
             requestedWidth: 114,
             requestedHeight: 217,
             type: 'embed-size-changed',
             sentinel: 'amp3ptest' + testIndex,
-          }));
+          });
         });
       });
 
@@ -142,7 +173,6 @@ describe('amp-ad-xorigin-iframe-handler', () => {
           type: 'no-content',
         });
         return initPromise.then(() => {
-          expect(iframe.style.visibility).to.equal('');
           expect(noContentSpy).to.be.calledOnce;
           expect(noContentSpy).to.be.calledWith(true);
         });
@@ -168,46 +198,58 @@ describe('amp-ad-xorigin-iframe-handler', () => {
               .be.rejectedWith(/timeout/);
         });
       });
-    });
 
-    it('should resolve on message "bootstrap-loaded" if render-start is'
-        + 'NOT implemented', done => {
+      it('should not update "ini-load" signal implicitly', () => {
+        return initPromise.then(() => {
+          expect(signals.get('ini-load')).to.be.null;
+        });
+      });
 
-      initPromise = iframeHandler.init(iframe);
-      iframe.onload = () => {
-        expect(iframe.style.visibility).to.equal('hidden');
+      it('should update "ini-load" signal on message', () => {
         iframe.postMessageToParent({
           sentinel: 'amp3ptest' + testIndex,
-          type: 'bootstrap-loaded',
+          type: 'ini-load',
         });
+        return initPromise.then(() => {
+          expect(signals.get('ini-load')).to.be.ok;
+        });
+      });
+    });
+
+    it('should trigger render-start on message "bootstrap-loaded" if' +
+       ' render-start is NOT implemented', done => {
+      initPromise = iframeHandler.init(iframe);
+      iframe.postMessageToParent({
+        sentinel: 'amp3ptest' + testIndex,
+        type: 'bootstrap-loaded',
+      });
+      const renderStartPromise = signals.whenSignal('render-start');
+      renderStartPromise.then(() => {
+        expect(renderStartedSpy).to.be.calledOnce;
+        done();
+      });
+    });
+
+    it('should trigger visibility on timeout', done => {
+      const clock = sandbox.useFakeTimers();
+      iframe.name = 'test_master';
+      initPromise = iframeHandler.init(iframe);
+      iframe.onload = () => {
+        clock.tick(10000);
         initPromise.then(() => {
           expect(iframe.style.visibility).to.equal('');
+          expect(renderStartedSpy).to.not.be.called;
           done();
         });
       };
     });
 
-    it('should resolve on timeout', done => {
-      const noContentSpy =
-          sandbox.spy/*OK*/(iframeHandler, 'freeXOriginIframe');
-      const clock = sandbox.useFakeTimers();
-
-      iframe.name = 'test_master';
-      initPromise = iframeHandler.init(iframe);
-      clock.tick(9999);
-      expect(noContentSpy).to.not.be.called;
-      clock.tick(1);
+    it('should be immediately visible if it is A4A', () => {
+      const initPromise = iframeHandler.init(iframe, true);
+      expect(iframe).to.be.visible;
       initPromise.then(() => {
         expect(iframe.style.visibility).to.equal('');
-        expect(noContentSpy).to.be.calledOnce;
-        expect(noContentSpy).to.be.calledWith(true);
-        done();
-      });
-    });
-
-    it('should resolve directly if it is A4A', () => {
-      return iframeHandler.init(iframe, true).then(() => {
-        expect(iframe.style.visibility).to.equal('');
+        expect(iframe.readyState).to.equal('complete');
       });
     });
   });
@@ -219,23 +261,28 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     });
 
     it('should be able to use embed-state API', () => {
+      sandbox.stub/*OK*/(iframeHandler.viewer_, 'isVisible', () => true);
       iframe.postMessageToParent({
         type: 'send-embed-state',
         sentinel: 'amp3ptest' + testIndex,
       });
-      return iframe.expectMessageFromParent('amp-' + JSON.stringify({
-        inViewport: false,
-        pageHidden: false,
-        type: 'embed-state',
-        sentinel: 'amp3ptest' + testIndex,
-      }));
+      return iframe.expectMessageFromParent('embed-state').then(data => {
+        expect(data).to.jsonEqual({
+          inViewport: false,
+          pageHidden: false,
+          type: 'embed-state',
+          sentinel: 'amp3ptest' + testIndex,
+        });
+      });
     });
 
     it('should be able to use embed-size API, change size deny', () => {
-      sandbox.stub(adImpl, 'attemptChangeSize', (height, width) => {
-        expect(height).to.equal(217);
-        expect(width).to.equal(114);
-        return Promise.reject(new Error('for testing'));
+      sandbox.stub(adImpl.uiHandler, 'updateSize', () => {
+        return Promise.resolve({
+          success: false,
+          newWidth: 114,
+          newHeight: 217,
+        });
       });
       iframe.postMessageToParent({
         width: 114,
@@ -243,19 +290,23 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         type: 'embed-size',
         sentinel: 'amp3ptest' + testIndex,
       });
-      return iframe.expectMessageFromParent('amp-' + JSON.stringify({
-        requestedWidth: 114,
-        requestedHeight: 217,
-        type: 'embed-size-denied',
-        sentinel: 'amp3ptest' + testIndex,
-      }));
+      return iframe.expectMessageFromParent('embed-size-denied').then(data => {
+        expect(data).to.jsonEqual({
+          requestedWidth: 114,
+          requestedHeight: 217,
+          type: 'embed-size-denied',
+          sentinel: 'amp3ptest' + testIndex,
+        });
+      });
     });
 
     it('should be able to use embed-size API, change size succeed', () => {
-      sandbox.stub(adImpl, 'attemptChangeSize', (height, width) => {
-        expect(height).to.equal(217);
-        expect(width).to.equal(114);
-        return Promise.resolve();
+      sandbox.stub(adImpl.uiHandler, 'updateSize', () => {
+        return Promise.resolve({
+          success: true,
+          newWidth: 114,
+          newHeight: 217,
+        });
       });
       iframe.postMessageToParent({
         width: 114,
@@ -263,31 +314,37 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         type: 'embed-size',
         sentinel: 'amp3ptest' + testIndex,
       });
-      return iframe.expectMessageFromParent('amp-' + JSON.stringify({
-        requestedWidth: 114,
-        requestedHeight: 217,
-        type: 'embed-size-changed',
-        sentinel: 'amp3ptest' + testIndex,
-      }));
+      return iframe.expectMessageFromParent('embed-size-changed').then(data => {
+        expect(data).to.jsonEqual({
+          requestedWidth: 114,
+          requestedHeight: 217,
+          type: 'embed-size-changed',
+          sentinel: 'amp3ptest' + testIndex,
+        });
+      });
     });
 
     it('should be able to use embed-size API to resize height only', () => {
-      sandbox.stub(adImpl, 'attemptChangeSize', (height, width) => {
-        expect(height).to.equal(217);
-        expect(width).to.be.undefined;
-        return Promise.resolve();
+      sandbox.stub(adImpl.uiHandler, 'updateSize', () => {
+        return Promise.resolve({
+          success: true,
+          newWidth: undefined,
+          newHeight: 217,
+        });
       });
       iframe.postMessageToParent({
         height: 217,
         type: 'embed-size',
         sentinel: 'amp3ptest' + testIndex,
       });
-      return iframe.expectMessageFromParent('amp-' + JSON.stringify({
-        requestedWidth: undefined,
-        requestedHeight: 217,
-        type: 'embed-size-changed',
-        sentinel: 'amp3ptest' + testIndex,
-      }));
+      return iframe.expectMessageFromParent('embed-size-changed').then(data => {
+        expect(data).to.jsonEqual({
+          requestedWidth: undefined,
+          requestedHeight: 217,
+          type: 'embed-size-changed',
+          sentinel: 'amp3ptest' + testIndex,
+        });
+      });
     });
   });
 });

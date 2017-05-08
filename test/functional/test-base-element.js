@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-import {listenOncePromise} from '../../src/event-helper';
 import {BaseElement} from '../../src/base-element';
+import {Resource} from '../../src/service/resource';
 import {createAmpElementProto} from '../../src/custom-element';
-import {timerFor} from '../../src/timer';
+import {layoutRectLtwh} from '../../src/layout-rect';
+import {listenOncePromise} from '../../src/event-helper';
+import {timerFor} from '../../src/services';
 import * as sinon from 'sinon';
+
 
 describe('BaseElement', () => {
 
@@ -95,14 +98,31 @@ describe('BaseElement', () => {
     const handler = sandbox.spy();
     element.registerAction('method1', handler);
     element.executeAction({method: 'method1'}, false);
-    expect(handler.callCount).to.equal(1);
+    expect(handler).to.be.calledOnce;
   });
 
   it('should execute "activate" action without registration', () => {
     const handler = sandbox.spy();
     element.activate = handler;
     element.executeAction({method: 'activate'}, false);
-    expect(handler.callCount).to.equal(1);
+    expect(handler).to.be.calledOnce;
+  });
+
+  it('should return correct layoutBox', () => {
+    const resources = window.services.resources.obj;
+    customElement.getResources = () => resources;
+    const resource = new Resource(1, customElement, resources);
+    sandbox.stub(resources, 'getResourceForElement')
+        .withArgs(customElement)
+        .returns(resource);
+    const layoutBox = layoutRectLtwh(0, 50, 100, 200);
+    const pageLayoutBox = layoutRectLtwh(0, 0, 100, 200);
+    sandbox.stub(resource, 'getLayoutBox', () => layoutBox);
+    sandbox.stub(resource, 'getPageLayoutBox', () => pageLayoutBox);
+    expect(element.getLayoutBox()).to.eql(layoutBox);
+    expect(customElement.getLayoutBox()).to.eql(layoutBox);
+    expect(element.getPageLayoutBox()).to.eql(pageLayoutBox);
+    expect(customElement.getPageLayoutBox()).to.eql(pageLayoutBox);
   });
 
   describe('forwardEvents', () => {

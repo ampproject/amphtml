@@ -15,8 +15,8 @@
  */
 
 import {dev} from '../../../src/log';
+import {getAdContainer} from '../../../src/ad-helper';
 import {isExperimentOn} from '../../../src/experiments';
-import {UX_EXPERIMENT} from '../../../src/layout';
 
 const TAG = 'AmpAdUIHandler';
 
@@ -59,6 +59,9 @@ export class AmpAdUIHandler {
     /** @private {!AMP.BaseElement} */
     this.baseInstance_ = baseInstance;
 
+    /** @private {!Element} */
+    this.element_ = baseInstance.element;
+
     /** @private @const {!Document} */
     this.doc_ = baseInstance.win.document;
 
@@ -73,10 +76,6 @@ export class AmpAdUIHandler {
    * TODO(@zhouyx): Add ad tag to the ad.
    */
   init() {
-    if (!isExperimentOn(this.baseInstance_.win, UX_EXPERIMENT)) {
-      return;
-    }
-
     if (this.hasPageProvidedFallback_) {
       return;
     }
@@ -118,9 +117,6 @@ export class AmpAdUIHandler {
    * See BaseElement method.
    */
   createPlaceholderCallback() {
-    if (!isExperimentOn(this.baseInstance_.win, UX_EXPERIMENT)) {
-      return null;
-    }
     return this.addDefaultUiComponent_('placeholder');
   }
 
@@ -150,28 +146,26 @@ export class AmpAdUIHandler {
    * @private
    */
   displayNoContentUI_() {
-    // The order here is user provided fallback > collapse > default fallback
-    if (this.hasPageProvidedFallback_) {
+    if (getAdContainer(this.element_) == 'AMP-STICKY-AD') {
+      // Special case: force collapse sticky-ad if no content.
+      this.baseInstance_./*OK*/collapse();
+      this.state = AdDisplayState.LOADED_NO_CONTENT;
+      return;
+    }
+    // The order here is collapse > user provided fallback > default fallback
+    this.baseInstance_.attemptCollapse().then(() => {
+      this.state = AdDisplayState.LOADED_NO_CONTENT;
+    }, () => {
       this.baseInstance_.deferMutate(() => {
         if (this.state == AdDisplayState.NOT_LAID_OUT) {
-          // If already unlaid out, do not replace current placeholder then.
+          // If already unlaid out, do not replace current placeholder.
           return;
         }
         this.baseInstance_.togglePlaceholder(false);
         this.baseInstance_.toggleFallback(true);
         this.state = AdDisplayState.LOADED_NO_CONTENT;
       });
-    } else {
-      this.baseInstance_.attemptChangeHeight(0).then(() => {
-        this.baseInstance_./*OK*/collapse();
-        this.state = AdDisplayState.LOADED_NO_CONTENT;
-      }, () => {
-        // Apply default fallback when resize fail.
-        this.baseInstance_.togglePlaceholder(false);
-        this.baseInstance_.toggleFallback(true);
-        this.state = AdDisplayState.LOADED_NO_CONTENT;
-      });
-    }
+    });
   }
 
   /**
@@ -194,19 +188,76 @@ export class AmpAdUIHandler {
 
   /**
    * @param {string} name
-   * @return {!Element}
+   * @return {?Element}
    * @private
    */
   addDefaultUiComponent_(name) {
+    if (this.element_.tagName == 'AMP-EMBED') {
+      // Do nothing for amp-embed element;
+      return null;
+    }
     const uiComponent = this.doc_.createElement('div');
     uiComponent.setAttribute(name, '');
 
     const content = this.doc_.createElement('div');
-    content.classList.add('-amp-ad-default-holder');
+    content.classList.add('i-amphtml-ad-default-holder');
+    if (isExperimentOn(this.baseInstance_.win, 'ad-loader-v1')) {
+      content.setAttribute('experiment1', '');
+    }
+    if (isExperimentOn(this.baseInstance_.win, 'ad-loader-v2')) {
+      content.setAttribute('experiment2', '');
+    }
     uiComponent.appendChild(content);
 
     this.baseInstance_.element.appendChild(uiComponent);
     return uiComponent;
+  }
+
+  /**
+   * @param {number|string|undefined} height
+   * @param {number|string|undefined} width
+   * @param {number} iframeHeight
+   * @param {number} iframeWidth
+   * @return {!Promise<!Object>}
+   */
+  updateSize(height, width, iframeHeight, iframeWidth) {
+    // Calculate new width and height of the container to include the padding.
+    // If padding is negative, just use the requested width and height directly.
+    let newHeight, newWidth;
+    height = parseInt(height, 10);
+    if (!isNaN(height)) {
+      newHeight = Math.max(this.element_./*OK*/offsetHeight +
+          height - iframeHeight, height);
+    }
+    width = parseInt(width, 10);
+    if (!isNaN(width)) {
+      newWidth = Math.max(this.element_./*OK*/offsetWidth +
+          width - iframeWidth, width);
+    }
+
+    /** @type {!Object<!boolean, number|undefined, number|undefined>} */
+    const resizeInfo = {
+      success: true,
+      newWidth,
+      newHeight,
+    };
+
+    if (!newHeight && !newWidth) {
+      return Promise.reject(new Error('undefined width and height'));
+    }
+
+    if (getAdContainer(this.element_) == 'AMP-STICKY-AD') {
+      // Special case: force collapse sticky-ad if no content.
+      resizeInfo.success = false;
+      return Promise.resolve(resizeInfo);
+    }
+    return this.baseInstance_.attemptChangeSize(
+        newHeight, newWidth).then(() => {
+          return resizeInfo;
+        }, () => {
+          resizeInfo.success = false;
+          return resizeInfo;
+        });
   }
 }
 

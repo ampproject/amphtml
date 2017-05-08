@@ -16,47 +16,22 @@
 
 tags: {  # amp-reach-player
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
-  mandatory_parent: "HEAD"
-  spec_name: "amp-reach-player extension .js script"
-  unique_warning: true
-  extension_unused_unless_tag_present: "amp-reach-player"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  satisfies: "amp-reach-player extension .js script"
+  extension_spec: {
+    name: "amp-reach-player"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    deprecated_recommends_usage_of_tag: "amp-reach-player"
+    deprecated_allow_duplicates: true
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-reach-player"
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-reach-player-(latest|0\\.1).js"
-    mandatory: true
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-reach-player.html"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-reach-player>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-REACH-PLAYER"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-reach-player extension .js script"
+  requires: "amp-reach-player extension .js script"
   attrs: {
     name: "data-embed-id"
     mandatory: true
@@ -64,7 +39,7 @@ tags: {  # <amp-reach-player>
     value_regex: "[0-9a-z-]+"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-reach-player.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-reach-player"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

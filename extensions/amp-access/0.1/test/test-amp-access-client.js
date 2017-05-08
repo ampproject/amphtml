@@ -15,20 +15,25 @@
  */
 
 import {AccessClientAdapter} from '../amp-access-client';
+import * as lolex from 'lolex';
 import * as sinon from 'sinon';
 import * as mode from '../../../../src/mode';
 
-describe('AccessClientAdapter', () => {
 
-  let sandbox;
+describes.realWin('AccessClientAdapter', {
+  amp: true,
+}, env => {
+  let win;
+  let ampdoc;
   let clock;
   let validConfig;
   let context;
   let contextMock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
+    win = env.win;
+    ampdoc = env.ampdoc;
+    clock = lolex.install(win);
 
     validConfig = {
       'authorization': 'https://acme.com/a?rid=READER_ID',
@@ -43,13 +48,12 @@ describe('AccessClientAdapter', () => {
 
   afterEach(() => {
     contextMock.verify();
-    sandbox.restore();
   });
 
 
   describe('config', () => {
     it('should load valid config', () => {
-      const adapter = new AccessClientAdapter(window, validConfig, context);
+      const adapter = new AccessClientAdapter(ampdoc, validConfig, context);
       expect(adapter.authorizationUrl_).to
           .equal('https://acme.com/a?rid=READER_ID');
       expect(adapter.pingbackUrl_).to
@@ -68,7 +72,7 @@ describe('AccessClientAdapter', () => {
 
     it('should set authorization timeout if provided', () => {
       validConfig['authorizationTimeout'] = 5000;
-      const adapter = new AccessClientAdapter(window, validConfig, context);
+      const adapter = new AccessClientAdapter(ampdoc, validConfig, context);
       expect(adapter.authorizationTimeout_).to.equal(5000);
     });
 
@@ -80,49 +84,49 @@ describe('AccessClientAdapter', () => {
       let adapter;
 
       validConfig['authorizationTimeout'] = 1000;
-      adapter = new AccessClientAdapter(window, validConfig, context);
+      adapter = new AccessClientAdapter(ampdoc, validConfig, context);
       expect(adapter.authorizationTimeout_).to.equal(1000);
 
       validConfig['authorizationTimeout'] = 5000;
-      adapter = new AccessClientAdapter(window, validConfig, context);
+      adapter = new AccessClientAdapter(ampdoc, validConfig, context);
       expect(adapter.authorizationTimeout_).to.equal(3000);
     });
 
     it('should fail when authorization timeout is malformed', () => {
       validConfig['authorizationTimeout'] = 'someString';
       expect(() => {
-        new AccessClientAdapter(window, validConfig, context);
+        new AccessClientAdapter(ampdoc, validConfig, context);
       }).to.throw(/"authorizationTimeout" must be a number/);
     });
 
     it('should fail if config authorization is missing or malformed', () => {
       delete validConfig['authorization'];
       expect(() => {
-        new AccessClientAdapter(window, validConfig, context);
+        new AccessClientAdapter(ampdoc, validConfig, context);
       }).to.throw(/"authorization" URL must be specified/);
 
       validConfig['authorization'] = 'http://acme.com/a';
       expect(() => {
-        new AccessClientAdapter(window, validConfig, context);
+        new AccessClientAdapter(ampdoc, validConfig, context);
       }).to.throw(/"authorization".*https\:/);
     });
 
     it('should fail if config pingback is missing or malformed', () => {
       delete validConfig['pingback'];
       expect(() => {
-        new AccessClientAdapter(window, validConfig, context);
+        new AccessClientAdapter(ampdoc, validConfig, context);
       }).to.throw(/"pingback" URL must be specified/);
 
       validConfig['pingback'] = 'http://acme.com/p';
       expect(() => {
-        new AccessClientAdapter(window, validConfig, context);
+        new AccessClientAdapter(ampdoc, validConfig, context);
       }).to.throw(/"pingback".*https\:/);
     });
 
     it('should allow missing pingback when noPingback=true', () => {
       delete validConfig['pingback'];
       validConfig['noPingback'] = true;
-      const adapter = new AccessClientAdapter(window, validConfig, context);
+      const adapter = new AccessClientAdapter(ampdoc, validConfig, context);
       expect(adapter.isPingbackEnabled()).to.be.false;
       expect(adapter.pingbackUrl_).to.not.exist;
     });
@@ -135,7 +139,7 @@ describe('AccessClientAdapter', () => {
     let xhrMock;
 
     beforeEach(() => {
-      adapter = new AccessClientAdapter(window, validConfig, context);
+      adapter = new AccessClientAdapter(ampdoc, validConfig, context);
       xhrMock = sandbox.mock(adapter.xhr_);
     });
 

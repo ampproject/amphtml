@@ -1,0 +1,58 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>AMP #0</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
+  <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <style amp-custom>
+    body {
+      max-width: 527px;
+      font-family: 'Questrial', Arial;
+    }
+    [fallback] {
+      display: block;
+      /* @alternative */ display: flex;
+      flex-direction: column;
+      flex-wrap: nowrap;
+      justify-content: center;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.5);
+      color: #fff;
+    }
+    .spacer {
+      height: 100vh;
+    }
+  </style>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <h1>amp-youtube</h1>
+
+  <amp-youtube
+      id="myVideo"
+      data-videoid="lBTCB7yLs8Y"
+      width="358"
+      height="204"
+      layout="responsive">
+  </amp-youtube>
+  <h3>Actions</h3>
+  <button on="tap:myVideo.play">Play</button>
+  <button on="tap:myVideo.pause">Pause</button>
+  <button on="tap:myVideo.mute">Mute</button>
+  <button on="tap:myVideo.unmute">Unmute</button>
+
+  <h2>Autoplay</h2>
+  <amp-youtube
+      autoplay
+      data-videoid="lBTCB7yLs8Y"
+      width="358"
+      height="204"
+      layout="responsive">
+  </amp-youtube>
+  <div class="spacer"></div>
+</body>
+</html>

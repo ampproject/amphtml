@@ -29,34 +29,158 @@ function AmpAdUIHandler$$module$extensions$amp_ad$0_1$amp_ad_ui() {};
 
 // Long list of, uhm, stuff the ads code needs to compile.
 // All unquoted external properties need to be added here.
+
+// Under 3p folder
+
+// facebook.js
+data.embedAs;
+data.href;
+
+// reddit.js
+data.uuid;
+data.embedcreated;
+data.embedparent;
+data.embedlive;
+data.embedtype;
+data.src;
+
+//twitter.js
+data.tweetid
+
+// Under ads/google folder
+
+// adsense.js
+
+// csa.js
+var _googCsa;
+window._googCsa;
+
+// doubleclick.js
+var googletag;
+window.googletag;
+googletag.cmd;
+googletag.cmd.push;
+googletag.pubads;
+googletag.defineSlot;
+var pubads;
+pubads.addService;
+pubads.markAsGladeOptOut;
+pubads.markAsAmp;
+pubads.setCorrelator;
+pubads.markAsGladeControl;
+googletag.enableServices;
+pubads.setCookieOptions;
+pubads.setTagForChildDirectedTreatment;
+data.slot.setCategoryExclusion;
+data.slot.setTargeting;
+data.slot.setAttribute;
+data.useSameDomainRenderingUntilDeprecated;
+data.multiSize;
+data.overrideWidth;
+data.width;
+data.overrideHeight;
+data.height;
+data.multiSizeValidation;
+data.categoryExclusions;
+data.categoryExclusions.length;;
+data.cookieOptions;
+data.tagForChildDirectedTreatment;
+data.targeting;
+data.slot;
+
+// 3P ads
+// Please sort by alphabetic order of the ad server name to avoid conflict
+
+// a9.js
+data.aax_size;
+data.aax_pubname;
+data.aax_src;
+
+// adblade.js
 data.cid;
+
+// adform.js
 data.bn;
 data.mid;
+
+// adgeneration.js
+data.option;
+data.id;
+data.adtype;
+data.adtype.toUpperCase;
+data.async;
+data.async.toLowerCase;
+data.displayid;
+data.targetid;
+
+// adman.js
 data.ws;
+data.host;
 data.s;
-data.sid;
-data.client;
+
+// adreactor.js
 data.zid;
 data.pid;
 data.custom3;
+
+// adsnative.js
+data.ankv;
+data.ankv.split;
+data.ancat;
+data.ancat.split;
+data.anapiid;
+data.annid;
+data.anwid;
+data.antid;
+
+// adtech.js
+data.atwco;
+data.atwdiv;
+data.atwheight;
+data.atwhtnmat;
+data.atwmn;
+data.atwmoat;
+data.atwnetid;
+data.atwothat;
+data.atwplid;
+data.atwpolar;
+data.atwsizes;
+data.atwwidth;
+
+// adthrive.js
+data.siteId;
+
+// aduptech.js
 window.uAd = {};
 window.uAd.embed;
+data.responsive;
+data.onAds;
+data.onNoAds;
+
+// amoad.js
+data.sid;
+
+// appnexus.js
+data.tagid;
+data.member;
+data.code;
 data.pageOpts;
+data.debug;
 data.adUnits;
+data.target;
+
+// colombia.js
 data.clmb_slot;
 data.clmb_position;
-data.clmb_divid;
 data.clmb_section;
-data.epl_si;
-data.epl_isv;
-data.epl_sv;
-data.epl_sec;
-data.epl_ksv;
-data.epl_kvs;
-data.epl_e;
-data.guid;
-data.adslot;
+data.clmb_divid;
 
+// contentad.js
+data.d;
+data.wid;
+data.url;
+
+// criteo.js
 var Criteo;
 Criteo.DisplayAd;
 Criteo.Log.Debug;
@@ -66,86 +190,242 @@ Criteo.PubTag = {};
 Criteo.PubTag.RTA = {};
 Criteo.PubTag.RTA.DefaultCrtgContentName;
 Criteo.PubTag.RTA.DefaultCrtgRtaCookieName
-data.varname;
 data.tagtype;
-data.cookiename;;
-data.networkid;;
+data.networkid;
+data.cookiename;
+data.varname;
 data.zone;
 data.adserver;
-data.slot;
-data.width;
-data.height;
 
-var googletag;
-window.googletag;
-googletag.cmd;
-googletag.cmd.push;
-googletag.pubads;
-googletag.defineSlot
-data.slot;
+// distroscale.js
+data.tid;
 
-var _googCsa;
-window._googCsa;
+// eplanning.js
+data.epl_si;
+data.epl_isv;
+data.epl_sv;
+data.epl_sec;
+data.epl_kvs;
+data.epl_e;
 
+// ezoic.js
+/**
+ * @constructor
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+window.EzoicAmpAd = function(global, data) {};
+window.EzoicAmpAd.prototype.createAd;
+
+// flite.js
+data.guid;
+data.mixins;
+
+// fusion.js
+var ev;
+ev.msg;
+var Fusion;
+Fusion.on;
+Fusion.on.warning;
+Fusion.loadAds;
+data.mediaZone;
+data.layout;
+data.space;
+data.parameters;
+
+// holder.js
+data.queue;
+
+// improvedigital.js
+data.placement;
+data.optin;
+data.keyvalue;
+
+// inmobi.js
 var _inmobi;
 window._inmobi;
 _inmobi.getNewAd;
 data.siteid;
 data.slotid;
 
-var pubads;
-pubads.addService;
-pubads.markAsGladeOptOut;
-pubads.markAsAmp;
-pubads.setCorrelator;
-pubads.markAsGladeControl;
-googletag.enableServices;
-data.slot.setCategoryExclusion;
-pubads.setCookieOptions;
-pubads.setTagForChildDirectedTreatment;
-data.slot.setTargeting;
-data.slot.setAttribute;
-data.optin;
-data.keyvalue;
+// ix.js
+data.ixId;
+data.ixId;
+data.ixSlot;
+data.ixSlot;
+
+// kargo.js
+data.options;
+data.slot;
+
+// kixer.js
+data.adslot;
+
+// mads.js
+window.MADSAdrequest = {};
+window.MADSAdrequest.adrequest;
+data.adrequest;
+
+// mediaimpact.js
 var asmi;
 asmi.sas;
 asmi.sas.call;
 asmi.sas.setup;
-data.spot;
+data.site;
+data.page;
+data.format;
+data.slot.replace;
+
+// medianet.js
+data.crid;
+data.hasOwnProperty;
+data.requrl;
+data.refurl;
+data.versionId;
+data.timeout;
+
+// microad.js
 var MicroAd;
 MicroAd.Compass;
 MicroAd.Compass.showAd;
+data.spot;
+
+// mixpo.js
+data.subdomain;
+data.guid;
+data.embedv;
+data.clicktag;
+data.customtarget;
+data.dynclickthrough;
+data.viewtracking;
+data.customcss;
+data.local;
+data.enablemraid;
+data.jsplayer;
+
+// nativo.js
+var PostRelease;
+PostRelease.Start;
+PostRelease.checkIsAdVisible;
+var _prx;
+data.delayByTime;
+data.delayByTime;
+
+// nokta.js
+data.category;
+
+// openadstream.js
 data.adhost
+data.sitepage;
 data.pos;
-var dfpData;
-dfpData.dfp;
+data.query;
+
+// openx.js
 var OX;
 OX._requestArgs;
+var OX_bidder_options;
+OX_bidder_options.bidderType;
+OX_bidder_options.callback;
+var OX_bidder_ads;
 var oxRequest;
 oxRequest.addAdUnit;
+oxRequest.addVariable;
 oxRequest.setAdSizes;
 oxRequest.getOrCreateAdUnit;
-data.zone;
-data.sitepage;
+var dfpData;
+dfpData.dfp;
+dfpData.targeting;
+data.dfpSlot;
+data.nc;
 data.auid;
+
+// plista.js
 data.widgetname;
+data.publickey;
 data.urlprefix;
+data.item;
+data.geo;
+data.categories;
+
+// pubmatic.js
+data.kadpageurl;
+
+// pubmine.js
+data.adsafe;
+data.wordads;
+data.section;
+
+// pulsepoint.js
+window.PulsePointHeaderTag;
+
+// rubicon.js
 var rubicontag;
 rubicontag.setFPV;
 rubicontag.setFPI;
 rubicontag.getSlot;
 rubicontag.getAdServerTargeting;
-data.account;
 rubicontag.addKW;
 rubicontag.setUrl;
 rubicontag.setIntegration;
+data.method;
+data.overrideWidth;
+data.width;
+data.overrideHeight;
+data.height;
 data.account;
 data.kw;
 data.visitor;
 data.inventory;
+data.size;
 data.callback;
+
+// sharethrough.js
+data.pkey;
+
+// sklik.js
+data.elm;
+
+// smartadserver.js
+var sas;
+sas.callAmpAd;
+
+// smartclip.js
+data.plc;
+data.sz;
+data.extra;
+
+// sortable.js
+data.name;
+
+// sovrn.js
+data.domain;
+data.u;
+data.iid;
+data.aid;
+data.z;
+data.tf;
+
+// swoop.js
+var Swoop
+Swoop.announcePlace
+
+// taboola.js
+data.referrer;
+data.publisher;
+data.mode;
+
+// teads.js
+data.tag;
+data.tag;
+data.tag.tta;
+data.tag.ttp;
+
+// webediads.js
 var wads;
 wads.init;
+data.position;
+
+// weborama.js
 data.wbo_account_id;
 data.wbo_customparameter;
 data.wbo_tracking_element_id;
@@ -162,82 +442,39 @@ data.wbo_script_variant;
 data.wbo_is_mobile;
 data.wbo_vars;
 data.wbo_weak_encoding;
-data.psn;
+
+// yieldbot.js
 var yieldbot;
 yieldbot.psn;
 yieldbot.enableAsync;
 yieldbot.defineSlot;
 yieldbot.go;
-data.ybSlot;
 yieldbot.nextPageview;
 yieldbot.getSlotCriteria;
+data.psn;
+data.ybSlot;
+
+// yieldmo.js
 data.ymid;
-var PostRelease;
-PostRelease.Start;
-PostRelease.checkIsAdVisible;
-var _prx;
-data.delayByTime;
-window.PulsePointHeaderTag;
-data.tagid;
-data.tagtype;
-data.zergid;
-window.zergnetWidgetId;
-data.ankv;
-data.ancat;
-data.annid;
-data.anwid;
-data.antid;
-data.anapiid;
-window.MADSAdrequest = {};
-window.MADSAdrequest.adrequest;
-data.divid;
-/**
- * @constructor
- * @param {!Window} global
- * @param {!Object} data
- */
-window.EzoicAmpAd = function(global, data) {};
-window.EzoicAmpAd.prototype.createAd;
-data.id;
-data.d;
-data.wid;
-data.url;
-data.customtarget;
-data.dynclickthrough;
-data.viewtracking;
-data.customcss;
-data.enablemraid;
-data.jsplayer;
-var sas;
-sas.callAmpAd;
-data.uuid;
-data.embedcreated;
-data.embedparent
-data.embedlive
+
+// zedo.js
 var ZGTag;
 var geckoTag;
 var placement;
-data.superId;
-data.network;
 geckoTag.setAMP;
 geckoTag.addPlacement;
+placement.includeRenderer;
+geckoTag.loadAds;
+geckoTag.placementReady;
+data.charset;
+data.superId;
+data.network;
 data.placementId;
 data.channel;
 data.publisher;
 data.dim;
-placement.includeRenderer;
-geckoTag.loadAds;
-geckoTag.placementReady;
-data.plc;
-data.sz;
-data.extra;
-var Fusion;
-Fusion.on;
-Fusion.on.warning;
-Fusion.loadAds;
-var ev;
-ev.msg;
-data.adServer;
-data.mediaZone;
-data.layout;
-data.space;
+data.renderer;
+
+// zergnet.js
+window.zergnetWidgetId;
+data.zergid;

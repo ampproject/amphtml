@@ -43,7 +43,7 @@ export const DEFAULT_THRESHOLD =
  *    currentThresholdSlot: number,
  *  }}
  */
-let IntersectionStateDef;
+let ElementIntersectionStateDef;
 
 /** @const @private */
 const TAG = 'INTERSECTION-OBSERVER';
@@ -118,6 +118,7 @@ export class IntersectionObserverApi {
       }
       this.subscriptionApi_.send('intersection', {changes: entries});
     }, {threshold: DEFAULT_THRESHOLD});
+    this.intersectionObserver_.tick(this.viewport_.getRect());
 
     /** @const {function()} */
     this.fire = () => {
@@ -201,12 +202,24 @@ export class IntersectionObserverPolyfill {
         this.threshold_[this.threshold_.length - 1] <= 1,
         'Threshold should be in the range from "[0, 1]"');
 
+    /** @private {?./layout-rect.LayoutRectDef} */
+    this.lastViewportRect_ = null;
+
+    /** @private {./layout-rect.LayoutRectDef|undefined} */
+    this.lastIframeRect_ = undefined;
+
     /**
      * Store a list of observed elements and their current threshold slot which
      * their intersection ratio fills, range from [0, this.threshold_.length]
-     * @private {Array<!IntersectionStateDef>}
+     * @private {Array<!ElementIntersectionStateDef>}
      */
     this.observeEntries_ = [];
+  }
+
+  /**
+   */
+  disconnect() {
+    this.observeEntries_.length = 0;
   }
 
   /**
@@ -216,8 +229,8 @@ export class IntersectionObserverPolyfill {
    * @param {!Element} element
    */
   observe(element) {
-    // Check the element is an AMP element
-    dev().assert(element.isBuilt && element.isBuilt());
+    // Check the element is an AMP element.
+    dev().assert(element.getLayoutBox);
 
     // If the element already exists in current observeEntries, do nothing
     for (let i = 0; i < this.observeEntries_.length; i++) {
@@ -227,11 +240,22 @@ export class IntersectionObserverPolyfill {
       }
     }
 
-    // push new observed element
-    this.observeEntries_.push({
+    const newState = {
       element,
       currentThresholdSlot: 0,
-    });
+    };
+
+    // Get the new observed element's first changeEntry based on last viewport
+    if (this.lastViewportRect_) {
+      const change = this.getValidIntersectionChangeEntry_(
+          newState, this.lastViewportRect_, this.lastIframeRect_);
+      if (change) {
+        this.callback_([change]);
+      }
+    }
+
+    // push new observed element
+    this.observeEntries_.push(newState);
   }
 
   /**
@@ -267,6 +291,9 @@ export class IntersectionObserverPolyfill {
           moveLayoutRect(opt_iframe, -opt_iframe.left, -opt_iframe.top);
     }
 
+    this.lastViewportRect_ = hostViewport;
+    this.lastIframeRect_ = opt_iframe;
+
     const changes = [];
 
     for (let i = 0; i < this.observeEntries_.length; i++) {
@@ -288,14 +315,14 @@ export class IntersectionObserverPolyfill {
    * When the new intersection ratio doesn't cross one of a threshold value,
    * the function will return null.
    *
-   * @param {!IntersectionStateDef} entry
+   * @param {!ElementIntersectionStateDef} state
    * @param {!./layout-rect.LayoutRectDef} hostViewport hostViewport's rect
    * @param {./layout-rect.LayoutRectDef=} opt_iframe. iframe container rect
    * @return {?IntersectionObserverEntry} A valid change entry or null if ratio
    * @private
    */
-  getValidIntersectionChangeEntry_(entry, hostViewport, opt_iframe) {
-    const element = entry.element;
+  getValidIntersectionChangeEntry_(state, hostViewport, opt_iframe) {
+    const element = state.element;
 
     // Normalize container LayoutRect to be relative to page
     let elementRect;
@@ -318,10 +345,10 @@ export class IntersectionObserverPolyfill {
     const ratio = intersectionRatio(intersectionRect, elementRect);
     const newThresholdSlot = getThresholdSlot(this.threshold_, ratio);
 
-    if (newThresholdSlot == entry.currentThresholdSlot) {
+    if (newThresholdSlot == state.currentThresholdSlot) {
       return null;
     }
-    entry.currentThresholdSlot = newThresholdSlot;
+    state.currentThresholdSlot = newThresholdSlot;
 
     // To get same behavior as native IntersectionObserver set hostViewport null
     // if inside an iframe

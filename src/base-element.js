@@ -18,8 +18,8 @@ import {Layout} from './layout';
 import {loadPromise} from './event-helper';
 import {preconnectForElement} from './preconnect';
 import {isArray} from './types';
-import {viewportForDoc} from './viewport';
-import {vsyncFor} from './vsync';
+import {viewportForDoc} from './services';
+import {vsyncFor} from './services';
 import {user} from './log';
 
 
@@ -35,7 +35,7 @@ import {user} from './log';
  * https://developers.google.com/web/fundamentals/getting-started/primers/customelements)
  * and adding AMP style late loading to the mix.
  *
- * The complete lifecycle of custom DOM element is:
+ * The complete lifecycle of a custom DOM element is:
  *
  *           ||
  *           || createdCallback
@@ -153,6 +153,14 @@ export class BaseElement {
   }
 
   /**
+   * The element's signal tracker.
+   * @return {!./utils/signals.Signals}
+   */
+  signals() {
+    return this.element.signals();
+  }
+
+  /**
   * This is the priority of loading elements (layoutCallback).
   * The lower the number, the higher the priority.
   * The default priority for base elements is 0.
@@ -183,11 +191,22 @@ export class BaseElement {
   }
 
   /**
-   * Returns a previously measured layout box of the element.
+   * Returns a previously measured layout box adjusted to the viewport. This
+   * mainly affects fixed-position elements that are adjusted to be always
+   * relative to the document position in the viewport.
    * @return {!./layout-rect.LayoutRectDef}
    */
   getLayoutBox() {
     return this.element.getLayoutBox();
+  }
+
+  /**
+   * Returns a previously measured layout box relative to the page. The
+   * fixed-position elements are relative to the top of the document.
+   * @return {!./layout-rect.LayoutRectDef}
+   */
+  getPageLayoutBox() {
+    return this.element.getPageLayoutBox();
   }
 
   /**
@@ -474,16 +493,14 @@ export class BaseElement {
 
   /**
    * Returns a promise that will resolve or fail based on the element's 'load'
-   * and 'error' events. Optionally this method takes a timeout, which will reject
-   * the promise if the resource has not loaded by then.
+   * and 'error' events.
    * @param {T} element
-   * @param {number=} opt_timeout
    * @return {!Promise<T>}
    * @template T
    * @final
    */
-  loadPromise(element, opt_timeout) {
-    return loadPromise(element, opt_timeout);
+  loadPromise(element) {
+    return loadPromise(element);
   }
 
   /** @private */
@@ -627,6 +644,14 @@ export class BaseElement {
   }
 
   /**
+   * An implementation can call this method to signal to the element that
+   * it has started rendering.
+   */
+  renderStarted() {
+    this.element.renderStarted();
+  }
+
+  /**
    * Returns the original nodes of the custom element without any service nodes
    * that could have been added for markup. These nodes can include Text,
    * Comment and other child nodes.
@@ -660,15 +685,9 @@ export class BaseElement {
    * @public @final
    */
   applyFillContent(element, opt_replacedContent) {
-    // TODO(dvoytenko, #6794): Remove old `-amp-fill-content` form after the new
-    // form is in PROD for 1-2 weeks.
     element.classList.add('i-amphtml-fill-content');
-    element.classList.add('-amp-fill-content');
     if (opt_replacedContent) {
-      // TODO(dvoytenko, #6794): Remove old `-amp-replaced-content` form after the new
-      // form is in PROD for 1-2 weeks.
       element.classList.add('i-amphtml-replaced-content');
-      element.classList.add('-amp-replaced-content');
     }
   }
 
@@ -681,8 +700,8 @@ export class BaseElement {
   }
 
   /**
-   * Returns the layout rectangle of the element used for reporting this
-   * element's intersection with the viewport.
+   * Returns the layout rectangle used for when calculating this element's
+   * intersection with the viewport.
    * @return {!./layout-rect.LayoutRectDef}
    */
   getIntersectionElementLayoutBox() {
@@ -761,6 +780,24 @@ export class BaseElement {
   }
 
   /**
+   * Collapses the element, setting it to `display: none`, and notifies its
+   * owner (if there is one) through {@link collapsedCallback} that the element
+   * is no longer visible.
+   */
+  collapse() {
+    this.element.getResources().collapseElement(this.element);
+  }
+
+  /**
+   * Return a promise that request the runtime to collapse one element
+   * @return {!Promise}
+   */
+  attemptCollapse() {
+    return this.element.getResources().attemptCollapse(this.element);
+  }
+
+
+  /**
    * Return a promise that requests the runtime to update
    * the height of this element to the specified value.
    * The runtime will schedule this request and attempt to process it
@@ -828,20 +865,29 @@ export class BaseElement {
   }
 
   /**
-   * Collapses the element, setting it to `display: none`, and notifies its
-   * owner (if there is one) through {@link collapsedCallback} that the element
-   * is no longer visible.
+   * Called every time an owned AmpElement collapses itself.
+   * See {@link collapse}.
+   * @param {!AmpElement} unusedElement Child element that was collapsed.
    */
-  collapse() {
-    this.element.getResources().collapseElement(this.element);
+  collapsedCallback(unusedElement) {
+    // Subclasses may override.
   }
 
   /**
-   * Called every time an owned AmpElement collapses itself.
-   * See {@link collapse}.
-   * @param {!AmpElement} unusedElement
+   * Expands the element, resetting its default display value, and notifies its
+   * owner (if there is one) through {@link expandedCallback} that the element
+   * is no longer visible.
    */
-  collapsedCallback(unusedElement) {
+  expand() {
+    this.element.getResources().expandElement(this.element);
+  }
+
+  /**
+   * Called every time an owned AmpElement expands itself.
+   * See {@link expand}.
+   * @param {!AmpElement} unusedElement Child element that was expanded.
+   */
+  expandedCallback(unusedElement) {
     // Subclasses may override.
   }
 
@@ -859,6 +905,18 @@ export class BaseElement {
   }
 
   /**
+   * Returns an array of elements in this element's subtree that this
+   * element owns that could have children added or removed dynamically.
+   * The array should not contain any ancestors of this element, but could
+   * contain this element itself.
+   * @return {!Array<!Element>}
+   * @public
+   */
+  getDynamicElementContainers() {
+    return [];
+  }
+
+  /**
    * Called when we just measured the layout rect of this element. Doing
    * more expensive style reads should now be cheap.
    * This may currently not work with extended elements. Please file
@@ -866,4 +924,4 @@ export class BaseElement {
    * @public
    */
   onLayoutMeasure() {}
-};
+}

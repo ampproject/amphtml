@@ -16,49 +16,26 @@
 tags: {  # amp-auto-ads
   html_format: AMP
   tag_name: "SCRIPT"
-  spec_name: "amp-auto-ads extension .js script"
-  mandatory_parent: "HEAD"
-  unique: true
-  also_requires_tag: "amp-auto-ads"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  satisfies: "amp-auto-ads extension .js script"
+  requires: "amp-auto-ads"
+  extension_spec: {
+    name: "amp-auto-ads"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-auto-ads"
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-auto-ads-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://github.com/ampproject/amphtml/issues/6196"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-auto-ads>
   html_format: AMP
   tag_name: "AMP-AUTO-ADS"
+  satisfies: "amp-auto-ads"
   disallowed_ancestor: "AMP-AUTO-ADS"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-auto-ads extension .js script"
+  requires: "amp-auto-ads extension .js script"
   attrs: {
     name: "type"
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://github.com/ampproject/amphtml/issues/6196"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-auto-ads"
 }

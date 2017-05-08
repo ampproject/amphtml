@@ -17,47 +17,24 @@
 tags: {  # amp-user-notification
   html_format: AMP
   tag_name: "SCRIPT"
-  spec_name: "amp-user-notification extension .js script"
-  mandatory_parent: "HEAD"
-  unique_warning: true
-  extension_unused_unless_tag_present: "amp-user-notification"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  satisfies: "amp-user-notification extension .js script"
+  extension_spec: {
+    name: "amp-user-notification"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    deprecated_recommends_usage_of_tag: "amp-user-notification"
+    deprecated_allow_duplicates: true
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-user-notification"
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-user-notification-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-user-notification.html"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-user-notification>
   html_format: AMP
   tag_name: "AMP-USER-NOTIFICATION"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-analytics extension .js script"
-  also_requires_tag: "amp-user-notification extension .js script"
+  requires: "amp-analytics extension .js script"
+  requires: "amp-user-notification extension .js script"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-user-notification.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-user-notification"
   amp_layout: {
     supported_layouts: NODISPLAY
   }

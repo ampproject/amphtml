@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import {addParamsToUrl, parseUrl} from '../../../src/url';
+import {addParamsToUrl, parseUrl, parseQueryString} from '../../../src/url';
+import {setStyle} from '../../../src/style';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {getSocialConfig} from './amp-social-share-config';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {openWindowDialog} from '../../../src/dom';
-import {urlReplacementsForDoc} from '../../../src/url-replacements';
+import {urlReplacementsForDoc} from '../../../src/services';
 import {CSS} from '../../../build/amp-social-share-0.1.css';
-import {platformFor} from '../../../src/platform';
+import {platformFor} from '../../../src/services';
 
 
 class AmpSocialShare extends AMP.BaseElement {
@@ -58,6 +59,22 @@ class AmpSocialShare extends AMP.BaseElement {
     user().assert(!/\s/.test(typeAttr),
         'Space characters are not allowed in type attribute value. %s',
         this.element);
+    if (typeAttr === 'system') {
+      // Hide/ignore system component if navigator.share unavailable
+      if (!('share' in navigator)) {
+        setStyle(this.element, 'display', 'none');
+        return;
+      }
+    } else {
+      // Hide/ignore non-system component if system share wants to be unique
+      const systemOnly = ('share' in navigator) &&
+        !!this.win.document.querySelectorAll(
+          'amp-social-share[type=system][data-mode=replace]').length;
+      if (systemOnly) {
+        setStyle(this.element, 'display', 'none');
+        return;
+      }
+    }
     const typeConfig = getSocialConfig(typeAttr) || {};
     this.shareEndpoint_ = user().assert(
         this.element.getAttribute('data-share-endpoint') ||
@@ -71,10 +88,12 @@ class AmpSocialShare extends AMP.BaseElement {
     const urlReplacements = urlReplacementsForDoc(this.getAmpDoc());
     urlReplacements.expandAsync(hrefWithVars).then(href => {
       this.href_ = href;
-      // mailto: protocol breaks when opened in _blank on iOS Safari.
+      // mailto:, whatsapp: protocols breaks when opened in _blank on iOS Safari
       const isMailTo = /^mailto:$/.test(parseUrl(href).protocol);
+      const isWhatsApp = /^whatsapp:$/.test(parseUrl(href).protocol);
       const isIosSafari = this.platform_.isIos() && this.platform_.isSafari();
-      this.target_ = (isIosSafari && isMailTo) ? '_top' : '_blank';
+      this.target_ = (isIosSafari && (isMailTo || isWhatsApp))
+          ? '_top' : '_blank';
     });
 
     this.element.setAttribute('role', 'link');
@@ -85,10 +104,17 @@ class AmpSocialShare extends AMP.BaseElement {
   /** @private */
   handleClick_() {
     user().assert(this.href_ && this.target_, 'Clicked before href is set.');
-    const windowFeatures = 'resizable,scrollbars,width=640,height=480';
     const href = dev().assertString(this.href_);
     const target = dev().assertString(this.target_);
-    openWindowDialog(this.win, href, target, windowFeatures);
+    if (this.shareEndpoint_ === 'navigator-share:') {
+      dev().assert(navigator.share !== undefined,
+          'navigator.share disappeared.');
+      // navigator.share() fails 'gulp check-types' validation on Travis
+      navigator['share'](parseQueryString(href.substr(href.indexOf('?'))));
+    } else {
+      const windowFeatures = 'resizable,scrollbars,width=640,height=480';
+      openWindowDialog(this.win, href, target, windowFeatures);
+    }
   }
 
 };

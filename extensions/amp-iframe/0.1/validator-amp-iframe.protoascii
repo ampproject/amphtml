@@ -17,46 +17,27 @@
 tags: {  # amp-iframe
   html_format: AMP  # Iframes not allowed in ads.
   tag_name: "SCRIPT"
-  spec_name: "amp-iframe extension .js script"
-  mandatory_parent: "HEAD"
-  unique_warning: true
-  extension_unused_unless_tag_present: "amp-iframe"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  satisfies: "amp-iframe extension .js script"
+  extension_spec: {
+    name: "amp-iframe"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    deprecated_recommends_usage_of_tag: "amp-iframe"
+    deprecated_allow_duplicates: true
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-iframe"
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-iframe-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-iframe.html"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-iframe>
   html_format: AMP  # Iframes not allowed in ads.
   tag_name: "AMP-IFRAME"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-iframe extension .js script"
+  requires: "amp-iframe extension .js script"
   attrs: {
     name: "allowfullscreen"
+    value: ""
+  }
+  attrs: {
+    name: "allowpaymentrequest"
     value: ""
   }
   attrs: {
@@ -91,8 +72,15 @@ tags: {  # <amp-iframe>
     name: "srcdoc"
     mandatory_oneof: "['src', 'srcdoc']"
   }
+  # <amp-bind>
+  attrs: {
+    name: "[src]"
+    trigger: {
+      also_requires_attr: "src"
+    }
+  }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-iframe.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-iframe"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

@@ -15,48 +15,21 @@
 #
 
 tags: {  # amp-carousel
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
-  spec_name: "amp-carousel extension .js script"
-  mandatory_parent: "HEAD"
-  unique_warning: true
-  extension_unused_unless_tag_present: "amp-carousel"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  satisfies: "amp-carousel extension .js script"
+  extension_spec: {
+    name: "amp-carousel"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    deprecated_recommends_usage_of_tag: "amp-carousel"
+    deprecated_allow_duplicates: true
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-carousel"
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-carousel-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-carousel.html"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-carousel>
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-CAROUSEL"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-carousel extension .js script"
+  requires: "amp-carousel extension .js script"
   attrs: {
     name: "arrows"
     value: ""
@@ -82,8 +55,10 @@ tags: {  # <amp-carousel>
     name: "type"
     value_regex: "slides|carousel"
   }
+  # <amp-bind>
+  attrs: { name: "[slide]" }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-carousel.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-carousel"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

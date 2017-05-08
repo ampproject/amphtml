@@ -22,10 +22,12 @@
 import '../../../third_party/babel/custom-babel-helpers';
 import '../../../src/polyfills';
 import {LoginDoneDialog} from './amp-login-done-dialog';
-import {initLogConstructor} from '../../../src/log';
+import {initLogConstructor, setReportError} from '../../../src/log';
+import {reportError} from '../../../src/error';
 import {onDocumentReady} from '../../../src/document-ready';
 
 initLogConstructor();
+setReportError(reportError);
 
 onDocumentReady(document, () => {
   new LoginDoneDialog(window).start();

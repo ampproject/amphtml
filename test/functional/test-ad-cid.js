@@ -15,13 +15,14 @@
  */
 
 import {adConfig} from '../../ads/_config';
+import {ampdocServiceFor} from '../../src/ampdoc';
 import {createIframePromise} from '../../testing/iframe';
-import {installCidServiceForDoc,} from
+import {cidServiceForDocForTesting,} from
     '../../extensions/amp-analytics/0.1/cid-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {getAdCid} from '../../src/ad-cid';
 import {setCookie} from '../../src/cookies';
-import {timerFor} from '../../src/timer';
+import {timerFor} from '../../src/services';
 import * as sinon from 'sinon';
 
 describe('ad-cid', () => {
@@ -39,9 +40,9 @@ describe('ad-cid', () => {
     clock = sandbox.useFakeTimers();
     element = document.createElement('amp-ad');
     element.setAttribute('type', '_ping_');
-    const ampdocService = installDocService(window, /* isSingleDoc */ true);
-    const ampdoc = ampdocService.getAmpDoc();
-    cidService = installCidServiceForDoc(ampdoc);
+    installDocService(window, /* isSingleDoc */ true);
+    const ampdoc = ampdocServiceFor(window).getAmpDoc();
+    cidService = cidServiceForDocForTesting(ampdoc);
     adElement = {
       getAmpDoc: () => ampdoc,
       element,

@@ -15,7 +15,12 @@
  */
 
 import {AstNodeType} from './bind-expr-defines';
+import {getMode} from '../../../src/mode';
+import {isArray, isObject} from '../../../src/types';
 import {parser} from './bind-expr-impl';
+import {user} from '../../../src/log';
+
+const TAG = 'amp-bind';
 
 /**
  * Possible types of a Bind expression evaluation.
@@ -23,11 +28,36 @@ import {parser} from './bind-expr-impl';
  */
 export let BindExpressionResultDef;
 
+/** @const @private {string} */
+const BUILT_IN_FUNCTIONS = 'built-in-functions';
+
 /**
  * Map of object type to function name to whitelisted function.
- * @type {!Object<string, !Object<string, Function>>}
+ * @const @private {!Object<string, !Object<string, Function>>}
  */
 const FUNCTION_WHITELIST = (function() {
+
+  /**
+   * Similar to Array.prototype.splice, except it returns a copy of the
+   * passed-in array with the desired modifications.
+   * @param {!Array} array
+   * @param {number=} start
+   * @param {number=} deleteCount
+   * @param {...?} items
+   */
+  /*eslint "no-unused-vars": 0*/
+  function copyAndSplice(array, start, deleteCount, items) {
+    if (!isArray(array)) {
+      throw new Error(
+        `copyAndSplice: ${array} is not an array.`);
+    }
+    const copy = Array.prototype.slice.call(array);
+    Array.prototype.splice.apply(
+        copy,
+        Array.prototype.slice.call(arguments, 1));
+    return copy;
+  }
+
   const whitelist = {
     '[object Array]':
       [
@@ -36,6 +66,7 @@ const FUNCTION_WHITELIST = (function() {
         Array.prototype.join,
         Array.prototype.lastIndexOf,
         Array.prototype.slice,
+        Array.prototype.includes,
       ],
     '[object String]':
       [
@@ -52,6 +83,19 @@ const FUNCTION_WHITELIST = (function() {
         String.prototype.toUpperCase,
       ],
   };
+  whitelist[BUILT_IN_FUNCTIONS] = [
+    Math.abs,
+    Math.ceil,
+    Math.floor,
+    Math.max,
+    Math.min,
+    Math.random,
+    Math.round,
+    Math.sign,
+    encodeURI,
+    encodeURIComponent,
+    copyAndSplice,
+  ];
   // Creates a prototype-less map of function name to the function itself.
   // This makes function lookups faster (compared to Array.indexOf).
   const out = Object.create(null);
@@ -68,19 +112,36 @@ const FUNCTION_WHITELIST = (function() {
 })();
 
 /**
+ * Default maximum number of nodes in an expression AST.
+ * Double size of a "typical" expression in examples/bind/performance.amp.html.
+ * @const @private {number}
+ */
+const DEFAULT_MAX_AST_SIZE = 50;
+
+/**
  * A single Bind expression.
  */
 export class BindExpression {
   /**
    * @param {string} expressionString
+   * @param {number=} opt_maxAstSize
    * @throws {Error} On malformed expressions.
    */
-  constructor(expressionString) {
+  constructor(expressionString, opt_maxAstSize) {
     /** @const {string} */
     this.expressionString = expressionString;
 
-    /** @const {!./bind-expr-defines.AstNode} */
+    /** @const @private {!./bind-expr-defines.AstNode} */
     this.ast_ = parser.parse(this.expressionString);
+
+    // Check if this expression string is too large (for performance).
+    const size = this.numberOfNodesInAst_(this.ast_);
+    const maxSize = opt_maxAstSize || DEFAULT_MAX_AST_SIZE;
+    const skipConstraint = getMode().localDev && !getMode().test;
+    if (size > maxSize && !skipConstraint) {
+      throw new Error(`Expression size (${size}) exceeds max (${maxSize}). ` +
+          `Please reduce number of operands.`);
+    }
   }
 
   /**
@@ -94,8 +155,25 @@ export class BindExpression {
   }
 
   /**
+   * @param {!./bind-expr-defines.AstNode} ast
+   * @return {number}
+   * @private
+   */
+  numberOfNodesInAst_(ast) {
+    let nodes = 1;
+    if (ast.args) {
+      ast.args.forEach(arg => {
+        if (arg) {
+          nodes += this.numberOfNodesInAst_(arg);
+        }
+      });
+    }
+    return nodes;
+  }
+
+  /**
    * Recursively evaluates and returns value of `node` and its children.
-   * @param {?./bind-expr-defines.AstNode} node
+   * @param {./bind-expr-defines.AstNode} node
    * @param {!Object} scope
    * @throws {Error}
    * @return {BindExpressionResultDef}
@@ -118,43 +196,75 @@ export class BindExpression {
         return this.eval_(args[0], scope);
 
       case AstNodeType.INVOCATION:
+        // Built-in functions don't have a caller object.
+        const isBuiltIn = (args[0] === undefined);
+
         const caller = this.eval_(args[0], scope);
         const params = this.eval_(args[1], scope);
         const method = String(value);
 
-        const callerType = Object.prototype.toString.call(caller);
-        const whitelist = FUNCTION_WHITELIST[callerType];
-        if (whitelist) {
-          const func = caller[method];
-          if (func && func === whitelist[method]) {
-            if (Array.isArray(params) && !this.containsObject_(params)) {
-              return func.apply(caller, params);
-            } else {
-              throw new Error(`Unexpected argument type in ${method}().`);
+        let validFunction;
+        let unsupportedError;
+
+        if (isBuiltIn) {
+          validFunction = FUNCTION_WHITELIST[BUILT_IN_FUNCTIONS][method];
+          if (!validFunction) {
+            unsupportedError = `${method} is not a supported function.`;
+          }
+        } else {
+          if (caller === null) {
+            user().warn(TAG, `Cannot invoke method ${method} on null; ` +
+                `returning null.`);
+            return null;
+          }
+          const callerType = Object.prototype.toString.call(caller);
+          const whitelist = FUNCTION_WHITELIST[callerType];
+          if (whitelist) {
+            const f = caller[method];
+            if (f && f === whitelist[method]) {
+              validFunction = f;
             }
           }
+          if (!validFunction) {
+            unsupportedError =
+                `${callerType}.${method} is not a supported function.`;
+          }
         }
-        throw new Error(`${method}() is not a supported function.`);
+
+        if (validFunction) {
+          if (Array.isArray(params) && !this.containsObject_(params)) {
+            return validFunction.apply(caller, params);
+          } else {
+            throw new Error(`Unexpected argument type in ${method}().`);
+          }
+        }
+
+        throw new Error(unsupportedError);
 
       case AstNodeType.MEMBER_ACCESS:
         const target = this.eval_(args[0], scope);
         const member = this.eval_(args[1], scope);
 
         if (target === null || member === null) {
+          this.memberAccessWarning_(target, member);
           return null;
         }
         const targetType = typeof target;
         if (targetType !== 'string' && targetType !== 'object') {
+          this.memberAccessWarning_(target, member);
           return null;
         }
         const memberType = typeof member;
         if (memberType !== 'string' && memberType !== 'number') {
+          this.memberAccessWarning_(target, member);
           return null;
         }
         // Ignore Closure's type constraint for `hasOwnProperty`.
         if (Object.prototype.hasOwnProperty.call(
               /** @type {Object} */ (target), member)) {
           return target[member];
+        } else {
+          this.memberAccessWarning_(target, member);
         }
         return null;
 
@@ -165,6 +275,8 @@ export class BindExpression {
         const variable = value;
         if (Object.prototype.hasOwnProperty.call(scope, variable)) {
           return scope[variable];
+        } else {
+          user().warn(TAG, `${variable} is not defined; returning null.`);
         }
         return null;
 
@@ -257,6 +369,16 @@ export class BindExpression {
   }
 
   /**
+   * @param {*} target
+   * @param {*} member
+   * @private
+   */
+  memberAccessWarning_(target, member) {
+    user().warn(TAG, `Cannot read property ${JSON.stringify(member)} of ` +
+        `${JSON.stringify(target)}; returning null.`);
+  }
+
+  /**
    * Returns true if input array contains a plain object.
    * @param {!Array} array
    * @return {boolean}
@@ -264,7 +386,7 @@ export class BindExpression {
    */
   containsObject_(array) {
     for (let i = 0; i < array.length; i++) {
-      if (Object.prototype.toString.call(array[i]) === '[object Object]') {
+      if (isObject(array[i])) {
         return true;
       }
     }

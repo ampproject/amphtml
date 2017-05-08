@@ -15,8 +15,8 @@
  */
 
 import {isExperimentOn} from '../../../src/experiments';
-import {xhrFor} from '../../../src/xhr';
-import {historyForDoc} from '../../../src/history';
+import {xhrFor} from '../../../src/services';
+import {historyForDoc} from '../../../src/services';
 import {getService} from '../../../src/service';
 import {Layout} from '../../../src/layout';
 import {base64UrlEncodeFromBytes} from '../../../src/utils/base64';
@@ -79,11 +79,10 @@ export class AmpShareTracking extends AMP.BaseElement {
       const outgoingFragment = results[1];
       dev().fine(TAG, 'incomingFragment: ', incomingFragment);
       dev().fine(TAG, 'outgoingFragment: ', outgoingFragment);
-      if (outgoingFragment) {
+      if (outgoingFragment && outgoingFragment != '') {
         const newFragment = this.getNewViewerFragment_(incomingFragment,
             outgoingFragment);
-        // Update the viewer fragment with leading '#'
-        this.getHistory_().updateFragment('#' + newFragment);
+        this.getHistory_().updateFragment(newFragment);
       }
       return {incomingFragment, outgoingFragment};
     });

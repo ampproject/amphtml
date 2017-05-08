@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {fromClass} from '../service';
+import {registerServiceBuilder} from '../service';
 
 
 /**
@@ -106,16 +106,16 @@ export class Platform {
       return this.evalMajorVersion_(/\sVersion\/(\d+)/, 1);
     }
     if (this.isChrome()) {
-      return this.evalMajorVersion_(/\Chrome\/(\d+)/, 1);
+      return this.evalMajorVersion_(/(Chrome|CriOS)\/(\d+)/, 2);
     }
     if (this.isFirefox()) {
-      return this.evalMajorVersion_(/\Firefox\/(\d+)/, 1);
+      return this.evalMajorVersion_(/Firefox\/(\d+)/, 1);
     }
     if (this.isIe()) {
-      return this.evalMajorVersion_(/\MSIE\s(\d+)/, 1);
+      return this.evalMajorVersion_(/MSIE\s(\d+)/, 1);
     }
     if (this.isEdge()) {
-      return this.evalMajorVersion_(/\Edge\/(\d+)/, 1);
+      return this.evalMajorVersion_(/Edge\/(\d+)/, 1);
     }
     return 0;
   }
@@ -136,13 +136,46 @@ export class Platform {
     }
     return parseInt(res[index], 10);
   }
+
+  /**
+   * Returns the minor ios version in string.
+   * The ios version can contain two numbers (10.2) or three numbers (10.2.1).
+   * Direct string equality check is not suggested, use startWith instead.
+   * @returns {string}
+   */
+  getIosVersionString() {
+    if (!this.navigator_.userAgent) {
+      return '';
+    }
+    if (!this.isIos()) {
+      return '';
+    }
+    let version = this.navigator_.userAgent
+        .match(/OS ([0-9]+_[0-9]+(_[0-9]+)?)\b/);
+    if (!version) {
+      return '';
+    }
+    version = version[1].replace(/_/g, '.');
+    return version;
+  }
+
+  /**
+   * Returns the major ios version in number.
+   * @return {?number}
+   */
+  getIosMajorVersion() {
+    const currentIosVersion = this.getIosVersionString();
+    if (currentIosVersion == '') {
+      return null;
+    }
+    return Number(currentIosVersion.split('.')[0]);
+  }
 };
 
 
 /**
  * @param {!Window} window
- * @return {!Platform}
  */
 export function installPlatformService(window) {
-  return fromClass(window, 'platform', Platform);
+  return registerServiceBuilder(window, 'platform', Platform);
 };

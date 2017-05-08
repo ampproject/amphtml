@@ -16,8 +16,8 @@
 
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {user} from '../../../src/log';
-import {templatesFor} from '../../../src/template';
-import {xhrFor} from '../../../src/xhr';
+import {templatesFor} from '../../../src/services';
+import {xhrFor} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
 import {ancestorElementsByTag} from '../../../src/dom';
 import {removeChildren} from '../../../src/dom';
@@ -84,9 +84,7 @@ export class AmpAdCustom extends AMP.BaseElement {
     // If this promise has no URL yet, create one for it.
     if (!(fullUrl in ampCustomadXhrPromises)) {
       // Here is a promise that will return the data for this URL
-      ampCustomadXhrPromises[fullUrl] = xhrFor(this.win).fetchJson(fullUrl, {
-        requireAmpResponseSourceOrigin: false,
-      });
+      ampCustomadXhrPromises[fullUrl] = xhrFor(this.win).fetchJson(fullUrl);
     }
     return ampCustomadXhrPromises[fullUrl].then(data => {
       this.uiHandler.setDisplayState(AdDisplayState.LOADING);

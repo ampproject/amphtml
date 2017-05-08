@@ -96,7 +96,7 @@ attributes as following:
 ```html
 <amp-install-serviceworker layout="nodisplay"
     src="https://www.your-domain.com/serviceworker.js"
-    data-no-service-worker-fallback-url-match=".*\.amp.html"
+    data-no-service-worker-fallback-url-match=".*\.amp\.html"
     data-no-service-worker-fallback-shell-url="https://pub.com/shell">
 </amp-install-serviceworker>
 ```

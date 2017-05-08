@@ -15,18 +15,25 @@
  */
 
 /**
+ * @param {string} _match
+ * @param {string} character
+ * @return {string}
+ */
+function toUpperCase(_match, character) {
+  return character.toUpperCase();
+}
+
+/**
  * @param {string} name Attribute name with dashes
  * @return {string} Dashes removed and character after to upper case.
  * visibleForTesting
  */
 export function dashToCamelCase(name) {
-  return name.replace(/-([a-z])/g, function(_all, character) {
-    return character.toUpperCase();
-  });
+  return name.replace(/-([a-z])/g, toUpperCase);
 }
 
 /**
- * Polyfill for String.prototype. endsWith.
+ * Polyfill for String.prototype.endsWith.
  * @param {string} string
  * @param {string} suffix
  * @return {boolean}
@@ -37,7 +44,7 @@ export function endsWith(string, suffix) {
 }
 
 /**
- * Polyfill for String.prototype. startsWith.
+ * Polyfill for String.prototype.startsWith.
  * @param {string} string
  * @param {string} prefix
  * @return {boolean}

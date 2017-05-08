@@ -19,8 +19,10 @@ import {
   doNotLoadExternalResourcesInTest,
 } from '../../../../testing/iframe';
 import '../amp-youtube';
+import {listenOncePromise} from '../../../../src/event-helper';
 import {adopt} from '../../../../src/runtime';
-import {timerFor} from '../../../../src/timer';
+import {timerFor} from '../../../../src/services';
+import {VideoEvents} from '../../../../src/video-interface';
 import * as sinon from 'sinon';
 
 adopt(window);
@@ -173,14 +175,7 @@ describe('amp-youtube', function() {
 
       expect(yt.implementation_.playerState_).to.equal(0);
 
-      yt.implementation_.handleYoutubeMessages_({
-        origin: 'https://www.youtube.com',
-        source: iframe.contentWindow,
-        data: JSON.stringify({
-          event: 'infoDelivery',
-          info: {playerState: 1},
-        }),
-      });
+      sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 1});
 
       expect(yt.implementation_.playerState_).to.equal(1);
 
@@ -259,4 +254,86 @@ describe('amp-youtube', function() {
       preloadSpy.should.have.been.calledWithExactly(src);
     });
   });
+
+  it('should forward certain events from youtube to the amp element', () => {
+    return getYt({'data-videoid': 'mGENRKrdoGY'}).then(yt => {
+      const iframe = yt.querySelector('iframe');
+
+      return Promise.resolve()
+      .then(() => {
+        const p = listenOncePromise(yt, VideoEvents.MUTED);
+        sendFakeInfoDeliveryMessage(yt, iframe, {muted: true});
+        return p;
+      })
+      .then(() => {
+        const p = listenOncePromise(yt, VideoEvents.PLAY);
+        sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 1});
+        return p;
+      })
+      .then(() => {
+        const p = listenOncePromise(yt, VideoEvents.PAUSE);
+        sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 2});
+        return p;
+      })
+      .then(() => {
+        const p = listenOncePromise(yt, VideoEvents.UNMUTED);
+        sendFakeInfoDeliveryMessage(yt, iframe, {muted: false});
+        return p;
+      }).then(() => {
+        // Should not send the unmute event twice if already sent once.
+        const p = listenOncePromise(yt, VideoEvents.UNMUTED).then(() => {
+          assert.fail('Should not have dispatch unmute message twice');
+        });
+        sendFakeInfoDeliveryMessage(yt, iframe, {muted: false});
+        const successTimeout = timer.timeoutPromise(10, true);
+        return Promise.race([p, successTimeout]);
+      });
+    });
+  });
+
+  it('should propagate attribute mutations', () => {
+    return getYt({'data-videoid': 'mGENRKrdoGY'}).then(yt => {
+      const spy = sandbox.spy(yt.implementation_, 'sendCommand_');
+      yt.setAttribute('data-videoid', 'lBTCB7yLs8Y');
+      yt.mutatedAttributesCallback({'data-videoid': 'lBTCB7yLs8Y'});
+      expect(spy).to.be.calledWith('loadVideoById',
+          sinon.match(['lBTCB7yLs8Y']));
+    });
+  });
+
+  it('should remove iframe after unlayoutCallback', () => {
+    return getYt({'data-videoid': 'mGENRKrdoGY'}).then(yt => {
+      const placeholder = yt.querySelector('[placeholder]');
+      const obj = yt.implementation_;
+      const unlistenSpy = sandbox.spy(obj, 'unlistenMessage_');
+      obj.unlayoutCallback();
+      expect(unlistenSpy).to.have.been.called;
+      expect(yt.querySelector('iframe')).to.be.null;
+      expect(obj.iframe_).to.be.null;
+      expect(placeholder.style.display).to.be.equal('');
+      expect(obj.playerState_).to.be.equal(2);
+    });
+  });
+
+  it('should propagate attribute mutations', () => {
+    return getYt({'data-videoid': 'mGENRKrdoGY'}).then(yt => {
+      const spy = sandbox.spy(yt.implementation_, 'sendCommand_');
+      yt.setAttribute('data-videoid', 'lBTCB7yLs8Y');
+      yt.mutatedAttributesCallback({'data-videoid': 'lBTCB7yLs8Y'});
+      expect(spy).to.be.calledWith('loadVideoById',
+          sinon.match(['lBTCB7yLs8Y']));
+
+    });
+  });
+
+  function sendFakeInfoDeliveryMessage(yt, iframe, info) {
+    yt.implementation_.handleYoutubeMessages_({
+      origin: 'https://www.youtube.com',
+      source: iframe.contentWindow,
+      data: JSON.stringify({
+        event: 'infoDelivery',
+        info,
+      }),
+    });
+  }
 });
