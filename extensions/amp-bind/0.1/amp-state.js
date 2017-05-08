@@ -16,6 +16,7 @@
 
 import {bindForDoc, viewerForDoc} from '../../../src/services';
 import {fetchBatchedJsonFor} from '../../../src/batched-json';
+import {getMode} from '../../../src/mode';
 import {isBindEnabledFor} from './bind-impl';
 import {isJsonScriptTag} from '../../../src/dom';
 import {toggle} from '../../../src/style';
@@ -23,6 +24,16 @@ import {tryParseJson} from '../../../src/json';
 import {dev, user} from '../../../src/log';
 
 export class AmpState extends AMP.BaseElement {
+
+  /** @param {!AmpElement} element */
+  constructor(elemment) {
+    super(element);
+
+    /** @visibleForTesting {?Promise} */
+    this.initializePromise = null;
+  }
+
+
   /** @override */
   getPriority() {
     // Loads after other content.
@@ -56,9 +67,26 @@ export class AmpState extends AMP.BaseElement {
     toggle(this.element, /* opt_display */ false);
     this.element.setAttribute('aria-hidden', 'true');
 
+<<<<<<< HEAD
     // Don't parse or fetch in prerender mode.
     const viewer = viewerForDoc(this.getAmpDoc());
     viewer.whenFirstVisible().then(() => this.initialize_());
+=======
+    // If both `src` and child script tag are provided,
+    // state fetched from `src` takes precedence.
+    const children = this.element.children;
+    if (children.length == 1) {
+      this.parseChildAndUpdateState_();
+    } else if (children.length > 1) {
+      user().error(TAG, 'Should contain only one <script> child.');
+    }
+    if (this.element.hasAttribute('src')) {
+      const p = this.fetchSrcAndUpdateState_(/* isInit */ true);
+      if (getmode().test) {
+        this.initializePromise = p;
+      }
+    }
+>>>>>>> ecaba238... partial work on augmenting amp-state tests
   }
 
   /** @override */
@@ -119,11 +147,24 @@ export class AmpState extends AMP.BaseElement {
   }
 
   /**
+   * Wrapper to stub during testing.
+   * @param {!../../../service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Element} element
+   * @return {!Promise}
+   * @visibleForTesting
+   */
+  fetchBatchedJsonFor_(ampdoc, element) {
+    return fetchBatchedJsonFor(ampdoc, element);
+  }
+
+  /**
    * @param {boolean} isInit
+   * @returm {!Promise}
    * @private
    */
   fetchSrcAndUpdateState_(isInit) {
-    fetchBatchedJsonFor(this.getAmpDoc(), this.element).then(json => {
+    const ampdoc = this.getAmpdoc();
+    return this.fetchBatchedJsonFor_(ampdoc, this.element).then(json => {
       this.updateState_(json, isInit);
     });
   }
