@@ -40,7 +40,7 @@ export const MessageType = {
   SEND_POSITIONS: 'send-positions',
   POSITION: 'position',
   SEND_POSITIONS_HIGH_FIDELITY: 'send-positions-high-fidelity',
-  POSITION_HIGH_FIDELITY: 'position_high-fidelity',
+  POSITION_HIGH_FIDELITY: 'position-high-fidelity',
 };
 
 

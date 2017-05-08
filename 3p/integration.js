@@ -502,6 +502,9 @@ function installContextUsingStandardImpl(win) {
     nextTick(win, () => cb([initialIntersection]));
     return unlisten;
   };
+  win.context.observePosition = cb => {
+    return observePosition(cb);
+  };
   win.context.onResizeSuccess = onResizeSuccess;
   win.context.onResizeDenied = onResizeDenied;
   win.context.reportRenderedEntityIdentifier =
@@ -572,6 +575,21 @@ function observeIntersection(observerCallback) {
   nonSensitiveDataPostMessage('send-intersections');
   return listenParent(window, 'intersection', data => {
     observerCallback(data.changes);
+  });
+}
+
+/**
+ * Registers a callback for position of this iframe with the current
+ * viewport.
+ * @param {function(*)} observerCallback
+ * @returns {!function()} A function which removes the event listener that
+ *    observes for intersection messages.
+ */
+function observePosition(observerCallback) {
+  // Send request to receive intersection records.
+  nonSensitiveDataPostMessage('send-positions-high-fidelity');
+  return listenParent(window, 'position_high-fidelity', position => {
+    observerCallback(position);
   });
 }
 

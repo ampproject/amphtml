@@ -169,6 +169,8 @@ exports.rules = [
         'src/service/video-manager-impl.js',
       'extensions/amp-fx-parallax/0.1/amp-fx-parallax.js->' +
           'src/service/parallax-impl.js',
+      'extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js->' +
+          'src/service/position-observer-impl.js',
     ],
   },
   {

@@ -25,10 +25,7 @@ import {
   layoutRectFromDomRect,
   layoutRectLtwh,
 } from '../layout-rect';
-import {IframeMessagingClient} from '../../3p/iframe-messaging-client';
 import {isExperimentOn} from '../../src/experiments';
-import {MessageType} from '../../src/3p-frame-messaging';
-
 
 /** @const @private */
 const TAG = 'POSITION_OBSERVER';
@@ -77,7 +74,7 @@ class AbstractPositionObserver {
    * @param {function(PositionInViewportEntryDef)} handler
    */
   observe(element, fidelity, handler) {
-    // make entry into a class
+    // TODO(@zhouyx, #9208) make entry into a class
     const entry = {
       element,
       handler,
@@ -192,18 +189,21 @@ export class AmpDocPositionObserver extends AbstractPositionObserver {
   /* @override */
   startCallback() {
     // listen to viewport scroll event to help pass determine if need to
+    const stopScroll = () => {
+      if (Date.now() - this.scrollTimer_ < 500) {
+        // viewport scroll in the last 500 ms, wait
+        return;
+      }
+      // assume scroll stops, if no scroll event in the last 500,
+      this.inScroll_ = false;
+    };
+
     this.unlisteners_.push(this.viewport_.onScroll(() => {
       this.inScroll_ = true;
       this.scrollTimer_ = Date.now();
       this.schedulePass_();
-      setTimeout(() => {
-        if (Date.now() - this.scrollTimer_ < 500) {
-          // viewport scroll in the last 500 ms, wait
-          return;
-        }
-        // assume scroll stops, if no scroll event in the last 500,
-        this.inScroll_ = false;
-      }, 500);
+      // TODO(@zhouyx, #9208) using debounce.
+      setTimeout(stopScroll.bind(this), 500);
     }));
     this.unlisteners_.push(this.viewport_.onChanged(() => {
       this.vsync_.measure(() => {
@@ -261,8 +261,9 @@ export class AmpDocPositionObserver extends AbstractPositionObserver {
       }
       // Reset entry.turn value.
       if (!force) {
-        entry.turn = (entry.fidelity == PositionObserverFidelity.LOW) ?
-          LOW_FEDELITY_FRAME_COUNT : 0;
+        if (entry.fidelity == PositionObserverFidelity.LOW) {
+          entry.turn = LOW_FEDELITY_FRAME_COUNT;
+        }
       }
 
       this.updateEntryPosition_(entry);
@@ -309,13 +310,6 @@ export class InaboxPositionObserver extends AbstractPositionObserver {
 
     /** @private {?function()} */
     this.unlistenHost_ = null;
-
-    /** @private {!IframeMessagingClient} */
-    this.iframeClient_ = new IframeMessagingClient(ampdoc.win);
-
-    if (ampdoc.win.context.sentinel) {
-      this.iframeClient_.setSentinel(ampdoc.win.context.sentinel);
-    }
   }
 
   /** @override */
@@ -335,13 +329,16 @@ export class InaboxPositionObserver extends AbstractPositionObserver {
   /** @override */
   startCallback() {
     // TODO(@zhouyx, #9208) need to add support for AMP host
-    this.unlistenHost_ = this.iframeClient_.makeRequest(
-        MessageType.SEND_POSITIONS_HIGH_FIDELITY,
-        MessageType.POSITION_HIGH_FIDELITY,
-        position => {
-          this.onMessageReceivedHandler_(
-              /** @type {PositionInViewportEntryDef} */ (position));
-        });
+    if (!this.ampdoc_.win.context) {
+      dev.error(TAG, 'no window context for inbox window');
+    }
+
+    // TODO(@zhouyx, #9208) Migrate to using ampContext
+    this.unlistenHost_ = this.ampdoc_.win.context.observePosition(
+      position => {
+        this.onMessageReceivedHandler_(
+            /** @type {PositionInViewportEntryDef} */ (position));
+      });
   }
 
   /** @override */
@@ -404,10 +401,10 @@ export function installPositionObserverServiceForDoc(ampdoc) {
   dev().assert(isExperimentOn(ampdoc.win, 'amp-animation'),
      'PositionObserver is experimental and used by amp-animation only for now');
   registerServiceBuilderForDoc(ampdoc, 'position-observer', () => {
-    if (getMode(ampdoc.win).runtime != 'inabox') {
-      return new AmpDocPositionObserver(ampdoc);
-    } else {
+    if (getMode(ampdoc.win).runtime == 'inabox') {
       return new InaboxPositionObserver(ampdoc);
+    } else {
+      return new AmpDocPositionObserver(ampdoc);
     }
   });
 }

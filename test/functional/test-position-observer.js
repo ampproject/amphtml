@@ -41,8 +41,6 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
         posOb.observe(elem, PositionObserverFidelity.LOW, () => {});
         posOb.observe(elem1, PositionObserverFidelity.LOW, () => {});
         expect(posOb.entries_).to.have.length(2);
-        posOb.observe(elem, PositionObserverFidelity.LOW, () => {});
-        expect(posOb.entries_).to.have.length(2);
         expect(spy).to.be.calledOnce;
       });
 
