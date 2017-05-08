@@ -1,3 +1,20 @@
+/**
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use baseInstance file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import {AmpContext} from '../../3p/ampcontext';
 import {registerServiceBuilderForDoc} from '../service';
 import {viewportForDoc, vsyncFor} from '../services';
 import {getMode} from '../mode';
@@ -6,8 +23,11 @@ import {
   moveLayoutRect,
   layoutRectEquals,
   layoutRectsOverlap,
+  layoutRectFromDomRect,
+  layoutRectLtwh,
 } from '../layout-rect';
 import {IframeMessagingClient} from '../../3p/iframe-messaging-client';
+import {isExperimentOn} from '../../src/experiments';
 import {MessageType} from '../../src/3p-frame-messaging';
 
 
@@ -15,8 +35,9 @@ import {MessageType} from '../../src/3p-frame-messaging';
 const TAG = 'POSITION_OBSERVER';
 
 /**
- * The positionObserver returned position value
- *
+ * The positionObserver returned position value which includes the position rect
+ * relative to viewport. And viewport rect which always has top 0, left 0, and
+ * viewport width and height.
  * @typedef {{
  *  positionRect: ?../layout-rect.LayoutRectDef,
  *  viewportRect: !../layout-rect.LayoutRectDef,
@@ -58,14 +79,6 @@ class AbstractPositionObserver {
    * @return {?Object}
    */
   observe(element, fidelity, handler) {
-    // If the element already exists in current observeEntries, do nothing
-    for (let i = 0; i < this.entries_.length; i++) {
-      if (this.entries_[i].element === element) {
-        dev().error(TAG, 'should observe same element only once');
-        return null;
-      }
-    }
-
     // make entry into a class
     const entry = {
       element,
@@ -87,7 +100,9 @@ class AbstractPositionObserver {
           // Only call handler if entry element overlap with viewport.
           try {
             entry.handler(position);
-          } catch(err) {}
+          } catch (err) {
+            // TODO(@zhouyx) Throw error. QQQ dev or user?
+          }
         } else if (entry.position) {
           // Need to notify that element gets outside viewport
           // NOTE: This is required for inabox position observer.
@@ -103,7 +118,11 @@ class AbstractPositionObserver {
     if (this.entries_.length == 1) {
       this.startCallback();
     }
-    this.updateEntryPosition_(entry);
+
+    this.vsync_.measure(() => {
+      this.updateEntryPosition_(entry);
+    });
+
     return entry;
   }
 
@@ -154,7 +173,7 @@ class AbstractPositionObserver {
   decreaseFidelityCallback() {}
 }
 
-export class AmpPagePositionObserver extends AbstractPositionObserver {
+export class AmpDocPositionObserver extends AbstractPositionObserver {
 
   /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
   constructor(ampdoc) {
@@ -182,24 +201,29 @@ export class AmpPagePositionObserver extends AbstractPositionObserver {
       this.scrollTimer_ = Date.now();
       this.schedulePass_();
       setTimeout(() => {
-        if (Date.now() - this.scrollTimer_ < 100) {
-          // viewport scroll in the last 100 ms, wait
+        if (Date.now() - this.scrollTimer_ < 500) {
+          // viewport scroll in the last 500 ms, wait
           return;
         }
-        // assume scroll stops, if no scroll event in the last 100,
+        // assume scroll stops, if no scroll event in the last 500,
         this.inScroll_ = false;
-      }, 100);
+      }, 500);
     }));
     this.unlisteners_.push(this.viewport_.onChanged(() => {
       this.vsync_.measure(() => {
         this.pass_(true);
       });
     }));
+    // QQQ: Already call this.updateEntryPosition_(entry) in observe()? Needed?
+    // initial pass
+    this.vsync_.measure(() => {
+      this.pass_(true);
+    });
   }
 
   /* @override */
   stopCallback() {
-    while(this.unlisteners_.length) {
+    while (this.unlisteners_.length) {
       const unlisten = this.unlisteners_.pop();
       unlisten();
     }
@@ -256,16 +280,18 @@ export class AmpPagePositionObserver extends AbstractPositionObserver {
   /** @override */
   updateEntryPosition_(entry) {
     // get layoutBoxes relative to doc.
-    let elementBox = this.viewport_.getLayoutRect(entry.element);
-    let viewportBox = this.viewport_.getRect();
+    const elementBox = layoutRectFromDomRect(
+        entry.element./*OK*/getBoundingClientRect());
+    const win = this.ampdoc_./*OK*/getWin();
 
-    // Adjust relative coordinate to viewport
-    // TODO(@zhouyx): We did one move when in #getLayoutRect.
-    // Optimize the code to avoid duplicate moveLayoutRect
-    elementBox = moveLayoutRect(elementBox,
-        -viewportBox.left, -viewportBox.top);
-    viewportBox = moveLayoutRect(viewportBox,
-        -viewportBox.left, -viewportBox.top);
+    let viewportWidth = win./*OK*/innerWidth;
+    let viewportHeight = win./*OK*/innerHeight;
+    if (!viewportWidth || !viewportHeight) {
+      const el = win.document.documentElement;
+      viewportWidth = el./*OK*/clientWidth;
+      viewportHeight = el./*OK*/clientHeight;
+    }
+    const viewportBox = layoutRectLtwh(0, 0, viewportWidth, viewportHeight);
 
     // Return { positionRect: <LayoutRectDef>, viewportRect: <LayoutRectDef>}
     entry.trigger(/** @type {PositionInViewportEntryDef}*/ ({
@@ -280,8 +306,8 @@ export class InaboxPositionObserver extends AbstractPositionObserver {
   constructor(ampdoc) {
     super(ampdoc);
 
-    /** @private {!AmpPagePositionObserver} */
-    this.positionObserver_ = new AmpPagePositionObserver(ampdoc);
+    /** @private {!AmpDocPositionObserver} */
+    this.positionObserver_ = new AmpDocPositionObserver(ampdoc);
 
     // TODO(@zhouyx) support fidelity
     this.effectiveFidelity_ = PositionObserverFidelity.LOW;
@@ -294,7 +320,10 @@ export class InaboxPositionObserver extends AbstractPositionObserver {
 
     /** @private {!IframeMessagingClient} */
     this.iframeClient_ = new IframeMessagingClient(ampdoc.win);
-    this.iframeClient_.setSentinel(String(ampdoc.win.Math.random()).substr(2));
+
+    // TODO(@zhouyx): AmpContext is in experiment. Make sure use it correctly
+    const context = new AmpContext(ampdoc.win);
+    this.iframeClient_.setSentinel(context.sentinel);
   }
 
   /** @override */
@@ -315,7 +344,8 @@ export class InaboxPositionObserver extends AbstractPositionObserver {
   startCallback() {
     // TODO(@zhouyx) need to add support for AMP host
     this.unlistenHost_ = this.iframeClient_.makeRequest(
-        MessageType.SEND_POSITIONS, MessageType.POSITION,
+        MessageType.SEND_POSITIONS_HIGH_FIDELITY,
+        MessageType.POSITION_HIGH_FIDELITY,
         position => {
           this.onMessageReceivedHandler_(
               /** @type {PositionInViewportEntryDef} */ (position));
@@ -347,7 +377,7 @@ export class InaboxPositionObserver extends AbstractPositionObserver {
 
   /** @private */
   pass_() {
-    for(let i = 0; i < this.entries_.length; i++) {
+    for (let i = 0; i < this.entries_.length; i++) {
       const entry = this.entries_[i];
       this.updateEntryPosition_(entry);
     }
@@ -360,7 +390,7 @@ export class InaboxPositionObserver extends AbstractPositionObserver {
       return;
     }
     if (!entry.element.inIframePositionRect) {
-      // Not receive element position in iframe from ampPagePositionObserver
+      // Not receive element position in iframe from ampDocPositionObserver
       return;
     }
     const iframeBox = this.iframePosition_.positionRect;
@@ -379,9 +409,11 @@ export class InaboxPositionObserver extends AbstractPositionObserver {
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  */
 export function installPositionObserverServiceForDoc(ampdoc) {
+  dev().assert(isExperimentOn(ampdoc.win, 'amp-animation'),
+     'PositionObserver is experimental and used by amp-animation only for now');
   registerServiceBuilderForDoc(ampdoc, 'position-observer', () => {
     if (getMode(ampdoc.win).runtime != 'inabox') {
-      return new AmpPagePositionObserver(ampdoc);
+      return new AmpDocPositionObserver(ampdoc);
     } else {
       return new InaboxPositionObserver(ampdoc);
     }

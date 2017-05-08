@@ -15,7 +15,7 @@
  */
 
 import {
-  AmpPagePositionObserver,
+  AmpDocPositionObserver,
   PositionObserverFidelity,
 } from '../../src/service/position-observer-impl';
 
@@ -27,10 +27,10 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
     ampdoc = env.ampdoc;
   });
 
-  describe('AmpPagePositionObserver', () => {
+  describe('AmpDocPositionObserver', () => {
     let posOb;
     beforeEach(() => {
-      posOb = new AmpPagePositionObserver(ampdoc);
+      posOb = new AmpDocPositionObserver(ampdoc);
     });
 
     describe('API functions includes observe/unobserve/changeFidelity', () => {
