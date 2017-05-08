@@ -121,8 +121,6 @@ class AmpBridPlayer extends AMP.BaseElement {
     placeholderFallback.setAttribute('fallback', '');
     placeholder.appendChild(placeholderFallback);
 
-    // TODO(#5321): Investigate if this is actually the correct URL format for generated
-    // dynamic image.
     placeholder.setAttribute('src',
         'https://cdn.brid.tv/live/partners/' +
         encodeURIComponent(partnerID) + '/snapshot/' +

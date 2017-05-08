@@ -163,7 +163,7 @@ export class AbstractAmpContext {
     // Call the callback with the value that was transmitted when the
     // iframe was drawn. Called in nextTick, so that callers don't
     // have to specially handle the sync case.
-    // TODO(#8562): Deprecate this behavior
+    // TODO(lannka, #8562): Deprecate this behavior
     nextTick(this.win_, () => {
       callback([this.initialIntersection]);
     });
