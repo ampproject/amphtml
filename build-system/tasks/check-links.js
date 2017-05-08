@@ -84,6 +84,25 @@ function checkLinks() {
 }
 
 /**
+ * Filters out markdown elements that contain localhost links.
+ *
+ * @param {string} markdown Original markdown.
+ * @return {string} Markdown after filtering out localhost links.
+ */
+function filterLocalhostLinks(markdown) {
+  var localhostPattern = 'http:\/\/localhost:8000';
+  var parenLinks = new RegExp('\\('+ localhostPattern + '[^\\)]*\\)', 'g');
+  var bracketLinks = new RegExp('\\['+ localhostPattern + '[^\\]]*\\]', 'g');
+  var rawLinks = new RegExp(localhostPattern, 'g');
+
+  var filteredMarkdown = markdown;
+  filteredMarkdown = filteredMarkdown.replace(parenLinks, '');
+  filteredMarkdown = filteredMarkdown.replace(bracketLinks, '');
+  filteredMarkdown = filteredMarkdown.replace(rawLinks, '');
+  return filteredMarkdown;
+}
+
+/**
  * Reads the raw contents in the given markdown file, filters out localhost
  * links (because they do not resolve on Travis), and checks for dead links.
  *
@@ -92,7 +111,7 @@ function checkLinks() {
  */
 function runLinkChecker(markdownFile) {
   var markdown = fs.readFileSync(markdownFile).toString();
-  var filteredMarkdown = markdown.replace(/http:\/\/localhost:8000\//g, '');
+  var filteredMarkdown = filterLocalhostLinks(markdown);
   var opts = {
     baseUrl : 'file://' + path.dirname(path.resolve((markdownFile)))
   };
