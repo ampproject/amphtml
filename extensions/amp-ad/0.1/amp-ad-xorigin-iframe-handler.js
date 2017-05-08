@@ -117,7 +117,6 @@ export class AmpAdXOriginIframeHandler {
           installPositionObserverServiceForDoc(ampdoc);
           this.positionObserver_ = getServiceForDoc(ampdoc,
               'position-observer');
-          // TODO(@zhouyx, #9208) Need to unobserve it during cleanup
           this.positionObserver_.observe(
             this.iframe,
             PositionObserverFidelity.HIGH, pos => {
@@ -324,6 +323,11 @@ export class AmpAdXOriginIframeHandler {
     if (this.embedStateApi_) {
       this.embedStateApi_.destroy();
       this.embedStateApi_ = null;
+    }
+    if (this.positionObserver_) {
+      if (this.iframe) {
+        this.positionObserver_.unobserve(this.iframe);
+      }
     }
     if (this.positionObserverHighFidelityApi_) {
       this.positionObserverHighFidelityApi_.destroy();
