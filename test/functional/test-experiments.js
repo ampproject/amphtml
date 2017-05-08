@@ -802,42 +802,41 @@ describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
   let ampdoc;
   let sandbox;
   let crypto;
-  let publicJwk;
 
   let correctToken;
   let tokenWithBadVersion;
   let tokenWithBadConfigLength;
   let tokenWithBadSignature;
+  const publicJwk = {
+    alg: 'RS256',
+    e: 'AQAB',
+    ext: true,
+    /*eslint "google-camelcase/google-camelcase": 0*/
+    key_ops: ['verify'],
+    kty: 'RSA',
+    n: 'tekkGCYJK_BO0es6jiGXFpu5BcNLpnnRMr7GKcASW0Br_jo-uVd1qXOSM_wGWr-xzP4' +
+       'zCr89ENu8cxAbtjLWzzHCRzv9T4n4IM2SDu8DyyL2s_8c8VaNXlj8wWGtGxPQkRQeWn' +
+       'H-YxUWTm1TPvkI-DgeQX66-Qa_-eJpBhDl1uPQYe5MeqIkF2RzLAXHL9mZT6BQHTCCX' +
+       'rC5ihQBHWtcv15442p7cTk5UyEVeUmGI6_yPpwhxdOP0sw90D8oDvdV7L4bBfJNZj3n' +
+       'PNLfhfhr_Pxx41vUQD7jUDkd0vbHQksvv8qpc-So8XqzDg8jYdw2KxY0GMYBNKXDLE2' +
+       'emjClQw',
+  };
 
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
-    sandbox = sinon.sandbox.create();
+    sandbox = env.sandbox;
 
     installCryptoService(win);
     crypto = cryptoFor(win);
 
-    publicJwk = {
-      alg: 'RS256',
-      e: 'AQAB',
-      ext: true,
-      /*eslint "google-camelcase/google-camelcase": 0*/
-      key_ops: ['verify'],
-      kty: 'RSA',
-      n: 'tekkGCYJK_BO0es6jiGXFpu5BcNLpnnRMr7GKcASW0Br_jo-uVd1qXOSM_wGWr-xzP4' +
-         'zCr89ENu8cxAbtjLWzzHCRzv9T4n4IM2SDu8DyyL2s_8c8VaNXlj8wWGtGxPQkRQeWn' +
-         'H-YxUWTm1TPvkI-DgeQX66-Qa_-eJpBhDl1uPQYe5MeqIkF2RzLAXHL9mZT6BQHTCCX' +
-         'rC5ihQBHWtcv15442p7cTk5UyEVeUmGI6_yPpwhxdOP0sw90D8oDvdV7L4bBfJNZj3n' +
-         'PNLfhfhr_Pxx41vUQD7jUDkd0vbHQksvv8qpc-So8XqzDg8jYdw2KxY0GMYBNKXDLE2' +
-         'emjClQw',
-    };
     // Version: 0
     // Size: 145
     // {
     //   origin: 'https://www.google.com',
     //   experiments: {
     //     'amp-expires-later': {expiration: 95617602000000},
-    //     'amp-expired-': {expiration: 1232427600000},
+    //     'amp-expired': {expiration: 1232427600000},
     //   },
     // }
     // Signature: Correct
@@ -922,7 +921,7 @@ describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
     setupMetaTagWith(tokenWithBadVersion);
     const p = isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
     return expect(p).to.eventually.be
-        .rejectedWith('Unrecorgnized experiments token version');
+        .rejectedWith(/Unrecognized experiments token version/);
   });
 
   it('should throw if config length exceeds byte length', () => {

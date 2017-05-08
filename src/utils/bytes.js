@@ -120,7 +120,7 @@ export function bytesToString(bytes) {
  * @param {!Uint8Array} bytes
  * @return {number}
  */
-export function bytesToInt(bytes) {
+export function bytesToUInt32(bytes) {
   if (bytes.length != 4) {
     throw new Error('Received byte array with length != 4');
   }
