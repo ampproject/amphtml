@@ -879,7 +879,7 @@ export class AmpA4A extends AMP.BaseElement {
                          'Error injecting creative in friendly frame', err);
             this.promiseErrorHandler_(err);
             return this.renderNonAmpCreative_(checkStillCurrent);
-        });
+          });
     }).catch(error => {
       this.promiseErrorHandler_(error);
       throw cancellation();
