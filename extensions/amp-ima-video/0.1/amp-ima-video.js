@@ -59,6 +59,8 @@ class AmpImaVideo extends AMP.BaseElement {
   preconnectCallback() {
     this.preconnect.preload(
         'https://imasdk.googleapis.com/js/sdkloader/ima3.js', 'script');
+    this.preconnect.url(this.element.getAttribute('data-src'));
+    this.preconnect.url(this.element.getAttribute('data-tag'));
     preloadBootstrap(this.win, this.preconnect);
   }
 
@@ -73,7 +75,6 @@ class AmpImaVideo extends AMP.BaseElement {
         this.element, 'ima-video');
     iframe.setAttribute('allowfullscreen', 'true');
     this.applyFillContent(iframe);
-    this.element.appendChild(iframe);
 
     this.iframe_ = iframe;
 
@@ -86,6 +87,8 @@ class AmpImaVideo extends AMP.BaseElement {
       'message',
       this.handlePlayerMessages_.bind(this)
     );
+
+    this.element.appendChild(iframe);
 
     installVideoManagerForDoc(this.element);
     videoManagerForDoc(this.win.document).register(this);
@@ -131,13 +134,16 @@ class AmpImaVideo extends AMP.BaseElement {
    * @private
    * */
   sendCommand_(command, opt_args) {
-    this.playerReadyPromise_.then(() => {
-      this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify({
-        'event': 'command',
-        'func': command,
-        'args': opt_args || '',
-      }), '*');
-    });
+    if (this.iframe_ && this.iframe_.contentWindow)
+    {
+      this.playerReadyPromise_.then(() => {
+        this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify({
+          'event': 'command',
+          'func': command,
+          'args': opt_args || '',
+        }), '*');
+      });
+    }
   }
 
   /** @private */
