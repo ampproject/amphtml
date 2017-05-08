@@ -101,7 +101,7 @@ export function isExperimentOnForOriginTrial(win, experimentId, opt_publicJwk) {
   if (version !== 0) {
     // Unrecognized version number
     const error =
-        new Error(`Unrecognized experiments token version: ${version}`)
+        new Error(`Unrecognized experiments token version: ${version}`);
     return Promise.reject(error);
   }
   current++;
