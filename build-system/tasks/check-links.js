@@ -85,6 +85,7 @@ function checkLinks() {
 
 /**
  * Filters out markdown elements that contain localhost links.
+ * TODO(rsimha-amp): Simplify this into a single regex.
  *
  * @param {string} markdown Original markdown.
  * @return {string} Markdown after filtering out localhost links.
