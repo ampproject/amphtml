@@ -30,8 +30,9 @@ import {dev} from './log';
  *   obj: (?Object),
  *   promise: (?Promise),
  *   resolve: (?function(!Object)),
- *   context: (!Window|!./service/ampdoc-impl.AmpDoc),
- *   ctor: {?function(new:Object,!Window|!./service/ampdoc-impl.AmpDoc):!Object}
+ *   context: (?Window|?./service/ampdoc-impl.AmpDoc),
+ *   ctor: (?function(new:Object, !Window)|
+ *          ?function(new:Object, !./service/ampdoc-impl.AmpDoc)),
  * }}
  */
 let ServiceHolderDef;
@@ -178,7 +179,7 @@ export function getService(win, id) {
  * Registers a service given a class to be used as implementation.
  * @param {!Window} win
  * @param {string} id of the service.
- * @param {function(new:Object, !Window)=} constructor
+ * @param {function(new:Object, !Window)} constructor
  * @param {boolean=} opt_instantiate Whether to immediately create the service
  */
 export function registerServiceBuilder(win,
@@ -380,7 +381,7 @@ function getServiceInternal(holder, id) {
   const services = getServices(holder);
   const s = services[id];
   if (!s.obj) {
-    dev().assert(s.ctor, `Service ${id} registered without constructor nor impl.`);
+    dev().assert(s.ctor, `Service ${id} registered without ctor nor impl.`);
     dev().assert(s.context, `Service ${id} registered without context.`);
     s.obj = new s.ctor(s.context);
     dev().assert(s.obj, `Service ${id} constructed to null.`);
@@ -399,7 +400,8 @@ function getServiceInternal(holder, id) {
  * @param {!Object} holder Object holding the service instance.
  * @param {!Window|!./service/ampdoc-impl.AmpDoc} context Win or AmpDoc.
  * @param {string} id of the service.
- * @param {!function(new:Object,!Window|!./service/ampdoc-impl.AmpDoc):!Object}
+ * @param {?function(new:Object, !Window)|
+ *         ?function(new:Object, !./service/ampdoc-impl.AmpDoc)}
  *     ctor Constructor function to new the service. Called with context.
  */
 function registerServiceInternal(holder, context, id, ctor) {
