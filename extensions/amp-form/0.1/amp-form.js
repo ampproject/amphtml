@@ -475,7 +475,9 @@ export class AmpForm {
       this.renderTemplate_(json || {});
       this.maybeHandleRedirect_(response);
     }, error => {
-      rethrowAsync('Failed to parse response JSON:', error);
+      const message = 'Failed to parse response JSON:';
+      user().error(TAG, message, error);
+      rethrowAsync(message, error);
     });
   }
 
@@ -491,7 +493,9 @@ export class AmpForm {
     this.setState_(FormState_.SUBMIT_ERROR);
     this.renderTemplate_(error.responseJson || {});
     this.maybeHandleRedirect_(error.response);
-    rethrowAsync('Form submission failed:', error);
+    const message = 'Form submission failed:';
+    user().error(TAG, message, error);
+    rethrowAsync(message, error);
   }
 
   /** @private */
