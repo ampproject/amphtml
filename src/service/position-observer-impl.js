@@ -76,7 +76,6 @@ class AbstractPositionObserver {
    * @param {!Element} element
    * @param {PositionObserverFidelity} fidelity
    * @param {function(PositionInViewportEntryDef)} handler
-   * @return {?Object}
    */
   observe(element, fidelity, handler) {
     // make entry into a class
@@ -122,8 +121,6 @@ class AbstractPositionObserver {
     this.vsync_.measure(() => {
       this.updateEntryPosition_(entry);
     });
-
-    return entry;
   }
 
   /**
@@ -282,7 +279,7 @@ export class AmpDocPositionObserver extends AbstractPositionObserver {
     // get layoutBoxes relative to doc.
     const elementBox = layoutRectFromDomRect(
         entry.element./*OK*/getBoundingClientRect());
-    const win = this.ampdoc_./*OK*/getWin();
+    const win = this.ampdoc_.win;
 
     let viewportWidth = win./*OK*/innerWidth;
     let viewportHeight = win./*OK*/innerHeight;
@@ -322,8 +319,11 @@ export class InaboxPositionObserver extends AbstractPositionObserver {
     this.iframeClient_ = new IframeMessagingClient(ampdoc.win);
 
     // TODO(@zhouyx): AmpContext is in experiment. Make sure use it correctly
+    // May need to create way to expose generated sentinel from inabox ampdoc.
     const context = new AmpContext(ampdoc.win);
-    this.iframeClient_.setSentinel(context.sentinel);
+    if (context.sentinel) {
+      this.iframeClient_.setSentinel(context.sentinel);
+    }
   }
 
   /** @override */

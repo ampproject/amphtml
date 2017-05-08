@@ -32,6 +32,15 @@ import {setStyle} from '../../../src/style';
 import {loadPromise} from '../../../src/event-helper';
 import {getHtml} from '../../../src/get-html';
 import {removeElement} from '../../../src/dom';
+import {getServiceForDoc} from '../../../src/service';
+import {MessageType} from '../../../src/3p-frame-messaging';
+import {isExperimentOn} from '../../../src/experiments';
+import {
+  installPositionObserverServiceForDoc,
+  PositionObserverFidelity,
+} from '../../../src/service/position-observer-impl';
+
+
 
 const VISIBILITY_TIMEOUT = 10000;
 
@@ -61,6 +70,15 @@ export class AmpAdXOriginIframeHandler {
     /** @private {SubscriptionApi} */
     this.embedStateApi_ = null;
 
+    /** @private {?SubscriptionApi} */
+    this.positionObserverHighFidelityApi_ = null;
+
+    /**
+     * {?../../../src/service/position-observer-impl.AbstractPositionObserver}
+     * @private
+     */
+    this.positionObserver_ = null;
+
     /** @private {!Array<!Function>} functions to unregister listeners */
     this.unlisteners_ = [];
 
@@ -89,6 +107,27 @@ export class AmpAdXOriginIframeHandler {
     this.embedStateApi_ = new SubscriptionApi(
         this.iframe, 'send-embed-state', true,
         () => this.sendEmbedInfo_(this.baseInstance_.isInViewport()));
+
+    // High-fidelity positions for scrollbound animations.
+    // Protected by 'amp-animation' experiment for now.
+    if (isExperimentOn(this.baseInstance_.win, 'amp-animation')) {
+      this.positionObserverHighFidelityApi_ = new SubscriptionApi(
+        this.iframe, MessageType.SEND_POSITIONS_HIGH_FIDELITY, true, () => {
+          const ampdoc = this.baseInstance_.getAmpDoc();
+          installPositionObserverServiceForDoc(ampdoc);
+          this.positionObserver_ = getServiceForDoc(ampdoc,
+              'position-observer');
+          // TODO(@zhouyx) Need to unobserve it during cleanup
+          this.positionObserver_.observe(
+            this.iframe,
+            PositionObserverFidelity.HIGH, pos => {
+              this.positionObserverHighFidelityApi_.send(
+                MessageType.POSITION_HIGH_FIDELITY,
+                pos);
+            });
+        });
+    }
+
     // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad
     // iframe.
     listenForOncePromise(this.iframe, 'entity-id', true)
@@ -285,6 +324,10 @@ export class AmpAdXOriginIframeHandler {
     if (this.embedStateApi_) {
       this.embedStateApi_.destroy();
       this.embedStateApi_ = null;
+    }
+    if (this.positionObserverHighFidelityApi_) {
+      this.positionObserverHighFidelityApi_.destroy();
+      this.positionObserverHighFidelityApi_ = null;
     }
     if (this.intersectionObserver_) {
       this.intersectionObserver_.destroy();
