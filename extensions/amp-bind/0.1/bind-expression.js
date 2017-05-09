@@ -109,7 +109,7 @@ const FUNCTION_WHITELIST = (function() {
   });
 
   // Custom functions (non-js-built-ins) must be added manually as their names
-  // will be minifid at compile time.
+  // will be minified at compile time.
   out[BUILT_IN_FUNCTIONS]['copyAndSplice'] = copyAndSplice;
   return out;
 })();
