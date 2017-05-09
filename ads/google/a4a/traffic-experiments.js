@@ -38,8 +38,7 @@ import {parseQueryString} from '../../../src/url';
 
 /** @typedef {{
  *    control: string,
- *    experiment: string,
- *    controlMeasureOnRender: (string|undefined)
+ *    experiment: string
  *  }} */
 export let A4aExperimentBranches;
 
@@ -86,16 +85,13 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
 
   const isSetFromUrl = maybeSetExperimentFromUrl(win, element,
       experimentName, externalBranches.control,
-      externalBranches.experiment, externalBranches.controlMeasureOnRender,
+      externalBranches.experiment,
       MANUAL_EXPERIMENT_ID);
   const experimentInfoMap = {};
   const branches = [
     internalBranches.control,
     internalBranches.experiment,
   ];
-  if (internalBranches.controlMeasureOnRender) {
-    branches.push(internalBranches.controlMeasureOnRender);
-  }
   experimentInfoMap[experimentName] = {
     isTrafficEligible: () => true,
     branches,
@@ -162,8 +158,6 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
  *   - `2`: Ad is on the experimental branch of the overall A4A-vs-3p iframe
  *     experiment.  Ad will render via the A4A path, including early ad
  *     request and (possibly) early rendering in shadow DOM or iframe.
- *   - `3`: Behaves the same as 1, but participates in an experiment to
- *     measure impact of Delayed Fetch when counted on render
  *
  * @param {!Window} win  Window.
  * @param {!Element} element Ad tag Element.
@@ -172,14 +166,12 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
  *   the overall experiment.
  * @param {!string} treatmentBranchId  Experiment ID string for the 'treatment'
  *   branch of the overall experiment.
- * @param {string|undefined} controlMeasureOnRender  Experiment ID string for
- *   the branch that counts Delayed Fetch on render
  * @param {!string} manualId  ID of the manual experiment.
  * @return {boolean}  Whether the experiment state was set from a command-line
  *   parameter or not.
  */
 function maybeSetExperimentFromUrl(win, element, experimentName,
-    controlBranchId, treatmentBranchId, controlMeasureOnRender, manualId) {
+    controlBranchId, treatmentBranchId, manualId) {
   const expParam = viewerForDoc(element).getParam('exp') ||
       parseQueryString(win.location.search)['exp'];
   if (!expParam) {
@@ -198,7 +190,6 @@ function maybeSetExperimentFromUrl(win, element, experimentName,
     '0': null,
     '1': controlBranchId,
     '2': treatmentBranchId,
-    '3': controlMeasureOnRender,
   };
   if (argMapping.hasOwnProperty(arg)) {
     forceExperimentBranch(win, experimentName, argMapping[arg]);
