@@ -218,6 +218,8 @@ const command = {
     execOrDie(`${gulp} dep-check`);
     // Unit tests with Travis' default chromium
     execOrDie(`${gulp} test --nobuild --compiled`);
+    // Visual diff tests with Percy
+    execOrDie(`${gulp} visual-diff --webpage examples/amp-by-example.html`);
     // Integration tests with all saucelabs browsers
     execOrDie(`${gulp} test --nobuild --saucelabs --integration --compiled`);
     // All unit tests with an old chrome (best we can do right now to pass tests
