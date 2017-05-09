@@ -15,6 +15,7 @@
  */
 
 import {writeScript, loadScript, validateData} from '../3p/3p';
+import {startsWith} from '../src/string';
 
 /**
  * @param {!Window} global
@@ -59,10 +60,9 @@ export function netletix(global, data) {
     + '&v=' + encodeURIComponent(nxv)
     + '&site=' + encodeURIComponent(nxsite)
     + '&ord=' + rand;
-
   const receiveNxAction = function(event)
   {
-    if (event.data.type && event.data.type.indexOf('nx-') == 0) {
+    if (event.data.type && event.data.type.startsWith(event.data.type, 'nx-')) {
       switch (event.data.type) {
         case 'nx-resize':
           const renderconfig = {
