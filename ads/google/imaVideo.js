@@ -344,12 +344,9 @@ export function imaVideo(global, data) {
       'fullscreenchange',
       'mozfullscreenchange',
       'webkitfullscreenchange'];
-    for (const key in fullScreenEvents) {
-      global.document.addEventListener(
-          fullScreenEvents[key],
-          onFullscreenChange,
-          false);
-    }
+    fullScreenEvents.forEach(fsEvent => {
+      global.document.addEventListener(fsEvent, onFullscreenChange, false);
+    });
 
     adDisplayContainer =
         new global.google.ima.AdDisplayContainer(adContainerDiv, videoPlayer);
@@ -637,7 +634,7 @@ function getPagePosition(el) {
  */
 export function onPlayPauseClick() {
   if (playerState == PlayerStates.PLAYING) {
-    pauseVideo();
+    pauseVideo(null);
   } else {
     playVideo();
   }
@@ -803,7 +800,7 @@ function onMessage(event) {
           adsManager.pause();
           window.parent.postMessage({event: VideoEvents.PAUSE}, '*');
         } else if (playbackStarted) {
-          pauseVideo();
+          pauseVideo(null);
         }
         break;
       case 'mute':
