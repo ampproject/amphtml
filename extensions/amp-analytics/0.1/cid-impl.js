@@ -60,7 +60,7 @@ let BaseCidInfoDef;
  * @typedef {{
  *   scope: string,
  *   createCookieIfNotPresent: (boolean|undefined),
- *   cookieName: string,
+ *   cookieName: (string|undefined),
  * }}
  */
 let GetCidDef;
