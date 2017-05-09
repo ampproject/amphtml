@@ -409,9 +409,9 @@ describe('amp-a4a', () => {
           AmpA4A.prototype, 'renderNonAmpCreative_');
       promiseResolver();
       layoutCallbackPromise.catch(err => {
-        console.log(err);
-        console.log(JSON.stringify(err));
-        expect(renderNonAmpCreativeSpy).to.never.be.called;
+        expect(renderNonAmpCreativeSpy).to.not.be.called;
+        expect(err).to.be.ok;
+        expect(err.message).to.equal('CANCELLED');
       });
     });
 
@@ -428,7 +428,7 @@ describe('amp-a4a', () => {
       promiseResolver();
       layoutCallbackPromise.catch(err => {
         expect(err).to.be.ok;
-        console.log(err);
+        expect(err.message).to.equal('CANCELLED');
       });
     });
   });
