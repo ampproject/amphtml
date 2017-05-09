@@ -71,10 +71,15 @@ let BoundPropertyDef;
  */
 let BoundElementDef;
 
-/** @private {!Object<string, !Array<string>>} */
+/**
+ * A map of tag names to arrays of attributes that do not have non-bind
+ * counterparts. For instance, amp-carousel allows a `[slide]` attribute,
+ * but does not support a `slide` attribute.
+ * @private {!Object<string, !Array<string>>}
+ */
 const BIND_ONLY_ATTRIBUTES = map({
-  'amp-carousel': ['slide'],
-  'amp-selector': ['selected'],
+  'AMP-CAROUSEL': ['slide'],
+  'AMP-SELECTOR': ['selected'],
 });
 
 /**
@@ -785,7 +790,7 @@ export class Bind {
 
     // Don't show a warning for bind-only attributes,
     // like 'slide' on amp-carousel.
-    const bindOnlyAttrs = BIND_ONLY_ATTRIBUTES[element.tagName.toLowerCase()];
+    const bindOnlyAttrs = BIND_ONLY_ATTRIBUTES[element.tagName];
     if (bindOnlyAttrs && bindOnlyAttrs.includes(property)) {
       return;
     }
