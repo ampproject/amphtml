@@ -80,6 +80,9 @@ export function isCanary(win) {
  * @return {!Promise<boolean>}
  */
 export function isExperimentOnForOriginTrial(win, experimentId, opt_publicJwk) {
+  if (isExperimentOn(win, experimentId)) {
+    return Promise.resolve(true);
+  }
   const crypto = cryptoFor(win);
   const meta =
       win.document.head.querySelector('meta[name="amp-experiment-token"]');
