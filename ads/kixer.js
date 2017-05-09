@@ -58,7 +58,7 @@ export function kixer(global, data) {
         viewTimer = setTimeout(kxviewFire, 900); // Set a Timeout to check the ad in 900ms and fire the view
       }
     } else {
-      if (viewTimer) {
+      if (viewTimer) { // If the Timeout is set
         clearTimeout(viewTimer); // Clear the Timeout
         viewTimer = null;
       }
