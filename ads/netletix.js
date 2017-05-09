@@ -15,7 +15,6 @@
  */
 
 import {writeScript, loadScript, validateData} from '../3p/3p';
-import {startsWith} from '../src/string';
 
 /**
  * @param {!Window} global
