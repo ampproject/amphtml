@@ -74,7 +74,7 @@ export class AmpAdXOriginIframeHandler {
     /** @private {?SubscriptionApi} */
     this.positionObserverHighFidelityApi_ = null;
 
-    /** @private {?../../../src/service/position-observer-impl.AbstractPositionObserver} */
+    /** @private {?../../../src/service/position-observer-impl.AmpDocPositionObserver} */
     this.positionObserver_ = null;
 
     /** @private {!Array<!Function>} functions to unregister listeners */
@@ -116,11 +116,12 @@ export class AmpAdXOriginIframeHandler {
           // TODO (#9232) May crash PWA
           if (!posObInstalled) {
             installPositionObserverServiceForDoc(ampdoc);
+            posObInstalled = true;
           }
           this.positionObserver_ = getServiceForDoc(ampdoc,
               'position-observer');
           this.positionObserver_.observe(
-            this.iframe,
+            dev().assertElement(this.iframe),
             PositionObserverFidelity.HIGH, pos => {
               this.positionObserverHighFidelityApi_.send(
                 POSITION_HIGH_FIDELITY,
