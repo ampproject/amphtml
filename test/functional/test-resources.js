@@ -17,9 +17,14 @@
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Resources} from '../../src/service/resources-impl';
 import {Resource, ResourceState} from '../../src/service/resource';
+import {LayerElement} from '../../src/service/layers-impl';
 import {VisibilityState} from '../../src/visibility-state';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import * as sinon from 'sinon';
+
+function stupidMutateLayoutBox(resource, rect) {
+  LayerElement.for(resource.element).layoutBox_ = rect;
+}
 
 /*eslint "google-camelcase/google-camelcase": 0*/
 describe('Resources', () => {
@@ -996,10 +1001,12 @@ describe('Resources discoverWork', () => {
     };
   }
 
-  function createResource(id, rect) {
-    const resource = new Resource(id, createElement(rect), resources);
+  function createResource(rect) {
+    const element = createElement(rect);
+    resources.add(element);
+    const resource = Resource.forElement(element)
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
-    resource.layoutBox_ = rect;
+    stupidMutateLayoutBox(resource, rect);
     return resource;
   }
 
@@ -1021,8 +1028,8 @@ describe('Resources discoverWork', () => {
       },
     };
 
-    resource1 = createResource(1, layoutRectLtwh(10, 10, 100, 100));
-    resource2 = createResource(2, layoutRectLtwh(10, 1010, 100, 100));
+    resource1 = createResource(layoutRectLtwh(10, 10, 100, 100));
+    resource2 = createResource(layoutRectLtwh(10, 1010, 100, 100));
     resources.resources_ = [resource1, resource2];
     resources.vsync_ = {
       mutate: callback => callback(),
@@ -1198,7 +1205,7 @@ describe('Resources discoverWork', () => {
   });
 
   it('should eject stale tasks when element unloaded', () => {
-    const pendingResource = createResource(5, layoutRectLtwh(0, 0, 0, 0));
+    const pendingResource = createResource(layoutRectLtwh(0, 0, 0, 0));
     pendingResource.state_ = ResourceState.NOT_BUILT;
     resources.pendingBuildResources_ = [pendingResource];
     resources.visible_ = true;
@@ -1627,11 +1634,13 @@ describe('Resources changeSize', () => {
     };
   }
 
-  function createResource(id, rect) {
-    const resource = new Resource(id, createElement(rect), resources);
-    resource.element['__AMP__RESOURCE'] = resource;
+  function createResource(rect) {
+    const element = createElement(rect);
+    resources.add(element);
+    const resource = Resource.forElement(element);
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
-    resource.initialLayoutBox_ = resource.layoutBox_ = rect;
+    resource.initialLayoutBox_ = rect;
+    stupidMutateLayoutBox(resource, rect);
     resource.changeSize = sandbox.spy();
     return resource;
   }
@@ -1655,8 +1664,8 @@ describe('Resources changeSize', () => {
     };
     viewportMock = sandbox.mock(resources.viewport_);
 
-    resource1 = createResource(1, layoutRectLtwh(10, 10, 100, 100));
-    resource2 = createResource(2, layoutRectLtwh(10, 1010, 100, 100));
+    resource1 = createResource(layoutRectLtwh(10, 10, 100, 100));
+    resource2 = createResource(layoutRectLtwh(10, 1010, 100, 100));
     resources.resources_ = [resource1, resource2];
   });
 
@@ -1748,7 +1757,7 @@ describe('Resources changeSize', () => {
   it('should change size', () => {
     resources.scheduleChangeSize_(resource1, 111, 222, undefined, true);
     resources.mutateWork_();
-    expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
+    expect(resources.relayoutTop_).to.equal(resource1.getPageLayoutBox().top);
     expect(resources.requestsChangeSize_.length).to.equal(0);
     expect(resource1.changeSize).to.be.calledOnce;
     expect(resource1.changeSize.firstCall.args[0]).to.equal(111);
@@ -1759,7 +1768,7 @@ describe('Resources changeSize', () => {
     resources.scheduleChangeSize_(resource2, 111, 222, undefined, true);
     resources.scheduleChangeSize_(resource1, 111, 222, undefined, true);
     resources.mutateWork_();
-    expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
+    expect(resources.relayoutTop_).to.equal(resource1.getPageLayoutBox().top);
   });
 
   it('should measure non-measured elements', () => {
@@ -1799,16 +1808,17 @@ describe('Resources changeSize', () => {
       viewportRect = {top: 2, left: 0, right: 100, bottom: 200, height: 200};
       viewportMock.expects('getRect').returns(viewportRect).atLeast(1);
       viewportMock.expects('getScrollHeight').returns(10000).atLeast(1);
-      resource1.layoutBox_ = {top: 10, left: 0, right: 100, bottom: 50,
-          height: 50};
+      // TODO
+      stupidMutateLayoutBox(resource1, {top: 10, left: 0, right: 100, bottom: 50,
+          height: 50});
       vsyncSpy = sandbox.stub(resources.vsync_, 'run');
       resources.visible_ = true;
     });
 
     it('should NOT change size when height is unchanged', () => {
       const callback = sandbox.spy();
-      resource1.layoutBox_ = {top: 10, left: 0, right: 100, bottom: 210,
-          height: 50};
+      stupidMutateLayoutBox(resource1, {top: 10, left: 0, right: 100, bottom: 210,
+          height: 50});
       resources.scheduleChangeSize_(resource1, 50, /* width */ undefined,
           undefined, false, callback);
       resources.mutateWork_();
@@ -1820,8 +1830,8 @@ describe('Resources changeSize', () => {
 
     it('should NOT change size when height and margins are unchanged', () => {
       const callback = sandbox.spy();
-      resource1.layoutBox_ = {top: 10, left: 0, right: 100, bottom: 210,
-          height: 50};
+      stupidMutateLayoutBox(resource1, {top: 10, left: 0, right: 100, bottom: 210,
+          height: 50});
       resource1.element.fakeComputedStyle = {
         marginTop: '1px',
         marginRight: '2px',
@@ -1844,8 +1854,8 @@ describe('Resources changeSize', () => {
 
     it('should change size when margins but not height changed', () => {
       const callback = sandbox.spy();
-      resource1.layoutBox_ = {top: 10, left: 0, right: 100, bottom: 210,
-          height: 50};
+      stupidMutateLayoutBox(resource1, {top: 10, left: 0, right: 100, bottom: 210,
+          height: 50});
       resource1.element.fakeComputedStyle = {
         marginTop: '1px',
         marginRight: '2px',
@@ -1896,8 +1906,8 @@ describe('Resources changeSize', () => {
     });
 
     it('should change size when below the viewport', () => {
-      resource1.layoutBox_ = {top: 10, left: 0, right: 100, bottom: 1050,
-          height: 50};
+      stupidMutateLayoutBox(resource1, {top: 10, left: 0, right: 100, bottom: 1050,
+          height: 50});
       resources.scheduleChangeSize_(resource1, 111, 222, undefined, false);
       resources.mutateWork_();
       expect(resources.requestsChangeSize_).to.be.empty;
@@ -1908,8 +1918,8 @@ describe('Resources changeSize', () => {
 
     it('should change size when below the viewport and top margin also changed',
         () => {
-          resource1.layoutBox_ = {top: 200, left: 0, right: 100, bottom: 300,
-              height: 100};
+          stupidMutateLayoutBox(resource1, {top: 200, left: 0, right: 100, bottom: 300,
+              height: 100});
           resources.scheduleChangeSize_(resource1, 111, 222, {top: 20}, false);
 
           expect(vsyncSpy).to.be.calledOnce;
@@ -1925,8 +1935,8 @@ describe('Resources changeSize', () => {
 
     it('should change size when box top below the viewport but top margin ' +
         'boundary is above viewport but top margin in unchanged', () => {
-      resource1.layoutBox_ = {top: 200, left: 0, right: 100, bottom: 300,
-          height: 100};
+      stupidMutateLayoutBox(resource1, {top: 200, left: 0, right: 100, bottom: 300,
+          height: 100});
       resource1.element.fakeComputedStyle = {
         marginTop: '100px',
         marginRight: '0px',
@@ -1949,8 +1959,8 @@ describe('Resources changeSize', () => {
     it('should NOT change size when top margin boundary within viewport ' +
         'and top margin changed', () => {
       const callback = sandbox.spy();
-      resource1.layoutBox_ = {top: 100, left: 0, right: 100, bottom: 300,
-          height: 200};
+      stupidMutateLayoutBox(resource1, {top: 100, left: 0, right: 100, bottom: 300,
+          height: 200});
       resources.scheduleChangeSize_(
           resource1, 111, 222, {top: 20}, false, callback);
 
@@ -1966,8 +1976,8 @@ describe('Resources changeSize', () => {
     });
 
     it('should defer when above the viewport and scrolling on', () => {
-      resource1.layoutBox_ = {top: -1200, left: 0, right: 100, bottom: -1050,
-          height: 50};
+      stupidMutateLayoutBox(resource1, {top: -1200, left: 0, right: 100, bottom: -1050,
+          height: 50});
       resources.lastVelocity_ = 10;
       resources.lastScrollTime_ = Date.now();
       resources.scheduleChangeSize_(resource1, 111, 222, undefined, false);
@@ -1980,8 +1990,8 @@ describe('Resources changeSize', () => {
     it('should defer change size if just inside viewport and viewport ' +
         'scrolled by user.', () => {
       viewportRect.top = 2;
-      resource1.layoutBox_ = {top: -50, left: 0, right: 100, bottom: 1,
-          height: 51};
+      stupidMutateLayoutBox(resource1, {top: -50, left: 0, right: 100, bottom: 1,
+          height: 51});
       resources.lastVelocity_ = 10;
       resources.lastScrollTime_ = Date.now();
       resources.scheduleChangeSize_(resource1, 111, 222, false);
@@ -1994,8 +2004,8 @@ describe('Resources changeSize', () => {
     it('should NOT change size and call overflow callback if viewport not ' +
         'scrolled by user.', () => {
       viewportRect.top = 1;
-      resource1.layoutBox_ = {top: -50, left: 0, right: 100, bottom: 0,
-          height: 51};
+      stupidMutateLayoutBox(resource1, {top: -50, left: 0, right: 100, bottom: 0,
+          height: 51});
       resources.lastVelocity_ = 10;
       resources.lastScrollTime_ = Date.now();
       resources.scheduleChangeSize_(resource1, 111, 222, false);
@@ -2009,8 +2019,8 @@ describe('Resources changeSize', () => {
     it('should change size when above the vp and adjust scrolling', () => {
       viewportMock.expects('getScrollHeight').returns(2999).once();
       viewportMock.expects('getScrollTop').returns(1777).once();
-      resource1.layoutBox_ = {top: -1200, left: 0, right: 100, bottom: -1050,
-          height: 50};
+      stupidMutateLayoutBox(resource1, {top: -1200, left: 0, right: 100, bottom: -1050,
+          height: 50});
       resources.lastVelocity_ = 0;
       clock.tick(5000);
       resources.scheduleChangeSize_(resource1, 111, 222, undefined, false);
@@ -2030,12 +2040,12 @@ describe('Resources changeSize', () => {
       task.mutate(state);
       expect(resource1.changeSize).to.be.calledOnce;
       expect(resource1.changeSize).to.be.calledWith(111, 222);
-      expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
+      expect(resources.relayoutTop_).to.equal(resource1.getPageLayoutBox().top);
     });
 
     it('should NOT resize when above vp but cannot adjust scrolling', () => {
-      resource1.layoutBox_ = {top: -1200, left: 0, right: 100, bottom: -1100,
-          height: 100};
+      stupidMutateLayoutBox(resource1, {top: -1200, left: 0, right: 100, bottom: -1100,
+          height: 100});
       resources.lastVelocity_ = 0;
       clock.tick(5000);
       resources.scheduleChangeSize_(resource1, 0, 222, undefined, false);
@@ -2049,10 +2059,10 @@ describe('Resources changeSize', () => {
     });
 
     it('should resize if multi request above vp can adjust scroll', () => {
-      resource1.layoutBox_ = {top: -1200, left: 0, right: 100, bottom: -1100,
-          height: 100};
-      resource2.layoutBox_ = {top: -1300, left: 0, right: 100, bottom: -1200,
-          height: 100};
+      stupidMutateLayoutBox(resource1, {top: -1200, left: 0, right: 100, bottom: -1100,
+          height: 100});
+      stupidMutateLayoutBox(resource2, {top: -1300, left: 0, right: 100, bottom: -1200,
+          height: 100});
       resources.lastVelocity_ = 0;
       clock.tick(5000);
       resources.scheduleChangeSize_(resource2, 200, 222, undefined, false);
@@ -2074,10 +2084,10 @@ describe('Resources changeSize', () => {
       viewportMock.expects('getRect').returns({
         top: 10, left: 0, right: 100, bottom: 210, height: 200,
       }).once();
-      resource1.layoutBox_ = {top: -1200, left: 0, right: 100, bottom: -1100,
-          height: 100};
-      resource2.layoutBox_ = {top: -1300, left: 0, right: 100, bottom: -1200,
-          height: 100};
+      stupidMutateLayoutBox(resource1, {top: -1200, left: 0, right: 100, bottom: -1100,
+          height: 100});
+      stupidMutateLayoutBox(resource2, {top: -1300, left: 0, right: 100, bottom: -1200,
+          height: 100});
       resources.lastVelocity_ = 0;
       clock.tick(5000);
       resources.scheduleChangeSize_(resource1, 92, 222, undefined, false);
@@ -2093,8 +2103,8 @@ describe('Resources changeSize', () => {
     it('should NOT adjust scrolling if height not change above vp', () => {
       viewportMock.expects('getScrollHeight').returns(2999).once();
       viewportMock.expects('getScrollTop').returns(1777).once();
-      resource1.layoutBox_ = {top: -1200, left: 0, right: 100, bottom: -1050,
-          height: 50};
+      stupidMutateLayoutBox(resource1, {top: -1200, left: 0, right: 100, bottom: -1050,
+          height: 50});
       resources.lastVelocity_ = 0;
       clock.tick(5000);
       resources.scheduleChangeSize_(resource1, 111, 222, undefined, false);
@@ -2114,14 +2124,14 @@ describe('Resources changeSize', () => {
       task.mutate(state);
       expect(resource1.changeSize).to.be.calledOnce;
       expect(resource1.changeSize).to.be.calledWith(111, 222);
-      expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
+      expect(resources.relayoutTop_).to.equal(resource1.getPageLayoutBox().top);
     });
 
     it('should adjust scrolling if height change above vp', () => {
       viewportMock.expects('getScrollHeight').returns(2999).once();
       viewportMock.expects('getScrollTop').returns(1000).once();
-      resource1.layoutBox_ = {top: -1200, left: 0, right: 100, bottom: -1050,
-          height: 50};
+      stupidMutateLayoutBox(resource1, {top: -1200, left: 0, right: 100, bottom: -1050,
+          height: 50});
       resources.lastVelocity_ = 0;
       clock.tick(5000);
       resources.scheduleChangeSize_(resource1, 111, 222, undefined, false);
@@ -2163,8 +2173,8 @@ describe('Resources changeSize', () => {
 
     it('should NOT change size when resized margin in viewport and should ' +
         'call overflowCallback', () => {
-      resource1.layoutBox_ = {top: -48, left: 0, right: 100, bottom: 2,
-          height: 50};
+      stupidMutateLayoutBox(resource1, {top: -48, left: 0, right: 100, bottom: 2,
+          height: 50});
       resource1.element.fakeComputedStyle = {
         marginBottom: '21px',
       };
@@ -2187,8 +2197,8 @@ describe('Resources changeSize', () => {
     });
 
     it('should change size when resized margin above viewport', () => {
-      resource1.layoutBox_ = {top: -49, left: 0, right: 100, bottom: 1,
-          height: 50};
+      stupidMutateLayoutBox(resource1, {top: -49, left: 0, right: 100, bottom: 1,
+          height: 50});
       resource1.element.fakeComputedStyle = {
         marginBottom: '21px',
       };
@@ -2221,7 +2231,7 @@ describe('Resources changeSize', () => {
       expect(resource1.changeSize).to.be.calledOnce;
       expect(resource1.changeSize).to.be.calledWith(undefined, undefined,
           {top: 1});
-      expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
+      expect(resources.relayoutTop_).to.equal(resource1.getPageLayoutBox().top);
     });
 
     it('should reset pending change size when rescheduling', () => {
@@ -2259,8 +2269,10 @@ describe('Resources changeSize', () => {
     beforeEach(() => {
       viewportMock.expects('getRect').returns(
           {top: 0, left: 0, right: 100, bottom: 10000, height: 200}).atLeast(1);
-      resource1.layoutBox_ = resource1.initialLayoutBox_ =
-          layoutRectLtwh(0, 10, 100, 100);
+      resource1.initialLayoutBox_ = layoutRectLtwh(0, 10, 100, 100);
+      sandbox.stub(resource1, 'getPageLayoutBox', () => {
+        return resource1.initialLayoutBox_;
+      });
     });
 
     it('should NOT change size when far the bottom of the document', () => {
@@ -2314,17 +2326,18 @@ describe('Resources mutateElement and collapse', () => {
       pauseCallback: () => {},
       unlayoutCallback: () => {},
       getPriority: () => 0,
+      getLayoutBox() {
+        return LayerElement.for(this).getPageLayoutBox();
+      },
     };
   }
 
-  function createResource(id, rect) {
-    const resource = new Resource(
-        id,
-        createElement(rect, /* isAmp */ true),
-        resources);
-    resource.element['__AMP__RESOURCE'] = resource;
+  function createResource(rect) {
+    const element = createElement(rect, /* isAmp */ true);
+    resources.add(element);
+    const resource = Resource.forElement(element);
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
-    resource.layoutBox_ = rect;
+    stupidMutateLayoutBox(resource, rect);
     resource.changeSize = sandbox.spy();
     resource.completeCollapse = sandbox.spy();
     return resource;
@@ -2369,8 +2382,8 @@ describe('Resources mutateElement and collapse', () => {
     relayoutTopStub = sandbox.stub(resources, 'setRelayoutTop_');
     sandbox.stub(resources, 'schedulePass');
 
-    resource1 = createResource(1, layoutRectLtwh(10, 10, 100, 100));
-    resource2 = createResource(2, layoutRectLtwh(10, 1010, 100, 100));
+    resource1 = createResource(layoutRectLtwh(10, 10, 100, 100));
+    resource2 = createResource(layoutRectLtwh(10, 1010, 100, 100));
     resources.resources_ = [resource1, resource2];
 
     resource1RequestMeasureStub = sandbox.stub(resource1, 'requestMeasure');
@@ -2497,8 +2510,8 @@ describe('Resources mutateElement and collapse', () => {
       index++;
     });
 
-    resource1.layoutBox_ = {top: 1000, left: 0, right: 100, bottom: 1050,
-        height: 50};
+    stupidMutateLayoutBox(resource1, {top: 1000, left: 0, right: 100, bottom: 1050,
+        height: 50});
     resources.lastVelocity_ = 0;
     resources.attemptCollapse(resource1.element);
     resources.mutateWork_();
@@ -2532,8 +2545,7 @@ describe('Resources mutateElement and collapse', () => {
   });
 
   it('should ignore relayout on an already collapsed element', () => {
-    resource1.layoutBox_.width = 0;
-    resource1.layoutBox_.height = 0;
+    stupidMutateLayoutBox(resource1, {top: 0, left: 0, width: 0, height: 0});
     resources.collapseElement(resource1.element);
     expect(resource1.completeCollapse).to.be.calledOnce;
     expect(relayoutTopStub).to.have.not.been.called;

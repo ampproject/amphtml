@@ -931,10 +931,10 @@ export class Resources {
     /**
    * Collapses the element: ensures that it's `display:none`, notifies its
    * owner and updates the layout box.
-   * @param {!Element} element
+   * @param {!AmpElement} element
    */
   collapseElement(element) {
-    const box = this.viewport_.getLayoutRect(element);
+    const box = element.getLayoutBox();
     const resource = Resource.forElement(element);
     if (box.width != 0 && box.height != 0) {
       this.setRelayoutTop_(box.top);

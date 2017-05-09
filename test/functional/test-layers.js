@@ -82,7 +82,7 @@ describes.fakeWin('Layers', {amp: true}, (env) => {
 
 });
 
-describes.fakeWin.only('LayerElement', {amp: true}, (env) => {
+describes.fakeWin('LayerElement', {amp: true}, (env) => {
   let win;
   let sandbox;
   let layers;
