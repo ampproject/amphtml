@@ -47,12 +47,10 @@ class AmpImaVideo extends AMP.BaseElement {
 
     assertHttpsUrl(this.element.getAttribute('data-tag'),
         'The data-tag attribute is required for <amp-video-ima> and must be ' +
-            'https',
-        this.element);
+            'https');
     assertHttpsUrl(this.element.getAttribute('data-src'),
         'The data-src attribute is required for <amp-video-ima> and must be ' +
-            'https',
-        this.element);
+            'https');
   }
 
   /** @override */
