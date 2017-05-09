@@ -34,7 +34,7 @@ var util = require('gulp-util');
 var root = process.cwd();
 var absPathRegExp = new RegExp(`^${root}/`);
 var argv = minimist(process.argv.slice(2), {boolean: ['strictBabelTransform']});
-var red = (msg) => $$.util.log($$.util.colors.red(msg));
+var red = (msg) => util.log(util.colors.red(msg));
 
 
 /**
