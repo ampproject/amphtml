@@ -269,6 +269,14 @@ var forbiddenTerms = {
       'src/service/xhr-impl.js',
     ],
   },
+  'installPositionObserverServiceForDoc': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/service/position-observer-impl.js',
+      // TODO(@zhouyx, #9213) Remove this item.
+      'extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js',
+    ],
+  },
   'initLogConstructor|setReportError': {
     message: 'Should only be called from JS binary entry files.',
     whitelist: [
