@@ -824,17 +824,19 @@ function onMessage(event) {
         window.parent.postMessage({event: VideoEvents.UNMUTED}, '*');
         break;
       case 'resize':
-        wrapperDiv.style.width = msg.args.width + 'px';
-        wrapperDiv.style.height = msg.args.height + 'px';
-        bigPlayDiv.style.width = msg.args.width + 'px';
-        bigPlayDiv.style.height = msg.args.height + 'px';
-        if (adsActive) {
-          adsManager.resize(
-              msg.args.width, msg.args.height,
-              global.google.ima.ViewMode.NORMAL);
-        } else {
-          adsManagerWidthOnLoad = msg.args.width;
-          adsManagerHeightOnLoad = msg.args.height;
+        if (msg.args && msg.args.width && msg.args.height) {
+          wrapperDiv.style.width = msg.args.width + 'px';
+          wrapperDiv.style.height = msg.args.height + 'px';
+          bigPlayDiv.style.width = msg.args.width + 'px';
+          bigPlayDiv.style.height = msg.args.height + 'px';
+          if (adsActive) {
+            adsManager.resize(
+                msg.args.width, msg.args.height,
+                global.google.ima.ViewMode.NORMAL);
+          } else {
+            adsManagerWidthOnLoad = msg.args.width;
+            adsManagerHeightOnLoad = msg.args.height;
+          }
         }
         break;
     }
