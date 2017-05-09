@@ -60,14 +60,16 @@ function checkLinks() {
         }
       });
       if(deadLinksFoundInFile) {
+        filesWithDeadLinks.push(markdownFiles[index]);
         util.log(
-            util.colors.yellow('WARNING'), 'Possible dead link(s) found in',
+            util.colors.yellow('WARNING'),
+            'Possible dead link(s) found in',
             util.colors.magenta(markdownFiles[index]),
             '(please update if necessary).');
-            filesWithDeadLinks.push(markdownFiles[index]);
       } else {
         util.log(
-            util.colors.green('SUCCESS'), 'All links in',
+            util.colors.green('SUCCESS'),
+            'All links in',
             util.colors.magenta(markdownFiles[index]), 'are alive.');
       }
     });
