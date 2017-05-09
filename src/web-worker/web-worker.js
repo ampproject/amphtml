@@ -38,32 +38,23 @@ self.addEventListener('message', function(event) {
 
   let returnValue;
 
+  if (!evaluator_) {
+    evaluator_ = new BindEvaluator();
+  }
+
   switch (method) {
     case 'bind.addBindings':
-      evaluator_ = evaluator_ || new BindEvaluator();
       returnValue = evaluator_.addBindings.apply(evaluator_, args);
       break;
     case 'bind.removeBindingsWithExpressionStrings':
-      if (evaluator_) {
-        const removeBindings = evaluator_.removeBindingsWithExpressionStrings;
-        returnValue = removeBindings.apply(evaluator_, args);
-      } else {
-        throw new Error(`${method}: BindEvaluator is not initialized.`);
-      }
+      const removeBindings = evaluator_.removeBindingsWithExpressionStrings;
+      returnValue = removeBindings.apply(evaluator_, args);
       break;
     case 'bind.evaluateBindings':
-      if (evaluator_) {
-        returnValue = evaluator_.evaluateBindings.apply(evaluator_, args);
-      } else {
-        throw new Error(`${method}: BindEvaluator is not initialized.`);
-      }
+      returnValue = evaluator_.evaluateBindings.apply(evaluator_, args);
       break;
     case 'bind.evaluateExpression':
-      if (evaluator_) {
-        returnValue = evaluator_.evaluateExpression.apply(evaluator_, args);
-      } else {
-        throw new Error(`${method}: BindEvaluator is not initialized.`);
-      }
+      returnValue = evaluator_.evaluateExpression.apply(evaluator_, args);
       break;
     default:
       throw new Error(`Unrecognized method: ${method}`);
