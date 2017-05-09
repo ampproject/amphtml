@@ -21,7 +21,6 @@
  * Experiments page: https://cdn.ampproject.org/experiments.html *
  */
 
-import {ampdocServiceFor} from './ampdoc';
 import {bytesToUInt32, stringToBytes, utf8DecodeSync} from './utils/bytes';
 import {cryptoFor} from './crypto';
 import {getCookie, setCookie} from './cookies';
@@ -111,15 +110,15 @@ export function isExperimentOnForOriginTrial(win, experimentId, opt_publicJwk) {
   * config = string containing the experiment ID, origin URL, etc.
   */
   const bytesForConfigSize = 4;
-  const configLen =
+  const configSize =
       bytesToUInt32(bytes.subarray(current, current + bytesForConfigSize));
   current += bytesForConfigSize;
-  if (configLen > bytes.length - current) {
+  if (configSize > bytes.length - current) {
     return Promise.reject(
         new Error('Specified len extends past end of buffer'));
   }
-  const configBytes = bytes.subarray(current, current + configLen);
-  current += configLen;
+  const configBytes = bytes.subarray(current, current + configSize);
+  current += configSize;
   const signatureBytes = bytes.subarray(current);
 
   // TODO(kmh287, choumx) fill in real public key
@@ -135,7 +134,7 @@ export function isExperimentOnForOriginTrial(win, experimentId, opt_publicJwk) {
     const config = JSON.parse(configStr);
 
     const approvedOrigin = config['origin'];
-    const url = ampdocServiceFor(win).getAmpDoc().getUrl();
+    const url = win.location;
     const sourceOrigin = getSourceOrigin(url);
     if (approvedOrigin !== sourceOrigin) {
       throw new Error('Config does not match current origin');

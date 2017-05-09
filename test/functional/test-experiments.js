@@ -799,7 +799,6 @@ describe('experiment branch tests', () => {
 describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
 
   let win;
-  let ampdoc;
   let sandbox;
   let crypto;
 
@@ -823,12 +822,23 @@ describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
   };
 
   beforeEach(() => {
-    win = env.win;
-    ampdoc = env.ampdoc;
+    win = {
+      document: env.win.document,
+      location: {
+        href: 'https://www.google.com',
+      },
+      crypto: env.win.crypto,
+    };
     sandbox = env.sandbox;
 
     installCryptoService(win);
     crypto = cryptoFor(win);
+
+    // Ensure that tests don't appear to pass because fake window object
+    // doesn't have crypto when the window actually has it.
+    installCryptoService(env.win);
+    expect(cryptoFor(env.win).isCryptoAvailable())
+        .to.equal(cryptoFor(win).isCryptoAvailable());
 
     // Version: 0
     // Size: 145
@@ -943,7 +953,7 @@ describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
   it('should throw if approved origin is not current origin', () => {
     if (!crypto.isCryptoAvailable()) { return; }
     setupMetaTagWith(correctToken);
-    sandbox.stub(ampdoc, 'getUrl').returns('https://www.not-google.com');
+    win.location.href = 'https://www.not-google.com';
     const p = isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
     return expect(p).to.eventually.be
         .rejectedWith('Config does not match current origin');
@@ -952,7 +962,6 @@ describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
   it('should return false if requested experiment is not in config', () => {
     if (!crypto.isCryptoAvailable()) { return; }
     setupMetaTagWith(correctToken);
-    sandbox.stub(ampdoc, 'getUrl').returns('https://www.google.com');
     const p = isExperimentOnForOriginTrial(win, 'amp-not-in-config', publicJwk);
     return expect(p).to.eventually.be.false;
   });
@@ -960,7 +969,6 @@ describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
   it('should return false if trial has expired', () => {
     if (!crypto.isCryptoAvailable()) { return; }
     setupMetaTagWith(correctToken);
-    sandbox.stub(ampdoc, 'getUrl').returns('https://www.google.com');
     const p = isExperimentOnForOriginTrial(win, 'amp-expired', publicJwk);
     return expect(p).to.eventually.be.false;
   });
@@ -969,7 +977,6 @@ describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
      'that has not yet expired', () => {
     if (!crypto.isCryptoAvailable()) { return; }
     setupMetaTagWith(correctToken);
-    sandbox.stub(ampdoc, 'getUrl').returns('https://www.google.com');
     const p = isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
     return expect(p).to.eventually.be.true;
   });
