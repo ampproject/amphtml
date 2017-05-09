@@ -28,11 +28,8 @@ before_install:
   - sudo dpkg -i google-chrome*.deb
 before_script:
   - pip install --user protobuf
-  - gem install jekyll
   - gem install percy-cli
-script:
-  - node build-system/pr-check.js
-  - gulp visual-diff --webpage examples/amp-by-example.html
+script: node build-system/pr-check.js
 branches:
   only:
     - master
