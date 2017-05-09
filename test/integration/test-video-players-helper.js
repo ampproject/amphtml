@@ -26,8 +26,6 @@ import {
 
 export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
   const TIMEOUT = 20000;
-  let fixtureGlobal;
-  let videoGlobal;
 
   describe.configure().retryOnSaucelabs()
   .run('Video Interface', function() {
@@ -48,8 +46,6 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
         }
       });
     });
-
-    afterEach(cleanUp);
   });
 
   describe.configure().retryOnSaucelabs()
@@ -104,8 +100,6 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
         }
       });
     });
-
-    afterEach(cleanUp);
   });
 
   describe.configure().retryOnSaucelabs()
@@ -206,8 +200,6 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
         }
       });
     });
-
-    afterEach(cleanUp);
   });
 
   function getVideoPlayer(options) {
@@ -239,20 +231,12 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
 
       fixture.doc.body.appendChild(sizer);
       fixture.doc.body.appendChild(video);
-      fixtureGlobal = fixture;
-      videoGlobal = video;
+
       return poll('video built', () => {
         return video.implementation_ && video.implementation_.play;
       },undefined, 5000).then(() => {
         return {video, fixture};
       });
     });
-  }
-
-  function cleanUp() {
-    if (fixtureGlobal) {
-      fixtureGlobal.doc.body.removeChild(videoGlobal);
-      fixtureGlobal.iframe.remove();
-    }
   }
 }
