@@ -27,11 +27,9 @@
 </head>
 
 <body>
-
-  <button on="tap:AMP.setState({})" id="triggerBindApplicationButton"></button>
-
   <p>DYNAMIC TAGS</p>
   <!-- Live list is used for generic dynamic tag testing  -->
+  <button on="tap:AMP.setState({dynamicText: 'bound'})" id="changeDynamicTextButton"></button>
   <amp-live-list id="dynamicTag" data-poll-interval="15000" data-max-items-per-page="2">
     <div items>
       <!-- Children added in test -->
@@ -135,6 +133,12 @@
   <button id='httpListSrcButton' on="tap:AMP.setState({listSrc: 'http://www.google.com/justhttp.json'})">Change amp-list</button>
   <amp-list id='list' src="https://www.google.com/unbound.json" [src]=listSrc>
   </amp-list>
+
+  <p>AMP-STATE</p>
+  <button id="ampStateSrcButton" on="tap:AMP.setState({ampState: {ampStateSrc: 'https://www.google.com/bind/second/source'}})">Change amp-state</button>
+    <button id="triggerBindApplicationButton" on="tap:AMP.setState({})">Trigger application</button>
+  <amp-state id="ampState" src="https://www.google.com/bind/first/source" [src]="ampState.ampStateSrc">
+  </amp-state>
 
 </body>
 </html>
