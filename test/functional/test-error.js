@@ -144,6 +144,32 @@ describe('reportErrorToServer', () => {
     expect(e.message).to.contain('_reported_');
   });
 
+  it.only('should truncate up to last newline if shortened', () => {
+    let e = new Error();
+    e.stack = 'abc xyz 1:1\nabc xyz';
+    let url = parseUrl(
+        getErrorReportUrl(undefined, undefined, undefined, undefined, e,
+          true, 16));
+    let query = parseQueryString(url.search);
+    expect(query.s).to.equal('abc xyz 1:1');
+
+    e = new Error();
+    e.stack = 'abc xyz 1:1\nabc xyz 3:3';
+    url = parseUrl(
+        getErrorReportUrl(undefined, undefined, undefined, undefined, e,
+          true, 100));
+    query = parseQueryString(url.search);
+    expect(query.s).to.equal('abc xyz 1:1\nabc xyz 3:3');
+
+    e = new Error();
+    e.stack = 'abc xyz 1:1';
+    url = parseUrl(
+        getErrorReportUrl(undefined, undefined, undefined, undefined, e,
+          true, 100));
+    query = parseQueryString(url.search);
+    expect(query.s).to.equal('abc xyz 1:1');
+  });
+
   it('reportError with error object w/args', () => {
     const e = new Error('XYZ');
     e.args = {x: 1};
