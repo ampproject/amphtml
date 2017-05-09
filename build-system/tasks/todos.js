@@ -23,6 +23,8 @@ var through2 = require('through2');
 var request = BBPromise.promisify(require('request'));
 
 var GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
+
+/** @type {!Object<string, !Promise<number>>} */
 var issueCache = {};
 
 
@@ -72,17 +74,17 @@ function findClosedTodosInFile(file) {
  */
 function reportClosedIssue(file, issueId, todo) {
   if (issueCache[issueId] !== undefined) {
-    return Promise.resolve(issueCache[issueId]);
+    return issueCache[issueId];
   }
-  return githubRequest('/issues/' + issueId).then(response => {
-    var issue = JSON.parse(response.body);
-    var value = issue.state == 'closed' ? 1 : 0;
-    issueCache[issueId] = value;
-    if (value) {
-      util.log(util.colors.red(todo, 'in', file.path));
-    }
-    return value;
-  });
+  return issueCache[issueId] = githubRequest('/issues/' + issueId)
+      .then(response => {
+        var issue = JSON.parse(response.body);
+        var value = issue.state == 'closed' ? 1 : 0;
+        if (value) {
+          util.log(util.colors.red(todo, 'in', file.path));
+        }
+        return value;
+      });
 }
 
 
