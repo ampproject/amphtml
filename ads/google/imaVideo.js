@@ -1,7 +1,6 @@
 import {isObject} from '../../src/types';
 import {loadScript} from '../../3p/3p';
 import {tryParseJson} from '../../src/json';
-import {VideoEvents} from '../../src/video-interface';
 
 /**
  * Possible player states.
@@ -967,3 +966,78 @@ export function setPlayerStateForTesting(newState) {
 export function setHideControlsTimeoutForTesting(newTimeout) {
   hideControlsTimeout = newTimeout;
 }
+
+/**
+ * Events
+ *
+ * Copied from src/video-interface.js.
+ *
+ * @constant {!Object<string, string>}
+ */
+const VideoEvents = {
+  /**
+   * load
+   *
+   * Fired when the video player is loaded and calls to methods such as `play()`
+   * are allowed.
+   *
+   * @event load
+   */
+  LOAD: 'load',
+
+  /**
+   * play
+   *
+   * Fired when the video plays.
+   *
+   * @event play
+   */
+  PLAY: 'play',
+
+  /**
+   * pause
+   *
+   * Fired when the video pauses.
+   *
+   * @event pause
+   */
+  PAUSE: 'pause',
+
+  /**
+   * muted
+   *
+   * Fired when the video is muted.
+   *
+   * @event play
+   */
+  MUTED: 'muted',
+
+  /**
+   * unmuted
+   *
+   * Fired when the video is unmuted.
+   *
+   * @event pause
+   */
+  UNMUTED: 'unmuted',
+
+  /**
+   * amp:video:visibility
+   *
+   * Fired when the video's visibility changes. Normally fired
+   * from `viewportCallback`.
+   *
+   * @event amp:video:visibility
+   * @property {boolean} visible Whether the video player is visible or not.
+   */
+  VISIBILITY: 'amp:video:visibility',
+
+  /**
+   * reload
+   *
+   * Fired when the video's src changes.
+   *
+   * @event reload
+   */
+  RELOAD: 'reloaded',
+};
