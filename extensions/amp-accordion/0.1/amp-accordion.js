@@ -198,6 +198,9 @@ class AmpAccordion extends AMP.BaseElement {
    * @param {!Event} event keydown event.
    */
   keyDownHandler_(event) {
+    if (event.defaultPrevented) {
+      return;
+    }
     const keyCode = event.keyCode;
     switch (keyCode) {
       case Keycodes.UP_ARROW: /* fallthrough */
@@ -212,7 +215,8 @@ class AmpAccordion extends AMP.BaseElement {
   }
 
   /**
-   * Handles keyboard navigation events.
+   * Handles keyboard navigation events. Only respond to keyboard navigation
+   * if a section header already has focus.
    * @param {!Event} event
    * @private
    */
@@ -220,6 +224,7 @@ class AmpAccordion extends AMP.BaseElement {
     const target = event.target;
     const index = this.headers_.indexOf(target);
     if (index !== -1) {
+      event.preventDefault();
       // Up and down are the same regardless of locale direction.
       const diff = event.keyCode == Keycodes.UP_ARROW ? -1 : 1;
       // If user navigates one past the beginning or end, wrap around.
