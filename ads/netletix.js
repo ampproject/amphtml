@@ -60,6 +60,7 @@ export function netletix(global, data) {
     + '&v=' + encodeURIComponent(nxv)
     + '&site=' + encodeURIComponent(nxsite)
     + '&ord=' + rand;
+    
   const receiveNxAction = function(event)
   {
     if (event.data.type && startsWith(String(event.data.type), 'nx-')) {
