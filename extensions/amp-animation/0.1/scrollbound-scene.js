@@ -22,6 +22,12 @@ import {getServiceForDoc} from '../../../src/service';
 
 export class ScrollboundScene {
 
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Element} element
+   * @param {!function(!number)} onscroll
+   * @param {!Function} onDurationChanged
+   */
   constructor(ampdoc, element, onScroll, onDurationChanged) {
 
     /** @private {!Element} */

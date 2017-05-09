@@ -17,6 +17,7 @@
 
 export class ScrollboundPlayer {
 
+  /** @param {!./web-animations.InternalWebAnimationRequestDef} request */
   constructor(request) {
     // TODO(aghassemi): Use {Animation} as typedef but looks like it is missing
     // currentTime in the extern.

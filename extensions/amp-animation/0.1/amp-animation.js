@@ -223,7 +223,7 @@ export class AmpAnimation extends AMP.BaseElement {
     return this.createRunner_().then(runner => {
       this.runner_ = runner;
       this.runner_.onPlayStateChanged(this.playStateChanged_.bind(this));
-      this.setupScrollboundAnimatins_();
+      this.setupScrollboundAnimations_();
       this.runner_.start();
     });
   }
@@ -289,7 +289,7 @@ export class AmpAnimation extends AMP.BaseElement {
   /**
    * @private
    */
-  setupScrollboundAnimatins_() {
+  setupScrollboundAnimations_() {
     dev().assert(this.runner_);
     if (!this.runner_.hasScrollboundAnimations()) {
       return;
