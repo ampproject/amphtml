@@ -94,7 +94,6 @@ const FUNCTION_WHITELIST = (function() {
     Math.sign,
     encodeURI,
     encodeURIComponent,
-    copyAndSplice,
   ];
   // Creates a prototype-less map of function name to the function itself.
   // This makes function lookups faster (compared to Array.indexOf).
@@ -108,6 +107,10 @@ const FUNCTION_WHITELIST = (function() {
       out[type][f.name] = f;
     }
   });
+
+  // Custom functions (non-js-built-ins) must be added manually as their names
+  // will be minifid at compile time.
+  out[BUILT_IN_FUNCTIONS]['copyAndSplice'] = copyAndSplice;
   return out;
 })();
 
