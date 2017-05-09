@@ -408,7 +408,10 @@ describe('amp-a4a', () => {
       const renderNonAmpCreativeSpy = sinon.spy(
           AmpA4A.prototype, 'renderNonAmpCreative_');
       promiseResolver();
-      layoutCallbackPromise.catch(err => {
+      layoutCallbackPromise.then(() => {
+        // We should never get in here.
+        expect(false).to.be.true;
+      }).catch(err => {
         expect(renderNonAmpCreativeSpy).to.not.be.called;
         expect(err).to.be.ok;
         expect(err.message).to.equal('CANCELLED');
@@ -426,7 +429,10 @@ describe('amp-a4a', () => {
       a4a.unlayoutCallback();
 
       promiseResolver();
-      layoutCallbackPromise.catch(err => {
+      layoutCallbackPromise.then(() => {
+        // We should never get in here.
+        expect(false).to.be.true;
+      }).catch(err => {
         expect(err).to.be.ok;
         expect(err.message).to.equal('CANCELLED');
       });
