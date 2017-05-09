@@ -61,7 +61,7 @@ function checkLinks() {
       });
       if(deadLinksFoundInFile) {
         util.log(
-            util.colors.yellow('WARNING'), 'Dead links potentially found in',
+            util.colors.yellow('WARNING'), 'Possible dead link(s) found in',
             util.colors.magenta(markdownFiles[index]),
             '(please update if necessary).');
             filesWithDeadLinks.push(markdownFiles[index]);
@@ -74,7 +74,7 @@ function checkLinks() {
     if (deadLinksFound) {
         util.log(
             util.colors.yellow('WARNING'),
-            'Dead links potentially found. Please update',
+            'Possible dead link(s) found. Please update',
             util.colors.magenta(filesWithDeadLinks.join(',')),
             'if necessary.');
     } else {
