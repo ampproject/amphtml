@@ -61,8 +61,9 @@ function checkLinks() {
       });
       if(deadLinksFoundInFile) {
         util.log(
-            util.colors.red('ERROR'), 'Dead links found in',
-            util.colors.magenta(markdownFiles[index]), '(please update it).');
+            util.colors.yellow('WARNING'), 'Dead links potentially found in',
+            util.colors.magenta(markdownFiles[index]),
+            '(please update if necessary).');
             filesWithDeadLinks.push(markdownFiles[index]);
       } else {
         util.log(
@@ -72,9 +73,10 @@ function checkLinks() {
     });
     if (deadLinksFound) {
         util.log(
-            util.colors.red('ERROR'), 'Dead links found. Please update',
-            util.colors.magenta(filesWithDeadLinks.join(',')));
-       process.exit(1);
+            util.colors.yellow('WARNING'),
+            'Dead links potentially found. Please update',
+            util.colors.magenta(filesWithDeadLinks.join(',')),
+            'if necessary.');
     } else {
         util.log(
             util.colors.green('SUCCESS'),
