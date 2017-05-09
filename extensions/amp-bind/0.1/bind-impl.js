@@ -17,22 +17,23 @@
 import {BindExpressionResultDef} from './bind-expression';
 import {BindingDef, BindEvaluator} from './bind-evaluator';
 import {BindValidator} from './bind-validator';
-import {chunk, ChunkPriority} from '../../../src/chunk';
-import {dev, user} from '../../../src/log';
-import {deepMerge} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
-import {formOrNullForElement} from '../../../src/form';
-import {isArray, isObject, toArray} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
-import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
-import {isFiniteNumber} from '../../../src/types';
-import {reportError} from '../../../src/error';
 import {
   ampFormServiceForDoc,
   resourcesForDoc,
   viewerForDoc,
 } from '../../../src/services';
+import {chunk, ChunkPriority} from '../../../src/chunk';
+import {dev, user} from '../../../src/log';
+import {deepMerge} from '../../../src/utils/object';
+import {getMode} from '../../../src/mode';
 import {filterSplice} from '../../../src/utils/array';
+import {formOrNullForElement} from '../../../src/form';
+import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
+import {isArray, isObject, toArray} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
+import {isFiniteNumber} from '../../../src/types';
+import {map} from '../../../src/utils/object';
+import {reportError} from '../../../src/error';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
 
 const TAG = 'amp-bind';
@@ -69,6 +70,17 @@ let BoundPropertyDef;
  * }}
  */
 let BoundElementDef;
+
+/**
+ * A map of tag names to arrays of attributes that do not have non-bind
+ * counterparts. For instance, amp-carousel allows a `[slide]` attribute,
+ * but does not support a `slide` attribute.
+ * @private {!Object<string, !Array<string>>}
+ */
+const BIND_ONLY_ATTRIBUTES = map({
+  'AMP-CAROUSEL': ['slide'],
+  'AMP-SELECTOR': ['selected'],
+});
 
 /**
  * Bind is the service that handles the Bind lifecycle, from identifying
@@ -775,6 +787,13 @@ export class Bind {
    */
   verifyBinding_(boundProperty, element, expectedValue) {
     const property = boundProperty.property;
+
+    // Don't show a warning for bind-only attributes,
+    // like 'slide' on amp-carousel.
+    const bindOnlyAttrs = BIND_ONLY_ATTRIBUTES[element.tagName];
+    if (bindOnlyAttrs && bindOnlyAttrs.includes(property)) {
+      return;
+    }
 
     let initialValue;
     let match = true;
