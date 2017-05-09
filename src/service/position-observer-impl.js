@@ -26,6 +26,8 @@ import {
   layoutRectLtwh,
 } from '../layout-rect';
 import {isExperimentOn} from '../../src/experiments';
+import {listenFor} from '../../src/iframe-helper';
+import {serializeMessage, MessageType} from '../../src/3p-frame-messaging';
 
 /** @const @private */
 const TAG = 'POSITION_OBSERVER';
@@ -96,7 +98,7 @@ class AbstractPositionObserver {
           try {
             entry.handler(position);
           } catch (err) {
-            // TODO(@zhouyx, #9208) Throw error. QQQ dev or user?
+            // TODO(@zhouyx, #9208) Throw error.
           }
         } else if (entry.position) {
           // Need to notify that element gets outside viewport
@@ -190,31 +192,29 @@ export class AmpDocPositionObserver extends AbstractPositionObserver {
   startCallback() {
     // listen to viewport scroll event to help pass determine if need to
     const stopScroll = () => {
-      if (Date.now() - this.scrollTimer_ < 500) {
+      const timeDiff = Date.now() - this.scrollTimer_;
+      if (timeDiff < 500) {
         // viewport scroll in the last 500 ms, wait
         return;
       }
       // assume scroll stops, if no scroll event in the last 500,
       this.inScroll_ = false;
     };
-
+    let timeout = null;
     this.unlisteners_.push(this.viewport_.onScroll(() => {
       this.inScroll_ = true;
       this.scrollTimer_ = Date.now();
       this.schedulePass_();
-      // TODO(@zhouyx, #9208) using debounce.
-      setTimeout(stopScroll.bind(this), 500);
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+      timeout = setTimeout(stopScroll.bind(this), 500);
     }));
     this.unlisteners_.push(this.viewport_.onChanged(() => {
       this.vsync_.measure(() => {
         this.pass_(true);
       });
     }));
-    // QQQ: Already call this.updateEntryPosition_(entry) in observe()? Needed?
-    // initial pass
-    this.vsync_.measure(() => {
-      this.pass_(true);
-    });
   }
 
   /* @override */
@@ -328,17 +328,22 @@ export class InaboxPositionObserver extends AbstractPositionObserver {
 
   /** @override */
   startCallback() {
-    // TODO(@zhouyx, #9208) need to add support for AMP host
-    if (!this.ampdoc_.win.context) {
-      dev.error(TAG, 'no window context for inbox window');
+    // TODO(@zhouyx, #9208) Remove all of them
+    const object = {};
+    const dataObject = tryParseJson(this.ampdoc_.win.name);
+    let sentinel = null;
+    if (dataObject) {
+      sentinel = dataObject._context.sentinel;
     }
-
-    // TODO(@zhouyx, #9208) Migrate to using ampContext
-    this.unlistenHost_ = this.ampdoc_.win.context.observePosition(
-      position => {
-        this.onMessageReceivedHandler_(
-            /** @type {PositionInViewportEntryDef} */ (position));
-      });
+    object.type = MessageType.SEND_POSITIONS_HIGH_FIDELITY;
+    this.ampdoc_.win.parent./*OK*/postMessage(serializeMessage(
+        MessageType.SEND_POSITIONS_HIGH_FIDELITY, sentinel));
+    this.unlistenHost_ =
+        listenFor(window.parent, MessageType.POSITION_HIGH_FIDELITY,
+            (position, unusedWin, unusedstring) => {
+              this.onMessageReceivedHandler_(
+                /** @type {PositionInViewportEntryDef} */ (position));
+            });
   }
 
   /** @override */
