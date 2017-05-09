@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-import {Layers, LayerElement} from "../../src/service/layers-impl";
+import {Layers, LayerElement} from '../../src/service/layers-impl';
 import {layoutRectLtwh} from '../../src/layout-rect';
 
-describes.fakeWin('Layers', {amp: true}, (env) => {
-  let win;
+describes.fakeWin('Layers', {amp: true}, env => {
   let sandbox;
   let layers;
 
   beforeEach(() => {
-    win = env.win;
     sandbox = env.sandbox;
     layers = new Layers(env.ampdoc);
   });
@@ -82,8 +80,7 @@ describes.fakeWin('Layers', {amp: true}, (env) => {
 
 });
 
-describes.fakeWin('LayerElement', {amp: true}, (env) => {
-  let win;
+describes.fakeWin('LayerElement', {amp: true}, env => {
   let sandbox;
   let layers;
   let element;
@@ -91,7 +88,6 @@ describes.fakeWin('LayerElement', {amp: true}, (env) => {
   let viewport;
 
   beforeEach(() => {
-    win = env.win;
     sandbox = env.sandbox;
     layers = new Layers(env.ampdoc);
     element = {};
@@ -110,13 +106,13 @@ describes.fakeWin('LayerElement', {amp: true}, (env) => {
         return this.top;
       },
 
-      getLayoutRect(element) {
+      getLayoutRect() {
         return layoutRectLtwh(0, 30, 100, 100);
       },
 
       isDeclaredFixed() {
         return false;
-      }
+      },
     };
     sandbox.stub(layers, 'getViewport', () => viewport);
   });
