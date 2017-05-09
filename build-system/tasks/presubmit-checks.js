@@ -273,6 +273,7 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/service/position-observer-impl.js',
+      // TODO(@zhouyx, #9213) Remove this item.
       'extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js',
     ],
   },

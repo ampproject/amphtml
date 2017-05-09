@@ -39,8 +39,6 @@ export const MessageType = {
   // For amp-inabox
   SEND_POSITIONS: 'send-positions',
   POSITION: 'position',
-  SEND_POSITIONS_HIGH_FIDELITY: 'send-positions-high-fidelity',
-  POSITION_HIGH_FIDELITY: 'position-high-fidelity',
 };
 
 

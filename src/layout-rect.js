@@ -182,8 +182,8 @@ export function areMarginsChanged(margins, change) {
 }
 
 /**
- * @param {!LayoutRectDef} r1
- * @param {!LayoutRectDef} r2
+ * @param {?LayoutRectDef} r1
+ * @param {?LayoutRectDef} r2
  * @return {boolean}
  */
 export function layoutRectEquals(r1, r2) {

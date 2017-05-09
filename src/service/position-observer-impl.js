@@ -26,11 +26,17 @@ import {
   layoutRectLtwh,
 } from '../layout-rect';
 import {isExperimentOn} from '../../src/experiments';
-import {listenFor} from '../../src/iframe-helper';
-import {serializeMessage, MessageType} from '../../src/3p-frame-messaging';
+import {serializeMessage} from '../../src/3p-frame-messaging';
+import {tryParseJson} from '../../src/json.js';
 
 /** @const @private */
 const TAG = 'POSITION_OBSERVER';
+
+/** @const */
+export const SEND_POSITIONS_HIGH_FIDELITY = 'send-positions-high-fidelity';
+
+/** @const */
+export const POSITION_HIGH_FIDELITY = 'position-high-fidelity';
 
 /**
  * The positionObserver returned position value which includes the position rect
@@ -50,7 +56,7 @@ export const PositionObserverFidelity = {
 };
 
 /** @const @private */
-const LOW_FEDELITY_FRAME_COUNT = 2;
+const LOW_FIDELITY_FRAME_COUNT = 4;
 
 class AbstractPositionObserver {
 
@@ -83,7 +89,7 @@ class AbstractPositionObserver {
       fidelity,
       position: null,
       turn: (fidelity == PositionObserverFidelity.LOW) ?
-          Math.floor(Math.random() * LOW_FEDELITY_FRAME_COUNT) : 0,
+          Math.floor(Math.random() * LOW_FIDELITY_FRAME_COUNT) : 0,
       trigger: function(position) {
         const prePos = entry.position;
         if (prePos
@@ -105,7 +111,11 @@ class AbstractPositionObserver {
           // NOTE: This is required for inabox position observer.
           entry.position = null;
           position.positionRect = null;
-          entry.handler(position);
+          try {
+            entry.handler(position);
+          } catch (err) {
+            // TODO(@zhouyx, #9208) Throw error.
+          }
         }
       },
     };
@@ -117,7 +127,7 @@ class AbstractPositionObserver {
     }
 
     this.vsync_.measure(() => {
-      this.updateEntryPosition_(entry);
+      this.updateEntryPosition(entry);
     });
   }
 
@@ -128,7 +138,7 @@ class AbstractPositionObserver {
   changeFidelity(element, fidelity) {
     for (let i = 0; i < this.entries_.length; i++) {
       const entry = this.entries_[i];
-      if (entry.element === element) {
+      if (entry.element == element) {
         entry.fidelity = fidelity;
         if (fidelity == PositionObserverFidelity.HIGH) {
           entry.turn = 0;
@@ -144,7 +154,7 @@ class AbstractPositionObserver {
    */
   unobserve(element) {
     for (let i = 0; i < this.entries_.length; i++) {
-      if (this.entries_[i].element === element) {
+      if (this.entries_[i].element == element) {
         this.entries_[i].handler = null;
         this.entries_.splice(i, 1);
         if (this.entries_.length == 0) {
@@ -157,17 +167,22 @@ class AbstractPositionObserver {
   }
 
   /** @param {!Object} unusedEntry */
-  updateEntryPosition_(unusedEntry) {}
+  updateEntryPosition(unusedEntry) {}
 
+  /**
+   * Callback function that gets called when start to observe the first element.
+   * Should be override by sub class.
+   */
   startCallback() {}
 
+  /**
+   * Callback function that gets called when unobserve last observed element.
+   * Should be override by sub class.
+   */
   stopCallback() {}
-
-  increaseFidelityCallback() {}
-
-  decreaseFidelityCallback() {}
 }
 
+/** The implementation of the positionObserver for an ampdoc */
 export class AmpDocPositionObserver extends AbstractPositionObserver {
 
   /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
@@ -211,6 +226,8 @@ export class AmpDocPositionObserver extends AbstractPositionObserver {
       timeout = setTimeout(stopScroll.bind(this), 500);
     }));
     this.unlisteners_.push(this.viewport_.onChanged(() => {
+      // TODO (@zhouyx, #9208): Consider doing this only when event.relayoutAll
+      // is true.
       this.vsync_.measure(() => {
         this.pass_(true);
       });
@@ -227,9 +244,11 @@ export class AmpDocPositionObserver extends AbstractPositionObserver {
 
   /** @param {boolean=} recursive */
   schedulePass_(recursive) {
-    // TODO (@zhouyx, #9208):
+    // TODO (@zhouyx, #9208): remove the duplicate recursive and this.measure_
     // P1: account for effective fidelity using this.effectiveFidelity
-    // P2: do passes on onDomMutation (if available using MutationObserver)
+    // P2: do passes on onDomMutation (if available using MutationObserver
+    // mostly for in-a-box host, since most DOM mutations are constraint to the
+    // AMP elements).
     if (!recursive && this.measure_) {
       // call of schedulePass_ from viewport onScroll
       // Do nothing if currently measure with calling schedulePass recursively
@@ -248,6 +267,7 @@ export class AmpDocPositionObserver extends AbstractPositionObserver {
   }
 
   /**
+   * This should always be called in vsync.
    * @param {boolean=} force
    * @private
   */
@@ -262,29 +282,26 @@ export class AmpDocPositionObserver extends AbstractPositionObserver {
       // Reset entry.turn value.
       if (!force) {
         if (entry.fidelity == PositionObserverFidelity.LOW) {
-          entry.turn = LOW_FEDELITY_FRAME_COUNT;
+          entry.turn = LOW_FIDELITY_FRAME_COUNT;
         }
       }
 
-      this.updateEntryPosition_(entry);
+      this.updateEntryPosition(entry);
     }
   }
 
-  /** @override */
-  updateEntryPosition_(entry) {
+  /**
+   * Should always be called in vsync.
+   * @override
+   */
+  updateEntryPosition(entry) {
     // get layoutBoxes relative to doc.
     const elementBox = layoutRectFromDomRect(
         entry.element./*OK*/getBoundingClientRect());
-    const win = this.ampdoc_.win;
 
-    let viewportWidth = win./*OK*/innerWidth;
-    let viewportHeight = win./*OK*/innerHeight;
-    if (!viewportWidth || !viewportHeight) {
-      const el = win.document.documentElement;
-      viewportWidth = el./*OK*/clientWidth;
-      viewportHeight = el./*OK*/clientHeight;
-    }
-    const viewportBox = layoutRectLtwh(0, 0, viewportWidth, viewportHeight);
+    const viewportSize = this.viewport_.getSize();
+    const viewportBox =
+        layoutRectLtwh(0, 0, viewportSize.width, viewportSize.height);
 
     // Return { positionRect: <LayoutRectDef>, viewportRect: <LayoutRectDef>}
     entry.trigger(/** @type {PositionInViewportEntryDef}*/ ({
@@ -294,7 +311,8 @@ export class AmpDocPositionObserver extends AbstractPositionObserver {
   }
 }
 
-export class InaboxPositionObserver extends AbstractPositionObserver {
+/** The implementation of the positionObserver for inabox */
+export class InaboxAmpDocPositionObserver extends AbstractPositionObserver {
   /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
   constructor(ampdoc) {
     super(ampdoc);
@@ -335,15 +353,33 @@ export class InaboxPositionObserver extends AbstractPositionObserver {
     if (dataObject) {
       sentinel = dataObject._context.sentinel;
     }
-    object.type = MessageType.SEND_POSITIONS_HIGH_FIDELITY;
+    const win = this.ampdoc_.win;
+    object.type = SEND_POSITIONS_HIGH_FIDELITY;
     this.ampdoc_.win.parent./*OK*/postMessage(serializeMessage(
-        MessageType.SEND_POSITIONS_HIGH_FIDELITY, sentinel));
-    this.unlistenHost_ =
-        listenFor(window.parent, MessageType.POSITION_HIGH_FIDELITY,
-            (position, unusedWin, unusedstring) => {
-              this.onMessageReceivedHandler_(
-                /** @type {PositionInViewportEntryDef} */ (position));
-            });
+    SEND_POSITIONS_HIGH_FIDELITY, sentinel),
+    '*'
+    );
+
+    this.ampdoc_.win.addEventListener('message', event => {
+    // Cheap operations first, so we don't parse JSON unless we have to.
+      if (event.source != win.parent || typeof event.data != 'string' ||
+          event.data.indexOf('amp-') != 0) {
+        return;
+      }
+      // Parse JSON only once per message.
+      const data = /** @type {!Object} */ (
+      JSON.parse(event.data.substr(4)));
+      if (data.sentinel != sentinel) {
+        return;
+      }
+
+      if (data.type != POSITION_HIGH_FIDELITY) {
+        return;
+      }
+
+      this.onMessageReceivedHandler_(
+      /** @type {PositionInViewportEntryDef} */ (data));
+    });
   }
 
   /** @override */
@@ -373,12 +409,12 @@ export class InaboxPositionObserver extends AbstractPositionObserver {
   pass_() {
     for (let i = 0; i < this.entries_.length; i++) {
       const entry = this.entries_[i];
-      this.updateEntryPosition_(entry);
+      this.updateEntryPosition(entry);
     }
   }
 
   /** @override */
-  updateEntryPosition_(entry) {
+  updateEntryPosition(entry) {
     if (!this.iframePosition_ || !this.iframePosition_.positionRect) {
       // If not receive iframe position from host, or if iframe is outside vp
       return;
@@ -407,7 +443,7 @@ export function installPositionObserverServiceForDoc(ampdoc) {
      'PositionObserver is experimental and used by amp-animation only for now');
   registerServiceBuilderForDoc(ampdoc, 'position-observer', () => {
     if (getMode(ampdoc.win).runtime == 'inabox') {
-      return new InaboxPositionObserver(ampdoc);
+      return new InaboxAmpDocPositionObserver(ampdoc);
     } else {
       return new AmpDocPositionObserver(ampdoc);
     }

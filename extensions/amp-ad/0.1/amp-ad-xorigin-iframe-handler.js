@@ -33,11 +33,12 @@ import {loadPromise} from '../../../src/event-helper';
 import {getHtml} from '../../../src/get-html';
 import {removeElement} from '../../../src/dom';
 import {getServiceForDoc} from '../../../src/service';
-import {MessageType} from '../../../src/3p-frame-messaging';
 import {isExperimentOn} from '../../../src/experiments';
 import {
   installPositionObserverServiceForDoc,
   PositionObserverFidelity,
+  SEND_POSITIONS_HIGH_FIDELITY,
+  POSITION_HIGH_FIDELITY,
 } from '../../../src/service/position-observer-impl';
 
 
@@ -73,10 +74,7 @@ export class AmpAdXOriginIframeHandler {
     /** @private {?SubscriptionApi} */
     this.positionObserverHighFidelityApi_ = null;
 
-    /**
-     * {?../../../src/service/position-observer-impl.AbstractPositionObserver}
-     * @private
-     */
+    /** @private {?../../../src/service/position-observer-impl.AbstractPositionObserver} */
     this.positionObserver_ = null;
 
     /** @private {!Array<!Function>} functions to unregister listeners */
@@ -111,17 +109,21 @@ export class AmpAdXOriginIframeHandler {
     // High-fidelity positions for scrollbound animations.
     // Protected by 'amp-animation' experiment for now.
     if (isExperimentOn(this.baseInstance_.win, 'amp-animation')) {
+      let posObInstalled = false;
       this.positionObserverHighFidelityApi_ = new SubscriptionApi(
-        this.iframe, MessageType.SEND_POSITIONS_HIGH_FIDELITY, true, () => {
+        this.iframe, SEND_POSITIONS_HIGH_FIDELITY, true, () => {
           const ampdoc = this.baseInstance_.getAmpDoc();
-          installPositionObserverServiceForDoc(ampdoc);
+          // TODO (#9232) May crash PWA
+          if (!posObInstalled) {
+            installPositionObserverServiceForDoc(ampdoc);
+          }
           this.positionObserver_ = getServiceForDoc(ampdoc,
               'position-observer');
           this.positionObserver_.observe(
             this.iframe,
             PositionObserverFidelity.HIGH, pos => {
               this.positionObserverHighFidelityApi_.send(
-                MessageType.POSITION_HIGH_FIDELITY,
+                POSITION_HIGH_FIDELITY,
                 pos);
             });
         });
