@@ -79,10 +79,10 @@ Let’s examine each of these situations more closely.
 
 **Context #1: the publisher’s origin.** AMP pages are deployed so that they are originally hosted from and accessible via the publisher’s site, e.g. on `https://example.com` one might find `https://example.com/article.amp.html`.
 
-Publishers can choose to publish exclusively in AMP, or to publish two versions of content (that is, AMP content “paired” with non-AMP content). The “paired” model requires some [particular steps](https://www.ampproject.org/docs/guides/discovery) to ensure the AMP versions of pages are discoverable to search engines, social media sites, and other platforms. Both publishing approaches are fully supported; it's up to the publisher to decide on which approach to take. 
+Publishers can choose to publish exclusively in AMP, or to publish two versions of content (that is, AMP content “paired” with non-AMP content). The “paired” model requires some [particular steps](https://www.ampproject.org/docs/guides/discovery) to ensure the AMP versions of pages are discoverable to search engines, social media sites, and other platforms. Both publishing approaches are fully supported; it's up to the publisher to decide on which approach to take.
 
 > **NOTE:**
-> 
+>
 > Due to the “paired” publishing model just described, the publisher’s origin (in the example above, `https://example.com`) is a context in which **both AMP and non-AMP content can be accessed**. Indeed, it’s the only context in which this can happen because AMP caches and AMP viewers, described below, only deliver valid AMP content.
 
 **Context #2: an AMP cache.** AMP files can be cached in the cloud by a third-party cache to reduce the time content takes to get to a user’s mobile device.
@@ -99,7 +99,7 @@ Just like the AMP cache case, expect the domain for an AMP viewer to also be dif
 
 Publishers must be prepared to manage the user state for each display context separately. AMP’s [Client ID](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md#client-id) feature, which takes advantage of cookies or local storage to persist state, provides the necessary support for AMP pages to have a stable and pseudonymous identifier for the user. From an implementation point of view, either cookies or local storage are used, and AMP makes the decision which to use depending on the display context. This choice is influenced by the technical feasibility of managing this state scaled to hundreds or thousands of publishers.
 
-However, publishers of AMP pages can easily end up (unwittingly) designing user journeys that involve multiple contexts. Let’s revisit our earlier look at the shopping cart use case and add some more detail to it to make a full **user story**: 
+However, publishers of AMP pages can easily end up (unwittingly) designing user journeys that involve multiple contexts. Let’s revisit our earlier look at the shopping cart use case and add some more detail to it to make a full **user story**:
 
 > *On day 1, the user discovers an AMP page from Example Inc. via Google Search. Google Search loads AMP pages in an AMP viewer. While viewing the page, the user adds four items to their shopping cart but doesn't check out. Two weeks later, on day 15, the user remembers the four items they were considering to purchase and decides now is the time to buy. They access Example Inc.’s homepage at `https://example.com` directly (it is a non-AMP homepage) and finds their four items are still saved in the shopping cart.*
 
@@ -223,7 +223,7 @@ Take note of the fact that the parameter passed into the Client ID substitution,
 Concerning the rest of the amp-analytics implementation, see the documentation for [amp-analytics configuration](https://www.ampproject.org/docs/guides/analytics_amp) for more detail on how to set up amp-analytics requests or to modify those of your analytics vendor. The ping can be further modified to transport additional data that you either directly define or by taking advantage of other [AMP substitutions](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md).
 
 > **Good to know:**
-> 
+>
 > Why did we use of the name “`uid`” for the parameter passed to the Client ID feature? The parameter that the `clientId(...)` substitution takes is used to define scope. You can actually use the Client ID feature for many use cases and, as a result, generate many client IDs. The parameter differentiates between these use cases and so you use it to specify which use case you would like a Client ID for. For instance, you might want to send different identifiers to third parties like an advertiser and you could use the “scope” parameter to achieve this.
 
 On the publisher origin, it’s easiest to think of “scope” as what you call the cookie. By recommending a value of “`uid`” for the Client ID parameter here in [Task 2](#task-2-for-amp-pages-set-up-an-identifier-and-send-analytics-pings-by-including-client-id-replacement-in-amp-analytics-pings), we align with the choice to use a cookie called “`uid`” in [Task 1](#task-1-for-non-amp-pages-on-the-publisher-origin-set-up-an-identifier-and-send-analytics-pings).
@@ -361,6 +361,18 @@ Our approach will take advantage of two types of [AMP variable substitutions](./
 <a href="https://example.com/step2.html?ref_id=CLIENT_ID(uid)" data-amp-replace="CLIENT_ID">
 ```
 
+**Alternative solution for passing Client ID to the outgoing links:** Define the new query parameter `ref_id` as part of the data attribute `data-amp-addparams` and for queries that needs parameter substitution provide those details as part of `data-amp-replace`. With this approach the URL would look clean and the parameters specified on `data-amp-addparams` will be dynamically added
+
+``` text
+<a href="https://example.com/step2.html" data-amp-addparams="ref_id=CLIENT_ID(uid)" data-amp-replace="CLIENT_ID">
+```
+
+For passing multiple query parameters through `data-amp-addparams` have those `&` separated like
+
+``` text
+<a href="https://example.com/step2.html" data-amp-addparams="ref_id=CLIENT_ID(uid)&pageid=p123" data-amp-replace="CLIENT_ID">
+```
+
 **To update form inputs to use a Client ID substitution:** Define a name for the input field, such as `orig_user_id`. Specify the `default-value` of the form field to be the value of AMP’s Client ID substitution:
 
 ``` text
@@ -428,20 +440,20 @@ We recommend validating the authenticity of query parameter values by using the 
 *Updates to non-AMP page:* Similarly, on a non-AMP page served from your publisher origin, extract and transmit `ref_id` value contained within the URL. Validate the authenticity of the value by following the steps outlined in the “[Parameter validation](#parameter-validation)” section below. Then, construct analytics pings that will include both an `orig_user_id` derived from `ref_id` and a `user_id` based on the value of the first-party cookie identifier.
 
 > **IMPORTANT:**
-> 
+>
 > If you choose to process the parameters client-side on the landing page, the landing page should remove identifier information from URLs as soon as the identifier can be captured.
-> 
+>
 > Before removing the parameters, be sure that other code that needs to run to read them has either:
 > - Run before the removal happens; or
 > - Can access a place where the code that read and removed the parameters has stored the data
-> 
+>
 > To do this on your non-AMP page, include the following JavaScript, which will remove all query parameters from the URL:
-> 
+>
 > ``` javascript
 > var href = location.href.replace(/\?[^#]+/, '');
 > history.replaceState(null, null, href);
 > ```
-> 
+>
 > Adapt this as needed to remove fewer query parameters.
 
 ##### Processing multiple identifiers in an analytics ping
@@ -543,7 +555,7 @@ If you cannot trust the referrer, then reject any values provided via URL parame
 
 ### Keep just one association
 
-**Only one association between identifiers from any two contexts should be maintained.** If an AMP Client ID that you have previously associated with a cookie or other user identifier issued by you is seen together with a new cookie or user identifier that you issue, you should delete all state you held against the previous cookie and user identifier. 
+**Only one association between identifiers from any two contexts should be maintained.** If an AMP Client ID that you have previously associated with a cookie or other user identifier issued by you is seen together with a new cookie or user identifier that you issue, you should delete all state you held against the previous cookie and user identifier.
 
 These steps will help ensure alignment with users’ expectations of privacy. As detailed in the preceding sections, managing user state in AMP will often involve storing and associating different identifiers across multiple contexts where AMP content is displayed. **This situation should never be abused to reconstitute data or perform tracking that the user would not expect or that you have not clearly disclosed to the user, such as, for example, after the user has deleted his or her cookies for your sites.**
 

@@ -1097,6 +1097,33 @@ describes.sandboxed('UrlReplacements', {}, () => {
             'https://canonical.com/link?out=bar&c=test-cid(abc)');
       });
     });
+
+    it('should not add URL parameters for unwhitelisted origin', () => {
+      a.href = 'https://example.com/link';
+      a.setAttribute('data-amp-addparams', 'guid=123');
+      urlReplacements.maybeExpandLink(a);
+      expect(a.href).to.equal('https://example.com/link');
+    });
+
+    it('should not add URL parameters for http URL\'s(non-secure)', () => {
+      a.href = 'http://whitelisted.com/link?out=QUERY_PARAM(foo)';
+      a.setAttribute('data-amp-addparams', 'guid=123');
+      urlReplacements.maybeExpandLink(a);
+      expect(a.href).to.equal('http://whitelisted.com/link?out=QUERY_PARAM(foo)');
+    });
+
+    it('should append the query parameters for whitelisted origin', () => {
+      a.href = 'https://whitelisted.com/link?out=QUERY_PARAM(foo)';
+      a.setAttribute('data-amp-replace', 'QUERY_PARAM CLIENT_ID');
+      a.setAttribute('data-amp-addparams', 'guid=123&c=CLIENT_ID(abc)');
+      // Get a cid, then proceed.
+      return urlReplacements.expandAsync('CLIENT_ID(abc)').then(() => {
+        urlReplacements.maybeExpandLink(a);
+        expect(a.href).to.equal(
+            'https://whitelisted.com/link?out=bar&guid=123&c=test-cid(abc)');
+      });
+    });
+
   });
 
   describe('Expanding String', () => {
