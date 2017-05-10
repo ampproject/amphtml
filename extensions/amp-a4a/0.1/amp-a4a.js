@@ -508,6 +508,13 @@ export class AmpA4A extends AMP.BaseElement {
     };
 
     let adUrlPromiseResolver = null;
+    if ((getMode().localDev ||
+        isExperimentOn(this.win, 'a4a-measure-get-ad-urls')) &&
+        isReportingEnabled(this)) {
+      this.adUrlsPromise_ = new Promise(resolve => {
+        adUrlPromiseResolver = resolve;
+      });
+    }
 
     // Return value from this chain: True iff rendering was "successful"
     // (i.e., shouldn't try to render later via iframe); false iff should
@@ -532,16 +539,12 @@ export class AmpA4A extends AMP.BaseElement {
         /** @return {!Promise<?Response>} */
         .then(adUrl => {
           checkStillCurrent(promiseId);
-          if ((getMode().localDev ||
-              isExperimentOn(this.win, 'a4a-measure-get-ad-urls')) &&
-              isReportingEnabled(this)) {
-            this.adUrlsPromise_ = new Promise(resolve => {
-              adUrlPromiseResolver = resolve;
-            });
-            this.measureGetAdUrlsDelay_();
-          }
           this.adUrl_ = adUrl;
           if (adUrlPromiseResolver) {
+            // Do not initialize ad url delay measurement until AFTER first
+            // slot ad url creation as any delayed would only be imposed at
+            // that time.
+            this.measureGetAdUrlsDelay_();
             adUrlPromiseResolver(adUrl);
           }
           this.protectedEmitLifecycleEvent_('urlBuilt');
