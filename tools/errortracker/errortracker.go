@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -174,9 +175,15 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	exception := r.URL.Query().Get("s")
+	// If format does not end with :\d+ truncate up to the last newline.
+	if !regexp.MustCompile(`:\d+$`).MatchString(exception) {
+		exception = string(regexp.MustCompile(`\n.*$`).ReplaceAllString(exception, ""))
+	}
+
 	event := &ErrorEvent{
 		Message:     r.URL.Query().Get("m"),
-		Exception:   r.URL.Query().Get("s"),
+		Exception:   exception,
 		Version:     errorType + "-" + r.URL.Query().Get("v"),
 		Environment: "prod",
 		Application: errorType,
