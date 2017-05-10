@@ -1,5 +1,22 @@
+/**
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import {isObject} from '../../src/types';
 import {loadScript} from '../../3p/3p';
+import {setStyle} from '../../src/style';
 import {tryParseJson} from '../../src/json';
 
 /**
@@ -156,33 +173,33 @@ function getIma(global, cb) {
  */
 export function imaVideo(global, data) {
 
-  videoWidth = global.innerWidth;
-  videoHeight = global.innerHeight;
+  videoWidth = global./*REVIEW*/innerWidth;
+  videoHeight = global./*REVIEW*/innerHeight;
 
   // Wraps *everything*.
   wrapperDiv = global.document.createElement('div');
   wrapperDiv.id = 'ima-wrapper';
-  wrapperDiv.style.width = videoWidth + 'px';
-  wrapperDiv.style.height = videoHeight + 'px';
-  wrapperDiv.style.backgroundColor = 'black';
+  setStyle(wrapperDiv, 'width', videoWidth + 'px');
+  setStyle(wrapperDiv, 'height', videoHeight + 'px');
+  setStyle(wrapperDiv, 'background-color', 'black');
 
   // Wraps the big play button we show before video start.
   bigPlayDiv = global.document.createElement('div');
   bigPlayDiv.id = 'ima-big-play';
-  bigPlayDiv.style.position = 'relative';
-  bigPlayDiv.style.width = videoWidth + 'px';
-  bigPlayDiv.style.height = videoHeight + 'px';
-  bigPlayDiv.style.display = 'table-cell';
-  bigPlayDiv.style.verticalAlign = 'middle';
-  bigPlayDiv.style.textAlign = 'center';
-  bigPlayDiv.style.cursor = 'pointer';
+  setStyle(bigPlayDiv, 'position', 'relative');
+  setStyle(bigPlayDiv, 'width', videoWidth + 'px');
+  setStyle(bigPlayDiv, 'height', videoHeight + 'px');
+  setStyle(bigPlayDiv, 'display', 'table-cell');
+  setStyle(bigPlayDiv, 'vertical-align', 'middle');
+  setStyle(bigPlayDiv, 'text-align', 'center');
+  setStyle(bigPlayDiv, 'cursor', 'pointer');
   // Inner div so we can v and h align.
   playButtonDiv = global.document.createElement('div');
   playButtonDiv.id = 'ima-play-button';
-  playButtonDiv.style.fontSize = '10em';
-  playButtonDiv.style.color = 'white';
-  playButtonDiv.style.display = 'inline-block';
-  playButtonDiv.style.lineHeight = '0.5';
+  setStyle(playButtonDiv, 'font-size', '10em');
+  setStyle(playButtonDiv, 'color', 'white');
+  setStyle(playButtonDiv, 'display', 'inline-block');
+  setStyle(playButtonDiv, 'line-height', '0.5');
   // Play button text node.
   bigPlayButtonNode = global.document.createTextNode(playChar);
   playButtonDiv.appendChild(bigPlayButtonNode);
@@ -191,71 +208,71 @@ export function imaVideo(global, data) {
   // Video controls.
   controlsDiv = global.document.createElement('div');
   controlsDiv.id = 'ima-controls';
-  controlsDiv.style.position = 'absolute';
-  controlsDiv.style.bottom = '0px';
-  controlsDiv.style.width = '100%';
-  controlsDiv.style.height = '30px';
-  controlsDiv.style.backgroundColor = '#EEEEEE';
-  controlsDiv.style.color = '#333333';
-  controlsDiv.style.display = 'none';
-  controlsDiv.style.webkitTouchCallout = 'none';
-  controlsDiv.style.webkitUserSelect = 'none';
-  controlsDiv.style.khtmlUserSelect = 'none';
-  controlsDiv.style.mozUserSelect = 'none';
-  controlsDiv.style.msUserSelect = 'none';
-  controlsDiv.style.userSelect = 'none';
+  setStyle(controlsDiv, 'position', 'absolute');
+  setStyle(controlsDiv, 'bottom', '0px');
+  setStyle(controlsDiv, 'width', '100%');
+  setStyle(controlsDiv, 'height', '30px');
+  setStyle(controlsDiv, 'background-color', '#EEEEEE');
+  setStyle(controlsDiv, 'color', '#333333');
+  setStyle(controlsDiv, 'display', 'none');
+  setStyle(controlsDiv, '-webkit-touch-callout', 'none');
+  setStyle(controlsDiv, '-webkit-user-select', 'none');
+  setStyle(controlsDiv, '-khtml-user-select', 'none');
+  setStyle(controlsDiv, '-moz-user-select', 'none');
+  setStyle(controlsDiv, '-ms-user-select', 'none');
+  setStyle(controlsDiv, 'user-select', 'none');
   // Play button
   playPauseDiv = global.document.createElement('div');
   playPauseDiv.id = 'ima-play-pause';
-  playPauseDiv.style.width = '30px';
-  playPauseDiv.style.height = '30px';
-  playPauseDiv.style.marginLeft = '10px';
-  playPauseDiv.style.fontSize = '1.25em';
-  playPauseDiv.style.float = 'left';
-  playPauseDiv.style.cursor = 'pointer';
+  setStyle(playPauseDiv, 'width', '30px');
+  setStyle(playPauseDiv, 'height', '30px');
+  setStyle(playPauseDiv, 'margin-left', '10px');
+  setStyle(playPauseDiv, 'font-size', '1.25em');
+  setStyle(playPauseDiv, 'float', 'left');
+  setStyle(playPauseDiv, 'cursor', 'pointer');
   playPauseNode = global.document.createTextNode(playChar);
   playPauseDiv.appendChild(playPauseNode);
   controlsDiv.appendChild(playPauseDiv);
   // Current time and duration.
   timeDiv = global.document.createElement('div');
   timeDiv.id = 'ima-time';
-  timeDiv.style.width = '120px';
-  timeDiv.style.height = '30px';
-  timeDiv.style.lineHeight = '30px';
-  timeDiv.style.float = 'left';
-  timeDiv.style.textAlign = 'center';
+  setStyle(timeDiv, 'width', '120px');
+  setStyle(timeDiv, 'height', '30px');
+  setStyle(timeDiv, 'line-height', '30px');
+  setStyle(timeDiv, 'float', 'left');
+  setStyle(timeDiv, 'text-align', 'center');
   timeNode = global.document.createTextNode('00:00 / 00:00');
   timeDiv.appendChild(timeNode);
   controlsDiv.appendChild(timeDiv);
   // Progress bar.
   progressBarWrapperDiv = global.document.createElement('div');
   progressBarWrapperDiv.id = 'ima-progress-wrapper';
-  progressBarWrapperDiv.style.height = '30px';
-  progressBarWrapperDiv.style.position = 'absolute';
-  progressBarWrapperDiv.style.left = '160px';
-  progressBarWrapperDiv.style.right = '50px';
+  setStyle(progressBarWrapperDiv, 'height', '30px');
+  setStyle(progressBarWrapperDiv, 'position', 'absolute');
+  setStyle(progressBarWrapperDiv, 'left', '160px');
+  setStyle(progressBarWrapperDiv, 'right', '50px');
   progressLine = global.document.createElement('div');
   progressLine.id = 'progress-line';
-  progressLine.style.backgroundColor = '#00BBFF';
-  progressLine.style.height = '2px';
-  progressLine.style.marginTop = '14px';
-  progressLine.style.width = '0%';
-  progressLine.style.float = 'left';
+  setStyle(progressLine, 'background-color', '#00BBFF');
+  setStyle(progressLine, 'height', '2px');
+  setStyle(progressLine, 'margin-top', '14px');
+  setStyle(progressLine, 'width', '0%');
+  setStyle(progressLine, 'float', 'left');
   totalTimeLine = global.document.createElement('div');
   totalTimeLine.id = 'total-time-line';
-  totalTimeLine.style.backgroundColor = '#333333';
-  totalTimeLine.style.height = '2px';
-  totalTimeLine.style.width = '100%';
-  totalTimeLine.style.marginTop = '14px';
+  setStyle(totalTimeLine, 'background-color', '#333333');
+  setStyle(totalTimeLine, 'height', '2px');
+  setStyle(totalTimeLine, 'width', '100%');
+  setStyle(totalTimeLine, 'margin-top', '14px');
   progressMarkerDiv = global.document.createElement('div');
   progressMarkerDiv.id = 'ima-progress-marker';
-  progressMarkerDiv.style.color = '#00BBFF';
-  progressMarkerDiv.style.height = '30px';
-  progressMarkerDiv.style.position = 'absolute';
-  progressMarkerDiv.style.fontSize = '2em';
-  progressMarkerDiv.style.marginTop = '-5px';
-  progressMarkerDiv.style.left = '-1%';
-  progressMarkerDiv.style.cursor = 'default';
+  setStyle(progressMarkerDiv, 'color', '#00BBFF');
+  setStyle(progressMarkerDiv, 'height', '30px');
+  setStyle(progressMarkerDiv, 'position', 'absolute');
+  setStyle(progressMarkerDiv, 'font-size', '2em');
+  setStyle(progressMarkerDiv, 'margin-top', '-5px');
+  setStyle(progressMarkerDiv, 'left', '-1%');
+  setStyle(progressMarkerDiv, 'cursor', 'default');
   progressMarkerDiv.appendChild(global.document.createTextNode(seekDot));
   progressBarWrapperDiv.appendChild(progressLine);
   progressBarWrapperDiv.appendChild(progressMarkerDiv);
@@ -264,42 +281,42 @@ export function imaVideo(global, data) {
   // Fullscreen button
   fullscreenDiv = global.document.createElement('div');
   fullscreenDiv.id = 'ima-fullscreen';
-  fullscreenDiv.style.position = 'absolute';
-  fullscreenDiv.style.bottom = '0px';
-  fullscreenDiv.style.right = '10px';
-  fullscreenDiv.style.width = '30px';
-  fullscreenDiv.style.height = '30px';
-  fullscreenDiv.style.fontSize = '1.25em';
-  fullscreenDiv.style.cursor = 'pointer';
-  fullscreenDiv.style.textAlign = 'center';
-  fullscreenDiv.style.fontWeight = 'bold';
-  fullscreenDiv.style.lineHeight = '1.4em';
+  setStyle(fullscreenDiv, 'position', 'absolute');
+  setStyle(fullscreenDiv, 'bottom', '0px');
+  setStyle(fullscreenDiv, 'right', '10px');
+  setStyle(fullscreenDiv, 'width', '30px');
+  setStyle(fullscreenDiv, 'height', '30px');
+  setStyle(fullscreenDiv, 'font-size', '1.25em');
+  setStyle(fullscreenDiv, 'cursor', 'pointer');
+  setStyle(fullscreenDiv, 'text-align', 'center');
+  setStyle(fullscreenDiv, 'font-weight', 'bold');
+  setStyle(fullscreenDiv, 'line-height', '1.4em');
   fullscreenDiv.appendChild(global.document.createTextNode(fullscreenChars));
   controlsDiv.appendChild(fullscreenDiv);
 
   // Ad container.
   adContainerDiv = global.document.createElement('div');
   adContainerDiv.id = 'ima-ad-container';
-  adContainerDiv.style.position = 'absolute';
-  adContainerDiv.style.top = '0px';
-  adContainerDiv.style.left = '0px';
-  adContainerDiv.style.width = '100%';
-  adContainerDiv.style.height = '100%';
+  setStyle(adContainerDiv, 'position', 'absolute');
+  setStyle(adContainerDiv, 'top', '0px');
+  setStyle(adContainerDiv, 'left', '0px');
+  setStyle(adContainerDiv, 'width', '100%');
+  setStyle(adContainerDiv, 'height', '100%');
 
   // Wraps our content video.
   contentDiv = global.document.createElement('div');
   contentDiv.id = 'ima-content';
-  contentDiv.style.position = 'absolute';
-  contentDiv.style.top = '0px';
-  contentDiv.style.left = '0px';
-  contentDiv.style.width = '100%';
-  contentDiv.style.height = '100%';
+  setStyle(contentDiv, 'position', 'absolute');
+  setStyle(contentDiv, 'top', '0px');
+  setStyle(contentDiv, 'left', '0px');
+  setStyle(contentDiv, 'width', '100%');
+  setStyle(contentDiv, 'height', '100%');
   // The video player
   videoPlayer = global.document.createElement('video');
   videoPlayer.id = 'ima-content-player';
-  videoPlayer.style.width = '100%';
-  videoPlayer.style.height = '100%';
-  videoPlayer.style.backgroundColor = 'black';
+  setStyle(videoPlayer, 'width', '100%');
+  setStyle(videoPlayer, 'height', '100%');
+  setStyle(videoPlayer, 'background-color', 'black');
   videoPlayer.setAttribute('src', data.src);
   videoPlayer.setAttribute('poster', data.poster);
   videoPlayer.setAttribute('playsinline', true);
@@ -386,7 +403,7 @@ export function onClick() {
   playbackStarted = true;
   uiTicker = setInterval(uiTickerClick, 500);
   bigPlayDiv.removeEventListener(interactEvent, onClick);
-  bigPlayDiv.style.display = 'none';
+  setStyle(bigPlayDiv, 'display', 'none');
   adDisplayContainer.initialize();
   videoPlayer.load();
   playAds();
@@ -404,10 +421,10 @@ export function playAds() {
     try {
       adsManager.init(
           videoWidth, videoHeight, global.google.ima.ViewMode.NORMAL);
-      window.parent.postMessage({event: VideoEvents.PLAY}, '*');
+      window.parent./*REVIEW*/postMessage({event: VideoEvents.PLAY}, '*');
       adsManager.start();
     } catch (adError) {
-      window.parent.postMessage({event: VideoEvents.PLAY}, '*');
+      window.parent./*REVIEW*/postMessage({event: VideoEvents.PLAY}, '*');
       playVideo();
     }
   } else if (!adRequestFailed) {
@@ -415,7 +432,7 @@ export function playAds() {
     setTimeout(playAds, 250);
   } else {
     // Ad request failed.
-    window.parent.postMessage({event: VideoEvents.PLAY}, '*');
+    window.parent./*REVIEW*/postMessage({event: VideoEvents.PLAY}, '*');
     playVideo();
   }
 }
@@ -454,7 +471,7 @@ export function onAdsManagerLoaded(adsManagerLoadedEvent) {
   if (muteAdsManagerOnLoaded) {
     adsManager.setVolume(0);
   }
-  window.parent.postMessage({event: VideoEvents.LOAD}, '*');
+  window.parent./*REVIEW*/postMessage({event: VideoEvents.LOAD}, '*');
 }
 
 /**
@@ -472,8 +489,7 @@ export function onAdsLoaderError() {
  *
  * @visibleForTesting
  */
-export function onAdError(error) {
-  console.log(error);
+export function onAdError() {
   if (adsManager) {
     adsManager.destroy();
   }
@@ -496,7 +512,7 @@ export function onContentPauseRequested() {
   }
   adsActive = true;
   videoPlayer.removeEventListener(interactEvent, showControls);
-  adContainerDiv.style.display = 'block';
+  setStyle(adContainerDiv, 'display', 'block');
   videoPlayer.removeEventListener('ended', onContentEnded);
   hideControls();
   videoPlayer.pause();
@@ -535,8 +551,8 @@ export function updateUi(currentTime, duration) {
       formatTime(currentTime) + ' / ' + formatTime(duration);
   const progressPercent =
       Math.floor((currentTime / duration) * 100);
-  progressLine.style.width = progressPercent + '%';
-  progressMarkerDiv.style.left = (progressPercent - 1) + '%';
+  setStyle(progressLine, 'width', progressPercent + '%');
+  setStyle(progressMarkerDiv, 'left', (progressPercent - 1) + '%');
 }
 
 /**
@@ -602,7 +618,7 @@ function onProgressClickEnd() {
 function onProgressMove(event) {
   const progressWrapperPosition = getPagePosition(progressBarWrapperDiv);
   const progressListStart = progressWrapperPosition.x;
-  const progressListWidth = progressBarWrapperDiv.offsetWidth;
+  const progressListWidth = progressBarWrapperDiv./*REVIEW*/offsetWidth;
 
   // Handle Android Chrome touch events.
   const eventX = event.clientX || event.touches[0].pageX;
@@ -622,7 +638,9 @@ function onProgressMove(event) {
 function getPagePosition(el) {
   let lx, ly;
   for (lx = 0, ly = 0;
-      el != null; lx += el.offsetLeft, ly += el.offsetTop, el = el.offsetParent)
+      el != null;
+      lx += el./*REVIEW*/offsetLeft, ly += el./*REVIEW*/offsetTop,
+          el = el./*REVIEW*/offsetParent)
     {};
   return {x: lx,y: ly};
 }
@@ -646,13 +664,13 @@ export function onPlayPauseClick() {
  * @visibleForTesting
  */
 export function playVideo() {
-  adContainerDiv.style.display = 'none';
+  setStyle(adContainerDiv, 'display', 'none');
   playerState = PlayerStates.PLAYING;
   // Kick off the hide controls timer.
   showControls();
-  playPauseDiv.style.lineHeight = '1.4em';
+  setStyle(playPauseDiv, 'line-height', '1.4em');
   playPauseNode.textContent = pauseChars;
-  window.parent.postMessage({event: VideoEvents.PLAY}, '*');
+  window.parent./*REVIEW*/postMessage({event: VideoEvents.PLAY}, '*');
   videoPlayer.play();
 }
 
@@ -670,8 +688,8 @@ export function pauseVideo(event) {
     showControls();
   }
   playPauseNode.textContent = playChar;
-  playPauseDiv.style.lineHeight = '';
-  window.parent.postMessage({event: VideoEvents.PAUSE}, '*');
+  setStyle(playPauseDiv, 'line-height', '');;
+  window.parent./*REVIEW*/postMessage({event: VideoEvents.PAUSE}, '*');
   if (event && event.type == 'webkitendfullscreen') {
     // Video was paused because we exited fullscreen.
     videoPlayer.removeEventListener('webkitendfullscreen', pauseVideo);
@@ -729,8 +747,8 @@ function onFullscreenChange() {
     adsManagerWidthOnLoad = null;
     adsManagerHeightOnLoad = null;
     // Return the video to its original size and position
-    wrapperDiv.style.width = videoWidth + 'px';
-    wrapperDiv.style.height = videoHeight + 'px';
+    setStyle(wrapperDiv, 'width', videoWidth + 'px');
+    setStyle(wrapperDiv, 'height', videoHeight + 'px');
     fullscreen = false;
   } else {
     // The user just entered fullscreen
@@ -742,8 +760,8 @@ function onFullscreenChange() {
       adsManagerWidthOnLoad = null;
       adsManagerHeightOnLoad = null;
       // Make the video take up the entire screen
-      wrapperDiv.style.width = fullscreenWidth + 'px';
-      wrapperDiv.style.height = fullscreenHeight + 'px';
+      setStyle(wrapperDiv, 'width', fullscreenWidth + 'px');
+      setStyle(wrapperDiv, 'height', fullscreenHeight + 'px');
       hideControls();
     }
     fullscreen = true;
@@ -756,7 +774,7 @@ function onFullscreenChange() {
  * @visibleForTesting
  */
 export function showControls() {
-  controlsDiv.style.display = 'block';
+  setStyle(controlsDiv, 'display', 'block');
   // Hide controls after 3 seconds
   if (playerState == PlayerStates.PLAYING) {
     // Reset hide controls timer.
@@ -771,7 +789,7 @@ export function showControls() {
  * @visibleForTesting
  */
 export function hideControls() {
-  controlsDiv.style.display = 'none';
+  setStyle(controlsDiv, 'display', 'none');
 }
 
 /**
@@ -787,7 +805,7 @@ function onMessage(event) {
       case 'playVideo':
         if (adsActive) {
           adsManager.resume();
-          window.parent.postMessage({event: VideoEvents.PLAY}, '*');
+          window.parent./*REVIEW*/postMessage({event: VideoEvents.PLAY}, '*');
         } else if (playbackStarted) {
           playVideo();
         } else {
@@ -798,7 +816,7 @@ function onMessage(event) {
       case 'pauseVideo':
         if (adsActive) {
           adsManager.pause();
-          window.parent.postMessage({event: VideoEvents.PAUSE}, '*');
+          window.parent./*REVIEW*/postMessage({event: VideoEvents.PAUSE}, '*');
         } else if (playbackStarted) {
           pauseVideo(null);
         }
@@ -811,7 +829,7 @@ function onMessage(event) {
         } else {
           muteAdsManagerOnLoaded = true;
         }
-        window.parent.postMessage({event: VideoEvents.MUTED}, '*');
+        window.parent./*REVIEW*/postMessage({event: VideoEvents.MUTED}, '*');
         break;
       case 'unMute':
         videoPlayer.volume = 1;
@@ -821,14 +839,14 @@ function onMessage(event) {
         } else {
           muteAdsManagerOnLoaded = false;
         }
-        window.parent.postMessage({event: VideoEvents.UNMUTED}, '*');
+        window.parent./*REVIEW*/postMessage({event: VideoEvents.UNMUTED}, '*');
         break;
       case 'resize':
         if (msg.args && msg.args.width && msg.args.height) {
-          wrapperDiv.style.width = msg.args.width + 'px';
-          wrapperDiv.style.height = msg.args.height + 'px';
-          bigPlayDiv.style.width = msg.args.width + 'px';
-          bigPlayDiv.style.height = msg.args.height + 'px';
+          setStyle(wrapperDiv, 'width', msg.args.width + 'px');
+          setStyle(wrapperDiv, 'height', msg.args.height + 'px');
+          setStyle(bigPlayDiv, 'width', msg.args.width + 'px');
+          setStyle(bigPlayDiv, 'height', msg.args.height + 'px');
           if (adsActive) {
             adsManager.resize(
                 msg.args.width, msg.args.height,
