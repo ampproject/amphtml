@@ -35,7 +35,7 @@ import {dev, user, initLogConstructor, setReportError} from './log';
 import {reportError} from './error';
 import {
   disposeServicesForDoc,
-  getService,
+  registerServiceBuilder,
   registerServiceBuilderForDoc,
 } from './service';
 import {childElementsByTag} from './dom';

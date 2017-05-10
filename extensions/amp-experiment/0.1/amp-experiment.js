@@ -48,7 +48,7 @@ export class AmpExperiment extends AMP.BaseElement {
         .then(this.addToBody_.bind(this));
 
     registerServiceBuilder(this.win, 'variant', function() {
-      return this.experimentVariants_
+      return this.experimentVariants_;
     });
   }
 
