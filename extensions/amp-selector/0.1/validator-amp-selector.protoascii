@@ -39,6 +39,10 @@ tags: {  # <amp-selector> for AMP (autoplay attribute allowed)
   }
   attrs: { name: "form" }
   attrs: {
+    name: "keyboard-select-mode"
+    value_regex_casei: "focus|none|select"
+  }
+  attrs: {
     name: "multiple"
     value: ""
   }
@@ -52,7 +56,7 @@ tags: {  # <amp-selector> for AMP (autoplay attribute allowed)
   }
   attr_lists: "extended-amp-global"
   attr_lists: "input-name-attr"
-  spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-selector"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-selector"
   amp_layout {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -77,10 +81,19 @@ tags: {
   html_format: AMP
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-SELECTOR option"
-  attrs: { name: "option" mandatory: true }
-  attrs: { name: "disabled" value: "" }
-  attrs: { name: "selected" value: "" }
-  spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-selector"
+  attrs: {
+    name: "disabled"
+    value: ""
+  }
+  attrs: {
+    name: "option"
+    mandatory: true
+  }
+  attrs: {
+    name: "selected"
+    value: ""
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-selector"
 }
 tags: {
   html_format: AMP

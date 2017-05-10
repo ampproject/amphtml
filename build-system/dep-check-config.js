@@ -50,13 +50,17 @@ exports.rules = [
           'third_party/closure-library/sha384-generated.js',
       'extensions/amp-mustache/0.1/amp-mustache.js->' +
           'third_party/mustache/mustache.js',
+      'extensions/amp-timeago/0.1/amp-timeago.js->' +
+          'third_party/timeagojs/timeago.js',
       '3p/polyfills.js->third_party/babel/custom-babel-helpers.js',
       'src/sanitizer.js->third_party/caja/html-sanitizer.js',
       'extensions/amp-viz-vega/**->third_party/vega/vega.js',
       'extensions/amp-viz-vega/**->third_party/d3/d3.js',
       'src/dom.js->third_party/css-escape/css-escape.js',
       'src/shadow-embed.js->third_party/webcomponentsjs/ShadowCSS.js',
-    ]
+      'third_party/timeagojs/timeago.js->' +
+          'third_party/timeagojs/timeago-locales.js',
+    ],
   },
   // Rules for 3p
   {
@@ -163,8 +167,13 @@ exports.rules = [
       'extensions/amp-a4a/0.1/amp-a4a.js->src/service/variable-source.js',
       'extensions/amp-nexxtv-player/0.1/amp-nexxtv-player.js->' +
           'src/service/video-manager-impl.js',
+      'extensions/amp-3q-player/0.1/amp-3q-player.js->' +
+        'src/service/video-manager-impl.js',
       'extensions/amp-fx-parallax/0.1/amp-fx-parallax.js->' +
           'src/service/parallax-impl.js',
+      // TODO(@zhouyx, #9213) Remove this item.
+      'extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js->' +
+          'src/service/position-observer-impl.js',
     ],
   },
   {

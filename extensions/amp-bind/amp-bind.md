@@ -161,12 +161,12 @@ Each AMP document that uses `amp-bind` has document-scope mutable JSON data, or 
 
 [Expressions](#expressions) can reference state variables via dot syntax. In this example, `myState.foo` will evaluate to `"bar"`.
 
-- An `<amp-state>` element's child JSON has a maximum size of 100KB. 
+- An `<amp-state>` element's child JSON has a maximum size of 100KB.
 - An `<amp-state>` element can also specify a CORS URL instead of a child JSON script. See the [Appendix](#amp-state-specification) for details.
 
 #### Updating state with `AMP.setState()`
 
-The [`AMP.setState()` action](../../spec/amp-actions-and-events.md) merges an object literal into the state. For example, when the below button is pressed, `AMP.setState()` will [deep-merge](#deep-merge-with-ampsetstate) the object literal with the state. 
+The [`AMP.setState()` action](../../spec/amp-actions-and-events.md) merges an object literal into the state. For example, when the below button is pressed, `AMP.setState()` will [deep-merge](#deep-merge-with-ampsetstate) the object literal with the state.
 
 ```html
 <!-- Like JavaScript, you can reference existing
@@ -176,10 +176,10 @@ The [`AMP.setState()` action](../../spec/amp-actions-and-events.md) merges an ob
 
 In general, nested objects will be merged up to a maximum depth of 10. All variables, including those introduced by `amp-state`, can be overidden.
 
-When triggered by certain events, `AMP.setState()` also can access event-related data on the `event` property. 
+When triggered by certain events, `AMP.setState()` also can access event-related data on the `event` property.
 
 ```html
-<!-- The "change" event of this <input> element contains 
+<!-- The "change" event of this <input> element contains
      a "value" variable that can be referenced via "event.value". -->
 <input type="range" on="change:AMP.setState({myRangeValue: event.value})">
 ```
@@ -330,7 +330,7 @@ Only binding to the following components and attributes are allowed:
   </tr>
   <tr>
     <td><code>&lt;amp-list></code></td>
-    <td><code>[src]</code><sup>1</sup></td>
+    <td><code>[src]</code></td>
     <td>Fetches JSON from the new URL and re-renders, replacing old content.</td>
   </tr>
   <tr>
@@ -341,7 +341,7 @@ Only binding to the following components and attributes are allowed:
   <tr>
     <td><code>&lt;amp-state></code></td>
     <td><code>[src]</code></td>
-    <td>Fetches JSON from the new URL and merges it into the existing state. </td>
+    <td>Fetches JSON from the new URL and merges it into the existing state. <em>Note the following update will ignore <code>&lt;amp-state&gt;</code> elements to prevent cycles.</em></td>
   </tr>
   <tr>
     <td><code>&lt;amp-video></code></td>
@@ -408,7 +408,7 @@ Only binding to the following components and attributes are allowed:
 
 ## Debugging
 
-Test in development mode (with the URL fragment `#development=1`) to highlight warnings and errors during development.
+Test in development mode (with the URL fragment `#development=1`) to highlight warnings and errors during development and to access special debugging functions.
 
 ### Warnings
 
@@ -441,35 +441,39 @@ There are several types of runtime errors that may be encountered when working w
 <table>
   <tr>
     <th>Type</th>
-    <th>Example</th>
     <th>Message</th>
     <th>Suggestion</th>
   </tr>
   <tr>
-    <td class="col-twenty"> Invalid binding</td>
-    <td class="col-thirty"><code>&lt;p [someBogusAttribute]="myExpression"></code></td>
-    <td class="col-thirty"><em>Binding to [someBogusAttribute] on &lt;P> is not allowed</em>.</td>
+    <td class="col-thirty">Invalid binding</td>
+    <td class="col-fourty"><em>Binding to [someBogusAttribute] on &lt;P> is not allowed</em>.</td>
     <td class="col-thirty">Use only <a href="#element-specific-attributes">white-listed bindings</a>.</td>
   </tr>
   <tr>
-    <td>Syntax error </td>
-    <td><code>&lt;p [text]="(missingClosingParens"></code></td>
+    <td>Syntax error</td>
     <td><em>Expression compilation error in...</em></td>
     <td>Verify the expression for typos.</td>
   </tr>
   <tr>
     <td>Non-whitelisted functions</td>
-    <td><code>&lt;p [text]="alert(1)">&lt;/p></code></td>
     <td><em>alert is not a supported function.</em></td>
     <td>Use only <a href="#white-listed-functions">white-listed functions</a>.</td>
   </tr>
   <tr>
     <td>Sanitized result</td>
-    <td><code>&lt;a href="javascript:alert(1)">&lt;/a></code></td>
     <td><em>"javascript:alert(1)" is not a valid result for [href].</em></td>
     <td>Avoid banned URL protocols or expressions that would fail the AMP Validator.</td>
   </tr>
+  <tr>
+    <td>CSP violation</td>
+    <td><em>Refused to create a worker from 'blob:...' because it violates the following Content Security Policy directive...</em></td>
+    <td>Add <code>default-src blob:</code> to your origin's Content Security Policy. <code>amp-bind</code> delegates expensive work to a <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers#Dedicated_workers">dedicated Web Worker</a> to ensure good performance.</td>
+  </tr>
 </table>
+
+### Debugging State
+
+In development mode, use `AMP.printState()` to print the current state to the console.
 
 ## Appendix
 
@@ -489,7 +493,7 @@ An `amp-state` element may contain either a child `<script>` element **OR** a `s
 <amp-state id="myRemoteState" src="https://data.com/articles.json">
 </amp-state>
 ```
-<br>
+
 #### Attributes
 
 **src**
@@ -506,9 +510,9 @@ the [AMP CORS security guidelines](../../spec/amp-cors-requests.md).
 
 The support values are "omit" and "include". Default is "omit".
 
-### Custom Built-in Functions
+### Non-standard built-in functions
 
-`amp-bind` includes the following built-in functions:
+`amp-bind` supports the following non-standard functions:
 
 <table>
   <tr>
@@ -534,7 +538,6 @@ copyAndSplice(['Pizza', 'Cake', 'Soda'], 2, 1, 'Ice Cream')</pre>
    </td>
   </tr>
 </table>
-
 
 ### Deep-merge with `AMP.setState()`
 
@@ -614,7 +617,7 @@ Will change the state to:
 }
 ```
 
-### Expression Grammar
+### Expression grammar
 
 The BNF-like grammar for `amp-bind` expressions:
 

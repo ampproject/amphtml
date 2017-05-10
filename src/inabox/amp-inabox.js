@@ -23,11 +23,11 @@ import '../polyfills';
 import {ampdocServiceFor} from '../ampdoc';
 import {startupChunk} from '../chunk';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
+import {installIframeMessagingClient} from './inabox-iframe-messaging-client';
 import {
   installPerformanceService,
   performanceFor,
 } from '../service/performance-impl';
-import {installPullToRefreshBlocker} from '../pull-to-refresh';
 import {installStyles, makeBodyVisible} from '../style-installer';
 import {installErrorReporting} from '../error';
 import {installDocService} from '../service/ampdoc-impl';
@@ -87,7 +87,7 @@ startupChunk(self.document, function initial() {
       // Core services.
       installRuntimeServices(self);
       fontStylesheetTimeout(self);
-
+      installIframeMessagingClient(self);
       // Install inabox specific Viewport service before
       // runtime tries to install the normal one.
       installViewerServiceForDoc(ampdoc);
@@ -109,7 +109,6 @@ startupChunk(self.document, function initial() {
       stubElements(self);
     });
     startupChunk(self.document, function final() {
-      installPullToRefreshBlocker(self);
       installAnchorClickInterceptor(ampdoc, self);
 
       maybeValidate(self);

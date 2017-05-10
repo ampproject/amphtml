@@ -255,6 +255,24 @@ describe('amp-live-list', () => {
     }).to.throw(/must have an "items" slot/);
   });
 
+  it('should have aria-live=polite by default', () => {
+    buildElement(elem, dftAttrs);
+    liveList.buildCallback();
+    expect(liveList.element.getAttribute('aria-live')).to.equal('polite');
+  });
+
+  it('should use explicitly defined aria-live attribute value', () => {
+    buildElement(elem, {
+      'aria-live': 'assertive',
+      'id': 'my-list',
+      'data-poll-interval': 2000,
+      'data-max-items-per-page': 5,
+      'data-sort-time': Date.now(),
+    });
+    liveList.buildCallback();
+    expect(liveList.element.getAttribute('aria-live')).to.equal('assertive');
+  });
+
   describe('#update', () => {
 
     beforeEach(() => {
@@ -1077,8 +1095,8 @@ describe('amp-live-list', () => {
     child1.textContent = 'hello world';
     child1.appendChild(document.createElement('div'));
     child2.setAttribute('id', 'id2');
-    child1.setAttribute('data-sort-time', '123');
-    child2.setAttribute('data-sort-time', '124');
+    child1.setAttribute('data-sort-time', '1');
+    child2.setAttribute('data-sort-time', '2');
     // append child 2 first
     itemsSlot.appendChild(child2);
     itemsSlot.appendChild(child1);
@@ -1128,6 +1146,44 @@ describe('amp-live-list', () => {
       // as id2 has been deleted from the live DOM to make room for new items.
       expect(liveList.itemsSlot_.lastElementChild
           .previousElementSibling.getAttribute('id')).to.equal('id4');
+    });
+  });
+
+  it('should insert properly using sort-time', () => {
+    const child1 = document.createElement('div');
+    const child2 = document.createElement('div');
+    child1.setAttribute('id', 'id1');
+    child1.textContent = 'hello world';
+    child1.appendChild(document.createElement('div'));
+    child2.setAttribute('id', 'id4');
+    child1.setAttribute('data-sort-time', '1');
+    child2.setAttribute('data-sort-time', '4');
+    itemsSlot.appendChild(child2);
+    itemsSlot.appendChild(child1);
+    buildElement(elem, dftAttrs);
+    liveList.buildCallback();
+
+    const fromServer = createFromServer([
+      {id: 'id2', sortTime: 2},
+      {id: 'id3', sortTime: 3},
+    ]);
+
+    expect(liveList.itemsSlot_.children[0].getAttribute('id'))
+        .to.equal('id4');
+    expect(liveList.itemsSlot_.children[1].getAttribute('id'))
+        .to.equal('id1');
+
+    liveList.update(fromServer);
+    return liveList.updateAction_().then(() => {
+      expect(liveList.curNumOfLiveItems_).to.equal(4);
+      expect(liveList.itemsSlot_.children[0].getAttribute('id'))
+          .to.equal('id4');
+      expect(liveList.itemsSlot_.children[1].getAttribute('id'))
+          .to.equal('id3');
+      expect(liveList.itemsSlot_.children[2].getAttribute('id'))
+          .to.equal('id2');
+      expect(liveList.itemsSlot_.children[3].getAttribute('id'))
+          .to.equal('id1');
     });
   });
 

@@ -313,8 +313,10 @@ export function viewerBaseCid(ampdoc, opt_data) {
     }
     const cidPromise = viewer.sendMessageAwaitResponse('cid', opt_data)
         .then(data => {
+          // TODO(dvoytenko, #9019): cleanup the legacy CID format.
           // For backward compatibility: #4029
           if (data && !tryParseJson(data)) {
+            // TODO(dvoytenko, #9019): use this for reporting: dev().error('cid', 'invalid cid format');
             return JSON.stringify({
               time: Date.now(), // CID returned from old API is always fresh
               cid: data,

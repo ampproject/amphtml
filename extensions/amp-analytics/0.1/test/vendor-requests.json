@@ -69,21 +69,27 @@
   },
   "googleanalytics": {
     "host": "https://www.google-analytics.com",
-    "basePrefix": "v=1&_v=a1&ds=AMP&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_",
+    "basePrefix": "v=1&_v=a1&ds=AMP&aip&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_",
     "baseSuffix": "&a=_page_view_id_&z=_random_",
-    "pageview": "https://www.google-analytics.com/r/collect?v=1&_v=a1&ds=AMP&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=pageview&jid=_random_&_r=1&a=_page_view_id_&z=_random_",
-    "event": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=event&jid=&ec=$eventCategory&ea=$eventAction&el=$eventLabel&ev=0&a=_page_view_id_&z=_random_",
-    "social": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=social&jid=&sa=$socialAction&sn=$socialNetwork&st=$socialTarget&a=_page_view_id_&z=_random_",
-    "timing": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=timing&jid=&plt=_page_load_time_&dns=_domain_lookup_time_&tcp=_tcp_connect_time_&rrt=_redirect_time_&srt=_server_response_time_&pdt=_page_download_time_&clt=_content_load_time_&dit=_dom_interactive_time_&a=_page_view_id_&z=_random_"
+    "pageview": "https://www.google-analytics.com/r/collect?v=1&_v=a1&ds=AMP&aip&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=pageview&jid=_random_&_r=1&a=_page_view_id_&z=_random_",
+    "event": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=event&jid=&ec=$eventCategory&ea=$eventAction&el=$eventLabel&ev=0&a=_page_view_id_&z=_random_",
+    "social": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=social&jid=&sa=$socialAction&sn=$socialNetwork&st=$socialTarget&a=_page_view_id_&z=_random_",
+    "timing": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=$timingRequestType&jid=&plt=_page_load_time_&dns=_domain_lookup_time_&tcp=_tcp_connect_time_&rrt=_redirect_time_&srt=_server_response_time_&pdt=_page_download_time_&clt=_content_load_time_&dit=_dom_interactive_time_&a=_page_view_id_&z=_random_",
+    "QUERY_PARAM": {
+      "gclid": ""
+    }
   },
-  "googleanalytics-v2": {
+  "googleanalytics-alpha": {
     "host": "https://www.google-analytics.com",
-    "basePrefix": "v=1&_v=a1&ds=AMP&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_",
+    "basePrefix": "v=1&_v=a1&ds=AMP&aip&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_",
     "baseSuffix": "&a=_page_view_id_&z=_random_",
-    "pageview": "https://www.google-analytics.com/r/collect?v=1&_v=a1&ds=AMP&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=pageview&jid=_random_&_r=1&a=_page_view_id_&z=_random_",
-    "event": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=event&jid=&ec=$eventCategory&ea=$eventAction&el=$eventLabel&ev=0&a=_page_view_id_&z=_random_",
-    "social": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=social&jid=&sa=$socialAction&sn=$socialNetwork&st=$socialTarget&a=_page_view_id_&z=_random_",
-    "timing": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=timing&jid=&plt=_page_load_time_&dns=_domain_lookup_time_&tcp=_tcp_connect_time_&rrt=_redirect_time_&srt=_server_response_time_&pdt=_page_download_time_&clt=_content_load_time_&dit=_dom_interactive_time_&a=_page_view_id_&z=_random_"
+    "pageview": "https://www.google-analytics.com/r/collect?v=1&_v=a1&ds=AMP&aip&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=pageview&jid=_random_&_r=1&a=_page_view_id_&z=_random_",
+    "event": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=event&jid=&ec=$eventCategory&ea=$eventAction&el=$eventLabel&ev=0&a=_page_view_id_&z=_random_",
+    "social": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=social&jid=&sa=$socialAction&sn=$socialNetwork&st=$socialTarget&a=_page_view_id_&z=_random_",
+    "timing": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=$timingRequestType&jid=&plt=_page_load_time_&dns=_domain_lookup_time_&tcp=_tcp_connect_time_&rrt=_redirect_time_&srt=_server_response_time_&pdt=_page_download_time_&clt=_content_load_time_&dit=_dom_interactive_time_&a=_page_view_id_&z=_random_",
+    "QUERY_PARAM": {
+      "gclid": ""
+    }
   },
   "googleadwords": {
     "conversion_prefix": "<ignore for test>",
@@ -202,8 +208,8 @@
     "custom": "https://$apiEndpoint/event/pixel?api.api_key=$writeKey&prop._platform=amp&prop._device_id=_client_id_&prop.locale=_browser_language_&prop.path=_canonical_path_&prop.url=_canonical_url_&prop.color_depth=_screen_color_depth_&prop._referrer=_document_referrer_&prop.title=_title_&prop.timezone=_timezone_&prop._time=_timestamp_&prop.resolution=_screen_width_ × _screen_height_&collection=$collection"
   },
   "ibeatanalytics": {
-    "host": "https://ibeats.indiatimes.com",
-    "base": "https://ibeats.indiatimes.com/iBeat/pageTrendlogAmp.html",
-    "pageview": "https://ibeats.indiatimes.com/iBeat/pageTrendlogAmp.html?&h=$h&d=$h&url=$url&k=$key&ts=$time&ch=$channel&sid=$uid&at=$agentType&ref=_document_referrer_&aid=$aid&loc=1&ct=1&cat=$cat&scat=$scat&ac=1&tg=$tags&ctids=$catIds&pts=$pagePublishTime&auth=$author&pos=$position&iBeatField=$ibeatFields&cid=_client_id_",
+    "host": "https://ibeat.indiatimes.com",
+    "base": "https://ibeat.indiatimes.com/iBeat/pageTrendlogAmp.html",
+    "pageview": "https://ibeat.indiatimes.com/iBeat/pageTrendlogAmp.html?&h=$h&d=$h&url=$url&k=$key&ts=$time&ch=$channel&sid=$uid&at=$agentType&ref=_document_referrer_&aid=$aid&loc=1&ct=1&cat=$cat&scat=$scat&ac=1&tg=$tags&ctids=$catIds&pts=$pagePublishTime&auth=$author&pos=$position&iBeatField=$ibeatFields&cid=_client_id_",
   },
 }

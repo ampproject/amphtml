@@ -30,7 +30,7 @@ var request = require('request');
 var url = require('url');
 
 app.use(bodyParser.json());
-app.use('/request-bank', require('./request-bank'));
+app.use('/amp4test', require('./amp4test'));
 
 // Append ?csp=1 to the URL to turn on the CSP header.
 // TODO: shall we turn on CSP all the time?
@@ -42,6 +42,28 @@ app.use(function(req, res, next) {
   }
   next();
 });
+
+app.get('/serve_mode=:mode', function (req, res, next) {
+  const newMode = req.params.mode;
+  var info;
+  if (newMode == 'default' || newMode == 'compiled' || newMode == 'cdn') {
+    process.env.SERVE_MODE = newMode;
+    info = '<h2>Serve mode changed to ' + newMode + '</h2>';
+    res.send(info);
+  } else {
+    info = '<h2>Serve mode ' + newMode + ' is not supported. </h2>';
+    res.status(400).send(info);
+  }
+});
+
+// Deprecate usage of .min.html/.max.html
+app.get(['/examples/*.(min|max).html', '/test/manual/*.(min|max).html',
+    '/dist/cache-sw.(min|max).html'],
+    function (req, res, next) {
+      var filePath = req.url;
+      res.send(generateInfo(filePath));
+      return;
+    });
 
 app.use('/pwa', function(req, res, next) {
   var file;
@@ -202,7 +224,7 @@ app.use('/share-tracking/get-outgoing-fragment', function(req, res) {
 
 // Fetches an AMP document from the AMP proxy and replaces JS
 // URLs, so that they point to localhost.
-function proxyToAmpProxy(req, res, minify) {
+function proxyToAmpProxy(req, res, mode) {
   var url = 'https://cdn.ampproject.org/'
       + (req.query['amp_js_v'] ? 'v' : 'c')
       + req.url;
@@ -216,7 +238,7 @@ function proxyToAmpProxy(req, res, minify) {
         .replace('<head>', '<head><base href="https://cdn.ampproject.org/">');
     const inabox = req.query['inabox'] == '1';
     const urlPrefix = getUrlPrefix(req);
-    body = replaceUrls(minify ? 'min' : 'max', body, urlPrefix, inabox);
+    body = replaceUrls(mode, body, urlPrefix, inabox);
     if (inabox) {
       // Allow CORS requests for A4A.
       const origin = req.headers.origin || urlPrefix;
@@ -232,10 +254,13 @@ var liveListCtr = 0;
 var itemCtr = 2;
 var liveListDoc = null;
 var doctype = '<!doctype html>\n';
-// Only handle min/max
-app.use('/examples/live-list-update.amp.(min|max).html', function(req, res) {
-  var filePath = req.baseUrl;
-  var mode = getPathMode(filePath);
+app.use('/examples/live-list-update.amp.html', function(req, res, next) {
+  var mode = process.env.SERVE_MODE;
+  if (mode != 'compiled' && mode != 'default') {
+    // Only handle compile(prev min)/default (prev max) mode
+    next();
+    return;
+  }
   // When we already have state in memory and user refreshes page, we flush
   // the dom we maintain on the server.
   if (!('amp_latest_update_time' in req.query) && liveListDoc) {
@@ -406,7 +431,7 @@ function getLiveBlogItemWithBindAttributes() {
     </amp-live-list></body></html>`;
 }
 
-app.use('/examples/live-blog(-non-floating-button)?.amp.(min.|max.)?html',
+app.use('/examples/live-blog(-non-floating-button)?.amp.html',
   function(req, res, next) {
     if ('amp_latest_update_time' in req.query) {
       res.setHeader('Content-Type', 'text/html');
@@ -416,7 +441,7 @@ app.use('/examples/live-blog(-non-floating-button)?.amp.(min.|max.)?html',
     next();
 });
 
-app.use('/examples/bind/live-list.amp.(min.|max.)?html',
+app.use('/examples/bind/live-list.amp.html',
   function(req, res, next) {
     if ('amp_latest_update_time' in req.query) {
       res.setHeader('Content-Type', 'text/html');
@@ -426,7 +451,7 @@ app.use('/examples/bind/live-list.amp.(min.|max.)?html',
     next();
 });
 
-app.use('/examples/amp-fresh.amp.(min.|max.)?html', function(req, res, next) {
+app.use('/examples/amp-fresh.amp.html', function(req, res, next) {
     if ('amp-fresh' in req.query && req.query['amp-fresh']) {
       res.setHeader('Content-Type', 'text/html');
       res.end(`<!doctype html>
@@ -455,23 +480,17 @@ app.use('/impression-proxy/', function(req, res) {
   res.send(body);
 });
 
-// Proxy with unminified JS.
+// Proxy with local JS.
 // Example:
-// http://localhost:8000/max/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
-app.use('/max/', function(req, res) {
-  proxyToAmpProxy(req, res, /* minify */ false);
-});
-
-// Proxy with minified JS.
-// Example:
-// http://localhost:8000/min/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
-app.use('/min/', function(req, res) {
-  proxyToAmpProxy(req, res, /* minify */ true);
+// http://localhost:8000/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
+app.use('/proxy/', function(req, res) {
+  var mode = process.env.SERVE_MODE;
+  proxyToAmpProxy(req, res, mode);
 });
 
 // Nest the response in an iframe.
 // Example:
-// http://localhost:8000/iframe/examples/ads.amp.max.html
+// http://localhost:8000/iframe/examples/ads.amp.html
 app.get('/iframe/*', function(req, res) {
   // Returns an html blob with an iframe pointing to the url after /iframe/.
   res.send(`<!doctype html>
@@ -510,15 +529,14 @@ app.get('/iframe-echo-message', function(req, res) {
 
 // A4A envelope.
 // Examples:
-// http://localhost:8000/a4a[-3p]/examples/animations.amp.max.html
-// http://localhost:8000/a4a[-3p]/max/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
-// http://localhost:8000/a4a[-3p]/min/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
+// http://localhost:8000/a4a[-3p]/examples/animations.amp.html
+// http://localhost:8000/a4a[-3p]/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
 app.use('/a4a(|-3p)/', function(req, res) {
   var force3p = req.baseUrl.indexOf('/a4a-3p') == 0;
   var adUrl = req.url;
   var templatePath = '/build-system/server-a4a-template.html';
   var urlPrefix = getUrlPrefix(req);
-  if (!adUrl.startsWith('/m') &&
+  if (!adUrl.startsWith('/proxy') &&
       urlPrefix.indexOf('//localhost') != -1) {
     // This is a special case for testing. `localhost` URLs are transformed to
     // `ads.localhost` to ensure that the iframe is fully x-origin.
@@ -539,14 +557,13 @@ app.use('/a4a(|-3p)/', function(req, res) {
 
 // In-a-box envelope.
 // Examples:
-// http://localhost:8000/inabox/examples/animations.amp.max.html
-// http://localhost:8000/inabox/max/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
-// http://localhost:8000/inabox/min/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
+// http://localhost:8000/inabox/examples/animations.amp.html
+// http://localhost:8000/inabox/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
 app.use('/inabox/', function(req, res) {
   var adUrl = req.url;
   var templatePath = '/build-system/server-inabox-template.html';
   var urlPrefix = getUrlPrefix(req);
-  if (!adUrl.startsWith('/m') &&  // Ignore /min and /max
+  if (!adUrl.startsWith('/proxy') &&  // Ignore /proxy
       urlPrefix.indexOf('//localhost') != -1) {
     // This is a special case for testing. `localhost` URLs are transformed to
     // `ads.localhost` to ensure that the iframe is fully x-origin.
@@ -590,14 +607,10 @@ app.use(['/dist/v0/amp-*.js'], function(req, res, next) {
   setTimeout(next, sleep);
 });
 
-app.get(['/examples/*', '/test/manual/*'], function(req, res, next) {
+app.get(['/examples/*.html', '/test/manual/*.html'], function(req, res, next) {
   var filePath = req.path;
-  var mode = getPathMode(filePath);
-  if (!mode) {
-    return next();
-  }
+  var mode = process.env.SERVE_MODE;
   const inabox = req.query['inabox'] == '1';
-  filePath = filePath.substr(0, filePath.length - 9) + '.html';
   fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
     if (req.query['amp_js_v']) {
       file = addViewerIntegrationScript(req.query['amp_js_v'], file);
@@ -638,32 +651,58 @@ app.use('/bind/ecommerce/sizes', function(req, res, next) {
   setTimeout(() => {
     var prices = {
       "0": {
-        "sizes": ["XS"]
+        "sizes": {
+          "XS": 8.99,
+          "S": 9.99,
+        },
       },
       "1": {
-        "sizes": ["S", "M", "L"]
+        "sizes": {
+          "S": 10.99,
+          "M": 12.99,
+          "L": 14.99,
+        },
       },
       "2": {
-        "sizes": ["XL"]
+        "sizes": {
+          "L": 11.99,
+          "XL": 13.99,
+        },
       },
       "3": {
-        "sizes": ["M", "XL"]
+        "sizes": {
+          "M": 7.99,
+          "L": 9.99,
+          "XL": 11.99,
+        },
       },
       "4": {
-        "sizes": ["S", "L"]
+        "sizes": {
+          "XS": 8.99,
+          "S": 10.99,
+          "L": 15.99,
+        },
       },
       "5": {
-        "sizes": ["S", "XL"]
+        "sizes": {
+          "S": 8.99,
+          "L": 14.99,
+          "XL": 11.99,
+        },
       },
       "6": {
-        "sizes": ["XS", "M"]
+        "sizes": {
+          "XS": 8.99,
+          "S": 9.99,
+          "M": 12.99,
+        },
       },
       "7": {
-        "sizes": ["M", "L", "XL"]
+        "sizes": {
+          "M": 10.99,
+          "L": 11.99,
+        },
       },
-      "8": {
-        "sizes": ["XS", "M", "XL"]
-      }
     };
     const object = {};
     object[req.query.shirt] = prices[req.query.shirt];
@@ -738,9 +777,63 @@ app.get([ fakeAdNetworkDataDir + '/*', cloudflareDataDir + '/*'], function(req, 
 });
 
 /*
+ * Serve extension script url
+ */
+app.get('/dist/rtv/*/v0/*.js', function(req, res, next) {
+  var mode = process.env.SERVE_MODE;
+  var fileName = path.basename(req.path);
+  var filePath = 'https://cdn.ampproject.org/v0/' + fileName;
+  if (mode == 'cdn') {
+    // This will not be useful until extension-location.js change in prod
+    // Require url from cdn
+    request(filePath, function (error, response) {
+      if (error) {
+        res.status(404);
+        res.end();
+      } else {
+        res.send(response);
+      }
+    });
+    return;
+  }
+  filePath = replaceUrls(mode, filePath);
+  req.url = filePath;
+  next();
+});
+
+/**
+ * Serve entry point script url
+ */
+app.get(['/dist/sw.js', '/dist/sw-kill.js', '/dist/ww.js'],
+    function(req, res, next) {
+      // Speical case for entry point script url. Use compiled for testing
+      var mode = process.env.SERVE_MODE;
+      var fileName = path.basename(req.path);
+      if (mode == 'cdn') {
+        // This will not be useful until extension-location.js change in prod
+        // Require url from cdn
+        var filePath = 'https://cdn.ampproject.org/' + fileName;
+        request(filePath, function(error, response) {
+          if (error) {
+            res.status(404);
+            res.end();
+          } else {
+            res.send(response);
+          }
+        });
+        return;
+      }
+      if (mode == 'default') {
+        var fileUrl = req.url;
+        req.url = req.url.replace(/\.js$/, '.max.js');
+      }
+      next();
+    });
+
+/*
  * Start Cache SW LOCALDEV section
  */
-app.get(['/dist/sw.js', '/dist/sw.max.js'], function(req, res, next) {
+app.get('/dist/sw(.max)?.js', function(req, res, next) {
   var filePath = req.path;
   fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
     var n = new Date();
@@ -779,7 +872,7 @@ app.get('/dist/rtv/9[89]*/*.js', function(req, res, next) {
   }, 2000);
 });
 
-app.get(['/dist/cache-sw.min.html', '/dist/cache-sw.max.html'], function(req, res, next) {
+app.get(['/dist/cache-sw.html'], function(req, res, next) {
   var filePath = '/test/manual/cache-sw.html';
   fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
     var n = new Date();
@@ -816,7 +909,7 @@ app.get('/dist/diversions', function(req, res, next) {
 /**
  * Web worker binary.
  */
-app.get(['/dist/ww.js', '/dist/ww.max.js'], function(req, res) {
+app.get('/dist/ww(.max)?.js', function(req, res) {
   fs.readFileAsync(process.cwd() + req.path).then(file => {
     res.setHeader('Content-Type', 'text/javascript');
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -832,14 +925,14 @@ app.get(['/dist/ww.js', '/dist/ww.max.js'], function(req, res) {
  */
 function replaceUrls(mode, file, hostName, inabox) {
   hostName = hostName || '';
-  if (mode == 'max') {
+  if (mode == 'default') {
     file = file.replace('https://cdn.ampproject.org/v0.js', hostName + '/dist/amp.js');
     file = file.replace('https://cdn.ampproject.org/amp4ads-v0.js', hostName + '/dist/amp-inabox.js');
     file = file.replace(/https:\/\/cdn.ampproject.org\/v0\/(.+?).js/g, hostName + '/dist/v0/$1.max.js');
     if (inabox) {
       file = file.replace('/dist/amp.js', '/dist/amp-inabox.js');
     }
-  } else if (mode == 'min') {
+  } else if (mode == 'compiled') {
     file = file.replace('https://cdn.ampproject.org/v0.js', hostName + '/dist/v0.js');
     file = file.replace('https://cdn.ampproject.org/amp4ads-v0.js', hostName + '/dist/amp4ads-v0.js');
     file = file.replace(/https:\/\/cdn.ampproject.org\/v0\/(.+?).js/g, hostName + '/dist/v0/$1.js');
@@ -874,29 +967,6 @@ function addViewerIntegrationScript(ampJsVersion, file) {
   }
   file = file.replace('</head>', viewerScript + '</head>');
   return file;
-}
-
-/**
- * @param {string} path
- * @return {string}
- */
-function extractFilePathSuffix(path) {
-  return path.substr(-9);
-}
-
-/**
- * @param {string} path
- * @return {?string}
- */
-function getPathMode(path) {
-  var suffix = extractFilePathSuffix(path);
-  if (suffix == '.max.html') {
-    return 'max';
-  } else if (suffix == '.min.html') {
-    return 'min';
-  } else {
-    return null;
-  }
 }
 
 function getUrlPrefix(req) {
@@ -966,6 +1036,21 @@ function assertCors(req, res, opt_validMethods, opt_exposeHeaders) {
   }
 
   enableCors(req, res, origin, opt_exposeHeaders);
+}
+
+function generateInfo(filePath) {
+  var mode = process.env.SERVE_MODE;
+  filePath = filePath.substr(0, filePath.length - 9) + '.html';
+
+  var info = '<h2>Please note that .min/.max is no longer supported</h2>' +
+      '<h3>Current serving mode is ' + mode + '</h3>' +
+      '<h3>Please go to <a href= ' + filePath +
+      '>Unversioned Link</a> to view the page<h3>' +
+      '<h3></h3>' +
+      '<h3><a href = /serve_mode=default>Change to DEFAULT mode (unminified JS)</a></h3>' +
+      '<h3><a href = /serve_mode=compiled>Change to COMPILED mode (minified JS)</a></h3>' +
+      '<h3><a href = /serve_mode=cdn>Change to CDN mode (prod JS)</a></h3>';
+  return info;
 }
 
 module.exports = app;

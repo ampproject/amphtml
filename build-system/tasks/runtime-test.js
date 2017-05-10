@@ -143,6 +143,12 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     adTypes: getAdTypes(),
   };
 
+  if (argv.compiled) {
+    process.env.SERVE_MODE = 'compiled';
+  } else {
+    process.env.SERVE_MODE = 'default';
+  }
+
   if (argv.grep) {
     c.client.mocha = {
       'grep': argv.grep,

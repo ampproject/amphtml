@@ -783,7 +783,11 @@ function createBaseCustomElementClass(win) {
         this.implementation_.layoutWidth_ = this.layoutWidth_;
       }
       if (this.isBuilt()) {
-        this.implementation_.onLayoutMeasure();
+        try {
+          this.implementation_.onLayoutMeasure();
+        } catch (e) {
+          reportError(e, this);
+        }
       }
 
       if (this.isLoadingEnabled_()) {
@@ -1247,7 +1251,10 @@ function createBaseCustomElementClass(win) {
           // Set a minimum delay in case the element loads very fast or if it
           // leaves the viewport.
           timerFor(this.ownerDocument.defaultView).delay(() => {
-            if (this.isInViewport_) {
+            // TODO(dvoytenko, #9177): cleanup `this.ownerDocument.defaultView`
+            // once investigation is complete. It appears that we get a lot of
+            // errors here once the iframe is destroyed due to timer.
+            if (this.isInViewport_ && this.ownerDocument.defaultView) {
               this.toggleLoading_(true);
             }
           }, 100);
@@ -1445,7 +1452,7 @@ function createBaseCustomElementClass(win) {
       const actionQueue = dev().assert(this.actionQueue_);
       this.actionQueue_ = null;
 
-      // TODO(dvoytenko, #1260): dedupe actions.
+      // Notice, the actions are currently not de-duped.
       actionQueue.forEach(invocation => {
         this.executionAction_(invocation, true);
       });
@@ -1824,6 +1831,8 @@ function assertNotTemplate(element) {
  * @return {!./service/vsync-impl.Vsync}
  */
 function getVsync(element) {
+  // TODO(dvoytenko, #9177): consider removing this and always resolving via
+  // `createCustomElementClass(win)` object.
   return vsyncFor(element.ownerDocument.defaultView);
 };
 
