@@ -26,6 +26,7 @@
 const child_process = require('child_process');
 const path = require('path');
 const minimist = require('minimist');
+const util = require('gulp-util');
 
 const gulp = 'node_modules/gulp/bin/gulp.js';
 const fileLogPrefix =
@@ -200,6 +201,10 @@ const command = {
   testBuildSystem: function() {
     execOrDie('npm run ava');
   },
+  testDocumentLinks: function(files) {
+    let docFiles = files.filter(isDocFile);
+    execOrDie(`${gulp} check-links --files ${docFiles.join(',')}`);
+  },
   buildRuntime: function() {
     execOrDie(`${gulp} clean`);
     execOrDie(`${gulp} lint`);
@@ -233,6 +238,7 @@ const command = {
 
 function runAllCommands() {
   command.testBuildSystem();
+  // Skip testDocumentLinks() during push builds.
   command.buildRuntime();
   command.presubmit();
   command.testRuntime();
@@ -262,23 +268,21 @@ function main(argv) {
   if (buildTargets.has('FLAG_CONFIG')) {
     files.forEach((file) => {
       if (!isFlagConfig(file)) {
-        console.log('A pull request may not contain a mix of flag-config and ' +
-            'non-flag-config files. Please make your changes in separate ' +
-            'pull requests.');
-        console.log('If you see a long list of unrelated files below, you ' +
-            'may need to sync your branch to master.');
+        console.log(util.colors.red('ERROR'),
+            'It appears that your PR contains a mix of flag-config files ' +
+            '(*config.json) and non-flag-config files.');
+        console.log('Please make your changes in separate pull requests.');
+        console.log(util.colors.yellow(
+            'NOTE: If you see a long list of unrelated files below, it is ' +
+            'likely because your branch is significantly out of sync.'));
+        console.log(util.colors.yellow(
+            'A full sync to upstream/master should clear this error.'));
         console.log('\nFull list of files in this PR:');
         files.forEach((file) => { console.log('\t' + file); });
         stopTimer('pr-check.js', startTime);
         process.exit(1);
       }
     });
-  }
-
-  if (buildTargets.length == 1 && buildTargets.has('DOCS')) {
-    console.log('Only docs were updated, stopping build process.');
-    stopTimer('pr-check.js', startTime);
-    return 0;
   }
 
   //if (files.includes('package.json') ?
@@ -300,6 +304,10 @@ function main(argv) {
 
   if (buildTargets.has('BUILD_SYSTEM')) {
     command.testBuildSystem();
+  }
+
+  if (buildTargets.has('DOCS')) {
+    command.testDocumentLinks(files);
   }
 
   if (buildTargets.has('RUNTIME')) {
