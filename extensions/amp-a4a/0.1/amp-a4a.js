@@ -446,7 +446,7 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * @return {!../../..//src/service/resource}
+   * @return {!../../../src/service/resource}
    * @visibileForTesting
    */
   getResource() {
