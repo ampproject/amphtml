@@ -405,7 +405,7 @@ describe('amp-a4a', () => {
       });
       const layoutCallbackPromise = a4a.layoutCallback();
       a4a.unlayoutCallback();
-      const renderNonAmpCreativeSpy = sinon.spy(
+      const renderNonAmpCreativeSpy = sandbox.spy(
           AmpA4A.prototype, 'renderNonAmpCreative_');
       promiseResolver();
       layoutCallbackPromise.then(() => {
