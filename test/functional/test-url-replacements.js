@@ -278,6 +278,16 @@ describes.sandboxed('UrlReplacements', {}, () => {
         });
   });
 
+  it('should replace CLIENT_ID with opt_cookieName', () => {
+    setCookie(window, 'url-abc', 'cid-for-abc');
+    // Make sure cookie does not exist
+    setCookie(window, 'url-xyz', '');
+    return expandAsync('?a=CLIENT_ID(abc,,url-abc)&b=CLIENT_ID(xyz,,url-xyz)',
+        /*opt_bindings*/undefined, {withCid: true}).then(res => {
+          expect(res).to.match(/^\?a=cid-for-abc\&b=amp-([a-zA-Z0-9_-]+){10,}/);
+        });
+  });
+
   it('should replace CLIENT_ID synchronously when available', () => {
     return getReplacements({withCid: true}).then(urlReplacements => {
       setCookie(window, 'url-abc', 'cid-for-abc');
