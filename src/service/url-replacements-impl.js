@@ -228,7 +228,7 @@ export class GlobalVariableSource extends VariableSource {
         return null;
       }
       return clientIds[dev().assertString(scope)];
-    }, (scope, opt_userNotificationId) => {
+    }, (scope, opt_userNotificationId, opt_cookieName) => {
       user().assertString(scope,
             'The first argument to CLIENT_ID, the fallback c' +
             /*OK*/'ookie name, is required');
@@ -246,6 +246,7 @@ export class GlobalVariableSource extends VariableSource {
         return cid.get({
           scope: dev().assertString(scope),
           createCookieIfNotPresent: true,
+          cookieName: opt_cookieName,
         }, consent);
       }).then(cid => {
         if (!clientIds) {
