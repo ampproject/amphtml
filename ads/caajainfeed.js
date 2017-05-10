@@ -50,6 +50,6 @@ export function caajainfeed(global, data) {
   );
 
   global.caAjaInfeedConfig = data;
-  loadScript(global, 'https://cdn.amanad.adtdp.com/sdk/ajaamp-v1.0.js');
+  loadScript(global, 'https://cdn.amanad.adtdp.com/sdk/ajaamp.js');
 
 }
