@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Keycodes} from '../../../src/utils/keycodes';
 import {addParamsToUrl, parseUrl, parseQueryString} from '../../../src/url';
 import {setStyle} from '../../../src/style';
 import {getDataParamsFromAttributes} from '../../../src/dom';
@@ -96,13 +97,38 @@ class AmpSocialShare extends AMP.BaseElement {
           ? '_top' : '_blank';
     });
 
-    this.element.setAttribute('role', 'link');
+    this.element.setAttribute('role', 'button');
+    if (!this.element.hasAttribute('tabindex')) {
+      this.element.setAttribute('tabindex', '0');
+    }
     this.element.addEventListener('click', () => this.handleClick_());
+    this.element.addEventListener('keydown', this.handleKeyPress_.bind(this));
     this.element.classList.add(`amp-social-share-${typeAttr}`);
   }
 
-  /** @private */
+  /**
+   * Handle key presses on the element.
+   * @param {!Event} event
+   * @private
+   */
+  handleKeyPress_(event) {
+    const keyCode = event.keyCode;
+    if (keyCode == Keycodes.SPACE || keyCode == Keycodes.ENTER) {
+      event.preventDefault();
+      this.handleActivation_();
+    }
+  }
+
+  /**
+   * Handle clicks on the element.
+   * @private
+   */
   handleClick_() {
+    this.handleActivation_();
+  }
+
+  /** @private */
+  handleActivation_() {
     user().assert(this.href_ && this.target_, 'Clicked before href is set.');
     const href = dev().assertString(this.href_);
     const target = dev().assertString(this.target_);
