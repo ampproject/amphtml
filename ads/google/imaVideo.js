@@ -453,6 +453,7 @@ export function onContentEnded() {
  * @visibleForTesting
  */
 export function onAdsManagerLoaded(adsManagerLoadedEvent) {
+  const global = window;
   const adsRenderingSettings = new global.google.ima.AdsRenderingSettings();
   adsRenderingSettings.restoreCustomPlaybackStateOnAdBreakComplete = true;
   adsRenderingSettings.uiElements =
