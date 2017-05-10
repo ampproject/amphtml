@@ -135,8 +135,8 @@ class AmpImaVideo extends AMP.BaseElement {
   onLayoutMeasure() {
     if (this.iframe_) {
       this.sendCommand_('resize', {
-        'width': this.iframe_./*REVIEW*/offsetWidth,
-        'height': this.iframe_./*REVIEW*/offsetHeight,
+        'width': this.iframe_./*OK*/offsetWidth,
+        'height': this.iframe_./*OK*/offsetHeight,
       });
     }
   }

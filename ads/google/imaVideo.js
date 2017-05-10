@@ -173,8 +173,8 @@ function getIma(global, cb) {
  */
 export function imaVideo(global, data) {
 
-  videoWidth = global./*REVIEW*/innerWidth;
-  videoHeight = global./*REVIEW*/innerHeight;
+  videoWidth = global./*OK*/innerWidth;
+  videoHeight = global./*OK*/innerHeight;
 
   // Wraps *everything*.
   wrapperDiv = global.document.createElement('div');
@@ -421,10 +421,10 @@ export function playAds() {
     try {
       adsManager.init(
           videoWidth, videoHeight, global.google.ima.ViewMode.NORMAL);
-      window.parent./*REVIEW*/postMessage({event: VideoEvents.PLAY}, '*');
+      window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
       adsManager.start();
     } catch (adError) {
-      window.parent./*REVIEW*/postMessage({event: VideoEvents.PLAY}, '*');
+      window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
       playVideo();
     }
   } else if (!adRequestFailed) {
@@ -432,7 +432,7 @@ export function playAds() {
     setTimeout(playAds, 250);
   } else {
     // Ad request failed.
-    window.parent./*REVIEW*/postMessage({event: VideoEvents.PLAY}, '*');
+    window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
     playVideo();
   }
 }
@@ -472,7 +472,7 @@ export function onAdsManagerLoaded(adsManagerLoadedEvent) {
   if (muteAdsManagerOnLoaded) {
     adsManager.setVolume(0);
   }
-  window.parent./*REVIEW*/postMessage({event: VideoEvents.LOAD}, '*');
+  window.parent./*OK*/postMessage({event: VideoEvents.LOAD}, '*');
 }
 
 /**
@@ -619,7 +619,7 @@ function onProgressClickEnd() {
 function onProgressMove(event) {
   const progressWrapperPosition = getPagePosition(progressBarWrapperDiv);
   const progressListStart = progressWrapperPosition.x;
-  const progressListWidth = progressBarWrapperDiv./*REVIEW*/offsetWidth;
+  const progressListWidth = progressBarWrapperDiv./*OK*/offsetWidth;
 
   // Handle Android Chrome touch events.
   const eventX = event.clientX || event.touches[0].pageX;
@@ -640,8 +640,8 @@ function getPagePosition(el) {
   let lx, ly;
   for (lx = 0, ly = 0;
       el != null;
-      lx += el./*REVIEW*/offsetLeft, ly += el./*REVIEW*/offsetTop,
-          el = el./*REVIEW*/offsetParent)
+      lx += el./*OK*/offsetLeft, ly += el./*OK*/offsetTop,
+          el = el./*OK*/offsetParent)
     {};
   return {x: lx,y: ly};
 }
@@ -671,7 +671,7 @@ export function playVideo() {
   showControls();
   setStyle(playPauseDiv, 'line-height', '1.4em');
   playPauseNode.textContent = pauseChars;
-  window.parent./*REVIEW*/postMessage({event: VideoEvents.PLAY}, '*');
+  window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
   videoPlayer.play();
 }
 
@@ -690,7 +690,7 @@ export function pauseVideo(event) {
   }
   playPauseNode.textContent = playChar;
   setStyle(playPauseDiv, 'line-height', '');;
-  window.parent./*REVIEW*/postMessage({event: VideoEvents.PAUSE}, '*');
+  window.parent./*OK*/postMessage({event: VideoEvents.PAUSE}, '*');
   if (event && event.type == 'webkitendfullscreen') {
     // Video was paused because we exited fullscreen.
     videoPlayer.removeEventListener('webkitendfullscreen', pauseVideo);
@@ -806,7 +806,7 @@ function onMessage(event) {
       case 'playVideo':
         if (adsActive) {
           adsManager.resume();
-          window.parent./*REVIEW*/postMessage({event: VideoEvents.PLAY}, '*');
+          window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
         } else if (playbackStarted) {
           playVideo();
         } else {
@@ -817,7 +817,7 @@ function onMessage(event) {
       case 'pauseVideo':
         if (adsActive) {
           adsManager.pause();
-          window.parent./*REVIEW*/postMessage({event: VideoEvents.PAUSE}, '*');
+          window.parent./*OK*/postMessage({event: VideoEvents.PAUSE}, '*');
         } else if (playbackStarted) {
           pauseVideo(null);
         }
@@ -830,7 +830,7 @@ function onMessage(event) {
         } else {
           muteAdsManagerOnLoaded = true;
         }
-        window.parent./*REVIEW*/postMessage({event: VideoEvents.MUTED}, '*');
+        window.parent./*OK*/postMessage({event: VideoEvents.MUTED}, '*');
         break;
       case 'unMute':
         videoPlayer.volume = 1;
@@ -840,7 +840,7 @@ function onMessage(event) {
         } else {
           muteAdsManagerOnLoaded = false;
         }
-        window.parent./*REVIEW*/postMessage({event: VideoEvents.UNMUTED}, '*');
+        window.parent./*OK*/postMessage({event: VideoEvents.UNMUTED}, '*');
         break;
       case 'resize':
         if (msg.args && msg.args.width && msg.args.height) {
