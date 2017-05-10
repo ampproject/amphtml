@@ -532,7 +532,13 @@ export function mergeExperimentIds(newIds, currentIdString) {
  * Adds two CSI signals to the given amp-analytics configuration object, one
  * for render-start, and one for ini-load.
  *
+<<<<<<< HEAD
  * @param {!JsonObject} config The original config object.
+=======
+ * @param {!Window} win
+ * @param {!Element} element The ad slot.
+ * @param {!JSONType} config The original config object.
+>>>>>>> PR feedback + test fixes.
  * @param {?../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
  *   XHR service FetchResponseHeaders object containing the response
  *   headers.
@@ -543,16 +549,16 @@ export function mergeExperimentIds(newIds, currentIdString) {
  *   TODO(levitzky) Remove the above two params once AV numbers stabilize.
  * @return {?JsonObject} config or null if invalid/missing.
  */
-export function addCsiSignalsToAmpAnalyticsConfig(a4a, config, responseHeaders,
-    isVerifiedAmpCreative, deltaTime, initTime) {
+export function addCsiSignalsToAmpAnalyticsConfig(win, element, config,
+    responseHeaders, isVerifiedAmpCreative, deltaTime, initTime) {
   // Add CSI pingbacks.
-  const correlator = getCorrelator(a4a.win);
-  const slotId = a4a.element.getAttribute('data-amp-slot-index');
+  const correlator = getCorrelator(win);
+  const slotId = element.getAttribute('data-amp-slot-index');
   const qqid = (responseHeaders && responseHeaders.has(QQID_HEADER))
       ? responseHeaders.get(QQID_HEADER) : 'null';
   const eids = encodeURIComponent(
-      a4a.element.getAttribute(EXPERIMENT_ATTRIBUTE));
-  const adType = a4a.element.getAttribute('type');
+      element.getAttribute(EXPERIMENT_ATTRIBUTE));
+  const adType = element.getAttribute('type');
   const baseCsiUrl = 'https://csi.gstatic.com/csi?s=a4a' +
       `&c=${correlator}&slotId=${slotId}&qqid.${slotId}=${qqid}` +
       `&dt=${initTime}` +

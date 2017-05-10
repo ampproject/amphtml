@@ -259,7 +259,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       dev().assert(!this.ampAnalyticsElement_);
       dev().assert(this.responseHeaders_);
       addCsiSignalsToAmpAnalyticsConfig(
-          this,
+          this.win,
+          this.element,
           this.ampAnalyticsConfig_,
           this.responseHeaders_,
           isVerifiedAmpCreative,

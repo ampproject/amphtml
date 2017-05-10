@@ -253,8 +253,8 @@ describe('Google A4A utils', () => {
       };
       let newConfig = addCsiSignalsToAmpAnalyticsConfig(
           mockA4a, builtConfig, headers,
-          true /* indicates that this is rendered via friendly frame */,
-          -1, -1  /* The lifecycle time fields don't matter for this test */);
+          /* isVerifiedAmpCreative */ true,
+          /* lifecycle time events; not relevant here */ -1, -1);
 
       expect(newConfig.requests.iniLoadCsi).to.not.be.null;
       expect(newConfig.requests.renderStartCsi).to.not.be.null;
@@ -281,8 +281,8 @@ describe('Google A4A utils', () => {
       });
       newConfig = addCsiSignalsToAmpAnalyticsConfig(
           mockA4a, builtConfig, headers,
-          false /* indicates that this is rendered via friendly frame */,
-          -1, -1  /* The lifecycle time fields don't matter for this test */);
+          /* isVerifiedAmpCreative */ false,
+          /* lifecycle time events; not relevant here */ -1, -1);
       getRegExps('iniLoadCsiCrossDomain').forEach(regExp => {
         expect(newConfig.requests.iniLoadCsi).to.match(regExp);
       });
