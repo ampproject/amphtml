@@ -310,6 +310,7 @@ export class MeasureScanner extends Scanner {
   /**
    * @param {!Window} win
    * @param {{
+   *   queryTargets: function(string):!Array<!Element>,
    *   resolveTarget: function(string):?Element,
    * }} context
    * @param {boolean} validate
@@ -390,8 +391,19 @@ export class MeasureScanner extends Scanner {
 
   /** @override */
   onKeyframeAnimation(spec) {
-    const timing = this.mergeTiming_(spec, this.timing_);
-    const target = this.resolveTarget_(spec.target);
+    const targets = this.resolveTargets_(spec);
+    targets.forEach(target => {
+      this.requests_.push(this.createKeyframeAnimationForTarget_(target, spec));
+    });
+  }
+
+  /**
+   * @param {!Element} target
+   * @param {!WebKeyframeAnimationDef} spec
+   * @return {!InternalWebAnimationRequestDef}
+   * @private
+   */
+  createKeyframeAnimationForTarget_(target, spec) {
     /** @type {!WebKeyframesDef} */
     let keyframes;
 
@@ -450,7 +462,8 @@ export class MeasureScanner extends Scanner {
       }
     }
 
-    this.requests_.push({target, keyframes, timing});
+    const timing = this.mergeTiming_(spec, this.timing_);
+    return {target, keyframes, timing};
   }
 
   /** @override */
@@ -495,20 +508,39 @@ export class MeasureScanner extends Scanner {
   }
 
   /**
-   * @param {string|!Element} targetSpec
-   * @return {!Element}
+   * @param {!WebKeyframeAnimationDef} spec
+   * @return {!Array<!Element>}
    * @private
    */
-  resolveTarget_(targetSpec) {
-    const target = user().assertElement(
-        typeof targetSpec == 'string' ?
-            this.context_.resolveTarget(targetSpec) :
-            targetSpec,
-        `Target not found: "${targetSpec}"`);
-    if (!this.targets_.includes(target)) {
-      this.targets_.push(target);
+  resolveTargets_(spec) {
+    let targets;
+    if (spec.selector) {
+      user().assert(!spec.target,
+          'Both "selector" and "target" are not allowed');
+      targets = this.context_.queryTargets(spec.selector);
+      if (targets.length == 0) {
+        user().warn(TAG, `Target not found: "${spec.selector}"`);
+      }
+    } else if (spec.target) {
+      if (typeof spec.target == 'string') {
+        // TODO(dvoytenko, #9129): cleanup deprecated string targets.
+        user().error(TAG, 'string targets are deprecated');
+      }
+      const target = user().assertElement(
+          typeof spec.target == 'string' ?
+              this.context_.resolveTarget(spec.target) :
+              spec.target,
+          `Target not found: "${spec.target}"`);
+      targets = [target];
+    } else {
+      user().assert(false, 'No target specified');
     }
-    return target;
+    targets.forEach(target => {
+      if (!this.targets_.includes(target)) {
+        this.targets_.push(target);
+      }
+    });
+    return targets;
   }
 
   /**

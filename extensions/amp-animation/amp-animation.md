@@ -77,14 +77,14 @@ will be removed in the near future.
 
 Each animation component is a [keyframes effect](https://www.w3.org/TR/web-animations/#dom-keyframeeffect-keyframeeffect)
 and is comprised of:
- - Target element referenced by ID
+ - Target element(s) referenced by a selector
  - Media query
  - Timing properties
  - Keyframes
 
 ```text
 {
-  "target": "element-id",
+  "selector": "#target-id",
   "media": "(min-width:300px)",
   // Timing properties
   ...
@@ -264,7 +264,7 @@ can be reduced to this one animation component only. For instance:
 <amp-animation layout="nodisplay">
 <script type="application/json">
 {
-  "target": "target1",
+  "selector": "#target-id",
   "duration": 1000,
   "keyframes": {"opacity": 1}
 }
@@ -279,12 +279,12 @@ can be reduced to an array of components. For instance:
 <script type="application/json">
 [
   {
-    "target": "target1",
+    "selector": ".target-class",
     "duration": 1000,
     "keyframes": {"opacity": 1}
   },
   {
-    "target": "target2",
+    "selector": ".target-class",
     "duration": 600,
     "delay": 400,
     "keyframes": {"transform": "scale(2)"}
