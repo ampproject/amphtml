@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {rateLimit} from '../../../src/utils/rate-limit';
+import {throttle} from '../../../src/utils/function';
 import * as sinon from 'sinon';
 
-describe('rate-limit', () => {
+describe('throttle', () => {
 
   let sandbox;
   let clock;
@@ -33,20 +33,20 @@ describe('rate-limit', () => {
 
   it('should work', () => {
     const callback = sandbox.spy();
-    const rateLimitedCallback = rateLimit(window, callback, 100);
+    const throttledCallback = throttle(window, callback, 100);
 
-    rateLimitedCallback(1);
+    throttledCallback(1);
     expect(callback).to.be.calledWith(1); // let 1st call through immediately
     callback.reset();
 
     clock.tick(20);
-    rateLimitedCallback(2);
+    throttledCallback(2);
     clock.tick(20);
-    rateLimitedCallback(3);
+    throttledCallback(3);
     clock.tick(20);
-    rateLimitedCallback(4);
+    throttledCallback(4);
     clock.tick(20);
-    rateLimitedCallback(5);
+    throttledCallback(5);
     clock.tick(19);
     expect(callback).not.to.be.called; // not 100ms yet
 
@@ -56,10 +56,10 @@ describe('rate-limit', () => {
     callback.reset();
 
     clock.tick(10);
-    rateLimitedCallback(6);
+    throttledCallback(6);
     expect(callback).not.to.be.called;
     clock.tick(89);
-    rateLimitedCallback(7, 'another param');
+    throttledCallback(7, 'another param');
     expect(callback).not.to.be.called;
     clock.tick(1);
     expect(callback).to.be.calledOnce;
@@ -68,17 +68,17 @@ describe('rate-limit', () => {
 
   it('should throttle recursive callback', () => {
     let totalCalls = 0;
-    let rateLimitedCallback;
+    let throttledCallback;
     function recursive(countdown) {
       totalCalls++;
       if (countdown > 0) {
-        rateLimitedCallback(countdown - 1);
+        throttledCallback(countdown - 1);
       }
     }
-    rateLimitedCallback = rateLimit(window, recursive, 100);
+    throttledCallback = throttle(window, recursive, 100);
 
     // recursive 3 times
-    rateLimitedCallback(3);
+    throttledCallback(3);
     // should immediately invoke callback only once.
     expect(totalCalls).to.equal(1);
     // 2nd invocation happen after the min interval

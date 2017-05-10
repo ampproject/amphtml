@@ -16,7 +16,7 @@
 
 import {layoutRectLtwh, LayoutRectDef} from '../../src/layout-rect';
 import {Observable} from '../../src/observable';
-import {rateLimit} from '../../src/utils/rate-limit';
+import {throttle} from '../../src/utils/function';
 
 /**
  * @typedef {{
@@ -58,7 +58,7 @@ export class PositionObserver {
   observe(element, callback) {
     if (!this.positionObservable_) {
       this.positionObservable_ = new Observable();
-      const listener = rateLimit(this.win_, () => {
+      const listener = throttle(this.win_, () => {
         this.update_();
         this.positionObservable_.fire();
       }, MIN_EVENT_INTERVAL_IN_MS);

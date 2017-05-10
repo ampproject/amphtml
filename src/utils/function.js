@@ -24,7 +24,7 @@
  * @param {number} minInterval the minimum time interval in millisecond
  * @returns {function()}
  */
-export function rateLimit(win, callback, minInterval) {
+export function throttle(win, callback, minInterval) {
   let locker = 0;
   let nextCallArgs = null;
 
@@ -44,11 +44,40 @@ export function rateLimit(win, callback, minInterval) {
     }
   }
 
-  return function() {
+  return function(...args) {
     if (locker) {
-      nextCallArgs = arguments;
+      nextCallArgs = args;
     } else {
-      fire(arguments);
+      fire(args);
+    }
+  };
+}
+
+export function debounce(win, callback, minInterval) {
+  let locker = 0;
+  let timestamp = 0;
+  let nextCallArgs = null;
+
+  function fire(args) {
+    nextCallArgs = null;
+    callback.apply(null, args);
+  }
+
+  function waiter() {
+    locker = 0;
+    const remaining = timestamp + minInterval - Date.now();
+    if (remaining > 0) {
+      locker = win.setTimeout(waiter, remaining);
+    } else {
+      fire(nextCallArgs);
+    }
+  }
+
+  return function(...args) {
+    timestamp = Date.now();
+    nextCallArgs = args;
+    if (!locker) {
+      locker = win.setTimeout(waiter, minInterval);
     }
   };
 }
