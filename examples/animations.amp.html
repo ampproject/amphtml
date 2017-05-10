@@ -35,7 +35,7 @@
   "animations": [
     {
       "media": "(max-width: 320px)",
-      "target": "image1",
+      "selector": ".rot-image",
       "easing": "cubic-bezier(0,0,.21,1)",
       "keyframes": {
         "transform": "rotate(45deg)"
@@ -43,14 +43,14 @@
     },
     {
       "media": "(min-width: 321px)",
-      "target": "image1",
+      "selector": ".rot-image",
       "easing": "cubic-bezier(0,0,.21,1)",
       "keyframes": {
         "transform": "rotate(-45deg)"
       }
     },
     {
-      "target": "image2",
+      "selector": "#image2",
       "easing": "cubic-bezier(0,0,.21,1)",
       "keyframes": {
         "transform": "translateX(0px)"
@@ -61,8 +61,13 @@
 </script>
 </amp-animation>
 
-<amp-img id="image1"
+<amp-img id="image1" class="rot-image"
     src="img/sea@2x.jpg"
+    width=527 height=193 layout="responsive"
+    on="tap:anim1.activate"></amp-img>
+
+<amp-img id="image3" class="rot-image"
+    src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w1002-h367-no/PANO_20150726_171347%257E2.jpg"
     width=527 height=193 layout="responsive"
     on="tap:anim1.activate"></amp-img>
 
@@ -70,6 +75,8 @@
     class="block"
     layout="responsive" width="100" height="100"
     src="img/hero@1x.jpg"></amp-img>
+
+<a id="a1"></a>
 
 </body>
 </html>
