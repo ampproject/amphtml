@@ -164,7 +164,7 @@ export function installDynamicClassesForTesting(ampdoc) {
 // Register doc-service factory.
 AMP.registerServiceForDoc(
     'amp-dynamic-css-classes',
-    ampdoc => {
+    function(ampdoc) {
       addRuntimeClasses(ampdoc);
       return {};
     });

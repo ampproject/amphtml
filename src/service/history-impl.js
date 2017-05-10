@@ -866,5 +866,7 @@ export function installHistoryServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(
       ampdoc,
       'history',
-      ampdoc => createHistory(ampdoc));
+      function(ampdoc) {
+        return createHistory(ampdoc);
+      });
 }
