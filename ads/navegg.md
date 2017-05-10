@@ -30,7 +30,6 @@ If you want to serve ads with Navegg data you need to use this adapter.
 </amp-ad>
 
 ```
-note: It is common to see a no-content ad in this example.
 
 ### Configuration
 
