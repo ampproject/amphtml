@@ -41,9 +41,6 @@ export class AmpShareTracking extends AMP.BaseElement {
     /** @private {string} */
     this.vendorHref_ = '';
 
-    /** @private {?Promise<!Object<string, string>>} */
-    this.shareTrackingFragments_ = null;
-
     /** @private {string} */
     this.originalViewerFragment_ = '';
   }
@@ -73,7 +70,7 @@ export class AmpShareTracking extends AMP.BaseElement {
     this.vendorHref_ = this.element.getAttribute('data-href');
     dev().fine(TAG, 'vendorHref_: ', this.vendorHref_);
 
-    this.shareTrackingFragments_ = Promise.all(
+    const shareTrackingFragments = Promise.all(
       [this.getIncomingFragment_(), this.getOutgoingFragment_()]
     ).then(results => {
       const incomingFragment = results[0];
@@ -88,7 +85,7 @@ export class AmpShareTracking extends AMP.BaseElement {
       return {incomingFragment, outgoingFragment};
     });
     registerServiceBuilder(this.win, 'share-tracking', function() {
-      return this.shareTrackingFragments_;
+      return shareTrackingFragments;
     });
   }
 

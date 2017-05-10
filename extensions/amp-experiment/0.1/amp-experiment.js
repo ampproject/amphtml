@@ -42,13 +42,14 @@ export class AmpExperiment extends AMP.BaseElement {
               });
     });
 
+
     /** @private @const {!Promise<!Object<string, ?string>>} */
-    this.experimentVariants_ = Promise.all(variants)
+    const experimentVariants = Promise.all(variants)
         .then(() => results)
         .then(this.addToBody_.bind(this));
 
     registerServiceBuilder(this.win, 'variant', function() {
-      return this.experimentVariants_;
+      return experimentVariants;
     });
   }
 
