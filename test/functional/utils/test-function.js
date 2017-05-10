@@ -17,7 +17,7 @@
 import {throttle, debounce} from '../../../src/utils/function';
 import * as sinon from 'sinon';
 
-describe.only('function utils', () => {
+describe('function utils', () => {
   describe('throttle', () => {
     let sandbox;
     let clock;
