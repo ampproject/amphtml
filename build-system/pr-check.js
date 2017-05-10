@@ -213,8 +213,6 @@ const command = {
     execOrDie(`${gulp} dist --fortesting`);
   },
   testRuntime: function() {
-    // Visual diff tests with Percy
-    execOrDie(`${gulp} visual-diff --webpage examples/amp-by-example.html`);
     // dep-check needs to occur after build since we rely on build to generate
     // the css files into js files.
     execOrDie(`${gulp} dep-check`);
