@@ -25,7 +25,8 @@ limitations under the License.
 ```
 
 ## Configuration
-For semantics of configuration, please see ad network documentation.
+For more information on configuration semantics, refer to the documentation 
+provided in the Mobusi panel for your users. Http://www.mobusi.com
 
 ### Direct URL Call:
 * `src` - It is a custom URL for each area of the web of our publishers.
