@@ -748,6 +748,9 @@ export class AmpA4A extends AMP.BaseElement {
                    this.getNow_() - startTime),
                'totalSlotCount.AD_SLOT_ID': getAdUrlsPromise.length,
                'totalUrlCount.AD_SLOT_ID': adUrls.filter(url => !!url).length,
+               'totalQueriedSlotCount.AD_SLOT_ID':
+                  this.win.document.querySelectorAll('amp-ad[type=doubleclick]')
+                    .length,
              });
        });
      }))();
