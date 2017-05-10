@@ -17,6 +17,7 @@
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 import {dev} from '../../../src/log';
+import {startsWith} from '../../../src/string';
 
 /**
  * Header that will contain Cloudflare generated signature
@@ -25,6 +26,14 @@ import {dev} from '../../../src/log';
  * @private
  */
 const AMP_SIGNATURE_HEADER_ = 'X-AmpAdSignature';
+
+/**
+ * GMOSSP base URL
+ *
+ * @type {string}
+ * @private
+ */
+const GMOSSP_BASE_URL_ = 'https://sp.gmossp-sp.jp';
 
 /**
  * This is a minimalistic AmpA4A implementation that primarily gets an Ad
@@ -36,12 +45,21 @@ export class AmpAdNetworkGmosspImpl extends AmpA4A {
 
   /** @override */
   isValidElement() {
-    return this.isAmpAdElement();
+    if (!this.isAmpAdElement()) {
+      return false;
+    }
+
+    const src = this.element.getAttribute('src');
+    if (!(src && startsWith(src, GMOSSP_BASE_URL_))) {
+      return false;
+    }
+
+    return true;
   }
 
   /** @override */
   getSigningServiceNames() {
-    return ['google'];
+    return ['cloudflare'];
   }
 
   /** @override */

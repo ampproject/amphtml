@@ -15,7 +15,7 @@
  */
 
 /** @const @private {string} */
-const SRC_PREFIX_ = 'https://sp.gmossp-sp.jp/';
+const GMOSSP_SRC_PREFIX_ = 'https://sp.gmossp-sp.jp';
 
 /**
  * @param {!Window} win
@@ -23,7 +23,7 @@ const SRC_PREFIX_ = 'https://sp.gmossp-sp.jp/';
  * @returns {boolean}
  */
 export function gmosspIsA4AEnabled(win, element) {
-  let src;
-  return !!element.getAttribute('data-use-a4a') && !!(src =
-    element.getAttribute('src')) && src.indexOf(SRC_PREFIX_) == 0;
+  const src = element.getAttribute('src');
+  return !!element.getAttribute('data-use-a4a') && !!src &&
+    src.indexOf(GMOSSP_SRC_PREFIX_) == 0;
 }
