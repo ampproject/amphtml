@@ -710,7 +710,7 @@ export class AmpA4A extends AMP.BaseElement {
     }
     this.win['a4a-measuring-ad-urls'] =
      (() => resourcesForDoc(this.element).getMeasuredResources(this.win,
-       (r) => {
+       r => {
          return r.element.tagName == 'AMP-AD' &&
            r.element.getAttribute('type') == type;
        })
@@ -724,7 +724,7 @@ export class AmpA4A extends AMP.BaseElement {
            //
            return instance.adUrlsPromise_;
          })));
-       return Promise.all(getAdUrlsPromise).then(unused_urls => {
+       return Promise.all(getAdUrlsPromise).then(unusedUrls => {
          if (promiseId != this.promiseId_) {
            throw cancellation();
          }

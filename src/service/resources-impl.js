@@ -298,7 +298,7 @@ export class Resources {
       // Second, wait for any left-over elements to complete measuring.
       const measurePromiseArray = [];
       this.resources_.forEach(r => {
-        if (!r.hasBeenMeasured() &&   r.hostWin == hostWin && !r.hasOwner()) {
+        if (!r.hasBeenMeasured() && r.hostWin == hostWin && !r.hasOwner()) {
           measurePromiseArray.push(this.ensuredMeasured_(r));
         }
       });
@@ -318,7 +318,7 @@ export class Resources {
    * @return {!Promise<!Array<!Resource>>}
    */
   getResourcesInRect(hostWin, rect, opt_isInPrerender) {
-    return this.getMeasuredResources(hostWin, (r) => {
+    return this.getMeasuredResources(hostWin, r => {
       // TODO(jridgewell): Remove isFixed check here once the position
       // is calculted correctly in a separate layer for embeds.
       if (!r.isDisplayed() || (!r.overlaps(rect) && !r.isFixed()) ||
