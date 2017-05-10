@@ -124,8 +124,8 @@ class AmpYoutube extends AMP.BaseElement {
       this.playerReadyResolver_ = resolve;
     });
 
-    // TODO(#3216): amp-youtube has a special case where 404s are not easily caught
-    // hence the following hacky-solution.
+    // TODO(aghassemi, #3216): amp-youtube has a special case where 404s are not
+    // easily caught hence the following hacky-solution.
     // Please don't follow this behavior in other extensions, instead
     // see BaseElement.createPlaceholderCallback.
     if (!this.getPlaceholder()) {

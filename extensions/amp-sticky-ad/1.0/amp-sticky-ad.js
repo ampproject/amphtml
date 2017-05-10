@@ -156,12 +156,12 @@ class AmpStickyAd extends AMP.BaseElement {
    * @private
    */
   onScroll_() {
-    if (isExperimentOn(this.win, EARLY_LOAD_EXPERIMENT)) {
+    const scrollTop = this.viewport_.getScrollTop();
+    if (isExperimentOn(this.win, EARLY_LOAD_EXPERIMENT) && scrollTop > 1) {
       this.display_();
       return;
     }
 
-    const scrollTop = this.viewport_.getScrollTop();
     const viewportHeight = this.viewport_.getSize().height;
     // Check user has scrolled at least one viewport from init position.
     if (scrollTop > viewportHeight) {
@@ -177,9 +177,10 @@ class AmpStickyAd extends AMP.BaseElement {
     this.removeOnScrollListener_();
     this.deferMutate(() => {
       this.visible_ = true;
-      this.viewport_.addToFixedLayer(this.element);
       this.addCloseButton_();
-      this.scheduleLayoutForAd_();
+      this.viewport_.addToFixedLayer(
+          this.element, /* forceTransfer */ true)
+          .then(() => this.scheduleLayoutForAd_());
     });
   }
 

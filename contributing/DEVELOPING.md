@@ -57,6 +57,11 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `gulp test --firefox`<sup>[[1]](#footnote-1)</sup>                      | Runs tests in Firefox.                                                |
 | `gulp test --files=<test-files-path-glob>`<sup>[[1]](#footnote-1)</sup> | Runs specific test files.                                             |
 | `gulp serve`                                                            | Serves content in repo root dir over http://localhost:8000/. Examples live in http://localhost:8000/examples/. Serve unminified AMP by default. |
+| `gulp check-types`                                                      | Verifies that there are no errors associated with Closure typing. Run automatically upon push.  |
+| `gulp dep-check`                                                        | Runs a dependency check on each module. Run automatically upon push.  |
+| `gulp presubmit`                                                        | Run validation against files to check for forbidden and required terms. Run automatically upon push.  |
+| `gulp validator`                                                        | Builds and tests the AMP validator. Run automatically upon push.  |
+| `node build-system/pr-check.js`                                         | Runs all tests that will be run upon pushing a CL.                     |
 | `npm run ava`<sup>[[1]](#footnote-1)</sup>                              | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava). |
 
 <a id="footnote-1">[1]</a> On Windows, this command must be run as administrator.
@@ -232,7 +237,7 @@ In particular, we try to maintain "it might not be perfect but isn't broken"-sup
 ## Eng docs
 
 - [Life of an AMP *](https://docs.google.com/document/d/1WdNj3qNFDmtI--c2PqyRYrPrxSg2a-93z5iX0SzoQS0/edit#)
-- [AMP Layout system](spec/amp-html-layout.md)
+- [AMP Layout system](../spec/amp-html-layout.md)
 - [Building an AMP Extension](https://docs.google.com/document/d/19o7eDta6oqPGF4RQ17LvZ9CHVQN53whN-mCIeIMM8Qk/edit#)
 
 We also recommend scanning the [spec](../spec/). The non-element part should help understand some of the design aspects.
