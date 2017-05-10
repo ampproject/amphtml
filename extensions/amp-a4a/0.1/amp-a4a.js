@@ -37,6 +37,7 @@ import {isArray, isObject, isEnumValue} from '../../../src/types';
 import {some} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
 import {viewerForDoc} from '../../../src/services';
+import {resourcesForDoc} from '../../../src/services';
 import {xhrFor} from '../../../src/services';
 import {endsWith} from '../../../src/string';
 import {platformFor} from '../../../src/services';
@@ -338,6 +339,9 @@ export class AmpA4A extends AMP.BaseElement {
      *    of resume callback.
      */
     this.fromResumeCallback = false;
+
+    /** @private {?Promise} */
+    this.adUrlsPromise_ = null;
   }
 
   /** @override */
@@ -501,6 +505,8 @@ export class AmpA4A extends AMP.BaseElement {
       }
     };
 
+    let adUrlPromiseResolver = null;
+
     // Return value from this chain: True iff rendering was "successful"
     // (i.e., shouldn't try to render later via iframe); false iff should
     // try to render later in iframe.
@@ -524,7 +530,17 @@ export class AmpA4A extends AMP.BaseElement {
         /** @return {!Promise<?Response>} */
         .then(adUrl => {
           checkStillCurrent(promiseId);
+          if (this.element.getAttribute('type') == 'doubleclick' &&
+              isExperimentOn(this.win, 'a4a-measure-get-ad-urls')) {
+            this.adUrlsPromise_ = new Promise(resolve => {
+              adUrlPromiseResolver = resolve;
+            });
+            this.measureGetAdUrlsDelay_();
+          }
           this.adUrl_ = adUrl;
+          if (adUrlPromiseResolver) {
+            adUrlPromiseResolver(adUrl);
+          }
           this.protectedEmitLifecycleEvent_('urlBuilt');
           return adUrl && this.sendXhrRequest_(adUrl);
         })
@@ -677,6 +693,49 @@ export class AmpA4A extends AMP.BaseElement {
           this.promiseErrorHandler_(error);
           return null;
         });
+  }
+
+  /**
+   * Measures the amount of time until last ad url generation for all amp-ad
+   * elements of this type.
+   * @private
+   */
+  measureGetAdUrlsDelay_() {
+    const startTime = Date.now();
+    const type = this.element.getAttribute('type');
+    const promiseId = this.promiseId_;
+    // Only execute once per page, this includes potential pauseCallback flows.
+    if (this.win['a4a-measuring-ad-urls']) {
+      return;
+    }
+    this.win['a4a-measuring-ad-urls'] =
+     (() => resourcesForDoc(this.element).getMeasuredResources(this.win,
+       (r) => {
+         return r.element.tagName == 'AMP-AD' &&
+           r.element.getAttribute('type') == type;
+       })
+     .then(resources => {
+       if (promiseId != this.promiseId_) {
+         throw cancellation();
+       }
+       const getAdUrlsPromise = [];
+       resources.forEach(r => getAdUrlsPromise.push(r.element.getImpl().then(
+         instance => {
+           //
+           return instance.adUrlsPromise_;
+         })));
+       return Promise.all(getAdUrlsPromise).then(unused_urls => {
+         if (promiseId != this.promiseId_) {
+           throw cancellation();
+         }
+         this.protectedEmitLifecycleEvent_(
+             'sraBuildRequestDelay', {
+               'met.delta.AD_SLOT_ID': Math.round(
+                   this.getNow_() - startTime),
+               'totalSlotCount.AD_SLOT_ID': getAdUrlsPromise.length,
+             });
+       });
+     }))();
   }
 
   /**
@@ -890,6 +949,7 @@ export class AmpA4A extends AMP.BaseElement {
   unlayoutCallback() {
     // Increment promiseId to cause any pending promise to cancel.
     this.promiseId_++;
+    this.adUrlsPromise_ = null;
     this.protectedEmitLifecycleEvent_('adSlotCleared');
     this.uiHandler.setDisplayState(AdDisplayState.NOT_LAID_OUT);
     if (this.originalSlotSize_) {
