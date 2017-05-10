@@ -25,11 +25,11 @@ import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {
+  AmpAnalyticsConfigDef,
+  extractAmpAnalyticsConfig,
   extractGoogleAdCreativeAndSignature,
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
-  AmpAnalyticsConfigDef,
-  extractAmpAnalyticsConfig,
 } from '../../../ads/google/a4a/utils';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {
@@ -112,7 +112,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const jsonParameters = rawJson ? JSON.parse(rawJson) : {};
     const tfcd = jsonParameters['tagForChildDirectedTreatment'];
     const adTestOn = isInManualExperiment(this.element);
-
     const multiSizeDataStr = this.element.getAttribute('data-multi-size');
     if (multiSizeDataStr) {
       const multiSizeValidation = this.element

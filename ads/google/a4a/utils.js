@@ -25,6 +25,10 @@ import {isProxyOrigin} from '../../../src/url';
 import {viewerForDoc} from '../../../src/services';
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 import {domFingerprint} from '../../../src/utils/dom-fingerprint';
+import {
+  getAllParentAdContainers,
+  ValidAdContainerTypes,
+} from '../../../extensions/amp-ad/0.1/utils';
 
 /** @const {string} */
 const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
@@ -42,13 +46,6 @@ const MAX_URL_LENGTH = 4096;
 const AmpAdImplementation = {
   AMP_AD_XHR_TO_IFRAME: '2',
   AMP_AD_XHR_TO_IFRAME_OR_AMP: '3',
-};
-
-/** @const {!Object} */
-export const ValidAdContainerTypes = {
-  'AMP-STICKY-AD': 'sa',
-  'AMP-FX-FLYING-CARPET': 'fc',
-  'AMP-LIGHTBOX': 'lb',
 };
 
 /** @const {string} */
@@ -124,14 +121,7 @@ export function googleAdUrl(
     const iframeDepth = iframeNestingDepth(win);
     const viewportSize = viewport.getSize();
     // Detect container types.
-    const containerTypeSet = {};
-    for (let el = adElement.parentElement, counter = 0;
-        el && counter < 20; el = el.parentElement, counter++) {
-      const tagName = el.tagName.toUpperCase();
-      if (ValidAdContainerTypes[tagName]) {
-        containerTypeSet[ValidAdContainerTypes[tagName]] = true;
-      }
-    }
+    const containerTypeSet = getAllParentAdContainers(adElement);
     const pfx =
         (containerTypeSet[ValidAdContainerTypes['AMP-FX-FLYING-CARPET']]
          || containerTypeSet[ValidAdContainerTypes['AMP-STICKY-AD']])
