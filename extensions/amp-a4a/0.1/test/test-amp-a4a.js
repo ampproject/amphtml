@@ -1337,25 +1337,24 @@ describe('amp-a4a', () => {
       });
     });
     it('should render correctly', () => {
-      return a4a.renderAmpCreative_(metaData)
-          .then(() => {
+      return a4a.renderAmpCreative_(metaData).then(() => {
         // Verify iframe presence.
-            expect(a4aElement.children.length).to.equal(1);
-            const friendlyIframe = a4aElement.children[0];
-            expect(friendlyIframe.tagName).to.equal('IFRAME');
-            expect(friendlyIframe.src).to.not.be.ok;
-            expect(friendlyIframe.srcdoc).to.be.ok;
-            const frameDoc = friendlyIframe.contentDocument;
-            const styles = frameDoc.querySelectorAll('style[amp-custom]');
-            expect(Array.prototype.some.call(styles,
+        expect(a4aElement.children.length).to.equal(1);
+        const friendlyIframe = a4aElement.children[0];
+        expect(friendlyIframe.tagName).to.equal('IFRAME');
+        expect(friendlyIframe.src).to.not.be.ok;
+        expect(friendlyIframe.srcdoc).to.be.ok;
+        const frameDoc = friendlyIframe.contentDocument;
+        const styles = frameDoc.querySelectorAll('style[amp-custom]');
+        expect(Array.prototype.some.call(styles,
             s => {
               return s.innerHTML == 'p { background: green }';
             }),
             'Some style is "background: green"').to.be.true;
-            expect(frameDoc.body.innerHTML.trim()).to.equal('<p>some text</p>');
-            expect(urlReplacementsForDoc(frameDoc))
+        expect(frameDoc.body.innerHTML.trim()).to.equal('<p>some text</p>');
+        expect(urlReplacementsForDoc(frameDoc))
             .to.not.equal(urlReplacementsForDoc(a4aElement));
-          });
+      });
     });
 
     it('should handle click expansion correctly', () => {
