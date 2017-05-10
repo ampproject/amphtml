@@ -84,7 +84,7 @@ describe('service', () => {
     beforeEach(() => {
       count = 0;
       factory = sandbox.spy(function() {
-        return ++count;
+        return new Class();
       });
       Class = class {
         constructor() {
@@ -103,7 +103,7 @@ describe('service', () => {
       registerServiceBuilder(window, 'a', factory);
       const a2 = getService(window, 'a');
       expect(a1).to.equal(a2);
-      expect(a1).to.equal(1);
+      expect(a1).to.deep.equal({count: 1});
       expect(factory).to.be.calledOnce;
       expect(factory.args[0][0]).to.equal(window);
 
@@ -148,17 +148,17 @@ describe('service', () => {
     it('should fail without factory on initial setup', () => {
       expect(() => {
         getService(window, 'not-present');
-      }).to.throw(/not given and service missing not-present/);
+      }).to.throw(/Expected service not-present to be registered/);
     });
 
     it('should provide a promise that resolves when instantiated', () => {
       const p1 = getServicePromise(window, 'e1');
       const p2 = getServicePromise(window, 'e1');
       registerServiceBuilder(window, 'e1', function() {
-        return 'from e1';
+        return {str: 'from e1'};
       });
       return p1.then(s1 => {
-        expect(s1).to.equal('from e1');
+        expect(s1).to.deep.equal({str: 'from e1'});
         return p2.then(s2 => {
           expect(s2).to.equal(s1);
           expect(factory).to.have.not.been.called;
@@ -283,8 +283,13 @@ describe('service', () => {
 
     beforeEach(() => {
       count = 0;
+      const Class = class {
+        constructor() {
+          this.count = ++count;
+        }
+      }
       factory = sandbox.spy(function() {
-        return ++count;
+        return new Class();
       });
       windowApi = {};
       ampdoc = {
@@ -312,7 +317,7 @@ describe('service', () => {
       registerServiceBuilderForDoc(node, 'a', factory);
       const a2 = getServiceForDoc(node, 'a');
       expect(a1).to.equal(a2);
-      expect(a1).to.equal(1);
+      expect(a1).to.deep.equal({count: 1});
       expect(factory).to.be.calledOnce;
       expect(factory.args[0][0]).to.equal(ampdoc);
       expect(windowApi.services['a']).to.exist;
@@ -336,7 +341,7 @@ describe('service', () => {
       registerServiceBuilderForDoc(ampdoc, 'a', factory);
       const a2 = getServiceForDoc(ampdoc, 'a');
       expect(a1).to.equal(a2);
-      expect(a1).to.equal(1);
+      expect(a1).to.deep.equal({count: 1});
       expect(factory).to.be.calledOnce;
       expect(factory.args[0][0]).to.equal(ampdoc);
       expect(windowApi.services['a']).to.exist;
@@ -350,7 +355,7 @@ describe('service', () => {
       registerServiceBuilderForDoc(node, 'a', factory);
       const a2 = getServiceForDoc(node, 'a');
       expect(a1).to.equal(a2);
-      expect(a1).to.equal(1);
+      expect(a1).to.deep.equal({count: 1});
       expect(factory).to.be.calledOnce;
       expect(factory.args[0][0]).to.equal(ampdoc);
       expect(windowApi.services['a']).to.not.exist;
@@ -389,17 +394,17 @@ describe('service', () => {
     it('should fail without factory on initial setup', () => {
       expect(() => {
         getServiceForDoc(node, 'not-present');
-      }).to.throw(/not given and service missing not-present/);
+      }).to.throw(/Expected service not-present to be registered/);
     });
 
     it('should provide a promise that resolves when instantiated', () => {
       const p1 = getServicePromiseForDoc(node, 'e1');
       const p2 = getServicePromiseForDoc(node, 'e1');
       registerServiceBuilderForDoc(node, 'e1', function() {
-        return 'from e1';
+        return {str: 'from e1'};
       });
       return p1.then(s1 => {
-        expect(s1).to.equal('from e1');
+        expect(s1).to.deep.equal({str: 'from e1'});
         return p2.then(s2 => {
           expect(s2).to.equal(s1);
           expect(factory).to.have.not.been.called;
@@ -439,23 +444,25 @@ describe('service', () => {
           dispose: sandbox.spy(),
         };
       };
-      const disposable =
-          registerServiceBuilderForDoc(node, 'a', disposableFactory);
-      const disposableWithError =
-          registerServiceBuilderForDoc(node, 'b', function() {
-            return {
-              dispose: function() {
-                throw new Error('intentional');
-              },
-            };
-          });
+      registerServiceBuilderForDoc(node, 'a', disposableFactory);
+      const disposable = getServiceForDoc(node, 'a');
+
+      registerServiceBuilderForDoc(node, 'b', function() {
+        return {
+          dispose: sinon.stub().throws('intentional'),
+        };
+      });
+      const disposableWithError = getServiceForDoc(node, 'b');
+
       const disposableDeferredPromise = getServicePromiseForDoc(node, 'c');
-      const nonDisposable =
-          registerServiceBuilderForDoc(node, 'd', function() {
-            return {};
-          });
-      const windowDisposable =
-          registerServiceBuilder(windowApi, 'e', disposableFactory);
+
+      registerServiceBuilderForDoc(node, 'd', function() {
+        return {};
+      });
+      const nonDisposable = getServiceForDoc(node, 'd');
+
+      registerServiceBuilder(windowApi, 'e', disposableFactory);
+      const windowDisposable = getService(windowApi, 'e');
 
       disposeServicesForDoc(ampdoc);
 
@@ -472,8 +479,8 @@ describe('service', () => {
       expect(windowDisposable.dispose).to.not.be.called;
 
       // Deffered.
-      const disposableDeferred =
-          registerServiceBuilder(node, 'c', disposableFactory);
+      registerServiceBuilderForDoc(node, 'c', disposableFactory);
+      const disposableDeferred = getServiceForDoc(node, 'c');
       expect(disposableDeferred.dispose).to.not.be.called;
       return disposableDeferredPromise.then(() => {
         expect(disposableDeferred.dispose).to.be.calledOnce;
@@ -490,7 +497,7 @@ describe('service', () => {
         childWin = {};
         childWinNode =
           {nodeType: 1, ownerDocument: {defaultView: childWin}};
-        setParentWindow(childWin, window);
+        setParentWindow(childWin, windowApi);
 
         // A grandchild.
         grandchildWin = {};
