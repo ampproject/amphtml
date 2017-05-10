@@ -58,6 +58,7 @@ import {A4AVariableSource} from './a4a-variable-source';
 // TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {getContextMetadata} from '../../../src/iframe-attributes';
+import {isReportingEnabled} from '../../../ads/google/a4a/utils';
 
 /** @type {string} */
 const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
@@ -169,6 +170,7 @@ export const LIFECYCLE_STAGES = {
   visLoadAndOneSec: '25',
   iniLoad: '26',
   resumeCallback: '27',
+  sraBuildRequestDelay: '28',
 };
 
 /**
@@ -530,8 +532,9 @@ export class AmpA4A extends AMP.BaseElement {
         /** @return {!Promise<?Response>} */
         .then(adUrl => {
           checkStillCurrent(promiseId);
-          if (this.element.getAttribute('type') == 'doubleclick' &&
-              isExperimentOn(this.win, 'a4a-measure-get-ad-urls')) {
+          if ((getMode().localDev ||
+              isExperimentOn(this.win, 'a4a-measure-get-ad-urls')) &&
+              isReportingEnabled(this)) {
             this.adUrlsPromise_ = new Promise(resolve => {
               adUrlPromiseResolver = resolve;
             });
