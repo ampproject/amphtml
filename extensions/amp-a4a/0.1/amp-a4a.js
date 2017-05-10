@@ -724,7 +724,7 @@ export class AmpA4A extends AMP.BaseElement {
            //
            return instance.adUrlsPromise_;
          })));
-       return Promise.all(getAdUrlsPromise).then(unusedUrls => {
+       return Promise.all(getAdUrlsPromise).then(adUrls => {
          if (promiseId != this.promiseId_) {
            throw cancellation();
          }
@@ -733,6 +733,7 @@ export class AmpA4A extends AMP.BaseElement {
                'met.delta.AD_SLOT_ID': Math.round(
                    this.getNow_() - startTime),
                'totalSlotCount.AD_SLOT_ID': getAdUrlsPromise.length,
+               'totalUrlCount.AD_SLOT_ID': adUrls.filter(url => !!url).length,
              });
        });
      }))();
