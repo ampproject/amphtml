@@ -30,6 +30,7 @@ If you want to serve ads with Navegg data you need to use this adapter.
 </amp-ad>
 
 ```
+note: It is common to see a no-content ad in this example.
 
 ### Configuration
 
@@ -39,5 +40,6 @@ To get Navegg integration working you only need to specify the 'data-acc' with y
 ```html
   data-acc="NAVEGG_ACCOUNT_ID"
 ```
+
 For any help, please contact
 [us](https://www.navegg.com/en/institutional/#contact)
