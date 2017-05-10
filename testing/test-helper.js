@@ -15,20 +15,24 @@
  */
 
 import {xhrServiceForTesting} from '../src/service/xhr-impl';
-import {getService, getServiceForDoc} from '../src/service';
+import {
+  registerServiceBuilder,
+  registerServiceBuilderForDoc,
+} from '../src/service';
 
 export function stubService(sandbox, win, serviceId, method) {
-  const service = getService(win, serviceId, () => {
-    return {
-      [method]: () => {},
-    };
+  const stub = sandbox.stub();
+  registerServiceBuilder(win, serviceId, function() {
+    const service = {};
+    service[method] = stub;
+    return service;
   });
   return sandbox.stub(service, method);
 }
 
 export function stubServiceForDoc(sandbox, ampdoc, serviceId, method) {
   const stub = sandbox.stub();
-  getServiceForDoc(ampdoc, serviceId, () => {
+  registerServiceBuilderForDoc(ampdoc, serviceId, function() {
     const service = {};
     service[method] = stub;
     return service;

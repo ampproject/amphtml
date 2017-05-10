@@ -160,30 +160,16 @@ function getLocalExistingServiceForEmbedWinOrNull(embedWin, id) {
 
 /**
  * Returns a service for the given id and window (a per-window singleton).
- * If the service is not yet available the factory function is invoked and
- * expected to return the service.
  * Users should typically wrap this as a special purpose function (e.g.
  * `vsyncFor(win)`) for type safety and because the factory should not be
  * passed around.
  * @param {!Window} win
  * @param {string} id of the service.
- * @param {function(!Window):T=} opt_factory Factory to create the service
- *     if the service does not exist yet. It is an error if the service does
- *     not exist and the caller does not provide opt_factory.
  * @template T
  * @return {T}
  */
-export function getService(win, id, opt_factory) {
+export function getService(win, id) {
   win = getTopWindow(win);
-  if (!isServiceRegistered(win, id)) {
-    dev().assert(opt_factory, 'Factory not given and service missing %s', id);
-    registerServiceBuilder(
-        win,
-        id,
-        /* opt_ctor */undefined,
-        opt_factory,
-        /* opt_instantiate */ true);
-  }
   return getServiceInternal(win, id);
 }
 
@@ -257,29 +243,14 @@ export function getServicePromiseOrNull(win, id) {
 
 /**
  * Returns a service for the given id and ampdoc (a per-ampdoc singleton).
- * If the service is not yet available the factory function is invoked and
- * expected to return the service.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
- * @param {function(!./service/ampdoc-impl.AmpDoc):T=} opt_factory
- *     Factory to create the service if the service does not exist yet.
- *     It is an error if the service does not exist and the caller does
- *     not provide opt_factory.
  * @return {T}
  * @template T
  */
-export function getServiceForDoc(nodeOrDoc, id, opt_factory) {
+export function getServiceForDoc(nodeOrDoc, id) {
   const ampdoc = getAmpdoc(nodeOrDoc);
   const holder = getAmpdocServiceHolder(ampdoc);
-  if (!isServiceRegistered(holder, id)) {
-    dev().assert(opt_factory, 'Factory not given and service missing %s', id);
-    registerServiceBuilderForDoc(
-        ampdoc,
-        id,
-        /* opt_ctor */ undefined,
-        opt_factory,
-        /* opt_instantiate */ true);
-  }
   return getServiceInternal(holder, id);
 }
 

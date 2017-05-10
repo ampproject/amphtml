@@ -17,7 +17,7 @@
 import {isExperimentOn} from '../../../src/experiments';
 import {xhrFor} from '../../../src/services';
 import {historyForDoc} from '../../../src/services';
-import {getService} from '../../../src/service';
+import {registerServiceBuilder} from '../../../src/service';
 import {Layout} from '../../../src/layout';
 import {base64UrlEncodeFromBytes} from '../../../src/utils/base64';
 import {getCryptoRandomBytesArray} from '../../../src/utils/bytes';
@@ -64,8 +64,9 @@ export class AmpShareTracking extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     if (!this.isExperimentOn_()) {
-      getService(this.win, 'share-tracking',
-          () => Promise.reject(user().createError(TAG + ' disabled')));
+      registerServiceBuilder(this.win, 'share-tracking', function() {
+        return Promise.reject(user().createError(TAG + ' disabled'));
+      });
       user().assert(false, `${TAG} experiment is disabled`);
     }
 
@@ -86,8 +87,9 @@ export class AmpShareTracking extends AMP.BaseElement {
       }
       return {incomingFragment, outgoingFragment};
     });
-
-    getService(this.win, 'share-tracking', () => this.shareTrackingFragments_);
+    registerServiceBuilder(this.win, 'share-tracking', function() {
+      return this.shareTrackingFragments_;
+    });
   }
 
   /**

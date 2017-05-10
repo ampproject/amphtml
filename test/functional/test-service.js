@@ -83,7 +83,7 @@ describe('service', () => {
 
     beforeEach(() => {
       count = 0;
-      factory = sandbox.spy(() => {
+      factory = sandbox.spy(function() {
         return ++count;
       });
       Class = class {
@@ -98,15 +98,19 @@ describe('service', () => {
     });
 
     it('should make per window singletons', () => {
-      const a1 = getService(window, 'a', factory);
-      const a2 = getService(window, 'a', factory);
+      registerServiceBuilder(window, 'a', factory);
+      const a1 = getService(window, 'a');
+      registerServiceBuilder(window, 'a', factory);
+      const a2 = getService(window, 'a');
       expect(a1).to.equal(a2);
       expect(a1).to.equal(1);
       expect(factory).to.be.calledOnce;
       expect(factory.args[0][0]).to.equal(window);
 
-      const b1 = getService(window, 'b', factory);
-      const b2 = getService(window, 'b', factory);
+      registerServiceBuilder(window, 'b', factory);
+      const b1 = getService(window, 'b');
+      registerServiceBuilder(window, 'b', factory);
+      const b2 = getService(window, 'b');
       expect(b1).to.equal(b2);
       expect(b1).to.not.equal(a1);
       expect(factory).to.have.callCount(2);
@@ -128,15 +132,9 @@ describe('service', () => {
       expect(count).to.equal(1);
     });
 
-    it('should work without a factory', () => {
-      const c1 = getService(window, 'c', factory);
-      const c2 = getService(window, 'c');
-      expect(c1).to.equal(c2);
-      expect(factory).to.be.calledOnce;
-    });
-
     it('should return the service when it exists', () => {
-      const c1 = getService(window, 'c', factory);
+      registerServiceBuilder(window, 'c', factory);
+      const c1 = getService(window, 'c');
       const c2 = getExistingServiceOrNull(window, 'c');
       expect(c1).to.equal(c2);
     });
@@ -156,7 +154,7 @@ describe('service', () => {
     it('should provide a promise that resolves when instantiated', () => {
       const p1 = getServicePromise(window, 'e1');
       const p2 = getServicePromise(window, 'e1');
-      getService(window, 'e1', function() {
+      registerServiceBuilder(window, 'e1', function() {
         return 'from e1';
       });
       return p1.then(s1 => {
@@ -211,18 +209,19 @@ describe('service', () => {
     });
 
     it('should resolve service for a child window', () => {
-      const c = getService(window, 'c', factory);
+      registerServiceBuilder(window, 'c', factory);
+      const c = getService(window, 'c');
 
       // A child.
       const child = {};
       setParentWindow(child, window);
-      expect(getService(child, 'c', factory)).to.equal(c);
+      expect(getService(child, 'c')).to.equal(c);
       expect(getExistingServiceOrNull(child, 'c')).to.equal(c);
 
       // A grandchild.
       const grandchild = {};
       setParentWindow(grandchild, child);
-      expect(getService(grandchild, 'c', factory)).to.equal(c);
+      expect(getService(grandchild, 'c')).to.equal(c);
       expect(getExistingServiceOrNull(grandchild, 'c')).to.equal(c);
     });
 
@@ -239,7 +238,8 @@ describe('service', () => {
         grandchildWin = {};
         setParentWindow(grandchildWin, childWin);
 
-        topService = getService(window, 'c', factory);
+        registerServiceBuilder(window, 'c', factory);
+        topService = getService(window, 'c');
       });
 
       it('should return top service for top window', () => {
@@ -283,7 +283,7 @@ describe('service', () => {
 
     beforeEach(() => {
       count = 0;
-      factory = sandbox.spy(() => {
+      factory = sandbox.spy(function() {
         return ++count;
       });
       windowApi = {};
@@ -293,8 +293,9 @@ describe('service', () => {
       };
       ampdocMock = sandbox.mock(ampdoc);
       const ampdocServiceApi = {getAmpDoc: () => ampdoc};
-
-      getService(windowApi, 'ampdoc', () => ampdocServiceApi);
+      registerServiceBuilder(windowApi, 'ampdoc', function() {
+        return ampdocServiceApi;
+      });
       node = {nodeType: 1, ownerDocument: {defaultView: windowApi}};
       resetServiceForTesting(windowApi, 'a');
       resetServiceForTesting(windowApi, 'b');
@@ -306,9 +307,10 @@ describe('service', () => {
 
     it('should make per ampdoc singletons and store them in window', () => {
       ampdocMock.expects('isSingleDoc').returns(true).atLeast(1);
-
-      const a1 = getServiceForDoc(node, 'a', factory);
-      const a2 = getServiceForDoc(node, 'a', factory);
+      registerServiceBuilderForDoc(node, 'a', factory);
+      const a1 = getServiceForDoc(node, 'a');
+      registerServiceBuilderForDoc(node, 'a', factory);
+      const a2 = getServiceForDoc(node, 'a');
       expect(a1).to.equal(a2);
       expect(a1).to.equal(1);
       expect(factory).to.be.calledOnce;
@@ -316,11 +318,10 @@ describe('service', () => {
       expect(windowApi.services['a']).to.exist;
       expect(ampdoc.services).to.not.exist;
 
-      const b1 = getServiceForDoc(node, 'b', factory);
-      const b2 = getServiceForDoc(node, 'b', factory);
-      const b3 = getServiceForDoc(node, 'b');
+      registerServiceBuilderForDoc(node, 'b', factory);
+      const b1 = getServiceForDoc(node, 'b');
+      const b2 = getServiceForDoc(node, 'b');
       expect(b1).to.equal(b2);
-      expect(b1).to.equal(b3);
       expect(b1).to.not.equal(a1);
       expect(factory).to.have.callCount(2);
       expect(factory.args[1][0]).to.equal(ampdoc);
@@ -330,12 +331,11 @@ describe('service', () => {
 
     it('should make per ampdoc singletons via ampdoc', () => {
       ampdocMock.expects('isSingleDoc').returns(true).atLeast(1);
-
-      const a1 = getServiceForDoc(ampdoc, 'a', factory);
-      const a2 = getServiceForDoc(ampdoc, 'a', factory);
-      const a3 = getServiceForDoc(ampdoc, 'a', factory);
+      registerServiceBuilderForDoc(ampdoc, 'a', factory);
+      const a1 = getServiceForDoc(ampdoc, 'a');
+      registerServiceBuilderForDoc(ampdoc, 'a', factory);
+      const a2 = getServiceForDoc(ampdoc, 'a');
       expect(a1).to.equal(a2);
-      expect(a1).to.equal(a3);
       expect(a1).to.equal(1);
       expect(factory).to.be.calledOnce;
       expect(factory.args[0][0]).to.equal(ampdoc);
@@ -345,9 +345,10 @@ describe('service', () => {
 
     it('should make per ampdoc singletons and store them in ampdoc', () => {
       ampdocMock.expects('isSingleDoc').returns(false).atLeast(1);
-
-      const a1 = getServiceForDoc(node, 'a', factory);
-      const a2 = getServiceForDoc(node, 'a', factory);
+      registerServiceBuilderForDoc(node, 'a', factory);
+      const a1 = getServiceForDoc(node, 'a');
+      registerServiceBuilderForDoc(node, 'a', factory);
+      const a2 = getServiceForDoc(node, 'a');
       expect(a1).to.equal(a2);
       expect(a1).to.equal(1);
       expect(factory).to.be.calledOnce;
@@ -355,8 +356,10 @@ describe('service', () => {
       expect(windowApi.services['a']).to.not.exist;
       expect(ampdoc.services['a']).to.exist;
 
-      const b1 = getServiceForDoc(node, 'b', factory);
-      const b2 = getServiceForDoc(node, 'b', factory);
+      registerServiceBuilderForDoc(node, 'b', factory);
+      const b1 = getServiceForDoc(node, 'b');
+      registerServiceBuilderForDoc(node, 'b', factory);
+      const b2 = getServiceForDoc(node, 'b');
       expect(b1).to.equal(b2);
       expect(b1).to.not.equal(a1);
       expect(factory).to.have.callCount(2);
@@ -383,13 +386,6 @@ describe('service', () => {
       });
     });
 
-    it('should work without a factory', () => {
-      const c1 = getServiceForDoc(node, 'c', factory);
-      const c2 = getServiceForDoc(node, 'c');
-      expect(c1).to.equal(c2);
-      expect(factory).to.be.calledOnce;
-    });
-
     it('should fail without factory on initial setup', () => {
       expect(() => {
         getServiceForDoc(node, 'not-present');
@@ -399,7 +395,7 @@ describe('service', () => {
     it('should provide a promise that resolves when instantiated', () => {
       const p1 = getServicePromiseForDoc(node, 'e1');
       const p2 = getServicePromiseForDoc(node, 'e1');
-      getServiceForDoc(node, 'e1', function() {
+      registerServiceBuilderForDoc(node, 'e1', function() {
         return 'from e1';
       });
       return p1.then(s1 => {
@@ -419,14 +415,14 @@ describe('service', () => {
 
     it('should resolve service for a child window', () => {
       ampdocMock.expects('isSingleDoc').returns(true).atLeast(1);
-      const c = getServiceForDoc(node, 'c', factory);
+      registerServiceBuilderForDoc(node, 'c', factory);
+      const c = getServiceForDoc(node, 'c');
 
       // A child.
       const childWin = {};
       const childWinNode =
           {nodeType: 1, ownerDocument: {defaultView: childWin}};
       setParentWindow(childWin, windowApi);
-      expect(getServiceForDoc(childWinNode, 'c', factory)).to.equal(c);
       expect(getServiceForDoc(childWinNode, 'c')).to.equal(c);
 
       // A grandchild.
@@ -434,7 +430,6 @@ describe('service', () => {
       const grandChildWinNode =
           {nodeType: 1, ownerDocument: {defaultView: grandchildWin}};
       setParentWindow(grandchildWin, childWin);
-      expect(getServiceForDoc(grandChildWinNode, 'c', factory)).to.equal(c);
       expect(getServiceForDoc(grandChildWinNode, 'c')).to.equal(c);
     });
 
@@ -444,20 +439,23 @@ describe('service', () => {
           dispose: sandbox.spy(),
         };
       };
-      const disposable = getServiceForDoc(node, 'a', disposableFactory);
-      const disposableWithError = getServiceForDoc(node, 'b', function() {
-        return {
-          dispose: function() {},
-        };
-      });
-      sandbox.stub(disposableWithError, 'dispose', function() {
-        throw new Error('intentional');
-      });
+      const disposable =
+          registerServiceBuilderForDoc(node, 'a', disposableFactory);
+      const disposableWithError =
+          registerServiceBuilderForDoc(node, 'b', function() {
+            return {
+              dispose: function() {
+                throw new Error('intentional');
+              },
+            };
+          });
       const disposableDeferredPromise = getServicePromiseForDoc(node, 'c');
-      const nonDisposable = getServiceForDoc(node, 'd', () => {
-        return {};
-      });
-      const windowDisposable = getService(windowApi, 'e', disposableFactory);
+      const nonDisposable =
+          registerServiceBuilderForDoc(node, 'd', function() {
+            return {};
+          });
+      const windowDisposable =
+          registerServiceBuilder(windowApi, 'e', disposableFactory);
 
       disposeServicesForDoc(ampdoc);
 
@@ -474,7 +472,8 @@ describe('service', () => {
       expect(windowDisposable.dispose).to.not.be.called;
 
       // Deffered.
-      const disposableDeferred = getServiceForDoc(node, 'c', disposableFactory);
+      const disposableDeferred =
+          registerServiceBuilder(node, 'c', disposableFactory);
       expect(disposableDeferred.dispose).to.not.be.called;
       return disposableDeferredPromise.then(() => {
         expect(disposableDeferred.dispose).to.be.calledOnce;
@@ -499,7 +498,8 @@ describe('service', () => {
             {nodeType: 1, ownerDocument: {defaultView: grandchildWin}};
         setParentWindow(grandchildWin, childWin);
 
-        topService = getServiceForDoc(ampdoc, 'c', factory);
+        registerServiceBuilderForDoc(ampdoc, 'c', factory);
+        topService = getServiceForDoc(ampdoc, 'c');
       });
 
       it('should return top service for ampdoc', () => {
@@ -548,8 +548,12 @@ describe('service', () => {
         };
         nonEmbeddable = {};
         embeddable = {adoptEmbedWindow: sandbox.spy()};
-        getServiceForDoc(ampdoc, 'embeddable', () => embeddable);
-        getServiceForDoc(ampdoc, 'nonEmbeddable', () => nonEmbeddable);
+        registerServiceBuilderForDoc(ampdoc, 'embeddable', function() {
+          return embeddable;
+        });
+        registerServiceBuilderForDoc(ampdoc, 'nonEmbeddable', function() {
+          return nonEmbeddable;
+        });
       });
 
       it('should test embeddable interface', () => {

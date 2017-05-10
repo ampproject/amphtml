@@ -35,7 +35,7 @@ import {
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 import {
-  getService,
+  registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service';
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
@@ -83,7 +83,7 @@ describe('amp-analytics', function() {
       markElementScheduledForTesting(iframe.win, 'amp-analytics');
       markElementScheduledForTesting(iframe.win, 'amp-user-notification');
       resetServiceForTesting(iframe.win, 'xhr');
-      getService(iframe.win, 'xhr', () => {
+      registerServiceBuilder(iframe.win, 'xhr', function() {
         return {fetchJson: (url, init) => {
           expect(init.requireAmpResponseSourceOrigin).to.be.undefined;
           if (configWithCredentials) {
@@ -96,8 +96,9 @@ describe('amp-analytics', function() {
       });
 
       resetServiceForTesting(iframe.win, 'crypto');
-      crypto = new Crypto(iframe.win);
-      getService(iframe.win, 'crypto', () => crypto);
+      registerServiceBuilder(iframe.win, 'crypto', function() {
+        return new Crypto(iframe.win);
+      });
       const link = document.createElement('link');
       link.setAttribute('rel', 'canonical');
       link.setAttribute('href', './test-canonical.html');

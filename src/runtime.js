@@ -500,7 +500,11 @@ function registerElementClass(global, name, implementationClass, opt_css) {
     };
   }
   // Resolve this extension's Service Promise.
-  getService(global, name, emptyService);
+  registerServiceBuilder(global,
+      name,
+      emptyService,
+      /* opt_factory */ undefined,
+      /* opt_instantiate */ true);
 }
 
 
