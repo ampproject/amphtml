@@ -287,7 +287,7 @@ describe('service', () => {
         constructor() {
           this.count = ++count;
         }
-      }
+      };
       factory = sandbox.spy(function() {
         return new Class();
       });
@@ -449,7 +449,7 @@ describe('service', () => {
 
       registerServiceBuilderForDoc(node, 'b', function() {
         return {
-          dispose: sinon.stub().throws('intentional'),
+          dispose: sandbox.stub().throws('intentional'),
         };
       });
       const disposableWithError = getServiceForDoc(node, 'b');

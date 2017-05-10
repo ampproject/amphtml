@@ -2156,8 +2156,8 @@ describes.realWin('services', {
       bodyResolver();
       return p1;
     }).then(service => {
-        expect(resolvedService).to.deep.equal({str: 'fake1'});
-        expect(service).to.deep.equal({str: 'fake1'});
+      expect(resolvedService).to.deep.equal({str: 'fake1'});
+      expect(service).to.deep.equal({str: 'fake1'});
     });
   });
 

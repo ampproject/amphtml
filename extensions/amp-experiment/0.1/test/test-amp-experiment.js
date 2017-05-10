@@ -131,7 +131,6 @@ describe('amp-experiment', () => {
         .returns(Promise.resolve(null));
 
     experiment.buildCallback();
-    debugger;
     return variantForOrNull(win).then(variants => {
       expect(variants).to.jsonEqual({
         'experiment-1': 'variant-a',
