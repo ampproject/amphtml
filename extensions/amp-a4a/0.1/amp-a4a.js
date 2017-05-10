@@ -439,11 +439,18 @@ export class AmpA4A extends AMP.BaseElement {
     this.fromResumeCallback = true;
     // If layout of page has not changed, onLayoutMeasure will not be called
     // so do so explicitly.
-    const resource =
-      this.element.getResources().getResourceForElement(this.element);
+    const resource = this.getResource();
     if (resource.hasBeenMeasured() && !resource.isMeasureRequested()) {
       this.onLayoutMeasure();
     }
+  }
+
+  /**
+   * @return {!../../..//src/service/resource}
+   * @visibileForTesting
+   */
+  getResource() {
+    return this.element.getResources().getResourceForElement(this.element);
   }
 
   /**
@@ -727,7 +734,8 @@ export class AmpA4A extends AMP.BaseElement {
        const getAdUrlsPromise = [];
        resources.forEach(r => getAdUrlsPromise.push(r.element.getImpl().then(
          instance => {
-           //
+           // Note that ad url promise could be null if isValidElement returns
+           // false.
            return instance.adUrlsPromise_;
          })));
        return Promise.all(getAdUrlsPromise).then(adUrls => {

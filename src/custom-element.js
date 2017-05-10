@@ -1177,7 +1177,7 @@ function createBaseCustomElementClass(win) {
 
     /**
      * Returns reference to implementation after it has been built.
-     * @return {!Promise<?./base-element.BaseElement>}
+     * @return {!Promise<!./base-element.BaseElement>}
      */
     getImpl() {
       return this.whenBuilt().then(() => this.implementation_);
