@@ -588,9 +588,6 @@ amp-fresh {
 
 /**
  * Animated equalizer icon for muted autoplaying videos.
- *
- * TODO(aghassemi, #5306): Move to video extension when video is out of core.
- * TODO(dvoytenko, #8464): cleanup old `i-amp-scroll-container`.
  */
 i-amphtml-video-mask, i-amp-video-mask {
   z-index: 1;
