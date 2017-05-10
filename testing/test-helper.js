@@ -27,7 +27,7 @@ export function stubService(sandbox, win, serviceId, method) {
     service[method] = stub;
     return service;
   });
-  return sandbox.stub(service, method);
+  return stub;
 }
 
 export function stubServiceForDoc(sandbox, ampdoc, serviceId, method) {
