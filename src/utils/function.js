@@ -15,7 +15,7 @@
  */
 
 /**
- * Wraps a given callback and apply rate limit.
+ * Wraps a given callback and applies a rate limit.
  * It throttles the calls so that no consequent calls have time interval
  * smaller than the given minimal interval.
  *
@@ -53,6 +53,16 @@ export function throttle(win, callback, minInterval) {
   };
 }
 
+/**
+ * Wraps a given callback and applies a wait timer, so that minInterval
+ * milliseconds must pass since the last call before the callback is actually
+ * invoked.
+ *
+ * @param {!Window} win
+ * @param {function()} callback
+ * @param {number} minInterval the minimum time interval in millisecond
+ * @returns {function()}
+ */
 export function debounce(win, callback, minInterval) {
   let locker = 0;
   let timestamp = 0;
@@ -65,7 +75,7 @@ export function debounce(win, callback, minInterval) {
 
   function waiter() {
     locker = 0;
-    const remaining = timestamp + minInterval - Date.now();
+    const remaining = minInterval - (Date.now() - timestamp);
     if (remaining > 0) {
       locker = win.setTimeout(waiter, remaining);
     } else {
