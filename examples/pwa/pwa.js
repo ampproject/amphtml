@@ -22,6 +22,9 @@ function log(args) {
   console/*OK*/.log.apply(console, var_args);
 }
 
+function startsWith(string, prefix) {
+  return string.lastIndexOf(prefix, 0) == 0;
+}
 
 class Shell {
 
@@ -98,8 +101,8 @@ class Shell {
     if (a) {
       const url = new URL(a.href);
       if (url.origin == this.win.location.origin &&
-              url.pathname.indexOf('/pwa/') == 0 &&
-              url.pathname.indexOf('amp.max.html') != -1) {
+              startsWith(url.pathname, '/pwa/') &&
+              url.pathname.indexOf('amp.html') != -1) {
         e.preventDefault();
         const newPage = url.pathname;
         log('Internal link to: ', newPage);
@@ -336,7 +339,7 @@ function parseQueryString(queryString) {
   if (!queryString) {
     return params;
   }
-  if (queryString.indexOf('?') == 0 || queryString.indexOf('#') == 0) {
+  if (startsWith(queryString, '?') || startsWith(queryString, '#')) {
     queryString = queryString.substr(1);
   }
   const pairs = queryString.split('&');

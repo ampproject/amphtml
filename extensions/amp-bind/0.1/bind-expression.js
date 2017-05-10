@@ -94,7 +94,6 @@ const FUNCTION_WHITELIST = (function() {
     Math.sign,
     encodeURI,
     encodeURIComponent,
-    copyAndSplice,
   ];
   // Creates a prototype-less map of function name to the function itself.
   // This makes function lookups faster (compared to Array.indexOf).
@@ -108,6 +107,10 @@ const FUNCTION_WHITELIST = (function() {
       out[type][f.name] = f;
     }
   });
+
+  // Custom functions (non-js-built-ins) must be added manually as their names
+  // will be minified at compile time.
+  out[BUILT_IN_FUNCTIONS]['copyAndSplice'] = copyAndSplice;
   return out;
 })();
 
@@ -197,7 +200,7 @@ export class BindExpression {
 
       case AstNodeType.INVOCATION:
         // Built-in functions don't have a caller object.
-        const isBuiltIn = (args[0] === null);
+        const isBuiltIn = (args[0] === undefined);
 
         const caller = this.eval_(args[0], scope);
         const params = this.eval_(args[1], scope);
@@ -212,6 +215,11 @@ export class BindExpression {
             unsupportedError = `${method} is not a supported function.`;
           }
         } else {
+          if (caller === null) {
+            user().warn(TAG, `Cannot invoke method ${method} on null; ` +
+                `returning null.`);
+            return null;
+          }
           const callerType = Object.prototype.toString.call(caller);
           const whitelist = FUNCTION_WHITELIST[callerType];
           if (whitelist) {

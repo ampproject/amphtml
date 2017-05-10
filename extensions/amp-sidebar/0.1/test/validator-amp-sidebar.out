@@ -1,4 +1,3 @@
 FAIL
-amp-sidebar/0.1/test/validator-amp-sidebar.html:50:2 The tag 'amp-sidebar' appears more than once in the document. (see https://www.ampproject.org/docs/reference/components/layout/amp-sidebar) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
-amp-sidebar/0.1/test/validator-amp-sidebar.html:51:4 The tag 'amp-ad' may not appear as a descendant of tag 'amp-sidebar'. (see https://www.ampproject.org/docs/reference/components/ads/amp-ad) [AMP_TAG_PROBLEM]
-amp-sidebar/0.1/test/validator-amp-sidebar.html:54:2 The attribute 'side' in tag 'amp-sidebar' is set to the invalid value 'center'. (see https://www.ampproject.org/docs/reference/components/layout/amp-sidebar) [AMP_TAG_PROBLEM]
+amp-sidebar/0.1/test/validator-amp-sidebar.html:51:4 The tag 'amp-ad' may not appear as a descendant of tag 'amp-sidebar'. (see https://www.ampproject.org/docs/reference/components/amp-ad) [AMP_TAG_PROBLEM]
+amp-sidebar/0.1/test/validator-amp-sidebar.html:54:2 The attribute 'side' in tag 'amp-sidebar' is set to the invalid value 'center'. (see https://www.ampproject.org/docs/reference/components/amp-sidebar) [AMP_TAG_PROBLEM]

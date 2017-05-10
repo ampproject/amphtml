@@ -32,7 +32,7 @@ let overrideBootstrapBaseUrl;
 /**
  * Produces the attributes for the ad template.
  * @param {!Window} parentWindow
- * @param {!Element} element
+ * @param {!AmpElement} element
  * @param {string=} opt_type
  * @param {Object=} opt_context
  * @return {!Object} Contains
@@ -59,7 +59,7 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
  * Creates the iframe for the embed. Applies correct size and passes the embed
  * attributes to the frame via JSON inside the fragment.
  * @param {!Window} parentWindow
- * @param {!Element} parentElement
+ * @param {!AmpElement} parentElement
  * @param {string=} opt_type
  * @param {Object=} opt_context
  * @return {!Element} The iframe.
@@ -294,18 +294,6 @@ export function generateSentinel(parentWindow) {
     windowDepth++;
   }
   return String(windowDepth) + '-' + getRandom(parentWindow);
-}
-
-/**
- * Generates sentinel, and context, and returns context
- * @param {!Element} iframe
- * @param {!Window} window The parent window of the iframe.
- * @return {Object}
- */
-export function generateSentinelAndContext(iframe, window) {
-  const sentinel = generateSentinel(window);
-  const context = getContextMetadata(window, iframe, sentinel)._context;
-  return context;
 }
 
 /**

@@ -5,6 +5,7 @@
   <title>Viewer</title>
   <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
   <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <script src="/dist/v0/examples/amp-viewer-host.max.js"></script>
   <style>
     html, body {
       overflow: hidden;
@@ -237,7 +238,9 @@
       this.iframe.style.display = 'none';
       this.container.appendChild(this.iframe);
 
-      this.awaitHandshake_();
+      this.ampViewerHost_ = new AmpViewerHost(window, this.iframe,
+        this.frameOrigin_, this.processRequest_.bind(this),
+        /* logs id */ this.id);
 
       this.iframe.onload = this.loaded_.bind(this);
       setTimeout(function() {
@@ -247,74 +250,30 @@
       }.bind(this));
     };
 
-
-    Viewer.prototype.awaitHandshake_ = function() {
-      log('Viewer.prototype.awaitHandshake_');
-      var targetId = this.iframe.id;
-      var target = this.iframe.contentWindow;
-      var targetOrigin = this.frameOrigin_;
-      var listener = function(event) {
-        if (event.origin == targetOrigin &&
-                this.isChannelOpen_(event.data) &&
-                (!event.source || event.source == target)) {
-          log('event: ',event);
-          log('Viewer ' + this.id + ' messaging established with ',
-              targetOrigin);
-          window.removeEventListener('message', listener, false);
-
-          const message = {
-            app: APP,
-            requestid: event.data.requestid,
-            data: {},
-            type: MessageType.RESPONSE,
-          };
-          target./*OK*/postMessage(message, targetOrigin);
-
-          this.messaging_ = new ViewerMessaging(target, targetOrigin,
-              this.processRequest_.bind(this), targetId);
-          this.sendRequest_('visibilitychange', {
-            state: this.visibilityState_,
-            prerenderSize: this.prerenderSize
-          }, true);
-        }
-      }.bind(this);
-      window.addEventListener('message', listener, false);
-    };
-
-    Viewer.prototype.isChannelOpen_ = function(eventData) {
-      return eventData.app == APP &&
-        eventData.name == 'channelOpen';
-    };
-
-
     Viewer.prototype.toggleVisibility = function(visible, updateToggle) {
       log('Viewer ' + this.id + ' visibility -> ', visible);
       this.visibilityState_ = visible ? 'visible' : 'hidden';
-      this.sendRequest_('visibilitychange', {
+      this.ampViewerHost_.sendRequest('visibilitychange', {
         state: this.visibilityState_,
         prerenderSize: this.prerenderSize
       }, true);
       if (updateToggle) {
         this.updateVisibilityToggle_();
       }
-    };
-
-
+    };    
+    
     Viewer.prototype.loaded_ = function() {
       if (this.alreadyLoaded_) {
         return;
       }
       log('AMP Loaded');
       this.alreadyLoaded_ = true;
-
       var waiter = this.container.querySelector('.wait');
       if (waiter) {
         waiter.parentElement.removeChild(waiter);
       }
-
       this.iframe.style.display = '';
       this.iframe.style.visibility = '';
-
       this.iframe.contentWindow.onbeforeunload = (function() {
         this.container.style.paddingTop = '120px';
         this.container.textContent =
@@ -332,7 +291,7 @@
 
     Viewer.prototype.onScroll_ = function() {
       log('Viewer.prototype.onScroll_');
-      this.sendRequest_('viewport', {
+      this.ampViewerHost_.sendRequest('viewport', {
         scrollTop: this.container./*OK*/scrollTop
       }, false);
     };
@@ -343,7 +302,7 @@
           this.container./*OK*/offsetHeight,
           this.header./*OK*/offsetHeight,
           this.container./*OK*/scrollTop);
-      this.sendRequest_('viewport', {
+      this.ampViewerHost_.sendRequest('viewport', {
         scrollTop: this.container./*OK*/scrollTop,
         width: this.container./*OK*/offsetWidth,
         height: this.container./*OK*/offsetHeight,
@@ -394,7 +353,7 @@
       // Even more trivial. Always assumes that only one step was popped in
       // history.
       this.stackIndex_--;
-      this.sendRequest_('historyPopped', {
+      this.ampViewerHost_.sendRequest('historyPopped', {
         newStackIndex: this.stackIndex_
       }, false);
       log('history popped to ', this.stackIndex_);
@@ -406,6 +365,7 @@
           'Visible' : 'Prerendering';
     };
 
+
     Viewer.prototype.broadcast_ = function(message) {
       log('broadcast: ', message);
       var self = this;
@@ -416,14 +376,16 @@
       });
     };
 
+
     Viewer.prototype.scrollAmpDoc = function(scrollTop) {
       log('viewer scroll amp doc: ', scrollTop);
-      this.sendRequest_('scroll', {scrollTop}, true);
+      this.ampViewerHost_.sendRequest('scroll', {scrollTop}, true);
     };
 
-    Viewer.prototype.processRequest_ = function(type, data, awaitResponse) {
-      log('Viewer.prototype.processRequest_', type);
-      switch(type) {
+
+    Viewer.prototype.processRequest_ = function(name, data, awaitResponse) {
+      log(this.id + ': Viewer.prototype.processRequest_', name);
+      switch(name) {
         case 'documentLoaded':
           return this.documentReady_();
         case 'requestFullOverlay':
@@ -441,28 +403,30 @@
           return this.handleUnload_();
         case 'tick':
           log('[CSI] tick. label:', data.label);
-          return;
+          return Promise.resolve();
         case 'a2a':
           log('a2a navigation', data);
-          return;
+          return Promise.resolve();
         case 'sendCsi':
           log('[CSI] sendCsi.');
-          return;
+          return Promise.resolve();
         case 'touchstart':
         case 'touchmove':
         case 'touchend':
-          log('touch event!', type);
-          return;
+          log('touch event!', name);
+          return Promise.resolve();
         case 'documentHeight':
         case 'setFlushParams':
         case 'prerenderComplete':
         case 'scroll':
         case 'replaceHistory':
-          return;
+        case 'visibilitychange':
+          return Promise.resolve();
         default:
-          return Promise.reject('request not supported: ' + type);
+          return Promise.reject('request not supported: ', name);
       }
     };
+
 
     Viewer.prototype.handleUnload_ = function(type, data, awaitResponse) {
       log('Viewer.prototype.handleUnload_');
@@ -472,21 +436,12 @@
       return Promise.resolve();
     };
 
-    Viewer.prototype.sendRequest_ = function(type, data, awaitResponse) {
-      log('Viewer.prototype.sendRequest_');
-      if (!this.messaging_) {
-        return;
-      }
-      return this.messaging_.sendRequest(type, data, awaitResponse);
-    };
-
 
     function log() {
       var var_args = Array.prototype.slice.call(arguments, 0);
       var_args.unshift('[VIEWER]');
       console/*OK*/.log.apply(console, var_args);
     }
-
 
     function parseUrl(urlString) {
       var a = document.createElement('a');
@@ -525,35 +480,35 @@
       new Viewer(
           'container1',
           '1',
-          './everything.amp.max.html?amp_js_v=0.1',
+          './everything.amp.html?amp_js_v=0.1',
           true).start();
       addShowContainer('1');
 
       new Viewer(
           'container2',
           '2',
-          './article.amp.max.html?amp_js_v=0.1',
+          './article.amp.html?amp_js_v=0.1',
           false).start();
       addShowContainer('2');
 
       new Viewer(
           'container3',
           '3',
-          './article-access.amp.max.html?amp_js_v=0.1',
+          './article-access.amp.html?amp_js_v=0.1',
           false).start();
       addShowContainer('3');
 
       new Viewer(
           'container4',
           '4',
-          './alp.amp.max.html',
+          './alp.amp.html',
           false).start();
       addShowContainer('4');
 
       new Viewer(
           'container5',
           '5',
-          './article-fixed-header.amp.max.html?amp_js_v=0.1',
+          './article-fixed-header.amp.html?amp_js_v=0.1',
           false).start();
       addShowContainer('5');
 

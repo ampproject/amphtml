@@ -32,6 +32,16 @@ import {setStyle} from '../../../src/style';
 import {loadPromise} from '../../../src/event-helper';
 import {getHtml} from '../../../src/get-html';
 import {removeElement} from '../../../src/dom';
+import {getServiceForDoc} from '../../../src/service';
+import {isExperimentOn} from '../../../src/experiments';
+import {
+  installPositionObserverServiceForDoc,
+  PositionObserverFidelity,
+  SEND_POSITIONS_HIGH_FIDELITY,
+  POSITION_HIGH_FIDELITY,
+} from '../../../src/service/position-observer-impl';
+
+
 
 const VISIBILITY_TIMEOUT = 10000;
 
@@ -61,6 +71,12 @@ export class AmpAdXOriginIframeHandler {
     /** @private {SubscriptionApi} */
     this.embedStateApi_ = null;
 
+    /** @private {?SubscriptionApi} */
+    this.positionObserverHighFidelityApi_ = null;
+
+    /** @private {?../../../src/service/position-observer-impl.AmpDocPositionObserver} */
+    this.positionObserver_ = null;
+
     /** @private {!Array<!Function>} functions to unregister listeners */
     this.unlisteners_ = [];
 
@@ -89,6 +105,31 @@ export class AmpAdXOriginIframeHandler {
     this.embedStateApi_ = new SubscriptionApi(
         this.iframe, 'send-embed-state', true,
         () => this.sendEmbedInfo_(this.baseInstance_.isInViewport()));
+
+    // High-fidelity positions for scrollbound animations.
+    // Protected by 'amp-animation' experiment for now.
+    if (isExperimentOn(this.baseInstance_.win, 'amp-animation')) {
+      let posObInstalled = false;
+      this.positionObserverHighFidelityApi_ = new SubscriptionApi(
+        this.iframe, SEND_POSITIONS_HIGH_FIDELITY, true, () => {
+          const ampdoc = this.baseInstance_.getAmpDoc();
+          // TODO (#9232) May crash PWA
+          if (!posObInstalled) {
+            installPositionObserverServiceForDoc(ampdoc);
+            posObInstalled = true;
+          }
+          this.positionObserver_ = getServiceForDoc(ampdoc,
+              'position-observer');
+          this.positionObserver_.observe(
+            dev().assertElement(this.iframe),
+            PositionObserverFidelity.HIGH, pos => {
+              this.positionObserverHighFidelityApi_.send(
+                POSITION_HIGH_FIDELITY,
+                pos);
+            });
+        });
+    }
+
     // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad
     // iframe.
     listenForOncePromise(this.iframe, 'entity-id', true)
@@ -192,20 +233,22 @@ export class AmpAdXOriginIframeHandler {
       this.baseInstance_.signals().signal(CommonSignals.INI_LOAD);
     });
 
+    this.element_.appendChild(this.iframe);
     if (opt_isA4A) {
-      // A4A writes creative frame directly to page therefore does not expect
-      // post message to unset visibility hidden
-      this.element_.appendChild(this.iframe);
-      // TODO(dvoytenko): if this is guaranteed to be a quasi-valid AMP creative
-      // then the `ini-load` message will work better here. Reconsider once
-      // `ini-load` message is supported in the in-a-box.
-      return iframeLoadPromise;
+      // A4A writes creative frame directly to page once creative is received
+      // and therefore does not require render start message so attach and
+      // impose no loader delay.  Network is using renderStart or
+      // bootstrap-loaded to indicate ad request was sent, either way we know
+      // that occurred for Fast Fetch.
+      this.renderStart_();
+      renderStartResolve();
+    } else {
+      // Set iframe initially hidden which will be removed on render-start or
+      // load, whichever is earlier.
+      setStyle(this.iframe, 'visibility', 'hidden');
+      this.baseInstance_.lifecycleReporter.addPingsForVisibility(this.element_);
     }
 
-    // Set iframe initially hidden which will be removed on render-start or
-    // load, whichever is earlier.
-    setStyle(this.iframe, 'visibility', 'hidden');
-    this.element_.appendChild(this.iframe);
     Promise.race([
       renderStartPromise,
       iframeLoadPromise,
@@ -218,8 +261,6 @@ export class AmpAdXOriginIframeHandler {
         }
       }
     });
-
-    this.baseInstance_.lifecycleReporter.addPingsForVisibility(this.element_);
 
     // The actual ad load is eariliest of iframe.onload event and no-content.
     return Promise.race([iframeLoadPromise, noContentPromise]);
@@ -285,6 +326,15 @@ export class AmpAdXOriginIframeHandler {
     if (this.embedStateApi_) {
       this.embedStateApi_.destroy();
       this.embedStateApi_ = null;
+    }
+    if (this.positionObserver_) {
+      if (this.iframe) {
+        this.positionObserver_.unobserve(this.iframe);
+      }
+    }
+    if (this.positionObserverHighFidelityApi_) {
+      this.positionObserverHighFidelityApi_.destroy();
+      this.positionObserverHighFidelityApi_ = null;
     }
     if (this.intersectionObserver_) {
       this.intersectionObserver_.destroy();

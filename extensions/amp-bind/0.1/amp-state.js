@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {bindForDoc} from '../../../src/services';
+import {bindForDoc, viewerForDoc} from '../../../src/services';
 import {fetchBatchedJsonFor} from '../../../src/batched-json';
 import {isBindEnabledFor} from './bind-impl';
 import {isJsonScriptTag} from '../../../src/dom';
 import {toggle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
-import {user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 
 export class AmpState extends AMP.BaseElement {
   /** @override */
@@ -40,11 +40,12 @@ export class AmpState extends AMP.BaseElement {
   }
 
   /** @override */
-  activate(invocation) {
-    const event = invocation.event;
-    if (event && event.detail) {
-      this.updateState_(event.detail.response, /* isInit */ false);
-    }
+  activate(unusedInvocation) {
+    // TODO(choumx): Remove this after a few weeks in production.
+    const TAG = this.getName_();
+    user().error(TAG,
+        'Please use AMP.setState() action explicitly, e.g. ' +
+        'on="submit-success:AMP.setState({myAmpState: event.response})"');
   }
 
   /** @override */
@@ -52,10 +53,37 @@ export class AmpState extends AMP.BaseElement {
     user().assert(isBindEnabledFor(this.win),
         `Experiment "amp-bind" is disabled.`);
 
-    const TAG = this.getName_();
-
     toggle(this.element, /* opt_display */ false);
     this.element.setAttribute('aria-hidden', 'true');
+
+    // Don't parse or fetch in prerender mode.
+    const viewer = viewerForDoc(this.getAmpDoc());
+    viewer.whenFirstVisible().then(() => this.initialize_());
+  }
+
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    const viewer = viewerForDoc(this.getAmpDoc());
+    if (!viewer.isVisible()) {
+      const TAG = this.getName_();
+      dev().error(TAG, 'Viewer must be visible before mutation.');
+      return;
+    }
+    const src = mutations['src'];
+    if (src !== undefined) {
+      this.fetchSrcAndUpdateState_(/* isInit */ false);
+    }
+  }
+
+  /** @override */
+  renderOutsideViewport() {
+    // We want the state data to be available wherever it is in the document.
+    return true;
+  }
+
+  /** @private */
+  initialize_() {
+    const TAG = this.getName_();
 
     // Fetch JSON from endpoint at `src` attribute if it exists,
     // otherwise parse child script tag.
@@ -83,20 +111,6 @@ export class AmpState extends AMP.BaseElement {
     }
   }
 
-  /** @override */
-  mutatedAttributesCallback(mutations) {
-    const src = mutations['src'];
-    if (src !== undefined) {
-      this.fetchSrcAndUpdateState_(/* isInit */ false);
-    }
-  }
-
-  /** @override */
-  renderOutsideViewport() {
-    // We want the state data to be available wherever it is in the document.
-    return true;
-  }
-
   /**
    * @param {boolean} isInit
    * @private
@@ -120,7 +134,8 @@ export class AmpState extends AMP.BaseElement {
     const state = Object.create(null);
     state[id] = json;
     bindForDoc(this.getAmpDoc()).then(bind => {
-      bind.setState(state, isInit);
+      bind.setState(state,
+          /* opt_skipEval */ isInit, /* opt_isAmpStateMutation */ !isInit);
     });
   }
 

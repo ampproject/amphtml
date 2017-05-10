@@ -106,6 +106,12 @@ class TestConfig {
     return this.skip(this.platform.isChrome.bind(this.platform));
   }
 
+  skipOldChrome() {
+    return this.skip(() => {
+      return this.platform.isChrome() && this.platform.getMajorVersion() < 48;
+    });
+  }
+
   skipEdge() {
     return this.skip(this.platform.isEdge.bind(this.platform));
   }
@@ -230,7 +236,8 @@ beforeEach(function() {
 
 function beforeTest() {
   activateChunkingForTesting();
-  window.AMP_MODE = null;
+  window.AMP_MODE = undefined;
+  window.context = undefined;
   window.AMP_CONFIG = {
     canary: 'testSentinel',
   };
@@ -248,7 +255,6 @@ afterEach(function() {
   this.timeout(BEFORE_AFTER_TIMEOUT);
   const cleanupTagNames = ['link', 'meta'];
   if (!platformFor(window).isSafari()) {
-    // TODO(#3315): Removing test iframes break tests on Safari.
     cleanupTagNames.push('iframe');
   }
   const cleanup = document.querySelectorAll(cleanupTagNames.join(','));
@@ -265,6 +271,7 @@ afterEach(function() {
   window.ENABLE_LOG = false;
   window.AMP_DEV_MODE = false;
   window.context = undefined;
+  window.AMP_MODE = undefined;
 
   const forgotGlobal = !!global.sandbox;
   if (forgotGlobal) {

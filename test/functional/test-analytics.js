@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {fromClassForDoc} from '../../src/service';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
@@ -88,8 +87,10 @@ describes.realWin('analytics', {amp: true}, env => {
       const ele = win.document.createElement('div');
       win.document.body.appendChild(ele);
       const baseEle = new BaseElement(ele);
-      fromClassForDoc(
+      registerServiceBuilderForDoc(
           ampdoc, 'amp-analytics-instrumentation', MockInstrumentation);
+      // Force instantiation
+      getServiceForDoc(ampdoc, 'amp-analytics-instrumentation');
       const config = {
         'requests': {
           'pageview': 'https://example.com/analytics',
@@ -102,7 +103,7 @@ describes.realWin('analytics', {amp: true}, env => {
         },
       };
       expect(baseEle.element.querySelector('amp-analytics')).to.be.null;
-      insertAnalyticsElement(baseEle.element, config, true);
+      expect(insertAnalyticsElement(baseEle.element, config, true)).to.be.ok;
       return timer.promise(50).then(() => {
         const analyticsEle = baseEle.element.querySelector('amp-analytics');
         expect(analyticsEle).to.not.be.null;

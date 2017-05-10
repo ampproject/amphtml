@@ -117,8 +117,7 @@ export function googleAdUrl(
       // Read by GPT for GA/GPT integration.
     win.gaGlobal = win.gaGlobal ||
       {cid: clientId, hid: documentInfo.pageViewId};
-    const slotRect = a4a.getPageLayoutBox ?
-        a4a.getPageLayoutBox() : a4a.getLayoutBox();
+    const slotRect = a4a.getPageLayoutBox();
     const screen = win.screen;
     const viewport = a4a.getViewport();
     const viewportRect = viewport.getRect();
@@ -174,6 +173,7 @@ export function googleAdUrl(
         {name: 'isw', value: viewportSize.width},
         {name: 'ish', value: viewportSize.height},
         {name: 'pfx', value: pfx},
+        {name: 'rc', value: a4a.fromResumeCallback ? 1 : null},
       ],
       unboundedQueryParams,
       [
