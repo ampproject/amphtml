@@ -722,7 +722,7 @@ export class AmpA4A extends AMP.BaseElement {
       return;
     }
     this.win['a4a-measuring-ad-urls'] =
-     (() => resourcesForDoc(this.element).getMeasuredResources(this.win,
+     resourcesForDoc(this.element).getMeasuredResources(this.win,
        r => {
          return r.element.tagName == 'AMP-AD' &&
            r.element.getAttribute('type') == type;
@@ -731,29 +731,25 @@ export class AmpA4A extends AMP.BaseElement {
        if (promiseId != this.promiseId_) {
          throw cancellation();
        }
-       const getAdUrlsPromise = [];
-       resources.forEach(r => getAdUrlsPromise.push(r.element.getImpl().then(
-         instance => {
-           // Note that ad url promise could be null if isValidElement returns
-           // false.
-           return instance.adUrlsPromise_;
-         })));
+       const getAdUrlsPromise = resources.map(r => r.element.getImpl().then(
+         // Note that ad url promise could be null if isValidElement returns
+         // false.
+         instance => instance.adUrlsPromise_));
        return Promise.all(getAdUrlsPromise).then(adUrls => {
          if (promiseId != this.promiseId_) {
            throw cancellation();
          }
          this.protectedEmitLifecycleEvent_(
              'sraBuildRequestDelay', {
-               'met.delta.AD_SLOT_ID': Math.round(
-                   this.getNow_() - startTime),
-               'totalSlotCount.AD_SLOT_ID': getAdUrlsPromise.length,
+               'met.delta.AD_SLOT_ID': Math.round(Date.now() - startTime),
+               'totalSlotCount.AD_SLOT_ID': adUrls.length,
                'totalUrlCount.AD_SLOT_ID': adUrls.filter(url => !!url).length,
                'totalQueriedSlotCount.AD_SLOT_ID':
                   this.win.document.querySelectorAll('amp-ad[type=doubleclick]')
                     .length,
              });
        });
-     }))();
+     });
   }
 
   /**
