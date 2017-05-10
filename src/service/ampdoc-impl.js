@@ -482,6 +482,6 @@ export function installDocService(win, isSingleDoc) {
       win,
       'ampdoc',
       function() {
-        return new AmpDocService(win, isSingleDoc)
+        return new AmpDocService(win, isSingleDoc);
       });
 };

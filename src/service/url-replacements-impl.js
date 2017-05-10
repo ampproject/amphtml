@@ -973,7 +973,7 @@ export function installUrlReplacementsServiceForDoc(ampdoc) {
       ampdoc,
       'url-replace',
       function(doc) {
-        return new UrlReplacements(doc, new GlobalVariableSource(doc))
+        return new UrlReplacements(doc, new GlobalVariableSource(doc));
       });
 }
 
