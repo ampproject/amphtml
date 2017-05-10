@@ -286,7 +286,6 @@ export class Resource {
 
     if (this.hasBeenMeasured()) {
       this.state_ = ResourceState.READY_FOR_LAYOUT;
-      // TODO
       this.element.updateLayoutBox(this.getPageLayoutBox());
     } else {
       this.state_ = ResourceState.NOT_LAID_OUT;

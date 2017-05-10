@@ -25,6 +25,11 @@ import {dev} from '../log';
 
 const LAYER_PROP_ = '__AMP__LAYER';
 
+
+/**
+ * Layers is the new home for everything having to do with an element's
+ * size and position relative to its parent container.
+ */
 export class Layers {
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
@@ -96,7 +101,9 @@ export class Layers {
 }
 
 
-
+/**
+ * LayerElement (née Layout) caches and measures an element's layout rectangle.
+ */
 export class LayerElement {
   /**
    * @param {!AmpElement} element
