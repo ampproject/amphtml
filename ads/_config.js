@@ -179,7 +179,7 @@ export const adConfig = {
 
   caajainfeed: {
     prefetch: [
-      'https://cdn.amanad.adtdp.com/sdk/ajaamp-v1.0.js',
+      'https://cdn.amanad.adtdp.com/sdk/ajaamp.js',
     ],
     preconnect: [
       'https://ad.amanad.adtdp.com',
