@@ -841,7 +841,7 @@ export class AmpA4A extends AMP.BaseElement {
     // most comparable with the layout callback for 3p ads.
     this.protectedEmitLifecycleEvent_('preAdThrottle');
     const layoutCallbackStart = this.getNow_();
-    let promiseId = this.promiseId_;
+    const promiseId = this.promiseId_;
     // Promise chain will have determined if creative is valid AMP.
     return this.adPromise_.then(creativeMetaData => {
       if (promiseId != this.promiseId_) {
@@ -865,7 +865,6 @@ export class AmpA4A extends AMP.BaseElement {
         // Non-AMP creative case, will verify ad url existence.
         return this.renderNonAmpCreative_();
       }
-      promiseId = this.promiseId_;
       // Must be an AMP creative.
       return this.renderAmpCreative_(creativeMetaData)
           .catch(err => {
@@ -1198,7 +1197,7 @@ export class AmpA4A extends AMP.BaseElement {
         }
       });
     }
-    let promiseId = this.promiseId_;
+    const promiseId = this.promiseId_;
     return installFriendlyIframeEmbed(
         this.iframe, this.element, {
           host: this.element,
@@ -1225,7 +1224,6 @@ export class AmpA4A extends AMP.BaseElement {
               this.getAmpDoc(), friendlyIframeEmbed.win);
           // Bubble phase click handlers on the ad.
           this.registerAlpHandler_(friendlyIframeEmbed.win);
-          promiseId = this.promiseId_;
           // Capture timing info for friendly iframe load completion.
           getTimingDataAsync(
               friendlyIframeEmbed.win,
@@ -1244,7 +1242,6 @@ export class AmpA4A extends AMP.BaseElement {
             dev().error(TAG, this.element.getAttribute('type'),
                 'Error executing onCreativeRender', err);
           })(true);
-          promiseId = this.promiseId_;
           // It's enough to wait for "ini-load" signal because in a FIE case
           // we know that the embed no longer consumes significant resources
           // after the initial load.

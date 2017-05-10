@@ -1327,7 +1327,6 @@ describe('amp-a4a', () => {
     const metaData = AmpA4A.prototype.getAmpAdMetadata_(buildCreativeString());
     let a4aElement;
     let a4a;
-    const checkStillCurrent = () => {return true;};
     beforeEach(() => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
@@ -1338,7 +1337,7 @@ describe('amp-a4a', () => {
       });
     });
     it('should render correctly', () => {
-      return a4a.renderAmpCreative_(metaData, checkStillCurrent)
+      return a4a.renderAmpCreative_(metaData)
           .then(() => {
         // Verify iframe presence.
             expect(a4aElement.children.length).to.equal(1);
@@ -1360,7 +1359,7 @@ describe('amp-a4a', () => {
     });
 
     it('should handle click expansion correctly', () => {
-      return a4a.renderAmpCreative_(metaData, checkStillCurrent).then(() => {
+      return a4a.renderAmpCreative_(metaData).then(() => {
         const adBody = a4aElement.querySelector('iframe')
             .contentDocument.querySelector('body');
         let clickHandlerCalled = 0;
