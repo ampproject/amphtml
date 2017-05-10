@@ -116,7 +116,7 @@ export class VideoManager {
       entry.videoLoaded_();
     });
 
-    // TODO(aghassemi, #4780): Create a new IntersectionObserver service.
+    // TODO(aghassemi, #6425): Create a new IntersectionObserver service.
     if (!this.scrollListenerInstalled_) {
       const scrollListener = () => {
         for (let i = 0; i < this.entries_.length; i++) {
