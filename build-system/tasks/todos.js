@@ -25,7 +25,7 @@ var request = BBPromise.promisify(require('request'));
 var GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
 
 /** @type {!Object<string, !Promise<number>>} */
-var issueCache = {};
+var issueCache = Object.create(null);
 
 
 /**
