@@ -27,8 +27,13 @@ import {
   installBuiltins,
   installRuntimeServices,
 } from './runtime';
+import {bodyAlwaysVisible} from './style-installer';
 import {deactivateChunking} from './chunk';
 import {stubElements} from './custom-element';
+
+
+// PWA shell manages its own visibility and shadow ampdocs their own.
+bodyAlwaysVisible(self);
 
 // This feature doesn't make sense in shadow mode as it only applies to
 // background rendered iframes;

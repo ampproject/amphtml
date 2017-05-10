@@ -22,10 +22,7 @@
 import {dev, user} from './log';
 import {isFiniteNumber} from './types';
 import {setStyles} from './style';
-import {isExperimentOn} from './experiments';
-
-/** @const {string} */
-export const UX_EXPERIMENT = 'amp-ad-loading-ux';
+import {startsWith} from './string';
 
 /**
  * @enum {string}
@@ -68,7 +65,7 @@ let DimensionsDef;
  * @private  Visible for testing only!
  */
 export const naturalDimensions_ = {
-  'AMP-PIXEL': {width: '1px', height: '1px'},
+  'AMP-PIXEL': {width: '0px', height: '0px'},
   'AMP-ANALYTICS': {width: '1px', height: '1px'},
   // TODO(dvoytenko): audio should have width:auto.
   'AMP-AUDIO': null,
@@ -143,7 +140,7 @@ export function isLayoutSizeDefined(layout) {
  */
 export function isInternalElement(tag) {
   const tagName = (typeof tag == 'string') ? tag : tag.tagName;
-  return tagName && tagName.toLowerCase().indexOf('i-') == 0;
+  return tagName && startsWith(tagName.toLowerCase(), 'i-');
 }
 
 
@@ -220,7 +217,7 @@ export function getLengthUnits(length) {
  */
 export function getLengthNumeral(length) {
   const res = parseFloat(length);
-  return !isFiniteNumber(res) ? undefined : res;
+  return isFiniteNumber(res) ? res : undefined;
 }
 
 
@@ -278,10 +275,7 @@ export function getNaturalDimensions(element) {
 export function isLoadingAllowed(element) {
   const tagName = element.tagName.toUpperCase();
   if (tagName == 'AMP-AD' || tagName == 'AMP-EMBED') {
-    const win = element.ownerDocument.defaultView;
-    if (isExperimentOn(win, UX_EXPERIMENT)) {
-      return true;
-    }
+    return true;
   }
   return LOADING_ELEMENTS_[tagName] || false;
 }

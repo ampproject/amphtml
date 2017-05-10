@@ -1,0 +1,88 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-bind: Carousels</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Questrial" rel="stylesheet" type="text/css">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+  <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js"></script>
+
+  <style amp-custom>
+    amp-carousel .selected {
+      border: solid 2px red;
+    }
+    amp-img[selected] {
+      border: solid 2px green;
+    }
+    button {
+      border: solid 1px black;
+    }
+  </style>
+</head>
+
+<body>
+  <button onclick="AMP.toggleExperiment('amp-bind');window.location.href=window.location.href;">Toggle &lt;amp-bind&gt; experiment</button>
+  <button onclick="AMP.toggleExperiment('amp-selector');window.location.href=window.location.href;">Toggle &lt;amp-selector&gt; experiment</button>
+
+  <div>
+    <h2>Linked carousels</h2>
+    <p [text]="'Selected slide: ' + selectedSlide">Selected slide: None<p>
+
+    <amp-carousel controls type=slides width=400 height=300
+        [slide]="selectedSlide" on="slideChange:AMP.setState({selectedSlide: event.index})">
+      <amp-img src="https://ampbyexample.com/img/image1.jpg" width=400 height=300></amp-img>
+      <amp-img src="https://ampbyexample.com/img/image2.jpg" width=400 height=300></amp-img>
+      <amp-img src="https://ampbyexample.com/img/image3.jpg" width=400 height=300></amp-img>
+      <amp-img src="https://ampbyexample.com/img/image1.jpg" width=400 height=300></amp-img>
+      <amp-img src="https://ampbyexample.com/img/image2.jpg" width=400 height=300></amp-img>
+      <amp-img src="https://ampbyexample.com/img/image3.jpg" width=400 height=300></amp-img>
+      <amp-img src="https://ampbyexample.com/img/image1.jpg" width=400 height=300></amp-img>
+      <amp-img src="https://ampbyexample.com/img/image2.jpg" width=400 height=300></amp-img>
+      <amp-img src="https://ampbyexample.com/img/image3.jpg" width=400 height=300></amp-img>
+    </amp-carousel>
+  </div>
+
+  <p>Without &lt;amp-selector&gt;</p>
+  <amp-carousel controls width=400 height=100>
+    <amp-img src="https://ampbyexample.com/img/image1.jpg" width=100 height=75
+        [class]="selectedSlide == 0 ? 'selected' : ''" on="tap:AMP.setState({selectedSlide: 0})"></amp-img>
+    <amp-img src="https://ampbyexample.com/img/image2.jpg" width=100 height=75
+        [class]="selectedSlide == 1 ? 'selected' : ''" on="tap:AMP.setState({selectedSlide: 1})"></amp-img>
+    <amp-img src="https://ampbyexample.com/img/image3.jpg" width=100 height=75
+        [class]="selectedSlide == 2 ? 'selected' : ''" on="tap:AMP.setState({selectedSlide: 2})"></amp-img>
+    <amp-img src="https://ampbyexample.com/img/image1.jpg" width=100 height=75
+        [class]="selectedSlide == 3 ? 'selected' : ''" on="tap:AMP.setState({selectedSlide: 3})"></amp-img>
+    <amp-img src="https://ampbyexample.com/img/image2.jpg" width=100 height=75
+        [class]="selectedSlide == 4 ? 'selected' : ''" on="tap:AMP.setState({selectedSlide: 4})"></amp-img>
+    <amp-img src="https://ampbyexample.com/img/image3.jpg" width=100 height=75
+        [class]="selectedSlide == 5 ? 'selected' : ''" on="tap:AMP.setState({selectedSlide: 5})"></amp-img>
+    <amp-img src="https://ampbyexample.com/img/image1.jpg" width=100 height=75
+        [class]="selectedSlide == 6 ? 'selected' : ''" on="tap:AMP.setState({selectedSlide: 6})"></amp-img>
+    <amp-img src="https://ampbyexample.com/img/image2.jpg" width=100 height=75
+        [class]="selectedSlide == 7 ? 'selected' : ''" on="tap:AMP.setState({selectedSlide: 7})"></amp-img>
+    <amp-img src="https://ampbyexample.com/img/image3.jpg" width=100 height=75
+        [class]="selectedSlide == 8 ? 'selected' : ''" on="tap:AMP.setState({selectedSlide: 8})"></amp-img>
+  </amp-carousel>
+
+  <p>With &lt;amp-selector&gt;</p>
+  <amp-selector layout=container name="carousel-selector" [selected]="selectedSlide"
+      on="select:AMP.setState({selectedSlide: event.targetOption})">
+    <amp-carousel controls width=400 height=100>
+        <amp-img src="https://ampbyexample.com/img/image1.jpg" width=100 height=75 option=0></amp-img>
+        <amp-img src="https://ampbyexample.com/img/image2.jpg" width=100 height=75 option=1></amp-img>
+        <amp-img src="https://ampbyexample.com/img/image3.jpg" width=100 height=75 option=2></amp-img>
+        <amp-img src="https://ampbyexample.com/img/image1.jpg" width=100 height=75 option=3></amp-img>
+        <amp-img src="https://ampbyexample.com/img/image2.jpg" width=100 height=75 option=4></amp-img>
+        <amp-img src="https://ampbyexample.com/img/image3.jpg" width=100 height=75 option=5></amp-img>
+        <amp-img src="https://ampbyexample.com/img/image1.jpg" width=100 height=75 option=6></amp-img>
+        <amp-img src="https://ampbyexample.com/img/image2.jpg" width=100 height=75 option=7></amp-img>
+        <amp-img src="https://ampbyexample.com/img/image3.jpg" width=100 height=75 option=8></amp-img>
+    </amp-carousel>
+  </amp-selector>
+</body>
+</html>

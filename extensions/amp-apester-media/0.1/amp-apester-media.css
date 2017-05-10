@@ -21,20 +21,13 @@
   opacity: 0;
 }
 
-.-amp-apester-iframe-ready {
+.i-amphtml-apester-iframe-ready {
   opacity: 1 !important;
 }
 
 .amp-apester-loader {
-  height: 100px;
-  width: 100px;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  margin-top: -22px;
-}
-
-.amp-apester-loader-container {
+  height: 100%;
+  width: 100%;
   background-color: white;
 }
 
@@ -64,4 +57,68 @@
   font-weight: 700;
   outline: none;
   position: relative;
+}
+
+
+.amp-apester-loader-blobs {
+  filter: url("#amp-apester-goo");
+  position: absolute;
+  top:0;
+  left:0;
+  bottom:0;
+  right:0;
+}
+.amp-apester-loader-blob {
+  position: absolute;
+  margin: auto;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #ee2e3d;
+}
+.amp-apester-loader-blob:nth-child(1) {
+  animation: amp-apester-blob-left-anim cubic-bezier(0.770, 0.000, 0.175, 1.000) 2s infinite;
+}
+.amp-apester-loader-blob:nth-child(2) {
+  animation: amp-apester-blob-right-anim cubic-bezier(0.770, 0.000, 0.175, 1.000) 2s infinite;
+}
+
+@keyframes amp-apester-blob-left-anim {
+  0% {transform:scale(1.0) translate(0, 0);}
+  33% {transform:scale(0.55, 0.5) translate(80px, 0);}
+  66% {transform:scale(0.8) translate(0, 0);}
+  100% {transform:scale(1.0) translate(0, 0);}
+}
+
+@keyframes amp-apester-blob-right-anim {
+  0% {transform:scale(1.0) translate(0, 0);}
+  33% {transform:scale(0.55, 0.5) translate(-80px, 0);}
+  66% {transform:scale(0.8) translate(0, 0);}
+  100% {transform:scale(1.0) translate(0, 0);}
+}
+
+@keyframes amp-apester-loader-logo {
+  0% {transform:scale(1.0); opacity:1;}
+  20% {transform:scale(1.0); opacity:0;}
+  40% {transform:scale(0.5); opacity:0;}
+  66% {transform:scale(0.8); opacity:1;}
+  100% {transform:scale(1.0); opacity:1;}
+}
+
+.amp-apester-loader-logo {
+  background: url("https://app.apester.com/assets/editor/3.4.10/dist/svg/ape-loader.svg") no-repeat center;
+  position: absolute;
+  height: 28px;
+  width: 28px;
+  left: calc(50% - 14px);
+  top: calc(50% - 14px);
+}
+
+.amp-apester-loader-logo svg {
+  height: 100%;
+  width: 100%;
 }

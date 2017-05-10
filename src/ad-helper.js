@@ -15,6 +15,9 @@
  */
 
 import {dev} from './log';
+import {computedStyle} from './style';
+
+const AD_CONTAINER_PROP = '__AMP__AD_CONTAINER';
 
 /**
  * Tags that are allowed to have fixed positioning
@@ -34,7 +37,9 @@ const CONTAINERS = {
  * @return {boolean}
  */
 function isPositionFixed(el, win) {
-  return win./*OK*/getComputedStyle(el).position == 'fixed';
+  const position = computedStyle(win, el).position;
+  // We consider sticky positions as fixed, since they can be fixed.
+  return position == 'fixed' || position == 'sticky';
 }
 
 /**
@@ -74,12 +79,15 @@ export function isAdPositionAllowed(element, win) {
  * @return {?string}
  */
 export function getAdContainer(element) {
-  let el = element;
-  do {
-    el = el.parentElement;
-    if (CONTAINERS[el.tagName]) {
-      return el.tagName;
-    }
-  } while (el && el.tagName != 'BODY');
-  return null;
+  if (element[AD_CONTAINER_PROP] === undefined) {
+    let el = element;
+    do {
+      el = el.parentElement;
+      if (CONTAINERS[el.tagName]) {
+        return element[AD_CONTAINER_PROP] = el.tagName;
+      }
+    } while (el && el.tagName != 'BODY');
+    element[AD_CONTAINER_PROP] = null;
+  }
+  return element[AD_CONTAINER_PROP];
 }

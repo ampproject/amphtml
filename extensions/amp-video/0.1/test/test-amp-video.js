@@ -15,6 +15,9 @@
  */
 
 import {createIframePromise} from '../../../../testing/iframe';
+import {listenOncePromise} from '../../../../src/event-helper';
+import {timerFor} from '../../../../src/services';
+import {VideoEvents} from '../../../../src/video-interface';
 import '../amp-video';
 import * as sinon from 'sinon';
 
@@ -23,6 +26,7 @@ const TAG = 'amp-video';
 describe(TAG, () => {
 
   let sandbox;
+  const timer = timerFor(window);
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -293,7 +297,7 @@ describe(TAG, () => {
     }).then(v => {
       const impl = v.implementation_;
       expect(impl.toggleFallback.called).to.be.true;
-      expect(impl.toggleFallback.calledWith(true)).to.be.true;
+      expect(impl.toggleFallback).to.have.been.calledWith(true);
     });
   });
 
@@ -328,4 +332,67 @@ describe(TAG, () => {
       expect(video.getAttribute('aria-describedby')).to.equal('id3');
     });
   });
+
+  it('should propagate attribute mutations', () => {
+    return getVideo({
+      src: 'foo.mp4',
+      width: 160,
+      height: 90,
+      controls: '',
+    }).then(v => {
+      const mutations = {
+        src: 'bar.mp4',
+        controls: null,
+      };
+      Object.keys(mutations).forEach(property => {
+        const value = mutations[property];
+        if (value === null) {
+          v.removeAttribute(property);
+        } else {
+          v.setAttribute(property, value);
+        }
+      });
+      v.mutatedAttributesCallback(mutations);
+      const video = v.querySelector('video');
+      expect(video.getAttribute('src')).to.equal('bar.mp4');
+      expect(video.controls).to.be.false;
+    });
+  });
+
+  it('should forward certain events from video to the amp element', () => {
+    return getVideo({
+      src: 'foo.mp4',
+      width: 160,
+      height: 90,
+    }).then(v => {
+      const impl = v.implementation_;
+      return Promise.resolve()
+      .then(() => {
+        impl.mute();
+        return listenOncePromise(v, VideoEvents.MUTED);
+      })
+      .then(() => {
+        impl.play();
+        return listenOncePromise(v, VideoEvents.PLAY);
+      })
+      .then(() => {
+        impl.pause();
+        return listenOncePromise(v, VideoEvents.PAUSE);
+      })
+      .then(() => {
+        impl.unmute();
+        return listenOncePromise(v, VideoEvents.UNMUTED);
+      })
+      .then(() => {
+        // Should not send the unmute event twice if already sent once.
+        const p = listenOncePromise(v, VideoEvents.UNMUTED).then(() => {
+          assert.fail('Should not have dispatch unmute message twice');
+        });
+        v.querySelector('video').dispatchEvent(new Event('volumechange'));
+        const successTimeout = timer.timeoutPromise(10, true);
+        return Promise.race([p, successTimeout]);
+      });
+    });
+  });
 });
+

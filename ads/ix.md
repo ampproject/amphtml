@@ -45,6 +45,10 @@ Index supports both direct ad tags and Header Tag style bidding using Doubleclic
 
 For semantics of configuration, please contact your account manager at Index Exchange.
 
+If you use `remote.html` in your AMP pages, you must add `ix` into the array that outlines the list of acceptable types. For example, `['doubleclick']` should be changed to `['doubleclick', 'ix']`. If you do not use `remote.html`, this step is not required.
+
+Ad size are based on the `width` and `height` attributes of the `amp-ad` tag. Neither width and height override attributes nor multi-size ads are currently supported.
+
 ### Ad tag ###
 
 __Required:__
@@ -52,7 +56,6 @@ __Required:__
 - `data-ad-units`
 - `data-casale-i-d` or `data-app-i-d`
 - `data-version`
-
 
 __Optional:__
 
@@ -73,10 +76,16 @@ __Required:__
 - `data-ix-id`
 - `data-slot`
 
-
 __Optional:__
 
 - `data-ix-slot`
+- `data-ix-timeout`
+
+__Unsupported:__
+
+- `data-override-width`
+- `data-override-height`
+- `data-multi-size-validation`
 
 Additional parameters including `json` will be passed through in the resulting call to DFP. For details please see the [Doubleclick documentation](https://github.com/ampproject/amphtml/blob/master/ads/google/doubleclick.md).
 

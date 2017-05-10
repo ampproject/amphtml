@@ -17,7 +17,6 @@
 import {
   loadScript,
   validateData,
-  computeInMasterFrame,
 } from '../3p/3p';
 
 /**
@@ -26,52 +25,12 @@ import {
  */
 export function f1h(global, data) {
 
-  validateData(data, ['sectionId', 'slot'], [
-    'instance',
-    'custom',
-    'adServerUrl',
-    'cacheSafe',
-    'pageIdModifier',
-    'click3rd',
-    'pubnetwork',
-    'debugsrc',
-  ]);
-  //TODO support dmp and cookie
+  validateData(data, ['sectionId', 'slot']);
 
-  //console.log('F1H function',data.slot,data);
+  let scriptUrl = (data['debugsrc'] || ("https:" === window.document.location.protocol ? "https://" : "http://") + 'img.ak.impact-ad.jp/fh/f1h_amp.js');
+  
+  global.f1hData = data;
+  loadScript(global, scriptUrl);
 
-  let scriptUrl = 'https://img.ak.impact-ad.jp/fh/showad_' +
-      (data['pubnetwork'] || 'd094700e') + '.js';
-
-  if (data['debugsrc']) {
-    scriptUrl = data['debugsrc'];
-  }
-  //const scriptUrl = 'http://dominica/js/build/showad_sc_ms.cc.min.js';
-
-  computeInMasterFrame(global, 'f1h-request', done => {
-    //console.log('Get showad.js',data.slot);
-    let success = false;
-    const masterWin = this;
-    if (!masterWin.showadAMPAdapter) {
-      masterWin.showadAMPAdapter = {
-        registerSlot: () => {},
-      };
-      loadScript(this, scriptUrl, () => {
-        if (masterWin.showadAMPAdapter.inited) {
-          success = true;
-        }
-        done(success);
-      });
-    } else {
-      done(true);
-    }
-  }, success => {
-    if (success) {
-      //console.log('Try to displayAd');
-      global.showadAMPAdapter = global.context.master.showadAMPAdapter;
-      global.showadAMPAdapter.registerSlot(data, global);
-    } else {
-      throw new Error('F1h AdTag failed to load');
-    }
-  });
 }
+

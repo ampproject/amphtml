@@ -16,54 +16,32 @@
 
 tags: {  # amp-youtube
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
-  spec_name: "amp-youtube extension .js script"
-  mandatory_parent: "HEAD"
-  unique_warning: true
-  also_requires_tag_warning: "amp-youtube"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  satisfies: "amp-youtube extension .js script"
+  extension_spec: {
+    name: "amp-youtube"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    deprecated_recommends_usage_of_tag: "amp-youtube"
+    deprecated_allow_duplicates: true
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-youtube"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-youtube-(latest|0\\.1)\\.js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-youtube.html"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-youtube>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-YOUTUBE"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-youtube extension .js script"
+  requires: "amp-youtube extension .js script"
   attrs: { name: "autoplay" }
   attrs: {
     name: "data-videoid"
     mandatory: true
     value_regex: "[^=/?:]+"
   }
+  # <amp-bind>
+  attrs: { name: "[data-videoid]" }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-youtube.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-youtube"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

@@ -16,7 +16,7 @@
 import {closestByTag} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {user} from '../../../src/log';
-import {viewerForDoc} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/services';
 import {isProxyOrigin} from '../../../src/url';
 
 /**

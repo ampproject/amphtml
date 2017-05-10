@@ -20,7 +20,11 @@
 // leading edge, instead of the trailing.
 
 import {rethrowAsync} from './../../../src/log';
-import {serializeQueryString} from '../../../src/url';
+import {
+  parseUrl,
+  removeFragment,
+  serializeQueryString,
+} from '../../../src/url';
 
 export function debounce(func, wait, immediate) {
   let timeout;
@@ -78,7 +82,7 @@ export function handleMessageByName(element, event, messageName, handler) {
 /**
  * @param {Object} event
  * @param {String} eventName
- * @param {Function} handler
+ * @param {function} handler
  */
 function handlePlaybuzzItemEvent(event, eventName, handler) {
   const data = parsePlaybuzzEventData(event.data);
@@ -105,11 +109,11 @@ function parsePlaybuzzEventData(data) {
     }
   }
   catch (e) {
-    rethrowAsync('amp-playbuzz',err, e);
+    rethrowAsync('amp-playbuzz', err, e);
     return {};
   }
 
-  rethrowAsync('amp-playbuzz',err, data);
+  rethrowAsync('amp-playbuzz', err, data);
   return {};
 }
 
@@ -136,4 +140,19 @@ export function composeEmbedUrl(options) {
     parentHost: options.parentHost,
   });
   return embedUrl;
+}
+
+function sanitizeUrl(localtion) {
+  return removeFragment(localtion.href)
+    .replace(localtion.protocol, ''); //remove scheme (cors) & fragment
+}
+
+export function composeItemSrcUrl(src, itemId) {
+  const DEFAULT_BASE_URL = '//www.playbuzz.com/';
+
+  const iframeSrcUrl = itemId ?
+    DEFAULT_BASE_URL + 'item/' + itemId :
+    sanitizeUrl(parseUrl(src));
+
+  return iframeSrcUrl;
 }

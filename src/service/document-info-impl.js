@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-import {fromClassForDoc} from '../service';
 import {parseUrl, getSourceUrl} from '../url';
+import {map} from '../utils/object';
+import {isArray} from '../types';
+import {registerServiceBuilderForDoc} from '../service';
 
+/** @private @const {!Array<string>} */
+const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
 
 /**
  * Properties:
@@ -25,11 +29,14 @@ import {parseUrl, getSourceUrl} from '../url';
  *     - canonicalUrl: The doc's canonical.
  *     - pageViewId: Id for this page view. Low entropy but should be unique
  *       for concurrent page views of a user().
+ *     - linkRels: A map object of link tag's rel (key) and corresponding
+ *       hrefs (value). rel could be 'canonical', 'icon', etc.
  *
  * @typedef {{
  *   sourceUrl: string,
  *   canonicalUrl: string,
  *   pageViewId: string,
+ *   linkRels: !Object<string, string|!Array<string>>,
  * }}
  */
 export let DocumentInfoDef;
@@ -37,10 +44,9 @@ export let DocumentInfoDef;
 
 /**
  * @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!DocInfo} Info about the doc
  */
 export function installDocumentInfoServiceForDoc(nodeOrDoc) {
-  return fromClassForDoc(nodeOrDoc, 'documentInfo', DocInfo);
+  return registerServiceBuilderForDoc(nodeOrDoc, 'documentInfo', DocInfo);
 }
 
 
@@ -73,6 +79,8 @@ export class DocInfo {
           : sourceUrl;
     }
     const pageViewId = getPageViewId(ampdoc.win);
+    const linkRels = getLinkRels(ampdoc.win.document);
+
     return this.info_ = {
       /** @return {string} */
       get sourceUrl() {
@@ -80,6 +88,7 @@ export class DocInfo {
       },
       canonicalUrl,
       pageViewId,
+      linkRels,
     };
   }
 }
@@ -94,4 +103,43 @@ export class DocInfo {
  */
 function getPageViewId(win) {
   return String(Math.floor(win.Math.random() * 10000));
+}
+
+/**
+ * Returns a map object of link tag relations in document head.
+ * Key is the link rel, value is a list of corresponding hrefs.
+ * @param {!Document} doc
+ * @return {!Object<string, string|!Array<string>>}
+ */
+function getLinkRels(doc) {
+  const linkRels = map();
+  if (doc.head) {
+    const links = doc.head.querySelectorAll('link[rel]');
+    for (let i = 0; i < links.length; i++) {
+      const link = links[i];
+      const href = link.href;
+      const rels = link.getAttribute('rel');
+      if (!rels || !href) {
+        continue;
+      }
+
+      rels.split(/\s+/).forEach(rel => {
+        if (filteredLinkRels.indexOf(rel) != -1) {
+          return;
+        }
+
+        let value = linkRels[rel];
+        if (value) {
+          // Change to array if more than one href for the same rel
+          if (!isArray(value)) {
+            value = linkRels[rel] = [value];
+          }
+          value.push(href);
+        } else {
+          linkRels[rel] = href;
+        }
+      });
+    }
+  }
+  return linkRels;
 }

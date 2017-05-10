@@ -17,7 +17,7 @@
 
 import {CSS} from '../../../build/amp-live-list-0.1.css';
 import {childElementByAttr} from '../../../src/dom';
-import {installLiveListManager, LiveListManager} from './live-list-manager';
+import {liveListManagerFor, LiveListManager} from './live-list-manager';
 import {isLayoutSizeDefined, Layout} from '../../../src/layout';
 import {user} from '../../../src/log';
 
@@ -180,7 +180,7 @@ export class AmpLiveList extends AMP.BaseElement {
   buildCallback() {
     this.viewport_ = this.getViewport();
 
-    this.manager_ = installLiveListManager(this.win);
+    this.manager_ = liveListManagerFor(this.win);
 
     this.updateSlot_ = user().assert(
        this.getUpdateSlot_(this.element),
@@ -223,6 +223,10 @@ export class AmpLiveList extends AMP.BaseElement {
         this.itemsSlot_, true);
 
     this.registerAction('update', this.updateAction_.bind(this));
+
+    if (!this.element.hasAttribute('aria-live')) {
+      this.element.setAttribute('aria-live', 'polite');
+    }
   }
 
   /** @override */
@@ -287,6 +291,9 @@ export class AmpLiveList extends AMP.BaseElement {
     const hasInsertItems = this.pendingItemsInsert_.length > 0;
     const hasTombstoneItems = this.pendingItemsTombstone_.length > 0;
 
+    const shouldSendAmpDomUpdateEvent = this.pendingItemsInsert_.length > 0 ||
+        this.pendingItemsReplace_.length > 0;
+
     let promise = this.mutateElement(() => {
 
       const itemsSlot = user().assertElement(this.itemsSlot_);
@@ -335,6 +342,12 @@ export class AmpLiveList extends AMP.BaseElement {
       // TODO(erwinm, #3332) compensate scroll position here.
     });
 
+    if (shouldSendAmpDomUpdateEvent) {
+      promise = promise.then(() => {
+        this.sendAmpDomUpdateEvent_();
+      });
+    }
+
     if (hasInsertItems) {
       promise = promise.then(() => {
         return this.viewport_.animateScrollIntoView(this.element);
@@ -366,13 +379,27 @@ export class AmpLiveList extends AMP.BaseElement {
    */
   insert_(parent, orphans) {
     let count = 0;
-    /** @const {!DocumentFragment} */
-    const fragment = this.win.document.createDocumentFragment();
-    orphans.forEach(elem => {
-      fragment.insertBefore(elem, fragment.firstElementChild);
-      count++;
+
+    orphans.forEach(orphan => {
+      if (this.itemsSlot_.childElementCount == 0) {
+        this.itemsSlot_.appendChild(orphan);
+      } else {
+        const orphanSortTime = this.getSortTime_(orphan);
+        for (let child = this.itemsSlot_.firstElementChild; child;
+            child = child.nextElementSibling) {
+          const childSortTime = this.getSortTime_(child);
+          if (orphanSortTime >= childSortTime) {
+            this.itemsSlot_.insertBefore(orphan, child);
+            count++;
+            break;
+          // We've exhausted the children list and the current orphan
+          // can be the last item.
+          } else if (!child.nextElementSibling) {
+            this.itemsSlot_.appendChild(orphan);
+          }
+        }
+      }
     });
-    parent.insertBefore(fragment, parent.firstElementChild);
     return count;
   }
 
@@ -392,7 +419,7 @@ export class AmpLiveList extends AMP.BaseElement {
     let count = 0;
     orphans.forEach(orphan => {
       const orphanId = orphan.getAttribute('id');
-      const liveElement = parent.querySelector(`#${orphanId}`);
+      const liveElement = parent./*OK*/querySelector(`#${orphanId}`);
       // Don't bother updating if live element is tombstoned or
       // if we can't find it.
       if (!liveElement) {
@@ -419,7 +446,7 @@ export class AmpLiveList extends AMP.BaseElement {
     let count = 0;
     orphans.forEach(orphan => {
       const orphanId = orphan.getAttribute('id');
-      const liveElement = parent.querySelector(`#${orphanId}`);
+      const liveElement = parent./*OK*/querySelector(`#${orphanId}`);
       if (!liveElement) {
         return;
       }
@@ -829,6 +856,17 @@ export class AmpLiveList extends AMP.BaseElement {
   /** @override */
   getUpdateTime() {
     return this.updateTime_;
+  }
+
+  /** @override */
+  getDynamicElementContainers() {
+    return this.itemsSlot_ ? [this.itemsSlot_] : [];
+  }
+
+  sendAmpDomUpdateEvent_() {
+    const event = this.win.document.createEvent('Event');
+    event.initEvent('amp:dom-update', true, true);
+    this.win.document.dispatchEvent(event);
   }
 }
 

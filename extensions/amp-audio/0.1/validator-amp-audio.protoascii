@@ -14,43 +14,22 @@
 # limitations under the license.
 #
 tags: {  # amp-audio
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
-  spec_name: "amp-audio extension .js script"
-  mandatory_parent: "HEAD"
-  unique_warning: true
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  satisfies: "amp-audio extension .js script"
+  extension_spec: {
+    name: "amp-audio"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    deprecated_allow_duplicates: true
+    # Due to the fact that one of these tags is not available in each
+    # html_format, we currently cannot support this feature for amp-audio.
+    #deprecated_recommends_usage_of_tag: "amp-audio"
+    #deprecated_recommends_usage_of_tag: "amp-audio (A4A)"
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-audio"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-audio-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-audio.html"
+  attr_lists: "common-extension-attrs"
 }
 attr_lists: { # amp-audio attributes that are common to both AMP and A4A format.
   name: "amp-audio-common"
-
   attrs: { name: "controls" }
   attrs: { name: "loop"  value: "" }
   attrs: { name: "muted" value: "" }
@@ -67,15 +46,14 @@ tags: {  # <amp-audio> for AMP (autoplay attribute allowed)
   html_format: AMP
   tag_name: "AMP-AUDIO"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-audio extension .js script"
+  requires: "amp-audio extension .js script"
   attrs: {
     name: "autoplay"
-    # ^$| prefix intended. empty string is valid.
-    value_regex: "^$|desktop|tablet|mobile|autoplay"
+    value: ""
   }
   attr_lists: "amp-audio-common"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-audio.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-audio"
   amp_layout {
     defines_default_height: true
     # TODO(johannes): in the longer run, defines_default_width should
@@ -92,10 +70,10 @@ tags: {  # <amp-audio> for A4A (autoplay attribute disallowed)
   tag_name: "AMP-AUDIO"
   spec_name: "amp-audio (A4A)"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-audio extension .js script"
+  requires: "amp-audio extension .js script"
   attr_lists: "amp-audio-common"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-audio.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-audio"
   amp_layout {
     defines_default_height: true
     defines_default_width: true

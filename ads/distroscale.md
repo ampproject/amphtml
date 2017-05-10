@@ -23,7 +23,6 @@ limitations under the License.
     type="distroscale"
     layout="responsive"
     data-pid="1"
-    data-zid="8710">
 </amp-ad>
 ```
 
@@ -34,4 +33,3 @@ For semantics of configuration, please [contact DistroScale](http://www.distrosc
 __Required:__
 
 - `data-pid` - Partner ID
-- `data-zid` - Zone ID

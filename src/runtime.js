@@ -16,6 +16,7 @@
 
 import {BaseElement} from './base-element';
 import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
+import {CommonSignals} from './common-signals';
 import {VisibilityState} from './visibility-state';
 import {
   addDocFactoryToExtension,
@@ -28,14 +29,14 @@ import {
   stubLegacyElements,
 } from './service/extensions-impl';
 import {ampdocServiceFor} from './ampdoc';
-import {chunk} from './chunk';
+import {startupChunk} from './chunk';
 import {cssText} from '../build/css';
-import {dev, user, initLogConstructor} from './log';
+import {dev, user, initLogConstructor, setReportError} from './log';
+import {reportError} from './error';
 import {
   disposeServicesForDoc,
-  fromClassForDoc,
   getService,
-  getServiceForDoc,
+  registerServiceBuilderForDoc,
 } from './service';
 import {childElementsByTag} from './dom';
 import {
@@ -44,10 +45,15 @@ import {
   installStylesForShadowRoot,
 } from './shadow-embed';
 import {getMode} from './mode';
+import {
+  hasRenderDelayingServices,
+} from './render-delaying-services';
 import {installActionServiceForDoc} from './service/action-impl';
+import {installCryptoService} from './service/crypto-impl';
 import {installDocumentInfoServiceForDoc} from './service/document-info-impl';
+import {installGlobalClickListenerForDoc} from './service/document-click';
 import {installGlobalSubmitListenerForDoc} from './document-submit';
-import {extensionsFor} from './extensions';
+import {extensionsFor} from './services';
 import {installHistoryServiceForDoc} from './service/history-impl';
 import {installPlatformService} from './service/platform-impl';
 import {installResourcesServiceForDoc} from './service/resources-impl';
@@ -68,20 +74,25 @@ import {installViewerServiceForDoc, setViewerVisibilityState,} from
 import {installViewportServiceForDoc} from './service/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
 import {installXhrService} from './service/xhr-impl';
-import {isExperimentOn, toggleExperiment} from './experiments';
+import {installBatchedXhrService} from './service/batched-xhr-impl';
+import {
+  isExperimentOn,
+  toggleExperiment,
+} from './experiments';
 import {parseUrl} from './url';
-import {platformFor} from './platform';
+import {platformFor} from './services';
 import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
-import {resourcesForDoc} from './resources';
+import {resourcesForDoc} from './services';
 import {setStyle} from './style';
-import {timerFor} from './timer';
-import {viewerForDoc} from './viewer';
-import {viewportForDoc} from './viewport';
+import {timerFor} from './services';
+import {viewerForDoc} from './services';
+import {viewportForDoc} from './services';
 import {waitForBody} from './dom';
 import * as config from './config';
 
 initLogConstructor();
+setReportError(reportError);
 
 /**
  * - n is the name.
@@ -110,10 +121,12 @@ const elementsForTesting = {};
  * @param {!Window} global Global scope to adopt.
  */
 export function installRuntimeServices(global) {
+  installCryptoService(global);
   installPlatformService(global);
   installTimerService(global);
   installVsyncService(global);
   installXhrService(global);
+  installBatchedXhrService(global);
   installTemplatesService(global);
 }
 
@@ -133,6 +146,7 @@ export function installAmpdocServices(ampdoc, opt_initParams) {
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);
   installStorageServiceForDoc(ampdoc);
+  installGlobalClickListenerForDoc(ampdoc);
   installGlobalSubmitListenerForDoc(ampdoc);
 }
 
@@ -176,8 +190,9 @@ function adoptShared(global, opts, callback) {
   /** @const {!Array<function(!Object)|ExtensionPayloadDef>} */
   const preregisteredExtensions = global.AMP || [];
 
+  installExtensionsService(global);
   /** @const {!./service/extensions-impl.Extensions} */
-  const extensions = installExtensionsService(global);
+  const extensions = extensionsFor(global);
   installRuntimeServices(global);
   stubLegacyElements(global);
 
@@ -285,7 +300,7 @@ function adoptShared(global, opts, callback) {
       Promise.resolve().then(register);
     } else {
       register.displayName = fnOrStruct.n;
-      chunk(global.document, register);
+      startupChunk(global.document, register);
     }
   }
 
@@ -299,29 +314,63 @@ function adoptShared(global, opts, callback) {
     }
   }
 
-  /**
-   * Registers a new custom element.
-   * @param {function(!Object)|ExtensionPayloadDef} fnOrStruct
-   */
-  global.AMP.push = function(fnOrStruct) {
-    installExtension(fnOrStruct);
-  };
-
-  // Execute asynchronously scheduled elements.
+  // Handle high priority extensions now, and if necessary issue
+  // requests for new extensions (used for experimental version
+  // locking).
   for (let i = 0; i < preregisteredExtensions.length; i++) {
     const fnOrStruct = preregisteredExtensions[i];
-    try {
-      installExtension(fnOrStruct);
-    } catch (e) {
-      // Throw errors outside of loop in its own micro task to
-      // avoid on error stopping other extensions from loading.
-      dev().error(TAG, 'Extension failed: ', e, fnOrStruct.n);
+    if (maybeLoadCorrectVersion(global, fnOrStruct)) {
+      preregisteredExtensions.splice(i--, 1);
+    }
+    else if (typeof fnOrStruct == 'function' || fnOrStruct.p == 'high') {
+      try {
+        installExtension(fnOrStruct);
+      } catch (e) {
+        // Throw errors outside of loop in its own micro task to
+        // avoid on error stopping other extensions from loading.
+        dev().error(TAG, 'Extension failed: ', e, fnOrStruct.n);
+      }
+      // We handled the entry. Remove from set for future execution.
+      preregisteredExtensions.splice(i--, 1);
     }
   }
-  // Make sure we empty the array of preregistered extensions.
-  // Technically this is only needed for testing, as everything should
-  // go out of scope here, but just making sure.
-  preregisteredExtensions.length = 0;
+
+  maybePumpEarlyFrame(global, () => {
+    /**
+     * Registers a new custom element.
+     * @param {function(!Object)|ExtensionPayloadDef} fnOrStruct
+     */
+    global.AMP.push = function(fnOrStruct) {
+      if (maybeLoadCorrectVersion(global, fnOrStruct)) {
+        return;
+      }
+      installExtension(fnOrStruct);
+    };
+    // Execute asynchronously scheduled elements.
+    for (let i = 0; i < preregisteredExtensions.length; i++) {
+      const fnOrStruct = preregisteredExtensions[i];
+      if (maybeLoadCorrectVersion(global, fnOrStruct)) {
+        continue;
+      }
+      try {
+        installExtension(fnOrStruct);
+      } catch (e) {
+        // Throw errors outside of loop in its own micro task to
+        // avoid on error stopping other extensions from loading.
+        dev().error(TAG, 'Extension failed: ', e, fnOrStruct.n);
+      }
+    }
+    // Make sure we empty the array of preregistered extensions.
+    // Technically this is only needed for testing, as everything should
+    // go out of scope here, but just making sure.
+    preregisteredExtensions.length = 0;
+  });
+  // If the closure passed to maybePumpEarlyFrame didn't execute
+  // immediately we need to keep pushing onto preregisteredExtensions
+  if (!global.AMP.push) {
+    global.AMP.push = preregisteredExtensions.push.bind(
+      preregisteredExtensions);
+  }
 
   installAutoLoadExtensions();
 
@@ -496,13 +545,13 @@ function prepareAndRegisterServiceForDocShadowMode(global, extensions,
  * @param {function(!./service/ampdoc-impl.AmpDoc):!Object=} opt_factory
  */
 function registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory) {
-  dev().assert((opt_ctor || opt_factory) && (!opt_ctor || !opt_factory),
-      'Only one: a class or a factory must be specified');
-  if (opt_ctor) {
-    fromClassForDoc(ampdoc, name, opt_ctor);
-  } else {
-    getServiceForDoc(ampdoc, name, opt_factory);
-  }
+  // TODO(kmh287): Investigate removing the opt_instantiate arg after
+  // all other services have been refactored.
+  registerServiceBuilderForDoc(ampdoc,
+                               name,
+                               opt_ctor,
+                               opt_factory,
+                               /* opt_instantiate */ true);
 }
 
 
@@ -646,11 +695,12 @@ class MultidocManager {
     // E.g. integrate with dynamic classes. In shadow case specifically, we have
     // to wait for stubbing to complete, which may take awhile due to importNode.
     setTimeout(() => {
+      ampdoc.signals().signal(CommonSignals.RENDER_START);
       setStyle(hostElement, 'visibility', 'visible');
     }, 50);
 
     // Store reference.
-    if (this.shadowRoots_.indexOf(shadowRoot) == -1) {
+    if (!this.shadowRoots_.includes(shadowRoot)) {
       this.shadowRoots_.push(shadowRoot);
     }
 
@@ -669,88 +719,106 @@ class MultidocManager {
     const extensionIds = [];
     if (doc.head) {
       const parentLinks = {};
-      childElementsByTag(dev().assertElement(this.win.document.head), 'link')
-          .forEach(link => {
-            const href = link.getAttribute('href');
-            if (href) {
-              parentLinks[href] = true;
-            }
-          });
+      const links = childElementsByTag(
+          dev().assertElement(this.win.document.head), 'link');
+      for (let i = 0; i < links.length; i++) {
+        const href = links[i].getAttribute('href');
+        if (href) {
+          parentLinks[href] = true;
+        }
+      }
 
       for (let n = doc.head.firstElementChild; n; n = n.nextElementSibling) {
         const tagName = n.tagName;
         const name = n.getAttribute('name');
         const rel = n.getAttribute('rel');
-        if (n.tagName == 'TITLE') {
-          shadowRoot.AMP.title = n.textContent;
-          dev().fine(TAG, '- set title: ', shadowRoot.AMP.title);
-        } else if (tagName == 'META' && n.hasAttribute('charset')) {
-          // Ignore.
-        } else if (tagName == 'META' && name == 'viewport') {
-          // Ignore.
-        } else if (tagName == 'META') {
-          // TODO(dvoytenko): copy other meta tags.
-          dev().warn(TAG, 'meta ignored: ', n);
-        } else if (tagName == 'LINK' && rel == 'canonical') {
-          shadowRoot.AMP.canonicalUrl = n.getAttribute('href');
-          dev().fine(TAG, '- set canonical: ', shadowRoot.AMP.canonicalUrl);
-        } else if (tagName == 'LINK' && rel == 'stylesheet') {
-          // This must be a font definition: no other stylesheets are allowed.
-          /** @const {string} */
-          const href = n.getAttribute('href');
-          if (parentLinks[href]) {
-            dev().fine(TAG, '- stylesheet already included: ', href);
-          } else {
-            parentLinks[href] = true;
-            const el = this.win.document.createElement('link');
-            el.setAttribute('rel', 'stylesheet');
-            el.setAttribute('type', 'text/css');
-            el.setAttribute('href', href);
-            this.win.document.head.appendChild(el);
-            dev().fine(TAG, '- import font to parent: ', href, el);
-          }
-        } else if (n.tagName == 'STYLE') {
-          if (n.hasAttribute('amp-boilerplate')) {
-            // Ignore.
-            dev().fine(TAG, '- ignore boilerplate style: ', n);
-          } else {
-            installStylesForShadowRoot(shadowRoot, n.textContent,
-                /* isRuntimeCss */ false, 'amp-custom');
-            dev().fine(TAG, '- import style: ', n);
-          }
-        } else if (n.tagName == 'SCRIPT' && n.hasAttribute('src')) {
-          dev().fine(TAG, '- src script: ', n);
-          const src = n.getAttribute('src');
-          const isRuntime = src.indexOf('/amp.js') != -1 ||
-              src.indexOf('/v0.js') != -1;
-          const customElement = n.getAttribute('custom-element');
-          const customTemplate = n.getAttribute('custom-template');
-          if (isRuntime) {
-            dev().fine(TAG, '- ignore runtime script: ', src);
-          } else if (customElement || customTemplate) {
-            // This is an extension.
-            this.extensions_.loadExtension(customElement || customTemplate);
-            dev().fine(
-                TAG, '- load extension: ', customElement || customTemplate);
-            if (customElement) {
-              extensionIds.push(customElement);
+        switch (tagName) {
+          case 'TITLE':
+            shadowRoot.AMP.title = n.textContent;
+            dev().fine(TAG, '- set title: ', shadowRoot.AMP.title);
+            break;
+          case 'META':
+            if (n.hasAttribute('charset')) {
+              // Ignore.
+            } else if (name == 'viewport') {
+              // Ignore.
+            } else {
+              // TODO(dvoytenko): copy other meta tags.
+              dev().warn(TAG, 'meta ignored: ', n);
             }
-          } else if (!n.hasAttribute('data-amp-report-test')) {
-            user().error(TAG, '- unknown script: ', n, src);
-          }
-        } else if (n.tagName == 'SCRIPT') {
-          // Non-src version of script.
-          const type = n.getAttribute('type') || 'application/javascript';
-          if (type.indexOf('javascript') == -1) {
-            shadowRoot.appendChild(this.win.document.importNode(n, true));
-            dev().fine(TAG, '- non-src script: ', n);
-          } else {
-            user().error(TAG, '- unallowed inline javascript: ', n);
-          }
-        } else if (n.tagName == 'NOSCRIPT') {
-          // Ignore.
-        } else {
-          user().error(TAG, '- UNKNOWN head element:', n);
+            break;
+          case 'LINK':
+            /** @const {string} */
+            const href = n.getAttribute('href');
+            if (rel == 'canonical') {
+              shadowRoot.AMP.canonicalUrl = href;
+              dev().fine(TAG, '- set canonical: ', shadowRoot.AMP.canonicalUrl);
+            } else if (rel == 'stylesheet') {
+              // Must be a font definition: no other stylesheets are allowed.
+              if (parentLinks[href]) {
+                dev().fine(TAG, '- stylesheet already included: ', href);
+              } else {
+                parentLinks[href] = true;
+                const el = this.win.document.createElement('link');
+                el.setAttribute('rel', 'stylesheet');
+                el.setAttribute('type', 'text/css');
+                el.setAttribute('href', href);
+                this.win.document.head.appendChild(el);
+                dev().fine(TAG, '- import font to parent: ', href, el);
+              }
+            } else {
+              dev().fine(TAG, '- ignore link rel=', rel);
+            }
+            break;
+          case 'STYLE':
+            if (n.hasAttribute('amp-boilerplate')) {
+              // Ignore.
+              dev().fine(TAG, '- ignore boilerplate style: ', n);
+            } else {
+              installStylesForShadowRoot(shadowRoot, n.textContent,
+                  /* isRuntimeCss */ false, 'amp-custom');
+              dev().fine(TAG, '- import style: ', n);
+            }
+            break;
+          case 'SCRIPT':
+            if (n.hasAttribute('src')) {
+              dev().fine(TAG, '- src script: ', n);
+              const src = n.getAttribute('src');
+              const isRuntime = src.indexOf('/amp.js') != -1 ||
+                  src.indexOf('/v0.js') != -1;
+              const customElement = n.getAttribute('custom-element');
+              const customTemplate = n.getAttribute('custom-template');
+              if (isRuntime) {
+                dev().fine(TAG, '- ignore runtime script: ', src);
+              } else if (customElement || customTemplate) {
+                // This is an extension.
+                this.extensions_.loadExtension(customElement || customTemplate);
+                dev().fine(
+                    TAG, '- load extension: ', customElement || customTemplate);
+                if (customElement) {
+                  extensionIds.push(customElement);
+                }
+              } else if (!n.hasAttribute('data-amp-report-test')) {
+                user().error(TAG, '- unknown script: ', n, src);
+              }
+            } else {
+              // Non-src version of script.
+              const type = n.getAttribute('type') || 'application/javascript';
+              if (type.indexOf('javascript') == -1) {
+                shadowRoot.appendChild(this.win.document.importNode(n, true));
+                dev().fine(TAG, '- non-src script: ', n);
+              } else {
+                user().error(TAG, '- unallowed inline javascript: ', n);
+              }
+            }
+            break;
+          case 'NOSCRIPT':
+            // Ignore.
+            break;
+          default:
+            user().error(TAG, '- UNKNOWN head element:', n);
+            break;
+
         }
       }
     }
@@ -867,8 +935,81 @@ export function registerForUnitTest(win) {
 export function registerElementForTesting(win, elementName) {
   const element = elementsForTesting[elementName];
   if (!element) {
-    throw new Error('test element not found: ' + elementName);
+    throw new Error('test element not found: ' + elementName +
+      '\nKnown elements ' + Object.keys(elementsForTesting).sort());
   }
   win.AMP.registerElement(element.name, element.implementationClass,
       element.css);
+}
+
+/**
+ * For a given extension, checks that its version is the same
+ * as the version of the main AMP binary.
+ * If yes, returns false and does nothing else.
+ * If they are different, returns false, and initiates a load
+ * of the respective extension via a versioned URL.
+ *
+ * This is currently guarded by the 'version-locking' experiment.
+ * With this active, all scripts in a given page are guaranteed
+ * to have the same AMP release version.
+ *
+ * @param {!Window} win
+ * @param {function(!Object)|ExtensionPayloadDef} fnOrStruct
+ * @return {boolean}
+ */
+function maybeLoadCorrectVersion(win, fnOrStruct) {
+  if (!isExperimentOn(win, 'version-locking')) {
+    return false;
+  }
+  if (typeof fnOrStruct == 'function') {
+    return false;
+  }
+  const version = fnOrStruct.v;
+  // This is non-obvious, but we only care about the release version,
+  // not about the full rtv version, because these only differ
+  // in the config that is fully determined by the primary binary.
+  if ('$internalRuntimeVersion$' == version) {
+    return false;
+  }
+  // The :not is an extra prevention of recursion because it will be
+  // added to script tags that go into the code path below.
+  const scriptInHead = win.document.head./*OK*/querySelector(
+          `[custom-element="${fnOrStruct.n}"]:not([i-amphtml-inserted])`);
+  dev().assert(scriptInHead, 'Expected to find script for extension: %s',
+      fnOrStruct.n);
+  if (!scriptInHead) {
+    return false;
+  }
+  // Mark the element as being replace, so that the loadExtension code
+  // assumes it as not-present.
+  scriptInHead.removeAttribute('custom-element');
+  scriptInHead.setAttribute('i-amphtml-loaded-new-version', fnOrStruct.n);
+  extensionsFor(win).loadExtension(fnOrStruct.n,
+      /* stubbing not needed, should have already happened. */ false);
+  return true;
+}
+
+/**
+ * If it makes sense, let the browser paint the current frame before
+ * executing the callback.
+ * @param {!Window} win
+ * @param {function()} cb Callback that should run after a frame was
+ *     pumped.
+ */
+function maybePumpEarlyFrame(win, cb) {
+  if (!isExperimentOn(win, 'pump-early-frame')) {
+    cb();
+    return;
+  }
+  // There is definitely nothing to draw yet, so we might as well
+  // proceed.
+  if (!win.document.body) {
+    cb();
+    return;
+  }
+  if (hasRenderDelayingServices(win)) {
+    cb();
+    return;
+  }
+  timerFor(win).delay(cb, 1);
 }

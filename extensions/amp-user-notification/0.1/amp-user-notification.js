@@ -16,14 +16,14 @@
 
 import {CSS} from '../../../build/amp-user-notification-0.1.css';
 import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
-import {cidFor} from '../../../src/cid';
-import {fromClass} from '../../../src/service';
+import {cidForDoc} from '../../../src/services';
+import {registerServiceBuilder, getService} from '../../../src/service';
 import {dev, user, rethrowAsync} from '../../../src/log';
-import {storageForDoc} from '../../../src/storage';
-import {urlReplacementsForDoc} from '../../../src/url-replacements';
-import {viewerForDoc} from '../../../src/viewer';
+import {storageForDoc} from '../../../src/services';
+import {urlReplacementsForDoc} from '../../../src/services';
+import {viewerForDoc} from '../../../src/services';
 import {whenDocumentReady} from '../../../src/document-ready';
-import {xhrFor} from '../../../src/xhr';
+import {xhrFor} from '../../../src/services';
 import {setStyle} from '../../../src/style';
 
 
@@ -107,7 +107,9 @@ export class AmpUserNotification extends AMP.BaseElement {
     this.urlReplacements_ = urlReplacementsForDoc(ampdoc);
     this.storagePromise_ = storageForDoc(ampdoc);
     if (!this.userNotificationManager_) {
-      this.userNotificationManager_ = getUserNotificationManager_(this.win);
+      installUserNotificationManager(window);
+      this.userNotificationManager_ = getService(window,
+          'userNotificationManager');
     }
 
     /** @private {?string} */
@@ -235,7 +237,7 @@ export class AmpUserNotification extends AMP.BaseElement {
    * @private
    */
   getAsyncCid_() {
-    return cidFor(this.win).then(cid => {
+    return cidForDoc(this.element).then(cid => {
       // `amp-user-notification` is our cid scope, while we give it a resolved
       // promise for the 2nd argument so that the 3rd argument (the
       // persistentConsent) is the one used to resolve getting
@@ -435,21 +437,11 @@ export class UserNotificationManager {
 
 /**
  * @param {!Window} window
- * @return {!UserNotificationManager}
- * @private
- */
-function getUserNotificationManager_(window) {
-  return fromClass(window, 'userNotificationManager',
-      UserNotificationManager);
-}
-
-/**
- * @param {!Window} window
- * @return {!UserNotificationManager}
- * @private
  */
 export function installUserNotificationManager(window) {
-  return getUserNotificationManager_(window);
+  registerServiceBuilder(window,
+      'userNotificationManager',
+      UserNotificationManager);
 }
 
 installUserNotificationManager(AMP.win);

@@ -15,11 +15,14 @@
  */
 
 import {adConfig} from '../../ads/_config';
+import {ampdocServiceFor} from '../../src/ampdoc';
 import {createIframePromise} from '../../testing/iframe';
-import {installCidService} from '../../extensions/amp-analytics/0.1/cid-impl';
+import {cidServiceForDocForTesting,} from
+    '../../extensions/amp-analytics/0.1/cid-impl';
+import {installDocService} from '../../src/service/ampdoc-impl';
 import {getAdCid} from '../../src/ad-cid';
 import {setCookie} from '../../src/cookies';
-import {timerFor} from '../../src/timer';
+import {timerFor} from '../../src/services';
 import * as sinon from 'sinon';
 
 describe('ad-cid', () => {
@@ -35,10 +38,13 @@ describe('ad-cid', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
-    cidService = installCidService(window);
     element = document.createElement('amp-ad');
     element.setAttribute('type', '_ping_');
+    installDocService(window, /* isSingleDoc */ true);
+    const ampdoc = ampdocServiceFor(window).getAmpDoc();
+    cidService = cidServiceForDocForTesting(ampdoc);
     adElement = {
+      getAmpDoc: () => ampdoc,
       element,
       win: window,
     };
@@ -94,8 +100,7 @@ describe('ad-cid', () => {
     return createIframePromise(true /* runtimeOff */).then(iframe => {
       adElement.win = iframe.win;
       return getAdCid(adElement).then(cid => {
-        console.log('cid is ', cid);
-        expect(cid).to.be.undefined;
+        expect(cid).to.be.null;
       });
     });
   });

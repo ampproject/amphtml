@@ -65,9 +65,9 @@ describes.realWin('test-scrollable-carousel', {ampCss: true}, env => {
 
       // create container
       expect(carousel.getElementsByClassName(
-          '-amp-scrollable-carousel-container').length).to.equal(1);
+          'i-amphtml-scrollable-carousel-container').length).to.equal(1);
       const container = carousel.getElementsByClassName(
-          '-amp-scrollable-carousel-container')[0];
+          'i-amphtml-scrollable-carousel-container')[0];
       const containerStyle = win.getComputedStyle(container, null);
 
       expect(containerStyle.getPropertyValue('overflow-x')).to.equal('auto');
@@ -106,7 +106,7 @@ describes.realWin('test-scrollable-carousel', {ampCss: true}, env => {
       expect(impl.container_./*OK*/scrollLeft).to.equal(300);
 
       // load new slides in viewport
-      expect(updateInViewportSpy.callCount).to.equal(5);
+      expect(updateInViewportSpy).to.have.callCount(5);
       expect(updateInViewportSpy).to.have.been.calledWith(impl.cells_[2], true);
       expect(updateInViewportSpy).to.have.been.calledWith(impl.cells_[3], true);
       expect(updateInViewportSpy).to.have.been.calledWith(impl.cells_[4], true);
@@ -120,13 +120,13 @@ describes.realWin('test-scrollable-carousel', {ampCss: true}, env => {
       expect(schedulePauseSpy).to.have.been.calledWith(impl.cells_[1]);
 
       // schedule layout for new slides
-      expect(scheduleLayoutSpy.callCount).to.equal(3);
+      expect(scheduleLayoutSpy).to.have.callCount(3);
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[2]);
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[3]);
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[4]);
 
       // preload slides in viewport
-      expect(schedulePreloadSpy.callCount).to.equal(3);
+      expect(schedulePreloadSpy).to.have.callCount(3);
       expect(schedulePreloadSpy).to.have.been.calledWith(impl.cells_[4]);
       expect(schedulePreloadSpy).to.have.been.calledWith(impl.cells_[5]);
       expect(schedulePreloadSpy).to.have.been.calledWith(impl.cells_[6]);
@@ -160,7 +160,7 @@ describes.realWin('test-scrollable-carousel', {ampCss: true}, env => {
       expect(impl.container_./*OK*/scrollLeft).to.equal(588);
 
       // load new slides in viewport
-      expect(updateInViewportSpy.callCount).to.equal(5);
+      expect(updateInViewportSpy).to.have.callCount(5);
       expect(updateInViewportSpy).to.have.been.calledWith(impl.cells_[4], true);
       expect(updateInViewportSpy).to.have.been.calledWith(impl.cells_[5], true);
       expect(updateInViewportSpy).to.have.been.calledWith(impl.cells_[6], true);
@@ -174,13 +174,13 @@ describes.realWin('test-scrollable-carousel', {ampCss: true}, env => {
       expect(schedulePauseSpy).to.have.been.calledWith(impl.cells_[3]);
 
       // schedule layout for new slides
-      expect(scheduleLayoutSpy.callCount).to.equal(3);
+      expect(scheduleLayoutSpy).to.have.callCount(3);
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[4]);
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[5]);
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[6]);
 
       // preload slides in viewport
-      expect(schedulePreloadSpy.callCount).to.equal(0);
+      expect(schedulePreloadSpy).to.have.not.been.called;
 
       // set control buttons correctly
       expect(impl.hasPrev()).to.be.true;
@@ -212,7 +212,7 @@ describes.realWin('test-scrollable-carousel', {ampCss: true}, env => {
       expect(impl.container_./*OK*/scrollLeft).to.equal(288);
 
       // load new slides in viewport
-      expect(updateInViewportSpy.callCount).to.equal(5);
+      expect(updateInViewportSpy).to.have.callCount(5);
       expect(updateInViewportSpy).to.have.been.calledWith(impl.cells_[2], true);
       expect(updateInViewportSpy).to.have.been.calledWith(impl.cells_[3], true);
       expect(updateInViewportSpy).to.have.been.calledWith(impl.cells_[4], true);
@@ -226,13 +226,13 @@ describes.realWin('test-scrollable-carousel', {ampCss: true}, env => {
       expect(schedulePauseSpy).to.have.been.calledWith(impl.cells_[6]);
 
       // schedule layout for new slides
-      expect(scheduleLayoutSpy.callCount).to.equal(3);
+      expect(scheduleLayoutSpy).to.have.callCount(3);
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[2]);
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[3]);
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[4]);
 
       // preload slides in viewport
-      expect(schedulePreloadSpy.callCount).to.equal(3);
+      expect(schedulePreloadSpy).to.have.callCount(3);
       expect(schedulePreloadSpy).to.have.been.calledWith(impl.cells_[0]);
       expect(schedulePreloadSpy).to.have.been.calledWith(impl.cells_[1]);
       expect(schedulePreloadSpy).to.have.been.calledWith(impl.cells_[2]);
@@ -268,7 +268,7 @@ describes.realWin('test-scrollable-carousel', {ampCss: true}, env => {
       expect(impl.container_./*OK*/scrollLeft).to.equal(0);
 
       // load new slides in viewport
-      expect(updateInViewportSpy.callCount).to.equal(5);
+      expect(updateInViewportSpy).to.have.callCount(5);
       expect(updateInViewportSpy).to.have.been.calledWith(impl.cells_[0], true);
       expect(updateInViewportSpy).to.have.been.calledWith(impl.cells_[1], true);
       expect(updateInViewportSpy).to.have.been.calledWith(impl.cells_[2], true);
@@ -282,13 +282,13 @@ describes.realWin('test-scrollable-carousel', {ampCss: true}, env => {
       expect(schedulePauseSpy).to.have.been.calledWith(impl.cells_[4]);
 
       // schedule layout for new slides
-      expect(scheduleLayoutSpy.callCount).to.equal(3);
+      expect(scheduleLayoutSpy).to.have.callCount(3);
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[0]);
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[1]);
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[2]);
 
       // preload slides in viewport
-      expect(schedulePreloadSpy.callCount).to.equal(0);
+      expect(schedulePreloadSpy).to.have.not.been.called;
 
       // set control buttons correctly
       expect(impl.hasPrev()).to.be.false;

@@ -25,7 +25,6 @@ describe.configure().retryOnSaucelabs().run('Rendering of one ad', () => {
   let beforeHref;
 
   function replaceUrl(win) {
-    // TODO(#2402) Support glade as well.
     const path = '/test/fixtures/doubleclick.html?google_glade=0';
     // We pass down the parent URL. So we change that, which we
     // can. We just need to change it back after the test.
@@ -47,7 +46,7 @@ describe.configure().retryOnSaucelabs().run('Rendering of one ad', () => {
     }
   });
 
-  // TODO(#3561): unmute the test.
+  // TODO(lannka, #3561): unmute the test.
   // it.configure().skipEdge().run('should create an iframe loaded', function() {
   it.skip('should create an iframe loaded', function() {
     this.timeout(20000);
@@ -82,6 +81,8 @@ describe.configure().retryOnSaucelabs().run('Rendering of one ad', () => {
         expect(context.referrer).to.contain('http://localhost:' + location.port);
       }
       expect(context.pageViewId).to.be.greaterThan(0);
+      expect(context.initialLayoutRect).to.be.defined;
+      expect(context.initialLayoutRect.top).to.be.defined;
       expect(context.initialIntersection).to.be.defined;
       expect(context.initialIntersection.rootBounds).to.be.defined;
       expect(context.data.tagForChildDirectedTreatment).to.equal(0);

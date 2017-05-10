@@ -1,0 +1,72 @@
+<!doctype html>
+<html ⚡>
+<head>
+    <meta charset="utf-8">
+    <title>Forms Examples in AMP</title>
+    <link rel="canonical" href="amps.html" >
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+    <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+</head>
+<body>
+
+  <p>Submit the form and then press a button to change the text in the below template</p>
+  <button on="tap:AMP.setState({selected: 1})">1</button>
+  <button on="tap:AMP.setState({selected: 2})">2</button>
+  <button on="tap:AMP.setState({selected: 3})">3</button>
+  <button on="tap:AMP.setState({selected: 4})">4</button>
+
+  <p [text]="'$' + selectedRange">$0</p>
+  <p>Color Selection: <span [text]="colorSelection || 'red'">red</span>
+
+  <h4>Enter your name and email.</h4>
+  <form method="post"
+        action-xhr="/form/echo-json/post"
+        target="_blank">
+      <fieldset>
+          <label>
+            <span>Your name</span>
+            <input type="text" name="name" id="name1" required>
+          </label>
+          <label>
+            <span>Your email</span>
+            <input type="email" name="email" id="email1" required>
+          </label>
+          <label>
+            <span>Your choice</span>
+            <select on="change:AMP.setState({colorSelection: event.value})">
+              <option value="red">red</option>
+              <option value="green">green</option>
+              <option value="blue">blue</option>
+              <option value="yellow">yellow</option>
+            </select>
+          </label>
+          <label>
+            <span>Your offer</span>
+            $100
+            <input type="range" min="100" max="200" step="10" on="change:AMP.setState({selectedRange: event.value})"/>
+            $200
+          </label>
+          <input type="submit" value="Subscribe">
+      </fieldset>
+
+      <div submit-success>
+          <template type="amp-mustache">
+              Success! Thanks {{name}} for entering your email: {{email}}
+
+              <p>You have selected: <span [text]="selected ? selected : 'No selection'">No selection</span></p>
+          </template>
+      </div>
+      <div submit-error>
+        <template type="amp-mustache">
+              Error! Failure to register: {{name}} : {{email}}
+
+              <p>You have selected: <span [text]="selected ? selected : 'No selection'">No selection</span></p>
+          </template>
+      </div>
+  </form>
+</body>
+</html>

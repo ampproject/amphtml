@@ -1,10 +1,1 @@
-FAIL
-amp-bind/0.1/test/validator-amp-bind.html:39:2 The parent tag of tag 'amp-state' is 'body', but it can only be 'head'. (see https://www.ampproject.org/docs/reference/extended/amp-bind.html) [AMP_TAG_PROBLEM]
-amp-bind/0.1/test/validator-amp-bind.html:47:2 The attribute 'onclick' may not appear in tag 'button'. [DISALLOWED_HTML]
-amp-bind/0.1/test/validator-amp-bind.html:49:2 The attribute '[text]' may not appear in tag 'p'. [DISALLOWED_HTML]
-amp-bind/0.1/test/validator-amp-bind.html:50:2 The attribute '[text]' may not appear in tag 'p'. [DISALLOWED_HTML]
-amp-bind/0.1/test/validator-amp-bind.html:51:2 The attribute '[text]' may not appear in tag 'p'. [DISALLOWED_HTML]
-amp-bind/0.1/test/validator-amp-bind.html:52:2 The attribute '[disabled]' may not appear in tag 'button'. [DISALLOWED_HTML]
-amp-bind/0.1/test/validator-amp-bind.html:53:2 The attribute '[class]' may not appear in tag 'p'. [DISALLOWED_HTML]
-amp-bind/0.1/test/validator-amp-bind.html:54:2 The attribute '[src]' may not appear in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/amp-img.html) [AMP_TAG_PROBLEM]
-amp-bind/0.1/test/validator-amp-bind.html:59:7 The tag 'amp-state' is missing or incorrect, but required by 'amp-bind extension .js script'. (see https://www.ampproject.org/docs/reference/extended/amp-bind.html) [AMP_TAG_PROBLEM]
+PASS

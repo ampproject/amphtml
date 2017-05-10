@@ -21,9 +21,9 @@ import {user} from '../src/log';
 /**
  * Produces the Facebook SDK object for the passed in callback.
  *
- * Note: Facebook SDK fails to render multiple posts when the SDK is only loaded
- * in one frame. To Allow the SDK to render them correctly we load the script
- * per iframe.
+ * Note: Facebook SDK fails to render multiple plugins when the SDK is only
+ * loaded in one frame. To Allow the SDK to render them correctly we load the
+ * script per iframe.
  *
  * @param {!Window} global
  * @param {function(!Object)} cb
@@ -35,33 +35,90 @@ function getFacebookSdk(global, cb) {
 }
 
 /**
+ * Create DOM element for the Facebook embedded content plugin.
+ * Reference: https://developers.facebook.com/docs/plugins/embedded-posts
  * @param {!Window} global
- * @param {!Object} data
+ * @param {!Object} data The element data
+ * @return {!Element} div
  */
-export function facebook(global, data) {
+function getPostContainer(global, data) {
+  const container = global.document.createElement('div');
   const embedAs = data.embedAs || 'post';
   user().assert(['post', 'video'].indexOf(embedAs) !== -1,
       'Attribute data-embed-as  for <amp-facebook> value is wrong, should be' +
       ' "post" or "video" was: %s', embedAs);
-  const fbPost = global.document.createElement('div');
-  fbPost.className = 'fb-' + embedAs;
-  fbPost.setAttribute('data-href', data.href);
-  global.document.getElementById('c').appendChild(fbPost);
+  container.className = 'fb-' + embedAs;
+  container.setAttribute('data-href', data.href);
+  return container;
+}
+
+/**
+ * Create DOM element for the Facebook comments plugin:
+ * Reference: https://developers.facebook.com/docs/plugins/comments
+ * @param {!Window} global
+ * @param {!Object} data The element data
+ * @return {!Element} div
+ */
+function getCommentsContainer(global, data) {
+  const container = global.document.createElement('div');
+  container.className = 'fb-comments';
+  container.setAttribute('data-href', data.href);
+  container.setAttribute('data-numposts', data.numposts || 10);
+  container.setAttribute('data-colorscheme', data.colorscheme || 'light');
+  container.setAttribute('data-width', '100%');
+  return container;
+}
+
+/**
+ * Create DOM element for the Facebook like-button plugin:
+ * Reference: https://developers.facebook.com/docs/plugins/like-button
+ * @param {!Window} global
+ * @param {!Object} data The element data
+ * @return {!Element} div
+ */
+function getLikeContainer(global, data) {
+  const container = global.document.createElement('div');
+  container.className = 'fb-like';
+  container.setAttribute('data-action', data.action || 'like');
+  container.setAttribute('data-colorscheme', data.colorscheme || 'light');
+  container.setAttribute('data-href', data.href);
+  container.setAttribute('data-kd_site', data.kd_site || 'false');
+  container.setAttribute('data-layout', data.layout || 'standard');
+  container.setAttribute('data-ref', data.ref || '');
+  container.setAttribute('data-share', data.share || 'false');
+  container.setAttribute('data-show_faces', data.show_faces || 'false');
+  container.setAttribute('data-size', data.size || 'small');
+  return container;
+}
+
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+export function facebook(global, data) {
+  const extension = global.context.tagName;
+  let container;
+  if (extension === 'AMP-FACEBOOK-LIKE') {
+    container = getLikeContainer(global, data);
+  } else if (extension === 'AMP-FACEBOOK-COMMENTS') {
+    container = getCommentsContainer(global, data);
+  } else /*AMP-FACEBOOK */ {
+    container = getPostContainer(global, data);
+  }
+
+  global.document.getElementById('c').appendChild(container);
+
   getFacebookSdk(global, FB => {
     // Dimensions are given by the parent frame.
     delete data.width;
     delete data.height;
 
-    // Only need to listen to post resizing as FB videos have a fixed ratio
-    // and can automatically resize correctly given the initial width/height.
-    if (embedAs === 'post') {
-      FB.Event.subscribe('xfbml.resize', event => {
-        context.updateDimensions(
-            parseInt(event.width, 10),
-            parseInt(event.height, 10) + /* margins */ 20);
-      });
-    }
+    FB.Event.subscribe('xfbml.resize', event => {
+      context.updateDimensions(
+        parseInt(event.width, 10),
+        parseInt(event.height, 10) + /* margins */ 20);
+    });
+
     FB.init({xfbml: true, version: 'v2.5'});
   });
-
 }

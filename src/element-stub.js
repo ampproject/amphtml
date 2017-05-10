@@ -16,7 +16,7 @@
 
 import {BaseElement} from './base-element';
 import {dev} from './log';
-import {extensionsFor} from './extensions';
+import {extensionsFor} from './services';
 
 /** @type {!Array} */
 export const stubbedElements = [];
@@ -47,6 +47,12 @@ export class ElementStub extends BaseElement {
     // Always returns true and will eventually call this method on the actual
     // element.
     return true;
+  }
+
+  /** @override */
+  reconstructWhenReparented() {
+    // No real state so no reason to reconstruct.
+    return false;
   }
 }
 

@@ -20,6 +20,7 @@ var closureCompiler = require('gulp-closure-compiler');
 var gulp = require('gulp');
 var rename = require('gulp-rename');
 var replace = require('gulp-replace');
+var util = require('gulp-util');
 var internalRuntimeVersion = require('../internal-version').VERSION;
 var internalRuntimeToken = require('../internal-version').TOKEN;
 var rimraf = require('rimraf');
@@ -41,16 +42,26 @@ exports.closureCompile = function(entryModuleFilename, outputDir,
       inProgress++;
       compile(entryModuleFilename, outputDir, outputFilename, options)
           .then(function() {
+            if (process.env.TRAVIS) {
+              // When printing simplified log in travis, use dot for each task.
+              process.stdout.write('.');
+            }
             inProgress--;
             next();
             resolve();
           }, function(e) {
-            console./*OK*/error('Compilation error', e.message);
+            console./*OK*/error(util.colors.red('Compilation error',
+                e.message));
             process.exit(1);
           });
     }
     function next() {
       if (!queue.length) {
+        // When printing simplified log in travis, print EOF after
+        // all closure compiling task are done.
+        if (process.env.TRAVIS) {
+          process.stdout.write('\n');
+        }
         return;
       }
       if (inProgress < MAX_PARALLEL_CLOSURE_INVOCATIONS) {
@@ -86,7 +97,7 @@ function compile(entryModuleFilenames, outputDir,
     var intermediateFilename = 'build/cc/' +
         entryModuleFilename.replace(/\//g, '_').replace(/^\./, '');
     if (!process.env.TRAVIS) {
-      console./*OK*/log('Starting closure compiler for', entryModuleFilenames);
+      util.log('Starting closure compiler for', entryModuleFilenames);
     }
     // If undefined/null or false then we're ok executing the deletions
     // and mkdir.
@@ -130,12 +141,16 @@ function compile(entryModuleFilenames, outputDir,
       // Strange access/login related files.
       'build/all/v0/*.js',
       // A4A has these cross extension deps.
-      'extensions/**/*-config.js',
+      'extensions/amp-ad-network*/**/*-config.js',
       'extensions/amp-ad/**/*.js',
       'extensions/amp-a4a/**/*.js',
       // Currently needed for crypto.js and visibility.js.
       // Should consider refactoring.
       'extensions/amp-analytics/**/*.js',
+      // For amp-bind in the web worker (ww.js).
+      'extensions/amp-bind/**/*.js',
+      // Needed to access form impl from other extensions
+      'extensions/amp-form/**/*.js',
       'src/*.js',
       'src/!(inabox)*/**/*.js',
       '!third_party/babel/custom-babel-helpers.js',
@@ -146,6 +161,7 @@ function compile(entryModuleFilenames, outputDir,
       'third_party/closure-library/sha384-generated.js',
       'third_party/css-escape/css-escape.js',
       'third_party/mustache/**/*.js',
+      'third_party/timeagojs/**/*.js',
       'third_party/vega/**/*.js',
       'third_party/d3/**/*.js',
       'third_party/webcomponentsjs/ShadowCSS.js',
@@ -166,7 +182,7 @@ function compile(entryModuleFilenames, outputDir,
     // Instead of globbing all extensions, this will only add the actual
     // extension path for much quicker build times.
     entryModuleFilenames.forEach(function(filename) {
-      if (filename.indexOf('extensions/') == -1) {
+      if (!filename.includes('extensions/')) {
         return;
       }
       var path = filename.replace(/\/[^/]+\.js$/, '/**/*.js');
@@ -219,7 +235,7 @@ function compile(entryModuleFilenames, outputDir,
       continueWithWarnings: false,
       tieredCompilation: true,  // Magic speed up.
       compilerFlags: {
-        compilation_level: 'SIMPLE_OPTIMIZATIONS',
+        compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
         // Turns on more optimizations.
         assume_function_wrapper: true,
         // Transpile from ES6 to ES5.
@@ -250,6 +266,7 @@ function compile(entryModuleFilenames, outputDir,
         jscomp_off: ['unknownDefines'],
         define: [],
         hide_warnings_for: [
+          'third_party/caja/',
           'third_party/closure-library/sha384-generated.js',
           'third_party/d3/',
           'third_party/vega/',
@@ -305,8 +322,9 @@ function compile(entryModuleFilenames, outputDir,
     var stream = gulp.src(srcs)
         .pipe(closureCompiler(compilerOptions))
         .on('error', function(err) {
-          console./*OK*/error('Error compiling', entryModuleFilenames);
-          console./*OK*/error(err.message);
+          console./*OK*/error(util.colors.red('Error compiling',
+              entryModuleFilenames));
+          console./*OK*/error(util.colors.red(err.message));
           process.exit(1);
         });
 
@@ -319,7 +337,7 @@ function compile(entryModuleFilenames, outputDir,
         .pipe(gulp.dest(outputDir))
         .on('end', function() {
           if (!process.env.TRAVIS) {
-            console./*OK*/log('Compiled', entryModuleFilename, 'to',
+            util.log('Compiled', entryModuleFilename, 'to',
                 outputDir + '/' + outputFilename, 'via', intermediateFilename);
           }
           gulp.src(intermediateFilename + '.map')

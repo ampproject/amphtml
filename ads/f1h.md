@@ -28,23 +28,6 @@ limitations under the License.
   </amp-ad>
 ```
 
-### Multi instance ads
-
-```html
-  <amp-ad width=250 height=250
-    type="f1h"
-    data-section-id="475"
-    data-slot="650"
-    data-instance="1" >
-  </amp-ad>
-  <amp-ad width=250 height=250
-    type="f1h"
-    data-section-id="475"
-    data-slot="650"
-    data-instance="2" >
-  </amp-ad>
-```
-
 ### Using custom params and custom ad server url
 
 ```html
@@ -53,7 +36,7 @@ limitations under the License.
     data-section-id="100"
     data-slot="107"
     data-custom='{"my_custom_param":"my_custom_value"}'
-    data-ad-server-url="//h.f1.impact-ad.jp/ad" >
+    data-pubnetwork-lib="lib_file_name" >
   </amp-ad>
 ```
 
@@ -63,10 +46,7 @@ Supported parameters:
 
 - `sectionId`: required: ID of this section in inventory system.
 - `slot`: required: ID of slot, that will be showed in this ad block.
-- `instance`: optional: ID of section instance in case we multiple times used the same section on the same page<br/>
-                      It can contain only letters and numbers<br/>
-                      Strictly required to use the same section multiple times per page.
-- `click3rd`: optional: 3rd party click watcher. 
+- `pubnetwork-lib`: Filepath of ad library.
 - `custom`: optional: You may use 3 types for its properties: {String}, {Number} and {Array}.<br/>
                     Array usage example:
                     ```
@@ -76,6 +56,4 @@ Supported parameters:
                     }
                     ```
                     Will translate into: arrayKey=value1&arrayKey=1&stringKey=stringValue...
-- `adServerUrl`: optional 
-- `cacheSafe`: optional
-- `pageIdModifier`: optional
+

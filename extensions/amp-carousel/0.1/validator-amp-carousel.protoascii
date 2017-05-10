@@ -15,56 +15,50 @@
 #
 
 tags: {  # amp-carousel
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
-  spec_name: "amp-carousel extension .js script"
-  mandatory_parent: "HEAD"
-  unique_warning: true
-  also_requires_tag_warning: "amp-carousel"
+  satisfies: "amp-carousel extension .js script"
+  extension_spec: {
+    name: "amp-carousel"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    deprecated_recommends_usage_of_tag: "amp-carousel"
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-carousel>
+  tag_name: "AMP-CAROUSEL"
+  disallowed_ancestor: "AMP-SIDEBAR"
+  requires: "amp-carousel extension .js script"
   attrs: {
-    name: "async"
-    mandatory: true
+    name: "arrows"
     value: ""
   }
   attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-carousel"
-    dispatch_key: true
+    name: "autoplay"
+    value: ""
+  }
+  attrs: { name: "controls" }
+  attrs: {
+    name: "delay"
+    value_regex: "[0-9]+"
   }
   attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-carousel-(latest|0\\.1).js"
+    name: "dots"
+    value: ""
+  }
+  attrs: {
+    name: "loop"
+    value: ""
   }
   attrs: {
     name: "type"
-    value_casei: "text/javascript"
+    value_regex: "slides|carousel"
   }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-carousel.html"
-}
-tags: {  # <amp-carousel>
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "AMP-CAROUSEL"
-  disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-carousel extension .js script"
-  attrs: { name: "arrows" value: "" }
-  attrs: { name: "autoplay" value: "" }
-  attrs: { name: "controls" }
-  attrs: { name: "delay" value_regex: "[0-9]+" }
-  attrs: { name: "dots" value: "" }
-  attrs: { name: "loop" value: "" }
-  attrs: { name: "type" value_regex: "slides|carousel" }
+  # <amp-bind>
+  attrs: { name: "[slide]" }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-carousel.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-carousel"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

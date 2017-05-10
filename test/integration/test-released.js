@@ -49,13 +49,13 @@ function runTest(shouldKillPolyfillableApis) {
     // saucelabs.
     // It never renders the ad, even though it appears to work when looking
     // at the rendering. The test passes when running locally in FF.
-    // TODO(#3561): unmute the test.
+    // TODO(lannka, #3561): unmute the test.
     it.configure().skipFirefox().skipChrome()
     .run('all components should get loaded', function() {
       this.timeout(15000);
       return pollForLayout(fixture.win, 13, 10000).then(() => {
         expect(fixture.doc.querySelectorAll('.i-amphtml-element'))
-            .to.have.length(16);
+            .to.have.length(17);
         expect(fixture.doc.querySelectorAll('.i-amphtml-layout'))
             .to.have.length(13);
         expect(fixture.doc.querySelectorAll('.i-amphtml-error'))

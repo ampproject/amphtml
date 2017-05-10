@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+import {isProxyOrigin, parseUrl} from './url';
+import {endsWith} from './string';
+import {urls} from './config';
+
 
 /**
  * Returns the value of the cookie. The cookie access is restricted and must
@@ -70,12 +74,18 @@ function tryGetDocumentCookieNoInline(win) {
  * @param {string} name
  * @param {string} value
  * @param {time} expirationTime
- * @param {{highestAvailableDomain:boolean}=} opt_options
+ * @param {{
+ *   highestAvailableDomain:(boolean|undefined),
+ *   domain:(string|undefined)
+ * }=} opt_options
  *     - highestAvailableDomain: If true, set the cookie at the widest domain
  *       scope allowed by the browser. E.g. on example.com if we are currently
  *       on www.example.com.
+ *     - domain: Explicit domain to set.
+ *     - allowOnProxyOrigin: Allow setting a cookie on the AMP Cache.
  */
 export function setCookie(win, name, value, expirationTime, opt_options) {
+  checkOriginForSettingCookie(win, opt_options, name);
   if (opt_options && opt_options.highestAvailableDomain) {
     const parts = win.location.hostname.split('.');
     let domain = parts[parts.length - 1];
@@ -87,7 +97,11 @@ export function setCookie(win, name, value, expirationTime, opt_options) {
       }
     }
   }
-  trySetCookie(win, name, value, expirationTime, undefined);
+  let domain = undefined;
+  if (opt_options && opt_options.domain) {
+    domain = opt_options.domain;
+  }
+  trySetCookie(win, name, value, expirationTime, domain);
 }
 
 /**
@@ -119,4 +133,29 @@ function trySetCookie(win, name, value, expirationTime, domain) {
     // when AMP docs are opened on origins that do not allow setting
     // cookies such as null origins.
   };
+}
+
+/**
+ * Throws if a given cookie should not be set on the given origin.
+ * This is a defense-in-depth. Callers should never run into this.
+ *
+ * @param {!Window} win
+ * @param {!Object|undefined} options
+ * @param {string} name For the error message.
+ */
+function checkOriginForSettingCookie(win, options, name) {
+  if (options && options.allowOnProxyOrigin) {
+    return;
+  }
+  if (isProxyOrigin(win.location.href)) {
+    throw new Error('Should never attempt to set cookie on proxy origin: '
+        + name);
+  }
+
+  const current = parseUrl(win.location.href).hostname.toLowerCase();
+  const proxy = parseUrl(urls.cdn).hostname.toLowerCase();
+  if (current == proxy || endsWith(current, '.' + proxy)) {
+    throw new Error('Should never attempt to set cookie on proxy origin.'
+        + ' (in depth check): ' + name);
+  }
 }

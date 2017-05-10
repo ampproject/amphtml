@@ -1,4 +1,2 @@
 FAIL
-amp-user-notification/0.1/test/validator-amp-user-notification.html:69:2 The specified layout 'CONTAINER' is not supported by tag 'amp-user-notification'. (see https://www.ampproject.org/docs/reference/extended/amp-user-notification.html) [AMP_LAYOUT_PROBLEM]
-amp-user-notification/0.1/test/validator-amp-user-notification.html:79:7 The tag 'amp-analytics extension .js script' is missing or incorrect, but required by 'amp-user-notification'. (see https://www.ampproject.org/docs/reference/extended/amp-user-notification.html) [AMP_TAG_PROBLEM]
-amp-user-notification/0.1/test/validator-amp-user-notification.html:79:7 The tag 'amp-user-notification extension .js script' is missing or incorrect, but required by 'amp-user-notification'. (see https://www.ampproject.org/docs/reference/extended/amp-user-notification.html) [AMP_TAG_PROBLEM]
+amp-user-notification/0.1/test/validator-amp-user-notification.html:71:2 The specified layout 'CONTAINER' is not supported by tag 'amp-user-notification'. (see https://www.ampproject.org/docs/reference/components/amp-user-notification) [AMP_LAYOUT_PROBLEM]

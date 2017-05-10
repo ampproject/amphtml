@@ -17,7 +17,7 @@
 import * as sinon from 'sinon';
 import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
 import {
-  installXhrService,
+  xhrServiceForTesting,
   fetchPolyfill,
   FetchResponse,
   assertSuccess,
@@ -43,10 +43,10 @@ describe('XHR', function() {
 
   const scenarios = [
     {
-      xhr: installXhrService(nativeWin),
+      xhr: xhrServiceForTesting(nativeWin),
       desc: 'Native',
     }, {
-      xhr: installXhrService(polyfillWin),
+      xhr: xhrServiceForTesting(polyfillWin),
       desc: 'Polyfill',
     },
   ];
@@ -296,9 +296,16 @@ describe('XHR', function() {
         it('should reject if error', () => {
           mockXhr.status = 500;
           return assertSuccess(createResponseInstance('', mockXhr))
-              .then(response => {
-                expect(response.status).to.equal(500);
-              }).should.be.rejectedWith(/HTTP error 500/);
+              .should.be.rejectedWith(/HTTP error 500/);
+        });
+
+        it('should include response in error', () => {
+          mockXhr.status = 500;
+          return assertSuccess(createResponseInstance('', mockXhr))
+              .catch(error => {
+                expect(error.response).to.be.defined;
+                expect(error.response.status).to.equal(500);
+              });
         });
 
         it('should parse json content when error', () => {
@@ -522,7 +529,7 @@ describe('XHR', function() {
     });
 
     describe('#fetch ' + test.desc, () => {
-      const creative = '<html><body>This is a creative</body></html>';
+      const creative = '<html><body>This is a creative简</body></html>';
 
       // Using the Native fetch, we can't mock the XHR request, so an actual
       // HTTP request would be sent to the server.  Only execute this test
@@ -654,6 +661,28 @@ describe('XHR', function() {
         expect(response.text.bind(response), 'should throw').to.throw(Error,
             /Body already used/);
       });
+    });
+
+    it('should be cloneable and each instance should provide text', () => {
+      const response = new FetchResponse(mockXhr);
+      const clone = response.clone();
+      return Promise.all([
+        response.text(),
+        clone.text(),
+      ]).then(results => {
+        expect(results[0]).to.equal(TEST_TEXT);
+        expect(results[1]).to.equal(TEST_TEXT);
+      });
+    });
+
+    it('should not be cloneable if body is already accessed', () => {
+      const response = new FetchResponse(mockXhr);
+      return response.text()
+          .then(() => {
+            expect(() => response.clone(), 'should throw').to.throw(
+                Error,
+                /Body already used/);
+          });
     });
 
     scenarios.forEach(test => {

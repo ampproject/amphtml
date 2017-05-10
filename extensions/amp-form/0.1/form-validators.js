@@ -15,8 +15,8 @@
  */
 
 import {dev} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
 import {ValidationBubble} from './validation-bubble';
+import {getAmpDoc} from '../../../src/ampdoc';
 
 
 /** @type {boolean|undefined} */
@@ -68,6 +68,9 @@ export class FormValidator {
     /** @protected @const {!HTMLFormElement} */
     this.form = form;
 
+    /** @protected @const {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc = getAmpDoc(form);
+
     /** @protected @const {!Document} */
     this.doc = /** @type {!Document} */ (form.ownerDocument);
   }
@@ -105,10 +108,9 @@ export class PolyfillDefaultValidator extends FormValidator {
 
   constructor(form) {
     super(form);
-    const win = this.doc.defaultView;
-    const bubbleId = `amp-validation-bubble-${validationBubbleCount++}`;
+    const bubbleId = `i-amphtml-validation-bubble-${validationBubbleCount++}`;
     /** @private @const {!./validation-bubble.ValidationBubble} */
-    this.validationBubble_ = new ValidationBubble(win, bubbleId);
+    this.validationBubble_ = new ValidationBubble(this.ampdoc, bubbleId);
   }
 
   /** @override */
@@ -338,29 +340,19 @@ export class AsYouGoValidator extends AbstractCustomValidator {
 /**
  * Returns the form validator instance.
  *
- * TODO(#5000): Consider allowing multiple custom validators to be registered to a form.
- *     This allows for example a form to have as-you-go AND show-all-on-submit
- *     validators instead of having to stick with one.
- *
- * TODO(#5004): Consider setting a form-level class to indicate that the form was blocked
- *    from submission after being invalid (like .amp-form-submit-invalid).
- *
  * @param {!HTMLFormElement} form
  * @return {!FormValidator}
  */
 export function getFormValidator(form) {
-  const win = form.ownerDocument.defaultView;
-  if (isExperimentOn(win, 'amp-form-custom-validations')) {
-    const customValidation = form.getAttribute(
-        'custom-validation-reporting');
-    switch (customValidation) {
-      case CustomValidationTypes.AsYouGo:
-        return new AsYouGoValidator(form);
-      case CustomValidationTypes.ShowAllOnSubmit:
-        return new ShowAllOnSubmitValidator(form);
-      case CustomValidationTypes.ShowFirstOnSubmit:
-        return new ShowFirstOnSubmitValidator(form);
-    }
+  const customValidation = form.getAttribute(
+      'custom-validation-reporting');
+  switch (customValidation) {
+    case CustomValidationTypes.AsYouGo:
+      return new AsYouGoValidator(form);
+    case CustomValidationTypes.ShowAllOnSubmit:
+      return new ShowAllOnSubmitValidator(form);
+    case CustomValidationTypes.ShowFirstOnSubmit:
+      return new ShowFirstOnSubmitValidator(form);
   }
 
   if (isReportValiditySupported(form.ownerDocument)) {
@@ -373,14 +365,14 @@ export function getFormValidator(form) {
 
 /**
  * Returns whether reportValidity API is supported.
- * @param {!Document} doc
+ * @param {?Document} doc
  * @return {boolean}
  */
 function isReportValiditySupported(doc) {
-  if (reportValiditySupported === undefined) {
-    reportValiditySupported = !!doc.createElement('form').reportValidity;
+  if (doc && reportValiditySupported === undefined) {
+    reportValiditySupported = !!document.createElement('form').reportValidity;
   }
-  return reportValiditySupported;
+  return !!reportValiditySupported;
 }
 
 

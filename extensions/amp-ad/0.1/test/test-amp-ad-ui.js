@@ -14,81 +14,198 @@
  * limitations under the License.
  */
 
+import {setStyles} from '../../../../src/style';
 import {AdDisplayState, AmpAdUIHandler} from '../amp-ad-ui';
 import {BaseElement} from '../../../../src/base-element';
-import {toggleExperiment} from '../../../../src/experiments';
-import {UX_EXPERIMENT} from '../../../../src/layout';
-import * as sinon from 'sinon';
+import * as adHelper from '../../../../src/ad-helper';
 
-describe('amp-ad-ui handler', () => {
+describes.realWin('amp-ad-ui handler', {
+  amp: {
+    ampdoc: 'single',
+  },
+}, env => {
   let sandbox;
   let adImpl;
   let uiHandler;
+  let adContainer;
+  let adElement;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    const adElement = document.createElement('amp-ad');
+    sandbox = env.sandbox;
+    adElement = env.win.document.createElement('amp-ad');
     adImpl = new BaseElement(adElement);
     uiHandler = new AmpAdUIHandler(adImpl);
     uiHandler.setDisplayState(AdDisplayState.LOADING);
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-    uiHandler = null;
+    sandbox.stub(adHelper, 'getAdContainer', () => {
+      return adContainer;
+    });
+    adContainer = null;
   });
 
   describe('with state LOADED_NO_CONTENT', () => {
-    it('should try to collapse element', () => {
+    it('should force collapse ad in special container', () => {
+      adContainer = 'AMP-STICKY-AD';
+      const attemptCollapseSpy = sandbox.spy(adImpl, 'attemptCollapse');
+      const collapseSpy = sandbox.stub(adImpl, 'collapse', () => {});
+      uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
+      expect(collapseSpy).to.be.calledOnce;
+      expect(attemptCollapseSpy).to.not.be.called;
+    });
+
+    it('should try to collapse element first', () => {
       sandbox.stub(adImpl, 'getFallback', () => {
-        return false;
+        return true;
       });
-      sandbox.stub(adImpl, 'attemptChangeHeight', height => {
-        expect(height).to.equal(0);
+      const fallbackSpy = sandbox.stub(adImpl, 'toggleFallback', () => {});
+      const collapseSpy = sandbox.stub(adImpl, 'attemptCollapse', () => {
+        expect(fallbackSpy).to.not.been.called;
         return Promise.resolve();
       });
-      const collapseSpy = sandbox.stub(adImpl, 'collapse', () => {});
       uiHandler.init();
       uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
-      return Promise.resolve().then(() => {
-        expect(collapseSpy).to.be.calledOnce;
-        expect(uiHandler.state).to.equal(3);
+      expect(collapseSpy).to.be.calledOnce;
+    });
+
+    it('should toggle fallback when collapse fail', () => {
+      let resolve = null;
+      const promise = new Promise(resolve_ => {
+        resolve = resolve_;
+      });
+      const placeholderSpy = sandbox.spy(adImpl, 'togglePlaceholder');
+      const fallbackSpy = sandbox.spy(adImpl, 'toggleFallback');
+      sandbox.stub(uiHandler.baseInstance_, 'attemptCollapse', () => {
+        return Promise.reject();
+      });
+      sandbox.stub(uiHandler.baseInstance_, 'deferMutate', callback => {
+        callback();
+        resolve();
+      });
+      uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
+      return promise.then(() => {
+        expect(uiHandler.state).to.equal(AdDisplayState.LOADED_NO_CONTENT);
+        expect(placeholderSpy).to.be.calledWith(false);
+        expect(fallbackSpy).to.be.calledWith(true);
       });
     });
 
-    it('should apply default holder when collapse fail', () => {
+    it('should apply default holder if not provided', () => {
       sandbox.stub(adImpl, 'getFallback', () => {
         return false;
       });
-      sandbox.stub(adImpl, 'attemptChangeHeight', () => {
+      let resolve = null;
+      const promise = new Promise(resolve_ => {
+        resolve = resolve_;
+      });
+      sandbox.stub(adImpl, 'attemptCollapse', () => {
         return Promise.reject();
       });
-      toggleExperiment(window, UX_EXPERIMENT, true);
+      sandbox.stub(adImpl, 'deferMutate', callback => {
+        callback();
+        resolve();
+      });
+      sandbox.stub(adImpl, 'togglePlaceholder', () => {});
+      sandbox.stub(adImpl, 'toggleFallback', () => {});
       uiHandler.init();
       uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
-      return Promise.resolve().then(() => {
-        const holder = adImpl.element.querySelector('.amp-ad-default-display');
-        expect(holder).to.not.be.null;
-        expect(holder).to.have.attribute('fallback');
+      return promise.then(() => {
+        expect(uiHandler.state).to.equal(AdDisplayState.LOADED_NO_CONTENT);
+        expect(adImpl.element.querySelector('[fallback]')).to.be.ok;
       });
     });
 
     it('should NOT continue with display state UN_LAID_OUT', () => {
-      sandbox.stub(adImpl, 'getFallback', () => {
-        return document.createElement('div');
+      let resolve = null;
+      const promise = new Promise(resolve_ => {
+        resolve = resolve_;
       });
-      uiHandler = new AmpAdUIHandler(adImpl);
-      uiHandler.setDisplayState(AdDisplayState.LOADING);
-      const spy = sandbox.stub(adImpl, 'deferMutate', callback => {
+
+      sandbox.stub(adImpl, 'attemptCollapse', () => {
+        return Promise.reject();
+      });
+      sandbox.stub(adImpl, 'deferMutate', callback => {
         uiHandler.state = AdDisplayState.NOT_LAID_OUT;
         callback();
+        resolve();
       });
-      const placeHolderSpy = sandbox.stub(adImpl, 'togglePlaceholder');
+      const fallbackSpy = sandbox.spy(adImpl, 'toggleFallback');
+
       uiHandler.init();
       uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
-      expect(spy).to.be.called;
-      expect(placeHolderSpy).to.not.be.called;
-      expect(uiHandler.state).to.equal(AdDisplayState.NOT_LAID_OUT);
+      return promise.then(() => {
+        expect(fallbackSpy).to.not.be.called;
+        expect(uiHandler.state).to.equal(AdDisplayState.NOT_LAID_OUT);
+      });
+    });
+
+    describe('updateSize function', () => {
+      it('should calculate take consideration of padding', () => {
+        setStyles(adImpl.element, {
+          width: '350px',
+          height: '50px',
+        });
+        env.win.document.body.appendChild(adElement);
+        sandbox.stub(adImpl, 'attemptChangeSize', (height, width) => {
+          expect(height).to.equal(100);
+          expect(width).to.equal(450);
+          return Promise.resolve();
+        });
+        return uiHandler.updateSize(100, 400, 50, 300).then(sizes => {
+          expect(sizes).to.deep.equal({
+            success: true,
+            newWidth: 450,
+            newHeight: 100,
+          });
+        });
+      });
+
+      it('should tolerate string input', () => {
+        sandbox.stub(adImpl, 'attemptChangeSize', (height, width) => {
+          expect(height).to.equal(100);
+          expect(width).to.equal(400);
+          return Promise.resolve();
+        });
+        return uiHandler.updateSize('100', 400, 0, 0).then(sizes => {
+          expect(sizes).to.deep.equal({
+            success: true,
+            newWidth: 400,
+            newHeight: 100,
+          });
+        });
+      });
+
+      it('should reject on special case undefined sizes', () => {
+        const attemptChangeSizeSpy = sandbox.spy(adImpl, 'attemptChangeSize');
+        return uiHandler.updateSize(undefined, undefined, 0, 0).catch(e => {
+          expect(e.message).to.equal('undefined width and height');
+          expect(attemptChangeSizeSpy).to.not.be.called;
+        });
+      });
+
+      it('should reject on special case inside sticky ad', () => {
+        adContainer = 'AMP-STICKY-AD';
+        const attemptChangeSizeSpy = sandbox.spy(adImpl, 'attemptChangeSize');
+        return uiHandler.updateSize(100, 400, 0, 0).then(sizes => {
+          expect(sizes).to.deep.equal({
+            success: false,
+            newWidth: 400,
+            newHeight: 100,
+          });
+          expect(attemptChangeSizeSpy).to.not.be.called;
+        });
+      });
+
+      it('should reject on attemptChangeSize reject', () => {
+        sandbox.stub(adImpl, 'attemptChangeSize', () => {
+          return Promise.reject();
+        });
+        return uiHandler.updateSize(100, 400, 0, 0).then(sizes => {
+          expect(sizes).to.deep.equal({
+            success: false,
+            newWidth: 400,
+            newHeight: 100,
+          });
+        });
+      });
     });
   });
 });

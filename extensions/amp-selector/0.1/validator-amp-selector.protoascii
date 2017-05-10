@@ -15,51 +15,39 @@
 #
 tags: {
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
-  spec_name: "amp-selector extension .js script"
-  also_requires_tag: "amp-selector"
-  mandatory_parent: "HEAD"
-  unique: true
-  also_requires_tag_warning: "amp-selector"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  satisfies: "amp-selector extension .js script"
+  requires: "amp-selector"
+  extension_spec: {
+    name: "amp-selector"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    deprecated_recommends_usage_of_tag: "amp-selector"
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-selector"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-selector-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-selector.html"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-selector> for AMP (autoplay attribute allowed)
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-SELECTOR"
+  satisfies: "amp-selector"
   disallowed_ancestor: "AMP-SELECTOR"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-selector extension .js script"
-  attrs: { name: "disabled" value: "" }
+  requires: "amp-selector extension .js script"
+  attrs: {
+    name: "disabled"
+    value: ""
+  }
   attrs: { name: "form" }
-  attrs: { name: "multiple" value: "" }
+  attrs: {
+    name: "keyboard-select-mode"
+    value_regex_casei: "focus|none|select"
+  }
+  attrs: {
+    name: "multiple"
+    value: ""
+  }
+  # <amp-bind>
+  attrs: { name: "[selected]" }
   reference_points: {
     tag_spec_name: "AMP-SELECTOR option"
   }
@@ -68,7 +56,7 @@ tags: {  # <amp-selector> for AMP (autoplay attribute allowed)
   }
   attr_lists: "extended-amp-global"
   attr_lists: "input-name-attr"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-selector.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-selector"
   amp_layout {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -91,17 +79,24 @@ tags: {  # <amp-selector> for AMP (autoplay attribute allowed)
 # always match, we want to prefer 'option' when both of them match.
 tags: {
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-SELECTOR option"
-  attrs: { name: "option" mandatory: true }
-  attrs: { name: "disabled" value: "" }
-  attrs: { name: "selected" value: "" }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-selector.html"
+  attrs: {
+    name: "disabled"
+    value: ""
+  }
+  attrs: {
+    name: "option"
+    mandatory: true
+  }
+  attrs: {
+    name: "selected"
+    value: ""
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-selector"
 }
 tags: {
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-SELECTOR child"
   reference_points: {

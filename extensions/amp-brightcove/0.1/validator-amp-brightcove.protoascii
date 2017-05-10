@@ -16,57 +16,35 @@
 
 tags: {  # amp-brightcove
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
-  spec_name: "amp-brightcove extension .js script"
-  mandatory_parent: "HEAD"
-  unique_warning: true
-  also_requires_tag_warning: "amp-brightcove"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  satisfies: "amp-brightcove extension .js script"
+  extension_spec: {
+    name: "amp-brightcove"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    deprecated_recommends_usage_of_tag: "amp-brightcove"
+    deprecated_allow_duplicates: true
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-brightcove"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-brightcove-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-brightcove.html"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-brightcove>
   html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-BRIGHTCOVE"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-brightcove extension .js script"
-  attrs: { name: "data-account" mandatory: true }
-  # If data-embed is missing, the default value is "default".
-  attrs: { name: "data-embed" }
-  # If data-player is missing, the default value is "default".
-  attrs: { name: "data-player" }
-  # If data-playlist-id is not used for perform player and hence it is optional.
-  attrs: { name: "data-playlist-id" }
-  # If data-video-id is not used for perform player and hence it is optional.
-  attrs: { name: "data-video-id" }
+  requires: "amp-brightcove extension .js script"
+  attrs: {
+    name: "data-account"
+    mandatory: true
+  }
+  # <amp-bind>
+  attrs: { name: "[data-account]" }
+  attrs: { name: "[data-embed]" }
+  attrs: { name: "[data-player]" }
+  attrs: { name: "[data-player-id]" }
+  attrs: { name: "[data-playlist-id]" }
+  attrs: { name: "[data-video-id]" }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-brightcove.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-brightcove"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

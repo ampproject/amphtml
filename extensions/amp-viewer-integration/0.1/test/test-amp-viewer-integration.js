@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import {Messaging} from '../messaging.js';
+import {AmpViewerIntegration} from '../amp-viewer-integration';
+import {Messaging, WindowPortEmulator, parseMessage} from '../messaging.js';
 import {ViewerForTesting} from './viewer-for-testing.js';
+import {getSourceUrl} from '../../../../src/url';
 
 
 describes.sandboxed('AmpViewerIntegration', {}, () => {
@@ -23,10 +25,11 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
   describe('Handshake', function() {
     let viewerEl;
     let viewer;
+    let ampDocUrl;
 
     beforeEach(() => {
       const loc = window.location;
-      const ampDocUrl =
+      ampDocUrl =
         `${loc.protocol}//iframe.${loc.hostname}:${loc.port}${ampDocSrc}`;
 
       viewerEl = document.createElement('div');
@@ -40,17 +43,100 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
     });
 
     it('should confirm the handshake', () => {
-      console.log('sending handshake response');
+      console/*OK*/.log('sending handshake response');
       viewer.confirmHandshake();
       return viewer.waitForDocumentLoaded();
+    });
+
+    it('should handle unload correctly', () => {
+      viewer.confirmHandshake();
+      viewer.waitForDocumentLoaded().then(() => {
+        const stub = sandbox.stub(viewer, 'handleUnload_');
+        window.eventListeners.fire({type: 'unload'});
+        expect(stub).to.be.calledOnce;
+      });
+    });
+
+
+    describes.realWin('amp-viewer-integration', {
+      amp: {
+        location: 'https://cdn.ampproject.org/c/s/www.example.com/path',
+        params: {
+          origin: 'https://example.com',
+        },
+      },
+    }, env => {
+      describe('Open Channel', () => {
+        class Messaging {
+          constructor() {}
+          sendRequest() {}
+          setup_() {}
+          setDefaultHandler() {}
+          registerHandler() {}
+        }
+
+        let win;
+        let messaging;
+        let ampViewerIntegration;
+
+        beforeEach(() => {
+          win = document.createElement('div');
+          win.document = document.createElement('div');
+          ampViewerIntegration = new AmpViewerIntegration(win);
+          messaging = new Messaging();
+
+        });
+
+        it('should start with the correct message', () => {
+          const sendRequestSpy = sandbox.stub(messaging, 'sendRequest', () => {
+            return Promise.resolve();
+          });
+
+          ampViewerIntegration.openChannelAndStart_(
+            viewer, env.ampdoc, messaging);
+
+          const ampdocUrl = env.ampdoc.getUrl();
+          const srcUrl = getSourceUrl(ampdocUrl);
+
+          expect(sendRequestSpy).to.have.been.calledWith('channelOpen', {
+            sourceUrl: srcUrl,
+            url: ampdocUrl,
+          }, true);
+        });
+
+        it('should not initiate the Touch Handler', () => {
+          sandbox.stub(messaging, 'sendRequest', () => {
+            return Promise.resolve();
+          });
+          const initTouchHandlerStub =
+            sandbox.stub(ampViewerIntegration, 'initTouchHandler_');
+          ampViewerIntegration.openChannelAndStart_(
+            viewer, env.ampdoc, messaging);
+
+          expect(initTouchHandlerStub).to.not.be.called;
+        });
+
+        it('should initiate the Touch Handler', () => {
+          sandbox.stub(messaging, 'sendRequest', () => {
+            return Promise.resolve();
+          });
+          sandbox.stub(viewer, 'hasCapability').returns(true);
+          const initTouchHandlerStub =
+            sandbox.stub(ampViewerIntegration, 'initTouchHandler_');
+          ampViewerIntegration.unconfirmedViewerOrigin_ = '';
+          ampViewerIntegration.openChannelAndStart_(
+            viewer, env.ampdoc, messaging).then(() => {
+              expect(initTouchHandlerStub).to.be.called;
+            });
+        });
+      });
     });
   });
 
   describe('Unit Tests for messaging.js', () => {
     const viewerOrigin = 'http://localhost:9876';
-    const ampDoc = 'http://localhost:8000/examples/everything.amp.max.html';
     const requestProcessor = function() {
-      return Promise.resolve();
+      return Promise.resolve({});
     };
     let messaging;
     let postMessagePromise;
@@ -61,25 +147,29 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
       postMessagePromise = new Promise(resolve => {
         postMessageResolve = resolve;
       });
-      postMessageSpy = sandbox.stub(window, 'postMessage', () => {
+
+      const port = new WindowPortEmulator(
+        this.win, viewerOrigin);
+      port.addEventListener = function() {};
+      port.postMessage = function() {};
+
+      postMessageSpy = sandbox.stub(port, 'postMessage', () => {
         postMessageResolve();
       });
 
-      const source = {
-        postMessage: function() {},
-        addEventListener: function() {},
-      };
-      messaging = new Messaging(
-        source, window, viewerOrigin, requestProcessor, ampDoc);
+      messaging = new Messaging(this.win, port);
+      messaging.setDefaultHandler(requestProcessor);
     });
 
     it('handleMessage_ should call postMessage correctly', () => {
-      const sntnl = '__AMPHTML__REQUEST';
       const event = {
         source: window,
         origin: viewerOrigin,
         data: {
-          sentinel: sntnl,
+          app: '__AMPHTML__',
+          name: 'message',
+          type: 'q',
+          requestid: 1,
           rsvp: true,
         },
       };
@@ -89,25 +179,31 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
       return postMessagePromise.then(function() {
         expect(postMessageSpy).to.have.been.calledOnce;
         expect(postMessageSpy).to.have.been.calledWith({
-          payload: undefined,
-          requestId: undefined,
-          rsvp: false,
-          sentinel: '__AMPHTML__RESPONSE',
-          type: null,
+          app: '__AMPHTML__',
+          data: {},
+          name: 'message',
+          requestid: 1,
+          type: 's',
         });
       });
     });
 
     it('handleMessage_ should resolve', () => {
-      const sntnl = '__AMPHTML__RESPONSE';
+      const data = {
+        time: 12345678,
+        id: 'abcdefg',
+      };
+
       const event = {
         source: window,
         origin: viewerOrigin,
         data: {
-          requestId: '1',
-          sentinel: sntnl,
+          app: '__AMPHTML__',
+          data: JSON.stringify(data),
+          name: 'messageName',
+          requestid: 1,
           rsvp: true,
-          type: 'messageType',
+          type: 's',
         },
       };
 
@@ -122,18 +218,22 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
       messaging.handleMessage_(event);
 
       expect(resolveSpy).to.have.been.calledOnce;
+      expect(resolveSpy).to.have.been.calledWith(JSON.stringify(data));
     });
 
-    it('handleMessage_ should reject', () => {
-      const sntnl = '__AMPHTML__RESPONSE';
+    it('handleMessage_ should resolve with correct data', () => {
+      const data = 12345;
+
       const event = {
         source: window,
         origin: viewerOrigin,
         data: {
-          requestId: '1',
-          sentinel: sntnl,
+          app: '__AMPHTML__',
+          data,
+          name: 'messageName',
+          requestid: 1,
           rsvp: true,
-          type: 'ERROR',
+          type: 's',
         },
       };
 
@@ -147,7 +247,42 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
       sandbox.stub(messaging, 'waitingForResponse_', waitingForResponse);
       messaging.handleMessage_(event);
 
+      expect(resolveSpy).to.have.been.calledWith(data);
+    });
+
+    it('handleMessage_ should reject', () => {
+      const event = {
+        source: window,
+        origin: viewerOrigin,
+        data: {
+          app: '__AMPHTML__',
+          data: {},
+          error: 'reason',
+          name: null,
+          requestid: 1,
+          rsvp: true,
+          type: 's',
+        },
+      };
+
+      const resolveSpy = sandbox.stub();
+      const rejectSpy = sandbox.stub();
+      const waitingForResponse = {'1': {
+        resolve: resolveSpy,
+        reject: rejectSpy,
+      }};
+
+      const logErrorSpy = sandbox.stub(messaging, 'logError_');
+      sandbox.stub(messaging, 'waitingForResponse_', waitingForResponse);
+      messaging.handleMessage_(event);
+
       expect(rejectSpy).to.have.been.calledOnce;
+
+      expect(logErrorSpy).to.have.been.calledOnce;
+
+      expect(logErrorSpy).to.have.been.calledWith(
+        'amp-viewer-messaging: handleResponse_ error: ',
+        'reason');
     });
 
     it('sendRequest should call postMessage correctly', () => {
@@ -159,69 +294,71 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
       return postMessagePromise.then(function() {
         expect(postMessageSpy).to.have.been.calledOnce;
         expect(postMessageSpy).to.have.been.calledWith({
-          payload: {},
-          requestId: '1',
+          app: '__AMPHTML__',
+          data: {},
+          name: message,
+          requestid: 1,
           rsvp: awaitResponse,
-          sentinel: '__AMPHTML__REQUEST',
-          type: message,
+          type: 'q',
         });
       });
     });
 
     it('sendResponse_ should call postMessage correctly', () => {
+      const mName = 'name';
       const payload = {};
-      const requestId = '1';
-      messaging.sendResponse_(requestId, payload);
+      const requestId = 1;
+      messaging.sendResponse_(requestId, mName, payload);
 
       return postMessagePromise.then(function() {
         expect(postMessageSpy).to.have.been.calledOnce;
         expect(postMessageSpy).to.have.been.calledWith({
-          payload: {},
-          requestId: '1',
-          rsvp: false,
-          sentinel: '__AMPHTML__RESPONSE',
-          type: null,
+          app: '__AMPHTML__',
+          data: {},
+          name: mName,
+          requestid: 1,
+          type: 's',
         });
       });
     });
 
     it('sendResponseError_ should call postMessage correctly', () => {
-      const message = 'ERROR';
-      const reason = {};
-      const requestId = '1';
-      messaging.sendResponseError_(requestId, reason);
+      const mName = 'name';
+      const err = new Error('reason');
+      const errString = messaging.errorToString_(err);
+      const requestId = 1;
+      const logErrorSpy = sandbox.stub(messaging, 'logError_');
+      messaging.sendResponseError_(requestId, mName, err);
 
       return postMessagePromise.then(function() {
         expect(postMessageSpy).to.have.been.calledOnce;
         expect(postMessageSpy).to.have.been.calledWith({
-          payload: reason,
-          requestId: '1',
-          rsvp: false,
-          sentinel: '__AMPHTML__RESPONSE',
-          type: message,
+          app: '__AMPHTML__',
+          data: null,
+          error: errString,
+          name: mName,
+          requestid: 1,
+          type: 's',
         });
+
+        expect(logErrorSpy).to.have.been.calledOnce;
+        const state = 'amp-viewer-messaging: sendResponseError_, ' +
+          'Message name: name';
+        expect(logErrorSpy).to.have.been.calledWith(state, errString);
       });
     });
 
-    it('sendMessage_ should call postMessage on this.target_', () => {
-      const sntnl = 'sntnl';
-      const awaitResponse = false;
-      const payload = null;
-      const requestId = '1';
-      const eventType = 'message';
-      messaging.sendMessage_(
-        sntnl, requestId, eventType, payload, awaitResponse);
-
-      return postMessagePromise.then(function() {
-        expect(postMessageSpy).to.have.been.calledOnce;
-        expect(postMessageSpy).to.have.been.calledWith({
-          payload: null,
-          requestId: '1',
-          rsvp: awaitResponse,
-          sentinel: sntnl,
-          type: eventType,
-        });
-      });
+    it('should parseMessage correctly', () => {
+      const obj = {bla: 'la'};
+      const json = JSON.stringify(obj);
+      const badJson = '{a:b';
+      let parsedCorrectly;
+      parsedCorrectly = parseMessage(json);
+      expect(parsedCorrectly.bla).to.equal('la');
+      parsedCorrectly = parseMessage(obj);
+      expect(parsedCorrectly.bla).to.equal('la');
+      expect(parseMessage('should return null')).to.be.null;
+      expect(parseMessage(badJson)).to.be.null;
     });
   });
 });

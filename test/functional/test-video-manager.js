@@ -17,7 +17,7 @@
 import {ampdocServiceFor} from '../../src/ampdoc';
 import {isLayoutSizeDefined} from '../../src/layout';
 import {VideoEvents} from '../../src/video-interface';
-import {videoManagerForDoc} from '../../src/video-manager';
+import {videoManagerForDoc} from '../../src/services';
 import {
   installVideoManagerForDoc,
   supportsAutoplay,
@@ -36,6 +36,34 @@ describe('Fake Video Player Integration Tests', () => {
     fixture.win.AMP.registerElement('amp-test-fake-videoplayer',
       createFakeVideoPlayerClass(fixture.win));
     return fixture.doc.createElement('amp-test-fake-videoplayer');
+  });
+});
+
+describes.fakeWin('VideoManager', {
+  amp: {
+    ampdoc: 'single',
+  },
+}, env => {
+  let sandbox;
+  let videoManager;
+
+  it('should register common actions', () => {
+    const klass = createFakeVideoPlayerClass(env.win);
+    const video = env.createAmpElement('amp-test-fake-videoplayer', klass);
+    const impl = video.implementation_;
+    const spy = sandbox.spy(impl, 'registerAction');
+    videoManager.register(impl);
+
+    expect(spy).to.have.been.calledWith('play');
+    expect(spy).to.have.been.calledWith('pause');
+    expect(spy).to.have.been.calledWith('mute');
+    expect(spy).to.have.been.calledWith('unmute');
+  });
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    installVideoManagerForDoc(env.ampdoc);
+    videoManager = videoManagerForDoc(env.ampdoc);
   });
 });
 
@@ -59,11 +87,11 @@ describe('Supports Autoplay', () => {
       expect(video.style.height).to.equal('0');
       expect(video.style.opacity).to.equal('0');
 
-      expect(setAttributeSpy.calledWith('muted', '')).to.be.true;
-      expect(setAttributeSpy.calledWith('playsinline', '')).to.be.true;
-      expect(setAttributeSpy.calledWith('webkit-playsinline', '')).to.be.true;
-      expect(setAttributeSpy.calledWith('height', '0')).to.be.true;
-      expect(setAttributeSpy.calledWith('width', '0')).to.be.true;
+      expect(setAttributeSpy).to.have.been.calledWith('muted', '');
+      expect(setAttributeSpy).to.have.been.calledWith('playsinline', '');
+      expect(setAttributeSpy).to.have.been.calledWith('webkit-playsinline', '');
+      expect(setAttributeSpy).to.have.been.calledWith('height', '0');
+      expect(setAttributeSpy).to.have.been.calledWith('width', '0');
 
       expect(video.muted).to.be.true;
       expect(video.playsinline).to.be.true;
@@ -250,12 +278,18 @@ function createFakeVideoPlayerClass(win) {
      * @override
      */
     mute() {
+      Promise.resolve().then(() => {
+        this.element.dispatchCustomEvent(VideoEvents.MUTED);
+      });
     }
 
     /**
      * @override
      */
     unmute() {
+      Promise.resolve().then(() => {
+        this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
+      });
     }
 
     /**

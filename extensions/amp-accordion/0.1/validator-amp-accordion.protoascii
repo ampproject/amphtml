@@ -14,58 +14,30 @@
 # limitations under the license.
 #
 tags: {  # amp-accordion
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SCRIPT"
-  spec_name: "amp-accordion extension .js script"
-  mandatory_parent: "HEAD"
-  unique_warning: true
-  also_requires_tag_warning: "amp-accordion"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  satisfies: "amp-accordion extension .js script"
+  extension_spec: {
+    name: "amp-accordion"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    deprecated_recommends_usage_of_tag: "amp-accordion"
+    deprecated_allow_duplicates: true
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-accordion"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-accordion-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-accordion.html"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-accordion>
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "AMP-ACCORDION"
-  also_requires_tag: "amp-accordion extension .js script"
+  requires: "amp-accordion extension .js script"
   attrs: { name: "disable-session-states" value: "" }
   child_tags: {
     child_tag_name_oneof: "SECTION"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-accordion.html"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-accordion"
   amp_layout: {
     supported_layouts: CONTAINER
   }
 }
 tags: {  # <amp-accordion> > <section>
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "SECTION"
   spec_name: "amp-accordion > section"
   mandatory_parent: "AMP-ACCORDION"

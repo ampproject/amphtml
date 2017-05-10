@@ -15,7 +15,7 @@
  */
 
 import {Pass} from '../../src/pass';
-import {timerFor} from '../../src/timer';
+import {timerFor} from '../../src/services';
 import * as sinon from 'sinon';
 
 describe('Pass', () => {

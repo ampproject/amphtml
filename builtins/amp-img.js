@@ -24,7 +24,7 @@ import {user} from '../src/log';
  * Attributes to propagate to internal image when changed externally.
  * @type {!Array<string>}
  */
-const ATTRIBUTES_TO_PROPAGATE = ['alt', 'referrerpolicy', 'aria-label',
+const ATTRIBUTES_TO_PROPAGATE = ['alt', 'title', 'referrerpolicy', 'aria-label',
       'aria-describedby', 'aria-labelledby'];
 
 export class AmpImg extends BaseElement {
@@ -67,8 +67,6 @@ export class AmpImg extends BaseElement {
   /** @override */
   buildCallback() {
     this.isPrerenderAllowed_ = !this.element.hasAttribute('noprerender');
-
-    this.srcset_ = srcsetFromElement(this.element);
   }
 
   /** @override */
@@ -83,6 +81,9 @@ export class AmpImg extends BaseElement {
   initialize_() {
     if (this.img_) {
       return;
+    }
+    if (!this.srcset_) {
+      this.srcset_ = srcsetFromElement(this.element);
     }
     this.allowImgLoadFallback_ = true;
     // If this amp-img IS the fallback then don't allow it to have its own
@@ -122,6 +123,11 @@ export class AmpImg extends BaseElement {
   }
 
   /** @override */
+  reconstructWhenReparented() {
+    return false;
+  }
+
+  /** @override */
   layoutCallback() {
     this.initialize_();
     let promise = this.updateImageSrc_();
@@ -156,9 +162,9 @@ export class AmpImg extends BaseElement {
     return this.loadPromise(this.img_).then(() => {
       // Clean up the fallback if the src has changed.
       if (!this.allowImgLoadFallback_ &&
-          this.img_.classList.contains('-amp-ghost')) {
+          this.img_.classList.contains('i-amphtml-ghost')) {
         this.getVsync().mutate(() => {
-          this.img_.classList.remove('-amp-ghost');
+          this.img_.classList.remove('i-amphtml-ghost');
           this.toggleFallback(false);
         });
       }
@@ -167,7 +173,7 @@ export class AmpImg extends BaseElement {
 
   onImgLoadingError_() {
     this.getVsync().mutate(() => {
-      this.img_.classList.add('-amp-ghost');
+      this.img_.classList.add('i-amphtml-ghost');
       this.toggleFallback(true);
     });
   }

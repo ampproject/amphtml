@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {timerFor} from '../../../../src/timer';
+import {timerFor} from '../../../../src/services';
 import {createIframePromise} from '../../../../testing/iframe';
 import '../amp-fit-text';
 import {
@@ -55,7 +55,7 @@ describe('amp-fit-text component', () => {
   it('renders', () => {
     const text = 'Lorem ipsum';
     return getFitText(text).then(ft => {
-      const content = ft.querySelector('.-amp-fit-text-content');
+      const content = ft.querySelector('.i-amphtml-fit-text-content');
       expect(content).to.not.equal(null);
       expect(content.textContent).to.equal(text);
     });
@@ -85,7 +85,6 @@ describe('amp-fit-text calculateFontSize', () => {
 
   it('should always fit on one line w/ enough width', () => {
     element./*OK*/innerHTML = 'A';
-    console.log(element.offsetWidth);
     expect(calculateFontSize_(element, 20, 200, 6, 72)).to.equal(20);
     expect(calculateFontSize_(element, 10, 200, 6, 72)).to.equal(10);
     expect(calculateFontSize_(element, 40, 200, 6, 72)).to.equal(40);
@@ -93,7 +92,6 @@ describe('amp-fit-text calculateFontSize', () => {
 
   it('should always fit the width w/ enough height', () => {
     element./*OK*/innerHTML = 'A';
-    console.log(element.offsetWidth);
     expect(calculateFontSize_(element, 200, 10, 6, 72)).to.equal(15);
     expect(calculateFontSize_(element, 200, 20, 6, 72)).to.equal(30);
     expect(calculateFontSize_(element, 200, 40, 6, 72)).to.equal(60);
@@ -171,7 +169,7 @@ describe('amp-fit-text updateOverflow', () => {
   it('should always fit on one line', () => {
     measurer./*OK*/innerHTML = 'A';
     updateOverflow_(content, measurer, 24, 20);
-    expect(classToggles['-amp-fit-text-content-overflown']).to.equal(false);
+    expect(classToggles['i-amphtml-fit-text-content-overflown']).to.be.false;
     expect(getLineClamp()).to.equal('');
     expect(content.style.maxHeight).to.equal('');
   });
@@ -179,7 +177,7 @@ describe('amp-fit-text updateOverflow', () => {
   it('should always fit on two lines', () => {
     measurer./*OK*/innerHTML = 'A<br>B';
     updateOverflow_(content, measurer, 24, 20);
-    expect(classToggles['-amp-fit-text-content-overflown']).to.equal(true);
+    expect(classToggles['i-amphtml-fit-text-content-overflown']).to.equal(true);
     expect(getLineClamp()).to.equal(1);
     expect(content.style.maxHeight).to.equal(23 + 'px');  // 23 = 20 * 1.15
   });

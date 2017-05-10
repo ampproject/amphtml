@@ -293,7 +293,7 @@ var instanceByValidatorJs = {};
  * Provided a URL or a filename from which to fetch the validator.js
  * file, fetches, instantiates, and caches the validator instance
  * asynchronously.  If you prefer to implement your own fetching /
- * caching logic, you may want to consider createInstance() instead,
+ * caching logic, you may want to consider newInstance() instead,
  * which is synchronous and much simpler.
  *
  * @param {string=} opt_validatorJs
@@ -345,16 +345,27 @@ function newInstance(validatorJsContents) {
 }
 exports.newInstance = newInstance;
 
+// A note on emitting output to the console and process exit status:
+// Node.js prior to 0.11.8 did not support process.exitCode
+// (https://nodejs.org/api/process.html#process_process_exitcode), which
+// makes it difficult to emit output and errors from multiple callbacks
+// and set the appropriate exit code. We use the following workaround:
+// process.<<stream>>(<<some output>>, function() { process.exit(<<code>>); });
+// This will flush the appropriate stream (stdout or stderr) and then
+// exit with the provided code. For now, this makes the CLI work with
+// Node.js versions as old as v0.10.25.
+
 /**
- * Logs a validation result to the console using console.log, console.warn,
- * and console.error as is appropriate.
+ * Logs a validation result to the console using process.stdout and
+ * process.stderr as is appropriate.
  * @param {!string} filename
  * @param {!ValidationResult} validationResult
  * @param {boolean} color
  */
 function logValidationResult(filename, validationResult, color) {
   if (validationResult.status === 'PASS') {
-    console.log(filename + ': ' + (color ? colors.green('PASS') : 'PASS'));
+    process.stdout.write(
+        filename + ': ' + (color ? colors.green('PASS') : 'PASS') + '\n');
   }
   for (var ii = 0; ii < validationResult.errors.length; ii++) {
     var error = validationResult.errors[ii];
@@ -368,11 +379,8 @@ function logValidationResult(filename, validationResult, color) {
     if (error.specUrl) {
       msg += ' (see ' + error.specUrl + ')';
     }
-    if (error.severity === 'ERROR') {
-      console.error(msg);
-    } else {
-      console.warn(msg);
-    }
+    // TODO(powdercloud): Should we distinguish error.severity === 'WARNING' ?
+    process.stderr.write(msg + '\n');
   }
 }
 
@@ -383,10 +391,11 @@ function main() {
   program
       .usage(
           '[options] <fileOrUrlOrMinus...>\n\n' +
-          '  Validates the files or urls provided as arguments. If "-" is ' +
+          '  Validates the files or urls provided as arguments. If "-" is\n' +
           '  specified, reads from stdin instead.')
       .option(
-          '--validator_js <fileOrUrl>', 'The Validator Javascript.\n' +
+          '--validator_js <fileOrUrl>',
+          'The Validator Javascript.\n' +
               '  Latest published version by default, or\n' +
               '  dist/validator_minified.js (built with build.py)\n' +
               '  for development.',
@@ -395,13 +404,15 @@ function main() {
           '--user-agent <userAgent>', 'User agent string to use in requests.',
           DEFAULT_USER_AGENT)
       .option(
-          '--html_format <AMP|AMP4ADS>', 'The input format to be validated.\n' +
+          '--html_format <AMP|AMP4ADS>',
+          'The input format to be validated.\n' +
               '  AMP by default. AMP4ADS is a format for ads creatives that is\n' +
-              '  still in draft; this requires specifying \n' +
+              '  still in draft; this requires specifying\n' +
               '  https://cdn.ampproject.org/v0/validator-canary.js as validator.js.',
           'AMP')
       .option(
-          '--format <color|text|json>', 'How to format the output.\n' +
+          '--format <color|text|json>',
+          'How to format the output.\n' +
               '  "color" displays errors/warnings/success in\n' +
               '          red/orange/green.\n' +
               '  "text"  avoids color (e.g., useful in terminals not\n' +
@@ -415,13 +426,17 @@ function main() {
     process.exit(1);
   }
   if (program.html_format !== 'AMP' && program.html_format !== 'AMP4ADS') {
-    console.error('--html_format must be set to "AMP" or "AMP4ADS".');
-    process.exit(1);
+    process.stderr.write(
+        '--html_format must be set to "AMP" or "AMP4ADS".\n', function() {
+          process.exit(1);
+        });
   }
   if (program.format !== 'color' && program.format !== 'text' &&
       program.format !== 'json') {
-    console.error('--format must be set to "color", "text", or "json".');
-    process.exit(1);
+    process.stderr.write(
+        '--format must be set to "color", "text", or "json".\n', function() {
+          process.exit(1);
+        });
   }
   var inputs = [];
   for (var ii = 0; ii < program.args.length; ii++) {
@@ -439,6 +454,7 @@ function main() {
         Promise.all(inputs)
             .then(function(resolvedInputs) {
               var jsonOut = {};
+              var hasError = false;
               for (var ii = 0; ii < resolvedInputs.length; ii++) {
                 var validationResult = validator.validateString(
                     resolvedInputs[ii], program.html_format);
@@ -450,25 +466,42 @@ function main() {
                       program.format === 'color' ? true : false);
                 }
                 if (validationResult.status !== 'PASS') {
-                  process.exitCode = 1;
+                  hasError = true;
                 }
               }
               if (program.format === 'json') {
-                console.log(JSON.stringify(jsonOut));
+                process.stdout.write(
+                    JSON.stringify(jsonOut) + '\n', function() {
+                      process.exit(hasError ? 1 : 0);
+                    });
+              } else if (hasError) {
+                process.stderr.write('', function() {
+                  process.exit(1);
+                });
+              } else {
+                process.stdout.write('', function() {
+                  process.exit(0);
+                });
               }
             })
             .catch(function(error) {
-              console.error(
-                  program.format == 'color' ? colors.red(error.message) :
-                                              error.message);
-              process.exitCode = 1;
+              process.stderr.write(
+                  (program.format == 'color' ? colors.red(error.message) :
+                                               error.message) +
+                      '\n',
+                  function() {
+                    process.exit(1);
+                  });
             });
       })
       .catch(function(error) {
-        console.error(
-            program.format == 'color' ? colors.red(error.message) :
-                                        error.message);
-        process.exitCode = 1;
+        process.stderr.write(
+            (program.format == 'color' ? colors.red(error.message) :
+                                         error.message) +
+                '\n',
+            function() {
+              process.exit(1);
+            });
       });
 }
 

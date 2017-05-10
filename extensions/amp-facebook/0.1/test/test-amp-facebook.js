@@ -76,6 +76,9 @@ describe('amp-facebook', function() {
       const div = document.createElement('div');
       div.setAttribute('id', 'c');
       iframe.doc.body.appendChild(div);
+      iframe.win.context = {
+        tagName: 'AMP-FACEBOOK',
+      };
 
       facebook(iframe.win, {
         href: fbPostHref,
@@ -93,6 +96,9 @@ describe('amp-facebook', function() {
       const div = document.createElement('div');
       div.setAttribute('id', 'c');
       iframe.doc.body.appendChild(div);
+      iframe.win.context = {
+        tagName: 'AMP-FACEBOOK',
+      };
 
       facebook(iframe.win, {
         href: fbVideoHref,
@@ -111,8 +117,8 @@ describe('amp-facebook', function() {
         '/test/fixtures/served/iframe.html';
     resetServiceForTesting(window, 'bootstrapBaseUrl');
     setDefaultBootstrapBaseUrlForTesting(iframeSrc);
-    return getAmpFacebook(fbPostHref, undefined,
-        /* opt_noFakeResources */ true).then(ampFB => {
+    return getAmpFacebook(
+        fbPostHref, undefined, /* opt_noFakeResources */ true).then(ampFB => {
           return new Promise((resolve, unusedReject) => {
             const iframe = ampFB.firstChild;
             const impl = ampFB.implementation_;
@@ -120,13 +126,14 @@ describe('amp-facebook', function() {
               expect(newHeight).to.equal(666);
               resolve(ampFB);
             };
-            iframe.contentWindow.postMessage({
-              sentinel: 'amp-test',
+            const message = {
               type: 'requestHeight',
               is3p: true,
               height: 666,
-              amp3pSentinel: iframe.getAttribute('data-amp-3p-sentinel'),
-            }, '*');
+            };
+            message['sentinel'] = iframe.getAttribute(
+                'data-amp-3p-sentinel');
+            iframe.contentWindow.postMessage(message, '*');
           });
         });
   });

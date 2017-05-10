@@ -28,14 +28,22 @@ import {
   extractGoogleAdCreativeAndSignature,
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
-  getCorrelator,
+  AmpAnalyticsConfigDef,
+  extractAmpAnalyticsConfig,
 } from '../../../ads/google/a4a/utils';
+import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {
   googleLifecycleReporterFactory,
   setGoogleLifecycleVarsFromHeaders,
 } from '../../../ads/google/a4a/google-data-reporter';
 import {stringHash32} from '../../../src/crypto';
+import {removeElement} from '../../../src/dom';
+import {dev} from '../../../src/log';
+import {extensionsFor} from '../../../src/services';
+import {isExperimentOn} from '../../../src/experiments';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
+import {insertAnalyticsElement} from '../../../src/analytics';
+import {setStyles} from '../../../src/style';
 
 /** @const {string} */
 const DOUBLECLICK_BASE_URL =
@@ -54,43 +62,86 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
      */
     this.lifecycleReporter_ = this.lifecycleReporter_ ||
         this.initLifecycleReporter();
+
+    /**
+     * Config to generate amp-analytics element for active view reporting.
+     * @type {?JSONType}
+     * @private
+     */
+    this.ampAnalyticsConfig_ = null;
+
+    /** @private {!../../../src/service/extensions-impl.Extensions} */
+    this.extensions_ = extensionsFor(this.win);
+
+    /** @private {../../../src/service/xhr-impl.FetchResponseHeaders} */
+    this.responseHeaders_ = null;
+
+    /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
+    this.size_ = null;
+
+    /** @private {?Element} */
+    this.ampAnalyticsElement_ = null;
   }
 
   /** @override */
   isValidElement() {
-    return isGoogleAdsA4AValidEnvironment(this.win, this.element) &&
-        this.isAmpAdElement() &&
+    return isGoogleAdsA4AValidEnvironment(this.win) && this.isAmpAdElement() &&
         // Ensure not within remote.html iframe.
         !document.querySelector('meta[name=amp-3p-iframe-src]');
   }
 
   /** @override */
   getAdUrl() {
+    // TODO: Check for required and allowed parameters. Probably use
+    // validateData, from 3p/3p/js, after noving it someplace common.
     const startTime = Date.now();
     const global = this.win;
-    const slotId = this.element.getAttribute('data-amp-slot-index');
-    const slotIdNumber = Number(slotId);
-    const correlator = getCorrelator(global, slotId);
-    const slotRect = this.getIntersectionElementLayoutBox();
-    const size = `${slotRect.width}x${slotRect.height}`;
+    const width = Number(this.element.getAttribute('width'));
+    const height = Number(this.element.getAttribute('height'));
+    // If dc-use-attr-for-format experiment is on, we want to make our attribute
+    // check to be more strict.
+    const useAttributesForSize =
+        isExperimentOn(this.win, 'dc-use-attr-for-format')
+        ? !isNaN(width) && width > 0 && !isNaN(height) && height > 0
+        : width && height;
+    this.size_ = useAttributesForSize
+        ? {width, height}
+        : this.getIntersectionElementLayoutBox();
+    let sizeStr = `${this.size_.width}x${this.size_.height}`;
     const rawJson = this.element.getAttribute('json');
     const jsonParameters = rawJson ? JSON.parse(rawJson) : {};
-    const tfcd = jsonParameters['tfcd'];
+    const tfcd = jsonParameters['tagForChildDirectedTreatment'];
     const adTestOn = isInManualExperiment(this.element);
-    return googleAdUrl(this, DOUBLECLICK_BASE_URL, startTime, slotIdNumber, [
+
+    const multiSizeDataStr = this.element.getAttribute('data-multi-size');
+    if (multiSizeDataStr) {
+      const multiSizeValidation = this.element
+          .getAttribute('data-multi-size-validation') || 'true';
+      // The following call will check all specified multi-size dimensions,
+      // verify that they meet all requirements, and then return all the valid
+      // dimensions in an array.
+      const dimensions = getMultiSizeDimensions(
+          multiSizeDataStr,
+          Number(this.element.getAttribute('width')),
+          Number(this.element.getAttribute('height')),
+          multiSizeValidation == 'true');
+      sizeStr += '|' + dimensions
+          .map(dimension => dimension.join('x'))
+          .join('|');
+    }
+
+    return googleAdUrl(this, DOUBLECLICK_BASE_URL, startTime, [
       {name: 'iu', value: this.element.getAttribute('data-slot')},
       {name: 'co', value: jsonParameters['cookieOptOut'] ? '1' : null},
-      {name: 'adk', value: this.adKey_(size)},
+      {name: 'adk', value: this.adKey_(sizeStr)},
       {name: 'gdfp_req', value: '1'},
       {name: 'impl', value: 'ifr'},
       {name: 'sfv', value: 'A'},
-      {name: 'sz', value: size},
+      {name: 'sz', value: sizeStr},
       {name: 'tfcd', value: tfcd == undefined ? null : tfcd},
       {name: 'u_sd', value: global.devicePixelRatio},
-      {name: 'adtest', value: adTestOn},
-      {name: 'ifi', value: slotIdNumber},
-      {name: 'c', value: correlator},
-
+      {name: 'adtest', value: adTestOn ? 'on' : null},
+      {name: 'asnt', value: this.sentinel},
     ], [
       {
         name: 'scp',
@@ -104,7 +155,28 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   extractCreativeAndSignature(responseText, responseHeaders) {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
-    return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
+    this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(
+        this,
+        responseHeaders,
+        this.lifecycleReporter_.getDeltaTime(),
+        this.lifecycleReporter_.getInitTime());
+    if (this.ampAnalyticsConfig_) {
+      // Load amp-analytics extensions
+      this.extensions_./*OK*/loadExtension('amp-analytics');
+    }
+    const adResponsePromise =
+        extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
+    return adResponsePromise.then(adResponse => {
+      // If the server returned a size, use that, otherwise use the size that
+      // we sent in the ad request.
+      if (adResponse.size) {
+        this.size_ = adResponse.size;
+      } else {
+        adResponse.size = this.size_;
+      }
+      this.handleResize_(adResponse.size.width, adResponse.size.height);
+      return Promise.resolve(adResponse);
+    });
   }
 
   /** @override */
@@ -121,13 +193,35 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.element.setAttribute('data-amp-slot-index',
         this.win.ampAdSlotIdCounter++);
     this.lifecycleReporter_ = this.initLifecycleReporter();
+    if (this.ampAnalyticsElement_) {
+      removeElement(this.ampAnalyticsElement_);
+      this.ampAnalyticsElement_ = null;
+    }
+    this.ampAnalyticsConfig_ = null;
   }
 
   /**
-   * @return {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
+   * @return {!../../../ads/google/a4a/performance.BaseLifecycleReporter}
    */
   initLifecycleReporter() {
     return googleLifecycleReporterFactory(this);
+  }
+
+  /** @override */
+  onCreativeRender(isVerifiedAmpCreative) {
+    super.onCreativeRender(isVerifiedAmpCreative);
+    if (this.ampAnalyticsConfig_) {
+      dev().assert(!this.ampAnalyticsElement_);
+      this.ampAnalyticsElement_ =
+          insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
+    }
+
+    this.lifecycleReporter_.addPingsForVisibility(this.element);
+
+    setStyles(dev().assertElement(this.iframe), {
+      width: `${this.size_.width}px`,
+      height: `${this.size_.height}px`,
+    });
   }
 
   /**
@@ -143,6 +237,25 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const string = `${slot}:${size}:${multiSize}:${domFingerprint}`;
     return stringHash32(string);
   }
+
+  /**
+   * Attempts to resize the ad, if the returned size is smaller than the primary
+   * dimensions.
+   * @param {number} width
+   * @param {number} height
+   * @private
+   */
+  handleResize_(width, height) {
+    const pWidth = this.element.getAttribute('width');
+    const pHeight = this.element.getAttribute('height');
+    // We want to resize only if neither returned dimension is larger than its
+    // primary counterpart, and if at least one of the returned dimensions
+    // differ from its primary counterpart.
+    if ((width != pWidth || height != pHeight)
+        && (width <= pWidth && height <= pHeight)) {
+      this.attemptChangeSize(height, width).catch(() => {});
+    }
+  }
 }
 
 AMP.registerElement(
@@ -154,15 +267,13 @@ AMP.registerElement(
  * @return {?string}
  */
 function serializeTargeting(targeting, categoryExclusions) {
-  if (!targeting) {
-    return null;
-  }
-  const serialized = Object.keys(targeting).map(
-      key => serializeItem(key, targeting[key]));
+  const serialized = targeting ?
+      Object.keys(targeting).map(key => serializeItem(key, targeting[key])) :
+      [];
   if (categoryExclusions) {
     serialized.push(serializeItem('excl_cat', categoryExclusions));
   }
-  return serialized.join('&');
+  return serialized.length ? serialized.join('&') : null;
 }
 
 /**

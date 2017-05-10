@@ -14,8 +14,8 @@
   * limitations under the License.
   */
 
-import {ampdocServiceFor} from '../../../src/ampdoc';
 import {elementByTag} from '../../../src/dom';
+import {listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getMode} from '../../../src/mode';
 import {dev} from '../../../src/log';
@@ -23,10 +23,25 @@ import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {VideoEvents} from '../../../src/video-interface';
-import {videoManagerForDoc} from '../../../src/video-manager';
+import {videoManagerForDoc} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 
 const TAG = 'amp-video';
+
+/** @private {!Array<string>} */
+const ATTRS_TO_PROPAGATE_ON_BUILD = ['poster', 'controls', 'aria-label',
+  'aria-describedby', 'aria-labelledby'];
+
+/**
+ * @note Do not propagate `autoplay`. Autoplay behaviour is managed by
+ *       video manager since amp-video implements the VideoInterface.
+ * @private {!Array<string>}
+ */
+const ATTRS_TO_PROPAGATE_ON_LAYOUT = ['src', 'loop', 'preload'];
+
+/** @private {!Array<string>} */
+const ATTRS_TO_PROPAGATE =
+    ATTRS_TO_PROPAGATE_ON_BUILD.concat(ATTRS_TO_PROPAGATE_ON_LAYOUT);
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -41,6 +56,9 @@ class AmpVideo extends AMP.BaseElement {
 
       /** @private {?Element} */
       this.video_ = null;
+
+      /** @private {?boolean}  */
+      this.muted_ = false;
     }
 
     /**
@@ -90,15 +108,33 @@ class AmpVideo extends AMP.BaseElement {
       this.video_.setAttribute('webkit-playsinline', '');
       // Disable video preload in prerender mode.
       this.video_.setAttribute('preload', 'none');
-      this.propagateAttributes(['poster', 'controls', 'aria-label',
-          'aria-describedby', 'aria-labelledby'], this.video_);
-      this.forwardEvents([VideoEvents.PLAY, VideoEvents.PAUSE], this.video_);
+      this.propagateAttributes(ATTRS_TO_PROPAGATE_ON_BUILD, this.video_,
+          /* opt_removeMissingAttrs */ true);
+      this.installEventHandlers_();
       this.applyFillContent(this.video_, true);
       this.element.appendChild(this.video_);
 
-      const ampdoc = ampdocServiceFor(this.win).getAmpDoc();
-      installVideoManagerForDoc(ampdoc);
-      videoManagerForDoc(this.win.document).register(this);
+      installVideoManagerForDoc(this.element);
+      videoManagerForDoc(this.element).register(this);
+    }
+
+    /** @override */
+    mutatedAttributesCallback(mutations) {
+      if (!this.video_) {
+        return;
+      }
+      if (mutations['src']) {
+        assertHttpsUrl(this.element.getAttribute('src'), this.element);
+      }
+      const attrs = ATTRS_TO_PROPAGATE.filter(
+          value => mutations[value] !== undefined);
+      this.propagateAttributes(
+          attrs,
+          dev().assertElement(this.video_),
+          /* opt_removeMissingAttrs */ true);
+      if (mutations['src']) {
+        this.element.dispatchCustomEvent(VideoEvents.RELOAD);
+      }
     }
 
     /** @override */
@@ -119,18 +155,8 @@ class AmpVideo extends AMP.BaseElement {
         assertHttpsUrl(this.element.getAttribute('src'), this.element);
       }
 
-      // Do not propagate `autoplay`. Autoplay behaviour is managed by
-      // video manager since amp-video implements the VideoInterface
-      this.propagateAttributes(
-          ['src', 'loop'],
-          this.video_);
-
-      if (this.element.hasAttribute('preload')) {
-        this.video_.setAttribute(
-            'preload', this.element.getAttribute('preload'));
-      } else {
-        this.video_.removeAttribute('preload');
-      }
+      this.propagateAttributes(ATTRS_TO_PROPAGATE_ON_LAYOUT, this.video_,
+          /* opt_removeMissingAttrs */ true);
 
       this.getRealChildNodes().forEach(child => {
         // Skip the video we already added to the element.
@@ -147,6 +173,21 @@ class AmpVideo extends AMP.BaseElement {
       // loadPromise for media elements listens to `loadstart`
       return this.loadPromise(this.video_).then(() => {
         this.element.dispatchCustomEvent(VideoEvents.LOAD);
+      });
+    }
+
+    /**
+     * @private
+     */
+    installEventHandlers_() {
+      const video = dev().assertElement(this.video_);
+      this.forwardEvents([VideoEvents.PLAY, VideoEvents.PAUSE], video);
+      listen(video, 'volumechange', () => {
+        if (this.muted_ != this.video_.muted) {
+          this.muted_ = this.video_.muted;
+          const evt = this.muted_ ? VideoEvents.MUTED : VideoEvents.UNMUTED;
+          this.element.dispatchCustomEvent(evt);
+        }
       });
     }
 

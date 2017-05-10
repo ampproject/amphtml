@@ -25,6 +25,7 @@ import {parseUrl, resolveRelativeUrl} from '../src/url';
  *   location: (string|undefined),
  *   navigator: ({userAgent:(string|undefined)}|undefined),
  *   readyState: (boolean|undefined),
+ *   top: (FakeWindowSpec|undefined),
  * }}
  */
 export let FakeWindowSpec;
@@ -49,7 +50,25 @@ export class FakeWindow {
     /** @const */
     this.HTMLElement = window.HTMLElement;
     /** @const */
+    this.HTMLFormElement = window.HTMLFormElement;
+    /** @const */
+    this.Element = window.Element;
+    /** @const */
+    this.Node = window.Node;
+    /** @const */
+    this.EventTarget = window.EventTarget;
+    /** @const */
     this.DOMTokenList = window.DOMTokenList;
+    /** @const */
+    this.Math = window.Math;
+
+    // Parent Window points to itself if spec.parent was not passed.
+    /** @const @type {!Window} */
+    this.parent = spec.parent ? new FakeWindow(spec.parent) : this;
+
+    // Top Window points to parent if spec.top was not passed.
+    /** @const */
+    this.top = spec.top ? new FakeWindow(spec.top) : this.parent;
 
     // Events.
     EventListeners.intercept(this);
@@ -59,6 +78,9 @@ export class FakeWindow {
     this.document = self.document.implementation.createHTMLDocument('');
     Object.defineProperty(this.document, 'defaultView', {
       get: () => this,
+    });
+    Object.defineProperty(this.document, 'readyState', {
+      get: () => this.readyState,
     });
 
     EventListeners.intercept(this.document);
@@ -74,6 +96,35 @@ export class FakeWindow {
         this.documentHidden_ = value;
         this.document.eventListeners.fire({type: 'visibilitychange'});
       },
+    });
+
+    /** @private {!Array<string>} */
+    this.cookie_ = [];
+    Object.defineProperty(this.document, 'cookie', {
+      get: () => {
+        let cookie = [];
+        for (let i = 0; i < this.cookie_.length; i += 2) {
+          cookie.push(`${this.cookie_[i]}=${this.cookie_[i + 1]}`);
+        }
+        return cookie.join(';');
+      },
+      set: value => {
+        const semi = value.indexOf(';');
+        const cookie = value.match(/^([^=]*)=([^;]*)/);
+        const expiresMatch = value.match(/expires=([^;]*)(;|$)/);
+        const expires = expiresMatch ? Date.parse(expiresMatch[1]) : Infinity;
+        let i = 0;
+        for (; i < this.cookie_.length; i += 2) {
+          if (this.cookie_[i] == cookie[1]) {
+            break;
+          }
+        }
+        if (Date.now() >= expires) {
+          this.cookie_.splice(i, 2);
+        } else {
+          this.cookie_.splice(i, 2, cookie[1], cookie[2]);
+        }
+      }
     });
 
     // Create element to enhance test elements.
@@ -115,6 +166,9 @@ export class FakeWindow {
         undefined : new FakeStorage(this);
 
     // Timers and animation frames.
+    /** @const */
+    this.Date = window.Date;
+
     /**
      * @param {function()} handler
      * @param {number=} timeout

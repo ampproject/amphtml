@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-import {accessServiceForOrNull} from '../access-service';
-import {cidFor} from '../cid';
-import {variantForOrNull} from '../variant-service';
-import {shareTrackingForOrNull} from '../share-tracking-service';
+import {accessServiceForDocOrNull} from '../services';
+import {cidForDoc} from '../services';
+import {variantForOrNull} from '../services';
+import {shareTrackingForOrNull} from '../services';
 import {dev, user, rethrowAsync} from '../log';
-import {documentInfoForDoc} from '../document-info';
-import {getServiceForDoc, installServiceInEmbedScope} from '../service';
-import {parseUrl, removeFragment, parseQueryString} from '../url';
-import {viewerForDoc} from '../viewer';
-import {viewportForDoc} from '../viewport';
-import {userNotificationManagerFor} from '../user-notification';
-import {activityForDoc} from '../activity';
-import {isExperimentOn} from '../experiments';
+import {documentInfoForDoc} from '../services';
+import {
+  installServiceInEmbedScope,
+  registerServiceBuilderForDoc,
+} from '../service';
+import {isSecureUrl, parseUrl, removeFragment, parseQueryString} from '../url';
+import {viewerForDoc} from '../services';
+import {viewportForDoc} from '../services';
+import {userNotificationManagerFor} from '../services';
+import {activityForDoc} from '../services';
 import {getTrackImpressionPromise} from '../impression.js';
 import {
   VariableSource,
@@ -69,8 +71,11 @@ export class GlobalVariableSource extends VariableSource {
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
-    /** @private @const {function(!Window):!Promise<?AccessService>} */
-    this.getAccessService_ = accessServiceForOrNull;
+    /**
+     * @private
+     * @const {function(!./ampdoc-impl.AmpDoc):!Promise<?AccessService>}
+     */
+    this.getAccessService_ = accessServiceForDocOrNull;
 
     /** @private {?Promise<?Object<string, string>>} */
     this.variants_ = null;
@@ -237,7 +242,7 @@ export class GlobalVariableSource extends VariableSource {
                 return service.get(opt_userNotificationId);
               });
       }
-      return cidFor(this.ampdoc.win).then(cid => {
+      return cidForDoc(this.ampdoc).then(cid => {
         return cid.get({
           scope: dev().assertString(scope),
           createCookieIfNotPresent: true,
@@ -246,6 +251,13 @@ export class GlobalVariableSource extends VariableSource {
         if (!clientIds) {
           clientIds = Object.create(null);
         }
+
+        // A temporary work around to extract Client ID from _ga cookie. #5761
+        // TODO: replace with "filter" when it's in place. #2198
+        if (scope == '_ga') {
+          cid = extractClientIdFromGaCookie(cid);
+        }
+
         clientIds[scope] = cid;
         return cid;
       });
@@ -468,7 +480,7 @@ export class GlobalVariableSource extends VariableSource {
    * @private
    */
   getAccessValue_(getter, expr) {
-    return this.getAccessService_(this.ampdoc.win).then(accessService => {
+    return this.getAccessService_(this.ampdoc).then(accessService => {
       if (!accessService) {
         // Access service is not installed.
         user().error(TAG, 'Access service is not installed to access: ', expr);
@@ -578,10 +590,12 @@ export class UrlReplacements {
    * TODO(mkhatib, #6322): Deprecate and please use expandUrlAsync or expandStringAsync.
    * @param {string} url
    * @param {!Object<string, *>=} opt_bindings
+   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
+   *     that can be substituted.
    * @return {!Promise<string>}
    */
-  expandAsync(url, opt_bindings) {
-    return this.expandUrlAsync(url, opt_bindings);
+  expandAsync(url, opt_bindings, opt_whiteList) {
+    return this.expandUrlAsync(url, opt_bindings, opt_whiteList);
   }
 
 
@@ -637,12 +651,15 @@ export class UrlReplacements {
    * or override existing ones.
    * @param {string} url
    * @param {!Object<string, *>=} opt_bindings
+   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
+   *     that can be substituted.
    * @return {!Promise<string>}
    */
-  expandUrlAsync(url, opt_bindings) {
+  expandUrlAsync(url, opt_bindings, opt_whiteList) {
     return /** @type {!Promise<string>} */ (
-        this.expand_(url, opt_bindings).then(
-            replacement => this.ensureProtocolMatches_(url, replacement)));
+        this.expand_(url, opt_bindings, undefined, undefined,
+            opt_whiteList).then(
+              replacement => this.ensureProtocolMatches_(url, replacement)));
   }
 
   /**
@@ -725,6 +742,34 @@ export class UrlReplacements {
   }
 
   /**
+    * Returns whether variable substitution is allowed for given url.
+    * @param {!Location} url.
+    * @return {boolean}
+    */
+  isAllowedOrigin_(url) {
+    const docInfo = documentInfoForDoc(this.ampdoc);
+
+    if (url.origin == parseUrl(docInfo.canonicalUrl).origin ||
+        url.origin == parseUrl(docInfo.sourceUrl).origin) {
+      return true;
+    }
+
+    const meta = this.ampdoc.getRootNode().querySelector(
+      'meta[name=amp-link-variable-allowed-origin]');
+
+    if (meta && meta.hasAttribute('content')) {
+      const whitelist = meta.getAttribute('content').trim().split(/\s+/);
+      for (let i = 0; i < whitelist.length; i++) {
+        if (url.origin == parseUrl(whitelist[i]).origin) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /**
    * Replaces values in the link of an anchor tag if
    * - the link opts into it (via data-amp-replace argument)
    * - the destination is the source or canonical origin of this doc.
@@ -732,9 +777,6 @@ export class UrlReplacements {
    * @return {string|undefined} Replaced string for testing
    */
   maybeExpandLink(element) {
-    if (!isExperimentOn(this.ampdoc.win, 'link-url-replace')) {
-      return;
-    }
     dev().assert(element.tagName == 'A');
     const supportedReplacements = {
       'CLIENT_ID': true,
@@ -745,18 +787,21 @@ export class UrlReplacements {
     if (!whitelist) {
       return;
     }
-    const docInfo = documentInfoForDoc(this.ampdoc);
     // ORIGINAL_HREF_PROPERTY has the value of the href "pre-replacement".
     // We set this to the original value before doing any work and use it
     // on subsequent replacements, so that each run gets a fresh value.
     const href = dev().assertString(
         element[ORIGINAL_HREF_PROPERTY] || element.getAttribute('href'));
     const url = parseUrl(href);
-    if (url.origin != parseUrl(docInfo.canonicalUrl).origin &&
-        url.origin != parseUrl(docInfo.sourceUrl).origin) {
+    if (!this.isAllowedOrigin_(url)) {
       user().warn('URL', 'Ignoring link replacement', href,
           ' because the link does not go to the document\'s' +
-          ' source or canonical origin.');
+          ' source, canonical, or whitelisted origin.');
+      return;
+    }
+    if (!isSecureUrl(href)) {
+      user().warn('URL', 'Ignoring link replacement', href,
+          ' because it is only supported for secure links.');
       return;
     }
     if (element[ORIGINAL_HREF_PROPERTY] == null) {
@@ -902,15 +947,25 @@ export class UrlReplacements {
   }
 }
 
+/**
+ * Extracts client ID from a _ga cookie.
+ * https://developers.google.com/analytics/devguides/collection/analyticsjs/cookies-user-id
+ * @param {string} gaCookie
+ * @returns {string}
+ */
+export function extractClientIdFromGaCookie(gaCookie) {
+  return gaCookie.replace(/^(GA1|1)\.[\d-]+\./, '');
+}
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @return {!UrlReplacements}
  */
 export function installUrlReplacementsServiceForDoc(ampdoc) {
-  return getServiceForDoc(ampdoc, 'url-replace', doc => {
-    return new UrlReplacements(doc, new GlobalVariableSource(doc));
-  });
+  registerServiceBuilderForDoc(
+      ampdoc,
+      'url-replace',
+      /* opt_constructor */ undefined,
+      doc => new UrlReplacements(doc, new GlobalVariableSource(doc)));
 }
 
 /**

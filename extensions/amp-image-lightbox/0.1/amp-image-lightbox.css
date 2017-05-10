@@ -39,7 +39,7 @@ amp-image-lightbox {
 }
 
 
-.-amp-image-lightbox-container {
+.i-amphtml-image-lightbox-container {
   position: absolute;
   z-index: 0;
   top: 0;
@@ -53,7 +53,7 @@ amp-image-lightbox {
 }
 
 
-.-amp-image-lightbox-trans {
+.i-amphtml-image-lightbox-trans {
   pointer-events: none !important;
   position: fixed;
   z-index: 1001;
@@ -64,7 +64,7 @@ amp-image-lightbox {
 }
 
 
-.-amp-image-lightbox-caption {
+.i-amphtml-image-lightbox-caption {
   position: absolute !important;
   z-index: 2 !important;
   bottom: 0 !important;
@@ -72,8 +72,8 @@ amp-image-lightbox {
   right: 0 !important;
 }
 
-.-amp-image-lightbox-caption.-amp-empty,
-.-amp-image-lightbox-view-mode .-amp-image-lightbox-caption {
+.i-amphtml-image-lightbox-caption.i-amphtml-empty,
+.i-amphtml-image-lightbox-view-mode .i-amphtml-image-lightbox-caption {
   visibility: hidden;
 }
 
@@ -85,7 +85,7 @@ amp-image-lightbox {
 }
 
 
-.-amp-image-lightbox-viewer {
+.i-amphtml-image-lightbox-viewer {
   position: absolute;
   z-index: 1;
   top: 0;
@@ -99,7 +99,7 @@ amp-image-lightbox {
 }
 
 
-.-amp-image-lightbox-viewer-image {
+.i-amphtml-image-lightbox-viewer-image {
   position: absolute;
   z-index: 1;
   display: block;

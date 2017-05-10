@@ -17,7 +17,7 @@
 import {isExperimentOn} from '../../../src/experiments';
 import {cryptoFor} from '../../../src/crypto';
 import {dev, user} from '../../../src/log';
-import {fromClass} from '../../../src/service';
+import {getService, registerServiceBuilder} from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
 import {map} from '../../../src/utils/object';
 
@@ -213,7 +213,7 @@ export class VariableService {
       }
 
       const {name, argList} = this.getNameArgs_(initialValue);
-      const raw = options.vars[name] || '';
+      const raw = options.vars[name] != null ? options.vars[name] : '';
 
       let p;
       if (typeof raw == 'string') {
@@ -274,7 +274,7 @@ export class VariableService {
    * @return {string} The encoded value.
    */
   encodeVars(raw, unusedName) {
-    if (!raw) {
+    if (raw == null) {
       return '';
     }
 
@@ -291,7 +291,7 @@ export class VariableService {
    * @return {!Promise<string>}
    */
   hashFilter_(value) {
-    return cryptoFor(this.win_).then(crypto => crypto.sha384Base64(value));
+    return cryptoFor(this.win_).sha384Base64(value);
   }
 
   isFilterExperimentOn_() {
@@ -302,8 +302,15 @@ export class VariableService {
 
 /**
  * @param {!Window} win
+ */
+export function installVariableService(win) {
+  registerServiceBuilder(win, 'amp-analytics-variables', VariableService);
+}
+
+/**
+ * @param {!Window} win
  * @return {!VariableService}
  */
 export function variableServiceFor(win) {
-  return fromClass(win, 'amp-analytics-variables', VariableService);
+  return getService(win, 'amp-analytics-variables');
 }

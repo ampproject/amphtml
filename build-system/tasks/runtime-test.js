@@ -33,9 +33,11 @@ function getConfig() {
   if (argv.safari) {
     return Object.assign({}, karmaDefault, {browsers: ['Safari']});
   }
-
   if (argv.firefox) {
     return Object.assign({}, karmaDefault, {browsers: ['Firefox']});
+  }
+  if (argv.edge) {
+    return Object.assign({}, karmaDefault, {browsers: ['Edge']});
   }
 
   if (argv.saucelabs) {
@@ -54,10 +56,10 @@ function getConfig() {
             'SL_Chrome_latest',
             'SL_Chrome_45',
             'SL_Firefox_latest',
-            'SL_Safari_8',
+            //'SL_Safari_8' // Disabled due to flakiness and low market share
             'SL_Safari_9',
             'SL_Edge_latest',
-            'SL_iOS_8_4',
+            //'SL_iOS_8_4', // Disabled due to flakiness and low market share
             'SL_iOS_9_1',
             'SL_iOS_10_0',
             //'SL_IE_11',
@@ -141,6 +143,12 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     adTypes: getAdTypes(),
   };
 
+  if (argv.compiled) {
+    process.env.SERVE_MODE = 'compiled';
+  } else {
+    process.env.SERVE_MODE = 'default';
+  }
+
   if (argv.grep) {
     c.client.mocha = {
       'grep': argv.grep,
@@ -171,6 +179,7 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     'saucelabs': '  Runs test on saucelabs (requires setup)',
     'safari': '  Runs tests in Safari',
     'firefox': '  Runs tests in Firefox',
+    'edge': '  Runs tests in Edge',
     'integration': 'Run only integration tests.',
     'compiled': 'Changes integration tests to use production JS ' +
         'binaries for execution',

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import {CommonSignals} from '../../../src/common-signals';
 import {CSS} from '../../../build/amp-sticky-ad-0.1.css';
 import {Layout} from '../../../src/layout';
 import {dev,user} from '../../../src/log';
 import {removeElement} from '../../../src/dom';
 import {toggle} from '../../../src/style';
-import {listenOnce} from '../../../src/event-helper';
 
 class AmpStickyAd extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -52,7 +52,7 @@ class AmpStickyAd extends AMP.BaseElement {
     this.viewport_ = this.getViewport();
 
     toggle(this.element, true);
-    this.element.classList.add('-amp-sticky-ad-layout');
+    this.element.classList.add('i-amphtml-sticky-ad-layout');
     const children = this.getRealChildren();
     user().assert((children.length == 1 && children[0].tagName == 'AMP-AD'),
         'amp-sticky-ad must have a single amp-ad child');
@@ -141,18 +141,15 @@ class AmpStickyAd extends AMP.BaseElement {
   }
 
   /**
-   * Function that check if ad has been built
-   * If not, wait for the amp:built event
-   * otherwise schedule layout for ad.
+   * Function that check if ad has been built.  If not, wait for the "built"
+   * signal. Otherwise schedule layout for ad.
    * @private
    */
   scheduleLayoutForAd_() {
     if (this.ad_.isBuilt()) {
       this.layoutAd_();
     } else {
-      listenOnce(dev().assertElement(this.ad_), 'amp:built', () => {
-        this.layoutAd_();
-      });
+      this.ad_.whenBuilt().then(this.layoutAd_.bind(this));
     }
   }
 
@@ -161,10 +158,18 @@ class AmpStickyAd extends AMP.BaseElement {
    * @private
    */
   layoutAd_() {
-    this.updateInViewport(dev().assertElement(this.ad_), true);
-    this.scheduleLayout(dev().assertElement(this.ad_));
-    listenOnce(dev().assertElement(this.ad_), 'amp:load:end', () => {
-      this.vsync_.mutate(() => {
+    const ad = dev().assertElement(this.ad_);
+    this.updateInViewport(ad, true);
+    this.scheduleLayout(ad);
+    // Wait for the earliest: `render-start` or `load-end` signals.
+    // `render-start` is expected to arrive first, but it's not emitted by
+    // all types of ads.
+    const signals = ad.signals();
+    return Promise.race([
+      signals.whenSignal(CommonSignals.RENDER_START),
+      signals.whenSignal(CommonSignals.LOAD_END),
+    ]).then(() => {
+      return this.vsync_.mutatePromise(() => {
         // Set sticky-ad to visible and change container style
         this.element.setAttribute('visible', '');
         this.element.classList.add('amp-sticky-ad-loaded');

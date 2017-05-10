@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {ampdocServiceFor} from '../../../src/ampdoc';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {tryParseJson} from '../../../src/json';
 import {user} from '../../../src/log';
@@ -23,8 +22,9 @@ import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {isObject} from '../../../src/types';
+import {listen} from '../../../src/event-helper';
 import {VideoEvents} from '../../../src/video-interface';
-import {videoManagerForDoc} from '../../../src/video-manager';
+import {videoManagerForDoc} from '../../../src/services';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -43,6 +43,9 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.playerReadyResolver_ = null;
+
+    /** @private {?Function} */
+    this.unlistenMessage_ = null;
   }
 
   /**
@@ -59,19 +62,8 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
       this.playerReadyResolver_ = resolve;
     });
 
-    const iframe = this.element.ownerDocument.createElement('iframe');
-    this.iframe_ = iframe;
-
-    this.forwardEvents([VideoEvents.PLAY, VideoEvents.PAUSE], iframe);
-    this.applyFillContent(iframe, true);
-    this.element.appendChild(iframe);
-
-    iframe.setAttribute('frameborder', '0');
-    iframe.setAttribute('allowfullscreen', 'true');
-
-    const ampdoc = ampdocServiceFor(this.win).getAmpDoc();
-    installVideoManagerForDoc(ampdoc);
-    videoManagerForDoc(this.win.document).register(this);
+    installVideoManagerForDoc(this.element);
+    videoManagerForDoc(this.element).register(this);
   }
 
   /** @override */
@@ -102,16 +94,25 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
     src += '&ec=' + encodeURIComponent(embedCode) +
       '&pbid=' + encodeURIComponent(playerId);
-    this.iframe_.src = src;
 
-    window.addEventListener('message',
-                            event => this.handleOoyalaMessages_(event));
+    const iframe = this.element.ownerDocument.createElement('iframe');
+    this.applyFillContent(iframe, true);
+    iframe.setAttribute('frameborder', '0');
+    iframe.setAttribute('allowfullscreen', 'true');
+    iframe.src = src;
 
-    return this.loadPromise(this.iframe_)
-      .then(() => {
-        this.element.dispatchCustomEvent(VideoEvents.LOAD);
-        this.playerReadyResolver_(this.iframe_);
-      });
+    this.iframe_ = iframe;
+
+    this.unlistenMessage_ = listen(this.win, 'message', event => {
+      this.handleOoyalaMessages_(event);
+    });
+
+    this.element.appendChild(this.iframe_);
+    const loaded = this.loadPromise(this.iframe_).then(() => {
+      this.element.dispatchCustomEvent(VideoEvents.LOAD);
+    });
+    this.playerReadyResolver_(loaded);
+    return loaded;
   }
 
   /** @override */
@@ -120,6 +121,15 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
       removeElement(this.iframe_);
       this.iframe_ = null;
     }
+
+    if (this.unlistenMessage_) {
+      this.unlistenMessage_();
+    }
+
+    this.playerReadyPromise_ = new Promise(resolve => {
+      this.playerReadyResolver_ = resolve;
+    });
+
     return true;
   }
 
@@ -160,34 +170,39 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     }
   }
 
+  /**
+   * Sends a command to the player through postMessage.
+   * @param {string} command
+   * @private
+   */
+  sendCommand_(command) {
+    this.playerReadyPromise_.then(() => {
+      if (this.iframe_ && this.iframe_.contentWindow) {
+        this.iframe_.contentWindow./*OK*/postMessage(command, '*');
+      }
+    });
+  }
+
   // VideoInterface Implementation. See ../src/video-interface.VideoInterface
 
   /** @override */
   play(unusedIsAutoplay) {
-    this.playerReadyPromise_.then(() => {
-      this.iframe_.contentWindow./*OK*/postMessage('play', '*');
-    });
+    this.sendCommand_('play');
   }
 
   /** @override */
   pause() {
-    this.playerReadyPromise_.then(() => {
-      this.iframe_.contentWindow./*OK*/postMessage('pause', '*');
-    });
+    this.sendCommand_('pause');
   }
 
   /** @override */
   mute() {
-    this.playerReadyPromise_.then(() => {
-      this.iframe_.contentWindow./*OK*/postMessage('mute', '*');
-    });
+    this.sendCommand_('mute');
   }
 
   /** @override */
   unmute() {
-    this.playerReadyPromise_.then(() => {
-      this.iframe_.contentWindow./*OK*/postMessage('unmute', '*');
-    });
+    this.sendCommand_('unmute');
   }
 
   /** @override */

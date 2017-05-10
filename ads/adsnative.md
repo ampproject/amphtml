@@ -21,13 +21,13 @@ limitations under the License.
 ```html
 <amp-ad width=300 height=250
     type="adsnative"
-    data-anapiid="123456"
+    data-anapiid="123456">
 </amp-ad>
 ```
 
 ## Configuration
 
-For configuration, please see [ad network documentation](https://dev.adsnative.com).
+For configuration, please see [ad server documentation](http://dev.adsnative.com).
 
 Supported parameters:
 

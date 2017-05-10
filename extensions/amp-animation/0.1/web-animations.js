@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import {ScrollboundPlayer} from './scrollbound-player';
 import {Observable} from '../../../src/observable';
 import {dev, user} from '../../../src/log';
-import {getVendorJsPropertyName} from '../../../src/style';
+import {getVendorJsPropertyName, computedStyle} from '../../../src/style';
 import {isArray, isObject} from '../../../src/types';
 import {
   WebAnimationDef,
@@ -29,6 +30,7 @@ import {
   WebMultiAnimationDef,
   isWhitelistedProp,
 } from './web-animation-types';
+import {dashToCamelCase} from '../../../src/string';
 
 
 /** @const {string} */
@@ -45,8 +47,16 @@ const TAG = 'amp-animation';
  *   timing: !WebAnimationTimingDef,
  * }}
  */
-let InternalWebAnimationRequestDef;
+export let InternalWebAnimationRequestDef;
 
+/**
+ * @private
+ * @enum {string}
+ */
+const Tickers = {
+  SCROLL: 'scroll',
+  TIME: 'time',
+};
 
 /**
  * @const {!Object<string, boolean>}
@@ -55,7 +65,6 @@ const SERVICE_PROPS = {
   'offset': true,
   'easing': true,
 };
-
 
 /**
  */
@@ -70,6 +79,7 @@ export class WebAnimationRunner {
 
     /** @private {?Array<!Animation>} */
     this.players_ = null;
+
 
     /** @private {number} */
     this.runningCount_ = 0;
@@ -102,7 +112,13 @@ export class WebAnimationRunner {
     dev().assert(!this.players_);
     this.setPlayState_(WebAnimationPlayState.RUNNING);
     this.players_ = this.requests_.map(request => {
-      return request.target.animate(request.keyframes, request.timing);
+      let player;
+      if (request.timing.ticker == Tickers.SCROLL) {
+        player = new ScrollboundPlayer(request);
+      } else {
+        player = request.target.animate(request.keyframes, request.timing);
+      }
+      return player;
     });
     this.runningCount_ = this.players_.length;
     this.players_.forEach(player => {
@@ -171,6 +187,44 @@ export class WebAnimationRunner {
     this.players_.forEach(player => {
       player.cancel();
     });
+  }
+
+  /**
+   */
+  scrollTick(pos) {
+    this.players_.forEach(player => {
+      if (player instanceof ScrollboundPlayer) {
+        player.tick(pos);
+      }
+    });
+  }
+
+  /**
+   */
+  updateScrollDuration(newDuration) {
+    this.requests_.forEach(request => {
+      if (request.timing.ticker == Tickers.SCROLL) {
+        request.timing.duration = newDuration;
+      }
+    });
+
+    this.players_.forEach(player => {
+      if (player instanceof ScrollboundPlayer) {
+        player.onScrollDurationChanged();
+      }
+    });
+  }
+
+  /**
+   */
+  hasScrollboundAnimations() {
+    for (let i = 0; i < this.requests_.length; i++) {
+      if (this.requests_[i].timing.ticker == Tickers.SCROLL) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**
@@ -276,6 +330,7 @@ export class MeasureScanner extends Scanner {
 
     /** @private {!WebAnimationTimingDef} */
     this.timing_ = {
+      ticker: Tickers.TIME,
       duration: 0,
       delay: 0,
       endDelay: 0,
@@ -289,7 +344,7 @@ export class MeasureScanner extends Scanner {
     /** @private {!Array<!Element> } */
     this.targets_ = [];
 
-    /** @private {!Array<!CSSStyleDeclaration>} */
+    /** @private {!Array<!Object<string, string>>} */
     this.computedStyleCache_ = [];
   }
 
@@ -312,13 +367,7 @@ export class MeasureScanner extends Scanner {
     const promises = [];
     for (let i = 0; i < this.targets_.length; i++) {
       const element = this.targets_[i];
-      // TODO(dvoytenko, #6794): Remove old `-amp-element` form after the new
-      // form is in PROD for 1-2 weeks.
-      if (element.classList.contains('-amp-element') ||
-          element.classList.contains('i-amphtml-element')) {
-        const resource = resources.getResourceForElement(element);
-        promises.push(resource.loadedOnce());
-      }
+      promises.push(resources.requireLayout(element));
     }
     return Promise.all(promises);
   }
@@ -456,7 +505,7 @@ export class MeasureScanner extends Scanner {
             this.context_.resolveTarget(targetSpec) :
             targetSpec,
         `Target not found: "${targetSpec}"`);
-    if (this.targets_.indexOf(target) == -1) {
+    if (!this.targets_.includes(target)) {
       this.targets_.push(target);
     }
     return target;
@@ -470,12 +519,11 @@ export class MeasureScanner extends Scanner {
   measure_(target, prop) {
     const index = this.targets_.indexOf(target);
     if (!this.computedStyleCache_[index]) {
-      this.computedStyleCache_[index] = /** @type {!CSSStyleDeclaration} */ (
-          this.win./*OK*/getComputedStyle(target));
+      this.computedStyleCache_[index] = computedStyle(this.win, target);
     }
-    const vendorName = getVendorJsPropertyName(
-        this.computedStyleCache_[index], prop);
-    return this.computedStyleCache_[index].getPropertyValue(vendorName);
+    const vendorName = getVendorJsPropertyName(this.computedStyleCache_[index],
+        dashToCamelCase(prop));
+    return this.computedStyleCache_[index][vendorName];
   }
 
   /**
@@ -502,6 +550,8 @@ export class MeasureScanner extends Scanner {
         newTiming.direction : prevTiming.direction;
     const fill = newTiming.fill != null ?
         newTiming.fill : prevTiming.fill;
+    const ticker = newTiming.ticker != null ?
+        newTiming.ticker : prevTiming.ticker;
 
     // Validate.
     if (this.validate_) {
@@ -526,6 +576,7 @@ export class MeasureScanner extends Scanner {
       easing,
       direction,
       fill,
+      ticker,
     };
   }
 

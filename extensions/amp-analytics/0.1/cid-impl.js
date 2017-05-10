@@ -23,7 +23,10 @@
  */
 
 import {getCookie, setCookie} from '../../../src/cookies';
-import {fromClass} from '../../../src/service';
+import {
+  registerServiceBuilderForDoc,
+  getServiceForDoc,
+} from '../../../src/service';
 import {
   getSourceOrigin,
   isProxyOrigin,
@@ -31,10 +34,11 @@ import {
 } from '../../../src/url';
 import {isIframed} from '../../../src/dom';
 import {getCryptoRandomBytesArray} from '../../../src/utils/bytes';
-import {viewerForDoc} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/services';
 import {cryptoFor} from '../../../src/crypto';
-import {user} from '../../../src/log';
-
+import {tryParseJson} from '../../../src/json';
+import {timerFor} from '../../../src/services';
+import {user, rethrowAsync} from '../../../src/log';
 
 const ONE_DAY_MILLIS = 24 * 3600 * 1000;
 
@@ -61,11 +65,11 @@ let BaseCidInfoDef;
 let GetCidDef;
 
 
-class Cid {
-  /** @param {!Window} win */
-  constructor(win) {
+export class Cid {
+  /** @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
+  constructor(ampdoc) {
     /** @const */
-    this.win = win;
+    this.ampdoc = ampdoc;
 
     /**
      * Cached base cid once read from storage to avoid repeated
@@ -117,7 +121,7 @@ class Cid {
         'The client id name must only use the characters ' +
         '[a-zA-Z0-9-_.]+\nInstead found: %s', getCidStruct.scope);
     return consent.then(() => {
-      return viewerForDoc(this.win.document).whenFirstVisible();
+      return viewerForDoc(this.ampdoc).whenFirstVisible();
     }).then(() => {
       return getExternalCid(this, getCidStruct,
           opt_persistenceConsent || consent);
@@ -136,15 +140,13 @@ class Cid {
  */
 function getExternalCid(cid, getCidStruct, persistenceConsent) {
   /** @const {!Location} */
-  const url = parseUrl(cid.win.location.href);
+  const url = parseUrl(cid.ampdoc.win.location.href);
   if (!isProxyOrigin(url)) {
     return getOrCreateCookie(cid, getCidStruct, persistenceConsent);
   }
-  return Promise.all([getBaseCid(cid, persistenceConsent), cryptoFor(cid.win)])
-      .then(results => {
-        const baseCid = results[0];
-        const crypto = results[1];
-        return crypto.sha384Base64(
+  return getBaseCid(cid, persistenceConsent)
+      .then(baseCid => {
+        return cryptoFor(cid.ampdoc.win).sha384Base64(
             baseCid + getProxySourceOrigin(url) + getCidStruct.scope);
       });
 }
@@ -172,7 +174,7 @@ function setCidCookie(win, scope, cookie) {
  * @return {!Promise<?string>}
  */
 function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
-  const win = cid.win;
+  const win = cid.ampdoc.win;
   const scope = getCidStruct.scope;
   const existingCookie = getCookie(win, scope);
 
@@ -193,8 +195,7 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
         Promise.resolve(existingCookie));
   }
 
-  const newCookiePromise = cryptoFor(win)
-      .then(crypto => crypto.sha384Base64(getEntropy(win)))
+  const newCookiePromise = cryptoFor(win).sha384Base64(getEntropy(win))
       // Create new cookie, always prefixed with "amp-", so that we can see from
       // the value whether we created it.
       .then(randomStr => 'amp-' + randomStr);
@@ -240,9 +241,9 @@ function getBaseCid(cid, persistenceConsent) {
   if (cid.baseCid_) {
     return cid.baseCid_;
   }
-  const win = cid.win;
+  const win = cid.ampdoc.win;
 
-  return cid.baseCid_ = read(win).then(stored => {
+  return cid.baseCid_ = read(cid.ampdoc).then(stored => {
     let needsToStore = false;
     let baseCid;
 
@@ -255,14 +256,13 @@ function getBaseCid(cid, persistenceConsent) {
       }
     } else {
       // We need to make a new one.
-      baseCid = cryptoFor(win)
-          .then(crypto => crypto.sha384Base64(getEntropy(win)));
+      baseCid = cryptoFor(win).sha384Base64(getEntropy(win));
       needsToStore = true;
     }
 
     if (needsToStore) {
       baseCid.then(baseCid => {
-        store(win, persistenceConsent, baseCid);
+        store(cid.ampdoc, persistenceConsent, baseCid);
       });
     }
 
@@ -273,17 +273,17 @@ function getBaseCid(cid, persistenceConsent) {
 /**
  * Stores a new cidString in localStorage. Adds the current time to the
  * stored value.
- * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Promise} persistenceConsent
  * @param {string} cidString Actual cid string to store.
  */
-function store(win, persistenceConsent, cidString) {
-  const viewer = viewerForDoc(win.document);
+function store(ampdoc, persistenceConsent, cidString) {
+  const win = ampdoc.win;
   // TODO(lannka, #4457): ideally, we should check if viewer has the capability
   // of CID storage, rather than if it is iframed.
   if (isIframed(win)) {
     // If we are being embedded, try to save the base cid to the viewer.
-    viewer.baseCid(createCidData(cidString));
+    viewerBaseCid(ampdoc, createCidData(cidString));
   } else {
     // To use local storage, we need user's consent.
     persistenceConsent.then(() => {
@@ -297,6 +297,42 @@ function store(win, persistenceConsent, cidString) {
       }
     });
   }
+}
+
+/**
+ * Get/set the Base CID from/to the viewer.
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {string=} opt_data Stringified JSON object {cid, time}.
+ * @return {!Promise<string|undefined>}
+ */
+export function viewerBaseCid(ampdoc, opt_data) {
+  const viewer = viewerForDoc(ampdoc);
+  return viewer.isTrustedViewer().then(trusted => {
+    if (!trusted) {
+      return undefined;
+    }
+    const cidPromise = viewer.sendMessageAwaitResponse('cid', opt_data)
+        .then(data => {
+          // TODO(dvoytenko, #9019): cleanup the legacy CID format.
+          // For backward compatibility: #4029
+          if (data && !tryParseJson(data)) {
+            // TODO(dvoytenko, #9019): use this for reporting: dev().error('cid', 'invalid cid format');
+            return JSON.stringify({
+              time: Date.now(), // CID returned from old API is always fresh
+              cid: data,
+            });
+          }
+          return data;
+        });
+    // Getting the CID may take some time (waits for JS file to
+    // load, might hit GC), but we do not wait indefinitely. Typically
+    // it should resolve in milli seconds.
+    return timerFor(ampdoc.win).timeoutPromise(10000, cidPromise, 'base cid')
+        .catch(error => {
+          rethrowAsync(error);
+          return undefined;
+        });
+  });
 }
 
 /**
@@ -316,21 +352,21 @@ function createCidData(cidString) {
  * Gets the persisted CID data as a promise. It tries to read from
  * localStorage first then from viewer if it is in embedded mode.
  * Returns null if none was found.
- * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @return {!Promise<?BaseCidInfoDef>}
  */
-function read(win) {
+function read(ampdoc) {
+  const win = ampdoc.win;
   let data;
   try {
     data = win.localStorage.getItem('amp-cid');
   } catch (ignore) {
     // If reading from localStorage fails, we assume it is empty.
   }
-  const viewer = viewerForDoc(win.document);
   let dataPromise = Promise.resolve(data);
   if (!data && isIframed(win)) {
     // If we are being embedded, try to get the base cid from the viewer.
-    dataPromise = viewer.baseCid();
+    dataPromise = viewerBaseCid(ampdoc);
   }
   return dataPromise.then(data => {
     if (!data) {
@@ -388,10 +424,13 @@ function getEntropy(win) {
       win.Math.random() + win.screen.width + win.screen.height);
 }
 
+
 /**
- * @param {!Window} window
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @return {!Cid}
+ * @private visible for testing
  */
-export function installCidService(window) {
-  return fromClass(window, 'cid', Cid);
+export function cidServiceForDocForTesting(ampdoc) {
+  registerServiceBuilderForDoc(ampdoc, 'cid', Cid);
+  return getServiceForDoc(ampdoc, 'cid');
 }

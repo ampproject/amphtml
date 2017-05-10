@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+import {Signals} from '../utils/signals';
 import {dev} from '../log';
 import {
   getParentWindowFrameElement,
-  getService,
+  registerServiceBuilder,
 } from '../service';
 import {getShadowRootNode} from '../shadow-embed';
 import {isDocumentReady, whenDocumentReady} from '../document-ready';
@@ -183,6 +184,9 @@ export class AmpDoc {
   constructor(win) {
     /** @public @const {!Window} */
     this.win = win;
+
+    /** @private @const */
+    this.signals_ = new Signals();
   }
 
   /**
@@ -201,6 +205,11 @@ export class AmpDoc {
    */
   getWin() {
     return this.win;
+  }
+
+  /** @return {!Signals} */
+  signals() {
+    return this.signals_;
   }
 
   /**
@@ -467,10 +476,11 @@ export class AmpDocShadow extends AmpDoc {
  * initial configuration.
  * @param {!Window} win
  * @param {boolean} isSingleDoc
- * @return {!AmpDocService}
  */
 export function installDocService(win, isSingleDoc) {
-  return /** @type {!AmpDocService} */ (getService(win, 'ampdoc', () => {
-    return new AmpDocService(win, isSingleDoc);
-  }));
+  registerServiceBuilder(
+      win,
+      'ampdoc',
+      /* opt_constructor */ undefined,
+      () => new AmpDocService(win, isSingleDoc));
 };

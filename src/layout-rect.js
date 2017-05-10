@@ -32,6 +32,34 @@ export let LayoutRectDef;
 
 
 /**
+ * The structure that represents the margins of an Element.
+ *
+ * @typedef {{
+ *   top: number,
+ *   right: number,
+ *   bottom: number,
+ *   left: number
+ * }}
+ */
+export let LayoutMarginsDef;
+
+
+/**
+ * The structure that represents a requested change to the margins of an
+ * Element. Any new values specified will replace existing ones (rather than
+ * being additive).
+ *
+ * @typedef {{
+ *   top: (number|undefined),
+ *   right: (number|undefined),
+ *   bottom: (number|undefined),
+ *   left: (number|undefined)
+ * }}
+ */
+export let LayoutMarginsChangeDef;
+
+
+/**
  * Creates a layout rect based on the left, top, width and height parameters
  * in that order.
  * @param {number} left
@@ -138,4 +166,30 @@ export function moveLayoutRect(rect, dx, dy) {
   }
   return layoutRectLtwh(rect.left + dx, rect.top + dy,
       rect.width, rect.height);
+}
+
+
+/**
+ * @param {!LayoutMarginsDef} margins
+ * @param {!LayoutMarginsChangeDef} change
+ * @return {boolean}
+ */
+export function areMarginsChanged(margins, change) {
+  return (change.top !== undefined && change.top != margins.top) ||
+      (change.right !== undefined && change.right != margins.right) ||
+      (change.bottom !== undefined && change.bottom != margins.bottom) ||
+      (change.left !== undefined && change.left != margins.left);
+}
+
+/**
+ * @param {?LayoutRectDef} r1
+ * @param {?LayoutRectDef} r2
+ * @return {boolean}
+ */
+export function layoutRectEquals(r1, r2) {
+  if (!r1 || !r2) {
+    return false;
+  }
+  return r1.left == r2.left && r1.top == r2.top &&
+      r1.width == r2.width && r1.height == r2.height;
 }

@@ -490,7 +490,7 @@ function errHandler(err) {
  * @return {boolean}
  */
 function isPrIdInTitle(str) {
-  return str.indexOf('Merge pull request #') == 0;
+  return str./*OK*/indexOf('Merge pull request #') == 0;
 }
 
 /**
@@ -520,7 +520,7 @@ function isJs(str) {
  * @return {boolean}
  */
 function isAmpRelease(str) {
-  return !!(str && str.indexOf('amp-release') == 0);
+  return !!(str && str./*OK*/indexOf('amp-release') == 0);
 }
 
 /**

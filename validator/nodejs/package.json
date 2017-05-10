@@ -1,6 +1,6 @@
 {
   "name": "amphtml-validator",
-  "version": "1.0.18",
+  "version": "1.0.20",
   "description": "Official validator for AMP HTML (www.ampproject.org)",
   "keywords": ["AMP", "validator", "validate", "AMP HTML", "Accelerated Mobile Pages"],
   "engines": {
@@ -24,6 +24,6 @@
     "jasmine": "2.3.2"
   },
   "scripts": {
-    "postinstall": "/bin/sh -c \"exit 0\" 2> NUL && rm NUL || node postinstall-windows.js"
+    "postinstall": "/bin/sh -c \"exit 0\" 2> postinstall.DELETEME && rm postinstall.DELETEME || node postinstall-windows.js"
   }
 }

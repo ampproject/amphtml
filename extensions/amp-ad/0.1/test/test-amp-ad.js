@@ -18,12 +18,12 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {a4aRegistry} from '../../../../ads/_a4a-config';
 import {AmpAd} from '../amp-ad';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
-import {childElement} from '../../../../src/dom';
-import {extensionsFor} from '../../../../src/extensions';
+import {extensionsFor} from '../../../../src/services';
 import {stubService} from '../../../../testing/test-helper';
+import {timerFor} from '../../../../src/services';
 import * as sinon from 'sinon';
 
-describe('A4A loader', () => {
+describe('Ad loader', () => {
   let sandbox;
   let registryBackup;
   const tagNames = ['amp-ad', 'amp-embed'];
@@ -64,7 +64,7 @@ describe('A4A loader', () => {
               }));
 
           ampAdElement = doc.createElement(tag);
-          ampAdElement.setAttribute('type', 'nonexistent-tag-type');
+          ampAdElement.setAttribute('type', '_ping_');
           ampAdElement.setAttribute('width', '300');
           ampAdElement.setAttribute('height', '200');
           doc.body.appendChild(ampAdElement);
@@ -74,48 +74,79 @@ describe('A4A loader', () => {
       });
 
       describe('with consent-notification-id, upgradeCallback', () => {
-        it('should block for notification dismissal', done => {
-          iframePromise.then(() => {
+        it('should block for notification dismissal', () => {
+          return iframePromise.then(fixture => {
             ampAdElement.setAttribute('data-consent-notification-id', 'notif');
 
-            ampAd.upgradeCallback().then(() => {
-              done('upgradeCallback should not resolve without ' +
+            return Promise.race([
+              ampAd.upgradeCallback().then(() => {
+                throw new Error('upgradeCallback should not resolve without ' +
                   'notification dismissal');
-            });
-            setTimeout(() => done(), 0);
+              }),
+              timerFor(fixture.win).promise(25),
+            ]);
           });
         });
 
-        it('should resolve once notification is dismissed', done => {
-          iframePromise.then(() => {
+        it('should resolve once notification is dismissed', () => {
+          return iframePromise.then(() => {
             ampAdElement.setAttribute('data-consent-notification-id', 'notif');
 
-            ampAd.upgradeCallback().then(() => {
-              done();
-            });
-            userNotificationResolver();
+            setTimeout(userNotificationResolver, 25);
+            return ampAd.upgradeCallback();
           });
         });
       });
 
       describe('#upgradeCallback', () => {
-        it('falls back to 3p for unregistered type', () => {
+        it('fails upgrade on unregistered type', () => {
           return iframePromise.then(() => {
-            return expect(ampAd.upgradeCallback())
-                .to.eventually.be.instanceof(AmpAd3PImpl);
+            ampAdElement.setAttribute('type', 'zort');
+            return expect(ampAd.upgradeCallback()).to.eventually.be.rejected;
           });
         });
 
         it('falls back to 3p for registered, non-A4A type', () => {
           return iframePromise.then(() => {
-            a4aRegistry['zort'] = function() {
-              return false;
-            };
-            ampAdElement.setAttribute('type', 'zort');
             ampAd = new AmpAd(ampAdElement);
             return expect(ampAd.upgradeCallback())
                 .to.eventually.be.instanceof(AmpAd3PImpl);
           });
+        });
+      });
+
+      it('fails upgrade on A4A upgrade with loadElementClass error', () => {
+        return iframePromise.then(fixture => {
+          a4aRegistry['zort'] = function() {
+            return true;
+          };
+          ampAdElement.setAttribute('type', 'zort');
+          const extensions = extensionsFor(fixture.win);
+          const extensionsStub = sandbox.stub(extensions, 'loadElementClass')
+              .withArgs('amp-ad-network-zort-impl')
+              .returns(Promise.reject(new Error('I failed!')));
+          ampAd = new AmpAd(ampAdElement);
+          return ampAd.upgradeCallback().then(baseElement => {
+            expect(extensionsStub).to.be.calledAtLeastOnce;
+            expect(ampAdElement.getAttribute(
+                'data-a4a-upgrade-type')).to.equal('amp-ad-network-zort-impl');
+            expect(baseElement).to.be.instanceof(AmpAd3PImpl);
+          });
+        });
+      });
+
+      it('falls back to Delayed Fetch if remote.html is used', () => {
+        return iframePromise.then(({doc}) => {
+          const meta = doc.createElement('meta');
+          meta.setAttribute('name', 'amp-3p-iframe-src');
+          meta.setAttribute('content', 'https://example.com/remote.html');
+          doc.head.appendChild(meta);
+          a4aRegistry['zort'] = () => {
+            throw new Error('predicate should not execute if remote.html!');
+          };
+          ampAdElement.setAttribute('type', 'zort');
+          const upgraded = new AmpAd(ampAdElement).upgradeCallback();
+          return expect(upgraded).to.eventually.be.instanceof(AmpAd3PImpl);
         });
       });
 
@@ -141,26 +172,6 @@ describe('A4A loader', () => {
         });
       });
 
-      it('falls back to 3p impl on upgrade with loadElementClass error', () => {
-        return iframePromise.then(fixture => {
-          a4aRegistry['zort'] = function() {
-            return true;
-          };
-          ampAdElement.setAttribute('type', 'zort');
-          const extensions = extensionsFor(fixture.win);
-          const extensionsStub = sandbox.stub(extensions, 'loadElementClass')
-              .withArgs('amp-ad-network-zort-impl')
-              .returns(Promise.reject(new Error('I failed!')));
-          ampAd = new AmpAd(ampAdElement);
-          return ampAd.upgradeCallback().then(baseElement => {
-            expect(extensionsStub).to.be.calledAtLeastOnce;
-            expect(ampAdElement.getAttribute(
-                'data-a4a-upgrade-type')).to.equal('amp-ad-network-zort-impl');
-            expect(baseElement).to.be.instanceof(AmpAd3PImpl);
-          });
-        });
-      });
-
       it('adds script to header for registered, A4A type', () => {
         return iframePromise.then(fixture => {
           a4aRegistry['zort'] = function() {
@@ -170,12 +181,9 @@ describe('A4A loader', () => {
           ampAd = new AmpAd(ampAdElement);
           ampAd.upgradeCallback().then(element => {
             expect(element).to.not.be.null;
-            expect(childElement(fixture.doc.head,
-                c => {
-                  return c.tagName == 'SCRIPT' &&
-                      c.getAttribute('custom-element') ===
-                      'amp-ad-network-zort-impl';
-                })).to.not.be.null;
+            expect(fixture.doc.head.querySelector(
+                'script[custom-element="amp-ad-network-zort-impl"]'))
+                .to.not.be.null;
           });
         });
       });
