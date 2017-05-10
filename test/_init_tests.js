@@ -255,7 +255,6 @@ afterEach(function() {
   this.timeout(BEFORE_AFTER_TIMEOUT);
   const cleanupTagNames = ['link', 'meta'];
   if (!platformFor(window).isSafari()) {
-    // TODO(#3315): Removing test iframes break tests on Safari.
     cleanupTagNames.push('iframe');
   }
   const cleanup = document.querySelectorAll(cleanupTagNames.join(','));

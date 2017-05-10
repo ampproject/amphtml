@@ -57,7 +57,13 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `gulp test --firefox`<sup>[[1]](#footnote-1)</sup>                      | Runs tests in Firefox.                                                |
 | `gulp test --files=<test-files-path-glob>`<sup>[[1]](#footnote-1)</sup> | Runs specific test files.                                             |
 | `gulp serve`                                                            | Serves content in repo root dir over http://localhost:8000/. Examples live in http://localhost:8000/examples/. Serve unminified AMP by default. |
+| `gulp check-types`                                                      | Verifies that there are no errors associated with Closure typing. Run automatically upon push.  |
+| `gulp dep-check`                                                        | Runs a dependency check on each module. Run automatically upon push.  |
+| `gulp presubmit`                                                        | Run validation against files to check for forbidden and required terms. Run automatically upon push.  |
+| `gulp validator`                                                        | Builds and tests the AMP validator. Run automatically upon push.  |
+| `node build-system/pr-check.js`                                         | Runs all tests that will be run upon pushing a CL.                     |
 | `npm run ava`<sup>[[1]](#footnote-1)</sup>                              | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava). |
+| `gulp todos:find-closed`                                                | Find `TODO`s in code for issues that have been closed. |
 
 <a id="footnote-1">[1]</a> On Windows, this command must be run as administrator.
 
