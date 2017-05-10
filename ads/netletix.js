@@ -16,12 +16,8 @@
 
 import {writeScript, loadScript, validateData} from '../3p/3p';
 import {startsWith} from '../src/string.js';
+import {dev} from '../src/log.js';
 import {assertHttpsUrl, addParamsToUrl} from '../src/url.js';
-
-/**
- * @param {!Window} global
- * @param {!Object} data
- */
 
 const NX_URL_HOST = 'https://call.adadapter.netzathleten-media.de';
 const NX_URL_PATHPREFIX = '/pb/';
@@ -33,6 +29,10 @@ const DEFAULT_NX_HEIGHT = 'fluid';
 const DEFAULT_NX_V = '0002';
 const DEFAULT_NX_SITE = 'none';
 
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
 export function netletix(global, data) {
   /*eslint "google-camelcase/google-camelcase": 0*/
   global._netletix_amp = {
@@ -42,8 +42,6 @@ export function netletix(global, data) {
   };
   validateData(data,
       global._netletix_amp.mandatory_data, global._netletix_amp.allowed_data);
-  data.nxwidth = data.nxwidth || DEFAULT_NX_WIDTH;
-  data.nxheight = data.nxheight || DEFAULT_NX_HEIGHT;
   const url = assertHttpsUrl(addParamsToUrl(
     NX_URL_FULL + encodeURIComponent(data.nxkey || DEFAULT_NX_KEY),
     {
@@ -53,10 +51,10 @@ export function netletix(global, data) {
       v: data.nxv || DEFAULT_NX_V,
       site: data.nxsite || DEFAULT_NX_SITE,
       ord: Math.round(Math.random() * 100000000),
-    }), data.ampSlotIndex
-  );
+    }), data.ampSlotIndex);
   window.addEventListener('message', event => {
-    if (event.data.type && startsWith(String(event.data.type), 'nx-')) {
+    if (event.data.type &&
+      startsWith(dev().assertString(event.data.type), 'nx-')) {
       switch (event.data.type) {
         case 'nx-resize':
           const renderconfig = {
@@ -65,21 +63,19 @@ export function netletix(global, data) {
           };
           global.context.renderStart(renderconfig);
           if (event.data.width &&
-              event.data.height &&
-              event.data.width != parseInt(global.context.data.nxwidth, 10) ||
-              event.data.height != parseInt(global.context.data.nxheight, 10)) {
-            global.context.requestResize(event.data.width, event.data.height);
+              event.data.height) {
+            if (dev().assertString(event.data.width) != data['nxwidth'] ||
+               dev().assertString(event.data.height) != data['nxheight']) {
+              global.context.requestResize(event.data.width,
+                event.data.height);
+            }
           }
           break;
         case 'nx-empty':
           global.context.noContentAvailable();
           break;
         case 'nx-identifier':
-          global.context.reportRenderedEntityIdentifier(
-            event.data.identifier
-          );
-          break;
-        case 'nx-info':
+          global.context.reportRenderedEntityIdentifier(event.data.identifier);
           break;
         default:
           break;
