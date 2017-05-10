@@ -40,7 +40,6 @@ const EXP_ID = 'EXP_ID';
 const EXTERNAL_BRANCHES = {
   control: '1',
   experiment: '2',
-  controlMeasureOnRender: '3',
 };
 /** @type {!Branches} */
 const INTERNAL_BRANCHES = {
@@ -310,19 +309,6 @@ describe('a4a_config', () => {
         expect(isInExperiment(element, INTERNAL_BRANCHES[branch]),
             'element in ', EXTERNAL_BRANCHES[branch]).to.be.false;
       }
-    });
-
-    it(`should force controlMeasureOnRender param from URL ` +
-       `when pattern=${urlBase}`, () => {
-      win.location.search = urlBase.replace('PARAM', 'a4a:3');
-      // Should not register as 'A4A enabled', but should still attach the
-      // controlMeasureOnRender experiment ID.
-      expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
-          INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.false;
-      expect(win.document.cookie).to.be.null;
-      expectThereCanBeOnlyOne(element,
-          EXTERNAL_BRANCHES.controlMeasureOnRender);
-      expectExternallyTriggered(element);
     });
 
   });
