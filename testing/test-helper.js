@@ -26,7 +26,7 @@ export function stubService(sandbox, win, serviceId, method) {
   // Register if not already registered.
   registerServiceBuilder(win, serviceId, function() {
     return {
-      [method]: () => {};
+      [method]: () => {},
     };
   });
   const service = getService(win, serviceId);
@@ -37,7 +37,7 @@ export function stubServiceForDoc(sandbox, ampdoc, serviceId, method) {
   // Register if not already registered.
   registerServiceBuilderForDoc(ampdoc, serviceId, function() {
     return {
-      [method]: () => {};
+      [method]: () => {},
     };
   });
   const service = getServiceforDoc(win, serviceId);
