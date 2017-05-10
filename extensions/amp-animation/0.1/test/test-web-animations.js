@@ -386,6 +386,13 @@ describes.sandboxed('MeasureScanner', {}, () => {
     }).to.throw(/No target specified/);
   });
 
+  it('should not allow both selector and target spec', () => {
+    expect(() => {
+      scan([{selector: '#target1', target: 'target1',
+          duration: 400, keyframes: {}}]);
+    }).to.throw(/Both/);
+  });
+
   it('should build keyframe for multiple targets', () => {
     target1.style.opacity = '0';
     target2.style.opacity = '0.1';

@@ -461,6 +461,8 @@ export class MeasureScanner extends Scanner {
   resolveTargets_(spec) {
     let targets;
     if (spec.selector) {
+      user().assert(!spec.target,
+          'Both "selector" and "target" are not allowed');
       targets = this.context_.queryTargets(spec.selector);
       if (targets.length == 0) {
         user().warn(TAG, `Target not found: "${spec.selector}"`);
