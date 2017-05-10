@@ -54,7 +54,6 @@ export function ix(global, data) {
       return;
     }
 
-    global._IndexRequestData = undefined;
     global.IndexArgs = {
       ampCallback: callDoubleclick,
       ampSuccess: EVENT_SUCCESS,
