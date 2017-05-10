@@ -158,6 +158,7 @@ describes.sandboxed('MeasureScanner', {}, () => {
           easing: 'ease-in',
           direction: 'reverse',
           fill: 'auto',
+          ticker: 'time',
         },
       ],
     });
@@ -170,6 +171,7 @@ describes.sandboxed('MeasureScanner', {}, () => {
       easing: 'ease-in',
       direction: 'reverse',
       fill: 'auto',
+      ticker: 'time',
     });
   });
 
