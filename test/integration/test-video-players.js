@@ -70,7 +70,7 @@ describe.skip('amp-nexxtv-player', () => {
 
 describe.configure().skipIos().run('amp-ima-video', () => {
   runVideoPlayerIntegrationTests(fixture => {
-    toggleExperiment(window, 'amp-ima-video', true);
+    toggleExperiment(fixture.win, 'amp-ima-video', true);
     const video = fixture.doc.createElement('amp-ima-video');
     video.setAttribute('width', 640);
     video.setAttribute('height', 360);
