@@ -208,10 +208,24 @@ describe('cid', () => {
     it('should fallback to cookie value on custom domain.', () => {
       fakeWin.location.href =
           'https://abc.org/v/www.DIFFERENT.com/foo/?f=0';
-      fakeWin.document.cookie = 'cookie_name=12345;';
-      return compare(
-          'cookie_name',
-          '12345');
+      fakeWin.document.cookie = 'cookie_name=12345;scope_name=54321;';
+      return cid.get({
+        scope: 'scope_name',
+      }, hasConsent).then(c => {
+        expect(c).to.equal('54321');
+      });
+    });
+
+    it('should fallback to cookie of given name on custom domain.', () => {
+      fakeWin.location.href =
+          'https://abc.org/v/www.DIFFERENT.com/foo/?f=0';
+      fakeWin.document.cookie = 'cookie_name=12345;scope_name=54321;';
+      return cid.get({
+        scope: 'scope_name',
+        cookieName: 'cookie_name',
+      }, hasConsent).then(c => {
+        expect(c).to.equal('12345');
+      });
     });
 
     it('should depend fall back to cookies on custom ' +
@@ -588,17 +602,37 @@ describe('cid', () => {
       fakeWin.location.href =
           'https://foo.abc.org/v/www.DIFFERENT.com/foo/?f=0';
       fakeWin.location.hostname = 'foo.abc.org';
-      return cid.get({scope: 'cookie_name', createCookieIfNotPresent: true},
+      return cid.get({scope: 'scope_name', createCookieIfNotPresent: true},
           hasConsent).then(c => {
             expect(c).to.exist;
             expect(c).to
                 .equal('amp-sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])');
             expect(fakeWin.document.cookie).to.equal(
-                'cookie_name=' + encodeURIComponent(c) +
+                'scope_name=' + encodeURIComponent(c) +
                 '; path=/' +
                 '; domain=abc.org' +
                 '; expires=Fri, 01 Jan 1971 00:00:00 GMT');  // 1 year from 0.
           });
+    });
+
+    it('should create fallback cookie with provided name', () => {
+      fakeWin.location.href =
+          'https://foo.abc.org/v/www.DIFFERENT.com/foo/?f=0';
+      fakeWin.location.hostname = 'foo.abc.org';
+      return cid.get({
+        scope: 'scope_name',
+        createCookieIfNotPresent: true,
+        cookieName: 'cookie_name',
+      }, hasConsent).then(c => {
+        expect(c).to.exist;
+        expect(c).to
+            .equal('amp-sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])');
+        expect(fakeWin.document.cookie).to.equal(
+            'cookie_name=' + encodeURIComponent(c) +
+            '; path=/' +
+            '; domain=abc.org' +
+            '; expires=Fri, 01 Jan 1971 00:00:00 GMT');  // 1 year from 0.
+      });
     });
 
     it('should update fallback cookie expiration when present', () => {
