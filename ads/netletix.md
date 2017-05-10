@@ -24,8 +24,7 @@ limitations under the License.
       data-nxkey="b5f0c5d4-c2b8-4989-a7b9-130ad4417102"
       data-nxunit="/60343726/netzathleten_.de"
       data-nxwidth="300"
-      data-nxheight="250"
-      >
+      data-nxheight="250">
 </amp-ad>
 ```
 

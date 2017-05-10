@@ -16,20 +16,22 @@
 
 import {writeScript, loadScript, validateData} from '../3p/3p';
 import {startsWith} from '../src/string.js';
+import {assertHttpsUrl, addParamsToUrl} from '../src/url.js';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
-/** @type {{nxasync:string}} */
-/** @type {{nxv:string}} */
-/** @type {{nxsite:string}} */
-/** @type {{nxid:string}} */
-/** @type {{nxscript:string}} */
-/** @type {{nxkey:string}} */
-/** @type {{nxunit:string}} */
-/** @type {{nxwidth:string}} */
-/** @type {{nxheight:string}} */
+
+const NX_URL_HOST = 'https://call.adadapter.netzathleten-media.de';
+const NX_URL_PATHPREFIX = '/pb/';
+const NX_URL_FULL = NX_URL_HOST + NX_URL_PATHPREFIX ;
+const DEFAULT_NX_KEY = 'default';
+const DEFAULT_NX_UNIT = 'default';
+const DEFAULT_NX_WIDTH = 'fluid';
+const DEFAULT_NX_HEIGHT = 'fluid';
+const DEFAULT_NX_V = '0002';
+const DEFAULT_NX_SITE = 'none';
 
 export function netletix(global, data) {
   /*eslint "google-camelcase/google-camelcase": 0*/
@@ -38,30 +40,22 @@ export function netletix(global, data) {
     mandatory_data: ['nxkey','nxunit','nxwidth','nxheight'],
     data,
   };
-
-
-
   validateData(data,
       global._netletix_amp.mandatory_data, global._netletix_amp.allowed_data);
-
-  const ls = 'https://call.adadapter.netzathleten-media.de';
-  const rand = Math.round(Math.random() * 100000000);
-  const nxkey = (data.nxkey ? data.nxkey : 'default');
-  const nxunit = (data.nxunit ? data.nxunit : 'default');
-  const nxwidth = (data.nxwidth ? data.nxwidth : 'fluid');
-  const nxheight = (data.nxheight ? data.nxheight : 'fluid');
-  const nxv = (data.nxv ? data.nxv : '0002');
-  const nxsite = (data.nxsite ? data.nxsite : 'none');
-  const url = ls + '/pb/'
-    + encodeURIComponent(nxkey)
-    + '?unit=' + encodeURIComponent(nxunit)
-    + '&width=' + encodeURIComponent(nxwidth)
-    + '&height=' + encodeURIComponent(nxheight)
-    + '&v=' + encodeURIComponent(nxv)
-    + '&site=' + encodeURIComponent(nxsite)
-    + '&ord=' + rand;
-  const receiveNxAction = function(event)
-  {
+  data.nxwidth = data.nxwidth || DEFAULT_NX_WIDTH;
+  data.nxheight = data.nxheight || DEFAULT_NX_HEIGHT;
+  const url = assertHttpsUrl(addParamsToUrl(
+    NX_URL_FULL + encodeURIComponent(data.nxkey || DEFAULT_NX_KEY),
+    {
+      unit: data.nxunit || DEFAULT_NX_UNIT,
+      width: data.nxwidth || DEFAULT_NX_WIDTH,
+      height: data.nxheight || DEFAULT_NX_HEIGHT,
+      v: data.nxv || DEFAULT_NX_V,
+      site: data.nxsite || DEFAULT_NX_SITE,
+      ord: Math.round(Math.random() * 100000000),
+    }), data.ampSlotIndex
+  );
+  window.addEventListener('message', event => {
     if (event.data.type && startsWith(String(event.data.type), 'nx-')) {
       switch (event.data.type) {
         case 'nx-resize':
@@ -70,16 +64,18 @@ export function netletix(global, data) {
             'height': event.data.height,
           };
           global.context.renderStart(renderconfig);
-          if (event.data.width != nxwidth ||
-              event.data.height != nxheight) {
-            window.context.requestResize(event.data.width, event.data.height);
+          if (event.data.width &&
+              event.data.height &&
+              event.data.width != parseInt(global.context.data.nxwidth, 10) ||
+              event.data.height != parseInt(global.context.data.nxheight, 10)) {
+            global.context.requestResize(event.data.width, event.data.height);
           }
           break;
         case 'nx-empty':
           global.context.noContentAvailable();
           break;
         case 'nx-identifier':
-          window.context.reportRenderedEntityIdentifier(
+          global.context.reportRenderedEntityIdentifier(
             event.data.identifier
           );
           break;
@@ -89,9 +85,7 @@ export function netletix(global, data) {
           break;
       }
     }
-  };
-  window.addEventListener('message', receiveNxAction);
-
+  });
   if (data.async && data.async.toLowerCase() === 'true') {
     loadScript(global, url);
   } else {

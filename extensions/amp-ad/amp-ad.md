@@ -31,7 +31,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-ad" src="https:&sol;&sol;cdn.ampproject.org&sol;v0&sol;amp-ad-0.1.js">&lt;/script></code> Note: amp-ad may still work without this script, but we highly recommend it for future compatibility</td>
+    <td><code>&lt;script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js">&lt;/script></code> Note: amp-ad may still work without this script, but we highly recommend it for future compatibility</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
@@ -165,7 +165,7 @@ The `content` attribute of the meta tag is the absolute URL to your copy of the 
 Iframes should also enforce that they are only iframed into origins that they expect to be iframed into. The origins would be:
 
 - your own origins
-- https:&sol;&sol;cdn.ampproject.org for the AMP cache
+- https://cdn.ampproject.org for the AMP cache
 
 In the case of the AMP cache you also need to check that the "source origin" (origin of the document served by cdn.ampproject.org) is one of your origins.
 
