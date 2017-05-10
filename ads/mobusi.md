@@ -1,5 +1,5 @@
 <!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,8 +22,6 @@ limitations under the License.
   <amp-ad width="300" height="450"
     type="mobusi"
     src="https://play.leadzu.com/banner_request.php?m=1GBTSITE40382X2&a=&idtm=300x450&lgid=324132413241234123">
-  <div placeholder></div>
-  <div fallback>No ads</div>
 ```
 
 ## Configuration

@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,6 @@ export function mobusi(global, data) {
   const adsrc = data.src;
   const timestamp = (Date.now() % 2147483648) + Math.random();
   if (typeof adsrc != 'undefined') {
-    writeScript(global, adsrc + '&lgid=' + timestamp);
+    writeScript(global, encodeURIComponent(adsrc + '&lgid=' + timestamp));
   }
 }
