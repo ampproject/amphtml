@@ -4,8 +4,8 @@
 
   "canary": 0,
   "pan-y": 1,
-  "expAdsenseA4A": 0.1,
-  "expDoubleclickA4A": 0.1,
+  "expAdsenseA4A": 0.5,
+  "expDoubleclickA4A": 0.5,
   "a4aProfilingRate": 0.1,
   "ad-type-custom": 1,
   "amp-scrollable-carousel": 1,
