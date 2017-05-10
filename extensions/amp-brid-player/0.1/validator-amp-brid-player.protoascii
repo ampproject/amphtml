@@ -32,6 +32,7 @@ tags: {  # <amp-brid-player>
   tag_name: "AMP-BRID-PLAYER"
   disallowed_ancestor: "AMP-SIDEBAR"
   requires: "amp-brid-player extension .js script"
+  attrs: { name: "autoplay" }
   attrs: {
     name: "data-partner"
     mandatory: true
