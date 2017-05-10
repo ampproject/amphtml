@@ -225,4 +225,11 @@ describe('amp-social-share', () => {
       );
     });
   });
+
+  it('has tabindex set to 0 by default', () => {
+    return getShare('twitter').then(el => {
+      expect(el.getAttribute('tabindex')).to.equal('0');
+    });
+  });
+
 });
