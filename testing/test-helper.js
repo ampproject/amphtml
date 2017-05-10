@@ -16,28 +16,32 @@
 
 import {xhrServiceForTesting} from '../src/service/xhr-impl';
 import {
+  getService,
+  getServiceForDoc,
   registerServiceBuilder,
   registerServiceBuilderForDoc,
 } from '../src/service';
 
 export function stubService(sandbox, win, serviceId, method) {
-  const stub = sandbox.stub();
+  // Register if not already registered.
   registerServiceBuilder(win, serviceId, function() {
-    const service = {};
-    service[method] = stub;
-    return service;
+    return {
+      [method]: () => {};
+    };
   });
-  return stub;
+  const service = getService(win, serviceId);
+  return sandbox.stub(service, method);
 }
 
 export function stubServiceForDoc(sandbox, ampdoc, serviceId, method) {
-  const stub = sandbox.stub();
+  // Register if not already registered.
   registerServiceBuilderForDoc(ampdoc, serviceId, function() {
-    const service = {};
-    service[method] = stub;
-    return service;
+    return {
+      [method]: () => {};
+    };
   });
-  return stub;
+  const service = getServiceforDoc(win, serviceId);
+  return sandbox.stub(service, method);
 }
 
 /**
