@@ -63,6 +63,7 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `gulp validator`                                                        | Builds and tests the AMP validator. Run automatically upon push.  |
 | `node build-system/pr-check.js`                                         | Runs all tests that will be run upon pushing a CL.                     |
 | `npm run ava`<sup>[[1]](#footnote-1)</sup>                              | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava). |
+| `gulp todos:find-closed`                                                | Find `TODO`s in code for issues that have been closed. |
 
 <a id="footnote-1">[1]</a> On Windows, this command must be run as administrator.
 
