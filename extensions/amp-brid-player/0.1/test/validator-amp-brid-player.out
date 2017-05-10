@@ -1,3 +1,3 @@
 FAIL
-amp-brid-player/0.1/test/validator-amp-brid-player.html:47:2 The mandatory attribute 'data-player' is missing in tag 'amp-brid-player'. (see https://www.ampproject.org/docs/reference/components/amp-brid-player) [AMP_TAG_PROBLEM]
-amp-brid-player/0.1/test/validator-amp-brid-player.html:53:2 The tag 'amp-brid-player' is missing a mandatory attribute - pick one of ['data-playlist', 'data-video']. (see https://www.ampproject.org/docs/reference/components/amp-brid-player) [AMP_TAG_PROBLEM]
+amp-brid-player/0.1/test/validator-amp-brid-player.html:48:2 The mandatory attribute 'data-player' is missing in tag 'amp-brid-player'. (see https://www.ampproject.org/docs/reference/components/amp-brid-player) [AMP_TAG_PROBLEM]
+amp-brid-player/0.1/test/validator-amp-brid-player.html:55:2 The tag 'amp-brid-player' is missing a mandatory attribute - pick one of ['data-playlist', 'data-video']. (see https://www.ampproject.org/docs/reference/components/amp-brid-player) [AMP_TAG_PROBLEM]

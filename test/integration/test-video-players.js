@@ -32,6 +32,7 @@ import {runVideoPlayerIntegrationTests} from './test-video-players-helper';
 //TODO(aghassemi,#7822): We have to skip iOS for video tests since videos
 // can't play SauceLab's iOS simulator. We need real devices instead.
 
+
 describe.configure().skipIos().run('amp-video', () => {
   runVideoPlayerIntegrationTests(fixture => {
     const video = fixture.doc.createElement('amp-video');
@@ -62,6 +63,16 @@ describe.skip('amp-nexxtv-player', () => {
     const video = fixture.doc.createElement('amp-nexxtv-player');
     video.setAttribute('data-mediaid', 'PTPFEC4U184674');
     video.setAttribute('data-client', '583');
+    return video;
+  });
+});
+
+describe.configure().skipIos().run('amp-brid-player', () => {
+  runVideoPlayerIntegrationTests(fixture => {
+    const video = fixture.doc.createElement('amp-brid-player');
+    video.setAttribute('data-partner', '264');
+    video.setAttribute('data-player', '4144');
+    video.setAttribute('data-video', '13663');
     return video;
   });
 });
