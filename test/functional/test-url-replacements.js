@@ -88,7 +88,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
         if (opt_options.withShareTracking) {
           markElementScheduledForTesting(iframe.win, 'amp-share-tracking');
           registerServiceBuilder(iframe.win, 'share-tracking', function() {
-            Promise.resolve({
+            return Promise.resolve({
               incomingFragment: '12345',
               outgoingFragment: '54321',
             });
