@@ -14,10 +14,73 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl} from '../../../src/url';
+const FINAL_URL_RE = /^(data|https)\:/i;
+const DEG_TO_RAD = 2 * Math.PI / 360;
+const GRAD_TO_RAD = Math.PI / 200;
 
-const EXTRACT_URL_RE = /url\(\s*['"]?([^()'"]*)['"]?\s*\)/i;
-const DATA_URL_RE = /^data\:/i;
+
+/**
+ * An interface that assists in CSS evaluation.
+ * @interface
+ */
+export class CssContext {
+
+  /**
+   * Returns a resolved URL. The result must be an allowed URL for execution,
+   * with HTTPS restrictions.
+   * @param {string} unusedUrl
+   * @return {string}
+   */
+  resolveUrl(unusedUrl) {}
+
+  /**
+   * Returns the value of a CSS variable or `null` if not available.
+   * @param {string} unusedVarName
+   * @return {?CssNode}
+   */
+  getVar(unusedVarName) {}
+
+  /**
+   * Returns the current font size.
+   * @return {number}
+   */
+  getCurrentFontSize() {}
+
+  /**
+   * Returns the root font size.
+   * @return {number}
+   */
+  getRootFontSize() {}
+
+  /**
+   * Returns the viewport size.
+   * @return {!{width: number, height: number}}
+   */
+  getViewportSize() {}
+
+  /**
+   * Returns the current element's size.
+   * @return {!{width: number, height: number}}
+   */
+  getCurrentElementSize() {}
+
+  /**
+   * Returns the dimension: "w" for width or "h" for height.
+   * @return {?string}
+   */
+  getDimension() {}
+
+  /**
+   * Pushes the dimension: "w" for width or "h" for height.
+   * @param {?string} unusedDim
+   */
+  pushDimension(unusedDim) {}
+
+  /**
+   * Pops the dimension.
+   */
+  popDimension() {}
+}
 
 
 /**
@@ -27,6 +90,65 @@ const DATA_URL_RE = /^data\:/i;
  */
 export class CssNode {
   constructor() {}
+
+  /**
+   * A return a string CSS representation.
+   * @return {string}
+   * @abstract
+   */
+  css() {}
+
+  /**
+   * Resolves the value of all variable components. Only performs any work if
+   * variable components exist.
+   * @param {!CssContext} context
+   * @return {?CssNode}
+   * @final
+   */
+  resolve(context) {
+    if (this.isConst()) {
+      return this;
+    }
+    return this.calc(context);
+  }
+
+  /**
+   * Whether the CSS node is a constant or includes variable components.
+   * @return {boolean}
+   * @protected
+   */
+  isConst() {
+    return true;
+  }
+
+  /**
+   * Calculates the value of all variable components.
+   * @param {!CssContext} unusedContext
+   * @return {?CssNode}
+   * @protected
+   */
+  calc(unusedContext) {
+    return this;
+  }
+}
+
+
+/**
+ * A CSS expression that's simply passed through from the original expression.
+ * Used for `url()`, colors, etc.
+ */
+export class CssPassthroughNode extends CssNode {
+  /** @param {string} css */
+  constructor(css) {
+    super();
+    /** @const @private {string} */
+    this.css_ = css;
+  }
+
+  /** @override */
+  css() {
+    return this.css_;
+  }
 }
 
 
@@ -62,19 +184,28 @@ export class CssConcatNode extends CssNode {
     }
     return set;
   }
-}
 
+  /** @override */
+  css() {
+    return this.array_.map(node => node.css()).join(' ');
+  }
 
-/**
- * A CSS expression that's simply passed through from the original expression.
- * Used for `url()`, colors, etc.
- */
-export class CssPassthroughNode extends CssNode {
-  /** @param {string} css */
-  constructor(css) {
-    super();
-    /** @const @private {string} */
-    this.css_ = css;
+  /** @override */
+  isConst() {
+    return this.array_.reduce((acc, node) => acc && node.isConst(), true);
+  }
+
+  /** @override */
+  calc(context) {
+    let nullCount = 0;
+    const resolvedArray = this.array_.map(node => {
+      const resolved = node.resolve(context);
+      if (!resolved) {
+        nullCount++;
+      }
+      return resolved;
+    });
+    return nullCount > 0 ? null : new CssConcatNode(resolvedArray);
   }
 }
 
@@ -82,17 +213,32 @@ export class CssPassthroughNode extends CssNode {
 /**
  * Verifies that URL is an HTTPS URL.
  */
-export class CssUrlNode extends CssPassthroughNode {
-  /** @param {string} css */
-  constructor(css) {
-    super(css);
-    const matches = css.match(EXTRACT_URL_RE);
-    if (matches || matches.length > 1) {
-      const url = (matches[1] || '').trim();
-      if (!url.match(DATA_URL_RE)) {
-        assertHttpsUrl(url);
-      }
+export class CssUrlNode extends CssNode {
+  /** @param {string} url */
+  constructor(url) {
+    super();
+    /** @const @private {string} */
+    this.url_ = url;
+  }
+
+  /** @override */
+  css() {
+    if (!this.url_) {
+      return '';
     }
+    return `url("${this.url_}")`;
+  }
+
+  /** @override */
+  isConst() {
+    return !this.url_ || FINAL_URL_RE.test(this.url_);
+  }
+
+  /** @override */
+  calc(context) {
+    const url = context.resolveUrl(this.url_);
+    // Return a passthrough CSS to avoid recursive `url()` evaluation.
+    return new CssPassthroughNode(`url("${url}")`);
   }
 }
 
@@ -115,6 +261,35 @@ export class CssNumericNode extends CssNode {
     /** @const @private {string} */
     this.units_ = units.toLowerCase();
   }
+
+  /** @override */
+  css() {
+    return `${this.num_}${this.units_}`;
+  }
+
+  /**
+   * @param {number} unusedNum
+   * @return {!CssNumberNode}
+   * @abstract
+   */
+  createSameUnits(unusedNum) {}
+
+  /**
+   * @param {!CssContext} unusedContext
+   * @return {!CssNumberNode}
+   */
+  norm(unusedContext) {
+    return this;
+  }
+
+  /**
+   * @param {number} percent
+   * @param {!CssContext} unusedContext
+   * @return {!CssNumberNode}
+   */
+  calcPercent(percent, unusedContext) {
+    throw new Error('cannot calculate percent for ' + this.type_);
+  }
 }
 
 
@@ -126,6 +301,11 @@ export class CssNumberNode extends CssNumericNode {
   constructor(num) {
     super('NUM', num, '');
   }
+
+  /** @override */
+  createSameUnits(num) {
+    return new CssNumberNode(num);
+  }
 }
 
 
@@ -136,6 +316,11 @@ export class CssPercentNode extends CssNumericNode {
   /** @param {number} num */
   constructor(num) {
     super('PRC', num, '%');
+  }
+
+  /** @override */
+  createSameUnits(num) {
+    return new CssPercentNode(num);
   }
 }
 
@@ -151,6 +336,61 @@ export class CssLengthNode extends CssNumericNode {
   constructor(num, units) {
     super('LEN', num, units);
   }
+
+  /** @override */
+  createSameUnits(num) {
+    return new CssLengthNode(num, this.units_);
+  }
+
+  /** @override */
+  norm(context) {
+    if (this.units_ == 'px') {
+      return this;
+    }
+
+    // Font-based: em/rem.
+    if (this.units_ == 'em' || this.units_ == 'rem') {
+      const fontSize = this.units_ == 'em' ?
+          context.getCurrentFontSize() :
+          context.getRootFontSize();
+      return new CssLengthNode(this.num_ * fontSize, 'px');
+    }
+
+    // Viewport based: vw, vh, vmin, vmax.
+    if (this.units_ == 'vw' ||
+        this.units_ == 'vh' ||
+        this.units_ == 'vmin' ||
+        this.units_ == 'vmax') {
+      const vp = context.getViewportSize();
+      const vw = vp.width * this.num_ / 100;
+      const vh = vp.height * this.num_ / 100;
+      let num = 0;
+      if (this.units_ == 'vw') {
+        num = vw;
+      } else if (this.units_ == 'vh') {
+        num = vh;
+      } else if (this.units_ == 'vmin') {
+        num = Math.min(vw, vh);
+      } else if (this.units_ == 'vmax') {
+        num = Math.max(vw, vh);
+      }
+      return new CssLengthNode(num, 'px');
+    }
+
+    // Can't convert cm/in/etc to px at this time.
+    throw unknownUnits(this.units_);
+  }
+
+  /** @override */
+  calcPercent(percent, context) {
+    const dim = context.getDimension();
+    const size = context.getCurrentElementSize();
+    const side =
+        dim == 'w' ? size.width :
+        dim == 'h' ? size.height :
+        0;
+    return new CssLengthNode(side * percent / 100, 'px');
+  }
 }
 
 
@@ -164,6 +404,25 @@ export class CssAngleNode extends CssNumericNode {
    */
   constructor(num, units) {
     super('ANG', num, units);
+  }
+
+  /** @override */
+  createSameUnits(num) {
+    return new CssAngleNode(num, this.units_);
+  }
+
+  /** @override */
+  norm() {
+    if (this.units_ == 'rad') {
+      return this;
+    }
+    if (this.units_ == 'deg') {
+      return new CssAngleNode(this.num_ * DEG_TO_RAD, 'rad');
+    }
+    if (this.units_ == 'grad') {
+      return new CssAngleNode(this.num_ * GRAD_TO_RAD, 'rad');
+    }
+    throw unknownUnits(this.units_);
   }
 }
 
@@ -179,6 +438,22 @@ export class CssTimeNode extends CssNumericNode {
   constructor(num, units) {
     super('TME', num, units);
   }
+
+  /** @override */
+  createSameUnits(num) {
+    return new CssTimeNode(num, this.units_);
+  }
+
+  /** @override */
+  norm() {
+    if (this.units_ == 'ms') {
+      return this;
+    }
+    if (this.units_ == 's') {
+      return new CssTimeNode(this.num_ * 1000, 'ms');
+    }
+    throw unknownUnits(this.units_);
+  }
 }
 
 
@@ -189,13 +464,47 @@ export class CssFuncNode extends CssNode {
   /**
    * @param {string} name
    * @param {!Array<!CssNode>} args
+   * @param {?Array<string>=} opt_dimensions
    */
-  constructor(name, args) {
+  constructor(name, args, opt_dimensions) {
     super();
     /** @const @private {string} */
     this.name_ = name.toLowerCase();
     /** @const @private {!Array<!CssNode>} */
     this.args_ = args;
+    /** @const @private {?Array<string>} */
+    this.dimensions_ = opt_dimensions || null;
+  }
+
+  /** @override */
+  css() {
+    const args = this.args_.map(node => node.css()).join(',');
+    return `${this.name_}(${args})`;
+  }
+
+  /** @override */
+  isConst() {
+    return this.args_.reduce((acc, node) => acc && node.isConst(), true);
+  }
+
+  /** @override */
+  calc(context) {
+    let nullCount = 0;
+    const resolvedArgs = this.args_.map((node, index) => {
+      let res;
+      if (this.dimensions_ && index < this.dimensions_.length) {
+        context.pushDimension(this.dimensions_[index]);
+        res = node.resolve(context);
+        context.popDimension();
+      } else {
+        res = node.resolve(context);
+      }
+      if (!res) {
+        nullCount++;
+      }
+      return res;
+    });
+    return nullCount > 0 ? null : new CssFuncNode(this.name_, resolvedArgs);
   }
 }
 
@@ -214,7 +523,12 @@ export class CssTranslateNode extends CssFuncNode {
    * @param {!Array<!CssNode>} args
    */
   constructor(suffix, args) {
-    super(`translate${suffix}`, args);
+    super(`translate${suffix.toUpperCase()}`, args,
+        suffix == '' ? ['w', 'h'] :
+        suffix == 'x' ? ['w'] :
+        suffix == 'y' ? ['h'] :
+        suffix == 'z' ? ['z'] :
+        suffix == '3d' ? ['w', 'h', 'z'] : null);
     /** @const @private {string} */
     this.suffix_ = suffix;
   }
@@ -237,6 +551,28 @@ export class CssVarNode extends CssNode {
     /** @const @private {?CssNode} */
     this.def_ = opt_def || null;
   }
+
+  /** @override */
+  css() {
+    return `var(${this.varName_}${this.def_ ? ',' + this.def_.css() : ''})`;
+  }
+
+  /** @override */
+  isConst() {
+    return false;
+  }
+
+  /** @override */
+  calc(context) {
+    const varNode = context.getVar(this.varName_);
+    if (varNode) {
+      return varNode.resolve(context);
+    }
+    if (this.def_) {
+      return this.def_.resolve(context);
+    }
+    return null;
+  }
 }
 
 
@@ -250,6 +586,21 @@ export class CssCalcNode extends CssNode {
     super();
     /** @const @private {!CssNode} */
     this.expr_ = expr;
+  }
+
+  /** @override */
+  css() {
+    return `calc(${this.expr_.css()})`;
+  }
+
+  /** @override */
+  isConst() {
+    return false;
+  }
+
+  /** @override */
+  calc(context) {
+    return this.expr_.resolve(context);
   }
 }
 
@@ -272,6 +623,56 @@ export class CssCalcSumNode extends CssNode {
     /** @const @private {string} */
     this.op_ = op;
   }
+
+  /** @override */
+  css() {
+    return `${this.left_.css()} ${this.op_} ${this.right_.css()}`;
+  }
+
+  /** @override */
+  isConst() {
+    return false;
+  }
+
+  /** @override */
+  calc(context) {
+    /*
+     * From spec:
+     * At + or -, check that both sides have the same type, or that one side is
+     * a <number> and the other is an <integer>. If both sides are the same
+     * type, resolve to that type. If one side is a <number> and the other is
+     * an <integer>, resolve to <number>.
+     */
+    let left = this.left_.resolve(context);
+    let right = this.right_.resolve(context);
+    if (left == null || right == null) {
+      return null;
+    }
+    if (!(left instanceof CssNumericNode) ||
+        !(right instanceof CssNumericNode)) {
+      throw new Error('left and right must be both numerical');
+    }
+    if (left.type_ != right.type_) {
+      // Percent values are special: they need to be resolved in the context
+      // of the other dimension.
+      if (left instanceof CssPercentNode) {
+        left = right.calcPercent(left.num_, context);
+      } else if (right instanceof CssPercentNode) {
+        right = left.calcPercent(right.num_, context);
+      } else {
+        throw new Error('left and right must be the same type');
+      }
+    }
+
+    // Units are the same, the math is simple: numerals are summed. Otherwise,
+    // the units neeed to be normalized first.
+    if (left.units_ != right.units_) {
+      left = left.norm(context);
+      right = right.norm(context);
+    }
+    const sign = this.op_ == '+' ? 1 : -1;
+    return left.createSameUnits(left.num_ + sign * right.num_);
+  }
 }
 
 
@@ -293,4 +694,72 @@ export class CssCalcProductNode extends CssNode {
     /** @const @private {string} */
     this.op_ = op;
   }
+
+  /** @override */
+  css() {
+    return `${this.left_.css()} ${this.op_} ${this.right_.css()}`;
+  }
+
+  /** @override */
+  isConst() {
+    return false;
+  }
+
+  /** @override */
+  calc(context) {
+    const left = this.left_.resolve(context);
+    const right = this.right_.resolve(context);
+    if (left == null || right == null) {
+      return null;
+    }
+    if (!(left instanceof CssNumericNode) ||
+        !(right instanceof CssNumericNode)) {
+      throw new Error('left and right must be both numerical');
+    }
+
+    /*
+     * From spec:
+     * At *, check that at least one side is <number>. If both sides are
+     * <integer>, resolve to <integer>. Otherwise, resolve to the type of the
+     * other side.
+     * At /, check that the right side is <number>. If the left side is
+     * <integer>, resolve to <number>. Otherwise, resolve to the type of the
+     * left side.
+     */
+    let base;
+    let multi;
+    if (this.op_ == '*') {
+      if (left instanceof CssNumberNode) {
+        multi = left.num_;
+        base = right;
+      } else {
+        if (!(right instanceof CssNumberNode)) {
+          throw new Error('one of sides in multiplication must be a number');
+        }
+        multi = right.num_;
+        base = left;
+      }
+    } else {
+      if (!(right instanceof CssNumberNode)) {
+        throw new Error('denominator must be a number');
+      }
+      base = left;
+      multi = 1 / right.num_;
+    }
+
+    const num = base.num_ * multi;
+    if (!isFinite(num)) {
+      return null;
+    }
+    return base.createSameUnits(num);
+  }
+}
+
+
+/**
+ * @param {string} units
+ * @return {!Error}
+ */
+function unknownUnits(units) {
+  return new Error('unknown units: ' + units);
 }
