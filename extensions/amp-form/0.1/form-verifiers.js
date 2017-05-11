@@ -112,13 +112,13 @@ function parseConfig_(script) {
   }
 }
 
-const submittableTagNames_ = ['button', 'input', 'select', 'textarea'];
+const submittableTagNames_ = ['BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'];
 /**
  * @param {!Element} element
  * @return {boolean}
  */
 function isSubmittable_(element) {
-  return submittableTagNames_.includes(element.tagName.toLowerCase());
+  return submittableTagNames_.includes(element.tagName);
 }
 
 /**
