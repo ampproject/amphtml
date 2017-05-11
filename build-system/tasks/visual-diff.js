@@ -27,18 +27,16 @@ var percyTokenLength = 64;  // Standard Percy API key length.
 var visualTestsFile = 'test/visual-diff/visual-tests.json';
 
 /**
- * Executes the provided command; terminates this program in case of failure.
- * Copied from pr-check.js.
+ * Executes the provided command. Copied from pr-check.js.
  * TODO(rsimha-amp): Refactor this into a shared library. Issue #9038.
  *
  * @param {string} cmd
  */
-function execOrDie(cmd) {
+function exec(cmd) {
   var p =
       child_process.spawnSync('/bin/sh', ['-c', cmd], {'stdio': 'inherit'});
   if (p.status != 0) {
-    console/*OK*/.log('\nExiting due to failing command: ' + cmd);
-    process.exit(p.status)
+    console/*OK*/.log(util.colors.yellow('\nCommand failed: ' + cmd));
   }
 }
 
@@ -157,7 +155,7 @@ function runTests() {
   util.log(util.colors.yellow('Running visual diff tests...'));
   var percyKeys = extractPercyKeys();
   var commandLine = constructCommandLine(percyKeys);
-  execOrDie(commandLine);
+  exec(commandLine);
 }
 
 
