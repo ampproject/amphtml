@@ -40,6 +40,7 @@ import {
 import * as dom from './dom';
 import {setStyle, setStyles} from './style';
 import {LayoutDelayMeter} from './layout-delay-meter';
+import {ResourceState} from './service/resource';
 
 const TAG_ = 'CustomElement';
 
@@ -1172,6 +1173,14 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Returns the current resource state of the element.
+     * @return {!ResourceState}
+     */
+    getResourceState_() {
+      return this.getResources().getResourceForElement(this).getState();
+    }
+
+    /**
      * The runtime calls this method to determine if {@link layoutCallback}
      * should be called again when layout changes.
      * @return {boolean}
@@ -1572,6 +1581,12 @@ function createBaseCustomElementClass(win) {
      * @package @final @this {!Element}
      */
     toggleFallback(state) {
+      // Do not show fallback if element has not been scheduled layout yet
+      if (state && (this.getResourceState_() == ResourceState.NOT_BUILT ||
+          this.getResourceState_() == ResourceState.NOT_LAID_OUT ||
+          this.getResourceState_() == ResourceState.READY_FOR_LAYOUT)) {
+        return;
+      }
       assertNotTemplate(this);
       // This implementation is notably less efficient then placeholder toggling.
       // The reasons for this are: (a) "not supported" is the state of the whole
@@ -1593,6 +1608,7 @@ function createBaseCustomElementClass(win) {
      */
     renderStarted() {
       this.signals_.signal(CommonSignals.RENDER_START);
+      this.togglePlaceholder(false);
       this.toggleLoading_(false);
     }
 

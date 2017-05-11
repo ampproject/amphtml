@@ -604,7 +604,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
                 'data-amp-slot-index');
 
             impl.layoutMeasureExecuted_ = true;
-            impl.uiHandler = {setDisplayState: () => {}};
+            impl.uiHandler = {displayUnlayoutUI: () => {}};
             const placeholder = document.createElement('div');
             placeholder.setAttribute('placeholder', '');
             const fallback = document.createElement('div');
