@@ -15,10 +15,17 @@
  */
 
 import {AmpAutoAds} from '../amp-auto-ads';
-import {toggleExperiment} from '../../../../src/experiments';
+import {
+  toggleExperiment,
+  forceExperimentBranch,
+} from '../../../../src/experiments';
 import {xhrFor} from '../../../../src/services';
 import {waitForChild} from '../../../../src/dom';
 import {viewportForDoc} from '../../../../src/services';
+import {
+  ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
+  AdSenseAmpAutoAdsHoldoutBranches,
+} from '../../../../ads/google/adsense-amp-auto-ads';
 
 describes.realWin('amp-auto-ads', {
   amp: {
@@ -159,6 +166,51 @@ describes.realWin('amp-auto-ads', {
         verifyAdElement(anchor4.childNodes[0]);
         resolve();
       });
+    });
+  });
+
+  it('should insert ads on the page when in holdout experiment branch', () => {
+    forceExperimentBranch(env.win,
+        ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
+        AdSenseAmpAutoAdsHoldoutBranches.EXPERIMENT);
+
+    ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
+    ampAutoAdsElem.setAttribute('type', 'adsense');
+    ampAutoAds.buildCallback();
+
+    return new Promise(resolve => {
+      waitForChild(anchor4, parent => {
+        return parent.childNodes.length > 0;
+      }, () => {
+        expect(anchor1.childNodes).to.have.lengthOf(1);
+        expect(anchor2.childNodes).to.have.lengthOf(1);
+        expect(anchor3.childNodes).to.have.lengthOf(0);
+        expect(anchor4.childNodes).to.have.lengthOf(1);
+        verifyAdElement(anchor1.childNodes[0]);
+        verifyAdElement(anchor2.childNodes[0]);
+        verifyAdElement(anchor4.childNodes[0]);
+        resolve();
+      });
+    });
+  });
+
+  it('should not insert ads on the page when in holdout control branch', () => {
+    forceExperimentBranch(env.win,
+        ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
+        AdSenseAmpAutoAdsHoldoutBranches.CONTROL);
+
+    ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
+    ampAutoAdsElem.setAttribute('type', 'adsense');
+    ampAutoAds.buildCallback();
+
+    return new Promise(resolve => {
+      setTimeout(() => {
+        expect(anchor1.childNodes).to.have.lengthOf(0);
+        expect(anchor2.childNodes).to.have.lengthOf(0);
+        expect(anchor3.childNodes).to.have.lengthOf(0);
+        expect(anchor4.childNodes).to.have.lengthOf(0);
+        resolve();
+      }, 500);
     });
   });
 
