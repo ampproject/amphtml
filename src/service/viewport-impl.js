@@ -1890,8 +1890,6 @@ function getViewportType(win, viewer) {
 export function installViewportServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(ampdoc,
       'viewport',
-      function(ampdoc) {
-        return createViewport(ampdoc);
-      },
+      createViewport,
       /* opt_instantiate */ true);
 }

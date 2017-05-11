@@ -863,10 +863,5 @@ function createHistory(ampdoc) {
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  */
 export function installHistoryServiceForDoc(ampdoc) {
-  registerServiceBuilderForDoc(
-      ampdoc,
-      'history',
-      function(ampdoc) {
-        return createHistory(ampdoc);
-      });
+  registerServiceBuilderForDoc(ampdoc, 'history', createHistory);
 }
