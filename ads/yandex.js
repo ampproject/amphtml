@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,8 @@ export function yandex(global, data) {
   validateData(data, ['blockId'], ['data', 'isAdfox']);
 
   addToQueue(global, data);
-  loadScript(global, 'https://yastatic.net/partner-code/loaders/context_amp.js');
+  loadScript(global,
+      'https://yastatic.net/partner-code/loaders/context_amp.js');
 }
 
 /**

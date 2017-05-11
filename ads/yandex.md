@@ -20,8 +20,8 @@ limitations under the License.
 
 ```html
 <amp-ad width="300" height="250"
-        type="yandex"
-        data-block-id="R-A-123456-1">
+    type="yandex"
+    data-block-id="R-A-123456-1">
 </amp-ad>
 ```
 
@@ -30,6 +30,10 @@ limitations under the License.
 For semantics of configuration, please see ad network documentation.
 
 
-Supported parameters:
+Required parameters:
 
 - data-block-id
+
+Supported parameters:
+- data
+- isAdfox

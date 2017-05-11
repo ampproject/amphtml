@@ -22,32 +22,9 @@ import {yandex} from './yandex';
  * @param {!Object} data
  */
 export function adfox(global, data) {
-
-  validateData(data, [
-    'adfoxParams',
-    'ownerId',
-  ]);
-
-  loadAdFox(global, () => initAdFox(global, data));
-}
-
-/**
- * @param {!Window} global
- * @param {!Function} cb
- */
-function loadAdFox(global, cb) {
-  loadScript(global, 'https://yastatic.net/pcode/adfox/loader.js', cb);
-}
-
-/**
- * @param {!Window} global
- * @param {string} name
- */
-function createContainer(global, name) {
-  const d = global.document.createElement('div');
-  d.setAttribute('id', name);
-
-  global.document.getElementById('c').appendChild(d);
+  validateData(data, ['adfoxParams', 'ownerId']);
+  loadScript(global, 'https://yastatic.net/pcode/adfox/loader.js',
+      () => initAdFox(global, data));
 }
 
 /**
@@ -55,14 +32,15 @@ function createContainer(global, name) {
  * @param {Object} data
  */
 function initAdFox(global, data) {
-  const containerName = 'adfox_container';
   const params = JSON.parse(data.adfoxParams);
+  const container = global.document.createElement('div');
 
-  createContainer(global, containerName);
+  container.setAttribute('id', 'adfox_container');
+  global.document.getElementById('c').appendChild(container);
 
   global.Ya.adfoxCode.create({
     ownerId: data.ownerId,
-    containerId: containerName,
+    containerId: 'adfox_container',
     params,
     onLoad: data => checkLoading(global, data),
     onRender: () => global.context.renderStart(),
