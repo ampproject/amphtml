@@ -41,7 +41,7 @@ export function netletix(global, data) {
     data,
   };
   validateData(data,
-      global._netletix_amp.mandatory_data, global._netletix_amp.allowed_data);
+    global._netletix_amp.mandatory_data, global._netletix_amp.allowed_data);
   const url = assertHttpsUrl(addParamsToUrl(
     NX_URL_FULL + encodeURIComponent(data.nxkey || DEFAULT_NX_KEY),
     {
@@ -62,14 +62,16 @@ export function netletix(global, data) {
             'height': event.data.height,
           };
           global.context.renderStart(renderconfig);
-          if (event.data.width &&
-              event.data.height) {
-            if (dev().assertString(event.data.width) != data['nxwidth'] ||
-               dev().assertString(event.data.height) != data['nxheight']) {
-              global.context.requestResize(event.data.width,
-                event.data.height);
-            }
-          }
+          if ((event.data.width &&
+            event.data.height) &&
+            (global.context.data &&
+            global.context.data.nxwidth &&
+            global.context.data.nxheight) &&
+            (event.data.width.toString() != global.context.data.nxwidth ||
+            event.data.height.toString() != global.context.data.nxheight)) {
+            global.context.requestResize(event.data.width,
+            event.data.height);
+          };
           break;
         case 'nx-empty':
           global.context.noContentAvailable();
