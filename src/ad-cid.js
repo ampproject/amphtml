@@ -36,8 +36,10 @@ export function getAdCid(adElement) {
     if (!cidService) {
       return;
     }
-    return cidService.get(dev().assertString(scope), Promise.resolve(undefined))
-    .catch(error => {
+    return cidService.get({
+      scope,
+      cookieName: config.clientIdCookieName,
+    }, Promise.resolve(undefined)).catch(error => {
       // Not getting a CID is not fatal.
       dev().error('AD-CID', error);
       return undefined;

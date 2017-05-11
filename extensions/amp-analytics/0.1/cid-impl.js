@@ -38,7 +38,7 @@ import {viewerForDoc} from '../../../src/services';
 import {cryptoFor} from '../../../src/crypto';
 import {tryParseJson} from '../../../src/json';
 import {timerFor} from '../../../src/services';
-import {user, rethrowAsync} from '../../../src/log';
+import {user, dev, rethrowAsync} from '../../../src/log';
 
 const ONE_DAY_MILLIS = 24 * 3600 * 1000;
 
@@ -46,6 +46,8 @@ const ONE_DAY_MILLIS = 24 * 3600 * 1000;
  * We ignore base cids that are older than (roughly) one year.
  */
 const BASE_CID_MAX_AGE_MILLIS = 365 * ONE_DAY_MILLIS;
+
+const SCOPE_NAME_VALIDATOR = /^[a-zA-Z0-9-_.]+$/;
 
 /**
  * A base cid string value and the time it was last read / stored.
@@ -88,10 +90,8 @@ export class Cid {
   }
 
   /**
-   * @param {string|!GetCidDef} externalCidScope Name of the fallback cookie
-   *     for the case where this doc is not served by an AMP proxy. GetCidDef
-   *     structure can also instruct CID to create a cookie if one doesn't yet
-   *     exist in a non-proxy case.
+   * @param {!GetCidDef} getCidStruct an object provides CID scope name for
+   *     proxy case and cookie name for non-proxy case.
    * @param {!Promise} consent Promise for when the user has given consent
    *     (if deemed necessary by the publisher) for use of the client
    *     identifier.
@@ -110,17 +110,14 @@ export class Cid {
    *      This promise may take a long time to resolve if consent isn't
    *      given.
    */
-  get(externalCidScope, consent, opt_persistenceConsent) {
-    /** @type {!GetCidDef} */
-    let getCidStruct;
-    if (typeof externalCidScope == 'string') {
-      getCidStruct = {scope: externalCidScope};
-    } else {
-      getCidStruct = /** @type {!GetCidDef} */ (externalCidScope);
-    }
-    user().assert(/^[a-zA-Z0-9-_.]+$/.test(getCidStruct.scope),
-        'The client id name must only use the characters ' +
-        '[a-zA-Z0-9-_.]+\nInstead found: %s', getCidStruct.scope);
+  get(getCidStruct, consent, opt_persistenceConsent) {
+    dev().assert(typeof getCidStruct != 'string', '');
+    user().assert(
+        SCOPE_NAME_VALIDATOR.test(getCidStruct.scope)
+            && SCOPE_NAME_VALIDATOR.test(getCidStruct.cookieName),
+        'The client id and cookie name must only use the characters ' +
+        '[a-zA-Z0-9-_.]+\nInstead found: %s',
+        getCidStruct.scope);
     return consent.then(() => {
       return viewerForDoc(this.ampdoc).whenFirstVisible();
     }).then(() => {
