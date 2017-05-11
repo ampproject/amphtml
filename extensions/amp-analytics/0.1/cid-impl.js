@@ -111,11 +111,11 @@ export class Cid {
    *      given.
    */
   get(getCidStruct, consent, opt_persistenceConsent) {
-    dev().assert(typeof getCidStruct != 'string', '');
+    dev().assert(typeof getCidStruct != 'string', '');  // DO NOT SUBMIT
     user().assert(
         SCOPE_NAME_VALIDATOR.test(getCidStruct.scope)
             && SCOPE_NAME_VALIDATOR.test(getCidStruct.cookieName),
-        'The client id and cookie name must only use the characters ' +
+        'The CID scope and cookie name must only use the characters ' +
         '[a-zA-Z0-9-_.]+\nInstead found: %s',
         getCidStruct.scope);
     return consent.then(() => {
