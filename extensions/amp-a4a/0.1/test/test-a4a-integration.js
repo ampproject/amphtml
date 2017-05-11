@@ -94,7 +94,7 @@ describe('integration test: a4a', () => {
     sandbox = sinon.sandbox.create();
     xhrMock = sandbox.stub(Xhr.prototype, 'fetch');
     // Expect key set fetches for signing services.
-    for (const serviceName in signingServerURLs) {
+    for (const serviceName in signingServerURLs.urls) {
       const keyHeaders = {'Content-Type': 'application/jwk-set+json'};
       const mockKeyResponse = {
         bodyUsed: false,
@@ -108,7 +108,7 @@ describe('integration test: a4a', () => {
         status: 200,
       };
       xhrMock
-          .withArgs(signingServerURLs[serviceName], {
+          .withArgs(signingServerURLs.urls[serviceName], {
             mode: 'cors',
             method: 'GET',
             ampCors: false,

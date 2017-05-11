@@ -158,74 +158,68 @@ class SignatureVerifier {
    *     on failure, to a `VerificationFailure` indicating the cause
    */
   verify(signingServiceName, keypairId, signature, creative) {
-    if (this.signers_) {
-      const signer = this.signers_[signingServiceName];
-      return signer.promise.then(success => {
-        if (success) {
-          const keyPromise = signer.keys[keypairId];
-          if (keyPromise === undefined) {
-            // We don't have this key, but maybe the cache is stale; try
-            // cachebusting.
-            signer.promise = this.fetchAndAddKeys_(
-                                     signer.keys, signingServiceName, keypairId)
-                                 .then(success => {
-                                   if (signer.keys[keypairId] === undefined) {
-                                     // We still don't have this key; make sure
-                                     // we never try again.
-                                     signer.keys[keypairId] = null;
-                                   }
-                                   return success;
-                                 });
-            // This "recursive" call can recur at most once.
-            return this.verify(
-                signingServiceName, keypairId, signature, creative);
-          } else if (keyPromise === null) {
-            // We don't have this key and we already tried cachebusting.
-            return VerificationFailure.KEY_NOT_FOUND;
-          } else {
-            return keyPromise.then(key => {
-              if (key) {
-                return cryptoFor(this.win_)
-                    .verifyPkcs(key, signature, creative)
-                    .then(
-                        result => {
-                          if (result) {
-                            return null;  // Success!
-                          } else {
-                            return VerificationFailure.SIGNATURE_MISMATCH;
-                          }
-                        },
-                        err => {
-                          // Web Cryptography rejected the verification attempt.
-                          // This hopefully won't happen in the wild, but
-                          // browsers can be weird about this, so we need to
-                          // guard against the possibility. Phone home to the
-                          // AMP Project so that we can understand why this
-                          // occurred.
-                          const message = err && err.message;
-                          dev().error(
-                              'AMP-A4A',
-                              `Failed to verify signature: ${message}`);
-                          return VerificationFailure.NO_FAULT;
-                        });
-              } else {
-                // This particular public key couldn't be imported. Probably the
-                // signing service's fault.
-                return VerificationFailure.NO_FAULT;
-              }
-            });
-          }
-        } else {
-          // The public keyset couldn't be fetched and imported. Probably a
-          // network connectivity failure.
-          return VerificationFailure.NO_FAULT;
-        }
-      });
-    } else {
+    if (!this.signers_) {
       // Web Cryptography isn't available.
       return Promise.resolve(
           /** @type {?VerificationFailure} */ (VerificationFailure.NO_FAULT));
     }
+    const signer = this.signers_[signingServiceName];
+    return signer.promise.then(success => {
+      if (!success) {
+        // The public keyset couldn't be fetched and imported. Probably a
+        // network connectivity failure.
+        return VerificationFailure.NO_FAULT;
+      }
+      const keyPromise = signer.keys[keypairId];
+      if (keyPromise === undefined) {
+        // We don't have this key, but maybe the cache is stale; try
+        // cachebusting.
+        signer.promise =
+            this.fetchAndAddKeys_(signer.keys, signingServiceName, keypairId)
+                .then(success => {
+                  if (signer.keys[keypairId] === undefined) {
+                    // We still don't have this key; make sure we never try
+                    // again.
+                    signer.keys[keypairId] = null;
+                  }
+                  return success;
+                });
+        // This "recursive" call can recur at most once.
+        return this.verify(signingServiceName, keypairId, signature, creative);
+      } else if (keyPromise === null) {
+        // We don't have this key and we already tried cachebusting.
+        return VerificationFailure.KEY_NOT_FOUND;
+      } else {
+        return keyPromise.then(key => {
+          if (!key) {
+            // This particular public key couldn't be imported. Probably the
+            // signing service's fault.
+            return VerificationFailure.NO_FAULT;
+          }
+          return cryptoFor(this.win_)
+              .verifyPkcs(key, signature, creative)
+              .then(
+                  result => {
+                    if (result) {
+                      return null;  // Success!
+                    } else {
+                      return VerificationFailure.SIGNATURE_MISMATCH;
+                    }
+                  },
+                  err => {
+                    // Web Cryptography rejected the verification attempt. This
+                    // hopefully won't happen in the wild, but browsers can be
+		    // weird about this, so we need to guard against the
+		    // possibility. Phone home to the AMP Project so that we can
+		    // understand why this occurred.
+                    const message = err && err.message;
+                    dev().error(
+                        'AMP-A4A', `Failed to verify signature: ${message}`);
+                    return VerificationFailure.NO_FAULT;
+                  });
+        });
+      }
+    });
   }
 
   /**
@@ -245,9 +239,9 @@ class SignatureVerifier {
    * @private
    */
   fetchAndAddKeys_(keys, signingServiceName, keypairId) {
-    let url = signingServerURLs[signingServiceName];
+    let url = signingServerURLs.urls[signingServiceName];
     if (keypairId != null) {
-      url += '?' + encodeURIComponent(keypairId);
+      url += '?kid=' + encodeURIComponent(keypairId);
     }
     return xhrFor(this.win_)
         .fetch(
@@ -255,76 +249,64 @@ class SignatureVerifier {
             {mode: 'cors', method: 'GET', ampCors: false, credentials: 'omit'})
         .then(
             response => {
-              if (response.status == 200) {
-                // The signing service spec requires this, but checking it at
-                // runtime in production isn't worth it.
-                dev().assert(
-                    response.headers.get('Content-Type') ==
-                    'application/jwk-set+json');
-                return response.json().then(
-                    jwkSet => {
-                      // This is supposed to be a JSON Web Key Set, as defined
-                      // in Section 5 of RFC 7517. However, the signing service
-                      // could misbehave and send an arbitrary JSON value, so we
-                      // have to type-check at runtime.
-                      if (jwkSet && Array.isArray(jwkSet['keys'])) {
-                        jwkSet['keys'].forEach(jwk => {
-                          if (jwk && typeof jwk['kid'] == 'string') {
-                            if (keys[jwk['kid']] === undefined) {
-                              // We haven't seen this keypair ID before.
-                              keys[jwk['kid']] =
-                                  cryptoFor(this.win_).importPkcsKey(jwk).catch(
-                                      err => {
-                                        // Web Cryptography rejected the key
-                                        // import attempt. Either the signing
-                                        // service sent a malformed key or the
-                                        // browser is doing something weird.
-                                        const jwkData = JSON.stringify(jwk);
-                                        const message = err && err.message;
-                                        signingServiceError(
-                                            signingServiceName,
-                                            `Failed to import key (${
-                                                                     jwkData
-                                                                   }): ${
-                                                                         message
-                                                                       }`);
-                                        return null;
-                                      });
-                            }
-                          } else {
-                            // The JSON Web Key is malformed or doesn't have a
-                            // "kid" parameter, which is where the keypair ID
-                            // has to be.
-                            signingServiceError(
-                                signingServiceName,
-                                `Key (${JSON.stringify(jwk)}) has no "kid"`);
-                          }
-                        });
-                        return true;
-                      } else {
-                        // The entire JSON Web Key Set is malformed.
-                        signingServiceError(
-                            signingServiceName,
-                            `Key set (${
-                                        JSON.stringify(jwkSet)
-                                      }) has no "keys"`);
-                        return false;
-                      }
-                    },
-                    err => {
-                      // The signing service didn't send valid JSON.
-                      signingServiceError(
-                          signingServiceName,
-                          `Failed to parse JSON: ${err && err.response}`);
-                      return false;
-                    });
-              } else {
-                // The signing service sent a non-200 HTTP status code. The
-                // signing service spec forbids this.
+              if (response.status != 200) {
+                // Violation of the signing service spec.
                 signingServiceError(
                     signingServiceName, `Status code ${response.status}`);
                 return false;
               }
+              const contentType = response.headers.get('Content-Type');
+              if (contentType != 'application/jwk-set+json') {
+                signingServiceError(
+                    signingServiceName, `Content-Type ${contentType}`);
+                return false;
+              }
+              return response.json().then(
+                  jwkSet => {
+                    // This is supposed to be a JSON Web Key Set, as defined in
+                    // Section 5 of RFC 7517. However, the signing service could
+                    // misbehave and send an arbitrary JSON value, so we have to
+                    // type-check at runtime.
+                    if (!jwkSet || !Array.isArray(jwkSet['keys'])) {
+                      signingServiceError(
+                          signingServiceName,
+                          `Key set (${JSON.stringify(jwkSet)}) has no "keys"`);
+                      return false;
+                    }
+                    jwkSet['keys'].forEach(jwk => {
+                      if (!jwk || typeof jwk['kid'] != 'string') {
+                        signingServiceError(
+                            signingServiceName,
+                            `Key (${JSON.stringify(jwk)}) has no "kid"`);
+                      } else if (keys[jwk['kid']] === undefined) {
+                        // We haven't seen this keypair ID before.
+                        keys[jwk['kid']] =
+                            cryptoFor(this.win_).importPkcsKey(jwk).catch(
+                                err => {
+                                  // Web Cryptography rejected the key
+                                  // import attempt. Either the signing
+                                  // service sent a malformed key or the
+                                  // browser is doing something weird.
+                                  const jwkData = JSON.stringify(jwk);
+                                  const message = err && err.message;
+                                  signingServiceError(
+                                      signingServiceName,
+                                      `Failed to import key (${
+                                                               jwkData
+                                                             }): ${message}`);
+                                  return null;
+                                });
+                      }
+                    });
+                    return true;
+                  },
+                  err => {
+                    // The signing service didn't send valid JSON.
+                    signingServiceError(
+                        signingServiceName,
+                        `Failed to parse JSON: ${err && err.response}`);
+                    return false;
+                  });
             },
             err => {
               // Some kind of error occurred during the XHR. This could be a lot

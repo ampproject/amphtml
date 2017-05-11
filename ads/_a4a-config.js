@@ -71,11 +71,16 @@ if (getMode().localDev || getMode().test) {
 
 /**
  * An object mapping signing server names to their corresponding URLs.
- * @type {!Object<string, string>}
+ * The `urls` layer of indirection is to enable stubbing in tests.
+ *
+ * @type {{urls: !Object<string, string>}}
  */
 export const signingServerURLs = {
-  'google': 'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
-  'google-dev': 'https://cdn.ampproject.org/amp-ad-verifying-keyset-dev.json',
-  'cloudflare': 'https://amp.cloudflare.com/amp-ad-verifying-keyset.json',
-  'cloudflare-dev': 'https://amp.cloudflare.com/amp-ad-verifying-keyset-dev.json',
+  urls: {
+    'google': 'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
+    'google-dev': 'https://cdn.ampproject.org/amp-ad-verifying-keyset-dev.json',
+    'cloudflare': 'https://amp.cloudflare.com/amp-ad-verifying-keyset.json',
+    'cloudflare-dev':
+        'https://amp.cloudflare.com/amp-ad-verifying-keyset-dev.json',
+  },
 };

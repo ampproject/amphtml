@@ -752,6 +752,7 @@ export class AmpA4A extends AMP.BaseElement {
      });
   }
 
+  /**
    * Handles uncaught errors within promise flow.
    * @param {*} error
    * @param {boolean=} opt_ignoreStack
@@ -948,7 +949,7 @@ export class AmpA4A extends AMP.BaseElement {
       creative: responseArrayBuffer,
       signatureInfo: decodeSignatureHeader(
           responseHeaders.get('AMP-Fast-Fetch-Signature')),
-      sizeInfo: decodeSizeHeader(responseHeaders.get('X-Creativesize')),
+      sizeInfo: decodeSizeHeader(responseHeaders.get('X-CreativeSize')),
     }));
   }
 
@@ -1375,6 +1376,10 @@ export class AmpA4A extends AMP.BaseElement {
   emitLifecycleEvent(unusedEventName, opt_extraVariables) {}
 }
 
+const SIGNATURE_FORMAT = new RegExp(
+    '^([A-Za-z0-9._-]+):([A-Za-z0-9._-]+):' +
+    '((?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}[A-Za-z0-9+/=]=)?)$');
+
 /**
  * Decode the `AMP-Fast-Fetch-Signature` header, in the format
  * `{signingServiceName}:{keypairId}:{base64Signature}`, to a signature info
@@ -1384,21 +1389,20 @@ export class AmpA4A extends AMP.BaseElement {
  * @return {?SignatureInfoDef}
  */
 export function decodeSignatureHeader(headerValue) {
-  if (headerValue) {
-    const match =
-        new RegExp(
-            '^([A-Za-z0-9._-]+):([A-Za-z0-9._-]+):' +
-            '((?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}[A-Za-z0-9+/=]=)?)$')
-            .exec(headerValue);
-    if (match) {
-      return /** @type {?SignatureInfoDef} */ ({
-        signingServiceName: match[1],
-        keypairId: match[2],
-        signature: base64DecodeToBytes(match[3]),
-      });
-    }
+  if (!headerValue) {
+    return null;
   }
-  return null;
+  const match = SIGNATURE_FORMAT.exec(headerValue);
+  if (!match) {
+    // TODO(@taymonbeal, #9274): replace this with real error reporting
+    user().error(TAG, `Invalid signature header: ${headerValue}`)
+    return null;
+  }
+  return /** @type {?SignatureInfoDef} */ ({
+    signingServiceName: match[1],
+    keypairId: match[2],
+    signature: base64DecodeToBytes(match[3]),
+  });
 }
 
 /**
@@ -1409,11 +1413,15 @@ export function decodeSignatureHeader(headerValue) {
  * @return {?SizeInfoDef}
  */
 export function decodeSizeHeader(headerValue) {
-  if (headerValue) {
-    dev().assert(new RegExp('[0-9]+x[0-9]+').test(headerValue));
-    const sizeArr = headerValue.split('x').map(Number);
-    return /** @type {?SizeInfoDef} */ (
-        {width: sizeArr[0], height: sizeArr[1]});
+  if (!headerValue) {
+    return null;
   }
+  if (!(/[0-9]+x[0-9]+/.test(headerValue))) {
+    // TODO(@taymonbeal, #9274): replace this with real error reporting
+    user().error(TAG, `Invalid size header: ${headerValue}`)
+    return null;
+  }
+  const sizeArr = headerValue.split('x').map(Number);
+  return /** @type {?SizeInfoDef} */ ({width: sizeArr[0], height: sizeArr[1]});
   return null;
 }
