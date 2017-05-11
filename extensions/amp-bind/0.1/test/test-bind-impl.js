@@ -17,7 +17,6 @@
 import * as sinon from 'sinon';
 import {Bind} from '../bind-impl';
 import {chunkInstanceForTesting} from '../../../../src/chunk';
-import {getMode} from '../../../../src/mode';
 import {installTimerService} from '../../../../src/service/timer-impl';
 import {toArray} from '../../../../src/types';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -119,7 +118,7 @@ describes.realWin('Bind', {
   it('should throw error if experiment is not enabled', () => {
     toggleExperiment(env.win, 'amp-bind', false);
     // Experiment check is bypassed on test mode -- make sure it isn't.
-    env.sandbox.stub(getMode(), 'test', false);
+    window.AMP_MODE = {test: false};
     expect(() => {
       new Bind(env.ampdoc);
     }).to.throw('Experiment "amp-bind" is disabled.');
@@ -177,7 +176,7 @@ describes.realWin('Bind', {
   });
 
   it('should verify class bindings in dev mode', () => {
-    env.sandbox.stub(getMode(), 'development', true);
+    window.AMP_MODE = {development: true, test: true};
     createElementWithBinding(`[class]="'foo'" class="foo"`);
     createElementWithBinding(`[class]="'foo'" class=" foo "`);
     createElementWithBinding(`[class]="''"`);
@@ -190,7 +189,7 @@ describes.realWin('Bind', {
   });
 
   it('should verify string attribute bindings in dev mode', () => {
-    env.sandbox.stub(getMode(), 'development', true);
+    window.AMP_MODE = {development: true, test: true};
     // Only the initial value for [a] binding does not match.
     createElementWithBinding(`[text]="'a'" [class]="'b'" class="b"`);
     const errorSpy = env.sandbox.spy(user(), 'createError');
@@ -200,7 +199,7 @@ describes.realWin('Bind', {
   });
 
   it('should verify boolean attribute bindings in dev mode', () => {
-    env.sandbox.stub(getMode(), 'development', true);
+    window.AMP_MODE = {development: true, test: true};
     createElementWithBinding('[disabled]="true" disabled', 'button');
     createElementWithBinding('[disabled]="false"', 'button');
     createElementWithBinding('[disabled]="true"', 'button'); // Mismatch.
