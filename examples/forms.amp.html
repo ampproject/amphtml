@@ -719,5 +719,31 @@
     </div>
 </form>
 
+<h4>Debounced search</h4>
+<form
+  id="debounced-search"
+  method="get"
+  action="/form/search-html/get"
+  action-xhr="/form/search-json/get"
+  target="_blank"
+>
+    <fieldset>
+        <label>
+            <span>Search for</span>
+            <input type="search" on="input-debounced:debounced-search.submit" name="term" required>
+        </label>
+        <input type="submit" value="Search">
+    </fieldset>
+
+    <div submit-success>
+        <template type="amp-mustache">
+            <h1>Here are the results for the search: {{term}}</h1>
+            <ul>
+                {{#results}}<li>{{title}}</li>{{/results}}
+            </ul>
+        </template>
+    </div>
+</form>
+
 </body>
 </html>

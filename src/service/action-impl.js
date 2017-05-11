@@ -47,6 +47,9 @@ const ACTION_HANDLER_ = '__AMP_ACTION_HANDLER__';
 /** @const {string} */
 const DEFAULT_METHOD_ = 'activate';
 
+/** @const {number} */
+const DEFAULT_DEBOUNCE_WAIT = 300; // ms
+
 /** @const {!Object<string,!Array<string>>} */
 const ELEMENTS_ACTIONS_MAP_ = {
   'form': ['submit'],
@@ -156,8 +159,8 @@ export class ActionService {
     // Add core events.
     this.addEvent('tap');
     this.addEvent('submit');
-    // TODO(mkhatib, #5702): Consider a debounced-input event for text-type inputs.
     this.addEvent('change');
+    this.addEvent('input-debounced');
   }
 
   /** @override */
@@ -200,6 +203,10 @@ export class ActionService {
         this.addChangeDetails_(event);
         this.trigger(dev().assertElement(event.target), name, event);
       });
+    } else if (name == 'input-debounced') {
+      this.root_.addEventListener('input', debounce_(event => {
+        this.trigger(dev().assertElement(event.target), name, event);
+      }, DEFAULT_DEBOUNCE_WAIT));
     }
   }
 
@@ -472,6 +479,20 @@ export class ActionService {
     }
     return actionMap;
   }
+}
+
+// TODO(cvializ): DO NOT SUBMIT
+// wait for common debounce function to be merged in
+// https://github.com/ampproject/amphtml/pull/9252/
+function debounce_(func, wait) {
+  let timeout;
+  return function() {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      timeout = null;
+      func.apply(this, arguments);
+    }, wait);
+  };
 }
 
 
