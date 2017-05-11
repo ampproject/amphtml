@@ -31,7 +31,6 @@ For semantics of configuration, please see ad network documentation.
 
 
 Required parameters:
-
 - data-block-id
 
 Supported parameters:

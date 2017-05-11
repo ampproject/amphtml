@@ -31,6 +31,5 @@ limitations under the License.
 For semantics of configuration, please see [documentation](https://specs.adfox.ru/page/254/).
 
 Required parameters:
-
 - data-owner-id
 - data-adfox-params
