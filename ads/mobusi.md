@@ -22,7 +22,7 @@ limitations under the License.
   <amp-ad width="300" height="450"
     type="mobusi"
     src="https://play.leadzu.com/banner_request.php?m=1GBTSITE40382X2&a=&idtm=300x450&lgid=324132413241234123">
-```
+``</amp-ad>
 
 ## Configuration
 For more information on configuration semantics, refer to the documentation 
