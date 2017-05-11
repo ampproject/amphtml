@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {BindEvaluator, BindingDef} from '../bind-evaluator';
+import {BindExpression} from '../bind-expression';
 
 describe('BindEvaluator', () => {
   let evaluator;
+  let sandbox;
 
   beforeEach(() => {
     evaluator = new BindEvaluator();
+    sandbox = sinon.sandbox.create();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
   });
 
   /** @return {number} */
@@ -67,6 +75,22 @@ describe('BindEvaluator', () => {
     expect(numberOfBindings()).to.equal(1);
     evaluator.removeBindingsWithExpressionStrings(['oneplusone + 3']);
     expect(numberOfBindings()).to.equal(0);
+  });
+
+  it('should only evaluate duplicate expressions once', () => {
+    evaluator.addBindings([{
+      tagName: 'P',
+      property: 'text',
+      expressionString: '1+1',
+    }, {
+      tagName: 'DIV',
+      property: 'text',
+      expressionString: '1+1',
+    }]);
+    const stub = sandbox.stub(BindExpression.prototype, 'evaluate');
+    stub.returns('stubbed');
+    evaluator.evaluateBindings({});
+    expect(stub.calledOnce).to.be.true;
   });
 
   it('should clean up removed expressions from its cache', () => {
