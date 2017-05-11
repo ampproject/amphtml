@@ -19,6 +19,7 @@ import {
   layoutRectsOverlap,
   moveLayoutRect,
 } from '../layout-rect';
+import {Layout} from './layout';
 import {dev} from '../log';
 import {startsWith} from '../string';
 import {toggle, computedStyle} from '../style';
@@ -408,7 +409,9 @@ export class Resource {
       }
       // If this ancestor isn't built yet, that means we don't know what kind
       // of styles will be applied to this element. We must wait.
-      if (!ancestor.isBuilt()) {
+      // Unless the ancestor is a container, in which case the element will
+      // define its own sizing.
+      if (!ancestor.isBuilt() && ancestor.getLayout() !== Layout.CONTAINER) {
         return;
       }
       current = resource;
