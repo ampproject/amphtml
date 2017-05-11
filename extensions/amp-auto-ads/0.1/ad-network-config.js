@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+import {
+  AdSenseAmpAutoAdsHoldoutBranches,
+  getAdSenseAmpAutoAdsExpBranch,
+} from '../../../ads/google/adsense-amp-auto-ads';
 import {buildUrl} from '../../../ads/google/a4a/url-builder';
 import {documentInfoForDoc} from '../../../src/services';
 import {parseUrl} from '../../../src/url';
@@ -26,6 +30,13 @@ import {viewportForDoc} from '../../../src/services';
  * @interface
  */
 class AdNetworkConfigDef {
+
+  /**
+   * Indicates whether amp-auto-ads should be enabled on this pageview.
+   * @param {!Window} unusedWin
+   * @return {boolean} true if amp-auto-ads should be enabled on this pageview.
+   */
+  isEnabled(unusedWin) {}
 
   /**
    * @return {string}
@@ -68,6 +79,14 @@ class AdSenseNetworkConfig {
    */
   constructor(autoAmpAdsElement) {
     this.autoAmpAdsElement_ = autoAmpAdsElement;
+  }
+
+  /**
+   * @param {!Window} win
+   */
+  isEnabled(win) {
+    const branch = getAdSenseAmpAutoAdsExpBranch(win);
+    return branch != AdSenseAmpAutoAdsHoldoutBranches.CONTROL;
   }
 
   /** @override */

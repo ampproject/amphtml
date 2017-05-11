@@ -48,6 +48,9 @@ import {
 import {viewerForDoc} from '../../../src/services';
 import {AdsenseSharedState} from './adsense-shared-state';
 import {insertAnalyticsElement} from '../../../src/analytics';
+import {
+  getAdSenseAmpAutoAdsExpBranch,
+} from '../../../ads/google/adsense-amp-auto-ads';
 
 /** @const {string} */
 const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
@@ -183,8 +186,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       paramList.push({name: 'prev_fmts', value: sharedStateParams.prevFmts});
     }
 
+    const experimentIds = [];
+    const ampAutoAdsBranch = getAdSenseAmpAutoAdsExpBranch(this.win);
+    if (ampAutoAdsBranch) {
+      experimentIds.push(ampAutoAdsBranch);
+    }
+
     return googleAdUrl(
-        this, ADSENSE_BASE_URL, startTime, paramList, []);
+        this, ADSENSE_BASE_URL, startTime, paramList, [], experimentIds);
   }
 
   /** @override */
