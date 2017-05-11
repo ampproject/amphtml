@@ -54,7 +54,7 @@ export function netletix(global, data) {
     }), data.ampSlotIndex);
   window.addEventListener('message', event => {
     if (event.data.type &&
-      startsWith(dev().assertString(event.data.type), 'nx-')) {
+    startsWith(dev().assertString(event.data.type), 'nx-')) {
       switch (event.data.type) {
         case 'nx-resize':
           const renderconfig = {
