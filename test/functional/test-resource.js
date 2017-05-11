@@ -17,12 +17,16 @@
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Resources} from '../../src/service/resources-impl';
 import {Resource, ResourceState} from '../../src/service/resource';
+import {LayerElement} from '../../src/service/layers-impl';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {viewerForDoc} from '../../src/services';
 import * as sinon from 'sinon';
 
+function stupidMutateLayoutBox(resource, rect) {
+  LayerElement.for(resource.element).layoutBox_ = rect;
+}
 
-describe('Resource', () => {
+describe.only('Resource', () => {
   let sandbox;
   let element;
   let elementMock;
@@ -45,7 +49,7 @@ describe('Resource', () => {
       prerenderAllowed: () => false,
       renderOutsideViewport: () => true,
       build: () => false,
-      getBoundingClientRect: () => null,
+      getBoundingClientRect: () => layoutRectLtwh(0, 0, 100, 100),
       updateLayoutBox: () => {},
       isRelayoutNeeded: () => false,
       layoutCallback: () => {},
@@ -74,7 +78,8 @@ describe('Resource', () => {
     const viewer = viewerForDoc(document);
     sandbox.stub(viewer, 'isRuntimeOn', () => false);
     resources = new Resources(new AmpDocSingle(window));
-    resource = new Resource(1, element, resources);
+    resources.add(element);
+    resource = Resource.forElement(element);
     viewportMock = sandbox.mock(resources.viewport_);
 
     resources.win = {
@@ -156,7 +161,7 @@ describe('Resource', () => {
         .withExactArgs(box)
         .once();
     const stub = sandbox.stub(resource, 'hasBeenMeasured').returns(true);
-    resource.layoutBox_ = box;
+    stupidMutateLayoutBox(resource, box);
     resource.build(false);
     expect(stub).to.be.calledOnce;
     expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
@@ -258,17 +263,17 @@ describe('Resource', () => {
   it('should always layout if has not been laid out before', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     resource.state_ = ResourceState.NOT_LAID_OUT;
-    resource.layoutBox_ = {left: 11, top: 12, width: 111, height: 222};
+    const box = layoutRectLtwh(11, 12, 111, 222);
+    stupidMutateLayoutBox(resource, box);
 
-    elementMock.expects('getBoundingClientRect')
-        .returns(resource.layoutBox_).once();
+    elementMock.expects('getBoundingClientRect').returns(box).once();
     resource.measure();
     expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
   });
 
   it('should not relayout if has box has not changed', () => {
     resource.state_ = ResourceState.LAYOUT_COMPLETE;
-    resource.layoutBox_ = {left: 11, top: 12, width: 111, height: 222};
+    stupidMutateLayoutBox(resource, {left: 11, top: 12, width: 111, height: 222});
 
     // Left is not part of validation.
     elementMock.expects('getBoundingClientRect')
@@ -281,7 +286,7 @@ describe('Resource', () => {
   it('should not relayout if box changed but element didn\'t opt in', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     resource.state_ = ResourceState.LAYOUT_COMPLETE;
-    resource.layoutBox_ = {left: 11, top: 12, width: 111, height: 222};
+    stupidMutateLayoutBox(resource, {left: 11, top: 12, width: 111, height: 222});
 
     // Width changed.
     elementMock.expects('getBoundingClientRect')
@@ -295,7 +300,7 @@ describe('Resource', () => {
   it('should relayout if box changed when element opted in', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     resource.state_ = ResourceState.LAYOUT_COMPLETE;
-    resource.layoutBox_ = {left: 11, top: 12, width: 111, height: 222};
+    stupidMutateLayoutBox(resource, {left: 11, top: 12, width: 111, height: 222});
 
     // Width changed.
     elementMock.expects('getBoundingClientRect')
@@ -410,7 +415,7 @@ describe('Resource', () => {
   });
 
   it('should hide and update layout box on collapse', () => {
-    resource.layoutBox_ = {left: 11, top: 12, width: 111, height: 222};
+    stupidMutateLayoutBox(resource, {left: 11, top: 12, width: 111, height: 222});
     resource.isFixed_ = true;
     elementMock.expects('updateLayoutBox')
         .withExactArgs(sinon.match(data => {
@@ -433,7 +438,7 @@ describe('Resource', () => {
 
   it('should show and request measure on expand', () => {
     resource.element.style.display = 'none';
-    resource.layoutBox_ = {left: 11, top: 12, width: 0, height: 0};
+    stupidMutateLayoutBox(resource, {left: 11, top: 12, width: 0, height: 0});
     resource.isFixed_ = false;
     resource.requestMeasure = sandbox.stub();
 
@@ -444,7 +449,7 @@ describe('Resource', () => {
 
   it('should show and request measure on expand', () => {
     resource.element.style.display = 'none';
-    resource.layoutBox_ = {left: 11, top: 12, width: 0, height: 0};
+    stupidMutateLayoutBox(resource, {left: 11, top: 12, width: 0, height: 0});
     resource.isFixed_ = false;
     resource.requestMeasure = sandbox.stub();
 
@@ -481,7 +486,7 @@ describe('Resource', () => {
   it('should ignore startLayout if not visible', () => {
     elementMock.expects('layoutCallback').never();
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
-    resource.layoutBox_ = {left: 11, top: 12, width: 0, height: 0};
+    stupidMutateLayoutBox(resource, {left: 11, top: 12, width: 0, height: 0});
     expect(() => {
       resource.startLayout();
     }).to.throw(/Not displayed/);
@@ -491,7 +496,7 @@ describe('Resource', () => {
     elementMock.expects('layoutCallback').returns(Promise.resolve()).once();
 
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
-    resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
+    stupidMutateLayoutBox(resource, {left: 11, top: 12, width: 10, height: 10});
     resource.startLayout();
     expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
   });
@@ -500,7 +505,7 @@ describe('Resource', () => {
     elementMock.expects('layoutCallback').never();
 
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
-    resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
+    stupidMutateLayoutBox(resource, {left: 11, top: 12, width: 10, height: 10});
     resource.layoutCount_ = 1;
     elementMock.expects('isRelayoutNeeded').returns(false).atLeast(1);
     resource.startLayout();
@@ -511,7 +516,7 @@ describe('Resource', () => {
     elementMock.expects('layoutCallback').returns(Promise.resolve()).once();
 
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
-    resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
+    stupidMutateLayoutBox(resource, {left: 11, top: 12, width: 10, height: 10});
     resource.layoutCount_ = 1;
     elementMock.expects('isRelayoutNeeded').returns(true).atLeast(1);
     resource.startLayout();
@@ -522,7 +527,7 @@ describe('Resource', () => {
     elementMock.expects('layoutCallback').returns(Promise.resolve()).once();
 
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
-    resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
+    stupidMutateLayoutBox(resource, {left: 11, top: 12, width: 10, height: 10});
     const loaded = resource.loadedOnce();
     const promise = resource.startLayout();
     expect(resource.layoutPromise_).to.not.equal(null);
@@ -541,7 +546,7 @@ describe('Resource', () => {
         .returns(Promise.reject(error)).once();
 
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
-    resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
+    stupidMutateLayoutBox(resource, {left: 11, top: 12, width: 10, height: 10});
     const promise = resource.startLayout();
     expect(resource.layoutPromise_).to.not.equal(null);
     expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
@@ -875,7 +880,7 @@ describe('Resource renderOutsideViewport', () => {
       prerenderAllowed: () => false,
       renderOutsideViewport: () => true,
       build: () => false,
-      getBoundingClientRect: () => null,
+      getBoundingClientRect: () => layoutRectLtwh(0, 0, 100, 100),
       updateLayoutBox: () => {},
       isRelayoutNeeded: () => false,
       layoutCallback: () => {},
@@ -886,10 +891,12 @@ describe('Resource renderOutsideViewport', () => {
       resumeCallback: () => false,
       viewportCallback: () => {},
       getPriority: () => 0,
+      applySizesAndMediaQuery: () => {},
     };
 
     resources = new Resources(new AmpDocSingle(window));
-    resource = new Resource(1, element, resources);
+    resources.add(element);
+    resource = Resource.forElement(element);
     viewport = resources.viewport_;
     renderOutsideViewport = sandbox.stub(element, 'renderOutsideViewport');
     sandbox.stub(viewport, 'getRect').returns(layoutRectLtwh(0, 0, 100, 100));
@@ -908,12 +915,12 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is inside viewport', () => {
         it('should allow rendering when bottom falls outside', () => {
-          resource.layoutBox_ = layoutRectLtwh(0, 10, 100, 100);
+          stupidMutateLayoutBox(resource, layoutRectLtwh(0, 10, 100, 100));
           expect(resource.renderOutsideViewport()).to.equal(true);
         });
 
         it('should allow rendering when top falls outside', () => {
-          resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
+          stupidMutateLayoutBox(resource, layoutRectLtwh(0, -10, 100, 100));
           expect(resource.renderOutsideViewport()).to.equal(true);
         });
 
@@ -923,12 +930,12 @@ describe('Resource renderOutsideViewport', () => {
           });
 
           it('should allow rendering when bottom falls outside', () => {
-            resource.layoutBox_ = layoutRectLtwh(0, 10, 100, 100);
+            stupidMutateLayoutBox(resource, layoutRectLtwh(0, 10, 100, 100));
             expect(resource.renderOutsideViewport()).to.equal(true);
           });
 
           it('should allow rendering when top falls outside', () => {
-            resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
+            stupidMutateLayoutBox(resource, layoutRectLtwh(0, -10, 100, 100));
             expect(resource.renderOutsideViewport()).to.equal(true);
           });
         });
@@ -936,7 +943,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is just below viewport', () => {
         beforeEach(() => {
-          resource.layoutBox_ = layoutRectLtwh(0, 110, 100, 100);
+          stupidMutateLayoutBox(resource, layoutRectLtwh(0, 110, 100, 100));
         });
 
         it('should allow rendering when scrolling towards', () => {
@@ -968,7 +975,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is marginally below viewport', () => {
         beforeEach(() => {
-          resource.layoutBox_ = layoutRectLtwh(0, 250, 100, 100);
+          stupidMutateLayoutBox(resource, layoutRectLtwh(0, 250, 100, 100));
         });
 
         it('should allow rendering when scrolling towards', () => {
@@ -1000,7 +1007,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is wayyy below viewport', () => {
         beforeEach(() => {
-          resource.layoutBox_ = layoutRectLtwh(0, 1000, 100, 100);
+          stupidMutateLayoutBox(resource, layoutRectLtwh(0, 1000, 100, 100));
         });
 
         it('should allow rendering', () => {
@@ -1040,7 +1047,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is just above viewport', () => {
         beforeEach(() => {
-          resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
+          stupidMutateLayoutBox(resource, layoutRectLtwh(0, -10, 100, 100));
         });
 
         it('should allow rendering when scrolling towards', () => {
@@ -1072,7 +1079,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is marginally above viewport', () => {
         beforeEach(() => {
-          resource.layoutBox_ = layoutRectLtwh(0, -250, 100, 100);
+          stupidMutateLayoutBox(resource, layoutRectLtwh(0, -250, 100, 100));
         });
 
         it('should allow rendering when scrolling towards', () => {
@@ -1104,7 +1111,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is wayyy above viewport', () => {
         beforeEach(() => {
-          resource.layoutBox_ = layoutRectLtwh(0, -1000, 100, 100);
+          stupidMutateLayoutBox(resource, layoutRectLtwh(0, -1000, 100, 100));
         });
 
         it('should allow rendering', () => {
@@ -1150,12 +1157,12 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is inside viewport', () => {
         it('should allow rendering when bottom falls outside', () => {
-          resource.layoutBox_ = layoutRectLtwh(0, 10, 100, 100);
+          stupidMutateLayoutBox(resource, layoutRectLtwh(0, 10, 100, 100));
           expect(resource.renderOutsideViewport()).to.equal(false);
         });
 
         it('should allow rendering when top falls outside', () => {
-          resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
+          stupidMutateLayoutBox(resource, layoutRectLtwh(0, -10, 100, 100));
           expect(resource.renderOutsideViewport()).to.equal(false);
         });
 
@@ -1165,12 +1172,12 @@ describe('Resource renderOutsideViewport', () => {
           });
 
           it('should allow rendering when bottom falls outside', () => {
-            resource.layoutBox_ = layoutRectLtwh(0, 10, 100, 100);
+            stupidMutateLayoutBox(resource, layoutRectLtwh(0, 10, 100, 100));
             expect(resource.renderOutsideViewport()).to.equal(true);
           });
 
           it('should allow rendering when top falls outside', () => {
-            resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
+            stupidMutateLayoutBox(resource, layoutRectLtwh(0, -10, 100, 100));
             expect(resource.renderOutsideViewport()).to.equal(true);
           });
         });
@@ -1178,7 +1185,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is just below viewport', () => {
         beforeEach(() => {
-          resource.layoutBox_ = layoutRectLtwh(0, 110, 100, 100);
+          stupidMutateLayoutBox(resource, layoutRectLtwh(0, 110, 100, 100));
         });
 
         it('should disallow rendering when scrolling towards', () => {
@@ -1210,7 +1217,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is marginally below viewport', () => {
         beforeEach(() => {
-          resource.layoutBox_ = layoutRectLtwh(0, 250, 100, 100);
+          stupidMutateLayoutBox(resource, layoutRectLtwh(0, 250, 100, 100));
         });
 
         it('should disallow rendering when scrolling towards', () => {
@@ -1242,7 +1249,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is wayyy below viewport', () => {
         beforeEach(() => {
-          resource.layoutBox_ = layoutRectLtwh(0, 1000, 100, 100);
+          stupidMutateLayoutBox(resource, layoutRectLtwh(0, 1000, 100, 100));
         });
 
         it('should disallow rendering', () => {
@@ -1282,7 +1289,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is just above viewport', () => {
         beforeEach(() => {
-          resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
+          stupidMutateLayoutBox(resource, layoutRectLtwh(0, -10, 100, 100));
         });
 
         it('should disallow rendering when scrolling towards', () => {
@@ -1314,7 +1321,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is marginally above viewport', () => {
         beforeEach(() => {
-          resource.layoutBox_ = layoutRectLtwh(0, -250, 100, 100);
+          stupidMutateLayoutBox(resource, layoutRectLtwh(0, -250, 100, 100));
         });
 
         it('should disallow rendering when scrolling towards', () => {
@@ -1346,7 +1353,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is wayyy above viewport', () => {
         beforeEach(() => {
-          resource.layoutBox_ = layoutRectLtwh(0, -1000, 100, 100);
+          stupidMutateLayoutBox(resource, layoutRectLtwh(0, -1000, 100, 100));
         });
 
         it('should disallow rendering', () => {
@@ -1393,12 +1400,12 @@ describe('Resource renderOutsideViewport', () => {
 
     describe('when element is inside viewport', () => {
       it('should allow rendering when bottom falls outside', () => {
-        resource.layoutBox_ = layoutRectLtwh(0, 10, 100, 100);
+        stupidMutateLayoutBox(resource, layoutRectLtwh(0, 10, 100, 100));
         expect(resource.renderOutsideViewport()).to.equal(true);
       });
 
       it('should allow rendering when top falls outside', () => {
-        resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
+        stupidMutateLayoutBox(resource, layoutRectLtwh(0, -10, 100, 100));
         expect(resource.renderOutsideViewport()).to.equal(true);
       });
 
@@ -1408,12 +1415,12 @@ describe('Resource renderOutsideViewport', () => {
         });
 
         it('should allow rendering when bottom falls outside', () => {
-          resource.layoutBox_ = layoutRectLtwh(0, 10, 100, 100);
+          stupidMutateLayoutBox(resource, layoutRectLtwh(0, 10, 100, 100));
           expect(resource.renderOutsideViewport()).to.equal(true);
         });
 
         it('should allow rendering when top falls outside', () => {
-          resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
+          stupidMutateLayoutBox(resource, layoutRectLtwh(0, -10, 100, 100));
           expect(resource.renderOutsideViewport()).to.equal(true);
         });
       });
@@ -1421,7 +1428,7 @@ describe('Resource renderOutsideViewport', () => {
 
     describe('when element is just below viewport', () => {
       beforeEach(() => {
-        resource.layoutBox_ = layoutRectLtwh(0, 110, 100, 100);
+        stupidMutateLayoutBox(resource, layoutRectLtwh(0, 110, 100, 100));
       });
 
       it('should allow rendering when scrolling towards', () => {
@@ -1453,7 +1460,7 @@ describe('Resource renderOutsideViewport', () => {
 
     describe('when element is marginally below viewport', () => {
       beforeEach(() => {
-        resource.layoutBox_ = layoutRectLtwh(0, 250, 100, 100);
+        stupidMutateLayoutBox(resource, layoutRectLtwh(0, 250, 100, 100));
       });
 
       it('should allow rendering when scrolling towards', () => {
@@ -1485,7 +1492,7 @@ describe('Resource renderOutsideViewport', () => {
 
     describe('when element is wayyy below viewport', () => {
       beforeEach(() => {
-        resource.layoutBox_ = layoutRectLtwh(0, 1000, 100, 100);
+        stupidMutateLayoutBox(resource, layoutRectLtwh(0, 1000, 100, 100));
       });
 
       it('should disallow rendering', () => {
@@ -1525,7 +1532,7 @@ describe('Resource renderOutsideViewport', () => {
 
     describe('when element is just above viewport', () => {
       beforeEach(() => {
-        resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
+        stupidMutateLayoutBox(resource, layoutRectLtwh(0, -10, 100, 100));
       });
 
       it('should allow rendering when scrolling towards', () => {
@@ -1557,7 +1564,7 @@ describe('Resource renderOutsideViewport', () => {
 
     describe('when element is marginally above viewport', () => {
       beforeEach(() => {
-        resource.layoutBox_ = layoutRectLtwh(0, -250, 100, 100);
+        stupidMutateLayoutBox(resource, layoutRectLtwh(0, -250, 100, 100));
       });
 
       it('should allow rendering when scrolling towards', () => {
@@ -1589,7 +1596,7 @@ describe('Resource renderOutsideViewport', () => {
 
     describe('when element is wayyy above viewport', () => {
       beforeEach(() => {
-        resource.layoutBox_ = layoutRectLtwh(0, -1000, 100, 100);
+        stupidMutateLayoutBox(resource, layoutRectLtwh(0, -1000, 100, 100));
       });
 
       it('should disallow rendering', () => {
@@ -1629,7 +1636,7 @@ describe('Resource renderOutsideViewport', () => {
 
     describe('when element is on the left of viewport', () => {
       beforeEach(() => {
-        resource.layoutBox_ = layoutRectLtwh(-200, 0, 100, 100);
+        stupidMutateLayoutBox(resource, layoutRectLtwh(-200, 0, 100, 100));
       });
 
       it('should disallow rendering', () => {
@@ -1669,7 +1676,7 @@ describe('Resource renderOutsideViewport', () => {
 
     describe('when element is on the right of viewport', () => {
       beforeEach(() => {
-        resource.layoutBox_ = layoutRectLtwh(200, 0, 100, 100);
+        stupidMutateLayoutBox(resource, layoutRectLtwh(200, 0, 100, 100));
       });
 
       it('should disallow rendering', () => {
@@ -1709,7 +1716,7 @@ describe('Resource renderOutsideViewport', () => {
 
     describe('when element is fully in viewport', () => {
       beforeEach(() => {
-        resource.layoutBox_ = layoutRectLtwh(0, 0, 100, 100);
+        stupidMutateLayoutBox(resource, layoutRectLtwh(0, 0, 100, 100));
       });
 
       it('should allow rendering', () => {
@@ -1749,7 +1756,7 @@ describe('Resource renderOutsideViewport', () => {
 
     describe('when element is partially in viewport', () => {
       beforeEach(() => {
-        resource.layoutBox_ = layoutRectLtwh(-50, -50, 100, 100);
+        stupidMutateLayoutBox(resource, layoutRectLtwh(-50, -50, 100, 100));
       });
 
       it('should allow rendering', () => {
