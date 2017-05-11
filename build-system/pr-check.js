@@ -214,7 +214,7 @@ const command = {
   },
   testRuntime: function() {
     // Visual diff tests
-    execOrDie(`${gulp} visual-diff --files examples/amp-by-example.html`);
+    execOrDie(`${gulp} visual-diff`);
     // dep-check needs to occur after build since we rely on build to generate
     // the css files into js files.
     execOrDie(`${gulp} dep-check`);
