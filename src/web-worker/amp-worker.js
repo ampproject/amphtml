@@ -19,7 +19,6 @@ import {calculateEntryPointScriptUrl} from '../service/extension-location';
 import {dev} from '../log';
 import {getService, registerServiceBuilder} from '../service';
 import {getMode} from '../mode';
-import {isExperimentOn} from '../experiments';
 import {xhrFor} from '../services';
 
 const TAG = 'web-worker';
@@ -39,9 +38,6 @@ let PendingMessageDef;
  * @return {!Promise}
  */
 export function invokeWebWorker(win, method, opt_args) {
-  if (!isExperimentOn(win, TAG)) {
-    return Promise.reject(`Experiment "${TAG}" is disabled.`);
-  }
   if (!win.Worker) {
     return Promise.reject('Worker not supported in window.');
   }
@@ -69,15 +65,19 @@ class AmpWorker {
    * @param {!Window} win
    */
   constructor(win) {
-    /** @const @private {!Window} */
-    this.win_ = win;
-
     /** @const @private {!../service/xhr-impl.Xhr} */
     this.xhr_ = xhrFor(win);
 
-    const url =
-        calculateEntryPointScriptUrl(location, 'ww', getMode().localDev);
-    dev().fine(TAG, 'Fetching web worker from:', url);
+    // Use `testLocation` for testing with iframes. @see testing/iframe.js.
+    let loc = win.location;
+    if (getMode().test && win.testLocation) {
+      loc = win.testLocation;
+    }
+    // Use RTV to make sure we fetch prod/canary/experiment correctly.
+    const useRtvVersion = !getMode().localDev && !getMode().test;
+    const url = calculateEntryPointScriptUrl(
+        loc, 'ww', getMode().localDev, useRtvVersion);
+    dev().fine(TAG, 'Fetching web worker from', url);
 
     /** @private {Worker} */
     this.worker_ = null;

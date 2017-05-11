@@ -22,6 +22,7 @@ import {registerServiceBuilderForDoc} from '../service';
 import {dev, duplicateErrorIfNecessary} from '../log';
 import {isIframed} from '../dom';
 import {
+  getSourceOrigin,
   parseQueryString,
   parseUrl,
   removeFragment,
@@ -362,6 +363,27 @@ export class Viewer {
       }
     });
 
+    // Replace URL if requested.
+    const replaceUrlParam = this.params_['replaceUrl'];
+    if (ampdoc.isSingleDoc() &&
+        replaceUrlParam &&
+        this.win.history.replaceState) {
+      try {
+        // The origin and source origin must match.
+        const url = parseUrl(this.win.location.href);
+        const replaceUrl = parseUrl(
+            removeFragment(replaceUrlParam) + this.win.location.hash);
+        if (url.origin == replaceUrl.origin &&
+            getSourceOrigin(url) == getSourceOrigin(replaceUrl)) {
+          this.win.history.replaceState({}, '', replaceUrl.href);
+          this.win.location.originalHref = url.href;
+          dev().fine(TAG_, 'replace url:' + replaceUrl.href);
+        }
+      } catch (e) {
+        dev().error(TAG_, 'replaceUrl failed', e);
+      }
+    }
+
     // Remove hash when we have an incoming click tracking string
     // (see impression.js).
     if (this.params_['click']) {
@@ -373,7 +395,7 @@ export class Viewer {
           this.win.location.originalHash = this.win.location.hash;
         }
         this.win.history.replaceState({}, '', newUrl);
-        dev().fine(TAG_, 'replace url:' + this.win.location.href);
+        dev().fine(TAG_, 'replace fragment:' + this.win.location.href);
       }
     }
 
@@ -940,6 +962,7 @@ function getChannelError(opt_reason) {
   }
   return new Error('No messaging channel: ' + opt_reason);
 }
+
 
 /**
  * Sets the viewer visibility state. This calls is restricted to runtime only.

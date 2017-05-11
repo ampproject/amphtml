@@ -587,7 +587,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
           'st=${socialTarget}' +
           '${baseSuffix}',
       'timing': '${host}/collect?${basePrefix}&' +
-          't=timing&' +
+          't=${timingRequestType}&' +
           'jid=&' +
           'plt=${pageLoadTime}&' +
           'dns=${domainLookupTime}&' +
@@ -606,6 +606,17 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
         'sampleSpec': {
           'sampleOn': '${clientId}',
           'threshold': 1,
+        },
+        'vars': {
+          'timingRequestType': 'timing',
+        },
+      },
+      'adwordsTiming': {
+        'on': 'visible',
+        'request': 'timing',
+        'enabled': '${queryParam(gclid)}',
+        'vars': {
+          'timingRequestType': 'adtiming',
         },
       },
     },
@@ -668,7 +679,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'st=${socialTarget}' +
       '${baseSuffix}',
       'timing': '${host}/collect?${basePrefix}&' +
-      't=timing&' +
+      't=${timingRequestType}&' +
       'jid=&' +
       'plt=${pageLoadTime}&' +
       'dns=${domainLookupTime}&' +
@@ -687,6 +698,17 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
         'sampleSpec': {
           'sampleOn': '${clientId}',
           'threshold': 1,
+        },
+        'vars': {
+          'timingRequestType': 'timing',
+        },
+      },
+      'adwordsTiming': {
+        'on': 'visible',
+        'request': 'timing',
+        'enabled': '${queryParam(gclid)}',
+        'vars': {
+          'timingRequestType': 'adtiming',
         },
       },
     },
@@ -912,9 +934,6 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
         'date=${timestamp}&' +
         'ampid=${clientId(_parsely_visitor)}',
       'pageview': '${basePrefix}&action=pageview',
-      // TODO(#1612): client-side session support
-      // TODO(#1296): active engaged time support
-      // 'heartbeat': '${basePrefix}&action=heartbeat&inc=${engagedTime}'
     },
     'triggers': {
       'defaultPageview': {
