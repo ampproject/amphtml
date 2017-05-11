@@ -23,6 +23,7 @@ import '../amp-ima-video';
 
 adopt(window);
 
+//TODO(shawnbuso, #9258): Switch to describes
 describe('amp-ima-video', () => {
   const srcUrl = 'http://rmcdn.2mdn.net/Demo/vast_inspector/android.mp4';
   const adTagUrl = 'https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpost&cmsid=496&vid=short_onecue&correlator=';
@@ -35,6 +36,7 @@ describe('amp-ima-video', () => {
   });
 
   afterEach(() => {
+    toggleExperiment(window, 'amp-ima-video', false);
     sandbox.restore();
   });
 
