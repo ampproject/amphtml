@@ -1176,6 +1176,14 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Returns reference to implementation after it has been built.
+     * @return {!Promise<!./base-element.BaseElement>}
+     */
+    getImpl() {
+      return this.whenBuilt().then(() => this.implementation_);
+    }
+
+    /**
      * Instructs the element to layout its content and load its resources if
      * necessary by calling the {@link BaseElement.layoutCallback} method that
      * should be implemented by BaseElement subclasses. Must return a promise
@@ -1254,7 +1262,9 @@ function createBaseCustomElementClass(win) {
             // TODO(dvoytenko, #9177): cleanup `this.ownerDocument.defaultView`
             // once investigation is complete. It appears that we get a lot of
             // errors here once the iframe is destroyed due to timer.
-            if (this.isInViewport_ && this.ownerDocument.defaultView) {
+            if (this.isInViewport_ &&
+                this.ownerDocument &&
+                this.ownerDocument.defaultView) {
               this.toggleLoading_(true);
             }
           }, 100);

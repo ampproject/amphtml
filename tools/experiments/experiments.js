@@ -285,6 +285,10 @@ const EXPERIMENTS = [
     name: 'New ad loader version 2',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8261',
   },
+  {
+    id: 'amp-ima-video',
+    name: 'IMA-integrated Video Player',
+  },
 ];
 
 if (getMode().localDev) {
