@@ -21,8 +21,8 @@ import {
 } from '../layout-rect';
 import {Layout} from './layout';
 import {dev} from '../log';
-import {startsWith} from '../string';
 import {toggle, computedStyle} from '../style';
+import {isAmpElement} from '../dom';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';
@@ -227,9 +227,7 @@ export class Resource {
     if (this.ampAncestor_ === undefined) {
       let ancestor = null;
       for (let n = this.element.parentElement; n; n = n.parentElement) {
-        // Use prefix to recognize AMP element. This is necessary because stub
-        // may not be attached yet.
-        if (startsWith(n.tagName, 'AMP-')) {
+        if (isAmpElement(n)) {
           ancestor = n;
           break;
         }

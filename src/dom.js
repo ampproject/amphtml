@@ -16,6 +16,7 @@
 
 import {dev} from './log';
 import {cssEscape} from '../third_party/css-escape/css-escape';
+import {startsWith} from './string';
 
 const HTML_ESCAPE_CHARS = {
   '&': '&amp;',
@@ -27,6 +28,20 @@ const HTML_ESCAPE_CHARS = {
 };
 const HTML_ESCAPE_REGEX = /(&|<|>|"|'|`)/g;
 
+
+/**
+ * Determines if this element is an AMP element
+ * @param {!Element}
+ * @return {boolean}
+ */
+export function isAmpElement(element) {
+  const tag = element.tagName;
+  // Use prefix to recognize AMP element. This is necessary because stub
+  // may not be attached yet.
+  return startsWith(tag, 'AMP-') &&
+      // Some "amp-*" elements are not really AMP elements. :smh:
+      !(tag == 'AMP-STICKY-AD-TOP-PADDING' || tag == 'AMP-BODY');
+}
 
 /**
  * Waits until the child element is constructed. Once the child is found, the
