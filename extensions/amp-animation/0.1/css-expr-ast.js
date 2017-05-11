@@ -17,6 +17,20 @@
 const FINAL_URL_RE = /^(data|https)\:/i;
 const DEG_TO_RAD = 2 * Math.PI / 360;
 const GRAD_TO_RAD = Math.PI / 200;
+const VAR_CSS_RE = /calc|var|url/i;
+const INFINITY_RE = /^(infinity|infinite)$/i;
+
+
+/**
+ * Returns `true` if the CSS expression contains variable components. The CSS
+ * parsing and evaluation is heavy, but used relatively rarely. This method
+ * can be used to avoid heavy parse/evaluate tasks.
+ * @param {string} css
+ * @return {boolean}
+ */
+export function isVarCss(css) {
+  return VAR_CSS_RE.test(css);
+}
 
 
 /**
@@ -73,13 +87,11 @@ export class CssContext {
   /**
    * Pushes the dimension: "w" for width or "h" for height.
    * @param {?string} unusedDim
+   * @param {function():T} unusedCallback
+   * @return {T}
+   * @template T
    */
-  pushDimension(unusedDim) {}
-
-  /**
-   * Pops the dimension.
-   */
-  popDimension() {}
+  withDimension(unusedDim, unusedCallback) {}
 }
 
 
@@ -273,14 +285,14 @@ export class CssNumericNode extends CssNode {
 
   /**
    * @param {number} unusedNum
-   * @return {!CssNumberNode}
+   * @return {!CssNumericNode}
    * @abstract
    */
   createSameUnits(unusedNum) {}
 
   /**
    * @param {!CssContext} unusedContext
-   * @return {!CssNumberNode}
+   * @return {!CssNumericNode}
    */
   norm(unusedContext) {
     return this;
@@ -289,7 +301,7 @@ export class CssNumericNode extends CssNode {
   /**
    * @param {number} percent
    * @param {!CssContext} unusedContext
-   * @return {!CssNumberNode}
+   * @return {!CssNumericNode}
    */
   calcPercent(percent, unusedContext) {
     throw new Error('cannot calculate percent for ' + this.type_);
@@ -309,6 +321,23 @@ export class CssNumberNode extends CssNumericNode {
   /** @override */
   createSameUnits(num) {
     return new CssNumberNode(num);
+  }
+
+  /**
+   * Returns a numerical value of the node if possible. `Infinity` is one of
+   * possible return values.
+   * @param {!CssNode} node
+   * @return {number|undefined}
+   */
+  static num(node) {
+    if (node instanceof CssNumberNode) {
+      return node.num_;
+    }
+    const css = node.css();
+    if (INFINITY_RE.test(css)) {
+      return Infinity;
+    }
+    return undefined;
   }
 }
 
@@ -453,10 +482,35 @@ export class CssTimeNode extends CssNumericNode {
     if (this.units_ == 'ms') {
       return this;
     }
+    return new CssTimeNode(this.millis_(), 'ms');
+  }
+
+  /**
+   * @return {number}
+   * @private
+   */
+  millis_() {
+    if (this.units_ == 'ms') {
+      return this.num_;
+    }
     if (this.units_ == 's') {
-      return new CssTimeNode(this.num_ * 1000, 'ms');
+      return this.num_ * 1000;
     }
     throw unknownUnits(this.units_);
+  }
+
+  /**
+   * @param {!CssNode} node
+   * @return {number|undefined}
+   */
+  static millis(node) {
+    if (node instanceof CssTimeNode) {
+      return node.millis_();
+    }
+    if (node instanceof CssNumberNode) {
+      return node.num_;
+    }
+    return undefined;
   }
 }
 
@@ -498,9 +552,8 @@ export class CssFuncNode extends CssNode {
       const node = this.args_[i];
       let resolved;
       if (this.dimensions_ && i < this.dimensions_.length) {
-        context.pushDimension(this.dimensions_[i]);
-        resolved = node.resolve(context);
-        context.popDimension();
+        resolved = context.withDimension(this.dimensions_[i],
+            () => node.resolve(context));
       } else {
         resolved = node.resolve(context);
       }

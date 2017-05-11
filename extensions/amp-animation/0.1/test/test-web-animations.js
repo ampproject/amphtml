@@ -59,10 +59,11 @@ describes.sandboxed('MeasureScanner', {}, () => {
 
   function scan(spec) {
     const targets = {target1, target2};
-    const scanner = new MeasureScanner(window, {
-      resolveTarget: name => targets[name] || null,
-      queryTargets: selector => targetsBySelector[selector] || [],
-    }, true);
+    const scanner = new MeasureScanner(window,
+        'https://acme.org/', {
+          resolveTarget: name => targets[name] || null,
+          queryTargets: selector => targetsBySelector[selector] || [],
+        }, true);
     scanner.scan(spec);
     return scanner.requests_;
   }
@@ -80,8 +81,12 @@ describes.sandboxed('MeasureScanner', {}, () => {
     expect(scanTiming({}).duration).to.equal(0);
     expect(scanTiming({duration: 0}).duration).to.equal(0);
     expect(scanTiming({duration: 10}).duration).to.equal(10);
-    expect(scanTiming({duration: Infinity}).duration).to.equal(Infinity);
-    expect(scanTiming({duration: 'Infinity'}).duration).to.equal(Infinity);
+    expect(scanTiming({duration: '10'}).duration).to.equal(10);
+    expect(scanTiming({duration: '10s'}).duration).to.equal(10000);
+    expect(scanTiming({duration: '10ms'}).duration).to.equal(10);
+    expect(scanTiming({duration: 'calc(10ms)'}).duration).to.equal(10);
+    expect(scanTiming({duration: 'var(--unk)'}).duration).to.equal(0);
+    expect(scanTiming({duration: 'var(--unk, 11ms)'}).duration).to.equal(11);
     expect(() => scanTiming({duration: 'a'})).to.throw(/"duration" is invalid/);
     expect(() => scanTiming({duration: -1})).to.throw(/"duration" is invalid/);
     expect(warnStub).to.not.be.called;
@@ -91,6 +96,12 @@ describes.sandboxed('MeasureScanner', {}, () => {
     expect(scanTiming({}).delay).to.equal(0);
     expect(scanTiming({delay: 0}).delay).to.equal(0);
     expect(scanTiming({delay: 10}).delay).to.equal(10);
+    expect(scanTiming({delay: '10'}).delay).to.equal(10);
+    expect(scanTiming({delay: '10s'}).delay).to.equal(10000);
+    expect(scanTiming({delay: '10ms'}).delay).to.equal(10);
+    expect(scanTiming({delay: 'calc(10ms)'}).delay).to.equal(10);
+    expect(scanTiming({delay: 'var(--unk)'}).delay).to.equal(0);
+    expect(scanTiming({delay: 'var(--unk, 11ms)'}).delay).to.equal(11);
     expect(() => scanTiming({delay: 'a'})).to.throw(/"delay" is invalid/);
     expect(() => scanTiming({delay: -1})).to.throw(/"delay" is invalid/);
     expect(warnStub).to.not.be.called;
@@ -98,6 +109,10 @@ describes.sandboxed('MeasureScanner', {}, () => {
     expect(scanTiming({}).endDelay).to.equal(0);
     expect(scanTiming({endDelay: 0}).endDelay).to.equal(0);
     expect(scanTiming({endDelay: 10}).endDelay).to.equal(10);
+    expect(scanTiming({endDelay: '10'}).endDelay).to.equal(10);
+    expect(scanTiming({endDelay: '10s'}).endDelay).to.equal(10000);
+    expect(scanTiming({endDelay: '10ms'}).endDelay).to.equal(10);
+    expect(scanTiming({endDelay: 'calc(10ms)'}).endDelay).to.equal(10);
     expect(() => scanTiming({endDelay: 'a'})).to.throw(/"endDelay" is invalid/);
     expect(() => scanTiming({endDelay: -1})).to.throw(/"endDelay" is invalid/);
     expect(warnStub).to.not.be.called;
@@ -107,6 +122,12 @@ describes.sandboxed('MeasureScanner', {}, () => {
     expect(scanTiming({}).iterations).to.equal(1);
     expect(scanTiming({iterations: 0}).iterations).to.equal(0);
     expect(scanTiming({iterations: 10}).iterations).to.equal(10);
+    expect(scanTiming({iterations: '10'}).iterations).to.equal(10);
+    expect(scanTiming({iterations: 'calc(10)'}).iterations).to.equal(10);
+    expect(scanTiming({iterations: Infinity}).iterations).to.equal(Infinity);
+    expect(scanTiming({iterations: 'Infinity'}).iterations).to.equal(Infinity);
+    expect(scanTiming({iterations: 'infinite'}).iterations).to.equal(Infinity);
+    expect(scanTiming({iterations: 'INFINITE'}).iterations).to.equal(Infinity);
     expect(() => scanTiming({iterations: 'a'}))
         .to.throw(/"iterations" is invalid/);
     expect(() => scanTiming({iterations: -1}))
@@ -115,6 +136,8 @@ describes.sandboxed('MeasureScanner', {}, () => {
     expect(scanTiming({}).iterationStart).to.equal(0);
     expect(scanTiming({iterationStart: 0}).iterationStart).to.equal(0);
     expect(scanTiming({iterationStart: 10}).iterationStart).to.equal(10);
+    expect(scanTiming({iterationStart: 'calc(10)'}).iterationStart)
+        .to.equal(10);
     expect(() => scanTiming({iterationStart: 'a'}))
         .to.throw(/"iterationStart" is invalid/);
     expect(() => scanTiming({iterationStart: -1}))
@@ -135,11 +158,15 @@ describes.sandboxed('MeasureScanner', {}, () => {
   it('should parse/validate timing easing', () => {
     expect(scanTiming({}).easing).to.equal('linear');
     expect(scanTiming({easing: 'ease-in'}).easing).to.equal('ease-in');
+    expect(scanTiming({easing: 'var(--unk, ease-out)'}).easing)
+        .to.equal('ease-out');
   });
 
   it('should parse/validate timing direction', () => {
     expect(scanTiming({}).direction).to.equal('normal');
     expect(scanTiming({direction: 'reverse'}).direction).to.equal('reverse');
+    expect(scanTiming({direction: 'var(--unk, reverse)'}).direction)
+        .to.equal('reverse');
     expect(() => scanTiming({direction: 'invalid'}))
         .to.throw(/Unknown direction value/);
   });
@@ -147,6 +174,8 @@ describes.sandboxed('MeasureScanner', {}, () => {
   it('should parse/validate timing fill', () => {
     expect(scanTiming({}).fill).to.equal('none');
     expect(scanTiming({fill: 'both'}).fill).to.equal('both');
+    expect(scanTiming({fill: 'var(--unk, backwards)'}).fill)
+        .to.equal('backwards');
     expect(() => scanTiming({fill: 'invalid'}))
         .to.throw(/Unknown fill value/);
   });
@@ -245,6 +274,31 @@ describes.sandboxed('MeasureScanner', {}, () => {
     expect(keyframes.opacity).to.deep.equal(['0', '1']);
   });
 
+  it('should parse object keyframe with parsing', () => {
+    const keyframes = scan({
+      target: target1,
+      keyframes: {
+        opacity: ['0', 'calc(1)'],
+      },
+    })[0].keyframes;
+    expect(isObject(keyframes)).to.be.true;
+    expect(isArray(keyframes.opacity)).to.be.true;
+    expect(keyframes.opacity).to.deep.equal(['0', '1']);
+  });
+
+  it('should parse object w/partial keyframe with parsing', () => {
+    target1.style.opacity = 0;
+    const keyframes = scan({
+      target: target1,
+      keyframes: {
+        opacity: ['calc(1)'],
+      },
+    })[0].keyframes;
+    expect(isObject(keyframes)).to.be.true;
+    expect(isArray(keyframes.opacity)).to.be.true;
+    expect(keyframes.opacity).to.deep.equal(['0', '1']);
+  });
+
   it('should passthrough service props in a partial object keyframe', () => {
     const keyframes = scan({
       target: target1,
@@ -327,6 +381,21 @@ describes.sandboxed('MeasureScanner', {}, () => {
     })[0].keyframes;
     expect(keyframes).to.deep.equal([
       {offset: 0, easing: 'ease-in', opacity: '0'},
+      {opacity: '1'},
+    ]);
+  });
+
+  it('should parse array keyframe with parsing', () => {
+    const keyframes = scan({
+      target: target1,
+      keyframes: [
+        {opacity: 'calc(0)'},
+        {opacity: 'calc(1)'},
+      ],
+    })[0].keyframes;
+    expect(isArray(keyframes)).to.be.true;
+    expect(keyframes).to.deep.equal([
+      {opacity: '0'},
       {opacity: '1'},
     ]);
   });
@@ -427,6 +496,170 @@ describes.sandboxed('MeasureScanner', {}, () => {
   });
 
 
+  describe('CSS evaluations', () => {
+    let css;
+    let parseSpy;
+
+    beforeEach(() => {
+      const scanner = new MeasureScanner(
+          window, 'https://acme.org/', {}, true);
+      css = scanner.css_;
+      parseSpy = sandbox.spy(css, 'resolveAsNode_');
+    });
+
+    it('should measure styles', () => {
+      expect(css.measure(target1, 'display')).to.equal('block');
+      expect(css.measure(target1, 'font-size')).to.match(/\d+px/);
+    });
+
+    it('should extract vars', () => {
+      target1.style.setProperty('--var0', 'A');
+      const isCssVarSupported = target1.style.getPropertyValue('--var0') == 'A';
+      if (isCssVarSupported) {
+        expect(css.measure(target1, '--var0')).to.equal('A');
+      }
+    });
+
+    it('should use cache', () => {
+      const spy = sandbox.spy(window, 'getComputedStyle');
+
+      // First: target1.
+      expect(css.measure(target1, 'display')).to.equal('block');
+      expect(css.measure(target1, 'font-size')).to.match(/\d+px/);
+      css.measure(target1, '--var0');
+      expect(spy).to.be.calledOnce;
+
+      // First: target2.
+      expect(css.measure(target2, 'display')).to.equal('block');
+      expect(css.measure(target2, 'font-size')).to.match(/\d+px/);
+      css.measure(target2, '--var0');
+      expect(spy).to.be.calledTwice;
+    });
+
+    it('should NOT parse CSS for simple values', () => {
+      expect(css.resolveCss(target1, '')).to.equal('');
+      expect(css.resolveCss(target1, null)).to.be.null;
+      expect(css.resolveCss(target1, 0)).to.equal(0);
+      expect(css.resolveCss(target1, 10)).to.equal(10);
+      expect(css.resolveCss(target1, -1)).to.equal(-1);
+      expect(css.resolveCss(target1, Infinity)).to.equal(Infinity);
+      expect(css.resolveCss(target1, '10px')).to.equal('10px');
+      expect(css.resolveCss(target1, '10vh')).to.equal('10vh');
+      expect(css.resolveCss(target1, 'rgb(0,0,0)')).to.equal('rgb(0,0,0)');
+      expect(css.resolveCss(target1, 'translateY(10vh)'))
+          .to.equal('translateY(10vh)');
+      expect(parseSpy).to.not.be.called;
+    });
+
+    it('should evaluate CSS for complex values', () => {
+      expect(css.resolveCss(target1, 'calc(10px)')).to.equal('10px');
+      expect(parseSpy).to.be.calledOnce;
+    });
+
+    it('should resolve simple time CSS w/o evaluation', () => {
+      expect(css.resolveMillis(target1, null, 1)).to.equal(1);
+      expect(css.resolveMillis(target1, '', 1)).to.equal(1);
+      expect(css.resolveMillis(target1, 2, 1)).to.equal(2);
+      expect(parseSpy).to.not.be.called;
+    });
+
+    it('should resolve time CSS with evaluation', () => {
+      expect(css.resolveMillis(target1, '10s', 1)).to.equal(10000);
+      expect(css.resolveMillis(target1, '10ms', 1)).to.equal(10);
+      expect(css.resolveMillis(target1, '10', 1)).to.equal(10);
+      expect(css.resolveMillis(target1, 'calc(10ms)', 1)).to.equal(10);
+      expect(parseSpy).to.be.called;
+    });
+
+    it('should resolve invalid time CSS to null', () => {
+      expect(css.resolveMillis(target1, 'abc', 1)).to.be.null;
+      expect(css.resolveMillis(target1, 'Infinity', 1)).to.be.null;
+      expect(css.resolveMillis(target1, 'infinite', 1)).to.be.null;
+      expect(parseSpy).to.be.called;
+    });
+
+
+    it('should resolve simple number CSS w/o evaluation', () => {
+      expect(css.resolveNumber(target1, null, 1)).to.equal(1);
+      expect(css.resolveNumber(target1, '', 1)).to.equal(1);
+      expect(css.resolveNumber(target1, 2, 1)).to.equal(2);
+      expect(css.resolveNumber(target1, Infinity, 1)).to.equal(Infinity);
+      expect(parseSpy).to.not.be.called;
+    });
+
+    it('should resolve number CSS with evaluation', () => {
+      expect(css.resolveNumber(target1, '10', 1)).to.equal(10);
+      expect(css.resolveNumber(target1, '10.5', 1)).to.equal(10.5);
+      expect(css.resolveNumber(target1, 'calc(10)', 1)).to.equal(10);
+      expect(css.resolveNumber(target1, 'Infinity', 1)).to.equal(Infinity);
+      expect(css.resolveNumber(target1, 'infinite', 1)).to.equal(Infinity);
+      expect(parseSpy).to.be.called;
+    });
+
+    it('should resolve invalid number CSS to null', () => {
+      expect(css.resolveNumber(target1, 'abc', 1)).to.be.null;
+      expect(parseSpy).to.be.called;
+    });
+
+    it('should read a var', () => {
+      const stub = sandbox.stub(css, 'measure', () => '10px');
+      expect(() => css.getVar('--var1')).to.throw(/target is specified/);
+      expect(css.withTarget_(target1, () => css.getVar('--var1')).num_)
+          .to.equal(10);
+      expect(stub).to.be.calledWith(target1, '--var1');
+    });
+
+    it('should propagate dimension', () => {
+      expect(css.getDimension()).to.be.null;
+      const res = css.withDimension('w', () => {
+        expect(css.getDimension()).to.equal('w');
+        return 11;
+      });
+      expect(res).to.equal(11);
+      expect(css.getDimension()).to.be.null;
+    });
+
+    it('should resolve viewport size, with cache', () => {
+      const size = css.getViewportSize();
+      expect(size.width).to.equal(window.innerWidth);
+      expect(size.height).to.equal(window.innerHeight);
+      expect(css.getViewportSize()).to.equal(size);
+    });
+
+    it('should resolve current and root font size', () => {
+      document.documentElement.style.fontSize = '12px';
+      expect(css.getRootFontSize()).to.equal(12);
+
+      target1.style.fontSize = '16px';
+      expect(() => css.getCurrentFontSize()).to.throw(/target is specified/);
+      expect(css.withTarget_(target1, () => css.getCurrentFontSize()))
+          .to.equal(16);
+      expect(css.withTarget_(target2, () => css.getCurrentFontSize()))
+          .to.equal(12);
+    });
+
+    it('should resolve current element size', () => {
+      target1.style.width = '11px';
+      target1.style.height = '12px';
+      expect(() => css.getCurrentElementSize()).to.throw(/target is specified/);
+      expect(css.withTarget_(target1, () => css.getCurrentElementSize()))
+          .to.deep.equal({width: 11, height: 12});
+    });
+
+    it('should resolve a valid URL', () => {
+      expect(css.resolveUrl('/path'))
+          .to.equal('https://acme.org/path');
+      expect(css.resolveUrl('//example.org/path'))
+          .to.equal('https://example.org/path');
+    });
+
+    it('should NOT resolve an invalid URL', () => {
+      expect(() => css.resolveUrl('http://acme.org/path'))
+          .to.throw(/https/);
+    });
+  });
+
+
   describes.fakeWin('createRunner', {amp: 1}, env => {
     let resources;
     let amp1, amp2;
@@ -453,9 +686,10 @@ describes.sandboxed('MeasureScanner', {}, () => {
 
     function createRunner(spec) {
       const targets = {target1, target2, amp1, amp2};
-      const scanner = new MeasureScanner(window, {
-        resolveTarget: name => targets[name] || null,
-      }, true);
+      const scanner = new MeasureScanner(window,
+          'https://acme.org/', {
+            resolveTarget: name => targets[name] || null,
+          }, true);
       scanner.scan(spec);
       return scanner.createRunner(resources);
     }
