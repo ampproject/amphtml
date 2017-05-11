@@ -147,6 +147,9 @@ export class Resource {
     /** @private {!AmpElement|undefined|null} */
     this.owner_ = undefined;
 
+    /** @private {!AmpElement|undefined|null} */
+    this.ampAncestor_ = undefined;
+
     /** @private {!ResourceState} */
     this.state_ = element.isBuilt() ? ResourceState.NOT_LAID_OUT :
         ResourceState.NOT_BUILT;
@@ -216,20 +219,42 @@ export class Resource {
   }
 
   /**
+   * Returns an ancestor amp element or null.
+   * @return {?AmpElement}
+   */
+  getAmpAncestor() {
+    if (this.ampAncestor_ === undefined) {
+      let ancestor = null;
+      for (let n = this.element.parentElement; n; n = n.parentElement) {
+        // Use prefix to recognize AMP element. This is necessary because stub
+        // may not be attached yet.
+        if (startsWith(n.tagName, 'AMP-')) {
+          ancestor = n;
+          break;
+        }
+      }
+      this.ampAncestor_ = ancestor;
+    }
+    return this.ampAncestor_;
+  }
+
+  /**
    * Returns an owner element or null.
    * @return {?AmpElement}
    */
   getOwner() {
     if (this.owner_ === undefined) {
-      for (let n = this.element; n; n = n.parentElement) {
-        if (n[OWNER_PROP_]) {
-          this.owner_ = n[OWNER_PROP_];
-          break;
+      const ancestor = this.getAmpAncestor();
+      let owner = null;
+      if (ancestor) {
+        for (let n = this.element; n !== ancestor; n = n.parentElement) {
+          if (n[OWNER_PROP_]) {
+            owner = n[OWNER_PROP_];
+            break;
+          }
         }
       }
-      if (this.owner_ === undefined) {
-        this.owner_ = null;
-      }
+      this.owner_ = owner;
     }
     return this.owner_;
   }
@@ -365,19 +390,29 @@ export class Resource {
    * transitioned to the "ready for layout" state.
    */
   measure() {
+    let current = this;
+    let ancestor = this.getAmpAncestor();
     // Check if the element is ready to be measured.
-    // Placeholders are special. They are technically "owned" by parent AMP
-    // elements, sized by parents, but laid out independently. This means
-    // that placeholders need to at least wait until the parent element
-    // has been stubbed. We can tell whether the parent has been stubbed
-    // by whether a resource has been attached to it.
-    if (this.isPlaceholder_ &&
-        this.element.parentElement &&
-        // Use prefix to recognize AMP element. This is necessary because stub
-        // may not be attached yet.
-        startsWith(this.element.parentElement.tagName, 'AMP-') &&
-        !(RESOURCE_PROP_ in this.element.parentElement)) {
-      return;
+    while (ancestor) {
+      const resource = Resource.forElementOptional(ancestor);
+      // If there's an AMP ancestor that's still not stubbed (has a Resource),
+      // we don't know what to do yet.
+      if (!resource) {
+        return;
+      }
+      // If the current resource (not the ancestor) is a placeholder, allow it to
+      // measure. This is because placeholders are laid out independently of
+      // the ancestor element (even if they are sized and "owned" by it).
+      if (current.isPlaceholder_) {
+        break;
+      }
+      // If this ancestor isn't built yet, that means we don't know what kind
+      // of styles will be applied to this element. We must wait.
+      if (!ancestor.isBuilt()) {
+        return;
+      }
+      current = resource;
+      ancestor = current.getAmpAncestor();
     }
 
     this.isMeasureRequested_ = false;
