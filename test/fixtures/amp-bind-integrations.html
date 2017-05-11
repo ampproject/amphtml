@@ -135,9 +135,9 @@
   </amp-list>
 
   <p>AMP-STATE</p>
-  <button id="ampStateSrcButton" on="tap:AMP.setState({ampState: {ampStateSrc: 'https://www.google.com/bind/second/source'}})">Change amp-state</button>
+  <button id="ampStateSrcButton" on="tap:AMP.setState({ampState: {stateSrc: 'https://www.google.com/bind/second/source'}})">Change amp-state</button>
     <button id="triggerBindApplicationButton" on="tap:AMP.setState({})">Trigger application</button>
-  <amp-state id="ampState" src="https://www.google.com/bind/first/source" [src]="ampState.ampStateSrc">
+  <amp-state id="ampState" src="https://www.google.com/bind/first/source" [src]="ampState.stateSrc">
   </amp-state>
 
 </body>
