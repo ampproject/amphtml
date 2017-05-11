@@ -271,7 +271,7 @@ i-amphtml-sizer {
   color: transparent !important;
 }
 
-.i-amphtml-notbuilt > * {
+.i-amphtml-notbuilt:not(.i-amphtml-layout-container) > * {
   display: none;
 }
 
