@@ -39,6 +39,10 @@ export class AmpAutoAds extends AMP.BaseElement {
     const adNetwork = getAdNetworkConfig(type, this.element);
     user().assert(adNetwork, 'No AdNetworkConfig for type: ' + type);
 
+    if (!adNetwork.isEnabled(this.win)) {
+      return;
+    }
+
     this.getConfig_(adNetwork.getConfigUrl()).then(configObj => {
       if (!configObj) {
         return;

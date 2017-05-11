@@ -19,6 +19,7 @@ import {
   extractAmpAnalyticsConfig,
   extractGoogleAdCreativeAndSignature,
   googleAdUrl,
+  mergeExperimentIds,
 } from '../utils';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
@@ -270,11 +271,11 @@ describe('Google A4A utils', () => {
         const impl = new MockA4AImpl(elem);
         noopMethods(impl, doc, sandbox);
         return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', 0, [], []).then(url1 => {
+          return googleAdUrl(impl, '', 0, [], [], []).then(url1 => {
             expect(url1).to.match(/ifi=1/);
-            return googleAdUrl(impl, '', 0, [], []).then(url2 => {
+            return googleAdUrl(impl, '', 0, [], [], []).then(url2 => {
               expect(url2).to.match(/ifi=2/);
-              return googleAdUrl(impl, '', 0, [], []).then(url3 => {
+              return googleAdUrl(impl, '', 0, [], [], []).then(url3 => {
                 expect(url3).to.match(/ifi=3/);
               });
             });
@@ -346,5 +347,46 @@ describe('Google A4A utils', () => {
       });
     });
 
+    it('should include all experiment ids', function() {
+      // When ran locally, this test tends to exceed 2000ms timeout.
+      this.timeout(5000);
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {
+          'type': 'adsense',
+          'width': '320',
+          'height': '50',
+          'data-experiment-id': '123,456',
+        });
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, doc, sandbox);
+        return fixture.addElement(elem).then(() => {
+          return googleAdUrl(impl, '', 0, [], [], ['789', '098']).then(url1 => {
+            expect(url1).to.match(/eid=123%2C456%2C789%2C098/);
+          });
+        });
+      });
+    });
+  });
+
+  describe('#mergeExperimentIds', () => {
+    it('should merge a single id to itself', () => {
+      expect(mergeExperimentIds(['12345'])).to.equal('12345');
+    });
+    it('should merge a single ID to a list', () => {
+      expect(mergeExperimentIds(['12345'], '3,4,5,6'))
+          .to.equal('3,4,5,6,12345');
+    });
+    it('should merge multiple IDs into a list', () => {
+      expect(mergeExperimentIds(['12345','6789'], '3,4,5,6'))
+          .to.equal('3,4,5,6,12345,6789');
+    });
+    it('should discard invalid ID', () => {
+      expect(mergeExperimentIds(['frob'], '3,4,5,6')).to.equal('3,4,5,6');
+    });
+    it('should return empty string for invalid input', () => {
+      expect(mergeExperimentIds(['frob'])).to.equal('');
+    });
   });
 });

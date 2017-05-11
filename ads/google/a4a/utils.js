@@ -132,10 +132,14 @@ export function isReportingEnabled(ampElement) {
  *     Parameters that will be put at the end of the URL, where they may be
  *     elided for length reasons. Intended for parameters with potentially
  *     long values, like URLs.
+ * @param {!Array<string>=} opt_experimentIds Any experiments IDs (in addition
+ *     to those specified on the ad element) that should be included in the
+ *     request.
  * @return {!Promise<string>}
  */
 export function googleAdUrl(
-    a4a, baseUrl, startTime, queryParams, unboundedQueryParams) {
+    a4a, baseUrl, startTime, queryParams, unboundedQueryParams,
+    opt_experimentIds) {
   // TODO: Maybe add checks in case these promises fail.
   /** @const {!Promise<string>} */
   const referrerPromise = viewerForDoc(a4a.getAmpDoc()).getReferrerUrl();
@@ -172,6 +176,10 @@ export function googleAdUrl(
     if (isCanary(win)) {
       queryParams.push({name: 'isc', value: '1'});
     }
+    let eids = adElement.getAttribute('data-experiment-id');
+    if (opt_experimentIds) {
+      eids = mergeExperimentIds(opt_experimentIds, eids);
+    }
     const allQueryParams = queryParams.concat(
       [
         {
@@ -187,7 +195,7 @@ export function googleAdUrl(
         {name: 'output', value: 'html'},
         {name: 'nhd', value: iframeDepth},
         {name: 'iu', value: adElement.getAttribute('data-ad-slot')},
-        {name: 'eid', value: adElement.getAttribute('data-experiment-id')},
+        {name: 'eid', value: eids},
         {name: 'biw', value: viewportRect.width},
         {name: 'bih', value: viewportRect.height},
         {name: 'adx', value: slotRect.left},
@@ -479,4 +487,26 @@ export function extractAmpAnalyticsConfig(
         responseHeaders.get(AMP_ANALYTICS_HEADER));
   }
   return null;
+}
+
+/**
+ * Add new experiment IDs to a (possibly empty) existing set of experiment IDs.
+ * The {@code currentIdString} may be {@code null} or {@code ''}, but if it is
+ * populated, it must contain a comma-separated list of integer experiment IDs
+ * (per {@code parseExperimentIds()}).  Returns the new set of IDs, encoded
+ * as a comma-separated list.  Does not de-duplicate ID entries.
+ *
+ * @param {!Array<string>} newIds IDs to merge in. Should contain stringified
+ *     integer (base 10) experiment IDs.
+ * @param {?string} currentIdString  If present, a string containing a
+ *   comma-separated list of integer experiment IDs.
+ * @returns {string}  New experiment list string, including newId iff it is
+ *   a valid (integer) experiment ID.
+ * @see parseExperimentIds, validateExperimentIds
+ */
+export function mergeExperimentIds(newIds, currentIdString) {
+  const newIdString = newIds.filter(newId => Number(newId)).join(',');
+  currentIdString = currentIdString || '';
+  return currentIdString + (currentIdString && newIdString ? ',' : '')
+      + newIdString;
 }

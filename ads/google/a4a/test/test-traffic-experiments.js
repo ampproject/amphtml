@@ -18,7 +18,6 @@ import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {
   addExperimentIdToElement,
-  mergeExperimentIds,
   isInExperiment,
   isExternallyTriggeredExperiment,
   isInternallyTriggeredExperiment,
@@ -211,21 +210,6 @@ describe('all-traffic-experiments-tests', () => {
       element.setAttribute(EXPERIMENT_ATTRIBUTE, '99,14,873,k,44');
       addExperimentIdToElement('3', element);
       expect(element.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal('3');
-    });
-  });
-
-  describe('#mergeExperimentIds', () => {
-    it('should merge a single id to itself', () => {
-      expect(mergeExperimentIds('12345')).to.equal('12345');
-    });
-    it('should merge a single ID to a list', () => {
-      expect(mergeExperimentIds('12345', '3,4,5,6')).to.equal('3,4,5,6,12345');
-    });
-    it('should discard invalid ID', () => {
-      expect(mergeExperimentIds('frob', '3,4,5,6')).to.equal('3,4,5,6');
-    });
-    it('should return empty string for invalid input', () => {
-      expect(mergeExperimentIds('frob')).to.equal('');
     });
   });
 

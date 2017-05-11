@@ -22,7 +22,11 @@
  * impacts on click-throughs.
  */
 
-import {isGoogleAdsA4AValidEnvironment, EXPERIMENT_ATTRIBUTE} from './utils';
+import {
+  isGoogleAdsA4AValidEnvironment,
+  mergeExperimentIds,
+  EXPERIMENT_ATTRIBUTE,
+} from './utils';
 import {
   isExperimentOn,
   forceExperimentBranch,
@@ -310,28 +314,6 @@ export function validateExperimentIds(idList) {
 }
 
 /**
- * Add a new experiment ID to a (possibly empty) existing set of experiment IDs.
- * The {@code currentIdString} may be {@code null} or {@code ''}, but if it is
- * populated, it must contain a comma-separated list of integer experiment IDs
- * (per {@code parseExperimentIds()}).  Returns the new set of IDs, encoded
- * as a comma-separated list.  Does not de-duplicate ID entries.
- *
- * @param {!string} newId  ID to merge in.  Must be a stringified integer
- *   (base 10).
- * @param {?string} currentIdString  If present, a string containing a
- *   comma-separated list of integer experiment IDs.
- * @returns {string}  New experiment list string, including newId iff it is
- *   a valid (integer) experiment ID.
- * @see parseExperimentIds, validateExperimentIds
- */
-export function mergeExperimentIds(newId, currentIdString) {
-  if (newId && !isNaN(parseInt(newId, 10))) {
-    return currentIdString ? (currentIdString + ',' + newId) : newId;
-  }
-  return currentIdString || '';
-}
-
-/**
  * Adds a single experimentID to an element iff it's a valid experiment ID.
  *
  * @param {!string} experimentId  ID to add to the element.
@@ -341,7 +323,7 @@ export function addExperimentIdToElement(experimentId, element) {
   const currentEids = element.getAttribute(EXPERIMENT_ATTRIBUTE);
   if (currentEids && validateExperimentIds(parseExperimentIds(currentEids))) {
     element.setAttribute(EXPERIMENT_ATTRIBUTE,
-        mergeExperimentIds(experimentId, currentEids));
+        mergeExperimentIds([experimentId], currentEids));
   } else {
     element.setAttribute(EXPERIMENT_ATTRIBUTE, experimentId);
   }
