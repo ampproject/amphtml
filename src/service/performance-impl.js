@@ -22,7 +22,7 @@ import {viewportForDoc} from '../services';
 import {whenDocumentComplete} from '../document-ready';
 import {getMode} from '../mode';
 import {isCanary} from '../experiments';
-import {throttle} from '../utils/function';
+import {throttle} from '../utils/rate-limit';
 import {map} from '../utils/object';
 
 /**

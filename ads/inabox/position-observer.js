@@ -16,7 +16,7 @@
 
 import {layoutRectLtwh, LayoutRectDef} from '../../src/layout-rect';
 import {Observable} from '../../src/observable';
-import {throttle} from '../../src/utils/function';
+import {throttle} from '../../src/utils/rate-limit';
 
 /**
  * @typedef {{
