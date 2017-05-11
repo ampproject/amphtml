@@ -40,7 +40,7 @@ export function stubServiceForDoc(sandbox, ampdoc, serviceId, method) {
       [method]: () => {},
     };
   });
-  const service = getServiceforDoc(win, serviceId);
+  const service = getServiceForDoc(win, serviceId);
   return sandbox.stub(service, method);
 }
 
