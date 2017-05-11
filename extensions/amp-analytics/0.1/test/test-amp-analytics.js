@@ -20,7 +20,7 @@ import {
   ClickEventTracker,
   VisibilityTracker,
 } from '../events';
-import {Crypto} from '../../../../src/service/crypto-impl';
+import {installCryptoService} from '../../../../src/service/crypto-impl';
 import {instrumentationServiceForDocForTesting} from '../instrumentation';
 import {
   installVariableService,
@@ -35,6 +35,7 @@ import {
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 import {
+  getService,
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service';
@@ -96,9 +97,8 @@ describe('amp-analytics', function() {
       });
 
       resetServiceForTesting(iframe.win, 'crypto');
-      registerServiceBuilder(iframe.win, 'crypto', function() {
-        return new Crypto(iframe.win);
-      });
+      installCryptoService(iframe.win, 'crypto');
+      crypto = getService(iframe.win, 'crypto');
       const link = document.createElement('link');
       link.setAttribute('rel', 'canonical');
       link.setAttribute('href', './test-canonical.html');
