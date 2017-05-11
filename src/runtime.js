@@ -499,12 +499,8 @@ function registerElementClass(global, name, implementationClass, opt_css) {
       css: opt_css,
     };
   }
-  // Resolve this extension's Service Promise.
-  registerServiceBuilder(global,
-      name,
-      emptyService,
-      /* opt_factory */ undefined,
-      /* opt_instantiate */ true);
+  // Register this extension to resolve its Service Promise.
+  registerServiceBuilder(global, name, emptyService);
 }
 
 
