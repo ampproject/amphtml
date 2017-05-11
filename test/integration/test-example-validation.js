@@ -36,7 +36,8 @@ describe.configure().retryOnSaucelabs().run('example', function() {
 
   const examples = [
     'ads.amp.html',
-    'brid-player.amp.html',
+    // TODO: uncomment when validator is deployed:
+    //'brid-player.amp.html',
     'brightcove.amp.html',
     'dailymotion.amp.html',
     'metadata-examples/article-json-ld.amp.html',

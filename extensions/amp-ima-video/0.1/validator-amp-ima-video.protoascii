@@ -14,52 +14,48 @@
 # limitations under the license.
 #
 
-tags: {  # amp-brid-player
+tags: {  # amp-ima-video
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-brid-player extension .js script"
+  satisfies: "amp-ima-video extension .js script"
+  requires: "amp-ima-video"
   extension_spec: {
-    name: "amp-brid-player"
+    name: "amp-ima-video"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    deprecated_recommends_usage_of_tag: "amp-brid-player"
-    deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-brid-player>
+tags: {  # <amp-ima-video>
   html_format: AMP
-  tag_name: "AMP-BRID-PLAYER"
+  tag_name: "AMP-IMA-VIDEO"
   disallowed_ancestor: "AMP-SIDEBAR"
-  requires: "amp-brid-player extension .js script"
-  attrs: { name: "autoplay" }
+  satisfies: "amp-ima-video"
+  requires: "amp-ima-video extension .js script"
+  # data-* is generally allowed, but it's not generally mandatory.
   attrs: {
-    name: "data-partner"
+    name: "data-src"
     mandatory: true
-    value_regex: "[0-9]+"
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+    blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: {
-    name: "data-player"
+    name: "data-tag"
     mandatory: true
-    value_regex: "[0-9]+"
-  }
-  attrs: {
-    name: "data-playlist"
-    mandatory_oneof: "['data-playlist', 'data-video']"
-    value_regex: "[0-9]+"
-  }
-  attrs: {
-    name: "data-video"
-    mandatory_oneof: "['data-playlist', 'data-video']"
-    value_regex: "[0-9]+"
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-brid-player"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ima-video"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
-    supported_layouts: FLEX_ITEM
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
