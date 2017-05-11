@@ -23,7 +23,7 @@ limitations under the License.
   width="320"
   height="50"
   type="polymorphicads"
-  data-adUnitId="7c0b3ae742beccf94f7726ea832277a2"
+  data-adunit="7c0b3ae742beccf94f7726ea832277a2"
   data-params='{"testMode": true}'>
 </amp-ad>
 ```
@@ -34,5 +34,5 @@ For configuration details and to generate your tags, please contact [Polymorphic
 
 Supported parameters:
 
-- data-adUnitId : adUnitId
+- data-adunit : adUnitId
 - data-params : parameters
