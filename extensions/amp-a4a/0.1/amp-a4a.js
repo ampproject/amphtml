@@ -1395,7 +1395,7 @@ export function decodeSignatureHeader(headerValue) {
   const match = SIGNATURE_FORMAT.exec(headerValue);
   if (!match) {
     // TODO(@taymonbeal, #9274): replace this with real error reporting
-    user().error(TAG, `Invalid signature header: ${headerValue}`)
+    user().error(TAG, `Invalid signature header: ${headerValue}`);
     return null;
   }
   return /** @type {?SignatureInfoDef} */ ({
@@ -1418,7 +1418,7 @@ export function decodeSizeHeader(headerValue) {
   }
   if (!(/[0-9]+x[0-9]+/.test(headerValue))) {
     // TODO(@taymonbeal, #9274): replace this with real error reporting
-    user().error(TAG, `Invalid size header: ${headerValue}`)
+    user().error(TAG, `Invalid size header: ${headerValue}`);
     return null;
   }
   const sizeArr = headerValue.split('x').map(Number);
