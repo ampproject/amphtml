@@ -21,7 +21,6 @@ import {
 } from '../../../src/web-worker/amp-worker';
 import {installXhrService} from '../../../src/service/xhr-impl';
 import {xhrFor} from '../../../src/services';
-import {toggleExperiment} from '../../../src/experiments';
 import * as sinon from 'sinon';
 
 describe('invokeWebWorker', () => {
@@ -44,6 +43,7 @@ describe('invokeWebWorker', () => {
       Worker: () => fakeWorker,
       Blob: sandbox.stub(),
       URL: {createObjectURL: sandbox.stub()},
+      location: window.location,
     };
 
     // Stub xhr.fetchText() to return a resolved promise.
@@ -52,27 +52,10 @@ describe('invokeWebWorker', () => {
 
     const ampWorker = ampWorkerForTesting(fakeWin);
     workerReadyPromise = ampWorker.fetchPromiseForTesting();
-
-    // Enable 'web-worker' experiment on `fakeWin`.
-    toggleExperiment(
-        fakeWin,
-        'web-worker',
-        /* opt_on */ true,
-        /* opt_transientExperiment */ true);
   });
 
   afterEach(() => {
     sandbox.restore();
-  });
-
-  it('should check if experiment is enabled', () => {
-    toggleExperiment(
-        fakeWin,
-        'web-worker',
-        /* opt_on */ false,
-        /* opt_transientExperiment */ true);
-    return expect(invokeWebWorker(fakeWin, 'foo'))
-        .to.eventually.be.rejectedWith('disabled');
   });
 
   it('should check if Worker is supported', () => {
