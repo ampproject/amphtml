@@ -213,8 +213,6 @@ const command = {
     execOrDie(`${gulp} dist --fortesting`);
   },
   testRuntime: function() {
-    // Visual diff tests
-    execOrDie(`${gulp} visual-diff`);
     // dep-check needs to occur after build since we rely on build to generate
     // the css files into js files.
     execOrDie(`${gulp} dep-check`);
@@ -226,6 +224,11 @@ const command = {
     // and not start relying on new features).
     // Disabled because it regressed. Better to run the other saucelabs tests.
     // execOrDie(`${gulp} test --nobuild --saucelabs --oldchrome --compiled`);
+  },
+  runVisualDiffTests: function() {
+    // This must only be run for push builds, since Travis hides the encrypted
+    // environment variables required by Percy during pull request builds.
+    execOrDie(`${gulp} visual-diff`);
   },
   presubmit: function() {
     execOrDie(`${gulp} presubmit`);
@@ -243,6 +246,7 @@ function runAllCommands() {
   // Skip testDocumentLinks() during push builds.
   command.buildRuntime();
   command.presubmit();
+  command.runVisualDiffTests();  // Only called during push builds.
   command.testRuntime();
   command.buildValidatorWebUI();
   command.buildValidator();
