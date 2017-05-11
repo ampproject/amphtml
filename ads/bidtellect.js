@@ -44,42 +44,11 @@ export function bidtellect(global, data) {
   if (data.height) {
     params += '&h=' + encodeURIComponent(data.height);
   }
-  if (data.sid) {
-    params += '&sid=' + encodeURIComponent(data.sid);
-  }
-  if (data.sname) {
-    params += '&sname=' + encodeURIComponent(data.sname);
-  }
-  if (data.pubid) {
-    params += '&pubid=' + encodeURIComponent(data.pubid);
-  }
-  if (data.pubname) {
-    params += '&pubname=' + encodeURIComponent(data.pubname);
-  }
-  if (data.renderid) {
-    params += '&renderid=' + encodeURIComponent(data.renderid);
-  }
-  if (data.bestrender) {
-    params += '&bestrender=' + encodeURIComponent(data.bestrender);
-  }
-  if (data.autoplay) {
-    params += '&autoplay=' + encodeURIComponent(data.autoplay);
-  }
-  if (data.playbutton) {
-    params += '&playbutton=' + encodeURIComponent(data.playbutton);
-  }
-  if (data.videotypeid) {
-    params += '&videotypeid=' + encodeURIComponent(data.videotypeid);
-  }
-  if (data.videocloseicon) {
-    params += '&videocloseicon=' + encodeURIComponent(data.videocloseicon);
-  }
-  if (data.targetid) {
-    params += '&targetid=' + encodeURIComponent(data.targetid);
-  }
-  if (data.bustframe) {
-    params += '&bustframe=' + encodeURIComponent(data.bustframe);
-  }
+  optionalParams.forEach(function(param) {
+    if (data[param]) {
+      params += '&' + param + '=' + encodeURIComponent(data[param]);
+    }
+  });
   const url = 'https://cdn.bttrack.com/js/infeed/2.0/infeed.min.js' + params;
   writeScript(global, url);
 }
