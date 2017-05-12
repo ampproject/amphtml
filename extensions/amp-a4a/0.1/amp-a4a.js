@@ -626,12 +626,9 @@ export class AmpA4A extends AMP.BaseElement {
           this.protectedEmitLifecycleEvent_('adResponseValidateStart');
           const {signingServiceName, keypairId, signature} =
               creativeParts.signatureInfo;
-          if (getMode().localDev) {
-            // localDev mode allows fake signature for the "fake" network.
-            if (signingServiceName == 'FAKESERVICE' &&
-                this.element.getAttribute('type') == 'fake') {
-              return creativeParts.creative;
-            }
+          if (getMode().localDev && signingServiceName == 'FAKESERVICE' &&
+              this.element.getAttribute('type') == 'fake') {
+            return creativeParts.creative;
           }
           return signatureVerifierFor(this.win)
               .verify(
