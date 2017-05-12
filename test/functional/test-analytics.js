@@ -54,7 +54,7 @@ describes.realWin('analytics', {amp: true}, env => {
     });
 
     it('should not do anything if analytics is not installed', () => {
-      triggerAnalyticsEvent(ampdoc, 'hello');
+      triggerAnalyticsEvent(ampdoc.win.document, 'hello');
       return timer.promise(50).then(() => {
         expect(triggerEventSpy).to.have.not.been.called;
       });
@@ -65,10 +65,11 @@ describes.realWin('analytics', {amp: true}, env => {
         ampdoc, 'amp-analytics-instrumentation', MockInstrumentation);
       // Force instantiation
       getServiceForDoc(ampdoc, 'amp-analytics-instrumentation');
-      triggerAnalyticsEvent(ampdoc, 'hello');
+      triggerAnalyticsEvent(ampdoc.win.document, 'hello');
       return timer.promise(50).then(() => {
         expect(triggerEventSpy).to.have.been.called;
-        expect(triggerEventSpy).to.have.been.calledWith(ampdoc, 'hello');
+        expect(triggerEventSpy).to.have.been.calledWith(
+            ampdoc.win.document, 'hello');
       });
     });
   });
