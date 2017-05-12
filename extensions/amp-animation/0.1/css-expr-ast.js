@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {endsWith} from '../../../src/string';
-
 
 /**
  * A base class for all CSS node components defined in the
