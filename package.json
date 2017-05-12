@@ -92,7 +92,7 @@
     "nodemon": "1.11.0",
     "path": "0.12.7",
     "postcss": "5.2.10",
-    "postcss-import": "9.1.0",
+    "postcss-import": "10.0.0",
     "pretty-bytes": "2.0.1",
     "request": "2.73.0",
     "rimraf": "2.5.1",
