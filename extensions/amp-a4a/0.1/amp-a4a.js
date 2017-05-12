@@ -58,7 +58,10 @@ import {A4AVariableSource} from './a4a-variable-source';
 // TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {getContextMetadata} from '../../../src/iframe-attributes';
-import {isReportingEnabled} from '../../../ads/google/a4a/utils';
+import {
+  isReportingEnabled,
+  EXPERIMENT_ATTRIBUTE,
+} from '../../../ads/google/a4a/utils';
 
 /** @type {string} */
 const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
@@ -345,14 +348,13 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?Promise} */
     this.adUrlsPromise_ = null;
 
-    const type = this.element.getAttribute('type').toLowerCase();
-
+    const type = (this.element.getAttribute('type') || 'notype').toLowerCase();
     /**
      * {boolean} whether request should only be sent when slot is within
      *    renderOutsideViewport distance
      */
     this.delayRequestEnabled = (type == 'adsense' || type == 'doubleclick') &&
-      (getMode().localDev || isExperimentOn(this.win, 'a4a-delay-request'));
+      /1171526[56]4/.test(this.element.getAttribute(EXPERIMENT_ATTRIBUTE));
   }
 
   /** @override */

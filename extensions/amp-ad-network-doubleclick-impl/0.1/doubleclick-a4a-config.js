@@ -57,6 +57,7 @@ const DOUBLECLICK_A4A_EXPERIMENT_NAME = 'expDoubleclickA4A';
 export const DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH = {
   control: '117152662',
   experiment: '117152663',
+  delayedExperiment: '117152664',
 };
 
 /**

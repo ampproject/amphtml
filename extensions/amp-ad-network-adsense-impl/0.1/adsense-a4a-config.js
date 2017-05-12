@@ -55,6 +55,7 @@ const ADSENSE_A4A_EXPERIMENT_NAME = 'expAdsenseA4A';
 export const ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH = {
   control: '117152652',
   experiment: '117152653',
+  delayedExperiment: '117152654',
 };
 
 /**
