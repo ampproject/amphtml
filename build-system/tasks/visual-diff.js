@@ -72,7 +72,7 @@ function extractPercyKeys() {
         'Error: PERCY_TOKEN doesn\'t look like a valid Percy API key'));
     process.exit(1);
   }
-  util.log('Percy token: ', util.colors.magenta(percyToken));
+  util.log('Percy token: ', util.colors.magenta('<redacted>'));
   return {
     percyProject: percyProject,
     percyToken: percyToken,
