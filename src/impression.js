@@ -100,9 +100,8 @@ export function maybeTrackImpression(win) {
 
 /**
  * Signal that impression tracking is not relevant in this environment.
- * @param {!Window} win
  */
-export function doNotTrackImpression(win) {
+export function doNotTrackImpression() {
   trackImpressionPromise = Promise.resolve();
 }
 

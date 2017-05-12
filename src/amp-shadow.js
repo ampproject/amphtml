@@ -48,7 +48,7 @@ installRuntimeServices(self);
 
 // Impression tracking for PWA is not meaningful, but the dependent code
 // has to be unblocked.
-doNotTrackImpression(self);
+doNotTrackImpression();
 
 // Builtins.
 installBuiltins(self);
