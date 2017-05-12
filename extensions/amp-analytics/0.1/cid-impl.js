@@ -111,7 +111,6 @@ export class Cid {
    *      given.
    */
   get(getCidStruct, consent, opt_persistenceConsent) {
-    dev().assert(typeof getCidStruct != 'string', ''); // DO-NOT-SUBMIT
     user().assert(
         SCOPE_NAME_VALIDATOR.test(getCidStruct.scope)
             && SCOPE_NAME_VALIDATOR.test(getCidStruct.cookieName),
