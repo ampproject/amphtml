@@ -1,0 +1,4 @@
+{
+  "_comment": "HTML file(s) used for visual diff tests. Paths relative to src.",
+  "webpage": "examples/amp-by-example.html"
+}
