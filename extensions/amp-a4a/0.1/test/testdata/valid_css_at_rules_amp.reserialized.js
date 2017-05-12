@@ -25,7 +25,7 @@ export const data = {
    ]
 }
 </script>
-</body></html>\0`,
+</body></html>` + '\0',
 
   original: `<!--
   Copyright 2016 The AMP HTML Authors. All Rights Reserved.
