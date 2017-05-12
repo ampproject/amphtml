@@ -26,9 +26,9 @@ Common usage of this extended component might look like:
 <amp-cat width=50 height=50></amp-cat>
 ```
 
-Your first step will be writing the extended component JavaScript code. The
-code will be placed in the amphtml src tree at the location of
-`amphtml/extensions/amp-cat/0.1/`. However, this document only describes how to
+Your first step will be writing the extended component JavaScript code. Place
+this code in the amphtml src tree at the location of
+`amphtml/extensions/amp-cat/0.1/`. This document only describes how to
 specify validation rules for an extended component - it does not cover
 implementing its runtime behavior. For the latter, see the codelab [Creating
 your first AMP
@@ -37,7 +37,7 @@ Component](https://codelabs.developers.google.com/codelabs/creating-your-first-a
 ## Validation Rules
 
 Once you have built the extended component JavaScript, you are ready to submit validator
-rules. This can be done in the same Pull Request, or a later Pull Request for
+rules. You may do this in the same Pull Request, or a later Pull Request for
 simplicity.
 
 You will be creating a rules file as well as two test files. The paths for
@@ -169,10 +169,10 @@ This tells the validator that we are defining a tag with the `<script>` name.
   requires: "amp-cat"
 ```
 
-The presence of certain tags can add additional validation requirements to the
-document. The presence of other tags can satisfy validation requirements. These
-requirements are indicated as arbitrary strings such as the ones in these
-fields. The strings are used in validation error messages to developers
+The presence of certain tags can add validation requirements to the
+document. The presence of other tags can satisfy validation requirements. 
+These requirements are indicated as arbitrary strings such as the ones in
+these fields. The strings are used in validation error messages to developers
 debugging their amp documents.
 
 In this case, these fields indicate that the presence of the amp-cat script tag
@@ -346,7 +346,7 @@ value_url: {
 ```
 This specifies that the attribute value must be a valid URL or an empty string.
 If an URL, it may be either "http" or "https" and may be relative. Note that in
-many cases, you may only want to allow "https" as non-secure resources will
+many cases, you may want to allow only "https" as non-secure resources will
 generate mixed-mode warnings when displayed from the AMP Cache.
 
 Only one of:
@@ -385,6 +385,76 @@ attrs: {
 }
 ```
 
+## Test Files
+
+It is a good idea to contribute test files along with your validator rules
+which at minimum demonstrate a correct usage of your validator rules.
+
+A good place to start is to copy
+[minimum_valid_amp.html](https://github.com/ampproject/amphtml/blob/master/validator/testdata/feature_tests/minimum_valid_amp.html) to a new file named, for example:
+
+<pre>
+amphtml/extensions/<b>amp-cat</b>/0.1/test/validator-<b>amp-cat</b>.html
+</pre>
+
+It a basic AMP HTML document. Open this file and then make the
+following modifications.
+
+**Change the Test Description**
+
+In an HTML comment, below the AMP copyright declaration, is a brief description
+of the test. Change this to describe which extension this test is for.
+
+**Add your extension script tag**
+
+In the document `<head>` section, add the extension `<script>` tag used by this extension:
+
+<pre>
+&lt;script async custom-element='<b>amp-cat</b>'
+     src='https://cdn.ampproject.org/v0/<b>amp-cat</b>-0.1.js'&gt;&lt;/scrip&gt;
+</pre>
+
+**Add a working example of your tag**
+
+In the document `<body>` section, add a valid example of your tag.
+
+```
+<!-- Valid amp-cat tag -->
+<amp-cat data-selected-cat="oscar" width=50 height=50></amp-cat>
+```
+
+Optionally, you may add more than one valid variant and/or invalid examples.
+
+## Test Output files
+
+For each test file, also add a matching output file which will display the
+validator output for the test case. If you only added valid examples, this file
+should contain a single line:
+
+```
+PASS
+```
+
+If you include one or more invalid test cases, the file should look like the
+following, with errors specific to your test cases.
+
+```
+FAIL
+amp-iframe/0.1/test/validator-amp-iframe.html:41:2 The attribute 'src' in tag 'amp-iframe' is missing or incorrect, but required by attribute '[src]'. (see https://www.ampproject.org/docs/reference/components/amp-iframe) [DISALLOWED_HTML]
+```
+
+To test your changes, from the `amphtml/validator/` path, run `python build.py`.
+If your test case `.html` files produce the validator output in the test case
+`.out` files, then you will see:
+
+```
+[[build.py RunTests]] - ... success
+```
+
+Alternatively, if the tests don't match, this script will print the validator
+output to stdout, which can be used for updating the test file.
+
+
 ## Final Note on Rules
 
 This document attempts to summarize some of the more commonly used rules for
@@ -392,5 +462,3 @@ creating validator extended components. More complex rules are possible and new 
 types can even be added as needed. If your goals are not met by the rules in
 this document, [don't hesitate to
 contact](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#discussion-channels) the AMP developers and ask for suggestions.
-
-
