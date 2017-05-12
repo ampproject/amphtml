@@ -253,6 +253,7 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
     if (fixtureGlobal) {
       fixtureGlobal.doc.body.removeChild(videoGlobal);
       fixtureGlobal.iframe.remove();
+      toggleExperiment(fixtureGlobal.win, 'amp-ima-video', false);
     }
   }
 }

@@ -79,7 +79,6 @@ describe.configure().skipIos().run('amp-ima-video', () => {
     video.setAttribute('data-src', '/examples/av/ForBiggerJoyrides.mp4');
     video.setAttribute('data-tag', 'https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpost&cmsid=496&vid=short_onecue&correlator=');
     video.setAttribute('data-poster', '/examples/img/ima-poster.png');
-    toggleExperiment(fixture.win, 'amp-ima-video', false);
     return video;
   });
 });
