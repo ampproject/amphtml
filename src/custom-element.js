@@ -1581,13 +1581,14 @@ function createBaseCustomElementClass(win) {
      * @package @final @this {!Element}
      */
     toggleFallback(state) {
+      assertNotTemplate(this);
+      const resourceState = this.getResourceState_();
       // Do not show fallback if element has not been scheduled layout yet
-      if (state && (this.getResourceState_() == ResourceState.NOT_BUILT ||
-          this.getResourceState_() == ResourceState.NOT_LAID_OUT ||
-          this.getResourceState_() == ResourceState.READY_FOR_LAYOUT)) {
+      if (state && (resourceState == ResourceState.NOT_BUILT ||
+          resourceState == ResourceState.NOT_LAID_OUT ||
+          resourceState == ResourceState.READY_FOR_LAYOUT)) {
         return;
       }
-      assertNotTemplate(this);
       // This implementation is notably less efficient then placeholder toggling.
       // The reasons for this are: (a) "not supported" is the state of the whole
       // element, (b) some realyout is expected and (c) fallback condition would
