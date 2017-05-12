@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {AmpA4A, XORIGIN_MODE} from '../../amp-a4a/0.1/amp-a4a';
 import {base64DecodeToBytes} from '../../../src/utils/base64';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
@@ -59,7 +59,20 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
           // and the signature is "FAKESIG". This mode is only allowed in
           // `localDev` and primarily used for A4A Envelope for testing.
           // See DEVELOPING.md for more info.
-          const creative = this.transformCreativeLocalDev_(deserialized);
+          let creative = this.transformCreativeLocalDev_(deserialized);
+          try {
+            // Gracefully handle the case in which the fake ad is still
+            // formatted in JSON, which it almost certainly is, since
+            // "gulp serve" won't serve an HTML file under /extensions
+            var json = JSON.parse(deserialized);
+            if (json.creative) {
+              creative = json.creative;
+            }
+          } catch (e) {
+          }
+          // Prevent issueing a second network request to try to fetch
+          // the same JSON again.
+          this.experimentalNonAmpCreativeRenderMethod_ = XORIGIN_MODE.NAMEFRAME;
           const encoder = new TextEncoder('utf-8');
           return {
             creative: encoder.encode(creative).buffer,
@@ -67,7 +80,6 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
           };
         }
       }
-
       // Normal mode: the content is a JSON structure with two fieleds:
       // `creative` and `signature`.
       const decoded = JSON.parse(deserialized);
