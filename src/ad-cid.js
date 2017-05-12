@@ -26,10 +26,7 @@ import {dev} from '../src/log';
  */
 export function getAdCid(adElement) {
   const config = adConfig[adElement.element.getAttribute('type')];
-  /** @const {?string} */
-  const scope = config ? config.clientIdScope : null;
-
-  if (!scope) {
+  if (!config.clientIdScope) {
     return Promise.resolve();
   }
   const cidPromise = cidForDocOrNull(adElement.getAmpDoc()).then(cidService => {
@@ -37,7 +34,7 @@ export function getAdCid(adElement) {
       return;
     }
     return cidService.get({
-      scope,
+      scope: dev().assertString(config.clientIdScope),
       cookieName: config.clientIdCookieName,
     }, Promise.resolve(undefined)).catch(error => {
       // Not getting a CID is not fatal.
