@@ -29,7 +29,7 @@ limitations under the License.
 
 ## Configuration
 
-For configuration details and to generate your tags, please contact us :- https://www.venatusmedia.com/contact
+For configuration details and to generate your tags, please contact us :- https://www.venatusmedia.com/contact or chrisb@venatusmedia.com
 
 Required parameter:
 
