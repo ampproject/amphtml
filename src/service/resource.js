@@ -175,6 +175,9 @@ export class Resource {
     /** @private {boolean} */
     this.isInViewport_ = false;
 
+    /** @private {boolean} */
+    this.isInRenderOutsideViewport_ = false;
+
     /** @private {?Promise<undefined>} */
     this.layoutPromise_ = null;
 
@@ -560,6 +563,19 @@ export class Resource {
   }
 
   /**
+   * @return {!Promise} resolves when underlying element is built and within the
+   *    range specified by implementation's renderOutsideViewport
+   */
+  whenWithinRenderOutsideViewport() {
+    if (this.renderOutsideViewportPromise_) {
+      return this.renderOutsideViewportPromise_;
+    }
+    return this.renderOutsideViewportPromise_ = new Promise(resolver => {
+      this.renderOutsideViewportResolver_ = resolver;
+    });
+  }
+
+  /**
    * Whether this is allowed to render when not in viewport.
    * @return {boolean}
    */
@@ -570,14 +586,21 @@ export class Resource {
     // prerender this resource, so that it can avoid expensive elements wayyy
     // outside of viewport. For now, blindly trust that owner knows what it's
     // doing.
-    if (this.hasOwner()) {
+    if (this.hasOwner() && !this.renderOutsideViewportPromise_) {
       return true;
     }
 
     const renders = this.element.renderOutsideViewport();
     // Boolean interface, element is either always allowed or never allowed to
     // render outside viewport.
+    const promiseCallback = () => {
+      if (!this.renderOutsideViewportResolver_) return;
+      this.renderOutsideViewportResolver_();
+      this.renderOutsideViewportPromise_= null;
+      this.renderOutsideViewportResolver_ = null;
+    };
     if (renders === true || renders === false) {
+      if (renders === true) { promiseCallback(); }
       return renders;
     }
     // Numeric interface, element is allowed to render outside viewport when it
@@ -611,9 +634,12 @@ export class Resource {
       }
     } else {
       // Element is in viewport
+      promiseCallback();
       return true;
     }
-    return distance < viewportBox.height * multipler / scrollPenalty;
+    const result = distance < viewportBox.height * multipler / scrollPenalty;
+    if (result) promiseCallback();
+    return result;
   }
 
   /**

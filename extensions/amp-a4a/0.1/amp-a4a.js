@@ -344,6 +344,15 @@ export class AmpA4A extends AMP.BaseElement {
 
     /** @private {?Promise} */
     this.adUrlsPromise_ = null;
+
+    const type = this.element.getAttribute('type').toLowerCase();
+
+    /**
+     * {boolean} whether request should only be sent when slot is within
+     *    renderOutsideViewport distance
+     */
+    this.delayRequestEnabled = (type == 'adsense' || type == 'doubleclick') &&
+      (getMode().localDev || isExperimentOn(this.win, 'a4a-delay-request'));
   }
 
   /** @override */
@@ -515,7 +524,7 @@ export class AmpA4A extends AMP.BaseElement {
     };
 
     let adUrlPromiseResolver = null;
-    if ((getMode().localDev ||
+    if (!this.delayRequestEnabled && (getMode().localDev ||
         isExperimentOn(this.win, 'a4a-measure-get-ad-urls')) &&
         isReportingEnabled(this)) {
       this.adUrlsPromise_ = new Promise(resolve => {
@@ -536,10 +545,24 @@ export class AmpA4A extends AMP.BaseElement {
     //   - Chain cancelled => don't return; drop error
     //   - Uncaught error otherwise => don't return; percolate error up
     this.adPromise_ = viewerForDoc(this.getAmpDoc()).whenFirstVisible()
+        .then(() => {
+          checkStillCurrent(promiseId);
+          // See if experiment that delays request until slot is within
+          // renderOutsideViewport.
+          const resource = this.getResource();
+          // Within render outside viewport will not resolve if already within.
+          if (this.delayRequestEnabled && !resource.renderOutsideViewport()) {
+            return resource.whenWithinRenderOutsideViewport();
+          }
+          return Promise.resolve();
+        })
         // This block returns the ad URL, if one is available.
         /** @return {!Promise<?string>} */
         .then(() => {
           checkStillCurrent(promiseId);
+          if (this.delayRequestEnabled) {
+            dev().info(TAG, 'ad request being built');
+          }
           return /** @type {!Promise<?string>} */ (this.getAdUrl());
         })
         // This block returns the (possibly empty) response to the XHR request.
