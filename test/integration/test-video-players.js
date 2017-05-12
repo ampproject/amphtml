@@ -27,7 +27,6 @@
  */
 
 import {runVideoPlayerIntegrationTests} from './test-video-players-helper';
-import {toggleExperiment} from '../../src/experiments';
 
 
 //TODO(aghassemi,#7822): We have to skip iOS for video tests since videos
