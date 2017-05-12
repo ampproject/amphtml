@@ -348,6 +348,7 @@ export const adConfig = {
 
   imedia: {
     prefetch: 'https://i.imedia.cz/js/im3.js',
+    renderStartImplemented: true,
   },
 
   imobile: {

@@ -22,11 +22,7 @@ import {loadScript, computeInMasterFrame, validateData} from '../3p/3p';
  */
 export function imedia(global, data) {
   validateData(data, ['id', 'positions']);
-
-  let positions = null;
-  if (data.positions) {
-    positions = JSON.parse(data.positions);
-  }
+  const positions = JSON.parse(data.positions);
   const mW = context.isMaster ? global : context.master;
 
   // create parent element
@@ -40,28 +36,41 @@ export function imedia(global, data) {
   }
   mW.elements.push(parentElement);
 
-  computeInMasterFrame(global, 'imedia-load', function(done) {
-    loadScript(this, 'https://i.imedia.cz/js/im3.js', () => {
-      if (this.im != null) {
-        mW.im = this.im;
+  computeInMasterFrame(global, 'imedia-load', done => {
+    loadScript(global, 'https://i.imedia.cz/js/im3.js', () => {
+      if (global.im != null) {
+        mW.im = global.im;
         mW.im.conf.referer = context.location.href;
+
         // send request to get all ads
         mW.im.getAds(positions, {AMPcallback: ads => {
           mW.ads = ads;
-          done(true);
+          done(null);
         }});
       }});
   }, () => {
-    mW.elements.forEach(element => {
-      positions.forEach((position, index) => {
-        // match right elemnent and zone to write advert from adserver
+    mW.elements = mW.elements.filter(element => {
+      let used = true;
+      positions.filter((position, index) => {
+
+        // match right element and zone to write advert from adserver
         if (element.id == position.id) {
+          used = false;
           position.id = element; // right element "c" to position obj.
           if (mW.im.writeAd) {
             mW.im.writeAd(mW.ads[index], position);
+
+            // inform AMP runtime when the ad starts rendering
+            if (mW.ads[index].impress) {
+              global.context.renderStart();
+            } else {
+              global.context.noContentAvailable();
+            }
           }
+          return false;
         }
       });
+      return used; // remove (filter) element filled with add
     });
   });
 };

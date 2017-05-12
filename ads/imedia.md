@@ -34,7 +34,7 @@ limitations under the License.
 For semantics of configuration, please see [ad network documentation](https://iimedia.sbeta.cz/html/navod-im3light/)
 or contact reklama-pozadavky@firma.seznam.cz
 
-Supported parameters:
+Required parameters:
 
 - data-id
 - data-positions
