@@ -19,7 +19,7 @@ import {
   layoutRectsOverlap,
   moveLayoutRect,
 } from '../layout-rect';
-import {Layout} from './layout';
+import {Layout} from '../layout';
 import {dev} from '../log';
 import {toggle, computedStyle} from '../style';
 import {isAmpElement} from '../dom';
