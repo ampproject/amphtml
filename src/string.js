@@ -33,7 +33,7 @@ export function dashToCamelCase(name) {
 }
 
 /**
- * Polyfill for String.prototype. endsWith.
+ * Polyfill for String.prototype.endsWith.
  * @param {string} string
  * @param {string} suffix
  * @return {boolean}
@@ -44,7 +44,7 @@ export function endsWith(string, suffix) {
 }
 
 /**
- * Polyfill for String.prototype. startsWith.
+ * Polyfill for String.prototype.startsWith.
  * @param {string} string
  * @param {string} prefix
  * @return {boolean}

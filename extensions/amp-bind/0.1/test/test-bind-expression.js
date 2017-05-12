@@ -152,6 +152,13 @@ describe('BindExpression', () => {
     }).to.throw(Error, unsupportedFunctionError);
   });
 
+  it('should return null when invoking methods on null', () => {
+    expect(evaluate('null.charAt(0)')).to.be.null;
+    expect(evaluate('null.includes(3)')).to.be.null;
+    expect(evaluate('a.indexOf("baz")', {a: null})).to.be.null;
+    expect(evaluate('(false || null).replace("foo", "bar")')).to.be.null;
+  });
+
   it('should support variables', () => {
     expect(evaluate('foo', {foo: 'bar'})).to.equal('bar');
     expect(evaluate('foo', {foo: 1})).to.equal(1);
