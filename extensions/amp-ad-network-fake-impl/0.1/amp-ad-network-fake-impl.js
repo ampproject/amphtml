@@ -64,7 +64,7 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
             // Gracefully handle the case in which the fake ad is still
             // formatted in JSON, which it almost certainly is, since
             // "gulp serve" won't serve an HTML file under /extensions
-            var json = JSON.parse(deserialized);
+            const json = JSON.parse(deserialized);
             if (json.creative) {
               creative = json.creative;
             }
