@@ -175,9 +175,6 @@ export class Resource {
     /** @private {boolean} */
     this.isInViewport_ = false;
 
-    /** @private {boolean} */
-    this.isInRenderOutsideViewport_ = false;
-
     /** @private {?Promise<undefined>} */
     this.layoutPromise_ = null;
 
