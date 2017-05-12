@@ -22,6 +22,6 @@ import {writeScript, validateData} from '../3p/3p';
  */
 export function venatus(global, data) {
   validateData(data, ['sid', 'pid'], []);
-  const url = 'http://localhost:9000/deliver/tag/' + data.sid + '/' + data.pid;
+  const url = 'https://api.venatusmedia.com/deliver/tag/' + data.sid + '/' + data.pid;
   writeScript(global, url);
 }
