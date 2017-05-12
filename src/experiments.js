@@ -24,9 +24,11 @@
 import {bytesToUInt32, stringToBytes, utf8DecodeSync} from './utils/bytes';
 import {cryptoFor} from './crypto';
 import {getCookie, setCookie} from './cookies';
-import {getSourceOrigin} from './url';
-import {parseQueryString} from './url';
+import {getSourceOrigin, parseQueryString, parseUrl} from './url';
+import {user} from './log';
 
+/** @const {string} */
+const TAG = 'experiments';
 
 /** @const {string} */
 const COOKIE_NAME = 'AMP_EXP';
@@ -39,6 +41,9 @@ const COOKIE_EXPIRATION_INTERVAL = COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
 
 /** @type {Object<string, boolean>} */
 let toggles_ = null;
+
+/** @type {!Promise} */
+const originTrialsPromise = enableExperimentsForOriginTrials(self);
 
 /**
  * @typedef {{
@@ -57,41 +62,23 @@ export function isCanary(win) {
   return !!(win.AMP_CONFIG && win.AMP_CONFIG.canary);
 }
 
+
 /**
- * Determines if the specified experiment is on or off for origin trials.
- * Callers shouldcheck if the experiment is already enabled before calling this
- * function.
- *
- * The promise returned by this function will resolve to true IFF the specified
- * experiment is enabled for this origin.
- * The promise returned by this function will resolve to false if:
- *   1. The experiment meta tag couldn't be found,
- *   2. Crypto isn't available,
- *   3. The experiment is not specified in the experiment token
- *   4. The experiment has expired.
- * The promise returned by this function will reject with an error if:
- *   1. The experiment meta tag is present without a token
- *   2. The token is malformed (e.g. non-existant version number)
- *   3. The token is not for this origin
- *   4. The experiments data was not signed with our private key
+ * Enable experiments detailed in an origin trials token iff the token is
+ * valid. A token is invalid if *
+ *   1. The token is malformed (e.g. non-existant version number)
+ *   2. The token is not for this origin
+ *   3. The experiments data was not signed with our private key
  * @param {!Window} win
- * @param {string} experimentId
- * @param {!Object} opt_publicJwk Used for testing only.
- * @return {!Promise<boolean>}
+ * @param {string} token
+ * @param {!Object=} opt_publicJwk Used for testing only.
+ * @return {!Promise}
  */
-export function isExperimentOnForOriginTrial(win, experimentId, opt_publicJwk) {
-  if (isExperimentOn(win, experimentId)) {
-    return Promise.resolve(true);
-  }
+function enableExperimentsFromToken(win, token, opt_publicJwk) {
   const crypto = cryptoFor(win);
-  const meta =
-      win.document.head.querySelector('meta[name="amp-experiment-token"]');
-  if (!meta || !crypto.isCryptoAvailable()) {
-    return Promise.resolve(false);
-  }
-  const token = meta.getAttribute('content');
-  if (!token) {
-    return Promise.reject(new Error('Unable to read experiments token'));
+  if (!crypto.isCryptoAvailable()) {
+    user().warn(TAG, 'Crypto is unavailable');
+    return Promise.resolve();
   }
   /**
    * token = encode64(version + length + config + sign(config, private_key))
@@ -102,23 +89,20 @@ export function isExperimentOnForOriginTrial(win, experimentId, opt_publicJwk) {
   const version = bytes[current];
   if (version !== 0) {
     // Unrecognized version number
-    const error =
-        new Error(`Unrecognized experiments token version: ${version}`);
-    return Promise.reject(error);
+    return Promise.reject(`Unrecognized experiments token version: ${version}`);
   }
   current++;
- /**
-  * Version 0:
-  * length = 4 bytes representing number of bytes in config
-  * config = string containing the experiment ID, origin URL, etc.
-  */
+  /**
+   * Version 0:
+   * length = 4 bytes representing number of bytes in config
+   * config = string containing the experiment ID, origin URL, etc.
+   */
   const bytesForConfigSize = 4;
   const configSize =
       bytesToUInt32(bytes.subarray(current, current + bytesForConfigSize));
   current += bytesForConfigSize;
   if (configSize > bytes.length - current) {
-    return Promise.reject(
-        new Error('Specified len extends past end of buffer'));
+    return Promise.reject('Specified len extends past end of buffer');
   }
   const configBytes = bytes.subarray(current, current + configSize);
   current += configSize;
@@ -131,37 +115,72 @@ export function isExperimentOnForOriginTrial(win, experimentId, opt_publicJwk) {
     return crypto.verifySignature(configBytes, signatureBytes, keyInfo);
   }).then(verified => {
     if (!verified) {
-      throw new Error('Failed to verify config signature');
+      return Promise.reject('Failed to verify config signature');
     }
     const configStr = utf8DecodeSync(configBytes);
     const config = JSON.parse(configStr);
 
-    const approvedOrigin = config['origin'];
-    const url = win.location;
-    const sourceOrigin = getSourceOrigin(url);
+    const approvedOrigin = parseUrl(config['origin']).origin;
+    const sourceOrigin = getSourceOrigin(win.location);
     if (approvedOrigin !== sourceOrigin) {
-      throw new Error('Config does not match current origin');
+      return Promise.reject('Config does not match current origin');
     }
 
     const experiments = config['experiments'];
-    const experiment = experiments[experimentId];
-    if (!experiment) {
-      return false;
-    }
-
-    const expiration = experiment['expiration'];
-    const now = Date.now();
-    if (expiration < now) {
-      return false;
-    }
-
-    // TODO(kmh287): Transient experiment?
-    toggleExperiment(win,
-        experimentId,
-        /* opt_on */ true,
-        /* opt_transientExperiment */ true);
-    return true;
+    Object.keys(experiments).forEach(experimentId => {
+      const experiment = experiments[experimentId];
+      const expiration = experiment['expiration'];
+      const now = Date.now();
+      if (expiration >= now) {
+        toggleExperiment(win,
+            experimentId,
+            /* opt_on */ true,
+            /* opt_transientExperiment */ true);
+      }
+    });
   });
+}
+
+
+/**
+ * Scan the page for origin trial tokens. Enable experiments detailed in the
+ * tokens iff the token is well-formed. A token
+ * @param {!Window} win
+  *@param {!Object=} opt_publicJwk Used for testing only.
+ * @return {!Promise}
+ */
+export function enableExperimentsForOriginTrials(win, opt_publicJwk) {
+  const metas =
+      win.document.head.querySelectorAll('meta[name="amp-experiment-token"]');
+  const tokenPromises = [];
+  for (let i = 0; i < metas.length; i++) {
+    const meta = metas[i];
+    const token = meta.getAttribute('content');
+    if (token) {
+      const tokenPromise =
+          enableExperimentsFromToken(win, token, opt_publicJwk).catch(msg => {
+            // Log message but do not prevent scans of other tokens.
+            user().warn(TAG, msg);
+          });
+      tokenPromises.push(tokenPromise);
+    } else {
+      user().warn(TAG, 'Unable to read experiments token');
+    }
+  }
+  return Promise.all(tokenPromises);
+}
+
+/**
+ * Determines if the specified experiment is on or off for origin trials.
+ * Callers should check if the experiment is already enabled before calling this
+ * function.
+ *
+ * @param {!Window} win
+ * @param {string} experimentId
+ * @return {!Promise<boolean>}
+ */
+export function isExperimentOnForOriginTrial(win, experimentId) {
+  return originTrialsPromise.then(() => isExperimentOn(win, experimentId));
 }
 
 /**
@@ -445,3 +464,4 @@ export function forceExperimentBranch(win, experimentName, branchId) {
   toggleExperiment(win, experimentName, !!branchId, true);
   win.experimentBranches[experimentName] = branchId;
 }
+
