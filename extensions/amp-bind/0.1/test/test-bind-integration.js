@@ -77,7 +77,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
         waitForEvent('amp:bind:mutated'));
   }
 
-  describe('text integration', () => {
+  describe('[text] and [class] integration', () => {
 
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-text-integration.html');
