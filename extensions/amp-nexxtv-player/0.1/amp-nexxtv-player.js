@@ -15,6 +15,7 @@
  */
 
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
+import {tryParseJson} from '../../../src/json';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {user} from '../../../src/log';
 import {
@@ -22,6 +23,7 @@ import {
 } from '../../../src/service/video-manager-impl';
 import {removeElement} from '../../../src/dom';
 import {listen} from '../../../src/event-helper';
+import {isObject} from '../../../src/types';
 import {VideoEvents} from '../../../src/video-interface';
 import {videoManagerForDoc} from '../../../src/services';
 
@@ -181,13 +183,18 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
       return;
     }
 
-    if (event.data == 'play') {
+    const data = isObject(event.data) ? event.data : tryParseJson(event.data);
+    if (data === undefined) {
+      return;
+    }
+
+    if (data.event == 'play') {
       this.element.dispatchCustomEvent(VideoEvents.PLAY);
-    } else if (event.data == 'pause') {
+    } else if (data.event == 'pause') {
       this.element.dispatchCustomEvent(VideoEvents.PAUSE);
-    } else if (event.data == 'mute') {
+    } else if (data.event == 'mute') {
       this.element.dispatchCustomEvent(VideoEvents.MUTED);
-    } else if (event.data == 'unmute') {
+    } else if (data.event == 'unmute') {
       this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
     }
   }

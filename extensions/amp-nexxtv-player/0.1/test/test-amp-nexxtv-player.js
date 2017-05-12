@@ -94,22 +94,22 @@ describe('amp-nexxtv-player', () => {
       return Promise.resolve()
         .then(() => {
           const p = listenOncePromise(nexxtv, VideoEvents.PLAY);
-          sendFakeMessage(nexxtv, iframe, 'play');
+          sendFakeMessage(nexxtv, iframe, {event: 'play'});
           return p;
         })
         .then(() => {
           const p = listenOncePromise(nexxtv, VideoEvents.MUTED);
-          sendFakeMessage(nexxtv, iframe, 'mute');
+          sendFakeMessage(nexxtv, iframe, {event: 'mute'});
           return p;
         })
         .then(() => {
           const p = listenOncePromise(nexxtv, VideoEvents.PAUSE);
-          sendFakeMessage(nexxtv, iframe, 'pause');
+          sendFakeMessage(nexxtv, iframe, {event: 'pause'});
           return p;
         })
         .then(() => {
           const p = listenOncePromise(nexxtv, VideoEvents.UNMUTED);
-          sendFakeMessage(nexxtv, iframe, 'unmute');
+          sendFakeMessage(nexxtv, iframe, {event: 'unmute'});
           return p;
         });
     });
