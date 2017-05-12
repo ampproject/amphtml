@@ -57,6 +57,7 @@ window.AMP_CONFIG.thirdPartyFrameHost;
 window.AMP_CONFIG.thirdPartyFrameRegex;
 window.AMP_CONFIG.cdnUrl;
 window.AMP_CONFIG.errorReportingUrl;
+window.AMP_CONFIG.safeFrameVersion;
 
 window.AMP_CONTEXT_DATA;
 

@@ -20,6 +20,7 @@ import {
 } from '../../amp-ad/0.1/concurrent-load';
 import {adConfig} from '../../../ads/_config';
 import {signingServerURLs} from '../../../ads/_a4a-config';
+import {urls} from '../../../src/config';
 import {createElementWithAttributes} from '../../../src/dom';
 import {cancellation, isCancellation} from '../../../src/error';
 import {
@@ -70,11 +71,9 @@ const METADATA_STRING_NO_QUOTES =
 // TODO(tdrl): Temporary, while we're verifying whether SafeFrame is an
 // acceptable solution to the 'Safari on iOS doesn't fetch iframe src from
 // cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
-/** @type {string} */
-const SAFEFRAME_VERSION = '1-0-6';
 /** @type {string} @visibleForTesting */
 export const SAFEFRAME_IMPL_PATH =
-    'https://tpc.googlesyndication.com/safeframe/' + SAFEFRAME_VERSION +
+    'https://tpc.googlesyndication.com/safeframe/' + urls.safeFrameVersion +
     '/html/container.html';
 
 /** @type {string} @visibleForTesting */
