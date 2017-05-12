@@ -29,7 +29,7 @@ import {user} from '../src/log';
  * @param {function(!Object)} cb
  */
 function getFacebookSdk(global, cb) {
-  loadScript(global, 'https://connect.facebook.net/en_US/sdk.js', () => {
+  loadScript(global, 'https://connect.facebook.net/'+window.navigator.language.replace("-", "_")+'/sdk.js', () => {
     cb(global.FB);
   });
 }
