@@ -308,19 +308,8 @@ export class AmpForm {
    * @private
    */
   submit_() {
-    let varSubsFields = [];
-    // Only allow variable substitutions for inputs if the form action origin
-    // is the canonical origin.
-    // TODO(mkhatib, #7168): Consider relaxing this.
-    if (this.isSubmittingToCanonical_()) {
-      // Fields that support var substitutions.
-      varSubsFields = this.form_.querySelectorAll(
-          '[type="hidden"][data-amp-replace]');
-    } else {
-      user().warn(TAG, 'Variable substitutions disabled for non-canonical ' +
-          'origin submit action: %s', this.form_);
-    }
-
+    const varSubsFields = this.form_.querySelectorAll(
+        '[type="hidden"][data-amp-replace]');
     if (this.xhrAction_) {
       this.handleXhrSubmit_(varSubsFields);
     } else if (this.method_ == 'POST') {
@@ -328,22 +317,6 @@ export class AmpForm {
     } else if (this.method_ == 'GET') {
       this.handleNonXhrGet_(varSubsFields);
     }
-  }
-
-  /**
-   * Checks whether the submissions are going to go through to the canonical origin
-   * or not.
-   * @private
-   */
-  isSubmittingToCanonical_() {
-    if (this.isCanonicalAction_ !== undefined) {
-      return this.isCanonicalAction_;
-    }
-
-    const docInfo = documentInfoForDoc(this.form_);
-    const canonicalOrigin = parseUrl(docInfo.canonicalUrl).origin;
-    const url = this.xhrAction_ || this.form_.getAttribute('action');
-    return this.isCanonicalAction_ = parseUrl(url).origin == canonicalOrigin;
   }
 
   /**
