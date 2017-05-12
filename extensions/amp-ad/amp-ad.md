@@ -249,6 +249,7 @@ To use `<amp-ad>` or `<amp-embed>`, the script to the `amp-ad` library is needed
 - [Fusion](../../ads/fusion.md)
 - [GenieeSSP](../../ads/genieessp.md)
 - [GMOSSP](../../ads/gmossp.md)
+- [GumGum](../../ads/gumgum.md)
 - [Holder](../../ads/holder.md)
 - [I-Mobile](../../ads/imobile.md)
 - [iBillboard](../../ads/ibillboard.md)
