@@ -27,7 +27,7 @@ export const data = {
    ]
 }
 </script>
-</body></html>{$NUL}`,
+</body></html>` + NUL,
 
   original: `<!--
   Copyright 2016 The AMP HTML Authors. All Rights Reserved.
