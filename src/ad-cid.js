@@ -26,7 +26,7 @@ import {dev} from '../src/log';
  */
 export function getAdCid(adElement) {
   const config = adConfig[adElement.element.getAttribute('type')];
-  if (!config.clientIdScope) {
+  if (!config || !config.clientIdScope) {
     return Promise.resolve();
   }
   const cidPromise = cidForDocOrNull(adElement.getAmpDoc()).then(cidService => {
