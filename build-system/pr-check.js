@@ -68,12 +68,24 @@ function stopTimer(functionName, startTime) {
  * @param {string} cmd
  * @return {!Array<string>}
  */
-function exec(cmd) {
+function getStdout(cmd) {
   return child_process.execSync(cmd, {'encoding': 'utf-8'}).trim().split('\n');
 }
 
 /**
+ * Executes the provided command.
+ * TODO(rsimha): Refactor this into a library. See #9038.
+ * @param {string} cmd
+ */
+function exec(cmd) {
+  const startTime = startTimer(cmd);
+  child_process.spawnSync('/bin/sh', ['-c', cmd], {'stdio': 'inherit'});
+  stopTimer(cmd, startTime);
+}
+
+/**
  * Executes the provided command; terminates this program in case of failure.
+ * TODO(rsimha): Refactor this into a library. See #9038.
  * @param {string} cmd
  */
 function execOrDie(cmd) {
@@ -95,7 +107,7 @@ function execOrDie(cmd) {
  * @return {!Array<string>}
  */
 function filesInPr(travisCommitRange) {
-  return exec(`git diff --name-only ${travisCommitRange}`);
+  return getStdout(`git diff --name-only ${travisCommitRange}`);
 }
 
 /**
@@ -225,6 +237,12 @@ const command = {
     // Disabled because it regressed. Better to run the other saucelabs tests.
     // execOrDie(`${gulp} test --nobuild --saucelabs --oldchrome --compiled`);
   },
+  runVisualDiffTests: function() {
+    // This must only be run for push builds, since Travis hides the encrypted
+    // environment variables required by Percy during pull request builds.
+    // For now, this is warning-only.
+    exec(`${gulp} visual-diff`);
+  },
   presubmit: function() {
     execOrDie(`${gulp} presubmit`);
   },
@@ -241,6 +259,7 @@ function runAllCommands() {
   // Skip testDocumentLinks() during push builds.
   command.buildRuntime();
   command.presubmit();
+  command.runVisualDiffTests();  // Only called during push builds.
   command.testRuntime();
   command.buildValidatorWebUI();
   command.buildValidator();
