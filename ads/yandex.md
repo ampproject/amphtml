@@ -34,5 +34,5 @@ Required parameters:
 - data-block-id
 
 Supported parameters:
-- data
-- isAdfox
+- data-data
+- data-is-adfox
