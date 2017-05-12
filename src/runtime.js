@@ -509,12 +509,14 @@ function registerElementClass(global, name, implementationClass, opt_css) {
  * @param {!Window} global
  * @param {!./service/extensions-impl.Extensions} extensions
  * @param {string} name
- * @param {!function(new:Object, !./service/ampdoc-impl.AmpDoc)} ctor
+ * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)=} opt_ctor
+ * @param {function(!./service/ampdoc-impl.AmpDoc):!Object=} opt_factory
  */
-function prepareAndRegisterServiceForDoc(global, extensions, name, ctor) {
+function prepareAndRegisterServiceForDoc(global, extensions,
+    name, opt_ctor, opt_factory) {
   const ampdocService = ampdocServiceFor(global);
   const ampdoc = ampdocService.getAmpDoc();
-  registerServiceForDoc(ampdoc, name, ctor);
+  registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory);
 }
 
 
@@ -523,12 +525,13 @@ function prepareAndRegisterServiceForDoc(global, extensions, name, ctor) {
  * @param {!Window} global
  * @param {!./service/extensions-impl.Extensions} extensions
  * @param {string} name
- * @param {!function(new:Object, !./service/ampdoc-impl.AmpDoc)} ctor
+ * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)=} opt_ctor
+ * @param {function(!./service/ampdoc-impl.AmpDoc):!Object=} opt_factory
  */
 function prepareAndRegisterServiceForDocShadowMode(global, extensions,
-    name, ctor) {
+    name, opt_ctor, opt_factory) {
   addDocFactoryToExtension(extensions, ampdoc => {
-    registerServiceForDoc(ampdoc, name, ctor);
+    registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory);
   }, name);
 }
 
@@ -538,12 +541,23 @@ function prepareAndRegisterServiceForDocShadowMode(global, extensions,
  * modes.
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {string} name
- * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)} ctor
+ * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)=} opt_ctor
+ * @param {function(!./service/ampdoc-impl.AmpDoc):!Object=} opt_factory
  */
-function registerServiceForDoc(ampdoc, name, ctor) {
+function registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory) {
+  // TODO(kmh287): Refactor to remove opt_factory param once #9212 has been
+  // in prod for two releases.
+  // Wrapping factory in function is necessary as opt_factory could be an
+  // arrow function, which cannot be used as constructors.
+  const ctor = opt_ctor || function(ampdoc) {
+    return opt_factory(ampdoc);
+  };
   // TODO(kmh287): Investigate removing the opt_instantiate arg after
   // all other services have been refactored.
-  registerServiceBuilderForDoc(ampdoc, name, ctor, /* opt_instantiate */ true);
+  registerServiceBuilderForDoc(ampdoc,
+                               name,
+                               ctor,
+                               /* opt_instantiate */ true);
 }
 
 
