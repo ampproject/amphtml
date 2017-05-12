@@ -78,8 +78,10 @@ function instrumentDocWrite(parent, win) {
     parent.ampManageWin = function(win) {
       manageWin(win);
     };
-    doc.write('<script>window.parent.ampManageWin(window)</script>');
-    // .call does not work in Safari with document.write.
+    if (!parent.ampSeen) {
+      // .call does not work in Safari with document.write.
+      doc.write('<script>window.parent.ampManageWin(window)</script>');
+    }
     doc._close = close;
     return doc._close();
   };

@@ -67,13 +67,13 @@ function lint() {
       util.log(util.colors.red(msg));
     }))
     .pipe(gulpIf(isFixed, gulp.dest('.')))
+    .pipe(eslint.failAfterError())
     .on('end', function() {
       if (errorsFound && !options.fix) {
         util.log(util.colors.blue('Run `gulp lint --fix` to automatically ' +
             'fix some of these lint warnings/errors. This is a destructive ' +
             'operation (operates on the file system) so please make sure ' +
             'you commit before running.'));
-        process.exit(1);
       }
     });
 }
