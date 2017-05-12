@@ -10,48 +10,15 @@
   <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
-  <style amp-custom>
-    amp-ad {
-      border: 1px solid #ccc;
-      max-width: 500px;
-    }
-    amp-ad div[placeholder] {
-      background-color: lightgray;
-    }
-    amp-ad div[fallback] {
-      background-color: black;
-    }
-    amp-ad div[placeholder]::after {
-      content: "loading ...";
-    }
-    amp-ad div[fallback]::after {
-      content: "No ad";
-      color: white;
-    }
-    amp-ad div[placeholder]::after,
-    amp-ad div[fallback]::after {
-      font-size: 20px;
-      line-height: 30px;
-      text-align: center;
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: calc(50% - 15px);
-    }
-    iframe.-amp-fill-content[src] {
-      display: none;
-    }
-  </style>
 </head>
 <body>
   Here is some text above the ad.<br/>
   <amp-ad width="300" height="400"
       type="fake"
-      data-use-a4a="true"
       src="fake_amp_ad_with_3p_analytics.json"
-      fakesig="true">
-    <div placeholder></div>
-    <div fallback></div>
+      data-use-a4a="true" fakesig="true">
+    <div placeholder>Loading...</div>
+    <div fallback>Could not display the fake ad :(</div>
   </amp-ad>
   <br/>
   Here is some text below the ad.<br/>

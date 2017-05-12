@@ -8,7 +8,7 @@ class AmpAnalyticsRemoteFrameManager {
     this.listener = listener;
   }
 };
-let remoteFrameMgr = new AmpAnalyticsRemoteFrameManager();
+const remoteFrameMgr = new AmpAnalyticsRemoteFrameManager();
 
 // The onNewAmpAnalyticsInstance() function must be implemented by the
 // vendor's page
