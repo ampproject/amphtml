@@ -554,6 +554,18 @@ export const adConfig = {
     prefetch: 'https://ap.lijit.com/www/sovrn_amp/sovrn_ads.js',
   },
 
+  sulvo: {
+    prefetch: [
+      'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
+      'https://www.googletagservices.com/tag/js/gpt.js',
+    ],
+    preconnect: [
+      'https://surgeprice.com',
+      'https://googleads.g.doubleclick.net',
+      'https://securepubads.g.doubleclick.net',
+    ],
+  },
+
   sunmedia: {
     prefetch: 'https://vod.addevweb.com/sunmedia/amp/ads/sunmedia.js',
     preconnect: 'https://static.addevweb.com',
