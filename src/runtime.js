@@ -545,7 +545,7 @@ function prepareAndRegisterServiceForDocShadowMode(global, extensions,
  * @param {function(!./service/ampdoc-impl.AmpDoc):!Object=} opt_factory
  */
 function registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory) {
-  // TODO(kmh287): Refactor to remove opt_factory param once #9212 has been
+  // TODO(kmh287, #9292): Refactor to remove opt_factory param once #9212 has been
   // in prod for two releases.
   // Wrapping factory in function is necessary as opt_factory could be an
   // arrow function, which cannot be used as constructors.
