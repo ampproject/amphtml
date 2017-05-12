@@ -15,7 +15,7 @@
  */
 
 /**
- * Wraps a given callback and apply rate limit.
+ * Wraps a given callback and applies a rate limit.
  * It throttles the calls so that no consequent calls have time interval
  * smaller than the given minimal interval.
  *
@@ -24,7 +24,7 @@
  * @param {number} minInterval the minimum time interval in millisecond
  * @returns {function()}
  */
-export function rateLimit(win, callback, minInterval) {
+export function throttle(win, callback, minInterval) {
   let locker = 0;
   let nextCallArgs = null;
 
@@ -44,11 +44,50 @@ export function rateLimit(win, callback, minInterval) {
     }
   }
 
-  return function() {
+  return function(...args) {
     if (locker) {
-      nextCallArgs = arguments;
+      nextCallArgs = args;
     } else {
-      fire(arguments);
+      fire(args);
+    }
+  };
+}
+
+/**
+ * Wraps a given callback and applies a wait timer, so that minInterval
+ * milliseconds must pass since the last call before the callback is actually
+ * invoked.
+ *
+ * @param {!Window} win
+ * @param {function()} callback
+ * @param {number} minInterval the minimum time interval in millisecond
+ * @returns {function()}
+ */
+export function debounce(win, callback, minInterval) {
+  let locker = 0;
+  let timestamp = 0;
+  let nextCallArgs = null;
+
+  function fire(args) {
+    nextCallArgs = null;
+    callback.apply(null, args);
+  }
+
+  function waiter() {
+    locker = 0;
+    const remaining = minInterval - (Date.now() - timestamp);
+    if (remaining > 0) {
+      locker = win.setTimeout(waiter, remaining);
+    } else {
+      fire(nextCallArgs);
+    }
+  }
+
+  return function(...args) {
+    timestamp = Date.now();
+    nextCallArgs = args;
+    if (!locker) {
+      locker = win.setTimeout(waiter, minInterval);
     }
   };
 }
