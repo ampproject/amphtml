@@ -35,8 +35,6 @@ export function runVideoPlayerIntegrationTests(
   .run('Video Interface', function() {
     this.timeout(TIMEOUT);
 
-    beforeEach(setUp);
-
     it('should override the video interface methods', function() {
       this.timeout(TIMEOUT);
       return getVideoPlayer({outsideView: false, autoplay: true})
@@ -53,14 +51,13 @@ export function runVideoPlayerIntegrationTests(
       });
     });
 
+    beforeEach(setUp);
     afterEach(cleanUp);
   });
 
   describe.configure().retryOnSaucelabs()
   .run('Actions', function() {
     this.timeout(TIMEOUT);
-
-    beforeEach(setUp);
 
     it('should support mute, play, pause, unmute actions', function() {
       return getVideoPlayer({outsideView: false, autoplay: false}).then(r => {
@@ -112,6 +109,7 @@ export function runVideoPlayerIntegrationTests(
       });
     });
 
+    beforeEach(setUp);
     afterEach(cleanUp);
   });
 
@@ -119,8 +117,6 @@ export function runVideoPlayerIntegrationTests(
   .run('Autoplay', function() {
     this.timeout(TIMEOUT);
     describe('play/pause', () => {
-      beforeEach(setUp);
-
       it('should play when in view port initially', () => {
         return getVideoPlayer({outsideView: false, autoplay: true}).then(r => {
           return listenOncePromise(r.video, VideoEvents.PLAY);
@@ -156,13 +152,9 @@ export function runVideoPlayerIntegrationTests(
           return p;
         });
       });
-
-      afterEach(cleanUp);
     });
 
     describe('Animated Icon', () => {
-      beforeEach(setUp);
-
       // TODO(amphtml): Unskip when #8385 is fixed.
       it.skip('should create an animated icon overlay', () => {
         let video;
@@ -208,8 +200,6 @@ export function runVideoPlayerIntegrationTests(
           }, undefined, TIMEOUT);
         }
       });
-
-      afterEach(cleanUp);
     });
 
     before(function() {
@@ -222,6 +212,7 @@ export function runVideoPlayerIntegrationTests(
       });
     });
 
+    beforeEach(setUp);
     afterEach(cleanUp);
   });
 
