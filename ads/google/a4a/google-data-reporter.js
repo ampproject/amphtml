@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-import {EXPERIMENT_ATTRIBUTE, QQID_HEADER} from './utils';
+import {
+  EXPERIMENT_ATTRIBUTE,
+  QQID_HEADER,
+  isReportingEnabled,
+} from './utils';
 import {BaseLifecycleReporter, GoogleAdLifecycleReporter} from './performance';
-import {getMode} from '../../../src/mode';
-import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
-
+import {randomlySelectUnsetExperiments} from '../../../src/experiments';
 import {
     parseExperimentIds,
     isInManualExperiment,
-    randomlySelectUnsetPageExperiments,
 } from './traffic-experiments';
 import {
-    ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
-    ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES,
+    ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
+    ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
+    ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
+    ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
 } from '../../../extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config';
 import {
     DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
@@ -41,16 +44,16 @@ import {
  * general traffic-experiments mechanism and is configured via the
  * a4aProfilingRate property of the global config(s),
  * build-system/global-configs/{canary,prod}-config.js.  This object is just
- * necessary for the traffic-experiments.js API, which expects a branch list
+ * necessary for the page-level-experiments.js API, which expects a branch list
  * for each experiment.  We assign all pages to the "control" branch
  * arbitrarily.
  *
- * @const {!Object<string,!./traffic-experiments.ExperimentInfo>}
+ * @const {!Object<string,!../../../src/experiments.ExperimentInfo>}
  */
 export const PROFILING_BRANCHES = {
   a4aProfilingRate: {
-    control: 'unused',
-    experiment: 'unused',
+    isTrafficEligible: () => true,
+    branches: ['unused', 'unused'],
   },
 };
 
@@ -77,16 +80,20 @@ function isInReportableBranch(ampElement, namespace) {
   const eids = parseExperimentIds(
       ampElement.element.getAttribute(EXPERIMENT_ATTRIBUTE));
   const reportableA4AEids = {
-    [ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES.experiment]: 1,
-    [ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES.experiment]: 1,
+    [ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment]: 1,
+    [ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment]: 1,
+    [ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment]: 1,
+    [ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment]: 1,
     [DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment]: 1,
     [DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment]: 1,
     [DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment]: 1,
     [DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment]: 1,
   };
   const reportableControlEids = {
-    [ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES.control]: 1,
-    [ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES.control]: 1,
+    [ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control]: 1,
+    [ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control]: 1,
+    [ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control]: 1,
+    [ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control]: 1,
     [DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control]: 1,
     [DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control]: 1,
     [DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control]: 1,
@@ -113,29 +120,11 @@ function isInReportableBranch(ampElement, namespace) {
  * @visibleForTesting
  */
 export function getLifecycleReporter(ampElement, namespace, slotId) {
-  // Carve-outs: We only want to enable profiling pingbacks when:
-  //   - The ad is from one of the Google networks (AdSense or Doubleclick).
-  //   - The ad slot is in the A4A-vs-3p amp-ad control branch (either via
-  //     internal, client-side selection or via external, Google Search
-  //     selection).
-  //   - We haven't turned off profiling via the rate controls in
-  //     build-system/global-config/{canary,prod}-config.json
-  // If any of those fail, we use the `BaseLifecycleReporter`, which is a
-  // a no-op (sends no pings).
-  const type = ampElement.element.getAttribute('type');
-  const win = ampElement.win;
-  const experimentName = 'a4aProfilingRate';
-  // In local dev mode, neither the canary nor prod config files is available,
-  // so manually set the profiling rate, for testing/dev.
-  if (getMode().localDev) {
-    toggleExperiment(win, experimentName, true, true);
-  }
-  randomlySelectUnsetPageExperiments(win, PROFILING_BRANCHES);
-  if ((type == 'doubleclick' || type == 'adsense') &&
-      isInReportableBranch(ampElement, namespace) &&
-      isExperimentOn(win, experimentName)) {
-    return new GoogleAdLifecycleReporter(win, ampElement.element, namespace,
-        Number(slotId));
+  randomlySelectUnsetExperiments(ampElement.win, PROFILING_BRANCHES);
+  if (isReportingEnabled(ampElement) &&
+      isInReportableBranch(ampElement, namespace)) {
+    return new GoogleAdLifecycleReporter(ampElement.win, ampElement.element,
+      namespace, Number(slotId));
   } else {
     return new BaseLifecycleReporter();
   }
@@ -201,4 +190,3 @@ export function setGoogleLifecycleVarsFromHeaders(headers, reporter) {
   pingParameters[renderingMethodKey] = headers.get(renderingMethodHeader);
   reporter.setPingParameters(pingParameters);
 }
-

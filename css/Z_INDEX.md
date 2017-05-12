@@ -23,16 +23,6 @@ amp-user-notification                            |   1000         |   extensions
 amp-image-lightbox                               |   1000         |   extensions/amp-image-lightbox/0.1/amp-image-lightbox.css
 amp-live-list > [update]                         |   1000         |   extensions/amp-live-list/0.1/amp-live-list.css
 amp-lightbox                                     |   1000         |   extensions/amp-lightbox/0.1/amp-lightbox.css
-.i-amphtml-lightboxed-ancestor                   |   auto         |   extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.css
 .i-amphtml-image-lightbox-trans                  |   1001         |   extensions/amp-image-lightbox/0.1/amp-image-lightbox.css
-.i-amphtml-lbv-mask                              |   2147483642   |   extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.css
-.amp-lightboxed                                  |   2147483643   |   extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.css
-.amp-lbv-desc-box                                |   2147483644   |   extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.css
-.i-amphtml-lbv-gallery                           |   2147483645   |   extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.css
-.i-amphtml-sidebar-mask                          |   2147483646   |   extensions/amp-sidebar/0.1/amp-sidebar.css
-.amp-lbv-button-prev                             |   2147483646   |   extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.css
-.amp-lbv-button-next                             |   2147483646   |   extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.css
-.amp-lbv-button-gallery                          |   2147483646   |   extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.css
-.amp-lbv-button-close                            |   2147483646   |   extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.css
-.amp-lbv-button-back                             |   2147483646   |   extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.css
+.i-amphtml-lbv                                   |   2147483642   |   extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.css
 amp-sidebar                                      |   2147483647   |   extensions/amp-sidebar/0.1/amp-sidebar.css

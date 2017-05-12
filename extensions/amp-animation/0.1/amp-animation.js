@@ -15,18 +15,21 @@
  */
 
 import {MeasureScanner} from './web-animations';
+import {ScrollboundScene} from './scrollbound-scene';
 import {Pass} from '../../../src/pass';
 import {WebAnimationPlayState} from './web-animation-types';
 import {childElementByTag} from '../../../src/dom';
 import {getFriendlyIframeEmbedOptional,}
     from '../../../src/friendly-iframe-embed';
+import {getMode} from '../../../src/mode';
 import {getParentWindowFrameElement} from '../../../src/service';
 import {isExperimentOn} from '../../../src/experiments';
 import {installWebAnimations} from 'web-animations-js/web-animations.install';
 import {listen} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
+import {toArray} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
-import {user} from '../../../src/log';
+import {user, dev} from '../../../src/log';
 import {viewerForDoc} from '../../../src/services';
 
 const TAG = 'amp-animation';
@@ -90,12 +93,16 @@ export class AmpAnimation extends AMP.BaseElement {
     if (this.triggerOnVisibility_) {
       // Make the element minimally displayed to make sure that `layoutCallback`
       // is called.
-      setStyles(this.element, {
-        visibility: 'hidden',
-        width: '1px',
-        height: '1px',
-        display: 'block',
-        position: 'fixed',
+      this.mutateElement(() => {
+        setStyles(this.element, {
+          visibility: 'hidden',
+          top: '0px',
+          left: '0px',
+          width: '1px',
+          height: '1px',
+          display: 'block',
+          position: 'fixed',
+        });
       });
     }
 
@@ -217,6 +224,7 @@ export class AmpAnimation extends AMP.BaseElement {
     return this.createRunner_().then(runner => {
       this.runner_ = runner;
       this.runner_.onPlayStateChanged(this.playStateChanged_.bind(this));
+      this.setupScrollboundAnimations_();
       this.runner_.start();
     });
   }
@@ -242,6 +250,7 @@ export class AmpAnimation extends AMP.BaseElement {
     return readyPromise.then(() => {
       const measurer = new MeasureScanner(this.win, {
         resolveTarget: this.resolveTarget_.bind(this),
+        queryTargets: this.queryTargets_.bind(this),
       }, /* validate */ true);
       return vsync.measurePromise(() => {
         measurer.scan(configJson);
@@ -251,15 +260,36 @@ export class AmpAnimation extends AMP.BaseElement {
   }
 
   /**
+   * @return {!Document|!ShadowRoot}
+   * @private
+   */
+  getRootNode_() {
+    return this.embed_ ?
+        this.embed_.win.document :
+        this.getAmpDoc().getRootNode();
+  }
+
+  /**
    * @param {string} id
    * @return {?Element}
    * @private
+   * TODO(dvoytenko, #9129): cleanup deprecated string targets.
    */
   resolveTarget_(id) {
-    if (this.embed_) {
-      return this.embed_.win.document.getElementById(id);
+    return this.getRootNode_().getElementById(id);
+  }
+
+  /**
+   * @param {string} selector
+   * @return {!Array<!Element>}
+   * @private
+   */
+  queryTargets_(selector) {
+    try {
+      return toArray(this.getRootNode_().querySelectorAll(selector));
+    } catch (e) {
+      throw user().createError('Invalid selector: ', selector);
     }
-    return this.getAmpDoc().getElementById(id);
   }
 
   /** @private */
@@ -278,8 +308,37 @@ export class AmpAnimation extends AMP.BaseElement {
       this.finish();
     }
   }
-}
 
+  /**
+   * @private
+   */
+  setupScrollboundAnimations_() {
+    dev().assert(this.runner_);
+    if (!this.runner_.hasScrollboundAnimations()) {
+      return;
+    }
+
+    // TODO(aghassemi): Remove restriction when we fully support scenes through
+    // scene-id attribute and/or allowing parent of `amp-animation` to be the
+    // scene container.
+    user().assert(this.embed_ || getMode().runtime == 'inabox',
+        'scroll-bound animations are only supported in embeds at the moment');
+
+    let sceneElement;
+    if (this.embed_) {
+      sceneElement = this.embed_.iframe;
+    } else {
+      sceneElement = this.win.document.documentElement;
+    }
+
+    new ScrollboundScene(
+      this.getAmpDoc(),
+      sceneElement,
+      this.runner_.scrollTick.bind(this.runner_), /* onScroll */
+      this.runner_.updateScrollDuration.bind(this.runner_) /* onDurationChanged */
+    );
+  }
+}
 
 AMP.extension(TAG, '0.1', function(AMP) {
   AMP.registerElement(TAG, AmpAnimation);

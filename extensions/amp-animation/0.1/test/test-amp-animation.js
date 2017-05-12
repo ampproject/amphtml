@@ -110,12 +110,17 @@ describes.sandboxed('AmpAnimation', {}, () => {
       const anim = createAnim({trigger: 'visibility'}, {duration: 1001});
       expect(anim.triggerOnVisibility_).to.be.true;
 
-      // Animation is made to be always in viewport.
-      expect(anim.element.style['visibility']).to.equal('hidden');
-      expect(anim.element.style['width']).to.equal('1px');
-      expect(anim.element.style['height']).to.equal('1px');
-      expect(anim.element.style['display']).to.equal('block');
-      expect(anim.element.style['position']).to.equal('fixed');
+      // Animation is made to be always in viewport via mutateElement.
+      expect(anim.element.style['position']).to.not.equal('fixed');
+      return anim.mutateElement(() => {}).then(() => {
+        expect(anim.element.style['position']).to.equal('fixed');
+        expect(anim.element.style['visibility']).to.equal('hidden');
+        expect(anim.element.style['top']).to.equal('0px');
+        expect(anim.element.style['left']).to.equal('0px');
+        expect(anim.element.style['width']).to.equal('1px');
+        expect(anim.element.style['height']).to.equal('1px');
+        expect(anim.element.style['display']).to.equal('block');
+      });
     });
 
     it('should fail on invalid trigger', () => {
@@ -270,12 +275,29 @@ describes.sandboxed('AmpAnimation', {}, () => {
       });
     });
 
-    it('should find target in the main doc', () => {
+    it('should resolve target in the main doc', () => {
       const anim = createAnim({}, {duration: 1001});
       const target = win.document.createElement('div');
       target.setAttribute('id', 'target1');
       win.document.body.appendChild(target);
       expect(anim.resolveTarget_('target1')).to.equal(target);
+    });
+
+    it('should query targets in the main doc', () => {
+      const anim = createAnim({}, {duration: 1001});
+      const target1 = win.document.createElement('div');
+      target1.setAttribute('id', 'target1');
+      target1.setAttribute('class', 'target');
+      win.document.body.appendChild(target1);
+      const target2 = win.document.createElement('div');
+      target2.setAttribute('id', 'target2');
+      target2.setAttribute('class', 'target');
+      win.document.body.appendChild(target2);
+      expect(anim.queryTargets_('#target1')).to.deep.equal([target1]);
+      expect(anim.queryTargets_('div#target1')).to.deep.equal([target1]);
+      expect(anim.queryTargets_('#target2')).to.deep.equal([target2]);
+      expect(anim.queryTargets_('.target')).to.deep.equal([target1, target2]);
+      expect(anim.queryTargets_('.target3')).to.deep.equal([]);
     });
 
     it('should resize from ampdoc viewport', () => {
@@ -394,6 +416,33 @@ describes.sandboxed('AmpAnimation', {}, () => {
       targetInEmbed.setAttribute('id', 'target1');
       embedWin.document.body.appendChild(targetInEmbed);
       expect(anim.resolveTarget_('target1')).to.equal(targetInEmbed);
+    });
+
+    it('should query target in the main doc', () => {
+      const parentWin = env.ampdoc.win;
+      const embedWin = embed.win;
+      const anim = createAnim({}, {duration: 1001});
+
+      const targetInDoc = parentWin.document.createElement('div');
+      targetInDoc.setAttribute('id', 'target1');
+      targetInDoc.setAttribute('class', 'target');
+      parentWin.document.body.appendChild(targetInDoc);
+      expect(anim.queryTargets_('#target1')).to.be.deep.equal([]);
+      expect(anim.queryTargets_('.target')).to.deep.equal([]);
+
+      const target1 = embedWin.document.createElement('div');
+      target1.setAttribute('id', 'target1');
+      target1.setAttribute('class', 'target');
+      embedWin.document.body.appendChild(target1);
+      const target2 = embedWin.document.createElement('div');
+      target2.setAttribute('id', 'target2');
+      target2.setAttribute('class', 'target');
+      embedWin.document.body.appendChild(target2);
+      expect(anim.queryTargets_('#target1')).to.deep.equal([target1]);
+      expect(anim.queryTargets_('div#target1')).to.deep.equal([target1]);
+      expect(anim.queryTargets_('#target2')).to.deep.equal([target2]);
+      expect(anim.queryTargets_('.target')).to.deep.equal([target1, target2]);
+      expect(anim.queryTargets_('.target3')).to.deep.equal([]);
     });
 
     it('should take resize from embed\'s window', () => {

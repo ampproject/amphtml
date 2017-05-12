@@ -16,13 +16,14 @@
 
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-image-lightbox-0.1.css';
-import {Gestures} from '../../../src/gesture';
 import {
   DoubletapRecognizer,
   SwipeXYRecognizer,
   TapRecognizer,
   TapzoomRecognizer,
 } from '../../../src/gesture-recognizers';
+import {Gestures} from '../../../src/gesture';
+import {Keycodes} from '../../../src/utils/keycodes';
 import {Layout} from '../../../src/layout';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
@@ -824,7 +825,7 @@ class AmpImageLightbox extends AMP.BaseElement {
    * @private
    */
   closeOnEscape_(event) {
-    if (event.keyCode == 27) {
+    if (event.keyCode == Keycodes.ESCAPE) {
       this.close();
     }
   }

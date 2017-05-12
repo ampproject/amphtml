@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -104,7 +105,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	// Fill query params into JSON struct.
 	line, _ := strconv.Atoi(r.URL.Query().Get("l"))
 	errorType := "default"
-	isUserError := false;
+	isUserError := false
 	if r.URL.Query().Get("a") == "1" {
 		errorType = "assert"
 		isUserError = true
@@ -116,8 +117,8 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	// docs) we log as "ERROR".
 	isCdn := false
 	if strings.HasPrefix(r.Referer(), "https://cdn.ampproject.org/") ||
-			strings.Contains(r.Referer(), ".cdn.ampproject.org/") ||
-			strings.Contains(r.Referer(), ".ampproject.net/") {
+		strings.Contains(r.Referer(), ".cdn.ampproject.org/") ||
+		strings.Contains(r.Referer(), ".ampproject.net/") {
 		severity = "ERROR"
 		level = logging.Error
 		errorType += "-cdn"
@@ -128,7 +129,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	is3p := false
 	runtime := r.URL.Query().Get("rt")
 	if runtime != "" {
-		errorType += "-" + runtime;
+		errorType += "-" + runtime
 		if runtime == "inabox" {
 			severity = "ERROR"
 			level = logging.Error
@@ -144,10 +145,10 @@ func handle(w http.ResponseWriter, r *http.Request) {
 			errorType += "-1p"
 		}
 	}
-	isCanary := false;
+	isCanary := false
 	if r.URL.Query().Get("ca") == "1" {
 		errorType += "-canary"
-		isCanary = true;
+		isCanary = true
 	}
 	if r.URL.Query().Get("ex") == "1" {
 		errorType += "-expected"
@@ -156,7 +157,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	throttleRate := 0.01
 
 	if isCanary {
-		throttleRate = 1.0  // Explicitly log all canary errors.
+		throttleRate = 1.0 // Explicitly log all canary errors.
 	} else if is3p {
 		throttleRate = 0.1
 	} else if isCdn {
@@ -164,7 +165,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if isUserError {
-		throttleRate = throttleRate / 10;
+		throttleRate = throttleRate / 10
 	}
 
 	if !(sample <= throttleRate) {
@@ -174,9 +175,15 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	exception := r.URL.Query().Get("s")
+	// If format does not end with :\d+ truncate up to the last newline.
+	if !regexp.MustCompile(`:\d+$`).MatchString(exception) {
+		exception = string(regexp.MustCompile(`\n.*$`).ReplaceAllString(exception, ""))
+	}
+
 	event := &ErrorEvent{
 		Message:     r.URL.Query().Get("m"),
-		Exception:   r.URL.Query().Get("s"),
+		Exception:   exception,
 		Version:     errorType + "-" + r.URL.Query().Get("v"),
 		Environment: "prod",
 		Application: errorType,
@@ -191,6 +198,13 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "One of 'message' or 'exception' must be present.",
 			http.StatusBadRequest)
 		log.Errorf(c, "Malformed request: %v", event)
+		return
+	}
+
+	if IsFilteredMessageOrException(event) {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(http.StatusNoContent)
+		fmt.Fprintln(w, "IGNORE\n")
 		return
 	}
 
@@ -228,9 +242,23 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Query().Get("debug") == "1" {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintln(w, "OK\n");
-		fmt.Fprintln(w, event);
+		fmt.Fprintln(w, "OK\n")
+		fmt.Fprintln(w, event)
 	} else {
 		w.WriteHeader(http.StatusNoContent)
 	}
+}
+
+func IsFilteredMessageOrException(event *ErrorEvent) bool {
+	filteredMessages := [...]string{
+		"stop_youtube",
+		"null%20is%20not%20an%20object%20(evaluating%20%27elt.parentNode%27)",
+	}
+	for _, msg := range filteredMessages {
+		if strings.Contains(event.Message, msg) ||
+			strings.Contains(event.Exception, msg) {
+			return true
+		}
+	}
+	return false
 }

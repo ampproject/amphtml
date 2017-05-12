@@ -30,7 +30,6 @@ tags: {  # amp-sidebar
 tags: {  # <amp-sidebar>
   html_format: AMP
   tag_name: "AMP-SIDEBAR"
-  unique: true
   mandatory_parent: "BODY"
   disallowed_ancestor: "AMP-SIDEBAR"
   requires: "amp-sidebar extension .js script"
@@ -39,7 +38,7 @@ tags: {  # <amp-sidebar>
     value_regex: "(left|right)"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/layout/amp-sidebar"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-sidebar"
   amp_layout: {
     supported_layouts: NODISPLAY
   }

@@ -43,7 +43,7 @@ limitations under the License.
 
 ## Behavior
 
-- There can be only one `<amp-sidebar>` in an AMP document. The `<amp-sidebar>` should be a direct child of the `<body>`.
+- The `<amp-sidebar>` should be a direct child of the `<body>`.
 - The sidebar can only appear on the left or right side of a page.
 - The `<amp-sidebar>` may contain any valid HTML elements (supported by AMP).
 - The `<amp-sidebar>` may not contain any AMP Elements except for:
@@ -53,7 +53,7 @@ limitations under the License.
     - `<amp-list>`
     - `<amp-live-list>`
     - `<amp-social-share>`
-- The max-height of the sidebar is 100vh, if the height exceeds 100vh then a vertical scrollbar appears. The default height is set to 100vw in CSS and is overridable in CSS.
+- The max-height of the sidebar is 100vh, if the height exceeds 100vh then a vertical scrollbar appears. The default height is set to 100vh in CSS and is overridable in CSS.
 - The width of the sidebar can be set and adjusted between 45px and 80vw using CSS.
 - Touch zoom is disabled on the `amp-sidebar` and it's mask when the sidebar is open.
 

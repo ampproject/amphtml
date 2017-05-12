@@ -56,8 +56,14 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `gulp test --safari`<sup>[[1]](#footnote-1)</sup>                       | Runs tests in Safari.                                                 |
 | `gulp test --firefox`<sup>[[1]](#footnote-1)</sup>                      | Runs tests in Firefox.                                                |
 | `gulp test --files=<test-files-path-glob>`<sup>[[1]](#footnote-1)</sup> | Runs specific test files.                                             |
-| `gulp serve`                                                            | Serves content in repo root dir over http://localhost:8000/. Examples live in http://localhost:8000/examples/ |
+| `gulp serve`                                                            | Serves content in repo root dir over http://localhost:8000/. Examples live in http://localhost:8000/examples/. Serve unminified AMP by default. |
+| `gulp check-types`                                                      | Verifies that there are no errors associated with Closure typing. Run automatically upon push.  |
+| `gulp dep-check`                                                        | Runs a dependency check on each module. Run automatically upon push.  |
+| `gulp presubmit`                                                        | Run validation against files to check for forbidden and required terms. Run automatically upon push.  |
+| `gulp validator`                                                        | Builds and tests the AMP validator. Run automatically upon push.  |
+| `node build-system/pr-check.js`                                         | Runs all tests that will be run upon pushing a CL.                     |
 | `npm run ava`<sup>[[1]](#footnote-1)</sup>                              | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava). |
+| `gulp todos:find-closed`                                                | Find `TODO`s in code for issues that have been closed. |
 
 <a id="footnote-1">[1]</a> On Windows, this command must be run as administrator.
 
@@ -65,34 +71,34 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 
 For manual testing build AMP and start the Node.js server by running `gulp`.
 
+### Serve Mode
+There are 3 serving modes:
+- DEFAULT mode serves unminified AMP. You want to use this during normal dev.
+- COMPILED mode serves minified AMP. This is closer to the prod setup. This is only available after running `gulp dist --fortesting`. Serve MIN mode by adding `--compiled` to `gulp` command.
+- CDN mode serves prod. These remote files would not reflect your local changes. Serve CDN mode by adding `--cdn` to `gulp` command.
+
+To switch serving mode during runtime, go to http://localhost:8000/serve_mode=$mode and set the `$mode` to one of the following values: `default`, `compiled,` or `cdn`.
+
 ### Examples
 
 The content in the `examples` directory can be reached at: http://localhost:8000/examples/
-
-For each example there are 3 modes:
-
-- `/examples/abc.html` points to prod. This file would not reflect your local changes.
-- `/examples/abc.max.html` points to your local unminified AMP. You want to use this during normal dev.
-- `/examples/abc.min.html` points to a local minified AMP. This is closer to the prod setup. Only available after running `gulp dist --fortesting`.
-
 
 ### Document proxy
 
 AMP ships with a local proxy for testing production AMP documents with the local JS version.
 
-For any public AMP document like: http://output.jsbin.com/pegizoq/quiet
+For any public AMP document like: http://output.jsbin.com/pegizoq/quiet,
 
-You can access is with the local JS at
+You can access it with the local JS at
 
-- normal sources: http://localhost:8000/max/output.jsbin.com/pegizoq/quiet
-- minified: http://localhost:8000/min/output.jsbin.com/pegizoq/quiet
+http://localhost:8000/proxy/output.jsbin.com/pegizoq/quiet.
 
-When accessing `min` urls make sure you run `gulp dist` with the `--fortesting`
+**Note** The local proxy will serve minified or unminified JS based on the current serve mode. When serve mode is `cdn`, the local proxy will serve remote JS.
+When accessing minified JS make sure you run `gulp dist` with the `--fortesting`
 flag so that we do not strip out the localhost code paths. (We do some
 code elimination to trim down the file size for the file we deploy to production)
 
-If the origin resource is on HTTPS, the URLs are http://localhost:8000/max/s/output.jsbin.com/pegizoq/quiet and http://localhost:8000/min/s/output.jsbin.com/pegizoq/quiet
-
+If the origin resource is on HTTPS, the URLs are http://localhost:8000/proxy/s/output.jsbin.com/pegizoq/quiet
 
 ### A4A envelope (/a4a/, /a4a-3p/)
 
@@ -105,15 +111,14 @@ A4A can be run either of these two modes:
 
 The following forms are supported:
 
-- local document: http://localhost:8000/a4a[-3p]/examples/animations.amp.max.html
-- proxied document with normal sources: http://localhost:8000/a4a[-3p]/max/output.jsbin.com/pegizoq/quiet
-- proxied document with minified sources: http://localhost:8000/a4a[-3p]/min/output.jsbin.com/pegizoq/quiet
+- local document: http://localhost:8000/a4a[-3p]/examples/animations.amp.html
+- proxied document with local sources: http://localhost:8000/a4a[-3p]/proxy/output.jsbin.com/pegizoq/quiet
 
-When accessing `min` urls make sure you run `gulp dist` with the `--fortesting`
+When accessing minified JS make sure you run `gulp dist` with the `--fortesting`
 flag so that we do not strip out the localhost code paths. (We do some
 code elimination to trim down the file size for the file we deploy to production)
 
-If the origin resource is on HTTPS, the URLs are http://localhost:8000/a4a[-3p]/max/s/output.jsbin.com/pegizoq/quiet and http://localhost:8000/a4a[-3p]/min/s/output.jsbin.com/pegizoq/quiet
+If the origin resource is on HTTPS, the URLs are http://localhost:8000/a4a[-3p]/proxy/s/output.jsbin.com/pegizoq/quiet
 
 Notice that all documents are assumed to have a "fake" signature. Thus, this functionality is only available in the
 `localDev` mode.
@@ -133,9 +138,8 @@ Make sure to run gulp with `--with_inabox` flag.
 
 The following forms are supported:
 
-- local document: http://localhost:8000/inabox/examples/animations.amp.max.html
-- proxied document with normal sources: http://localhost:8000/inabox/max/output.jsbin.com/pegizoq/quiet
-- proxied document with minified sources: http://localhost:8000/inabox/min/output.jsbin.com/pegizoq/quiet
+- local document: http://localhost:8000/inabox/examples/animations.amp.html
+- proxied document with local sources: http://localhost:8000/inabox/proxy/output.jsbin.com/pegizoq/quiet
 
 Additionally, the following query parameters can be provided:
 
@@ -234,7 +238,7 @@ In particular, we try to maintain "it might not be perfect but isn't broken"-sup
 ## Eng docs
 
 - [Life of an AMP *](https://docs.google.com/document/d/1WdNj3qNFDmtI--c2PqyRYrPrxSg2a-93z5iX0SzoQS0/edit#)
-- [AMP Layout system](spec/amp-html-layout.md)
+- [AMP Layout system](../spec/amp-html-layout.md)
 - [Building an AMP Extension](https://docs.google.com/document/d/19o7eDta6oqPGF4RQ17LvZ9CHVQN53whN-mCIeIMM8Qk/edit#)
 
 We also recommend scanning the [spec](../spec/). The non-element part should help understand some of the design aspects.

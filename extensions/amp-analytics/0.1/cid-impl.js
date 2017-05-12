@@ -60,6 +60,7 @@ let BaseCidInfoDef;
  * @typedef {{
  *   scope: string,
  *   createCookieIfNotPresent: (boolean|undefined),
+ *   cookieName: (string|undefined),
  * }}
  */
 let GetCidDef;
@@ -176,7 +177,8 @@ function setCidCookie(win, scope, cookie) {
 function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
   const win = cid.ampdoc.win;
   const scope = getCidStruct.scope;
-  const existingCookie = getCookie(win, scope);
+  const cookieName = getCidStruct.cookieName || scope;
+  const existingCookie = getCookie(win, cookieName);
 
   if (!existingCookie && !getCidStruct.createCookieIfNotPresent) {
     return /** @type {!Promise<?string>} */ (Promise.resolve(null));
@@ -189,7 +191,7 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
   if (existingCookie) {
     // If we created the cookie, update it's expiration time.
     if (/^amp-/.test(existingCookie)) {
-      setCidCookie(win, scope, existingCookie);
+      setCidCookie(win, cookieName, existingCookie);
     }
     return /** @type {!Promise<?string>} */ (
         Promise.resolve(existingCookie));
@@ -206,9 +208,9 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
         // The initial CID generation is inherently racy. First one that gets
         // consent wins.
         const newCookie = results[0];
-        const relookup = getCookie(win, scope);
+        const relookup = getCookie(win, cookieName);
         if (!relookup) {
-          setCidCookie(win, scope, newCookie);
+          setCidCookie(win, cookieName, newCookie);
         }
       });
   return cid.externalCidCache_[scope] = newCookiePromise;
@@ -313,8 +315,10 @@ export function viewerBaseCid(ampdoc, opt_data) {
     }
     const cidPromise = viewer.sendMessageAwaitResponse('cid', opt_data)
         .then(data => {
+          // TODO(dvoytenko, #9019): cleanup the legacy CID format.
           // For backward compatibility: #4029
           if (data && !tryParseJson(data)) {
+            // TODO(dvoytenko, #9019): use this for reporting: dev().error('cid', 'invalid cid format');
             return JSON.stringify({
               time: Date.now(), // CID returned from old API is always fresh
               cid: data,

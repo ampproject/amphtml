@@ -32,6 +32,7 @@ tags: {  # <amp-brid-player>
   tag_name: "AMP-BRID-PLAYER"
   disallowed_ancestor: "AMP-SIDEBAR"
   requires: "amp-brid-player extension .js script"
+  attrs: { name: "autoplay" }
   attrs: {
     name: "data-partner"
     mandatory: true
@@ -53,7 +54,7 @@ tags: {  # <amp-brid-player>
     value_regex: "[0-9]+"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-brid-player"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-brid-player"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

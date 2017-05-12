@@ -21,6 +21,7 @@ import {dev,user} from '../../../src/log';
 import {removeElement} from '../../../src/dom';
 import {toggle, computedStyle} from '../../../src/style';
 import {isExperimentOn} from '../../../src/experiments';
+import {timerFor} from '../../../src/services';
 import {
   setStyle,
   removeAlphaFromColor,
@@ -28,6 +29,9 @@ import {
 
 /** @const */
 const EARLY_LOAD_EXPERIMENT = 'sticky-ad-early-load';
+
+/** @const */
+const TAG = 'amp-sticky-ad';
 
 class AmpStickyAd extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -66,9 +70,26 @@ class AmpStickyAd extends AMP.BaseElement {
     this.ad_ = children[0];
     this.setAsOwner(this.ad_);
 
-    this.ad_.whenBuilt().then(() => {
-      this.mutateElement(() => {
-        toggle(this.element, true);
+    // TODO(@zhouyx, #9126): cleanup once research
+    // on custom-element stubbing is complete.
+    let customApiResolver;
+    const customApiPromise = new Promise(resolve => {
+      customApiResolver = resolve;
+    });
+    if (this.ad_.whenBuilt) {
+      customApiResolver();
+    } else {
+      // Give 1s for amp-ad to stub. Report 1% error.
+      if (Math.random() < 0.01) {
+        dev().error(TAG, 'race condition on customElement stubbing');
+      }
+      timerFor(this.win).delay(customApiResolver, 1000);
+    }
+    customApiPromise.then(() => {
+      this.ad_.whenBuilt().then(() => {
+        this.mutateElement(() => {
+          toggle(this.element, true);
+        });
       });
     });
 
@@ -135,12 +156,12 @@ class AmpStickyAd extends AMP.BaseElement {
    * @private
    */
   onScroll_() {
-    if (isExperimentOn(this.win, EARLY_LOAD_EXPERIMENT)) {
+    const scrollTop = this.viewport_.getScrollTop();
+    if (isExperimentOn(this.win, EARLY_LOAD_EXPERIMENT) && scrollTop > 1) {
       this.display_();
       return;
     }
 
-    const scrollTop = this.viewport_.getScrollTop();
     const viewportHeight = this.viewport_.getSize().height;
     // Check user has scrolled at least one viewport from init position.
     if (scrollTop > viewportHeight) {
@@ -156,9 +177,10 @@ class AmpStickyAd extends AMP.BaseElement {
     this.removeOnScrollListener_();
     this.deferMutate(() => {
       this.visible_ = true;
-      this.viewport_.addToFixedLayer(this.element);
       this.addCloseButton_();
-      this.scheduleLayoutForAd_();
+      this.viewport_.addToFixedLayer(
+          this.element, /* forceTransfer */ true)
+          .then(() => this.scheduleLayoutForAd_());
     });
   }
 

@@ -23,6 +23,7 @@
 import {
   googleAdsIsA4AEnabled,
 } from '../../../ads/google/a4a/traffic-experiments';
+import {isExperimentOn} from '../../../src/experiments';
 
 /** @const {!string}  @private */
 const ADSENSE_A4A_EXPERIMENT_NAME = 'expAdsenseA4A';
@@ -48,18 +49,36 @@ const ADSENSE_A4A_EXPERIMENT_NAME = 'expAdsenseA4A';
 // debug traffic profiling.  Once we have debugged the a4a implementation and
 // can disable profiling again, we can return these constants to being
 // private to this file.
-/** const {!../../../ads/google/a4a/traffic-experiments.ExperimentInfo}  */
-export const ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES = {
-  control: '117152650',
-  experiment: '117152651',
-  controlMeasureOnRender: '2093326',
+/**
+ * const {!../../../ads/google/a4a/traffic-experiments.A4aExperimentBranches}
+ */
+export const ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH = {
+  control: '117152652',
+  experiment: '117152653',
 };
 
-/** @const {!../../../ads/google/a4a/traffic-experiments.ExperimentInfo}  */
-export const ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES = {
+/**
+ * const {!../../../ads/google/a4a/traffic-experiments.A4aExperimentBranches}
+ */
+export const ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH = {
+  control: '2092617',
+  experiment: '2092618',
+};
+
+/**
+ * @const {!../../../ads/google/a4a/traffic-experiments.A4aExperimentBranches}
+ */
+export const ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH = {
   control: '117152670',
   experiment: '117152671',
-  controlMeasureOnRender: null,
+};
+
+/**
+ * @const {!../../../ads/google/a4a/traffic-experiments.A4aExperimentBranches}
+ */
+export const ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH = {
+  control: '2092615',
+  experiment: '2092616',
 };
 
 /**
@@ -68,9 +87,17 @@ export const ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES = {
  * @returns {boolean}
  */
 export function adsenseIsA4AEnabled(win, element) {
+  let externalBranches, internalBranches;
+  if (isExperimentOn(win, 'a4aFastFetchAdSenseLaunched')) {
+    externalBranches = ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH;
+    internalBranches = ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH;
+  } else {
+    externalBranches = ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH;
+    internalBranches = ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH;
+  }
+
   return !!element.getAttribute('data-ad-client') &&
       googleAdsIsA4AEnabled(
         win, element, ADSENSE_A4A_EXPERIMENT_NAME,
-        ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
-        ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES);
+        externalBranches, internalBranches);
 }

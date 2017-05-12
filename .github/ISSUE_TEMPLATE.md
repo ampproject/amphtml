@@ -1,19 +1,23 @@
-Please walk through the following steps for reporting an issue about AMP:
+**Please only file bugs/feature requests for AMP here.**
 
-- Please ask general questions about AMP over on stackoverflow under the AMP HTML tag: http://stackoverflow.com/questions/tagged/amp-html
-- Please ask/post questions/problems related to Google Search in Google's AMP forum: https://goo.gl/utQ1KZ
+- If you have questions about how to use AMP or other general questions about AMP please ask them on Stack Overflow under the AMP HTML tag instead of filing an issue here: http://stackoverflow.com/questions/tagged/amp-html
+- If you have questions/issues related to Google Search please ask them in Google's AMP forum instead of filing an issue here: https://goo.gl/utQ1KZ
 
-## Short description of your issue:
+If you have a bug or feature request for AMP please fill in the following template.  Delete everything except the headers (including this text).
 
-Start by deleting everything above this including this sentence :)
+## What's the issue?
+
+Briefly describe the bug/feature request.
 
 ## How do we reproduce the issue?
 
-Please post a public URL and ideally post a reduced test case. E.g. on jsbin.com that exhibits only your issue and nothing else.
+If this is a bug please provide a public URL and ideally a reduced test case (e.g. on jsbin.com) that exhibits only your issue and nothing else.  Then provide step-by-step instructions for reproducing the issue:
 
 1. Step 1 to reproduce
 2. Step 2 to reproduce
 3. …
+
+If this is a feature request you can use this section to point to a prototype/mockup that will help us understand the request.
 
 ## What browsers are affected?
 

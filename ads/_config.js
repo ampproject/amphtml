@@ -179,7 +179,7 @@ export const adConfig = {
 
   caajainfeed: {
     prefetch: [
-      'https://cdn.amanad.adtdp.com/sdk/ajaamp-v1.0.js',
+      'https://cdn.amanad.adtdp.com/sdk/ajaamp.js',
     ],
     preconnect: [
       'https://ad.amanad.adtdp.com',
@@ -256,6 +256,7 @@ export const adConfig = {
       'https://www.googletagservices.com/tag/js/gpt.js',
       'https://g.ezoic.net/ezoic/ampad.js',
     ],
+    clientIdScope: 'AMP_ECID_EZOIC',
   },
 
   f1e: {
@@ -270,6 +271,14 @@ export const adConfig = {
   },
 
   flite: {},
+
+  fluct: {
+    preconnect: [
+      'https://cdn-fluct.sh.adingo.jp',
+      'https://s.sh.adingo.jp',
+      'https://i.adingo.jp',
+    ],
+  },
 
   fusion: {
     prefetch: 'https://assets.adtomafusion.net/fusion/latest/fusion-amp.min.js',

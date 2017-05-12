@@ -17,7 +17,8 @@
 // Node.js global
 var process = {};
 process.env;
-process.end.NODE_ENV;
+process.env.NODE_ENV;
+process.env.SERVE_MODE;
 
 // Exposed to ads.
 window.context = {};
@@ -131,6 +132,45 @@ FB.init;
 
 var gist;
 gist.gistid;
+
+// IMA SDK for amp-ima-video
+var google;
+google.ima;
+google.ima.AdDisplayContainer = function(adContainerDiv, videoPlayer) {};
+google.ima.AdDisplayContainer.initialize = function() {};
+google.ima.ImaSdkSettings = function() {};
+google.ima.ImaSdkSettings.setPlayerType = function(type) {};
+google.ima.ImaSdkSettings.setPlayerVersion = function(version) {};
+google.ima.AdsLoader = function(adDisplayContainer) {};
+google.ima.AdsLoader.getSettings = function() {};
+google.ima.AdsLoader.requestAds = function() {};
+google.ima.AdsManagerLoadedEvent;
+google.ima.AdsManagerLoadedEvent.Type = {
+  ADS_MANAGER_LOADED,
+};
+google.ima.AdsManagerLoadedEvent.getAdsManager = function() {};
+google.ima.AdErrorEvent;
+google.ima.AdErrorEvent.Type = {
+  AD_ERROR,
+};
+google.ima.AdsRequest = function() {};
+google.ima.ViewMode = {
+  NORMAL,
+  FULLSCREEN,
+};
+google.ima.AdsRenderingSettings = function() {};
+google.ima.UiElements = {
+  AD_ATTRIBUTION,
+  COUNTDOWN,
+};
+google.ima.AdEvent;
+google.ima.AdEvent.Type = {
+  CONTENT_PAUSE_REQUESTED,
+  CONTENT_RESUME_REQUESTED,
+};
+google.ima.AdsManager;
+google.ima.AdsManager.setVolume = function() {};
+
 
 // Validator
 var amp;

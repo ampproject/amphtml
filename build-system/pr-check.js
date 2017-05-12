@@ -26,6 +26,7 @@
 const child_process = require('child_process');
 const path = require('path');
 const minimist = require('minimist');
+const util = require('gulp-util');
 
 const gulp = 'node_modules/gulp/bin/gulp.js';
 const fileLogPrefix =
@@ -67,12 +68,24 @@ function stopTimer(functionName, startTime) {
  * @param {string} cmd
  * @return {!Array<string>}
  */
-function exec(cmd) {
+function getStdout(cmd) {
   return child_process.execSync(cmd, {'encoding': 'utf-8'}).trim().split('\n');
 }
 
 /**
+ * Executes the provided command.
+ * TODO(rsimha): Refactor this into a library. See #9038.
+ * @param {string} cmd
+ */
+function exec(cmd) {
+  const startTime = startTimer(cmd);
+  child_process.spawnSync('/bin/sh', ['-c', cmd], {'stdio': 'inherit'});
+  stopTimer(cmd, startTime);
+}
+
+/**
  * Executes the provided command; terminates this program in case of failure.
+ * TODO(rsimha): Refactor this into a library. See #9038.
  * @param {string} cmd
  */
 function execOrDie(cmd) {
@@ -94,7 +107,7 @@ function execOrDie(cmd) {
  * @return {!Array<string>}
  */
 function filesInPr(travisCommitRange) {
-  return exec(`git diff --name-only ${travisCommitRange}`);
+  return getStdout(`git diff --name-only ${travisCommitRange}`);
 }
 
 /**
@@ -200,6 +213,10 @@ const command = {
   testBuildSystem: function() {
     execOrDie('npm run ava');
   },
+  testDocumentLinks: function(files) {
+    let docFiles = files.filter(isDocFile);
+    execOrDie(`${gulp} check-links --files ${docFiles.join(',')}`);
+  },
   buildRuntime: function() {
     execOrDie(`${gulp} clean`);
     execOrDie(`${gulp} lint`);
@@ -218,7 +235,13 @@ const command = {
     // All unit tests with an old chrome (best we can do right now to pass tests
     // and not start relying on new features).
     // Disabled because it regressed. Better to run the other saucelabs tests.
-    execOrDie(`${gulp} test --nobuild --saucelabs --oldchrome --compiled`);
+    // execOrDie(`${gulp} test --nobuild --saucelabs --oldchrome --compiled`);
+  },
+  runVisualDiffTests: function() {
+    // This must only be run for push builds, since Travis hides the encrypted
+    // environment variables required by Percy during pull request builds.
+    // For now, this is warning-only.
+    exec(`${gulp} visual-diff`);
   },
   presubmit: function() {
     execOrDie(`${gulp} presubmit`);
@@ -233,8 +256,10 @@ const command = {
 
 function runAllCommands() {
   command.testBuildSystem();
+  // Skip testDocumentLinks() during push builds.
   command.buildRuntime();
   command.presubmit();
+  command.runVisualDiffTests();  // Only called during push builds.
   command.testRuntime();
   command.buildValidatorWebUI();
   command.buildValidator();
@@ -262,19 +287,21 @@ function main(argv) {
   if (buildTargets.has('FLAG_CONFIG')) {
     files.forEach((file) => {
       if (!isFlagConfig(file)) {
-        console.log('A pull request may not contain a mix of flag-config and ' +
-            'non-flag-config files. Please make your changes in separate ' +
-            'pull requests. First offending file: ' + file);
+        console.log(util.colors.red('ERROR'),
+            'It appears that your PR contains a mix of flag-config files ' +
+            '(*config.json) and non-flag-config files.');
+        console.log('Please make your changes in separate pull requests.');
+        console.log(util.colors.yellow(
+            'NOTE: If you see a long list of unrelated files below, it is ' +
+            'likely because your branch is significantly out of sync.'));
+        console.log(util.colors.yellow(
+            'A full sync to upstream/master should clear this error.'));
+        console.log('\nFull list of files in this PR:');
+        files.forEach((file) => { console.log('\t' + file); });
         stopTimer('pr-check.js', startTime);
         process.exit(1);
       }
     });
-  }
-
-  if (buildTargets.length == 1 && buildTargets.has('DOCS')) {
-    console.log('Only docs were updated, stopping build process.');
-    stopTimer('pr-check.js', startTime);
-    return 0;
   }
 
   //if (files.includes('package.json') ?
@@ -296,6 +323,10 @@ function main(argv) {
 
   if (buildTargets.has('BUILD_SYSTEM')) {
     command.testBuildSystem();
+  }
+
+  if (buildTargets.has('DOCS')) {
+    command.testDocumentLinks(files);
   }
 
   if (buildTargets.has('RUNTIME')) {

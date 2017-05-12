@@ -76,7 +76,7 @@ tags: {  # <amp-video>
   attrs: { name: "[preload]" }
   attrs: { name: "[src]" }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/media/amp-video"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-video"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

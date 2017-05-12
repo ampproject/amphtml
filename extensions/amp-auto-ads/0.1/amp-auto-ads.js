@@ -16,7 +16,7 @@
 
 import {AdTracker, getExistingAds} from './ad-tracker';
 import {AdStrategy} from './ad-strategy';
-import {dev, user} from '../../../src/log';
+import {user} from '../../../src/log';
 import {xhrFor} from '../../../src/services';
 import {getAdNetworkConfig} from './ad-network-config';
 import {isExperimentOn} from '../../../src/experiments';
@@ -39,7 +39,15 @@ export class AmpAutoAds extends AMP.BaseElement {
     const adNetwork = getAdNetworkConfig(type, this.element);
     user().assert(adNetwork, 'No AdNetworkConfig for type: ' + type);
 
+    if (!adNetwork.isEnabled(this.win)) {
+      return;
+    }
+
     this.getConfig_(adNetwork.getConfigUrl()).then(configObj => {
+      if (!configObj) {
+        return;
+      }
+
       const placements = getPlacementsFromConfigObj(this.win, configObj);
       const attributes = Object.assign(adNetwork.getAttributes(),
           getAttributesFromConfigObj(configObj));
@@ -72,7 +80,7 @@ export class AmpAutoAds extends AMP.BaseElement {
     return xhrFor(this.win)
         .fetchJson(configUrl, xhrInit)
         .catch(reason => {
-          dev().error(TAG, 'amp-auto-ads config xhr failed: ' + reason);
+          user().error(TAG, 'amp-auto-ads config xhr failed: ' + reason);
           return null;
         });
   }
