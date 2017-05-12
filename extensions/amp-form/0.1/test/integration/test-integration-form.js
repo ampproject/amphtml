@@ -192,8 +192,8 @@ describes.realWin('AmpForm Integration', {
           () => form.querySelector('[i-amphtml-rendered]'));
 
       form.dispatchEvent(new Event('submit'));
-      return fetch.catch(error => error).then(error => {
-        expect(error.message).to.match(/HTTP error 500/);
+      return fetch.catch(fetchError => fetchError).then(fetchError => {
+        expect(fetchError.error.message).to.match(/HTTP error 500/);
         return render.then(rendered => {
           expect(rendered.textContent).to.equal(
               'Oops. John Miller your email john@miller.what is already ' +
@@ -253,8 +253,8 @@ describes.realWin('AmpForm Integration', {
           () => form.querySelector('[i-amphtml-rendered]'));
 
       form.dispatchEvent(new Event('submit'));
-      return fetch.catch(error => error).then(error => {
-        expect(error.message).to.match(/HTTP error 500/);
+      return fetch.catch(fetchError => fetchError).then(fetchError => {
+        expect(fetchError.error.message).to.match(/HTTP error 500/);
         return render.then(rendered => {
           expect(rendered.textContent).to.equal(
               'Oops. John Miller your email john@miller.what is already ' +
@@ -289,8 +289,8 @@ describes.realWin('AmpForm Integration', {
           () => form.querySelector('amp-img img'));
 
       form.dispatchEvent(new Event('submit'));
-      return fetch.catch(error => error).then(error => {
-        expect(error.message).to.match(/HTTP error 500/);
+      return fetch.catch(fetchError => fetchError).then(fetchError => {
+        expect(fetchError.error.message).to.match(/HTTP error 500/);
 
         // It shouldn't have the i-amphtml-rendered attribute since no
         // template was rendered.
