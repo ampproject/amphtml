@@ -47,13 +47,12 @@ Supported parameters:
 - `sectionId`: required: ID of this section in inventory system.
 - `slot`: required: ID of slot, that will be showed in this ad block.
 - `pubnetwork-lib`: Filepath of ad library.
-- `custom`: optional: You may use 3 types for its properties: {String}, {Number} and {Array}.<br/>
-                    Array usage example:
+- `custom`: optional: <br/>
+                    usage example:
                     ```
                     {
-                        arrayKey: [ "value1", 1 ],
-                        stringKey: 'stringValue'
+                        "arrayKey":["value1",1],
+                        "stringKey":"stringValue"
                     }
                     ```
-                    Will translate into: arrayKey=value1&arrayKey=1&stringKey=stringValue...
 
