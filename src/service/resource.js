@@ -587,7 +587,7 @@ export class Resource {
       if (!this.renderOutsideViewportResolve_) {
         return;
       }
-      this.renderOutsideViewportResolver_();
+      this.renderOutsideViewportResolve_();
       this.renderOutsideViewportPromise_ = null;
       this.renderOutsideViewportResolve_ = null;
     };
