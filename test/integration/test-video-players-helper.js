@@ -25,7 +25,8 @@ import {
   poll,
 } from '../../testing/iframe';
 
-export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
+export function runVideoPlayerIntegrationTests(
+    createVideoElementFunc, opt_experiment) {
   const TIMEOUT = 20000;
   let fixtureGlobal;
   let videoGlobal;
@@ -33,6 +34,8 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
   describe.configure().retryOnSaucelabs()
   .run('Video Interface', function() {
     this.timeout(TIMEOUT);
+
+    beforeEach(setUp);
 
     it('should override the video interface methods', function() {
       this.timeout(TIMEOUT);
@@ -56,6 +59,9 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
   describe.configure().retryOnSaucelabs()
   .run('Actions', function() {
     this.timeout(TIMEOUT);
+
+    beforeEach(setUp);
+
     it('should support mute, play, pause, unmute actions', function() {
       return getVideoPlayer({outsideView: false, autoplay: false}).then(r => {
         // Create a action buttons
@@ -113,6 +119,8 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
   .run('Autoplay', function() {
     this.timeout(TIMEOUT);
     describe('play/pause', () => {
+      beforeEach(setUp);
+
       it('should play when in view port initially', () => {
         return getVideoPlayer({outsideView: false, autoplay: true}).then(r => {
           return listenOncePromise(r.video, VideoEvents.PLAY);
@@ -148,9 +156,13 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
           return p;
         });
       });
+
+      afterEach(cleanUp);
     });
 
     describe('Animated Icon', () => {
+      beforeEach(setUp);
+
       // TODO(amphtml): Unskip when #8385 is fixed.
       it.skip('should create an animated icon overlay', () => {
         let video;
@@ -196,6 +208,8 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
           }, undefined, TIMEOUT);
         }
       });
+
+      afterEach(cleanUp);
     });
 
     before(function() {
@@ -250,11 +264,19 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
     });
   }
 
+  function setUp() {
+    if (opt_experiment && fixtureGlobal) {
+      toggleExperiment(fixtureGlobal.win, opt_experiment, true);
+    }
+  }
+
   function cleanUp() {
     if (fixtureGlobal) {
       fixtureGlobal.doc.body.removeChild(videoGlobal);
       fixtureGlobal.iframe.remove();
-      toggleExperiment(fixtureGlobal.win, 'amp-ima-video', false);
+      if (opt_experiment) {
+        toggleExperiment(fixtureGlobal.win, opt_experiment, false);
+      }
     }
   }
 }
