@@ -178,8 +178,8 @@ export class Resource {
     /** @private {?Promise} */
     this.renderOutsideViewportPromise_ = null;
 
-    /** @private {?Resolver} */
-    this.renderOutsideViewportResolver_ = null;
+    /** @private {?Function} */
+    this.renderOutsideViewportResolve_ = null;
 
     /** @private {?Promise<undefined>} */
     this.layoutPromise_ = null;
@@ -574,7 +574,7 @@ export class Resource {
       return this.renderOutsideViewportPromise_;
     }
     return this.renderOutsideViewportPromise_ = new Promise(resolver => {
-      this.renderOutsideViewportResolver_ = resolver;
+      this.renderOutsideViewportResolve_ = resolver;
     });
   }
 
@@ -584,12 +584,12 @@ export class Resource {
    */
   renderOutsideViewport() {
     const promiseCallback = () => {
-      if (!this.renderOutsideViewportResolver_) {
+      if (!this.renderOutsideViewportResolve_) {
         return;
       }
       this.renderOutsideViewportResolver_();
       this.renderOutsideViewportPromise_ = null;
-      this.renderOutsideViewportResolver_ = null;
+      this.renderOutsideViewportResolve_ = null;
     };
     // The exception is for owned resources, since they only attempt to
     // render outside viewport when the owner has explicitly allowed it.
