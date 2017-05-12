@@ -593,7 +593,6 @@ message ValidationError {
   optional Code code = 1;
   optional int32 line = 2 [ default = 1 ];
   optional int32 col = 3;
-  optional string detail = 4;
   optional string spec_url = 5;
   repeated string params = 7;
   // This field is not populated by default. See
@@ -607,6 +606,8 @@ message ValidationError {
   // in tests to match specific errors to specific tags in the test cases. It
   // is not a rendered value.
   optional string data_amp_report_test_value = 9;
+
+  reserved 4;  // Previously used tag ids.
 }
 
 // Used in the verbose validator to select between multiple generated error
