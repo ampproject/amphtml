@@ -295,6 +295,11 @@ const EXPERIMENTS = [
     id: 'amp-ima-video',
     name: 'IMA-integrated Video Player',
   },
+  {
+    id: 'a4a-measure-get-ad-urls',
+    name: 'DoubleClick Fast Fetch measure delay from after first slot ad url ' +
+          'generation to last slot as precursor for SRA support',
+  },
 ];
 
 if (getMode().localDev) {
