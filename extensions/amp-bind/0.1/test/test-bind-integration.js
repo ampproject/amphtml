@@ -21,8 +21,6 @@ import {ampdocServiceFor} from '../../../../src/ampdoc';
 import * as sinon from 'sinon';
 
 describe.configure().retryOnSaucelabs().run('amp-bind', function() {
-  const fixtureLocation = 'test/fixtures/amp-bind-integrations.html';
-
   let fixture;
   let ampdoc;
   let sandbox;
@@ -31,6 +29,17 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  /**
+   * @param {string} fixtureLocation
+   * @return {!Promise}
+   */
+  function setupWithFixture(fixtureLocation) {
     return createFixtureIframe(fixtureLocation).then(f => {
       fixture = f;
       return waitForEvent('amp:bind:initialize');
@@ -38,11 +47,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
       const ampdocService = ampdocServiceFor(fixture.win);
       ampdoc = ampdocService.getAmpDoc(fixture.doc);
     });
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-  });
+  }
 
   /**
    * @param {string} name
@@ -72,7 +77,39 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
         waitForEvent('amp:bind:mutated'));
   }
 
+  describe('text integration', () => {
+
+    beforeEach(() => {
+      return setupWithFixture('test/fixtures/bind-text-integration.html');
+    });
+
+    it('should update text when text attribute binding changes', () => {
+      const textElement = fixture.doc.getElementById('textElement');
+      const button = fixture.doc.getElementById('changeTextButton');
+      expect(textElement.textContent).to.equal('unbound');
+      button.click();
+      return waitForBindApplication().then(() => {
+        expect(textElement.textContent).to.equal('hello world');
+      });
+    });
+
+    it('should update CSS class when class binding changes', () => {
+      const textElement = fixture.doc.getElementById('textElement');
+      const button = fixture.doc.getElementById('changeTextClassButton');
+      expect(textElement.className).to.equal('original');
+      button.click();
+      return waitForBindApplication().then(() => {
+        expect(textElement.className).to.equal('new');
+      });
+    });
+  });
+
   describe('detecting bindings under dynamic tags', () => {
+
+    beforeEach(() => {
+      return setupWithFixture('test/fixtures/bind-integrations.html');
+    });
+
     it('should NOT bind blacklisted attributes', () => {
       const dynamicTag = fixture.doc.getElementById('dynamicTag');
       const div = fixture.doc.createElement('div');
@@ -115,29 +152,12 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
     });
   });
 
-  describe('text integration', () => {
-    it('should update text when text attribute binding changes', () => {
-      const textElement = fixture.doc.getElementById('textElement');
-      const button = fixture.doc.getElementById('changeTextButton');
-      expect(textElement.textContent).to.equal('unbound');
-      button.click();
-      return waitForBindApplication().then(() => {
-        expect(textElement.textContent).to.equal('hello world');
-      });
-    });
-
-    it('should update CSS class when class binding changes', () => {
-      const textElement = fixture.doc.getElementById('textElement');
-      const button = fixture.doc.getElementById('changeTextClassButton');
-      expect(textElement.className).to.equal('original');
-      button.click();
-      return waitForBindApplication().then(() => {
-        expect(textElement.className).to.equal('new');
-      });
-    });
-  });
-
   describe('input integration', () => {
+
+    beforeEach(() => {
+      return setupWithFixture('test/fixtures/bind-integrations.html');
+    });
+
     it('should update dependent bindings on range input changes', () => {
       const rangeText = fixture.doc.getElementById('rangeText');
       const range = fixture.doc.getElementById('range');
@@ -173,6 +193,11 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   });
 
   describe('amp-carousel integration', () => {
+
+    beforeEach(() => {
+      return setupWithFixture('test/fixtures/bind-integrations.html');
+    });
+
     it('should update dependent bindings on carousel slide changes', () => {
       const slideNum = fixture.doc.getElementById('slideNum');
       const carousel = fixture.doc.getElementById('carousel');
@@ -199,6 +224,11 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   });
 
   describe('amp-img integration', () => {
+
+    beforeEach(() => {
+      return setupWithFixture('test/fixtures/bind-integrations.html');
+    });
+
     it('should change src when the src attribute binding changes', () => {
       const button = fixture.doc.getElementById('changeImgSrcButton');
       const img = fixture.doc.getElementById('image');
@@ -261,6 +291,11 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   });
 
   describe('amp-live-list integration', () => {
+
+    beforeEach(() => {
+      return setupWithFixture('test/fixtures/bind-integrations.html');
+    });
+
     it('should detect bindings in initial live-list elements', () => {
       const liveListItems = fixture.doc.getElementById('liveListItems');
       expect(liveListItems.children.length).to.equal(1);
@@ -311,6 +346,11 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   });
 
   describe('amp-selector integration', () => {
+
+    beforeEach(() => {
+      return setupWithFixture('test/fixtures/bind-integrations.html');
+    });
+
     it('should update dependent bindings when selection changes', () => {
       const selectionText = fixture.doc.getElementById('selectionText');
       const img1 = fixture.doc.getElementById('selectorImg1');
@@ -351,6 +391,11 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   });
 
   describe('amp-video integration', () => {
+
+    beforeEach(() => {
+      return setupWithFixture('test/fixtures/bind-integrations.html');
+    });
+
     it('should support binding to src', () => {
       const button = fixture.doc.getElementById('changeVidSrcButton');
       const vid = fixture.doc.getElementById('video');
@@ -417,6 +462,11 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   });
 
   describe('amp-youtube', () => {
+
+    beforeEach(() => {
+      return setupWithFixture('test/fixtures/bind-integrations.html');
+    });
+
     it('should support binding to data-video-id', () => {
       const button = fixture.doc.getElementById('youtubeButton');
       const yt = fixture.doc.getElementById('youtube');
@@ -429,6 +479,11 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   });
 
   describe('amp-brightcove', () => {
+
+    beforeEach(() => {
+      return setupWithFixture('test/fixtures/bind-integrations.html');
+    });
+
     it('should support binding to data-account', () => {
       const button = fixture.doc.getElementById('brightcoveButton');
       const bc = fixture.doc.getElementById('brightcove');
@@ -444,6 +499,11 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   });
 
   describe('amp-iframe', () => {
+
+    beforeEach(() => {
+      return setupWithFixture('test/fixtures/bind-integrations.html');
+    });
+
     it('should support binding to src', () => {
       const button = fixture.doc.getElementById('iframeButton');
       const ampIframe = fixture.doc.getElementById('ampIframe');
@@ -463,6 +523,11 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   });
 
   describe('amp-list', () => {
+
+    beforeEach(() => {
+      return setupWithFixture('test/fixtures/bind-integrations.html');
+    });
+
     it('should support binding to src', () => {
       const button = fixture.doc.getElementById('listSrcButton');
       const list = fixture.doc.getElementById('list');
@@ -489,6 +554,11 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   });
 
   describe('amp-state', () => {
+
+    beforeEach(() => {
+      return setupWithFixture('test/fixtures/bind-integrations.html');
+    });
+
     it('should not loop infinitely if updates change its src binding', () => {
       const changeAmpStateSrcButton =
           fixture.doc.getElementById('ampStateSrcButton');
