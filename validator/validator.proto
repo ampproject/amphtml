@@ -607,7 +607,7 @@ message ValidationError {
   // is not a rendered value.
   optional string data_amp_report_test_value = 9;
 
-  reserved 4;  // Previously used tag ids.
+  extensions 4;  // Previously used tag ids.
 }
 
 // Used in the verbose validator to select between multiple generated error
