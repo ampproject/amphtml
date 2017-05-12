@@ -31,7 +31,7 @@ const HTML_ESCAPE_REGEX = /(&|<|>|"|'|`)/g;
 
 /**
  * Determines if this element is an AMP element
- * @param {!Element}
+ * @param {!Element} element
  * @return {boolean}
  */
 export function isAmpElement(element) {
