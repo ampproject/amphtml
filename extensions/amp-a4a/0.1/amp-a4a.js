@@ -1423,5 +1423,4 @@ export function decodeSizeHeader(headerValue) {
   }
   const sizeArr = headerValue.split('x').map(Number);
   return /** @type {?SizeInfoDef} */ ({width: sizeArr[0], height: sizeArr[1]});
-  return null;
 }
