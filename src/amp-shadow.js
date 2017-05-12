@@ -29,6 +29,7 @@ import {
 } from './runtime';
 import {bodyAlwaysVisible} from './style-installer';
 import {deactivateChunking} from './chunk';
+import {doNotTrackImpression} from './impression';
 import {stubElements} from './custom-element';
 
 
@@ -44,6 +45,10 @@ installDocService(self, /* isSingleDoc */ false);
 
 // Core services.
 installRuntimeServices(self);
+
+// Impression tracking for PWA is not meaningful, but the dependent code
+// has to be unblocked.
+doNotTrackImpression(self);
 
 // Builtins.
 installBuiltins(self);

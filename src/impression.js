@@ -99,6 +99,14 @@ export function maybeTrackImpression(win) {
 }
 
 /**
+ * Signal that impression tracking is not relevant in this environment.
+ * @param {!Window} win
+ */
+export function doNotTrackImpression(win) {
+  trackImpressionPromise = Promise.resolve();
+}
+
+/**
  * Send the url to ad server and wait for its response
  * @param {!Window} win
  * @param {string} clickUrl
