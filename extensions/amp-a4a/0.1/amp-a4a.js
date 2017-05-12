@@ -354,7 +354,7 @@ export class AmpA4A extends AMP.BaseElement {
      *    renderOutsideViewport distance
      */
     this.delayRequestEnabled = (type == 'adsense' || type == 'doubleclick') &&
-      /1171526[56]4/.test(this.element.getAttribute(EXPERIMENT_ATTRIBUTE));
+      /1171526[56]5/.test(this.element.getAttribute(EXPERIMENT_ATTRIBUTE));
   }
 
   /** @override */

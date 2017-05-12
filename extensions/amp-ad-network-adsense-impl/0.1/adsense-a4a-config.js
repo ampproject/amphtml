@@ -55,7 +55,11 @@ const ADSENSE_A4A_EXPERIMENT_NAME = 'expAdsenseA4A';
 export const ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH = {
   control: '117152652',
   experiment: '117152653',
-  delayedExperiment: '117152654',
+};
+
+export const ADSENSE_A4A_EXTERNAL_DELAYED_EXPERIMENT_BRANCHES_PRE_LAUNCH = {
+  control: '117152654',
+  experiment: '117152655',
 };
 
 /**
@@ -100,5 +104,6 @@ export function adsenseIsA4AEnabled(win, element) {
   return !!element.getAttribute('data-ad-client') &&
       googleAdsIsA4AEnabled(
         win, element, ADSENSE_A4A_EXPERIMENT_NAME,
-        externalBranches, internalBranches);
+        externalBranches, internalBranches,
+        ADSENSE_A4A_EXTERNAL_DELAYED_EXPERIMENT_BRANCHES_PRE_LAUNCH);
 }

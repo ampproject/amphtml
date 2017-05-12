@@ -81,7 +81,7 @@ const INTERNALLY_SELECTED_ID = '2088462';
  *   pathway.
  */
 export function googleAdsIsA4AEnabled(win, element, experimentName,
-    externalBranches, internalBranches) {
+    externalBranches, internalBranches, delayedExternalBranches) {
   if (!isGoogleAdsA4AValidEnvironment(win)) {
     // Serving location doesn't qualify for A4A treatment
     return false;
@@ -89,7 +89,8 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
 
   const isSetFromUrl = maybeSetExperimentFromUrl(win, element,
       experimentName, externalBranches.control,
-      externalBranches.experiment, externalBranches.delayedExperiment,
+      externalBranches.experiment, delayedExternalBranches.control,
+      delayedExternalBranches.experiment,
       MANUAL_EXPERIMENT_ID);
   const experimentInfoMap = {};
   const branches = [
@@ -129,7 +130,7 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
     // "control" (i.e., use traditional, 3p iframe rendering pathway).
     const selected = selectedBranch == internalBranches.experiment ||
                      selectedBranch == externalBranches.experiment ||
-                     selectedBranch == externalBranches.delayedExperiment ||
+                     selectedBranch == delayedExternalBranches.experiment ||
                      selectedBranch == MANUAL_EXPERIMENT_ID;
     // Not launched, control branch -> Delayed Fetch
     // Not launched, experimental branch -> Fast Fetch
@@ -178,7 +179,8 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
  *   parameter or not.
  */
 function maybeSetExperimentFromUrl(win, element, experimentName,
-    controlBranchId, treatmentBranchId, delayedTreatmentBrandId, manualId) {
+    controlBranchId, treatmentBranchId, delayedControlId,
+    delayedTreatmentBrandId, manualId) {
   const expParam = viewerForDoc(element).getParam('exp') ||
       parseQueryString(win.location.search)['exp'];
   if (!expParam) {
@@ -197,7 +199,8 @@ function maybeSetExperimentFromUrl(win, element, experimentName,
     '0': null,
     '1': controlBranchId,
     '2': treatmentBranchId,
-    '3': delayedTreatmentBrandId,
+    '3': delayedControlId,
+    '4': delayedTreatmentBrandId,
   };
   if (argMapping.hasOwnProperty(arg)) {
     forceExperimentBranch(win, experimentName, argMapping[arg]);
