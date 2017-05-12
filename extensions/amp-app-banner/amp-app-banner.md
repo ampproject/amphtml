@@ -47,7 +47,7 @@ limitations under the License.
 `amp-app-banner` is a wrapper and minimal UI for a cross-platform, fixed-position banner showing a call-to-action to install an app. Includes conditional logic to direct to the right app on the right platform, and to hide permanently if the user dismisses the banner.
 
 
-##Data Sources
+## Data Sources
 To extend and promote the usage of the natively supported app banners on <a href="https://developer.apple.com/library/content/documentation/AppleApplications/Reference/SafariWebContent/PromotingAppswithAppBanners/PromotingAppswithAppBanners.html">iOS</a> and <a href="https://developers.google.com/web/updates/2015/03/increasing-engagement-with-app-install-banners-in-chrome-for-android?hl=en#span-idnativenative-app-install-bannerspan">Android</a>, we are using the exact data-sources the native app banners use on the respective platforms. iOS uses a `<meta name="apple-itunes-app">` tag in the head of the document and Android uses a `<link rel="manifest">`. 
 
 The AMP runtime parses the meta tag content attribute on iOS extracting the App ID and `app-argument` (usually used for deep-linking URIs - app-protocols like `whatsapp://` or `medium://`). On Android, the AMP runtimes makes an XHR request to fetch the `manifest.json` file, and parses its content to extract `app_id` from `related_applications` and it calculates the app store URL as well as open-in-app URL:
@@ -88,7 +88,7 @@ android-app://${appId}/${protocol}/${host}${pathname}
 }
 ```
 
-##Appearance Behavior
+## Appearance Behavior
 
 `amp-app-banner` provides no default UI and leaves the UI to the developer. The developer can build any kind of UI inside the banner and style it accordingly. There is one UI element that has limits to the amount of customization--the "X" button that dismisses the banner. This button can be styled with the `.amp-app-banner-dismiss-button` class. It should be kept visible and easily accessible on mobile devices, to avoid blocking content.
 
