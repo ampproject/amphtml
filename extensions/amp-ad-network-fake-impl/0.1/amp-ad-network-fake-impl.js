@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpA4A, XORIGIN_MODE} from '../../amp-a4a/0.1/amp-a4a';
+import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {base64DecodeToBytes} from '../../../src/utils/base64';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
@@ -70,9 +70,6 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
             }
           } catch (e) {
           }
-          // Prevent issueing a second network request to try to fetch
-          // the same JSON again.
-          this.experimentalNonAmpCreativeRenderMethod_ = XORIGIN_MODE.NAMEFRAME;
           const encoder = new TextEncoder('utf-8');
           return {
             creative: encoder.encode(creative).buffer,
