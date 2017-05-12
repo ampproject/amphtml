@@ -36,8 +36,8 @@ describes.realWin('analytics', {amp: true}, env => {
     let triggerEventSpy;
 
     class MockInstrumentation {
-      triggerEvent(eventType, opt_vars) {
-        triggerEventSpy(eventType, opt_vars);
+      triggerEventForTarget(nodeOrDoc, eventType, opt_vars) {
+        triggerEventSpy(nodeOrDoc, eventType, opt_vars);
       }
     }
 
@@ -68,7 +68,7 @@ describes.realWin('analytics', {amp: true}, env => {
       triggerAnalyticsEvent(ampdoc, 'hello');
       return timer.promise(50).then(() => {
         expect(triggerEventSpy).to.have.been.called;
-        expect(triggerEventSpy).to.have.been.calledWith('hello');
+        expect(triggerEventSpy).to.have.been.calledWith(ampdoc, 'hello');
       });
     });
   });
