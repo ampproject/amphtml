@@ -57,3 +57,62 @@ export function some(promises, count = 1) {
     }
   });
 }
+
+/**
+ * Resolves with the result of the last promise added.
+ * @implements {IThenable}
+ */
+export class LastAddedResolver {
+  /**
+   * @param {!Array<!Promise>=} opt_promises
+   */
+  constructor(opt_promises) {
+    let resolve_, reject_;
+    /** @private @const {!Promise} */
+    this.promise_ = new Promise((resolve, reject) => {
+      resolve_ = resolve;
+      reject_ = reject;
+    });
+
+    /** @private */
+    this.resolve_ = resolve_;
+
+    /** @private */
+    this.reject_ = reject_;
+
+    /** @private */
+    this.count_ = 0;
+
+    if (opt_promises) {
+      for (let i = 0; i < opt_promises.length; i++) {
+        this.add(opt_promises[i]);
+      }
+    }
+  }
+
+  /**
+   * Add a promise to possibly be resolved.
+   * @param {!Promise} promise
+   * @return {!Promise}
+   */
+  add(promise) {
+    const countAtAdd = ++this.count_;
+    Promise.resolve(promise).then(result => {
+      if (this.count_ === countAtAdd) {
+        this.resolve_(result);
+      }
+    }, error => {
+      // Don't follow behavior of Promise.all and Promise.race error so that
+      // this will only reject when most recently added promise fails.
+      if (this.count_ === countAtAdd) {
+        this.reject_(error);
+      }
+    });
+    return this.promise_;
+  }
+
+  /** @override */
+  then(opt_resolve, opt_reject) {
+    return this.promise_.then(opt_resolve, opt_reject);
+  }
+}

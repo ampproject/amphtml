@@ -292,6 +292,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8261',
   },
   {
+    id: 'amp-form-verifiers',
+    name: 'Asynchronous form verifiers',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9174',
+    spec: 'https://github.com/ampproject/amphtml/issues/8736',
+  },
+  {
     id: 'amp-ima-video',
     name: 'IMA-integrated Video Player',
   },
