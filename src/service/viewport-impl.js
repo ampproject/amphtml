@@ -120,7 +120,7 @@ export class Viewport {
     this.scrollTracking_ = false;
 
     /** @private {number} */
-    this.scrollCount_ = 0;
+    this.scrollLength_ = 0;
 
     /** @private @const {!Observable<!ViewportChangedEventDef>} */
     this.changeObservable_ = new Observable();
@@ -549,11 +549,11 @@ export class Viewport {
   }
 
   /**
-   * Returns whether the user has scrolled yet.
-   * @return {boolean}
+   * Returns total scrolled length in pixel.
+   * @return {number}
    */
-  hasScrolled() {
-    return this.scrollCount_ > 0;
+  getTotalScrollLength() {
+    return this.scrollLength_;
   }
 
   /**
@@ -717,7 +717,6 @@ export class Viewport {
   /** @private */
   scroll_() {
     this.rect_ = null;
-    this.scrollCount_++;
     this.scrollLeft_ = this.binding_.getScrollLeft();
     const newScrollTop = this.binding_.getScrollTop();
     if (newScrollTop < 0) {
@@ -726,6 +725,7 @@ export class Viewport {
       // be ignored here.
       return;
     }
+    this.scrollLength_ += Math.abs(newScrollTop - this.scrollTop_);
     this.scrollTop_ = newScrollTop;
     if (!this.scrollTracking_) {
       this.scrollTracking_ = true;
