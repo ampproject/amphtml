@@ -51,7 +51,6 @@ export function runVideoPlayerIntegrationTests(
       });
     });
 
-    beforeEach(setUp);
     afterEach(cleanUp);
   });
 
@@ -109,7 +108,6 @@ export function runVideoPlayerIntegrationTests(
       });
     });
 
-    beforeEach(setUp);
     afterEach(cleanUp);
   });
 
@@ -212,7 +210,6 @@ export function runVideoPlayerIntegrationTests(
       });
     });
 
-    beforeEach(setUp);
     afterEach(cleanUp);
   });
 
@@ -223,6 +220,9 @@ export function runVideoPlayerIntegrationTests(
     return createFixtureIframe('test/fixtures/video-players.html', 1000)
     .then(f => {
       fixture = f;
+      if (opt_experiment) {
+        toggleExperiment(fixture.win, opt_experiment, true);
+      }
       return expectBodyToBecomeVisible(fixture.win);
     })
     .then(() => {
@@ -253,12 +253,6 @@ export function runVideoPlayerIntegrationTests(
         return {video, fixture};
       });
     });
-  }
-
-  function setUp() {
-    if (opt_experiment && fixtureGlobal) {
-      toggleExperiment(fixtureGlobal.win, opt_experiment, true);
-    }
   }
 
   function cleanUp() {
