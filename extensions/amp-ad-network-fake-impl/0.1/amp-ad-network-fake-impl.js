@@ -19,7 +19,7 @@ import {base64DecodeToBytes} from '../../../src/utils/base64';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {resolveRelativeUrl} from '../../../src/url';
-import {utf8Decode} from '../../../src/utils/bytes';
+import {utf8EncodeSync, utf8Decode} from '../../../src/utils/bytes';
 
 
 export class AmpAdNetworkFakeImpl extends AmpA4A {
@@ -31,8 +31,6 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
     super(element);
     user().assert(element.hasAttribute('src'),
         'Attribute src required for <amp-ad type="fake">: %s', element);
-    user().assert(TextEncoder, '<amp-ad type="fake"> requires browser'
-        + ' support for TextEncoder() function.');
   }
 
   /** @override */
@@ -60,9 +58,8 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
           // `localDev` and primarily used for A4A Envelope for testing.
           // See DEVELOPING.md for more info.
           const creative = this.transformCreativeLocalDev_(deserialized);
-          const encoder = new TextEncoder('utf-8');
           return {
-            creative: encoder.encode(creative).buffer,
+            creative: utf8EncodeSync(creative),
             signature: 'FAKESIG',
           };
         }
@@ -73,9 +70,8 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
       const decoded = JSON.parse(deserialized);
       dev().info('AMP-AD-FAKE', 'Decoded response text =', decoded['creative']);
       dev().info('AMP-AD-FAKE', 'Decoded signature =', decoded['signature']);
-      const encoder = new TextEncoder('utf-8');
       return {
-        creative: encoder.encode(decoded['creative']).buffer,
+        creative: utf8EncodeSync(decoded['creative']),
         signature: base64DecodeToBytes(decoded['signature']),
       };
     });
