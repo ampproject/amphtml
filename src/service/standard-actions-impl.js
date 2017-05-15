@@ -191,6 +191,5 @@ export function installStandardActionsForDoc(ampdoc) {
       ampdoc,
       'standard-actions',
       StandardActions,
-      /* opt_factory */ undefined,
       /* opt_instantiate */ true);
 };

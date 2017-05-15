@@ -32,7 +32,6 @@ export function iframeMessagingClientFor(win) {
 export function installIframeMessagingClient(win) {
   registerServiceBuilder(win,
       'iframeMessagingClient',
-      /* opt_ctor */ undefined,
       createIframeMessagingClient.bind(null, win),
       /* opt_instantiate */ true);
 }

@@ -49,7 +49,6 @@ export function installGlobalClickListenerForDoc(ampdoc) {
       ampdoc,
       TAG,
       ClickHandler,
-      /* opt_factory */ undefined,
       /* opt_instantiate */ true);
 }
 

@@ -575,8 +575,10 @@ describes.fakeWin('runtime', {
     });
 
     it('should register doc-service factory and install it immediately', () => {
+      let count = 0;
       function factory() {
-        return 'A';
+        count++;
+        return {str: 'A'};
       }
       const ampdoc = new AmpDocSingle(win);
       ampdocServiceMock.expects('getAmpDoc')
@@ -585,7 +587,7 @@ describes.fakeWin('runtime', {
       win.AMP.push({
         n: 'amp-ext',
         f: amp => {
-          amp.registerServiceForDoc('service1', undefined, factory);
+          amp.registerServiceForDoc('service1', factory);
         },
       });
       runChunksForTesting(win.document);
@@ -595,7 +597,8 @@ describes.fakeWin('runtime', {
       expect(extHolder.docFactories).to.have.length(0);
 
       // Already installed.
-      expect(getServiceForDoc(ampdoc, 'service1')).to.equal('A');
+      expect(count).to.equal(1);
+      expect(getServiceForDoc(ampdoc, 'service1')).to.deep.equal({str: 'A'});
     });
   });
 

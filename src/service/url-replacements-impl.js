@@ -972,8 +972,9 @@ export function installUrlReplacementsServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(
       ampdoc,
       'url-replace',
-      /* opt_constructor */ undefined,
-      doc => new UrlReplacements(doc, new GlobalVariableSource(doc)));
+      function(doc) {
+        return new UrlReplacements(doc, new GlobalVariableSource(doc));
+      });
 }
 
 /**
