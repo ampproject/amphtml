@@ -1123,10 +1123,14 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
 
   'snowplow': {
     'requests': {
-      'aaVersion': 'amp-0.1',
+      'aaVersion': 'amp-0.2',
       'basePrefix': 'https://${collectorHost}/i?url=${canonicalUrl}&page=${title}&' +
           'res=${screenWidth}x${screenHeight}&stm=${timestamp}&' +
-          'tz=${timezone}&aid=${appId}&p=web&tv=${aaVersion}',
+          'tz=${timezone}&aid=${appId}&p=web&tv=${aaVersion}&' +
+          'cd=${screenColorDepth}&cs=${documentCharset}&' +
+          'duid=${clientId}&' +
+          'lang=${browserLanguage}&refr=${documentReferrer}&stm=${timezone}&' +
+          'vp=${viewportWidth}x${viewportHeight}',
       'pageView': '${basePrefix}&e=pv',
       'structEvent': '${basePrefix}&e=se&' +
           'se_ca=${structEventCategory}&se_ac=${structEventAction}&' +
