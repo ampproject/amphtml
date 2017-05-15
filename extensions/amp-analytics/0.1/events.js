@@ -143,16 +143,31 @@ export class CustomEventTracker extends EventTracker {
       selector = ':root';
     }
     const selectionMethod = config['selectionMethod'] || null;
-    const target = this.root.getElement(context, selector, selectionMethod);
+
+    let targetReady = null;
+    if (selector == ':root' || selector == ':host') {
+      targetReady = Promise.resolve(
+          this.root.getElement(context, selector, selectionMethod));
+    } else {
+      // Wait for DOM to be fully parsed to avoid false missed searches.
+      targetReady = this.root.ampdoc.whenReady().then(() => {
+        return this.root.getElement(context, selector, selectionMethod);
+      });
+    }
+
     let observers = this.observers_[eventType];
     if (!observers) {
       observers = new Observable();
       this.observers_[eventType] = observers;
     }
-    return observers.add(event => {
-      if (target.contains(event.target)) {
-        listener(event);
-      }
+
+    return this.observers_[eventType].add(event => {
+      // Wait for target selected
+      targetReady.then(target => {
+        if (target.contains(event.target)) {
+          listener(event);
+        }
+      });
     });
   }
 

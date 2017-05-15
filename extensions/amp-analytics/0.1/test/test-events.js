@@ -159,6 +159,8 @@ describes.realWin('Events', {amp: 1}, env => {
   describe('CustomEventTracker', () => {
     let tracker;
     let clock;
+    const targetReadyPromise = Promise.resolve();
+
 
     beforeEach(() => {
       clock = sandbox.useFakeTimers();
@@ -179,31 +181,42 @@ describes.realWin('Events', {amp: 1}, env => {
       tracker.add(analyticsElement, 'custom-event-2', {}, handler2);
 
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-1'));
-      expect(handler).to.be.calledOnce;
-      expect(handler2).to.have.not.been.called;
-
-      tracker.trigger(new AnalyticsEvent(target, 'custom-event-2'));
-      expect(handler).to.be.calledOnce;
-      expect(handler2).to.be.calledOnce;
-
-      tracker.trigger(new AnalyticsEvent(target, 'custom-event-1'));
-      expect(handler).to.have.callCount(2);
-      expect(handler2).to.be.calledOnce;
+      return ampdoc.whenReady().then(() => {
+        expect(handler).to.be.calledOnce;
+        expect(handler2).to.have.not.been.called;
+        tracker.trigger(new AnalyticsEvent(target, 'custom-event-2'));
+        return targetReadyPromise.then(() => {
+          expect(handler).to.be.calledOnce;
+          expect(handler2).to.be.calledOnce;
+          tracker.trigger(new AnalyticsEvent(target, 'custom-event-1'));
+          return targetReadyPromise.then(() => {
+            expect(handler).to.have.callCount(2);
+            expect(handler2).to.be.calledOnce;
+          });
+        });
+      });
     });
 
     it('should support selector', () => {
-      const handler2 = sandbox.spy();
-      const handler3 = sandbox.spy();
+      let eventResolver1, eventResolver2;
+      const eventPromise1 = new Promise(resolve => {
+        eventResolver1 = resolve;
+      });
+      const eventPromise2 = new Promise(resolve => {
+        eventResolver2 = resolve;
+      });
       tracker.add(
           analyticsElement, 'custom-event', {'selector': '.child'}, handler);
+      tracker.add(analyticsElement,
+          'custom-event', {'selector': '.target'}, eventResolver1);
       tracker.add(
-          analyticsElement, 'custom-event', {'selector': '.target'}, handler2);
-      tracker.add(
-          analyticsElement, 'custom-event', {}, handler3);
+          analyticsElement, 'custom-event', {}, eventResolver2);
       tracker.trigger(new AnalyticsEvent(target, 'custom-event'));
-      expect(handler).to.not.be.called;
-      expect(handler2).to.be.calledOnce;
-      expect(handler3).to.be.calledOnce;
+      return eventPromise1.then(() => {
+        return eventPromise2.then(() => {
+          expect(handler).to.not.be.called;
+        });
+      });
     });
 
     it('should differ custom event with same name different selector', () => {
@@ -216,12 +229,17 @@ describes.realWin('Events', {amp: 1}, env => {
       tracker.add(
           analyticsElement, 'custom-event', {'selector': '.child2'}, handler2);
       tracker.trigger(new AnalyticsEvent(child, 'custom-event'));
-      expect(handler).to.be.calledOnce;
-      expect(handler2).to.not.be.called;
-      handler.reset();
-      tracker.trigger(new AnalyticsEvent(child2, 'custom-event'));
-      expect(handler).to.not.be.called;
-      expect(handler2).to.be.calledOnce;
+      return ampdoc.whenReady().then(() => {
+        return targetReadyPromise.then(() => {
+          expect(handler).to.be.calledOnce;
+          expect(handler2).to.not.be.called;
+          handler.reset();
+          tracker.trigger(new AnalyticsEvent(child2, 'custom-event'));
+        }).then(() => {
+          expect(handler).to.not.be.called;
+          expect(handler2).to.be.calledOnce;
+        });
+      });
     });
 
     it('should buffer custom events early on', () => {
@@ -250,25 +268,29 @@ describes.realWin('Events', {amp: 1}, env => {
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-1'));
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-2'));
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-3'));
-      expect(handler).to.have.callCount(2);
-      expect(handler2).to.have.callCount(3);
-      expect(handler3).to.be.calledOnce;
-      expect(tracker.buffer_['custom-event-1']).to.have.length(2);
-      expect(tracker.buffer_['custom-event-2']).to.have.length(3);
-      expect(tracker.buffer_['custom-event-3']).to.have.length(1);
+      return targetReadyPromise.then(() => {
+        expect(handler).to.have.callCount(2);
+        expect(handler2).to.have.callCount(3);
+        expect(handler3).to.be.calledOnce;
+        expect(tracker.buffer_['custom-event-1']).to.have.length(2);
+        expect(tracker.buffer_['custom-event-2']).to.have.length(3);
+        expect(tracker.buffer_['custom-event-3']).to.have.length(1);
 
-      // Buffering time expires.
-      clock.tick(10001);
-      expect(tracker.buffer_).to.be.undefined;
+        // Buffering time expires.
+        clock.tick(10001);
+        expect(tracker.buffer_).to.be.undefined;
 
-      // Post-buffering round of events.
-      tracker.trigger(new AnalyticsEvent(target, 'custom-event-1'));
-      tracker.trigger(new AnalyticsEvent(target, 'custom-event-2'));
-      tracker.trigger(new AnalyticsEvent(target, 'custom-event-3'));
-      expect(handler).to.have.callCount(3);
-      expect(handler2).to.have.callCount(4);
-      expect(handler3).to.have.callCount(2);
-      expect(tracker.buffer_).to.be.undefined;
+        // Post-buffering round of events.
+        tracker.trigger(new AnalyticsEvent(target, 'custom-event-1'));
+        tracker.trigger(new AnalyticsEvent(target, 'custom-event-2'));
+        tracker.trigger(new AnalyticsEvent(target, 'custom-event-3'));
+        return targetReadyPromise.then(() => {
+          expect(handler).to.have.callCount(3);
+          expect(handler2).to.have.callCount(4);
+          expect(handler3).to.have.callCount(2);
+          expect(tracker.buffer_).to.be.undefined;
+        });
+      });
     });
   });
 
