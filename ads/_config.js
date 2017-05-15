@@ -179,7 +179,7 @@ export const adConfig = {
 
   caajainfeed: {
     prefetch: [
-      'https://cdn.amanad.adtdp.com/sdk/ajaamp-v1.0.js',
+      'https://cdn.amanad.adtdp.com/sdk/ajaamp.js',
     ],
     preconnect: [
       'https://ad.amanad.adtdp.com',
@@ -292,6 +292,11 @@ export const adConfig = {
     prefetch: 'https://cdn.gmossp-sp.jp/ads/amp.js',
   },
 
+  gumgum: {
+    prefetch: 'https://g2.gumgum.com/javascripts/ad.js',
+    renderStartImplemented: true,
+  },
+
   holder: {
     prefetch: 'https://i.holder.com.ua/js2/holder/ajax/ampv1.js',
     preconnect: 'https://h.holder.com.ua',
@@ -323,8 +328,7 @@ export const adConfig = {
 
   ix: {
     prefetch: [
-      'https://js-sec.indexww.com/indexJTag.js',
-      'https://js-sec.indexww.com/apl/apl6.js',
+      'https://js-sec.indexww.com/apl/amp.js',
     ],
     preconnect: 'https://as-sec.casalemedia.com',
   },
@@ -430,6 +434,10 @@ export const adConfig = {
 
   nativo: {
     prefetch: 'https://s.ntv.io/serve/load.js',
+  },
+
+  navegg: {
+    renderStartImplemented: true,
   },
 
   nend: {

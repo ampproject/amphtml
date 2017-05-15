@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Keycodes} from '../../../../src/utils/keycodes';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 import * as sinon from 'sinon';
@@ -151,8 +152,9 @@ describe('amp-social-share', () => {
           'https://twitter.com/intent/tweet');
 
       expect(el.implementation_.href_).to.not.contain('TITLE');
-      expect(el.addEventListener).to.be.calledOnce;
+      expect(el.addEventListener).to.be.calledTwice;
       expect(el.addEventListener).to.be.calledWith('click');
+      expect(el.addEventListener).to.be.calledWith('keydown');
     });
   });
 
@@ -201,4 +203,33 @@ describe('amp-social-share', () => {
       );
     });
   });
+
+  it('should handle key presses', () => {
+    return getShare('twitter').then(el => {
+      const nonActivationEvent = {
+        preventDefault: () => {},
+        keyCode: Keycodes.RIGHT_ARROW,
+      };
+      const activationEvent = {
+        preventDefault: () => {},
+        keyCode: Keycodes.SPACE,
+      };
+      el.implementation_.handleKeyPress_(nonActivationEvent);
+      expect(el.implementation_.win.open).to.not.have.been.called;
+      el.implementation_.handleKeyPress_(activationEvent);
+      expect(el.implementation_.win.open).to.be.calledOnce;
+      expect(el.implementation_.win.open).to.be.calledWith(
+        'https://twitter.com/intent/tweet?text=doc%20title&' +
+          'url=https%3A%2F%2Fcanonicalexample.com%2F',
+          '_blank', 'resizable,scrollbars,width=640,height=480'
+      );
+    });
+  });
+
+  it('has tabindex set to 0 by default', () => {
+    return getShare('twitter').then(el => {
+      expect(el.getAttribute('tabindex')).to.equal('0');
+    });
+  });
+
 });

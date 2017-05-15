@@ -22,7 +22,11 @@
  * impacts on click-throughs.
  */
 
-import {isGoogleAdsA4AValidEnvironment, EXPERIMENT_ATTRIBUTE} from './utils';
+import {
+  isGoogleAdsA4AValidEnvironment,
+  mergeExperimentIds,
+  EXPERIMENT_ATTRIBUTE,
+} from './utils';
 import {
   isExperimentOn,
   forceExperimentBranch,
@@ -38,8 +42,7 @@ import {parseQueryString} from '../../../src/url';
 
 /** @typedef {{
  *    control: string,
- *    experiment: string,
- *    controlMeasureOnRender: (string|undefined)
+ *    experiment: string
  *  }} */
 export let A4aExperimentBranches;
 
@@ -86,16 +89,13 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
 
   const isSetFromUrl = maybeSetExperimentFromUrl(win, element,
       experimentName, externalBranches.control,
-      externalBranches.experiment, externalBranches.controlMeasureOnRender,
+      externalBranches.experiment,
       MANUAL_EXPERIMENT_ID);
   const experimentInfoMap = {};
   const branches = [
     internalBranches.control,
     internalBranches.experiment,
   ];
-  if (internalBranches.controlMeasureOnRender) {
-    branches.push(internalBranches.controlMeasureOnRender);
-  }
   experimentInfoMap[experimentName] = {
     isTrafficEligible: () => true,
     branches,
@@ -162,8 +162,6 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
  *   - `2`: Ad is on the experimental branch of the overall A4A-vs-3p iframe
  *     experiment.  Ad will render via the A4A path, including early ad
  *     request and (possibly) early rendering in shadow DOM or iframe.
- *   - `3`: Behaves the same as 1, but participates in an experiment to
- *     measure impact of Delayed Fetch when counted on render
  *
  * @param {!Window} win  Window.
  * @param {!Element} element Ad tag Element.
@@ -172,14 +170,12 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
  *   the overall experiment.
  * @param {!string} treatmentBranchId  Experiment ID string for the 'treatment'
  *   branch of the overall experiment.
- * @param {string|undefined} controlMeasureOnRender  Experiment ID string for
- *   the branch that counts Delayed Fetch on render
  * @param {!string} manualId  ID of the manual experiment.
  * @return {boolean}  Whether the experiment state was set from a command-line
  *   parameter or not.
  */
 function maybeSetExperimentFromUrl(win, element, experimentName,
-    controlBranchId, treatmentBranchId, controlMeasureOnRender, manualId) {
+    controlBranchId, treatmentBranchId, manualId) {
   const expParam = viewerForDoc(element).getParam('exp') ||
       parseQueryString(win.location.search)['exp'];
   if (!expParam) {
@@ -195,10 +191,9 @@ function maybeSetExperimentFromUrl(win, element, experimentName,
   const arg = a4aParam.split(':', 2)[1];
   const argMapping = {
     '-1': manualId,
-    '0': null, // TODO Ensure does not generate exp id
+    '0': null,
     '1': controlBranchId,
     '2': treatmentBranchId,
-    '3': controlMeasureOnRender,
   };
   if (argMapping.hasOwnProperty(arg)) {
     forceExperimentBranch(win, experimentName, argMapping[arg]);
@@ -319,28 +314,6 @@ export function validateExperimentIds(idList) {
 }
 
 /**
- * Add a new experiment ID to a (possibly empty) existing set of experiment IDs.
- * The {@code currentIdString} may be {@code null} or {@code ''}, but if it is
- * populated, it must contain a comma-separated list of integer experiment IDs
- * (per {@code parseExperimentIds()}).  Returns the new set of IDs, encoded
- * as a comma-separated list.  Does not de-duplicate ID entries.
- *
- * @param {!string} newId  ID to merge in.  Must be a stringified integer
- *   (base 10).
- * @param {?string} currentIdString  If present, a string containing a
- *   comma-separated list of integer experiment IDs.
- * @returns {string}  New experiment list string, including newId iff it is
- *   a valid (integer) experiment ID.
- * @see parseExperimentIds, validateExperimentIds
- */
-export function mergeExperimentIds(newId, currentIdString) {
-  if (newId && !isNaN(parseInt(newId, 10))) {
-    return currentIdString ? (currentIdString + ',' + newId) : newId;
-  }
-  return currentIdString || '';
-}
-
-/**
  * Adds a single experimentID to an element iff it's a valid experiment ID.
  *
  * @param {!string} experimentId  ID to add to the element.
@@ -350,7 +323,7 @@ export function addExperimentIdToElement(experimentId, element) {
   const currentEids = element.getAttribute(EXPERIMENT_ATTRIBUTE);
   if (currentEids && validateExperimentIds(parseExperimentIds(currentEids))) {
     element.setAttribute(EXPERIMENT_ATTRIBUTE,
-        mergeExperimentIds(experimentId, currentEids));
+        mergeExperimentIds([experimentId], currentEids));
   } else {
     element.setAttribute(EXPERIMENT_ATTRIBUTE, experimentId);
   }

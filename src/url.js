@@ -84,9 +84,7 @@ export function parseUrlWithA(a, url) {
   a.href = url;
 
   // IE11 doesn't provide full URL components when parsing relative URLs.
-  // Assigning to itself again does the trick.
-  // TODO(lannka, #3449): Remove all the polyfills once we don't support IE11
-  // and it passes tests in all browsers.
+  // Assigning to itself again does the trick #3449.
   if (!a.protocol) {
     a.href = a.href;
   }

@@ -45,7 +45,6 @@ import {resetScheduledElementForTesting} from '../../../../src/custom-element';
 import {urlReplacementsForDoc} from '../../../../src/services';
 import {incrementLoadingAds} from '../../../amp-ad/0.1/concurrent-load';
 import {platformFor, timerFor} from '../../../../src/services';
-import {Resource} from '../../../../src/service/resource';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {dev, user} from '../../../../src/log';
 import {createElementWithAttributes} from '../../../../src/dom';
@@ -377,6 +376,67 @@ describe('amp-a4a', () => {
       });
     });
   });
+  describe('layoutCallback cancels properly', () => {
+    let a4aElement;
+    let a4a;
+    let fixture;
+    beforeEach(() => {
+      xhrMock.withArgs(TEST_URL, {
+        mode: 'cors',
+        method: 'GET',
+        credentials: 'include',
+      }).onFirstCall().returns(Promise.resolve(mockResponse));
+      return createIframePromise().then(f => {
+        fixture = f;
+        setupForAdTesting(fixture);
+        a4aElement = createA4aElement(fixture.doc);
+        a4a = new MockA4AImpl(a4aElement);
+        return fixture;
+      });
+    });
+
+    it('when unlayoutCallback called after adPromise', () => {
+      a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      let promiseResolver;
+      a4a.adPromise_ = new Promise(resolver => {
+        promiseResolver = resolver;
+      });
+      const layoutCallbackPromise = a4a.layoutCallback();
+      a4a.unlayoutCallback();
+      const renderNonAmpCreativeSpy = sandbox.spy(
+          AmpA4A.prototype, 'renderNonAmpCreative_');
+      promiseResolver();
+      layoutCallbackPromise.then(() => {
+        // We should never get in here.
+        expect(false).to.be.true;
+      }).catch(err => {
+        expect(renderNonAmpCreativeSpy).to.not.be.called;
+        expect(err).to.be.ok;
+        expect(err.message).to.equal('CANCELLED');
+      });
+    });
+
+    it('when unlayoutCallback called before renderAmpCreative_', () => {
+      a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      let promiseResolver;
+      a4a.renderAmpCreative_ = new Promise(resolver => {
+        promiseResolver = resolver;
+      });
+      const layoutCallbackPromise = a4a.layoutCallback();
+      a4a.unlayoutCallback();
+
+      promiseResolver();
+      layoutCallbackPromise.then(() => {
+        // We should never get in here.
+        expect(false).to.be.true;
+      }).catch(err => {
+        expect(err).to.be.ok;
+        expect(err.message).to.equal('CANCELLED');
+      });
+    });
+  });
 
   describe('cross-domain rendering', () => {
     let a4aElement;
@@ -686,16 +746,19 @@ describe('amp-a4a', () => {
         doc.head.appendChild(s);
         const a4a = new MockA4AImpl(a4aElement);
         const renderAmpCreativeSpy = sandbox.spy(a4a, 'renderAmpCreative_');
+        a4a.buildCallback();
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.ok;
-        a4a.layoutCallback().then(() => {
+        return a4a.layoutCallback().then(() => {
           expect(renderAmpCreativeSpy.calledOnce,
               'renderAmpCreative_ called exactly once').to.be.true;
           a4a.unlayoutCallback();
           const onLayoutMeasureSpy = sandbox.spy(a4a, 'onLayoutMeasure');
-          sandbox.stub(Resource, 'hasBeenMeasured').returns(false);
+          //sandbox.stub(Resource.prototype, 'hasBeenMeasured').returns(false);
+          sandbox.stub(AmpA4A.prototype, 'getResource').returns(
+            {'hasBeenMeasured': () => false});
           a4a.resumeCallback();
-          expect(onLayoutMeasureSpy).to.never.be.called;
+          expect(onLayoutMeasureSpy).to.not.be.called;
           expect(a4a.fromResumeCallback).to.be.true;
         });
       });

@@ -35,9 +35,11 @@ export let WebMultiAnimationDef;
  * @mixes WebAnimationTimingDef
  * @mixes WebAnimationMediaDef
  * @typedef {{
- *   target: (string|!Element),
+ *   target: (string|!Element|undefined),
+ *   selector: (string|undefined),
  *   keyframes: !WebKeyframesDef,
  * }}
+ * TODO(dvoytenko, #9129): cleanup deprecated string `target`.
  */
 export let WebKeyframeAnimationDef;
 
@@ -61,6 +63,7 @@ export let WebKeyframesDef;
  *   easing: (string|undefined),
  *   direction: (!WebAnimationTimingDirection|undefined),
  *   fill: (!WebAnimationTimingFill|undefined),
+ *   ticker: (string|undefined)
  * }}
  */
 export let WebAnimationTimingDef;

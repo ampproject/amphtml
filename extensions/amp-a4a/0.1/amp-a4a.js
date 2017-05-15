@@ -37,6 +37,7 @@ import {isArray, isObject, isEnumValue} from '../../../src/types';
 import {some} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
 import {viewerForDoc} from '../../../src/services';
+import {resourcesForDoc} from '../../../src/services';
 import {xhrFor} from '../../../src/services';
 import {endsWith} from '../../../src/string';
 import {platformFor} from '../../../src/services';
@@ -57,6 +58,7 @@ import {A4AVariableSource} from './a4a-variable-source';
 // TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {getContextMetadata} from '../../../src/iframe-attributes';
+import {isReportingEnabled} from '../../../ads/google/a4a/utils';
 
 /** @type {string} */
 const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
@@ -168,6 +170,7 @@ export const LIFECYCLE_STAGES = {
   visLoadAndOneSec: '25',
   iniLoad: '26',
   resumeCallback: '27',
+  sraBuildRequestDelay: '28',
 };
 
 /**
@@ -338,6 +341,9 @@ export class AmpA4A extends AMP.BaseElement {
      *    of resume callback.
      */
     this.fromResumeCallback = false;
+
+    /** @private {?Promise} */
+    this.adUrlsPromise_ = null;
   }
 
   /** @override */
@@ -433,11 +439,18 @@ export class AmpA4A extends AMP.BaseElement {
     this.fromResumeCallback = true;
     // If layout of page has not changed, onLayoutMeasure will not be called
     // so do so explicitly.
-    const resource =
-      this.element.getResources().getResourceForElement(this.element);
+    const resource = this.getResource();
     if (resource.hasBeenMeasured() && !resource.isMeasureRequested()) {
       this.onLayoutMeasure();
     }
+  }
+
+  /**
+   * @return {!../../../src/service/resource.Resource}
+   * @visibileForTesting
+   */
+  getResource() {
+    return this.element.getResources().getResourceForElement(this.element);
   }
 
   /**
@@ -501,6 +514,15 @@ export class AmpA4A extends AMP.BaseElement {
       }
     };
 
+    let adUrlPromiseResolver = null;
+    if ((getMode().localDev ||
+        isExperimentOn(this.win, 'a4a-measure-get-ad-urls')) &&
+        isReportingEnabled(this)) {
+      this.adUrlsPromise_ = new Promise(resolve => {
+        adUrlPromiseResolver = resolve;
+      });
+    }
+
     // Return value from this chain: True iff rendering was "successful"
     // (i.e., shouldn't try to render later via iframe); false iff should
     // try to render later in iframe.
@@ -525,6 +547,13 @@ export class AmpA4A extends AMP.BaseElement {
         .then(adUrl => {
           checkStillCurrent(promiseId);
           this.adUrl_ = adUrl;
+          if (adUrlPromiseResolver) {
+            // Do not initialize ad url delay measurement until AFTER first
+            // slot ad url creation as any delayed would only be imposed at
+            // that time.
+            this.measureGetAdUrlsDelay_();
+            adUrlPromiseResolver(adUrl);
+          }
           this.protectedEmitLifecycleEvent_('urlBuilt');
           return adUrl && this.sendXhrRequest_(adUrl);
         })
@@ -677,6 +706,50 @@ export class AmpA4A extends AMP.BaseElement {
           this.promiseErrorHandler_(error);
           return null;
         });
+  }
+
+  /**
+   * Measures the amount of time until last ad url generation for all amp-ad
+   * elements of this type.
+   * @private
+   */
+  measureGetAdUrlsDelay_() {
+    const startTime = Date.now();
+    const type = this.element.getAttribute('type');
+    const promiseId = this.promiseId_;
+    // Only execute once per page, this includes potential pauseCallback flows.
+    if (this.win['a4a-measuring-ad-urls']) {
+      return;
+    }
+    this.win['a4a-measuring-ad-urls'] =
+     resourcesForDoc(this.element).getMeasuredResources(this.win,
+       r => {
+         return r.element.tagName == 'AMP-AD' &&
+           r.element.getAttribute('type') == type;
+       })
+     .then(resources => {
+       if (promiseId != this.promiseId_) {
+         throw cancellation();
+       }
+       const getAdUrlsPromise = resources.map(r => r.element.getImpl().then(
+         // Note that ad url promise could be null if isValidElement returns
+         // false.
+         instance => instance.adUrlsPromise_));
+       return Promise.all(getAdUrlsPromise).then(adUrls => {
+         if (promiseId != this.promiseId_) {
+           throw cancellation();
+         }
+         this.protectedEmitLifecycleEvent_(
+             'sraBuildRequestDelay', {
+               'met.delta.AD_SLOT_ID': Math.round(Date.now() - startTime),
+               'totalSlotCount.AD_SLOT_ID': adUrls.length,
+               'totalUrlCount.AD_SLOT_ID': adUrls.filter(url => !!url).length,
+               'totalQueriedSlotCount.AD_SLOT_ID':
+                  this.win.document.querySelectorAll('amp-ad[type=doubleclick]')
+                    .length,
+             });
+       });
+     });
   }
 
   /**
@@ -841,8 +914,12 @@ export class AmpA4A extends AMP.BaseElement {
     // most comparable with the layout callback for 3p ads.
     this.protectedEmitLifecycleEvent_('preAdThrottle');
     const layoutCallbackStart = this.getNow_();
+    const promiseId = this.promiseId_;
     // Promise chain will have determined if creative is valid AMP.
     return this.adPromise_.then(creativeMetaData => {
+      if (promiseId != this.promiseId_) {
+        throw cancellation();
+      }
       const delta = this.getNow_() - layoutCallbackStart;
       this.protectedEmitLifecycleEvent_('layoutAdPromiseDelay', {
         layoutAdPromiseDelay: Math.round(delta),
@@ -863,14 +940,17 @@ export class AmpA4A extends AMP.BaseElement {
       }
       // Must be an AMP creative.
       return this.renderAmpCreative_(creativeMetaData)
-        .catch(err => {
-          // Failed to render via AMP creative path so fallback to non-AMP
-          // rendering within cross domain iframe.
-          user().error(TAG, this.element.getAttribute('type'),
-            'Error injecting creative in friendly frame', err);
-          this.promiseErrorHandler_(err);
-          return this.renderNonAmpCreative_();
-        });
+          .catch(err => {
+            if (promiseId != this.promiseId_) {
+              throw cancellation();
+            }
+            // Failed to render via AMP creative path so fallback to non-AMP
+            // rendering within cross domain iframe.
+            user().error(TAG, this.element.getAttribute('type'),
+                         'Error injecting creative in friendly frame', err);
+            this.promiseErrorHandler_(err);
+            return this.renderNonAmpCreative_();
+          });
     }).catch(error => {
       this.promiseErrorHandler_(error);
       throw cancellation();
@@ -890,6 +970,7 @@ export class AmpA4A extends AMP.BaseElement {
   unlayoutCallback() {
     // Increment promiseId to cause any pending promise to cancel.
     this.promiseId_++;
+    this.adUrlsPromise_ = null;
     this.protectedEmitLifecycleEvent_('adSlotCleared');
     this.uiHandler.setDisplayState(AdDisplayState.NOT_LAID_OUT);
     if (this.originalSlotSize_) {
@@ -1190,7 +1271,7 @@ export class AmpA4A extends AMP.BaseElement {
         }
       });
     }
-
+    const promiseId = this.promiseId_;
     return installFriendlyIframeEmbed(
         this.iframe, this.element, {
           host: this.element,
@@ -1202,6 +1283,9 @@ export class AmpA4A extends AMP.BaseElement {
           installUrlReplacementsForEmbed(this.getAmpDoc(), embedWin,
             new A4AVariableSource(this.getAmpDoc(), embedWin));
         }).then(friendlyIframeEmbed => {
+          if (promiseId != this.promiseId_) {
+            throw cancellation();
+          }
           this.friendlyIframeEmbed_ = friendlyIframeEmbed;
           setFriendlyIframeEmbedVisible(
               friendlyIframeEmbed, this.isInViewport());
@@ -1215,8 +1299,12 @@ export class AmpA4A extends AMP.BaseElement {
           // Bubble phase click handlers on the ad.
           this.registerAlpHandler_(friendlyIframeEmbed.win);
           // Capture timing info for friendly iframe load completion.
-          getTimingDataAsync(friendlyIframeEmbed.win,
+          getTimingDataAsync(
+              friendlyIframeEmbed.win,
               'navigationStart', 'loadEventEnd').then(delta => {
+                if (promiseId != this.promiseId_) {
+                  throw cancellation();
+                }
                 this.protectedEmitLifecycleEvent_('friendlyIframeLoaded', {
                   'navStartToLoadEndDelta.AD_SLOT_ID': Math.round(delta),
                 });
@@ -1233,6 +1321,9 @@ export class AmpA4A extends AMP.BaseElement {
           // after the initial load.
           return friendlyIframeEmbed.whenIniLoaded();
         }).then(() => {
+          if (promiseId != this.promiseId_) {
+            throw cancellation();
+          }
           // Capture ini-load ping.
           this.protectedEmitLifecycleEvent_('friendlyIframeIniLoad');
         });
@@ -1309,7 +1400,11 @@ export class AmpA4A extends AMP.BaseElement {
         method == XORIGIN_MODE.NAMEFRAME,
         'Unrecognized A4A cross-domain rendering mode: %s', method);
     this.protectedEmitLifecycleEvent_('renderSafeFrameStart');
+    const promiseId = this.promiseId_;
     return utf8Decode(creativeBody).then(creative => {
+      if (promiseId != this.promiseId_) {
+        throw cancellation();
+      }
       let srcPath;
       let name = '';
       switch (method) {
