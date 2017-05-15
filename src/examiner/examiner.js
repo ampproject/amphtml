@@ -39,7 +39,7 @@ function detectLongTasks(win) {
           culprit = `<amp-ad type="${match[1]}">`;
         }
       }
-      console.log(
+      console./*OK*/log(
           `%c LONG TASK %c ${duration}ms from ${culprit}`,
           'background: red; color: white',
           'background: #fff; color: #000'
