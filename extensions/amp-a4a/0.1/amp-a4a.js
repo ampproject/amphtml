@@ -1148,12 +1148,16 @@ export class AmpA4A extends AMP.BaseElement {
       const url = signingServerURLs[serviceName];
       const currServiceName = serviceName;
       if (url) {
-        // Set disableAmpSourceOrigin so that __amp_source_origin is not
-        // included in XHR CORS request allowing for keyset to be cached
-        // across pages.
-        return xhrFor(this.win).fetchJson(url, {
+        // Delay request until document is not in a prerender state.
+        const firstVisiblePromise =
+          isExperimentOn(this.win, 'a4a-disable-cryptokey-viewer-check') ?
+          Promise.resolve() : viewerForDoc(this.getAmpDoc()).whenFirstVisible();
+        return firstVisiblePromise.then(() => xhrFor(this.win).fetchJson(url, {
           mode: 'cors',
           method: 'GET',
+          // Set ampCors false so that __amp_source_origin is not
+          // included in XHR CORS request allowing for keyset to be cached
+          // across pages.
           ampCors: false,
           credentials: 'omit',
         }).then(jwkSetObj => {
@@ -1187,7 +1191,7 @@ export class AmpA4A extends AMP.BaseElement {
           // the keys, probably b/c of a network condition.  We should
           // re-trigger key fetching later.
           return {serviceName: currServiceName, keys: []};
-        });
+        }));
       } else {
         // The given serviceName does not have a corresponding URL in
         // _a4a-config.js.
