@@ -25,6 +25,7 @@ var util = require('gulp-util');
  * Spawns the given command in a child process.
  *
  * @param {string} cmd
+ * @return {<Object>} Process info.
  */
 function spawnProcess(cmd){
   return child_process.spawnSync('/bin/sh', ['-c', cmd], {'stdio': 'inherit'});
@@ -50,7 +51,7 @@ exports.exec = function(cmd) {
 exports.execOrDie = function(cmd) {
   const p = spawnProcess(cmd);
   if (p.status != 0) {
-    console.error(`\n${fileLogPrefix}exiting due to failing command: ${cmd}`);
+    console/*OK*/.error(util.colors.red('\nCommand failed: ' + cmd));
     process.exit(p.status)
   }
 }
