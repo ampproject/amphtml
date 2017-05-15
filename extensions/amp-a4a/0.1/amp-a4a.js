@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import {VerificationFailure, signatureVerifierFor} from './signature-verifier';
 import {
   is3pThrottled,
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
 } from '../../amp-ad/0.1/concurrent-load';
 import {adConfig} from '../../../ads/_config';
-import {signingServerURLs} from '../../../ads/_a4a-config';
 import {createElementWithAttributes} from '../../../src/dom';
 import {cancellation, isCancellation} from '../../../src/error';
 import {
@@ -34,14 +35,12 @@ import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {dev, user, duplicateErrorIfNecessary} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, isEnumValue} from '../../../src/types';
-import {some} from '../../../src/utils/promise';
+import {base64DecodeToBytes} from '../../../src/utils/base64';
 import {utf8Decode} from '../../../src/utils/bytes';
 import {viewerForDoc} from '../../../src/services';
 import {resourcesForDoc} from '../../../src/services';
 import {xhrFor} from '../../../src/services';
-import {endsWith} from '../../../src/string';
 import {platformFor} from '../../../src/services';
-import {cryptoFor} from '../../../src/crypto';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
 import {handleClick} from '../../../ads/alp/handler';
@@ -103,40 +102,35 @@ const SHARED_IFRAME_PROPERTIES = {
   marginheight: '0',
 };
 
-/** @typedef {{
- *    creative: ArrayBuffer,
- *    signature: ?Uint8Array,
- *    size: ?{width: number, height: number}
- *  }} */
+/**
+ * @typedef {{
+ *   signingServiceName: string,
+ *   keypairId: string,
+ *   signature: !Uint8Array,
+ * }}
+ */
+let SignatureInfoDef;
+
+/** @typedef {{width: number, height: number}} */
+let SizeInfoDef;
+
+/**
+ * @typedef {{
+ *   creative: !ArrayBuffer,
+ *   signatureInfo: ?SignatureInfoDef,
+ *   size: ?SizeInfoDef
+ * }}
+ */
 export let AdResponseDef;
 
-/** @typedef {{
-      minifiedCreative: string,
-      customElementExtensions: !Array<string>,
-      customStylesheets: !Array<{href: string}>
-    }} */
+/**
+ * @typedef {{
+ *   minifiedCreative: string,
+ *   customElementExtensions: !Array<string>,
+ *   customStylesheets: !Array<{href: string}>
+ * }}
+ */
 let CreativeMetaDataDef;
-
-/**
- * A set of public keys for a single AMP signing service.  A single service may
- * return more than one key if, e.g., they're rotating keys and they serve
- * the current and upcoming keys.  A CryptoKeysDef stores one or more
- * (promises to) keys, in the order given by the return value from the
- * signing service.
- *
- * @typedef {{serviceName: string, keys: !Array<!Promise<!../../../src/crypto.PublicKeyInfoDef>>}}
- */
-let CryptoKeysDef;
-
-/**
- * The public keys for all signing services.  This is an array of promises,
- * one per signing service, in the order given by the array returned by
- * #getSigningServiceNames().  Each entry resolves to the keys returned by
- * that service, represented by a `CryptoKeysDef` object.
- *
- * @typedef {Array<!Promise<!CryptoKeysDef>>}
- */
-let AllServicesCryptoKeysDef;
 
 /** @private */
 export const LIFECYCLE_STAGES = {
@@ -252,20 +246,6 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {boolean} whether creative has been verified as AMP */
     this.isVerifiedAmpCreative_ = false;
 
-    /** @private @const {!../../../src/service/crypto-impl.Crypto} */
-    this.crypto_ = cryptoFor(this.win);
-
-    if (!this.win.ampA4aValidationKeys) {
-      // Without the following variable assignment, there's no way to apply a
-      // type annotation to a win-scoped variable, so the type checker doesn't
-      // catch type errors here.  This no-op allows us to enforce some type
-      // expectations.  The const assignment will hopefully be optimized
-      // away by the compiler.  *fingers crossed*
-      /** @type {!AllServicesCryptoKeysDef} */
-      const forTypeSafety = this.getKeyInfoSets_();
-      this.win.ampA4aValidationKeys = forTypeSafety;
-    }
-
     /** @private {?ArrayBuffer} */
     this.creativeBody_ = null;
 
@@ -344,6 +324,11 @@ export class AmpA4A extends AMP.BaseElement {
 
     /** @private {?Promise} */
     this.adUrlsPromise_ = null;
+
+    const signatureVerifier = signatureVerifierFor(this.win);
+    this.getSigningServiceNames().forEach(signingServiceName => {
+      signatureVerifier.loadKeyset(signingServiceName);
+    });
   }
 
   /** @override */
@@ -459,9 +444,6 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   shouldInitializePromiseChain_() {
-    if (!this.crypto_.isCryptoAvailable()) {
-      return false;
-    }
     const slotRect = this.getIntersectionElementLayoutBox();
     if (slotRect.height == 0 || slotRect.width == 0) {
       dev().fine(
@@ -632,30 +614,45 @@ export class AmpA4A extends AMP.BaseElement {
           if (!creativeParts) {
             return Promise.resolve();
           }
-          this.creativeSize_ = creativeParts.size || this.creativeSize_;
+          this.creativeSize_ = creativeParts.sizeInfo || this.creativeSize_;
           if (this.experimentalNonAmpCreativeRenderMethod_ !=
               XORIGIN_MODE.CLIENT_CACHE &&
               creativeParts.creative) {
             this.creativeBody_ = creativeParts.creative;
           }
-          if (!creativeParts.signature) {
+          if (!creativeParts.signatureInfo) {
             return Promise.resolve();
           }
           this.protectedEmitLifecycleEvent_('adResponseValidateStart');
-          return this.verifyCreativeSignature_(
-              creativeParts.creative, creativeParts.signature)
-              .then(creative => {
-                if (creative) {
-                  return creative;
+          const {signingServiceName, keypairId, signature} =
+              creativeParts.signatureInfo;
+          if (getMode().localDev && signingServiceName == 'FAKESERVICE' &&
+              this.element.getAttribute('type') == 'fake') {
+            return creativeParts.creative;
+          }
+          return signatureVerifierFor(this.win)
+              .verify(
+                  signingServiceName, keypairId, signature,
+                  creativeParts.creative)
+              .then(failure => {
+                switch (failure) {
+                  case VerificationFailure.KEY_NOT_FOUND:
+                    user().error(
+                        TAG, this.element.getAttribute('type'),
+                        `Key (${
+                                keypairId
+                              }) for signing service (${
+                                                        signingServiceName
+                                                      }) not found`);
+                  case VerificationFailure.SIGNATURE_MISMATCH:
+                    user().error(
+                        TAG, this.element.getAttribute('type'),
+                        'Invalid signature for key (' + keypairId +
+                            ') for signing service (' + signingServiceName +
+                            ')');
                 }
-
-                user().error(TAG, this.element.getAttribute('type'),
-                    'Unable to validate AMP creative against key providers');
-                // Attempt to re-fetch the keys in case our locally cached
-                // batch has expired.
-                this.win.ampA4aValidationKeys = this.getKeyInfoSets_();
-                return this.verifyCreativeSignature_(
-                    creativeParts.creative, creativeParts.signature);
+                this.protectedEmitLifecycleEvent_('adResponseValidateEnd');
+                return failure ? null : creativeParts.creative;
               });
         })
         .then(creative => {
@@ -750,112 +747,6 @@ export class AmpA4A extends AMP.BaseElement {
              });
        });
      });
-  }
-
-  /**
-   * Attempts to validate the creative signature against every key currently in
-   * our possession. This should never be called before at least one key fetch
-   * attempt is made.
-   *
-   * @param {!ArrayBuffer} creative
-   * @param {!Uint8Array} signature
-   * @return {!Promise<!ArrayBuffer>} The creative.
-   */
-  verifyCreativeSignature_(creative, signature) {
-    if (getMode().localDev) {
-      // localDev mode allows "FAKESIG" signature for the "fake" network.
-      if (signature == 'FAKESIG' &&
-          this.element.getAttribute('type') == 'fake') {
-        return Promise.resolve(creative);
-      }
-    }
-
-    // For each signing service, we have exactly one Promise,
-    // keyInfoSetPromise, that holds an Array of Promises of signing keys.
-    // So long as any one of these signing services can verify the
-    // signature, then the creative is valid AMP.
-    /** @type {!AllServicesCryptoKeysDef} */
-    const keyInfoSetPromises = this.win.ampA4aValidationKeys;
-    // Track if verification found, as it will ensure that promises yet to
-    // resolve will "cancel" as soon as possible saving unnecessary resource
-    // allocation.
-    let verified = false;
-    return some(keyInfoSetPromises.map(keyInfoSetPromise => {
-      // Resolve Promise into an object containing a 'keys' field, which
-      // is an Array of Promises of signing keys.  *whew*
-      return keyInfoSetPromise.then(keyInfoSet => {
-        // As long as any one individual key of a particular signing
-        // service, keyInfoPromise, can verify the signature, then the
-        // creative is valid AMP.
-        if (verified) {
-          return Promise.reject('noop');
-        }
-        return some(keyInfoSet.keys.map(keyInfoPromise => {
-          // Resolve Promise into signing key.
-          return keyInfoPromise.then(keyInfo => {
-            if (verified) {
-              return Promise.reject('noop');
-            }
-            if (!keyInfo) {
-              return Promise.reject('Promise resolved to null key.');
-            }
-            const signatureVerifyStartTime = this.getNow_();
-            // If the key exists, try verifying with it.
-            return this.crypto_.verifySignature(
-                new Uint8Array(creative),
-                signature,
-                keyInfo)
-                .then(isValid => {
-                  if (isValid) {
-                    verified = true;
-                    this.protectedEmitLifecycleEvent_(
-                        'signatureVerifySuccess', {
-                          'met.delta.AD_SLOT_ID': Math.round(
-                              this.getNow_() - signatureVerifyStartTime),
-                          'signingServiceName.AD_SLOT_ID': keyInfo.serviceName,
-                        });
-                    return creative;
-                  }
-                  // Only report if signature is expected to match, given that
-                  // multiple key providers could have been specified.
-                  // Note: the 'keyInfo &&' check here is not strictly
-                  // necessary, because we checked that above.  But
-                  // Closure type compiler can't seem to recognize that, so
-                  // this guarantees it to the compiler.
-                  if (keyInfo &&
-                      this.crypto_.verifyHashVersion(signature, keyInfo)) {
-                    user().error(TAG, this.element.getAttribute('type'),
-                        'Key failed to validate creative\'s signature',
-                        keyInfo.serviceName, keyInfo.cryptoKey);
-                  }
-                  // Reject to ensure the some operation waits for other
-                  // possible providers to properly verify and resolve.
-                  return Promise.reject(
-                      `${keyInfo.serviceName} key failed to verify`);
-                },
-                err => {
-                  dev().error(
-                    TAG, this.element.getAttribute('type'), keyInfo.serviceName,
-                    err, this.element);
-                });
-          });
-        }))
-        // some() returns an array of which we only need a single value.
-        .then(returnedArray => returnedArray[0], () => {
-          // Rejection occurs if all keys for this provider fail to validate.
-          return Promise.reject(
-              `All keys for ${keyInfoSet.serviceName} failed to verify`);
-        });
-      });
-    }))
-    .then(returnedArray => {
-      this.protectedEmitLifecycleEvent_('adResponseValidateEnd');
-      return returnedArray[0];
-    }, () => {
-      // rejection occurs if all providers fail to verify.
-      this.protectedEmitLifecycleEvent_('adResponseValidateEnd');
-      return Promise.reject('No validation service could verify this key');
-    });
   }
 
   /**
@@ -1041,23 +932,29 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * Extracts creative and verification signature (if present) from
-   * XHR response body and header.  To be implemented by network.
+   * XHR response body and header.  May be overridden by network.
    *
    * In the returned value, the `creative` field should be an `ArrayBuffer`
    * containing the utf-8 encoded bytes of the creative itself, while the
-   * `signature` field should be a `Uint8Array` containing the raw signature
-   * bytes.  The `signature` field may be null if no signature was available
-   * for this creative / the creative is not valid AMP.
+   * `signatureInfo` field should be either null (if the creative is not valid
+   * AMP or was not signed) or an object with `signingServiceName`, `keypairId`,
+   * and `signature` fields. `signingServiceName` and `keypairId` must be
+   * strings; `signature` must be a `Uint8Array` containing the raw signature
+   * bytes.
    *
-   * @param {!ArrayBuffer} unusedResponseArrayBuffer content as array buffer
-   * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} unusedResponseHeaders
+   * @param {!ArrayBuffer} responseArrayBuffer content as array buffer
+   * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
    *   XHR service FetchResponseHeaders object containing the response
    *   headers.
    * @return {!Promise<!AdResponseDef>}
    */
-  extractCreativeAndSignature(unusedResponseArrayBuffer,
-      unusedResponseHeaders) {
-    throw new Error('extractCreativeAndSignature not implemented!');
+  extractCreativeAndSignature(responseArrayBuffer, responseHeaders) {
+    return Promise.resolve(/** @type {!AdResponseDef} */ ({
+      creative: responseArrayBuffer,
+      signatureInfo: decodeSignatureHeader(
+          responseHeaders.get('AMP-Fast-Fetch-Signature')),
+      sizeInfo: decodeSizeHeader(responseHeaders.get('X-CreativeSize')),
+    }));
   }
 
   /**
@@ -1130,73 +1027,6 @@ export class AmpA4A extends AMP.BaseElement {
    */
   getSigningServiceNames() {
     return getMode().localDev ? ['google', 'google-dev'] : ['google'];
-  }
-
-  /**
-   * Retrieves all public keys, as specified in _a4a-config.js.
-   * None of the (inner or outer) promises returned by this function can reject.
-   *
-   * @return {!AllServicesCryptoKeysDef}
-   * @private
-   */
-  getKeyInfoSets_() {
-    if (!this.crypto_.isCryptoAvailable()) {
-      return [];
-    }
-    return this.getSigningServiceNames().map(serviceName => {
-      dev().assert(getMode().localDev || !endsWith(serviceName, '-dev'));
-      const url = signingServerURLs[serviceName];
-      const currServiceName = serviceName;
-      if (url) {
-        // Set disableAmpSourceOrigin so that __amp_source_origin is not
-        // included in XHR CORS request allowing for keyset to be cached
-        // across pages.
-        return xhrFor(this.win).fetchJson(url, {
-          mode: 'cors',
-          method: 'GET',
-          ampCors: false,
-          credentials: 'omit',
-        }).then(jwkSetObj => {
-          const result = {serviceName: currServiceName};
-          if (isObject(jwkSetObj) && Array.isArray(jwkSetObj.keys) &&
-              jwkSetObj.keys.every(isObject)) {
-            result.keys = jwkSetObj.keys;
-          } else {
-            user().error(TAG, this.element.getAttribute('type'),
-                `Invalid response from signing server ${currServiceName}`,
-                this.element);
-            result.keys = [];
-          }
-          return result;
-        }).then(jwkSet => {
-          return {
-            serviceName: jwkSet.serviceName,
-            keys: jwkSet.keys.map(jwk =>
-                this.crypto_.importPublicKey(jwkSet.serviceName, jwk)
-                .catch(err => {
-                  user().error(TAG, this.element.getAttribute('type'),
-                      `error importing keys for service: ${jwkSet.serviceName}`,
-                      err, this.element);
-                  return null;
-                })),
-          };
-        }).catch(err => {
-          user().error(
-              TAG, this.element.getAttribute('type'), err, this.element);
-          // TODO(a4a-team): This is a failure in the initial attempt to get
-          // the keys, probably b/c of a network condition.  We should
-          // re-trigger key fetching later.
-          return {serviceName: currServiceName, keys: []};
-        });
-      } else {
-        // The given serviceName does not have a corresponding URL in
-        // _a4a-config.js.
-        const reason = `Signing service '${serviceName}' does not exist.`;
-        user().error(
-            TAG, this.element.getAttribute('type'), reason, this.element);
-        return Promise.resolve({serviceName: currServiceName, keys: []});
-      }
-    });
   }
 
   /**
@@ -1562,4 +1392,53 @@ export class AmpA4A extends AMP.BaseElement {
    * @param {!Object<string, string|number>=} opt_extraVariables
    */
   emitLifecycleEvent(unusedEventName, opt_extraVariables) {}
+}
+
+const SIGNATURE_FORMAT = new RegExp(
+    '^([A-Za-z0-9._-]+):([A-Za-z0-9._-]+):' +
+    '((?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}[A-Za-z0-9+/=]=)?)$');
+
+/**
+ * Decode the `AMP-Fast-Fetch-Signature` header, in the format
+ * `{signingServiceName}:{keypairId}:{base64Signature}`, to a signature info
+ * object.
+ *
+ * @param {?string} headerValue
+ * @return {?SignatureInfoDef}
+ */
+export function decodeSignatureHeader(headerValue) {
+  if (!headerValue) {
+    return null;
+  }
+  const match = SIGNATURE_FORMAT.exec(headerValue);
+  if (!match) {
+    // TODO(@taymonbeal, #9274): replace this with real error reporting
+    user().error(TAG, `Invalid signature header: ${headerValue}`);
+    return null;
+  }
+  return /** @type {?SignatureInfoDef} */ ({
+    signingServiceName: match[1],
+    keypairId: match[2],
+    signature: base64DecodeToBytes(match[3]),
+  });
+}
+
+/**
+ * Decode the `X-Creativesize` header, in the format `{width}x{height}`, to a
+ * size info object.
+ *
+ * @param {?string} headerValue
+ * @return {?SizeInfoDef}
+ */
+export function decodeSizeHeader(headerValue) {
+  if (!headerValue) {
+    return null;
+  }
+  if (!(/[0-9]+x[0-9]+/.test(headerValue))) {
+    // TODO(@taymonbeal, #9274): replace this with real error reporting
+    user().error(TAG, `Invalid size header: ${headerValue}`);
+    return null;
+  }
+  const sizeArr = headerValue.split('x').map(Number);
+  return /** @type {?SizeInfoDef} */ ({width: sizeArr[0], height: sizeArr[1]});
 }

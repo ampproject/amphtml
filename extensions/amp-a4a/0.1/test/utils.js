@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpA4A} from '../amp-a4a';
-import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
+import {AmpA4A, decodeSignatureHeader, decodeSizeHeader} from '../amp-a4a';
 
 /** @type {string} @private */
 export const SIGNATURE_HEADER = 'X-TestSignatureHeader';
@@ -37,15 +36,12 @@ export class MockA4AImpl extends AmpA4A {
   }
 
   extractCreativeAndSignature(responseArrayBuffer, responseHeaders) {
-    const sizeArr = responseHeaders.has(SIZE_HEADER) ?
-        responseHeaders.get(SIZE_HEADER).split('x') : null;
-    const size = sizeArr ? {width: sizeArr[0], height: sizeArr[1]} : null;
-    return Promise.resolve({
+    return Promise.resolve(/** @type {!AdResponseDef} */ ({
       creative: responseArrayBuffer,
-      signature: responseHeaders.has(SIGNATURE_HEADER) ?
-          base64UrlDecodeToBytes(responseHeaders.get(SIGNATURE_HEADER)) : null,
-      size,
-    });
+      signatureInfo: decodeSignatureHeader(
+          responseHeaders.get(SIGNATURE_HEADER)),
+      sizeInfo: decodeSizeHeader(responseHeaders.get(SIZE_HEADER)),
+    }));
   }
 
   getFallback() {

@@ -25,7 +25,6 @@ import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {
-  extractGoogleAdCreativeAndSignature,
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
   AmpAnalyticsConfigDef,
@@ -156,27 +155,25 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   extractCreativeAndSignature(responseText, responseHeaders) {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
     this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(
-        this,
-        responseHeaders,
-        this.lifecycleReporter_.getDeltaTime(),
+        this, responseHeaders, this.lifecycleReporter_.getDeltaTime(),
         this.lifecycleReporter_.getInitTime());
     if (this.ampAnalyticsConfig_) {
       // Load amp-analytics extensions
-      this.extensions_./*OK*/loadExtension('amp-analytics');
+      this.extensions_./*OK*/ loadExtension('amp-analytics');
     }
-    const adResponsePromise =
-        extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
-    return adResponsePromise.then(adResponse => {
-      // If the server returned a size, use that, otherwise use the size that
-      // we sent in the ad request.
-      if (adResponse.size) {
-        this.size_ = adResponse.size;
-      } else {
-        adResponse.size = this.size_;
-      }
-      this.handleResize_(adResponse.size.width, adResponse.size.height);
-      return Promise.resolve(adResponse);
-    });
+    return super.extractCreativeAndSignature(responseText, responseHeaders)
+        .then(adResponse => {
+          // If the server returned a size, use that, otherwise use the size
+          // that we sent in the ad request.
+          if (adResponse.sizeInfo) {
+            this.size_ = adResponse.sizeInfo;
+          } else {
+            adResponse.sizeInfo = this.size_;
+          }
+          this.handleResize_(
+              adResponse.sizeInfo.width, adResponse.sizeInfo.height);
+          return adResponse;
+        });
   }
 
   /** @override */

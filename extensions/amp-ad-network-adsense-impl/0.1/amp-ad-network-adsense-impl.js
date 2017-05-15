@@ -26,7 +26,6 @@ import {
 } from '../../../ads/google/a4a/traffic-experiments';
 import {isExperimentOn} from '../../../src/experiments';
 import {
-  extractGoogleAdCreativeAndSignature,
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
   extractAmpAnalyticsConfig,
@@ -200,19 +199,13 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   extractCreativeAndSignature(responseText, responseHeaders) {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
     this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(
-        this,
-        responseHeaders,
-        this.lifecycleReporter_.getDeltaTime(),
+        this, responseHeaders, this.lifecycleReporter_.getDeltaTime(),
         this.lifecycleReporter_.getInitTime());
     if (this.ampAnalyticsConfig_) {
       // Load amp-analytics extensions
-      this.extensions_./*OK*/loadExtension('amp-analytics');
+      this.extensions_./*OK*/ loadExtension('amp-analytics');
     }
-    return extractGoogleAdCreativeAndSignature(responseText, responseHeaders)
-        .then(adResponse => {
-          adResponse.size = this.size_;
-          return Promise.resolve(adResponse);
-        });
+    return super.extractCreativeAndSignature(responseText, responseHeaders);
   }
 
   /**

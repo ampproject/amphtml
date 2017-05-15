@@ -55,15 +55,18 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
     return utf8Decode(responseText).then(deserialized => {
       if (getMode().localDev) {
         if (this.element.getAttribute('fakesig') == 'true') {
-          // In the fake signature mode the content is the plain AMP HTML
-          // and the signature is "FAKESIG". This mode is only allowed in
-          // `localDev` and primarily used for A4A Envelope for testing.
-          // See DEVELOPING.md for more info.
+          // In the fake signature mode the content is the plain AMP HTML.
+	  // This mode is only allowed in  `localDev` and primarily used for A4A
+	  // Envelope for testing. See DEVELOPING.md for more info.
           const creative = this.transformCreativeLocalDev_(deserialized);
           const encoder = new TextEncoder('utf-8');
           return {
             creative: encoder.encode(creative).buffer,
-            signature: 'FAKESIG',
+            signatureInfo: {
+              signingServiceName: 'FAKESERVICE',
+              keypairId: 'FAKEKEY',
+              signature: new Uint8Array(0),
+            },
           };
         }
       }

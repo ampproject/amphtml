@@ -23,18 +23,11 @@ import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isProxyOrigin} from '../../../src/url';
 import {viewerForDoc} from '../../../src/services';
-import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 import {domFingerprint} from '../../../src/utils/dom-fingerprint';
 import {
   isExperimentOn,
   toggleExperiment,
 } from '../../../src/experiments';
-
-/** @const {string} */
-const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
-
-/** @const {string} */
-const CREATIVE_SIZE_HEADER = 'X-CreativeSize';
 
 /** @type {string}  */
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
@@ -230,36 +223,6 @@ export function googleAdUrl(
                          {name: 'trunc', value: '1'});
     return url + '&dtd=' + elapsedTimeWithCeiling(Date.now(), startTime);
   }));
-}
-
-/**
- * @param {!ArrayBuffer} creative
- * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
- * @return {!Promise<!../../../extensions/amp-a4a/0.1/amp-a4a.AdResponseDef>}
- */
-export function extractGoogleAdCreativeAndSignature(
-    creative, responseHeaders) {
-  let signature = null;
-  let size = null;
-  try {
-    if (responseHeaders.has(AMP_SIGNATURE_HEADER)) {
-      signature =
-        base64UrlDecodeToBytes(dev().assertString(
-            responseHeaders.get(AMP_SIGNATURE_HEADER)));
-    }
-    if (responseHeaders.has(CREATIVE_SIZE_HEADER)) {
-      const sizeHeader = responseHeaders.get(CREATIVE_SIZE_HEADER);
-      dev().assert(new RegExp('[0-9]+x[0-9]+').test(sizeHeader));
-      const sizeArr = sizeHeader
-          .split('x')
-          .map(dim => Number(dim));
-      size = {width: sizeArr[0], height: sizeArr[1]};
-    }
-  } finally {
-    return Promise.resolve(/** @type {
-          !../../../extensions/amp-a4a/0.1/amp-a4a.AdResponseDef} */ (
-          {creative, signature, size}));
-  }
 }
 
 /**

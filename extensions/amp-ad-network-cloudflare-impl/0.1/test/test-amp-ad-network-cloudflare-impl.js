@@ -18,8 +18,6 @@ import {AmpAdNetworkCloudflareImpl} from '../amp-ad-network-cloudflare-impl';
 import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
-import {utf8Encode} from '../../../../src/utils/bytes';
 import * as sinon from 'sinon';
 import {cloudflareIsA4AEnabled} from '../cloudflare-a4a-config';
 import {createElementWithAttributes} from '../../../../src/dom';
@@ -160,34 +158,4 @@ describe('amp-ad-network-cloudflare-impl', () => {
     });
   });
 
-  describe('#extractCreativeAndSignature', () => {
-    it('without signature', () => {
-      return utf8Encode('some creative').then(creative => {
-        return expect(cloudflareImpl.extractCreativeAndSignature(
-          creative,
-          {
-            get: function() { return undefined; },
-            has: function() { return false; },
-          })).to.eventually.deep.equal(
-            {creative, signature: null}
-          );
-      });
-    });
-    it('with signature', () => {
-      return utf8Encode('some creative').then(creative => {
-        return expect(cloudflareImpl.extractCreativeAndSignature(
-          creative,
-          {
-            get: function(name) {
-              return name == 'X-AmpAdSignature' ? 'AQAB' : undefined;
-            },
-            has: function(name) {
-              return name === 'X-AmpAdSignature';
-            },
-          })).to.eventually.deep.equal(
-            {creative, signature: base64UrlDecodeToBytes('AQAB')}
-          );
-      });
-    });
-  });
 });
