@@ -471,7 +471,7 @@ export const adConfig = {
     prefetch: 'https://www.polymorphicads.jp/js/amp.js',
     preconnect: [
       'https://img.polymorphicads.jp',
-      'https://ad.polymorphicads.jp'
+      'https://ad.polymorphicads.jp',
     ],
     renderStartImplemented: true,
   },
