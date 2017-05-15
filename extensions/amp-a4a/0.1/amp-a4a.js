@@ -71,7 +71,7 @@ const METADATA_STRING_NO_QUOTES =
 // acceptable solution to the 'Safari on iOS doesn't fetch iframe src from
 // cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
 /** @type {string} */
-const SAFEFRAME_VERSION = '1-0-6';
+const SAFEFRAME_VERSION = '1-0-8';
 /** @type {string} @visibleForTesting */
 export const SAFEFRAME_IMPL_PATH =
     'https://tpc.googlesyndication.com/safeframe/' + SAFEFRAME_VERSION +
@@ -914,8 +914,12 @@ export class AmpA4A extends AMP.BaseElement {
     // most comparable with the layout callback for 3p ads.
     this.protectedEmitLifecycleEvent_('preAdThrottle');
     const layoutCallbackStart = this.getNow_();
+    const promiseId = this.promiseId_;
     // Promise chain will have determined if creative is valid AMP.
     return this.adPromise_.then(creativeMetaData => {
+      if (promiseId != this.promiseId_) {
+        throw cancellation();
+      }
       const delta = this.getNow_() - layoutCallbackStart;
       this.protectedEmitLifecycleEvent_('layoutAdPromiseDelay', {
         layoutAdPromiseDelay: Math.round(delta),
@@ -936,14 +940,17 @@ export class AmpA4A extends AMP.BaseElement {
       }
       // Must be an AMP creative.
       return this.renderAmpCreative_(creativeMetaData)
-        .catch(err => {
-          // Failed to render via AMP creative path so fallback to non-AMP
-          // rendering within cross domain iframe.
-          user().error(TAG, this.element.getAttribute('type'),
-            'Error injecting creative in friendly frame', err);
-          this.promiseErrorHandler_(err);
-          return this.renderNonAmpCreative_();
-        });
+          .catch(err => {
+            if (promiseId != this.promiseId_) {
+              throw cancellation();
+            }
+            // Failed to render via AMP creative path so fallback to non-AMP
+            // rendering within cross domain iframe.
+            user().error(TAG, this.element.getAttribute('type'),
+                         'Error injecting creative in friendly frame', err);
+            this.promiseErrorHandler_(err);
+            return this.renderNonAmpCreative_();
+          });
     }).catch(error => {
       this.promiseErrorHandler_(error);
       throw cancellation();
@@ -1264,7 +1271,7 @@ export class AmpA4A extends AMP.BaseElement {
         }
       });
     }
-
+    const promiseId = this.promiseId_;
     return installFriendlyIframeEmbed(
         this.iframe, this.element, {
           host: this.element,
@@ -1276,6 +1283,9 @@ export class AmpA4A extends AMP.BaseElement {
           installUrlReplacementsForEmbed(this.getAmpDoc(), embedWin,
             new A4AVariableSource(this.getAmpDoc(), embedWin));
         }).then(friendlyIframeEmbed => {
+          if (promiseId != this.promiseId_) {
+            throw cancellation();
+          }
           this.friendlyIframeEmbed_ = friendlyIframeEmbed;
           setFriendlyIframeEmbedVisible(
               friendlyIframeEmbed, this.isInViewport());
@@ -1289,8 +1299,12 @@ export class AmpA4A extends AMP.BaseElement {
           // Bubble phase click handlers on the ad.
           this.registerAlpHandler_(friendlyIframeEmbed.win);
           // Capture timing info for friendly iframe load completion.
-          getTimingDataAsync(friendlyIframeEmbed.win,
+          getTimingDataAsync(
+              friendlyIframeEmbed.win,
               'navigationStart', 'loadEventEnd').then(delta => {
+                if (promiseId != this.promiseId_) {
+                  throw cancellation();
+                }
                 this.protectedEmitLifecycleEvent_('friendlyIframeLoaded', {
                   'navStartToLoadEndDelta.AD_SLOT_ID': Math.round(delta),
                 });
@@ -1307,6 +1321,9 @@ export class AmpA4A extends AMP.BaseElement {
           // after the initial load.
           return friendlyIframeEmbed.whenIniLoaded();
         }).then(() => {
+          if (promiseId != this.promiseId_) {
+            throw cancellation();
+          }
           // Capture ini-load ping.
           this.protectedEmitLifecycleEvent_('friendlyIframeIniLoad');
         });
@@ -1383,7 +1400,11 @@ export class AmpA4A extends AMP.BaseElement {
         method == XORIGIN_MODE.NAMEFRAME,
         'Unrecognized A4A cross-domain rendering mode: %s', method);
     this.protectedEmitLifecycleEvent_('renderSafeFrameStart');
+    const promiseId = this.promiseId_;
     return utf8Decode(creativeBody).then(creative => {
+      if (promiseId != this.promiseId_) {
+        throw cancellation();
+      }
       let srcPath;
       let name = '';
       switch (method) {

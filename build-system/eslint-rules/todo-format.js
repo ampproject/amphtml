@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-import {LaterpayVendor} from './laterpay-impl';
-import {accessServiceForDoc} from '../../../src/services';
-
-
-AMP.extension('amp-access-laterpay', '0.1', function(AMP) {
-  AMP.registerServiceForDoc(
-      'laterpay',
-      function(ampdoc) {
-        return accessServiceForDoc(ampdoc).then(accessService => {
-          const vendor = new LaterpayVendor(accessService);
-          accessService.registerVendor('laterpay', vendor);
-          return vendor;
+module.exports = function(context) {
+  return {
+    Program: function(node) {
+      if (node.comments) {
+        node.comments.forEach(function(comment) {
+          if (/TODO/.test(comment.value) &&
+                !/TODO\(@?\w+,\s*#\d{1,}\)/.test(comment.value)) {
+            context.report(comment,
+                'TODOs must be in TODO(@username, #1234) format. Found: "' +
+                comment.value.trim() + '"');
+          }
         });
-      });
-});
+      }
+    }
+  };
+};
