@@ -23,6 +23,8 @@ import {
 } from '../url';
 import {isArray, isObject, isFormData} from '../types';
 import {utf8EncodeSync} from '../utils/bytes';
+import {ampdocServiceFor} form '../ampdoc';
+import {viewerForDoc} form '../services';
 
 
 /**
@@ -94,6 +96,15 @@ export class Xhr {
   constructor(win) {
     /** @const {!Window} */
     this.win = win;
+
+    // TODO(@jridgewell, #9048): Once we figure out if ampdoc can always be
+    // found, remove the try catch.
+    try {
+      this.ampdoc_ = ampdocServiceFor(win).getAmpDoc();
+    } catch (e) {
+      this.ampdoc_ = null;
+      dev().error('XHR', e, 'XHR service failed to find ampdoc');
+    }
   }
 
   /**
@@ -106,6 +117,18 @@ export class Xhr {
    * @private
    */
   fetch_(input, init) {
+    if (this.ampdoc_) {
+      // TODO(@jridgewell, #9048): We can alternatively _always_ wait on
+      // #whenFirstVisible.
+      if (!viewerForDoc(this.ampdoc_).hasBeenVisible()) {
+        dev().error('XHR', 'attempted to fetch %s before viewer was visible',
+            input);
+      }
+    } else {
+      dev().error('XHR', 'attempted to fetch %s without knowing if viewer is' +
+          ' visible', input);
+    }
+
     dev().assert(typeof input == 'string', 'Only URL supported: %s', input);
     // In particular, Firefox does not tolerate `null` values for
     // `credentials`.
