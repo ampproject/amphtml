@@ -236,13 +236,6 @@ const EXPERIMENTS = [
     name: 'Display jank meter',
   },
   {
-    id: 'amp-selector',
-    name: 'Amp selector extension- [LAUNCHED]',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6168',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-         'amp-selector/amp-selector.md',
-  },
-  {
     id: 'sticky-ad-early-load',
     name: 'Load sticky-ad early after user first scroll' +
         'Only apply to 1.0 version',
@@ -253,13 +246,6 @@ const EXPERIMENTS = [
     name: 'Amp extension for a parallax effect',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7801',
     spec: 'https://github.com/ampproject/amphtml/issues/1443',
-  },
-  {
-    id: 'amp-sortable-table',
-    name: 'AMP Sortable Table',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6057',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-sortable-table/amp-sortable-table.md',
   },
   {
     id: 'slidescroll-disable-css-snap',
