@@ -278,6 +278,7 @@ To use `<amp-ad>` or `<amp-embed>`, the script to the `amp-ad` library is needed
 - [Open AdStream (OAS)](../../ads/openadstream.md)
 - [OpenX](../../ads/openx.md)
 - [plista](../../ads/plista.md)
+- [polymorphicAds](../../ads/polymorphicads.md)
 - [popin](../../ads/popin.md)
 - [PubMatic](../../ads/pubmatic.md)
 - [Pubmine](../../ads/pubmine.md)
