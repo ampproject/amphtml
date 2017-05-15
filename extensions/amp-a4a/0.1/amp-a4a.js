@@ -1172,7 +1172,7 @@ export class AmpA4A extends AMP.BaseElement {
             result.keys = [];
           }
           return result;
-        }).then(jwkSet => {
+        })).then(jwkSet => {
           return {
             serviceName: jwkSet.serviceName,
             keys: jwkSet.keys.map(jwk =>
@@ -1191,7 +1191,7 @@ export class AmpA4A extends AMP.BaseElement {
           // the keys, probably b/c of a network condition.  We should
           // re-trigger key fetching later.
           return {serviceName: currServiceName, keys: []};
-        }));
+        });
       } else {
         // The given serviceName does not have a corresponding URL in
         // _a4a-config.js.

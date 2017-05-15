@@ -1725,7 +1725,9 @@ describe('amp-a4a', () => {
       // Key fetch happens on A4A class construction.
       const unusedA4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
       const result = win.ampA4aValidationKeys;
-      return timerFor(win).promise(1).then(() => {
+      expect(result).to.be.instanceof(Array);
+      expect(result).to.have.lengthOf(1);
+      return Promise.all(result).then(serviceInfos => {
         expect(xhrMockJson).to.be.calledOnce;
         expect(xhrMockJson).to.be.calledWith(
             'https://cdn.ampproject.org/amp-ad-verifying-keyset.json', {
@@ -1734,19 +1736,15 @@ describe('amp-a4a', () => {
               ampCors: false,
               credentials: 'omit',
             });
-        expect(result).to.be.instanceof(Array);
-        expect(result).to.have.lengthOf(1);
-        expect(result[0]).to.be.instanceof(Promise);
-        return result[0].then(serviceInfo => {
-          expect(serviceInfo).to.have.all.keys(['serviceName', 'keys']);
-          expect(serviceInfo['serviceName']).to.equal('google');
-          expect(serviceInfo['keys']).to.be.an.instanceof(Array);
-          expect(serviceInfo['keys']).to.have.lengthOf(1);
-          const keyInfoPromise = serviceInfo['keys'][0];
-          expect(keyInfoPromise).to.be.an.instanceof(Promise);
-          return keyInfoPromise.then(keyInfo => {
-            verifyIsKeyInfo(keyInfo);
-          });
+        const serviceInfo = serviceInfos[0];
+        expect(serviceInfo).to.have.all.keys(['serviceName', 'keys']);
+        expect(serviceInfo['serviceName']).to.equal('google');
+        expect(serviceInfo['keys']).to.be.an.instanceof(Array);
+        expect(serviceInfo['keys']).to.have.lengthOf(1);
+        const keyInfoPromise = serviceInfo['keys'][0];
+        expect(keyInfoPromise).to.be.an.instanceof(Promise);
+        return keyInfoPromise.then(keyInfo => {
+          verifyIsKeyInfo(keyInfo);
         });
       });
     });
