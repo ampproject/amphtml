@@ -183,7 +183,6 @@ export function installInaboxViewportService(ampdoc) {
       function() {
         return new Viewport(ampdoc, binding, viewer);
       },
-      /* opt_factory */ undefined,
       /* opt_instantiate */ true);
 }
 

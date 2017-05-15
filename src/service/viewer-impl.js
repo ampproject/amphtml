@@ -981,7 +981,8 @@ export function setViewerVisibilityState(viewer, state) {
 export function installViewerServiceForDoc(ampdoc, opt_initParams) {
   registerServiceBuilderForDoc(ampdoc,
       'viewer',
-      /* opt_ctor */ undefined,
-      () => new Viewer(ampdoc, opt_initParams),
+      function() {
+        return new Viewer(ampdoc, opt_initParams);
+      },
       /* opt_instantiate */ true);
 }

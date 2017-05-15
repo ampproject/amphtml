@@ -922,6 +922,5 @@ export function installActionServiceForDoc(ampdoc) {
       ampdoc,
       'action',
       ActionService,
-      /* opt_factory */ undefined,
       /* opt_instantiate */ true);
 }
