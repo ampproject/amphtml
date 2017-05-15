@@ -529,6 +529,7 @@ export class FetchPolyfillResponse {
     this.bodyUsed = false;
   }
 
+  /** @override */
   clone() {
     dev().assert(!this.bodyUsed, 'Body already used');
     return new FetchPolyfillResponse(this.xhr_);
@@ -545,10 +546,12 @@ export class FetchPolyfillResponse {
     return Promise.resolve(this.xhr_.responseText);
   }
 
+  /** @override */
   text() {
     return this.drainText_();
   }
 
+  /** @override */
   json() {
     return /** @type {!Promise<!JSONType>} */ (
         this.drainText_().then(JSON.parse.bind(JSON)));
@@ -614,10 +617,12 @@ export class FetchPolyfillResponseHeaders {
     this.xhr_ = xhr;
   }
 
+  /** @override */
   get(name) {
     return this.xhr_.getResponseHeader(name);
   }
 
+  /** @override */
   has(name) {
     return this.xhr_.getResponseHeader(name) != null;
   }
