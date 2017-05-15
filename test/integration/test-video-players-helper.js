@@ -257,11 +257,11 @@ export function runVideoPlayerIntegrationTests(
 
   function cleanUp() {
     if (fixtureGlobal) {
-      fixtureGlobal.doc.body.removeChild(videoGlobal);
-      fixtureGlobal.iframe.remove();
       if (opt_experiment) {
         toggleExperiment(fixtureGlobal.win, opt_experiment, false);
       }
+      fixtureGlobal.doc.body.removeChild(videoGlobal);
+      fixtureGlobal.iframe.remove();
     }
   }
 }
