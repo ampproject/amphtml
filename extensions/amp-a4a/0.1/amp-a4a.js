@@ -71,7 +71,7 @@ const METADATA_STRING_NO_QUOTES =
 // acceptable solution to the 'Safari on iOS doesn't fetch iframe src from
 // cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
 /** @type {string} */
-const SAFEFRAME_VERSION = '1-0-6';
+const SAFEFRAME_VERSION = '1-0-8';
 /** @type {string} @visibleForTesting */
 export const SAFEFRAME_IMPL_PATH =
     'https://tpc.googlesyndication.com/safeframe/' + SAFEFRAME_VERSION +
