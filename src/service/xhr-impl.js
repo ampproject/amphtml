@@ -97,14 +97,10 @@ export class Xhr {
     /** @const {!Window} */
     this.win = win;
 
-    // TODO(@jridgewell, #9048): Once we figure out if ampdoc can always be
-    // found, remove the try catch.
-    try {
-      this.ampdoc_ = ampdocServiceFor(win).getAmpDoc();
-    } catch (e) {
-      this.ampdoc_ = null;
-      dev().error('XHR', e, 'XHR service failed to find ampdoc');
-    }
+    const ampdocService = ampdocServiceFor(win);
+    this.ampdoc_ = ampdocService.isSingleDoc() ?
+      ampdocService.getAmpDoc() :
+      null;
   }
 
   /**
@@ -120,13 +116,10 @@ export class Xhr {
     if (this.ampdoc_) {
       // TODO(@jridgewell, #9048): We can alternatively _always_ wait on
       // #whenFirstVisible.
-      if (!viewerForDoc(this.ampdoc_).hasBeenVisible()) {
+      if (Math.random() < .01 && !viewerForDoc(this.ampdoc_).hasBeenVisible()) {
         dev().error('XHR', 'attempted to fetch %s before viewer was visible',
             input);
       }
-    } else {
-      dev().error('XHR', 'attempted to fetch %s without knowing if viewer is' +
-          ' visible', input);
     }
 
     dev().assert(typeof input == 'string', 'Only URL supported: %s', input);
