@@ -43,10 +43,10 @@ import {ANALYTICS_CONFIG} from './vendors';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 
 // Register doc-service factory.
-AMP.registerServiceForDoc(
-    'amp-analytics-instrumentation', InstrumentationService);
-AMP.registerServiceForDoc('activity', Activity);
-AMP.registerServiceForDoc('cid', Cid);
+AMP.registerServiceForDoc('amp-analytics-instrumentation',
+    ampdoc => new InstrumentationService(ampdoc));
+AMP.registerServiceForDoc('activity', ampdoc => new Activity(ampdoc));
+AMP.registerServiceForDoc('cid', ampdoc => new Cid(ampdoc));
 
 installVariableService(AMP.win);
 

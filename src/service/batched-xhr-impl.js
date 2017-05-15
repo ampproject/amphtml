@@ -88,18 +88,20 @@ export class BatchedXhr extends Xhr {
 
 
 /**
- * @param {!Window} window
+ * @param {!Window} win
  * @return {!BatchedXhr}
  */
-export function batchedXhrServiceForTesting(window) {
-  installBatchedXhrService(window);
-  return getService(window, 'batched-xhr');
+export function batchedXhrServiceForTesting(win) {
+  installBatchedXhrService(win);
+  return getService(win, 'batched-xhr');
 }
 
 
 /**
- * @param {!Window} window
+ * @param {!Window} win
  */
-export function installBatchedXhrService(window) {
-  registerServiceBuilder(window, 'batched-xhr', BatchedXhr);
+export function installBatchedXhrService(win) {
+  registerServiceBuilder(win,
+      'batched-xhr',
+      win => new BatchedXhr(win));
 };

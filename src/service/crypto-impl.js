@@ -274,5 +274,5 @@ function hashesEqual(signature, keyHash) {
  * @param {!Window} win
  */
 export function installCryptoService(win) {
-  return registerServiceBuilder(win, 'crypto', Crypto);
+  return registerServiceBuilder(win, 'crypto', win => new Crypto(win));
 }

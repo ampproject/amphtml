@@ -41,7 +41,9 @@ const resolved = Promise.resolve();
  * @private
  */
 function getChunkServiceForDoc_(nodeOrAmpDoc) {
-  registerServiceBuilderForDoc(nodeOrAmpDoc, 'chunk', Chunks);
+  registerServiceBuilderForDoc(nodeOrAmpDoc,
+      'chunk',
+      ampdoc => new Chunks(ampdoc));
   return getServiceForDoc(nodeOrAmpDoc, 'chunk');
 }
 

@@ -222,7 +222,9 @@ export class LiveListManager {
  * @param {!Window} win
  */
 export function installLiveListManager(win) {
-  registerServiceBuilder(win, 'liveListManager', LiveListManager);
+  registerServiceBuilder(win,
+      'liveListManager',
+      win => new LiveListManager(win));
 }
 
 /**

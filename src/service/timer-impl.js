@@ -167,5 +167,5 @@ export class Timer {
  * @param {!Window} window
  */
 export function installTimerService(window) {
-  registerServiceBuilder(window, 'timer', Timer);
+  registerServiceBuilder(window, 'timer', win => new Timer(win));
 };

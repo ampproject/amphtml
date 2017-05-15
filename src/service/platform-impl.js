@@ -174,8 +174,8 @@ export class Platform {
 
 
 /**
- * @param {!Window} window
+ * @param {!Window} win
  */
-export function installPlatformService(window) {
-  return registerServiceBuilder(window, 'platform', Platform);
+export function installPlatformService(win) {
+  return registerServiceBuilder(win, 'platform', win => new Platform(win));
 };

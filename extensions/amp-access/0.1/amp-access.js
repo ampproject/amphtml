@@ -968,8 +968,5 @@ class AccessTypeAdapterDef {
 AMP.extension(TAG, '0.1', function(AMP) {
   AMP.registerServiceForDoc(
       'access',
-      /* ctor */ undefined,
-      ampdoc => {
-        return new AccessService(ampdoc).start_();
-      });
+      ampdoc => new AccessService(ampdoc).start_());
 });

@@ -87,11 +87,11 @@ let ExtensionHolderDef;
 
 /**
  * Install extensions service.
- * @param {!Window} window
+ * @param {!Window} win
  * @restricted
  */
-export function installExtensionsService(window) {
-  registerServiceBuilder(window, 'extensions', Extensions);
+export function installExtensionsService(win) {
+  registerServiceBuilder(win, 'extensions', win => new Extensions(win));
 }
 
 /**

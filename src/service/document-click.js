@@ -48,8 +48,7 @@ export function installGlobalClickListenerForDoc(ampdoc) {
   registerServiceBuilderForDoc(
       ampdoc,
       TAG,
-      ClickHandler,
-      /* opt_factory */ undefined,
+      ampdoc => new ClickHandler(ampdoc),
       /* opt_instantiate */ true);
 }
 

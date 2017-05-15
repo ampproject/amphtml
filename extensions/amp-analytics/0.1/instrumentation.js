@@ -616,6 +616,8 @@ export function instrumentationServicePromiseForDoc(nodeOrDoc) {
  */
 export function instrumentationServiceForDocForTesting(nodeOrDoc) {
   registerServiceBuilderForDoc(
-      nodeOrDoc, 'amp-analytics-instrumentation', InstrumentationService);
+      nodeOrDoc,
+      'amp-analytics-instrumentation',
+      ampdoc => new InstrumentationService(ampdoc));
   return getServiceForDoc(nodeOrDoc, 'amp-analytics-instrumentation');
 }

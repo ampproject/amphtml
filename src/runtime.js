@@ -173,8 +173,7 @@ export function installBuiltins(global) {
  *         !Window,
  *         !./service/extensions-impl.Extensions,
  *         string,
- *         (function(new:Object, !./service/ampdoc-impl.AmpDoc)|undefined),
- *         (function(!./service/ampdoc-impl.AmpDoc):!Object|undefined)),
+ *         (function(!./service/ampdoc-impl.AmpDoc):!Object)),
  *   }} opts
  * @param {function(!Window, !./service/extensions-impl.Extensions)} callback
  */
@@ -243,8 +242,7 @@ function adoptShared(global, opts, callback) {
   /**
    * Registers an ampdoc service.
    * @param {string} name
-   * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)|undefined} opt_ctor
-   * @param {function(!./service/ampdoc-impl.AmpDoc):!Object|undefined} opt_factory
+   * @param {function(!./service/ampdoc-impl.AmpDoc):!Object} factory
    */
   global.AMP.registerServiceForDoc = opts.registerServiceForDoc.bind(null,
       global, extensions);
@@ -509,14 +507,13 @@ function registerElementClass(global, name, implementationClass, opt_css) {
  * @param {!Window} global
  * @param {!./service/extensions-impl.Extensions} extensions
  * @param {string} name
- * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)=} opt_ctor
- * @param {function(!./service/ampdoc-impl.AmpDoc):!Object=} opt_factory
+ * @param {function(!./service/ampdoc-impl.AmpDoc):!Object} factory
  */
 function prepareAndRegisterServiceForDoc(global, extensions,
-    name, opt_ctor, opt_factory) {
+    name, factory) {
   const ampdocService = ampdocServiceFor(global);
   const ampdoc = ampdocService.getAmpDoc();
-  registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory);
+  registerServiceForDoc(ampdoc, name, factory);
 }
 
 
@@ -525,13 +522,12 @@ function prepareAndRegisterServiceForDoc(global, extensions,
  * @param {!Window} global
  * @param {!./service/extensions-impl.Extensions} extensions
  * @param {string} name
- * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)=} opt_ctor
- * @param {function(!./service/ampdoc-impl.AmpDoc):!Object=} opt_factory
+ * @param {function(!./service/ampdoc-impl.AmpDoc):!Object} factory
  */
 function prepareAndRegisterServiceForDocShadowMode(global, extensions,
-    name, opt_ctor, opt_factory) {
+    name, factory) {
   addDocFactoryToExtension(extensions, ampdoc => {
-    registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory);
+    registerServiceForDoc(ampdoc, name, factory);
   }, name);
 }
 
@@ -541,16 +537,14 @@ function prepareAndRegisterServiceForDocShadowMode(global, extensions,
  * modes.
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {string} name
- * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)=} opt_ctor
- * @param {function(!./service/ampdoc-impl.AmpDoc):!Object=} opt_factory
+ * @param {function(!./service/ampdoc-impl.AmpDoc):!Object} factory
  */
-function registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory) {
+function registerServiceForDoc(ampdoc, name, factory) {
   // TODO(kmh287): Investigate removing the opt_instantiate arg after
   // all other services have been refactored.
   registerServiceBuilderForDoc(ampdoc,
                                name,
-                               opt_ctor,
-                               opt_factory,
+                               factory,
                                /* opt_instantiate */ true);
 }
 

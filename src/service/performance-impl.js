@@ -375,16 +375,16 @@ export class Performance {
 
 
 /**
- * @param {!Window} window
+ * @param {!Window} win
  */
-export function installPerformanceService(window) {
-  registerServiceBuilder(window, 'performance', Performance);
+export function installPerformanceService(win) {
+  registerServiceBuilder(win, 'performance', win => new Performance(win));
 }
 
 /**
- * @param {!Window} window
+ * @param {!Window} win
  * @return {!Performance}
  */
-export function performanceFor(window) {
-  return getService(window, 'performance');
+export function performanceFor(win) {
+  return getService(win, 'performance');
 }

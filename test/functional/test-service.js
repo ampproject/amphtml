@@ -77,7 +77,6 @@ describe('service', () => {
 
   describe('window singletons', () => {
 
-    let Class;
     let count;
     let factory;
 
@@ -86,11 +85,6 @@ describe('service', () => {
       factory = sandbox.spy(() => {
         return ++count;
       });
-      Class = class {
-        constructor() {
-          this.count = ++count;
-        }
-      };
       resetServiceForTesting(window, 'a');
       resetServiceForTesting(window, 'b');
       resetServiceForTesting(window, 'c');
@@ -114,14 +108,14 @@ describe('service', () => {
     });
 
     it('should not instantiate service when registered', () => {
-      registerServiceBuilder(window, 'a', Class);
+      registerServiceBuilder(window, 'a', factory);
       expect(count).to.equal(0);
       getService(window, 'a');
       expect(count).to.equal(1);
     });
 
     it('should only instantiate the service once', () => {
-      registerServiceBuilder(window, 'b', Class);
+      registerServiceBuilder(window, 'b', factory);
       expect(count).to.equal(0);
       getService(window, 'b');
       getService(window, 'b');
@@ -170,7 +164,7 @@ describe('service', () => {
 
     it('should resolve existing service promise on registering service', () => {
       const p = getServicePromise(window, 'a');
-      registerServiceBuilder(window, 'a', Class);
+      registerServiceBuilder(window, 'a', factory);
       expect(count).to.equal(1);
       return p.then(() => {
         expect(count).to.equal(1);
@@ -178,7 +172,7 @@ describe('service', () => {
     });
 
     it('should resolve service promise if service is registered', () => {
-      registerServiceBuilder(window, 'a', Class);
+      registerServiceBuilder(window, 'a', factory);
       expect(count).to.equal(0);
       return getServicePromise(window, 'a').then(() => {
         expect(count).to.equal(1);
@@ -186,7 +180,7 @@ describe('service', () => {
     });
 
     it('should provide promise without clobbering registered services', () => {
-      registerServiceBuilder(window, 'a', Class);
+      registerServiceBuilder(window, 'a', factory);
       expect(count).to.equal(0);
       const p = getServicePromise(window, 'a');
       expect(getService(window, 'a')).to.not.throw;
@@ -196,13 +190,13 @@ describe('service', () => {
     });
 
     it('should NOT return null promise for registered services', () => {
-      registerServiceBuilder(window, 'a', Class);
+      registerServiceBuilder(window, 'a', factory);
       const p = getServicePromiseOrNull(window, 'a');
       expect(p).to.not.be.null;
     });
 
     it('should set service builders to null after instantiation', () => {
-      registerServiceBuilder(window, 'a', Class);
+      registerServiceBuilder(window, 'a', factory);
       expect(window.services['a'].obj).to.be.null;
       expect(window.services['a'].build).to.not.be.null;
       getService(window, 'a');

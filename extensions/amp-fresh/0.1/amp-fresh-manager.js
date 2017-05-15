@@ -122,7 +122,9 @@ export class AmpFreshManager {
  * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
  */
 export function installAmpFreshManagerForDoc(nodeOrDoc) {
-  registerServiceBuilderForDoc(nodeOrDoc, 'ampFreshManager', AmpFreshManager);
+  registerServiceBuilderForDoc(nodeOrDoc,
+      'ampFreshManager',
+      ampdoc => new AmpFreshManager(ampdoc));
 }
 
 /**

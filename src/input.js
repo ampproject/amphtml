@@ -254,5 +254,5 @@ export class Input {
  * @param {!Window} win
  */
 export function installInputService(win) {
-  registerServiceBuilder(win, 'input', Input);
+  registerServiceBuilder(win, 'input', win => new Input(win));
 }
