@@ -287,6 +287,11 @@ i-amphtml-sizer {
   /* Just state. */
 }
 
+/* layout=nodisplay are automatically hidden until displayed directly. */
+[layout=nodisplay]:not(.i-amphtml-display) {
+  display: none !important;
+}
+
 .i-amphtml-element > [placeholder] {
   display: block;
 }
