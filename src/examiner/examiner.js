@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-if (isLongTaskApiSupported(window)) {
-  detectLongTasks(window);
+if (isLongTaskApiSupported(self)) {
+  detectLongTasks(self);
 }
 
 function detectLongTasks(win) {
