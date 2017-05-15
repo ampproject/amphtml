@@ -205,13 +205,15 @@ export class ActionService {
         this.trigger(dev().assertElement(event.target), name, event);
       });
     } else if (name == 'input-debounced') {
-      const inputDebounced = debounce(this.ampdoc.win, (target, event) => {
-        this.trigger(
-            dev().assertElement(target), name, /** @type {?Event} */ (event));
+      const inputDebounced = debounce(this.ampdoc.win, event => {
+        const target = dev().assertElement(event.target);
+        this.trigger(target, name, /** @type {!Event} */ (event));
       }, DEFAULT_DEBOUNCE_WAIT);
 
       this.root_.addEventListener('input', event => {
-        inputDebounced(event.target, event);
+        // Clone the event to avoid races where the browser cleans up the event
+        // object before the async debounced function is called.
+        inputDebounced(cloneWithoutFunctions(event));
       });
     }
   }
@@ -917,6 +919,7 @@ class ParserTokenizer {
   }
 }
 
+
 /**
  * Tests whether a chacter is a number.
  * @param {string} c
@@ -924,6 +927,28 @@ class ParserTokenizer {
  */
 function isNum(c) {
   return c >= '0' && c <= '9';
+}
+
+
+/**
+ * Clones an object without its function properties. This is useful e.g. for
+ * event objects that need to be passed to an async context, but the browser
+ * might have cleaned up the original event object.
+ * This clone avoids functions since they won't behave normally after the
+ * original object has been destroyed.
+ * @param {!T} original
+ * @return {!T}
+ * @template T
+ */
+function cloneWithoutFunctions(original) {
+  const clone = map();
+  for (const prop in original) {
+    const value = original[prop];
+    if (typeof value !== 'function') {
+      clone[prop] = original[prop];
+    }
+  }
+  return clone;
 }
 
 
