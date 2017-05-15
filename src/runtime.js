@@ -35,7 +35,7 @@ import {dev, user, initLogConstructor, setReportError} from './log';
 import {reportError} from './error';
 import {
   disposeServicesForDoc,
-  getService,
+  registerServiceBuilder,
   registerServiceBuilderForDoc,
 } from './service';
 import {childElementsByTag} from './dom';
@@ -499,8 +499,8 @@ function registerElementClass(global, name, implementationClass, opt_css) {
       css: opt_css,
     };
   }
-  // Resolve this extension's Service Promise.
-  getService(global, name, emptyService);
+  // Register this extension to resolve its Service Promise.
+  registerServiceBuilder(global, name, emptyService);
 }
 
 

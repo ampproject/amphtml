@@ -20,7 +20,10 @@ import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
 import {installResourcesServiceForDoc} from '../../src/service/resources-impl';
 import {resourcesForDoc} from '../../src/services';
 import {vsyncFor} from '../../src/services';
-import {getService, resetServiceForTesting} from '../../src/service';
+import {
+  registerServiceBuilder,
+  resetServiceForTesting,
+} from '../../src/service';
 import {
   copyElementToChildWindow,
   createAmpElementProto,
@@ -1962,15 +1965,15 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
 
         // Resolve body.
         markElementScheduledForTesting(win, 'element-1');
-        getService(win, 'e1', function() {
-          return 'fake1';
+        registerServiceBuilder(win, 'e1', function() {
+          return {str: 'fake1'};
         });
         doc.body = {};
         intervalCallback();
         return p1;
       }).then(service => {
-        expect(resolvedService).to.equal('fake1');
-        expect(service).to.equal('fake1');
+        expect(resolvedService).to.deep.equal({str: 'fake1'});
+        expect(service).to.deep.equal({str: 'fake1'});
       });
     });
 
@@ -1982,12 +1985,12 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
         expect(intervalCallback).to.be.undefined;
 
         // Resolve service.
-        getService(win, 'e1', function() {
-          return 'fake1';
+        registerServiceBuilder(win, 'e1', function() {
+          return {str: 'fake1'};
         });
         return p1;
       }).then(service => {
-        expect(service).to.equal('fake1');
+        expect(service).to.deep.equal({str: 'fake1'});
       });
     });
   });
@@ -2011,12 +2014,12 @@ describes.realWin('services', {
     const p1 = getElementService(env.win, 'e1', 'element-1');
     const p2 = getElementService(env.win, 'e1', 'element-1');
 
-    getService(env.win, 'e1', function() {
-      return 'from e1';
+    registerServiceBuilder(env.win, 'e1', function() {
+      return {str: 'from e1'};
     });
 
     return p1.then(s1 => {
-      expect(s1).to.equal('from e1');
+      expect(s1).to.deep.equal({str: 'from e1'});
       return p2.then(s2 => {
         expect(s1).to.equal(s2);
       });
@@ -2040,11 +2043,11 @@ describes.realWin('services', {
     markElementScheduledForTesting(env.win, 'element-1');
     const p1 = getElementServiceIfAvailable(env.win, 'e1', 'element-1');
     const p2 = getElementServiceIfAvailable(env.win, 'e2', 'not-available');
-    getService(env.win, 'e1', function() {
-      return 'from e1';
+    registerServiceBuilder(env.win, 'e1', function() {
+      return {str: 'from e1'};
     });
     return p1.then(s1 => {
-      expect(s1).to.equal('from e1');
+      expect(s1).to.deep.equal({str: 'from e1'});
       return p2.then(s2 => {
         expect(s2).to.be.null;
       });
@@ -2056,12 +2059,12 @@ describes.realWin('services', {
     const p1 = getElementServiceForDoc(env.ampdoc, 'e1', 'element-1');
     const p2 = getElementServiceForDoc(env.ampdoc, 'e1', 'element-1');
 
-    getService(env.win, 'e1', function() {
-      return 'from e1';
+    registerServiceBuilder(env.win, 'e1', function() {
+      return {str: 'from e1'};
     });
 
     return p1.then(s1 => {
-      expect(s1).to.equal('from e1');
+      expect(s1).to.deep.equal({str: 'from e1'});
       return p2.then(s2 => {
         expect(s1).to.equal(s2);
       });
@@ -2087,11 +2090,11 @@ describes.realWin('services', {
         env.ampdoc, 'e1', 'element-1');
     const p2 = getElementServiceIfAvailableForDoc(
         env.ampdoc, 'e2', 'not-available');
-    getService(env.win, 'e1', function() {
-      return 'from e1';
+    registerServiceBuilder(env.win, 'e1', function() {
+      return {str: 'from e1'};
     });
     return p1.then(s1 => {
-      expect(s1).to.equal('from e1');
+      expect(s1).to.deep.equal({str: 'from e1'});
       return p2.then(s2 => {
         expect(s2).to.be.null;
       });
@@ -2147,14 +2150,14 @@ describes.realWin('services', {
 
       // Resolve body.
       markElementScheduledForTesting(env.win, 'element-1');
-      getService(env.win, 'e1', function() {
-        return 'fake1';
+      registerServiceBuilder(env.win, 'e1', function() {
+        return {str: 'fake1'};
       });
       bodyResolver();
       return p1;
     }).then(service => {
-      expect(resolvedService).to.equal('fake1');
-      expect(service).to.equal('fake1');
+      expect(resolvedService).to.deep.equal({str: 'fake1'});
+      expect(service).to.deep.equal({str: 'fake1'});
     });
   });
 
@@ -2164,12 +2167,12 @@ describes.realWin('services', {
         env.ampdoc, 'e1', 'element-1');
     return Promise.resolve().then(() => {
       // Resolve service.
-      getService(env.win, 'e1', function() {
-        return 'fake1';
+      registerServiceBuilder(env.win, 'e1', function() {
+        return {str: 'fake1'};
       });
       return p1;
     }).then(service => {
-      expect(service).to.equal('fake1');
+      expect(service).to.deep.equal({str: 'fake1'});
     });
   });
 });

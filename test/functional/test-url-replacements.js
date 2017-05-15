@@ -35,7 +35,7 @@ import {
   installUrlReplacementsServiceForDoc,
   extractClientIdFromGaCookie,
 } from '../../src/service/url-replacements-impl';
-import {getService} from '../../src/service';
+import {registerServiceBuilder} from '../../src/service';
 import {setCookie} from '../../src/cookies';
 import {parseUrl} from '../../src/url';
 import {urlReplacementsForDoc, viewerForDoc} from '../../src/services';
@@ -78,17 +78,21 @@ describes.sandboxed('UrlReplacements', {}, () => {
         }
         if (opt_options.withVariant) {
           markElementScheduledForTesting(iframe.win, 'amp-experiment');
-          getService(iframe.win, 'variant', () => Promise.resolve({
-            'x1': 'v1',
-            'x2': null,
-          }));
+          registerServiceBuilder(iframe.win, 'variant', function() {
+            return Promise.resolve({
+              'x1': 'v1',
+              'x2': null,
+            });
+          });
         }
         if (opt_options.withShareTracking) {
           markElementScheduledForTesting(iframe.win, 'amp-share-tracking');
-          getService(iframe.win, 'share-tracking', () => Promise.resolve({
-            incomingFragment: '12345',
-            outgoingFragment: '54321',
-          }));
+          registerServiceBuilder(iframe.win, 'share-tracking', function() {
+            return Promise.resolve({
+              incomingFragment: '12345',
+              outgoingFragment: '54321',
+            });
+          });
         }
       }
       viewerService = viewerForDoc(iframe.ampdoc);
