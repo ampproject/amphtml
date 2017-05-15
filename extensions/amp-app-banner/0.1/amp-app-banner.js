@@ -27,7 +27,7 @@ import {storageForDoc} from '../../../src/services';
 import {timerFor} from '../../../src/services';
 import {parseUrl} from '../../../src/url';
 import {setStyles} from '../../../src/style';
-import {isProxyOrigin} from '../../../src/url';
+import {isProxyOrigin, isProtocolValid} from '../../../src/url';
 
 const TAG = 'amp-app-banner';
 
@@ -284,9 +284,7 @@ export class AmpIosAppBanner extends AbstractAppBanner {
     const appId = config['app-id'];
     const openUrl = config['app-argument'];
 
-    const parsedUrl = parseUrl(openUrl);
-    const invalidProtocols = ['javascript:', 'data:', 'vbscript:'];
-    user().assert(!invalidProtocols.includes(parsedUrl.protocol),
+    user().assert(isProtocolValid(openUrl),
         'The url in app-argument is invalid');
 
     const installAppUrl = `https://itunes.apple.com/us/app/id${appId}`;

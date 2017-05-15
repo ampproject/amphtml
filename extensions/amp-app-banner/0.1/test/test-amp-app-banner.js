@@ -306,7 +306,8 @@ describe('amp-app-banner', () => {
 
     it('should parse meta content and validate app-argument url', () => {
       return getAppBanner({
-        meta: {content: 'app-id=828256236, app-argument=javascript:xxx'},
+        meta: {content:
+            'app-id=828256236, app-argument=javascript:alert("foo");'},
       }).should.eventually.be.rejectedWith(
          /The url in app-argument is invalid/);
     });
