@@ -80,7 +80,7 @@ describes.sandboxed('amp-accordion', {}, () => {
       obj.ampAccordion.implementation_.onHeaderPicked_(clickEvent);
       expect(header.parentNode.hasAttribute('expanded')).to.be.true;
       expect(header.getAttribute('aria-expanded')).to.equal('true');
-      expect(clickEvent.preventDefault.called).to.be.true;
+      expect(clickEvent.preventDefault).to.have.been.called;
     });
   });
 
@@ -99,7 +99,32 @@ describes.sandboxed('amp-accordion', {}, () => {
       obj.ampAccordion.implementation_.onHeaderPicked_(clickEvent);
       expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.false;
       expect(headerElements[1].getAttribute('aria-expanded')).to.equal('false');
-      expect(clickEvent.preventDefault.called).to.be.true;
+      expect(clickEvent.preventDefault).to.have.been.called;
+    });
+  });
+
+  it('should allow for clickable links and buttons in header', () => {
+    return getAmpAccordion().then(obj => {
+      const iframe = obj.iframe;
+      const headerElements = iframe.doc.querySelectorAll(
+          'section > *:first-child');
+      const a = iframe.doc.createElement('a');
+      headerElements[0].appendChild(a);
+      const aClickEvent = {
+        target: a,
+        preventDefault: sandbox.spy(),
+      };
+      obj.ampAccordion.implementation_.clickHandler_(aClickEvent);
+      expect(aClickEvent.preventDefault).to.not.have.been.called;
+
+      const button = iframe.doc.createElement('button');
+      headerElements[0].appendChild(button);
+      const buttonClickEvent = {
+        target: button,
+        preventDefault: sandbox.spy(),
+      };
+      obj.ampAccordion.implementation_.clickHandler_(buttonClickEvent);
+      expect(buttonClickEvent.preventDefault).to.not.have.been.called;
     });
   });
 
