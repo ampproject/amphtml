@@ -1304,7 +1304,7 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
   });
 });
 
-describes.realWin('ViewportBindingNaturalIosEmbed', {}, env => {
+describes.realWin('ViewportBindingNaturalIosEmbed', {ampCss: true}, env => {
   let binding;
   let win;
 
@@ -1322,6 +1322,7 @@ describes.realWin('ViewportBindingNaturalIosEmbed', {}, env => {
     installPlatformService(win);
     installViewerServiceForDoc(ampdoc);
 
+    win.document.documentElement.classList.add('i-amphtml-singledoc');
     binding = new ViewportBindingNaturalIosEmbed_(win, ampdoc);
     return Promise.resolve();
   });
@@ -1341,6 +1342,9 @@ describes.realWin('ViewportBindingNaturalIosEmbed', {}, env => {
     const body = win.document.body;
     expect(documentElement.style.overflowY).to.equal('auto');
     expect(documentElement.style.webkitOverflowScrolling).to.equal('touch');
+    expect(win.getComputedStyle(documentElement).overflowY).to.equal('auto');
+
+    // Assigned styles.
     expect(body.style.overflowX).to.equal('hidden');
     expect(body.style.overflowY).to.equal('auto');
     expect(body.style.webkitOverflowScrolling).to.equal('touch');
@@ -1349,6 +1353,16 @@ describes.realWin('ViewportBindingNaturalIosEmbed', {}, env => {
     expect(body.style.left).to.equal('0px');
     expect(body.style.right).to.equal('0px');
     expect(body.style.bottom).to.equal('0px');
+
+    // Resolved styles.
+    const resolvedBodyStyle = win.getComputedStyle(body);
+    expect(resolvedBodyStyle.overflowX).to.equal('hidden');
+    expect(resolvedBodyStyle.overflowY).to.equal('auto');
+    expect(resolvedBodyStyle.position).to.equal('absolute');
+    expect(resolvedBodyStyle.top).to.equal('0px');
+    expect(resolvedBodyStyle.left).to.equal('0px');
+    expect(resolvedBodyStyle.right).to.equal('0px');
+    expect(resolvedBodyStyle.bottom).to.equal('0px');
 
     const scrollpos = body.querySelector('#i-amphtml-scrollpos');
     expect(scrollpos).to.be.ok;
@@ -1533,7 +1547,7 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     env.iframe.style.width = '100px';
     env.iframe.style.height = '100px';
     win = env.win;
-    win.document.documentElement.className = 'top';
+    win.document.documentElement.className = 'top i-amphtml-singledoc';
     child = win.document.createElement('div');
     child.style.width = '200px';
     child.style.height = '300px';
