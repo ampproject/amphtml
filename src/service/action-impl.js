@@ -15,6 +15,7 @@
  */
 
 import {KeyCodes} from '../utils/key-codes';
+import {debounce} from '../utils/rate-limit';
 import {dev, user} from '../log';
 import {
   registerServiceBuilderForDoc,
@@ -204,7 +205,7 @@ export class ActionService {
         this.trigger(dev().assertElement(event.target), name, event);
       });
     } else if (name == 'input-debounced') {
-      this.root_.addEventListener('input', debounce_(event => {
+      this.root_.addEventListener('input', debounce(this.ampdoc.win, event => {
         this.trigger(dev().assertElement(event.target), name, event);
       }, DEFAULT_DEBOUNCE_WAIT));
     }
@@ -479,20 +480,6 @@ export class ActionService {
     }
     return actionMap;
   }
-}
-
-// TODO(cvializ): DO NOT SUBMIT
-// wait for common debounce function to be merged in
-// https://github.com/ampproject/amphtml/pull/9252/
-function debounce_(func, wait) {
-  let timeout;
-  return function() {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => {
-      timeout = null;
-      func.apply(this, arguments);
-    }, wait);
-  };
 }
 
 
