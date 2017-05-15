@@ -244,6 +244,7 @@ export class AmpIosAppBanner extends AbstractAppBanner {
         this.element.querySelector('button[open-button]'),
         '<button open-button> is required inside %s: %s', TAG, this.element);
 
+    this.parseIosMetaContent_(this.metaTag_.getAttribute('content'));
     this.checkIfDismissed_();
   }
 
@@ -257,7 +258,6 @@ export class AmpIosAppBanner extends AbstractAppBanner {
       return Promise.resolve();
     }
 
-    this.parseIosMetaContent_(this.metaTag_.getAttribute('content'));
     return Promise.resolve();
   }
 
@@ -283,6 +283,12 @@ export class AmpIosAppBanner extends AbstractAppBanner {
 
     const appId = config['app-id'];
     const openUrl = config['app-argument'];
+
+    const parsedUrl = parseUrl(openUrl);
+    const invalidProtocols = ['javascript:', 'data:', 'vbscript:'];
+    user().assert(!invalidProtocols.includes(parsedUrl.protocol),
+        'The url in app-argument is invalid');
+
     const installAppUrl = `https://itunes.apple.com/us/app/id${appId}`;
     const openInAppUrl = openUrl || installAppUrl;
     this.setupOpenButton_(this.openButton_, openInAppUrl, installAppUrl);
