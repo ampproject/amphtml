@@ -58,19 +58,41 @@ describe('ad-cid', () => {
   it('should get correct cid', () => {
     config.clientIdScope = cidScope;
 
-    sandbox.stub(cidService, 'get', scope => {
-      expect(scope).to.equal(cidScope);
+    let getCidStruct;
+    sandbox.stub(cidService, 'get', struct => {
+      getCidStruct = struct;
       return Promise.resolve('test123');
     });
     return getAdCid(adElement).then(cid => {
       expect(cid).to.equal('test123');
+      expect(getCidStruct).to.deep.equal({
+        scope: cidScope,
+        cookieName: undefined,
+      });
+    });
+  });
+
+  it('should respect clientIdCookieName field', () => {
+    config.clientIdScope = cidScope;
+    config.clientIdCookieName = 'different-cookie-name';
+
+    let getCidStruct;
+    sandbox.stub(cidService, 'get', struct => {
+      getCidStruct = struct;
+      return Promise.resolve('test123');
+    });
+    return getAdCid(adElement).then(cid => {
+      expect(cid).to.equal('test123');
+      expect(getCidStruct).to.deep.equal({
+        scope: cidScope,
+        cookieName: 'different-cookie-name',
+      });
     });
   });
 
   it('should return on timeout', () => {
     config.clientIdScope = cidScope;
-    sandbox.stub(cidService, 'get', scope => {
-      expect(scope).to.equal(cidScope);
+    sandbox.stub(cidService, 'get', () => {
       return timerFor(window).promise(2000);
     });
     const p = getAdCid(adElement).then(cid => {
