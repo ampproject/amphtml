@@ -206,7 +206,8 @@ export class ActionService {
       });
     } else if (name == 'input-debounced') {
       this.root_.addEventListener('input', debounce(this.ampdoc.win, event => {
-        this.trigger(dev().assertElement(event.target), name, event);
+        const target = dev().assertElement(event.target);
+        this.trigger(target, name, /** @type {Event} */ (event));
       }, DEFAULT_DEBOUNCE_WAIT));
     }
   }
