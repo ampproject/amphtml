@@ -323,6 +323,22 @@ export function isLocalhostOrigin(url) {
 }
 
 /**
+ * Returns whether the URL has valid protocol.
+ * @param {string|!Location} url URL of an AMP document.
+ * @return {boolean}
+ */
+export function isProtocolValid(url) {
+  if (typeof url == 'string') {
+    url = parseUrl(url);
+  }
+  const invalidProtocols = [
+    /*eslint no-script-url: 0*/ 'javascript:',
+    /*eslint no-script-url: 0*/ 'data:',
+    /*eslint no-script-url: 0*/ 'vbscript:'];
+  return !invalidProtocols.includes(url.protocol);
+}
+
+/**
  * Removes parameters that start with amp js parameter pattern and returns the new
  * search string.
  * @param {string} urlSearch
