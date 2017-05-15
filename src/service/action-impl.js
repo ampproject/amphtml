@@ -97,6 +97,13 @@ let ActionInfoArgsDef;
  */
 let ActionInfoDef;
 
+
+/**
+ * @typedef {Event|DeferredEvent}
+ */
+let ActionEventDef;
+
+
 /**
  * The structure that contains all details of the action method invocation.
  * @struct
@@ -110,7 +117,7 @@ export class ActionInvocation {
    * @param {string} method
    * @param {?JSONType} args
    * @param {?Element} source
-   * @param {?Event} event
+   * @param {?ActionEventDef} event
    */
   constructor(target, method, args, source, event) {
     /** @const {!Node} */
@@ -121,7 +128,7 @@ export class ActionInvocation {
     this.args = args;
     /** @const {?Element} */
     this.source = source;
-    /** @const {?Event} */
+    /** @const {?ActionEventDef} */
     this.event = event;
   }
 }
@@ -205,15 +212,16 @@ export class ActionService {
         this.trigger(dev().assertElement(event.target), name, event);
       });
     } else if (name == 'input-debounced') {
-      const inputDebounced = debounce(this.ampdoc.win, event => {
+      const debouncedInput = debounce(this.ampdoc.win, event => {
         const target = dev().assertElement(event.target);
-        this.trigger(target, name, /** @type {!Event} */ (event));
+        this.trigger(target, name, /** @type {!ActionEventDef} */ (event));
       }, DEFAULT_DEBOUNCE_WAIT);
 
       this.root_.addEventListener('input', event => {
-        // Clone the event to avoid races where the browser cleans up the event
-        // object before the async debounced function is called.
-        inputDebounced(cloneWithoutFunctions(event));
+        // Create a DeferredEvent to avoid races where the browser cleans up
+        // the event object before the async debounced function is called.
+        const deferredEvent = new DeferredEvent(event);
+        debouncedInput(deferredEvent);
       });
     }
   }
@@ -221,7 +229,7 @@ export class ActionService {
   /**
    * Given a browser 'change' event, add `details` property containing the
    * relevant information for the change that generated the initial event.
-   * @param {!Event} event A `change` event.
+   * @param {!ActionEventDef} event A `change` event.
    */
   addChangeDetails_(event) {
     const detail = map();
@@ -276,7 +284,7 @@ export class ActionService {
    * Triggers the specified event on the target element.
    * @param {!Element} target
    * @param {string} eventType
-   * @param {?Event} event
+   * @param {?ActionEventDef} event
    */
   trigger(target, eventType, event) {
     this.action_(target, eventType, event);
@@ -288,7 +296,7 @@ export class ActionService {
    * @param {string} method
    * @param {?JSONType} args
    * @param {?Element} source
-   * @param {?Event} event
+   * @param {?ActionEventDef} event
    */
   execute(target, method, args, source, event) {
     this.invoke_(target, method, args, source, event, null);
@@ -335,12 +343,12 @@ export class ActionService {
 
   /**
    * @param {!Element} source
-   * @param {string} actionEventType
-   * @param {?Event} event
+   * @param {string} ActionEventDefType
+   * @param {?ActionEventDef} event
    * @private
    */
-  action_(source, actionEventType, event) {
-    const action = this.findAction_(source, actionEventType);
+  action_(source, ActionEventDefType, event) {
+    const action = this.findAction_(source, ActionEventDefType);
     if (!action) {
       // TODO(dvoytenko): implement default (catch-all) actions.
       return;
@@ -392,7 +400,7 @@ export class ActionService {
    * @param {string} method
    * @param {?JSONType} args
    * @param {?Element} source
-   * @param {?Event} event
+   * @param {?ActionEventDef} event
    * @param {?ActionInfoDef} actionInfo
    */
   invoke_(target, method, args, source, event, actionInfo) {
@@ -443,14 +451,14 @@ export class ActionService {
 
   /**
    * @param {!Element} target
-   * @param {string} actionEventType
+   * @param {string} ActionEventDefType
    * @return {?{node: !Element, actionInfos: !Array<!ActionInfoDef>}}
    */
-  findAction_(target, actionEventType) {
+  findAction_(target, ActionEventDefType) {
     // Go from target up the DOM tree and find the applicable action.
     let n = target;
     while (n) {
-      const actionInfos = this.matchActionInfos_(n, actionEventType);
+      const actionInfos = this.matchActionInfos_(n, ActionEventDefType);
       if (actionInfos) {
         return {node: n, actionInfos: dev().assert(actionInfos)};
       }
@@ -461,15 +469,15 @@ export class ActionService {
 
   /**
    * @param {!Element} node
-   * @param {string} actionEventType
+   * @param {string} ActionEventDefType
    * @return {?Array<!ActionInfoDef>}
    */
-  matchActionInfos_(node, actionEventType) {
+  matchActionInfos_(node, ActionEventDefType) {
     const actionMap = this.getActionMap_(node);
     if (!actionMap) {
       return null;
     }
-    return actionMap[actionEventType] || null;
+    return actionMap[ActionEventDefType] || null;
   }
 
   /**
@@ -488,6 +496,51 @@ export class ActionService {
     return actionMap;
   }
 }
+
+
+/**
+ * A clone of an event object with its function properties noop'd.
+ * This is useful e.g. for event objects that need to be passed to an async
+ * context, but the browser might have cleaned up the original event object.
+ * This clone noops functions since they won't behave normally after the
+ * original object has been destroyed.
+ */
+class DeferredEvent {
+  /**
+   * @param {!Event} event
+   */
+  constructor(event) {
+    cloneWithoutFunctions(event, this);
+
+    /** @type {?Object} */
+    this.detail = null;
+  }
+}
+
+
+/**
+ * Clones an object and noops its function properties.
+ * @param {!T} original
+ * @param {!T=} opt_dest
+ * @return {!T}
+ * @template T
+ * @private
+ */
+function cloneWithoutFunctions(original, opt_dest) {
+  const clone = opt_dest || map();
+  for (const prop in original) {
+    const value = original[prop];
+    if (typeof value === 'function') {
+      clone[prop] = noop;
+    } else {
+      clone[prop] = original[prop];
+    }
+  }
+  return clone;
+}
+
+/** @private */
+function noop() { }
 
 
 /**
@@ -680,7 +733,7 @@ function getActionInfoArgValue(tokens) {
  * Generates method arg values for each key in the given ActionInfoArgsDef
  * with the data in the given event.
  * @param {?ActionInfoArgsDef} args
- * @param {?Event} event
+ * @param {?ActionEventDef} event
  * @return {?JSONType}
  * @private Visible for testing only.
  */
@@ -927,28 +980,6 @@ class ParserTokenizer {
  */
 function isNum(c) {
   return c >= '0' && c <= '9';
-}
-
-
-/**
- * Clones an object without its function properties. This is useful e.g. for
- * event objects that need to be passed to an async context, but the browser
- * might have cleaned up the original event object.
- * This clone avoids functions since they won't behave normally after the
- * original object has been destroyed.
- * @param {!T} original
- * @return {!T}
- * @template T
- */
-function cloneWithoutFunctions(original) {
-  const clone = map();
-  for (const prop in original) {
-    const value = original[prop];
-    if (typeof value !== 'function') {
-      clone[prop] = original[prop];
-    }
-  }
-  return clone;
 }
 
 
