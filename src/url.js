@@ -329,7 +329,10 @@ export function isProtocolValid(url) {
   if (typeof url == 'string') {
     url = parseUrl(url);
   }
-  const invalidProtocols = ['javascript:', 'data:', 'vbscript:'];
+  const invalidProtocols = [
+    /*eslint no-script-url: 0*/ 'javascript:',
+    /*eslint no-script-url: 0*/ 'data:',
+    /*eslint no-script-url: 0*/ 'vbscript:'];
   return !invalidProtocols.includes(url.protocol);
 }
 
