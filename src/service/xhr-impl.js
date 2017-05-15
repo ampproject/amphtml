@@ -38,6 +38,7 @@ import {utf8EncodeSync} from '../utils/bytes';
  *   credentials: (string|undefined),
  *   headers: (!Object|undefined),
  *   method: (string|undefined),
+ *   mode: (string|undefined),
  *   requireAmpResponseSourceOrigin: (boolean|undefined),
  *   ampCors: (boolean|undefined)
  * }}
@@ -94,6 +95,8 @@ export class Xhr {
   constructor(win) {
     /** @const {!Window} */
     this.win = win;
+    /** @type {function(this:Xhr, string, !FetchInitDef): !Promise<!FetchResponse>} */
+    this.fetchImpl = win.fetch ? this.nativeFetch_ : fetchPolyfill;
   }
 
   /**
@@ -102,7 +105,7 @@ export class Xhr {
    *
    * @param {string} input
    * @param {!FetchInitDef} init
-   * @return {!Promise<!FetchResponse>|!Promise<!Response>}
+   * @return {!Promise<!FetchResponse>}
    * @private
    */
   fetch_(input, init) {
@@ -113,13 +116,24 @@ export class Xhr {
     dev().assert(
         creds === undefined || creds == 'include' || creds == 'omit',
         'Only credentials=include|omit support: %s', creds);
+    return this.fetchImpl(input, init);
+  }
+
+  /**
+   * @param {string} input
+   * @param {!FetchInitDef} init
+   * @return {!Promise<!FetchResponse>}
+   */
+  nativeFetch_(input, init) {
     // Fallback to xhr polyfill since `fetch` api does not support
     // responseType = 'document'. We do this so we don't have to do any parsing
     // and document construction on the UI thread which would be expensive.
     if (init.responseType == 'document') {
       return fetchPolyfill(input, init);
     }
-    return (this.win.fetch || fetchPolyfill).apply(null, arguments);
+    // This prevents `TypeError`s when using a fake `Window` in testing.
+    const response = this.win.fetch.call(null, input, init);
+    return /** @type {!Promise<!FetchResponse>} */ (response);
   }
 
   /**
@@ -244,7 +258,9 @@ export class Xhr {
     const init = setupInit(opt_init, 'text/html');
     init.responseType = 'document';
     return this.fetch(input, init)
-        .then(response => response.document_());
+        .then(
+            response =>
+                /** @type {!FetchPolyfillResponse} */ (response).document_());
   }
 
   /**
@@ -326,7 +342,6 @@ function setupInit(opt_init, opt_accept) {
   return init;
 }
 
-
 /**
  * A minimal polyfill of Fetch API. It only polyfills what we currently use.
  *
@@ -372,7 +387,7 @@ export function fetchPolyfill(input, init) {
       // whole document loading to complete. This is fine for the use cases
       // we have now, but may need to be reimplemented later.
       if (xhr.readyState == /* COMPLETE */ 4) {
-        resolve(new FetchResponse(xhr));
+        resolve(new FetchPolyfillResponse(xhr));
       }
     };
     xhr.onerror = () => {
@@ -451,37 +466,72 @@ export function assertSuccess(response) {
   });
 }
 
-
 /**
- * Response object in the Fetch API.
+ * Response object in the Fetch API. This interface is implemented by native
+ * `Response` and by the polyfill and mock response types.
  *
  * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
+ *
+ * @record
  */
 export class FetchResponse {
-  /**
-   * @param {!XMLHttpRequest|!XDomainRequest} xhr
-   */
-  constructor(xhr) {
-    /** @private @const {!XMLHttpRequest|!XDomainRequest} */
-    this.xhr_ = xhr;
 
-    /** @type {number} */
-    this.status = this.xhr_.status;
-
-    /** @const {!FetchResponseHeaders} */
-    this.headers = new FetchResponseHeaders(xhr);
-
-    /** @type {boolean} */
-    this.bodyUsed = false;
+  constructor() {
+    /** @type {number} The HTTP status code of the response. */
+    this.status;
+    /** @type {!FetchResponseHeaders} The response's exposed HTTP headers. */
+    this.headers;
+    /** @type {boolean} Whether the response has already been drained. */
+    this.bodyUsed;
   }
 
   /**
    * Create a copy of the response and return it.
    * @return {!FetchResponse}
    */
+  clone() {}
+
+  /**
+   * Drains the response and returns a promise that resolves with the response
+   * text.
+   * @return {!Promise<string>}
+   */
+  text() {}
+
+  /**
+   * Drains the response and returns the JSON object.
+   * @return {!Promise<!JSONType>}
+   */
+  json() {}
+
+  /**
+   * Drains the response and returns a promise that resolves with the response
+   * ArrayBuffer.
+   * @return {!Promise<!ArrayBuffer>}
+   */
+  arrayBuffer() {}
+}
+
+/**
+ * Response object from the `XMLHttpRequest`-based polyfill.
+ *
+ * @implements {FetchResponse}
+ */
+export class FetchPolyfillResponse {
+  /**
+   * @param {!XMLHttpRequest|!XDomainRequest} xhr
+   */
+  constructor(xhr) {
+    /** @private @const {!XMLHttpRequest|!XDomainRequest} */
+    this.xhr_ = xhr;
+    this.status = this.xhr_.status;
+    this.headers = new FetchPolyfillResponseHeaders(xhr);
+    this.bodyUsed = false;
+  }
+
   clone() {
     dev().assert(!this.bodyUsed, 'Body already used');
-    return new FetchResponse(this.xhr_);
+    return new FetchPolyfillResponse(this.xhr_);
   }
 
   /**
@@ -495,19 +545,10 @@ export class FetchResponse {
     return Promise.resolve(this.xhr_.responseText);
   }
 
-  /**
-   * Drains the response and returns a promise that resolves with the response
-   * text.
-   * @return {!Promise<string>}
-   */
   text() {
     return this.drainText_();
   }
 
-  /**
-   * Drains the response and returns the JSON object.
-   * @return {!Promise<!JSONType>}
-   */
   json() {
     return /** @type {!Promise<!JSONType>} */ (
         this.drainText_().then(JSON.parse.bind(JSON)));
@@ -528,11 +569,6 @@ export class FetchResponse {
         Promise.resolve(dev().assert(this.xhr_.responseXML)));
   }
 
-  /**
-   * Drains the response and returns a promise that resolves with the response
-   * ArrayBuffer.
-   * @return {!Promise<!ArrayBuffer>}
-   */
   arrayBuffer() {
     return /** @type {!Promise<!ArrayBuffer>} */ (
         this.drainText_().then(utf8EncodeSync));
@@ -541,10 +577,35 @@ export class FetchResponse {
 
 
 /**
- * Provides access to the response headers as defined in the Fetch API.
- * @private Visible for testing.
+ * Provides access to the response headers as defined in the Fetch API. This
+ * interface is implemented by native `Headers` and by the polyfill and mock
+ * response headers types.
+ *
+ * @record
  */
 export class FetchResponseHeaders {
+
+  /**
+   * @param {string} unusedName
+   * @return {string}
+   */
+  get(unusedName) {}
+
+  /**
+   * @param {string} unusedName
+   * @return {boolean}
+   */
+  has(unusedName) {}
+}
+
+
+/**
+ * Headers object from the `XMLHttpRequest`-based polyfill.
+ *
+ * @implements {FetchResponseHeaders}
+ * @private Visible for testing.
+ */
+export class FetchPolyfillResponseHeaders {
   /**
    * @param {!XMLHttpRequest|!XDomainRequest} xhr
    */
@@ -553,18 +614,10 @@ export class FetchResponseHeaders {
     this.xhr_ = xhr;
   }
 
-  /**
-   * @param {string} name
-   * @return {string}
-   */
   get(name) {
     return this.xhr_.getResponseHeader(name);
   }
 
-  /**
-   * @param {string} name
-   * @return {boolean}
-   */
   has(name) {
     return this.xhr_.getResponseHeader(name) != null;
   }

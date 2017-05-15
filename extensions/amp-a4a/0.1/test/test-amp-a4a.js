@@ -38,7 +38,7 @@ import {
   data as validCSSAmp,
 } from './testdata/valid_css_at_rules_amp.reserialized';
 import {data as testFragments} from './testdata/test_fragments';
-import {FetchResponseHeaders} from '../../../../src/service/xhr-impl';
+import {FetchPolyfillResponseHeaders} from '../../../../src/service/xhr-impl';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {utf8Encode} from '../../../../src/utils/bytes';
 import {resetScheduledElementForTesting} from '../../../../src/custom-element';
@@ -100,7 +100,7 @@ describe('amp-a4a', () => {
         return utf8Encode(validCSSAmp.reserialized);
       },
       bodyUsed: false,
-      headers: new FetchResponseHeaders({
+      headers: new FetchPolyfillResponseHeaders({
         getResponseHeader(name) {
           return headers[name];
         },
@@ -1067,7 +1067,7 @@ describe('amp-a4a', () => {
           return utf8Encode(validCSSAmp.reserialized);
         },
         bodyUsed: false,
-        headers: new FetchResponseHeaders({
+        headers: new FetchPolyfillResponseHeaders({
           getResponseHeader(name) {
             return headers[name];
           },
@@ -1121,7 +1121,7 @@ describe('amp-a4a', () => {
           return utf8Encode('');
         },
         bodyUsed: false,
-        headers: new FetchResponseHeaders({
+        headers: new FetchPolyfillResponseHeaders({
           getResponseHeader(name) {
             return headers[name];
           },
