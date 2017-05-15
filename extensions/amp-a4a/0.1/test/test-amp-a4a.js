@@ -1168,6 +1168,61 @@ describe('amp-a4a', () => {
         });
       });
     });
+
+    describe('delay request experiment', () => {
+      let getAdUrlSpy;
+      let a4a;
+      beforeEach(() => {
+        xhrMock.withArgs(TEST_URL, {
+          mode: 'cors',
+          method: 'GET',
+          credentials: 'include',
+        }).onFirstCall().returns(Promise.resolve(mockResponse));
+        return createIframePromise().then(fixture => {
+          setupForAdTesting(fixture);
+          const doc = fixture.doc;
+          const a4aElement = createA4aElement(doc);
+          a4aElement.setAttribute('data-experiment-id', '117152655');
+          a4a = new MockA4AImpl(a4aElement);
+          expect(a4a.delayRequestEnabled_).to.be.true;
+          getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
+        });
+      });
+      it('should not delay request when in viewport', () => {
+        sandbox.stub(AmpA4A.prototype, 'getResource').returns(
+          {
+            renderOutsideViewport: () => true,
+            whenWithinRenderOutsideViewport: () => {
+              throw new Error('failure!');
+            },
+          });
+        a4a.onLayoutMeasure();
+        expect(a4a.adPromise_);
+        return a4a.adPromise_.then(() => {
+          expect(getAdUrlSpy).to.be.calledOnce;
+        });
+      });
+      it('should delay request until within renderOutsideViewport',() => {
+        let whenWithinRenderOutsideViewportResolve;
+        sandbox.stub(AmpA4A.prototype, 'getResource').returns(
+          {
+            renderOutsideViewport: () => false,
+            whenWithinRenderOutsideViewport: () => new Promise(resolve => {
+              whenWithinRenderOutsideViewportResolve = resolve;
+            }),
+          });
+        a4a.onLayoutMeasure();
+        expect(a4a.adPromise_);
+        // Delay to all getAdUrl to potentially execute.
+        return timerFor(a4a.win).promise(1).then(() => {
+          expect(getAdUrlSpy).to.not.be.called;
+          whenWithinRenderOutsideViewportResolve();
+          return a4a.adPromise_.then(() => {
+            expect(getAdUrlSpy).to.be.calledOnce;
+          });
+        });
+      });
+    });
     // TODO(tdrl): Go through case analysis in amp-a4a.js#onLayoutMeasure and
     // add one test for each case / ensure that all cases are covered.
   });

@@ -579,18 +579,23 @@ export class Resource {
   }
 
   /**
+   * @private resolves render outside viewport promise if one was created via
+   *    whenWithinRenderOutsideViewport.
+   */
+  resolveRenderOutsideViewport_() {
+    if (!this.renderOutsideViewportResolve_) {
+      return;
+    }
+    this.renderOutsideViewportResolve_();
+    this.renderOutsideViewportPromise_ = null;
+    this.renderOutsideViewportResolve_ = null;
+  }
+
+  /**
    * Whether this is allowed to render when not in viewport.
    * @return {boolean}
    */
   renderOutsideViewport() {
-    const promiseCallback = () => {
-      if (!this.renderOutsideViewportResolve_) {
-        return;
-      }
-      this.renderOutsideViewportResolve_();
-      this.renderOutsideViewportPromise_ = null;
-      this.renderOutsideViewportResolve_ = null;
-    };
     // The exception is for owned resources, since they only attempt to
     // render outside viewport when the owner has explicitly allowed it.
     // TODO(jridgewell, #5803): Resources should be asking owner if it can
@@ -598,7 +603,7 @@ export class Resource {
     // outside of viewport. For now, blindly trust that owner knows what it's
     // doing.
     if (this.hasOwner()) {
-      promiseCallback();
+      this.resolveRenderOutsideViewport_();
       return true;
     }
 
@@ -606,7 +611,9 @@ export class Resource {
     // Boolean interface, element is either always allowed or never allowed to
     // render outside viewport.
     if (renders === true || renders === false) {
-      if (renders === true) { promiseCallback(); }
+      if (renders === true) {
+        this.resolveRenderOutsideViewport_();
+      }
       return renders;
     }
     // Numeric interface, element is allowed to render outside viewport when it
@@ -640,12 +647,12 @@ export class Resource {
       }
     } else {
       // Element is in viewport
-      promiseCallback();
+      this.resolveRenderOutsideViewport_();
       return true;
     }
     const result = distance < viewportBox.height * multipler / scrollPenalty;
     if (result) {
-      promiseCallback();
+      this.resolveRenderOutsideViewport_();
     }
     return result;
   }
