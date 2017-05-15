@@ -23,8 +23,8 @@ import {
 } from '../url';
 import {isArray, isObject, isFormData} from '../types';
 import {utf8EncodeSync} from '../utils/bytes';
-import {ampdocServiceFor} form '../ampdoc';
-import {viewerForDoc} form '../services';
+import {ampdocServiceFor} from '../ampdoc';
+import {viewerForDoc} from '../services';
 
 
 /**
