@@ -890,6 +890,48 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     },
   },
 
+  'nielsen': {
+    'vars': {
+      'apid': '',
+      'section': '',
+      'apv': '1.0',
+      'segA': 'NA',
+      'segB': 'NA',
+      'segC': 'NA',
+    },
+    'requests': {
+      'session': 'https://uaid-linkage.imrworldwide.com/cgi-bin/gn?prd=session&c13=asid,P${apid}&sessionId=${clientId(imrworldwide)},&pingtype=4&enc=false&c61=createtm,${timestamp}&rnd=${random}',
+      'cloudapi': 'https://cloudapi.imrworldwide.com/nmapi/v2/${apid}/${clientId(imrworldwide)}/a?b=%7B%22devInfo%22%3A%7B%22devId%22%3A%22${clientId(imrworldwide)}%22%2C%22apn%22%3A%22${apn}%22%2C%22apv%22%3A%22${apv}%22%2C%22apid%22%3A%22${apid}%22%7D%2C%22metadata%22%3A%7B%22static%22%3A%7B%22type%22%3A%22static%22%2C%22section%22%3A%22${section}%22%2C%22assetid%22%3A%22${pageViewId}%22%2C%22segA%22%3A%22${segA}%22%2C%22segB%22%3A%22${segB}%22%2C%22segC%22%3A%22${segC}%22%2C%22adModel%22%3A%220%22%2C%22dataSrc%22%3A%22cms%22%7D%2C%22content%22%3A%7B%7D%2C%22ad%22%3A%7B%7D%7D%2C%22event%22%3A%22playhead%22%2C%22position%22%3A%22${timestamp}%22%2C%22data%22%3A%7B%22hidden%22%3A%22${backgroundState}%22%2C%22blur%22%3A%22${backgroundState}%22%2C%22position%22%3A%22${timestamp}%22%7D%2C%22type%22%3A%22static%22%2C%22utc%22%3A%22${timestamp}%22%2C%22index%22%3A%22${requestCount}%22%7D',
+    },
+    'triggers': {
+      'init': {
+        'on': 'visible',
+        'request': 'session',
+      },
+      'visible': {
+        'on': 'visible',
+        'request': 'cloudapi',
+      },
+      'hidden': {
+        'on': 'hidden',
+        'request': 'cloudapi',
+      },
+      'duration': {
+        'on': 'timer',
+        'timerSpec': {
+          'interval': 10,
+          'maxTimerLength': 86400,
+          'immediate': false,
+        },
+        'request': 'cloudapi',
+      },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
   'oewadirect': {
     'transport': {'beacon': false, 'xhrpost': false, 'image': true},
     'requests': {
