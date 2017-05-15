@@ -255,17 +255,6 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private @const {!../../../src/service/crypto-impl.Crypto} */
     this.crypto_ = cryptoFor(this.win);
 
-    if (!this.win.ampA4aValidationKeys) {
-      // Without the following variable assignment, there's no way to apply a
-      // type annotation to a win-scoped variable, so the type checker doesn't
-      // catch type errors here.  This no-op allows us to enforce some type
-      // expectations.  The const assignment will hopefully be optimized
-      // away by the compiler.  *fingers crossed*
-      /** @type {!AllServicesCryptoKeysDef} */
-      const forTypeSafety = this.getKeyInfoSets_();
-      this.win.ampA4aValidationKeys = forTypeSafety;
-    }
-
     /** @private {?ArrayBuffer} */
     this.creativeBody_ = null;
 
@@ -366,6 +355,16 @@ export class AmpA4A extends AMP.BaseElement {
     this.config = adConfig[adType] || {};
     this.uiHandler = new AMP.AmpAdUIHandler(this);
     this.uiHandler.init();
+    if (!this.win.ampA4aValidationKeys) {
+      // Without the following variable assignment, there's no way to apply a
+      // type annotation to a win-scoped variable, so the type checker doesn't
+      // catch type errors here.  This no-op allows us to enforce some type
+      // expectations.  The const assignment will hopefully be optimized
+      // away by the compiler.  *fingers crossed*
+      /** @type {!AllServicesCryptoKeysDef} */
+      const forTypeSafety = this.getKeyInfoSets_();
+      this.win.ampA4aValidationKeys = forTypeSafety;
+    }
   }
 
   /** @override */

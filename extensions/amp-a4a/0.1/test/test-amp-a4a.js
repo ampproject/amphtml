@@ -329,6 +329,7 @@ describe('amp-a4a', () => {
           () => iniLoadPromise);
       const lifecycleEventStub = sandbox.stub(
           a4a, 'protectedEmitLifecycleEvent_');
+      a4a.buildCallback();
       a4a.onLayoutMeasure();
       const layoutPromise = a4a.layoutCallback();
       return Promise.resolve().then(() => {
@@ -360,6 +361,7 @@ describe('amp-a4a', () => {
 
     it('should update embed visibility', () => {
       sandbox.stub(a4a, 'isInViewport', () => false);
+      a4a.buildCallback();
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
         a4a.vsync_.runScheduledTasks_();
@@ -647,6 +649,7 @@ describe('amp-a4a', () => {
     ['nameframe', 'safeframe'].forEach(renderType => {
       it(`should not use ${renderType} if creative is A4A`, () => {
         headers[RENDERING_TYPE_HEADER] = renderType;
+        a4a.buildCallback();
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
           // Force vsync system to run all queued tasks, so that DOM mutations
@@ -659,6 +662,7 @@ describe('amp-a4a', () => {
       it(`should not use ${renderType} even if onLayoutMeasure called ` +
           'multiple times', () => {
         headers[RENDERING_TYPE_HEADER] = renderType;
+        a4a.buildCallback();
         a4a.onLayoutMeasure();
         a4a.onLayoutMeasure();
         a4a.onLayoutMeasure();
@@ -782,6 +786,7 @@ describe('amp-a4a', () => {
         const renderAmpCreativeSpy = sandbox.spy(a4a, 'renderAmpCreative_');
         const loadExtensionSpy =
             sandbox.spy(Extensions.prototype, 'loadExtension');
+        a4a.buildCallback();
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         return a4a.adPromise_.then(promiseResult => {
@@ -976,6 +981,7 @@ describe('amp-a4a', () => {
                 signature: base64UrlDecodeToBytes(validCSSAmp.signature),
               };
             }));
+        a4a.buildCallback();
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
           expect(a4a.isVerifiedAmpCreative_).to.be.true;
@@ -1723,7 +1729,8 @@ describe('amp-a4a', () => {
     it('should fetch a single key', () => {
       expect(win.ampA4aValidationKeys).not.to.exist;
       // Key fetch happens on A4A class construction.
-      const unusedA4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      a4a.buildCallback();
       const result = win.ampA4aValidationKeys;
       expect(result).to.be.instanceof(Array);
       expect(result).to.have.lengthOf(1);
@@ -1757,14 +1764,13 @@ describe('amp-a4a', () => {
         }));
       expect(win.ampA4aValidationKeys).not.to.exist;
       // Key fetch happens on A4A class construction.
-      const unusedA4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      a4a.buildCallback();
       const result = win.ampA4aValidationKeys;
-      return timerFor(win).promise(1).then(() => {
-        expect(xhrMockJson).to.not.be.called;
-        firstVisibleResolve();
-        return Promise.all(result).then(() => {
-          expect(xhrMockJson).to.be.calledOnce;
-        });
+      expect(xhrMockJson).to.not.be.called;
+      firstVisibleResolve();
+      return Promise.all(result).then(() => {
+        expect(xhrMockJson).to.be.calledOnce;
       });
     });
 
@@ -1774,7 +1780,8 @@ describe('amp-a4a', () => {
         .to.be.true;
       expect(win.ampA4aValidationKeys).not.to.exist;
       // Key fetch happens on A4A class construction.
-      const unusedA4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      a4a.buildCallback();
       const result = win.ampA4aValidationKeys;
       expect(result).to.be.instanceof(Array);
       expect(result).to.have.lengthOf(1);  // Only one service.
@@ -1797,7 +1804,8 @@ describe('amp-a4a', () => {
           Promise.resolve({keys: [testKey, testKey, testKey]}));
       expect(win.ampA4aValidationKeys).not.to.exist;
       // Key fetch happens on A4A class construction.
-      const unusedA4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      a4a.buildCallback();
       const result = win.ampA4aValidationKeys;
       expect(result).to.be.instanceof(Array);
       expect(result).to.have.lengthOf(1);  // Only one service.
@@ -1834,7 +1842,8 @@ describe('amp-a4a', () => {
               Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]}));
       expect(win.ampA4aValidationKeys).not.to.exist;
       // Key fetch happens on A4A class construction.
-      const unusedA4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      a4a.buildCallback();
       const result = win.ampA4aValidationKeys;
       expect(result).to.be.instanceof(Array);
       expect(result).to.have.lengthOf(2);  // Two services.
@@ -1864,7 +1873,8 @@ describe('amp-a4a', () => {
           }).returns(Promise.resolve({keys: ['invalid key data']}));
       expect(win.ampA4aValidationKeys).not.to.exist;
       // Key fetch happens on A4A class construction.
-      const unusedA4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      a4a.buildCallback();
       const result = win.ampA4aValidationKeys;
       expect(result).to.be.instanceof(Array);
       expect(result).to.have.lengthOf(1);  // Only one service.
@@ -1895,7 +1905,8 @@ describe('amp-a4a', () => {
               new TypeError('some random network error')));
       expect(win.ampA4aValidationKeys).not.to.exist;
       // Key fetch happens on A4A class construction.
-      const unusedA4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      a4a.buildCallback();
       const result = win.ampA4aValidationKeys;
       expect(result).to.be.instanceof(Array);
       expect(result).to.have.lengthOf(1);  // Only one service.
@@ -1919,7 +1930,8 @@ describe('amp-a4a', () => {
               new TypeError('some random network error')));
       expect(win.ampA4aValidationKeys).not.to.exist;
       // Key fetch happens on A4A class construction.
-      const unusedA4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      a4a.buildCallback();
       const result = win.ampA4aValidationKeys;
       expect(result).to.be.instanceof(Array);
       expect(result).to.have.lengthOf(2);  // Two services.
@@ -1951,7 +1963,8 @@ describe('amp-a4a', () => {
       getSigningServiceNamesMock.returns(['fnord']);
       expect(win.ampA4aValidationKeys).not.to.exist;
       // Key fetch happens on A4A class construction.
-      const unusedA4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      a4a.buildCallback();
       const result = win.ampA4aValidationKeys;
       expect(xhrMockJson).not.to.be.called;
       expect(result).to.be.instanceof(Array);
