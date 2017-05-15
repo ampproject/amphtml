@@ -31,7 +31,10 @@ import {
 } from '../../../../src/experiments';
 import {installPlatformService} from '../../../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
-import {resetServiceForTesting, getService} from '../../../../src/service';
+import {
+  registerServiceBuilder,
+  resetServiceForTesting,
+} from '../../../../src/service';
 import {
   installDocumentStateService,
 } from '../../../../src/service/document-state';
@@ -295,7 +298,7 @@ describe('all-traffic-experiments-tests', () => {
       element = document.createElement('div');
       document.body.appendChild(element);
       addEnabledExperimentSpy = sandbox.stub();
-      getService(win, 'performance', () => {
+      registerServiceBuilder(win, 'performance', function() {
         return {
           addEnabledExperiment: addEnabledExperimentSpy,
         };

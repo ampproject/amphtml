@@ -15,7 +15,6 @@
  */
 
 import {actionServiceForDoc} from './services';
-import {getServiceForDoc} from './service';
 import {dev, user} from './log';
 import {
   assertHttpsUrl,
@@ -28,11 +27,7 @@ import {
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  */
 export function installGlobalSubmitListenerForDoc(ampdoc) {
-  return getServiceForDoc(ampdoc, 'submit', ampdoc => {
-    ampdoc.getRootNode().addEventListener(
-        'submit', onDocumentFormSubmit_, true);
-    return {};
-  });
+  ampdoc.getRootNode().addEventListener('submit', onDocumentFormSubmit_, true);
 }
 
 
