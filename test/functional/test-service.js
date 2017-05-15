@@ -83,14 +83,14 @@ describe('service', () => {
 
     beforeEach(() => {
       count = 0;
-      factory = sandbox.spy(function() {
-        return new Class();
-      });
       Class = class {
         constructor() {
           this.count = ++count;
         }
       };
+      factory = sandbox.spy(() => {
+        return new Class();
+      });
       resetServiceForTesting(window, 'a');
       resetServiceForTesting(window, 'b');
       resetServiceForTesting(window, 'c');
@@ -202,10 +202,10 @@ describe('service', () => {
     it('should set service builders to null after instantiation', () => {
       registerServiceBuilder(window, 'a', Class);
       expect(window.services['a'].obj).to.be.null;
-      expect(window.services['a'].build).to.not.be.null;
+      expect(window.services['a'].ctor).to.not.be.null;
       getService(window, 'a');
       expect(window.services['a'].obj).to.not.be.null;
-      expect(window.services['a'].build).to.be.null;
+      expect(window.services['a'].ctor).to.be.null;
     });
 
     it('should resolve service for a child window', () => {

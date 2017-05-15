@@ -1983,8 +1983,6 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
       const p1 = getElementServiceIfAvailable(win, 'e1', 'element-1');
       return Promise.resolve().then(() => {
         expect(intervalCallback).to.be.undefined;
-
-        // Resolve service.
         registerServiceBuilder(win, 'e1', function() {
           return {str: 'fake1'};
         });
@@ -2166,7 +2164,6 @@ describes.realWin('services', {
     const p1 = getElementServiceIfAvailableForDoc(
         env.ampdoc, 'e1', 'element-1');
     return Promise.resolve().then(() => {
-      // Resolve service.
       registerServiceBuilder(env.win, 'e1', function() {
         return {str: 'fake1'};
       });
