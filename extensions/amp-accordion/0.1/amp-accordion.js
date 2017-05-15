@@ -177,8 +177,43 @@ class AmpAccordion extends AMP.BaseElement {
   }
 
   /**
+<<<<<<< HEAD
    * Handles key presses on an accordion expand/collapse its content or
    * move focus to previous/next header.
+=======
+   * Handles accordion headers clicks to expand/collapse its content.
+   * @param {!Event} event Click event.
+   * @private
+   */
+  clickHandler_(event) {
+    // Need to support clicks on any children of the header except
+    // for buttons and links, which should not have their default behavior
+    // overidden.
+    const target = dev().assertElement(event.target);
+    const clickable = closest(target,
+        element => element.tagName == 'A' || element.tagName == 'BUTTON',
+        /* opt_stopAt */ this.element);
+    if (clickable) {
+      return;
+    }
+
+    let header;
+    for (let i = 0; i < this.headers_.length; i++) {
+      const curr = this.headers_[i];
+      if (curr.contains(target)) {
+        header = curr;
+        break;
+      }
+    }
+    if (header) {
+      event.preventDefault();
+      this.onHeaderPicked_(header);
+    }
+  }
+
+  /**
+   * Handles accordion key presses ot expand/collapse its content.
+>>>>>>> 69970be7... cleanup
    * @param {!Event} event keydown event.
    */
   keyDownHandler_(event) {
