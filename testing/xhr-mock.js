@@ -183,22 +183,26 @@ class MockFetchResponse {
     this.body_ = body;
   }
 
+  /** @override */
   clone() {
     dev().assert(!this.bodyUsed, 'Body already used');
     return new MockFetchResponse(this.status, this.headers, this.body_);
   }
 
+  /** @override */
   text() {
     dev().assert(!this.bodyUsed, 'Body already used');
     this.bodyUsed = true;
     return Promise.resolve(this.body_);
   }
 
+  /** @override */
   json() {
     return /** @type {!Promise<!JSONType>} */ (
         this.text().then(JSON.parse.bind(JSON)));
   }
 
+  /** @override */
   arrayBuffer() {
     return /** @type {!Promise<!ArrayBuffer>} */ (
         this.text().then(utf8EncodeSync));
@@ -219,10 +223,12 @@ class MockFetchResponseHeaders {
     this.headers_ = Object.assign({}, headers);
   }
 
+  /** @override */
   get(name) {
     return this.headers_[name];
   }
 
+  /** @override */
   has(name) {
     return this.headers_[name] != undefined;
   }
