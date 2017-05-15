@@ -55,8 +55,6 @@ function checkLinks() {
           deadLinksFound = true;
           deadLinksFoundInFile = true;
           util.log('[%s] %s', chalk.red('✖'), result.link);
-        } else {
-          util.log('[%s] %s', chalk.green('✓'), result.link);
         }
       });
       if(deadLinksFoundInFile) {
