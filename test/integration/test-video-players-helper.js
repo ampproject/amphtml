@@ -16,6 +16,7 @@
 
 import {listenOncePromise} from '../../src/event-helper';
 import {timerFor} from '../../src/services';
+import {toggleExperiment} from '../../src/experiments';
 import {VideoInterface, VideoEvents} from '../../src/video-interface';
 import {supportsAutoplay} from '../../src/service/video-manager-impl';
 import {
@@ -24,7 +25,8 @@ import {
   poll,
 } from '../../testing/iframe';
 
-export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
+export function runVideoPlayerIntegrationTests(
+    createVideoElementFunc, opt_experiment) {
   const TIMEOUT = 20000;
   let fixtureGlobal;
   let videoGlobal;
@@ -55,6 +57,7 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
   describe.configure().retryOnSaucelabs()
   .run('Actions', function() {
     this.timeout(TIMEOUT);
+
     it('should support mute, play, pause, unmute actions', function() {
       return getVideoPlayer({outsideView: false, autoplay: false}).then(r => {
         // Create a action buttons
@@ -217,6 +220,9 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
     return createFixtureIframe('test/fixtures/video-players.html', 1000)
     .then(f => {
       fixture = f;
+      if (opt_experiment) {
+        toggleExperiment(fixture.win, opt_experiment, true);
+      }
       return expectBodyToBecomeVisible(fixture.win);
     })
     .then(() => {
@@ -253,6 +259,9 @@ export function runVideoPlayerIntegrationTests(createVideoElementFunc) {
     if (fixtureGlobal) {
       fixtureGlobal.doc.body.removeChild(videoGlobal);
       fixtureGlobal.iframe.remove();
+      if (opt_experiment) {
+        toggleExperiment(fixtureGlobal.win, opt_experiment, false);
+      }
     }
   }
 }
