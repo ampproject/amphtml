@@ -89,6 +89,9 @@ class AmpAccordion extends AMP.BaseElement {
         header.setAttribute('aria-controls', contentId);
         header.setAttribute('aria-expanded',
             section.hasAttribute('expanded').toString());
+        if (!header.hasAttribute('tabindex')) {
+          header.setAttribute('tabindex', 0);
+        }
         this.headers_.push(header);
       });
     });
