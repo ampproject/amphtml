@@ -23,7 +23,7 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {
   AmpA4A,
   RENDERING_TYPE_HEADER,
-  SAFEFRAME_VERSION,
+  DEFAULT_SAFEFRAME_VERSION,
   SAFEFRAME_VERSION_HEADER,
   protectFunctionWrapper,
 } from '../amp-a4a';
@@ -563,7 +563,7 @@ describe('amp-a4a', () => {
           // Force vsync system to run all queued tasks, so that DOM mutations
           // are actually completed before testing.
           a4a.vsync_.runScheduledTasks_();
-          verifySafeFrameRender(a4aElement, SAFEFRAME_VERSION);
+          verifySafeFrameRender(a4aElement, DEFAULT_SAFEFRAME_VERSION);
           expect(xhrMock).to.be.calledOnce;
         });
       });
@@ -589,7 +589,7 @@ describe('amp-a4a', () => {
           // Force vsync system to run all queued tasks, so that DOM mutations
           // are actually completed before testing.
           a4a.vsync_.runScheduledTasks_();
-          verifySafeFrameRender(a4aElement, SAFEFRAME_VERSION);
+          verifySafeFrameRender(a4aElement, DEFAULT_SAFEFRAME_VERSION);
           expect(xhrMock).to.be.calledOnce;
         });
       });
@@ -607,7 +607,7 @@ describe('amp-a4a', () => {
                     // DOM mutations are actually completed before testing.
                     a4a.vsync_.runScheduledTasks_();
                     const safeframeUrl = 'https://tpc.googlesyndication.com/safeframe/' +
-                      SAFEFRAME_VERSION + '/html/container.html';
+                      DEFAULT_SAFEFRAME_VERSION + '/html/container.html';
                     const safeChild = a4aElement.querySelector(
                         `iframe[src^="${safeframeUrl}"]`);
                     expect(safeChild).to.not.be.ok;

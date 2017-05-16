@@ -71,13 +71,13 @@ const METADATA_STRING_NO_QUOTES =
 // acceptable solution to the 'Safari on iOS doesn't fetch iframe src from
 // cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
 /** @type {string} */
-export const SAFEFRAME_VERSION = '1-0-8';
+export const DEFAULT_SAFEFRAME_VERSION = '1-0-8';
 
 /** @type {string} @visibleForTesting */
 export const RENDERING_TYPE_HEADER = 'X-AmpAdRender';
 
 /** @type {string} @visibleForTesting */
-export const SAFEFRAME_VERSION_HEADER = 'X-AmpSafeframeVersion';
+export const SAFEFRAME_VERSION_HEADER = 'X-AmpSafeFrameVersion';
 
 /** @type {string} */
 const TAG = 'amp-a4a';
@@ -334,7 +334,7 @@ export class AmpA4A extends AMP.BaseElement {
     this.adUrlsPromise_ = null;
 
     /** @private {string} */
-    this.safeframeVersion_ = SAFEFRAME_VERSION;
+    this.safeframeVersion_ = DEFAULT_SAFEFRAME_VERSION;
   }
 
   /** @override */
@@ -586,10 +586,11 @@ export class AmpA4A extends AMP.BaseElement {
           if (method && !isEnumValue(XORIGIN_MODE, method)) {
             dev().error('AMP-A4A', `cross-origin render mode header ${method}`);
           }
-          const safeframeVersion =
+          const safeframeVersionHeader =
             fetchResponse.headers.get(SAFEFRAME_VERSION_HEADER);
-          if (safeframeVersion && safeframeVersion != SAFEFRAME_VERSION) {
-            this.safeframeVersion_ = safeframeVersion;
+          if (safeframeVersionHeader &&
+              safeframeVersionHeader != DEFAULT_SAFEFRAME_VERSION) {
+            this.safeframeVersion_ = safeframeVersionHeader;
             this.preconnect.preload(this.getSafeframePath_());
           }
           // Note: Resolving a .then inside a .then because we need to capture
