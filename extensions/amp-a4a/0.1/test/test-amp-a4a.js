@@ -1189,9 +1189,89 @@ describe('amp-a4a', () => {
           });
         });
       });
+
+      it('should process safeframe version header properly', () => {
+        headers[SAFEFRAME_VERSION_HEADER] = '1-2-3';
+        headers[RENDERING_TYPE_HEADER] = 'safeframe';
+        delete headers[SIGNATURE_HEADER];
+        xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
+        return createIframePromise().then(fixture => {
+          setupForAdTesting(fixture);
+          const doc = fixture.doc;
+          const a4aElement = createA4aElement(doc);
+          const a4a = new MockA4AImpl(a4aElement);
+          a4a.buildCallback();
+          a4a.onLayoutMeasure();
+          return a4a.adPromise_.then(() => {
+            expect(xhrMock).to.be.calledOnce;
+            return a4a.layoutCallback().then(() => {
+              verifySafeFrameRender(a4aElement, '1-2-3');
+              // Verify preload to safeframe with header version.
+              expect(doc.querySelector('link[rel=preload]' +
+                '[href="https://tpc.googlesyndication.com/safeframe/' +
+                '1-2-3/html/container.html"]')).to.be.ok;
+            });
+          });
+        });
+      });
     });
-    it('should process safeframe version header properly', () => {
-      headers[SAFEFRAME_VERSION_HEADER] = '1-2-3';
+
+    describe('delay request experiment', () => {
+      let getAdUrlSpy;
+      let a4a;
+      beforeEach(() => {
+        xhrMock.withArgs(TEST_URL, {
+          mode: 'cors',
+          method: 'GET',
+          credentials: 'include',
+        }).onFirstCall().returns(Promise.resolve(mockResponse));
+        return createIframePromise().then(fixture => {
+          setupForAdTesting(fixture);
+          const doc = fixture.doc;
+          const a4aElement = createA4aElement(doc);
+          a4aElement.setAttribute('data-experiment-id', '117152655');
+          a4a = new MockA4AImpl(a4aElement);
+          expect(a4a.delayRequestEnabled_).to.be.true;
+          getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
+        });
+      });
+      it('should not delay request when in viewport', () => {
+        sandbox.stub(AmpA4A.prototype, 'getResource').returns(
+          {
+            renderOutsideViewport: () => true,
+            whenWithinRenderOutsideViewport: () => {
+              throw new Error('failure!');
+            },
+          });
+        a4a.onLayoutMeasure();
+        expect(a4a.adPromise_);
+        return a4a.adPromise_.then(() => {
+          expect(getAdUrlSpy).to.be.calledOnce;
+        });
+      });
+      it('should delay request until within renderOutsideViewport',() => {
+        let whenWithinRenderOutsideViewportResolve;
+        sandbox.stub(AmpA4A.prototype, 'getResource').returns(
+          {
+            renderOutsideViewport: () => false,
+            whenWithinRenderOutsideViewport: () => new Promise(resolve => {
+              whenWithinRenderOutsideViewportResolve = resolve;
+            }),
+          });
+        a4a.onLayoutMeasure();
+        expect(a4a.adPromise_);
+        // Delay to all getAdUrl to potentially execute.
+        return timerFor(a4a.win).promise(1).then(() => {
+          expect(getAdUrlSpy).to.not.be.called;
+          whenWithinRenderOutsideViewportResolve();
+          return a4a.adPromise_.then(() => {
+            expect(getAdUrlSpy).to.be.calledOnce;
+          });
+        });
+      });
+    });
+    it('should ignore invalid safeframe version header', () => {
+      headers[SAFEFRAME_VERSION_HEADER] = 'some-bad-item';
       headers[RENDERING_TYPE_HEADER] = 'safeframe';
       delete headers[SIGNATURE_HEADER];
       xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
@@ -1205,11 +1285,7 @@ describe('amp-a4a', () => {
         return a4a.adPromise_.then(() => {
           expect(xhrMock).to.be.calledOnce;
           return a4a.layoutCallback().then(() => {
-            verifySafeFrameRender(a4aElement, '1-2-3');
-            // Verify preload to safeframe with header version.
-            expect(doc.querySelector('link[rel=preload]' +
-              '[href="https://tpc.googlesyndication.com/safeframe/' +
-              '1-2-3/html/container.html"]')).to.be.ok;
+            verifySafeFrameRender(a4aElement, DEFAULT_SAFEFRAME_VERSION);
           });
         });
       });
