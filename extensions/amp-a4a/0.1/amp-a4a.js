@@ -72,14 +72,13 @@ const METADATA_STRING_NO_QUOTES =
 // acceptable solution to the 'Safari on iOS doesn't fetch iframe src from
 // cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
 /** @type {string} */
-const SAFEFRAME_VERSION = '1-0-6';
-/** @type {string} @visibleForTesting */
-export const SAFEFRAME_IMPL_PATH =
-    'https://tpc.googlesyndication.com/safeframe/' + SAFEFRAME_VERSION +
-    '/html/container.html';
+export const DEFAULT_SAFEFRAME_VERSION = '1-0-8';
 
 /** @type {string} @visibleForTesting */
 export const RENDERING_TYPE_HEADER = 'X-AmpAdRender';
+
+/** @type {string} @visibleForTesting */
+export const SAFEFRAME_VERSION_HEADER = 'X-AmpSafeFrameVersion';
 
 /** @type {string} */
 const TAG = 'amp-a4a';
@@ -256,17 +255,6 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private @const {!../../../src/service/crypto-impl.Crypto} */
     this.crypto_ = cryptoFor(this.win);
 
-    if (!this.win.ampA4aValidationKeys) {
-      // Without the following variable assignment, there's no way to apply a
-      // type annotation to a win-scoped variable, so the type checker doesn't
-      // catch type errors here.  This no-op allows us to enforce some type
-      // expectations.  The const assignment will hopefully be optimized
-      // away by the compiler.  *fingers crossed*
-      /** @type {!AllServicesCryptoKeysDef} */
-      const forTypeSafety = this.getKeyInfoSets_();
-      this.win.ampA4aValidationKeys = forTypeSafety;
-    }
-
     /** @private {?ArrayBuffer} */
     this.creativeBody_ = null;
 
@@ -354,6 +342,9 @@ export class AmpA4A extends AMP.BaseElement {
     this.delayRequestEnabled_ =
       (type == 'adsense' && isInExperiment(this.element, '117152655')) ||
       (type == 'doubleclick' && isInExperiment(this.element, '117152665'));
+
+    /** @private {string} */
+    this.safeframeVersion_ = DEFAULT_SAFEFRAME_VERSION;
   }
 
   /** @override */
@@ -376,6 +367,16 @@ export class AmpA4A extends AMP.BaseElement {
     this.config = adConfig[adType] || {};
     this.uiHandler = new AMP.AmpAdUIHandler(this);
     this.uiHandler.init();
+    if (!this.win.ampA4aValidationKeys) {
+      // Without the following variable assignment, there's no way to apply a
+      // type annotation to a win-scoped variable, so the type checker doesn't
+      // catch type errors here.  This no-op allows us to enforce some type
+      // expectations.  The const assignment will hopefully be optimized
+      // away by the compiler.  *fingers crossed*
+      /** @type {!AllServicesCryptoKeysDef} */
+      const forTypeSafety = this.getKeyInfoSets_();
+      this.win.ampA4aValidationKeys = forTypeSafety;
+    }
   }
 
   /** @override */
@@ -420,8 +421,8 @@ export class AmpA4A extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(unusedOnLayout) {
-    this.preconnect.url(SAFEFRAME_IMPL_PATH);
-    this.preconnect.url(getDefaultBootstrapBaseUrl(this.win, 'nameframe'));
+    this.preconnect.preload(this.getSafeframePath_());
+    this.preconnect.preload(getDefaultBootstrapBaseUrl(this.win, 'nameframe'));
     if (!this.config) {
       return;
     }
@@ -608,6 +609,13 @@ export class AmpA4A extends AMP.BaseElement {
           this.experimentalNonAmpCreativeRenderMethod_ = method;
           if (method && !isEnumValue(XORIGIN_MODE, method)) {
             dev().error('AMP-A4A', `cross-origin render mode header ${method}`);
+          }
+          const safeframeVersionHeader =
+            fetchResponse.headers.get(SAFEFRAME_VERSION_HEADER);
+          if (safeframeVersionHeader &&
+              safeframeVersionHeader != DEFAULT_SAFEFRAME_VERSION) {
+            this.safeframeVersion_ = safeframeVersionHeader;
+            this.preconnect.preload(this.getSafeframePath_());
           }
           // Note: Resolving a .then inside a .then because we need to capture
           // two fields of fetchResponse, one of which is, itself, a promise,
@@ -1172,12 +1180,16 @@ export class AmpA4A extends AMP.BaseElement {
       const url = signingServerURLs[serviceName];
       const currServiceName = serviceName;
       if (url) {
-        // Set disableAmpSourceOrigin so that __amp_source_origin is not
-        // included in XHR CORS request allowing for keyset to be cached
-        // across pages.
-        return xhrFor(this.win).fetchJson(url, {
+        // Delay request until document is not in a prerender state.
+        const firstVisiblePromise =
+          isExperimentOn(this.win, 'a4a-disable-cryptokey-viewer-check') ?
+          Promise.resolve() : viewerForDoc(this.getAmpDoc()).whenFirstVisible();
+        return firstVisiblePromise.then(() => xhrFor(this.win).fetchJson(url, {
           mode: 'cors',
           method: 'GET',
+          // Set ampCors false so that __amp_source_origin is not
+          // included in XHR CORS request allowing for keyset to be cached
+          // across pages.
           ampCors: false,
           credentials: 'omit',
         }).then(jwkSetObj => {
@@ -1192,7 +1204,7 @@ export class AmpA4A extends AMP.BaseElement {
             result.keys = [];
           }
           return result;
-        }).then(jwkSet => {
+        })).then(jwkSet => {
           return {
             serviceName: jwkSet.serviceName,
             keys: jwkSet.keys.map(jwk =>
@@ -1433,7 +1445,7 @@ export class AmpA4A extends AMP.BaseElement {
       let name = '';
       switch (method) {
         case XORIGIN_MODE.SAFEFRAME:
-          srcPath = SAFEFRAME_IMPL_PATH + '?n=0';
+          srcPath = this.getSafeframePath_() + '?n=0';
           break;
         case XORIGIN_MODE.NAMEFRAME:
           srcPath = getDefaultBootstrapBaseUrl(this.win, 'nameframe');
@@ -1457,7 +1469,7 @@ export class AmpA4A extends AMP.BaseElement {
         name = JSON.stringify(contextMetadata);
       } else if (method == XORIGIN_MODE.SAFEFRAME) {
         contextMetadata = JSON.stringify(contextMetadata);
-        name = `${SAFEFRAME_VERSION};${creative.length};${creative}` +
+        name = `${this.safeframeVersion_};${creative.length};${creative}` +
             `${contextMetadata}`;
       }
       return this.iframeRenderHelper_({src: srcPath, name});
@@ -1563,6 +1575,15 @@ export class AmpA4A extends AMP.BaseElement {
         viewerForDoc(this.getAmpDoc()).navigateTo(url, 'a4a');
       });
     });
+  }
+
+  /**
+   * @return {string} full url to safeframe implementation.
+   * @private
+   */
+  getSafeframePath_() {
+    return 'https://tpc.googlesyndication.com/safeframe/' +
+      `${this.safeframeVersion_}/html/container.html`;
   }
 
   /**

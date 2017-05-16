@@ -35,7 +35,7 @@ import {dev, user, initLogConstructor, setReportError} from './log';
 import {reportError} from './error';
 import {
   disposeServicesForDoc,
-  getService,
+  registerServiceBuilder,
   registerServiceBuilderForDoc,
 } from './service';
 import {childElementsByTag} from './dom';
@@ -499,8 +499,8 @@ function registerElementClass(global, name, implementationClass, opt_css) {
       css: opt_css,
     };
   }
-  // Resolve this extension's Service Promise.
-  getService(global, name, emptyService);
+  // Register this extension to resolve its Service Promise.
+  registerServiceBuilder(global, name, emptyService);
 }
 
 
@@ -514,6 +514,8 @@ function registerElementClass(global, name, implementationClass, opt_css) {
  */
 function prepareAndRegisterServiceForDoc(global, extensions,
     name, opt_ctor, opt_factory) {
+  // TODO(kmh287, #9292): Refactor to remove opt_factory param and require ctor
+  // once #9212 has been in prod for two releases.
   const ampdocService = ampdocServiceFor(global);
   const ampdoc = ampdocService.getAmpDoc();
   registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory);
@@ -530,6 +532,8 @@ function prepareAndRegisterServiceForDoc(global, extensions,
  */
 function prepareAndRegisterServiceForDocShadowMode(global, extensions,
     name, opt_ctor, opt_factory) {
+  // TODO(kmh287, #9292): Refactor to remove opt_factory param and require ctor
+  // once #9212 has been in prod for two releases.
   addDocFactoryToExtension(extensions, ampdoc => {
     registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory);
   }, name);
@@ -545,12 +549,18 @@ function prepareAndRegisterServiceForDocShadowMode(global, extensions,
  * @param {function(!./service/ampdoc-impl.AmpDoc):!Object=} opt_factory
  */
 function registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory) {
+  // TODO(kmh287, #9292): Refactor to remove opt_factory param and require ctor
+  // once #9212 has been in prod for two releases.
+  // Wrapping factory in function is necessary as opt_factory could be an
+  // arrow function, which cannot be used as constructors.
+  const ctor = opt_ctor || function(ampdoc) {
+    return opt_factory(ampdoc);
+  };
   // TODO(kmh287): Investigate removing the opt_instantiate arg after
   // all other services have been refactored.
   registerServiceBuilderForDoc(ampdoc,
                                name,
-                               opt_ctor,
-                               opt_factory,
+                               ctor,
                                /* opt_instantiate */ true);
 }
 

@@ -1,5 +1,7 @@
 # <a name="amp-ad"></a> `amp-ad` / `amp-embed`
 
+[TOC]
+
 {% call callout('Note', type='note') %}
 The specification of `amp-ad` / `amp-embed` is likely to significantly evolve over time. The current approach is designed to bootstrap the format to be able to show ads.
 {% endcall %}
@@ -26,12 +28,8 @@ limitations under the License.
     <td>A container to display an ad. The <code>amp-embed</code> is an alias to the <code>amp-ad</code> tag, deriving all of its functionality with a different tag name. Use <code>amp-embed</code> when semantically more accurate. AMP documents only support ads/embeds served via HTTPS.</td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js">&lt;/script></code> Note: amp-ad may still work without this script, but we highly recommend it for future compatibility</td>
+    <td><code>&lt;script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js">&lt;/script></code><br>Note: amp-ad may still work without this script, but we highly recommend it for future compatibility</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
@@ -39,75 +37,56 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-ad/">Annotated code example for amp-ad</a></td>
+    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-ad/">amp-ad example</a>.</td>
   </tr>
 </table>
 
 ## Behavior
 
 Ads are loaded like all other resources in AMP documents, with a special
-custom element called `<amp-ad>`. No ad network provided JavaScript is allowed to run inside the AMP document. Instead the AMP runtime loads an iframe from a
+custom element called `<amp-ad>`. No ad network-provided JavaScript is allowed to run inside the AMP document. Instead, the AMP runtime loads an iframe from a
 different origin (via iframe sandbox) as the AMP document and executes the ad
 network’s JS inside that iframe sandbox.
 
 The `<amp-ad>` requires width and height values to be specified according to the [rule](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#tldr-summary-of-layout-requirements--behaviors) of its layout type. It requires a `type` argument that select what ad network is displayed. All `data-*` attributes on the tag are automatically passed as arguments to the code that eventually renders the ad. What `data-` attributes are required for a given type of network depends and must be documented with the ad network.
 
-```html
-<amp-ad width=300 height=250
-    type="a9"
-    data-aax_size="300x250"
-    data-aax_pubname="test123"
-    data-aax_src="302">
-</amp-ad>
-
-<amp-ad width=320 height=140
-    type="colombia"
-    layout=responsive
-    data-clmb_slot="129883"
-    data-clmb_position="1"
-    data-clmb_section="0">
-</amp-ad>
-
-<amp-embed width=400 height=300
-    type="taboola"
-    layout=responsive
-    data-publisher=thepublisher
-    data-mode=themode
-    data-article=auto
-    data-placement="Below Article Thumbnails">
-</amp-embed>
-```
-
-## Styling
-
-`<amp-ad>` elements may not themselves have or be placed in containers that have CSS `position: fixed` set (with the exception of `amp-lightbox`).
-This is due to the UX implications of full page overlay ads. It may be considered to allow similar ad formats in the future inside of AMP controlled containers that maintain certain UX invariants.
+#### Example: Displaying a few ads
+<div>
+<amp-iframe height="522"
+            layout="fixed-height"
+            sandbox="allow-scripts allow-forms allow-same-origin"
+            resizable
+            src="https://ampproject-b5f4c.firebaseapp.com/examples/ampad.basic.embed.html">
+  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
+  <div placeholder></div> 
+</amp-iframe>
+</div>
 
 ## Attributes
 
-**type**
+**type** (required)
 
-An identifier for the ad network. This selects the template that is used for the ad tag.
+Specifies an identifier for the [ad network](#supported-ad-networks). The `type`attribute selects the template to use for the ad tag.
 
-**src**
+**src** (optional)
 
-An optional src value for a script tag loaded for this ad network. This can be used with ad networks that require exactly a single script tag to be inserted in the page. The src value must have a prefix that is white-listed for this ad network.
+Use this attribute to load a script tag for the specified ad network. This can be used for ad networks that require exactly a single script tag to be inserted in the page. The `src` value must have a prefix that is white-listed for the specified ad network.
 
 **data-foo-bar**
 
-Most ad networks require further configuration. This can be passed to the network using HTML `data-` attributes. The parameter names are subject to standard data attribute dash to camel case conversion. For example, "data-foo-bar" is send to the ad for configuration as "fooBar".
+Most ad networks require further configuration, which can be passed to the network by using HTML `data-` attributes. The parameter names are subject to standard data attribute dash to camel case conversion. For example, "data-foo-bar" is send to the ad for configuration as "fooBar".  See the documentation for the [ad network](#supported-ad-networks) on which attributes can be used.
 
-**json**
+**json** (optional)
 
-An optional attribute to pass a configuration to the ad as an arbitrarily complex JSON object. The object is passed to the ad as-is with no mangling done on the names.
+Use this attribute to pass a configuration to the ad as an arbitrarily complex JSON object. The object is passed to the ad as-is with no mangling done on the names.
 
-**data-consent-notification-id**
+**data-consent-notification-id** (optional)
 
-An optional attribute. If provided, will require confirming the [amp-user-notification](../amp-user-notification/amp-user-notification.md) with the given HTML-id until the "AMP client id" for the user (similar to a cookie) is passed to the ad. The means ad rendering is delayed until the user confirmed the notification.
+If provided, requires confirming the [amp-user-notification](https://www.ampproject.org/docs/reference/components/amp-user-notification.html) with the given HTML-id until the "AMP client id" for the user (similar to a cookie) is passed to the ad. This means that ad rendering is delayed until the user confirms the notification.
 
-**data-loading-strategy**
+**data-loading-strategy** (optional)
 
-An optional attribute that takes a float value in range of [0, 3], which instructs the ad to start loading when it's within the given number of viewports away from the current viewport. Use a smaller value to gain higher degree of viewability, with the risk of generating fewer views. If the attribute is not used, the default value is 3. If the attribute is used but the value is left blank, then a float value is assigned by the system which optimizes for viewability without drastically impacting the views.
+Instructs the ad to start loading when it is within the given number of viewports away (specified as a float value in the range of [0, 3]) from the current viewport. Use a smaller value to gain higher degree of viewability, with the risk of generating fewer views. If the attribute is not used, the default value is 3. If the attribute is used but the value is left blank, then a float value is assigned by the system, which optimizes for viewability without drastically impacting the views.
 
 **common attributes**
 
@@ -115,7 +94,7 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 
 ## Placeholder
 
-Optionally, `amp-ad` supports a child element with the `placeholder` attribute. If supported by the ad network, this element is shown until the ad is available for viewing.
+Optionally, `amp-ad` supports a child element with the `placeholder` attribute. If supported by the ad network, this element is shown until the ad is available for viewing. Learn more in [Placeholders & Fallbacks](https://www.ampproject.org/docs/guides/responsive/placeholders).
 
 ```html
 <amp-ad width=300 height=250
@@ -124,9 +103,11 @@ Optionally, `amp-ad` supports a child element with the `placeholder` attribute. 
 </amp-ad>
 ```
 
-## No Ad available
-- `amp-ad` supports a child element with the `fallback` attribute. If supported by the ad network, this element is shown if no ad is available for this slot.
-- If there is no fallback element available, the amp-ad tag will be collapsed (set to `display: none`) if the ad sends a message that the ad slot cannot be filled and AMP determines that this operation can be performed without affecting the user's scroll position.
+## No ad available
+
+The `amp-ad` component supports a child element with the `fallback` attribute. If supported by the ad network, the fallback element is shown if no ad is available for this slot. 
+
+If there is no fallback element available, the `amp-ad` element is collapsed (that is, set to `display: none`) if the ad sends a message that the ad slot cannot be filled and AMP determines that this operation can be performed without affecting the user's scroll position.
 
 Example with fallback:
 
@@ -137,13 +118,13 @@ Example with fallback:
 ```
 
 ## Serving video ads
-AMP natively supports a number video players like BrightCove, DailyMotion etc that can monetize ads. For a full list, see [here](https://www.ampproject.org/docs/reference/components#audio-video).
+AMP natively supports a number video players like BrightCove, DailyMotion, etc. that can monetize ads. For a full list, see the [media](https://www.ampproject.org/docs/reference/components#media) components.
 
 If you use a player that is not supported in AMP, you can serve your custom player using [amp-iframe](https://ampbyexample.com/components/amp-iframe/).
 
 When using `amp-iframe` approach:
- - Make sure there is a poster if loading the player in the first viewport. [Details](../amp-iframe/amp-iframe.md#iframe-with-placeholder).
- - Video and poster have to be served over HTTPS.
+ - Make sure there is a poster if loading the player in the first viewport. [Details](https://www.ampproject.org/docs/reference/components/amp-iframe#iframe-with-placeholder).
+ - Video and poster must be served over HTTPS.
 
 
 ## Running ads from a custom domain
@@ -190,14 +171,14 @@ draw3p(function(config, done) {
 }, ['allowed-ad-type'], ['your-domain.com']);
 ```
 
+## Styling
+
+`<amp-ad>` elements may not themselves have or be placed in containers that have CSS `position: fixed` set (with the exception of `amp-lightbox`).
+This is due to the UX implications of full page overlay ads. It may be considered to allow similar ad formats in the future inside of AMP controlled containers that maintain certain UX invariants.
+
 ## Validation
 
 See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad/0.1/validator-amp-ad.protoascii) in the AMP validator specification.
-
-## Notes
-
-To use `<amp-ad>` or `<amp-embed>`, the script to the `amp-ad` library is needed. It's recommended that you add the script manually; however, currently, it will be automatically fetched when `amp-ad` is used.
-
 
 ## Supported ad networks
 
@@ -278,6 +259,7 @@ To use `<amp-ad>` or `<amp-embed>`, the script to the `amp-ad` library is needed
 - [Open AdStream (OAS)](../../ads/openadstream.md)
 - [OpenX](../../ads/openx.md)
 - [plista](../../ads/plista.md)
+- [polymorphicAds](../../ads/polymorphicads.md)
 - [popin](../../ads/popin.md)
 - [PubMatic](../../ads/pubmatic.md)
 - [Pubmine](../../ads/pubmine.md)

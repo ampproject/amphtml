@@ -84,6 +84,15 @@ html.i-amphtml-webview > body {
 
 
 /**
+ * iOS-Embed mode (iOS <= 8). The `body` itself is scrollable.
+ */
+html.i-amphtml-ios-embed-legacy > body {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  position: absolute !important;
+}
+
+/**
  * iOS-Embed Wrapper mode. The `body` is wrapped into `#i-amphtml-wrapper`
  * element.
  */
@@ -285,6 +294,11 @@ i-amphtml-sizer {
 
 .i-amphtml-error {
   /* Just state. */
+}
+
+/* layout=nodisplay are automatically hidden until displayed directly. */
+[layout=nodisplay]:not(.i-amphtml-display) {
+  display: none !important;
 }
 
 .i-amphtml-element > [placeholder] {

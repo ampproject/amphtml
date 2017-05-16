@@ -14,5 +14,18 @@
  * limitations under the License.
  */
 
-describe('amp-sortable-table', () => {
-});
+import {startsWith} from '../../../src/string';
+
+/** @const @private {string} */
+const GMOSSP_SRC_PREFIX_ = 'https://sp.gmossp-sp.jp';
+
+/**
+ * @param {!Window} win
+ * @param {!Element} element
+ * @returns {boolean}
+ */
+export function gmosspIsA4AEnabled(win, element) {
+  const src = element.getAttribute('src');
+  return !!element.getAttribute('data-use-a4a') && !!src &&
+    startsWith(src, GMOSSP_SRC_PREFIX_);
+}
