@@ -171,7 +171,7 @@ literal:
   | time
       {$$ = $1;}
   | URL
-      {$$ = new ast.CssPassthroughNode($1);}
+      {$$ = new ast.CssUrlNode($1);}
   | HEXCOLOR
       {$$ = new ast.CssPassthroughNode($1);}
   | IDENT

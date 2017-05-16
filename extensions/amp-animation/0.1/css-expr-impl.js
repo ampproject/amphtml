@@ -116,7 +116,7 @@ break;
 case 4:
 this.$ = ast.CssConcatNode.concat($$[$0-1], $$[$0]);
 break;
-case 7: case 13: case 14: case 15:
+case 7: case 14: case 15:
 this.$ = new ast.CssPassthroughNode($$[$0]);
 break;
 case 8:
@@ -124,6 +124,9 @@ this.$ = new ast.CssNumberNode(parseFloat($$[$0]));
 break;
 case 9:
 this.$ = new ast.CssPercentNode(parseFloat($$[$0]));
+break;
+case 13:
+this.$ = new ast.CssUrlNode($$[$0]);
 break;
 case 16:
 this.$ = new ast.CssLengthNode(parseFloat($$[$0]), 'px');

@@ -168,8 +168,18 @@ describe('parse', () => {
   });
 
   it('should parse url', () => {
-    expect(parsePseudo('url("abc")')).to.equal('url("abc")');
-    expect(parsePseudo('url(\'abc\')')).to.equal('url(\'abc\')');
+    expect(parsePseudo('url("https://acme.org/abc")'))
+        .to.equal('url("https://acme.org/abc")');
+    expect(parsePseudo('url(\'https://acme.org/abc\')'))
+        .to.equal('url(\'https://acme.org/abc\')');
+    expect(parsePseudo('url(\'data:abc\')'))
+        .to.equal('url(\'data:abc\')');
+  });
+
+  it('should disallow non-https urls', () => {
+    expect(() => {
+      parsePseudo('url("http://acme.org/abc")');
+    }).to.throw(/https/);
   });
 
   it('should parse hexcolor', () => {
@@ -214,6 +224,19 @@ describe('parse', () => {
   it('should parse a concat of functions', () => {
     expect(parsePseudo('translateX(100px) rotate(45deg)'))
         .to.equal('CON<TRANSLATE-X<LEN<100 PX>>, ROTATE<ANG<45 DEG>>>');
+  });
+
+  it('should allow two-way concatenation', () => {
+    // This is currently doesn't happen in parse, but by API possible with
+    // minor changes to parsing order. Thus it's re-tested separately here.
+    expect(pseudo(ast.CssConcatNode.concat(
+        new ast.CssConcatNode([new ast.CssPassthroughNode('A')]),
+        new ast.CssConcatNode([new ast.CssPassthroughNode('B')]))))
+        .to.equal('CON<A, B>');
+    expect(pseudo(ast.CssConcatNode.concat(
+        new ast.CssPassthroughNode('A'),
+        new ast.CssConcatNode([new ast.CssPassthroughNode('B')]))))
+        .to.equal('CON<A, B>');
   });
 
   it('should parse a var()', () => {

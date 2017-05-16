@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+import {assertHttpsUrl} from '../../../src/url';
+
+const EXTRACT_URL_RE = /url\(\s*['"]?([^()'"]*)['"]?\s*\)/i;
+const DATA_URL_RE = /^data\:/i;
+
 
 /**
  * A base class for all CSS node components defined in the
@@ -33,7 +38,7 @@ export class CssConcatNode extends CssNode {
   /** @param {!Array<!CssNode>=} opt_array */
   constructor(opt_array) {
     super();
-    /** @const @private {!Array<!CssNode>} */
+    /** @private {!Array<!CssNode>} */
     this.array_ = opt_array || [];
   }
 
@@ -51,7 +56,7 @@ export class CssConcatNode extends CssNode {
       set = new CssConcatNode([nodeOrSet]);
     }
     if (otherNodeOrSet instanceof CssConcatNode) {
-      set.array_.concat(otherNodeOrSet.array_);
+      set.array_ = set.array_.concat(otherNodeOrSet.array_);
     } else {
       set.array_.push(otherNodeOrSet);
     }
@@ -70,6 +75,24 @@ export class CssPassthroughNode extends CssNode {
     super();
     /** @const @private {string} */
     this.css_ = css;
+  }
+}
+
+
+/**
+ * Verifies that URL is an HTTPS URL.
+ */
+export class CssUrlNode extends CssPassthroughNode {
+  /** @param {string} css */
+  constructor(css) {
+    super(css);
+    const matches = css.match(EXTRACT_URL_RE);
+    if (matches || matches.length > 1) {
+      const url = (matches[1] || '').trim();
+      if (!url.match(DATA_URL_RE)) {
+        assertHttpsUrl(url);
+      }
+    }
   }
 }
 
