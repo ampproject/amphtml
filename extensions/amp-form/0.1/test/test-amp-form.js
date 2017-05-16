@@ -17,21 +17,29 @@
 import {
   AmpForm,
   AmpFormService,
-  onInputInteraction_,
+  checkUserValidityAfterInteraction_,
 } from '../amp-form';
 import {
   setReportValiditySupportedForTesting,
   setCheckValiditySupportedForTesting,
 } from '../form-validators';
+import {
+  CONFIG_KEY,
+  FORM_VERIFY_EXPERIMENT,
+} from '../form-verifiers';
 import * as sinon from 'sinon';
-import {timerFor} from '../../../../src/services';
 import '../../../amp-mustache/0.1/amp-mustache';
-import {actionServiceForDoc} from '../../../../src/services';
 import {
   cidServiceForDocForTesting,
 } from '../../../../extensions/amp-analytics/0.1/cid-impl';
-import {documentInfoForDoc} from '../../../../src/services';
+import {
+  actionServiceForDoc,
+  documentInfoForDoc,
+  timerFor,
+} from '../../../../src/services';
+import {FetchError} from '../../../../src/service/xhr-impl';
 import '../../../amp-selector/0.1/amp-selector';
+import {toggleExperiment} from '../../../../src/experiments';
 
 describes.repeated('', {
   'single ampdoc': {ampdoc: 'single'},
@@ -49,12 +57,10 @@ describes.repeated('', {
     let sandbox;
     const timer = timerFor(window);
 
-    function getAmpForm(button1 = true, button2 = false, button3 = false,
-                        canonical = 'https://example.com/amps.html') {
+    function getAmpForm(form, canonical = 'https://example.com/amps.html') {
       new AmpFormService(env.ampdoc);
       documentInfoForDoc(env.ampdoc).canonicalUrl = canonical;
       cidServiceForDocForTesting(env.ampdoc);
-      const form = getForm(env.ampdoc.win.document, button1, button2, button3);
       env.ampdoc.getBody().appendChild(form);
       const ampForm = new AmpForm(form, 'amp-form-test-id');
       return Promise.resolve(ampForm);
@@ -92,6 +98,24 @@ describes.repeated('', {
 
       return form;
     }
+
+    function getVerificationForm(doc = document, config) {
+      const form = getForm(doc);
+      const script = doc.createElement('script');
+      script.textContent = config;
+      script.type = 'application/json';
+      form.appendChild(script);
+      return form;
+    }
+
+    const asyncVerifyConfig = `{
+      "${CONFIG_KEY}": [
+        {
+          "name": "",
+          "elements": ["name"]
+        }
+      ]
+    }`;
 
     beforeEach(() => {
       sandbox = env.sandbox;
@@ -297,7 +321,7 @@ describes.repeated('', {
 
     it('should check validity and report when invalid', () => {
       setReportValiditySupportedForTesting(false);
-      return getAmpForm().then(ampForm => {
+      return getAmpForm(getForm()).then(ampForm => {
         const form = ampForm.form_;
         const emailInput = document.createElement('input');
         emailInput.setAttribute('name', 'email');
@@ -372,7 +396,7 @@ describes.repeated('', {
 
     it('should not check validity if .checkValidity is not supported', () => {
       setCheckValiditySupportedForTesting(false);
-      return getAmpForm().then(ampForm => {
+      return getAmpForm(getForm()).then(ampForm => {
         const form = ampForm.form_;
         const emailInput = document.createElement('input');
         emailInput.setAttribute('name', 'email');
@@ -408,8 +432,74 @@ describes.repeated('', {
       });
     });
 
+    it('should allow verifying elements with a presubmit request', () => {
+      toggleExperiment(env.win, FORM_VERIFY_EXPERIMENT, true);
+      const formPromise = getAmpForm(getVerificationForm(
+          env.win.document, asyncVerifyConfig));
+
+      return formPromise.then(ampForm => {
+        sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.reject({
+          responseJson: {
+            verifyErrors: [{name: 'name', message: 'This name is just wrong.'}],
+          },
+        }));
+
+        const form = ampForm.form_;
+        const input = form.name;
+        input.dispatchEvent(new Event('input', {bubbles: true}));
+        input.dispatchEvent(new Event('change', {bubbles: true}));
+
+        return ampForm.verifier_.xhrVerifyPromiseForTesting().then(() => {
+          expect(input.validity.customError).to.be.true;
+          expect(input.validationMessage).to.equal('This name is just wrong.');
+        });
+      });
+    });
+
+    it('should only use the more recent verify request', () => {
+      toggleExperiment(env.win, FORM_VERIFY_EXPERIMENT, true);
+      const formPromise = getAmpForm(getVerificationForm(
+          env.win.document, asyncVerifyConfig));
+
+      return formPromise.then(ampForm => {
+        const xhrStub = sandbox.stub(ampForm.xhr_, 'fetch');
+        xhrStub.onCall(0).returns(new Promise((unusedResolve, reject) => {
+          setTimeout(() => {
+            reject({
+              responseJson: {
+                verifyErrors: [{name: 'name', message: 'First request error'}],
+              },
+            });
+          }, 10);
+        }));
+        xhrStub.onCall(1).returns(new Promise((unusedResolve, reject) => {
+          setTimeout(() => {
+            reject({
+              responseJson: {
+                verifyErrors: [{name: 'name', message: 'Second request error'}],
+              },
+            });
+          }, 20);
+        }));
+
+        const form = ampForm.form_;
+        const input = form.name;
+        input.dispatchEvent(new Event('input', {bubbles: true}));
+        input.dispatchEvent(new Event('change', {bubbles: true}));
+
+        input.value = 'Frank';
+        input.dispatchEvent(new Event('input', {bubbles: true}));
+        input.dispatchEvent(new Event('change', {bubbles: true}));
+
+        return ampForm.verifier_.xhrVerifyPromiseForTesting().then(() => {
+          expect(input.validity.customError).to.be.true;
+          expect(input.validationMessage).to.equal('Second request error');
+        });
+      });
+    });
+
     it('should allow rendering responses through templates', () => {
-      return getAmpForm(true).then(ampForm => {
+      return getAmpForm(getForm(env.win.document, true)).then(ampForm => {
         const form = ampForm.form_;
         // Add a div[submit-error] with a template child.
         const errorContainer = document.createElement('div');
@@ -422,8 +512,10 @@ describes.repeated('', {
         errorContainer.appendChild(errorTemplate);
         let renderedTemplate = document.createElement('div');
         renderedTemplate.innerText = 'Error: hello there';
-        sandbox.stub(ampForm.xhr_, 'fetch')
-            .returns(Promise.reject({responseJson: {message: 'hello there'}}));
+        sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.reject({
+          response: {},
+          responseJson: {message: 'hello there'},
+        }));
         sandbox.stub(ampForm.templates_, 'findAndRenderTemplate')
             .returns(Promise.resolve(renderedTemplate));
         const event = {
@@ -446,7 +538,7 @@ describes.repeated('', {
     });
 
     it('should replace previously rendered responses', () => {
-      return getAmpForm(true).then(ampForm => {
+      return getAmpForm(getForm(env.win.document, true)).then(ampForm => {
         const form = ampForm.form_;
         const successContainer = document.createElement('div');
         successContainer.setAttribute('submit-success', '');
@@ -493,7 +585,7 @@ describes.repeated('', {
     });
 
     it('should call fetch with the xhr action and form data', () => {
-      return getAmpForm().then(ampForm => {
+      return getAmpForm(getForm()).then(ampForm => {
         sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
         const event = {
           stopImmediatePropagation: sandbox.spy(),
@@ -516,7 +608,7 @@ describes.repeated('', {
     });
 
     it('should trigger amp-form-submit analytics event with form data', () => {
-      return getAmpForm().then(ampForm => {
+      return getAmpForm(getForm()).then(ampForm => {
         sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
         sandbox.stub(ampForm, 'analyticsEvent_');
         const event = {
@@ -548,7 +640,7 @@ describes.repeated('', {
     });
 
     it('should trigger amp-form-submit after variables substitution', () => {
-      return getAmpForm().then(ampForm => {
+      return getAmpForm(getForm()).then(ampForm => {
         const form = ampForm.form_;
         const clientIdField = document.createElement('input');
         clientIdField.setAttribute('name', 'clientId');
@@ -597,7 +689,9 @@ describes.repeated('', {
     });
 
     it('should block multiple submissions and disable buttons', () => {
-      return getAmpForm(true, true, true).then(ampForm => {
+      const formPromise =
+          getAmpForm(getForm(env.win.document, true, true, true));
+      return formPromise.then(ampForm => {
         let fetchResolver;
         sandbox.stub(ampForm.xhr_, 'fetch').returns(new Promise(resolve => {
           fetchResolver = resolve;
@@ -644,7 +738,7 @@ describes.repeated('', {
     });
 
     it('should manage form state classes (submitting, success)', () => {
-      return getAmpForm().then(ampForm => {
+      return getAmpForm(getForm()).then(ampForm => {
         let fetchResolver;
         sandbox.stub(ampForm.xhr_, 'fetch').returns(new Promise(resolve => {
           fetchResolver = resolve;
@@ -682,7 +776,7 @@ describes.repeated('', {
     });
 
     it('should manage form state classes (submitting, error)', () => {
-      return getAmpForm(true, true).then(ampForm => {
+      return getAmpForm(getForm(env.win.document, true, true)).then(ampForm => {
         let fetchRejecter;
         sandbox.stub(ampForm, 'analyticsEvent_');
         sandbox.stub(ampForm.xhr_, 'fetch')
@@ -730,7 +824,7 @@ describes.repeated('', {
 
     describe('GET requests', () => {
       it('should allow GET submissions', () => {
-        return getAmpForm().then(ampForm => {
+        return getAmpForm(getForm()).then(ampForm => {
           ampForm.method_ = 'GET';
           ampForm.form_.setAttribute('method', 'GET');
           sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
@@ -756,7 +850,7 @@ describes.repeated('', {
       });
 
       it('should not send disabled or nameless inputs', () => {
-        return getAmpForm().then(ampForm => {
+        return getAmpForm(getForm()).then(ampForm => {
           const form = ampForm.form_;
           ampForm.method_ = 'GET';
           form.setAttribute('method', 'GET');
@@ -830,7 +924,7 @@ describes.repeated('', {
 
 
       it('should properly serialize inputs to query params', () => {
-        return getAmpForm().then(ampForm => {
+        return getAmpForm(getForm()).then(ampForm => {
           const form = ampForm.form_;
           ampForm.method_ = 'GET';
           form.setAttribute('method', 'GET');
@@ -938,7 +1032,7 @@ describes.repeated('', {
     describe('User Validity', () => {
       it('should manage valid/invalid on input/fieldset/form on submit', () => {
         setReportValiditySupportedForTesting(false);
-        return getAmpForm(true).then(ampForm => {
+        return getAmpForm(getForm(env.win.document, true)).then(ampForm => {
           const form = ampForm.form_;
           const fieldset = document.createElement('fieldset');
           const emailInput = document.createElement('input');
@@ -976,7 +1070,7 @@ describes.repeated('', {
 
       it('should manage valid/invalid on input user interaction', () => {
         setReportValiditySupportedForTesting(false);
-        return getAmpForm(true).then(ampForm => {
+        return getAmpForm(getForm(env.win.document, true)).then(ampForm => {
           const form = ampForm.form_;
           const fieldset = document.createElement('fieldset');
           const emailInput = document.createElement('input');
@@ -994,7 +1088,7 @@ describes.repeated('', {
           sandbox.spy(fieldset, 'checkValidity');
           sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
 
-          onInputInteraction_({target: emailInput});
+          checkUserValidityAfterInteraction_(emailInput);
           expect(form.checkValidity).to.be.called;
           expect(emailInput.checkValidity).to.be.called;
           expect(fieldset.checkValidity).to.be.called;
@@ -1008,7 +1102,7 @@ describes.repeated('', {
 
 
           emailInput.value = 'cool@bea.ns';
-          onInputInteraction_({target: emailInput});
+          checkUserValidityAfterInteraction_(emailInput);
           expect(emailInput.className).to.contain('user-valid');
           expect(form.className).to.contain('user-invalid');
 
@@ -1018,7 +1112,7 @@ describes.repeated('', {
 
           // Both inputs back to invalid.
           emailInput.value = 'invalid-value';
-          onInputInteraction_({target: emailInput});
+          checkUserValidityAfterInteraction_(emailInput);
           expect(emailInput.className).to.contain('user-invalid');
           expect(form.className).to.contain('user-invalid');
 
@@ -1028,14 +1122,14 @@ describes.repeated('', {
 
           // Only email input is invalid now.
           usernameInput.value = 'coolbeans';
-          onInputInteraction_({target: usernameInput});
+          checkUserValidityAfterInteraction_(usernameInput);
           expect(emailInput.className).to.contain('user-invalid');
           expect(form.className).to.contain('user-invalid');
           expect(usernameInput.className).to.contain('user-valid');
 
           // Both input are finally valid.
           emailInput.value = 'cool@bea.ns';
-          onInputInteraction_({target: emailInput});
+          checkUserValidityAfterInteraction_(emailInput);
           expect(emailInput.className).to.contain('user-valid');
           expect(usernameInput.className).to.contain('user-valid');
           expect(form.className).to.contain('user-valid');
@@ -1044,7 +1138,7 @@ describes.repeated('', {
 
       it('should propagates user-valid only when going from invalid', () => {
         setReportValiditySupportedForTesting(false);
-        return getAmpForm(true).then(ampForm => {
+        return getAmpForm(getForm(env.win.document, true)).then(ampForm => {
           const form = ampForm.form_;
           const fieldset = document.createElement('fieldset');
           const emailInput = document.createElement('input');
@@ -1059,8 +1153,7 @@ describes.repeated('', {
           sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
 
           emailInput.value = 'cool@bea.ns';
-          const event = {target: emailInput};
-          onInputInteraction_(event);
+          checkUserValidityAfterInteraction_(emailInput);
 
           expect(emailInput.checkValidity).to.be.called;
           expect(form.checkValidity).to.not.be.called;
@@ -1091,7 +1184,7 @@ describes.repeated('', {
 
     it('should submit after timeout of waiting for amp-selector', function() {
       this.timeout(3000);
-      return getAmpForm().then(ampForm => {
+      return getAmpForm(getForm()).then(ampForm => {
         const form = ampForm.form_;
         const selector = env.win.document.createElement('amp-selector');
         selector.setAttribute('name', 'color');
@@ -1113,7 +1206,7 @@ describes.repeated('', {
     });
 
     it('should wait for amp-selector to build before submitting', () => {
-      return getAmpForm().then(ampForm => {
+      return getAmpForm(getForm()).then(ampForm => {
         let builtPromiseResolver_;
         const form = ampForm.form_;
         const selector = env.win.document.createElement('amp-selector');
@@ -1142,7 +1235,7 @@ describes.repeated('', {
 
     describe('Var Substitution', () => {
       it('should substitute hidden fields variables in XHR async', () => {
-        return getAmpForm().then(ampForm => {
+        return getAmpForm(getForm()).then(ampForm => {
           const form = ampForm.form_;
           const clientIdField = document.createElement('input');
           clientIdField.setAttribute('name', 'clientId');
@@ -1180,7 +1273,7 @@ describes.repeated('', {
       });
 
       it('should send request if vars did not resolve after a timeout', () => {
-        return getAmpForm().then(ampForm => {
+        return getAmpForm(getForm()).then(ampForm => {
           const expandAsyncStringResolvers = [];
           const form = ampForm.form_;
           const clientIdField = document.createElement('input');
@@ -1222,7 +1315,7 @@ describes.repeated('', {
 
       it('should substitute hidden fields variables ' +
           'in non-XHR via sync', () => {
-        return getAmpForm().then(ampForm => {
+        return getAmpForm(getForm()).then(ampForm => {
           const form = ampForm.form_;
           ampForm.method_ = 'GET';
           ampForm.xhrAction_ = null;
@@ -1262,7 +1355,7 @@ describes.repeated('', {
       });
 
       it('should not substitute variables if xhr-POST non-canonical', () => {
-        return getAmpForm().then(ampForm => {
+        return getAmpForm(getForm()).then(ampForm => {
           const form = ampForm.form_;
           ampForm.xhrAction_ = 'https://anotherexample.com';
           const clientIdField = document.createElement('input');
@@ -1296,7 +1389,7 @@ describes.repeated('', {
       });
 
       it('should not substitute variables if xhr-GET non-canonical', () => {
-        return getAmpForm().then(ampForm => {
+        return getAmpForm(getForm()).then(ampForm => {
           const form = ampForm.form_;
           ampForm.method_ = 'GET';
           ampForm.xhrAction_ = 'https://anotherexample.com';
@@ -1331,7 +1424,7 @@ describes.repeated('', {
       });
 
       it('should not substitute variables if non-xhr-GET non-canonical', () => {
-        return getAmpForm().then(ampForm => {
+        return getAmpForm(getForm()).then(ampForm => {
           const form = ampForm.form_;
           ampForm.method_ = 'GET';
           ampForm.xhrAction_ = null;
@@ -1393,10 +1486,8 @@ describes.repeated('', {
         json: () => Promise.resolve(),
         headers: headersMock,
       });
-      const fetchRejectPromise = Promise.reject({
-        responseJson: null,
-        headers: headersMock,
-      });
+      const fetchRejectPromise = Promise.reject(
+          new FetchError(new Error('Error'), {headers: headersMock}));
       fetchRejectPromise.catch(() => {
         // Just avoiding a global uncaught promise exception.
       });
@@ -1476,7 +1567,7 @@ describes.repeated('', {
 
     describe('non-XHR GET', () => {
       it('should execute form submit when not triggered through event', () => {
-        return getAmpForm().then(ampForm => {
+        return getAmpForm(getForm()).then(ampForm => {
           const form = ampForm.form_;
           ampForm.method_ = 'GET';
           ampForm.xhrAction_ = null;
@@ -1489,7 +1580,7 @@ describes.repeated('', {
       });
 
       it('should not execute form submit when triggered through event', () => {
-        return getAmpForm().then(ampForm => {
+        return getAmpForm(getForm()).then(ampForm => {
           const form = ampForm.form_;
           ampForm.method_ = 'GET';
           ampForm.xhrAction_ = null;
@@ -1508,7 +1599,7 @@ describes.repeated('', {
     });
 
     it('should trigger amp-form-submit analytics event with form data', () => {
-      return getAmpForm().then(ampForm => {
+      return getAmpForm(getForm()).then(ampForm => {
         const form = ampForm.form_;
         form.id = 'registration';
 
@@ -1544,7 +1635,7 @@ describes.repeated('', {
     });
 
     it('should trigger amp-form-submit after variables substitution', () => {
-      return getAmpForm().then(ampForm => {
+      return getAmpForm(getForm()).then(ampForm => {
         const form = ampForm.form_;
         form.id = 'registration';
         ampForm.method_ = 'GET';
