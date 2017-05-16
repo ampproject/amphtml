@@ -588,7 +588,7 @@ export class AmpA4A extends AMP.BaseElement {
           }
           const safeframeVersionHeader =
             fetchResponse.headers.get(SAFEFRAME_VERSION_HEADER);
-          if (safeframeVersionHeader &&
+          if (/^[0-9-]+$/.test(safeframeVersionHeader) &&
               safeframeVersionHeader != DEFAULT_SAFEFRAME_VERSION) {
             this.safeframeVersion_ = safeframeVersionHeader;
             this.preconnect.preload(this.getSafeframePath_());
