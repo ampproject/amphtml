@@ -1927,7 +1927,7 @@ describe('Resource renderOutsideViewport', () => {
     });
 
     it('should resolve immediately if already laid out', () => {
-      sandbox.stub(resource, 'isLayoutPending').returns(() => false);
+      sandbox.stub(resource, 'isLayoutPending').returns(false);
       return resource.whenWithinRenderOutsideViewport();
     });
   });
