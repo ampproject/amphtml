@@ -42,7 +42,7 @@ limitations under the License.
   </tr>
 </table>
 
-## Overview 
+## Overview
 
 You can use the `amp-ima-video` component to embed an <a
 href="https://developers.google.com/interactive-media-ads/docs/sdks/html5/">IMA
@@ -72,10 +72,16 @@ The URL of your video content.
 
 The URL for your VAST ad document.
 
-**data-poster**
+**data-poster** (optional)
 
 An image for the frame to be displayed before video playback has started. By
 default, the first frame is displayed.
+
+**common attributes**
+
+This element includes
+[common attributes](https://www.ampproject.org/docs/reference/common_attributes)
+extended to AMP components
 
 ## Validation
 
