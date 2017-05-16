@@ -906,11 +906,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     'triggers': {
       'init': {
         'on': 'visible',
-        'request': 'session',
-      },
-      'visible': {
-        'on': 'visible',
-        'request': 'cloudapi',
+        'request': ['session', 'cloudapi'],
       },
       'hidden': {
         'on': 'hidden',
@@ -925,6 +921,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
         },
         'request': 'cloudapi',
       },
+    },
     'transport': {
       'beacon': false,
       'xhrpost': false,
