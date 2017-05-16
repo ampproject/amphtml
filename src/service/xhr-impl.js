@@ -99,7 +99,7 @@ export class Xhr {
 
     const ampdocService = ampdocServiceFor(win);
 
-    /** @private @const {?AmpDoc} */
+    /** @private @const {?./ampdoc-impl.AmpDoc} */
     this.ampdocSingle_ = ampdocService.isSingleDoc() ?
       ampdocService.getAmpDoc() :
       null;
