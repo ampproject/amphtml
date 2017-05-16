@@ -16,14 +16,12 @@ limitations under the License.
 
 # <a name="amp-facebook"></a> `amp-facebook`
 
+[TOC]
+
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
     <td>Displays a Facebook post or video. </td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -35,37 +33,52 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-facebook/">Annotated code example for amp-facebook</a></td>
+    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-facebook/">annotated amp-facebook</a> example.</td>
   </tr>
 </table>
+
 ## Overview 
 
 You can use the `amp-facebook` component to embed a Facebook post or a Facebook video.
 
-**Example: Embedding a post**
+#### Example: Embedding a post
 
+Code:
 ```html
-<amp-facebook width=486 height=657
+<amp-facebook width="552" height="310"
     layout="responsive"
-    data-href="https://www.facebook.com/zuck/posts/10102593740125791">
+    data-href="https://www.facebook.com/ParksCanada/posts/1712989015384373">
 </amp-facebook>
 ```
+Renders as:
+<amp-facebook width="552" height="310"
+    layout="responsive"
+    data-href="https://www.facebook.com/ParksCanada/posts/1712989015384373">
+</amp-facebook>
 
-**Example: Embedding a video**
+#### Example: Embedding a video
 
+Code:
 ```html
-<amp-facebook width=552 height=574
+<amp-facebook width="476" height="316"
     layout="responsive"
     data-embed-as="video"
-    data-href="https://www.facebook.com/zuck/videos/10102509264909801/">
+    data-href="https://www.facebook.com/nasaearth/videos/10155187938052139">
 </amp-facebook>
 ```
+Renders as:
+<amp-facebook width="476" height="316"
+    layout="responsive"
+    data-embed-as="video"
+    data-href="https://www.facebook.com/nasaearth/videos/10155187938052139">
+</amp-facebook>
+
 
 ## Attributes
 
 **data-href** (required)
 
-The URL of the Facebook post/video. For example: https://www.facebook.com/zuck/posts/10102593740125791.
+The URL of the Facebook post/video. For example, `https://www.facebook.com/zuck/posts/10102593740125791`.
 
 **data-embed-as** (optional)
 
