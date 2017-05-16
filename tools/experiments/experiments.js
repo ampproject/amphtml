@@ -93,6 +93,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6217',
   },
   {
+    id: 'amp-auto-ads-adsense-holdout',
+    name: 'AMP Auto Ads AdSense Holdout',
+    spec: 'https://github.com/ampproject/amphtml/issues/6196',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9247',
+  },
+  {
     id: 'amp-google-vrview-image',
     name: 'AMP VR Viewer for images via Google VRView',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
@@ -284,6 +290,12 @@ const EXPERIMENTS = [
     id: 'ad-loader-v2',
     name: 'New ad loader version 2',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8261',
+  },
+  {
+    id: 'amp-form-verifiers',
+    name: 'Asynchronous form verifiers',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9174',
+    spec: 'https://github.com/ampproject/amphtml/issues/8736',
   },
   {
     id: 'amp-ima-video',

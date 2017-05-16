@@ -18,7 +18,6 @@ import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {
   addExperimentIdToElement,
-  mergeExperimentIds,
   isInExperiment,
   isExternallyTriggeredExperiment,
   isInternallyTriggeredExperiment,
@@ -32,7 +31,10 @@ import {
 } from '../../../../src/experiments';
 import {installPlatformService} from '../../../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
-import {resetServiceForTesting, getService} from '../../../../src/service';
+import {
+  registerServiceBuilder,
+  resetServiceForTesting,
+} from '../../../../src/service';
 import {
   installDocumentStateService,
 } from '../../../../src/service/document-state';
@@ -214,21 +216,6 @@ describe('all-traffic-experiments-tests', () => {
     });
   });
 
-  describe('#mergeExperimentIds', () => {
-    it('should merge a single id to itself', () => {
-      expect(mergeExperimentIds('12345')).to.equal('12345');
-    });
-    it('should merge a single ID to a list', () => {
-      expect(mergeExperimentIds('12345', '3,4,5,6')).to.equal('3,4,5,6,12345');
-    });
-    it('should discard invalid ID', () => {
-      expect(mergeExperimentIds('frob', '3,4,5,6')).to.equal('3,4,5,6');
-    });
-    it('should return empty string for invalid input', () => {
-      expect(mergeExperimentIds('frob')).to.equal('');
-    });
-  });
-
   describe('#isInExperiment', () => {
     it('should return false for empty element and any query', () => {
       const element = document.createElement('div');
@@ -311,7 +298,7 @@ describe('all-traffic-experiments-tests', () => {
       element = document.createElement('div');
       document.body.appendChild(element);
       addEnabledExperimentSpy = sandbox.stub();
-      getService(win, 'performance', () => {
+      registerServiceBuilder(win, 'performance', function() {
         return {
           addEnabledExperiment: addEnabledExperimentSpy,
         };

@@ -366,6 +366,7 @@ function watch() {
 
   return Promise.all([
     buildAlp({watch: true}),
+    buildExaminer({watch: true}),
     buildExtensions({watch: true}),
     compile(true),
   ]);
@@ -510,6 +511,7 @@ function build() {
   return Promise.all([
     polyfillsForTests(),
     buildAlp(),
+    buildExaminer(),
     buildSw(),
     buildWebWorker(),
     buildExtensions({bundleOnlyIfListedInFiles: true}),
@@ -530,6 +532,7 @@ function dist() {
     // When adding a line here, consider whether you need to include polyfills
     // and whether you need to init logging (initLogConstructor).
     buildAlp({minify: true, watch: false, preventRemoveAndMakeDir: true}),
+    buildExaminer({minify: true, watch: false, preventRemoveAndMakeDir: true}),
     buildSw({minify: true, watch: false, preventRemoveAndMakeDir: true}),
     buildWebWorker({minify: true, watch: false, preventRemoveAndMakeDir: true}),
     buildExtensions({minify: true, preventRemoveAndMakeDir: true}),
@@ -897,6 +900,25 @@ function buildAlp(options) {
     minify: options.minify || argv.minify,
     includePolyfills: true,
     minifiedName: 'alp.js',
+    preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
+  });
+}
+
+/**
+ * Build Examiner JS.
+ *
+ * @param {!Object} options
+ */
+function buildExaminer(options) {
+  options = options || {};
+  $$.util.log('Bundling examiner.js');
+
+  return compileJs('./src/examiner/', 'examiner.js', './dist/', {
+    toName: 'examiner.max.js',
+    watch: options.watch,
+    minify: options.minify || argv.minify,
+    includePolyfills: true,
+    minifiedName: 'examiner.js',
     preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
   });
 }
