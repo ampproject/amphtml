@@ -23,7 +23,8 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {
   AmpA4A,
   RENDERING_TYPE_HEADER,
-  SAFEFRAME_IMPL_PATH,
+  SAFEFRAME_VERSION,
+  SAFEFRAME_VERSION_HEADER,
   protectFunctionWrapper,
 } from '../amp-a4a';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
@@ -173,12 +174,13 @@ describe('amp-a4a', () => {
   }
 
   // Checks that element is an amp-ad that is rendered via SafeFrame.
-  function verifySafeFrameRender(element) {
+  function verifySafeFrameRender(element, sfVersion) {
     expect(element.tagName.toLowerCase()).to.equal('amp-a4a');
     expect(element).to.be.visible;
     expect(element.querySelectorAll('iframe')).to.have.lengthOf(1);
-    const child = element.querySelector(
-        `iframe[src^="${SAFEFRAME_IMPL_PATH}"][name]`);
+    const safeFrameUrl = 'https://tpc.googlesyndication.com/safeframe/' +
+      sfVersion + '/html/container.html';
+    const child = element.querySelector(`iframe[src^="${safeFrameUrl}"][name]`);
     expect(child).to.be.ok;
     const name = child.getAttribute('name');
     expect(name).to.match(/[^;]+;\d+;[\s\S]+/);
@@ -561,7 +563,18 @@ describe('amp-a4a', () => {
           // Force vsync system to run all queued tasks, so that DOM mutations
           // are actually completed before testing.
           a4a.vsync_.runScheduledTasks_();
-          verifySafeFrameRender(a4aElement);
+          verifySafeFrameRender(a4aElement, SAFEFRAME_VERSION);
+          expect(xhrMock).to.be.calledOnce;
+        });
+      });
+
+      it('should use safeframe version header value', () => {
+        a4a.safeframeVersion_ = '1-2-3';
+        return a4a.layoutCallback().then(() => {
+          // Force vsync system to run all queued tasks, so that DOM mutations
+          // are actually completed before testing.
+          a4a.vsync_.runScheduledTasks_();
+          verifySafeFrameRender(a4aElement, '1-2-3');
           expect(xhrMock).to.be.calledOnce;
         });
       });
@@ -576,7 +589,7 @@ describe('amp-a4a', () => {
           // Force vsync system to run all queued tasks, so that DOM mutations
           // are actually completed before testing.
           a4a.vsync_.runScheduledTasks_();
-          verifySafeFrameRender(a4aElement);
+          verifySafeFrameRender(a4aElement, SAFEFRAME_VERSION);
           expect(xhrMock).to.be.calledOnce;
         });
       });
@@ -593,8 +606,10 @@ describe('amp-a4a', () => {
                     // Force vsync system to run all queued tasks, so that
                     // DOM mutations are actually completed before testing.
                     a4a.vsync_.runScheduledTasks_();
+                    const safeframeUrl = 'https://tpc.googlesyndication.com/safeframe/' +
+                      SAFEFRAME_VERSION + '/html/container.html';
                     const safeChild = a4aElement.querySelector(
-                        `iframe[src^="${SAFEFRAME_IMPL_PATH}"]`);
+                        `iframe[src^="${safeframeUrl}"]`);
                     expect(safeChild).to.not.be.ok;
                     if (headerVal != 'nameframe') {
                       const unsafeChild = a4aElement.querySelector('iframe');
@@ -1171,6 +1186,30 @@ describe('amp-a4a', () => {
             return timerFor(a4a.win).promise(1).then(() => {
               expect(a4a.originalSlotSize_).to.not.be.ok;
             });
+          });
+        });
+      });
+    });
+    it('should process safeframe version header properly', () => {
+      headers[SAFEFRAME_VERSION_HEADER] = '1-2-3';
+      headers[RENDERING_TYPE_HEADER] = 'safeframe';
+      delete headers[SIGNATURE_HEADER];
+      xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        const a4aElement = createA4aElement(doc);
+        const a4a = new MockA4AImpl(a4aElement);
+        a4a.buildCallback();
+        a4a.onLayoutMeasure();
+        return a4a.adPromise_.then(() => {
+          expect(xhrMock).to.be.calledOnce;
+          return a4a.layoutCallback().then(() => {
+            verifySafeFrameRender(a4aElement, '1-2-3');
+            // Verify preload to safeframe with header version.
+            expect(doc.querySelector('link[rel=preload]' +
+              '[href="https://tpc.googlesyndication.com/safeframe/' +
+              '1-2-3/html/container.html"]')).to.be.ok;
           });
         });
       });
