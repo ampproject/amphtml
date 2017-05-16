@@ -84,9 +84,7 @@ export function parseUrlWithA(a, url) {
   a.href = url;
 
   // IE11 doesn't provide full URL components when parsing relative URLs.
-  // Assigning to itself again does the trick.
-  // TODO(lannka, #3449): Remove all the polyfills once we don't support IE11
-  // and it passes tests in all browsers.
+  // Assigning to itself again does the trick #3449.
   if (!a.protocol) {
     a.href = a.href;
   }
@@ -320,6 +318,22 @@ export function isLocalhostOrigin(url) {
     url = parseUrl(url);
   }
   return urls.localhostRegex.test(url.origin);
+}
+
+/**
+ * Returns whether the URL has valid protocol.
+ * @param {string|!Location} url URL of an AMP document.
+ * @return {boolean}
+ */
+export function isProtocolValid(url) {
+  if (typeof url == 'string') {
+    url = parseUrl(url);
+  }
+  const invalidProtocols = [
+    /*eslint no-script-url: 0*/ 'javascript:',
+    /*eslint no-script-url: 0*/ 'data:',
+    /*eslint no-script-url: 0*/ 'vbscript:'];
+  return !invalidProtocols.includes(url.protocol);
 }
 
 /**

@@ -16,18 +16,30 @@
 
 import '../../../amp-carousel/0.1/amp-carousel';
 import {createFixtureIframe} from '../../../../testing/iframe';
-import {bindForDoc} from '../../../../src/services';
+import {batchedXhrFor, bindForDoc} from '../../../../src/services';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
+import * as sinon from 'sinon';
 
 describe.configure().retryOnSaucelabs().run('amp-bind', function() {
-  const fixtureLocation = 'test/fixtures/amp-bind-integrations.html';
-
   let fixture;
   let ampdoc;
+  let sandbox;
 
   this.timeout(5000);
 
   beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  /**
+   * @param {string} fixtureLocation
+   * @return {!Promise}
+   */
+  function setupWithFixture(fixtureLocation) {
     return createFixtureIframe(fixtureLocation).then(f => {
       fixture = f;
       return waitForEvent('amp:bind:initialize');
@@ -35,7 +47,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
       const ampdocService = ampdocServiceFor(fixture.win);
       ampdoc = ampdocService.getAmpDoc(fixture.doc);
     });
-  });
+  }
 
   /**
    * @param {string} name
@@ -65,45 +77,12 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
         waitForEvent('amp:bind:mutated'));
   }
 
-  describe('detecting bindings under dynamic tags', () => {
-    it('should NOT bind blacklisted attributes', () => {
-      const dynamicTag = fixture.doc.getElementById('dynamicTag');
-      const div = fixture.doc.createElement('div');
-      div.innerHTML = '<p [onclick]="javascript:alert(document.cookie)" ' +
-                         '[onmouseover]="javascript:alert()" ' +
-                         '[style]="background=color:black"></p>';
-      const textElement = div.firstElementChild;
-      // for amp-live-list, dynamic element is <div items>, which is a child
-      // of the list.
-      dynamicTag.firstElementChild.appendChild(textElement);
-      return waitForAllMutations().then(() => {
-        // Force bind to apply bindings
-        fixture.doc.getElementById('triggerBindApplicationButton').click();
-        return waitForBindApplication();
-      }).then(() => {
-        expect(textElement.getAttribute('onclick')).to.be.null;
-        expect(textElement.getAttribute('onmouseover')).to.be.null;
-        expect(textElement.getAttribute('style')).to.be.null;
-      });
+  describe('[text] and [class] integration', () => {
+
+    beforeEach(() => {
+      return setupWithFixture('test/fixtures/bind-text-integration.html');
     });
 
-    it('should NOT allow unsecure attribute values', () => {
-      const div = fixture.doc.createElement('div');
-      div.innerHTML = '<a [href]="javascript:alert(1)"></a>';
-      const aElement = div.firstElementChild;
-      const dynamicTag = fixture.doc.getElementById('dynamicTag');
-      dynamicTag.firstElementChild.appendChild(aElement);
-      return waitForAllMutations().then(() => {
-        // Force bind to apply bindings
-        fixture.doc.getElementById('triggerBindApplicationButton').click();
-        return waitForBindApplication();
-      }).then(() => {
-        expect(aElement.getAttribute('href')).to.be.null;
-      });
-    });
-  });
-
-  describe('text integration', () => {
     it('should update text when text attribute binding changes', () => {
       const textElement = fixture.doc.getElementById('textElement');
       const button = fixture.doc.getElementById('changeTextButton');
@@ -125,7 +104,60 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
     });
   });
 
+  describe('detecting bindings under dynamic tags', () => {
+
+    beforeEach(() => {
+      return setupWithFixture('test/fixtures/bind-integrations.html');
+    });
+
+    it('should NOT bind blacklisted attributes', () => {
+      const dynamicTag = fixture.doc.getElementById('dynamicTag');
+      const div = fixture.doc.createElement('div');
+      div.innerHTML = '<p [onclick]="javascript:alert(document.cookie)" ' +
+                         '[onmouseover]="javascript:alert()" ' +
+                         '[style]="background=color:black" ' +
+                         '[text]="dynamicText"></p>';
+      const textElement = div.firstElementChild;
+      // for amp-live-list, dynamic element is <div items>, which is a child
+      // of the list.
+      dynamicTag.firstElementChild.appendChild(textElement);
+      expect(textElement.getAttribute('onclick')).to.be.null;
+      expect(textElement.getAttribute('onmouseover')).to.be.null;
+      expect(textElement.getAttribute('style')).to.be.null;
+      expect(textElement.textContent).to.equal('');
+      return waitForAllMutations().then(() => {
+        fixture.doc.getElementById('changeDynamicTextButton').click();
+        return waitForBindApplication();
+      }).then(() => {
+        expect(textElement.getAttribute('onclick')).to.be.null;
+        expect(textElement.getAttribute('onmouseover')).to.be.null;
+        expect(textElement.getAttribute('style')).to.be.null;
+        expect(textElement.textContent).to.equal('bound');
+      });
+    });
+
+    it('should NOT allow unsecure attribute values', () => {
+      const div = fixture.doc.createElement('div');
+      div.innerHTML = '<a [href]="javascript:alert(1)"></a>';
+      const aElement = div.firstElementChild;
+      const dynamicTag = fixture.doc.getElementById('dynamicTag');
+      dynamicTag.firstElementChild.appendChild(aElement);
+      return waitForAllMutations().then(() => {
+        // Force bind to apply bindings
+        fixture.doc.getElementById('triggerBindApplicationButton').click();
+        return waitForBindApplication();
+      }).then(() => {
+        expect(aElement.getAttribute('href')).to.be.null;
+      });
+    });
+  });
+
   describe('input integration', () => {
+
+    beforeEach(() => {
+      return setupWithFixture('test/fixtures/bind-integrations.html');
+    });
+
     it('should update dependent bindings on range input changes', () => {
       const rangeText = fixture.doc.getElementById('rangeText');
       const range = fixture.doc.getElementById('range');
@@ -161,6 +193,11 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   });
 
   describe('amp-carousel integration', () => {
+
+    beforeEach(() => {
+      return setupWithFixture('test/fixtures/bind-integrations.html');
+    });
+
     it('should update dependent bindings on carousel slide changes', () => {
       const slideNum = fixture.doc.getElementById('slideNum');
       const carousel = fixture.doc.getElementById('carousel');
@@ -187,6 +224,11 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   });
 
   describe('amp-img integration', () => {
+
+    beforeEach(() => {
+      return setupWithFixture('test/fixtures/bind-integrations.html');
+    });
+
     it('should change src when the src attribute binding changes', () => {
       const button = fixture.doc.getElementById('changeImgSrcButton');
       const img = fixture.doc.getElementById('image');
@@ -249,6 +291,11 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   });
 
   describe('amp-live-list integration', () => {
+
+    beforeEach(() => {
+      return setupWithFixture('test/fixtures/bind-integrations.html');
+    });
+
     it('should detect bindings in initial live-list elements', () => {
       const liveListItems = fixture.doc.getElementById('liveListItems');
       expect(liveListItems.children.length).to.equal(1);
@@ -299,6 +346,11 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   });
 
   describe('amp-selector integration', () => {
+
+    beforeEach(() => {
+      return setupWithFixture('test/fixtures/bind-integrations.html');
+    });
+
     it('should update dependent bindings when selection changes', () => {
       const selectionText = fixture.doc.getElementById('selectionText');
       const img1 = fixture.doc.getElementById('selectorImg1');
@@ -339,6 +391,11 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   });
 
   describe('amp-video integration', () => {
+
+    beforeEach(() => {
+      return setupWithFixture('test/fixtures/bind-integrations.html');
+    });
+
     it('should support binding to src', () => {
       const button = fixture.doc.getElementById('changeVidSrcButton');
       const vid = fixture.doc.getElementById('video');
@@ -405,6 +462,11 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   });
 
   describe('amp-youtube', () => {
+
+    beforeEach(() => {
+      return setupWithFixture('test/fixtures/bind-integrations.html');
+    });
+
     it('should support binding to data-video-id', () => {
       const button = fixture.doc.getElementById('youtubeButton');
       const yt = fixture.doc.getElementById('youtube');
@@ -417,6 +479,11 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   });
 
   describe('amp-brightcove', () => {
+
+    beforeEach(() => {
+      return setupWithFixture('test/fixtures/bind-integrations.html');
+    });
+
     it('should support binding to data-account', () => {
       const button = fixture.doc.getElementById('brightcoveButton');
       const bc = fixture.doc.getElementById('brightcove');
@@ -432,6 +499,11 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   });
 
   describe('amp-iframe', () => {
+
+    beforeEach(() => {
+      return setupWithFixture('test/fixtures/bind-integrations.html');
+    });
+
     it('should support binding to src', () => {
       const button = fixture.doc.getElementById('iframeButton');
       const ampIframe = fixture.doc.getElementById('ampIframe');
@@ -451,6 +523,11 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   });
 
   describe('amp-list', () => {
+
+    beforeEach(() => {
+      return setupWithFixture('test/fixtures/bind-integrations.html');
+    });
+
     it('should support binding to src', () => {
       const button = fixture.doc.getElementById('listSrcButton');
       const list = fixture.doc.getElementById('list');
@@ -472,6 +549,52 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
       return waitForBindApplication().then(() => {
         expect(list.getAttribute('src'))
             .to.equal('https://www.google.com/unbound.json');
+      });
+    });
+  });
+
+  describe('amp-state', () => {
+
+    beforeEach(() => {
+      return setupWithFixture('test/fixtures/bind-integrations.html');
+    });
+
+    it('should not loop infinitely if updates change its src binding', () => {
+      const changeAmpStateSrcButton =
+          fixture.doc.getElementById('ampStateSrcButton');
+      const triggerBindApplicationButton =
+          fixture.doc.getElementById('triggerBindApplicationButton');
+      const ampState = fixture.doc.getElementById('ampState');
+      const batchedXhr = batchedXhrFor(fixture.win);
+      // Stub XHR for endpoint such that it returns state that would point
+      // the amp-state element back to its original source.
+      sandbox.stub(batchedXhr, 'fetchJson')
+          .withArgs(
+              'https://www.google.com/bind/second/source',
+              sinon.match.any)
+          .returns(Promise.resolve({
+            stateSrc: 'https://www.google.com/bind/first/source',
+          }));
+      // Changes amp-state's src from .../first/source to .../second/source.
+      changeAmpStateSrcButton.click();
+      return waitForBindApplication().then(() => {
+        expect(ampState.getAttribute('src'))
+            .to.equal('https://www.google.com/bind/second/source');
+        // Wait for XHR to finish and for bind to re-apply bindings.
+        return waitForBindApplication();
+      }).then(() => {
+        // bind applications caused by an amp-state mutation SHOULD NOT update
+        // src attributes on amp-state elements.
+        expect(ampState.getAttribute('src'))
+            .to.equal('https://www.google.com/bind/second/source');
+        // Trigger a bind apply that isn't from an amp-state
+        triggerBindApplicationButton.click();
+        return waitForBindApplication();
+      }).then(() => {
+        // Now that a non-amp-state mutation has ocurred, the amp-state's src
+        // attribute can be updated with the new src from the XHR.
+        expect(ampState.getAttribute('src'))
+            .to.equal('https://www.google.com/bind/first/source');
       });
     });
   });

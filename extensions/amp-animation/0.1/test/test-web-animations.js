@@ -28,12 +28,18 @@ import {user} from '../../../../src/log';
 describes.sandboxed('MeasureScanner', {}, () => {
   let target1, target2;
   let warnStub;
+  let targetsBySelector;
 
   beforeEach(() => {
     target1 = document.createElement('div');
     target2 = document.createElement('div');
     document.body.appendChild(target1);
     document.body.appendChild(target2);
+    targetsBySelector = {
+      '#target1': [target1],
+      '#target2': [target2],
+      '.target': [target1, target2],
+    };
     sandbox.stub(window, 'matchMedia', query => {
       if (query == 'match') {
         return {matches: true};
@@ -55,6 +61,7 @@ describes.sandboxed('MeasureScanner', {}, () => {
     const targets = {target1, target2};
     const scanner = new MeasureScanner(window, {
       resolveTarget: name => targets[name] || null,
+      queryTargets: selector => targetsBySelector[selector] || [],
     }, true);
     scanner.scan(spec);
     return scanner.requests_;
@@ -158,6 +165,7 @@ describes.sandboxed('MeasureScanner', {}, () => {
           easing: 'ease-in',
           direction: 'reverse',
           fill: 'auto',
+          ticker: 'time',
         },
       ],
     });
@@ -170,6 +178,7 @@ describes.sandboxed('MeasureScanner', {}, () => {
       easing: 'ease-in',
       direction: 'reverse',
       fill: 'auto',
+      ticker: 'time',
     });
   });
 
@@ -346,6 +355,77 @@ describes.sandboxed('MeasureScanner', {}, () => {
     expect(requests[0].target).to.equal(target2);
   });
 
+  it('should find targets by selector', () => {
+    const requests = scan([
+      {selector: '#target1', keyframes: {}},
+      {selector: '#target2', duration: 300, keyframes: {}},
+      {selector: '.target', duration: 400, keyframes: {}},
+    ]);
+    expect(requests).to.have.length(4);
+    // `#target1`
+    expect(requests[0].target).to.equal(target1);
+    expect(requests[0].timing.duration).to.equal(0);
+    // `#target2`
+    expect(requests[1].target).to.equal(target2);
+    expect(requests[1].timing.duration).to.equal(300);
+    // `.target`
+    expect(requests[2].target).to.equal(target1);
+    expect(requests[2].timing.duration).to.equal(400);
+    expect(requests[3].target).to.equal(target2);
+    expect(requests[3].timing.duration).to.equal(400);
+  });
+
+  it('should allow not-found targets', () => {
+    const requests = scan([
+      {selector: '.unknown', duration: 400, keyframes: {}},
+    ]);
+    expect(requests).to.have.length(0);
+  });
+
+  it('should require any target spec', () => {
+    expect(() => {
+      scan([{duration: 400, keyframes: {}}]);
+    }).to.throw(/No target specified/);
+  });
+
+  it('should not allow both selector and target spec', () => {
+    expect(() => {
+      scan([{selector: '#target1', target: 'target1',
+          duration: 400, keyframes: {}}]);
+    }).to.throw(/Both/);
+  });
+
+  it('should build keyframe for multiple targets', () => {
+    target1.style.opacity = '0';
+    target2.style.opacity = '0.1';
+    const requests = scan({
+      selector: '.target',
+      duration: 100,
+      delay: 10,
+      keyframes: {
+        opacity: '1',
+        transform: ['translateY(0px)', 'translateY(100px)'],
+      },
+    });
+    expect(requests).to.have.length(2);
+    const request1 = requests[0];
+    const request2 = requests[1];
+    // `#target1`
+    expect(request1.target).to.equal(target1);
+    expect(request1.timing.duration).to.equal(100);
+    expect(request1.timing.delay).to.equal(10);
+    expect(request1.keyframes.opacity).to.deep.equal(['0', '1']);
+    expect(request1.keyframes.transform)
+        .to.deep.equal(['translateY(0px)', 'translateY(100px)']);
+    // `#target2`
+    expect(request2.target).to.equal(target2);
+    expect(request2.timing.duration).to.equal(100);
+    expect(request2.timing.delay).to.equal(10);
+    expect(request2.keyframes.opacity).to.deep.equal(['0.1', '1']);
+    expect(request2.keyframes.transform)
+        .to.deep.equal(['translateY(0px)', 'translateY(100px)']);
+  });
+
 
   describes.fakeWin('createRunner', {amp: 1}, env => {
     let resources;
@@ -355,12 +435,20 @@ describes.sandboxed('MeasureScanner', {}, () => {
       resources = env.win.services.resources.obj;
       amp1 = env.createAmpElement();
       amp2 = env.createAmpElement();
+      sandbox.stub(amp1, 'isUpgraded', () => true);
+      sandbox.stub(amp2, 'isUpgraded', () => true);
+      sandbox.stub(amp1, 'isBuilt', () => true);
+      sandbox.stub(amp2, 'isBuilt', () => true);
+      sandbox.stub(amp1, 'whenBuilt', () => Promise.resolve());
+      sandbox.stub(amp2, 'whenBuilt', () => Promise.resolve());
       resources.add(amp1);
       resources.add(amp2);
     });
 
     function waitForNextMicrotask() {
-      return Promise.resolve().then(() => Promise.resolve());
+      return Promise.resolve()
+          .then(() => Promise.resolve())
+          .then(() => Promise.all([Promise.resolve()]));
     }
 
     function createRunner(spec) {
@@ -387,6 +475,10 @@ describes.sandboxed('MeasureScanner', {}, () => {
     });
 
     it('should block AMP elements', () => {
+      const r1 = resources.getResourceForElement(amp1);
+      const r2 = resources.getResourceForElement(amp2);
+      sandbox.stub(r1, 'isDisplayed', () => true);
+      sandbox.stub(r2, 'isDisplayed', () => true);
       let runner;
       createRunner([
         {target: amp1, keyframes: {}},
@@ -396,12 +488,13 @@ describes.sandboxed('MeasureScanner', {}, () => {
       });
       return waitForNextMicrotask().then(() => {
         expect(runner).to.be.undefined;
-        resources.getResourceForElement(amp1).loadPromiseResolve_();
+        r1.loadPromiseResolve_();
         return waitForNextMicrotask();
       }).then(() => {
         expect(runner).to.be.undefined;
-        resources.getResourceForElement(amp2).loadPromiseResolve_();
-        return waitForNextMicrotask();
+        r2.loadPromiseResolve_();
+        return Promise.all([r1.loadedOnce(), r2.loadedOnce()])
+            .then(() => waitForNextMicrotask());
       }).then(() => {
         expect(runner).to.be.ok;
         expect(runner.requests_).to.have.length(2);

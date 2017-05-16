@@ -35,7 +35,7 @@ import {
   installUrlReplacementsServiceForDoc,
   extractClientIdFromGaCookie,
 } from '../../src/service/url-replacements-impl';
-import {getService} from '../../src/service';
+import {registerServiceBuilder} from '../../src/service';
 import {setCookie} from '../../src/cookies';
 import {parseUrl} from '../../src/url';
 import {urlReplacementsForDoc, viewerForDoc} from '../../src/services';
@@ -78,17 +78,21 @@ describes.sandboxed('UrlReplacements', {}, () => {
         }
         if (opt_options.withVariant) {
           markElementScheduledForTesting(iframe.win, 'amp-experiment');
-          getService(iframe.win, 'variant', () => Promise.resolve({
-            'x1': 'v1',
-            'x2': null,
-          }));
+          registerServiceBuilder(iframe.win, 'variant', function() {
+            return Promise.resolve({
+              'x1': 'v1',
+              'x2': null,
+            });
+          });
         }
         if (opt_options.withShareTracking) {
           markElementScheduledForTesting(iframe.win, 'amp-share-tracking');
-          getService(iframe.win, 'share-tracking', () => Promise.resolve({
-            incomingFragment: '12345',
-            outgoingFragment: '54321',
-          }));
+          registerServiceBuilder(iframe.win, 'share-tracking', function() {
+            return Promise.resolve({
+              incomingFragment: '12345',
+              outgoingFragment: '54321',
+            });
+          });
         }
       }
       viewerService = viewerForDoc(iframe.ampdoc);
@@ -273,6 +277,16 @@ describes.sandboxed('UrlReplacements', {}, () => {
     // Make sure cookie does not exist
     setCookie(window, 'url-xyz', '');
     return expandAsync('?a=CLIENT_ID(url-abc)&b=CLIENT_ID(url-xyz)',
+        /*opt_bindings*/undefined, {withCid: true}).then(res => {
+          expect(res).to.match(/^\?a=cid-for-abc\&b=amp-([a-zA-Z0-9_-]+){10,}/);
+        });
+  });
+
+  it('should replace CLIENT_ID with opt_cookieName', () => {
+    setCookie(window, 'url-abc', 'cid-for-abc');
+    // Make sure cookie does not exist
+    setCookie(window, 'url-xyz', '');
+    return expandAsync('?a=CLIENT_ID(abc,,url-abc)&b=CLIENT_ID(xyz,,url-xyz)',
         /*opt_bindings*/undefined, {withCid: true}).then(res => {
           expect(res).to.match(/^\?a=cid-for-abc\&b=amp-([a-zA-Z0-9_-]+){10,}/);
         });
@@ -1087,6 +1101,33 @@ describes.sandboxed('UrlReplacements', {}, () => {
             'https://canonical.com/link?out=bar&c=test-cid(abc)');
       });
     });
+
+    it('should not add URL parameters for unwhitelisted origin', () => {
+      a.href = 'https://example.com/link';
+      a.setAttribute('data-amp-addparams', 'guid=123');
+      urlReplacements.maybeExpandLink(a);
+      expect(a.href).to.equal('https://example.com/link');
+    });
+
+    it('should not add URL parameters for http URL\'s(non-secure)', () => {
+      a.href = 'http://whitelisted.com/link?out=QUERY_PARAM(foo)';
+      a.setAttribute('data-amp-addparams', 'guid=123');
+      urlReplacements.maybeExpandLink(a);
+      expect(a.href).to.equal('http://whitelisted.com/link?out=QUERY_PARAM(foo)');
+    });
+
+    it('should append the query parameters for whitelisted origin', () => {
+      a.href = 'https://whitelisted.com/link?out=QUERY_PARAM(foo)';
+      a.setAttribute('data-amp-replace', 'QUERY_PARAM CLIENT_ID');
+      a.setAttribute('data-amp-addparams', 'guid=123&c=CLIENT_ID(abc)');
+      // Get a cid, then proceed.
+      return urlReplacements.expandAsync('CLIENT_ID(abc)').then(() => {
+        urlReplacements.maybeExpandLink(a);
+        expect(a.href).to.equal(
+            'https://whitelisted.com/link?out=bar&guid=123&c=test-cid(abc)');
+      });
+    });
+
   });
 
   describe('Expanding String', () => {

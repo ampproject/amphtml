@@ -13,3 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import {validateData, writeScript} from '../3p/3p';
+
+/* global adingoFluct: false */
+
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+export function fluct(global, data) {
+  validateData(data, ['g', 'u']);
+  writeScript(global,
+      `https://cdn-fluct.sh.adingo.jp/f.js?G=${encodeURIComponent(data['g'])}`,
+      function() {
+        adingoFluct.showAd(data['u']);
+      });
+}

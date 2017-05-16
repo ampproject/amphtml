@@ -27,7 +27,7 @@ import {storageForDoc} from '../../../src/services';
 import {timerFor} from '../../../src/services';
 import {parseUrl} from '../../../src/url';
 import {setStyles} from '../../../src/style';
-import {isProxyOrigin} from '../../../src/url';
+import {isProxyOrigin, isProtocolValid} from '../../../src/url';
 
 const TAG = 'amp-app-banner';
 
@@ -244,6 +244,7 @@ export class AmpIosAppBanner extends AbstractAppBanner {
         this.element.querySelector('button[open-button]'),
         '<button open-button> is required inside %s: %s', TAG, this.element);
 
+    this.parseIosMetaContent_(this.metaTag_.getAttribute('content'));
     this.checkIfDismissed_();
   }
 
@@ -257,7 +258,6 @@ export class AmpIosAppBanner extends AbstractAppBanner {
       return Promise.resolve();
     }
 
-    this.parseIosMetaContent_(this.metaTag_.getAttribute('content'));
     return Promise.resolve();
   }
 
@@ -283,6 +283,12 @@ export class AmpIosAppBanner extends AbstractAppBanner {
 
     const appId = config['app-id'];
     const openUrl = config['app-argument'];
+
+    if (openUrl) {
+      user().assert(isProtocolValid(openUrl),
+          '%s: The url in app-argument is invalid', TAG);
+    }
+
     const installAppUrl = `https://itunes.apple.com/us/app/id${appId}`;
     const openInAppUrl = openUrl || installAppUrl;
     this.setupOpenButton_(this.openButton_, openInAppUrl, installAppUrl);

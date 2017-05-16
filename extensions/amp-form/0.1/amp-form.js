@@ -50,6 +50,11 @@ import {
   getFormValidator,
   isCheckValiditySupported,
 } from './form-validators';
+import {
+  FORM_VERIFY_PARAM,
+  getFormVerifier,
+} from './form-verifiers';
+import {deepMerge} from '../../../src/utils/object';
 
 
 /** @type {string} */
@@ -67,6 +72,8 @@ const EXTERNAL_DEPS = [
 
 /** @const @enum {string} */
 const FormState_ = {
+  INITIAL: 'initial',
+  VERIFYING: 'verifying',
   SUBMITTING: 'submitting',
   SUBMIT_ERROR: 'submit-error',
   SUBMIT_SUCCESS: 'submit-success',
@@ -180,13 +187,17 @@ export class AmpForm {
 
     const inputs = this.form_.elements;
     for (let i = 0; i < inputs.length; i++) {
-      user().assert(!inputs[i].name ||
-          inputs[i].name != SOURCE_ORIGIN_PARAM,
-          'Illegal input name, %s found: %s', SOURCE_ORIGIN_PARAM, inputs[i]);
+      const name = inputs[i].name;
+      user().assert(name != SOURCE_ORIGIN_PARAM && name != FORM_VERIFY_PARAM,
+          'Illegal input name, %s found: %s', name, inputs[i]);
     }
 
     /** @const @private {!./form-validators.FormValidator} */
     this.validator_ = getFormValidator(this.form_);
+
+    /** @const @private {!./form-verifiers.FormVerifier} */
+    this.verifier_ = getFormVerifier(
+        this.form_, () => this.handleXhrVerify_());
 
     this.actions_.installActionHandler(
         this.form_, this.actionHandler_.bind(this));
@@ -229,12 +240,26 @@ export class AmpForm {
     this.form_.addEventListener(
         'submit', this.handleSubmitEvent_.bind(this), true);
     this.form_.addEventListener('blur', e => {
-      onInputInteraction_(e);
+      checkUserValidityAfterInteraction_(dev().assertElement(e.target));
       this.validator_.onBlur(e);
     }, true);
+    this.form_.addEventListener('change', e => {
+      const input = dev().assertElement(e.target);
+      this.verifier_.onCommit(input, updatedElements => {
+        updatedElements.forEach(updatedElement => {
+          checkUserValidityAfterInteraction_(updatedElement);
+        });
+        this.validator_.onBlur(e);
+        // Move from the VERIFYING state back to INITIAL
+        if (this.state_ === FormState_.VERIFYING) {
+          this.setState_(FormState_.INITIAL);
+        }
+      });
+    });
     this.form_.addEventListener('input', e => {
-      onInputInteraction_(e);
+      checkUserValidityAfterInteraction_(dev().assertElement(e.target));
       this.validator_.onInput(e);
+      this.verifier_.onMutate(dev().assertElement(e.target));
     });
   }
 
@@ -308,25 +333,32 @@ export class AmpForm {
    * @private
    */
   submit_() {
-    let varSubsFields = [];
-    // Only allow variable substitutions for inputs if the form action origin
-    // is the canonical origin.
-    // TODO(mkhatib, #7168): Consider relaxing this.
-    if (this.isSubmittingToCanonical_()) {
-      // Fields that support var substitutions.
-      varSubsFields = this.form_.querySelectorAll(
-          '[type="hidden"][data-amp-replace]');
-    } else {
-      user().warn(TAG, 'Variable substitutions disabled for non-canonical ' +
-          'origin submit action: %s', this.form_);
-    }
-
+    const varSubsFields = this.getVarSubsFields_();
     if (this.xhrAction_) {
       this.handleXhrSubmit_(varSubsFields);
     } else if (this.method_ == 'POST') {
       this.handleNonXhrPost_();
     } else if (this.method_ == 'GET') {
       this.handleNonXhrGet_(varSubsFields);
+    }
+  }
+
+  /**
+   * Get form fields that require variable substitutions
+   * @return {!IArrayLike<!HTMLInputElement>}
+   * @private
+   */
+  getVarSubsFields_() {
+    // Only allow variable substitutions for inputs if the form action origin
+    // is the canonical origin.
+    // TODO(mkhatib, #7168): Consider relaxing this.
+    if (this.isSubmittingToCanonical_()) {
+      // Fields that support var substitutions.
+      return this.form_.querySelectorAll('[type="hidden"][data-amp-replace]');
+    } else {
+      user().warn(TAG, 'Variable substitutions disabled for non-canonical ' +
+          'origin submit action: %s', this.form_);
+      return [];
     }
   }
 
@@ -347,66 +379,123 @@ export class AmpForm {
   }
 
   /**
-   * @param {IArrayLike<!HTMLInputElement>} varSubsFields
+   * Send the verify request and control the VERIFYING state.
+   * @return {!Promise}
+   * @private
+   */
+  handleXhrVerify_() {
+    if (this.state_ === FormState_.SUBMITTING) {
+      return Promise.resolve();
+    }
+    this.setState_(FormState_.VERIFYING);
+
+    const verifyXhr = this.doVarSubs_(this.getVarSubsFields_())
+        .then(() => this.doXhr_({[FORM_VERIFY_PARAM]: true}));
+    return verifyXhr;
+  }
+
+  /**
+   * @param {!IArrayLike<!HTMLInputElement>} varSubsFields
    * @private
    */
   handleXhrSubmit_(varSubsFields) {
     this.cleanupRenderedTemplate_();
     this.setState_(FormState_.SUBMITTING);
-    const isHeadOrGet = this.method_ == 'GET' || this.method_ == 'HEAD';
+
+    const p = this.doVarSubs_(varSubsFields)
+        .then(() => {
+          this.triggerFormSubmitInAnalytics_();
+          this.actions_.trigger(this.form_, 'submit', /*event*/ null);
+        })
+        .then(() => this.doXhr_())
+        .then(response => this.handleXhrSubmitSuccess_(response),
+            error => this.handleXhrSubmitFailure_(
+                /** @type {!../../../src/service/xhr-impl.FetchError} */ (
+                    error)));
+
+    if (getMode().test) {
+      this.xhrSubmitPromise_ = p;
+    }
+  }
+
+  /**
+   * Perform asynchronous variable substitution on the fields that require it.
+   * @param {!IArrayLike<!HTMLInputElement>} varSubsFields
+   * @return {!Promise}
+   * @private
+   */
+  doVarSubs_(varSubsFields) {
     const varSubPromises = [];
     for (let i = 0; i < varSubsFields.length; i++) {
       varSubPromises.push(
           this.urlReplacement_.expandInputValueAsync(varSubsFields[i]));
     }
+    return this.waitOnPromisesOrTimeout_(varSubPromises, 100);
+  }
 
-    // Wait until all variables have been substituted or 100ms timeout.
-    const p = this.waitOnPromisesOrTimeout_(varSubPromises, 100).then(() => {
-      this.triggerFormSubmitInAnalytics_();
-
-      let xhrUrl, body;
-      if (isHeadOrGet) {
-        xhrUrl = addParamsToUrl(
-            dev().assertString(this.xhrAction_), this.getFormAsObject_());
-      } else {
-        xhrUrl = this.xhrAction_;
-        body = new FormData(this.form_);
+  /**
+   * Send a request to the form's action endpoint.
+   * @param {!Object<string, string>=} opt_extraValues
+   * @private
+   */
+  doXhr_(opt_extraValues) {
+    const isHeadOrGet = this.method_ == 'GET' || this.method_ == 'HEAD';
+    let xhrUrl, body;
+    if (isHeadOrGet) {
+      xhrUrl = addParamsToUrl(dev().assertString(this.xhrAction_),
+          this.getFormAsObject_(opt_extraValues));
+    } else {
+      xhrUrl = this.xhrAction_;
+      body = new FormData(this.form_);
+      for (const key in opt_extraValues) {
+        body.append(key, opt_extraValues[key]);
       }
-      this.actions_.trigger(this.form_, 'submit', /*event*/ null);
-      return this.xhr_.fetch(dev().assertString(xhrUrl), {
-        body,
-        method: this.method_,
-        credentials: 'include',
-        headers: {
-          Accept: 'application/json',
-        },
-      }).then(response => {
-        return response.json().then(json => {
-          this.triggerAction_(/* success */ true, json);
-          this.analyticsEvent_('amp-form-submit-success');
-          this.setState_(FormState_.SUBMIT_SUCCESS);
-          this.renderTemplate_(json || {});
-          this.maybeHandleRedirect_(
-              /** @type {../../../src/service/xhr-impl.FetchResponse} */ (
-                  response));
-        }, error => {
-          rethrowAsync('Failed to parse response JSON:', error);
-        });
-      }, error => {
-        this.triggerAction_(
-            /* success */ false, error ? error.responseJson : null);
-        this.analyticsEvent_('amp-form-submit-error');
-        this.setState_(FormState_.SUBMIT_ERROR);
-        this.renderTemplate_(error.responseJson || {});
-        this.maybeHandleRedirect_(
-            /** @type {../../../src/service/xhr-impl.FetchResponse} */ (
-                error));
-        rethrowAsync('Form submission failed:', error);
-      });
-    });
-    if (getMode().test) {
-      this.xhrSubmitPromise_ = p;
     }
+    return this.xhr_.fetch(dev().assertString(xhrUrl), {
+      body,
+      method: this.method_,
+      credentials: 'include',
+      headers: {
+        Accept: 'application/json',
+      },
+    });
+  }
+
+  /**
+   * Transition the form to the submit success state.
+   * @param {!../../../src/service/xhr-impl.FetchResponse} response
+   * @return {!Promise}
+   * @private
+   */
+  handleXhrSubmitSuccess_(response) {
+    return response.json().then(json => {
+      this.triggerAction_(/* success */ true, json);
+      this.analyticsEvent_('amp-form-submit-success');
+      this.setState_(FormState_.SUBMIT_SUCCESS);
+      this.renderTemplate_(json || {});
+      this.maybeHandleRedirect_(response);
+    }, error => {
+      const message = 'Failed to parse response JSON:';
+      user().error(TAG, message, error);
+      rethrowAsync(message, error);
+    });
+  }
+
+  /**
+   * Transition the form the the submit error state.
+   * @param {../../../src/service/xhr-impl.FetchError} error
+   * @private
+   */
+  handleXhrSubmitFailure_(error) {
+    this.triggerAction_(
+        /* success */ false, error ? error.responseJson : null);
+    this.analyticsEvent_('amp-form-submit-error');
+    this.setState_(FormState_.SUBMIT_ERROR);
+    this.renderTemplate_(error.responseJson || {});
+    this.maybeHandleRedirect_(error.response);
+    const message = 'Form submission failed:';
+    user().error(TAG, message, error);
+    rethrowAsync(message, error);
   }
 
   /** @private */
@@ -441,7 +530,6 @@ export class AmpForm {
       // reporting and blocking submission on non-valid forms.
       const isValid = checkUserValidityOnSubmission(this.form_);
       if (this.shouldValidate_ && !isValid) {
-        // TODO(#3776): Use .mutate method when it supports passing state.
         this.vsync_.run({
           measure: undefined,
           mutate: reportValidity,
@@ -456,11 +544,11 @@ export class AmpForm {
 
   /**
    * Handles response redirect throught the AMP-Redirect-To response header.
-   * @param {../../../src/service/xhr-impl.FetchResponse} response
+   * @param {!../../../src/service/xhr-impl.FetchResponse} response
    * @private
    */
   maybeHandleRedirect_(response) {
-    if (!response.headers) {
+    if (!response || !response.headers) {
       return;
     }
     const redirectTo = response.headers.get(REDIRECT_TO_HEADER);
@@ -515,10 +603,11 @@ export class AmpForm {
 
   /**
    * Returns form data as an object.
+   * @param {!Object<string, string>=} opt_extraFields
    * @return {!Object}
    * @private
    */
-  getFormAsObject_() {
+  getFormAsObject_(opt_extraFields) {
     const data = {};
     const inputs = this.form_.elements;
     const submittableTagsRegex = /^(?:input|select|textarea)$/i;
@@ -537,6 +626,9 @@ export class AmpForm {
         data[input.name] = [];
       }
       data[input.name].push(input.value);
+    }
+    if (opt_extraFields) {
+      deepMerge(data, opt_extraFields);
     }
     return data;
   }
@@ -677,8 +769,6 @@ function getUserValidityStateFor(element) {
 /**
  * Updates class names on the element to reflect the active invalid types on it.
  *
- * TODO(#5005): Maybe propagate the invalid type classes to parents of the input as well.
- *
  * @param {!Element} element
  */
 function updateInvalidTypesClasses(element) {
@@ -702,9 +792,6 @@ function updateInvalidTypesClasses(element) {
  * The specs are still not fully specified. The current solution tries to follow a common
  * sense approach for when to apply these classes. As the specs gets clearer, we should
  * strive to match it as much as possible.
- *
- * TODO(#4317): Follow up on ancestor propagation behavior and understand the future
- *              specs for the :user-valid/:user-inavlid.
  *
  * @param {!Element} element
  * @param {boolean=} propagate Whether to propagate the user validity to ancestors.
@@ -755,11 +842,10 @@ function checkUserValidity(element, propagate = false) {
 /**
  * Responds to user interaction with an input by checking user validity of the input
  * and possibly its input-related ancestors (e.g. feildset, form).
- * @param {!Event} e
+ * @param {!Element} input
  * @private visible for testing.
  */
-export function onInputInteraction_(e) {
-  const input = dev().assertElement(e.target);
+export function checkUserValidityAfterInteraction_(input) {
   checkUserValidity(input, /* propagate */ true);
 }
 

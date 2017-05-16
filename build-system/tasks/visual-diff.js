@@ -15,7 +15,8 @@
  */
 
 var argv = require('minimist')(process.argv.slice(2));
-var child_process = require('child_process');
+var exec = require('../exec.js').exec;
+var fs = require('fs-extra');
 var gulp = require('gulp-help')(require('gulp'));
 var util = require('gulp-util');
 
@@ -23,23 +24,7 @@ var percyCommand = 'percy snapshot';
 var defaultWidths = [375, 411];  // CSS widths: iPhone: 375, Pixel: 411.
 var percyProjectSeparator = '/';  // Standard format of repo slug: "foo/bar".
 var percyTokenLength = 64;  // Standard Percy API key length.
-
-
-/**
- * Executes the provided command; terminates this program in case of failure.
- * Copied from pr-check.js.
- * TODO(rsimha-amp): Refactor this into a shared library. Issue #9038.
- *
- * @param {string} cmd
- */
-function execOrDie(cmd) {
-  var p =
-      child_process.spawnSync('/bin/sh', ['-c', cmd], {'stdio': 'inherit'});
-  if (p.status != 0) {
-    console/*OK*/.log('\nExiting due to failing command: ' + cmd);
-    process.exit(p.status)
-  }
-}
+var visualTestsFile = 'test/visual-diff/visual-tests.json';
 
 /**
  * Extracts and verifies Percy project keys from the environment.
@@ -73,7 +58,7 @@ function extractPercyKeys() {
         'Error: PERCY_TOKEN doesn\'t look like a valid Percy API key'));
     process.exit(1);
   }
-  util.log('Percy token: ', util.colors.magenta(percyToken));
+  util.log('Percy token: ', util.colors.magenta('<redacted>'));
   return {
     percyProject: percyProject,
     percyToken: percyToken,
@@ -86,14 +71,15 @@ function extractPercyKeys() {
  * @return {!Object} Object containing extracted args.
  */
 function extractPercyArgs() {
-  // Webpage to snapshot. This is a path, relative to amphtml/.
+  // Webpage to snapshot. This is a path, relative to amphtml/. For automated
+  // tests on Travis, this defaults to the set of test cases defined in
   var webpage = '';
   if (argv.webpage) {
     webpage = argv.webpage;
   } else {
-    console./*OK*/error(util.colors.red(
-        'Must specify a webpage to diff via --webpage'));
-    process.exit(1);
+    // Default to the amp-by-example page for test runs.
+    // TODO(rsimha): Refactor this to support multiple webpages.
+    var webpage = JSON.parse(fs.readFileSync(visualTestsFile)).webpage;
   }
   util.log('Webpage: ', util.colors.magenta(webpage));
 
@@ -155,7 +141,7 @@ function runTests() {
   util.log(util.colors.yellow('Running visual diff tests...'));
   var percyKeys = extractPercyKeys();
   var commandLine = constructCommandLine(percyKeys);
-  execOrDie(commandLine);
+  exec(commandLine);
 }
 
 
