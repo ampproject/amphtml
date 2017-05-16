@@ -198,62 +198,47 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
     });
   });
 
+  /**
+   * Combined test specs for amp-img
+   */
   describe('amp-img integration', () => {
-    it('should change src when the src attribute binding changes', () => {
-      const button = fixture.doc.getElementById('changeImgSrcButton');
+    it('should integrate with amp-img', () => {
+      const changeImgSrcButton = fixture.doc
+          .getElementById('changeImgSrcButton');
+      const invalidSrcButton = fixture.doc.getElementById('invalidSrcButton');
+      const ftpSrcButton = fixture.doc.getElementById('ftpSrcButton');
+      const changeImgAltButton = fixture.doc
+          .getElementById('changeImgAltButton');
+      const changeImgDimensButton = fixture.doc
+          .getElementById('changeImgDimensButton');
       const img = fixture.doc.getElementById('image');
       expect(img.getAttribute('src')).to.equal('http://www.google.com/image1');
-      button.click();
+      expect(img.getAttribute('height')).to.equal('200');
+      expect(img.getAttribute('width')).to.equal('200');
+      changeImgSrcButton.click();
+      invalidSrcButton.click();
+      ftpSrcButton.click();
+      changeImgAltButton.click();
+      changeImgDimensButton.click();
       return waitForBindApplication().then(() => {
+        // Should change src when the src attribute binding changes
         expect(img.getAttribute('src')).to
             .equal('http://www.google.com/image2');
-      });
-    });
-
-    it('should NOT change src when new value is a blocked URL', () => {
-      const button = fixture.doc.getElementById('invalidSrcButton');
-      const img = fixture.doc.getElementById('image');
-      expect(img.getAttribute('src')).to.equal('http://www.google.com/image1');
-      button.click();
-      return waitForBindApplication().then(() => {
+        // Should NOT change src when new value is a blocked URL
         expect(img.getAttribute('src')).to
             .equal('http://www.google.com/image1');
-      });
-    });
-
-    it('should NOT change src when new value uses an invalid protocol', () => {
-      const img = fixture.doc.getElementById('image');
-      expect(img.getAttribute('src')).to.equal('http://www.google.com/image1');
-      const ftpSrcButton = fixture.doc.getElementById('ftpSrcButton');
-      ftpSrcButton.click();
-      return waitForBindApplication().then(() => {
-        expect(img.getAttribute('src')).to.equal('http://www.google.com/image1');
+        // Should NOT change src when new value uses an invalid protocol
+        expect(img.getAttribute('src')).to
+            .equal('http://www.google.com/image1');
         const telSrcButton = fixture.doc.getElementById('telSrcButton');
         telSrcButton.click();
         return waitForBindApplication();
       }).then(() => {
         expect(img.getAttribute('src')).to
             .equal('http://www.google.com/image1');
-      });
-    });
-
-    it('should change alt when the alt attribute binding changes', () => {
-      const button = fixture.doc.getElementById('changeImgAltButton');
-      const img = fixture.doc.getElementById('image');
-      expect(img.getAttribute('alt')).to.equal('unbound');
-      button.click();
-      return waitForBindApplication().then(() => {
+        // Should change alt when the alt attribute binding changes
         expect(img.getAttribute('alt')).to.equal('hello world');
-      });
-    });
-
-    it('should change width and height when their bindings change', () => {
-      const button = fixture.doc.getElementById('changeImgDimensButton');
-      const img = fixture.doc.getElementById('image');
-      expect(img.getAttribute('height')).to.equal('200');
-      expect(img.getAttribute('width')).to.equal('200');
-      button.click();
-      return waitForBindApplication().then(() => {
+        // Should change width and height when their bindings change
         expect(img.getAttribute('height')).to.equal('300');
         expect(img.getAttribute('width')).to.equal('300');
       });
