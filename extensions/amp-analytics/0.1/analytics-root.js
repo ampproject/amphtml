@@ -173,6 +173,8 @@ export class AnalyticsRoot {
   /**
    * Searches the element that matches the selector within the scope of the
    * analytics root in relationship to the specified context node.
+   * Note: Please wait for document-ready to avoid false missed searches with
+   * selector other than :root or :host
    *
    * @param {!Element} context
    * @param {string} selector DOM query selector.
