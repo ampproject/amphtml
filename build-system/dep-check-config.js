@@ -134,6 +134,8 @@ exports.rules = [
           'extensions/amp-ad-network-triplelift-impl/0.1/triplelift-a4a-config.js',
       'ads/_a4a-config.js->' +
           'extensions/amp-ad-network-cloudflare-impl/0.1/cloudflare-a4a-config.js',
+      'ads/_a4a-config.js->' +
+          'extensions/amp-ad-network-gmossp-impl/0.1/gmossp-a4a-config.js',
       'ads/google/a4a/google-data-reporter.js->' +
           'extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config.js',
       'ads/google/a4a/google-data-reporter.js->' +
