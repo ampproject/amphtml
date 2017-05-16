@@ -23,7 +23,6 @@ export const stubbedElements = [];
 
 export class ElementStub extends BaseElement {
   constructor(element) {
-    debugger;
     super(element);
     stubbedElements.push(this);
   }

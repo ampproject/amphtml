@@ -104,6 +104,15 @@ export class LiveListManager {
   }
 
   /**
+   * @param {!Document} doc
+   * @return {!Array<string>}
+   */
+  getExtensionScripts_(doc) {
+    return [].slice.call(doc
+        .querySelectorAll('script[custom-element], script[custom-template]'));
+  }
+
+  /**
    * Checks if any of the registered amp-live-list components is active/
    *
    * @return {boolean}
@@ -139,6 +148,10 @@ export class LiveListManager {
    * @param {!Document} doc
    */
   getLiveLists_(doc) {
+    const extensions = this.getExtensionScripts_(doc);
+    if (extensions.length) {
+      this.insertNewExtenstionScripts_(extensionsToInsert);
+    }
     const lists = Array.prototype.slice.call(
         doc.getElementsByTagName('amp-live-list'));
     const updateTimes = lists.map(this.updateLiveList_.bind(this));
@@ -211,6 +224,17 @@ export class LiveListManager {
         this.poller_.stop();
       }
     });
+  }
+
+  /**
+   * @param {!Object<string, string>}
+   */
+  insertNewExtenstionScripts_(extensions) {
+    const fragment = this.win.document.createDocumentFragment();
+    Object.keys(extensions).forEach(x => {
+      fragment.appendChild(extensions[x]);
+    });
+    this.win.document.head.appendChild(extensions);
   }
 
   /**

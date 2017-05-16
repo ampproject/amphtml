@@ -107,7 +107,6 @@ export function createCustomElementClass(win, name) {
      * @suppress {checkTypes}
      */
     constructor(self) {
-      debugger;
       return super(self);
     }
     elementName() {
