@@ -54,7 +54,7 @@ export function netletix(global, data) {
     }), data.ampSlotIndex);
   window.addEventListener('message', event => {
     if (event.data.type &&
-    startsWith(dev().assertString(event.data.type), 'nx-')) {
+        startsWith(dev().assertString(event.data.type), 'nx-')) {
       switch (event.data.type) {
         case 'nx-resize':
           const renderconfig = {
@@ -62,15 +62,14 @@ export function netletix(global, data) {
             'height': event.data.height,
           };
           global.context.renderStart(renderconfig);
-          if ((event.data.width &&
-            event.data.height) &&
-            (global.context.data &&
-            global.context.data.nxwidth &&
-            global.context.data.nxheight) &&
-            (event.data.width.toString() != global.context.data.nxwidth ||
-            event.data.height.toString() != global.context.data.nxheight)) {
+          const nxh = (data.nxheight || DEFAULT_NX_HEIGHT);
+          const nxw = (data.nxwidth || DEFAULT_NX_WIDTH);
+          if (event.data.width &&
+              event.data.height &&
+              (event.data.width != nxh ||
+              event.data.height != nxw)) {
             global.context.requestResize(event.data.width,
-            event.data.height);
+                event.data.height);
           };
           break;
         case 'nx-empty':
