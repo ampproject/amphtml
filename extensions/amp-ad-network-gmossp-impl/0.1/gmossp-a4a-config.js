@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {startsWith} from '../../../src/string';
+
 /** @const @private {string} */
 const GMOSSP_SRC_PREFIX_ = 'https://sp.gmossp-sp.jp';
 
@@ -25,5 +27,5 @@ const GMOSSP_SRC_PREFIX_ = 'https://sp.gmossp-sp.jp';
 export function gmosspIsA4AEnabled(win, element) {
   const src = element.getAttribute('src');
   return !!element.getAttribute('data-use-a4a') && !!src &&
-    src.indexOf(GMOSSP_SRC_PREFIX_) == 0;
+    startsWith(src, GMOSSP_SRC_PREFIX_);
 }
