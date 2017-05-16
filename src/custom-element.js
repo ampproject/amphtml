@@ -1583,7 +1583,7 @@ function createBaseCustomElementClass(win) {
     toggleFallback(show) {
       assertNotTemplate(this);
       const resourceState = this.getResourceState_();
-      // Do not show fallback if element has not been scheduled layout yet
+      // Do not show fallback before layout
       if (show && (resourceState == ResourceState.NOT_BUILT ||
           resourceState == ResourceState.NOT_LAID_OUT ||
           resourceState == ResourceState.READY_FOR_LAYOUT)) {
