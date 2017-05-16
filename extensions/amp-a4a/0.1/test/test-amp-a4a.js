@@ -1214,6 +1214,26 @@ describe('amp-a4a', () => {
         });
       });
     });
+    it('should ignore invalid safeframe version header', () => {
+      headers[SAFEFRAME_VERSION_HEADER] = 'some-bad-item';
+      headers[RENDERING_TYPE_HEADER] = 'safeframe';
+      delete headers[SIGNATURE_HEADER];
+      xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        const a4aElement = createA4aElement(doc);
+        const a4a = new MockA4AImpl(a4aElement);
+        a4a.buildCallback();
+        a4a.onLayoutMeasure();
+        return a4a.adPromise_.then(() => {
+          expect(xhrMock).to.be.calledOnce;
+          return a4a.layoutCallback().then(() => {
+            verifySafeFrameRender(a4aElement, DEFAULT_SAFEFRAME_VERSION);
+          });
+        });
+      });
+    });
     // TODO(tdrl): Go through case analysis in amp-a4a.js#onLayoutMeasure and
     // add one test for each case / ensure that all cases are covered.
   });
