@@ -941,8 +941,11 @@ describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
       return isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
     }).then(result => {
       expect(result).to.be.false;
-      expect(warnStub).to.have.been.calledWith('experiments',
-          sinon.match(/Unrecognized experiments token version/));
+      expect(warnStub).to.have.been.calledWith(
+          'experiments',
+          sinon.match({
+            message: sinon.match(/Unrecognized experiments token version/),
+          }));
     });
   });
 
@@ -953,8 +956,9 @@ describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
       return isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
     }).then(result => {
       expect(result).to.be.false;
-      expect(warnStub).to.have.been.calledWith('experiments',
-          'Specified len extends past end of buffer');
+      expect(warnStub).to.have.been.calledWith(
+          'experiments',
+          sinon.match({message: 'Specified len extends past end of buffer'}));
     });
   });
 
@@ -965,8 +969,9 @@ describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
       return isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
     }).then(result => {
       expect(result).to.be.false;
-      expect(warnStub).to.have.been
-        .calledWith('experiments', 'Failed to verify config signature');
+      expect(warnStub).to.have.been.calledWith(
+          'experiments',
+          sinon.match({message: 'Failed to verify config signature'}));
     });
   });
 
@@ -978,8 +983,9 @@ describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
       return isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
     }).then(result => {
       expect(result).to.be.false;
-      expect(warnStub).to.have.been
-          .calledWith('experiments', 'Config does not match current origin');
+      expect(warnStub).to.have.been.calledWith(
+            'experiments',
+            sinon.match({message: 'Config does not match current origin'}));
     });
   });
 

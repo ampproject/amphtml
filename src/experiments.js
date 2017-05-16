@@ -89,7 +89,8 @@ function enableExperimentsFromToken(win, token, opt_publicJwk) {
   const version = bytes[current];
   if (version !== 0) {
     // Unrecognized version number
-    return Promise.reject(`Unrecognized experiments token version: ${version}`);
+    return Promise.reject(
+        new Error(`Unrecognized experiments token version: ${version}`));
   }
   current++;
   /**
@@ -102,7 +103,8 @@ function enableExperimentsFromToken(win, token, opt_publicJwk) {
       bytesToUInt32(bytes.subarray(current, current + bytesForConfigSize));
   current += bytesForConfigSize;
   if (configSize > bytes.length - current) {
-    return Promise.reject('Specified len extends past end of buffer');
+    return Promise.reject(
+        new Error('Specified len extends past end of buffer'));
   }
   const configBytes = bytes.subarray(current, current + configSize);
   current += configSize;
@@ -115,7 +117,7 @@ function enableExperimentsFromToken(win, token, opt_publicJwk) {
     return crypto.verifySignature(configBytes, signatureBytes, keyInfo);
   }).then(verified => {
     if (!verified) {
-      return Promise.reject('Failed to verify config signature');
+      throw new Error('Failed to verify config signature');
     }
     const configStr = utf8DecodeSync(configBytes);
     const config = JSON.parse(configStr);
@@ -123,7 +125,7 @@ function enableExperimentsFromToken(win, token, opt_publicJwk) {
     const approvedOrigin = parseUrl(config['origin']).origin;
     const sourceOrigin = getSourceOrigin(win.location);
     if (approvedOrigin !== sourceOrigin) {
-      return Promise.reject('Config does not match current origin');
+      throw new Error('Config does not match current origin');
     }
 
     const experiments = config['experiments'];
