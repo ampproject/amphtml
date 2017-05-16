@@ -23,7 +23,7 @@ Before you can add your analytics service to AMP HTML runtime, you may need to:
   * "vars": {} for additional default variables.
   * "requests": {} for requests that your service will use.
   * "optout": if needed.  We currently don't have a great opt-out system, so please reach out to help us design one that works well for you.
- * An example in the [examples/analytics-vendors.amp.html](../examples/analytics-vendors.amp.html)
+ * An example in the [examples/analytics-vendors.amp.html](../../examples/analytics-vendors.amp.html)
 3. A line for your analytics service in the 'type' attribute section of the [amp-analytics](amp-analytics.md) usage reference.
 Test the patch to ensure the hits from the example are working as expected.  For example, the data needed is being collected and displayed in your analytics dashboard.
 4. Submit a Pull Request with this patch, referencing the Intent-To-Implement issue.
