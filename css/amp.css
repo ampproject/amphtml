@@ -403,7 +403,7 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
 }
 
 .i-amphtml-loader-line.amp-active .i-amphtml-loader-moving-line {
-  animation: i-amphtml-loader-line-moving 2s ease infinite;
+  animation: i-amphtml-loader-line-moving 4s ease infinite;
 }
 
 .i-amphtml-loader {
