@@ -163,12 +163,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
   },
   {
-    id: 'make-body-relative',
-    name: 'Sets the body to position:relative (launched)',
-    spec: 'https://github.com/ampproject/amphtml/issues/5667',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5660',
-  },
-  {
     id: 'alp-for-a4a',
     name: 'Enable redirect to landing page directly for A4A',
     spec: 'https://github.com/ampproject/amphtml/issues/5212',
@@ -196,11 +190,6 @@ const EXPERIMENTS = [
     id: 'visibility-v3',
     name: 'Visibility tracking with FIE and in-a-box support',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8121',
-  },
-  {
-    id: 'amp-accordion-session-state-optout',
-    name: 'AMP Accordion attribute to opt out of preserved state.',
-    Spec: 'https://github.com/ampproject/amphtml/issues/3813',
   },
   {
     id: 'variable-filters',
@@ -236,13 +225,6 @@ const EXPERIMENTS = [
     name: 'Display jank meter',
   },
   {
-    id: 'amp-selector',
-    name: 'Amp selector extension- [LAUNCHED]',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6168',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-         'amp-selector/amp-selector.md',
-  },
-  {
     id: 'sticky-ad-early-load',
     name: 'Load sticky-ad early after user first scroll' +
         'Only apply to 1.0 version',
@@ -253,13 +235,6 @@ const EXPERIMENTS = [
     name: 'Amp extension for a parallax effect',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7801',
     spec: 'https://github.com/ampproject/amphtml/issues/1443',
-  },
-  {
-    id: 'amp-sortable-table',
-    name: 'AMP Sortable Table',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6057',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-sortable-table/amp-sortable-table.md',
   },
   {
     id: 'slidescroll-disable-css-snap',
