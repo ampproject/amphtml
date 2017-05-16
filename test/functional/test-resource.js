@@ -1925,5 +1925,10 @@ describe('Resource renderOutsideViewport', () => {
       expect(resource.renderOutsideViewportResolve_).to.not.be.ok;
       return promise;
     });
+
+    it('should resolve immediately if already laid out', () => {
+      sandbox.stub(resource, 'isLayoutPending').returns(() => false);
+      return resource.whenWithinRenderOutsideViewport();
+    });
   });
 });

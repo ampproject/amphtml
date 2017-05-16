@@ -570,6 +570,9 @@ export class Resource {
    *    range specified by implementation's renderOutsideViewport
    */
   whenWithinRenderOutsideViewport() {
+    if (!this.isLayoutPending()) {
+      return Promise.resolve();
+    }
     if (this.renderOutsideViewportPromise_) {
       return this.renderOutsideViewportPromise_;
     }
