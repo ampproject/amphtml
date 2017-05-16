@@ -33,6 +33,7 @@ import {Extensions} from '../../../../src/service/extensions-impl';
 import {Viewer} from '../../../../src/service/viewer-impl';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {cryptoFor} from '../../../../src/crypto';
+import {isExperimentOn, toggleExperiment} from '../../../../src/experiments';
 import {cancellation} from '../../../../src/error';
 import {
   data as validCSSAmp,
@@ -328,6 +329,7 @@ describe('amp-a4a', () => {
           () => iniLoadPromise);
       const lifecycleEventStub = sandbox.stub(
           a4a, 'protectedEmitLifecycleEvent_');
+      a4a.buildCallback();
       a4a.onLayoutMeasure();
       const layoutPromise = a4a.layoutCallback();
       return Promise.resolve().then(() => {
@@ -359,6 +361,7 @@ describe('amp-a4a', () => {
 
     it('should update embed visibility', () => {
       sandbox.stub(a4a, 'isInViewport', () => false);
+      a4a.buildCallback();
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
         a4a.vsync_.runScheduledTasks_();
@@ -646,6 +649,7 @@ describe('amp-a4a', () => {
     ['nameframe', 'safeframe'].forEach(renderType => {
       it(`should not use ${renderType} if creative is A4A`, () => {
         headers[RENDERING_TYPE_HEADER] = renderType;
+        a4a.buildCallback();
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
           // Force vsync system to run all queued tasks, so that DOM mutations
@@ -658,6 +662,7 @@ describe('amp-a4a', () => {
       it(`should not use ${renderType} even if onLayoutMeasure called ` +
           'multiple times', () => {
         headers[RENDERING_TYPE_HEADER] = renderType;
+        a4a.buildCallback();
         a4a.onLayoutMeasure();
         a4a.onLayoutMeasure();
         a4a.onLayoutMeasure();
@@ -781,6 +786,7 @@ describe('amp-a4a', () => {
         const renderAmpCreativeSpy = sandbox.spy(a4a, 'renderAmpCreative_');
         const loadExtensionSpy =
             sandbox.spy(Extensions.prototype, 'loadExtension');
+        a4a.buildCallback();
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         return a4a.adPromise_.then(promiseResult => {
@@ -975,6 +981,7 @@ describe('amp-a4a', () => {
                 signature: base64UrlDecodeToBytes(validCSSAmp.signature),
               };
             }));
+        a4a.buildCallback();
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
           expect(a4a.isVerifiedAmpCreative_).to.be.true;
@@ -1760,6 +1767,8 @@ describe('amp-a4a', () => {
         fixture = f;
         win = fixture.win;
         a4aElement = createA4aElement(fixture.doc);
+        toggleExperiment(
+          win, 'a4a-disable-cryptokey-viewer-check', false, true);
         return fixture;
       });
     });
@@ -1775,20 +1784,21 @@ describe('amp-a4a', () => {
     it('should fetch a single key', () => {
       expect(win.ampA4aValidationKeys).not.to.exist;
       // Key fetch happens on A4A class construction.
-      const unusedA4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      a4a.buildCallback();
       const result = win.ampA4aValidationKeys;
-      expect(xhrMockJson).to.be.calledOnce;
-      expect(xhrMockJson).to.be.calledWith(
-          'https://cdn.ampproject.org/amp-ad-verifying-keyset.json', {
-            mode: 'cors',
-            method: 'GET',
-            ampCors: false,
-            credentials: 'omit',
-          });
       expect(result).to.be.instanceof(Array);
       expect(result).to.have.lengthOf(1);
-      expect(result[0]).to.be.instanceof(Promise);
-      return result[0].then(serviceInfo => {
+      return Promise.all(result).then(serviceInfos => {
+        expect(xhrMockJson).to.be.calledOnce;
+        expect(xhrMockJson).to.be.calledWith(
+            'https://cdn.ampproject.org/amp-ad-verifying-keyset.json', {
+              mode: 'cors',
+              method: 'GET',
+              ampCors: false,
+              credentials: 'omit',
+            });
+        const serviceInfo = serviceInfos[0];
         expect(serviceInfo).to.have.all.keys(['serviceName', 'keys']);
         expect(serviceInfo['serviceName']).to.equal('google');
         expect(serviceInfo['keys']).to.be.an.instanceof(Array);
@@ -1798,6 +1808,41 @@ describe('amp-a4a', () => {
         return keyInfoPromise.then(keyInfo => {
           verifyIsKeyInfo(keyInfo);
         });
+      });
+    });
+
+    it('should wait for first visible', () => {
+      let firstVisibleResolve;
+      viewerWhenVisibleMock.returns(
+        new Promise(resolve => {
+          firstVisibleResolve = resolve;
+        }));
+      expect(win.ampA4aValidationKeys).not.to.exist;
+      // Key fetch happens on A4A class construction.
+      const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      a4a.buildCallback();
+      const result = win.ampA4aValidationKeys;
+      expect(xhrMockJson).to.not.be.called;
+      firstVisibleResolve();
+      return Promise.all(result).then(() => {
+        expect(xhrMockJson).to.be.calledOnce;
+      });
+    });
+
+    it('should not wait for first visible if exp disabled', () => {
+      toggleExperiment(win, 'a4a-disable-cryptokey-viewer-check', true, true);
+      expect(isExperimentOn(win, 'a4a-disable-cryptokey-viewer-check'))
+        .to.be.true;
+      expect(win.ampA4aValidationKeys).not.to.exist;
+      // Key fetch happens on A4A class construction.
+      const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      a4a.buildCallback();
+      const result = win.ampA4aValidationKeys;
+      expect(result).to.be.instanceof(Array);
+      expect(result).to.have.lengthOf(1);  // Only one service.
+      return Promise.all(result).then(() => {
+        expect(viewerWhenVisibleMock).to.not.be.called;
+        expect(xhrMockJson).to.be.calledOnce;
       });
     });
 
@@ -1814,20 +1859,22 @@ describe('amp-a4a', () => {
           Promise.resolve({keys: [testKey, testKey, testKey]}));
       expect(win.ampA4aValidationKeys).not.to.exist;
       // Key fetch happens on A4A class construction.
-      const unusedA4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      a4a.buildCallback();
       const result = win.ampA4aValidationKeys;
-      expect(xhrMockJson).to.be.calledOnce;
-      expect(xhrMockJson).to.be.calledWith(
+      expect(result).to.be.instanceof(Array);
+      expect(result).to.have.lengthOf(1);  // Only one service.
+      return Promise.all(result).then(serviceInfos => {
+        expect(xhrMockJson).to.be.calledOnce;
+        expect(xhrMockJson).to.be.calledWith(
           'https://cdn.ampproject.org/amp-ad-verifying-keyset.json', {
             mode: 'cors',
             method: 'GET',
             ampCors: false,
             credentials: 'omit',
           });
-      expect(result).to.be.instanceof(Array);
-      expect(result).to.have.lengthOf(1);  // Only one service.
-      expect(result[0]).to.be.instanceof(Promise);
-      return result[0].then(serviceInfo => {
+        expect(serviceInfos).to.have.lengthOf(1);  // Only one service.
+        const serviceInfo = serviceInfos[0];
         expect(serviceInfo).to.have.all.keys(['serviceName', 'keys']);
         expect(serviceInfo['serviceName']).to.equal('google');
         expect(serviceInfo['keys']).to.be.an.instanceof(Array);
@@ -1850,23 +1897,25 @@ describe('amp-a4a', () => {
               Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]}));
       expect(win.ampA4aValidationKeys).not.to.exist;
       // Key fetch happens on A4A class construction.
-      const unusedA4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      a4a.buildCallback();
       const result = win.ampA4aValidationKeys;
-      expect(xhrMockJson).to.be.calledTwice;
       expect(result).to.be.instanceof(Array);
       expect(result).to.have.lengthOf(2);  // Two services.
-      return Promise.all(result.map(  // For each service...
-          serviceInfoPromise => serviceInfoPromise.then(serviceInfo => {
-            expect(serviceInfo).to.have.all.keys(['serviceName', 'keys']);
-            expect(serviceInfo['serviceName']).to.have.string('google');
-            expect(serviceInfo['keys']).to.be.an.instanceof(Array);
-            expect(serviceInfo['keys']).to.have.lengthOf(1);
-            const keyInfoPromise = serviceInfo['keys'][0];
-            expect(keyInfoPromise).to.be.an.instanceof(Promise);
-            return keyInfoPromise.then(keyInfo => {
-              verifyIsKeyInfo(keyInfo);
-            });
-          })));
+      return Promise.all(result).then(serviceInfos => {
+        expect(xhrMockJson).to.be.calledTwice;
+        serviceInfos.map(serviceInfo => {
+          expect(serviceInfo).to.have.all.keys(['serviceName', 'keys']);
+          expect(serviceInfo['serviceName']).to.have.string('google');
+          expect(serviceInfo['keys']).to.be.an.instanceof(Array);
+          expect(serviceInfo['keys']).to.have.lengthOf(1);
+          const keyInfoPromise = serviceInfo['keys'][0];
+          expect(keyInfoPromise).to.be.an.instanceof(Promise);
+          return keyInfoPromise.then(keyInfo => {
+            verifyIsKeyInfo(keyInfo);
+          });
+        });
+      });
     });
 
     it('Should gracefully handle malformed key responses', () => {
@@ -1879,23 +1928,24 @@ describe('amp-a4a', () => {
           }).returns(Promise.resolve({keys: ['invalid key data']}));
       expect(win.ampA4aValidationKeys).not.to.exist;
       // Key fetch happens on A4A class construction.
-      const unusedA4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      a4a.buildCallback();
       const result = win.ampA4aValidationKeys;
-      expect(xhrMockJson).to.be.calledOnce;
-      expect(xhrMockJson).to.be.calledWith(
-          'https://cdn.ampproject.org/amp-ad-verifying-keyset.json', {
-            mode: 'cors',
-            method: 'GET',
-            ampCors: false,
-            credentials: 'omit',
-          });
       expect(result).to.be.instanceof(Array);
       expect(result).to.have.lengthOf(1);  // Only one service.
-      return result[0].then(serviceInfo => {
-        expect(serviceInfo).to.have.all.keys(['serviceName', 'keys']);
-        expect(serviceInfo['serviceName']).to.equal('google');
-        expect(serviceInfo['keys']).to.be.an.instanceof(Array);
-        expect(serviceInfo['keys']).to.be.empty;
+      return Promise.all(result).then(serviceInfos => {
+        expect(xhrMockJson).to.be.calledOnce;
+        expect(xhrMockJson).to.be.calledWith(
+            'https://cdn.ampproject.org/amp-ad-verifying-keyset.json', {
+              mode: 'cors',
+              method: 'GET',
+              ampCors: false,
+              credentials: 'omit',
+            });
+        expect(serviceInfos[0]).to.have.all.keys(['serviceName', 'keys']);
+        expect(serviceInfos[0]['serviceName']).to.equal('google');
+        expect(serviceInfos[0]['keys']).to.be.an.instanceof(Array);
+        expect(serviceInfos[0]['keys']).to.be.empty;
       });
     });
 
@@ -1910,7 +1960,8 @@ describe('amp-a4a', () => {
               new TypeError('some random network error')));
       expect(win.ampA4aValidationKeys).not.to.exist;
       // Key fetch happens on A4A class construction.
-      const unusedA4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      a4a.buildCallback();
       const result = win.ampA4aValidationKeys;
       expect(result).to.be.instanceof(Array);
       expect(result).to.have.lengthOf(1);  // Only one service.
@@ -1934,9 +1985,9 @@ describe('amp-a4a', () => {
               new TypeError('some random network error')));
       expect(win.ampA4aValidationKeys).not.to.exist;
       // Key fetch happens on A4A class construction.
-      const unusedA4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      a4a.buildCallback();
       const result = win.ampA4aValidationKeys;
-      expect(xhrMockJson).to.be.calledTwice;
       expect(result).to.be.instanceof(Array);
       expect(result).to.have.lengthOf(2);  // Two services.
       return Promise.all(result.map(  // For each service...
@@ -1958,14 +2009,17 @@ describe('amp-a4a', () => {
                   `Unexpected service name: ${serviceName} is neither ` +
                   'google nor google-dev');
             }
-          })));
+          }))).then(() => {
+            expect(xhrMockJson).to.be.calledTwice;
+          });
     });
 
     it('should return valid object on invalid service name', () => {
       getSigningServiceNamesMock.returns(['fnord']);
       expect(win.ampA4aValidationKeys).not.to.exist;
       // Key fetch happens on A4A class construction.
-      const unusedA4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
+      a4a.buildCallback();
       const result = win.ampA4aValidationKeys;
       expect(xhrMockJson).not.to.be.called;
       expect(result).to.be.instanceof(Array);

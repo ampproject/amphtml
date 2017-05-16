@@ -17,8 +17,8 @@
 import {AmpInstallServiceWorker} from '../amp-install-serviceworker';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {
-  getService,
-  getServiceForDoc,
+  registerServiceBuilder,
+  registerServiceBuilderForDoc,
   resetServiceForTesting,
 } from '../../../../src/service';
 import {loadPromise} from '../../../../src/event-helper';
@@ -190,13 +190,13 @@ describes.realWin('amp-install-serviceworker', {
         sourceUrl: 'https://source.example.com/path',
       };
       resetServiceForTesting(env.win, 'documentInfo');
-      getServiceForDoc(doc, 'documentInfo', () => {
+      registerServiceBuilderForDoc(doc, 'documentInfo', function() {
         return {
           get: () => docInfo,
         };
       });
       whenVisible = Promise.resolve();
-      getService(win, 'viewer', () => {
+      registerServiceBuilder(win, 'viewer', function() {
         return {
           whenFirstVisible: () => whenVisible,
           isVisible: () => true,

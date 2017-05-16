@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-import {LaterpayVendor} from './laterpay-impl';
-import {accessServiceForDoc} from '../../../src/services';
+import {writeScript, validateData} from '../3p/3p';
 
-
-AMP.extension('amp-access-laterpay', '0.1', function(AMP) {
-  AMP.registerServiceForDoc(
-      'laterpay',
-      function(ampdoc) {
-        return accessServiceForDoc(ampdoc).then(accessService => {
-          const vendor = new LaterpayVendor(accessService);
-          accessService.registerVendor('laterpay', vendor);
-          return vendor;
-        });
-      });
-});
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+export function polymorphicads(global, data) {
+  validateData(data, ['adunit', 'params']);
+  global.polyParam = data;
+  writeScript(global, 'https://www.polymorphicads.jp/js/amp.js');
+}
