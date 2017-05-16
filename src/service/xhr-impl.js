@@ -593,6 +593,13 @@ export class FetchResponseHeaders {
  * @return {!Xhr}
  */
 export function xhrServiceForTesting(window) {
+  registerServiceBuilder(window, 'ampdoc', function() {
+    return {
+      isSingleDoc() {
+        return false;
+      },
+    };
+  });
   installXhrService(window);
   return getService(window, 'xhr');
 }

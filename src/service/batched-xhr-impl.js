@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Xhr} from './xhr-impl';
+import {Xhr, xhrServiceForTesting} from './xhr-impl';
 import {getService, registerServiceBuilder} from '../service';
 import {map} from '../utils/object';
 import {removeFragment} from '../url';
@@ -92,6 +92,7 @@ export class BatchedXhr extends Xhr {
  * @return {!BatchedXhr}
  */
 export function batchedXhrServiceForTesting(window) {
+  xhrServiceForTesting(window);
   installBatchedXhrService(window);
   return getService(window, 'batched-xhr');
 }
