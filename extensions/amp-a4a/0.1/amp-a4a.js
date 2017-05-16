@@ -59,6 +59,7 @@ import {A4AVariableSource} from './a4a-variable-source';
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {isReportingEnabled} from '../../../ads/google/a4a/utils';
+import {isInExperiment} from '../../../ads/google/a4a/traffic-experiments';
 
 /** @type {string} */
 const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
@@ -333,6 +334,15 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?Promise} */
     this.adUrlsPromise_ = null;
 
+    const type = (this.element.getAttribute('type') || 'notype').toLowerCase();
+    /**
+     * @private @const{boolean} whether request should only be sent when slot is
+     *    within renderOutsideViewport distance.
+     */
+    this.delayRequestEnabled_ =
+      (type == 'adsense' && isInExperiment(this.element, '117152655')) ||
+      (type == 'doubleclick' && isInExperiment(this.element, '117152665'));
+
     /** @private {string} */
     this.safeframeVersion_ = DEFAULT_SAFEFRAME_VERSION;
   }
@@ -516,7 +526,7 @@ export class AmpA4A extends AMP.BaseElement {
     };
 
     let adUrlPromiseResolver = null;
-    if ((getMode().localDev ||
+    if (!this.delayRequestEnabled_ && (getMode().localDev ||
         isExperimentOn(this.win, 'a4a-measure-get-ad-urls')) &&
         isReportingEnabled(this)) {
       this.adUrlsPromise_ = new Promise(resolve => {
@@ -537,10 +547,24 @@ export class AmpA4A extends AMP.BaseElement {
     //   - Chain cancelled => don't return; drop error
     //   - Uncaught error otherwise => don't return; percolate error up
     this.adPromise_ = viewerForDoc(this.getAmpDoc()).whenFirstVisible()
+        .then(() => {
+          checkStillCurrent(promiseId);
+          // See if experiment that delays request until slot is within
+          // renderOutsideViewport. Within render outside viewport will not
+          // resolve if already within viewport thus the check for already
+          // meeting the definition as opposed to waiting on the promise.
+          if (this.delayRequestEnabled_ &&
+              !this.getResource().renderOutsideViewport()) {
+            return this.getResource().whenWithinRenderOutsideViewport();
+          }
+        })
         // This block returns the ad URL, if one is available.
         /** @return {!Promise<?string>} */
         .then(() => {
           checkStillCurrent(promiseId);
+          if (this.delayRequestEnabled_) {
+            dev().info(TAG, 'ad request being built');
+          }
           return /** @type {!Promise<?string>} */ (this.getAdUrl());
         })
         // This block returns the (possibly empty) response to the XHR request.
