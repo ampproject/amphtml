@@ -208,7 +208,7 @@ export class ActionService {
       });
     } else if (name == 'change') {
       this.root_.addEventListener(name, event => {
-        this.addChangeDetails_(event);
+        this.addInputMutateDetails_(event);
         this.trigger(dev().assertElement(event.target), name, event);
       });
     } else if (name == 'input-debounced') {
@@ -221,17 +221,19 @@ export class ActionService {
         // Create a DeferredEvent to avoid races where the browser cleans up
         // the event object before the async debounced function is called.
         const deferredEvent = new DeferredEvent(event);
+        this.addInputMutateDetails_(deferredEvent);
         debouncedInput(deferredEvent);
       });
     }
   }
 
   /**
-   * Given a browser 'change' event, add `details` property containing the
-   * relevant information for the change that generated the initial event.
+   * Given a browser 'change' or 'input' event, add `details` property
+   * containing the relevant information for the change that generated
+   * the initial event.
    * @param {!ActionEventDef} event A `change` event.
    */
-  addChangeDetails_(event) {
+  addInputMutateDetails_(event) {
     const detail = map();
     const target = event.target;
     const tagName = target.tagName.toLowerCase();

@@ -1053,12 +1053,17 @@ describe('Core events', () => {
     it('should replace functions with throws', () => {
       const event = createCustomEvent(window, 'MyEvent', {foo: 'bar'});
       const deferredEvent = new DeferredEvent(event);
+      const errorText = 'cannot access native event functions';
 
+      // Specifically test these commonly used functions
+      expect(() => deferredEvent.preventDefault()).to.throw(errorText);
+      expect(() => deferredEvent.stopPropagation()).to.throw(errorText);
+
+      // Test all functions
       for (const key in deferredEvent) {
         const value = deferredEvent[key];
         if (typeof value === 'function') {
-          expect(() => value()).to.throw(
-              'cannot access native event functions');
+          expect(() => value()).to.throw(errorText);
         }
       }
     });
