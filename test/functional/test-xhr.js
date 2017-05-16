@@ -28,7 +28,10 @@ import {getCookie} from '../../src/cookies';
 describe('XHR', function() {
   let sandbox;
   let requests;
-  const location = {href: 'https://acme.com/path'};
+  const location = {
+    href: 'https://acme.com/path',
+    origin: 'https://acme.com',
+  };
   const nativeWin = {
     location,
     fetch: window.fetch,
@@ -72,6 +75,7 @@ describe('XHR', function() {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     location.href = 'https://acme.com/path';
+    location.origin = 'https://acme.com';
   });
 
   afterEach(() => {
@@ -236,32 +240,33 @@ describe('XHR', function() {
     describe('AMP-Same-Origin', () => {
       it('should not be set for cross origin requests', () => {
         const init = {};
+        location.origin = 'https://example.com';
         xhr.fetchJson('/whatever', init);
         expect(init['headers']['AMP-Same-Origin']).to.be.undefined;
       });
 
       it('should be set for all same origin GET requests', () => {
         const init = {};
-        location.href = '/path';
+        location.origin = window.location.origin;
         xhr.fetchJson('/whatever', init);
         expect(init['headers']['AMP-Same-Origin']).to.equal('true');
       });
 
       it('should be set for all same origin POST requests', () => {
         const init = {method: 'post', body: {}};
-        location.href = '/path';
+        location.origin = window.location.origin;
         xhr.fetchJson('/whatever', init);
         expect(init['headers']['AMP-Same-Origin']).to.equal('true');
       });
 
       it('should check origin not source origin', () => {
         let init = {method: 'post', body: {}};
-        location.href = 'https://cdn.ampproject.org/c/s/example.com/hello/path';
+        location.origin = 'https://cdn.ampproject.org';
         xhr.fetchJson('https://example.com/what/ever', init);
         expect(init['headers']['AMP-Same-Origin']).to.be.undefined;
 
         init = {method: 'post', body: {}};
-        location.href = 'https://example.com/hello/path';
+        location.origin = 'https://example.com';
         xhr.fetchJson('https://example.com/what/ever', init);
         expect(init['headers']['AMP-Same-Origin']).to.equal('true');
       });
