@@ -41,4 +41,5 @@ export const urls = {
   errorReporting: env['errorReportingUrl'] ||
       'https://amp-error-reporting.appspot.com/r',
   localDev: env['localDev'] || false,
+  safeFrameVersion: env['safeFrameVersion'] || '1-0-8',
 };
