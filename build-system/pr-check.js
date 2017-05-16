@@ -24,6 +24,8 @@
  * presubmit checking, via the determineBuildTargets method.
  */
 const child_process = require('child_process');
+const exec = require('./exec.js').exec;
+const execOrDie = require('./exec.js').execOrDie;
 const path = require('path');
 const minimist = require('minimist');
 const util = require('gulp-util');
@@ -73,30 +75,23 @@ function getStdout(cmd) {
 }
 
 /**
- * Executes the provided command.
- * TODO(rsimha): Refactor this into a library. See #9038.
+ * Executes the provided command and times it.
  * @param {string} cmd
  */
-function exec(cmd) {
+function timedExec(cmd) {
   const startTime = startTimer(cmd);
-  child_process.spawnSync('/bin/sh', ['-c', cmd], {'stdio': 'inherit'});
+  exec(cmd);
   stopTimer(cmd, startTime);
 }
 
 /**
- * Executes the provided command; terminates this program in case of failure.
- * TODO(rsimha): Refactor this into a library. See #9038.
+ * Executes the provided command and times it. The program terminates in case of
+ * failure.
  * @param {string} cmd
  */
-function execOrDie(cmd) {
+function timedExecOrDie(cmd) {
   const startTime = startTimer(cmd);
-  const p =
-      child_process.spawnSync('/bin/sh', ['-c', cmd], {'stdio': 'inherit'});
-  if (p.status != 0) {
-    console.error(`\n${fileLogPrefix}exiting due to failing command: ${cmd}`);
-    stopTimer(cmd, startTime);
-    process.exit(p.status)
-  }
+  execOrDie(cmd);
   stopTimer(cmd, startTime);
 }
 
@@ -211,46 +206,48 @@ function determineBuildTargets(filePaths) {
 
 const command = {
   testBuildSystem: function() {
-    execOrDie('npm run ava');
+    timedExecOrDie('npm run ava');
   },
   testDocumentLinks: function(files) {
     let docFiles = files.filter(isDocFile);
-    execOrDie(`${gulp} check-links --files ${docFiles.join(',')}`);
+    timedExecOrDie(`${gulp} check-links --files ${docFiles.join(',')}`);
   },
   buildRuntime: function() {
-    execOrDie(`${gulp} clean`);
-    execOrDie(`${gulp} lint`);
-    execOrDie(`${gulp} build`);
-    execOrDie(`${gulp} check-types`);
-    execOrDie(`${gulp} dist --fortesting`);
+    timedExecOrDie(`${gulp} clean`);
+    timedExecOrDie(`${gulp} lint`);
+    timedExecOrDie(`${gulp} build`);
+    timedExecOrDie(`${gulp} check-types`);
+    timedExecOrDie(`${gulp} dist --fortesting`);
   },
   testRuntime: function() {
     // dep-check needs to occur after build since we rely on build to generate
     // the css files into js files.
-    execOrDie(`${gulp} dep-check`);
+    timedExecOrDie(`${gulp} dep-check`);
     // Unit tests with Travis' default chromium
-    execOrDie(`${gulp} test --nobuild --compiled`);
+    timedExecOrDie(`${gulp} test --nobuild --compiled`);
     // Integration tests with all saucelabs browsers
-    execOrDie(`${gulp} test --nobuild --saucelabs --integration --compiled`);
+    timedExecOrDie(
+        `${gulp} test --nobuild --saucelabs --integration --compiled`);
     // All unit tests with an old chrome (best we can do right now to pass tests
     // and not start relying on new features).
     // Disabled because it regressed. Better to run the other saucelabs tests.
-    // execOrDie(`${gulp} test --nobuild --saucelabs --oldchrome --compiled`);
+    // timedExecOrDie(
+    //     `${gulp} test --nobuild --saucelabs --oldchrome --compiled`);
   },
   runVisualDiffTests: function() {
     // This must only be run for push builds, since Travis hides the encrypted
     // environment variables required by Percy during pull request builds.
     // For now, this is warning-only.
-    exec(`${gulp} visual-diff`);
+    timedExec(`${gulp} visual-diff`);
   },
   presubmit: function() {
-    execOrDie(`${gulp} presubmit`);
+    timedExecOrDie(`${gulp} presubmit`);
   },
   buildValidatorWebUI: function() {
-    execOrDie('cd validator/webui && python build.py');
+    timedExecOrDie('cd validator/webui && python build.py');
   },
   buildValidator: function() {
-    execOrDie('cd validator && python build.py');
+    timedExecOrDie('cd validator && python build.py');
   },
 };
 
