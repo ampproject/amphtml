@@ -63,6 +63,13 @@ export class AmpList extends AMP.BaseElement {
     if (mutations['src'] != undefined) {
       this.populateList_();
     }
+    // TODO(kmh287, #7379) Mutually exclusive with [src]?
+    const localData = mutations['localdata'];
+    if (localData != undefined) {
+      const items = isArray(localData) ? localData : [localData];
+      templatesFor(this.win).findAndRenderTemplateArray(
+          this.element, items).then(this.rendered_.bind(this));
+    }
   }
 
   /** @override */
