@@ -71,14 +71,13 @@ const METADATA_STRING_NO_QUOTES =
 // acceptable solution to the 'Safari on iOS doesn't fetch iframe src from
 // cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
 /** @type {string} */
-const SAFEFRAME_VERSION = '1-0-8';
-/** @type {string} @visibleForTesting */
-export const SAFEFRAME_IMPL_PATH =
-    'https://tpc.googlesyndication.com/safeframe/' + SAFEFRAME_VERSION +
-    '/html/container.html';
+export const DEFAULT_SAFEFRAME_VERSION = '1-0-8';
 
 /** @type {string} @visibleForTesting */
 export const RENDERING_TYPE_HEADER = 'X-AmpAdRender';
+
+/** @type {string} @visibleForTesting */
+export const SAFEFRAME_VERSION_HEADER = 'X-AmpSafeFrameVersion';
 
 /** @type {string} */
 const TAG = 'amp-a4a';
@@ -333,6 +332,9 @@ export class AmpA4A extends AMP.BaseElement {
 
     /** @private {?Promise} */
     this.adUrlsPromise_ = null;
+
+    /** @private {string} */
+    this.safeframeVersion_ = DEFAULT_SAFEFRAME_VERSION;
   }
 
   /** @override */
@@ -409,8 +411,8 @@ export class AmpA4A extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(unusedOnLayout) {
-    this.preconnect.url(SAFEFRAME_IMPL_PATH);
-    this.preconnect.url(getDefaultBootstrapBaseUrl(this.win, 'nameframe'));
+    this.preconnect.preload(this.getSafeframePath_());
+    this.preconnect.preload(getDefaultBootstrapBaseUrl(this.win, 'nameframe'));
     if (!this.config) {
       return;
     }
@@ -583,6 +585,13 @@ export class AmpA4A extends AMP.BaseElement {
           this.experimentalNonAmpCreativeRenderMethod_ = method;
           if (method && !isEnumValue(XORIGIN_MODE, method)) {
             dev().error('AMP-A4A', `cross-origin render mode header ${method}`);
+          }
+          const safeframeVersionHeader =
+            fetchResponse.headers.get(SAFEFRAME_VERSION_HEADER);
+          if (safeframeVersionHeader &&
+              safeframeVersionHeader != DEFAULT_SAFEFRAME_VERSION) {
+            this.safeframeVersion_ = safeframeVersionHeader;
+            this.preconnect.preload(this.getSafeframePath_());
           }
           // Note: Resolving a .then inside a .then because we need to capture
           // two fields of fetchResponse, one of which is, itself, a promise,
@@ -1412,7 +1421,7 @@ export class AmpA4A extends AMP.BaseElement {
       let name = '';
       switch (method) {
         case XORIGIN_MODE.SAFEFRAME:
-          srcPath = SAFEFRAME_IMPL_PATH + '?n=0';
+          srcPath = this.getSafeframePath_() + '?n=0';
           break;
         case XORIGIN_MODE.NAMEFRAME:
           srcPath = getDefaultBootstrapBaseUrl(this.win, 'nameframe');
@@ -1436,7 +1445,7 @@ export class AmpA4A extends AMP.BaseElement {
         name = JSON.stringify(contextMetadata);
       } else if (method == XORIGIN_MODE.SAFEFRAME) {
         contextMetadata = JSON.stringify(contextMetadata);
-        name = `${SAFEFRAME_VERSION};${creative.length};${creative}` +
+        name = `${this.safeframeVersion_};${creative.length};${creative}` +
             `${contextMetadata}`;
       }
       return this.iframeRenderHelper_({src: srcPath, name});
@@ -1542,6 +1551,15 @@ export class AmpA4A extends AMP.BaseElement {
         viewerForDoc(this.getAmpDoc()).navigateTo(url, 'a4a');
       });
     });
+  }
+
+  /**
+   * @return {string} full url to safeframe implementation.
+   * @private
+   */
+  getSafeframePath_() {
+    return 'https://tpc.googlesyndication.com/safeframe/' +
+      `${this.safeframeVersion_}/html/container.html`;
   }
 
   /**
