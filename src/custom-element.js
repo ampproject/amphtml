@@ -322,7 +322,13 @@ export function applyLayout_(element) {
     element.classList.add('i-amphtml-layout-size-defined');
   }
   if (layout == Layout.NODISPLAY) {
+    // CSS defines layout=nodisplay automatically with `display:none`. Thus
+    // no additional styling is needed.
+    // TODO(dvoytenko, #9353): once `toggleLayoutDisplay` API has been deployed
+    // everywhere, switch all relevant elements to this API. In the meantime,
+    // simply unblock display toggling via `style="display: ..."`.
     setStyle(element, 'display', 'none');
+    element.classList.add('i-amphtml-display');
   } else if (layout == Layout.FIXED) {
     setStyles(element, {
       width: dev().assertString(width),
@@ -1504,6 +1510,15 @@ function createBaseCustomElementClass(win) {
     getRealChildren() {
       return dom.childElements(this, element =>
         !isInternalOrServiceNode(element));
+    }
+
+    /**
+     * Must be executed in the mutate context. Removes `display:none` from the
+     * element set via `layout=nodisplay`.
+     * @param {boolean} displayOn
+     */
+    toggleLayoutDisplay(displayOn) {
+      this.classList.toggle('i-amphtml-display', displayOn);
     }
 
     /**
