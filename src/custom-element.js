@@ -1577,14 +1577,14 @@ function createBaseCustomElementClass(win) {
     /**
      * Hides or shows the fallback, if available. This function must only
      * be called inside a mutate context.
-     * @param {boolean} state
+     * @param {boolean} show
      * @package @final @this {!Element}
      */
-    toggleFallback(state) {
+    toggleFallback(show) {
       assertNotTemplate(this);
       const resourceState = this.getResourceState_();
       // Do not show fallback if element has not been scheduled layout yet
-      if (state && (resourceState == ResourceState.NOT_BUILT ||
+      if (show && (resourceState == ResourceState.NOT_BUILT ||
           resourceState == ResourceState.NOT_LAID_OUT ||
           resourceState == ResourceState.READY_FOR_LAYOUT)) {
         return;
@@ -1593,8 +1593,8 @@ function createBaseCustomElementClass(win) {
       // The reasons for this are: (a) "not supported" is the state of the whole
       // element, (b) some realyout is expected and (c) fallback condition would
       // be rare.
-      this.classList.toggle('amp-notsupported', state);
-      if (state == true) {
+      this.classList.toggle('amp-notsupported', show);
+      if (show == true) {
         const fallbackElement = this.getFallback();
         if (fallbackElement) {
           this.getResources().scheduleLayout(this, fallbackElement);
