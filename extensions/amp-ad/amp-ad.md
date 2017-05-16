@@ -58,7 +58,7 @@ The `<amp-ad>` requires width and height values to be specified according to the
             resizable
             src="https://ampproject-b5f4c.firebaseapp.com/examples/ampad.basic.embed.html">
   <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div>
+  <div placeholder></div> 
 </amp-iframe>
 </div>
 
