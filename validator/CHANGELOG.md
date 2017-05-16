@@ -25,6 +25,11 @@ time as https://cdn.ampproject.org/v0/validator.js is updated.
 
 ## Releases
 
+<!--
+Please add new release changes here. Use the time in UTC for the header and
+mention and release notes since the last change as well as the version numbers.
+-->
+
 ### 10:00 PM, May 8, 2017 UTC
 
 First Release in Changelog. No release notes.
