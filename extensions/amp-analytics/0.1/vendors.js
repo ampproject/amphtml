@@ -1378,11 +1378,11 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       "trackEvent": "${base}&ep=${CATEGORY}*${ACTION}*${LABEL}*${VALUE}&et=4&api=8_0"
     },
     "triggers": {
-      "trackPageview": {
+      "pageview": {
         "on": "visible",
         "request": "base"
       },
-      "anchorClicks": {
+      "trackAnchorClick": {
         "on": "click",
         "request": "trackEvent"
       }
