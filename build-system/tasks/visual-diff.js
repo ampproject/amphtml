@@ -15,7 +15,7 @@
  */
 
 var argv = require('minimist')(process.argv.slice(2));
-var child_process = require('child_process');
+var exec = require('../exec.js').exec;
 var fs = require('fs-extra');
 var gulp = require('gulp-help')(require('gulp'));
 var util = require('gulp-util');
@@ -25,20 +25,6 @@ var defaultWidths = [375, 411];  // CSS widths: iPhone: 375, Pixel: 411.
 var percyProjectSeparator = '/';  // Standard format of repo slug: "foo/bar".
 var percyTokenLength = 64;  // Standard Percy API key length.
 var visualTestsFile = 'test/visual-diff/visual-tests.json';
-
-/**
- * Executes the provided command. Copied from pr-check.js.
- * TODO(rsimha-amp): Refactor this into a shared library. Issue #9038.
- *
- * @param {string} cmd
- */
-function exec(cmd) {
-  var p =
-      child_process.spawnSync('/bin/sh', ['-c', cmd], {'stdio': 'inherit'});
-  if (p.status != 0) {
-    console/*OK*/.log(util.colors.yellow('\nCommand failed: ' + cmd));
-  }
-}
 
 /**
  * Extracts and verifies Percy project keys from the environment.
