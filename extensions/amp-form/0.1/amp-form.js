@@ -29,7 +29,7 @@ import {
   isProxyOrigin,
   parseUrl,
 } from '../../../src/url';
-import {dev, user, rethrowAsync} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {xhrFor} from '../../../src/services';
 import {toArray} from '../../../src/types';
@@ -475,27 +475,24 @@ export class AmpForm {
       this.renderTemplate_(json || {});
       this.maybeHandleRedirect_(response);
     }, error => {
-      const message = 'Failed to parse response JSON:';
-      user().error(TAG, message, error);
-      rethrowAsync(message, error);
+      user().error(TAG, `Failed to parse response JSON: ${error}`);
     });
   }
 
   /**
    * Transition the form the the submit error state.
-   * @param {../../../src/service/xhr-impl.FetchError} error
+   * @param {../../../src/service/xhr-impl.FetchError} errorResponse
    * @private
    */
-  handleXhrSubmitFailure_(error) {
+  handleXhrSubmitFailure_(errorResponse) {
+    const error = (errorResponse && errorResponse.error) || errorResponse;
     this.triggerAction_(
-        /* success */ false, error ? error.responseJson : null);
+        /* success */ false, errorResponse ? errorResponse.responseJson : null);
     this.analyticsEvent_('amp-form-submit-error');
     this.setState_(FormState_.SUBMIT_ERROR);
-    this.renderTemplate_(error.responseJson || {});
-    this.maybeHandleRedirect_(error.response);
-    const message = 'Form submission failed:';
-    user().error(TAG, message, error);
-    rethrowAsync(message, error);
+    this.renderTemplate_(errorResponse.responseJson || {});
+    this.maybeHandleRedirect_(errorResponse.response);
+    user().error(TAG, `Form submission failed: ${error}`);
   }
 
   /** @private */

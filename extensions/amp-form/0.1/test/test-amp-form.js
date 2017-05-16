@@ -40,6 +40,7 @@ import {
 import {FetchError} from '../../../../src/service/xhr-impl';
 import '../../../amp-selector/0.1/amp-selector';
 import {toggleExperiment} from '../../../../src/experiments';
+import {user} from '../../../../src/log';
 
 describes.repeated('', {
   'single ampdoc': {ampdoc: 'single'},
@@ -758,7 +759,8 @@ describes.repeated('', {
         expect(form.className).to.not.contain('amp-form-submit-error');
         expect(form.className).to.not.contain('amp-form-submit-success');
         fetchResolver({json: () => Promise.resolve()});
-        return timer.promise(5).then(() => {
+
+        return ampForm.xhrSubmitPromiseForTesting().then(() => {
           expect(ampForm.actions_.trigger).to.be.called;
           expect(ampForm.actions_.trigger).to.be.calledWith(form, 'submit');
           expect(ampForm.state_).to.equal('submit-success');
@@ -771,6 +773,8 @@ describes.repeated('', {
               /** CustomEvent */ sinon.match.has('detail'));
           expect(ampForm.analyticsEvent_).to.be.calledWith(
               'amp-form-submit-success');
+        }, () => {
+          expect(false).to.be.true; // should not run
         });
       });
     });
@@ -804,7 +808,10 @@ describes.repeated('', {
         expect(form.className).to.not.contain('amp-form-submit-error');
         expect(form.className).to.not.contain('amp-form-submit-success');
         fetchRejecter();
-        return timer.promise(5).then(() => {
+
+        return ampForm.xhrSubmitPromiseForTesting().then(() => {
+          expect(false).to.be.true; // should not run
+        }, () => {
           expect(button1.hasAttribute('disabled')).to.be.false;
           expect(button2.hasAttribute('disabled')).to.be.false;
           expect(ampForm.state_).to.equal('submit-error');
@@ -1505,7 +1512,8 @@ describes.repeated('', {
           sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchResolvePromise);
           redirectToValue = 'https://google.com/';
           ampForm.handleSubmitAction_();
-          return timer.promise(10).then(() => {
+
+          return ampForm.xhrSubmitPromiseForTesting().then(() => {
             expect(env.win.top.location.href).to.be.equal(redirectToValue);
           });
         });
@@ -1514,7 +1522,10 @@ describes.repeated('', {
           sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchResolvePromise);
           redirectToValue = 'http://google.com/';
           ampForm.handleSubmitAction_();
-          return timer.promise(10).then(() => {
+
+          return ampForm.xhrSubmitPromiseForTesting().then(() => {
+            expect(false).to.be.true; // should not run
+          }, () => {
             expect(env.win.top.location.href).to.be.equal(
                 'https://example-top.com/');
           });
@@ -1524,7 +1535,10 @@ describes.repeated('', {
           sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchResolvePromise);
           redirectToValue = '/hello';
           ampForm.handleSubmitAction_();
-          return timer.promise(10).then(() => {
+
+          return ampForm.xhrSubmitPromiseForTesting().then(() => {
+            expect(false).to.be.true; // should not run
+          }, () => {
             expect(env.win.top.location.href).to.be.equal(
                 'https://example-top.com/');
           });
@@ -1535,7 +1549,10 @@ describes.repeated('', {
           sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchResolvePromise);
           redirectToValue = 'http://google.com/';
           ampForm.handleSubmitAction_();
-          return timer.promise(10).then(() => {
+
+          return ampForm.xhrSubmitPromiseForTesting().then(() => {
+            expect(false).to.be.true; // should not run
+          }, () => {
             expect(env.win.top.location.href).to.be.equal(
                 'https://example-top.com/');
           });
@@ -1544,21 +1561,13 @@ describes.repeated('', {
         it('should redirect on error and header is set', () => {
           sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchRejectPromise);
           redirectToValue = 'https://example2.com/hello';
-          const errors = [];
-          const realSetTimeout = window.setTimeout;
-          sandbox.stub(window, 'setTimeout', (callback, delay) => {
-            realSetTimeout(() => {
-              try {
-                callback();
-              } catch (e) {
-                errors.push(e);
-              }
-            }, delay);
-          });
+          const logSpy = sandbox.spy(user(), 'error');
           ampForm.handleSubmitAction_();
-          return timer.promise(10).then(() => {
-            expect(errors.length).to.equal(1);
-            expect(errors[0]).to.match(/Form submission failed/);
+
+          return ampForm.xhrSubmitPromiseForTesting().then(() => {
+            expect(logSpy).to.be.calledOnce;
+            const error = logSpy.getCall(0).args[1];
+            expect(error).to.match(/Form submission failed/);
             expect(env.win.top.location.href).to.be.equal(redirectToValue);
           });
         });
