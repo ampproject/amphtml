@@ -862,6 +862,7 @@ describe('Resource renderOutsideViewport', () => {
   let resource;
   let viewport;
   let renderOutsideViewport;
+  let resolveRenderOutsideViewportSpy;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -893,6 +894,8 @@ describe('Resource renderOutsideViewport', () => {
     viewport = resources.viewport_;
     renderOutsideViewport = sandbox.stub(element, 'renderOutsideViewport');
     sandbox.stub(viewport, 'getRect').returns(layoutRectLtwh(0, 0, 100, 100));
+    resolveRenderOutsideViewportSpy =
+      sandbox.spy(resource, 'resolveRenderOutsideViewport_');
   });
 
   afterEach(() => {
@@ -910,11 +913,13 @@ describe('Resource renderOutsideViewport', () => {
         it('should allow rendering when bottom falls outside', () => {
           resource.layoutBox_ = layoutRectLtwh(0, 10, 100, 100);
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         it('should allow rendering when top falls outside', () => {
           resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         describe('when element is owned', () => {
@@ -925,11 +930,13 @@ describe('Resource renderOutsideViewport', () => {
           it('should allow rendering when bottom falls outside', () => {
             resource.layoutBox_ = layoutRectLtwh(0, 10, 100, 100);
             expect(resource.renderOutsideViewport()).to.equal(true);
+            expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
 
           it('should allow rendering when top falls outside', () => {
             resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
             expect(resource.renderOutsideViewport()).to.equal(true);
+            expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
         });
       });
@@ -942,11 +949,13 @@ describe('Resource renderOutsideViewport', () => {
         it('should allow rendering when scrolling towards', () => {
           resources.lastVelocity_ = 2;
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         it('should allow rendering when scrolling away', () => {
           resources.lastVelocity_ = -2;
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         describe('when element is owned', () => {
@@ -957,11 +966,13 @@ describe('Resource renderOutsideViewport', () => {
           it('should allow rendering when scrolling towards', () => {
             resources.lastVelocity_ = 2;
             expect(resource.renderOutsideViewport()).to.equal(true);
+            expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
 
           it('should allow rendering when scrolling away', () => {
             resources.lastVelocity_ = -2;
             expect(resource.renderOutsideViewport()).to.equal(true);
+            expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
         });
       });
@@ -974,11 +985,13 @@ describe('Resource renderOutsideViewport', () => {
         it('should allow rendering when scrolling towards', () => {
           resources.lastVelocity_ = 2;
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         it('should allow rendering when scrolling away', () => {
           resources.lastVelocity_ = -2;
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         describe('when element is owned', () => {
@@ -989,11 +1002,13 @@ describe('Resource renderOutsideViewport', () => {
           it('should allow rendering when scrolling towards', () => {
             resources.lastVelocity_ = 2;
             expect(resource.renderOutsideViewport()).to.equal(true);
+            expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
 
           it('should allow rendering when scrolling away', () => {
             resources.lastVelocity_ = -2;
             expect(resource.renderOutsideViewport()).to.equal(true);
+            expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
         });
       });
@@ -1005,16 +1020,19 @@ describe('Resource renderOutsideViewport', () => {
 
         it('should allow rendering', () => {
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         it('should allow rendering when scrolling towards', () => {
           resources.lastVelocity_ = 2;
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         it('should allow rendering when scrolling away', () => {
           resources.lastVelocity_ = -2;
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         describe('when element is owned', () => {
@@ -1024,16 +1042,19 @@ describe('Resource renderOutsideViewport', () => {
 
           it('should allow rendering', () => {
             expect(resource.renderOutsideViewport()).to.equal(true);
+            expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
 
           it('should allow rendering when scrolling towards', () => {
             resources.lastVelocity_ = 2;
             expect(resource.renderOutsideViewport()).to.equal(true);
+            expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
 
           it('should allow rendering when scrolling away', () => {
             resources.lastVelocity_ = -2;
             expect(resource.renderOutsideViewport()).to.equal(true);
+            expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
         });
       });
@@ -1046,11 +1067,13 @@ describe('Resource renderOutsideViewport', () => {
         it('should allow rendering when scrolling towards', () => {
           resources.lastVelocity_ = -2;
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         it('should allow rendering when scrolling away', () => {
           resources.lastVelocity_ = 2;
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         describe('when element is owned', () => {
@@ -1061,11 +1084,13 @@ describe('Resource renderOutsideViewport', () => {
           it('should allow rendering when scrolling towards', () => {
             resources.lastVelocity_ = -2;
             expect(resource.renderOutsideViewport()).to.equal(true);
+            expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
 
           it('should allow rendering when scrolling away', () => {
             resources.lastVelocity_ = 2;
             expect(resource.renderOutsideViewport()).to.equal(true);
+            expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
         });
       });
@@ -1078,11 +1103,13 @@ describe('Resource renderOutsideViewport', () => {
         it('should allow rendering when scrolling towards', () => {
           resources.lastVelocity_ = -2;
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         it('should allow rendering when scrolling away', () => {
           resources.lastVelocity_ = 2;
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         describe('when element is owned', () => {
@@ -1093,11 +1120,13 @@ describe('Resource renderOutsideViewport', () => {
           it('should allow rendering when scrolling towards', () => {
             resources.lastVelocity_ = -2;
             expect(resource.renderOutsideViewport()).to.equal(true);
+            expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
 
           it('should allow rendering when scrolling away', () => {
             resources.lastVelocity_ = 2;
             expect(resource.renderOutsideViewport()).to.equal(true);
+            expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
         });
       });
@@ -1109,16 +1138,19 @@ describe('Resource renderOutsideViewport', () => {
 
         it('should allow rendering', () => {
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         it('should allow rendering when scrolling towards', () => {
           resources.lastVelocity_ = -2;
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         it('should allow rendering when scrolling away', () => {
           resources.lastVelocity_ = 2;
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         describe('when element is owned', () => {
@@ -1128,16 +1160,19 @@ describe('Resource renderOutsideViewport', () => {
 
           it('should allow rendering', () => {
             expect(resource.renderOutsideViewport()).to.equal(true);
+            expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
 
           it('should allow rendering when scrolling towards', () => {
             resources.lastVelocity_ = -2;
             expect(resource.renderOutsideViewport()).to.equal(true);
+            expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
 
           it('should allow rendering when scrolling away', () => {
             resources.lastVelocity_ = 2;
             expect(resource.renderOutsideViewport()).to.equal(true);
+            expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
         });
       });
@@ -1152,11 +1187,13 @@ describe('Resource renderOutsideViewport', () => {
         it('should allow rendering when bottom falls outside', () => {
           resource.layoutBox_ = layoutRectLtwh(0, 10, 100, 100);
           expect(resource.renderOutsideViewport()).to.equal(false);
+          expect(resolveRenderOutsideViewportSpy).to.not.be.called;
         });
 
         it('should allow rendering when top falls outside', () => {
           resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
           expect(resource.renderOutsideViewport()).to.equal(false);
+          expect(resolveRenderOutsideViewportSpy).to.not.be.called;
         });
 
         describe('when element is owned', () => {
@@ -1167,11 +1204,13 @@ describe('Resource renderOutsideViewport', () => {
           it('should allow rendering when bottom falls outside', () => {
             resource.layoutBox_ = layoutRectLtwh(0, 10, 100, 100);
             expect(resource.renderOutsideViewport()).to.equal(true);
+            expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
 
           it('should allow rendering when top falls outside', () => {
             resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
             expect(resource.renderOutsideViewport()).to.equal(true);
+            expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
         });
       });
@@ -1184,11 +1223,13 @@ describe('Resource renderOutsideViewport', () => {
         it('should disallow rendering when scrolling towards', () => {
           resources.lastVelocity_ = 2;
           expect(resource.renderOutsideViewport()).to.equal(false);
+          expect(resolveRenderOutsideViewportSpy).to.not.be.called;
         });
 
         it('should disallow rendering when scrolling away', () => {
           resources.lastVelocity_ = -2;
           expect(resource.renderOutsideViewport()).to.equal(false);
+          expect(resolveRenderOutsideViewportSpy).to.not.be.called;
         });
 
         describe('when element is owned', () => {
@@ -1199,11 +1240,13 @@ describe('Resource renderOutsideViewport', () => {
           it('should allow rendering when scrolling towards', () => {
             resources.lastVelocity_ = 2;
             expect(resource.renderOutsideViewport()).to.equal(true);
+            expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
 
           it('should allow rendering when scrolling away', () => {
             resources.lastVelocity_ = -2;
             expect(resource.renderOutsideViewport()).to.equal(true);
+            expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
         });
       });
@@ -1216,11 +1259,13 @@ describe('Resource renderOutsideViewport', () => {
         it('should disallow rendering when scrolling towards', () => {
           resources.lastVelocity_ = 2;
           expect(resource.renderOutsideViewport()).to.equal(false);
+          expect(resolveRenderOutsideViewportSpy).to.not.be.called;
         });
 
         it('should disallow rendering when scrolling away', () => {
           resources.lastVelocity_ = -2;
           expect(resource.renderOutsideViewport()).to.equal(false);
+          expect(resolveRenderOutsideViewportSpy).to.not.be.called;
         });
 
         describe('when element is owned', () => {
@@ -1231,11 +1276,13 @@ describe('Resource renderOutsideViewport', () => {
           it('should allow rendering when scrolling towards', () => {
             resources.lastVelocity_ = 2;
             expect(resource.renderOutsideViewport()).to.equal(true);
+            expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
 
           it('should allow rendering when scrolling away', () => {
             resources.lastVelocity_ = -2;
             expect(resource.renderOutsideViewport()).to.equal(true);
+            expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
         });
       });
@@ -1247,16 +1294,19 @@ describe('Resource renderOutsideViewport', () => {
 
         it('should disallow rendering', () => {
           expect(resource.renderOutsideViewport()).to.equal(false);
+          expect(resolveRenderOutsideViewportSpy).to.not.be.called;
         });
 
         it('should disallow rendering when scrolling towards', () => {
           resources.lastVelocity_ = 2;
           expect(resource.renderOutsideViewport()).to.equal(false);
+          expect(resolveRenderOutsideViewportSpy).to.not.be.called;
         });
 
         it('should disallow rendering when scrolling away', () => {
           resources.lastVelocity_ = -2;
           expect(resource.renderOutsideViewport()).to.equal(false);
+          expect(resolveRenderOutsideViewportSpy).to.not.be.called;
         });
 
         describe('when element is owned', () => {
@@ -1266,16 +1316,19 @@ describe('Resource renderOutsideViewport', () => {
 
           it('should allow rendering', () => {
             expect(resource.renderOutsideViewport()).to.equal(true);
+            expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
 
           it('should allow rendering when scrolling towards', () => {
             resources.lastVelocity_ = 2;
             expect(resource.renderOutsideViewport()).to.equal(true);
+            expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
 
           it('should allow rendering when scrolling away', () => {
             resources.lastVelocity_ = -2;
             expect(resource.renderOutsideViewport()).to.equal(true);
+            expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
         });
       });
@@ -1288,11 +1341,13 @@ describe('Resource renderOutsideViewport', () => {
         it('should disallow rendering when scrolling towards', () => {
           resources.lastVelocity_ = -2;
           expect(resource.renderOutsideViewport()).to.equal(false);
+          expect(resolveRenderOutsideViewportSpy).to.not.be.called;
         });
 
         it('should disallow rendering when scrolling away', () => {
           resources.lastVelocity_ = 2;
           expect(resource.renderOutsideViewport()).to.equal(false);
+          expect(resolveRenderOutsideViewportSpy).to.not.be.called;
         });
 
         describe('when element is owned', () => {
@@ -1303,11 +1358,13 @@ describe('Resource renderOutsideViewport', () => {
           it('should allow rendering when scrolling towards', () => {
             resources.lastVelocity_ = -2;
             expect(resource.renderOutsideViewport()).to.equal(true);
+            expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
 
           it('should allow rendering when scrolling away', () => {
             resources.lastVelocity_ = 2;
             expect(resource.renderOutsideViewport()).to.equal(true);
+            expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
         });
       });
@@ -1320,11 +1377,13 @@ describe('Resource renderOutsideViewport', () => {
         it('should disallow rendering when scrolling towards', () => {
           resources.lastVelocity_ = -2;
           expect(resource.renderOutsideViewport()).to.equal(false);
+          expect(resolveRenderOutsideViewportSpy).to.not.be.called;
         });
 
         it('should disallow rendering when scrolling away', () => {
           resources.lastVelocity_ = 2;
           expect(resource.renderOutsideViewport()).to.equal(false);
+          expect(resolveRenderOutsideViewportSpy).to.not.be.called;
         });
 
         describe('when element is owned', () => {
@@ -1335,11 +1394,13 @@ describe('Resource renderOutsideViewport', () => {
           it('should allow rendering when scrolling towards', () => {
             resources.lastVelocity_ = -2;
             expect(resource.renderOutsideViewport()).to.equal(true);
+            expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
 
           it('should allow rendering when scrolling away', () => {
             resources.lastVelocity_ = 2;
             expect(resource.renderOutsideViewport()).to.equal(true);
+            expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
         });
       });
@@ -1351,16 +1412,19 @@ describe('Resource renderOutsideViewport', () => {
 
         it('should disallow rendering', () => {
           expect(resource.renderOutsideViewport()).to.equal(false);
+          expect(resolveRenderOutsideViewportSpy).to.not.be.called;
         });
 
         it('should disallow rendering when scrolling towards', () => {
           resources.lastVelocity_ = -2;
           expect(resource.renderOutsideViewport()).to.equal(false);
+          expect(resolveRenderOutsideViewportSpy).to.not.be.called;
         });
 
         it('should disallow rendering when scrolling away', () => {
           resources.lastVelocity_ = 2;
           expect(resource.renderOutsideViewport()).to.equal(false);
+          expect(resolveRenderOutsideViewportSpy).to.not.be.called;
         });
 
         describe('when element is owned', () => {
@@ -1370,16 +1434,19 @@ describe('Resource renderOutsideViewport', () => {
 
           it('should allow rendering', () => {
             expect(resource.renderOutsideViewport()).to.equal(true);
+            expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
 
           it('should allow rendering when scrolling towards', () => {
             resources.lastVelocity_ = -2;
             expect(resource.renderOutsideViewport()).to.equal(true);
+            expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
 
           it('should allow rendering when scrolling away', () => {
             resources.lastVelocity_ = 2;
             expect(resource.renderOutsideViewport()).to.equal(true);
+            expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
         });
       });
@@ -1395,11 +1462,13 @@ describe('Resource renderOutsideViewport', () => {
       it('should allow rendering when bottom falls outside', () => {
         resource.layoutBox_ = layoutRectLtwh(0, 10, 100, 100);
         expect(resource.renderOutsideViewport()).to.equal(true);
+        expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
       });
 
       it('should allow rendering when top falls outside', () => {
         resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
         expect(resource.renderOutsideViewport()).to.equal(true);
+        expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
       });
 
       describe('when element is owned', () => {
@@ -1410,11 +1479,13 @@ describe('Resource renderOutsideViewport', () => {
         it('should allow rendering when bottom falls outside', () => {
           resource.layoutBox_ = layoutRectLtwh(0, 10, 100, 100);
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         it('should allow rendering when top falls outside', () => {
           resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
       });
     });
@@ -1427,11 +1498,13 @@ describe('Resource renderOutsideViewport', () => {
       it('should allow rendering when scrolling towards', () => {
         resources.lastVelocity_ = 2;
         expect(resource.renderOutsideViewport()).to.equal(true);
+        expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
       });
 
       it('should allow rendering when scrolling away', () => {
         resources.lastVelocity_ = -2;
         expect(resource.renderOutsideViewport()).to.equal(true);
+        expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
       });
 
       describe('when element is owned', () => {
@@ -1442,11 +1515,13 @@ describe('Resource renderOutsideViewport', () => {
         it('should allow rendering when scrolling towards', () => {
           resources.lastVelocity_ = 2;
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         it('should allow rendering when scrolling away', () => {
           resources.lastVelocity_ = -2;
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
       });
     });
@@ -1459,11 +1534,13 @@ describe('Resource renderOutsideViewport', () => {
       it('should allow rendering when scrolling towards', () => {
         resources.lastVelocity_ = 2;
         expect(resource.renderOutsideViewport()).to.equal(true);
+        expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
       });
 
       it('should disallow rendering when scrolling away', () => {
         resources.lastVelocity_ = -2;
         expect(resource.renderOutsideViewport()).to.equal(false);
+        expect(resolveRenderOutsideViewportSpy).to.not.be.called;
       });
 
       describe('when element is owned', () => {
@@ -1474,11 +1551,13 @@ describe('Resource renderOutsideViewport', () => {
         it('should allow rendering when scrolling towards', () => {
           resources.lastVelocity_ = 2;
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         it('should allow rendering when scrolling away', () => {
           resources.lastVelocity_ = -2;
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
       });
     });
@@ -1490,16 +1569,19 @@ describe('Resource renderOutsideViewport', () => {
 
       it('should disallow rendering', () => {
         expect(resource.renderOutsideViewport()).to.equal(false);
+        expect(resolveRenderOutsideViewportSpy).to.not.be.called;
       });
 
       it('should disallow rendering when scrolling towards', () => {
         resources.lastVelocity_ = 2;
         expect(resource.renderOutsideViewport()).to.equal(false);
+        expect(resolveRenderOutsideViewportSpy).to.not.be.called;
       });
 
       it('should disallow rendering when scrolling away', () => {
         resources.lastVelocity_ = -2;
         expect(resource.renderOutsideViewport()).to.equal(false);
+        expect(resolveRenderOutsideViewportSpy).to.not.be.called;
       });
 
       describe('when element is owned', () => {
@@ -1509,16 +1591,19 @@ describe('Resource renderOutsideViewport', () => {
 
         it('should allow rendering', () => {
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         it('should allow rendering when scrolling towards', () => {
           resources.lastVelocity_ = 2;
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         it('should allow rendering when scrolling away', () => {
           resources.lastVelocity_ = -2;
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
       });
     });
@@ -1531,11 +1616,13 @@ describe('Resource renderOutsideViewport', () => {
       it('should allow rendering when scrolling towards', () => {
         resources.lastVelocity_ = -2;
         expect(resource.renderOutsideViewport()).to.equal(true);
+        expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
       });
 
       it('should allow rendering when scrolling away', () => {
         resources.lastVelocity_ = 2;
         expect(resource.renderOutsideViewport()).to.equal(true);
+        expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
       });
 
       describe('when element is owned', () => {
@@ -1546,11 +1633,13 @@ describe('Resource renderOutsideViewport', () => {
         it('should allow rendering when scrolling towards', () => {
           resources.lastVelocity_ = -2;
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         it('should allow rendering when scrolling away', () => {
           resources.lastVelocity_ = 2;
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
       });
     });
@@ -1563,11 +1652,13 @@ describe('Resource renderOutsideViewport', () => {
       it('should allow rendering when scrolling towards', () => {
         resources.lastVelocity_ = -2;
         expect(resource.renderOutsideViewport()).to.equal(true);
+        expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
       });
 
       it('should disallow rendering when scrolling away', () => {
         resources.lastVelocity_ = 2;
         expect(resource.renderOutsideViewport()).to.equal(false);
+        expect(resolveRenderOutsideViewportSpy).to.not.be.called;
       });
 
       describe('when element is owned', () => {
@@ -1578,11 +1669,13 @@ describe('Resource renderOutsideViewport', () => {
         it('should allow rendering when scrolling towards', () => {
           resources.lastVelocity_ = -2;
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         it('should allow rendering when scrolling away', () => {
           resources.lastVelocity_ = 2;
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
       });
     });
@@ -1594,16 +1687,19 @@ describe('Resource renderOutsideViewport', () => {
 
       it('should disallow rendering', () => {
         expect(resource.renderOutsideViewport()).to.equal(false);
+        expect(resolveRenderOutsideViewportSpy).to.not.be.called;
       });
 
       it('should disallow rendering when scrolling towards', () => {
         resources.lastVelocity_ = -2;
         expect(resource.renderOutsideViewport()).to.equal(false);
+        expect(resolveRenderOutsideViewportSpy).to.not.be.called;
       });
 
       it('should disallow rendering when scrolling away', () => {
         resources.lastVelocity_ = 2;
         expect(resource.renderOutsideViewport()).to.equal(false);
+        expect(resolveRenderOutsideViewportSpy).to.not.be.called;
       });
 
       describe('when element is owned', () => {
@@ -1613,16 +1709,19 @@ describe('Resource renderOutsideViewport', () => {
 
         it('should allow rendering', () => {
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         it('should allow rendering when scrolling towards', () => {
           resources.lastVelocity_ = -2;
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         it('should allow rendering when scrolling away', () => {
           resources.lastVelocity_ = 2;
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
       });
     });
@@ -1634,16 +1733,19 @@ describe('Resource renderOutsideViewport', () => {
 
       it('should disallow rendering', () => {
         expect(resource.renderOutsideViewport()).to.equal(false);
+        expect(resolveRenderOutsideViewportSpy).to.not.be.called;
       });
 
       it('should disallow rendering when scrolling towards on y-axis', () => {
         resources.lastVelocity_ = -2;
         expect(resource.renderOutsideViewport()).to.equal(false);
+        expect(resolveRenderOutsideViewportSpy).to.not.be.called;
       });
 
       it('should disallow rendering when scrolling away on y-axis', () => {
         resources.lastVelocity_ = 2;
         expect(resource.renderOutsideViewport()).to.equal(false);
+        expect(resolveRenderOutsideViewportSpy).to.not.be.called;
       });
 
       describe('when element is owned', () => {
@@ -1653,16 +1755,19 @@ describe('Resource renderOutsideViewport', () => {
 
         it('should allow rendering', () => {
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         it('should allow rendering when scrolling towards on y-axis', () => {
           resources.lastVelocity_ = -2;
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         it('should allow rendering when scrolling away on y-axis', () => {
           resources.lastVelocity_ = 2;
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
       });
     });
@@ -1674,16 +1779,19 @@ describe('Resource renderOutsideViewport', () => {
 
       it('should disallow rendering', () => {
         expect(resource.renderOutsideViewport()).to.equal(false);
+        expect(resolveRenderOutsideViewportSpy).to.not.be.called;
       });
 
       it('should disallow rendering when scrolling towards on y-axis', () => {
         resources.lastVelocity_ = -2;
         expect(resource.renderOutsideViewport()).to.equal(false);
+        expect(resolveRenderOutsideViewportSpy).to.not.be.called;
       });
 
       it('should disallow rendering when scrolling away on y-axis', () => {
         resources.lastVelocity_ = 2;
         expect(resource.renderOutsideViewport()).to.equal(false);
+        expect(resolveRenderOutsideViewportSpy).to.not.be.called;
       });
 
       describe('when element is owned', () => {
@@ -1693,16 +1801,19 @@ describe('Resource renderOutsideViewport', () => {
 
         it('should allow rendering', () => {
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         it('should allow rendering when scrolling towards on y-axis', () => {
           resources.lastVelocity_ = -2;
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         it('should allow rendering when scrolling away on y-axis', () => {
           resources.lastVelocity_ = 2;
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
       });
     });
@@ -1714,16 +1825,19 @@ describe('Resource renderOutsideViewport', () => {
 
       it('should allow rendering', () => {
         expect(resource.renderOutsideViewport()).to.equal(true);
+        expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
       });
 
       it('should allow rendering when scrolling towards', () => {
         resources.lastVelocity_ = -2;
         expect(resource.renderOutsideViewport()).to.equal(true);
+        expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
       });
 
       it('should allow rendering when scrolling away', () => {
         resources.lastVelocity_ = 2;
         expect(resource.renderOutsideViewport()).to.equal(true);
+        expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
       });
 
       describe('when element is owned', () => {
@@ -1733,16 +1847,19 @@ describe('Resource renderOutsideViewport', () => {
 
         it('should allow rendering', () => {
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         it('should allow rendering when scrolling towards on y-axis', () => {
           resources.lastVelocity_ = -2;
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         it('should allow rendering when scrolling away on y-axis', () => {
           resources.lastVelocity_ = 2;
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
       });
     });
@@ -1754,16 +1871,19 @@ describe('Resource renderOutsideViewport', () => {
 
       it('should allow rendering', () => {
         expect(resource.renderOutsideViewport()).to.equal(true);
+        expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
       });
 
       it('should allow rendering when scrolling towards', () => {
         resources.lastVelocity_ = -2;
         expect(resource.renderOutsideViewport()).to.equal(true);
+        expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
       });
 
       it('should allow rendering when scrolling away', () => {
         resources.lastVelocity_ = 2;
         expect(resource.renderOutsideViewport()).to.equal(true);
+        expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
       });
 
       describe('when element is owned', () => {
@@ -1773,18 +1893,42 @@ describe('Resource renderOutsideViewport', () => {
 
         it('should allow rendering', () => {
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         it('should allow rendering when scrolling towards on y-axis', () => {
           resources.lastVelocity_ = -2;
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         it('should allow rendering when scrolling away on y-axis', () => {
           resources.lastVelocity_ = 2;
           expect(resource.renderOutsideViewport()).to.equal(true);
+          expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
       });
+    });
+  });
+
+  describe('resolveRenderOutsideViewport', () => {
+    it('should resolve correctly', () => {
+      const promise = resource.whenWithinRenderOutsideViewport();
+      // Multiple calls should return the same promise.
+      expect(resource.whenWithinRenderOutsideViewport()).to.equal(promise);
+      expect(resource.renderOutsideViewportPromise_).to.be.ok;
+      expect(resource.renderOutsideViewportResolve_).to.be.ok;
+      // Call again should do nothing.
+      resource.resolveRenderOutsideViewport_();
+      resource.resolveRenderOutsideViewport_();
+      expect(resource.renderOutsideViewportPromise_).to.not.be.ok;
+      expect(resource.renderOutsideViewportResolve_).to.not.be.ok;
+      return promise;
+    });
+
+    it('should resolve immediately if already laid out', () => {
+      sandbox.stub(resource, 'isLayoutPending').returns(false);
+      return resource.whenWithinRenderOutsideViewport();
     });
   });
 });

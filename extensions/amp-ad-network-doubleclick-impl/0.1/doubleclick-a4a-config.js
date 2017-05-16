@@ -59,6 +59,11 @@ export const DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH = {
   experiment: '117152663',
 };
 
+export const DOUBLECLICK_A4A_EXTERNAL_DELAYED_EXPERIMENT_BRANCHES_PRE_LAUNCH = {
+  control: '117152664',
+  experiment: '117152665',
+};
+
 /**
  * @const {!../../../ads/google/a4a/traffic-experiments.A4aExperimentBranches}
  */
@@ -119,7 +124,8 @@ export function doubleclickIsA4AEnabled(win, element) {
   }
   const enableA4A = googleAdsIsA4AEnabled(
           win, element, DOUBLECLICK_A4A_EXPERIMENT_NAME,
-          externalBranches, internalBranches) ||
+          externalBranches, internalBranches,
+          DOUBLECLICK_A4A_EXTERNAL_DELAYED_EXPERIMENT_BRANCHES_PRE_LAUNCH) ||
       (a4aRequested && (isProxyOrigin(win.location) ||
        getMode(win).localDev || getMode(win).test));
   if (enableA4A && a4aRequested && !isInManualExperiment(element)) {
