@@ -97,7 +97,6 @@ class AmpSocialShare extends AMP.BaseElement {
       const isIosSafari = this.platform_.isIos() && this.platform_.isSafari();
       this.target_ = (isIosSafari && (isMailTo || isWhatsApp || isSms))
           ? '_top' : '_blank';
-          
       if (isSms) {
         // http://stackoverflow.com/a/19126326
         // This code path seems to be stable for both iOS and Android.
