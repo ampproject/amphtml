@@ -499,27 +499,28 @@ export class ActionService {
 
 
 /**
- * A clone of an event object with its function properties noop'd.
+ * A clone of an event object with its function properties replaced.
  * This is useful e.g. for event objects that need to be passed to an async
  * context, but the browser might have cleaned up the original event object.
- * This clone noops functions since they won't behave normally after the
- * original object has been destroyed.
+ * This clone replaces functions with error throws since they won't behave
+ * normally after the original object has been destroyed.
+ * @private visible for testing
  */
-class DeferredEvent {
+export class DeferredEvent {
   /**
    * @param {!Event} event
    */
   constructor(event) {
-    cloneWithoutFunctions(event, this);
-
     /** @type {?Object} */
     this.detail = null;
+
+    cloneWithoutFunctions(event, this);
   }
 }
 
 
 /**
- * Clones an object and noops its function properties.
+ * Clones an object and replaces its function properties with throws.
  * @param {!T} original
  * @param {!T=} opt_dest
  * @return {!T}
@@ -531,7 +532,7 @@ function cloneWithoutFunctions(original, opt_dest) {
   for (const prop in original) {
     const value = original[prop];
     if (typeof value === 'function') {
-      clone[prop] = noop;
+      clone[prop] = notImplemented;
     } else {
       clone[prop] = original[prop];
     }
@@ -539,8 +540,11 @@ function cloneWithoutFunctions(original, opt_dest) {
   return clone;
 }
 
+
 /** @private */
-function noop() { }
+function notImplemented() {
+  dev().assert(null, 'Deferred events cannot access native event functions.');
+}
 
 
 /**

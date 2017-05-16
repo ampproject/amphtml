@@ -16,6 +16,7 @@
 
 import {
   ActionService,
+  DeferredEvent,
   OBJECT_STRING_ARGS_KEY,
   applyActionInfoArgs,
   parseActionMap,
@@ -1037,4 +1038,29 @@ describe('Core events', () => {
         }));
   });
 
+  describe('DeferredEvent', () => {
+    it('should copy the properties of an event object', () => {
+      const event = createCustomEvent(window, 'MyEvent', {foo: 'bar'});
+      const deferredEvent = new DeferredEvent(event);
+
+      for (const key in deferredEvent) {
+        if (typeof deferredEvent[key] !== 'function') {
+          expect(deferredEvent[key]).to.deep.equal(event[key]);
+        }
+      }
+    });
+
+    it('should replace functions with throws', () => {
+      const event = createCustomEvent(window, 'MyEvent', {foo: 'bar'});
+      const deferredEvent = new DeferredEvent(event);
+
+      for (const key in deferredEvent) {
+        const value = deferredEvent[key];
+        if (typeof value === 'function') {
+          expect(() => value()).to.throw(
+              'cannot access native event functions');
+        }
+      }
+    });
+  });
 });
