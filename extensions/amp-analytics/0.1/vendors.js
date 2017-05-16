@@ -893,10 +893,6 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
   'nielsen': {
     'vars': {
       'sessionId': 'CLIENT_ID(imrworldwide)',
-      'apv': '1.0',
-      'segA': 'NA',
-      'segB': 'NA',
-      'segC': 'NA',
     },
     'requests': {
       'session': 'https://uaid-linkage.imrworldwide.com/cgi-bin/gn?prd=session&c13=asid,P${apid}&sessionId=${sessionId},&pingtype=4&enc=false&c61=createtm,${timestamp}&rnd=${random}',
