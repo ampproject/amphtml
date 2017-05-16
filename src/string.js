@@ -33,6 +33,14 @@ export function dashToCamelCase(name) {
 }
 
 /**
+ * @param {string} name Attribute name with dashes
+ * @return {string} Dashes replaced by underlines.
+ */
+export function dashToUnderline(name) {
+  return name.replace('-', '_')
+}
+
+/**
  * Polyfill for String.prototype.endsWith.
  * @param {string} string
  * @param {string} suffix
@@ -84,4 +92,3 @@ export function expandTemplate(template, getter, opt_maxIterations) {
   }
   return template;
 }
-

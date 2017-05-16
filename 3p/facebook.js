@@ -16,7 +16,7 @@
 
 import {loadScript} from './3p';
 import {user} from '../src/log';
-
+import {dashToUnderline} from '../src/string';
 
 /**
  * Produces the Facebook SDK object for the passed in callback.
@@ -29,7 +29,7 @@ import {user} from '../src/log';
  * @param {function(!Object)} cb
  */
 function getFacebookSdk(global, cb) {
-  loadScript(global, 'https://connect.facebook.net/' + window.navigator.language.replace('-', '_') + '/sdk.js', () => {
+  loadScript(global, 'https://connect.facebook.net/' + dashToUnderline(window.navigator.language) + '/sdk.js', () => {
     cb(global.FB);
   });
 }
