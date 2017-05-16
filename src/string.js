@@ -37,7 +37,7 @@ export function dashToCamelCase(name) {
  * @return {string} Dashes replaced by underlines.
  */
 export function dashToUnderline(name) {
-  return name.replace('-', '_')
+  return name.replace('-', '_');
 }
 
 /**
