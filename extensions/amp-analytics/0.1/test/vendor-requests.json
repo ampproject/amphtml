@@ -1,4 +1,10 @@
 {
+  "baiduanalytics": {
+    "host": "https://hm.baidu.com/hm.gif?",
+    "base": "https://hm.baidu.com/hm.gif?si=$token&nv=0&st=4&v=pixel-1.0&rnd=$timestamp",
+    "pageview": "https://hm.baidu.com/hm.gif?si=$token&nv=0&st=4&v=pixel-1.0&rnd=$timestamp&et=0",
+    "trackEvent": "https://hm.baidu.com/hm.gif?si=$token&nv=0&st=4&v=pixel-1.0&rnd=$timestamp&ep=$CATEGORY*$ACTION*$LABEL*$VALUE&et=4&api=8_0"
+  },
   "acquialift": {
    "base": "https://us-east-1-decisionapi.lift.acquia.com/capture?account_id=xxxxxxxx&site_id=xxxxxxxx",
    "basicCapture": "https://us-east-1-decisionapi.lift.acquia.com/capture?account_id=xxxxxxxx&site_id=xxxxxxxx&ident=_client_id_&identsrc=amp&es=Amp&url=_canonical_url_&rurl=_document_referrer_&cttl=_title_",
