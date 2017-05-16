@@ -19,13 +19,14 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>A video player with an integration of the
+    <td>Embeds a video player for instream video ads that are integrated with
+    the
     <a href="https://developers.google.com/interactive-media-ads/docs/sdks/html5/">IMA SDK</a>
-    for instream video ads.</td>
+    </td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>Experiment</td>
+    <td>Experimental</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -43,10 +44,12 @@ limitations under the License.
 
 ## Overview 
 
-You can use the `amp-ima-video` component to embed an IMA SDK enabled video
-player. Provide a source URL for your content video and an ad tag, which is a
-URL to a VAST-compliant ad response (see examples
-[here](https://developers.google.com/interactive-media-ads/docs/sdks/html5/tags)).
+You can use the `amp-ima-video` component to embed an <a
+href="https://developers.google.com/interactive-media-ads/docs/sdks/html5/">IMA
+SDK</a>enabled video player. To embed a video, provide a source URL for your
+content video (`data-src`) and an ad tag (`data-tag`), which is a URL to a
+VAST-compliant ad response (for examples, see
+[IMA Sample Tags](https://developers.google.com/interactive-media-ads/docs/sdks/html5/tags)).
 
 **Example: Embedding a video**
 
@@ -55,7 +58,7 @@ URL to a VAST-compliant ad response (see examples
     width=640 height=360 layout="responsive"
     data-src="https://s0.2mdn.net/4253510/google_ddm_animation_480P.mp4"
     data-tag="https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpost&cmsid=496&vid=short_onecue&correlator="
-    data-poster="path/to/poster.png"
+    data-poster="path/to/poster.png">
 </amp-ima-video>
 ```
 
@@ -63,11 +66,16 @@ URL to a VAST-compliant ad response (see examples
 
 **data-src** (required)
 
-The URL of your content video.
+The URL of your video content.
 
 **data-tag** (required)
 
 The URL for your VAST ad document.
+
+**data-poster**
+
+An image for the frame to be displayed before video playback has started. By
+default, the first frame is displayed.
 
 ## Validation
 
