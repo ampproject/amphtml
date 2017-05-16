@@ -98,7 +98,9 @@ export class Xhr {
     this.win = win;
 
     const ampdocService = ampdocServiceFor(win);
-    this.ampdoc_ = ampdocService.isSingleDoc() ?
+
+    /** @private @const {?AmpDoc} */
+    this.ampdocSingle_ = ampdocService.isSingleDoc() ?
       ampdocService.getAmpDoc() :
       null;
   }
@@ -113,13 +115,12 @@ export class Xhr {
    * @private
    */
   fetch_(input, init) {
-    if (this.ampdoc_) {
-      // TODO(@jridgewell, #9048): We can alternatively _always_ wait on
-      // #whenFirstVisible.
-      if (Math.random() < .01 && !viewerForDoc(this.ampdoc_).hasBeenVisible()) {
-        dev().error('XHR', 'attempted to fetch %s before viewer was visible',
-            input);
-      }
+    if (this.ampdocSingle_ &&
+        Math.random() < 0.01 &&
+        parseUrl(input).origin != this.win.location.origin &&
+        !viewerForDoc(this.ampdocSingle_).hasBeenVisible()) {
+      dev().error('XHR', 'attempted to fetch %s before viewer was visible',
+          input);
     }
 
     dev().assert(typeof input == 'string', 'Only URL supported: %s', input);
@@ -170,7 +171,7 @@ export class Xhr {
     }
     // For some same origin requests, add AMP-Same-Origin: true header to allow
     // publishers to validate that this request came from their own origin.
-    const currentOrigin = parseUrl(this.win.location.href).origin;
+    const currentOrigin = this.win.location.origin;
     const targetOrigin = parseUrl(input).origin;
     if (currentOrigin == targetOrigin) {
       init['headers'] = init['headers'] || {};
