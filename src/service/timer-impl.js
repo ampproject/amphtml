@@ -145,7 +145,7 @@ export class Timer {
       this.cancel(timerKey);
     };
     opt_racePromise.then(cancel, cancel);
-    return Promise.race([delayPromise, opt_racePromise])
+    return Promise.race([delayPromise, opt_racePromise]);
   }
 
   /**

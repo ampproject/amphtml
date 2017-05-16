@@ -233,7 +233,7 @@ export class AmpForm {
     const depElements = this.form_./*OK*/querySelectorAll(
         EXTERNAL_DEPS.join(','));
     // Wait for an element to be built to make sure it is ready.
-    const depPromises = toArray(depElements).map(el => el.whenBuilt());
+    const promises = toArray(depElements).map(el => el.whenBuilt());
     return this.dependenciesPromise_ = this.waitOnPromisesOrTimeout_(promises,
         2000);
   }
