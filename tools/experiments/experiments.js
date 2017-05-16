@@ -198,11 +198,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8121',
   },
   {
-    id: 'amp-accordion-session-state-optout',
-    name: 'AMP Accordion attribute to opt out of preserved state.',
-    Spec: 'https://github.com/ampproject/amphtml/issues/3813',
-  },
-  {
     id: 'variable-filters',
     name: 'Format to apply filters to analytics variables',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
