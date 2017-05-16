@@ -1215,7 +1215,7 @@ describe('amp-a4a', () => {
       });
     });
     it('should ignore invalid safeframe version header', () => {
-      headers[SAFEFRAME_VERSION_HEADER] = 'javascript:evil!';
+      headers[SAFEFRAME_VERSION_HEADER] = 'some-bad-item';
       headers[RENDERING_TYPE_HEADER] = 'safeframe';
       delete headers[SIGNATURE_HEADER];
       xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
