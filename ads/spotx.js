@@ -47,6 +47,8 @@ export function spotx(global, data) {
     }
   };
 
+  script.onload = global.context.renderStart;
+
   script.src = `//js.spotx.tv/easi/v1/${data['spotx_channel_id']}.js`;
   global.document.body.appendChild(script);
 }

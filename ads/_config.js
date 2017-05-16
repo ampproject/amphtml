@@ -589,6 +589,7 @@ export const adConfig = {
 
   spotx: {
     preconnect: 'https://js.spotx.tv',
+    renderStartImplemented: true,
   },
 
   sunmedia: {
