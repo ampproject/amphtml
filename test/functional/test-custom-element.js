@@ -18,6 +18,7 @@ import {BaseElement} from '../../src/base-element';
 import {ElementStub, setLoadingCheckForTests} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
 import {installResourcesServiceForDoc} from '../../src/service/resources-impl';
+import {poll} from '../../testing/iframe';
 import {resourcesForDoc} from '../../src/services';
 import {vsyncFor} from '../../src/services';
 import {
@@ -1309,6 +1310,30 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
     expect(elements[0].tagName.toLowerCase()).to.equal('content');
   });
 
+  it('toggleLayoutDisplay should add/remove display class', () => {
+    element.setAttribute('layout', 'nodisplay');
+    win.document.body.appendChild(element);
+    return poll('wait for static layout',
+            () => element.classList.contains('i-amphtml-layout-nodisplay'))
+        .then(() => {
+          // TODO(dvoytenko, #9353): once `toggleLayoutDisplay` API has been
+          // deployed this will start `false`.
+          expect(element.classList.contains('i-amphtml-display')).to.be.true;
+
+          element.style.display = 'block';
+          element.toggleLayoutDisplay(true);
+          expect(element.classList.contains('i-amphtml-display')).to.be.true;
+          expect(win.getComputedStyle(element).display).to.equal('block');
+
+          element.toggleLayoutDisplay(false);
+          expect(element.classList.contains('i-amphtml-display')).to.be.false;
+          expect(win.getComputedStyle(element).display).to.equal('none');
+
+          element.toggleLayoutDisplay(true);
+          expect(element.classList.contains('i-amphtml-display')).to.be.true;
+          expect(win.getComputedStyle(element).display).to.equal('block');
+        });
+  });
 
   it('getPlaceholder should return nothing', () => {
     expect(element.getPlaceholder()).to.be.null;
