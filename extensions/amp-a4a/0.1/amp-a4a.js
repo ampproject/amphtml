@@ -448,7 +448,7 @@ export class AmpA4A extends AMP.BaseElement {
   resumeCallback() {
     // FIE that was not destroyed on unlayoutCallback does not require a new
     // ad request.
-    if (!isExperimentOn('a4a-fie-unlayout-enabled') &&
+    if (!isExperimentOn(this.win, 'a4a-fie-unlayout-enabled') &&
         this.friendlyIframeEmbed_) {
       return;
     }
@@ -1006,9 +1006,9 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override  */
   unlayoutCallback() {
-    if (!isExperimentOn('a4a-fie-unlayout-enabled') &&
+    if (!isExperimentOn(this.win, 'a4a-fie-unlayout-enabled') &&
         this.friendlyIframeEmbed_) {
-      return;
+      return false;
     }
     // Increment promiseId to cause any pending promise to cancel.
     this.promiseId_++;
