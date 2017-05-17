@@ -346,7 +346,19 @@ describe('amp-a4a', () => {
       });
     });
 
-    it('should reset state to null on unlayoutCallback', () => {
+    it('should reset state to null on non-FIE unlayoutCallback', () => {
+      // Make sure there's no signature, so that we go down the 3p iframe path.
+      delete headers[SIGNATURE_HEADER];
+      a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      return a4a.layoutCallback().then(() => {
+        expect(a4aElement.querySelector('iframe[src]')).to.be.ok;
+        expect(a4a.unlayoutCallback()).to.be.true;
+        expect(a4aElement.querySelector('iframe[src]')).to.not.be.ok;
+      });
+    });
+
+    it('should not reset state to null on FIE unlayoutCallback', () => {
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
@@ -354,8 +366,21 @@ describe('amp-a4a', () => {
         expect(a4a.friendlyIframeEmbed_).to.exist;
         const destroySpy = sandbox.spy();
         a4a.friendlyIframeEmbed_.destroy = destroySpy;
-        a4a.unlayoutCallback();
-        a4a.vsync_.runScheduledTasks_();
+        expect(a4a.unlayoutCallback()).to.be.false;
+        expect(a4a.friendlyIframeEmbed_).to.exist;
+        expect(destroySpy).to.not.be.called;
+      });
+    });
+
+    it('should reset state to null on FIE unlayoutCallback if exp set', () => {
+      toggleExperiment(fixture.win, 'a4a-fie-unlayout-enabled', true, true);
+      a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      return a4a.layoutCallback().then(() => {
+        expect(a4a.friendlyIframeEmbed_).to.exist;
+        const destroySpy = sandbox.spy();
+        a4a.friendlyIframeEmbed_.destroy = destroySpy;
+        expect(a4a.unlayoutCallback()).to.be.true;
         expect(a4a.friendlyIframeEmbed_).to.not.exist;
         expect(destroySpy).to.be.calledOnce;
       });
@@ -732,6 +757,8 @@ describe('amp-a4a', () => {
 
   describe('#onLayoutMeasure', () => {
     it('resumeCallback calls onLayoutMeasure', () => {
+      // Force non-FIE
+      delete headers[SIGNATURE_HEADER];
       xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
@@ -741,13 +768,17 @@ describe('amp-a4a', () => {
         s.textContent = '.fixed {position:fixed;}';
         doc.head.appendChild(s);
         const a4a = new MockA4AImpl(a4aElement);
-        const renderAmpCreativeSpy = sandbox.spy(a4a, 'renderAmpCreative_');
+        const renderNonAmpCreativeSpy =
+          sandbox.spy(a4a, 'renderNonAmpCreative_');
+        a4a.buildCallback();
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.ok;
-        a4a.layoutCallback().then(() => {
-          expect(renderAmpCreativeSpy.calledOnce,
-              'renderAmpCreative_ called exactly once').to.be.true;
+        return a4a.layoutCallback().then(() => {
+          expect(renderNonAmpCreativeSpy.calledOnce,
+              'renderNonAmpCreative_ called exactly once').to.be.true;
           a4a.unlayoutCallback();
+          sandbox.stub(AmpA4A.prototype, 'getResource').returns(
+            {'hasBeenMeasured': () => true, 'isMeasureRequested': () => false});
           const onLayoutMeasureSpy = sandbox.spy(a4a, 'onLayoutMeasure');
           a4a.resumeCallback();
           expect(onLayoutMeasureSpy).to.be.calledOnce;
@@ -755,7 +786,7 @@ describe('amp-a4a', () => {
         });
       });
     });
-    it('resumeCallback w/ measure required no onLayoutMeasure', () => {
+    it('resumeCallback does not call onLayoutMeasure for FIE', () => {
       xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
@@ -774,7 +805,62 @@ describe('amp-a4a', () => {
               'renderAmpCreative_ called exactly once').to.be.true;
           a4a.unlayoutCallback();
           const onLayoutMeasureSpy = sandbox.spy(a4a, 'onLayoutMeasure');
-          //sandbox.stub(Resource.prototype, 'hasBeenMeasured').returns(false);
+          a4a.resumeCallback();
+          expect(onLayoutMeasureSpy).to.not.be.called;
+          expect(a4a.fromResumeCallback).to.be.false;
+        });
+      });
+    });
+    it('resumeCallback does call onLayoutMeasure for FIE if exp set', () => {
+      xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        const a4aElement = createA4aElement(doc);
+        const s = doc.createElement('style');
+        s.textContent = '.fixed {position:fixed;}';
+        doc.head.appendChild(s);
+        toggleExperiment(fixture.win, 'a4a-fie-unlayout-enabled', true, true);
+        const a4a = new MockA4AImpl(a4aElement);
+        const renderAmpCreativeSpy = sandbox.spy(a4a, 'renderAmpCreative_');
+        a4a.buildCallback();
+        a4a.onLayoutMeasure();
+        expect(a4a.adPromise_).to.be.ok;
+        return a4a.layoutCallback().then(() => {
+          expect(renderAmpCreativeSpy.calledOnce,
+              'renderAmpCreative_ called exactly once').to.be.true;
+          a4a.unlayoutCallback();
+          const onLayoutMeasureSpy = sandbox.spy(a4a, 'onLayoutMeasure');
+          sandbox.stub(AmpA4A.prototype, 'getResource').returns(
+            {'hasBeenMeasured': () => true, 'isMeasureRequested': () => false});
+          a4a.resumeCallback();
+          expect(onLayoutMeasureSpy).to.be.called;
+          expect(a4a.fromResumeCallback).to.be.true;
+        });
+      });
+    });
+    it('resumeCallback w/ measure required no onLayoutMeasure', () => {
+      // Force non-FIE
+      delete headers[SIGNATURE_HEADER];
+      xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        const a4aElement = createA4aElement(doc);
+        const s = doc.createElement('style');
+        s.textContent = '.fixed {position:fixed;}';
+        doc.head.appendChild(s);
+        const a4a = new MockA4AImpl(a4aElement);
+        const renderNonAmpCreativeSpy =
+          sandbox.spy(a4a, 'renderNonAmpCreative_');
+        a4a.buildCallback();
+        a4a.onLayoutMeasure();
+        expect(a4a.adPromise_).to.be.ok;
+        return a4a.layoutCallback().then(() => {
+          expect(renderNonAmpCreativeSpy.calledOnce,
+              'renderNonAmpCreative_ called exactly once').to.be.true;
+          a4a.unlayoutCallback();
+          const onLayoutMeasureSpy = sandbox.spy(a4a, 'onLayoutMeasure');
           sandbox.stub(AmpA4A.prototype, 'getResource').returns(
             {'hasBeenMeasured': () => false});
           a4a.resumeCallback();
