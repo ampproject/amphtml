@@ -24,6 +24,7 @@
 import {bytesToUInt32, stringToBytes, utf8DecodeSync} from './utils/bytes';
 import {cryptoFor} from './crypto';
 import {getCookie, setCookie} from './cookies';
+import {getServicePromise} from './service';
 import {getSourceOrigin, parseQueryString, parseUrl} from './url';
 import {user} from './log';
 
@@ -42,8 +43,9 @@ const COOKIE_EXPIRATION_INTERVAL = COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
 /** @type {Object<string, boolean>} */
 let toggles_ = null;
 
+//TODO(kmh287, #8331) Replaced undefined with real experiment public key jwk.
 /** @type {!Promise} */
-const originTrialsPromise = enableExperimentsForOriginTrials(self);
+const originTrialsPromise = enableExperimentsForOriginTrials(self, undefined);
 
 /**
  * @typedef {{
@@ -71,11 +73,12 @@ export function isCanary(win) {
  *   3. The experiments data was not signed with our private key
  * @param {!Window} win
  * @param {string} token
- * @param {!Object=} opt_publicJwk Used for testing only.
+ * @param {!Object} crypto Crypto service
+ * @param {!Object} keyInfo Key info for the public key used to verify
+ *    the token's signature.
  * @return {!Promise}
  */
-function enableExperimentsFromToken(win, token, opt_publicJwk) {
-  const crypto = cryptoFor(win);
+function enableExperimentsFromToken(win, token, crypto, keyInfo) {
   if (!crypto.isCryptoAvailable()) {
     user().warn(TAG, 'Crypto is unavailable');
     return Promise.resolve();
@@ -111,36 +114,32 @@ function enableExperimentsFromToken(win, token, opt_publicJwk) {
   const signedBytes = bytes.subarray(0, current);
   const signatureBytes = bytes.subarray(current);
 
-  // TODO(kmh287, choumx) fill in real public key
-  const publicJwk = opt_publicJwk || {};
+  return crypto.verifySignature(signedBytes, signatureBytes, keyInfo)
+      .then(verified => {
+        if (!verified) {
+          throw new Error('Failed to verify config signature');
+        }
+        const configStr = utf8DecodeSync(configBytes);
+        const config = JSON.parse(configStr);
 
-  return crypto.importPublicKey('experiments', publicJwk).then(keyInfo => {
-    return crypto.verifySignature(signedBytes, signatureBytes, keyInfo);
-  }).then(verified => {
-    if (!verified) {
-      throw new Error('Failed to verify config signature');
-    }
-    const configStr = utf8DecodeSync(configBytes);
-    const config = JSON.parse(configStr);
+        const approvedOrigin = parseUrl(config['origin']).origin;
+        const sourceOrigin = getSourceOrigin(win.location);
+        if (approvedOrigin !== sourceOrigin) {
+          throw new Error('Config does not match current origin');
+        }
 
-    const approvedOrigin = parseUrl(config['origin']).origin;
-    const sourceOrigin = getSourceOrigin(win.location);
-    if (approvedOrigin !== sourceOrigin) {
-      throw new Error('Config does not match current origin');
-    }
-
-    const experimentId = config['experiment'];
-    const expiration = config['expiration'];
-    const now = Date.now();
-    if (expiration >= now) {
-      toggleExperiment(win,
-          experimentId,
-          /* opt_on */ true,
-          /* opt_transientExperiment */ true);
-    } else {
-      throw new Error(`Experiment ${experimentId} has expired`);
-    }
-  });
+        const experimentId = config['experiment'];
+        const expiration = config['expiration'];
+        const now = Date.now();
+        if (expiration >= now) {
+          toggleExperiment(win,
+              experimentId,
+              /* opt_on */ true,
+              /* opt_transientExperiment */ true);
+        } else {
+          throw new Error(`Experiment ${experimentId} has expired`);
+        }
+      });
 }
 
 
@@ -148,28 +147,38 @@ function enableExperimentsFromToken(win, token, opt_publicJwk) {
  * Scan the page for origin trial tokens. Enable experiments detailed in the
  * tokens iff the token is well-formed. A token
  * @param {!Window} win
-  *@param {!Object=} opt_publicJwk Used for testing only.
+  *@param {!Object} publicJwk Used for testing only.
  * @return {!Promise}
  */
-export function enableExperimentsForOriginTrials(win, opt_publicJwk) {
+export function enableExperimentsForOriginTrials(win, publicJwk) {
   const metas =
       win.document.head.querySelectorAll('meta[name="amp-experiment-token"]');
-  const tokenPromises = [];
-  for (let i = 0; i < metas.length; i++) {
-    const meta = metas[i];
-    const token = meta.getAttribute('content');
-    if (token) {
-      const tokenPromise =
-          enableExperimentsFromToken(win, token, opt_publicJwk).catch(msg => {
-            // Log message but do not prevent scans of other tokens.
-            user().warn(TAG, msg);
-          });
-      tokenPromises.push(tokenPromise);
-    } else {
-      user().warn(TAG, 'Unable to read experiments token');
-    }
+  if (metas.length == 0 || publicJwk == undefined) {
+    return Promise.resolve();
   }
-  return Promise.all(tokenPromises);
+  let crypto;
+  return getServicePromise(win, 'crypto').then(c => {
+    crypto = c;
+    return crypto.importPublicKey('experiments', publicJwk)
+  }).then(keyInfo => {
+    const tokenPromises = [];
+    for (let i = 0; i < metas.length; i++) {
+      const meta = metas[i];
+      const token = meta.getAttribute('content');
+      if (token) {
+        const tokenPromise =
+            enableExperimentsFromToken(win, token, crypto, keyInfo)
+                .catch(err => {
+                  // Log message but do not prevent scans of other tokens.
+                  user().warn(TAG, err);
+                });
+        tokenPromises.push(tokenPromise);
+      } else {
+        user().warn(TAG, 'Unable to read experiments token');
+      }
+    }
+    return Promise.all(tokenPromises);
+  });
 }
 
 /**
