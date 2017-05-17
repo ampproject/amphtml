@@ -58,7 +58,9 @@ function extractPercyKeys() {
         'Error: PERCY_TOKEN doesn\'t look like a valid Percy API key'));
     process.exit(1);
   }
-  util.log('Percy token: ', util.colors.magenta('<redacted>'));
+  // Note: The secret percy token only gets printed during local use. Travis
+  // will hide it in publicly accessible logs.
+  util.log('Percy token: ', util.colors.magenta(percyToken));
   return {
     percyProject: percyProject,
     percyToken: percyToken,
