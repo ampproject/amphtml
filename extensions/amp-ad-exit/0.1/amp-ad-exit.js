@@ -95,6 +95,13 @@ export class AmpAdExit extends AMP.BaseElement {
         url, vars, undefined /* opt_collectVars */, whitelist);
   }
 
+  /**
+   * Attemts to issue a request to `url` to report the click. The request method
+   * depends on the exit config's transport property. navigator.sendBeacon will
+   * be tried if transport.beacon is `true` or `undefined`. Otherwise, or if
+   * sendBeacon returns false, an image request will be made.
+   * @param {string} url
+   */
   pingTrackingUrl_(url) {
     user().fine(TAG, `pinging ${url}`);
     const useBeacon = this.config_.transport[TransportMode.BEACON] == true ||
