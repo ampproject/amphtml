@@ -213,6 +213,5 @@ export function installParallaxForDoc(nodeOrDoc) {
       nodeOrDoc,
       'amp-fx-parallax',
       ParallaxService,
-      /* opt_factory */ undefined,
       /* opt instantiate */ true);
 };

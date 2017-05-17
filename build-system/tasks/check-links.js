@@ -46,6 +46,10 @@ function checkLinks() {
     var deadLinksFound = false;
     var filesWithDeadLinks = [];
     allResults.map(function(results, index) {
+      // Skip files that were deleted by the PR.
+      if (!fs.existsSync(markdownFiles[index])) {
+        return;
+      }
       var deadLinksFoundInFile = false;
       util.log(
           'Checking links in',
@@ -55,8 +59,6 @@ function checkLinks() {
           deadLinksFound = true;
           deadLinksFoundInFile = true;
           util.log('[%s] %s', chalk.red('✖'), result.link);
-        } else {
-          util.log('[%s] %s', chalk.green('✓'), result.link);
         }
       });
       if(deadLinksFoundInFile) {
@@ -115,6 +117,10 @@ function filterLocalhostLinks(markdown) {
  * @return {Promise} Used to wait until the async link checker is done.
  */
 function runLinkChecker(markdownFile) {
+  // Skip files that were deleted by the PR.
+  if (!fs.existsSync(markdownFile)) {
+    return Promise.resolve();
+  }
   var markdown = fs.readFileSync(markdownFile).toString();
   var filteredMarkdown = filterLocalhostLinks(markdown);
   var opts = {

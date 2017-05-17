@@ -15,6 +15,17 @@
  */
 
 /**
+ * @typedef {{
+ *   prefetch: (string|undefined),
+ *   preconnect: (string|undefined),
+ *   renderStartImplemented: (boolean|undefined),
+ *   clientIdScope: (string|undefined),
+ *   clientIdCookieName: (string|undefined),
+ * }}
+ */
+let AdNetworkConfigDef;
+
+/**
  * The config of each ad network.
  * Please keep the list alphabetic order.
  *
@@ -26,14 +37,19 @@
  *   // List of hosts for preconnect
  *   preconnect: string|array
  *
- *   // The externalCidScope used to provide CIDs to ads
+ *   // The scope used to provide CIDs to ads
  *   clientIdScope: string
+ *
+ *  // The cookie name to store the CID. In absence, `clientIdScope` is used.
+ *   clientIdCookieName: string
  *
  *   // Whether render-start API has been implemented
  *   // We highly recommend all networks to implement the API,
  *   // see details in the README.md
  *   renderStartImplemented: boolean
  * }
+ *
+ * @const {!Object<string, !AdNetworkConfigDef>}}
  */
 export const adConfig = {
   _ping_: {
@@ -297,6 +313,11 @@ export const adConfig = {
     prefetch: 'https://cdn.gmossp-sp.jp/ads/amp.js',
   },
 
+  gumgum: {
+    prefetch: 'https://g2.gumgum.com/javascripts/ad.js',
+    renderStartImplemented: true,
+  },
+
   holder: {
     prefetch: 'https://i.holder.com.ua/js2/holder/ajax/ampv1.js',
     preconnect: 'https://h.holder.com.ua',
@@ -328,8 +349,7 @@ export const adConfig = {
 
   ix: {
     prefetch: [
-      'https://js-sec.indexww.com/indexJTag.js',
-      'https://js-sec.indexww.com/apl/apl6.js',
+      'https://js-sec.indexww.com/apl/amp.js',
     ],
     preconnect: 'https://as-sec.casalemedia.com',
   },
@@ -437,6 +457,10 @@ export const adConfig = {
     prefetch: 'https://s.ntv.io/serve/load.js',
   },
 
+  navegg: {
+    renderStartImplemented: true,
+  },
+
   nend: {
     prefetch: 'https://js1.nend.net/js/amp.js',
     preconnect: [
@@ -471,6 +495,15 @@ export const adConfig = {
   },
 
   plista: {},
+
+  polymorphicads: {
+    prefetch: 'https://www.polymorphicads.jp/js/amp.js',
+    preconnect: [
+      'https://img.polymorphicads.jp',
+      'https://ad.polymorphicads.jp',
+    ],
+    renderStartImplemented: true,
+  },
 
   popin: {
     renderStartImplemented: true,

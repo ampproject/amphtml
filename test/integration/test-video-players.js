@@ -27,7 +27,6 @@
  */
 
 import {runVideoPlayerIntegrationTests} from './test-video-players-helper';
-import {toggleExperiment} from '../../src/experiments';
 
 
 //TODO(aghassemi,#7822): We have to skip iOS for video tests since videos
@@ -42,7 +41,8 @@ describe.configure().skipIos().run('amp-video', () => {
   });
 });
 
-describe.configure().skipIos().run('amp-youtube', () => {
+//TODO(aghassemi, #9379): unskip
+describe.skip('amp-youtube', () => {
   runVideoPlayerIntegrationTests(fixture => {
     const video = fixture.doc.createElement('amp-youtube');
     video.setAttribute('data-videoid', 'O0QDEXZhow4');
@@ -68,9 +68,9 @@ describe.skip('amp-nexxtv-player', () => {
   });
 });
 
-describe.configure().skipIos().run('amp-ima-video', () => {
+//TODO(aghassemi, #9379): unskip
+describe.skip('amp-ima-video', () => {
   runVideoPlayerIntegrationTests(fixture => {
-    toggleExperiment(fixture.win, 'amp-ima-video', true);
     const video = fixture.doc.createElement('amp-ima-video');
     video.setAttribute('width', 640);
     video.setAttribute('height', 360);
@@ -80,7 +80,7 @@ describe.configure().skipIos().run('amp-ima-video', () => {
     video.setAttribute('data-tag', 'https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpost&cmsid=496&vid=short_onecue&correlator=');
     video.setAttribute('data-poster', '/examples/img/ima-poster.png');
     return video;
-  });
+  }, 'amp-ima-video');
 });
 
 describe.configure().skipIos().run('amp-brid-player', () => {

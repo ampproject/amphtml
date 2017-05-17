@@ -1181,6 +1181,10 @@ export class ViewportBindingNaturalIosEmbed_ {
     /** @private {number} */
     this.paddingTop_ = 0;
 
+    // Mark as a legacy viewport.
+    this.win.document.documentElement.classList.add(
+        'i-amphtml-ios-embed-legacy');
+
     // Microtask is necessary here to let Safari to recalculate scrollWidth
     // post DocumentReady signal.
     whenDocumentReady(this.win.document).then(() => this.setup_());
@@ -1888,8 +1892,8 @@ function getViewportType(win, viewer) {
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  */
 export function installViewportServiceForDoc(ampdoc) {
-  registerServiceBuilderForDoc(ampdoc, 'viewport',
-      /* constructor */ undefined,
-      ampdoc => createViewport(ampdoc),
-      /* instantiate */ true);
+  registerServiceBuilderForDoc(ampdoc,
+      'viewport',
+      createViewport,
+      /* opt_instantiate */ true);
 }

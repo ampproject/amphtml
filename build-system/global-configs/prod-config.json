@@ -3,19 +3,14 @@
   "allow-url-opt-in": ["pump-early-frame"],
 
   "canary": 0,
-  "pan-y": 1,
   "expAdsenseA4A": 0.5,
   "expDoubleclickA4A": 0.5,
   "a4aProfilingRate": 0.1,
   "ad-type-custom": 1,
-  "amp-scrollable-carousel": 1,
   "ios-embed-wrapper": 1,
   "amp-apester-media": 1,
-  "amp-accordion-session-state-optout": 1,
   "amp-playbuzz": 1,
-  "make-body-relative": 1,
   "chunked-amp": 1,
-  "amp-selector": 1,
   "sticky-ad-early-load": 1,
   "amp-auto-ads": 1,
   "slidescroll-disable-css-snap": 1,
@@ -23,5 +18,6 @@
   "web-worker": 1,
   "a4aFastFetchDoubleclickLaunched": 0,
   "a4aFastFetchAdSenseLaunched": 0,
-  "pump-early-frame": 1
+  "pump-early-frame": 1,
+  "a4a-measure-get-ad-urls": 0
 }

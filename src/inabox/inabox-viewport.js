@@ -17,7 +17,7 @@
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
 import {viewerForDoc} from '../services';
 import {Viewport, ViewportBindingDef} from '../service/viewport-impl';
-import {getServiceForDoc} from '../service';
+import {registerServiceBuilderForDoc} from '../service';
 import {resourcesForDoc} from '../services';
 import {
   nativeIntersectionObserverSupported,
@@ -174,14 +174,16 @@ export class ViewportBindingInabox {
 
 /**
  * @param {!../service/ampdoc-impl.AmpDoc} ampdoc
- * @return {!Viewport}
  */
 export function installInaboxViewportService(ampdoc) {
   const binding = new ViewportBindingInabox(ampdoc.win);
   const viewer = viewerForDoc(ampdoc);
-  const viewport = new Viewport(ampdoc, binding, viewer);
-  return /** @type {!Viewport} */(getServiceForDoc(
-      ampdoc, 'viewport', () => viewport));
+  registerServiceBuilderForDoc(ampdoc,
+      'viewport',
+      function() {
+        return new Viewport(ampdoc, binding, viewer);
+      },
+      /* opt_instantiate */ true);
 }
 
 /**
