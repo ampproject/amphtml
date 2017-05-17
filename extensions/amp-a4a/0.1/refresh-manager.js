@@ -18,25 +18,22 @@ import {dev} from '../../../src/log';
 import {IntersectionObserverPolyfill} from '../../../src/intersection-observer-polyfill';
 import {timerFor} from '../../../src/services';
 
-const DEFAULT_MIN_ON_SCREEN_PIXEL_RATIO = 0.5;
-const DEFAULT_MIN_ON_SCREEN_TIME = 1000;  // In ms.
-const DEFAULT_REFRESH_INTERVAL = 30;  // In sec.
 const NAME_IN_WINDOW = 'AMP_A4A_REFRESHER';
 
 export const REFRESH_REFERENCE_ATTRIBUTE = 'data-amp-a4a-refresh-id';
 
 /** @typedef {{
- *   ?minOnScreenPixelRatioThreshold: number,
- *   ?minOnScreenTimeThreshold: number,
- *   ?refreshInterval: number,
+ *   minOnScreenPixelRatioThreshold: number,
+ *   minOnScreenTimeThreshold: number,
+ *   refreshInterval: number,
  * }} */
 export let RefreshConfig;
 
 /** @type {!RefreshConfig} */
 const DEFAULT_CONFIG = {
-  minOnScreenPixelRatioThreshold: DEFAULT_MIN_ON_SCREEN_PIXEL_RATIO,
-  minOnScreenTimeThreshold: DEFAULT_MIN_ON_SCREEN_TIME,
-  refreshInterval: DEFAULT_REFRESH_INTERVAL,
+  minOnScreenPixelRatioThreshold: 0.5,
+  minOnScreenTimeThreshold: 1,  // In seconds.
+  refreshInterval: 30,  // In seconds.
 };
 
 /**
@@ -104,11 +101,9 @@ export class RefreshManager {
     /**
      * The Intersection Observer used for all monitored elements.
      *
-     * @const @private {!IntersectionObserver|!IntersectionObserverPolyfill}
+     * @private {!Object<string, (IntersectionObserver|!IntersectionObserverPolyfill)>}
      */
-    this.intersectionObserver_ = 'IntersectionObserver' in win
-        ? new win['IntersectionObserver'](this.ioCallback_)
-        : new IntersectionObserverPolyfill(this.ioCallback_);
+    this.intersectionObservers_ = {};
 
     /**
      * A an object containing the RefreshState of all elements currently being
@@ -129,15 +124,34 @@ export class RefreshManager {
   }
 
   /**
+   * Returns an IntersectionObserver configured to the given threshold, creating
+   * one if one does not yet exist.
+   *
+   * @param {string|number} threshold
+   * @return {(IntersectionObserver|!IntersectionObserverPolyfill)}
+   */
+  getIntersectionObserverWithThreshold_(threshold) {
+    threshold = String(threshold);
+    this.intersectionObservers_[threshold] =
+        this.intersectionObservers_[threshold] ||
+        'IntersectionObserver' in this.win_
+            ? new this.win_['IntersectionObserver'](
+                this.ioCallback_, {threshold})
+            : new IntersectionObserverPolyfill(this.ioCallback_, {threshold});
+    return this.intersectionObservers_[threshold];
+  }
+
+  /**
    * This function will be invoked directly by the IntersectionObserver
    * implementation. It will implement the core logic of the refresh lifecycle,
    * including the transitions of the DFA.
    */
   ioCallback_(entries) {
     const refreshManager = getRefreshManagerFor(window);
-    for (const idx in entries) {
+    for (const idx in entries) { debugger;
       const entry = entries[idx];
       const wrapper = refreshManager.getElementWrapper_(entry.target);
+      console.log('### ioCallback');
       switch (wrapper.getRefreshLifecycleState()) {
         case RefreshLifecycleState.INITIAL:
           // First check if the element qualifies as "being on screen", i.e.,
@@ -148,13 +162,15 @@ export class RefreshManager {
           // timer.
           if (entry.intersectionRatio >=
               wrapper.getMinOnScreenPixelRatioThreshold()) {
+            console.log('INITIAL -> VIEW_PENDING');
             wrapper.setRefreshLifecycleState(
                 RefreshLifecycleState.VIEW_PENDING);
             const visibilityTimeoutId = refreshManager.timer_.delay(() => {
+              console.log('VIEW_PENDING -> REFRESH_PENDING');
               wrapper.setRefreshLifecycleState(
                   RefreshLifecycleState.REFRESH_PENDING);
               refreshManager.startRefreshTimer_(wrapper);
-            }, wrapper.getMinOnScreenTimeThreshold());
+            }, wrapper.getMinOnScreenTimeThreshold() * 1000);
             wrapper.setVisibilityTimeoutId(visibilityTimeoutId);
           }
           break;
@@ -163,6 +179,7 @@ export class RefreshManager {
           // duration elapses, place it back into INITIAL state.
           if (entry.intersectionRatio <
               wrapper.getMinOnScreenPixelRatioThreshold()) {
+            console.log('VIEW_PENDING -> INITIAL');
             refreshManager.timer_.cancel(wrapper.getVisibilityTimeoutId());
             wrapper.setRefreshLifecycleState(RefreshLifecycleState.INITIAL);
           }
@@ -181,22 +198,23 @@ export class RefreshManager {
    * and the refresh interval has elapsed.
    *
    * @param {!Element} element The element to be registered.
-   * @param {!function()} callback The function to be invoked when the element is
-   *     refreshed.
-   * @param {?RefreshConfig} config Specifies the viewability conditions and the
-   *     refresh interval.
+   * @param {!function()} callback The function to be invoked when the element
+   *     is refreshed.
+   * @param {?RefreshConfig} config Specifies the viewability conditions and
+   *     the refresh interval.
    */
   registerElement(element, callback, config = DEFAULT_CONFIG) {
-    const uniqueId = this.elementReferenceId_++;
+    console.log('### registerElement');
+    const uniqueId = String(++this.elementReferenceId_);
     this.registeredElementWrappers_[uniqueId] = new RegisteredElementWrapper(
         element,
         callback,
-        config.minOnScreenPixelRatioThreshold ||
-            DEFAULT_MIN_ON_SCREEN_PIXEL_RATIO,
-        config.minOnScreenTimeThreshold || DEFAULT_MIN_ON_SCREEN_TIME,
-        config.refreshInterval || DEFAULT_REFRESH_INTERVAL);
+        config.minOnScreenPixelRatioThreshold,
+        config.minOnScreenTimeThreshold,
+        config.refreshInterval);
     element.setAttribute(REFRESH_REFERENCE_ATTRIBUTE, uniqueId);
-    this.intersectionObserver_.observe(element);
+    this.getIntersectionObserverWithThreshold_(
+        config.minOnScreenPixelRatioThreshold).observe(element);
   }
 
   /**
@@ -205,10 +223,12 @@ export class RefreshManager {
    * @param {!RegisteredElementWrapper} elementWrapper
    */
   startRefreshTimer_(elementWrapper) {
+    console.log('### startRefreshTimer');
     this.timer_.delay(() => {
+      console.log('REFRESH_PENDING -> REFRESHED');
       elementWrapper.setRefreshLifecycleState(RefreshLifecycleState.REFRESHED);
       elementWrapper.invokeCallback();
-    }, elementWrapper.getRefreshInterval());
+    }, elementWrapper.getRefreshInterval() * 1000);
   }
 
   /**
@@ -246,9 +266,11 @@ export class RefreshManager {
       const element = wrapper.getElement();
       this.resetElement(element);
       element.removeAttribute(REFRESH_REFERENCE_ATTRIBUTE);
-      this.intersectionObserver_.unobserve(element);
+      this.getIntersectionObserverWithThreshold_(
+          wrapper.getMinOnScreenPixelRatioThreshold()).unobserve(element);
     }
     this.registeredElementWrappers_ = {};
+    this.intersectionObservers_ = {};
     this.elementReferenceId_ = 0;
   }
 
