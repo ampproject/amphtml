@@ -76,7 +76,8 @@ let PurchaseOptionDef;
  *   access: boolean,
  *   apl: string,
  *   premiumcontent: !PurchaseOptionDef,
- *   timepasses: Array<PurchaseOptionDef>=
+ *   timepasses: Array<PurchaseOptionDef>=,
+ *   subscriptions: Array<PurchaseOptionDef>=
  * }}
  */
 let PurchaseConfigDef;
@@ -306,6 +307,9 @@ export class LaterpayVendor {
     );
     this.purchaseConfig_.timepasses.forEach(timepass => {
       listContainer.appendChild(this.createPurchaseOption_(timepass));
+    });
+    this.purchaseConfig_.subscriptions.forEach(subscription => {
+      listContainer.appendChild(this.createPurchaseOption_(subscription));
     });
     const purchaseButton = this.createElement_('button');
     purchaseButton.className = TAG + '-purchase-button';
