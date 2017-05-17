@@ -212,27 +212,33 @@ const command = {
     let docFiles = files.filter(isDocFile);
     timedExecOrDie(`${gulp} check-links --files ${docFiles.join(',')}`);
   },
-  buildRuntime: function() {
+  runPreBuildChecks: function() {
     timedExecOrDie(`${gulp} clean`);
     timedExecOrDie(`${gulp} lint`);
-    timedExecOrDie(`${gulp} build`);
     timedExecOrDie(`${gulp} check-types`);
+  },
+  buildRuntime: function() {
+    timedExecOrDie(`${gulp} clean`);
+    timedExecOrDie(`${gulp} build`);
     timedExecOrDie(`${gulp} dist --fortesting`);
   },
-  testRuntime: function() {
-    // dep-check needs to occur after build since we rely on build to generate
-    // the css files into js files.
+  runDepChecks: function() {
+    timedExecOrDie(`${gulp} build --css-only`);
     timedExecOrDie(`${gulp} dep-check`);
+  },
+  runUnitTests: function() {
     // Unit tests with Travis' default chromium
     timedExecOrDie(`${gulp} test --nobuild --compiled`);
-    // Integration tests with all saucelabs browsers
-    timedExecOrDie(
-        `${gulp} test --nobuild --saucelabs --integration --compiled`);
     // All unit tests with an old chrome (best we can do right now to pass tests
     // and not start relying on new features).
     // Disabled because it regressed. Better to run the other saucelabs tests.
     // timedExecOrDie(
     //     `${gulp} test --nobuild --saucelabs --oldchrome --compiled`);
+  },
+  runIntegrationTests: function() {
+    // Integration tests with all saucelabs browsers
+    timedExecOrDie(
+        `${gulp} test --nobuild --saucelabs --integration --compiled`);
   },
   runVisualDiffTests: function() {
     // This must only be run for push builds, since Travis hides the encrypted
@@ -252,14 +258,26 @@ const command = {
 };
 
 function runAllCommands() {
-  command.testBuildSystem();
-  // Skip testDocumentLinks() during push builds.
-  command.buildRuntime();
-  command.presubmit();
-  command.runVisualDiffTests();  // Only called during push builds.
-  command.testRuntime();
-  command.buildValidatorWebUI();
-  command.buildValidator();
+  // Run different sets of independent tasks in parallel to reduce build time.
+  if (process.env.BUILD_SHARD == "pre_build_checks") {
+    command.testBuildSystem();
+    command.runPreBuildChecks();
+    command.runDepChecks();
+    // Skip testDocumentLinks() during push builds.
+  }
+  if (process.env.BUILD_SHARD == "integration_tests") {
+    command.buildRuntime();
+    command.presubmit();  // Must be run after the runtime is built.
+    command.runVisualDiffTests();  // Only called during push builds.
+    command.runIntegrationTests();    
+  }
+  if (process.env.BUILD_SHARD == "unit_tests") {
+    command.runUnitTests();
+  }
+  if (process.env.BUILD_SHARD == "validator_tests") {
+    command.buildValidatorWebUI();
+    command.buildValidator();
+  }
 }
 
 /**
@@ -318,34 +336,45 @@ function main(argv) {
       '\npr-check.js: detected build targets: ' +
       sortedBuildTargets.join(', ') + '\n');
 
-  if (buildTargets.has('BUILD_SYSTEM')) {
-    command.testBuildSystem();
+  // Run different sets of independent tasks in parallel to reduce build time.
+  if (process.env.BUILD_SHARD == "pre_build_checks") {
+    if (buildTargets.has('BUILD_SYSTEM')) {
+      command.testBuildSystem();
+    }
+
+    if (buildTargets.has('DOCS')) {
+      command.testDocumentLinks(files);
+    }
+
+    if (buildTargets.has('RUNTIME')) {
+      command.runPreBuildChecks();
+      command.runDepChecks();
+    }
   }
 
-  if (buildTargets.has('DOCS')) {
-    command.testDocumentLinks(files);
+  if (process.env.BUILD_SHARD == "integration_tests") {
+    if (buildTargets.has('RUNTIME')) {
+      command.buildRuntime();
+      command.runIntegrationTests();
+    }
+    // Presubmit needs to run after `gulp dist` as some checks run through
+    // the dist/ folder.
+    // Also presubmit always needs to run even for just docs to check for
+    // copyright at the top.
+    command.presubmit();
   }
 
-  if (buildTargets.has('RUNTIME')) {
-    command.buildRuntime();
+  if (process.env.BUILD_SHARD == "unit_tests" && buildTargets.has('RUNTIME')) {
+    command.runUnitTests();
   }
 
-  // Presubmit needs to run after `gulp dist` as some checks runs through the
-  // dist/ folder.
-  // Also presubmit always needs to run even for just docs to check for
-  // copyright at the top.
-  command.presubmit();
-
-  if (buildTargets.has('RUNTIME')) {
-    command.testRuntime();
-  }
-
-  if (buildTargets.has('VALIDATOR_WEBUI')) {
-    command.buildValidatorWebUI();
-  }
-
-  if (buildTargets.has('VALIDATOR')) {
-    command.buildValidator();
+  if (process.env.BUILD_SHARD == "validator_tests") {
+    if (buildTargets.has('VALIDATOR_WEBUI')) {
+      command.buildValidatorWebUI();
+    }
+    if (buildTargets.has('VALIDATOR')) {
+      command.buildValidator();
+    }
   }
 
   stopTimer('pr-check.js', startTime);
