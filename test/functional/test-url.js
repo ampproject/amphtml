@@ -485,16 +485,19 @@ describe('isProtocolValid', () => {
     });
   }
 
-  testProtocolValid(
-      'http://foo.com', true);
-  testProtocolValid(
-      'https://foo.com', true);
-  testProtocolValid(
-      'bar://foo.com', true);
-  testProtocolValid(
-      'javascript:alert("hello world!");', false);
-  testProtocolValid(
-      'data:12345', false);
+  testProtocolValid('http://foo.com', true);
+  testProtocolValid('https://foo.com', true);
+  testProtocolValid('bar://foo.com', true);
+  testProtocolValid('', true);
+  testProtocolValid('foo', true);
+  testProtocolValid('./foo', true);
+  testProtocolValid('/foo', true);
+  testProtocolValid('//foo.com', true);
+  testProtocolValid(undefined, true);
+  testProtocolValid(null, true);
+  testProtocolValid('javascript:alert("hello world!");', false);
+  testProtocolValid('data:12345', false);
+  testProtocolValid('vbscript:foo', false);
 });
 
 describe('getSourceOrigin/Url', () => {

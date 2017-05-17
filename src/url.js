@@ -333,6 +333,9 @@ export function isLocalhostOrigin(url) {
  * @return {boolean}
  */
 export function isProtocolValid(url) {
+  if (!url) {
+    return true;
+  }
   if (typeof url == 'string') {
     url = parseUrl(url);
   }
