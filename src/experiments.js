@@ -22,7 +22,6 @@
  */
 
 import {bytesToUInt32, stringToBytes, utf8DecodeSync} from './utils/bytes';
-import {cryptoFor} from './crypto';
 import {getCookie, setCookie} from './cookies';
 import {getServicePromise} from './service';
 import {getSourceOrigin, parseQueryString, parseUrl} from './url';
@@ -159,7 +158,7 @@ export function enableExperimentsForOriginTrials(win, publicJwk) {
   let crypto;
   return getServicePromise(win, 'crypto').then(c => {
     crypto = c;
-    return crypto.importPublicKey('experiments', publicJwk)
+    return crypto.importPublicKey('experiments', publicJwk);
   }).then(keyInfo => {
     const tokenPromises = [];
     for (let i = 0; i < metas.length; i++) {

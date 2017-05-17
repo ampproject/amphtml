@@ -124,11 +124,11 @@ export function bytesToUInt32(bytes) {
   if (bytes.length != 4) {
     throw new Error('Received byte array with length != 4');
   }
-  const val = (bytes[0] << 24) & 0xff000000 |
-      (bytes[1] << 16) & 0x00ff0000 |
-      (bytes[2] << 8) & 0x0000ff00 |
-      bytes[3] & 0x000000ff;
-  // Convert to unsigned
+  const val = (bytes[0] & 0xFF) << 24 |
+     (bytes[1] & 0xFF) << 16 |
+     (bytes[2] & 0xFF) << 8 |
+     (bytes[3] & 0xFF);
+  // Convert to unsigned.
   return val >>> 0;
 }
 

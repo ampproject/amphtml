@@ -810,6 +810,7 @@ describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
   let tokenWithBadVersion;
   let tokenWithBadConfigLength;
   let tokenWithBadSignature;
+  let tokenWithExpiredExperiment;
   const publicJwk = {
     alg: 'RS256',
     e: 'AQAB',
@@ -853,14 +854,14 @@ describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
     //   expiration: 95617602000000,
     // }
     // amp-expires-later will expire in a few millenia, give or take a decade.
-    correctToken ='AAAAAGB7Im9yaWdpbiI6Imh0dHBzOi8vd3d3Lmdvb2dsZS5jb20iLCJleH' +
-        'BlcmltZW50IjoiYW1wLWV4cGlyZXMtbGF0ZXIiLCJleHBpcmF0aW9uIjo5NTYxNzYwMj' +
-        'AwMDAwMH0ALRBeCa2Adrz+bZdQ0IMr2uBozsHHXCfR8S4CKPUpGvzqhQ8v3Dah3gNWu2' +
-        'k/WkAxbSC4UNisoHWx/t7JWPfoUZUZkUSq4rbtWwSg9Pdlk1rP5yMw/Yg4exnKJdJVE8' +
-        'zAFcoxoL3ottTqqiLoLW7fhx0icCC1BgiZzGUBU8PB1lq10qLeBndRopqyOlqMTN6pBi' +
-        'gwN4qNZcg8zGiDkUuvrsOhsmqzbZR4P5RFkpUC6IiT84QKz5HiG1ASWu0kC9783s9FTQ' +
-        'Pk7/nmwbe9Nwsa9Y20RRz/JZw8d32xBwPAGl/BptjO/wjurKHoA343BnjYXkynozNEuP' +
-        'LZ50UpEkN+TbCzeiQ=';
+    correctToken = 'AAAAAGB7Im9yaWdpbiI6Imh0dHBzOi8vd3d3Lmdvb2dsZS5jb20iLCJle' +
+        'HBlcmltZW50IjoiYW1wLWV4cGlyZXMtbGF0ZXIiLCJleHBpcmF0aW9uIjo5NTYxNzYwM' +
+        'jAwMDAwMH0ALRBeCa2Adrz+bZdQ0IMr2uBozsHHXCfR8S4CKPUpGvzqhQ8v3Dah3gNWu' +
+        '2k/WkAxbSC4UNisoHWx/t7JWPfoUZUZkUSq4rbtWwSg9Pdlk1rP5yMw/Yg4exnKJdJVE' +
+        '8zAFcoxoL3ottTqqiLoLW7fhx0icCC1BgiZzGUBU8PB1lq10qLeBndRopqyOlqMTN6pB' +
+        'igwN4qNZcg8zGiDkUuvrsOhsmqzbZR4P5RFkpUC6IiT84QKz5HiG1ASWu0kC9783s9FT' +
+        'QPk7/nmwbe9Nwsa9Y20RRz/JZw8d32xBwPAGl/BptjO/wjurKHoA343BnjYXkynozNEu' +
+        'PLZ50UpEkN+TbCzeiQ=';
 
     // Same as correctToken except Version: 47
     tokenWithBadVersion = 'LwAAAGB7Im9yaWdpbiI6Imh0dHBzOi8vd3d3Lmdvb2dsZS5jb2' +
