@@ -24,7 +24,8 @@ export function admanmedia(global, data) {
   validateData(data, ['id']);
 
   loadScript(global, `https://mona.admanmedia.com/go?id=${data.id}`, () => {
-    const scriptTag = global.document.querySelector(`script[src$="id=${data.id}"]`);
+    const pattern = `script[src$="id=${data.id}"]`;
+    const scriptTag = global.document.querySelector(pattern);
     scriptTag.setAttribute('id', `hybs-${data.id}`);
     global.context.renderStart();
   }, () => {
