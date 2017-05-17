@@ -224,19 +224,16 @@ describe('Google A4A utils', () => {
     });
 
     it('should add the correct CSI signals', () => {
-      const mockA4a = {
-        win: window,
-        element: {
-          getAttribute: function(name) {
-            switch (name) {
-              case EXPERIMENT_ATTRIBUTE:
-                return '00000001,00000002';
-              case 'type':
-                return 'fake-type';
-              case 'data-amp-slot-index':
-                return '0';
-            }
-          },
+      const mockElement = {
+        getAttribute: function(name) {
+          switch (name) {
+            case EXPERIMENT_ATTRIBUTE:
+              return '00000001,00000002';
+            case 'type':
+              return 'fake-type';
+            case 'data-amp-slot-index':
+              return '0';
+          }
         },
       };
       const headers = {
@@ -252,7 +249,7 @@ describe('Google A4A utils', () => {
         },
       };
       let newConfig = addCsiSignalsToAmpAnalyticsConfig(
-          mockA4a, builtConfig, headers,
+          window, mockElement, builtConfig, headers,
           /* isVerifiedAmpCreative */ true,
           /* lifecycle time events; not relevant here */ -1, -1);
 
@@ -280,7 +277,7 @@ describe('Google A4A utils', () => {
         expect(newConfig.requests.renderStartCsi).to.match(regExp);
       });
       newConfig = addCsiSignalsToAmpAnalyticsConfig(
-          mockA4a, builtConfig, headers,
+          window, mockElement, builtConfig, headers,
           /* isVerifiedAmpCreative */ false,
           /* lifecycle time events; not relevant here */ -1, -1);
       getRegExps('iniLoadCsiCrossDomain').forEach(regExp => {
