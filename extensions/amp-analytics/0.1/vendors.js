@@ -82,8 +82,8 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
   'baiduanalytics': {
     'requests': {
       'host': 'https://hm.baidu.com',
-      'base': '/hm.gif?' +
-          '${host}si=${token}&nv=0&st=4&v=pixel-1.0&rnd=${timestamp}',
+      'base': '${host}/hm.gif?' +
+          'si=${token}&nv=0&st=4&v=pixel-1.0&rnd=${timestamp}',
       'pageview': '${base}&et=0',
       'trackEvent': '${base}&ep=${CATEGORY}*${ACTION}*' +
           '${LABEL}*${VALUE}&et=4&api=8_0',
