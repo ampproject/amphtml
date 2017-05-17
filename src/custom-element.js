@@ -1868,4 +1868,4 @@ function getVsync(element) {
  */
 function isStub(impl) {
   return (impl instanceof ElementStub);
-};
+}
