@@ -662,11 +662,19 @@ app.get(['/examples/*.html', '/test/manual/*.html'], function(req, res, next) {
     }
 
     // Extract amp-ad for the given 'type' specified in URL query.
-    if (req.path.indexOf('/examples/ads.amp') == 0 && req.query.type) {
+    if (req.path.indexOf('/examples/ads.amp.html') == 0 && req.query.type) {
       var ads = file.match(new RegExp('<(amp-ad|amp-embed) [^>]*[\'"]'
           + req.query.type + '[\'"][^>]*>([\\s\\S]+?)<\/(amp-ad|amp-embed)>', 'gm'));
       file = file.replace(
           /<body>[\s\S]+<\/body>/m, '<body>' + ads.join('') + '</body>');
+    }
+
+    // Extract amp-ad for the given 'type' specified in URL query.
+    if (req.path.indexOf('/examples/analytics-vendors.amp.html') == 0 && req.query.type) {
+      var analytics = file.match(new RegExp('<amp-analytics [^>]*[\'"]'
+          + req.query.type + '[\'"][^>]*>([\\s\\S]+?)<\/amp-analytics>', 'gm'));
+      file = file.replace(
+          /<div id="container">[\s\S]+<\/div>/m, '<div id="container">' + analytics.join('') + '</div>');
     }
 
     res.send(file);
