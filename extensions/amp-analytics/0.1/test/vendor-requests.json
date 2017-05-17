@@ -1,6 +1,6 @@
 {
   "baiduanalytics": {
-    "host": "https://hm.baidu.com/hm.gif?",
+    "host": "https://hm.baidu.com",
     "base": "https://hm.baidu.com/hm.gif?si=$token&nv=0&st=4&v=pixel-1.0&rnd=_timestamp_",
     "pageview": "https://hm.baidu.com/hm.gif?si=$token&nv=0&st=4&v=pixel-1.0&rnd=_timestamp_&et=0",
     "trackEvent": "https://hm.baidu.com/hm.gif?si=$token&nv=0&st=4&v=pixel-1.0&rnd=_timestamp_&ep=$CATEGORY*$ACTION*$LABEL*$VALUE&et=4&api=8_0"
