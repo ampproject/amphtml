@@ -215,16 +215,16 @@ const command = {
   runPreBuildChecks: function() {
     timedExecOrDie(`${gulp} clean`);
     timedExecOrDie(`${gulp} lint`);
-    timedExecOrDie(`${gulp} check-types`);
   },
   buildRuntime: function() {
     timedExecOrDie(`${gulp} clean`);
     timedExecOrDie(`${gulp} build`);
     timedExecOrDie(`${gulp} dist --fortesting`);
   },
-  runDepChecks: function() {
+  runDepAndTypeChecks: function() {
     timedExecOrDie(`${gulp} build --css-only`);
     timedExecOrDie(`${gulp} dep-check`);
+    timedExecOrDie(`${gulp} check-types`);
   },
   runUnitTests: function() {
     // Unit tests with Travis' default chromium
@@ -262,7 +262,7 @@ function runAllCommands() {
   if (process.env.BUILD_SHARD == "pre_build_checks") {
     command.testBuildSystem();
     command.runPreBuildChecks();
-    command.runDepChecks();
+    command.runDepAndTypeChecks();
     // Skip testDocumentLinks() during push builds.
   }
   if (process.env.BUILD_SHARD == "integration_tests") {
@@ -348,7 +348,7 @@ function main(argv) {
 
     if (buildTargets.has('RUNTIME')) {
       command.runPreBuildChecks();
-      command.runDepChecks();
+      command.runDepAndTypeChecks();
     }
   }
 
