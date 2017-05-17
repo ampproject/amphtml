@@ -75,7 +75,7 @@ describes.realWin('amp-ad-exit', {
   function makeClickEvent(time = 0, x = 0, y = 0) {
     sandbox.clock.tick(time);
     return {
-      preventDefault: sinon.spy(),
+      preventDefault: sandbox.spy(),
       clientX: x,
       clientY: y,
     };
