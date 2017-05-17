@@ -322,7 +322,13 @@ export function applyLayout_(element) {
     element.classList.add('i-amphtml-layout-size-defined');
   }
   if (layout == Layout.NODISPLAY) {
+    // CSS defines layout=nodisplay automatically with `display:none`. Thus
+    // no additional styling is needed.
+    // TODO(dvoytenko, #9353): once `toggleLayoutDisplay` API has been deployed
+    // everywhere, switch all relevant elements to this API. In the meantime,
+    // simply unblock display toggling via `style="display: ..."`.
     setStyle(element, 'display', 'none');
+    element.classList.add('i-amphtml-display');
   } else if (layout == Layout.FIXED) {
     setStyles(element, {
       width: dev().assertString(width),
@@ -1176,6 +1182,14 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Returns reference to implementation after it has been built.
+     * @return {!Promise<!./base-element.BaseElement>}
+     */
+    getImpl() {
+      return this.whenBuilt().then(() => this.implementation_);
+    }
+
+    /**
      * Instructs the element to layout its content and load its resources if
      * necessary by calling the {@link BaseElement.layoutCallback} method that
      * should be implemented by BaseElement subclasses. Must return a promise
@@ -1251,7 +1265,12 @@ function createBaseCustomElementClass(win) {
           // Set a minimum delay in case the element loads very fast or if it
           // leaves the viewport.
           timerFor(this.ownerDocument.defaultView).delay(() => {
-            if (this.isInViewport_) {
+            // TODO(dvoytenko, #9177): cleanup `this.ownerDocument.defaultView`
+            // once investigation is complete. It appears that we get a lot of
+            // errors here once the iframe is destroyed due to timer.
+            if (this.isInViewport_ &&
+                this.ownerDocument &&
+                this.ownerDocument.defaultView) {
               this.toggleLoading_(true);
             }
           }, 100);
@@ -1449,7 +1468,7 @@ function createBaseCustomElementClass(win) {
       const actionQueue = dev().assert(this.actionQueue_);
       this.actionQueue_ = null;
 
-      // TODO(dvoytenko, #1260): dedupe actions.
+      // Notice, the actions are currently not de-duped.
       actionQueue.forEach(invocation => {
         this.executionAction_(invocation, true);
       });
@@ -1491,6 +1510,15 @@ function createBaseCustomElementClass(win) {
     getRealChildren() {
       return dom.childElements(this, element =>
         !isInternalOrServiceNode(element));
+    }
+
+    /**
+     * Must be executed in the mutate context. Removes `display:none` from the
+     * element set via `layout=nodisplay`.
+     * @param {boolean} displayOn
+     */
+    toggleLayoutDisplay(displayOn) {
+      this.classList.toggle('i-amphtml-display', displayOn);
     }
 
     /**
@@ -1828,6 +1856,8 @@ function assertNotTemplate(element) {
  * @return {!./service/vsync-impl.Vsync}
  */
 function getVsync(element) {
+  // TODO(dvoytenko, #9177): consider removing this and always resolving via
+  // `createCustomElementClass(win)` object.
   return vsyncFor(element.ownerDocument.defaultView);
 };
 

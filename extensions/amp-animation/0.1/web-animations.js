@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ScrollboundPlayer} from './scrollbound-player';
 import {Observable} from '../../../src/observable';
 import {dev, user} from '../../../src/log';
 import {getVendorJsPropertyName, computedStyle} from '../../../src/style';
@@ -46,8 +47,16 @@ const TAG = 'amp-animation';
  *   timing: !WebAnimationTimingDef,
  * }}
  */
-let InternalWebAnimationRequestDef;
+export let InternalWebAnimationRequestDef;
 
+/**
+ * @private
+ * @enum {string}
+ */
+const Tickers = {
+  SCROLL: 'scroll',
+  TIME: 'time',
+};
 
 /**
  * @const {!Object<string, boolean>}
@@ -56,7 +65,6 @@ const SERVICE_PROPS = {
   'offset': true,
   'easing': true,
 };
-
 
 /**
  */
@@ -71,6 +79,7 @@ export class WebAnimationRunner {
 
     /** @private {?Array<!Animation>} */
     this.players_ = null;
+
 
     /** @private {number} */
     this.runningCount_ = 0;
@@ -103,7 +112,13 @@ export class WebAnimationRunner {
     dev().assert(!this.players_);
     this.setPlayState_(WebAnimationPlayState.RUNNING);
     this.players_ = this.requests_.map(request => {
-      return request.target.animate(request.keyframes, request.timing);
+      let player;
+      if (request.timing.ticker == Tickers.SCROLL) {
+        player = new ScrollboundPlayer(request);
+      } else {
+        player = request.target.animate(request.keyframes, request.timing);
+      }
+      return player;
     });
     this.runningCount_ = this.players_.length;
     this.players_.forEach(player => {
@@ -172,6 +187,44 @@ export class WebAnimationRunner {
     this.players_.forEach(player => {
       player.cancel();
     });
+  }
+
+  /**
+   */
+  scrollTick(pos) {
+    this.players_.forEach(player => {
+      if (player instanceof ScrollboundPlayer) {
+        player.tick(pos);
+      }
+    });
+  }
+
+  /**
+   */
+  updateScrollDuration(newDuration) {
+    this.requests_.forEach(request => {
+      if (request.timing.ticker == Tickers.SCROLL) {
+        request.timing.duration = newDuration;
+      }
+    });
+
+    this.players_.forEach(player => {
+      if (player instanceof ScrollboundPlayer) {
+        player.onScrollDurationChanged();
+      }
+    });
+  }
+
+  /**
+   */
+  hasScrollboundAnimations() {
+    for (let i = 0; i < this.requests_.length; i++) {
+      if (this.requests_[i].timing.ticker == Tickers.SCROLL) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**
@@ -257,6 +310,7 @@ export class MeasureScanner extends Scanner {
   /**
    * @param {!Window} win
    * @param {{
+   *   queryTargets: function(string):!Array<!Element>,
    *   resolveTarget: function(string):?Element,
    * }} context
    * @param {boolean} validate
@@ -277,6 +331,7 @@ export class MeasureScanner extends Scanner {
 
     /** @private {!WebAnimationTimingDef} */
     this.timing_ = {
+      ticker: Tickers.TIME,
       duration: 0,
       delay: 0,
       endDelay: 0,
@@ -313,10 +368,7 @@ export class MeasureScanner extends Scanner {
     const promises = [];
     for (let i = 0; i < this.targets_.length; i++) {
       const element = this.targets_[i];
-      if (element.classList.contains('i-amphtml-element')) {
-        const resource = resources.getResourceForElement(element);
-        promises.push(resource.loadedOnce());
-      }
+      promises.push(resources.requireLayout(element));
     }
     return Promise.all(promises);
   }
@@ -339,8 +391,19 @@ export class MeasureScanner extends Scanner {
 
   /** @override */
   onKeyframeAnimation(spec) {
-    const timing = this.mergeTiming_(spec, this.timing_);
-    const target = this.resolveTarget_(spec.target);
+    const targets = this.resolveTargets_(spec);
+    targets.forEach(target => {
+      this.requests_.push(this.createKeyframeAnimationForTarget_(target, spec));
+    });
+  }
+
+  /**
+   * @param {!Element} target
+   * @param {!WebKeyframeAnimationDef} spec
+   * @return {!InternalWebAnimationRequestDef}
+   * @private
+   */
+  createKeyframeAnimationForTarget_(target, spec) {
     /** @type {!WebKeyframesDef} */
     let keyframes;
 
@@ -399,7 +462,8 @@ export class MeasureScanner extends Scanner {
       }
     }
 
-    this.requests_.push({target, keyframes, timing});
+    const timing = this.mergeTiming_(spec, this.timing_);
+    return {target, keyframes, timing};
   }
 
   /** @override */
@@ -444,20 +508,39 @@ export class MeasureScanner extends Scanner {
   }
 
   /**
-   * @param {string|!Element} targetSpec
-   * @return {!Element}
+   * @param {!WebKeyframeAnimationDef} spec
+   * @return {!Array<!Element>}
    * @private
    */
-  resolveTarget_(targetSpec) {
-    const target = user().assertElement(
-        typeof targetSpec == 'string' ?
-            this.context_.resolveTarget(targetSpec) :
-            targetSpec,
-        `Target not found: "${targetSpec}"`);
-    if (!this.targets_.includes(target)) {
-      this.targets_.push(target);
+  resolveTargets_(spec) {
+    let targets;
+    if (spec.selector) {
+      user().assert(!spec.target,
+          'Both "selector" and "target" are not allowed');
+      targets = this.context_.queryTargets(spec.selector);
+      if (targets.length == 0) {
+        user().warn(TAG, `Target not found: "${spec.selector}"`);
+      }
+    } else if (spec.target) {
+      if (typeof spec.target == 'string') {
+        // TODO(dvoytenko, #9129): cleanup deprecated string targets.
+        user().error(TAG, 'string targets are deprecated');
+      }
+      const target = user().assertElement(
+          typeof spec.target == 'string' ?
+              this.context_.resolveTarget(spec.target) :
+              spec.target,
+          `Target not found: "${spec.target}"`);
+      targets = [target];
+    } else {
+      user().assert(false, 'No target specified');
     }
-    return target;
+    targets.forEach(target => {
+      if (!this.targets_.includes(target)) {
+        this.targets_.push(target);
+      }
+    });
+    return targets;
   }
 
   /**
@@ -499,6 +582,8 @@ export class MeasureScanner extends Scanner {
         newTiming.direction : prevTiming.direction;
     const fill = newTiming.fill != null ?
         newTiming.fill : prevTiming.fill;
+    const ticker = newTiming.ticker != null ?
+        newTiming.ticker : prevTiming.ticker;
 
     // Validate.
     if (this.validate_) {
@@ -523,6 +608,7 @@ export class MeasureScanner extends Scanner {
       easing,
       direction,
       fill,
+      ticker,
     };
   }
 

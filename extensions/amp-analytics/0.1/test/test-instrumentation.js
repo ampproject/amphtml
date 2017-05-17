@@ -85,11 +85,11 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
     // TODO(dvoytenko): remove in preference of triggerEventForTarget.
     const tracker = root.getTracker('custom', CustomEventTracker);
     const triggerStub = sandbox.stub(tracker, 'trigger');
-    service.triggerEvent('test-event', {foo: 'bar'});
+    service.triggerEventForTarget(ampdoc, 'test-event', {foo: 'bar'});
     expect(triggerStub).to.be.calledOnce;
 
     const event = triggerStub.args[0][0];
-    expect(event.target).to.equal(root.getRootElement());
+    expect(event.target).to.equal(ampdoc);
     expect(event.type).to.equal('test-event');
     expect(event.vars).to.deep.equal({foo: 'bar'});
   });

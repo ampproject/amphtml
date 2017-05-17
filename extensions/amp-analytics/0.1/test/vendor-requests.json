@@ -74,7 +74,10 @@
     "pageview": "https://www.google-analytics.com/r/collect?v=1&_v=a1&ds=AMP&aip&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=pageview&jid=_random_&_r=1&a=_page_view_id_&z=_random_",
     "event": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=event&jid=&ec=$eventCategory&ea=$eventAction&el=$eventLabel&ev=0&a=_page_view_id_&z=_random_",
     "social": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=social&jid=&sa=$socialAction&sn=$socialNetwork&st=$socialTarget&a=_page_view_id_&z=_random_",
-    "timing": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=timing&jid=&plt=_page_load_time_&dns=_domain_lookup_time_&tcp=_tcp_connect_time_&rrt=_redirect_time_&srt=_server_response_time_&pdt=_page_download_time_&clt=_content_load_time_&dit=_dom_interactive_time_&a=_page_view_id_&z=_random_"
+    "timing": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=$timingRequestType&jid=&plt=_page_load_time_&dns=_domain_lookup_time_&tcp=_tcp_connect_time_&rrt=_redirect_time_&srt=_server_response_time_&pdt=_page_download_time_&clt=_content_load_time_&dit=_dom_interactive_time_&a=_page_view_id_&z=_random_",
+    "QUERY_PARAM": {
+      "gclid": ""
+    }
   },
   "googleanalytics-alpha": {
     "host": "https://www.google-analytics.com",
@@ -83,7 +86,10 @@
     "pageview": "https://www.google-analytics.com/r/collect?v=1&_v=a1&ds=AMP&aip&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=pageview&jid=_random_&_r=1&a=_page_view_id_&z=_random_",
     "event": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=event&jid=&ec=$eventCategory&ea=$eventAction&el=$eventLabel&ev=0&a=_page_view_id_&z=_random_",
     "social": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=social&jid=&sa=$socialAction&sn=$socialNetwork&st=$socialTarget&a=_page_view_id_&z=_random_",
-    "timing": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=timing&jid=&plt=_page_load_time_&dns=_domain_lookup_time_&tcp=_tcp_connect_time_&rrt=_redirect_time_&srt=_server_response_time_&pdt=_page_download_time_&clt=_content_load_time_&dit=_dom_interactive_time_&a=_page_view_id_&z=_random_"
+    "timing": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=$timingRequestType&jid=&plt=_page_load_time_&dns=_domain_lookup_time_&tcp=_tcp_connect_time_&rrt=_redirect_time_&srt=_server_response_time_&pdt=_page_download_time_&clt=_content_load_time_&dit=_dom_interactive_time_&a=_page_view_id_&z=_random_",
+    "QUERY_PARAM": {
+      "gclid": ""
+    }
   },
   "googleadwords": {
     "conversion_prefix": "<ignore for test>",
@@ -172,10 +178,10 @@
     "track": "https://api.segment.io/v1/pixel/track?writeKey=$writeKey&context.library.name=amp&anonymousId=_client_id_&context.locale=_browser_language_&context.page.path=_canonical_path_&context.page.url=_canonical_url_&context.page.referrer=_document_referrer_&context.page.title=_title_&context.screen.width=_screen_width_&context.screen.height=_screen_height_&event=$event"
   },
   "snowplow": {
-    "aaVersion": "amp-0.1",
-    "basePrefix": "https://$collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_&aid=$appId&p=web&tv=amp-0.1",
-    "pageView": "https://$collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_&aid=$appId&p=web&tv=amp-0.1&e=pv",
-    "structEvent": "https://$collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_&aid=$appId&p=web&tv=amp-0.1&e=se&se_ca=$structEventCategory&se_ac=$structEventAction&se_la=$structEventLabel&se_pr=$structEventProperty&se_va=$structEventValue"
+    "aaVersion": "amp-0.2",
+    "basePrefix": "https://$collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_&aid=$appId&p=web&tv=amp-0.2&cd=_screen_color_depth_&cs=_document_charset_&duid=_client_id_&lang=_browser_language_&refr=_document_referrer_&stm=_timezone_&vp=_viewport_width_x_viewport_height_",
+    "pageView": "https://$collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_&aid=$appId&p=web&tv=amp-0.2&cd=_screen_color_depth_&cs=_document_charset_&duid=_client_id_&lang=_browser_language_&refr=_document_referrer_&stm=_timezone_&vp=_viewport_width_x_viewport_height_&e=pv",
+    "structEvent": "https://$collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_&aid=$appId&p=web&tv=amp-0.2&cd=_screen_color_depth_&cs=_document_charset_&duid=_client_id_&lang=_browser_language_&refr=_document_referrer_&stm=_timezone_&vp=_viewport_width_x_viewport_height_&e=se&se_ca=$structEventCategory&se_ac=$structEventAction&se_la=$structEventLabel&se_pr=$structEventProperty&se_va=$structEventValue"
   },
   "webtrekk": {
     "trackURL": "https://$trackDomain/$trackId/wt",

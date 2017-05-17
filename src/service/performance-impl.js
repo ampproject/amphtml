@@ -22,7 +22,7 @@ import {viewportForDoc} from '../services';
 import {whenDocumentComplete} from '../document-ready';
 import {getMode} from '../mode';
 import {isCanary} from '../experiments';
-import {rateLimit} from '../utils/rate-limit';
+import {throttle} from '../utils/rate-limit';
 import {map} from '../utils/object';
 
 /**
@@ -301,7 +301,7 @@ export class Performance {
   throttledFlush() {
     if (!this.throttledFlush_) {
       /** @private {function()} */
-      this.throttledFlush_ = rateLimit(this.win, this.flush.bind(this), 100);
+      this.throttledFlush_ = throttle(this.win, this.flush.bind(this), 100);
     }
     this.throttledFlush_();
   }

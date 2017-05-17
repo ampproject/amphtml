@@ -18,7 +18,6 @@ import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {
   addExperimentIdToElement,
-  mergeExperimentIds,
   isInExperiment,
   isExternallyTriggeredExperiment,
   isInternallyTriggeredExperiment,
@@ -32,7 +31,10 @@ import {
 } from '../../../../src/experiments';
 import {installPlatformService} from '../../../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
-import {resetServiceForTesting, getService} from '../../../../src/service';
+import {
+  registerServiceBuilder,
+  resetServiceForTesting,
+} from '../../../../src/service';
 import {
   installDocumentStateService,
 } from '../../../../src/service/document-state';
@@ -41,6 +43,7 @@ import {
   DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
   DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
   DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
+  DOUBLECLICK_A4A_EXTERNAL_DELAYED_EXPERIMENT_BRANCHES_PRE_LAUNCH,
 } from '../../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config.js'; // eslint-disable-line
 import {EXPERIMENT_ATTRIBUTE} from '../utils';
 import * as sinon from 'sinon';
@@ -92,11 +95,13 @@ describe('all-traffic-experiments-tests', () => {
     it('should enable the external A4A experiment from the URL', () => {
       const externalBranches = {control: '12', experiment: '34'};
       const internalBranches = {control: '56', experiment: '78'};
+      const externalDelayedBranches = {control: '90', experiment: '13'};
 
       sandbox.win.location.search = '?exp=a4a:2';
 
       const renderViaA4a = googleAdsIsA4AEnabled(
-          sandbox.win, element, 'exp_name', externalBranches, internalBranches);
+          sandbox.win, element, 'exp_name', externalBranches, internalBranches,
+          externalDelayedBranches);
       expect(renderViaA4a).to.be.true;
       expect(isInExperiment(element, '12')).to.be.false;
       expect(isInExperiment(element, '34')).to.be.true;
@@ -109,11 +114,13 @@ describe('all-traffic-experiments-tests', () => {
     it('should enable the external A4A control from the URL', () => {
       const externalBranches = {control: '12', experiment: '34'};
       const internalBranches = {control: '56', experiment: '78'};
+      const externalDelayedBranches = {control: '90', experiment: '13'};
 
       sandbox.win.location.search = '?exp=a4a:1';
 
       const renderViaA4a = googleAdsIsA4AEnabled(
-          sandbox.win, element, 'exp_name', externalBranches, internalBranches);
+          sandbox.win, element, 'exp_name', externalBranches, internalBranches,
+          externalDelayedBranches);
       expect(renderViaA4a).to.be.false;
       expect(isInExperiment(element, '12')).to.be.true;
       expect(isInExperiment(element, '34')).to.be.false;
@@ -127,11 +134,13 @@ describe('all-traffic-experiments-tests', () => {
       toggleExperiment(sandbox.win, 'exp_name', true, true);
       const externalBranches = {control: '12', experiment: '34'};
       const internalBranches = {control: '56', experiment: '78'};
+      const externalDelayedBranches = {control: '90', experiment: '13'};
 
       RANDOM_NUMBER_GENERATORS.accuratePrng.onFirstCall().returns(0.6);
 
       const renderViaA4a = googleAdsIsA4AEnabled(
-          sandbox.win, element, 'exp_name', externalBranches, internalBranches);
+          sandbox.win, element, 'exp_name', externalBranches, internalBranches,
+          externalDelayedBranches);
       expect(renderViaA4a).to.be.true;
       expect(isInExperiment(element, '12')).to.be.false;
       expect(isInExperiment(element, '34')).to.be.false;
@@ -145,11 +154,13 @@ describe('all-traffic-experiments-tests', () => {
       toggleExperiment(sandbox.win, 'exp_name', true, true);
       const externalBranches = {control: '12', experiment: '34'};
       const internalBranches = {control: '56', experiment: '78'};
+      const externalDelayedBranches = {control: '90', experiment: '13'};
 
       RANDOM_NUMBER_GENERATORS.accuratePrng.onFirstCall().returns(0.3);
 
       const renderViaA4a = googleAdsIsA4AEnabled(
-          sandbox.win, element, 'exp_name', externalBranches, internalBranches);
+          sandbox.win, element, 'exp_name', externalBranches, internalBranches,
+          externalDelayedBranches);
       expect(renderViaA4a).to.be.false;
       expect(isInExperiment(element, '12')).to.be.false;
       expect(isInExperiment(element, '34')).to.be.false;
@@ -211,21 +222,6 @@ describe('all-traffic-experiments-tests', () => {
       element.setAttribute(EXPERIMENT_ATTRIBUTE, '99,14,873,k,44');
       addExperimentIdToElement('3', element);
       expect(element.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal('3');
-    });
-  });
-
-  describe('#mergeExperimentIds', () => {
-    it('should merge a single id to itself', () => {
-      expect(mergeExperimentIds('12345')).to.equal('12345');
-    });
-    it('should merge a single ID to a list', () => {
-      expect(mergeExperimentIds('12345', '3,4,5,6')).to.equal('3,4,5,6,12345');
-    });
-    it('should discard invalid ID', () => {
-      expect(mergeExperimentIds('frob', '3,4,5,6')).to.equal('3,4,5,6');
-    });
-    it('should return empty string for invalid input', () => {
-      expect(mergeExperimentIds('frob')).to.equal('');
     });
   });
 
@@ -311,7 +307,7 @@ describe('all-traffic-experiments-tests', () => {
       element = document.createElement('div');
       document.body.appendChild(element);
       addEnabledExperimentSpy = sandbox.stub();
-      getService(win, 'performance', () => {
+      registerServiceBuilder(win, 'performance', function() {
         return {
           addEnabledExperiment: addEnabledExperimentSpy,
         };
@@ -465,7 +461,9 @@ describe('all-traffic-experiments-tests', () => {
           DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
           DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH;
         expect(googleAdsIsA4AEnabled(win, element, 'expDoubleclickA4A',
-          external, internal)).to.equal(test.shouldServeFastFetch);
+          external, internal,
+          DOUBLECLICK_A4A_EXTERNAL_DELAYED_EXPERIMENT_BRANCHES_PRE_LAUNCH))
+          .to.equal(test.shouldServeFastFetch);
         expectCorrectBranchOnly(element, test.branchId);
         expect(win.document.cookie).to.be.null;
         if (test.branchId) {

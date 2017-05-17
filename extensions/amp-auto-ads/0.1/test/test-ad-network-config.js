@@ -15,7 +15,15 @@
  */
 
 import {getAdNetworkConfig} from '../ad-network-config';
+import {
+  toggleExperiment,
+  forceExperimentBranch,
+} from '../../../../src/experiments';
 import {viewportForDoc} from '../../../../src/services';
+import {
+  ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
+  AdSenseAmpAutoAdsHoldoutBranches,
+} from '../../../../ads/google/adsense-amp-auto-ads';
 
 describes.realWin('ad-network-config', {
   amp: {
@@ -44,6 +52,31 @@ describes.realWin('ad-network-config', {
 
     beforeEach(() => {
       ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
+    });
+
+    it('should report enabled when holdout experiment not on', () => {
+      toggleExperiment(
+          env.win, ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME, false);
+      const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
+      expect(adNetwork.isEnabled(env.win)).to.equal(true);
+    });
+
+    it('should report enabled when holdout experiment on and experiment ' +
+        'branch picked', () => {
+      forceExperimentBranch(env.win,
+          ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
+          AdSenseAmpAutoAdsHoldoutBranches.EXPERIMENT);
+      const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
+      expect(adNetwork.isEnabled(env.win)).to.equal(true);
+    });
+
+    it('should report disabled when holdout experiment on and control ' +
+        'branch picked', () => {
+      forceExperimentBranch(env.win,
+          ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
+          AdSenseAmpAutoAdsHoldoutBranches.CONTROL);
+      const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
+      expect(adNetwork.isEnabled(env.win)).to.equal(false);
     });
 
     it('should generate the config fetch URL', () => {

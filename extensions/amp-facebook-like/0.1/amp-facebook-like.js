@@ -30,6 +30,14 @@ class AmpFacebookLike extends AMP.BaseElement {
     this.iframe_ = null;
   }
 
+  /** @override */
+  renderOutsideViewport() {
+    // We are conservative about loading heavy embeds.
+    // This will still start loading before they become visible, but it
+    // won't typically load a large number of embeds.
+    return 0.75;
+  }
+
   /**
    * @param {boolean=} opt_onLayout
    * @override

@@ -69,7 +69,6 @@ export class AmpAnalytics extends AMP.BaseElement {
      */
     this.predefinedConfig_ = ANALYTICS_CONFIG;
 
-
     /** @private {!Promise} */
     this.consentPromise_ = Promise.resolve();
 
@@ -523,8 +522,6 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   handleRequestForEvent_(request, trigger, event) {
-    // TODO(avimehta, #6543): Remove this code or mark as "error" for the
-    // once destroyed embed release is implemented. See `detachedCallback`.
     if (!this.element.ownerDocument.defaultView) {
       const TAG = this.getName_();
       dev().warn(TAG, 'request against destroyed embed: ', trigger['on']);
@@ -538,6 +535,53 @@ export class AmpAnalytics extends AMP.BaseElement {
       return Promise.resolve();
     }
 
+    return this.checkTriggerEnabled_(trigger, event)
+        .then(enabled => {
+          if (!enabled) {
+            return;
+          }
+          return this.expandAndSendRequest_(request, trigger, event);
+        });
+  }
+
+  /**
+   * @param {string} request The request to process.
+   * @param {!JSONType} trigger JSON config block that resulted in this event.
+   * @param {!Object} event Object with details about the event.
+   * @return {!Promise<string>} The request that was sent out.
+   * @private
+   */
+  expandAndSendRequest_(request, trigger, event) {
+    return this.expandExtraUrlParams_(trigger, event)
+        .then(params => {
+          request = this.addParamsToUrl_(request, params);
+          this.config_['vars']['requestCount']++;
+          const expansionOptions = this.expansionOptions_(event, trigger);
+          return this.variableService_
+              .expandTemplate(request, expansionOptions);
+        })
+        .then(request => {
+          const whiteList =
+              this.isSandbox_ ? SANDBOX_AVAILABLE_VARS : undefined;
+          // For consistency with amp-pixel we also expand any url
+          // replacements.
+          return urlReplacementsForDoc(this.element).expandAsync(
+              request, undefined, whiteList);
+        })
+        .then(request => {
+          this.sendRequest_(request, trigger);
+          return request;
+        });
+  }
+
+  /**
+   * @param {!JSONType} trigger JSON config block that resulted in this event.
+   * @param {!Object} event Object with details about the event.
+   * @return {!Promise<T>} Map of the resolved parameters.
+   * @template T
+   * @private
+   */
+  expandExtraUrlParams_(trigger, event) {
     const requestPromises = [];
     const params = map();
     // Add any given extraUrlParams as query string param
@@ -553,24 +597,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         }
       }
     }
-
-    return Promise.all(requestPromises)
-      .then(() => {
-        request = this.addParamsToUrl_(request, params);
-        this.config_['vars']['requestCount']++;
-        const expansionOptions = this.expansionOptions_(event, trigger);
-        return this.variableService_.expandTemplate(request, expansionOptions);
-      })
-      .then(request => {
-        const whiteList = this.isSandbox_ ? SANDBOX_AVAILABLE_VARS : undefined;
-        // For consistency with amp-pixel we also expand any url replacements.
-        return urlReplacementsForDoc(this.element).expandAsync(
-            request, undefined, whiteList);
-      })
-      .then(request => {
-        this.sendRequest_(request, trigger);
-        return request;
-      });
+    return Promise.all(requestPromises).then(() => params);
   }
 
   /**
@@ -587,21 +614,75 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (!spec) {
       return resolve;
     }
-    if (!spec['sampleOn']) {
+    const sampleOn = spec['sampleOn'];
+    if (!sampleOn) {
       user().error(TAG, 'Invalid sampleOn value.');
       return resolve;
     }
     const threshold = parseFloat(spec['threshold']); // Threshold can be NaN.
     if (threshold >= 0 && threshold <= 100) {
-      const keyPromise = this.variableService_.expandTemplate(
-          spec['sampleOn'], this.expansionOptions_({}, trigger))
-        .then(key => urlReplacementsForDoc(this.element).expandAsync(key));
-      return keyPromise
+      const expansionOptions = this.expansionOptions_({}, trigger);
+      return this.expandTemplateWithUrlParams_(sampleOn, expansionOptions)
           .then(key => this.cryptoService_.uniform(key))
-          .then(digest => digest * 100 < spec['threshold']);
+          .then(digest => digest * 100 < threshold);
     }
     user()./*OK*/error(TAG, 'Invalid threshold for sampling.');
     return resolve;
+  }
+
+  /**
+   * Checks if request for a trigger is enabled.
+   * @param {!JSONType} trigger The config to use to determine if trigger is
+   * enabled.
+   * @param {!Object} event Object with details about the event.
+   * @return {!Promise<boolean>} Whether trigger must be called.
+   * @private
+   */
+  checkTriggerEnabled_(trigger, event) {
+    const expansionOptions = this.expansionOptions_(event, trigger);
+    const enabledOnTagLevel =
+        this.checkSpecEnabled_(this.config_['enabled'], expansionOptions);
+    const enabledOnTriggerLevel =
+        this.checkSpecEnabled_(trigger['enabled'], expansionOptions);
+
+    return Promise.all([enabledOnTagLevel, enabledOnTriggerLevel])
+        .then(enabled => {
+          dev().assert(enabled.length === 2);
+          return enabled[0] && enabled[1];
+        });
+  }
+
+  /**
+   * Checks result of 'enabled' spec evaluation. Returns false if spec is provided and value
+   * resolves to a falsey value (empty string, 0, false, null, NaN or undefined).
+   * @param {string} spec Expression that will be evaluated.
+   * @param {!ExpansionOptions} expansionOptions Expansion options.
+   * @return {!Promise<boolean>} False only if spec is provided and value is falsey.
+   * @private
+   */
+  checkSpecEnabled_(spec, expansionOptions) {
+    // Spec absence always resolves to true.
+    if (spec === undefined) {
+      return Promise.resolve(true);
+    }
+
+    return this.expandTemplateWithUrlParams_(spec, expansionOptions)
+        .then(val => {
+          return val !== '' && val !== '0' && val !== 'false' &&
+              val !== 'null' && val !== 'NaN' && val !== 'undefined';
+        });
+  }
+
+  /**
+   * Expands spec using provided expansion options and applies url replacement if necessary.
+   * @param {string} spec Expression that needs to be expanded.
+   * @param {!ExpansionOptions} expansionOptions Expansion options.
+   * @return {!Promise<string>} expanded spec.
+   * @private
+   */
+  expandTemplateWithUrlParams_(spec, expansionOptions) {
+    return this.variableService_.expandTemplate(spec, expansionOptions)
+        .then(key => urlReplacementsForDoc(this.element).expandUrlAsync(key));
   }
 
   /**

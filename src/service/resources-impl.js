@@ -280,15 +280,15 @@ export class Resources {
     this.ampdoc.signals().signal(CommonSignals.RENDER_START);
   }
 
+
   /**
    * Returns a subset of resources which are (1) belong to the specified host
-   * window, and (2) positioned in the specified rect.
+   * window, and (2) meet the filterFn given.
    * @param {!Window} hostWin
-   * @param {!../layout-rect.LayoutRectDef} rect
-   * @param {boolean=} opt_isInPrerender signifies if we are in prerender mode.
+   * @param {!function(!Resource):boolean} filterFn
    * @return {!Promise<!Array<!Resource>>}
    */
-  getResourcesInRect(hostWin, rect, opt_isInPrerender) {
+  getMeasuredResources(hostWin, filterFn) {
     // First, wait for the `ready-scan` signal. Waiting for each element
     // individually is too expensive and `ready-scan` will cover most of
     // the initially parsed elements.
@@ -298,30 +298,34 @@ export class Resources {
       // Second, wait for any left-over elements to complete measuring.
       const measurePromiseArray = [];
       this.resources_.forEach(r => {
-        if (!r.hasBeenMeasured() &&
-            r.hostWin == hostWin &&
-            !r.hasOwner()) {
+        if (!r.hasBeenMeasured() && r.hostWin == hostWin && !r.hasOwner()) {
           measurePromiseArray.push(this.ensuredMeasured_(r));
         }
       });
       return Promise.all(measurePromiseArray);
-    }).then(() => {
-      // Finally, filter visible resources.
-      return this.resources_.filter(r => {
-        if (r.hostWin != hostWin ||
-            r.hasOwner() ||
-            !r.hasBeenMeasured() ||
-            !r.isDisplayed() ||
-            // TODO(jridgewell): Remove isFixed check here once the position
-            // is calculted correctly in a separate layer for embeds.
-            (!r.overlaps(rect) && !r.isFixed())) {
-          return false;
-        }
-        if (opt_isInPrerender && !r.prerenderAllowed()) {
-          return false;
-        }
-        return true;
-      });
+    }).then(() => this.resources_.filter(r => {
+      return r.hostWin == hostWin && !r.hasOwner() && r.hasBeenMeasured() &&
+        filterFn(r);
+    }));
+  }
+
+  /**
+   * Returns a subset of resources which are (1) belong to the specified host
+   * window, and (2) positioned in the specified rect.
+   * @param {!Window} hostWin
+   * @param {!../layout-rect.LayoutRectDef} rect
+   * @param {boolean=} opt_isInPrerender signifies if we are in prerender mode.
+   * @return {!Promise<!Array<!Resource>>}
+   */
+  getResourcesInRect(hostWin, rect, opt_isInPrerender) {
+    return this.getMeasuredResources(hostWin, r => {
+      // TODO(jridgewell): Remove isFixed check here once the position
+      // is calculted correctly in a separate layer for embeds.
+      if (!r.isDisplayed() || (!r.overlaps(rect) && !r.isFixed()) ||
+          (opt_isInPrerender && !r.prerenderAllowed())) {
+        return false;
+      }
+      return true;
     });
   }
 
@@ -621,6 +625,40 @@ export class Resources {
    */
   setOwner(element, owner) {
     Resource.setOwner(element, owner);
+  }
+
+  /**
+   * Requires the layout of the specified element or top-level sub-elements
+   * within.
+   * @param {!Element} element
+   * @param {number=} opt_parentPriority
+   * @return {!Promise}
+   * @restricted
+   */
+  requireLayout(element, opt_parentPriority) {
+    const promises = [];
+    this.discoverResourcesForElement_(element, resource => {
+      if (resource.getState() == ResourceState.LAYOUT_COMPLETE) {
+        return;
+      }
+      if (resource.getState() != ResourceState.LAYOUT_SCHEDULED) {
+        promises.push(resource.element.whenBuilt().then(() => {
+          resource.measure();
+          if (!resource.isDisplayed()) {
+            return;
+          }
+          this.scheduleLayoutOrPreload_(
+              resource,
+              /* layout */ true,
+              opt_parentPriority,
+              /* forceOutsideViewport */ true);
+          return resource.loadedOnce();
+        }));
+      } else if (resource.isDisplayed()) {
+        promises.push(resource.loadedOnce());
+      }
+    });
+    return Promise.all(promises);
   }
 
   /**
@@ -1413,7 +1451,6 @@ export class Resources {
    */
   work_() {
     const now = Date.now();
-    const visibility = this.viewer_.getVisibilityState();
 
     let timeout = -1;
     let task = this.queue_.peek(this.boundTaskScorer_);
@@ -1437,13 +1474,20 @@ export class Resources {
         const reschedule = this.reschedule_.bind(this, task);
         executing.promise.then(reschedule, reschedule);
       } else {
-        task.promise = task.callback(visibility == 'visible');
-        task.startTime = now;
-        dev().fine(TAG_, 'exec:', task.id, 'at', task.startTime);
-        this.exec_.enqueue(task);
-        task.promise.then(this.taskComplete_.bind(this, task, true),
-            this.taskComplete_.bind(this, task, false))
-            .catch(/** @type {function (*)} */ (reportError));
+        task.resource.measure();
+        if (this.isLayoutAllowed_(
+                task.resource, task.forceOutsideViewport)) {
+          task.promise = task.callback();
+          task.startTime = now;
+          dev().fine(TAG_, 'exec:', task.id, 'at', task.startTime);
+          this.exec_.enqueue(task);
+          task.promise.then(this.taskComplete_.bind(this, task, true),
+              this.taskComplete_.bind(this, task, false))
+              .catch(/** @type {function (*)} */ (reportError));
+        } else {
+          dev().fine(TAG_, 'cancelled', task.id);
+          task.resource.layoutCanceled();
+        }
       }
 
       task = this.queue_.peek(this.boundTaskScorer_);
@@ -1690,40 +1734,69 @@ export class Resources {
   }
 
   /**
-   * Schedules layout or preload for the specified resource.
+   * Returns whether the resource should be preloaded at this time.
+   * The element must be measured by this time.
    * @param {!Resource} resource
-   * @param {boolean} layout
-   * @param {number=} opt_parentPriority
+   * @param {boolean} forceOutsideViewport
+   * @return {boolean}
    * @private
    */
-  scheduleLayoutOrPreload_(resource, layout, opt_parentPriority) {
-    dev().assert(resource.getState() != ResourceState.NOT_BUILT &&
-        resource.isDisplayed(),
-        'Not ready for layout: %s (%s)',
-        resource.debugid, resource.getState());
+  isLayoutAllowed_(resource, forceOutsideViewport) {
+    // Only built and displayed elements can be loaded.
+    if (resource.getState() == ResourceState.NOT_BUILT ||
+        !resource.isDisplayed()) {
+      return false;
+    }
 
     // Don't schedule elements when we're not visible, or in prerender mode
     // (and they can't prerender).
     if (!this.visible_) {
-      if (this.viewer_.getVisibilityState() != VisibilityState.PRERENDER) {
-        return;
-      } else if (!resource.prerenderAllowed()) {
-        return;
+      if (this.viewer_.getVisibilityState() != VisibilityState.PRERENDER ||
+          !resource.prerenderAllowed()) {
+        return false;
       }
     }
 
-    if (!resource.isInViewport() && !resource.renderOutsideViewport()) {
+    // The element has to be in its rendering corridor.
+    if (!forceOutsideViewport &&
+        !resource.isInViewport() &&
+        !resource.renderOutsideViewport()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Schedules layout or preload for the specified resource.
+   * @param {!Resource} resource
+   * @param {boolean} layout
+   * @param {number=} opt_parentPriority
+   * @param {boolean=} opt_forceOutsideViewport
+   * @private
+   */
+  scheduleLayoutOrPreload_(resource, layout, opt_parentPriority,
+      opt_forceOutsideViewport) {
+    dev().assert(resource.getState() != ResourceState.NOT_BUILT &&
+        resource.isDisplayed(),
+        'Not ready for layout: %s (%s)',
+        resource.debugid, resource.getState());
+    const forceOutsideViewport = opt_forceOutsideViewport || false;
+    if (!this.isLayoutAllowed_(resource, forceOutsideViewport)) {
       return;
     }
+
     if (layout) {
       this.schedule_(resource,
           LAYOUT_TASK_ID_, LAYOUT_TASK_OFFSET_,
           opt_parentPriority || 0,
+          forceOutsideViewport,
           resource.startLayout.bind(resource));
     } else {
       this.schedule_(resource,
           PRELOAD_TASK_ID_, PRELOAD_TASK_OFFSET_,
           opt_parentPriority || 0,
+          forceOutsideViewport,
           resource.startLayout.bind(resource));
     }
   }
@@ -1737,21 +1810,30 @@ export class Resources {
    * @private
    */
   scheduleLayoutOrPreloadForSubresources_(parentResource, layout, subElements) {
-    const resources = [];
     this.discoverResourcesForArray_(parentResource, subElements, resource => {
-      if (resource.getState() != ResourceState.NOT_BUILT) {
-        resources.push(resource);
+      if (resource.getState() == ResourceState.NOT_BUILT) {
+        resource.element.whenBuilt().then(() => {
+          this.measureAndScheduleIfAllowed_(resource, layout,
+              parentResource.getPriority());
+        });
+      } else {
+        this.measureAndScheduleIfAllowed_(resource, layout,
+            parentResource.getPriority());
       }
     });
-    if (resources.length > 0) {
-      resources.forEach(resource => {
-        resource.measure();
-        if (resource.getState() == ResourceState.READY_FOR_LAYOUT &&
-                resource.isDisplayed()) {
-          this.scheduleLayoutOrPreload_(resource, layout,
-              parentResource.getPriority());
-        }
-      });
+  }
+
+  /**
+   * @param {!Resource} resource
+   * @param {boolean} layout
+   * @param {number} parentPriority
+   * @private
+   */
+  measureAndScheduleIfAllowed_(resource, layout, parentPriority) {
+    resource.measure();
+    if (resource.getState() == ResourceState.READY_FOR_LAYOUT &&
+        resource.isDisplayed()) {
+      this.scheduleLayoutOrPreload_(resource, layout, parentPriority);
     }
   }
 
@@ -1761,10 +1843,17 @@ export class Resources {
    * @param {string} localId
    * @param {number} priorityOffset
    * @param {number} parentPriority
-   * @param {function(boolean):!Promise} callback
+   * @param {boolean} forceOutsideViewport
+   * @param {function():!Promise} callback
    * @private
    */
-  schedule_(resource, localId, priorityOffset, parentPriority, callback) {
+  schedule_(
+      resource,
+      localId,
+      priorityOffset,
+      parentPriority,
+      forceOutsideViewport,
+      callback) {
     const taskId = resource.getTaskId(localId);
 
     const task = {
@@ -1772,6 +1861,7 @@ export class Resources {
       resource,
       priority: Math.max(resource.getPriority(), parentPriority) +
           priorityOffset,
+      forceOutsideViewport,
       callback,
       scheduleTime: Date.now(),
       startTime: 0,

@@ -16,20 +16,23 @@
 
 require('./babel-helpers');
 require('./changelog');
+require('./check-links');
 require('./clean');
 require('./compile');
 require('./compile-access-expr');
 require('./compile-bind-expr');
+require('./compile-css-expr');
 require('./csvify-size');
 require('./dep-check');
 require('./get-zindex');
-require('./lint');
 require('./extension-generator');
+require('./lint');
 require('./prepend-global');
 require('./presubmit-checks');
-require('./serve');
-require('./size');
 require('./release-tagging');
 require('./runtime-test');
+require('./serve');
+require('./size');
+require('./todos');
 require('./validator');
 require('./visual-diff');

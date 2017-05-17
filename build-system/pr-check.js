@@ -24,8 +24,11 @@
  * presubmit checking, via the determineBuildTargets method.
  */
 const child_process = require('child_process');
+const exec = require('./exec.js').exec;
+const execOrDie = require('./exec.js').execOrDie;
 const path = require('path');
 const minimist = require('minimist');
+const util = require('gulp-util');
 
 const gulp = 'node_modules/gulp/bin/gulp.js';
 const fileLogPrefix =
@@ -67,23 +70,28 @@ function stopTimer(functionName, startTime) {
  * @param {string} cmd
  * @return {!Array<string>}
  */
-function exec(cmd) {
+function getStdout(cmd) {
   return child_process.execSync(cmd, {'encoding': 'utf-8'}).trim().split('\n');
 }
 
 /**
- * Executes the provided command; terminates this program in case of failure.
+ * Executes the provided command and times it.
  * @param {string} cmd
  */
-function execOrDie(cmd) {
+function timedExec(cmd) {
   const startTime = startTimer(cmd);
-  const p =
-      child_process.spawnSync('/bin/sh', ['-c', cmd], {'stdio': 'inherit'});
-  if (p.status != 0) {
-    console.error(`\n${fileLogPrefix}exiting due to failing command: ${cmd}`);
-    stopTimer(cmd, startTime);
-    process.exit(p.status)
-  }
+  exec(cmd);
+  stopTimer(cmd, startTime);
+}
+
+/**
+ * Executes the provided command and times it. The program terminates in case of
+ * failure.
+ * @param {string} cmd
+ */
+function timedExecOrDie(cmd) {
+  const startTime = startTimer(cmd);
+  execOrDie(cmd);
   stopTimer(cmd, startTime);
 }
 
@@ -94,7 +102,7 @@ function execOrDie(cmd) {
  * @return {!Array<string>}
  */
 function filesInPr(travisCommitRange) {
-  return exec(`git diff --name-only ${travisCommitRange}`);
+  return getStdout(`git diff --name-only ${travisCommitRange}`);
 }
 
 /**
@@ -198,43 +206,57 @@ function determineBuildTargets(filePaths) {
 
 const command = {
   testBuildSystem: function() {
-    execOrDie('npm run ava');
+    timedExecOrDie('npm run ava');
+  },
+  testDocumentLinks: function(files) {
+    let docFiles = files.filter(isDocFile);
+    timedExecOrDie(`${gulp} check-links --files ${docFiles.join(',')}`);
   },
   buildRuntime: function() {
-    execOrDie(`${gulp} clean`);
-    execOrDie(`${gulp} lint`);
-    execOrDie(`${gulp} build`);
-    execOrDie(`${gulp} check-types`);
-    execOrDie(`${gulp} dist --fortesting`);
+    timedExecOrDie(`${gulp} clean`);
+    timedExecOrDie(`${gulp} lint`);
+    timedExecOrDie(`${gulp} build`);
+    timedExecOrDie(`${gulp} check-types`);
+    timedExecOrDie(`${gulp} dist --fortesting`);
   },
   testRuntime: function() {
     // dep-check needs to occur after build since we rely on build to generate
     // the css files into js files.
-    execOrDie(`${gulp} dep-check`);
+    timedExecOrDie(`${gulp} dep-check`);
     // Unit tests with Travis' default chromium
-    execOrDie(`${gulp} test --nobuild --compiled`);
+    timedExecOrDie(`${gulp} test --nobuild --compiled`);
     // Integration tests with all saucelabs browsers
-    execOrDie(`${gulp} test --nobuild --saucelabs --integration --compiled`);
+    timedExecOrDie(
+        `${gulp} test --nobuild --saucelabs --integration --compiled`);
     // All unit tests with an old chrome (best we can do right now to pass tests
     // and not start relying on new features).
     // Disabled because it regressed. Better to run the other saucelabs tests.
-    // execOrDie(`${gulp} test --nobuild --saucelabs --oldchrome --compiled`);
+    // timedExecOrDie(
+    //     `${gulp} test --nobuild --saucelabs --oldchrome --compiled`);
+  },
+  runVisualDiffTests: function() {
+    // This must only be run for push builds, since Travis hides the encrypted
+    // environment variables required by Percy during pull request builds.
+    // For now, this is warning-only.
+    timedExec(`${gulp} visual-diff`);
   },
   presubmit: function() {
-    execOrDie(`${gulp} presubmit`);
+    timedExecOrDie(`${gulp} presubmit`);
   },
   buildValidatorWebUI: function() {
-    execOrDie('cd validator/webui && python build.py');
+    timedExecOrDie('cd validator/webui && python build.py');
   },
   buildValidator: function() {
-    execOrDie('cd validator && python build.py');
+    timedExecOrDie('cd validator && python build.py');
   },
 };
 
 function runAllCommands() {
   command.testBuildSystem();
+  // Skip testDocumentLinks() during push builds.
   command.buildRuntime();
   command.presubmit();
+  command.runVisualDiffTests();  // Only called during push builds.
   command.testRuntime();
   command.buildValidatorWebUI();
   command.buildValidator();
@@ -262,23 +284,21 @@ function main(argv) {
   if (buildTargets.has('FLAG_CONFIG')) {
     files.forEach((file) => {
       if (!isFlagConfig(file)) {
-        console.log('A pull request may not contain a mix of flag-config and ' +
-            'non-flag-config files. Please make your changes in separate ' +
-            'pull requests.');
-        console.log('If you see a long list of unrelated files below, you ' +
-            'may need to sync your branch to master.');
+        console.log(util.colors.red('ERROR'),
+            'It appears that your PR contains a mix of flag-config files ' +
+            '(*config.json) and non-flag-config files.');
+        console.log('Please make your changes in separate pull requests.');
+        console.log(util.colors.yellow(
+            'NOTE: If you see a long list of unrelated files below, it is ' +
+            'likely because your branch is significantly out of sync.'));
+        console.log(util.colors.yellow(
+            'A full sync to upstream/master should clear this error.'));
         console.log('\nFull list of files in this PR:');
         files.forEach((file) => { console.log('\t' + file); });
         stopTimer('pr-check.js', startTime);
         process.exit(1);
       }
     });
-  }
-
-  if (buildTargets.length == 1 && buildTargets.has('DOCS')) {
-    console.log('Only docs were updated, stopping build process.');
-    stopTimer('pr-check.js', startTime);
-    return 0;
   }
 
   //if (files.includes('package.json') ?
@@ -300,6 +320,10 @@ function main(argv) {
 
   if (buildTargets.has('BUILD_SYSTEM')) {
     command.testBuildSystem();
+  }
+
+  if (buildTargets.has('DOCS')) {
+    command.testDocumentLinks(files);
   }
 
   if (buildTargets.has('RUNTIME')) {

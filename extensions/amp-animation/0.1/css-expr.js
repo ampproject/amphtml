@@ -14,5 +14,13 @@
  * limitations under the License.
  */
 
-describe('amp-sortable-table', () => {
-});
+import {parser} from './css-expr-impl';
+
+
+/**
+ * @param {string} cssString
+ * @return {?CssNode}
+ */
+export function parseCss(cssString) {
+  return parser.parse(cssString);
+}
