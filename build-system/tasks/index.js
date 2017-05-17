@@ -21,6 +21,7 @@ require('./clean');
 require('./compile');
 require('./compile-access-expr');
 require('./compile-bind-expr');
+require('./compile-css-expr');
 require('./csvify-size');
 require('./dep-check');
 require('./get-zindex');
