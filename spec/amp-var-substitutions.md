@@ -194,7 +194,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | Variable Name  | Platform Variable  | amp-analytics Variable |
 |----------------|--------------------|------------------------|
 | [Horizontal Scroll Boundary](#horizontal-scroll-boundary) | N/A | `${horizontalScrollBoundary}` |
-| [Total Engaged Time](#horizontal-scroll-boundary) | `TOTAL_ENGAGED_TIME` | `${totalEngagedTime}` |
+| [Total Engaged Time](#total-engaged-time) | `TOTAL_ENGAGED_TIME` | `${totalEngagedTime}` |
 | [Vertical Scroll Boundary](#vertical-scroll-boundary) | N/A | `${verticalScrollBoundary}` |
 
 ### Visibility
