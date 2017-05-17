@@ -99,7 +99,10 @@ export class RefreshManager {
     this.timer_ = timerFor(win);
 
     /**
-     * The Intersection Observer used for all monitored elements.
+     * An object containing the IntersectionObservers used to monitor elements.
+     * Each IO is configured to a different threshold, and all elements that
+     * share the same minOnScreenPixelRatioThreshold will be monitored by the
+     * same IO.
      *
      * @private {!Object<string, (IntersectionObserver|!IntersectionObserverPolyfill)>}
      */
