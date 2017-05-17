@@ -131,6 +131,7 @@ export class AbstractAppBanner extends AMP.BaseElement {
         });
         this.addDismissButton_();
         this.updateViewportPadding_();
+        this./*OK*/expand();
       }
     });
   }
