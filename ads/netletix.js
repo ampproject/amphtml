@@ -40,18 +40,25 @@ export function netletix(global, data) {
     mandatory_data: ['nxkey','nxunit','nxwidth','nxheight'],
     data,
   };
+
   validateData(data,
     global._netletix_amp.mandatory_data, global._netletix_amp.allowed_data);
-  const url = assertHttpsUrl(addParamsToUrl(
-    NX_URL_FULL + encodeURIComponent(data.nxkey || DEFAULT_NX_KEY),
-    {
-      unit: data.nxunit || DEFAULT_NX_UNIT,
-      width: data.nxwidth || DEFAULT_NX_WIDTH,
-      height: data.nxheight || DEFAULT_NX_HEIGHT,
-      v: data.nxv || DEFAULT_NX_V,
-      site: data.nxsite || DEFAULT_NX_SITE,
-      ord: Math.round(Math.random() * 100000000),
-    }), data.ampSlotIndex);
+
+  const nxh = (data.nxheight || DEFAULT_NX_HEIGHT);
+  const nxw = (data.nxwidth || DEFAULT_NX_WIDTH);
+  const url = assertHttpsUrl(
+      addParamsToUrl(
+          NX_URL_FULL + encodeURIComponent(data.nxkey || DEFAULT_NX_KEY),
+          {
+            unit: data.nxunit || DEFAULT_NX_UNIT,
+            width: data.nxwidth || DEFAULT_NX_WIDTH,
+            height: data.nxheight || DEFAULT_NX_HEIGHT,
+            v: data.nxv || DEFAULT_NX_V,
+            site: data.nxsite || DEFAULT_NX_SITE,
+            ord: Math.round(Math.random() * 100000000),
+          }), 
+      data.ampSlotIndex);
+
   window.addEventListener('message', event => {
     if (event.data.type &&
         startsWith(dev().assertString(event.data.type), 'nx-')) {
@@ -62,14 +69,9 @@ export function netletix(global, data) {
             'height': event.data.height,
           };
           global.context.renderStart(renderconfig);
-          const nxh = (data.nxheight || DEFAULT_NX_HEIGHT);
-          const nxw = (data.nxwidth || DEFAULT_NX_WIDTH);
-          if (event.data.width &&
-              event.data.height &&
-              (event.data.width != nxh ||
-              event.data.height != nxw)) {
-            global.context.requestResize(event.data.width,
-                event.data.height);
+          if (event.data.width && event.data.height &&
+              (event.data.width != nxw || event.data.height != nxh)) {
+            global.context.requestResize(event.data.width, event.data.height);
           };
           break;
         case 'nx-empty':
@@ -83,6 +85,7 @@ export function netletix(global, data) {
       }
     }
   });
+
   if (data.async && data.async.toLowerCase() === 'true') {
     loadScript(global, url);
   } else {
