@@ -285,7 +285,7 @@ describe('amp-youtube', function() {
           assert.fail('Should not have dispatch unmute message twice');
         });
         sendFakeInfoDeliveryMessage(yt, iframe, {muted: false});
-        const successTimeout = timer.timeoutPromise(10, true);
+        const successTimeout = timer.promise(10);
         return Promise.race([p, successTimeout]);
       });
     });
