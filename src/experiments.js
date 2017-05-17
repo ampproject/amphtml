@@ -108,13 +108,14 @@ function enableExperimentsFromToken(win, token, opt_publicJwk) {
   }
   const configBytes = bytes.subarray(current, current + configSize);
   current += configSize;
+  const signedBytes = bytes.subarray(0, current);
   const signatureBytes = bytes.subarray(current);
 
   // TODO(kmh287, choumx) fill in real public key
   const publicJwk = opt_publicJwk || {};
 
   return crypto.importPublicKey('experiments', publicJwk).then(keyInfo => {
-    return crypto.verifySignature(configBytes, signatureBytes, keyInfo);
+    return crypto.verifySignature(signedBytes, signatureBytes, keyInfo);
   }).then(verified => {
     if (!verified) {
       throw new Error('Failed to verify config signature');
@@ -128,18 +129,17 @@ function enableExperimentsFromToken(win, token, opt_publicJwk) {
       throw new Error('Config does not match current origin');
     }
 
-    const experiments = config['experiments'];
-    Object.keys(experiments).forEach(experimentId => {
-      const experiment = experiments[experimentId];
-      const expiration = experiment['expiration'];
-      const now = Date.now();
-      if (expiration >= now) {
-        toggleExperiment(win,
-            experimentId,
-            /* opt_on */ true,
-            /* opt_transientExperiment */ true);
-      }
-    });
+    const experimentId = config['experiment'];
+    const expiration = config['expiration'];
+    const now = Date.now();
+    if (expiration >= now) {
+      toggleExperiment(win,
+          experimentId,
+          /* opt_on */ true,
+          /* opt_transientExperiment */ true);
+    } else {
+      throw new Error(`Experiment ${experimentId} has expired`);
+    }
   });
 }
 

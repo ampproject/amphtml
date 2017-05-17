@@ -847,56 +847,29 @@ describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
         .to.equal(cryptoFor(win).isCryptoAvailable());
 
     // Version: 0
-    // Size: 145
     // {
     //   origin: 'https://www.google.com',
-    //   experiments: {
-    //     'amp-expires-later': {expiration: 95617602000000},
-    //     'amp-expired': {expiration: 1232427600000},
-    //   },
+    //   experiment: 'amp-expires-later',
+    //   expiration: 95617602000000,
     // }
-    // Signature: Correct
-    // amp-expires-later's expiration will be wrong in a few millenia, give or
-    // take a decade.
-    correctToken =
-        'AAAAAJF7Im9yaWdpbiI6Imh0dHBzOi8vd3d3Lmdvb2dsZS5jb20iLCJleHBlcmltZW50' +
-        'cyI6eyJhbXAtZXhwaXJlcy1sYXRlciI6eyJleHBpcmF0aW9uIjo5NTYxNzYwMjAwMDAw' +
-        'MH0sImFtcC1leHBpcmVkLSI6eyJleHBpcmF0aW9uIjoxMjMyNDI3NjAwMDAwfX19AC0Q' +
-        'XglvsXoxh8tpQN1/ZAQm/2c6O8JZwdcAylHhOn0tA6RiYtaQMycgqrvBOWIPWO10Nalm' +
-        '4xvi6BNPZRJCpVDsj4Bt8tCr2n6kZWuA0a5MqQTfpEZfTBLLB8UPlryGHXYSIHrtZahb' +
-        'AyQMs/AzLp/IotDsUEhPWJg5ApjnM1uw4djIq2lAUrlc4a8mM8s4i0h4Ung3RFkgmott' +
-        'JuM/w25iNA6Xo1mEMQDjuASrJheVErl3KRbZTi4++sbpY3Six2jyxUZlHgjQgYaz9e9/' +
-        'wP4RGg0a3FMHzKKNpmzFY7tTcsPbgeZ1EPkz4suyjl6vL2zkbDUgO/5GKD9A5oQNS6w1' +
-        '3NN7';
+    // amp-expires-later will expire in a few millenia, give or take a decade.
+    correctToken ="AAAAAGB7Im9yaWdpbiI6Imh0dHBzOi8vd3d3Lmdvb2dsZS5jb20iLCJleHBlcmltZW50IjoiYW1wLWV4cGlyZXMtbGF0ZXIiLCJleHBpcmF0aW9uIjo5NTYxNzYwMjAwMDAwMH0ALRBeCa2Adrz+bZdQ0IMr2uBozsHHXCfR8S4CKPUpGvzqhQ8v3Dah3gNWu2k/WkAxbSC4UNisoHWx/t7JWPfoUZUZkUSq4rbtWwSg9Pdlk1rP5yMw/Yg4exnKJdJVE8zAFcoxoL3ottTqqiLoLW7fhx0icCC1BgiZzGUBU8PB1lq10qLeBndRopqyOlqMTN6pBigwN4qNZcg8zGiDkUuvrsOhsmqzbZR4P5RFkpUC6IiT84QKz5HiG1ASWu0kC9783s9FTQPk7/nmwbe9Nwsa9Y20RRz/JZw8d32xBwPAGl/BptjO/wjurKHoA343BnjYXkynozNEuPLZ50UpEkN+TbCzeiQ=";
 
     // Same as correctToken except Version: 47
-    tokenWithBadVersion =
-        'LwAAAJF7Im9yaWdpbiI6Imh0dHBzOi8vd3d3Lmdvb2dsZS5jb20iLCJleHBlcmltZW50' +
-        'cyI6eyJhbXAtZXhwaXJlcy1sYXRlciI6eyJleHBpcmF0aW9uIjo5NTYxNzYwMjAwMDAw' +
-        'MH0sImFtcC1leHBpcmVkLSI6eyJleHBpcmF0aW9uIjoxMjMyNDI3NjAwMDAwfX19AC0Q' +
-        'XglvsXoxh8tpQN1/ZAQm/2c6O8JZwdcAylHhOn0tA6RiYtaQMycgqrvBOWIPWO10Nalm' +
-        '4xvi6BNPZRJCpVDsj4Bt8tCr2n6kZWuA0a5MqQTfpEZfTBLLB8UPlryGHXYSIHrtZahb' +
-        'AyQMs/AzLp/IotDsUEhPWJg5ApjnM1uw4djIq2lAUrlc4a8mM8s4i0h4Ung3RFkgmott' +
-        'JuM/w25iNA6Xo1mEMQDjuASrJheVErl3KRbZTi4++sbpY3Six2jyxUZlHgjQgYaz9e9/' +
-        'wP4RGg0a3FMHzKKNpmzFY7tTcsPbgeZ1EPkz4suyjl6vL2zkbDUgO/5GKD9A5oQNS6w1' +
-        '3NN7';
+    tokenWithBadVersion = "LwAAAGB7Im9yaWdpbiI6Imh0dHBzOi8vd3d3Lmdvb2dsZS5jb20iLCJleHBlcmltZW50IjoiYW1wLWV4cGlyZXMtbGF0ZXIiLCJleHBpcmF0aW9uIjo5NTYxNzYwMjAwMDAwMH0ALRBeCSrZf73cUlO49X4slZKNtiGFU9X6U5fUuzAYVLu7DirrE1XRk4AgjrQx57qAkerTrlHvylMESuefyS2n4B/Eme7GMr5/ZzUX4PklyhJmuLwVdVqgtIQo4MyLKGqsS8W4FuQA35usf0CJ4FiJRWvJPaFQjWs7oLjqTvClPiNXVoOhp2G+3q7IP47JwIyGxxlzGOsVA0Nac2OeYCqhAvwijgpfooSW43B1Qtrz3tCDqKIvCAz3ISfmGEVPJWrzz45G6UpVT9V/99EcMVikiMhFJbqqfZ4ZZc/XOYDcJ5u6EPbxUWbF+EdiayLYSmHGCvu9UckHHz9cZRoGrJhGDTExktk=";
+
     // Same as correctToken except length = 999999
-    tokenWithBadConfigLength =
-        'AAAPQj97Im9yaWdpbiI6Imh0dHBzOi8vd3d3Lmdvb2dsZS5jb20iLCJleHBlcmltZW50' +
-        'cyI6eyJhbXAtZXhwaXJlcy1sYXRlciI6eyJleHBpcmF0aW9uIjo5NTYxNzYwMjAwMDAw' +
-        'MH0sImFtcC1leHBpcmVkLSI6eyJleHBpcmF0aW9uIjoxMjMyNDI3NjAwMDAwfX19AC0Q' +
-        'XglvsXoxh8tpQN1/ZAQm/2c6O8JZwdcAylHhOn0tA6RiYtaQMycgqrvBOWIPWO10Nalm' +
-        '4xvi6BNPZRJCpVDsj4Bt8tCr2n6kZWuA0a5MqQTfpEZfTBLLB8UPlryGHXYSIHrtZahb' +
-        'AyQMs/AzLp/IotDsUEhPWJg5ApjnM1uw4djIq2lAUrlc4a8mM8s4i0h4Ung3RFkgmott' +
-        'JuM/w25iNA6Xo1mEMQDjuASrJheVErl3KRbZTi4++sbpY3Six2jyxUZlHgjQgYaz9e9/' +
-        'wP4RGg0a3FMHzKKNpmzFY7tTcsPbgeZ1EPkz4suyjl6vL2zkbDUgO/5GKD9A5oQNS6w1' +
-        '3NN7';
+    tokenWithBadConfigLength = "AAAPQj97Im9yaWdpbiI6Imh0dHBzOi8vd3d3Lmdvb2dsZS5jb20iLCJleHBlcmltZW50IjoiYW1wLWV4cGlyZXMtbGF0ZXIiLCJleHBpcmF0aW9uIjo5NTYxNzYwMjAwMDAwMH0ALRBeCQNICZZpdeBoZnbOE5mLiL7BEfTq98m6FLqMcpE7nx87cMbs1QG8zihLErsQMAtzGeoeSBN/Y7z3LoKPTtWo3UtZwcPq9Vq4B+jK+j+a2ipq79nelm/TrJAoyWpzSuL0vl8ObIXxFLdvm4yC7d/ICTokm7MTZIOerJxOH+L4wb62O2PXgsW2Npg3gr24L2OzrjaDoIc1V2p+JMlUfbDQj51gmsPBRpm8rYfXqh7oATkFA7nWpcvRkLlVycjp60n7VRN9fl1e+NUXbpfVcZPH6Vsce0YpdSmBQ1mtTd8XKYZ4hxtYozSvBlbT3XePDe2YjbN3yqfMuN8XqkR8SHr1m9E=";
+
      // Same as correctToken except with a bad signature
-    tokenWithBadSignature =
-        'AAAAAJF7Im9yaWdpbiI6Imh0dHBzOi8vd3d3Lmdvb2dsZS5jb20iLCJleHBlcmltZW50' +
-        'cyI6eyJhbXAtZXhwaXJlcy1sYXRlciI6eyJleHBpcmF0aW9uIjo5NTYxNzYwMjAwMDAw' +
-        'MH0sImFtcC1leHBpcmVkLSI6eyJleHBpcmF0aW9uIjoxMjMyNDI3NjAwMDAwfX19YmFk' +
-        'c2lnbmF0dXJlISEhISEh';
+    tokenWithBadSignature = "AAAAAGB7Im9yaWdpbiI6Imh0dHBzOi8vd3d3Lmdvb2dsZS5jb20iLCJleHBlcmltZW50IjoiYW1wLWV4cGlyZXMtbGF0ZXIiLCJleHBpcmF0aW9uIjo5NTYxNzYwMjAwMDAwMH0ALRBeCU6Q+7A24/bRObLlzhVvuFXzQTzr1qKkRxu0eRB/1LM1anyoffvLuGurADnCHG3S3mk7p/21WNh4GnpDJ88AyD8DpilLaQKVhVfhBRh4COG/dU7CQUeMcPuNDJfdrhF4mazq52U4MWMKV87hjcehmiM9uqn8l3okWZiqRl2BOAjc3Ln4Q2YBhkRVVEj/0jSzyt+QBZoI495Sa/ugO1pShcaersnmE2GqA1IGkZTrHo0IVtr0Rxq2zw9CDdqiToef7hcEAQYpcWAI5LGeXWIva+6gcWZNlwrdCG/OF0cZTMiD/BFt+pw9VBPyfI2tpYq7MJXm7e8mxmUBhuP3Xg304ZU=";
+
+    // {
+    //   origin: 'https://www.google.com',
+    //   experiment: 'amp-expired',
+    //   expiration: 1232427600000,
+    // }
+    tokenWithExpiredExperiment = "AAAAAFl7Im9yaWdpbiI6Imh0dHBzOi8vd3d3Lmdvb2dsZS5jb20iLCJleHBlcmltZW50IjoiYW1wLWV4cGlyZWQiLCJleHBpcmF0aW9uIjoxMjMyNDI3NjAwMDAwfQAtEF4JYy04PNTqkOJCJ61OZqzUSYTk4MsNYVVJQfUfPuzX7650CfprSnKXXMMxR6z+fhLQPogfArWiQOiyMSWMIRh4y3F6aPYXswRzLAI2PDXrKz2E+7AjkqrVHef/Ii2pxFOvwdVOCcF+5CCfamBBTFDRzh4lKFpyZbZzRsfClxwQw/qQr2OyB6R7IGVuz4ghVOHiOY9eXGQufwnku7I7DvPcVqJUnHOnoTvKcuFmgNZ6hUSUk3BNvnTD1WHpJbSJ4Vay/8kU2bvkcr5L8s9lL05/JR2vvKL96LqiIlFnMFS6CUqu8LDO8REVVi7nCKfEE43rvhCuM9vAscwRjq0He7inCg==";
   });
 
   afterEach(() => {
@@ -1001,11 +974,14 @@ describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
 
   it('should return false if trial has expired', () => {
     if (!crypto.isCryptoAvailable()) { return; }
-    setupMetaTagWith(correctToken);
+    setupMetaTagWith(tokenWithExpiredExperiment);
     return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
-      const p =
-          isExperimentOnForOriginTrial(win, 'amp-expiresd', publicJwk);
-      return expect(p).to.eventually.be.false;
+      return isExperimentOnForOriginTrial(win, 'amp-expired', publicJwk);
+    }).then(result => {
+      expect(result).to.be.false;
+      expect(warnStub).to.have.been.calledWith(
+            'experiments',
+            sinon.match({message: 'Experiment amp-expired has expired'}));
     });
   });
 
