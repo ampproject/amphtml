@@ -464,6 +464,13 @@ export const adConfig = {
     ],
   },
 
+  netletix: {
+    preconnect: [
+      'https://call.netzathleten-media.de',
+    ],
+    renderStartImplemented: true,
+  },
+
   nokta: {
     prefetch: 'https://static.virgul.com/theme/mockups/noktaamp/ampjs.js',
     renderStartImplemented: true,
