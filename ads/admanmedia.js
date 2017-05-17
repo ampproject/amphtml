@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-import {validateData} from '../3p/3p';
+import {validateData, loadScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function admanmedia(global, data) {
-  validateData(data, ['id'], []);
+  validateData(data, ['id']);
 
-  const script = global.document.createElement('script');
-  script.id = `hybs-${data.id}`;
-  script.async = true;
-  script.src = `https://mona.admanmedia.com/go?id=${data.id}`;
-
-  global.document.body.appendChild(script);
+  loadScript(global, `https://mona.admanmedia.com/go?id=${data.id}`, () => {
+    const scriptTag = global.document.querySelector(`script[src$="id=${data.id}"]`);
+    scriptTag.setAttribute('id', `hybs-${data.id}`);
+    global.context.renderStart();
+  }, () => {
+    global.context.noContentAvailable();
+  });
 }

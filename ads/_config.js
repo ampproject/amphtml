@@ -80,7 +80,9 @@ export const adConfig = {
 
   adman: {},
 
-  admanmedia: {},
+  admanmedia: {
+    renderStartImplemented: true,
+  },
 
   adreactor: {},
 

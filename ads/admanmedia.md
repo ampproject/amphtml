@@ -1,5 +1,5 @@
 <!---
-Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,14 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Admanmedia
+# Admanmedia 
 
+Please visit our web (http://www.admanmedia.com) for more details
 ## Example
 
 ```html
 <amp-ad width="300" height="250"
     type="admanmedia"
-    data-id="e3f7103a">
+    data-id="8e916419">
   </amp-ad>
 ```
 
