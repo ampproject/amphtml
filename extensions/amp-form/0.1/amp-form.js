@@ -205,6 +205,9 @@ export class AmpForm {
 
     /** @private {?Promise} */
     this.xhrSubmitPromise_ = null;
+
+    /** @private {?Promise} */
+    this.renderTemplatePromise_ = null;
   }
 
   /**
@@ -655,6 +658,7 @@ export class AmpForm {
    */
   renderTemplate_(data) {
     const container = this.form_./*OK*/querySelector(`[${this.state_}]`);
+    let p = null;
     if (container) {
       const messageId = `rendered-message-${this.id_}`;
       container.setAttribute('role', 'alert');
@@ -662,7 +666,7 @@ export class AmpForm {
       container.setAttribute('aria-live', 'assertive');
 
       if (this.templates_.hasTemplate(container)) {
-        this.templates_.findAndRenderTemplate(container, data)
+        p = this.templates_.findAndRenderTemplate(container, data)
             .then(rendered => {
               rendered.id = messageId;
               rendered.setAttribute('i-amphtml-rendered', '');
@@ -676,7 +680,12 @@ export class AmpForm {
         // made visible so that we don't do redundant layout work when a
         // template is rendered too.
         this.resources_.mutateElement(container, () => {});
+        p = Promise.resolve();
       }
+    }
+
+    if (getMode().test) {
+      this.renderTemplatePromise_ = p;
     }
   }
 
@@ -714,12 +723,21 @@ export class AmpForm {
   }
 
   /**
-   * Returns a promise that resolves when xhr submit finishes. the promise
+   * Returns a promise that resolves when xhr submit finishes. The promise
    * will be null if xhr submit has not started.
    * @visibleForTesting
    */
   xhrSubmitPromiseForTesting() {
     return this.xhrSubmitPromise_;
+  }
+
+  /**
+   * Returns a promise that resolves when tempalte render finishes. The promise
+   * will be null if the template render has not started.
+   * @visibleForTesting
+   */
+  renderTemplatePromiseForTesting() {
+    return this.renderTemplatePromise_;
   }
 }
 
