@@ -855,7 +855,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
         .then(
           () => { throw new Error('never here'); },
           err => {
-            expect(err.message).to.match(/Illegal javascript/);
+            expect(err.message).to.match(/invalid protocol/);
           }
         );
   });
@@ -903,7 +903,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       const urlReplacements = urlReplacementsForDoc(win.ampdoc);
       expect(() => {
         urlReplacements.expandSync(`javascript://example.com/?r=RANDOM`);
-      }).to.throw('Illegal javascript');
+      }).to.throw('invalid protocol');
     });
   });
 

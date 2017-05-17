@@ -23,6 +23,7 @@ import {
   getSourceUrl,
   isProxyOrigin,
   isLocalhostOrigin,
+  isProtocolValid,
   isSecureUrl,
   parseQueryString,
   parseUrl,
@@ -475,6 +476,25 @@ describe('isLocalhostOrigin', () => {
       'http://localhost.example.com/foo.html', false);
   testLocalhostOrigin(
       'http://www.example.com/foo.html', false);
+});
+
+describe('isProtocolValid', () => {
+  function testProtocolValid(href, bool) {
+    it('should return whether it is a valid protocol for ' + href, () => {
+      expect(isProtocolValid(href)).to.equal(bool);
+    });
+  }
+
+  testProtocolValid(
+      'http://foo.com', true);
+  testProtocolValid(
+      'https://foo.com', true);
+  testProtocolValid(
+      'bar://foo.com', true);
+  testProtocolValid(
+      'javascript:alert("hello world!");', false);
+  testProtocolValid(
+      'data:12345', false);
 });
 
 describe('getSourceOrigin/Url', () => {

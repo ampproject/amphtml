@@ -309,7 +309,7 @@ describe('amp-app-banner', () => {
         meta: {content:
             'app-id=828256236, app-argument=javascript:alert("foo");'},
       }).should.eventually.be.rejectedWith(
-         /The url in app-argument is invalid/);
+         /The url in app-argument has invalid protocol/);
     });
   });
 
