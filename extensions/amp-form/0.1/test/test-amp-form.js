@@ -774,7 +774,7 @@ describes.repeated('', {
           expect(ampForm.analyticsEvent_).to.be.calledWith(
               'amp-form-submit-success');
         }, () => {
-          expect(false).to.be.true; // should not run
+          assert.fail('Submit should have succeeded.');
         });
       });
     });
@@ -810,7 +810,7 @@ describes.repeated('', {
         fetchRejecter();
 
         return ampForm.xhrSubmitPromiseForTesting().then(() => {
-          expect(false).to.be.true; // should not run
+          assert.fail('Submit should have failed.');
         }, () => {
           expect(button1.hasAttribute('disabled')).to.be.false;
           expect(button2.hasAttribute('disabled')).to.be.false;
@@ -1524,7 +1524,7 @@ describes.repeated('', {
           ampForm.handleSubmitAction_();
 
           return ampForm.xhrSubmitPromiseForTesting().then(() => {
-            expect(false).to.be.true; // should not run
+            assert.fail('Submit should have failed.');
           }, () => {
             expect(env.win.top.location.href).to.be.equal(
                 'https://example-top.com/');
@@ -1537,7 +1537,7 @@ describes.repeated('', {
           ampForm.handleSubmitAction_();
 
           return ampForm.xhrSubmitPromiseForTesting().then(() => {
-            expect(false).to.be.true; // should not run
+            assert.fail('Submit should have failed.');
           }, () => {
             expect(env.win.top.location.href).to.be.equal(
                 'https://example-top.com/');
@@ -1551,7 +1551,7 @@ describes.repeated('', {
           ampForm.handleSubmitAction_();
 
           return ampForm.xhrSubmitPromiseForTesting().then(() => {
-            expect(false).to.be.true; // should not run
+            assert.fail('Submit should have failed.');
           }, () => {
             expect(env.win.top.location.href).to.be.equal(
                 'https://example-top.com/');
