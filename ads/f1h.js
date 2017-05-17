@@ -24,13 +24,11 @@ import {
  * @param {!Object} data
  */
 export function f1h(global, data) {
-
   validateData(data, ['sectionId', 'slot']);
 
-  const scriptUrl = (data['debugsrc'] || ('https:' === window.document.location.protocol ? 'https://' : 'http://') + 'img.ak.impact-ad.jp/fh/f1h_amp.js');
+  const scriptUrl = data['debugsrc'] || 'https://img.ak.impact-ad.jp/fh/f1h_amp.js';
 
   global.f1hData = data;
   loadScript(global, scriptUrl);
-
 }
 

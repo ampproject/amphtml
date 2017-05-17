@@ -36,7 +36,7 @@ limitations under the License.
     data-section-id="100"
     data-slot="107"
     data-custom='{"my_custom_param":"my_custom_value"}'
-    data-pubnetwork-lib="lib_file_name" >
+    data-pubnetwork-lib="adlib_file_url" >
   </amp-ad>
 ```
 
