@@ -286,7 +286,7 @@ export class AmpIosAppBanner extends AbstractAppBanner {
 
     if (openUrl) {
       user().assert(isProtocolValid(openUrl),
-          '%s: The url in app-argument is invalid', TAG);
+          'The url in app-argument has invalid protocol: %s', openUrl);
     }
 
     const installAppUrl = `https://itunes.apple.com/us/app/id${appId}`;
