@@ -14,37 +14,37 @@
  * limitations under the License.
  */
 
-import {FilterType} from './filter';
+import {FilterType, Filter} from './filter';
 
-/** @implements {./filter.Filter} */
-export class ClickDelayFilter {
-  constructor() {
+export class ClickDelayFilter extends Filter {
+  constructor(name, delay) {
+    super(name);
+
+    this.delay_ = delay;
+
     /** @private {number} */
-    this.inViewportTime_ = Date.now();
+    this.inViewportTime_ = -Infinity;
   }
 
   /** @override */
-  filter(spec) {
-    return (Date.now() - this.inViewportTime_) >= spec.delay;
+  filter() {
+    return (Date.now() - this.inViewportTime_) >= this.delay_;
   }
 
-  resetClock() {
+  /**
+   * Resets the clock to measure clicks from the current time.
+   * @override
+   */
+  buildCallback() {
     this.inViewportTime_ = Date.now();
   }
-}
-
-/**
- * @return {!../config.ClickDelayConfig}
- */
-export function makeClickDelaySpec(delayMs) {
-  return {type: FilterType.CLICK_DELAY, delay: delayMs};
 }
 
 /**
  * @param {!../config.FilterConfig} spec
  * @return {boolean} Whether the config defines a ClickDelay filter.
  */
-export function assertClickDelaySpec(spec) {
+export function isValidClickDelaySpec(spec) {
   return spec.type == FilterType.CLICK_DELAY && typeof spec.delay == 'number' &&
       spec.delay > 0;
 }

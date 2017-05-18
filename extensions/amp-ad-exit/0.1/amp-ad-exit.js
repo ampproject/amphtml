@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import {assertConfig, TransportMode} from './config';
-import {user} from '../../../src/log';
-import {urlReplacementsForDoc} from '../../../src/services';
-import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
+import {ClickDelayFilter} from './filters/click-delay';
 import {FilterType} from './filters/filter';
-import {ClickDelayFilter, makeClickDelaySpec} from './filters/click-delay';
+import {assertConfig, TransportMode} from './config';
+import {createFilter} from './filters/filter-factory';
+import {isExperimentOn} from '../../../src/experiments';
+import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
+import {urlReplacementsForDoc} from '../../../src/services';
+import {user} from '../../../src/log';
 
 const TAG = 'amp-ad-exit';
 
@@ -28,14 +30,22 @@ export class AmpAdExit extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {!./config.AmpAdExitConfig} */
-    this.config_ = {targets: {}, filters: {}};
+    /**
+     * @private @const {!Object<string, !./navigation-target.NavigationTarget}
+     */
+    this.targets_ = {};
 
-    this.defaultFilterSpecs_ = {
-      'mindelay': makeClickDelaySpec(1000),
+    /**
+     * Filters to apply to every target.
+     * @private @const {!Array<!./filters/filter.Filter>}
+     */
+    this.defaultFilters_ = [new ClickDelayFilter('minDelay', 1000)];
+
+    /** @private @struct */
+    this.transport_ = {
+      beacon: true,
+      image: true,
     };
-
-    this.clickDelayFilter_ = new ClickDelayFilter();
 
     this.registerAction('exit', this.exit.bind(this));
   }
@@ -44,31 +54,32 @@ export class AmpAdExit extends AMP.BaseElement {
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
    */
   exit({args, event}) {
+    user().assert(
+        isExperimentOn(this.win, 'amp-ad-exit'),
+        'amp-ad-exit experiment is off.');
+
+    const target = this.targets_[args.target];
+    user().assert(target, `Exit target not found: '${args.target}'`);
+
     event.preventDefault();
-    const targetName = args.target;
-    const target = this.config_.targets[targetName];
-    if (!target) {
-      user().error(TAG, `Exit target not found: '${targetName}'`);
-      return;
-    }
-    if (!this.filter_(
-            Object.keys(this.defaultFilterSpecs_), this.defaultFilterSpecs_,
-            event) ||
-        !this.filter_(target.filters, this.config_.filters, event)) {
-      user().info(TAG, 'Click deemed unintenful');
+    if (!this.filter_(this.defaultFilters_, event) ||
+        !this.filter_(target.filters, event)) {
       return;
     }
     const substituteVariables =
         this.getUrlVariableRewriter_(args, event, target);
-    if (target.tracking_urls) {
-      target.tracking_urls.map(substituteVariables)
+    if (target.trackingUrls) {
+      target.trackingUrls.map(substituteVariables)
           .forEach(url => this.pingTrackingUrl_(url));
     }
-    openWindowDialog(this.win, substituteVariables(target.final_url), '_blank');
+    openWindowDialog(this.win, substituteVariables(target.finalUrl), '_blank');
   }
 
 
   /**
+   * @param {!Object<string, string|number|boolean>} args
+   * @param {!../../../src/service/action-impl.ActionEventDef} event
+   * @param {!./navigation-target.NavigationTarget} target
    * @return {function(string): string}
    */
   getUrlVariableRewriter_(args, event, target) {
@@ -83,7 +94,7 @@ export class AmpAdExit extends AMP.BaseElement {
     };
     if (target.vars) {
       for (const customVar in target.vars) {
-        if (customVar.startsWith('_')) {
+        if (customVar.charAt(0) == '_') {
           vars[customVar] = () =>
               args[customVar] || target.vars[customVar].defaultValue;
           whitelist[customVar] = true;
@@ -104,85 +115,72 @@ export class AmpAdExit extends AMP.BaseElement {
    */
   pingTrackingUrl_(url) {
     user().fine(TAG, `pinging ${url}`);
-    const useBeacon = this.config_.transport[TransportMode.BEACON] == true ||
-        !this.config_.transport.hasOwnProperty(TransportMode.BEACON);
-    if (useBeacon &&
+    if (this.transport_.beacon &&
         this.win.navigator.sendBeacon &&
         this.win.navigator.sendBeacon(url, '')) {
       return;
     }
-    const req = this.win.document.createElement('img');
-    req.src = url;
+    if (this.transport_.image) {
+      const req = this.win.document.createElement('img');
+      req.src = url;
+      return;
+    }
   }
 
   /**
    * Checks the click event against the given filters. Returns true if the event
    * passes.
-   * @param {!Array<string>} names
-   * @param {!Object<string, !./config.FilterConfig>} specs
-   * @param {!Event} event
+   * @param {!Array<!./filters/filter.Filter>} filters
+   * @param {!../../../src/service/action-impl.ActionEventDef} event
    * @returns {boolean}
    */
-  filter_(names, specs, event) {
-    if (!names) { return true; }
-    return names.every(name => {
-      const spec = specs[name];
-      if (!spec) {
-        user().warn(TAG, `Filter '${name}' not found`);
-        return true;
-      }
-      const filter = this.findFilterForType_(spec.type);
-      if (!filter) {
-        user().warn(
-            TAG, `Invalid filter type '${spec.type}' for filter '${name}'`);
-        return true;
-      }
-      const result = filter.filter(spec, event);
-      user().info(TAG, `Filter '${name}': ${result ? 'pass' : 'fail'}`);
+  filter_(filters, event) {
+    return filters.every(filter => {
+      const result = filter.filter(event);
+      user().info(TAG, `Filter '${filter.name}': ${result ? 'pass' : 'fail'}`);
       return result;
     });
-  }
-
-  /** @return {?./filters/filter.Filter} */
-  findFilterForType_(type) {
-    switch (type) {
-      case FilterType.CLICK_DELAY:
-        return this.clickDelayFilter_;
-      case FilterType.CLICK_LOCATION:
-        // TODO(clawr): implement this.
-      default:
-        return null;
-    }
   }
 
   /** @override */
   buildCallback() {
     this.element.setAttribute('aria-hidden', 'true');
 
-    try {
-      const children = this.element.children;
-      if (children.length != 1) {
-        throw new Error('The tag should contain exactly one <script> child.');
-      }
-      const child = children[0];
-      if (isJsonScriptTag(child)) {
-        this.config_ = assertConfig(JSON.parse(child.textContent));
-      } else {
-        throw new Error(
-            'The amp-ad-exit config should ' +
-            'be put in a <script> tag with type="application/json"');
-      }
+    this.defaultFilters_.forEach(f => f.buildCallback());
+
+    const children = this.element.children;
+    if (children.length != 1) {
+      throw new Error('The tag should contain exactly one <script> child.');
     }
-    catch (e) {
+    const child = children[0];
+    if (!isJsonScriptTag(child)) {
+      throw new Error(
+          'The amp-ad-exit config should ' +
+          'be put in a <script> tag with type="application/json"');
+    }
+    try {
+      const config = assertConfig(JSON.parse(child.textContent));
+      const userFilters = {};
+      for (const name in config.filters) {
+        const filter = createFilter(name, config.filters[name]);
+        filter.buildCallback();
+        userFilters[name] = filter;
+      }
+      for (const name in config.targets) {
+        const target = config.targets[name];
+        this.targets_[name] = {
+          finalUrl: target.finalUrl,
+          trackingUrls: target.trackingUrls || [],
+          vars: target.vars || {},
+          filters:
+              (target.filters || []).map(f => userFilters[f]).filter(f => f),
+        };
+      }
+      this.transport_.beacon = config.transport[TransportMode.BEACON] !== false;
+      this.transport_.image = config.transport[TransportMode.IMAGE] !== false;
+    } catch (e) {
       user().error(TAG, 'Invalid JSON config', e);
       throw e;
-    }
-  }
-
-  /** @override */
-  viewportCallback(inViewport) {
-    if (inViewport) {
-      this.clickDelayFilter_.resetClock();
     }
   }
 

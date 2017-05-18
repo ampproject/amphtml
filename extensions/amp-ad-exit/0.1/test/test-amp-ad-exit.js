@@ -16,39 +16,40 @@
 
 import '../amp-ad-exit';
 import * as sinon from 'sinon';
+import {toggleExperiment} from '../../../../src/experiments';
 
 const EXIT_CONFIG = {
   targets: {
-    simple: {'final_url': 'http://localhost:8000/simple'},
+    simple: {'finalUrl': 'http://localhost:8000/simple'},
     twoSecondDelay: {
-      'final_url': 'http://localhost:8000/simple',
+      'finalUrl': 'http://localhost:8000/simple',
       'filters': ['two_second'],
     },
     tracking: {
-      'final_url': 'http://localhost:8000/tracking-test',
-      'tracking_urls': [
+      'finalUrl': 'http://localhost:8000/tracking-test',
+      'trackingUrls': [
         'http://localhost:8000/tracking?1',
         'http://localhost:8000/tracking?2',
         'http://localhost:8000/tracking?3',
       ],
     },
     variables: {
-      'final_url':
+      'finalUrl':
           'http://localhost:8000/vars?foo=bar&ampdoc=AMPDOC_HOST&r=RANDOM&x=CLICK_X&y=CLICK_Y',
-      'tracking_urls': [
+      'trackingUrls': [
         'http://localhost:8000/tracking?r=RANDOM&x=CLICK_X&y=CLICK_Y',
       ],
     },
     customVars: {
-      'final_url': 'http://localhost:8000/vars?foo=_FOO',
-      'tracking_urls': [
-        'http://localhost:8000/tracking?bar=_BAR',
+      'finalUrl': 'http://localhost:8000/vars?foo=_foo',
+      'trackingUrls': [
+        'http://localhost:8000/tracking?bar=_bar',
       ],
       vars: {
-        _FOO: {
+        _foo: {
           defaultValue: 'foo-default',
         },
-        _BAR: {
+        _bar: {
           defaultValue: 'bar-default',
         },
       },
@@ -56,7 +57,7 @@ const EXIT_CONFIG = {
   },
   filters: {
     'two_second': {
-      type: 'click_delay',
+      type: 'clickDelay',
       delay: 2000,
     },
   },
@@ -96,6 +97,7 @@ describes.realWin('amp-ad-exit', {
   beforeEach(() => {
     sandbox = sinon.sandbox.create({useFakeTimers: true});
     win = env.win;
+    toggleExperiment(win, 'amp-ad-exit', true);
     element = makeElementWithConfig(EXIT_CONFIG);
   });
 
@@ -114,12 +116,14 @@ describes.realWin('amp-ad-exit', {
 
   it('should do nothing for missing targets', () => {
     const open = sandbox.stub(win, 'open');
-    element.implementation_.executeAction({
-      method: 'exit',
-      args: {target: 'not-a-real-target'},
-      event: makeClickEvent(1001),
-    });
-    expect(open).to.not.have.been.called;
+    try {
+      element.implementation_.executeAction({
+        method: 'exit',
+        args: {target: 'not-a-real-target'},
+        event: makeClickEvent(1001),
+      });
+      expect(open).to.not.have.been.called;
+    } catch (expected) {}
   });
 
   it('should stop event propagation', () => {
@@ -141,11 +145,10 @@ describes.realWin('amp-ad-exit', {
       event: makeClickEvent(999),
     });
 
-    element.viewportCallback(true);  // Reset click delay clock.
     element.implementation_.executeAction({
       method: 'exit',
       args: {target: 'twoSecondDelay'},
-      event: makeClickEvent(1999),
+      event: makeClickEvent(1000),  // 1000 ms + 999 from the previous exit.
     });
 
     expect(open).to.not.have.been.called;
@@ -164,7 +167,7 @@ describes.realWin('amp-ad-exit', {
 
     expect(open).to.have.been.calledOnce;
     expect(open).to.have.been.calledWith(
-        EXIT_CONFIG.targets.simple.final_url, '_blank');
+        EXIT_CONFIG.targets.simple.finalUrl, '_blank');
   });
 
   it('should fall back to top navigation', () => {
@@ -178,9 +181,9 @@ describes.realWin('amp-ad-exit', {
 
     expect(open).to.have.been.calledTwice;
     expect(open).to.have.been.calledWith(
-        EXIT_CONFIG.targets.simple.final_url, '_blank');
+        EXIT_CONFIG.targets.simple.finalUrl, '_blank');
     expect(open).to.have.been.calledWith(
-        EXIT_CONFIG.targets.simple.final_url, '_top');
+        EXIT_CONFIG.targets.simple.finalUrl, '_top');
   });
 
   it('should ping tracking URLs with sendBeacon', () => {
@@ -329,7 +332,7 @@ describes.realWin('amp-ad-exit', {
 
     element.implementation_.executeAction({
       method: 'exit',
-      args: {target: 'customVars', _FOO: 'foo', _BAR: 'bar'},
+      args: {target: 'customVars', _foo: 'foo', _bar: 'bar'},
       event: makeClickEvent(1001, 101, 102),
     });
 

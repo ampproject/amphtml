@@ -14,26 +14,12 @@
  * limitations under the License.
  */
 
-/** @enum {string} */
-export const FilterType = {
-  CLICK_DELAY: 'clickDelay',
-  CLICK_LOCATION: 'clickLocation',
-};
-
-export class Filter {
-  /** @param {string} name The name given to this filter. */
-  constructor(name) {
-    /** @const {string} */
-    this.name = name;
-  }
-
-  /**
-   * @param {!Event} event
-   * @return {boolean} Whether the exit is allowed.
-   */
-  /* eslint-disable no-unused-vars */
-  filter(event) {}
-
-  /** Initializes the filter when the parent element is built, if necessary. */
-  buildCallback() {}
-}
+/**
+ * @typedef {{
+ *   finalUrl: string,
+ *   trackingUrls: !Array<string>,
+ *   vars: !./config.Variables,
+ *   filters: !Array<!./filters/filter.Filter>
+ * }}
+ */
+export let NavigationTarget;

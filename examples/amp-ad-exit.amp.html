@@ -1,11 +1,12 @@
 <!doctype html>
-<html ⚡>
+<!doctype html>
+<html amp4ads>
 <head>
-  <meta charset="utf-8">
   <title>amp-ad-exit example</title>
-  <link rel="canonical" href="amps.html">
-  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
-  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <style amp4ads-boilerplate>body{visibility:hidden}</style>
+  <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
   <style amp-custom>
 #ad {
   border: 1px solid black;
@@ -35,7 +36,6 @@ h1 {
 }
     </style>
   <script async custom-element="amp-ad-exit" src="https://cdn.ampproject.org/v0/amp-ad-exit-0.1.js"></script>
-  <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
 <amp-ad-exit id="exit-api">
@@ -43,25 +43,25 @@ h1 {
 {
   "targets": {
     "target1": {
-      "final_url": "http://localhost:8000/?product1&x=CLICK_X&y=CLICK_Y&e=_ELEM&shouldNotBeReplaced=AMP_VERSION",
+      "finalUrl": "http://localhost:8000/?product1&x=CLICK_X&y=CLICK_Y&e=_elem&shouldNotBeReplaced=AMP_VERSION",
       "vars": {
-        "_ELEM": {"defaultValue": "headline"}
+        "_elem": {"defaultValue": "headline"}
       }
     },
     "target2": {
-      "final_url": "http://localhost:8000/?product2&r=RANDOM",
-      "tracking_urls": [
-        "http://localhost:8000/?tracking-url&clicked=_ELEM"
+      "finalUrl": "http://localhost:8000/?product2&r=RANDOM",
+      "trackingUrls": [
+        "http://localhost:8000/?tracking-url&clicked=_elem"
       ],
       "vars": {
-        "_ELEM": {"defaultValue": "headline"}
+        "_elem": {"defaultValue": "headline"}
       },
       "filters": ["long_delay"]
     }
   },
   "filters": {
     "long_delay": {
-      "type": "click_delay",
+      "type": "clickDelay",
       "delay": 10000
     }
   },
@@ -74,13 +74,13 @@ h1 {
 </amp-ad-exit>
 <div id="ad">
   <h1 on="tap:exit-api.exit(target='target1')">amp-ad-exit example</h1>
-  <div class="product" on="tap:exit-api.exit(target='target1', _ELEM='Product 1')">
+  <div class="product" on="tap:exit-api.exit(target='target1', _elem='Product 1')">
     <p>product 1</p>
   </div>
-  <div class="product" on="tap:exit-api.exit(target='target2', _ELEM='Product 2')">
+  <div class="product" on="tap:exit-api.exit(target='target2', _elem='Product 2')">
     <p>product 2</p>
   </div>
-  <p><a href="https://www.google.com/" on="tap:exit-api.exit(target='target1', _ELEM='anchor')">&lt;A&gt; tags don't work well (try middle-clicking)</a>
+  <p><a href="https://www.google.com/" on="tap:exit-api.exit(target='target1', _elem='anchor')">&lt;A&gt; tags don't work well (try middle-clicking)</a>
 </div>
 </body>
 </html>

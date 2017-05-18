@@ -16,11 +16,11 @@
 
 import {user} from '../../../src/log';
 import {FilterType} from './filters/filter';
-import {assertClickDelaySpec} from './filters/click-delay';
+import {isValidClickDelaySpec} from './filters/click-delay';
 
 /**
  * @typedef {{
- *   targets: !Object<string, !NavigationTarget>,
+ *   targets: !Object<string, !NavigationTargetConfig>,
  *   filters: (!Object<string, !FilterConfig>|undefined),
  *   transport: (!Object<TransportMode, boolean>|undefined)
  * }}
@@ -29,13 +29,13 @@ export let AmpAdExitConfig;
 
 /**
  * @typedef {{
- *   final_url: string,
- *   tracking_urls: (!Array<string>|undefined),
+ *   finalUrl: string,
+ *   trackingUrls: (!Array<string>|undefined),
  *   vars: (Variables|undefined),
  *   filters: (!Array<string>|undefined)
  * }}
  */
-export let NavigationTarget;
+export let NavigationTargetConfig;
 
 /**
  * @typedef {!Object<string, {defaultValue: (string|number|boolean)}>}
@@ -97,7 +97,7 @@ function assertFilters(filters) {
     switch (type) {
       case FilterType.CLICK_DELAY:
         user().assert(
-            assertClickDelaySpec(filters[name]),
+            isValidClickDelaySpec(filters[name]),
             `invalid ClickDelayConfig: '%s'`, name);
         break;
       case FilterType.CLICK_LOCATION:
@@ -118,8 +118,8 @@ function assertTargets(targets, config) {
 
 function assertTarget(name, target, config) {
   user().assert(
-      typeof target.final_url == 'string',
-      `final_url of target '%s' must be a string`, name);
+      typeof target.finalUrl == 'string',
+      `finalUrl of target '%s' must be a string`, name);
   if (target.filters) {
     target.filters.forEach(filter => {
       user().assert(config.filters[filter], `filter '%s' not defined`, filter);

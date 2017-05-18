@@ -56,8 +56,8 @@ values to insert. The exit action will perform these steps:
 <script type="application/json">
 {
   "targets": {
-    "landing-page": {
-      "final_url": "https://example.com/artisan-baking/?from=_CLICKAREA",
+    "landingPage": {
+      "finalUrl": "https://example.com/artisan-baking/?from=_CLICKAREA",
       "vars": {
         "_CLICKAREA": {
           "defaultValue": "headline",
@@ -65,12 +65,12 @@ values to insert. The exit action will perform these steps:
       }
     }
     "flour": {
-      "final_url": "https://adclickserver.example.com/click?id=af319adec901&x=CLICK_X&y=CLICK_Y&adurl=https://example.com/artisan-baking/flour",
+      "finalUrl": "https://adclickserver.example.com/click?id=af319adec901&x=CLICK_X&y=CLICK_Y&adurl=https://example.com/artisan-baking/flour",
       "filters": ["3s_click", "border_protection"]
     },
     "bannetons": {
-      "final_url": "https://example.com/artisan-baking/bannetons",
-      "tracking_urls": [
+      "finalUrl": "https://example.com/artisan-baking/bannetons",
+      "trackingUrls": [
         "https://adclickserver.example.com/click?id=af319adec901&x=CLICK_X&y=CLICK_Y",
         "https://tracker.adnetwork.example.com/?url=example.com",
       ],
@@ -79,11 +79,11 @@ values to insert. The exit action will perform these steps:
   },
   "filters": {
     "3s_click": {
-      "type": "click_delay",
+      "type": "clickDelay",
       "delay": 3000
     },
     "border_protection": {
-      "type": "click_location",
+      "type": "clickLocation",
       "top": 10,
       "right": 10,
       "bottom": 10,
@@ -118,7 +118,7 @@ There are two types of filters: location-based and time-based. Other filters (su
 
 | Property | Value | Meaning
 | --- | --- | ---
-| `type` | `"click_location"` |
+| `type` | `"clickLocation"` |
 | `top` | `number` | Distance in px from the top edge
 | `right` | `number` | Distance in px from the right edge
 | `bottom` | `number` | Distance in px from the bottom edge
@@ -128,7 +128,7 @@ There are two types of filters: location-based and time-based. Other filters (su
 
 | Property | Value | Meaning
 | --- | --- | ---
-| `type` | `"click_delay"` |
+| `type` | `"clickDelay"` |
 | `delay` | `number` | Time in ms to reject any clicks after entering the viewport.
 
 Example:
@@ -137,24 +137,24 @@ Example:
 {
   "targets": {
     "ad": {
-      "final_url": "...",
+      "finalUrl": "...",
       "filters": ["2second", "huge-border"]
     }
   },
   "filters": {
     "2second": {
-      "type": "click_delay",
+      "type": "clickDelay",
       "delay": 2000
     },
     "small-border": {
-      "type": "click_location",
+      "type": "clickLocation",
       "top": 5,
       "right": 5,
       "bottom": 5,
       "left": 5
     }
     "huge-border": {
-      "type": "click_location",
+      "type": "clickLocation",
       "top": 100,
       "right": 100,
       "bottom": 100,
@@ -207,9 +207,9 @@ in the `exit` action invocation:
 {
   "targets": {
     "product": {
-      "final_url": "http://example.com/?page=_PRODUCT",
+      "finalUrl": "http://example.com/?page=_productCategory",
       "vars": {
-        "_PRODUCT": {
+        "_productCategory": {
           "defaultValue": "none"
         }
       }
@@ -217,9 +217,12 @@ in the `exit` action invocation:
   }
 }
 </script></amp-ad-exit>
-<a on="tap:exit-api.exit(target='product', _PRODUCT='shoes')">buy shoes</a>
-<a on="tap:exit-api.exit(target='product', _PRODUCT='hats')">buy hats</a>
+<a on="tap:exit-api.exit(target='product', _productCategory='shoes')">buy shoes</a>
+<a on="tap:exit-api.exit(target='product', _productCategory='hats')">buy hats</a>
 ```
+
+By convention, user-defined variables should be in `_camelCase`. System
+variables are in `ALL_CAPS`.
 
 WARNING: Be careful with your variable names. Substitution works by simple
 string replacement. *Any* occurence of the variable in the URL will be
@@ -243,4 +246,5 @@ See the `AmpAdExitConfig` typedef in config.js.
 amp-ad-exit needs an `id` to be referenced by tappable elements.
 
 ## Validation
-See [amp-ad-exit rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-exit/0.1/validator-amp-ad-exit.protoascii) in the AMP validator specification.
+`amp-ad-exit` is only available for AMP4ADS documents. 
+See [amp-ad-exit rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-exit/0.1/validator-amp-ad-exit.protoascii) for the AMP validator specification.

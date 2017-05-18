@@ -15,64 +15,46 @@
 #
 
 tags: {  # amp-ad-exit
-  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp-ad-exit extension .js script"
   satisfies: "amp-ad-exit extension .js script"
   requires: "amp-ad-exit"
   mandatory_parent: "HEAD"
   unique: true
-  extension_unused_unless_tag_present: "amp-ad-exit"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  extension_spec {
+    name: "amp-ad-exit"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-ad-exit"
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\.ampproject\.org/v0/amp-ad-exit-(latest|0\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ad-exit"
-}
-tags: {  # amp-ad-exit config JSON
-  html_format: AMP
-  tag_name: "SCRIPT"
-  spec_name: "amp-ad-exit configuration JSON"
-  mandatory_parent: "AMP-AD-EXIT"
-  attrs: {
-    name: "type"
-    value: "application/json"
-    mandatory: true
-  }
-  requires: "amp-ad-exit extension .js script"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ad-exit"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-ad-exit>
-  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "AMP-AD-EXIT"
   satisfies: "amp-ad-exit"
   requires: "amp-ad-exit extension .js script"
+  requires: "amp-ad-exit configuration JSON"
   attrs: {
     name: "id"
     mandatory: true
   }
+  attr_lists: "extended-amp-global"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ad-exit"
+}
+tags: {  # amp-ad-exit config JSON
+  html_format: AMP4ADS
+  tag_name: "SCRIPT"
+  spec_name: "amp-ad-exit configuration JSON"
+  satisfies: "amp-ad-exit configuration JSON"
+  mandatory_parent: "AMP-AD-EXIT"
+  attrs: { name: "nonce" }
+  attrs: {
+    name: "type"
+    value: "application/json"
+    mandatory: true
+    dispatch_key: true
+  }
+  requires: "amp-ad-exit extension .js script"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-ad-exit"
 }

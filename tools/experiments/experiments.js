@@ -282,6 +282,12 @@ const EXPERIMENTS = [
     id: 'amp-ima-video',
     name: 'IMA-integrated Video Player',
   },
+  {
+    id: 'amp-ad-exit',
+    name: 'Enable amp-ad-exit component',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9502',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-exit/amp-ad-exit.md',
+  },
 ];
 
 if (getMode().localDev) {
