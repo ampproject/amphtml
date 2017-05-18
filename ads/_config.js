@@ -177,6 +177,15 @@ export const adConfig = {
 
   brainy: {},
 
+  bringhub: {
+    renderStartImplemented: true,
+    prefetch: 'https://local-static.bringhub.com/msf/amp-loader.js',
+    preconnect: [
+      'https://dev-core-api.bringhub.com',
+    ],
+  },
+
+
   caajainfeed: {
     prefetch: [
       'https://cdn.amanad.adtdp.com/sdk/ajaamp.js',
