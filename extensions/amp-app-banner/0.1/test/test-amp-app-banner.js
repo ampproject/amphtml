@@ -125,28 +125,25 @@ describe('amp-app-banner', () => {
     });
   }
 
+  function testSetupAndShowBanner() {
+    return getAppBanner({meta, manifest}).then(banner => {
+      expect(banner.parentElement).to.not.be.null;
+      expect(banner.style.display).to.be.equal('');
+      const bannerTop = banner.querySelector(
+          'i-amphtml-app-banner-top-padding');
+      expect(bannerTop).to.exist;
+      const dismissBtn = banner.querySelector(
+          '.amp-app-banner-dismiss-button');
+      expect(dismissBtn).to.exist;
+    });
+  }
+
   function testButtonMissing() {
     return getAppBanner({
       meta,
       manifest,
       noOpenButton: true,
     }).should.eventually.be.rejectedWith(/<button open-button> is required/);
-  }
-
-  function testAddDismissButton() {
-    sandbox.stub(AbstractAppBanner.prototype, 'isDismissed', () => {
-      return Promise.resolve(false);
-    });
-    sandbox.spy(AbstractAppBanner.prototype, 'addDismissButton_');
-    sandbox.spy(AbstractAppBanner.prototype, 'updateViewportPadding_');
-    return getAppBanner({meta, manifest}).then(banner => {
-      expect(banner.parentElement).to.not.be.null;
-      expect(AbstractAppBanner.prototype.addDismissButton_.called).to.be.true;
-      expect(AbstractAppBanner.prototype.updateViewportPadding_.called)
-          .to.be.true;
-      expect(banner.style.display).to.be.equal('');
-      expect(banner.style.visibility).to.be.equal('');
-    });
   }
 
   function testRemoveIfDismissed() {
@@ -264,11 +261,14 @@ describe('amp-app-banner', () => {
       });
     });
 
+    it('should show banner and set up correctly', testSetupAndShowBanner);
+
     it('should throw if open button is missing', testButtonMissing);
 
     it('should remove banner if meta is not provided', () => {
       return getAppBanner({meta: null}).then(banner => {
         expect(banner.parentElement).to.be.null;
+        expect(banner.style.display).to.be.equal('none');
       });
     });
 
@@ -277,6 +277,7 @@ describe('amp-app-banner', () => {
       isEmbedded = false;
       return getAppBanner().then(banner => {
         expect(banner.parentElement).to.be.null;
+        expect(banner.style.display).to.be.equal('none');
       });
     });
 
@@ -285,10 +286,9 @@ describe('amp-app-banner', () => {
       isEmbedded = true;
       return getAppBanner({meta}).then(banner => {
         expect(banner.parentElement).to.not.be.null;
+        expect(banner.style.display).to.be.equal('');
       });
     });
-
-    it('should add dismiss button and update padding', testAddDismissButton);
 
     it('should remove banner if already dismissed', testRemoveIfDismissed);
 
@@ -323,19 +323,22 @@ describe('amp-app-banner', () => {
     it('should preconnect to play store and preload origin-manifest',
         testManifestPreconnectPreload('originManifest'));
 
+    it('should show banner and set up correctly', testSetupAndShowBanner);
+
     it('should throw if open button is missing', testButtonMissing);
-    it('should add dismiss button and update padding', testAddDismissButton);
     it('should remove banner if already dismissed', testRemoveIfDismissed);
 
     it('should remove banner if manifest is not provided', () => {
       return getAppBanner({manifest: null}).then(banner => {
         expect(banner.parentElement).to.be.null;
+        expect(banner.style.display).to.be.equal('none');
       });
     });
 
     it('should remove banner if origin-manifest is not provided', () => {
       return getAppBanner({originManifest: null}).then(banner => {
         expect(banner.parentElement).to.be.null;
+        expect(banner.style.display).to.be.equal('none');
       });
     });
 
@@ -343,6 +346,7 @@ describe('amp-app-banner', () => {
       isChrome = true;
       return getAppBanner().then(banner => {
         expect(banner.parentElement).to.be.null;
+        expect(banner.style.display).to.be.equal('none');
       });
     });
 
