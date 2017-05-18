@@ -21,7 +21,7 @@ import {yandex} from './yandex';
  * @param {!Window} global
  * @param {!Object} data
  */
-export function adfox(global, data) {
+function adfox(global, data) {
   validateData(data, ['adfoxParams', 'ownerId']);
   loadScript(global, 'https://yastatic.net/pcode/adfox/loader.js',
       () => initAdFox(global, data));

@@ -27,8 +27,7 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please see ad network documentation.
-
+For semantics of configuration, please see [ad network documentation](https://yandex.ru/support/direct/index.html).
 
 Required parameters:
 - data-block-id
