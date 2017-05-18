@@ -227,8 +227,10 @@ const command = {
     timedExecOrDie(`${gulp} check-types`);
   },
   runUnitTests: function() {
-    // Unit tests need a CSS-only build.
-    timedExecOrDie(`${gulp} build --css-only`);
+    // Unit tests should need a CSS-only build, but for now, we do a full build
+    // because some of the tests are integration tests.
+    // TODO(rsimha-amp, 9404): Clean up unit tests and make this css-only.
+    timedExecOrDie(`${gulp} build`);
     // Unit tests with Travis' default chromium
     timedExecOrDie(`${gulp} test --nobuild --compiled`);
     // All unit tests with an old chrome (best we can do right now to pass tests
