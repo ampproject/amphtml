@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -95,6 +95,7 @@ import {doubleclick} from '../ads/google/doubleclick';
 import {eas} from '../ads/eas';
 import {eplanning} from '../ads/eplanning';
 import {f1e} from '../ads/f1e';
+import {f1h} from '../ads/f1h';
 import {felmat} from '../ads/felmat';
 import {flite} from '../ads/flite';
 import {fluct} from '../ads/fluct';
@@ -126,6 +127,7 @@ import {mywidget} from '../ads/mywidget';
 import {nativo} from '../ads/nativo';
 import {navegg} from '../ads/navegg';
 import {nend} from '../ads/nend';
+import {netletix} from '../ads/netletix';
 import {nokta} from '../ads/nokta';
 import {openadstream} from '../ads/openadstream';
 import {openx} from '../ads/openx';
@@ -252,6 +254,7 @@ register('eas', eas);
 register('eplanning', eplanning);
 register('ezoic', ezoic);
 register('f1e', f1e);
+register('f1h', f1h);
 register('facebook', facebook);
 register('felmat', felmat);
 register('flite', flite);
@@ -287,6 +290,7 @@ register('mywidget', mywidget);
 register('nativo', nativo);
 register('navegg', navegg);
 register('nend', nend);
+register('netletix', netletix);
 register('nokta', nokta);
 register('openadstream', openadstream);
 register('openx', openx);

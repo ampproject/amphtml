@@ -446,6 +446,12 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   resumeCallback() {
+    // FIE that was not destroyed on unlayoutCallback does not require a new
+    // ad request.
+    if (!isExperimentOn(this.win, 'a4a-fie-unlayout-enabled') &&
+        this.friendlyIframeEmbed_) {
+      return;
+    }
     this.protectedEmitLifecycleEvent_('resumeCallback');
     this.fromResumeCallback = true;
     // If layout of page has not changed, onLayoutMeasure will not be called
@@ -1000,6 +1006,10 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override  */
   unlayoutCallback() {
+    if (!isExperimentOn(this.win, 'a4a-fie-unlayout-enabled') &&
+        this.friendlyIframeEmbed_) {
+      return false;
+    }
     // Increment promiseId to cause any pending promise to cancel.
     this.promiseId_++;
     this.adUrlsPromise_ = null;

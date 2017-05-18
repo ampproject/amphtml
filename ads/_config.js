@@ -283,6 +283,11 @@ export const adConfig = {
     prefetch: 'https://img.ak.impact-ad.jp/util/f1e_amp.min.js',
   },
 
+  f1h: {
+    preconnect: 'https://img.ak.impact-ad.jp',
+    renderStartImplemented: true,
+  },
+
   fake: {},
 
   felmat: {
@@ -466,6 +471,13 @@ export const adConfig = {
       'https://output.nend.net',
       'https://img1.nend.net',
     ],
+  },
+
+  netletix: {
+    preconnect: [
+      'https://call.netzathleten-media.de',
+    ],
+    renderStartImplemented: true,
   },
 
   nokta: {
