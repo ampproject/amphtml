@@ -297,7 +297,9 @@ export class Resources {
     return this.ampdoc.signals().whenSignal(READY_SCAN_SIGNAL_).then(() => {
       // Second, wait for any left-over elements to complete measuring.
       const measurePromiseArray = [];
+      console.log('resources', this.resources_);
       this.resources_.forEach(r => {
+        console.log(r.hasBeenMeasured(), r.hostWin == hostWin, r.hasOwner());
         if (!r.hasBeenMeasured() && r.hostWin == hostWin && !r.hasOwner()) {
           measurePromiseArray.push(this.ensuredMeasured_(r));
         }

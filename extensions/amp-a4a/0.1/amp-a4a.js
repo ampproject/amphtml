@@ -756,7 +756,7 @@ export class AmpA4A extends AMP.BaseElement {
     const type = this.element.getAttribute('type');
     const promiseId = this.promiseId_;
     // Only execute once per page, this includes potential pauseCallback flows.
-    if ((type != 'adsense' & type != 'doubleclick') ||
+    if ((type != 'adsense' && type != 'doubleclick') ||
       this.win[`a4a-measuring-ad-urls-${type}`]) {
       return;
     }
