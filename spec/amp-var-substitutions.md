@@ -96,17 +96,17 @@ Only these variables are supported:
 
 ### Per-use opt-in
 
-Link substitution requires per-use opt-in as an added security measure and to affirm the intention to use variable substitution. This is done by specifying an additional attribute called `data-amp-replace` with a string value containing a comma-delimited listing of the desired variables to substitute. An example is below.
+Link substitution requires per-use opt-in as an added security measure and to affirm the intention to use variable substitution. This is done by specifying an additional attribute called `data-amp-replace` with a string value containing a space-delimited listing of the desired variables to substitute. An example is below.
 
 ``` text
-<a href="https://example.com?client_id=CLIENT_ID(bar)&abc=QUERY_PARAM(abc)" data-amp-replace="CLIENT_ID,QUERY_PARAM">Go to my site</a>
+<a href="https://example.com?client_id=CLIENT_ID(bar)&abc=QUERY_PARAM(abc)" data-amp-replace="CLIENT_ID QUERY_PARAM">Go to my site</a>
 ```
 
 #### Appending parameters to the href
 If you need to append dynamic parameters to the href, specify the parameters by using the `data-amp-addparams` attribute. Any substitution parameters that you specify in `data-amp-addparams` must also be specified in `data-amp-replace`, as in the following example
 
 ``` text
-<a href="https://example.com?abc=QUERY_PARAM(abc)" data-amp-replace="CLIENT_ID,QUERY_PARAM" data-amp-addparams="client_id=CLIENT_ID(bar)&linkid=l123">Go to my site</a>
+<a href="https://example.com?abc=QUERY_PARAM(abc)" data-amp-replace="CLIENT_ID QUERY_PARAM" data-amp-addparams="client_id=CLIENT_ID(bar)&linkid=l123">Go to my site</a>
 ```
 
 ### Whitelisted domains for link substitution
