@@ -31,7 +31,7 @@ Container for analytics tags. Positioned far away from top to make sure that doe
 <amp-analytics type="acquialift" id="acquialift">
 <script type="application/json">
 {
-  "requests":
+  "requests": {
     "customEvent": "${basicCapture}&en=${eventName}"
   },
   "vars": {
@@ -47,7 +47,7 @@ Container for analytics tags. Positioned far away from top to make sure that doe
     "click": {
       "on": "click",
       "selector": "#test1",
-      "request": "click",
+      "request": "click"
     },
     "clickCustomEvent": {
       "on": "click",
@@ -153,7 +153,7 @@ For complete documentation and additional examples please see: https://marketing
   {
     "vars": {
       "server":"www3",
-      "websiteid": "00345340",
+      "websiteid": "00345340"
     }
   }
 </script>
@@ -700,14 +700,13 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End Rakam example -->
 
-<!-- Ibeat Analytics pageview tracking -->
 <amp-analytics type="ibeatanalytics" id="ibeatanalytics">
 <script type="application/json">
-  {
-    "vars": {
-    "aid": "99999999",
-    }
+{
+  "vars": {
+    "aid": "99999999"
   }
+}
 </script>
 </amp-analytics>
 <!-- End Ibeat Analytics example -->
