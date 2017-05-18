@@ -76,6 +76,16 @@ export class DomStream {
    * @private
    */
   flush_(eof) {
+    // There are two phases:
+    // 1. "advance". This phase waits for a sibling node to the pending node
+    //    or a singling node to one of its ancestors. As soon as sibling node
+    //    is found, the parse of pending node is complete and it can be merged
+    //    into the target DOM.
+    // 2. "split". If no sibling nodes are found, this phase finds the nearest
+    //    descendant of this node with a sibling. If found, it imports the
+    //    partial DOM path and the found descendant node into the target DOM.
+    //    There are limitations of how deep the input DOM can be split and some
+    //    nodes are not allowed to be split, such as "table" and "ul".
     let splitsLeft = eof ? 0 : 1;
     let lastInputPoint;
     do {
