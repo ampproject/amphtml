@@ -756,10 +756,11 @@ export class AmpA4A extends AMP.BaseElement {
     const type = this.element.getAttribute('type');
     const promiseId = this.promiseId_;
     // Only execute once per page, this includes potential pauseCallback flows.
-    if (this.win['a4a-measuring-ad-urls']) {
+    if ((type != 'adsense' & type != 'doubleclick') ||
+      this.win[`a4a-measuring-ad-urls-${type}`]) {
       return;
     }
-    this.win['a4a-measuring-ad-urls'] =
+    this.win[`a4a-measuring-ad-urls-${type}`] =
      resourcesForDoc(this.element).getMeasuredResources(this.win,
        r => {
          return r.element.tagName == 'AMP-AD' &&
@@ -782,8 +783,9 @@ export class AmpA4A extends AMP.BaseElement {
                'met.delta.AD_SLOT_ID': Math.round(Date.now() - startTime),
                'totalSlotCount.AD_SLOT_ID': adUrls.length,
                'totalUrlCount.AD_SLOT_ID': adUrls.filter(url => !!url).length,
+               'type.AD_SLOT_ID': type,
                'totalQueriedSlotCount.AD_SLOT_ID':
-                  this.win.document.querySelectorAll('amp-ad[type=doubleclick]')
+                  this.win.document.querySelectorAll(`amp-ad[type=${type}]`)
                     .length,
              });
        });
