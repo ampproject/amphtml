@@ -43,6 +43,7 @@ import {cryptoFor} from '../../../src/crypto';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
 import {assertHttpsUrl} from '../../../src/url';
+import {timerFor} from '../../../src/services';
 import {handleClick} from '../../../ads/alp/handler';
 import {
   getDefaultBootstrapBaseUrl,
@@ -343,14 +344,35 @@ export class AmpA4A extends AMP.BaseElement {
     this.safeframeVersion_ = DEFAULT_SAFEFRAME_VERSION;
 
     /**
-     * Refresher module.
-     *
-     * @const @private {!./refresh-manager.RefreshManager}
+     * Set up refresh infrastructure for this ad slot.
      */
-    this.refresher_ = getRefreshManagerFor(this.win);
-    this.refresher_.registerElement(this.element, () => {
+    getRefreshManagerFor(this.win).registerElement(this.element, refresher => {
       console.log('Eureka!');
+      this.isRefreshing_ = true;
+      this.unlayoutCallback();
+      this.onLayoutMeasure();
+      this.adPromise_.then(() => {
+        this.uiHandler.setDisplayState(AdDisplayState.LOADING);
+        // We don't want the next creative to appear too suddenly, so we show
+        // the loader for a quarter of a second before switching to the new
+        // creative.
+        timerFor(this.win).delay(() => {
+          this.destroyFrame_(true);
+          this.layoutCallback().then(() => {
+            this.isRefreshing_ = false;
+            // Restart refresh cycle.
+            refresher.resetElement(this.element);
+          });
+        }, 250);
+      });
     });
+
+    /**
+     * Indicates whether the ad is currently in the process of being refreshed.
+     *
+     * @private {boolean}
+     */
+    this.isRefreshing_ = false;
   }
 
   /** @override */
@@ -926,9 +948,10 @@ export class AmpA4A extends AMP.BaseElement {
       if (this.isCollapsed_) {
         return Promise.resolve();
       }
-      // If this.iframe already exists, bail out here. This should only happen in
+      // If this.iframe already exists, and we're not currently in the middle
+      // of refreshing, bail out here. This should only happen in
       // testing context, not in production.
-      if (this.iframe) {
+      if (this.iframe && !this.isRefreshing_) {
         this.protectedEmitLifecycleEvent_('iframeAlreadyExists');
         return Promise.resolve();
       }
@@ -987,17 +1010,8 @@ export class AmpA4A extends AMP.BaseElement {
 
     this.isCollapsed_ = false;
 
-    // Allow embed to release its resources.
-    if (this.friendlyIframeEmbed_) {
-      this.friendlyIframeEmbed_.destroy();
-      this.friendlyIframeEmbed_ = null;
-    }
-
     // Remove rendering frame, if it exists.
-    if (this.iframe && this.iframe.parentElement) {
-      this.iframe.parentElement.removeChild(this.iframe);
-      this.iframe = null;
-    }
+    this.destroyFrame_();
 
     this.adPromise_ = null;
     this.adUrl_ = null;
@@ -1006,11 +1020,32 @@ export class AmpA4A extends AMP.BaseElement {
     this.fromResumeCallback = false;
     this.experimentalNonAmpCreativeRenderMethod_ =
         platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
-    if (this.xOriginIframeHandler_) {
+    return true;
+  }
+
+  /**
+   * Attempts to remove the current frame and free any associated resources.
+   * This function will no-op if this ad slot is currently in the process of
+   * being refreshed.
+   *
+   * @param {boolean=} opt_force Forces the removal of the frame, even if
+   *   this.isRefreshing_ is true.
+   */
+  destroyFrame_(opt_force) {
+    const proceed = opt_force || !this.isRefreshing_;
+    if (this.iframe && this.iframe.parentElement && proceed) {
+      this.iframe.parentElement.removeChild(this.iframe);
+      this.iframe = null;
+    }
+    if (this.xOriginIframeHandler_ && proceed) {
       this.xOriginIframeHandler_.freeXOriginIframe();
       this.xOriginIframeHandler_ = null;
     }
-    return true;
+    // Allow embed to release its resources.
+    if (this.friendlyIframeEmbed_ && proceed) {
+      this.friendlyIframeEmbed_.destroy();
+      this.friendlyIframeEmbed_ = null;
+    }
   }
 
   /** @override  */
