@@ -155,8 +155,7 @@ describe('amp-app-banner', () => {
     });
     return getAppBanner().then(banner => {
       expect(banner.parentElement).to.be.null;
-      expect(banner.style.display).to.be.equal('');
-      expect(banner.style.visibility).to.be.equal('hidden');
+      expect(banner.style.display).to.be.equal('none');
     });
   }
 

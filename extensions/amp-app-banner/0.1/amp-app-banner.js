@@ -26,7 +26,6 @@ import {removeElement, openWindowDialog} from '../../../src/dom';
 import {storageForDoc} from '../../../src/services';
 import {timerFor} from '../../../src/services';
 import {parseUrl} from '../../../src/url';
-import {setStyles} from '../../../src/style';
 import {isProxyOrigin, isProtocolValid} from '../../../src/url';
 
 const TAG = 'amp-app-banner';
@@ -126,9 +125,6 @@ export class AbstractAppBanner extends AMP.BaseElement {
       if (isDismissed) {
         this.hide_();
       } else {
-        setStyles(this.element, {
-          visibility: '',
-        });
         this.addDismissButton_();
         this.updateViewportPadding_();
         this./*OK*/expand();
@@ -217,12 +213,6 @@ export class AmpIosAppBanner extends AbstractAppBanner {
 
   /** @override */
   buildCallback() {
-    // To allow layout to be scheduled.
-    setStyles(this.element, {
-      display: '',
-      visibility: 'hidden',
-    });
-
     // We want to fallback to browser builtin mechanism when possible.
     const platform = platformFor(this.win);
     this.canShowBuiltinBanner_ = !this.viewer_.isEmbedded()
@@ -331,12 +321,6 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
 
   /** @override */
   buildCallback() {
-    // To allow layout to be scheduled.
-    setStyles(this.element, {
-      display: '',
-      visibility: 'hidden',
-    });
-
     const viewer = viewerForDoc(this.getAmpDoc());
     this.manifestLink_ = this.win.document.head.querySelector(
         'link[rel=manifest],link[rel=origin-manifest]');
