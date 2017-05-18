@@ -447,6 +447,11 @@ export const adConfig = {
     ],
   },
 
+  mobusi: {
+    preconnect: 'https://img.mobusi.com',
+    renderStartImplemented: true,
+  },
+
   mywidget: {
     preconnect: 'https://likemore-fe.go.mail.ru',
     prefetch: 'https://likemore-go.imgsmail.ru/widget.amp.js',
