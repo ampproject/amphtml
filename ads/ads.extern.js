@@ -103,6 +103,13 @@ data.cid;
 data.bn;
 data.mid;
 
+// adfox.js
+data.bundleName;
+data.adfoxParams;
+data.bundleParams;
+data.bundleParams.blockId;
+data.bundleParams.data;
+
 // adgeneration.js
 data.option;
 data.id;
@@ -442,6 +449,15 @@ data.wbo_script_variant;
 data.wbo_is_mobile;
 data.wbo_vars;
 data.wbo_weak_encoding;
+
+// yandex.js
+var Ya;
+Ya.Context;
+Ya.Context.AdvManager;
+Ya.Context.AdvManager.render;
+Ya.adfoxCode;
+Ya.adfoxCode.onRender;
+data.isAdfox;
 
 // yieldbot.js
 var yieldbot;
