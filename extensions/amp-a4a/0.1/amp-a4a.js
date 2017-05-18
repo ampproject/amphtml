@@ -343,23 +343,31 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {string} */
     this.safeframeVersion_ = DEFAULT_SAFEFRAME_VERSION;
 
-    /**
-     * Set up refresh infrastructure for this ad slot.
-     */
-    getRefreshManagerFor(this.win).registerElement(this.element, refresher => {
+    /** @private @const {RefreshManager}  */
+    this.refreshManager_ = getRefreshManagerFor(this.win);
+
+    this.refreshManager_.registerElement(this.element, refresher => {
       console.log('Eureka!');
       this.isRefreshing_ = true;
       this.unlayoutCallback();
       this.onLayoutMeasure();
       this.adPromise_.then(() => {
-        this.uiHandler.setDisplayState(AdDisplayState.LOADING);
+        if (!this.isRefreshing_) {
+          // If this refresh cycle was canceled, such as in a no-content
+          // response case, keep showing the old creative.
+          refresher.resetElement(this.element);
+          return;
+        }
+        this.togglePlaceholder(true);
+        this.destroyFrame_(true);
         // We don't want the next creative to appear too suddenly, so we show
         // the loader for a quarter of a second before switching to the new
         // creative.
         timerFor(this.win).delay(() => {
-          this.destroyFrame_(true);
           this.layoutCallback().then(() => {
             this.isRefreshing_ = false;
+            //this.uiHandler.setDisplayState(AdDisplayState.LOADED_RENDER_START);
+            this.togglePlaceholder(false);
             // Restart refresh cycle.
             refresher.resetElement(this.element);
           });
@@ -1121,6 +1129,12 @@ export class AmpA4A extends AMP.BaseElement {
    * @visibleForTesting
    */
   forceCollapse() {
+    if (this.isRefreshing_) {
+      // If, for whatever reason, the new creative would collapse this slot,
+      // stick with the old creative until the next refresh cycle.
+      this.isRefreshing_ = false;
+      return;
+    }
     dev().assert(this.uiHandler);
     // Store original size to allow for reverting on unlayoutCallback so that
     // subsequent pageview allows for ad request.
