@@ -23,6 +23,7 @@ import {
 } from '../service';
 import {getMode} from '../mode';
 import {isArray} from '../types';
+import {isExperimentOn} from '../experiments';
 import {map} from '../utils/object';
 import {timerFor} from '../services';
 import {vsyncFor} from '../services';
@@ -231,7 +232,7 @@ export class ActionService {
    * Given a browser 'change' or 'input' event, add `details` property
    * containing the relevant information for the change that generated
    * the initial event.
-   * @param {!ActionEventDef} event A `change` event.
+   * @param {!ActionEventDef} event
    */
   addInputMutateDetails_(event) {
     const detail = map();
@@ -358,6 +359,12 @@ export class ActionService {
 
     for (let i = 0; i < action.actionInfos.length; i++) {
       const actionInfo = action.actionInfos[i];
+
+      if (actionInfo.event === 'input-debounced') {
+        user().assert(isExperimentOn(this.ampdoc.win, 'input-debounced'),
+            'Enable "input-debounced" experiment to use input-debounced');
+      }
+
       // Replace any variables in args with data in `event`.
       const args = applyActionInfoArgs(actionInfo.args, event);
 
@@ -404,6 +411,7 @@ export class ActionService {
    * @param {?Element} source
    * @param {?ActionEventDef} event
    * @param {?ActionInfoDef} actionInfo
+   * @private visible for testing
    */
   invoke_(target, method, args, source, event, actionInfo) {
     const invocation = new ActionInvocation(target, method, args,
