@@ -66,7 +66,11 @@ const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
 
 /** @type {string} */
 const METADATA_STRING_NO_QUOTES =
-      '<script type=application/json amp-ad-metadata>';
+    '<script type=application/json amp-ad-metadata>';
+
+/** @type {string} */
+const METADATA_STRING_NO_QUOTES_SORTED_ATTRS =
+    '<script amp-ad-metadata type=application/json>';
 
 // TODO(tdrl): Temporary, while we're verifying whether SafeFrame is an
 // acceptable solution to the 'Safari on iOS doesn't fetch iframe src from
@@ -1498,11 +1502,15 @@ export class AmpA4A extends AMP.BaseElement {
    * TODO(keithwrightbos@): report error cases
    */
   getAmpAdMetadata_(creative) {
-    let metadataString = METADATA_STRING;
-    let metadataStart = creative.lastIndexOf(METADATA_STRING);
+    let metadataString = METADATA_STRING_NO_QUOTES_SORTED_ATTRS;
+    let metadataStart = creative.lastIndexOf(METADATA_STRING_NO_QUOTES_SORTED_ATTRS);
     if (metadataStart < 0) {
       metadataString = METADATA_STRING_NO_QUOTES;
       metadataStart = creative.lastIndexOf(METADATA_STRING_NO_QUOTES);
+    }
+    if (metadataStart < 0) {
+      metadataString = METADATA_STRING;
+      metadataStart = creative.lastIndexOf(METADATA_STRING);
     }
     if (metadataStart < 0) {
       // Couldn't find a metadata blob.
