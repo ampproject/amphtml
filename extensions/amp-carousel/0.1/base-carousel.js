@@ -71,11 +71,7 @@ export class BaseCarousel extends AMP.BaseElement {
     this.prevButton_.setAttribute('role', 'button');
     // TODO(erwinm): Does label need i18n support in the future? or provide
     // a way to be overridden.
-    if (this.element.hasAttribute('data-previous-button-aria-label')) {
-        this.prevButton_.setAttribute('aria-label', this.element.getAttribute('data-previous-button-aria-label'));
-    } else {
-        this.prevButton_.setAttribute('aria-label', 'Previous item in carousel');
-    }
+    this.prevButton_.setAttribute('aria-label', 'Previous item in carousel');
     this.prevButton_.setAttribute('tabindex', 0);
     this.prevButton_.onkeydown = event => {
       if (event.keyCode == Keycodes.ENTER || event.keyCode == Keycodes.SPACE) {
@@ -94,12 +90,7 @@ export class BaseCarousel extends AMP.BaseElement {
     this.nextButton_.classList.add('amp-carousel-button');
     this.nextButton_.classList.add('amp-carousel-button-next');
     this.nextButton_.setAttribute('role', 'button');
-    if (this.element.hasAttribute('data-next-button-aria-label')) {
-        this.nextButton_.setAttribute('aria-label', this.element.getAttribute('data-next-button-aria-label'));
-    } else {
-        this.nextButton_.setAttribute('aria-label', 'Next item in carousel');
-    }
-    
+    this.nextButton_.setAttribute('aria-label', 'Next item in carousel');
     this.nextButton_.setAttribute('tabindex', 0);
     this.nextButton_.onkeydown = event => {
       if (event.keyCode == Keycodes.ENTER || event.keyCode == Keycodes.SPACE) {
