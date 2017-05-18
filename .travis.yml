@@ -39,6 +39,11 @@ branches:
 env:
   global:
     - NPM_CONFIG_PROGRESS="false"
+  matrix:
+    - BUILD_SHARD="pre_build_checks"
+    - BUILD_SHARD="integration_tests"
+    - BUILD_SHARD="unit_tests"
+    - BUILD_SHARD="validator_tests"
 cache:
   yarn: true
   directories:
