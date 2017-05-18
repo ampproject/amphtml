@@ -1503,7 +1503,8 @@ export class AmpA4A extends AMP.BaseElement {
    */
   getAmpAdMetadata_(creative) {
     let metadataString = METADATA_STRING_NO_QUOTES_SORTED_ATTRS;
-    let metadataStart = creative.lastIndexOf(METADATA_STRING_NO_QUOTES_SORTED_ATTRS);
+    let metadataStart = creative.lastIndexOf(
+        METADATA_STRING_NO_QUOTES_SORTED_ATTRS);
     if (metadataStart < 0) {
       metadataString = METADATA_STRING_NO_QUOTES;
       metadataStart = creative.lastIndexOf(METADATA_STRING_NO_QUOTES);
