@@ -33,7 +33,7 @@ export let RefreshConfig;
 const DEFAULT_CONFIG = {
   minOnScreenPixelRatioThreshold: 0.5,
   minOnScreenTimeThreshold: 1,  // In seconds.
-  refreshInterval: 30,  // In seconds.
+  refreshInterval: 3,  // In seconds.
 };
 
 /**
@@ -51,19 +51,30 @@ const DEFAULT_CONFIG = {
  *     The element will remain in this state until reset() is called on the
  *     element, at which point it will return to the INITIAL state.
  *
- * @enum {string}
+ * @enum {number}
  */
 const RefreshLifecycleState = {
-  // Element has been registered, but not yet seen on screen.
-  INITIAL: 'initial',
-  // The element has appeared in the viewport, but not yet for the required
-  // duration.
-  VIEW_PENDING: 'view_pending',
-  // The element has been in the viewport for the required duration; the
-  // refresh interval for the element has begun.
-  REFRESH_PENDING: 'refresh_pending',
-  // The refresh interval has elapsed; the element is in the process of being
-  // refreshed.
+  /**
+   * Element has been registered, but not yet seen on screen.
+   */
+  INITIAL: 0,
+
+  /**
+   * The element has appeared in the viewport, but not yet for the required
+   * duration.
+   */
+  VIEW_PENDING: 1,
+
+  /**
+   * The element has been in the viewport for the required duration; the
+   * refresh interval for the element has begun.
+   */
+  REFRESH_PENDING: 2,
+
+  /**
+   * The refresh interval has elapsed; the element is in the process of being
+   * refreshed.
+   */
   REFRESHED: 'refreshed',
 };
 
@@ -151,7 +162,7 @@ export class RefreshManager {
    */
   ioCallback_(entries) {
     const refreshManager = getRefreshManagerFor(window);
-    for (const idx in entries) { debugger;
+    for (const idx in entries) {
       const entry = entries[idx];
       const wrapper = refreshManager.getElementWrapper_(entry.target);
       console.log('### ioCallback');
@@ -230,7 +241,7 @@ export class RefreshManager {
     this.timer_.delay(() => {
       console.log('REFRESH_PENDING -> REFRESHED');
       elementWrapper.setRefreshLifecycleState(RefreshLifecycleState.REFRESHED);
-      elementWrapper.invokeCallback();
+      elementWrapper.invokeCallback(this);
     }, elementWrapper.getRefreshInterval() * 1000);
   }
 
@@ -256,6 +267,10 @@ export class RefreshManager {
     this.timer_.cancel(wrapper.getRefreshTimeoutId());
     this.timer_.cancel(wrapper.getVisibilityTimeoutId());
     wrapper.reset();
+    const io = this.getIntersectionObserverWithThreshold_(
+        wrapper.getMinOnScreenPixelRatioThreshold());
+    io.unobserve(element);
+    io.observe(element);
   }
 
   /**
@@ -381,9 +396,13 @@ class RegisteredElementWrapper {
 
   /**
    * Invokes the callback function.
+   *
+   * @param {RefreshManager} refreshManager The calling refreshManager, passed
+   *   as a courtesy to the callback to make resetting the refresh cycle more
+   *   convenient.
    */
-  invokeCallback() {
-    this.callback_();
+  invokeCallback(refreshManager) {
+    this.callback_(refreshManager);
   }
 
   /**
