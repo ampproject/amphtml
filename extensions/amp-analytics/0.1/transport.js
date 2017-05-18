@@ -167,7 +167,6 @@ export class Transport {
    * @param {!Object<string,string>} transportOptions The 'transport' portion
    * of the amp-analytics
    * config object
-   * @private
    */
   static processCrossDomainIframe(ampDoc, transportOptions) {
     user().assert(!(transportOptions['beacon'] || transportOptions['xhrpost'] ||
@@ -200,8 +199,8 @@ export class Transport {
    */
   static createCrossDomainFrame(ampDoc, frameUrl) {
     // DO NOT MERGE THIS
-    // Warning: the scriptSrc URL below is only temporary. Don't check
-    // in before getting resolution on that.
+    // Warning: the scriptSrc URL below is only temporary. Don't merge
+    // before getting resolution on that.
     const frame = createElementWithAttributes(ampDoc, 'iframe', {
       sandbox: 'allow-scripts',
       name: JSON.stringify({
@@ -211,16 +210,18 @@ export class Transport {
     loadPromise(frame).then(() => {
       this.setIsReady_(frameUrl);
     });
-    frame.src = frameUrl; // Intentionally doing this after creating load
-    // promise, rather than in the object supplied to
-    // createElementWithAttribute() above. Want to be absolutely
-    // certain that we don't lose the loaded event.
-    setStyles(frame, {width: 0,height: 0,visibility: 'hidden'});
+    setStyles(frame,
+        { width: 0, height: 0, display: 'none',
+          position: 'absolute', top: 0, left: 0 });
     Transport.crossDomainFrames[frameUrl] = {
       frame,
       isReady: false,
       msgQueue: [],
     };
+    frame.src = frameUrl; // Intentionally doing this after creating load
+    // promise, rather than in the object supplied to
+    // createElementWithAttribute() above. Want to be absolutely
+    // certain that we don't lose the loaded event.
     return frame;
   }
 
@@ -234,7 +235,7 @@ export class Transport {
     const frameData = Transport.crossDomainFrames[frameUrl];
     frameData.isReady = true;
     this.sendToCrossDomainIframe_(frameData.frame, frameData.msgQueue);
-    frameData.msgQueue = [];
+    delete frameData.msgQueue;
   }
 
   /**

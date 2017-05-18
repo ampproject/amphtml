@@ -11,18 +11,18 @@
        * pass that function to the registerAmpAnalyticsEventListener() method
        * of the object which is passed as a parameter to
        * onNewAmpAnalyticsInstance().
-       * @param instance  Call registerAmpAnalyticsEventListener() on this,
+       * @param ampAnalytics  Call registerAmpAnalyticsEventListener() on this,
        * passing your function which will receive the analytics events.
        */
-      window.onNewAmpAnalyticsInstance = (instance) => {
-        instance.registerAmpAnalyticsEventListener((arrayOfEventStrings) => {
-          for (evt of arrayOfEventStrings) {
+      window.onNewAmpAnalyticsInstance = (ampAnalytics) => {
+        ampAnalytics.registerAmpAnalyticsEventListener((arrayOfEventStrings) => {
+          arrayOfEventStrings.forEach(evt => {
             // Now, do something meaningful with the AMP Analytics event
             console.log("Received an event: " + evt);
-          }
+          });
         });
         // TODO: Could also do something like:
-        // instance.sendMessageToCreative('hello');
+        // ampAnalytics.sendMessageToCreative('hello');
       };
 
       // Load the script specified in the iframe’s name attribute:
