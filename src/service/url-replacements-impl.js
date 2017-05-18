@@ -40,7 +40,7 @@ import {
   getTimingDataSync,
   getTimingDataAsync,
 } from './variable-source';
-
+import {isProtocolValid} from '../url';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
@@ -941,8 +941,8 @@ export class UrlReplacements {
       user().error(TAG, 'Illegal replacement of the protocol: ', url);
       return url;
     }
-    user().assert(newProtocol !== `javascript:`, 'Illegal javascript link ' +
-        'protocol: %s', url);
+    user().assert(isProtocolValid(replacement),
+        'The replacement url has invalid protocol: %s', replacement);
 
     return replacement;
   }

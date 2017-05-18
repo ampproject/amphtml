@@ -304,12 +304,26 @@ describe('amp-app-banner', () => {
       });
     });
 
+    it('should parse meta content and setup hrefs if app-argument is ' +
+        'not provided', () => {
+      sandbox.spy(AbstractAppBanner.prototype, 'setupOpenButton_');
+      return getAppBanner({
+        meta: {content: 'app-id=828256236'},
+      }).then(el => {
+        expect(AbstractAppBanner.prototype.setupOpenButton_)
+            .to.have.been.calledWith(
+            el.querySelector('button[open-button]'),
+            'https://itunes.apple.com/us/app/id828256236',
+            'https://itunes.apple.com/us/app/id828256236');
+      });
+    });
+
     it('should parse meta content and validate app-argument url', () => {
       return getAppBanner({
         meta: {content:
             'app-id=828256236, app-argument=javascript:alert("foo");'},
       }).should.eventually.be.rejectedWith(
-         /The url in app-argument is invalid/);
+         /The url in app-argument has invalid protocol/);
     });
   });
 
