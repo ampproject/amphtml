@@ -19,6 +19,7 @@ import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
+import {dashToUnderline} from '../../../src/string';
 
 class AmpFacebook extends AMP.BaseElement {
 
@@ -46,7 +47,7 @@ class AmpFacebook extends AMP.BaseElement {
     this.preconnect.url('https://facebook.com', opt_onLayout);
     // Hosts the facebook SDK.
     this.preconnect.preload(
-        'https://connect.facebook.net/en_US/sdk.js', 'script');
+        'https://connect.facebook.net/' + dashToUnderline(window.navigator.language) + '/sdk.js', 'script');
     preloadBootstrap(this.win, this.preconnect);
   }
 
