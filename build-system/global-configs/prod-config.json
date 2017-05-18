@@ -3,7 +3,6 @@
   "allow-url-opt-in": ["pump-early-frame"],
 
   "canary": 0,
-  "pan-y": 1,
   "expAdsenseA4A": 0.5,
   "expDoubleclickA4A": 0.5,
   "a4aProfilingRate": 0.1,
@@ -19,5 +18,6 @@
   "web-worker": 1,
   "a4aFastFetchDoubleclickLaunched": 0,
   "a4aFastFetchAdSenseLaunched": 0,
-  "pump-early-frame": 1
+  "pump-early-frame": 1,
+  "a4a-measure-get-ad-urls": 0
 }

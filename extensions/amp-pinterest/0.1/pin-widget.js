@@ -232,7 +232,11 @@ export class PinWidget {
     this.pinId = '';
     try {
       this.pinId = this.pinUrl.split('/pin/')[1].split('/')[0];
-    } catch (err) { return; }
+    } catch (err) {
+      return Promise.reject(
+        user().createError('Invalid pinterest url: ' + this.pinUrl)
+      );
+    }
 
     return this.fetchPin()
       .then(this.renderPin.bind(this));

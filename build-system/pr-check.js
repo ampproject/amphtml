@@ -24,6 +24,8 @@
  * presubmit checking, via the determineBuildTargets method.
  */
 const child_process = require('child_process');
+const exec = require('./exec.js').exec;
+const execOrDie = require('./exec.js').execOrDie;
 const path = require('path');
 const minimist = require('minimist');
 const util = require('gulp-util');
@@ -73,30 +75,23 @@ function getStdout(cmd) {
 }
 
 /**
- * Executes the provided command.
- * TODO(rsimha): Refactor this into a library. See #9038.
+ * Executes the provided command and times it.
  * @param {string} cmd
  */
-function exec(cmd) {
+function timedExec(cmd) {
   const startTime = startTimer(cmd);
-  child_process.spawnSync('/bin/sh', ['-c', cmd], {'stdio': 'inherit'});
+  exec(cmd);
   stopTimer(cmd, startTime);
 }
 
 /**
- * Executes the provided command; terminates this program in case of failure.
- * TODO(rsimha): Refactor this into a library. See #9038.
+ * Executes the provided command and times it. The program terminates in case of
+ * failure.
  * @param {string} cmd
  */
-function execOrDie(cmd) {
+function timedExecOrDie(cmd) {
   const startTime = startTimer(cmd);
-  const p =
-      child_process.spawnSync('/bin/sh', ['-c', cmd], {'stdio': 'inherit'});
-  if (p.status != 0) {
-    console.error(`\n${fileLogPrefix}exiting due to failing command: ${cmd}`);
-    stopTimer(cmd, startTime);
-    process.exit(p.status)
-  }
+  execOrDie(cmd);
   stopTimer(cmd, startTime);
 }
 
@@ -211,58 +206,82 @@ function determineBuildTargets(filePaths) {
 
 const command = {
   testBuildSystem: function() {
-    execOrDie('npm run ava');
+    timedExecOrDie('npm run ava');
   },
   testDocumentLinks: function(files) {
     let docFiles = files.filter(isDocFile);
-    execOrDie(`${gulp} check-links --files ${docFiles.join(',')}`);
+    timedExecOrDie(`${gulp} check-links --files ${docFiles.join(',')}`);
+  },
+  runPreBuildChecks: function() {
+    timedExecOrDie(`${gulp} clean`);
+    timedExecOrDie(`${gulp} lint`);
   },
   buildRuntime: function() {
-    execOrDie(`${gulp} clean`);
-    execOrDie(`${gulp} lint`);
-    execOrDie(`${gulp} build`);
-    execOrDie(`${gulp} check-types`);
-    execOrDie(`${gulp} dist --fortesting`);
+    timedExecOrDie(`${gulp} clean`);
+    timedExecOrDie(`${gulp} build`);
+    timedExecOrDie(`${gulp} dist --fortesting`);
   },
-  testRuntime: function() {
-    // dep-check needs to occur after build since we rely on build to generate
-    // the css files into js files.
-    execOrDie(`${gulp} dep-check`);
+  runDepAndTypeChecks: function() {
+    timedExecOrDie(`${gulp} build --css-only`);
+    timedExecOrDie(`${gulp} dep-check`);
+    timedExecOrDie(`${gulp} check-types`);
+  },
+  runUnitTests: function() {
     // Unit tests with Travis' default chromium
-    execOrDie(`${gulp} test --nobuild --compiled`);
-    // Integration tests with all saucelabs browsers
-    execOrDie(`${gulp} test --nobuild --saucelabs --integration --compiled`);
+    timedExecOrDie(`${gulp} test --nobuild --compiled`);
     // All unit tests with an old chrome (best we can do right now to pass tests
     // and not start relying on new features).
     // Disabled because it regressed. Better to run the other saucelabs tests.
-    // execOrDie(`${gulp} test --nobuild --saucelabs --oldchrome --compiled`);
+    // timedExecOrDie(
+    //     `${gulp} test --nobuild --saucelabs --oldchrome --compiled`);
+  },
+  runIntegrationTests: function() {
+    // Integration tests with all saucelabs browsers
+    timedExecOrDie(
+        `${gulp} test --nobuild --saucelabs --integration --compiled`);
   },
   runVisualDiffTests: function() {
     // This must only be run for push builds, since Travis hides the encrypted
     // environment variables required by Percy during pull request builds.
     // For now, this is warning-only.
-    exec(`${gulp} visual-diff`);
+    timedExec(`${gulp} visual-diff`);
   },
   presubmit: function() {
-    execOrDie(`${gulp} presubmit`);
+    timedExecOrDie(`${gulp} presubmit`);
   },
   buildValidatorWebUI: function() {
-    execOrDie('cd validator/webui && python build.py');
+    timedExecOrDie('cd validator/webui && python build.py');
   },
   buildValidator: function() {
-    execOrDie('cd validator && python build.py');
+    timedExecOrDie('cd validator && python build.py');
   },
 };
 
 function runAllCommands() {
-  command.testBuildSystem();
-  // Skip testDocumentLinks() during push builds.
-  command.buildRuntime();
-  command.presubmit();
-  command.runVisualDiffTests();  // Only called during push builds.
-  command.testRuntime();
-  command.buildValidatorWebUI();
-  command.buildValidator();
+  // Run different sets of independent tasks in parallel to reduce build time.
+  if (process.env.BUILD_SHARD == "pre_build_checks") {
+    command.testBuildSystem();
+    command.runPreBuildChecks();
+    command.runDepAndTypeChecks();
+    // Skip testDocumentLinks() during push builds.
+  }
+  if (process.env.BUILD_SHARD == "integration_tests") {
+    command.buildRuntime();
+    command.presubmit();  // Must be run after the runtime is built.
+    command.runVisualDiffTests();  // Only called during push builds.
+    command.runIntegrationTests();    
+  }
+  if (process.env.BUILD_SHARD == "unit_tests") {
+    // Unit tests should need a CSS-only build, but for now, we need a full dist
+    // because some of the tests are integration tests.
+    // TODO(rsimha-amp, 9404): Clean up unit tests and change to css-only build.
+    command.buildRuntime();
+    command.runUnitTests();
+  }
+  if (process.env.BUILD_SHARD == "validator_tests") {
+    command.buildValidatorWebUI();
+    command.buildValidator();
+  }
 }
 
 /**
@@ -321,34 +340,49 @@ function main(argv) {
       '\npr-check.js: detected build targets: ' +
       sortedBuildTargets.join(', ') + '\n');
 
-  if (buildTargets.has('BUILD_SYSTEM')) {
-    command.testBuildSystem();
+  // Run different sets of independent tasks in parallel to reduce build time.
+  if (process.env.BUILD_SHARD == "pre_build_checks") {
+    if (buildTargets.has('BUILD_SYSTEM')) {
+      command.testBuildSystem();
+    }
+
+    if (buildTargets.has('DOCS')) {
+      command.testDocumentLinks(files);
+    }
+
+    if (buildTargets.has('RUNTIME')) {
+      command.runPreBuildChecks();
+      command.runDepAndTypeChecks();
+    }
   }
 
-  if (buildTargets.has('DOCS')) {
-    command.testDocumentLinks(files);
+  if (process.env.BUILD_SHARD == "integration_tests") {
+    if (buildTargets.has('RUNTIME')) {
+      command.buildRuntime();
+      command.runIntegrationTests();
+    }
+    // Presubmit needs to run after `gulp dist` as some checks run through
+    // the dist/ folder.
+    // Also presubmit always needs to run even for just docs to check for
+    // copyright at the top.
+    command.presubmit();
   }
 
-  if (buildTargets.has('RUNTIME')) {
+  if (process.env.BUILD_SHARD == "unit_tests" && buildTargets.has('RUNTIME')) {
+    // Unit tests should need a CSS-only build, but for now, we need a full dist
+    // because some of the tests are integration tests.
+    // TODO(rsimha-amp, 9404): Clean up unit tests and change to css-only build.
     command.buildRuntime();
+    command.runUnitTests();
   }
 
-  // Presubmit needs to run after `gulp dist` as some checks runs through the
-  // dist/ folder.
-  // Also presubmit always needs to run even for just docs to check for
-  // copyright at the top.
-  command.presubmit();
-
-  if (buildTargets.has('RUNTIME')) {
-    command.testRuntime();
-  }
-
-  if (buildTargets.has('VALIDATOR_WEBUI')) {
-    command.buildValidatorWebUI();
-  }
-
-  if (buildTargets.has('VALIDATOR')) {
-    command.buildValidator();
+  if (process.env.BUILD_SHARD == "validator_tests") {
+    if (buildTargets.has('VALIDATOR_WEBUI')) {
+      command.buildValidatorWebUI();
+    }
+    if (buildTargets.has('VALIDATOR')) {
+      command.buildValidator();
+    }
   }
 
   stopTimer('pr-check.js', startTime);

@@ -29,7 +29,7 @@ import {
   isProxyOrigin,
   parseUrl,
 } from '../../../src/url';
-import {dev, user, rethrowAsync} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {xhrFor} from '../../../src/services';
 import {toArray} from '../../../src/types';
@@ -205,6 +205,9 @@ export class AmpForm {
 
     /** @private {?Promise} */
     this.xhrSubmitPromise_ = null;
+
+    /** @private {?Promise} */
+    this.renderTemplatePromise_ = null;
   }
 
   /**
@@ -475,27 +478,24 @@ export class AmpForm {
       this.renderTemplate_(json || {});
       this.maybeHandleRedirect_(response);
     }, error => {
-      const message = 'Failed to parse response JSON:';
-      user().error(TAG, message, error);
-      rethrowAsync(message, error);
+      user().error(TAG, `Failed to parse response JSON: ${error}`);
     });
   }
 
   /**
    * Transition the form the the submit error state.
-   * @param {../../../src/service/xhr-impl.FetchError} error
+   * @param {../../../src/service/xhr-impl.FetchError} errorResponse
    * @private
    */
-  handleXhrSubmitFailure_(error) {
+  handleXhrSubmitFailure_(errorResponse) {
+    const error = (errorResponse && errorResponse.error) || errorResponse;
     this.triggerAction_(
-        /* success */ false, error ? error.responseJson : null);
+        /* success */ false, errorResponse ? errorResponse.responseJson : null);
     this.analyticsEvent_('amp-form-submit-error');
     this.setState_(FormState_.SUBMIT_ERROR);
-    this.renderTemplate_(error.responseJson || {});
-    this.maybeHandleRedirect_(error.response);
-    const message = 'Form submission failed:';
-    user().error(TAG, message, error);
-    rethrowAsync(message, error);
+    this.renderTemplate_(errorResponse.responseJson || {});
+    this.maybeHandleRedirect_(errorResponse.response);
+    user().error(TAG, `Form submission failed: ${error}`);
   }
 
   /** @private */
@@ -658,6 +658,7 @@ export class AmpForm {
    */
   renderTemplate_(data) {
     const container = this.form_./*OK*/querySelector(`[${this.state_}]`);
+    let p = null;
     if (container) {
       const messageId = `rendered-message-${this.id_}`;
       container.setAttribute('role', 'alert');
@@ -665,7 +666,7 @@ export class AmpForm {
       container.setAttribute('aria-live', 'assertive');
 
       if (this.templates_.hasTemplate(container)) {
-        this.templates_.findAndRenderTemplate(container, data)
+        p = this.templates_.findAndRenderTemplate(container, data)
             .then(rendered => {
               rendered.id = messageId;
               rendered.setAttribute('i-amphtml-rendered', '');
@@ -679,7 +680,12 @@ export class AmpForm {
         // made visible so that we don't do redundant layout work when a
         // template is rendered too.
         this.resources_.mutateElement(container, () => {});
+        p = Promise.resolve();
       }
+    }
+
+    if (getMode().test) {
+      this.renderTemplatePromise_ = p;
     }
   }
 
@@ -717,12 +723,21 @@ export class AmpForm {
   }
 
   /**
-   * Returns a promise that resolves when xhr submit finishes. the promise
+   * Returns a promise that resolves when xhr submit finishes. The promise
    * will be null if xhr submit has not started.
    * @visibleForTesting
    */
   xhrSubmitPromiseForTesting() {
     return this.xhrSubmitPromise_;
+  }
+
+  /**
+   * Returns a promise that resolves when tempalte render finishes. The promise
+   * will be null if the template render has not started.
+   * @visibleForTesting
+   */
+  renderTemplatePromiseForTesting() {
+    return this.renderTemplatePromise_;
   }
 }
 
