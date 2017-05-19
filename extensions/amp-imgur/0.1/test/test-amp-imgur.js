@@ -19,27 +19,29 @@ import {
 } from '../../../../testing/iframe';
 import {AmpImgur} from '../amp-imgur';
 
-describes.realWin('amp-imgur', {
-  amp: {
-    extensions: ['amp-imgur'],
+describe('amp-imgur', () => {
+
+  function getIns(imgurId) {
+    return createIframePromise().then(iframe => {
+      doNotLoadExternalResourcesInTest(iframe.win);
+      const ins = iframe.doc.createElement('amp-imgur');
+      ins.setAttribute('data-imgurid', imgurId);
+      ins.setAttribute('width', '540');
+      ins.setAttribute('height', '663');
+      ins.setAttribute('layout', 'responsive');
+      return iframe.addElement(ins);
+    })
   }
-}, env => {
 
-  let win;
-  let element;
+  function testIframe(iframe) {
+    expect(iframe).to.not.be.null;
+    expect(iframe.src).to.equal('http://imgur.com/f462IUj/embed/');
+    expect(iframe.className).to.match(/i-amphtml-fill-content/);
+  }
 
-  beforeEach(() => {
-    win = env.win;
-    element = win.document.createElement('amp-imgur');
-    element.setAttribute('data-imgurid', 'f462IUj');
-    element.setAttribute('width', '540');
-    element.setAttribute('height', '663');
-    element.setAttribute('layout', 'responsive');
-    win.document.body.appendChild(element);
+  it('renders', () => {
+    return getIns('f462IUj').then(ins => {
+      testIframe(ins.querySelector('iframe'));
+    });
   });
-  
-  it('render responsively', () => {
-    element.build();
-    expect(element.querySelector('iframe')).to.equal('f462IUj');
-  });
-});
+})
