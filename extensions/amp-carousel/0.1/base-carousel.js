@@ -13,12 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {
-  Keycodes
-} from '../../../src/utils/keycodes';
-import {
-  timerFor
-} from '../../../src/services';
+import {KeyCodes} from '../../../src/utils/key-codes';
+import {timerFor} from '../../../src/services';
 
 /**
  * @abstract
