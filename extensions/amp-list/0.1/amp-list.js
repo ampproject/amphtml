@@ -70,7 +70,7 @@ export class AmpList extends AMP.BaseElement {
           this.element, items).then(this.rendered_.bind(this));
     }
     if (srcMutation != undefined && stateMutation != undefined) {
-      user().warn('amp-list', '[src] and [state] mutated simultaneously.' +
+      user().warn('AMP-LIST', '[src] and [state] mutated simultaneously.' +
           'The [state] mutation will be dropped.');
     }
   }
