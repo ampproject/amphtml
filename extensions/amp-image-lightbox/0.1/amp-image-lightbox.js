@@ -23,7 +23,7 @@ import {
   TapzoomRecognizer,
 } from '../../../src/gesture-recognizers';
 import {Gestures} from '../../../src/gesture';
-import {KeyCodes} from '../../../src/utils/keycodes';
+import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';

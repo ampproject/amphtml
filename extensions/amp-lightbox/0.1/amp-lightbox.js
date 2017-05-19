@@ -16,7 +16,7 @@
 
 import {CSS} from '../../../build/amp-lightbox-0.1.css';
 import {Gestures} from '../../../src/gesture';
-import {KeyCodes} from '../../../src/utils/keycodes';
+import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {childElementByTag} from '../../../src/dom.js';

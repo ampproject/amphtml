@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {KeyCodes} from '../utils/keycodes';
+import {KeyCodes} from '../utils/key-codes';
 import {dev, user} from '../log';
 import {
   registerServiceBuilderForDoc,
