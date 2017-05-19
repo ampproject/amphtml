@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {liveListManagerForDoc, LiveListManager} from '../live-list-manager';
-import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
-import {resetServiceForTesting} from '../../../../src/service';
 import {viewerForDoc} from '../../../../src/services';
-import * as sinon from 'sinon';
 
 
 describes.fakeWin('LiveListManager', {amp: true}, env => {

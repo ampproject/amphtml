@@ -23,7 +23,6 @@ import {
 } from '../../../src/service';
 import {user} from '../../../src/log';
 import {viewerForDoc} from '../../../src/services';
-import {whenDocumentReady} from '../../../src/document-ready';
 import {xhrFor} from '../../../src/services';
 
 const SERVICE_ID = 'liveListManager';
