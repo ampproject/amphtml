@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Keycodes} from '../../../../src/utils/keycodes';
+import {KeyCodes} from '../../../../src/utils/keycodes';
 import {timerFor} from '../../../../src/services';
 import {createIframePromise} from '../../../../testing/iframe';
 import '../amp-image-lightbox';
@@ -200,7 +200,7 @@ describe('amp-image-lightbox component', () => {
       ampImage.setAttribute('width', '100');
       ampImage.setAttribute('height', '100');
       impl.activate({source: ampImage});
-      impl.closeOnEscape_({keyCode: Keycodes.ESCAPE});
+      impl.closeOnEscape_({keyCode: KeyCodes.ESCAPE});
       expect(setupCloseSpy).to.be.calledOnce;
 
       // Regression test: ensure escape event listener is bound properly
