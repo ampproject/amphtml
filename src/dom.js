@@ -191,7 +191,7 @@ export function rootNodeFor(node) {
     return node.getRootNode();
   }
   let n;
-  for (n = node; !!n.parentNode; n = n.parentNode);
+  for (n = node; !!n.parentNode; n = n.parentNode) {}
   return n;
 }
 

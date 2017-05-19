@@ -188,7 +188,7 @@ export class AmpSlideScroll extends BaseSlides {
       // Slides must only be re-parented to DOM-connected nodes to avoid
       // errors when used in a shadow document (#9291).
       dev().assert(isConnectedNode(slideWrapper),
-          "Slides must only be re-parented to connected nodes.");
+          'Slides must only be re-parented to connected nodes.');
       slideWrapper.appendChild(slide);
 
       this.slideWrappers_.push(slideWrapper);
