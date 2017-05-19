@@ -17,7 +17,7 @@
   <button on="tap:AMP.setState({listSrc:'/list/fruit-data/get'})">Show Fruit</button>
   <button on="tap:AMP.setState({listSrc:'/list/vegetable-data/get'})">Show Vegetables</button>
     <button on="tap:AMP.setState({
-    localData: [{
+    localState: [{
       name: 'pizza',
       quantity: 1976,
       unitPrice: 3.50
@@ -28,7 +28,7 @@
     }]
   })">Show Other Foods</button>
 
-  <amp-list layout="responsive" src="/list/fruit-data/get" [src]="listSrc || '/list/fruit-data/get'" width="600" height="600" [localData]="localData">
+  <amp-list layout="responsive" src="/list/fruit-data/get" [src]="listSrc || '/list/fruit-data/get'" width="600" height="600" [state]="localState">
     <template type="amp-mustache">
       <strong>Product</strong>: {{name}}
       <strong>Quantity:</strong>: {{quantity}}
