@@ -21,7 +21,7 @@ import {
   parseActionMap,
 } from '../../src/service/action-impl';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {Keycodes} from '../../src/utils/keycodes';
+import {KeyCodes} from '../../src/utils/keycodes';
 import {createCustomEvent} from '../../src/event-helper';
 import {setParentWindow} from '../../src/service';
 import * as sinon from 'sinon';
@@ -963,7 +963,7 @@ describe('Core events', () => {
     element.setAttribute('role', 'button');
     const event = {
       target: element,
-      keyCode: Keycodes.ENTER,
+      keyCode: KeyCodes.ENTER,
       preventDefault: sandbox.stub()};
     handler(event);
     expect(event.preventDefault).to.have.been.called;
@@ -976,7 +976,7 @@ describe('Core events', () => {
     const handler = window.document.addEventListener.getCall(1).args[1];
     const element = document.createElement('div');
     element.setAttribute('role', 'not-a-button');
-    const event = {target: element, keyCode: Keycodes.ENTER};
+    const event = {target: element, keyCode: KeyCodes.ENTER};
     handler(event);
     expect(action.trigger).to.not.have.been.called;
   });

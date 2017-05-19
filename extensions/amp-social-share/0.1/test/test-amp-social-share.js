@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Keycodes} from '../../../../src/utils/keycodes';
+import {KeyCodes} from '../../../../src/utils/keycodes';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 import * as sinon from 'sinon';
@@ -208,11 +208,11 @@ describe('amp-social-share', () => {
     return getShare('twitter').then(el => {
       const nonActivationEvent = {
         preventDefault: () => {},
-        keyCode: Keycodes.RIGHT_ARROW,
+        keyCode: KeyCodes.RIGHT_ARROW,
       };
       const activationEvent = {
         preventDefault: () => {},
-        keyCode: Keycodes.SPACE,
+        keyCode: KeyCodes.SPACE,
       };
       el.implementation_.handleKeyPress_(nonActivationEvent);
       expect(el.implementation_.win.open).to.not.have.been.called;
