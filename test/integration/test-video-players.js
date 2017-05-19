@@ -41,7 +41,8 @@ describe.configure().skipIos().run('amp-video', () => {
   });
 });
 
-describe.configure().skipIos().run('amp-youtube', () => {
+//TODO(aghassemi, #9379): unskip
+describe.skip('amp-youtube', () => {
   runVideoPlayerIntegrationTests(fixture => {
     const video = fixture.doc.createElement('amp-youtube');
     video.setAttribute('data-videoid', 'O0QDEXZhow4');
@@ -67,7 +68,8 @@ describe.skip('amp-nexxtv-player', () => {
   });
 });
 
-describe.configure().skipIos().run('amp-ima-video', () => {
+//TODO(aghassemi, #9379): unskip
+describe.skip('amp-ima-video', () => {
   runVideoPlayerIntegrationTests(fixture => {
     const video = fixture.doc.createElement('amp-ima-video');
     video.setAttribute('width', 640);

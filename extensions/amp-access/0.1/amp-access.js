@@ -321,7 +321,7 @@ export class AccessService {
    * @private
    */
   analyticsEvent_(eventType) {
-    triggerAnalyticsEvent(this.ampdoc, eventType);
+    triggerAnalyticsEvent(this.getRootElement_(), eventType);
   }
 
   /**
