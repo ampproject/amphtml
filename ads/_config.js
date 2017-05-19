@@ -84,6 +84,11 @@ export const adConfig = {
 
   adform: {},
 
+  adfox: {
+    prefetch: 'https://yastatic.net/pcode/adfox/loader.js',
+    renderStartImplemented: true,
+  },
+
   adgeneration: {
     prefetch: 'https://i.socdm.com/sdk/js/adg-script-loader.js',
   },
@@ -673,6 +678,11 @@ export const adConfig = {
       'https://yads.c.yimg.jp/js/yads.js',
     ],
     preconnect: 'https://yads.yahoo.co.jp',
+  },
+
+  yandex: {
+    prefetch: 'https://yastatic.net/partner-code/loaders/context_amp.js',
+    renderStartImplemented: true,
   },
 
   yieldbot: {
