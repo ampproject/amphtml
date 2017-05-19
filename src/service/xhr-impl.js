@@ -195,9 +195,11 @@ export class Xhr {
    *
    * @param {string} input
    * @param {?FetchInitDef=} opt_init
+   * @param {boolean=} opt_skipProcessing Disables any processing of the
+   *     response, including asserting the response is 2XX.
    * @return {!Promise<!JSONType>}
    */
-  fetchJson(input, opt_init) {
+  fetchJson(input, opt_init, opt_skipProcessing) {
     const init = setupInit(opt_init, 'application/json');
     if (init.method == 'POST' && !isFormData(init.body)) {
       // Assume JSON strict mode where only objects or arrays are allowed
@@ -211,8 +213,8 @@ export class Xhr {
       init.headers['Content-Type'] = 'application/json;charset=utf-8';
       init.body = JSON.stringify(init.body);
     }
-    return this.fetch(input, init)
-        .then(response => response.json());
+    const fetch = this.fetch(input, init, opt_skipProcessing);
+    return opt_skipProcessing ? fetch : fetch.then(response => response.json());
   }
 
   /**
@@ -224,12 +226,14 @@ export class Xhr {
    *
    * @param {string} input
    * @param {?FetchInitDef=} opt_init
+   * @param {boolean=} opt_skipProcessing Disables any processing of the
+   *     response, including asserting the response is 2XX.
    * @return {!Promise<string>}
    */
-  fetchText(input, opt_init) {
+  fetchText(input, opt_init, opt_skipProcessing) {
     const init = setupInit(opt_init, 'text/plain');
-    return this.fetch(input, init)
-        .then(response => response.text());
+    const fetch = this.fetch(input, init, opt_skipProcessing);
+    return opt_skipProcessing ? fetch : fetch.then(response => response.text());
   }
 
   /**
@@ -238,24 +242,30 @@ export class Xhr {
    *
    * @param {string} input
    * @param {?FetchInitDef=} opt_init
+   * @param {boolean=} opt_skipProcessing Disables any processing of the
+   *     response, including asserting the response is 2XX.
    * @return {!Promise<!Document>}
    */
-  fetchDocument(input, opt_init) {
+  fetchDocument(input, opt_init, opt_skipProcessing) {
     const init = setupInit(opt_init, 'text/html');
     init.responseType = 'document';
-    return this.fetch(input, init)
-        .then(response => response.document_());
+    const fetch = this.fetch(input, init, opt_skipProcessing);
+    return opt_skipProcessing ? fetch : fetch.then(response => {
+      return response.document_();
+    });
   }
 
   /**
    * @param {string} input URL
    * @param {?FetchInitDef=} opt_init Fetch options object.
+   * @param {boolean=} opt_skipProcessing Disables any processing of the
+   *     response, including asserting the response is 2XX.
    * @return {!Promise<!FetchResponse>}
    */
-  fetch(input, opt_init) {
+  fetch(input, opt_init, opt_skipProcessing) {
     const init = setupInit(opt_init);
-    return this.fetchAmpCors_(input, init).then(response =>
-        assertSuccess(response));
+    const fetch = this.fetchAmpCors_(input, init);
+    return opt_skipProcessing ? fetch : fetch.then(assertSuccess);
   }
 
   /**
@@ -270,8 +280,7 @@ export class Xhr {
    * @return {!Promise}
    */
   sendSignal(input, opt_init) {
-    return this.fetchAmpCors_(input, opt_init)
-        .then(response => assertSuccess(response));
+    return this.fetchAmpCors_(input, opt_init).then(assertSuccess);
   }
 
   /**
@@ -425,7 +434,7 @@ function isRetriable(status) {
  * @return {!Promise<!FetchResponse>}
  * @private Visible for testing
  */
-export function assertSuccess(response) {
+export function assertSuccess(response, jsonDecode) {
   return new Promise((resolve, reject) => {
     const status = response.status;
     if (status < 200 || status >= 300) {
@@ -433,18 +442,6 @@ export function assertSuccess(response) {
       const err = new FetchError(
           user().createError(`HTTP error ${status}`), response, retriable);
       const contentType = response.headers.get('Content-Type') || '';
-      if (contentType.split(';')[0] == 'application/json') {
-        response.json().then(json => {
-          err.responseJson = json;
-          reject(err);
-        }, () => {
-          // Ignore a failed json parsing and just throw the error without
-          // setting responseJson.
-          reject(err);
-        });
-      } else {
-        reject(err);
-      }
     } else {
       resolve(response);
     }
@@ -467,6 +464,9 @@ export class FetchResponse {
 
     /** @type {number} */
     this.status = this.xhr_.status;
+
+    /** @const {boolean} */
+    this.ok = this.status >= 200 && this.status < 300;
 
     /** @const {!FetchResponseHeaders} */
     this.headers = new FetchResponseHeaders(xhr);
