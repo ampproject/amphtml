@@ -44,25 +44,6 @@ import {utf8EncodeSync} from '../utils/bytes';
  */
 export let FetchInitDef;
 
-/**
- * A custom error that encapsulates an XHR error message
- * with the corresponding response data.
- */
-export class FetchError {
-  /**
-   * @param {!Error} error
-   * @param {!FetchResponse} response
-   * @param {boolean=} opt_retriable
-   * @param {?JSONType=} opt_responseJson
-   */
-  constructor(error, response, opt_retriable, opt_responseJson) {
-    this.error = error;
-    this.response = response;
-    this.retriable = opt_retriable;
-    this.responseJson = opt_responseJson;
-  }
-}
-
 
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
@@ -434,16 +415,15 @@ function isRetriable(status) {
  * @return {!Promise<!FetchResponse>}
  * @private Visible for testing
  */
-export function assertSuccess(response, jsonDecode) {
-  return new Promise((resolve, reject) => {
-    const status = response.status;
-    if (status < 200 || status >= 300) {
-      const retriable = isRetriable(status);
-      const err = new FetchError(
-          user().createError(`HTTP error ${status}`), response, retriable);
-      const contentType = response.headers.get('Content-Type') || '';
-    } else {
+export function assertSuccess(response) {
+  return new Promise(resolve => {
+    if (response.ok) {
       resolve(response);
+    } else {
+      const status = response.status;
+      const err = user().createError(`HTTP error ${status}`);
+      err.retriable = isRetriable(status);
+      throw err;
     }
   });
 }
