@@ -17,7 +17,6 @@ import {
   createIframePromise,
   doNotLoadExternalResourcesInTest,
 } from '../../../../testing/iframe';
-import {AmpImgur} from '../amp-imgur';
 
 describe('amp-imgur', () => {
 
@@ -30,7 +29,7 @@ describe('amp-imgur', () => {
       ins.setAttribute('height', '663');
       ins.setAttribute('layout', 'responsive');
       return iframe.addElement(ins);
-    })
+    });
   }
 
   function testIframe(iframe) {
@@ -44,4 +43,4 @@ describe('amp-imgur', () => {
       testIframe(ins.querySelector('iframe'));
     });
   });
-})
+});

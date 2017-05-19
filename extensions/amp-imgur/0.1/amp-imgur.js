@@ -28,6 +28,7 @@
   */
 
 import {user} from '../../../src/log';
+import {removeElement} from '../../../src/dom';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 
 export class AmpImgur extends AMP.BaseElement {
@@ -68,7 +69,7 @@ export class AmpImgur extends AMP.BaseElement {
     iframe.setAttribute('allowfullscreen', 'true');
 
     iframe.src = 'http://imgur.com/' +
-      encodeURIComponent(this.imgurId_) + '/embed/'
+      encodeURIComponent(this.imgurId_) + '/embed/';
 
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
