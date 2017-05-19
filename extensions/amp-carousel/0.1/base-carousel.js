@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 import {
-  Keycodes,
+  Keycodes
 } from '../../../src/utils/keycodes';
 import {
-  timerFor,
+  timerFor
 } from '../../../src/services';
 
 /**
