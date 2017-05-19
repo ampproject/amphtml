@@ -1850,13 +1850,13 @@ describe('amp-a4a', () => {
         })();
         stubVerifySignature.returns(Promise.resolve(false));
         return a4a.verifyCreativeSignature_('some_creative', 'some_sig')
-          .then(() => {
-            throw new Error('should have triggered rejection');
-          })
-          .catch(err => {
-            expect(stubVerifySignature).to.be.callCount(20);
-            expect(err).to.equal('No validation service could verify this key');
-          });
+        .then(() => {
+          throw new Error('should have triggered rejection');
+        })
+        .catch(err => {
+          expect(stubVerifySignature).to.be.callCount(20);
+          expect(err).to.equal('No validation service could verify this key');
+        });
       });
 
       it('properly handles multiple keys for one provider', () => {
