@@ -28,14 +28,7 @@ export function bringhub(global, data) {
     referrer: data['referrer'] || global.context.referrer,
   });
 
-  writeScript(global, "https://local-static.bringhub.com/msf/amp-loader.js?v=" + (Date.now()), function() {
-      let ss = document.createElement('link');
-      ss.setAttribute('rel','stylesheet');
-      ss.setAttribute('href', 'https://local-static.bringhub.com/msf/index.css?v=' + global._bringhub.hash);
-      document.head.appendChild(ss);
-      let msf = document.createElement('div');
-      msf.setAttribute('id', 'amp-msf');
-      document.body.appendChild(msf);
-      loadScript(global, "https://local-static.bringhub.com/msf/amp-widget.js?v=" + global._bringhub.hash);
+  writeScript(global, `https://static.bh-cdn.com/msf/amp-loader.js?v=${Date.now()}`, function() {
+    loadScript(global, `https://static.bh-cdn.com/msf/amp-widget.js?v=${global._bringhub.hash}`);
   });
 }

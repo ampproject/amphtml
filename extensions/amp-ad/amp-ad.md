@@ -313,6 +313,7 @@ To use `<amp-ad>` or `<amp-embed>`, the script to the `amp-ad` library is needed
 
 ## Supported embed types
 
+- [Bringhub](../../ads/bringhub.md)
 - [Outbrain](../../ads/outbrain.md)
 - [Taboola](../../ads/taboola.md)
 - [ZergNet](../../ads/zergnet.md)

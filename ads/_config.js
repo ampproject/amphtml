@@ -179,9 +179,9 @@ export const adConfig = {
 
   bringhub: {
     renderStartImplemented: true,
-    prefetch: 'https://local-static.bringhub.com/msf/amp-loader.js',
     preconnect: [
-      'https://dev-core-api.bringhub.com',
+      'https://static.bh-cdn.com',
+      'https://core-api.bringhub.io',
     ],
   },
 

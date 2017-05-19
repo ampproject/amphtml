@@ -16,20 +16,20 @@ limitations under the License.
 
 # Bringhub
 
-## Example installation of the Bringhub mini-storefront
+## Example installation of the Bringhub Mini-Storefront
 
 ### Basic
 
 ```html
-  <amp-embed width="100" height="100"
-             type="bringhub"
-             layout="responsive"
-             data-pageURL="https://bringhub.com/test-page"
-             data-testMode="true">
+  <amp-embed width="600" height="320"
+      type="bringhub"
+      layout="responsive"
+      heights="(max-width: 270px) 1280px, (max-width:553px) 640px, 338px">
   </amp-embed>
 ```
 
 ## Parameters
 
-- pageURL *(**mandatory**)* - The URL of the standard html version of the page.
-- ampURL *(optional)* - The URL of the AMP version of the page.
+- htmlURL *(optional)* - The URL of the standard html version of the page. (Defaults to global.context.canonicalURL)
+- ampURL *(optional)* - The URL of the AMP version of the page. (Defaults to global.context.sourceUrl)
+- articleSelector *(optional)* - The CSS Selector of the article body on the page.  (Contact your Bringhub Account Manager for requirements)
