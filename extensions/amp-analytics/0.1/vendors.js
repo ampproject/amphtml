@@ -1148,13 +1148,16 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
   },
 
   'snowplow': {
+    'vars': {
+      'duid': 'CLIENT_ID(_sp_id)',
+    },
     'requests': {
       'aaVersion': 'amp-0.2',
       'basePrefix': 'https://${collectorHost}/i?url=${canonicalUrl}&page=${title}&' +
           'res=${screenWidth}x${screenHeight}&stm=${timestamp}&' +
           'tz=${timezone}&aid=${appId}&p=web&tv=${aaVersion}&' +
           'cd=${screenColorDepth}&cs=${documentCharset}&' +
-          'duid=${clientId}&' +
+          'duid=${duid}&' +
           'lang=${browserLanguage}&refr=${documentReferrer}&stm=${timezone}&' +
           'vp=${viewportWidth}x${viewportHeight}',
       'pageView': '${basePrefix}&e=pv',
