@@ -192,6 +192,25 @@ const FALLBACK_CONTEXT_DATA = {
 };
 
 
+/**
+ * Gets data encoded in iframe name attribute.
+ * @return {!Object}
+ */
+function getData(iframeName) {
+  try {
+    // TODO(bradfrizzell@): Change the data structure of the attributes
+    //    to make it less terrible.
+    return JSON.parse(iframeName).attributes;
+  } catch (err) {
+    if (!getMode().test) {
+      dev().info(
+          'INTEGRATION', 'Could not parse context from:', iframeName);
+    }
+    return FALLBACK_CONTEXT_DATA;
+  }
+}
+
+
 // Need to cache iframeName as it will be potentially overwritten by
 // masterSelection, as per below.
 const iframeName = window.name;
@@ -348,25 +367,6 @@ const defaultAllowedTypesInCustomFrame = [
   'yieldbot',
   '_ping_',
 ];
-
-
-/**
- * Gets data encoded in iframe name attribute.
- * @return {!Object}
- */
-function getData(iframeName) {
-  try {
-    // TODO(bradfrizzell@): Change the data structure of the attributes
-    //    to make it less terrible.
-    return JSON.parse(iframeName).attributes;
-  } catch (err) {
-    if (!getMode().test) {
-      dev().info(
-          'INTEGRATION', 'Could not parse context from:', iframeName);
-    }
-    return FALLBACK_CONTEXT_DATA;
-  }
-}
 
 
 /**
