@@ -99,7 +99,7 @@ export class JankMeter {
       }
       this.perf_.flush();
       if (isJankMeterEnabled(this.win_)) {
-        this.displayMeterDisplay_(gfp, batteryDrop);
+        this.displayMeterDisplay_(batteryDrop);
       }
     }
   }
@@ -112,15 +112,14 @@ export class JankMeter {
   }
 
   /**
-   * @param {number} gfp
    * @param {number} batteryDrop
    * @private
    */
-  displayMeterDisplay_(gfp, batteryDrop) {
+  displayMeterDisplay_(batteryDrop) {
     const display = this.win_.document.createElement('div');
     display.classList.add('i-amphtml-jank-meter');
     display.textContent =
-        `gfp:${gfp}%, lts: ${this.longTaskSelf_}, ` +
+        `bf:${this.badFrameCnt_}, lts: ${this.longTaskSelf_}, ` +
         `ltc:${this.longTaskChild_}, bd:${batteryDrop}`;
     this.win_.document.body.appendChild(display);
   }
