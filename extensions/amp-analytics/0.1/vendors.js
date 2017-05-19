@@ -85,7 +85,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'base': '${host}/hm.gif?' +
           'si=${token}&nv=0&st=4&v=pixel-1.0&rnd=${timestamp}',
       'pageview': '${base}&et=0',
-      'event': '${base}&ep=${gategory}*${action}*' +
+      'event': '${base}&ep=${category}*${action}*' +
           '${label}*${value}&et=4&api=8_0',
     },
     'transport': {
