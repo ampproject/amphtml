@@ -71,8 +71,8 @@
   "facebookpixel": {
     "host": "https://www.facebook.com",
     "base": "https://www.facebook.com/tr?noscript=1",
-    "pageview": "https://www.facebook.comtr?noscript=1&ev=PageView&id=0123456789",
-    "event": "https://www.facebook.comtr?noscript=1&ev=EventName&id=0123456789"
+    "pageview": "https://www.facebook.com/tr?noscript=1&ev=PageView&id=PIXEL-ID",
+    "event": "https://www.facebook.com/tr?noscript=1&ev=$eventName&id=PIXEL-ID"
   },
   "gemius": {
     "base": "https://$prefix.hit.gemius.pl/__timestamp_/redot.gif?l=91&id=$identifier&screen=_screen_width_x_screen_height_&window=_viewport_width_x_viewport_height_&fr=1&href=_source_url_&ref=_document_referrer_&extra=gemamp%3D1%7Campid%3D_client_id_%7C$extraparams",
