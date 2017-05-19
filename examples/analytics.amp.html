@@ -24,6 +24,11 @@
   <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
 </head>
 <body>
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 62e92b0b... add amp-analytics Facebook Pixel support
 <div id="container">
 Container for analytics tags. Positioned far away from top to make sure that doesn't matter.
 
@@ -188,8 +193,36 @@ Donec pharetra molestie sollicitudin. Duis mattis eleifend rutrum. Quisque luctu
 <ul>
 <li>Aenean ac sem eget libero varius viverra sit amet vitae nunc.</li>
 </ul>
+<<<<<<< HEAD
 </p>
 
+=======
+<p></p>
+<button id="fb-pixel">Track with Facebook Pixel</button>
+<amp-analytics type="facebookpixel" id="facebook-pixel">
+    <script type="application/json">
+    {
+      "vars": {
+        "pixelId": "1760516960931795" //https://www.facebook.com/business/a/facebook-pixel
+      },
+      "triggers": {
+        "trackPageview": {
+          "on": "visible",
+          "request": "pageview"
+        },
+        "trackEvent": {
+          "on": "click",
+          "selector": "#fb-pixel",
+          "request": "event",
+          "vars": {
+            "eventName": "ClickedBtn-x"
+          }
+        }
+      }
+    }
+    </script>
+  </amp-analytics>
+>>>>>>> 62e92b0b... add amp-analytics Facebook Pixel support
 <amp-anim src="https://www.google.com/logos/doodles/2016/2016-doodle-fruit-games-day-14-5645577527230464-hp.gif" id="anim-id" width="665" height="220" layout="responsive">
   <amp-img placeholder src="https://www.google.com/logos/doodles/2016/2016-doodle-fruit-games-day-14-5645577527230464.2-scta.png" width="665" height="220" layout="responsive"></amp-img>
   <amp-analytics id="nestedAnalytics">
