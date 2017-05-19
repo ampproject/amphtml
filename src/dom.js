@@ -161,6 +161,38 @@ export function createElementWithAttributes(doc, tagName, attributes) {
   return addAttributesToElement(element, attributes);
 }
 
+/**
+ * Returns true if node is connected (attached).
+ * @param {!Node} node
+ * @return {boolean}
+ * @see https://dom.spec.whatwg.org/#connected
+ */
+export function isConnectedNode(node) {
+  let n = node;
+  do {
+    n = rootNodeFor(n);
+    if (n.host) {
+      n = n.host;
+    } else {
+      break;
+    }
+  } while (true);
+  return (n instanceof Document);
+}
+
+/**
+ * Returns the root for a given node. Does not cross shadow DOM boundary.
+ * @param {!Node} node
+ * @return {!Node}
+ */
+export function rootNodeFor(node) {
+  if (Node.prototype.getRootNode) {
+    return node.getRootNode();
+  }
+  let n;
+  for (n = node; !!n.parentNode; n = n.parentNode);
+  return n;
+}
 
 /**
  * Finds the closest element that satisfies the callback from this element
