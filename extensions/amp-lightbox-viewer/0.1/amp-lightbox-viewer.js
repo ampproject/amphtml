@@ -16,7 +16,7 @@
 
 
 import {CSS} from '../../../build/amp-lightbox-viewer-0.1.css';
-import {Keycodes} from '../../../src/utils/keycodes';
+import {KeyCodes} from '../../../src/utils/key-codes';
 import {ampdocServiceFor} from '../../../src/ampdoc';
 import {isExperimentOn} from '../../../src/experiments';
 import {Layout} from '../../../src/layout';
@@ -284,11 +284,11 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   handleKeyboardEvents_(event) {
     // TODO(aghassemi): RTL support
     const code = event.keyCode;
-    if (code == Keycodes.ESCAPE) {
+    if (code == KeyCodes.ESCAPE) {
       this.close_();
-    } else if (code == Keycodes.RIGHT_ARROW) {
+    } else if (code == KeyCodes.RIGHT_ARROW) {
       this.next_();
-    } else if (code == Keycodes.LEFT_ARROW) {
+    } else if (code == KeyCodes.LEFT_ARROW) {
       this.previous_();
     }
   }

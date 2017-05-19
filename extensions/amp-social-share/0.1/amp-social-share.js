@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Keycodes} from '../../../src/utils/keycodes';
+import {KeyCodes} from '../../../src/utils/key-codes';
 import {addParamsToUrl, parseUrl, parseQueryString} from '../../../src/url';
 import {setStyle} from '../../../src/style';
 import {getDataParamsFromAttributes} from '../../../src/dom';
@@ -90,11 +90,18 @@ class AmpSocialShare extends AMP.BaseElement {
     urlReplacements.expandAsync(hrefWithVars).then(href => {
       this.href_ = href;
       // mailto:, whatsapp: protocols breaks when opened in _blank on iOS Safari
-      const isMailTo = /^mailto:$/.test(parseUrl(href).protocol);
-      const isWhatsApp = /^whatsapp:$/.test(parseUrl(href).protocol);
+      const protocol = parseUrl(href).protocol;
+      const isMailTo = protocol === 'mailto:';
+      const isWhatsApp = protocol === 'whatsapp:';
+      const isSms = protocol === 'sms:';
       const isIosSafari = this.platform_.isIos() && this.platform_.isSafari();
-      this.target_ = (isIosSafari && (isMailTo || isWhatsApp))
+      this.target_ = (isIosSafari && (isMailTo || isWhatsApp || isSms))
           ? '_top' : '_blank';
+      if (isSms) {
+        // http://stackoverflow.com/a/19126326
+        // This code path seems to be stable for both iOS and Android.
+        this.href_ = this.href_.replace('?', '?&');
+      }
     });
 
     this.element.setAttribute('role', 'button');
@@ -113,7 +120,7 @@ class AmpSocialShare extends AMP.BaseElement {
    */
   handleKeyPress_(event) {
     const keyCode = event.keyCode;
-    if (keyCode == Keycodes.SPACE || keyCode == Keycodes.ENTER) {
+    if (keyCode == KeyCodes.SPACE || keyCode == KeyCodes.ENTER) {
       event.preventDefault();
       this.handleActivation_();
     }
