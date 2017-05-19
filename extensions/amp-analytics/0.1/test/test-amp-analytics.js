@@ -54,6 +54,8 @@ const VENDOR_REQUESTS = require('./vendor-requests.json');
 
 adopt(window);
 
+// REMOVE once all tests have been fixed.
+
 describe('amp-analytics', function() {
 
   let sandbox;
