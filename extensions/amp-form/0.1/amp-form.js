@@ -441,16 +441,25 @@ export class AmpForm {
   doXhr_(opt_extraValues) {
     const isHeadOrGet = this.method_ == 'GET' || this.method_ == 'HEAD';
     let xhrUrl, body;
+    let values = null;
     if (isHeadOrGet) {
-      xhrUrl = addParamsToUrl(dev().assertString(this.xhrAction_),
-          this.getFormAsObject_(opt_extraValues));
+      values = this.getFormAsObject_(opt_extraValues);
+      xhrUrl = addParamsToUrl(dev().assertString(this.xhrAction_), values);
     } else {
       xhrUrl = this.xhrAction_;
       body = new FormData(this.form_);
       for (const key in opt_extraValues) {
         body.append(key, opt_extraValues[key]);
       }
+      values = {};
+      const entries = body.entries();
+      let item;
+      while (!(item = entries.next()).done) {
+        values[item.value[0]] = item.value[1];
+      }
     }
+    this.renderTemplate_(values);
+
     return this.xhr_.fetch(dev().assertString(xhrUrl), {
       body,
       method: this.method_,
@@ -471,6 +480,7 @@ export class AmpForm {
     return response.json().then(json => {
       this.triggerAction_(/* success */ true, json);
       this.analyticsEvent_('amp-form-submit-success');
+      this.cleanupRenderedTemplate_();
       this.setState_(FormState_.SUBMIT_SUCCESS);
       this.renderTemplate_(json || {});
       this.maybeHandleRedirect_(response);
@@ -490,6 +500,7 @@ export class AmpForm {
     this.triggerAction_(
         /* success */ false, error ? error.responseJson : null);
     this.analyticsEvent_('amp-form-submit-error');
+    this.cleanupRenderedTemplate_();
     this.setState_(FormState_.SUBMIT_ERROR);
     this.renderTemplate_(error.responseJson || {});
     this.maybeHandleRedirect_(error.response);
