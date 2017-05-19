@@ -15,7 +15,7 @@
  */
 
 import '../amp-selector';
-import {KeyCodes} from '../../../../src/utils/keycodes';
+import {KeyCodes} from '../../../../src/utils/key-codes';
 
 describes.realWin('amp-selector', {
   win: { /* window spec */
