@@ -2690,6 +2690,24 @@ describe('Resources.add/upgrade/remove', () => {
       expect(resources.schedulePass.calledTwice).to.be.true;
     });
 
+    it('should NOT build past the root node when pending', () => {
+      sandbox.stub(resources, 'schedulePass');
+      resources.documentReady_ = false;
+      resources.pendingBuildResources_ = [resource1];
+      resources.buildReadyResources_();
+      expect(child1.build.called).to.be.false;
+      expect(resources.pendingBuildResources_.length).to.be.equal(1);
+      expect(resources.schedulePass.called).to.be.false;
+
+      child1.parentNode = parent;
+      parent.nextSibling = true;
+      sandbox.stub(resources.ampdoc, 'getRootNode', () => parent);
+      resources.buildReadyResources_();
+      expect(child1.build.called).to.be.false;
+      expect(resources.pendingBuildResources_.length).to.be.equal(1);
+      expect(resources.schedulePass.called).to.be.false;
+    });
+
     it('should not try to build resources already being built', () => {
       resources.documentReady_ = false;
       resources.pendingBuildResources_ = [resource1, resource2];
