@@ -17,7 +17,7 @@
 /**
  * @enum {number}
  */
-export const Keycodes = {
+export const KeyCodes = {
   ENTER: 13,
   ESCAPE: 27,
   SPACE: 32,
