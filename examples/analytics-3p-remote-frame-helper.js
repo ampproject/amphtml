@@ -56,6 +56,10 @@ class AmpAnalyticsRemoteFrameManager {
  */
 const remoteFrameMgr_ = new AmpAnalyticsRemoteFrameManager();
 
+window.requestIdleCallback = window.requestIdleCallback || function(cb) {
+  return setTimeout(cb, 1);
+};
+
 if (window.onNewAmpAnalyticsInstance) {
   window.onNewAmpAnalyticsInstance(remoteFrameMgr_);
   // Warning: the following code is likely only temporary. Don't check in

@@ -177,7 +177,7 @@ export class Transport {
         transportOptions['dataHash']);
     // If iframe doesn't exist for this iframe url (and data hash), create it.
     if (Transport.hasCrossDomainFrame(frameUrl)) {
-      ++Transport.crossDomainFrames[frameUrl].usageCount;
+      this.incrementUsageCount_(frameUrl);
     } else {
       const frame = Transport.createCrossDomainFrame(ampDoc, frameUrl);
       ampDoc.body.appendChild(frame);
@@ -204,8 +204,8 @@ export class Transport {
     const frameUrl = Transport.appendHashToUrl_(transportOptions['iframe'],
         transportOptions['dataHash']);
     if (Transport.hasCrossDomainFrame(frameUrl)) {
-      if (--Transport.crossDomainFrames[frameUrl].usageCount <= 0) {
-        ampDoc.body.removeChild(Transport.crossDomainFrames[frameUrl]);
+      if (this.decrementUsageCount_(frameUrl) <= 0) {
+        ampDoc.body.removeChild(Transport.crossDomainFrames[frameUrl].frame);
         delete Transport.crossDomainFrames[frameUrl];
       }
     }
@@ -267,6 +267,26 @@ export class Transport {
     frameData.isReady = true;
     this.sendToCrossDomainIframe_(frameData.frame, frameData.msgQueue);
     delete frameData.msgQueue;
+  }
+
+  /**
+   * Record that one more creative is using this cross-domain iframe
+   * @param {!string} frameUrl The URL (including any data hash) of the frame
+   * @return {number}
+   * @private
+   */
+  static incrementUsageCount_(frameUrl) {
+    return ++(Transport.crossDomainFrames[frameUrl].usageCount);
+  }
+
+  /**
+   * Record that one fewer creative is using this cross-domain iframe
+   * @param {!string} frameUrl The URL (including any data hash) of the frame
+   * @return {number}
+   * @private
+   */
+  static decrementUsageCount_(frameUrl) {
+    return --(Transport.crossDomainFrames[frameUrl].usageCount);
   }
 
   /**

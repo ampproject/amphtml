@@ -162,7 +162,8 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /* @ override */
   unlayoutCallback() {
-    Transport.doneWithCrossDomainIframe(this.config_['transport']);
+    Transport.doneWithCrossDomainIframe(this.getAmpDoc().win.document,
+      this.config_['transport']);
     return true;
   }
 
