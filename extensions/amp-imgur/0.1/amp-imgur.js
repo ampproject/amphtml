@@ -29,7 +29,7 @@
 
 import {user} from '../../../src/log';
 import {removeElement} from '../../../src/dom';
-import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/layout';
 
 export class AmpImgur extends AMP.BaseElement {
 
