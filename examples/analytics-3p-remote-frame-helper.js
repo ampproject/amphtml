@@ -16,7 +16,7 @@
 
 /**
  * This provides the "glue" between the AMP Analytics tag and the third-party
- * vendors metrics-collection page.
+ * vendor's metrics-collection page.
  *
  * The vendor's page must implement onNewAmpAnalyticsInstance().
  */
@@ -37,6 +37,18 @@ class AmpAnalyticsRemoteFrameManager {
   registerAmpAnalyticsEventListener(listener) {
     this.listener_ = listener;
   }
+
+  /**
+   * Sends a message from the third-party vendor's metrics-collection page back
+   * to the creative.
+   * @param {!String} message The message to send.
+   */
+  sendMessageToCreative(message) {
+    // DO NOT MERGE THIS
+    // Warning: the following code is likely only temporary. Don't check
+    // in before getting resolution on that.
+    /*REVIEW*/window.parent.postMessage({ampAnalyticsResponse: message}, '*');
+  }
 };
 
 /**
@@ -50,7 +62,9 @@ if (window.onNewAmpAnalyticsInstance) {
   // before getting resolution on that.
   window.addEventListener("message", (msg) => {
     if (msg.data.ampAnalyticsEvents) {
-      remoteFrameMgr_.listener_(msg.data.ampAnalyticsEvents);
+      window.requestIdleCallback(() => {
+        remoteFrameMgr_.listener_(msg.data.ampAnalyticsEvents);
+      });
     }
   });
 } else {

@@ -17,6 +17,7 @@
 import {isJsonScriptTag} from '../../../src/dom';
 import {assertHttpsUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 import {dev, rethrowAsync, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {expandTemplate} from '../../../src/string';
 import {isArray, isObject} from '../../../src/types';
 import {hasOwn, map} from '../../../src/utils/object';
@@ -159,6 +160,12 @@ export class AmpAnalytics extends AMP.BaseElement {
     return this.ensureInitialized_();
   }
 
+  /* @ override */
+  unlayoutCallback() {
+    Transport.doneWithCrossDomainIframe(this.config_['transport']);
+    return true;
+  }
+
   /** @override */
   detachedCallback() {
     if (this.analyticsGroup_) {
@@ -222,7 +229,15 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     if (this.config_['transport'] && this.config_['transport']['iframe']) {
       Transport.processCrossDomainIframe(this.getAmpDoc().win.document,
-        this.config_['transport']);
+        this.config_['transport'],
+        (msg) => {
+          try {
+            if (this.element.ownerDocument.location.href !== 'about:srcdoc') {
+              this.element.ownerDocument.location.href += msg;
+            }
+          } catch (err) {
+          }
+        });
     }
 
     const promises = [];
@@ -402,6 +417,18 @@ export class AmpAnalytics extends AMP.BaseElement {
           'deprecation');
     }
     const typeConfig = this.predefinedConfig_[type] || {};
+
+    // transport.iframe is only allowed to be specified in typeConfig, not
+    // the others. Allowed when running locally for testing purposes.
+    if (!getMode().localDev &&
+        ((defaultConfig.transport && defaultConfig.transport.iframe) ||
+         (inlineConfig && inlineConfig.transport &&
+          inlineConfig.transport.iframe) ||
+         (this.remoteConfig_ && this.remoteConfig_.transport &&
+          this.remoteConfig_.transport.iframe))) {
+      user().error(this.getName_(), 'transport/iframe may only be specified' +
+          ' in type config');
+    }
 
     this.mergeObjects_(defaultConfig, config);
     this.mergeObjects_(typeConfig, config, /* predefined */ true);

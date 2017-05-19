@@ -165,19 +165,49 @@ export class Transport {
    * not, create it.
    * @param {!HTMLDocument} ampDoc The AMP document
    * @param {!Object<string,string>} transportOptions The 'transport' portion
-   * of the amp-analytics
-   * config object
+   * of the amp-analytics config object
+   * @param {Function} processResponse An optional function to receive any
+   * response messages back from the cross-domain iframe
    */
-  static processCrossDomainIframe(ampDoc, transportOptions) {
+  static processCrossDomainIframe(ampDoc, transportOptions, processResponse) {
     user().assert(!(transportOptions['beacon'] || transportOptions['xhrpost'] ||
       transportOptions['image']), 'Cross-domain frame cannot coexist with' +
       ' other transport methods');
     const frameUrl = Transport.appendHashToUrl_(transportOptions['iframe'],
         transportOptions['dataHash']);
     // If iframe doesn't exist for this iframe url (and data hash), create it.
-    if (!Transport.hasCrossDomainFrame(frameUrl)) {
+    if (Transport.hasCrossDomainFrame(frameUrl)) {
+      ++Transport.crossDomainFrames[frameUrl].usageCount;
+    } else {
       const frame = Transport.createCrossDomainFrame(ampDoc, frameUrl);
       ampDoc.body.appendChild(frame);
+    }
+    if (processResponse) {
+      window.addEventListener("message", (msg) => {
+        if (msg.data.ampAnalyticsResponse) {
+          processResponse(msg.data.ampAnalyticsResponse);
+        }
+      });
+    }
+  }
+
+  /**
+   * Called when a creative no longer needs its cross-domain iframe (for
+   * instance, because the creative has been removed from the DOM).
+   * Once all creatives using a frame are done with it, the frame can be
+   * destroyed.
+   * @param {!HTMLDocument} ampDoc The AMP document
+   * @param {!Object<string,string>} transportOptions The 'transport' portion
+   * of the amp-analytics config object
+   */
+  static doneWithCrossDomainIframe(ampDoc, transportOptions) {
+    const frameUrl = Transport.appendHashToUrl_(transportOptions['iframe'],
+        transportOptions['dataHash']);
+    if (Transport.hasCrossDomainFrame(frameUrl)) {
+      if (--Transport.crossDomainFrames[frameUrl].usageCount <= 0) {
+        ampDoc.body.removeChild(Transport.crossDomainFrames[frameUrl]);
+        delete Transport.crossDomainFrames[frameUrl];
+      }
     }
   }
 
@@ -211,12 +241,13 @@ export class Transport {
       this.setIsReady_(frameUrl);
     });
     setStyles(frame,
-        { width: 0, height: 0, display: 'none',
-          position: 'absolute', top: 0, left: 0 });
+        {width: 0, height: 0, display: 'none',
+         position: 'absolute', top: 0, left: 0});
     Transport.crossDomainFrames[frameUrl] = {
       frame,
       isReady: false,
       msgQueue: [],
+      usageCount: 1
     };
     frame.src = frameUrl; // Intentionally doing this after creating load
     // promise, rather than in the object supplied to
@@ -249,7 +280,7 @@ export class Transport {
     // Warning: the following code is likely only temporary. Don't check
     // in before getting resolution on that.
     frame && frame.contentWindow &&
-    frame.contentWindow.postMessage({ampAnalyticsEvents: messages}, '*');
+    /*REVIEW*/frame.contentWindow.postMessage({ampAnalyticsEvents: messages}, '*');
   }
 }
 Transport.crossDomainFrames = map();
