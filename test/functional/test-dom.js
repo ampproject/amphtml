@@ -629,6 +629,18 @@ describes.sandboxed('DOM', {}, env => {
       parent.appendChild(element);
       expect(dom.hasNextNodeInDocumentOrder(element)).to.be.true;
     });
+
+    it('should return false when ancestor with sibling with stop node', () => {
+      const element = document.createElement('div');
+      const parent = document.createElement('div');
+      const uncle = document.createElement('div');
+      const ancestor = document.createElement('div');
+      ancestor.appendChild(parent);
+      ancestor.appendChild(uncle);
+      parent.appendChild(element);
+      expect(dom.hasNextNodeInDocumentOrder(element)).to.be.true;
+      expect(dom.hasNextNodeInDocumentOrder(element, parent)).to.be.false;
+    });
   });
 
   describe('openWindowDialog', () => {
