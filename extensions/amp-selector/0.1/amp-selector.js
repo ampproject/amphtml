@@ -15,7 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-selector-0.1.css';
-import {KeyCodes} from '../../../src/utils/keycodes';
+import {KeyCodes} from '../../../src/utils/key-codes';
 import {actionServiceForDoc} from '../../../src/services';
 import {closestBySelector, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';

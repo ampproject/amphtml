@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {KeyCodes} from '../../../src/utils/keycodes';
+import {KeyCodes} from '../../../src/utils/key-codes';
 import {addParamsToUrl, parseUrl, parseQueryString} from '../../../src/url';
 import {setStyle} from '../../../src/style';
 import {getDataParamsFromAttributes} from '../../../src/dom';

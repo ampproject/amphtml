@@ -15,7 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
-import {KeyCodes} from '../../../src/utils/keycodes';
+import {KeyCodes} from '../../../src/utils/key-codes';
 import {closestByTag, tryFocus} from '../../../src/dom';
 import {Layout} from '../../../src/layout';
 import {dev} from '../../../src/log';

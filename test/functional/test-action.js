@@ -21,7 +21,7 @@ import {
   parseActionMap,
 } from '../../src/service/action-impl';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {KeyCodes} from '../../src/utils/keycodes';
+import {KeyCodes} from '../../src/utils/key-codes';
 import {createCustomEvent} from '../../src/event-helper';
 import {setParentWindow} from '../../src/service';
 import * as sinon from 'sinon';
