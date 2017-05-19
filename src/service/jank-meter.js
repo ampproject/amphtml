@@ -34,9 +34,9 @@ export class JankMeter {
     /** @private {number} */
     this.totalCnt_ = 0;
     /** @private {number} */
-    this.longTaskChildCnt_ = 0;
+    this.longTaskChild_ = 0;
     /** @private {number} */
-    this.longTaskSelfCnt_ = 0;
+    this.longTaskSelf_ = 0;
     /** @private {?number} */
     this.scheduledTime_ = null;
     /** @private {?./performance-impl.Performance} */
@@ -82,9 +82,9 @@ export class JankMeter {
       this.perf_.tickDelta('gfp', gfp);
       if (this.longTaskObserver_) {
         // lts: Long Tasks of Self frame
-        this.perf_.tickDelta('lts', this.longTaskSelfCnt_);
+        this.perf_.tickDelta('lts', this.longTaskSelf_);
         // ltc: Long Tasks of Child frames
-        this.perf_.tickDelta('ltc', this.longTaskChildCnt_);
+        this.perf_.tickDelta('ltc', this.longTaskChild_);
         this.longTaskObserver_.disconnect();
         this.longTaskObserver_ = null;
       }
@@ -118,8 +118,8 @@ export class JankMeter {
     const display = this.win_.document.createElement('div');
     display.classList.add('i-amphtml-jank-meter');
     display.textContent =
-        `gfp:${gfp}%, lts: ${this.longTaskSelfCnt_},
- ltc:${this.longTaskChildCnt_}, bd:${batteryDrop}`;
+        `gfp:${gfp}%, lts: ${this.longTaskSelf_}, ` +
+        `ltc:${this.longTaskChild_}, bd:${batteryDrop}`;
     this.win_.document.body.appendChild(display);
   }
 
@@ -141,12 +141,15 @@ export class JankMeter {
       const entries = entryList.getEntries();
       for (let i = 0; i < entries.length; i++) {
         if (entries[i].entryType == 'longtask') {
+          // longtask is any task with duration of bigger than 50ms
+          // we sum up the number of 50ms a task spans.
+          const span = this.win_.Math.floor(entries[i].duration / 50);
           if (entries[i].name == 'cross-origin-descendant') {
-            this.longTaskChildCnt_++;
-            dev().info('LONGTASK-child', entries[i].duration + 'ms');
+            this.longTaskChild_ += span;
+            dev().info('LONGTASK', `from child frame ${entries[i].duration}ms`);
           } else {
-            this.longTaskSelfCnt_++;
-            dev().info('LONGTASK-self', entries[i].duration + 'ms');
+            this.longTaskSelf_ += span;
+            dev().info('LONGTASK', `from self frame ${entries[i].duration}ms`);
           }
         }
       }
@@ -164,16 +167,28 @@ export class JankMeter {
   }
 }
 
+/**
+ * @param {!Window} win
+ * @returns {boolean}
+ */
 function isJankMeterEnabled(win) {
   return isExperimentOn(win, 'jank-meter');
 }
 
+/**
+ * @param {!Window} win
+ * @returns {boolean}
+ */
 function isLongTaskApiSupported(win) {
   return !!win.PerformanceObserver
       && !!win.TaskAttributionTiming
       && ('containerName' in win.TaskAttributionTiming.prototype);
 }
 
+/**
+ * @param {!Window} win
+ * @returns {boolean}
+ */
 function isBatteryApiSupported(win) {
   return typeof win.navigator.getBattery === 'function';
 }
