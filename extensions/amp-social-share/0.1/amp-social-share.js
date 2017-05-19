@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Keycodes} from '../../../src/utils/keycodes';
+import {KeyCodes} from '../../../src/utils/keycodes';
 import {addParamsToUrl, parseUrl, parseQueryString} from '../../../src/url';
 import {setStyle} from '../../../src/style';
 import {getDataParamsFromAttributes} from '../../../src/dom';
@@ -113,7 +113,7 @@ class AmpSocialShare extends AMP.BaseElement {
    */
   handleKeyPress_(event) {
     const keyCode = event.keyCode;
-    if (keyCode == Keycodes.SPACE || keyCode == Keycodes.ENTER) {
+    if (keyCode == KeyCodes.SPACE || keyCode == KeyCodes.ENTER) {
       event.preventDefault();
       this.handleActivation_();
     }
