@@ -80,6 +80,12 @@ const BUILTINS = {
       text: 'TITLE - CANONICAL_URL',
     },
   },
+  sms: {
+    shareEndpoint: 'sms:',
+    defaultParams: {
+      body: 'TITLE - CANONICAL_URL',
+    },
+  },
   system: {
     shareEndpoint: 'navigator-share:',
     defaultParams: {

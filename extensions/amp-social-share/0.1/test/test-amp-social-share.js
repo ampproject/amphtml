@@ -204,6 +204,19 @@ describe('amp-social-share', () => {
     });
   });
 
+  it('opens sms: window in _top on iOS Safari', () => {
+    isIos = true;
+    isSafari = true;
+    return getShare('sms').then(el => {
+      el.implementation_.handleClick_();
+      expect(el.implementation_.win.open).to.be.calledOnce;
+      expect(el.implementation_.win.open).to.be.calledWith(
+          'sms:?&body=doc%20title%20-%20https%3A%2F%2Fcanonicalexample.com%2F',
+          '_top', 'resizable,scrollbars,width=640,height=480'
+      );
+    });
+  });
+
   it('should handle key presses', () => {
     return getShare('twitter').then(el => {
       const nonActivationEvent = {
