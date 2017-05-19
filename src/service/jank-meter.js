@@ -30,9 +30,9 @@ export class JankMeter {
     /** @private {!Window} */
     this.win_ = win;
     /** @private {number} */
-    this.jankCnt_ = 0;
+    this.badFrameCnt_ = 0;
     /** @private {number} */
-    this.totalCnt_ = 0;
+    this.totalFrameCnt_ = 0;
     /** @private {number} */
     this.longTaskChild_ = 0;
     /** @private {number} */
@@ -69,17 +69,19 @@ export class JankMeter {
     }
     const paintLatency = this.win_.Date.now() - this.scheduledTime_;
     this.scheduledTime_ = null;
-    this.totalCnt_++;
+    this.totalFrameCnt_++;
     if (paintLatency > 16) {
-      this.jankCnt_++;
+      this.badFrameCnt_++;
       dev().info('JANK', 'Paint latency: ' + paintLatency + 'ms');
     }
 
     // Report metrics on Nth frame, so we have sort of normalized numbers.
-    if (this.perf_ && this.totalCnt_ == NTH_FRAME) {
+    if (this.perf_ && this.totalFrameCnt_ == NTH_FRAME) {
       // gfp: Good Frame Probability
       const gfp = this.calculateGfp_();
       this.perf_.tickDelta('gfp', gfp);
+      // bf: Bad Frames
+      this.perf_.tickDelta('bf', this.badFrameCnt_);
       if (this.longTaskObserver_) {
         // lts: Long Tasks of Self frame
         this.perf_.tickDelta('lts', this.longTaskSelf_);
@@ -106,7 +108,7 @@ export class JankMeter {
     return isJankMeterEnabled(this.win_)
         || (this.perf_
             && this.perf_.isPerformanceTrackingOn()
-            && this.totalCnt_ < NTH_FRAME);
+            && this.totalFrameCnt_ < NTH_FRAME);
   }
 
   /**
@@ -130,7 +132,7 @@ export class JankMeter {
    */
   calculateGfp_() {
     return this.win_.Math.floor(
-        (this.totalCnt_ - this.jankCnt_) / this.totalCnt_ * 100);
+        (this.totalFrameCnt_ - this.badFrameCnt_) / this.totalFrameCnt_ * 100);
   }
 
   initializeLongTaskObserver_() {
