@@ -1878,7 +1878,7 @@ describe('amp-a4a', () => {
           });
       });
 
-      it('properly stops verification at first valid key', done => {
+      it('properly stops verification at first valid key', () => {
         // Single provider where first key fails, second passes, and third
         // never calls verifySignature.
         const serviceName = 'test-service';
@@ -1896,16 +1896,17 @@ describe('amp-a4a', () => {
         const signature = 'some_signature';
         stubVerifySignature.onCall(0).returns(Promise.resolve(false));
         stubVerifySignature.onCall(1).returns(Promise.resolve(true));
-        a4a.verifyCreativeSignature_(creative, signature)
-          .then(verifiedCreative => {
-            expect(stubVerifySignature).to.be.calledTwice;
-            expect(verifiedCreative).to.equal(creative);
-            done();
-          });
+
         // From testing have found that need to yield prior to calling last
         // key info resolver to ensure previous keys have had a chance to
         // execute.
         setTimeout(() => {keyInfoResolver({}); }, 0);
+
+        return a4a.verifyCreativeSignature_(creative, signature)
+          .then(verifiedCreative => {
+            expect(stubVerifySignature).to.be.calledTwice;
+            expect(verifiedCreative).to.equal(creative);
+          });
       });
     });
   });
