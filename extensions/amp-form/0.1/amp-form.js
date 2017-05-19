@@ -411,10 +411,17 @@ export class AmpForm {
           this.actions_.trigger(this.form_, 'submit', /*event*/ null);
         })
         .then(() => this.doXhr_())
-        .then(response => this.handleXhrSubmitSuccess_(response),
-            error => this.handleXhrSubmitFailure_(
-                /** @type {!../../../src/service/xhr-impl.FetchError} */ (
-                    error)));
+        .then(response => {
+          return response.json().then(json => {
+            if (response.ok) {
+              this.handleXhrSubmitSuccess_(json);
+            } else {
+              this.handleXhrSubmitFailure_(null, response, json);
+            }
+          }).catch(error => {
+            this.handleXhrSubmitFailure_(err, response, null);
+          });
+        });
 
     if (getMode().test) {
       this.xhrSubmitPromise_ = p;
@@ -454,47 +461,40 @@ export class AmpForm {
         body.append(key, opt_extraValues[key]);
       }
     }
-    return this.xhr_.fetch(dev().assertString(xhrUrl), {
+    return this.xhr_.fetchJson(dev().assertString(xhrUrl), {
       body,
       method: this.method_,
       credentials: 'include',
-      headers: {
-        Accept: 'application/json',
-      },
-    });
+    }, /* opt_skipProcessing */ true);
   }
 
   /**
    * Transition the form to the submit success state.
    * @param {!../../../src/service/xhr-impl.FetchResponse} response
-   * @return {!Promise}
+   * @param {?JSONType} json
    * @private
    */
-  handleXhrSubmitSuccess_(response) {
-    return response.json().then(json => {
-      this.triggerAction_(/* success */ true, json);
-      this.analyticsEvent_('amp-form-submit-success');
-      this.setState_(FormState_.SUBMIT_SUCCESS);
-      this.renderTemplate_(json || {});
-      this.maybeHandleRedirect_(response);
-    }, error => {
-      user().error(TAG, `Failed to parse response JSON: ${error}`);
-    });
+  handleXhrSubmitSuccess_(response, json) {
+    this.triggerAction_(/* success */ true, json);
+    this.analyticsEvent_('amp-form-submit-success');
+    this.setState_(FormState_.SUBMIT_SUCCESS);
+    this.renderTemplate_(json || {});
+    this.maybeHandleRedirect_(response);
   }
 
   /**
    * Transition the form the the submit error state.
-   * @param {../../../src/service/xhr-impl.FetchError} errorResponse
+   * @param {?Error} error
+   * @param {!../../../src/service/xhr-impl.FetchResponse} response
+   * @param {?JSONType} json
    * @private
    */
-  handleXhrSubmitFailure_(errorResponse) {
-    const error = (errorResponse && errorResponse.error) || errorResponse;
-    this.triggerAction_(
-        /* success */ false, errorResponse ? errorResponse.responseJson : null);
+  handleXhrSubmitFailure_(error, response, json) {
+    this.triggerAction_(/* success */ false, json);
     this.analyticsEvent_('amp-form-submit-error');
     this.setState_(FormState_.SUBMIT_ERROR);
-    this.renderTemplate_(errorResponse.responseJson || {});
-    this.maybeHandleRedirect_(errorResponse.response);
+    this.renderTemplate_(json || {});
+    this.maybeHandleRedirect_(response);
     user().error(TAG, `Form submission failed: ${error}`);
   }
 
