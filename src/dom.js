@@ -178,7 +178,7 @@ export function isConnectedNode(node) {
       break;
     }
   } while (true);
-  return (n instanceof Document);
+  return n.nodeType === Node.DOCUMENT_NODE;
 }
 
 /**
@@ -188,7 +188,8 @@ export function isConnectedNode(node) {
  */
 export function rootNodeFor(node) {
   if (Node.prototype.getRootNode) {
-    return node.getRootNode();
+    // Type checker says `getRootNode` may return null.
+    return node.getRootNode() || node;
   }
   let n;
   for (n = node; !!n.parentNode; n = n.parentNode) {}
