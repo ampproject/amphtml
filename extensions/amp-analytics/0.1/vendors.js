@@ -78,23 +78,6 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'viewportWidth': 'VIEWPORT_WIDTH',
     },
   },
-
-  'baiduanalytics': {
-    'requests': {
-      'host': 'https://hm.baidu.com',
-      'base': '${host}/hm.gif?' +
-          'si=${token}&nv=0&st=4&v=pixel-1.0&rnd=${timestamp}',
-      'pageview': '${base}&et=0',
-      'event': '${base}&ep=${category}*${action}*' +
-          '${label}*${value}&et=4&api=8_0',
-    },
-    'transport': {
-      'beacon': false,
-      'xhrpost': false,
-      'image': true,
-    },
-  },
-
   'acquialift': {
     'vars': {
       'decisionApiUrl': 'us-east-1-decisionapi.lift.acquia.com',
@@ -170,6 +153,22 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
         'p=${label}&' +
         's2=${level2Click}&' +
         'type=click&click=${type}${suffix}',
+    },
+  },
+  
+  'baiduanalytics': {
+    'requests': {
+      'host': 'https://hm.baidu.com',
+      'base': '${host}/hm.gif?' +
+          'si=${token}&nv=0&st=4&v=pixel-1.0&rnd=${timestamp}',
+      'pageview': '${base}&et=0',
+      'event': '${base}&ep=${category}*${action}*' +
+          '${label}*${value}&et=4&api=8_0',
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
     },
   },
 
@@ -491,6 +490,31 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
         'actr=${actionRef}',
       'user': '${base}/uparam/${basePrefix}' +
         'euk${userParamKey}=${userParamVal}',
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
+  'facebookpixel': {
+    'vars': {
+      'pixelId': 'PIXEL-ID',
+    },
+    'requests': {
+      'host': 'https://www.facebook.com',
+      'base': '${host}/tr?noscript=1',
+      'pageview': '${base}&ev=PageView&' +
+          'id=${pixelId}',
+      'event': '${base}&ev=${eventName}&' +
+          'id=${pixelId}',
+    },
+    'triggers': {
+      'trackPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
     },
     'transport': {
       'beacon': false,
