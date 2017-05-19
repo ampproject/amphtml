@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {KeyCodes} from '../../../../src/utils/keycodes';
+import {KeyCodes} from '../../../../src/utils/key-codes';
 import {timerFor} from '../../../../src/services';
 import {createIframePromise} from '../../../../testing/iframe';
 import '../amp-image-lightbox';

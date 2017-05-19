@@ -16,7 +16,7 @@
 
 
 import {CSS} from '../../../build/amp-lightbox-viewer-0.1.css';
-import {KeyCodes} from '../../../src/utils/keycodes';
+import {KeyCodes} from '../../../src/utils/key-codes';
 import {ampdocServiceFor} from '../../../src/ampdoc';
 import {isExperimentOn} from '../../../src/experiments';
 import {Layout} from '../../../src/layout';
