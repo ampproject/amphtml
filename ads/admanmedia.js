@@ -23,10 +23,11 @@ import {validateData, loadScript} from '../3p/3p';
 export function admanmedia(global, data) {
   validateData(data, ['id']);
 
-  loadScript(global, `https://mona.admanmedia.com/go?id=${data.id}`, () => {
+  const encodedId = encodeURIComponent(data.id);
+  loadScript(global, `https://mona.admanmedia.com/go?id=${encodedId}`, () => {
     const pattern = `script[src$="id=${data.id}"]`;
     const scriptTag = global.document.querySelector(pattern);
-    scriptTag.setAttribute('id', `hybs-${data.id}`);
+    scriptTag.setAttribute('id', `hybs-${encodedId}`);
     global.context.renderStart();
   }, () => {
     global.context.noContentAvailable();

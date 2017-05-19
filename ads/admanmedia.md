@@ -23,7 +23,7 @@ Please visit our web (http://www.admanmedia.com) for more details
 <amp-ad width="300" height="250"
     type="admanmedia"
     data-id="8e916419">
-  </amp-ad>
+</amp-ad>
 ```
 
 ## Configuration
