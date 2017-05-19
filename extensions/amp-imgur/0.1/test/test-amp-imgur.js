@@ -17,6 +17,7 @@ import {
   createIframePromise,
   doNotLoadExternalResourcesInTest,
 } from '../../../../testing/iframe';
+import {AmpImgur} from '../amp-imgur';
 
 describe('amp-imgur', () => {
 
