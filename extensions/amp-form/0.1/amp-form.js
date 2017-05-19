@@ -440,10 +440,11 @@ export class AmpForm {
    */
   doXhr_(opt_extraValues) {
     const isHeadOrGet = this.method_ == 'GET' || this.method_ == 'HEAD';
+    const values = this.getFormAsObject_(opt_extraValues);
+    this.renderTemplate_(values);
+
     let xhrUrl, body;
-    let values = null;
     if (isHeadOrGet) {
-      values = this.getFormAsObject_(opt_extraValues);
       xhrUrl = addParamsToUrl(dev().assertString(this.xhrAction_), values);
     } else {
       xhrUrl = this.xhrAction_;
@@ -451,14 +452,7 @@ export class AmpForm {
       for (const key in opt_extraValues) {
         body.append(key, opt_extraValues[key]);
       }
-      values = {};
-      const entries = body.entries();
-      let item;
-      while (!(item = entries.next()).done) {
-        values[item.value[0]] = item.value[1];
-      }
     }
-    this.renderTemplate_(values);
 
     return this.xhr_.fetch(dev().assertString(xhrUrl), {
       body,
@@ -615,11 +609,11 @@ export class AmpForm {
   /**
    * Returns form data as an object.
    * @param {!Object<string, string>=} opt_extraFields
-   * @return {!Object}
+   * @return {!JSONType}
    * @private
    */
   getFormAsObject_(opt_extraFields) {
-    const data = {};
+    const data = /** @type {!JSONType} */ ({});
     const inputs = this.form_.elements;
     const submittableTagsRegex = /^(?:input|select|textarea)$/i;
     const unsubmittableTypesRegex = /^(?:button|image|file|reset)$/i;
