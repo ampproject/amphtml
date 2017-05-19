@@ -170,6 +170,13 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
       </ul>
     </td>
   </tr>
+  <tr>
+    <td>SMS</td>
+    <td>
+      <ul>
+        <li><code>data-param-body</code>: optional, defaults to: <code>rel=title - rel=canonical</code> URL</li></ul>
+    </td>
+  </tr>
 </table>
 
 
