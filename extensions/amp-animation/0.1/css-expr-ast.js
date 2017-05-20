@@ -92,7 +92,7 @@ export class CssNode {
   constructor() {}
 
   /**
-   * A return a string CSS representation.
+   * Returns a string CSS representation.
    * @return {string}
    * @abstract
    */
@@ -100,7 +100,9 @@ export class CssNode {
 
   /**
    * Resolves the value of all variable components. Only performs any work if
-   * variable components exist.
+   * variable components exist. As an optimization, this node is returned
+   * for a non-variable nodes (`isConst() == true`). Otherwise, `calc()` method
+   * is used to calculate the new value.
    * @param {!CssContext} context
    * @return {?CssNode}
    * @final
@@ -197,15 +199,17 @@ export class CssConcatNode extends CssNode {
 
   /** @override */
   calc(context) {
-    let nullCount = 0;
-    const resolvedArray = this.array_.map(node => {
-      const resolved = node.resolve(context);
-      if (!resolved) {
-        nullCount++;
+    const resolvedArray = [];
+    for (let i = 0; i < this.array_.length; i++) {
+      const resolved = this.array_[i].resolve(context);
+      if (resolved) {
+        resolvedArray.push(resolved);
+      } else {
+        // One element is null - the result is null.
+        return null;
       }
-      return resolved;
-    });
-    return nullCount > 0 ? null : new CssConcatNode(resolvedArray);
+    }
+    return new CssConcatNode(resolvedArray);
   }
 }
 
@@ -489,22 +493,25 @@ export class CssFuncNode extends CssNode {
 
   /** @override */
   calc(context) {
-    let nullCount = 0;
-    const resolvedArgs = this.args_.map((node, index) => {
-      let res;
-      if (this.dimensions_ && index < this.dimensions_.length) {
-        context.pushDimension(this.dimensions_[index]);
-        res = node.resolve(context);
+    const resolvedArgs = [];
+    for (let i = 0; i < this.args_.length; i++) {
+      const node = this.args_[i];
+      let resolved;
+      if (this.dimensions_ && i < this.dimensions_.length) {
+        context.pushDimension(this.dimensions_[i]);
+        resolved = node.resolve(context);
         context.popDimension();
       } else {
-        res = node.resolve(context);
+        resolved = node.resolve(context);
       }
-      if (!res) {
-        nullCount++;
+      if (resolved) {
+        resolvedArgs.push(resolved);
+      } else {
+        // One argument is null - the function's result is null.
+        return null;
       }
-      return res;
-    });
-    return nullCount > 0 ? null : new CssFuncNode(this.name_, resolvedArgs);
+    }
+    return new CssFuncNode(this.name_, resolvedArgs);
   }
 }
 
