@@ -28,7 +28,8 @@ describes.sandboxed('alt nameframe', {}, () => {
       iframe.src = 'http://localhost:9876/dist.3p/current/nameframe.max.html';
     });
 
-    it('should load remote nameframe and succeed w/ valid JSON', done => {
+    it('should load remote nameframe and succeed w/ valid JSON', () => {
+      let messageContent;
       iframe.name = JSON.stringify({
         creative: `<html>
                    <body>
@@ -39,11 +40,15 @@ describes.sandboxed('alt nameframe', {}, () => {
                    </body>
                    </html>`,
       });
-      win.addEventListener('message', content => {
-        expect(content.data.type).to.equal('creative rendered');
-        done();
-      });
       doc.body.appendChild(iframe);
+      return new Promise(resolve => {
+        win.addEventListener('message', content => {
+          messageContent = content;
+          resolve();
+        });
+      }).then(() => {
+        expect(messageContent.data.type).to.equal('creative rendered');
+      });
     });
 
     it('should fail if JSON is not paresable', done => {
