@@ -28,14 +28,7 @@ export function mediaimpact(global, data) {
   /* eslint google-camelcase/google-camelcase: 0 */
   global.sas_loadHandler = function(f) {
     if (f.hasAd) {
-      f.crea1 || (f.crea1 = {
-        width: 300,
-        height: 250,
-      });
-      global.context.renderStart({
-        width: f.crea1.width,
-        height: f.crea1.height,
-      });
+      global.context.renderStart();
     } else {
       global.context.noContentAvailable();
     }
