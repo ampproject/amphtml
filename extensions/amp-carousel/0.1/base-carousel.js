@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {KeyCodes} from '../../../src/utils/key-codes';
+import {keyCodes} from '../../../src/utils/key-codes';
 import {timerFor} from '../../../src/services';
 
 /**
@@ -69,8 +69,6 @@ export class BaseCarousel extends AMP.BaseElement {
     this.prevButton_.classList.add('amp-carousel-button');
     this.prevButton_.classList.add('amp-carousel-button-prev');
     this.prevButton_.setAttribute('role', 'button');
-    // TODO(erwinm): Does label need i18n support in the future? or provide
-    // a way to be overridden.
     if (this.element.hasAttribute('data-previous-button-aria-label')) {
       this.prevButton_.setAttribute('aria-label',
         this.element.getAttribute('data-previous-button-aria-label'));
@@ -80,7 +78,7 @@ export class BaseCarousel extends AMP.BaseElement {
     }
     this.prevButton_.setAttribute('tabindex', 0);
     this.prevButton_.onkeydown = event => {
-      if (event.keyCode == Keycodes.ENTER || event.keyCode == Keycodes.SPACE) {
+      if (event.keyCode == keyCodes.ENTER || event.keyCode == keyCodes.SPACE) {
         if (!event.defaultPrevented) {
           event.preventDefault();
           this.interactionPrev();
@@ -105,7 +103,7 @@ export class BaseCarousel extends AMP.BaseElement {
     }
     this.nextButton_.setAttribute('tabindex', 0);
     this.nextButton_.onkeydown = event => {
-      if (event.keyCode == Keycodes.ENTER || event.keyCode == Keycodes.SPACE) {
+      if (event.keyCode == keyCodes.ENTER || event.keyCode == keyCodes.SPACE) {
         if (!event.defaultPrevented) {
           event.preventDefault();
           this.interactionNext();
