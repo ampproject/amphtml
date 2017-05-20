@@ -46,7 +46,7 @@ describes.realWin('inabox-host:position-observer', {}, env => {
     };
   });
 
-  it('observe should work', done => {
+  it('observe should work', () => {
     let position1 = {
       viewport: layoutRectLtwh(0, 0, 200, 300),
       target: layoutRectLtwh(1, 2, 30, 40),
@@ -66,19 +66,22 @@ describes.realWin('inabox-host:position-observer', {}, env => {
     expect(callbackSpy21).to.be.calledWith(position2);
 
     win.scrollTo(10, 20);
-    setTimeout(() => {
-      position1 = {
-        viewport: layoutRectLtwh(10, 20, 200, 300),
-        target: layoutRectLtwh(11, 22, 30, 40),
-      };
-      position2 = {
-        viewport: layoutRectLtwh(10, 20, 200, 300),
-        target: layoutRectLtwh(13, 24, 30, 40),
-      };
+    return new Promise(resolve => {
+      setTimeout(() => {
+        position1 = {
+          viewport: layoutRectLtwh(10, 20, 200, 300),
+          target: layoutRectLtwh(11, 22, 30, 40),
+        };
+        position2 = {
+          viewport: layoutRectLtwh(10, 20, 200, 300),
+          target: layoutRectLtwh(13, 24, 30, 40),
+        };
+        resolve();
+      }, 100);
+    }).then(() => {
       expect(callbackSpy11).to.be.calledWith(position1);
       expect(callbackSpy12).to.be.calledWith(position1);
       expect(callbackSpy21).to.be.calledWith(position2);
-      done();
-    }, 100);
+    });
   });
 });
