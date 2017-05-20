@@ -96,7 +96,7 @@ describes.fakeWin('LaterpayVendor', {
       });
     });
 
-    it('authorization fails due to lack of server config', done => {
+    it('authorization fails due to lack of server config', () => {
       accessServiceMock.expects('buildUrl')
         .returns(Promise.resolve('https://builturl'))
         .once();
@@ -109,11 +109,10 @@ describes.fakeWin('LaterpayVendor', {
         .once();
       return vendor.authorize().catch(err => {
         expect(err.message).to.exist;
-        done();
       });
     });
 
-    it('authorization response from server fails', done => {
+    it('authorization response from server fails', () => {
       accessServiceMock.expects('buildUrl')
         .returns(Promise.resolve('https://builturl'))
         .once();
@@ -130,7 +129,6 @@ describes.fakeWin('LaterpayVendor', {
       emptyContainerStub.returns(Promise.resolve());
       return vendor.authorize().then(err => {
         expect(err.access).to.be.false;
-        done();
       });
     });
 

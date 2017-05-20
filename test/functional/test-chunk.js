@@ -60,27 +60,30 @@ describe('chunk', () => {
       });
     });
 
-    it('should execute chunks', done => {
+    it('should execute chunks', () => {
       let count = 0;
       let progress = '';
-      function complete(str) {
-        return function(unusedIdleDeadline) {
-          progress += str;
-          if (++count == 6) {
-            expect(progress).to.equal('abcdef');
-            done();
-          }
-        };
-      }
-      startupChunk(fakeWin.document, complete('a'));
-      startupChunk(fakeWin.document, complete('b'));
-      startupChunk(fakeWin.document, function() {
-        complete('c')();
+      return new Promise(resolve => {
+        function complete(str) {
+          return function(unusedIdleDeadline) {
+            progress += str;
+            if (++count == 6) {
+              resolve();
+            }
+          };
+        }
+        startupChunk(fakeWin.document, complete('a'));
+        startupChunk(fakeWin.document, complete('b'));
         startupChunk(fakeWin.document, function() {
-          complete('d')();
-          startupChunk(fakeWin.document, complete('e'));
-          startupChunk(fakeWin.document, complete('f'));
+          complete('c')();
+          startupChunk(fakeWin.document, function() {
+            complete('d')();
+            startupChunk(fakeWin.document, complete('e'));
+            startupChunk(fakeWin.document, complete('f'));
+          });
         });
+      }).then(() => {
+        expect(progress).to.equal('abcdef');
       });
     });
   }

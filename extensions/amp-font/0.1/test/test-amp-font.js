@@ -52,7 +52,7 @@ describe('amp-font', function() {
     });
   }
 
-  it('should timeout while loading custom font', function(done) {
+  it('should timeout while loading custom font', function() {
     sandbox.stub(FontLoader.prototype, 'load')
         .returns(Promise.reject('mock rejection'));
     return getAmpFontIframe().then(iframe => {
@@ -60,18 +60,16 @@ describe('amp-font', function() {
           .to.have.class('comic-amp-font-missing');
       expect(iframe.doc.body)
           .to.not.have.class('comic-amp-font-loading');
-      done();
     });
   });
 
-  it('should load custom font', function(done) {
+  it('should load custom font', function() {
     sandbox.stub(FontLoader.prototype, 'load').returns(Promise.resolve());
     return getAmpFontIframe().then(iframe => {
       expect(iframe.doc.documentElement)
           .to.have.class('comic-amp-font-loaded');
       expect(iframe.doc.body)
           .to.not.have.class('comic-amp-font-loading');
-      done();
     });
   });
 

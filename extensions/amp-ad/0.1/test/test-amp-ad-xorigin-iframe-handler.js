@@ -217,31 +217,33 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     });
 
     it('should trigger render-start on message "bootstrap-loaded" if' +
-       ' render-start is NOT implemented', done => {
+       ' render-start is NOT implemented', () => {
       initPromise = iframeHandler.init(iframe);
       iframe.postMessageToParent({
         sentinel: 'amp3ptest' + testIndex,
         type: 'bootstrap-loaded',
       });
       const renderStartPromise = signals.whenSignal('render-start');
-      renderStartPromise.then(() => {
+      return renderStartPromise.then(() => {
         expect(renderStartedSpy).to.be.calledOnce;
-        done();
       });
     });
 
-    it('should trigger visibility on timeout', done => {
+    it('should trigger visibility on timeout', () => {
       const clock = sandbox.useFakeTimers();
       iframe.name = 'test_master';
       initPromise = iframeHandler.init(iframe);
-      iframe.onload = () => {
-        clock.tick(10000);
-        initPromise.then(() => {
-          expect(iframe.style.visibility).to.equal('');
-          expect(renderStartedSpy).to.not.be.called;
-          done();
-        });
-      };
+      return new Promise(resolve => {
+        iframe.onload = () => {
+          clock.tick(10000);
+          initPromise.then(() => {
+            resolve();
+          });
+        };
+      }).then(() => {
+        expect(iframe.style.visibility).to.equal('');
+        expect(renderStartedSpy).to.not.be.called;
+      });
     });
 
     it('should be immediately visible if it is A4A', () => {
