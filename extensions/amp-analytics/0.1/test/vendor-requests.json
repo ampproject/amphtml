@@ -72,7 +72,16 @@
     "host": "https://www.facebook.com",
     "base": "https://www.facebook.com/tr?noscript=1",
     "pageview": "https://www.facebook.com/tr?noscript=1&ev=PageView&id=PIXEL-ID",
-    "event": "https://www.facebook.com/tr?noscript=1&ev=$eventName&id=PIXEL-ID"
+    "event": "https://www.facebook.com/tr?noscript=1&ev=$eventName&id=PIXEL-ID&cd[content_name]=$content_name",
+    "eventViewContent": "https://www.facebook.com/tr?noscript=1&ev=ViewContent&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_name]=$content_name&cd[content_type]=$content_type&cd[content_ids]=$content_ids",
+    "eventSearch": "https://www.facebook.com/tr?noscript=1&ev=Search&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_category]=$content_category&cd[content_ids]=$content_ids&cd[search_string]=$search_string",
+    "eventAddToCart": "https://www.facebook.com/tr?noscript=1&ev=AddToCart&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_name]=$content_name&cd[content_type]=$content_type&cd[content_ids]=$content_ids",
+    "eventAddToWishlist": "https://www.facebook.com/tr?noscript=1&ev=AddToWishlist&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_name]=$content_name&cd[content_category]=$content_category&cd[content_ids]=$content_ids",
+    "eventInitiateCheckout": "https://www.facebook.com/tr?noscript=1&ev=InitiateCheckout&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_name]=$content_name&cd[content_category]=$content_category&cd[num_items]=$num_items&cd[content_ids]=$content_ids",
+    "eventAddPaymentInfo": "https://www.facebook.com/tr?noscript=1&ev=AddPaymentInfo&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_category]=$content_category&cd[content_ids]=$content_ids",
+    "eventPurchase": "https://www.facebook.com/tr?noscript=1&ev=Purchase&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_name]=$content_name&cd[content_type]=$content_type&cd[content_ids]=$content_ids&cd[num_items]=$num_items",
+    "eventLead": "https://www.facebook.com/tr?noscript=1&ev=Lead&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_name]=$content_name&cd[content_category]=$content_category",
+    "eventCompleteRegistration": "https://www.facebook.com/tr?noscript=1&ev=CompleteRegistration&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_name]=$content_name&cd[status]=$status"
   },
   "gemius": {
     "base": "https://$prefix.hit.gemius.pl/__timestamp_/redot.gif?l=91&id=$identifier&screen=_screen_width_x_screen_height_&window=_viewport_width_x_viewport_height_&fr=1&href=_source_url_&ref=_document_referrer_&extra=gemamp%3D1%7Campid%3D_client_id_%7C$extraparams",

@@ -191,13 +191,15 @@ Donec pharetra molestie sollicitudin. Duis mattis eleifend rutrum. Quisque luctu
 </p><ul>
 <li>Aenean ac sem eget libero varius viverra sit amet vitae nunc.</li>
 </ul>
-<p></p>
-<button id="fb-pixel">Track with Facebook Pixel</button>
+<p>
+<button id="fb-pixel">Track click with Facebook Pixel custom event</button> | <button id="fb-addToWishlist">Track Add To Wishlist</button>
+REF: https://www.facebook.com/business/a/facebook-pixel and https://developers.facebook.com/docs/ads-for-websites/pixel-events/v2.9#events
+</p>
 <amp-analytics type="facebookpixel" id="facebook-pixel">
     <script type="application/json">
     {
       "vars": {
-        "pixelId": "1760516960931795" //https://www.facebook.com/business/a/facebook-pixel
+        "pixelId": "1760516960931795"
       },
       "triggers": {
         "trackPageview": {
@@ -211,7 +213,26 @@ Donec pharetra molestie sollicitudin. Duis mattis eleifend rutrum. Quisque luctu
           "vars": {
             "eventName": "ClickedBtn-x"
           }
+        },
+      "trackSearch": {
+        "on": "visible",
+        "request": "eventSearch",
+        "vars": {
+          "search_string": "How to use Facebook Pixel in AMP Pages"
         }
+      },
+      "trackAddToWishlist": {
+        "on": "click",
+        "selector": "#fb-addToWishlist",
+        "request": "eventAddToWishlist",
+        "vars": {
+          "content_ids": ["1234"],
+          "content_name": "The Avengers",
+          "content_category": "Entertainment",
+          "value": 1.50,
+          "currency": "USD"
+        }
+      }
       }
     }
     </script>
