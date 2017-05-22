@@ -147,7 +147,7 @@ export class Bind {
     this.setStatePromise_ = null;
 
     // Expose for testing on dev.
-    if (getMode().development) {
+    if (getMode().development || getMode().localDev) {
       AMP.printState = this.printState_.bind(this);
     }
   }
