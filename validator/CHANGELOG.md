@@ -30,6 +30,22 @@ Please add new release changes here. Use the time in UTC for the header and
 mention and release notes since the last change as well as the version numbers.
 -->
 
+### 11:30 PM, May 22, 2017 UTC
+
+Validator Version 232
+Spec Version 421
+
+Includes:
+
+ - #7999 amp-3q-player
+ - #8557 amp-timeago
+ - #8835 and #9139 changes to amp-timeago
+ - #9146 amp-bind changes
+ - #8632 amp-brid-player autoplay
+ - style attributes in SVG tags
+ - #8782 amp-ima-video
+
+ 
 ### 10:00 PM, May 8, 2017 UTC
 
 First Release in Changelog. No release notes.
