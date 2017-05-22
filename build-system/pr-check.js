@@ -31,7 +31,7 @@ const minimist = require('minimist');
 const util = require('gulp-util');
 
 const gulp = 'node_modules/gulp/bin/gulp.js';
-const fileLogPrefix = util.colors.yellow('pr-check.js:');
+const fileLogPrefix = util.colors.yellow.bold('pr-check.js:');
 
 /**
  * Starts a timer to measure the execution time of the given function.
@@ -41,7 +41,7 @@ const fileLogPrefix = util.colors.yellow('pr-check.js:');
 function startTimer(functionName) {
   const startTime = Date.now();
   console.log(
-      '\n', fileLogPrefix, 'Running', util.colors.cyan(functionName), '...');
+      '\n' + fileLogPrefix, 'Running', util.colors.cyan(functionName), '...');
   return startTime;
 }
 
@@ -337,7 +337,8 @@ function main(argv) {
   sortedBuildTargets.sort();
 
   console.log(
-      fileLogPrefix, 'detected build targets:', sortedBuildTargets.join(', '));
+      fileLogPrefix, 'Detected build targets:',
+      util.colors.cyan(sortedBuildTargets.join(', ')));
 
   // Run different sets of independent tasks in parallel to reduce build time.
   if (process.env.BUILD_SHARD == "pre_build_checks") {
