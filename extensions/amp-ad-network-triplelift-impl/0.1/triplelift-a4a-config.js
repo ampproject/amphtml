@@ -26,3 +26,5 @@ export function tripleliftIsA4AEnabled(win, element) {
   return !!element.getAttribute('data-use-a4a') && !!(src =
     element.getAttribute('src')) && src.indexOf(SRC_PREFIX_) == 0;
 }
+
+export const adConfig = {};

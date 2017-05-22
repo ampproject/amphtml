@@ -29,3 +29,7 @@ export function gmosspIsA4AEnabled(win, element) {
   return !!element.getAttribute('data-use-a4a') && !!src &&
     startsWith(src, GMOSSP_SRC_PREFIX_);
 }
+
+export const adConfig = {
+    prefetch: 'https://cdn.gmossp-sp.jp/ads/amp.js',
+};

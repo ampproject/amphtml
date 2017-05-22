@@ -15,6 +15,7 @@
  */
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {adConfig} from './gmossp-a4a-config.js';
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 import {dev} from '../../../src/log';
 import {startsWith} from '../../../src/string';
@@ -42,6 +43,16 @@ const GMOSSP_BASE_URL_ = 'https://sp.gmossp-sp.jp';
  * the cloudflare signing key.
  */
 export class AmpAdNetworkGmosspImpl extends AmpA4A {
+
+  /**
+   * @param {!Element} element
+   */
+  constructor(element) {
+    super(element);
+
+    /** {?Object} */
+    this.config = adConfig;
+  }
 
   /** @override */
   isValidElement() {
