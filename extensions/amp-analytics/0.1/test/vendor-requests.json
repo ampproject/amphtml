@@ -17,6 +17,7 @@
     "pageview": "https://$log$domain/hit.xiti?s=$site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_&p=_title_&s2=$level2&medium=amp&&ref=_document_referrer_",
     "click": "https://$log$domain/hit.xiti?s=$site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_&pclick=_title_&s2click=$level2&p=$label&s2=$level2Click&type=click&click=$type&medium=amp&&ref=_document_referrer_"
   },
+  {
   "baiduanalytics": {
     "host": "https://hm.baidu.com",
     "base": "https://hm.baidu.com/hm.gif?si=$token&nv=0&st=4&v=pixel-1.0&rnd=_timestamp_",
