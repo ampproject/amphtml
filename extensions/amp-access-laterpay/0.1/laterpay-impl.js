@@ -181,31 +181,26 @@ export class LaterpayVendor {
   authorize() {
     user().assert(isExperimentOn(this.ampdoc.win, TAG),
         'Enable "amp-access-laterpay" experiment');
-    return this.getPurchaseConfig_()
-    .then(response => {
+    return this.getPurchaseConfig_().then(response => {
       if (response.status === 204) {
         throw user()
           .createError('No merchant domains have been matched for this ' +
             'article, or no paid content configurations are setup.');
       }
 
-      if (this.laterpayConfig_.scrollToTopAfterAuth) {
-        this.vsync_.mutate(() => this.viewport_.setScrollTop(0));
-      }
-      this.emptyContainer_();
-      return {access: response.access};
-    }, err => {
-      const status = err && err.response && err.response.status;
-      if (status === 402) {
-        this.purchaseConfig_ = err.responseJson;
-        // empty before rendering, in case authorization is being called again
-        // with the same state
-        this.emptyContainer_()
-          .then(this.renderPurchaseOverlay_.bind(this));
-      } else {
-        throw err;
-      }
-      return {access: false};
+      return response.json().then(json => {
+        if (response.ok && json) {
+          if (this.laterpayConfig_.scrollToTopAfterAuth) {
+            this.vsync_.mutate(() => this.viewport_.setScrollTop(0));
+          }
+          this.emptyContainer_();
+          return {access: response.access};
+        } else if (response.status === 402) {
+          this.purchaseConfig_ = json;
+          this.emptyContainer_().then(this.renderPurchaseOverlay_.bind(this));
+          return {access: false};
+        }
+      });
     });
   }
 
