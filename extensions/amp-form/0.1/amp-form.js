@@ -443,10 +443,12 @@ export class AmpForm {
    */
   doXhr_(opt_extraValues) {
     const isHeadOrGet = this.method_ == 'GET' || this.method_ == 'HEAD';
+    const values = this.getFormAsObject_(opt_extraValues);
+    this.renderTemplate_(values);
+
     let xhrUrl, body;
     if (isHeadOrGet) {
-      xhrUrl = addParamsToUrl(dev().assertString(this.xhrAction_),
-          this.getFormAsObject_(opt_extraValues));
+      xhrUrl = addParamsToUrl(dev().assertString(this.xhrAction_), values);
     } else {
       xhrUrl = this.xhrAction_;
       body = new FormData(this.form_);
@@ -454,6 +456,7 @@ export class AmpForm {
         body.append(key, opt_extraValues[key]);
       }
     }
+
     return this.xhr_.fetch(dev().assertString(xhrUrl), {
       body,
       method: this.method_,
@@ -474,6 +477,7 @@ export class AmpForm {
     return response.json().then(json => {
       this.triggerAction_(/* success */ true, json);
       this.analyticsEvent_('amp-form-submit-success');
+      this.cleanupRenderedTemplate_();
       this.setState_(FormState_.SUBMIT_SUCCESS);
       this.renderTemplate_(json || {});
       this.maybeHandleRedirect_(response);
@@ -492,6 +496,7 @@ export class AmpForm {
     this.triggerAction_(
         /* success */ false, errorResponse ? errorResponse.responseJson : null);
     this.analyticsEvent_('amp-form-submit-error');
+    this.cleanupRenderedTemplate_();
     this.setState_(FormState_.SUBMIT_ERROR);
     this.renderTemplate_(errorResponse.responseJson || {});
     this.maybeHandleRedirect_(errorResponse.response);
@@ -604,11 +609,11 @@ export class AmpForm {
   /**
    * Returns form data as an object.
    * @param {!Object<string, string>=} opt_extraFields
-   * @return {!Object}
+   * @return {!JSONType}
    * @private
    */
   getFormAsObject_(opt_extraFields) {
-    const data = {};
+    const data = /** @type {!JSONType} */ ({});
     const inputs = this.form_.elements;
     const submittableTagsRegex = /^(?:input|select|textarea)$/i;
     const unsubmittableTypesRegex = /^(?:button|image|file|reset)$/i;
