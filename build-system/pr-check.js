@@ -31,8 +31,7 @@ const minimist = require('minimist');
 const util = require('gulp-util');
 
 const gulp = 'node_modules/gulp/bin/gulp.js';
-const fileLogPrefix =
-    '\x1b[33;1m' + 'pr-check.js' + '\x1b[0m: ';  // Yellow, bold.
+const fileLogPrefix = util.colors.yellow('pr-check.js:');
 
 /**
  * Starts a timer to measure the execution time of the given function.
@@ -42,8 +41,7 @@ const fileLogPrefix =
 function startTimer(functionName) {
   const startTime = Date.now();
   console.log(
-      '\n' + fileLogPrefix + 'Running ' + '\x1b[36m' +  // Cyan.
-      functionName + '\x1b[0m' + '...');
+      '\n', fileLogPrefix, 'Running', util.colors.cyan(functionName), '...');
   return startTime;
 }
 
@@ -58,10 +56,8 @@ function stopTimer(functionName, startTime) {
   const mins = executionTime.getMinutes();
   const secs = executionTime.getSeconds();
   console.log(
-      fileLogPrefix + 'Done running ' +
-      '\x1b[36m' + functionName + '\x1b[0m' +  // Cyan.
-      '. ' + 'Total time: ' +
-      '\x1b[32m' + mins + 'm ' + secs + 's.' + '\x1b[0m');  // Green.
+      fileLogPrefix, 'Done running', util.colors.cyan(functionName),
+      'Total time:', util.colors.green(mins + 'm ' + secs + 's'));
 }
 
 /**
@@ -269,7 +265,7 @@ function runAllCommands() {
     command.buildRuntime();
     command.presubmit();  // Must be run after the runtime is built.
     command.runVisualDiffTests();  // Only called during push builds.
-    command.runIntegrationTests();    
+    command.runIntegrationTests();
   }
   if (process.env.BUILD_SHARD == "unit_tests") {
     // Unit tests should need a CSS-only build, but for now, we need a full dist
@@ -292,6 +288,10 @@ function runAllCommands() {
  */
 function main(argv) {
   const startTime = startTimer('pr-check.js');
+  console.log(
+      fileLogPrefix, 'Running build shard',
+      util.colors.cyan(process.env.BUILD_SHARD));
+
   // If $TRAVIS_PULL_REQUEST_SHA is empty then it is a push build and not a PR.
   if (!process.env.TRAVIS_PULL_REQUEST_SHA) {
     console.log('Running all commands on push build.');
@@ -337,8 +337,7 @@ function main(argv) {
   sortedBuildTargets.sort();
 
   console.log(
-      '\npr-check.js: detected build targets: ' +
-      sortedBuildTargets.join(', ') + '\n');
+      fileLogPrefix, 'detected build targets:', sortedBuildTargets.join(', '));
 
   // Run different sets of independent tasks in parallel to reduce build time.
   if (process.env.BUILD_SHARD == "pre_build_checks") {
