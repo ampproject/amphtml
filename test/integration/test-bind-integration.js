@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import '../../../amp-carousel/0.1/amp-carousel';
-import {createFixtureIframe} from '../../../../testing/iframe';
-import {batchedXhrFor, bindForDoc} from '../../../../src/services';
-import {ampdocServiceFor} from '../../../../src/ampdoc';
+import '../../extensions/amp-carousel/0.1/amp-carousel';
+import {createFixtureIframe} from '../../testing/iframe';
+import {batchedXhrFor, bindForDoc} from '../../src/services';
+import {ampdocServiceFor} from '../../src/ampdoc';
 import * as sinon from 'sinon';
 
 describe.configure().retryOnSaucelabs().run('amp-bind', function() {
