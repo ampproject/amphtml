@@ -187,7 +187,6 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'image': true,
     },
   },
-
   'burt': {
     'vars': {
       'trackingKey': 'ignore',
