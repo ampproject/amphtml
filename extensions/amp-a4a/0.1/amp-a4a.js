@@ -18,7 +18,6 @@ import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
 } from '../../amp-ad/0.1/concurrent-load';
-import {adConfig} from '../../../ads/_config';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {createElementWithAttributes} from '../../../src/dom';
 import {cancellation, isCancellation} from '../../../src/error';
@@ -362,8 +361,6 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const adType = this.element.getAttribute('type');
-    this.config = adConfig[adType] || {};
     this.uiHandler = new AMP.AmpAdUIHandler(this);
     if (!this.win.ampA4aValidationKeys) {
       // Without the following variable assignment, there's no way to apply a
