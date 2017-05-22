@@ -85,18 +85,8 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'base': '${host}/hm.gif?' +
           'si=${token}&nv=0&st=4&v=pixel-1.0&rnd=${timestamp}',
       'pageview': '${base}&et=0',
-      'trackEvent': '${base}&ep=${CATEGORY}*${ACTION}*' +
-          '${LABEL}*${VALUE}&et=4&api=8_0',
-    },
-    'triggers': {
-      'pageview': {
-        'on': 'visible',
-        'request': 'base',
-      },
-      'trackAnchorClick': {
-        'on': 'click',
-        'request': 'trackEvent',
-      },
+      'event': '${base}&ep=${category}*${action}*' +
+          '${label}*${value}&et=4&api=8_0',
     },
     'transport': {
       'beacon': false,
@@ -1148,13 +1138,16 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
   },
 
   'snowplow': {
+    'vars': {
+      'duid': 'CLIENT_ID(_sp_id)',
+    },
     'requests': {
       'aaVersion': 'amp-0.2',
       'basePrefix': 'https://${collectorHost}/i?url=${canonicalUrl}&page=${title}&' +
           'res=${screenWidth}x${screenHeight}&stm=${timestamp}&' +
           'tz=${timezone}&aid=${appId}&p=web&tv=${aaVersion}&' +
           'cd=${screenColorDepth}&cs=${documentCharset}&' +
-          'duid=${clientId}&' +
+          'duid=${duid}&' +
           'lang=${browserLanguage}&refr=${documentReferrer}&stm=${timezone}&' +
           'vp=${viewportWidth}x${viewportHeight}',
       'pageView': '${basePrefix}&e=pv',
