@@ -16,6 +16,8 @@
 
 import {AmpA4A} from '../amp-a4a';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
+import {adConfig} from
+'../../../amp-ad-network-adsense-impl/0.1/adsense-a4a-config.js';
 
 /** @type {string} @private */
 export const SIGNATURE_HEADER = 'X-TestSignatureHeader';
@@ -28,6 +30,13 @@ export const TEST_URL = 'http://iframe.localhost:' + location.port +
     '/test/fixtures/served/iframe.html?args';
 
 export class MockA4AImpl extends AmpA4A {
+
+  constructor(element) {
+    super(element);
+    /** {?Object} */
+    this.config = adConfig;
+  }
+
   getAdUrl() {
     return Promise.resolve(TEST_URL);
   }
