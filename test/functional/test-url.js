@@ -528,6 +528,9 @@ describe('getSourceOrigin/Url', () => {
   testOrigin(
       'https://cdn.ampproject.org/c/s/origin.com%3A81/foo/?f=0',
       'https://origin.com:81/foo/?f=0');
+  testOrigin(
+      'https://cdn.ampproject.org/a/www.origin.com/foo/?f=0#h',
+      'http://www.origin.com/foo/?f=0#h');
 
   // Prefixed CDN
   testOrigin(
