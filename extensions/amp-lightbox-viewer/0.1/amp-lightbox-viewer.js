@@ -58,6 +58,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     /** @private {!boolean} */
     this.active_ = false;
 
+    /** @private {!number} */
+    this.currentElementId_ = -1;
+
     /** @private {!function(!Event)} */
     this.boundHandleKeyboardEvents_ = this.handleKeyboardEvents_.bind(this);
 
@@ -78,6 +81,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.descriptionBox_ = null;
+
+    this.clonedLightboxableElements = [];
 
     /** @private  {?Element} */
     this.gallery_ = null;
@@ -133,13 +138,30 @@ export class AmpLightboxViewer extends AMP.BaseElement {
             const deepClone = !element.classList.contains(
                 'i-amphtml-element');
             const nodeToClone = element.cloneNode(deepClone);
+            nodeToClone.removeAttribute('on');
+            const descText = this.manager_.getDescription(element);
+            if (descText) {
+              nodeToClone.descriptionText = descText;
+            }
+            this.clonedLightboxableElements.push(nodeToClone);
             this.carousel_.appendChild(nodeToClone);
           });
         });
       });
 
       this.container_.appendChild(this.carousel_);
+      this.win.document.addEventListener(
+          'slideChange', event => {this.slideChangeHandler_(event);});
     }
+  }
+
+  /**
+   * Handles slide change.
+   * @private
+   */
+  slideChangeHandler_(event) {
+    this.currentElementId_ = event.data.index;
+    this.updateDescriptionBox_();
   }
 
   /**
@@ -157,14 +179,27 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   }
 
   /**
+   * Update description box text.
+   * @private
+   */
+  updateDescriptionBox_() {
+    const descText = this.clonedLightboxableElements[this.currentElementId_]
+        .descriptionText;
+    this.descriptionBox_.textContent = descText;
+    if (!descText) {
+      this.descriptionBox_.classList.add('hide');
+    }
+  }
+
+  /**
    * Toggle description box if it has text content
    * @private
    */
   toggleDescriptionBox_() {
-    if (!this.descriptionBox_.textContent) {
-      return;
+    this.updateDescriptionBox_();
+    if (this.descriptionBox_.textContent) {
+      this.descriptionBox_.classList.toggle('hide');
     }
-    this.descriptionBox_.classList.toggle('hide');
   }
 
   /**
@@ -242,6 +277,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.scheduleLayout(this.container_);
 
     this.carousel_.implementation_.showSlideWhenReady_(element.lightboxItemId);
+    this.currentElementId_ = element.lightboxItemId;
 
     this.win.document.documentElement.addEventListener(
         'keydown', this.boundHandleKeyboardEvents_);
