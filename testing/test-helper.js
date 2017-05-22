@@ -45,6 +45,27 @@ export function stubServiceForDoc(sandbox, ampdoc, serviceId, method) {
 }
 
 /**
+ * Resolves a promise when the method stub is called for the first time.
+ */
+export function stubWithCalledPromise(sandbox, object, method, opt_callMethod) {
+  const original = object[method];
+  let stub;
+  const promise = new Promise(resolve => {
+    stub = sandbox.stub();
+    const spy = sandbox.stub(object, method, () => {
+      const result = stub.apply(object, spy.lastCall.args);
+      if (opt_callMethod) {
+        original.apply(object, spy.lastCall.args);
+      }
+
+      resolve({value: result});
+      return result;
+    });
+  });
+  return {stub, promise};
+}
+
+/**
  * Asserts that the given element is only visible to screen readers.
  * @param {!Element} node
  */
