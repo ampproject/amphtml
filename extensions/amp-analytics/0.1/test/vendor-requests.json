@@ -3,7 +3,7 @@
     "host": "https://hm.baidu.com",
     "base": "https://hm.baidu.com/hm.gif?si=$token&nv=0&st=4&v=pixel-1.0&rnd=_timestamp_",
     "pageview": "https://hm.baidu.com/hm.gif?si=$token&nv=0&st=4&v=pixel-1.0&rnd=_timestamp_&et=0",
-    "trackEvent": "https://hm.baidu.com/hm.gif?si=$token&nv=0&st=4&v=pixel-1.0&rnd=_timestamp_&ep=$CATEGORY*$ACTION*$LABEL*$VALUE&et=4&api=8_0"
+    "event": "https://hm.baidu.com/hm.gif?si=$token&nv=0&st=4&v=pixel-1.0&rnd=_timestamp_&ep=$category*$action*$label*$value&et=4&api=8_0"
   },
   "acquialift": {
    "base": "https://us-east-1-decisionapi.lift.acquia.com/capture?account_id=xxxxxxxx&site_id=xxxxxxxx",
