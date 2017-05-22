@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Keycodes} from '../../../../src/utils/keycodes';
+import {KeyCodes} from '../../../../src/utils/key-codes';
 import {createIframePromise} from '../../../../testing/iframe';
 import {tryFocus} from '../../../../src/dom';
 import '../amp-accordion';
@@ -107,7 +107,7 @@ describes.sandboxed('amp-accordion', {}, () => {
       const headerElements = iframe.doc.querySelectorAll(
           'section > *:first-child');
       const keyDownEvent = {
-        keyCode: Keycodes.SPACE,
+        keyCode: KeyCodes.SPACE,
         target: headerElements[0],
         preventDefault: sandbox.spy(),
       };
@@ -129,7 +129,7 @@ describes.sandboxed('amp-accordion', {}, () => {
       const child = iframe.doc.createElement('div');
       headerElements[0].appendChild(child);
       const keyDownEvent = {
-        keyCode: Keycodes.ENTER,
+        keyCode: KeyCodes.ENTER,
         target: child,
         preventDefault: sandbox.spy(),
       };
@@ -149,7 +149,7 @@ describes.sandboxed('amp-accordion', {}, () => {
       const headerElements = iframe.doc.querySelectorAll(
           'section > *:first-child');
       const keyDownEvent = {
-        keyCode: Keycodes.ENTER,
+        keyCode: KeyCodes.ENTER,
         target: headerElements[1],
         preventDefault: sandbox.spy(),
       };
@@ -171,7 +171,7 @@ describes.sandboxed('amp-accordion', {}, () => {
       // Focus the first header,
       tryFocus(headerElements[0]);
       const upArrowEvent = {
-        keyCode: Keycodes.UP_ARROW,
+        keyCode: KeyCodes.UP_ARROW,
         target: headerElements[0],
         preventDefault: sandbox.spy(),
       };
@@ -179,7 +179,7 @@ describes.sandboxed('amp-accordion', {}, () => {
       expect(iframe.doc.activeElement)
           .to.equal(headerElements[headerElements.length - 1]);
       const downArrowEvent = {
-        keyCode: Keycodes.DOWN_ARROW,
+        keyCode: KeyCodes.DOWN_ARROW,
         target: headerElements[headerElements.length - 1],
         preventDefault: sandbox.spy(),
       };

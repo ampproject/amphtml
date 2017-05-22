@@ -15,7 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-accordion-0.1.css';
-import {Keycodes} from '../../../src/utils/keycodes';
+import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {removeFragment} from '../../../src/url';
@@ -206,12 +206,12 @@ class AmpAccordion extends AMP.BaseElement {
     }
     const keyCode = event.keyCode;
     switch (keyCode) {
-      case Keycodes.UP_ARROW: /* fallthrough */
-      case Keycodes.DOWN_ARROW:
+      case KeyCodes.UP_ARROW: /* fallthrough */
+      case KeyCodes.DOWN_ARROW:
         this.navigationKeyDownHandler_(event);
         return;
-      case Keycodes.ENTER: /* fallthrough */
-      case Keycodes.SPACE:
+      case KeyCodes.ENTER: /* fallthrough */
+      case KeyCodes.SPACE:
         this.activationKeyDownHandler_(event);
         return;
     }
@@ -229,7 +229,7 @@ class AmpAccordion extends AMP.BaseElement {
     if (index !== -1) {
       event.preventDefault();
       // Up and down are the same regardless of locale direction.
-      const diff = event.keyCode == Keycodes.UP_ARROW ? -1 : 1;
+      const diff = event.keyCode == KeyCodes.UP_ARROW ? -1 : 1;
       // If user navigates one past the beginning or end, wrap around.
       let newFocusIndex = (index + diff) % this.headers_.length;
       if (newFocusIndex < 0) {
