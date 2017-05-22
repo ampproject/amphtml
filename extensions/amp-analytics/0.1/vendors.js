@@ -1399,6 +1399,41 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       },
     },
   },
+
+  'topmailru': {
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+    'vars': {
+      'url': '${sourceUrl}',
+      'referrer': '${documentReferrer}',
+    },
+    'requests': {
+      'pageView': '${_basicMessageCounter};${_title}',
+      'reachGoal': '${_basicMessageTracker};${_goal};${_title}',
+      'sendEvent': '${_basicMessageTracker};${_customEvent}',
+      '_basicMessageCounter': '${_protocol}${_domain}${_counter}?${_basicMessage}',
+      '_basicMessageTracker': '${_protocol}${_domain}${_tracker}?${_basicMessage}',
+      '_domain': 'https://top-fwz1.mail.ru',
+      '_counter': '/counter',
+      '_tracker': '/tracker',
+      '_basicMessage': 'js=13;ver=60;s=${screenWidth}*${screenHeight};vp=${viewportWidth}*${viewportHeight};${_event};${_advancedEvent};_=${random}',
+      '_event': 'id=${id};u=${url};r=${referrer}',
+      '_advancedEvent': 'st=${start};gender=${gender};age=${age};pid=${pid};userid=${userid};device=${device};params=${params}',
+      '_title': 'title=${title}',
+      '_goal': 'e=RG%3A${value}%2F${goal}',
+      '_customEvent': 'e=CE%3A${value}%2F${category}%3B${action}%3B${label}',
+    },
+    'triggers': {
+      'pageView': {
+        'on': 'visible',
+        'request': 'pageView',
+      },
+    },
+  },
+
 });
 ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
