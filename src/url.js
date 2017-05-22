@@ -380,7 +380,7 @@ export function getSourceUrl(url) {
   // The /s/ is optional and signals a secure origin.
   const path = url.pathname.split('/');
   const prefix = path[1];
-  user().assert(prefix == 'c' || prefix == 'v',
+  user().assert(prefix == 'a' || prefix == 'c' || prefix == 'v',
       'Unknown path prefix in url %s', url.href);
   const domainOrHttpsSignal = path[2];
   const origin = domainOrHttpsSignal == 's'
