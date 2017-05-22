@@ -160,6 +160,24 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End AFS Analytics tracking -->
 
+<!-- Baidu stats tracking -->
+<amp-analytics type="baiduanalytics" id="baiduanalytics">
+    <script type="application/json">
+        {
+          "vars": {
+            "token": "your-token"
+          },
+          "triggers": {
+            "pageview": {
+              "on": "visible",
+              "request": "pageview"
+            }
+          }
+        }
+    </script>
+</amp-analytics>
+<!-- Baidu stats example -->
+
 
 <!-- Burt tracking -->
 <amp-analytics type="burt" id="burt">
@@ -285,7 +303,7 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Eulerian Analytics example -->
-  
+
 <!-- Gemius Audience pageview tracking -->
 <amp-analytics type="gemius" id="gemius">
 <script type="application/json">
