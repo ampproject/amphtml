@@ -21,7 +21,7 @@ limitations under the License.
     <td width="40%"><strong>Description</strong></td>
     <td>Embeds a video player for instream video ads that are integrated with
     the
-    <a href="https://developers.google.com/interactive-media-ads/docs/sdks/html5/">IMA SDK</a>
+    <a href="https://developers.google.com/interactive-media-ads/docs/sdks/html5/">IMA SDK</a>,
     </td>
   </tr>
   <tr>
@@ -46,7 +46,9 @@ limitations under the License.
 
 You can use the `amp-ima-video` component to embed an <a
 href="https://developers.google.com/interactive-media-ads/docs/sdks/html5/">IMA
-SDK</a>enabled video player. To embed a video, provide a source URL for your
+SDK</a> enabled video player.
+
+To embed a video, provide a source URL for your
 content video (`data-src`) and an ad tag (`data-tag`), which is a URL to a
 VAST-compliant ad response (for examples, see
 [IMA Sample Tags](https://developers.google.com/interactive-media-ads/docs/sdks/html5/tags)).
@@ -81,7 +83,7 @@ default, the first frame is displayed.
 
 This element includes
 [common attributes](https://www.ampproject.org/docs/reference/common_attributes)
-extended to AMP components
+extended to AMP components.
 
 ## Validation
 
