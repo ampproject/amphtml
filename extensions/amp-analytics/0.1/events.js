@@ -154,8 +154,10 @@ export class CustomEventTracker extends EventTracker {
     }
 
     return this.observers_[eventType].add(event => {
+      //console.log('add listener');
       // Wait for target selected
       targetReady.then(target => {
+        //console.log('trigger target handler');
         if (target.contains(event.target)) {
           listener(event);
         }
