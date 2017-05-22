@@ -72,8 +72,10 @@ describes.sandboxed('Extension Location', {}, () => {
         pathname: 'examples/ads.amp.html',
         host: 'localhost:8000',
         protocol: 'http:',
-      }, 'sw', true);
-      expect(script).to.equal('http://localhost:8000/dist/sw.js');
+      },
+          'sw',
+          /* isLocalDev */ true);
+      expect(script).to.equal('http://localhost:8000/dist/sw.max.js');
     });
 
     it('with remote mode', () => {
@@ -82,9 +84,10 @@ describes.sandboxed('Extension Location', {}, () => {
         pathname: 'examples/ads.amp.min.html',
         host: 'localhost:8000',
         protocol: 'http:',
-      }, 'sw', /* isLocalDev */ false);
+      }, 'sw',
+          /* isLocalDev */ false);
       expect(script).to.equal(
-          'https://cdn.ampproject.org/sw.js');
+          'https://cdn.ampproject.org/sw.max.js');
     });
 
     it('with remote mode & rtv', () => {
@@ -93,9 +96,42 @@ describes.sandboxed('Extension Location', {}, () => {
         pathname: 'examples/ads.amp.min.html',
         host: 'localhost:8000',
         protocol: 'http:',
-      }, 'ww', /* isLocalDev */ false, /* opt_rtv */ true);
+      },
+          'ww',
+          /* isLocalDev */ false,
+          /* opt_rtv */ true);
       expect(script).to.equal(
-          'https://cdn.ampproject.org/rtv/123/ww.js');
+          'https://cdn.ampproject.org/rtv/123/ww.max.js');
     });
+  });
+
+  it('with remote mode & rtv & compiled', () => {
+    window.AMP_MODE = {rtvVersion: '123'};
+    const script = calculateEntryPointScriptUrl({
+      pathname: 'examples/ads.amp.min.html',
+      host: 'localhost:8000',
+      protocol: 'http:',
+    },
+        'ww',
+        /* isLocalDev */ false,
+        /* opt_rtv */ true,
+        /* opt_compiled */ true);
+    expect(script).to.equal(
+        'https://cdn.ampproject.org/rtv/123/ww.js');
+  });
+
+  it('with local mode & not rtv & compiled', () => {
+    window.AMP_MODE = {rtvVersion: '123'};
+    const script = calculateEntryPointScriptUrl({
+      pathname: 'examples/ads.amp.min.html',
+      host: 'localhost:8000',
+      protocol: 'http:',
+    },
+        'ww',
+        /* isLocalDev */ true,
+        /* opt_rtv */ false,
+        /* opt_compiled */ true);
+    expect(script).to.equal(
+        'http://localhost:8000/dist/ww.js');
   });
 });

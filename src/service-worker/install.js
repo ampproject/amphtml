@@ -45,7 +45,7 @@ export function installCacheServiceWorker(win) {
     const kill = isExperimentOn(win, `${TAG}-kill`);
     const entryPoint = `sw${kill ? '-kill' : ''}`;
     const url = calculateEntryPointScriptUrl(location, entryPoint,
-        getMode().localDev);
+        getMode().localDev, getMode().minified);
     navigator.serviceWorker.register(url).then(reg => {
       dev().info(TAG, 'ServiceWorker registration successful: ', reg);
     }, err => {
