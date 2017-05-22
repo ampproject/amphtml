@@ -140,5 +140,5 @@ export const adConfig = {
     'https://partner.googleadservices.com',
     'https://tpc.googlesyndication.com',
   ],
-  renderStartImplemented: true,
+  clientIdScope: 'AMP_ECID_GOOGLE',
 };
