@@ -1118,6 +1118,21 @@ describes.realWin('CustomElement', {amp: true}, env => {
       element.unlayoutCallback();
       expect(testElementUnlayoutCallback).to.have.not.been.called;
     });
+
+    it('should remove sandbox analytics element', () => {
+      const element = new ElementClass();
+      sandbox.stub(element.implementation_,
+          'createSandboxAnalyticsConfigCallback', () => {
+            return Promise.resolve({});
+          });
+
+      container.appendChild(element);
+      return element.layoutCallback().then(() => {
+        expect(element.querySelector('amp-analytics')).to.not.be.null;
+        element.unlayoutCallback();
+        expect(element.querySelector('amp-analytics')).to.be.null;
+      });
+    });
   });
 
   describe('pauseCallback', () => {
@@ -1725,7 +1740,6 @@ describes.realWin('CustomElement Loading Indicator', {amp: true}, env => {
     });
   });
 });
-
 
 describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
   let win, doc;

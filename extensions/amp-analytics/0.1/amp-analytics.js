@@ -189,7 +189,9 @@ export class AmpAnalytics extends AMP.BaseElement {
             .then(instrumentation => {
               this.instrumentation_ = instrumentation;
             })
-            .then(this.onFetchRemoteConfigSuccess_.bind(this));
+            .then(this.onFetchRemoteConfigSuccess_.bind(this))
+            // USE CommonSignals.LOAD_END once get rid of trigger = immediate
+            .then(() => this.signals().signal('amp-analytics-ready'));
     return this.iniPromise_;
   }
 
