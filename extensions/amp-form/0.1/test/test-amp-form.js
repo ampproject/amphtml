@@ -1239,9 +1239,9 @@ describes.repeated('', {
       const form = getForm();
       document.body.appendChild(form);
       const actions = actionServiceForDoc(form.ownerDocument);
-      const ampForm = new AmpForm(form);
 
       sandbox.stub(actions, 'installActionHandler');
+      const ampForm = new AmpForm(form);
       const {promise, stub} = stubWithCalledPromise(
           sandbox, ampForm.xhr_, 'fetch');
       stub.returns(Promise.resolve());
