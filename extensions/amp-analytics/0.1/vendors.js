@@ -651,7 +651,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     'vars': {
       'eventValue': '0',
       'documentLocation': 'SOURCE_URL',
-      'clientId': 'CLIENT_ID(_ga)',
+      'clientId': 'CLIENT_ID(AMP_ECID_GOOGLE,_ga)',
       'dataSource': 'AMP',
       'anonymizeIP': 'aip',
     },
