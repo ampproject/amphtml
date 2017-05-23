@@ -62,14 +62,14 @@ class AmpAccordion extends AMP.BaseElement {
           'Sections should be enclosed in a <section> tag, ' +
           'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
           'amp-accordion/amp-accordion.md. Found in: %s', this.element);
-      const sectionComponents_ = section.children;
+      const sectionComponents = section.children;
       user().assert(
-          sectionComponents_.length == 2,
+          sectionComponents.length == 2,
           'Each section must have exactly two children. ' +
           'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
           'amp-accordion/amp-accordion.md. Found in: %s', this.element);
       this.mutateElement(() => {
-        const content = sectionComponents_[1];
+        const content = sectionComponents[1];
         content.classList.add('i-amphtml-accordion-content');
         let contentId = content.getAttribute('id');
         if (!contentId) {
@@ -83,7 +83,7 @@ class AmpAccordion extends AMP.BaseElement {
           section.removeAttribute('expanded');
         }
 
-        const header = sectionComponents_[0];
+        const header = sectionComponents[0];
         header.classList.add('i-amphtml-accordion-header');
         header.setAttribute('role', 'heading');
         header.setAttribute('aria-controls', contentId);
@@ -157,8 +157,8 @@ class AmpAccordion extends AMP.BaseElement {
    */
   onHeaderPicked_(header) {
     const section = header.parentElement;
-    const sectionComponents_ = section.children;
-    const content = sectionComponents_[1];
+    const sectionComponents = section.children;
+    const content = sectionComponents[1];
     const contentId = content.getAttribute('id');
     const isSectionClosedAfterClick = section.hasAttribute('expanded');
     this.mutateElement(() => {
