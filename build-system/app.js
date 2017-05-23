@@ -209,7 +209,8 @@ app.use('/form/search-html/get', function(req, res) {
 app.use('/form/search-json/get', function(req, res) {
   assertCors(req, res, ['GET']);
   res.json({
-    results: [{title: 'Result 1'}, {title: 'Result 2'}, {title: 'Result 3'}]
+    term: req.query.term,
+    results: [{title: 'Result 1'}, {title: 'Result 2'}, {title: 'Result 3'}],
   });
 });
 
