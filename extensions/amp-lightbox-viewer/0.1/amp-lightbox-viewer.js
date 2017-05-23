@@ -153,7 +153,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       });
 
       this.container_.appendChild(this.carousel_);
-      this.element.addEventListener(
+      this.carousel_.addEventListener(
           'slideChange', event => {this.slideChangeHandler_(event);});
     }
   }
