@@ -273,6 +273,12 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/8736',
   },
   {
+    id: 'input-debounced',
+    name: 'A debounced input event for AMP actions',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9413',
+    spec: 'https://github.com/ampproject/amphtml/issues/9277',
+  },
+  {
     id: 'amp-ima-video',
     name: 'IMA-integrated Video Player',
   },
