@@ -151,7 +151,7 @@ class Shell {
     }
 
     // Fetch.
-    const url = this.resolveUrl_(path) + '?stream=1000';
+    const url = this.resolveUrl_(path);
     log('Fetch and render doc:', path, url);
     // TODO(dvoytenko, #9490): Make `streamDocument` the only used API once
     // streaming is graduated out of experimental.
