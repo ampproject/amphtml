@@ -157,6 +157,8 @@ module.exports = {
     mocha: {
       reporter: 'html',
       // Allow tests to run for up to 5 seconds locally and on Travis.
+      // TODO(rsimha-amp): Reduce local run timeout to 2s after large tests are
+      // removed from unit_tests. See #9404.
       timeout: 5000,
     },
     captureConsole: false,
