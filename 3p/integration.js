@@ -47,6 +47,7 @@ import {startsWith} from '../src/string.js';
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
 import {github} from './github';
+import {imgur} from './imgur';
 import {reddit} from './reddit';
 import {twitter} from './twitter';
 
@@ -269,6 +270,7 @@ register('holder', holder);
 register('ibillboard', ibillboard);
 register('ima-video', imaVideo);
 register('imobile', imobile);
+register('imgur', imgur);
 register('improvedigital', improvedigital);
 register('industrybrains', industrybrains);
 register('inmobi', inmobi);
