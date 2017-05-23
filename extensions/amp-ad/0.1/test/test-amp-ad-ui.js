@@ -15,7 +15,7 @@
  */
 
 import {setStyles} from '../../../../src/style';
-import {AdDisplayState, AmpAdUIHandler} from '../amp-ad-ui';
+import {AmpAdUIHandler} from '../amp-ad-ui';
 import {BaseElement} from '../../../../src/base-element';
 import * as adHelper from '../../../../src/ad-helper';
 
@@ -35,19 +35,18 @@ describes.realWin('amp-ad-ui handler', {
     adElement = env.win.document.createElement('amp-ad');
     adImpl = new BaseElement(adElement);
     uiHandler = new AmpAdUIHandler(adImpl);
-    uiHandler.setDisplayState(AdDisplayState.LOADING);
     sandbox.stub(adHelper, 'getAdContainer', () => {
       return adContainer;
     });
     adContainer = null;
   });
 
-  describe('with state LOADED_NO_CONTENT', () => {
+  describe('applyNoContentUI', () => {
     it('should force collapse ad in special container', () => {
       adContainer = 'AMP-STICKY-AD';
       const attemptCollapseSpy = sandbox.spy(adImpl, 'attemptCollapse');
       const collapseSpy = sandbox.stub(adImpl, 'collapse', () => {});
-      uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
+      uiHandler.applyNoContentUI();
       expect(collapseSpy).to.be.calledOnce;
       expect(attemptCollapseSpy).to.not.be.called;
     });
@@ -61,8 +60,7 @@ describes.realWin('amp-ad-ui handler', {
         expect(fallbackSpy).to.not.been.called;
         return Promise.resolve();
       });
-      uiHandler.init();
-      uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
+      uiHandler.applyNoContentUI();
       expect(collapseSpy).to.be.calledOnce;
     });
 
@@ -72,7 +70,7 @@ describes.realWin('amp-ad-ui handler', {
         resolve = resolve_;
       });
       const placeholderSpy = sandbox.spy(adImpl, 'togglePlaceholder');
-      const fallbackSpy = sandbox.spy(adImpl, 'toggleFallback');
+      const fallbackSpy = sandbox.stub(adImpl, 'toggleFallback', () => {});
       sandbox.stub(uiHandler.baseInstance_, 'attemptCollapse', () => {
         return Promise.reject();
       });
@@ -80,9 +78,8 @@ describes.realWin('amp-ad-ui handler', {
         callback();
         resolve();
       });
-      uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
+      uiHandler.applyNoContentUI();
       return promise.then(() => {
-        expect(uiHandler.state).to.equal(AdDisplayState.LOADED_NO_CONTENT);
         expect(placeholderSpy).to.be.calledWith(false);
         expect(fallbackSpy).to.be.calledWith(true);
       });
@@ -105,35 +102,9 @@ describes.realWin('amp-ad-ui handler', {
       });
       sandbox.stub(adImpl, 'togglePlaceholder', () => {});
       sandbox.stub(adImpl, 'toggleFallback', () => {});
-      uiHandler.init();
-      uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
+      uiHandler.applyNoContentUI();
       return promise.then(() => {
-        expect(uiHandler.state).to.equal(AdDisplayState.LOADED_NO_CONTENT);
         expect(adImpl.element.querySelector('[fallback]')).to.be.ok;
-      });
-    });
-
-    it('should NOT continue with display state UN_LAID_OUT', () => {
-      let resolve = null;
-      const promise = new Promise(resolve_ => {
-        resolve = resolve_;
-      });
-
-      sandbox.stub(adImpl, 'attemptCollapse', () => {
-        return Promise.reject();
-      });
-      sandbox.stub(adImpl, 'deferMutate', callback => {
-        uiHandler.state = AdDisplayState.NOT_LAID_OUT;
-        callback();
-        resolve();
-      });
-      const fallbackSpy = sandbox.spy(adImpl, 'toggleFallback');
-
-      uiHandler.init();
-      uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
-      return promise.then(() => {
-        expect(fallbackSpy).to.not.be.called;
-        expect(uiHandler.state).to.equal(AdDisplayState.NOT_LAID_OUT);
       });
     });
 
