@@ -47,6 +47,7 @@ export function spotx(global, data) {
     }
   };
 
+  // TODO(KenneyE): Implement AdLoaded callback in script to accurately trigger renderStart()
   script.onload = global.context.renderStart;
 
   script.src = `//js.spotx.tv/easi/v1/${data['spotx_channel_id']}.js`;
