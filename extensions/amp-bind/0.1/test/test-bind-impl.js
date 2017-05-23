@@ -19,7 +19,10 @@ import {Bind} from '../bind-impl';
 import {BindEvaluator} from '../bind-evaluator';
 import {chunkInstanceForTesting} from '../../../../src/chunk';
 import {installTimerService} from '../../../../src/service/timer-impl';
-import {registerServiceBuilder} from '../../../../src/service';
+import {
+  registerServiceBuilder,
+  resetServiceForTesting,
+} from '../../../../src/service';
 import {toArray} from '../../../../src/types';
 import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
@@ -72,6 +75,7 @@ describes.realWin('Bind', {
 
   afterEach(() => {
     toggleExperiment(env.win, 'amp-bind', false);
+    resetServiceForTesting(env.win, 'amp-worker');
   });
 
   /**
