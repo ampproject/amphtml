@@ -191,20 +191,18 @@ You can configure your analytics to send these events as in the example below.
 
 The `amp-form-submit` event fires when a form request is initiated. The `amp-form-submit` event generates a set of variables that correspond to the specific form and the fields in the form. These variables can be used for analytics.
 
-For example, the following form has two fields:
+For example, the following form has one field:
 
 ```html
-<form action-xhr="/register" method="POST" id="registration_form">
-  <input type="text" name="user_name" />
-  <input type="password" name="user_password" />
-  <input type="submit" value="Sign up" />
+<form action-xhr="/comment" method="POST" id="submit_form">
+  <input type="text" name="comment" />
+  <input type="submit" value="Comment" />
 </form>
 ```
 When the `amp-form-submit` event fires, it generates the following variables containing the values that were specified in the form:
 
 * `formId`
-* `formFields[user_name]`
-* `formFields[user_password]`
+* `formFields[comment]`
 
 ## Success/Error Response Rendering
 `amp-form` allows publishers to render the responses using [Extended Templates](../../spec/amp-html-format.md#extended-templates).
