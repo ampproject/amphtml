@@ -108,6 +108,8 @@ export class Performance {
       this.onload_();
       this.flush();
     });
+
+    this.registerPaintTimingObserver_();
   }
 
   /**
@@ -165,11 +167,36 @@ export class Performance {
     // Detect deprecated first pain time API
     // https://bugs.chromium.org/p/chromium/issues/detail?id=621512
     // We'll use this until something better is available.
-    if (this.win.chrome && typeof this.win.chrome.loadTimes == 'function') {
+    if (!this.win.PerformancePaintTiming
+        && this.win.chrome
+        && typeof this.win.chrome.loadTimes == 'function') {
       this.tickDelta('fp',
           this.win.chrome.loadTimes().firstPaintTime * 1000 -
               this.win.performance.timing.navigationStart);
     }
+  }
+
+  /**
+   * Reports first pain and first contentful paint timings.
+   * See https://github.com/WICG/paint-timing
+   */
+  registerPaintTimingObserver_() {
+    if (!this.win.PerformancePaintTiming) {
+      return;
+    }
+    const observer = new this.win.PerformanceObserver(list => {
+      list.getEntries().forEach(entry => {
+        if (entry.name == 'first-paint') {
+          this.tickDelta('fp', entry.startTime + entry.duration);
+        }
+        else if (entry.name == 'first-contentful-paint') {
+          this.tickDelta('fcp', entry.startTime + entry.duration);
+        }
+        console.info(entry);
+      });
+    });
+
+    observer.observe({entryTypes: ['paint']});
   }
 
   /**
