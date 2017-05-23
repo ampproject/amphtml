@@ -109,7 +109,7 @@ unless only a single child is present.
 Usage example:
 
 ```html
-<amp-carousel width="100" height="100" controls layout="responsive" type="slides">
+<amp-carousel width="100" height="100" data-next-button-aria-label="Go to next slide" data-previous-button-aria-label="Go to previous slide" controls layout="responsive" type="slides">
 ```
 
 **type**
@@ -139,6 +139,14 @@ attribute if present (minimum of 1000 ms; an error will be thrown if it's any lo
 **height** (required)
 
 The height of the carousel, in pixels.
+
+**data-next-button-aria-label**  (optional)
+- sets the aria-label for the amp-carousel-button-next
+- if no value is given, aria-label will default to 'Next item in carousel'
+
+**data-prev-button-aria-label**  (optional)
+- sets the aria-label for the amp-carousel-button-prev
+- if no value is given, aria-label will default to 'Previous item in carousel'
 
 **common attributes**
 
