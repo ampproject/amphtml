@@ -192,7 +192,6 @@ export class Performance {
         else if (entry.name == 'first-contentful-paint') {
           this.tickDelta('fcp', entry.startTime + entry.duration);
         }
-        console.info(entry);
       });
     });
 
