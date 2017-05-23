@@ -955,7 +955,7 @@ export class Bind {
       }
       return value;
     });
-    dev().info(TAG, s);
+    user().info(TAG, s);
   }
 
   /**
