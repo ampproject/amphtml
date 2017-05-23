@@ -73,10 +73,11 @@ class AmpWorker {
     if (getMode().test && win.testLocation) {
       loc = win.testLocation;
     }
+    const useLocalFile = getMode().localDev || getMode().test;
     // Use RTV to make sure we fetch prod/canary/experiment correctly.
-    const useRtvVersion = !getMode().localDev && !getMode().test;
+    const useRtvVersion = !useLocalFile;
     const url = calculateEntryPointScriptUrl(
-        loc, 'ww', !useRtvVersion, useRtvVersion, getMode().minified);
+        loc, 'ww', useLocalFile, useRtvVersion, getMode().minified);
     dev().fine(TAG, 'Fetching web worker from', url);
 
     /** @private {Worker} */
