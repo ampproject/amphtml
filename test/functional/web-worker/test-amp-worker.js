@@ -19,7 +19,8 @@ import {
   invokeWebWorker,
   ampWorkerForTesting,
 } from '../../../src/web-worker/amp-worker';
-import {xhrServiceForTesting} from '../../../src/service/xhr-impl';
+import {installXhrService} from '../../../src/service/xhr-impl';
+import {xhrFor} from '../../../src/services';
 import * as sinon from 'sinon';
 
 describe('invokeWebWorker', () => {
@@ -46,8 +47,8 @@ describe('invokeWebWorker', () => {
     };
 
     // Stub xhr.fetchText() to return a resolved promise.
-    const xhr = xhrServiceForTesting(fakeWin);
-    sandbox.stub(xhr, 'fetchText', () => Promise.resolve());
+    installXhrService(fakeWin);
+    sandbox.stub(xhrFor(fakeWin), 'fetchText', () => Promise.resolve());
 
     const ampWorker = ampWorkerForTesting(fakeWin);
     workerReadyPromise = ampWorker.fetchPromiseForTesting();

@@ -25,6 +25,7 @@ import {isArray, isObject, isFormData} from '../types';
 import {utf8EncodeSync} from '../utils/bytes';
 import {ampdocServiceFor} from '../ampdoc';
 import {viewerForDoc} from '../services';
+import {getMode} from '../mode';
 
 
 /**
@@ -97,12 +98,14 @@ export class Xhr {
     /** @const {!Window} */
     this.win = win;
 
-    const ampdocService = ampdocServiceFor(win);
-
-    /** @private @const {?./ampdoc-impl.AmpDoc} */
-    this.ampdocSingle_ = ampdocService.isSingleDoc() ?
-      ampdocService.getAmpDoc() :
-      null;
+    /** @private {?./ampdoc-impl.AmpDoc} */
+    this.ampdocSingle_ = null;
+    if (!getMode().test) {
+      const ampdocService = ampdocServiceFor(win);
+      this.ampdocSingle_ = ampdocService.isSingleDoc() ?
+          ampdocService.getAmpDoc() :
+          null;
+    }
   }
 
   /**
@@ -593,13 +596,6 @@ export class FetchResponseHeaders {
  * @return {!Xhr}
  */
 export function xhrServiceForTesting(window) {
-  registerServiceBuilder(window, 'ampdoc', function() {
-    return {
-      isSingleDoc() {
-        return false;
-      },
-    };
-  });
   installXhrService(window);
   return getService(window, 'xhr');
 }
