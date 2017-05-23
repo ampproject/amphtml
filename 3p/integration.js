@@ -81,6 +81,7 @@ import {amoad} from '../ads/amoad';
 import {appnexus} from '../ads/appnexus';
 import {atomx} from '../ads/atomx';
 import {brainy} from '../ads/brainy';
+import {bringhub} from '../ads/bringhub';
 import {caajainfeed} from '../ads/caajainfeed';
 import {capirs} from '../ads/capirs';
 import {caprofitx} from '../ads/caprofitx';
@@ -150,6 +151,7 @@ import {smartadserver} from '../ads/smartadserver';
 import {smartclip} from '../ads/smartclip';
 import {sortable} from '../ads/sortable';
 import {sovrn} from '../ads/sovrn';
+import {spotx} from '../ads/spotx';
 import {sunmedia} from '../ads/sunmedia';
 import {swoop} from '../ads/swoop';
 import {taboola} from '../ads/taboola';
@@ -177,6 +179,7 @@ import {zucks} from '../ads/zucks';
  */
 const AMP_EMBED_ALLOWED = {
   _ping_: true,
+  bringhub: true,
   'mantis-recommend': true,
   mywidget: true,
   outbrain: true,
@@ -242,6 +245,7 @@ register('amoad', amoad);
 register('appnexus', appnexus);
 register('atomx', atomx);
 register('brainy', brainy);
+register('bringhub', bringhub);
 register('caajainfeed', caajainfeed);
 register('capirs', capirs);
 register('caprofitx', caprofitx);
@@ -316,6 +320,7 @@ register('smartadserver', smartadserver);
 register('smartclip', smartclip);
 register('sortable', sortable);
 register('sovrn', sovrn);
+register('spotx', spotx);
 register('sunmedia', sunmedia);
 register('swoop', swoop);
 register('taboola', taboola);

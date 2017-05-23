@@ -45,7 +45,6 @@ import {cryptoFor} from '../../../src/crypto';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
 import {handleClick} from '../../../ads/alp/handler';
-import {AdDisplayState} from '../../../extensions/amp-ad/0.1/amp-ad-ui';
 import {
   getDefaultBootstrapBaseUrl,
   generateSentinel,
@@ -366,7 +365,6 @@ export class AmpA4A extends AMP.BaseElement {
     const adType = this.element.getAttribute('type');
     this.config = adConfig[adType] || {};
     this.uiHandler = new AMP.AmpAdUIHandler(this);
-    this.uiHandler.init();
     if (!this.win.ampA4aValidationKeys) {
       // Without the following variable assignment, there's no way to apply a
       // type annotation to a win-scoped variable, so the type checker doesn't
@@ -756,10 +754,11 @@ export class AmpA4A extends AMP.BaseElement {
     const type = this.element.getAttribute('type');
     const promiseId = this.promiseId_;
     // Only execute once per page, this includes potential pauseCallback flows.
-    if (this.win['a4a-measuring-ad-urls']) {
+    if ((type != 'adsense' && type != 'doubleclick') ||
+      this.win[`a4a-measuring-ad-urls-${type}`]) {
       return;
     }
-    this.win['a4a-measuring-ad-urls'] =
+    this.win[`a4a-measuring-ad-urls-${type}`] =
      resourcesForDoc(this.element).getMeasuredResources(this.win,
        r => {
          return r.element.tagName == 'AMP-AD' &&
@@ -782,8 +781,9 @@ export class AmpA4A extends AMP.BaseElement {
                'met.delta.AD_SLOT_ID': Math.round(Date.now() - startTime),
                'totalSlotCount.AD_SLOT_ID': adUrls.length,
                'totalUrlCount.AD_SLOT_ID': adUrls.filter(url => !!url).length,
+               'type.AD_SLOT_ID': type,
                'totalQueriedSlotCount.AD_SLOT_ID':
-                  this.win.document.querySelectorAll('amp-ad[type=doubleclick]')
+                  this.win.document.querySelectorAll(`amp-ad[type=${type}]`)
                     .length,
              });
        });
@@ -1014,7 +1014,7 @@ export class AmpA4A extends AMP.BaseElement {
     this.promiseId_++;
     this.adUrlsPromise_ = null;
     this.protectedEmitLifecycleEvent_('adSlotCleared');
-    this.uiHandler.setDisplayState(AdDisplayState.NOT_LAID_OUT);
+    this.uiHandler.applyUnlayoutUI();
     if (this.originalSlotSize_) {
       super.attemptChangeSize(
         this.originalSlotSize_.height, this.originalSlotSize_.width)
@@ -1069,7 +1069,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   createPlaceholderCallback() {
-    return this.uiHandler.createPlaceholderCallback();
+    return this.uiHandler.createPlaceholder();
   }
 
   /**
@@ -1111,8 +1111,7 @@ export class AmpA4A extends AMP.BaseElement {
     // Store original size to allow for reverting on unlayoutCallback so that
     // subsequent pageview allows for ad request.
     this.originalSlotSize_ = this.originalSlotSize_ || this.getLayoutBox();
-    this.uiHandler.setDisplayState(AdDisplayState.LOADING);
-    this.uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
+    this.uiHandler.applyNoContentUI();
     this.isCollapsed_ = true;
   }
 

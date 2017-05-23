@@ -280,6 +280,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [smartclip](../../ads/smartclip.md)
 - [Sortable](../../ads/sortable.md)
 - [SOVRN](../../ads/sovrn.md)
+- [SpotX](../../ads/spotx.md)
 - [SunMedia](../../ads/sunmedia.md)
 - [Swoop](../../ads/swoop.md)
 - [Teads](../../ads/teads.md)
@@ -300,6 +301,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 
 ## Supported embed types
 
+- [Bringhub](../../ads/bringhub.md)
 - [Outbrain](../../ads/outbrain.md)
 - [Taboola](../../ads/taboola.md)
 - [ZergNet](../../ads/zergnet.md)
