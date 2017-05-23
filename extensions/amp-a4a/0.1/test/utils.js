@@ -16,7 +16,7 @@
 
 import {AmpA4A} from '../amp-a4a';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
-import {adConfig} from
+import {adConfig,} from
 '../../../amp-ad-network-adsense-impl/0.1/adsense-a4a-config.js';
 
 /** @type {string} @private */
