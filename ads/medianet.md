@@ -61,7 +61,7 @@ If you have questions, please feel free to reach out to your Media.net contact.
 
 ## Supported Parameters 
 
-###Media.net Contextual Monetization
+### Media.net Contextual Monetization
 
 **Mandatory Parameters**
  
@@ -75,7 +75,7 @@ If you have questions, please feel free to reach out to your Media.net contact.
 
 
 
-###Media.net Header Bidder
+### Media.net Header Bidder
 
 **Mandatory Parameters**
  

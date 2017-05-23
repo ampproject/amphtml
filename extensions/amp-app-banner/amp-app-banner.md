@@ -94,7 +94,7 @@ android-app://${appId}/${protocol}/${host}${pathname}
 
 One required UI element is the `button[open-button]` button, which is the click target for the banner to install the app, or open the deep-link if the app is already installed.
 
-###OS/Browser/Viewer Dependencies
+### OS/Browser/Viewer Dependencies
 
 Because native app banners currently are not shown in the viewer context, `<amp-app-banner>` is shown inside of the viewer when the appropriate markup is present. Because system-level app banners are already shown in Android/Chrome and iOS/Safari OS/Browser combinations, `<amp-app-banner>` is hidden in those contexts to avoid redundancy.
 
@@ -120,7 +120,7 @@ Because native app banners currently are not shown in the viewer context, `<amp-
 </table>
 
 
-##Dismissal Persistence
+## Dismissal Persistence
 Currently, the banner will be displayed always unless it was dismissed. Once dismissed, the banner will never be displayed on that domain unless the user visits on a different browser or clears their local storage.
 
 
