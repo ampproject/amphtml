@@ -156,6 +156,7 @@ module.exports = {
   client: {
     mocha: {
       reporter: 'html',
+      // Allow tests to run for up to 5 seconds locally and on Travis.
       timeout: 5000,
     },
     captureConsole: false,
