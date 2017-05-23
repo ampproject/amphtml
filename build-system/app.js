@@ -663,25 +663,30 @@ app.get(['/examples/*.html', '/test/manual/*.html'], function(req, res, next) {
 
     // Extract amp-ad for the given 'type' specified in URL query.
     if (req.path.indexOf('/examples/ads.amp.html') == 0 && req.query.type) {
-      var ads = file.match(new RegExp('<(amp-ad|amp-embed) [^>]*[\'"]'
-          + req.query.type + '[\'"][^>]*>([\\s\\S]+?)<\/(amp-ad|amp-embed)>', 'gm'));
+      var ads = file.match(
+          elementExtractor('(amp-ad|amp-embed)', req.query.type));
       file = file.replace(
           /<body>[\s\S]+<\/body>/m, '<body>' + ads.join('') + '</body>');
     }
 
     // Extract amp-ad for the given 'type' specified in URL query.
     if (req.path.indexOf('/examples/analytics-vendors.amp.html') == 0 && req.query.type) {
-      var analytics = file.match(new RegExp('<amp-analytics [^>]*[\'"]'
-          + req.query.type + '[\'"][^>]*>([\\s\\S]+?)<\/amp-analytics>', 'gm'));
+      var analytics = file.match(
+          elementExtractor('amp-analytics', req.query.type));
       file = file.replace(
           /<div id="container">[\s\S]+<\/div>/m, '<div id="container">' + analytics.join('') + '</div>');
     }
-
     res.send(file);
   }).catch(() => {
     next();
   });
 });
+
+function elementExtractor(tagName, type) {
+  return new RegExp(
+      `<${tagName} [^>]*['"]${type}['"][^>]*>([\\s\\S]+?)</${tagName}>`,
+      'gm');
+}
 
 // Data for example: http://localhost:8000/examples/bind/xhr.amp.max.html
 app.use('/bind/form/get', function(req, res, next) {
