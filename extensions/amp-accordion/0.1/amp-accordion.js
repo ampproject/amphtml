@@ -93,10 +93,10 @@ class AmpAccordion extends AMP.BaseElement {
           header.setAttribute('tabindex', 0);
         }
         this.headers_.push(header);
+        header.addEventListener('click', this.clickHandler_.bind(this));
       });
     });
 
-    this.element.addEventListener('click', this.clickHandler_.bind(this));
     this.element.addEventListener('keydown', this.keyDownHandler_.bind(this));
   }
 
@@ -180,20 +180,9 @@ class AmpAccordion extends AMP.BaseElement {
    * @private
    */
   clickHandler_(event) {
-    // Need to support clicks on any children of the header.
-    let header;
-    for (let i = 0; i < this.headers_.length; i++) {
-      const curr = this.headers_[i];
-      if (curr.contains(event.target)) {
-        header = curr;
-        break;
-      }
-    }
-    if (header) {
-      header = dev().assertElement(header);
-      event.preventDefault();
-      this.onHeaderPicked_(header);
-    }
+    event.preventDefault();
+    const header = dev().assertElement(event.currentTarget);
+    this.onHeaderPicked_(header);
   }
 
   /**

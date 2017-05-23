@@ -50,6 +50,7 @@ describes.sandboxed('amp-accordion', {}, () => {
           'section > *:first-child');
       const clickEvent = {
         target: headerElements[0],
+        currentTarget: headerElements[0],
         preventDefault: sandbox.spy(),
       };
       expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.false;
@@ -71,6 +72,7 @@ describes.sandboxed('amp-accordion', {}, () => {
       header.appendChild(child);
       const clickEvent = {
         target: child,
+        currentTarget: header,
         preventDefault: sandbox.spy(),
       };
       expect(header.parentNode.hasAttribute('expanded')).to.be.false;
@@ -89,6 +91,7 @@ describes.sandboxed('amp-accordion', {}, () => {
           'section > *:first-child');
       const clickEvent = {
         target: headerElements[1],
+        currentTarget: headerElements[1],
         preventDefault: sandbox.spy(),
       };
       expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.true;
@@ -208,10 +211,12 @@ describes.sandboxed('amp-accordion', {}, () => {
           'section > *:first-child');
       const clickEventExpandElement = {
         target: headerElements[0],
+        currentTarget: headerElements[0],
         preventDefault: sandbox.spy(),
       };
       const clickEventCollapseElement = {
         target: headerElements[1],
+        currentTarget: headerElements[1],
         preventDefault: sandbox.spy(),
       };
       expect(Object.keys(impl.currentState_)).to.have.length(0);
@@ -284,6 +289,7 @@ describes.sandboxed('amp-accordion', {}, () => {
           'section > *:first-child');
       const clickEventExpandElement = {
         target: headerElements[0],
+        currentTarget: headerElements[0],
         preventDefault: sandbox.spy(),
       };
       impl.clickHandler_(clickEventExpandElement);
@@ -312,6 +318,7 @@ describes.sandboxed('amp-accordion', {}, () => {
           'section > *:first-child');
         const clickEventElement = {
           target: headerElements1[0],
+          currentTarget: headerElements1[0],
           preventDefault: sandbox.spy(),
         };
         ampAccordion1.implementation_.clickHandler_(clickEventElement);
