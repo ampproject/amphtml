@@ -82,7 +82,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     /** @private {?Element} */
     this.descriptionBox_ = null;
 
-    this.clonedLightboxableElements = [];
+    /** @private {!Array<!Element>} */
+    this.clonedLightboxableElements_ = [];
 
     /** @private  {?Element} */
     this.gallery_ = null;
@@ -137,20 +138,22 @@ export class AmpLightboxViewer extends AMP.BaseElement {
             element.lightboxItemId = index++;
             const deepClone = !element.classList.contains(
                 'i-amphtml-element');
-            const nodeToClone = element.cloneNode(deepClone);
-            nodeToClone.removeAttribute('on');
+            const clonedNode = element.cloneNode(deepClone);
+            clonedNode.removeAttribute('on');
             const descText = this.manager_.getDescription(element);
             if (descText) {
-              nodeToClone.descriptionText = descText;
+              clonedNode.descriptionText = descText;
             }
-            this.clonedLightboxableElements.push(nodeToClone);
-            this.carousel_.appendChild(nodeToClone);
+            // TODO(yuxichen): store descriptionText and lightboxItemId in a
+            // list other than the node itself
+            this.clonedLightboxableElements_.push(clonedNode);
+            this.carousel_.appendChild(clonedNode);
           });
         });
       });
 
       this.container_.appendChild(this.carousel_);
-      this.win.document.addEventListener(
+      this.element.addEventListener(
           'slideChange', event => {this.slideChangeHandler_(event);});
     }
   }
@@ -183,7 +186,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   updateDescriptionBox_() {
-    const descText = this.clonedLightboxableElements[this.currentElementId_]
+    const descText = this.clonedLightboxableElements_[this.currentElementId_]
         .descriptionText;
     this.descriptionBox_.textContent = descText;
     if (!descText) {
