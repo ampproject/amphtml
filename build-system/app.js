@@ -669,7 +669,7 @@ app.get(['/examples/*.html', '/test/manual/*.html'], function(req, res, next) {
           /<body>[\s\S]+<\/body>/m, '<body>' + ads.join('') + '</body>');
     }
 
-    // Extract amp-ad for the given 'type' specified in URL query.
+    // Extract amp-analytics for the given 'type' specified in URL query.
     if (req.path.indexOf('/examples/analytics-vendors.amp.html') == 0 && req.query.type) {
       var analytics = file.match(
           elementExtractor('amp-analytics', req.query.type));
