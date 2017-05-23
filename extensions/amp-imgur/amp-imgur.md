@@ -41,8 +41,7 @@ limitations under the License.
 
 ## Behavior
 
-This extension creates an iframe and displays the imgur post. **You must find the
-width and height of the imgur by inspecting it with your browser** (e.g. Chrome Developer Tools)
+This extension creates an iframe and displays the imgur post. 
 
 ## Attributes
 

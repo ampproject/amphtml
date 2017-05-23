@@ -564,6 +564,7 @@ amp-iframe iframe {
 /**
  * Forms error/success messaging containers should be hidden at first.
  */
+form [submitting],
 form [submit-success],
 form [submit-error] {
   display: none;

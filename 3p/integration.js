@@ -47,6 +47,7 @@ import {startsWith} from '../src/string.js';
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
 import {github} from './github';
+import {imgur} from './imgur';
 import {reddit} from './reddit';
 import {twitter} from './twitter';
 
@@ -269,6 +270,7 @@ register('holder', holder);
 register('ibillboard', ibillboard);
 register('ima-video', imaVideo);
 register('imobile', imobile);
+register('imgur', imgur);
 register('improvedigital', improvedigital);
 register('industrybrains', industrybrains);
 register('inmobi', inmobi);
@@ -502,7 +504,7 @@ function installContextUsingStandardImpl(win) {
   win.context.renderStart = triggerRenderStart;
 
   if (data.type === 'facebook' || data.type === 'twitter'
-    || data.type === 'github') {
+    || data.type === 'github' || data.type === 'imgur') {
     // Only make this available to selected embeds until the
     // generic solution is available.
     win.context.updateDimensions = triggerDimensions;

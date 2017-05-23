@@ -22,12 +22,14 @@
   *   layout="reponsive"
   *   width="540"
   *   height="663"
-  *   data-id="f462IUj">
+  *   data-imgur-id="f462IUj">
   * </amp-imgur>
   * </code>
   */
 
 import {user} from '../../../src/log';
+import {getIframe} from '../../../src/3p-frame';
+import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
@@ -36,9 +38,9 @@ export class AmpImgur extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    /** @private {?string} */
-    this.imgurId_ = '';
+    
+    /** @private {?HTMLIFrameElement} */
+    this.iframe_ = null;
   }
 
   /** @override */
@@ -52,42 +54,30 @@ export class AmpImgur extends AMP.BaseElement {
   }
 
   /** @override */
-  buildCallback() {
-    this.imgurId_ = user().assert(
-      this.element.getAttribute('data-imgurid'),
-      'The data-imgurid attribute is required for <amp-imgur> %s',
-      this.element);
+  isLayoutSupported(layout) {
+    return isLayoutSizeDefined(layout);
   }
 
   /** @override */
   layoutCallback() {
-    const iframe = this.win.document.createElement('iframe');
-    this.iframe_ = iframe;
-
-    iframe.setAttribute('scrolling', 'no');
-    iframe.setAttribute('frameborder', '0');
-    iframe.setAttribute('allowfullscreen', 'true');
-
-    iframe.src = 'http://imgur.com/' +
-      encodeURIComponent(this.imgurId_) + '/embed/';
-
+    const iframe = getIframe(this.win, this.element, 'imgur');
     this.applyFillContent(iframe);
+
+    listenFor(iframe, 'embed-size', data => {
+      this.changeHeight(data.height);
+    }, true);
+
     this.element.appendChild(iframe);
+    this.iframe_ = iframe;
     return this.loadPromise(iframe);
   }
 
-  /** @override */
   unlayoutCallback() {
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;
     }
     return true;
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
   }
 
 }

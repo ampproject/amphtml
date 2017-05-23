@@ -1850,13 +1850,13 @@ describe('amp-a4a', () => {
         })();
         stubVerifySignature.returns(Promise.resolve(false));
         return a4a.verifyCreativeSignature_('some_creative', 'some_sig')
-          .then(() => {
-            throw new Error('should have triggered rejection');
-          })
-          .catch(err => {
-            expect(stubVerifySignature).to.be.callCount(20);
-            expect(err).to.equal('No validation service could verify this key');
-          });
+        .then(() => {
+          throw new Error('should have triggered rejection');
+        })
+        .catch(err => {
+          expect(stubVerifySignature).to.be.callCount(20);
+          expect(err).to.equal('No validation service could verify this key');
+        });
       });
 
       it('properly handles multiple keys for one provider', () => {
@@ -1878,7 +1878,7 @@ describe('amp-a4a', () => {
           });
       });
 
-      it('properly stops verification at first valid key', done => {
+      it('properly stops verification at first valid key', () => {
         // Single provider where first key fails, second passes, and third
         // never calls verifySignature.
         const serviceName = 'test-service';
@@ -1896,16 +1896,17 @@ describe('amp-a4a', () => {
         const signature = 'some_signature';
         stubVerifySignature.onCall(0).returns(Promise.resolve(false));
         stubVerifySignature.onCall(1).returns(Promise.resolve(true));
-        a4a.verifyCreativeSignature_(creative, signature)
-          .then(verifiedCreative => {
-            expect(stubVerifySignature).to.be.calledTwice;
-            expect(verifiedCreative).to.equal(creative);
-            done();
-          });
+
         // From testing have found that need to yield prior to calling last
         // key info resolver to ensure previous keys have had a chance to
         // execute.
         setTimeout(() => {keyInfoResolver({}); }, 0);
+
+        return a4a.verifyCreativeSignature_(creative, signature)
+          .then(verifiedCreative => {
+            expect(stubVerifySignature).to.be.calledTwice;
+            expect(verifiedCreative).to.equal(creative);
+          });
       });
     });
   });
