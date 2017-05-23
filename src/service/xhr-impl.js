@@ -514,6 +514,19 @@ export class FetchResponse {
   }
 
   /**
+   * @return {?ReadableStreamReader} stream reader for streaming consumption or
+   *    null if streaming is not supported.
+   */
+  reader() {
+    if (!this.xhr_.body) {
+      return null;
+    }
+    dev().assert(!this.bodyUsed, 'Body already used');
+    this.bodyUsed = true;
+    return this.xhr_.body.getReader();
+  }
+
+  /**
    * Reads the xhr responseXML.
    * @return {!Promise<!Document>}
    * @private

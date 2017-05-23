@@ -37,7 +37,6 @@ import {isArray, isObject, isEnumValue} from '../../../src/types';
 import {some} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
 import {viewerForDoc} from '../../../src/services';
-import {resourcesForDoc} from '../../../src/services';
 import {xhrFor} from '../../../src/services';
 import {endsWith} from '../../../src/string';
 import {platformFor} from '../../../src/services';
@@ -58,7 +57,6 @@ import {A4AVariableSource} from './a4a-variable-source';
 // TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {getContextMetadata} from '../../../src/iframe-attributes';
-import {isReportingEnabled} from '../../../ads/google/a4a/utils';
 import {isInExperiment} from '../../../ads/google/a4a/traffic-experiments';
 
 /** @type {string} */
@@ -170,7 +168,6 @@ export const LIFECYCLE_STAGES = {
   visLoadAndOneSec: '25',
   iniLoad: '26',
   resumeCallback: '27',
-  sraBuildRequestDelay: '28',
 };
 
 /**
@@ -331,8 +328,6 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.fromResumeCallback = false;
 
-    /** @private {?Promise} */
-    this.adUrlsPromise_ = null;
 
     const type = (this.element.getAttribute('type') || 'notype').toLowerCase();
     /**
@@ -531,15 +526,6 @@ export class AmpA4A extends AMP.BaseElement {
       }
     };
 
-    let adUrlPromiseResolver = null;
-    if (!this.delayRequestEnabled_ && (getMode().localDev ||
-        isExperimentOn(this.win, 'a4a-measure-get-ad-urls')) &&
-        isReportingEnabled(this)) {
-      this.adUrlsPromise_ = new Promise(resolve => {
-        adUrlPromiseResolver = resolve;
-      });
-    }
-
     // Return value from this chain: True iff rendering was "successful"
     // (i.e., shouldn't try to render later via iframe); false iff should
     // try to render later in iframe.
@@ -578,15 +564,8 @@ export class AmpA4A extends AMP.BaseElement {
         .then(adUrl => {
           checkStillCurrent(promiseId);
           this.adUrl_ = adUrl;
-          if (adUrlPromiseResolver) {
-            // Do not initialize ad url delay measurement until AFTER first
-            // slot ad url creation as any delayed would only be imposed at
-            // that time.
-            this.measureGetAdUrlsDelay_();
-            adUrlPromiseResolver(adUrl);
-          }
           this.protectedEmitLifecycleEvent_('urlBuilt');
-          return adUrl && this.sendXhrRequest_(adUrl);
+          return adUrl && this.sendXhrRequest(adUrl);
         })
         // The following block returns either the response (as a {bytes, headers}
         // object), or null if no response is available / response is empty.
@@ -744,52 +723,6 @@ export class AmpA4A extends AMP.BaseElement {
           this.promiseErrorHandler_(error);
           return null;
         });
-  }
-
-  /**
-   * Measures the amount of time until last ad url generation for all amp-ad
-   * elements of this type.
-   * @private
-   */
-  measureGetAdUrlsDelay_() {
-    const startTime = Date.now();
-    const type = this.element.getAttribute('type');
-    const promiseId = this.promiseId_;
-    // Only execute once per page, this includes potential pauseCallback flows.
-    if ((type != 'adsense' && type != 'doubleclick') ||
-      this.win[`a4a-measuring-ad-urls-${type}`]) {
-      return;
-    }
-    this.win[`a4a-measuring-ad-urls-${type}`] =
-     resourcesForDoc(this.element).getMeasuredResources(this.win,
-       r => {
-         return r.element.tagName == 'AMP-AD' &&
-           r.element.getAttribute('type') == type;
-       })
-     .then(resources => {
-       if (promiseId != this.promiseId_) {
-         throw cancellation();
-       }
-       const getAdUrlsPromise = resources.map(r => r.element.getImpl().then(
-         // Note that ad url promise could be null if isValidElement returns
-         // false.
-         instance => instance.adUrlsPromise_));
-       return Promise.all(getAdUrlsPromise).then(adUrls => {
-         if (promiseId != this.promiseId_) {
-           throw cancellation();
-         }
-         this.protectedEmitLifecycleEvent_(
-             'sraBuildRequestDelay', {
-               'met.delta.AD_SLOT_ID': Math.round(Date.now() - startTime),
-               'totalSlotCount.AD_SLOT_ID': adUrls.length,
-               'totalUrlCount.AD_SLOT_ID': adUrls.filter(url => !!url).length,
-               'type.AD_SLOT_ID': type,
-               'totalQueriedSlotCount.AD_SLOT_ID':
-                  this.win.document.querySelectorAll(`amp-ad[type=${type}]`)
-                    .length,
-             });
-       });
-     });
   }
 
   /**
@@ -1014,7 +947,6 @@ export class AmpA4A extends AMP.BaseElement {
     }
     // Increment promiseId to cause any pending promise to cancel.
     this.promiseId_++;
-    this.adUrlsPromise_ = null;
     this.protectedEmitLifecycleEvent_('adSlotCleared');
     this.uiHandler.setDisplayState(AdDisplayState.NOT_LAID_OUT);
     if (this.originalSlotSize_) {
@@ -1146,9 +1078,9 @@ export class AmpA4A extends AMP.BaseElement {
    * Send ad request, extract the creative and signature from the response.
    * @param {string} adUrl Request URL to send XHR to.
    * @return {!Promise<?../../../src/service/xhr-impl.FetchResponse>}
-   * @private
+   * @protected
    */
-  sendXhrRequest_(adUrl) {
+  sendXhrRequest(adUrl) {
     this.protectedEmitLifecycleEvent_('adRequestStart');
     const xhrInit = {
       mode: 'cors',
@@ -1419,7 +1351,7 @@ export class AmpA4A extends AMP.BaseElement {
    * Safari-on-iOS, which issues a fresh network request, even though the
    * content is already in cache.
    *
-   * @param {string} adUrl  Ad request URL, as sent to #sendXhrRequest_ (i.e.,
+   * @param {string} adUrl  Ad request URL, as sent to #sendXhrRequest (i.e.,
    *    before any modifications that XHR module does to it.)
    * @return {!Promise} awaiting ad completed insertion.
    * @private
