@@ -76,6 +76,10 @@ window.vg;
 // IntersectionObserverEntry, but appears to have been omitted.
 IntersectionObserverEntry.prototype.rootBounds;
 
+// TODO (remove after we update closure compiler externs)
+window.PerformancePaintTiming;
+window.PerformanceObserver;
+
 // Externed explicitly because this private property is read across
 // binaries.
 Element.implementation_ = {};
