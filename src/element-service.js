@@ -33,19 +33,21 @@ import * as dom from './dom';
  * passed around.
  * @param {!Window} win
  * @param {string} id of the service.
- * @param {string} providedByElement Name of the custom element that provides
- *     the implementation of this service.
+ * @param {string} extension Name of the custom extension that provides the
+ *     implementation of this service.
+ * @param {boolean=} opt_element Whether this service is provided by an
+ *     element, not the extension.
  * @return {!Promise<*>}
  */
-export function getElementService(win, id, providedByElement) {
-  return getElementServiceIfAvailable(win, id, providedByElement).then(
-      service => {
-        return user().assert(service,
-            'Service %s was requested to be provided through %s, ' +
-            'but %s is not loaded in the current page. To fix this ' +
-            'problem load the JavaScript file for %s in this page.',
-            id, providedByElement, providedByElement, providedByElement);
-      });
+export function getElementService(win, id, extension, opt_element) {
+  const service = getElementServiceIfAvailable(win, id, extension, opt_element);
+  return service.then(service => {
+    return user().assert(service,
+        'Service %s was requested to be provided through %s, ' +
+        'but %s is not loaded in the current page. To fix this ' +
+        'problem load the JavaScript file for %s in this page.',
+        id, extension, extension, extension);
+  });
 }
 
 /**
@@ -53,11 +55,13 @@ export function getElementService(win, id, providedByElement) {
  * actually available on the current page.
  * @param {!Window} win
  * @param {string} id of the service.
- * @param {string} providedByElement Name of the custom element that provides
- *     the implementation of this service.
+ * @param {string} extension Name of the custom extension that provides the
+ *     implementation of this service.
+ * @param {boolean=} opt_element Whether this service is provided by an
+ *     element, not the extension.
  * @return {!Promise<?Object>}
  */
-export function getElementServiceIfAvailable(win, id, providedByElement) {
+export function getElementServiceIfAvailable(win, id, extension, opt_element) {
   const s = getServicePromiseOrNull(win, id);
   if (s) {
     return /** @type {!Promise<?Object>} */ (s);
@@ -65,12 +69,16 @@ export function getElementServiceIfAvailable(win, id, providedByElement) {
   // Microtask is necessary to ensure that window.ampExtendedElements has been
   // initialized.
   return Promise.resolve().then(() => {
-    if (isElementScheduled(win, providedByElement)) {
+    if (!opt_element && isElementScheduled(win, extension)) {
       return getServicePromise(win, id);
     }
     // Wait for HEAD to fully form before denying access to the service.
     return dom.waitForBodyPromise(win.document).then(() => {
-      if (isElementScheduled(win, providedByElement)) {
+      // If this service is provided by an element, then we can't depend on the
+      // service (they may not use the element).
+      if (opt_element) {
+        return getServicePromiseOrNull(win, id);
+      } else if (isElementScheduled(win, extension)) {
         return getServicePromise(win, id);
       }
       return null;
@@ -101,19 +109,22 @@ function isElementScheduled(win, elementName) {
  * passed around.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
- * @param {string} providedByElement Name of the custom element that provides
- *     the implementation of this service.
+ * @param {string} extension Name of the custom extension that provides the
+ *     implementation of this service.
+ * @param {boolean=} opt_element Whether this service is provided by an
+ *     element, not the extension.
  * @return {!Promise<*>}
  */
-export function getElementServiceForDoc(nodeOrDoc, id, providedByElement) {
-  return getElementServiceIfAvailableForDoc(nodeOrDoc, id, providedByElement)
-      .then(service => {
-        return user().assert(service,
-              'Service %s was requested to be provided through %s, ' +
-              'but %s is not loaded in the current page. To fix this ' +
-              'problem load the JavaScript file for %s in this page.',
-              id, providedByElement, providedByElement, providedByElement);
-      });
+export function getElementServiceForDoc(nodeOrDoc, id, extension, opt_element) {
+  const service = getElementServiceIfAvailableForDoc(nodeOrDoc, id, extension,
+      opt_element);
+  return service.then(service => {
+    return user().assert(service,
+        'Service %s was requested to be provided through %s, ' +
+        'but %s is not loaded in the current page. To fix this ' +
+        'problem load the JavaScript file for %s in this page.',
+        id, extension, extension, extension);
+  });
 }
 
 /**
@@ -121,12 +132,14 @@ export function getElementServiceForDoc(nodeOrDoc, id, providedByElement) {
  * actually available on the current page.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
- * @param {string} providedByElement Name of the custom element that provides
- *     the implementation of this service.
+ * @param {string} extension Name of the custom extension that provides the
+ *     implementation of this service.
+ * @param {boolean=} opt_element Whether this service is provided by an
+ *     element, not the extension.
  * @return {!Promise<?Object>}
  */
 export function getElementServiceIfAvailableForDoc(
-    nodeOrDoc, id, providedByElement) {
+    nodeOrDoc, id, extension, opt_element) {
   const ampdoc = getAmpdoc(nodeOrDoc);
   const s = getServicePromiseOrNullForDoc(nodeOrDoc, id);
   if (s) {
@@ -135,12 +148,16 @@ export function getElementServiceIfAvailableForDoc(
   // Microtask is necessary to ensure that window.ampExtendedElements has been
   // initialized.
   return Promise.resolve().then(() => {
-    if (isElementScheduled(ampdoc.win, providedByElement)) {
+    if (!opt_element && isElementScheduled(ampdoc.win, extension)) {
       return getServicePromiseForDoc(nodeOrDoc, id);
     }
     // Wait for HEAD to fully form before denying access to the service.
     return ampdoc.whenBodyAvailable().then(() => {
-      if (isElementScheduled(ampdoc.win, providedByElement)) {
+      // If this service is provided by an element, then we can't depend on the
+      // service (they may not use the element).
+      if (opt_element) {
+        return getServicePromiseOrNullForDoc(nodeOrDoc, id);
+      } else if (isElementScheduled(ampdoc.win, extension)) {
         return getServicePromiseForDoc(nodeOrDoc, id);
       }
       return null;
