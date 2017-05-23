@@ -21,7 +21,7 @@ limitations under the License.
     <td width="40%"><strong>Description</strong></td>
     <td>Embeds a video player for instream video ads that are integrated with
     the
-    <a href="https://developers.google.com/interactive-media-ads/docs/sdks/html5/">IMA SDK</a>,
+    <a href="https://developers.google.com/interactive-media-ads/docs/sdks/html5/">IMA SDK</a>.
     </td>
   </tr>
   <tr>
