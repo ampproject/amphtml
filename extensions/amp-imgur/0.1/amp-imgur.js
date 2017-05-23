@@ -24,20 +24,28 @@ export class AmpImgur extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
+    
+    /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
   }
 
+  /** @override */
+  preconnectCallback(opt_onLayout) {
+    this.preconnect.url('https://imgur.com/', opt_onLayout);
+  }
+
+  /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
   }
 
+  /** @override */
   layoutCallback() {
     const iframe = getIframe(this.win, this.element, 'imgur');
     this.applyFillContent(iframe);
 
     listenFor(iframe, 'embed-size', data => {
-      // this.changeHeight(data.height);
+      this.changeHeight(data.height);
     }, true);
 
     this.element.appendChild(iframe);

@@ -14,15 +14,23 @@
  * limitations under the License.
  */
 
-import {writeScript} from './3p';
+import {loadScript} from './3p';
 import {user} from '../src/log';
-
-function getImgurScript(global, scriptSource, cb) {
-  writeScript(global, scriptSource, function() {
+/**
+ * 
+ * @param {!Window} global 
+ * @param {string} scriptSource 
+ */
+function getImgurScript(global, cb) {
+  loadScript(global, "https://s.imgur.com/min/embed.js", function() {
     cb();
   });
 }
-
+/**
+ * 
+ * @param {!Window} global 
+ * @param {!Object} data 
+ */
 function getImgurContainer(global, data) {
   const blockquote = global.document.createElement('blockquote');
   blockquote.classList.add("imgur-embed-pub");
@@ -30,6 +38,10 @@ function getImgurContainer(global, data) {
   return blockquote;
 }
 
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
 export function imgur(global, data) {
   user().assert(
     data.imgurId,
@@ -37,10 +49,25 @@ export function imgur(global, data) {
     data.element);
 
   let container = getImgurContainer(global, data);
-  let scriptSource = "https://s.imgur.com/min/embed.js";
 
   global.document.getElementById('c').appendChild(container);
-  getImgurScript(global, scriptSource, function() {
-    const imgurContainer = global.document.querySelector('#c iframe');
+
+  getImgurScript(global, function(imgur) {
+    delete data.width;
+    delete data.height;
+    let imgurContainer = global.document.querySelector('#c .imgur-embed-iframe-pub');
+    let repeat;
+    if(imgurContainer === null) {
+      let repeat = setInterval(function() {
+        imgurContainer = global.document.querySelector('#c .imgur-embed-iframe-pub');
+        if(imgurContainer !== null) {
+          clearInterval(repeat);
+          context.updateDimensions(
+            imgurContainer.offsetWidth,
+            imgurContainer.offsetHeight
+          )
+        }
+      }, 30);
+    }
   });
 }
