@@ -74,12 +74,7 @@ export class AmpViewerIntegration {
     const ampdoc = getAmpDoc(this.win.document);
 
     if (this.isWebView_ || this.isHandShakePoll_) {
-      let source;
-      if (isIframed(this.win)) {
-        source = this.win.parent;
-      } else {
-        source = null;
-      }
+      const source = isIframed(this.win) ? this.win.parent : null;
       return this.webviewPreHandshakePromise_(source, origin)
           .then(receivedPort => {
             return this.openChannelAndStart_(viewer, ampdoc, origin,
