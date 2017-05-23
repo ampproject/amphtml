@@ -52,7 +52,6 @@ import {dev, user} from '../../../../src/log';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
-import {AdDisplayState} from '../../../../extensions/amp-ad/0.1/amp-ad-ui';
 import * as sinon from 'sinon';
 
 function setupForAdTesting(fixture) {
@@ -1189,17 +1188,18 @@ describe('amp-a4a', () => {
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         const forceCollapseSpy = sandbox.spy(a4a, 'forceCollapse');
-        const expectStates = [];
+        const noContentUISpy = sandbox.spy();
+        const unlayoutUISpy = sandbox.spy();
         a4a.uiHandler = {
-          setDisplayState: state => {expectStates.push(state);},
+          applyNoContentUI: () => {noContentUISpy();},
+          applyUnlayoutUI: () => {unlayoutUISpy();},
         };
         sandbox.stub(a4a, 'getLayoutBox').returns({width: 123, height: 456});
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.ok;
         return a4a.adPromise_.then(() => {
           expect(forceCollapseSpy).to.be.calledOnce;
-          expect(expectStates).to.deep.equal(
-            [AdDisplayState.LOADING, AdDisplayState.LOADED_NO_CONTENT]);
+          expect(noContentUISpy).to.be.calledOnce;
           return a4a.layoutCallback().then(() => {
             // should have no iframe.
             expect(a4aElement.querySelector('iframe')).to.not.be.ok;
@@ -1214,6 +1214,7 @@ describe('amp-a4a', () => {
             sandbox.stub(AMP.BaseElement.prototype, 'attemptChangeSize')
               .returns(attemptChangeSizePromise);
             a4a.unlayoutCallback();
+            expect(unlayoutUISpy).to.be.calledOnce;
             expect(a4a.originalSlotSize_).to.be.ok;
             attemptChangeSizeResolver();
             return timerFor(a4a.win).promise(1).then(() => {
@@ -1242,17 +1243,17 @@ describe('amp-a4a', () => {
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         const forceCollapseSpy = sandbox.spy(a4a, 'forceCollapse');
-        const expectStates = [];
+        const noContentUISpy = sandbox.spy();
         a4a.uiHandler = {
-          setDisplayState: state => {expectStates.push(state);},
+          applyNoContentUI: () => {noContentUISpy();},
+          applyUnlayoutUI: () => {},
         };
         sandbox.stub(a4a, 'getLayoutBox').returns({width: 123, height: 456});
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.ok;
         return a4a.adPromise_.then(() => {
           expect(forceCollapseSpy).to.be.calledOnce;
-          expect(expectStates).to.deep.equal(
-            [AdDisplayState.LOADING, AdDisplayState.LOADED_NO_CONTENT]);
+          expect(noContentUISpy).to.be.calledOnce;
           return a4a.layoutCallback().then(() => {
             // should have no iframe.
             expect(a4aElement.querySelector('iframe')).to.not.be.ok;
@@ -1766,7 +1767,7 @@ describe('amp-a4a', () => {
         a4a.buildCallback();
         a4a.onLayoutMeasure();
         const adPromise = a4a.adPromise_;
-        // This is to prevent `displayUnlayoutUI` to be called;
+        // This is to prevent `applyUnlayoutUI` to be called;
         a4a.uiHandler.state = 0;
         a4a.unlayoutCallback();
         // Force vsync system to run all queued tasks, so that DOM mutations

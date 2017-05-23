@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {AdDisplayState} from './amp-ad-ui';
 import {CommonSignals} from '../../../src/common-signals';
 import {
   IntersectionObserver,
@@ -272,7 +271,6 @@ export class AmpAdXOriginIframeHandler {
    * @private
    */
   renderStart_(opt_info) {
-    this.uiHandler_.setDisplayState(AdDisplayState.LOADED_RENDER_START);
     this.baseInstance_.renderStarted();
     if (!opt_info) {
       return;
@@ -313,7 +311,7 @@ export class AmpAdXOriginIframeHandler {
       return;
     }
     this.freeXOriginIframe(this.iframe.name.indexOf('_master') >= 0);
-    this.uiHandler_.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
+    this.uiHandler_.applyNoContentUI();
   }
 
   /**
