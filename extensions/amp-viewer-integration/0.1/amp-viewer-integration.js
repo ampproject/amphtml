@@ -65,7 +65,7 @@ export class AmpViewerIntegration {
     const viewer = viewerForDoc(this.win.document);
     this.isWebView_ = viewer.getParam('webview') == '1';
     this.isHandShakePoll_ = viewer.hasCapability('handshakepoll');
-    let origin = viewer.getParam('origin');
+    const origin = viewer.getParam('origin') || '';
 
     if (!this.isWebView_ && !origin) {
       return Promise.resolve();
@@ -79,7 +79,6 @@ export class AmpViewerIntegration {
         source = this.win.parent;
       } else {
         source = null;
-        origin = '';
       }
       return this.webviewPreHandshakePromise_(source, origin)
           .then(receivedPort => {
