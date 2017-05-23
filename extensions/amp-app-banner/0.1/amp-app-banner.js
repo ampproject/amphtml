@@ -254,10 +254,17 @@ export class AmpIosAppBanner extends AbstractAppBanner {
 
   /** @override */
   openButtonClicked(openInAppUrl, installAppUrl) {
-    timerFor(this.win).delay(() => {
-      this.viewer_.sendMessage('navigateTo', {url: installAppUrl});
-    }, 1500);
-    this.viewer_.sendMessage('navigateTo', {url: openInAppUrl});
+    if (!this.viewer_.isEmbedded()) {
+      timerFor(this.win).delay(() => {
+        openWindowDialog(this.win, installAppUrl, '_top');
+      }, 1500);
+      openWindowDialog(this.win, openInAppUrl, '_top');
+    } else {
+      timerFor(this.win).delay(() => {
+        this.viewer_.sendMessage('navigateTo', {url: installAppUrl});
+      }, 1500);
+      this.viewer_.sendMessage('navigateTo', {url: openInAppUrl});
+    }
   }
 
   /**
