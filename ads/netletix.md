@@ -35,7 +35,7 @@ limitations under the License.
 - ```data-nxunit``` (mandatory, String, non-empty)
 - ```data-nxwidth``` (mandatory, String, non-empty)
 - ```data-nxheight``` (mandatory, String, non-empty)
-##Optional Parameters 
+## Optional Parameters 
 - ```data-nxasync``` (String, non-empty)
 - ```data-nxv``` (String, non-empty)
 - ```data-nxsite``` (String, non-empty)

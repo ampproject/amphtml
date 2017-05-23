@@ -14,9 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-#Adverticum
+# Adverticum
 
-##Example
+## Example
 
 ```html
 <amp-ad width=300 height=250
@@ -26,7 +26,7 @@ limitations under the License.
 </amp-ad>
 ```
 
-##Configuration
+## Configuration
 
 The only supported costume parameters are: 
 
@@ -38,7 +38,7 @@ Optional parameter:
 
  - ```data-costumetargetstring:``` It's value must be Base64Encoded!
 
-##Support and contact
+## Support and contact
 
 For further information and specific configuration please contact our support team via e-mail:
 support@adverticum.com

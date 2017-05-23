@@ -40,8 +40,6 @@ limitations under the License.
 </amp-ad>
 ```
 
-###
-
 ## Configuration
 
 For configuration details and to generate your tags, please contact https://www.valuecommerce.ne.jp/info/
