@@ -30,5 +30,3 @@ export function fakeIsA4AEnabled(win, element) {
   const a4aRequested = element.getAttribute('data-use-a4a');
   return !!a4aRequested;
 }
-
-export const adConfig = {};

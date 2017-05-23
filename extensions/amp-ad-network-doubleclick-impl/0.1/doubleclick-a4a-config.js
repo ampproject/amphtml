@@ -134,11 +134,3 @@ export function doubleclickIsA4AEnabled(win, element) {
   }
   return enableA4A;
 }
-
-export const adConfig = {
-  preconnect: [
-    'https://partner.googleadservices.com',
-    'https://tpc.googlesyndication.com',
-  ],
-  clientIdScope: 'AMP_ECID_GOOGLE',
-};

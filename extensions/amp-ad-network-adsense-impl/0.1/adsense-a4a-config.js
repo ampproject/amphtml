@@ -107,7 +107,3 @@ export function adsenseIsA4AEnabled(win, element) {
         externalBranches, internalBranches,
         ADSENSE_A4A_EXTERNAL_DELAYED_EXPERIMENT_BRANCHES_PRE_LAUNCH);
 }
-
-export const adConfig = {
-  preconnect: 'https://googleads.g.doubleclick.net',
-};

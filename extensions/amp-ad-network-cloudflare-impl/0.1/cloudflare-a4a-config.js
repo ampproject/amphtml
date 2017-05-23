@@ -24,5 +24,3 @@ export function cloudflareIsA4AEnabled() {
   // when non-a4a content is delivered
   return true;
 }
-
-export const adConfig = {};

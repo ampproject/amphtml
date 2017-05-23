@@ -44,16 +44,6 @@ const GMOSSP_BASE_URL_ = 'https://sp.gmossp-sp.jp';
  */
 export class AmpAdNetworkGmosspImpl extends AmpA4A {
 
-  /**
-   * @param {!Element} element
-   */
-  constructor(element) {
-    super(element);
-
-    /** {?Object} */
-    this.config = adConfig;
-  }
-
   /** @override */
   isValidElement() {
     return this.isAmpAdElement() &&

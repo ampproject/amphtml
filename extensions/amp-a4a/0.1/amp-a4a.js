@@ -398,6 +398,16 @@ export class AmpA4A extends AMP.BaseElement {
     return true;
   }
 
+  /** @return {!Array|!String} */
+  getPreconnectUrls() {
+    return false;
+  }
+
+  /** @return {!Array|!String} */
+  getPrefetchUrls() {
+    return false;
+  }
+
   /**
    * Returns true if this element was loaded from an amp-ad element.  For use by
    * network-specific implementations that don't want to allow themselves to be
@@ -418,10 +428,10 @@ export class AmpA4A extends AMP.BaseElement {
   preconnectCallback(unusedOnLayout) {
     this.preconnect.preload(this.getSafeframePath_());
     this.preconnect.preload(getDefaultBootstrapBaseUrl(this.win, 'nameframe'));
-    if (!this.config) {
+    const preconnect = this.getPreconnectUrls();
+    if (!preconnect) {
       return;
     }
-    const preconnect = this.config.preconnect;
     // NOTE(keithwrightbos): using onLayout to indicate if preconnect should be
     // given preferential treatment.  Currently this would be false when
     // relevant (i.e. want to preconnect on or before onLayoutMeasure) which
