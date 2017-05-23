@@ -1881,7 +1881,6 @@ function getViewportType(win, viewer) {
   }
 
   // Override to ios-embed for iframe-viewer mode.
-  // TODO(lannka, #6213): Reimplement binding selection for in-a-box.
   if (isIframed(win) && viewer.isEmbedded()) {
     return ViewportType.NATURAL_IOS_EMBED;
   }
