@@ -80,6 +80,7 @@ import {amoad} from '../ads/amoad';
 import {appnexus} from '../ads/appnexus';
 import {atomx} from '../ads/atomx';
 import {brainy} from '../ads/brainy';
+import {bringhub} from '../ads/bringhub';
 import {caajainfeed} from '../ads/caajainfeed';
 import {capirs} from '../ads/capirs';
 import {caprofitx} from '../ads/caprofitx';
@@ -177,6 +178,7 @@ import {zucks} from '../ads/zucks';
  */
 const AMP_EMBED_ALLOWED = {
   _ping_: true,
+  bringhub: true,
   'mantis-recommend': true,
   mywidget: true,
   outbrain: true,
@@ -241,6 +243,7 @@ register('amoad', amoad);
 register('appnexus', appnexus);
 register('atomx', atomx);
 register('brainy', brainy);
+register('bringhub', bringhub);
 register('caajainfeed', caajainfeed);
 register('capirs', capirs);
 register('caprofitx', caprofitx);

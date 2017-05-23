@@ -198,6 +198,15 @@ export const adConfig = {
 
   brainy: {},
 
+  bringhub: {
+    renderStartImplemented: true,
+    preconnect: [
+      'https://static.bh-cdn.com',
+      'https://core-api.bringhub.io',
+    ],
+  },
+
+
   caajainfeed: {
     prefetch: [
       'https://cdn.amanad.adtdp.com/sdk/ajaamp.js',
