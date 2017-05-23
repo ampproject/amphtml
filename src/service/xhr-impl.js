@@ -181,8 +181,8 @@ export class Xhr {
       }
       return response;
     }, reason => {
-      user().assert(false, 'Fetch failed %s: %s', input,
-          reason && reason.message);
+      throw user().createExpectedError('XHR', `Failed fetching` +
+          ` (${targetOrigin}/...):`, reason && reason.message);
     });
   }
 
