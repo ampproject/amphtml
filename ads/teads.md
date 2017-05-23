@@ -28,7 +28,7 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please contact [Teads](http://teads.tv/fr/contact/).
+For semantics of configuration, please contact [Teads](http://teads.tv/teads-contact/).
 
 Supported parameters:
 

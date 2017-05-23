@@ -642,6 +642,7 @@ export const adConfig = {
       'https://a.teads.tv',
       'https://t.teads.tv',
     ],
+    renderStartImplemented: true,
   },
 
   triplelift: {},
