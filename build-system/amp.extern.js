@@ -60,16 +60,6 @@ window.AMP_CONFIG.errorReportingUrl;
 
 window.AMP_CONTEXT_DATA;
 
-/**
- * @typedef {{
- *   observe: function(!Object),
- *   disconnect: function(),
- * }}
- */
-let PerformanceObserver;
-window.PerformanceObserver;
-window.TaskAttributionTiming;
-
 // amp-viz-vega related externs.
 /**
  * @typedef {{spec: function(!JSONType, function())}}

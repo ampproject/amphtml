@@ -16,7 +16,7 @@
 
 import {isExperimentOn} from '../experiments';
 import {performanceForOrNull} from '../services';
-import {dev} from '../log';
+import {dev, user} from '../log';
 
 /** @const {number} */
 const NTH_FRAME = 200;
@@ -147,7 +147,8 @@ export class JankMeter {
           const span = this.win_.Math.floor(entries[i].duration / 50);
           if (entries[i].name == 'cross-origin-descendant') {
             this.longTaskChild_ += span;
-            dev().info('LONGTASK', `from child frame ${entries[i].duration}ms`);
+            user().info(
+                'LONGTASK', `from child frame ${entries[i].duration}ms`);
           } else {
             this.longTaskSelf_ += span;
             dev().info('LONGTASK', `from self frame ${entries[i].duration}ms`);
