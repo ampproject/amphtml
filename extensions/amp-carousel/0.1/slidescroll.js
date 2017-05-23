@@ -20,6 +20,7 @@ import {actionServiceForDoc} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
+import {isConnectedNode} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getStyle, setStyle} from '../../../src/style';
 import {numeric} from '../../../src/transition';
@@ -186,6 +187,8 @@ export class AmpSlideScroll extends BaseSlides {
 
       // Slides must only be re-parented to DOM-connected nodes to avoid
       // errors when used in a shadow document (#9291).
+      dev().assert(isConnectedNode(slideWrapper),
+          'Slides must only be re-parented to connected nodes.');
       slideWrapper.appendChild(slide);
 
       this.slideWrappers_.push(slideWrapper);
