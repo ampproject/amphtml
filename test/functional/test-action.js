@@ -1041,7 +1041,6 @@ describes.fakeWin('Core events', {amp: true}, env => {
     const event = {target: element};
     handler(event);
 
-
     expect(action.trigger).to.have.been.calledWith(
         element,
         'change',

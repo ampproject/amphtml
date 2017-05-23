@@ -346,12 +346,12 @@ export class ActionService {
 
   /**
    * @param {!Element} source
-   * @param {string} ActionEventDefType
+   * @param {string} actionEventType
    * @param {?ActionEventDef} event
    * @private
    */
-  action_(source, ActionEventDefType, event) {
-    const action = this.findAction_(source, ActionEventDefType);
+  action_(source, actionEventType, event) {
+    const action = this.findAction_(source, actionEventType);
     if (!action) {
       // TODO(dvoytenko): implement default (catch-all) actions.
       return;
@@ -461,14 +461,14 @@ export class ActionService {
 
   /**
    * @param {!Element} target
-   * @param {string} ActionEventDefType
+   * @param {string} actionEventType
    * @return {?{node: !Element, actionInfos: !Array<!ActionInfoDef>}}
    */
-  findAction_(target, ActionEventDefType) {
+  findAction_(target, actionEventType) {
     // Go from target up the DOM tree and find the applicable action.
     let n = target;
     while (n) {
-      const actionInfos = this.matchActionInfos_(n, ActionEventDefType);
+      const actionInfos = this.matchActionInfos_(n, actionEventType);
       if (actionInfos) {
         return {node: n, actionInfos: dev().assert(actionInfos)};
       }
@@ -479,15 +479,15 @@ export class ActionService {
 
   /**
    * @param {!Element} node
-   * @param {string} ActionEventDefType
+   * @param {string} actionEventType
    * @return {?Array<!ActionInfoDef>}
    */
-  matchActionInfos_(node, ActionEventDefType) {
+  matchActionInfos_(node, actionEventType) {
     const actionMap = this.getActionMap_(node);
     if (!actionMap) {
       return null;
     }
-    return actionMap[ActionEventDefType] || null;
+    return actionMap[actionEventType] || null;
   }
 
   /**
