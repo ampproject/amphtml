@@ -22,7 +22,8 @@ limitations under the License.
 <amp-ad width=320 height=200
     type="bidtellect"
     data-t="20bc0442-8vec-41f8-9892-04be6e6c3521"
-    data-pid="815676411">
+    data-pid="815676411"
+    data-sid="234022">
 </amp-ad>
 ```
 
@@ -32,13 +33,12 @@ Any questions, please [contact Bidtellect](mailto:technology@bidtellect.com).
 
 Required Parameters:
 
-- ```data-t```  - Parent publisher security token. 
+- ```data-t```  - Parent publisher security token.
 - ```data-pid```  - The unique identifier for your placement.
-
+- ```data-sid```  - Unique identifier for the site.
 
 Optional Parameters:
 
-- ```data-sid```  - Unique identifier for the site.
 - ```data-sname```  - Name of site that corresponds to the Site ID.
 - ```data-pubid```  - Unique identifier for the publisher.
 - ```data-pubname```  - Name of publisher that corresponds to the Publisher ID.
