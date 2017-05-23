@@ -57,12 +57,12 @@ Playlist Mode:
 
 ## Required attributes
 
-###Single Mode: 
+### Single Mode: 
 **data-apester-media-id**
 
 The ID of the media, a string.
 
-###Playlist Mode: 
+### Playlist Mode: 
 **data-apester-channel-token**
 
 The token of the channel, a string.
