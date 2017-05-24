@@ -70,14 +70,13 @@ export class AmpAdExit extends AMP.BaseElement {
     const target = this.targets_[args.target];
     user().assert(target, `Exit target not found: '${args.target}'`);
 
-    const realEvent = /** @type {!Event} */(actionEvent);
-    realEvent.preventDefault();
-    if (!this.filter_(this.defaultFilters_, realEvent) ||
-        !this.filter_(target.filters, realEvent)) {
+    event.preventDefault();
+    if (!this.filter_(this.defaultFilters_, event) ||
+        !this.filter_(target.filters, event)) {
       return;
     }
     const substituteVariables =
-        this.getUrlVariableRewriter_(args, realEvent, target);
+        this.getUrlVariableRewriter_(args, event, target);
     if (target.trackingUrls) {
       target.trackingUrls.map(substituteVariables)
           .forEach(url => this.pingTrackingUrl_(url));
@@ -88,7 +87,7 @@ export class AmpAdExit extends AMP.BaseElement {
 
   /**
    * @param {!Object<string, string|number|boolean>} args
-   * @param {!Event} event
+   * @param {!../../../src/service/action-impl.ActionEventDef} event
    * @param {!NavigationTarget} target
    * @return {function(string): string}
    */
@@ -141,7 +140,7 @@ export class AmpAdExit extends AMP.BaseElement {
    * Checks the click event against the given filters. Returns true if the event
    * passes.
    * @param {!Array<!./filters/filter.Filter>} filters
-   * @param {!Event} event
+   * @param {!../../../src/service/action-impl.ActionEventDef} event
    * @returns {boolean}
    */
   filter_(filters, event) {
