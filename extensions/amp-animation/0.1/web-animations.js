@@ -18,9 +18,11 @@ import {CssNumberNode, CssTimeNode, isVarCss} from './css-expr-ast';
 import {Observable} from '../../../src/observable';
 import {ScrollboundPlayer} from './scrollbound-player';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
+import {closestBySelector} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {getVendorJsPropertyName, computedStyle} from '../../../src/style';
-import {isArray, isObject} from '../../../src/types';
+import {isArray, isObject, toArray} from '../../../src/types';
 import {map} from '../../../src/utils/object';
 import {parseCss} from './css-expr';
 import {
@@ -321,21 +323,18 @@ export class MeasureScanner extends Scanner {
 
   /**
    * @param {!Window} win
+   * @param {!Node} rootNode
    * @param {string} baseUrl
-   * @param {{
-   *   queryTargets: function(string):!Array<!Element>,
-   *   resolveTarget: function(string):?Element,
-   * }} context
    * @param {boolean} validate
    */
-  constructor(win, baseUrl, context, validate) {
+  constructor(win, rootNode, baseUrl, validate) {
     super();
 
     /** @const @private */
-    this.css_ = new CssContextImpl(win, baseUrl);
+    this.rootNode_ = rootNode;
 
     /** @const @private */
-    this.context_ = context;
+    this.css_ = new CssContextImpl(win, rootNode, baseUrl);
 
     /** @const @private */
     this.validate_ = validate;
@@ -365,6 +364,9 @@ export class MeasureScanner extends Scanner {
    * @return {!Promise<!WebAnimationRunner>}
    */
   createRunner(resources) {
+    if (getMode().localDev || getMode().development) {
+      user().fine(TAG, 'Animation: ', this.requests_);
+    }
     return this.unblockElements_(resources).then(() => {
       return new WebAnimationRunner(this.requests_);
     });
@@ -530,7 +532,7 @@ export class MeasureScanner extends Scanner {
     if (spec.selector) {
       user().assert(!spec.target,
           'Both "selector" and "target" are not allowed');
-      targets = this.context_.queryTargets(spec.selector);
+      targets = this.queryTargets_(spec.selector);
       if (targets.length == 0) {
         user().warn(TAG, `Target not found: "${spec.selector}"`);
       }
@@ -541,7 +543,7 @@ export class MeasureScanner extends Scanner {
       }
       const target = user().assertElement(
           typeof spec.target == 'string' ?
-              this.context_.resolveTarget(spec.target) :
+              this.resolveTarget_(spec.target) :
               spec.target,
           `Target not found: "${spec.target}"`);
       targets = [target];
@@ -555,6 +557,30 @@ export class MeasureScanner extends Scanner {
     });
     return targets;
   }
+
+  /**
+   * @param {string} id
+   * @return {?Element}
+   * @private
+   * TODO(dvoytenko, #9129): cleanup deprecated string targets.
+   */
+  resolveTarget_(id) {
+    return this.rootNode_.getElementById(id);
+  }
+
+  /**
+   * @param {string} selector
+   * @return {!Array<!Element>}
+   * @private
+   */
+  queryTargets_(selector) {
+    try {
+      return toArray(this.rootNode_./*OK*/querySelectorAll(selector));
+    } catch (e) {
+      throw user().createError('Invalid selector: ', selector);
+    }
+  }
+
 
   /**
    * Merges timing by defaulting values from the previous timing.
@@ -652,11 +678,15 @@ export class MeasureScanner extends Scanner {
 class CssContextImpl {
   /**
    * @param {!Window} win
+   * @param {!Node} rootNode
    * @param {string} baseUrl
    */
-  constructor(win, baseUrl) {
+  constructor(win, rootNode, baseUrl) {
     /** @const @private */
     this.win_ = win;
+
+    /** @const @private */
+    this.rootNode_ = rootNode;
 
     /** @const @private */
     this.baseUrl_ = baseUrl;
@@ -893,6 +923,35 @@ class CssContextImpl {
   /** @override */
   getCurrentElementSize() {
     return this.getElementSize_(this.requireTarget_());
+  }
+
+  /** @override */
+  getElementSize(selector, selectionMethod) {
+    return this.getElementSize_(this.getElement_(selector, selectionMethod));
+  }
+
+  /**
+   * @param {string} selector
+   * @param {?string} selectionMethod
+   * @return {!Element}
+   * @private
+   */
+  getElement_(selector, selectionMethod) {
+    dev().assert(
+        selectionMethod == null || selectionMethod == 'closest',
+        'Unknown selection method: %s', selectionMethod);
+    const context = this.requireTarget_();
+    let element;
+    try {
+      if (selectionMethod == 'closest') {
+        element = closestBySelector(context, selector);
+      } else {
+        element = this.rootNode_./*OK*/querySelector(selector);
+      }
+    } catch (e) {
+      throw user().createError(`Bad query selector: "${selector}"`, e);
+    }
+    return user().assertElement(element, `Element not found: ${selector}`);
   }
 
   /**
