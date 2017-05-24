@@ -292,6 +292,14 @@ describes.sandboxed('UrlReplacements', {}, () => {
         });
   });
 
+  it('should parse _ga cookie correctly', () => {
+    setCookie(window, '_ga', 'GA1.2.12345.54321');
+    return expandAsync('?a=CLIENT_ID(AMP_ECID_GOOGLE,,_ga)&b=CLIENT_ID(_ga)',
+        /*opt_bindings*/undefined, {withCid: true}).then(res => {
+          expect(res).to.match(/^\?a=12345.54321&b=12345.54321/);
+        });
+  });
+
   it('should replace CLIENT_ID synchronously when available', () => {
     return getReplacements({withCid: true}).then(urlReplacements => {
       setCookie(window, 'url-abc', 'cid-for-abc');
