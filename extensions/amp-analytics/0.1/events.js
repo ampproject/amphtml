@@ -154,10 +154,8 @@ export class CustomEventTracker extends EventTracker {
     }
 
     return this.observers_[eventType].add(event => {
-      //console.log('add listener');
       // Wait for target selected
       targetReady.then(target => {
-        //console.log('trigger target handler');
         if (target.contains(event.target)) {
           listener(event);
         }
@@ -277,10 +275,8 @@ export class SignalTracker extends EventTracker {
           selector,
           selectionMethod
           ).then(element => {
-            target = user().assertElement(
-                element, `Element "${selector}" not found`);;
-            return this.getElementSignal(
-                eventType, target);
+            target = element;
+            return this.getElementSignal(eventType, target);
           });
     }
 
@@ -339,10 +335,8 @@ export class IniLoadTracker extends EventTracker {
           selector,
           selectionMethod
           ).then(element => {
-            target = user().assertElement(
-                element, `Element "${selector}" not found`);;
-            return this.getElementSignal(
-                'ini-load', /** @type{!Element} */ (element));
+            target = element;
+            return this.getElementSignal('ini-load', target);
           });
     }
     // Wait for the target and the event.
@@ -422,8 +416,6 @@ export class VisibilityTracker extends EventTracker {
         selector,
         selectionMethod
         ).then(element => {
-          element =
-              user().assertElement(element, `Element "${selector}" not found`);
           return visibilityManager.listenElement(
             element,
             visibilitySpec,

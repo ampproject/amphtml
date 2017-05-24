@@ -142,27 +142,31 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
 
   describe('getElement', () => {
 
-    let getElementTestInstances;
+    let allTestInstances;
+    let getTestPromise;
     let addTestInstance;
+
     beforeEach(() => {
-      getElementTestInstances = {
-        'promises': [],
-        'results': [],
+      getTestPromise = (promise, result) => {
+        return promise.then(element => {
+          expect(result).to.not.be.null;
+          expect(element).to.equal(result);
+        }).catch(error => {
+          expect(error).to.match(new RegExp(result));
+        });
       };
+
+      allTestInstances = [];
+
       addTestInstance = (promise, result) => {
-        getElementTestInstances.promises.push(promise);
-        getElementTestInstances.results.push(result);
+        allTestInstances.push(getTestPromise(promise, result));
       };
     });
 
     afterEach(() => {
-      // Tests happen here.
-      return Promise.all(getElementTestInstances.promises).then(values => {
-        for (let i = 0; i < values.length; i++) {
-          expect(values[i]).to.equal(getElementTestInstances.results[i]);
-        }
-      });
+      return Promise.all(allTestInstances);
     });
+
 
     it('should find :root', () => {
       const rootElement = win.document.documentElement;
@@ -174,10 +178,14 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
     });
 
     it('should find :host, but always null', () => {
-      addTestInstance(root.getElement(body, ':host'), null);
-      addTestInstance(root.getElement(target, ':host'), null);
-      addTestInstance(root.getElement(target, ':host', ':scope'), null);
-      addTestInstance(root.getElement(target, ':host', ':closest'), null);
+      addTestInstance(root.getElement(body, ':host'),
+          'Element ":host" not found');
+      addTestInstance(root.getElement(target, ':host'),
+          'Element ":host" not found');
+      addTestInstance(root.getElement(target, ':host', ':scope'),
+          'Element ":host" not found');
+      addTestInstance(root.getElement(target, ':host', ':closest'),
+          'Element ":host" not found');
     });
 
     it('should find element by ID', () => {
@@ -281,7 +289,8 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
     });
 
     it('should allow not-found element for AMP search', () => {
-      addTestInstance(root.getAmpElement(body, '#unknown'), null);
+      addTestInstance(root.getAmpElement(body, '#unknown'),
+          'Element "#unknown" not found');
     });
 
     it('should fail if the found element is not AMP for AMP search', () => {

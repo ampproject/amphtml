@@ -178,25 +178,25 @@ export class AnalyticsRoot {
    * @param {string} selector DOM query selector.
    * @param {?string=} selectionMethod Allowed values are `null`,
    *   `'closest'` and `'scope'`.
-   * @return {Promise<?Element>} Element corresponding to the selector if found.
+   * @return {!Promise<!Element>} Element corresponding to the selector.
    */
   getElement(context, selector, selectionMethod = null) {
     // Special case selectors. The selection method is irrelavant.
     // And no need to wait for document ready.
     if (selector == ':root') {
-      return Promise.resolve().then(() => {
-        return this.getRootElement();
-      });
+      return Promise.resolve(this.getRootElement());
     }
     if (selector == ':host') {
       return Promise.resolve().then(() => {
-        return this.getHostElement();
+        return user().assertElement(
+          this.getHostElement(), `Element "${selector}" not found`);
       });
     }
 
     // Wait for document-ready to avoid false missed searches
     return this.ampdoc.whenReady().then(() => {
       let found;
+      let result = null;
       // Query search based on the selection method.
       if (selectionMethod == 'scope') {
         found = scopedQuerySelector(context, selector);
@@ -208,9 +208,10 @@ export class AnalyticsRoot {
       // DOM search can "look" outside the boundaries of the root, thus make
       // sure the result is contained.
       if (found && this.contains(found)) {
-        return found;
+        result = found;
       }
-      return null;
+      return user().assertElement(
+          result, `Element "${selector}" not found`);
     });
   }
 
@@ -222,15 +223,13 @@ export class AnalyticsRoot {
    * @param {string} selector DOM query selector.
    * @param {?string=} selectionMethod Allowed values are `null`,
    *   `'closest'` and `'scope'`.
-   * @return {Promise<?AmpElement>} AMP element corresponding to the selector if found.
+   * @return {!Promise<!AmpElement>} AMP element corresponding to the selector if found.
    */
   getAmpElement(context, selector, selectionMethod) {
     return this.getElement(context, selector, selectionMethod).then(element => {
-      if (element) {
-        user().assert(
-            element.classList.contains('i-amphtml-element'),
-            'Element "%s" is required to be an AMP element', selector);
-      }
+      user().assert(
+          element.classList.contains('i-amphtml-element'),
+          'Element "%s" is required to be an AMP element', selector);
       return element;
     });
   }
