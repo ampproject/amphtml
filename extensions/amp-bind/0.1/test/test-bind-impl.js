@@ -18,6 +18,7 @@ import * as sinon from 'sinon';
 import {Bind} from '../bind-impl';
 import {chunkInstanceForTesting} from '../../../../src/chunk';
 import {installTimerService} from '../../../../src/service/timer-impl';
+import {parseUrl} from '../../../../src/url';
 import {toArray} from '../../../../src/types';
 import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
@@ -30,6 +31,7 @@ describes.realWin('Bind', {
   let bind;
 
   beforeEach(() => {
+    env.win.testLocation = parseUrl('http://localhost:31862');
     installTimerService(env.win);
     toggleExperiment(env.win, 'amp-bind', true);
 

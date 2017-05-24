@@ -111,5 +111,17 @@ app.use('/form/post', function(req, res) {
   });
 });
 
+/**
+ * Serve entry point script url
+ */
+app.get('/dist/ww.js', function(req, res, next) {
+  // Speical case for entry point script url. Use compiled for testing
+  var mode = process.env.SERVE_MODE;
+  if (mode == 'default') {
+    req.url = req.url.replace(/\.js$/, '.max.js');
+  }
+  next();
+});
+
 
 exports.app = app;
