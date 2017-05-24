@@ -58,7 +58,7 @@ The `<amp-ad>` requires width and height values to be specified according to the
             resizable
             src="https://ampproject-b5f4c.firebaseapp.com/examples/ampad.basic.embed.html">
   <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div> 
+  <div placeholder></div>
 </amp-iframe>
 </div>
 
@@ -105,7 +105,7 @@ Optionally, `amp-ad` supports a child element with the `placeholder` attribute. 
 
 ## No ad available
 
-The `amp-ad` component supports a child element with the `fallback` attribute. If supported by the ad network, the fallback element is shown if no ad is available for this slot. 
+The `amp-ad` component supports a child element with the `fallback` attribute. If supported by the ad network, the fallback element is shown if no ad is available for this slot.
 
 If there is no fallback element available, the `amp-ad` element is collapsed (that is, set to `display: none`) if the ad sends a message that the ad slot cannot be filled and AMP determines that this operation can be performed without affecting the user's scroll position.
 
@@ -188,6 +188,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Adblade](../../ads/adblade.md)
 - [AdButler](../../ads/adbutler.md)
 - [Adform](../../ads/adform.md)
+- [Adfox](../../ads/adfox.md)
 - [Ad Generation](../../ads/adgeneration.md)
 - [Adhese](../../ads/adhese.md)
 - [ADITION](../../ads/adition.md)
@@ -208,7 +209,6 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [AMoAd](../../ads/amoad.md)
 - [AppNexus](../../ads/appnexus.md)
 - [Atomx](../../ads/atomx.md)
-- [Bidtellect](../../ads/bidtellect.md)
 - [brainy](../../ads/brainy.md)
 - [CA A.J.A. Infeed](../../ads/caajainfeed.md)
 - [CA-ProFit-X](../../ads/caprofitx.md)
@@ -225,6 +225,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [E-Planning](../../ads/eplanning.md)
 - [Ezoic](../../ads/ezoic.md)
 - [FlexOneELEPHANT](../../ads/f1e.md)
+- [FlexOneHARRIER](../../ads/f1h.md)
 - [fluct](../../ads/fluct.md)
 - [Felmat](../../ads/felmat.md)
 - [Flite](../../ads/flite.md)
@@ -256,6 +257,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Nativo](../../ads/nativo.md)
 - [Navegg](../../ads/navegg.md)
 - [Nend](../../ads/nend.md)
+- [NETLETIX](../../ads/netletix.md)
 - [Nokta](../../ads/nokta.md)
 - [Open AdStream (OAS)](../../ads/openadstream.md)
 - [OpenX](../../ads/openx.md)
@@ -277,6 +279,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [smartclip](../../ads/smartclip.md)
 - [Sortable](../../ads/sortable.md)
 - [SOVRN](../../ads/sovrn.md)
+- [SpotX](../../ads/spotx.md)
 - [SunMedia](../../ads/sunmedia.md)
 - [Swoop](../../ads/swoop.md)
 - [Teads](../../ads/teads.md)
@@ -288,6 +291,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Xlift](../../ads/xlift.md)
 - [Yahoo](../../ads/yahoo.md)
 - [YahooJP](../../ads/yahoojp.md)
+- [Yandex](../../ads/yandex.md)
 - [Yieldbot](../../ads/yieldbot.md)
 - [Yieldmo](../../ads/yieldmo.md)
 - [Yieldone](../../ads/yieldone.md)
@@ -296,6 +300,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 
 ## Supported embed types
 
+- [Bringhub](../../ads/bringhub.md)
 - [Outbrain](../../ads/outbrain.md)
 - [Taboola](../../ads/taboola.md)
 - [ZergNet](../../ads/zergnet.md)
