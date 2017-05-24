@@ -84,6 +84,11 @@ export const adConfig = {
 
   adform: {},
 
+  adfox: {
+    prefetch: 'https://yastatic.net/pcode/adfox/loader.js',
+    renderStartImplemented: true,
+  },
+
   adgeneration: {
     prefetch: 'https://i.socdm.com/sdk/js/adg-script-loader.js',
   },
@@ -192,6 +197,15 @@ export const adConfig = {
   },
 
   brainy: {},
+
+  bringhub: {
+    renderStartImplemented: true,
+    preconnect: [
+      'https://static.bh-cdn.com',
+      'https://core-api.bringhub.io',
+    ],
+  },
+
 
   caajainfeed: {
     prefetch: [
@@ -599,6 +613,11 @@ export const adConfig = {
     prefetch: 'https://ap.lijit.com/www/sovrn_amp/sovrn_ads.js',
   },
 
+  spotx: {
+    preconnect: 'https://js.spotx.tv',
+    renderStartImplemented: true,
+  },
+
   sunmedia: {
     prefetch: 'https://vod.addevweb.com/sunmedia/amp/ads/sunmedia.js',
     preconnect: 'https://static.addevweb.com',
@@ -669,6 +688,11 @@ export const adConfig = {
       'https://yads.c.yimg.jp/js/yads.js',
     ],
     preconnect: 'https://yads.yahoo.co.jp',
+  },
+
+  yandex: {
+    prefetch: 'https://yastatic.net/partner-code/loaders/context_amp.js',
+    renderStartImplemented: true,
   },
 
   yieldbot: {

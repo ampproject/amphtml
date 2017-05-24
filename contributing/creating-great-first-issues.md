@@ -2,7 +2,7 @@
 
 The AMP Project welcomes new contributors and we want to make it as easy as possible for them to contribute.  For many new contributors (who may not have open source/Git/AMP/etc. experience) it can be difficult to figure out how to get started.
 
-To help these new contributors get oriented we curate [Great First Issues](https://github.com/ampproject/amphtml/milestone/25).  A Great First Issue is a starter issue that a new contributor can use to get comfortable contributing to the AMP Project.
+To help these new contributors get oriented we curate [Great First Issues](https://github.com/ampproject/amphtml/labels/Great%20First%20Issue).  A Great First Issue is a starter issue that a new contributor can use to get comfortable contributing to the AMP Project.
 
 We depend on experienced members of the community to identify bugs/features that would provide this orientation and to then create a well-documented Great First Issue for them.
 
@@ -20,5 +20,5 @@ Keep these qualities in mind when creating your Great First Issues:
 ## How to create a Great First Issue
 
 * When you identify an issue that would make a Great First Issue, create a new issue using the [Great First Issues Template](great-first-issues-template.md) (inspired by Hoodie's [template](https://github.com/hoodiehq/camp/blob/gh-pages/ISSUE_TEMPLATE.md)).  Copy the [raw markdown](https://raw.githubusercontent.com/ampproject/amphtml/master/contributing/great-first-issues-template.md) into your issue and follow the guidance in the comments.
-* Add the issue to the [Great First Issues milestone](https://github.com/ampproject/amphtml/milestone/25).
+* Add the [Great First Issue label](https://github.com/ampproject/amphtml/labels/Great%20First%20Issue) and add the issue to the [Great First Issues milestone](https://github.com/ampproject/amphtml/milestone/25).  (The redundancy is intentional.  Most other open source projects use a label for tracking these types of issues, so we do too... but we also ensure every bug is triaged to the right milestone.)
 * If you come across a good candidate for a Great First Issue but are momentarily unable to spend the time filling out the template add the [GFI Candidate](https://github.com/ampproject/amphtml/labels/GFI%20Candidate) label to the issue.  The time spent converting GFI Candidates to Great First Issues will pay off for the AMP Project so please remember to come back to issues you labeled as a GFI Candidate.

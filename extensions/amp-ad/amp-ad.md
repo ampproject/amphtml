@@ -188,6 +188,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Adblade](../../ads/adblade.md)
 - [AdButler](../../ads/adbutler.md)
 - [Adform](../../ads/adform.md)
+- [Adfox](../../ads/adfox.md)
 - [Ad Generation](../../ads/adgeneration.md)
 - [Adhese](../../ads/adhese.md)
 - [ADITION](../../ads/adition.md)
@@ -278,6 +279,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [smartclip](../../ads/smartclip.md)
 - [Sortable](../../ads/sortable.md)
 - [SOVRN](../../ads/sovrn.md)
+- [SpotX](../../ads/spotx.md)
 - [SunMedia](../../ads/sunmedia.md)
 - [Swoop](../../ads/swoop.md)
 - [Teads](../../ads/teads.md)
@@ -289,6 +291,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Xlift](../../ads/xlift.md)
 - [Yahoo](../../ads/yahoo.md)
 - [YahooJP](../../ads/yahoojp.md)
+- [Yandex](../../ads/yandex.md)
 - [Yieldbot](../../ads/yieldbot.md)
 - [Yieldmo](../../ads/yieldmo.md)
 - [Yieldone](../../ads/yieldone.md)
@@ -297,6 +300,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 
 ## Supported embed types
 
+- [Bringhub](../../ads/bringhub.md)
 - [Outbrain](../../ads/outbrain.md)
 - [Taboola](../../ads/taboola.md)
 - [ZergNet](../../ads/zergnet.md)

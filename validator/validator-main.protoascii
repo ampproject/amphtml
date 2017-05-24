@@ -2580,6 +2580,17 @@ tags {  # <form method=POST ...>
 }
 tags {
   tag_name: "DIV"
+  spec_name: "FORM > DIV [submitting]"
+  mandatory_parent: "FORM"
+  attrs: { name: "submitting" mandatory: true }
+  attrs: { name: "align" }
+  child_tags: {
+    mandatory_num_child_tags: 1
+    first_child_tag_name_oneof: "TEMPLATE"
+  }
+}
+tags {
+  tag_name: "DIV"
   spec_name: "FORM > DIV [submit-success]"
   mandatory_parent: "FORM"
   attrs: { name: "submit-success" mandatory: true }

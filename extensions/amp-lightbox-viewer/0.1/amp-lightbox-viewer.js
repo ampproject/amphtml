@@ -16,7 +16,7 @@
 
 
 import {CSS} from '../../../build/amp-lightbox-viewer-0.1.css';
-import {Keycodes} from '../../../src/utils/keycodes';
+import {KeyCodes} from '../../../src/utils/key-codes';
 import {ampdocServiceFor} from '../../../src/ampdoc';
 import {isExperimentOn} from '../../../src/experiments';
 import {Layout} from '../../../src/layout';
@@ -58,6 +58,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     /** @private {!boolean} */
     this.active_ = false;
 
+    /** @private {!number} */
+    this.currentElementId_ = -1;
+
     /** @private {!function(!Event)} */
     this.boundHandleKeyboardEvents_ = this.handleKeyboardEvents_.bind(this);
 
@@ -78,6 +81,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.descriptionBox_ = null;
+
+    /** @private {!Array<!Element>} */
+    this.clonedLightboxableElements_ = [];
 
     /** @private  {?Element} */
     this.gallery_ = null;
@@ -132,14 +138,33 @@ export class AmpLightboxViewer extends AMP.BaseElement {
             element.lightboxItemId = index++;
             const deepClone = !element.classList.contains(
                 'i-amphtml-element');
-            const nodeToClone = element.cloneNode(deepClone);
-            this.carousel_.appendChild(nodeToClone);
+            const clonedNode = element.cloneNode(deepClone);
+            clonedNode.removeAttribute('on');
+            const descText = this.manager_.getDescription(element);
+            if (descText) {
+              clonedNode.descriptionText = descText;
+            }
+            // TODO(yuxichen): store descriptionText and lightboxItemId in a
+            // list other than the node itself
+            this.clonedLightboxableElements_.push(clonedNode);
+            this.carousel_.appendChild(clonedNode);
           });
         });
       });
 
       this.container_.appendChild(this.carousel_);
+      this.carousel_.addEventListener(
+          'slideChange', event => {this.slideChangeHandler_(event);});
     }
+  }
+
+  /**
+   * Handles slide change.
+   * @private
+   */
+  slideChangeHandler_(event) {
+    this.currentElementId_ = event.data.index;
+    this.updateDescriptionBox_();
   }
 
   /**
@@ -157,14 +182,27 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   }
 
   /**
+   * Update description box text.
+   * @private
+   */
+  updateDescriptionBox_() {
+    const descText = this.clonedLightboxableElements_[this.currentElementId_]
+        .descriptionText;
+    this.descriptionBox_.textContent = descText;
+    if (!descText) {
+      this.descriptionBox_.classList.add('hide');
+    }
+  }
+
+  /**
    * Toggle description box if it has text content
    * @private
    */
   toggleDescriptionBox_() {
-    if (!this.descriptionBox_.textContent) {
-      return;
+    this.updateDescriptionBox_();
+    if (this.descriptionBox_.textContent) {
+      this.descriptionBox_.classList.toggle('hide');
     }
-    this.descriptionBox_.classList.toggle('hide');
   }
 
   /**
@@ -242,6 +280,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.scheduleLayout(this.container_);
 
     this.carousel_.implementation_.showSlideWhenReady_(element.lightboxItemId);
+    this.currentElementId_ = element.lightboxItemId;
 
     this.win.document.documentElement.addEventListener(
         'keydown', this.boundHandleKeyboardEvents_);
@@ -284,11 +323,11 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   handleKeyboardEvents_(event) {
     // TODO(aghassemi): RTL support
     const code = event.keyCode;
-    if (code == Keycodes.ESCAPE) {
+    if (code == KeyCodes.ESCAPE) {
       this.close_();
-    } else if (code == Keycodes.RIGHT_ARROW) {
+    } else if (code == KeyCodes.RIGHT_ARROW) {
       this.next_();
-    } else if (code == Keycodes.LEFT_ARROW) {
+    } else if (code == KeyCodes.LEFT_ARROW) {
       this.previous_();
     }
   }

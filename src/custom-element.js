@@ -40,6 +40,7 @@ import {
 import * as dom from './dom';
 import {setStyle, setStyles} from './style';
 import {LayoutDelayMeter} from './layout-delay-meter';
+import {ResourceState} from './service/resource';
 
 const TAG_ = 'CustomElement';
 
@@ -1172,6 +1173,14 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Returns the current resource state of the element.
+     * @return {!ResourceState}
+     */
+    getResourceState_() {
+      return this.getResources().getResourceForElement(this).getState();
+    }
+
+    /**
      * The runtime calls this method to determine if {@link layoutCallback}
      * should be called again when layout changes.
      * @return {boolean}
@@ -1568,17 +1577,24 @@ function createBaseCustomElementClass(win) {
     /**
      * Hides or shows the fallback, if available. This function must only
      * be called inside a mutate context.
-     * @param {boolean} state
+     * @param {boolean} show
      * @package @final @this {!Element}
      */
-    toggleFallback(state) {
+    toggleFallback(show) {
       assertNotTemplate(this);
+      const resourceState = this.getResourceState_();
+      // Do not show fallback before layout
+      if (show && (resourceState == ResourceState.NOT_BUILT ||
+          resourceState == ResourceState.NOT_LAID_OUT ||
+          resourceState == ResourceState.READY_FOR_LAYOUT)) {
+        return;
+      }
       // This implementation is notably less efficient then placeholder toggling.
       // The reasons for this are: (a) "not supported" is the state of the whole
       // element, (b) some realyout is expected and (c) fallback condition would
       // be rare.
-      this.classList.toggle('amp-notsupported', state);
-      if (state == true) {
+      this.classList.toggle('amp-notsupported', show);
+      if (show == true) {
         const fallbackElement = this.getFallback();
         if (fallbackElement) {
           this.getResources().scheduleLayout(this, fallbackElement);
@@ -1593,6 +1609,7 @@ function createBaseCustomElementClass(win) {
      */
     renderStarted() {
       this.signals_.signal(CommonSignals.RENDER_START);
+      this.togglePlaceholder(false);
       this.toggleLoading_(false);
     }
 

@@ -19,6 +19,7 @@ import {ElementStub, setLoadingCheckForTests} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
 import {installResourcesServiceForDoc} from '../../src/service/resources-impl';
 import {poll} from '../../testing/iframe';
+import {ResourceState} from '../../src/service/resource';
 import {resourcesForDoc} from '../../src/services';
 import {vsyncFor} from '../../src/services';
 import {
@@ -1372,21 +1373,49 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
   });
 
   it('toggleFallback should toggle unsupported class', () => {
-    const fallback = element.appendChild(createWithAttr('fallback'));
-    const resourcesSpy = sandbox.spy();
+    element.resource = {
+      getState: () => {return ResourceState.LAYOUT_COMPLETE;},
+    };
     element.resources_ = {
       scheduleLayout: function(el, fb) {
         if (el == element && fb == fallback) {
           resourcesSpy();
         }
       },
+      getResourceForElement: element => {
+        return element.resource;
+      },
     };
+    const fallback = element.appendChild(createWithAttr('fallback'));
+    const resourcesSpy = sandbox.spy();
     element.toggleFallback(true);
     expect(element).to.have.class('amp-notsupported');
     expect(resourcesSpy).to.be.calledOnce;
 
     element.toggleFallback(false);
     expect(element).to.not.have.class('amp-notsupported');
+  });
+
+  it('toggleFallback should not display fallback before element layout', () => {
+    let resourceState = ResourceState.NOT_LAID_OUT;
+    element.resource = {
+      getState: () => {return resourceState;},
+    };
+    element.resources_ = {
+      scheduleLayout: () => {},
+      getResourceForElement: element => {
+        return element.resource;
+      },
+    };
+    element.appendChild(createWithAttr('fallback'));
+    element.toggleFallback(true);
+    expect(element).to.not.have.class('amp-notsupported');
+    resourceState = ResourceState.READY_FOR_LAYOUT;
+    element.toggleFallback(true);
+    expect(element).to.not.have.class('amp-notsupported');
+    resourceState = ResourceState.LAYOUT_COMPLETE;
+    element.toggleFallback(true);
+    expect(element).to.have.class('amp-notsupported');
   });
 
   it('togglePlaceholder should NOT call in template', () => {

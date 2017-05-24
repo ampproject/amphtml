@@ -52,7 +52,6 @@ import {dev, user} from '../../../../src/log';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
-import {AdDisplayState} from '../../../../extensions/amp-ad/0.1/amp-ad-ui';
 import * as sinon from 'sinon';
 
 function setupForAdTesting(fixture) {
@@ -1189,17 +1188,18 @@ describe('amp-a4a', () => {
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         const forceCollapseSpy = sandbox.spy(a4a, 'forceCollapse');
-        const expectStates = [];
+        const noContentUISpy = sandbox.spy();
+        const unlayoutUISpy = sandbox.spy();
         a4a.uiHandler = {
-          setDisplayState: state => {expectStates.push(state);},
+          applyNoContentUI: () => {noContentUISpy();},
+          applyUnlayoutUI: () => {unlayoutUISpy();},
         };
         sandbox.stub(a4a, 'getLayoutBox').returns({width: 123, height: 456});
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.ok;
         return a4a.adPromise_.then(() => {
           expect(forceCollapseSpy).to.be.calledOnce;
-          expect(expectStates).to.deep.equal(
-            [AdDisplayState.LOADING, AdDisplayState.LOADED_NO_CONTENT]);
+          expect(noContentUISpy).to.be.calledOnce;
           return a4a.layoutCallback().then(() => {
             // should have no iframe.
             expect(a4aElement.querySelector('iframe')).to.not.be.ok;
@@ -1214,6 +1214,7 @@ describe('amp-a4a', () => {
             sandbox.stub(AMP.BaseElement.prototype, 'attemptChangeSize')
               .returns(attemptChangeSizePromise);
             a4a.unlayoutCallback();
+            expect(unlayoutUISpy).to.be.calledOnce;
             expect(a4a.originalSlotSize_).to.be.ok;
             attemptChangeSizeResolver();
             return timerFor(a4a.win).promise(1).then(() => {
@@ -1242,17 +1243,17 @@ describe('amp-a4a', () => {
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         const forceCollapseSpy = sandbox.spy(a4a, 'forceCollapse');
-        const expectStates = [];
+        const noContentUISpy = sandbox.spy();
         a4a.uiHandler = {
-          setDisplayState: state => {expectStates.push(state);},
+          applyNoContentUI: () => {noContentUISpy();},
+          applyUnlayoutUI: () => {},
         };
         sandbox.stub(a4a, 'getLayoutBox').returns({width: 123, height: 456});
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.ok;
         return a4a.adPromise_.then(() => {
           expect(forceCollapseSpy).to.be.calledOnce;
-          expect(expectStates).to.deep.equal(
-            [AdDisplayState.LOADING, AdDisplayState.LOADED_NO_CONTENT]);
+          expect(noContentUISpy).to.be.calledOnce;
           return a4a.layoutCallback().then(() => {
             // should have no iframe.
             expect(a4aElement.querySelector('iframe')).to.not.be.ok;
@@ -1502,6 +1503,98 @@ describe('amp-a4a', () => {
     // FAILURE cases here
   });
 
+  describe('SRA Ads Delay Measure', () => {
+    let fixture;
+    beforeEach(() => {
+      xhrMock.withArgs(TEST_URL, {
+        mode: 'cors',
+        method: 'GET',
+        credentials: 'include',
+      }).onFirstCall().returns(Promise.resolve(mockResponse));
+      return createIframePromise().then(f => {
+        setupForAdTesting(f);
+        fixture = f;
+        return fixture;
+      });
+    });
+    it('sends as expected', () => {
+      const win = fixture.win;
+      const a4a = new MockA4AImpl(createA4aElement(fixture.doc, win));
+      a4a.buildCallback();
+      const emitLifecycleEventSpy =
+        sandbox.spy(a4a, 'protectedEmitLifecycleEvent_');
+      a4a.onLayoutMeasure();
+      expect(a4a.adPromise_).to.be.ok;
+      return a4a.adPromise_.then(() => {
+        expect(win['a4a-measuring-ad-urls-adsense']).to.be.ok;
+        expect(win['a4a-measuring-ad-urls-doubleclick']).to.not.be.ok;
+        return win['a4a-measuring-ad-urls-adsense'].then(() => {
+          // TODO: get resources to include element so reported object can
+          // be verified.
+          expect(emitLifecycleEventSpy.withArgs(
+            'sraBuildRequestDelay',
+            {
+              'met.delta.AD_SLOT_ID': sinon.match.number,
+              'totalSlotCount.AD_SLOT_ID': 0,
+              'totalUrlCount.AD_SLOT_ID': 0,
+              'type.AD_SLOT_ID': 'adsense',
+              'totalQueriedSlotCount.AD_SLOT_ID': 0,
+            })).to.be.calledOnce;
+        });
+      });
+    });
+    it('does not execute if already present', () => {
+      const win = fixture.win;
+      win['a4a-measuring-ad-urls-adsense'] = true;
+      const a4aElement = createA4aElement(fixture.doc, win);
+      const a4a = new MockA4AImpl(a4aElement);
+      a4a.buildCallback();
+      const emitLifecycleEventSpy =
+        sandbox.spy(a4a, 'protectedEmitLifecycleEvent_');
+      a4a.onLayoutMeasure();
+      expect(a4a.adPromise_).to.be.ok;
+      return a4a.adPromise_.then(() => {
+        expect(emitLifecycleEventSpy).to.not.be.calledWith(
+          'sraBuildRequestDelay', sinon.match.object);
+      });
+    });
+    it('creates separate executions for doubleclick vs adsense', () => {
+      const win = fixture.win;
+      const adsenseA4a = new MockA4AImpl(createA4aElement(fixture.doc, win));
+      adsenseA4a.buildCallback();
+      const adSenseEmitLifecycleEventSpy =
+        sandbox.spy(adsenseA4a, 'protectedEmitLifecycleEvent_');
+      adsenseA4a.onLayoutMeasure();
+      expect(adsenseA4a.adPromise_).to.be.ok;
+      const doubleclickElement = createA4aElement(fixture.doc, win);
+      doubleclickElement.setAttribute('type', 'doubleclick');
+      const doubleclickA4a = new MockA4AImpl(doubleclickElement);
+      const doubleclickEmitLifecycleEventSpy =
+        sandbox.spy(doubleclickA4a, 'protectedEmitLifecycleEvent_');
+      doubleclickA4a.buildCallback();
+      doubleclickA4a.onLayoutMeasure();
+      expect(doubleclickA4a.adPromise_).to.be.ok;
+      return Promise.all(
+        [adsenseA4a.adPromise_, doubleclickA4a.adPromise_]).then(() => {
+          expect(win['a4a-measuring-ad-urls-adsense']).to.be.ok;
+          expect(win['a4a-measuring-ad-urls-doubleclick']).to.be.ok;
+          const checks = {adsense: adSenseEmitLifecycleEventSpy,
+            doubleclick: doubleclickEmitLifecycleEventSpy};
+          Object.keys(checks).forEach(type => {
+            expect(checks[type].withArgs(
+              'sraBuildRequestDelay',
+              {
+                'met.delta.AD_SLOT_ID': sinon.match.number,
+                'totalSlotCount.AD_SLOT_ID': 0,
+                'totalUrlCount.AD_SLOT_ID': 0,
+                'type.AD_SLOT_ID': type,
+                'totalQueriedSlotCount.AD_SLOT_ID': 0,
+              })).to.be.calledOnce;
+          });
+        });
+    });
+  });
+
   describe('#renderOutsideViewport', () => {
     let a4aElement;
     let a4a;
@@ -1674,7 +1767,7 @@ describe('amp-a4a', () => {
         a4a.buildCallback();
         a4a.onLayoutMeasure();
         const adPromise = a4a.adPromise_;
-        // This is to prevent `displayUnlayoutUI` to be called;
+        // This is to prevent `applyUnlayoutUI` to be called;
         a4a.uiHandler.state = 0;
         a4a.unlayoutCallback();
         // Force vsync system to run all queued tasks, so that DOM mutations
@@ -1758,13 +1851,13 @@ describe('amp-a4a', () => {
         })();
         stubVerifySignature.returns(Promise.resolve(false));
         return a4a.verifyCreativeSignature_('some_creative', 'some_sig')
-          .then(() => {
-            throw new Error('should have triggered rejection');
-          })
-          .catch(err => {
-            expect(stubVerifySignature).to.be.callCount(20);
-            expect(err).to.equal('No validation service could verify this key');
-          });
+        .then(() => {
+          throw new Error('should have triggered rejection');
+        })
+        .catch(err => {
+          expect(stubVerifySignature).to.be.callCount(20);
+          expect(err).to.equal('No validation service could verify this key');
+        });
       });
 
       it('properly handles multiple keys for one provider', () => {
@@ -1786,7 +1879,7 @@ describe('amp-a4a', () => {
           });
       });
 
-      it('properly stops verification at first valid key', done => {
+      it('properly stops verification at first valid key', () => {
         // Single provider where first key fails, second passes, and third
         // never calls verifySignature.
         const serviceName = 'test-service';
@@ -1804,16 +1897,17 @@ describe('amp-a4a', () => {
         const signature = 'some_signature';
         stubVerifySignature.onCall(0).returns(Promise.resolve(false));
         stubVerifySignature.onCall(1).returns(Promise.resolve(true));
-        a4a.verifyCreativeSignature_(creative, signature)
-          .then(verifiedCreative => {
-            expect(stubVerifySignature).to.be.calledTwice;
-            expect(verifiedCreative).to.equal(creative);
-            done();
-          });
+
         // From testing have found that need to yield prior to calling last
         // key info resolver to ensure previous keys have had a chance to
         // execute.
         setTimeout(() => {keyInfoResolver({}); }, 0);
+
+        return a4a.verifyCreativeSignature_(creative, signature)
+          .then(verifiedCreative => {
+            expect(stubVerifySignature).to.be.calledTwice;
+            expect(verifiedCreative).to.equal(creative);
+          });
       });
     });
   });
