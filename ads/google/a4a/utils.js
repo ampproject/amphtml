@@ -174,7 +174,11 @@ export function googleAdUrl(
     queryParams.push({name: 'act', value:
       Object.keys(containerTypeSet).join()});
     if (isCanary(win)) {
-      queryParams.push({name: 'isc', value: '1'});
+      // The semantics here are:
+      //   0: production branch (this is never actually sent)
+      //   1: control branch (this is not yet supported, so is never sent)
+      //   2: canary branch
+      queryParams.push({name: 'art', value: '2'});
     }
     let eids = adElement.getAttribute('data-experiment-id');
     if (opt_experimentIds) {
