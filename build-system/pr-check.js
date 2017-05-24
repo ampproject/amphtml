@@ -361,15 +361,8 @@ function main(argv) {
   }
 
   if (process.env.BUILD_SHARD == "integration_tests") {
-    if (buildTargets.has('RUNTIME')) {
-      command.buildRuntime();
-      command.runIntegrationTests();
-    }
-    // Presubmit needs to run after `gulp dist` as some checks run through
-    // the dist/ folder.
-    // Also presubmit always needs to run even for just docs to check for
-    // copyright at the top.
-    command.presubmit();
+    // The integration_tests shard can be skipped for PRs.
+    console.log(fileLogPrefix, 'Skipping integration_tests for PRs');
   }
 
   if (process.env.BUILD_SHARD == "unit_tests" && buildTargets.has('RUNTIME')) {
@@ -377,6 +370,13 @@ function main(argv) {
     // because some of the tests are integration tests.
     // TODO(rsimha-amp, 9404): Clean up unit tests and change to css-only build.
     command.buildRuntime();
+    // Presubmit needs to run after `gulp dist` as some checks run through
+    // the dist/ folder.
+    // Also presubmit always needs to run even for just docs to check for
+    // copyright at the top.
+    // TODO(rsimha-amp, 9404): Move to integration_tests once it's enabled.
+    command.presubmit();
+    // Finally, run all unit tests.
     command.runUnitTests();
   }
 
