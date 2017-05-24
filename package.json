@@ -88,7 +88,7 @@
     "markdown-link-check": "^3.0.3",
     "minimatch": "3.0.0",
     "minimist": "1.2.0",
-    "mocha": "2.5.3",
+    "mocha": "3.4.2",
     "morgan": "1.7.0",
     "nodemon": "1.11.0",
     "path": "0.12.7",
