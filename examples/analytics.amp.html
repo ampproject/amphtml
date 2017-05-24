@@ -17,15 +17,13 @@
       top: 10000px;
       height: 10px;
     }
-  </style>
-  <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
-  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  </style>  
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
 </head>
 <body>
-
-
 <div id="container">
 Container for analytics tags. Positioned far away from top to make sure that doesn't matter.
 
@@ -136,7 +134,6 @@ Container for analytics tags. Positioned far away from top to make sure that doe
 
 <div class="logo"></div>
 <h1 id="top">AMP Analytics</h1>
-
 <span id="test1" class="box" data-vars-title="Example request with element level overrides">
   Click here to generate an event
 </span>
@@ -156,29 +153,29 @@ Integer in felis at lacus mattis facilisis. Curabitur tincidunt, felis porttitor
 Donec pharetra molestie sollicitudin. Duis mattis eleifend rutrum. Quisque luctus tincidunt lacus, vitae lobortis nisi malesuada ac. Aliquam mattis leo vel elit rutrum, nec consequat massa vestibulum. Maecenas bibendum metus nec ante feugiat, eu faucibus orci mattis. Cras tristique sem non elit congue malesuada. Proin ornare, lacus et porttitor consequat, sapien urna rutrum diam, ac pellentesque ligula est eget nisi. Interdum et malesuada fames ac ante ipsum primis in faucibus. Donec ultrices sollicitudin eros a placerat. Proin eget pulvinar est. Donec posuere ultrices odio at ultrices. Suspendisse potenti. Phasellus id orci id purus porttitor consectetur a at erat. Nullam volutpat ultricies nisl id maximus. Morbi porta ex ante, et egestas odio ultricies consequat.
 </p>
 <p>
-</p><ul>
+<ul>
 <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</li>
 <li>Aliquam in ex porta, imperdiet elit sit amet, condimentum diam.</li>
 <li>Etiam fermentum nisi at porta pulvinar.</li>
 </ul>
-<p></p>
+</p>
 <p>
-</p><ul>
+<ul>
 <li>Proin mattis neque vel elit posuere molestie.</li>
 <li>Integer tincidunt sem sed nunc auctor elementum.</li>
 <li>Integer a felis in ipsum aliquet auctor sit amet a neque.</li>
 </ul>
-<p></p>
+</p>
 <p>
-</p><ul>
+<ul>
 <li>Sed suscipit dolor molestie, rhoncus quam ac, lacinia ex.</li>
 <li>Curabitur et tellus vel justo ultrices aliquet sed id turpis.</li>
 <li>Nam finibus risus at justo elementum bibendum.</li>
 <li>In non lacus non urna congue feugiat at vel diam.</li>
 </ul>
-<p></p>
+</p>
 <p>
-</p><ul>
+<ul>
 <li>Integer hendrerit augue interdum dui venenatis, sit amet tristique mauris cursus.</li>
 <li>Etiam quis eros viverra, tincidunt justo in, facilisis nunc.</li>
 <li>Aliquam at lacus faucibus, congue lorem interdum, semper mauris.</li>
@@ -186,57 +183,13 @@ Donec pharetra molestie sollicitudin. Duis mattis eleifend rutrum. Quisque luctu
 <li>Morbi id augue id orci sagittis tempus.</li>
 <li>Vestibulum varius libero ac dignissim sodales.</li>
 </ul>
-<p></p>
+</p>
 <p>
-</p><ul>
+<ul>
 <li>Aenean ac sem eget libero varius viverra sit amet vitae nunc.</li>
 </ul>
-<p>
-<button id="fb-pixel">Track click with Facebook Pixel custom event</button> | <button id="fb-addToWishlist">Track Add To Wishlist</button>
-REF: https://www.facebook.com/business/a/facebook-pixel and https://developers.facebook.com/docs/ads-for-websites/pixel-events/v2.9#events
 </p>
-<amp-analytics type="facebookpixel" id="facebook-pixel">
-    <script type="application/json">
-    {
-      "vars": {
-        "pixelId": "1760516960931795"
-      },
-      "triggers": {
-        "trackPageview": {
-          "on": "visible",
-          "request": "pageview"
-        },
-        "trackEvent": {
-          "on": "click",
-          "selector": "#fb-pixel",
-          "request": "event",
-          "vars": {
-            "eventName": "ClickedBtn-x"
-          }
-        },
-      "trackSearch": {
-        "on": "visible",
-        "request": "eventSearch",
-        "vars": {
-          "search_string": "How to use Facebook Pixel in AMP Pages"
-        }
-      },
-      "trackAddToWishlist": {
-        "on": "click",
-        "selector": "#fb-addToWishlist",
-        "request": "eventAddToWishlist",
-        "vars": {
-          "content_ids": ["1234"],
-          "content_name": "The Avengers",
-          "content_category": "Entertainment",
-          "value": 1.50,
-          "currency": "USD"
-        }
-      }
-      }
-    }
-    </script>
-  </amp-analytics>
+
 <amp-anim src="https://www.google.com/logos/doodles/2016/2016-doodle-fruit-games-day-14-5645577527230464-hp.gif" id="anim-id" width="665" height="220" layout="responsive">
   <amp-img placeholder src="https://www.google.com/logos/doodles/2016/2016-doodle-fruit-games-day-14-5645577527230464.2-scta.png" width="665" height="220" layout="responsive"></amp-img>
   <amp-analytics id="nestedAnalytics">
