@@ -166,15 +166,21 @@ export class Transport {
    * @param {!HTMLDocument} ampDoc The AMP document
    * @param {!Object<string,string>} transportOptions The 'transport' portion
    * of the amp-analytics config object
-   * @param {Function} processResponse An optional function to receive any
-   * response messages back from the cross-domain iframe
+   * @param {Function<String>=} processResponse An optional function to
+   * receive any response messages back from the cross-domain iframe
    */
   static processCrossDomainIframe(ampDoc, transportOptions, processResponse) {
-    user().assert(!(transportOptions['beacon'] || transportOptions['xhrpost'] ||
-      transportOptions['image']), 'Cross-domain frame cannot coexist with' +
-      ' other transport methods');
+    user().assert(transportationOptions['iframe'],
+      'Cross-domain frame parameters missing');
+    Object.keys(transportOptions).forEach(key => {
+      if (key != 'iframe' && transportOptions[key]) {
+        user.error('Cross-domain frame cannot coexist with other transport' +
+        ' methods');
+        return;
+      }
+    });
     const frameUrl = Transport.appendHashToUrl_(transportOptions['iframe'],
-        transportOptions['dataHash']);
+      transportOptions['dataHash']);
     // If iframe doesn't exist for this iframe url (and data hash), create it.
     if (Transport.hasCrossDomainFrame(frameUrl)) {
       this.incrementUsageCount_(frameUrl);
@@ -183,7 +189,7 @@ export class Transport {
       ampDoc.body.appendChild(frame);
     }
     if (processResponse) {
-      window.addEventListener("message", (msg) => {
+      window.addEventListener('message', msg => {
         if (msg.data.ampAnalyticsResponse) {
           processResponse(msg.data.ampAnalyticsResponse);
         }
@@ -203,8 +209,8 @@ export class Transport {
   static doneWithCrossDomainIframe(ampDoc, transportOptions) {
     const frameUrl = Transport.appendHashToUrl_(transportOptions['iframe'],
         transportOptions['dataHash']);
-    if (Transport.hasCrossDomainFrame(frameUrl)) {
-      if (this.decrementUsageCount_(frameUrl) <= 0) {
+    if (Transport.hasCrossDomainFrame(frameUrl) &&
+        this.decrementUsageCount_(frameUrl) <= 0) {
         ampDoc.body.removeChild(Transport.crossDomainFrames[frameUrl].frame);
         delete Transport.crossDomainFrames[frameUrl];
       }
@@ -299,7 +305,8 @@ export class Transport {
     // DO NOT MERGE THIS
     // Warning: the following code is likely only temporary. Don't check
     // in before getting resolution on that.
-    frame && frame.contentWindow &&
+    dev().assert(frame && frame.contentWindow, 'Message bound for frame that' +
+        ' does not exist');
     /*REVIEW*/frame.contentWindow.postMessage({ampAnalyticsEvents: messages}, '*');
   }
 }

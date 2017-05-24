@@ -14,8 +14,8 @@
        * @param ampAnalytics  Call registerAmpAnalyticsEventListener() on this,
        * passing your function which will receive the analytics events.
        */
-      window.onNewAmpAnalyticsInstance = (ampAnalytics) => {
-        ampAnalytics.registerAmpAnalyticsEventListener((arrayOfEventStrings) => {
+      window.onNewAmpAnalyticsInstance = ampAnalytics => {
+        ampAnalytics.registerAmpAnalyticsEventListener(arrayOfEventStrings => {
           arrayOfEventStrings.forEach(evt => {
             // Now, do something meaningful with the AMP Analytics event
             console.log("Received an event: " + evt);

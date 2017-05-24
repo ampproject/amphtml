@@ -23,7 +23,7 @@
 class AmpAnalyticsRemoteFrameManager {
   constructor() {
     /**
-     * @type {Function}
+     * @type {Function<!String>}
      * @private
      */
     this.listener_ = null;
@@ -56,15 +56,14 @@ class AmpAnalyticsRemoteFrameManager {
  */
 const remoteFrameMgr_ = new AmpAnalyticsRemoteFrameManager();
 
-window.requestIdleCallback = window.requestIdleCallback || function(cb) {
-  return setTimeout(cb, 1);
-};
+window.requestIdleCallback = window.requestIdleCallback ||
+    cb => setTimeout(cb, 1);
 
 if (window.onNewAmpAnalyticsInstance) {
   window.onNewAmpAnalyticsInstance(remoteFrameMgr_);
   // Warning: the following code is likely only temporary. Don't check in
   // before getting resolution on that.
-  window.addEventListener("message", (msg) => {
+  window.addEventListener("message", msg => {
     if (msg.data.ampAnalyticsEvents) {
       window.requestIdleCallback(() => {
         remoteFrameMgr_.listener_(msg.data.ampAnalyticsEvents);

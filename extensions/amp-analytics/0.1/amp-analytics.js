@@ -231,7 +231,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.config_['transport'] && this.config_['transport']['iframe']) {
       Transport.processCrossDomainIframe(this.getAmpDoc().win.document,
         this.config_['transport'],
-        (msg) => {
+        msg => {
           try {
             if (this.element.ownerDocument.location.href !== 'about:srcdoc') {
               this.element.ownerDocument.location.href += msg;
@@ -421,15 +421,17 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     // transport.iframe is only allowed to be specified in typeConfig, not
     // the others. Allowed when running locally for testing purposes.
-    if (!getMode().localDev &&
-        ((defaultConfig.transport && defaultConfig.transport.iframe) ||
-         (inlineConfig && inlineConfig.transport &&
-          inlineConfig.transport.iframe) ||
-         (this.remoteConfig_ && this.remoteConfig_.transport &&
-          this.remoteConfig_.transport.iframe))) {
-      user().error(this.getName_(), 'transport/iframe may only be specified' +
-          ' in type config');
-    }
+    [defaultConfig, inlineConfig, this.remoteConfig_].forEach(config => {
+      if (config && config.transport && config.transport.iframe) {
+        if (!getMode().localDev) {
+          user().warn('invalid config contains iframe transport, but okay' +
+              ' since in local dev mode', config);
+        } else {
+          user().error('invalid config contains iframe transport', config);
+          return;
+        }
+      }
+    });
 
     this.mergeObjects_(defaultConfig, config);
     this.mergeObjects_(typeConfig, config, /* predefined */ true);
