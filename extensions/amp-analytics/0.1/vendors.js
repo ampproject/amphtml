@@ -579,7 +579,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       },
     },
     'transport': {
-      'beacon': false,
+      'beacon': true,
       'xhrpost': false,
       'image': true,
     },
