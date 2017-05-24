@@ -165,8 +165,8 @@ export function googleAdUrl(
         el && counter < 20; el = el.parentElement, counter++) {
           const tagName = el.tagName.toUpperCase();
           if (ValidAdContainerTypes[tagName]) {
-        containerTypeSet[ValidAdContainerTypes[tagName]] = true;
-      }
+            containerTypeSet[ValidAdContainerTypes[tagName]] = true;
+          }
         }
         const pfx =
         (containerTypeSet[ValidAdContainerTypes['AMP-FX-FLYING-CARPET']]
@@ -223,11 +223,11 @@ export function googleAdUrl(
           [
         {name: 'url', value: documentInfo.canonicalUrl},
         {name: 'top', value: iframeDepth ? topWindowUrlOrDomain(win) : null},
-        {
-          name: 'loc',
-          value: win.location.href == documentInfo.canonicalUrl ?
+            {
+              name: 'loc',
+              value: win.location.href == documentInfo.canonicalUrl ?
             null : win.location.href,
-        },
+            },
         {name: 'ref', value: referrer},
           ]
     );

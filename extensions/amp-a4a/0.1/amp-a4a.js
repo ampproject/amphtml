@@ -398,12 +398,22 @@ export class AmpA4A extends AMP.BaseElement {
     return true;
   }
 
-  /** @return {!Array|!string} */
+  /**
+   * Returns preconnect urls for A4A. Ad network should overwrite in their
+   * Fast Fetch implementation and return an array of urls for the runtime to
+   * preconnect to.
+   * @return {!Array<string>}
+   */
   getPreconnectUrls() {
     return [];
   }
 
-  /** @return {!Array|!string} */
+  /**
+   * Returns preconnect urls for A4A. Ad network should overwrite in their
+   * Fast Fetch implementation and return an array of urls for the runtime to
+   * preconnect to.
+   * @return {!Array<string>|string}
+   */
   getPrefetchUrls() {
     return [];
   }
@@ -429,9 +439,7 @@ export class AmpA4A extends AMP.BaseElement {
     this.preconnect.preload(this.getSafeframePath_());
     this.preconnect.preload(getDefaultBootstrapBaseUrl(this.win, 'nameframe'));
     const preconnect = this.getPreconnectUrls();
-    if (preconnect.length == 0) {
-      return;
-    }
+
     // NOTE(keithwrightbos): using onLayout to indicate if preconnect should be
     // given preferential treatment.  Currently this would be false when
     // relevant (i.e. want to preconnect on or before onLayoutMeasure) which
@@ -440,9 +448,7 @@ export class AmpA4A extends AMP.BaseElement {
     // NOTE(keithwrightbos): Does not take isValidElement into account so could
     // preconnect unnecessarily, however it is assumed that isValidElement
     // matches amp-ad loader predicate such that A4A impl does not load.
-    if (typeof preconnect == 'string') {
-      this.preconnect.url(preconnect, true);
-    } else if (preconnect) {
+    if (preconnect) {
       preconnect.forEach(p => {
         this.preconnect.url(p, true);
       });

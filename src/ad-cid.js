@@ -42,16 +42,16 @@ export function getAdCid(adElement) {
  *     - the ad network does not request one or
  *     - `amp-analytics` which provides the CID service was not installed.
  */
-export function getClientScopedAdCid(doc, win, clientIdScope,
-                                     opt_clientIdCookieName) {
+export function getClientScopedAdCid(
+    doc, win, clientIdScope, opt_clientIdCookieName) {
   const cidPromise = cidForDocOrNull(doc).then(cidService => {
     if (!cidService) {
-     return;
-   }
+      return;
+    }
     return cidService.get({
-     scope: dev().assertString(clientIdScope),
+      scope: dev().assertString(clientIdScope),
       cookieName: opt_clientIdCookieName || undefined,
-   }, Promise.resolve(undefined)).catch(error => {
+    }, Promise.resolve(undefined)).catch(error => {
       // Not getting a CID is not fatal.
       dev().error('AD-CID', error);
       return undefined;
