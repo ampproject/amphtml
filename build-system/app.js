@@ -650,6 +650,7 @@ app.get(['/examples/*.html', '/test/manual/*.html'], function(req, res, next) {
   var filePath = req.path;
   var mode = process.env.SERVE_MODE;
   const inabox = req.query['inabox'] == '1';
+  const stream = Number(req.query['stream']);
   fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
     if (req.query['amp_js_v']) {
       file = addViewerIntegrationScript(req.query['amp_js_v'], file);
@@ -677,7 +678,24 @@ app.get(['/examples/*.html', '/test/manual/*.html'], function(req, res, next) {
       file = file.replace(
           /<div id="container">[\s\S]+<\/div>/m, '<div id="container">' + analytics.join('') + '</div>');
     }
-    res.send(file);
+
+    if (stream > 0) {
+      res.writeHead(200, {'Content-Type': 'text/html'});
+      var pos = 0;
+      function writeChunk() {
+        var chunk = file.substring(pos, Math.min(pos + stream, file.length));
+        res.write(chunk);
+        pos += stream;
+        if (pos < file.length) {
+          setTimeout(writeChunk, 500);
+        } else {
+          res.end();
+        }
+      }
+      writeChunk();
+    } else {
+      res.send(file);
+    }
   }).catch(() => {
     next();
   });
