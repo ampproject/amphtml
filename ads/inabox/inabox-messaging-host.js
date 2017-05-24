@@ -21,9 +21,32 @@ import {
   MessageType,
 } from '../../src/3p-frame-messaging';
 import {dev} from '../../src/log';
+import {tryToEnterOverlayMode, leaveOverlayMode} from './frame-overlay-helper';
 
 /** @const */
 const TAG = 'InaboxMessagingHost';
+
+
+class NamedObservable {
+  constructor() {
+    this.map_ = {};
+  }
+
+  listen(key, callback) {
+    if (key in this.map_) {
+      dev().fine(TAG, `Overriding message callback [${key}]`);
+    }
+    this.map_[key] = callback;
+  }
+
+  fire(key, thisArg, args) {
+    if (key in this.map_) {
+      return this.map_[key].apply(thisArg, args);
+    }
+    return false;
+  }
+}
+
 
 export class InaboxMessagingHost {
 
@@ -33,6 +56,16 @@ export class InaboxMessagingHost {
     this.iframeMap_ = Object.create(null);
     this.registeredIframeSentinels_ = Object.create(null);
     this.positionObserver_ = new PositionObserver(win);
+    this.msgObservable_ = new NamedObservable();
+
+    this.msgObservable_.listen(
+        MessageType.SEND_POSITIONS, this.handleSendPositions_);
+
+    this.msgObservable_.listen(
+        MessageType.FULL_OVERLAY_FRAME, this.handleEnterFullOverlay_);
+
+    this.msgObservable_.listen(
+        MessageType.RESET_FULL_OVERLAY_FRAME, this.handleResetFullOverlay_);
   }
 
   /**
@@ -60,23 +93,82 @@ export class InaboxMessagingHost {
       return false;
     }
 
-    if (request.type == MessageType.SEND_POSITIONS) {
-      // To prevent double tracking for the same requester.
-      if (this.registeredIframeSentinels_[request.sentinel]) {
-        return false;
-      }
-      this.registeredIframeSentinels_[request.sentinel] = true;
-      this.positionObserver_.observe(iframe, data => {
-        dev().fine(TAG, `Sent position data to [${request.sentinel}]`, data);
-        message.source./*OK*/postMessage(
-            serializeMessage(MessageType.POSITION, request.sentinel, data),
-            message.origin);
-      });
-      return true;
-    } else {
+    if (!this.msgObservable_.fire(request.type, this,
+        [iframe, request, message.source, message.origin])) {
       dev().warn(TAG, 'Unprocessed AMP message:', message);
       return false;
     }
+
+    return true;
+  }
+
+  /**
+   * @param {!HTMLIFrameElement} iframe
+   * @param {!Object} request
+   * @param {!Window} source
+   * @param {string} origin
+   * @return {boolean}
+   */
+  handleSendPositions_(iframe, request, source, origin) {
+    // To prevent double tracking for the same requester.
+    if (this.registeredIframeSentinels_[request.sentinel]) {
+      return false;
+    }
+    this.registeredIframeSentinels_[request.sentinel] = true;
+    this.positionObserver_.observe(iframe, data => {
+      dev().fine(TAG, `Sent position data to [${request.sentinel}]`, data);
+      source./*OK*/postMessage(
+          serializeMessage(MessageType.POSITION, request.sentinel, data),
+          origin);
+    });
+    return true;
+  }
+
+  /**
+   * @param {!HTMLIFrameElement} iframe
+   * @param {!Object} request
+   * @param {!Window} source
+   * @param {string} origin
+   * @return {boolean}
+   */
+  handleEnterFullOverlay_(iframe, request, source, origin) {
+    tryToEnterOverlayMode(this.win_, iframe, () => {
+      source./*OK*/postMessage(
+          serializeMessage(
+              MessageType.FULL_OVERLAY_FRAME_RESPONSE,
+              request.sentinel,
+              {content: {accept: true}}),
+          origin);
+    }, reason => {
+      source./*OK*/postMessage(
+          serializeMessage(
+              MessageType.FULL_OVERLAY_FRAME_RESPONSE,
+              request.sentinel,
+              {content: {accept: false, reason}}),
+          origin);
+    });
+
+    return true;
+  }
+
+  /**
+   * @param {!HTMLIFrameElement} iframe
+   * @param {!Object} request
+   * @param {!Window} source
+   * @param {string} origin
+   * @return {boolean}
+   */
+  handleResetFullOverlay_(iframe, request, source, origin) {
+    leaveOverlayMode(this.win_, iframe, () => {
+      source./*OK*/postMessage(
+          serializeMessage(
+              MessageType.RESET_FULL_OVERLAY_FRAME_RESPONSE,
+              request.sentinel,
+              {}),
+          origin);
+    });
+
+    return true;
   }
 
   /**

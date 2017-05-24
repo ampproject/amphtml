@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {childElementByTag} from '../../src/dom.js';
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
 import {viewerForDoc} from '../services';
 import {Viewport, ViewportBindingDef} from '../service/viewport-impl';
@@ -26,6 +27,9 @@ import {layoutRectLtwh} from '../layout-rect';
 import {Observable} from '../observable';
 import {MessageType} from '../../src/3p-frame-messaging';
 import {dev} from '../log';
+import {vsyncFor} from '../../src/services';
+import {px, setStyles} from '../../src/style';
+
 
 /** @const {string} */
 const TAG = 'inabox-viewport';
@@ -157,6 +161,118 @@ export class ViewportBindingInabox {
     }
   }
 
+  /** @override */
+  updateLightboxMode(lightboxMode) {
+    if (lightboxMode) {
+      return this.tryToEnterOverlayMode_();
+    }
+    return this.leaveOverlayMode_();
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  tryToEnterOverlayMode_() {
+    return this.prepareFixedContainer_()
+        .then(() => this.requestFullOverlayFrame_());
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  leaveOverlayMode_() {
+    return this.requestResetFullOverlayFrame_()
+        .then(() => this.resetFixedContainer_());
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  requestFullOverlayFrame_() {
+    return new Promise((resolve, reject) => {
+      this.iframeClient_.makeRequest(
+          MessageType.FULL_OVERLAY_FRAME,
+          MessageType.FULL_OVERLAY_FRAME_RESPONSE,
+          response => {
+            if (response.content.accept) {
+              resolve();
+            } else {
+              reject('Request to open lightbox rejected by host document');
+            }
+          });
+    });
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  requestResetFullOverlayFrame_() {
+    return new Promise(resolve => {
+      this.iframeClient_.makeRequest(
+          MessageType.RESET_FULL_OVERLAY_FRAME,
+          MessageType.RESET_FULL_OVERLAY_FRAME_RESPONSE,
+          resolve);
+    });
+  }
+
+  prepareFixedContainer_() {
+    const fixedContainer = this.getFixedContainer_();
+
+    return vsyncFor(this.win).runPromise({
+      measure: state => {
+        state.boundingRect = fixedContainer./*OK*/getBoundingClientRect();
+      },
+      mutate: state => {
+        setStyles(/** @type {!Element} */ (this.win.document.body), {
+          'background': 'transparent',
+        });
+
+        setStyles(fixedContainer, {
+          'position': 'absolute',
+          'left': '50%',
+          'top': '50%',
+          'right': 'auto',
+          'bottom': 'auto',
+          'width': px(state.boundingRect.width),
+          'height': px(state.boundingRect.height),
+          'margin-left': px(-(state.boundingRect.width / 2)),
+          'margin-top': px(-(state.boundingRect.height / 2)),
+        });
+      },
+    }, {});
+  }
+
+  resetFixedContainer_() {
+    const fixedContainer = this.getFixedContainer_();
+
+    return vsyncFor(this.win).mutatePromise(() => {
+      setStyles(/** @type {!Element} */ (this.win.document.body), {
+        'background': 'transparent',
+      });
+
+      setStyles(fixedContainer, {
+        'position': null,
+        'left': null,
+        'top': null,
+        'right': null,
+        'bottom': null,
+        'width': null,
+        'height': null,
+        'margin-left': null,
+        'margin-top': null,
+      });
+    });
+  }
+
+  getFixedContainer_() {
+    return dev().assertElement(childElementByTag(
+        dev().assertElement(this.win.document.body), 'amp-ad-banner'));
+  }
+
   /** @override */ disconnect() {/* no-op */}
   /** @override */ updatePaddingTop() {/* no-op */}
   /** @override */ hideViewerHeader() {/* no-op */}
@@ -164,7 +280,6 @@ export class ViewportBindingInabox {
   /** @override */ disableScroll() {/* no-op */}
   /** @override */ resetScroll() {/* no-op */}
   /** @override */ ensureReadyForElements() {/* no-op */}
-  /** @override */ updateLightboxMode() {/* no-op */}
   /** @override */ setScrollTop() {/* no-op */}
   /** @override */ getScrollWidth() {return 0;}
   /** @override */ getScrollHeight() {return 0;}

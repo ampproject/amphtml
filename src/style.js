@@ -227,3 +227,17 @@ export function computedStyle(win, el) {
   const style = /** @type {?CSSStyleDeclaration} */(win.getComputedStyle(el));
   return /** @type {!Object<string, string>} */(style) || map();
 }
+
+
+/**
+ * Resets styles that were set dynamically (i.e. inline)
+ * @param {!Element} element
+ * @param {!Array<string>} properties
+ */
+export function resetStyles(element, properties) {
+  const styleObj = {};
+
+  properties.forEach(prop => styleObj[prop] = null);
+
+  setStyles(element, styleObj);
+}
