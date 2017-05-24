@@ -34,6 +34,7 @@ describes.realWin('amp-sticky-ad 1.0 version', {
   let ampStickyAd;
   let impl;
   let addToFixedLayerStub, addToFixedLayerPromise;
+  const adUpgradeToCustomElementPromise = Promise.resolve();
   describe('with valid child 1.0', () => {
     beforeEach(() => {
       win = env.win;
@@ -215,12 +216,14 @@ describes.realWin('amp-sticky-ad 1.0 version', {
       impl.scheduleLayoutForAd_();
       expect(layoutAdSpy).to.not.been.called;
       impl.ad_.signals().signal('built');
-      return impl.ad_.signals().whenSignal('built').then(() => {
-        expect(layoutAdSpy).to.be.called;
-        expect(ampStickyAd).to.not.have.attribute('visible');
-        impl.ad_.signals().signal('load-end');
-        return poll('visible attribute must be set', () => {
-          return ampStickyAd.hasAttribute('visible');
+      return adUpgradeToCustomElementPromise.then(() => {
+        return impl.ad_.signals().whenSignal('built').then(() => {
+          expect(layoutAdSpy).to.be.called;
+          expect(ampStickyAd).to.not.have.attribute('visible');
+          impl.ad_.signals().signal('load-end');
+          return poll('visible attribute must be set', () => {
+            return ampStickyAd.hasAttribute('visible');
+          });
         });
       });
     });
@@ -233,12 +236,14 @@ describes.realWin('amp-sticky-ad 1.0 version', {
       impl.scheduleLayoutForAd_();
       expect(layoutAdSpy).to.not.been.called;
       impl.ad_.signals().signal('built');
-      return impl.ad_.signals().whenSignal('built').then(() => {
-        expect(layoutAdSpy).to.be.called;
-        expect(ampStickyAd).to.not.have.attribute('visible');
-        impl.ad_.signals().signal('render-start');
-        return poll('visible attribute must be set', () => {
-          return ampStickyAd.hasAttribute('visible');
+      return adUpgradeToCustomElementPromise.then(() => {
+        return impl.ad_.signals().whenSignal('built').then(() => {
+          expect(layoutAdSpy).to.be.called;
+          expect(ampStickyAd).to.not.have.attribute('visible');
+          impl.ad_.signals().signal('render-start');
+          return poll('visible attribute must be set', () => {
+            return ampStickyAd.hasAttribute('visible');
+          });
         });
       });
     });

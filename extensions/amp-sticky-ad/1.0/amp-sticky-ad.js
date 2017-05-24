@@ -26,6 +26,7 @@ import {
   setStyle,
   removeAlphaFromColor,
 } from '../../../src/style';
+import {whenUpgradeToCustomElement} from '../../../src/dom';
 
 /** @const */
 const EARLY_LOAD_EXPERIMENT = 'sticky-ad-early-load';
@@ -69,28 +70,24 @@ class AmpStickyAd extends AMP.BaseElement {
 
     this.ad_ = children[0];
     this.setAsOwner(this.ad_);
-
-    // TODO(@zhouyx, #9126): cleanup once research
-    // on custom-element stubbing is complete.
-    let customApiResolver;
-    const customApiPromise = new Promise(resolve => {
-      customApiResolver = resolve;
-    });
-    if (this.ad_.whenBuilt) {
-      customApiResolver();
-    } else {
-      // Give 1s for amp-ad to stub. Report 1% error.
-      if (Math.random() < 0.01) {
-        dev().error(TAG, 'race condition on customElement stubbing');
-      }
-      timerFor(this.win).delay(customApiResolver, 1000);
-    }
-    customApiPromise.then(() => {
-      this.ad_.whenBuilt().then(() => {
-        this.mutateElement(() => {
-          toggle(this.element, true);
+    whenUpgradeToCustomElement(dev().assertElement(this.ad_)).then(() => {
+      if (!this.ad_.whenBuilt) {
+        // TODO(@zhouyx, #9126): Cleanup once make sure the fix works
+        dev().error(TAG, 'element whenBuilt still do not exist!');
+        timerFor(this.win).delay(() => {
+          this.ad_.whenBuilt().then(() => {
+            this.mutateElement(() => {
+              toggle(this.element, true);
+            });
+          });
+        }, 1000);
+      } else {
+        this.ad_.whenBuilt().then(() => {
+          this.mutateElement(() => {
+            toggle(this.element, true);
+          });
         });
-      });
+      }
     });
 
     const paddingBar = this.win.document.createElement(
@@ -190,7 +187,9 @@ class AmpStickyAd extends AMP.BaseElement {
    * @private
    */
   scheduleLayoutForAd_() {
-    this.ad_.whenBuilt().then(this.layoutAd_.bind(this));
+    whenUpgradeToCustomElement(dev().assertElement(this.ad_)).then(() => {
+      this.ad_.whenBuilt().then(this.layoutAd_.bind(this));
+    });
   }
 
   /**
