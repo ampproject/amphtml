@@ -398,14 +398,14 @@ export class AmpA4A extends AMP.BaseElement {
     return true;
   }
 
-  /** @return {!Array|!String} */
+  /** @return {!Array|!string} */
   getPreconnectUrls() {
-    return false;
+    return [];
   }
 
-  /** @return {!Array|!String} */
+  /** @return {!Array|!string} */
   getPrefetchUrls() {
-    return false;
+    return [];
   }
 
   /**
@@ -429,7 +429,7 @@ export class AmpA4A extends AMP.BaseElement {
     this.preconnect.preload(this.getSafeframePath_());
     this.preconnect.preload(getDefaultBootstrapBaseUrl(this.win, 'nameframe'));
     const preconnect = this.getPreconnectUrls();
-    if (!preconnect) {
+    if (preconnect.length == 0) {
       return;
     }
     // NOTE(keithwrightbos): using onLayout to indicate if preconnect should be

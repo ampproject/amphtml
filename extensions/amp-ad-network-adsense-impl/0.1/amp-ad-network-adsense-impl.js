@@ -21,7 +21,6 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {adConfig} from './adsense-a4a-config.js';
 import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
@@ -116,9 +115,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
     /** @private {?Element} */
     this.ampAnalyticsElement_ = null;
-
-    /** {?Object} */
-    this.config = adConfig;
   }
 
   /** @override */

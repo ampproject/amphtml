@@ -15,7 +15,6 @@
  */
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {adConfig} from './gmossp-a4a-config.js';
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 import {dev} from '../../../src/log';
 import {startsWith} from '../../../src/string';
