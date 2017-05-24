@@ -380,22 +380,20 @@ function streamDocument(url, writer) {
       // but, TMK, these are not supported anywhere yet.
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-      function readChunk() {
-        return reader.read().then(chunk => {
-          const text = decoder.decode(
-              chunk.value || new Uint8Array(),
-              {stream: !chunk.done});
-          if (text) {
-            writer.write(text);
-          }
-          if (chunk.done) {
-            writer.close();
-          } else {
-            return readChunk();
-          }
-        });
+      function readChunk(chunk) {
+        const text = decoder.decode(
+            chunk.value || new Uint8Array(),
+            {stream: !chunk.done});
+        if (text) {
+          writer.write(text);
+        }
+        if (chunk.done) {
+          writer.close();
+        } else {
+          return reader.read().then(readChunk);
+        }
       }
-      return readChunk();
+      return reader.read().then(readChunk);
     });
   }
 
@@ -414,7 +412,7 @@ function streamDocument(url, writer) {
         reject(new Error(`Unknown HTTP status ${xhr.status}`));
         return;
       }
-      if (xhr.readyState == /* COMPLETE */ 3 ||
+      if (xhr.readyState == /* LOADING */ 3 ||
           xhr.readyState == /* COMPLETE */ 4) {
         const s = xhr.responseText;
         const chunk = s.substring(pos);
