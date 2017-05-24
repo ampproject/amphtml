@@ -39,6 +39,7 @@ describe('amp-app-banner', () => {
   let isChrome = false;
   let isSafari = false;
   let isEmbedded = false;
+  let hasNavigateToCapability = true;
 
   const meta = {
     content: 'app-id=828256236, app-argument=medium://p/cb7f223fad86',
@@ -71,6 +72,7 @@ describe('amp-app-banner', () => {
       const ampdoc = new AmpDocSingle(iframe.win);
       const viewer = viewerForDoc(ampdoc);
       sandbox.stub(viewer, 'isEmbedded', () => isEmbedded);
+      sandbox.stub(viewer, 'hasCapability', () => hasNavigateToCapability);
       platform = platformFor(iframe.win);
       sandbox.stub(platform, 'isIos', () => isIos);
       sandbox.stub(platform, 'isAndroid', () => isAndroid);
@@ -205,6 +207,7 @@ describe('amp-app-banner', () => {
     isChrome = false;
     isSafari = false;
     isEmbedded = false;
+    hasNavigateToCapability = true;
   });
 
   afterEach(() => {
@@ -287,6 +290,17 @@ describe('amp-app-banner', () => {
       return getAppBanner({meta}).then(banner => {
         expect(banner.parentElement).to.not.be.null;
         expect(banner.style.display).to.be.equal('');
+      });
+    });
+
+    it('should hide banner if embedded but viewer does not support ' +
+        'navigateTo', () => {
+      isSafari = true;
+      isEmbedded = true;
+      hasNavigateToCapability = false;
+      return getAppBanner({meta}).then(banner => {
+        expect(banner.parentElement).to.be.null;
+        expect(banner.style.display).to.be.equal('none');
       });
     });
 
