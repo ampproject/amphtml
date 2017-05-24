@@ -836,8 +836,8 @@ class CssContextImpl {
    * @private
    */
   requireTarget_() {
-    return /** @type {!Element} */ (user().assert(this.currentTarget_,
-        'Only allowed when target is specified'));
+    return user().assertElement(this.currentTarget_,
+        'Only allowed when target is specified');
   }
 
   /** @override */
@@ -864,8 +864,8 @@ class CssContextImpl {
   getViewportSize() {
     if (!this.viewportSize_) {
       this.viewportSize_ = {
-        width: this.win_.innerWidth,
-        height: this.win_.innerHeight,
+        width: this.win_./*OK*/innerWidth,
+        height: this.win_./*OK*/innerHeight,
       };
     }
     return this.viewportSize_;
@@ -901,7 +901,7 @@ class CssContextImpl {
    * @private
    */
   getElementSize_(target) {
-    return {width: target.offsetWidth, height: target.offsetHeight};
+    return {width: target./*OK*/offsetWidth, height: target./*OK*/offsetHeight};
   }
 
   /** @override */
