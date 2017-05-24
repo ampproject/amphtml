@@ -34,10 +34,10 @@ export function getAdCid(adElement) {
 }
 
 /**
- * @param {!AmpDoc$$module$src$service$ampdoc_impl} doc
+ * @param {!./service/ampdoc-impl.AmpDoc} doc
  * @param {!Window} win
  * @param {!string} clientIdScope
- * @param {?string=} opt_clientIdCookieName
+ * @param {string=} opt_clientIdCookieName
  * @return {!Promise<string|undefined>} A promise for a CID or undefined if
  *     - the ad network does not request one or
  *     - `amp-analytics` which provides the CID service was not installed.

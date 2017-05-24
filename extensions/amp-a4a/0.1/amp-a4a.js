@@ -409,10 +409,10 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * Returns preconnect urls for A4A. Ad network should overwrite in their
+   * Returns prefetch urls for A4A. Ad network should overwrite in their
    * Fast Fetch implementation and return an array of urls for the runtime to
-   * preconnect to.
-   * @return {!Array<string>|string}
+   * prefetch.
+   * @return {!Array<string>}
    */
   getPrefetchUrls() {
     return [];
