@@ -180,7 +180,6 @@ export function googleAdUrl(
       //   2: canary branch
       queryParams.push({name: 'art', value: '2'});
     }
-    queryParams.push({name: 'debug_experiment_id', value: '21060314'});
     let eids = adElement.getAttribute('data-experiment-id');
     if (opt_experimentIds) {
       eids = mergeExperimentIds(opt_experimentIds, eids);
