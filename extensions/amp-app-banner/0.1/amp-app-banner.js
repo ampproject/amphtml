@@ -224,6 +224,12 @@ export class AmpIosAppBanner extends AbstractAppBanner {
       return;
     }
 
+    if (this.viewer_.isEmbedded() &&
+        !this.viewer_.hasCapability('navigateTo')) {
+      this.hide_();
+      return;
+    }
+
     this.metaTag_ = this.win.document.head.querySelector(
         'meta[name=apple-itunes-app]');
     if (!this.metaTag_) {
