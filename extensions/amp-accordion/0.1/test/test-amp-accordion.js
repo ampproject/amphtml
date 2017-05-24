@@ -55,7 +55,7 @@ describes.sandboxed('amp-accordion', {}, () => {
       };
       expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.false;
       expect(headerElements[0].getAttribute('aria-expanded')).to.equal('false');
-      obj.ampAccordion.implementation_.clickHandler_(clickEvent);
+      obj.ampAccordion.implementation_.onHeaderPicked_(clickEvent);
       expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.true;
       expect(headerElements[0].getAttribute('aria-expanded')).to.equal('true');
       expect(clickEvent.preventDefault.called).to.be.true;
@@ -77,7 +77,7 @@ describes.sandboxed('amp-accordion', {}, () => {
       };
       expect(header.parentNode.hasAttribute('expanded')).to.be.false;
       expect(header.getAttribute('aria-expanded')).to.equal('false');
-      obj.ampAccordion.implementation_.clickHandler_(clickEvent);
+      obj.ampAccordion.implementation_.onHeaderPicked_(clickEvent);
       expect(header.parentNode.hasAttribute('expanded')).to.be.true;
       expect(header.getAttribute('aria-expanded')).to.equal('true');
       expect(clickEvent.preventDefault.called).to.be.true;
@@ -96,7 +96,7 @@ describes.sandboxed('amp-accordion', {}, () => {
       };
       expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.true;
       expect(headerElements[1].getAttribute('aria-expanded')).to.equal('true');
-      obj.ampAccordion.implementation_.clickHandler_(clickEvent);
+      obj.ampAccordion.implementation_.onHeaderPicked_(clickEvent);
       expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.false;
       expect(headerElements[1].getAttribute('aria-expanded')).to.equal('false');
       expect(clickEvent.preventDefault.called).to.be.true;
@@ -112,6 +112,7 @@ describes.sandboxed('amp-accordion', {}, () => {
       const keyDownEvent = {
         keyCode: KeyCodes.SPACE,
         target: headerElements[0],
+        currentTarget: headerElements[0],
         preventDefault: sandbox.spy(),
       };
       expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.false;
@@ -134,6 +135,7 @@ describes.sandboxed('amp-accordion', {}, () => {
       const keyDownEvent = {
         keyCode: KeyCodes.ENTER,
         target: child,
+        currentTarget: headerElements[0],
         preventDefault: sandbox.spy(),
       };
       expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.false;
@@ -154,6 +156,7 @@ describes.sandboxed('amp-accordion', {}, () => {
       const keyDownEvent = {
         keyCode: KeyCodes.ENTER,
         target: headerElements[1],
+        currentTarget: headerElements[1],
         preventDefault: sandbox.spy(),
       };
       expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.true;
@@ -176,6 +179,7 @@ describes.sandboxed('amp-accordion', {}, () => {
       const upArrowEvent = {
         keyCode: KeyCodes.UP_ARROW,
         target: headerElements[0],
+        currentTarget: headerElements[0],
         preventDefault: sandbox.spy(),
       };
       obj.ampAccordion.implementation_.keyDownHandler_(upArrowEvent);
@@ -184,6 +188,7 @@ describes.sandboxed('amp-accordion', {}, () => {
       const downArrowEvent = {
         keyCode: KeyCodes.DOWN_ARROW,
         target: headerElements[headerElements.length - 1],
+        currentTarget: headerElements[headerElements.length - 1],
         preventDefault: sandbox.spy(),
       };
       obj.ampAccordion.implementation_.keyDownHandler_(downArrowEvent);
@@ -220,10 +225,10 @@ describes.sandboxed('amp-accordion', {}, () => {
         preventDefault: sandbox.spy(),
       };
       expect(Object.keys(impl.currentState_)).to.have.length(0);
-      impl.clickHandler_(clickEventExpandElement);
+      impl.onHeaderPicked_(clickEventExpandElement);
       expect(Object.keys(impl.currentState_)).to.have.length(1);
       expect(impl.currentState_['test0']).to.be.true;
-      impl.clickHandler_(clickEventCollapseElement);
+      impl.onHeaderPicked_(clickEventCollapseElement);
       expect(Object.keys(impl.currentState_)).to.have.length(2);
       expect(impl.currentState_['test0']).to.be.true;
       expect(impl.currentState_['test1']).to.be.false;
@@ -292,7 +297,7 @@ describes.sandboxed('amp-accordion', {}, () => {
         currentTarget: headerElements[0],
         preventDefault: sandbox.spy(),
       };
-      impl.clickHandler_(clickEventExpandElement);
+      impl.onHeaderPicked_(clickEventExpandElement);
       expect(getSessionStateSpy).to.not.have.been.called;
       expect(setSessionStateSpy).to.not.have.been.called;
       expect(Object.keys(impl.currentState_)).to.have.length(1);
@@ -321,7 +326,7 @@ describes.sandboxed('amp-accordion', {}, () => {
           currentTarget: headerElements1[0],
           preventDefault: sandbox.spy(),
         };
-        ampAccordion1.implementation_.clickHandler_(clickEventElement);
+        ampAccordion1.implementation_.onHeaderPicked_(clickEventElement);
         ampAccordion2.implementation_.buildCallback();
         const headerElements2 = ampAccordion2.querySelectorAll(
           'section > *:first-child');

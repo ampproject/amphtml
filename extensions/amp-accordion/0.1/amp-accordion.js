@@ -93,11 +93,11 @@ class AmpAccordion extends AMP.BaseElement {
           header.setAttribute('tabindex', 0);
         }
         this.headers_.push(header);
-        header.addEventListener('click', this.clickHandler_.bind(this));
+        header.addEventListener('click',
+            this.onHeaderPicked_.bind(this));
+        header.addEventListener('keydown', this.keyDownHandler_.bind(this));
       });
     });
-
-    this.element.addEventListener('keydown', this.keyDownHandler_.bind(this));
   }
 
   /**
@@ -151,11 +151,13 @@ class AmpAccordion extends AMP.BaseElement {
   }
 
   /**
-   * Handles user action on an accordion header, agnostic of input method.
-   * @param {!Element} header
+   * Handles accordion header activation, through clicks or enter/space presses.
+   * @param {!Event} event 'click' or 'keydown' event.
    * @private
    */
-  onHeaderPicked_(header) {
+  onHeaderPicked_(event) {
+    event.preventDefault();
+    const header = dev().assertElement(event.currentTarget);
     const section = header.parentElement;
     const sectionComponents = section.children;
     const content = sectionComponents[1];
@@ -175,18 +177,8 @@ class AmpAccordion extends AMP.BaseElement {
   }
 
   /**
-   * Handles accordion headers clicks to expand/collapse its content.
-   * @param {!Event} event Click event.
-   * @private
-   */
-  clickHandler_(event) {
-    event.preventDefault();
-    const header = dev().assertElement(event.currentTarget);
-    this.onHeaderPicked_(header);
-  }
-
-  /**
-   * Handles accordion key presses ot expand/collapse its content.
+   * Handles key presses on an accordion expand/collapse its content or
+   * move focus to previous/next header.
    * @param {!Event} event keydown event.
    */
   keyDownHandler_(event) {
@@ -201,7 +193,11 @@ class AmpAccordion extends AMP.BaseElement {
         return;
       case KeyCodes.ENTER: /* fallthrough */
       case KeyCodes.SPACE:
-        this.activationKeyDownHandler_(event);
+        if (event.target == event.currentTarget) {
+          // Only activate if header element was activated directly.
+          // Do not respond to key presses on its children.
+          this.onHeaderPicked_(event);
+        }
         return;
     }
   }
@@ -213,8 +209,8 @@ class AmpAccordion extends AMP.BaseElement {
    * @private
    */
   navigationKeyDownHandler_(event) {
-    const target = event.target;
-    const index = this.headers_.indexOf(target);
+    const header = event.currentTarget;
+    const index = this.headers_.indexOf(header);
     if (index !== -1) {
       event.preventDefault();
       // Up and down are the same regardless of locale direction.
@@ -226,22 +222,6 @@ class AmpAccordion extends AMP.BaseElement {
       }
       const newFocusHeader = this.headers_[newFocusIndex];
       tryFocus(newFocusHeader);
-    }
-  }
-
-  /**
-   * Handles keyboard navigation events.
-   * @param {!Event} event
-   * @private
-   */
-  activationKeyDownHandler_(event) {
-    const target = event.target;
-    // TODO(kmh287): Should we also support activation of children of the
-    // header?
-    if (this.headers_.includes(target)) {
-      event.preventDefault();
-      const header = dev().assertElement(target);
-      this.onHeaderPicked_(header);
     }
   }
 
