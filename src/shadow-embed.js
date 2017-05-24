@@ -20,12 +20,13 @@ import {dev} from './log';
 import {closestNode, escapeCssSelectorIdent} from './dom';
 import {extensionsFor} from './services';
 import {insertStyleElement} from './style-installer';
-import {setStyle} from './style';
 import {
   isShadowDomSupported,
   getShadowDomSupportedVersion,
   ShadowDomVersion,
 } from './web-components';
+import {setStyle} from './style';
+import {vsyncFor} from './services';
 
 /**
  * Used for non-composed root-node search. See `getRootNode`.
@@ -163,19 +164,26 @@ export function createShadowEmbedRoot(hostElement, extensionIds) {
  * Imports a body into a shadow root with the workaround for a polyfill case.
  * @param {!ShadowRoot} shadowRoot
  * @param {!Element} body
+ * @param {boolean} deep
  * @return {!Element}
  */
-export function importShadowBody(shadowRoot, body) {
+export function importShadowBody(shadowRoot, body, deep) {
   const doc = shadowRoot.ownerDocument;
   let resultBody;
   if (isShadowDomSupported()) {
-    resultBody = dev().assertElement(doc.importNode(body, true));
+    resultBody = dev().assertElement(doc.importNode(body, deep));
   } else {
     resultBody = doc.createElement('amp-body');
-    for (let n = body.firstChild; !!n; n = n.nextSibling) {
-      resultBody.appendChild(doc.importNode(n, true));
-    }
     setStyle(resultBody, 'display', 'block');
+    for (let i = 0; i < body.attributes.length; i++) {
+      resultBody.setAttribute(
+          body.attributes[0].name, body.attributes[0].value);
+    }
+    if (deep) {
+      for (let n = body.firstChild; !!n; n = n.nextSibling) {
+        resultBody.appendChild(doc.importNode(n, true));
+      }
+    }
   }
   setStyle(resultBody, 'position', 'relative');
   shadowRoot.appendChild(resultBody);
@@ -331,6 +339,145 @@ function getStylesheetRules(doc, css) {
   } finally {
     if (style.parentNode) {
       style.parentNode.removeChild(style);
+    }
+  }
+}
+
+
+/**
+ * Takes as an input a text stream, parses it and incrementally reconstructs
+ * it in the shadow root.
+ *
+ * See https://jakearchibald.com/2016/fun-hacks-faster-content/ for more
+ * details.
+ *
+ * @implements {WritableStreamDefaultWriter}
+ */
+export class ShadowDomWriter {
+  /**
+   * @param {!Window} win
+   */
+  constructor(win) {
+    /** @const @private {!Document} */
+    this.parser_ = win.document.implementation.createHTMLDocument('');
+    this.parser_.open();
+
+    /** @const @private */
+    this.vsync_ = vsyncFor(win);
+
+    /** @private @const */
+    this.boundMerge_ = this.merge_.bind(this);
+
+    /** @private {?function(!Document):!Element} */
+    this.onBody_ = null;
+
+    /** @private {?function()} */
+    this.onBodyChunk_ = null;
+
+    /** @private {?function()} */
+    this.onEnd_ = null;
+
+    /** @private {boolean} */
+    this.mergeScheduled_ = false;
+
+    /** @const @private {!Promise} */
+    this.success_ = Promise.resolve();
+
+    /** @private {boolean} */
+    this.eof_ = false;
+
+    /** @private {?Element} */
+    this.targetBody_ = null;
+  }
+
+  /**
+   * Sets the callback that will be called when body has been parsed.
+   *
+   * Unlike most of other nodes, `<body>` cannot be simply merged to support
+   * SD polyfill where the use of `<body>` element is not possible. The
+   * callback will be given the parsed document and it must return back
+   * the reconstructed `<body>` node in the target DOM where all children
+   * will be streamed into.
+   *
+   * @param {function(!Document):!Element} callback
+   */
+  onBody(callback) {
+    this.onBody_ = callback;
+  }
+
+  /**
+   * Sets the callback that will be called when new nodes have been merged
+   * into the target DOM.
+   * @param {function()} callback
+   */
+  onBodyChunk(callback) {
+    this.onBodyChunk_ = callback;
+  }
+
+  /**
+   * Sets the callback that will be called when the DOM has been fully
+   * constructed.
+   * @param {function()} callback
+   */
+  onEnd(callback) {
+    this.onEnd_ = callback;
+  }
+
+  /** @override */
+  write(chunk) {
+    if (this.eof_) {
+      throw new Error('closed already');
+    }
+    if (chunk) {
+      this.parser_.write(/** @type {string} */ (chunk));
+    }
+    this.schedule_();
+    return this.success_;
+  }
+
+  /** @override */
+  close() {
+    this.parser_.close();
+    this.eof_ = true;
+    this.schedule_();
+    return this.success_;
+  }
+
+  /** @private */
+  schedule_() {
+    dev().assert(this.onBody_ && this.onBodyChunk_ && this.onEnd_);
+    if (!this.mergeScheduled_) {
+      this.mergeScheduled_ = true;
+      this.vsync_.mutate(this.boundMerge_);
+    }
+  }
+
+  /** @private */
+  merge_() {
+    this.mergeScheduled_ = false;
+
+    // Body has been newly parsed.
+    if (!this.targetBody_ && this.parser_.body) {
+      this.targetBody_ = this.onBody_(this.parser_);
+    }
+
+    // Merge body children.
+    if (this.targetBody_) {
+      const inputBody = dev().assert(this.parser_.body);
+      const targetBody = dev().assert(this.targetBody_);
+      let transferCount = 0;
+      while (inputBody.firstChild) {
+        transferCount++;
+        targetBody.appendChild(inputBody.firstChild);
+      }
+      if (transferCount > 0) {
+        this.onBodyChunk_();
+      }
+    }
+
+    // EOF.
+    if (this.eof_) {
+      this.onEnd_();
     }
   }
 }
