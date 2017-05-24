@@ -25,13 +25,23 @@ import {user} from '../../../src/log';
 
 const TAG = 'amp-ad-exit';
 
+/**
+ * @typedef {{
+ *   finalUrl: string,
+ *   trackingUrls: !Array<string>,
+ *   vars: !./config.Variables,
+ *   filters: !Array<!./filters/filter.Filter>
+ * }}
+ */
+let NavigationTarget;
+
 export class AmpAdExit extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
     /**
-     * @private @const {!Object<string, !./navigation-target.NavigationTarget}
+     * @private @const {!Object<string, !NavigationTarget>}
      */
     this.targets_ = {};
 
@@ -79,7 +89,7 @@ export class AmpAdExit extends AMP.BaseElement {
   /**
    * @param {!Object<string, string|number|boolean>} args
    * @param {!../../../src/service/action-impl.ActionEventDef} event
-   * @param {!./navigation-target.NavigationTarget} target
+   * @param {!NavigationTarget} target
    * @return {function(string): string}
    */
   getUrlVariableRewriter_(args, event, target) {
