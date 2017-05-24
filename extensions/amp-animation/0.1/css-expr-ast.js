@@ -17,7 +17,7 @@
 const FINAL_URL_RE = /^(data|https)\:/i;
 const DEG_TO_RAD = 2 * Math.PI / 360;
 const GRAD_TO_RAD = Math.PI / 200;
-const VAR_CSS_RE = /calc|var|url/i;
+const VAR_CSS_RE = /(calc|var|url)\(/i;
 const INFINITY_RE = /^(infinity|infinite)$/i;
 
 

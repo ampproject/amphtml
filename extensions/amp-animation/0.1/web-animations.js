@@ -668,7 +668,7 @@ class CssContextImpl {
     this.parsedCssCache_ = map();
 
     /** @private {?Element} */
-    this.current_ = null;
+    this.currentTarget_ = null;
 
     /** @private {?string} */
     this.dim_ = null;
@@ -720,10 +720,10 @@ class CssContextImpl {
    * @private
    */
   withTarget_(target, callback) {
-    const prev = this.current_;
-    this.current_ = target;
+    const prev = this.currentTarget_;
+    this.currentTarget_ = target;
     const result = callback(target);
-    this.current_ = prev;
+    this.currentTarget_ = prev;
     return result;
   }
 
@@ -757,7 +757,11 @@ class CssContextImpl {
   resolveCssMap(target, input) {
     const result = map();
     for (const k in input) {
-      result[k] = this.resolveCss(target, input[k]);
+      if (k == 'offset') {
+        result[k] = input[k];
+      } else {
+        result[k] = this.resolveCss(target, input[k]);
+      }
     }
     return result;
   }
@@ -832,7 +836,7 @@ class CssContextImpl {
    * @private
    */
   requireTarget_() {
-    return /** @type {!Element} */ (user().assert(this.current_,
+    return /** @type {!Element} */ (user().assert(this.currentTarget_,
         'Only allowed when target is specified'));
   }
 
@@ -903,6 +907,6 @@ class CssContextImpl {
   /** @override */
   resolveUrl(url) {
     const resolvedUrl = resolveRelativeUrl(url, this.baseUrl_);
-    return assertHttpsUrl(resolvedUrl, this.current_ || '');
+    return assertHttpsUrl(resolvedUrl, this.currentTarget_ || '');
   }
 }

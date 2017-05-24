@@ -258,7 +258,7 @@ describes.sandboxed('MeasureScanner', {}, () => {
     })[0].keyframes;
     expect(isObject(keyframes)).to.be.true;
     expect(isArray(keyframes.opacity)).to.be.true;
-    expect(keyframes.opacity).to.deep.equal([0, 1]);
+    expect(keyframes.opacity).to.deep.equal(['0', '1']);
   });
 
   it('should parse object keyframe w/partial offsets', () => {
@@ -538,11 +538,11 @@ describes.sandboxed('MeasureScanner', {}, () => {
 
     it('should NOT parse CSS for simple values', () => {
       expect(css.resolveCss(target1, '')).to.equal('');
-      expect(css.resolveCss(target1, null)).to.be.null;
-      expect(css.resolveCss(target1, 0)).to.equal(0);
-      expect(css.resolveCss(target1, 10)).to.equal(10);
-      expect(css.resolveCss(target1, -1)).to.equal(-1);
-      expect(css.resolveCss(target1, Infinity)).to.equal(Infinity);
+      expect(css.resolveCss(target1, null)).to.equal('');
+      expect(css.resolveCss(target1, 0)).to.equal('0');
+      expect(css.resolveCss(target1, 10)).to.equal('10');
+      expect(css.resolveCss(target1, -1)).to.equal('-1');
+      expect(css.resolveCss(target1, Infinity)).to.equal('Infinity');
       expect(css.resolveCss(target1, '10px')).to.equal('10px');
       expect(css.resolveCss(target1, '10vh')).to.equal('10vh');
       expect(css.resolveCss(target1, 'rgb(0,0,0)')).to.equal('rgb(0,0,0)');
@@ -572,9 +572,9 @@ describes.sandboxed('MeasureScanner', {}, () => {
     });
 
     it('should resolve invalid time CSS to null', () => {
-      expect(css.resolveMillis(target1, 'abc', 1)).to.be.null;
-      expect(css.resolveMillis(target1, 'Infinity', 1)).to.be.null;
-      expect(css.resolveMillis(target1, 'infinite', 1)).to.be.null;
+      expect(css.resolveMillis(target1, 'abc', 1)).to.be.undefined;
+      expect(css.resolveMillis(target1, 'Infinity', 1)).to.be.undefined;
+      expect(css.resolveMillis(target1, 'infinite', 1)).to.be.undefined;
       expect(parseSpy).to.be.called;
     });
 
@@ -597,7 +597,7 @@ describes.sandboxed('MeasureScanner', {}, () => {
     });
 
     it('should resolve invalid number CSS to null', () => {
-      expect(css.resolveNumber(target1, 'abc', 1)).to.be.null;
+      expect(css.resolveNumber(target1, 'abc', 1)).to.be.undefined;
       expect(parseSpy).to.be.called;
     });
 
