@@ -51,7 +51,7 @@ If you are new to contributing to an open source project, Git/GitHub, etc. welco
 
 The [Getting Started End-to-End Guide](contributing/getting-started-e2e.md) provides step-by-step instructions for everything from creating a GitHub account to getting your code reviewed and merged.  Even if you've never contributed to an open source project before you'll soon be building AMP, making improvements and seeing your code live across the web.
 
-The community has created a list of [Great First Issues](https://github.com/ampproject/amphtml/milestone/25) specifically for new contributors to the project.  Feel free to find one that interests you and jump in!  Make sure to comment on the issue first so others know you are starting on it.
+The community has created a list of [Great First Issues](https://github.com/ampproject/amphtml/labels/Great%20First%20Issue) specifically for new contributors to the project.  Feel free to find one that interests you and jump in!  Make sure to comment on the issue first so others know you are starting on it.
 
 If you run into any problems we have plenty of people who are willing to help; see the [How to get help](contributing/getting-started-e2e.md#how-to-get-help) section of the Getting Started guide.
 
