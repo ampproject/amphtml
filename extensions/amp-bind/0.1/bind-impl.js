@@ -78,8 +78,8 @@ let BoundElementDef;
  * @private {!Object<string, !Array<string>>}
  */
 const BIND_ONLY_ATTRIBUTES = map({
-  'AMP-LIST': ['state'],
   'AMP-CAROUSEL': ['slide'],
+  'AMP-LIST': ['state'],
   'AMP-SELECTOR': ['selected'],
 });
 
