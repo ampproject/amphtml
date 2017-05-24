@@ -57,7 +57,7 @@ describes.sandboxed('AmpWebviewViewerIntegration', {}, () => {
     amp: {
       params: {
         webview: '1',
-        origin: 'doesnt-matter',
+        origin: null,
       },
     },
   }, env => {
