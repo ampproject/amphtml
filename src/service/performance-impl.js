@@ -164,16 +164,7 @@ export class Performance {
 
   onload_() {
     this.tick('ol');
-    // Detect deprecated first pain time API
-    // https://bugs.chromium.org/p/chromium/issues/detail?id=621512
-    // We'll use this until something better is available.
-    if (!this.win.PerformancePaintTiming
-        && this.win.chrome
-        && typeof this.win.chrome.loadTimes == 'function') {
-      this.tickDelta('fp',
-          this.win.chrome.loadTimes().firstPaintTime * 1000 -
-              this.win.performance.timing.navigationStart);
-    }
+    this.tickLegacyFirstPaintTime_();
   }
 
   /**
@@ -196,6 +187,30 @@ export class Performance {
     });
 
     observer.observe({entryTypes: ['paint']});
+  }
+
+  /**
+   * Tick fp time based on Chrome's legacy paint timing API when
+   * appropriate.
+   * `registerPaintTimingObserver_` calls the standards based API and this
+   * method does nothing if it is available.
+   */
+  tickLegacyFirstPaintTime_() {
+    // Detect deprecated first pain time API
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=621512
+    // We'll use this until something better is available.
+    if (!this.win.PerformancePaintTiming
+        && this.win.chrome
+        && typeof this.win.chrome.loadTimes == 'function') {
+      const fpTime = this.win.chrome.loadTimes().firstPaintTime
+          * 1000 - this.win.performance.timing.navigationStart;
+      if (fpTime <= 1) {
+        // Throw away bad data generated from an apparent Chrome bug
+        // that is fixed in later Chrome versions.
+        return;
+      }
+      this.tickDelta('fp', fpTime);
+    }
   }
 
   /**
