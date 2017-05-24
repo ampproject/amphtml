@@ -106,6 +106,7 @@ The `<amp-ad>` requires width and height values to be specified according to the
 - [AMoAd](../../ads/amoad.md)
 - [AppNexus](../../ads/appnexus.md)
 - [Atomx](../../ads/atomx.md)
+- [Bidtellect](../../ads/bidtellect.md)
 - [brainy](../../ads/brainy.md)
 - [CA A.J.A. Infeed](../../ads/caajainfeed.md)
 - [CA-ProFit-X](../../ads/caprofitx.md)
