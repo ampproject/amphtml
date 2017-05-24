@@ -347,6 +347,14 @@ export class FriendlyIframeEmbed {
     return this.startTime_;
   }
 
+  /**
+   * Returns the base URL for the embedded document.
+   * @return {string}
+   */
+  getUrl() {
+    return this.spec.url;
+  }
+
   /** @return {!Signals} */
   signals() {
     return this.signals_;

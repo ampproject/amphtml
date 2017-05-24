@@ -115,31 +115,31 @@ Top-level animation and animation components may contain timing properties. Thes
   </tr>
   <tr>
     <td><code>duration</code></td>
-    <td>number</td>
+    <td>time</td>
     <td>0</td>
-    <td>The animation duration in milliseconds.</td>
+    <td>The animation duration. Either a numeric value in milliseconds or a CSS time value, e.g. `2s`.</td>
   </tr>
   <tr>
     <td><code>delay</code></td>
-    <td>number</td>
+    <td>time</td>
     <td>0</td>
-    <td>The delay in milliseconds before animation starts executing.</td>
+    <td>The delay before animation starts executing. Either a numeric value in milliseconds or a CSS time value, e.g. `2s`.</td>
   </tr>
   <tr>
     <td><code>endDelay</code></td>
-    <td>number</td>
+    <td>time</td>
     <td>0</td>
-    <td>The delay in milliseconds after the animation completes and before it's actually considered to be complete.</td>
+    <td>The delay after the animation completes and before it's actually considered to be complete. Either a numeric value in milliseconds or a CSS time value, e.g. `2s`.</td>
   </tr>
   <tr>
     <td><code>iterations</code></td>
-    <td>number or<br>"Infinity"</td>
+    <td>number or<br>"Infinity" or<br>"infinite"</td>
     <td>1</td>
     <td>The number of times the animation effect repeats.</td>
   </tr>
   <tr>
     <td><code>iterationStart</code></td>
-    <td>number</td>
+    <td>number/CSS</td>
     <td>0</td>
     <td>The time offset at which the effect begins animating.</td>
   </tr>
@@ -163,12 +163,15 @@ Top-level animation and animation components may contain timing properties. Thes
   </tr>
 </table>
 
+All timing properties allow either a direct numeric/string values or CSS values. For instance, "duration" can be specified as `1000` or `1s` or `1000ms`. In addition, CSS `calc()` and `var()` expressions are also allowed (see notes on `var()` in the section below).
+
 An example of timing properties in JSON:
 ```text
 {
   ...
-  "duration": 1000,
+  "duration": "1s",
   "delay": 100,
+  "endDelay": "var(--end-delay, 10ms)",
   "easing": "ease-in",
   "fill": "both"
   ...
@@ -243,6 +246,8 @@ The array-form can also include "easing":
 
 For additional keyframes formats refer to [Web Animations spec](https://www.w3.org/TR/web-animations/#processing-a-keyframes-argument).
 
+The property values allow any valid CSS values, including `calc()` and `var()` expressions (see notes on `var()` in the section below).
+
 
 #### Whitelisted properties for keyframes
 
@@ -265,7 +270,7 @@ can be reduced to this one animation component only. For instance:
 <script type="application/json">
 {
   "selector": "#target-id",
-  "duration": 1000,
+  "duration": "1s",
   "keyframes": {"opacity": 1}
 }
 </script>
@@ -293,6 +298,42 @@ can be reduced to an array of components. For instance:
 </script>
 </amp-animation>
 ```
+
+### `var()` and `calc()` expressions
+
+`amp-animation` allows use of `var()` and `calc()` expressions.
+
+For instance:
+```html
+<amp-animation layout="nodisplay">
+<script type="application/json">
+[
+  {
+    "selector": ".target-class",
+    "duration": "4s",
+    "delay": "var(--delay)",
+    "keyframes": {"transform": "translateX(calc(100vh + 20px))"}
+  }
+]
+</script>
+</amp-animation>
+```
+
+Both `var()` and `calc()` polyfilled on platforms that do not directly support them. `var()` properties are extracted from the corresponding target elements. However, it's unfortunately impossible to fully polyfill `var()`. Thus, where compatibility is important, it's strongly recommended to include default values in the `var()` expressions. For instance:
+```html
+<amp-animation layout="nodisplay">
+<script type="application/json">
+[
+  {
+    "selector": ".target-class",
+    "duration": "4s",
+    "delay": "var(--delay, 100ms)",
+  }
+]
+</script>
+</amp-animation>
+```
+
 
 ## Triggering animation
 

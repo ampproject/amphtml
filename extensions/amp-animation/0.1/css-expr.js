@@ -19,7 +19,7 @@ import {parser} from './css-expr-impl';
 
 /**
  * @param {string} cssString
- * @return {?CssNode}
+ * @return {?./css-expr-ast.CssNode}
  */
 export function parseCss(cssString) {
   return parser.parse(cssString);
