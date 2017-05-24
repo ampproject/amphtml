@@ -89,7 +89,7 @@
     "minimatch": "3.0.0",
     "minimist": "1.2.0",
     "mocha": "2.5.3",
-    "morgan": "1.7.0",
+    "morgan": "1.8.2",
     "nodemon": "1.11.0",
     "path": "0.12.7",
     "postcss": "5.2.10",
