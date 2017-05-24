@@ -781,7 +781,7 @@ class MultidocManager {
             // Append shallow body.
             const body = importShadowBody(
                 shadowRoot,
-                /** @type {!Element} */ (doc.body),
+                dev().assertElement(doc.body),
                 /* deep */ false);
             body.classList.add('amp-shadow');
             shadowRoot.appendChild(body);

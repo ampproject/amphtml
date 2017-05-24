@@ -1052,7 +1052,7 @@ describes.realWin('runtime multidoc', {
   });
 
 
-  describe.only('attachShadowDocAsStream', () => {
+  describe('attachShadowDocAsStream', () => {
     const docUrl = 'https://example.org/doc1';
 
     let hostElement;
