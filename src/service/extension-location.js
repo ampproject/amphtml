@@ -55,13 +55,7 @@ export function calculateExtensionScriptUrl(location, extensionId, isLocalDev) {
 export function calculateEntryPointScriptUrl(
     location, entryPoint, isLocalDev, opt_rtv, opt_minified) {
   const base = calculateScriptBaseUrl(location, isLocalDev);
-  if (opt_rtv && opt_minified) {
-    return `${base}/rtv/${getMode().rtvVersion}/${entryPoint}.js`;
-  } else if (opt_rtv) {
-    return `${base}/rtv/${getMode().rtvVersion}/${entryPoint}.max.js`;
-  } else if (opt_minified) {
-    return `${base}/${entryPoint}.js`;
-  } else {
-    return `${base}/${entryPoint}.max.js`;
-  }
+  const rtv = opt_rtv ? `/rtv/${getMode().rtvVersion}` : '';
+  const max = opt_minified ? '' : '.max';
+  return `${base}${rtv}/${entryPoint}${max}.js`;
 }

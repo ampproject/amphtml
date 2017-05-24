@@ -68,11 +68,12 @@ describes.sandboxed('Extension Location', {}, () => {
     });
 
     it('with local mode', () => {
-      const script = calculateEntryPointScriptUrl({
+      const location = {
         pathname: 'examples/ads.amp.html',
         host: 'localhost:8000',
         protocol: 'http:',
-      },
+      };
+      const script = calculateEntryPointScriptUrl(location,
           'sw',
           /* isLocalDev */ true);
       expect(script).to.equal('http://localhost:8000/dist/sw.max.js');
@@ -80,11 +81,13 @@ describes.sandboxed('Extension Location', {}, () => {
 
     it('with remote mode', () => {
       window.AMP_MODE = {rtvVersion: '123'};
-      const script = calculateEntryPointScriptUrl({
+      const location = {
         pathname: 'examples/ads.amp.min.html',
         host: 'localhost:8000',
         protocol: 'http:',
-      }, 'sw',
+      };
+      const script = calculateEntryPointScriptUrl(location,
+           'sw',
           /* isLocalDev */ false);
       expect(script).to.equal(
           'https://cdn.ampproject.org/sw.max.js');
@@ -92,11 +95,12 @@ describes.sandboxed('Extension Location', {}, () => {
 
     it('with remote mode & rtv', () => {
       window.AMP_MODE = {rtvVersion: '123'};
-      const script = calculateEntryPointScriptUrl({
+      const location = {
         pathname: 'examples/ads.amp.min.html',
         host: 'localhost:8000',
         protocol: 'http:',
-      },
+      };
+      const script = calculateEntryPointScriptUrl(location,
           'ww',
           /* isLocalDev */ false,
           /* opt_rtv */ true);
@@ -107,11 +111,12 @@ describes.sandboxed('Extension Location', {}, () => {
 
   it('with remote mode & rtv & compiled', () => {
     window.AMP_MODE = {rtvVersion: '123'};
-    const script = calculateEntryPointScriptUrl({
+    const location = {
       pathname: 'examples/ads.amp.min.html',
       host: 'localhost:8000',
       protocol: 'http:',
-    },
+    };
+    const script = calculateEntryPointScriptUrl(location,
         'ww',
         /* isLocalDev */ false,
         /* opt_rtv */ true,
@@ -122,11 +127,12 @@ describes.sandboxed('Extension Location', {}, () => {
 
   it('with local mode & not rtv & compiled', () => {
     window.AMP_MODE = {rtvVersion: '123'};
-    const script = calculateEntryPointScriptUrl({
+    const location = {
       pathname: 'examples/ads.amp.min.html',
       host: 'localhost:8000',
       protocol: 'http:',
-    },
+    };
+    const script = calculateEntryPointScriptUrl(location,
         'ww',
         /* isLocalDev */ true,
         /* opt_rtv */ false,
