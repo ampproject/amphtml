@@ -245,10 +245,13 @@ export class AmpAnimation extends AMP.BaseElement {
     }
 
     const vsync = this.getVsync();
+    const ampdoc = this.getAmpDoc();
     const readyPromise = this.embed_ ? this.embed_.whenReady() :
-        this.getAmpDoc().whenReady();
+        ampdoc.whenReady();
+    const hostWin = this.embed_ ? this.embed_.win : this.win;
+    const baseUrl = this.embed_ ? this.embed_.getUrl() : ampdoc.getUrl();
     return readyPromise.then(() => {
-      const measurer = new MeasureScanner(this.win, {
+      const measurer = new MeasureScanner(hostWin, baseUrl, {
         resolveTarget: this.resolveTarget_.bind(this),
         queryTargets: this.queryTargets_.bind(this),
       }, /* validate */ true);
