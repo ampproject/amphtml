@@ -260,6 +260,8 @@ function runAllCommands() {
     command.runPreBuildChecks();
     command.runDepAndTypeChecks();
     // Skip testDocumentLinks() during push builds.
+    command.buildValidatorWebUI();
+    command.buildValidator();
   }
   if (process.env.BUILD_SHARD == "integration_tests") {
     command.buildRuntime();
@@ -273,10 +275,6 @@ function runAllCommands() {
     // TODO(rsimha-amp, 9404): Clean up unit tests and change to css-only build.
     command.buildRuntime();
     command.runUnitTests();
-  }
-  if (process.env.BUILD_SHARD == "validator_tests") {
-    command.buildValidatorWebUI();
-    command.buildValidator();
   }
 }
 
@@ -354,6 +352,12 @@ function main(argv) {
       command.runPreBuildChecks();
       command.runDepAndTypeChecks();
     }
+    if (buildTargets.has('VALIDATOR_WEBUI')) {
+      command.buildValidatorWebUI();
+    }
+    if (buildTargets.has('VALIDATOR')) {
+      command.buildValidator();
+    }
   }
 
   if (process.env.BUILD_SHARD == "integration_tests") {
@@ -374,15 +378,6 @@ function main(argv) {
     // TODO(rsimha-amp, 9404): Clean up unit tests and change to css-only build.
     command.buildRuntime();
     command.runUnitTests();
-  }
-
-  if (process.env.BUILD_SHARD == "validator_tests") {
-    if (buildTargets.has('VALIDATOR_WEBUI')) {
-      command.buildValidatorWebUI();
-    }
-    if (buildTargets.has('VALIDATOR')) {
-      command.buildValidator();
-    }
   }
 
   stopTimer('pr-check.js', startTime);
