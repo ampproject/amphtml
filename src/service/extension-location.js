@@ -49,13 +49,13 @@ export function calculateExtensionScriptUrl(location, extensionId, isLocalDev) {
  * @param {string} entryPoint
  * @param {boolean=} isLocalDev
  * @param {boolean=} opt_rtv
- * @param {boolean=} opt_minified
  * @return {string}
  */
 export function calculateEntryPointScriptUrl(
-    location, entryPoint, isLocalDev, opt_rtv, opt_minified) {
+    location, entryPoint, isLocalDev, opt_rtv) {
   const base = calculateScriptBaseUrl(location, isLocalDev);
-  const rtv = opt_rtv ? `/rtv/${getMode().rtvVersion}` : '';
-  const max = opt_minified ? '' : '.max';
-  return `${base}${rtv}/${entryPoint}${max}.js`;
+  if (opt_rtv) {
+    return `${base}/rtv/${getMode().rtvVersion}/${entryPoint}.js`;
+  }
+  return `${base}/${entryPoint}.js`;
 }
