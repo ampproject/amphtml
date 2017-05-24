@@ -174,9 +174,9 @@ export function googleAdUrl(
     queryParams.push({name: 'act', value:
       Object.keys(containerTypeSet).join()});
     if (isCanary(win)) {
-      // The semantics here mean:
-      //   0: production branch (never actually sent)
-      //   1: control branch (is not yet supported, so never sent)
+      // The semantics here are:
+      //   0: production branch (this is never actually sent)
+      //   1: control branch (this is not yet supported, so is never sent)
       //   2: canary branch
       queryParams.push({name: 'art', value: '2'});
     }
