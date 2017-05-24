@@ -209,7 +209,7 @@ class AmpAccordion extends AMP.BaseElement {
    * @private
    */
   navigationKeyDownHandler_(event) {
-    const header = event.currentTarget;
+    const header = dev().assertElement(event.currentTarget);
     const index = this.headers_.indexOf(header);
     if (index !== -1) {
       event.preventDefault();
