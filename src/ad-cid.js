@@ -50,7 +50,7 @@ export function getClientScopedAdCid(
     }
     return cidService.get({
       scope: dev().assertString(clientIdScope),
-      cookieName: opt_clientIdCookieName || undefined,
+      cookieName: opt_clientIdCookieName,
     }, Promise.resolve(undefined)).catch(error => {
       // Not getting a CID is not fatal.
       dev().error('AD-CID', error);
