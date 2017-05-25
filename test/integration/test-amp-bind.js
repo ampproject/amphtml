@@ -25,7 +25,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   let ampdoc;
   let sandbox;
 
-  this.timeout(5000);
+  this.timeout(10000);
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
