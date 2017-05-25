@@ -6,7 +6,19 @@
   <link rel="canonical" href="amps.html">
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-fx-parallax" src="https://cdn.ampproject.org/v0/amp-fx-parallax-0.1.js"></script>
   <style amp-custom>
+
+    body {
+      font-family:sans-serif;
+      color: #444;
+    }
+
+    main {
+      max-width: 800px;
+      margin: auto;
+    }
+
     article, header h1 {
       margin: 0px 10px;
     }
@@ -22,10 +34,10 @@
     header h1 span {
       background-color: black;
       color: white;
-      line-height: 1.2em;
+      line-height: 1.3em;
     }
 
-    header amp-img img {
+    amp-img img {
       object-fit: cover;
     }
 
@@ -35,51 +47,55 @@
     .vertically-center {
       transform: translateY(-50%);
     }
+
+    .parallax-window {
+      height: 50vh;
+      overflow: hidden;
+    }
+
   </style>
-  <script async custom-element="amp-fx-parallax" src="https://cdn.ampproject.org/v0/amp-fx-parallax-0.1.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 </head>
 <body>
   <header>
+    <!-- Parallax Title -->
     <h1 amp-fx-parallax="1.7">
       <div class="vertically-center">
-        <span>Lorem Ipsum Dolor Sit Amet Consectetur Adipiscing<span>
+        <span amp-fx-parallax=1.7>Lorem Ipsum Dolor Sit Amet Consectetur Adipiscing<span>
       </div>
     </h1>
-    <amp-img height="50vh" layout="fixed-height" src="img/hero@1x.jpg"></amp-img>
+    <amp-img height="50vh" layout="fixed-height" src="https://unsplash.it/2000/1000?image=1003"></amp-img>
   </header>
 
-  <article>
-    <p>
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur ullamcorper turpis vel commodo scelerisque. Phasellus
-      luctus nunc ut elit cursus, et imperdiet diam vehicula. Duis et nisi sed urna blandit bibendum et sit amet erat. Suspendisse
-      potenti. Curabitur consequat volutpat arcu nec elementum. Etiam a turpis ac libero varius condimentum. Maecenas sollicitudin
-      felis aliquam tortor vulputate, ac posuere velit semper.
-    </p>
-    <p>
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur ullamcorper turpis vel commodo scelerisque. Phasellus
-      luctus nunc ut elit cursus, et imperdiet diam vehicula. Duis et nisi sed urna blandit bibendum et sit amet erat. Suspendisse
-      potenti. Curabitur consequat volutpat arcu nec elementum. Etiam a turpis ac libero varius condimentum. Maecenas sollicitudin
-      felis aliquam tortor vulputate, ac posuere velit semper.
-    </p>
-    <p>
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur ullamcorper turpis vel commodo scelerisque. Phasellus
-      luctus nunc ut elit cursus, et imperdiet diam vehicula. Duis et nisi sed urna blandit bibendum et sit amet erat. Suspendisse
-      potenti. Curabitur consequat volutpat arcu nec elementum. Etiam a turpis ac libero varius condimentum. Maecenas sollicitudin
-      felis aliquam tortor vulputate, ac posuere velit semper.
-    </p>
-    <p>
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur ullamcorper turpis vel commodo scelerisque. Phasellus
-      luctus nunc ut elit cursus, et imperdiet diam vehicula. Duis et nisi sed urna blandit bibendum et sit amet erat. Suspendisse
-      potenti. Curabitur consequat volutpat arcu nec elementum. Etiam a turpis ac libero varius condimentum. Maecenas sollicitudin
-      felis aliquam tortor vulputate, ac posuere velit semper.
-    </p>
-    <p>
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur ullamcorper turpis vel commodo scelerisque. Phasellus
-      luctus nunc ut elit cursus, et imperdiet diam vehicula. Duis et nisi sed urna blandit bibendum et sit amet erat. Suspendisse
-      potenti. Curabitur consequat volutpat arcu nec elementum. Etiam a turpis ac libero varius condimentum. Maecenas sollicitudin
-      felis aliquam tortor vulputate, ac posuere velit semper.
-    </p>
-  </article>
+  <main>
+    <article>
+      <p>
+        Vestibulum eu varius dolor. Praesent sagittis magna sem, non bibendum quam aliquam et. Sed et tristique mi. Quisque porta lorem et nulla lacinia gravida. Nullam semper lobortis sem, interdum tempus tellus. Proin accumsan imperdiet leo at vulputate. Nulla euismod placerat finibus. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+      </p>
+      <p>
+        Mauris aliquet eleifend lacinia. Maecenas non finibus ante, et maximus urna. In non enim a lectus molestie tincidunt. Curabitur eu tortor odio. Aliquam bibendum elit risus, vitae rutrum ex placerat eget.
+      </p>
+      <p>
+        Etiam egestas velit ut purus dictum, vel placerat turpis convallis. Nullam metus urna, posuere ut elit eu, imperdiet consequat metus. Phasellus blandit at lorem ut mollis. Donec vel ligula at erat mattis aliquet eget quis nibh.
+      </p>
+      <!-- Parallax Image Window -->
+      <div class="parallax-window">
+        <amp-img amp-fx-parallax=1.2 height="100vh" layout="fixed-height" src="https://unsplash.it/1920/1280?image=1044"></amp-img>
+      </div>
+
+      <p>
+        Vestibulum eu varius dolor. Praesent sagittis magna sem, non bibendum quam aliquam et. Sed et tristique mi. Quisque porta lorem et nulla lacinia gravida. Nullam semper lobortis sem, interdum tempus tellus. Proin accumsan imperdiet leo at vulputate. Nulla euismod placerat finibus. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+      </p>
+      <p>
+        Mauris aliquet eleifend lacinia. Maecenas non finibus ante, et maximus urna. In non enim a lectus molestie tincidunt. Curabitur eu tortor odio. Aliquam bibendum elit risus, vitae rutrum ex placerat eget.
+      </p>
+      <p>
+        Integer fringilla eu lacus sit amet tristique. Nulla sagittis fermentum porta. Aenean convallis nulla eu nulla lobortis, sit amet sagittis mauris tincidunt. Praesent sed efficitur odio. Quisque et sollicitudin nisi. Fusce sed auctor ligula. Suspendisse potenti. Nam hendrerit sollicitudin enim, non aliquet lacus congue et.
+      </p>
+      <p>
+        Etiam egestas velit ut purus dictum, vel placerat turpis convallis. Nullam metus urna, posuere ut elit eu, imperdiet consequat metus. Phasellus blandit at lorem ut mollis. Donec vel ligula at erat mattis aliquet eget quis nibh.
+      </p>
+    </article>
+  <main>
 </body>
 </html>
