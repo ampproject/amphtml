@@ -35,7 +35,7 @@ import {
   installUrlReplacementsServiceForDoc,
   extractClientIdFromGaCookie,
 } from '../../src/service/url-replacements-impl';
-import {getService} from '../../src/service';
+import {registerServiceBuilder} from '../../src/service';
 import {setCookie} from '../../src/cookies';
 import {parseUrl} from '../../src/url';
 import {urlReplacementsForDoc, viewerForDoc} from '../../src/services';
@@ -78,17 +78,21 @@ describes.sandboxed('UrlReplacements', {}, () => {
         }
         if (opt_options.withVariant) {
           markElementScheduledForTesting(iframe.win, 'amp-experiment');
-          getService(iframe.win, 'variant', () => Promise.resolve({
-            'x1': 'v1',
-            'x2': null,
-          }));
+          registerServiceBuilder(iframe.win, 'variant', function() {
+            return Promise.resolve({
+              'x1': 'v1',
+              'x2': null,
+            });
+          });
         }
         if (opt_options.withShareTracking) {
           markElementScheduledForTesting(iframe.win, 'amp-share-tracking');
-          getService(iframe.win, 'share-tracking', () => Promise.resolve({
-            incomingFragment: '12345',
-            outgoingFragment: '54321',
-          }));
+          registerServiceBuilder(iframe.win, 'share-tracking', function() {
+            return Promise.resolve({
+              incomingFragment: '12345',
+              outgoingFragment: '54321',
+            });
+          });
         }
       }
       viewerService = viewerForDoc(iframe.ampdoc);
@@ -285,6 +289,14 @@ describes.sandboxed('UrlReplacements', {}, () => {
     return expandAsync('?a=CLIENT_ID(abc,,url-abc)&b=CLIENT_ID(xyz,,url-xyz)',
         /*opt_bindings*/undefined, {withCid: true}).then(res => {
           expect(res).to.match(/^\?a=cid-for-abc\&b=amp-([a-zA-Z0-9_-]+){10,}/);
+        });
+  });
+
+  it('should parse _ga cookie correctly', () => {
+    setCookie(window, '_ga', 'GA1.2.12345.54321');
+    return expandAsync('?a=CLIENT_ID(AMP_ECID_GOOGLE,,_ga)&b=CLIENT_ID(_ga)',
+        /*opt_bindings*/undefined, {withCid: true}).then(res => {
+          expect(res).to.match(/^\?a=12345.54321&b=12345.54321/);
         });
   });
 
@@ -851,7 +863,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
         .then(
           () => { throw new Error('never here'); },
           err => {
-            expect(err.message).to.match(/Illegal javascript/);
+            expect(err.message).to.match(/invalid protocol/);
           }
         );
   });
@@ -899,7 +911,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       const urlReplacements = urlReplacementsForDoc(win.ampdoc);
       expect(() => {
         urlReplacements.expandSync(`javascript://example.com/?r=RANDOM`);
-      }).to.throw('Illegal javascript');
+      }).to.throw('invalid protocol');
     });
   });
 

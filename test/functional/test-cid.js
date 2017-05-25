@@ -393,12 +393,12 @@ describe('cid', () => {
       cidServiceForDocForTesting(ampdoc2);
       installCryptoService(win);
       return cidForDoc(ampdoc2).then(cid => {
-        return cid.get('foo', hasConsent).then(c1 => {
-          return cid.get('foo', hasConsent).then(c2 => {
+        return cid.get({scope: 'foo'}, hasConsent).then(c1 => {
+          return cid.get({scope: 'foo'}, hasConsent).then(c2 => {
             expect(c1).to.equal(c2);
             window.localStorage.removeItem('amp-cid');
             removeMemoryCacheOfCid(cid);
-            return cid.get('foo', hasConsent).then(c3 => {
+            return cid.get({scope: 'foo'}, hasConsent).then(c3 => {
               expect(c1).to.not.equal(c3);
             });
           });
@@ -492,7 +492,7 @@ describe('cid', () => {
       whenFirstVisible = timer.promise(100).then(() => {
         nonce = 'visible';
       });
-      const p = cid.get('test', hasConsent).then(unusedC => {
+      const p = cid.get({scope: 'test'}, hasConsent).then(unusedC => {
         expect(nonce).to.equal('visible');
       });
       clock.tick(100);
@@ -504,7 +504,7 @@ describe('cid', () => {
       const consent = timer.promise(100).then(() => {
         nonce = 'timer fired';
       });
-      const p = cid.get('test', consent).then(unusedC => {
+      const p = cid.get({scope: 'test'}, consent).then(unusedC => {
         expect(nonce).to.equal('timer fired');
       });
       clock.tick(100);
@@ -512,12 +512,12 @@ describe('cid', () => {
     });
 
     it('should fail on failed consent', () => {
-      return expect(cid.get('abc', Promise.reject())).to.be.rejected;
+      return expect(cid.get({scope: 'abc'}, Promise.reject())).to.be.rejected;
     });
 
     it('should fail on invalid scope', () => {
       expect(() => {
-        cid.get('$$$', Promise.resolve());
+        cid.get({scope: '$$$'}, Promise.resolve());
       }).to.throw(/\$\$\$/);
     });
 
@@ -536,7 +536,7 @@ describe('cid', () => {
         return sha384Promise = Promise.resolve('sha384(' + val + ')');
       };
 
-      return cid.get('e2', hasConsent, persistencePromise).then(c => {
+      return cid.get({scope: 'e2'}, hasConsent, persistencePromise).then(c => {
         expect(c).to.equal('sha384(sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])http://www.origin.come2)');
         expect(storage['amp-cid']).to.be.undefined;
         clock.tick(777);
@@ -554,7 +554,7 @@ describe('cid', () => {
     it('should not wait persistence consent for viewer storage', () => {
       fakeWin.parent = {};
       const persistencePromise = new Promise(() => {/* never resolves */});
-      return cid.get('e2', hasConsent, persistencePromise).then(() => {
+      return cid.get({scope: 'e2'}, hasConsent, persistencePromise).then(() => {
         expect(viewerStorage).to.equal(JSON.stringify({
           time: 0,
           cid: 'sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])',
@@ -583,7 +583,7 @@ describe('cid', () => {
     it('should NOT create fallback cookie by default with string scope', () => {
       fakeWin.location.href =
           'https://abc.org/v/www.DIFFERENT.com/foo/?f=0';
-      return cid.get('cookie_name', hasConsent).then(c => {
+      return cid.get({scope: 'cookie_name'}, hasConsent).then(c => {
         expect(c).to.not.exist;
         expect(fakeWin.document.cookie).to.not.exist;
       });
@@ -641,7 +641,7 @@ describe('cid', () => {
       fakeWin.location.hostname = 'foo.abc.org';
       fakeWin.document.cookie = 'cookie_name=amp-12345';
 
-      return cid.get('cookie_name', hasConsent).then(c => {
+      return cid.get({scope: 'cookie_name'}, hasConsent).then(c => {
         expect(fakeWin.document.cookie).to.equal(
           'cookie_name=' + encodeURIComponent(c) +
           '; path=/' +
@@ -657,7 +657,7 @@ describe('cid', () => {
       fakeWin.location.hostname = 'foo.abc.org';
       fakeWin.document.cookie = 'cookie_name=12345';
 
-      return cid.get('cookie_name', hasConsent).then(() => {
+      return cid.get({scope: 'cookie_name'}, hasConsent).then(() => {
         expect(fakeWin.document.cookie).to.equal('cookie_name=12345');
       });
     });
@@ -702,7 +702,7 @@ describe('cid', () => {
   });
 
   function compare(externalCidScope, compareValue) {
-    return cid.get(externalCidScope, hasConsent).then(c => {
+    return cid.get({scope: externalCidScope}, hasConsent).then(c => {
       expect(c).to.equal(compareValue);
     });
   }

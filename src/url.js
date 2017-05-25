@@ -38,6 +38,12 @@ let cache;
 /** @private @const Matches amp_js_* paramters in query string. */
 const AMP_JS_PARAMS_REGEX = /[?&]amp_js[^&]*/;
 
+const INVALID_PROTOCOLS = [
+  /*eslint no-script-url: 0*/ 'javascript:',
+  /*eslint no-script-url: 0*/ 'data:',
+  /*eslint no-script-url: 0*/ 'vbscript:',
+];
+
 /** @const {string} */
 export const SOURCE_ORIGIN_PARAM = '__amp_source_origin';
 
@@ -321,6 +327,22 @@ export function isLocalhostOrigin(url) {
 }
 
 /**
+ * Returns whether the URL has valid protocol.
+ * Deep link protocol is valid, but not javascript etc.
+ * @param {string|!Location} url
+ * @return {boolean}
+ */
+export function isProtocolValid(url) {
+  if (!url) {
+    return true;
+  }
+  if (typeof url == 'string') {
+    url = parseUrl(url);
+  }
+  return !INVALID_PROTOCOLS.includes(url.protocol);
+}
+
+/**
  * Removes parameters that start with amp js parameter pattern and returns the new
  * search string.
  * @param {string} urlSearch
@@ -358,7 +380,7 @@ export function getSourceUrl(url) {
   // The /s/ is optional and signals a secure origin.
   const path = url.pathname.split('/');
   const prefix = path[1];
-  user().assert(prefix == 'c' || prefix == 'v',
+  user().assert(prefix == 'a' || prefix == 'c' || prefix == 'v',
       'Unknown path prefix in url %s', url.href);
   const domainOrHttpsSignal = path[2];
   const origin = domainOrHttpsSignal == 's'

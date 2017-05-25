@@ -40,7 +40,7 @@ import {
   getTimingDataSync,
   getTimingDataAsync,
 } from './variable-source';
-
+import {isProtocolValid} from '../url';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
@@ -256,7 +256,8 @@ export class GlobalVariableSource extends VariableSource {
 
         // A temporary work around to extract Client ID from _ga cookie. #5761
         // TODO: replace with "filter" when it's in place. #2198
-        if (scope == '_ga') {
+        const cookieName = opt_cookieName || scope;
+        if (cookieName == '_ga') {
           cid = extractClientIdFromGaCookie(cid);
         }
 
@@ -941,8 +942,8 @@ export class UrlReplacements {
       user().error(TAG, 'Illegal replacement of the protocol: ', url);
       return url;
     }
-    user().assert(newProtocol !== `javascript:`, 'Illegal javascript link ' +
-        'protocol: %s', url);
+    user().assert(isProtocolValid(replacement),
+        'The replacement url has invalid protocol: %s', replacement);
 
     return replacement;
   }
@@ -972,8 +973,9 @@ export function installUrlReplacementsServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(
       ampdoc,
       'url-replace',
-      /* opt_constructor */ undefined,
-      doc => new UrlReplacements(doc, new GlobalVariableSource(doc)));
+      function(doc) {
+        return new UrlReplacements(doc, new GlobalVariableSource(doc));
+      });
 }
 
 /**

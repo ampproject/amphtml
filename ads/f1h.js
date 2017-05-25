@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,22 @@
  * limitations under the License.
  */
 
+import {
+  loadScript,
+  validateData,
+} from '../3p/3p';
+
 /**
- * @enum {number}
+ * @param {!Window} global
+ * @param {!Object} data
  */
-export const Keycodes = {
-  ENTER: 13,
-  ESCAPE: 27,
-  SPACE: 32,
-  LEFT_ARROW: 37,
-  UP_ARROW: 38,
-  RIGHT_ARROW: 39,
-  DOWN_ARROW: 40,
-};
+export function f1h(global, data) {
+  validateData(data, ['sectionId', 'slot']);
+
+  const scriptUrl =
+      data['debugsrc'] || 'https://img.ak.impact-ad.jp/fh/f1h_amp.js';
+
+  global.f1hData = data;
+  loadScript(global, scriptUrl);
+}
+

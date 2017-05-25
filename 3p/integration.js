@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -58,6 +58,7 @@ import {accesstrade} from '../ads/accesstrade';
 import {adblade, industrybrains} from '../ads/adblade';
 import {adbutler} from '../ads/adbutler';
 import {adform} from '../ads/adform';
+import {adfox} from '../ads/adfox';
 import {adgeneration} from '../ads/adgeneration';
 import {adhese} from '../ads/adhese';
 import {adition} from '../ads/adition';
@@ -79,6 +80,7 @@ import {amoad} from '../ads/amoad';
 import {appnexus} from '../ads/appnexus';
 import {atomx} from '../ads/atomx';
 import {brainy} from '../ads/brainy';
+import {bringhub} from '../ads/bringhub';
 import {caajainfeed} from '../ads/caajainfeed';
 import {capirs} from '../ads/capirs';
 import {caprofitx} from '../ads/caprofitx';
@@ -94,6 +96,7 @@ import {doubleclick} from '../ads/google/doubleclick';
 import {eas} from '../ads/eas';
 import {eplanning} from '../ads/eplanning';
 import {f1e} from '../ads/f1e';
+import {f1h} from '../ads/f1h';
 import {felmat} from '../ads/felmat';
 import {flite} from '../ads/flite';
 import {fluct} from '../ads/fluct';
@@ -125,11 +128,13 @@ import {mywidget} from '../ads/mywidget';
 import {nativo} from '../ads/nativo';
 import {navegg} from '../ads/navegg';
 import {nend} from '../ads/nend';
+import {netletix} from '../ads/netletix';
 import {nokta} from '../ads/nokta';
 import {openadstream} from '../ads/openadstream';
 import {openx} from '../ads/openx';
 import {outbrain} from '../ads/outbrain';
 import {plista} from '../ads/plista';
+import {polymorphicads} from '../ads/polymorphicads';
 import {popin} from '../ads/popin';
 import {pubmatic} from '../ads/pubmatic';
 import {pubmine} from '../ads/pubmine';
@@ -145,6 +150,7 @@ import {smartadserver} from '../ads/smartadserver';
 import {smartclip} from '../ads/smartclip';
 import {sortable} from '../ads/sortable';
 import {sovrn} from '../ads/sovrn';
+import {spotx} from '../ads/spotx';
 import {sunmedia} from '../ads/sunmedia';
 import {swoop} from '../ads/swoop';
 import {taboola} from '../ads/taboola';
@@ -157,6 +163,7 @@ import {widespace} from '../ads/widespace';
 import {xlift} from '../ads/xlift';
 import {yahoo} from '../ads/yahoo';
 import {yahoojp} from '../ads/yahoojp';
+import {yandex} from '../ads/yandex';
 import {yieldbot} from '../ads/yieldbot';
 import {yieldmo} from '../ads/yieldmo';
 import {yieldone} from '../ads/yieldone';
@@ -171,6 +178,7 @@ import {zucks} from '../ads/zucks';
  */
 const AMP_EMBED_ALLOWED = {
   _ping_: true,
+  bringhub: true,
   'mantis-recommend': true,
   mywidget: true,
   outbrain: true,
@@ -213,6 +221,7 @@ register('accesstrade', accesstrade);
 register('adblade', adblade);
 register('adbutler', adbutler);
 register('adform', adform);
+register('adfox', adfox);
 register('adgeneration', adgeneration);
 register('adhese', adhese);
 register('adition', adition);
@@ -234,6 +243,7 @@ register('amoad', amoad);
 register('appnexus', appnexus);
 register('atomx', atomx);
 register('brainy', brainy);
+register('bringhub', bringhub);
 register('caajainfeed', caajainfeed);
 register('capirs', capirs);
 register('caprofitx', caprofitx);
@@ -249,6 +259,7 @@ register('eas', eas);
 register('eplanning', eplanning);
 register('ezoic', ezoic);
 register('f1e', f1e);
+register('f1h', f1h);
 register('facebook', facebook);
 register('felmat', felmat);
 register('flite', flite);
@@ -284,11 +295,13 @@ register('mywidget', mywidget);
 register('nativo', nativo);
 register('navegg', navegg);
 register('nend', nend);
+register('netletix', netletix);
 register('nokta', nokta);
 register('openadstream', openadstream);
 register('openx', openx);
 register('outbrain', outbrain);
 register('plista', plista);
+register('polymorphicads', polymorphicads);
 register('popin', popin);
 register('pubmatic', pubmatic);
 register('pubmine', pubmine);
@@ -305,6 +318,7 @@ register('smartadserver', smartadserver);
 register('smartclip', smartclip);
 register('sortable', sortable);
 register('sovrn', sovrn);
+register('spotx', spotx);
 register('sunmedia', sunmedia);
 register('swoop', swoop);
 register('taboola', taboola);
@@ -318,6 +332,7 @@ register('widespace', widespace);
 register('xlift' , xlift);
 register('yahoo', yahoo);
 register('yahoojp', yahoojp);
+register('yandex', yandex);
 register('yieldbot', yieldbot);
 register('yieldmo', yieldmo);
 register('zergnet', zergnet);

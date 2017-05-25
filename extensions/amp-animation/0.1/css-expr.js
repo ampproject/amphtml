@@ -13,3 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import {parser} from './css-expr-impl';
+
+
+/**
+ * @param {string} cssString
+ * @return {?./css-expr-ast.CssNode}
+ */
+export function parseCss(cssString) {
+  return parser.parse(cssString);
+}

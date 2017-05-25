@@ -209,7 +209,8 @@ app.use('/form/search-html/get', function(req, res) {
 app.use('/form/search-json/get', function(req, res) {
   assertCors(req, res, ['GET']);
   res.json({
-    results: [{title: 'Result 1'}, {title: 'Result 2'}, {title: 'Result 3'}]
+    term: req.query.term,
+    results: [{title: 'Result 1'}, {title: 'Result 2'}, {title: 'Result 3'}],
   });
 });
 
@@ -649,6 +650,7 @@ app.get(['/examples/*.html', '/test/manual/*.html'], function(req, res, next) {
   var filePath = req.path;
   var mode = process.env.SERVE_MODE;
   const inabox = req.query['inabox'] == '1';
+  const stream = Number(req.query['stream']);
   fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
     if (req.query['amp_js_v']) {
       file = addViewerIntegrationScript(req.query['amp_js_v'], file);
@@ -662,18 +664,48 @@ app.get(['/examples/*.html', '/test/manual/*.html'], function(req, res, next) {
     }
 
     // Extract amp-ad for the given 'type' specified in URL query.
-    if (req.path.indexOf('/examples/ads.amp') == 0 && req.query.type) {
-      var ads = file.match(new RegExp('<(amp-ad|amp-embed) [^>]*[\'"]'
-          + req.query.type + '[\'"][^>]*>([\\s\\S]+?)<\/(amp-ad|amp-embed)>', 'gm'));
+    if (req.path.indexOf('/examples/ads.amp.html') == 0 && req.query.type) {
+      var ads = file.match(
+          elementExtractor('(amp-ad|amp-embed)', req.query.type));
       file = file.replace(
           /<body>[\s\S]+<\/body>/m, '<body>' + ads.join('') + '</body>');
     }
 
-    res.send(file);
+    // Extract amp-analytics for the given 'type' specified in URL query.
+    if (req.path.indexOf('/examples/analytics-vendors.amp.html') == 0 && req.query.type) {
+      var analytics = file.match(
+          elementExtractor('amp-analytics', req.query.type));
+      file = file.replace(
+          /<div id="container">[\s\S]+<\/div>/m, '<div id="container">' + analytics.join('') + '</div>');
+    }
+
+    if (stream > 0) {
+      res.writeHead(200, {'Content-Type': 'text/html'});
+      var pos = 0;
+      function writeChunk() {
+        var chunk = file.substring(pos, Math.min(pos + stream, file.length));
+        res.write(chunk);
+        pos += stream;
+        if (pos < file.length) {
+          setTimeout(writeChunk, 500);
+        } else {
+          res.end();
+        }
+      }
+      writeChunk();
+    } else {
+      res.send(file);
+    }
   }).catch(() => {
     next();
   });
 });
+
+function elementExtractor(tagName, type) {
+  return new RegExp(
+      `<${tagName} [^>]*['"]${type}['"][^>]*>([\\s\\S]+?)</${tagName}>`,
+      'gm');
+}
 
 // Data for example: http://localhost:8000/examples/bind/xhr.amp.max.html
 app.use('/bind/form/get', function(req, res, next) {

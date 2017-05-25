@@ -45,7 +45,6 @@ import {cryptoFor} from '../../../src/crypto';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
 import {handleClick} from '../../../ads/alp/handler';
-import {AdDisplayState} from '../../../extensions/amp-ad/0.1/amp-ad-ui';
 import {
   getDefaultBootstrapBaseUrl,
   generateSentinel,
@@ -59,6 +58,7 @@ import {A4AVariableSource} from './a4a-variable-source';
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {isReportingEnabled} from '../../../ads/google/a4a/utils';
+import {isInExperiment} from '../../../ads/google/a4a/traffic-experiments';
 
 /** @type {string} */
 const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
@@ -71,14 +71,13 @@ const METADATA_STRING_NO_QUOTES =
 // acceptable solution to the 'Safari on iOS doesn't fetch iframe src from
 // cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
 /** @type {string} */
-const SAFEFRAME_VERSION = '1-0-6';
-/** @type {string} @visibleForTesting */
-export const SAFEFRAME_IMPL_PATH =
-    'https://tpc.googlesyndication.com/safeframe/' + SAFEFRAME_VERSION +
-    '/html/container.html';
+export const DEFAULT_SAFEFRAME_VERSION = '1-0-8';
 
 /** @type {string} @visibleForTesting */
 export const RENDERING_TYPE_HEADER = 'X-AmpAdRender';
+
+/** @type {string} @visibleForTesting */
+export const SAFEFRAME_VERSION_HEADER = 'X-AmpSafeFrameVersion';
 
 /** @type {string} */
 const TAG = 'amp-a4a';
@@ -255,17 +254,6 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private @const {!../../../src/service/crypto-impl.Crypto} */
     this.crypto_ = cryptoFor(this.win);
 
-    if (!this.win.ampA4aValidationKeys) {
-      // Without the following variable assignment, there's no way to apply a
-      // type annotation to a win-scoped variable, so the type checker doesn't
-      // catch type errors here.  This no-op allows us to enforce some type
-      // expectations.  The const assignment will hopefully be optimized
-      // away by the compiler.  *fingers crossed*
-      /** @type {!AllServicesCryptoKeysDef} */
-      const forTypeSafety = this.getKeyInfoSets_();
-      this.win.ampA4aValidationKeys = forTypeSafety;
-    }
-
     /** @private {?ArrayBuffer} */
     this.creativeBody_ = null;
 
@@ -344,6 +332,18 @@ export class AmpA4A extends AMP.BaseElement {
 
     /** @private {?Promise} */
     this.adUrlsPromise_ = null;
+
+    const type = (this.element.getAttribute('type') || 'notype').toLowerCase();
+    /**
+     * @private @const{boolean} whether request should only be sent when slot is
+     *    within renderOutsideViewport distance.
+     */
+    this.delayRequestEnabled_ =
+      (type == 'adsense' && isInExperiment(this.element, '117152655')) ||
+      (type == 'doubleclick' && isInExperiment(this.element, '117152665'));
+
+    /** @private {string} */
+    this.safeframeVersion_ = DEFAULT_SAFEFRAME_VERSION;
   }
 
   /** @override */
@@ -365,7 +365,16 @@ export class AmpA4A extends AMP.BaseElement {
     const adType = this.element.getAttribute('type');
     this.config = adConfig[adType] || {};
     this.uiHandler = new AMP.AmpAdUIHandler(this);
-    this.uiHandler.init();
+    if (!this.win.ampA4aValidationKeys) {
+      // Without the following variable assignment, there's no way to apply a
+      // type annotation to a win-scoped variable, so the type checker doesn't
+      // catch type errors here.  This no-op allows us to enforce some type
+      // expectations.  The const assignment will hopefully be optimized
+      // away by the compiler.  *fingers crossed*
+      /** @type {!AllServicesCryptoKeysDef} */
+      const forTypeSafety = this.getKeyInfoSets_();
+      this.win.ampA4aValidationKeys = forTypeSafety;
+    }
   }
 
   /** @override */
@@ -410,8 +419,8 @@ export class AmpA4A extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(unusedOnLayout) {
-    this.preconnect.url(SAFEFRAME_IMPL_PATH);
-    this.preconnect.url(getDefaultBootstrapBaseUrl(this.win, 'nameframe'));
+    this.preconnect.preload(this.getSafeframePath_());
+    this.preconnect.preload(getDefaultBootstrapBaseUrl(this.win, 'nameframe'));
     if (!this.config) {
       return;
     }
@@ -435,6 +444,12 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   resumeCallback() {
+    // FIE that was not destroyed on unlayoutCallback does not require a new
+    // ad request.
+    if (!isExperimentOn(this.win, 'a4a-fie-unlayout-enabled') &&
+        this.friendlyIframeEmbed_) {
+      return;
+    }
     this.protectedEmitLifecycleEvent_('resumeCallback');
     this.fromResumeCallback = true;
     // If layout of page has not changed, onLayoutMeasure will not be called
@@ -515,7 +530,7 @@ export class AmpA4A extends AMP.BaseElement {
     };
 
     let adUrlPromiseResolver = null;
-    if ((getMode().localDev ||
+    if (!this.delayRequestEnabled_ && (getMode().localDev ||
         isExperimentOn(this.win, 'a4a-measure-get-ad-urls')) &&
         isReportingEnabled(this)) {
       this.adUrlsPromise_ = new Promise(resolve => {
@@ -536,10 +551,24 @@ export class AmpA4A extends AMP.BaseElement {
     //   - Chain cancelled => don't return; drop error
     //   - Uncaught error otherwise => don't return; percolate error up
     this.adPromise_ = viewerForDoc(this.getAmpDoc()).whenFirstVisible()
+        .then(() => {
+          checkStillCurrent(promiseId);
+          // See if experiment that delays request until slot is within
+          // renderOutsideViewport. Within render outside viewport will not
+          // resolve if already within viewport thus the check for already
+          // meeting the definition as opposed to waiting on the promise.
+          if (this.delayRequestEnabled_ &&
+              !this.getResource().renderOutsideViewport()) {
+            return this.getResource().whenWithinRenderOutsideViewport();
+          }
+        })
         // This block returns the ad URL, if one is available.
         /** @return {!Promise<?string>} */
         .then(() => {
           checkStillCurrent(promiseId);
+          if (this.delayRequestEnabled_) {
+            dev().info(TAG, 'ad request being built');
+          }
           return /** @type {!Promise<?string>} */ (this.getAdUrl());
         })
         // This block returns the (possibly empty) response to the XHR request.
@@ -584,6 +613,13 @@ export class AmpA4A extends AMP.BaseElement {
           this.experimentalNonAmpCreativeRenderMethod_ = method;
           if (method && !isEnumValue(XORIGIN_MODE, method)) {
             dev().error('AMP-A4A', `cross-origin render mode header ${method}`);
+          }
+          const safeframeVersionHeader =
+            fetchResponse.headers.get(SAFEFRAME_VERSION_HEADER);
+          if (/^[0-9-]+$/.test(safeframeVersionHeader) &&
+              safeframeVersionHeader != DEFAULT_SAFEFRAME_VERSION) {
+            this.safeframeVersion_ = safeframeVersionHeader;
+            this.preconnect.preload(this.getSafeframePath_());
           }
           // Note: Resolving a .then inside a .then because we need to capture
           // two fields of fetchResponse, one of which is, itself, a promise,
@@ -718,10 +754,11 @@ export class AmpA4A extends AMP.BaseElement {
     const type = this.element.getAttribute('type');
     const promiseId = this.promiseId_;
     // Only execute once per page, this includes potential pauseCallback flows.
-    if (this.win['a4a-measuring-ad-urls']) {
+    if ((type != 'adsense' && type != 'doubleclick') ||
+      this.win[`a4a-measuring-ad-urls-${type}`]) {
       return;
     }
-    this.win['a4a-measuring-ad-urls'] =
+    this.win[`a4a-measuring-ad-urls-${type}`] =
      resourcesForDoc(this.element).getMeasuredResources(this.win,
        r => {
          return r.element.tagName == 'AMP-AD' &&
@@ -744,8 +781,9 @@ export class AmpA4A extends AMP.BaseElement {
                'met.delta.AD_SLOT_ID': Math.round(Date.now() - startTime),
                'totalSlotCount.AD_SLOT_ID': adUrls.length,
                'totalUrlCount.AD_SLOT_ID': adUrls.filter(url => !!url).length,
+               'type.AD_SLOT_ID': type,
                'totalQueriedSlotCount.AD_SLOT_ID':
-                  this.win.document.querySelectorAll('amp-ad[type=doubleclick]')
+                  this.win.document.querySelectorAll(`amp-ad[type=${type}]`)
                     .length,
              });
        });
@@ -968,11 +1006,15 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override  */
   unlayoutCallback() {
+    if (!isExperimentOn(this.win, 'a4a-fie-unlayout-enabled') &&
+        this.friendlyIframeEmbed_) {
+      return false;
+    }
     // Increment promiseId to cause any pending promise to cancel.
     this.promiseId_++;
     this.adUrlsPromise_ = null;
     this.protectedEmitLifecycleEvent_('adSlotCleared');
-    this.uiHandler.setDisplayState(AdDisplayState.NOT_LAID_OUT);
+    this.uiHandler.applyUnlayoutUI();
     if (this.originalSlotSize_) {
       super.attemptChangeSize(
         this.originalSlotSize_.height, this.originalSlotSize_.width)
@@ -1027,7 +1069,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   createPlaceholderCallback() {
-    return this.uiHandler.createPlaceholderCallback();
+    return this.uiHandler.createPlaceholder();
   }
 
   /**
@@ -1069,8 +1111,7 @@ export class AmpA4A extends AMP.BaseElement {
     // Store original size to allow for reverting on unlayoutCallback so that
     // subsequent pageview allows for ad request.
     this.originalSlotSize_ = this.originalSlotSize_ || this.getLayoutBox();
-    this.uiHandler.setDisplayState(AdDisplayState.LOADING);
-    this.uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
+    this.uiHandler.applyNoContentUI();
     this.isCollapsed_ = true;
   }
 
@@ -1148,12 +1189,16 @@ export class AmpA4A extends AMP.BaseElement {
       const url = signingServerURLs[serviceName];
       const currServiceName = serviceName;
       if (url) {
-        // Set disableAmpSourceOrigin so that __amp_source_origin is not
-        // included in XHR CORS request allowing for keyset to be cached
-        // across pages.
-        return xhrFor(this.win).fetchJson(url, {
+        // Delay request until document is not in a prerender state.
+        const firstVisiblePromise =
+          isExperimentOn(this.win, 'a4a-disable-cryptokey-viewer-check') ?
+          Promise.resolve() : viewerForDoc(this.getAmpDoc()).whenFirstVisible();
+        return firstVisiblePromise.then(() => xhrFor(this.win).fetchJson(url, {
           mode: 'cors',
           method: 'GET',
+          // Set ampCors false so that __amp_source_origin is not
+          // included in XHR CORS request allowing for keyset to be cached
+          // across pages.
           ampCors: false,
           credentials: 'omit',
         }).then(jwkSetObj => {
@@ -1168,7 +1213,7 @@ export class AmpA4A extends AMP.BaseElement {
             result.keys = [];
           }
           return result;
-        }).then(jwkSet => {
+        })).then(jwkSet => {
           return {
             serviceName: jwkSet.serviceName,
             keys: jwkSet.keys.map(jwk =>
@@ -1409,7 +1454,7 @@ export class AmpA4A extends AMP.BaseElement {
       let name = '';
       switch (method) {
         case XORIGIN_MODE.SAFEFRAME:
-          srcPath = SAFEFRAME_IMPL_PATH + '?n=0';
+          srcPath = this.getSafeframePath_() + '?n=0';
           break;
         case XORIGIN_MODE.NAMEFRAME:
           srcPath = getDefaultBootstrapBaseUrl(this.win, 'nameframe');
@@ -1433,7 +1478,7 @@ export class AmpA4A extends AMP.BaseElement {
         name = JSON.stringify(contextMetadata);
       } else if (method == XORIGIN_MODE.SAFEFRAME) {
         contextMetadata = JSON.stringify(contextMetadata);
-        name = `${SAFEFRAME_VERSION};${creative.length};${creative}` +
+        name = `${this.safeframeVersion_};${creative.length};${creative}` +
             `${contextMetadata}`;
       }
       return this.iframeRenderHelper_({src: srcPath, name});
@@ -1539,6 +1584,15 @@ export class AmpA4A extends AMP.BaseElement {
         viewerForDoc(this.getAmpDoc()).navigateTo(url, 'a4a');
       });
     });
+  }
+
+  /**
+   * @return {string} full url to safeframe implementation.
+   * @private
+   */
+  getSafeframePath_() {
+    return 'https://tpc.googlesyndication.com/safeframe/' +
+      `${this.safeframeVersion_}/html/container.html`;
   }
 
   /**
