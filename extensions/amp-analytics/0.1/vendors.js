@@ -1419,12 +1419,12 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       '_domain': 'https://top-fwz1.mail.ru',
       '_counter': '/counter',
       '_tracker': '/tracker',
-      '_basicMessage': 'js=13;ver=60;${_screen};${_event}' + 
+      '_basicMessage': 'js=13;ver=60;${_screen};${_event}' +
                        ';${_advancedEvent};_=${random}',
       '_screen': 's=${screenWidth}*${screenHeight}' +
                  ';vp=${viewportWidth}*${viewportHeight}',
       '_event': 'id=${id};u=${url};r=${referrer}',
-      '_advancedEvent': 'st=${start};gender=${gender};age=${age}' + 
+      '_advancedEvent': 'st=${start};gender=${gender};age=${age}' +
                         ';pid=${pid};userid=${userid}' +
                         ';device=${device};params=${params}',
       '_title': 'title=${title}',
