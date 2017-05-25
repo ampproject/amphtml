@@ -253,7 +253,9 @@ export class Xhr {
 
   /**
    * Creates an XHR request with responseType=document
-   * and returns the `FetchResponse` object.
+   * and returns a promise for the initialized `Document`.
+   * Note this does not return a `Response`, since this is not a standard
+   * Fetch response type.
    *
    * @param {string} input
    * @param {?FetchInitDef=} opt_init
