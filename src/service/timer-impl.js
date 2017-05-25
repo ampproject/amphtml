@@ -128,8 +128,9 @@ export class Timer {
    * @template RESULT
    */
   timeoutPromise(delay, opt_racePromise, opt_message) {
+    let timerKey;
     const delayPromise = new Promise((_resolve, reject) => {
-      const timerKey = this.delay(() => {
+      timerKey = this.delay(() => {
         reject(user().createError(opt_message || 'timeout'));
       }, delay);
 
@@ -140,6 +141,10 @@ export class Timer {
     if (!opt_racePromise) {
       return delayPromise;
     }
+    const cancel = () => {
+      this.cancel(timerKey);
+    };
+    opt_racePromise.then(cancel, cancel);
     return Promise.race([delayPromise, opt_racePromise]);
   }
 
