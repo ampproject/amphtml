@@ -14,6 +14,7 @@
   "pump-early-frame": 1,
   "sticky-ad-early-load": 1,
   "amp-auto-ads": 1,
+  "amp-auto-ads-adsense-holdout": 0.1,
   "slidescroll-disable-css-snap": 1,
   "visibility-v3": 1,
   "as-use-attr-for-format": 1,
