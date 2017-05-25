@@ -16,7 +16,7 @@
 
 import '../../../../third_party/babel/custom-babel-helpers';
 import {initLogConstructor} from '../../../../src/log';
-import {APP, Messaging, MessageType, WindowPortEmulator} from '../messaging';
+import {APP, Messaging, MessageType, WindowPortEmulator} from 'messaging';
 import {listen} from '../../../../src/event-helper';
 
 initLogConstructor();
