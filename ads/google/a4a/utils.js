@@ -133,7 +133,7 @@ export function isReportingEnabled(ampElement) {
  * @param {!Array<string>=} opt_experimentIds Any experiments IDs (in addition
  *     to those specified on the ad element) that should be included in the
  *     request.
- * @return {!Object<string,string|number|boolean>} block level parameters
+ * @return {!Object<string,null|number|string>} block level parameters
  */
 export function googleBlockParameters(a4a, opt_experimentIds) {
   const adElement = a4a.element;
@@ -195,10 +195,10 @@ export function groupAmpAdsByType(win, type, groupFn) {
 
 /**
  * @param {!Window} win
- * @param {!Document} doc
+ * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} doc
  * @param {number} startTime
- * @param {string=} opt_output default is 'html'
- * @return {!Promise<!Object<string,string|number|boolean>>}
+ * @param {string=} output default is 'html'
+ * @return {!Promise<!Object<string,null|number|string>>}
  */
 export function googlePageParameters(win, doc, startTime, output = 'html') {
   const referrerPromise = viewerForDoc(doc).getReferrerUrl();
@@ -245,12 +245,16 @@ export function googlePageParameters(win, doc, startTime, output = 'html') {
  * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
  * @param {string} baseUrl
  * @param {number} startTime
- * @param {!Object<string,string|number|boolean>} parameters
+ * @param {!Object<string,null|number|string>} parameters
+ * @param {!Array<string>=} opt_experimentIds Any experiments IDs (in addition
+ *     to those specified on the ad element) that should be included in the
+ *     request.
  * @return {!Promise<string>}
  */
-export function googleAdUrl(a4a, baseUrl, startTime, parameters) {
+export function googleAdUrl(
+    a4a, baseUrl, startTime, parameters, opt_experimentIds) {
   // TODO: Maybe add checks in case these promises fail.
-  const blockLevelParameters = googleBlockParameters(a4a);
+  const blockLevelParameters = googleBlockParameters(a4a, opt_experimentIds);
   return googlePageParameters(a4a.win, a4a.getAmpDoc(), startTime)
     .then(pageLevelParameters => {
       Object.assign(parameters, blockLevelParameters);
@@ -261,7 +265,7 @@ export function googleAdUrl(a4a, baseUrl, startTime, parameters) {
 
 /**
  * @param {string} baseUrl
- * @param {!Object<string,string|number|boolean>} parameters
+ * @param {!Object<string,null|number|string>} parameters
  * @param {number} startTime
  * @return {string}
  */

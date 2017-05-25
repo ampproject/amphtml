@@ -57,7 +57,7 @@ import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {insertAnalyticsElement} from '../../../src/analytics';
 import {setStyles} from '../../../src/style';
 import {utf8Encode} from '../../../src/utils/bytes';
-import {cancellation, isCancellation} from '../../../src/error';
+import {isCancellation} from '../../../src/error';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -219,7 +219,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {?Element} */
     this.ampAnalyticsElement_ = null;
 
-    /** @private {!Object<string,*>}*/
+    /** @private {?Object<string,*>}*/
     this.jsonTargeting_ = null;
 
     /** @private {number} */
@@ -233,7 +233,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {?function(?../../../src/service/xhr-impl.FetchResponse)} */
     this.sraResponseResolver_ = null;
 
-    /** @private {!function(?Error)} */
+    /** @private {?function(?Error)} */
     this.sraResponseRejecter_ = null;
 
     /** @private {!Promise<?../../../src/service/xhr-impl.FetchResponse>} */
@@ -252,7 +252,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (!valid) {
       // Resolve ad url promise to ensure invalid elements do not delay SRA
       // request.
-      this.blockLevelParamsResolver_(null);
+      this.sraResponseResolver_(null);
     }
     return valid;
   }
@@ -312,7 +312,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getAdUrl() {
     if (this.iframe) {
       dev().warn(TAG, `Frame already exists, sra: ${this.useSra_}`);
-      this.adUrlResolver_('');
       return '';
     }
     // TODO: SRA unnecessarily builds ad url?
@@ -459,16 +458,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (SraRequests) {
       return;
     }
-    // Use incrementing of the first slot's promiseId as indication of
+    // Use cancellation of the first slot's promiseId as indication of
     // unlayoutCallback execution.  Assume that if called for one slot, it will
     // be called for all and we should cancel SRA execution.
-    const promiseId = this.promiseId;
-    const checkStillCurrent = () => {
-      if (promiseId != this.promiseId) {
-        throw cancellation();
-      }
-      return true;
-    };
+    const checkStillCurrent = this.verifyStillCurrent();
     SraRequests = groupAmpAdsByType(
         this.win, this.element.getAttribute('type'), getNetworkId_)
       .then(groupIdToBlocksAry => {
@@ -477,13 +470,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           const blocks = dev().assert(groupIdToBlocksAry[networkId]);
           // TODO: filter blocks with SRA disabled?
           return Promise.all(blocks).then(instances => {
+            dev().assert(instances.length);
+            const typeInstances =
+              /** @type {!Array<!AmpAdNetworkDoubleclickImpl>}*/(instances);
             // Determine if more than one block for this element, if not do not
             // set sra request promise which results in sending as
             // non-SRA request (benefit is it allows direct cache method).
-            dev().assert(instances.length);
-            if (instances.length == 1) {
+            if (typeInstances.length == 1) {
               dev().info(TAG, `single block in network ${networkId}`);
-              instances[0].sraResponseResolver_(null);
+              typeInstances[0].sraResponseResolver_(null);
               return;
             }
             // Construct and send SRA request.
@@ -491,55 +486,59 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             // in order of URLs given.  Construct promise for each slot
             // such that its resolver will be called.
             const sraRequestAdUrlResolvers =
-              instances.map(instance => instance.sraResponseResolver_);
+              typeInstances.map(instance => instance.sraResponseResolver_);
             // TODO(keithwrightbos) - how do we handle per slot 204 response?
-            return constructSRARequest_(this.win, this.getAmpDoc(), instances)
-              .then(sraUrl => checkStillCurrent() && fetchLineDelimitedChunks(
-                xhrFor(this.win),
-                sraUrl,
-                (creative, headers) => {
-                  checkStillCurrent();
-                  // Force safeframe rendering method.
-                  headers[RENDERING_TYPE_HEADER] = XORIGIN_MODE.SAFEFRAME;
-                  // Need to convert to FetchResponse object?
-                  const fetchResponseHeaders =
-                    /** @type {?../../../src/service/xhr-impl.FetchResponseHeaders} */
-                    ({
-                      get: name => headers[name],
-                      has: name => !!headers[name],
-                    });
-                  const fetchResponse =
-                    /** @type {?../../../src/service/xhr-impl.FetchResponse} */
-                    ({
-                      headers: fetchResponseHeaders,
-                      arrayBuffer: () => utf8Encode(creative),
-                    });
-                  sraRequestAdUrlResolvers.shift()(fetchResponse);
-                },
-                {
-                  mode: 'cors',
-                  method: 'GET',
-                  credentials: 'include',
-                }))
-                .catch(error => {
-                  const canceled = isCancellation(error);
-                  if (!canceled) {
-                    user().error(TAG, 'SRA request failure', error, instances);
-                  }
-                  // Collapse all slots on failure so long as they are not
-                  // cancellation.
-                  instances.forEach(instance => {
-                    // Reset ad url to ensure layoutCallback does not fallback
-                    // to frame get which would lose SRA guarantees.
-                    // TODO(keithwrightbos): publisher should indicate if
-                    // explicit is required!
-                    instance.adUrl = null;
-                    if (!canceled) {
-                      instance.forceCollapse();
-                    }
-                    instance.sraResponseRejecter_(error);
+            return constructSRARequest_(
+                this.win, this.getAmpDoc(), typeInstances)
+              .then(sraUrl => {
+                checkStillCurrent();
+                fetchLineDelimitedChunks(
+                  xhrFor(this.win),
+                  sraUrl,
+                  (creative, headers) => {
+                    checkStillCurrent();
+                    // Force safeframe rendering method.
+                    headers[RENDERING_TYPE_HEADER] = XORIGIN_MODE.SAFEFRAME;
+                    // Need to convert to FetchResponse object?
+                    const fetchResponseHeaders =
+                      /** @type {?../../../src/service/xhr-impl.FetchResponseHeaders} */
+                      ({
+                        get: name => headers[name],
+                        has: name => !!headers[name],
+                      });
+                    const fetchResponse =
+                      /** @type {?../../../src/service/xhr-impl.FetchResponse} */
+                      ({
+                        headers: fetchResponseHeaders,
+                        arrayBuffer: () => utf8Encode(creative),
+                      });
+                    sraRequestAdUrlResolvers.shift()(fetchResponse);
+                  },
+                  {
+                    mode: 'cors',
+                    method: 'GET',
+                    credentials: 'include',
                   });
+              })
+              .catch(error => {
+                const canceled = isCancellation(error);
+                if (!canceled) {
+                  user().error(TAG, 'SRA request failure', error);
+                }
+                // Collapse all slots on failure so long as they are not
+                // cancellation.
+                typeInstances.forEach(instance => {
+                  // Reset ad url to ensure layoutCallback does not fallback to
+                  // frame get which would lose SRA guarantees.
+                  // TODO(keithwrightbos): publisher should indicate if
+                  // explicit is required!
+                  instance.resetAdUrl();
+                  if (!canceled) {
+                    instance.forceCollapse();
+                  }
+                  instance.sraResponseRejecter_(error);
                 });
+              });
           });
         });
       });
@@ -564,7 +563,7 @@ function getNetworkId_(element) {
 
 /**
  * @param {!Window} win
- * @param {!Document} doc
+ * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} doc
  * @param {!Array<!AmpAdNetworkDoubleclickImpl>} instances
  * @return {!Promise<string>} SRA request URL
  * @private
@@ -583,7 +582,7 @@ function constructSRARequest_(win, doc, instances) {
 
 /**
  * @param {!Window} win
- * @param {!Document} doc
+ * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} doc
  * @param {number} startTime
  * @param {boolean=} isSra
  * @return {!Promise<!Object<string,string|number|boolean>>}

@@ -185,7 +185,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     }
 
     return googleAdUrl(
-        this, ADSENSE_BASE_URL, startTime, parameters, [], experimentIds);
+        this, ADSENSE_BASE_URL, startTime, parameters, experimentIds);
   }
 
   /** @override */

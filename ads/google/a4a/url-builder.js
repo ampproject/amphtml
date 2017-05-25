@@ -50,7 +50,7 @@ export function buildUrl(
       continue;
     }
     const encodedNameAndSep = encodeURIComponent(key) + '=';
-    const encodedValue = encodeURIComponent(value);
+    const encodedValue = encodeURIComponent(String(value));
     const fullLength = encodedNameAndSep.length + encodedValue.length + 1;
     if (fullLength > capacity) {
       const truncatedValue = encodedValue
