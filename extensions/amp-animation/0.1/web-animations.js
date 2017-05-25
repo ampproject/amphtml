@@ -940,11 +940,10 @@ class CssContextImpl {
     dev().assert(
         selectionMethod == null || selectionMethod == 'closest',
         'Unknown selection method: %s', selectionMethod);
-    const context = this.requireTarget_();
     let element;
     try {
       if (selectionMethod == 'closest') {
-        element = closestBySelector(context, selector);
+        element = closestBySelector(this.requireTarget_(), selector);
       } else {
         element = this.rootNode_./*OK*/querySelector(selector);
       }
