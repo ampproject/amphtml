@@ -92,8 +92,11 @@ describe('amp-a4a', () => {
         method: 'GET',
         ampCors: false,
         credentials: 'omit',
-      }).returns(
-        Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]}));
+      }).returns(Promise.resolve({
+        json() {
+          return Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]});
+        },
+      }));
     viewerWhenVisibleMock = sandbox.stub(Viewer.prototype, 'whenFirstVisible');
     viewerWhenVisibleMock.returns(Promise.resolve());
     mockResponse = {

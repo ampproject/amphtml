@@ -160,7 +160,7 @@ export class AmpVizVega extends AMP.BaseElement {
 
       return xhrFor(this.win).fetchJson(dev().assertString(this.src_), {
         requireAmpResponseSourceOrigin: false,
-      }).then(data => {
+      }).then(res => res.json()).then(data => {
         this.data_ = data;
       });
     }

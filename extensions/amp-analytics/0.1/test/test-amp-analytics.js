@@ -92,7 +92,11 @@ describe('amp-analytics', function() {
           } else {
             expect(init.credentials).to.undefined;
           }
-          return Promise.resolve(JSON.parse(jsonMockResponses[url]));
+          return Promise.resolve({
+            json() {
+              return Promise.resolve(SON.parse(jsonMockResponses[url]));
+            },
+          });
         }};
       });
 

@@ -227,7 +227,8 @@ export class LaterpayVendor {
           AUTHORIZATION_TIMEOUT,
           this.xhr_.fetchJson(url, {
             credentials: 'include',
-          }));
+            requireAmpResponseSourceOrigin: true,
+          })).then(res => res.json());
     });
   }
 

@@ -341,19 +341,23 @@ describe('XHR', function() {
       });
 
       it('should do simple JSON fetch', () => {
-        return xhr.fetchJson('http://localhost:31862/get?k=v1').then(res => {
-          expect(res).to.exist;
-          expect(res['args']['k']).to.equal('v1');
-        });
+        return xhr.fetchJson('http://localhost:31862/get?k=v1')
+            .then(res => res.json())
+            .then(res => {
+              expect(res).to.exist;
+              expect(res['args']['k']).to.equal('v1');
+            });
       });
 
       it('should redirect fetch', () => {
         const url = 'http://localhost:31862/redirect-to?url=' + encodeURIComponent(
             'http://localhost:31862/get?k=v2');
-        return xhr.fetchJson(url, {ampCors: false}).then(res => {
-          expect(res).to.exist;
-          expect(res['args']['k']).to.equal('v2');
-        });
+        return xhr.fetchJson(url, {ampCors: false})
+            .then(res => res.json())
+            .then(res => {
+              expect(res).to.exist;
+              expect(res['args']['k']).to.equal('v2');
+            });
       });
 
       it('should fail fetch for 400-error', () => {
@@ -602,7 +606,7 @@ describe('XHR', function() {
           body: {
             hello: 'world',
           },
-        }).then(res => {
+        }).then(res => res.json()).then(res => {
           expect(res.json).to.jsonEqual({
             hello: 'world',
           });

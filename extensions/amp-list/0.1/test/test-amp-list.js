@@ -70,7 +70,11 @@ describe('amp-list component', () => {
     const newHeight = 127;
     const itemElement = document.createElement('div');
     itemElement.style.height = newHeight + 'px';
-    const xhrPromise = Promise.resolve({items});
+    const xhrPromise = Promise.resolve({
+      json() {
+        return Promise.resolve({items});
+      },
+    });
     const renderPromise = Promise.resolve([itemElement]);
     xhrMock.expects('fetchJson').withExactArgs('https://data.com/list.json',
         sinon.match(opts => opts.credentials === undefined))
@@ -105,7 +109,11 @@ describe('amp-list component', () => {
     const itemElement = document.createElement('div');
     const itemElement2 = document.createElement('div');
     const itemElement3 = document.createElement('div');
-    const xhrPromise = Promise.resolve({items: initialItems});
+    const xhrPromise = Promise.resolve({
+      json() {
+        return Promise.resolve({items: initialItems});
+      },
+    });
     const renderPromise = Promise.resolve([itemElement]);
     xhrMock.expects('fetchJson').withExactArgs('https://data.com/list.json',
         sinon.match(opts => opts.credentials === undefined))
@@ -120,7 +128,11 @@ describe('amp-list component', () => {
       return Promise.all([xhrPromise, renderPromise]);
     }).then(() => {
       expect(list.container_.contains(itemElement)).to.be.true;
-      const newXhrPromise = Promise.resolve({items: newItems});
+      const newXhrPromise = Promise.resolve({
+        json() {
+          return Promise.resolve({items: newItems});
+        },
+      });
       const newRenderPromise = Promise.resolve([itemElement2, itemElement3]);
       xhrMock.expects('fetchJson').withExactArgs('https://data2.com/list.json',
           sinon.match(opts => opts.credentials === undefined))
@@ -137,7 +149,11 @@ describe('amp-list component', () => {
 
   it('should fail to load b/c data is absent', () => {
     xhrMock.expects('fetchJson')
-        .returns(Promise.resolve({})).once();
+      .returns(Promise.resolve({
+        json() {
+          return Promise.resolve({});
+        },
+      });.once();
     templatesMock.expects('findAndRenderTemplateArray').never();
     return expect(list.layoutCallback()).to.eventually.be
         .rejectedWith(/Response must contain an array/);
@@ -150,7 +166,11 @@ describe('amp-list component', () => {
     element.setAttribute('items', 'different');
     const itemElement = document.createElement('div');
     xhrMock.expects('fetchJson')
-        .returns(Promise.resolve({different})).once();
+      .returns(Promise.resolve({
+        json() {
+          return Promise.resolve({different});
+        },
+      });.once();
     templatesMock.expects('findAndRenderTemplateArray')
         .withExactArgs(element, different)
         .returns(Promise.resolve([itemElement])).once();
@@ -164,7 +184,11 @@ describe('amp-list component', () => {
       {title: 'Title1'},
     ];
     const itemElement = document.createElement('div');
-    const xhrPromise = Promise.resolve({items});
+    const xhrPromise = Promise.resolve({
+      json() {
+        return Promise.resolve({items});
+      },
+    });
     const renderPromise = Promise.resolve([itemElement]);
     xhrMock.expects('fetchJson').withExactArgs('https://data.com/list.json',
         sinon.match(opts => opts.credentials === undefined))
@@ -187,7 +211,11 @@ describe('amp-list component', () => {
     element.setAttribute('role', 'list1');
     const itemElement = document.createElement('div');
     itemElement.setAttribute('role', 'listitem1');
-    const xhrPromise = Promise.resolve({items});
+    const xhrPromise = Promise.resolve({
+      json() {
+        return Promise.resolve({items});
+      },
+    });
     const renderPromise = Promise.resolve([itemElement]);
     xhrMock.expects('fetchJson').withExactArgs('https://data.com/list.json',
         sinon.match(opts => opts.credentials === undefined))
@@ -205,7 +233,11 @@ describe('amp-list component', () => {
 
   it('should request credentials', () => {
     const items = [];
-    const xhrPromise = Promise.resolve({items});
+    const xhrPromise = Promise.resolve({
+      json() {
+        return Promise.resolve({items});
+      },
+    });
     element.setAttribute('credentials', 'include');
     xhrMock.expects('fetchJson').withExactArgs('https://data.com/list.json',
         sinon.match(opts => {

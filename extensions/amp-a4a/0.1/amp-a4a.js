@@ -1215,7 +1215,7 @@ export class AmpA4A extends AMP.BaseElement {
           // across pages.
           ampCors: false,
           credentials: 'omit',
-        }).then(jwkSetObj => {
+        }).then(res => res.json()).then(jwkSetObj => {
           const result = {serviceName: currServiceName};
           if (isObject(jwkSetObj) && Array.isArray(jwkSetObj.keys) &&
               jwkSetObj.keys.every(isObject)) {

@@ -135,7 +135,11 @@ describes.realWin('amp-auto-ads', {
 
     xhr = xhrFor(env.win);
     xhr.fetchJson = () => {
-      return Promise.resolve(configObj);
+      return Promise.resolve({
+        json() {
+          return Promise.resolve(configObj);
+        },
+      });
     };
     sandbox.spy(xhr, 'fetchJson');
 

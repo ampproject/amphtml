@@ -207,7 +207,8 @@ export class Xhr {
   }
 
   /**
-   * Fetches and constructs JSON object based on the fetch polyfill.
+   * Fetches a JSON response. Note this returns the response object, not the
+   * response's JSON. #fetchJson merely sets up the request to accept JSOn.
    *
    * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
    *
@@ -231,8 +232,7 @@ export class Xhr {
       init.headers['Content-Type'] = 'application/json;charset=utf-8';
       init.body = JSON.stringify(init.body);
     }
-    return this.fetch(input, init)
-        .then(response => response.json());
+    return this.fetch(input, init);
   }
 
   /**
