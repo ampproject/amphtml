@@ -20,7 +20,7 @@
   left: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
-  z-index: 2147483642 !important;
+  z-index: 2147483642;
 }
 
 .i-amphtml-lbv-mask,
