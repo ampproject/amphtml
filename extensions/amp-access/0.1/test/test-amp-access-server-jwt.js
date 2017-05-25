@@ -363,7 +363,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
             .returns(Promise.resolve({
               text() {
                 return Promise.resolve(encoded);
-              }
+              },
             }))
             .once();
         jwtMock.expects('decode')
@@ -443,7 +443,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
             .returns(Promise.resolve({
               text() {
                 return Promise.resolve(encoded);
-              }
+              },
             }))
             .once();
         xhrMock.expects('fetchText')
@@ -451,7 +451,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
             .returns({
               text() {
                 return pemPromise;
-              }
+              },
             })
             .once();
         jwtMock.expects('decode')
@@ -493,7 +493,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
             .returns(Promise.resolve({
               text() {
                 return Promise.resolve(encoded);
-              }
+              },
             }))
             .once();
         xhrMock.expects('fetchText')
@@ -543,7 +543,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
             .returns(Promise.resolve({
               text() {
                 return Promise.resolve(encoded);
-              }
+              },
             }))
             .once();
         jwtMock.expects('decode')

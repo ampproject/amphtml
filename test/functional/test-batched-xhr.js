@@ -213,7 +213,7 @@ describes.sandboxed('BatchedXhr', {}, () => {
       return Promise.all([
         xhr.fetchText('/get?k=v1', {method: 'POST', body: {}}),
         xhr.fetchText('/get?k=v1', {method: 'POST', body: {}}),
-      ]).then(results => {
+      ]).then(() => {
         expect(fetchStub).to.be.calledTwice;
       });
     });
