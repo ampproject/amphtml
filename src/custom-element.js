@@ -226,6 +226,11 @@ export function upgradeElementInChildWindow(parentWin, childWin, name) {
 
 /**
  * Applies layout to the element. Visible for testing only.
+ *
+ * WARNING: The equivalent of this method is used for server-side
+ * rendering (SSR) and any changes made to it must be made in coordination
+ * with caches that implement SSR. For more info on SSR see bit.ly/amp-ssr.
+ *
  * @param {!Element} element
  * @return {!Layout}
  */
