@@ -28,24 +28,33 @@
   */
 
 import {user} from '../../../src/log';
-import {getIframe} from '../../../src/3p-frame';
-import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {tryParseJson} from '../../../src/json';
+import {isObject} from '../../../src/types';
+import {listen} from '../../../src/event-helper';
 
 export class AmpImgur extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-    
-    /** @private {?HTMLIFrameElement} */
+
+    /** @private {?Element} */
     this.iframe_ = null;
+
+    /** @private {?Promise} */
+    this.iframePromise_ = null;
+
+    /** @private {?Function} */
+    this.unlistenMessage_ = null;
+
+    /** @private {?string} */
+    this.imgurid_ = '';
   }
 
   /** @override */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('http://imgur.com/', opt_onLayout);
+    this.preconnect.url('https://imgur.com/', opt_onLayout);
   }
 
   /** @override */
@@ -59,25 +68,61 @@ export class AmpImgur extends AMP.BaseElement {
   }
 
   /** @override */
-  layoutCallback() {
-    const iframe = getIframe(this.win, this.element, 'imgur');
-    this.applyFillContent(iframe);
-
-    listenFor(iframe, 'embed-size', data => {
-      this.changeHeight(data.height);
-    }, true);
-
-    this.element.appendChild(iframe);
-    this.iframe_ = iframe;
-    return this.loadPromise(iframe);
+  buildCallback() {
+    this.imgurid_ = user().assert(
+      this.element.getAttribute("data-imgur-id"),
+      'The data-imgur-id attribute is required for <amp-imgur> %s',
+      this.element);
   }
 
+  /** @override */
+  layoutCallback() {
+    const iframe = this.element.ownerDocument.createElement('iframe');
+    this.iframe_ = iframe;
+
+    this.unlistenMessage_ = listen(
+      this.win,
+      'message',
+      this.hadleImgurMessages_.bind(this)
+    );
+
+    iframe.setAttribute('scrolling', 'no');
+    iframe.setAttribute('frameborder', '0');
+    iframe.setAttribute('allowfullscreen', 'true');
+
+    iframe.src = 'https://imgur.com/a/' +
+      encodeURIComponent(this.imgurid_) + '/embed?pub=true';
+    this.applyFillContent(iframe);
+    this.element.appendChild(iframe);
+    return this.iframePromise_ = this.loadPromise(iframe);
+  }
+
+  /** @private */
+  hadleImgurMessages_(event) {
+    const data = isObject(event.data) ? event.data : tryParseJson(event.data);
+    if(data.message == 'resize_imgur') {
+      const height = data.height;
+
+      this.getVsync().measure(() => {
+        if (this.iframe_ && this.iframe_.offsetHeight !== height) {
+          this.attemptChangeHeight(height)
+            .catch(() => {});
+        }
+      })
+    }
+  }
+
+  /** @override */
   unlayoutCallback() {
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;
+      this.iframePromise_ = null;
     }
-    return true;
+    if (this.unlistenMessage_) {
+      this.unlistenMessage_();
+    }
+    return true;  // Call layoutCallback again.
   }
 
 }
