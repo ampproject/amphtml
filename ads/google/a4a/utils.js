@@ -266,11 +266,8 @@ export function googleAdUrl(a4a, baseUrl, startTime, parameters) {
  * @return {string}
  */
 export function truncAndTimeUrl(baseUrl, parameters, startTime) {
-  const paramsArray = [];
-  Object.keys(parameters).forEach(key =>
-    parameters[key] && paramsArray.push({name: key, value: parameters[key]}));
   return buildUrl(
-    baseUrl, paramsArray, MAX_URL_LENGTH - 10, {name: 'trunc', value: '1'})
+    baseUrl, parameters, MAX_URL_LENGTH - 10, {name: 'trunc', value: '1'})
     + '&dtd=' + elapsedTimeWithCeiling(Date.now(), startTime);
 }
 
