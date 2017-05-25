@@ -245,7 +245,7 @@ app.use('/form/autocomplete/search', (req, res) => {
   const form = new formidable.IncomingForm();
   form.parse(req, function(err, fields) {
     res.json({
-      term: fields.term,
+      query: fields.query,
       results: [{title: 'Result 1'}, {title: 'Result 2'}, {title: 'Result 3'}],
     });
   });

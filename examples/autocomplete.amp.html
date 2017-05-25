@@ -49,7 +49,9 @@
     line-height: 30px;
     padding-left: 10px;
     background: #ddd;
-    outline: none!important;
+  }
+  amp-selector .select-option.no-outline.no-outline[option] {
+    outline: none;
   }
   .select-option:focus {
     box-shadow: inset rgb(94, 158, 215) 0px 0px 45px;
@@ -74,15 +76,17 @@
     <div class="search-container">
       <input
         id="query"
+        name="query"
         type="text"
         class="search-box"
         on="input-debounced:AMP.setState({
-          query: event.value,
-          autocomplete: event.value
-        }),autocomplete-list.show,results.hide"
-        name="term"
+            query: event.value,
+            autocomplete: event.value
+          }),
+          autocomplete-list.show,
+          results.hide"
         [value]="query"
-        autofocus/>
+      />
       <button class="search-submit" type="submit">Search</button>
     </div>
     <amp-list
@@ -95,19 +99,34 @@
       hidden
     >
       <template type="amp-mustache">
-        <amp-selector keyboard-select-mode="focus" layout="container" on="select:AMP.setState({query: event.targetOption}),autocomplete-list.hide,results.hide">
+        <amp-selector
+          keyboard-select-mode="focus"
+          layout="container"
+          on="select:AMP.setState({
+              query: event.targetOption
+            }),
+            autocomplete-list.hide,
+            results.hide"
+        >
           {{#results}}
-            <div class="select-option" option="{{.}}" on="tap:autocomplete-list.hide">{{.}}</div>
+            <div
+              class="select-option no-outline"
+              role="option"
+              tabindex="0"
+              on="tap:autocomplete-list.hide"
+              option="{{.}}"
+            >{{.}}</div>
           {{/results}}
           {{^results.3}}<div class="select-option"></div>{{/results.3}}
-          {{^results.2}}<div class="select-option"></div><div class="select-option"></div>{{/results.2}}
-          {{^results.1}}<div class="select-option"></div><div class="select-option"></div><div class="select-option"></div>{{/results.1}}
+          {{^results.2}}<div class="select-option"></div>{{/results.2}}
+          {{^results.1}}<div class="select-option"></div>{{/results.1}}
+          {{^results.0}}<div class="select-option"></div>{{/results.0}}
         </amp-selector>
       </template>
     </amp-list>
     <div submit-success id="results">
       <template type="amp-mustache">
-        <p>Here are the results for the search "{{term}}":</p>
+        <p>Here are the results for the search "{{query}}":</p>
         <ul>
             {{#results}}<li>{{title}}</li>{{/results}}
         </ul>
