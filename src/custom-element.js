@@ -226,7 +226,7 @@ export function upgradeElementInChildWindow(parentWin, childWin, name) {
 
 /**
  * Applies layout to the element. Visible for testing only.
- * 
+ *
  * \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  / _____|
  *  \   \/    \/   / /  ^  \    |  |_)  |    |   \|  | |  | |   \|  | |  |  __
  *   \            / /  /_\  \   |      /     |  . `  | |  | |  . `  | |  | |_ |
@@ -261,7 +261,7 @@ export function applyLayout_(element) {
   // If the layout was already done by server-side rendering (SSR), then the code
   // below will not run. Any changes below will necessitate a change to SSR and must
   // be coordinated with caches that implement SSR. See bit.ly/amp-ssr.
-    
+
   // Parse layout from the element.
   const layoutAttr = element.getAttribute('layout');
   const widthAttr = element.getAttribute('width');
