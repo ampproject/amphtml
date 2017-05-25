@@ -310,14 +310,14 @@ function main(argv) {
             'Please make your changes in separate pull requests.');
         // Print details if there appear to be more files than the average PR.
         if (files.length > 1) {
-          console.log(fileLogPrefix,
-              'NOTE: If you see a long list of unrelated files below, it is ' +
-              'likely because your branch is significantly out of sync.\n' +
+          console.log(fileLogPrefix, util.colors.yellow('NOTE:'),
+              'If you see a long list of unrelated files below, it is likely ' +
+              'because your branch is significantly out of sync.\n' +
               'A full sync to upstream/master should clear this error.\n' +
               'You can do so by running these commands:');
           console.log(util.colors.cyan(
-            '\t git fetch upstream master' +
-            '\t git rebase upstream/master' +
+            '\t git fetch upstream master\n' +
+            '\t git rebase upstream/master\n' +
             '\t git push origin --force'
           ));
           console.log('\nFull list of files in this PR:');
