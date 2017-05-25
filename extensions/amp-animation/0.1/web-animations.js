@@ -422,7 +422,8 @@ export class MeasureScanner extends Scanner {
       // Property -> keyframes form.
       // The object is cloned, while properties are verified to be
       // whitelisted. Additionally, the `offset:0` frames are inserted
-      // to polyfill partial keyframes.
+      // to polyfill partial keyframes per spec.
+      // See https://github.com/w3c/web-animations/issues/187
       const object = /** {!Object<string, *>} */ (spec.keyframes);
       keyframes = {};
       for (const prop in object) {
@@ -445,8 +446,9 @@ export class MeasureScanner extends Scanner {
       // Keyframes -> property form.
       // The array is cloned, while properties are verified to be whitelisted.
       // Additionally, if the `offset:0` properties are inserted when absent
-      // to polyfill partial keyframes.
-      // See https://github.com/web-animations/web-animations-js/issues/14
+      // to polyfill partial keyframes per spec.
+      // See https://github.com/w3c/web-animations/issues/187 and
+      // https://github.com/web-animations/web-animations-js/issues/14
       const array = /** {!Array<!Object<string, *>>} */ (spec.keyframes);
       keyframes = [];
       const addStartFrame = array.length == 1 || array[0].offset > 0;
@@ -469,6 +471,7 @@ export class MeasureScanner extends Scanner {
         keyframes.push(this.css_.resolveCssMap(target, frame));
       }
     } else {
+      // TODO(dvoytenko): support CSS keyframes per https://github.com/w3c/web-animations/issues/189
       // Unknown form of keyframes spec.
       if (this.validate_) {
         throw user().createError('keyframes not found', spec.keyframes);
