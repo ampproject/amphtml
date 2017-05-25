@@ -292,7 +292,7 @@ function main(argv) {
 
   // If $TRAVIS_PULL_REQUEST_SHA is empty then it is a push build and not a PR.
   if (!process.env.TRAVIS_PULL_REQUEST_SHA) {
-    console.log('Running all commands on push build.');
+    console.log(fileLogPrefix, 'Running all commands on push build.');
     runAllCommands();
     stopTimer('pr-check.js', startTime);
     return 0;
@@ -304,17 +304,25 @@ function main(argv) {
   if (buildTargets.has('FLAG_CONFIG')) {
     files.forEach((file) => {
       if (!isFlagConfig(file)) {
-        console.log(util.colors.red('ERROR'),
+        console.log(fileLogPrefix, util.colors.red('ERROR:'),
             'It appears that your PR contains a mix of flag-config files ' +
-            '(*config.json) and non-flag-config files.');
-        console.log('Please make your changes in separate pull requests.');
-        console.log(util.colors.yellow(
-            'NOTE: If you see a long list of unrelated files below, it is ' +
-            'likely because your branch is significantly out of sync.'));
-        console.log(util.colors.yellow(
-            'A full sync to upstream/master should clear this error.'));
-        console.log('\nFull list of files in this PR:');
-        files.forEach((file) => { console.log('\t' + file); });
+            '(*config.json) and non-flag-config files.\n' +
+            'Please make your changes in separate pull requests.');
+        // Print details if there appear to be more files than the average PR.
+        if (files.length > 1) {
+          console.log(fileLogPrefix,
+              'NOTE: If you see a long list of unrelated files below, it is ' +
+              'likely because your branch is significantly out of sync.\n' +
+              'A full sync to upstream/master should clear this error.\n' +
+              'You can do so by running these commands:');
+          console.log(util.colors.cyan(
+            '\t git fetch upstream master' +
+            '\t git rebase upstream/master' +
+            '\t git push origin --force'
+          ));
+          console.log('\nFull list of files in this PR:');
+          files.forEach((file) => { console.log('\t' + file); });
+        }
         stopTimer('pr-check.js', startTime);
         process.exit(1);
       }
