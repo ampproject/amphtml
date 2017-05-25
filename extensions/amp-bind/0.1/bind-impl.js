@@ -28,6 +28,7 @@ import {deepMerge} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {filterSplice} from '../../../src/utils/array';
 import {formOrNullForElement} from '../../../src/form';
+import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isObject, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
@@ -35,6 +36,7 @@ import {isFiniteNumber} from '../../../src/types';
 import {map} from '../../../src/utils/object';
 import {reportError} from '../../../src/error';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
+import {waitForBodyPromise} from '../../../src/dom';
 
 const TAG = 'amp-bind';
 
@@ -83,14 +85,17 @@ const BIND_ONLY_ATTRIBUTES = map({
 });
 
 /**
- * Bind is the service that handles the Bind lifecycle, from identifying
- * bindings in the document to scope mutations to reevaluating expressions.
+ * Bind is an ampdoc-scoped service that handles the Bind lifecycle, from
+ * scanning for bindings to evaluating expressions to mutating elements.
+ * @implements {../../../src/service.EmbeddableService}
  */
 export class Bind {
   /**
+   * If `opt_win` is provided, scans its document for bindings instead.
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Window=} opt_win
    */
-  constructor(ampdoc) {
+  constructor(ampdoc, opt_win) {
     // Allow integration test to access this class in testing mode.
     /** @const @private {boolean} */
     this.enabled_ = isBindEnabledFor(ampdoc.win);
@@ -101,6 +106,12 @@ export class Bind {
 
     /** @const @private {!Window} */
     this.win_ = ampdoc.win;
+
+    /**
+     * The window containing the document to scan.
+     * May differ from the `ampdoc`'s window e.g. in FIE.
+     * @const @private {!Window} */
+    this.localWin_ = opt_win || ampdoc.win;
 
     /** @private {!Array<BoundElementDef>} */
     this.boundElements_ = [];
@@ -133,13 +144,15 @@ export class Bind {
     this.viewer_ = viewerForDoc(this.ampdoc);
 
     /**
-     * Resolved when the service is fully initialized.
+     * Resolved when the service finishes scanning the document for bindings.
      * @const @private {Promise}
      */
     this.initializePromise_ = Promise.all([
-      this.ampdoc.whenReady(),
+      waitForBodyPromise(this.localWin_.document), // Wait for body.
       this.viewer_.whenFirstVisible(), // Don't initialize in prerender mode.
-    ]).then(() => this.initialize_());
+    ]).then(() => this.initialize_(
+      dev().assertElement(this.localWin_.document.body)
+    ));
 
     /**
      * @private {?Promise}
@@ -150,6 +163,12 @@ export class Bind {
     if (getMode().development || getMode().localDev) {
       AMP.printState = this.printState_.bind(this);
     }
+  }
+
+  /** @override */
+  adoptEmbedWindow(embedWin) {
+    installServiceInEmbedScope(
+        embedWin, 'bind', new Bind(this.ampdoc, embedWin));
   }
 
   /**
@@ -202,8 +221,7 @@ export class Bind {
     this.setStatePromise_ = this.initializePromise_.then(() => {
       // Allow expression to reference current scope in addition to event scope.
       Object.assign(scope, this.scope_);
-      return invokeWebWorker(
-          this.win_, 'bind.evaluateExpression', [expression, scope]);
+      return this.ww_('bind.evaluateExpression', [expression, scope]);
     }).then(returnValue => {
       const {result, error} = returnValue;
       if (error) {
@@ -220,12 +238,13 @@ export class Bind {
 
   /**
    * Scans the ampdoc for bindings and creates the expression evaluator.
+   * @param {!Node} rootNode
    * @return {!Promise}
    * @private
    */
-  initialize_() {
+  initialize_(rootNode) {
     dev().fine(TAG, 'Scanning DOM for bindings...');
-    let promise = this.addBindingsForNode_(this.ampdoc.getBody());
+    let promise = this.addBindingsForNode_(rootNode);
     // Check default values against initial expression results in development.
     if (getMode().development) {
       // Check default values against initial expression results.
@@ -262,12 +281,12 @@ export class Bind {
   }
 
   /**
-   * Scans the substree rooted at `node` and adds bindings for nodes
+   * Scans `node` and its descendants and adds bindings for nodes
    * that contain bindable elements. This function is not idempotent.
    *
    * Returns a promise that resolves after bindings have been added.
    *
-   * @param {!Element} node
+   * @param {!Node} node
    * @return {!Promise}
    * @private
    */
@@ -297,7 +316,7 @@ export class Bind {
         return {};
       } else {
         dev().fine(TAG, `Asking worker to parse expressions...`);
-        return invokeWebWorker(this.win_, 'bind.addBindings', [bindings]);
+        return this.ww_('bind.addBindings', [bindings]);
       }
     }).then(parseErrors => {
       // Report each parse error.
@@ -351,7 +370,7 @@ export class Bind {
     // Remove the bindings from the evaluator.
     if (deletedExpressions.length > 0) {
       dev().fine(TAG, `Asking worker to remove expressions...`);
-      return invokeWebWorker(this.win_,
+      return this.ww_(
           'bind.removeBindingsWithExpressionStrings', [deletedExpressions]);
     } else {
       return Promise.resolve();
@@ -539,8 +558,7 @@ export class Bind {
    */
   evaluate_() {
     user().fine(TAG, 'Asking worker to re-evaluate expressions...');
-    const evaluatePromise =
-        invokeWebWorker(this.win_, 'bind.evaluateBindings', [this.scope_]);
+    const evaluatePromise = this.ww_('bind.evaluateBindings', [this.scope_]);
     return evaluatePromise.then(returnValue => {
       const {results, errors} = returnValue;
       // Report evaluation errors.
@@ -869,6 +887,16 @@ export class Bind {
   }
 
   /**
+   * Helper for invoking a method on web worker.
+   * @param {string} method
+   * @param {!Array=} opt_args
+   * @return {!Promise}
+   */
+  ww_(method, opt_args) {
+    return invokeWebWorker(this.win_, method, opt_args, this.localWin_);
+  }
+
+  /**
    * Returns true if both arrays contain the same strings.
    * @param {!(IArrayLike<string>|Array<string>)} a
    * @param {!(IArrayLike<string>|Array<string>)} b
@@ -985,7 +1013,7 @@ export class Bind {
    */
   dispatchEventForTesting_(name) {
     if (getMode().test) {
-      this.win_.dispatchEvent(new Event(name));
+      this.localWin_.dispatchEvent(new Event(name));
     }
   }
 }

@@ -22,12 +22,105 @@ import {toArray} from '../../../../src/types';
 import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
 
+////////////////////////////////////////////////////////////////////////////////
+// Curried test helpers
+////////////////////////////////////////////////////////////////////////////////
+
+function createElementWithBinding_(parent, env) {
+  /**
+   * @param {string} binding
+   * @param {string=} opt_tagName
+   * @param {boolean=} opt_isAmpElement
+   * @return {!Element}
+   */
+  return function(binding, opt_tagName, opt_isAmpElement) {
+    const tag = opt_tagName || 'p';
+    const div = env.win.document.createElement('div');
+    div.innerHTML = `<${tag} ${binding}></${tag}>`;
+    const newElement = div.firstElementChild;
+    if (opt_isAmpElement) {
+      newElement.className = 'i-amphtml-foo -amp-foo amp-foo';
+      newElement.mutatedAttributesCallback = () => {};
+    }
+    parent.appendChild(newElement);
+    return newElement;
+  };
+}
+
+function onBindReady_(bind, env) {
+  /**
+   * @return {!Promise}
+   */
+  return function() {
+    return bind.initializePromiseForTesting().then(() => {
+      env.flushVsync();
+    });
+  };
+}
+
+function onBindReadyAndSetState_(bind, env) {
+  /**
+   * @param {!Object} state
+   * @param {boolean=} opt_isAmpStateMutation
+   * @return {!Promise}
+   */
+  return function(state, opt_isAmpStateMutation) {
+    return bind.initializePromiseForTesting().then(() => {
+      return bind.setState(
+          state, /* opt_skipEval */ undefined, opt_isAmpStateMutation);
+    }).then(() => {
+      env.flushVsync();
+      return bind.setStatePromiseForTesting();
+    });
+  };
+}
+
+function onBindReadyAndSetStateWithExpression_(bind, env) {
+  /**
+   * @param {string} expression
+   * @param {!Object} scope
+   * @return {!Promise}
+   */
+  return function(expression, scope) {
+    return bind.setStateWithExpression(expression, scope).then(() => {
+      env.flushVsync();
+    });
+  };
+}
+
+function waitForEvent_(bind, env) {
+  /**
+   * @param {string} name
+   * @return {!Promise}
+   */
+  return function(name) {
+    return new Promise(resolve => {
+      function callback() {
+        resolve();
+        env.win.removeEventListener(name, callback);
+      };
+      env.win.addEventListener(name, callback);
+    });
+  };
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Unit tests
+////////////////////////////////////////////////////////////////////////////////
+
 describes.realWin('Bind', {
   amp: {
     runtimeOn: false,
   },
 }, env => {
   let bind;
+  let parent; // A connected <div> created by describes.
+
+  let createElementWithBinding;
+  let onBindReady;
+  let onBindReadyAndSetState;
+  let onBindReadyAndSetStateWithExpression;
+  let waitForEvent;
 
   beforeEach(() => {
     installTimerService(env.win);
@@ -37,83 +130,20 @@ describes.realWin('Bind', {
     chunkInstanceForTesting(env.ampdoc);
 
     bind = new Bind(env.ampdoc);
+    parent = env.win.document.getElementById('parent');
+
+    // TODO(choumx): Use better names in a follow-up PR.
+    createElementWithBinding = createElementWithBinding_(parent, env);
+    onBindReady = onBindReady_(bind, env);
+    onBindReadyAndSetState = onBindReadyAndSetState_(bind, env);
+    onBindReadyAndSetStateWithExpression =
+        onBindReadyAndSetStateWithExpression_(bind, env);
+    waitForEvent = waitForEvent_(bind, env);
   });
 
   afterEach(() => {
     toggleExperiment(env.win, 'amp-bind', false);
   });
-
-  /**
-   * @param {string} binding
-   * @param {string=} opt_tagName
-   * @param {boolean=} opt_isAmpElement
-   * @return {!Element}
-   */
-  function createElementWithBinding(binding, opt_tagName, opt_isAmpElement) {
-    const tag = opt_tagName || 'p';
-    const div = env.win.document.createElement('div');
-    div.innerHTML = `<${tag} ${binding}></${tag}>`;
-    const newElement = div.firstElementChild;
-    if (opt_isAmpElement) {
-      newElement.className = 'i-amphtml-foo -amp-foo amp-foo';
-      newElement.mutatedAttributesCallback = () => {};
-    }
-    const parent = env.win.document.getElementById('parent');
-    parent.appendChild(newElement);
-    return newElement;
-  }
-
-  /**
-   * Resolves when Bind service is fully initialized.
-   * @return {!Promise}
-   */
-  function onBindReady() {
-    return bind.initializePromiseForTesting().then(() => {
-      env.flushVsync();
-    });
-  }
-
-  /**
-   * Calls `callback` when digest that updates bind state to `state` completes.
-   * @param {!Object} state
-   * @param {boolean=} opt_isAmpStateMutation
-   * @return {!Promise}
-   */
-  function onBindReadyAndSetState(state, opt_isAmpStateMutation) {
-    return bind.initializePromiseForTesting().then(() => {
-      return bind.setState(
-          state, /* opt_skipEval */ undefined, opt_isAmpStateMutation);
-    }).then(() => {
-      env.flushVsync();
-      return bind.setStatePromiseForTesting();
-    });
-  }
-
-  /**
-   * Calls `callback` when digest that updates bind state to `state` completes.
-   * @param {!Object} state
-   * @param {!Function} callback
-   * @return {!Promise}
-   */
-  function onBindReadyAndSetStateWithExpression(expression, scope) {
-    return bind.setStateWithExpression(expression, scope).then(() => {
-      env.flushVsync();
-    });
-  }
-
-  /**
-   * @param {string} name
-   * @return {!Promise}
-   */
-  function waitForEvent(name) {
-    return new Promise(resolve => {
-      function callback() {
-        resolve();
-        env.win.removeEventListener(name, callback);
-      };
-      env.win.addEventListener(name, callback);
-    });
-  }
 
   it('should throw error if experiment is not enabled', () => {
     toggleExperiment(env.win, 'amp-bind', false);
@@ -133,17 +163,16 @@ describes.realWin('Bind', {
   });
 
   it('should have same state after removing + re-adding a subtree', () => {
-    const container = env.win.document.getElementById('parent');
     for (let i = 0; i < 5; i++) {
       createElementWithBinding('[text]="1+1"');
     }
     expect(bind.boundElements_.length).to.equal(0);
     return onBindReady().then(() => {
       expect(bind.boundElements_.length).to.equal(5);
-      return bind.removeBindingsForNode_(container);
+      return bind.removeBindingsForNode_(parent);
     }).then(() => {
       expect(bind.boundElements_.length).to.equal(0);
-      return bind.addBindingsForNode_(container);
+      return bind.addBindingsForNode_(parent);
     }).then(() => {
       expect(bind.boundElements_.length).to.equal(5);
     });
@@ -151,7 +180,6 @@ describes.realWin('Bind', {
 
   it('should dynamically detect new bindings under dynamic tags', () => {
     const doc = env.win.document;
-    const parent = doc.getElementById('parent');
     const dynamicTag = doc.createElement('div');
     parent.appendChild(dynamicTag);
     parent.getDynamicElementContainers = () => {
@@ -373,7 +401,7 @@ describes.realWin('Bind', {
     });
   });
 
-  it('should stop scanning once maximum number of bindings is reached', () => {
+  it('should stop scanning once max number of bindings is reached', () => {
     bind.setMaxNumberOfBindingsForTesting(2);
     const errorStub = env.sandbox.stub(user(), 'error');
 
@@ -381,7 +409,9 @@ describes.realWin('Bind', {
     const bar = createElementWithBinding(`[text]="bar" [class]="baz"`);
     const qux = createElementWithBinding(`[text]="qux"`);
 
-    return onBindReadyAndSetState({foo: 1, bar: 2, baz: 3, qux: 4}).then(() => {
+    return onBindReadyAndSetState({
+      foo: 1, bar: 2, baz: 3, qux: 4,
+    }).then(() => {
       expect(foo.textContent).to.equal('1');
       expect(bar.textContent).to.equal('2');
       // Max number of bindings exceeded with [baz].
@@ -390,6 +420,59 @@ describes.realWin('Bind', {
 
       expect(errorStub).to.have.been.calledWith('amp-bind',
           sinon.match(/Maximum number of bindings reached/));
+    });
+  });
+
+  describes.realWin('in embedded window', {
+    amp: {
+      runtimeOn: false,
+    },
+  }, otherEnv => {
+    let otherBind;
+    let otherParent;
+
+    let otherElementWithBinding;
+    let onOtherBindReady;
+    let onOtherBindReadyAndSetState;
+
+    beforeEach(() => {
+      otherBind = new Bind(env.ampdoc, otherEnv.win);
+      otherParent = otherEnv.win.document.getElementById('parent');
+
+      // TODO(choumx): Better names in a follow-up PR.
+      otherElementWithBinding =
+          createElementWithBinding_(otherParent, otherEnv);
+      onOtherBindReady = onBindReady_(otherBind, otherEnv);
+      onOtherBindReadyAndSetState =
+          onBindReadyAndSetState_(otherBind, otherEnv);
+    });
+
+    it('should scan the elements in the provided window', () => {
+      createElementWithBinding('[text]="1+1"');
+      otherElementWithBinding('[text]="2+2"');
+
+      expect(otherBind.boundElements_.length).to.equal(0);
+      return onOtherBindReady().then(() => {
+        // `otherBind` shouldn't detect the "1+1" binding.
+        expect(otherBind.boundElements_.length).to.equal(1);
+      });
+    });
+
+    it('should not be able to access variables from other windows', () => {
+      const element = createElementWithBinding('[text]="foo + bar"');
+      const otherElement =
+          otherElementWithBinding('[text]="foo + bar"');
+
+      const promises = [
+        onBindReadyAndSetState({foo: '123'}),
+        onOtherBindReadyAndSetState({bar: '456'}),
+      ];
+
+      return Promise.all(promises).then(() => {
+        // `element` only sees `foo` and `otherElement` only sees `bar`.
+        expect(element.textContent).to.equal('123null');
+        expect(otherElement.textContent).to.equal('null456');
+      });
     });
   });
 });
