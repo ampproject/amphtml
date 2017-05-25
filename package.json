@@ -97,7 +97,7 @@
     "postcss": "5.2.10",
     "postcss-import": "9.1.0",
     "pretty-bytes": "2.0.1",
-    "request": "2.73.0",
+    "request": "2.76.0",
     "rimraf": "2.5.1",
     "sinon": "1.17.3",
     "sinon-chai": "2.8.0",
