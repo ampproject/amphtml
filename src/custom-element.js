@@ -241,9 +241,9 @@ export function upgradeElementInChildWindow(parentWin, childWin, name) {
  * @return {!Layout}
  */
 export function applyLayout_(element) {
-    /*
-    
-  // Check if the layout has already been done by the server.
+  // Check if the layout has already been done by server-side rendering. The
+  // document may be visible to the user if the boilerplate was removed so
+  // please take care in making changes here.
   const completedLayoutAttr = element.getAttribute('i-amphtml-layout');
   if (completedLayoutAttr) {
     const layout = /** @type {!Layout} */ (dev().assert(
@@ -258,6 +258,10 @@ export function applyLayout_(element) {
     return layout;
   }
 
+  // If the layout was already done by server-side rendering (SSR), then the code
+  // below will not run. Any changes below will necessitate a change to SSR and must
+  // be coordinated with caches that implement SSR. See bit.ly/amp-ssr.
+    
   // Parse layout from the element.
   const layoutAttr = element.getAttribute('layout');
   const widthAttr = element.getAttribute('width');
