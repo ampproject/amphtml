@@ -372,7 +372,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     this.ampAnalyticsConfig_ = null;
     this.jsonTargeting_ = null;
-    // TODO: handle SRA!
+    // Reset SRA requests to allow for resumeCallback to re-fetch
+    // ad requests.  Assumes that unlayoutCallback will be called for all slots
+    // in rapid succession (meaning onLayoutMeasure initiated promise chain
+    // will not be started until resumeCallback).
+    SraRequests = null;
   }
 
   /**
