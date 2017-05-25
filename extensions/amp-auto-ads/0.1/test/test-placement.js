@@ -547,7 +547,7 @@ describes.realWin('placement', {
       return placements[0].placeAd(attributes, adTracker)
           .then(placementState => {
             expect(resource.attemptChangeSize).to.have.been.calledWith(
-                anchor.firstChild, 100, undefined);
+                anchor.firstChild, 250, undefined);
             expect(placementState).to.equal(PlacementState.PLACED);
           });
     });
@@ -587,7 +587,7 @@ describes.realWin('placement', {
       return placements[0].placeAd(attributes, adTracker)
           .then(placementState => {
             expect(resource.attemptChangeSize).to.have.been.calledWith(
-                anchor.firstChild, 100, undefined);
+                anchor.firstChild, 250, undefined);
             expect(placementState).to.equal(PlacementState.RESIZE_FAILED);
           });
     });
