@@ -98,7 +98,7 @@ describe('amp-3q-player', function() {
           }).then(() => {
             const p = listenOncePromise(player, VideoEvents.UNMUTED);
             sendFakeMessage(player, iframe, 'unmuted');
-            const successTimeout = timer.timeoutPromise(10, true);
+            const successTimeout = timer.promise(10);
             return Promise.race([p, successTimeout]);
           });
         });
