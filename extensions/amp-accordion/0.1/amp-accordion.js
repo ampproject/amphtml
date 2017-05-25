@@ -20,7 +20,7 @@ import {Layout} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {removeFragment} from '../../../src/url';
 import {map} from '../../../src/utils/object';
-import {closest, tryFocus} from '../../../src/dom';
+import {tryFocus} from '../../../src/dom';
 
 class AmpAccordion extends AMP.BaseElement {
 
