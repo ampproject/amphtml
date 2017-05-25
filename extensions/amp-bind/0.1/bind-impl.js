@@ -684,6 +684,10 @@ export class Bind {
   applyBinding_(boundProperty, element, newValue) {
     const property = boundProperty.property;
     switch (property) {
+      case 'value':
+        element.value = String(newValue);
+        break;
+
       case 'text':
         element.textContent = String(newValue);
         break;

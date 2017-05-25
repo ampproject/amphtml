@@ -217,6 +217,40 @@ app.use('/form/search-json/get', (req, res) => {
   });
 });
 
+const autocompleteLanguages = ['ActionScript', 'AppleScript', 'Asp', 'BASIC',
+  'C', 'C++', 'Clojure', 'COBOL', 'ColdFusion', 'Erlang', 'Fortran', 'Go',
+  'Groovy', 'Haskell', 'Java', 'JavaScript', 'Lisp', 'Perl', 'PHP', 'Python',
+  'Ruby', 'Scala', 'Scheme'];
+
+app.use('/form/autocomplete/query', (req, res) => {
+  assertCors(req, res, ['GET']);
+  const MAX_RESULTS = 4;
+  const query = req.query.q;
+  if (!query) {
+    res.json({items: [{
+      results: autocompleteLanguages.slice(0, MAX_RESULTS),
+    }]});
+  } else {
+    const lowerCaseQuery = query.toLowerCase();
+    const filtered = autocompleteLanguages.filter(
+        l => l.toLowerCase().includes(lowerCaseQuery));
+    res.json({items: [{
+      results: filtered.slice(0, MAX_RESULTS)},
+    ]});
+  }
+});
+
+app.use('/form/autocomplete/search', (req, res) => {
+  assertCors(req, res, ['POST']);
+  const form = new formidable.IncomingForm();
+  form.parse(req, function(err, fields) {
+    res.json({
+      term: fields.term,
+      results: [{title: 'Result 1'}, {title: 'Result 2'}, {title: 'Result 3'}],
+    });
+  });
+});
+
 app.use('/form/verify-search-json/post', (req, res) => {
   assertCors(req, res, ['POST']);
   const form = new formidable.IncomingForm();
