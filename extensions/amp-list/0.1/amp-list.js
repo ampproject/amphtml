@@ -60,8 +60,18 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   mutatedAttributesCallback(mutations) {
-    if (mutations['src'] != undefined) {
+    const srcMutation = mutations['src'];
+    const stateMutation = mutations['state'];
+    if (srcMutation != undefined) {
       this.populateList_();
+    } else if (stateMutation != undefined) {
+      const items = isArray(stateMutation) ? stateMutation : [stateMutation];
+      templatesFor(this.win).findAndRenderTemplateArray(
+          this.element, items).then(this.rendered_.bind(this));
+    }
+    if (srcMutation != undefined && stateMutation != undefined) {
+      user().warn('AMP-LIST', '[src] and [state] mutated simultaneously.' +
+          'The [state] mutation will be dropped.');
     }
   }
 
