@@ -93,8 +93,7 @@ class AmpAccordion extends AMP.BaseElement {
           header.setAttribute('tabindex', 0);
         }
         this.headers_.push(header);
-        header.addEventListener('click',
-            this.clickHandler_.bind(this));
+        header.addEventListener('click', this.clickHandler_.bind(this));
         header.addEventListener('keydown', this.keyDownHandler_.bind(this));
       });
     });

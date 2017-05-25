@@ -80,7 +80,11 @@ describes.sandboxed('amp-accordion', {}, () => {
       obj.ampAccordion.implementation_.onHeaderPicked_(clickEvent);
       expect(header.parentNode.hasAttribute('expanded')).to.be.true;
       expect(header.getAttribute('aria-expanded')).to.equal('true');
+<<<<<<< HEAD
       expect(clickEvent.preventDefault).to.have.been.called;
+=======
+      expect(clickEvent.preventDefault.called).to.be.true;
+>>>>>>> 2e4bef74becbbbfe9b18dc60ff8c035913167a47
     });
   });
 
@@ -99,6 +103,7 @@ describes.sandboxed('amp-accordion', {}, () => {
       obj.ampAccordion.implementation_.onHeaderPicked_(clickEvent);
       expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.false;
       expect(headerElements[1].getAttribute('aria-expanded')).to.equal('false');
+<<<<<<< HEAD
       expect(clickEvent.preventDefault).to.have.been.called;
     });
   });
@@ -125,6 +130,9 @@ describes.sandboxed('amp-accordion', {}, () => {
       };
       obj.ampAccordion.implementation_.clickHandler_(buttonClickEvent);
       expect(buttonClickEvent.preventDefault).to.not.have.been.called;
+=======
+      expect(clickEvent.preventDefault.called).to.be.true;
+>>>>>>> 2e4bef74becbbbfe9b18dc60ff8c035913167a47
     });
   });
 
