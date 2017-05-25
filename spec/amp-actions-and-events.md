@@ -202,6 +202,18 @@ Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and
   </tr>
 </table>
 
+### amp-carousel[type="slides"]
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>goToSlide(index=INTEGER)</td>
+    <td>Advances the carousel to a specified slide index.</td>
+  </tr>
+</table>
+
 ### amp-image-lightbox
 <table>
   <tr>
@@ -285,18 +297,6 @@ Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and
   <tr>
     <td>dismiss (default)</td>
     <td>Hides the referenced user notification element.</td>
-  </tr>
-</table>
-
-### amp-carousel[type="slides"]
-<table>
-  <tr>
-    <th>Action</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td>goToSlide(index=INTEGER)</td>
-    <td>Advances the carousel to a specified slide index.</td>
   </tr>
 </table>
 
