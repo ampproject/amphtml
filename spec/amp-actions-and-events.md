@@ -200,6 +200,14 @@ Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and
     <td>hide</td>
     <td>Hides the target element.</td>
   </tr>
+  <tr>
+    <td>show</td>
+    <td>Shows the target element.</td>
+  </tr>
+  <tr>
+    <td>toggleVisibility</td>
+    <td>Toggles the visibility of the target element.</td>
+  </tr>
 </table>
 
 ### amp-image-lightbox
