@@ -30,7 +30,7 @@ const TAG = 'amp-auto-ads';
  * TODO: Specify this via the configuration.
  * @const
  */
-const TARGET_AD_HEIGHT_PX = 100;
+const TARGET_AD_HEIGHT_PX = 250;
 
 /**
  * @enum {number}
