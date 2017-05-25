@@ -2,7 +2,7 @@
 <html ⚡>
 <head>
   <meta charset="utf-8">
-  <title>AMP Autocomplete Demo</title>
+  <title>AMP autosuggest Demo</title>
   <link rel="canonical" href="amps.html">
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <link href="https://fonts.googleapis.com/css?family=Questrial" rel="stylesheet" type="text/css">
@@ -24,7 +24,7 @@
   .search-box, .search-submit, .select-option {
     font-size: 1.25em;
   }
-  .autocomplete-box {
+  .autosuggest-box {
     box-shadow: 0px 2px 6px rgba(0,0,0,.3);
   }
   .search-box {
@@ -68,10 +68,10 @@
   <h1>Programming language search</h1>
   <form
     method="post"
-    action-xhr="/form/autocomplete/search"
+    action-xhr="/form/autosuggest/search"
     target="_blank"
     id="search-form"
-    on="submit:autocomplete-list.hide;submit-success:results.show"
+    on="submit:autosuggest-list.hide;submit-success:results.show"
   >
     <div class="search-container">
       <input
@@ -81,21 +81,21 @@
         class="search-box"
         on="input-debounced:AMP.setState({
             query: event.value,
-            autocomplete: event.value
+            autosuggest: event.value
           }),
-          autocomplete-list.show,
+          autosuggest-list.show,
           results.hide"
         [value]="query"
       />
       <button class="search-submit" type="submit">Search</button>
     </div>
     <amp-list
-      class="autocomplete-box"
+      class="autosuggest-box"
       layout="fixed-height"
       height="120"
-      src="/form/autocomplete/query"
-      [src]="'/form/autocomplete/query?q=' + (autocomplete ? autocomplete : '')"
-      id="autocomplete-list"
+      src="/form/autosuggest/query"
+      [src]="'/form/autosuggest/query?q=' + (autosuggest ? autosuggest : '')"
+      id="autosuggest-list"
       hidden
     >
       <template type="amp-mustache">
@@ -105,7 +105,7 @@
           on="select:AMP.setState({
               query: event.targetOption
             }),
-            autocomplete-list.hide,
+            autosuggest-list.hide,
             results.hide"
         >
           {{#results}}
@@ -113,7 +113,7 @@
               class="select-option no-outline"
               role="option"
               tabindex="0"
-              on="tap:autocomplete-list.hide"
+              on="tap:autosuggest-list.hide"
               option="{{.}}"
             >{{.}}</div>
           {{/results}}
