@@ -39,24 +39,10 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   function setupWithFixture(fixtureLocation) {
     return createFixtureIframe(fixtureLocation).then(f => {
       fixture = f;
-      return waitForEvent('amp:bind:initialize');
+      return fixture.awaitEvent('amp:bind:initialize', 1);
     }).then(() => {
       const ampdocService = ampdocServiceFor(fixture.win);
       ampdoc = ampdocService.getAmpDoc(fixture.doc);
-    });
-  }
-
-  /**
-   * @param {string} name
-   * @return {!Promise}
-   */
-  function waitForEvent(name) {
-    return new Promise(resolve => {
-      function callback() {
-        resolve();
-        fixture.win.removeEventListener(name, callback);
-      };
-      fixture.win.addEventListener(name, callback);
     });
   }
 
@@ -65,17 +51,16 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
     // Bind should be available, but need to wait for actions to resolve
     // service promise for bind and call setState.
     return bindForDoc(ampdoc).then(unusedBind =>
-        waitForEvent('amp:bind:setState'));
+        fixture.awaitEvent('amp:bind:setState', 1));
   }
 
   /** @return {!Promise} */
   function waitForAllMutations() {
     return bindForDoc(ampdoc).then(unusedBind =>
-        waitForEvent('amp:bind:mutated'));
+        fixture.awaitEvent('amp:bind:mutated', 1));
   }
 
-  // TODO(choumx): Unskip once #9571 is fixed.
-  describe.skip('[text] and [class] integration', () => {
+  describe('[text] and [class] integration', () => {
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-text-integration.html');
     });
@@ -101,8 +86,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
     });
   });
 
-  // TODO(choumx): Unskip once #9571 is fixed.
-  describe.skip('detecting bindings under dynamic tags', () => {
+  describe('detecting bindings under dynamic tags', () => {
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-integrations.html');
     });
@@ -149,7 +133,6 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
     });
   });
 
-  // TODO(choumx): Unskip once #9571 is fixed.
   describe('input integration', () => {
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-integrations.html');
@@ -218,7 +201,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
       expect(firstSlide.getAttribute('aria-hidden')).to.equal('false');
       expect(secondSlide.getAttribute('aria-hidden')).to.be.equal('true');
 
-      const button = fixture.doc.getElementById('goToSlide1Button');
+      const button = fixture.doc.getElementById('goToSlideOne');
       button.click();
 
       return waitForBindApplication().then(() => {
@@ -228,8 +211,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
     });
   });
 
-  // TODO(choumx): Unskip once #9571 is fixed.
-  describe.skip('amp-img integration', () => {
+  describe('amp-img integration', () => {
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-integrations.html');
     });
@@ -295,8 +277,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
     });
   });
 
-  // TODO(choumx): Unskip once #9571 is fixed.
-  describe.skip('amp-live-list integration', () => {
+  describe('amp-live-list integration', () => {
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-integrations.html');
     });
@@ -350,8 +331,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
     });
   });
 
-  // TODO(choumx): Unskip once #9571 is fixed.
-  describe.skip('amp-selector integration', () => {
+  describe('amp-selector integration', () => {
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-integrations.html');
     });
@@ -466,8 +446,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
     });
   });
 
-  // TODO(choumx): Unskip once #9571 is fixed.
-  describe.skip('amp-youtube', () => {
+  describe('amp-youtube', () => {
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-integrations.html');
     });
@@ -483,8 +462,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
     });
   });
 
-  // TODO(choumx): Unskip once #9571 is fixed.
-  describe.skip('amp-brightcove', () => {
+  describe('amp-brightcove', () => {
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-integrations.html');
     });
@@ -503,8 +481,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
     });
   });
 
-  // TODO(choumx): Unskip once #9571 is fixed.
-  describe.skip('amp-iframe', () => {
+  describe('amp-iframe', () => {
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-integrations.html');
     });
@@ -527,8 +504,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
     });
   });
 
-  // TODO(choumx): Unskip once #9571 is fixed.
-  describe.skip('amp-list', () => {
+  describe('amp-list', () => {
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-integrations.html');
     });
