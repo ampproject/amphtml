@@ -321,7 +321,7 @@ i-amphtml-sizer {
   left: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
-  z-index: 1 !important;
+  z-index: 1;
 }
 
 .i-amphtml-notbuilt > [placeholder] {
