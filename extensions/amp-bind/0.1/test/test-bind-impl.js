@@ -450,7 +450,7 @@ describes.realWin('Bind', {
           onBindReadyAndSetState_(otherBind, otherEnv);
     });
 
-    it('should scan the elements in the provided window', () => {
+    it('should only scan the elements in the provided window', () => {
       createElementWithBinding('[text]="1+1"');
       otherElementWithBinding('[text]="2+2"');
 
@@ -467,14 +467,14 @@ describes.realWin('Bind', {
           otherElementWithBinding('[text]="foo + bar"');
 
       const promises = [
-        onBindReadyAndSetState({foo: '123'}),
-        onOtherBindReadyAndSetState({bar: '456'}),
+        onBindReadyAndSetState({foo: '123', bar: '456'}),
+        onOtherBindReadyAndSetState({foo: 'ABC', bar: 'DEF'}),
       ];
 
       return Promise.all(promises).then(() => {
         // `element` only sees `foo` and `otherElement` only sees `bar`.
-        expect(element.textContent).to.equal('123null');
-        expect(otherElement.textContent).to.equal('null456');
+        expect(element.textContent).to.equal('123456');
+        expect(otherElement.textContent).to.equal('ABCDEF');
       });
     });
   });

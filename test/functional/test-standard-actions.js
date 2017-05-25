@@ -165,7 +165,7 @@ describes.sandboxed('StandardActions', {}, () => {
       const setStateWithExpressionSpy = sandbox.spy();
       window.services.bind = {
         obj: {
-          setStateWithExpression: setStateWithExpressionSpy
+          setStateWithExpression: setStateWithExpressionSpy,
         },
       };
 
@@ -175,7 +175,7 @@ describes.sandboxed('StandardActions', {}, () => {
       standardActions.handleAmpTarget({
         method: 'setState',
         args,
-        target: ampdoc
+        target: ampdoc,
       });
       return bindForDoc(ampdoc).then(() => {
         expect(setStateWithExpressionSpy).to.be.calledOnce;
