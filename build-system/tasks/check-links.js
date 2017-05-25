@@ -64,10 +64,10 @@ function checkLinks() {
       if(deadLinksFoundInFile) {
         filesWithDeadLinks.push(markdownFiles[index]);
         util.log(
-            util.colors.yellow('WARNING'),
+            util.colors.red('ERROR'),
             'Possible dead link(s) found in',
             util.colors.magenta(markdownFiles[index]),
-            '(please update if necessary).');
+            '(please update it).');
       } else {
         util.log(
             util.colors.green('SUCCESS'),
@@ -77,10 +77,10 @@ function checkLinks() {
     });
     if (deadLinksFound) {
         util.log(
-            util.colors.yellow('WARNING'),
+            util.colors.red('ERROR'),
             'Possible dead link(s) found. Please update',
-            util.colors.magenta(filesWithDeadLinks.join(',')),
-            'if necessary.');
+            util.colors.magenta(filesWithDeadLinks.join(',')));
+            process.exit(1);
     } else {
         util.log(
             util.colors.green('SUCCESS'),
@@ -110,6 +110,17 @@ function filterLocalhostLinks(markdown) {
 }
 
 /**
+ * Filters out links in script tags, since they needn't point to real pages.
+ *
+ * @param {string} markdown Original markdown.
+ * @return {string} Markdown after filtering out links in script tags.
+ */
+function filterScriptTagLinks(markdown) {
+  var scriptTagLinks = new RegExp('src="http.*"', 'g');
+  return markdown.replace(scriptTagLinks, '');
+}
+
+/**
  * Reads the raw contents in the given markdown file, filters out localhost
  * links (because they do not resolve on Travis), and checks for dead links.
  *
@@ -123,6 +134,7 @@ function runLinkChecker(markdownFile) {
   }
   var markdown = fs.readFileSync(markdownFile).toString();
   var filteredMarkdown = filterLocalhostLinks(markdown);
+  filteredMarkdown = filterScriptTagLinks(filteredMarkdown);
   var opts = {
     baseUrl : 'file://' + path.dirname(path.resolve((markdownFile)))
   };
