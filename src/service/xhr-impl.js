@@ -216,7 +216,8 @@ export class Xhr {
   }
 
   /**
-   * Fetches text based on the fetch polyfill.
+   * Fetches a text response. Note this returns the response object, not the
+   * response's text. #fetchText merely sets up the request to accept text.
    *
    * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
    *
@@ -224,12 +225,10 @@ export class Xhr {
    *
    * @param {string} input
    * @param {?FetchInitDef=} opt_init
-   * @return {!Promise<string>}
+   * @return {!Promise<!FetchResponse>}
    */
   fetchText(input, opt_init) {
-    const init = setupInit(opt_init, 'text/plain');
-    return this.fetch(input, init)
-        .then(response => response.text());
+    return this.fetch(input, setupInit(opt_init, 'text/plain'));
   }
 
   /**
