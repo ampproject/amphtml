@@ -29,10 +29,10 @@ limitations under the License.
     <td width="40%"><strong>Required Script</strong></td>
     <td>
       <div>
-        <code>&lt;script async custom-element="amp-user-notification" src="https://cdn.ampproject.org/v0/amp-user-notification-0.1.js">&lt;/script></code>
+        <code><script async custom-element="amp-user-notification" src="https://cdn.ampproject.org/v0/amp-user-notification-0.1.js"></script></code>
       </div>
       <div>
-        <code>&lt;script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js">&lt;/script></code>
+        <code><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></code>
       </div>
       <small>Notice that both "amp-user-notification" and "amp-analytics" scripts are required.</small>
     </td>

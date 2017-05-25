@@ -27,7 +27,7 @@ limitations under the License.
     <td class="col-fourty"><strong>Required Script</strong></td>
     <td>
       <div>
-        <code>&lt;script async custom-element="amp-social-share" src="https://cdn.ampproject.org/v0/amp-social-share-0.1.js">&lt;/script></code>
+        <code><script async custom-element="amp-social-share" src="https://cdn.ampproject.org/v0/amp-social-share-0.1.js"></script></code>
       </div>
     </td>
   </tr>
