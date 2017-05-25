@@ -90,7 +90,7 @@
       layout="fixed-height"
       height="120"
       src="/form/autocomplete/query"
-      [src]="'/form/autocomplete/query?q=' + autocomplete"
+      [src]="'/form/autocomplete/query?q=' + (autocomplete ? autocomplete : '')"
       id="autocomplete-list"
       hidden
     >
