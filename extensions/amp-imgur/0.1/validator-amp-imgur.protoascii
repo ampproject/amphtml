@@ -18,6 +18,7 @@ tags: {  # amp-imgur
   html_format: AMP
   tag_name: "SCRIPT"
   satisfies: "amp-imgur extension .js script"
+  requires: "amp-imgur"
   extension_spec: {
     name: "amp-imgur"
     allowed_versions: "0.1"
@@ -25,39 +26,6 @@ tags: {  # amp-imgur
   }
   attr_lists: "common-extension-attrs"
   spec_name: "amp-imgur extension .js script"
-  satisfies: "amp-imgur extension .js script"
-  requires: "amp-imgur"
-  mandatory_parent: "HEAD"
-  unique: true
-  extension_unused_unless_tag_present: "amp-imgur"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-imgur"
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\.ampproject\.org/v0/amp-imgur-(latest|0\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-imgur"
 }
 tags: {  # <amp-imgur>
   html_format: AMP
@@ -69,8 +37,13 @@ tags: {  # <amp-imgur>
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-hello-world"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-imgur"
   amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
 }

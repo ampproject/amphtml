@@ -29,6 +29,7 @@
 
 import {user} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {removeElement} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 import {isObject} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
@@ -41,9 +42,6 @@ export class AmpImgur extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.iframe_ = null;
-
-    /** @private {?Promise} */
-    this.iframePromise_ = null;
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
@@ -58,11 +56,6 @@ export class AmpImgur extends AMP.BaseElement {
   }
 
   /** @override */
-  renderOutsideViewport() {
-    return false;
-  }
-
-  /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
   }
@@ -70,7 +63,7 @@ export class AmpImgur extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.imgurid_ = user().assert(
-      this.element.getAttribute("data-imgur-id"),
+      this.element.getAttribute('data-imgur-id'),
       'The data-imgur-id attribute is required for <amp-imgur> %s',
       this.element);
   }
@@ -94,21 +87,26 @@ export class AmpImgur extends AMP.BaseElement {
       encodeURIComponent(this.imgurid_) + '/embed?pub=true';
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
-    return this.iframePromise_ = this.loadPromise(iframe);
+    return this.loadPromise(iframe);
   }
 
   /** @private */
   hadleImgurMessages_(event) {
+    if (event.origin != 'https://imgur.com' ||
+        event.source != this.iframe_.contentWindow) {
+      return;
+    }
+    if (!event.data || !(isObject(event.data))) {
+      return;
+    }
     const data = isObject(event.data) ? event.data : tryParseJson(event.data);
-    if(data.message == 'resize_imgur') {
+    if (data.message == 'resize_imgur') {
       const height = data.height;
 
       this.getVsync().measure(() => {
-        if (this.iframe_ && this.iframe_.offsetHeight !== height) {
-          this.attemptChangeHeight(height)
-            .catch(() => {});
-        }
-      })
+        this.attemptChangeHeight(height)
+          .catch(() => {});
+      });
     }
   }
 

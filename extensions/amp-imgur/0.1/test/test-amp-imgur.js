@@ -25,9 +25,9 @@ describe('amp-imgur', () => {
     return createIframePromise().then(iframe => {
       doNotLoadExternalResourcesInTest(iframe.win);
       const ins = iframe.doc.createElement('amp-imgur');
-      ins.setAttribute('data-imgurid', imgurId);
-      ins.setAttribute('width', '540');
-      ins.setAttribute('height', '663');
+      ins.setAttribute('data-imgur-id', imgurId);
+      ins.setAttribute('width', '1');
+      ins.setAttribute('height', '1');
       ins.setAttribute('layout', 'responsive');
       return iframe.addElement(ins);
     });
@@ -35,12 +35,12 @@ describe('amp-imgur', () => {
 
   function testIframe(iframe) {
     expect(iframe).to.not.be.null;
-    expect(iframe.src).to.equal('http://imgur.com/f462IUj/embed/');
+    expect(iframe.src).to.equal('https://imgur.com/a/2CnX7/embed?pub=true');
     expect(iframe.className).to.match(/i-amphtml-fill-content/);
   }
 
   it('renders', () => {
-    return getIns('f462IUj').then(ins => {
+    return getIns('2CnX7').then(ins => {
       testIframe(ins.querySelector('iframe'));
     });
   });
