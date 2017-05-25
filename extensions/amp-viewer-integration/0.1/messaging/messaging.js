@@ -281,9 +281,7 @@ export class Messaging {
       if (!promise) {
         this.sendResponseError_(
           requestId, message.name, new Error('no response'));
-        if (!promise) {
-          throw new Error('expected response but none given: ' + message.name);
-        }
+        throw new Error('expected response but none given: ' + message.name);
       }
       promise.then(data => {
         this.sendResponse_(requestId, message.name, data);
