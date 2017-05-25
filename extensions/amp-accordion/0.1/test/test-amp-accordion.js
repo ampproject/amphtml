@@ -103,7 +103,7 @@ describes.sandboxed('amp-accordion', {}, () => {
     });
   });
 
-  it('should allow for clickable links and buttons in header', () => {
+  it('should allow for clickable links in header', () => {
     return getAmpAccordion().then(obj => {
       const iframe = obj.iframe;
       const headerElements = iframe.doc.querySelectorAll(
@@ -112,19 +112,11 @@ describes.sandboxed('amp-accordion', {}, () => {
       headerElements[0].appendChild(a);
       const aClickEvent = {
         target: a,
+        currentTarget: headerElements[0],
         preventDefault: sandbox.spy(),
       };
       obj.ampAccordion.implementation_.clickHandler_(aClickEvent);
       expect(aClickEvent.preventDefault).to.not.have.been.called;
-
-      const button = iframe.doc.createElement('button');
-      headerElements[0].appendChild(button);
-      const buttonClickEvent = {
-        target: button,
-        preventDefault: sandbox.spy(),
-      };
-      obj.ampAccordion.implementation_.clickHandler_(buttonClickEvent);
-      expect(buttonClickEvent.preventDefault).to.not.have.been.called;
     });
   });
 
