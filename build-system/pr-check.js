@@ -309,7 +309,7 @@ function main(argv) {
             '(*config.json) and non-flag-config files. ' +
             'Please make your changes in separate pull requests.');
         // Print details if there appear to be more files than the average PR.
-        if (files.length > 1) {
+        if (files.length > 5) {
           console.log(fileLogPrefix, util.colors.yellow('NOTE:'),
               'If you see a long list of unrelated files below, it is likely ' +
               'because your branch is significantly out of sync. ' +
