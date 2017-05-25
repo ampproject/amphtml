@@ -174,18 +174,18 @@ export function googleAdUrl(
         ? '1' : '0';
         queryParams.push({name: 'act', value:
       Object.keys(containerTypeSet).join()});
-    if (isCanary(win)) {
+        if (isCanary(win)) {
       // The semantics here are:
       //   0: production branch (this is never actually sent)
       //   1: control branch (this is not yet supported, so is never sent)
       //   2: canary branch
       queryParams.push({name: 'art', value: '2'});
     }
-    let eids = adElement.getAttribute('data-experiment-id');
-    if (opt_experimentIds) {
+        let eids = adElement.getAttribute('data-experiment-id');
+        if (opt_experimentIds) {
       eids = mergeExperimentIds(opt_experimentIds, eids);
     }
-    const allQueryParams = queryParams.concat(
+        const allQueryParams = queryParams.concat(
       [
         {
           name: 'is_amp',
@@ -218,9 +218,9 @@ export function googleAdUrl(
         {name: 'ish', value: viewportSize.height},
         {name: 'pfx', value: pfx},
         {name: 'rc', value: a4a.fromResumeCallback ? 1 : null},
-          ],
+      ],
       unboundedQueryParams,
-          [
+      [
         {name: 'url', value: documentInfo.canonicalUrl},
         {name: 'top', value: iframeDepth ? topWindowUrlOrDomain(win) : null},
             {
@@ -229,7 +229,7 @@ export function googleAdUrl(
             null : win.location.href,
             },
         {name: 'ref', value: referrer},
-          ]
+      ]
     );
         const url = buildUrl(baseUrl, allQueryParams, MAX_URL_LENGTH - 10,
                          {name: 'trunc', value: '1'});
