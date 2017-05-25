@@ -932,7 +932,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
     expect(element2.sizerElement_.style.paddingTop).to.equal('1%');
   });
 
-  it('should rediscover sizer to apply heights', () => {
+  it('should rediscover sizer to apply heights in SSR', () => {
     const element1 = new ElementClass();
     element1.setAttribute('i-amphtml-layout', 'responsive');
     element1.setAttribute('layout', 'responsive');
@@ -949,7 +949,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
     expect(sizer.style.paddingTop).to.equal('99%');
   });
 
-  it('should NOT rediscover sizer after reset', () => {
+  it('should NOT rediscover sizer after reset in SSR', () => {
     const element1 = new ElementClass();
     element1.setAttribute('i-amphtml-layout', 'responsive');
     element1.setAttribute('layout', 'responsive');
@@ -964,6 +964,17 @@ describes.realWin('CustomElement', {amp: true}, env => {
     element1.applySizesAndMediaQuery();
     expect(element1.sizerElement_).to.be.null;
     expect(sizer.style.paddingTop).to.equal('');
+  });
+
+  it('should reapply layout=nodisplay in SSR', () => {
+    const element1 = new ElementClass();
+    element1.setAttribute('i-amphtml-layout', 'nodisplay');
+    element1.setAttribute('layout', 'nodisplay');
+    container.appendChild(element1);
+    // TODO(dvoytenko, #9353): cleanup once `toggleLayoutDisplay` API has been
+    // fully migrated.
+    expect(element1.style.display).to.equal('none');
+    expect(element1).to.have.class('i-amphtml-display');
   });
 
   it('should change size without sizer', () => {
