@@ -223,10 +223,10 @@ export class AmpA4A extends AMP.BaseElement {
     this.adPromise_ = null;
 
     /**
-     * @private {number} unique ID of the currently executing promise to allow
-     * for cancellation.
+     * {number} unique ID of the currently executing promise to allow for
+     * cancellation.
      */
-    this.promiseId_ = 0;
+    this.promiseId = 0;
 
     /** {?Object} */
     this.config = null;
@@ -518,10 +518,10 @@ export class AmpA4A extends AMP.BaseElement {
 
     // Increment unique promise ID so that if its value changes within the
     // promise chain due to cancel from unlayout, the promise will be rejected.
-    const promiseId = ++this.promiseId_;
+    const promiseId = ++this.promiseId;
     // Shorthand for: reject promise if current promise chain is out of date.
-    const checkStillCurrent = promiseId => {
-      if (promiseId != this.promiseId_) {
+    const checkStillCurrent = () => {
+      if (promiseId != this.promiseId) {
         throw cancellation();
       }
     };
@@ -540,7 +540,7 @@ export class AmpA4A extends AMP.BaseElement {
     //   - Uncaught error otherwise => don't return; percolate error up
     this.adPromise_ = viewerForDoc(this.getAmpDoc()).whenFirstVisible()
         .then(() => {
-          checkStillCurrent(promiseId);
+          checkStillCurrent();
           // See if experiment that delays request until slot is within
           // renderOutsideViewport. Within render outside viewport will not
           // resolve if already within viewport thus the check for already
@@ -553,7 +553,7 @@ export class AmpA4A extends AMP.BaseElement {
         // This block returns the ad URL, if one is available.
         /** @return {!Promise<?string>} */
         .then(() => {
-          checkStillCurrent(promiseId);
+          checkStillCurrent();
           if (this.delayRequestEnabled_) {
             dev().info(TAG, 'ad request being built');
           }
@@ -562,7 +562,7 @@ export class AmpA4A extends AMP.BaseElement {
         // This block returns the (possibly empty) response to the XHR request.
         /** @return {!Promise<?Response>} */
         .then(adUrl => {
-          checkStillCurrent(promiseId);
+          checkStillCurrent();
           this.adUrl_ = adUrl;
           this.protectedEmitLifecycleEvent_('urlBuilt');
           return adUrl && this.sendXhrRequest(adUrl);
@@ -571,7 +571,7 @@ export class AmpA4A extends AMP.BaseElement {
         // object), or null if no response is available / response is empty.
         /** @return {?Promise<?{bytes: !ArrayBuffer, headers: !Headers}>} */
         .then(fetchResponse => {
-          checkStillCurrent(promiseId);
+          checkStillCurrent();
           this.protectedEmitLifecycleEvent_('adRequestEnd');
           // If the response is null, we want to return null so that
           // unlayoutCallback will attempt to render via x-domain iframe,
@@ -627,7 +627,7 @@ export class AmpA4A extends AMP.BaseElement {
          * @return {!Promise<?{AdResponseDef}>}
          */
         .then(responseParts => {
-          checkStillCurrent(promiseId);
+          checkStillCurrent();
           if (responseParts) {
             this.protectedEmitLifecycleEvent_('extractCreativeAndSignature');
           }
@@ -638,7 +638,7 @@ export class AmpA4A extends AMP.BaseElement {
         // null otherwise.
         /** @return {!Promise<?ArrayBuffer>} */
         .then(creativeParts => {
-          checkStillCurrent(promiseId);
+          checkStillCurrent();
           // Keep a handle to the creative body so that we can render into
           // SafeFrame or NameFrame later, if necessary.  TODO(tdrl): Temporary,
           // while we
@@ -676,7 +676,7 @@ export class AmpA4A extends AMP.BaseElement {
               });
         })
         .then(creative => {
-          checkStillCurrent(promiseId);
+          checkStillCurrent();
           // Need to know if creative was verified as part of render outside
           // viewport but cannot wait on promise.  Sadly, need a state a
           // variable.
@@ -690,7 +690,7 @@ export class AmpA4A extends AMP.BaseElement {
         // as AMP and could be properly parsed for friendly iframe render.
         /** @return {?CreativeMetaDataDef} */
         .then(creativeDecoded => {
-          checkStillCurrent(promiseId);
+          checkStillCurrent();
           // Note: It's critical that #getAmpAdMetadata_ be called
           // on precisely the same creative that was validated
           // via #validateAdResponse_.  See GitHub issue
@@ -887,10 +887,10 @@ export class AmpA4A extends AMP.BaseElement {
     // most comparable with the layout callback for 3p ads.
     this.protectedEmitLifecycleEvent_('preAdThrottle');
     const layoutCallbackStart = this.getNow_();
-    const promiseId = this.promiseId_;
+    const promiseId = this.promiseId;
     // Promise chain will have determined if creative is valid AMP.
     return this.adPromise_.then(creativeMetaData => {
-      if (promiseId != this.promiseId_) {
+      if (promiseId != this.promiseId) {
         throw cancellation();
       }
       const delta = this.getNow_() - layoutCallbackStart;
@@ -914,7 +914,7 @@ export class AmpA4A extends AMP.BaseElement {
       // Must be an AMP creative.
       return this.renderAmpCreative_(creativeMetaData)
           .catch(err => {
-            if (promiseId != this.promiseId_) {
+            if (promiseId != this.promiseId) {
               throw cancellation();
             }
             // Failed to render via AMP creative path so fallback to non-AMP
@@ -946,7 +946,7 @@ export class AmpA4A extends AMP.BaseElement {
       return false;
     }
     // Increment promiseId to cause any pending promise to cancel.
-    this.promiseId_++;
+    this.promiseId++;
     this.protectedEmitLifecycleEvent_('adSlotCleared');
     this.uiHandler.setDisplayState(AdDisplayState.NOT_LAID_OUT);
     if (this.originalSlotSize_) {
@@ -1251,7 +1251,7 @@ export class AmpA4A extends AMP.BaseElement {
         }
       });
     }
-    const promiseId = this.promiseId_;
+    const promiseId = this.promiseId;
     return installFriendlyIframeEmbed(
         this.iframe, this.element, {
           host: this.element,
@@ -1263,7 +1263,7 @@ export class AmpA4A extends AMP.BaseElement {
           installUrlReplacementsForEmbed(this.getAmpDoc(), embedWin,
             new A4AVariableSource(this.getAmpDoc(), embedWin));
         }).then(friendlyIframeEmbed => {
-          if (promiseId != this.promiseId_) {
+          if (promiseId != this.promiseId) {
             throw cancellation();
           }
           this.friendlyIframeEmbed_ = friendlyIframeEmbed;
@@ -1282,7 +1282,7 @@ export class AmpA4A extends AMP.BaseElement {
           getTimingDataAsync(
               friendlyIframeEmbed.win,
               'navigationStart', 'loadEventEnd').then(delta => {
-                if (promiseId != this.promiseId_) {
+                if (promiseId != this.promiseId) {
                   throw cancellation();
                 }
                 this.protectedEmitLifecycleEvent_('friendlyIframeLoaded', {
@@ -1301,7 +1301,7 @@ export class AmpA4A extends AMP.BaseElement {
           // after the initial load.
           return friendlyIframeEmbed.whenIniLoaded();
         }).then(() => {
-          if (promiseId != this.promiseId_) {
+          if (promiseId != this.promiseId) {
             throw cancellation();
           }
           // Capture ini-load ping.
@@ -1380,9 +1380,9 @@ export class AmpA4A extends AMP.BaseElement {
         method == XORIGIN_MODE.NAMEFRAME,
         'Unrecognized A4A cross-domain rendering mode: %s', method);
     this.protectedEmitLifecycleEvent_('renderSafeFrameStart');
-    const promiseId = this.promiseId_;
+    const promiseId = this.promiseId;
     return utf8Decode(creativeBody).then(creative => {
-      if (promiseId != this.promiseId_) {
+      if (promiseId != this.promiseId) {
         throw cancellation();
       }
       let srcPath;

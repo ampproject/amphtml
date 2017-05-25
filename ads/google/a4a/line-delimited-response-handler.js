@@ -33,8 +33,7 @@
  export function fetchLineDelimitedChunks(xhr, input, chunkHandler, opt_init) {
    return xhr.fetch(input, opt_init)
      .then(response => {
-       const reader = response.reader();
-       if (!reader || !xhr.win.TextDecoder) {
+       if (!response.body || !xhr.win.TextDecoder) {
          // TODO(keithwrightbos) - TextDecoder polyfill?
          response.text().then(content =>
            chunkHandleFullResponse(content, chunkHandler));
@@ -42,30 +41,39 @@
          let metaData;
          let snippet = '';
          const chunkCallback = (chunk, done) => {
-           let pos = 0;
            let hasDelimiter;
+           let pos = 0;
            do {
              const delimIndex = chunk.indexOf('\n', pos);
              hasDelimiter = delimIndex != -1;
-             const end = hasDelimiter ? delimIndex : chunk.length;
+             let end = hasDelimiter ? delimIndex : chunk.length;
              snippet += chunk.substr(pos, end - pos);
              pos = hasDelimiter ? delimIndex + 1 : end;
              if (hasDelimiter) {
                if (!metaData) {
                  metaData = safeJsonParse_(snippet);
                } else {
-                 // Have metaData and HTML so we can call chunkHandler and reset.
+                 // Have metaData/HTML so we can call chunkHandler and reset.
                  chunkHandler(
                    unescapeHtml_(snippet),
                    /** @type {!Object<string, *>} */(metaData),
                    done && end == chunk.length);
-                 snippet = '';
                  metaData = undefined;
                }
+               snippet = '';
+             } else if (countTrailingSlashes(chunk, pos - 1) & 1) {
+               // Decrement 'end' to skip the last character of the chunk if it
+               // ends with an odd number of slashes, since that implies that
+               // the last slash is used to escape a character that we haven't
+               // received yet. So we skip the last byte in this iteration and
+               // wait for the next chunk to see what is being escaped.
+               end--;
              }
+             pos = hasDelimiter ? delimIndex + 1 : end;
            } while (hasDelimiter && pos < chunk.length);
          };
-         handleFetchResponseStream_(reader, chunkCallback, new TextDecoder());
+         handleFetchResponseStream_(
+           response.body.getReader(), chunkCallback, new TextDecoder());
        }
        return response;
      });
@@ -100,7 +108,7 @@
   */
  function chunkHandleFullResponse(text, chunkHandler) {
    const lines = text.split('\n');
-   dev().assert(lines.length % 2 == 0);
+   // Note that its expected for an extra return to existing in the format.
    let linesRemaining = lines.length;
    let metaData;
    lines.forEach(line => {
@@ -140,3 +148,17 @@
      return {};
    }
  }
+
+ /**
+  * Counts the number of trailing backslashes in the given html.
+  * @param {string} html The html to be inspected.
+  * @param {number} end The last position of html to be read.
+  * @return {number}
+  */
+ const countTrailingSlashes = (html, end) => {
+   let slashes = 0;
+   while (end >= 0 && html[end--] == '\\') {
+     slashes++;
+   }
+   return slashes;
+ };

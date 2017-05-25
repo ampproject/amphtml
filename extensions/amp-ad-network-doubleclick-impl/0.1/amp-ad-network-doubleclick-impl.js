@@ -31,9 +31,13 @@ import {
 import {
   extractGoogleAdCreativeAndSignature,
   googleAdUrl,
+  truncAndTimeUrl,
+  googleBlockParameters,
+  googlePageParameters,
   isGoogleAdsA4AValidEnvironment,
   AmpAnalyticsConfigDef,
   extractAmpAnalyticsConfig,
+  groupAmpAdsByType,
 } from '../../../ads/google/a4a/utils';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {
@@ -47,12 +51,13 @@ import {stringHash32} from '../../../src/crypto';
 import {removeElement} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {extensionsFor, resourcesForDoc, xhrFor} from '../../../src/services';
+import {extensionsFor, xhrFor} from '../../../src/services';
 import {isExperimentOn} from '../../../src/experiments';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {insertAnalyticsElement} from '../../../src/analytics';
 import {setStyles} from '../../../src/style';
 import {utf8Encode} from '../../../src/utils/bytes';
+import {cancellation, isCancellation} from '../../../src/error';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -60,6 +65,126 @@ const TAG = 'amp-ad-network-doubleclick-impl';
 /** @const {string} */
 const DOUBLECLICK_BASE_URL =
     'https://securepubads.g.doubleclick.net/gampad/ads';
+
+/** @private @const {!Object<string,string>} */
+const PAGE_LEVEL_PARAMS_ = {
+  'gdfp_req': '1',
+  'sfv': 'A',
+};
+
+/** @private @const {string} */
+const TFCD_ = 'tagForChildDirectedTreatment';
+
+/** @private {?Promise} */
+let SraRequests = null;
+
+/**
+ * @private @const
+ * {!Array<!function(AmpAdNetworkDoubleclickImpl>):?Object<string,string>}
+ */
+const BLOCK_SRA_COMBINERS_ = [
+  instances => {
+    const uniqueIuNames = [];
+    const prevIusEncoded = [];
+    instances.forEach(instance => {
+      const iu = dev().assert(instance.element.getAttribute('data-slot'));
+      const componentNames = (iu || '').split('/');
+      let encodedName = '';
+      for (let i = 0; i < componentNames.length; i++) {
+        if (i > 0) {
+          encodedName += '/';
+        }
+        if (componentNames[i] == '') {
+          continue;
+        }
+        let nameFound = false;
+        for (let j = 0; j < uniqueIuNames.length; j++) {
+          if (componentNames[i] == uniqueIuNames[j]) {
+            nameFound = true;
+            break;
+          }
+        }
+        if (!nameFound) {
+          uniqueIuNames.push(componentNames[i]);
+        }
+        for (let j = 0; j < uniqueIuNames.length; j++) {
+          // find index of component name.
+          if (componentNames[i] == uniqueIuNames[j]) {
+            encodedName += j;
+            break;
+          }
+        }
+      }
+      prevIusEncoded.push(encodedName);
+    });
+    return {
+      'iu_parts': uniqueIuNames.join(),
+      'enc_prev_ius': prevIusEncoded.join(),
+    };
+  },
+  instances => {
+    // Although declared at a block-level, this is actually page level so
+    // return true if ANY indicate cookie opt out.
+    for (let i = 0; i < instances.length; i++) {
+      if (instances.jsonTargeting_ &&
+          instances.jsonTargeting_['cookieOptOut']) {
+        return {'co': '1'};
+      }
+    }
+    return null;
+  },
+  instances => {
+    return {'adks': instances.map(instance => instance.adKey_).join()};
+  },
+  instances => {
+    return {'prev_iu_szs': instances.map(instance =>
+      `${instance.size_.width}x${instance.size_.height}`).join()};
+  },
+  instances => {
+    // Although declared at a block-level, this is actually page level so
+    // return true if ANY indicate TFCD.
+    for (let i = 0; i < instances.length; i++) {
+      const instance = instances[i];
+      if (instance.jsonTargeting_ && instance.jsonTargeting_[TFCD_]) {
+        return {'tfcd': instance.jsonTargeting_[TFCD_]};
+      }
+    }
+    return null;
+  },
+  instances => {
+    // Although declared at a block-level, this is actually page level so
+    // return true if ANY indicate TFCD.
+    for (let i = 0; i < instances.length; i++) {
+      const instance = instances[i];
+      if (isInManualExperiment(instance.element)) {
+        return {'adtest': 'on'};
+      }
+    }
+    return null;
+  },
+  instances => {
+    const scps = [];
+    instances.forEach(instance => {
+      if (!instance.jsonTargeting_) {
+        return;
+      }
+      scps.push(serializeTargeting(
+          instance.jsonTargeting_['targeting'] || null,
+          instance.jsonTargeting_['categoryExclusions'] || null));
+    });
+    return scps.length ? {'prev_scp': scps.join('|')} : null;
+  },
+  instances => {
+    const eids = {};
+    instances.forEach(instance => {
+      const currEids = instance.element.getAttribute('data-experiment-id');
+      if (currEids) {
+        currEids.split(',').forEach(eid => eids[eid] = 1);
+      }
+    });
+    return Object.keys(eids).length ? {'eid': Object.keys(eids).join()} : null;
+  },
+];
 
 export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
@@ -94,17 +219,27 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {?Element} */
     this.ampAnalyticsElement_ = null;
 
+    /** @private {!Object<string,*>}*/
+    this.jsonTargeting_ = null;
+
+    /** @private {number} */
+    this.adKey_ = 0;
+
     // TODO(keithwrightbos) - how can pub enable?
     /** @private @const {boolean} */
-    this.useSra_ = getMode().localDev && /[?&]force_sra=true[&|$])/.test(
+    this.useSra_ = getMode().localDev && /(\?|&)force_sra=true(&|$)/.test(
         this.win.location.search);
 
-    /** @private {?function(string)} */
-    this.adUrlResolver_ = null;
+    /** @private {?function(?../../../src/service/xhr-impl.FetchResponse)} */
+    this.sraResponseResolver_ = null;
 
-    /** @private {!Promise<string>} */
-    this.adUrlPromise_ = new Promise(resolver => {
-      this.adUrlResolver_ = resolver;
+    /** @private {!function<?Error>} */
+    this.sraResponseRejecter_ = null;
+
+    /** @private {!Promise<?../../../src/service/xhr-impl.FetchResponse>} */
+    this.sraResponsePromise_ = new Promise((resolver, rejecter) => {
+      this.sraResponseResolver_ = resolver;
+      this.sraResponseRejecter_ = rejecter;
     });
   }
 
@@ -117,22 +252,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (!valid) {
       // Resolve ad url promise to ensure invalid elements do not delay SRA
       // request.
-      this.adUrlResolver_('');
+      this.blockLevelParamsResolver_(null);
     }
     return valid;
   }
 
-  /** @override */
-  getAdUrl() {
-    if (this.iframe) {
-      dev().warn(TAG, `Frame already exists, sra: ${this.useSra_}`);
-      this.adUrlResolver_(url);
-      return '';
-    }
-    // TODO: Check for required and allowed parameters. Probably use
-    // validateData, from 3p/3p/js, after noving it someplace common.
-    const startTime = Date.now();
-    const global = this.win;
+  /**
+   * Constructs block-level url parameters with side effect of setting
+   * size_, jsonTargeting_, and adKey_ fields.
+   * @return {!Object<string,string|boolean|number>}
+   */
+  getBlockParameters_() {
     const width = Number(this.element.getAttribute('width'));
     const height = Number(this.element.getAttribute('height'));
     // If dc-use-attr-for-format experiment is on, we want to make our attribute
@@ -146,10 +276,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         : this.getIntersectionElementLayoutBox();
     let sizeStr = `${this.size_.width}x${this.size_.height}`;
     const rawJson = this.element.getAttribute('json');
-    const jsonParameters = rawJson ? JSON.parse(rawJson) : {};
-    const tfcd = jsonParameters['tagForChildDirectedTreatment'];
-    const adTestOn = isInManualExperiment(this.element);
-
+    this.jsonTargeting_ = rawJson ? JSON.parse(rawJson) : {};
+    const tfcd = this.jsonTargeting_[TFCD_];
     const multiSizeDataStr = this.element.getAttribute('data-multi-size');
     if (multiSizeDataStr) {
       const multiSizeValidation = this.element
@@ -166,29 +294,36 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           .map(dimension => dimension.join('x'))
           .join('|');
     }
+    this.adKey_ = this.generateAdKey_(sizeStr);
+    return Object.assign({
+      'iu': this.element.getAttribute('data-slot'),
+      'co': this.jsonTargeting_['cookieOptOut'] ? '1' : null,
+      'adk': this.adKey_,
+      'sz': sizeStr,
+      'tfcd': tfcd == undefined ? null : tfcd,
+      'adtest': isInManualExperiment(this.element) ? 'on' : null,
+      'scp': serializeTargeting(
+          this.jsonTargeting_['targeting'] || null,
+          this.jsonTargeting_['categoryExclusions'] || null),
+    }, googleBlockParameters(this));;
+  }
 
-    const url = googleAdUrl(this, DOUBLECLICK_BASE_URL, startTime, [
-      {name: 'iu', value: this.element.getAttribute('data-slot')},
-      {name: 'co', value: jsonParameters['cookieOptOut'] ? '1' : null},
-      {name: 'adk', value: this.adKey_(sizeStr)},
-      {name: 'gdfp_req', value: '1'},
-      {name: 'impl', value: 'ifr'},
-      {name: 'sfv', value: 'A'},
-      {name: 'sz', value: sizeStr},
-      {name: 'tfcd', value: tfcd == undefined ? null : tfcd},
-      {name: 'u_sd', value: global.devicePixelRatio},
-      {name: 'adtest', value: adTestOn ? 'on' : null},
-      {name: 'asnt', value: this.sentinel},
-    ], [
-      {
-        name: 'scp',
-        value: serializeTargeting(
-            jsonParameters['targeting'] || null,
-            jsonParameters['categoryExclusions'] || null),
-      },
-    ]);
-    this.adUrlResolver_(url);
-    return url;
+  /** @override */
+  getAdUrl() {
+    if (this.iframe) {
+      dev().warn(TAG, `Frame already exists, sra: ${this.useSra_}`);
+      this.adUrlResolver_('');
+      return '';
+    }
+    // TODO: SRA unnecessarily builds ad url?
+
+    // TODO: Check for required and allowed parameters. Probably use
+    // validateData, from 3p/3p/js, after noving it someplace common.
+    const startTime = Date.now();
+    return getPageLevelParameters_(this.win, this.getAmpDoc(), startTime)
+      .then(pageLevelParameters =>
+        googleAdUrl(this, DOUBLECLICK_BASE_URL, startTime,
+          Object.assign(this.getBlockParameters_(), pageLevelParameters)));
   }
 
   /** @override */
@@ -237,6 +372,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.ampAnalyticsElement_ = null;
     }
     this.ampAnalyticsConfig_ = null;
+    this.jsonTargeting_ = null;
+    // TODO: handle SRA!
   }
 
   /**
@@ -268,7 +405,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @return {string} The ad unit hash key string.
    * @private
    */
-  adKey_(size) {
+  generateAdKey_(size) {
     const element = this.element;
     const domFingerprint = domFingerprintPlain(element);
     const slot = element.getAttribute('data-slot') || '';
@@ -301,101 +438,111 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (!this.useSra_) {
       return super.sendXhrRequest(adUrl);
     }
-    // TODO(keithwrightbos) - additional CSI ping including SRA delay time
-    // and number of slots
-    return this.waitForSraResponse_().then(adUrlToSlotResponsePromise => {
-      dev().assert(adUrlToSlotResponsePromise[adUrl]);
-      return adUrlToSlotResponsePromise[adUrl].then(response => {
-        const {creative, headers} = response;
-        // Force safeframe rendering method.
-        headers[RENDERING_TYPE_HEADER] = XORIGIN_MODE.SAFEFRAME;
-        // Need to convert to FetchResponse object?
-        const fetchResponseHeaders =
-          /** @type {?../../../src/service/xhr-impl.FetchResponseHeaders} */({
-            get: name => headers[name],
-            has: name => !!headers[name],
-          });
-        return /** @type {?../../../src/service/xhr-impl.FetchResponse} */({
-          headers: fetchResponseHeaders,
-          arrayBuffer: utf8Encode(creative),
-        });
-      });
-    });
+    // Wait for SRA request which will ncall response promise when this block's
+    // response has been returned.
+    this.initiateSraRequests_();
+    // Null response indicates single slot should execute using non-SRA method.
+    return this.sraResponsePromise_.then(
+      response => response || super.sendXhrRequest(adUrl));
   }
 
   /**
    * Executes SRA request via the following steps:
-   * - wait for each slot's ad url to be constructed
-   * - group by network ID
-   * - construct SRA request for each network ID
-   * - execute SRA request for each network ID using line delimited streamed
-   *    response format
-   * - construct ad URL to slot response object (metadata and string)
-   * @return {Promise<!Object<string,!Promise<!{creative, headers}>>>}
+   * - create only one executor per page
+   * - get all doubleclick amp-ad instances on the page
+   * - group by networkID allowing for separate SRA requests
+   * - for each grouping, construct SRA request
+   * - handle chunks for streaming response for each block
    * @private
    */
-  waitForSraResponse_() {
-    const type = this.element.getAttribute('type');
-    // TODO(keithwrightbos) - race conditions?! what if slot is cancelled
-    // in the middle of SRA callback?  How do we clean this up?
-    // What if creative was AMP and therefore not destroyed in unlayoutCallback?
-    // Ensure that network failure does not cause Frame GET.
-    return (this.win['sra_ad_urls_promise'] = this.win['sra_ad_urls_promise'] ||
-      // TODO(keithwrightbos) - possible optimization would be to prescan
-      // iu values and group in advance saving the need to construct urls.
-      resourcesForDoc(this.element).getMeasuredResources(this.win,
-        r => r.element.tagName == 'AMP-AD' &&
-          r.element.getAttribute('type') == type)
-        .then(resources => Promise.all(
-          resources.map(r => r.element.getImpl().then(
-            // Note that ad url promise could be null if isValidElement returns
-            // false.
-            instance => instance.adUrlPromise_)))
-        .then(adUrls => {
-          // Group ad urls by inventory url, network ID.
-          const networkIdToUrls = {};
-          adUrls.forEach(adUrl => {
-            // Ignore empty ad URL as this is indicating invalid element.
-            if (!adUrl) {
+  initiateSraRequests_() {
+    if (SraRequests) {
+      return;
+    }
+    // Use incrementing of the first slot's promiseId as indication of
+    // unlayoutCallback execution.  Assume that if called for one slot, it will
+    // be called for all and we should cancel SRA execution.
+    const promiseId = this.promiseId;
+    const checkStillCurrent = () => {
+      if (promiseId != this.promiseId) {
+        throw cancellation();
+      }
+      return true;
+    };
+    SraRequests = groupAmpAdsByType(
+        this.win, this.element.getAttribute('type'), getNetworkId_)
+      .then(groupIdToBlocksAry => {
+        checkStillCurrent();
+        Object.keys(groupIdToBlocksAry).forEach(networkId => {
+          const blocks = dev().assert(groupIdToBlocksAry[networkId]);
+          // TODO: filter blocks with SRA disabled?
+          return Promise.all(blocks).then(instances => {
+            // Determine if more than one block for this element, if not do not
+            // set sra request promise which results in sending as
+            // non-SRA request (benefit is it allows direct cache method).
+            dev().assert(instances.length);
+            if (instances.length == 1) {
+              dev().info(TAG, `single block in network ${networkId}`);
+              instances[0].sraResponseResolver_(null);
               return;
             }
-            let networkId = /&iu=%2F(\d+)/.exec(adUrl);
-            // In case of inability to get networkId, store as 0.
-            networkId = networkId && networkId.length ?
-              Number(networkId[0]) : 0;
-            (networkIdToUrls[networkId] || (networkIdToUrls[networkId] = []))
-              .push(adUrl);
-          });
-          // Send XHR request for each SRA url.
-          const adUrlToSlotResponsePromise = {};
-          Object.keys(networkIdToUrls).forEach(networkId => {
+            // Construct and send SRA request.
             // Chunk hanlder called with metadata and creative for each slot
             // in order of URLs given.  Construct promise for each slot
             // such that its resolver will be called.
-            const sraRequestAdUrlResolver = [];
-            networkIdToUrls[networkId].forEach(currUrl => {
-              adUrlToSlotResponsePromise[currUrl] = new Promise(resolver => {
-                sraRequestAdUrlResolver.push(resolver);
-              });
-            });
+            const sraRequestAdUrlResolvers =
+              instances.map(instance => instance.sraResponseResolver_);
             // TODO(keithwrightbos) - how do we handle per slot 204 response?
-            fetchLineDelimitedChunks(
-              xhrFor(this.win),
-              constructSRARequest_(networkIdToUrls[networkId]),
-              (creative, metadata) => {
-                sraRequestAdUrlResolver.shift()(creative, metadata);
-              },
-              {
-                mode: 'cors',
-                method: 'GET',
-                credentials: 'include',
-              }).catch(err => {
-                user().error(TAG, 'SRA request failure', err);
-                // TODO(keithwrightbos): collapse all slots on failure?
-              });
+            return constructSRARequest_(this.win, this.getAmpDoc(), instances)
+              .then(sraUrl => checkStillCurrent() && fetchLineDelimitedChunks(
+                xhrFor(this.win),
+                sraUrl,
+                (creative, headers) => {
+                  checkStillCurrent();
+                  // Force safeframe rendering method.
+                  headers[RENDERING_TYPE_HEADER] = XORIGIN_MODE.SAFEFRAME;
+                  // Need to convert to FetchResponse object?
+                  const fetchResponseHeaders =
+                    /** @type {?../../../src/service/xhr-impl.FetchResponseHeaders} */
+                    ({
+                      get: name => headers[name],
+                      has: name => !!headers[name],
+                    });
+                  const fetchResponse =
+                    /** @type {?../../../src/service/xhr-impl.FetchResponse} */
+                    ({
+                      headers: fetchResponseHeaders,
+                      arrayBuffer: () => utf8Encode(creative),
+                    });
+                  sraRequestAdUrlResolvers.shift()(fetchResponse);
+                },
+                {
+                  mode: 'cors',
+                  method: 'GET',
+                  credentials: 'include',
+                }))
+                .catch(error => {
+                  const canceled = isCancellation(error);
+                  if (!canceled) {
+                    user().error(TAG, 'SRA request failure', error, instances);
+                  }
+                  // Collapse all slots on failure so long as they are not
+                  // cancellation.
+                  instances.forEach(instance => {
+                    // Reset ad url to ensure layoutCallback does not fallback
+                    // to frame get which would lose SRA guarantees.
+                    // TODO(keithwrightbos): publisher should indicate if
+                    // explicit is required!
+                    instance.adUrl = null;
+                    if (!canceled) {
+                      instance.forceCollapse();
+                    }
+                    instance.sraResponseRejecter_(error);
+                  });
+                });
           });
-          return adUrlToSlotResponsePromise;
-        })));
+        });
+      });
   }
 }
 
@@ -403,13 +550,53 @@ AMP.registerElement(
     'amp-ad-network-doubleclick-impl', AmpAdNetworkDoubleclickImpl);
 
 /**
- * @param {!Array<string>} adUrls for each block to be included.
- * @return {string} SRA request URL
+ * @param {!Element} element
+ * @return {string} networkId from data-ad-slot attribute.
  * @private
  */
-function constructSRARequest_(adUrls) {
-  return adUrls[0];
+function getNetworkId_(element) {
+  const networkId = /^\/(\d+)/.exec(
+    dev().assertString(element.getAttribute('data-slot')));
+  // TODO: guarantee data-ad-slot format as part of isValidElement?
+  return networkId ? networkId[1] : '';
 }
+
+
+/**
+ * @param {!Window} win
+ * @param {!Document} doc
+ * @param {!Array<!AmpAdNetworkDoubleclickImpl>} instances
+ * @return {!Promise<string>} SRA request URL
+ * @private
+ */
+function constructSRARequest_(win, doc, instances) {
+  const startTime = Date.now();
+  return getPageLevelParameters_(win, doc, startTime, true)
+    .then(pageLevelParameters => {
+      const parameters = {};
+      BLOCK_SRA_COMBINERS_.forEach(
+        combiner => Object.assign(parameters, combiner(instances)));
+      return truncAndTimeUrl(DOUBLECLICK_BASE_URL,
+        Object.assign(parameters, pageLevelParameters), startTime);
+    });
+}
+
+/**
+ * @param {!Window} win
+ * @param {!Document} doc
+ * @param {number} startTime
+ * @param {boolean=} isSra
+ * @return {!Promise<!Object<string,string|number|boolean>>}
+ */
+function getPageLevelParameters_(win, doc, startTime, isSra) {
+  return googlePageParameters(win, doc, startTime, 'ldjh')
+    .then(pageLevelParameters => {
+      const parameters = Object.assign({}, PAGE_LEVEL_PARAMS_);
+      parameters['impl'] = isSra ? 'fifs' : 'ifr';
+      return Object.assign(parameters, pageLevelParameters);
+    });
+}
+
 /**
  * @param {?Object<string, (!Array<string>|string)>} targeting
  * @param {?(!Array<string>|string)} categoryExclusions
