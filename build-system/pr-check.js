@@ -308,19 +308,16 @@ function main(argv) {
             'It appears that your PR contains a mix of flag-config files ' +
             '(*config.json) and non-flag-config files. ' +
             'Please make your changes in separate pull requests.');
-        // Print details if there appear to be more files than the average PR.
-        if (files.length > 5) {
-          console.log(fileLogPrefix, util.colors.yellow('NOTE:'),
-              'If you see a long list of unrelated files below, it is likely ' +
-              'because your branch is significantly out of sync. ' +
-              'A full sync to upstream/master should clear this error. ' +
-              'You can do so by running these commands:');
-          console.log(util.colors.cyan('\t git fetch upstream master'));
-          console.log(util.colors.cyan('\t git rebase upstream/master'));
-          console.log(util.colors.cyan('\t git push origin --force'));
-          console.log('\nFull list of files in this PR:');
-          files.forEach((file) => { console.log('\t' + file); });
-        }
+        console.log(fileLogPrefix, util.colors.yellow('NOTE:'),
+            'If you see a long list of unrelated files below, it is likely ' +
+            'because your branch is significantly out of sync. ' +
+            'A full sync to upstream/master should clear this error. ' +
+            'You can do so by running these commands:');
+        console.log(util.colors.cyan('\t git fetch upstream master'));
+        console.log(util.colors.cyan('\t git rebase upstream/master'));
+        console.log(util.colors.cyan('\t git push origin --force'));
+        console.log('\nFull list of files in this PR:');
+        files.forEach((file) => { console.log('\t' + file); });
         stopTimer('pr-check.js', startTime);
         process.exit(1);
       }
