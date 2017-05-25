@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,20 @@
  */
 
 import {dev} from '../../../src/log';
-import {IntersectionObserverPolyfill} from '../../../src/intersection-observer-polyfill';
+import {IntersectionObserverPolyfill} from '../../../src/intersection-observer-polyfill'; // eslint-disable-line max-len
 import {timerFor} from '../../../src/services';
 
 const NAME_IN_WINDOW = 'AMP_A4A_REFRESHER';
 
 export const REFRESH_REFERENCE_ATTRIBUTE = 'data-amp-a4a-refresh-id';
 
-/** @typedef {{
+/**
+ * @typedef {{
  *   minOnScreenPixelRatioThreshold: number,
  *   minOnScreenTimeThreshold: number,
  *   refreshInterval: number,
- * }} */
+ * }}
+ */
 export let RefreshConfig;
 
 /** @type {!RefreshConfig} */
@@ -75,7 +77,7 @@ const RefreshLifecycleState = {
    * The refresh interval has elapsed; the element is in the process of being
    * refreshed.
    */
-  REFRESHED: 'refreshed',
+  REFRESHED: 3,
 };
 
 /**
@@ -85,14 +87,14 @@ const RefreshLifecycleState = {
  * @param {!Window} win
  * @return {!RefreshManager}
  */
-export function getRefreshManagerFor(win) {
+export function refreshManagerFor(win) {
   return win[NAME_IN_WINDOW] ||
       (win[NAME_IN_WINDOW] = new RefreshManager(win));
 }
 
 /** Visible for testing */
 export function resetRefreshManagerFor(win) {
-  getRefreshManagerFor(win).resetManager();
+  refreshManagerFor(win).resetManager();
   win[NAME_IN_WINDOW] = null;
 }
 
@@ -115,7 +117,7 @@ export class RefreshManager {
      * share the same minOnScreenPixelRatioThreshold will be monitored by the
      * same IO.
      *
-     * @private {!Object<string, (IntersectionObserver|!IntersectionObserverPolyfill)>}
+     * @private {!Object<string, (!IntersectionObserver|!IntersectionObserverPolyfill)>}
      */
     this.intersectionObservers_ = {};
 
@@ -124,7 +126,7 @@ export class RefreshManager {
      * monitored, indexed by a unique ID stored as data-amp-a4a-refresh-id on
      * the element.
      *
-     * @private {!Object<string, RegisteredElementWrapper>}
+     * @private {!Object<string, !RegisteredElementWrapper>}
      */
     this.registeredElementWrappers_ = {};
 
@@ -141,17 +143,18 @@ export class RefreshManager {
    * Returns an IntersectionObserver configured to the given threshold, creating
    * one if one does not yet exist.
    *
-   * @param {string|number} threshold
-   * @return {(IntersectionObserver|!IntersectionObserverPolyfill)}
+   * @param {(string|number)} threshold
+   * @return {(!IntersectionObserver|!IntersectionObserverPolyfill)}
    */
   getIntersectionObserverWithThreshold_(threshold) {
     threshold = String(threshold);
-    this.intersectionObservers_[threshold] =
-        this.intersectionObservers_[threshold] ||
-        'IntersectionObserver' in this.win_
-            ? new this.win_['IntersectionObserver'](
-                this.ioCallback_, {threshold})
-            : new IntersectionObserverPolyfill(this.ioCallback_, {threshold});
+    if (!this.intersectionObservers_[threshold]) {
+      this.intersectionObservers_[threshold] =
+          'IntersectionObserver' in this.win_
+          ? new this.win_['IntersectionObserver'](
+              this.ioCallback_, {threshold})
+          : new IntersectionObserverPolyfill(this.ioCallback_, {threshold});
+    }
     return this.intersectionObservers_[threshold];
   }
 
@@ -159,10 +162,12 @@ export class RefreshManager {
    * This function will be invoked directly by the IntersectionObserver
    * implementation. It will implement the core logic of the refresh lifecycle,
    * including the transitions of the DFA.
+   *
+   * @param {!Array<IntersectionObserverEntry>} entries
    */
   ioCallback_(entries) {
-    const refreshManager = getRefreshManagerFor(window);
-    for (const idx in entries) {
+    const refreshManager = refreshManagerFor(window);
+    for (let idx = 0; idx < entries.length; idx++) {
       const entry = entries[idx];
       const wrapper = refreshManager.getElementWrapper_(entry.target);
       console.log('### ioCallback');
@@ -212,9 +217,9 @@ export class RefreshManager {
    * and the refresh interval has elapsed.
    *
    * @param {!Element} element The element to be registered.
-   * @param {!function()} callback The function to be invoked when the element
-   *     is refreshed.
-   * @param {?RefreshConfig} config Specifies the viewability conditions and
+   * @param {function(RefreshManager)} callback The function to be invoked when
+   *     the element is refreshed.
+   * @param {RefreshConfig=} config Specifies the viewability conditions and
    *     the refresh interval.
    */
   registerElement(element, callback, config = DEFAULT_CONFIG) {
@@ -247,6 +252,7 @@ export class RefreshManager {
 
   /**
    * @param {!Element} element The element whose wrapper is to be returned.
+   * @return {!RegisteredElementWrapper}
    */
   getElementWrapper_(element) {
     const id = element.getAttribute(REFRESH_REFERENCE_ATTRIBUTE);
@@ -314,8 +320,8 @@ class RegisteredElementWrapper {
 
   /**
    * @param {!Element} element The element to be wrapped.
-   * @param {!function()} callback The function to be invoked when the element
-   *     is ready to be refreshed.
+   * @param {function(RefreshManager)} callback The function to be invoked when
+   *     the element is ready to be refreshed.
    * @param {number} minOnScreenPixelRatioThreshold The ratio of pixels of the
    *     element which must be on screen for part of the viewability condition
    *     to be satisfied.
@@ -342,7 +348,7 @@ class RegisteredElementWrapper {
     /**
      * The function that will be invoked when the refreshInterval has expired.
      *
-     * @private @const {!function()}
+     * @private @const {function(RefreshManager)}
      */
     this.callback_ = callback;
 
@@ -397,7 +403,7 @@ class RegisteredElementWrapper {
   /**
    * Invokes the callback function.
    *
-   * @param {RefreshManager} refreshManager The calling refreshManager, passed
+   * @param {!RefreshManager} refreshManager The calling refreshManager, passed
    *   as a courtesy to the callback to make resetting the refresh cycle more
    *   convenient.
    */

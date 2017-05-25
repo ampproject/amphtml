@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,11 @@
  */
 
 import {
-  getRefreshManagerFor,
+  refreshManagerFor,
   resetRefreshManagerFor,
-  RefreshManager,
   REFRESH_REFERENCE_ATTRIBUTE,
 } from '../refresh-manager';
-import * as sinon from 'sinon';
+import * as sinon from 'sinon'; // eslint-disable-line no-unused-vars
 
 function getNumElementsRegistered(refreshManager) {
   return Object.keys(refreshManager.registeredElementWrappers_).length;
@@ -40,7 +39,7 @@ describe('refresh-manager', () => {
   const noop = () => {};
 
   beforeEach(() => {
-    refreshManager = getRefreshManagerFor(window);
+    refreshManager = refreshManagerFor(window);
     testElement = getTestElement();
   });
 

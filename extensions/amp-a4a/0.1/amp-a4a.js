@@ -62,7 +62,8 @@ import {A4AVariableSource} from './a4a-variable-source';
 // TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {getContextMetadata} from '../../../src/iframe-attributes';
-import {getRefreshManagerFor} from './refresh-manager';
+import {isInExperiment} from '../../../ads/google/a4a/traffic-experiments';
+import {refreshManagerFor} from './refresh-manager';
 
 /** @type {string} */
 const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
@@ -337,8 +338,8 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {string} */
     this.safeframeVersion_ = DEFAULT_SAFEFRAME_VERSION;
 
-    /** @private @const {RefreshManager}  */
-    this.refreshManager_ = getRefreshManagerFor(this.win);
+    /** @private @const {!./refresh-manager.RefreshManager}  */
+    this.refreshManager_ = refreshManagerFor(this.win);
 
     this.refreshManager_.registerElement(this.element, refresher => {
       console.log('Eureka!');
@@ -360,7 +361,6 @@ export class AmpA4A extends AMP.BaseElement {
         timerFor(this.win).delay(() => {
           this.layoutCallback().then(() => {
             this.isRefreshing_ = false;
-            //this.uiHandler.setDisplayState(AdDisplayState.LOADED_RENDER_START);
             this.togglePlaceholder(false);
             // Restart refresh cycle.
             refresher.resetElement(this.element);
@@ -1048,11 +1048,7 @@ export class AmpA4A extends AMP.BaseElement {
     this.isVerifiedAmpCreative_ = false;
     this.fromResumeCallback = false;
     this.experimentalNonAmpCreativeRenderMethod_ =
-<<<<<<< HEAD
         Services.platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
-    if (this.xOriginIframeHandler_) {
-=======
-        platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
     return true;
   }
 
@@ -1061,22 +1057,23 @@ export class AmpA4A extends AMP.BaseElement {
    * This function will no-op if this ad slot is currently in the process of
    * being refreshed.
    *
-   * @param {boolean=} opt_force Forces the removal of the frame, even if
+   * @param {boolean=} force Forces the removal of the frame, even if
    *   this.isRefreshing_ is true.
    */
-  destroyFrame_(opt_force) {
-    const proceed = opt_force || !this.isRefreshing_;
-    if (this.iframe && this.iframe.parentElement && proceed) {
+  destroyFrame_(force = false) {
+    if (!force && this.isRefreshing_) {
+      return;
+    }
+    if (this.iframe && this.iframe.parentElement) {
       this.iframe.parentElement.removeChild(this.iframe);
       this.iframe = null;
     }
-    if (this.xOriginIframeHandler_ && proceed) {
->>>>>>> Added refresh logic to amp-a4a.
+    if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.freeXOriginIframe();
       this.xOriginIframeHandler_ = null;
     }
     // Allow embed to release its resources.
-    if (this.friendlyIframeEmbed_ && proceed) {
+    if (this.friendlyIframeEmbed_) {
       this.friendlyIframeEmbed_.destroy();
       this.friendlyIframeEmbed_ = null;
     }
