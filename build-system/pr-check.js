@@ -305,14 +305,14 @@ function main(argv) {
     files.forEach((file) => {
       if (!isFlagConfig(file)) {
         console.log(fileLogPrefix, util.colors.red('ERROR:'),
-            'It appears that your PR contains a mix of flag-config files ' +
-            '(*config.json) and non-flag-config files. ' +
-            'Please make your changes in separate pull requests.');
+            'PRs may not include *config.json files and non-flag-config ' +
+            'files. Please make the changes in separate PRs.');
         console.log(fileLogPrefix, util.colors.yellow('NOTE:'),
             'If you see a long list of unrelated files below, it is likely ' +
-            'because your branch is significantly out of sync. ' +
-            'A full sync to upstream/master should clear this error. ' +
-            'You can do so by running these commands:');
+            'that your private branch is significantly out of sync.');
+        console.log(fileLogPrefix,
+            'A sync to upstream/master and a push to origin should clear' +
+            ' this error. If a normal push doesn\'t work, try a force push:');
         console.log(util.colors.cyan('\t git fetch upstream master'));
         console.log(util.colors.cyan('\t git rebase upstream/master'));
         console.log(util.colors.cyan('\t git push origin --force'));
