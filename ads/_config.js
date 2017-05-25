@@ -366,6 +366,7 @@ export const adConfig = {
       'https://js-sec.indexww.com/apl/amp.js',
     ],
     preconnect: 'https://as-sec.casalemedia.com',
+    renderStartImplemented: true,
   },
 
   kargo: {},
