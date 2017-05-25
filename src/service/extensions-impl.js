@@ -410,6 +410,12 @@ export class Extensions {
         // becomes necessary. This will require refactoring of extension
         // loader that can be resolved via the parent ampdoc.
 
+        // TODO(choumx): Similar to `adoptServicesForEmbed`, should there be
+        // a map of extension ID -> service? E.g. "cid" -> "amp-analytics".
+        if (extensionId == 'amp-bind') {
+          adoptServiceForEmbed(childWin, 'bind');
+        }
+
         // Adopt the custom element.
         const elementDef = extension.elements[extensionId];
         if (elementDef && elementDef.css) {
@@ -420,12 +426,15 @@ export class Extensions {
                 /* completeCallback */ resolve,
                 /* isRuntime */ false,
                 extensionId);
-          });
+          }).then(() => extension); // Forward `extension` to chained Promise.
         }
-      }).then(() => {
+        return extension;
+      }).then(extension => {
         // Notice that stubbing happens much sooner above
         // (see stubElementInChildWindow).
-        upgradeElementInChildWindow(topWin, childWin, extensionId);
+        Object.keys(extension.elements).forEach(element => {
+          upgradeElementInChildWindow(topWin, childWin, element);
+        });
       });
       promises.push(promise);
     });
