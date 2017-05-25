@@ -226,15 +226,23 @@ export function upgradeElementInChildWindow(parentWin, childWin, name) {
 
 /**
  * Applies layout to the element. Visible for testing only.
+ * 
+ * \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  / _____|
+ *  \   \/    \/   / /  ^  \    |  |_)  |    |   \|  | |  | |   \|  | |  |  __
+ *   \            / /  /_\  \   |      /     |  . `  | |  | |  . `  | |  | |_ |
+ *    \    /\    / /  _____  \  |  |\  \----.|  |\   | |  | |  |\   | |  |__| |
+ *     \__/  \__/ /__/     \__\ | _| `._____||__| \__| |__| |__| \__|  \______|
  *
- * WARNING: The equivalent of this method is used for server-side
- * rendering (SSR) and any changes made to it must be made in coordination
- * with caches that implement SSR. For more info on SSR see bit.ly/amp-ssr.
+ * The equivalent of this method is used for server-side rendering (SSR) and
+ * any changes made to it must be made in coordination with caches that
+ * implement SSR. For more information on SSR see bit.ly/amp-ssr.
  *
  * @param {!Element} element
  * @return {!Layout}
  */
 export function applyLayout_(element) {
+    /*
+    
   // Check if the layout has already been done by the server.
   const completedLayoutAttr = element.getAttribute('i-amphtml-layout');
   if (completedLayoutAttr) {
