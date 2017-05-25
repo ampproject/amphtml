@@ -285,19 +285,21 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
 
     it('should find an AMP element for AMP search', () => {
       child.classList.add('i-amphtml-element');
-      addTestInstance(root.getAmpElement(body, '#child'), child);
+      return root.getAmpElement(body, '#child').then(element => {
+        expect(element).to.equal(child);
+      });
     });
 
     it('should allow not-found element for AMP search', () => {
-      addTestInstance(root.getAmpElement(body, '#unknown'),
-          'Element "#unknown" not found');
+      return root.getAmpElement(body, '#unknown').catch(error => {
+        expect(error).to.match(/Element "#unknown" not found/);
+      });
     });
 
     it('should fail if the found element is not AMP for AMP search', () => {
       child.classList.remove('i-amphtml-element');
       return root.getAmpElement(body, '#child').catch(error => {
         expect(error).to.match(/required to be an AMP element/);
-
       });
     });
   });
