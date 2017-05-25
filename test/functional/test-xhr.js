@@ -20,7 +20,7 @@ import {
   xhrServiceForTesting,
   fetchPolyfill,
   FetchError,
-  FetchResponse,
+  FetchPolyfillResponse,
   assertSuccess,
 } from '../../src/service/xhr-impl';
 import {getCookie} from '../../src/cookies';
@@ -272,7 +272,7 @@ describe('XHR', function() {
             return new Response(body, init);
           } else {
             init.responseText = body;
-            return new FetchResponse(init);
+            return new FetchPolyfillResponse(init);
           }
         }
         const mockXhr = {
@@ -519,7 +519,7 @@ describe('XHR', function() {
           responseText: TEST_TEXT,
         };
         fetchStub = sandbox.stub(xhr, 'fetchAmpCors_',
-            () => Promise.resolve(new FetchResponse(mockXhr)));
+            () => Promise.resolve(new FetchPolyfillResponse(mockXhr)));
       });
 
       it('should be able to fetch a document', () => {
@@ -646,7 +646,7 @@ describe('XHR', function() {
     });
   });
 
-  describe('FetchResponse', () => {
+  describe('FetchPolyfillResponse', () => {
     const TEST_TEXT = 'this is some test text';
     const mockXhr = {
       status: 200,
@@ -654,14 +654,14 @@ describe('XHR', function() {
     };
 
     it('should provide text', () => {
-      const response = new FetchResponse(mockXhr);
+      const response = new FetchPolyfillResponse(mockXhr);
       return response.text().then(result => {
         expect(result).to.equal(TEST_TEXT);
       });
     });
 
     it('should provide text only once', () => {
-      const response = new FetchResponse(mockXhr);
+      const response = new FetchPolyfillResponse(mockXhr);
       return response.text().then(result => {
         expect(result).to.equal(TEST_TEXT);
         expect(response.text.bind(response), 'should throw').to.throw(Error,
@@ -670,7 +670,7 @@ describe('XHR', function() {
     });
 
     it('should be cloneable and each instance should provide text', () => {
-      const response = new FetchResponse(mockXhr);
+      const response = new FetchPolyfillResponse(mockXhr);
       const clone = response.clone();
       return Promise.all([
         response.text(),
@@ -682,7 +682,7 @@ describe('XHR', function() {
     });
 
     it('should not be cloneable if body is already accessed', () => {
-      const response = new FetchResponse(mockXhr);
+      const response = new FetchPolyfillResponse(mockXhr);
       return response.text()
           .then(() => {
             expect(() => response.clone(), 'should throw').to.throw(
@@ -700,7 +700,7 @@ describe('XHR', function() {
             expect(requests[0]).to.be.undefined;
             const promise = test.xhr.fetchAmpCors_('http://nowhere.org').then(
                 response => {
-                  expect(response).to.be.instanceof(FetchResponse);
+                  expect(response).to.be.instanceof(FetchPolyfillResponse);
                   return response.text().then(result => {
                     expect(result).to.equal(TEST_TEXT);
                   });

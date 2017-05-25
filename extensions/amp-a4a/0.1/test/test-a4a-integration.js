@@ -26,7 +26,7 @@ import {
 } from './testdata/valid_css_at_rules_amp.reserialized';
 import {installCryptoService} from '../../../../src/service/crypto-impl';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
-import {FetchResponseHeaders} from '../../../../src/service/xhr-impl';
+import {FetchPolyfillResponseHeaders} from '../../../../src/service/xhr-impl';
 import {adConfig} from '../../../../ads/_config';
 import {a4aRegistry} from '../../../../ads/_a4a-config';
 import {signingServerURLs} from '../../../../ads/_a4a-config';
@@ -110,7 +110,7 @@ describe('integration test: a4a', () => {
     mockResponse = {
       arrayBuffer: () => utf8Encode(validCSSAmp.reserialized),
       bodyUsed: false,
-      headers: new FetchResponseHeaders({
+      headers: new FetchPolyfillResponseHeaders({
         getResponseHeader(name) {
           return headers[name];
         },
@@ -234,7 +234,7 @@ describe('integration test: a4a', () => {
     mockResponse = {
       arrayBuffer: () => utf8Encode(validCSSAmp.reserialized),
       bodyUsed: false,
-      headers: new FetchResponseHeaders({
+      headers: new FetchPolyfillResponseHeaders({
         getResponseHeader(name) {
           return headers[name];
         },
@@ -272,7 +272,7 @@ describe('integration test: a4a', () => {
     mockResponse = {
       arrayBuffer: () => null,
       bodyUsed: false,
-      headers: new FetchResponseHeaders({
+      headers: new FetchPolyfillResponseHeaders({
         getResponseHeader(name) {
           return headers[name];
         },
@@ -298,7 +298,7 @@ describe('integration test: a4a', () => {
         mockResponse = {
           arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
           bodyUsed: false,
-          headers: new FetchResponseHeaders({
+          headers: new FetchPolyfillResponseHeaders({
             getResponseHeader(name) {
               return headers[name];
             },

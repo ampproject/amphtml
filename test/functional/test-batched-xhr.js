@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {FetchResponse, fetchPolyfill} from '../../src/service/xhr-impl';
+import {FetchPolyfillResponse, fetchPolyfill} from '../../src/service/xhr-impl';
 import {batchedXhrServiceForTesting} from '../../src/service/batched-xhr-impl';
 
 
@@ -43,7 +43,7 @@ describes.sandboxed('BatchedXhr', {}, () => {
     beforeEach(() => {
       xhr = batchedXhrServiceForTesting(env.win);
       fetchStub = env.sandbox.stub(xhr, 'fetchAmpCors_',
-          () => Promise.resolve(new FetchResponse(mockXhr)));
+          () => Promise.resolve(new FetchPolyfillResponse(mockXhr)));
     });
 
     it('should fetch a generic request once for identical URLs', () => {
@@ -101,7 +101,7 @@ describes.sandboxed('BatchedXhr', {}, () => {
     beforeEach(() => {
       xhr = batchedXhrServiceForTesting(env.win);
       fetchStub = env.sandbox.stub(xhr, 'fetchAmpCors_',
-          () => Promise.resolve(new FetchResponse(mockXhr)));
+          () => Promise.resolve(new FetchPolyfillResponse(mockXhr)));
     });
 
     it('should fetch JSON GET requests once for identical URLs', () => {
@@ -157,7 +157,7 @@ describes.sandboxed('BatchedXhr', {}, () => {
       };
       xhr = batchedXhrServiceForTesting(env.win);
       fetchStub = env.sandbox.stub(xhr, 'fetchAmpCors_',
-          () => Promise.resolve(new FetchResponse(mockXhr)));
+          () => Promise.resolve(new FetchPolyfillResponse(mockXhr)));
     });
 
     it('should fetch document GET requests once for identical URLs', () => {
@@ -195,7 +195,7 @@ describes.sandboxed('BatchedXhr', {}, () => {
     beforeEach(() => {
       xhr = batchedXhrServiceForTesting(env.win);
       fetchStub = env.sandbox.stub(xhr, 'fetchAmpCors_',
-          () => Promise.resolve(new FetchResponse(mockXhr)));
+          () => Promise.resolve(new FetchPolyfillResponse(mockXhr)));
     });
 
     it('should fetch text GET requests once for identical URLs', () => {
