@@ -233,7 +233,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {?function(?../../../src/service/xhr-impl.FetchResponse)} */
     this.sraResponseResolver_ = null;
 
-    /** @private {!function<?Error>} */
+    /** @private {!function(?Error)} */
     this.sraResponseRejecter_ = null;
 
     /** @private {!Promise<?../../../src/service/xhr-impl.FetchResponse>} */
