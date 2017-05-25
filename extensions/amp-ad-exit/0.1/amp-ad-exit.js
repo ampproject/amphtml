@@ -103,7 +103,7 @@ export class AmpAdExit extends AMP.BaseElement {
     };
     if (target.vars) {
       for (const customVar in target.vars) {
-        if (customVar.charAt(0) == '_') {
+        if (customVar[0] == '_') {
           vars[customVar] = () =>
               args[customVar] || target.vars[customVar].defaultValue;
           whitelist[customVar] = true;

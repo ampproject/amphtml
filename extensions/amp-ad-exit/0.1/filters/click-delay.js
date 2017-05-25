@@ -23,7 +23,7 @@ export class ClickDelayFilter extends Filter {
     this.delay_ = delay;
 
     /** @private {number} */
-    this.inViewportTime_ = -Infinity;
+    this.inViewportTime_ = Infinity;
   }
 
   /** @override */
