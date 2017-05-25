@@ -601,7 +601,7 @@ export class CssTranslateNode extends CssFuncNode {
 
 
 /**
- * An AMP-specific `width()` and `height()` functions.
+ * AMP-specific `width()` and `height()` functions.
  */
 export class CssDimSizeNode extends CssNode {
   /**
@@ -621,8 +621,7 @@ export class CssDimSizeNode extends CssNode {
 
   /** @override */
   css() {
-    // No CSS represention.
-    return '';
+    throw noCss();
   }
 
   /** @override */
@@ -642,7 +641,13 @@ export class CssDimSizeNode extends CssNode {
 
 
 /**
- * An AMP-specific `rand()` function.
+ * AMP-specific `rand()` function. Has two forms:
+ * - `rand()` - returns a random number value between 0 and 1.
+ * - `rand(left, right)` - returns a random value between `left` and
+ *   `right`. The `left` and `right` are any number-based values in this
+ *   case, such as a length (`10px`), a time (`1s`), an angle (`1rad`), etc.
+ *   The returned value is the same type - a length, time angle, etc. Thus,
+ *   `rand(1s, 5s)` may return a value of `rand(2.1s)`.
  */
 export class CssRandNode extends CssNode {
   /**
@@ -659,8 +664,7 @@ export class CssRandNode extends CssNode {
 
   /** @override */
   css() {
-    // No CSS represention.
-    return '';
+    throw noCss();
   }
 
   /** @override */
@@ -932,6 +936,14 @@ export class CssCalcProductNode extends CssNode {
  */
 function unknownUnits(units) {
   return new Error('unknown units: ' + units);
+}
+
+
+/**
+ * @return {!Error}
+ */
+function noCss() {
+  return new Error('no css');
 }
 
 
