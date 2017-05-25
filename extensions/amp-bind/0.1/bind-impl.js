@@ -150,9 +150,10 @@ export class Bind {
     this.initializePromise_ = Promise.all([
       waitForBodyPromise(this.localWin_.document), // Wait for body.
       this.viewer_.whenFirstVisible(), // Don't initialize in prerender mode.
-    ]).then(() => this.initialize_(
-      dev().assertElement(this.localWin_.document.body)
-    ));
+    ]).then(() => {
+      const rootNode = dev().assertElement(this.localWin_.document.body);
+      return this.initialize_(rootNode);
+    });
 
     /**
      * @private {?Promise}

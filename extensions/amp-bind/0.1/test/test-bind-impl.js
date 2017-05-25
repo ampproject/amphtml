@@ -436,6 +436,9 @@ describes.realWin('Bind', {
     let onOtherBindReadyAndSetState;
 
     beforeEach(() => {
+      // `otherBind` mimics an adopted embed window of `bind` -- it shares an
+      // ampdoc service instance but has a different root node and var scope.
+      // @see Bind#adoptEmbedWindow
       otherBind = new Bind(env.ampdoc, otherEnv.win);
       otherParent = otherEnv.win.document.getElementById('parent');
 
