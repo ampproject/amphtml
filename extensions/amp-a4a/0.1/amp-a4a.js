@@ -44,7 +44,6 @@ import {cryptoFor} from '../../../src/crypto';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
 import {handleClick} from '../../../ads/alp/handler';
-import {AdDisplayState} from '../../../extensions/amp-ad/0.1/amp-ad-ui';
 import {
   getDefaultBootstrapBaseUrl,
   generateSentinel,
@@ -361,7 +360,6 @@ export class AmpA4A extends AMP.BaseElement {
     const adType = this.element.getAttribute('type');
     this.config = adConfig[adType] || {};
     this.uiHandler = new AMP.AmpAdUIHandler(this);
-    this.uiHandler.init();
     if (!this.win.ampA4aValidationKeys) {
       // Without the following variable assignment, there's no way to apply a
       // type annotation to a win-scoped variable, so the type checker doesn't
@@ -948,7 +946,7 @@ export class AmpA4A extends AMP.BaseElement {
     // Increment promiseId to cause any pending promise to cancel.
     this.promiseId++;
     this.protectedEmitLifecycleEvent_('adSlotCleared');
-    this.uiHandler.setDisplayState(AdDisplayState.NOT_LAID_OUT);
+    this.uiHandler.applyUnlayoutUI();
     if (this.originalSlotSize_) {
       super.attemptChangeSize(
         this.originalSlotSize_.height, this.originalSlotSize_.width)
@@ -1003,7 +1001,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   createPlaceholderCallback() {
-    return this.uiHandler.createPlaceholderCallback();
+    return this.uiHandler.createPlaceholder();
   }
 
   /**
@@ -1045,8 +1043,7 @@ export class AmpA4A extends AMP.BaseElement {
     // Store original size to allow for reverting on unlayoutCallback so that
     // subsequent pageview allows for ad request.
     this.originalSlotSize_ = this.originalSlotSize_ || this.getLayoutBox();
-    this.uiHandler.setDisplayState(AdDisplayState.LOADING);
-    this.uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
+    this.uiHandler.applyNoContentUI();
     this.isCollapsed_ = true;
   }
 

@@ -231,7 +231,7 @@ export function googlePageParameters(win, doc, startTime, output = 'html') {
         'brdim': additionalDimensions(win, viewportSize),
         'isw': viewportSize.width,
         'ish': viewportSize.height,
-        'isc': isCanary(win) ? '1' : null,
+        'art': isCanary(win) ? '2' : null,
         'url': documentInfo.canonicalUrl,
         'top': win != win.top ? topWindowUrlOrDomain(win) : null,
         'loc': win.location.href == documentInfo.canonicalUrl ?

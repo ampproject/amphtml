@@ -242,6 +242,8 @@ describe('CSS parse', () => {
 
   it('should parse a var()', () => {
     expect(parsePseudo('var(--abc)')).to.equal('VAR<--abc>');
+    expect(parsePseudo('var(--abc1)')).to.equal('VAR<--abc1>');
+    expect(parsePseudo('var(--abc-d)')).to.equal('VAR<--abc-d>');
     expect(parsePseudo('VAR(--abc)')).to.equal('VAR<--abc>');
     expect(parsePseudo('var(--ABC)')).to.equal('VAR<--ABC>');
     expect(parsePseudo('var(--abc, 100px)'))
@@ -656,8 +658,7 @@ describes.sandboxed('CSS resolve', {}, () => {
 
   describe('function', () => {
     it('should resolve a const-arg function', () => {
-      contextMock.expects('pushDimension').never();
-      contextMock.expects('popDimension').never();
+      contextMock.expects('withDimension').never();
       const node = new ast.CssFuncNode('rgb', [
         new ast.CssNumberNode(201),
         new ast.CssNumberNode(202),
@@ -670,8 +671,7 @@ describes.sandboxed('CSS resolve', {}, () => {
     });
 
     it('should resolve a var-arg function', () => {
-      contextMock.expects('pushDimension').never();
-      contextMock.expects('popDimension').never();
+      contextMock.expects('withDimension').never();
       contextMock.expects('getVar')
           .withExactArgs('--var1')
           .returns(new ast.CssNumberNode(11))
@@ -689,11 +689,11 @@ describes.sandboxed('CSS resolve', {}, () => {
     it('should push a dimension when specified', () => {
       let index = 0;
       const stack = [];
-      context.pushDimension = function(dim) {
+      context.withDimension = function(dim, callback) {
         stack.push(dim);
-      };
-      context.popDimension = function() {
+        const res = callback();
         stack.pop();
+        return res;
       };
 
       const arg1 = new ast.CssNumberNode(201);
@@ -747,11 +747,11 @@ describes.sandboxed('CSS resolve', {}, () => {
 
     beforeEach(() => {
       dimStack = [];
-      context.pushDimension = function(dim) {
+      context.withDimension = function(dim, callback) {
         dimStack.push(dim);
-      };
-      context.popDimension = function() {
+        const res = callback();
         dimStack.pop();
+        return res;
       };
       sandbox.stub(ast.CssPassthroughNode.prototype, 'resolve', function() {
         return new ast.CssPassthroughNode(this.css_ + dimStack.join(''));
