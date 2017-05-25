@@ -116,8 +116,7 @@ function filterLocalhostLinks(markdown) {
  * @return {string} Markdown after filtering out links in script tags.
  */
 function filterScriptTagLinks(markdown) {
-  var scriptTagLinks = new RegExp('src="http.*"', 'g');
-  return markdown.replace(scriptTagLinks, '');
+  return markdown.replace(/src="http.*"/, '');
 }
 
 /**
