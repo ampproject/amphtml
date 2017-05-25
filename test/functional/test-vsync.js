@@ -40,6 +40,8 @@ describe('vsync', () => {
         nodeType: /* DOCUMENT */ 9,
         body: {},
       },
+      navigator: {
+      },
       services: {},
       setTimeout: (fn, t) => {
         return window.setTimeout(fn, t);
