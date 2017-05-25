@@ -28,7 +28,7 @@ export class Filter {
   }
 
   /**
-   * @param {!Event} event
+   * @param {!../../../../src/service/action-impl.ActionEventDef} event
    * @return {boolean} Whether the exit is allowed.
    */
   /* eslint-disable no-unused-vars */
