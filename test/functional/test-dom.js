@@ -65,6 +65,40 @@ describes.sandboxed('DOM', {}, env => {
     expect(other.textContent).to.equal('ABC');
   });
 
+  it('isConnectedNode', () => {
+    expect(dom.isConnectedNode(document)).to.be.true;
+
+    const a = document.createElement('div');
+    expect(dom.isConnectedNode(a)).to.be.false;
+
+    const b = document.createElement('div');
+    b.appendChild(a);
+
+    document.body.appendChild(b);
+    expect(dom.isConnectedNode(a)).to.be.true;
+
+    const shadow = a.attachShadow({mode: 'open'});
+    const c = document.createElement('div');
+    shadow.appendChild(c);
+    expect(dom.isConnectedNode(c)).to.be.true;
+
+    document.body.removeChild(b);
+    expect(dom.isConnectedNode(c)).to.be.false;
+  });
+
+  it('rootNodeFor', () => {
+    const a = document.createElement('div');
+    expect(dom.rootNodeFor(a)).to.equal(a);
+
+    const b = document.createElement('div');
+    a.appendChild(b);
+    expect(dom.rootNodeFor(b)).to.equal(a);
+
+    const c = document.createElement('div');
+    b.appendChild(c);
+    expect(dom.rootNodeFor(c)).to.equal(a);
+  });
+
   it('closest should find itself', () => {
     const element = document.createElement('div');
 

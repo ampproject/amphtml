@@ -321,7 +321,7 @@ describe('Google A4A utils', () => {
         impl.win.AMP_CONFIG.canary = true;
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, [], []).then(url1 => {
-            expect(url1).to.contain('isc=1');
+            expect(url1).to.match(/art=2/);
           });
         });
       });
@@ -341,7 +341,7 @@ describe('Google A4A utils', () => {
         impl.win.AMP_CONFIG.canary = false;
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, [], []).then(url1 => {
-            expect(url1).to.not.match(/isc=1/);
+            expect(url1).to.not.match(/art=2/);
           });
         });
       });

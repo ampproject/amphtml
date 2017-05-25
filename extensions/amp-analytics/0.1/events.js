@@ -144,16 +144,8 @@ export class CustomEventTracker extends EventTracker {
     }
     const selectionMethod = config['selectionMethod'] || null;
 
-    let targetReady = null;
-    if (selector == ':root' || selector == ':host') {
-      targetReady = Promise.resolve(
-          this.root.getElement(context, selector, selectionMethod));
-    } else {
-      // Wait for DOM to be fully parsed to avoid false missed searches.
-      targetReady = this.root.ampdoc.whenReady().then(() => {
-        return this.root.getElement(context, selector, selectionMethod);
-      });
-    }
+    const targetReady =
+        this.root.getElement(context, selector, selectionMethod);
 
     let observers = this.observers_[eventType];
     if (!observers) {
@@ -277,17 +269,15 @@ export class SignalTracker extends EventTracker {
     } else {
       // Look for the AMP-element. Wait for DOM to be fully parsed to avoid
       // false missed searches.
-      signalsPromise = this.root.ampdoc.whenReady().then(() => {
-        const selectionMethod = config['selectionMethod'];
-        const element = user().assertElement(
-            this.root.getAmpElement(
-                (context.parentElement || context),
-                selector,
-                selectionMethod),
-            `Element "${selector}" not found`);
-        target = element;
-        return this.getElementSignal(eventType, element);
-      });
+      const selectionMethod = config['selectionMethod'];
+      signalsPromise = this.root.getAmpElement(
+          (context.parentElement || context),
+          selector,
+          selectionMethod
+          ).then(element => {
+            target = element;
+            return this.getElementSignal(eventType, target);
+          });
     }
 
     // Wait for the target and the event signal.
@@ -339,17 +329,15 @@ export class IniLoadTracker extends EventTracker {
     } else {
       // An AMP-element. Wait for DOM to be fully parsed to avoid
       // false missed searches.
-      promise = this.root.ampdoc.whenReady().then(() => {
-        const selectionMethod = config['selectionMethod'];
-        const element = user().assertElement(
-            this.root.getAmpElement(
-                (context.parentElement || context),
-                selector,
-                selectionMethod),
-            `Element "${selector}" not found`);
-        target = element;
-        return this.getElementSignal('ini-load', element);
-      });
+      const selectionMethod = config['selectionMethod'];
+      promise = this.root.getAmpElement(
+          (context.parentElement || context),
+          selector,
+          selectionMethod
+          ).then(element => {
+            target = element;
+            return this.getElementSignal('ini-load', target);
+          });
     }
     // Wait for the target and the event.
     promise.then(() => {
@@ -421,22 +409,20 @@ export class VisibilityTracker extends EventTracker {
 
     // An AMP-element. Wait for DOM to be fully parsed to avoid
     // false missed searches.
-    const unlistenPromise = this.root.ampdoc.whenReady().then(() => {
-      const selectionMethod = config['selectionMethod'] ||
+    const selectionMethod = config['selectionMethod'] ||
           visibilitySpec['selectionMethod'];
-      const element = user().assertElement(
-          this.root.getAmpElement(
-              (context.parentElement || context),
-              selector,
-              selectionMethod),
-          `Element "${selector}" not found`);
-      return visibilityManager.listenElement(
-          element,
-          visibilitySpec,
-          this.getReadyPromise(waitForSpec, selector, element),
-          createReadyReportPromiseFunc,
-          this.onEvent_.bind(this, eventType, listener, element));
-    });
+    const unlistenPromise = this.root.getAmpElement(
+        (context.parentElement || context),
+        selector,
+        selectionMethod
+        ).then(element => {
+          return visibilityManager.listenElement(
+            element,
+            visibilitySpec,
+            this.getReadyPromise(waitForSpec, selector, element),
+            createReadyReportPromiseFunc,
+            this.onEvent_.bind(this, eventType, listener, element));
+        });
     return function() {
       unlistenPromise.then(unlisten => {
         unlisten();
