@@ -699,11 +699,16 @@ describes.sandboxed('MeasureScanner', {}, () => {
       const child = target1.ownerDocument.createElement('div');
       target1.appendChild(child);
 
-      expect(() => css.getElementSize('#target1', null))
-          .to.throw(/target is specified/);
+      // Normal selectors search whole DOM and don't need context.
+      expect(css.getElementSize('#target1', null))
+          .to.deep.equal({width: 11, height: 12});
       expect(css.withTarget_(target2,
           () => css.getElementSize('#target1', null)))
           .to.deep.equal({width: 11, height: 12});
+
+      // Closest selectors always need a context node.
+      expect(() => css.getElementSize('#target1', 'closest'))
+          .to.throw(/target is specified/);
       expect(css.withTarget_(child,
           () => css.getElementSize('.parent', 'closest')))
           .to.deep.equal({width: 11, height: 12});
