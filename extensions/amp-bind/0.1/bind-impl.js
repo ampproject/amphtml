@@ -735,7 +735,11 @@ export class Bind {
           }
           // Rewriting can fail due to e.g. invalid URL.
           if (rewrittenNewValue !== undefined) {
-            element.setAttribute(property, rewrittenNewValue);
+            // if (element.tagName == 'INPUT' && property in element) {
+            //   element[property] = rewriteAttributeValue;
+            // } else {
+              element.setAttribute(property, rewrittenNewValue);
+            // }
             attributeChanged = true;
           }
         }

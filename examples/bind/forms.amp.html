@@ -13,6 +13,9 @@
 </head>
 <body>
 
+  <input type="checkbox" checked [checked]="isChecked">
+  <button on="tap:AMP.setState({isChecked: isChecked != null ? !isChecked : false})">toggle</button>
+
   <p>Submit the form and then press a button to change the text in the below template</p>
   <button on="tap:AMP.setState({selected: 1})">1</button>
   <button on="tap:AMP.setState({selected: 2})">2</button>

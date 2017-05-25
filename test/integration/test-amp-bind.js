@@ -161,6 +161,14 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
       });
     });
 
+    it('should update checkbox checked attr when its binding changes', () => {
+      const checkbox = fixture.doc.getElementById('checkedBound');
+      // Some attributes on certain input elements, such as `checked` on
+      // checkbox, only specify an initial value. Clicking the checkbox twice
+      // ensures the element is no longer relying on `value` as
+      // an initial value.
+    });
+
     it('should update dependent bindings on radio input changes', () => {
       const radioText = fixture.doc.getElementById('radioText');
       const radio = fixture.doc.getElementById('radio');
