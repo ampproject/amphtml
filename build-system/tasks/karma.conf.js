@@ -170,7 +170,7 @@ module.exports = {
 
   // Import our gulp webserver as a Karma server middleware
   // So we instantly have all the custom server endpoints available
-  middleware: ['custom'],
+  beforeMiddleware: ['custom'],
   plugins: [
     'karma-browserify',
     'karma-chai',
