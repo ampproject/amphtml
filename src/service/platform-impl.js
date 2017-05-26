@@ -53,7 +53,7 @@ export class Platform {
    */
   isSafari() {
     return /Safari/i.test(this.navigator_.userAgent) && !this.isChrome() &&
-        !this.isEdge();
+        !this.isEdge() && !this.isFirefox();
   }
 
   /**
@@ -70,7 +70,7 @@ export class Platform {
    * @return {boolean}
    */
   isFirefox() {
-    return /Firefox/i.test(this.navigator_.userAgent) && !this.isEdge();
+    return /Firefox|FxiOS/i.test(this.navigator_.userAgent) && !this.isEdge();
   }
 
   /**
@@ -109,7 +109,7 @@ export class Platform {
       return this.evalMajorVersion_(/(Chrome|CriOS)\/(\d+)/, 2);
     }
     if (this.isFirefox()) {
-      return this.evalMajorVersion_(/Firefox\/(\d+)/, 1);
+      return this.evalMajorVersion_(/(Firefox|FxiOS)\/(\d+)/, 2);
     }
     if (this.isIe()) {
       return this.evalMajorVersion_(/MSIE\s(\d+)/, 1);
