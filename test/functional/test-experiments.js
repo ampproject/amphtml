@@ -925,6 +925,12 @@ describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
     return expect(p).to.eventually.be.false;
   });
 
+  it('should return false if public key is not present', () => {
+    setupMetaTagWith(correctToken);
+    const p = isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
+    return expect(p).to.eventually.be.false;
+  });
+
   it('should return false if crypto is unavailable', () => {
     sandbox.stub(crypto, 'isCryptoAvailable').returns(false);
     const p = isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);

@@ -153,7 +153,7 @@ function enableExperimentsFromToken(win, token, crypto, keyInfo) {
 export function enableExperimentsForOriginTrials(win, publicJwk) {
   const metas =
       win.document.head.querySelectorAll('meta[name="amp-experiment-token"]');
-  if (metas.length == 0 || publicJwk == undefined) {
+  if (metas.length == 0 || Object.keys(publicJwk).length == 0) {
     return Promise.resolve();
   }
   let crypto;
