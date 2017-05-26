@@ -18,7 +18,6 @@
   <script src="/dist/amp.js"></script>
   <script custom-element="amp-bind" src="/dist/v0/amp-bind-0.1.max.js"></script>
   <script custom-element="amp-brightcove" src="/dist/v0/amp-brightcove-0.1.max.js"></script>
-  <script custom-element="amp-carousel" src="/dist/v0/amp-carousel-0.1.max.js"></script>
   <script custom-element="amp-iframe" src="/dist/v0/amp-iframe-0.1.max.js"></script>
   <script custom-element="amp-list" src="/dist/v0/amp-list-0.1.max.js"></script>
   <script custom-element="amp-live-list" src="/dist/v0/amp-live-list-0.1.max.js"></script>
@@ -49,15 +48,6 @@
   <p id="checkboxText" [text]="'Checked: ' + checkboxChange.checked" id="checkboxText">Unbound</p>
   <input type="radio" on="change:AMP.setState({radioChange: event})" id="radio">
   <p id="radioText" [text]="'Checked: ' + radioChange.checked" id="radioText">Unbound</p>
-
-  <p>CAROUSEL</p>
-  <button on="tap:AMP.setState({selectedSlide: 1})" id="goToSlide1Button">slide 1!</button>
-  <p id="slideNum" [text]="selectedSlide">0</p>
-  <amp-carousel width="300" height="100" type="slides"  id="carousel" on="slideChange:AMP.setState({selectedSlide: event.index})" [slide]="selectedSlide">
-    <amp-img src="http://www.google.com/image1" height="200" width="200"></amp-img>
-    <amp-img src="http://www.google.com/image1" height="200" width="200"></amp-img>
-    <amp-img src="http://www.google.com/image1" height="200" width="200"></amp-img>
-  </amp-carousel>
 
   <p>AMP-IMG</p>
   <button on="tap:AMP.setState({imageSrc: 'http://www.google.com/image2'})" id="changeImgSrcButton"></button>

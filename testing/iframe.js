@@ -65,9 +65,12 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
     // Counts the supported custom events.
     const events = {
       'amp:attached': 0,
+      'amp:bind:initialize': 0,
+      'amp:bind:setState': 0,
+      'amp:bind:mutated': 0,
       'amp:error': 0,
-      'amp:stubbed': 0,
       'amp:load:start': 0,
+      'amp:stubbed': 0,
     };
     const messages = [];
     let html = __html__[fixture];
