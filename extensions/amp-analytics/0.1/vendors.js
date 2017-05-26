@@ -1411,25 +1411,18 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'referrer': '${documentReferrer}',
     },
     'requests': {
-      'pageView': '${_basicMessageCounter};${_title}',
-      'reachGoal': '${_basicMessageTracker};${_goal};${_title}',
-      'sendEvent': '${_basicMessageTracker};${_customEvent}',
-      '_basicMessageCounter': '${_domain}${_counter}?${_basicMessage}',
-      '_basicMessageTracker': '${_domain}${_tracker}?${_basicMessage}',
+      'pageView': '${_domain}/counter?${_basicMessage};title=${title}',
+      'reachGoal': '${_domain}/tracker?${_basicMessage};title=${title}' +
+                   ';e=RG%3A${value}%2F${goal}',
+      'sendEvent': '${_domain}/tracker?${_basicMessage};' +
+                   'e=CE%3A${value}%2F${category}%3B${action}%3B${label}',
       '_domain': 'https://top-fwz1.mail.ru',
-      '_counter': '/counter',
-      '_tracker': '/tracker',
-      '_basicMessage': 'js=13;ver=60;${_screen};${_event}' +
-                       ';${_advancedEvent};_=${random}',
-      '_screen': 's=${screenWidth}*${screenHeight}' +
-                 ';vp=${viewportWidth}*${viewportHeight}',
-      '_event': 'id=${id};u=${url};r=${referrer}',
-      '_advancedEvent': 'st=${start};gender=${gender};age=${age}' +
-                        ';pid=${pid};userid=${userid}' +
-                        ';device=${device};params=${params}',
-      '_title': 'title=${title}',
-      '_goal': 'e=RG%3A${value}%2F${goal}',
-      '_customEvent': 'e=CE%3A${value}%2F${category}%3B${action}%3B${label}',
+      '_basicMessage': 'js=13;id=${id};u=${url};r=${referrer}' +
+                       ';s=${screenWidth}*${screenHeight}' +
+                       ';vp=${viewportWidth}*${viewportHeight}' +
+                       ';st=${start};gender=${gender};age=${age}' +
+                       ';pid=${pid};userid=${userid};device=${device}' +
+                       ';params=${params};_=${random}',
     },
     'triggers': {
       'pageView': {
