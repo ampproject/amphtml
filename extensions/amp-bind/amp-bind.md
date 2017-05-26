@@ -48,6 +48,10 @@ limitations under the License.
     </td>
   </tr>
   <tr>
+    <td class="col-fourty"><strong>Codelabs</strong></td>
+    <td><a href="https://codelabs.developers.google.com/codelabs/advanced-interactivity-in-amp/">Advanced Interactivity in AMP</a> highlights a sophisticated e-commerce use case.</td>
+  </tr>
+  <tr>
     <td class="col-fourty"><strong>Origin Trials</strong></td>
     <td><a href="https://docs.google.com/a/google.com/forms/d/e/1FAIpQLSfGCAjUU4pDu84Sclw6wjGVDiFJhVr61pYTMehIt6ex4wmr1Q/viewform">Register here</a> to enable <code>amp-bind</code> for your origin.</td>
   </tr>
