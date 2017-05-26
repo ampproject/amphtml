@@ -26,7 +26,7 @@ import {
   setStyle,
   removeAlphaFromColor,
 } from '../../../src/style';
-import {whenUpgradeToCustomElement} from '../../../src/dom';
+import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 /** @const */
 const EARLY_LOAD_EXPERIMENT = 'sticky-ad-early-load';
@@ -70,19 +70,19 @@ class AmpStickyAd extends AMP.BaseElement {
 
     this.ad_ = children[0];
     this.setAsOwner(this.ad_);
-    whenUpgradeToCustomElement(dev().assertElement(this.ad_)).then(() => {
-      if (!this.ad_.whenBuilt) {
+    whenUpgradedToCustomElement(dev().assertElement(this.ad_)).then(ad => {
+      if (!ad.whenBuilt) {
         // TODO(@zhouyx, #9126): Cleanup once make sure the fix works
         dev().error(TAG, 'element whenBuilt still do not exist!');
         timerFor(this.win).delay(() => {
-          this.ad_.whenBuilt().then(() => {
+          ad.whenBuilt().then(() => {
             this.mutateElement(() => {
               toggle(this.element, true);
             });
           });
         }, 1000);
       } else {
-        this.ad_.whenBuilt().then(() => {
+        ad.whenBuilt().then(() => {
           this.mutateElement(() => {
             toggle(this.element, true);
           });
@@ -187,8 +187,8 @@ class AmpStickyAd extends AMP.BaseElement {
    * @private
    */
   scheduleLayoutForAd_() {
-    whenUpgradeToCustomElement(dev().assertElement(this.ad_)).then(() => {
-      this.ad_.whenBuilt().then(this.layoutAd_.bind(this));
+    whenUpgradedToCustomElement(dev().assertElement(this.ad_)).then(ad => {
+      ad.whenBuilt().then(this.layoutAd_.bind(this));
     });
   }
 

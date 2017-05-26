@@ -34,7 +34,7 @@ describes.realWin('amp-sticky-ad 1.0 version', {
   let ampStickyAd;
   let impl;
   let addToFixedLayerStub, addToFixedLayerPromise;
-  const adUpgradeToCustomElementPromise = Promise.resolve();
+  const adUpgradedToCustomElementPromise = Promise.resolve();
   describe('with valid child 1.0', () => {
     beforeEach(() => {
       win = env.win;
@@ -216,7 +216,7 @@ describes.realWin('amp-sticky-ad 1.0 version', {
       impl.scheduleLayoutForAd_();
       expect(layoutAdSpy).to.not.been.called;
       impl.ad_.signals().signal('built');
-      return adUpgradeToCustomElementPromise.then(() => {
+      return adUpgradedToCustomElementPromise.then(() => {
         return impl.ad_.signals().whenSignal('built').then(() => {
           expect(layoutAdSpy).to.be.called;
           expect(ampStickyAd).to.not.have.attribute('visible');
@@ -236,7 +236,7 @@ describes.realWin('amp-sticky-ad 1.0 version', {
       impl.scheduleLayoutForAd_();
       expect(layoutAdSpy).to.not.been.called;
       impl.ad_.signals().signal('built');
-      return adUpgradeToCustomElementPromise.then(() => {
+      return adUpgradedToCustomElementPromise.then(() => {
         return impl.ad_.signals().whenSignal('built').then(() => {
           expect(layoutAdSpy).to.be.called;
           expect(ampStickyAd).to.not.have.attribute('visible');

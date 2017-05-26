@@ -567,9 +567,9 @@ function createBaseCustomElementClass(win) {
       /** @private {?./layout-delay-meter.LayoutDelayMeter} */
       this.layoutDelayMeter_ = null;
 
-      if (this.whenUpgradeToCustomElement_) {
-        this.whenUpgradeToCustomElement_();
-        this.whenUpgradeToCustomElement_ = null;
+      if (this['whenUpgradedToCustomElement']) {
+        this['whenUpgradedToCustomElement'](this);
+        this['whenUpgradedToCustomElement'] = null;
       }
     }
 

@@ -919,14 +919,16 @@ describes.realWin('DOM', {
 
     it('should not continue if element is not AMP element', () => {
       const element = doc.createElement('div');
-      expect(() => dom.whenUpgradeToCustomElement(element)).to.throw(
+      expect(() => dom.whenUpgradedToCustomElement(element)).to.throw(
           'element is not AmpElement');
     });
 
     it('should resolve if element has already upgrade', () => {
       const element = doc.createElement('amp-img');
       doc.body.appendChild(element);
-      return dom.whenUpgradeToCustomElement(element);
+      return dom.whenUpgradedToCustomElement(element).then(element => {
+        expect(element.whenBuilt).to.not.be.undefined;
+      });
     });
 
     it('should resolve when element upgrade', () => {
@@ -937,7 +939,9 @@ describes.realWin('DOM', {
           prototype: createAmpElementProto(env.win, 'amp-test', TestElement),
         });
       }, 100);
-      return dom.whenUpgradeToCustomElement(element);
+      return dom.whenUpgradedToCustomElement(element).then(element => {
+        expect(element.whenBuilt).to.not.be.undefined;
+      });
     });
   });
 });

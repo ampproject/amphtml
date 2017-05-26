@@ -709,19 +709,21 @@ export function isAmpElement(element) {
  * Return a promise that resolve when an AMP element upgrade from HTMLElement
  * to CustomElement
  * @param {!Element} element
- * @return {!Promise}
+ * @return {!Promise<!Element>}
  */
-export function whenUpgradeToCustomElement(element) {
+export function whenUpgradedToCustomElement(element) {
   dev().assert(isAmpElement(element), 'element is not AmpElement');
   if (element.createdCallback) {
     // Element already is CustomElement;
-    return Promise.resolve();
+    return Promise.resolve(element);
   }
   // If Element is still HTMLElement, wait for it to upgrade to customElement
-  if (!element.upgradeToCustomElementPromise_) {
-    element.upgradeToCustomElementPromise_ = new Promise(resolve => {
-      element.whenUpgradeToCustomElement_ = resolve;
+  // Note: use pure string to avoid obfuscation between versions.
+  if (!element['upgradedToCustomElementPromise']) {
+    element['upgradedToCustomElementPromise'] = new Promise(resolve => {
+      element['whenUpgradedToCustomElement'] = resolve;
     });
   }
-  return element.upgradeToCustomElementPromise_;
+
+  return element['upgradedToCustomElementPromise'];
 }
