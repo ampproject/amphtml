@@ -16,7 +16,7 @@
 
 
 /**
- * @typedef {!WebMultiAnimationDef|!WebKeyframeAnimationDef}
+ * @typedef {!WebMultiAnimationDef|!WebCompAnimationDef|!WebKeyframeAnimationDef}
  */
 export let WebAnimationDef;
 
@@ -29,6 +29,18 @@ export let WebAnimationDef;
  * }}
  */
 export let WebMultiAnimationDef;
+
+
+/**
+ * @mixes WebAnimationTimingDef
+ * @mixes WebAnimationMediaDef
+ * @typedef {{
+ *   target: (string|!Element|undefined),
+ *   selector: (string|undefined),
+ *   animation: string,
+ * }}
+ */
+export let WebCompAnimationDef;
 
 
 /**

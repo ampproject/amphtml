@@ -86,6 +86,7 @@ and is comprised of:
 {
   "selector": "#target-id",
   "media": "(min-width:300px)",
+  // Variables
   // Timing properties
   ...
   "keyframes": []
@@ -99,6 +100,39 @@ for [Window.matchMedia](https://developer.mozilla.org/en-US/docs/Web/API/Window/
 
 If value is specified for an animation component, the animation component will only be included if the
 media query will match the current environment.
+
+### Variables
+
+An animation component can declare CSS variables that will be used for timing and keyframes values via `var()` expressions. `var()` expressions are evaluated using the current target context. The CSS variables specified in animation components are propagated to nested animations, applied to animation targets and thus override CSS variables used in final animations.
+
+For instance:
+```html
+<amp-animation layout="nodisplay">
+<script type="application/json">
+{
+  "--delay": "0.5s",
+  "--x": "100px",
+  "animations": [
+    {
+      "selector": "#target1",
+      "delay": "var(--delay)",
+      "--x": "150px",
+      "keyframes": {"transform": "translate(var(--x), var(--y, 0px)"}
+    },
+    ...
+  ]
+}
+</script>
+</amp-animation>
+```
+
+In this sample:
+ - `--delay` is propagated into nested animations and used as a delay of `#target1` animation.
+ - `--x` is propagated into nested animations but overriden by the `#target1` animation and later used for `transform` property.
+ - `--y` is not specified anywhere in the `<amp-animation>` and thus will be queried on the `#target1` element. It defaults to `0px` if not defined in CSS either.
+
+For more information on `var()`, see the [`var()` and `calc()` section](#var-and-calc-expressions).
+
 
 ### Timing properties
 
@@ -299,6 +333,64 @@ can be reduced to an array of components. For instance:
 </amp-animation>
 ```
 
+
+### Animation composition
+
+Animations can reference other animations thus combining several `amp-animation` declarations into a single final animation.
+
+For instance:
+```html
+<amp-animation id="anim1" layout="nodisplay">
+<script type="application/json">
+{
+  "animamtion": "anim2",
+  "duration": 1000,
+  "--scale": 2
+}
+</script>
+</amp-animation>
+
+<amp-animation id="anim2" layout="nodisplay">
+<script type="application/json">
+{
+  "selector": ".target-class",
+  "keyframes": {"transform": "scale(var(--scale))"}
+}
+</script>
+</amp-animation>
+```
+
+This sample animation, will combine "anim2" animation as part of "anim1". The "anim2" is included
+without a target (`selector`). In such case, the included animation is expected to reference its own target.
+
+Another form allows the including animation to provide the target or multiple targets. In that case, the included
+animation is executed for each matched target. For instance:
+```html
+<amp-animation id="anim1" layout="nodisplay">
+<script type="application/json">
+{
+  "selector": ".target-class",
+  "animamtion": "anim2",
+  "duration": 1000,
+  "--scale": 2
+}
+</script>
+</amp-animation>
+
+<amp-animation id="anim2" layout="nodisplay">
+<script type="application/json">
+{
+  "keyframes": {"transform": "scale(var(--scale))"}
+}
+</script>
+</amp-animation>
+```
+
+Here, whether the ".target-class" matches one element, several or none - the "anim2" is executed for each matched target.
+
+The variables and timing properties specified in the caller animation are passed to the included animation as well.
+
+
 ### `var()` and `calc()` expressions
 
 `amp-animation` allows use of `var()` and `calc()` expressions for timing and keyframes values.
@@ -312,7 +404,8 @@ For instance:
     "selector": ".target-class",
     "duration": "4s",
     "delay": "var(--delay)",
-    "keyframes": {"transform": "translateX(calc(100vh + 20px))"}
+    "--y": "var(--other-y, 100px)",
+    "keyframes": {"transform": "translate(calc(100vh + 20px), var(--y))"}
   }
 ]
 </script>
@@ -333,6 +426,9 @@ Both `var()` and `calc()` polyfilled on platforms that do not directly support t
 </script>
 </amp-animation>
 ```
+
+Animation components can specify their own variables as `--var-name` fields. These variables are propagated into nested animations and override variables of target elements specified via `<style>`. `var()` expressions first try to resolve variable values specified in the animations and then by querying target styles.
+
 
 ### CSS extensions
 

@@ -15,7 +15,7 @@
  */
 
 import {
-  MeasureScanner,
+  Builder,
   WebAnimationRunner,
 } from '../web-animations';
 import {
@@ -23,22 +23,21 @@ import {
 } from '../web-animation-types';
 import {isArray, isObject} from '../../../../src/types';
 import {user} from '../../../../src/log';
+import * as sinon from 'sinon';
 
 
-describes.sandboxed('MeasureScanner', {}, () => {
+describes.realWin('MeasureScanner', {amp: 1}, env => {
+  let win, doc;
+  let vsync;
+  let resources;
+  let requireLayoutSpy;
   let target1, target2;
   let warnStub;
 
   beforeEach(() => {
-    target1 = document.createElement('div');
-    target1.id = 'target1';
-    target1.classList.add('target');
-    target2 = document.createElement('div');
-    target2.id = 'target2';
-    target2.classList.add('target');
-    document.body.appendChild(target1);
-    document.body.appendChild(target2);
-    sandbox.stub(window, 'matchMedia', query => {
+    win = env.win;
+    doc = win.document;
+    sandbox.stub(win, 'matchMedia', query => {
       if (query == 'match') {
         return {matches: true};
       }
@@ -48,16 +47,34 @@ describes.sandboxed('MeasureScanner', {}, () => {
       throw new Error('unknown query: ' + query);
     });
     warnStub = sandbox.stub(user(), 'warn');
+
+    vsync = win.services.vsync.obj;
+    sandbox.stub(vsync, 'measurePromise', callback => {
+      return Promise.resolve(callback());
+    });
+    resources = win.services.resources.obj;
+    requireLayoutSpy = sandbox.spy(resources, 'requireLayout');
+
+    target1 = doc.createElement('div');
+    target1.id = 'target1';
+    target1.classList.add('target');
+    target2 = doc.createElement('div');
+    target2.id = 'target2';
+    target2.classList.add('target');
+    doc.body.appendChild(target1);
+    doc.body.appendChild(target2);
   });
 
   afterEach(() => {
-    document.body.removeChild(target1);
-    document.body.removeChild(target2);
+    doc.body.removeChild(target1);
+    doc.body.removeChild(target2);
   });
 
   function scan(spec) {
-    const scanner = new MeasureScanner(
-        window, document, 'https://acme.org/', true);
+    const builder = new Builder(win, doc, 'https://acme.org/',
+        /* vsync */ null, /* resources */ null);
+    sandbox.stub(builder, 'requireLayout');
+    const scanner = builder.createScanner_([]);
     scanner.scan(spec);
     return scanner.requests_;
   }
@@ -83,7 +100,9 @@ describes.sandboxed('MeasureScanner', {}, () => {
     expect(scanTiming({duration: 'var(--unk, 11ms)'}).duration).to.equal(11);
     expect(() => scanTiming({duration: 'a'})).to.throw(/"duration" is invalid/);
     expect(() => scanTiming({duration: -1})).to.throw(/"duration" is invalid/);
-    expect(warnStub).to.not.be.called;
+    expect(warnStub).to.not.be.calledWith(sinon.match.any, sinon.match(arg => {
+      return /fractional/.test(arg);
+    }));
   });
 
   it('should parse/validate timing delay', () => {
@@ -98,7 +117,6 @@ describes.sandboxed('MeasureScanner', {}, () => {
     expect(scanTiming({delay: 'var(--unk, 11ms)'}).delay).to.equal(11);
     expect(() => scanTiming({delay: 'a'})).to.throw(/"delay" is invalid/);
     expect(() => scanTiming({delay: -1})).to.throw(/"delay" is invalid/);
-    expect(warnStub).to.not.be.called;
 
     expect(scanTiming({}).endDelay).to.equal(0);
     expect(scanTiming({endDelay: 0}).endDelay).to.equal(0);
@@ -109,7 +127,6 @@ describes.sandboxed('MeasureScanner', {}, () => {
     expect(scanTiming({endDelay: 'calc(10ms)'}).endDelay).to.equal(10);
     expect(() => scanTiming({endDelay: 'a'})).to.throw(/"endDelay" is invalid/);
     expect(() => scanTiming({endDelay: -1})).to.throw(/"endDelay" is invalid/);
-    expect(warnStub).to.not.be.called;
   });
 
   it('should parse/validate timing iterations', () => {
@@ -140,6 +157,8 @@ describes.sandboxed('MeasureScanner', {}, () => {
 
   it('should warn if timing is fractional', () => {
     // Fractional values are allowed, but warning is shown.
+    expect(scanTiming({duration: 1}).duration).to.equal(1);
+    expect(scanTiming({duration: 1.1}).duration).to.equal(1.1);
     expect(scanTiming({duration: 0.1}).duration).to.equal(0.1);
     expect(scanTiming({delay: 0.1}).delay).to.equal(0.1);
     expect(scanTiming({endDelay: 0.1}).endDelay).to.equal(0.1);
@@ -230,6 +249,45 @@ describes.sandboxed('MeasureScanner', {}, () => {
     expect(requests[0].timing.duration).to.equal(0);
     expect(requests[1].target).to.equal(target2);
     expect(requests[1].timing.duration).to.equal(300);
+  });
+
+  it('should propagate vars', () => {
+    sandbox.stub(win, 'getComputedStyle', target => {
+      if (target == target2) {
+        return {
+          getPropertyValue: prop => {
+            if (prop == '--var4') {
+              return '50px';
+            }
+            return null;
+          },
+        };
+      }
+      return null;
+    });
+    const requests = scan({
+      duration: 500,
+      '--var1': '10px',
+      animations: [
+        {target: target1, keyframes: {}, '--var1': '20px', '--var2': '30px'},
+        {target: target2, duration: 300, keyframes: {},
+            '--var2': '40px', '--var3': 'var(--var4)'},
+      ],
+    });
+    expect(requests).to.have.length(2);
+    expect(requests[0].target).to.equal(target1);
+    expect(requests[0].timing.duration).to.equal(500);
+    expect(requests[0].vars).to.deep.equal({
+      '--var1': '20px',
+      '--var2': '30px',
+    });
+    expect(requests[1].target).to.equal(target2);
+    expect(requests[1].timing.duration).to.equal(300);
+    expect(requests[1].vars).to.deep.equal({
+      '--var1': '10px',
+      '--var2': '40px',
+      '--var3': '50px',
+    });
   });
 
   it('should accept keyframe animation', () => {
@@ -541,15 +599,201 @@ describes.sandboxed('MeasureScanner', {}, () => {
         .to.deep.equal(['translateY(0px)', 'translateY(100px)']);
   });
 
+  describe('composite animations', () => {
+    let builder, scanner;
+    let animation2;
+    let animation2Spec;
+
+    beforeEach(() => {
+      animation2Spec = {};
+      animation2 = env.createAmpElement('amp-animation');
+      animation2.implementation_.getAnimationSpec = () => animation2Spec;
+      animation2.signals().signal('built');
+      animation2.id = 'animation2';
+      doc.body.appendChild(animation2);
+
+      builder = new Builder(win, doc, 'https://acme.org/',
+          vsync, resources);
+      sandbox.stub(builder, 'requireLayout');
+      scanner = builder.createScanner_([]);
+    });
+
+    it('should fail when animation cannot be found', () => {
+      expect(() => {
+        scanner.resolveRequests({animation: 'animation3'});
+      }).to.throw(/Animation not found/);
+    });
+
+    it('should fail when animation reference is not an amp-animation', () => {
+      const animation3 = env.createAmpElement('amp-other');
+      animation3.id = 'animation3';
+      doc.body.appendChild(animation3);
+      expect(() => {
+        scanner.resolveRequests({animation: 'animation3'});
+      }).to.throw(/Element is not an animation/);
+    });
+
+    it('should fail the recursive animation', () => {
+      animation2Spec = {animation: 'animation2'};
+      return scanner.resolveRequests({animation: 'animation2'}).then(() => {
+        throw new Error('must have failed');
+      }, reason => {
+        expect(reason.message).to.match(/Recursive animations/);
+      });
+    });
+
+    it('should resolve animation w/o target', () => {
+      animation2Spec = {
+        target: target1,
+        duration: 2000,
+        keyframes: {},
+      };
+      return scanner.resolveRequests({
+        animation: 'animation2',
+        delay: 100,
+      }).then(requests => {
+        expect(requests).to.have.length(1);
+        expect(requests[0].target).to.equal(target1);
+        expect(requests[0].timing.duration).to.equal(2000);
+        expect(requests[0].timing.delay).to.equal(100);
+        expect(requests[0].vars).to.deep.equal({});
+      });
+    });
+
+    it('should combine animations', () => {
+      animation2Spec = {
+        target: target1,
+        duration: 2000,
+        keyframes: {},
+      };
+      return scanner.resolveRequests([
+        {
+          target: target2,
+          delay: 100,
+          keyframes: {},
+        },
+        {
+          animation: 'animation2',
+          delay: 200,
+        },
+      ]).then(requests => {
+        expect(requests).to.have.length(2);
+        expect(requests[0].target).to.equal(target2);
+        expect(requests[0].timing.delay).to.equal(100);
+        expect(requests[1].target).to.equal(target1);
+        expect(requests[1].timing.delay).to.equal(200);
+      });
+    });
+
+    it('should NOT override the target', () => {
+      animation2Spec = {
+        target: target1,
+        duration: 2000,
+        keyframes: {},
+      };
+      return scanner.resolveRequests({
+        target: target2,
+        animation: 'animation2',
+        delay: 100,
+      }).then(requests => {
+        expect(requests).to.have.length(1);
+        expect(requests[0].target).to.equal(target1);
+        expect(requests[0].timing.duration).to.equal(2000);
+        expect(requests[0].timing.delay).to.equal(100);
+        expect(requests[0].vars).to.deep.equal({});
+      });
+    });
+
+    it('should NOT override the target in nested animations', () => {
+      animation2Spec = {
+        animations: [
+          {
+            // No target here: the provided target will be used.
+            duration: 2000,
+            keyframes: {},
+          },
+          {
+            // Target here: will not be overridden.
+            target: target1,
+            duration: 2500,
+            delay: 400,
+            keyframes: {},
+          },
+        ],
+      };
+      return scanner.resolveRequests({
+        target: target2,
+        animation: 'animation2',
+        delay: 100,
+      }).then(requests => {
+        expect(requests).to.have.length(2);
+        expect(requests[0].target).to.equal(target2);
+        expect(requests[0].timing.duration).to.equal(2000);
+        expect(requests[0].timing.delay).to.equal(100);
+        expect(requests[0].vars).to.deep.equal({});
+        expect(requests[1].target).to.equal(target1);
+        expect(requests[1].timing.duration).to.equal(2500);
+        expect(requests[1].timing.delay).to.equal(400);
+        expect(requests[1].vars).to.deep.equal({});
+      });
+    });
+
+    it('should multiply animations by selector', () => {
+      animation2Spec = {
+        duration: 2000,
+        keyframes: {},
+      };
+      return scanner.resolveRequests({
+        selector: '.target',
+        animation: 'animation2',
+        delay: 100,
+      }).then(requests => {
+        expect(requests).to.have.length(2);
+        expect(requests[0].target).to.equal(target1);
+        expect(requests[0].timing.duration).to.equal(2000);
+        expect(requests[0].timing.delay).to.equal(100);
+        expect(requests[0].vars).to.deep.equal({});
+        expect(requests[1].target).to.equal(target2);
+        expect(requests[1].timing.duration).to.equal(2000);
+        expect(requests[1].timing.delay).to.equal(100);
+        expect(requests[1].vars).to.deep.equal({});
+      });
+    });
+
+    it('should propagate vars', () => {
+      animation2Spec = {
+        target: target1,
+        duration: 'var(--duration)',
+        '--y': '200px',
+        keyframes: {transform: 'translate(var(--x), var(--y))'},
+      };
+      return scanner.resolveRequests({
+        animation: 'animation2',
+        '--duration': 1500,
+        '--x': '100px',
+      }).then(requests => {
+        expect(requests).to.have.length(1);
+        expect(requests[0].timing.duration).to.equal(1500);
+        expect(requests[0].keyframes.transform[1])
+            .to.equal('translate(100px,200px)');
+        expect(requests[0].vars).to.deep.equal({
+          '--duration': '1500',
+          '--x': '100px',
+          '--y': '200px',
+        });
+      });
+    });
+  });
 
   describe('CSS evaluations', () => {
     let css;
     let parseSpy;
 
     beforeEach(() => {
-      const scanner = new MeasureScanner(
-          window, document, 'https://acme.org/', true);
-      css = scanner.css_;
+      const builder = new Builder(
+          win, doc, 'https://acme.org/',
+          /* vsync */ null, /* resources */ null);
+      css = builder.css_;
       parseSpy = sandbox.spy(css, 'resolveAsNode_');
     });
 
@@ -567,7 +811,7 @@ describes.sandboxed('MeasureScanner', {}, () => {
     });
 
     it('should use cache', () => {
-      const spy = sandbox.spy(window, 'getComputedStyle');
+      const spy = sandbox.spy(win, 'getComputedStyle');
 
       // First: target1.
       expect(css.measure(target1, 'display')).to.equal('block');
@@ -583,76 +827,106 @@ describes.sandboxed('MeasureScanner', {}, () => {
     });
 
     it('should NOT parse CSS for simple values', () => {
-      expect(css.resolveCss(target1, '')).to.equal('');
-      expect(css.resolveCss(target1, null)).to.equal('');
-      expect(css.resolveCss(target1, 0)).to.equal('0');
-      expect(css.resolveCss(target1, 10)).to.equal('10');
-      expect(css.resolveCss(target1, -1)).to.equal('-1');
-      expect(css.resolveCss(target1, Infinity)).to.equal('Infinity');
-      expect(css.resolveCss(target1, '10px')).to.equal('10px');
-      expect(css.resolveCss(target1, '10vh')).to.equal('10vh');
-      expect(css.resolveCss(target1, 'rgb(0,0,0)')).to.equal('rgb(0,0,0)');
-      expect(css.resolveCss(target1, 'translateY(10vh)'))
+      expect(css.resolveCss('')).to.equal('');
+      expect(css.resolveCss(null)).to.equal('');
+      expect(css.resolveCss(0)).to.equal('0');
+      expect(css.resolveCss(10)).to.equal('10');
+      expect(css.resolveCss(-1)).to.equal('-1');
+      expect(css.resolveCss(Infinity)).to.equal('Infinity');
+      expect(css.resolveCss('10px')).to.equal('10px');
+      expect(css.resolveCss('10em')).to.equal('10em');
+      expect(css.resolveCss('10vh')).to.equal('10vh');
+      expect(css.resolveCss('rgb(0,0,0)')).to.equal('rgb(0,0,0)');
+      expect(css.resolveCss('translateY(10vh)'))
           .to.equal('translateY(10vh)');
       expect(parseSpy).to.not.be.called;
     });
 
     it('should evaluate CSS for complex values', () => {
-      expect(css.resolveCss(target1, 'calc(10px)')).to.equal('10px');
+      expect(css.resolveCss('calc(10px)')).to.equal('10px');
       expect(parseSpy).to.be.calledOnce;
     });
 
+    it('should require target for CSS that need element context', () => {
+      expect(() => css.resolveCss('calc(10em + 10px)'))
+          .to.throw(/target is specified/);
+      target1.style.fontSize = '10px';
+      expect(css.withTarget(target1, () => css.resolveCss('calc(10em + 10px)')))
+          .to.equal('110px');
+    });
+
     it('should resolve simple time CSS w/o evaluation', () => {
-      expect(css.resolveMillis(target1, null, 1)).to.equal(1);
-      expect(css.resolveMillis(target1, '', 1)).to.equal(1);
-      expect(css.resolveMillis(target1, 2, 1)).to.equal(2);
+      expect(css.resolveMillis(null, 1)).to.equal(1);
+      expect(css.resolveMillis('', 1)).to.equal(1);
+      expect(css.resolveMillis(2, 1)).to.equal(2);
       expect(parseSpy).to.not.be.called;
     });
 
     it('should resolve time CSS with evaluation', () => {
-      expect(css.resolveMillis(target1, '10s', 1)).to.equal(10000);
-      expect(css.resolveMillis(target1, '10ms', 1)).to.equal(10);
-      expect(css.resolveMillis(target1, '10', 1)).to.equal(10);
-      expect(css.resolveMillis(target1, 'calc(10ms)', 1)).to.equal(10);
+      expect(css.resolveMillis('10s', 1)).to.equal(10000);
+      expect(css.resolveMillis('10ms', 1)).to.equal(10);
+      expect(css.resolveMillis('10', 1)).to.equal(10);
+      expect(css.resolveMillis('calc(10ms)', 1)).to.equal(10);
       expect(parseSpy).to.be.called;
     });
 
     it('should resolve invalid time CSS to null', () => {
-      expect(css.resolveMillis(target1, 'abc', 1)).to.be.undefined;
-      expect(css.resolveMillis(target1, 'Infinity', 1)).to.be.undefined;
-      expect(css.resolveMillis(target1, 'infinite', 1)).to.be.undefined;
+      expect(css.resolveMillis('abc', 1)).to.be.undefined;
+      expect(css.resolveMillis('Infinity', 1)).to.be.undefined;
+      expect(css.resolveMillis('infinite', 1)).to.be.undefined;
       expect(parseSpy).to.be.called;
     });
 
 
     it('should resolve simple number CSS w/o evaluation', () => {
-      expect(css.resolveNumber(target1, null, 1)).to.equal(1);
-      expect(css.resolveNumber(target1, '', 1)).to.equal(1);
-      expect(css.resolveNumber(target1, 2, 1)).to.equal(2);
-      expect(css.resolveNumber(target1, Infinity, 1)).to.equal(Infinity);
+      expect(css.resolveNumber(null, 1)).to.equal(1);
+      expect(css.resolveNumber('', 1)).to.equal(1);
+      expect(css.resolveNumber(2, 1)).to.equal(2);
+      expect(css.resolveNumber(Infinity, 1)).to.equal(Infinity);
       expect(parseSpy).to.not.be.called;
     });
 
     it('should resolve number CSS with evaluation', () => {
-      expect(css.resolveNumber(target1, '10', 1)).to.equal(10);
-      expect(css.resolveNumber(target1, '10.5', 1)).to.equal(10.5);
-      expect(css.resolveNumber(target1, 'calc(10)', 1)).to.equal(10);
-      expect(css.resolveNumber(target1, 'Infinity', 1)).to.equal(Infinity);
-      expect(css.resolveNumber(target1, 'infinite', 1)).to.equal(Infinity);
+      expect(css.resolveNumber('10', 1)).to.equal(10);
+      expect(css.resolveNumber('10.5', 1)).to.equal(10.5);
+      expect(css.resolveNumber('calc(10)', 1)).to.equal(10);
+      expect(css.resolveNumber('Infinity', 1)).to.equal(Infinity);
+      expect(css.resolveNumber('infinite', 1)).to.equal(Infinity);
       expect(parseSpy).to.be.called;
     });
 
     it('should resolve invalid number CSS to null', () => {
-      expect(css.resolveNumber(target1, 'abc', 1)).to.be.undefined;
+      expect(css.resolveNumber('abc', 1)).to.be.undefined;
       expect(parseSpy).to.be.called;
     });
 
     it('should read a var', () => {
       const stub = sandbox.stub(css, 'measure', () => '10px');
-      expect(() => css.getVar('--var1')).to.throw(/target is specified/);
-      expect(css.withTarget_(target1, () => css.getVar('--var1')).num_)
+      expect(css.getVar('--var1')).to.be.null;
+      expect(warnStub).to.have.callCount(1);
+      expect(warnStub.args[0][1]).to.match(/Variable not found/);
+
+      // With element.
+      warnStub.reset();
+      stub.reset();
+      expect(css.withTarget(target1, () => css.getVar('--var1')).num_)
           .to.equal(10);
       expect(stub).to.be.calledWith(target1, '--var1');
+      expect(warnStub).to.have.callCount(0);
+
+      // With predefined vars.
+      warnStub.reset();
+      stub.reset();
+      css.withVars({'--var1': 11}, () => {
+        // No element, but predefined vars.
+        expect(css.getVar('--var1').num_).to.equal(11);
+        // Predefined vars override the element.
+        expect(css.withTarget(target1, () => css.getVar('--var1')).num_)
+            .to.equal(11);
+
+        expect(stub).to.not.be.called;
+        expect(warnStub).to.have.callCount(0);
+      });
     });
 
     it('should propagate dimension', () => {
@@ -667,20 +941,20 @@ describes.sandboxed('MeasureScanner', {}, () => {
 
     it('should resolve viewport size, with cache', () => {
       const size = css.getViewportSize();
-      expect(size.width).to.equal(window.innerWidth);
-      expect(size.height).to.equal(window.innerHeight);
+      expect(size.width).to.equal(win.innerWidth);
+      expect(size.height).to.equal(win.innerHeight);
       expect(css.getViewportSize()).to.equal(size);
     });
 
     it('should resolve current and root font size', () => {
-      document.documentElement.style.fontSize = '12px';
+      doc.documentElement.style.fontSize = '12px';
       expect(css.getRootFontSize()).to.equal(12);
 
       target1.style.fontSize = '16px';
       expect(() => css.getCurrentFontSize()).to.throw(/target is specified/);
-      expect(css.withTarget_(target1, () => css.getCurrentFontSize()))
+      expect(css.withTarget(target1, () => css.getCurrentFontSize()))
           .to.equal(16);
-      expect(css.withTarget_(target2, () => css.getCurrentFontSize()))
+      expect(css.withTarget(target2, () => css.getCurrentFontSize()))
           .to.equal(12);
     });
 
@@ -688,7 +962,7 @@ describes.sandboxed('MeasureScanner', {}, () => {
       target1.style.width = '11px';
       target1.style.height = '12px';
       expect(() => css.getCurrentElementSize()).to.throw(/target is specified/);
-      expect(css.withTarget_(target1, () => css.getCurrentElementSize()))
+      expect(css.withTarget(target1, () => css.getCurrentElementSize()))
           .to.deep.equal({width: 11, height: 12});
     });
 
@@ -702,14 +976,14 @@ describes.sandboxed('MeasureScanner', {}, () => {
       // Normal selectors search whole DOM and don't need context.
       expect(css.getElementSize('#target1', null))
           .to.deep.equal({width: 11, height: 12});
-      expect(css.withTarget_(target2,
+      expect(css.withTarget(target2,
           () => css.getElementSize('#target1', null)))
           .to.deep.equal({width: 11, height: 12});
 
       // Closest selectors always need a context node.
       expect(() => css.getElementSize('#target1', 'closest'))
           .to.throw(/target is specified/);
-      expect(css.withTarget_(child,
+      expect(css.withTarget(child,
           () => css.getElementSize('.parent', 'closest')))
           .to.deep.equal({width: 11, height: 12});
     });
@@ -728,12 +1002,10 @@ describes.sandboxed('MeasureScanner', {}, () => {
   });
 
 
-  describes.fakeWin('createRunner', {amp: 1}, env => {
-    let resources;
+  describe('createRunner', () => {
     let amp1, amp2;
 
     beforeEach(() => {
-      resources = env.win.services.resources.obj;
       amp1 = env.createAmpElement();
       amp2 = env.createAmpElement();
       sandbox.stub(amp1, 'isUpgraded', () => true);
@@ -747,29 +1019,29 @@ describes.sandboxed('MeasureScanner', {}, () => {
     });
 
     function waitForNextMicrotask() {
-      return Promise.resolve()
+      return vsync.measurePromise(() => {})
           .then(() => Promise.resolve())
           .then(() => Promise.all([Promise.resolve()]));
     }
 
     function createRunner(spec) {
-      const scanner = new MeasureScanner(
-          window, document, 'https://acme.org/', true);
-      scanner.scan(spec);
-      return scanner.createRunner(resources);
+      const builder = new Builder(
+          win, doc, 'https://acme.org/',
+          vsync, resources);
+      return builder.createRunner(spec);
     }
 
     it('should unblock non-AMP elements immediately', () => {
-      let runner;
-      createRunner([
+      return createRunner([
         {target: target1, keyframes: {}},
         {target: target2, keyframes: {}},
-      ]).then(res => {
-        runner = res;
-      });
-      return waitForNextMicrotask().then(() => {
-        expect(runner).to.be.ok;
+      ]).then(runner => {
         expect(runner.requests_).to.have.length(2);
+        expect(runner.requests_[0].target).to.equal(target1);
+        expect(runner.requests_[1].target).to.equal(target2);
+        expect(requireLayoutSpy).to.have.callCount(2);
+        expect(requireLayoutSpy).to.be.calledWith(target1);
+        expect(requireLayoutSpy).to.be.calledWith(target2);
       });
     });
 
@@ -797,6 +1069,11 @@ describes.sandboxed('MeasureScanner', {}, () => {
       }).then(() => {
         expect(runner).to.be.ok;
         expect(runner.requests_).to.have.length(2);
+        expect(runner.requests_[0].target).to.equal(amp1);
+        expect(runner.requests_[1].target).to.equal(amp2);
+        expect(requireLayoutSpy).to.have.callCount(2);
+        expect(requireLayoutSpy).to.be.calledWith(amp1);
+        expect(requireLayoutSpy).to.be.calledWith(amp2);
       });
     });
   });
@@ -841,9 +1118,9 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
     anim1Mock = sandbox.mock(anim1);
     anim2Mock = sandbox.mock(anim2);
 
-    target1 = {animate: () => anim1};
+    target1 = {style: createStyle(), animate: () => anim1};
     target1Mock = sandbox.mock(target1);
-    target2 = {animate: () => anim2};
+    target2 = {style: createStyle(), animate: () => anim2};
     target2Mock = sandbox.mock(target2);
 
     runner = new WebAnimationRunner([
@@ -861,6 +1138,14 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
     anim1Mock.verify();
     anim2Mock.verify();
   });
+
+  function createStyle() {
+    const style = {};
+    style.setProperty = (k, v) => {
+      style[k] = v;
+    };
+    return style;
+  }
 
   it('should call start on all animatons', () => {
     target1Mock.expects('animate')
@@ -887,6 +1172,24 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
     expect(() => {
       runner.start();
     }).to.throw();
+  });
+
+  it('should set vars on start', () => {
+    const vars = {
+      '--var1': '1px',
+      '--var2': '2s',
+    };
+    runner = new WebAnimationRunner([
+      {vars, target: target1, keyframes: keyframes1, timing: timing1},
+    ]);
+    target1Mock.expects('animate')
+        .withExactArgs(keyframes1, timing1)
+        .returns(anim1)
+        .once();
+
+    runner.start();
+    expect(target1.style['--var1']).to.equal('1px');
+    expect(target1.style['--var2']).to.equal('2s');
   });
 
   it('should complete all animations are complete', () => {
