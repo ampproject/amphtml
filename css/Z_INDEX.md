@@ -13,7 +13,6 @@ i-amphtml-video-mask                             |   1            |   css/amp.cs
 .i-amphtml-element > [overflow]                  |   2            |   css/amp.css
 .amp-carousel-button                             |   10           |   extensions/amp-carousel/0.1/amp-carousel.css
 amp-sticky-ad                                    |   11           |   extensions/amp-sticky-ad/1.0/amp-sticky-ad.css
-amp-sticky-ad                                    |   11           |   extensions/amp-sticky-ad/0.1/amp-sticky-ad.css
 amp-sticky-ad-top-padding                        |   12           |   extensions/amp-sticky-ad/1.0/amp-sticky-ad.css
 amp-app-banner                                   |   13           |   extensions/amp-app-banner/0.1/amp-app-banner.css
 .amp-app-banner-dismiss-button                   |   14           |   extensions/amp-app-banner/0.1/amp-app-banner.css

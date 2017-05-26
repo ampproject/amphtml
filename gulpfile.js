@@ -44,7 +44,7 @@ var hostname3p = argv.hostname3p || '3p.ampproject.net';
 
 // All declared extensions.
 var extensions = {};
-var aliasExtensionsCopyPath = {};
+var extensionAliasFilePath = {};
 
 // Each extension and version must be listed individually here.
 // NOTE: No new extensions must pass the NO_TYPE_CHECK argument.
@@ -137,7 +137,7 @@ declareExtension('amp-viewer-integration', '0.1', {
 });
 declareExtension('amp-video', '0.1', false);
 declareExtension('amp-youtube', '0.1', false);
-declareAliasExtensionVersion(
+declareExtensionVersionAlias(
     'amp-sticky-ad', '0.1', /* lastestVersion */ '1.0', /* hasCss */ true);
 /**
  * @param {string} name
@@ -172,11 +172,11 @@ function declareExtension(name, version, hasCssOrOptions, opt_noTypeCheck,
  * @param {string} lastestVersion
  * @param {boolean} hasCss
  */
-function declareAliasExtensionVersion(name, version, lastestVersion, hasCss) {
-  aliasExtensionsCopyPath[name + '-' + version + '.js'] =
+function declareExtensionVersionAlias(name, version, lastestVersion, hasCss) {
+  extensionAliasFilePath[name + '-' + version + '.js'] =
       name + '-' + lastestVersion + '.js';
   if (hasCss) {
-    aliasExtensionsCopyPath[name + '-' + version + '.css'] =
+    extensionAliasFilePath[name + '-' + version + '.css'] =
       name + '-' + lastestVersion + '.css';
   }
 }
@@ -372,15 +372,6 @@ function copyCss() {
 }
 
 /**
- * Copy built extension to alias extension
- */
-function copyAliasExtensions() {
-  for (var key in aliasExtensionsCopyPath) {
-    fs.copySync('dist/v0/' + aliasExtensionsCopyPath[key], 'dist/v0/' + key);
-  }
-}
-
-/**
  * Enables watching for file changes in css, extensions.
  * @return {!Promise}
  */
@@ -558,6 +549,15 @@ function dist() {
   ]).then(() => {
     copyAliasExtensions();
   });
+}
+
+/**
+ * Copy built extension to alias extension
+ */
+function copyAliasExtensions() {
+  for (var key in extensionAliasFilePath) {
+    fs.copySync('dist/v0/' + extensionAliasFilePath[key], 'dist/v0/' + key);
+  }
 }
 
 /**
