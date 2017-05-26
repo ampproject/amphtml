@@ -32,7 +32,7 @@ tags: {  # <amp-imgur>
   satisfies: "amp-imgur"
   requires: "amp-imgur extension .js script"
   attrs: {
-    name: "data-imgurid"
+    name: "data-imgur-id"
     mandatory: true
   }
   attr_lists: "extended-amp-global"
