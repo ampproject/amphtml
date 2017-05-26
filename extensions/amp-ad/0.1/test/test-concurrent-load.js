@@ -14,45 +14,76 @@
  * limitations under the License.
  */
 
-import {getAmpAdRenderOutsideViewport} from '../concurrent-load';
+import {
+  getAmpAdRenderOutsideViewport,
+  is3pThrottled,
+  incrementLoadingAds,
+} from '../concurrent-load';
 import {createElementWithAttributes} from '../../../../src/dom';
+import {installTimerService} from '../../../../src/service/timer-impl';
+import * as lolex from 'lolex';
 
 describes.realWin('concurrent-load', {}, env => {
 
-  it('getAmpAdRenderOutsideViewport should return null if ' +
-      'data-loading-strategy attribute does not exist', () => {
-    const element = env.win.document.createElement('amp-ad');
-    expect(getAmpAdRenderOutsideViewport(element)).to.be.null;
+  describe('getAmpAdRenderOutsideViewport', () => {
+    it('should return null if ' +
+        'data-loading-strategy attribute does not exist', () => {
+      const element = env.win.document.createElement('amp-ad');
+      expect(getAmpAdRenderOutsideViewport(element)).to.be.null;
+    });
+
+    it('getAmpAdRenderOutsideViewport should respect ' +
+        'data-loading-strategy attribute', () => {
+      // data-loading-strategy=prefer-viewability-over-views is 1.25
+      verifyGetAmpAdRenderOutsideViewport(
+          'prefer-viewability-over-views', 1.25);
+      // data-loading-strategy attribute with no value is 1.25
+      verifyGetAmpAdRenderOutsideViewport('', 1.25);
+
+      verifyGetAmpAdRenderOutsideViewport('0', 0);
+      verifyGetAmpAdRenderOutsideViewport('0.256', 0.256);
+      verifyGetAmpAdRenderOutsideViewport('1.25', 1.25);
+      verifyGetAmpAdRenderOutsideViewport('3.0', 3);
+
+      expectGetAmpAdRenderOutsideViewportThrow('3.1');
+      expectGetAmpAdRenderOutsideViewportThrow('-0.1');
+      expectGetAmpAdRenderOutsideViewportThrow('invalid-value');
+    });
+
+    function verifyGetAmpAdRenderOutsideViewport(loadingStrategy, viewportNum) {
+      const element = createElementWithAttributes(env.win.document, 'amp-ad', {
+        'data-loading-strategy': loadingStrategy,
+      });
+      expect(getAmpAdRenderOutsideViewport(element)).to.equal(viewportNum);
+    }
+
+    function expectGetAmpAdRenderOutsideViewportThrow(loadingStrategy) {
+      const element = createElementWithAttributes(env.win.document, 'amp-ad', {
+        'data-loading-strategy': loadingStrategy,
+      });
+      expect(() => getAmpAdRenderOutsideViewport(element)).to.throw();
+    }
   });
 
-  it('getAmpAdRenderOutsideViewport should respect ' +
-      'data-loading-strategy attribute', () => {
-    // data-loading-strategy=prefer-viewability-over-views is 1.25
-    verifyGetAmpAdRenderOutsideViewport('prefer-viewability-over-views', 1.25);
-    // data-loading-strategy attribute with no value is 1.25
-    verifyGetAmpAdRenderOutsideViewport('', 1.25);
+  describe('incrementLoadingAds', () => {
 
-    verifyGetAmpAdRenderOutsideViewport('0', 0);
-    verifyGetAmpAdRenderOutsideViewport('0.256', 0.256);
-    verifyGetAmpAdRenderOutsideViewport('1.25', 1.25);
-    verifyGetAmpAdRenderOutsideViewport('3.0', 3);
+    let win;
+    let clock;
 
-    expectGetAmpAdRenderOutsideViewportThrow('3.1');
-    expectGetAmpAdRenderOutsideViewportThrow('-0.1');
-    expectGetAmpAdRenderOutsideViewportThrow('invalid-value');
+    beforeEach(() => {
+      win = env.win;
+      clock = lolex.install(win, 0, ['Date', 'setTimeout', 'clearTimeout']);
+      installTimerService(win);
+    });
+
+    it('should throttle ad loading one per second', () => {
+      expect(is3pThrottled(win)).to.be.false;
+      incrementLoadingAds(win);
+      expect(is3pThrottled(win)).to.be.true;
+      clock.tick(999);
+      expect(is3pThrottled(win)).to.be.true;
+      clock.tick(1);
+      expect(is3pThrottled(win)).to.be.false;
+    });
   });
-
-  function verifyGetAmpAdRenderOutsideViewport(loadingStrategy, viewportNum) {
-    const element = createElementWithAttributes(env.win.document, 'amp-ad', {
-      'data-loading-strategy': loadingStrategy,
-    });
-    expect(getAmpAdRenderOutsideViewport(element)).to.equal(viewportNum);
-  }
-
-  function expectGetAmpAdRenderOutsideViewportThrow(loadingStrategy) {
-    const element = createElementWithAttributes(env.win.document, 'amp-ad', {
-      'data-loading-strategy': loadingStrategy,
-    });
-    expect(() => getAmpAdRenderOutsideViewport(element)).to.throw();
-  }
 });
