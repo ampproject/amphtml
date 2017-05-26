@@ -713,17 +713,17 @@ export class Bind {
         // Once the user interacts with these elements, the JS properties
         // underlying these attributes must be updated for the change to be
         // visible to the user.
-        const requiresJsUpdate =
+        const updateElementProperty =
             element.tagName == 'INPUT' && property in element;
         const oldValue = element.getAttribute(property);
 
         let attributeChanged = false;
         if (typeof newValue === 'boolean') {
-          if (requiresJsUpdate) {
+          if (updateElementProperty && element[property] !== newValue) {
             // Property value *must* be read before the attribute is changed.
             // Before user interaction, attribute updates affect the property.
-            attributeChanged = element[property] !== newValue;
             element[property] = newValue;
+            attributeChanged = true;
           } else {
             attributeChanged =
                 (oldValue === null && newValue) ||
