@@ -1,6 +1,11 @@
-# <a name="amp-access-"></a> AMP Access Specification
+# <a name="amp-access-"></a> amp-access
 
-**This extension is under active development, and the version number of the specification section should provide guidance to its evolution.**
+[TOC]
+
+{% call callout('Important', type='caution') %}
+This extension is under active development, and the version number of the specification section should provide guidance to its evolution.
+{% endcall %}
+
 
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
@@ -25,7 +30,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Availability</strong></td>
-    <td>Stable</td>
+    <td>In development</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
