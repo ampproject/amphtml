@@ -83,14 +83,15 @@ class AmpWorker {
     this.worker_ = null;
 
     /** @const @private {!Promise} */
-    this.fetchPromise_ =
-        this.xhr_.fetchText(url, {ampCors: false}).then(text => {
-          // Workaround since Worker constructor only accepts same origin URLs.
-          const blob = new win.Blob([text], {type: 'text/javascript'});
-          const blobUrl = win.URL.createObjectURL(blob);
-          this.worker_ = new win.Worker(blobUrl);
-          this.worker_.onmessage = this.receiveMessage_.bind(this);
-        });
+    this.fetchPromise_ = this.xhr_.fetchText(url, {
+      ampCors: false,
+    }).then(res => res.text()).then(text => {
+      // Workaround since Worker constructor only accepts same origin URLs.
+      const blob = new win.Blob([text], {type: 'text/javascript'});
+      const blobUrl = win.URL.createObjectURL(blob);
+      this.worker_ = new win.Worker(blobUrl);
+      this.worker_.onmessage = this.receiveMessage_.bind(this);
+    });
 
     /**
      * Array of in-flight messages pending response from worker.
