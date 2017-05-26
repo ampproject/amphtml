@@ -528,7 +528,9 @@ describe('XHR', function() {
           method: 'GET',
           headers: {'Accept': 'text/plain'},
         })).to.be.true;
-        return promise.then(text => {
+        return promise.then(res => {
+          return res.text();
+        }).then(text => {
           expect(text).to.equal(TEST_TEXT);
         });
       });
