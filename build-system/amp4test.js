@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
-var app = module.exports = require('express').Router();
+const app = module.exports = require('express').Router();
 
 app.get('/compose-doc', function(req, res) {
   res.send(`
@@ -38,13 +39,13 @@ ${req.query.body}
  * A server side temporary request storage which is useful for testing
  * browser sent HTTP requests.
  */
-var bank = {};
+const bank = {};
 
 /**
  * Deposit a request. An ID has to be specified. Will override previous request
  * if the same ID already exists.
  */
-app.get('/request-bank/deposit/:id', function(req, res) {
+app.get('/request-bank/deposit/:id', (req, res) => {
   if (typeof bank[req.params.id] === 'function') {
     bank[req.params.id](req);
   } else {
@@ -58,8 +59,8 @@ app.get('/request-bank/deposit/:id', function(req, res) {
  * return it immediately. Otherwise wait until it gets deposited
  * The same request cannot be withdrawn twice at the same time.
  */
-app.get('/request-bank/withdraw/:id', function(req, res) {
-  var result = bank[req.params.id];
+app.get('/request-bank/withdraw/:id', (req, res) => {
+  const result = bank[req.params.id];
   if (typeof result === 'function') {
     return res.status(500).send('another client is withdrawing this ID');
   }
