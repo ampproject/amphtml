@@ -377,7 +377,7 @@ For complete documentation and additional examples please see: https://marketing
         },
         "trackEvent": {
           "on": "click",
-          "selector": "#fb-pixel",
+          "selector": "#test1",
           "request": "event",
           "vars": {
             "eventName": "ClickedBtn-x"
@@ -392,7 +392,7 @@ For complete documentation and additional examples please see: https://marketing
       },
       "trackAddToWishlist": {
         "on": "click",
-        "selector": "#fb-addToWishlist",
+        "selector": "#test1",
         "request": "eventAddToWishlist",
         "vars": {
           "content_ids": ["1234"],
@@ -854,13 +854,6 @@ For complete documentation and additional examples please see: https://marketing
 
 <div class="logo"></div>
 <h1 id="top">AMP Analytics</h1>
-
-<p>
-<button id="fb-pixel">Track click with Facebook Pixel custom event</button> | <button id="fb-addToWishlist">Track Add To Wishlist</button>
-</p>
-<p>
-REF: https://www.facebook.com/business/a/facebook-pixel and https://developers.facebook.com/docs/ads-for-websites/pixel-events/v2.9#events
-</p>
 <span id="test1" class="box" data-vars-title="Example request with element level overrides">
   Click here to generate an event
 </span>
