@@ -15,7 +15,11 @@
  */
 
 import {AmpViewerIntegration} from '../amp-viewer-integration';
-import {Messaging, WindowPortEmulator, parseMessage} from '../messaging.js';
+import {
+  Messaging,
+  WindowPortEmulator,
+  parseMessage,
+} from '../messaging/messaging.js';
 import {ViewerForTesting} from './viewer-for-testing.js';
 import {getSourceUrl} from '../../../../src/url';
 
