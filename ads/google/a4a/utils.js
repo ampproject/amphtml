@@ -158,6 +158,7 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
   if (opt_experimentIds) {
     eids = mergeExperimentIds(opt_experimentIds, eids);
   }
+  const containerTypeArray = Object.keys(containerTypeSet);
   return {
     'ifi': win['ampAdGoogleIfiCounter']++,
     'adf': domFingerprint(adElement),
@@ -168,8 +169,7 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
     'oid': '2',
     pfx,
     'rc': a4a.fromResumeCallback ? 1 : null,
-    'act': containerTypeSet.length ?
-      Object.keys(containerTypeSet).join() : null,
+    'act': containerTypeArray.length ? containerTypeArray.join() : null,
   };
 }
 

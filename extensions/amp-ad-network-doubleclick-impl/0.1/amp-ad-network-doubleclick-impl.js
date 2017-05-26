@@ -70,6 +70,7 @@ const DOUBLECLICK_BASE_URL =
 const PAGE_LEVEL_PARAMS_ = {
   'gdfp_req': '1',
   'sfv': 'A',
+  'u_sd': window.devicePixelRatio,
 };
 
 /** @private @const {string} */
