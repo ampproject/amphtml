@@ -74,6 +74,10 @@ ident     \-?[a-zA-Z_][\-a-zA-Z0-9_]*
 {T}{R}{A}{N}{S}{L}{A}{T}{E}{Y}\(    return 'TRANSLATE_Y_START'
 {T}{R}{A}{N}{S}{L}{A}{T}{E}{Z}\(    return 'TRANSLATE_Z_START'
 {T}{R}{A}{N}{S}{L}{A}{T}{E}3{D}\(   return 'TRANSLATE_3D_START'
+{R}{A}{N}{D}\(                      return 'RAND_START'
+{W}{I}{D}{T}{H}\(                   return 'WIDTH_START'
+{H}{E}{I}{G}{H}{T}\(                return 'HEIGHT_START'
+{C}{L}{O}{S}{E}{S}{T}\(             return 'CLOSEST_START'
 {ident}\(                           return 'FUNCTION_START'
 {ident}                             return 'IDENT'
 \-\-{ident}                         return 'VAR_NAME';
@@ -243,6 +247,10 @@ function:
       {$$ = $1;}
   | translate_function
       {$$ = $1;}
+  | dim_function
+      {$$ = $1;}
+  | rand_function
+      {$$ = $1;}
   | any_function
       {$$ = $1;}
   ;
@@ -304,6 +312,42 @@ translate_function:
       {$$ = new ast.CssTranslateNode('z', $2);}
   | TRANSLATE_3D_START args ')'
       {$$ = new ast.CssTranslateNode('3d', $2);}
+  ;
+
+
+/**
+ * AMP-specific `width()` and `height()` functions:
+ * - `width(".selector")`
+ * - `height(".selector")`
+ * - `width(closest(".selector"))`
+ * - `height(closest(".selector"))`
+ */
+dim_function:
+    WIDTH_START ')'
+      {$$ = new ast.CssDimSizeNode('w');}
+  | HEIGHT_START ')'
+      {$$ = new ast.CssDimSizeNode('h');}
+  | WIDTH_START STRING ')'
+      {$$ = new ast.CssDimSizeNode('w', $2.slice(1, -1));}
+  | HEIGHT_START STRING ')'
+      {$$ = new ast.CssDimSizeNode('h', $2.slice(1, -1));}
+  | WIDTH_START CLOSEST_START STRING ')' ')'
+      {$$ = new ast.CssDimSizeNode('w', $3.slice(1, -1), 'closest');}
+  | HEIGHT_START CLOSEST_START STRING ')' ')'
+      {$$ = new ast.CssDimSizeNode('h', $3.slice(1, -1), 'closest');}
+  ;
+
+
+/**
+ * AMP-specific `rand()` functions:
+ * - `rand()` - a random value between 0 and 1
+ * - `rand(min, max)` - a random value between min and max
+ */
+rand_function:
+    RAND_START ')'
+      {$$ = new ast.CssRandNode();}
+  | RAND_START literal_or_function ',' literal_or_function ')'
+      {$$ = new ast.CssRandNode($2, $4);}
   ;
 
 

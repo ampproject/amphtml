@@ -163,7 +163,7 @@ Top-level animation and animation components may contain timing properties. Thes
   </tr>
 </table>
 
-All timing properties allow either a direct numeric/string values or CSS values. For instance, "duration" can be specified as `1000` or `1s` or `1000ms`. In addition, CSS `calc()` and `var()` expressions are also allowed (see notes on `var()` in the section below).
+All timing properties allow either a direct numeric/string values or CSS values. For instance, "duration" can be specified as `1000` or `1s` or `1000ms`. In addition, `calc()` and `var()` and other CSS expressions are also allowed.
 
 An example of timing properties in JSON:
 ```text
@@ -246,7 +246,7 @@ The array-form can also include "easing":
 
 For additional keyframes formats refer to [Web Animations spec](https://www.w3.org/TR/web-animations/#processing-a-keyframes-argument).
 
-The property values allow any valid CSS values, including `calc()` and `var()` expressions (see notes on `var()` in the section below).
+The property values allow any valid CSS values, including `calc()`, `var()` and other CSS expressions.
 
 
 #### Whitelisted properties for keyframes
@@ -301,7 +301,7 @@ can be reduced to an array of components. For instance:
 
 ### `var()` and `calc()` expressions
 
-`amp-animation` allows use of `var()` and `calc()` expressions.
+`amp-animation` allows use of `var()` and `calc()` expressions for timing and keyframes values.
 
 For instance:
 ```html
@@ -332,6 +332,46 @@ Both `var()` and `calc()` polyfilled on platforms that do not directly support t
 ]
 </script>
 </amp-animation>
+```
+
+### CSS extensions
+
+`amp-animation` provides several CSS extensions for typical animations needs: `rand()`, `width()`, and `height()`. These functions can be used everywhere where CSS values can be used within `amp-animation`, including timing and keyframes values.
+
+#### CSS `rand()` extension
+
+The `rand()` function returns a random CSS value. There are two forms.
+
+The form without arguments simply returns the random number between 0 and 1.
+```
+{
+  "animation-delay": "calc(10s * rand())"
+}
+```
+
+The second form has two arguments and returns the random value between these two arguments.
+```
+{
+  "animation-delay": "rand(5s, 10s)"
+}
+```
+
+#### CSS `width()` and `height()` extensions
+
+The `width()` and `height()` extensions return the width/height of the animated element or the element specified by the selector. The returned value is in pixels, e.g. `100px`.
+
+The following forms are supported:
+ - `width()` and `height()` - width/height of the animated element.
+ - `width('.selector')` and `height('.selector')` - width/height of the element specified by the selector. Any CSS selector can be used. For instance, `width('#container > li')`.
+ - `width(closest('.selector'))` and `height(closest('.selector'))` - width/height of the element specified by the closest selector.
+
+The `width()` and `height()` are epsecially useful for transforms. The `left`, `top` and similar CSS properties that can use `%` values to express animations proportional to container size. However, `transform` property interpretes `%` values differently - as a percent of the selected element. Thus, the `width()` and `height()` can be used to express transform animations in terms of container elements and similar.
+
+These functions can be combined with `calc()`, `var()` and other CSS expressions. For instance:
+```
+{
+  "transform": "translateX(calc(width('#container') + 10px))"
+}
 ```
 
 

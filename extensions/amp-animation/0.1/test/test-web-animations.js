@@ -28,18 +28,16 @@ import {user} from '../../../../src/log';
 describes.sandboxed('MeasureScanner', {}, () => {
   let target1, target2;
   let warnStub;
-  let targetsBySelector;
 
   beforeEach(() => {
     target1 = document.createElement('div');
+    target1.id = 'target1';
+    target1.classList.add('target');
     target2 = document.createElement('div');
+    target2.id = 'target2';
+    target2.classList.add('target');
     document.body.appendChild(target1);
     document.body.appendChild(target2);
-    targetsBySelector = {
-      '#target1': [target1],
-      '#target2': [target2],
-      '.target': [target1, target2],
-    };
     sandbox.stub(window, 'matchMedia', query => {
       if (query == 'match') {
         return {matches: true};
@@ -58,12 +56,8 @@ describes.sandboxed('MeasureScanner', {}, () => {
   });
 
   function scan(spec) {
-    const targets = {target1, target2};
-    const scanner = new MeasureScanner(window,
-        'https://acme.org/', {
-          resolveTarget: name => targets[name] || null,
-          queryTargets: selector => targetsBySelector[selector] || [],
-        }, true);
+    const scanner = new MeasureScanner(
+        window, document, 'https://acme.org/', true);
     scanner.scan(spec);
     return scanner.requests_;
   }
@@ -400,6 +394,38 @@ describes.sandboxed('MeasureScanner', {}, () => {
     ]);
   });
 
+  it('should parse width/height functions', () => {
+    target2.style.width = '11px';
+    target2.style.height = '22px';
+    const keyframes = scan({
+      target: target1,
+      keyframes: {
+        transform: [
+          'translateX(width("#target2"))',
+          'translateY(height("#target2"))',
+        ],
+      },
+    })[0].keyframes;
+    expect(keyframes.transform).to.jsonEqual([
+      'translatex(11px)',
+      'translatey(22px)',
+    ]);
+  });
+
+  it('should parse rand function', () => {
+    sandbox.stub(Math, 'random', () => 0.25);
+    const keyframes = scan({
+      target: target1,
+      keyframes: {
+        opacity: [
+          0,
+          'rand(0.5, 0.6)',
+        ],
+      },
+    })[0].keyframes;
+    expect(keyframes.opacity).to.jsonEqual(['0', '0.525']);
+  });
+
   it('should check media in top animation', () => {
     const requests = scan({
       duration: 500,
@@ -442,6 +468,26 @@ describes.sandboxed('MeasureScanner', {}, () => {
     expect(requests[2].timing.duration).to.equal(400);
     expect(requests[3].target).to.equal(target2);
     expect(requests[3].timing.duration).to.equal(400);
+  });
+
+  it('should find targets by complex selector', () => {
+    const requests = scan([
+      {selector: '#target1.target', keyframes: {}},
+    ]);
+    expect(requests).to.have.length(1);
+    // `#target1.target`
+    expect(requests[0].target).to.equal(target1);
+    expect(requests[0].timing.duration).to.equal(0);
+  });
+
+  it('should find target by ID', () => {
+    const requests = scan([
+      {target: 'target1', keyframes: {}},
+    ]);
+    expect(requests).to.have.length(1);
+    // `#target1`
+    expect(requests[0].target).to.equal(target1);
+    expect(requests[0].timing.duration).to.equal(0);
   });
 
   it('should allow not-found targets', () => {
@@ -502,7 +548,7 @@ describes.sandboxed('MeasureScanner', {}, () => {
 
     beforeEach(() => {
       const scanner = new MeasureScanner(
-          window, 'https://acme.org/', {}, true);
+          window, document, 'https://acme.org/', true);
       css = scanner.css_;
       parseSpy = sandbox.spy(css, 'resolveAsNode_');
     });
@@ -646,6 +692,28 @@ describes.sandboxed('MeasureScanner', {}, () => {
           .to.deep.equal({width: 11, height: 12});
     });
 
+    it('should resolve the selected element size', () => {
+      target1.style.width = '11px';
+      target1.style.height = '12px';
+      target1.classList.add('parent');
+      const child = target1.ownerDocument.createElement('div');
+      target1.appendChild(child);
+
+      // Normal selectors search whole DOM and don't need context.
+      expect(css.getElementSize('#target1', null))
+          .to.deep.equal({width: 11, height: 12});
+      expect(css.withTarget_(target2,
+          () => css.getElementSize('#target1', null)))
+          .to.deep.equal({width: 11, height: 12});
+
+      // Closest selectors always need a context node.
+      expect(() => css.getElementSize('#target1', 'closest'))
+          .to.throw(/target is specified/);
+      expect(css.withTarget_(child,
+          () => css.getElementSize('.parent', 'closest')))
+          .to.deep.equal({width: 11, height: 12});
+    });
+
     it('should resolve a valid URL', () => {
       expect(css.resolveUrl('/path'))
           .to.equal('https://acme.org/path');
@@ -685,11 +753,8 @@ describes.sandboxed('MeasureScanner', {}, () => {
     }
 
     function createRunner(spec) {
-      const targets = {target1, target2, amp1, amp2};
-      const scanner = new MeasureScanner(window,
-          'https://acme.org/', {
-            resolveTarget: name => targets[name] || null,
-          }, true);
+      const scanner = new MeasureScanner(
+          window, document, 'https://acme.org/', true);
       scanner.scan(spec);
       return scanner.createRunner(resources);
     }
