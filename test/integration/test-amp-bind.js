@@ -27,6 +27,8 @@ describe.skip('amp-bind', function() {
   let numSetStates;
   let numMutated;
 
+  this.timeout(5000);
+
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     numSetStates = 0;

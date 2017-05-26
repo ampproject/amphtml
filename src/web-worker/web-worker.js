@@ -24,11 +24,17 @@
 import '../../third_party/babel/custom-babel-helpers';
 import {BindEvaluator} from '../../extensions/amp-bind/0.1/bind-evaluator';
 import {FromWorkerMessageDef, ToWorkerMessageDef} from './web-worker-defines';
-import {initLogConstructor} from '../../src/log';
+import {initLogConstructor} from '../log';
 import {installWorkerErrorReporting} from '../worker-error-reporting';
+import {install as installArrayIncludes} from '../polyfills/array-includes';
+import {install as installMathSign} from '../polyfills/math-sign';
 
 initLogConstructor();
 installWorkerErrorReporting('ww');
+
+// Polyfills.
+installArrayIncludes(self);
+installMathSign(self);
 
 /**
  * Element `i` contains the evaluator for scope `i`.
