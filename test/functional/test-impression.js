@@ -36,7 +36,7 @@ describe('impression', () => {
     sandbox.stub(viewer, 'getParam');
     xhr = xhrFor(window);
     expect(xhr.fetchJson).to.be.defined;
-    sandbox.stub(xhr, 'fetchJson' () => {
+    sandbox.stub(xhr, 'fetchJson', () => {
       return Promise.resolve({
         json() {
           return Promise.resolve(null);
@@ -101,7 +101,7 @@ describe('impression', () => {
             return Promise.resolve({
               'location': 'test_location?gclid=654321',
             });
-          }
+          },
         });
       }, 5000);
     }));
@@ -125,7 +125,7 @@ describe('impression', () => {
         resolve({
           json() {
             return Promise.resolve(null);
-          }
+          },
         });
       }, 10000);
     }));

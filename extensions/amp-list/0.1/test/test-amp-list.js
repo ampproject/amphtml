@@ -153,7 +153,7 @@ describe('amp-list component', () => {
         json() {
           return Promise.resolve({});
         },
-      });.once();
+      })).once();
     templatesMock.expects('findAndRenderTemplateArray').never();
     return expect(list.layoutCallback()).to.eventually.be
         .rejectedWith(/Response must contain an array/);
@@ -170,7 +170,7 @@ describe('amp-list component', () => {
         json() {
           return Promise.resolve({different});
         },
-      });.once();
+      })).once();
     templatesMock.expects('findAndRenderTemplateArray')
         .withExactArgs(element, different)
         .returns(Promise.resolve([itemElement])).once();

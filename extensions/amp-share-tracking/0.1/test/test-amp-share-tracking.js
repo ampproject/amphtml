@@ -222,7 +222,7 @@ describes.fakeWin('amp-share-tracking', {
       status: 404,
       json() {
         return Promise.reject('404 bad json');
-      }
+      },
     }));
     const ampShareTracking = getAmpShareTracking('http://foo.bar');
     return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {

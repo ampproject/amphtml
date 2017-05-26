@@ -94,7 +94,7 @@ describe('amp-analytics', function() {
           }
           return Promise.resolve({
             json() {
-              return Promise.resolve(SON.parse(jsonMockResponses[url]));
+              return Promise.resolve(JSON.parse(jsonMockResponses[url]));
             },
           });
         }};
