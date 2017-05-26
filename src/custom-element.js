@@ -1763,7 +1763,7 @@ function createBaseCustomElementClass(win) {
           this.sandboxAnalyticsElement_ = insertAnalyticsElement(
               this,
               config,
-              this.implementation_.isloadingAnalyticsExtension());
+              false);
           if (!this.sandboxAnalyticsElement_.signals) {
             return;
           }

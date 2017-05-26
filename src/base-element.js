@@ -389,11 +389,6 @@ export class BaseElement {
    */
   onSandboxAnalyticsReadyCallback() {}
 
-  /** Subclasses can override this method */
-  isloadingAnalyticsExtension() {
-    return false;
-  }
-
   /**
    * Subclasses can override this method to opt-out of rendering the element
    * when it is not currently visible.
