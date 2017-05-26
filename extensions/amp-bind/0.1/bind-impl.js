@@ -724,15 +724,13 @@ export class Bind {
             // Before user interaction, attribute updates affect the property.
             element[property] = newValue;
             attributeChanged = true;
-          } else {
-            attributeChanged =
-                (oldValue === null && newValue) ||
-                (oldValue === '' && !newValue);
           }
-          if (newValue) {
+          if (newValue && oldValue !== '') {
             element.setAttribute(property, '');
-          } else {
+            attributeChanged = true;
+          } else if (!newValue && oldValue !== null) {
             element.removeAttribute(property);
+            attributeChanged = true;
           }
         } else if (newValue !== oldValue) {
           // TODO(choumx): Perform in worker with URL API.
@@ -750,7 +748,7 @@ export class Bind {
           // Rewriting can fail due to e.g. invalid URL.
           if (rewrittenNewValue !== undefined) {
             element.setAttribute(property, rewrittenNewValue);
-            if (requiresJsUpdate) {
+            if (updateElementProperty) {
               element[property] = rewrittenNewValue;
             }
             attributeChanged = true;
