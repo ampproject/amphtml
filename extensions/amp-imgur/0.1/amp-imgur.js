@@ -112,7 +112,6 @@ export class AmpImgur extends AMP.BaseElement {
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;
-      this.iframePromise_ = null;
     }
     if (this.unlistenMessage_) {
       this.unlistenMessage_();
