@@ -709,16 +709,29 @@ export class Bind {
         break;
 
       default:
+        // Some input elements treat some of their attributes as initial values.
+        // Once the user interacts with these elements, the JS properties
+        // underlying these attributes must be updated for the change to be
+        // visible to the user.
+        const requiresJsUpdate =
+            element.tagName == 'INPUT' && property in element;
         const oldValue = element.getAttribute(property);
 
         let attributeChanged = false;
         if (typeof newValue === 'boolean') {
-          if (newValue && oldValue !== '') {
+          if (newValue) {
             element.setAttribute(property, '');
-            attributeChanged = true;
-          } else if (!newValue && oldValue !== null) {
+          } else {
             element.removeAttribute(property);
-            attributeChanged = true;
+          }
+          if (requiresJsUpdate) {
+            const oldJsPropertyValue = element[property];
+            element[property] = newValue;
+            attributeChanged = oldJsPropertyValue !== newValue;
+          } else {
+            attributeChanged =
+                (oldValue === null && newValue) ||
+                (oldValue === '' && !newValue);
           }
         } else if (newValue !== oldValue) {
           // TODO(choumx): Perform in worker with URL API.
@@ -735,11 +748,10 @@ export class Bind {
           }
           // Rewriting can fail due to e.g. invalid URL.
           if (rewrittenNewValue !== undefined) {
-            // if (element.tagName == 'INPUT' && property in element) {
-            //   element[property] = rewriteAttributeValue;
-            // } else {
-              element.setAttribute(property, rewrittenNewValue);
-            // }
+            element.setAttribute(property, rewrittenNewValue);
+            if (requiresJsUpdate) {
+              element[property] = rewrittenNewValue;
+            }
             attributeChanged = true;
           }
         }
