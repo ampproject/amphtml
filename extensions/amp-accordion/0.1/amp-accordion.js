@@ -180,7 +180,7 @@ class AmpAccordion extends AMP.BaseElement {
    */
   clickHandler_(event) {
     // Need to support clicks on any children of the header except
-    // for buttons and links, which should not have their default behavior
+    // for on links, which should not have their default behavior
     // overidden.
     const target = dev().assertElement(event.target);
     if (target.tagName != 'A') {
