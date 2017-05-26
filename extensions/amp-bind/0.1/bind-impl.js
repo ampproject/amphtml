@@ -619,7 +619,6 @@ export class Bind {
    * @private
    */
   apply_(results, opt_isAmpStateMutation) {
-    debugger;
     const applyPromises = [];
     this.boundElements_.forEach(boundElement => {
       const {element, boundProperties} = boundElement;
