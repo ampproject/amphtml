@@ -27,6 +27,7 @@ import {FromWorkerMessageDef, ToWorkerMessageDef} from './web-worker-defines';
 import {initLogConstructor} from '../log';
 import {installWorkerErrorReporting} from '../worker-error-reporting';
 import {install as installArrayIncludes} from '../polyfills/array-includes';
+import {install as installObjectAssign} from '../polyfills/object-assign';
 import {install as installMathSign} from '../polyfills/math-sign';
 
 initLogConstructor();
@@ -34,6 +35,7 @@ installWorkerErrorReporting('ww');
 
 // Polyfills.
 installArrayIncludes(self);
+installObjectAssign(self);
 installMathSign(self);
 
 /**
