@@ -17,6 +17,7 @@
 import {CSS} from '../../../build/amp-accordion-0.1.css';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
+import {closest} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {removeFragment} from '../../../src/url';
 import {map} from '../../../src/utils/object';
@@ -183,7 +184,9 @@ class AmpAccordion extends AMP.BaseElement {
     // for on links, which should not have their default behavior
     // overidden.
     const target = dev().assertElement(event.target);
-    if (target.tagName != 'A') {
+    const header = dev().assertElement(event.currentTarget);
+    const anchor = closest(target, e => e.tagName == 'A', header);
+    if (anchor === null) {
       // Don't use clicks on links in header to expand/collapse.
       this.onHeaderPicked_(event);
     }
