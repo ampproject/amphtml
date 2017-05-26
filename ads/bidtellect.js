@@ -21,7 +21,7 @@ import {writeScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function bidtellect(global, data) {
-  const requiredParams = ['t','pid','sid'];
+  const requiredParams = ['t', 'pid', 'sid'];
   const optionalParams = [
     'sname',
     'pubid',
