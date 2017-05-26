@@ -328,7 +328,7 @@ export function imaVideo(global, data) {
   wrapperDiv.appendChild(bigPlayDiv);
   global.document.getElementById('c').appendChild(wrapperDiv);
 
-  window.addEventListener('message', onMessage);
+  window.addEventListener('message', event => { onMessage(global, event); });
 
   /**
    * Set-up code that can't run until the IMA lib loads.
@@ -352,17 +352,21 @@ export function imaVideo(global, data) {
       mouseMoveEvent = 'touchmove';
       mouseUpEvent = 'touchend';
     }
-    bigPlayDiv.addEventListener(interactEvent, onClick);
+    bigPlayDiv.addEventListener(interactEvent, () => { onClick(global); });
     playPauseDiv.addEventListener(interactEvent, onPlayPauseClick);
     progressBarWrapperDiv.addEventListener(mouseDownEvent, onProgressClick);
-    fullscreenDiv.addEventListener(interactEvent, onFullscreenClick);
+    fullscreenDiv.addEventListener(interactEvent,() => {
+      onFullscreenClick(global);
+    });
 
     const fullScreenEvents = [
       'fullscreenchange',
       'mozfullscreenchange',
       'webkitfullscreenchange'];
     fullScreenEvents.forEach(fsEvent => {
-      global.document.addEventListener(fsEvent, onFullscreenChange, false);
+      global.document.addEventListener(fsEvent,
+        () => { onFullscreenChange(global); },
+        false);
     });
 
     adDisplayContainer =
@@ -373,7 +377,8 @@ export function imaVideo(global, data) {
     adsLoader.getSettings().setPlayerVersion('0.1');
     adsLoader.addEventListener(
         global.google.ima.AdsManagerLoadedEvent.Type.ADS_MANAGER_LOADED,
-        onAdsManagerLoaded,
+        adsManagerLoadedEvent => {
+          onAdsManagerLoaded(global, adsManagerLoadedEvent); },
         false);
     adsLoader.addEventListener(
         global.google.ima.AdErrorEvent.Type.AD_ERROR,
@@ -399,14 +404,14 @@ export function imaVideo(global, data) {
  *
  * @visibleForTesting
  */
-export function onClick() {
+export function onClick(global) {
   playbackStarted = true;
   uiTicker = setInterval(uiTickerClick, 500);
   bigPlayDiv.removeEventListener(interactEvent, onClick);
   setStyle(bigPlayDiv, 'display', 'none');
   adDisplayContainer.initialize();
   videoPlayer.load();
-  playAds();
+  playAds(global);
 }
 
 /**
@@ -415,7 +420,7 @@ export function onClick() {
  *
  * @visibleForTesting
  */
-export function playAds() {
+export function playAds(global) {
   if (adsManager) {
     // Ad request resolved.
     try {
@@ -429,7 +434,7 @@ export function playAds() {
     }
   } else if (!adRequestFailed) {
     // Ad request did not yet resolve but also did not yet fail.
-    setTimeout(playAds, 250);
+    setTimeout(() => { playAds(global); }, 250);
   } else {
     // Ad request failed.
     window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
@@ -452,8 +457,7 @@ export function onContentEnded() {
  *
  * @visibleForTesting
  */
-export function onAdsManagerLoaded(adsManagerLoadedEvent) {
-  const global = window;
+export function onAdsManagerLoaded(global, adsManagerLoadedEvent) {
   const adsRenderingSettings = new global.google.ima.AdsRenderingSettings();
   adsRenderingSettings.restoreCustomPlaybackStateOnAdBreakComplete = true;
   adsRenderingSettings.uiElements =
@@ -465,7 +469,7 @@ export function onAdsManagerLoaded(adsManagerLoadedEvent) {
       onAdError);
   adsManager.addEventListener(
       global.google.ima.AdEvent.Type.CONTENT_PAUSE_REQUESTED,
-      onContentPauseRequested);
+      () => { onContentPauseRequested(global); });
   adsManager.addEventListener(
       global.google.ima.AdEvent.Type.CONTENT_RESUME_REQUESTED,
       onContentResumeRequested);
@@ -701,7 +705,7 @@ export function pauseVideo(event) {
  * Called when the user clicks on the fullscreen button. Makes the video player
  * fullscreen
  */
-function onFullscreenClick() {
+function onFullscreenClick(global) {
   if (fullscreen) {
     // The video is currently in fullscreen mode
     const cancelFullscreen = global.document.exitFullscreen ||
@@ -740,7 +744,7 @@ function onFullscreenClick() {
 /**
  * Called when the fullscreen mode of the browser or content player changes.
  */
-function onFullscreenChange() {
+function onFullscreenChange(global) {
   if (fullscreen) {
     // Resize the ad container
     adsManager.resize(
@@ -796,7 +800,7 @@ export function hideControls() {
 /**
  * Handles messages from the top window.
  */
-function onMessage(event) {
+function onMessage(global, event) {
   const msg = isObject(event.data) ? event.data : tryParseJson(event.data);
   if (msg === undefined) {
     return; // We only process valid JSON.
