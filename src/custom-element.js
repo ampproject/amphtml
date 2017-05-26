@@ -567,9 +567,10 @@ function createBaseCustomElementClass(win) {
       /** @private {?./layout-delay-meter.LayoutDelayMeter} */
       this.layoutDelayMeter_ = null;
 
-      if (this['whenUpgradedToCustomElement']) {
-        this['whenUpgradedToCustomElement'](this);
-        this['whenUpgradedToCustomElement'] = null;
+      if (this[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER]) {
+        this[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER](this);
+        this[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER] = null;
+        this[dom.UPGRADE_TO_CUSTOMELEMENT_PROMISE] = null;
       }
     }
 

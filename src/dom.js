@@ -28,6 +28,14 @@ const HTML_ESCAPE_CHARS = {
 };
 const HTML_ESCAPE_REGEX = /(&|<|>|"|'|`)/g;
 
+/** @const {string} */
+export const UPGRADE_TO_CUSTOMELEMENT_PROMISE =
+    '__AMP_UPGRADE_CUS_ELE_PROMISE__';
+
+/** @const {string} */
+export const UPGRADE_TO_CUSTOMELEMENT_RESOLVER =
+    '__AMP_UPGRADE_CUS_ELE_RESOLVER__';
+
 
 /**
  * Waits until the child element is constructed. Once the child is found, the
@@ -719,11 +727,11 @@ export function whenUpgradedToCustomElement(element) {
   }
   // If Element is still HTMLElement, wait for it to upgrade to customElement
   // Note: use pure string to avoid obfuscation between versions.
-  if (!element['upgradedToCustomElementPromise']) {
-    element['upgradedToCustomElementPromise'] = new Promise(resolve => {
-      element['whenUpgradedToCustomElement'] = resolve;
+  if (!element[UPGRADE_TO_CUSTOMELEMENT_PROMISE]) {
+    element[UPGRADE_TO_CUSTOMELEMENT_PROMISE] = new Promise(resolve => {
+      element[UPGRADE_TO_CUSTOMELEMENT_RESOLVER] = resolve;
     });
   }
 
-  return element['upgradedToCustomElementPromise'];
+  return element[UPGRADE_TO_CUSTOMELEMENT_PROMISE];
 }

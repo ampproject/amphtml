@@ -21,7 +21,6 @@ import {dev,user} from '../../../src/log';
 import {removeElement} from '../../../src/dom';
 import {toggle, computedStyle} from '../../../src/style';
 import {isExperimentOn} from '../../../src/experiments';
-import {timerFor} from '../../../src/services';
 import {
   setStyle,
   removeAlphaFromColor,
@@ -30,9 +29,6 @@ import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 /** @const */
 const EARLY_LOAD_EXPERIMENT = 'sticky-ad-early-load';
-
-/** @const */
-const TAG = 'amp-sticky-ad';
 
 class AmpStickyAd extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -71,23 +67,11 @@ class AmpStickyAd extends AMP.BaseElement {
     this.ad_ = children[0];
     this.setAsOwner(this.ad_);
     whenUpgradedToCustomElement(dev().assertElement(this.ad_)).then(ad => {
-      if (!ad.whenBuilt) {
-        // TODO(@zhouyx, #9126): Cleanup once make sure the fix works
-        dev().error(TAG, 'element whenBuilt still do not exist!');
-        timerFor(this.win).delay(() => {
-          ad.whenBuilt().then(() => {
-            this.mutateElement(() => {
-              toggle(this.element, true);
-            });
-          });
-        }, 1000);
-      } else {
-        ad.whenBuilt().then(() => {
-          this.mutateElement(() => {
-            toggle(this.element, true);
-          });
+      ad.whenBuilt().then(() => {
+        this.mutateElement(() => {
+          toggle(this.element, true);
         });
-      }
+      });
     });
 
     const paddingBar = this.win.document.createElement(
