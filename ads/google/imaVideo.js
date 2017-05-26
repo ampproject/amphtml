@@ -41,6 +41,9 @@ const seekDot = '\u25cf\ufe0e';
 // Characters used for fullscreen icon.
 const fullscreenChars = '\u25ad\ufe0e';
 
+// Global context.
+let globalContext;
+
 // Div wrapping our entire DOM.
 let wrapperDiv;
 
@@ -172,6 +175,9 @@ function getIma(global, cb) {
  * The business.
  */
 export function imaVideo(global, data) {
+  globalContext = global;
+
+  console.log('you should see logs');
 
   videoWidth = global./*OK*/innerWidth;
   videoHeight = global./*OK*/innerHeight;
@@ -352,7 +358,7 @@ export function imaVideo(global, data) {
       mouseMoveEvent = 'touchmove';
       mouseUpEvent = 'touchend';
     }
-    bigPlayDiv.addEventListener(interactEvent, onClick);
+    bigPlayDiv.addEventListener(interactEvent, onClick.bind(this));
     playPauseDiv.addEventListener(interactEvent, onPlayPauseClick);
     progressBarWrapperDiv.addEventListener(mouseDownEvent, onProgressClick);
     fullscreenDiv.addEventListener(interactEvent, onFullscreenClick);
@@ -420,11 +426,12 @@ export function playAds() {
     // Ad request resolved.
     try {
       adsManager.init(
-          videoWidth, videoHeight, global.google.ima.ViewMode.NORMAL);
+          videoWidth, videoHeight, globalContext.google.ima.ViewMode.NORMAL);
       window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
       adsManager.start();
     } catch (adError) {
       window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
+      console.log('playAds, catch(adError): ' + adError);
       playVideo();
     }
   } else if (!adRequestFailed) {
@@ -433,6 +440,7 @@ export function playAds() {
   } else {
     // Ad request failed.
     window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
+    console.log('playAds, else');
     playVideo();
   }
 }
@@ -482,6 +490,7 @@ export function onAdsManagerLoaded(adsManagerLoadedEvent) {
  */
 export function onAdsLoaderError() {
   adRequestFailed = true;
+  console.log('onAdsLoaderError');
   playVideo();
 }
 
@@ -494,6 +503,7 @@ export function onAdError() {
   if (adsManager) {
     adsManager.destroy();
   }
+  console.log('onAdError');
   playVideo();
 }
 
@@ -531,6 +541,7 @@ export function onContentResumeRequested() {
     // CONTENT_RESUME will fire after post-rolls as well, and we don't want to
     // resume content in that case.
     videoPlayer.addEventListener('ended', onContentEnded);
+    console.log('content resume requested');
     playVideo();
   }
 }
@@ -655,6 +666,7 @@ export function onPlayPauseClick() {
   if (playerState == PlayerStates.PLAYING) {
     pauseVideo(null);
   } else {
+    console.log('onPlayPauseClick');
     playVideo();
   }
 }
@@ -704,26 +716,26 @@ export function pauseVideo(event) {
 function onFullscreenClick() {
   if (fullscreen) {
     // The video is currently in fullscreen mode
-    const cancelFullscreen = global.document.exitFullscreen ||
-        global.document.exitFullScreen ||
-        global.document.webkitCancelFullScreen ||
-        global.document.mozCancelFullScreen;
+    const cancelFullscreen = globalContext.document.exitFullscreen ||
+        globalContext.document.exitFullScreen ||
+        globalContext.document.webkitCancelFullScreen ||
+        globalContext.document.mozCancelFullScreen;
     if (cancelFullscreen) {
       cancelFullscreen.call(document);
     }
   } else {
     // Try to enter fullscreen mode in the browser
     const requestFullscreen =
-        global.document.documentElement.requestFullscreen ||
-        global.document.documentElement.webkitRequestFullscreen ||
-        global.document.documentElement.mozRequestFullscreen ||
-        global.document.documentElement.requestFullScreen ||
-        global.document.documentElement.webkitRequestFullScreen ||
-        global.document.documentElement.mozRequestFullScreen;
+        globalContext.document.documentElement.requestFullscreen ||
+        globalContext.document.documentElement.webkitRequestFullscreen ||
+        globalContext.document.documentElement.mozRequestFullscreen ||
+        globalContext.document.documentElement.requestFullScreen ||
+        globalContext.document.documentElement.webkitRequestFullScreen ||
+        globalContext.document.documentElement.mozRequestFullScreen;
     if (requestFullscreen) {
       fullscreenWidth = window.screen.width;
       fullscreenHeight = window.screen.height;
-      requestFullscreen.call(global.document.documentElement);
+      requestFullscreen.call(globalContext.document.documentElement);
     } else {
       // Figure out how to make iPhone fullscren work here - I've got nothing.
       videoPlayer.webkitEnterFullscreen();
@@ -744,7 +756,7 @@ function onFullscreenChange() {
   if (fullscreen) {
     // Resize the ad container
     adsManager.resize(
-        videoWidth, videoHeight, global.google.ima.ViewMode.NORMAL);
+        videoWidth, videoHeight, globalContext.google.ima.ViewMode.NORMAL);
     adsManagerWidthOnLoad = null;
     adsManagerHeightOnLoad = null;
     // Return the video to its original size and position
@@ -757,7 +769,7 @@ function onFullscreenChange() {
       // Resize the ad container
       adsManager.resize(
           fullscreenWidth, fullscreenHeight,
-          global.google.ima.ViewMode.FULLSCREEN);
+          globalContext.google.ima.ViewMode.FULLSCREEN);
       adsManagerWidthOnLoad = null;
       adsManagerHeightOnLoad = null;
       // Make the video take up the entire screen
@@ -808,6 +820,7 @@ function onMessage(event) {
           adsManager.resume();
           window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
         } else if (playbackStarted) {
+          console.log('playVideo message');
           playVideo();
         } else {
           // Auto-play support

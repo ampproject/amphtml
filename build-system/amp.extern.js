@@ -175,7 +175,6 @@ google.ima.AdEvent.Type = {
 google.ima.AdsManager;
 google.ima.AdsManager.setVolume = function() {};
 
-
 // Validator
 var amp;
 amp.validator;
