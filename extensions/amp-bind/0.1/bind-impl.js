@@ -715,25 +715,24 @@ export class Bind {
         // visible to the user.
         const requiresJsUpdate =
             element.tagName == 'INPUT' && property in element;
-        // Property value *must* be read before the attribute is changed.
-        // Before user interaction, attribute updates affect the property.
-        const oldJsPropertyValue = requiresJsUpdate && element[property];
         const oldValue = element.getAttribute(property);
 
         let attributeChanged = false;
         if (typeof newValue === 'boolean') {
-          if (newValue) {
-            element.setAttribute(property, '');
-          } else {
-            element.removeAttribute(property);
-          }
           if (requiresJsUpdate) {
+            // Property value *must* be read before the attribute is changed.
+            // Before user interaction, attribute updates affect the property.
+            attributeChanged = element[property] !== newValue;
             element[property] = newValue;
-            attributeChanged = oldJsPropertyValue !== newValue;
           } else {
             attributeChanged =
                 (oldValue === null && newValue) ||
                 (oldValue === '' && !newValue);
+          }
+          if (newValue) {
+            element.setAttribute(property, '');
+          } else {
+            element.removeAttribute(property);
           }
         } else if (newValue !== oldValue) {
           // TODO(choumx): Perform in worker with URL API.
