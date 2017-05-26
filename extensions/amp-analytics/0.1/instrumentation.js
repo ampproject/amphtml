@@ -559,7 +559,8 @@ export class AnalyticsGroup {
   addTrigger(config, handler) {
     let eventType = dev().assertString(config['on']);
     // TODO(dvoytenko, #8121): Cleanup visibility-v3 experiment.
-    if ((eventType == 'visible') && this.visibilityV3_) {
+    if ((eventType == 'visible' || eventType == 'hidden')
+        && this.visibilityV3_) {
       eventType += '-v3';
     }
     let trackerProfile = EVENT_TRACKERS[eventType];
