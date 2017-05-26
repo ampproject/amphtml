@@ -27,7 +27,6 @@ import {isExperimentOn} from '../../../src/experiments';
 import {installWebAnimations} from 'web-animations-js/web-animations.install';
 import {listen} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
-import {toArray} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
 import {user, dev} from '../../../src/log';
 import {viewerForDoc} from '../../../src/services';
@@ -251,10 +250,8 @@ export class AmpAnimation extends AMP.BaseElement {
     const hostWin = this.embed_ ? this.embed_.win : this.win;
     const baseUrl = this.embed_ ? this.embed_.getUrl() : ampdoc.getUrl();
     return readyPromise.then(() => {
-      const measurer = new MeasureScanner(hostWin, baseUrl, {
-        resolveTarget: this.resolveTarget_.bind(this),
-        queryTargets: this.queryTargets_.bind(this),
-      }, /* validate */ true);
+      const measurer = new MeasureScanner(
+          hostWin, this.getRootNode_(), baseUrl, /* validate */ true);
       return vsync.measurePromise(() => {
         measurer.scan(configJson);
         return measurer.createRunner(this.element.getResources());
@@ -270,29 +267,6 @@ export class AmpAnimation extends AMP.BaseElement {
     return this.embed_ ?
         this.embed_.win.document :
         this.getAmpDoc().getRootNode();
-  }
-
-  /**
-   * @param {string} id
-   * @return {?Element}
-   * @private
-   * TODO(dvoytenko, #9129): cleanup deprecated string targets.
-   */
-  resolveTarget_(id) {
-    return this.getRootNode_().getElementById(id);
-  }
-
-  /**
-   * @param {string} selector
-   * @return {!Array<!Element>}
-   * @private
-   */
-  queryTargets_(selector) {
-    try {
-      return toArray(this.getRootNode_().querySelectorAll(selector));
-    } catch (e) {
-      throw user().createError('Invalid selector: ', selector);
-    }
   }
 
   /** @private */
