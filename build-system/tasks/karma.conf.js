@@ -89,10 +89,12 @@ module.exports = {
     SL_Chrome_android: {
       base: 'SauceLabs',
       browserName: 'android',
+      version: 'latest',
     },
     SL_Chrome_latest: {
       base: 'SauceLabs',
       browserName: 'chrome',
+      version: 'latest',
     },
     SL_Chrome_45: {
       base: 'SauceLabs',
@@ -117,6 +119,7 @@ module.exports = {
     SL_Firefox_latest: {
       base: 'SauceLabs',
       browserName: 'firefox',
+      version: 'latest',
     },
     SL_IE_11: {
       base: 'SauceLabs',
@@ -126,6 +129,7 @@ module.exports = {
     SL_Edge_latest: {
       base: 'SauceLabs',
       browserName: 'microsoftedge',
+      version: 'latest',
     },
     SL_Safari_9: {
       base: 'SauceLabs',
@@ -166,7 +170,7 @@ module.exports = {
 
   // Import our gulp webserver as a Karma server middleware
   // So we instantly have all the custom server endpoints available
-  middleware: ['custom'],
+  beforeMiddleware: ['custom'],
   plugins: [
     'karma-browserify',
     'karma-chai',

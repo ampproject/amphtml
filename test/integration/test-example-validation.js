@@ -36,7 +36,8 @@ describe.configure().retryOnSaucelabs().run('example', function() {
 
   const examples = [
     'ads.amp.html',
-    'brid-player.amp.html',
+    // TODO: uncomment when validator is deployed:
+    //'brid-player.amp.html',
     'brightcove.amp.html',
     'dailymotion.amp.html',
     'metadata-examples/article-json-ld.amp.html',
@@ -86,7 +87,7 @@ describe.configure().retryOnSaucelabs().run('example', function() {
 
   examples.forEach(filename => {
     it(filename + ' should validate', () => {
-      const url = '/examples/' + filename;
+      const url = '/base/examples/' + filename;
       return get(url).then(html => {
         /* global amp: false */
         const validationResult = amp.validator.validateString(html);

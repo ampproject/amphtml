@@ -16,15 +16,12 @@ limitations under the License.
 
 # <a name="amp-social-share"></a>`amp-social-share`
 
+[TOC]
+
 <table>
   <tr>
     <td class="col-fourty"><strong>Description</strong></td>
     <td>Displays a social share button.</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Availability</strong></td>
-    <td> Stable
-    </td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
@@ -40,10 +37,13 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-social-share/">Annotated code example for amp-social-share</a>
-    </td>
+    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-social-share/">amp-social-share example</a>.</td>
   </tr>
 </table>
+
+## Overview
+
+The `amp-social-share` component displays a social share button for various social platform providers.
 
 ## Examples
 
@@ -104,6 +104,7 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
       <ul>
         <li><code>data-param-app_id</code>: <strong>required</strong>, defaults to: none. This parameter is required for the <a href="https://developers.facebook.com/docs/sharing/reference/share-dialog">Facebook Share dialog</a>.</li>
         <li><code>data-param-href</code>: optional, defaults to: <code>rel=canonical</code> URL</li>
+        <li><code>data-param-quote</code>: optional. Can be used to share a quote or text.</li>
         </ul>
     </td>
   </tr>
@@ -167,6 +168,13 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
         <li><code>data-param-text</code>: optional, defaults to: "Current page title"</li>
         <li><code>data-mode</code>: optional, if set to <code>replace</code>, all other share options are removed.</li>
       </ul>
+    </td>
+  </tr>
+  <tr>
+    <td>SMS</td>
+    <td>
+      <ul>
+        <li><code>data-param-body</code>: optional, defaults to: <code>rel=title - rel=canonical</code> URL</li></ul>
     </td>
   </tr>
 </table>

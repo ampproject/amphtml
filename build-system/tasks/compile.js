@@ -161,6 +161,7 @@ function compile(entryModuleFilenames, outputDir,
       'third_party/closure-library/sha384-generated.js',
       'third_party/css-escape/css-escape.js',
       'third_party/mustache/**/*.js',
+      'third_party/timeagojs/**/*.js',
       'third_party/vega/**/*.js',
       'third_party/d3/**/*.js',
       'third_party/webcomponentsjs/ShadowCSS.js',
@@ -218,7 +219,9 @@ function compile(entryModuleFilenames, outputDir,
     var externs = [
       'build-system/amp.extern.js',
       'third_party/closure-compiler/externs/intersection_observer.js',
+      'third_party/closure-compiler/externs/performance_observer.js',
       'third_party/closure-compiler/externs/shadow_dom.js',
+      'third_party/closure-compiler/externs/streams.js',
       'third_party/closure-compiler/externs/web_animations.js',
     ];
     if (options.externs) {
@@ -234,7 +237,7 @@ function compile(entryModuleFilenames, outputDir,
       continueWithWarnings: false,
       tieredCompilation: true,  // Magic speed up.
       compilerFlags: {
-        compilation_level: 'SIMPLE_OPTIMIZATIONS',
+        compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
         // Turns on more optimizations.
         assume_function_wrapper: true,
         // Transpile from ES6 to ES5.

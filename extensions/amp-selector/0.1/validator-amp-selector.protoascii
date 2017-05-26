@@ -34,14 +34,14 @@ tags: {  # <amp-selector> for AMP (autoplay attribute allowed)
   disallowed_ancestor: "AMP-SIDEBAR"
   requires: "amp-selector extension .js script"
   attrs: {
-    name: "keyboard-select-mode"
-    value_regex_casei: "none|focus|select"
-  }
-  attrs: {
     name: "disabled"
     value: ""
   }
   attrs: { name: "form" }
+  attrs: {
+    name: "keyboard-select-mode"
+    value_regex_casei: "focus|none|select"
+  }
   attrs: {
     name: "multiple"
     value: ""
@@ -81,9 +81,18 @@ tags: {
   html_format: AMP
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-SELECTOR option"
-  attrs: { name: "option" mandatory: true }
-  attrs: { name: "disabled" value: "" }
-  attrs: { name: "selected" value: "" }
+  attrs: {
+    name: "disabled"
+    value: ""
+  }
+  attrs: {
+    name: "option"
+    mandatory: true
+  }
+  attrs: {
+    name: "selected"
+    value: ""
+  }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-selector"
 }
 tags: {

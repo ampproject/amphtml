@@ -22,7 +22,7 @@ amp-app-banner {
   max-height: 100px !important;
   box-sizing: border-box;
   background: #fff;
-  z-index: 13 !important;
+  z-index: 13;
   box-shadow: 0 0 5px 0 rgba(0,0,0, 0.2) !important;
 }
 
@@ -34,7 +34,7 @@ i-amphtml-app-banner-top-padding {
   background: #fff;
   height: 4px;
   /** Must be above the dismiss button to cover bottom shadow */
-  z-index: 15 !important;
+  z-index: 15;
 }
 
 .amp-app-banner-dismiss-button {
@@ -48,7 +48,7 @@ i-amphtml-app-banner-top-padding {
   background-position: 9px center;
   background-color: #fff;
   background-repeat: no-repeat;
-  z-index: 14 !important;
+  z-index: 14;
   box-shadow: 0 0 5px 0 rgba(0,0,0, 0.2);
   border: none;
   border-top-left-radius: 12px;

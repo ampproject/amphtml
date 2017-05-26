@@ -31,7 +31,6 @@ describes.realWin('performance', {amp: true}, env => {
   let clock;
   let win;
   let ampdoc;
-  let hasLoadTimes;
 
   beforeEach(() => {
     win = env.win;
@@ -40,7 +39,6 @@ describes.realWin('performance', {amp: true}, env => {
     clock = lolex.install(win, 0, ['Date', 'setTimeout', 'clearTimeout']);
     installPerformanceService(env.win);
     perf = performanceFor(env.win);
-    hasLoadTimes = window.chrome && window.chrome.loadTimes;
   });
 
   describe('when viewer is not ready', () => {
@@ -260,7 +258,7 @@ describes.realWin('performance', {amp: true}, env => {
         return perf.coreServicesAvailable().then(() => {
           expect(flushSpy).to.have.callCount(3);
           expect(perf.isMessagingReady_).to.be.false;
-          const count = hasLoadTimes ? 5 : 4;
+          const count = 4;
           expect(perf.events_.length).to.equal(count);
         });
       });
@@ -430,7 +428,7 @@ describes.realWin('performance', {amp: true}, env => {
 
       it('should call the flush callback', () => {
         const payload = {
-          ampexp: getMode(win).rtvVersion,
+          ampexp: 'rtv-' + getMode(win).rtvVersion,
         };
         expect(viewerSendMessageStub.withArgs('sendCsi', payload,
             /* cancelUnsent */true)).to.have.callCount(0);
@@ -566,16 +564,16 @@ describes.realWin('performance', {amp: true}, env => {
          'to be visible before before first viewport completion', () => {
         clock.tick(100);
         whenFirstVisibleResolve();
-        expect(tickSpy).to.have.callCount(hasLoadTimes ? 3 : 2);
+        expect(tickSpy).to.have.callCount(2);
         return viewer.whenFirstVisible().then(() => {
           clock.tick(400);
-          expect(tickSpy).to.have.callCount(hasLoadTimes ? 4 : 3);
+          expect(tickSpy).to.have.callCount(3);
           whenViewportLayoutCompleteResolve();
           return perf.whenViewportLayoutComplete_().then(() => {
-            expect(tickSpy).to.have.callCount(hasLoadTimes ? 4 : 3);
+            expect(tickSpy).to.have.callCount(3);
             expect(tickSpy.withArgs('ofv')).to.be.calledOnce;
             return whenFirstVisiblePromise.then(() => {
-              expect(tickSpy).to.have.callCount(hasLoadTimes ? 5 : 4);
+              expect(tickSpy).to.have.callCount(4);
               expect(tickSpy.withArgs('pc')).to.be.calledOnce;
               expect(Number(tickSpy.withArgs('pc').args[0][1])).to.equal(400);
             });
@@ -655,7 +653,7 @@ describes.realWin('performance with experiment', {amp: true}, env => {
       viewerSendMessageStub.reset();
       perf.flush();
       expect(viewerSendMessageStub).to.be.calledWith('sendCsi', {
-        ampexp: getMode(win).rtvVersion,
+        ampexp: 'rtv-' + getMode(win).rtvVersion,
       });
     });
   });
@@ -671,8 +669,11 @@ describes.realWin('performance with experiment', {amp: true}, env => {
           sandbox.match(payload => {
             const experiments = payload.ampexp.split(',');
             expect(experiments).to.have.length(3);
-            expect(experiments).to.have.members(
-                [getMode(win).rtvVersion, 'experiment-a', 'experiment-b']);
+            expect(experiments).to.have.members([
+              'rtv-' + getMode(win).rtvVersion,
+              'experiment-a',
+              'experiment-b',
+            ]);
             return true;
           }));
     });

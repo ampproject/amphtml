@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {Keycodes} from '../utils/keycodes';
+import {KeyCodes} from '../utils/key-codes';
+import {debounce} from '../utils/rate-limit';
 import {dev, user} from '../log';
 import {
   registerServiceBuilderForDoc,
@@ -22,6 +23,7 @@ import {
 } from '../service';
 import {getMode} from '../mode';
 import {isArray} from '../types';
+import {isExperimentOn} from '../experiments';
 import {map} from '../utils/object';
 import {timerFor} from '../services';
 import {vsyncFor} from '../services';
@@ -46,6 +48,9 @@ const ACTION_HANDLER_ = '__AMP_ACTION_HANDLER__';
 
 /** @const {string} */
 const DEFAULT_METHOD_ = 'activate';
+
+/** @const {number} */
+const DEFAULT_DEBOUNCE_WAIT = 300; // ms
 
 /** @const {!Object<string,!Array<string>>} */
 const ELEMENTS_ACTIONS_MAP_ = {
@@ -93,6 +98,13 @@ let ActionInfoArgsDef;
  */
 let ActionInfoDef;
 
+
+/**
+ * @typedef {Event|DeferredEvent}
+ */
+let ActionEventDef;
+
+
 /**
  * The structure that contains all details of the action method invocation.
  * @struct
@@ -106,7 +118,7 @@ export class ActionInvocation {
    * @param {string} method
    * @param {?JSONType} args
    * @param {?Element} source
-   * @param {?Event} event
+   * @param {?ActionEventDef} event
    */
   constructor(target, method, args, source, event) {
     /** @const {!Node} */
@@ -117,7 +129,7 @@ export class ActionInvocation {
     this.args = args;
     /** @const {?Element} */
     this.source = source;
-    /** @const {?Event} */
+    /** @const {?ActionEventDef} */
     this.event = event;
   }
 }
@@ -156,8 +168,8 @@ export class ActionService {
     // Add core events.
     this.addEvent('tap');
     this.addEvent('submit');
-    // TODO(mkhatib, #5702): Consider a debounced-input event for text-type inputs.
     this.addEvent('change');
+    this.addEvent('input-debounced');
   }
 
   /** @override */
@@ -182,7 +194,7 @@ export class ActionService {
       });
       this.root_.addEventListener('keydown', event => {
         const keyCode = event.keyCode;
-        if (keyCode == Keycodes.ENTER || keyCode == Keycodes.SPACE) {
+        if (keyCode == KeyCodes.ENTER || keyCode == KeyCodes.SPACE) {
           const element = dev().assertElement(event.target);
           if (!event.defaultPrevented &&
               element.getAttribute('role') == 'button') {
@@ -197,18 +209,32 @@ export class ActionService {
       });
     } else if (name == 'change') {
       this.root_.addEventListener(name, event => {
-        this.addChangeDetails_(event);
+        this.addInputMutateDetails_(event);
         this.trigger(dev().assertElement(event.target), name, event);
+      });
+    } else if (name == 'input-debounced') {
+      const debouncedInput = debounce(this.ampdoc.win, event => {
+        const target = dev().assertElement(event.target);
+        this.trigger(target, name, /** @type {!ActionEventDef} */ (event));
+      }, DEFAULT_DEBOUNCE_WAIT);
+
+      this.root_.addEventListener('input', event => {
+        // Create a DeferredEvent to avoid races where the browser cleans up
+        // the event object before the async debounced function is called.
+        const deferredEvent = new DeferredEvent(event);
+        this.addInputMutateDetails_(deferredEvent);
+        debouncedInput(deferredEvent);
       });
     }
   }
 
   /**
-   * Given a browser 'change' event, add `details` property containing the
-   * relevant information for the change that generated the initial event.
-   * @param {!Event} event A `change` event.
+   * Given a browser 'change' or 'input' event, add `details` property
+   * containing the relevant information for the change that generated
+   * the initial event.
+   * @param {!ActionEventDef} event
    */
-  addChangeDetails_(event) {
+  addInputMutateDetails_(event) {
     const detail = map();
     const target = event.target;
     const tagName = target.tagName.toLowerCase();
@@ -261,7 +287,7 @@ export class ActionService {
    * Triggers the specified event on the target element.
    * @param {!Element} target
    * @param {string} eventType
-   * @param {?Event} event
+   * @param {?ActionEventDef} event
    */
   trigger(target, eventType, event) {
     this.action_(target, eventType, event);
@@ -273,7 +299,7 @@ export class ActionService {
    * @param {string} method
    * @param {?JSONType} args
    * @param {?Element} source
-   * @param {?Event} event
+   * @param {?ActionEventDef} event
    */
   execute(target, method, args, source, event) {
     this.invoke_(target, method, args, source, event, null);
@@ -321,7 +347,7 @@ export class ActionService {
   /**
    * @param {!Element} source
    * @param {string} actionEventType
-   * @param {?Event} event
+   * @param {?ActionEventDef} event
    * @private
    */
   action_(source, actionEventType, event) {
@@ -333,6 +359,12 @@ export class ActionService {
 
     for (let i = 0; i < action.actionInfos.length; i++) {
       const actionInfo = action.actionInfos[i];
+
+      if (actionInfo.event === 'input-debounced') {
+        user().assert(isExperimentOn(this.ampdoc.win, 'input-debounced'),
+            'Enable "input-debounced" experiment to use input-debounced');
+      }
+
       // Replace any variables in args with data in `event`.
       const args = applyActionInfoArgs(actionInfo.args, event);
 
@@ -377,8 +409,9 @@ export class ActionService {
    * @param {string} method
    * @param {?JSONType} args
    * @param {?Element} source
-   * @param {?Event} event
+   * @param {?ActionEventDef} event
    * @param {?ActionInfoDef} actionInfo
+   * @private visible for testing
    */
   invoke_(target, method, args, source, event, actionInfo) {
     const invocation = new ActionInvocation(target, method, args,
@@ -472,6 +505,55 @@ export class ActionService {
     }
     return actionMap;
   }
+}
+
+
+/**
+ * A clone of an event object with its function properties replaced.
+ * This is useful e.g. for event objects that need to be passed to an async
+ * context, but the browser might have cleaned up the original event object.
+ * This clone replaces functions with error throws since they won't behave
+ * normally after the original object has been destroyed.
+ * @private visible for testing
+ */
+export class DeferredEvent {
+  /**
+   * @param {!Event} event
+   */
+  constructor(event) {
+    /** @type {?Object} */
+    this.detail = null;
+
+    cloneWithoutFunctions(event, this);
+  }
+}
+
+
+/**
+ * Clones an object and replaces its function properties with throws.
+ * @param {!T} original
+ * @param {!T=} opt_dest
+ * @return {!T}
+ * @template T
+ * @private
+ */
+function cloneWithoutFunctions(original, opt_dest) {
+  const clone = opt_dest || map();
+  for (const prop in original) {
+    const value = original[prop];
+    if (typeof value === 'function') {
+      clone[prop] = notImplemented;
+    } else {
+      clone[prop] = original[prop];
+    }
+  }
+  return clone;
+}
+
+
+/** @private */
+function notImplemented() {
+  dev().assert(null, 'Deferred events cannot access native event functions.');
 }
 
 
@@ -665,7 +747,7 @@ function getActionInfoArgValue(tokens) {
  * Generates method arg values for each key in the given ActionInfoArgsDef
  * with the data in the given event.
  * @param {?ActionInfoArgsDef} args
- * @param {?Event} event
+ * @param {?ActionEventDef} event
  * @return {?JSONType}
  * @private Visible for testing only.
  */
@@ -904,6 +986,7 @@ class ParserTokenizer {
   }
 }
 
+
 /**
  * Tests whether a chacter is a number.
  * @param {string} c
@@ -922,6 +1005,5 @@ export function installActionServiceForDoc(ampdoc) {
       ampdoc,
       'action',
       ActionService,
-      /* opt_factory */ undefined,
       /* opt_instantiate */ true);
 }

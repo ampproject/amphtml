@@ -15,7 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
-import {Keycodes} from '../../../src/utils/keycodes';
+import {KeyCodes} from '../../../src/utils/key-codes';
 import {closestByTag, tryFocus} from '../../../src/dom';
 import {Layout} from '../../../src/layout';
 import {dev} from '../../../src/log';
@@ -113,7 +113,7 @@ export class AmpSidebar extends AMP.BaseElement {
 
     this.documentElement_.addEventListener('keydown', event => {
       // Close sidebar on ESC.
-      if (event.keyCode == Keycodes.ESCAPE) {
+      if (event.keyCode == KeyCodes.ESCAPE) {
         this.close_();
       }
     });
@@ -134,8 +134,6 @@ export class AmpSidebar extends AMP.BaseElement {
     this.registerAction('open', this.open_.bind(this));
     this.registerAction('close', this.close_.bind(this));
 
-    // TODO(mkhatib, #6589): Consider exposing onLocalNavigation from
-    // document-click service to simplifiy this.
     this.element.addEventListener('click', e => {
       const target = closestByTag(dev().assertElement(e.target), 'A');
       if (target && target.href) {

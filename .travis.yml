@@ -28,6 +28,7 @@ before_install:
   - sudo dpkg -i google-chrome*.deb
 before_script:
   - pip install --user protobuf
+  - gem install percy-cli
 script: node build-system/pr-check.js
 branches:
   only:
@@ -38,7 +39,10 @@ branches:
 env:
   global:
     - NPM_CONFIG_PROGRESS="false"
-
+  matrix:
+    - BUILD_SHARD="pre_build_checks"
+    - BUILD_SHARD="integration_tests"
+    - BUILD_SHARD="unit_tests"
 cache:
   yarn: true
   directories:

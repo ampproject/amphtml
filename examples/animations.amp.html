@@ -6,6 +6,27 @@
   <link rel="canonical" href="amps.html" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <style amp-custom>
+    .block {
+      width: 100px;
+      height: 100px;
+      display: block;
+      background: pink;
+      position: absolute;
+      top: 50px;
+      left: 10px;
+      z-index: 2;
+      --start-y: -240px;
+      --start-o: 0.1;
+    }
+
+    .rot-image {
+      --angle: 20deg;
+      --delay: 0.1s;
+    }
+    #image3 {
+      --angle: 10deg;
+      --delay: 0.4s;
+    }
   </style>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
@@ -16,36 +37,57 @@
 <amp-animation id="anim1" layout="nodisplay" trigger="visibility">
 <script type="application/json">
 {
-  "duration": 1000,
-  "iterations": 5,
+  "duration": "1s",
+  "iterations": "4",
   "fill": "both",
   "direction": "alternate",
   "animations": [
     {
       "media": "(max-width: 320px)",
-      "target": "image1",
+      "selector": ".rot-image",
       "easing": "cubic-bezier(0,0,.21,1)",
       "keyframes": {
-        "transform": "rotate(45deg)"
+        "transform": "rotate(var(--angle))"
       }
     },
     {
       "media": "(min-width: 321px)",
-      "target": "image1",
+      "selector": ".rot-image",
+      "delay": "var(--delay)",
       "easing": "cubic-bezier(0,0,.21,1)",
       "keyframes": {
-        "transform": "rotate(-45deg)"
+        "transform": "rotate(calc(var(--angle) * -2))"
       }
+    },
+    {
+      "selector": "#image2",
+      "easing": "cubic-bezier(0,0,.21,1)",
+      "keyframes": [
+        {"transform": "translateX(calc(width('#image1') / 2)) translateY(var(--start-y))", "opacity": "var(--start-o)"},
+        {"transform": "translateY(calc(10% + 10px))", "opacity": "calc(var(--start-o) * 7)"}
+      ]
     }
   ]
 }
 </script>
 </amp-animation>
 
-<amp-img id="image1"
+<amp-img id="image1" class="rot-image"
     src="img/sea@2x.jpg"
     width=527 height=193 layout="responsive"
     on="tap:anim1.activate"></amp-img>
+
+<amp-img id="image3" class="rot-image"
+    src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w1002-h367-no/PANO_20150726_171347%257E2.jpg"
+    width=527 height=193 layout="responsive"
+    on="tap:anim1.activate"></amp-img>
+
+<amp-img id="image2"
+    class="block"
+    layout="responsive" width="100" height="100"
+    src="img/hero@1x.jpg"></amp-img>
+
+<a id="a1"></a>
 
 </body>
 </html>

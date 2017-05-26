@@ -16,13 +16,12 @@
 
 
 import {CSS} from '../../../build/amp-lightbox-viewer-0.1.css';
-import {Keycodes} from '../../../src/utils/keycodes';
+import {KeyCodes} from '../../../src/utils/key-codes';
 import {ampdocServiceFor} from '../../../src/ampdoc';
-import {ancestorElements} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {Layout} from '../../../src/layout';
 import {user, dev} from '../../../src/log';
-import {resourcesForDoc} from '../../../src/services';
+import {extensionsFor} from '../../../src/services';
 import {toggle} from '../../../src/style';
 import {listen} from '../../../src/event-helper';
 import {LightboxManager} from './service/lightbox-manager-impl';
@@ -59,8 +58,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     /** @private {!boolean} */
     this.active_ = false;
 
-    /** @private {?Element} */
-    this.activeElement_ = null;
+    /** @private {!number} */
+    this.currentElementId_ = -1;
 
     /** @private {!function(!Event)} */
     this.boundHandleKeyboardEvents_ = this.handleKeyboardEvents_.bind(this);
@@ -78,8 +77,13 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.container_ = this.win.document.createElement('div');
     this.container_.classList.add('i-amphtml-lbv');
 
+    this.carousel_ = null;
+
     /** @private {?Element} */
     this.descriptionBox_ = null;
+
+    /** @private {!Array<!Element>} */
+    this.clonedLightboxableElements_ = [];
 
     /** @private  {?Element} */
     this.gallery_ = null;
@@ -87,10 +91,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     /** @private {?Array<{string, Element}>} */
     this.thumbnails_ = null;
 
-    /** @private {?UnlistenDef} */
-    this.elementUnlisten_ = null;
-
     this.buildMask_();
+    this.buildCarousel_();
     this.buildDescriptionBox_();
     this.buildControls_();
     this.element.appendChild(this.container_);
@@ -117,13 +119,62 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   }
 
   /**
+   * Builds the carousel and appends it to the container.
+   * @private
+   */
+  buildCarousel_() {
+    if (!this.carousel_) {
+      dev().assert(this.container_);
+      extensionsFor(this.win).loadExtension('amp-carousel');
+      this.carousel_ = this.win.document.createElement('amp-carousel');
+      this.carousel_.setAttribute('type', 'slides');
+      this.carousel_.setAttribute('layout', 'fill');
+
+      this.manager_.getElements().then(list => {
+        const lightboxableElements = list;
+        this.vsync_.mutate(() => {
+          let index = 0;
+          lightboxableElements.forEach(element => {
+            element.lightboxItemId = index++;
+            const deepClone = !element.classList.contains(
+                'i-amphtml-element');
+            const clonedNode = element.cloneNode(deepClone);
+            clonedNode.removeAttribute('on');
+            const descText = this.manager_.getDescription(element);
+            if (descText) {
+              clonedNode.descriptionText = descText;
+            }
+            // TODO(yuxichen): store descriptionText and lightboxItemId in a
+            // list other than the node itself
+            this.clonedLightboxableElements_.push(clonedNode);
+            this.carousel_.appendChild(clonedNode);
+          });
+        });
+      });
+
+      this.container_.appendChild(this.carousel_);
+      this.carousel_.addEventListener(
+          'slideChange', event => {this.slideChangeHandler_(event);});
+    }
+  }
+
+  /**
+   * Handles slide change.
+   * @private
+   */
+  slideChangeHandler_(event) {
+    this.currentElementId_ = event.data.index;
+    this.updateDescriptionBox_();
+  }
+
+  /**
    * Build description box and append it to the container.
    * @private
    */
   buildDescriptionBox_() {
     dev().assert(this.container_);
     this.descriptionBox_ = this.win.document.createElement('div');
-    this.descriptionBox_.classList.add('amp-lbv-desc-box');
+    this.descriptionBox_.classList.add('i-amphtml-lbv-desc-box');
 
     const toggleDescription = this.toggleDescriptionBox_.bind(this);
     listen(this.container_, 'click', toggleDescription);
@@ -131,14 +182,27 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   }
 
   /**
+   * Update description box text.
+   * @private
+   */
+  updateDescriptionBox_() {
+    const descText = this.clonedLightboxableElements_[this.currentElementId_]
+        .descriptionText;
+    this.descriptionBox_.textContent = descText;
+    if (!descText) {
+      this.descriptionBox_.classList.add('hide');
+    }
+  }
+
+  /**
    * Toggle description box if it has text content
    * @private
    */
   toggleDescriptionBox_() {
-    if (!this.descriptionBox_.textContent) {
-      return;
+    this.updateDescriptionBox_();
+    if (this.descriptionBox_.textContent) {
+      this.descriptionBox_.classList.toggle('hide');
     }
-    this.descriptionBox_.classList.toggle('hide');
   }
 
   /**
@@ -147,20 +211,13 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   buildControls_() {
-    const next = this.next_.bind(this);
-    const prev = this.previous_.bind(this);
     const close = this.close_.bind(this);
     const openGallery = this.openGallery_.bind(this);
 
     // TODO(aghassemi): i18n and customization. See https://git.io/v6JWu
-    this.buildButton_('Next', 'amp-lbv-button-next', next);
-    this.buildButton_('Previous', 'amp-lbv-button-prev', prev);
     this.buildButton_('Close', 'amp-lbv-button-close', close);
     this.buildButton_('Gallery', 'amp-lbv-button-gallery',
         openGallery);
-
-    this.container_.setAttribute('no-prev', '');
-    this.container_.setAttribute('no-next', '');
   }
 
   /**
@@ -214,20 +271,21 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @return {!Promise}
    */
   open_(element) {
-    if (this.activeElement_ == element) {
-      return Promise.resolve();
-    }
-
-    const updateViewerPromise = this.updateViewer_(element);
     this.getViewport().enterLightboxMode();
 
     toggle(this.element, true);
     this.active_ = true;
 
+    this.updateInViewport(this.container_, true);
+    this.scheduleLayout(this.container_);
+
+    this.carousel_.implementation_.showSlideWhenReady_(element.lightboxItemId);
+    this.currentElementId_ = element.lightboxItemId;
+
     this.win.document.documentElement.addEventListener(
         'keydown', this.boundHandleKeyboardEvents_);
 
-    return updateViewerPromise;
+    return Promise.resolve();
   }
 
   /**
@@ -240,10 +298,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     }
 
     toggle(this.element, false);
-    this.tearDownElement_(this.activeElement_);
     this.getViewport().leaveLightboxMode();
 
-    this.activeElement_ = null;
+    this.schedulePause(dev().assertElement(this.container_));
     this.active_ = false;
 
     // Reset the state of the description box
@@ -252,167 +309,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     // If there's gallery, set gallery to display none
     this.container_.removeAttribute('gallery-view');
 
-    this.container_.setAttribute('no-prev', '');
-    this.container_.setAttribute('no-next', '');
-
     this.win.document.documentElement.removeEventListener(
         'keydown', this.boundHandleKeyboardEvents_);
-  }
-
-  /**
-   * Opens the next element to be displayed in the lightbox.
-   * @private
-   * @return {!Promise}
-   */
-  next_() {
-    dev().assert(this.activeElement_);
-    return this.manager_.getNext(this.activeElement_).then(nextElement => {
-      if (nextElement) {
-        return this.updateViewer_(nextElement);
-      }
-    });
-  }
-
-  /**
-   * Opens the previous element to be displayed in the lightbox.
-   * @private
-   * @return {!Promise}
-   */
-  previous_() {
-    dev().assert(this.activeElement_);
-    return this.manager_.getPrevious(this.activeElement_).then(prevElement => {
-      if (prevElement) {
-        return this.updateViewer_(prevElement);
-      }
-    });
-  }
-
-  /**
-   * Updates the viewer to display the new element and tears down the old one
-   * @param {!Element} newElement
-   * @private
-   * @return {!Promise}
-   */
-  updateViewer_(newElement) {
-    const previousElement = this.activeElement_;
-    dev().assert(newElement);
-    if (newElement == previousElement) {
-      return Promise.resolve();
-    }
-
-    // tear down the previous element
-    if (previousElement) {
-      this.tearDownElement_(previousElement);
-    }
-
-    // setup the new element
-    this.setupElement_(newElement);
-
-    // update active element to be the new element
-    this.activeElement_ = newElement;
-
-    // update the controls
-    const updateControlsPromise = this.updateControls_();
-
-    // TODO(aghassemi): Preloading of +/- 1 elements
-
-    // TODO(aghassemi): This is a giant hack.
-    // Find a proper way of scheduling layout for a resource that does not
-    // not belong to the element requesting the layout.
-    if (newElement.__AMP__RESOURCE) {
-      newElement.__AMP__RESOURCE.setInViewport(true);
-      resourcesForDoc(this.element).scheduleLayout(newElement, newElement);
-    }
-
-    return updateControlsPromise;
-  }
-
-  /**
-   * Prepares the element to be displayed in the lightbox.
-   * @param {!Element} element
-   * @private
-   */
-  setupElement_(element) {
-    const descText = this.manager_.getDescription(element);
-    this.vsync_.mutate(() => {
-      this.updateStackingContext_(element, /* reset */ false);
-      element.classList.add('amp-lightboxed');
-      // update description box
-      this.descriptionBox_.textContent = descText;
-    });
-    // add click event to current element to trigger discription box
-    const toggleDescription = this.toggleDescriptionBox_.bind(this);
-    this.elementUnlisten_ =
-        listen(element, 'click', toggleDescription);
-  }
-
-  /**
-   * Prepares the element to be taken out of the lightbox.
-   * @param {!Element} element
-   * @private
-   */
-  tearDownElement_(element) {
-    this.vsync_.mutate(() => {
-      this.updateStackingContext_(element, /* reset */ true);
-      element.classList.remove('amp-lightboxed');
-    });
-    if (this.elementUnlisten_) {
-      this.elementUnlisten_();
-    }
-
-  }
-
-  /**
-   * Updates the controls based on the current active element.
-   * @private
-   * @return {!Promise}
-   */
-  updateControls_() {
-    dev().assert(this.activeElement_);
-
-    const prevPromise = this.manager_.hasPrevious(this.activeElement_)
-    .then(hasPrev => {
-      if (hasPrev) {
-        this.container_.removeAttribute('no-prev');
-      } else {
-        this.container_.setAttribute('no-prev', '');
-      }
-    });
-
-    const nextPromise = this.manager_.hasNext(this.activeElement_)
-    .then(hasNext => {
-      if (hasNext) {
-        this.container_.removeAttribute('no-next');
-      } else {
-        this.container_.setAttribute('no-next', '');
-      }
-    });
-
-    return Promise.all([nextPromise, prevPromise]);
-  }
-
-  /**
-   * Walks up the tree from the given element and either adds or removes
-   * `i-amphtml-lightboxed-ancestor` class to/from all ancestors.
-   *
-   * `i-amphtml-lightboxed-ancestor` resets the properties that create new
-   * stacking context on the ancestors of the `elem` and therefore the z-index
-   * value given to `elem` becomes absolute and `elem` can be displayed on top
-   * of everything else. More info: https://goo.gl/uqY5CN
-   *
-   * @param {!Element} element
-   * @param {!boolean} reset Whether to add or remove the
-   * `i-amphtml-lightboxed-ancestor` class.
-   * @private
-   */
-  updateStackingContext_(element, reset) {
-    ancestorElements(element, ancestor => {
-      if (reset) {
-        ancestor.classList.remove('i-amphtml-lightboxed-ancestor');
-      } else {
-        ancestor.classList.add('i-amphtml-lightboxed-ancestor');
-      }
-    });
   }
 
   /**
@@ -425,11 +323,11 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   handleKeyboardEvents_(event) {
     // TODO(aghassemi): RTL support
     const code = event.keyCode;
-    if (code == Keycodes.ESCAPE) {
+    if (code == KeyCodes.ESCAPE) {
       this.close_();
-    } else if (code == Keycodes.RIGHT_ARROW) {
+    } else if (code == KeyCodes.RIGHT_ARROW) {
       this.next_();
-    } else if (code == Keycodes.LEFT_ARROW) {
+    } else if (code == KeyCodes.LEFT_ARROW) {
       this.previous_();
     }
   }
@@ -515,7 +413,6 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     imgElement.setAttribute('src', thumbnailObj.url);
     element.appendChild(imgElement);
     const redirect = event => {
-      this.updateViewer_(thumbnailObj.element);
       this.closeGallery_();
       event.stopPropagation();
     };

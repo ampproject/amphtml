@@ -48,6 +48,10 @@ limitations under the License.
     </td>
   </tr>
   <tr>
+    <td class="col-fourty"><strong>Codelabs</strong></td>
+    <td><a href="https://codelabs.developers.google.com/codelabs/advanced-interactivity-in-amp/">Advanced Interactivity in AMP</a> highlights a sophisticated e-commerce use case.</td>
+  </tr>
+  <tr>
     <td class="col-fourty"><strong>Origin Trials</strong></td>
     <td><a href="https://docs.google.com/a/google.com/forms/d/e/1FAIpQLSfGCAjUU4pDu84Sclw6wjGVDiFJhVr61pYTMehIt6ex4wmr1Q/viewform">Register here</a> to enable <code>amp-bind</code> for your origin.</td>
   </tr>
@@ -341,7 +345,7 @@ Only binding to the following components and attributes are allowed:
   <tr>
     <td><code>&lt;amp-state></code></td>
     <td><code>[src]</code></td>
-    <td>Fetches JSON from the new URL and merges it into the existing state. </td>
+    <td>Fetches JSON from the new URL and merges it into the existing state. <em>Note the following update will ignore <code>&lt;amp-state&gt;</code> elements to prevent cycles.</em></td>
   </tr>
   <tr>
     <td><code>&lt;amp-video></code></td>

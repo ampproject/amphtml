@@ -20,6 +20,7 @@ import {actionServiceForDoc} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
+import {isConnectedNode} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getStyle, setStyle} from '../../../src/style';
 import {numeric} from '../../../src/transition';
@@ -157,13 +158,11 @@ export class AmpSlideScroll extends BaseSlides {
     // to it (such after pressing next) should be announced to the
     // user.
     this.slidesContainer_.setAttribute('aria-live', 'polite');
-
     // Snap point is buggy in IOS 10.3 (beta), so it is disabled in beta.
     // https://bugs.webkit.org/show_bug.cgi?id=169800
     if (this.shouldDisableCssSnap_) {
       this.slidesContainer_.classList.add('i-amphtml-slidescroll-no-snap');
     }
-
     // Workaround - https://bugs.webkit.org/show_bug.cgi?id=158821
     if (this.hasNativeSnapPoints_) {
       const start = this.win.document.createElement('div');
@@ -174,21 +173,26 @@ export class AmpSlideScroll extends BaseSlides {
       end.classList.add('i-amphtml-carousel-end-marker');
       this.slidesContainer_.appendChild(end);
     }
+    this.element.appendChild(this.slidesContainer_);
 
     this.slides_.forEach((slide, index) => {
       this.dataSlideIdArr_.push(
           slide.getAttribute('data-slide-id') || index.toString());
       this.setAsOwner(slide);
-      const slideWrapper = this.win.document.createElement('div');
       slide.classList.add('amp-carousel-slide');
-      slideWrapper.appendChild(slide);
-      slideWrapper.classList.add('i-amphtml-slide-item');
 
+      const slideWrapper = this.win.document.createElement('div');
+      slideWrapper.classList.add('i-amphtml-slide-item');
       this.slidesContainer_.appendChild(slideWrapper);
+
+      // Slides must only be re-parented to DOM-connected nodes to avoid
+      // errors when used in a shadow document (#9291).
+      dev().assert(isConnectedNode(slideWrapper),
+          'Slides must only be re-parented to connected nodes.');
+      slideWrapper.appendChild(slide);
+
       this.slideWrappers_.push(slideWrapper);
     });
-
-    this.element.appendChild(this.slidesContainer_);
 
     this.cancelTouchEvents_();
 
@@ -583,6 +587,7 @@ export class AmpSlideScroll extends BaseSlides {
     const name = 'slideChange';
     const event =
         createCustomEvent(this.win, `slidescroll.${name}`, {index: newIndex});
+    this.element.dispatchCustomEvent(name, {index: newIndex});
     this.action_.trigger(this.element, name, event);
   }
 

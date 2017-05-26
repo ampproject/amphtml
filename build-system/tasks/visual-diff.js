@@ -14,33 +14,17 @@
  * limitations under the License.
  */
 
-const argv = require('minimist')(process.argv.slice(2));
-const child_process = require('child_process');
-const gulp = require('gulp-help')(require('gulp'));
-const util = require('gulp-util');
+var argv = require('minimist')(process.argv.slice(2));
+var exec = require('../exec.js').exec;
+var fs = require('fs-extra');
+var gulp = require('gulp-help')(require('gulp'));
+var util = require('gulp-util');
 
-const percyCommand = 'percy snapshot';
-const defaultWidths = [375, 411];  // CSS widths: iPhone: 375, Pixel: 411.
-const percyProjectSeparator = '/';  // Standard format of repo slug: "foo/bar".
-const percyTokenLength = 64;  // Standard Percy API key length.
-
-
-/**
- * Executes the provided command; terminates this program in case of failure.
- * Copied from pr-check.js.
- * TODO(rsimha-amp): Refactor this into a shared library. Issue #9038.
- *
- * @param {string} cmd
- */
-function execOrDie(cmd) {
-  const p =
-      child_process.spawnSync('/bin/sh', ['-c', cmd], {'stdio': 'inherit'});
-  if (p.status != 0) {
-    console/*OK*/.log(
-        `\n${fileLogPrefix}exiting due to failing command: ${cmd}`);
-    process.exit(p.status)
-  }
-}
+var percyCommand = 'percy snapshot';
+var defaultWidths = [375, 411];  // CSS widths: iPhone: 375, Pixel: 411.
+var percyProjectSeparator = '/';  // Standard format of repo slug: "foo/bar".
+var percyTokenLength = 64;  // Standard Percy API key length.
+var visualTestsFile = 'test/visual-diff/visual-tests.json';
 
 /**
  * Extracts and verifies Percy project keys from the environment.
@@ -54,8 +38,8 @@ function extractPercyKeys() {
         'Error: PERCY_PROJECT must be specified as an environment variable'));
     process.exit(1);
   }
-  const percyProject = process.env.PERCY_PROJECT;
-  if (!percyProject.includes(percyProjectSeparator)) {
+  var percyProject = process.env.PERCY_PROJECT;
+  if (percyProject.indexOf(percyProjectSeparator) == -1) {
     util.log(util.colors.red(
         'Error: PERCY_PROJECT doesn\'t look like a valid repo slug'));
     process.exit(1);
@@ -68,12 +52,14 @@ function extractPercyKeys() {
         'Error: PERCY_TOKEN must be specified as an environment variable'));
     process.exit(1);
   }
-  const percyToken = process.env.PERCY_TOKEN;
+  var percyToken = process.env.PERCY_TOKEN;
   if (percyToken.length != percyTokenLength) {
     util.log(util.colors.red(
         'Error: PERCY_TOKEN doesn\'t look like a valid Percy API key'));
     process.exit(1);
   }
+  // Note: The secret percy token only gets printed during local use. Travis
+  // will hide it in publicly accessible logs.
   util.log('Percy token: ', util.colors.magenta(percyToken));
   return {
     percyProject: percyProject,
@@ -87,19 +73,20 @@ function extractPercyKeys() {
  * @return {!Object} Object containing extracted args.
  */
 function extractPercyArgs() {
-  // Webpage to snapshot. This is a path, relative to amphtml/.
-  let webpage = '';
+  // Webpage to snapshot. This is a path, relative to amphtml/. For automated
+  // tests on Travis, this defaults to the set of test cases defined in
+  var webpage = '';
   if (argv.webpage) {
     webpage = argv.webpage;
   } else {
-    console./*OK*/error(util.colors.red(
-        'Must specify a webpage to diff via --webpage'));
-    process.exit(1);
+    // Default to the amp-by-example page for test runs.
+    // TODO(rsimha): Refactor this to support multiple webpages.
+    var webpage = JSON.parse(fs.readFileSync(visualTestsFile)).webpage;
   }
   util.log('Webpage: ', util.colors.magenta(webpage));
 
   // Smartphone screen widths to snapshot.
-  let widths = defaultWidths;
+  var widths = defaultWidths;
   if (argv.widths) {
     widths = argv.widths.split(',');
   }
@@ -121,7 +108,7 @@ function extractPercyArgs() {
  * @return {string} Full command line to be executed.
  */
 function constructCommandLine(percyKeys) {
-  let commandLine = [];
+  var commandLine = [];
 
   // Main snapshot command.
   commandLine.push(percyCommand);
@@ -130,7 +117,7 @@ function constructCommandLine(percyKeys) {
   commandLine.push('--repo ' + percyKeys.percyProject);
 
   // Percy args.
-  const percyArgs = extractPercyArgs();
+  var percyArgs = extractPercyArgs();
   commandLine.push('--baseurl /' + percyArgs.webpage);
   commandLine.push('--widths ' + percyArgs.widths);
 
@@ -142,9 +129,10 @@ function constructCommandLine(percyKeys) {
   commandLine.push(percyArgs.webpage);
 
   util.log('Executing command line:');
-  commandLine.forEach((command) => {
+  commandLine.forEach(function(command) {
     util.log('\t', util.colors.cyan(command));
   });
+
   return commandLine.join(' ');
 }
 
@@ -153,9 +141,9 @@ function constructCommandLine(percyKeys) {
  */
 function runTests() {
   util.log(util.colors.yellow('Running visual diff tests...'));
-  const percyKeys = extractPercyKeys();
-  const commandLine = constructCommandLine(percyKeys);
-  execOrDie(commandLine);
+  var percyKeys = extractPercyKeys();
+  var commandLine = constructCommandLine(percyKeys);
+  exec(commandLine);
 }
 
 

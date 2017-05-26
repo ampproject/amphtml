@@ -77,14 +77,14 @@ will be removed in the near future.
 
 Each animation component is a [keyframes effect](https://www.w3.org/TR/web-animations/#dom-keyframeeffect-keyframeeffect)
 and is comprised of:
- - Target element referenced by ID
+ - Target element(s) referenced by a selector
  - Media query
  - Timing properties
  - Keyframes
 
 ```text
 {
-  "target": "element-id",
+  "selector": "#target-id",
   "media": "(min-width:300px)",
   // Timing properties
   ...
@@ -115,31 +115,31 @@ Top-level animation and animation components may contain timing properties. Thes
   </tr>
   <tr>
     <td><code>duration</code></td>
-    <td>number</td>
+    <td>time</td>
     <td>0</td>
-    <td>The animation duration in milliseconds.</td>
+    <td>The animation duration. Either a numeric value in milliseconds or a CSS time value, e.g. `2s`.</td>
   </tr>
   <tr>
     <td><code>delay</code></td>
-    <td>number</td>
+    <td>time</td>
     <td>0</td>
-    <td>The delay in milliseconds before animation starts executing.</td>
+    <td>The delay before animation starts executing. Either a numeric value in milliseconds or a CSS time value, e.g. `2s`.</td>
   </tr>
   <tr>
     <td><code>endDelay</code></td>
-    <td>number</td>
+    <td>time</td>
     <td>0</td>
-    <td>The delay in milliseconds after the animation completes and before it's actually considered to be complete.</td>
+    <td>The delay after the animation completes and before it's actually considered to be complete. Either a numeric value in milliseconds or a CSS time value, e.g. `2s`.</td>
   </tr>
   <tr>
     <td><code>iterations</code></td>
-    <td>number or<br>"Infinity"</td>
+    <td>number or<br>"Infinity" or<br>"infinite"</td>
     <td>1</td>
     <td>The number of times the animation effect repeats.</td>
   </tr>
   <tr>
     <td><code>iterationStart</code></td>
-    <td>number</td>
+    <td>number/CSS</td>
     <td>0</td>
     <td>The time offset at which the effect begins animating.</td>
   </tr>
@@ -163,12 +163,15 @@ Top-level animation and animation components may contain timing properties. Thes
   </tr>
 </table>
 
+All timing properties allow either a direct numeric/string values or CSS values. For instance, "duration" can be specified as `1000` or `1s` or `1000ms`. In addition, `calc()` and `var()` and other CSS expressions are also allowed.
+
 An example of timing properties in JSON:
 ```text
 {
   ...
-  "duration": 1000,
+  "duration": "1s",
   "delay": 100,
+  "endDelay": "var(--end-delay, 10ms)",
   "easing": "ease-in",
   "fill": "both"
   ...
@@ -243,6 +246,8 @@ The array-form can also include "easing":
 
 For additional keyframes formats refer to [Web Animations spec](https://www.w3.org/TR/web-animations/#processing-a-keyframes-argument).
 
+The property values allow any valid CSS values, including `calc()`, `var()` and other CSS expressions.
+
 
 #### Whitelisted properties for keyframes
 
@@ -264,8 +269,8 @@ can be reduced to this one animation component only. For instance:
 <amp-animation layout="nodisplay">
 <script type="application/json">
 {
-  "target": "target1",
-  "duration": 1000,
+  "selector": "#target-id",
+  "duration": "1s",
   "keyframes": {"opacity": 1}
 }
 </script>
@@ -279,12 +284,12 @@ can be reduced to an array of components. For instance:
 <script type="application/json">
 [
   {
-    "target": "target1",
+    "selector": ".target-class",
     "duration": 1000,
     "keyframes": {"opacity": 1}
   },
   {
-    "target": "target2",
+    "selector": ".target-class",
     "duration": 600,
     "delay": 400,
     "keyframes": {"transform": "scale(2)"}
@@ -293,6 +298,82 @@ can be reduced to an array of components. For instance:
 </script>
 </amp-animation>
 ```
+
+### `var()` and `calc()` expressions
+
+`amp-animation` allows use of `var()` and `calc()` expressions for timing and keyframes values.
+
+For instance:
+```html
+<amp-animation layout="nodisplay">
+<script type="application/json">
+[
+  {
+    "selector": ".target-class",
+    "duration": "4s",
+    "delay": "var(--delay)",
+    "keyframes": {"transform": "translateX(calc(100vh + 20px))"}
+  }
+]
+</script>
+</amp-animation>
+```
+
+Both `var()` and `calc()` polyfilled on platforms that do not directly support them. `var()` properties are extracted from the corresponding target elements. However, it's unfortunately impossible to fully polyfill `var()`. Thus, where compatibility is important, it's strongly recommended to include default values in the `var()` expressions. For instance:
+```html
+<amp-animation layout="nodisplay">
+<script type="application/json">
+[
+  {
+    "selector": ".target-class",
+    "duration": "4s",
+    "delay": "var(--delay, 100ms)",
+  }
+]
+</script>
+</amp-animation>
+```
+
+### CSS extensions
+
+`amp-animation` provides several CSS extensions for typical animations needs: `rand()`, `width()`, and `height()`. These functions can be used everywhere where CSS values can be used within `amp-animation`, including timing and keyframes values.
+
+#### CSS `rand()` extension
+
+The `rand()` function returns a random CSS value. There are two forms.
+
+The form without arguments simply returns the random number between 0 and 1.
+```
+{
+  "animation-delay": "calc(10s * rand())"
+}
+```
+
+The second form has two arguments and returns the random value between these two arguments.
+```
+{
+  "animation-delay": "rand(5s, 10s)"
+}
+```
+
+#### CSS `width()` and `height()` extensions
+
+The `width()` and `height()` extensions return the width/height of the animated element or the element specified by the selector. The returned value is in pixels, e.g. `100px`.
+
+The following forms are supported:
+ - `width()` and `height()` - width/height of the animated element.
+ - `width('.selector')` and `height('.selector')` - width/height of the element specified by the selector. Any CSS selector can be used. For instance, `width('#container > li')`.
+ - `width(closest('.selector'))` and `height(closest('.selector'))` - width/height of the element specified by the closest selector.
+
+The `width()` and `height()` are epsecially useful for transforms. The `left`, `top` and similar CSS properties that can use `%` values to express animations proportional to container size. However, `transform` property interpretes `%` values differently - as a percent of the selected element. Thus, the `width()` and `height()` can be used to express transform animations in terms of container elements and similar.
+
+These functions can be combined with `calc()`, `var()` and other CSS expressions. For instance:
+```
+{
+  "transform": "translateX(calc(width('#container') + 10px))"
+}
+```
+
 
 ## Triggering animation
 

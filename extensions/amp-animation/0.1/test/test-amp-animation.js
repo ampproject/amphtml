@@ -275,14 +275,6 @@ describes.sandboxed('AmpAnimation', {}, () => {
       });
     });
 
-    it('should find target in the main doc', () => {
-      const anim = createAnim({}, {duration: 1001});
-      const target = win.document.createElement('div');
-      target.setAttribute('id', 'target1');
-      win.document.body.appendChild(target);
-      expect(anim.resolveTarget_('target1')).to.equal(target);
-    });
-
     it('should resize from ampdoc viewport', () => {
       const anim = createAnim({}, {duration: 1001});
       const stub = sandbox.stub(anim, 'onResize_');
@@ -385,20 +377,40 @@ describes.sandboxed('AmpAnimation', {}, () => {
       expect(anim.visible_).to.be.true;
     });
 
-    it('should find target in the embed only', () => {
+    it('should find target in the embed only via selector', () => {
       const parentWin = env.ampdoc.win;
       const embedWin = embed.win;
-      const anim = createAnim({}, {duration: 1001});
-
+      const anim = createAnim({},
+          {duration: 1001, selector: '#target1', keyframes: {}});
       const targetInDoc = parentWin.document.createElement('div');
       targetInDoc.setAttribute('id', 'target1');
       parentWin.document.body.appendChild(targetInDoc);
-      expect(anim.resolveTarget_('target1')).to.be.null;
-
       const targetInEmbed = embedWin.document.createElement('div');
       targetInEmbed.setAttribute('id', 'target1');
       embedWin.document.body.appendChild(targetInEmbed);
-      expect(anim.resolveTarget_('target1')).to.equal(targetInEmbed);
+      return anim.createRunner_().then(runner => {
+        const requests = runner.requests_;
+        expect(requests).to.have.length(1);
+        expect(requests[0].target).to.equal(targetInEmbed);
+      });
+    });
+
+    it('should find target in the embed only via target', () => {
+      const parentWin = env.ampdoc.win;
+      const embedWin = embed.win;
+      const anim = createAnim({},
+          {duration: 1001, target: 'target1', keyframes: {}});
+      const targetInDoc = parentWin.document.createElement('div');
+      targetInDoc.setAttribute('id', 'target1');
+      parentWin.document.body.appendChild(targetInDoc);
+      const targetInEmbed = embedWin.document.createElement('div');
+      targetInEmbed.setAttribute('id', 'target1');
+      embedWin.document.body.appendChild(targetInEmbed);
+      return anim.createRunner_().then(runner => {
+        const requests = runner.requests_;
+        expect(requests).to.have.length(1);
+        expect(requests[0].target).to.equal(targetInEmbed);
+      });
     });
 
     it('should take resize from embed\'s window', () => {

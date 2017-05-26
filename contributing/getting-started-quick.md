@@ -40,7 +40,7 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 * Fork the [amphtml repository](https://github.com/ampproject/amphtml) by clicking "Fork" in the Web UI.
 
 * Create your local repository: `git clone git@github.com:<your username>/amphtml.git`
-* Add an alias: `git remote add upstream git@github.com:ampproject/amphtml.git`
+* Add an alias:  Go to the newly created local repository directory and run `git remote add upstream git@github.com:ampproject/amphtml.git`
 
 # Branch (do this each time you want a new branch)
 

@@ -287,8 +287,6 @@ export class Viewport {
       const visibilityState = this.viewer_.getVisibilityState();
       if (visibilityState == VisibilityState.PRERENDER ||
           visibilityState == VisibilityState.VISIBLE) {
-        // TODO(dvoytenko, #8044): only report 1% for now until most of cases
-        // are elimitated.
         if (Math.random() < 0.01) {
           dev().error(TAG_, 'viewport has zero dimensions');
         }
@@ -417,7 +415,6 @@ export class Viewport {
     // TODO(erwinm): the duration should not be a constant and should
     // be done in steps for better transition experience when things
     // are closer vs farther.
-    // TODO(dvoytenko, #3742): documentElement will be replaced by ampdoc.
     return Animation.animate(this.ampdoc.getRootNode(), pos => {
       this.binding_.setScrollTop(interpolate(pos));
     }, duration, curve).then();
@@ -585,9 +582,10 @@ export class Viewport {
    * @param {!Element} element
    * @param {boolean=} opt_forceTransfer If set to true , then the element needs
    *    to be forcefully transferred to the fixed layer.
+   * @return {!Promise}
    */
   addToFixedLayer(element, opt_forceTransfer) {
-    this.fixedLayer_.addElement(element, opt_forceTransfer);
+    return this.fixedLayer_.addElement(element, opt_forceTransfer);
   }
 
   /**
@@ -1183,6 +1181,10 @@ export class ViewportBindingNaturalIosEmbed_ {
     /** @private {number} */
     this.paddingTop_ = 0;
 
+    // Mark as a legacy viewport.
+    this.win.document.documentElement.classList.add(
+        'i-amphtml-ios-embed-legacy');
+
     // Microtask is necessary here to let Safari to recalculate scrollWidth
     // post DocumentReady signal.
     whenDocumentReady(this.win.document).then(() => this.setup_());
@@ -1478,6 +1480,8 @@ export class ViewportBindingNaturalIosEmbed_ {
     // Scroll document into a safe position to avoid scroll freeze on iOS.
     // This means avoiding scrollTop to be minimum (0) or maximum value.
     // This is very sad but very necessary. See #330 for more details.
+    // Unfortunately, the same is very expensive to do on the bottom, due to
+    // costly scrollHeight.
     const scrollTop = -this.scrollPosEl_./*OK*/getBoundingClientRect().top +
         this.paddingTop_;
     if (scrollTop == 0) {
@@ -1487,10 +1491,6 @@ export class ViewportBindingNaturalIosEmbed_ {
       }
       return;
     }
-
-    // TODO(dvoytenko, #330): Ideally we would do the same for the overscroll
-    // on the bottom. Unfortunately, iOS Safari misreports scrollHeight in
-    // this case.
   }
 }
 
@@ -1712,9 +1712,8 @@ export class ViewportBindingIosEmbedWrapper_ {
     // Scroll document into a safe position to avoid scroll freeze on iOS.
     // This means avoiding scrollTop to be minimum (0) or maximum value.
     // This is very sad but very necessary. See #330 for more details.
-    // TODO(dvoytenko, #330): Ideally we would do the same for the overscroll
-    // on the bottom. Unfortunately, iOS Safari misreports scrollHeight in
-    // this case.
+    // Unfortunately, the same is very expensive to do on the bottom, due to
+    // costly scrollHeight.
     if (this.wrapper_./*OK*/scrollTop == 0) {
       this.wrapper_./*OK*/scrollTop = 1;
       if (opt_event) {
@@ -1882,7 +1881,6 @@ function getViewportType(win, viewer) {
   }
 
   // Override to ios-embed for iframe-viewer mode.
-  // TODO(lannka, #6213): Reimplement binding selection for in-a-box.
   if (isIframed(win) && viewer.isEmbedded()) {
     return ViewportType.NATURAL_IOS_EMBED;
   }
@@ -1893,8 +1891,8 @@ function getViewportType(win, viewer) {
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  */
 export function installViewportServiceForDoc(ampdoc) {
-  registerServiceBuilderForDoc(ampdoc, 'viewport',
-      /* constructor */ undefined,
-      ampdoc => createViewport(ampdoc),
-      /* instantiate */ true);
+  registerServiceBuilderForDoc(ampdoc,
+      'viewport',
+      createViewport,
+      /* opt_instantiate */ true);
 }

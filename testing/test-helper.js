@@ -15,25 +15,33 @@
  */
 
 import {xhrServiceForTesting} from '../src/service/xhr-impl';
-import {getService, getServiceForDoc} from '../src/service';
+import {
+  getService,
+  getServiceForDoc,
+  registerServiceBuilder,
+  registerServiceBuilderForDoc,
+} from '../src/service';
 
 export function stubService(sandbox, win, serviceId, method) {
-  const service = getService(win, serviceId, () => {
+  // Register if not already registered.
+  registerServiceBuilder(win, serviceId, function() {
     return {
       [method]: () => {},
     };
   });
+  const service = getService(win, serviceId);
   return sandbox.stub(service, method);
 }
 
 export function stubServiceForDoc(sandbox, ampdoc, serviceId, method) {
-  const stub = sandbox.stub();
-  getServiceForDoc(ampdoc, serviceId, () => {
-    const service = {};
-    service[method] = stub;
-    return service;
+  // Register if not already registered.
+  registerServiceBuilderForDoc(ampdoc, serviceId, function() {
+    return {
+      [method]: () => {},
+    };
   });
-  return stub;
+  const service = getServiceForDoc(ampdoc, serviceId);
+  return sandbox.stub(service, method);
 }
 
 /**
@@ -64,7 +72,7 @@ export function assertScreenReaderElement(element) {
 // A server side temporary request storage which is useful for testing
 // browser sent HTTP requests.
 /////////////////
-const REQUEST_URL = '//localhost:9876/request-bank/';
+const REQUEST_URL = '//localhost:9876/amp4test/request-bank/';
 
 export function depositRequestUrl(id) {
   return REQUEST_URL + 'deposit/' + id;

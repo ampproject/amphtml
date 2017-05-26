@@ -15,6 +15,17 @@
  */
 
 /**
+ * @typedef {{
+ *   prefetch: (string|undefined),
+ *   preconnect: (string|undefined),
+ *   renderStartImplemented: (boolean|undefined),
+ *   clientIdScope: (string|undefined),
+ *   clientIdCookieName: (string|undefined),
+ * }}
+ */
+let AdNetworkConfigDef;
+
+/**
  * The config of each ad network.
  * Please keep the list alphabetic order.
  *
@@ -26,14 +37,19 @@
  *   // List of hosts for preconnect
  *   preconnect: string|array
  *
- *   // The externalCidScope used to provide CIDs to ads
+ *   // The scope used to provide CIDs to ads
  *   clientIdScope: string
+ *
+ *  // The cookie name to store the CID. In absence, `clientIdScope` is used.
+ *   clientIdCookieName: string
  *
  *   // Whether render-start API has been implemented
  *   // We highly recommend all networks to implement the API,
  *   // see details in the README.md
  *   renderStartImplemented: boolean
  * }
+ *
+ * @const {!Object<string, !AdNetworkConfigDef>}}
  */
 export const adConfig = {
   _ping_: {
@@ -68,6 +84,11 @@ export const adConfig = {
 
   adform: {},
 
+  adfox: {
+    prefetch: 'https://yastatic.net/pcode/adfox/loader.js',
+    renderStartImplemented: true,
+  },
+
   adgeneration: {
     prefetch: 'https://i.socdm.com/sdk/js/adg-script-loader.js',
   },
@@ -79,6 +100,10 @@ export const adConfig = {
   adition: {},
 
   adman: {},
+
+  admanmedia: {
+    renderStartImplemented: true,
+  },
 
   adreactor: {},
 
@@ -179,9 +204,18 @@ export const adConfig = {
 
   brainy: {},
 
+  bringhub: {
+    renderStartImplemented: true,
+    preconnect: [
+      'https://static.bh-cdn.com',
+      'https://core-api.bringhub.io',
+    ],
+  },
+
+
   caajainfeed: {
     prefetch: [
-      'https://cdn.amanad.adtdp.com/sdk/ajaamp-v1.0.js',
+      'https://cdn.amanad.adtdp.com/sdk/ajaamp.js',
     ],
     preconnect: [
       'https://ad.amanad.adtdp.com',
@@ -265,6 +299,11 @@ export const adConfig = {
     prefetch: 'https://img.ak.impact-ad.jp/util/f1e_amp.min.js',
   },
 
+  f1h: {
+    preconnect: 'https://img.ak.impact-ad.jp',
+    renderStartImplemented: true,
+  },
+
   fake: {},
 
   felmat: {
@@ -273,6 +312,14 @@ export const adConfig = {
   },
 
   flite: {},
+
+  fluct: {
+    preconnect: [
+      'https://cdn-fluct.sh.adingo.jp',
+      'https://s.sh.adingo.jp',
+      'https://i.adingo.jp',
+    ],
+  },
 
   fusion: {
     prefetch: 'https://assets.adtomafusion.net/fusion/latest/fusion-amp.min.js',
@@ -284,6 +331,11 @@ export const adConfig = {
 
   gmossp: {
     prefetch: 'https://cdn.gmossp-sp.jp/ads/amp.js',
+  },
+
+  gumgum: {
+    prefetch: 'https://g2.gumgum.com/javascripts/ad.js',
+    renderStartImplemented: true,
   },
 
   holder: {
@@ -317,8 +369,7 @@ export const adConfig = {
 
   ix: {
     prefetch: [
-      'https://js-sec.indexww.com/indexJTag.js',
-      'https://js-sec.indexww.com/apl/apl6.js',
+      'https://js-sec.indexww.com/apl/amp.js',
     ],
     preconnect: 'https://as-sec.casalemedia.com',
   },
@@ -426,12 +477,23 @@ export const adConfig = {
     prefetch: 'https://s.ntv.io/serve/load.js',
   },
 
+  navegg: {
+    renderStartImplemented: true,
+  },
+
   nend: {
     prefetch: 'https://js1.nend.net/js/amp.js',
     preconnect: [
       'https://output.nend.net',
       'https://img1.nend.net',
     ],
+  },
+
+  netletix: {
+    preconnect: [
+      'https://call.netzathleten-media.de',
+    ],
+    renderStartImplemented: true,
   },
 
   nokta: {
@@ -460,6 +522,15 @@ export const adConfig = {
   },
 
   plista: {},
+
+  polymorphicads: {
+    prefetch: 'https://www.polymorphicads.jp/js/amp.js',
+    preconnect: [
+      'https://img.polymorphicads.jp',
+      'https://ad.polymorphicads.jp',
+    ],
+    renderStartImplemented: true,
+  },
 
   popin: {
     renderStartImplemented: true,
@@ -548,6 +619,11 @@ export const adConfig = {
     prefetch: 'https://ap.lijit.com/www/sovrn_amp/sovrn_ads.js',
   },
 
+  spotx: {
+    preconnect: 'https://js.spotx.tv',
+    renderStartImplemented: true,
+  },
+
   sunmedia: {
     prefetch: 'https://vod.addevweb.com/sunmedia/amp/ads/sunmedia.js',
     preconnect: 'https://static.addevweb.com',
@@ -618,6 +694,11 @@ export const adConfig = {
       'https://yads.c.yimg.jp/js/yads.js',
     ],
     preconnect: 'https://yads.yahoo.co.jp',
+  },
+
+  yandex: {
+    prefetch: 'https://yastatic.net/partner-code/loaders/context_amp.js',
+    renderStartImplemented: true,
   },
 
   yieldbot: {
