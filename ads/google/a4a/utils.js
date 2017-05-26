@@ -17,7 +17,7 @@
 import {buildUrl} from './url-builder';
 import {makeCorrelator} from '../correlator';
 import {isCanary} from '../../../src/experiments';
-import {getClientScopedAdCid} from '../../../src/ad-cid';
+import {getAdCidHelper} from '../../../src/ad-cid';
 import {documentInfoForDoc} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
@@ -143,7 +143,7 @@ export function googleAdUrl(
   // TODO: Maybe add checks in case these promises fail.
   /** @const {!Promise<string>} */
   const referrerPromise = viewerForDoc(a4a.getAmpDoc()).getReferrerUrl();
-  return getClientScopedAdCid(a4a.getAmpDoc(), 'AMP_ECID_GOOGLE').then(
+  return getAdCidHelper(a4a.getAmpDoc(), 'AMP_ECID_GOOGLE').then(
       clientId => referrerPromise.then(referrer => {
         const adElement = a4a.element;
         window['ampAdGoogleIfiCounter'] = window['ampAdGoogleIfiCounter'] || 1;

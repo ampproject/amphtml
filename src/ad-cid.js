@@ -29,19 +29,17 @@ export function getAdCid(adElement) {
   if (!config || !config.clientIdScope) {
     return Promise.resolve();
   }
-  return getClientScopedAdCid(adElement.getAmpDoc(), config.clientIdScope,
-                              config.clientIdCookieName);
+  return getAdCidHelper(adElement.getAmpDoc(), config.clientIdScope,
+                        config.clientIdCookieName);
 }
 
 /**
  * @param {!./service/ampdoc-impl.AmpDoc} ampDoc
  * @param {!string} clientIdScope
  * @param {string=} opt_clientIdCookieName
- * @return {!Promise<string|undefined>} A promise for a CID or undefined if
- *     - the ad network does not request one or
- *     - `amp-analytics` which provides the CID service was not installed.
+ * @return {!Promise<string|undefined>} A promise for a CID or undefined.
  */
-export function getClientScopedAdCid(
+export function getAdCidHelper(
     ampDoc, clientIdScope, opt_clientIdCookieName) {
   const cidPromise = cidForDocOrNull(ampDoc).then(cidService => {
     if (!cidService) {
