@@ -226,11 +226,24 @@ export function upgradeElementInChildWindow(parentWin, childWin, name) {
 
 /**
  * Applies layout to the element. Visible for testing only.
+ *
+ * \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  / _____|
+ *  \   \/    \/   / /  ^  \    |  |_)  |    |   \|  | |  | |   \|  | |  |  __
+ *   \            / /  /_\  \   |      /     |  . `  | |  | |  . `  | |  | |_ |
+ *    \    /\    / /  _____  \  |  |\  \----.|  |\   | |  | |  |\   | |  |__| |
+ *     \__/  \__/ /__/     \__\ | _| `._____||__| \__| |__| |__| \__|  \______|
+ *
+ * The equivalent of this method is used for server-side rendering (SSR) and
+ * any changes made to it must be made in coordination with caches that
+ * implement SSR. For more information on SSR see bit.ly/amp-ssr.
+ *
  * @param {!Element} element
  * @return {!Layout}
  */
 export function applyLayout_(element) {
-  // Check if the layout has already been done by the server.
+  // Check if the layout has already been done by server-side rendering. The
+  // document may be visible to the user if the boilerplate was removed so
+  // please take care in making changes here.
   const completedLayoutAttr = element.getAttribute('i-amphtml-layout');
   if (completedLayoutAttr) {
     const layout = /** @type {!Layout} */ (dev().assert(
@@ -239,9 +252,15 @@ export function applyLayout_(element) {
       // Find sizer, but assume that it might not have been parsed yet.
       element.sizerElement_ =
           element.querySelector('i-amphtml-sizer') || undefined;
+    } else if (layout == Layout.NODISPLAY) {
+      applyNoDisplayLayout_(element);
     }
     return layout;
   }
+
+  // If the layout was already done by server-side rendering (SSR), then the code
+  // below will not run. Any changes below will necessitate a change to SSR and must
+  // be coordinated with caches that implement SSR. See bit.ly/amp-ssr.
 
   // Parse layout from the element.
   const layoutAttr = element.getAttribute('layout');
@@ -325,11 +344,7 @@ export function applyLayout_(element) {
   if (layout == Layout.NODISPLAY) {
     // CSS defines layout=nodisplay automatically with `display:none`. Thus
     // no additional styling is needed.
-    // TODO(dvoytenko, #9353): once `toggleLayoutDisplay` API has been deployed
-    // everywhere, switch all relevant elements to this API. In the meantime,
-    // simply unblock display toggling via `style="display: ..."`.
-    setStyle(element, 'display', 'none');
-    element.classList.add('i-amphtml-display');
+    applyNoDisplayLayout_(element);
   } else if (layout == Layout.FIXED) {
     setStyles(element, {
       width: dev().assertString(width),
@@ -363,6 +378,18 @@ export function applyLayout_(element) {
     }
   }
   return layout;
+}
+
+
+/**
+ * @param {!Element} element
+ */
+function applyNoDisplayLayout_(element) {
+  // TODO(dvoytenko, #9353): once `toggleLayoutDisplay` API has been deployed
+  // everywhere, switch all relevant elements to this API. In the meantime,
+  // simply unblock display toggling via `style="display: ..."`.
+  setStyle(element, 'display', 'none');
+  element.classList.add('i-amphtml-display');
 }
 
 

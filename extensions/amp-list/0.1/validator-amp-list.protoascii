@@ -47,6 +47,7 @@ tags: {  # <amp-list>
   attrs: { name: "template" }
   # <amp-bind>
   attrs: { name: "[src]" }
+  attrs: { name: "[state]" }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-list"
   amp_layout: {

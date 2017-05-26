@@ -219,6 +219,7 @@ function compile(entryModuleFilenames, outputDir,
     var externs = [
       'build-system/amp.extern.js',
       'third_party/closure-compiler/externs/intersection_observer.js',
+      'third_party/closure-compiler/externs/performance_observer.js',
       'third_party/closure-compiler/externs/shadow_dom.js',
       'third_party/closure-compiler/externs/streams.js',
       'third_party/closure-compiler/externs/web_animations.js',
