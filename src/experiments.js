@@ -42,10 +42,11 @@ const COOKIE_EXPIRATION_INTERVAL = COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
 /** @type {Object<string, boolean>} */
 let toggles_ = null;
 
-//TODO(kmh287, #8331) Replaced empty object literal with real experiment public
-// key jwk.
+//TODO(kmh287, #8331) Uncomment and replace empty object literal with real
+// experiment public key jwk.
 /** @type {!Promise} */
-const originTrialsPromise = enableExperimentsForOriginTrials(self, {});
+const originTrialsPromise = Promise.resolve();
+// const originTrialsPromise = enableExperimentsForOriginTrials(self, {});
 
 /**
  * @typedef {{
