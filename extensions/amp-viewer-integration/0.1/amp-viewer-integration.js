@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Messaging, WindowPortEmulator, parseMessage} from 'messaging';
+import {Messaging, WindowPortEmulator, parseMessage} from './messaging/messaging';
 import {TouchHandler} from './touch-handler';
 import {getAmpDoc} from '../../../src/ampdoc';
 import {isIframed} from '../../../src/dom';
