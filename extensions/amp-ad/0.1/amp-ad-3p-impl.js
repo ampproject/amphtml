@@ -34,7 +34,7 @@ import {user, dev} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
 import {moveLayoutRect} from '../../../src/layout-rect';
-import {AdDisplayState, AmpAdUIHandler} from './amp-ad-ui';
+import {AmpAdUIHandler} from './amp-ad-ui';
 
 /** @const {!string} Tag name for 3P AD implementation. */
 export const TAG_3P_IMPL = 'amp-ad-3p-impl';
@@ -125,7 +125,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     user().assert(this.config, `Type "${adType}" is not supported in amp-ad`);
 
     this.uiHandler = new AmpAdUIHandler(this);
-    this.uiHandler.init();
 
     setupA2AListener(this.win);
   }
@@ -222,7 +221,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         'position:fixed: %s', this.element);
     incrementLoadingAds(this.win);
     return this.layoutPromise_ = getAdCid(this).then(cid => {
-      this.uiHandler.setDisplayState(AdDisplayState.LOADING);
       const opt_context = {
         clientId: cid || null,
         container: this.container_,
@@ -251,7 +249,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   /** @override  */
   unlayoutCallback() {
     this.layoutPromise_ = null;
-    this.uiHandler.setDisplayState(AdDisplayState.NOT_LAID_OUT);
+    this.uiHandler.applyUnlayoutUI();
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.freeXOriginIframe();
       this.xOriginIframeHandler_ = null;
@@ -262,7 +260,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   createPlaceholderCallback() {
-    return this.uiHandler.createPlaceholderCallback();
+    return this.uiHandler.createPlaceholder();
   }
 
   /**

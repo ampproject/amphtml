@@ -31,8 +31,7 @@ const minimist = require('minimist');
 const util = require('gulp-util');
 
 const gulp = 'node_modules/gulp/bin/gulp.js';
-const fileLogPrefix =
-    '\x1b[33;1m' + 'pr-check.js' + '\x1b[0m: ';  // Yellow, bold.
+const fileLogPrefix = util.colors.yellow.bold('pr-check.js:');
 
 /**
  * Starts a timer to measure the execution time of the given function.
@@ -42,8 +41,7 @@ const fileLogPrefix =
 function startTimer(functionName) {
   const startTime = Date.now();
   console.log(
-      '\n' + fileLogPrefix + 'Running ' + '\x1b[36m' +  // Cyan.
-      functionName + '\x1b[0m' + '...');
+      '\n' + fileLogPrefix, 'Running', util.colors.cyan(functionName), '...');
   return startTime;
 }
 
@@ -58,10 +56,8 @@ function stopTimer(functionName, startTime) {
   const mins = executionTime.getMinutes();
   const secs = executionTime.getSeconds();
   console.log(
-      fileLogPrefix + 'Done running ' +
-      '\x1b[36m' + functionName + '\x1b[0m' +  // Cyan.
-      '. ' + 'Total time: ' +
-      '\x1b[32m' + mins + 'm ' + secs + 's.' + '\x1b[0m');  // Green.
+      fileLogPrefix, 'Done running', util.colors.cyan(functionName),
+      'Total time:', util.colors.green(mins + 'm ' + secs + 's'));
 }
 
 /**
@@ -264,12 +260,14 @@ function runAllCommands() {
     command.runPreBuildChecks();
     command.runDepAndTypeChecks();
     // Skip testDocumentLinks() during push builds.
+    command.buildValidatorWebUI();
+    command.buildValidator();
   }
   if (process.env.BUILD_SHARD == "integration_tests") {
     command.buildRuntime();
     command.presubmit();  // Must be run after the runtime is built.
     command.runVisualDiffTests();  // Only called during push builds.
-    command.runIntegrationTests();    
+    command.runIntegrationTests();
   }
   if (process.env.BUILD_SHARD == "unit_tests") {
     // Unit tests should need a CSS-only build, but for now, we need a full dist
@@ -277,10 +275,6 @@ function runAllCommands() {
     // TODO(rsimha-amp, 9404): Clean up unit tests and change to css-only build.
     command.buildRuntime();
     command.runUnitTests();
-  }
-  if (process.env.BUILD_SHARD == "validator_tests") {
-    command.buildValidatorWebUI();
-    command.buildValidator();
   }
 }
 
@@ -292,9 +286,13 @@ function runAllCommands() {
  */
 function main(argv) {
   const startTime = startTimer('pr-check.js');
+  console.log(
+      fileLogPrefix, 'Running build shard',
+      util.colors.cyan(process.env.BUILD_SHARD));
+
   // If $TRAVIS_PULL_REQUEST_SHA is empty then it is a push build and not a PR.
   if (!process.env.TRAVIS_PULL_REQUEST_SHA) {
-    console.log('Running all commands on push build.');
+    console.log(fileLogPrefix, 'Running all commands on push build.');
     runAllCommands();
     stopTimer('pr-check.js', startTime);
     return 0;
@@ -306,15 +304,18 @@ function main(argv) {
   if (buildTargets.has('FLAG_CONFIG')) {
     files.forEach((file) => {
       if (!isFlagConfig(file)) {
-        console.log(util.colors.red('ERROR'),
-            'It appears that your PR contains a mix of flag-config files ' +
-            '(*config.json) and non-flag-config files.');
-        console.log('Please make your changes in separate pull requests.');
-        console.log(util.colors.yellow(
-            'NOTE: If you see a long list of unrelated files below, it is ' +
-            'likely because your branch is significantly out of sync.'));
-        console.log(util.colors.yellow(
-            'A full sync to upstream/master should clear this error.'));
+        console.log(fileLogPrefix, util.colors.red('ERROR:'),
+            'PRs may not include *config.json files and non-flag-config ' +
+            'files. Please make the changes in separate PRs.');
+        console.log(fileLogPrefix, util.colors.yellow('NOTE:'),
+            'If you see a long list of unrelated files below, it is likely ' +
+            'that your private branch is significantly out of sync.');
+        console.log(fileLogPrefix,
+            'A sync to upstream/master and a push to origin should clear' +
+            ' this error. If a normal push doesn\'t work, try a force push:');
+        console.log(util.colors.cyan('\t git fetch upstream master'));
+        console.log(util.colors.cyan('\t git rebase upstream/master'));
+        console.log(util.colors.cyan('\t git push origin --force'));
         console.log('\nFull list of files in this PR:');
         files.forEach((file) => { console.log('\t' + file); });
         stopTimer('pr-check.js', startTime);
@@ -337,8 +338,8 @@ function main(argv) {
   sortedBuildTargets.sort();
 
   console.log(
-      '\npr-check.js: detected build targets: ' +
-      sortedBuildTargets.join(', ') + '\n');
+      fileLogPrefix, 'Detected build targets:',
+      util.colors.cyan(sortedBuildTargets.join(', ')));
 
   // Run different sets of independent tasks in parallel to reduce build time.
   if (process.env.BUILD_SHARD == "pre_build_checks") {
@@ -354,18 +355,17 @@ function main(argv) {
       command.runPreBuildChecks();
       command.runDepAndTypeChecks();
     }
+    if (buildTargets.has('VALIDATOR_WEBUI')) {
+      command.buildValidatorWebUI();
+    }
+    if (buildTargets.has('VALIDATOR')) {
+      command.buildValidator();
+    }
   }
 
   if (process.env.BUILD_SHARD == "integration_tests") {
-    if (buildTargets.has('RUNTIME')) {
-      command.buildRuntime();
-      command.runIntegrationTests();
-    }
-    // Presubmit needs to run after `gulp dist` as some checks run through
-    // the dist/ folder.
-    // Also presubmit always needs to run even for just docs to check for
-    // copyright at the top.
-    command.presubmit();
+    // The integration_tests shard can be skipped for PRs.
+    console.log(fileLogPrefix, 'Skipping integration_tests for PRs');
   }
 
   if (process.env.BUILD_SHARD == "unit_tests" && buildTargets.has('RUNTIME')) {
@@ -373,16 +373,14 @@ function main(argv) {
     // because some of the tests are integration tests.
     // TODO(rsimha-amp, 9404): Clean up unit tests and change to css-only build.
     command.buildRuntime();
+    // Presubmit needs to run after `gulp dist` as some checks run through
+    // the dist/ folder.
+    // Also presubmit always needs to run even for just docs to check for
+    // copyright at the top.
+    // TODO(rsimha-amp, 9404): Move to integration_tests once it's enabled.
+    command.presubmit();
+    // Finally, run all unit tests.
     command.runUnitTests();
-  }
-
-  if (process.env.BUILD_SHARD == "validator_tests") {
-    if (buildTargets.has('VALIDATOR_WEBUI')) {
-      command.buildValidatorWebUI();
-    }
-    if (buildTargets.has('VALIDATOR')) {
-      command.buildValidator();
-    }
   }
 
   stopTimer('pr-check.js', startTime);

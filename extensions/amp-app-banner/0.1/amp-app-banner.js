@@ -29,6 +29,7 @@ import {parseUrl} from '../../../src/url';
 import {isProxyOrigin, isProtocolValid} from '../../../src/url';
 
 const TAG = 'amp-app-banner';
+const OPEN_LINK_TIMEOUT = 1500;
 
 /**
  * visible for testing.
@@ -224,6 +225,12 @@ export class AmpIosAppBanner extends AbstractAppBanner {
       return;
     }
 
+    if (this.viewer_.isEmbedded() &&
+        !this.viewer_.hasCapability('navigateTo')) {
+      this.hide_();
+      return;
+    }
+
     this.metaTag_ = this.win.document.head.querySelector(
         'meta[name=apple-itunes-app]');
     if (!this.metaTag_) {
@@ -254,10 +261,17 @@ export class AmpIosAppBanner extends AbstractAppBanner {
 
   /** @override */
   openButtonClicked(openInAppUrl, installAppUrl) {
-    timerFor(this.win).delay(() => {
-      this.viewer_.sendMessage('navigateTo', {url: installAppUrl});
-    }, 1500);
-    this.viewer_.sendMessage('navigateTo', {url: openInAppUrl});
+    if (!this.viewer_.isEmbedded()) {
+      timerFor(this.win).delay(() => {
+        openWindowDialog(this.win, installAppUrl, '_top');
+      }, OPEN_LINK_TIMEOUT);
+      openWindowDialog(this.win, openInAppUrl, '_top');
+    } else {
+      timerFor(this.win).delay(() => {
+        this.viewer_.sendMessage('navigateTo', {url: installAppUrl});
+      }, OPEN_LINK_TIMEOUT);
+      this.viewer_.sendMessage('navigateTo', {url: openInAppUrl});
+    }
   }
 
   /**
@@ -380,7 +394,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
   openButtonClicked(openInAppUrl, installAppUrl) {
     timerFor(this.win).delay(() => {
       this.redirectTopLocation_(installAppUrl);
-    }, 1500);
+    }, OPEN_LINK_TIMEOUT);
     openWindowDialog(this.win, openInAppUrl, '_top');
   }
 

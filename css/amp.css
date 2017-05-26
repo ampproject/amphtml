@@ -321,7 +321,7 @@ i-amphtml-sizer {
   left: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
-  z-index: 1 !important;
+  z-index: 1;
 }
 
 .i-amphtml-notbuilt > [placeholder] {
@@ -564,6 +564,7 @@ amp-iframe iframe {
 /**
  * Forms error/success messaging containers should be hidden at first.
  */
+form [submitting],
 form [submit-success],
 form [submit-error] {
   display: none;
@@ -595,7 +596,6 @@ amp-fresh {
   right: 0;
   color: #fff;
   font-size: 16px;
-  width: 110px;
   z-index: 1000;
   padding: 5px;
 }

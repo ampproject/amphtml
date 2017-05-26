@@ -23,6 +23,9 @@ import {
 } from '../url';
 import {isArray, isObject, isFormData} from '../types';
 import {utf8EncodeSync} from '../utils/bytes';
+import {ampdocServiceFor} from '../ampdoc';
+import {viewerForDoc} from '../services';
+import {getMode} from '../mode';
 
 
 /**
@@ -94,6 +97,15 @@ export class Xhr {
   constructor(win) {
     /** @const {!Window} */
     this.win = win;
+
+    /** @private {?./ampdoc-impl.AmpDoc} */
+    this.ampdocSingle_ = null;
+    if (!getMode().test) {
+      const ampdocService = ampdocServiceFor(win);
+      this.ampdocSingle_ = ampdocService.isSingleDoc() ?
+          ampdocService.getAmpDoc() :
+          null;
+    }
   }
 
   /**
@@ -106,6 +118,14 @@ export class Xhr {
    * @private
    */
   fetch_(input, init) {
+    if (this.ampdocSingle_ &&
+        Math.random() < 0.01 &&
+        parseUrl(input).origin != this.win.location.origin &&
+        !viewerForDoc(this.ampdocSingle_).hasBeenVisible()) {
+      dev().error('XHR', 'attempted to fetch %s before viewer was visible',
+          input);
+    }
+
     dev().assert(typeof input == 'string', 'Only URL supported: %s', input);
     // In particular, Firefox does not tolerate `null` values for
     // `credentials`.
@@ -181,8 +201,8 @@ export class Xhr {
       }
       return response;
     }, reason => {
-      user().assert(false, 'Fetch failed %s: %s', input,
-          reason && reason.message);
+      throw user().createExpectedError('XHR', `Failed fetching` +
+          ` (${targetOrigin}/...):`, reason && reason.message);
     });
   }
 

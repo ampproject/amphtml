@@ -41,6 +41,7 @@ The following adservers support serving AMP Ads at the moment:
 2. TripleLift 
 3. Dianomi
 4. Adzerk
+5. Google AdSense
 
 
 ## Creative Agencies

@@ -35,7 +35,7 @@ Z         [Zz]
 num       [+-]?[0-9]+("."[0-9]+)?([eE][+\-]?[0-9]+)?|[+-]?"."[0-9]+([eE][+\-]?[0-9]+)?
 hex       [a-fA-F0-9]+
 str       \'[^\']*\'|\"[^\"]*\"
-ident     \-?[a-zA-Z_][a-zA-Z0-9_]*
+ident     \-?[a-zA-Z_][\-a-zA-Z0-9_]*
 
 %%
 \s+                       /* skip whitespace */
@@ -66,9 +66,9 @@ ident     \-?[a-zA-Z_][a-zA-Z0-9_]*
 
 "#"{hex}                            return 'HEXCOLOR';
 
-{U}{R}{L}"("{str}")"                return 'URL'
+{U}{R}{L}\(                         return 'URL_START'
 {C}{A}{L}{C}\(                      return 'CALC_START'
-{V}{A}{R}"("                        return 'VAR_START'
+{V}{A}{R}\(                         return 'VAR_START'
 {T}{R}{A}{N}{S}{L}{A}{T}{E}\(       return 'TRANSLATE_START'
 {T}{R}{A}{N}{S}{L}{A}{T}{E}{X}\(    return 'TRANSLATE_X_START'
 {T}{R}{A}{N}{S}{L}{A}{T}{E}{Y}\(    return 'TRANSLATE_Y_START'
@@ -170,8 +170,8 @@ literal:
       {$$ = $1;}
   | time
       {$$ = $1;}
-  | URL
-      {$$ = new ast.CssUrlNode($1);}
+  | url
+      {$$ = $1;}
   | HEXCOLOR
       {$$ = new ast.CssPassthroughNode($1);}
   | IDENT
@@ -269,6 +269,19 @@ args:
         args.push($3);
         $$ = args;
       %}
+  ;
+
+
+/**
+ * CSS `url()` function.
+ * - `url("https://acme.org/img")`
+ * - `url(`https://acme.org/img`)`
+ * - `url(`data:...`)`
+ * - `url("/img")`
+ */
+url:
+    URL_START STRING ')'
+      {$$ = new ast.CssUrlNode($2.slice(1, -1));}
   ;
 
 

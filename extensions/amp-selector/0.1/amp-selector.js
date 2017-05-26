@@ -323,7 +323,7 @@ export class AmpSelector extends AMP.BaseElement {
       case KeyCodes.LEFT_ARROW: /* fallthrough */
       case KeyCodes.UP_ARROW: /* fallthrough */
       case KeyCodes.RIGHT_ARROW: /* fallthrough */
-      case KeyCodes.DOWN_ARROW: /* fallthrough */
+      case KeyCodes.DOWN_ARROW:
         if (this.kbSelectMode_ != KEYBOARD_SELECT_MODES.NONE) {
           this.navigationKeyDownHandler_(event);
         }

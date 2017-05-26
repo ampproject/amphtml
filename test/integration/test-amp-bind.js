@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-import '../../../amp-carousel/0.1/amp-carousel';
-import {createFixtureIframe} from '../../../../testing/iframe';
-import {batchedXhrFor, bindForDoc} from '../../../../src/services';
-import {ampdocServiceFor} from '../../../../src/ampdoc';
+import '../../extensions/amp-carousel/0.1/amp-carousel';
+import {createFixtureIframe} from '../../testing/iframe';
+import {batchedXhrFor, bindForDoc} from '../../src/services';
+import {ampdocServiceFor} from '../../src/ampdoc';
 import * as sinon from 'sinon';
 
-describe.configure().retryOnSaucelabs().run('amp-bind', function() {
+// TODO(choumx): Unskip once #9571 is fixed.
+describe.skip('amp-bind', function() {
   let fixture;
   let ampdoc;
   let sandbox;
-
-  this.timeout(5000);
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
