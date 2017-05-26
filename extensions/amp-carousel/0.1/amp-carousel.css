@@ -57,12 +57,16 @@ amp-carousel[controls] .amp-carousel-button,
   left: 16px;
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#fff" viewBox="0 0 18 18"><path d="M15 8.25H5.87l4.19-4.19L9 3 3 9l6 6 1.06-1.06-4.19-4.19H15v-1.5z"/></svg>');
   background-size: 18px 18px;
+  opacity: 1;
+  visibility: visible;
 }
 
 .amp-carousel-button-next {
   right: 16px;
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#fff" viewBox="0 0 18 18"><path d="M9 3L7.94 4.06l4.19 4.19H3v1.5h9.13l-4.19 4.19L9 15l6-6z"/></svg>');
   background-size: 18px 18px;
+  opacity: 1;
+  visibility: visible;
 }
 
 .i-amphtml-carousel-button-start-hint .amp-carousel-button:not(.amp-disabled) {
