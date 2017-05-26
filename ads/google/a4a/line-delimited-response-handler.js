@@ -110,7 +110,6 @@
    const lines = text.split('\n');
    // Note that its expected for an extra return to existing in the format.
    let linesRemaining = lines.length;
-   console.log('chunkHandleFullResponse', text, lines);
    let metaData;
    lines.forEach(line => {
      if (!metaData) {
