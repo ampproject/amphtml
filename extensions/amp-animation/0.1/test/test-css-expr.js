@@ -929,7 +929,7 @@ describes.sandboxed('CSS resolve', {}, () => {
     it('should be always a non-const and no css', () => {
       const node = new ast.CssDimSizeNode('?');
       expect(node.isConst()).to.be.false;
-      expect(node.css()).to.equal('');
+      expect(() => node.css()).to.throw(/no css/);
     });
 
     it('should resolve width on the current node', () => {
@@ -976,7 +976,7 @@ describes.sandboxed('CSS resolve', {}, () => {
     it('should always be a non-const and no css', () => {
       const node = new ast.CssRandNode();
       expect(node.isConst()).to.equal(false);
-      expect(node.css()).to.equal('');
+      expect(() => node.css()).to.throw(/no css/);
     });
 
     it('should resolve a no-arg rand', () => {
