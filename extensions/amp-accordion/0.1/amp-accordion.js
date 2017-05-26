@@ -17,6 +17,7 @@
 import {CSS} from '../../../build/amp-accordion-0.1.css';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
+import {closest} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {removeFragment} from '../../../src/url';
 import {map} from '../../../src/utils/object';
@@ -93,8 +94,7 @@ class AmpAccordion extends AMP.BaseElement {
           header.setAttribute('tabindex', 0);
         }
         this.headers_.push(header);
-        header.addEventListener('click',
-            this.onHeaderPicked_.bind(this));
+        header.addEventListener('click', this.clickHandler_.bind(this));
         header.addEventListener('keydown', this.keyDownHandler_.bind(this));
       });
     });
@@ -177,8 +177,24 @@ class AmpAccordion extends AMP.BaseElement {
   }
 
   /**
-   * Handles key presses on an accordion expand/collapse its content or
-   * move focus to previous/next header.
+   * Handles clicks on an accordion header to expand/collapse its content.
+   */
+  clickHandler_(event) {
+    // Need to support clicks on any children of the header except
+    // for on links, which should not have their default behavior
+    // overidden.
+    const target = dev().assertElement(event.target);
+    const header = dev().assertElement(event.currentTarget);
+    const anchor = closest(target, e => e.tagName == 'A', header);
+    if (anchor === null) {
+      // Don't use clicks on links in header to expand/collapse.
+      this.onHeaderPicked_(event);
+    }
+  }
+
+  /**
+   * Handles key presses on an accordion header to expand/collapse its content
+   * or move focus to previous/next header.
    * @param {!Event} event keydown event.
    */
   keyDownHandler_(event) {
