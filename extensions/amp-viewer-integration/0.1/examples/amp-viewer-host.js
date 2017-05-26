@@ -15,7 +15,12 @@
  */
 
 import '../../../../third_party/babel/custom-babel-helpers';
-import {APP, Messaging, MessageType, WindowPortEmulator} from '../messaging/messaging';
+import {
+  APP,
+  Messaging,
+  MessageType,
+  WindowPortEmulator,
+} from '../messaging/messaging';
 import {listen} from '../../../../src/event-helper';
 
 const CHANNEL_OPEN_MSG = 'channelOpen';
