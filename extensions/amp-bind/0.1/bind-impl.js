@@ -619,6 +619,7 @@ export class Bind {
    * @private
    */
   apply_(results, opt_isAmpStateMutation) {
+    debugger;
     const applyPromises = [];
     this.boundElements_.forEach(boundElement => {
       const {element, boundProperties} = boundElement;
@@ -715,6 +716,9 @@ export class Bind {
         // visible to the user.
         const requiresJsUpdate =
             element.tagName == 'INPUT' && property in element;
+        // Property value *must* be read before the attribute is changed.
+        // Before user interaction, attribute updates affect the property.
+        const oldJsPropertyValue = requiresJsUpdate && element[property];
         const oldValue = element.getAttribute(property);
 
         let attributeChanged = false;
@@ -725,7 +729,6 @@ export class Bind {
             element.removeAttribute(property);
           }
           if (requiresJsUpdate) {
-            const oldJsPropertyValue = element[property];
             element[property] = newValue;
             attributeChanged = oldJsPropertyValue !== newValue;
           } else {

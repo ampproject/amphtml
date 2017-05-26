@@ -300,6 +300,7 @@ describes.realWin('Bind', {
         + `checked [checked]="false" [disabled]="true" [multiple]="false"`;
     const element = createElementWithBinding(binding,
         /* opt_tagName */ 'input', /* opt_isAmpElement */ true);
+    debugger;
     const spy = env.sandbox.spy(element, 'mutatedAttributesCallback');
     return onBindReadyAndSetState({}).then(() => {
       expect(spy).calledWithMatch({
