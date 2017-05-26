@@ -19,8 +19,8 @@ import {
   Messaging,
   WindowPortEmulator,
   parseMessage,
-} from '../messaging/messaging.js';
-import {ViewerForTesting} from './viewer-for-testing.js';
+} from '../messaging/messaging';
+import {ViewerForTesting} from './viewer-for-testing';
 import {getSourceUrl} from '../../../../src/url';
 
 

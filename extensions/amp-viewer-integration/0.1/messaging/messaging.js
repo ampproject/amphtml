@@ -55,7 +55,13 @@ export function parseMessage(message) {
   if (message.charAt(0) != '{') {
     return null;
   }
-  return /** @type {?Message} */ (JSON.parse(/** @type {string} */ (message)));
+
+  try {
+    return /** @type {?Message} */ (
+      JSON.parse(/** @type {string} */ (message)));
+  } catch (e) {
+    return null;
+  }
 }
 
 
