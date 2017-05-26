@@ -101,6 +101,10 @@ export const adConfig = {
 
   adman: {},
 
+  admanmedia: {
+    renderStartImplemented: true,
+  },
+
   adreactor: {},
 
   adsense: {
