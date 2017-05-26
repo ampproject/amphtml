@@ -163,10 +163,19 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
 
     it('should update checkbox checked attr when its binding changes', () => {
       const checkbox = fixture.doc.getElementById('checkedBound');
+      const button = fixture.doc.getElementById('toggleCheckedButton');
       // Some attributes on certain input elements, such as `checked` on
-      // checkbox, only specify an initial value. Clicking the checkbox twice
+      // checkbox, only specify an initial value. Clicking the checkbox
       // ensures the element is no longer relying on `value` as
       // an initial value.
+      checkbox.click();
+      expect(checkbox.hasAttribute('checked')).to.be.true;
+      expect(checkbox.checked).to.be.true;
+      button.click();
+      return waitForBindApplication().then(() => {
+        expect(checkbox.hasAttribute('checked')).to.be.false;
+        expect(checkbox.checked).to.be.false;
+      });
     });
 
     it('should update dependent bindings on radio input changes', () => {
