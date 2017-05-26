@@ -108,6 +108,7 @@ const WHITELISTED_ATTRS = [
   'href',
   'on',
   'placeholder',
+  'option',
   /* Attributes added for amp-bind */
   // TODO(kmh287): Add more whitelisted attributes for bind?
   'text',
