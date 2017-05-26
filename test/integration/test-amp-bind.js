@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import '../../extensions/amp-carousel/0.1/amp-carousel';
 import {createFixtureIframe} from '../../testing/iframe';
 import {batchedXhrFor, bindForDoc} from '../../src/services';
 import {ampdocServiceFor} from '../../src/ampdoc';
@@ -24,8 +23,6 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   let fixture;
   let ampdoc;
   let sandbox;
-
-  this.timeout(5000);
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -42,24 +39,10 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   function setupWithFixture(fixtureLocation) {
     return createFixtureIframe(fixtureLocation).then(f => {
       fixture = f;
-      return waitForEvent('amp:bind:initialize');
+      return fixture.awaitEvent('amp:bind:initialize', 1);
     }).then(() => {
       const ampdocService = ampdocServiceFor(fixture.win);
       ampdoc = ampdocService.getAmpDoc(fixture.doc);
-    });
-  }
-
-  /**
-   * @param {string} name
-   * @return {!Promise}
-   */
-  function waitForEvent(name) {
-    return new Promise(resolve => {
-      function callback() {
-        resolve();
-        fixture.win.removeEventListener(name, callback);
-      };
-      fixture.win.addEventListener(name, callback);
     });
   }
 
@@ -68,17 +51,16 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
     // Bind should be available, but need to wait for actions to resolve
     // service promise for bind and call setState.
     return bindForDoc(ampdoc).then(unusedBind =>
-        waitForEvent('amp:bind:setState'));
+        fixture.awaitEvent('amp:bind:setState', 1));
   }
 
   /** @return {!Promise} */
   function waitForAllMutations() {
     return bindForDoc(ampdoc).then(unusedBind =>
-        waitForEvent('amp:bind:mutated'));
+        fixture.awaitEvent('amp:bind:mutated', 1));
   }
 
   describe('[text] and [class] integration', () => {
-
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-text-integration.html');
     });
@@ -105,7 +87,6 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   });
 
   describe('detecting bindings under dynamic tags', () => {
-
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-integrations.html');
     });
@@ -153,7 +134,6 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   });
 
   describe('input integration', () => {
-
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-integrations.html');
     });
@@ -192,39 +172,46 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
     });
   });
 
-  describe('amp-carousel integration', () => {
-
+  describe('with amp-carousel', () => {
     beforeEach(() => {
-      return setupWithFixture('test/fixtures/bind-integrations.html');
+      return setupWithFixture('test/fixtures/bind-carousel.html');
     });
 
     it('should update dependent bindings on carousel slide changes', () => {
-      const slideNum = fixture.doc.getElementById('slideNum');
+      const slideNumber = fixture.doc.getElementById('slideNumber');
+      expect(slideNumber.textContent).to.equal('0');
+
       const carousel = fixture.doc.getElementById('carousel');
-      const impl = carousel.implementation_;
-      expect(slideNum.textContent).to.equal('0');
-      impl.go(1, /* animate */ false);
+      const nextSlideButton =
+          carousel.querySelector('div.amp-carousel-button-next');
+      nextSlideButton.click();
+
       return waitForBindApplication().then(() => {
-        expect(slideNum.textContent).to.equal('1');
+        expect(slideNumber.textContent).to.equal('1');
       });
     });
 
     it('should change slides when the slide attribute binding changes', () => {
       const carousel = fixture.doc.getElementById('carousel');
-      const button = fixture.doc.getElementById('goToSlide1Button');
-      const impl = carousel.implementation_;
-      // No previous slide as current slide is 0th side
-      expect(impl.hasPrev()).to.be.false;
+      const slides =
+          carousel.querySelectorAll('.i-amphtml-slide-item > amp-img');
+      const firstSlide = slides[0];
+      const secondSlide = slides[1];
+
+      expect(firstSlide.getAttribute('aria-hidden')).to.equal('false');
+      expect(secondSlide.getAttribute('aria-hidden')).to.be.equal('true');
+
+      const button = fixture.doc.getElementById('goToSlideOne');
       button.click();
+
       return waitForBindApplication().then(() => {
-        // Has previous slide since the index has changed
-        expect(impl.hasPrev()).to.be.true;
+        expect(secondSlide.getAttribute('aria-hidden')).to.be.equal('false');
+        expect(firstSlide.getAttribute('aria-hidden')).to.equal('true');
       });
     });
   });
 
   describe('amp-img integration', () => {
-
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-integrations.html');
     });
@@ -291,7 +278,6 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   });
 
   describe('amp-live-list integration', () => {
-
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-integrations.html');
     });
@@ -346,7 +332,6 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   });
 
   describe('amp-selector integration', () => {
-
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-integrations.html');
     });
@@ -390,8 +375,8 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
     });
   });
 
-  describe('amp-video integration', () => {
-
+  // TODO(choumx): Unskip once #9571 is fixed.
+  describe.skip('amp-video integration', () => {
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-integrations.html');
     });
@@ -462,7 +447,6 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   });
 
   describe('amp-youtube', () => {
-
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-integrations.html');
     });
@@ -479,7 +463,6 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   });
 
   describe('amp-brightcove', () => {
-
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-integrations.html');
     });
@@ -499,7 +482,6 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   });
 
   describe('amp-iframe', () => {
-
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-integrations.html');
     });
@@ -523,7 +505,6 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   });
 
   describe('amp-list', () => {
-
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-integrations.html');
     });
@@ -553,8 +534,8 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
     });
   });
 
-  describe('amp-state', () => {
-
+  // TODO(choumx): Unskip once #9571 is fixed.
+  describe.skip('amp-state', () => {
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-integrations.html');
     });

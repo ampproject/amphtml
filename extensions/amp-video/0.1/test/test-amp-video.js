@@ -389,7 +389,7 @@ describe(TAG, () => {
           assert.fail('Should not have dispatch unmute message twice');
         });
         v.querySelector('video').dispatchEvent(new Event('volumechange'));
-        const successTimeout = timer.timeoutPromise(10, true);
+        const successTimeout = timer.promise(10);
         return Promise.race([p, successTimeout]);
       });
     });
