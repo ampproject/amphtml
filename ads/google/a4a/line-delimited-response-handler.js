@@ -22,7 +22,7 @@
   * pairs of JSON object metadata then string HTML delimited by line returns.
   *
   * @param {!../../../src/service/xhr-impl.Xhr} xhr
-  * @param {string} input
+  * @param {string} url
   * @param {!function(string, !Object<string, *>, boolean)} chunkHandler called
   *    with creative, metadata, and boolean indicating if completed.  Failure to
   *    JSON parse metadata will cause empty object to be given.
@@ -30,8 +30,8 @@
   * @return {!Promise<!../../../src/service/xhr-impl.FetchResponse>} response,
   *    note that accessing body will cause error as its consumed in streaming.
   */
- export function fetchLineDelimitedChunks(xhr, input, chunkHandler, opt_init) {
-   return xhr.fetch(input, opt_init)
+ export function fetchLineDelimitedChunks(xhr, url, chunkHandler, opt_init) {
+   return xhr.fetch(url, opt_init)
      .then(response => {
        if (!response.body || !xhr.win.TextDecoder) {
          // TODO(keithwrightbos) - TextDecoder polyfill?
@@ -73,7 +73,7 @@
            } while (hasDelimiter && pos < chunk.length);
          };
          handleFetchResponseStream_(
-           response.body.getReader(), chunkCallback, new TextDecoder());
+           response.body.getReader(), chunkCallback, new TextDecoder('utf-8'));
        }
        return response;
      });
@@ -110,6 +110,7 @@
    const lines = text.split('\n');
    // Note that its expected for an extra return to existing in the format.
    let linesRemaining = lines.length;
+   console.log('chunkHandleFullResponse', text, lines);
    let metaData;
    lines.forEach(line => {
      if (!metaData) {

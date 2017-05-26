@@ -16,6 +16,7 @@
 
 import {AmpA4A} from '../amp-a4a';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
+import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 
 /** @type {string} @private */
 export const SIGNATURE_HEADER = 'X-TestSignatureHeader';
