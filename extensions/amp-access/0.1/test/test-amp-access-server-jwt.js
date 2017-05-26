@@ -448,11 +448,11 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
             .once();
         xhrMock.expects('fetchText')
             .withExactArgs('https://acme.com/pk')
-            .returns({
+            .returns(Promise.resolve({
               text() {
                 return pemPromise;
               },
-            })
+            }))
             .once();
         jwtMock.expects('decode')
             .withExactArgs(encoded)
