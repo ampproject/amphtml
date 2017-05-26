@@ -1414,8 +1414,8 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'pageView': '${_domain}/counter?${_basicMessage};title=${title}',
       'reachGoal': '${_domain}/tracker?${_basicMessage};title=${title}' +
                    ';e=RG%3A${value}%2F${goal}',
-      'sendEvent': '${_domain}/tracker?${_basicMessage};' +
-                   'e=CE%3A${value}%2F${category}%3B${action}%3B${label}',
+      'sendEvent': '${_domain}/tracker?${_basicMessage}' +
+                   ';e=CE%3A${value}%2F${category}%3B${action}%3B${label}',
       '_domain': 'https://top-fwz1.mail.ru',
       '_basicMessage': 'js=13;id=${id};u=${url};r=${referrer}' +
                        ';s=${screenWidth}*${screenHeight}' +
