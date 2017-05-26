@@ -31,7 +31,6 @@ describes.realWin('Bind', {
   let bind;
 
   beforeEach(() => {
-    env.win.testLocation = parseUrl('http://localhost:31862');
     installTimerService(env.win);
     toggleExperiment(env.win, 'amp-bind', true);
 
