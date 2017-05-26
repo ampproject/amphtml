@@ -16,13 +16,13 @@
 
 import {adConfig} from '../../ads/_config';
 import {ampdocServiceFor} from '../../src/ampdoc';
-import {createIframePromise} from '../../testing/iframe';
-import {cidServiceForDocForTesting,} from
+import {cidServiceForDocForTesting} from
     '../../extensions/amp-analytics/0.1/cid-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {getAdCid} from '../../src/ad-cid';
 import {setCookie} from '../../src/cookies';
 import {timerFor} from '../../src/services';
+import {resetServiceForTesting} from '../../src/service';
 import * as sinon from 'sinon';
 
 describe('ad-cid', () => {
@@ -67,6 +67,7 @@ describe('ad-cid', () => {
       expect(cid).to.equal('test123');
       expect(getCidStruct).to.deep.equal({
         scope: cidScope,
+        createCookieIfNotPresent: true,
         cookieName: undefined,
       });
     });
@@ -85,6 +86,7 @@ describe('ad-cid', () => {
       expect(cid).to.equal('test123');
       expect(getCidStruct).to.deep.equal({
         scope: cidScope,
+        createCookieIfNotPresent: true,
         cookieName: 'different-cookie-name',
       });
     });
@@ -112,18 +114,12 @@ describe('ad-cid', () => {
     sandbox.stub(cidService, 'get', () => {
       return Promise.reject(new Error('nope'));
     });
-    return getAdCid(adElement).then(cid => {
-      expect(cid).to.be.undefined;
-    });
+    return expect(getAdCid(adElement)).to.eventually.be.undefined;
   });
 
   it('should return null if cid service not available', () => {
+    resetServiceForTesting(window, 'cid');
     config.clientIdScope = cidScope;
-    return createIframePromise(true /* runtimeOff */).then(iframe => {
-      adElement.win = iframe.win;
-      return getAdCid(adElement).then(cid => {
-        expect(cid).to.be.null;
-      });
-    });
+    return expect(getAdCid(adElement)).to.eventually.be.undefined;
   });
 });
