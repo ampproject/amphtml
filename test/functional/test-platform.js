@@ -163,6 +163,18 @@ describe('Platform', () => {
         'Gecko/20100101 Firefox/40.1');
   });
 
+  it('Firefox ios', () => {
+    isIos = true;
+    isFirefox = true;
+    isWebKit = true;
+    majorVersion = 7;
+    iosVersion = '10.3.1';
+    iosMajorVersion = 10;
+    testUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X)' +
+        ' AppleWebKit/603.1.30 (KHTML, like Gecko) FxiOS/7.5b3349' +
+        ' Mobile/14E304 Safari/603.1.30');
+  });
+
   it('IE', () => {
     isIe = true;
     majorVersion = 10;
