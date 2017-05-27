@@ -155,7 +155,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
         'type=click&click=${type}${suffix}',
     },
   },
-
+  
   'baiduanalytics': {
     'requests': {
       'host': 'https://hm.baidu.com',
@@ -172,21 +172,6 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     },
   },
 
-  'baiduanalytics': {
-    'requests': {
-      'host': 'https://hm.baidu.com',
-      'base': '${host}/hm.gif?' +
-          'si=${token}&nv=0&st=4&v=pixel-1.0&rnd=${timestamp}',
-      'pageview': '${base}&et=0',
-      'event': '${base}&ep=${category}*${action}*' +
-          '${label}*${value}&et=4&api=8_0',
-    },
-    'transport': {
-      'beacon': false,
-      'xhrpost': false,
-      'image': true,
-    },
-  },
   'burt': {
     'vars': {
       'trackingKey': 'ignore',
