@@ -569,8 +569,8 @@ function createBaseCustomElementClass(win) {
 
       if (this[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER]) {
         this[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER](this);
-        this[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER] = null;
-        this[dom.UPGRADE_TO_CUSTOMELEMENT_PROMISE] = null;
+        delete this[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER];
+        delete this[dom.UPGRADE_TO_CUSTOMELEMENT_PROMISE];
       }
     }
 

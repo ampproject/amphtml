@@ -30,11 +30,11 @@ const HTML_ESCAPE_REGEX = /(&|<|>|"|'|`)/g;
 
 /** @const {string} */
 export const UPGRADE_TO_CUSTOMELEMENT_PROMISE =
-    '__AMP_UPGRADE_CUS_ELE_PROMISE__';
+    '__AMP_UPG_PRM';
 
 /** @const {string} */
 export const UPGRADE_TO_CUSTOMELEMENT_RESOLVER =
-    '__AMP_UPGRADE_CUS_ELE_RESOLVER__';
+    '__AMP_UPG_RES';
 
 
 /**

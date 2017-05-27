@@ -66,11 +66,12 @@ class AmpStickyAd extends AMP.BaseElement {
 
     this.ad_ = children[0];
     this.setAsOwner(this.ad_);
+
     whenUpgradedToCustomElement(dev().assertElement(this.ad_)).then(ad => {
-      ad.whenBuilt().then(() => {
-        this.mutateElement(() => {
-          toggle(this.element, true);
-        });
+      return ad.whenBuilt();
+    }).then(() => {
+      this.mutateElement(() => {
+        toggle(this.element, true);
       });
     });
 
