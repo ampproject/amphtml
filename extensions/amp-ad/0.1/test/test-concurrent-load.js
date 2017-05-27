@@ -32,8 +32,7 @@ describes.realWin('concurrent-load', {}, env => {
       expect(getAmpAdRenderOutsideViewport(element)).to.be.null;
     });
 
-    it('getAmpAdRenderOutsideViewport should respect ' +
-        'data-loading-strategy attribute', () => {
+    it('should respect data-loading-strategy attribute', () => {
       // data-loading-strategy=prefer-viewability-over-views is 1.25
       verifyGetAmpAdRenderOutsideViewport(
           'prefer-viewability-over-views', 1.25);
