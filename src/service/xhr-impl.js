@@ -216,7 +216,7 @@ export class Xhr {
    *
    * @param {string} input
    * @param {?FetchInitDef=} opt_init
-   * @return {!Promise<!JSONType>}
+   * @return {!Promise<!FetchResponse>}
    */
   fetchJson(input, opt_init) {
     const init = setupInit(opt_init, 'application/json');
