@@ -16,16 +16,17 @@
 
 import {adConfig} from '../../ads/_config';
 import {ampdocServiceFor} from '../../src/ampdoc';
-import {cidServiceForDocForTesting} from
-    '../../extensions/amp-analytics/0.1/cid-impl';
+import {
+  cidServiceForDocForTesting,
+} from '../../extensions/amp-analytics/0.1/cid-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
+import {installTimerService} from '../../src/service/timer-impl';
 import {getAdCid} from '../../src/ad-cid';
-import {setCookie} from '../../src/cookies';
 import {timerFor} from '../../src/services';
 import {resetServiceForTesting} from '../../src/service';
-import * as sinon from 'sinon';
+import * as lolex from 'lolex';
 
-describe('ad-cid', () => {
+describes.realWin('ad-cid', {}, env => {
   const cidScope = 'cid-in-ads-test';
   const config = adConfig['_ping_'];
   let sandbox;
@@ -34,25 +35,23 @@ describe('ad-cid', () => {
   let clock;
   let element;
   let adElement;
+  let win;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
-    element = document.createElement('amp-ad');
+    win = env.win;
+    sandbox = env.sandbox;
+    clock = lolex.install(win, 0, ['Date', 'setTimeout', 'clearTimeout']);
+    element = env.win.document.createElement('amp-ad');
     element.setAttribute('type', '_ping_');
-    installDocService(window, /* isSingleDoc */ true);
-    const ampdoc = ampdocServiceFor(window).getAmpDoc();
+    installDocService(win, /* isSingleDoc */ true);
+    installTimerService(win);
+    const ampdoc = ampdocServiceFor(win).getAmpDoc();
     cidService = cidServiceForDocForTesting(ampdoc);
     adElement = {
       getAmpDoc: () => ampdoc,
       element,
-      win: window,
+      win,
     };
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-    setCookie(window, cidScope, '', Date.now() - 5000);
   });
 
   it('should get correct cid', () => {
@@ -95,11 +94,11 @@ describe('ad-cid', () => {
   it('should return on timeout', () => {
     config.clientIdScope = cidScope;
     sandbox.stub(cidService, 'get', () => {
-      return timerFor(window).promise(2000);
+      return timerFor(win).promise(2000);
     });
     const p = getAdCid(adElement).then(cid => {
       expect(cid).to.be.undefined;
-      expect(Date.now()).to.equal(1000);
+      expect(win.Date.now()).to.equal(1000);
     });
     clock.tick(999);
     // Let promises resolve before ticking 1 more ms.
@@ -118,7 +117,7 @@ describe('ad-cid', () => {
   });
 
   it('should return null if cid service not available', () => {
-    resetServiceForTesting(window, 'cid');
+    resetServiceForTesting(win, 'cid');
     config.clientIdScope = cidScope;
     return expect(getAdCid(adElement)).to.eventually.be.undefined;
   });
