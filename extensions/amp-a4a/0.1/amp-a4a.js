@@ -511,15 +511,12 @@ export class AmpA4A extends AMP.BaseElement {
     }
     // If in localDev `type=fake` Ad specifies `force3p`, it will be forced
     // to go via 3p.
-    if (getMode().localDev && this.element.getAttribute('type') == 'fake') {
-      // Prevent issuing a second network request to try to fetch
-      // the same JSON again.
-      this.experimentalNonAmpCreativeRenderMethod_ = XORIGIN_MODE.NAMEFRAME;
-      if (this.element.getAttribute('force3p') == 'true') {
-        this.adUrl_ = this.getAdUrl();
-        this.adPromise_ = Promise.resolve();
-        return;
-      }
+    if (getMode().localDev &&
+        this.element.getAttribute('type') == 'fake' &&
+        this.element.getAttribute('force3p') == 'true') {
+      this.adUrl_ = this.getAdUrl();
+      this.adPromise_ = Promise.resolve();
+      return;
     }
 
     // Increment unique promise ID so that if its value changes within the
