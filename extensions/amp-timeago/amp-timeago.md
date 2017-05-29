@@ -23,7 +23,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>In development</td>
+    <td>Stable</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -42,7 +42,10 @@ Provides fuzzy timestamps that you can use on your AMP pages. This component is 
 Example:
 
 ```html
-<amp-timeago layout="fixed" width="160" height="20" datetime="2017-04-11T00:37:33.809Z" locale="en">Saturday 11 April 2017 00.37</amp-timeago>
+<amp-timeago layout="fixed" width="160"
+    height="20"
+    datetime="2017-04-11T00:37:33.809Z"
+    locale="en">Saturday 11 April 2017 00.37</amp-timeago>
 ```
 
 ## Attributes
@@ -94,3 +97,11 @@ By default, the local is set to <code>en</code>; however, you can specify one of
   <li>zhCN (Chinese)</li>
   <li>zhTW (Taiwanese)</li>
 </ul>
+
+**common attributes**
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+
+## Validation
+
+See [amp-timeago rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-timeago/0.1/validator-amp-timeago.protoascii) in the AMP validator specification.
