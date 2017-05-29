@@ -63,7 +63,11 @@ cached AMP page sends a request to your origin domain to get the prices, which
 is a mismatch between origins (cache -> origin domain). To allow for such
 cross-origin requests, you need to handle CORS, otherwise, the request fails.
 
-![CORS and Cache](./img/CORS_with_Cache.png)
+<amp-img alt="CORS and Cache" layout="responsive" src="https://www.ampproject.org/static/img/docs/CORS_with_Cache.png" width="809" height="391">
+  <noscript>
+    <img alt="CORS and Cache" src="https://www.ampproject.org/static/img/docs/CORS_with_Cache.png" />
+  </noscript>
+</amp-img>
 
 **Okay, what should I do?**
  
