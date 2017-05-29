@@ -579,11 +579,6 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
         'request': 'pageview',
       },
     },
-    'transport': {
-      'beacon': true,
-      'xhrpost': false,
-      'image': true,
-    },
   },
 
   'gemius': {
