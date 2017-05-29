@@ -17,10 +17,11 @@
 import {isJsonScriptTag} from '../../../src/dom';
 import {assertHttpsUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 import {dev, rethrowAsync, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {expandTemplate} from '../../../src/string';
 import {isArray, isObject} from '../../../src/types';
 import {dict, hasOwn, map} from '../../../src/utils/object';
-import {sendRequest, sendRequestUsingIframe} from './transport';
+import {sendRequest, sendRequestUsingIframe, Transport} from './transport';
 import {urlReplacementsForDoc} from '../../../src/services';
 import {userNotificationManagerFor} from '../../../src/services';
 import {cryptoFor} from '../../../src/crypto';
@@ -162,6 +163,13 @@ export class AmpAnalytics extends AMP.BaseElement {
     return this.ensureInitialized_();
   }
 
+  /* @ override */
+  unlayoutCallback() {
+    Transport.doneWithCrossDomainIframe(this.getAmpDoc().win.document,
+      this.config_['transport']);
+    return true;
+  }
+
   /** @override */
   detachedCallback() {
     if (this.analyticsGroup_) {
@@ -223,6 +231,11 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.analyticsGroup_ =
         this.instrumentation_.createAnalyticsGroup(this.element);
 
+    if (this.config_['transport'] && this.config_['transport']['iframe']) {
+      Transport.processCrossDomainIframe(this.getAmpDoc().win.document,
+        this.config_['transport'], this.processCrossDomainIframeResponse_);
+    }
+
     const promises = [];
     // Trigger callback can be synchronous. Do the registration at the end.
     for (const k in this.config_['triggers']) {
@@ -278,6 +291,20 @@ export class AmpAnalytics extends AMP.BaseElement {
       }
     }
     return Promise.all(promises);
+  }
+
+  /**
+   * Receives any response that may be sent from the cross-domain iframe
+   * @param {String} msg The response message from the iframe
+   * was specified in the amp-analytics config
+   */
+  processCrossDomainIframeResponse_(msg) {
+    try {
+      if (this.element.ownerDocument.location.href !== 'about:srcdoc') {
+        this.element.ownerDocument.location.href += msg;
+      }
+    } catch (err) {
+    }
   }
 
   /**
@@ -401,6 +428,20 @@ export class AmpAnalytics extends AMP.BaseElement {
           'deprecation');
     }
     const typeConfig = this.predefinedConfig_[type] || {};
+
+    // transport.iframe is only allowed to be specified in typeConfig, not
+    // the others. Allowed when running locally for testing purposes.
+    [defaultConfig, inlineConfig, this.remoteConfig_].forEach(config => {
+      if (config && config.transport && config.transport.iframe) {
+        if (getMode().localDev) {
+          user().warn('Only typeConfig may specify iframe transport, but ' +
+              ' in local dev mode, so okay', config);
+        } else {
+          user().error('Only typeConfig may specify iframe transport', config);
+          return;
+        }
+      }
+    });
 
     this.mergeObjects_(defaultConfig, config);
     this.mergeObjects_(typeConfig, config, /* predefined */ true);
