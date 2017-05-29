@@ -39,7 +39,7 @@ limitations under the License.
 
 With the `responsive` layout, the width and height in this should yield correct layouts for 16:9 aspect ratio videos:
 
-``` html
+```html
 <amp-3q-player
     data-id="c8dbe7f4-7f7f-11e6-a407-0cc47a188158"
     layout="responsive"
