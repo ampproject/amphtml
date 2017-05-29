@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# IM.cz
+# Imedia
 
 ## Example
 
@@ -22,10 +22,7 @@ limitations under the License.
 <amp-ad width=300 height=250
   type="imedia"
   data-id="p1"
-  data-positions='[
-    {"id":"p1", "zoneId":"seznam.novinky.ikona2"},
-    {"id":"p2", "zoneId":"seznam.novinky.ikona"}
-  ]'
+  data-positions='[{"id":"p1", "zoneId":"seznam.novinky.ikona2"}, {"id":"p2", "zoneId":"seznam.novinky.ikona"}]'
 </amp-ad>
 ```
 
@@ -37,4 +34,9 @@ or contact reklama-pozadavky@firma.seznam.cz
 Required parameters:
 
 - data-id
-- data-positions
+- data-positions - JSON value
+
+Required JSON fields:
+
+* id - unique element id
+* zoneId - advertisement identificator

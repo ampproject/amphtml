@@ -30,11 +30,11 @@ export function imedia(global, data) {
   parentElement.id = data.id;
   global.document.getElementById('c').appendChild(parentElement);
 
-  // array of all ad elements through all iframes
-  if (!mW.elements) {
-    mW.elements = [];
+  // array of all ad elements and matching contexts through all iframes
+  if (!mW.inPagePositions) {
+    mW.inPagePositions = [];
   }
-  mW.elements.push(parentElement);
+  mW.inPagePositions.push({parentElement, context: global.context});
 
   computeInMasterFrame(global, 'imedia-load', done => {
     loadScript(global, 'https://i.imedia.cz/js/im3.js', () => {
@@ -49,22 +49,22 @@ export function imedia(global, data) {
         }});
       }});
   }, () => {
-    mW.elements = mW.elements.filter(element => {
+    mW.inPagePositions = mW.inPagePositions.filter(inPagePostion => {
       let used = true;
       positions.filter((position, index) => {
 
         // match right element and zone to write advert from adserver
-        if (element.id == position.id) {
+        if (inPagePostion.parentElement.id == position.id) {
           used = false;
-          position.id = element; // right element "c" to position obj.
+          position.id = inPagePostion.parentElement; // right element "c" to position obj.
           if (mW.im.writeAd) {
             mW.im.writeAd(mW.ads[index], position);
 
             // inform AMP runtime when the ad starts rendering
             if (mW.ads[index].impress) {
-              global.context.renderStart();
+              inPagePostion.context.renderStart();
             } else {
-              global.context.noContentAvailable();
+              inPagePostion.context.noContentAvailable();
             }
           }
           return false;
