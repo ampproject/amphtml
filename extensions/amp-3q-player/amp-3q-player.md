@@ -19,11 +19,11 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Embeds Videos from <a href="https://www.3qsdn.com/en/">3Q SDN</a>.</td>
+    <td>Embeds videos from <a href="https://www.3qsdn.com/en/">3Q SDN</a>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>In Development</td>
+    <td>Stable</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -37,19 +37,22 @@ limitations under the License.
 
 ## Example
 
+With the `responsive` layout, the width and height in this should yield correct layouts for 16:9 aspect ratio videos:
+
 ``` html
 <amp-3q-player
     data-id="c8dbe7f4-7f7f-11e6-a407-0cc47a188158"
-    width="100%" height="100%"></amp-3q-player>
+    layout="responsive"
+    width="480" height="270"></amp-3q-player>
 ```
 
 ## Attributes
 
 **data-id** (required)
 
-sdnPlayoutId from 3Q SDN
+The sdnPlayoutId from 3Q SDN.
 
-**autoplay**
+**autoplay** (optional)
 
 If this attribute is present, and the browser supports autoplay:
 
@@ -58,6 +61,10 @@ If this attribute is present, and the browser supports autoplay:
 * when the video is scrolled into view, the video resumes playback
 * when the user taps the video, the video is unmuted
 * if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it.  For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.
+
+**common attributes**
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
 
