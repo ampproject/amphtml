@@ -506,7 +506,7 @@ export function onAdError() {
  *
  * @visibleForTesting
  */
-export function onContentPauseRequested() {
+export function onContentPauseRequested(global) {
   if (adsManagerWidthOnLoad) {
     adsManager.resize(
       adsManagerWidthOnLoad,
@@ -815,7 +815,7 @@ function onMessage(global, event) {
           playVideo();
         } else {
           // Auto-play support
-          onClick();
+          onClick(global);
         }
         break;
       case 'pauseVideo':
