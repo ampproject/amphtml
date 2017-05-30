@@ -73,7 +73,7 @@ describes.realWin('performance', {amp: true}, env => {
       expect(perf.events_[c])
           .to.be.jsonEqual({
             label: 'test1',
-            delta: 1,
+            delta: 0,
           });
 
       c++;
@@ -82,7 +82,7 @@ describes.realWin('performance', {amp: true}, env => {
       expect(perf.events_[c])
           .to.be.jsonEqual({
             label: 'test2',
-            delta: 1,
+            delta: 0,
           });
 
       c++;
