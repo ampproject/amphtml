@@ -360,7 +360,11 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
             .withExactArgs('https://acme.com/a?rid=r1', {
               credentials: 'include',
             })
-            .returns(Promise.resolve(encoded))
+            .returns(Promise.resolve({
+              text() {
+                return Promise.resolve(encoded);
+              },
+            }))
             .once();
         jwtMock.expects('decode')
             .withExactArgs(encoded)
@@ -436,11 +440,19 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
             .withExactArgs('https://acme.com/a?rid=r1', {
               credentials: 'include',
             })
-            .returns(Promise.resolve(encoded))
+            .returns(Promise.resolve({
+              text() {
+                return Promise.resolve(encoded);
+              },
+            }))
             .once();
         xhrMock.expects('fetchText')
             .withExactArgs('https://acme.com/pk')
-            .returns(pemPromise)
+            .returns(Promise.resolve({
+              text() {
+                return pemPromise;
+              },
+            }))
             .once();
         jwtMock.expects('decode')
             .withExactArgs(encoded)
@@ -478,7 +490,11 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
             .withExactArgs('https://acme.com/a?rid=r1', {
               credentials: 'include',
             })
-            .returns(Promise.resolve(encoded))
+            .returns(Promise.resolve({
+              text() {
+                return Promise.resolve(encoded);
+              },
+            }))
             .once();
         xhrMock.expects('fetchText')
             .withExactArgs('https://acme.com/pk')
@@ -524,7 +540,11 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
             .withExactArgs('https://acme.com/a?rid=r1', {
               credentials: 'include',
             })
-            .returns(Promise.resolve(encoded))
+            .returns(Promise.resolve({
+              text() {
+                return Promise.resolve(encoded);
+              },
+            }))
             .once();
         jwtMock.expects('decode')
             .withExactArgs(encoded)
