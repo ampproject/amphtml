@@ -266,6 +266,14 @@ describes.sandboxed('HistoryBindingNatural', {}, () => {
     expect(onStackIndexUpdated).to.have.not.been.called;
   });
 
+  it('should preserve the initial state if possible', () => {
+    history.origReplaceState_({'a': 11}, undefined);
+    const history2 = new HistoryBindingNatural_(window);
+    expect(history.getState_()['a']).to.equal(11);
+    history2.cleanup_();
+    expect(onStackIndexUpdated).to.have.not.been.called;
+  });
+
   it('should override history.pushState and set its properties', () => {
     window.history.pushState({a: 111});
     expect(history.unsupportedState_.a).to.equal(111);
