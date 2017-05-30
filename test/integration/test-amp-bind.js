@@ -19,7 +19,8 @@ import {batchedXhrFor, bindForDoc} from '../../src/services';
 import {ampdocServiceFor} from '../../src/ampdoc';
 import * as sinon from 'sinon';
 
-describe.configure().retryOnSaucelabs().run('amp-bind', function() {
+// TODO(choumx): Unskip once #9571 is fixed.
+describe.skip('amp-bind', function() {
   let fixture;
   let ampdoc;
   let sandbox;
