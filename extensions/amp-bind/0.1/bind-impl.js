@@ -709,10 +709,22 @@ export class Bind {
         break;
 
       default:
+        // Some input elements treat some of their attributes as initial values.
+        // Once the user interacts with these elements, the JS properties
+        // underlying these attributes must be updated for the change to be
+        // visible to the user.
+        const updateElementProperty =
+            element.tagName == 'INPUT' && property in element;
         const oldValue = element.getAttribute(property);
 
         let attributeChanged = false;
         if (typeof newValue === 'boolean') {
+          if (updateElementProperty && element[property] !== newValue) {
+            // Property value *must* be read before the attribute is changed.
+            // Before user interaction, attribute updates affect the property.
+            element[property] = newValue;
+            attributeChanged = true;
+          }
           if (newValue && oldValue !== '') {
             element.setAttribute(property, '');
             attributeChanged = true;
@@ -736,6 +748,9 @@ export class Bind {
           // Rewriting can fail due to e.g. invalid URL.
           if (rewrittenNewValue !== undefined) {
             element.setAttribute(property, rewrittenNewValue);
+            if (updateElementProperty) {
+              element[property] = rewrittenNewValue;
+            }
             attributeChanged = true;
           }
         }

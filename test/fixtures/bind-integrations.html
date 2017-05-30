@@ -48,6 +48,8 @@
   <p id="checkboxText" [text]="'Checked: ' + checkboxChange.checked" id="checkboxText">Unbound</p>
   <input type="radio" on="change:AMP.setState({radioChange: event})" id="radio">
   <p id="radioText" [text]="'Checked: ' + radioChange.checked" id="radioText">Unbound</p>
+  <input type="checkbox" [checked]="isChecked" id="checkedBound">
+  <button on="tap:AMP.setState({isChecked: isChecked != null ? !isChecked : false})" id="toggleCheckedButton"></button>
 
   <p>AMP-IMG</p>
   <button on="tap:AMP.setState({imageSrc: 'http://www.google.com/image2'})" id="changeImgSrcButton"></button>
