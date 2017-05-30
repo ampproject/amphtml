@@ -25,7 +25,7 @@ min_validator_revision_required: 232
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 422
+spec_file_revision: 424
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 
@@ -2582,8 +2582,11 @@ tags {
   tag_name: "DIV"
   spec_name: "FORM > DIV [submitting]"
   mandatory_parent: "FORM"
-  attrs: { name: "submitting" mandatory: true }
   attrs: { name: "align" }
+  attrs: {
+    name: "submitting"
+    mandatory: true
+  }
   child_tags: {
     mandatory_num_child_tags: 1
     first_child_tag_name_oneof: "TEMPLATE"
@@ -2593,8 +2596,11 @@ tags {
   tag_name: "DIV"
   spec_name: "FORM > DIV [submit-success]"
   mandatory_parent: "FORM"
-  attrs: { name: "submit-success" mandatory: true }
   attrs: { name: "align" }
+  attrs: {
+    name: "submit-success"
+    mandatory: true
+  }
   child_tags: {
     mandatory_num_child_tags: 1
     first_child_tag_name_oneof: "TEMPLATE"
@@ -2604,8 +2610,11 @@ tags {
   tag_name: "DIV"
   spec_name: "FORM > DIV [submit-error]"
   mandatory_parent: "FORM"
-  attrs: { name: "submit-error" mandatory: true }
   attrs: { name: "align" }
+  attrs: {
+    name: "submit-error"
+    mandatory: true
+  }
   child_tags: {
     mandatory_num_child_tags: 1
     first_child_tag_name_oneof: "TEMPLATE"
