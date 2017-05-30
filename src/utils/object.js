@@ -48,6 +48,22 @@ export function hasOwn(obj, key) {
 }
 
 /**
+ * Returns obj[key] iff key is obj's own property (is not inherited).
+ * Otherwise, returns undefined.
+ *
+ * @param {!Object} obj
+ * @param {string} key
+ * @return {*}
+ */
+export function ownProperty(obj, key) {
+  if (hasOwn(obj, key)) {
+    return obj[key];
+  } else {
+    return undefined;
+  }
+}
+
+/**
  * @param {!Object} target
  * @param {!Object} source
  * @param {number} maxDepth The maximum depth for deep merge, beyond which

@@ -19,8 +19,7 @@ import {batchedXhrFor, bindForDoc} from '../../src/services';
 import {ampdocServiceFor} from '../../src/ampdoc';
 import * as sinon from 'sinon';
 
-// TODO(choumx): Unskip once #9571 is fixed.
-describe.skip('amp-bind', function() {
+describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   let fixture;
   let ampdoc;
   let sandbox;
@@ -295,7 +294,8 @@ describe.skip('amp-bind', function() {
       });
     });
 
-    it('should change width and height when their bindings change', () => {
+    // TODO(choumx): Fix this final flaky test.
+    it.skip('should change width and height when their bindings change', () => {
       const button = fixture.doc.getElementById('changeImgDimensButton');
       const img = fixture.doc.getElementById('image');
       expect(img.getAttribute('height')).to.equal('200');
