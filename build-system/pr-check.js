@@ -182,7 +182,8 @@ function determineBuildTargets(filePaths) {
         'FLAG_CONFIG']);
   }
   const targetSet = new Set();
-  for (p of filePaths) {
+  for (let i = 0; i < filePaths.length; i++) {
+    const p = filePaths[i];
     if (isBuildSystemFile(p)) {
       targetSet.add('BUILD_SYSTEM');
     } else if (isValidatorWebuiFile(p)) {
