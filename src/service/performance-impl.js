@@ -286,8 +286,8 @@ export class Performance {
     const data = {
       label,
       value,
-      // Delta can be 0 or negative, but will always be changed to 1.
-      delta: opt_delta != null ? Math.max(opt_delta, 1) : undefined,
+      // Delta can negative, but will always be changed to 0.
+      delta: opt_delta != null ? Math.max(opt_delta, 0) : undefined,
     };
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
       this.viewer_.sendMessage('tick', data);
