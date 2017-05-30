@@ -149,7 +149,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             jsonParameters['targeting'] || null,
             jsonParameters['categoryExclusions'] || null),
       },
-    ]);
+    ], ['108809080']);
   }
 
   /** @override */
