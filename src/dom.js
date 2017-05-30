@@ -16,6 +16,7 @@
 
 import {dev} from './log';
 import {cssEscape} from '../third_party/css-escape/css-escape';
+import {startsWith} from './string';
 
 const HTML_ESCAPE_CHARS = {
   '&': '&amp;',
@@ -26,6 +27,14 @@ const HTML_ESCAPE_CHARS = {
   '`': '&#x60;',
 };
 const HTML_ESCAPE_REGEX = /(&|<|>|"|'|`)/g;
+
+/** @const {string} */
+export const UPGRADE_TO_CUSTOMELEMENT_PROMISE =
+    '__AMP_UPG_PRM';
+
+/** @const {string} */
+export const UPGRADE_TO_CUSTOMELEMENT_RESOLVER =
+    '__AMP_UPG_RES';
 
 
 /**
@@ -688,4 +697,41 @@ export function tryFocus(element) {
  */
 export function isIframed(win) {
   return win.parent && win.parent != win;
+}
+
+/**
+ * Determines if this element is an AMP element
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isAmpElement(element) {
+  const tag = element.tagName;
+  // Use prefix to recognize AMP element. This is necessary because stub
+  // may not be attached yet.
+  return startsWith(tag, 'AMP-') &&
+      // Some "amp-*" elements are not really AMP elements. :smh:
+      !(tag == 'AMP-STICKY-AD-TOP-PADDING' || tag == 'AMP-BODY');
+}
+
+/**
+ * Return a promise that resolve when an AMP element upgrade from HTMLElement
+ * to CustomElement
+ * @param {!Element} element
+ * @return {!Promise<!Element>}
+ */
+export function whenUpgradedToCustomElement(element) {
+  dev().assert(isAmpElement(element), 'element is not AmpElement');
+  if (element.createdCallback) {
+    // Element already is CustomElement;
+    return Promise.resolve(element);
+  }
+  // If Element is still HTMLElement, wait for it to upgrade to customElement
+  // Note: use pure string to avoid obfuscation between versions.
+  if (!element[UPGRADE_TO_CUSTOMELEMENT_PROMISE]) {
+    element[UPGRADE_TO_CUSTOMELEMENT_PROMISE] = new Promise(resolve => {
+      element[UPGRADE_TO_CUSTOMELEMENT_RESOLVER] = resolve;
+    });
+  }
+
+  return element[UPGRADE_TO_CUSTOMELEMENT_PROMISE];
 }
