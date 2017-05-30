@@ -148,13 +148,14 @@ function buildKeyframes(keyframesRule) {
         keyframeRule.keyText == 'from' ? 0 :
         keyframeRule.keyText == 'to' ? 1 :
         parseFloat(keyframeRule.keyText) / 100;
-    for (let j = 0; j < keyframeRule.style.length; j++) {
-      const styleName = keyframeRule.style[j];
+    const style = keyframeRule.style;
+    for (let j = 0; j < style.length; j++) {
+      const styleName = style[j];
       let propName = styleName;
       if (styleName == 'animation-timing-function') {
         propName = 'easing';
       }
-      keyframe[propName] = keyframeRule.style[styleName];
+      keyframe[propName] = style[styleName];
     }
     array.push(keyframe);
   }
