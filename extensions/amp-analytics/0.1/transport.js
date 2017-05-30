@@ -26,6 +26,7 @@ import {timerFor} from '../../../src/services';
 import {removeElement} from '../../../src/dom';
 import {setStyle, setStyles} from '../../../src/style';
 import {hasOwn, map} from '../../../src/utils/object';
+import {IframeMessagingClient} from '../../../3p/iframe-messaging-client';
 
 /** @const {string} */
 const TAG_ = 'amp-analytics.Transport';
@@ -163,9 +164,10 @@ export class Transport {
       ampDoc.body.appendChild(frame);
     }
     if (processResponse) {
-      window.addEventListener('message', msg => {
-        if (msg.data.ampAnalyticsResponse) {
-          processResponse(msg.data.ampAnalyticsResponse);
+      const iframeClient = Transport.crossDomainFrames[frameUrl].iframeClient;
+      iframeClient.registerCallback('ampAnalyticsResponse', msg => {
+        if (msg && msg.ampAnalyticsResponse) {
+          processResponse(msg.ampAnalyticsResponse);
         }
       });
     }
@@ -214,7 +216,10 @@ export class Transport {
         'scriptSrc': '/examples/analytics-3p-remote-frame-helper.js',
       }),
     });
+    const iframeClient = new IframeMessagingClient(window);
+    iframeClient.setSentinel(String(Math.random()).substr(2));
     loadPromise(frame).then(() => {
+      iframeClient.setHostWindow(frame.contentWindow);
       this.setIsReady_(frameUrl);
     });
     setStyles(frame,
@@ -226,13 +231,9 @@ export class Transport {
       msgQueue: [],
       usageCount: 1,
       send: messages => {
-        // DO NOT MERGE THIS
-        // Warning: the following code is likely only temporary. Don't check
-        // in before getting resolution on that.
-        dev().assert(frame && frame.contentWindow,
-            'Message bound for frame that does not exist');
-        /*REVIEW*/frame.contentWindow.postMessage({ampAnalyticsEvents: messages}, '*');
-      }
+        iframeClient.sendMessage('ampAnalyticsEvents', {ampAnalyticsEvents: [messages]});
+      },
+      iframeClient
     };
     frame.src = frameUrl; // Intentionally doing this after creating load
     // promise, rather than in the object supplied to

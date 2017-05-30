@@ -44,12 +44,13 @@ class AmpAnalyticsRemoteFrameManager {
    * @param {!String} message The message to send.
    */
   sendMessageToCreative(message) {
-    // DO NOT MERGE THIS
-    // Warning: the following code is likely only temporary. Don't check
-    // in before getting resolution on that.
-    /*REVIEW*/window.parent.postMessage({ampAnalyticsResponse: message}, '*');
+    /*REVIEW*/window.parent.postMessage(
+      serializeMessage('ampAnalyticsResponse', this.sentinel_,
+                       {ampAnalyticsResponse: message}, this.rtvVersion_), '*');
   }
 };
+
+AmpAnalyticsRemoteFrameManager.rtvVersion_ = '1234'; // TODO
 
 /**
  * @const {AmpAnalyticsRemoteFrameManager}
@@ -64,12 +65,65 @@ if (window.onNewAmpAnalyticsInstance) {
   // Warning: the following code is likely only temporary. Don't check in
   // before getting resolution on that.
   window.addEventListener("message", msg => {
-    if (msg.data.ampAnalyticsEvents) {
-      window.requestIdleCallback(() => {
-        remoteFrameMgr_.listener_(msg.data.ampAnalyticsEvents);
-      });
+    if (msg && msg.data) {
+      const deserialized = deserializeMessage(msg.data);
+      if (deserialized && deserialized.ampAnalyticsEvents) {
+        remoteFrameMgr_.sentinel_ = deserialized.sentinel; // TODO Temp Code!
+        window.requestIdleCallback(() => {
+          remoteFrameMgr_.listener_(deserialized.ampAnalyticsEvents);
+        });
+      }
     }
   });
 } else {
   console.error("Vendor page must implement onNewAmpAnalyticsInstance.");
+}
+
+const AMP_MESSAGE_PREFIX = 'amp-';
+
+/**
+ * Serialize an AMP post message. Output looks like:
+ * 'amp-011481323099490{"type":"position","sentinel":"12345","foo":"bar"}'
+ * @param {string} type
+ * @param {string} sentinel
+ * @param {Object=} data
+ * @param {?string=} rtvVersion
+ * @returns {string}
+ */
+function serializeMessage(type, sentinel, data = {}, rtvVersion = null) {
+  // TODO: consider wrap the data in a "data" field. { type, sentinal, data }
+  const message = data;
+  message.type = type;
+  message.sentinel = sentinel;
+  return AMP_MESSAGE_PREFIX + (rtvVersion || '') + JSON.stringify(message);
+}
+
+/**
+ * Deserialize an AMP post message.
+ * Returns null if it's not valid AMP message format.
+ *
+ * @param {*} message
+ * @returns {?JSONType}
+ */
+function deserializeMessage(message) {
+  if (!isAmpMessage(message)) {
+    return null;
+  }
+  const startPos = message.indexOf('{');
+  try {
+    return /** @type {!JSONType} */ (JSON.parse(message.substr(startPos)));
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ *  Returns true if message looks like it is an AMP postMessage
+ *  @param {*} message
+ *  @return {!boolean}
+ */
+function isAmpMessage(message) {
+  return (typeof message == 'string' &&
+  message.indexOf(AMP_MESSAGE_PREFIX) == 0 &&
+  message.indexOf('{') != -1);
 }
