@@ -332,7 +332,8 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           '&u_sd=[0-9]+(&asnt=[0-9]+-[0-9]+)?(&isc=1)?' +
           '&is_amp=3&amp_v=%24internalRuntimeVersion%24' +
           '&d_imp=1&dt=[0-9]+&ifi=[0-9]+&adf=[0-9]+' +
-          '&c=[0-9]+&output=html&nhd=1&biw=[0-9]+&bih=[0-9]+' +
+          '&c=[0-9]+&output=html&nhd=1&eid=([^&]+%2c)*108809080(%2c[^&]+)*' +
+          '&biw=[0-9]+&bih=[0-9]+' +
           '&adx=-?[0-9]+&ady=-?[0-9]+&u_aw=[0-9]+&u_ah=[0-9]+&u_cd=24' +
           '&u_w=[0-9]+&u_h=[0-9]+&u_tz=-?[0-9]+&u_his=[0-9]+' +
           '&oid=2&brdim=-?[0-9]+(%2C-?[0-9]+){9}' +
