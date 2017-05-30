@@ -57,6 +57,7 @@ export function ix(global, data) {
     global.IndexArgs = {
       ampCallback: callDoubleclick,
       ampSuccess: EVENT_SUCCESS,
+      ampError: EVENT_ERROR,
     };
 
     loadScript(global, 'https://js-sec.indexww.com/apl/amp.js', undefined, () => {
