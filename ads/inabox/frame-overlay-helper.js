@@ -26,14 +26,13 @@ const CENTER_TRANSITION_END_WAIT_TIME_MS = 200;
 
 
 /**
- * Places the child frame in full overlay mode if the request is valid.
+ * Places the child frame in full overlay mode.
  * @param {!Window} win Host window.
  * @param {!HTMLIFrameElement} iframe
- * @param {!Function} onAccept
- * @param {!Function} unusedOnReject
+ * @param {!Function} onFinish
+ * @private
  */
-// TODO(alanorozco): consider rejecting if frame is out of focus
-export function tryToEnterOverlayMode(win, iframe, onAccept, unusedOnReject) {
+const expandFrameImpl = function(win, iframe, onFinish) {
   fakeVsync(win, {
     measure(state) {
       state.viewportSize = {
@@ -50,13 +49,13 @@ export function tryToEnterOverlayMode(win, iframe, onAccept, unusedOnReject) {
         fakeVsync(win, {
           mutate() {
             expandFrameUnderVsyncMutate(iframe, state.viewportSize);
-            onAccept();
+            onFinish();
           },
         });
       }, CENTER_TRANSITION_TIME_MS + CENTER_TRANSITION_END_WAIT_TIME_MS);
     },
   }, {});
-}
+};
 
 
 /**
@@ -64,12 +63,65 @@ export function tryToEnterOverlayMode(win, iframe, onAccept, unusedOnReject) {
  * @param {!Window} win Host window.
  * @param {!HTMLIFrameElement} iframe
  * @param {!Function} onFinish
+ * @private
  */
-export function leaveOverlayMode(win, iframe, onFinish) {
+const collapseFrameImpl = function(win, iframe, onFinish) {
   fakeVsync(win, {
     mutate() {
       collapseFrameUnderVsyncMutate(iframe);
       onFinish();
     },
   });
+};
+
+
+/**
+ * Places the child frame in full overlay mode.
+ * @param {!Window} win Host window.
+ * @param {!HTMLIFrameElement} iframe
+ * @param {!Function} onFinish
+ */
+export let expandFrame = expandFrameImpl;
+
+
+/**
+ * @param {!Function} implFn
+ * @visibleForTesting
+ */
+export function stubExpandFrameForTesting(implFn) {
+  expandFrame = implFn;
+}
+
+
+/**
+ * @visibleForTesting
+ */
+export function resetExpandFrameForTesting() {
+  expandFrame = expandFrameImpl;
+}
+
+
+/**
+ * Places the child frame in full overlay mode.
+ * @param {!Window} win Host window.
+ * @param {!HTMLIFrameElement} iframe
+ * @param {!Function} onFinish
+ */
+export let collapseFrame = collapseFrameImpl;
+
+
+/**
+ * @param {!Function} implFn
+ * @visibleForTesting
+ */
+export function stubCollapseFrameForTesting(implFn) {
+  collapseFrame = implFn;
+}
+
+
+/**
+ * @visibleForTesting
+ */
+export function resetCollapseFrameForTesting() {
+  collapseFrame = collapseFrameImpl;
 }

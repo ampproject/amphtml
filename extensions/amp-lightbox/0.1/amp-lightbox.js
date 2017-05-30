@@ -217,7 +217,8 @@ class AmpLightbox extends AMP.BaseElement {
     this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
     this.win.document.documentElement.addEventListener(
         'keydown', this.boundCloseOnEscape_);
-    this.getViewport().enterLightboxMode().then(() => this.finalizeOpen_());
+    this.getViewport().enterLightboxMode()
+        .then(() => this.finalizeOpen_());
   }
 
   finalizeOpen_() {
@@ -320,7 +321,8 @@ class AmpLightbox extends AMP.BaseElement {
     if (this.isScrollable_) {
       st.setStyle(this.element, 'webkitOverflowScrolling', '');
     }
-    this.getViewport().leaveLightboxMode().then(() => this.finalizeClose_());
+    this.getViewport().leaveLightboxMode()
+        .then(() => this.finalizeClose_());
   }
 
   finalizeClose_() {
