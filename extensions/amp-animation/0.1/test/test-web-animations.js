@@ -115,8 +115,9 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     expect(scanTiming({delay: 'calc(10ms)'}).delay).to.equal(10);
     expect(scanTiming({delay: 'var(--unk)'}).delay).to.equal(0);
     expect(scanTiming({delay: 'var(--unk, 11ms)'}).delay).to.equal(11);
+    // Note! The negative "delay" is allowed.
+    expect(scanTiming({delay: -1}).delay).to.equal(-1);
     expect(() => scanTiming({delay: 'a'})).to.throw(/"delay" is invalid/);
-    expect(() => scanTiming({delay: -1})).to.throw(/"delay" is invalid/);
 
     expect(scanTiming({}).endDelay).to.equal(0);
     expect(scanTiming({endDelay: 0}).endDelay).to.equal(0);
@@ -628,6 +629,29 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     expect(request2.keyframes.opacity).to.deep.equal(['0.1', '1']);
     expect(request2.keyframes.transform)
         .to.deep.equal(['translateY(0px)', 'translateY(100px)']);
+  });
+
+  it('should be able to resolve animation with args', () => {
+    const builder = new Builder(win, doc, 'https://acme.org/',
+        vsync, /* resources */ null);
+    sandbox.stub(builder, 'requireLayout');
+    const spec = {target: target1, delay: 101, keyframes: {}};
+    const args = {
+      'duration': 1001,
+      '--var1': '10px',
+      '--var2': '20px',
+    };
+    return builder.resolveRequests([], spec, args).then(requests => {
+      expect(requests).to.have.length(1);
+      const request = requests[0];
+      expect(request.target).to.equal(target1);
+      expect(request.vars).to.deep.equal({
+        '--var1': '10px',
+        '--var2': '20px',
+      });
+      expect(request.timing.duration).to.equal(1001);
+      expect(request.timing.delay).to.equal(101);
+    });
   });
 
   describe('composite animations', () => {
@@ -1337,5 +1361,17 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
   it('should ignore cancel when not started', () => {
     runner.cancel();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.IDLE);
+  });
+
+  it('should seek all animations', () => {
+    runner.start();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
+
+    anim1Mock.expects('pause').once();
+    anim2Mock.expects('pause').once();
+    runner.seekTo(101);
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.PAUSED);
+    expect(anim1.currentTime).to.equal(101);
+    expect(anim2.currentTime).to.equal(101);
   });
 });

@@ -475,7 +475,7 @@ These functions can be combined with `calc()`, `var()` and other CSS expressions
 
 The animation can be triggered via a `trigger` attribute or an `on` action.
 
-**`trigger` attribute**
+### `trigger` attribute
 
 Currently, `visibility` is the only available value for the `trigger` attribute. The `visibility` triggers when the underlying document or embed are visible (in viewport).
 
@@ -487,7 +487,7 @@ For instance:
 </amp-animation>
 ```
 
-**`on` action**
+### Triggering via `on` action
 
 For instance:
 
@@ -495,5 +495,22 @@ For instance:
 <amp-animation id="anim1" layout="nodisplay">
   ...
 </amp-animation>
-<button on="tap:anim1.activate">Animate</button>
+<button on="tap:anim1.start">Animate</button>
 ```
+
+
+## `on` actions
+
+`amp-animation` element exports the following actions:
+
+- `start` - Starts the animation is it's not running already. Timing properties and variables
+  can be specified as action arguments. E.g. `anim1.start(delay=-100, --scale=2)`.
+- `restart` - Starts the animation or restarts the currently running one. Timing properties and variables
+  can be specified as action arguments. E.g. `anim1.start(delay=-100, --scale=2)`.
+- `pause` - Pauses the currently running animation.
+- `resume` - Resumes the currently running animation.
+- `togglePause` - Toggles pause/resume actions.
+- `seekTo` - Pauses the animation and seeks to the point of time specified by the `time` argument in milliseconds.
+- `reverse` - Reverses the animation.
+- `finish` - Finishes the animation.
+- `cancel` - Cancels the animation.

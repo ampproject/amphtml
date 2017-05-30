@@ -6,6 +6,13 @@
   <link rel="canonical" href="amps.html" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <style amp-custom>
+    .buttons {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
+
     .block {
       width: 100px;
       height: 100px;
@@ -128,13 +135,11 @@
 
 <amp-img id="image1" class="rot-image"
     src="img/sea@2x.jpg"
-    width=527 height=193 layout="responsive"
-    on="tap:anim1.activate"></amp-img>
+    width=527 height=193 layout="responsive"></amp-img>
 
 <amp-img id="image3" class="rot-image"
     src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w1002-h367-no/PANO_20150726_171347%257E2.jpg"
-    width=527 height=193 layout="responsive"
-    on="tap:anim1.activate"></amp-img>
+    width=527 height=193 layout="responsive"></amp-img>
 
 <amp-img id="image2"
     class="block"
@@ -142,6 +147,19 @@
     src="img/hero@1x.jpg"></amp-img>
 
 <a id="a1"></a>
+
+<div class="buttons">
+  <button on="tap:anim1.start">Start</button>
+  <button on="tap:anim1.restart">Restart</button>
+  <button on="tap:anim1.restart(delay='-0.5s')">Restart at -0.5s</button>
+  <button on="tap:anim1.pause">Pause</button>
+  <button on="tap:anim1.resume">Resume</button>
+  <button on="tap:anim1.togglePause">Toggle Pause</button>
+  <button on="tap:anim1.seekTo(time=500)">Seek to 500</button>
+  <button on="tap:anim1.reverse">Reverse</button>
+  <button on="tap:anim1.finish">Finish</button>
+  <button on="tap:anim1.cancel">Cancel</button>
+</div>
 
 </body>
 </html>
