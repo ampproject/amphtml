@@ -161,7 +161,7 @@ origins.
  
 #### Verify state changing requests
 
-:exclamation: **Important**: Perform these validation checks *before* you
+**Important**: Perform these validation checks *before* you
 process the request. This validation helps to provide protection against CSRF
 attacks, and avoids processing untrusted sources requests.
  
