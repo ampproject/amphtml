@@ -34,6 +34,69 @@ import {px, setStyles} from '../../src/style';
 /** @const {string} */
 const TAG = 'inabox-viewport';
 
+
+/**
+ * @param {!HTMLBodyElement} bodyElement
+ * @return {!Element}
+ * @visibleForTesting
+ */
+ // TODO(alanorozco):
+//   Move this where it makes sense
+export function getFixedContainer(bodyElement) {
+  return dev().assertElement(childElementByTag(
+      dev().assertElement(bodyElement), 'amp-ad-banner'));
+}
+
+
+/** @visibleForTesting */
+export function prepareFixedContainer(win, fixedContainer) {
+  return vsyncFor(win).runPromise({
+    measure: state => {
+      state.boundingRect = fixedContainer./*OK*/getBoundingClientRect();
+    },
+    mutate: state => {
+      setStyles(/** @type {!Element} */ (win.document.body), {
+        'background': 'transparent',
+      });
+
+      setStyles(fixedContainer, {
+        'position': 'absolute',
+        'left': '50%',
+        'top': '50%',
+        'right': 'auto',
+        'bottom': 'auto',
+        'width': px(state.boundingRect.width),
+        'height': px(state.boundingRect.height),
+        'margin-left': px(-(state.boundingRect.width / 2)),
+        'margin-top': px(-(state.boundingRect.height / 2)),
+      });
+    },
+  }, {});
+}
+
+
+/** @visibleForTesting */
+export function resetFixedContainer(win, fixedContainer) {
+  return vsyncFor(win).mutatePromise(() => {
+    setStyles(/** @type {!Element} */ (win.document.body), {
+      'background': 'transparent',
+    });
+
+    setStyles(fixedContainer, {
+      'position': null,
+      'left': null,
+      'top': null,
+      'right': null,
+      'bottom': null,
+      'width': null,
+      'height': null,
+      'margin-left': null,
+      'margin-top': null,
+    });
+  });
+}
+
+
 /**
  * Implementation of ViewportBindingDef that works inside an non-scrollable
  * iframe box by listening to host doc for position and resize updates.
@@ -174,6 +237,7 @@ export class ViewportBindingInabox {
    * @private
    */
   tryToEnterOverlayMode_() {
+    // TODO: remeasure
     return this.prepareFixedContainer_()
         .then(() => this.requestFullOverlayFrame_());
   }
@@ -185,6 +249,28 @@ export class ViewportBindingInabox {
   leaveOverlayMode_() {
     return this.requestResetFullOverlayFrame_()
         .then(() => this.resetFixedContainer_());
+  }
+
+  prepareFixedContainer_() {
+    const fixedContainer = this.getFixedContainer_();
+
+    if (!fixedContainer) {
+      dev().warn(TAG, 'No fixed container inside frame, content will shift.');
+      return Promise.resolve();
+    }
+
+    return prepareFixedContainer(this.win, dev().assertElement(fixedContainer));
+  }
+
+  resetFixedContainer_() {
+    const fixedContainer = this.getFixedContainer_();
+
+    if (!fixedContainer) {
+      dev().warn(TAG, 'No fixed container inside frame, content will shift.');
+      return Promise.resolve();
+    }
+
+    return resetFixedContainer(this.win, dev().assertElement(fixedContainer));
   }
 
   /**
@@ -219,58 +305,8 @@ export class ViewportBindingInabox {
     });
   }
 
-  prepareFixedContainer_() {
-    const fixedContainer = this.getFixedContainer_();
-
-    return vsyncFor(this.win).runPromise({
-      measure: state => {
-        state.boundingRect = fixedContainer./*OK*/getBoundingClientRect();
-      },
-      mutate: state => {
-        setStyles(/** @type {!Element} */ (this.win.document.body), {
-          'background': 'transparent',
-        });
-
-        setStyles(fixedContainer, {
-          'position': 'absolute',
-          'left': '50%',
-          'top': '50%',
-          'right': 'auto',
-          'bottom': 'auto',
-          'width': px(state.boundingRect.width),
-          'height': px(state.boundingRect.height),
-          'margin-left': px(-(state.boundingRect.width / 2)),
-          'margin-top': px(-(state.boundingRect.height / 2)),
-        });
-      },
-    }, {});
-  }
-
-  resetFixedContainer_() {
-    const fixedContainer = this.getFixedContainer_();
-
-    return vsyncFor(this.win).mutatePromise(() => {
-      setStyles(/** @type {!Element} */ (this.win.document.body), {
-        'background': 'transparent',
-      });
-
-      setStyles(fixedContainer, {
-        'position': null,
-        'left': null,
-        'top': null,
-        'right': null,
-        'bottom': null,
-        'width': null,
-        'height': null,
-        'margin-left': null,
-        'margin-top': null,
-      });
-    });
-  }
-
   getFixedContainer_() {
-    return dev().assertElement(childElementByTag(
-        dev().assertElement(this.win.document.body), 'amp-ad-banner'));
+    return getFixedContainer(this.win.document.body);
   }
 
   /** @override */ disconnect() {/* no-op */}

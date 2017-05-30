@@ -21,7 +21,7 @@ import {
   MessageType,
 } from '../../src/3p-frame-messaging';
 import {dev} from '../../src/log';
-import {tryToEnterOverlayMode, leaveOverlayMode} from './frame-overlay-helper';
+import {expandFrame, collapseFrame} from './frame-overlay-helper';
 
 /** @const */
 const TAG = 'InaboxMessagingHost';
@@ -131,20 +131,14 @@ export class InaboxMessagingHost {
    * @param {string} origin
    * @return {boolean}
    */
+  // TODO(alanorozco): consider rejecting if frame is out of focus
   handleEnterFullOverlay_(iframe, request, source, origin) {
-    tryToEnterOverlayMode(this.win_, iframe, () => {
+    expandFrame(this.win_, iframe, () => {
       source./*OK*/postMessage(
           serializeMessage(
               MessageType.FULL_OVERLAY_FRAME_RESPONSE,
               request.sentinel,
               {content: {accept: true}}),
-          origin);
-    }, reason => {
-      source./*OK*/postMessage(
-          serializeMessage(
-              MessageType.FULL_OVERLAY_FRAME_RESPONSE,
-              request.sentinel,
-              {content: {accept: false, reason}}),
           origin);
     });
 
@@ -159,12 +153,12 @@ export class InaboxMessagingHost {
    * @return {boolean}
    */
   handleResetFullOverlay_(iframe, request, source, origin) {
-    leaveOverlayMode(this.win_, iframe, () => {
+    collapseFrame(this.win_, iframe, () => {
       source./*OK*/postMessage(
           serializeMessage(
               MessageType.RESET_FULL_OVERLAY_FRAME_RESPONSE,
               request.sentinel,
-              {}),
+              {content: {accept: true}}),
           origin);
     });
 

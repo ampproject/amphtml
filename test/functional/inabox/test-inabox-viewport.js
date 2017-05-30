@@ -16,7 +16,12 @@
 
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {resourcesForDoc} from '../../../src/services';
-import {ViewportBindingInabox} from '../../../src/inabox/inabox-viewport';
+import {
+  getFixedContainer,
+  prepareFixedContainer,
+  resetFixedContainer,
+  ViewportBindingInabox,
+} from '../../../src/inabox/inabox-viewport';
 import {
   installIframeMessagingClient,
 } from '../../../src/inabox/inabox-iframe-messaging-client';
@@ -30,8 +35,15 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   let onScrollCallback;
   let onResizeCallback;
   let measureSpy;
+  let sandbox;
+
+  function stubIframeClientMakeRequest(callback) {
+    return sandbox./*OK*/stub(binding.iframeClient_, 'makeRequest', callback);
+  }
 
   beforeEach(() => {
+    sandbox = env.sandbox;
+
     win = env.win;
     win.Math = {
       random() {
@@ -42,6 +54,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     win.innerHeight = 150;
 
     installIframeMessagingClient(win);
+
     binding = new ViewportBindingInabox(win);
     measureSpy = sandbox.spy();
     element = {
@@ -51,17 +64,23 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       measure: measureSpy,
     };
     sandbox.stub(resourcesForDoc(win.document), 'get').returns([element]);
-    sandbox./*OK*/stub(binding.iframeClient_, 'makeRequest', (req, res, cb) => {
+  });
+
+  afterEach(function () {
+    sandbox.reset();
+  });
+
+  it('should work for size, layoutRect and position observer', () => {
+    stubIframeClientMakeRequest((req, res, cb) => {
       positionCallback = cb;
     });
+
     onScrollCallback = sandbox.spy();
     onResizeCallback = sandbox.spy();
     binding.connect();
     binding.onScroll(onScrollCallback);
     binding.onResize(onResizeCallback);
-  });
 
-  it('should work', () => {
     // Initial state
     expect(binding.getSize()).to.deep.equal({width: 200, height: 150});
     expect(binding.getLayoutRect(element))
@@ -118,4 +137,97 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     expect(binding.getLayoutRect(element))
         .to.deep.equal(layoutRectLtwh(20, 20, 100, 100));
   });
+
+  it('should center content and request resize on enter overlay mode', done => {
+    const prepareContainer =
+        sandbox.stub(binding, 'prepareFixedContainer_')
+            .returns(Promise.resolve());
+
+    const makeRequest = stubIframeClientMakeRequest((req, res, callback) => {
+      expect(req).to.equal('full-overlay-frame');
+      expect(res).to.equal('full-overlay-frame-response');
+
+      callback({content: {accept: true}});
+    });
+
+    binding.updateLightboxMode(true).then(() => {
+      expect(prepareContainer).to.be.calledOnce;
+      expect(prepareContainer).to.be.calledBefore(makeRequest);
+
+      done();
+    });
+  });
+
+  it('should reset content and request resize on leave overlay mode', done => {
+    const resetContainer =
+        sandbox.stub(binding, 'resetFixedContainer_')
+            .returns(Promise.resolve());
+
+    const makeRequest = stubIframeClientMakeRequest((req, res, callback) => {
+      expect(req).to.equal('reset-full-overlay-frame');
+      expect(res).to.equal('reset-full-overlay-frame-response');
+
+      callback();
+    });
+
+    binding.updateLightboxMode(false).then(() => {
+      expect(resetContainer).to.be.calledOnce;
+      expect(resetContainer).to.be.calledAfter(makeRequest);
+
+      done();
+    });
+  });
+
+  it('should center the fixed container properly', done => {
+    const w = 120;
+    const h = 90;
+
+    const el = {
+      getBoundingClientRect() {
+        return layoutRectLtwh(123, 456, w, h);
+      },
+      style: {},
+    };
+
+    prepareFixedContainer(win, el).then(() => {
+      expect(el.style['position']).to.equal('absolute');
+      expect(el.style['left']).to.equal('50%');
+      expect(el.style['top']).to.equal('50%');
+      expect(el.style['bottom']).to.equal('auto');
+      expect(el.style['right']).to.equal('auto');
+      expect(el.style['width']).to.equal(`${w}px`);
+      expect(el.style['height']).to.equal(`${h}px`);
+      expect(el.style['margin-left']).to.equal(`-${w/2}px`);
+      expect(el.style['margin-top']).to.equal(`-${h/2}px`);
+
+      done();
+    });
+  });
+
+  it('should undo styling when the fixed container is reset', done => {
+    const w = 120;
+    const h = 90;
+
+    const el = {
+      getBoundingClientRect() {
+        return layoutRectLtwh(123, 456, w, h);
+      },
+      style: {},
+    };
+
+    resetFixedContainer(win, el).then(() => {
+      expect(el.style['position']).to.be.null;
+      expect(el.style['left']).to.be.null;
+      expect(el.style['top']).to.be.null;
+      expect(el.style['bottom']).to.be.null;
+      expect(el.style['right']).to.be.null;
+      expect(el.style['width']).to.be.null;
+      expect(el.style['height']).to.be.null;
+      expect(el.style['margin-left']).to.be.null;
+      expect(el.style['margin-top']).to.be.null;
+
+      done();
+    });
+  });
+
 });
