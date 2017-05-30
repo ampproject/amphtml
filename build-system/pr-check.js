@@ -374,12 +374,10 @@ function main(argv) {
   if (process.env.BUILD_SHARD == "integration_tests") {
     // The integration_tests shard can be skipped for PRs.
     console.log(fileLogPrefix, 'Skipping integration_tests for PRs');
-    // Presubmit needs to run after `gulp dist` as some checks run through the
-    // dist/ folder. In addition, we run presubmit even for PRs with just docs
-    // to check for the copyright at the top. However, to speed up the Travis
-    // queue, we no longer do a dist build for PRs.
-    // TODO(rsimha-amp, 9404): Enable this once integration_tests are enabled.
-    // command.runPresubmitTests();
+    // Ideally, we'd run presubmit tests after `gulp dist`, as some checks run
+    // through the dist/ folder. However, to speed up the Travis queue, we no
+    // longer do a dist build for PRs, so this call won't cover dist/.
+    command.runPresubmitTests();
   }
 
 
