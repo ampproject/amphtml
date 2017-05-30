@@ -328,7 +328,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         expect(url).to.match(new RegExp(
           '^https://securepubads\\.g\\.doubleclick\\.net/gampad/ads' +
           // Depending on how the test is run, it can get different results.
-          '\\?adk=[0-9]+&gdfp_req=1&impl=ifr&sfv=A&sz=320x50' +
+          '\\?adk=[0-9]+&gdfp_req=1&impl=ifr&sfv=\d+-\d+-\d+&sz=320x50' +
           '&u_sd=[0-9]+(&asnt=[0-9]+-[0-9]+)?(&art=2)?' +
           '&is_amp=3&amp_v=%24internalRuntimeVersion%24' +
           '&d_imp=1&dt=[0-9]+&ifi=[0-9]+&adf=[0-9]+' +
