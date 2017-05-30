@@ -62,6 +62,6 @@ export class MockA4AImpl extends AmpA4A {
 
   /** @override */
   getPreconnectUrls() {
-    return 'https://googleads.g.doubleclick.net';
+    return ['https://googleads.g.doubleclick.net'];
   }
 }

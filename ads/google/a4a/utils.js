@@ -17,7 +17,7 @@
 import {buildUrl} from './url-builder';
 import {makeCorrelator} from '../correlator';
 import {isCanary} from '../../../src/experiments';
-import {getAdCidHelper} from '../../../src/ad-cid';
+import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {documentInfoForDoc} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
@@ -143,8 +143,8 @@ export function googleAdUrl(
   // TODO: Maybe add checks in case these promises fail.
   /** @const {!Promise<string>} */
   const referrerPromise = viewerForDoc(a4a.getAmpDoc()).getReferrerUrl();
-  return getAdCidHelper(a4a.getAmpDoc(), 'AMP_ECID_GOOGLE').then(
-      clientId => referrerPromise.then(referrer => {
+  return getOrCreateAdCid(a4a.getAmpDoc(), a4a.win, 'AMP_ECID_GOOGLE', '_ga')
+      .then(clientId => referrerPromise.then(referrer => {
         const adElement = a4a.element;
         window['ampAdGoogleIfiCounter'] = window['ampAdGoogleIfiCounter'] || 1;
         const slotNumber = window['ampAdGoogleIfiCounter']++;
@@ -179,18 +179,18 @@ export function googleAdUrl(
       //   0: production branch (this is never actually sent)
       //   1: control branch (this is not yet supported, so is never sent)
       //   2: canary branch
-      queryParams.push({name: 'art', value: '2'});
-    }
+          queryParams.push({name: 'art', value: '2'});
+        }
         let eids = adElement.getAttribute('data-experiment-id');
         if (opt_experimentIds) {
-      eids = mergeExperimentIds(opt_experimentIds, eids);
-    }
+          eids = mergeExperimentIds(opt_experimentIds, eids);
+        }
         const allQueryParams = queryParams.concat(
-      [
-        {
-          name: 'is_amp',
-          value: AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
-        },
+          [
+            {
+              name: 'is_amp',
+              value: AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
+            },
         {name: 'amp_v', value: '$internalRuntimeVersion$'},
         {name: 'd_imp', value: '1'},
         {name: 'dt', value: startTime},
@@ -218,9 +218,9 @@ export function googleAdUrl(
         {name: 'ish', value: viewportSize.height},
         {name: 'pfx', value: pfx},
         {name: 'rc', value: a4a.fromResumeCallback ? 1 : null},
-      ],
+          ],
       unboundedQueryParams,
-      [
+          [
         {name: 'url', value: documentInfo.canonicalUrl},
         {name: 'top', value: iframeDepth ? topWindowUrlOrDomain(win) : null},
             {
@@ -229,7 +229,7 @@ export function googleAdUrl(
             null : win.location.href,
             },
         {name: 'ref', value: referrer},
-      ]
+          ]
     );
         const url = buildUrl(baseUrl, allQueryParams, MAX_URL_LENGTH - 10,
                          {name: 'trunc', value: '1'});
