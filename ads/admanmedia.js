@@ -14,12 +14,22 @@
  * limitations under the License.
  */
 
-import {ANALYTICS_CONFIG} from '../vendors';
+import {validateData, loadScript} from '../3p/3p';
 
-describe('analyaitcs vendors', () => {
-  it('googleanalytics & googleanalytics-alpha should be identical', () => {
-    const gaConfig = ANALYTICS_CONFIG['googleanalytics'];
-    expect(gaConfig).to
-        .deep.equal(ANALYTICS_CONFIG['googleanalytics-alpha']);
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+export function admanmedia(global, data) {
+  validateData(data, ['id']);
+
+  const encodedId = encodeURIComponent(data.id);
+  loadScript(global, `https://mona.admanmedia.com/go?id=${encodedId}`, () => {
+    const pattern = `script[src$="id=${encodedId}"]`;
+    const scriptTag = global.document.querySelector(pattern);
+    scriptTag.setAttribute('id', `hybs-${encodedId}`);
+    global.context.renderStart();
+  }, () => {
+    global.context.noContentAvailable();
   });
-});
+}

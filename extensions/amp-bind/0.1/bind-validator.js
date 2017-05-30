@@ -239,6 +239,7 @@ function createElementRules_() {
           'https': true,
         },
       },
+      'state': null,
     },
     'AMP-SELECTOR': {
       'selected': null,

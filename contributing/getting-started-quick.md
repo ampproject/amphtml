@@ -52,7 +52,6 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 * Start the server: `gulp`
 * Access your server at [http://localhost:8000](http://localhost:8000)
 * Access your sample pages at [http://localhost:8000/examples](http://localhost:8000/examples)
-* Change the suffix for the examples from .html to .max.html to use your local JavaScript
 
 # Test AMP
 * Run the tests: `gulp test`

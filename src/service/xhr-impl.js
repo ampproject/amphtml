@@ -23,6 +23,9 @@ import {
 } from '../url';
 import {isArray, isObject, isFormData} from '../types';
 import {utf8EncodeSync} from '../utils/bytes';
+import {ampdocServiceFor} from '../ampdoc';
+import {viewerForDoc} from '../services';
+import {getMode} from '../mode';
 
 
 /**
@@ -94,6 +97,15 @@ export class Xhr {
   constructor(win) {
     /** @const {!Window} */
     this.win = win;
+
+    /** @private {?./ampdoc-impl.AmpDoc} */
+    this.ampdocSingle_ = null;
+    if (!getMode().test) {
+      const ampdocService = ampdocServiceFor(win);
+      this.ampdocSingle_ = ampdocService.isSingleDoc() ?
+          ampdocService.getAmpDoc() :
+          null;
+    }
   }
 
   /**
@@ -106,6 +118,14 @@ export class Xhr {
    * @private
    */
   fetch_(input, init) {
+    if (this.ampdocSingle_ &&
+        Math.random() < 0.01 &&
+        parseUrl(input).origin != this.win.location.origin &&
+        !viewerForDoc(this.ampdocSingle_).hasBeenVisible()) {
+      dev().error('XHR', 'attempted to fetch %s before viewer was visible',
+          input);
+    }
+
     dev().assert(typeof input == 'string', 'Only URL supported: %s', input);
     // In particular, Firefox does not tolerate `null` values for
     // `credentials`.
@@ -216,7 +236,8 @@ export class Xhr {
   }
 
   /**
-   * Fetches text based on the fetch polyfill.
+   * Fetches a text response. Note this returns the response object, not the
+   * response's text. #fetchText merely sets up the request to accept text.
    *
    * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
    *
@@ -224,12 +245,10 @@ export class Xhr {
    *
    * @param {string} input
    * @param {?FetchInitDef=} opt_init
-   * @return {!Promise<string>}
+   * @return {!Promise<!FetchResponse>}
    */
   fetchText(input, opt_init) {
-    const init = setupInit(opt_init, 'text/plain');
-    return this.fetch(input, init)
-        .then(response => response.text());
+    return this.fetch(input, setupInit(opt_init, 'text/plain'));
   }
 
   /**

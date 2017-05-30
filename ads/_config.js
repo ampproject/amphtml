@@ -101,12 +101,17 @@ export const adConfig = {
 
   adman: {},
 
+  admanmedia: {
+    renderStartImplemented: true,
+  },
+
   adreactor: {},
 
   adsense: {
     prefetch: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
     preconnect: 'https://googleads.g.doubleclick.net',
     clientIdScope: 'AMP_ECID_GOOGLE',
+    clientIdCookieName: '_ga',
   },
 
   adsnative: {
@@ -269,6 +274,7 @@ export const adConfig = {
       'https://tpc.googlesyndication.com',
     ],
     clientIdScope: 'AMP_ECID_GOOGLE',
+    clientIdCookieName: '_ga',
     renderStartImplemented: true,
   },
 

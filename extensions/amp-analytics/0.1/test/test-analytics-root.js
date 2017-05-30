@@ -142,140 +142,165 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
 
   describe('getElement', () => {
 
+    let allTestInstances;
+    let getTestPromise;
+    let addTestInstance;
+
+    beforeEach(() => {
+      getTestPromise = (promise, result) => {
+        return promise.then(element => {
+          expect(result).to.not.be.null;
+          expect(element).to.equal(result);
+        }).catch(error => {
+          expect(error).to.match(new RegExp(result));
+        });
+      };
+
+      allTestInstances = [];
+
+      addTestInstance = (promise, result) => {
+        allTestInstances.push(getTestPromise(promise, result));
+      };
+    });
+
+    afterEach(() => {
+      return Promise.all(allTestInstances);
+    });
+
+
     it('should find :root', () => {
       const rootElement = win.document.documentElement;
-      expect(root.getElement(body, ':root')).to.equal(rootElement);
-      expect(root.getElement(target, ':root')).to.equal(rootElement);
-      expect(root.getElement(target, ':root', ':scope')).to.equal(rootElement);
-      expect(root.getElement(target, ':root', ':closest'))
-          .to.equal(rootElement);
+      addTestInstance(root.getElement(body, ':root'), rootElement);
+      addTestInstance(root.getElement(target, ':root'), rootElement);
+      addTestInstance(root.getElement(target, ':root', ':scope'), rootElement);
+      addTestInstance(
+          root.getElement(target, ':root', ':closest'), rootElement);
     });
 
     it('should find :host, but always null', () => {
-      expect(root.getElement(body, ':host')).to.be.null;
-      expect(root.getElement(target, ':host')).to.be.null;
-      expect(root.getElement(target, ':host', ':scope')).to.be.null;
-      expect(root.getElement(target, ':host', ':closest')).to.be.null;
+      addTestInstance(root.getElement(body, ':host'),
+          'Element ":host" not found');
+      addTestInstance(root.getElement(target, ':host'),
+          'Element ":host" not found');
+      addTestInstance(root.getElement(target, ':host', ':scope'),
+          'Element ":host" not found');
+      addTestInstance(root.getElement(target, ':host', ':closest'),
+          'Element ":host" not found');
     });
 
     it('should find element by ID', () => {
-      expect(root.getElement(body, '#target')).to.equal(target);
-      expect(root.getElement(body, '#child')).to.equal(child);
-      expect(root.getElement(target, '#target')).to.equal(target);
-      expect(root.getElement(child, '#target')).to.equal(target);
-      expect(root.getElement(other, '#target')).to.equal(target);
+      addTestInstance(root.getElement(body, '#target'), target);
+      addTestInstance(root.getElement(body, '#child'), child);
+      addTestInstance(root.getElement(target, '#target'), target);
+      addTestInstance(root.getElement(child, '#target'), target);
+      addTestInstance(root.getElement(other, '#target'), target);
 
-      expect(root.getElement(body, '#target', 'scope'))
-          .to.equal(target);
-      expect(root.getElement(other, '#target', 'scope'))
-          .to.be.null;
-      expect(root.getElement(target, '#target', 'scope'))
-          .to.be.null;
+      addTestInstance(root.getElement(body, '#target', 'scope'), target);
+      addTestInstance(root.getElement(other, '#target', 'scope'), null);
+      addTestInstance(root.getElement(target, '#target', 'scope'), null);
 
-      expect(root.getElement(target, '#target', 'closest'))
-          .to.equal(target);
-      expect(root.getElement(child, '#target', 'closest'))
-          .to.equal(target);
-      expect(root.getElement(body, '#target', 'closest'))
-          .to.be.null;
-      expect(root.getElement(other, '#target', 'closest'))
-          .to.be.null;
+      addTestInstance(root.getElement(target, '#target', 'closest'), target);
+      addTestInstance(root.getElement(child, '#target', 'closest'), target);
+      addTestInstance(root.getElement(body, '#target', 'closest'), null);
+      addTestInstance(root.getElement(other, '#target', 'closest'), null);
     });
 
     it('should find element by class', () => {
-      expect(root.getElement(body, '.target')).to.equal(target);
-      expect(root.getElement(body, '.child')).to.equal(child);
-      expect(root.getElement(target, '.target')).to.equal(target);
-      expect(root.getElement(child, '.target')).to.equal(target);
-      expect(root.getElement(other, '.target')).to.equal(target);
+      addTestInstance(root.getElement(body, '.target'), target);
+      addTestInstance(root.getElement(body, '.child'), child);
+      addTestInstance(root.getElement(target, '.target'), target);
+      addTestInstance(root.getElement(child, '.target'), target);
+      addTestInstance(root.getElement(other, '.target'), target);
 
-      expect(root.getElement(body, '.target', 'scope'))
-          .to.equal(target);
-      expect(root.getElement(other, '.target', 'scope'))
-          .to.be.null;
-      expect(root.getElement(target, '.target', 'scope'))
-          .to.be.null;
+      addTestInstance(root.getElement(body, '.target', 'scope'), target);
+      addTestInstance(root.getElement(other, '.target', 'scope'), null);
+      addTestInstance(root.getElement(target, '.target', 'scope'), null);
 
-      expect(root.getElement(target, '.target', 'closest'))
-          .to.equal(target);
-      expect(root.getElement(child, '.target', 'closest'))
-          .to.equal(target);
-      expect(root.getElement(body, '.target', 'closest'))
-          .to.be.null;
-      expect(root.getElement(other, '.target', 'closest'))
-          .to.be.null;
+      addTestInstance(root.getElement(target, '.target', 'closest'), target);
+      addTestInstance(root.getElement(child, '.target', 'closest'), target);
+      addTestInstance(root.getElement(body, '.target', 'closest'), null);
+      addTestInstance(root.getElement(other, '.target', 'closest'), null);
     });
 
     it('should find element by tag name', () => {
-      expect(root.getElement(body, 'target')).to.equal(target);
-      expect(root.getElement(body, 'child')).to.equal(child);
-      expect(root.getElement(target, 'target')).to.equal(target);
-      expect(root.getElement(child, 'target')).to.equal(target);
+      addTestInstance(root.getElement(body, 'target'), target);
+      addTestInstance(root.getElement(body, 'child'), child);
+      addTestInstance(root.getElement(target, 'target'), target);
+      addTestInstance(root.getElement(child, 'target'), target);
 
-      expect(root.getElement(target, 'target', 'closest'))
-          .to.equal(target);
-      expect(root.getElement(child, 'target', 'closest'))
-          .to.equal(target);
-      expect(root.getElement(body, 'target', 'closest'))
-          .to.be.null;
-      expect(root.getElement(other, 'target', 'closest'))
-          .to.be.null;
+      addTestInstance(root.getElement(target, 'target', 'closest'), target);
+      addTestInstance(root.getElement(child, 'target', 'closest'), target);
+      addTestInstance(root.getElement(body, 'target', 'closest'), null);
+      addTestInstance(root.getElement(other, 'target', 'closest'), null);
     });
 
     it('should find element by selector', () => {
-      expect(root.getElement(target, '#target.target')).to.equal(target);
+      addTestInstance(root.getElement(target, '#target.target'), target);
     });
 
     it('should ensure that the element is contained by the root', () => {
-      expect(root.getElement(body, '#child')).to.equal(child);
-      expect(root.getElement(body, '#target')).to.equal(target);
-      expect(root.getElement(body, '.target')).to.equal(target);
-      expect(root.getElement(body, 'target')).to.equal(target);
-      expect(root.getElement(child, 'target', 'closest')).to.equal(target);
-      expect(root.getElement(child, '#other')).to.equal(other);
+      addTestInstance(root.getElement(body, '#child'), child);
+      addTestInstance(root.getElement(body, '#target'), target);
+      addTestInstance(root.getElement(body, '.target'), target);
+      addTestInstance(root.getElement(body, 'target'), target);
+      addTestInstance(root.getElement(child, 'target', 'closest'), target);
+      addTestInstance(root.getElement(child, '#other'), other);
 
       // Root on `target` element.
       const ampdoc1 = new AmpDocShadow(win, 'https://amce.org/', target);
+      sandbox.stub(ampdoc1, 'whenReady', () => {
+        return Promise.resolve();
+      });
       const root1 = new AmpdocAnalyticsRoot(ampdoc1);
-      expect(root1.getElement(child, 'child', 'closest')).to.equal(child);
-      expect(root1.getElement(child, 'target', 'closest')).to.equal(target);
-      expect(root1.getElement(body, '#target')).to.be.null;
-      expect(root1.getElement(body, '.target')).to.be.null;
-      expect(root1.getElement(body, 'target')).to.be.null;
-      expect(root1.getElement(body, '#other')).to.be.null;
+      addTestInstance(root1.getElement(child, 'child', 'closest'), child);
+      addTestInstance(root1.getElement(child, 'target', 'closest'), target);
+      addTestInstance(root1.getElement(body, '#target'), null);
+      addTestInstance(root1.getElement(body, '.target'), null);
+      addTestInstance(root1.getElement(body, 'target'), null);
+      addTestInstance(root1.getElement(body, '#other'), null);
 
-      // Root on `child` element.
+      // // Root on `child` element.
       const ampdoc2 = new AmpDocShadow(win, 'https://amce.org/', child);
+      sandbox.stub(ampdoc2, 'whenReady', () => {
+        return Promise.resolve();
+      });
       const root2 = new AmpdocAnalyticsRoot(ampdoc2);
-      expect(root2.getElement(child, 'child', 'closest')).to.equal(child);
-      expect(root2.getElement(child, 'target', 'closest')).to.be.null;
-      expect(root2.getElement(body, '#target')).to.be.null;
-      expect(root2.getElement(body, '.target')).to.be.null;
-      expect(root2.getElement(body, 'target')).to.be.null;
-      expect(root2.getElement(body, '#other')).to.be.null;
+      addTestInstance(root2.getElement(child, 'child', 'closest'), child);
+      addTestInstance(root2.getElement(child, 'target', 'closest'), null);
+      addTestInstance(root2.getElement(body, '#target'), null);
+      addTestInstance(root2.getElement(body, '.target'), null);
+      addTestInstance(root2.getElement(body, 'target'), null);
+      addTestInstance(root2.getElement(body, '#other'), null);
 
-      // Root on `other` element.
+      // // Root on `other` element.
       const ampdoc3 = new AmpDocShadow(win, 'https://amce.org/', other);
+      sandbox.stub(ampdoc3, 'whenReady', () => {
+        return Promise.resolve();
+      });
       const root3 = new AmpdocAnalyticsRoot(ampdoc3);
-      expect(root3.getElement(other, '#other', 'closest')).to.equal(other);
-      expect(root3.getElement(child, 'target', 'closest')).to.be.null;
-      expect(root3.getElement(body, '#target')).to.be.null;
+      addTestInstance(root3.getElement(other, '#other', 'closest'), other);
+      addTestInstance(root3.getElement(child, 'target', 'closest'), null);
+      addTestInstance(root3.getElement(body, '#target'), null);
     });
 
     it('should find an AMP element for AMP search', () => {
       child.classList.add('i-amphtml-element');
-      expect(root.getAmpElement(body, '#child')).to.equal(child);
+      return root.getAmpElement(body, '#child').then(element => {
+        expect(element).to.equal(child);
+      });
+    });
+
+    it('should allow not-found element for AMP search', () => {
+      return root.getAmpElement(body, '#unknown').catch(error => {
+        expect(error).to.match(/Element "#unknown" not found/);
+      });
     });
 
     it('should fail if the found element is not AMP for AMP search', () => {
       child.classList.remove('i-amphtml-element');
-      expect(() => {
-        root.getAmpElement(body, '#child');
-      }).to.throw(/required to be an AMP element/);
-    });
-
-    it('should allow not-found element for AMP search', () => {
-      expect(root.getAmpElement(body, '#unknown')).to.be.null;
+      return root.getAmpElement(body, '#child').catch(error => {
+        expect(error).to.match(/required to be an AMP element/);
+      });
     });
   });
 
@@ -464,38 +489,59 @@ describes.realWin('EmbedAnalyticsRoot', {
 
   describe('getElement', () => {
 
+    let getElementTestInstances;
+    let addTestInstance;
+    beforeEach(() => {
+      getElementTestInstances = {
+        'promises': [],
+        'results': [],
+      };
+      addTestInstance = (promise, result) => {
+        getElementTestInstances.promises.push(promise);
+        getElementTestInstances.results.push(result);
+      };
+    });
+
+    afterEach(() => {
+      // Tests happen here.
+      return Promise.all(getElementTestInstances.promises).then(values => {
+        for (let i = 0; i < values.length; i++) {
+          expect(values[i]).to.equal(getElementTestInstances.results[i]);
+        }
+      });
+    });
+
     it('should find :root', () => {
       const rootElement = win.document.documentElement;
-      expect(root.getElement(body, ':root')).to.equal(rootElement);
-      expect(root.getElement(target, ':root')).to.equal(rootElement);
-      expect(root.getElement(target, ':root', ':scope')).to.equal(rootElement);
-      expect(root.getElement(target, ':root', ':closest'))
-          .to.equal(rootElement);
+      addTestInstance(root.getElement(body, ':root'), rootElement);
+      addTestInstance(root.getElement(target, ':root'), rootElement);
+      addTestInstance(root.getElement(target, ':root', ':scope'), rootElement);
+      addTestInstance(
+          root.getElement(target, ':root', ':closest'), rootElement);
     });
 
     it('should find :host', () => {
-      expect(root.getElement(body, ':host')).to.equal(embed.iframe);
-      expect(root.getElement(target, ':host')).to.equal(embed.iframe);
-      expect(root.getElement(target, ':host', ':scope')).to.equal(embed.iframe);
-      expect(root.getElement(target, ':host', ':closest'))
-          .to.equal(embed.iframe);
+      addTestInstance(root.getElement(body, ':host'), embed.iframe);
+      addTestInstance(root.getElement(target, ':host'), embed.iframe);
+      addTestInstance(root.getElement(target, ':host', ':scope'), embed.iframe);
+      addTestInstance(
+          root.getElement(target, ':host', ':closest'), embed.iframe);
     });
 
     it('should find element by ID', () => {
-      expect(root.getElement(body, '#target')).to.equal(target);
-      expect(root.getElement(body, '#child')).to.equal(child);
-      expect(root.getElement(target, '#target')).to.equal(target);
-      expect(root.getElement(child, '#target')).to.equal(target);
-      expect(root.getElement(other, '#target')).to.equal(target);
-
+      addTestInstance(root.getElement(body, '#target'), target);
+      addTestInstance(root.getElement(body, '#child'), child);
+      addTestInstance(root.getElement(target, '#target'), target);
+      addTestInstance(root.getElement(child, '#target'), target);
+      addTestInstance(root.getElement(other, '#target'), target);
     });
 
     it('should find element by class', () => {
-      expect(root.getElement(body, '.target')).to.equal(target);
-      expect(root.getElement(body, '.child')).to.equal(child);
-      expect(root.getElement(target, '.target')).to.equal(target);
-      expect(root.getElement(child, '.target')).to.equal(target);
-      expect(root.getElement(other, '.target')).to.equal(target);
+      addTestInstance(root.getElement(body, '.target'), target);
+      addTestInstance(root.getElement(body, '.child'), child);
+      addTestInstance(root.getElement(target, '.target'), target);
+      addTestInstance(root.getElement(child, '.target'), target);
+      addTestInstance(root.getElement(other, '.target'), target);
     });
   });
 

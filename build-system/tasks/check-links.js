@@ -64,10 +64,11 @@ function checkLinks() {
       if(deadLinksFoundInFile) {
         filesWithDeadLinks.push(markdownFiles[index]);
         util.log(
-            util.colors.yellow('WARNING'),
+            util.colors.red('ERROR'),
             'Possible dead link(s) found in',
             util.colors.magenta(markdownFiles[index]),
-            '(please update if necessary).');
+            '(please update, or whitelist in',
+            'build-system/tasks/check-links.js).');
       } else {
         util.log(
             util.colors.green('SUCCESS'),
@@ -77,10 +78,11 @@ function checkLinks() {
     });
     if (deadLinksFound) {
         util.log(
-            util.colors.yellow('WARNING'),
-            'Possible dead link(s) found. Please update',
-            util.colors.magenta(filesWithDeadLinks.join(',')),
-            'if necessary.');
+            util.colors.red('ERROR'),
+            'Possible dead link(s) found.',
+            'Please update, or whitelist in build-system/tasks/check-links.js.',
+            util.colors.magenta(filesWithDeadLinks.join(',')));
+            process.exit(1);
     } else {
         util.log(
             util.colors.green('SUCCESS'),
@@ -90,22 +92,24 @@ function checkLinks() {
 }
 
 /**
- * Filters out markdown elements that contain localhost links.
- * TODO(rsimha-amp): Simplify this into a single regex.
+ * Filters out whitelisted links before running the link checker.
  *
  * @param {string} markdown Original markdown.
- * @return {string} Markdown after filtering out localhost links.
+ * @return {string} Markdown after filtering out whitelisted links.
  */
-function filterLocalhostLinks(markdown) {
-  var localhostPattern = 'http:\/\/localhost:8000';
-  var parenLinks = new RegExp('\\('+ localhostPattern + '[^\\)]*\\)', 'g');
-  var bracketLinks = new RegExp('\\['+ localhostPattern + '[^\\]]*\\]', 'g');
-  var rawLinks = new RegExp(localhostPattern, 'g');
-
+function filterWhitelistedLinks(markdown) {
   var filteredMarkdown = markdown;
-  filteredMarkdown = filteredMarkdown.replace(parenLinks, '');
-  filteredMarkdown = filteredMarkdown.replace(bracketLinks, '');
-  filteredMarkdown = filteredMarkdown.replace(rawLinks, '');
+
+  // localhost links (not served on Travis)
+  filteredMarkdown = filteredMarkdown.replace(/http:\/\/localhost:8000/g, '');
+
+  // Links in script tags (illustrative, and not always valid)
+  filteredMarkdown = filteredMarkdown.replace(/src="http.*?"/g, '');
+
+  // Direct links to the https://cdn.ampproject.org domain (not a valid page)
+  filteredMarkdown =
+      filteredMarkdown.replace(/https:\/\/cdn.ampproject.org(?!\/)/g, '');
+
   return filteredMarkdown;
 }
 
@@ -122,7 +126,7 @@ function runLinkChecker(markdownFile) {
     return Promise.resolve();
   }
   var markdown = fs.readFileSync(markdownFile).toString();
-  var filteredMarkdown = filterLocalhostLinks(markdown);
+  var filteredMarkdown = filterWhitelistedLinks(markdown);
   var opts = {
     baseUrl : 'file://' + path.dirname(path.resolve((markdownFile)))
   };

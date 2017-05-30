@@ -173,39 +173,46 @@ export class AnalyticsRoot {
   /**
    * Searches the element that matches the selector within the scope of the
    * analytics root in relationship to the specified context node.
-   * Note: Please wait for document-ready to avoid false missed searches with
-   * selector other than :root or :host
    *
    * @param {!Element} context
    * @param {string} selector DOM query selector.
    * @param {?string=} selectionMethod Allowed values are `null`,
    *   `'closest'` and `'scope'`.
-   * @return {?Element} Element corresponding to the selector if found.
+   * @return {!Promise<!Element>} Element corresponding to the selector.
    */
   getElement(context, selector, selectionMethod = null) {
     // Special case selectors. The selection method is irrelavant.
+    // And no need to wait for document ready.
     if (selector == ':root') {
-      return this.getRootElement();
+      return Promise.resolve(this.getRootElement());
     }
     if (selector == ':host') {
-      return this.getHostElement();
+      return new Promise(resolve => {
+        resolve(user().assertElement(
+          this.getHostElement(), `Element "${selector}" not found`));
+      });
     }
 
-    // Query search based on the selection method.
-    let found;
-    if (selectionMethod == 'scope') {
-      found = scopedQuerySelector(context, selector);
-    } else if (selectionMethod == 'closest') {
-      found = closestBySelector(context, selector);
-    } else {
-      found = this.getRoot().querySelector(selector);
-    }
-    // DOM search can "look" outside the boundaries of the root, thus make
-    // sure the result is contained.
-    if (found && this.contains(found)) {
-      return found;
-    }
-    return null;
+    // Wait for document-ready to avoid false missed searches
+    return this.ampdoc.whenReady().then(() => {
+      let found;
+      let result = null;
+      // Query search based on the selection method.
+      if (selectionMethod == 'scope') {
+        found = scopedQuerySelector(context, selector);
+      } else if (selectionMethod == 'closest') {
+        found = closestBySelector(context, selector);
+      } else {
+        found = this.getRoot().querySelector(selector);
+      }
+      // DOM search can "look" outside the boundaries of the root, thus make
+      // sure the result is contained.
+      if (found && this.contains(found)) {
+        result = found;
+      }
+      return user().assertElement(
+          result, `Element "${selector}" not found`);
+    });
   }
 
   /**
@@ -216,16 +223,15 @@ export class AnalyticsRoot {
    * @param {string} selector DOM query selector.
    * @param {?string=} selectionMethod Allowed values are `null`,
    *   `'closest'` and `'scope'`.
-   * @return {?AmpElement} AMP element corresponding to the selector if found.
+   * @return {!Promise<!AmpElement>} AMP element corresponding to the selector if found.
    */
   getAmpElement(context, selector, selectionMethod) {
-    const element = this.getElement(context, selector, selectionMethod);
-    if (element) {
+    return this.getElement(context, selector, selectionMethod).then(element => {
       user().assert(
           element.classList.contains('i-amphtml-element'),
           'Element "%s" is required to be an AMP element', selector);
-    }
-    return element;
+      return element;
+    });
   }
 
   /**
