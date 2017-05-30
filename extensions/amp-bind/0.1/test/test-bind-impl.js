@@ -16,8 +16,13 @@
 
 import * as sinon from 'sinon';
 import {Bind} from '../bind-impl';
+import {BindEvaluator} from '../bind-evaluator';
 import {chunkInstanceForTesting} from '../../../../src/chunk';
 import {installTimerService} from '../../../../src/service/timer-impl';
+import {
+  registerServiceBuilder,
+  resetServiceForTesting,
+} from '../../../../src/service';
 import {toArray} from '../../../../src/types';
 import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
@@ -36,11 +41,41 @@ describes.realWin('Bind', {
     // Make sure we have a chunk instance for testing.
     chunkInstanceForTesting(env.ampdoc);
 
+    // Worker stubbing.
+    const evaluator = new BindEvaluator();
+    const stubWorker = {
+      sendMessage_: (method, args) => {
+        let returnValue;
+        switch (method) {
+          case 'bind.addBindings':
+            returnValue = evaluator.addBindings.apply(evaluator, args);
+            break;
+          case 'bind.removeBindingsWithExpressionStrings':
+            const removeBindings =
+                evaluator.removeBindingsWithExpressionStrings;
+            returnValue = removeBindings.apply(evaluator, args);
+            break;
+          case 'bind.evaluateBindings':
+            returnValue = evaluator.evaluateBindings.apply(evaluator, args);
+            break;
+          case 'bind.evaluateExpression':
+            returnValue = evaluator.evaluateExpression.apply(evaluator, args);
+            break;
+          default:
+            throw new Error(`Unrecognized method: ${method}`);
+        }
+        return Promise.resolve(returnValue);
+      },
+    };
+    registerServiceBuilder(env.win, 'amp-worker', function() {
+      return stubWorker;
+    });
     bind = new Bind(env.ampdoc);
   });
 
   afterEach(() => {
     toggleExperiment(env.win, 'amp-bind', false);
+    resetServiceForTesting(env.win, 'amp-worker');
   });
 
   /**
