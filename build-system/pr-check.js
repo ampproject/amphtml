@@ -210,23 +210,25 @@ const command = {
     let docFiles = files.filter(isDocFile);
     timedExecOrDie(`${gulp} check-links --files ${docFiles.join(',')}`);
   },
-  runPreBuildChecks: function() {
+  cleanBuild: function() {
     timedExecOrDie(`${gulp} clean`);
+  },
+  runLintChecks: function() {
     timedExecOrDie(`${gulp} lint`);
   },
   buildRuntime: function() {
-    timedExecOrDie(`${gulp} clean`);
     timedExecOrDie(`${gulp} build`);
+  },
+  serveRuntime: function() {
     timedExecOrDie(`${gulp} dist --fortesting`);
   },
   runDepAndTypeChecks: function() {
-    timedExecOrDie(`${gulp} build --css-only`);
     timedExecOrDie(`${gulp} dep-check`);
     timedExecOrDie(`${gulp} check-types`);
   },
   runUnitTests: function() {
     // Unit tests with Travis' default chromium
-    timedExecOrDie(`${gulp} test --nobuild --compiled`);
+    timedExecOrDie(`${gulp} test --nobuild`);
     // All unit tests with an old chrome (best we can do right now to pass tests
     // and not start relying on new features).
     // Disabled because it regressed. Better to run the other saucelabs tests.
@@ -244,7 +246,7 @@ const command = {
     // For now, this is warning-only.
     timedExec(`${gulp} visual-diff`);
   },
-  presubmit: function() {
+  runPresubmitTests: function() {
     timedExecOrDie(`${gulp} presubmit`);
   },
   buildValidatorWebUI: function() {
@@ -257,26 +259,24 @@ const command = {
 
 function runAllCommands() {
   // Run different sets of independent tasks in parallel to reduce build time.
-  if (process.env.BUILD_SHARD == "pre_build_checks") {
+  if (process.env.BUILD_SHARD == "pre_build_checks_and_unit_tests") {
     command.testBuildSystem();
-    command.runPreBuildChecks();
+    command.cleanBuild();
+    command.buildRuntime();
+    command.runLintChecks();
     command.runDepAndTypeChecks();
-    // Skip testDocumentLinks() during push builds.
+    command.runUnitTests();
+    // command.testDocumentLinks() is skipped during push builds.
     command.buildValidatorWebUI();
     command.buildValidator();
   }
   if (process.env.BUILD_SHARD == "integration_tests") {
+    command.cleanBuild();
     command.buildRuntime();
-    command.presubmit();  // Must be run after the runtime is built.
+    command.serveRuntime();
+    command.runPresubmitTests();  // Needs runtime to be built and served.
     command.runVisualDiffTests();  // Only called during push builds.
     command.runIntegrationTests();
-  }
-  if (process.env.BUILD_SHARD == "unit_tests") {
-    // Unit tests should need a CSS-only build, but for now, we need a full dist
-    // because some of the tests are integration tests.
-    // TODO(rsimha-amp, 9404): Clean up unit tests and change to css-only build.
-    command.buildRuntime();
-    command.runUnitTests();
   }
 }
 
@@ -344,7 +344,7 @@ function main(argv) {
       util.colors.cyan(sortedBuildTargets.join(', ')));
 
   // Run different sets of independent tasks in parallel to reduce build time.
-  if (process.env.BUILD_SHARD == "pre_build_checks") {
+  if (process.env.BUILD_SHARD == "pre_build_checks_and_unit_tests") {
     if (buildTargets.has('BUILD_SYSTEM')) {
       command.testBuildSystem();
     }
@@ -354,8 +354,11 @@ function main(argv) {
     }
 
     if (buildTargets.has('RUNTIME')) {
-      command.runPreBuildChecks();
+      command.cleanBuild();
+      command.buildRuntime();
+      command.runLintChecks();
       command.runDepAndTypeChecks();
+      command.runUnitTests();
     }
     if (buildTargets.has('VALIDATOR_WEBUI')) {
       command.buildValidatorWebUI();
@@ -368,22 +371,14 @@ function main(argv) {
   if (process.env.BUILD_SHARD == "integration_tests") {
     // The integration_tests shard can be skipped for PRs.
     console.log(fileLogPrefix, 'Skipping integration_tests for PRs');
+    // Presubmit needs to run after `gulp dist` as some checks run through the
+    // dist/ folder. In addition, we run presubmit even for PRs with just docs
+    // to check for the copyright at the top. However, to speed up the Travis
+    // queue, we no longer do a dist build for PRs.
+    // TODO(rsimha-amp, 9404): Enable this once integration_tests are enabled.
+    // command.runPresubmitTests();
   }
 
-  if (process.env.BUILD_SHARD == "unit_tests" && buildTargets.has('RUNTIME')) {
-    // Unit tests should need a CSS-only build, but for now, we need a full dist
-    // because some of the tests are integration tests.
-    // TODO(rsimha-amp, 9404): Clean up unit tests and change to css-only build.
-    command.buildRuntime();
-    // Presubmit needs to run after `gulp dist` as some checks run through
-    // the dist/ folder.
-    // Also presubmit always needs to run even for just docs to check for
-    // copyright at the top.
-    // TODO(rsimha-amp, 9404): Move to integration_tests once it's enabled.
-    command.presubmit();
-    // Finally, run all unit tests.
-    command.runUnitTests();
-  }
 
   stopTimer('pr-check.js', startTime);
   return 0;
