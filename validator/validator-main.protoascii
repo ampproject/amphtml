@@ -25,7 +25,7 @@ min_validator_revision_required: 232
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 424
+spec_file_revision: 425
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 
@@ -2224,6 +2224,7 @@ tags: {
   attrs: { name: "offset" }
   attrs: { name: "stop-color" }
   attrs: { name: "stop-opacity" }
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
@@ -2233,6 +2234,7 @@ tags: {
   attrs: { name: "offset" }
   attrs: { name: "stop-color" }
   attrs: { name: "stop-opacity" }
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
