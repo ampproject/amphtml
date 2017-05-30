@@ -45,7 +45,7 @@ This extension creates an iframe and displays the imgur post.
 
 ## Attributes
 
-**data-imgurid** (required)
+**data-imgur-id** (required)
 The ID of the imgur to embed.
 
 **layout** (required)
