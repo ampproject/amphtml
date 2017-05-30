@@ -219,6 +219,9 @@ const command = {
   buildRuntime: function() {
     timedExecOrDie(`${gulp} build`);
   },
+  buildCSS: function() {
+    timedExecOrDie(`${gulp} build --css-only`);
+  },
   serveRuntime: function() {
     timedExecOrDie(`${gulp} dist --fortesting`);
   },
@@ -262,7 +265,7 @@ function runAllCommands() {
   if (process.env.BUILD_SHARD == "pre_build_checks_and_unit_tests") {
     command.testBuildSystem();
     command.cleanBuild();
-    command.buildRuntime();
+    command.buildCSS();
     command.runLintChecks();
     command.runDepAndTypeChecks();
     command.runUnitTests();
@@ -355,7 +358,7 @@ function main(argv) {
 
     if (buildTargets.has('RUNTIME')) {
       command.cleanBuild();
-      command.buildRuntime();
+      command.buildCSS();
       command.runLintChecks();
       command.runDepAndTypeChecks();
       command.runUnitTests();
