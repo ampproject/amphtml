@@ -15,7 +15,7 @@
  */
 
 import {parseUrl, serializeQueryString} from '../../../../src/url';
-import {Messaging} from '../messaging';
+import {Messaging} from '../messaging/messaging';
 
 const APP = '__AMPHTML__';
 const MessageType = {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-import {listen} from '../../../src/event-helper';
-import {tryParseJson} from '../../../src/json';
-import {dev} from '../../../src/log';
 
 const TAG = 'amp-viewer-messaging';
 export const APP = '__AMPHTML__';
@@ -58,8 +55,15 @@ export function parseMessage(message) {
   if (message.charAt(0) != '{') {
     return null;
   }
-  return /** @type {?Message} */ (tryParseJson(message) || null);
+
+  try {
+    return /** @type {?Message} */ (
+      JSON.parse(/** @type {string} */ (message)));
+  } catch (e) {
+    return null;
+  }
 }
+
 
 /**
  * @fileoverview This class is a de-facto implementation of MessagePort
@@ -86,7 +90,7 @@ export class WindowPortEmulator {
    * @param {function(!Event):undefined} handler
    */
   addEventListener(eventType, handler) {
-    listen(this.win, 'message', e => {
+    this.win.addEventListener('message', e => {
       if (e.origin == this.origin_ &&
           e.source == this.target_ && e.data.app == APP) {
         handler(e);
@@ -175,7 +179,6 @@ export class Messaging {
    * @private
    */
   handleMessage_(event) {
-    dev().fine(TAG, 'Got a message:', event.type, event.data);
     const message = parseMessage(event.data);
     if (!message) {
       return;
@@ -195,7 +198,6 @@ export class Messaging {
    * @return {!Promise<*>|undefined}
    */
   sendRequest(messageName, messageData, awaitResponse) {
-    dev().fine(TAG, 'sendRequest, event name: ', messageName);
     const requestId = ++this.requestIdCounter_;
     let promise = undefined;
     if (awaitResponse) {
@@ -222,7 +224,6 @@ export class Messaging {
    * @private
    */
   sendResponse_(requestId, messageName, messageData) {
-    dev().fine(TAG, 'sendResponse_');
     this.sendMessage_({
       app: APP,
       requestid: requestId,
@@ -269,8 +270,6 @@ export class Messaging {
    * @private
    */
   handleRequest_(message) {
-    dev().fine(TAG, 'handleRequest_', message);
-
     let handler = this.messageHandlers_[message.name];
     if (!handler) {
       handler = this.defaultHandler_;
@@ -288,8 +287,7 @@ export class Messaging {
       if (!promise) {
         this.sendResponseError_(
           requestId, message.name, new Error('no response'));
-        dev().assert(promise,
-          'expected response but none given: ' + message.name);
+        throw new Error('expected response but none given: ' + message.name);
       }
       promise.then(data => {
         this.sendResponse_(requestId, message.name, data);
@@ -306,7 +304,6 @@ export class Messaging {
    * @private
    */
   handleResponse_(message) {
-    dev().fine(TAG, 'handleResponse_');
     const requestId = message.requestid;
     const pending = this.waitingForResponse_[requestId];
     if (pending) {
