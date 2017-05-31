@@ -224,7 +224,7 @@ export class AmpA4A extends AMP.BaseElement {
     dev().assert(AMP.AmpAdUIHandler);
     dev().assert(AMP.AmpAdXOriginIframeHandler);
 
-    /** @protected {?Promise<?CreativeMetaDataDef>} */
+    /** @private {?Promise<?CreativeMetaDataDef>} */
     this.adPromise_ = null;
 
     /**
@@ -1165,7 +1165,7 @@ export class AmpA4A extends AMP.BaseElement {
     const config = refreshConfigs[adType];
     if (!config) {
       // Network has not opted in for refresh eligibility; we can ignore any
-      // all publisher configurations related to refresh.
+      // and all publisher configurations related to refresh.
       return null;
     }
     let refreshEnabled =
