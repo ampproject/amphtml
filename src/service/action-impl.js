@@ -62,6 +62,7 @@ const ELEMENTS_ACTIONS_MAP_ = {
 const TYPE = {
   NUMBER: 'number',
   BOOLEAN: 'boolean',
+  STRING: 'string',
 };
 
 /** @const {!Object<string, !Object<string, string>>} */
@@ -76,6 +77,9 @@ const WHITELISTED_INPUT_DATA_ = {
   },
   'checkbox': {
     'checked': TYPE.BOOLEAN,
+  },
+  'text': {
+    'value': TYPE.STRING,
   },
 };
 
