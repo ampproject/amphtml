@@ -265,9 +265,9 @@ function runAllCommands() {
   if (process.env.BUILD_SHARD == "pre_build_checks_and_unit_tests") {
     command.testBuildSystem();
     command.cleanBuild();
+    command.buildRuntime();
     command.runLintChecks();
     command.runDepAndTypeChecks();
-    command.buildRuntime();
     command.runUnitTests();
     // command.testDocumentLinks() is skipped during push builds.
     command.buildValidatorWebUI();
@@ -358,9 +358,9 @@ function main(argv) {
 
     if (buildTargets.has('RUNTIME')) {
       command.cleanBuild();
+      command.buildRuntime();
       command.runLintChecks();
       command.runDepAndTypeChecks();
-      command.buildRuntime();
       command.runUnitTests();
       // Ideally, we'd run presubmit tests after `gulp dist`, as some checks run
       // through the dist/ folder. However, to speed up the Travis queue, we no
