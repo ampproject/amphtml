@@ -16,12 +16,13 @@
 
 
 /**
- * @typedef {!WebMultiAnimationDef|!WebKeyframeAnimationDef}
+ * @typedef {!WebMultiAnimationDef|!WebCompAnimationDef|!WebKeyframeAnimationDef}
  */
 export let WebAnimationDef;
 
 
 /**
+ * @mixes WebAnimationSelectorDef
  * @mixes WebAnimationTimingDef
  * @mixes WebAnimationMediaDef
  * @typedef {{
@@ -32,14 +33,23 @@ export let WebMultiAnimationDef;
 
 
 /**
+ * @mixes WebAnimationSelectorDef
  * @mixes WebAnimationTimingDef
  * @mixes WebAnimationMediaDef
  * @typedef {{
- *   target: (string|!Element|undefined),
- *   selector: (string|undefined),
+ *   animation: string,
+ * }}
+ */
+export let WebCompAnimationDef;
+
+
+/**
+ * @mixes WebAnimationSelectorDef
+ * @mixes WebAnimationTimingDef
+ * @mixes WebAnimationMediaDef
+ * @typedef {{
  *   keyframes: !WebKeyframesDef,
  * }}
- * TODO(dvoytenko, #9129): cleanup deprecated string `target`.
  */
 export let WebKeyframeAnimationDef;
 
@@ -78,6 +88,15 @@ export let WebAnimationTimingDef;
  * }}
  */
 export let WebAnimationMediaDef;
+
+
+/**
+ * @typedef {{
+ *   target: (!Element|undefined),
+ *   selector: (string|undefined),
+ * }}
+ */
+export let WebAnimationSelectorDef;
 
 
 /**

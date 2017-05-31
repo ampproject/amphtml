@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {MeasureScanner} from './web-animations';
+import {Builder} from './web-animations';
 import {ScrollboundScene} from './scrollbound-scene';
 import {Pass} from '../../../src/pass';
 import {WebAnimationPlayState} from './web-animation-types';
@@ -137,6 +137,14 @@ export class AmpAnimation extends AMP.BaseElement {
     }
   }
 
+  /**
+   * Returns the animation spec.
+   * @return {?JSONType}
+   */
+  getAnimationSpec() {
+    return /** @type {?JSONType} */ (this.configJson_);
+  }
+
   /** @override */
   layoutCallback() {
     if (this.triggerOnVisibility_) {
@@ -243,19 +251,19 @@ export class AmpAnimation extends AMP.BaseElement {
       installWebAnimations(this.win);
     }
 
-    const vsync = this.getVsync();
     const ampdoc = this.getAmpDoc();
     const readyPromise = this.embed_ ? this.embed_.whenReady() :
         ampdoc.whenReady();
     const hostWin = this.embed_ ? this.embed_.win : this.win;
     const baseUrl = this.embed_ ? this.embed_.getUrl() : ampdoc.getUrl();
     return readyPromise.then(() => {
-      const measurer = new MeasureScanner(
-          hostWin, this.getRootNode_(), baseUrl, /* validate */ true);
-      return vsync.measurePromise(() => {
-        measurer.scan(configJson);
-        return measurer.createRunner(this.element.getResources());
-      });
+      const builder = new Builder(
+          hostWin,
+          this.getRootNode_(),
+          baseUrl,
+          this.getVsync(),
+          this.element.getResources());
+      return builder.createRunner(configJson);
     });
   }
 
