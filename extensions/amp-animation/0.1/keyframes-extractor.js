@@ -16,21 +16,6 @@
 
 import {endsWith} from '../../../src/string';
 
-/**
- * @extends {CSSRule}
- * @see http://www.w3.org/TR/DOM-Level-2-Style/css.html#CSS-CSSKeyframesRule
- */
-class CSSKeyframesRuleDef {
-  constructor() {
-    /** @type {string} */
-    this.name;
-    /** @type {string} */
-    this.keyText;
-    /** @type {!CSSRuleList} */
-    this.cssRules;
-  }
-}
-
 
 /**
  * Finds and extracts keyframes definition for Web Animations from CSS styles.
@@ -93,7 +78,7 @@ function scanRules(win, rules, name) {
   for (let i = rules.length - 1; i >= 0; i--) {
     const rule = rules[i];
     if (rule.type == /* CSSKeyframesRule */ 7) {
-      const keyframesRule = /** @type {!CSSKeyframesRuleDef} */ (rule);
+      const keyframesRule = /** @type {!CSSKeyframesRule} */ (rule);
       if (rule.name == name && isEnabled(win, rule)) {
         return buildKeyframes(keyframesRule);
       }
@@ -137,13 +122,14 @@ function isEnabled(win, rule) {
 
 
 /**
- * @param {!CSSKeyframesRuleDef} keyframesRule
+ * @param {!CSSKeyframesRule} keyframesRule
  * @return {!./web-animation-types.WebKeyframesDef}
  */
 function buildKeyframes(keyframesRule) {
   const array = [];
   for (let i = 0; i < keyframesRule.cssRules.length; i++) {
-    const keyframeRule = keyframesRule.cssRules[i];
+    const keyframeRule = /** @type {!CSSKeyframeRule} */ (
+        keyframesRule.cssRules[i]);
     const keyframe = {};
     keyframe['offset'] =
         keyframeRule.keyText == 'from' ? 0 :
