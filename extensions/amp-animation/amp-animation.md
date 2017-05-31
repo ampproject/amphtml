@@ -284,7 +284,7 @@ The property values allow any valid CSS values, including `calc()`, `var()` and 
 
 #### Keyframes from CSS
 
-Another way to specify keyframes is in the `<style>` tag as `@keyframes` CSS rule. For instance:
+Another way to specify keyframes is in the document's stylesheet (`<style>` tag) as `@keyframes` CSS rule. For instance:
 ```html
 <style amp-custom>
   @keyframes keyframes1 {
@@ -457,7 +457,7 @@ Both `var()` and `calc()` polyfilled on platforms that do not directly support t
 </amp-animation>
 ```
 
-Animation components can specify their own variables as `--var-name` fields. These variables are propagated into nested animations and override variables of target elements specified via `<style>`. `var()` expressions first try to resolve variable values specified in the animations and then by querying target styles.
+Animation components can specify their own variables as `--var-name` fields. These variables are propagated into nested animations and override variables of target elements specified via stylesheet (`<style>` tag). `var()` expressions first try to resolve variable values specified in the animations and then by querying target styles.
 
 
 ### CSS extensions

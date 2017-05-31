@@ -585,7 +585,8 @@ export class MeasureScanner extends Scanner {
     if (typeof spec.keyframes == 'string') {
       // Keyframes name to be extracted from `<style>`.
       const keyframes = extractKeyframes(this.css_.rootNode_, spec.keyframes);
-      user().assert(keyframes, `Keyframes not found: "${spec.keyframes}"`);
+      user().assert(keyframes,
+          `Keyframes not found in stylesheet: "${spec.keyframes}"`);
       return /** @type {!WebKeyframesDef} */ (keyframes);
     }
 
