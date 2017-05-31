@@ -110,6 +110,10 @@ function filterWhitelistedLinks(markdown) {
   // Direct links to the https://cdn.ampproject.org domain (not a valid page)
   filteredMarkdown =
       filteredMarkdown.replace(/https:\/\/cdn.ampproject.org(?!\/)/g, '');
+  
+  // TODO(honeybadgerdontcare): Remove after PR #9434 is merged
+  filteredMarkdown =
+      filteredMarkdown.replace(/https:\/\/github.com\/ampproject\/amphtml\/blob\/master\/extensions\/amp-imgur\/0.1\/validator-amp-imgur.protoascii/g, '');
 
   return filteredMarkdown;
 }
