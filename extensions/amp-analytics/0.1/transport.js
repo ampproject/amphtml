@@ -31,6 +31,9 @@ import {IframeMessagingClient} from '../../../3p/iframe-messaging-client';
 /** @const {string} */
 const TAG_ = 'amp-analytics.Transport';
 
+/** @const {number} */
+const MESSAGE_THROTTLE_TIME_ = 100;
+
 /**
  * @param {!Window} win
  * @param {string} request
@@ -136,10 +139,16 @@ export class Transport {
   static sendRequestUsingCrossDomainIframe(request, transportOptions) {
     const frameData = Transport.crossDomainFrames[transportOptions['iframe']];
     user().assert(frameData, 'Trying to send message to non-existent frame');
+    console.log("Enqueue @ " + new Date());
+    frameData.msgQueue.push(request);
     if (frameData.isReady) {
-      this.sendToCrossDomainIframe_(frameData, [request]);
-    } else {
-      frameData.msgQueue.push(request);
+      if (frameData.sendTimer == null) {
+        frameData.sendTimer = window.setTimeout(() => {
+          console.log("Send @ " + new Date());
+          this.sendQueuedMessagesToCrossDomainIframe_(frameData);
+          frameData.sendTimer = null;
+        }, MESSAGE_THROTTLE_TIME_);
+      }
     }
   }
 
@@ -233,7 +242,8 @@ export class Transport {
       send: messages => {
         iframeClient.sendMessage('ampAnalyticsEvents', {ampAnalyticsEvents: [messages]});
       },
-      iframeClient
+      iframeClient,
+      sendTimer: null,
     };
     frame.src = frameUrl; // Intentionally doing this after creating load
     // promise, rather than in the object supplied to
@@ -251,8 +261,7 @@ export class Transport {
   static setIsReady_(frameUrl) {
     const frameData = Transport.crossDomainFrames[frameUrl];
     frameData.isReady = true;
-    this.sendToCrossDomainIframe_(frameData, frameData.msgQueue);
-    frameData.msgQueue = [];
+    this.sendQueuedMessagesToCrossDomainIframe_(frameData);
   }
 
   /**
@@ -281,10 +290,13 @@ export class Transport {
    * @param {!Array<string>} messages  The messages to send
    * @private
    */
-  static sendToCrossDomainIframe_(frameData, messages) {
+  static sendQueuedMessagesToCrossDomainIframe_(frameData) {
     dev().assert(frameData && frameData.send,
       'Message bound for frame that does not exist');
-    frameData.send(messages);
+    if (frameData.msgQueue && frameData.msgQueue.length > 0) {
+      frameData.send(frameData.msgQueue);
+      frameData.msgQueue = [];
+    }
   }
 }
 Transport.crossDomainFrames = map();
