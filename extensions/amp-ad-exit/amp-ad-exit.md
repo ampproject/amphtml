@@ -57,16 +57,16 @@ values to insert. The exit action will perform these steps:
 {
   "targets": {
     "landingPage": {
-      "finalUrl": "https://example.com/artisan-baking/?from=_CLICKAREA",
+      "finalUrl": "https://example.com/artisan-baking/?from=_clickArea",
       "vars": {
-        "_CLICKAREA": {
+        "_clickArea": {
           "defaultValue": "headline",
         }
       }
     }
     "flour": {
       "finalUrl": "https://adclickserver.example.com/click?id=af319adec901&x=CLICK_X&y=CLICK_Y&adurl=https://example.com/artisan-baking/flour",
-      "filters": ["3s_click", "border_protection"]
+      "filters": ["3sClick", "borderProtection"]
     },
     "bannetons": {
       "finalUrl": "https://example.com/artisan-baking/bannetons",
@@ -74,15 +74,15 @@ values to insert. The exit action will perform these steps:
         "https://adclickserver.example.com/click?id=af319adec901&x=CLICK_X&y=CLICK_Y",
         "https://tracker.adnetwork.example.com/?url=example.com",
       ],
-      "filters": ["3s_click", "border_protection"]
+      "filters": ["3sClick", "borderProtection"]
     }
   },
   "filters": {
-    "3s_click": {
+    "3sClick": {
       "type": "clickDelay",
       "delay": 3000
     },
-    "border_protection": {
+    "borderProtection": {
       "type": "clickLocation",
       "top": 10,
       "right": 10,
@@ -103,7 +103,7 @@ values to insert. The exit action will perform these steps:
   <p>Bannetons</p>
   <amp-img src="..." width="..." height="..."></amp-img>
 </div>
-<div id="footer" on="tap:exit-api.exit(target='landing', _CLICKAREA='footer')">
+<div id="footer" on="tap:exit-api.exit(target='landing', _clickArea='footer')">
   example.com/artisan-baking
 </div>
 ```
