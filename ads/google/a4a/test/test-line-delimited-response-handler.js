@@ -69,9 +69,17 @@ describe('#line-delimited-response-handler', () => {
       // results[0] is the response
       expect(results[0]).to.be.ok;
       expect(chunkHandlerStub.callCount).to.equal(slotData.length);
-      slotData.forEach(slot =>
-        expect(chunkHandlerStub.withArgs(slot.creative, slot.headers))
-          .to.be.calledOnce);
+      // Could have duplicate responses so need to iterate and get counts.
+      // TODO: can't use objects as keys :(
+      const calls = {};
+      slotData.forEach(slot => {
+        const key = slot.creative + JSON.stringify(slot.headers);
+        calls[key] ? calls[key]++ : (calls[key] = 1);
+      });
+      slotData.forEach(slot => {
+        expect(chunkHandlerStub.withArgs(slot.creative, slot.headers).callCount)
+          .to.equal(calls[slot.creative + JSON.stringify(slot.headers)]);
+      });
     });
   }
 
@@ -125,13 +133,14 @@ describe('#line-delimited-response-handler', () => {
     function setup() {
       const responseString = generateResponseFormat();
       const textEncoder = new TextEncoder('utf-8');
+      const CHUNK_SIZE = 5;
       let chunk = 0;
       do {
-        const value = textEncoder.encode(
-          responseString.substr(chunk * 5, 5), {'stream': true});
-        const done = chunk * 5 >= responseString.length - 1;
+        const value = textEncoder.encode(responseString.substr(
+          chunk * CHUNK_SIZE, CHUNK_SIZE), {'stream': true});
+        const done = chunk * CHUNK_SIZE >= responseString.length - 1;
         readStub.onCall(chunk).returns(Promise.resolve({value, done}));
-      } while (chunk++ * 5 < responseString.length);
+      } while (chunk++ * CHUNK_SIZE < responseString.length);
     }
 
     beforeEach(() => {
@@ -160,10 +169,27 @@ describe('#line-delimited-response-handler', () => {
       return executeAndVerifyResponse();
     });
 
+    it('should handle no fill response properly', () => {
+      slotData = [{headers: {}, creative: ''}];
+      setup();
+      return executeAndVerifyResponse();
+    });
+
+    it('should handle multiple no fill responses properly', () => {
+      slotData = [
+        {headers: {}, creative: ''},
+        {headers: {}, creative: ''}
+      ];
+      setup();
+      return executeAndVerifyResponse();
+    });
+
     it('should stream properly', () => {
       slotData = [
+        {headers: {}, creative: ''},
         {headers: {foo: 'bar', hello: 'world'},
           creative: '\t\n\r<html>\bbaz\r</html>\n\n'},
+        {headers: {}, creative: ''},
         {headers: {hello: 'world'},
           creative: '<html>\nchu\nnk me</h\rtml\n\t>'},
         {headers: {}, creative: ''},

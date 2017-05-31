@@ -37,44 +37,29 @@
          // TODO(keithwrightbos) - TextDecoder polyfill?
          response.text().then(content =>
            chunkHandleFullResponse(content, chunkHandler));
-       } else {
-         let metaData;
-         let snippet = '';
-         const chunkCallback = (chunk, done) => {
-           let hasDelimiter;
-           let pos = 0;
-           do {
-             const delimIndex = chunk.indexOf('\n', pos);
-             hasDelimiter = delimIndex != -1;
-             let end = hasDelimiter ? delimIndex : chunk.length;
-             snippet += chunk.substr(pos, end - pos);
-             pos = hasDelimiter ? delimIndex + 1 : end;
-             if (hasDelimiter) {
-               if (!metaData) {
-                 metaData = safeJsonParse_(snippet);
-               } else {
-                 // Have metaData/HTML so we can call chunkHandler and reset.
-                 chunkHandler(
-                   unescapeHtml_(snippet),
-                   /** @type {!Object<string, *>} */(metaData),
-                   done && end == chunk.length);
-                 metaData = undefined;
-               }
-               snippet = '';
-             } else if (countTrailingSlashes(chunk, pos - 1) & 1) {
-               // Decrement 'end' to skip the last character of the chunk if it
-               // ends with an odd number of slashes, since that implies that
-               // the last slash is used to escape a character that we haven't
-               // received yet. So we skip the last byte in this iteration and
-               // wait for the next chunk to see what is being escaped.
-               end--;
-             }
-             pos = hasDelimiter ? delimIndex + 1 : end;
-           } while (hasDelimiter && pos < chunk.length);
-         };
-         handleFetchResponseStream_(
-           response.body.getReader(), chunkCallback, new TextDecoder('utf-8'));
+         return response;
        }
+       let metadata;
+       let snippet = '';
+       const chunkCallback = (chunk, done) => {
+         const regex = /([^\n]*)(\n)?/g;
+         while ((match = regex.exec(chunk))) {
+           snippet += match[1];
+           if (match[2]) {
+             if (metadata) {
+               chunkHandler(unescapeHtml_(snippet), metadata,
+                  done && regex.lastIndex === chunk.length);
+               metadata = undefined;
+             } else {
+               metadata = safeJsonParse_(snippet);
+             }
+             snippet = '';
+           }
+           if (regex.lastIndex === chunk.length) break;
+         }
+       };
+       handleFetchResponseStream_(
+         response.body.getReader(), chunkCallback, new TextDecoder('utf-8'));
        return response;
      });
  }
@@ -87,7 +72,7 @@
   * @private
   */
  function handleFetchResponseStream_(reader, chunkHandler, textDecoder) {
-   return reader.read().then(result => {
+   reader.read().then(function chunk(result) {
      if (result.value) {
        chunkHandler(
          textDecoder.decode(
@@ -96,7 +81,7 @@
      }
      if (!result.done) {
        // More chunks to read.
-       handleFetchResponseStream_.apply(this, arguments);
+       reader.read().then(chunk);
      }
    });
  }
@@ -108,18 +93,12 @@
   */
  function chunkHandleFullResponse(text, chunkHandler) {
    const lines = text.split('\n');
-   // Note that its expected for an extra return to existing in the format.
-   let linesRemaining = lines.length;
-   let metaData;
-   lines.forEach(line => {
-     if (!metaData) {
-       metaData = safeJsonParse_(line);
-     } else {
-       chunkHandler(unescapeHtml_(line),
-          /** @type {!Object<string,*>} */(metaData), !(--linesRemaining));
-       metaData = undefined;
-     }
-   });
+   for (let i = 1; i < lines.length; i += 2) {
+     chunkHandler(
+       unescapeHtml_(lines[i]),
+       safeJsonParse_(lines[i - 1]),
+       i == lines.length - 1);
+   }
  }
 
  /**
@@ -129,9 +108,9 @@
   * @private
   */
  function unescapeHtml_(html) {
-   return html.replace(
+   return html ? html.replace(
      /\\(n|r|\\)/g,
-     (_, match) => match == 'n' ? '\n' : match == 'r' ? '\r' : '\\');
+     (_, match) => match == 'n' ? '\n' : match == 'r' ? '\r' : '\\') : html;
  }
 
  /**
