@@ -225,7 +225,7 @@ export class AmpA4A extends AMP.BaseElement {
     dev().assert(AMP.AmpAdXOriginIframeHandler);
 
     /** @protected {?Promise<?CreativeMetaDataDef>} */
-    this.adPromise = null;
+    this.adPromise_ = null;
 
     /**
      * @private {number} unique ID of the currently executing promise to allow
@@ -531,12 +531,33 @@ export class AmpA4A extends AMP.BaseElement {
     return true;
   }
 
+  /**
+   * @return {?Promise<?CreativeMetaDataDef>}
+   * @protected
+   */
+  getAdPromise() {
+    return this.adPromise_;
+  }
+
   /** @override */
   onLayoutMeasure() {
+    this.initiateAdRequest();
+  }
+
+  /**
+   * This is the entry point into the promise chain.
+   *
+   * Calling this function will initiate the following sequence of events: ad
+   * url construction, ad request issuance, creative verification, and metadata
+   * parsing.
+   *
+   * @protected
+   */
+  initiateAdRequest() {
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.onLayoutMeasure();
     }
-    if (this.adPromise || !this.shouldInitializePromiseChain_()) {
+    if (this.adPromise_ || !this.shouldInitializePromiseChain_()) {
       return;
     }
     // If in localDev `type=fake` Ad specifies `force3p`, it will be forced
@@ -545,7 +566,7 @@ export class AmpA4A extends AMP.BaseElement {
         this.element.getAttribute('type') == 'fake' &&
         this.element.getAttribute('force3p') == 'true') {
       this.adUrl_ = this.getAdUrl();
-      this.adPromise = Promise.resolve();
+      this.adPromise_ = Promise.resolve();
       return;
     }
 
@@ -568,7 +589,7 @@ export class AmpA4A extends AMP.BaseElement {
     //   - Rendering fails => return false
     //   - Chain cancelled => don't return; drop error
     //   - Uncaught error otherwise => don't return; percolate error up
-    this.adPromise = viewerForDoc(this.getAmpDoc()).whenFirstVisible()
+    this.adPromise_ = viewerForDoc(this.getAmpDoc()).whenFirstVisible()
         .then(() => {
           checkStillCurrent();
           // See if experiment that delays request until slot is within
@@ -905,7 +926,7 @@ export class AmpA4A extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     // Promise may be null if element was determined to be invalid for A4A.
-    if (!this.adPromise) {
+    if (!this.adPromise_) {
       if (this.shouldInitializePromiseChain_()) {
         dev().error(TAG, 'Null promise in layoutCallback');
       }
@@ -918,7 +939,13 @@ export class AmpA4A extends AMP.BaseElement {
     const checkStillCurrent = this.verifyStillCurrent();
     // Promise chain will have determined if creative is valid AMP.
     return this.adPromise_.then(creativeMetaData => {
+<<<<<<< HEAD
       checkStillCurrent();
+=======
+      if (promiseId != this.promiseId_) {
+        throw cancellation();
+      }
+>>>>>>> No longer calling lifecycle methods directly.
       const delta = this.getNow_() - layoutCallbackStart;
       this.protectedEmitLifecycleEvent_('layoutAdPromiseDelay', {
         layoutAdPromiseDelay: Math.round(delta),
@@ -969,6 +996,15 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.friendlyIframeEmbed_) {
       return false;
     }
+    this.tearDownSlot();
+    return true;
+  }
+
+  /**
+   * Attempts to tear down and set all state variables to initial conditions.
+   * @protected
+   */
+  tearDownSlot() {
     // Increment promiseId to cause any pending promise to cancel.
     this.promiseId_++;
     this.protectedEmitLifecycleEvent_('adSlotCleared');
@@ -992,14 +1028,13 @@ export class AmpA4A extends AMP.BaseElement {
     // Remove rendering frame, if it exists.
     this.destroyFrame();
 
-    this.adPromise = null;
+    this.adPromise_ = null;
     this.adUrl_ = null;
     this.creativeBody_ = null;
     this.isVerifiedAmpCreative_ = false;
     this.fromResumeCallback = false;
     this.experimentalNonAmpCreativeRenderMethod_ =
         platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
-    return true;
   }
 
   /**
