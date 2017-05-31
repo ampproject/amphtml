@@ -136,6 +136,7 @@ declareExtension('amp-viewer-integration', '0.1', {
 });
 declareExtension('amp-video', '0.1', false);
 declareExtension('amp-youtube', '0.1', false);
+declareExtension('amp-shadow-doc-loader', '0.1', true);
 
 /**
  * @param {string} name
