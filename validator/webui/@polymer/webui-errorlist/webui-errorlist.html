@@ -30,7 +30,6 @@
     .filterMessage,
     .filterMessage:hover {
       line-height: 16px;
-      min-height: 16px;
       padding: 4px 0;
       text-align: center;
     }
@@ -41,8 +40,9 @@
       display: inline-block;
     }
     paper-listbox {
-      height: 240px;
       overflow-y: scroll;
+      margin-bottom: 16px;
+      padding: 0;
     }
     paper-item-body {
       width: 100%;
@@ -71,33 +71,35 @@
     }
   </style>
   <template>
-    <template is="dom-if" if="{{filter}}">
-      <paper-item class="filterMessage">
-        <paper-item-body>
-          Results filtered to {{filter}}.
-          <paper-button id="clearFilterButton" on-click="clearFilter" raised>Clear filter</paper-button>
-        </paper-item-body>
-      </paper-item>
-    </template>
-    <paper-listbox id="listbox" on-iron-select="handleSelect" selected="{{selectedError}}">
-      <template id="listboxErrors" is="dom-repeat" items='{{errors}}' as="e" filter="filterErrors">
-        <paper-item>
-          <template is="dom-if" if="{{e.isError}}">
-            <iron-icon class="ampproject-error" icon='{{e.icon}}'></iron-icon>&nbsp;&nbsp;
-          </template>
-          <template is="dom-if" if="{{e.isWarning}}">
-            <iron-icon class="ampproject-warning" icon='{{e.icon}}'></iron-icon>&nbsp;&nbsp;
-          </template>
-          <paper-item-body two-line>
-            <div>
-              <div class="message">{{e.message}}</div>
-              <div class="category">{{e.category}}</div>
-            </div>
-            <div secondary><small>line {{e.line}}, column {{e.col}}</small></div>
+    <paper-material id="preview-material" elevation="1">
+      <template is="dom-if" if="{{filter}}">
+        <paper-item class="filterMessage">
+          <paper-item-body>
+            Results filtered to {{filter}}.
+            <paper-button id="clearFilterButton" on-click="clearFilter" raised>Clear filter</paper-button>
           </paper-item-body>
         </paper-item>
       </template>
-    </paper-listbox>
+      <paper-listbox id="listbox" on-iron-select="handleSelect" selected="{{selectedError}}">
+        <template id="listboxErrors" is="dom-repeat" items='{{errors}}' as="e" filter="filterErrors">
+          <paper-item>
+            <template is="dom-if" if="{{e.isError}}">
+              <iron-icon class="ampproject-error" icon='{{e.icon}}'></iron-icon>&nbsp;&nbsp;
+            </template>
+            <template is="dom-if" if="{{e.isWarning}}">
+              <iron-icon class="ampproject-warning" icon='{{e.icon}}'></iron-icon>&nbsp;&nbsp;
+            </template>
+            <paper-item-body two-line>
+              <div>
+                <div class="message">{{e.message}}</div>
+                <div class="category">{{e.category}}</div>
+              </div>
+              <div secondary><small>line {{e.line}}, column {{e.col}}</small></div>
+            </paper-item-body>
+          </paper-item>
+        </template>
+      </paper-listbox>
+    </paper-material>
   </template>
 
   <script>

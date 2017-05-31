@@ -19,10 +19,19 @@
 <link rel="import" href="../polymer/polymer.html">
 <dom-module id="webui-statusbar">
   <style>
+    paper-material {
+      transition: all 0.25s ease-in-out;
+    }
     .ampproject-fail {
-      color: #F44336;
+      @apply(--shadow-elevation-8dp);
     }
     .ampproject-pass {
+      @apply(--shadow-elevation-2dp);
+    }
+    .ampproject-fail span {
+      color: #F44336;
+    }
+    .ampproject-pass span {
       color: #4CAF50;
     }
     .ampproject-result {
@@ -31,9 +40,9 @@
     }
   </style>
   <template>
-    <paper-material elevation="3">
+    <paper-material class$="{{getClass(status)}}">
       <div class="ampproject-result">Validation Status:
-        <span class$="{{getClass(status)}}">{{status}}</span>
+        <span >{{status}}</span>
       </div>
     </paper-material>
   </template>

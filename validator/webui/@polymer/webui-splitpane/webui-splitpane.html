@@ -1,0 +1,134 @@
+<!--
+  Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS-IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the license.
+-->
+<!-- An element consisting of two sides, separated by a divider which the user can
+drag to resize the two sides. -->
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-resizable-behavior/iron-resizable-behavior.html">
+<link rel="import" href="../iron-localstorage/iron-localstorage.html">
+<dom-module id="webui-splitpane">
+  <style>
+    :host {
+      display: -ms-flex;
+      display: -webkit-flex;
+      display: flex;
+    }
+  </style>
+  <template>
+    <content></content>
+    <iron-localstorage name="webui-splitpane-custom-ratio"
+                       on-iron-localstorage-load="_localStorageLoad"
+                       value="{{customRatio}}"></iron-localstorage>
+  </template>
+  <script>
+    Polymer({
+      is: 'webui-splitpane',
+
+      behaviors: [
+        Polymer.IronResizableBehavior
+      ],
+
+      listeners: {
+        'iron-resize': '_onResize'
+      },
+
+      properties: {
+        ratio: {
+          type: Number
+        },
+        customRatio: {
+          type: Number
+        }
+      },
+
+      ready: function() {
+        var children = Polymer.dom(this).children;
+        if (children.length !== 3) {
+          console.error('webui-splitpane must have three children: left, handle, right');
+          return;
+        }
+        // init panes & drag handle
+        this._left = children[0];
+        this._dragHandle = children[1];
+        this._right = children[2];
+      },
+
+      attached: function() {
+        // register dragging listeners
+        this._dragHandle.onmousedown = this._startResizing.bind(this);
+        document.onmousemove = this._resizing.bind(this);
+        document.onmouseup = this._endResizing.bind(this);
+
+        // set initial size
+        this._onResize();
+      },
+
+      _isResizing: false,
+
+      _startResizing: function(e) {
+        this._isResizing = true;
+        // disable pointer events for all children to avoid mouse events
+        // being swallowed by the iframe and changing the editor scroll 
+        // position
+        this._setPointerEvent('none');
+      },
+
+      _resizing: function(e) {
+        // we don't want to do anything if we aren't resizing.
+        if (!this._isResizing) {
+          return;
+        }
+        this._updateSize(e.clientX - this.getBoundingClientRect().left);
+      },
+
+      _endResizing: function(e) {
+        this._isResizing = false;
+        // re-enable pointer events for all children
+        this._setPointerEvent('auto');
+        // save the pane ratio
+        this.set('customRatio', this._left.offsetWidth / this.offsetWidth);
+        console.log('customRatio', this._left.offsetWidth / this.offsetWidth);
+      },
+
+      _updateSize: function(size) {
+        // adjust the panes size
+        this._left.style.width = size + 'px';
+        this._right.style.width = '' + (this.offsetWidth - size - this._dragHandle.offsetWidth) + 'px';
+      },
+
+      _setPointerEvent: function(value) {
+        var children = this.getElementsByTagName("*");
+        for (i = 0; i < children.length; i++) {
+          children[i].style['pointer-events'] = value;
+        };
+      },
+
+      _onResize: function() {
+        if (!this.ratio) {
+          return;
+        }
+        this._updateSize(this.offsetWidth * this.ratio);
+      },
+
+      _localStorageLoad: function() {
+        if (this.customRatio) {
+          this.ratio = this.customRatio;
+          this._onResize();
+        }
+      }
+
+    });
+  </script>
+</dom-module>

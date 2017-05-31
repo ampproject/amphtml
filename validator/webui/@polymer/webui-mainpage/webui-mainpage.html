@@ -19,16 +19,44 @@
 <link rel="import" href="../ampproject-toolbar/ampproject-toolbar.html">
 <link rel="import" href="../amphtml-editor/amphtml-editor.html">
 <link rel="import" href="../webui-statusbar/webui-statusbar.html">
+<link rel="import" href="../webui-splitpane/webui-splitpane.html">
 <link rel="import" href="../webui-errorlist/webui-errorlist.html">
 <link rel="import" href="../webui-urlform/webui-urlform.html">
+<link rel="import" href="../webui-preview/webui-preview.html">
 <dom-module id="webui-mainpage">
+  <style scope="webui-preview">
+    #amphtmlEditor {
+      min-width: 100px;
+    }
+    #preview {
+      min-width: 100px;
+    }
+    #drag {
+      width: 8px;
+      height: calc(100vh-200px);
+      cursor: col-resize;
+    }
+    @media (max-width: 599px) {
+      #amphtmlEditor {
+        width: 100%;
+      }
+      #preview {
+        display: none;
+      }
+    }
+  </style>
   <template>
     <ampproject-toolbar></ampproject-toolbar>
     <webui-urlform id="urlForm"></webui-urlform>
-    <amphtml-editor id="amphtmlEditor"></amphtml-editor>
+    <webui-splitpane ratio="0.6">
+      <amphtml-editor id="amphtmlEditor"></amphtml-editor>
+      <div id="drag"></div>
+      <webui-preview id="preview"></webui-preview>
+    </webui-splitpane>
     <webui-statusbar id="statusBar"></webui-statusbar>
     <webui-errorlist id="errorListBox"></webui-errorlist>
   </template>
+
   <script>
     var minimumValidAmp =
       '\x3C!--\n' +
@@ -43,6 +71,7 @@
       '  \x3Cmeta name="viewport" content="width=device-width,minimum-scale=1">\n' +
       '  \x3Cstyle amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}\x3C/style>\x3Cnoscript>\x3Cstyle amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}\x3C/style>\x3C/noscript>\n' +
       '  \x3Cscript async src="https://cdn.ampproject.org/v0.js">\x3C/script>\n' +
+      '  \x3Cstyle amp-custom>\x3C/style>\n' +
       '\x3C/head>\n' +
       '\x3Cbody>Hello, AMP world.\x3C/body>\n' +
       '\x3C/html>\n';
@@ -71,7 +100,6 @@
     Polymer({
       is: 'webui-mainpage',
       ready: function() {
-
         // The URL form at the top of the screen.
         var urlForm = this.$.urlForm;
 
@@ -93,6 +121,9 @@
         // The listbox has the errors at the bottom of the screen.
         var listbox = this.$.errorListBox;
 
+        // The document preview 
+        var preview = this.$.preview;
+
         // When the editor contents change, trigger validation (with a delay)
         // and propagate the validation errors into the editor (as line
         // widgets) and the listbox below the editor as clickable errors.
@@ -103,6 +134,9 @@
           while (lineWidgets.length > 0) {
             lineWidgets.shift().clear();
           }
+
+          // Show preview 
+          preview.refresh(editor.getEditorValue());
 
           // Validate - result is of type amp.validator.ValidationResult.
           // See validator.proto for the provided fields.
@@ -170,6 +204,7 @@
             removeParamFromLocationHashParams('errno');
           }
         };
+
         var refreshEditorAndErrorsWithDelay = function(e) {
           clearTimeout(validationTimeout);
           validationTimeout = setTimeout(
@@ -193,6 +228,7 @@
         var input = document.getElementById('urlToFetch');
         var button = document.getElementById('validateButton');
         button.addEventListener('click', function() {
+          // fetch the document
           var urlToFetch = input.value.trim();
           if (urlToFetch.length > 0) {
             if (!(urlToFetch.indexOf('http://') == 0 ||
