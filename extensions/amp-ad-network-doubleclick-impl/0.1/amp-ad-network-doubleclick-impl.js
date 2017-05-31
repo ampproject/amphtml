@@ -222,36 +222,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {!Promise<?../../../src/service/xhr-impl.FetchResponse>} */
     this.sraResponsePromise_ = sraInitializer.promise;
 
-    /** @private @const {!RefreshManager}  */
-    this.refreshManager_ =
-        new RefreshManager(this.win, this.element, refresher => {
-          this.isRefreshing = true;
-          this.unlayoutCallback();
-          this.onLayoutMeasure();
-          this.adPromise.then(() => {
-            if (!this.isRefreshing) {
-              // If this refresh cycle was canceled, such as in a no-content
-              // response case, keep showing the old creative.
-              refresher.initiateRefreshCycle();
-              return;
-            }
-            this.togglePlaceholder(true);
-            this.destroyFrame(true);
-            // We don't want the next creative to appear too suddenly, so we
-            // show the loader for a quarter of a second before switching to
-            // the new creative.
-            timerFor(this.win).delay(() => {
-              this.layoutCallback().then(() => {
-                this.isRefreshing = false;
-                this.togglePlaceholder(false);
-                // Restart refresh cycle.
-                refresher.initiateRefreshCycle();
-              });
-            }, 250);
-          });
-        });
-
-    this.refreshManager_.initiateRefreshCycle();
+    this.initializeRefreshIfEligible();
   }
 
   /** @override */
@@ -361,6 +332,39 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         googleAdUrl(this, DOUBLECLICK_BASE_URL, startTime,
             Object.assign(this.getBlockParameters_(), pageLevelParameters),
           ['108809080']));
+  }
+
+  initializeRefreshIfEligible() {
+    const refreshConfig = this.getRefreshConfiguration();
+    if (!refreshConfig) {
+      return;
+    }
+    new RefreshManager(this.win, this.element, refresher => {
+      this.isRefreshing = true;
+      this.unlayoutCallback();
+      this.onLayoutMeasure();
+      this.adPromise.then(() => {
+        if (!this.isRefreshing) {
+          // If this refresh cycle was canceled, such as in a no-content
+          // response case, keep showing the old creative.
+          refresher.initiateRefreshCycle();
+          return;
+        }
+        this.togglePlaceholder(true);
+        this.destroyFrame(true);
+        // We don't want the next creative to appear too suddenly, so we
+        // show the loader for a quarter of a second before switching to
+        // the new creative.
+        timerFor(this.win).delay(() => {
+          this.layoutCallback().then(() => {
+            this.isRefreshing = false;
+            this.togglePlaceholder(false);
+            // Restart refresh cycle.
+            refresher.initiateRefreshCycle();
+          });
+        }, 250);
+      });
+    }, refreshConfig).initiateRefreshCycle();
   }
 
   /** @override */

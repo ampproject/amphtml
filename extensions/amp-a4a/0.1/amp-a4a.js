@@ -18,7 +18,11 @@ import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
 } from '../../amp-ad/0.1/concurrent-load';
-import {signingServerURLs} from '../../../ads/_a4a-config';
+import {adConfig} from '../../../ads/_config';
+import {
+  signingServerURLs,
+  refreshConfigs,
+} from '../../../ads/_a4a-config';
 import {createElementWithAttributes} from '../../../src/dom';
 import {cancellation, isCancellation} from '../../../src/error';
 import {
@@ -1112,6 +1116,38 @@ export class AmpA4A extends AMP.BaseElement {
     this.uiHandler.applyNoContentUI();
     this.isCollapsed_ = true;
   }
+
+  /**
+   * If this ad slot's network has opted in for refresh, and refresh has been
+   * enabled on this slot, this method will return the refresh configuration
+   * for this slot; otherwise, it will return null.
+   *
+   * @return {?./refresh-manager.RefreshConfig}
+   * @protected
+   */
+  getRefreshConfiguration() {
+    const adType = this.element.getAttribute('type');
+    const config = refreshConfigs[adType];
+    if (!config) {
+      // Network has not opted in for refresh eligibility; we can ignore any
+      // all publisher configurations related to refresh.
+      return null;
+    }
+    let refreshEnabled =
+        this.element.getAttribute('data-enable-refresh') == 'true';
+    if (!refreshEnabled) {
+      const metaTags = this.win.document.getElementsByTagName('meta') || [];
+      for (let i = 0; i < metaTags.length; i++) {
+        if (metaTags[i].getAttribute('name') ==
+            `amp-ad-enable-refresh:${adType}`) {
+          refreshEnabled = metaTags[i].getAttribute('content') == 'true';
+          break;
+        }
+      }
+    }
+    return refreshEnabled ? config : null;
+  }
+
 
   /**
    * Callback executed when creative has successfully rendered within the
