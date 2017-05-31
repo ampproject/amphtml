@@ -31,6 +31,7 @@ import * as sinon from 'sinon';
 function setupForAdTesting(fixture) {
   installDocService(fixture.win, /* isSingleDoc */ true);
   const doc = fixture.doc;
+  doc.win = fixture.win;
   // TODO(a4a-cam@): This is necessary in the short term, until A4A is
   // smarter about host document styling.  The issue is that it needs to
   // inherit the AMP runtime style element in order for shadow DOM-enclosed
@@ -113,6 +114,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
+        doc.win = window;
         element = createElementWithAttributes(doc, 'amp-ad', {
           'width': '200',
           'height': '50',
@@ -199,6 +201,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
+        doc.win = window;
         element = createElementWithAttributes(doc, 'amp-ad', {
           'width': '200',
           'height': '50',
@@ -316,7 +319,10 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
               height: 50,
             };
           });
-      sandbox.stub(impl, 'getAmpDoc', () => {return document;});
+      sandbox.stub(impl, 'getAmpDoc', () => {
+        document.win = window;
+        return document;
+      });
     });
 
     afterEach(() =>

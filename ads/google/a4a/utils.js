@@ -143,7 +143,7 @@ export function googleAdUrl(
   // TODO: Maybe add checks in case these promises fail.
   /** @const {!Promise<string>} */
   const referrerPromise = viewerForDoc(a4a.getAmpDoc()).getReferrerUrl();
-  return getOrCreateAdCid(a4a.getAmpDoc(), a4a.win, 'AMP_ECID_GOOGLE', '_ga')
+  return getOrCreateAdCid(a4a.getAmpDoc(), 'AMP_ECID_GOOGLE', '_ga')
       .then(clientId => referrerPromise.then(referrer => {
         const adElement = a4a.element;
         window['ampAdGoogleIfiCounter'] = window['ampAdGoogleIfiCounter'] || 1;
