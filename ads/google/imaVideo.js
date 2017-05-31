@@ -328,7 +328,7 @@ export function imaVideo(global, data) {
   wrapperDiv.appendChild(bigPlayDiv);
   global.document.getElementById('c').appendChild(wrapperDiv);
 
-  window.addEventListener('message', event => { onMessage(global, event); });
+  window.addEventListener('message', onMessage.bind(null, global));
 
   /**
    * Set-up code that can't run until the IMA lib loads.
@@ -352,12 +352,11 @@ export function imaVideo(global, data) {
       mouseMoveEvent = 'touchmove';
       mouseUpEvent = 'touchend';
     }
-    bigPlayDiv.addEventListener(interactEvent, () => { onClick(global); });
+    bigPlayDiv.addEventListener(interactEvent, onClick.bind(null, global));
     playPauseDiv.addEventListener(interactEvent, onPlayPauseClick);
     progressBarWrapperDiv.addEventListener(mouseDownEvent, onProgressClick);
-    fullscreenDiv.addEventListener(interactEvent,() => {
-      onFullscreenClick(global);
-    });
+    fullscreenDiv.addEventListener(interactEvent,
+        onFullscreenClick.bind(null, global));
 
     const fullScreenEvents = [
       'fullscreenchange',
@@ -365,7 +364,7 @@ export function imaVideo(global, data) {
       'webkitfullscreenchange'];
     fullScreenEvents.forEach(fsEvent => {
       global.document.addEventListener(fsEvent,
-        () => { onFullscreenChange(global); },
+        onFullscreenChange.bind(null, global),
         false);
     });
 
@@ -377,8 +376,7 @@ export function imaVideo(global, data) {
     adsLoader.getSettings().setPlayerVersion('0.1');
     adsLoader.addEventListener(
         global.google.ima.AdsManagerLoadedEvent.Type.ADS_MANAGER_LOADED,
-        adsManagerLoadedEvent => {
-          onAdsManagerLoaded(global, adsManagerLoadedEvent); },
+        onAdsManagerLoaded.bind(null, global),
         false);
     adsLoader.addEventListener(
         global.google.ima.AdErrorEvent.Type.AD_ERROR,
@@ -434,7 +432,7 @@ export function playAds(global) {
     }
   } else if (!adRequestFailed) {
     // Ad request did not yet resolve but also did not yet fail.
-    setTimeout(() => { playAds(global); }, 250);
+    setTimeout(playAds.bind(null, global), 250);
   } else {
     // Ad request failed.
     window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
@@ -469,7 +467,7 @@ export function onAdsManagerLoaded(global, adsManagerLoadedEvent) {
       onAdError);
   adsManager.addEventListener(
       global.google.ima.AdEvent.Type.CONTENT_PAUSE_REQUESTED,
-      () => { onContentPauseRequested(global); });
+      onContentPauseRequested.bind(null, global));
   adsManager.addEventListener(
       global.google.ima.AdEvent.Type.CONTENT_RESUME_REQUESTED,
       onContentResumeRequested);
