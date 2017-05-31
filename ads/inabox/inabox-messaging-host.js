@@ -131,7 +131,9 @@ export class InaboxMessagingHost {
    * @param {string} origin
    * @return {boolean}
    */
-  // TODO(alanorozco): consider rejecting if frame is out of focus
+  // TODO(alanorozco):
+  // 1. Reject request if frame is out of focus
+  // 2. Disable zoom and scroll on parent doc
   handleEnterFullOverlay_(iframe, request, source, origin) {
     expandFrame(this.win_, iframe, () => {
       source./*OK*/postMessage(
