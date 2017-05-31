@@ -26,7 +26,7 @@ const CENTER_TRANSITION_END_WAIT_TIME_MS = 200;
 
 
 /**
- * Places the child frame in full overlay mode if the request is valid.
+ * Places the child frame in full overlay mode.
  * @param {!Window} win Host window.
  * @param {!HTMLIFrameElement} iframe
  * @param {!Function} onFinish
@@ -76,7 +76,7 @@ let collapseFrameImpl = function(win, iframe, onFinish) {
 
 
 /**
- * Places the child frame in full overlay mode if the request is valid.
+ * Places the child frame in full overlay mode.
  * @param {!Window} win Host window.
  * @param {!HTMLIFrameElement} iframe
  * @param {!Function} onFinish
@@ -102,7 +102,7 @@ export function resetExpandFrameForTesting() {
 
 
 /**
- * Places the child frame in full overlay mode if the request is valid.
+ * Places the child frame in full overlay mode.
  * @param {!Window} win Host window.
  * @param {!HTMLIFrameElement} iframe
  * @param {!Function} onFinish
