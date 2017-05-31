@@ -26,6 +26,7 @@ import {
   ShadowDomVersion,
 } from './web-components';
 import {setStyle} from './style';
+import {toArray} from './types';
 import {vsyncFor} from './services';
 
 /**
@@ -88,11 +89,23 @@ function createShadowRootPolyfill(hostElement) {
 
   shadowRoot.host = hostElement;
 
+  // `getElementById` is resolved via `querySelector('#id')`.
   shadowRoot.getElementById = function(id) {
     const escapedId = escapeCssSelectorIdent(win, id);
     return /** @type {HTMLElement|null} */ (
         shadowRoot./*OK*/querySelector(`#${escapedId}`));
   };
+
+  // The styleSheets property should have a list of local styles.
+  Object.defineProperty(shadowRoot, 'styleSheets', {
+    get: () => {
+      if (!doc.styleSheets) {
+        return [];
+      }
+      return toArray(doc.styleSheets).filter(
+          styleSheet => shadowRoot.contains(styleSheet.ownerNode));
+    },
+  });
 
   return shadowRoot;
 }
