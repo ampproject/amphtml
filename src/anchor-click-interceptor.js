@@ -59,6 +59,9 @@ function maybeExpandUrlParams(ampdoc, e) {
     'CLICK_Y': () => {
       return e.pageY;
     },
+    'RESPONSE': () => {
+      return ampdoc.mostRecentCrossDomainIframeResponse;
+    },
   };
   const newHref = urlReplacementsForDoc(ampdoc).expandSync(
       hrefToExpand, vars, undefined, /* opt_whitelist */ {
@@ -67,6 +70,7 @@ function maybeExpandUrlParams(ampdoc, e) {
         // NOTE: Addition to this whitelist requires additional review.
         'CLICK_X': true,
         'CLICK_Y': true,
+        'RESPONSE': true,
       });
   if (newHref != hrefToExpand) {
     // Store original value so that later clicks can be processed with

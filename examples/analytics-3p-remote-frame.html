@@ -18,7 +18,8 @@
         ampAnalytics.registerAmpAnalyticsEventListener(arrayOfEventStrings => {
           arrayOfEventStrings.forEach(evt => {
             // Now, do something meaningful with the AMP Analytics event
-            console.log("Received an event: " + evt);
+            console.log("Received an event: " + evt +
+            ", and my extra data is: " + ampAnalytics.getExtraData());
           });
           ampAnalytics.sendMessageToCreative('received');
         });

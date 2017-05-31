@@ -41,7 +41,8 @@ const MESSAGE_THROTTLE_TIME_ = 100;
  */
 export function sendRequest(win, request, transportOptions) {
   if (transportOptions['iframe']) {
-    Transport.sendRequestUsingCrossDomainIframe(request, transportOptions);
+    Transport.sendRequestUsingCrossDomainIframe(request, transportOptions,
+      event);
     return;
   }
   assertHttpsUrl(request, 'amp-analytics request');
@@ -132,19 +133,16 @@ export class Transport {
   /**
    * Sends an Amp Analytics trigger event to a vendor's cross-domain iframe,
    * or queues the message if the frame is not yet ready to receive messages.
-   * TODO: Implement throttling if messages are sent too rapidly.
    * @param {string} request
    * @param {!Object<string, string>} transportOptions
    */
   static sendRequestUsingCrossDomainIframe(request, transportOptions) {
     const frameData = Transport.crossDomainFrames[transportOptions['iframe']];
     user().assert(frameData, 'Trying to send message to non-existent frame');
-    console.log("Enqueue @ " + new Date());
     frameData.msgQueue.push(request);
     if (frameData.isReady) {
       if (frameData.sendTimer == null) {
         frameData.sendTimer = window.setTimeout(() => {
-          console.log("Send @ " + new Date());
           this.sendQueuedMessagesToCrossDomainIframe_(frameData);
           frameData.sendTimer = null;
         }, MESSAGE_THROTTLE_TIME_);
@@ -169,9 +167,12 @@ export class Transport {
     if (Transport.hasCrossDomainFrame(frameUrl)) {
       this.incrementFrameUsageCount_(frameUrl);
     } else {
-      const frame = Transport.createCrossDomainIframe(ampDoc, frameUrl);
+      const frame = Transport.createCrossDomainIframe(ampDoc, frameUrl,
+        transportOptions['extraData']);
       ampDoc.body.appendChild(frame);
     }
+    // Regardless of whether we just created it, or are re-using an existing
+    // one, wire up the response callback
     if (processResponse) {
       const iframeClient = Transport.crossDomainFrames[frameUrl].iframeClient;
       iframeClient.registerCallback('ampAnalyticsResponse', msg => {
@@ -213,9 +214,11 @@ export class Transport {
    * Create a cross-domain iframe for third-party vendor anaytlics
    * @param {!HTMLDocument} ampDoc  The document node of the parent page
    * @param {!string} frameUrl  The URL of the cross-domain iframe
+   * @param {?string=} extraData  An extra string for the cross-domain
+   * iframe to use, which will be associated with this creative only
    * @return {!Element}
    */
-  static createCrossDomainIframe(ampDoc, frameUrl) {
+  static createCrossDomainIframe(ampDoc, frameUrl, extraData) {
     // DO NOT MERGE THIS
     // Warning: the scriptSrc URL below is only temporary. Don't merge
     // before getting resolution on that.
@@ -226,9 +229,13 @@ export class Transport {
       }),
     });
     const iframeClient = new IframeMessagingClient(window);
-    iframeClient.setSentinel(String(Math.random()).substr(2));
+    iframeClient.setSentinel(Transport.createSentinel_());
     loadPromise(frame).then(() => {
       iframeClient.setHostWindow(frame.contentWindow);
+      if (extraData) {
+        iframeClient.sendMessage('ampAnalyticsExtraData',
+          {ampAnalyticsExtraData: extraData});
+      }
       this.setIsReady_(frameUrl);
     });
     setStyles(frame,
@@ -240,7 +247,7 @@ export class Transport {
       msgQueue: [],
       usageCount: 1,
       send: messages => {
-        iframeClient.sendMessage('ampAnalyticsEvents', {ampAnalyticsEvents: [messages]});
+        iframeClient.sendMessage('ampAnalyticsEvents', {ampAnalyticsEvents: messages});
       },
       iframeClient,
       sendTimer: null,
@@ -250,6 +257,16 @@ export class Transport {
     // createElementWithAttribute() above. Want to be absolutely
     // certain that we don't lose the loaded event.
     return frame;
+  }
+
+  /**
+   * Create an almost-certainly-unique value to differentiate messages from
+   * this particular creative to the cross-domain iframe
+   * @returns {string}
+   * @private
+   */
+  static createSentinel_() {
+    return String(Math.random()).substr(2);
   }
 
   /**

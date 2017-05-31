@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+const RTV_VERSION = '1234'; // TODO Replace with import from AMP, or just remove
+
 /**
  * This provides the "glue" between the AMP Analytics tag and the third-party
  * vendor's metrics-collection page.
@@ -39,45 +41,91 @@ class AmpAnalyticsRemoteFrameManager {
   }
 
   /**
+   * Receives a message from the creative. Handles deserialization (which
+   * filters out messages not actually meant for us) and passes it to the
+   * listener that was supplied to registerAmpAnalyticsEventListener above.
+   * @param {!String} message The message that was received.
+   */
+  receiveMessageFromCreative(message) {
+    if (message && message.data) {
+      const deserialized = deserializeMessage(message.data);
+      if (deserialized) {
+        this.setSentinel_(deserialized.sentinel);
+        if (deserialized.ampAnalyticsExtraData) {
+          this.setExtraData(deserialized.ampAnalyticsExtraData);
+          // TODO: Send event here?
+        } else if (deserialized.ampAnalyticsEvents) {
+          window.requestIdleCallback(() => {
+            this.listener_(deserialized.ampAnalyticsEvents);
+          });
+        }
+      }
+    }
+  }
+
+  /**
+   * Sets the sentinel value, which is used to identify which creative the
+   * event messages come from
+   * @param {!String} sentinel The sentinel value
+   */
+  setSentinel_(sentinel) {
+    if (this.sentinel_ && sentinel!=this.sentinel_) {
+      console.warn("Attempting to set sentinel to " + sentinel + " when it" +
+          " was already set to " + this.sentinel_);
+    }
+    this.sentinel_ = sentinel;
+  }
+
+  /**
+   * Gets any optional extra data that should be made available to the
+   * cross-domain frame, in the context of a particular creative.
+   * @returns {String=}
+   */
+  getExtraData(extraData) {
+    return this.extraData_;
+  }
+
+  /**
+   * Sets any optional extra data that should be made available to the
+   * cross-domain frame, in the context of a particular creative.
+   * @param {?String=} extraData The extra data
+   */
+  setExtraData(extraData) {
+    this.extraData_ = extraData;
+  }
+
+  /**
    * Sends a message from the third-party vendor's metrics-collection page back
    * to the creative.
    * @param {!String} message The message to send.
    */
   sendMessageToCreative(message) {
     /*REVIEW*/window.parent.postMessage(
-      serializeMessage('ampAnalyticsResponse', this.sentinel_,
-                       {ampAnalyticsResponse: message}, this.rtvVersion_), '*');
+        serializeMessage('ampAnalyticsResponse', this.sentinel_,
+            {ampAnalyticsResponse: message}, RTV_VERSION), '*');
   }
 };
 
-AmpAnalyticsRemoteFrameManager.rtvVersion_ = '1234'; // TODO
+// Simple requestIdleCallback polyfill
+window.requestIdleCallback =
+    window.requestIdleCallback || (cb => setTimeout(cb, 1));
 
 /**
  * @const {AmpAnalyticsRemoteFrameManager}
  */
 const remoteFrameMgr_ = new AmpAnalyticsRemoteFrameManager();
 
-window.requestIdleCallback =
-  window.requestIdleCallback || (cb => setTimeout(cb, 1));
-
 if (window.onNewAmpAnalyticsInstance) {
-  window.onNewAmpAnalyticsInstance(remoteFrameMgr_);
-  // Warning: the following code is likely only temporary. Don't check in
-  // before getting resolution on that.
-  window.addEventListener("message", msg => {
-    if (msg && msg.data) {
-      const deserialized = deserializeMessage(msg.data);
-      if (deserialized && deserialized.ampAnalyticsEvents) {
-        remoteFrameMgr_.sentinel_ = deserialized.sentinel; // TODO Temp Code!
-        window.requestIdleCallback(() => {
-          remoteFrameMgr_.listener_(deserialized.ampAnalyticsEvents);
-        });
-      }
-    }
+  window.addEventListener("message", message => {
+    remoteFrameMgr_.receiveMessageFromCreative(message);
   });
+  window.onNewAmpAnalyticsInstance(remoteFrameMgr_);
 } else {
   console.error("Vendor page must implement onNewAmpAnalyticsInstance.");
 }
+
+// TODO: Consider getting rid of everything below here, and importing from
+// AMP sources instead.
 
 const AMP_MESSAGE_PREFIX = 'amp-';
 
@@ -91,7 +139,6 @@ const AMP_MESSAGE_PREFIX = 'amp-';
  * @returns {string}
  */
 function serializeMessage(type, sentinel, data = {}, rtvVersion = null) {
-  // TODO: consider wrap the data in a "data" field. { type, sentinal, data }
   const message = data;
   message.type = type;
   message.sentinel = sentinel;

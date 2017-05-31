@@ -233,7 +233,8 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     if (this.config_['transport'] && this.config_['transport']['iframe']) {
       Transport.processCrossDomainIframe(this.getAmpDoc().win.document,
-        this.config_['transport'], this.processCrossDomainIframeResponse_);
+        this.config_['transport'],
+        (message) => { this.processCrossDomainIframeResponse_(message); });
     }
 
     const promises = [];
@@ -299,12 +300,8 @@ export class AmpAnalytics extends AMP.BaseElement {
    * was specified in the amp-analytics config
    */
   processCrossDomainIframeResponse_(msg) {
-    try {
-      if (this.element.ownerDocument.location.href !== 'about:srcdoc') {
-        this.element.ownerDocument.location.href += msg;
-      }
-    } catch (err) {
-    }
+    // Used in ../../../src/anchor-click-interceptor.js
+    this.getAmpDoc().mostRecentCrossDomainIframeResponse = msg;
   }
 
   /**
