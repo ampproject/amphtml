@@ -52,11 +52,6 @@ export class AmpImgur extends AMP.BaseElement {
   }
 
   /** @override */
-  preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://imgur.com/', opt_onLayout);
-  }
-
-  /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
   }
