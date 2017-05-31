@@ -28,7 +28,7 @@ import {timerFor} from '../../../src/services';
 export let RefreshConfig;
 
 /** @type {!RefreshConfig} */
-const DEFAULT_CONFIG = {
+export const DEFAULT_REFRESH_CONFIG = {
   visiblePercentageMin: 50,
   totalTimeMin: 0,
   continuousTimeMin: 5000,
@@ -42,10 +42,10 @@ export class RefreshManager {
    * @param {!Element} element The element to be registered.
    * @param {function(RefreshManager)} callback The function to be invoked when
    *     the element is refreshed.
-   * @param {RefreshConfig=} config Specifies the viewability conditions and
+   * @param {!RefreshConfig} config Specifies the viewability conditions and
    *     the refresh interval.
    */
-  constructor(win, element, callback, config = DEFAULT_CONFIG) {
+  constructor(win, element, callback, config) {
 
     /** @const @private {!Window} */
     this.win_ = win;

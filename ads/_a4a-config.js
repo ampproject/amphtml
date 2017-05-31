@@ -37,6 +37,9 @@ import {
   gmosspIsA4AEnabled,
 } from
 '../extensions/amp-ad-network-gmossp-impl/0.1/gmossp-a4a-config';
+import {
+  DEFAULT_REFRESH_CONFIG,
+} from '../extensions/amp-a4a/0.1/refresh-manager';
 import {getMode} from '../src/mode';
 import {map} from '../src/utils/object';
 
@@ -83,4 +86,15 @@ export const signingServerURLs = {
   'google-dev': 'https://cdn.ampproject.org/amp-ad-verifying-keyset-dev.json',
   'cloudflare': 'https://amp.cloudflare.com/amp-ad-verifying-keyset.json',
   'cloudflare-dev': 'https://amp.cloudflare.com/amp-ad-verifying-keyset-dev.json',
+};
+
+/**
+ * An object mapping networks to refresh configuratons. No mapping implies the
+ * network has not opted in to become refresh-eligible. See
+ * ../extensions/amp-a4a/0.1/refresh-manager for the RefreshConfig definition.
+ *
+ * @type {!Object<string, !../extensions/amp-a4a/0.1/refresh-manager.RefreshConfig>}
+ */
+export const refreshConfigs = {
+  'doubleclick': DEFAULT_REFRESH_CONFIG,
 };
