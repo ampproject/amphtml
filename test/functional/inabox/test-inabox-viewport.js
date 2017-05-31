@@ -17,7 +17,6 @@
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {resourcesForDoc} from '../../../src/services';
 import {
-  getFixedContainer,
   prepareFixedContainer,
   resetFixedContainer,
   ViewportBindingInabox,
@@ -42,8 +41,6 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   }
 
   beforeEach(() => {
-    sandbox = env.sandbox;
-
     win = env.win;
     win.Math = {
       random() {
@@ -54,7 +51,6 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     win.innerHeight = 150;
 
     installIframeMessagingClient(win);
-
     binding = new ViewportBindingInabox(win);
     measureSpy = sandbox.spy();
     element = {
@@ -74,7 +70,6 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     stubIframeClientMakeRequest((req, res, cb) => {
       positionCallback = cb;
     });
-
     onScrollCallback = sandbox.spy();
     onResizeCallback = sandbox.spy();
     binding.connect();
