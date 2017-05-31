@@ -188,6 +188,22 @@ export class WebAnimationRunner {
   }
 
   /**
+   * @param {time} time
+   */
+  seekTo(time) {
+    dev().assert(this.players_);
+    this.setPlayState_(WebAnimationPlayState.PAUSED);
+    this.players_.forEach(player => {
+      player.pause();
+      if (player instanceof ScrollboundPlayer) {
+        player.tick(time);
+      } else {
+        player.currentTime = time;
+      }
+    });
+  }
+
+  /**
    */
   finish() {
     if (!this.players_) {
@@ -364,10 +380,11 @@ export class Builder {
    * Creates the animation runner for the provided spec. Waits for all
    * necessary resources to be loaded before the runner is resolved.
    * @param {!WebAnimationDef|!Array<!WebAnimationDef>} spec
+   * @param {?WebAnimationDef=} opt_args
    * @return {!Promise<!WebAnimationRunner>}
    */
-  createRunner(spec) {
-    return this.resolveRequests([], spec).then(requests => {
+  createRunner(spec, opt_args) {
+    return this.resolveRequests([], spec, opt_args).then(requests => {
       if (getMode().localDev || getMode().development) {
         user().fine(TAG, 'Animation: ', requests);
       }
@@ -380,15 +397,18 @@ export class Builder {
   /**
    * @param {!Array<string>} path
    * @param {!WebAnimationDef|!Array<!WebAnimationDef>} spec
+   * @param {?WebAnimationDef|undefined} args
    * @param {?Element} target
    * @param {?Object<string, *>} vars
    * @param {?WebAnimationTimingDef} timing
    * @return {!Promise<!Array<!InternalWebAnimationRequestDef>>}
    * @protected
    */
-  resolveRequests(path, spec, target = null, vars = null, timing = null) {
+  resolveRequests(path, spec, args,
+      target = null, vars = null, timing = null) {
     const scanner = this.createScanner_(path, target, vars, timing);
-    return this.vsync_.measurePromise(() => scanner.resolveRequests(spec));
+    return this.vsync_.measurePromise(
+        () => scanner.resolveRequests(spec, args));
   }
 
   /**
@@ -475,13 +495,23 @@ export class MeasureScanner extends Scanner {
   }
 
   /**
+   * This methods scans all animation declarations specified in `spec`
+   * recursively to produce the animation requests. `opt_args` is an additional
+   * spec that can be used to default timing and variables.
    * @param {!WebAnimationDef|!Array<!WebAnimationDef>} spec
+   * @param {?WebAnimationDef=} opt_args
    * @return {!Promise<!Array<!InternalWebAnimationRequestDef>>}
    */
-  resolveRequests(spec) {
-    this.css_.withVars(this.vars_, () => {
-      this.scan(spec);
-    });
+  resolveRequests(spec, opt_args) {
+    if (opt_args) {
+      this.with_(opt_args, () => {
+        this.scan(spec);
+      });
+    } else {
+      this.css_.withVars(this.vars_, () => {
+        this.scan(spec);
+      });
+    }
     return Promise.all(this.deps_).then(() => this.requests_);
   }
 
@@ -522,7 +552,7 @@ export class MeasureScanner extends Scanner {
           return;
         }
         return this.builder_.resolveRequests(
-            newPath, otherSpec, target, vars, timing);
+            newPath, otherSpec, /* args */ null, target, vars, timing);
       }).then(requests => {
         requests.forEach(request => this.requests_.push(request));
       });
@@ -769,7 +799,7 @@ export class MeasureScanner extends Scanner {
 
     // Validate.
     this.validateTime_(duration, newTiming.duration, 'duration');
-    this.validateTime_(delay, newTiming.delay, 'delay');
+    this.validateTime_(delay, newTiming.delay, 'delay', /* negative */ true);
     this.validateTime_(endDelay, newTiming.endDelay, 'endDelay');
     user().assert(iterations != null && iterations >= 0,
         '"iterations" is invalid: %s', newTiming.iterations);
@@ -797,11 +827,13 @@ export class MeasureScanner extends Scanner {
    * @param {number|undefined} value
    * @param {*} newValue
    * @param {string} field
+   * @param {boolean=} opt_allowNegative
    * @private
    */
-  validateTime_(value, newValue, field) {
+  validateTime_(value, newValue, field, opt_allowNegative) {
     // Ensure that positive or zero values are only allowed.
-    user().assert(value != null && value >= 0,
+    user().assert(
+        value != null && (value >= 0 || value < 0 && opt_allowNegative),
         '"%s" is invalid: %s', field, newValue);
     // Make sure that the values are in milliseconds: show a warning if
     // time is fractional.

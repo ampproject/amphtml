@@ -15,9 +15,10 @@
  */
 
 import {AmpAnimation} from '../amp-animation';
+import {Builder, WebAnimationRunner} from '../web-animations';
 import {WebAnimationPlayState} from '../web-animation-types';
-import {WebAnimationRunner} from '../web-animations';
 import {toggleExperiment} from '../../../../src/experiments';
+import * as sinon from 'sinon';
 
 
 describes.sandboxed('AmpAnimation', {}, () => {
@@ -63,6 +64,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
   }, env => {
     let win;
     let viewer;
+    let createRunnerStub;
     let runner;
     let runnerMock;
 
@@ -72,7 +74,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
       viewer.setVisibilityState_('hidden');
       runner = new WebAnimationRunner([]);
       runnerMock = sandbox.mock(runner);
-      sandbox.stub(AmpAnimation.prototype, 'createRunner_',
+      createRunnerStub = sandbox.stub(AmpAnimation.prototype, 'createRunner_',
           () => Promise.resolve(runner));
     });
 
@@ -148,7 +150,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
 
     it('should not activate w/o visibility trigger', () => {
       const anim = createAnim({}, {duration: 1001});
-      const activateStub = sandbox.stub(anim, 'activate');
+      const activateStub = sandbox.stub(anim, 'startAction_');
       viewer.setVisibilityState_('visible');
       return anim.layoutCallback().then(() => {
         expect(activateStub).to.not.be.called;
@@ -157,7 +159,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
 
     it('should activate with visibility trigger', () => {
       const anim = createAnim({trigger: 'visibility'}, {duration: 1001});
-      const activateStub = sandbox.stub(anim, 'activate');
+      const activateStub = sandbox.stub(anim, 'startAction_');
       viewer.setVisibilityState_('visible');
       return anim.layoutCallback().then(() => {
         expect(activateStub).to.be.calledOnce;
@@ -237,7 +239,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
       runnerMock.expects('start').once();
       runnerMock.expects('finish').once();
       return anim.startOrResume_().then(() => {
-        anim.finish();
+        anim.finish_();
         expect(anim.triggered_).to.be.false;
         expect(anim.runner_).to.be.null;
       });
@@ -348,6 +350,140 @@ describes.sandboxed('AmpAnimation', {}, () => {
       anim.activate();
       anim.visible_ = false;
       expect(anim.startOrResume_()).to.be.null;
+    });
+
+    describe('actions', () => {
+      let anim;
+
+      beforeEach(() => {
+        anim = createAnim({}, {duration: 1001});
+        anim.visible_ = true;
+      });
+
+      it('should trigger activate via start', () => {
+        const startStub = sandbox.stub(anim, 'startOrResume_');
+        const args = {};
+        anim.executeAction({method: 'activate', args});
+        expect(anim.triggered_).to.be.true;
+        expect(startStub).to.be.calledOnce;
+        expect(startStub).to.be.calledWith(args);
+      });
+
+      it('should trigger start', () => {
+        const startStub = sandbox.stub(anim, 'startOrResume_');
+        const args = {};
+        anim.executeAction({method: 'start', args});
+        expect(anim.triggered_).to.be.true;
+        expect(startStub).to.be.calledOnce;
+        expect(startStub).to.be.calledWith(args);
+      });
+
+      it('should create runner with args', () => {
+        const args = {};
+        anim.triggered_ = true;
+        createRunnerStub.restore();
+        const stub = sandbox.stub(Builder.prototype, 'createRunner',
+            () => runner);
+        return anim.startOrResume_(args).then(() => {
+          expect(anim.runner_).to.exist;
+          expect(stub).to.be.calledWith(sinon.match.any, args);
+        });
+      });
+
+      it('should trigger restart via cancel and start', () => {
+        const cancelStub = sandbox.stub(anim, 'cancel_');
+        const startStub = sandbox.stub(anim, 'startOrResume_');
+        const args = {};
+        anim.executeAction({method: 'restart', args});
+        expect(anim.triggered_).to.be.true;
+        expect(cancelStub).to.be.calledOnce;
+        expect(startStub).to.be.calledOnce;
+        expect(startStub).to.be.calledWith(args);
+      });
+
+      it('should trigger pause after start', () => {
+        anim.triggered_ = true;
+        return anim.startOrResume_().then(() => {
+          runnerMock.expects('pause').once();
+          anim.executeAction({method: 'pause'});
+        });
+      });
+
+      it('should ignore pause before start', () => {
+        runnerMock.expects('pause').never();
+        anim.executeAction({method: 'pause'});
+      });
+
+      it('should trigger resume after start', () => {
+        anim.triggered_ = true;
+        return anim.startOrResume_().then(() => {
+          runnerMock.expects('resume').once();
+          anim.executeAction({method: 'resume'});
+        });
+      });
+
+      it('should ignore resume before start', () => {
+        runnerMock.expects('resume').never();
+        anim.executeAction({method: 'resume'});
+      });
+
+      it('should toggle pause/resume after start', () => {
+        anim.triggered_ = true;
+        return anim.startOrResume_().then(() => {
+          runnerMock.expects('pause').once();
+          anim.executeAction({method: 'togglePause'});
+
+          runnerMock.expects('getPlayState')
+              .returns(WebAnimationPlayState.PAUSED);
+          runnerMock.expects('resume').once();
+          anim.executeAction({method: 'togglePause'});
+        });
+      });
+
+      it('should seek-to after start', () => {
+        anim.triggered_ = true;
+        return anim.startOrResume_().then(() => {
+          runnerMock.expects('seekTo').withExactArgs(100).once();
+          anim.executeAction({method: 'seekTo', args: {time: 100}});
+
+          runnerMock.expects('seekTo').withExactArgs(200).once();
+          anim.executeAction({method: 'seekTo', args: {time: '200'}});
+        });
+      });
+
+      it('should ignore seek-to before start', () => {
+        runnerMock.expects('seekTo').never();
+        anim.executeAction({method: 'seekTo', args: {time: 100}});
+      });
+
+      it('should trigger reverse after start', () => {
+        anim.triggered_ = true;
+        return anim.startOrResume_().then(() => {
+          runnerMock.expects('reverse').once();
+          anim.executeAction({method: 'reverse'});
+        });
+      });
+
+      it('should ignore reverse before start', () => {
+        runnerMock.expects('reverse').never();
+        anim.executeAction({method: 'reverse'});
+      });
+
+      it('should trigger finish after start', () => {
+        anim.triggered_ = true;
+        return anim.startOrResume_().then(() => {
+          runnerMock.expects('finish').once();
+          anim.executeAction({method: 'finish'});
+        });
+      });
+
+      it('should trigger cancel after start', () => {
+        anim.triggered_ = true;
+        return anim.startOrResume_().then(() => {
+          runnerMock.expects('cancel').once();
+          anim.executeAction({method: 'cancel'});
+        });
+      });
     });
   });
 
