@@ -26,6 +26,8 @@ import * as sinon from 'sinon';
 describe('invokeWebWorker', () => {
   let sandbox;
   let fakeWin;
+
+  let ampWorker;
   let postMessageStub;
   let fakeWorker;
   let workerReadyPromise;
@@ -54,7 +56,7 @@ describe('invokeWebWorker', () => {
       },
     }));
 
-    const ampWorker = ampWorkerForTesting(fakeWin);
+    ampWorker = ampWorkerForTesting(fakeWin);
     workerReadyPromise = ampWorker.fetchPromiseForTesting();
   });
 
@@ -195,8 +197,6 @@ describe('invokeWebWorker', () => {
   });
 
   it('should clean up storage after message completion', () => {
-    const ampWorker = ampWorkerForTesting(fakeWin);
-
     invokeWebWorker(fakeWin, 'foo');
 
     return workerReadyPromise.then(() => {
@@ -209,6 +209,41 @@ describe('invokeWebWorker', () => {
       }});
 
       expect(ampWorker.hasPendingMessages()).to.be.false;
+    });
+  });
+
+  it('should send unique scope IDs per `opt_localWin` value', () => {
+    const scopeOne = {};
+    const scopeTwo = {};
+
+    // Sending.
+    invokeWebWorker(fakeWin, 'a'); // Default scope == 0.
+    invokeWebWorker(fakeWin, 'b', undefined, /* opt_localWin */ scopeOne);
+    invokeWebWorker(fakeWin, 'c', undefined, /* opt_localWin */ scopeTwo);
+    invokeWebWorker(fakeWin, 'd', undefined, /* opt_localWin */ scopeOne);
+    invokeWebWorker(fakeWin, 'e', undefined, /* opt_localWin */ fakeWin);
+
+    return workerReadyPromise.then(() => {
+      expect(postMessageStub).to.have.been.calledWithMatch({
+        method: 'a',
+        scope: 0,
+      });
+      expect(postMessageStub).to.have.been.calledWithMatch({
+        method: 'b',
+        scope: 1,
+      });
+      expect(postMessageStub).to.have.been.calledWithMatch({
+        method: 'c',
+        scope: 2,
+      });
+      expect(postMessageStub).to.have.been.calledWithMatch({
+        method: 'd',
+        scope: 1,
+      });
+      expect(postMessageStub).to.have.been.calledWithMatch({
+        method: 'e',
+        scope: 0,
+      });
     });
   });
 });

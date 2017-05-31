@@ -84,7 +84,7 @@ export class StandardActions {
   handleAmpTarget(invocation) {
     switch (invocation.method) {
       case 'setState':
-        bindForDoc(this.ampdoc).then(bind => {
+        bindForDoc(invocation.target).then(bind => {
           const args = invocation.args;
           const objectString = args[OBJECT_STRING_ARGS_KEY];
           if (objectString) {
