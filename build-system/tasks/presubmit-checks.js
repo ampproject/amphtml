@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 var gulp = require('gulp-help')(require('gulp'));
 var path = require('path');
@@ -756,6 +757,7 @@ var forbiddenTermsSrcInclusive = {
       'tools/errortracker/errortracker.go',
       'validator/nodejs/index.js',
       'validator/webui/serve-standalone.go',
+      'build-system/tasks/check-links.js',
       'build-system/tasks/extension-generator/index.js',
     ],
   },
