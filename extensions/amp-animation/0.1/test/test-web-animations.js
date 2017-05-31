@@ -290,6 +290,37 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     });
   });
 
+  it('should calculate vars based on parent and same context', () => {
+    const requests = scan({
+      '--parent1': '11px',
+      '--parent2': '12px',
+      animations: [{
+        target: target1,
+        '--child1': '21px',
+        '--parent2': '22px',  // Override parent.
+        '--child2': 'var(--child1)',
+        '--child3': 'var(--parent1)',
+        '--child4': 'var(--parent2)',
+        '--child5': 'var(--child6)',  // Reverse order dependency.
+        '--child6': '23px',
+        keyframes: {
+          transform: 'translate()'
+        },
+      }],
+    });
+    expect(requests).to.have.length(1);
+    expect(requests[0].vars).to.jsonEqual({
+      '--parent1': '11px',
+      '--parent2': '22px',
+      '--child1': '21px',
+      '--child2': '21px',
+      '--child3': '11px',
+      '--child4': '22px',
+      '--child5': '23px',
+      '--child6': '23px',
+    });
+  });
+
   it('should accept keyframe animation', () => {
     const requests = scan({
       target: target1,
@@ -926,6 +957,24 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
 
         expect(stub).to.not.be.called;
         expect(warnStub).to.have.callCount(0);
+      });
+    });
+
+    it('should disallow recursive vars', () => {
+      css.withVars({
+        '--var1': '11',
+        '--var2': 'var(--var1)',
+        '--rec1': 'var(--rec2)',
+        '--rec2': 'var(--rec1)',
+        '--rec3': 'var(--rec4)',
+        '--rec4': 'var(--rec1)',
+      }, () => {
+        expect(css.getVar('--var1').num_).to.equal(11);
+        expect(css.getVar('--var2').num_).to.equal(11);
+        expect(() => css.getVar('--rec1')).to.throw(/Recursive/);
+        expect(() => css.getVar('--rec2')).to.throw(/Recursive/);
+        expect(() => css.getVar('--rec3')).to.throw(/Recursive/);
+        expect(() => css.getVar('--rec4')).to.throw(/Recursive/);
       });
     });
 

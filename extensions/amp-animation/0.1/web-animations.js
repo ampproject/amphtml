@@ -708,12 +708,22 @@ export class MeasureScanner extends Scanner {
    * @private
    */
   mergeVars_(newVars, prevVars) {
+    // First combine all vars (previous and new) in one map. The new vars take
+    // precedence. This is done so that the new vars can be resolved from both
+    // the previous and new vars.
     const result = map(prevVars);
     for (const k in newVars) {
       if (startsWith(k, '--')) {
-        result[k] = this.css_.resolveCss(newVars[k]);
+        result[k] = newVars[k];
       }
     }
+    this.css_.withVars(result, () => {
+      for (const k in newVars) {
+        if (startsWith(k, '--')) {
+          result[k] = this.css_.resolveCss(newVars[k]);
+        }
+      }
+    });
     return result;
   }
 
@@ -834,6 +844,9 @@ class CssContextImpl {
 
     /** @private {?Object<string, *>} */
     this.vars_ = null;
+
+    /** @private {!Array<string>} */
+    this.varPath_ = [];
 
     /** @private {?string} */
     this.dim_ = null;
@@ -1038,6 +1051,10 @@ class CssContextImpl {
 
   /** @override */
   getVar(varName) {
+    user().assert(
+        this.varPath_.indexOf(varName) == -1,
+        `Recursive variable: "${varName}"`);
+    this.varPath_.push(varName);
     const rawValue = (this.vars_ && this.vars_[varName] != undefined) ?
         this.vars_[varName] :
         this.currentTarget_ ?
@@ -1046,7 +1063,9 @@ class CssContextImpl {
     if (rawValue == null || rawValue === '') {
       user().warn(TAG, `Variable not found: "${varName}"`);
     }
-    return this.resolveAsNode_(rawValue);
+    const result = this.resolveAsNode_(rawValue);
+    this.varPath_.pop();
+    return result;
   }
 
   /** @override */
