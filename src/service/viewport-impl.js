@@ -1041,12 +1041,29 @@ export class ViewportBindingNatural_ {
   disableScroll() {
     this.win.document.documentElement.classList.add(
         'i-amphtml-scroll-disabled');
+    // Unfortunately overflow hidden is not working in ios natural viewport.
+    if (platformFor(this.win).isIos()) {
+      this.win.document.addEventListener('touchmove', this.handleTouchMove_);
+    }
   }
 
   /** @override */
   resetScroll() {
     this.win.document.documentElement.classList.remove(
         'i-amphtml-scroll-disabled');
+    // Unfortunately overflow hidden is not working in ios natural viewport.
+    if (platformFor(this.win).isIos()) {
+      this.win.document.removeEventListener('touchmove', this.handleTouchMove_);
+    }
+  }
+
+  /**
+   * Handle touch move for window.document in ios natural to disable scrolling.
+   * @param {!Event} e
+   * @private
+   */
+  handleTouchMove_(e) {
+    e.preventDefault();
   }
 
   /** @override */
