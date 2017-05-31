@@ -219,9 +219,6 @@ const command = {
   buildRuntime: function() {
     timedExecOrDie(`${gulp} build`);
   },
-  buildCSS: function() {
-    timedExecOrDie(`${gulp} build --css-only`);
-  },
   serveRuntime: function() {
     timedExecOrDie(`${gulp} dist --fortesting`);
   },
@@ -265,7 +262,7 @@ function runAllCommands() {
   if (process.env.BUILD_SHARD == "pre_build_checks_and_unit_tests") {
     command.testBuildSystem();
     command.cleanBuild();
-    command.buildCSS();
+    command.buildRuntime();
     command.runLintChecks();
     command.runDepAndTypeChecks();
     command.runUnitTests();
@@ -358,10 +355,15 @@ function main(argv) {
 
     if (buildTargets.has('RUNTIME')) {
       command.cleanBuild();
-      command.buildCSS();
+      command.buildRuntime();
       command.runLintChecks();
       command.runDepAndTypeChecks();
       command.runUnitTests();
+      // Ideally, we'd run presubmit tests after `gulp dist`, as some checks run
+      // through the dist/ folder. However, to speed up the Travis queue, we no
+      // longer do a dist build for PRs, so this call won't cover dist/.
+      // TODO(rsimha-amp): Move this once integration tests are enabled.
+      command.runPresubmitTests();
     }
     if (buildTargets.has('VALIDATOR_WEBUI')) {
       command.buildValidatorWebUI();
@@ -374,10 +376,6 @@ function main(argv) {
   if (process.env.BUILD_SHARD == "integration_tests") {
     // The integration_tests shard can be skipped for PRs.
     console.log(fileLogPrefix, 'Skipping integration_tests for PRs');
-    // Ideally, we'd run presubmit tests after `gulp dist`, as some checks run
-    // through the dist/ folder. However, to speed up the Travis queue, we no
-    // longer do a dist build for PRs, so this call won't cover dist/.
-    command.runPresubmitTests();
   }
 
 
