@@ -21,7 +21,7 @@ import {getMode} from '../../../src/mode';
 import {expandTemplate} from '../../../src/string';
 import {isArray, isObject} from '../../../src/types';
 import {dict, hasOwn, map} from '../../../src/utils/object';
-import {sendRequest, sendRequestUsingIframe, Transport} from './transport';
+import {sendRequestUsingIframe, Transport} from './transport';
 import {urlReplacementsForDoc} from '../../../src/services';
 import {userNotificationManagerFor} from '../../../src/services';
 import {cryptoFor} from '../../../src/crypto';
@@ -119,6 +119,9 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     /** @private {?Promise} */
     this.iniPromise_ = null;
+
+    /** @private {!Transport} */
+    this.transport_ = new Transport();
   }
 
   /** @override */
@@ -165,7 +168,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /* @ override */
   unlayoutCallback() {
-    Transport.doneWithCrossDomainIframe(this.getAmpDoc().win.document,
+    this.transport_.doneWithCrossDomainIframe(this.getAmpDoc().win.document,
       this.config_['transport']);
     return true;
   }
@@ -232,7 +235,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         this.instrumentation_.createAnalyticsGroup(this.element);
 
     if (this.config_['transport'] && this.config_['transport']['iframe']) {
-      Transport.processCrossDomainIframe(this.getAmpDoc().win.document,
+      this.transport_.processCrossDomainIframe(this.getAmpDoc().win.document,
         this.config_['transport'],
         (message) => { this.processCrossDomainIframeResponse_(message); });
     }
@@ -771,7 +774,8 @@ export class AmpAnalytics extends AMP.BaseElement {
           'iframePing is only available on page view requests.');
       sendRequestUsingIframe(this.win, request);
     } else {
-      sendRequest(this.win, request, this.config_['transport'] || {});
+      this.transport_.sendRequest(this.win, request,
+        this.config_['transport'] || {});
     }
   }
 

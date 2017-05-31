@@ -15,14 +15,19 @@
        * passing your function which will receive the analytics events.
        */
       window.onNewAmpAnalyticsInstance = ampAnalytics => {
-        ampAnalytics.registerAmpAnalyticsEventListener(arrayOfEventStrings => {
-          arrayOfEventStrings.forEach(evt => {
-            // Now, do something meaningful with the AMP Analytics event
-            console.log("Received an event: " + evt +
-            ", and my extra data is: " + ampAnalytics.getExtraData());
+        ampAnalytics.registerAmpAnalyticsEventListener(
+          arrayOfEventStrings => {
+            arrayOfEventStrings.forEach(evt => {
+              // Now, do something meaningful with the AMP Analytics event
+              console.log("Received an event: " + evt +
+              ", and my extra data is: " + ampAnalytics.getExtraData());
+            });
+            ampAnalytics.sendMessageToCreative('received');
+          },
+          // The following function is optional:
+          extraData => {
+            console.log("Received extra setup data: " + extraData);
           });
-          ampAnalytics.sendMessageToCreative('received');
-        });
       };
 
       // Load the script specified in the iframe’s name attribute:

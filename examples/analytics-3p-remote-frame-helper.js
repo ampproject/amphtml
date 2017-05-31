@@ -28,16 +28,25 @@ class AmpAnalyticsRemoteFrameManager {
      * @type {Function<!String>}
      * @private
      */
-    this.listener_ = null;
+    this.listener_ = () => {};
+
+    /**
+     * @type {Function<!String>}
+     * @private
+     */
+    this.extraDataListener_ = () => {};
   }
 
   /**
    * Registers a callback function to be called when AMP Analytics events occur
    * @param {!Function} listener A function that takes an array of event
    * strings, and does something with them.
+   * @param {?Function} extraDataListener A function to receive any extra
+   * setup data sent by the creative
    */
-  registerAmpAnalyticsEventListener(listener) {
+  registerAmpAnalyticsEventListener(listener, extraDataListener) {
     this.listener_ = listener;
+    this.extraDataListener_ = extraDataListener;
   }
 
   /**
@@ -53,7 +62,9 @@ class AmpAnalyticsRemoteFrameManager {
         this.setSentinel_(deserialized.sentinel);
         if (deserialized.ampAnalyticsExtraData) {
           this.setExtraData(deserialized.ampAnalyticsExtraData);
-          // TODO: Send event here?
+          window.requestIdleCallback(() => {
+            this.extraDataListener_(deserialized.ampAnalyticsExtraData);
+          });
         } else if (deserialized.ampAnalyticsEvents) {
           window.requestIdleCallback(() => {
             this.listener_(deserialized.ampAnalyticsEvents);
