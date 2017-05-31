@@ -257,7 +257,7 @@ export function googleAdUrl(
   const blockLevelParameters = googleBlockParameters(a4a, opt_experimentIds);
   return googlePageParameters(a4a.win, a4a.getAmpDoc(), startTime)
     .then(pageLevelParameters => {
-      Object.assign(parameters, blockLevelParameters);
+      Object.assign(parameters, blockLevelParameters, pageLevelParameters);
       Object.assign(parameters, pageLevelParameters);
       return truncAndTimeUrl(baseUrl, parameters, startTime);
     });
