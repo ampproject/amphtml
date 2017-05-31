@@ -336,14 +336,14 @@ can be reduced to an array of components. For instance:
 
 ### Animation composition
 
-Animations can reference other animations thus combining several `amp-animation` declarations into a single final animation.
+Animations can reference other animations thus combining several `amp-animation` declarations into a single final animation. Referencing an animation from another animation is mostly the same as nesting. The reason why one would want to split animations into different elements would be to reuse the same animation from several places or to simply make each animation declaration smaller and more manageable.
 
 For instance:
 ```html
 <amp-animation id="anim1" layout="nodisplay">
 <script type="application/json">
 {
-  "animamtion": "anim2",
+  "animation": "anim2",
   "duration": 1000,
   "--scale": 2
 }
@@ -370,7 +370,7 @@ animation is executed for each matched target. For instance:
 <script type="application/json">
 {
   "selector": ".target-class",
-  "animamtion": "anim2",
+  "animation": "anim2",
   "duration": 1000,
   "--scale": 2
 }

@@ -464,7 +464,13 @@ export class MeasureScanner extends Scanner {
     /** @private {!Array<!InternalWebAnimationRequestDef>} */
     this.requests_ = [];
 
-    /** @const @private {!Array<!Promise>} */
+    /**
+     * Dependencies required to resolve all animation requests. In case of
+     * composition, all requests can only be resolved asynchronously. This
+     * dependencies are used to block `resolveRequests` to collect all
+     * dependenices.
+     * @const @private {!Array<!Promise>}
+     */
     this.deps_ = [];
   }
 
