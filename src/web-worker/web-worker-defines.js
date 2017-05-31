@@ -18,6 +18,7 @@
  * @typedef {{
  *   method: string,
  *   args: !Array,
+ *   scope: number,
  *   id: number,
  * }}
  */
