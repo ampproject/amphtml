@@ -20,7 +20,9 @@ import {
   installExtensionsService,
 } from '../../src/service/extensions-impl';
 import {extensionsFor} from '../../src/services';
-import {AmpAdNetworkDoubleclickImpl} from '../../extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl';
+import {
+  AmpAdNetworkDoubleclickImpl,
+} from '../../extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl';  // eslint-disable-line max-len
 import {base64UrlDecodeToBytes} from '../../src/utils/base64';
 import {utf8Encode} from '../../src/utils/bytes';
 import {createElementWithAttributes} from '../../src/dom';
