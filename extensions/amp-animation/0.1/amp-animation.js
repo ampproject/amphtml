@@ -341,6 +341,8 @@ export class AmpAnimation extends AMP.BaseElement {
     // phase.
     const configJson = /** @type {!./web-animation-types.WebAnimationDef} */ (
         this.configJson_);
+    const args = /** @type {?./web-animation-types.WebAnimationDef} */ (
+        opt_args || null);
 
     // Ensure polyfill is installed.
     if (!this.win.Element.prototype.animate) {
@@ -359,7 +361,7 @@ export class AmpAnimation extends AMP.BaseElement {
           baseUrl,
           this.getVsync(),
           this.element.getResources());
-      return builder.createRunner(configJson, opt_args);
+      return builder.createRunner(configJson, args);
     });
   }
 

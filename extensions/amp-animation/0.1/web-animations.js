@@ -380,7 +380,7 @@ export class Builder {
    * Creates the animation runner for the provided spec. Waits for all
    * necessary resources to be loaded before the runner is resolved.
    * @param {!WebAnimationDef|!Array<!WebAnimationDef>} spec
-   * @param {?JSONType=} opt_args
+   * @param {?WebAnimationDef=} opt_args
    * @return {!Promise<!WebAnimationRunner>}
    */
   createRunner(spec, opt_args) {
@@ -397,7 +397,7 @@ export class Builder {
   /**
    * @param {!Array<string>} path
    * @param {!WebAnimationDef|!Array<!WebAnimationDef>} spec
-   * @param {?JSONType|undefined} args
+   * @param {?WebAnimationDef|undefined} args
    * @param {?Element} target
    * @param {?Object<string, *>} vars
    * @param {?WebAnimationTimingDef} timing
@@ -495,13 +495,16 @@ export class MeasureScanner extends Scanner {
   }
 
   /**
+   * This methods scans all animation declarations specified in `spec`
+   * recursively to produce the animation requests. `opt_args` is an additional
+   * spec that can be used to default timing and variables.
    * @param {!WebAnimationDef|!Array<!WebAnimationDef>} spec
-   * @param {?JSONType=} opt_args
+   * @param {?WebAnimationDef=} opt_args
    * @return {!Promise<!Array<!InternalWebAnimationRequestDef>>}
    */
   resolveRequests(spec, opt_args) {
     if (opt_args) {
-      this.with_(/** @type {!WebAnimationDef} */ (opt_args), () => {
+      this.with_(opt_args, () => {
         this.scan(spec);
       });
     } else {
