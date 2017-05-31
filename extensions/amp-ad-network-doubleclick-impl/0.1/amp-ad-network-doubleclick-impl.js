@@ -341,9 +341,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     new RefreshManager(this.win, this.element, refresher => {
       this.isRefreshing = true;
-      this.unlayoutCallback();
-      this.onLayoutMeasure();
-      this.adPromise.then(() => {
+      this.tearDownSlot();
+      this.initiateAdRequest();
+      this.getAdPromise().then(() => {
         if (!this.isRefreshing) {
           // If this refresh cycle was canceled, such as in a no-content
           // response case, keep showing the old creative.
@@ -403,8 +403,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  unlayoutCallback() {
-    super.unlayoutCallback();
+  tearDownSlot() {
+    super.tearDownSlot();
     this.element.setAttribute('data-amp-slot-index',
         this.win.ampAdSlotIdCounter++);
     this.lifecycleReporter_ = this.initLifecycleReporter();
