@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 'use strict';
 
 /**
@@ -215,6 +214,40 @@ app.use('/form/search-json/get', (req, res) => {
   res.json({
     term: req.query.term,
     results: [{title: 'Result 1'}, {title: 'Result 2'}, {title: 'Result 3'}],
+  });
+});
+
+const autosuggestLanguages = ['ActionScript', 'AppleScript', 'Asp', 'BASIC',
+  'C', 'C++', 'Clojure', 'COBOL', 'ColdFusion', 'Erlang', 'Fortran', 'Go',
+  'Groovy', 'Haskell', 'Java', 'JavaScript', 'Lisp', 'Perl', 'PHP', 'Python',
+  'Ruby', 'Scala', 'Scheme'];
+
+app.use('/form/autosuggest/query', (req, res) => {
+  assertCors(req, res, ['GET']);
+  const MAX_RESULTS = 4;
+  const query = req.query.q;
+  if (!query) {
+    res.json({items: [{
+      results: autosuggestLanguages.slice(0, MAX_RESULTS),
+    }]});
+  } else {
+    const lowerCaseQuery = query.toLowerCase();
+    const filtered = autosuggestLanguages.filter(
+        l => l.toLowerCase().includes(lowerCaseQuery));
+    res.json({items: [{
+      results: filtered.slice(0, MAX_RESULTS)},
+    ]});
+  }
+});
+
+app.use('/form/autosuggest/search', (req, res) => {
+  assertCors(req, res, ['POST']);
+  const form = new formidable.IncomingForm();
+  form.parse(req, function(err, fields) {
+    res.json({
+      query: fields.query,
+      results: [{title: 'Result 1'}, {title: 'Result 2'}, {title: 'Result 3'}],
+    });
   });
 });
 
@@ -466,7 +499,7 @@ function getLiveBlogItemWithBindAttributes() {
       <div id="live-blog-item-${now}" data-sort-time="${now}">
         <div class="article-body">
           ${body}
-          <p> As you can see, bacon is far superior to 
+          <p> As you can see, bacon is far superior to
           <b><span [text]='favoriteFood'>everything!</span></b>!</p>
         </div>
       </div>
@@ -539,7 +572,7 @@ app.get('/iframe/*', (req, res) => {
   res.send(`<!doctype html>
           <html style="width:100%; height:100%;">
             <body style="width:98%; height:98%;">
-              <iframe src="${req.url.substr(7)}" 
+              <iframe src="${req.url.substr(7)}"
                   style="width:100%; height:100%;">
               </iframe>
             </body>
