@@ -33,7 +33,4 @@ export class Filter {
    */
   /* eslint-disable no-unused-vars */
   filter(event) {}
-
-  /** Initializes the filter when the parent element is built, if necessary. */
-  buildCallback() {}
 }

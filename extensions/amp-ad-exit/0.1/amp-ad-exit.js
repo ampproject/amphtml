@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ClickDelayFilter} from './filters/click-delay';
+import {makeClickDelaySpec} from './filters/click-delay';
 import {assertConfig, TransportMode} from './config';
 import {createFilter} from './filters/factory';
 import {isExperimentOn} from '../../../src/experiments';
@@ -48,7 +48,7 @@ export class AmpAdExit extends AMP.BaseElement {
      * Filters to apply to every target.
      * @private @const {!Array<!./filters/filter.Filter>}
      */
-    this.defaultFilters_ = [new ClickDelayFilter('minDelay', 1000)];
+    this.defaultFilters_ = [];
 
     /** @private @struct */
     this.transport_ = {
@@ -116,10 +116,11 @@ export class AmpAdExit extends AMP.BaseElement {
   }
 
   /**
-   * Attemts to issue a request to `url` to report the click. The request method
-   * depends on the exit config's transport property. navigator.sendBeacon will
-   * be tried if transport.beacon is `true` or `undefined`. Otherwise, or if
-   * sendBeacon returns false, an image request will be made.
+   * Attempts to issue a request to `url` to report the click. The request
+   * method depends on the exit config's transport property.
+   * navigator.sendBeacon will be tried if transport.beacon is `true` or
+   * `undefined`. Otherwise, or if sendBeacon returns false, an image request
+   * will be made.
    * @param {string} url
    */
   pingTrackingUrl_(url) {
@@ -155,25 +156,22 @@ export class AmpAdExit extends AMP.BaseElement {
   buildCallback() {
     this.element.setAttribute('aria-hidden', 'true');
 
-    this.defaultFilters_.forEach(f => f.buildCallback());
+    this.defaultFilters_.push(
+        createFilter('minDelay', makeClickDelaySpec(1000)));
 
     const children = this.element.children;
-    if (children.length != 1) {
-      throw new Error('The tag should contain exactly one <script> child.');
-    }
+    user().assert(children.length == 1,
+                  'The tag should contain exactly one <script> child.');
     const child = children[0];
-    if (!isJsonScriptTag(child)) {
-      throw new Error(
-          'The amp-ad-exit config should ' +
-          'be put in a <script> tag with type="application/json"');
-    }
+    user().assert(
+        isJsonScriptTag(child),
+        'The amp-ad-exit config should ' +
+        'be inside a <script> tag with type="application/json"');
     try {
       const config = assertConfig(JSON.parse(child.textContent));
       const userFilters = {};
       for (const name in config.filters) {
-        const filter = createFilter(name, config.filters[name]);
-        filter.buildCallback();
-        userFilters[name] = filter;
+        userFilters[name] = createFilter(name, config.filters[name]);
       }
       for (const name in config.targets) {
         const target = config.targets[name];

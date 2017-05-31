@@ -15,28 +15,26 @@
  */
 
 import {FilterType, Filter} from './filter';
+import {user} from '../../../../src/log';
 
 export class ClickDelayFilter extends Filter {
-  constructor(name, delay) {
+  /**
+   * @param {string} name The user-defined name of the filter.
+   * @param {!../config.ClickDelayConfig} spec
+   */
+  constructor(name, spec) {
     super(name);
+    user().assert(isValidClickDelaySpec(spec), 'Invalid ClickDelay spec');
 
-    this.delay_ = delay;
+    this.delay_ = spec.delay;
 
     /** @private {number} */
-    this.inViewportTime_ = Infinity;
+    this.inViewportTime_ = Date.now();
   }
 
   /** @override */
   filter() {
     return (Date.now() - this.inViewportTime_) >= this.delay_;
-  }
-
-  /**
-   * Resets the clock to measure clicks from the current time.
-   * @override
-   */
-  buildCallback() {
-    this.inViewportTime_ = Date.now();
   }
 }
 
@@ -44,7 +42,11 @@ export class ClickDelayFilter extends Filter {
  * @param {!../config.FilterConfig} spec
  * @return {boolean} Whether the config defines a ClickDelay filter.
  */
-export function isValidClickDelaySpec(spec) {
+function isValidClickDelaySpec(spec) {
   return spec.type == FilterType.CLICK_DELAY && typeof spec.delay == 'number' &&
       spec.delay > 0;
+}
+
+export function makeClickDelaySpec(delay) {
+  return {type: FilterType.CLICK_DELAY, delay};
 }

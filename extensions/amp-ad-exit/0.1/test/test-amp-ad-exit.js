@@ -23,7 +23,7 @@ const EXIT_CONFIG = {
     simple: {'finalUrl': 'http://localhost:8000/simple'},
     twoSecondDelay: {
       'finalUrl': 'http://localhost:8000/simple',
-      'filters': ['two_second'],
+      'filters': ['twoSecond'],
     },
     tracking: {
       'finalUrl': 'http://localhost:8000/tracking-test',
@@ -56,7 +56,7 @@ const EXIT_CONFIG = {
     },
   },
   filters: {
-    'two_second': {
+    'twoSecond': {
       type: 'clickDelay',
       delay: 2000,
     },

@@ -20,7 +20,7 @@ import {FilterType} from './filter';
 export function createFilter(name, spec) {
   switch (spec.type) {
     case FilterType.CLICK_DELAY:
-      return new ClickDelayFilter(name, spec.delay);
+      return new ClickDelayFilter(name, spec);
     case FilterType.CLICK_LOCATION:
       // TODO(clawr): Implement this.
     default:

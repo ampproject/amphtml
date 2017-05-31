@@ -16,7 +16,6 @@
 
 import {user} from '../../../src/log';
 import {FilterType} from './filters/filter';
-import {isValidClickDelaySpec} from './filters/click-delay';
 
 /**
  * @typedef {{
@@ -93,19 +92,9 @@ function assertFilters(filters) {
   for (const name in filters) {
     user().assert(typeof filters[name] == 'object',
                   `Filter specification '%s' is malformed`, name);
-    const type = filters[name].type;
-    switch (type) {
-      case FilterType.CLICK_DELAY:
-        user().assert(
-            isValidClickDelaySpec(filters[name]),
-            `invalid ClickDelayConfig: '%s'`, name);
-        break;
-      case FilterType.CLICK_LOCATION:
-        user().assert(false, 'Click location is not yet implemented');
-        break;
-      default:
-        user().assert(false, `'${type}' is not a known filter type`);
-    }
+    user().assert(
+        filters[name].type == FilterType.CLICK_DELAY,
+        'Only ClickDelayFilter is currently supported.');
   }
 }
 
