@@ -316,7 +316,8 @@ export class ViewportBindingInabox {
   }
 
   getFixedContainer_() {
-    return getFixedContainer(this.win.document.body);
+    return getFixedContainer(
+        /** @type {!HTMLBodyElement} */ (dev().assert(this.win.document.body)));
   }
 
   /** @override */ disconnect() {/* no-op */}

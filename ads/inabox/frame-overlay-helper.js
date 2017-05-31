@@ -32,7 +32,7 @@ const CENTER_TRANSITION_END_WAIT_TIME_MS = 200;
  * @param {!Function} onFinish
  * @private
  */
-let expandFrameImpl = function(win, iframe, onFinish) {
+const expandFrameImpl = function(win, iframe, onFinish) {
   fakeVsync(win, {
     measure(state) {
       state.viewportSize = {
@@ -65,14 +65,14 @@ let expandFrameImpl = function(win, iframe, onFinish) {
  * @param {!Function} onFinish
  * @private
  */
-let collapseFrameImpl = function(win, iframe, onFinish) {
+const collapseFrameImpl = function(win, iframe, onFinish) {
   fakeVsync(win, {
     mutate() {
       collapseFrameUnderVsyncMutate(iframe);
       onFinish();
     },
   });
-}
+};
 
 
 /**

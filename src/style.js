@@ -237,7 +237,7 @@ export function computedStyle(win, el) {
 export function resetStyles(element, properties) {
   const styleObj = {};
   properties.forEach(prop => {
-    styleObj[prop] = null
+    styleObj[prop] = null;
   });
   setStyles(element, styleObj);
 }

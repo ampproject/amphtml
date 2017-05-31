@@ -163,6 +163,8 @@ describes.realWin('inabox-host:position-observer', {}, env => {
 
   describe('full-overlay-frame', () => {
 
+    let iframePostMessageSpy;
+
     beforeEach(() => {
       iframe1.contentWindow.postMessage = iframePostMessageSpy = sandbox.stub();
     });
@@ -180,13 +182,12 @@ describes.realWin('inabox-host:position-observer', {}, env => {
         origin: 'www.example.com',
         data: 'amp-' + JSON.stringify({
           sentinel: '0-123',
-          type: 'full-overlay-frame'
+          type: 'full-overlay-frame',
         }),
       });
 
       const message = deserializeMessage(
           iframePostMessageSpy.getCall(0).args[0]);
-      const targetOrigin = iframePostMessageSpy.getCall(0).args[1];
 
       expect(expandFrame).calledWith(win, iframe1, sinon.match.any);
       expect(message.type).to.equal('full-overlay-frame-response');
@@ -205,13 +206,12 @@ describes.realWin('inabox-host:position-observer', {}, env => {
         origin: 'www.example.com',
         data: 'amp-' + JSON.stringify({
           sentinel: '0-123',
-          type: 'reset-full-overlay-frame'
+          type: 'reset-full-overlay-frame',
         }),
       });
 
       const message = deserializeMessage(
           iframePostMessageSpy.getCall(0).args[0]);
-      const targetOrigin = iframePostMessageSpy.getCall(0).args[1];
 
       expect(collapseFrame).calledWith(win, iframe1, sinon.match.any);
       expect(message.type).to.equal('reset-full-overlay-frame-response');

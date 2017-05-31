@@ -62,7 +62,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     sandbox.stub(resourcesForDoc(win.document), 'get').returns([element]);
   });
 
-  afterEach(function () {
+  afterEach(() => {
     sandbox.reset();
   });
 
@@ -192,8 +192,8 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       expect(el.style['right']).to.equal('auto');
       expect(el.style['width']).to.equal(`${w}px`);
       expect(el.style['height']).to.equal(`${h}px`);
-      expect(el.style['margin-left']).to.equal(`-${w/2}px`);
-      expect(el.style['margin-top']).to.equal(`-${h/2}px`);
+      expect(el.style['margin-left']).to.equal(`-${w / 2}px`);
+      expect(el.style['margin-top']).to.equal(`-${h / 2}px`);
 
       done();
     });
