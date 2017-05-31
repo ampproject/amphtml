@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
-import {createIframePromise} from '../../../../testing/iframe';
+import {AmpAd} from '../../extensions/amp-ad/0.1/amp-ad';
+import {createIframePromise} from '../../testing/iframe';
 import {
   installExtensionsService,
-} from '../../../../src/service/extensions-impl';
-import {extensionsFor} from '../../../../src/services';
-import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
-import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
-import {utf8Encode} from '../../../../src/utils/bytes';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {toggleExperiment} from '../../../../src/experiments';
-import {installDocService} from '../../../../src/service/ampdoc-impl';
+} from '../../src/service/extensions-impl';
+import {extensionsFor} from '../../src/services';
+import {AmpAdNetworkDoubleclickImpl} from '../../extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl';
+import {base64UrlDecodeToBytes} from '../../src/utils/base64';
+import {utf8Encode} from '../../src/utils/bytes';
+import {createElementWithAttributes} from '../../src/dom';
+import {toggleExperiment} from '../../src/experiments';
+import {installDocService} from '../../src/service/ampdoc-impl';
 import * as sinon from 'sinon';
 
 function setupForAdTesting(fixture) {
