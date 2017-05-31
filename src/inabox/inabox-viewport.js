@@ -237,7 +237,7 @@ export class ViewportBindingInabox {
    * @private
    */
   tryToEnterOverlayMode_() {
-    // TODO: remeasure
+    // TODO(alanorozco): Update viewport measurement from host message.
     return this.prepareFixedContainer_()
         .then(() => this.requestFullOverlayFrame_());
   }
@@ -251,6 +251,11 @@ export class ViewportBindingInabox {
         .then(() => this.resetFixedContainer_());
   }
 
+  /**
+   * Prepares the "fixed" container before expanding frame.
+   * @return {!Promise}
+   * @private
+   */
   prepareFixedContainer_() {
     const fixedContainer = this.getFixedContainer_();
 
@@ -262,6 +267,11 @@ export class ViewportBindingInabox {
     return prepareFixedContainer(this.win, dev().assertElement(fixedContainer));
   }
 
+  /**
+   * Resets the "fixed" container to its original position after collapse.
+   * @return {!Promise}
+   * @private
+   */
   resetFixedContainer_() {
     const fixedContainer = this.getFixedContainer_();
 
