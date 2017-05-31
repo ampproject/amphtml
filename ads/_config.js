@@ -201,6 +201,8 @@ export const adConfig = {
     prefetch: 'https://s.ato.mx/p.js',
   },
 
+  bidtellect: {},
+
   brainy: {},
 
   bringhub: {
