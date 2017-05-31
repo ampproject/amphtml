@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {endsWith} from '../../../src/string';
+
 /**
  * @extends {CSSRule}
  * @see http://www.w3.org/TR/DOM-Level-2-Style/css.html#CSS-CSSKeyframesRule
@@ -71,9 +73,8 @@ function scanStyle(win, styleSheet, name) {
     return null;
   }
   // Exlcude AMP's own styles.
-  if (styleNode.hasAttribute('amp-boilerplate') ||
-      styleNode.hasAttribute('amp-runtime') ||
-      styleNode.hasAttribute('amp-extension')) {
+  if (!styleNode.hasAttribute('amp-custom') &&
+      !styleNode.hasAttribute('amp-keyframes')) {
     return null;
   }
 
@@ -152,7 +153,7 @@ function buildKeyframes(keyframesRule) {
     for (let j = 0; j < style.length; j++) {
       const styleName = style[j];
       let propName = styleName;
-      if (styleName == 'animation-timing-function') {
+      if (endsWith(styleName, 'animation-timing-function')) {
         propName = 'easing';
       }
       keyframe[propName] = style[styleName];

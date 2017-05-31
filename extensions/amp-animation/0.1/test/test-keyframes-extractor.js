@@ -73,13 +73,31 @@ describes.realWin('extractKeyframes', {amp: 1}, env => {
       });
     });
 
-    it('should find simplest keyframes', () => {
+    it('should find simplest keyframes in amp-custom', () => {
       const kf1 = keyframesCss('anim1',
           'from{opacity: 0; visibility: hidden}' +
           ' to{opacity: 1; visibility: visible}');
       const kf2 = keyframesCss('anim2',
           'from{opacity: 0} to{opacity: 0.5}');
-      return createStyle({}, kf1 + kf2).then(() => {
+      return createStyle({'amp-custom': ''}, kf1 + kf2).then(() => {
+        expect(extractKeyframes(doc, 'anim1')).to.jsonEqual([
+          {offset: 0, opacity: '0', visibility: 'hidden'},
+          {offset: 1, opacity: '1', visibility: 'visible'},
+        ]);
+        expect(extractKeyframes(doc, 'anim2')).to.jsonEqual([
+          {offset: 0, opacity: '0'},
+          {offset: 1, opacity: '0.5'},
+        ]);
+      });
+    });
+
+    it('should find simplest keyframes in amp-keyframes', () => {
+      const kf1 = keyframesCss('anim1',
+          'from{opacity: 0; visibility: hidden}' +
+          ' to{opacity: 1; visibility: visible}');
+      const kf2 = keyframesCss('anim2',
+          'from{opacity: 0} to{opacity: 0.5}');
+      return createStyle({'amp-keyframes': ''}, kf1 + kf2).then(() => {
         expect(extractKeyframes(doc, 'anim1')).to.jsonEqual([
           {offset: 0, opacity: '0', visibility: 'hidden'},
           {offset: 1, opacity: '1', visibility: 'visible'},
@@ -94,27 +112,45 @@ describes.realWin('extractKeyframes', {amp: 1}, env => {
     it('should replace easing property', () => {
       const css = 'from{opacity: 0; animation-timing-function: ease}' +
           ' to{opacity: 1}';
-      return createStyle({}, keyframesCss('anim1', css)).then(() => {
-        const keyframes = extractKeyframes(doc, 'anim1');
-        expect(keyframes).to.jsonEqual([
-          {offset: 0, opacity: '0', easing: 'ease'},
-          {offset: 1, opacity: '1'},
-        ]);
-      });
+      return createStyle({'amp-custom': ''}, keyframesCss('anim1', css))
+          .then(() => {
+            const keyframes = extractKeyframes(doc, 'anim1');
+            expect(keyframes).to.jsonEqual([
+              {offset: 0, opacity: '0', easing: 'ease'},
+              {offset: 1, opacity: '1'},
+            ]);
+          });
+    });
+
+    it('should remove vendor prefixes', () => {
+      const css = 'to{' +
+          '-webkit-transform: translateX(10px);' +
+          '-moz-transform: translateX(10px);' +
+          '-ms-transform: translateX(10px);' +
+          'transform: translateX(10px);' +
+          '}';
+      return createStyle({'amp-custom': ''}, keyframesCss('anim1', css))
+          .then(() => {
+            const keyframes = extractKeyframes(doc, 'anim1');
+            expect(keyframes).to.jsonEqual([
+              {offset: 1, transform: 'translateX(10px)'},
+            ]);
+          });
     });
 
     it('should support different offsets', () => {
       const css = '0%{opacity: 0}' +
           ' 25%{opacity: 0.5}' +
           ' 100%{opacity: 1}';
-      return createStyle({}, keyframesCss('anim1', css)).then(() => {
-        const keyframes = extractKeyframes(doc, 'anim1');
-        expect(keyframes).to.jsonEqual([
-          {offset: 0, opacity: '0'},
-          {offset: 0.25, opacity: '0.5'},
-          {offset: 1, opacity: '1'},
-        ]);
-      });
+      return createStyle({'amp-custom': ''}, keyframesCss('anim1', css))
+          .then(() => {
+            const keyframes = extractKeyframes(doc, 'anim1');
+            expect(keyframes).to.jsonEqual([
+              {offset: 0, opacity: '0'},
+              {offset: 0.25, opacity: '0.5'},
+              {offset: 1, opacity: '1'},
+            ]);
+          });
     });
 
     it('should select the latest keyframes', () => {
@@ -123,10 +159,10 @@ describes.realWin('extractKeyframes', {amp: 1}, env => {
       const css3 = 'from{opacity: 0} to{opacity: 0.3}';
       const css4 = 'from{opacity: 0} to{opacity: 0.4}';
       return Promise.all([
-        createStyle({},
+        createStyle({'amp-custom': ''},
             keyframesCss('anim1', css1) +
             keyframesCss('anim1', css2)),
-        createStyle({},
+        createStyle({'amp-custom': ''},
             keyframesCss('anim1', css3) +
             keyframesCss('anim1', css4)),
       ]).then(() => {
@@ -142,7 +178,7 @@ describes.realWin('extractKeyframes', {amp: 1}, env => {
       const kf1 = keyframesCss('anim1', 'from{opacity: 0} to{opacity: 0.1}');
       const kf2 = keyframesCss('anim1', 'from{opacity: 0} to{opacity: 0.2}');
       const media = `@media (min-width: 10px) {${kf2}}`;
-      return createStyle({}, kf1 + media).then(() => {
+      return createStyle({'amp-custom': ''}, kf1 + media).then(() => {
         const keyframes = extractKeyframes(doc, 'anim1');
         expect(keyframes).to.jsonEqual([
           {offset: 0, opacity: '0'},
@@ -155,7 +191,7 @@ describes.realWin('extractKeyframes', {amp: 1}, env => {
       const kf1 = keyframesCss('anim1', 'from{opacity: 0} to{opacity: 0.1}');
       const kf2 = keyframesCss('anim1', 'from{opacity: 0} to{opacity: 0.2}');
       const media = `@media (max-width: 10px) {${kf2}}`;  // Disabled.
-      return createStyle({}, kf1 + media).then(() => {
+      return createStyle({'amp-custom': ''}, kf1 + media).then(() => {
         const keyframes = extractKeyframes(doc, 'anim1');
         expect(keyframes).to.jsonEqual([
           {offset: 0, opacity: '0'},
@@ -168,8 +204,8 @@ describes.realWin('extractKeyframes', {amp: 1}, env => {
       const kf1 = keyframesCss('anim1', 'from{opacity: 0} to{opacity: 0.1}');
       const kf2 = keyframesCss('anim1', 'from{opacity: 0} to{opacity: 0.2}');
       return Promise.all([
-        createStyle({}, kf1),
-        createStyle({media: '(max-width: 10px)'}, kf2),
+        createStyle({'amp-custom': ''}, kf1),
+        createStyle({'amp-custom': '', media: '(max-width: 10px)'}, kf2),
       ]).then(() => {
         const keyframes = extractKeyframes(doc, 'anim1');
         expect(keyframes).to.jsonEqual([
