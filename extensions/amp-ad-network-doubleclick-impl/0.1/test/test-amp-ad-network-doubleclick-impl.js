@@ -317,6 +317,11 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
             };
           });
       sandbox.stub(impl, 'getAmpDoc', () => {return document;});
+      sandbox.stub(impl, 'getPageLayoutBox', () => {
+        return {
+          top: 11, left: 12, right: 0, bottom: 0, width: 0, height: 0,
+        };
+      });
     });
 
     afterEach(() =>
