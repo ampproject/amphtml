@@ -122,6 +122,7 @@ amp-carousel .amp-carousel-button.amp-disabled {
 /** Only hide scroll bar for touch devices as it causes jitters on desktops */
 .i-amphtml-slides-container.i-amphtml-no-scroll {
   overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
 }
 
 .i-amphtml-slide-item {
