@@ -34,7 +34,11 @@ import {startsWith} from '../../../src/string';
  * @enum {number}
  * @private
  */
+
+ // Correct PlayerStates taken from: https://developers.google.com/youtube/iframe_api_reference#Playback_status
 const PlayerStates = {
+  UNSTARTED: -1,
+  ENDED: 0,
   PLAYING: 1,
   PAUSED: 2,
 };
@@ -44,7 +48,7 @@ const PlayerStates = {
  * @private
  */
 const PlayerFlags = {
-  /* Config to tell YouTube to hide annotations by default*/
+  // Config to tell YouTube to hide annotations by default
   HIDE_ANNOTATION: 3,
 };
 
@@ -57,7 +61,7 @@ class AmpYoutube extends AMP.BaseElement {
   constructor(element) {
     super(element);
     /** @private {number} */
-    this.playerState_ = 0;
+    this.playerState_ = PlayerStates.UNSTARTED;
 
     /** @private {?string}  */
     this.videoid_ = null;
@@ -291,7 +295,8 @@ class AmpYoutube extends AMP.BaseElement {
     if (data.event == 'infoDelivery' &&
         data.info && data.info.playerState !== undefined) {
       this.playerState_ = data.info.playerState;
-      if (this.playerState_ == PlayerStates.PAUSED) {
+      if (this.playerState_ == PlayerStates.PAUSED ||
+          this.playerState_ == PlayerStates.ENDED) {
         this.element.dispatchCustomEvent(VideoEvents.PAUSE);
       } else if (this.playerState_ == PlayerStates.PLAYING) {
         this.element.dispatchCustomEvent(VideoEvents.PLAY);
