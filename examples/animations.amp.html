@@ -27,6 +27,26 @@
       --angle: 10deg;
       --delay: 0.4s;
     }
+
+    .rain {
+      position: absolute;
+      top: -20px;
+      left: 0;
+      right: 0;
+      height: 0;
+      z-index: 1000;
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      justify-content: space-around;
+      align-items: center;
+    }
+    .drop {
+      width: 20px;
+      height: 20px;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 50%;
+    }
   </style>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
@@ -60,17 +80,51 @@
       }
     },
     {
+      "animation": "anim2",
       "selector": "#image2",
-      "easing": "cubic-bezier(0,0,.21,1)",
-      "keyframes": [
-        {"transform": "translateX(calc(width('#image1') / 2)) translateY(var(--start-y))", "opacity": "var(--start-o)"},
-        {"transform": "translateY(calc(10% + 10px))", "opacity": "calc(var(--start-o) * 7)"}
-      ]
+      "easing": "cubic-bezier(0,0,.21,1)"
+    },
+    {
+      "animation": "anim-rain",
+      "--max-delay": "5s"
     }
   ]
 }
 </script>
 </amp-animation>
+
+<amp-animation id="anim2" layout="nodisplay">
+<script type="application/json">
+{
+  "keyframes": [
+    {"transform": "translateX(calc(width('#image1') / 2)) translateY(var(--start-y))", "opacity": "var(--start-o)"},
+    {"transform": "translateY(calc(10% + 10px))", "opacity": "calc(var(--start-o) * 7)"}
+  ]
+}
+</script>
+</amp-animation>
+
+<amp-animation id="anim-rain" layout="nodisplay">
+<script type="application/json">
+{
+  "selector": ".drop",
+  "--delay": "rand(0.1s, var(--max-delay))",
+  "delay": "var(--delay)",
+  "direction": "normal",
+  "keyframes": {"transform": "translateY(120vh)"}
+}
+</script>
+</amp-animation>
+
+<div class="rain">
+  <div class="drop"></div>
+  <div class="drop"></div>
+  <div class="drop"></div>
+  <div class="drop"></div>
+  <div class="drop"></div>
+  <div class="drop"></div>
+  <div class="drop"></div>
+</div>
 
 <amp-img id="image1" class="rot-image"
     src="img/sea@2x.jpg"
