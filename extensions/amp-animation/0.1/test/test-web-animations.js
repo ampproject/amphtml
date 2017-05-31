@@ -304,7 +304,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
         '--child5': 'var(--child6)',  // Reverse order dependency.
         '--child6': '23px',
         keyframes: {
-          transform: 'translate()'
+          transform: 'translate()',
         },
       }],
     });
