@@ -216,10 +216,13 @@ const command = {
   runLintChecks: function() {
     timedExecOrDie(`${gulp} lint`);
   },
+  buildRuntimeCssOnly: function() {
+    timedExecOrDie(`${gulp} build --css-only`);
+  },
   buildRuntime: function() {
     timedExecOrDie(`${gulp} build`);
   },
-  serveRuntime: function() {
+  buildRuntimeMinified: function() {
     timedExecOrDie(`${gulp} dist --fortesting`);
   },
   runDepAndTypeChecks: function() {
@@ -262,9 +265,9 @@ function runAllCommands() {
   if (process.env.BUILD_SHARD == "pre_build_checks_and_unit_tests") {
     command.testBuildSystem();
     command.cleanBuild();
-    command.buildRuntime();
     command.runLintChecks();
     command.runDepAndTypeChecks();
+    command.buildRuntime();
     command.runUnitTests();
     // command.testDocumentLinks() is skipped during push builds.
     command.buildValidatorWebUI();
@@ -272,8 +275,8 @@ function runAllCommands() {
   }
   if (process.env.BUILD_SHARD == "integration_tests") {
     command.cleanBuild();
-    command.buildRuntime();
-    command.serveRuntime();
+    command.buildRuntimeCssOnly();
+    command.buildRuntimeMinified();
     command.runPresubmitTests();  // Needs runtime to be built and served.
     command.runVisualDiffTests();  // Only called during push builds.
     command.runIntegrationTests();
@@ -355,9 +358,9 @@ function main(argv) {
 
     if (buildTargets.has('RUNTIME')) {
       command.cleanBuild();
-      command.buildRuntime();
       command.runLintChecks();
       command.runDepAndTypeChecks();
+      command.buildRuntime();
       command.runUnitTests();
       // Ideally, we'd run presubmit tests after `gulp dist`, as some checks run
       // through the dist/ folder. However, to speed up the Travis queue, we no
