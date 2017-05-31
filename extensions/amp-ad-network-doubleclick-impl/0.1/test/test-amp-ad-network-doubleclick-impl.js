@@ -358,6 +358,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           /(\?|&)isw=[0-9]+(&|$)/,
           /(\?|&)ish=[0-9]+(&|$)/,
           /(\?|&)pfx=(1|0)(&|$)/,
+          /(\?|&)eid=([^&]+%2c)*108809080(%2c[^&]+)*(&|$)/,
           /(\?|&)url=https?%3A%2F%2F[a-zA-Z0-9.:%]+(&|$)/,
           /(\?|&)top=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D[0-9]+(&|$)/,
           /(\?|&)ref=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D[0-9]+(&|$)/,

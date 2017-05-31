@@ -13,21 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
-module.exports = function(context) {
-  return {
-    Program: function(node) {
-      if (node.comments) {
-        node.comments.forEach(function(comment) {
-          if (/TODO/.test(comment.value) &&
-                !/TODO\(@?\w+,\s*#\d{1,}\)/.test(comment.value)) {
-            context.report(comment,
-                'TODOs must be in TODO(@username, #1234) format. Found: "' +
-                comment.value.trim() + '"');
-          }
-        });
-      }
-    }
-  };
-};
+import {validateData, loadScript} from '../3p/3p';
+
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+export function admanmedia(global, data) {
+  validateData(data, ['id']);
+
+  const encodedId = encodeURIComponent(data.id);
+  loadScript(global, `https://mona.admanmedia.com/go?id=${encodedId}`, () => {
+    const pattern = `script[src$="id=${encodedId}"]`;
+    const scriptTag = global.document.querySelector(pattern);
+    scriptTag.setAttribute('id', `hybs-${encodedId}`);
+    global.context.renderStart();
+  }, () => {
+    global.context.noContentAvailable();
+  });
+}

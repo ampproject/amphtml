@@ -15,11 +15,12 @@
  */
 
 import {
-  stringToBytes,
   bytesToString,
+  bytesToUInt32,
   getCryptoRandomBytesArray,
-  utf8Encode,
+  stringToBytes,
   utf8Decode,
+  utf8Encode,
 } from '../../../src/utils/bytes';
 
 describe('stringToBytes', function() {
@@ -129,5 +130,18 @@ describe('utf8', function() {
       utf8Decode(new Uint8Array(bytes[i])).then(string => expect(string).to
           .equal(strings[i]));
     }
+  });
+});
+
+describe('bytesToUInt32', function() {
+  it('should convert Uint8Arrays into unsigned 32-bit integers', () => {
+    expect(bytesToUInt32(new Uint8Array([0xff, 0xff, 0xff, 0xff])))
+        .to.equal(0xffffffff);
+    expect(bytesToUInt32(new Uint8Array([0xde, 0xad, 0xbe, 0xef])))
+        .to.equal(0xdeadbeef);
+    expect(bytesToUInt32(new Uint8Array([0x47, 0x47, 0x47, 0x47])))
+        .to.equal(0x47474747);
+    expect(bytesToUInt32(new Uint8Array([0x00, 0x00, 0x00, 0x00])))
+        .to.equal(0x00000000);
   });
 });

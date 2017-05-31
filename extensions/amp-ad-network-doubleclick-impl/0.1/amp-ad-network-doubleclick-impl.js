@@ -323,7 +323,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return getPageLevelParameters_(this.win, this.getAmpDoc(), startTime)
       .then(pageLevelParameters =>
         googleAdUrl(this, DOUBLECLICK_BASE_URL, startTime,
-          Object.assign(this.getBlockParameters_(), pageLevelParameters)));
+          Object.assign(this.getBlockParameters_(), pageLevelParameters),
+          ['108809080']));
   }
 
   /** @override */

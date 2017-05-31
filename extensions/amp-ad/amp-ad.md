@@ -193,6 +193,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Adhese](../../ads/adhese.md)
 - [ADITION](../../ads/adition.md)
 - [Adman](../../ads/adman.md)
+- [AdmanMedia](../../ads/admanmedia.md)
 - [AdReactor](../../ads/adreactor.md)
 - [AdSense](../../ads/google/adsense.md)
 - [AdsNative](../../ads/adsnative.md)
