@@ -40,9 +40,8 @@ env:
   global:
     - NPM_CONFIG_PROGRESS="false"
   matrix:
-    - BUILD_SHARD="pre_build_checks"
+    - BUILD_SHARD="pre_build_checks_and_unit_tests"
     - BUILD_SHARD="integration_tests"
-    - BUILD_SHARD="unit_tests"
 cache:
   yarn: true
   directories:
