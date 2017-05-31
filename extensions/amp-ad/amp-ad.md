@@ -210,6 +210,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [AMoAd](../../ads/amoad.md)
 - [AppNexus](../../ads/appnexus.md)
 - [Atomx](../../ads/atomx.md)
+- [Bidtellect](../../ads/bidtellect.md)
 - [brainy](../../ads/brainy.md)
 - [CA A.J.A. Infeed](../../ads/caajainfeed.md)
 - [CA-ProFit-X](../../ads/caprofitx.md)
