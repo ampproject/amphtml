@@ -734,7 +734,7 @@ function onFullscreenClick(global) {
       // sync the UI.
       videoPlayer.addEventListener('webkitendfullscreen', pauseVideo);
       nativeFullscreen = true;
-      onFullscreenChange();
+      onFullscreenChange(global);
     }
   }
 }
