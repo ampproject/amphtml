@@ -128,6 +128,34 @@ describes.sandboxed('shadow-embed', {}, () => {
             }
           });
 
+          describe('stylesheets', () => {
+            let parentStylesheet;
+
+            beforeEach(() => {
+              parentStylesheet = document.createElement('style');
+              parentStylesheet.textContent = '.x {background: red}';
+              document.body.appendChild(parentStylesheet);
+              document.body.appendChild(hostElement);
+            });
+
+            afterEach(() => {
+              document.body.removeChild(parentStylesheet);
+              document.body.removeChild(hostElement);
+            });
+
+            it('should have shadow stylesheets and not global', () => {
+              const shadowRoot = createShadowRoot(hostElement);
+              const shadowStyle = document.createElement('style');
+              shadowStyle.textContent = '.x {background: green}';
+              shadowRoot.appendChild(shadowStyle);
+
+              const styleSheets = shadowRoot.styleSheets;
+              expect(styleSheets).to.exist;
+              expect(styleSheets).to.have.length(1);
+              expect(styleSheets[0].ownerNode).to.equal(shadowStyle);
+            });
+          });
+
           describe('importShadowBody', () => {
             let shadowRoot, source, child1, child2;
 
