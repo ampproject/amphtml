@@ -17,6 +17,7 @@
 import {getMode} from './mode';
 import {urls} from './config';
 import {startsWith} from './string';
+import {loadPromise} from './event-helper';
 
 /**
  * Triggers validation for the current document if there is a script in the
@@ -34,14 +35,24 @@ export function maybeValidate(win) {
   }
 
   /** @const {!Element} */
-  const s = win.document.createElement('script');
+  const validatorScript = win.document.createElement('script');
   // TODO(@cramforce): Introduce a switch to locally built version for local
   // development.
-  s.src = `${urls.cdn}/v0/validator.js`;
-  s.onload = () => {
-    win.document.head.removeChild(s);
-    /* global amp: false */
-    amp.validator.validateUrlAndLog(filename, win.document, getMode().filter);
-  };
-  win.document.head.appendChild(s);
+  validatorScript.src = `${urls.cdn}/v0/validator.js`;
+
+  const examinerScript = win.document.createElement('script');
+  examinerScript.src = `${urls.cdn}/examiner0.js`;
+
+  Promise.all([
+    loadPromise(validatorScript),
+    loadPromise(examinerScript).catch(() => {})])
+      .then(() => {
+        win.document.head.removeChild(validatorScript);
+        win.document.head.removeChild(examinerScript);
+        /* global amp: false */
+        amp.validator.validateUrlAndLog(
+            filename, win.document, getMode().filter);
+      });
+  win.document.head.appendChild(validatorScript);
+  win.document.head.appendChild(examinerScript);
 }
