@@ -356,7 +356,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         // show the loader for a quarter of a second before switching to
         // the new creative.
         timerFor(this.win).delay(() => {
-          this.layoutCallback().then(() => {
+          this.attemptToRenderCreative().then(() => {
             this.isRefreshing = false;
             this.togglePlaceholder(false);
             // Restart refresh cycle.
