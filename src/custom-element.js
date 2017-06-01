@@ -1262,8 +1262,8 @@ function createBaseCustomElementClass(win) {
       this.dispatchCustomEventForTesting(AmpEvents.LOAD_START);
       const isLoadEvent = (this.layoutCount_ == 0);  // First layout is "load".
       if (isLoadEvent) {
+        this.signals_.reset(CommonSignals.UNLOAD_RESET);
         this.signals_.signal(CommonSignals.LOAD_START);
-        this.insertSandboxAnalytics_();
       }
       if (this.perfOn_) {
         this.getLayoutDelayMeter_().startLayout();
@@ -1392,12 +1392,6 @@ function createBaseCustomElementClass(win) {
       }
       const isReLayoutNeeded = this.implementation_.unlayoutCallback();
       if (isReLayoutNeeded) {
-        // Remove sandbox analytics and insert new one during relayout
-        this.sandboxAnalyticsConfigPromise_ = null;
-        if (this.sandboxAnalyticsElement_) {
-          dom.removeElement(this.sandboxAnalyticsElement_);
-          this.sandboxAnalyticsElement_ = null;
-        }
         this.reset_();
       }
       return isReLayoutNeeded;
@@ -1411,6 +1405,7 @@ function createBaseCustomElementClass(win) {
       this.signals_.reset(CommonSignals.LOAD_START);
       this.signals_.reset(CommonSignals.LOAD_END);
       this.signals_.reset(CommonSignals.INI_LOAD);
+      this.signals_.signal(CommonSignals.UNLOAD_RESET);
     }
 
     /**
@@ -1752,27 +1747,6 @@ function createBaseCustomElementClass(win) {
           });
         }
       });
-    }
-
-    insertSandboxAnalytics_() {
-      this.sandboxAnalyticsConfigPromise_ =
-          this.implementation_.createSandboxAnalyticsConfigCallback();
-      if (this.sandboxAnalyticsConfigPromise_) {
-        this.sandboxAnalyticsConfigPromise_.then(config => {
-          this.sandboxAnalyticsConfigPromise_ = null;
-          this.sandboxAnalyticsElement_ = insertAnalyticsElement(
-              this,
-              config,
-              false);
-          if (!this.sandboxAnalyticsElement_.signals) {
-            return;
-          }
-          this.sandboxAnalyticsElement_.signals().whenSignal(
-              'amp-analytics-ready').then(() => {
-                this.implementation_.onSandboxAnalyticsReadyCallback();
-              });
-        });
-      }
     }
 
     /**

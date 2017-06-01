@@ -45,4 +45,9 @@ export const CommonSignals = {
    * Rendering has been confirmed to have been started.
    */
   RENDER_START: 'render-start',
+
+  /**
+   * The element has been unlaid out and relayout is needed.
+   */
+  UNLOAD_RESET: 'unload-reset',
 };

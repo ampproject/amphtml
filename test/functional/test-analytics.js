@@ -29,6 +29,8 @@ import {timerFor} from '../../src/services';
 import {BaseElement} from '../../src/base-element';
 import {macroTask} from '../../testing/yield';
 import * as sinon from 'sinon';
+import {createAmpElementProto} from '../../src/custom-element';
+import {CommonSignals} from '../../src/common-signals';
 
 describes.realWin('analytics', {amp: true}, env => {
   let sandbox;

@@ -19,7 +19,11 @@ import {
   getElementServiceForDoc,
   getElementServiceIfAvailableForDoc,
 } from './element-service';
-import {createElementWithAttributes} from './dom';
+import {
+  createElementWithAttributes,
+  removeElement,
+  whenUpgradedToCustomElement,
+} from './dom';
 import {getAmpdoc} from './service';
 import {extensionsFor} from './services';
 import {dev} from './log';
@@ -215,4 +219,3 @@ export class CustomEventReporterBuilder {
     return report;
   }
 }
-
