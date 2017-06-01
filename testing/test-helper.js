@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {poll} from './iframe';
 import {xhrServiceForTesting} from '../src/service/xhr-impl';
 import {
   getService,
@@ -44,25 +45,9 @@ export function stubServiceForDoc(sandbox, ampdoc, serviceId, method) {
   return sandbox.stub(service, method);
 }
 
-/**
- * Resolves a promise when the method stub is called for the first time.
- */
-export function stubWithCalledPromise(sandbox, object, method, opt_callMethod) {
-  const original = object[method];
-  let stub;
-  const promise = new Promise(resolve => {
-    stub = sandbox.stub();
-    const spy = sandbox.stub(object, method, () => {
-      const result = stub.apply(object, spy.lastCall.args);
-      if (opt_callMethod) {
-        original.apply(object, spy.lastCall.args);
-      }
-
-      resolve({value: result});
-      return result;
-    });
-  });
-  return {stub, promise};
+export function whenCalled(stub, opt_callCount = 1) {
+  return poll(`Stub was called ${opt_callCount} times`,
+      () => stub.callCount === opt_callCount);
 }
 
 /**
