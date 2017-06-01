@@ -211,8 +211,7 @@ function maybeSetExperimentFromUrl(win, element, experimentName,
   };
   if (argMapping.hasOwnProperty(arg)) {
     forceExperimentBranch(win, experimentName, argMapping[arg]);
-    // Neither branch of SFG is eligible for A4A, unless we're an AdSense ad.
-    return arg != '5' && arg != '6';
+    return true;
   } else {
     dev().warn('A4A-CONFIG', 'Unknown a4a URL parameter: ', a4aParam,
         ' expected one of -1 (manual), 0 (not in experiment), 1 (control ' +
