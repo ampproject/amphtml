@@ -545,7 +545,7 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * This is the entry point into the promise chain.
+   * This is the entry point into the ad promise chain.
    *
    * Calling this function will initiate the following sequence of events: ad
    * url construction, ad request issuance, creative verification, and metadata
@@ -1182,14 +1182,10 @@ export class AmpA4A extends AMP.BaseElement {
     let refreshEnabled =
         this.element.getAttribute('data-enable-refresh') == 'true';
     if (!refreshEnabled) {
-      const metaTags = this.win.document.getElementsByTagName('meta') || [];
-      for (let i = 0; i < metaTags.length; i++) {
-        if (metaTags[i].getAttribute('name') ==
-            `amp-ad-enable-refresh:${adType}`) {
-          refreshEnabled = metaTags[i].getAttribute('content') == 'true';
-          break;
-        }
-      }
+      const metaTag = this.win.document.getElementsByName(
+          `amp-ad-enable-refresh:${adType}`);
+      refreshEnabled = metaTag[0] &&
+          metaTag[0].getAttribute('content') == 'true';
     }
     return refreshEnabled ? config : null;
   }
