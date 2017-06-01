@@ -18,7 +18,7 @@ import {CssNumberNode, CssTimeNode, isVarCss} from './css-expr-ast';
 import {Observable} from '../../../src/observable';
 import {ScrollboundPlayer} from './scrollbound-player';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
-import {closestBySelector} from '../../../src/dom';
+import {closestBySelector, matches} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {extractKeyframes} from './keyframes-extractor';
 import {getMode} from '../../../src/mode';
@@ -29,6 +29,8 @@ import {parseCss} from './css-expr';
 import {
   WebAnimationDef,
   WebAnimationPlayState,
+  WebAnimationSelectorDef,
+  WebAnimationSubtargetDef,
   WebAnimationTimingDef,
   WebAnimationTimingDirection,
   WebAnimationTimingFill,
@@ -690,12 +692,16 @@ export class MeasureScanner extends Scanner {
         (spec.target || spec.selector) ?
         this.resolveTargets_(spec) :
         [null];
-    targets.forEach(target => {
+    targets.forEach((target, index) => {
       this.target_ = target || prevTarget;
       this.css_.withTarget(this.target_, () => {
-        this.vars_ = this.mergeVars_(spec, prevVars);
+        const subtargetSpec =
+            this.target_ ?
+            this.matchSubtargets_(this.target_, index, spec) :
+            spec;
+        this.vars_ = this.mergeVars_(subtargetSpec, prevVars);
         this.css_.withVars(this.vars_, () => {
-          this.timing_ = this.mergeTiming_(spec, prevTiming);
+          this.timing_ = this.mergeTiming_(subtargetSpec, prevTiming);
           callback();
         });
       });
@@ -737,6 +743,59 @@ export class MeasureScanner extends Scanner {
     }
     targets.forEach(target => this.builder_.requireLayout(target));
     return targets;
+  }
+
+  /**
+   * @param {!Element} target
+   * @param {number} index
+   * @param {!WebAnimationSelectorDef} spec
+   * @return {!WebAnimationSelectorDef}
+   */
+  matchSubtargets_(target, index, spec) {
+    if (!spec.subtargets || spec.subtargets.length == 0) {
+      return spec;
+    }
+    const result = map(spec);
+    spec.subtargets.forEach(subtargetSpec => {
+      const matcher = this.getMatcher_(subtargetSpec);
+      if (matcher(target, index)) {
+        Object.assign(result, subtargetSpec);
+      }
+    });
+    return result;
+  }
+
+  /**
+   * @param {!WebAnimationSubtargetDef} spec
+   * @return {function(!Element, number):boolean}
+   */
+  getMatcher_(spec) {
+    if (spec.matcher) {
+      return spec.matcher;
+    }
+    user().assert(
+        (spec.index !== undefined || spec.selector !== undefined) &&
+        (spec.index === undefined || spec.selector === undefined),
+        'Only one "index" or "selector" must be specified');
+
+    let matcher;
+    if (spec.index !== undefined) {
+      // Match by index, e.g. `index: 0`.
+      const specIndex = Number(spec.index);
+      matcher = (target, index) => index === specIndex;
+    } else {
+      // Match by selector, e.g. `:nth-child(2n+1)`.
+      const specSelector = /** @type {string} */ (spec.selector);
+      matcher = target => {
+        try {
+          return matches(target, specSelector);
+        } catch (e) {
+          throw user().createError(
+              `Bad subtarget selector: "${specSelector}"`, e);
+        }
+      };
+    }
+    return spec.matcher = matcher;
   }
 
   /**
