@@ -239,9 +239,9 @@ For instance:
 }
 ```
 
-In this example, by default all targets matched by the ".target" have delay of 100ms and "--y" of 100px. However, the first target (`index: 0`) is overriden to have delay of 200ms; and the ever odd target is overriden to have "--y" of 200px.
+In this example, by default all targets matched by the ".target" have delay of 100ms and "--y" of 100px. However, the first target (`index: 0`) is overriden to have delay of 200ms; and odd targets are overriden to have "--y" of 200px.
 
-Notice, that multiple subtargets can match one target.
+Notice, that multiple subtargets can match one target element.
 
 
 ### Keyframes
