@@ -24,9 +24,9 @@ describe('Object', () => {
   });
 
   it('ownProperty', () => {
-    expect(object.ownProperty({}, '__proto__')).to.be.false;
-    expect(object.ownProperty({}, 'constructor')).to.be.false;
-    expect(object.ownProperty({foo: 'bar'}, 'foo')).to.be.true;
+    expect(object.ownProperty({}, '__proto__')).to.be.undefined;
+    expect(object.ownProperty({}, 'constructor')).to.be.undefined;
+    expect(object.ownProperty({foo: 'bar'}, 'foo')).to.equal('bar');
   });
 
   describe('map', () => {

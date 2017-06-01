@@ -183,7 +183,7 @@ export class BindValidator {
   rulesForTagAndProperty_(tag, property) {
     const globalRules = ownProperty(GLOBAL_PROPERTY_RULES, property);
     if (globalRules !== undefined) {
-      return globalRules;
+      return /** @type {PropertyRulesDef} */ (globalRules);
     }
     const tagRules = ownProperty(ELEMENT_RULES, tag);
     if (tagRules) {
@@ -191,7 +191,7 @@ export class BindValidator {
     }
     const ampPropertyRules = ownProperty(AMP_PROPERTY_RULES, property);
     if (startsWith(tag, 'AMP-') && ampPropertyRules !== undefined) {
-      return ampPropertyRules;
+      return /** @type {PropertyRulesDef} */ (ampPropertyRules);
     }
     return undefined;
   }

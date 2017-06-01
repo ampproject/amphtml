@@ -51,7 +51,7 @@ export function hasOwn(obj, key) {
  * Returns obj[key] iff key is obj's own property (is not inherited).
  * Otherwise, returns undefined.
  *
- * @param {!Object} obj
+ * @param {Object} obj
  * @param {string} key
  * @return {*}
  */
