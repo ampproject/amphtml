@@ -28,9 +28,10 @@
 }
 
 .amp-access-laterpay ul {
+  width: 100%;
   margin: 0;
   padding: 0;
-  width: 100%;
+  margin-bottom: 40px;
 }
 
 .amp-access-laterpay li {
@@ -48,8 +49,13 @@
   width: 20px;
 }
 
-.amp-access-laterpay-metadata-container {
-  width: 90%;
+.amp-access-laterpay-header {
+  font-size: 1.2em;
+  margin-bottom: 40px;
+}
+
+.amp-access-laterpay-metadata {
+  width: 92%;
 }
 
 .amp-access-laterpay-title {
@@ -69,8 +75,26 @@
   margin-left: auto;
 }
 
+.amp-access-laterpay-price {
+  font-size: 1.5em;
+}
+
+.amp-access-laterpay-currency {
+  font-size: 0.7em;
+}
+
 .amp-access-laterpay-purchase-button {
   font-size: 1.1em;
   padding: 0.5em 0.8em;
   width: 70%;
+  padding: 0.5em 0.8em;
+  background-color: #8db444;
+  border-radius: 4px;
+  border: 0;
+  color: #fff;
+  width: 70%;
+}
+
+.amp-access-laterpay-already-purchased-link-container {
+  font-size: 0.9em;
 }
