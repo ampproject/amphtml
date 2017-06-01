@@ -506,13 +506,20 @@ The URL of the remote endpoint that will return the JSON that will update this `
 
 The `src` attribute allows all standard URL variable substitutions. See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
 
+{% call callout('Important', type='caution') %}
+The endpoint must implement the requirements specified in the [CORS Requests in AMP](../../spec/amp-cors-requests.md) spec.
+{% endcall %}
+
+
 **credentials** (optional)
 
 Defines a `credentials` option as specified by the [Fetch API](https://fetch.spec.whatwg.org/).
-To send credentials, pass the value of "include". If this is set, the response must follow
-the [AMP CORS security guidelines](../../spec/amp-cors-requests.md).
 
-The support values are "omit" and "include". Default is "omit".
+* Supported values: `omit`, `include`
+* Default: `omit`
+
+To send credentials, pass the value of `include`. If this value is set, the response must follow the [AMP CORS security guidelines](../../spec/amp-cors-requests.md).
+
 
 ### Non-standard built-in functions
 

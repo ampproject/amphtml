@@ -22,6 +22,7 @@ import {
   WebAnimationPlayState,
 } from '../web-animation-types';
 import {isArray, isObject} from '../../../../src/types';
+import {poll} from '../../../../testing/iframe';
 import {user} from '../../../../src/log';
 import * as sinon from 'sinon';
 
@@ -115,8 +116,9 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     expect(scanTiming({delay: 'calc(10ms)'}).delay).to.equal(10);
     expect(scanTiming({delay: 'var(--unk)'}).delay).to.equal(0);
     expect(scanTiming({delay: 'var(--unk, 11ms)'}).delay).to.equal(11);
+    // Note! The negative "delay" is allowed.
+    expect(scanTiming({delay: -1}).delay).to.equal(-1);
     expect(() => scanTiming({delay: 'a'})).to.throw(/"delay" is invalid/);
-    expect(() => scanTiming({delay: -1})).to.throw(/"delay" is invalid/);
 
     expect(scanTiming({}).endDelay).to.equal(0);
     expect(scanTiming({endDelay: 0}).endDelay).to.equal(0);
@@ -304,7 +306,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
         '--child5': 'var(--child6)',  // Reverse order dependency.
         '--child6': '23px',
         keyframes: {
-          transform: 'translate()',
+          transform: 'translate(var(--child3), var(--child4))',
         },
       }],
     });
@@ -319,6 +321,79 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       '--child5': '23px',
       '--child6': '23px',
     });
+    expect(requests[0].keyframes.transform[1])
+        .to.equal('translate(11px,22px)');
+  });
+
+  it('should override vars in subtargets with index', () => {
+    const requests = scan({
+      '--parent1': '11px',
+      '--parent2': '12px',
+      animations: [{
+        selector: '.target',
+        '--child1': '21px',
+        '--parent2': '22px',  // Override parent.
+        '--child2': 'var(--child1)',
+        '--child3': 'var(--parent1)',
+        '--child4': 'var(--parent2)',
+        '--child5': 'var(--child6)',  // Reverse order dependency.
+        '--child6': '23px',
+        subtargets: [
+          // By index.
+          {
+            index: 0,
+            '--child6': '31px',
+          },
+          {
+            index: 1,
+            '--child6': '32px',
+          },
+          // By selector.
+          {
+            selector: '#target1',
+            '--child1': '33px',
+          },
+          {
+            selector: '#target2',
+            '--child1': '34px',
+          },
+          {
+            selector: 'div',
+            '--child2': '35px',
+          },
+        ],
+        keyframes: {
+          transform: 'translate(var(--child6), var(--child1))',
+        },
+      }],
+    });
+    expect(requests).to.have.length(2);
+
+    // `#target1`
+    expect(requests[0].vars).to.jsonEqual({
+      '--parent1': '11px',
+      '--parent2': '22px',
+      '--child1': '33px',  // Overriden via `#target1`
+      '--child2': '35px',  // Overriden via `div`
+      '--child3': '11px',
+      '--child4': '22px',
+      '--child5': '31px',  // Overriden via `index: 0`
+      '--child6': '31px',  // Overriden via `index: 0`
+    });
+    expect(requests[0].keyframes.transform[1]).to.equal('translate(31px,33px)');
+
+    // `#target2`
+    expect(requests[1].vars).to.jsonEqual({
+      '--parent1': '11px',
+      '--parent2': '22px',
+      '--child1': '34px',  // Overriden via `#target2`
+      '--child2': '35px',  // Overriden via `div`
+      '--child3': '11px',
+      '--child4': '22px',
+      '--child5': '32px',  // Overriden via `index: 1`
+      '--child6': '32px',  // Overriden via `index: 1`
+    });
+    expect(requests[1].keyframes.transform[1]).to.equal('translate(32px,34px)');
   });
 
   it('should accept keyframe animation', () => {
@@ -515,6 +590,38 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     expect(keyframes.opacity).to.jsonEqual(['0', '0.525']);
   });
 
+  it('should fail when cannot discover style keyframes', () => {
+    expect(() => scan({target: target1, keyframes: 'keyframes1'}))
+        .to.throw(/Keyframes not found/);
+  });
+
+  it('should discover style keyframes', () => {
+    const name = 'keyframes1';
+    const css = 'from{opacity: 0} to{opacity: 1}';
+    const style = doc.createElement('style');
+    style.setAttribute('amp-custom', '');
+    style.textContent =
+        `@-ms-keyframes ${name} {${css}}` +
+        `@-moz-keyframes ${name} {${css}}` +
+        `@-webkit-keyframes ${name} {${css}}` +
+        `@keyframes ${name} {${css}}`;
+    doc.head.appendChild(style);
+    return poll('wait for style', () => {
+      for (let i = 0; i < doc.styleSheets.length; i++) {
+        if (doc.styleSheets[i].ownerNode == style) {
+          return true;
+        }
+      }
+      return false;
+    }).then(() => {
+      const keyframes = scan({target: target1, keyframes: name})[0].keyframes;
+      expect(keyframes).to.jsonEqual([
+        {offset: 0, opacity: '0'},
+        {offset: 1, opacity: '1'},
+      ]);
+    });
+  });
+
   it('should check media in top animation', () => {
     const requests = scan({
       duration: 500,
@@ -628,6 +735,29 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     expect(request2.keyframes.opacity).to.deep.equal(['0.1', '1']);
     expect(request2.keyframes.transform)
         .to.deep.equal(['translateY(0px)', 'translateY(100px)']);
+  });
+
+  it('should be able to resolve animation with args', () => {
+    const builder = new Builder(win, doc, 'https://acme.org/',
+        vsync, /* resources */ null);
+    sandbox.stub(builder, 'requireLayout');
+    const spec = {target: target1, delay: 101, keyframes: {}};
+    const args = {
+      'duration': 1001,
+      '--var1': '10px',
+      '--var2': '20px',
+    };
+    return builder.resolveRequests([], spec, args).then(requests => {
+      expect(requests).to.have.length(1);
+      const request = requests[0];
+      expect(request.target).to.equal(target1);
+      expect(request.vars).to.deep.equal({
+        '--var1': '10px',
+        '--var2': '20px',
+      });
+      expect(request.timing.duration).to.equal(1001);
+      expect(request.timing.delay).to.equal(101);
+    });
   });
 
   describe('composite animations', () => {
@@ -1337,5 +1467,17 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
   it('should ignore cancel when not started', () => {
     runner.cancel();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.IDLE);
+  });
+
+  it('should seek all animations', () => {
+    runner.start();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
+
+    anim1Mock.expects('pause').once();
+    anim2Mock.expects('pause').once();
+    runner.seekTo(101);
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.PAUSED);
+    expect(anim1.currentTime).to.equal(101);
+    expect(anim2.currentTime).to.equal(101);
   });
 });

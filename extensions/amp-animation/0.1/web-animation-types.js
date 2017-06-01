@@ -24,6 +24,7 @@ export let WebAnimationDef;
 /**
  * @mixes WebAnimationSelectorDef
  * @mixes WebAnimationTimingDef
+ * @mixes WebAnimationVarsDef
  * @mixes WebAnimationMediaDef
  * @typedef {{
  *   animations: !Array<!WebAnimationDef>,
@@ -35,6 +36,7 @@ export let WebMultiAnimationDef;
 /**
  * @mixes WebAnimationSelectorDef
  * @mixes WebAnimationTimingDef
+ * @mixes WebAnimationVarsDef
  * @mixes WebAnimationMediaDef
  * @typedef {{
  *   animation: string,
@@ -46,9 +48,10 @@ export let WebCompAnimationDef;
 /**
  * @mixes WebAnimationSelectorDef
  * @mixes WebAnimationTimingDef
+ * @mixes WebAnimationVarsDef
  * @mixes WebAnimationMediaDef
  * @typedef {{
- *   keyframes: !WebKeyframesDef,
+ *   keyframes: (string|!WebKeyframesDef),
  * }}
  */
 export let WebKeyframeAnimationDef;
@@ -80,6 +83,16 @@ export let WebAnimationTimingDef;
 
 
 /**
+ * Indicates an extension to a type that allows specifying vars. Vars are
+ * specified as properties with the name in the format of `--varName`.
+ *
+ * @mixin
+ * @typedef {Object}
+ */
+export let WebAnimationVarsDef;
+
+
+/**
  * Defines media parameters for an animation.
  *
  * @mixin
@@ -94,9 +107,22 @@ export let WebAnimationMediaDef;
  * @typedef {{
  *   target: (!Element|undefined),
  *   selector: (string|undefined),
+ *   subtargets: (!Array<!WebAnimationSubtargetDef>|undefined),
  * }}
  */
 export let WebAnimationSelectorDef;
+
+
+/**
+ * @mixes WebAnimationTimingDef
+ * @mixes WebAnimationVarsDef
+ * @typedef {{
+ *   matcher: (function(!Element, number):boolean|undefined),
+ *   index: (number|undefined),
+ *   selector: (string|undefined),
+ * }}
+ */
+export let WebAnimationSubtargetDef;
 
 
 /**

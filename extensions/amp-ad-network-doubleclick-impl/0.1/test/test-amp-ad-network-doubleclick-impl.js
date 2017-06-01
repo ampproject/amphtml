@@ -319,9 +319,17 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
               height: 50,
             };
           });
+
       sandbox.stub(impl, 'getAmpDoc', () => {
         document.win = window;
         return document;
+      });
+      // Reproduced from noopMethods in ads/google/a4a/test/test-utils.js,
+      // to fix failures when this is run after 'gulp build', without a 'dist'.
+      sandbox.stub(impl, 'getPageLayoutBox', () => {
+        return {
+          top: 11, left: 12, right: 0, bottom: 0, width: 0, height: 0,
+        };
       });
     });
 
@@ -334,7 +342,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         expect(url).to.match(new RegExp(
           '^https://securepubads\\.g\\.doubleclick\\.net/gampad/ads' +
           // Depending on how the test is run, it can get different results.
-          '\\?adk=[0-9]+&gdfp_req=1&impl=ifr&sfv=A&sz=320x50' +
+          '\\?adk=[0-9]+&gdfp_req=1&impl=ifr&sfv=\\d+-\\d+-\\d+&sz=320x50' +
           '&u_sd=[0-9]+(&asnt=[0-9]+-[0-9]+)?(&art=2)?' +
           '&is_amp=3&amp_v=%24internalRuntimeVersion%24' +
           '&d_imp=1&dt=[0-9]+&ifi=[0-9]+&adf=[0-9]+' +

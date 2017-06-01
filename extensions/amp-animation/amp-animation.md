@@ -88,6 +88,7 @@ and is comprised of:
   "media": "(min-width:300px)",
   // Variables
   // Timing properties
+  // Subtargets
   ...
   "keyframes": []
 }
@@ -214,9 +215,38 @@ An example of timing properties in JSON:
 
 Animation components inherit timing properties specified for the top-level animation.
 
+
+### Subtargets
+
+Everywhere where `selector` can be specified, it's possible to also specify `subtargets: []`. Subtargets can override timing properties or variables defined in the animation for specific subtargets indicated via either an index or a CSS selector.
+
+For instance:
+```text
+{
+  "selector": ".target",
+  "delay": 100,
+  "--y": "100px",
+  "subtargets": [
+    {
+      "index": 0,
+      "delay": 200,
+    },
+    {
+      "selector": ":nth-child(2n+1)",
+      "--y": "200px"
+    }
+  ]
+}
+```
+
+In this example, by default all targets matched by the ".target" have delay of 100ms and "--y" of 100px. However, the first target (`index: 0`) is overriden to have delay of 200ms; and odd targets are overriden to have "--y" of 200px.
+
+Notice, that multiple subtargets can match one target element.
+
+
 ### Keyframes
 
-Keyframes can be specified in numerous ways described in the [keyframes section](https://www.w3.org/TR/web-animations/#processing-a-keyframes-argument) of the Web Animations spec.
+Keyframes can be specified in numerous ways described in the [keyframes section](https://www.w3.org/TR/web-animations/#processing-a-keyframes-argument) of the Web Animations spec or as a string refering to the `@keyframes` name in the CSS.
 
 Some typical examples of keyframes definitions are below.
 
@@ -281,6 +311,36 @@ The array-form can also include "easing":
 For additional keyframes formats refer to [Web Animations spec](https://www.w3.org/TR/web-animations/#processing-a-keyframes-argument).
 
 The property values allow any valid CSS values, including `calc()`, `var()` and other CSS expressions.
+
+#### Keyframes from CSS
+
+Another way to specify keyframes is in the document's stylesheet (`<style>` tag) as `@keyframes` CSS rule. For instance:
+```html
+<style amp-custom>
+  @keyframes keyframes1 {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+</style>
+
+<amp-animation layout="nodisplay">
+<script type="application/json">
+{
+  "duration": "1s",
+  "keyframes": "keyframes1"
+}
+</script>
+</amp-animation>
+```
+
+CSS `@keyframes` are mostly equivalent to inlining keyframes definition in the JSON per [Web Animations spec](https://www.w3.org/TR/web-animations/#processing-a-keyframes-argument). However, there are some nuances:
+ - For broad-platform support, vendor prefixes, e.g. `@-ms-keyframes {}` or `-moz-transform` may be needed. Vendor prefixes are not needed and not allowed in the JSON format, but in CSS they could be necessary.
+ - Platforms that do not support `calc()` and `var()` will not be able to take advantage of `amp-animation` polyfills when keyframes are specified in CSS. It's thus recommended to always include fallback values in CSS.
+ - CSS extensions such as [`width()`, `height()` and `rand()`](#css-extensions) cannot be used in CSS.
 
 
 #### Whitelisted properties for keyframes
@@ -427,7 +487,7 @@ Both `var()` and `calc()` polyfilled on platforms that do not directly support t
 </amp-animation>
 ```
 
-Animation components can specify their own variables as `--var-name` fields. These variables are propagated into nested animations and override variables of target elements specified via `<style>`. `var()` expressions first try to resolve variable values specified in the animations and then by querying target styles.
+Animation components can specify their own variables as `--var-name` fields. These variables are propagated into nested animations and override variables of target elements specified via stylesheet (`<style>` tag). `var()` expressions first try to resolve variable values specified in the animations and then by querying target styles.
 
 
 ### CSS extensions
@@ -475,7 +535,7 @@ These functions can be combined with `calc()`, `var()` and other CSS expressions
 
 The animation can be triggered via a `trigger` attribute or an `on` action.
 
-**`trigger` attribute**
+### `trigger` attribute
 
 Currently, `visibility` is the only available value for the `trigger` attribute. The `visibility` triggers when the underlying document or embed are visible (in viewport).
 
@@ -487,7 +547,7 @@ For instance:
 </amp-animation>
 ```
 
-**`on` action**
+### Triggering via `on` action
 
 For instance:
 
@@ -495,5 +555,22 @@ For instance:
 <amp-animation id="anim1" layout="nodisplay">
   ...
 </amp-animation>
-<button on="tap:anim1.activate">Animate</button>
+<button on="tap:anim1.start">Animate</button>
 ```
+
+
+## `on` actions
+
+`amp-animation` element exports the following actions:
+
+- `start` - Starts the animation is it's not running already. Timing properties and variables
+  can be specified as action arguments. E.g. `anim1.start(delay=-100, --scale=2)`.
+- `restart` - Starts the animation or restarts the currently running one. Timing properties and variables
+  can be specified as action arguments. E.g. `anim1.start(delay=-100, --scale=2)`.
+- `pause` - Pauses the currently running animation.
+- `resume` - Resumes the currently running animation.
+- `togglePause` - Toggles pause/resume actions.
+- `seekTo` - Pauses the animation and seeks to the point of time specified by the `time` argument in milliseconds.
+- `reverse` - Reverses the animation.
+- `finish` - Finishes the animation.
+- `cancel` - Cancels the animation.
