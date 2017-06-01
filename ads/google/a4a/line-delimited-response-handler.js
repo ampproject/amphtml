@@ -23,31 +23,26 @@
   *
   * @param {!../../../src/service/xhr-impl.Xhr} xhr
   * @param {string} url
-  * @param {!function(string, !Object<string, *>, boolean)} chunkHandler called
+  * @param {!function(string, !Object<string, *>, boolean)} slotCallback called
   *    with creative, metadata, and boolean indicating if completed.  Failure to
   *    JSON parse metadata will cause empty object to be given.
   * @param {?../../../src/service/xhr-impl.FetchInitDef=} opt_init
   * @return {!Promise<!../../../src/service/xhr-impl.FetchResponse>} response,
   *    note that accessing body will cause error as its consumed in streaming.
   */
- export function fetchLineDelimitedChunks(xhr, url, chunkHandler, opt_init) {
+ export function fetchLineDelimitedChunks(xhr, url, slotCallback, opt_init) {
    return xhr.fetch(url, opt_init)
      .then(response => {
-       if (!response.body || !xhr.win.TextDecoder) {
-         // TODO(keithwrightbos) - TextDecoder polyfill?
-         response.text().then(content =>
-           chunkHandleFullResponse(content, chunkHandler));
-         return response;
-       }
        let metadata;
        let snippet = '';
        const chunkCallback = (chunk, done) => {
          const regex = /([^\n]*)(\n)?/g;
+         let match;
          while ((match = regex.exec(chunk))) {
            snippet += match[1];
            if (match[2]) {
              if (metadata) {
-               chunkHandler(unescapeHtml_(snippet), metadata,
+               slotCallback(unescapeHtml_(snippet), metadata,
                   done && regex.lastIndex === chunk.length);
                metadata = undefined;
              } else {
@@ -55,12 +50,19 @@
              }
              snippet = '';
            }
-           if (regex.lastIndex === chunk.length) break;
+           if (regex.lastIndex === chunk.length) {
+             break;
+           }
          }
        };
-       handleFetchResponseStream_(
-         response.body.getReader(), chunkCallback, new TextDecoder('utf-8'));
-       return response;
+       if (!response.body || !xhr.win.TextDecoder) {
+         // TODO(keithwrightbos) - TextDecoder polyfill?
+         response.text().then(content => chunkCallback(content, true));
+       } else {
+         handleFetchResponseStream_(
+           response.body.getReader(), chunkCallback, new TextDecoder('utf-8'));
+       }
+       return {status: response.status, headers: response.headers};
      });
  }
 
@@ -84,21 +86,6 @@
        reader.read().then(chunk);
      }
    });
- }
-
- /**
-  * @param {string} text
-  * @param {!function(string, !Object<string, *>, boolean)} chunkHandler
-  * @visibleForTesting
-  */
- function chunkHandleFullResponse(text, chunkHandler) {
-   const lines = text.split('\n');
-   for (let i = 1; i < lines.length; i += 2) {
-     chunkHandler(
-       unescapeHtml_(lines[i]),
-       safeJsonParse_(lines[i - 1]),
-       i == lines.length - 1);
-   }
  }
 
  /**
@@ -127,17 +114,3 @@
      return {};
    }
  }
-
- /**
-  * Counts the number of trailing backslashes in the given html.
-  * @param {string} html The html to be inspected.
-  * @param {number} end The last position of html to be read.
-  * @return {number}
-  */
- const countTrailingSlashes = (html, end) => {
-   let slashes = 0;
-   while (end >= 0 && html[end--] == '\\') {
-     slashes++;
-   }
-   return slashes;
- };

@@ -339,7 +339,6 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     it('returns the right URL', () => {
       new AmpAd(element).upgradeCallback();
       return impl.getAdUrl().then(url => {
-<<<<<<< HEAD
         [
           /^https:\/\/securepubads\.g\.doubleclick\.net\/gampad\/ads/,
           /(\?|&)adk=\d+(&|$)/,

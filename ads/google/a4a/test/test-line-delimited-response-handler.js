@@ -178,7 +178,7 @@ describe('#line-delimited-response-handler', () => {
     it('should handle multiple no fill responses properly', () => {
       slotData = [
         {headers: {}, creative: ''},
-        {headers: {}, creative: ''}
+        {headers: {}, creative: ''},
       ];
       setup();
       return executeAndVerifyResponse();

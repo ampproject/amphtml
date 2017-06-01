@@ -494,7 +494,7 @@ export class FetchResponse {
     this.bodyUsed = false;
 
     /** @type {?ReadableStream} */
-    this.body = this.xhr_.body;
+    this.body = null;
   }
 
   /**

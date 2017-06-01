@@ -202,7 +202,7 @@ export function groupAmpAdsByType(win, type, groupFn) {
  */
 export function googlePageParameters(win, doc, startTime, output = 'html') {
   const referrerPromise = viewerForDoc(doc).getReferrerUrl();
-  return getOrCreateAdCid(a4a.getAmpDoc(), 'AMP_ECID_GOOGLE', '_ga')
+  return getOrCreateAdCid(doc, 'AMP_ECID_GOOGLE', '_ga')
     .then(clientId => referrerPromise.then(referrer => {
       const documentInfo = documentInfoForDoc(win.document);
         // Read by GPT for GA/GPT integration.
@@ -254,7 +254,6 @@ export function googlePageParameters(win, doc, startTime, output = 'html') {
 export function googleAdUrl(
     a4a, baseUrl, startTime, parameters, opt_experimentIds) {
   // TODO: Maybe add checks in case these promises fail.
-<<<<<<< HEAD
   const blockLevelParameters = googleBlockParameters(a4a, opt_experimentIds);
   return googlePageParameters(a4a.win, a4a.getAmpDoc(), startTime)
     .then(pageLevelParameters => {
