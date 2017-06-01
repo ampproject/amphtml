@@ -153,7 +153,7 @@ const BLOCK_SRA_COMBINERS_ = [
       if (!instance.jsonTargeting_) {
         return;
       }
-      scps.push(serializeTargeting(
+      scps.push(serializeTargeting_(
           instance.jsonTargeting_['targeting'] || null,
           instance.jsonTargeting_['categoryExclusions'] || null));
     });
@@ -287,7 +287,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'sz': sizeStr,
       'tfcd': tfcd == undefined ? null : tfcd,
       'adtest': isInManualExperiment(this.element) ? 'on' : null,
-      'scp': serializeTargeting(
+      'scp': serializeTargeting_(
           this.jsonTargeting_['targeting'] || null,
           this.jsonTargeting_['categoryExclusions'] || null),
     }, googleBlockParameters(this));
@@ -595,13 +595,14 @@ function getPageLevelParameters_(win, doc, startTime, isSra) {
  * @param {?Object<string, (!Array<string>|string)>} targeting
  * @param {?(!Array<string>|string)} categoryExclusions
  * @return {?string}
+ * @private
  */
-function serializeTargeting(targeting, categoryExclusions) {
+function serializeTargeting_(targeting, categoryExclusions) {
   const serialized = targeting ?
-      Object.keys(targeting).map(key => serializeItem(key, targeting[key])) :
+      Object.keys(targeting).map(key => serializeItem_(key, targeting[key])) :
       [];
   if (categoryExclusions) {
-    serialized.push(serializeItem('excl_cat', categoryExclusions));
+    serialized.push(serializeItem_('excl_cat', categoryExclusions));
   }
   return serialized.length ? serialized.join('&') : null;
 }
@@ -610,12 +611,12 @@ function serializeTargeting(targeting, categoryExclusions) {
  * @param {string} key
  * @param {(!Array<string>|string)} value
  * @return {string}
+ * @private
  */
-function serializeItem(key, value) {
-  const serializedKey = encodeURIComponent(key);
-  const serializedValue = Array.isArray(value) ?
-      value.map(encodeURIComponent).join(',') : encodeURIComponent(value);
-  return `${serializedKey}=${serializedValue}`;
+function serializeItem_(key, value) {
+  const serializedValue =
+    (Array.isArray(value) ? value : [value]).map(encodeURIComponent).join();
+  return `${encodeURIComponent(key)}=${serializedValue}`;
 }
 
 /**
