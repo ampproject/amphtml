@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-const RTV_VERSION = '1234'; // TODO Replace with import from AMP, or just remove
-
 /**
  * This provides the "glue" between the AMP Analytics tag and the third-party
  * vendor's metrics-collection page.
@@ -25,16 +23,16 @@ const RTV_VERSION = '1234'; // TODO Replace with import from AMP, or just remove
 class AmpAnalyticsRemoteFrameManager {
   constructor() {
     /**
-     * @type {Function<!String>}
+     * @type {function<!string>}
      * @private
      */
-    this.listener_ = () => {};
+    this.listener_ = null;
 
     /**
      * @type {Function<!String>}
      * @private
      */
-    this.extraDataListener_ = () => {};
+    this.extraDataListener_ = null;
 
     /**
      * Holds a mapping between sender ID and extra data
@@ -60,25 +58,32 @@ class AmpAnalyticsRemoteFrameManager {
    * Receives a message from the creative. Handles deserialization (which
    * filters out messages not actually meant for us) and passes it to the
    * listener that was supplied to registerAmpAnalyticsEventListener above.
-   * @param {!String} message The message that was received.
+   * @param {!string} message The message that was received.
    */
   receiveMessageFromCreative(message) {
-    if (message && message.data) {
-      const deserialized = deserializeMessage(message.data);
-      if (deserialized) {
-        this.setSentinel_(deserialized.sentinel);
-        if (deserialized.ampAnalyticsExtraData) {
-          this.senderIdToExtraData_[deserialized.senderId] =
-            deserialized.ampAnalyticsExtraData;
-          window.requestIdleCallback(() => {
-            this.extraDataListener_(deserialized.senderId,
-              deserialized.ampAnalyticsExtraData);
-          });
-        } else if (deserialized.ampAnalyticsEvents) {
-          window.requestIdleCallback(() => {
-            this.listener_(deserialized.ampAnalyticsEvents);
-          });
+    if (!message || !message.data) {
+      return;
+    }
+    const deserialized = deserializeMessage(message.data);
+    if (deserialized) {
+      this.setSentinel_(deserialized.sentinel);
+      if (deserialized.ampAnalyticsExtraData) {
+        this.senderIdToExtraData_[deserialized.senderId] =
+          deserialized.ampAnalyticsExtraData;
+        if (!this.extraDataListener_) {
+          return;
         }
+        requestIdleCallback(() => {
+          this.extraDataListener_(deserialized.senderId,
+            deserialized.ampAnalyticsExtraData);
+        });
+      } else if (deserialized.ampAnalyticsEvents) {
+        if (!this.listener_) {
+          return;
+        }
+        requestIdleCallback(() => {
+          this.listener_(deserialized.ampAnalyticsEvents);
+        });
       }
     }
   }
@@ -86,12 +91,12 @@ class AmpAnalyticsRemoteFrameManager {
   /**
    * Sets the sentinel value, which is used to identify which creative the
    * event messages come from
-   * @param {!String} sentinel The sentinel value
+   * @param {!string} sentinel The sentinel value
    */
   setSentinel_(sentinel) {
     if (this.sentinel_ && sentinel != this.sentinel_) {
-      console.warn("Attempting to set sentinel to " + sentinel + " when it" +
-          " was already set to " + this.sentinel_);
+      dev().warn('Attempting to set sentinel to ' + sentinel +
+        ' when it was already set to ' + this.sentinel_);
     }
     this.sentinel_ = sentinel;
   }
@@ -99,8 +104,8 @@ class AmpAnalyticsRemoteFrameManager {
   /**
    * Gets any optional extra data that should be made available to the
    * cross-domain frame, in the context of a particular creative.
-   * @param {!number} senderId The ID of the creative that sent the extra data
-   * @returns {String=}
+   * @param {number} senderId The ID of the creative that sent the extra data
+   * @returns {string=}
    */
   getExtraData(senderId) {
     return this.senderIdToExtraData_[senderId];
@@ -109,31 +114,32 @@ class AmpAnalyticsRemoteFrameManager {
   /**
    * Sends a message from the third-party vendor's metrics-collection page back
    * to the creative.
-   * @param {!String} message The message to send.
+   * @param {!string} message The message to send.
    */
   sendMessageToCreative(message) {
     /*REVIEW*/window.parent.postMessage(
-        serializeMessage('ampAnalyticsResponse', this.sentinel_,
-            {ampAnalyticsResponse: message}, RTV_VERSION), '*');
+        serializeMessage('ampAnalytics3pResponse', this.sentinel_,
+            {ampAnalytics3pResponse: message}), '*');
   }
 };
 
 // Simple requestIdleCallback polyfill
-window.requestIdleCallback =
-    window.requestIdleCallback || (cb => setTimeout(cb, 1));
+// TODO: Combine this with the onReady() change
+requestIdleCallback =
+  window.requestIdleCallback || (cb => setTimeout(cb, 1));
 
 /**
- * @const {AmpAnalyticsRemoteFrameManager}
+ * @private @const {!AmpAnalyticsRemoteFrameManager}
  */
 const remoteFrameMgr_ = new AmpAnalyticsRemoteFrameManager();
 
 if (window.onNewAmpAnalyticsInstance) {
-  window.addEventListener("message", message => {
+  window.addEventListener('message', message => {
     remoteFrameMgr_.receiveMessageFromCreative(message);
   });
   window.onNewAmpAnalyticsInstance(remoteFrameMgr_);
 } else {
-  console.error("Vendor page must implement onNewAmpAnalyticsInstance.");
+  dev().error('Vendor page must implement onNewAmpAnalyticsInstance.');
 }
 
 // TODO: Consider getting rid of everything below here, and importing from
@@ -185,4 +191,9 @@ function isAmpMessage(message) {
   return (typeof message == 'string' &&
   message.indexOf(AMP_MESSAGE_PREFIX) == 0 &&
   message.indexOf('{') != -1);
+}
+
+// TODO: Temp to enable testing until we import AMP stuff
+function dev() {
+  return console;
 }

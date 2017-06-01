@@ -24,7 +24,7 @@ adopt(window);
 describe('amp-analytics.transport', () => {
 
   let sandbox;
-  let transport = new Transport();
+  const transport = new Transport();
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
   });

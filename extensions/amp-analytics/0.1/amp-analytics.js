@@ -168,7 +168,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /* @ override */
   unlayoutCallback() {
-    Transport.doneWithCrossDomainIframe(this.getAmpDoc().win.document,
+    Transport.doneUsingCrossDomainIframe(this.getAmpDoc().win.document,
       this.config_['transport']);
     return true;
   }
@@ -300,7 +300,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /**
    * Receives any response that may be sent from the cross-domain iframe
-   * @param {String} msg The response message from the iframe
+   * @param {string} msg The response message from the iframe
    * was specified in the amp-analytics config
    */
   processCrossDomainIframeResponse_(msg) {
