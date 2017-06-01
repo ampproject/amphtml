@@ -341,6 +341,18 @@ Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and
   </tr>
 </table>
 
+### form
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>submit</td>
+    <td>Submits the form.</td>
+  </tr>
+</table>
+
 ## `AMP` target
 
 `AMP` target is a special target. It's provided by the AMP runtime and implements top-level
