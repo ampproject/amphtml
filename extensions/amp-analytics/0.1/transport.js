@@ -175,7 +175,7 @@ export class Transport {
       ampDoc.body.appendChild(frame);
     }
     // Regardless of whether we just created it, or are re-using an existing
-    // one, send extra data if available, and wire up the response callback
+    // one, wire up the response callback
     if (processResponse) {
       const imc = Transport.crossDomainIframes_[frameUrl].iframeMessagingClient;
       imc.registerCallback(
@@ -196,7 +196,7 @@ export class Transport {
    * @param {!Object<string,string>} transportOptions The 'transport' portion
    * of the amp-analytics config object
    */
-  doneWithCrossDomainIframe(ampDoc, transportOptions) {
+  static doneWithCrossDomainIframe(ampDoc, transportOptions) {
     const frameUrl = transportOptions['iframe'];
     if (Transport.hasCrossDomainFrame(frameUrl) &&
       Transport.decrementFrameUsageCount_(frameUrl) <= 0) {
