@@ -28,15 +28,27 @@ const TAG = 'amp-bind';
  */
 export let BindExpressionResultDef;
 
+/**
+ * Default maximum number of nodes in an expression AST.
+ * Double size of a "typical" expression in examples/bind/performance.amp.html.
+ * @const @private {number}
+ */
+const DEFAULT_MAX_AST_SIZE = 50;
+
 /** @const @private {string} */
 const BUILT_IN_FUNCTIONS = 'built-in-functions';
 
 /**
  * Map of object type to function name to whitelisted function.
- * @const @private {!Object<string, !Object<string, Function>>}
+ * @private {!Object<string, !Object<string, Function>>}
  */
-const FUNCTION_WHITELIST = (function() {
+let FUNCTION_WHITELIST;
 
+/**
+ * @return {!Object<string, !Object<string, Function>>}
+ * @private
+ */
+function generateFunctionWhitelist() {
   /**
    * Similar to Array.prototype.splice, except it returns a copy of the
    * passed-in array with the desired modifications.
@@ -101,25 +113,21 @@ const FUNCTION_WHITELIST = (function() {
   Object.keys(whitelist).forEach(type => {
     out[type] = Object.create(null);
 
-    const functions = whitelist[type];
-    for (let i = 0; i < functions.length; i++) {
-      const f = functions[i];
-      out[type][f.name] = f;
-    }
+    whitelist[type].forEach((fn, i) => {
+      if (fn) {
+        out[type][fn.name] = fn;
+      } else {
+        // This can happen if a browser doesn't support a built-in function.
+        throw new Error(`Unsupported function for ${type} at index ${i}.`);
+      }
+    });
   });
 
   // Custom functions (non-js-built-ins) must be added manually as their names
   // will be minified at compile time.
   out[BUILT_IN_FUNCTIONS]['copyAndSplice'] = copyAndSplice;
   return out;
-})();
-
-/**
- * Default maximum number of nodes in an expression AST.
- * Double size of a "typical" expression in examples/bind/performance.amp.html.
- * @const @private {number}
- */
-const DEFAULT_MAX_AST_SIZE = 50;
+}
 
 /**
  * A single Bind expression.
@@ -131,6 +139,10 @@ export class BindExpression {
    * @throws {Error} On malformed expressions.
    */
   constructor(expressionString, opt_maxAstSize) {
+    if (!FUNCTION_WHITELIST) {
+      FUNCTION_WHITELIST = generateFunctionWhitelist();
+    }
+
     /** @const {string} */
     this.expressionString = expressionString;
 

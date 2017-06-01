@@ -1030,7 +1030,14 @@ export class Bind {
    */
   dispatchEventForTesting_(name) {
     if (getMode().test) {
-      this.localWin_.dispatchEvent(new Event(name));
+      let event;
+      if (typeof this.localWin_.Event === 'function') {
+        event = new Event(name, {bubbles: true, cancelable: true});
+      } else {
+        event = this.localWin_.document.createEvent('Event');
+        event.initEvent(name, /* bubbles */ true, /* cancelable */ true);
+      }
+      this.localWin_.dispatchEvent(event);
     }
   }
 }
