@@ -122,6 +122,17 @@
   "--delay": "rand(0.1s, var(--max-delay))",
   "delay": "var(--delay)",
   "direction": "normal",
+  "subtargets": [
+    {
+      "index": 0,
+      "direction": "reverse"
+    },
+    {
+      "selector": ".antigrav",
+      "direction": "reverse",
+      "--delay": "0s"
+    }
+  ],
   "keyframes": {"transform": "translateY(120vh)"}
 }
 </script>
@@ -130,7 +141,7 @@
 <div class="rain">
   <div class="drop"></div>
   <div class="drop"></div>
-  <div class="drop"></div>
+  <div class="drop antigrav"></div>
   <div class="drop"></div>
   <div class="drop"></div>
   <div class="drop"></div>
