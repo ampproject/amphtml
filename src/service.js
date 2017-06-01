@@ -601,7 +601,8 @@ export function isEmbeddable(service) {
  */
 export function adoptServiceForEmbed(embedWin, serviceId) {
   const adopted = adoptServiceForEmbedIfEmbeddable(embedWin, serviceId);
-  dev().assert(adopted, `${serviceId} does not implement EmbeddableService.`);
+  dev().assert(adopted,
+      `${serviceId} required to implement EmbeddableService.`);
 }
 
 
