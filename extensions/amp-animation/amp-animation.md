@@ -216,7 +216,7 @@ Animation components inherit timing properties specified for the top-level anima
 
 ### Keyframes
 
-Keyframes can be specified in numerous ways described in the [keyframes section](https://www.w3.org/TR/web-animations/#processing-a-keyframes-argument) of the Web Animations spec.
+Keyframes can be specified in numerous ways described in the [keyframes section](https://www.w3.org/TR/web-animations/#processing-a-keyframes-argument) of the Web Animations spec or as a string refering to the `@keyframes` name in the CSS.
 
 Some typical examples of keyframes definitions are below.
 
@@ -281,6 +281,36 @@ The array-form can also include "easing":
 For additional keyframes formats refer to [Web Animations spec](https://www.w3.org/TR/web-animations/#processing-a-keyframes-argument).
 
 The property values allow any valid CSS values, including `calc()`, `var()` and other CSS expressions.
+
+#### Keyframes from CSS
+
+Another way to specify keyframes is in the document's stylesheet (`<style>` tag) as `@keyframes` CSS rule. For instance:
+```html
+<style amp-custom>
+  @keyframes keyframes1 {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+</style>
+
+<amp-animation layout="nodisplay">
+<script type="application/json">
+{
+  "duration": "1s",
+  "keyframes": "keyframes1"
+}
+</script>
+</amp-animation>
+```
+
+CSS `@keyframes` are mostly equivalent to inlining keyframes definition in the JSON per [Web Animations spec](https://www.w3.org/TR/web-animations/#processing-a-keyframes-argument). However, there are some nuances:
+ - For broad-platform support, vendor prefixes, e.g. `@-ms-keyframes {}` or `-moz-transform` may be needed. Vendor prefixes are not needed and not allowed in the JSON format, but in CSS they could be necessary.
+ - Platforms that do not support `calc()` and `var()` will not be able to take advantage of `amp-animation` polyfills when keyframes are specified in CSS. It's thus recommended to always include fallback values in CSS.
+ - CSS extensions such as [`width()`, `height()` and `rand()`](#css-extensions) cannot be used in CSS.
 
 
 #### Whitelisted properties for keyframes
@@ -427,7 +457,7 @@ Both `var()` and `calc()` polyfilled on platforms that do not directly support t
 </amp-animation>
 ```
 
-Animation components can specify their own variables as `--var-name` fields. These variables are propagated into nested animations and override variables of target elements specified via `<style>`. `var()` expressions first try to resolve variable values specified in the animations and then by querying target styles.
+Animation components can specify their own variables as `--var-name` fields. These variables are propagated into nested animations and override variables of target elements specified via stylesheet (`<style>` tag). `var()` expressions first try to resolve variable values specified in the animations and then by querying target styles.
 
 
 ### CSS extensions

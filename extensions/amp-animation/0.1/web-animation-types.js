@@ -48,7 +48,7 @@ export let WebCompAnimationDef;
  * @mixes WebAnimationTimingDef
  * @mixes WebAnimationMediaDef
  * @typedef {{
- *   keyframes: !WebKeyframesDef,
+ *   keyframes: (string|!WebKeyframesDef),
  * }}
  */
 export let WebKeyframeAnimationDef;

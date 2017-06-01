@@ -22,6 +22,7 @@ import {
   WebAnimationPlayState,
 } from '../web-animation-types';
 import {isArray, isObject} from '../../../../src/types';
+import {poll} from '../../../../testing/iframe';
 import {user} from '../../../../src/log';
 import * as sinon from 'sinon';
 
@@ -305,7 +306,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
         '--child5': 'var(--child6)',  // Reverse order dependency.
         '--child6': '23px',
         keyframes: {
-          transform: 'translate()',
+          transform: 'translate(var(--child3), var(--child4))',
         },
       }],
     });
@@ -320,6 +321,8 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       '--child5': '23px',
       '--child6': '23px',
     });
+    expect(requests[0].keyframes.transform[1])
+        .to.equal('translate(11px,22px)');
   });
 
   it('should accept keyframe animation', () => {
@@ -514,6 +517,38 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       },
     })[0].keyframes;
     expect(keyframes.opacity).to.jsonEqual(['0', '0.525']);
+  });
+
+  it('should fail when cannot discover style keyframes', () => {
+    expect(() => scan({target: target1, keyframes: 'keyframes1'}))
+        .to.throw(/Keyframes not found/);
+  });
+
+  it('should discover style keyframes', () => {
+    const name = 'keyframes1';
+    const css = 'from{opacity: 0} to{opacity: 1}';
+    const style = doc.createElement('style');
+    style.setAttribute('amp-custom', '');
+    style.textContent =
+        `@-ms-keyframes ${name} {${css}}` +
+        `@-moz-keyframes ${name} {${css}}` +
+        `@-webkit-keyframes ${name} {${css}}` +
+        `@keyframes ${name} {${css}}`;
+    doc.head.appendChild(style);
+    return poll('wait for style', () => {
+      for (let i = 0; i < doc.styleSheets.length; i++) {
+        if (doc.styleSheets[i].ownerNode == style) {
+          return true;
+        }
+      }
+      return false;
+    }).then(() => {
+      const keyframes = scan({target: target1, keyframes: name})[0].keyframes;
+      expect(keyframes).to.jsonEqual([
+        {offset: 0, opacity: '0'},
+        {offset: 1, opacity: '1'},
+      ]);
+    });
   });
 
   it('should check media in top animation', () => {
