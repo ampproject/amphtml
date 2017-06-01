@@ -20,6 +20,7 @@ import {ScrollboundPlayer} from './scrollbound-player';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 import {closestBySelector} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
+import {extractKeyframes} from './keyframes-extractor';
 import {getMode} from '../../../src/mode';
 import {getVendorJsPropertyName, computedStyle} from '../../../src/style';
 import {isArray, isObject, toArray} from '../../../src/types';
@@ -354,7 +355,7 @@ class Scanner {
 export class Builder {
   /**
    * @param {!Window} win
-   * @param {!Node} rootNode
+   * @param {!Document|!ShadowRoot} rootNode
    * @param {string} baseUrl
    * @param {!../../../src/service/vsync-impl.Vsync} vsync
    * @param {!../../../src/service/resources-impl.Resources} resources
@@ -581,6 +582,14 @@ export class MeasureScanner extends Scanner {
    * @private
    */
   createKeyframes_(target, spec) {
+    if (typeof spec.keyframes == 'string') {
+      // Keyframes name to be extracted from `<style>`.
+      const keyframes = extractKeyframes(this.css_.rootNode_, spec.keyframes);
+      user().assert(keyframes,
+          `Keyframes not found in stylesheet: "${spec.keyframes}"`);
+      return /** @type {!WebKeyframesDef} */ (keyframes);
+    }
+
     if (isObject(spec.keyframes)) {
       // Property -> keyframes form.
       // The object is cloned, while properties are verified to be
@@ -852,7 +861,7 @@ export class MeasureScanner extends Scanner {
 class CssContextImpl {
   /**
    * @param {!Window} win
-   * @param {!Node} rootNode
+   * @param {!Document|!ShadowRoot} rootNode
    * @param {string} baseUrl
    */
   constructor(win, rootNode, baseUrl) {
