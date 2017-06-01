@@ -26,10 +26,12 @@ import {
 } from '../../../ads/google/a4a/traffic-experiments';
 import {
   extractGoogleAdCreativeAndSignature,
-  googleAdUrl,
+  googleQueryParams,
   isGoogleAdsA4AValidEnvironment,
   AmpAnalyticsConfigDef,
   extractAmpAnalyticsConfig,
+  elapsedTimeWithCeiling,
+  MAX_URL_LENGTH,
 } from '../../../ads/google/a4a/utils';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {
@@ -38,8 +40,9 @@ import {
 } from '../../../ads/google/a4a/google-data-reporter';
 import {stringHash32} from '../../../src/crypto';
 import {removeElement} from '../../../src/dom';
+import {tryParseJson} from '../../../src/json';
 import {dev} from '../../../src/log';
-import {extensionsFor} from '../../../src/services';
+import {extensionsFor, timerFor} from '../../../src/services';
 import {isExperimentOn} from '../../../src/experiments';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {insertAnalyticsElement} from '../../../src/analytics';
@@ -94,6 +97,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getAdUrl() {
     // TODO: Check for required and allowed parameters. Probably use
     // validateData, from 3p/3p/js, after noving it someplace common.
+    const rtcConfig = tryParseJson(document.getElementById('amp-rtc').innerHTML);
+    const rtcRequestPromise = rtcConfig ? this.sendRtcRequestPromise(rtcConfig) : null;
+    let queryParams;
+
     const startTime = Date.now();
     const global = this.win;
     const width = Number(this.element.getAttribute('width'));
@@ -130,7 +137,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           .join('|');
     }
 
-    return googleAdUrl(this, DOUBLECLICK_BASE_URL, startTime, [
+    return googleQueryParams(this, DOUBLECLICK_BASE_URL, startTime, [
       {name: 'iu', value: this.element.getAttribute('data-slot')},
       {name: 'co', value: jsonParameters['cookieOptOut'] ? '1' : null},
       {name: 'adk', value: this.adKey_(sizeStr)},
@@ -149,7 +156,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             jsonParameters['targeting'] || null,
             jsonParameters['categoryExclusions'] || null),
       },
-    ], ['108809080']);
+    ], ['108809080']).then(allQueryParams => {
+      queryParams = allQueryParams;
+      console.log(queryParams);
+      return rtcRequestPromise;
+    }).then(targetting => {
+      console.log(targetting);
+      console.log(queryParams);
+      const url = buildUrl(DOUBLECLICK_BASE_URL, allQueryParams, MAX_URL_LENGTH - 10,
+                           {name: 'trunc', value: '1'});
+      return url + '&dtd=' + elapsedTimeWithCeiling(Date.now(), startTime);
+    });
   }
 
   /** @override */
@@ -255,6 +272,39 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         && (width <= pWidth && height <= pHeight)) {
       this.attemptChangeSize(height, width).catch(() => {});
     }
+  }
+
+  sendRtcRequestPromise(rtcConfig) {
+
+    console.log("Attempting to send rtc");
+    let endpoint;
+    try {
+      endpoint = rtcConfig['doubleclick']['endpoint'];
+    } catch (err) {
+      // report error
+      return;
+    }
+
+    let rtcresponse;
+
+    const xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4) {
+        rtcResponse(xhr.response);
+      }
+    }
+
+    xhr.open('GET', endpoint, true);
+    //xhr.withCredentials = true;
+    xhr.send();
+
+    const requestPromise = new Promise((resolve, reject) => {
+      rtcResponse = resolve;
+    });
+
+    const timeout = timerFor(window).timeoutPromise(10000);
+    return Promise.race([requestPromise, timeout])
+
   }
 }
 
