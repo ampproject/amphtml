@@ -77,12 +77,14 @@ const INTERNALLY_SELECTED_ID = '2088462';
  * @param {!A4aExperimentBranches} internalBranches experiment and control
  *   branch IDs to use when experiment is triggered internally (i.e., via
  *   client-side selection).
+ * @param {!A4aExperimentBranches} delayedExternalBranches
+ * @param {!A4aExperimentBranches=} opt_sfgInternalBranches
  * @return {boolean} Whether Google Ads should attempt to render via the A4A
  *   pathway.
  */
 export function googleAdsIsA4AEnabled(win, element, experimentName,
     externalBranches, internalBranches, delayedExternalBranches,
-    sfgInternalBranches) {
+    opt_sfgInternalBranches) {
   if (!isGoogleAdsA4AValidEnvironment(win)) {
     // Serving location doesn't qualify for A4A treatment
     return false;
@@ -91,8 +93,10 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
   const isSetFromUrl = maybeSetExperimentFromUrl(win, element,
       experimentName, externalBranches.control,
       externalBranches.experiment, delayedExternalBranches.control,
-      delayedExternalBranches.experiment, sfgInternalBranches.control,
-      sfgInternalBranches.experiment, MANUAL_EXPERIMENT_ID);
+      delayedExternalBranches.experiment,
+      opt_sfgInternalBranches ? opt_sfgInternalBranches.control : null,
+      opt_sfgInternalBranches ? opt_sfgInternalBranches.experiment : null,
+      MANUAL_EXPERIMENT_ID);
   const experimentInfoMap = {};
   const branches = [
     internalBranches.control,
@@ -207,7 +211,7 @@ function maybeSetExperimentFromUrl(win, element, experimentName,
   };
   if (argMapping.hasOwnProperty(arg)) {
     forceExperimentBranch(win, experimentName, argMapping[arg]);
-    // Neither branch of SFG is eligible for A4A.
+    // Neither branch of SFG is eligible for A4A, unless we're an AdSense ad.
     return arg != '5' && arg != '6';
   } else {
     dev().warn('A4A-CONFIG', 'Unknown a4a URL parameter: ', a4aParam,
