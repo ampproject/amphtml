@@ -31,6 +31,7 @@ import * as sinon from 'sinon';
 function setupForAdTesting(fixture) {
   installDocService(fixture.win, /* isSingleDoc */ true);
   const doc = fixture.doc;
+  doc.win = fixture.win;
   // TODO(a4a-cam@): This is necessary in the short term, until A4A is
   // smarter about host document styling.  The issue is that it needs to
   // inherit the AMP runtime style element in order for shadow DOM-enclosed
@@ -113,6 +114,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
+        doc.win = window;
         element = createElementWithAttributes(doc, 'amp-ad', {
           'width': '200',
           'height': '50',
@@ -199,6 +201,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
+        doc.win = window;
         element = createElementWithAttributes(doc, 'amp-ad', {
           'width': '200',
           'height': '50',
@@ -316,7 +319,18 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
               height: 50,
             };
           });
-      sandbox.stub(impl, 'getAmpDoc', () => {return document;});
+
+      sandbox.stub(impl, 'getAmpDoc', () => {
+        document.win = window;
+        return document;
+      });
+      // Reproduced from noopMethods in ads/google/a4a/test/test-utils.js,
+      // to fix failures when this is run after 'gulp build', without a 'dist'.
+      sandbox.stub(impl, 'getPageLayoutBox', () => {
+        return {
+          top: 11, left: 12, right: 0, bottom: 0, width: 0, height: 0,
+        };
+      });
     });
 
     afterEach(() =>
@@ -328,11 +342,12 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         expect(url).to.match(new RegExp(
           '^https://securepubads\\.g\\.doubleclick\\.net/gampad/ads' +
           // Depending on how the test is run, it can get different results.
-          '\\?adk=[0-9]+&gdfp_req=1&impl=ifr&sfv=A&sz=320x50' +
+          '\\?adk=[0-9]+&gdfp_req=1&impl=ifr&sfv=\\d+-\\d+-\\d+&sz=320x50' +
           '&u_sd=[0-9]+(&asnt=[0-9]+-[0-9]+)?(&art=2)?' +
           '&is_amp=3&amp_v=%24internalRuntimeVersion%24' +
           '&d_imp=1&dt=[0-9]+&ifi=[0-9]+&adf=[0-9]+' +
-          '&c=[0-9]+&output=html&nhd=1&biw=[0-9]+&bih=[0-9]+' +
+          '&c=[0-9]+&output=html&nhd=1&eid=([^&]+%2c)*108809080(%2c[^&]+)*' +
+          '&biw=[0-9]+&bih=[0-9]+' +
           '&adx=-?[0-9]+&ady=-?[0-9]+&u_aw=[0-9]+&u_ah=[0-9]+&u_cd=24' +
           '&u_w=[0-9]+&u_h=[0-9]+&u_tz=-?[0-9]+&u_his=[0-9]+' +
           '&oid=2&brdim=-?[0-9]+(%2C-?[0-9]+){9}' +

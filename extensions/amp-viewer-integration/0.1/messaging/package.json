@@ -1,6 +1,6 @@
 {
   "name": "amp-viewer-messaging",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Messaging between an AMP Doc and a Viewer",
   "author": "The AMP HTML Authors",
   "license": "Apache-2.0",
