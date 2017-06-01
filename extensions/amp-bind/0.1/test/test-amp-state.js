@@ -20,7 +20,7 @@ import {viewerForDoc} from '../../../../src/services';
 describes.realWin('AmpState', {
   amp: {
     runtimeOn: true,
-    extensions: ['amp-state:0.1'],
+    extensions: ['amp-bind:0.1'],
   },
 }, env => {
   let ampState;

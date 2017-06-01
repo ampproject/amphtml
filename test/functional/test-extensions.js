@@ -27,6 +27,7 @@ import {
   registerExtension,
 } from '../../src/service/extensions-impl';
 import {extensionsFor} from '../../src/services';
+import {registerServiceBuilder} from '../../src/service';
 import {resetScheduledElementForTesting} from '../../src/custom-element';
 import {loadPromise} from '../../src/event-helper';
 
@@ -473,7 +474,10 @@ describes.sandboxed('Extensions', {}, () => {
           }, parentWin.AMP);
           const elements = {};
           elements[extensionId] = {css: 'a{}'};
-          return {elements};
+          return {
+            elements,
+            services: [],
+          };
         });
       });
       const promise = extensions.installExtensionsInChildWindow(
@@ -494,6 +498,39 @@ describes.sandboxed('Extensions', {}, () => {
       });
     });
 
+    it('should adopt extension services', () => {
+      const fooSpy = sandbox.spy();
+      const fakeServiceFoo = {adoptEmbedWindow: fooSpy};
+      registerServiceBuilder(parentWin, 'fake-service-foo',
+          () => fakeServiceFoo, /* opt_instantiate */ true);
+
+      const barSpy = sandbox.spy();
+      const fakeServiceBar = {adoptEmbedWindow: barSpy};
+      registerServiceBuilder(parentWin, 'fake-service-bar',
+          () => fakeServiceBar, /* opt_instantiate */ true);
+
+      sandbox.stub(extensions, 'loadExtension', extensionId => {
+        return Promise.resolve().then(() => {
+          registerExtension(extensions, extensionId, AMP => {
+            AMP.registerElement(extensionId, AmpTest);
+          }, parentWin.AMP);
+          const elements = {};
+          elements[extensionId] = {};
+          return /* ExtensionDef */ {
+            elements,
+            services: ['fake-service-foo'], // fake-service-bar NOT included.
+          };
+        });
+      });
+
+      const promise =
+          extensions.installExtensionsInChildWindow(iframeWin, ['amp-test']);
+      return promise.then(() => {
+        expect(fooSpy).calledOnce;
+        expect(barSpy).notCalled;
+      });
+    });
+
     it('should call pre-install callback before other installs', () => {
       const stub = sandbox.stub(extensions, 'loadExtension', extensionId => {
         registerExtension(extensions, extensionId, AMP => {
@@ -501,7 +538,10 @@ describes.sandboxed('Extensions', {}, () => {
         }, parentWin.AMP);
         const elements = {};
         elements[extensionId] = {css: 'a{}'};
-        return Promise.resolve({elements});
+        return Promise.resolve({
+          elements,
+          services: [],
+        });
       });
       let preinstallCount = 0;
       const promise = extensions.installExtensionsInChildWindow(

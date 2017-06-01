@@ -24,6 +24,7 @@ import {
 import {
   getElementService,
   getElementServiceForDoc,
+  getElementServiceForDocInEmbedScope,
   getElementServiceIfAvailable,
   getElementServiceIfAvailableForDoc,
 } from './element-service';
@@ -92,7 +93,7 @@ export function batchedXhrFor(window) {
  */
 export function bindForDoc(nodeOrDoc) {
   return /** @type {!Promise<!../extensions/amp-bind/0.1/bind-impl.Bind>} */ (
-      getElementServiceForDoc(nodeOrDoc, 'bind', 'amp-bind'));
+      getElementServiceForDocInEmbedScope(nodeOrDoc, 'bind', 'amp-bind'));
 }
 
 /**

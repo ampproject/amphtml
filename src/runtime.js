@@ -27,6 +27,7 @@ import {VisibilityState} from './visibility-state';
 import {
   addDocFactoryToExtension,
   addElementToExtension,
+  addServiceToExtension,
   addShadowRootFactoryToExtension,
   installBuiltinElements,
   installExtensionsInShadowDoc,
@@ -530,6 +531,8 @@ function prepareAndRegisterServiceForDoc(global, extensions,
   const ampdocService = ampdocServiceFor(global);
   const ampdoc = ampdocService.getAmpDoc();
   registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory);
+
+  addServiceToExtension(extensions, name);
 }
 
 
@@ -548,6 +551,8 @@ function prepareAndRegisterServiceForDocShadowMode(global, extensions,
   addDocFactoryToExtension(extensions, ampdoc => {
     registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory);
   }, name);
+
+  addServiceToExtension(extensions, name);
 }
 
 

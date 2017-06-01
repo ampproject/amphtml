@@ -16,8 +16,8 @@
 
 import {
   adoptServiceForEmbed,
+  adoptServiceForEmbedIfEmbeddable,
   assertDisposable,
-  assertEmbeddable,
   disposeServicesForDoc,
   getExistingServiceForDocInEmbedScope,
   getExistingServiceInEmbedScope,
@@ -568,12 +568,6 @@ describe('service', () => {
         expect(isEmbeddable(nonEmbeddable)).to.be.false;
       });
 
-      it('should assert embeddable interface', () => {
-        expect(assertEmbeddable(embeddable)).to.equal(embeddable);
-        expect(() => assertEmbeddable(nonEmbeddable))
-            .to.throw(/required to implement EmbeddableService/);
-      });
-
       it('should adopt embeddable', () => {
         adoptServiceForEmbed(embedWin, 'embeddable');
         expect(embeddable.adoptEmbedWindow).to.be.calledOnce;
@@ -584,6 +578,14 @@ describe('service', () => {
         expect(() => {
           adoptServiceForEmbed(embedWin, 'nonEmbeddable');
         }).to.throw(/required to implement EmbeddableService/);
+      });
+
+      it('should adopt embeddable if embeddable', () => {
+        adoptServiceForEmbedIfEmbeddable(embedWin, 'embeddable');
+        expect(embeddable.adoptEmbedWindow).to.be.calledOnce;
+        expect(embeddable.adoptEmbedWindow.args[0][0]).to.equal(embedWin);
+
+        adoptServiceForEmbedIfEmbeddable(embedWin, 'nonEmbeddable'); // No-op.
       });
 
       it('should refuse adopt of unknown service', () => {
