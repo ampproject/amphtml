@@ -291,6 +291,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     }
     this.ampAnalyticsConfig_ = null;
   }
+
+  /** @override */
+  getPreconnectUrls() {
+    return ['https://googleads.g.doubleclick.net'];
+  }
 }
 
 AMP.registerElement('amp-ad-network-adsense-impl', AmpAdNetworkAdsenseImpl);

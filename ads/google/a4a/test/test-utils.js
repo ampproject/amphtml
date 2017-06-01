@@ -263,6 +263,7 @@ describe('Google A4A utils', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
+        doc.win = window;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
           'width': '320',
@@ -290,6 +291,7 @@ describe('Google A4A utils', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
+        doc.win = window;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
           'width': '320',
@@ -310,6 +312,7 @@ describe('Google A4A utils', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
+        doc.win = window;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
           'width': '320',
@@ -330,6 +333,7 @@ describe('Google A4A utils', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
+        doc.win = window;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
           'width': '320',
@@ -353,6 +357,7 @@ describe('Google A4A utils', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
+        doc.win = window;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
           'width': '320',
