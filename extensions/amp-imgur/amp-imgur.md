@@ -27,7 +27,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-imgur-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-imgur" src="https://cdn.ampproject.org/v0/amp-imgur-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
@@ -46,15 +46,19 @@ This extension creates an iframe and displays the imgur post.
 ## Attributes
 
 **data-imgur-id** (required)
+
 The ID of the imgur to embed.
 
 **layout** (required)
+
 Currently only supports `responsive`.
 
 **width** (required)
+
 The width of the imgur.
 
 **height** (required)
+
 The width of the imgur.
 
 ## Validation
