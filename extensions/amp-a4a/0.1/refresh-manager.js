@@ -64,8 +64,8 @@ export class RefreshManager {
    */
   initiateRefreshCycle() {
     if (!this.isRefreshEnabled_()) {
-      // This instance of AmpA4A is not eligible for refresh, or does not it
-      // enabled.
+      // This instance of AmpA4A is not eligible for refresh, or does not have
+      // it enabled.
       return;
     }
     analyticsForDoc(this.element_, true).then(analytics => {
