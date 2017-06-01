@@ -85,7 +85,7 @@
           }),
           autosuggest-list.show,
           results.hide"
-        [value]="query"
+        [value]="query || ''"
       />
       <button class="search-submit" type="submit">Search</button>
     </div>
@@ -94,7 +94,7 @@
       layout="fixed-height"
       height="120"
       src="/form/autosuggest/query"
-      [src]="'/form/autosuggest/query?q=' + (autosuggest ? autosuggest : '')"
+      [src]="'/form/autosuggest/query?q=' + (autosuggest || '')"
       id="autosuggest-list"
       hidden
     >
