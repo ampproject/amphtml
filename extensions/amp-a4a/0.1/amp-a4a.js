@@ -19,10 +19,7 @@ import {
   incrementLoadingAds,
 } from '../../amp-ad/0.1/concurrent-load';
 import {adConfig} from '../../../ads/_config';
-import {
-  signingServerURLs,
-  refreshConfigs,
-} from '../../../ads/_a4a-config';
+import {signingServerURLs} from '../../../ads/_a4a-config';
 import {createElementWithAttributes} from '../../../src/dom';
 import {cancellation, isCancellation} from '../../../src/error';
 import {
@@ -40,6 +37,8 @@ import {isArray, isObject, isEnumValue} from '../../../src/types';
 import {some} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
 import {viewerForDoc} from '../../../src/services';
+import {resourcesForDoc} from '../../../src/services';
+import {timerFor} from '../../../src/services';
 import {xhrFor} from '../../../src/services';
 import {endsWith} from '../../../src/string';
 import {platformFor} from '../../../src/services';
@@ -349,9 +348,9 @@ export class AmpA4A extends AMP.BaseElement {
     /**
      * Indicates whether the ad is currently in the process of being refreshed.
      *
-     * @protected {boolean}
+     * @private {boolean}
      */
-    this.isRefreshing = false;
+    this.isRefreshing_ = false;
   }
 
   /** @override */
@@ -529,14 +528,6 @@ export class AmpA4A extends AMP.BaseElement {
       return false;
     }
     return true;
-  }
-
-  /**
-   * @return {?Promise<?CreativeMetaDataDef>}
-   * @protected
-   */
-  getAdPromise() {
-    return this.adPromise_;
   }
 
   /** @override */
@@ -777,6 +768,80 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * Refreshes ad slot by fetching new creative and rendering it.
+   */
+  refresh() {
+    this.isRefreshing_ = true;
+    this.tearDownSlot();
+    this.initiateAdRequest();
+    this.adPromise_.then(() => {
+      if (!this.isRefreshing_) {
+        // If this refresh cycle was canceled, such as in a no-content
+        // response case, keep showing the old creative.
+        refresher.initiateRefreshCycle();
+        return;
+      }
+      this.togglePlaceholder(true);
+      this.destroyFrame(true);
+      // We don't want the next creative to appear too suddenly, so we
+      // show the loader for a quarter of a second before switching to
+      // the new creative.
+      timerFor(this.win).delay(() => {
+        this.attemptToRenderCreative().then(() => {
+          this.isRefreshing_ = false;
+          this.togglePlaceholder(false);
+        });
+      }, 250);
+    });
+  }
+
+  /**
+   * Measures the amount of time until last ad url generation for all amp-ad
+   * elements of this type.
+   * @private
+   */
+  measureGetAdUrlsDelay_() {
+    const startTime = Date.now();
+    const type = this.element.getAttribute('type');
+    const promiseId = this.promiseId_;
+    // Only execute once per page, this includes potential pauseCallback flows.
+    if ((type != 'adsense' && type != 'doubleclick') ||
+      this.win[`a4a-measuring-ad-urls-${type}`]) {
+      return;
+    }
+    this.win[`a4a-measuring-ad-urls-${type}`] =
+     resourcesForDoc(this.element).getMeasuredResources(this.win,
+       r => {
+         return r.element.tagName == 'AMP-AD' &&
+           r.element.getAttribute('type') == type;
+       })
+     .then(resources => {
+       if (promiseId != this.promiseId_) {
+         throw cancellation();
+       }
+       const getAdUrlsPromise = resources.map(r => r.element.getImpl().then(
+         // Note that ad url promise could be null if isValidElement returns
+         // false.
+         instance => instance.adUrlsPromise_));
+       return Promise.all(getAdUrlsPromise).then(adUrls => {
+         if (promiseId != this.promiseId_) {
+           throw cancellation();
+         }
+         this.protectedEmitLifecycleEvent_(
+             'sraBuildRequestDelay', {
+               'met.delta.AD_SLOT_ID': Math.round(Date.now() - startTime),
+               'totalSlotCount.AD_SLOT_ID': adUrls.length,
+               'totalUrlCount.AD_SLOT_ID': adUrls.filter(url => !!url).length,
+               'type.AD_SLOT_ID': type,
+               'totalQueriedSlotCount.AD_SLOT_ID':
+                  this.win.document.querySelectorAll(`amp-ad[type=${type}]`)
+                    .length,
+             });
+       });
+     });
+  }
+
+  /**
    * Attempts to validate the creative signature against every key currently in
    * our possession. This should never be called before at least one key fetch
    * attempt is made.
@@ -950,13 +1015,7 @@ export class AmpA4A extends AMP.BaseElement {
     const checkStillCurrent = this.verifyStillCurrent();
     // Promise chain will have determined if creative is valid AMP.
     return this.adPromise_.then(creativeMetaData => {
-<<<<<<< HEAD
       checkStillCurrent();
-=======
-      if (promiseId != this.promiseId_) {
-        throw cancellation();
-      }
->>>>>>> No longer calling lifecycle methods directly.
       const delta = this.getNow_() - layoutCallbackStart;
       this.protectedEmitLifecycleEvent_('layoutAdPromiseDelay', {
         layoutAdPromiseDelay: Math.round(delta),
@@ -968,7 +1027,7 @@ export class AmpA4A extends AMP.BaseElement {
       // If this.iframe already exists, and we're not currently in the middle
       // of refreshing, bail out here. This should only happen in
       // testing context, not in production.
-      if (this.iframe && !this.isRefreshing) {
+      if (this.iframe && !this.isRefreshing_) {
         this.protectedEmitLifecycleEvent_('iframeAlreadyExists');
         return Promise.resolve();
       }
@@ -1054,11 +1113,11 @@ export class AmpA4A extends AMP.BaseElement {
    * being refreshed.
    *
    * @param {boolean=} force Forces the removal of the frame, even if
-   *   this.isRefreshing is true.
+   *   this.isRefreshing_ is true.
    * @protected
    */
   destroyFrame(force = false) {
-    if (!force && this.isRefreshing) {
+    if (!force && this.isRefreshing_) {
       return;
     }
     if (this.iframe && this.iframe.parentElement) {
@@ -1149,10 +1208,10 @@ export class AmpA4A extends AMP.BaseElement {
    * @visibleForTesting
    */
   forceCollapse() {
-    if (this.isRefreshing) {
+    if (this.isRefreshing_) {
       // If, for whatever reason, the new creative would collapse this slot,
       // stick with the old creative until the next refresh cycle.
-      this.isRefreshing = false;
+      this.isRefreshing_ = false;
       return;
     }
     dev().assert(this.uiHandler);
@@ -1162,34 +1221,6 @@ export class AmpA4A extends AMP.BaseElement {
     this.uiHandler.applyNoContentUI();
     this.isCollapsed_ = true;
   }
-
-  /**
-   * If this ad slot's network has opted in for refresh, and refresh has been
-   * enabled on this slot, this method will return the refresh configuration
-   * for this slot; otherwise, it will return null.
-   *
-   * @return {?./refresh-manager.RefreshConfig}
-   * @protected
-   */
-  getRefreshConfiguration() {
-    const adType = this.element.getAttribute('type');
-    const config = refreshConfigs[adType];
-    if (!config) {
-      // Network has not opted in for refresh eligibility; we can ignore any
-      // and all publisher configurations related to refresh.
-      return null;
-    }
-    let refreshEnabled =
-        this.element.getAttribute('data-enable-refresh') == 'true';
-    if (!refreshEnabled) {
-      const metaTag = this.win.document.getElementsByName(
-          `amp-ad-enable-refresh:${adType}`);
-      refreshEnabled = metaTag[0] &&
-          metaTag[0].getAttribute('content') == 'true';
-    }
-    return refreshEnabled ? config : null;
-  }
-
 
   /**
    * Callback executed when creative has successfully rendered within the
