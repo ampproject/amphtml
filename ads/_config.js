@@ -201,6 +201,8 @@ export const adConfig = {
     prefetch: 'https://s.ato.mx/p.js',
   },
 
+  bidtellect: {},
+
   brainy: {},
 
   bringhub: {
@@ -372,6 +374,7 @@ export const adConfig = {
       'https://js-sec.indexww.com/apl/amp.js',
     ],
     preconnect: 'https://as-sec.casalemedia.com',
+    renderStartImplemented: true,
   },
 
   kargo: {},

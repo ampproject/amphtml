@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {MeasureScanner} from './web-animations';
+import {Builder} from './web-animations';
 import {ScrollboundScene} from './scrollbound-scene';
 import {Pass} from '../../../src/pass';
 import {WebAnimationPlayState} from './web-animation-types';
@@ -135,12 +135,31 @@ export class AmpAnimation extends AMP.BaseElement {
         }
       });
     }
+
+    // Actions.
+    this.registerAction('start', this.startAction_.bind(this));
+    this.registerAction('restart', this.restartAction_.bind(this));
+    this.registerAction('pause', this.pauseAction_.bind(this));
+    this.registerAction('resume', this.resumeAction_.bind(this));
+    this.registerAction('togglePause', this.togglePauseAction_.bind(this));
+    this.registerAction('seekTo', this.seekToAction_.bind(this));
+    this.registerAction('reverse', this.reverseAction_.bind(this));
+    this.registerAction('finish', this.finishAction_.bind(this));
+    this.registerAction('cancel', this.cancelAction_.bind(this));
+  }
+
+  /**
+   * Returns the animation spec.
+   * @return {?JSONType}
+   */
+  getAnimationSpec() {
+    return /** @type {?JSONType} */ (this.configJson_);
   }
 
   /** @override */
   layoutCallback() {
     if (this.triggerOnVisibility_) {
-      this.activate();
+      this.startAction_();
     }
     return Promise.resolve();
   }
@@ -151,23 +170,88 @@ export class AmpAnimation extends AMP.BaseElement {
   }
 
   /** @override */
-  activate() {
+  activate(invocation) {
+    this.startAction_(invocation);
+  }
+
+  /**
+   * @param {?../../../src/service/action-impl.ActionInvocation=} opt_invocation
+   * @private
+   */
+  startAction_(opt_invocation) {
     // The animation has been triggered, but there's no guarantee that it
     // will actually be running.
     this.triggered_ = true;
     if (this.visible_) {
-      this.startOrResume_();
+      this.startOrResume_(opt_invocation ? opt_invocation.args : null);
     }
   }
 
   /**
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   * @private
    */
-  finish() {
-    this.triggered_ = false;
-    if (this.runner_) {
-      this.runner_.finish();
-      this.runner_ = null;
+  restartAction_(invocation) {
+    this.cancel_();
+    // The animation has been triggered, but there's no guarantee that it
+    // will actually be running.
+    this.triggered_ = true;
+    if (this.visible_) {
+      this.startOrResume_(invocation.args);
     }
+  }
+
+  /** @private */
+  pauseAction_() {
+    this.pause_();
+  }
+
+  /** @private */
+  resumeAction_() {
+    if (this.runner_ && this.visible_ && this.triggered_) {
+      this.runner_.resume();
+    }
+  }
+
+  /** @private */
+  togglePauseAction_() {
+    if (this.runner_ && this.visible_ && this.triggered_) {
+      if (this.runner_.getPlayState() == WebAnimationPlayState.PAUSED) {
+        this.startOrResume_();
+      } else {
+        this.pause_();
+      }
+    }
+  }
+
+  /**
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   * @private
+   */
+  seekToAction_(invocation) {
+    if (this.runner_ && this.visible_ && this.triggered_) {
+      const time = parseFloat(invocation.args && invocation.args['time']);
+      if (time && isFinite(time)) {
+        this.runner_.seekTo(time);
+      }
+    }
+  }
+
+  /** @private */
+  reverseAction_() {
+    if (this.runner_ && this.visible_ && this.triggered_) {
+      this.runner_.reverse();
+    }
+  }
+
+  /** @private */
+  finishAction_() {
+    this.finish_();
+  }
+
+  /** @private */
+  cancelAction_() {
+    this.cancel_();
   }
 
   /**
@@ -207,10 +291,11 @@ export class AmpAnimation extends AMP.BaseElement {
   }
 
   /**
+   * @param {?JSONType=} opt_args
    * @return {?Promise}
    * @private
    */
-  startOrResume_() {
+  startOrResume_(opt_args) {
     if (!this.triggered_ || !this.visible_) {
       return null;
     }
@@ -220,7 +305,7 @@ export class AmpAnimation extends AMP.BaseElement {
       return null;
     }
 
-    return this.createRunner_().then(runner => {
+    return this.createRunner_(opt_args).then(runner => {
       this.runner_ = runner;
       this.runner_.onPlayStateChanged(this.playStateChanged_.bind(this));
       this.setupScrollboundAnimations_();
@@ -228,34 +313,55 @@ export class AmpAnimation extends AMP.BaseElement {
     });
   }
 
+  /** @private */
+  finish_() {
+    this.triggered_ = false;
+    if (this.runner_) {
+      this.runner_.finish();
+      this.runner_ = null;
+    }
+  }
+
+  /** @private */
+  cancel_() {
+    this.triggered_ = false;
+    if (this.runner_) {
+      this.runner_.cancel();
+      this.runner_ = null;
+    }
+  }
+
   /**
+   * @param {?JSONType=} opt_args
    * @return {!Promise<!./web-animations.WebAnimationRunner>}
    * @private
    */
-  createRunner_() {
+  createRunner_(opt_args) {
     // Force cast to `WebAnimationDef`. It will be validated during preparation
     // phase.
     const configJson = /** @type {!./web-animation-types.WebAnimationDef} */ (
         this.configJson_);
+    const args = /** @type {?./web-animation-types.WebAnimationDef} */ (
+        opt_args || null);
 
     // Ensure polyfill is installed.
     if (!this.win.Element.prototype.animate) {
       installWebAnimations(this.win);
     }
 
-    const vsync = this.getVsync();
     const ampdoc = this.getAmpDoc();
     const readyPromise = this.embed_ ? this.embed_.whenReady() :
         ampdoc.whenReady();
     const hostWin = this.embed_ ? this.embed_.win : this.win;
     const baseUrl = this.embed_ ? this.embed_.getUrl() : ampdoc.getUrl();
     return readyPromise.then(() => {
-      const measurer = new MeasureScanner(
-          hostWin, this.getRootNode_(), baseUrl, /* validate */ true);
-      return vsync.measurePromise(() => {
-        measurer.scan(configJson);
-        return measurer.createRunner(this.element.getResources());
-      });
+      const builder = new Builder(
+          hostWin,
+          this.getRootNode_(),
+          baseUrl,
+          this.getVsync(),
+          this.element.getResources());
+      return builder.createRunner(configJson, args);
     });
   }
 
@@ -282,7 +388,7 @@ export class AmpAnimation extends AMP.BaseElement {
    */
   playStateChanged_(playState) {
     if (playState == WebAnimationPlayState.FINISHED) {
-      this.finish();
+      this.finish_();
     }
   }
 
