@@ -31,7 +31,7 @@ class AmpFacebook extends AMP.BaseElement {
     this.iframe_ = null;
   }
 
-    /** @override */
+  /** @override */
   renderOutsideViewport() {
     // We are conservative about loading heavy embeds.
     // This will still start loading before they become visible, but it
