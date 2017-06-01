@@ -180,10 +180,10 @@ export class Transport {
       const imc = Transport.crossDomainIframes_[frameUrl].iframeMessagingClient;
       imc.registerCallback(
         'ampAnalyticsResponse', msg => {
-        if (msg && msg.ampAnalyticsResponse) {
-          processResponse(msg.ampAnalyticsResponse);
-        }
-      });
+          if (msg && msg.ampAnalyticsResponse) {
+            processResponse(msg.ampAnalyticsResponse);
+          }
+        });
     }
   }
 

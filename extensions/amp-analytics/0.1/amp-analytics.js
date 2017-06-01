@@ -236,8 +236,9 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     if (this.config_['transport'] && this.config_['transport']['iframe']) {
       this.transport_.processCrossDomainIframe(this.getAmpDoc().win.document,
-        this.config_['transport'],
-        (message) => { this.processCrossDomainIframeResponse_(message); });
+        this.config_['transport'], message => {
+          this.processCrossDomainIframeResponse_(message);
+        });
     }
 
     const promises = [];
@@ -433,6 +434,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     // the others. Allowed when running locally for testing purposes.
     [defaultConfig, inlineConfig, this.remoteConfig_].forEach(config => {
       if (config && config.transport && config.transport.iframe) {
+        const TAG = this.getName_();
         if (getMode().localDev) {
           user().warn(TAG, 'Only typeConfig may specify iframe transport,' +
             ' but in local dev mode, so okay', config);
