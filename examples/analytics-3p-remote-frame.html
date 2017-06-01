@@ -19,14 +19,16 @@
           arrayOfEventStrings => {
             arrayOfEventStrings.forEach(evt => {
               // Now, do something meaningful with the AMP Analytics event
-              console.log("Received an event: " + evt +
-              ", and my extra data is: " + ampAnalytics.getExtraData());
+              console.log("    Received an event: " + evt.request +
+                " from: " + evt.senderId + ", and my extra data is: " +
+                ampAnalytics.getExtraData(evt.senderId));
             });
             ampAnalytics.sendMessageToCreative('received');
           },
           // The following function is optional:
-          extraData => {
-            console.log("Received extra setup data: " + extraData);
+        (senderId, extraData) => {
+            console.log("    Received extra setup data: " + extraData +
+              " from: " + senderId);
           });
       };
 

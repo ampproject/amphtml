@@ -60,7 +60,8 @@ function maybeExpandUrlParams(ampdoc, e) {
       return e.pageY;
     },
     'RESPONSE': () => {
-      return ampdoc.mostRecentCrossDomainIframeResponse;
+      return target && target.ownerDocument &&
+        target.ownerDocument.mostRecentCrossDomainIframeResponse;
     },
   };
   const newHref = urlReplacementsForDoc(ampdoc).expandSync(

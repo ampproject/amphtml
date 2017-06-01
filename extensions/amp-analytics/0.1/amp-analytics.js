@@ -304,7 +304,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    */
   processCrossDomainIframeResponse_(msg) {
     // Used in ../../../src/anchor-click-interceptor.js
-    this.getAmpDoc().mostRecentCrossDomainIframeResponse = msg;
+    this.win.document.mostRecentCrossDomainIframeResponse = msg;
   }
 
   /**

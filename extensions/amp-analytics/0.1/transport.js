@@ -39,7 +39,7 @@ const MESSAGE_THROTTLE_TIME_ = 100;
  */
 export class Transport {
   constructor() {
-    this.crossDomainIframes_ = map();
+    this.id_ = Transport.createUniqueId_();
   }
 
   /**
@@ -49,8 +49,7 @@ export class Transport {
    */
   sendRequest(win, request, transportOptions) {
     if (transportOptions['iframe']) {
-      this.sendRequestUsingCrossDomainIframe(request, transportOptions,
-        event);
+      this.sendRequestUsingCrossDomainIframe(request, transportOptions, event);
       return;
     }
     assertHttpsUrl(request, 'amp-analytics request');
@@ -140,13 +139,13 @@ export class Transport {
    * @param {!Object<string, string>} transportOptions
    */
   sendRequestUsingCrossDomainIframe(request, transportOptions) {
-    const frameData = this.crossDomainIframes_[transportOptions['iframe']];
+    const frameData = Transport.crossDomainIframes_[transportOptions['iframe']];
     user().assert(frameData, 'Trying to send message to non-existent frame');
-    frameData.msgQueue.push(request);
+    frameData.msgQueue.push({senderId: this.id_, request});
     if (frameData.isReady) {
       if (frameData.sendTimer == null) {
-        frameData.sendTimer = window.setTimeout(() => {
-          this.sendQueuedMessagesToCrossDomainIframe_(frameData);
+        frameData.sendTimer = timerFor(window).delay(() => {
+          Transport.sendQueuedMessagesToCrossDomainIframe_(frameData);
           frameData.sendTimer = null;
         }, MESSAGE_THROTTLE_TIME_);
       }
@@ -167,19 +166,19 @@ export class Transport {
       'Cross-domain frame parameters missing');
     const frameUrl = transportOptions['iframe'];
     // If iframe doesn't exist for this iframe url, create it.
-    if (this.hasCrossDomainFrame(frameUrl)) {
-      this.incrementFrameUsageCount_(frameUrl);
-      this.sendExtraData(this.crossDomainIframes_[frameUrl].iframeClient,
-        extraData);
+    if (Transport.hasCrossDomainFrame(frameUrl)) {
+      Transport.incrementFrameUsageCount_(frameUrl);
+      this.sendExtraData(frameUrl, transportOptions['extraData']);
     } else {
-      const frame = this.createCrossDomainIframe(ampDoc, frameUrl,
+      const frame = this.createCrossDomainIframe_(ampDoc, frameUrl,
         transportOptions['extraData']);
       ampDoc.body.appendChild(frame);
     }
     // Regardless of whether we just created it, or are re-using an existing
     // one, send extra data if available, and wire up the response callback
     if (processResponse) {
-      this.crossDomainIframes_[frameUrl].iframeClient.registerCallback(
+      const imc = Transport.crossDomainIframes_[frameUrl].iframeMessagingClient;
+      imc.registerCallback(
         'ampAnalyticsResponse', msg => {
         if (msg && msg.ampAnalyticsResponse) {
           processResponse(msg.ampAnalyticsResponse);
@@ -199,10 +198,10 @@ export class Transport {
    */
   doneWithCrossDomainIframe(ampDoc, transportOptions) {
     const frameUrl = transportOptions['iframe'];
-    if (this.hasCrossDomainFrame(frameUrl) &&
-      this.decrementFrameUsageCount_(frameUrl) <= 0) {
-      ampDoc.body.removeChild(this.crossDomainIframes_[frameUrl].frame);
-      delete this.crossDomainIframes_[frameUrl];
+    if (Transport.hasCrossDomainFrame(frameUrl) &&
+      Transport.decrementFrameUsageCount_(frameUrl) <= 0) {
+      ampDoc.body.removeChild(Transport.crossDomainIframes_[frameUrl].frame);
+      delete Transport.crossDomainIframes_[frameUrl];
     }
   }
 
@@ -211,14 +210,28 @@ export class Transport {
    * @param {!string} frameUrl
    * @return {!boolean}
    */
-  hasCrossDomainFrame(frameUrl) {
-    return hasOwn(this.crossDomainIframes_, frameUrl);
+  static hasCrossDomainFrame(frameUrl) {
+    return hasOwn(Transport.crossDomainIframes_, frameUrl);
   }
 
-  sendExtraData(iframeClient, extraData) {
+  /**
+   * Sends extra data (from the amp-analytics config object) to the
+   * cross-domain iframe.
+   * @param {!string} frameUrl The URL of the frame to send the data to
+   * @param {?string=} extraData The data to send to the frame
+   */
+  sendExtraData(frameUrl, extraData) {
     if (extraData) {
-      iframeClient.sendMessage('ampAnalyticsExtraData',
-        {ampAnalyticsExtraData: extraData});
+      const frameData = Transport.crossDomainIframes_[frameUrl];
+      // TODO: Rewrite this more elegantly
+      if (!frameData.isReady) {
+        timerFor(window).delay(() => {
+          this.sendExtraData(frameUrl, extraData);
+        }, 10);
+        return;
+      }
+      frameData.iframeMessagingClient.sendMessage('ampAnalyticsExtraData',
+        {senderId: this.id_, ampAnalyticsExtraData: extraData});
     }
   }
   /**
@@ -227,7 +240,7 @@ export class Transport {
    * @param {!string} frameUrl  The URL of the cross-domain iframe
    * @return {!Element}
    */
-  createCrossDomainIframe(ampDoc, frameUrl, extraData) {
+  createCrossDomainIframe_(ampDoc, frameUrl, extraData) {
     // DO NOT MERGE THIS
     // Warning: the scriptSrc URL below is only temporary. Don't merge
     // before getting resolution on that.
@@ -237,25 +250,26 @@ export class Transport {
         'scriptSrc': '/examples/analytics-3p-remote-frame-helper.js',
       }),
     });
-    const iframeClient = new IframeMessagingClient(window);
-    iframeClient.setSentinel(Transport.createSentinel_());
+    const iframeMessagingClient = new IframeMessagingClient(window);
+    iframeMessagingClient.setSentinel(Transport.createUniqueId_());
     loadPromise(frame).then(() => {
-      iframeClient.setHostWindow(frame.contentWindow);
-      this.sendExtraData(iframeClient, extraData);
-      this.setIsReady_(frameUrl);
+      iframeMessagingClient.setHostWindow(frame.contentWindow);
+      Transport.setIsReady_(frameUrl);
+      this.sendExtraData(frameUrl, extraData);
     });
     setStyles(frame,
         {width: 0, height: 0, display: 'none',
          position: 'absolute', top: 0, left: 0});
-    this.crossDomainIframes_[frameUrl] = {
+    Transport.crossDomainIframes_[frameUrl] = {
       frame,
       isReady: false,
       msgQueue: [],
       usageCount: 1,
       send: messages => {
-        iframeClient.sendMessage('ampAnalyticsEvents', {ampAnalyticsEvents: messages});
+        iframeMessagingClient.sendMessage('ampAnalyticsEvents',
+          {ampAnalyticsEvents: messages});
       },
-      iframeClient,
+      iframeMessagingClient,
       sendTimer: null,
     };
     frame.src = frameUrl; // Intentionally doing this after creating load
@@ -266,13 +280,18 @@ export class Transport {
   }
 
   /**
-   * Create an almost-certainly-unique value to differentiate messages from
+   * Create a unique value to differentiate messages from
    * this particular creative to the cross-domain iframe
    * @returns {string}
    * @private
    */
-  static createSentinel_() {
-    return String(Math.random()).substr(2);
+  static createUniqueId_() {
+    let newId;
+    do {
+      newId = String(Math.random()).substr(2);
+    } while (Transport.usedIds_[newId]);
+    Transport.usedIds_[newId] = true;
+    return newId;
   }
 
   /**
@@ -281,10 +300,10 @@ export class Transport {
    * @param {!string} frameUrl The URL of the frame
    * @private
    */
-  setIsReady_(frameUrl) {
-    const frameData = this.crossDomainIframes_[frameUrl];
+  static setIsReady_(frameUrl) {
+    const frameData = Transport.crossDomainIframes_[frameUrl];
     frameData.isReady = true;
-    this.sendQueuedMessagesToCrossDomainIframe_(frameData);
+    Transport.sendQueuedMessagesToCrossDomainIframe_(frameData);
   }
 
   /**
@@ -293,8 +312,8 @@ export class Transport {
    * @return {number}
    * @private
    */
-  incrementFrameUsageCount_(frameUrl) {
-    return ++(this.crossDomainIframes_[frameUrl].usageCount);
+  static incrementFrameUsageCount_(frameUrl) {
+    return ++(Transport.crossDomainIframes_[frameUrl].usageCount);
   }
 
   /**
@@ -303,8 +322,8 @@ export class Transport {
    * @return {number}
    * @private
    */
-  decrementFrameUsageCount_(frameUrl) {
-    return --(this.crossDomainIframes_[frameUrl].usageCount);
+  static decrementFrameUsageCount_(frameUrl) {
+    return --(Transport.crossDomainIframes_[frameUrl].usageCount);
   }
 
   /**
@@ -313,7 +332,7 @@ export class Transport {
    * @param {!Array<string>} messages  The messages to send
    * @private
    */
-  sendQueuedMessagesToCrossDomainIframe_(frameData) {
+  static sendQueuedMessagesToCrossDomainIframe_(frameData) {
     dev().assert(frameData && frameData.send,
       'Message bound for frame that does not exist');
     if (frameData.msgQueue && frameData.msgQueue.length > 0) {
@@ -322,6 +341,8 @@ export class Transport {
     }
   }
 }
+Transport.usedIds_ = map();
+Transport.crossDomainIframes_ = map();
 
 /**
  * Sends a ping request using an iframe, that is removed 5 seconds after

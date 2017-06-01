@@ -35,6 +35,13 @@ class AmpAnalyticsRemoteFrameManager {
      * @private
      */
     this.extraDataListener_ = () => {};
+
+    /**
+     * Holds a mapping between sender ID and extra data
+     * @type {Map}
+     * @private
+     */
+    this.senderIdToExtraData_ = {}; // TODO: Replace with map from AMP
   }
 
   /**
@@ -61,9 +68,11 @@ class AmpAnalyticsRemoteFrameManager {
       if (deserialized) {
         this.setSentinel_(deserialized.sentinel);
         if (deserialized.ampAnalyticsExtraData) {
-          this.setExtraData(deserialized.ampAnalyticsExtraData);
+          this.senderIdToExtraData_[deserialized.senderId] =
+            deserialized.ampAnalyticsExtraData;
           window.requestIdleCallback(() => {
-            this.extraDataListener_(deserialized.ampAnalyticsExtraData);
+            this.extraDataListener_(deserialized.senderId,
+              deserialized.ampAnalyticsExtraData);
           });
         } else if (deserialized.ampAnalyticsEvents) {
           window.requestIdleCallback(() => {
@@ -80,7 +89,7 @@ class AmpAnalyticsRemoteFrameManager {
    * @param {!String} sentinel The sentinel value
    */
   setSentinel_(sentinel) {
-    if (this.sentinel_ && sentinel!=this.sentinel_) {
+    if (this.sentinel_ && sentinel != this.sentinel_) {
       console.warn("Attempting to set sentinel to " + sentinel + " when it" +
           " was already set to " + this.sentinel_);
     }
@@ -90,19 +99,11 @@ class AmpAnalyticsRemoteFrameManager {
   /**
    * Gets any optional extra data that should be made available to the
    * cross-domain frame, in the context of a particular creative.
+   * @param {!number} senderId The ID of the creative that sent the extra data
    * @returns {String=}
    */
-  getExtraData(extraData) {
-    return this.extraData_;
-  }
-
-  /**
-   * Sets any optional extra data that should be made available to the
-   * cross-domain frame, in the context of a particular creative.
-   * @param {?String=} extraData The extra data
-   */
-  setExtraData(extraData) {
-    this.extraData_ = extraData;
+  getExtraData(senderId) {
+    return this.senderIdToExtraData_[senderId];
   }
 
   /**
