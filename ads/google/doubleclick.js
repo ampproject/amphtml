@@ -35,7 +35,7 @@ const GladeExperiment = {
  * @param {!Window} global
  * @param {!Object} data
  */
-export function doubleclick(global, data) { debugger;
+export function doubleclick(global, data) {
   const experimentFraction = 0.1;
 
   // TODO: check mandatory fields

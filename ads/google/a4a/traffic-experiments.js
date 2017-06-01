@@ -82,7 +82,7 @@ const INTERNALLY_SELECTED_ID = '2088462';
  */
 export function googleAdsIsA4AEnabled(win, element, experimentName,
     externalBranches, internalBranches, delayedExternalBranches,
-    sfgExternalBranches) {
+    sfgInternalBranches) {
   if (!isGoogleAdsA4AValidEnvironment(win)) {
     // Serving location doesn't qualify for A4A treatment
     return false;
@@ -91,8 +91,8 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
   const isSetFromUrl = maybeSetExperimentFromUrl(win, element,
       experimentName, externalBranches.control,
       externalBranches.experiment, delayedExternalBranches.control,
-      delayedExternalBranches.experiment, sfgExternalBranches.control,
-      sfgExternalBranches.experiment, MANUAL_EXPERIMENT_ID);
+      delayedExternalBranches.experiment, sfgInternalBranches.control,
+      sfgInternalBranches.experiment, MANUAL_EXPERIMENT_ID);
   const experimentInfoMap = {};
   const branches = [
     internalBranches.control,
@@ -207,7 +207,7 @@ function maybeSetExperimentFromUrl(win, element, experimentName,
   };
   if (argMapping.hasOwnProperty(arg)) {
     forceExperimentBranch(win, experimentName, argMapping[arg]);
-    // Neither branch of SFG is eligible for A4a.
+    // Neither branch of SFG is eligible for A4A.
     return arg != '5' && arg != '6';
   } else {
     dev().warn('A4A-CONFIG', 'Unknown a4a URL parameter: ', a4aParam,
