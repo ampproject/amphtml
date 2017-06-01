@@ -17,7 +17,7 @@
 import {buildUrl} from './url-builder';
 import {makeCorrelator} from '../correlator';
 import {isCanary} from '../../../src/experiments';
-import {getAdCid} from '../../../src/ad-cid';
+import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {documentInfoForDoc} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
@@ -143,53 +143,54 @@ export function googleAdUrl(
   // TODO: Maybe add checks in case these promises fail.
   /** @const {!Promise<string>} */
   const referrerPromise = viewerForDoc(a4a.getAmpDoc()).getReferrerUrl();
-  return getAdCid(a4a).then(clientId => referrerPromise.then(referrer => {
-    const adElement = a4a.element;
-    window['ampAdGoogleIfiCounter'] = window['ampAdGoogleIfiCounter'] || 1;
-    const slotNumber = window['ampAdGoogleIfiCounter']++;
-    const win = a4a.win;
-    const documentInfo = documentInfoForDoc(adElement);
+  return getOrCreateAdCid(a4a.getAmpDoc(), 'AMP_ECID_GOOGLE', '_ga')
+      .then(clientId => referrerPromise.then(referrer => {
+        const adElement = a4a.element;
+        window['ampAdGoogleIfiCounter'] = window['ampAdGoogleIfiCounter'] || 1;
+        const slotNumber = window['ampAdGoogleIfiCounter']++;
+        const win = a4a.win;
+        const documentInfo = documentInfoForDoc(adElement);
       // Read by GPT for GA/GPT integration.
-    win.gaGlobal = win.gaGlobal ||
+        win.gaGlobal = win.gaGlobal ||
       {cid: clientId, hid: documentInfo.pageViewId};
-    const slotRect = a4a.getPageLayoutBox();
-    const screen = win.screen;
-    const viewport = a4a.getViewport();
-    const viewportRect = viewport.getRect();
-    const iframeDepth = iframeNestingDepth(win);
-    const viewportSize = viewport.getSize();
+        const slotRect = a4a.getPageLayoutBox();
+        const screen = win.screen;
+        const viewport = a4a.getViewport();
+        const viewportRect = viewport.getRect();
+        const iframeDepth = iframeNestingDepth(win);
+        const viewportSize = viewport.getSize();
     // Detect container types.
-    const containerTypeSet = {};
-    for (let el = adElement.parentElement, counter = 0;
+        const containerTypeSet = {};
+        for (let el = adElement.parentElement, counter = 0;
         el && counter < 20; el = el.parentElement, counter++) {
-      const tagName = el.tagName.toUpperCase();
-      if (ValidAdContainerTypes[tagName]) {
-        containerTypeSet[ValidAdContainerTypes[tagName]] = true;
-      }
-    }
-    const pfx =
+          const tagName = el.tagName.toUpperCase();
+          if (ValidAdContainerTypes[tagName]) {
+            containerTypeSet[ValidAdContainerTypes[tagName]] = true;
+          }
+        }
+        const pfx =
         (containerTypeSet[ValidAdContainerTypes['AMP-FX-FLYING-CARPET']]
          || containerTypeSet[ValidAdContainerTypes['AMP-STICKY-AD']])
         ? '1' : '0';
-    queryParams.push({name: 'act', value:
+        queryParams.push({name: 'act', value:
       Object.keys(containerTypeSet).join()});
-    if (isCanary(win)) {
+        if (isCanary(win)) {
       // The semantics here are:
       //   0: production branch (this is never actually sent)
       //   1: control branch (this is not yet supported, so is never sent)
       //   2: canary branch
-      queryParams.push({name: 'art', value: '2'});
-    }
-    let eids = adElement.getAttribute('data-experiment-id');
-    if (opt_experimentIds) {
-      eids = mergeExperimentIds(opt_experimentIds, eids);
-    }
-    const allQueryParams = queryParams.concat(
-      [
-        {
-          name: 'is_amp',
-          value: AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
-        },
+          queryParams.push({name: 'art', value: '2'});
+        }
+        let eids = adElement.getAttribute('data-experiment-id');
+        if (opt_experimentIds) {
+          eids = mergeExperimentIds(opt_experimentIds, eids);
+        }
+        const allQueryParams = queryParams.concat(
+          [
+            {
+              name: 'is_amp',
+              value: AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
+            },
         {name: 'amp_v', value: '$internalRuntimeVersion$'},
         {name: 'd_imp', value: '1'},
         {name: 'dt', value: startTime},
@@ -217,23 +218,23 @@ export function googleAdUrl(
         {name: 'ish', value: viewportSize.height},
         {name: 'pfx', value: pfx},
         {name: 'rc', value: a4a.fromResumeCallback ? 1 : null},
-      ],
+          ],
       unboundedQueryParams,
-      [
+          [
         {name: 'url', value: documentInfo.canonicalUrl},
         {name: 'top', value: iframeDepth ? topWindowUrlOrDomain(win) : null},
-        {
-          name: 'loc',
-          value: win.location.href == documentInfo.canonicalUrl ?
+            {
+              name: 'loc',
+              value: win.location.href == documentInfo.canonicalUrl ?
             null : win.location.href,
-        },
+            },
         {name: 'ref', value: referrer},
-      ]
+          ]
     );
-    const url = buildUrl(baseUrl, allQueryParams, MAX_URL_LENGTH - 10,
+        const url = buildUrl(baseUrl, allQueryParams, MAX_URL_LENGTH - 10,
                          {name: 'trunc', value: '1'});
-    return url + '&dtd=' + elapsedTimeWithCeiling(Date.now(), startTime);
-  }));
+        return url + '&dtd=' + elapsedTimeWithCeiling(Date.now(), startTime);
+      }));
 }
 
 /**
