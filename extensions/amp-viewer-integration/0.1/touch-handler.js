@@ -49,12 +49,12 @@ export class TouchHandler {
 
   /**
    * @param {!Window} win
-   * @param {!./messaging.Messaging} messaging
+   * @param {!./messaging/messaging.Messaging} messaging
    */
   constructor(win, messaging) {
     /** @const {!Window} */
     this.win = win;
-    /** @const @private {!./messaging.Messaging} */
+    /** @const @private {!./messaging/messaging.Messaging} */
     this.messaging_ = messaging;
     /**
      * When true, prevent default to prevent scrolling.

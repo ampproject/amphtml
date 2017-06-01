@@ -15,20 +15,14 @@
  */
 
 /**
- * @typedef {{
- *   method: string,
- *   args: !Array,
- *   scope: number,
- *   id: number,
- * }}
+ * @fileoverview Directly imported into web-worker.js entry point so polyfills
+ *     can be used in top-level scope in module dependencies.
  */
-export let ToWorkerMessageDef;
 
-/**
- * @typedef {{
- *   method: string,
- *   returnValue: *,
- *   id: number,
- * }}
- */
-export let FromWorkerMessageDef;
+import {install as installArrayIncludes} from '../polyfills/array-includes';
+import {install as installObjectAssign} from '../polyfills/object-assign';
+import {install as installMathSign} from '../polyfills/math-sign';
+
+installArrayIncludes(self);
+installObjectAssign(self);
+installMathSign(self);

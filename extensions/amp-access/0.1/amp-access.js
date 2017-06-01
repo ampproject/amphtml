@@ -34,7 +34,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
 import {listenOnce} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
-import {openLoginDialog} from './login-dialog';
+import {getLoginUrl, openLoginDialog} from './login-dialog';
 import {parseQueryString} from '../../../src/url';
 import {performanceForOrNull} from '../../../src/services';
 import {resourcesForDoc} from '../../../src/services';
@@ -794,6 +794,15 @@ export class AccessService {
   }
 
   /**
+   * Expose the getLoginUrl method with the current ampdoc context
+   * @param {string|!Promise<string>} urlOrPromise
+   * @return {!Promise<string>}
+   */
+  getLoginUrl(urlOrPromise) {
+    return getLoginUrl(this.ampdoc, urlOrPromise);
+  }
+
+  /**
    * Runs the login flow using one of the predefined urls in the amp-access config
    *
    * @private
@@ -919,8 +928,8 @@ export class AccessService {
     }
     return Promise.all(promises);
   }
-}
 
+}
 
 /**
  * @typedef {{

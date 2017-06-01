@@ -52,6 +52,7 @@ describe.configure().retryOnSaucelabs().run('example', function() {
     'article.amp.html',
     'analytics.amp.html',
     'analytics-notification.amp.html',
+    'autosuggest.amp.html',
     'everything.amp.html',
     // TODO: uncomment when validator is deployed:
     // 'facebook.amp.html',

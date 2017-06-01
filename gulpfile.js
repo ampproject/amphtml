@@ -44,6 +44,7 @@ var hostname3p = argv.hostname3p || '3p.ampproject.net';
 
 // All declared extensions.
 var extensions = {};
+var extensionAliasFilePath = {};
 
 // Each extension and version must be listed individually here.
 // NOTE: No new extensions must pass the NO_TYPE_CHECK argument.
@@ -90,6 +91,7 @@ declareExtension('amp-hulu', '0.1', false);
 declareExtension('amp-iframe', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-ima-video', '0.1', false);
 declareExtension('amp-image-lightbox', '0.1', true);
+declareExtension('amp-imgur', '0.1', false);
 declareExtension('amp-instagram', '0.1', true);
 declareExtension('amp-install-serviceworker', '0.1', false);
 declareExtension('amp-izlesene', '0.1', false);
@@ -110,7 +112,6 @@ declareExtension('amp-share-tracking', '0.1', false);
 declareExtension('amp-sidebar', '0.1', true);
 declareExtension('amp-soundcloud', '0.1', false);
 declareExtension('amp-springboard-player', '0.1', false);
-declareExtension('amp-sticky-ad', '0.1', true);
 declareExtension('amp-sticky-ad', '1.0', true);
 declareExtension('amp-selector', '0.1', true);
 
@@ -136,7 +137,8 @@ declareExtension('amp-viewer-integration', '0.1', {
 });
 declareExtension('amp-video', '0.1', false);
 declareExtension('amp-youtube', '0.1', false);
-
+declareExtensionVersionAlias(
+    'amp-sticky-ad', '0.1', /* lastestVersion */ '1.0', /* hasCss */ true);
 /**
  * @param {string} name
  * @param {string} version E.g. 0.1
@@ -162,6 +164,21 @@ function declareExtension(name, version, hasCssOrOptions, opt_noTypeCheck,
     noTypeCheck: !!opt_noTypeCheck,
     extraGlobs: opt_extraGlobs,
   }, options);
+}
+
+/**
+ * @param {string} name
+ * @param {string} version E.g. 0.1
+ * @param {string} lastestVersion
+ * @param {boolean} hasCss
+ */
+function declareExtensionVersionAlias(name, version, lastestVersion, hasCss) {
+  extensionAliasFilePath[name + '-' + version + '.js'] =
+      name + '-' + lastestVersion + '.js';
+  if (hasCss) {
+    extensionAliasFilePath[name + '-' + version + '.css'] =
+      name + '-' + lastestVersion + '.css';
+  }
 }
 
 /**
@@ -397,15 +414,6 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
   options = options || {};
   options.extraGlobs = opt_extraGlobs;
   var path = 'extensions/' + name + '/' + version;
-  if (name == 'amp-sticky-ad' && version == '0.1') {
-    // Special case for amp-sticky-ad force upgrade from v0.1 to v1.0
-    // to provide better UX. (related issue #6169).
-    // To deprecate 0.1, replace the build path so that amp-sticky-ad-0.1.js
-    // is built from extensions/amp-sticky-ad/1.0/amp-sticky-ad.js
-    // NOTE: The upgrade happens here to provide backward compatibility
-    // to existing pages with amp-sticky-ad 0.1 script.
-    path = 'extensions/' + name + '/1.0';
-  }
   var jsPath = path + '/' + name + '.js';
   var jsTestPath = path + '/test/' + 'test-' + name + '.js';
   if (argv.files && options.bundleOnlyIfListedInFiles) {
@@ -538,7 +546,18 @@ function dist() {
     buildExperiments({minify: true, watch: false, preventRemoveAndMakeDir: true}),
     buildLoginDone({minify: true, watch: false, preventRemoveAndMakeDir: true}),
     copyCss(),
-  ]);
+  ]).then(() => {
+    copyAliasExtensions();
+  });
+}
+
+/**
+ * Copy built extension to alias extension
+ */
+function copyAliasExtensions() {
+  for (var key in extensionAliasFilePath) {
+    fs.copySync('dist/v0/' + extensionAliasFilePath[key], 'dist/v0/' + key);
+  }
 }
 
 /**
@@ -966,6 +985,7 @@ function buildWebWorker(options) {
   return compileJs('./src/web-worker/', 'web-worker.js', './dist/', {
     toName: 'ww.max.js',
     minifiedName: 'ww.js',
+    includePolyfills: true,
     watch: opts.watch,
     minify: opts.minify || argv.minify,
     preventRemoveAndMakeDir: opts.preventRemoveAndMakeDir,

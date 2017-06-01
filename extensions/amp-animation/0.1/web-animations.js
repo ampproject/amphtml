@@ -18,8 +18,9 @@ import {CssNumberNode, CssTimeNode, isVarCss} from './css-expr-ast';
 import {Observable} from '../../../src/observable';
 import {ScrollboundPlayer} from './scrollbound-player';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
-import {closestBySelector} from '../../../src/dom';
+import {closestBySelector, matches} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
+import {extractKeyframes} from './keyframes-extractor';
 import {getMode} from '../../../src/mode';
 import {getVendorJsPropertyName, computedStyle} from '../../../src/style';
 import {isArray, isObject, toArray} from '../../../src/types';
@@ -28,9 +29,12 @@ import {parseCss} from './css-expr';
 import {
   WebAnimationDef,
   WebAnimationPlayState,
+  WebAnimationSelectorDef,
+  WebAnimationSubtargetDef,
   WebAnimationTimingDef,
   WebAnimationTimingDirection,
   WebAnimationTimingFill,
+  WebCompAnimationDef,
   WebKeyframeAnimationDef,
   WebKeyframesDef,
   WebMultiAnimationDef,
@@ -58,6 +62,7 @@ let animIdCounter = 0;
  * @typedef {{
  *   target: !Element,
  *   keyframes: !WebKeyframesDef,
+ *   vars: ?Object<string, *>,
  *   timing: !WebAnimationTimingDef,
  * }}
  */
@@ -126,6 +131,14 @@ export class WebAnimationRunner {
     dev().assert(!this.players_);
     this.setPlayState_(WebAnimationPlayState.RUNNING);
     this.players_ = this.requests_.map(request => {
+      // Apply vars.
+      if (request.vars) {
+        for (const k in request.vars) {
+          request.target.style.setProperty(k, String(request.vars[k]));
+        }
+      }
+
+      // Create the player.
       let player;
       if (request.timing.ticker == Tickers.SCROLL) {
         player = new ScrollboundPlayer(request);
@@ -174,6 +187,22 @@ export class WebAnimationRunner {
     dev().assert(this.players_);
     this.players_.forEach(player => {
       player.reverse();
+    });
+  }
+
+  /**
+   * @param {time} time
+   */
+  seekTo(time) {
+    dev().assert(this.players_);
+    this.setPlayState_(WebAnimationPlayState.PAUSED);
+    this.players_.forEach(player => {
+      player.pause();
+      if (player instanceof ScrollboundPlayer) {
+        player.tick(time);
+      } else {
+        player.currentTime = time;
+      }
     });
   }
 
@@ -275,9 +304,11 @@ class Scanner {
       return;
     }
 
-    // WebAnimationDef: (!WebMultiAnimationDef|!WebKeyframeAnimationDef)
+    // WebAnimationDef: (!WebMultiAnimationDef|!WebCompAnimationDef|!WebKeyframeAnimationDef)
     if (spec.animations) {
       this.onMultiAnimation(/** @type {!WebMultiAnimationDef} */ (spec));
+    } else if (spec.animation) {
+      this.onCompAnimation(/** @type {!WebCompAnimationDef} */ (spec));
     } else if (spec.keyframes) {
       this.onKeyframeAnimation(/** @type {!WebKeyframeAnimationDef} */ (spec));
     } else {
@@ -301,6 +332,12 @@ class Scanner {
   onMultiAnimation(unusedSpec) {}
 
   /**
+   * @param {!WebCompAnimationDef} unusedSpec
+   * @abstract
+   */
+  onCompAnimation(unusedSpec) {}
+
+  /**
    * @param {!WebKeyframeAnimationDef} unusedSpec
    * @abstract
    */
@@ -315,6 +352,93 @@ class Scanner {
 
 
 /**
+ * Builds animation runners based on the provided spec.
+ */
+export class Builder {
+  /**
+   * @param {!Window} win
+   * @param {!Document|!ShadowRoot} rootNode
+   * @param {string} baseUrl
+   * @param {!../../../src/service/vsync-impl.Vsync} vsync
+   * @param {!../../../src/service/resources-impl.Resources} resources
+   */
+  constructor(win, rootNode, baseUrl, vsync, resources) {
+    /** @const @private */
+    this.css_ = new CssContextImpl(win, rootNode, baseUrl);
+
+    /** @const @private */
+    this.vsync_ = vsync;
+
+    /** @const @private */
+    this.resources_ = resources;
+
+    /** @const @private {!Array<!Element>} */
+    this.targets_ = [];
+
+    /** @const @private {!Array<!Promise>} */
+    this.loaders_ = [];
+  }
+
+  /**
+   * Creates the animation runner for the provided spec. Waits for all
+   * necessary resources to be loaded before the runner is resolved.
+   * @param {!WebAnimationDef|!Array<!WebAnimationDef>} spec
+   * @param {?WebAnimationDef=} opt_args
+   * @return {!Promise<!WebAnimationRunner>}
+   */
+  createRunner(spec, opt_args) {
+    return this.resolveRequests([], spec, opt_args).then(requests => {
+      if (getMode().localDev || getMode().development) {
+        user().fine(TAG, 'Animation: ', requests);
+      }
+      return Promise.all(this.loaders_).then(() => {
+        return new WebAnimationRunner(requests);
+      });
+    });
+  }
+
+  /**
+   * @param {!Array<string>} path
+   * @param {!WebAnimationDef|!Array<!WebAnimationDef>} spec
+   * @param {?WebAnimationDef|undefined} args
+   * @param {?Element} target
+   * @param {?Object<string, *>} vars
+   * @param {?WebAnimationTimingDef} timing
+   * @return {!Promise<!Array<!InternalWebAnimationRequestDef>>}
+   * @protected
+   */
+  resolveRequests(path, spec, args,
+      target = null, vars = null, timing = null) {
+    const scanner = this.createScanner_(path, target, vars, timing);
+    return this.vsync_.measurePromise(
+        () => scanner.resolveRequests(spec, args));
+  }
+
+  /**
+   * @param {!Element} target
+   * @protected
+   */
+  requireLayout(target) {
+    if (!this.targets_.includes(target)) {
+      this.targets_.push(target);
+      this.loaders_.push(this.resources_.requireLayout(target));
+    }
+  }
+
+  /**
+   * @param {!Array<string>} path
+   * @param {?Element} target
+   * @param {?Object<string, *>} vars
+   * @param {?WebAnimationTimingDef} timing
+   * @private
+   */
+  createScanner_(path, target, vars, timing) {
+    return new MeasureScanner(this, this.css_, path, target, vars, timing);
+  }
+}
+
+
+/**
  * The scanner that evaluates all expressions and builds the final
  * `WebAnimationRunner` instance for the target animation. It must be
  * executed in the "measure" vsync phase.
@@ -322,28 +446,33 @@ class Scanner {
 export class MeasureScanner extends Scanner {
 
   /**
-   * @param {!Window} win
-   * @param {!Node} rootNode
-   * @param {string} baseUrl
-   * @param {boolean} validate
+   * @param {!Builder} builder
+   * @param {!CssContextImpl} css
+   * @param {!Array<string>} path
+   * @param {?Element} target
+   * @param {?Object<string, *>} vars
+   * @param {?WebAnimationTimingDef} timing
    */
-  constructor(win, rootNode, baseUrl, validate) {
+  constructor(builder, css, path, target, vars, timing) {
     super();
 
     /** @const @private */
-    this.rootNode_ = rootNode;
+    this.builder_ = builder;
 
     /** @const @private */
-    this.css_ = new CssContextImpl(win, rootNode, baseUrl);
+    this.css_ = css;
 
     /** @const @private */
-    this.validate_ = validate;
+    this.path_ = path;
 
-    /** @private {!Array<!InternalWebAnimationRequestDef>} */
-    this.requests_ = [];
+    /** @private {?Element} */
+    this.target_ = target;
+
+    /** @private {!Object<string, *>} */
+    this.vars_ = vars || map();
 
     /** @private {!WebAnimationTimingDef} */
-    this.timing_ = {
+    this.timing_ = timing || {
       ticker: Tickers.TIME,
       duration: 0,
       delay: 0,
@@ -355,35 +484,38 @@ export class MeasureScanner extends Scanner {
       fill: WebAnimationTimingFill.NONE,
     };
 
-    /** @private {!Array<!Element> } */
-    this.targets_ = [];
+    /** @private {!Array<!InternalWebAnimationRequestDef>} */
+    this.requests_ = [];
+
+    /**
+     * Dependencies required to resolve all animation requests. In case of
+     * composition, all requests can only be resolved asynchronously. This
+     * dependencies are used to block `resolveRequests` to collect all
+     * dependenices.
+     * @const @private {!Array<!Promise>}
+     */
+    this.deps_ = [];
   }
 
   /**
-   * @param {!../../../src/service/resources-impl.Resources} resources
-   * @return {!Promise<!WebAnimationRunner>}
+   * This methods scans all animation declarations specified in `spec`
+   * recursively to produce the animation requests. `opt_args` is an additional
+   * spec that can be used to default timing and variables.
+   * @param {!WebAnimationDef|!Array<!WebAnimationDef>} spec
+   * @param {?WebAnimationDef=} opt_args
+   * @return {!Promise<!Array<!InternalWebAnimationRequestDef>>}
    */
-  createRunner(resources) {
-    if (getMode().localDev || getMode().development) {
-      user().fine(TAG, 'Animation: ', this.requests_);
+  resolveRequests(spec, opt_args) {
+    if (opt_args) {
+      this.with_(opt_args, () => {
+        this.scan(spec);
+      });
+    } else {
+      this.css_.withVars(this.vars_, () => {
+        this.scan(spec);
+      });
     }
-    return this.unblockElements_(resources).then(() => {
-      return new WebAnimationRunner(this.requests_);
-    });
-  }
-
-  /**
-   * @param {!../../../src/service/resources-impl.Resources} resources
-   * @return {!Promise}
-   * @private
-   */
-  unblockElements_(resources) {
-    const promises = [];
-    for (let i = 0; i < this.targets_.length; i++) {
-      const element = this.targets_[i];
-      promises.push(resources.requireLayout(element));
-    }
-    return Promise.all(promises);
+    return Promise.all(this.deps_).then(() => this.requests_);
   }
 
   /** @override */
@@ -396,29 +528,69 @@ export class MeasureScanner extends Scanner {
 
   /** @override */
   onMultiAnimation(spec) {
-    const newTiming = this.mergeTiming_(spec, this.timing_, /* target */ null);
-    this.withTiming_(newTiming, () => {
-      this.scan(spec.animations);
+    this.with_(spec, () => this.scan(spec.animations));
+  }
+
+  /** @override */
+  onCompAnimation(spec) {
+    user().assert(this.path_.indexOf(spec.animation) == -1,
+        `Recursive animations are not allowed: "${spec.animation}"`);
+    const newPath = this.path_.concat(spec.animation);
+    const animationElement = user().assertElement(
+        this.css_.getElementById(spec.animation),
+        `Animation not found: "${spec.animation}"`);
+    // Currently, only `<amp-animation>` supplies animations. In the future
+    // this could become an interface.
+    user().assert(animationElement.tagName == 'AMP-ANIMATION',
+        `Element is not an animation: "${spec.animation}"`);
+    const otherSpecPromise = animationElement.getImpl().then(impl => {
+      return impl.getAnimationSpec();
+    });
+    this.with_(spec, () => {
+      const target = this.target_;
+      const vars = this.vars_;
+      const timing = this.timing_;
+      const promise = otherSpecPromise.then(otherSpec => {
+        if (!otherSpec) {
+          return;
+        }
+        return this.builder_.resolveRequests(
+            newPath, otherSpec, /* args */ null, target, vars, timing);
+      }).then(requests => {
+        requests.forEach(request => this.requests_.push(request));
+      });
+      this.deps_.push(promise);
     });
   }
 
   /** @override */
   onKeyframeAnimation(spec) {
-    const targets = this.resolveTargets_(spec);
-    targets.forEach(target => {
-      this.requests_.push(this.createKeyframeAnimationForTarget_(target, spec));
+    this.with_(spec, () => {
+      const target = user().assertElement(this.target_, 'No target specified');
+      const keyframes = this.createKeyframes_(target, spec);
+      this.requests_.push({
+        target,
+        keyframes,
+        vars: this.vars_,
+        timing: this.timing_,
+      });
     });
   }
 
   /**
    * @param {!Element} target
    * @param {!WebKeyframeAnimationDef} spec
-   * @return {!InternalWebAnimationRequestDef}
+   * @return {!WebKeyframesDef}
    * @private
    */
-  createKeyframeAnimationForTarget_(target, spec) {
-    /** @type {!WebKeyframesDef} */
-    let keyframes;
+  createKeyframes_(target, spec) {
+    if (typeof spec.keyframes == 'string') {
+      // Keyframes name to be extracted from `<style>`.
+      const keyframes = extractKeyframes(this.css_.rootNode_, spec.keyframes);
+      user().assert(keyframes,
+          `Keyframes not found in stylesheet: "${spec.keyframes}"`);
+      return /** @type {!WebKeyframesDef} */ (keyframes);
+    }
 
     if (isObject(spec.keyframes)) {
       // Property -> keyframes form.
@@ -427,7 +599,8 @@ export class MeasureScanner extends Scanner {
       // to polyfill partial keyframes per spec.
       // See https://github.com/w3c/web-animations/issues/187
       const object = /** {!Object<string, *>} */ (spec.keyframes);
-      keyframes = {};
+      /** @type {!WebKeyframesDef} */
+      const keyframes = {};
       for (const prop in object) {
         this.validateProperty_(prop);
         const value = object[prop];
@@ -437,14 +610,17 @@ export class MeasureScanner extends Scanner {
         } else if (!isArray(value) || value.length == 1) {
           // Missing "from" value. Measure and add.
           const fromValue = this.css_.measure(target, prop);
-          preparedValue = [fromValue, this.css_.resolveCss(
-              target, isArray(value) ? value[0] : value)];
+          const toValue = isArray(value) ? value[0] : value;
+          preparedValue = [fromValue, this.css_.resolveCss(toValue)];
         } else {
-          preparedValue = value.map(v => this.css_.resolveCss(target, v));
+          preparedValue = value.map(v => this.css_.resolveCss(v));
         }
         keyframes[prop] = preparedValue;
       }
-    } else if (isArray(spec.keyframes) && spec.keyframes.length > 0) {
+      return keyframes;
+    }
+
+    if (isArray(spec.keyframes) && spec.keyframes.length > 0) {
       // Keyframes -> property form.
       // The array is cloned, while properties are verified to be whitelisted.
       // Additionally, if the `offset:0` properties are inserted when absent
@@ -452,10 +628,11 @@ export class MeasureScanner extends Scanner {
       // See https://github.com/w3c/web-animations/issues/187 and
       // https://github.com/web-animations/web-animations-js/issues/14
       const array = /** {!Array<!Object<string, *>>} */ (spec.keyframes);
-      keyframes = [];
+      /** @type {!WebKeyframesDef} */
+      const keyframes = [];
       const addStartFrame = array.length == 1 || array[0].offset > 0;
       const startFrame = addStartFrame ? map() :
-          this.css_.resolveCssMap(target, array[0]);
+          this.css_.resolveCssMap(array[0]);
       keyframes.push(startFrame);
       const start = addStartFrame ? 0 : 1;
       for (let i = start; i < array.length; i++) {
@@ -470,28 +647,20 @@ export class MeasureScanner extends Scanner {
             startFrame[prop] = this.css_.measure(target, prop);
           }
         }
-        keyframes.push(this.css_.resolveCssMap(target, frame));
+        keyframes.push(this.css_.resolveCssMap(frame));
       }
-    } else {
-      // TODO(dvoytenko): support CSS keyframes per https://github.com/w3c/web-animations/issues/189
-      // Unknown form of keyframes spec.
-      if (this.validate_) {
-        throw user().createError('keyframes not found', spec.keyframes);
-      }
+      return keyframes;
     }
 
-    const timing = this.mergeTiming_(spec, this.timing_, target);
-    return {target, keyframes, timing};
+    // TODO(dvoytenko): support CSS keyframes per https://github.com/w3c/web-animations/issues/189
+    // Unknown form of keyframes spec.
+    throw user().createError('keyframes not found', spec.keyframes);
   }
 
   /** @override */
-  onUnknownAnimation(spec) {
-    if (this.validate_) {
-      throw user().createError('unknown animation type:' +
-          ' must have "animations" or "keyframes" field');
-    } else {
-      super.onUnknownAnimation(spec);
-    }
+  onUnknownAnimation() {
+    throw user().createError('unknown animation type:' +
+        ' must have "animation", "animations" or "keyframes" field');
   }
 
   /**
@@ -502,31 +671,50 @@ export class MeasureScanner extends Scanner {
     if (SERVICE_PROPS[prop]) {
       return;
     }
-    if (this.validate_) {
-      user().assert(isWhitelistedProp(prop),
-          'Property is not whitelisted for animation: %s', prop);
-    } else {
-      dev().assert(isWhitelistedProp(prop),
-          'Property is not whitelisted for animation: %s', prop);
-    }
+    user().assert(isWhitelistedProp(prop),
+        'Property is not whitelisted for animation: %s', prop);
   }
 
   /**
-   * Runs the callback with the specified timing and restores old timing
-   * later.
-   * @param {!WebAnimationTimingDef} timing
+   * Resolves common parameters of an animation: target, timing and vars.
+   * @param {!WebAnimationDef} spec
    * @param {function()} callback
    * @private
    */
-  withTiming_(timing, callback) {
+  with_(spec, callback) {
+    // Save context.
+    const prevTarget = this.target_;
+    const prevVars = this.vars_;
     const prevTiming = this.timing_;
-    this.timing_ = timing;
-    callback();
+
+    // Push new context and perform calculations.
+    const targets =
+        (spec.target || spec.selector) ?
+        this.resolveTargets_(spec) :
+        [null];
+    targets.forEach((target, index) => {
+      this.target_ = target || prevTarget;
+      this.css_.withTarget(this.target_, () => {
+        const subtargetSpec =
+            this.target_ ?
+            this.matchSubtargets_(this.target_, index, spec) :
+            spec;
+        this.vars_ = this.mergeVars_(subtargetSpec, prevVars);
+        this.css_.withVars(this.vars_, () => {
+          this.timing_ = this.mergeTiming_(subtargetSpec, prevTiming);
+          callback();
+        });
+      });
+    });
+
+    // Restore context.
+    this.target_ = prevTarget;
+    this.vars_ = prevVars;
     this.timing_ = prevTiming;
   }
 
   /**
-   * @param {!WebKeyframeAnimationDef} spec
+   * @param {!WebAnimationDef} spec
    * @return {!Array<!Element>}
    * @private
    */
@@ -535,7 +723,7 @@ export class MeasureScanner extends Scanner {
     if (spec.selector) {
       user().assert(!spec.target,
           'Both "selector" and "target" are not allowed');
-      targets = this.queryTargets_(spec.selector);
+      targets = this.css_.queryElements(spec.selector);
       if (targets.length == 0) {
         user().warn(TAG, `Target not found: "${spec.selector}"`);
       }
@@ -546,80 +734,131 @@ export class MeasureScanner extends Scanner {
       }
       const target = user().assertElement(
           typeof spec.target == 'string' ?
-              this.resolveTarget_(spec.target) :
+              this.css_.getElementById(spec.target) :
               spec.target,
           `Target not found: "${spec.target}"`);
       targets = [target];
-    } else {
-      user().assert(false, 'No target specified');
+    } else if (this.target_) {
+      targets = [this.target_];
     }
-    targets.forEach(target => {
-      if (!this.targets_.includes(target)) {
-        this.targets_.push(target);
-      }
-    });
+    targets.forEach(target => this.builder_.requireLayout(target));
     return targets;
   }
 
   /**
-   * @param {string} id
-   * @return {?Element}
-   * @private
-   * TODO(dvoytenko, #9129): cleanup deprecated string targets.
+   * @param {!Element} target
+   * @param {number} index
+   * @param {!WebAnimationSelectorDef} spec
+   * @return {!WebAnimationSelectorDef}
    */
-  resolveTarget_(id) {
-    return this.rootNode_.getElementById(id);
+  matchSubtargets_(target, index, spec) {
+    if (!spec.subtargets || spec.subtargets.length == 0) {
+      return spec;
+    }
+    const result = map(spec);
+    spec.subtargets.forEach(subtargetSpec => {
+      const matcher = this.getMatcher_(subtargetSpec);
+      if (matcher(target, index)) {
+        Object.assign(result, subtargetSpec);
+      }
+    });
+    return result;
   }
 
   /**
-   * @param {string} selector
-   * @return {!Array<!Element>}
-   * @private
+   * @param {!WebAnimationSubtargetDef} spec
+   * @return {function(!Element, number):boolean}
    */
-  queryTargets_(selector) {
-    try {
-      return toArray(this.rootNode_./*OK*/querySelectorAll(selector));
-    } catch (e) {
-      throw user().createError('Invalid selector: ', selector);
+  getMatcher_(spec) {
+    if (spec.matcher) {
+      return spec.matcher;
     }
+    user().assert(
+        (spec.index !== undefined || spec.selector !== undefined) &&
+        (spec.index === undefined || spec.selector === undefined),
+        'Only one "index" or "selector" must be specified');
+
+    let matcher;
+    if (spec.index !== undefined) {
+      // Match by index, e.g. `index: 0`.
+      const specIndex = Number(spec.index);
+      matcher = (target, index) => index === specIndex;
+    } else {
+      // Match by selector, e.g. `:nth-child(2n+1)`.
+      const specSelector = /** @type {string} */ (spec.selector);
+      matcher = target => {
+        try {
+          return matches(target, specSelector);
+        } catch (e) {
+          throw user().createError(
+              `Bad subtarget selector: "${specSelector}"`, e);
+        }
+      };
+    }
+    return spec.matcher = matcher;
   }
 
+  /**
+   * Merges vars by defaulting values from the previous vars.
+   * @param {!Object<string, *>} newVars
+   * @param {!Object<string, *>} prevVars
+   * @return {!Object<string, *>}
+   * @private
+   */
+  mergeVars_(newVars, prevVars) {
+    // First combine all vars (previous and new) in one map. The new vars take
+    // precedence. This is done so that the new vars can be resolved from both
+    // the previous and new vars.
+    const result = map(prevVars);
+    for (const k in newVars) {
+      if (startsWith(k, '--')) {
+        result[k] = newVars[k];
+      }
+    }
+    this.css_.withVars(result, () => {
+      for (const k in newVars) {
+        if (startsWith(k, '--')) {
+          result[k] = this.css_.resolveCss(newVars[k]);
+        }
+      }
+    });
+    return result;
+  }
 
   /**
    * Merges timing by defaulting values from the previous timing.
    * @param {!WebAnimationTimingDef} newTiming
    * @param {!WebAnimationTimingDef} prevTiming
-   * @param {?Element} target
    * @return {!WebAnimationTimingDef}
    * @private
    */
-  mergeTiming_(newTiming, prevTiming, target) {
+  mergeTiming_(newTiming, prevTiming) {
     // CSS time values in milliseconds.
     const duration = this.css_.resolveMillis(
-        target, newTiming.duration, prevTiming.duration);
+        newTiming.duration, prevTiming.duration);
     const delay = this.css_.resolveMillis(
-        target, newTiming.delay, prevTiming.delay);
+        newTiming.delay, prevTiming.delay);
     const endDelay = this.css_.resolveMillis(
-        target, newTiming.endDelay, prevTiming.endDelay);
+        newTiming.endDelay, prevTiming.endDelay);
 
     // Numeric.
     const iterations = this.css_.resolveNumber(
-        target, newTiming.iterations,
+        newTiming.iterations,
         dev().assertNumber(prevTiming.iterations));
     const iterationStart = this.css_.resolveNumber(
-        target, newTiming.iterationStart, prevTiming.iterationStart);
+        newTiming.iterationStart, prevTiming.iterationStart);
 
     // Identifier CSS values.
     const easing = newTiming.easing != null ?
-        this.css_.resolveCss(target, newTiming.easing) :
+        this.css_.resolveCss(newTiming.easing) :
         prevTiming.easing;
     const direction = newTiming.direction != null ?
         /** @type {!WebAnimationTimingDirection} */
-        (this.css_.resolveCss(target, newTiming.direction)) :
+        (this.css_.resolveCss(newTiming.direction)) :
         prevTiming.direction;
     const fill = newTiming.fill != null ?
         /** @type {!WebAnimationTimingFill} */
-        (this.css_.resolveCss(target, newTiming.fill)) :
+        (this.css_.resolveCss(newTiming.fill)) :
         prevTiming.fill;
 
     // Other.
@@ -627,20 +866,18 @@ export class MeasureScanner extends Scanner {
         newTiming.ticker : prevTiming.ticker;
 
     // Validate.
-    if (this.validate_) {
-      this.validateTime_(duration, newTiming.duration, 'duration');
-      this.validateTime_(delay, newTiming.delay, 'delay');
-      this.validateTime_(endDelay, newTiming.endDelay, 'endDelay');
-      user().assert(iterations != null && iterations >= 0,
-          '"iterations" is invalid: %s', newTiming.iterations);
-      user().assert(iterationStart != null &&
-          iterationStart >= 0 && isFinite(iterationStart),
-          '"iterationStart" is invalid: %s', newTiming.iterationStart);
-      user().assertEnumValue(WebAnimationTimingDirection,
-          /** @type {string} */ (direction), 'direction');
-      user().assertEnumValue(WebAnimationTimingFill,
-          /** @type {string} */ (fill), 'fill');
-    }
+    this.validateTime_(duration, newTiming.duration, 'duration');
+    this.validateTime_(delay, newTiming.delay, 'delay', /* negative */ true);
+    this.validateTime_(endDelay, newTiming.endDelay, 'endDelay');
+    user().assert(iterations != null && iterations >= 0,
+        '"iterations" is invalid: %s', newTiming.iterations);
+    user().assert(iterationStart != null &&
+        iterationStart >= 0 && isFinite(iterationStart),
+        '"iterationStart" is invalid: %s', newTiming.iterationStart);
+    user().assertEnumValue(WebAnimationTimingDirection,
+        /** @type {string} */ (direction), 'direction');
+    user().assertEnumValue(WebAnimationTimingFill,
+        /** @type {string} */ (fill), 'fill');
     return {
       duration,
       delay,
@@ -658,15 +895,17 @@ export class MeasureScanner extends Scanner {
    * @param {number|undefined} value
    * @param {*} newValue
    * @param {string} field
+   * @param {boolean=} opt_allowNegative
    * @private
    */
-  validateTime_(value, newValue, field) {
+  validateTime_(value, newValue, field, opt_allowNegative) {
     // Ensure that positive or zero values are only allowed.
-    user().assert(value != null && value >= 0,
+    user().assert(
+        value != null && (value >= 0 || value < 0 && opt_allowNegative),
         '"%s" is invalid: %s', field, newValue);
     // Make sure that the values are in milliseconds: show a warning if
     // time is fractional.
-    if (newValue != null && Math.floor(value) != value) {
+    if (newValue != null && Math.floor(value) != value && value < 1) {
       user().warn(TAG,
           `"${field}" is fractional.`
           + ' Note that all times are in milliseconds.');
@@ -681,7 +920,7 @@ export class MeasureScanner extends Scanner {
 class CssContextImpl {
   /**
    * @param {!Window} win
-   * @param {!Node} rootNode
+   * @param {!Document|!ShadowRoot} rootNode
    * @param {string} baseUrl
    */
   constructor(win, rootNode, baseUrl) {
@@ -703,6 +942,12 @@ class CssContextImpl {
     /** @private {?Element} */
     this.currentTarget_ = null;
 
+    /** @private {?Object<string, *>} */
+    this.vars_ = null;
+
+    /** @private {!Array<string>} */
+    this.varPath_ = [];
+
     /** @private {?string} */
     this.dim_ = null;
 
@@ -716,6 +961,26 @@ class CssContextImpl {
    */
   matchMedia(mediaQuery) {
     return this.win_.matchMedia(mediaQuery).matches;
+  }
+
+  /**
+   * @param {string} id
+   * @return {?Element}
+   */
+  getElementById(id) {
+    return this.rootNode_.getElementById(id);
+  }
+
+  /**
+   * @param {string} selector
+   * @return {!Array<!Element>}
+   */
+  queryElements(selector) {
+    try {
+      return toArray(this.rootNode_./*OK*/querySelectorAll(selector));
+    } catch (e) {
+      throw user().createError(`Bad query selector: "${selector}"`, e);
+    }
   }
 
   /**
@@ -750,9 +1015,9 @@ class CssContextImpl {
    * @param {function(?Element):T} callback
    * @return {T}
    * @template T
-   * @private
+   * @protected
    */
-  withTarget_(target, callback) {
+  withTarget(target, callback) {
     const prev = this.currentTarget_;
     this.currentTarget_ = target;
     const result = callback(target);
@@ -761,11 +1026,26 @@ class CssContextImpl {
   }
 
   /**
-   * @param {?Element} target
+   * @param {?Object<string, *>} vars
+   * @param {function():T} callback
+   * @return {T}
+   * @template T
+   * @protected
+   */
+  withVars(vars, callback) {
+    const prev = this.vars_;
+    this.vars_ = vars;
+    const result = callback();
+    this.vars_ = prev;
+    return result;
+  }
+
+  /**
    * @param {*} input
    * @return {string}
+   * @protected
    */
-  resolveCss(target, input) {
+  resolveCss(input) {
     if (input == null || input === '') {
       return '';
     }
@@ -778,39 +1058,37 @@ class CssContextImpl {
     if (!isVarCss(inputCss)) {
       return inputCss;
     }
-    const result = this.resolveAsNode_(target, inputCss);
+    const result = this.resolveAsNode_(inputCss);
     return result != null ? result.css() : '';
   }
 
   /**
-   * @param {?Element} target
    * @param {!Object<string, *>} input
    * @return {!Object<string, string|number>}
    */
-  resolveCssMap(target, input) {
+  resolveCssMap(input) {
     const result = map();
     for (const k in input) {
       if (k == 'offset') {
         result[k] = input[k];
       } else {
-        result[k] = this.resolveCss(target, input[k]);
+        result[k] = this.resolveCss(input[k]);
       }
     }
     return result;
   }
 
   /**
-   * @param {?Element} target
    * @param {*} input
    * @param {number|undefined} def
    * @return {number|undefined}
    */
-  resolveMillis(target, input, def) {
+  resolveMillis(input, def) {
     if (input != null && input !== '') {
       if (typeof input == 'number') {
         return input;
       }
-      const node = this.resolveAsNode_(target, input);
+      const node = this.resolveAsNode_(input);
       if (node) {
         return CssTimeNode.millis(node);
       }
@@ -819,17 +1097,16 @@ class CssContextImpl {
   }
 
   /**
-   * @param {?Element} target
    * @param {*} input
    * @param {number|undefined} def
    * @return {number|undefined}
    */
-  resolveNumber(target, input, def) {
+  resolveNumber(input, def) {
     if (input != null && input !== '') {
       if (typeof input == 'number') {
         return input;
       }
-      const node = this.resolveAsNode_(target, input);
+      const node = this.resolveAsNode_(input);
       if (node) {
         return CssNumberNode.num(node);
       }
@@ -838,12 +1115,11 @@ class CssContextImpl {
   }
 
   /**
-   * @param {?Element} target
    * @param {*} input
    * @return {?./css-expr-ast.CssNode}
    * @private
    */
-  resolveAsNode_(target, input) {
+  resolveAsNode_(input) {
     if (input == null || input === '') {
       return null;
     }
@@ -861,7 +1137,7 @@ class CssContextImpl {
     if (!node) {
       return null;
     }
-    return this.withTarget_(target, () => node.resolve(this));
+    return node.resolve(this);
   }
 
   /**
@@ -875,8 +1151,21 @@ class CssContextImpl {
 
   /** @override */
   getVar(varName) {
-    const target = this.requireTarget_();
-    return this.resolveAsNode_(target, this.measure(target, varName));
+    user().assert(
+        this.varPath_.indexOf(varName) == -1,
+        `Recursive variable: "${varName}"`);
+    this.varPath_.push(varName);
+    const rawValue = (this.vars_ && this.vars_[varName] != undefined) ?
+        this.vars_[varName] :
+        this.currentTarget_ ?
+            this.measure(this.currentTarget_, varName) :
+            null;
+    if (rawValue == null || rawValue === '') {
+      user().warn(TAG, `Variable not found: "${varName}"`);
+    }
+    const result = this.resolveAsNode_(rawValue);
+    this.varPath_.pop();
+    return result;
   }
 
   /** @override */

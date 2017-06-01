@@ -309,6 +309,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }, googleBlockParameters(this));;
   }
 
+<<<<<<< HEAD
   /** @override */
   getAdUrl() {
     if (this.iframe) {
@@ -439,6 +440,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
+<<<<<<< HEAD
   sendXhrRequest(adUrl) {
     if (!this.useSra_) {
       return super.sendXhrRequest(adUrl);
@@ -548,6 +550,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           });
         });
       });
+=======
+  getPreconnectUrls() {
+    return ['https://partner.googleadservices.com',
+            'https://tpc.googlesyndication.com'];
+>>>>>>> 5f69c782b6e975c6dedf7b6e93037f9aeff40376
   }
 }
 
