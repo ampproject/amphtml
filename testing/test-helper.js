@@ -84,5 +84,5 @@ export function withdrawRequest(win, id) {
     method: 'GET',
     ampCors: false,
     credentials: 'omit',
-  });
+  }).then(res => res.json());
 }

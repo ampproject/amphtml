@@ -43,7 +43,6 @@ describe('impression', () => {
         },
       });
     });
-    sandbox.spy(xhr, 'fetchJson');
     sandbox.stub(viewer, 'whenFirstVisible').returns(Promise.resolve());
     resetTrackImpressionPromiseForTesting();
   });

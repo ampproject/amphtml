@@ -447,28 +447,15 @@ function isRetriable(status) {
  * @private Visible for testing
  */
 export function assertSuccess(response) {
-  return new Promise((resolve, reject) => {
-    const status = response.status;
-    if (status < 200 || status >= 300) {
-      const retriable = isRetriable(status);
-      const err = new FetchError(
-          user().createError(`HTTP error ${status}`), response, retriable);
-      const contentType = response.headers.get('Content-Type') || '';
-      if (contentType.split(';')[0] == 'application/json') {
-        response.json().then(json => {
-          err.responseJson = json;
-          reject(err);
-        }, () => {
-          // Ignore a failed json parsing and just throw the error without
-          // setting responseJson.
-          reject(err);
-        });
-      } else {
-        reject(err);
-      }
-    } else {
-      resolve(response);
+  return new Promise(resolve => {
+    if (response.ok) {
+      return resolve(response);
     }
+
+    const { status } = response;
+    const err = user().createError(`HTTP error ${status}`);
+    err.retriable = isRetriable(status);
+    throw err;
   });
 }
 
