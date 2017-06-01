@@ -22,10 +22,6 @@ limitations under the License.
     <td>Displays a <a href="https://gist.github.com/">GitHub Gist</a>.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-gist" src="https://cdn.ampproject.org/v0/amp-gist-0.1.js">&lt;/script></code></td>
   </tr>
@@ -39,9 +35,11 @@ limitations under the License.
   </tr>
 </table>
 
-## Examples
+## Behavior
 
-### Multiple files
+This extension creates an iframe and displays a [gist from GitHub](https://help.github.com/articles/about-gists/). 
+
+#### Example: Embedding multiple files
 
 ```html
 <amp-gist
@@ -51,7 +49,7 @@ limitations under the License.
 </amp-gist>
 ```
 
-### Single file
+#### Example: Embedding a single file
 
 ```html
 <amp-gist
@@ -62,26 +60,25 @@ limitations under the License.
 </amp-gist>
 ```
 
-## Behavior
-
-This extension creates an iframe and displays the gist from GitHub. **You must find the 
-height of the gist by inspecting it with your browser** (e.g. Chrome Developer Tools).
-
 ## Attributes
 
-These are the valid attributes for the `amp-gist` component:
+##### data-gistid (required)
 
-**data-gistid** (required)
 The ID of the gist to embed.
 
-**layout** (required)
-Currently only supports `fixed-height`
+##### layout (required)
 
-**height** (required)
+Currently only supports `fixed-height`.
+
+##### height(required)
+
 The height of the gist or gist file in pixels.
 
-**data-file** (optional)
-`data-file` is used for displaying only one file in a gist.
+**Note**: You must find the height of the gist by inspecting it with your browser (e.g., Chrome Developer Tools).
+
+##### data-file (optional)
+
+If specified, display only one file in a gist.
 
 ## Validation
 See [amp-gist rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-gist/0.1/validator-amp-gist.protoascii) in the AMP validator specification.

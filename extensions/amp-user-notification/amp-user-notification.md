@@ -16,6 +16,8 @@ limitations under the License.
 
 # <a name="amp-user-notification"></a> `amp-user-notification`
 
+[TOC]
+
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
@@ -69,13 +71,12 @@ the user.
 To close `amp-user-notification`, add an `on` attribute to a button with the
 following value scheme `on="event:idOfUserNotificationElement.dismiss"`
 (see example below). This user action also triggers the `GET` to the
-`data-dismiss-href` URL. Be very mindful of the browser caching the `GET` response; see details below in the `data-show-if-href` section. (We recommend
+`data-dismiss-href` URL. Be very mindful of the browser caching the `GET` response; see details below in the [`data-show-if-href`](#data-show-if-href-(optional)) section. (We recommend
 adding a unique value to the `GET` url like a timestamp as a query string field).
 
 When multiple `amp-user-notification` elements are on a page, only one is shown
 at a single time (Once one is dismissed the next one is shown).
-The order of the notifications being shown is currently not deterministic. (TODO:
-follow up task [#1229](https://github.com/ampproject/amphtml/issues/1229) to fix this).
+The order of the notifications being shown is currently not deterministic. 
 
 Example:
 
@@ -93,9 +94,9 @@ Example:
 
 ## Attributes
 
-**data-show-if-href** (optional)
+##### data-show-if-href (optional)
 
-When specified, AMP will make a [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS) GET request with credentials to this URL to determine whether the notification should be shown. AMP appends the `elementId` and `ampUserId` query string fields to the href provided
+When specified, AMP will make a CORS GET request with credentials to the specified URL to determine whether the notification should be shown. AMP appends the `elementId` and `ampUserId` query string fields to the href provided
 on the `data-show-if-href` attribute (see [#1228](https://github.com/ampproject/amphtml/issues/1228) on why this is a GET instead of a POST).
 
 As a best practice to not let the browser cache the GET response values, you should add
@@ -103,43 +104,52 @@ a [`TIMESTAMP` url replacement](https://github.com/ampproject/amphtml/blob/maste
 You can add it as a query string field (e.g., 
 `data-show-if-href="https://foo.com/api/show-api?timestamp=TIMESTAMP"`).
 
- - **CORS GET request** query string fields: `elementId`, `ampUserId`
+If the `data-show-if-href` attribute is not specified, AMP will only check if the notification with the specified ID has been "dismissed" by the user locally. If not, the notification will be shown.
 
-    Example:
-  ```text
-  https://foo.com/api/show-api?timestamp=1234567890&elementId=notification1&ampUserId=cid-value
-  ```
+{% call callout('Important', type='caution') %}
+For handling CORS requests and responses, see the [AMP CORS spec](../../spec/amp-cors-requests.md).
+{% endcall %}
 
- - **CORS GET response** JSON fields: `showNotification`. The response must contain a single JSON object with a `showNotification` field of type boolean. If this field is `true`, the notification will be shown, otherwise it will not be shown.
+**CORS GET request** query string fields: `elementId`, `ampUserId`
 
-    Example:
-    ```json
-    { "showNotification": true }
-    ```
+Example:
 
-If not specified, AMP will only check if the notification with the specified ID has been "dismissed" by the user locally. If not, the notification will be shown.
+```text
+https://foo.com/api/show-api?timestamp=1234567890&elementId=notification1&ampUserId=cid-value
+```
 
-**data-dismiss-href** (optional)
+**CORS GET response** JSON fields: `showNotification`. The response must contain a single JSON object with a `showNotification` field of type boolean. If this field is `true`, the notification will be shown, otherwise it won't.
 
-When specified, AMP will make a [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS) 
-POST request to this URL transmitting the `elementId` and
-`ampUserId` only when the user has explicitly agreed.
+Example:
+
+```json
+{ "showNotification": true }
+```
+
+##### data-dismiss-href (optional)
+
+When specified, AMP will make a CORS POST request to the specified URL transmitting the `elementId` and `ampUserId` only when the user has explicitly agreed.
+
+If this attribute is not specified, AMP will not send a request upon dismissal, and will only store the "dismissed" flag for the specified ID locally.
+
+{% call callout('Important', type='caution') %}
+For handling CORS requests and responses, see the [AMP CORS spec](../../spec/amp-cors-requests.md).
+{% endcall %}
+
+**POST request** JSON fields: `elementId`, `ampUserId`
 
 Use the `ampUserId` field to store that the user has seen the notification before, if you want to avoid showing it in the future. It's the same value that
 will be passed in future requests to `data-show-if-href`.
 
-  - **POST request** JSON fields: `elementId`, `ampUserId`
+Example:
 
-    Example:
-    ```json
-    { "elementId": "id-of-amp-user-notification", "ampUserId": "ampUserIdString" }
-    ```
+```json
+{ "elementId": "id-of-amp-user-notification", "ampUserId": "ampUserIdString" }
+```
+**POST response** should be a 200 HTTP code and no data is expected back.
 
-  - **POST response** should be a 200 HTTP code and no data is expected back.
 
-If not specified, AMP will not send a request upon dismissal, and will only store the "dismissed" flag for the specified ID locally.
-
-**data-persist-dismissal** (optional)
+##### data-persist-dismissal (optional)
 
 By default, this is set to `true`. If set to `false`, AMP will not remember the user's dismissal of the notification. The notification
 will always show if the `data-show-if-href` result is show notification. If no `data-show-if-href` is provided
