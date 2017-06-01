@@ -20,7 +20,7 @@ import {stubService} from '../../../../testing/test-helper';
 import {createElementWithAttributes} from '../../../../src/dom';
 import * as adCid from '../../../../src/ad-cid';
 import '../../../amp-ad/0.1/amp-ad';
-import '../../../amp-sticky-ad/0.1/amp-sticky-ad';
+import '../../../amp-sticky-ad/1.0/amp-sticky-ad';
 import * as lolex from 'lolex';
 import * as sinon from 'sinon';
 
