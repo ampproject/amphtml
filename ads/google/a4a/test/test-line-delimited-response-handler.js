@@ -150,7 +150,8 @@ describe('#line-delimited-response-handler', () => {
     }
 
     beforeEach(() => {
-      readStub = sinon.stub();
+      sandbox = sinon.sandbox.create();
+      readStub = sandbox.stub();
       fetchStub.returns(Promise.resolve({
         text: () => Promise.resolve(),
         body: {
@@ -167,6 +168,10 @@ describe('#line-delimited-response-handler', () => {
           TextDecoder,
         },
       };
+    });
+
+    afterEach(() => {
+      sandbox.restore();
     });
 
     it('should handle empty streamed response properly', () => {

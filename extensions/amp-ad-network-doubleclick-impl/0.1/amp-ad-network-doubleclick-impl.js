@@ -123,17 +123,12 @@ const BLOCK_SRA_COMBINERS_ = [
       'enc_prev_ius': prevIusEncoded.join(),
     };
   },
-  instances => {
-    // Although declared at a block-level, this is actually page level so
-    // return true if ANY indicate cookie opt out.
-    for (let i = 0; i < instances.length; i++) {
-      if (instances.jsonTargeting_ &&
-          instances.jsonTargeting_['cookieOptOut']) {
-        return {'co': '1'};
-      }
-    }
-    return null;
-  },
+  // Although declared at a block-level, this is actually page level so
+  // return true if ANY indicate cookie opt out.
+  instances => getFirstInstanceValue_(instances, instance => {
+    return instance.jsonTargeting_ &&
+        instance.jsonTargeting_['cookieOptOut'] ? {'co': '1'} : null;
+  }),
   instances => {
     return {'adks': instances.map(instance => instance.adKey_).join()};
   },
@@ -141,28 +136,17 @@ const BLOCK_SRA_COMBINERS_ = [
     return {'prev_iu_szs': instances.map(instance =>
       `${instance.size_.width}x${instance.size_.height}`).join()};
   },
-  instances => {
-    // Although declared at a block-level, this is actually page level so
-    // return true if ANY indicate TFCD.
-    for (let i = 0; i < instances.length; i++) {
-      const instance = instances[i];
-      if (instance.jsonTargeting_ && instance.jsonTargeting_[TFCD_]) {
-        return {'tfcd': instance.jsonTargeting_[TFCD_]};
-      }
-    }
-    return null;
-  },
-  instances => {
-    // Although declared at a block-level, this is actually page level so
-    // return true if ANY indicate TFCD.
-    for (let i = 0; i < instances.length; i++) {
-      const instance = instances[i];
-      if (isInManualExperiment(instance.element)) {
-        return {'adtest': 'on'};
-      }
-    }
-    return null;
-  },
+  // Although declared at a block-level, this is actually page level so
+  // return true if ANY indicate TFCD.
+  instances => getFirstInstanceValue_(instances, instance => {
+    return instance.jsonTargeting_ && instance.jsonTargeting_[TFCD_] ?
+      {'tfcd': instance.jsonTargeting_[TFCD_]} : null;
+  }),
+  // Although declared at a block-level, this is actually page level so
+  // return true if ANY indicate manual experiment.
+  instances => getFirstInstanceValue_(instances, instance => {
+    return isInManualExperiment(instance.element) ? {'adtest': 'on'} : null;
+  }),
   instances => {
     const scps = [];
     instances.forEach(instance => {
@@ -632,4 +616,22 @@ function serializeItem(key, value) {
   const serializedValue = Array.isArray(value) ?
       value.map(encodeURIComponent).join(',') : encodeURIComponent(value);
   return `${serializedKey}=${serializedValue}`;
+}
+
+/**
+ * @param {!Array<!AmpAdNetworkDoubleclickImpl>} instances
+ * @param {!function(AmpAdNetworkDoubleclickImpl):?T} extractFn
+ * @return {?T} value of first instance with non-null/undefined value or null
+ *    if none can be found
+ * @template T
+ * @private
+ */
+function getFirstInstanceValue_(instances, extractFn) {
+  for (let i = 0; i < instances.length; i++) {
+    const val = extractFn(instances[i]);
+    if (val) {
+      return val;
+    }
+  }
+  return null;
 }
