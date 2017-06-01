@@ -23,7 +23,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>Stable with the following Experimental feature: <a href="#verification-experimental-">Verification</a></td>
+    <td>Stable with the following Experimental feature: <a href="#verification-(experimental)">Verification</a></td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -84,7 +84,7 @@ An XHR request (sometimes called an AJAX request) is where the browser would mak
 The value for `action-xhr` can be the same or a different endpoint than `action` and has the same action requirements above.
 
 {% call callout('Important', type='caution') %}
-See [Security Considerations](#security-considerations) for notes on how to secure your forms endpoints.
+See the [Security Considerations](#security-considerations) section below for notes on how to secure your forms endpoints.
 {% endcall %}
 
 **other form attributes**
@@ -448,10 +448,13 @@ Note how `CANONICAL_HOSTNAME` above did not get replaced because it was not in t
 Substitutions will happen on every subsequent submission. Read more about [variable substitutions in AMP](../../spec/amp-var-substitutions.md).
 
 ## Security Considerations
-Your XHR endpoints need to follow and implement [CORS Requests in AMP spec](../../spec/amp-cors-requests.md).
+
+{% call callout('Important', type='caution') %}
+Your XHR endpoint must implement the requirements specified in the [CORS Requests in AMP](../../spec/amp-cors-requests.md) spec.
+{% endcall %}
 
 ### Protecting against XSRF
-In addition to following AMP CORS spec, please pay extra attention to [state changing requests note](../../spec/amp-cors-requests.md#note-on-state-changing-requests) to protect against [XSRF attacks](https://en.wikipedia.org/wiki/Cross-site_request_forgery) where an attacker can execute unauthorized commands using the current user session without the user knowledge.
+In addition to following the details in the AMP CORS spec, please pay extra attention to the section on ["Verifying state changing requests" ](../../spec/amp-cors-requests.md#verify-state-changing-requests) to protect against [XSRF attacks](https://en.wikipedia.org/wiki/Cross-site_request_forgery) where an attacker can execute unauthorized commands using the current user session without the user knowledge.
 
 In general, keep in mind the following points when accepting input from the user:
 

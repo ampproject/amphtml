@@ -1,6 +1,6 @@
-# <a name="amp-access-"></a> AMP Access Specification
+# <a name="amp-access-"></a> amp-access
 
-**This extension is under active development, and the version number of the specification section should provide guidance to its evolution.**
+[TOC]
 
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
@@ -107,7 +107,7 @@ Login Page is implemented and served by the Publisher and called by the AMP Runt
 
 Login Page is triggered when the Reader taps on the Login Link which can be placed by the Publisher anywhere in the document.
 
-## Specification v0.5
+## Specification v0.1
 
 ### Configuration
 
