@@ -122,7 +122,6 @@ amp-carousel .amp-carousel-button.amp-disabled {
 /** Only hide scroll bar for touch devices as it causes jitters on desktops */
 .i-amphtml-slides-container.i-amphtml-no-scroll {
   overflow-x: hidden !important;
-  -webkit-overflow-scrolling: touch !important;
 }
 
 .i-amphtml-slide-item {
@@ -174,6 +173,11 @@ amp-carousel .amp-carousel-button.amp-disabled {
 .i-amphtml-slidescroll-no-snap .i-amphtml-slide-item {
   scroll-snap-coordinate: none !important;
 }
+
+.i-amphtml-slidescroll-no-snap.i-amphtml-slides-container.i-amphtml-no-scroll {
+  -webkit-overflow-scrolling: auto !important;
+}
+
 /* End SlideScroll */
 
 /* Begin ScrollableCarousel */
