@@ -22,9 +22,10 @@
  */
 
 import '../../third_party/babel/custom-babel-helpers';
+import './web-worker-polyfills';
 import {BindEvaluator} from '../../extensions/amp-bind/0.1/bind-evaluator';
 import {FromWorkerMessageDef, ToWorkerMessageDef} from './web-worker-defines';
-import {initLogConstructor} from '../../src/log';
+import {initLogConstructor} from '../log';
 import {installWorkerErrorReporting} from '../worker-error-reporting';
 
 initLogConstructor();
