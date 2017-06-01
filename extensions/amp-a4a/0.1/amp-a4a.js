@@ -925,6 +925,17 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    return this.attemptToRenderCreative();
+  }
+
+  /**
+   * Attemps to render the returned creative following the resolution of the
+   * adPromise.
+   *
+   * @return {!Promise} Whether the creative was successfully rendered.
+   * @protected
+   */
+  attemptToRenderCreative() {
     // Promise may be null if element was determined to be invalid for A4A.
     if (!this.adPromise_) {
       if (this.shouldInitializePromiseChain_()) {
