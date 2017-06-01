@@ -33,31 +33,25 @@ describes.realWin('ad-network-config', {
   },
 }, env => {
 
-  let ampAutoAdsElem;
-  let document;
+  let ampdoc;
 
   beforeEach(() => {
-    document = env.win.document;
-    ampAutoAdsElem = document.createElement('amp-auto-ads');
-    env.win.document.body.appendChild(ampAutoAdsElem);
-  });
-
-  afterEach(() => {
-    env.win.document.body.removeChild(ampAutoAdsElem);
+    ampdoc = env.ampdoc;
   });
 
   describe('AdSense', () => {
 
     const AD_CLIENT = 'ca-pub-1234';
+    const setupParams = {};
 
     beforeEach(() => {
-      ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
+      setupParams['adClient'] = AD_CLIENT;
     });
 
     it('should report enabled when holdout experiment not on', () => {
       toggleExperiment(
           env.win, ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME, false);
-      const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
+      const adNetwork = getAdNetworkConfig(ampdoc, 'adsense', setupParams);
       expect(adNetwork.isEnabled(env.win)).to.equal(true);
     });
 
@@ -66,7 +60,7 @@ describes.realWin('ad-network-config', {
       forceExperimentBranch(env.win,
           ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
           AdSenseAmpAutoAdsHoldoutBranches.EXPERIMENT);
-      const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
+      const adNetwork = getAdNetworkConfig(ampdoc, 'adsense', setupParams);
       expect(adNetwork.isEnabled(env.win)).to.equal(true);
     });
 
@@ -75,19 +69,19 @@ describes.realWin('ad-network-config', {
       forceExperimentBranch(env.win,
           ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
           AdSenseAmpAutoAdsHoldoutBranches.CONTROL);
-      const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
+      const adNetwork = getAdNetworkConfig(ampdoc, 'adsense', setupParams);
       expect(adNetwork.isEnabled(env.win)).to.equal(false);
     });
 
     it('should generate the config fetch URL', () => {
-      const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
+      const adNetwork = getAdNetworkConfig(ampdoc, 'adsense', setupParams);
       expect(adNetwork.getConfigUrl()).to.equal(
           '//pagead2.googlesyndication.com/getconfig/ama?client=' +
           AD_CLIENT + '&plah=foo.bar&ama_t=amp');
     });
 
     it('should generate the attributes', () => {
-      const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
+      const adNetwork = getAdNetworkConfig(ampdoc, 'adsense', setupParams);
       expect(adNetwork.getAttributes()).to.deep.equal({
         'type': 'adsense',
         'data-ad-client': 'ca-pub-1234',
@@ -95,11 +89,11 @@ describes.realWin('ad-network-config', {
     });
 
     it('should get the ad constraints', () => {
-      const viewportMock = sandbox.mock(viewportForDoc(env.win.document));
+      const viewportMock = sandbox.mock(viewportForDoc(ampdoc));
       viewportMock.expects('getSize').returns(
           {width: 320, height: 500}).atLeast(1);
 
-      const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
+      const adNetwork = getAdNetworkConfig(ampdoc, 'adsense', setupParams);
       expect(adNetwork.getAdConstraints()).to.deep.equal({
         initialMinSpacing: 500,
         subsequentMinSpacing: [
@@ -112,6 +106,6 @@ describes.realWin('ad-network-config', {
   });
 
   it('should return null for unknown type', () => {
-    expect(getAdNetworkConfig('unknowntype', ampAutoAdsElem)).to.be.null;
+    expect(getAdNetworkConfig(ampdoc, 'unknowntype', {})).to.be.null;
   });
 });

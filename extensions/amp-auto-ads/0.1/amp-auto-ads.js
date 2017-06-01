@@ -17,7 +17,7 @@
 import {AdTracker, getExistingAds} from './ad-tracker';
 import {AdStrategy} from './ad-strategy';
 import {user} from '../../../src/log';
-import {xhrFor} from '../../../src/services';
+import {viewerForDoc, xhrFor} from '../../../src/services';
 import {getAdNetworkConfig} from './ad-network-config';
 import {isExperimentOn} from '../../../src/experiments';
 import {getAttributesFromConfigObj} from './attributes';
@@ -26,40 +26,55 @@ import {getPlacementsFromConfigObj} from './placement';
 /** @const */
 const TAG = 'amp-auto-ads';
 
+/**
+ * The window property used to ensure that amp-auto-ads only runs once.
+ * @const
+ */
+const ALREADY_RUN_PROPERTY = '__AMP__AUTO_ADS_HAS_RUN';
 
-export class AmpAutoAds extends AMP.BaseElement {
+class AmpAutoAds {
+  /**
+   * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Node} setupNode
+   */
+  constructor(ampdoc, setupNode) {
+    /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
 
-  /** @override */
-  buildCallback() {
-    user().assert(isExperimentOn(self, 'amp-auto-ads'), 'Experiment is off');
+    /** @const @private {!Node} */
+    this.setupNode_ = setupNode;
+  }
 
-    const type = this.element.getAttribute('type');
+  run() {
+    const win = this.ampdoc_.win;
+    user().assert(isExperimentOn(win, 'amp-auto-ads'), 'Experiment is off');
+
+    const type = this.setupNode_.getAttribute('type');
     user().assert(type, 'Missing type attribute');
 
-    const adNetwork = getAdNetworkConfig(type, this.element);
+    const adNetwork = getAdNetworkConfig(
+        this.ampdoc_, type, this.setupNode_.dataset);
     user().assert(adNetwork, 'No AdNetworkConfig for type: ' + type);
 
-    if (!adNetwork.isEnabled(this.win)) {
+    if (!adNetwork.isEnabled()) {
       return;
     }
+
+    user().assert(!win[ALREADY_RUN_PROPERTY], 'amp-auto-ads has already run');
+    win[ALREADY_RUN_PROPERTY] = true;
 
     this.getConfig_(adNetwork.getConfigUrl()).then(configObj => {
       if (!configObj) {
         return;
       }
 
-      const placements = getPlacementsFromConfigObj(this.win, configObj);
+      const placements = getPlacementsFromConfigObj(win, configObj);
       const attributes = Object.assign(adNetwork.getAttributes(),
           getAttributesFromConfigObj(configObj));
-      const adTracker =
-          new AdTracker(getExistingAds(this.win), adNetwork.getAdConstraints());
+      const adTracker = new AdTracker(
+          getExistingAds(win), adNetwork.getAdConstraints());
       new AdStrategy(placements, attributes, adTracker).run();
     });
-  }
-
-  /** @override */
-  isLayoutSupported() {
-    return true;
   }
 
   /**
@@ -77,7 +92,7 @@ export class AmpAutoAds extends AMP.BaseElement {
       credentials: 'omit',
       requireAmpResponseSourceOrigin: false,
     };
-    return xhrFor(this.win)
+    return xhrFor(this.ampdoc_.win)
         .fetchJson(configUrl, xhrInit)
         .catch(reason => {
           user().error(TAG, 'amp-auto-ads config xhr failed: ' + reason);
@@ -86,4 +101,65 @@ export class AmpAutoAds extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-auto-ads', AmpAutoAds);
+export class AmpAutoAdsElement extends AMP.BaseElement {
+
+  /** @override */
+  buildCallback() {
+    new AmpAutoAds(this.getAmpDoc(), this.element).run();
+  }
+
+  /** @override */
+  isLayoutSupported() {
+    return true;
+  }
+}
+
+export class AmpAutoAdsService {
+  /**
+   * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   */
+  constructor(ampdoc) {
+    /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
+
+    /** @const @private {!../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = viewerForDoc(ampdoc);
+
+    /** @private {boolean} */
+    this.hasRun_ = false;
+
+    this.registerCallback_();
+  }
+
+  /**
+   * @private
+   */
+  registerCallback_() {
+    this.ampdoc_.whenBodyAvailable().then(() => {
+      if (!this.runOnceIfDocVisible_()) {
+        this.viewer_.onVisibilityChanged(() => this.runOnceIfDocVisible_());
+      }
+    });
+  }
+
+  /**
+   * @return {boolean} returns true if running of amp-auto-ads was attempted
+   *    (regardless of success) either on this call or a previous one.
+   * @private
+   */
+  runOnceIfDocVisible_() {
+    if (!this.hasRun_ && this.viewer_.isVisible()) {
+      this.hasRun_ = true;
+      const setupNode = this.ampdoc_.win.document.querySelector(
+          'META[name="amp-auto-ads-setup"]');
+      if (setupNode) {
+        new AmpAutoAds(this.ampdoc_, setupNode).run();
+      }
+    }
+    return this.hasRun_;
+  }
+}
+
+
+AMP.registerElement('amp-auto-ads', AmpAutoAdsElement);
+AMP.registerServiceForDoc('amp-auto-ads-service', AmpAutoAdsService);
