@@ -594,15 +594,15 @@ export function isEmbeddable(service) {
 
 
 /**
- * Asserts that the specified service implements `EmbeddableService` interface
- * and typecasts the instance to `EmbeddableService`.
- * @param {!Object} service
- * @return {!EmbeddableService}
+ * Adopts an embeddable (implements `EmbeddableService` interface) service
+ * in embed scope.
+ * @param {!Window} embedWin
+ * @param {string} serviceId
  */
-export function assertEmbeddable(service) {
-  dev().assert(isEmbeddable(service),
-      'required to implement EmbeddableService');
-  return /** @type {!EmbeddableService} */ (service);
+export function adoptServiceForEmbed(embedWin, serviceId) {
+  const adopted = adoptServiceForEmbedIfEmbeddable(embedWin, serviceId);
+  dev().assert(adopted,
+      `${serviceId} required to implement EmbeddableService.`);
 }
 
 
@@ -611,13 +611,18 @@ export function assertEmbeddable(service) {
  * in embed scope.
  * @param {!Window} embedWin
  * @param {string} serviceId
+ * @return {boolean}
  */
-export function adoptServiceForEmbed(embedWin, serviceId) {
+export function adoptServiceForEmbedIfEmbeddable(embedWin, serviceId) {
   const frameElement = /** @type {!Node} */ (dev().assert(
       embedWin.frameElement,
       'frameElement not found for embed'));
   const service = getServiceForDoc(frameElement, serviceId);
-  assertEmbeddable(service).adoptEmbedWindow(embedWin);
+  if (isEmbeddable(service)) {
+    service.adoptEmbedWindow(embedWin);
+    return true;
+  }
+  return false;
 }
 
 
