@@ -55,7 +55,7 @@ export function prepareFixedContainer(win, fixedContainer) {
       state.boundingRect = fixedContainer./*OK*/getBoundingClientRect();
     },
     mutate: state => {
-      setStyles(/** @type {!Element} */ (win.document.body), {
+      setStyles(dev().assertElement(win.document.body), {
         'background': 'transparent',
       });
 
@@ -78,7 +78,7 @@ export function prepareFixedContainer(win, fixedContainer) {
 /** @visibleForTesting */
 export function resetFixedContainer(win, fixedContainer) {
   return vsyncFor(win).mutatePromise(() => {
-    setStyles(/** @type {!Element} */ (win.document.body), {
+    setStyles(dev().assertElement(win.document.body), {
       'background': 'transparent',
     });
 

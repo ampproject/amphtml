@@ -34,7 +34,6 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   let onScrollCallback;
   let onResizeCallback;
   let measureSpy;
-  let sandbox;
 
   function stubIframeClientMakeRequest(callback) {
     return sandbox./*OK*/stub(binding.iframeClient_, 'makeRequest', callback);
