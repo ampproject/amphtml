@@ -455,16 +455,8 @@ export function extractAmpAnalyticsConfig(
         },
       },
     });
-    const requests = {};
-    for (let idx = 1; idx <= urls.length; idx++) {
-      // TODO: Ensure url is valid and not freeform JS?
-      requests[`visibility${idx}`] = `${urls[idx - 1]}`;
-    }
-    // Security review needed here.
-    config['requests'] = requests;
-    config['triggers']['continuousVisible']['request'] =
-        Object.keys(requests);
-    // Add CSI pingbacks.
+
+    // CSI base request.
     const correlator = getCorrelator(a4a.win);
     const slotId = a4a.element.getAttribute('data-amp-slot-index');
     const qqid = (responseHeaders && responseHeaders.has(QQID_HEADER))
@@ -478,6 +470,22 @@ export function extractAmpAnalyticsConfig(
         (eids != 'null' ? `&e.${slotId}=${eids}` : ``) +
         `&rls=$internalRuntimeVersion$&adt.${slotId}=${adType}`;
     opt_deltaTime = Math.round(opt_deltaTime);
+
+    // Duscover and build visibility endpoints.
+    const requests = {};
+    for (let idx = 1; idx <= urls.length; idx++) {
+      // TODO: Ensure url is valid and not freeform JS?
+      requests[`visibility${idx}`] = `${urls[idx - 1]}`;
+    }
+    // Add CSI ping for visibility.
+    requests['visibilityCsi'] = baseCsiUrl +
+        `&met.a4a.${slotId}=visibilityCsi.${opt_deltaTime}`;
+    // Security review needed here.
+    config['requests'] = requests;
+    config['triggers']['continuousVisible']['request'] =
+        Object.keys(requests);
+
+    // Add CSI pings for render-start and ini-load.
     config['requests']['iniLoadCsi'] = baseCsiUrl +
         `&met.a4a.${slotId}=iniLoadCsi.${opt_deltaTime}`;
     config['requests']['renderStartCsi'] = baseCsiUrl +
