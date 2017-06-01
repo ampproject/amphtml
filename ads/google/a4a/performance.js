@@ -301,11 +301,17 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
                         () => {
                           this.sendPing('firstVisible');
                         });
-      // ini-load
+
+      // ini load
+      readyPromise.then(() => {
+        this.sendPing('iniLoad');
+      });
+
+      // first visible + ini-load
       vis.listenElement(element, {waitFor: 'ini-load'},
                         readyPromise, null,
                         () => {
-                          this.sendPing('iniLoad');
+                          this.sendPing('visIniLoad');
                         });
 
       // 50% vis, ini-load and 1 sec
