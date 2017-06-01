@@ -81,7 +81,8 @@ const INTERNALLY_SELECTED_ID = '2088462';
  *   pathway.
  */
 export function googleAdsIsA4AEnabled(win, element, experimentName,
-    externalBranches, internalBranches, delayedExternalBranches) {
+    externalBranches, internalBranches, delayedExternalBranches,
+    sfgExternalBranches) {
   if (!isGoogleAdsA4AValidEnvironment(win)) {
     // Serving location doesn't qualify for A4A treatment
     return false;
@@ -90,8 +91,8 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
   const isSetFromUrl = maybeSetExperimentFromUrl(win, element,
       experimentName, externalBranches.control,
       externalBranches.experiment, delayedExternalBranches.control,
-      delayedExternalBranches.experiment,
-      MANUAL_EXPERIMENT_ID);
+      delayedExternalBranches.experiment, sfgExternalBranches.control,
+      sfgExternalBranches.experiment, MANUAL_EXPERIMENT_ID);
   const experimentInfoMap = {};
   const branches = [
     internalBranches.control,
@@ -180,7 +181,7 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
  */
 function maybeSetExperimentFromUrl(win, element, experimentName,
     controlBranchId, treatmentBranchId, delayedControlId,
-    delayedTreatmentBrandId, manualId) {
+    delayedTreatmentBrandId, sfgControlId, sfgTreatmentId, manualId) {
   const expParam = viewerForDoc(element).getParam('exp') ||
       parseQueryString(win.location.search)['exp'];
   if (!expParam) {
@@ -201,10 +202,13 @@ function maybeSetExperimentFromUrl(win, element, experimentName,
     '2': treatmentBranchId,
     '3': delayedControlId,
     '4': delayedTreatmentBrandId,
+    '5': sfgControlId,
+    '6': sfgTreatmentId,
   };
   if (argMapping.hasOwnProperty(arg)) {
     forceExperimentBranch(win, experimentName, argMapping[arg]);
-    return true;
+    // Neither branch of SFG is eligible for A4a.
+    return arg != '5' && arg != '6';
   } else {
     dev().warn('A4A-CONFIG', 'Unknown a4a URL parameter: ', a4aParam,
         ' expected one of -1 (manual), 0 (not in experiment), 1 (control ' +
