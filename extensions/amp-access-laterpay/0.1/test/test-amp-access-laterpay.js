@@ -43,6 +43,7 @@ describes.fakeWin('LaterpayVendor', {
       getAdapterConfig: () => { return laterpayConfig; },
       buildUrl: () => {},
       loginWithUrl: () => {},
+      getLoginUrl: () => {},
     };
     accessServiceMock = sandbox.mock(accessService);
 
@@ -83,10 +84,12 @@ describes.fakeWin('LaterpayVendor', {
         .withExactArgs('https://baseurl?param&article_title=test%20title', false)
         .returns(Promise.resolve('https://builturl'))
         .once();
+      accessServiceMock.expects('getLoginUrl')
+        .returns(Promise.resolve('https://builturl'))
+        .once();
       xhrMock.expects('fetchJson')
         .withExactArgs('https://builturl', {
           credentials: 'include',
-          requireAmpResponseSourceOrigin: true,
         })
         .returns(Promise.resolve({access: true}))
         .once();
@@ -100,10 +103,12 @@ describes.fakeWin('LaterpayVendor', {
       accessServiceMock.expects('buildUrl')
         .returns(Promise.resolve('https://builturl'))
         .once();
+      accessServiceMock.expects('getLoginUrl')
+        .returns(Promise.resolve('https://builturl'))
+        .once();
       xhrMock.expects('fetchJson')
         .withExactArgs('https://builturl', {
           credentials: 'include',
-          requireAmpResponseSourceOrigin: true,
         })
         .returns(Promise.resolve({status: 204}))
         .once();
@@ -116,10 +121,12 @@ describes.fakeWin('LaterpayVendor', {
       accessServiceMock.expects('buildUrl')
         .returns(Promise.resolve('https://builturl'))
         .once();
+      accessServiceMock.expects('getLoginUrl')
+        .returns(Promise.resolve('https://builturl'))
+        .once();
       xhrMock.expects('fetchJson')
         .withExactArgs('https://builturl', {
           credentials: 'include',
-          requireAmpResponseSourceOrigin: true,
         })
         .returns(Promise.reject({
           response: {status: 402},
