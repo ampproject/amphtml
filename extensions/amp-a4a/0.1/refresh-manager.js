@@ -15,6 +15,7 @@
  */
 
 import {analyticsForDoc} from '../../../src/analytics';
+import {refreshConfigs} from '../../../ads/_a4a-config';
 import {timerFor} from '../../../src/services';
 
 /**
@@ -27,40 +28,30 @@ import {timerFor} from '../../../src/services';
  */
 export let RefreshConfig;
 
-/** @type {!RefreshConfig} */
-export const DEFAULT_REFRESH_CONFIG = {
-  visiblePercentageMin: 50,
-  totalTimeMin: 0,
-  continuousTimeMin: 5000,
-  refreshInterval: 5000,
-};
-
 export class RefreshManager {
 
   /**
-   * @param {!Window} win
-   * @param {!Element} element The element to be registered.
-   * @param {function(RefreshManager)} callback The function to be invoked when
-   *     the element is refreshed.
-   * @param {!RefreshConfig} config Specifies the viewability conditions and
-   *     the refresh interval.
+   * @param {!./amp-a4a.AmpA4A} a4a The AmpA4A instance to be refreshed.
    */
-  constructor(win, element, callback, config) {
+  constructor(a4a) {
+
+    /** @const @private {!./amp-a4a.AmpA4A} */
+    this.a4a_ = a4a;
 
     /** @const @private {!Window} */
-    this.win_ = win;
+    this.win_ = a4a.win;
 
     /** @const @private {!Element} */
-    this.element_ = element;
+    this.element_ = a4a.element;
 
-    /** @const @private {function(RefreshManager)} */
-    this.callback_ = callback;
+    /** @const @private {string} */
+    this.adType_ = this.element_.getAttribute('type');
 
     /** @const @private {!RefreshConfig} */
-    this.config_ = config;
+    this.config_ = refreshConfigs[this.adType_];
 
     /** @const @private {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = timerFor(win);
+    this.timer_ = timerFor(this.win_);
 
     /** @private {?(number|string)} */
     this.refreshTimeoutId_ = null;
@@ -72,13 +63,42 @@ export class RefreshManager {
    * element.
    */
   initiateRefreshCycle() {
+    if (!this.isRefreshEnabled_()) {
+      // This instance of AmpA4A is not eligible for refresh, or does not it
+      // enabled.
+      return;
+    }
     analyticsForDoc(this.element_, true).then(analytics => {
       analytics.getAnalyticsRoot(this.element_).getVisibilityManager()
           .listenElement(this.element_, this.config_, null, null, () => {
             this.refreshTimeoutId_ = this.timer_.delay(() => {
-              this.callback_(this);
+              this.a4a_.refresh();
+              this.initiateRefreshCycle();
             }, this.config_.refreshInterval);
           });
     });
+  }
+
+  /**
+   * If this ad slot's network has opted in for refresh, and refresh has been
+   * enabled on this slot, this method will return the refresh configuration
+   * for this slot; otherwise, it will return null.
+   *
+   */
+  isRefreshEnabled_() {
+    if (!this.config_) {
+      // Network has not opted in for refresh eligibility; we can ignore any
+      // and all publisher configurations related to refresh.
+      return false;
+    }
+    let refreshEnabled =
+        this.element_.getAttribute('data-enable-refresh') == 'true';
+    if (!refreshEnabled) {
+      const metaTag = this.win_.document.getElementsByName(
+          `amp-ad-enable-refresh:${this.adType_}`);
+      refreshEnabled = metaTag[0] &&
+          metaTag[0].getAttribute('content') == 'true';
+    }
+    return refreshEnabled;
   }
 }
