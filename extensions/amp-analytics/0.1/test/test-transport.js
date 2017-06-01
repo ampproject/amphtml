@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {sendRequest, sendRequestUsingIframe, Transport} from '../transport';
+import {sendRequestUsingIframe, Transport} from '../transport';
 import {adopt} from '../../../../src/runtime';
 import {loadPromise} from '../../../../src/event-helper';
 import * as sinon from 'sinon';
@@ -24,6 +24,7 @@ adopt(window);
 describe('amp-analytics.transport', () => {
 
   let sandbox;
+  let transport = new Transport();
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
   });
@@ -50,7 +51,7 @@ describe('amp-analytics.transport', () => {
 
   it('prefers beacon over xhrpost and image', () => {
     setupStubs(true, true);
-    sendRequest(window, 'https://example.com/test', {
+    transport.sendRequest(window, 'https://example.com/test', {
       beacon: true, xhrpost: true, image: true,
     });
     assertCallCounts(1, 0, 0);
@@ -58,7 +59,7 @@ describe('amp-analytics.transport', () => {
 
   it('prefers xhrpost over image', () => {
     setupStubs(true, true);
-    sendRequest(window, 'https://example.com/test', {
+    transport.sendRequest(window, 'https://example.com/test', {
       beacon: false, xhrpost: true, image: true,
     });
     assertCallCounts(0, 1, 0);
@@ -66,7 +67,7 @@ describe('amp-analytics.transport', () => {
 
   it('reluctantly uses image if nothing else is enabled', () => {
     setupStubs(true, true);
-    sendRequest(window, 'https://example.com/test', {
+    transport.sendRequest(window, 'https://example.com/test', {
       image: true,
     });
     assertCallCounts(0, 0, 1);
@@ -74,7 +75,7 @@ describe('amp-analytics.transport', () => {
 
   it('falls back to xhrpost when enabled and beacon is not available', () => {
     setupStubs(false, true);
-    sendRequest(window, 'https://example.com/test', {
+    transport.sendRequest(window, 'https://example.com/test', {
       beacon: true, xhrpost: true, image: true,
     });
     assertCallCounts(1, 1, 0);
@@ -82,7 +83,7 @@ describe('amp-analytics.transport', () => {
 
   it('falls back to image when beacon not found and xhr disabled', () => {
     setupStubs(false, true);
-    sendRequest(window, 'https://example.com/test', {
+    transport.sendRequest(window, 'https://example.com/test', {
       beacon: true, xhrpost: false, image: true,
     });
     assertCallCounts(1, 0, 1);
@@ -90,7 +91,7 @@ describe('amp-analytics.transport', () => {
 
   it('falls back to image when beacon and xhr are not available', () => {
     setupStubs(false, false);
-    sendRequest(window, 'https://example.com/test', {
+    transport.sendRequest(window, 'https://example.com/test', {
       beacon: true, xhrpost: true, image: true,
     });
     assertCallCounts(1, 1, 1);
@@ -98,19 +99,19 @@ describe('amp-analytics.transport', () => {
 
   it('does not send a request when no transport methods are enabled', () => {
     setupStubs(true, true);
-    sendRequest(window, 'https://example.com/test', {});
+    transport.sendRequest(window, 'https://example.com/test', {});
     assertCallCounts(0, 0, 0);
   });
 
   it('asserts that urls are https', () => {
     expect(() => {
-      sendRequest(window, 'http://example.com/test');
+      transport.sendRequest(window, 'http://example.com/test');
     }).to.throw(/https/);
   });
 
   it('should NOT allow __amp_source_origin', () => {
     expect(() => {
-      sendRequest(window, 'https://twitter.com?__amp_source_origin=1');
+      transport.sendRequest(window, 'https://twitter.com?__amp_source_origin=1');
     }).to.throw(/Source origin is not allowed in/);
   });
 

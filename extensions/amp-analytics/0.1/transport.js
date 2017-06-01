@@ -45,10 +45,10 @@ export class Transport {
   /**
    * @param {!Window} win
    * @param {string} request
-   * @param {!Object<string, string>} transportOptions
+   * @param {Object<string, string>=} transportOptions
    */
   sendRequest(win, request, transportOptions) {
-    if (transportOptions['iframe']) {
+    if (transportOptions && transportOptions['iframe']) {
       this.sendRequestUsingCrossDomainIframe(request, transportOptions);
       return;
     }
