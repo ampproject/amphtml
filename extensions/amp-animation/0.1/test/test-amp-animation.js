@@ -381,7 +381,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
       it('should create runner with args', () => {
         const args = {};
         anim.triggered_ = true;
-        createRunnerStub.restore();
+        createRunnerStub./*OK*/restore();
         const stub = sandbox.stub(Builder.prototype, 'createRunner',
             () => runner);
         return anim.startOrResume_(args).then(() => {
