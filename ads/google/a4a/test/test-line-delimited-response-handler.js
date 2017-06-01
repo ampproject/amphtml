@@ -29,6 +29,7 @@ describe('#line-delimited-response-handler', () => {
   let chunkHandlerStub;
   let slotData;
   let xhr;
+  let sandbox;
 
   /**
    * @param {!Array<!{{creative:string,headers:!Object<string,string>}}>} slotData
@@ -84,8 +85,13 @@ describe('#line-delimited-response-handler', () => {
   }
 
   beforeEach(() => {
-    fetchStub = sinon.stub();
-    chunkHandlerStub = sinon.stub();
+    sandbox = sinon.sandbox.create();
+    fetchStub = sandbox.stub();
+    chunkHandlerStub = sandbox.stub();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
   });
 
   describe('stream not supported', () => {

@@ -306,7 +306,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'scp': serializeTargeting(
           this.jsonTargeting_['targeting'] || null,
           this.jsonTargeting_['categoryExclusions'] || null),
-    }, googleBlockParameters(this));;
+    }, googleBlockParameters(this));
   }
 
   /** @override */
