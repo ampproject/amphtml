@@ -88,6 +88,39 @@ data.tagForChildDirectedTreatment;
 data.targeting;
 data.slot;
 
+// imaVideo.js
+var google;
+google.ima;
+google.ima.AdDisplayContainer;
+google.ima.AdDisplayContainer.initialize;
+google.ima.ImaSdkSettings;
+google.ima.ImaSdkSettings.setPlayerType;
+google.ima.ImaSdkSettings.setPlayerVersion;
+google.ima.AdsLoader;
+google.ima.AdsLoader.getSettings;
+google.ima.AdsLoader.requestAds;
+google.ima.AdsManagerLoadedEvent;
+google.ima.AdsManagerLoadedEvent.Type
+google.ima.AdsManagerLoadedEvent.Type.ADS_MANAGER_LOADED;
+google.ima.AdsManagerLoadedEvent.getAdsManager;
+google.ima.AdErrorEvent;
+google.ima.AdErrorEvent.Type;
+google.ima.AdErrorEvent.Type.AD_ERROR;
+google.ima.AdsRequest;
+google.ima.ViewMode;
+google.ima.ViewMode.NORMAL;
+google.ima.ViewMode.FULLSCREEN;
+google.ima.AdsRenderingSettings;
+google.ima.UiElements;
+google.ima.UiElements.AD_ATTRIBUTION;
+google.ima.UiElements.COUNTDOWN;
+google.ima.AdEvent;
+google.ima.AdEvent.Type;
+google.ima.AdEvent.Type.CONTENT_PAUSE_REQUESTED;
+google.ima.AdEvent.Type.CONTENT_RESUME_REQUESTED;
+google.ima.AdsManager;
+google.ima.AdsManager.setVolume;
+
 // 3P ads
 // Please sort by alphabetic order of the ad server name to avoid conflict
 
