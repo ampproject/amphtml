@@ -67,22 +67,16 @@ class AmpAnalyticsRemoteFrameManager {
     const deserialized = deserializeMessage(message.data);
     if (deserialized) {
       this.setSentinel_(deserialized.sentinel);
-      if (deserialized.ampAnalyticsExtraData) {
+      if (deserialized.ampAnalytics3pExtraData && this.extraDataListener_) {
         this.senderIdToExtraData_[deserialized.senderId] =
-          deserialized.ampAnalyticsExtraData;
-        if (!this.extraDataListener_) {
-          return;
-        }
+          deserialized.ampAnalytics3pExtraData;
         requestIdleCallback(() => {
           this.extraDataListener_(deserialized.senderId,
-            deserialized.ampAnalyticsExtraData);
+            deserialized.ampAnalytics3pExtraData);
         });
-      } else if (deserialized.ampAnalyticsEvents) {
-        if (!this.listener_) {
-          return;
-        }
+      } else if (deserialized.ampAnalytics3pEvents && this.listener_) {
         requestIdleCallback(() => {
-          this.listener_(deserialized.ampAnalyticsEvents);
+          this.listener_(deserialized.ampAnalytics3pEvents);
         });
       }
     }

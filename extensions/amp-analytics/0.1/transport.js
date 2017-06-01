@@ -245,8 +245,8 @@ export class Transport {
       }, 10);
       return;
     }
-    frameData.iframeMessagingClient.sendMessage('ampAnalyticsExtraData',
-      {senderId: this.id_, ampAnalyticsExtraData: opt_extraData});
+    frameData.iframeMessagingClient.sendMessage('ampAnalytics3pExtraData',
+      {senderId: this.id_, ampAnalytics3pExtraData: opt_extraData});
   }
   /**
    * Create a cross-domain iframe for third-party vendor anaytlics
@@ -281,8 +281,8 @@ export class Transport {
       msgQueue: [],
       usageCount: 1,
       send: messages => {
-        iframeMessagingClient.sendMessage('ampAnalyticsEvents',
-          {ampAnalyticsEvents: messages});
+        iframeMessagingClient.sendMessage('ampAnalytics3pEvents',
+          {ampAnalytics3pEvents: messages});
       },
       iframeMessagingClient,
       sendTimer: null,
