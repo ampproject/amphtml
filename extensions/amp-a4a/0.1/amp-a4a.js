@@ -169,6 +169,7 @@ export const LIFECYCLE_STAGES = {
   iniLoad: '26',
   resumeCallback: '27',
   sraBuildRequestDelay: '28',
+  visIniLoad: '29',
 };
 
 /**
