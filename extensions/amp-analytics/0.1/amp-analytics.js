@@ -434,10 +434,11 @@ export class AmpAnalytics extends AMP.BaseElement {
     [defaultConfig, inlineConfig, this.remoteConfig_].forEach(config => {
       if (config && config.transport && config.transport.iframe) {
         if (getMode().localDev) {
-          user().warn('Only typeConfig may specify iframe transport, but ' +
-              ' in local dev mode, so okay', config);
+          user().warn(TAG, 'Only typeConfig may specify iframe transport,' +
+            ' but in local dev mode, so okay', config);
         } else {
-          user().error('Only typeConfig may specify iframe transport', config);
+          user().error(TAG, 'Only typeConfig may specify iframe transport',
+            config);
           return;
         }
       }

@@ -49,7 +49,7 @@ export class Transport {
    */
   sendRequest(win, request, transportOptions) {
     if (transportOptions['iframe']) {
-      this.sendRequestUsingCrossDomainIframe(request, transportOptions, event);
+      this.sendRequestUsingCrossDomainIframe(request, transportOptions);
       return;
     }
     assertHttpsUrl(request, 'amp-analytics request');
@@ -223,7 +223,6 @@ export class Transport {
   sendExtraData(frameUrl, extraData) {
     if (extraData) {
       const frameData = Transport.crossDomainIframes_[frameUrl];
-      // TODO: Rewrite this more elegantly
       if (!frameData.isReady) {
         timerFor(window).delay(() => {
           this.sendExtraData(frameUrl, extraData);
@@ -328,8 +327,7 @@ export class Transport {
 
   /**
    * Send an array of messages to a cross-domain iframe
-   * @param {!FrameData} frameData  The cross-domain iframe
-   * @param {!Array<string>} messages  The messages to send
+   * @param {!Object} frameData  The cross-domain iframe
    * @private
    */
   static sendQueuedMessagesToCrossDomainIframe_(frameData) {
