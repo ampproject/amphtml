@@ -59,17 +59,7 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
           // and the signature is "FAKESIG". This mode is only allowed in
           // `localDev` and primarily used for A4A Envelope for testing.
           // See DEVELOPING.md for more info.
-          let creative = this.transformCreativeLocalDev_(deserialized);
-          try {
-            // Gracefully handle the case in which the fake ad is still
-            // formatted in JSON, which it almost certainly is, since
-            // "gulp serve" won't serve an HTML file under /extensions
-            const json = JSON.parse(deserialized);
-            if (json.creative) {
-              creative = json.creative;
-            }
-          } catch (e) {
-          }
+          const creative = this.transformCreativeLocalDev_(deserialized);
           const encoder = new TextEncoder('utf-8');
           return {
             creative: encoder.encode(creative).buffer,
