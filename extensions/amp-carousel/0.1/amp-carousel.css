@@ -173,6 +173,11 @@ amp-carousel .amp-carousel-button.amp-disabled {
 .i-amphtml-slidescroll-no-snap .i-amphtml-slide-item {
   scroll-snap-coordinate: none !important;
 }
+
+.i-amphtml-slidescroll-no-snap.i-amphtml-slides-container.i-amphtml-no-scroll {
+  -webkit-overflow-scrolling: auto !important;
+}
+
 /* End SlideScroll */
 
 /* Begin ScrollableCarousel */
