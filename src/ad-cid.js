@@ -47,6 +47,7 @@ export function getOrCreateAdCid(
     }
     return cidService.get({
       scope: dev().assertString(clientIdScope),
+      createCookieIfNotPresent: true,
       cookieName: opt_clientIdCookieName,
     }, Promise.resolve(undefined)).catch(error => {
       // Not getting a CID is not fatal.
