@@ -129,7 +129,7 @@ Endpoints should restrict requests to allow only the following origins:
 - **Google AMP Cache subdomain**: `https://<publisher's subdomain>.cdn.ampproject.org`
   (for example, `https://nytimes-com.cdn.ampproject.org`)
 - **Google AMP Cache (legacy)**: `https://cdn.ampproject.org`
-- **Cloudflare AMP Cache**: `https:<publisher's domain>.amp.cloudflare.com`
+- **Cloudflare AMP Cache**: `https://<publisher's domain>.amp.cloudflare.com`
 - The Publisher’s own origins
 
 For information on AMP Cache URL formats, see these resources:
@@ -171,11 +171,14 @@ following:
 
 **If the `Origin` header is set**:
  
-1.  If the origin is not one of the following values, stop and return an error
+1.  If the origin does not match one of the following values, stop and return an error
     response:
     - `*.ampproject.org`
     - `*.amp.cloudflare.com`
     - the publisher's origin (aka yours)
+    
+    where `*` represents a wildcard match, and not an actual asterisk ( * ).
+    
 2.  If the value of the `__amp_source_origin` query parameter is not the
     publisher's origin, stop and return an error response.
 3.  If the two checks above pass, process the request. 
