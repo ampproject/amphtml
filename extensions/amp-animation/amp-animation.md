@@ -88,6 +88,7 @@ and is comprised of:
   "media": "(min-width:300px)",
   // Variables
   // Timing properties
+  // Subtargets
   ...
   "keyframes": []
 }
@@ -213,6 +214,35 @@ An example of timing properties in JSON:
 ```
 
 Animation components inherit timing properties specified for the top-level animation.
+
+
+### Subtargets
+
+Everywhere where `selector` can be specified, it's possible to also specify `subtargets: []`. Subtargets can override timing properties or variables defined in the animation for specific subtargets indicated via either an index or a CSS selector.
+
+For instance:
+```text
+{
+  "selector": ".target",
+  "delay": 100,
+  "--y": "100px",
+  "subtargets": [
+    {
+      "index": 0,
+      "delay": 200,
+    },
+    {
+      "selector": ":nth-child(2n+1)",
+      "--y": "200px"
+    }
+  ]
+}
+```
+
+In this example, by default all targets matched by the ".target" have delay of 100ms and "--y" of 100px. However, the first target (`index: 0`) is overriden to have delay of 200ms; and odd targets are overriden to have "--y" of 200px.
+
+Notice, that multiple subtargets can match one target element.
+
 
 ### Keyframes
 
