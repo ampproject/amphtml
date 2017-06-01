@@ -16,6 +16,7 @@
 
 import {
   adoptServiceForEmbed,
+  adoptServiceForEmbedIfEmbeddable,
   registerServiceBuilder,
   setParentWindow,
 } from '../service';
@@ -57,10 +58,10 @@ let ExtensionElementDef;
 
 /**
  * The structure that contains the resources declared by an extension.
- * Currently only limitted to elements.
  *
  * @typedef {{
  *   elements: !Object<string, !ExtensionElementDef>,
+ *   services: !Array<string>,
  * }}
  */
 let ExtensionDef;
@@ -138,6 +139,17 @@ export function addElementToExtension(
   extensions.addElement_(name, implementationClass, css);
 }
 
+/**
+ * Add a service to the extension currently being registered. This is a
+ * restricted method and it's allowed to be called only during the overall
+ * extension registration.
+ * @param {!Extensions} extensions
+ * @param {string} name
+ * @restricted
+ */
+export function addServiceToExtension(extensions, name) {
+  extensions.addService_(name);
+}
 
 /**
  * Add a ampdoc factory to the extension currently being registered. This is a
@@ -279,6 +291,15 @@ export class Extensions {
   }
 
   /**
+   * Adds `name` to the list of services registered by the current extension.
+   * @param {string} name
+   */
+  addService_(name) {
+    const holder = this.getCurrentExtensionHolder_();
+    holder.extension.services.push(name);
+  }
+
+  /**
    * Registers an ampdoc factory.
    * @param {function(!./ampdoc-impl.AmpDoc)} factory
    * @param {string=} opt_forName
@@ -389,7 +410,7 @@ export class Extensions {
     }
 
     // Adopt embeddable services.
-    adoptServicesForEmbed(childWin);
+    adoptStandardServicesForEmbed(childWin);
 
     // Install built-ins and legacy elements.
     copyBuiltinElementsToChildWindow(topWin, childWin);
@@ -406,15 +427,10 @@ export class Extensions {
 
       // Install CSS.
       const promise = this.loadExtension(extensionId).then(extension => {
-        // TODO(dvoytenko): Adopt embeddable services from the extension when
-        // becomes necessary. This will require refactoring of extension
-        // loader that can be resolved via the parent ampdoc.
-
-        // TODO(choumx): Similar to `adoptServicesForEmbed`, should there be
-        // a map of extension ID -> service? E.g. "cid" -> "amp-analytics".
-        if (extensionId == 'amp-bind') {
-          adoptServiceForEmbed(childWin, 'bind');
-        }
+        // Adopt embeddable extension services.
+        extension.services.forEach(service => {
+          adoptServiceForEmbedIfEmbeddable(childWin, service);
+        });
 
         // Adopt the custom element.
         const elementDef = extension.elements[extensionId];
@@ -450,9 +466,10 @@ export class Extensions {
   getExtensionHolder_(extensionId) {
     let holder = this.extensions_[extensionId];
     if (!holder) {
-      const extension = {
+      const extension = /** @type {ExtensionDef} */ ({
         elements: {},
-      };
+        services: [],
+      });
       holder = /** @type {ExtensionHolderDef} */ ({
         extension,
         docFactories: [],
@@ -613,7 +630,7 @@ function installPolyfillsInChildWindow(childWin) {
  * Adopt predefined core services for the child window (friendly iframe).
  * @param {!Window} childWin
  */
-function adoptServicesForEmbed(childWin) {
+function adoptStandardServicesForEmbed(childWin) {
   // The order of service adoptations is important.
   // TODO(dvoytenko): Refactor service registration if this set becomes
   // to pass the "embeddable" flag if this set becomes too unwieldy.
