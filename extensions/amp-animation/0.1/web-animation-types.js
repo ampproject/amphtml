@@ -25,7 +25,7 @@ export let WebAnimationDef;
  * @mixes WebAnimationSelectorDef
  * @mixes WebAnimationTimingDef
  * @mixes WebAnimationVarsDef
- * @mixes WebAnimationMediaDef
+ * @mixes WebAnimationConditionalDef
  * @typedef {{
  *   animations: !Array<!WebAnimationDef>,
  * }}
@@ -37,7 +37,7 @@ export let WebMultiAnimationDef;
  * @mixes WebAnimationSelectorDef
  * @mixes WebAnimationTimingDef
  * @mixes WebAnimationVarsDef
- * @mixes WebAnimationMediaDef
+ * @mixes WebAnimationConditionalDef
  * @typedef {{
  *   animation: string,
  * }}
@@ -49,7 +49,7 @@ export let WebCompAnimationDef;
  * @mixes WebAnimationSelectorDef
  * @mixes WebAnimationTimingDef
  * @mixes WebAnimationVarsDef
- * @mixes WebAnimationMediaDef
+ * @mixes WebAnimationConditionalDef
  * @typedef {{
  *   keyframes: (string|!WebKeyframesDef),
  * }}
@@ -100,7 +100,7 @@ export let WebAnimationVarsDef;
  *   media: (string|undefined),
  * }}
  */
-export let WebAnimationMediaDef;
+export let WebAnimationConditionalDef;
 
 
 /**
@@ -168,6 +168,8 @@ const WHITELISTED_RPOPS = {
   'opacity': true,
   'transform': true,
   'visibility': true,
+  'offset-distance': true,
+  'offsetDistance': true,
 };
 
 

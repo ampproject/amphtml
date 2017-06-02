@@ -78,7 +78,7 @@ will be removed in the near future.
 Each animation component is a [keyframes effect](https://www.w3.org/TR/web-animations/#dom-keyframeeffect-keyframeeffect)
 and is comprised of:
  - Target element(s) referenced by a selector
- - Media query
+ - Conditions, such as media query
  - Timing properties
  - Keyframes
 
@@ -94,13 +94,19 @@ and is comprised of:
 }
 ```
 
-### Media query
+
+### Conditions
+
+Conditions can specify whether this animation component is included in the final animation. Currently, only `media` expression is supported.
+
+#### Media query
 
 Media query can be specified using the `media` property. This attribute can contain any expression allowed
 for [Window.matchMedia](https://developer.mozilla.org/en-US/docs/Web/API/Window/matchMedia) API.
 
 If value is specified for an animation component, the animation component will only be included if the
 media query will match the current environment.
+
 
 ### Variables
 
