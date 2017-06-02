@@ -100,8 +100,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // validateData, from 3p/3p/js, after noving it someplace common.
     const rtcConfig = tryParseJson(
         document.getElementById('amp-rtc').innerHTML);
-    const rtcRequestPromise = rtcConfig ?
-        this.sendRtcRequestPromise(rtcConfig) : null;
+    const rtcRequestPromise = (rtcConfig && typeof rtcConfig == 'object') ?
+        this.sendRtcRequestPromise(/** @type {!Object} */(rtcConfig)) : null;
     let queryParams;
 
     const startTime = Date.now();
@@ -171,10 +171,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             break;
           }
         }
-        if (jsonParameters['targeting']) {
+        const jsonTargeting = JSON.parse(jsonParamters['targeting']);
+        if (jsonTargeting && typeof jsonTargeting == 'object') {
           queryParams[index].value = serializeTargeting(
-              Object.assign(JSON.parse(
-                  jsonParameters['targeting']),JSON.parse(targeting)),
+              Object.assign(/** @type {!Object} */(jsonTargeting),
+                  JSON.parse(targeting)),
               jsonParameters['categoryExclusions'] || null);
         } else {
           queryParams[index].value = serializeTargeting(
@@ -183,7 +184,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         }
       }
       const url = buildUrl(DOUBLECLICK_BASE_URL, queryParams,
-                           MAX_URL_LENGTH - 10, {'trunc': '1'});
+                           MAX_URL_LENGTH - 10, {name: 'trunc', value: '1'});
       return url + '&dtd=' + elapsedTimeWithCeiling(Date.now(), startTime);
     });
   }
@@ -293,15 +294,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
   }
 
+  /**
+   * Sends RTC request as specified by rtcConfig. Returns promise which
+   * resolves to the targeting informtation from the request response.
+   * @param {!Object} rtcConfig
+   * @return {?Promise} The rtc targeting info to attach to the ad url.
+   */
   sendRtcRequestPromise(rtcConfig) {
-
-    console.log('Attempting to send rtc');
     let endpoint;
     try {
       endpoint = rtcConfig['doubleclick']['endpoint'];
     } catch (err) {
       // report error
-      return;
+      return null;
     }
 
     let rtcResponse;
