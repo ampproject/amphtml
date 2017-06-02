@@ -19,12 +19,11 @@ import {
   withdrawRequest,
 } from '../../testing/test-helper';
 
-describe.only('amp-pixel', () => {
+describe('amp-pixel', () => {
   describes.integration('amp-pixel integration test', {
     body: `<amp-pixel src="${depositRequestUrl('has-referrer')}">`,
   }, env => {
     it('should keep referrer if no referrerpolicy specified', () => {
-      debugger;
       return withdrawRequest(env.win, 'has-referrer').then(request => {
         expect(request.headers.referer).to.be.ok;
       });

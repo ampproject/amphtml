@@ -222,11 +222,7 @@ export class AsyncVerifier extends FormVerifier {
     if (this.shouldVerify_()) {
       const xhrConsumeErrors = this.doXhr_().then(() => {
         return [];
-      }, error => {
-        // A 400 error response should be handled here.
-        return getResponseErrorData_(
-            /** @type {!../../../src/service/xhr-impl.FetchError} */ (error));
-      });
+      }, getResponseErrorData_);
 
       const p = this.addToResolver_(xhrConsumeErrors)
           .then(errors => this.verify_(errors))
@@ -411,16 +407,16 @@ class VerificationGroup {
 }
 
 /**
- * @param {!../../../src/service/xhr-impl.FetchError} fetchError
- * @return {!Array<VerificationErrorDef>}
+ * @param {!Error} error
+ * @return {!Promise<!Array<VerificationErrorDef>>}
  * @private
  */
-function getResponseErrorData_(fetchError) {
-  const json = /** @type {?VerificationErrorResponseDef} */ (
-      fetchError && fetchError.responseJson);
-  if (json && json.verifyErrors) {
-    return json.verifyErrors;
-  } else {
-    return [];
+function getResponseErrorData_(error) {
+  const {response} = error;
+  if (!response) {
+    return Promise.resolve([]);
   }
+  return response.json().then(json => {
+    return json.verifyErrors || [];
+  }, () => []);
 }

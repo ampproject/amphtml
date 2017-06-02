@@ -19,7 +19,6 @@ import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
 import {
   xhrServiceForTesting,
   fetchPolyfill,
-  FetchError,
   FetchResponse,
   assertSuccess,
 } from '../../src/service/xhr-impl';
@@ -294,7 +293,7 @@ describe('XHR', function() {
         it('should reject if error', () => {
           mockXhr.status = 500;
           return assertSuccess(createResponseInstance('', mockXhr))
-              .should.be.rejectedWith(FetchError);
+              .should.be.rejected;
         });
 
         it('should include response in error', () => {

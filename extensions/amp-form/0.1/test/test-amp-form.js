@@ -37,7 +37,6 @@ import {
   documentInfoForDoc,
   timerFor,
 } from '../../../../src/services';
-import {FetchError} from '../../../../src/service/xhr-impl';
 import '../../../amp-selector/0.1/amp-selector';
 import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
@@ -1493,8 +1492,9 @@ describes.repeated('', {
         json: () => Promise.resolve(),
         headers: headersMock,
       });
-      const fetchRejectPromise = Promise.reject(
-          new FetchError(new Error('Error'), {headers: headersMock}));
+      const error = new Error('Error');
+      error.response = {headers: headersMock};
+      const fetchRejectPromise = Promise.reject(error);
       fetchRejectPromise.catch(() => {
         // Just avoiding a global uncaught promise exception.
       });

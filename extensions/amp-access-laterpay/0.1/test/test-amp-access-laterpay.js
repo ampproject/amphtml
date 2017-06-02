@@ -131,11 +131,14 @@ describes.fakeWin('LaterpayVendor', {
       xhrMock.expects('fetchJson')
         .withExactArgs('https://builturl', {
           credentials: 'include',
+          requireAmpResponseSourceOrigin: true,
         })
         .returns(Promise.reject({
-          status: 402,
-          json() {
-            return Promise.resolve({access: false});
+          response: {
+            status: 402,
+            json() {
+              return Promise.resolve({access: false});
+            },
           },
         }))
         .once();

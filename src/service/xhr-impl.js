@@ -452,9 +452,12 @@ export function assertSuccess(response) {
       return resolve(response);
     }
 
-    const { status } = response;
+    const {status} = response;
     const err = user().createError(`HTTP error ${status}`);
     err.retriable = isRetriable(status);
+    // TODO(@jridgewell, #9448): Callers who need the response should
+    // skip processing.
+    err.response = response;
     throw err;
   });
 }
@@ -473,8 +476,11 @@ export class FetchResponse {
     /** @private @const {!XMLHttpRequest|!XDomainRequest} */
     this.xhr_ = xhr;
 
-    /** @type {number} */
+    /** @const {number} */
     this.status = this.xhr_.status;
+
+    /** @const {boolean} */
+    this.ok = this.status >= 200 && this.status < 300;
 
     /** @const {!FetchResponseHeaders} */
     this.headers = new FetchResponseHeaders(xhr);
