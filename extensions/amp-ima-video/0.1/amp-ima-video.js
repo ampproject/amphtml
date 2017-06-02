@@ -189,7 +189,7 @@ class AmpImaVideo extends AMP.BaseElement {
       } else if (event.data.event == IMAVideoEvents.CANCEL_FULLSCREEN) {
         this.iframe_.removeAttribute('allowfullscreen');
         if (event.data.confirm) {
-          this.sendCommand('toggleFullscreen');
+          this.sendCommand_('toggleFullscreen');
         }
       }
     }
