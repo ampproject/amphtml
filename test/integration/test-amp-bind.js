@@ -92,7 +92,8 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
     });
   });
 
-  describe('with bindings in dynamic content', () => {
+  // TODO(choumx, #8673): Unskip when race condition is fixed.
+  describe.skip('with bindings in dynamic content', () => {
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-live-list.html');
     });
@@ -328,7 +329,8 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
       });
     });
 
-    it('should apply scope to bindings in new list items', () => {
+    // TODO(choumx, #8673): Unskip when race condition is fixed.
+    it.skip('should apply scope to bindings in new list items', () => {
       const liveList = fixture.doc.getElementById('liveList');
       const liveListItems = fixture.doc.getElementById('liveListItems');
       expect(liveListItems.children.length).to.equal(1);
@@ -534,7 +536,8 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
     });
   });
 
-  describe('with <amp-list>', () => {
+  // TODO(choumx, #8673): Unskip when race condition is fixed.
+  describe.skip('with <amp-list>', () => {
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-list.html');
     });
