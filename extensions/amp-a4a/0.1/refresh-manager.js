@@ -101,8 +101,7 @@ export class RefreshManager {
       // and all publisher configurations related to refresh.
       return false;
     }
-    /** @type ?NodeList<!Element> */
-    let metaTag;
+    let metaTag = [];
     return this.element_.getAttribute('data-enable-refresh') == 'true' ||
         ((metaTag = this.win_.document.getElementsByName(
             `amp-ad-enable-refresh:${this.adType_}`)) && metaTag[0] &&
