@@ -59,27 +59,22 @@ class AmpAnalytics3pRemoteFrameHelper {
     this.iframeMessagingClient_.setHostWindow(win.parent);
     this.iframeMessagingClient_.setSentinel(JSON.parse(window.name).sentinel);
     this.iframeMessagingClient_.registerCallback(
-      'ampAnalytics3pEvents', message => {
-        if (!message || !message.ampAnalytics3pEvents) {
+      'ampAnalytics3pMessages', received => {
+        if (!received || !received.ampAnalytics3pMessages) {
           return;
         }
-        for (eventsListener of this.eventListeners_) {
-          requestIdleCallback(() => {
-            eventsListener(message.ampAnalytics3pEvents);
-          });
-        }
-      });
-    this.iframeMessagingClient_.registerCallback(
-      'ampAnalytics3pExtraData', message => {
-        if (!message || !message.ampAnalytics3pExtraData) {
-          return;
-        }
-        for (extraDataListener of this.extraDataListeners_) {
-          this.senderIdToExtraData_[message.senderId] =
-            message.ampAnalytics3pExtraData;
-          requestIdleCallback(() => {
-            extraDataListener(message.senderId, message.ampAnalytics3pExtraData);
-          });
+        for (submessage of received.ampAnalytics3pMessages) {
+          if (submessage.ampAnalytics3pEvent) {
+            for (eventsListener of this.eventListeners_) {
+              this.dispatch_(eventsListener, submessage);
+            }
+          } else if (submessage.ampAnalytics3pExtraData) {
+            this.senderIdToExtraData_[submessage.senderId] =
+              submessage.ampAnalytics3pExtraData;
+            for (extraDataListener of this.extraDataListeners_) {
+              this.dispatch_(extraDataListener, submessage);
+            }
+          }
         }
       });
   }
@@ -122,6 +117,23 @@ class AmpAnalytics3pRemoteFrameHelper {
    */
   getExtraData(senderId) {
     return this.senderIdToExtraData_[senderId];
+  }
+
+  /**
+   * Sends a message that was received from the parent frame to the
+   * registered listener function.
+   * This is not inside of the iteration in registerCallback because we want
+   * message to be on the stack. If not, the loop could iterate another time
+   * before requestIdleCallback() fires, by which time message may have been
+   * overwritten by the next one in the array.
+   * @param {!Function<Object>} listener The listener to dispatch the message to
+   * @param {!Object} message The content to dispatch to the listener
+   * @private
+   */
+  dispatch_(listener, message) {
+    requestIdleCallback(() => {
+      listener(message);
+    });
   }
 };
 

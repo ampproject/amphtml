@@ -16,20 +16,19 @@
        */
       window.onNewAmpAnalyticsInstance = ampAnalytics => {
         ampAnalytics.registerAmpAnalytics3pEventsListener(
-          arrayOfEventStrings => {
-            arrayOfEventStrings.forEach(evt => {
-              // Now, do something meaningful with the AMP Analytics event
-              console.log("Received an event: " + evt.request +
-                " from: " + evt.senderId + ", and my extra data is: " +
-                ampAnalytics.getExtraData(evt.senderId));
-            });
+          event => {
+            // Now, do something meaningful with the AMP Analytics event
+            console.log("Received an event: " + event.ampAnalytics3pEvent +
+              " from: " + event.senderId + ", and my extra data is: " +
+              ampAnalytics.getExtraData(event.senderId));
             ampAnalytics.sendMessageToCreative('received');
           });
+        // The following is optional:
         ampAnalytics.registerAmpAnalytics3pExtraDataListener(
-          // The following function is optional:
-          (senderId, extraData) => {
-            console.log("Received extra setup data: " + extraData +
-              " from: " + senderId);
+          extraData => {
+            console.log("Received extra setup data: " +
+              extraData.ampAnalytics3pExtraData + " from: " +
+              extraData.senderId);
           });
       };
 
