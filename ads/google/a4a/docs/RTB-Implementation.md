@@ -24,16 +24,16 @@ Exchanges will need to indicate in the RTB bid request whether a page is built i
 **Site Object Additional field: amp**
 A new field is added to the site object to indicate whether a webpage is built on AMP HTML.
  
-INSERT IMAGE 1 HERE
+![RTB1](./img1.png)
  
 **Imp Object Additional field: ampad**
 A new field is added to the imp object to provide more detail around AMP ad requirements and how AMP ads will load.
  
-INSERT IMAGE 2 HERE
+![RTB2](./img2.png)
  
 **AMP Ad Status Table**
  
-INSERT IMAGE 3 HERE
+![RTB3](./img3.png)
  
 ### RTB Bid Response
  
@@ -41,7 +41,7 @@ SSPs will need to provide a new field in the bid response to allow bidders to re
  
 **AMP Ad Status Table**
  
-INSERT IMAGE 4 HERE
+![RTB4](./img4.png)
  
 ### Verification of valid AMP
  
