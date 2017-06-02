@@ -63,7 +63,7 @@
     "gulp-rename": "1.2.2",
     "gulp-replace": "0.5.4",
     "gulp-sourcemaps": "1.5.2",
-    "gulp-uglify": "2.0.1",
+    "gulp-uglify": "3.0.0",
     "gulp-util": "3.0.7",
     "gulp-watch": "4.3.5",
     "gulp-webserver": "0.9.1",
