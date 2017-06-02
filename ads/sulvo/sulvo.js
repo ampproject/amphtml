@@ -36,6 +36,7 @@ export function sulvo(global, data) {
   // Create Sulvo body tag
   const c = global.document.createElement('div');
   const slot = global.document.getElementById('c');
+  const url = `https://surgeprice.com/display/async/${data.adClient}/${data.adDomain}/ariel.js`;
   var custom = data.adCustom || '';
 
   c.id = data.adId;
@@ -43,7 +44,8 @@ export function sulvo(global, data) {
 
   slot.appendChild(c);
 
-  loadScript(global, `https://surgeprice.com/display/async/${data.adClient}/${data.adDomain}/ariel.js`, () => {
+  loadScript(global, url, () => {
+    window.context.renderStart();
     surgeprice.display(data.adId, custom);
   });
 
