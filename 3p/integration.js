@@ -471,8 +471,6 @@ function isAmpContextExperimentOn() {
  * @param {!Window} win
  */
 function installContext(win) {
-  // throw new Error('pls fail');
-
   if (isAmpContextExperimentOn()) {
     installContextUsingExperimentalImpl(win);
     return;
