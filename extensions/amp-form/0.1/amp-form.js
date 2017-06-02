@@ -471,7 +471,7 @@ export class AmpForm {
    * Transition the form to the submit success state.
    * @param {!../../../src/service/xhr-impl.FetchResponse} response
    * @return {!Promise}
-   * @private
+   * @private visible for testing
    */
   handleXhrSubmitSuccess_(response) {
     return response.json().then(json => {
