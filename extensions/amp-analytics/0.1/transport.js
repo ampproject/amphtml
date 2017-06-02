@@ -256,17 +256,19 @@ export class Transport {
    * @return {!Element}
    */
   createCrossDomainIframe_(ampDoc, frameUrl, opt_extraData) {
+    const sentinel = Transport.createUniqueId_();
     // DO NOT MERGE THIS
-    // Warning: the scriptSrc URL below is only temporary. Don't merge
-    // before getting resolution on that.
+    // Warning: the scriptSrc URL below will become something like:
+    // https://cdn.ampproject.org/rtv/001496360274808/v0/ampanalytics-lib.js
     const frame = createElementWithAttributes(ampDoc, 'iframe', {
       sandbox: 'allow-scripts',
       name: JSON.stringify({
-        'scriptSrc': '/examples/analytics-3p-remote-frame-helper.js',
+        'scriptSrc': '/dist.3p/current/ampanalytics-lib.js',
+        'sentinel': sentinel,
       }),
     });
     const iframeMessagingClient = new IframeMessagingClient(window);
-    iframeMessagingClient.setSentinel(Transport.createUniqueId_());
+    iframeMessagingClient.setSentinel(sentinel);
     loadPromise(frame).then(() => {
       iframeMessagingClient.setHostWindow(frame.contentWindow);
       Transport.setIsReady_(frameUrl);

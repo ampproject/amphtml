@@ -15,7 +15,7 @@
        * passing your function which will receive the analytics events.
        */
       window.onNewAmpAnalyticsInstance = ampAnalytics => {
-        ampAnalytics.registerAmpAnalyticsEventListener(
+        ampAnalytics.registerAmpAnalytics3pEventsListener(
           arrayOfEventStrings => {
             arrayOfEventStrings.forEach(evt => {
               // Now, do something meaningful with the AMP Analytics event
@@ -24,7 +24,8 @@
                 ampAnalytics.getExtraData(evt.senderId));
             });
             ampAnalytics.sendMessageToCreative('received');
-          },
+          });
+        ampAnalytics.registerAmpAnalytics3pExtraDataListener(
           // The following function is optional:
           (senderId, extraData) => {
             console.log("Received extra setup data: " + extraData +
