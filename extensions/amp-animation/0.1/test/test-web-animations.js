@@ -89,6 +89,25 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     return scan(def)[0].timing;
   }
 
+  function writeAndWaitForStyleKeyframes(name, css) {
+    const style = doc.createElement('style');
+    style.setAttribute('amp-custom', '');
+    style.textContent =
+        `@-ms-keyframes ${name} {${css}}` +
+        `@-moz-keyframes ${name} {${css}}` +
+        `@-webkit-keyframes ${name} {${css}}` +
+        `@keyframes ${name} {${css}}`;
+    doc.head.appendChild(style);
+    return poll('wait for style', () => {
+      for (let i = 0; i < doc.styleSheets.length; i++) {
+        if (doc.styleSheets[i].ownerNode == style) {
+          return true;
+        }
+      }
+      return false;
+    });
+  }
+
   it('should parse/validate timing duration', () => {
     expect(scanTiming({}).duration).to.equal(0);
     expect(scanTiming({duration: 0}).duration).to.equal(0);
@@ -618,25 +637,6 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       ]);
     });
   });
-
-  function writeAndWaitForStyleKeyframes(name, css) {
-    const style = doc.createElement('style');
-    style.setAttribute('amp-custom', '');
-    style.textContent =
-        `@-ms-keyframes ${name} {${css}}` +
-        `@-moz-keyframes ${name} {${css}}` +
-        `@-webkit-keyframes ${name} {${css}}` +
-        `@keyframes ${name} {${css}}`;
-    doc.head.appendChild(style);
-    return poll('wait for style', () => {
-      for (let i = 0; i < doc.styleSheets.length; i++) {
-        if (doc.styleSheets[i].ownerNode == style) {
-          return true;
-        }
-      }
-      return false;
-    });
-  }
 
   it('should check media in top animation', () => {
     const requests = scan({
