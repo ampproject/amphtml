@@ -237,9 +237,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {!Promise<?../../../src/service/xhr-impl.FetchResponse>} */
     this.sraResponsePromise_ = sraInitializer.promise;
 
-    // Will initiate the refresh lifecycle iff the slot has been enabled to do
-    // so through an appropriate data attribute, or a page-level meta tag.
-    new RefreshManager(this).initiateRefreshCycle();
+    /** @private {?RefreshManager} */
+    this.refreshManager_ = null;
   }
 
   /** @override */
@@ -420,6 +419,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.sraResponseRejector = sraInitializer.rejector;
     this.sraResponsePromise_ = sraInitializer.promise;
     this.qqid_ = null;
+  }
+
+  /** @override */
+  layoutCallback() {
+    const superReturnValue = super.layoutCallback();
+    if (!this.refreshManager_) {
+      // Will initiate the refresh lifecycle iff the slot has been enabled to
+      // do so through an appropriate data attribute, or a page-level meta tag.
+      (this.refreshManager_ = new RefreshManager(this)).initiateRefreshCycle();
+    }
+    return superReturnValue;
   }
 
   /**

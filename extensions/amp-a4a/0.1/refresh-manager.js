@@ -19,6 +19,15 @@ import {refreshConfigs} from '../../../ads/_a4a-config';
 import {timerFor} from '../../../src/services';
 
 /**
+ * visibilePercentageMin - The percentage of pixels that need to be on screen
+ *   for the creative to be considered "visible".
+ * totalTimeMin - The total amount of time, in milliseconds, that the creative
+ *   must be on screen in order to be considered "visible".
+ * continuousTimeMin - The amount of continuous time, in milliseconds, that the
+ *   creative must be on screen for in oreder to be considered "visible"
+ * refreshInterval - The amount of time, in milliseconds, that must pass in
+ *   between the creative being "seen" and the refresh trigger.
+ *
  * @typedef {{
  *   visiblePercentageMin: number,
  *   totalTimeMin: number,

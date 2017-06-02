@@ -86,7 +86,7 @@ export const signingServerURLs = {
 };
 
 /** @type {!../extensions/amp-a4a/0.1/refresh-manager.RefreshConfig} */
-export const DEFAULT_REFRESH_CONFIG = {
+const DEFAULT_REFRESH_CONFIG = {
   visiblePercentageMin: 50,
   totalTimeMin: 0,
   continuousTimeMin: 5000,
