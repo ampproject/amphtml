@@ -222,7 +222,9 @@ export class AsyncVerifier extends FormVerifier {
     if (this.shouldVerify_()) {
       const xhrConsumeErrors = this.doXhr_().then(() => {
         return [];
-      }, getResponseErrorData_);
+      }, error => {
+        return getResponseErrorData_(/** @type {!Error} */(error));
+      });
 
       const p = this.addToResolver_(xhrConsumeErrors)
           .then(errors => this.verify_(errors))

@@ -412,7 +412,9 @@ export class AmpForm {
         })
         .then(() => this.doXhr_())
         .then(response => this.handleXhrSubmitSuccess_(response),
-            error => this.handleXhrSubmitFailure_(error));
+            error => {
+              return this.handleXhrSubmitFailure_(/** @type {!Error} */(error));
+            });
 
     if (getMode().test) {
       this.xhrSubmitPromise_ = p;
