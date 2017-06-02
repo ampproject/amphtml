@@ -72,8 +72,9 @@ export class RefreshManager {
       analytics.getAnalyticsRoot(this.element_).getVisibilityManager()
           .listenElement(this.element_, this.config_, null, null, () => {
             this.refreshTimeoutId_ = this.timer_.delay(() => {
-              this.a4a_.refresh();
-              this.initiateRefreshCycle();
+              this.a4a_.refresh(() => {
+                this.initiateRefreshCycle();
+              });
             }, this.config_.refreshInterval);
           });
     });
