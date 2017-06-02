@@ -16,6 +16,7 @@
 
 import {assertHttpsUrl} from '../../../src/url';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
+import {IMAVideoEvents} from '../../../ads/google/imaVideo.js';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
@@ -87,7 +88,7 @@ class AmpImaVideo extends AMP.BaseElement {
   layoutCallback() {
     const iframe = getIframe(this.element.ownerDocument.defaultView,
         this.element, 'ima-video');
-    iframe.setAttribute('allowfullscreen', 'true');
+    //iframe.setAttribute('allowfullscreen', 'false');
     this.applyFillContent(iframe);
 
     this.iframe_ = iframe;
@@ -180,6 +181,16 @@ class AmpImaVideo extends AMP.BaseElement {
           this.playerReadyResolver_(this.iframe_);
         }
         this.element.dispatchCustomEvent(event.data.event);
+      } else if (event.data.event == IMAVideoEvents.REQUEST_FULLSCREEN) {
+        this.iframe_.setAttribute('allowfullscreen', true);
+        if (event.data.confirm) {
+          this.sendCommand_('toggleFullscreen');
+        }
+      } else if (event.data.event == IMAVideoEvents.CANCEL_FULLSCREEN) {
+        this.iframe_.removeAttribute('allowfullscreen');
+        if (event.data.confirm) {
+          this.sendCommand('toggleFullscreen');
+        }
       }
     }
   }
