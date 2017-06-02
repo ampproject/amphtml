@@ -56,7 +56,7 @@
     "gulp-eslint": "1.1.0",
     "gulp-exec": "2.1.2",
     "gulp-file": "0.2.0",
-    "gulp-git": "1.7.2",
+    "gulp-git": "2.3.0",
     "gulp-help": "1.6.1",
     "gulp-if": "2.0.0",
     "gulp-load-plugins": "1.2.0",
