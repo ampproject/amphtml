@@ -34,25 +34,22 @@ export function maybeValidate(win) {
     return;
   }
 
-  /** @const {!Element} */
-  const validatorScript = win.document.createElement('script');
-  // TODO(@cramforce): Introduce a switch to locally built version for local
-  // development.
-  validatorScript.src = `${urls.cdn}/v0/validator.js`;
-
-  const examinerScript = win.document.createElement('script');
-  examinerScript.src = `${urls.cdn}/examiner0.js`;
-
   Promise.all([
-    loadPromise(validatorScript),
-    loadPromise(examinerScript).catch(() => {})])
-      .then(() => {
-        win.document.head.removeChild(validatorScript);
-        win.document.head.removeChild(examinerScript);
-        /* global amp: false */
-        amp.validator.validateUrlAndLog(
-            filename, win.document, getMode().filter);
-      });
-  win.document.head.appendChild(validatorScript);
-  win.document.head.appendChild(examinerScript);
+    loadScript(win.document, `${urls.cdn}/v0/validator.js`),
+    loadScript(win.document, `${urls.cdn}/examiner.js`),
+  ]).then(() => {
+    /* global amp: false */
+    amp.validator.validateUrlAndLog(
+        filename, win.document, getMode().filter);
+  });
+}
+
+function loadScript(doc, url) {
+  const script = doc.createElement('script');
+  script.src = url;
+  const promise = loadPromise(script).then(() => {
+    doc.head.removeChild(script);
+  }, () => {});
+  doc.head.appendChild(script);
+  return promise;
 }
