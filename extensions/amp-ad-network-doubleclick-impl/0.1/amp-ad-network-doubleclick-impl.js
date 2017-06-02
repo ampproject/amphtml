@@ -63,10 +63,7 @@ import {setStyles} from '../../../src/style';
 import {utf8Encode} from '../../../src/utils/bytes';
 import {isCancellation} from '../../../src/error';
 import {timerFor} from '../../../src/services';
-import {
-  getRefreshConfiguration,
-  RefreshManager,
-} from '../../amp-a4a/0.1/refresh-manager';
+import {RefreshManager} from '../../amp-a4a/0.1/refresh-manager';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';

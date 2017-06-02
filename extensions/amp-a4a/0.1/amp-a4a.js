@@ -18,7 +18,6 @@ import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
 } from '../../amp-ad/0.1/concurrent-load';
-import {adConfig} from '../../../ads/_config';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {createElementWithAttributes} from '../../../src/dom';
 import {cancellation, isCancellation} from '../../../src/error';

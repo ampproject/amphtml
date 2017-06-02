@@ -101,14 +101,11 @@ export class RefreshManager {
       // and all publisher configurations related to refresh.
       return false;
     }
-    let refreshEnabled =
-        this.element_.getAttribute('data-enable-refresh') == 'true';
-    if (!refreshEnabled) {
-      const metaTag = this.win_.document.getElementsByName(
-          `amp-ad-enable-refresh:${this.adType_}`);
-      refreshEnabled = metaTag[0] &&
-          metaTag[0].getAttribute('content') == 'true';
-    }
-    return refreshEnabled;
+    /** @type ?NodeList<!Element> */
+    let metaTag;
+    return this.element_.getAttribute('data-enable-refresh') == 'true' ||
+        ((metaTag = this.win_.document.getElementsByName(
+            `amp-ad-enable-refresh:${this.adType_}`)) && metaTag[0] &&
+         metaTag[0].getAttribute('content') == 'true');
   }
 }
