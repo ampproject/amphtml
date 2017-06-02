@@ -584,21 +584,22 @@ export class MeasureScanner extends Scanner {
    * @private
    */
   createKeyframes_(target, spec) {
-    if (typeof spec.keyframes == 'string') {
+    let specKeyframes = spec.keyframes;
+    if (typeof specKeyframes == 'string') {
       // Keyframes name to be extracted from `<style>`.
-      const keyframes = extractKeyframes(this.css_.rootNode_, spec.keyframes);
+      const keyframes = extractKeyframes(this.css_.rootNode_, specKeyframes);
       user().assert(keyframes,
-          `Keyframes not found in stylesheet: "${spec.keyframes}"`);
-      return /** @type {!WebKeyframesDef} */ (keyframes);
+          `Keyframes not found in stylesheet: "${specKeyframes}"`);
+      specKeyframes = keyframes;
     }
 
-    if (isObject(spec.keyframes)) {
+    if (isObject(specKeyframes)) {
       // Property -> keyframes form.
       // The object is cloned, while properties are verified to be
       // whitelisted. Additionally, the `offset:0` frames are inserted
       // to polyfill partial keyframes per spec.
       // See https://github.com/w3c/web-animations/issues/187
-      const object = /** {!Object<string, *>} */ (spec.keyframes);
+      const object = /** {!Object<string, *>} */ (specKeyframes);
       /** @type {!WebKeyframesDef} */
       const keyframes = {};
       for (const prop in object) {
@@ -620,14 +621,14 @@ export class MeasureScanner extends Scanner {
       return keyframes;
     }
 
-    if (isArray(spec.keyframes) && spec.keyframes.length > 0) {
+    if (isArray(specKeyframes) && specKeyframes.length > 0) {
       // Keyframes -> property form.
       // The array is cloned, while properties are verified to be whitelisted.
       // Additionally, if the `offset:0` properties are inserted when absent
       // to polyfill partial keyframes per spec.
       // See https://github.com/w3c/web-animations/issues/187 and
       // https://github.com/web-animations/web-animations-js/issues/14
-      const array = /** {!Array<!Object<string, *>>} */ (spec.keyframes);
+      const array = /** {!Array<!Object<string, *>>} */ (specKeyframes);
       /** @type {!WebKeyframesDef} */
       const keyframes = [];
       const addStartFrame = array.length == 1 || array[0].offset > 0;
@@ -654,7 +655,7 @@ export class MeasureScanner extends Scanner {
 
     // TODO(dvoytenko): support CSS keyframes per https://github.com/w3c/web-animations/issues/189
     // Unknown form of keyframes spec.
-    throw user().createError('keyframes not found', spec.keyframes);
+    throw user().createError('keyframes not found', specKeyframes);
   }
 
   /** @override */
