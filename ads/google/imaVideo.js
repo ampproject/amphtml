@@ -419,6 +419,7 @@ export function pauseVideo(event) {
  * Called when the user clicks the fullscreen button.
  */
 function toggleFullscreen() {
+  debugger;
   if (fullscreen) {
     window.parent./*OK*/postMessage(
       {event: IMAVideoEvents.CANCEL_FULLSCREEN, confirm: true}, '*');
@@ -433,6 +434,7 @@ function toggleFullscreen() {
  * fullscreen
  */
 function onFullscreenClick(global) {
+  debugger;
   if (fullscreen) {
     // The video is currently in fullscreen mode
     const cancelFullscreen = global.document.exitFullscreen ||
@@ -472,6 +474,7 @@ function onFullscreenClick(global) {
  * Called when the fullscreen mode of the browser or content player changes.
  */
 function onFullscreenChange(global) {
+  debugger;
   if (fullscreen) {
     // Resize the ad container
     console.log('Resizing ad container to ' + videoWidth + 'x' + videoHeight);
