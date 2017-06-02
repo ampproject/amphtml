@@ -20,7 +20,10 @@ import {
   installExtensionsService,
 } from '../../../../src/service/extensions-impl';
 import {extensionsFor} from '../../../../src/services';
-import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
+import {
+  AmpAdNetworkDoubleclickImpl,
+  getNetworkId,
+} from '../amp-ad-network-doubleclick-impl';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {utf8Encode} from '../../../../src/utils/bytes';
 import {createElementWithAttributes} from '../../../../src/dom';
@@ -470,5 +473,23 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
                 .equal(String(Number(slotIdBefore) + 1));
           });
         });
+  });
+
+  describe('#getNetworkId', () => {
+    it('should match expectations', () => {
+      element = document.createElement('amp-ad');
+      const testValues = {
+        '/1234/abc/def': '1234',
+        '1234/abc/def': '1234',
+        '/a1234/abc/def': '',
+        'a1234/abc/def': '',
+        '789': '789',
+        '//789': '',
+      };
+      Object.keys(testValues).forEach(slotName => {
+        element.setAttribute('data-slot', slotName);
+        expect(getNetworkId(element)).to.equal(testValues[slotName]);
+      });
+    });
   });
 });

@@ -14,22 +14,19 @@
  * limitations under the License.
  */
 
-import {fetchLineDelimitedChunks} from '../line-delimited-response-handler';
+import {
+  lineDelimitedStreamer,
+  metaJsonCreativeGrouper,
+} from '../line-delimited-response-handler';
 import * as sinon from 'sinon';
 
 describe('#line-delimited-response-handler', () => {
 
-  const url = 'https://someadnetwork.com?who=me&yes=you';
-  const xhrInit = {
-    mode: 'cors',
-    method: 'GET',
-    credentials: 'include',
-  };
-  let fetchStub;
   let chunkHandlerStub;
   let slotData;
-  let xhr;
   let sandbox;
+  let win;
+  let response;
 
   /**
    * @param {!Array<!{{creative:string,headers:!Object<string,string>}}>} slotData
@@ -62,13 +59,9 @@ describe('#line-delimited-response-handler', () => {
     if (slotData.length == 0) {
       chunkResolver();
     }
-    return Promise.all([
-      fetchLineDelimitedChunks(xhr, url, chunkHandlerWrapper, xhrInit),
-      chunkPromise,
-    ])
-    .then(results => {
-      // results[0] is the response
-      expect(results[0]).to.be.ok;
+    lineDelimitedStreamer(
+      win, response, metaJsonCreativeGrouper(chunkHandlerWrapper));
+    return chunkPromise.then(() => {
       expect(chunkHandlerStub.callCount).to.equal(slotData.length);
       // Could have duplicate responses so need to iterate and get counts.
       // TODO: can't use objects as keys :(
@@ -86,7 +79,6 @@ describe('#line-delimited-response-handler', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    fetchStub = sandbox.stub();
     chunkHandlerStub = sandbox.stub();
   });
 
@@ -96,15 +88,12 @@ describe('#line-delimited-response-handler', () => {
 
   describe('stream not supported', () => {
     beforeEach(() => {
-      fetchStub.returns(Promise.resolve({
+      response = {
         text: () => Promise.resolve(generateResponseFormat()),
-      }));
-      xhr = {
-        fetch: fetchStub,
-        win: {
-          // TextDecoder should exist but not be called
-          TextDecoder: () => { throw new Error('fail'); },
-        },
+      };
+      win = {
+        // TextDecoder should exist but not be called
+        TextDecoder: () => { throw new Error('fail'); },
       };
     });
 
@@ -152,7 +141,7 @@ describe('#line-delimited-response-handler', () => {
     beforeEach(() => {
       sandbox = sinon.sandbox.create();
       readStub = sandbox.stub();
-      fetchStub.returns(Promise.resolve({
+      response = {
         text: () => Promise.resolve(),
         body: {
           getReader: () => {
@@ -161,12 +150,9 @@ describe('#line-delimited-response-handler', () => {
             };
           },
         },
-      }));
-      xhr = {
-        fetch: fetchStub,
-        win: {
-          TextDecoder,
-        },
+      };
+      win = {
+        TextDecoder,
       };
     });
 

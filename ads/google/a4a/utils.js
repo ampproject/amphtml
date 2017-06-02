@@ -258,7 +258,6 @@ export function googleAdUrl(
   return googlePageParameters(a4a.win, a4a.getAmpDoc(), startTime)
     .then(pageLevelParameters => {
       Object.assign(parameters, blockLevelParameters, pageLevelParameters);
-      Object.assign(parameters, pageLevelParameters);
       return truncAndTimeUrl(baseUrl, parameters, startTime);
     });
 }

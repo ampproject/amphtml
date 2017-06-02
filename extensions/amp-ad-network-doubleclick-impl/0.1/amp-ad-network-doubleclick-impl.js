@@ -45,10 +45,12 @@ import {
   setGoogleLifecycleVarsFromHeaders,
 } from '../../../ads/google/a4a/google-data-reporter';
 import {
-  fetchLineDelimitedChunks,
+  lineDelimitedStreamer,
+  metaJsonCreativeGrouper,
 } from '../../../ads/google/a4a/line-delimited-response-handler';
 import {stringHash32} from '../../../src/crypto';
 import {removeElement} from '../../../src/dom';
+import {tryParseJson} from '../../../src/json';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {extensionsFor, xhrFor} from '../../../src/services';
@@ -80,46 +82,34 @@ const TFCD_ = 'tagForChildDirectedTreatment';
 let SraRequests = null;
 
 /**
+ * Array of functions used to combine block level request parameters for SRA
+ * request.
  * @private @const
- * {!Array<!function(AmpAdNetworkDoubleclickImpl>):?Object<string,string>}
+ * {!Array<!function(!Array<AmpAdNetworkDoubleclickImpl>):?Object<string,string>}
  */
 const BLOCK_SRA_COMBINERS_ = [
   instances => {
-    const uniqueIuNames = [];
+    const uniqueIuNames = {};
+    let uniqueIuNamesCount = 0;
     const prevIusEncoded = [];
     instances.forEach(instance => {
       const iu = dev().assert(instance.element.getAttribute('data-slot'));
       const componentNames = (iu || '').split('/');
-      let encodedName = '';
+      const encodedNames = [];
       for (let i = 0; i < componentNames.length; i++) {
-        if (i > 0) {
-          encodedName += '/';
-        }
         if (componentNames[i] == '') {
           continue;
         }
-        let nameFound = false;
-        for (let j = 0; j < uniqueIuNames.length; j++) {
-          if (componentNames[i] == uniqueIuNames[j]) {
-            nameFound = true;
-            break;
-          }
+        let index = uniqueIuNames[componentNames[i]];
+        if (index == undefined) {
+          uniqueIuNames[componentNames[i]] = (index = uniqueIuNamesCount++);
         }
-        if (!nameFound) {
-          uniqueIuNames.push(componentNames[i]);
-        }
-        for (let j = 0; j < uniqueIuNames.length; j++) {
-          // find index of component name.
-          if (componentNames[i] == uniqueIuNames[j]) {
-            encodedName += j;
-            break;
-          }
-        }
+        encodedNames.push(index);
       }
-      prevIusEncoded.push(encodedName);
+      prevIusEncoded.push(encodedNames.join('/'));
     });
     return {
-      'iu_parts': uniqueIuNames.join(),
+      'iu_parts': Object.keys(uniqueIuNames).join(),
       'enc_prev_ius': prevIusEncoded.join(),
     };
   },
@@ -261,7 +251,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         : this.getIntersectionElementLayoutBox();
     let sizeStr = `${this.size_.width}x${this.size_.height}`;
     const rawJson = this.element.getAttribute('json');
-    this.jsonTargeting_ = rawJson ? JSON.parse(rawJson) : {};
+    this.jsonTargeting_ = tryParseJson(rawJson) || {};
     const tfcd = this.jsonTargeting_[TFCD_];
     const multiSizeDataStr = this.element.getAttribute('data-multi-size');
     if (multiSizeDataStr) {
@@ -453,7 +443,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // be called for all and we should cancel SRA execution.
     const checkStillCurrent = this.verifyStillCurrent();
     SraRequests = groupAmpAdsByType(
-        this.win, this.element.getAttribute('type'), getNetworkId_)
+        this.win, this.element.getAttribute('type'), getNetworkId)
       .then(groupIdToBlocksAry => {
         checkStillCurrent();
         Object.keys(groupIdToBlocksAry).forEach(networkId => {
@@ -482,34 +472,32 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                 this.win, this.getAmpDoc(), typeInstances)
               .then(sraUrl => {
                 checkStillCurrent();
-                fetchLineDelimitedChunks(
-                  xhrFor(this.win),
-                  sraUrl,
-                  (creative, headers) => {
-                    checkStillCurrent();
-                    // Force safeframe rendering method.
-                    headers[RENDERING_TYPE_HEADER] = XORIGIN_MODE.SAFEFRAME;
-                    // Need to convert to FetchResponse object?
-                    const fetchResponseHeaders =
-                      /** @type {?../../../src/service/xhr-impl.FetchResponseHeaders} */
-                      ({
-                        get: name => headers[name],
-                        has: name => !!headers[name],
-                      });
-                    const fetchResponse =
-                      /** @type {?../../../src/service/xhr-impl.FetchResponse} */
-                      ({
-                        headers: fetchResponseHeaders,
-                        arrayBuffer: () => utf8Encode(creative),
-                      });
-                    sraRequestAdUrlResolvers.shift()(fetchResponse);
-                  },
-                  {
-                    mode: 'cors',
-                    method: 'GET',
-                    credentials: 'include',
-                  });
+                return xhrFor(this.win).fetch(sraUrl, {
+                  mode: 'cors',
+                  method: 'GET',
+                  credentials: 'include',
+                });
               })
+              .then(response => lineDelimitedStreamer(this.win, response,
+                metaJsonCreativeGrouper((creative, headers) => {
+                  checkStillCurrent();
+                  // Force safeframe rendering method.
+                  headers[RENDERING_TYPE_HEADER] = XORIGIN_MODE.SAFEFRAME;
+                  // Need to convert to FetchResponse object?
+                  const fetchResponseHeaders =
+                    /** @type {?../../../src/service/xhr-impl.FetchResponseHeaders} */
+                    ({
+                      get: name => headers[name],
+                      has: name => !!headers[name],
+                    });
+                  const fetchResponse =
+                    /** @type {?../../../src/service/xhr-impl.FetchResponse} */
+                    ({
+                      headers: fetchResponseHeaders,
+                      arrayBuffer: () => utf8Encode(creative),
+                    });
+                  sraRequestAdUrlResolvers.shift()(fetchResponse);
+                })))
               .catch(error => {
                 const canceled = isCancellation(error);
                 if (!canceled) {
@@ -546,10 +534,10 @@ AMP.registerElement(
 /**
  * @param {!Element} element
  * @return {string} networkId from data-ad-slot attribute.
- * @private
+ * @visibileForTesting
  */
-function getNetworkId_(element) {
-  const networkId = /^\/(\d+)/.exec(
+export function getNetworkId(element) {
+  const networkId = /^(?:\/)?(\d+)/.exec(
     dev().assertString(element.getAttribute('data-slot')));
   // TODO: guarantee data-ad-slot format as part of isValidElement?
   return networkId ? networkId[1] : '';

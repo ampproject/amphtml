@@ -14,70 +14,43 @@
  * limitations under the License.
  */
 
- import {dev} from '../../../src/log';
- import {isObject} from '../../../src/types';
+ import {tryParseJson} from '../../../src/json';
 
  /**
-  * Creates an XHR streaming request with expected response format of repeated
-  * pairs of JSON object metadata then string HTML delimited by line returns.
-  *
-  * @param {!../../../src/service/xhr-impl.Xhr} xhr
-  * @param {string} url
-  * @param {!function(string, !Object<string, *>, boolean)} slotCallback called
-  *    with creative, metadata, and boolean indicating if completed.  Failure to
-  *    JSON parse metadata will cause empty object to be given.
-  * @param {?../../../src/service/xhr-impl.FetchInitDef=} opt_init
-  * @return {!Promise<!../../../src/service/xhr-impl.FetchResponse>} response,
-  *    note that accessing body will cause error as its consumed in streaming.
-  */
- export function fetchLineDelimitedChunks(xhr, url, slotCallback, opt_init) {
-   return xhr.fetch(url, opt_init)
-     .then(response => {
-       let metadata;
-       let snippet = '';
-       const chunkCallback = (chunk, done) => {
-         const regex = /([^\n]*)(\n)?/g;
-         let match;
-         while ((match = regex.exec(chunk))) {
-           snippet += match[1];
-           if (match[2]) {
-             if (metadata) {
-               slotCallback(unescapeHtml_(snippet), metadata,
-                  done && regex.lastIndex === chunk.length);
-               metadata = undefined;
-             } else {
-               metadata = safeJsonParse_(snippet);
-             }
-             snippet = '';
-           }
-           if (regex.lastIndex === chunk.length) {
-             break;
-           }
-         }
-       };
-       if (!response.body || !xhr.win.TextDecoder) {
-         // TODO(keithwrightbos) - TextDecoder polyfill?
-         response.text().then(content => chunkCallback(content, true));
-       } else {
-         handleFetchResponseStream_(
-           response.body.getReader(), chunkCallback, new TextDecoder('utf-8'));
-       }
-       return {status: response.status, headers: response.headers};
-     });
- }
-
- /**
-  * @param {!ReadableStreamReader} reader The reader of the fetch's
-  *  response stream.
-  * @param {!function(string, boolean)} chunkHandler
-  * @param {!TextDecoder} textDecoder
+  * Handles an XHR response by calling lineCallback for each line delineation.
+  * Uses streaming where possible otherwise falls back to text.
+  * @param {!Window} win
+  * @param {!../../../src/service/xhr-impl.FetchResponse} response
+  * @param {!function(string, boolean)} lineCallback
   * @private
   */
- function handleFetchResponseStream_(reader, chunkHandler, textDecoder) {
+ export function lineDelimitedStreamer(win, response, lineCallback) {
+   let line = '';
+   function streamer(text, done) {
+     const regex = /([^\n]*)(\n)?/g;
+     let match;
+     while ((match = regex.exec(text))) {
+       line += match[1];
+       if (match[2]) {
+         lineCallback(line, done && regex.lastIndex === text.length);
+         line = '';
+       }
+       if (regex.lastIndex === text.length) {
+         break;
+       }
+     }
+   }
+   if (!response.body || !win.TextDecoder) {
+     response.text().then(text => streamer(text, true));
+     return;
+   }
+
+   const decoder = new TextDecoder('utf-8');
+   const reader = response.body.getReader();
    reader.read().then(function chunk(result) {
      if (result.value) {
-       chunkHandler(
-         textDecoder.decode(
+       streamer(
+         decoder.decode(
            /** @type {!ArrayBuffer} */(result.value), {'stream': true}),
          result.done);
      }
@@ -89,28 +62,34 @@
  }
 
  /**
+  * Given each line, groups such that the first is JSON parsed and second
+  * html unescaped.
+  * @param {!function(string, !Object<string, *>, boolean)} callback
+  * @private
+  */
+ export function metaJsonCreativeGrouper(callback) {
+   let first;
+   return function(line, done) {
+     if (first) {
+       callback(
+         unescapeLineDelimitedHtml_(line),
+         /** @type {!Object<string, *>} */(tryParseJson(first) || {}),
+         done);
+       first = null;
+     } else {
+       first = line;
+     }
+   };
+ }
+
+ /**
   * Unescapes characters that are escaped in line-delimited JSON-HTML.
   * @param {string} html An html snippet.
   * @return {string}
   * @private
   */
- function unescapeHtml_(html) {
-   return html ? html.replace(
+ function unescapeLineDelimitedHtml_(html) {
+   return html.replace(
      /\\(n|r|\\)/g,
-     (_, match) => match == 'n' ? '\n' : match == 'r' ? '\r' : '\\') : html;
- }
-
- /**
-  * @param {string} rawString to be parsed
-  * @return {!Object<string, *>} JSON parsed string or empty object if invalid.
-  * @private
-  */
- function safeJsonParse_(rawString) {
-   try {
-     const result = JSON.parse(rawString);
-     dev().assert(isObject(result));
-     return /** @type {!Object<string,*>} */(result);
-   } catch (err) {
-     return {};
-   }
+     (_, match) => match == 'n' ? '\n' : match == 'r' ? '\r' : '\\');
  }
