@@ -33,6 +33,7 @@ import {
   elapsedTimeWithCeiling,
   MAX_URL_LENGTH,
 } from '../../../ads/google/a4a/utils';
+import {buildUrl} from '../../../ads/google/a4a/url-builder';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {
   googleLifecycleReporterFactory,
@@ -158,13 +159,29 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       },
     ], ['108809080']).then(allQueryParams => {
       queryParams = allQueryParams;
-      console.log(queryParams);
       return rtcRequestPromise;
-    }).then(targetting => {
-      console.log(targetting);
-      console.log(queryParams);
-      const url = buildUrl(DOUBLECLICK_BASE_URL, allQueryParams, MAX_URL_LENGTH - 10,
-                           {name: 'trunc', value: '1'});
+    }).then(targeting => {
+      let index;
+      if (targeting) {
+        for (let i=0; i<queryParams.length; i++) {
+          if (queryParams[i].name == 'scp') {
+            index = i;
+            break;
+          }
+        }
+        if (jsonParameters['targeting']) {
+          queryParams[index].value =  serializeTargeting(
+              Object.assign(JSON.parse(
+                  jsonParameters['targeting']),JSON.parse(targeting)),
+              jsonParameters['categoryExclusions'] || null);
+        } else {
+          queryParams[index].value =  serializeTargeting(
+              JSON.parse(targeting),
+              jsonParameters['categoryExclusions'] || null);
+        }
+      }
+      const url = buildUrl(DOUBLECLICK_BASE_URL, queryParams, MAX_URL_LENGTH - 10,
+                           {'trunc': '1'});
       return url + '&dtd=' + elapsedTimeWithCeiling(Date.now(), startTime);
     });
   }
