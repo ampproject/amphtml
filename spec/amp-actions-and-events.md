@@ -94,7 +94,7 @@ For example, the following is possible in AMP.
 </table>
 
 
-### Input Elements (any that fires `change` event)
+### Input Elements (any that fires `change` and `input` event)
 
 Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and `select`.
 
@@ -106,7 +106,12 @@ Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and
   </tr>
   <tr>
     <td>change</td>
-    <td>Fired when the value of the element is changed.</td>
+    <td>Fired when the value of the element is changed and committed.</td>
+    <td>Various, see below.</td>
+  </tr>
+  <tr>
+    <td>input-debounced</td>
+    <td>Fired when the value of the element is changed. This is similar to the standard input event, but it only fires when 300ms have passed after the value of the input has stopped changing. This is currently experimental, so [the "input-debounced" experiment must be enabled](https://www.ampproject.org/docs/reference/experimental) before using.</td>
     <td>Various, see below.</td>
   </tr>
 </table>
@@ -132,6 +137,10 @@ Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and
   <tr>
     <td>Checkbox</td>
     <td><code>event.checked</code> : If the element is checked</td>
+  </tr>
+  <tr>
+    <td>Text</td>
+    <td><code>event.value</code> : The text currently in the text box
   </tr>
 </table>
 
@@ -199,6 +208,26 @@ Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and
   <tr>
     <td>hide</td>
     <td>Hides the target element.</td>
+  </tr>
+  <tr>
+    <td>show</td>
+    <td>Shows the target element.</td>
+  </tr>
+  <tr>
+    <td>toggleVisibility</td>
+    <td>Toggles the visibility of the target element.</td>
+  </tr>
+</table>
+
+### amp-carousel[type="slides"]
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>goToSlide(index=INTEGER)</td>
+    <td>Advances the carousel to a specified slide index.</td>
   </tr>
 </table>
 
@@ -288,18 +317,6 @@ Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and
   </tr>
 </table>
 
-### amp-carousel[type="slides"]
-<table>
-  <tr>
-    <th>Action</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td>goToSlide(index=INTEGER)</td>
-    <td>Advances the carousel to a specified slide index.</td>
-  </tr>
-</table>
-
 ### amp-video, amp-youtube
 <table>
   <tr>
@@ -321,6 +338,18 @@ Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and
   <tr>
     <td>unmute</td>
     <td>Unmutes the video.</td>
+  </tr>
+</table>
+
+### form
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>submit</td>
+    <td>Submits the form.</td>
   </tr>
 </table>
 

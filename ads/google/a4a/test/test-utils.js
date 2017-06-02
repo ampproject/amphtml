@@ -19,6 +19,7 @@ import {
   extractAmpAnalyticsConfig,
   extractGoogleAdCreativeAndSignature,
   googleAdUrl,
+  mergeExperimentIds,
 } from '../utils';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
@@ -28,6 +29,7 @@ import {
 import {
   MockA4AImpl,
 } from '../../../../extensions/amp-a4a/0.1/test/utils';
+import '../../../../extensions/amp-ad/0.1/amp-ad-ui';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {createIframePromise} from '../../../../testing/iframe';
@@ -179,8 +181,12 @@ describe('Google A4A utils', () => {
 
         url = ['https://foo.com?hello=world', 'https://bar.com?a=b'];
         const config = extractAmpAnalyticsConfig(a4a, headers);
+        const visibilityCsiRequest = config.requests.visibilityCsi;
+        expect(config.triggers.continuousVisible.request)
+            .to.contain('visibilityCsi');
         const iniLoadCsiRequest = config.requests.iniLoadCsi;
         const renderStartCsiRequest = config.requests.renderStartCsi;
+        expect(visibilityCsiRequest).to.not.be.null;
         expect(iniLoadCsiRequest).to.not.be.null;
         expect(renderStartCsiRequest).to.not.be.null;
         // We expect slotId == null, since no real element is created, and so
@@ -198,6 +204,9 @@ describe('Google A4A utils', () => {
           /rls=\$internalRuntimeVersion\$/,
           /adt.null=(doubleclick|adsense)/,
         ];
+        getRegExps('visibilityCsi').forEach(regExp => {
+          expect(visibilityCsiRequest).to.match(regExp);
+        });
         getRegExps('iniLoadCsi').forEach(regExp => {
           expect(iniLoadCsiRequest).to.match(regExp);
         });
@@ -205,9 +214,13 @@ describe('Google A4A utils', () => {
           expect(renderStartCsiRequest).to.match(regExp);
         });
         // Need to remove this request as it will vary in test execution.
+        delete config.requests.visibilityCsi;
+        config.triggers.continuousVisible.request.splice(
+            config.triggers.continuousVisible.request.indexOf('visibilityCsi'),
+            1);
         delete config.requests.iniLoadCsi;
         delete config.requests.renderStartCsi;
-        expect(config).to.deep.equal({
+        expect(config).to.jsonEqual({
           transport: {beacon: false, xhrpost: false},
           requests: {
             visibility1: url[0],
@@ -262,6 +275,7 @@ describe('Google A4A utils', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
+        doc.win = window;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
           'width': '320',
@@ -270,11 +284,11 @@ describe('Google A4A utils', () => {
         const impl = new MockA4AImpl(elem);
         noopMethods(impl, doc, sandbox);
         return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', 0, [], []).then(url1 => {
+          return googleAdUrl(impl, '', 0, [], [], []).then(url1 => {
             expect(url1).to.match(/ifi=1/);
-            return googleAdUrl(impl, '', 0, [], []).then(url2 => {
+            return googleAdUrl(impl, '', 0, [], [], []).then(url2 => {
               expect(url2).to.match(/ifi=2/);
-              return googleAdUrl(impl, '', 0, [], []).then(url3 => {
+              return googleAdUrl(impl, '', 0, [], [], []).then(url3 => {
                 expect(url3).to.match(/ifi=3/);
               });
             });
@@ -289,6 +303,7 @@ describe('Google A4A utils', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
+        doc.win = window;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
           'width': '320',
@@ -309,6 +324,7 @@ describe('Google A4A utils', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
+        doc.win = window;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
           'width': '320',
@@ -320,7 +336,7 @@ describe('Google A4A utils', () => {
         impl.win.AMP_CONFIG.canary = true;
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, [], []).then(url1 => {
-            expect(url1).to.contain('isc=1');
+            expect(url1).to.match(/art=2/);
           });
         });
       });
@@ -329,6 +345,7 @@ describe('Google A4A utils', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
+        doc.win = window;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
           'width': '320',
@@ -340,11 +357,53 @@ describe('Google A4A utils', () => {
         impl.win.AMP_CONFIG.canary = false;
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, [], []).then(url1 => {
-            expect(url1).to.not.match(/isc=1/);
+            expect(url1).to.not.match(/art=2/);
           });
         });
       });
     });
 
+    it('should include all experiment ids', function() {
+      // When ran locally, this test tends to exceed 2000ms timeout.
+      this.timeout(5000);
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        doc.win = window;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {
+          'type': 'adsense',
+          'width': '320',
+          'height': '50',
+          'data-experiment-id': '123,456',
+        });
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, doc, sandbox);
+        return fixture.addElement(elem).then(() => {
+          return googleAdUrl(impl, '', 0, [], [], ['789', '098']).then(url1 => {
+            expect(url1).to.match(/eid=123%2C456%2C789%2C098/);
+          });
+        });
+      });
+    });
+  });
+
+  describe('#mergeExperimentIds', () => {
+    it('should merge a single id to itself', () => {
+      expect(mergeExperimentIds(['12345'])).to.equal('12345');
+    });
+    it('should merge a single ID to a list', () => {
+      expect(mergeExperimentIds(['12345'], '3,4,5,6'))
+          .to.equal('3,4,5,6,12345');
+    });
+    it('should merge multiple IDs into a list', () => {
+      expect(mergeExperimentIds(['12345','6789'], '3,4,5,6'))
+          .to.equal('3,4,5,6,12345,6789');
+    });
+    it('should discard invalid ID', () => {
+      expect(mergeExperimentIds(['frob'], '3,4,5,6')).to.equal('3,4,5,6');
+    });
+    it('should return empty string for invalid input', () => {
+      expect(mergeExperimentIds(['frob'])).to.equal('');
+    });
   });
 });

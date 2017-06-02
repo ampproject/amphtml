@@ -34,6 +34,7 @@ describes.realWin('amp-sticky-ad 1.0 version', {
   let ampStickyAd;
   let impl;
   let addToFixedLayerStub, addToFixedLayerPromise;
+  const adUpgradedToCustomElementPromise = Promise.resolve();
   describe('with valid child 1.0', () => {
     beforeEach(() => {
       win = env.win;
@@ -53,7 +54,7 @@ describes.realWin('amp-sticky-ad 1.0 version', {
       expect(impl.scrollUnlisten_).to.be.function;
     });
 
-    it('should not build when scrollTop less than viewportHeight', done => {
+    it('should not build when scrollTop less than viewportHeight', () => {
       const scheduleLayoutSpy = sandbox.spy(impl, 'scheduleLayout');
       const removeOnScrollListenerSpy =
           sandbox.spy(impl, 'removeOnScrollListener_');
@@ -74,11 +75,14 @@ describes.realWin('amp-sticky-ad 1.0 version', {
         return 300;
       };
       impl.onScroll_();
-      expect(getScrollTopSpy).to.have.been.called;
-      expect(getSizeSpy).to.have.been.called;
-      expect(scheduleLayoutSpy).to.not.have.been.called;
-      expect(removeOnScrollListenerSpy).to.not.have.been.called;
-      done();
+      return new Promise(resolve => {
+        setTimeout(resolve, 0);
+      }).then(() => {
+        expect(getScrollTopSpy).to.have.been.called;
+        expect(getSizeSpy).to.have.been.called;
+        expect(scheduleLayoutSpy).to.not.have.been.called;
+        expect(removeOnScrollListenerSpy).to.not.have.been.called;
+      });
     });
 
     it('should build on enough scroll dist, one more viewport ahead', () => {
@@ -212,12 +216,14 @@ describes.realWin('amp-sticky-ad 1.0 version', {
       impl.scheduleLayoutForAd_();
       expect(layoutAdSpy).to.not.been.called;
       impl.ad_.signals().signal('built');
-      return impl.ad_.signals().whenSignal('built').then(() => {
-        expect(layoutAdSpy).to.be.called;
-        expect(ampStickyAd).to.not.have.attribute('visible');
-        impl.ad_.signals().signal('load-end');
-        return poll('visible attribute must be set', () => {
-          return ampStickyAd.hasAttribute('visible');
+      return adUpgradedToCustomElementPromise.then(() => {
+        return impl.ad_.signals().whenSignal('built').then(() => {
+          expect(layoutAdSpy).to.be.called;
+          expect(ampStickyAd).to.not.have.attribute('visible');
+          impl.ad_.signals().signal('load-end');
+          return poll('visible attribute must be set', () => {
+            return ampStickyAd.hasAttribute('visible');
+          });
         });
       });
     });
@@ -230,12 +236,14 @@ describes.realWin('amp-sticky-ad 1.0 version', {
       impl.scheduleLayoutForAd_();
       expect(layoutAdSpy).to.not.been.called;
       impl.ad_.signals().signal('built');
-      return impl.ad_.signals().whenSignal('built').then(() => {
-        expect(layoutAdSpy).to.be.called;
-        expect(ampStickyAd).to.not.have.attribute('visible');
-        impl.ad_.signals().signal('render-start');
-        return poll('visible attribute must be set', () => {
-          return ampStickyAd.hasAttribute('visible');
+      return adUpgradedToCustomElementPromise.then(() => {
+        return impl.ad_.signals().whenSignal('built').then(() => {
+          expect(layoutAdSpy).to.be.called;
+          expect(ampStickyAd).to.not.have.attribute('visible');
+          impl.ad_.signals().signal('render-start');
+          return poll('visible attribute must be set', () => {
+            return ampStickyAd.hasAttribute('visible');
+          });
         });
       });
     });

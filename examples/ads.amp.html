@@ -13,18 +13,23 @@
       border: 1px solid #ccc;
       max-width: 500px;
     }
-    /* Included here to make sure it does not render. */
-    .fixed {
-      position: fixed;
-      bottom: 0;
-      right: 0;
-      background-color: #eee;
-      opacity: .8;
-    }
     .red {
       background-color: red;
     }
-
+    .filterBar {
+      background: #eee;
+      padding: 3px;
+      font-size: 1.2em;
+    }
+    select {
+      border: 1px solid #999;
+    }
+    input[type=submit] {
+      font-size: 14px;
+      border: 1px solid #999;
+      border-radius: 3px;
+      margin-left: 10px;
+    }
     amp-ad[type="revcontent"] {
       width: 100%;
       max-width: 1280px;
@@ -42,140 +47,145 @@
   <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
   <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
   <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+  <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-  <h2>Ad networks in <span class="broken">red color</span> have broken examples, please help to fix.</h2>
-  <nav>
-    <!--
-        When adding new ad network to the list, please
-        1) verify that the ad slot loads ad. Check DEVELOPMENT.md for how to
-           run a local server.
-        2) keep the list in alphabetic order
-    -->
-    <a href="#a8">A8</a> |
-    <a href="#a9">A9</a> |
-    <a href="#accesstrade">AccessTrade</a> |
-    <a href="#adblade">Adblade</a> |
-    <a href="#adbutler">AdButler</a> |
-    <a href="#adition">ADITION</a> |
-    <a href="#adgeneration">Ad Generation</a> |
-    <a href="#adhese">Adhese</a> |
-    <a href="#adman">Adman</a> |
-    <a href="#adreactor">AdReactor</a> |
-    <a href="#adsense">AdSense</a> |
-    <a href="#adsnative">AdsNative</a> |
-    <a href="#adspeed">AdSpeed</a> |
-    <a href="#adspirit">AdSpirit</a> |
-    <a href="#adstir">AdStir</a> |
-    <a href="#adtech">AdTech</a> |
-    <a href="#adthrive">AdThrive</a> |
-    <a href="#aduptech">Ad Up Technology</a> |
-    <a href="#adverline">Adverline</a> |
-    <a href="#adverticum">Adverticum</a> |
-    <a href="#advertserve">AdvertServe</a> |
-    <a href="#affiliateb">Affiliate-B</a> |
-    <a href="#amoad">AMoAd</a> |
-    <a href="#appnexus">App Nexus</a> |
-    <a href="#atomx">Atomx</a> |
-    <a href="#brainy">brainy</a> |
-    <a href="#caajainfeed">CA A.J.A. Infeed</a> |
-    <a href="#caprofitx">CA ProFit X</a> |
-    <a href="#chargeads">Chargeads</a> |
-    <a href="#colombia" class="broken">Colombia ad</a> |
-    <a href="#contentad">Content.ad</a> |
-    <a href="#criteo">Criteo</a> |
-    <a href="#csa">CSA</a> |
-    <a href="#custom">Custom</a>|
-    <a href="#eas">Cxense Display</a> |
-    <a href="#distroscale">DistroScale</a> |
-    <a href="#dotandads">DotAndAds</a> |
-    <a href="#doubleclick">Doubleclick</a> |
-    <a href="#eplanning">E-Planning</a> |
-    <a href="#ezoic">Ezoic</a> |
-    <a href="#f1e">FlexOneELEPHANT</a> |
-    <a href="#felmat">Felmat</a> |
-    <a href="#flite">Flite</a> |
-    <a href="#fluct">fluct</a> |
-    <a href="#fusion">Fusion</a> |
-    <a href="#genieessp"></a> |
-    <a href="#gmossp" class="broken"></a> |
-    <a href="#holder">Holder</a> |
-    <a href="#ibillboard">iBILLBOARD</a> |
-    <a href="#imobile">I-Mobile</a> |
-    <a href="#industrybrains">Industrybrains</a> |
-    <a href="#inmobi">InMobi</a> |
-    <a href="#ix">Index Exchange</a> |
-    <a href="#kiosked">Kiosked</a> |
-    <a href="#kargo">Kargo</a> |
-    <a href="#kixer">Kixer</a> |
-    <a href="#ligatus">Ligatus</a> |
-    <a href="#loka">LOKA</a> |
-    <a href="#mads">MADS</a> |
-    <a href="#mantis-display">MANTIS</a> |
-    <a href="#mediaimpact">Media Impact</a> |
-    <a href="#medianet">Media.Net</a> |
-    <a href="#mediavine">Mediavine</a> |
-    <a href="#meg">Meg</a> |
-    <a href="#microad">MicroAd</a> |
-    <a href="#mixpo">Mixpo</a> |
-    <a href="#mywidget">myWidget</a> |
-    <a href="#nativo">Nativo</a> |
-    <a href="#nend">Nend</a> |
-    <a href="#nokta">Nokta</a> |
-    <a href="#openadstream">Open AdStream</a> |
-    <a href="#openx">OpenX</a> |
-    <a href="#outbrain">Outbrain</a> |
-    <a href="#plista">Plista</a> |
-    <a href="#popin">popIn</a> |
-    <a href="#pubmine">Pubmine</a> |
-    <a href="#pulsepoint" class="broken">PulsePoint</a> |
-    <a href="#purch">Purch</a> |
-    <a href="#capirs">Rambler&Co</a> |
-    <a href="#relap">Relap</a> |
-    <a href="#revcontent">Revcontent</a> |
-    <a href="#rubicon">Rubicon</a> |
-    <a href="#sharethrough">Sharethrough</a> |
-    <a href="#sklik">Sklik</a> |
-    <a href="#slimcutmedia">SlimCut Media</a> |
-    <a href="#smartadserver">SmartAdServer</a> |
-    <a href="#smartclip">smartclip</a> |
-    <a href="#sortable">Sortable ad</a> |
-    <a href="#sovrn">SOVRN</a> |
-    <a href="#sunmedia">SunMedia</a> |
-    <a href="#swoop">Swoop</a> |
-    <a href="#taboola">Taboola</a> |
-    <a href="#teads">Teads</a> |
-    <a href="#triplelift">TripleLift</a> |
-    <a href="#valuecommerce">ValueCommerce</a> |
-    <a href="#webediads">Webediads</a> |
-    <a href="#weborama">Weborama</a> |
-    <a href="#widespace">Widespace</a> |
-    <a href="#xlift">Xlift</a> |
-    <a href="#yahoo">Yahoo</a> |
-    <a href="#yahoojp">YahooJP</a> |
-    <a href="#yieldbot">Yieldbot</a> |
-    <a href="#yieldone">Yield One</a> |
-    <a href="#yieldmo">Yieldmo</a> |
-    <a href="#zedo">ZEDO</a> |
-    <a href="#zergnet">ZergNet</a> |
-    <a href="#zucks">Zucks</a> |
-  </nav>
-
-  <div class="fixed">
-    <amp-ad width="300" height="50"
-        type="a9"
-        data-aax_size="300x250"
-        data-aax_pubname="test123"
-        data-aax_src="302">
-      <div placeholder>
-        Fixed positioned ad (will not render)
-      </div>
-    </amp-ad>
+  <div class="filterBar">
+    <form action="ads.amp.html" method="get" target="_top">
+      <label for="filter">Ad network filter</label>
+      <select id="filter" name="type">
+        <option>[Select an ad network]</option>
+        <!--
+          When adding new ad network to the list, please
+          1) verify that the ad slot loads ad. Check DEVELOPMENT.md for how to
+             run a local server.
+          2) keep the list in alphabetic order
+        -->
+        <option>a8</option>
+        <option>a9</option>
+        <option>accesstrade</option>
+        <option>adblade</option>
+        <option>adbutler</option>
+        <option>adfox</option>
+        <option>adition</option>
+        <option>adgeneration</option>
+        <option>adhese</option>
+        <option>adman</option>
+        <option>admanmedia</option>
+        <option>adreactor</option>
+        <option>adsense</option>
+        <option>adsnative</option>
+        <option>adspeed</option>
+        <option>adspirit</option>
+        <option>adstir</option>
+        <option>adtech</option>
+        <option>adthrive</option>
+        <option>aduptech</option>
+        <option>adverline</option>
+        <option>adverticum</option>
+        <option>advertserve</option>
+        <option>affiliateb</option>
+        <option>amoad</option>
+        <option>appnexus</option>
+        <option>atomx</option>
+        <option>bidtellect</option>
+        <option>brainy</option>
+        <option>bringhub</option>
+        <option>caajainfeed</option>
+        <option>caprofitx</option>
+        <option>chargeads</option>
+        <option>contentad</option>
+        <option>criteo</option>
+        <option>csa</option>
+        <option>custom</option>
+        <option>eas</option>
+        <option>distroscale</option>
+        <option>dotandads</option>
+        <option>doubleclick</option>
+        <option>eplanning</option>
+        <option>ezoic</option>
+        <option>f1e</option>
+        <option>f1h</option>
+        <option>felmat</option>
+        <option>flite</option>
+        <option>fluct</option>
+        <option>fusion</option>
+        <option>genieessp</option>
+        <option>gmossp</option>
+        <option>gumgum</option>
+        <option>holder</option>
+        <option>ibillboard</option>
+        <option>imobile</option>
+        <option>industrybrains</option>
+        <option>inmobi</option>
+        <option>ix</option>
+        <option>kiosked</option>
+        <option>kargo</option>
+        <option>kixer</option>
+        <option>ligatus</option>
+        <option>loka</option>
+        <option>mads</option>
+        <option>mantis-display</option>
+        <option>mediaimpact</option>
+        <option>medianet</option>
+        <option>mediavine</option>
+        <option>meg</option>
+        <option>microad</option>
+        <option>mixpo</option>
+        <option>mywidget</option>
+        <option>nativo</option>
+        <option>navegg</option>
+        <option>nend</option>
+        <option>netletix</option>
+        <option>nokta</option>
+        <option>openadstream</option>
+        <option>openx</option>
+        <option>outbrain</option>
+        <option>plista</option>
+        <option>polymorphicads</option>
+        <option>popin</option>
+        <option>pubmine</option>
+        <option>pulsepoint</option>
+        <option>purch</option>
+        <option>capirs</option>
+        <option>relap</option>
+        <option>revcontent</option>
+        <option>rubicon</option>
+        <option>sharethrough</option>
+        <option>sklik</option>
+        <option>slimcutmedia</option>
+        <option>smartadserver</option>
+        <option>smartclip</option>
+        <option>sortable</option>
+        <option>sovrn</option>
+        <option>spotx</option>
+        <option>sunmedia</option>
+        <option>swoop</option>
+        <option>taboola</option>
+        <option>teads</option>
+        <option>triplelift</option>
+        <option>valuecommerce</option>
+        <option>webediads</option>
+        <option>weborama</option>
+        <option>widespace</option>
+        <option>xlift</option>
+        <option>yahoo</option>
+        <option>yahoojp</option>
+        <option>yandex</option>
+        <option>yieldbot</option>
+        <option>yieldone</option>
+        <option>yieldmo</option>
+        <option>zedo</option>
+        <option>zergnet</option>
+        <option>zucks</option>
+      </select>
+      <input type="submit" value="Go">
+    </form>
   </div>
 
-  <h2 id="a8">A8</h2>
+  <h2>A8</h2>
   <amp-ad width="300" height="250"
       type="a8"
       data-aid="170223075073"
@@ -186,7 +196,7 @@
       data-type="static">
   </amp-ad>
 
-  <h2 id="a9">A9</h2>
+  <h2>A9</h2>
   <amp-ad width="300" height="250"
       type="a9"
       data-aax_size="300x250"
@@ -194,14 +204,14 @@
       data-aax_src="302">
   </amp-ad>
 
-  <h2 id="accesstrade">AccessTrade</h2>
+  <h2>AccessTrade</h2>
   <amp-ad width="300" height="250"
       type="accesstrade"
       data-atops="r"
       data-atrotid="00000000000008c06y">
   </amp-ad>
 
-  <h2 id="adblade">Adblade</h2>
+  <h2>Adblade</h2>
   <amp-ad width="300" height="250"
       type="adblade"
       data-width="300"
@@ -209,27 +219,27 @@
       data-cid="19626-3798936394">
   </amp-ad>
 
-  <h2 id="adbutler">AdButler</h2>
+  <h2>AdButler</h2>
   <amp-ad width="300" height="250"
       type="adbutler"
       data-account="167283"
       data-zone="212491">
   </amp-ad>
 
-  <h2 id="adition">ADITION</h2>
+  <h2>ADITION</h2>
   <amp-ad width="300" height="250"
       type="adition"
       data-version="1"
       data-wp_id="3470234">
   </amp-ad>
 
-  <h2 id="adgeneration">Ad Generation</h2>
+  <h2>Ad Generation</h2>
   <amp-ad width="320" height="50"
       type="adgeneration"
       data-id="10722">
   </amp-ad>
 
-  <h2 id="adhese">Adhese</h2>
+  <h2>Adhese</h2>
   <amp-ad width=300 height=250
       type="adhese"
       data-location="_sdk_amp_"
@@ -253,7 +263,14 @@
     <div fallback></div>
   </amp-ad>
 
-  <h2 id="adman">Adman</h2>
+  <h2 id="adfox">AdFox</h2>
+  <amp-ad width="248" height="408"
+      type="adfox"
+      data-owner-id="208087"
+      data-adfox-params='{"pt": "b","p1": "bsoji","p2": "feil","pct": "a","pfc": "bbhfo","pfb": "cwrtv"}'>
+  </amp-ad>
+
+  <h2>Adman</h2>
   <amp-ad width="300" height="250"
       type="adman"
       data-ws="17342"
@@ -261,7 +278,13 @@
       data-host="talos.adman.gr">
   </amp-ad>
 
-  <h2 id="adreactor">AdReactor</h2>
+  <h2>AdmanMedia</h2>
+  <amp-ad width="300" height="250"
+      type="admanmedia"
+      data-id="8e916419">
+  </amp-ad>
+
+  <h2>AdReactor</h2>
   <amp-ad width="728" height="90"
       type="adreactor"
       data-pid=790
@@ -269,14 +292,14 @@
       data-custom3="No Type">
   </amp-ad>
 
-  <h2 id="adsense">AdSense</h2>
+  <h2>AdSense</h2>
   <amp-ad width="300" height="250"
       type="adsense"
       data-ad-client="ca-pub-2005682797531342"
       data-ad-slot="7046626912">
   </amp-ad>
 
-  <h2 id="adsnative">AdsNative</h2>
+  <h2>AdsNative</h2>
   <amp-ad width="300" height="250"
       type="adsnative"
       data-anapiid="t8AjW-y8rudFGzKft_YQcBZG1-aGZ5otj5QdsKaP"
@@ -285,7 +308,7 @@
       data-ankv="key:val,key:val2">
   </amp-ad>
 
-  <h2 id="adspeed">AdSpeed</h2>
+  <h2>AdSpeed</h2>
   <amp-ad width="300" height="250"
       type="adspeed"
       data-zone="82441"
@@ -294,27 +317,27 @@
   <div fallback></div>
   </amp-ad>
 
-  <h2 id="adspirit">AdSpirit</h2>
+  <h2>AdSpirit</h2>
   <amp-ad width="300" height="250"
       type="adspirit"
       data-asm-params="&amp;pid=4"
       data-asm-host="help.adspirit.de">
   </amp-ad>
 
-  <h2 id="adstir">AdStir 320x50 banner</h2>
+  <h2>AdStir 320x50 banner</h2>
   <amp-ad width="320" height="50"
       type="adstir"
       data-app-id="MEDIA-343ded3e"
       data-ad-spot="1">
   </amp-ad>
 
-  <h2 id="adtech">AdTech (1x1 fake image ad)</h2>
+  <h2>AdTech (1x1 fake image ad)</h2>
   <amp-ad width="300" height="250"
       type="adtech"
       src="https://adserver.adtechus.com/addyn/3.0/5280.1/2274008/0/-1/ADTECH;size=300x250;key=plumber;alias=careerbear-ros-middle1;loc=300;;target=_blank;grp=27980912;misc=3767074">
   </amp-ad>
 
-  <h2 id="adthrive">AdThrive 320x50 banner</h2>
+  <h2>AdThrive 320x50 banner</h2>
   <amp-ad width="320" height="50"
       type="adthrive"
       data-site-id="test"
@@ -322,7 +345,7 @@
       data-sizes="320x50">
   </amp-ad>
 
-  <h2 id="adthrive">AdThrive 300x250 banner</h2>
+  <h2>AdThrive 300x250 banner</h2>
   <amp-ad width="300" height="250"
       type="adthrive"
       data-site-id="test"
@@ -330,7 +353,7 @@
       data-sizes="300x250">
   </amp-ad>
 
-  <h2 id="aduptech">Ad Up Technology</h2>
+  <h2>Ad Up Technology</h2>
   <amp-ad width="500" height="250"
       type="aduptech"
       layout="fixed"
@@ -339,21 +362,21 @@
       data-adtest="1">
   </amp-ad>
 
-  <h2 id="adverline">Adverline</h2>
+  <h2>Adverline</h2>
   <amp-ad width="300" height="250"
       type="adverline"
       data-id=13625
       data-plc=3>
   </amp-ad>
 
-  <h2 id="adverticum">Adverticum</h2>
+  <h2>Adverticum</h2>
   <amp-ad width="285" height="350"
      type="adverticum"
      data-goa3zone="4316734"
      data-costumeTargetString="bWFsYWM=">
   </amp-ad>
 
-  <h2 id="advertserve">AdvertServe</h2>
+  <h2>AdvertServe</h2>
   <amp-ad width="300" height="250"
       type="advertserve"
       data-client="tester"
@@ -361,7 +384,7 @@
       data-zid=68>
   </amp-ad>
 
-  <h2 id="affiliateb">Affiliate-B</h2>
+  <h2>Affiliate-B</h2>
   <amp-ad width="300" height="250"
       type="affiliateb"
       data-afb_a="l44x-y174897c"
@@ -369,7 +392,7 @@
       data-afb_t="i">
   </amp-ad>
 
-  <h2 id="amoad">AMoAd banner</h2>
+  <h2>AMoAd banner</h2>
   <amp-ad width="300" height="250"
       type="amoad"
       data-ad-type="banner"
@@ -383,7 +406,7 @@
       data-sid="62056d310111552c951d19c06bfa71e1bc19eea7e94d0a6e73e46a9402dbee47">
   </amp-ad>
 
-  <h2 id="appnexus">AppNexus with JSON based configuration multi ad</h2>
+  <h2>AppNexus with JSON based configuration multi ad</h2>
   <amp-ad width="300" height="250"
       type="appnexus"
       data-target="apn_ad_1"
@@ -396,49 +419,54 @@
       json='{"pageOpts":{"member": 958}, "adUnits": [{"disablePsa": true, "tagId": 6063968,"sizes": [300,250],"targetId": "apn_ad_1"}, {"tagId": 6063968,"sizes": [728,90],"targetId":"apn_ad_2"}]}'>
   </amp-ad>
 
-  <h2 id="atomx">Atomx</h2>
+  <h2>Atomx</h2>
   <amp-ad width="300" height="250"
       type="atomx"
       data-id="1234">
   </amp-ad>
 
-  <h2 id="brainy">brainy</h2>
+  <h2 id="bidtellect">Bidtellect</h2>
+  <amp-ad width=320 height=200
+      type="bidtellect"
+      data-t="20bc0442-8bec-43f8-9992-08be6e6a3591"
+      data-pid="925847381"
+      data-sid="216072">
+  </amp-ad>
+
+  <h2>brainy</h2>
   <amp-ad width="300" height="250"
       type="brainy"
       data-aid="10"
       data-slot-id="3347">
   </amp-ad>
 
-  <h2 id="caajainfeed">CA A.J.A. Infeed</h2>
+  <h2>Bringhub Mini-Storefront</h2>
+  <amp-embed width="600" height="320"
+      type="bringhub"
+      layout="responsive"
+      heights="(max-width: 270px) 1280px, (max-width:553px) 640px, 338px">
+  </amp-embed>
+
+  <h2>CA A.J.A. Infeed</h2>
   <amp-ad width="320" height="120"
       type="caajainfeed"
-      data-ad-spot="thtuegn1pAQ"
+      data-ad-spot="jqeto4eMJqk"
       data-test="true">
   </amp-ad>
 
-  <h2 id="caprofitx">CA ProFit-X</h2>
+  <h2>CA ProFit-X</h2>
   <amp-ad width="320" height="50"
       type="caprofitx"
       data-tagid="17359">
   </amp-ad>
 
-  <h2 id="chargeads">Chargeads</h2>
+  <h2>Chargeads</h2>
   <amp-ad width="320" height="50"
       type="chargeads"
       src="https://www.chargeplatform.com/ads/?id=1288491435">
   </amp-ad>
 
-  <h2 id="colombia" class="broken">Colombia ad</h2>
-  <a href="https://github.com/ampproject/amphtml/issues/4613">Issue on GitHub</a><br>
-  <amp-ad width="320" height="140"
-      type="colombia"
-      layout=responsive
-      data-clmb_slot="129883"
-      data-clmb_position="1"
-      data-clmb_section="0">
-  </amp-ad>
-
-  <h2 id="contentad">Content.ad Banner 320x50</h2>
+  <h2>Content.ad Banner 320x50</h2>
   <amp-ad width="320" height="50"
       type="contentad"
       data-id="80a26f7c-277a-4c9a-b541-1ae7304d8b06"
@@ -483,7 +511,7 @@
       data-url="nonblocking.io">
   </amp-ad>
 
-  <h2 id="criteo">Criteo Passback</h2>
+  <h2>Criteo Passback</h2>
   <p>Due to ad targeting, the slot might not load ad.</p>
 
   <amp-ad width="300" height="250"
@@ -503,7 +531,7 @@
       data-networkid="1976">
   </amp-ad>
 
-  <h2 id="csa">CSA</h2>
+  <h2>CSA</h2>
   <amp-ad width="auto" height="300"
       type="csa"
       layout="fixed-height"
@@ -528,7 +556,7 @@
       type="custom"
       data-slot="2"
       data-url="/examples/custom.ad.example.json">
-    <template type="amp-mustache" id="amp-template-id">
+    <template type="amp-mustache">
       <a href="{{href}}" target="_blank">
         <amp-img layout='fixed' height="200" width="200" src="{{src}}" data-info="{{info}}"></amp-img>
       </a>
@@ -546,14 +574,14 @@
     </template>
   </amp-ad>
 
-  <h2 id="eas">Cxense Display</h2>
+  <h2>Cxense Display</h2>
   <amp-ad width="240" height="65"
       type="eas"
       data-eas-domain="stage.emediate.eu"
       data-eas-cu="3255">
   </amp-ad>
 
-  <h2 id="distroscale">DistroScale</h2>
+  <h2>DistroScale</h2>
   <amp-ad width="300" height="600"
       type="distroscale"
       data-pid="1"
@@ -561,7 +589,7 @@
       layout="responsive">
   </amp-ad>
 
-  <h2 id="dotandads">DotAndAds masthead</h2>
+  <h2>DotAndAds masthead</h2>
   <amp-ad width="980" height="250"
       type="dotandads"
       data-cid="11"
@@ -579,7 +607,7 @@
       data-mpt="amp-amp-all-all">
   </amp-ad>
 
-  <h2 id="doubleclick">Doubleclick</h2>
+  <h2>Doubleclick</h2>
   <amp-ad width="320" height="50"
       type="doubleclick"
       data-slot="/4119129/mobile_ad_banner">
@@ -613,7 +641,7 @@
       data-slot="/35096353/amptesting/badvideoad">
   </amp-ad>
 
-  <h2 id="eplanning">E-Planning 320x50</h2>
+  <h2>E-Planning 320x50</h2>
   <amp-ad width="320" height="50"
       type="eplanning"
       layout=responsive
@@ -625,21 +653,28 @@
       data-epl_e="AMP_TEST">
   </amp-ad>
 
-  <h2 id="ezoic">Ezoic</h2>
+  <h2>Ezoic</h2>
   <amp-ad width="300" height="250"
       type="ezoic"
       data-slot="/1254144/28607874"
       json='{"targeting": {"iid15":"1479509","t":"134","d":"1317","t1":"134","pvc":"0","ap":"1144","sap":"1144","a":"|0|","as":"revenue","plat":"1","bra":"mod1","ic":"1","at":"mbf","adr":"400","reft":"tf","ga":"2497208","rid":"99998","pt":"0","al":"2022","compid":"1","tap":"28607874-1479509","br1":"0","br2":"0"}}'>
   </amp-ad>
 
-  <h2 id="f1e">FlexOneELEPHANT</h2>
+  <h2>FlexOneELEPHANT</h2>
   <amp-ad width="300" height="250"
       type="f1e"
       data-url="https://demo.impact-ad.jp"
       data-target="/SITE=AMPSITE/AREA=AMPAREA/AAMSZ=300X250/OENCJP=UTF8" >
   </amp-ad>
 
-  <h2 id="felmat">Felmat</h2>
+  <h2>FlexOneHARRIER</h2>
+  <amp-ad width="300" height="250"
+      type="f1h"
+      data-section-id="2267"
+      data-slot="2843">
+  </amp-ad>
+
+  <h2>Felmat</h2>
   <amp-ad width="300" height="250"
       type="felmat"
       data-host="felmat.net"
@@ -648,21 +683,21 @@
       data-fmp="0">
   </amp-ad>
 
-  <h2 id="flite">Flite</h2>
+  <h2>Flite</h2>
   <amp-ad width="320" height="568"
       type="flite"
       data-guid="aa7bf589-6d51-4194-91f4-d22eef8e3688"
       data-mixins="">
   </amp-ad>
 
-  <h2 id="fluct">fluct</h2>
+  <h2>fluct</h2>
   <amp-ad width="300" height="250"
       type="fluct"
       data-g="1000067784"
       data-u="1000101409">
   </amp-ad>
 
-  <h2 id="fusion">Fusion</h2>
+  <h2>Fusion</h2>
   <amp-ad width="600" height="100"
       type="fusion"
       data-ad-server="bn-01d.adtomafusion.com"
@@ -672,32 +707,39 @@
       data-parameters="age=99&isMobile&gender=male">
   </amp-ad>
 
-  <h2 id="genieessp">Geniee SSP</h2>
+  <h2>Geniee SSP</h2>
   <amp-ad width="300" height="250"
       type="genieessp"
       data-vid="3"
       data-zid="1077330">
   </amp-ad>
 
-  <h2 id="gmossp" class="broken">GMOSSP 320x50 banner</h2>
+  <h2 class="broken">GMOSSP 320x50 banner</h2>
   <amp-ad width="320" height="50"
       type="gmossp"
       data-id="10014">
   </amp-ad>
 
-  <h2 id="holder">Holder 300x250 banner</h2>
+  <h2>GumGum 300x100 banner</h2>
+  <amp-ad width=300 height=100
+      type="gumgum"
+      data-zone="ggumtest"
+      data-slot="3883">
+  </amp-ad>
+
+  <h2>Holder 300x250 banner</h2>
   <amp-ad width="300" height="250"
       type="holder"
       data-block="7163">
   </amp-ad>
 
-  <h2 id="ibillboard">iBillboard 300x250 banner</h2>
+  <h2>iBillboard 300x250 banner</h2>
   <amp-ad width="300" height="250"
       type="ibillboard"
       src="https://go.eu.bbelements.com/please/code?j-21414.1.5.6.0.0._blank">
   </amp-ad>
 
-  <h2 id="imobile">I-Mobile 320x50 banner</h2>
+  <h2>I-Mobile 320x50 banner</h2>
   <amp-ad width="320" height="50"
       type="imobile"
       data-pid="1847"
@@ -705,7 +747,7 @@
       data-asid="813689">
   </amp-ad>
 
-  <h2 id="industrybrains">Industrybrains</h2>
+  <h2>Industrybrains</h2>
   <amp-ad width="300" height="250"
       type="industrybrains"
       data-width="300"
@@ -713,19 +755,11 @@
       data-cid="19626-3798936394">
   </amp-ad>
 
-  <h2 id="inmobi">InMobi</h2>
+  <h2>InMobi</h2>
   <amp-ad width="320" height="50"
       type="inmobi"
       data-siteid="a0078c4ae5a54199a8689d49f3b46d4b"
       data-slotid="15">
-  </amp-ad>
-
-  <h2 id="ix">Index Exchange</h2>
-  <amp-ad width="300" height="250"
-      type="ix"
-      data-version="2"
-      data-ad-units="4"
-      data-casale-i-d="1">
   </amp-ad>
 
   <h2>Index Exchange Header Tag</h2>
@@ -736,7 +770,7 @@
   </amp-ad>
 
 
-  <h2 id="kargo">Kargo</h2>
+  <h2>Kargo</h2>
   <amp-ad width="300" height="250"
       type="kargo"
       data-site="_tt9gZ3qxCc2RCg6CADfLAAFR"
@@ -744,37 +778,37 @@
       data-options='{"targetParams":{"AD_ID":"test-middle","ad_id":"test-middle"}}'>
   </amp-ad>
 
-  <h2 id="kiosked">Kiosked</h2>
+  <h2>Kiosked</h2>
   <amp-ad width="300" height="250"
       type="kiosked"
       data-scriptid="91">
   </amp-ad>
 
-  <h2 id="kixer">Kixer</h2>
+  <h2>Kixer</h2>
   <amp-ad width="300" height="250"
       type="kixer"
       data-adslot="6812">
   </amp-ad>
 
-  <h2 id="ligatus">Ligatus</h2>
+  <h2>Ligatus</h2>
   <amp-ad width="300" height="250"
       type="ligatus"
       src="https://a-ssl.ligatus.com/?ids=88443&t=js&s=1&bc=2">
   </amp-ad>
 
-  <h2 id="loka">LOKA</h2>
+  <h2>LOKA</h2>
   <amp-ad width="300" height="250"
       type="loka"
       data-unit-params='{"unit":"mvbanner","id":"YdzhBxTvKwZlLeeQ"}'>
   </amp-ad>
 
-  <h2 id="mads">MADS</h2>
+  <h2>MADS</h2>
   <amp-ad width="320" height="50"
       type="mads"
       data-adrequest='{"pid":"6252122059"}'>
   </amp-ad>
 
-  <h2 id="mantis-display">MANTIS</h2>
+  <h2>MANTIS</h2>
   <amp-ad width="300" height="250"
       type="mantis-display"
       data-property = "demo"
@@ -788,7 +822,7 @@
       data-property="demo">
   </amp-embed>
 
-  <h2 id="mediaimpact">Media Impact</h2>
+  <h2>Media Impact</h2>
   <amp-ad width="320" height="250"
       type="mediaimpact"
       data-site="67767"
@@ -798,7 +832,7 @@
       data-slot="4459">
   </amp-ad>
 
-  <h2 id="medianet">Media.Net Header Bidder Tag</h2>
+  <h2>Media.Net Header Bidder Tag</h2>
   <amp-ad width="300" height="250"
       type="medianet"
       data-tagtype="headerbidder"
@@ -815,7 +849,7 @@
       data-crid="112682482">
   </amp-ad>
 
-  <h2 id="mediavine">Mediavine</h2>
+  <h2>Mediavine</h2>
   <amp-ad width="300" height="250"
       type="mediavine"
       data-site="amp-project"
@@ -824,13 +858,13 @@
       <div fallback></div>
   </amp-ad>
 
-  <h2 id="meg">Meg</h2>
+  <h2>Meg</h2>
   <amp-ad width="320" height="250"
       type="meg"
       data-code="6rc0ERhN75">
   </amp-ad>
 
-  <h2 id="microad">MicroAd 320x50 banner</h2>
+  <h2>MicroAd 320x50 banner</h2>
   <amp-ad width="320" height="50"
       type="microad"
       data-spot="b4bf837c5ddd69758d5ac924d04cf502"
@@ -841,20 +875,20 @@
       data-geo="${COMPASS_EXT_GEO}">
   </amp-ad>
 
-  <h2 id="mixpo">Mixpo</h2>
+  <h2>Mixpo</h2>
   <amp-ad width="300" height="250"
       type = "mixpo"
       data-guid = "b0caf856-fd92-4adb-aaec-e91948c9ffc8"
       data-subdomain = "www">
   </amp-ad>
 
-  <h2 id="mywidget">myWidget</h2>
+  <h2>myWidget</h2>
   <amp-embed width="300" height="250"
       type="mywidget"
       data-cid="ed1538fc077cfeae6ea558f6e7404541">
   </amp-embed>
 
-  <h2 id="nativo">Nativo</h2>
+  <h2>Nativo</h2>
   <amp-ad width="350" height="150"
       type="nativo"
       layout="responsive"
@@ -862,13 +896,31 @@
       data-request-url="http://localhost:9876">
   </amp-ad>
 
-  <h2 id="nend">Nend</h2>
+  <h2>Navegg</h2>
+  <div>It is common to see a no-fill ad in this example.</div>
+  <amp-ad width=320 height=50
+      type="navegg"
+      data-acc="10"
+      data-slot="/4119129/mobile_ad_banner"
+      json='{"targeting":{"sport":["rugby","cricket"]}}'>
+  </amp-ad>
+
+  <h2>Nend</h2>
   <amp-ad width="320" height="50"
       type="nend"
       data-nend_params='{"media":82,"site":58536,"spot":127513,"type":1,"oriented":1}'>
   </amp-ad>
 
-  <h2 id="nokta">Nokta</h2>
+  <h2>NETLETIX</h2>
+  <amp-ad width='300' height='250'
+      type='netletix'
+      data-nxkey='b5f0c5d4-c2b8-4989-a7b9-130ad4417102'
+      data-nxunit='/60343726/netzathleten_.de'
+      data-nxwidth='300'
+      data-nxheight='250'>
+  </amp-ad>
+
+  <h2>Nokta</h2>
   <amp-ad width="300" height="250"
       type="nokta"
       data-category="izlesene_anasayfa"
@@ -876,7 +928,7 @@
       data-zone="152541">
   </amp-ad>
 
-  <h2 id="openadstream">Open AdStream single ad</h2>
+  <h2>Open AdStream single ad</h2>
   <amp-ad width="300" height="250"
       type="openadstream"
       data-adhost="oasc-training7.247realmedia.com"
@@ -885,7 +937,7 @@
       data-query="keyword=keyvalue&key2=value2" >
   </amp-ad>
 
-  <h2 id="openx">OpenX</h2>
+  <h2>OpenX</h2>
   <amp-ad width="728" height="90"
       type="openx"
       data-auid="538289845"
@@ -896,7 +948,7 @@
     <a href="openx.amp.max.html">See all OpenX examples</a>
   </div>
 
-  <h2 id="outbrain">Outbrain widget</h2>
+  <h2>Outbrain widget</h2>
   <amp-embed width="100" height="100"
       type="outbrain"
       layout="responsive"
@@ -908,7 +960,7 @@
       data-testMode="true">
   </amp-embed>
 
-  <h2 id="plista">Plista responsive widget</h2>
+  <h2>Plista responsive widget</h2>
   <amp-embed width="300" height="300"
       type="plista"
       layout=responsive
@@ -920,7 +972,14 @@
       data-categories="politik">
   </amp-embed>
 
-  <h2 id="popin">popIn native ad</h2>
+  <h2>polymorphicAds</h2>
+  <amp-ad width=320 height=50
+      type="polymorphicads"
+      data-adunit="7c0b3ae742beccf94f7726ea832277a2"
+      data-params='{"testMode": "true"}'>
+  </amp-ad>
+
+  <h2>popIn native ad</h2>
   <amp-ad width="300" height="568"
       type="popin"
       layout=responsive
@@ -928,7 +987,7 @@
       data-mediaid="popin_amp">
   </amp-ad>
 
-  <h2 id="pubmine">Pubmine 300x250</h2>
+  <h2>Pubmine 300x250</h2>
   <amp-ad width="300" height="250"
       type="pubmine"
       data-adsafe="1"
@@ -937,7 +996,7 @@
       data-wordads="1">
   </amp-ad>
 
-  <h2 id="pulsepoint" class="broken">PulsePoint Header Bidding 300x250</h2>
+  <h2 class="broken">PulsePoint Header Bidding 300x250</h2>
   <amp-ad width="300" height="250"
       type="pulsepoint"
       data-pid="521732"
@@ -954,14 +1013,14 @@
       data-tagid="472988">
   </amp-ad>
 
-  <h2 id="purch">Purch 300x250</h2>
+  <h2>Purch 300x250</h2>
   <amp-ad width="300" height="250"
       type="purch"
       data-pid="2882"
       data-divid="rightcol_top">
   </amp-ad>
 
-  <h2 id="capirs">Rambler&Co</h2>
+  <h2>Rambler&Co</h2>
   <amp-ad width="500" height="250"
       type="capirs"
       layout="responsive"
@@ -970,7 +1029,7 @@
       json='{"params":{"p1":"bvpkq","p2":"y","pct":"a"}}'>
   </amp-ad>
 
-  <h2 id="relap">Relap</h2>
+  <h2>Relap</h2>
   <amp-ad width="auto" height="750"
       type="relap"
       layout="fixed-height"
@@ -979,7 +1038,7 @@
       data-anchorid="i0xMMY1MoliiZWVl">
   </amp-ad>
 
-  <h2 id="revcontent">Revcontent Responsive Tag</h2>
+  <h2>Revcontent Responsive Tag</h2>
   <amp-ad width="320" height="240"
       type="revcontent"
       layout="responsive"
@@ -1000,7 +1059,7 @@
       data-id="203">
   </amp-ad>
 
-  <h2 id="rubicon">Rubicon Project Smart Tag</h2>
+  <h2>Rubicon Project Smart Tag</h2>
   <amp-ad width="320" height="50"
       type="rubicon"
       data-method="smartTag"
@@ -1023,27 +1082,27 @@
       json='{"targeting":{"kw":"amp-test","age":"18-24","gender":"male","section":"amp"},"visitor":{"age":"18-24","gender":"male"},"inventory":{"section":"amp"}}'>
   </amp-ad>
 
-  <h2 id="sharethrough">Sharethrough</h2>
+  <h2>Sharethrough</h2>
   <amp-ad width="300" height="150"
       type="sharethrough"
       layout="responsive"
       data-pkey="c0fa8367">
   </amp-ad>
 
-  <h2 id="sklik">Sklik</h2>
+  <h2>Sklik</h2>
   <amp-ad width="970" height="310"
       type="sklik"
       json='{"zoneId":0, "w": 970, "h": 310}'>
   </amp-ad>
 
-  <h2 id="slimcutmedia">SlimCut Media</h2>
+  <h2>SlimCut Media</h2>
   <amp-ad width="400" height="225"
       type="slimcutmedia"
       data-pid="amp-3"
       data-ffc="SCMPROMO">
   </amp-ad>
 
-  <h2 id="smartadserver">SmartAdServer ad</h2>
+  <h2>SmartAdServer ad</h2>
   <amp-ad width="320" height="50"
       type="smartadserver"
       data-site="94612"
@@ -1052,21 +1111,21 @@
       data-target="foo=bar">
   </amp-ad>
 
-  <h2 id="smartclip">smartclip</h2>
+  <h2>smartclip</h2>
   <amp-ad width="400" height="225"
       type="smartclip"
       data-plc="84555"
       data-sz="400x320">
   </amp-ad>
 
-  <h2 id="sortable">Sortable ad</h2>
+  <h2>Sortable ad</h2>
   <amp-ad width="300" height="250"
       type="sortable"
       data-name="medrec"
       data-site="ampproject.org">
   </amp-ad>
 
-  <h2 id="sovrn">SOVRN</h2>
+  <h2>SOVRN</h2>
   <amp-ad width="300" height="250"
       type="sovrn"
       data-width="300"
@@ -1078,7 +1137,14 @@
       data-z="393900"><!-- this ID is only whitelisted for localhost:8000 and http://amphtml-nightly.herokuapp.com-->
   </amp-ad>
 
-  <h2 id="sunmedia">SunMedia</h2>
+  <h2>SpotX</h2>
+  <amp-ad width="300" height="250"
+      type="spotx"
+      data-spotx_channel_id="85394"
+      data-spotx_autoplay="1">
+  </amp-ad>
+
+  <h2>SunMedia</h2>
   <amp-ad width="300" height="1"
       type="sunmedia"
       layout="responsive"
@@ -1087,7 +1153,7 @@
       data-crst="1">
   </amp-ad>
 
-  <h2 id="swoop">Swoop</h2>
+  <h2>Swoop</h2>
   <amp-ad width=250 height=35
       type="swoop"
       data-layout="auto"
@@ -1096,7 +1162,7 @@
       data-slot="amp/test">
   </amp-ad>
 
-  <h2 id="taboola">Taboola responsive widget</h2>
+  <h2>Taboola responsive widget</h2>
   <amp-embed width="100" height="283"
       type="taboola"
       layout="responsive"
@@ -1107,21 +1173,21 @@
       data-article="auto">
   </amp-embed>
 
-  <h2 id="teads">Teads</h2>
+  <h2>Teads</h2>
   <amp-ad width="300" height="220"
       type="teads"
       data-pid="42266"
       layout="responsive">
   </amp-ad>
 
-  <h2 id="triplelift">TripleLift</h2>
+  <h2>TripleLift</h2>
   <amp-ad width="297" height="410"
       type="triplelift"
       layout="responsive"
       src="https://ib.3lift.com/dtj/amptest_main_feed/335430">
   </amp-ad>
 
-  <h2 id="weborama">Weborama</h2>
+  <h2>Weborama</h2>
   <amp-ad width="300" height="250"
       type="weborama-display"
       data-wbo_account_id=51
@@ -1131,7 +1197,7 @@
       data-wbo_publisherclick="[PUBLISHER_TRACKING_URL]">
   </amp-ad>
 
-  <h2 id="widespace">Widespace Panorama Ad</h2>
+  <h2>Widespace Panorama Ad</h2>
   <amp-ad width="300" height="50"
       type="widespace"
       data-sid="93f1a996-52f5-46b4-8dc8-ccd8886a8fbf"
@@ -1145,13 +1211,13 @@
       layout="responsive">
   </amp-ad>
 
-  <h2 id="xlift">Xlift native ad</h2>
+  <h2>Xlift native ad</h2>
   <amp-ad width="300" height="300"
       type="xlift"
       data-mediaid="mamastar">
   </amp-ad>
 
-  <h2 id="yahoo">Yahoo Display</h2>
+  <h2>Yahoo Display</h2>
   <amp-ad width="316" height="264"
       type="yahoo"
       data-sid="954014446"
@@ -1159,13 +1225,19 @@
       data-sa='{"LREC":"300x250","secure":"true","content":"no_expandable;"}'>
   </amp-ad>
 
-  <h2 id="yahoojp">YahooJP YDN</h2>
+  <h2>YahooJP YDN</h2>
   <amp-ad width="300" height="250"
       type="yahoojp"
       data-yadsid="79712_113431">
   </amp-ad>
 
-  <h2 id="yieldbot">Yieldbot 300x250</h2>
+  <h2 id="yandex">Yandex</h2>
+  <amp-ad width="240" height="400"
+      type="yandex"
+      data-block-id="R-I-106712-3">
+  </amp-ad>
+
+  <h2>Yieldbot 300x250</h2>
   <amp-ad width="300" height="250"
       type="yieldbot"
       data-psn="1234"
@@ -1174,27 +1246,27 @@
       json='{"targeting":{"category":["food","lifestyle"]},"categoryExclusions":["health"]}'>
   </amp-ad>
 
-  <h2 id="yieldone">YIELD ONE</h2>
+  <h2>YIELD ONE</h2>
   <amp-ad width="320" height="50"
       type="yieldone"
       data-pubid="0001"
       data-pid="032478_4">
   </amp-ad>
 
-  <h2 id="yieldmo">Yieldmo</h2>
+  <h2>Yieldmo</h2>
   <amp-ad width="300" height="168"
       type="yieldmo"
       data-ymid="1349317029731662884">
   </amp-ad>
 
-  <h2 id="valuecommerce">ValueCommerce</h2>
+  <h2>ValueCommerce</h2>
   <amp-ad width="300" height="250"
       type="valuecommerce"
       data-sid="3008"
       data-pid="884466614">
   </amp-ad>
 
-  <h2 id="webediads">Webediads</h2>
+  <h2>Webediads</h2>
   <div>It's a private ad network with strict ad targeting, hence very common to see a no-fill.</div>
   <amp-ad width="300" height="250"
       type="webediads"
@@ -1204,7 +1276,7 @@
       data-query="amptest=1">
   </amp-ad>
 
-  <h2 id="zedo">ZEDO</h2>
+  <h2>ZEDO</h2>
   <amp-ad width="300" height="250"
       type="zedo"
       data-super-id="364489"
@@ -1215,7 +1287,7 @@
       data-dim="9">
   </amp-ad>
 
-  <h2 id="zergnet">ZergNet</h2>
+  <h2>ZergNet</h2>
   <amp-embed width="780" height="100"
       type="zergnet"
       heights="(max-width:645px) 100%, (max-width:845px) 31%, 23%"
@@ -1223,7 +1295,7 @@
       data-zergid="42658">
   </amp-embed>
 
-  <h2 id="zucks">Zucks</h2>
+  <h2>Zucks</h2>
   <amp-ad width="320" height="50"
       type="zucks"
       data-frame-id="_bda46cf5ac">

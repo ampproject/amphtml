@@ -163,12 +163,21 @@ describes.sandboxed('StandardActions', {}, () => {
 
     it('should implement setState', () => {
       const setStateWithExpressionSpy = sandbox.spy();
-      const bind = {setStateWithExpression: setStateWithExpressionSpy};
-      window.services.bind = {obj: bind};
+      window.services.bind = {
+        obj: {
+          setStateWithExpression: setStateWithExpressionSpy,
+        },
+      };
+
       const args = {};
       args[OBJECT_STRING_ARGS_KEY] = '{foo: 123}';
-      standardActions.handleAmpTarget({method: 'setState', args});
-      return bindForDoc(standardActions.ampdoc).then(() => {
+
+      standardActions.handleAmpTarget({
+        method: 'setState',
+        args,
+        target: ampdoc,
+      });
+      return bindForDoc(ampdoc).then(() => {
         expect(setStateWithExpressionSpy).to.be.calledOnce;
         expect(setStateWithExpressionSpy).to.be.calledWith('{foo: 123}');
       });

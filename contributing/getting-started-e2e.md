@@ -47,7 +47,7 @@ If you're already familiar with Git/GitHub/etc. or you just want to know what co
 
 If you have a question or are unsure about something while following this end-to-end guide, you can get help from the AMP Project community in many ways:
 
-* If you are tackling a [Great First Issue](https://github.com/ampproject/amphtml/milestone/25) or other GitHub issue you can ask a question as a comment on the issue directly.  This works particularly well if the question is about how to make progress on that specific issue.
+* If you are tackling a [Great First Issue](https://github.com/ampproject/amphtml/labels/Great%20First%20Issue) or other GitHub issue you can ask a question as a comment on the issue directly.  This works particularly well if the question is about how to make progress on that specific issue.
 
 * The [#welcome-contributors](https://amphtml.slack.com/messages/welcome-contributors/) channel on Slack is a place for new contributors getting up to speed in the AMP Project to find help.  You should feel comfortable asking any question in there no matter how basic it may seem to you (e.g. problems getting Git set up, errors during a build, etc.).  If you haven't already signed up for our Slack, you'll need to [request an invitation](https://docs.google.com/forms/d/e/1FAIpQLSd83J2IZA6cdR6jPwABGsJE8YL4pkypAbKMGgUZZriU7Qu6Tg/viewform?fbzx=4406980310789882877).
 

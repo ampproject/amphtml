@@ -84,6 +84,15 @@ html.i-amphtml-webview > body {
 
 
 /**
+ * iOS-Embed mode (iOS <= 8). The `body` itself is scrollable.
+ */
+html.i-amphtml-ios-embed-legacy > body {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  position: absolute !important;
+}
+
+/**
  * iOS-Embed Wrapper mode. The `body` is wrapped into `#i-amphtml-wrapper`
  * element.
  */
@@ -271,7 +280,7 @@ i-amphtml-sizer {
   color: transparent !important;
 }
 
-.i-amphtml-notbuilt > * {
+.i-amphtml-notbuilt:not(.i-amphtml-layout-container) > * {
   display: none;
 }
 
@@ -285,6 +294,11 @@ i-amphtml-sizer {
 
 .i-amphtml-error {
   /* Just state. */
+}
+
+/* layout=nodisplay are automatically hidden until displayed directly. */
+[layout=nodisplay]:not(.i-amphtml-display) {
+  display: none !important;
 }
 
 .i-amphtml-element > [placeholder] {
@@ -307,7 +321,7 @@ i-amphtml-sizer {
   left: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
-  z-index: 1 !important;
+  z-index: 1;
 }
 
 .i-amphtml-notbuilt > [placeholder] {
@@ -403,7 +417,7 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
 }
 
 .i-amphtml-loader-line.amp-active .i-amphtml-loader-moving-line {
-  animation: i-amphtml-loader-line-moving 2s ease infinite;
+  animation: i-amphtml-loader-line-moving 4s ease infinite;
 }
 
 .i-amphtml-loader {
@@ -550,6 +564,7 @@ amp-iframe iframe {
 /**
  * Forms error/success messaging containers should be hidden at first.
  */
+form [submitting],
 form [submit-success],
 form [submit-error] {
   display: none;
@@ -581,16 +596,12 @@ amp-fresh {
   right: 0;
   color: #fff;
   font-size: 16px;
-  width: 110px;
   z-index: 1000;
   padding: 5px;
 }
 
 /**
  * Animated equalizer icon for muted autoplaying videos.
- *
- * TODO(aghassemi, #5306): Move to video extension when video is out of core.
- * TODO(dvoytenko, #8464): cleanup old `i-amp-scroll-container`.
  */
 i-amphtml-video-mask, i-amp-video-mask {
   z-index: 1;

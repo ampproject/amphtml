@@ -200,8 +200,8 @@ describes.sandboxed('BatchedXhr', {}, () => {
 
     it('should fetch text GET requests once for identical URLs', () => {
       return Promise.all([
-        xhr.fetchText('/get?k=v1'),
-        xhr.fetchText('/get?k=v1'),
+        xhr.fetchText('/get?k=v1').then(res => res.text()),
+        xhr.fetchText('/get?k=v1').then(res => res.text()),
       ]).then(results => {
         expect(fetchStub).to.be.calledOnce;
         expect(results[0]).to.equal(TEST_RESPONSE);
@@ -213,10 +213,8 @@ describes.sandboxed('BatchedXhr', {}, () => {
       return Promise.all([
         xhr.fetchText('/get?k=v1', {method: 'POST', body: {}}),
         xhr.fetchText('/get?k=v1', {method: 'POST', body: {}}),
-      ]).then(results => {
+      ]).then(() => {
         expect(fetchStub).to.be.calledTwice;
-        expect(results[0]).to.equal(TEST_RESPONSE);
-        expect(results[1]).to.equal(TEST_RESPONSE);
       });
     });
   });

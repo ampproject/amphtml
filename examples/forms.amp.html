@@ -57,6 +57,34 @@
             color: #dc4e41;
         }
 
+        .verification-form label {
+          display: block;
+        }
+
+        .spinner,
+        .spinner:after {
+          border-radius: 50%;
+          width: 18px;
+          height: 18px;
+        }
+
+        .spinner {
+          visibility: hidden;
+          margin: 5px;
+          border: 9px solid rgba(0, 0, 0, 0.3);
+          border-left-color: #fff;
+          animation: spin 1.1s infinite linear;
+        }
+
+        .amp-form-verifying .spinner {
+          visibility: visible;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
         .lightbox {
             background: rgba(0,0,0,.8);
         }
@@ -236,7 +264,11 @@
         </label>
         <input type="submit" value="Subscribe">
     </fieldset>
-
+    <div submitting>
+      <template type="amp-mustache">
+        Please wait, {{name}}.
+      </template>
+    </div>
     <div submit-success>
       Success! Thanks for subscribing! Please make sure to check your email
       to confirm!
@@ -614,6 +646,105 @@
     <div submit-error>
         <template type="amp-mustache">
             Oops! {{name}}, We apologies something went wrong. Please try again later.
+        </template>
+    </div>
+</form>
+
+<h4>Asynchronous verification example</h4>
+
+<form
+  method="post"
+  action-xhr="/form/verify-search-json/post"
+  target="_blank"
+  class="verification-form"
+>
+    <script type="application/json">
+    {
+      "verificationGroups": [
+        {
+          "name": "coolName",
+          "elements": ["name"]
+        },
+        {
+          "name": "fullAddress",
+          "elements": ["addressLine2", "city", "zip"]
+        },
+        {
+          "name": "validCarrier",
+          "elements": ["phone"]
+        }
+      ]
+    }
+    </script>
+    <fieldset>
+        <label>
+            <span>Name</span>
+            <input type="text" name="name" id="nameId" required>
+        </label>
+        <label>
+            <span>Phone</span>
+            <input type="tel" name="phone" required>
+        </label>
+        <label>
+            <span>Address line 2 (optional)</span>
+            <input type="text" name="addressLine2">
+        </label>
+        <label>
+            <span>Zip Code</span>
+            <input type="tel" name="zip" required pattern="[0-9]{5}">
+        </label>
+        <label>
+            <span>City</span>
+            <input type="text" name="city" required>
+        </label>
+        <p>Throw an error?</p>
+        <label>Yes: <input type="radio" name="error" value="true" required></label>
+        <label>No: <input type="radio" name="error" value="false" required checked></label>
+        <div class="spinner"></div>
+        <input type="submit" value="Search">
+    </fieldset>
+    <div submit-success>
+        <template type="amp-mustache">
+            <h1>Here are your results:</h1>
+            <ul>
+                {{#results}}<li>{{title}}</li>{{/results}}
+            </ul>
+        </template>
+    </div>
+    <div submit-error>
+        <template type="amp-mustache">
+            {{#verifyErrors}}
+                <p>{{message}}</p>
+            {{/verifyErrors}}
+            {{^verifyErrors}}
+                <p>Something went wrong. Try again later?</p>
+            {{/verifyErrors}}
+        </template>
+    </div>
+</form>
+
+<h4>Debounced search</h4>
+<form
+  id="debounced-search"
+  method="get"
+  action="/form/search-html/get"
+  action-xhr="/form/search-json/get"
+  target="_blank"
+>
+    <fieldset>
+        <label>
+            <span>Search for</span>
+            <input type="search" on="input-debounced:debounced-search.submit" name="term" required>
+        </label>
+        <input type="submit" value="Search">
+    </fieldset>
+
+    <div submit-success>
+        <template type="amp-mustache">
+            <h1>Here are the results for the search: {{term}}</h1>
+            <ul>
+                {{#results}}<li>{{title}}</li>{{/results}}
+            </ul>
         </template>
     </div>
 </form>

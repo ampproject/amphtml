@@ -20,7 +20,7 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {AmpA4A, DEFAULT_SAFEFRAME_VERSION} from '../../amp-a4a/0.1/amp-a4a';
 import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
@@ -136,7 +136,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       {name: 'adk', value: this.adKey_(sizeStr)},
       {name: 'gdfp_req', value: '1'},
       {name: 'impl', value: 'ifr'},
-      {name: 'sfv', value: 'A'},
+      {name: 'sfv', value: DEFAULT_SAFEFRAME_VERSION},
       {name: 'sz', value: sizeStr},
       {name: 'tfcd', value: tfcd == undefined ? null : tfcd},
       {name: 'u_sd', value: global.devicePixelRatio},
@@ -149,7 +149,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             jsonParameters['targeting'] || null,
             jsonParameters['categoryExclusions'] || null),
       },
-    ]);
+    ], ['108809080']);
   }
 
   /** @override */
@@ -255,6 +255,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         && (width <= pWidth && height <= pHeight)) {
       this.attemptChangeSize(height, width).catch(() => {});
     }
+  }
+
+  /** @override */
+  getPreconnectUrls() {
+    return ['https://partner.googleadservices.com',
+            'https://tpc.googlesyndication.com'];
   }
 }
 

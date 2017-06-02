@@ -48,6 +48,10 @@ limitations under the License.
     </td>
   </tr>
   <tr>
+    <td class="col-fourty"><strong>Codelabs</strong></td>
+    <td><a href="https://codelabs.developers.google.com/codelabs/advanced-interactivity-in-amp/">Advanced Interactivity in AMP</a> highlights a sophisticated e-commerce use case.</td>
+  </tr>
+  <tr>
     <td class="col-fourty"><strong>Origin Trials</strong></td>
     <td><a href="https://docs.google.com/a/google.com/forms/d/e/1FAIpQLSfGCAjUU4pDu84Sclw6wjGVDiFJhVr61pYTMehIt6ex4wmr1Q/viewform">Register here</a> to enable <code>amp-bind</code> for your origin.</td>
   </tr>
@@ -502,13 +506,20 @@ The URL of the remote endpoint that will return the JSON that will update this `
 
 The `src` attribute allows all standard URL variable substitutions. See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
 
+{% call callout('Important', type='caution') %}
+The endpoint must implement the requirements specified in the [CORS Requests in AMP](../../spec/amp-cors-requests.md) spec.
+{% endcall %}
+
+
 **credentials** (optional)
 
 Defines a `credentials` option as specified by the [Fetch API](https://fetch.spec.whatwg.org/).
-To send credentials, pass the value of "include". If this is set, the response must follow
-the [AMP CORS security guidelines](../../spec/amp-cors-requests.md).
 
-The support values are "omit" and "include". Default is "omit".
+* Supported values: `omit`, `include`
+* Default: `omit`
+
+To send credentials, pass the value of `include`. If this value is set, the response must follow the [AMP CORS security guidelines](../../spec/amp-cors-requests.md).
+
 
 ### Non-standard built-in functions
 

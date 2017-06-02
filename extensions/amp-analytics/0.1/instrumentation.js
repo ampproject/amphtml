@@ -202,18 +202,6 @@ export class InstrumentationService {
   }
 
   /**
-   * Triggers the analytics event with the specified type.
-   *
-   * @param {string} eventType
-   * @param {!Object<string, string>=} opt_vars A map of vars and their values.
-   */
-  triggerEvent(eventType, opt_vars) {
-    // TODO(dvoytenko): deprecate/remove in preference of triggerEventForTarget.
-    this.triggerEventForTarget(
-        this.ampdocRoot_.getRootElement(), eventType, opt_vars);
-  }
-
-  /**
    * @param {!Node} context
    * @return {!./analytics-root.AnalyticsRoot}
    */
@@ -571,7 +559,8 @@ export class AnalyticsGroup {
   addTrigger(config, handler) {
     let eventType = dev().assertString(config['on']);
     // TODO(dvoytenko, #8121): Cleanup visibility-v3 experiment.
-    if ((eventType == 'visible') && this.visibilityV3_) {
+    if ((eventType == 'visible' || eventType == 'hidden')
+        && this.visibilityV3_) {
       eventType += '-v3';
     }
     let trackerProfile = EVENT_TRACKERS[eventType];

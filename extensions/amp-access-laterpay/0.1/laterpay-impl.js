@@ -76,7 +76,8 @@ let PurchaseOptionDef;
  *   access: boolean,
  *   apl: string,
  *   premiumcontent: !PurchaseOptionDef,
- *   timepasses: Array<PurchaseOptionDef>=
+ *   timepasses: Array<PurchaseOptionDef>=,
+ *   subscriptions: Array<PurchaseOptionDef>=
  * }}
  */
 let PurchaseConfigDef;
@@ -219,12 +220,13 @@ export class LaterpayVendor {
     const urlPromise = this.accessService_.buildUrl(
       url, /* useAuthData */ false);
     return urlPromise.then(url => {
-      dev().fine(TAG, 'Authorization URL: ', url);
+      return this.accessService_.getLoginUrl(url);
+    }).then(url => {
+      dev().info(TAG, 'Authorization URL: ', url);
       return this.timer_.timeoutPromise(
           AUTHORIZATION_TIMEOUT,
           this.xhr_.fetchJson(url, {
             credentials: 'include',
-            requireAmpResponseSourceOrigin: true,
           }));
     });
   }
@@ -305,6 +307,9 @@ export class LaterpayVendor {
     );
     this.purchaseConfig_.timepasses.forEach(timepass => {
       listContainer.appendChild(this.createPurchaseOption_(timepass));
+    });
+    this.purchaseConfig_.subscriptions.forEach(subscription => {
+      listContainer.appendChild(this.createPurchaseOption_(subscription));
     });
     const purchaseButton = this.createElement_('button');
     purchaseButton.className = TAG + '-purchase-button';
@@ -464,12 +469,8 @@ export class LaterpayVendor {
    */
   handlePurchase_(ev, purchaseUrl) {
     ev.preventDefault();
-    const configuredUrl = purchaseUrl +
-                '?return_url=RETURN_URL' +
-                '&article_url=SOURCE_URL' +
-                '&amp_reader_id=READER_ID';
     const urlPromise = this.accessService_.buildUrl(
-      configuredUrl, /* useAuthData */ false);
+      purchaseUrl, /* useAuthData */ false);
     return urlPromise.then(url => {
       dev().fine(TAG, 'Authorization URL: ', url);
       this.accessService_.loginWithUrl(

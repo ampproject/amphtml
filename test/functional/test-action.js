@@ -16,13 +16,15 @@
 
 import {
   ActionService,
+  DeferredEvent,
   OBJECT_STRING_ARGS_KEY,
   applyActionInfoArgs,
   parseActionMap,
 } from '../../src/service/action-impl';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {Keycodes} from '../../src/utils/keycodes';
+import {KeyCodes} from '../../src/utils/key-codes';
 import {createCustomEvent} from '../../src/event-helper';
+import {toggleExperiment} from '../../src/experiments';
 import {setParentWindow} from '../../src/service';
 import * as sinon from 'sinon';
 
@@ -923,27 +925,37 @@ describes.sandboxed('Action global target', {}, () => {
 });
 
 
-describe('Core events', () => {
+describes.fakeWin('Core events', {amp: true}, env => {
   let sandbox;
   let win;
+  let window;
+  let document;
   let action;
+  let triggerPromise;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    win = window = env.win;
+    document = window.document;
+    sandbox = env.sandbox;
     sandbox.stub(window.document, 'addEventListener');
-    win = {
-      document: {body: {}},
-      services: {
-        vsync: {obj: {}},
-      },
-    };
-    action = new ActionService(new AmpDocSingle(win), document);
-    sandbox.stub(action, 'trigger');
+    const ampdoc = env.ampdoc;
+    action = new ActionService(ampdoc, document);
+    const originalTrigger = action.trigger;
+    triggerPromise = new Promise((resolve, reject) => {
+      sandbox.stub(action, 'trigger', () => {
+        try {
+          originalTrigger.apply(action, action.trigger.getCall(0).args);
+          resolve();
+        } catch (e) {
+          reject(e);
+        }
+      });
+    });
     action.vsync_ = {mutate: callback => callback()};
   });
 
   afterEach(() => {
-    sandbox.restore();
+    toggleExperiment(win, 'input-debounced', false);
   });
 
   it('should trigger tap event on click', () => {
@@ -963,7 +975,7 @@ describe('Core events', () => {
     element.setAttribute('role', 'button');
     const event = {
       target: element,
-      keyCode: Keycodes.ENTER,
+      keyCode: KeyCodes.ENTER,
       preventDefault: sandbox.stub()};
     handler(event);
     expect(event.preventDefault).to.have.been.called;
@@ -976,7 +988,7 @@ describe('Core events', () => {
     const handler = window.document.addEventListener.getCall(1).args[1];
     const element = document.createElement('div');
     element.setAttribute('role', 'not-a-button');
-    const event = {target: element, keyCode: Keycodes.ENTER};
+    const event = {target: element, keyCode: KeyCodes.ENTER};
     handler(event);
     expect(action.trigger).to.not.have.been.called;
   });
@@ -1028,6 +1040,7 @@ describe('Core events', () => {
     element.selectedIndex = 2;
     const event = {target: element};
     handler(event);
+
     expect(action.trigger).to.have.been.calledWith(
         element,
         'change',
@@ -1037,4 +1050,82 @@ describe('Core events', () => {
         }));
   });
 
+  it('should trigger input-debounced event on input', () => {
+    toggleExperiment(window, 'input-debounced', true);
+    sandbox.stub(action, 'invoke_');
+    const handler = window.document.addEventListener.getCall(4).args[1];
+    const element = document.createElement('input');
+    element.id = 'test';
+    element.setAttribute('on', 'input-debounced:test.hide');
+    element.value = 'foo bar baz';
+    const event = {target: element};
+    document.body.appendChild(element);
+    handler(event);
+
+    return triggerPromise.then(() => {
+      expect(action.trigger).to.have.been.calledWith(
+          element,
+          'input-debounced',
+          sinon.match(event => {
+            const value = event.target.value;
+            return value == 'foo bar baz';
+          }));
+      toggleExperiment(window, 'input-debounced', false);
+    }, () => {
+      assert.fail('Should succeed with experiment.');
+    });
+  });
+
+  it('should not handle input-debounced event without experiment', () => {
+    const handler = window.document.addEventListener.getCall(4).args[1];
+    const element = document.createElement('input');
+    element.setAttribute('on', 'input-debounced:body.hide');
+    element.value = 'foo bar baz';
+    const event = {target: element};
+    handler(event);
+
+    return triggerPromise.then(() => {
+      assert.fail('Should not succeed without experiment.');
+    }, error => {
+      expect(error).to.match(/"input-debounced" experiment/);
+      expect(action.trigger).to.have.been.calledWith(
+          element,
+          'input-debounced',
+          sinon.match(event => {
+            const value = event.target.value;
+            return value == 'foo bar baz';
+          }));
+    });
+  });
+
+  describe('DeferredEvent', () => {
+    it('should copy the properties of an event object', () => {
+      const event = createCustomEvent(window, 'MyEvent', {foo: 'bar'});
+      const deferredEvent = new DeferredEvent(event);
+
+      for (const key in deferredEvent) {
+        if (typeof deferredEvent[key] !== 'function') {
+          expect(deferredEvent[key]).to.deep.equal(event[key]);
+        }
+      }
+    });
+
+    it('should replace functions with throws', () => {
+      const event = createCustomEvent(window, 'MyEvent', {foo: 'bar'});
+      const deferredEvent = new DeferredEvent(event);
+      const errorText = 'cannot access native event functions';
+
+      // Specifically test these commonly used functions
+      expect(() => deferredEvent.preventDefault()).to.throw(errorText);
+      expect(() => deferredEvent.stopPropagation()).to.throw(errorText);
+
+      // Test all functions
+      for (const key in deferredEvent) {
+        const value = deferredEvent[key];
+        if (typeof value === 'function') {
+          expect(() => value()).to.throw(errorText);
+        }
+      }
+    });
+  });
 });

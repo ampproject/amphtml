@@ -14,26 +14,46 @@
  * limitations under the License.
  */
 
+import {poll} from './iframe';
 import {xhrServiceForTesting} from '../src/service/xhr-impl';
-import {getService, getServiceForDoc} from '../src/service';
+import {
+  getService,
+  getServiceForDoc,
+  registerServiceBuilder,
+  registerServiceBuilderForDoc,
+} from '../src/service';
 
 export function stubService(sandbox, win, serviceId, method) {
-  const service = getService(win, serviceId, () => {
+  // Register if not already registered.
+  registerServiceBuilder(win, serviceId, function() {
     return {
       [method]: () => {},
     };
   });
+  const service = getService(win, serviceId);
   return sandbox.stub(service, method);
 }
 
 export function stubServiceForDoc(sandbox, ampdoc, serviceId, method) {
-  const stub = sandbox.stub();
-  getServiceForDoc(ampdoc, serviceId, () => {
-    const service = {};
-    service[method] = stub;
-    return service;
+  // Register if not already registered.
+  registerServiceBuilderForDoc(ampdoc, serviceId, function() {
+    return {
+      [method]: () => {},
+    };
   });
-  return stub;
+  const service = getServiceForDoc(ampdoc, serviceId);
+  return sandbox.stub(service, method);
+}
+
+/**
+ * Resolves a promise when a spy has been called a configurable number of times.
+ * @param {!Object} spy
+ * @param {number=} opt_callCount
+ * @return {!Promise}
+ */
+export function whenCalled(spy, opt_callCount = 1) {
+  return poll(`Spy was called ${opt_callCount} times`,
+      () => spy.callCount === opt_callCount);
 }
 
 /**

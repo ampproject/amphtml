@@ -22,7 +22,7 @@ import {viewportForDoc} from '../services';
 import {whenDocumentComplete} from '../document-ready';
 import {getMode} from '../mode';
 import {isCanary} from '../experiments';
-import {rateLimit} from '../utils/rate-limit';
+import {throttle} from '../utils/rate-limit';
 import {map} from '../utils/object';
 
 /**
@@ -108,6 +108,8 @@ export class Performance {
       this.onload_();
       this.flush();
     });
+
+    this.registerPaintTimingObserver_();
   }
 
   /**
@@ -162,13 +164,52 @@ export class Performance {
 
   onload_() {
     this.tick('ol');
+    this.tickLegacyFirstPaintTime_();
+  }
+
+  /**
+   * Reports first pain and first contentful paint timings.
+   * See https://github.com/WICG/paint-timing
+   */
+  registerPaintTimingObserver_() {
+    if (!this.win.PerformancePaintTiming) {
+      return;
+    }
+    const observer = new this.win.PerformanceObserver(list => {
+      list.getEntries().forEach(entry => {
+        if (entry.name == 'first-paint') {
+          this.tickDelta('fp', entry.startTime + entry.duration);
+        }
+        else if (entry.name == 'first-contentful-paint') {
+          this.tickDelta('fcp', entry.startTime + entry.duration);
+        }
+      });
+    });
+
+    observer.observe({entryTypes: ['paint']});
+  }
+
+  /**
+   * Tick fp time based on Chrome's legacy paint timing API when
+   * appropriate.
+   * `registerPaintTimingObserver_` calls the standards based API and this
+   * method does nothing if it is available.
+   */
+  tickLegacyFirstPaintTime_() {
     // Detect deprecated first pain time API
     // https://bugs.chromium.org/p/chromium/issues/detail?id=621512
     // We'll use this until something better is available.
-    if (this.win.chrome && typeof this.win.chrome.loadTimes == 'function') {
-      this.tickDelta('fp',
-          this.win.chrome.loadTimes().firstPaintTime * 1000 -
-              this.win.performance.timing.navigationStart);
+    if (!this.win.PerformancePaintTiming
+        && this.win.chrome
+        && typeof this.win.chrome.loadTimes == 'function') {
+      const fpTime = this.win.chrome.loadTimes().firstPaintTime
+          * 1000 - this.win.performance.timing.navigationStart;
+      if (fpTime <= 1) {
+        // Throw away bad data generated from an apparent Chrome bug
+        // that is fixed in later Chrome versions.
+        return;
+      }
+      this.tickDelta('fp', fpTime);
     }
   }
 
@@ -245,8 +286,8 @@ export class Performance {
     const data = {
       label,
       value,
-      // Delta can be 0 or negative, but will always be changed to 1.
-      delta: opt_delta != null ? Math.max(opt_delta, 1) : undefined,
+      // Delta can negative, but will always be changed to 0.
+      delta: opt_delta != null ? Math.max(opt_delta, 0) : undefined,
     };
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
       this.viewer_.sendMessage('tick', data);
@@ -301,7 +342,7 @@ export class Performance {
   throttledFlush() {
     if (!this.throttledFlush_) {
       /** @private {function()} */
-      this.throttledFlush_ = rateLimit(this.win, this.flush.bind(this), 100);
+      this.throttledFlush_ = throttle(this.win, this.flush.bind(this), 100);
     }
     this.throttledFlush_();
   }

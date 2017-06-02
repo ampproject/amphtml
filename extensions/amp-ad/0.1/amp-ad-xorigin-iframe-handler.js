@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {AdDisplayState} from './amp-ad-ui';
 import {CommonSignals} from '../../../src/common-signals';
 import {
   IntersectionObserver,
@@ -32,6 +31,16 @@ import {setStyle} from '../../../src/style';
 import {loadPromise} from '../../../src/event-helper';
 import {getHtml} from '../../../src/get-html';
 import {removeElement} from '../../../src/dom';
+import {getServiceForDoc} from '../../../src/service';
+import {isExperimentOn} from '../../../src/experiments';
+import {
+  installPositionObserverServiceForDoc,
+  PositionObserverFidelity,
+  SEND_POSITIONS_HIGH_FIDELITY,
+  POSITION_HIGH_FIDELITY,
+} from '../../../src/service/position-observer-impl';
+
+
 
 const VISIBILITY_TIMEOUT = 10000;
 
@@ -61,6 +70,12 @@ export class AmpAdXOriginIframeHandler {
     /** @private {SubscriptionApi} */
     this.embedStateApi_ = null;
 
+    /** @private {?SubscriptionApi} */
+    this.positionObserverHighFidelityApi_ = null;
+
+    /** @private {?../../../src/service/position-observer-impl.AmpDocPositionObserver} */
+    this.positionObserver_ = null;
+
     /** @private {!Array<!Function>} functions to unregister listeners */
     this.unlisteners_ = [];
 
@@ -89,6 +104,31 @@ export class AmpAdXOriginIframeHandler {
     this.embedStateApi_ = new SubscriptionApi(
         this.iframe, 'send-embed-state', true,
         () => this.sendEmbedInfo_(this.baseInstance_.isInViewport()));
+
+    // High-fidelity positions for scrollbound animations.
+    // Protected by 'amp-animation' experiment for now.
+    if (isExperimentOn(this.baseInstance_.win, 'amp-animation')) {
+      let posObInstalled = false;
+      this.positionObserverHighFidelityApi_ = new SubscriptionApi(
+        this.iframe, SEND_POSITIONS_HIGH_FIDELITY, true, () => {
+          const ampdoc = this.baseInstance_.getAmpDoc();
+          // TODO (#9232) May crash PWA
+          if (!posObInstalled) {
+            installPositionObserverServiceForDoc(ampdoc);
+            posObInstalled = true;
+          }
+          this.positionObserver_ = getServiceForDoc(ampdoc,
+              'position-observer');
+          this.positionObserver_.observe(
+            dev().assertElement(this.iframe),
+            PositionObserverFidelity.HIGH, pos => {
+              this.positionObserverHighFidelityApi_.send(
+                POSITION_HIGH_FIDELITY,
+                pos);
+            });
+        });
+    }
+
     // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad
     // iframe.
     listenForOncePromise(this.iframe, 'entity-id', true)
@@ -231,7 +271,6 @@ export class AmpAdXOriginIframeHandler {
    * @private
    */
   renderStart_(opt_info) {
-    this.uiHandler_.setDisplayState(AdDisplayState.LOADED_RENDER_START);
     this.baseInstance_.renderStarted();
     if (!opt_info) {
       return;
@@ -272,7 +311,7 @@ export class AmpAdXOriginIframeHandler {
       return;
     }
     this.freeXOriginIframe(this.iframe.name.indexOf('_master') >= 0);
-    this.uiHandler_.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
+    this.uiHandler_.applyNoContentUI();
   }
 
   /**
@@ -285,6 +324,15 @@ export class AmpAdXOriginIframeHandler {
     if (this.embedStateApi_) {
       this.embedStateApi_.destroy();
       this.embedStateApi_ = null;
+    }
+    if (this.positionObserver_) {
+      if (this.iframe) {
+        this.positionObserver_.unobserve(this.iframe);
+      }
+    }
+    if (this.positionObserverHighFidelityApi_) {
+      this.positionObserverHighFidelityApi_.destroy();
+      this.positionObserverHighFidelityApi_ = null;
     }
     if (this.intersectionObserver_) {
       this.intersectionObserver_.destroy();

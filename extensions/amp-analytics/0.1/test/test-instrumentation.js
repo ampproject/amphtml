@@ -85,11 +85,11 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
     // TODO(dvoytenko): remove in preference of triggerEventForTarget.
     const tracker = root.getTracker('custom', CustomEventTracker);
     const triggerStub = sandbox.stub(tracker, 'trigger');
-    service.triggerEvent('test-event', {foo: 'bar'});
+    service.triggerEventForTarget(ampdoc, 'test-event', {foo: 'bar'});
     expect(triggerStub).to.be.calledOnce;
 
     const event = triggerStub.args[0][0];
-    expect(event.target).to.equal(root.getRootElement());
+    expect(event.target).to.equal(ampdoc);
     expect(event.type).to.equal('test-event');
     expect(event.vars).to.deep.equal({foo: 'bar'});
   });
@@ -235,10 +235,10 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
           analyticsElement, 'visible-v3', config, handler);
     });
 
-    it('should add "visible-v3" trigger for hidden-v3', () => {
+    it('should add "visible-v3" trigger for hidden', () => {
       toggleExperiment(win, 'visibility-v3', true);
       group = service.createAnalyticsGroup(analyticsElement);
-      const config = {on: 'hidden-v3'};
+      const config = {on: 'hidden'};
       const getTrackerSpy = sandbox.spy(root, 'getTracker');
       group.addTrigger(config, () => {});
       expect(getTrackerSpy).to.be.calledWith('visible-v3');

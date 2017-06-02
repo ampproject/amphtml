@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 
 var $$ = require('gulp-load-plugins')();
@@ -34,7 +35,7 @@ var util = require('gulp-util');
 var root = process.cwd();
 var absPathRegExp = new RegExp(`^${root}/`);
 var argv = minimist(process.argv.slice(2), {boolean: ['strictBabelTransform']});
-var red = (msg) => $$.util.log($$.util.colors.red(msg));
+var red = (msg) => util.log(util.colors.red(msg));
 
 
 /**
@@ -201,7 +202,10 @@ function getGraph(entryModule) {
  * @return {!Array<!ModuleDef>}
  */
 function getEntryModule(extensionFolder) {
-  // TODO: handle more than just 0.1
+  // TODO (@zhouyx, #9642): Remove the special check and handle more than just 0.1
+  if (extensionFolder == 'extensions/amp-sticky-ad') {
+    return `${extensionFolder}/1.0/${path.basename(extensionFolder)}.js`;
+  }
   return `${extensionFolder}/0.1/${path.basename(extensionFolder)}.js`;
 }
 

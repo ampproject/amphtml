@@ -57,7 +57,11 @@ const DOUBLECLICK_A4A_EXPERIMENT_NAME = 'expDoubleclickA4A';
 export const DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH = {
   control: '117152662',
   experiment: '117152663',
-  controlMeasureOnRender: '2093327',
+};
+
+export const DOUBLECLICK_A4A_EXTERNAL_DELAYED_EXPERIMENT_BRANCHES_PRE_LAUNCH = {
+  control: '117152664',
+  experiment: '117152665',
 };
 
 /**
@@ -66,7 +70,6 @@ export const DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH = {
 export const DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH = {
   control: '2092619',
   experiment: '2092620',
-  controlMeasureOnRender: '2093327',
 };
 
 /**
@@ -91,6 +94,14 @@ export const DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH = {
 export const DOUBLECLICK_A4A_BETA_BRANCHES = {
   control: '2077830',
   experiment: '2077831',
+};
+
+/**
+ * @const {!../../../ads/google/a4a/traffic-experiments.A4aExperimentBranches}
+ */
+export const DOUBLECLICK_SFG_INTERNAL_EXPERIMENT_BRANCHES = {
+  control: '21060540',
+  experiment: '21060541',
 };
 
 export const BETA_ATTRIBUTE = 'data-use-beta-a4a-implementation';
@@ -121,7 +132,9 @@ export function doubleclickIsA4AEnabled(win, element) {
   }
   const enableA4A = googleAdsIsA4AEnabled(
           win, element, DOUBLECLICK_A4A_EXPERIMENT_NAME,
-          externalBranches, internalBranches) ||
+          externalBranches, internalBranches,
+          DOUBLECLICK_A4A_EXTERNAL_DELAYED_EXPERIMENT_BRANCHES_PRE_LAUNCH,
+          DOUBLECLICK_SFG_INTERNAL_EXPERIMENT_BRANCHES) ||
       (a4aRequested && (isProxyOrigin(win.location) ||
        getMode(win).localDev || getMode(win).test));
   if (enableA4A && a4aRequested && !isInManualExperiment(element)) {

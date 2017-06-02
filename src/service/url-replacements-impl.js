@@ -24,7 +24,8 @@ import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
 } from '../service';
-import {isSecureUrl, parseUrl, removeFragment, parseQueryString} from '../url';
+import {isSecureUrl, parseUrl, removeFragment, parseQueryString,
+  addParamsToUrl} from '../url';
 import {viewerForDoc} from '../services';
 import {viewportForDoc} from '../services';
 import {userNotificationManagerFor} from '../services';
@@ -39,7 +40,7 @@ import {
   getTimingDataSync,
   getTimingDataAsync,
 } from './variable-source';
-
+import {isProtocolValid} from '../url';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
@@ -228,7 +229,7 @@ export class GlobalVariableSource extends VariableSource {
         return null;
       }
       return clientIds[dev().assertString(scope)];
-    }, (scope, opt_userNotificationId) => {
+    }, (scope, opt_userNotificationId, opt_cookieName) => {
       user().assertString(scope,
             'The first argument to CLIENT_ID, the fallback c' +
             /*OK*/'ookie name, is required');
@@ -246,6 +247,7 @@ export class GlobalVariableSource extends VariableSource {
         return cid.get({
           scope: dev().assertString(scope),
           createCookieIfNotPresent: true,
+          cookieName: opt_cookieName,
         }, consent);
       }).then(cid => {
         if (!clientIds) {
@@ -254,7 +256,8 @@ export class GlobalVariableSource extends VariableSource {
 
         // A temporary work around to extract Client ID from _ga cookie. #5761
         // TODO: replace with "filter" when it's in place. #2198
-        if (scope == '_ga') {
+        const cookieName = opt_cookieName || scope;
+        if (cookieName == '_ga') {
           cid = extractClientIdFromGaCookie(cid);
         }
 
@@ -790,7 +793,7 @@ export class UrlReplacements {
     // ORIGINAL_HREF_PROPERTY has the value of the href "pre-replacement".
     // We set this to the original value before doing any work and use it
     // on subsequent replacements, so that each run gets a fresh value.
-    const href = dev().assertString(
+    let href = dev().assertString(
         element[ORIGINAL_HREF_PROPERTY] || element.getAttribute('href'));
     const url = parseUrl(href);
     if (!this.isAllowedOrigin_(url)) {
@@ -806,6 +809,12 @@ export class UrlReplacements {
     }
     if (element[ORIGINAL_HREF_PROPERTY] == null) {
       element[ORIGINAL_HREF_PROPERTY] = href;
+    }
+    const additionalURLParameters = element.getAttribute('data-amp-addparams');
+    if (additionalURLParameters) {
+      href = addParamsToUrl(
+        href,
+        parseQueryString(additionalURLParameters));
     }
     return element.href = this.expandSync(
         href,
@@ -933,8 +942,8 @@ export class UrlReplacements {
       user().error(TAG, 'Illegal replacement of the protocol: ', url);
       return url;
     }
-    user().assert(newProtocol !== `javascript:`, 'Illegal javascript link ' +
-        'protocol: %s', url);
+    user().assert(isProtocolValid(replacement),
+        'The replacement url has invalid protocol: %s', replacement);
 
     return replacement;
   }
@@ -964,8 +973,9 @@ export function installUrlReplacementsServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(
       ampdoc,
       'url-replace',
-      /* opt_constructor */ undefined,
-      doc => new UrlReplacements(doc, new GlobalVariableSource(doc)));
+      function(doc) {
+        return new UrlReplacements(doc, new GlobalVariableSource(doc));
+      });
 }
 
 /**

@@ -51,4 +51,17 @@ export class MockA4AImpl extends AmpA4A {
   getFallback() {
     return null;
   }
+
+  toggleFallback() {
+    // Do nothing.
+  }
+
+  deferMutate(callback) {
+    callback();
+  }
+
+  /** @override */
+  getPreconnectUrls() {
+    return ['https://googleads.g.doubleclick.net'];
+  }
 }

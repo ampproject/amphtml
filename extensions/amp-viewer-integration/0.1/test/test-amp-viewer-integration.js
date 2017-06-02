@@ -15,8 +15,12 @@
  */
 
 import {AmpViewerIntegration} from '../amp-viewer-integration';
-import {Messaging, WindowPortEmulator, parseMessage} from '../messaging.js';
-import {ViewerForTesting} from './viewer-for-testing.js';
+import {
+  Messaging,
+  WindowPortEmulator,
+  parseMessage,
+} from '../messaging/messaging';
+import {ViewerForTesting} from './viewer-for-testing';
 import {getSourceUrl} from '../../../../src/url';
 
 
@@ -78,13 +82,14 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         let win;
         let messaging;
         let ampViewerIntegration;
+        let origin;
 
         beforeEach(() => {
           win = document.createElement('div');
           win.document = document.createElement('div');
           ampViewerIntegration = new AmpViewerIntegration(win);
           messaging = new Messaging();
-
+          origin = 'http://localhost:9876';
         });
 
         it('should start with the correct message', () => {
@@ -93,7 +98,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           });
 
           ampViewerIntegration.openChannelAndStart_(
-            viewer, env.ampdoc, messaging);
+            viewer, env.ampdoc, origin, messaging);
 
           const ampdocUrl = env.ampdoc.getUrl();
           const srcUrl = getSourceUrl(ampdocUrl);
@@ -111,7 +116,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           const initTouchHandlerStub =
             sandbox.stub(ampViewerIntegration, 'initTouchHandler_');
           ampViewerIntegration.openChannelAndStart_(
-            viewer, env.ampdoc, messaging);
+            viewer, env.ampdoc, origin, messaging);
 
           expect(initTouchHandlerStub).to.not.be.called;
         });
@@ -125,7 +130,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
             sandbox.stub(ampViewerIntegration, 'initTouchHandler_');
           ampViewerIntegration.unconfirmedViewerOrigin_ = '';
           ampViewerIntegration.openChannelAndStart_(
-            viewer, env.ampdoc, messaging).then(() => {
+            viewer, env.ampdoc, origin, messaging).then(() => {
               expect(initTouchHandlerStub).to.be.called;
             });
         });

@@ -43,6 +43,7 @@ describes.fakeWin('LaterpayVendor', {
       getAdapterConfig: () => { return laterpayConfig; },
       buildUrl: () => {},
       loginWithUrl: () => {},
+      getLoginUrl: () => {},
     };
     accessServiceMock = sandbox.mock(accessService);
 
@@ -83,10 +84,12 @@ describes.fakeWin('LaterpayVendor', {
         .withExactArgs('https://baseurl?param&article_title=test%20title', false)
         .returns(Promise.resolve('https://builturl'))
         .once();
+      accessServiceMock.expects('getLoginUrl')
+        .returns(Promise.resolve('https://builturl'))
+        .once();
       xhrMock.expects('fetchJson')
         .withExactArgs('https://builturl', {
           credentials: 'include',
-          requireAmpResponseSourceOrigin: true,
         })
         .returns(Promise.resolve({access: true}))
         .once();
@@ -96,31 +99,34 @@ describes.fakeWin('LaterpayVendor', {
       });
     });
 
-    it('authorization fails due to lack of server config', done => {
+    it('authorization fails due to lack of server config', () => {
       accessServiceMock.expects('buildUrl')
+        .returns(Promise.resolve('https://builturl'))
+        .once();
+      accessServiceMock.expects('getLoginUrl')
         .returns(Promise.resolve('https://builturl'))
         .once();
       xhrMock.expects('fetchJson')
         .withExactArgs('https://builturl', {
           credentials: 'include',
-          requireAmpResponseSourceOrigin: true,
         })
         .returns(Promise.resolve({status: 204}))
         .once();
       return vendor.authorize().catch(err => {
         expect(err.message).to.exist;
-        done();
       });
     });
 
-    it('authorization response from server fails', done => {
+    it('authorization response from server fails', () => {
       accessServiceMock.expects('buildUrl')
+        .returns(Promise.resolve('https://builturl'))
+        .once();
+      accessServiceMock.expects('getLoginUrl')
         .returns(Promise.resolve('https://builturl'))
         .once();
       xhrMock.expects('fetchJson')
         .withExactArgs('https://builturl', {
           credentials: 'include',
-          requireAmpResponseSourceOrigin: true,
         })
         .returns(Promise.reject({
           response: {status: 402},
@@ -130,7 +136,6 @@ describes.fakeWin('LaterpayVendor', {
       emptyContainerStub.returns(Promise.resolve());
       return vendor.authorize().then(err => {
         expect(err.access).to.be.false;
-        done();
       });
     });
 
@@ -147,6 +152,9 @@ describes.fakeWin('LaterpayVendor', {
         premiumcontent: {
           price: {},
         },
+        subscriptions: [
+          {price: {}},
+        ],
         timepasses: [
           {price: {}},
         ],
@@ -162,8 +170,8 @@ describes.fakeWin('LaterpayVendor', {
       expect(container.querySelector('ul')).to.not.be.null;
     });
 
-    it('renders 2 purchase options', () => {
-      expect(container.querySelector('ul').childNodes.length).to.equal(2);
+    it('renders 3 purchase options', () => {
+      expect(container.querySelector('ul').childNodes.length).to.equal(3);
     });
 
   });
@@ -179,6 +187,9 @@ describes.fakeWin('LaterpayVendor', {
         premiumcontent: {
           price: {},
         },
+        subscriptions: [
+          {price: {}},
+        ],
         timepasses: [
           {price: {}},
         ],
@@ -211,6 +222,9 @@ describes.fakeWin('LaterpayVendor', {
         premiumcontent: {
           price: {},
         },
+        subscriptions: [
+          {price: {}},
+        ],
         timepasses: [
           {price: {}},
         ],

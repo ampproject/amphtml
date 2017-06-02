@@ -23,6 +23,9 @@ import {
 } from '../url';
 import {isArray, isObject, isFormData} from '../types';
 import {utf8EncodeSync} from '../utils/bytes';
+import {ampdocServiceFor} from '../ampdoc';
+import {viewerForDoc} from '../services';
+import {getMode} from '../mode';
 
 
 /**
@@ -43,6 +46,26 @@ import {utf8EncodeSync} from '../utils/bytes';
  * }}
  */
 export let FetchInitDef;
+
+/**
+ * A custom error that encapsulates an XHR error message
+ * with the corresponding response data.
+ */
+export class FetchError {
+  /**
+   * @param {!Error} error
+   * @param {!FetchResponse} response
+   * @param {boolean=} opt_retriable
+   * @param {?JSONType=} opt_responseJson
+   */
+  constructor(error, response, opt_retriable, opt_responseJson) {
+    this.error = error;
+    this.response = response;
+    this.retriable = opt_retriable;
+    this.responseJson = opt_responseJson;
+  }
+}
+
 
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
@@ -74,6 +97,15 @@ export class Xhr {
   constructor(win) {
     /** @const {!Window} */
     this.win = win;
+
+    /** @private {?./ampdoc-impl.AmpDoc} */
+    this.ampdocSingle_ = null;
+    if (!getMode().test) {
+      const ampdocService = ampdocServiceFor(win);
+      this.ampdocSingle_ = ampdocService.isSingleDoc() ?
+          ampdocService.getAmpDoc() :
+          null;
+    }
   }
 
   /**
@@ -86,6 +118,14 @@ export class Xhr {
    * @private
    */
   fetch_(input, init) {
+    if (this.ampdocSingle_ &&
+        Math.random() < 0.01 &&
+        parseUrl(input).origin != this.win.location.origin &&
+        !viewerForDoc(this.ampdocSingle_).hasBeenVisible()) {
+      dev().error('XHR', 'attempted to fetch %s before viewer was visible',
+          input);
+    }
+
     dev().assert(typeof input == 'string', 'Only URL supported: %s', input);
     // In particular, Firefox does not tolerate `null` values for
     // `credentials`.
@@ -161,8 +201,8 @@ export class Xhr {
       }
       return response;
     }, reason => {
-      user().assert(false, 'Fetch failed %s: %s', input,
-          reason && reason.message);
+      throw user().createExpectedError('XHR', `Failed fetching` +
+          ` (${targetOrigin}/...):`, reason && reason.message);
     });
   }
 
@@ -196,7 +236,8 @@ export class Xhr {
   }
 
   /**
-   * Fetches text based on the fetch polyfill.
+   * Fetches a text response. Note this returns the response object, not the
+   * response's text. #fetchText merely sets up the request to accept text.
    *
    * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
    *
@@ -204,12 +245,10 @@ export class Xhr {
    *
    * @param {string} input
    * @param {?FetchInitDef=} opt_init
-   * @return {!Promise<string>}
+   * @return {!Promise<!FetchResponse>}
    */
   fetchText(input, opt_init) {
-    const init = setupInit(opt_init, 'text/plain');
-    return this.fetch(input, init)
-        .then(response => response.text());
+    return this.fetch(input, setupInit(opt_init, 'text/plain'));
   }
 
   /**
@@ -407,13 +446,11 @@ function isRetriable(status) {
  */
 export function assertSuccess(response) {
   return new Promise((resolve, reject) => {
-    if (response.status < 200 || response.status >= 300) {
-      /** @const {!Error} */
-      const err = user().createError(`HTTP error ${response.status}`);
-      err.response = response;
-      if (isRetriable(response.status)) {
-        err.retriable = true;
-      }
+    const status = response.status;
+    if (status < 200 || status >= 300) {
+      const retriable = isRetriable(status);
+      const err = new FetchError(
+          user().createError(`HTTP error ${status}`), response, retriable);
       const contentType = response.headers.get('Content-Type') || '';
       if (contentType.split(';')[0] == 'application/json') {
         response.json().then(json => {

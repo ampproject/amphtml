@@ -175,6 +175,12 @@ export class Resource {
     /** @private {boolean} */
     this.isInViewport_ = false;
 
+    /** @private {?Promise} */
+    this.renderOutsideViewportPromise_ = null;
+
+    /** @private {?Function} */
+    this.renderOutsideViewportResolve_ = null;
+
     /** @private {?Promise<undefined>} */
     this.layoutPromise_ = null;
 
@@ -530,6 +536,7 @@ export class Resource {
    */
   isDisplayed() {
     return (this.layoutBox_.height > 0 && this.layoutBox_.width > 0 &&
+        !!this.element.ownerDocument &&
         !!this.element.ownerDocument.defaultView);
   }
 
@@ -559,6 +566,35 @@ export class Resource {
   }
 
   /**
+   * @return {!Promise} resolves when underlying element is built and within the
+   *    range specified by implementation's renderOutsideViewport
+   */
+  whenWithinRenderOutsideViewport() {
+    if (!this.isLayoutPending()) {
+      return Promise.resolve();
+    }
+    if (this.renderOutsideViewportPromise_) {
+      return this.renderOutsideViewportPromise_;
+    }
+    return this.renderOutsideViewportPromise_ = new Promise(resolver => {
+      this.renderOutsideViewportResolve_ = resolver;
+    });
+  }
+
+  /**
+   * @private resolves render outside viewport promise if one was created via
+   *    whenWithinRenderOutsideViewport.
+   */
+  resolveRenderOutsideViewport_() {
+    if (!this.renderOutsideViewportResolve_) {
+      return;
+    }
+    this.renderOutsideViewportResolve_();
+    this.renderOutsideViewportPromise_ = null;
+    this.renderOutsideViewportResolve_ = null;
+  }
+
+  /**
    * Whether this is allowed to render when not in viewport.
    * @return {boolean}
    */
@@ -570,6 +606,7 @@ export class Resource {
     // outside of viewport. For now, blindly trust that owner knows what it's
     // doing.
     if (this.hasOwner()) {
+      this.resolveRenderOutsideViewport_();
       return true;
     }
 
@@ -577,6 +614,9 @@ export class Resource {
     // Boolean interface, element is either always allowed or never allowed to
     // render outside viewport.
     if (renders === true || renders === false) {
+      if (renders === true) {
+        this.resolveRenderOutsideViewport_();
+      }
       return renders;
     }
     // Numeric interface, element is allowed to render outside viewport when it
@@ -610,9 +650,14 @@ export class Resource {
       }
     } else {
       // Element is in viewport
+      this.resolveRenderOutsideViewport_();
       return true;
     }
-    return distance < viewportBox.height * multipler / scrollPenalty;
+    const result = distance < viewportBox.height * multipler / scrollPenalty;
+    if (result) {
+      this.resolveRenderOutsideViewport_();
+    }
+    return result;
   }
 
   /**
@@ -745,6 +790,7 @@ export class Resource {
     // TODO(dvoytenko, #9177): investigate/cleanup viewport signals for
     // elements in dead iframes.
     if (inViewport == this.isInViewport_ ||
+        !this.element.ownerDocument ||
         !this.element.ownerDocument.defaultView) {
       return;
     }

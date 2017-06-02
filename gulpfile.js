@@ -44,6 +44,7 @@ var hostname3p = argv.hostname3p || '3p.ampproject.net';
 
 // All declared extensions.
 var extensions = {};
+var extensionAliasFilePath = {};
 
 // Each extension and version must be listed individually here.
 // NOTE: No new extensions must pass the NO_TYPE_CHECK argument.
@@ -57,6 +58,7 @@ declareExtension('amp-ad-network-doubleclick-impl', 0.1, false);
 declareExtension('amp-ad-network-fake-impl', 0.1, false);
 declareExtension('amp-ad-network-triplelift-impl', 0.1, false);
 declareExtension('amp-ad-network-cloudflare-impl', 0.1, false);
+declareExtension('amp-ad-network-gmossp-impl', 0.1, false);
 declareExtension('amp-analytics', '0.1', false);
 declareExtension('amp-anim', '0.1', false);
 declareExtension('amp-animation', '0.1', false);
@@ -87,7 +89,9 @@ declareExtension('amp-gfycat', '0.1', false);
 declareExtension('amp-gist', '0.1', false);
 declareExtension('amp-hulu', '0.1', false);
 declareExtension('amp-iframe', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-ima-video', '0.1', false);
 declareExtension('amp-image-lightbox', '0.1', true);
+declareExtension('amp-imgur', '0.1', false);
 declareExtension('amp-instagram', '0.1', true);
 declareExtension('amp-install-serviceworker', '0.1', false);
 declareExtension('amp-izlesene', '0.1', false);
@@ -106,10 +110,8 @@ declareExtension('amp-reach-player', '0.1', false);
 declareExtension('amp-reddit', '0.1', false);
 declareExtension('amp-share-tracking', '0.1', false);
 declareExtension('amp-sidebar', '0.1', true);
-declareExtension('amp-sortable-table', '0.1', true);
 declareExtension('amp-soundcloud', '0.1', false);
 declareExtension('amp-springboard-player', '0.1', false);
-declareExtension('amp-sticky-ad', '0.1', true);
 declareExtension('amp-sticky-ad', '1.0', true);
 declareExtension('amp-selector', '0.1', true);
 
@@ -135,7 +137,8 @@ declareExtension('amp-viewer-integration', '0.1', {
 });
 declareExtension('amp-video', '0.1', false);
 declareExtension('amp-youtube', '0.1', false);
-
+declareExtensionVersionAlias(
+    'amp-sticky-ad', '0.1', /* lastestVersion */ '1.0', /* hasCss */ true);
 /**
  * @param {string} name
  * @param {string} version E.g. 0.1
@@ -161,6 +164,21 @@ function declareExtension(name, version, hasCssOrOptions, opt_noTypeCheck,
     noTypeCheck: !!opt_noTypeCheck,
     extraGlobs: opt_extraGlobs,
   }, options);
+}
+
+/**
+ * @param {string} name
+ * @param {string} version E.g. 0.1
+ * @param {string} lastestVersion
+ * @param {boolean} hasCss
+ */
+function declareExtensionVersionAlias(name, version, lastestVersion, hasCss) {
+  extensionAliasFilePath[name + '-' + version + '.js'] =
+      name + '-' + lastestVersion + '.js';
+  if (hasCss) {
+    extensionAliasFilePath[name + '-' + version + '.css'] =
+      name + '-' + lastestVersion + '.css';
+  }
 }
 
 /**
@@ -200,8 +218,8 @@ function polyfillsForTests() {
  */
 function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     opt_checkTypes) {
-  var results = [
-    compileCss().then(function() {
+  return compileCss().then(() => {
+    var promises = [
       compileJs('./3p/', 'integration.js',
           './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
         minifiedName: 'f.js',
@@ -212,117 +230,119 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
         externs: ['ads/ads.extern.js',],
         include3pDirectories: true,
         includePolyfills: true,
-      });
-    }),
-
-    compileJs('./3p/', 'ampcontext-lib.js',
-        './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
-      minifiedName: 'ampcontext-v0.js',
-      checkTypes: opt_checkTypes,
-      watch: watch,
-      minify: shouldMinify,
-      preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-      externs: ['ads/ads.extern.js',],
-      include3pDirectories: true,
-      includePolyfills: false,
-    }),
-
-    // For compilation with babel we start with the amp-babel entry point,
-    // but then rename to the amp.js which we've been using all along.
-    compileJs('./src/', 'amp-babel.js', './dist', {
-      toName: 'amp.js',
-      minifiedName: 'v0.js',
-      includePolyfills: true,
-      checkTypes: opt_checkTypes,
-      watch: watch,
-      preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-      minify: shouldMinify,
-      // If there is a sync JS error during initial load,
-      // at least try to unhide the body.
-      wrapper: 'try{(function(){<%= contents %>})()}catch(e){' +
-          'setTimeout(function(){' +
-          'var s=document.body.style;' +
-          's.opacity=1;' +
-          's.visibility="visible";' +
-          's.animation="none";' +
-          's.WebkitAnimation="none;"},1000);throw e};'
-    }),
-
-    compileJs('./extensions/amp-viewer-integration/0.1/examples/',
-      'amp-viewer-host.js', './dist/v0/examples', {
-        toName: 'amp-viewer-host.max.js',
-        minifiedName: 'amp-viewer-host.js',
-        incudePolyfills: true,
-        watch: watch,
-        extraGlobs: ['extensions/amp-viewer-integration/**/*.js'],
-        compilationLevel: 'WHITESPACE_ONLY',
-        preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-        minify: false,
       }),
-  ];
-  if (opt_checkTypes) {
-    // We don't rerun type check for the shadow entry point for now.
-    return Promise.all(results);
-  }
-
-  if (!watch || argv.with_shadow) {
-    results.push(
-      // Entry point for shadow runtime.
-      compileJs('./src/', 'amp-shadow-babel.js', './dist', {
-        toName: 'amp-shadow.js',
-        minifiedName: 'shadow-v0.js',
-        includePolyfills: true,
+      compileJs('./3p/', 'ampcontext-lib.js',
+          './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
+        minifiedName: 'ampcontext-v0.js',
         checkTypes: opt_checkTypes,
         watch: watch,
-        preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
         minify: shouldMinify,
-        wrapper: '<%= contents %>'
-      })
-    );
-  }
-
-  if (!watch || argv.with_inabox) {
-    results.push(
-      // Entry point for inabox runtime.
-      compileJs('./src/inabox/', 'amp-inabox.js', './dist', {
-        toName: 'amp-inabox.js',
-        minifiedName: 'amp4ads-v0.js',
-        includePolyfills: true,
-        extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
-        checkTypes: opt_checkTypes,
-        watch: watch,
         preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-        minify: shouldMinify,
-        wrapper: '<%= contents %>',
-      }),
-
-      // inabox-host
-      compileJs('./ads/inabox/', 'inabox-host.js', './dist', {
-        toName: 'amp-inabox-host.js',
-        minifiedName: 'amp4ads-host-v0.js',
+        externs: ['ads/ads.extern.js',],
+        include3pDirectories: true,
         includePolyfills: false,
+      }),
+      // For compilation with babel we start with the amp-babel entry point,
+      // but then rename to the amp.js which we've been using all along.
+      compileJs('./src/', 'amp-babel.js', './dist', {
+        toName: 'amp.js',
+        minifiedName: 'v0.js',
+        includePolyfills: true,
         checkTypes: opt_checkTypes,
         watch: watch,
         preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
         minify: shouldMinify,
-        wrapper: '<%= contents %>',
-      })
-    );
-  }
-  results.push(
-    thirdPartyBootstrap('3p/frame.max.html', 'frame.html', shouldMinify),
-    thirdPartyBootstrap('3p/nameframe.max.html', 'nameframe.html',shouldMinify)
-  );
+        // If there is a sync JS error during initial load,
+        // at least try to unhide the body.
+        wrapper: 'try{(function(){<%= contents %>})()}catch(e){' +
+            'setTimeout(function(){' +
+            'var s=document.body.style;' +
+            's.opacity=1;' +
+            's.visibility="visible";' +
+            's.animation="none";' +
+            's.WebkitAnimation="none;"},1000);throw e};'
+      }),
+      compileJs('./extensions/amp-viewer-integration/0.1/examples/',
+        'amp-viewer-host.js', './dist/v0/examples', {
+          toName: 'amp-viewer-host.max.js',
+          minifiedName: 'amp-viewer-host.js',
+          incudePolyfills: true,
+          watch: watch,
+          extraGlobs: ['extensions/amp-viewer-integration/**/*.js'],
+          compilationLevel: 'WHITESPACE_ONLY',
+          preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+          minify: false,
+        }),
+    ];
 
-  if (watch) {
-    $$.watch('3p/nameframe.max.html', function () {
-      thirdPartyBootstrap('3p/nameframe.max.html', 'nameframe.html', shouldMinify);
-    });
-    $$.watch('3p/frame.max.html', function() {
-      thirdPartyBootstrap('3p/frame.max.html', 'frame.html', shouldMinify);
-    });
-  }
-  return Promise.all(results);
+    // We don't rerun type check for the shadow entry point for now.
+    if (!opt_checkTypes) {
+      if (!watch || argv.with_shadow) {
+        promises.push(
+          // Entry point for shadow runtime.
+          compileJs('./src/', 'amp-shadow-babel.js', './dist', {
+            toName: 'amp-shadow.js',
+            minifiedName: 'shadow-v0.js',
+            includePolyfills: true,
+            checkTypes: opt_checkTypes,
+            watch: watch,
+            preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+            minify: shouldMinify,
+            wrapper: '<%= contents %>'
+          })
+        );
+      }
+
+      if (!watch || argv.with_inabox) {
+        promises.push(
+          // Entry point for inabox runtime.
+          compileJs('./src/inabox/', 'amp-inabox.js', './dist', {
+            toName: 'amp-inabox.js',
+            minifiedName: 'amp4ads-v0.js',
+            includePolyfills: true,
+            extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
+            checkTypes: opt_checkTypes,
+            watch: watch,
+            preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+            minify: shouldMinify,
+            wrapper: '<%= contents %>',
+          }),
+
+          // inabox-host
+          compileJs('./ads/inabox/', 'inabox-host.js', './dist', {
+            toName: 'amp-inabox-host.js',
+            minifiedName: 'amp4ads-host-v0.js',
+            includePolyfills: false,
+            checkTypes: opt_checkTypes,
+            watch: watch,
+            preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+            minify: shouldMinify,
+            wrapper: '<%= contents %>',
+          })
+        );
+      }
+
+      promises.push(
+        thirdPartyBootstrap(
+            '3p/frame.max.html', 'frame.html', shouldMinify),
+        thirdPartyBootstrap(
+            '3p/nameframe.max.html', 'nameframe.html',shouldMinify)
+      );
+
+      if (watch) {
+        $$.watch('3p/nameframe.max.html', function() {
+          thirdPartyBootstrap(
+              '3p/nameframe.max.html', 'nameframe.html', shouldMinify);
+        });
+        $$.watch('3p/frame.max.html', function() {
+          thirdPartyBootstrap(
+              '3p/frame.max.html', 'frame.html', shouldMinify);
+        });
+      }
+
+      return Promise.all(promises);
+    }
+  });
 }
 
 /**
@@ -364,6 +384,7 @@ function watch() {
 
   return Promise.all([
     buildAlp({watch: true}),
+    buildExaminer({watch: true}),
     buildExtensions({watch: true}),
     compile(true),
   ]);
@@ -395,15 +416,6 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
   options = options || {};
   options.extraGlobs = opt_extraGlobs;
   var path = 'extensions/' + name + '/' + version;
-  if (name == 'amp-sticky-ad' && version == '0.1') {
-    // Special case for amp-sticky-ad force upgrade from v0.1 to v1.0
-    // to provide better UX. (related issue #6169).
-    // To deprecate 0.1, replace the build path so that amp-sticky-ad-0.1.js
-    // is built from extensions/amp-sticky-ad/1.0/amp-sticky-ad.js
-    // NOTE: The upgrade happens here to provide backward compatibility
-    // to existing pages with amp-sticky-ad 0.1 script.
-    path = 'extensions/' + name + '/1.0';
-  }
   var jsPath = path + '/' + name + '.js';
   var jsTestPath = path + '/test/' + 'test-' + name + '.js';
   if (argv.files && options.bundleOnlyIfListedInFiles) {
@@ -508,6 +520,7 @@ function build() {
   return Promise.all([
     polyfillsForTests(),
     buildAlp(),
+    buildExaminer(),
     buildSw(),
     buildWebWorker(),
     buildExtensions({bundleOnlyIfListedInFiles: true}),
@@ -528,13 +541,25 @@ function dist() {
     // When adding a line here, consider whether you need to include polyfills
     // and whether you need to init logging (initLogConstructor).
     buildAlp({minify: true, watch: false, preventRemoveAndMakeDir: true}),
+    buildExaminer({minify: true, watch: false, preventRemoveAndMakeDir: true}),
     buildSw({minify: true, watch: false, preventRemoveAndMakeDir: true}),
     buildWebWorker({minify: true, watch: false, preventRemoveAndMakeDir: true}),
     buildExtensions({minify: true, preventRemoveAndMakeDir: true}),
     buildExperiments({minify: true, watch: false, preventRemoveAndMakeDir: true}),
     buildLoginDone({minify: true, watch: false, preventRemoveAndMakeDir: true}),
     copyCss(),
-  ]);
+  ]).then(() => {
+    copyAliasExtensions();
+  });
+}
+
+/**
+ * Copy built extension to alias extension
+ */
+function copyAliasExtensions() {
+  for (var key in extensionAliasFilePath) {
+    fs.copySync('dist/v0/' + extensionAliasFilePath[key], 'dist/v0/' + key);
+  }
 }
 
 /**
@@ -900,6 +925,25 @@ function buildAlp(options) {
 }
 
 /**
+ * Build Examiner JS.
+ *
+ * @param {!Object} options
+ */
+function buildExaminer(options) {
+  options = options || {};
+  $$.util.log('Bundling examiner.js');
+
+  return compileJs('./src/examiner/', 'examiner.js', './dist/', {
+    toName: 'examiner.max.js',
+    watch: options.watch,
+    minify: options.minify || argv.minify,
+    includePolyfills: true,
+    minifiedName: 'examiner.js',
+    preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
+  });
+}
+
+/**
  * Build service worker JS.
  *
  * @param {!Object} options
@@ -943,6 +987,7 @@ function buildWebWorker(options) {
   return compileJs('./src/web-worker/', 'web-worker.js', './dist/', {
     toName: 'ww.max.js',
     minifiedName: 'ww.js',
+    includePolyfills: true,
     watch: opts.watch,
     minify: opts.minify || argv.minify,
     preventRemoveAndMakeDir: opts.preventRemoveAndMakeDir,
