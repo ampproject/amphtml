@@ -15,6 +15,7 @@
  */
 
 import * as lolex from 'lolex';
+import {macroTask} from '../../testing/yield';
 
 describes.realWin('yield', {}, env => {
 
@@ -41,7 +42,7 @@ describes.realWin('yield', {}, env => {
 
     nestPromise(100);
     expect(value).to.be.false;
-    yield;
+    yield macroTask();
     expect(value).to.be.true;
   });
 
@@ -56,7 +57,7 @@ describes.realWin('yield', {}, env => {
       value = true;
     });
     expect(value).to.be.undefined;
-    yield;
+    yield macroTask();
     expect(value).to.be.true;
   });
 
@@ -72,7 +73,7 @@ describes.realWin('yield', {}, env => {
     expect(value).to.be.undefined;
     clock.tick(100);
     expect(value).to.be.false;
-    yield;
+    yield macroTask();
     expect(value).to.be.true;
   });
 
@@ -90,7 +91,7 @@ describes.realWin('yield', {}, env => {
     }, 100);
     clock.tick(100);
     expect(value).to.be.false;
-    yield;
+    yield macroTask();
     expect(value).to.be.true;
   });
 
@@ -100,5 +101,15 @@ describes.realWin('yield', {}, env => {
     resolver();
     const result = yield promise;
     expect(result).to.equal('yes');
+  });
+
+  it('should be able to expect throwable', function* () {
+    const promiseThatRejects = Promise.reject(new Error('OMG'));
+    try {
+      yield promiseThatRejects;
+      throw new Error('UNREACHABLE');
+    } catch (e) {
+      expect(e.message).to.contain('OMG');
+    }
   });
 });

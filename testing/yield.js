@@ -15,7 +15,9 @@
  */
 
 /**
- * Install "yield" support to Mocha tests.
+ * Install "YieldIt" support to Mocha tests.
+ * "YieldIt" allows you to wait for a promise to resolve before resuming your
+ * test, so you can write asynchronous test in a synchronous way.
  * Check test-yield.js for how-to.
  */
 export function installYieldIt(realIt) {
@@ -24,44 +26,47 @@ export function installYieldIt(realIt) {
   it.skip = realIt.skip;
 }
 
+/**
+ * A convenient method so you can flush the event queue by doing
+ * `yield macroTask()` in your test.
+ * @returns {Promise}
+ */
+export function macroTask() {
+  return new Promise(setTimeout);
+}
+
 function enableYield(fn, message, runnable) {
   if (!runnable || !runnable.constructor
       || runnable.constructor.name !== 'GeneratorFunction') {
     return fn(message, runnable);
   }
   return fn(message, done => {
-    const runner = (iterator, result) => {
+    const iterator = runnable();
+    function step(method, result) {
       let state;
       try {
-        state = iterator.next(result);
+        state = iterator[method](result);
       } catch (e) {
         // catch any assertion errors and pass to `done`
         // otherwise the messages are swallowed
         return done(e);
       }
       if (state.done) {
-        return done();
+        Promise.resolve(state.value).then(() => done(), _throw);
+        return;
       }
 
-      const _runner = runner.bind(null, iterator);
-      if (isPromise(state.value)) {
-        // With this, we can do: `const result = yield promise;`
-        state.value.then(_runner).catch(done);
-      } else {
-        // With this, we can do: `yield 50;`, which blocks the test for 50ms
-        // We should rarely need this in unit test, use with caution, as it
-        // usually brings test flakiness.
-        const timeout = (typeof state.value === 'number') ? state.value : 0;
-        setTimeout(_runner, timeout);
-      }
-    };
-    runner(runnable());
+      Promise.resolve(state.value).then(_next, _throw);
+    }
+
+    function _next(value) {
+      step('next', value);
+    }
+
+    function _throw(error) {
+      step('throw', error);
+    }
+
+    _next();
   });
-}
-
-function isPromise(subject) {
-  if (subject === undefined || subject === null) {
-    return false;
-  }
-  return typeof subject.then == 'function';
 }
