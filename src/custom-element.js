@@ -219,7 +219,11 @@ export function copyElementToChildWindow(parentWin, childWin, name) {
  */
 export function upgradeElementInChildWindow(parentWin, childWin, name) {
   const toClass = getExtendedElements(parentWin)[name];
-  dev().assert(toClass, '%s is not stubbed yet', name);
+  // Some extensions unofficially register unstubbed elements, e.g. amp-bind.
+  // Can be changed to assert() once official support (#9143) is implemented.
+  if (!toClass) {
+    dev().warn(TAG_, '%s is not stubbed yet', name);
+  }
   dev().assert(toClass != ElementStub, '%s is not upgraded yet', name);
   upgradeOrRegisterElement(childWin, name, toClass);
 }
@@ -593,6 +597,12 @@ function createBaseCustomElementClass(win) {
 
       /** @private {?./layout-delay-meter.LayoutDelayMeter} */
       this.layoutDelayMeter_ = null;
+
+      if (this[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER]) {
+        this[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER](this);
+        delete this[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER];
+        delete this[dom.UPGRADE_TO_CUSTOMELEMENT_PROMISE];
+      }
     }
 
     /**

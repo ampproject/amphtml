@@ -63,7 +63,11 @@ cached AMP page sends a request to your origin domain to get the prices, which
 is a mismatch between origins (cache -> origin domain). To allow for such
 cross-origin requests, you need to handle CORS, otherwise, the request fails.
 
-![CORS and Cache](./img/CORS_with_Cache.png)
+<amp-img alt="CORS and Cache" layout="responsive" src="https://www.ampproject.org/static/img/docs/CORS_with_Cache.png" width="809" height="391">
+  <noscript>
+    <img alt="CORS and Cache" src="https://www.ampproject.org/static/img/docs/CORS_with_Cache.png" />
+  </noscript>
+</amp-img>
 
 **Okay, what should I do?**
  
@@ -125,7 +129,7 @@ Endpoints should restrict requests to allow only the following origins:
 - **Google AMP Cache subdomain**: `https://<publisher's subdomain>.cdn.ampproject.org`
   (for example, `https://nytimes-com.cdn.ampproject.org`)
 - **Google AMP Cache (legacy)**: `https://cdn.ampproject.org`
-- **Cloudflare AMP Cache**: `https:<publisher's domain>.amp.cloudflare.com`
+- **Cloudflare AMP Cache**: `https://<publisher's domain>.amp.cloudflare.com`
 - The Publisher’s own origins
 
 For information on AMP Cache URL formats, see these resources:
@@ -157,7 +161,7 @@ origins.
  
 #### Verify state changing requests
 
-:exclamation: **Important**: Perform these validation checks *before* you
+**Important**: Perform these validation checks *before* you
 process the request. This validation helps to provide protection against CSRF
 attacks, and avoids processing untrusted sources requests.
  
@@ -167,11 +171,14 @@ following:
 
 **If the `Origin` header is set**:
  
-1.  If the origin is not one of the following values, stop and return an error
+1.  If the origin does not match one of the following values, stop and return an error
     response:
     - `*.ampproject.org`
     - `*.amp.cloudflare.com`
     - the publisher's origin (aka yours)
+    
+    where `*` represents a wildcard match, and not an actual asterisk ( * ).
+    
 2.  If the value of the `__amp_source_origin` query parameter is not the
     publisher's origin, stop and return an error response.
 3.  If the two checks above pass, process the request. 
