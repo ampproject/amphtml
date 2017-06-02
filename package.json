@@ -37,7 +37,7 @@
     "babelify": "6.4.0",
     "baconipsum": "0.1.2",
     "bluebird": "3.0.5",
-    "body-parser": "1.14.2",
+    "body-parser": "1.17.2",
     "browserify": "14.0.0",
     "chai": "3.5.0",
     "chai-as-promised": "5.2.0",
