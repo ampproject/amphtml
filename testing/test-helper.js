@@ -45,9 +45,15 @@ export function stubServiceForDoc(sandbox, ampdoc, serviceId, method) {
   return sandbox.stub(service, method);
 }
 
-export function whenCalled(stub, opt_callCount = 1) {
-  return poll(`Stub was called ${opt_callCount} times`,
-      () => stub.callCount === opt_callCount);
+/**
+ * Resolves a promise when a spy has been called a configurable number of times.
+ * @param {!Object} spy
+ * @param {number=} opt_callCount
+ * @return {!Promise}
+ */
+export function whenCalled(spy, opt_callCount = 1) {
+  return poll(`Spy was called ${opt_callCount} times`,
+      () => spy.callCount === opt_callCount);
 }
 
 /**
