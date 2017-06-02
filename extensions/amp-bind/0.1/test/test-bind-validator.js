@@ -164,6 +164,9 @@ describe('BindValidator', () => {
 
   describe('AMP extensions', () => {
     it('should support width/height for all AMP elements', () => {
+      expect(val.canBind('AMP-IMG', 'width')).to.be.true;
+      expect(val.canBind('AMP-IMG', 'height')).to.be.true;
+
       expect(val.canBind('AMP-FOO', 'width')).to.be.true;
       expect(val.canBind('AMP-FOO', 'height')).to.be.true;
     });
