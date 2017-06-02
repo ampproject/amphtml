@@ -43,7 +43,7 @@ import {stringHash32} from '../../../src/crypto';
 import {removeElement} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 import {dev} from '../../../src/log';
-import {extensionsFor, timerFor} from '../../../src/services';
+import {extensionsFor, timerFor, xhrFor} from '../../../src/services';
 import {isExperimentOn} from '../../../src/experiments';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {insertAnalyticsElement} from '../../../src/analytics';
@@ -299,9 +299,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * resolves to the targeting informtation from the request response.
    * @param {!Object} rtcConfig
    * @return {?Promise} The rtc targeting info to attach to the ad url.
+   * @private
    */
   sendRtcRequestPromise(rtcConfig) {
     let endpoint;
+    const init = {
+      headers: {
+        'Access-Control-Allow-Credentials': true
+      }
+    };
+
     try {
       endpoint = rtcConfig['doubleclick']['endpoint'];
     } catch (err) {
@@ -309,25 +316,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       return null;
     }
 
-    let rtcResponse;
+    const rtcResponse = xhrFor(this.win).fetchJson(endpoint);
 
-    const xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState === 4) {
-        rtcResponse(xhr.response);
-      }
-    };
-
-    xhr.open('GET', endpoint, true);
-    //xhr.withCredentials = true;
-    xhr.send();
-
-    const requestPromise = new Promise(resolve => {
-      rtcResponse = resolve;
-    });
-
-    const timeout = timerFor(window).timeoutPromise(10000);
-    return Promise.race([requestPromise, timeout]);
+    const timeout = timerFor(window).timeoutPromise(2000);
+    return Promise.race([rtcResponse, timeout]);
 
   }
 }
