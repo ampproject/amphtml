@@ -52,7 +52,7 @@ function enableYield(fn, message, runnable) {
         return done(e);
       }
       if (state.done) {
-        Promise.resolve(state.value).then(() => done(), _throw);
+        Promise.resolve(state.value).then(() => done(), done);
         return;
       }
 
