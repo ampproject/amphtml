@@ -658,13 +658,6 @@ export class MeasureScanner extends Scanner {
     throw user().createError('keyframes not found', specKeyframes);
   }
 
-  /**
-   *
-   */
-  polyfillPartialKeyframes(keyframes) {
-
-  }
-
   /** @override */
   onUnknownAnimation() {
     throw user().createError('unknown animation type:' +
