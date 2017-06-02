@@ -598,6 +598,28 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
   it('should discover style keyframes', () => {
     const name = 'keyframes1';
     const css = 'from{opacity: 0} to{opacity: 1}';
+    return writeAndWaitForStyleKeyframes(name, css).then(() => {
+      const keyframes = scan({target: target1, keyframes: name})[0].keyframes;
+      expect(keyframes).to.jsonEqual([
+        {offset: 0, opacity: '0'},
+        {offset: 1, opacity: '1'},
+      ]);
+    });
+  });
+
+  it('should polyfill partial style keyframes', () => {
+    const name = 'keyframes2';
+    const css = 'to{opacity: 0}';
+    return writeAndWaitForStyleKeyframes(name, css).then(() => {
+      const keyframes = scan({target: target1, keyframes: name})[0].keyframes;
+      expect(keyframes).to.jsonEqual([
+        {opacity: '1'},
+        {offset: 1, opacity: '0'},
+      ]);
+    });
+  });
+
+  function writeAndWaitForStyleKeyframes(name, css) {
     const style = doc.createElement('style');
     style.setAttribute('amp-custom', '');
     style.textContent =
@@ -613,14 +635,8 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
         }
       }
       return false;
-    }).then(() => {
-      const keyframes = scan({target: target1, keyframes: name})[0].keyframes;
-      expect(keyframes).to.jsonEqual([
-        {offset: 0, opacity: '0'},
-        {offset: 1, opacity: '1'},
-      ]);
     });
-  });
+  }
 
   it('should check media in top animation', () => {
     const requests = scan({
