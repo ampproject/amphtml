@@ -295,8 +295,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
       });
     });
 
-    // TODO(choumx): Fix this final flaky test.
-    it.skip('should change width and height when their bindings change', () => {
+    it('should change width and height when their bindings change', () => {
       const button = fixture.doc.getElementById('changeImgDimensButton');
       const img = fixture.doc.getElementById('image');
       expect(img.getAttribute('height')).to.equal('200');
