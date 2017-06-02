@@ -11,11 +11,9 @@
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
     <style amp-custom>
-      .dashedborder {
-        border: 2px dashed;
-      }
       .artificialfold {
-        height: 900px;
+        height: 1000px;
+        width: 300px
         background: #000;
       }
     </style>
@@ -23,6 +21,6 @@
   <body>
     <h1>AMP Static Image DFP Reservation.</h1>
     <p>Tests a static image ad in an AMP page.</p>
-    <div style="height:1000px; width: 3000px"></div>
+    <div class="artificialfold"></div>
     <amp-ad data-slot="/701/wpni.amp.opinions/blog/plum-line" height=250 layout=fixed type=doubleclick width=300></amp-ad>
 </body></html>
