@@ -785,9 +785,10 @@ export class UrlReplacements {
       'CLIENT_ID': true,
       'QUERY_PARAM': true,
     };
+    const additionalURLParameters = element.getAttribute('data-amp-addparams');
     const whitelist = this.getWhitelistForElement_(
         element, supportedReplacements);
-    if (!whitelist) {
+    if (!whitelist && !additionalURLParameters) {
       return;
     }
     // ORIGINAL_HREF_PROPERTY has the value of the href "pre-replacement".
@@ -810,7 +811,6 @@ export class UrlReplacements {
     if (element[ORIGINAL_HREF_PROPERTY] == null) {
       element[ORIGINAL_HREF_PROPERTY] = href;
     }
-    const additionalURLParameters = element.getAttribute('data-amp-addparams');
     if (additionalURLParameters) {
       href = addParamsToUrl(
         href,
