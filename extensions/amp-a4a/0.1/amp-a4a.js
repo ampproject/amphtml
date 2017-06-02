@@ -768,12 +768,13 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * Refreshes ad slot by fetching new creative and rendering it.
+   * Refreshes ad slot by fetching a new creative and rendering it. This leaves
+   * the current creative displayed until the next one is ready.
    *
-   * @param {function} refreshCallback When called, this function will restart
+   * @param {function()} restartRefresh When called, this function will restart
    *   the refresh cycle.
    */
-  refresh(refreshCallback) {
+  refresh(restartRefresh) {
     this.isRefreshing_ = true;
     this.tearDownSlot();
     this.initiateAdRequest();
@@ -781,7 +782,7 @@ export class AmpA4A extends AMP.BaseElement {
       if (!this.isRefreshing_) {
         // If this refresh cycle was canceled, such as in a no-content
         // response case, keep showing the old creative.
-        refreshCallback();
+        restartRefresh();
         return;
       }
       this.togglePlaceholder(true);
@@ -793,7 +794,7 @@ export class AmpA4A extends AMP.BaseElement {
         this.attemptToRenderCreative().then(() => {
           this.isRefreshing_ = false;
           this.togglePlaceholder(false);
-          refreshCallback();
+          restartRefresh();
         });
       }, 250);
     });
@@ -1120,7 +1121,7 @@ export class AmpA4A extends AMP.BaseElement {
    *   this.isRefreshing_ is true.
    * @protected
    */
-  destroyFrame(force = false) {
+  destroyFrame(force) {
     if (!force && this.isRefreshing_) {
       return;
     }
