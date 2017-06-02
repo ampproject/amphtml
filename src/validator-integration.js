@@ -26,22 +26,20 @@ import {loadPromise} from './event-helper';
  * @param {!Window} win Destination window for the new element.
  */
 export function maybeValidate(win) {
-  if (!getMode().development) {
-    return;
-  }
   const filename = win.location.href;
   if (startsWith(filename, 'about:')) {  // Should only happen in tests.
     return;
   }
 
-  Promise.all([
-    loadScript(win.document, `${urls.cdn}/v0/validator.js`),
-    loadScript(win.document, `${urls.cdn}/examiner.js`),
-  ]).then(() => {
-    /* global amp: false */
-    amp.validator.validateUrlAndLog(
-        filename, win.document, getMode().filter);
-  });
+  if (getMode().development) {
+    loadScript(win.document, `${urls.cdn}/v0/validator.js`).then(() => {
+      /* global amp: false */
+      amp.validator.validateUrlAndLog(
+          filename, win.document, getMode().filter);
+    });
+  } else if (getMode().examiner) {
+    loadScript(win.document, `${urls.cdn}/examiner.js`);
+  }
 }
 
 function loadScript(doc, url) {
