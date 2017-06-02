@@ -98,8 +98,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getAdUrl() {
     // TODO: Check for required and allowed parameters. Probably use
     // validateData, from 3p/3p/js, after noving it someplace common.
-    const rtcConfig = tryParseJson(document.getElementById('amp-rtc').innerHTML);
-    const rtcRequestPromise = rtcConfig ? this.sendRtcRequestPromise(rtcConfig) : null;
+    const rtcConfig = tryParseJson(
+        document.getElementById('amp-rtc').innerHTML);
+    const rtcRequestPromise = rtcConfig ?
+        this.sendRtcRequestPromise(rtcConfig) : null;
     let queryParams;
 
     const startTime = Date.now();
@@ -163,25 +165,25 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }).then(targeting => {
       let index;
       if (targeting) {
-        for (let i=0; i<queryParams.length; i++) {
+        for (let i = 0; i < queryParams.length; i++) {
           if (queryParams[i].name == 'scp') {
             index = i;
             break;
           }
         }
         if (jsonParameters['targeting']) {
-          queryParams[index].value =  serializeTargeting(
+          queryParams[index].value = serializeTargeting(
               Object.assign(JSON.parse(
                   jsonParameters['targeting']),JSON.parse(targeting)),
               jsonParameters['categoryExclusions'] || null);
         } else {
-          queryParams[index].value =  serializeTargeting(
+          queryParams[index].value = serializeTargeting(
               JSON.parse(targeting),
               jsonParameters['categoryExclusions'] || null);
         }
       }
-      const url = buildUrl(DOUBLECLICK_BASE_URL, queryParams, MAX_URL_LENGTH - 10,
-                           {'trunc': '1'});
+      const url = buildUrl(DOUBLECLICK_BASE_URL, queryParams,
+                           MAX_URL_LENGTH - 10, {'trunc': '1'});
       return url + '&dtd=' + elapsedTimeWithCeiling(Date.now(), startTime);
     });
   }
@@ -293,7 +295,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   sendRtcRequestPromise(rtcConfig) {
 
-    console.log("Attempting to send rtc");
+    console.log('Attempting to send rtc');
     let endpoint;
     try {
       endpoint = rtcConfig['doubleclick']['endpoint'];
@@ -302,25 +304,25 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       return;
     }
 
-    let rtcresponse;
+    let rtcResponse;
 
     const xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
       if (xhr.readyState === 4) {
         rtcResponse(xhr.response);
       }
-    }
+    };
 
     xhr.open('GET', endpoint, true);
     //xhr.withCredentials = true;
     xhr.send();
 
-    const requestPromise = new Promise((resolve, reject) => {
+    const requestPromise = new Promise(resolve => {
       rtcResponse = resolve;
     });
 
     const timeout = timerFor(window).timeoutPromise(10000);
-    return Promise.race([requestPromise, timeout])
+    return Promise.race([requestPromise, timeout]);
 
   }
 }
