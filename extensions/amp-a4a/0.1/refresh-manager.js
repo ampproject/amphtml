@@ -56,8 +56,16 @@ export class RefreshManager {
     /** @const @private {string} */
     this.adType_ = this.element_.getAttribute('type');
 
+    /**
+     * This must be defined before getConfiguration_ is called, since that
+     * function can override this value.
+     *
+     * @private {boolean}
+     */
+    this.enabled_ = false;
+
     /** @const @private {!RefreshConfig} */
-    this.config_ = refreshConfigs[this.adType_];
+    this.config_ = this.getConfiguration_();
 
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = timerFor(this.win_);
@@ -72,7 +80,7 @@ export class RefreshManager {
    * element.
    */
   initiateRefreshCycle() {
-    if (!this.isRefreshEnabled_()) {
+    if (!this.enabled_) {
       // This instance of AmpA4A is not eligible for refresh, or does not have
       // it enabled.
       return;
@@ -90,21 +98,33 @@ export class RefreshManager {
   }
 
   /**
-   * If this ad slot's network has opted in for refresh, and refresh has been
-   * enabled on this slot, this method will return the refresh configuration
-   * for this slot; otherwise, it will return null.
+   * Retrieves the refresh configuration for this slot. The base of the
+   * configuration is set by the network, but the refresh interval must be set
+   * at the page or slot level in order for the slot to be refresh-enabled.
    *
+   * @return {!RefreshConfig}
    */
-  isRefreshEnabled_() {
-    if (!this.config_) {
-      // Network has not opted in for refresh eligibility; we can ignore any
-      // and all publisher configurations related to refresh.
-      return false;
-    }
+  getConfiguration_() {
+    const networkConfig = refreshConfigs[this.adType_];
     let metaTag = [];
-    return this.element_.getAttribute('data-enable-refresh') == 'true' ||
+    const refreshInterval = this.element_.getAttribute('data-enable-refresh') ||
         ((metaTag = this.win_.document.getElementsByName(
             `amp-ad-enable-refresh:${this.adType_}`)) && metaTag[0] &&
-         metaTag[0].getAttribute('content') == 'true');
+         metaTag[0].getAttribute('content'));
+    if (refreshInterval != 'false' && !isNaN(refreshInterval)) {
+      if (refreshInterval) {
+        // If we're here, then data-enable-refresh is set, and it's a number.
+        // This check is needed because isNaN(undefined) and isNaN('') are both
+        // false, so it's possible that refreshInterval == undefined or
+        // refreshInterval == ''.
+        networkConfig['refreshInterval'] =
+            // TODO(levitzky) Using 5 only for testing.
+            Math.max(5, Number(refreshInterval));
+        // TODO(levitzky) Should we print some error to the console if the
+        // publisher's refresh interval is less than 30?
+      }
+      this.enabled_ = true;
+    }
+    return networkConfig;
   }
 }
