@@ -347,7 +347,7 @@ export class Transport {
     messageObject[messageType] = message;
     frameData.messageQueue.push(messageObject);
     if (frameData.isReady && frameData.sendTimer == null) {
-      frameData.sendTimer = timerFor(window).delay(() => {
+      frameData.sendTimer = Transport.timer_.delay(() => {
         Transport.sendQueuedMessagesToCrossDomainIframe_(frameData);
         frameData.sendTimer = null;
       }, MESSAGE_THROTTLE_TIME_);
@@ -369,8 +369,15 @@ export class Transport {
     frameData.messageQueue = [];
   }
 }
+
+/** @private @const {!Map} */
 Transport.usedIds_ = map();
+
+/** @private @const {!Map} */
 Transport.crossDomainIframes_ = map();
+
+/** @private @const {!Timer} */
+Transport.timer_ = timerFor(AMP.win);
 
 /**
  * Sends a ping request using an iframe, that is removed 5 seconds after
@@ -388,7 +395,7 @@ export function sendRequestUsingIframe(win, request) {
   const iframe = win.document.createElement('iframe');
   setStyle(iframe, 'display', 'none');
   iframe.onload = iframe.onerror = () => {
-    timerFor(win).delay(() => {
+    Transport.timer_(win).delay(() => {
       removeElement(iframe);
     }, 5000);
   };
