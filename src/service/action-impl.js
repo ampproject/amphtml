@@ -106,7 +106,7 @@ let ActionInfoDef;
 /**
  * @typedef {Event|DeferredEvent}
  */
-let ActionEventDef;
+export let ActionEventDef;
 
 
 /**
