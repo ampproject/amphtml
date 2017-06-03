@@ -305,30 +305,6 @@ describe('XHR', function() {
               });
         });
 
-        it('should parse json content when error', () => {
-          mockXhr.status = 500;
-          mockXhr.responseText = '{"a": "hello"}';
-          mockXhr.headers['Content-Type'] = 'application/json';
-          mockXhr.getResponseHeader = () => 'application/json';
-          return assertSuccess(createResponseInstance('{"a": 2}', mockXhr))
-              .catch(error => {
-                expect(error.responseJson).to.be.defined;
-                expect(error.responseJson.a).to.equal(2);
-              });
-        });
-
-        it('should parse json content with charset when error', () => {
-          mockXhr.status = 500;
-          mockXhr.responseText = '{"a": "hello"}';
-          mockXhr.headers['Content-Type'] = 'application/json; charset=utf-8';
-          mockXhr.getResponseHeader = () => 'application/json; charset=utf-8';
-          return assertSuccess(createResponseInstance('{"a": 2}', mockXhr))
-              .catch(error => {
-                expect(error.responseJson).to.be.defined;
-                expect(error.responseJson.a).to.equal(2);
-              });
-        });
-
         it('should not resolve after rejecting promise', () => {
           mockXhr.status = 500;
           mockXhr.responseText = '{"a": "hello"}';
@@ -364,7 +340,7 @@ describe('XHR', function() {
         return xhr.fetchJson(url).then(() => {
           throw new Error('UNREACHABLE');
         }, error => {
-          expect(error.error.message).to.contain('HTTP error 404');
+          expect(error.message).to.contain('HTTP error 404');
         });
       });
 
@@ -373,7 +349,7 @@ describe('XHR', function() {
         return xhr.fetchJson(url).then(() => {
           throw new Error('UNREACHABLE');
         }, error => {
-          expect(error.error.message).to.contain('HTTP error 500');
+          expect(error.message).to.contain('HTTP error 500');
         });
       });
 

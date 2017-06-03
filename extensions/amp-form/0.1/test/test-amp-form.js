@@ -1493,7 +1493,12 @@ describes.repeated('', {
         headers: headersMock,
       });
       const error = new Error('Error');
-      error.response = {headers: headersMock};
+      error.response = {
+        headers: headersMock,
+        json() {
+          return Promise.resolve();
+        },
+      };
       const fetchRejectPromise = Promise.reject(error);
       fetchRejectPromise.catch(() => {
         // Just avoiding a global uncaught promise exception.

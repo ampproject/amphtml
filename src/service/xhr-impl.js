@@ -47,26 +47,6 @@ import {getMode} from '../mode';
  */
 export let FetchInitDef;
 
-/**
- * A custom error that encapsulates an XHR error message
- * with the corresponding response data.
- */
-export class FetchError {
-  /**
-   * @param {!Error} error
-   * @param {!FetchResponse} response
-   * @param {boolean=} opt_retriable
-   * @param {?JSONType=} opt_responseJson
-   */
-  constructor(error, response, opt_retriable, opt_responseJson) {
-    this.error = error;
-    this.response = response;
-    this.retriable = opt_retriable;
-    this.responseJson = opt_responseJson;
-  }
-}
-
-
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
 
