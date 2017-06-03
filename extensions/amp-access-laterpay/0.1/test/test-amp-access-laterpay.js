@@ -152,6 +152,9 @@ describes.fakeWin('LaterpayVendor', {
         premiumcontent: {
           price: {},
         },
+        subscriptions: [
+          {price: {}},
+        ],
         timepasses: [
           {price: {}},
         ],
@@ -167,8 +170,8 @@ describes.fakeWin('LaterpayVendor', {
       expect(container.querySelector('ul')).to.not.be.null;
     });
 
-    it('renders 2 purchase options', () => {
-      expect(container.querySelector('ul').childNodes.length).to.equal(2);
+    it('renders 3 purchase options', () => {
+      expect(container.querySelector('ul').childNodes.length).to.equal(3);
     });
 
   });
@@ -184,6 +187,9 @@ describes.fakeWin('LaterpayVendor', {
         premiumcontent: {
           price: {},
         },
+        subscriptions: [
+          {price: {}},
+        ],
         timepasses: [
           {price: {}},
         ],
@@ -216,6 +222,9 @@ describes.fakeWin('LaterpayVendor', {
         premiumcontent: {
           price: {},
         },
+        subscriptions: [
+          {price: {}},
+        ],
         timepasses: [
           {price: {}},
         ],

@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-import {AmpState} from './amp-state';
-import {Bind} from './bind-impl';
+import {ClickDelayFilter} from './click-delay';
+import {FilterType} from './filter';
 
-/** @const {string} */
-const TAG = 'amp-bind';
-
-AMP.extension(TAG, '0.1', function(AMP) {
-  AMP.registerServiceForDoc('bind', Bind);
-  AMP.registerElement('amp-state', AmpState);
-});
+export function createFilter(name, spec) {
+  switch (spec.type) {
+    case FilterType.CLICK_DELAY:
+      return new ClickDelayFilter(name, spec);
+    case FilterType.CLICK_LOCATION:
+      // TODO(clawr): Implement this.
+    default:
+      return undefined;
+  }
+}

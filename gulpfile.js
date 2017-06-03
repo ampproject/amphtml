@@ -59,6 +59,7 @@ declareExtension('amp-ad-network-fake-impl', 0.1, false);
 declareExtension('amp-ad-network-triplelift-impl', 0.1, false);
 declareExtension('amp-ad-network-cloudflare-impl', 0.1, false);
 declareExtension('amp-ad-network-gmossp-impl', 0.1, false);
+declareExtension('amp-ad-exit', 0.1, false);
 declareExtension('amp-analytics', '0.1', false);
 declareExtension('amp-anim', '0.1', false);
 declareExtension('amp-animation', '0.1', false);
@@ -218,8 +219,8 @@ function polyfillsForTests() {
  */
 function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     opt_checkTypes) {
-  var results = [
-    compileCss().then(function() {
+  return compileCss().then(() => {
+    var promises = [
       compileJs('./3p/', 'integration.js',
           './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
         minifiedName: 'f.js',
@@ -230,117 +231,119 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
         externs: ['ads/ads.extern.js',],
         include3pDirectories: true,
         includePolyfills: true,
-      });
-    }),
-
-    compileJs('./3p/', 'ampcontext-lib.js',
-        './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
-      minifiedName: 'ampcontext-v0.js',
-      checkTypes: opt_checkTypes,
-      watch: watch,
-      minify: shouldMinify,
-      preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-      externs: ['ads/ads.extern.js',],
-      include3pDirectories: true,
-      includePolyfills: false,
-    }),
-
-    // For compilation with babel we start with the amp-babel entry point,
-    // but then rename to the amp.js which we've been using all along.
-    compileJs('./src/', 'amp-babel.js', './dist', {
-      toName: 'amp.js',
-      minifiedName: 'v0.js',
-      includePolyfills: true,
-      checkTypes: opt_checkTypes,
-      watch: watch,
-      preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-      minify: shouldMinify,
-      // If there is a sync JS error during initial load,
-      // at least try to unhide the body.
-      wrapper: 'try{(function(){<%= contents %>})()}catch(e){' +
-          'setTimeout(function(){' +
-          'var s=document.body.style;' +
-          's.opacity=1;' +
-          's.visibility="visible";' +
-          's.animation="none";' +
-          's.WebkitAnimation="none;"},1000);throw e};'
-    }),
-
-    compileJs('./extensions/amp-viewer-integration/0.1/examples/',
-      'amp-viewer-host.js', './dist/v0/examples', {
-        toName: 'amp-viewer-host.max.js',
-        minifiedName: 'amp-viewer-host.js',
-        incudePolyfills: true,
-        watch: watch,
-        extraGlobs: ['extensions/amp-viewer-integration/**/*.js'],
-        compilationLevel: 'WHITESPACE_ONLY',
-        preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-        minify: false,
       }),
-  ];
-  if (opt_checkTypes) {
-    // We don't rerun type check for the shadow entry point for now.
-    return Promise.all(results);
-  }
-
-  if (!watch || argv.with_shadow) {
-    results.push(
-      // Entry point for shadow runtime.
-      compileJs('./src/', 'amp-shadow-babel.js', './dist', {
-        toName: 'amp-shadow.js',
-        minifiedName: 'shadow-v0.js',
-        includePolyfills: true,
+      compileJs('./3p/', 'ampcontext-lib.js',
+          './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
+        minifiedName: 'ampcontext-v0.js',
         checkTypes: opt_checkTypes,
         watch: watch,
-        preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
         minify: shouldMinify,
-        wrapper: '<%= contents %>'
-      })
-    );
-  }
-
-  if (!watch || argv.with_inabox) {
-    results.push(
-      // Entry point for inabox runtime.
-      compileJs('./src/inabox/', 'amp-inabox.js', './dist', {
-        toName: 'amp-inabox.js',
-        minifiedName: 'amp4ads-v0.js',
-        includePolyfills: true,
-        extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
-        checkTypes: opt_checkTypes,
-        watch: watch,
         preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-        minify: shouldMinify,
-        wrapper: '<%= contents %>',
-      }),
-
-      // inabox-host
-      compileJs('./ads/inabox/', 'inabox-host.js', './dist', {
-        toName: 'amp-inabox-host.js',
-        minifiedName: 'amp4ads-host-v0.js',
+        externs: ['ads/ads.extern.js',],
+        include3pDirectories: true,
         includePolyfills: false,
+      }),
+      // For compilation with babel we start with the amp-babel entry point,
+      // but then rename to the amp.js which we've been using all along.
+      compileJs('./src/', 'amp-babel.js', './dist', {
+        toName: 'amp.js',
+        minifiedName: 'v0.js',
+        includePolyfills: true,
         checkTypes: opt_checkTypes,
         watch: watch,
         preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
         minify: shouldMinify,
-        wrapper: '<%= contents %>',
-      })
-    );
-  }
-  results.push(
-    thirdPartyBootstrap('3p/frame.max.html', 'frame.html', shouldMinify),
-    thirdPartyBootstrap('3p/nameframe.max.html', 'nameframe.html',shouldMinify)
-  );
+        // If there is a sync JS error during initial load,
+        // at least try to unhide the body.
+        wrapper: 'try{(function(){<%= contents %>})()}catch(e){' +
+            'setTimeout(function(){' +
+            'var s=document.body.style;' +
+            's.opacity=1;' +
+            's.visibility="visible";' +
+            's.animation="none";' +
+            's.WebkitAnimation="none;"},1000);throw e};'
+      }),
+      compileJs('./extensions/amp-viewer-integration/0.1/examples/',
+        'amp-viewer-host.js', './dist/v0/examples', {
+          toName: 'amp-viewer-host.max.js',
+          minifiedName: 'amp-viewer-host.js',
+          incudePolyfills: true,
+          watch: watch,
+          extraGlobs: ['extensions/amp-viewer-integration/**/*.js'],
+          compilationLevel: 'WHITESPACE_ONLY',
+          preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+          minify: false,
+        }),
+    ];
 
-  if (watch) {
-    $$.watch('3p/nameframe.max.html', function () {
-      thirdPartyBootstrap('3p/nameframe.max.html', 'nameframe.html', shouldMinify);
-    });
-    $$.watch('3p/frame.max.html', function() {
-      thirdPartyBootstrap('3p/frame.max.html', 'frame.html', shouldMinify);
-    });
-  }
-  return Promise.all(results);
+    // We don't rerun type check for the shadow entry point for now.
+    if (!opt_checkTypes) {
+      if (!watch || argv.with_shadow) {
+        promises.push(
+          // Entry point for shadow runtime.
+          compileJs('./src/', 'amp-shadow-babel.js', './dist', {
+            toName: 'amp-shadow.js',
+            minifiedName: 'shadow-v0.js',
+            includePolyfills: true,
+            checkTypes: opt_checkTypes,
+            watch: watch,
+            preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+            minify: shouldMinify,
+            wrapper: '<%= contents %>'
+          })
+        );
+      }
+
+      if (!watch || argv.with_inabox) {
+        promises.push(
+          // Entry point for inabox runtime.
+          compileJs('./src/inabox/', 'amp-inabox.js', './dist', {
+            toName: 'amp-inabox.js',
+            minifiedName: 'amp4ads-v0.js',
+            includePolyfills: true,
+            extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
+            checkTypes: opt_checkTypes,
+            watch: watch,
+            preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+            minify: shouldMinify,
+            wrapper: '<%= contents %>',
+          }),
+
+          // inabox-host
+          compileJs('./ads/inabox/', 'inabox-host.js', './dist', {
+            toName: 'amp-inabox-host.js',
+            minifiedName: 'amp4ads-host-v0.js',
+            includePolyfills: false,
+            checkTypes: opt_checkTypes,
+            watch: watch,
+            preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+            minify: shouldMinify,
+            wrapper: '<%= contents %>',
+          })
+        );
+      }
+
+      promises.push(
+        thirdPartyBootstrap(
+            '3p/frame.max.html', 'frame.html', shouldMinify),
+        thirdPartyBootstrap(
+            '3p/nameframe.max.html', 'nameframe.html',shouldMinify)
+      );
+
+      if (watch) {
+        $$.watch('3p/nameframe.max.html', function() {
+          thirdPartyBootstrap(
+              '3p/nameframe.max.html', 'nameframe.html', shouldMinify);
+        });
+        $$.watch('3p/frame.max.html', function() {
+          thirdPartyBootstrap(
+              '3p/frame.max.html', 'frame.html', shouldMinify);
+        });
+      }
+
+      return Promise.all(promises);
+    }
+  });
 }
 
 /**
