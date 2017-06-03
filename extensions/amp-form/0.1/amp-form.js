@@ -498,7 +498,7 @@ export class AmpForm {
     } else {
       promise = Promise.resolve(null);
     }
-    promise.then(responseJson => {
+    return promise.then(responseJson => {
       this.triggerAction_(/* success */ false, responseJson);
       this.analyticsEvent_('amp-form-submit-error');
       this.cleanupRenderedTemplate_();

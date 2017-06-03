@@ -36,13 +36,12 @@ describe('impression', () => {
     sandbox.stub(viewer, 'getParam');
     xhr = xhrFor(window);
     expect(xhr.fetchJson).to.be.defined;
-    sandbox.stub(xhr, 'fetchJson', () => {
-      return Promise.resolve({
-        json() {
-          return Promise.resolve(null);
-        },
-      });
-    });
+    const stub = sandbox.stub(xhr, 'fetchJson');
+    stub.returns(Promise.resolve({
+      json() {
+        return Promise.resolve(null);
+      },
+    }));
     sandbox.stub(viewer, 'whenFirstVisible').returns(Promise.resolve());
     resetTrackImpressionPromiseForTesting();
   });

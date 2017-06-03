@@ -439,8 +439,13 @@ describes.repeated('', {
 
       return formPromise.then(ampForm => {
         sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.reject({
-          responseJson: {
-            verifyErrors: [{name: 'name', message: 'This name is just wrong.'}],
+          response: {
+            status: 400,
+            json() {
+              return Promise.resolve({
+                verifyErrors: [{name: 'name', message: 'This name is just wrong.'}],
+              });
+            },
           },
         }));
 
@@ -463,23 +468,29 @@ describes.repeated('', {
 
       return formPromise.then(ampForm => {
         const xhrStub = sandbox.stub(ampForm.xhr_, 'fetch');
-        xhrStub.onCall(0).returns(new Promise((unusedResolve, reject) => {
+        xhrStub.onCall(0).returns(Promise.reject({
+          response: {
+            status: 400,
+            json() {
+              return Promise.resolve({
+                verifyErrors: [{name: 'name', message: 'First request error'}],
+              });
+            },
+          },
+        }));
+        xhrStub.onCall(1).returns(new Promise((res, reject) => {
           setTimeout(() => {
             reject({
-              responseJson: {
-                verifyErrors: [{name: 'name', message: 'First request error'}],
+              response: {
+                status: 400,
+                json() {
+                  return Promise.resolve({
+                    verifyErrors: [{name: 'name', message: 'Second request error'}],
+                  });
+                },
               },
             });
           }, 10);
-        }));
-        xhrStub.onCall(1).returns(new Promise((unusedResolve, reject) => {
-          setTimeout(() => {
-            reject({
-              responseJson: {
-                verifyErrors: [{name: 'name', message: 'Second request error'}],
-              },
-            });
-          }, 20);
         }));
 
         const form = ampForm.form_;
@@ -513,8 +524,12 @@ describes.repeated('', {
         let renderedTemplate = document.createElement('div');
         renderedTemplate.innerText = 'Error: hello there';
         sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.reject({
-          response: {},
-          responseJson: {message: 'hello there'},
+          response: {
+            status: 400,
+            json() {
+              return Promise.resolve({message: 'hello there'});
+            },
+          },
         }));
         sandbox.stub(ampForm.templates_, 'findAndRenderTemplate')
             .returns(Promise.resolve(renderedTemplate));
