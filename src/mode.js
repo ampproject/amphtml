@@ -110,6 +110,7 @@ function getMode_(win) {
     // Triggers validation
     development: !!(hashQuery['development'] == '1' ||
         win.AMP_DEV_MODE),
+    examiner: hashQuery['development'] == '2',
     // Allows filtering validation errors by error category. For the
     // available categories, see ErrorCategory in validator/validator.proto.
     filter: hashQuery['filter'],
