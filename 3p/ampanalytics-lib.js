@@ -51,32 +51,24 @@ class AmpAnalytics3pRemoteFrameHelper {
     this.senderIdToExtraData_ = map();
 
     /**
+     * Simple requestIdleCallback polyfill
+     * @type {Function<Function>}
+     * @private
+     */
+    this.requestIdleCallback_ =
+      win.requestIdleCallback.bind(win) || (cb => setTimeout(cb, 1));
+
+    /**
      * Handles communication between frames
      * @type {IframeMessagingClient}
      * @private
      */
     this.iframeMessagingClient_ = new IframeMessagingClient(win);
-    this.iframeMessagingClient_.setHostWindow(win.parent);
     this.iframeMessagingClient_.setSentinel(JSON.parse(window.name).sentinel);
-    this.iframeMessagingClient_.registerCallback(
-      'ampAnalytics3pMessages', received => {
-        if (!received || !received.ampAnalytics3pMessages) {
-          return;
-        }
-        for (submessage of received.ampAnalytics3pMessages) {
-          if (submessage.ampAnalytics3pEvent) {
-            for (eventsListener of this.eventListeners_) {
-              this.dispatch_(eventsListener, submessage);
-            }
-          } else if (submessage.ampAnalytics3pExtraData) {
-            this.senderIdToExtraData_[submessage.senderId] =
-              submessage.ampAnalytics3pExtraData;
-            for (extraDataListener of this.extraDataListeners_) {
-              this.dispatch_(extraDataListener, submessage);
-            }
-          }
-        }
-      });
+    this.iframeMessagingClient_.registerCallback('ampAnalytics3pMessages',
+      this.onReceiveMessagesFromCreative_.bind(this));
+
+    this.sendReadyMessageToCreative_();
   }
 
   /**
@@ -102,7 +94,6 @@ class AmpAnalytics3pRemoteFrameHelper {
    * Sends a message from the third-party vendor's metrics-collection page back
    * to the creative.
    * @param {!string} message The message to send.
-   * @private
    */
   sendMessageToCreative(message) {
     this.iframeMessagingClient_.sendMessage('ampAnalytics3pResponse',
@@ -120,27 +111,57 @@ class AmpAnalytics3pRemoteFrameHelper {
   }
 
   /**
+   * Sends a message from the third-party vendor's metrics-collection page back
+   * to the creative.
+   * @private
+   */
+  sendReadyMessageToCreative_() {
+    this.iframeMessagingClient_.sendMessage('ampAnalytics3pReady',
+      {senderId: this.id_});
+  }
+
+  /**
+   * Handles messages received from the creative, by sending them to the
+   * third-party vendor's metrics-collection page
+   * @param {!string} received The messages that were received from the creative
+   * @private
+   */
+  onReceiveMessagesFromCreative_(received) {
+    if (!received || !received.ampAnalytics3pMessages) {
+      return;
+    }
+    for (submessage of received.ampAnalytics3pMessages) {
+      if (submessage.ampAnalytics3pEvent) {
+        for (eventsListener of this.eventListeners_) {
+          this.dispatch_(eventsListener, submessage);
+        }
+      } else if (submessage.ampAnalytics3pExtraData) {
+        this.senderIdToExtraData_[submessage.senderId] =
+          submessage.ampAnalytics3pExtraData;
+        for (extraDataListener of this.extraDataListeners_) {
+          this.dispatch_(extraDataListener, submessage);
+        }
+      }
+    }
+  }
+
+  /**
    * Sends a message that was received from the parent frame to the
    * registered listener function.
-   * This is not inside of the iteration in registerCallback because we want
-   * message to be on the stack. If not, the loop could iterate another time
-   * before requestIdleCallback() fires, by which time message may have been
-   * overwritten by the next one in the array.
+   * This is not inside of the iteration in receivedMessagesFromCreative_
+   * because we want message to be on the stack. If not, the loop could
+   * iterate another time before requestIdleCallback_() fires, by which time
+   * message may have been overwritten by the next one in the array.
    * @param {!Function<Object>} listener The listener to dispatch the message to
    * @param {!Object} message The content to dispatch to the listener
    * @private
    */
   dispatch_(listener, message) {
-    requestIdleCallback(() => {
+    this.requestIdleCallback_(() => {
       listener(message);
     });
   }
 };
-
-// Simple requestIdleCallback polyfill
-// TODO: Combine this with the onReady() change
-requestIdleCallback =
-  window.requestIdleCallback || (cb => setTimeout(cb, 1));
 
 /**
  * @private @const {!AmpAnalytics3pRemoteFrameHelper}

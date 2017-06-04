@@ -24,6 +24,10 @@ import {dict, hasOwn, map} from '../../../src/utils/object';
 import {sendRequestUsingIframe, Transport} from './transport';
 import {urlReplacementsForDoc} from '../../../src/services';
 import {userNotificationManagerFor} from '../../../src/services';
+import {
+  addToResponseMap,
+  deleteFromResponseMap
+} from '../../../src/anchor-click-interceptor';
 import {cryptoFor} from '../../../src/crypto';
 import {timerFor, viewerForDoc, xhrFor} from '../../../src/services';
 import {toggle} from '../../../src/style';
@@ -121,7 +125,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.iniPromise_ = null;
 
     /** @private {!Transport} */
-    this.transport_ = new Transport();
+    this.transport_ = new Transport(this.element.getAttribute('type'));
   }
 
   /** @override */
@@ -170,6 +174,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   unlayoutCallback() {
     Transport.doneUsingCrossDomainIframe(this.getAmpDoc().win.document,
       this.config_['transport']);
+    deleteFromResponseMap(this.config_.transport.type);
     return true;
   }
 
@@ -236,8 +241,8 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     if (this.config_['transport'] && this.config_['transport']['iframe']) {
       this.transport_.processCrossDomainIframe(this.getAmpDoc().win.document,
-        this.config_['transport'], message => {
-          this.processCrossDomainIframeResponse_(message);
+        this.config_['transport'], (type, message) => {
+          this.processCrossDomainIframeResponse_(type, message);
         });
     }
 
@@ -300,12 +305,13 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /**
    * Receives any response that may be sent from the cross-domain iframe
-   * @param {string} msg The response message from the iframe
+   * @param {!string} type The type parameter of the cross-domain iframe
+   * @param {string} response The response message from the iframe
    * was specified in the amp-analytics config
    */
-  processCrossDomainIframeResponse_(msg) {
-    // Used in ../../../src/anchor-click-interceptor.js
-    this.win.document.mostRecentCrossDomainIframeResponse = msg;
+  processCrossDomainIframeResponse_(type, response) {
+    const creativeUrl = this.win.document.baseURI;
+    addToResponseMap(type, creativeUrl, response);
   }
 
   /**

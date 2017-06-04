@@ -19,6 +19,7 @@ import {
 } from './dom';
 import {dev} from './log';
 import {urlReplacementsForDoc} from './services';
+import {map} from './utils/object';
 
 /** @private @const {string} */
 const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';
@@ -59,9 +60,11 @@ function maybeExpandUrlParams(ampdoc, e) {
     'CLICK_Y': () => {
       return e.pageY;
     },
-    'RESPONSE': () => {
-      return target && target.ownerDocument &&
-        target.ownerDocument.mostRecentCrossDomainIframeResponse;
+    '3PANALYTICS': (frameType) => {
+      if (responseMap_[frameType] && responseMap_[frameType][target.baseURI]) {
+        return responseMap_[frameType][target.baseURI];
+      }
+      return '';
     },
   };
   const newHref = urlReplacementsForDoc(ampdoc).expandSync(
@@ -71,7 +74,7 @@ function maybeExpandUrlParams(ampdoc, e) {
         // NOTE: Addition to this whitelist requires additional review.
         'CLICK_X': true,
         'CLICK_Y': true,
-        'RESPONSE': true,
+        '3PANALYTICS': true,
       });
   if (newHref != hrefToExpand) {
     // Store original value so that later clicks can be processed with
@@ -85,4 +88,16 @@ function maybeExpandUrlParams(ampdoc, e) {
 
 export function maybeExpandUrlParamsForTesting(ampdoc, e) {
   maybeExpandUrlParams(ampdoc, e);
+}
+
+responseMap_ = map();
+export function addToResponseMap(frameType, creativeUrl, response) {
+  if (!responseMap_[frameType]) {
+    responseMap_[frameType] = map();
+  }
+  responseMap_[frameType][creativeUrl] = response;
+}
+
+export function deleteFromResponseMap(frameType) {
+  delete responseMap_[frameType];
 }

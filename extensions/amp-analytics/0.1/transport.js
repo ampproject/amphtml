@@ -27,6 +27,7 @@ import {removeElement} from '../../../src/dom';
 import {setStyle, setStyles} from '../../../src/style';
 import {hasOwn, map} from '../../../src/utils/object';
 import {IframeMessagingClient} from '../../../3p/iframe-messaging-client';
+import {listen, deserializeMessage} from '../../../src/3p-frame-messaging';
 
 /** @private @const {string} */
 const TAG_ = 'amp-analytics.Transport';
@@ -41,9 +42,15 @@ const MAX_QUEUE_SIZE_ = 100;
  * @visibleForTesting
  */
 export class Transport {
-  constructor() {
+  /**
+   * @param {!string} type The value of the amp-analytics tag's type attribute
+   */
+  constructor(type) {
     /** @private @const {string} */
     this.id_ = Transport.createUniqueId_();
+
+    /** @private @const {string} */
+    this.type_ = type;
   }
 
   /**
@@ -142,8 +149,8 @@ export class Transport {
    * @param {!HTMLDocument} ampDoc The AMP document
    * @param {!Object<string,string>} transportOptions The 'transport' portion
    * of the amp-analytics config object
-   * @param {?function(string)=} opt_processResponse An optional function to
-   * receive any response messages back from the cross-domain iframe
+   * @param {function(!string,string)=} opt_processResponse An optional
+   * function to receive any response messages back from the cross-domain iframe
    */
   processCrossDomainIframe(ampDoc, transportOptions, opt_processResponse) {
     dev().assert(transportOptions['iframe'],
@@ -151,19 +158,32 @@ export class Transport {
     const frameUrl = transportOptions['iframe'];
     this.beginUsingCrossDomainIframe_(ampDoc, frameUrl,
       transportOptions['extraData']);
-    // Regardless of whether we just created it, or are re-using an existing
-    // one, wire up the response callback if there is one
+    const frameData = Transport.crossDomainIframes_[frameUrl];
+    const iframeMessagingClient = frameData.iframeMessagingClient;
+    // 1. Must specify which window we're willing to accept messages from
+    // 2. frame.contentWindow is null until frame has loaded
+    // ...therefore this circular dependency means that we can't use
+    // iframeMessagingClient to send the loaded notification
+    listen(AMP.win, 'message', event => {
+      const message = deserializeMessage(event.data);
+      if (!message || message.sentinel != frameData.sentinel) {
+        return;
+      }
+      if (message.type == 'ampAnalytics3pReady') {
+        iframeMessagingClient.setHostWindow(frameData.frame.contentWindow);
+        Transport.setIsReady_(frameUrl);
+      }
+    });
     if (!opt_processResponse) {
       return;
     }
-    Transport.crossDomainIframes_[frameUrl].iframeMessagingClient
-      .registerCallback(
-        'ampAnalytics3pResponse', msg => {
-          if (!msg || !msg.ampAnalytics3pResponse) {
-            return;
-          }
-          opt_processResponse(msg.ampAnalytics3pResponse);
-        });
+    iframeMessagingClient.registerCallback(
+      'ampAnalytics3pResponse', (response) => {
+        if (!response || !response.ampAnalytics3pResponse) {
+          return;
+        }
+        opt_processResponse(this.type_, response.ampAnalytics3pResponse);
+      });
   }
 
   /**
@@ -253,15 +273,12 @@ export class Transport {
     });
     const iframeMessagingClient = new IframeMessagingClient(window);
     iframeMessagingClient.setSentinel(sentinel);
-    loadPromise(frame).then(() => {
-      iframeMessagingClient.setHostWindow(frame.contentWindow);
-      Transport.setIsReady_(frameUrl);
-    });
     setStyles(frame,
         {width: 0, height: 0, display: 'none',
          position: 'absolute', top: 0, left: 0});
     Transport.crossDomainIframes_[frameUrl] = {
       frame,
+      sentinel,
       isReady: false,
       messageQueue: [],
       usageCount: 1,
@@ -346,12 +363,15 @@ export class Transport {
     };
     messageObject[messageType] = message;
     frameData.messageQueue.push(messageObject);
-    if (frameData.isReady && frameData.sendTimer == null) {
-      frameData.sendTimer = Transport.timer_.delay(() => {
+    if (frameData.sendTimer) {
+      return; // Timer is already about to fire, no need to set a new one
+    }
+    frameData.sendTimer = Transport.timer_.delay(() => {
+      if (frameData.isReady) {
         Transport.sendQueuedMessagesToCrossDomainIframe_(frameData);
         frameData.sendTimer = null;
-      }, MESSAGE_THROTTLE_TIME_);
-    }
+      }
+    }, MESSAGE_THROTTLE_TIME_);
   }
 
   /**
