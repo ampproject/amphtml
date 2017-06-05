@@ -83,40 +83,59 @@ export class AmpState extends AMP.BaseElement {
 
   /** @private */
   initialize_() {
-    const TAG = this.getName_();
-
-    // Fetch JSON from endpoint at `src` attribute if it exists,
-    // otherwise parse child script tag.
+    // Parse child script tag and/or fetch JSON from endpoint at `src`
+    // attribute, with the latter taking priority.
+    const children = this.element.children;
+    if (children.length > 0) {
+      this.parseChildAndUpdateState_();
+    }
     if (this.element.hasAttribute('src')) {
       this.fetchSrcAndUpdateState_(/* isInit */ true);
-      if (this.element.children.length > 0) {
-        user().error(TAG, 'Should not have children if src attribute exists.');
-      }
-    } else {
-      const children = this.element.children;
-      if (children.length == 1) {
-        const firstChild = children[0];
-        if (isJsonScriptTag(firstChild)) {
-          const json = tryParseJson(firstChild.textContent, e => {
-            user().error(TAG, 'Failed to parse state. Is it valid JSON?', e);
-          });
-          this.updateState_(json, /* isInit */ true);
-        } else {
-          user().error(TAG,
-              'State should be in a <script> tag with type="application/json"');
-        }
-      } else if (children.length > 1) {
-        user().error(TAG, 'Should contain only one <script> child.');
-      }
     }
   }
 
   /**
+   * Parses JSON in child script element and updates state.
+   * @private
+   */
+  parseChildAndUpdateState_() {
+    const TAG = this.getName_();
+    const children = this.element.children;
+    if (children.length != 1) {
+      user().error(TAG, 'Should contain exactly one <script> child.');
+      return;
+    }
+    const firstChild = children[0];
+    if (!isJsonScriptTag(firstChild)) {
+      user().error(TAG,
+          'State should be in a <script> tag with type="application/json".');
+      return;
+    }
+    const json = tryParseJson(firstChild.textContent, e => {
+      user().error(TAG, 'Failed to parse state. Is it valid JSON?', e);
+    });
+    this.updateState_(json, /* isInit */ true);
+  }
+
+  /**
+   * Wrapper to stub during testing.
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Element} element
+   * @return {!Promise}
+   * @visibleForTesting
+   */
+  fetchBatchedJsonFor_(ampdoc, element) {
+    return fetchBatchedJsonFor(ampdoc, element);
+  }
+
+  /**
    * @param {boolean} isInit
+   * @returm {!Promise}
    * @private
    */
   fetchSrcAndUpdateState_(isInit) {
-    fetchBatchedJsonFor(this.getAmpDoc(), this.element).then(json => {
+    const ampdoc = this.getAmpDoc();
+    return this.fetchBatchedJsonFor_(ampdoc, this.element).then(json => {
       this.updateState_(json, isInit);
     });
   }
@@ -141,7 +160,7 @@ export class AmpState extends AMP.BaseElement {
 
   /**
    * @return {string} Returns a string to identify this tag. May not be unique
-   * if the element id is not unique.
+   *     if the element id is not unique.
    * @private
    */
   getName_() {
