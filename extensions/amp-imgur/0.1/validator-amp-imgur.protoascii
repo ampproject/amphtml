@@ -17,8 +17,6 @@
 tags: {  # amp-imgur
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-imgur extension .js script"
-  requires: "amp-imgur"
   extension_spec: {
     name: "amp-imgur"
     allowed_versions: "0.1"
@@ -29,14 +27,12 @@ tags: {  # amp-imgur
 tags: {  # <amp-imgur>
   html_format: AMP
   tag_name: "AMP-IMGUR"
-  satisfies: "amp-imgur"
-  requires: "amp-imgur extension .js script"
+  requires_extension: "amp-imgur"
   attrs: {
     name: "data-imgur-id"
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-imgur"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
