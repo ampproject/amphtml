@@ -6,7 +6,7 @@ This guide is designed to provide additional information for SSPs and Ad Exchang
  
 AMP pages must ensure all content conforms to the AMP format. When non-AMP content is included in an AMP page, there can be a delay as the content is verified. A major benefit for AMP Ads on AMP pages is that the ad can be rendered early by splicing the ad into the surrounding AMP page, without affecting the UX of the page and without delay.
 
-For those new to AMP Ads, see the background docs at thje bottom of this article.
+For those new to AMP Ads, see the background docs at the bottom of this article.
  
 ## AMP Ads in RTB: High-Level Approach
  
