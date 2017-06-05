@@ -347,9 +347,9 @@ export class AmpA4A extends AMP.BaseElement {
     /**
      * Indicates whether the ad is currently in the process of being refreshed.
      *
-     * @private {boolean}
+     * @protected {boolean}
      */
-    this.isRefreshing_ = false;
+    this.isRefreshing = false;
   }
 
   /** @override */
@@ -774,11 +774,12 @@ export class AmpA4A extends AMP.BaseElement {
    *   the refresh cycle.
    */
   refresh(restartRefresh) {
-    this.isRefreshing_ = true;
+    this.isRefreshing = true;
     this.tearDownSlot();
     this.initiateAdRequest();
+    const promiseId = this.promiseId_;
     this.adPromise_.then(() => {
-      if (!this.isRefreshing_) {
+      if (!this.isRefreshing || promiseId != this.promiseId_) {
         // If this refresh cycle was canceled, such as in a no-content
         // response case, keep showing the old creative.
         restartRefresh();
@@ -791,7 +792,7 @@ export class AmpA4A extends AMP.BaseElement {
       // the new creative.
       timerFor(this.win).delay(() => {
         this.attemptToRenderCreative().then(() => {
-          this.isRefreshing_ = false;
+          this.isRefreshing = false;
           this.togglePlaceholder(false);
           restartRefresh();
         });
@@ -1031,7 +1032,7 @@ export class AmpA4A extends AMP.BaseElement {
       // If this.iframe already exists, and we're not currently in the middle
       // of refreshing, bail out here. This should only happen in
       // testing context, not in production.
-      if (this.iframe && !this.isRefreshing_) {
+      if (this.iframe && !this.isRefreshing) {
         this.protectedEmitLifecycleEvent_('iframeAlreadyExists');
         return Promise.resolve();
       }
@@ -1117,11 +1118,11 @@ export class AmpA4A extends AMP.BaseElement {
    * being refreshed.
    *
    * @param {boolean=} force Forces the removal of the frame, even if
-   *   this.isRefreshing_ is true.
+   *   this.isRefreshing is true.
    * @protected
    */
   destroyFrame(force) {
-    if (!force && this.isRefreshing_) {
+    if (!force && this.isRefreshing) {
       return;
     }
     if (this.iframe && this.iframe.parentElement) {
@@ -1212,10 +1213,10 @@ export class AmpA4A extends AMP.BaseElement {
    * @visibleForTesting
    */
   forceCollapse() {
-    if (this.isRefreshing_) {
+    if (this.isRefreshing) {
       // If, for whatever reason, the new creative would collapse this slot,
       // stick with the old creative until the next refresh cycle.
-      this.isRefreshing_ = false;
+      this.isRefreshing = false;
       return;
     }
     dev().assert(this.uiHandler);
