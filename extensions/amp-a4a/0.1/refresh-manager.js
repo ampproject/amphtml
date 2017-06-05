@@ -98,6 +98,21 @@ export class RefreshManager {
   }
 
   /**
+   * Terminates the current refresh cycle, if one currently exists. This
+   * function also returns a courtesy callback, which, if invoked, will
+   * initiate a new refresh cycle.
+   *
+   * @return {function()} Initiate refresh callback.
+   */
+  stopRefreshCycle() {
+    if (this.refreshTimeoutId_) {
+      this.timer_.cancel(this.refreshTimeoutId_);
+      this.refreshTimeoutId_ = null;
+    }
+    return () => this.initiateRefreshCycle();
+  }
+
+  /**
    * Retrieves the refresh configuration for this slot. The base of the
    * configuration is set by the network, but the refresh interval must be set
    * at the page or slot level in order for the slot to be refresh-enabled.
@@ -116,7 +131,7 @@ export class RefreshManager {
         // If we're here, then data-enable-refresh is set, and it's a number.
         // This check is needed because isNaN(undefined) and isNaN('') are both
         // false, so it's possible that refreshInterval == undefined or
-        // refreshInterval == ''.
+        // refreshInterval == '' after first check.
         networkConfig['refreshInterval'] =
             // TODO(levitzky) Using 5 only for testing.
             Math.max(5, Number(refreshInterval));

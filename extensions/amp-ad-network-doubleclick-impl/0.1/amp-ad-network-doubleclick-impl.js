@@ -271,9 +271,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // dimensions in an array.
       const dimensions = getMultiSizeDimensions(
           multiSizeDataStr,
-          Number(this.element.getAttribute('width')),
-          Number(this.element.getAttribute('height')),
-          multiSizeValidation == 'true');
+          width, height,
+          multiSizeValidation == 'true',
+          /* Use strict mode only in non-refresh case */ !this.isRefreshing);
       sizeStr += '|' + dimensions
           .map(dimension => dimension.join('x'))
           .join('|');
