@@ -604,11 +604,6 @@ function createBaseCustomElementClass(win) {
         delete this[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER];
         delete this[dom.UPGRADE_TO_CUSTOMELEMENT_PROMISE];
       }
-      /** @private {?Promise<!JSONType>} */
-      this.sandboxAnalyticsConfigPromise_ = null;
-
-      /** @private {?Element} */
-      this.sandboxAnalyticsElement_ = null;
     }
 
     /**
