@@ -31,7 +31,7 @@ This is the name of the event that an element exposes.
 
 **targetId**
 __required__
-This is the DOM id for the element you'd like to execute an action on in response to the event. In the following example, the `targetId` is the DOM id of the `amp-lightbox` target, `photo-slides`.
+This is the DOM id for the element, or a predefined [special target](#special-targets) you'd like to execute an action on in response to the event. In the following example, the `targetId` is the DOM id of the `amp-lightbox` target, `photo-slides`.
 
 ```html
 <amp-lightbox id="photo-slides"></amp-lightbox>
@@ -93,7 +93,6 @@ For example, the following is possible in AMP.
   </tr>
 </table>
 
-
 ### Input Elements (any that fires `change` and `input` event)
 
 Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and `select`.
@@ -143,7 +142,6 @@ Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and
     <td><code>event.value</code> : The text currently in the text box
   </tr>
 </table>
-
 
 ### amp-carousel[type="slides"]
 <table>
@@ -353,9 +351,13 @@ Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and
   </tr>
 </table>
 
-## `AMP` target
+## Special targets
 
-`AMP` target is a special target. It's provided by the AMP runtime and implements top-level
+The following are targets provided by the AMP system that have special requirements:
+
+### `AMP`
+
+The `AMP` target is provided by the AMP runtime and implements top-level
 actions that apply to the whole document.
 
 <table>
@@ -372,3 +374,13 @@ actions that apply to the whole document.
     <td>Updates <code>amp-bind</code>'s state. See <a href="../extensions/amp-bind/amp-bind.md#ampsetstate">details</a>.</td>
   </tr>
 </table>
+
+### `amp-access`
+
+The `amp-access` target is provided by the [AMP Access extension](../extensions/amp-access/amp-access.md).
+
+It's special because
+1. You can't give an arbitrary ID to this target. The target is always `amp-access`.
+2. The actions for `amp-access` are dynamic depending on the structure of the [AMP Access Configruation](../extensions/amp-access/amp-access.md#configuration).
+
+See [details](../extensions/amp-access/amp-access.md#login-link) about using the `amp-access` target.
