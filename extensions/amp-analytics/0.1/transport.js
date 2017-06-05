@@ -369,8 +369,8 @@ export class Transport {
     frameData.sendTimer = Transport.timer_.delay(() => {
       if (frameData.isReady) {
         Transport.sendQueuedMessagesToCrossDomainIframe_(frameData);
-        frameData.sendTimer = null;
       }
+      frameData.sendTimer = null;
     }, MESSAGE_THROTTLE_TIME_);
   }
 
