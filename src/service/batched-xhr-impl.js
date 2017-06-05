@@ -61,7 +61,8 @@ export class BatchedXhr extends Xhr {
     const fetchPromise = super.fetch(input, opt_init);
 
     if (isBatchable) {
-      this.fetchPromises_[key] = fetchPromise.then(response => {
+      this.fetchPromises_[key] = fetchPromise;
+      return fetchPromise.then(response => {
         delete this.fetchPromises_[key];
         return response.clone();
       }, err => {
