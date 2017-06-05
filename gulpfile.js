@@ -258,8 +258,8 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
         include3pDirectories: true,
         includePolyfills: false,
       }),
-    compileJs('./3p/', 'ampanalytics-lib.js',
-      './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
+      compileJs('./3p/', 'ampanalytics-lib.js',
+          './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
         minifiedName: 'ampanalytics-v0.js',
         checkTypes: opt_checkTypes,
         watch: watch,
