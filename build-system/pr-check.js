@@ -138,6 +138,7 @@ function isBuildSystemFile(filePath) {
 function isValidatorFile(filePath) {
   if (filePath.startsWith('validator/')) return true;
   if (!path.dirname(filePath).endsWith('0.1') &&
+      !path.dirname(filePath).endsWith('1.0') &&
       !path.dirname(filePath).endsWith('test'))
     return false;
   const name = path.basename(filePath);
