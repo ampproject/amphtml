@@ -110,7 +110,7 @@ Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and
   </tr>
   <tr>
     <td>input-debounced</td>
-    <td>Fired when the value of the element is changed. This is similar to the standard input event, but it only fires when 300ms have passed after the value of the input has stopped changing. This is currently experimental, so [the "input-debounced" experiment must be enabled](https://www.ampproject.org/docs/reference/experimental) before using.</td>
+    <td>Fired when the value of the element is changed. This is similar to the standard input event, but it only fires when 300ms have passed after the value of the input has stopped changing.</td>
     <td>Various, see below.</td>
   </tr>
 </table>
