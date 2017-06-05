@@ -4,7 +4,7 @@
  
 This guide is designed to provide additional information for SSPs and Ad Exchanges that want to support AMP Ads in a Real-Time Bidding (RTB) environment.  The IAB's OpenRTB 2.5 spec is [here](http://www.iab.com/wp-content/uploads/2016/03/OpenRTB-API-Specification-Version-2-5-FINAL.pdf&sa=D&ust=1496436943725000&usg=AFQjCNFlig47imweXbZx-yuvW8LmlonzFw).
  
-For AMP Ads on AMP Pages, a major benefit is that if the ad response is AMP, then the ad can be rendered early by splicing it into the surrounding AMP page, with no need for iframing or delays, without risk to the page's UX.  The AMP page needs to protect itself from non-AMP content, so must delay the rendering of any ad that has not been blessed by trusted AMP verification.
+For AMP Ads on AMP Pages, a major benefit is that if the ad response is AMP, then the ad can be rendered early by splicing it into the surrounding AMP page, with no delays and without risk to the page's UX.  The AMP page needs to protect itself from non-AMP content, so must delay the rendering of any ad that is not in AMP Format.
  
 # Background Docs
 * [AMP Ads for AMP Pages (Github)](https://github.com/ampproject/amphtml/issues/3133&sa=D&ust=1496436943729000&usg=AFQjCNFdEAhcweynv_C57XPDvquNmA-d_w)
@@ -22,12 +22,12 @@ For AMP Ads on AMP Pages, a major benefit is that if the ad response is AMP, the
 Exchanges will need to indicate in the RTB bid request whether a page is built in AMP HTML, and any specific requirements or treatment of AMP Ads.  As of [OpenRTB 2.5](https://www.google.com/url?q=http://www.iab.com/wp-content/uploads/2016/03/OpenRTB-API-Specification-Version-2-5-FINAL.pdf&sa=D&ust=1496436943740000&usg=AFQjCNGuz1b-E6kOzHQr9RJ6Xb_DNAy_xQ), this is not yet included in the spec, but the proposed implementation to the IAB committee is as follows.
  
 **Site Object Additional field: amp**
-A new field is added to the site object to indicate whether a webpage is built on AMP HTML.
+A new field is added to the 'Site' object of the OpenRTB standard to indicate whether a webpage is built on AMP HTML.  In OpenRTB 2.5, this is section 3.2.13.
  
 ![RTB1](./img1.png)
  
 **Imp Object Additional field: ampad**
-A new field is added to the imp object to provide more detail around AMP ad requirements and how AMP ads will load.
+A new field is added to the 'Imp' object of the OpenRTB standard to provide more detail around AMP ad requirements and how AMP ads will load.  In OpenRTB 2.5, this is section 3.2.4.
  
 ![RTB2](./img2.png)
  
@@ -37,7 +37,7 @@ A new field is added to the imp object to provide more detail around AMP ad requ
  
 ### RTB Bid Response
  
-SSPs will need to provide a new field in the bid response to allow bidders to return AMP Ad content, and RTB bidders will need to populate that field in order to return AMP Ads.  As of [OpenRTB 2.5](http://www.iab.com/wp-content/uploads/2016/03/OpenRTB-API-Specification-Version-2-5-FINAL.pdf&sa=D&ust=1496436943812000&usg=AFQjCNEQipmPbKkfCuGkKvzgdpC-I60EOg), this is not yet included in the spec, but the proposed workflow is a n ew field that accepts a URL pointing to AMP ad content.  
+SSPs will need to provide a new field in the bid response to allow bidders to return AMP Ad content, and RTB bidders will need to populate that field in order to return AMP Ads.  As of [OpenRTB 2.5](http://www.iab.com/wp-content/uploads/2016/03/OpenRTB-API-Specification-Version-2-5-FINAL.pdf&sa=D&ust=1496436943812000&usg=AFQjCNEQipmPbKkfCuGkKvzgdpC-I60EOg), this is not yet included in the spec, but the proposed workflow is a new field that accepts a URL pointing to AMP ad content.  
  
 **AMP Ad Status Table**
  
