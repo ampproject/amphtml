@@ -155,7 +155,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
         'type=click&click=${type}${suffix}',
     },
   },
-  
+
   'baiduanalytics': {
     'requests': {
       'host': 'https://hm.baidu.com',
