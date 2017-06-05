@@ -53,7 +53,9 @@ tags: {  # <amp-state>
   disallowed_ancestor: "AMP-SIDEBAR"
   attrs: {
     name: "credentials"
-    also_requires_attr: "src"
+    trigger: {
+      also_requires_attr: "src"
+    }
   }
   attrs: {
     name: "id"
