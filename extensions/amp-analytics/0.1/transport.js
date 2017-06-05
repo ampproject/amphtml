@@ -29,7 +29,6 @@ import {removeElement} from '../../../src/dom';
 import {setStyle, setStyles} from '../../../src/style';
 import {hasOwn, map} from '../../../src/utils/object';
 import {IframeMessagingClient} from '../../../3p/iframe-messaging-client';
-import {listen, deserializeMessage} from '../../../src/3p-frame-messaging';
 
 /** @private @const {string} */
 const TAG_ = 'amp-analytics.Transport';
@@ -162,21 +161,11 @@ export class Transport {
       transportOptions['extraData']);
     const frameData = Transport.crossDomainIframes_[frameUrl];
     const iframeMessagingClient = frameData.iframeMessagingClient;
-    // 1. Must specify which window we're willing to accept messages from
-    // 2. frame.contentWindow is null until frame has loaded
-    // ...therefore this circular dependency means that we can't use
-    // iframeMessagingClient to send the loaded notification
-    listen(AMP.win, 'message', event => {
-      const message = deserializeMessage(event.data);
-      if (!message || message.sentinel != frameData.sentinel) {
-        return;
-      }
-      if (message.type == 'ampAnalytics3pReady') {
+    iframeMessagingClient.registerCallback(
+      'ampAnalytics3pReady', () => {
         iframeMessagingClient.setHostWindow(frameData.frame.contentWindow);
         Transport.setIsReady_(frameUrl);
-      }
-      // TODO: Kill this listener
-    });
+      });
     if (!opt_processResponse) {
       return;
     }
@@ -276,6 +265,7 @@ export class Transport {
     });
     const iframeMessagingClient = new IframeMessagingClient(window);
     iframeMessagingClient.setSentinel(sentinel);
+    iframeMessagingClient.setHostWindow(frame);
     setStyles(frame,
         {width: 0, height: 0, display: 'none',
          position: 'absolute', top: 0, left: 0});
