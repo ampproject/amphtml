@@ -23,7 +23,6 @@ import {
 } from '../service';
 import {getMode} from '../mode';
 import {isArray} from '../types';
-import {isExperimentOn} from '../experiments';
 import {map} from '../utils/object';
 import {timerFor} from '../services';
 import {vsyncFor} from '../services';
@@ -363,11 +362,6 @@ export class ActionService {
 
     for (let i = 0; i < action.actionInfos.length; i++) {
       const actionInfo = action.actionInfos[i];
-
-      if (actionInfo.event === 'input-debounced') {
-        user().assert(isExperimentOn(this.ampdoc.win, 'input-debounced'),
-            'Enable "input-debounced" experiment to use input-debounced');
-      }
 
       // Replace any variables in args with data in `event`.
       const args = applyActionInfoArgs(actionInfo.args, event);
