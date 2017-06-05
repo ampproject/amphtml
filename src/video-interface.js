@@ -220,3 +220,41 @@ export const VideoEvents = {
    */
   RELOAD: 'reloaded',
 };
+
+/**
+ * Playing States
+ *
+ * Components implementing the VideoInterface are expected to have one of these
+ * playing states.
+ *
+ * @constant {!Object<string, string>}
+ */
+export const PlayingStates = {
+  /**
+   * playing_manual
+   *
+   * When the video user manually interacted with the video and the video
+   * is now playing
+   *
+   * @event playing_manual
+   */
+  PLAYING_MANUAL: 'playing_manual',
+
+  /**
+   * playing_auto
+   *
+   * When the video has autoplay and the user hasn't interacted with it yet
+   *
+   * @event playing_auto
+   */
+  PLAYING_AUTO: 'playing_auto',
+
+  /**
+   * paused
+   *
+   * When the video is paused.
+   *
+   * @event paused
+   */
+  PAUSED: 'paused',
+};

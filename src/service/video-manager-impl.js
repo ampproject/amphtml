@@ -22,7 +22,7 @@ import {platformFor} from '../services';
 import {registerServiceBuilderForDoc} from '../service';
 import {setStyles} from '../style';
 import {isFiniteNumber} from '../types';
-import {VideoEvents, VideoAttributes} from '../video-interface';
+import {VideoEvents, VideoAttributes, PlayingStates} from '../video-interface';
 import {viewerForDoc} from '../services';
 import {viewportForDoc} from '../services';
 import {vsyncFor} from '../services';
@@ -68,9 +68,9 @@ export class VideoManager {
 
     // TODO(aghassemi): Remove this later. For now, VideoManager only matters
     // for autoplay videos so no point in registering arbitrary videos yet.
-    if (!video.element.hasAttribute(VideoAttributes.AUTOPLAY)) {
-      return;
-    }
+    // if (!video.element.hasAttribute(VideoAttributes.AUTOPLAY)) {
+    //   return;
+    // }
 
     if (!video.supportsPlatform()) {
       return;
@@ -131,6 +131,63 @@ export class VideoManager {
       this.scrollListenerInstalled_ = true;
     }
   }
+
+  /**
+   * Returns whether the video is paused or playing after the user interacted
+   * with it or playing through autoplay
+   *
+   * @param {VideoEntry} entry
+   * @return {!../video-interface.VideoInterface} PlayingStates
+   * @private
+   */
+  getPlayingState_(entry) {
+    return entry.getPlayingState();
+  }
+
+  /**
+   * Returns whether the video was interacted with or not
+   *
+   * @param {VideoEntry} entry
+   * @return {boolean}
+   * @private
+   */
+  userInteracted_(entry) {
+    return entry.userInteracted();
+  }
+
+  /**
+   * Returns whether the video is paused or playing after the user interacted
+   * with it or playing through autoplay
+   *
+   * @param {!../video-interface.VideoInterface} video
+   * @return {!../video-interface.VideoInterface} PlayingStates
+   */
+  getPlayingState(video) {
+    for (let i = 0; i < this.entries_.length; i++) {
+      if (this.entries_[i].video === video) {
+        return this.entries_[i].getPlayingState();
+      }
+    }
+    return PlayingStates.PAUSED;
+  }
+
+  /**
+   * Returns whether the video was interacted with or not
+   *
+   * @param {!../video-interface.VideoInterface} video
+   * @return {boolean}
+   */
+  userInteracted(video) {
+    for (let i = 0; i < this.entries_.length; i++) {
+      if (this.entries_[i].video === video) {
+        return this.entries_[i].userInteracted();
+      }
+    }
+    return false;
+  }
+
+
+
 }
 
 /**
@@ -156,10 +213,10 @@ class VideoEntry {
     this.loaded_ = false;
 
     /** @private {boolean} */
-    this.isVisible_ = false;
+    this.isPlaying_ = false;
 
     /** @private {boolean} */
-    this.userInteracted_ = false;
+    this.isVisible_ = false;
 
     /** @private @const {!../service/vsync-impl.Vsync} */
     this.vsync_ = vsyncFor(ampdoc.win);
@@ -173,8 +230,24 @@ class VideoEntry {
     /** @private {boolean} */
     this.hasAutoplay_ = element.hasAttribute(VideoAttributes.AUTOPLAY);
 
+    /** @private {boolean} */
+    this.userInteracted_ = !this.hasAutoplay_;
+
     listenOncePromise(element, VideoEvents.LOAD)
         .then(() => this.videoLoaded_());
+
+
+    const updatePlayStatus = playing => {
+      this.isPlaying_ = playing;
+    };
+
+
+    listen(this.video.element, VideoEvents.PAUSE,
+      updatePlayStatus.bind(this, /*playing*/ false));
+
+    listen(this.video.element, VideoEvents.PLAY,
+      updatePlayStatus.bind(this, /*playing*/ true));
+
 
     // Currently we only register after video player is build.
     this.videoBuilt_();
@@ -406,6 +479,30 @@ class VideoEntry {
       measure,
       mutate,
     });
+  }
+
+
+  /**
+   * Returns whether the video is paused or playing after the user interacted
+   * with it or playing through autoplay
+   * @return {!../video-interface.VideoInterface} PlayingStates
+   */
+  getPlayingState() {
+    if (this.userInteracted_ && this.isPlaying_) {
+      return PlayingStates.PLAYING_MANUAL;
+    } else if (this.isPlaying_) {
+      return PlayingStates.PLAYING_AUTO;
+    } else {
+      return PlayingStates.PAUSED;
+    }
+  }
+
+  /**
+   * Returns whether the video was interacted with or not
+   * @return {boolean}
+   */
+  userInteracted() {
+    return this.userInteracted_;
   }
 }
 
