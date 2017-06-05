@@ -785,10 +785,10 @@ export class UrlReplacements {
       'CLIENT_ID': true,
       'QUERY_PARAM': true,
     };
-    const additionalURLParameters = element.getAttribute('data-amp-addparams');
+    const additionalUrlParameters = element.getAttribute('data-amp-addparams');
     const whitelist = this.getWhitelistForElement_(
         element, supportedReplacements);
-    if (!whitelist && !additionalURLParameters) {
+    if (!whitelist && !additionalUrlParameters) {
       return;
     }
     // ORIGINAL_HREF_PROPERTY has the value of the href "pre-replacement".
@@ -797,30 +797,35 @@ export class UrlReplacements {
     let href = dev().assertString(
         element[ORIGINAL_HREF_PROPERTY] || element.getAttribute('href'));
     const url = parseUrl(href);
-    if (!this.isAllowedOrigin_(url)) {
-      user().warn('URL', 'Ignoring link replacement', href,
-          ' because the link does not go to the document\'s' +
-          ' source, canonical, or whitelisted origin.');
-      return;
-    }
-    if (!isSecureUrl(href)) {
-      user().warn('URL', 'Ignoring link replacement', href,
-          ' because it is only supported for secure links.');
-      return;
-    }
     if (element[ORIGINAL_HREF_PROPERTY] == null) {
       element[ORIGINAL_HREF_PROPERTY] = href;
     }
-    if (additionalURLParameters) {
+    if (additionalUrlParameters) {
       href = addParamsToUrl(
         href,
-        parseQueryString(additionalURLParameters));
+        parseQueryString(additionalUrlParameters));
     }
-    return element.href = this.expandSync(
-        href,
-        /* opt_bindings */ undefined,
-        /* opt_collectVars */ undefined,
-        /* opt_whitelist */ whitelist);
+    if (whitelist) {
+      const isAllowedOrigin = this.isAllowedOrigin_(url);
+      const isSecure = isSecureUrl(href);
+      if (!isAllowedOrigin) {
+        user().warn('URL', 'Ignoring link replacement', href,
+            ' because the link does not go to the document\'s' +
+            ' source, canonical, or whitelisted origin.');
+      }
+      if (!isSecure) {
+        user().warn('URL', 'Ignoring link replacement', href,
+            ' because it is only supported for secure links.');
+      }
+      if (isAllowedOrigin && isSecure) {
+        href = this.expandSync(
+          href,
+          /* opt_bindings */ undefined,
+          /* opt_collectVars */ undefined,
+          /* opt_whitelist */ whitelist);
+      }
+    }
+    return element.href = href;
   }
 
   /**

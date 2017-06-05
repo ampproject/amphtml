@@ -1110,26 +1110,27 @@ describes.sandboxed('UrlReplacements', {}, () => {
       });
     });
 
-    it('should not add URL parameters for different origin', () => {
+    it('should add URL parameters for different origin', () => {
       a.href = 'https://example2.com/link';
       a.setAttribute('data-amp-addparams', 'guid=123');
       urlReplacements.maybeExpandLink(a);
-      expect(a.href).to.equal('https://example2.com/link');
+      expect(a.href).to.equal('https://example2.com/link?guid=123');
     });
 
-    it('should not add URL parameters for http URL\'s(non-secure)', () => {
+    it('should add URL parameters for http URL\'s(non-secure)', () => {
       a.href = 'http://whitelisted.com/link?out=QUERY_PARAM(foo)';
       a.setAttribute('data-amp-addparams', 'guid=123');
       urlReplacements.maybeExpandLink(a);
-      expect(a.href).to.equal('http://whitelisted.com/link?out=QUERY_PARAM(foo)');
+      expect(a.href).to.equal('http://whitelisted.com/link?out=QUERY_PARAM(foo)&guid=123');
     });
 
-    it('should append query parameters for whitelisted origin', () => {
-      a.href = 'https://whitelisted.com/link';
-      a.setAttribute('data-amp-addparams', 'guid=123');
+    it('should add URL parameters without replacing whitelisted'
+      + ' values for http URL\'s(non-secure)', () => {
+      a.href = 'http://whitelisted.com/link?out=QUERY_PARAM(foo)';
+      a.setAttribute('data-amp-replace', 'CLIENT_ID');
+      a.setAttribute('data-amp-addparams', 'guid=123&c=CLIENT_ID(abc)');
       urlReplacements.maybeExpandLink(a);
-      expect(a.href).to.equal(
-          'https://whitelisted.com/link?guid=123');
+      expect(a.href).to.equal('http://whitelisted.com/link?out=QUERY_PARAM(foo)&guid=123&c=CLIENT_ID(abc)');
     });
 
     it('should append query parameters and repalce whitelisted values', () => {
