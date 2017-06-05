@@ -351,7 +351,9 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
  * @return {!Promise}
  */
 function compileCss() {
-  $$.util.log('Recompiling CSS in amp.css');
+  if (!process.env.TRAVIS) {
+    $$.util.log('Recompiling CSS in amp.css');
+  }
   return jsifyCssAsync('css/amp.css').then(function(css) {
     return toPromise(gulp.src('css/**.css')
           .pipe($$.file('css.js', 'export const cssText = ' +
@@ -370,7 +372,9 @@ function compileCss() {
  * @return {!Promise}
  */
 function copyCss() {
-  $$.util.log('Copying build/css/v0.css to dist/v0.css');
+  if (!process.env.TRAVIS) {
+    $$.util.log('Copying build/css/v0.css to dist/v0.css');
+  }
   fs.copySync('build/css/v0.css', 'dist/v0.css');
   return toPromise(gulp.src('build/css/amp-*.css')
       .pipe(gulp.dest('dist/v0')));
@@ -456,9 +460,6 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
       if (cssOnly) {
         return Promise.resolve();
       }
-      if (!process.env.TRAVIS) {
-        $$.util.log('Bundling ' + name);
-      }
       return buildExtensionJs(path, name, version, options);
     });
   } else {
@@ -478,6 +479,9 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
  * @return {!Promise}
  */
 function buildExtensionJs(path, name, version, options) {
+  if (!process.env.TRAVIS) {
+    $$.util.log('Bundling ' + name);
+  }
   var filename = options.filename || name + '.js';
   if (options.loadPriority && options.loadPriority != 'high') {
     throw new Error('Unsupported loadPriority: ' + options.loadPriority);
@@ -641,7 +645,9 @@ function checkTypes() {
  * @return {!Promise}
  */
 function thirdPartyBootstrap(input, outputName, shouldMinify) {
-  $$.util.log('Processing ' + input);
+  if (!process.env.TRAVIS) {
+    $$.util.log('Processing ' + input);
+  }
 
   if (!shouldMinify) {
     return toPromise(gulp.src(input)
@@ -776,7 +782,9 @@ function compileJs(srcDir, srcFilename, destDir, options) {
 
   if (options.watch) {
     bundler.on('update', function() {
-      $$.util.log('-> bundling ' + srcDir + '...');
+      if (!process.env.TRAVIS) {
+        $$.util.log('-> bundling ' + srcDir + '...');
+      }
       rebundle();
       // Touch file in unit test set. This triggers rebundling of tests because
       // karma only considers changes to tests files themselves re-bundle
@@ -795,7 +803,9 @@ function compileJs(srcDir, srcFilename, destDir, options) {
  */
 function buildExperiments(options) {
   options = options || {};
-  $$.util.log('Bundling experiments.html/js');
+  if (!process.env.TRAVIS) {
+    $$.util.log('Bundling experiments.html/js');
+  }
 
   var path = 'tools/experiments';
   var htmlPath = path + '/experiments.html';
@@ -818,7 +828,9 @@ function buildExperiments(options) {
   }
 
   // Build HTML.
-  $$.util.log('Processing ' + htmlPath);
+  if (!process.env.TRAVIS) {
+    $$.util.log('Processing ' + htmlPath);
+  }
   var html = fs.readFileSync(htmlPath, 'utf8');
   var minHtml = html.replace('/dist.tools/experiments/experiments.js',
       `https://${hostname}/v0/experiments.js`);
@@ -862,7 +874,9 @@ function buildLoginDone(options) {
  */
 function buildLoginDoneVersion(version, options) {
   options = options || {};
-  $$.util.log('Bundling amp-login-done.html/js');
+  if (!process.env.TRAVIS) {
+    $$.util.log('Bundling amp-login-done.html/js');
+  }
 
   var path = 'extensions/amp-access/' + version + '/';
   var htmlPath = path + 'amp-login-done.html';
@@ -885,7 +899,9 @@ function buildLoginDoneVersion(version, options) {
   }
 
   // Build HTML.
-  $$.util.log('Processing ' + htmlPath);
+  if (!process.env.TRAVIS) {
+    $$.util.log('Processing ' + htmlPath);
+  }
   var html = fs.readFileSync(htmlPath, 'utf8');
   var minHtml = html.replace(
       '../../../dist/v0/amp-login-done-' + version + '.max.js',
@@ -924,7 +940,9 @@ function buildLoginDoneVersion(version, options) {
  */
 function buildAlp(options) {
   options = options || {};
-  $$.util.log('Bundling alp.js');
+  if (!process.env.TRAVIS) {
+    $$.util.log('Bundling alp.js');
+  }
 
   return compileJs('./ads/alp/', 'install-alp.js', './dist/', {
     toName: 'alp.max.js',
@@ -943,7 +961,9 @@ function buildAlp(options) {
  */
 function buildExaminer(options) {
   options = options || {};
-  $$.util.log('Bundling examiner.js');
+  if (!process.env.TRAVIS) {
+    $$.util.log('Bundling examiner.js');
+  }
 
   return compileJs('./src/examiner/', 'examiner.js', './dist/', {
     toName: 'examiner.max.js',
@@ -961,7 +981,9 @@ function buildExaminer(options) {
  * @param {!Object} options
  */
 function buildSw(options) {
-  $$.util.log('Bundling sw.js');
+  if (!process.env.TRAVIS) {
+    $$.util.log('Bundling sw.js');
+  }
   var opts = Object.assign({}, options);
 
   return Promise.all([
@@ -993,7 +1015,9 @@ function buildSw(options) {
  * @param {!Object} options
  */
 function buildWebWorker(options) {
-  $$.util.log('Bundling ww.js');
+  if (!process.env.TRAVIS) {
+    $$.util.log('Bundling ww.js');
+  }
   var opts = Object.assign({}, options);
 
   return compileJs('./src/web-worker/', 'web-worker.js', './dist/', {
