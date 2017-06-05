@@ -240,11 +240,12 @@ function reportErrorToServer(message, filename, line, col, error) {
  * @param {string|undefined} col
  * @param {*|undefined} error
  * @param {boolean} hasNonAmpJs
+ * @param {number=} maxStackChar
  * @return {string|undefined} The URL
  * visibleForTesting
  */
 export function getErrorReportUrl(message, filename, line, col, error,
-    hasNonAmpJs) {
+    hasNonAmpJs, maxStackChar = 1000) {
   let expected = false;
   if (error) {
     if (error.message) {
@@ -362,7 +363,11 @@ export function getErrorReportUrl(message, filename, line, col, error,
 
     if (!isUserError && !error.ignoreStack && error.stack) {
       // Shorten
-      const stack = (error.stack || '').substr(0, 1000);
+      let stack = (error.stack || '').substr(0, maxStackChar);
+      // If format does not end with :\d+ truncate up to the last newline.
+      if (!/:\d+$/.test(stack)) {
+        stack = stack.replace(/\n.*$/, '')
+      }
       url += `&s=${encodeURIComponent(stack)}`;
     }
 
