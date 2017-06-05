@@ -320,7 +320,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     const timeout = timerFor(window).timeoutPromise(2000);
     return Promise.race([rtcResponse, timeout]);
+  }
 
+  /** @override */
+  getPreconnectUrls() {
+    return ['https://partner.googleadservices.com',
+            'https://tpc.googlesyndication.com'];
   }
 }
 

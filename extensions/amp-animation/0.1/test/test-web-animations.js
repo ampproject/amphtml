@@ -89,6 +89,25 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     return scan(def)[0].timing;
   }
 
+  function writeAndWaitForStyleKeyframes(name, css) {
+    const style = doc.createElement('style');
+    style.setAttribute('amp-custom', '');
+    style.textContent =
+        `@-ms-keyframes ${name} {${css}}` +
+        `@-moz-keyframes ${name} {${css}}` +
+        `@-webkit-keyframes ${name} {${css}}` +
+        `@keyframes ${name} {${css}}`;
+    doc.head.appendChild(style);
+    return poll('wait for style', () => {
+      for (let i = 0; i < doc.styleSheets.length; i++) {
+        if (doc.styleSheets[i].ownerNode == style) {
+          return true;
+        }
+      }
+      return false;
+    });
+  }
+
   it('should parse/validate timing duration', () => {
     expect(scanTiming({}).duration).to.equal(0);
     expect(scanTiming({duration: 0}).duration).to.equal(0);
@@ -598,26 +617,23 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
   it('should discover style keyframes', () => {
     const name = 'keyframes1';
     const css = 'from{opacity: 0} to{opacity: 1}';
-    const style = doc.createElement('style');
-    style.setAttribute('amp-custom', '');
-    style.textContent =
-        `@-ms-keyframes ${name} {${css}}` +
-        `@-moz-keyframes ${name} {${css}}` +
-        `@-webkit-keyframes ${name} {${css}}` +
-        `@keyframes ${name} {${css}}`;
-    doc.head.appendChild(style);
-    return poll('wait for style', () => {
-      for (let i = 0; i < doc.styleSheets.length; i++) {
-        if (doc.styleSheets[i].ownerNode == style) {
-          return true;
-        }
-      }
-      return false;
-    }).then(() => {
+    return writeAndWaitForStyleKeyframes(name, css).then(() => {
       const keyframes = scan({target: target1, keyframes: name})[0].keyframes;
       expect(keyframes).to.jsonEqual([
         {offset: 0, opacity: '0'},
         {offset: 1, opacity: '1'},
+      ]);
+    });
+  });
+
+  it('should polyfill partial style keyframes', () => {
+    const name = 'keyframes2';
+    const css = 'to{opacity: 0}';
+    return writeAndWaitForStyleKeyframes(name, css).then(() => {
+      const keyframes = scan({target: target1, keyframes: name})[0].keyframes;
+      expect(keyframes).to.jsonEqual([
+        {opacity: '1'},
+        {offset: 1, opacity: '0'},
       ]);
     });
   });

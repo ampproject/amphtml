@@ -29,6 +29,7 @@ import {
 import {
   MockA4AImpl,
 } from '../../../../extensions/amp-a4a/0.1/test/utils';
+import '../../../../extensions/amp-ad/0.1/amp-ad-ui';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {createIframePromise} from '../../../../testing/iframe';
@@ -180,8 +181,12 @@ describe('Google A4A utils', () => {
 
         url = ['https://foo.com?hello=world', 'https://bar.com?a=b'];
         const config = extractAmpAnalyticsConfig(a4a, headers);
+        const visibilityCsiRequest = config.requests.visibilityCsi;
+        expect(config.triggers.continuousVisible.request)
+            .to.contain('visibilityCsi');
         const iniLoadCsiRequest = config.requests.iniLoadCsi;
         const renderStartCsiRequest = config.requests.renderStartCsi;
+        expect(visibilityCsiRequest).to.not.be.null;
         expect(iniLoadCsiRequest).to.not.be.null;
         expect(renderStartCsiRequest).to.not.be.null;
         // We expect slotId == null, since no real element is created, and so
@@ -199,6 +204,9 @@ describe('Google A4A utils', () => {
           /rls=\$internalRuntimeVersion\$/,
           /adt.null=(doubleclick|adsense)/,
         ];
+        getRegExps('visibilityCsi').forEach(regExp => {
+          expect(visibilityCsiRequest).to.match(regExp);
+        });
         getRegExps('iniLoadCsi').forEach(regExp => {
           expect(iniLoadCsiRequest).to.match(regExp);
         });
@@ -206,9 +214,13 @@ describe('Google A4A utils', () => {
           expect(renderStartCsiRequest).to.match(regExp);
         });
         // Need to remove this request as it will vary in test execution.
+        delete config.requests.visibilityCsi;
+        config.triggers.continuousVisible.request.splice(
+            config.triggers.continuousVisible.request.indexOf('visibilityCsi'),
+            1);
         delete config.requests.iniLoadCsi;
         delete config.requests.renderStartCsi;
-        expect(config).to.deep.equal({
+        expect(config).to.jsonEqual({
           transport: {beacon: false, xhrpost: false},
           requests: {
             visibility1: url[0],
@@ -263,6 +275,7 @@ describe('Google A4A utils', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
+        doc.win = window;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
           'width': '320',
@@ -290,6 +303,7 @@ describe('Google A4A utils', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
+        doc.win = window;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
           'width': '320',
@@ -310,6 +324,7 @@ describe('Google A4A utils', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
+        doc.win = window;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
           'width': '320',
@@ -330,6 +345,7 @@ describe('Google A4A utils', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
+        doc.win = window;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
           'width': '320',
@@ -353,6 +369,7 @@ describe('Google A4A utils', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
+        doc.win = window;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
           'width': '320',
