@@ -1712,8 +1712,8 @@ class Context {
     this.tagStack_ = new TagStack();
 
     /**
-     * Maps from the tagspec id to the tagspec id.
-     * @type {!Array<?>}
+     * Set of tagSpec ids that have been validated.
+     * @type {!Array<boolean>}
      * @private
      */
     this.tagspecsValidated_ = [];
@@ -1838,13 +1838,16 @@ class Context {
   recordTagspecValidated(tagSpecId) {
     const duplicate = this.tagspecsValidated_.hasOwnProperty(tagSpecId);
     if (!duplicate) {
-      this.tagspecsValidated_[tagSpecId] = 0;
+      this.tagspecsValidated_[tagSpecId] = true;
     }
     return !duplicate;
   }
 
   /**
-   * @return {!Array<?>}
+   * Returns the tag spec ids that have been validated. The return object
+   * should be treated as a set (the object keys), and the value should be
+   * ignored.
+   * @return {!Array<boolean>}
    */
   getTagspecsValidated() {
     return this.tagspecsValidated_;
