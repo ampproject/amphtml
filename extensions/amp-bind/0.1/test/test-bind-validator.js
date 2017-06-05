@@ -195,6 +195,11 @@ describe('BindValidator', () => {
           /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
     });
 
+    it('should support <amp-list>', () => {
+      expect(val.canBind('AMP-LIST', 'src')).to.be.true;
+      expect(val.canBind('AMP-LIST', 'state')).to.be.true;
+    });
+
     it('should support <amp-selector>', () => {
       expect(val.canBind('AMP-SELECTOR', 'selected')).to.be.true;
     });

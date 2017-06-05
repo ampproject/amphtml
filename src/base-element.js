@@ -22,6 +22,15 @@ import {viewportForDoc} from './services';
 import {vsyncFor} from './services';
 import {user} from './log';
 
+/**
+ * @enum {string}
+ */
+export const BaseElementEvents = {
+  // Dispatched by elements that contain templated children when said template
+  // is rendered. The event target is the template container element.
+  // The event bubbles and is not cancelable.
+  Templated: 'templated',
+};
 
 /**
  * Base class for all custom element implementations. Instead of inheriting
@@ -911,18 +920,6 @@ export class BaseElement {
    */
   mutatedAttributesCallback(unusedMutations) {
     // Subclasses may override.
-  }
-
-  /**
-   * Returns an array of elements in this element's subtree that this
-   * element owns that could have children added or removed dynamically.
-   * The array should not contain any ancestors of this element, but could
-   * contain this element itself.
-   * @return {!Array<!Element>}
-   * @public
-   */
-  getDynamicElementContainers() {
-    return [];
   }
 
   /**

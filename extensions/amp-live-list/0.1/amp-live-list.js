@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-
+import {BaseElementEvents} from '../../../src/base-element';
 import {CSS} from '../../../build/amp-live-list-0.1.css';
 import {childElementByAttr} from '../../../src/dom';
 import {liveListManagerForDoc, LiveListManager} from './live-list-manager';
@@ -290,12 +290,11 @@ export class AmpLiveList extends AMP.BaseElement {
   updateAction_() {
     const hasInsertItems = this.pendingItemsInsert_.length > 0;
     const hasTombstoneItems = this.pendingItemsTombstone_.length > 0;
+    const hasReplaceItems = this.pendingItemsReplace_.length > 0;
 
-    const shouldSendAmpDomUpdateEvent = this.pendingItemsInsert_.length > 0 ||
-        this.pendingItemsReplace_.length > 0;
+    const updateHasNewItems = hasInsertItems || hasReplaceItems;
 
     let promise = this.mutateElement(() => {
-
       const itemsSlot = user().assertElement(this.itemsSlot_);
 
       if (hasInsertItems) {
@@ -342,9 +341,12 @@ export class AmpLiveList extends AMP.BaseElement {
       // TODO(erwinm, #3332) compensate scroll position here.
     });
 
-    if (shouldSendAmpDomUpdateEvent) {
+    if (updateHasNewItems) {
       promise = promise.then(() => {
         this.sendAmpDomUpdateEvent_();
+
+        this.itemsSlot_.dispatchEvent(
+            new Event(BaseElementEvents.Templated, {bubbles: true}));
       });
     }
 
@@ -856,11 +858,6 @@ export class AmpLiveList extends AMP.BaseElement {
   /** @override */
   getUpdateTime() {
     return this.updateTime_;
-  }
-
-  /** @override */
-  getDynamicElementContainers() {
-    return this.itemsSlot_ ? [this.itemsSlot_] : [];
   }
 
   sendAmpDomUpdateEvent_() {

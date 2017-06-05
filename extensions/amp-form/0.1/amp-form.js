@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {BaseElementEvents} from '../../../src/base-element'
 import {installFormProxy} from './form-proxy';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {createCustomEvent} from '../../../src/event-helper';
@@ -682,6 +683,8 @@ export class AmpForm {
               rendered.id = messageId;
               rendered.setAttribute('i-amphtml-rendered', '');
               container.appendChild(rendered);
+              container.dispatchEvent(
+                  new Event(BaseElementEvents.Templated, {bubbles: true}));
             });
       } else {
         // TODO(vializ): This is to let AMP know that the AMP elements inside
@@ -712,25 +715,6 @@ export class AmpForm {
     if (previousRender) {
       removeElement(previousRender);
     }
-  }
-
-  /**
-   * @return {Array<!Element>}
-   * @public
-   */
-  getDynamicElementContainers() {
-    const dynamicElements = [];
-    const successDiv =
-        this.form_./*OK*/querySelector(`[${FormState_.SUBMIT_SUCCESS}]`);
-    const errorDiv =
-        this.form_./*OK*/querySelector(`[${FormState_.SUBMIT_ERROR}]`);
-    if (successDiv) {
-      dynamicElements.push(successDiv);
-    }
-    if (errorDiv) {
-      dynamicElements.push(errorDiv);
-    }
-    return dynamicElements;
   }
 
   /**

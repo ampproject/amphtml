@@ -20,6 +20,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
 import {templatesFor} from '../../../src/services';
 import {user} from '../../../src/log';
+import {BaseElementEvents} from '../../../src/base-element';
 
 /**
  * The implementation of `amp-list` component. See {@link ../amp-list.md} for
@@ -75,11 +76,6 @@ export class AmpList extends AMP.BaseElement {
     }
   }
 
-  /** @override */
-  getDynamicElementContainers() {
-    return [this.container_];
-  }
-
   /**
    * Request list data from `src` and return a promise that resolves when
    * the list has been populated with rendered list items.
@@ -111,6 +107,9 @@ export class AmpList extends AMP.BaseElement {
       }
       this.container_.appendChild(element);
     });
+
+    this.container_.dispatchEvent(
+        new Event(BaseElementEvents.Templated, {bubbles: true}));
 
     // Change height if needed.
     this.getVsync().measure(() => {
