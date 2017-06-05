@@ -16,6 +16,7 @@
 
 import {bindForDoc, viewerForDoc} from '../../../src/services';
 import {fetchBatchedJsonFor} from '../../../src/batched-json';
+import {getMode} from '../../../src/mode';
 import {isBindEnabledFor} from './bind-impl';
 import {isJsonScriptTag} from '../../../src/dom';
 import {toggle} from '../../../src/style';
@@ -23,6 +24,18 @@ import {tryParseJson} from '../../../src/json';
 import {dev, user} from '../../../src/log';
 
 export class AmpState extends AMP.BaseElement {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    if (getMode().test) {
+      /** @visibleForTesting {?Promise} */
+      this.updateStatePromise = null;
+    }
+  }
+
+
   /** @override */
   getPriority() {
     // Loads after other content.
@@ -71,7 +84,10 @@ export class AmpState extends AMP.BaseElement {
     }
     const src = mutations['src'];
     if (src !== undefined) {
-      this.fetchSrcAndUpdateState_(/* isInit */ false);
+      const p = this.fetchSrcAndUpdateState_(/* isInit */ false);
+      if (getMode().test) {
+        this.updateStatePromise = p;
+      }
     }
   }
 
@@ -87,36 +103,63 @@ export class AmpState extends AMP.BaseElement {
 
     // Fetch JSON from endpoint at `src` attribute if it exists,
     // otherwise parse child script tag.
+    // If both `src` and child script tag are provided,
+    // state fetched from `src` takes precedence.
+    const children = this.element.children;
+    if (children.length == 0 && !this.element.hasAttribute('src')) {
+      user().error(TAG, 'Needs either a <script> child or src attribute');
+    }
+    if (children.length == 1) {
+      this.parseChildAndUpdateState_();
+    } else if (children.length > 1) {
+      user().error(TAG, 'Should contain only one <script> child.');
+    }
     if (this.element.hasAttribute('src')) {
-      this.fetchSrcAndUpdateState_(/* isInit */ true);
-      if (this.element.children.length > 0) {
-        user().error(TAG, 'Should not have children if src attribute exists.');
+      const p = this.fetchSrcAndUpdateState_(/* isInit */ true);
+      if (getMode().test) {
+        this.updateStatePromise = p;
       }
+    }
+
+  }
+
+  /**
+   * @private
+   */
+  parseChildAndUpdateState_() {
+    const TAG = this.getName_();
+    const children = this.element.children;
+    const firstChild = children[0];
+    if (isJsonScriptTag(firstChild)) {
+      const json = tryParseJson(firstChild.textContent, e => {
+        user().error(TAG, 'Failed to parse state. Is it valid JSON?', e);
+      });
+      this.updateState_(json, /* isInit */ true);
     } else {
-      const children = this.element.children;
-      if (children.length == 1) {
-        const firstChild = children[0];
-        if (isJsonScriptTag(firstChild)) {
-          const json = tryParseJson(firstChild.textContent, e => {
-            user().error(TAG, 'Failed to parse state. Is it valid JSON?', e);
-          });
-          this.updateState_(json, /* isInit */ true);
-        } else {
-          user().error(TAG,
-              'State should be in a <script> tag with type="application/json"');
-        }
-      } else if (children.length > 1) {
-        user().error(TAG, 'Should contain only one <script> child.');
-      }
+      user().error(TAG,
+          'State should be in a <script> tag with type="application/json"');
     }
   }
 
   /**
+   * Wrapper to stub during testing.
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Element} element
+   * @return {!Promise}
+   * @visibleForTesting
+   */
+  fetchBatchedJsonFor_(ampdoc, element) {
+    return fetchBatchedJsonFor(ampdoc, element);
+  }
+
+  /**
    * @param {boolean} isInit
+   * @returm {!Promise}
    * @private
    */
   fetchSrcAndUpdateState_(isInit) {
-    fetchBatchedJsonFor(this.getAmpDoc(), this.element).then(json => {
+    const ampdoc = this.getAmpDoc();
+    return this.fetchBatchedJsonFor_(ampdoc, this.element).then(json => {
       this.updateState_(json, isInit);
     });
   }

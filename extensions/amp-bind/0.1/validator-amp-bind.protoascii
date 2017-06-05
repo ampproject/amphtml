@@ -53,9 +53,18 @@ tags: {  # <amp-state> with json child
   requires: "amp-bind extension .js script"
   requires: "amp-bind extension .json script"
   disallowed_ancestor: "AMP-SIDEBAR"
+  attrs: { name: "credentials" }
   attrs: {
     name: "id"
     mandatory: true
+  }
+  attrs: {
+    name: "src"
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+    blacklisted_value_regex: "__amp_source_origin"
   }
   # <amp-bind>
   attrs: { name: "[src]" }
@@ -65,7 +74,7 @@ tags: {  # <amp-state> with json child
   }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-bind"
 }
-tags: {  # <amp-state> with src
+tags: {  # <amp-state> with src only
   html_format: AMP
   tag_name: "AMP-STATE"
   spec_name: "amp-state[src]"
