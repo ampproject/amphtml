@@ -47,6 +47,18 @@ class AmpAnalytics3pRemoteFrameHelper {
     this.extraDataListeners_ = [];
 
     /**
+     * @type {!Array<Object>}
+     * @private
+     */
+    this.receivedMessagesQueue_ = [];
+
+    /**
+     * @type {!Array<Object>}
+     * @private
+     */
+    this.receivedExtraDataQueue_ = [];
+
+    /**
      * Holds a mapping between sender ID and extra data
      * @type {Map}
      * @private
@@ -69,7 +81,7 @@ class AmpAnalytics3pRemoteFrameHelper {
     this.iframeMessagingClient_ = new IframeMessagingClient(win);
     this.iframeMessagingClient_.setSentinel(JSON.parse(window.name).sentinel);
     this.iframeMessagingClient_.registerCallback('ampAnalytics3pMessages',
-      this.onReceiveMessagesFromCreative_.bind(this));
+      this.onReceivedMessagesFromCreative_.bind(this));
 
     this.sendReadyMessageToCreative_();
   }
@@ -124,31 +136,56 @@ class AmpAnalytics3pRemoteFrameHelper {
   }
 
   /**
-   * Handles messages received from the creative, by sending them to the
-   * third-party vendor's metrics-collection page
-   * @param {!string} received The messages that were received from the creative
+   * Handles messages received from the creative, by enqueueing them to
+   * be sent to the third-party vendor's metrics-collection page
+   * @param {!Object} received The messages that were received from the creative
    * @private
    */
-  onReceiveMessagesFromCreative_(received) {
+  onReceivedMessagesFromCreative_(received) {
     if (!received || !received.ampAnalytics3pMessages) {
       return;
     }
     received.ampAnalytics3pMessages.forEach(submessage => {
       if (submessage.ampAnalytics3pEvent) {
-        this.eventsListeners_.forEach(eventsListener => {
-          this.requestIdleCallback_(() => {
-            eventsListener(submessage);
-          });
-        });
+        this.receivedMessagesQueue_.push(submessage);
       } else if (submessage.ampAnalytics3pExtraData) {
         this.senderIdToExtraData_[submessage.senderId] =
           submessage.ampAnalytics3pExtraData;
-        this.extraDataListeners_.forEach(extraDataListener => {
-          this.requestIdleCallback_(() => {
-            extraDataListener(submessage);
-          });
-        });
+        this.receivedExtraDataQueue_.push(submessage);
       }
+    });
+    this.sendQueuedMessagesToListeners_();
+  }
+
+  /**
+   * Sends enqueued messages to the third-party vendor's metrics-collection page
+   * If there are no event listeners on the page, event messages will remain
+   * in the queue. But if there is at least one event listener, messages will be
+   * sent to those listener(s) and the queue will be emptied. This means
+   * that the first event listener will receive messages that predate its
+   * creation, but if there are additional event listeners, they may not.
+   * Likewise for extra data listeners.
+   * @private
+   */
+  sendQueuedMessagesToListeners_() {
+    this.flushQueue_(this.receivedMessagesQueue_, this.eventsListeners_);
+    this.receivedMessagesQueue_ = [];
+    this.flushQueue_(this.receivedExtraDataQueue_, this.extraDataListeners_);
+    this.receivedExtraDataQueue_ = [];
+  }
+
+  flushQueue_(queue, listeners) {
+    if (queue.length == 0 || listeners.length == 0) {
+      return;
+    }
+    listeners.forEach(listener => {
+      this.dispatch(listener, queue);
+    });
+  }
+
+  dispatch(listener, dataToSend) {
+    this.requestIdleCallback_(() => {
+      listener(dataToSend);
     });
   }
 };
