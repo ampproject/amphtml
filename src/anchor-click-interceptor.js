@@ -60,8 +60,12 @@ function maybeExpandUrlParams(ampdoc, e) {
     'CLICK_Y': () => {
       return e.pageY;
     },
-    '3PANALYTICS': frameType => {
-      return ResponseMap.get(frameType, target.baseURI);
+    '3PANALYTICS': (frameType, key) => {
+      const responses = ResponseMap.get(frameType, target.baseURI);
+      if (responses && responses[key]) {
+        return responses[key];
+      }
+      return '';
     },
   };
   const newHref = urlReplacementsForDoc(ampdoc).expandSync(

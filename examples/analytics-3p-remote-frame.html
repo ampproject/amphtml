@@ -21,7 +21,8 @@
             console.log("Received an event: " + event.ampAnalytics3pEvent +
               " from: " + event.senderId + ", and my extra data is: " +
               ampAnalytics.getExtraData(event.senderId));
-            ampAnalytics.sendMessageToCreative('received');
+            ampAnalytics.sendMessageToCreative(
+              {'status': 'received', 'somethingElse': '42'});
           });
         });
         // The following is optional:

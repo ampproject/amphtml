@@ -19,8 +19,10 @@ import {
   parseUrl,
   checkCorsUrl,
 } from '../../../src/url';
+import {urls} from '../../../src/config';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {loadPromise} from '../../../src/event-helper';
 import {timerFor} from '../../../src/services';
 import {removeElement} from '../../../src/dom';
@@ -173,6 +175,7 @@ export class Transport {
         iframeMessagingClient.setHostWindow(frameData.frame.contentWindow);
         Transport.setIsReady_(frameUrl);
       }
+      // TODO: Kill this listener
     });
     if (!opt_processResponse) {
       return;
@@ -261,13 +264,13 @@ export class Transport {
    */
   createCrossDomainIframe_(ampDoc, frameUrl, opt_extraData) {
     const sentinel = Transport.createUniqueId_();
-    // DO NOT MERGE THIS
-    // Warning: the scriptSrc URL below will become something like:
-    // https://cdn.ampproject.org/rtv/001496360274808/v0/ampanalytics-lib.js
+    const scriptSrc = getMode().localDev
+      ? '/dist.3p/current/ampanalytics-lib.js'
+      : `${urls.thirdParty}/$internalRuntimeVersion$/ampanalytics-v0.js`;
     const frame = createElementWithAttributes(ampDoc, 'iframe', {
       sandbox: 'allow-scripts',
       name: JSON.stringify({
-        'scriptSrc': '/dist.3p/current/ampanalytics-lib.js',
+        scriptSrc,
         sentinel,
       }),
     });
