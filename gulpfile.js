@@ -351,7 +351,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
  * @return {!Promise}
  */
 function compileCss() {
-  $$.util.log('Recompiling CSS.');
+  $$.util.log('Recompiling CSS in amp.css');
   return jsifyCssAsync('css/amp.css').then(function(css) {
     return toPromise(gulp.src('css/**.css')
           .pipe($$.file('css.js', 'export const cssText = ' +
@@ -367,8 +367,10 @@ function compileCss() {
 
 /**
  * Copies the css from the build folder to the dist folder
+ * @return {!Promise}
  */
 function copyCss() {
+  $$.util.log('Copying build/css/v0.css to dist/v0.css');
   fs.copySync('build/css/v0.css', 'dist/v0.css');
   return toPromise(gulp.src('build/css/amp-*.css')
       .pipe(gulp.dest('dist/v0')));
@@ -428,9 +430,6 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
       return Promise.resolve();
     }
   }
-  if (!process.env.TRAVIS) {
-    $$.util.log('Bundling ' + name);
-  }
   // Building extensions is a 2 step process because of the renaming
   // and CSS inlining. This watcher watches the original file, copies
   // it to the destination and adds the CSS.
@@ -445,6 +444,9 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
   if (hasCss) {
     mkdirSync('build');
     mkdirSync('build/css');
+    if (!process.env.TRAVIS) {
+      $$.util.log('Recompiling CSS in ' + name);
+    }
     return jsifyCssAsync(path + '/' + name + '.css').then(function(css) {
       var jsCss = 'export const CSS = ' + JSON.stringify(css) + ';\n';
       var jsName = 'build/' + name + '-' + version + '.css.js';
@@ -453,6 +455,9 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
       fs.writeFileSync(cssName, css, 'utf-8');
       if (cssOnly) {
         return Promise.resolve();
+      }
+      if (!process.env.TRAVIS) {
+        $$.util.log('Bundling ' + name);
       }
       return buildExtensionJs(path, name, version, options);
     });
@@ -518,6 +523,12 @@ function build() {
     $$.util.log($$.util.colors.green('AMP_CONFIG written successfully.'));
   }
   process.env.NODE_ENV = 'development';
+  if (cssOnly) {
+    return Promise.all([
+      compileCss(),
+      buildExtensions({bundleOnlyIfListedInFiles: true}),  // Only ones with CSS
+    ]);
+  }
   return Promise.all([
     polyfillsForTests(),
     buildAlp(),
