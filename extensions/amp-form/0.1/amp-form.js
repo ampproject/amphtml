@@ -493,7 +493,7 @@ export class AmpForm {
    */
   handleXhrSubmitFailure_(error) {
     let promise;
-    if (error.response) {
+    if (error && error.response) {
       promise = error.response.json().catch(() => null);
     } else {
       promise = Promise.resolve(null);
