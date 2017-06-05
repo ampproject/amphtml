@@ -2676,7 +2676,7 @@ function validateAncestorTags(parsedTagSpec, context, validationResult) {
               context.getDocLocator(),
               /* params */
               [
-                spec.tagName.toLowerCase(), mandatoryAncestor.toLowerCase(),
+                getTagSpecName(spec), mandatoryAncestor.toLowerCase(),
                 spec.mandatoryAncestorSuggestedAlternative.toLowerCase()
               ],
               spec.specUrl, validationResult);
@@ -2686,7 +2686,7 @@ function validateAncestorTags(parsedTagSpec, context, validationResult) {
               amp.validator.ValidationError.Code.MANDATORY_TAG_ANCESTOR,
               context.getDocLocator(),
               /* params */
-              [spec.tagName.toLowerCase(), mandatoryAncestor.toLowerCase()],
+              [getTagSpecName(spec), mandatoryAncestor.toLowerCase()],
               spec.specUrl, validationResult);
         }
       }
@@ -2703,7 +2703,7 @@ function validateAncestorTags(parsedTagSpec, context, validationResult) {
             amp.validator.ValidationError.Code.DISALLOWED_TAG_ANCESTOR,
             context.getDocLocator(),
             /* params */
-            [spec.tagName.toLowerCase(), disallowedAncestor.toLowerCase()],
+            [getTagSpecName(spec), disallowedAncestor.toLowerCase()],
             spec.specUrl, validationResult);
       }
       return;

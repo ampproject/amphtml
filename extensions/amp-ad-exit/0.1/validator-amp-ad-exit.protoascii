@@ -17,11 +17,9 @@
 tags: {  # amp-ad-exit
   html_format: AMP4ADS
   tag_name: "SCRIPT"
-  spec_name: "amp-ad-exit extension .js script"
   satisfies: "amp-ad-exit extension .js script"
   requires: "amp-ad-exit"
   mandatory_parent: "HEAD"
-  unique: true
   extension_spec {
     name: "amp-ad-exit"
     allowed_versions: "0.1"
@@ -47,14 +45,14 @@ tags: {  # amp-ad-exit config JSON
   tag_name: "SCRIPT"
   spec_name: "amp-ad-exit configuration JSON"
   satisfies: "amp-ad-exit configuration JSON"
+  requires: "amp-ad-exit extension .js script"
   mandatory_parent: "AMP-AD-EXIT"
   attrs: { name: "nonce" }
   attrs: {
     name: "type"
-    value: "application/json"
     mandatory: true
+    value: "application/json"
     dispatch_key: true
   }
-  requires: "amp-ad-exit extension .js script"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-ad-exit"
 }
