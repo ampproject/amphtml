@@ -24,10 +24,7 @@ import {dict, hasOwn, map} from '../../../src/utils/object';
 import {sendRequestUsingIframe, Transport} from './transport';
 import {urlReplacementsForDoc} from '../../../src/services';
 import {userNotificationManagerFor} from '../../../src/services';
-import {
-  addToResponseMap,
-  deleteFromResponseMap
-} from '../../../src/anchor-click-interceptor';
+import {ResponseMap} from '../../../src/anchor-click-interceptor';
 import {cryptoFor} from '../../../src/crypto';
 import {timerFor, viewerForDoc, xhrFor} from '../../../src/services';
 import {toggle} from '../../../src/style';
@@ -174,7 +171,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   unlayoutCallback() {
     Transport.doneUsingCrossDomainIframe(this.getAmpDoc().win.document,
       this.config_['transport']);
-    deleteFromResponseMap(this.config_.transport.type);
+    ResponseMap.remove(this.config_.transport.type);
     return true;
   }
 
@@ -311,7 +308,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    */
   processCrossDomainIframeResponse_(type, response) {
     const creativeUrl = this.win.document.baseURI;
-    addToResponseMap(type, creativeUrl, response);
+    ResponseMap.add(type, creativeUrl, response);
   }
 
   /**

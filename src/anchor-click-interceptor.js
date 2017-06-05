@@ -60,11 +60,8 @@ function maybeExpandUrlParams(ampdoc, e) {
     'CLICK_Y': () => {
       return e.pageY;
     },
-    '3PANALYTICS': (frameType) => {
-      if (responseMap_[frameType] && responseMap_[frameType][target.baseURI]) {
-        return responseMap_[frameType][target.baseURI];
-      }
-      return '';
+    '3PANALYTICS': frameType => {
+      return ResponseMap.get(frameType, target.baseURI);
     },
   };
   const newHref = urlReplacementsForDoc(ampdoc).expandSync(
@@ -90,14 +87,26 @@ export function maybeExpandUrlParamsForTesting(ampdoc, e) {
   maybeExpandUrlParams(ampdoc, e);
 }
 
-responseMap_ = map();
-export function addToResponseMap(frameType, creativeUrl, response) {
-  if (!responseMap_[frameType]) {
-    responseMap_[frameType] = map();
+export class ResponseMap {
+  static add(frameType, creativeUrl, response) {
+    if (!AMP.responseMap_[frameType]) {
+      AMP.responseMap_[frameType] = map();
+    }
+    AMP.responseMap_[frameType][creativeUrl] = response;
   }
-  responseMap_[frameType][creativeUrl] = response;
-}
 
-export function deleteFromResponseMap(frameType) {
-  delete responseMap_[frameType];
+  static remove(frameType) {
+    delete AMP.responseMap_[frameType];
+  }
+
+  static get(frameType, creativeUrl) {
+    if (AMP.responseMap_[frameType] &&
+      AMP.responseMap_[frameType][creativeUrl]) {
+      return AMP.responseMap_[frameType][creativeUrl];
+    }
+    return '';
+  }
 }
+/** @private @const {Map} */
+AMP.responseMap_ = AMP.responseMap_ || map();
+

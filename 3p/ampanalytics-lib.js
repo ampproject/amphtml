@@ -23,6 +23,9 @@ import {reportError} from '../src/error';
 initLogConstructor();
 setReportError(reportError);
 
+/** @private @const {string} */
+const TAG_ = 'ampanalytics-lib';
+
 /**
  * This provides the "glue" between the AMP Analytics tag and the third-party
  * vendor's metrics-collection page.
@@ -32,13 +35,13 @@ setReportError(reportError);
 class AmpAnalytics3pRemoteFrameHelper {
   constructor(win) {
     /**
-     * @type {!Array<function<string>>}
+     * @type {!Array<function(string)>}
      * @private
      */
-    this.eventListeners_ = [];
+    this.eventsListeners_ = [];
 
     /**
-     * @type {!Array<function<string,string>>}
+     * @type {!Array<function(string,string)>}
      * @private
      */
     this.extraDataListeners_ = [];
@@ -77,7 +80,7 @@ class AmpAnalytics3pRemoteFrameHelper {
    * strings, and does something with them.
    */
   registerAmpAnalytics3pEventsListener(listener) {
-    this.eventListeners_.push(listener);
+    this.eventsListeners_.push(listener);
   }
 
   /**
@@ -104,7 +107,7 @@ class AmpAnalytics3pRemoteFrameHelper {
    * Gets any optional extra data that should be made available to the
    * cross-domain frame, in the context of a particular creative.
    * @param {number} senderId The ID of the creative that sent the extra data
-   * @returns {string=}
+   * @returns {?string}
    */
   getExtraData(senderId) {
     return this.senderIdToExtraData_[senderId];
@@ -130,35 +133,22 @@ class AmpAnalytics3pRemoteFrameHelper {
     if (!received || !received.ampAnalytics3pMessages) {
       return;
     }
-    for (submessage of received.ampAnalytics3pMessages) {
+    received.ampAnalytics3pMessages.forEach(submessage => {
       if (submessage.ampAnalytics3pEvent) {
-        for (eventsListener of this.eventListeners_) {
-          this.dispatch_(eventsListener, submessage);
-        }
+        this.eventsListeners_.forEach(eventsListener => {
+          this.requestIdleCallback_(() => {
+            eventsListener(submessage);
+          });
+        });
       } else if (submessage.ampAnalytics3pExtraData) {
         this.senderIdToExtraData_[submessage.senderId] =
           submessage.ampAnalytics3pExtraData;
-        for (extraDataListener of this.extraDataListeners_) {
-          this.dispatch_(extraDataListener, submessage);
-        }
+        this.extraDataListeners_.forEach(extraDataListener => {
+          this.requestIdleCallback_(() => {
+            extraDataListener(submessage);
+          });
+        });
       }
-    }
-  }
-
-  /**
-   * Sends a message that was received from the parent frame to the
-   * registered listener function.
-   * This is not inside of the iteration in receivedMessagesFromCreative_
-   * because we want message to be on the stack. If not, the loop could
-   * iterate another time before requestIdleCallback_() fires, by which time
-   * message may have been overwritten by the next one in the array.
-   * @param {!Function<Object>} listener The listener to dispatch the message to
-   * @param {!Object} message The content to dispatch to the listener
-   * @private
-   */
-  dispatch_(listener, message) {
-    this.requestIdleCallback_(() => {
-      listener(message);
     });
   }
 };
@@ -171,5 +161,5 @@ const remoteFrameHelper_ = new AmpAnalytics3pRemoteFrameHelper(window);
 if (window.onNewAmpAnalyticsInstance) {
   window.onNewAmpAnalyticsInstance(remoteFrameHelper_);
 } else {
-  dev().error('Vendor page must implement onNewAmpAnalyticsInstance.');
+  dev().error(TAG_, 'Vendor page must implement onNewAmpAnalyticsInstance.');
 }

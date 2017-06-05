@@ -178,7 +178,7 @@ export class Transport {
       return;
     }
     iframeMessagingClient.registerCallback(
-      'ampAnalytics3pResponse', (response) => {
+      'ampAnalytics3pResponse', response => {
         if (!response || !response.ampAnalytics3pResponse) {
           return;
         }
@@ -268,7 +268,7 @@ export class Transport {
       sandbox: 'allow-scripts',
       name: JSON.stringify({
         'scriptSrc': '/dist.3p/current/ampanalytics-lib.js',
-        'sentinel': sentinel,
+        sentinel,
       }),
     });
     const iframeMessagingClient = new IframeMessagingClient(window);
@@ -349,15 +349,15 @@ export class Transport {
       return;
     }
     const frameData = Transport.crossDomainIframes_[frameUrl];
-    this.enqueueMessageForCrossDomainIframe_(frameData, 'ampAnalytics3pExtraData',
-      opt_extraData);
+    this.enqueueMessageForCrossDomainIframe_(frameData,
+      'ampAnalytics3pExtraData', opt_extraData);
   }
 
   enqueueMessageForCrossDomainIframe_(frameData, messageType, message) {
     if (frameData.messageQueue.length > MAX_QUEUE_SIZE_) {
       dev().warn(TAG_, 'Queue has exceeded maximum size');
     }
-    let messageObject = {
+    const messageObject = {
       senderId: this.id_,
       type: messageType,
     };
