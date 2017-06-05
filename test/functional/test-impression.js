@@ -97,8 +97,6 @@ describe('impression', () => {
     }));
     const href = window.location.href;
     return getTrackImpressionPromise().then(() => {
-      throw new Error('UNREACHABLE');
-    }, () => {
       expect(window.location.href).to.equal(href);
     });
   });
