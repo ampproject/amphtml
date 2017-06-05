@@ -2,7 +2,7 @@ language: node_js
 dist: trusty
 sudo: false  # See http://docs.travis-ci.com/user/trusty-ci-environment/
 node_js:
-  - "4"
+  - "stable"
 python:
   - "2.7"
 notifications:
