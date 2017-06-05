@@ -67,7 +67,7 @@ export function getMultiSizeDimensions(
           w => isNaN(w),
           h => isNaN(h),
           ({badDim, badVal}) =>
-          `Invalid ${badDim} of ${badVal} given for secondary size.`, true)) {
+          `Invalid ${badDim} of ${badVal} given for secondary size.`, strict)) {
       if (strict) {
         return null;
       }
@@ -79,7 +79,7 @@ export function getMultiSizeDimensions(
           w => w > primaryWidth,
           h => h > primaryHeight,
           ({badDim, badVal}) => `Secondary ${badDim} ${badVal} ` +
-          `can't be larger than the primary ${badDim}.`, true)) {
+          `can't be larger than the primary ${badDim}.`, strict)) {
       if (strict) {
         return null;
       }
@@ -98,7 +98,7 @@ export function getMultiSizeDimensions(
             w => w < minWidth,
             h => h < minHeight,
             ({badDim, badVal}) => `Secondary ${badDim} ${badVal} is ` +
-            `smaller than 2/3rds of the primary ${badDim}.`, true)) {
+            `smaller than 2/3rds of the primary ${badDim}.`, strict)) {
         if (strict) {
           return null;
         }
