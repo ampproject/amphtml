@@ -443,7 +443,10 @@ describes.repeated('', {
             status: 400,
             json() {
               return Promise.resolve({
-                verifyErrors: [{name: 'name', message: 'This name is just wrong.'}],
+                verifyErrors: [{
+                  name: 'name',
+                  message: 'This name is just wrong.',
+                }],
               });
             },
           },
@@ -485,7 +488,10 @@ describes.repeated('', {
                 status: 400,
                 json() {
                   return Promise.resolve({
-                    verifyErrors: [{name: 'name', message: 'Second request error'}],
+                    verifyErrors: [{
+                      name: 'name',
+                      message: 'Second request error',
+                    }],
                   });
                 },
               },
