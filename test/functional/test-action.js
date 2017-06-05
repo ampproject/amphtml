@@ -24,7 +24,6 @@ import {
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {KeyCodes} from '../../src/utils/key-codes';
 import {createCustomEvent} from '../../src/event-helper';
-import {toggleExperiment} from '../../src/experiments';
 import {setParentWindow} from '../../src/service';
 import * as sinon from 'sinon';
 
@@ -927,14 +926,13 @@ describes.sandboxed('Action global target', {}, () => {
 
 describes.fakeWin('Core events', {amp: true}, env => {
   let sandbox;
-  let win;
   let window;
   let document;
   let action;
   let triggerPromise;
 
   beforeEach(() => {
-    win = window = env.win;
+    window = env.win;
     document = window.document;
     sandbox = env.sandbox;
     sandbox.stub(window.document, 'addEventListener');
@@ -952,10 +950,6 @@ describes.fakeWin('Core events', {amp: true}, env => {
       });
     });
     action.vsync_ = {mutate: callback => callback()};
-  });
-
-  afterEach(() => {
-    toggleExperiment(win, 'input-debounced', false);
   });
 
   it('should trigger tap event on click', () => {
@@ -1051,7 +1045,6 @@ describes.fakeWin('Core events', {amp: true}, env => {
   });
 
   it('should trigger input-debounced event on input', () => {
-    toggleExperiment(window, 'input-debounced', true);
     sandbox.stub(action, 'invoke_');
     const handler = window.document.addEventListener.getCall(4).args[1];
     const element = document.createElement('input');
@@ -1063,31 +1056,6 @@ describes.fakeWin('Core events', {amp: true}, env => {
     handler(event);
 
     return triggerPromise.then(() => {
-      expect(action.trigger).to.have.been.calledWith(
-          element,
-          'input-debounced',
-          sinon.match(event => {
-            const value = event.target.value;
-            return value == 'foo bar baz';
-          }));
-      toggleExperiment(window, 'input-debounced', false);
-    }, () => {
-      assert.fail('Should succeed with experiment.');
-    });
-  });
-
-  it('should not handle input-debounced event without experiment', () => {
-    const handler = window.document.addEventListener.getCall(4).args[1];
-    const element = document.createElement('input');
-    element.setAttribute('on', 'input-debounced:body.hide');
-    element.value = 'foo bar baz';
-    const event = {target: element};
-    handler(event);
-
-    return triggerPromise.then(() => {
-      assert.fail('Should not succeed without experiment.');
-    }, error => {
-      expect(error).to.match(/"input-debounced" experiment/);
       expect(action.trigger).to.have.been.calledWith(
           element,
           'input-debounced',
