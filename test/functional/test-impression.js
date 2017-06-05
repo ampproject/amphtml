@@ -96,8 +96,13 @@ describe('impression', () => {
       // never resolves
     }));
     const href = window.location.href;
-    return getTrackImpressionPromise().then(() => {
-      expect(window.location.href).to.equal(href);
+    const clock = sandbox.useFakeTimers();
+    maybeTrackImpression(window);
+    return Promise.resolve().then(() => {
+      clock.tick(8001);
+      return getTrackImpressionPromise().then(() => {
+        expect(window.location.href).to.equal(href);
+      });
     });
   });
 
