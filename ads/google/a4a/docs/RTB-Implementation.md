@@ -5,15 +5,8 @@
 This guide is designed to provide additional information for SSPs and Ad Exchanges that want to support AMP Ads in a Real-Time Bidding (RTB) environment.  The IAB's OpenRTB 2.5 spec is [here](http://www.iab.com/wp-content/uploads/2016/03/OpenRTB-API-Specification-Version-2-5-FINAL.pdf).
  
 AMP pages must ensure all content conforms to the AMP format. When non-AMP content is included in an AMP page, there can be a delay as the content is verified. A major benefit for AMP Ads on AMP pages is that the ad can be rendered early by splicing the ad into the surrounding AMP page, without affecting the UX of the page and without delay.
- 
-# Background Docs
-* [AMP Ads for AMP Pages (Github)](https://github.com/ampproject/amphtml/issues/3133)
-* [AMP Ad Creative Format Spec (Github)](https://github.com/google/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md)
-* [AMP Ads Overview (Github)](https://github.com/ampproject/amphtml/blob/master/ads/google/a4a/docs/a4a-readme.md)
-* [AMP Ads Website from the AMP Project](https://www.ampproject.org/learn/who-uses-amp/amp-ads/)
-* [Example AMP Ads](https://ampbyexample.com/amp-ads/#amp-ads/introduction)
-* [Speed comparison](https://ampbyexample.com/amp-ads/introduction/amp_ads_vs_non-amp_ads/): see how fast an AMP Ad loads in comparison to a regular ad. Best viewed on a 3G connection.
-* [Discussion in OpenRTB Dev Forum](https://groups.google.com/forum/#!topic/openrtb-dev/0wyPsF5D07Q): RTB Specific Proposal
+
+For those new to AMP Ads, see the background docs at thje bottom of this article.
  
 ## AMP Ads in RTB: High-Level Approach
  
@@ -62,6 +55,15 @@ SSPs will need to provide a new field in the bid response to allow bidders to re
 ### Impression Tracking and Billing URLs
  
 * RTB buyers often include impression trackers as a structured field in the bid response (for example `Bid.burl`, the "billing notice URL" in OpenRTB 2.5).
-* It is up to the exchange or publisher ad server to determine how these URLs are fired, but <[amp-pixel](https://www.ampproject.org/docs/reference/components/amp-pixel)> and <[amp-analytics](https://www.ampproject.org/docs/reference/components/amp-analytics)> can handle most impression tracking and analytics use cases.
+* It is up to the exchange or publisher ad server to determine how these URLs are fired, but <[`amp-pixel`](https://www.ampproject.org/docs/reference/components/amp-pixel)> and <[`amp-analytics`](https://www.ampproject.org/docs/reference/components/amp-analytics)> can handle most impression tracking and analytics use cases.
+
+## Background Docs
+* [AMP Ads for AMP Pages (Github)](https://github.com/ampproject/amphtml/issues/3133)
+* [AMP Ad Creative Format Spec (Github)](https://github.com/google/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md)
+* [AMP Ads Overview (Github)](https://github.com/ampproject/amphtml/blob/master/ads/google/a4a/docs/a4a-readme.md)
+* [AMP Ads Website from the AMP Project](https://www.ampproject.org/learn/who-uses-amp/amp-ads/)
+* [Example AMP Ads](https://ampbyexample.com/amp-ads/#amp-ads/introduction)
+* [Speed comparison](https://ampbyexample.com/amp-ads/introduction/amp_ads_vs_non-amp_ads/): see how fast an AMP Ad loads in comparison to a regular ad. Best viewed on a 3G connection.
+* [Discussion in OpenRTB Dev Forum](https://groups.google.com/forum/#!topic/openrtb-dev/0wyPsF5D07Q): RTB Specific Proposal
  
  
