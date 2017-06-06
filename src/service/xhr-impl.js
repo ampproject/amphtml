@@ -188,7 +188,7 @@ export class Xhr {
 
   /**
    * Fetches a JSON response. Note this returns the response object, not the
-   * response's JSON. #fetchJson merely sets up the request to accept JSOn.
+   * response's JSON. #fetchJson merely sets up the request to accept JSON.
    *
    * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
    *
@@ -196,9 +196,10 @@ export class Xhr {
    *
    * @param {string} input
    * @param {?FetchInitDef=} opt_init
+   * @param {boolean=} opt_allowFailure Allows non-2XX status codes to fulfill.
    * @return {!Promise<!FetchResponse>}
    */
-  fetchJson(input, opt_init) {
+  fetchJson(input, opt_init, opt_allowFailure) {
     const init = setupInit(opt_init, 'application/json');
     if (init.method == 'POST' && !isFormData(init.body)) {
       // Assume JSON strict mode where only objects or arrays are allowed
