@@ -181,7 +181,7 @@ amp-carousel .amp-carousel-button.amp-disabled {
 /* End SlideScroll */
 
 /* Begin ScrollableCarousel */
-.i-amphtml-scrollable-carousel-container .amp-carousel-slide {
+.amp-scrollable-carousel-slide {
   display: inline-block !important;
   margin-left: 8px;
 }
