@@ -35,7 +35,6 @@ var internalRuntimeVersion = require('./build-system/internal-version').VERSION;
 var internalRuntimeToken = require('./build-system/internal-version').TOKEN;
 
 var argv = minimist(process.argv.slice(2), {boolean: ['strictBabelTransform']});
-var cssOnly = argv['css-only'];
 
 require('./build-system/tasks');
 
@@ -372,6 +371,11 @@ function compileCss() {
             mkdirSync('build/css');
             fs.writeFileSync('build/css/v0.css', css);
           }));
+  }).then(() => {
+    return buildExtensions({
+      bundleOnlyIfListedInFiles: true,
+      compileOnlyCss: true
+    });
   });
 }
 
@@ -396,6 +400,7 @@ function watch() {
   });
 
   return Promise.all([
+    compileCss(),
     buildAlp({watch: true}),
     buildExaminer({watch: true}),
     buildExtensions({watch: true}),
@@ -423,11 +428,11 @@ function watch() {
  * @return {!Promise}
  */
 function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
-  if (cssOnly && !hasCss) {
-    return Promise.resolve();
-  }
   options = options || {};
   options.extraGlobs = opt_extraGlobs;
+  if (options.compileOnlyCss && !hasCss) {
+    return Promise.resolve();
+  }
   var path = 'extensions/' + name + '/' + version;
   var jsPath = path + '/' + name + '.js';
   var jsTestPath = path + '/test/' + 'test-' + name + '.js';
@@ -461,7 +466,7 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
       var cssName = 'build/css/' + name + '-' + version + '.css';
       fs.writeFileSync(jsName, jsCss, 'utf-8');
       fs.writeFileSync(cssName, css, 'utf-8');
-      if (cssOnly) {
+      if (options.compileOnlyCss) {
         return Promise.resolve();
       }
       return buildExtensionJs(path, name, version, options);
@@ -510,10 +515,9 @@ function buildExtensionJs(path, name, version, options) {
 }
 
 /**
- * Main Build
- * @return {!Promise}
+ * Writes the AMP config to file if AMP_TESTING_HOST is set.
  */
-function build() {
+function writeAmpConfig() {
   var TESTING_HOST = process.env.AMP_TESTING_HOST;
   if (argv.fortesting && typeof TESTING_HOST == 'string') {
     var AMP_CONFIG = {
@@ -528,13 +532,15 @@ function build() {
         JSON.stringify(AMP_CONFIG));
     $$.util.log($$.util.colors.green('AMP_CONFIG written successfully.'));
   }
+}
+
+/**
+ * Main build
+ * @return {!Promise}
+ */
+function build() {
   process.env.NODE_ENV = 'development';
-  if (cssOnly) {
-    return Promise.all([
-      compileCss(),
-      buildExtensions({bundleOnlyIfListedInFiles: true}),  // Only ones with CSS
-    ]);
-  }
+  writeAmpConfig();
   return compileCss().then(() => {
     return Promise.all([
       polyfillsForTests(),
@@ -554,21 +560,24 @@ function build() {
  */
 function dist() {
   process.env.NODE_ENV = 'production';
+  writeAmpConfig();
   cleanupBuildDir();
-  return Promise.all([
-    compile(false, true, true),
-    // NOTE:
-    // When adding a line here, consider whether you need to include polyfills
-    // and whether you need to init logging (initLogConstructor).
-    buildAlp({minify: true, watch: false, preventRemoveAndMakeDir: true}),
-    buildExaminer({minify: true, watch: false, preventRemoveAndMakeDir: true}),
-    buildSw({minify: true, watch: false, preventRemoveAndMakeDir: true}),
-    buildWebWorker({minify: true, watch: false, preventRemoveAndMakeDir: true}),
-    buildExtensions({minify: true, preventRemoveAndMakeDir: true}),
-    buildExperiments({minify: true, watch: false, preventRemoveAndMakeDir: true}),
-    buildLoginDone({minify: true, watch: false, preventRemoveAndMakeDir: true}),
-    copyCss(),
-  ]).then(() => {
+  return compileCss().then(() => {
+    return Promise.all([
+      compile(false, true, true),
+      // NOTE:
+      // When adding a line here, consider whether you need to include polyfills
+      // and whether you need to init logging (initLogConstructor).
+      buildAlp({minify: true, watch: false, preventRemoveAndMakeDir: true}),
+      buildExaminer({minify: true, watch: false, preventRemoveAndMakeDir: true}),
+      buildSw({minify: true, watch: false, preventRemoveAndMakeDir: true}),
+      buildWebWorker({minify: true, watch: false, preventRemoveAndMakeDir: true}),
+      buildExtensions({minify: true, preventRemoveAndMakeDir: true}),
+      buildExperiments({minify: true, watch: false, preventRemoveAndMakeDir: true}),
+      buildLoginDone({minify: true, watch: false, preventRemoveAndMakeDir: true}),
+      copyCss(),
+    ]);
+  }).then(() => {
     copyAliasExtensions();
   });
 }
