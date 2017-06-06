@@ -152,7 +152,7 @@ export class Bind {
     });
 
     /** @const @private {!Function} */
-    this.boundOnElementTemplated_ = this.onElementTemplated_.bind(this);
+    this.boundOnTemplateRendered_ = this.onTemplateRendered_.bind(this);
 
     /**
      * @private {?Promise}
@@ -247,7 +247,7 @@ export class Bind {
     let promise = this.addBindingsForNode_(rootNode).then(() => {
       // Listen for template renders (e.g. amp-list) to rescan for bindings.
       rootNode.addEventListener(
-          'amp:template-rendered', this.boundOnElementTemplated_);
+          'amp:template-rendered', this.boundOnTemplateRendered_);
     });
     // Check default values against initial expression results in development.
     if (getMode().development) {
@@ -829,12 +829,12 @@ export class Bind {
   /**
    * @param {!Event} event
    */
-  onElementTemplated_(event) {
-    const node = /** @type {!Node} */ (event.target);
-    this.removeBindingsForNode_(node).then(() => {
-      return this.addBindingsForNode_(node);
+  onTemplateRendered_(event) {
+    const templateContainer = /** @type {!Element} */ (event.target);
+    this.removeBindingsForNode_(templateContainer).then(() => {
+      return this.addBindingsForNode_(templateContainer);
     }).then(() => {
-      this.dispatchEventForTesting_('amp:bind:templated');
+      this.dispatchEventForTesting_('amp:bind:rescan-template');
     });
   }
 

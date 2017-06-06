@@ -188,7 +188,7 @@ describes.realWin('Bind', {
       dynamicTag.appendChild(elementWithBinding);
       dynamicTag.dispatchEvent(
           new Event('amp:template-rendered', {bubbles: true}));
-      return waitForEvent('amp:bind:templated');
+      return waitForEvent('amp:bind:rescan-template');
     }).then(() => {
       expect(bind.boundElements_.length).to.equal(1);
     });

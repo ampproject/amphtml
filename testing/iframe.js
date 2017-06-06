@@ -67,7 +67,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
       'amp:attached': 0,
       'amp:bind:initialize': 0,
       'amp:bind:setState': 0,
-      'amp:bind:templated': 0,
+      'amp:bind:rescan-template': 0,
       'amp:error': 0,
       'amp:load:start': 0,
       'amp:stubbed': 0,

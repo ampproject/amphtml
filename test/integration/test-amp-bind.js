@@ -61,9 +61,9 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   }
 
   /** @return {!Promise} */
-  function waitForTemplateRender() {
+  function waitForTemplateRescan() {
     return bindForDoc(ampdoc).then(unusedBind =>
-        fixture.awaitEvent('amp:bind:templated', ++numTemplated));
+        fixture.awaitEvent('amp:bind:rescan-template', ++numTemplated));
   }
 
   describe('with [text] and [class]', () => {
@@ -336,7 +336,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
       fixture.doc.getElementById('liveListUpdateButton').click();
 
       let newItem;
-      return waitForTemplateRender().then(() => {
+      return waitForTemplateRescan().then(() => {
         expect(liveListItems.children.length).to.equal(2);
         newItem = fixture.doc.getElementById('newItem');
         fixture.doc.getElementById('changeLiveListTextButton').click();
