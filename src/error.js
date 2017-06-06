@@ -93,7 +93,9 @@ export function reportError(error, opt_associatedElement) {
         isValidError = true;
       } else {
         const origError = error;
-        error = new Error(String(origError));
+        error = new Error(typeof origError == 'object' ?
+            JSON.stringify(origError) :
+            String(origError));
         error.origError = origError;
       }
     } else {
