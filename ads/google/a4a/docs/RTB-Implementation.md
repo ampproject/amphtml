@@ -18,17 +18,28 @@ Exchanges will need to indicate in the RTB bid request whether a page is built i
 
 A new field is added to the `Site` object of the OpenRTB standard to indicate whether a webpage is built on AMP HTML.  In OpenRTB 2.5, this is section 3.2.13.
  
-![RTB1](./img1.png)
+| Field         | Scope     | Type      | Default       | Description           |
+| ------------- |------     |-----      |:-------------:|-------------          |
+| `amp`         | optional  | integer   | -             | Whether the request is for an Accelerated Mobile Page. 0 = page is non-AMP, 1 = page is built with AMP HTML.  AMP status unknown if omitted. |
  
 **`Imp` Object additional field: `ampad`**
 
 A new field is added to the `Imp` object of the OpenRTB standard to provide more detail around AMP ad requirements and how AMP ads will load.  In OpenRTB 2.5, this is section 3.2.4.
  
-![RTB2](./img2.png)
+| Field         | Scope     | Type      | Default       | Description           |
+| ------------- |------     |-----      |:-------------:|-------------          |
+| `ampad`       | optional  | integer   | 1             | AMP Ad requirements and rendering behavior.  See AMP Ad Status table. |
  
 **AMP Ad Status Table**
  
-![RTB3](./img3.png)
+| Value        | Description            | 
+| ------------- |-------------          |
+| 1         | AMP Ad requirements are unknown.|
+| 2         | AMP Ads are not allowed.                |  
+| 3         | Either AMP Ads or non-AMP Ads are allowed; AMP Ads are not early rendered. | 
+| 4         | Either AMP Ads or non-AMP Ads are allowed, and AMP Ads are early rendered.|
+| 5         | AMP Ads are required.  Ads that are non-AMP may be rejected by the publisher.|
+| 500+      | Exchange-specific values; should be communicated to bidders *a priori*         |
  
 ### RTB Bid Response
  
@@ -36,7 +47,9 @@ SSPs will need to provide a new field in the bid response to allow bidders to re
  
 **`Bid` Object additional field: `ampadurl`**
  
-![RTB4](./img4.png)
+| Field         | Type     | Description        | 
+| ------------- |------     |-----              |
+| `ampadurl`       | string  | Optional means of conveying Amp Ad markup in case the bid wins; only one of `ampadurl` or `adm` should be set. Substitution macros (Section 4.4) may be included.  URL should point to a creative server containing valid AMP Ad html.           |  
  
 ### Verification of valid AMP
  
