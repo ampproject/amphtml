@@ -40,7 +40,7 @@ export function fetchBatchedJsonFor(ampdoc, element, opt_expr) {
       opts.requireAmpResponseSourceOrigin = false;
     }
     return batchedXhrFor(ampdoc.win).fetchJson(src, opts);
-  }).then(data => {
+  }).then(res => res.json()).then(data => {
     if (data == null) {
       throw new Error('Response is undefined.');
     }

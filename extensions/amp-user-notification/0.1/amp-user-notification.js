@@ -190,7 +190,7 @@ export class AmpUserNotification extends AMP.BaseElement {
         credentials: 'include',
         requireAmpResponseSourceOrigin: false,
       };
-      return xhrFor(this.win).fetchJson(href, getReq);
+      return xhrFor(this.win).fetchJson(href, getReq).then(res => res.json());
     });
   }
 

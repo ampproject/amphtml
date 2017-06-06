@@ -78,7 +78,7 @@ describes.sandboxed('BatchedXhr', {}, () => {
     it('should cache the same as the convenience methods', () => {
       return Promise.all([
         xhr.fetch('/get?k=v1', jsonInit).then(response => response.json()),
-        xhr.fetchJson('/get?k=v1'),
+        xhr.fetchJson('/get?k=v1').then(res => res.json()),
       ]).then(results => {
         expect(fetchStub).to.be.calledOnce;
         expect(results[0]).to.jsonEqual(TEST_OBJECT);
@@ -106,8 +106,8 @@ describes.sandboxed('BatchedXhr', {}, () => {
 
     it('should fetch JSON GET requests once for identical URLs', () => {
       return Promise.all([
-        xhr.fetchJson('/get?k=v1'),
-        xhr.fetchJson('/get?k=v1'),
+        xhr.fetchJson('/get?k=v1').then(res => res.json()),
+        xhr.fetchJson('/get?k=v1').then(res => res.json()),
       ]).then(results => {
         expect(fetchStub).to.be.calledOnce;
         expect(results[0]).to.jsonEqual(TEST_OBJECT);
@@ -117,8 +117,8 @@ describes.sandboxed('BatchedXhr', {}, () => {
 
     it('should not be affected by fragments passed in the URL', () => {
       return Promise.all([
-        xhr.fetchJson('/get?k=v1#a.b[0].c'),
-        xhr.fetchJson('/get?k=v1#a.b[1].d'),
+        xhr.fetchJson('/get?k=v1#a.b[0].c').then(res => res.json()),
+        xhr.fetchJson('/get?k=v1#a.b[1].d').then(res => res.json()),
       ]).then(results => {
         expect(fetchStub).to.be.calledOnce;
         expect(results[0]).to.jsonEqual(TEST_OBJECT);
@@ -130,10 +130,8 @@ describes.sandboxed('BatchedXhr', {}, () => {
       return Promise.all([
         xhr.fetchJson('/get?k=v1', {method: 'POST', body: {}}),
         xhr.fetchJson('/get?k=v1', {method: 'POST', body: {}}),
-      ]).then(results => {
+      ]).then(() => {
         expect(fetchStub).to.be.calledTwice;
-        expect(results[0]).to.jsonEqual(TEST_OBJECT);
-        expect(results[1]).to.jsonEqual(TEST_OBJECT);
       });
     });
   });

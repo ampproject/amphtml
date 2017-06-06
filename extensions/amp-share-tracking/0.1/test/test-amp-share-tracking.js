@@ -163,7 +163,11 @@ describes.fakeWin('amp-share-tracking', {
       'and the response format is correct', () => {
     historyGetFragmentStub.onFirstCall().returns(Promise.resolve(''));
     const mockJsonResponse = {fragment: '54321'};
-    xhrStub.onFirstCall().returns(Promise.resolve(mockJsonResponse));
+    xhrStub.onFirstCall().returns(Promise.resolve({
+      json() {
+        return Promise.resolve(mockJsonResponse);
+      },
+    }));
     const ampShareTracking = getAmpShareTracking('http://foo.bar');
     return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
       expect(historyGetFragmentStub).to.be.calledOnce;
@@ -175,7 +179,11 @@ describes.fakeWin('amp-share-tracking', {
   it('should get empty outgoing fragment if vendor url is provided ' +
       'but the response format is NOT correct', () => {
     historyGetFragmentStub.onFirstCall().returns(Promise.resolve(''));
-    xhrStub.onFirstCall().returns(Promise.resolve({foo: 'bar'}));
+    xhrStub.onFirstCall().returns(Promise.resolve({
+      json() {
+        return Promise.resolve({foo: 'bar'});
+      },
+    }));
     const ampShareTracking = getAmpShareTracking('http://foo.bar');
     return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
       expect(historyGetFragmentStub).to.be.calledOnce;
@@ -187,7 +195,11 @@ describes.fakeWin('amp-share-tracking', {
   it('should call fetchJson with correct request when getting outgoing' +
       'fragment', () => {
     historyGetFragmentStub.onFirstCall().returns(Promise.resolve(''));
-    xhrStub.onFirstCall().returns(Promise.resolve({fragment: '54321'}));
+    xhrStub.onFirstCall().returns(Promise.resolve({
+      json() {
+        return Promise.resolve({fragment: '54321'});
+      },
+    }));
     const ampShareTracking = getAmpShareTracking('http://foo.bar');
     const xhrCall = xhrStub.getCall(0);
     expect(xhrCall.args[0]).to.equal('http://foo.bar');
@@ -206,7 +218,12 @@ describes.fakeWin('amp-share-tracking', {
   it('should get empty outgoing fragment if vendor url is provided ' +
       'but the xhr fails', () => {
     historyGetFragmentStub.onFirstCall().returns(Promise.resolve(''));
-    xhrStub.onFirstCall().returns(Promise.reject('404'));
+    xhrStub.onFirstCall().returns(Promise.reject({
+      status: 404,
+      json() {
+        return Promise.reject('404 bad json');
+      },
+    }));
     const ampShareTracking = getAmpShareTracking('http://foo.bar');
     return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
       expect(historyGetFragmentStub).to.be.calledOnce;

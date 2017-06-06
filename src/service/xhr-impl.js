@@ -47,26 +47,6 @@ import {getMode} from '../mode';
  */
 export let FetchInitDef;
 
-/**
- * A custom error that encapsulates an XHR error message
- * with the corresponding response data.
- */
-export class FetchError {
-  /**
-   * @param {!Error} error
-   * @param {!FetchResponse} response
-   * @param {boolean=} opt_retriable
-   * @param {?JSONType=} opt_responseJson
-   */
-  constructor(error, response, opt_retriable, opt_responseJson) {
-    this.error = error;
-    this.response = response;
-    this.retriable = opt_retriable;
-    this.responseJson = opt_responseJson;
-  }
-}
-
-
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
 
@@ -207,7 +187,8 @@ export class Xhr {
   }
 
   /**
-   * Fetches and constructs JSON object based on the fetch polyfill.
+   * Fetches a JSON response. Note this returns the response object, not the
+   * response's JSON. #fetchJson merely sets up the request to accept JSOn.
    *
    * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
    *
@@ -215,7 +196,7 @@ export class Xhr {
    *
    * @param {string} input
    * @param {?FetchInitDef=} opt_init
-   * @return {!Promise<!JSONType>}
+   * @return {!Promise<!FetchResponse>}
    */
   fetchJson(input, opt_init) {
     const init = setupInit(opt_init, 'application/json');
@@ -231,8 +212,7 @@ export class Xhr {
       init.headers['Content-Type'] = 'application/json;charset=utf-8';
       init.body = JSON.stringify(init.body);
     }
-    return this.fetch(input, init)
-        .then(response => response.json());
+    return this.fetch(input, init);
   }
 
   /**
@@ -253,7 +233,9 @@ export class Xhr {
 
   /**
    * Creates an XHR request with responseType=document
-   * and returns the `FetchResponse` object.
+   * and returns a promise for the initialized `Document`.
+   * Note this does not return a `Response`, since this is not a standard
+   * Fetch response type.
    *
    * @param {string} input
    * @param {?FetchInitDef=} opt_init
@@ -445,28 +427,18 @@ function isRetriable(status) {
  * @private Visible for testing
  */
 export function assertSuccess(response) {
-  return new Promise((resolve, reject) => {
-    const status = response.status;
-    if (status < 200 || status >= 300) {
-      const retriable = isRetriable(status);
-      const err = new FetchError(
-          user().createError(`HTTP error ${status}`), response, retriable);
-      const contentType = response.headers.get('Content-Type') || '';
-      if (contentType.split(';')[0] == 'application/json') {
-        response.json().then(json => {
-          err.responseJson = json;
-          reject(err);
-        }, () => {
-          // Ignore a failed json parsing and just throw the error without
-          // setting responseJson.
-          reject(err);
-        });
-      } else {
-        reject(err);
-      }
-    } else {
-      resolve(response);
+  return new Promise(resolve => {
+    if (response.ok) {
+      return resolve(response);
     }
+
+    const {status} = response;
+    const err = user().createError(`HTTP error ${status}`);
+    err.retriable = isRetriable(status);
+    // TODO(@jridgewell, #9448): Callers who need the response should
+    // skip processing.
+    err.response = response;
+    throw err;
   });
 }
 
@@ -484,8 +456,11 @@ export class FetchResponse {
     /** @private @const {!XMLHttpRequest|!XDomainRequest} */
     this.xhr_ = xhr;
 
-    /** @type {number} */
+    /** @const {number} */
     this.status = this.xhr_.status;
+
+    /** @const {boolean} */
+    this.ok = this.status >= 200 && this.status < 300;
 
     /** @const {!FetchResponseHeaders} */
     this.headers = new FetchResponseHeaders(xhr);

@@ -36,7 +36,8 @@ let cachedResponsePromises_ = {};
  */
 function fetch_(win, url) {
   if (!(url in cachedResponsePromises_)) {
-    cachedResponsePromises_[url] = xhrFor(win).fetchJson(url);
+    cachedResponsePromises_[url] = xhrFor(win).fetchJson(url)
+        .then(res => res.json());
   }
   return cachedResponsePromises_[url];
 }

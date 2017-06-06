@@ -101,8 +101,11 @@ describe('integration test: a4a', () => {
           method: 'GET',
           ampCors: false,
           credentials: 'omit',
-        }).returns(
-          Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]}));
+        }).returns(Promise.resolve({
+          json() {
+            return Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]});
+          },
+        }));
     }
     // Expect ad request.
     headers = {};

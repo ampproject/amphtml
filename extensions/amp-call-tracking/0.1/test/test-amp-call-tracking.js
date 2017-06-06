@@ -50,7 +50,11 @@ describe('amp-call-tracking', () => {
     xhrMock
         .expects('fetchJson')
         .withArgs(url)
-        .returns(Promise.resolve(response));
+        .returns(Promise.resolve({
+          json() {
+            return Promise.resolve(response);
+          },
+        }));
   }
 
   function expectHyperlinkToBe(callTrackingEl, href, textContent) {

@@ -51,7 +51,11 @@ describes.sandboxed('A4A integration', {}, () => {
     it.skip('should send ping beacons for all lifecycle stages', () => {
       pingStub.returns(null);
       creativeXhrStub.returns(Promise.resolve({}));
-      keyXhrStub.returns(Promise.resolve({}));
+      keyXhrStub.returns(Promise.resolve({
+        json() {
+          return Promise.resolve({});
+        },
+      }));
       expect(0).to.equal(1);
     });
   });

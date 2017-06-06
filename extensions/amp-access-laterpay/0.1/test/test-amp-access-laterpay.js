@@ -80,7 +80,11 @@ describes.fakeWin('LaterpayVendor', {
         .withExactArgs('https://builturl', {
           credentials: 'include',
         })
-        .returns(Promise.resolve({access: true}))
+        .returns(Promise.resolve({
+          json() {
+            return Promise.resolve({access: true});
+          },
+        }))
         .once();
       return vendor.authorize().then(resp => {
         expect(resp.access).to.be.true;
@@ -118,8 +122,12 @@ describes.fakeWin('LaterpayVendor', {
           credentials: 'include',
         })
         .returns(Promise.reject({
-          response: {status: 402},
-          responseJson: {access: false},
+          response: {
+            status: 402,
+            json() {
+              return Promise.resolve({access: false});
+            },
+          },
         }))
         .once();
       emptyContainerStub.returns(Promise.resolve());

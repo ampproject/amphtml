@@ -112,7 +112,11 @@ describes.realWin('amp-app-banner', {amp: true}, () => {
         manifest.setAttribute('href', manifestObj.href);
         iframe.doc.head.appendChild(manifest);
         sandbox.mock(xhrFor(iframe.win)).expects('fetchJson')
-            .returns(Promise.resolve(manifestObj.content));
+          .returns(Promise.resolve({
+            json() {
+              return Promise.resolve(manifestObj.content);
+            },
+          }));
       }
 
       const banner = iframe.doc.createElement('amp-app-banner');
