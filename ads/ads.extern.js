@@ -276,6 +276,9 @@ data.parameters;
 // holder.js
 data.queue;
 
+// imedia.js
+data.positions
+
 // improvedigital.js
 data.placement;
 data.optin;
