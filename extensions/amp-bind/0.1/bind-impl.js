@@ -18,7 +18,6 @@ import {BindExpressionResultDef} from './bind-expression';
 import {BindingDef} from './bind-evaluator';
 import {BindValidator} from './bind-validator';
 import {
-  ampFormServiceForDoc,
   resourcesForDoc,
   viewerForDoc,
 } from '../../../src/services';
@@ -27,7 +26,6 @@ import {dev, user} from '../../../src/log';
 import {deepMerge} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {filterSplice} from '../../../src/utils/array';
-import {formOrNullForElement} from '../../../src/form';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isObject, toArray} from '../../../src/types';
@@ -138,9 +136,6 @@ export class Bind {
     /** @const @private {!../../../src/service/resources-impl.Resources} */
     this.resources_ = resourcesForDoc(ampdoc);
 
-    /** @private {MutationObserver} */
-    this.mutationObserver_ = null;
-
     /** @const @private {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = viewerForDoc(this.ampdoc);
 
@@ -155,6 +150,9 @@ export class Bind {
       const rootNode = dev().assertElement(this.localWin_.document.body);
       return this.initialize_(rootNode);
     });
+
+    /** @const @private {!Function} */
+    this.boundOnTemplateRendered_ = this.onTemplateRendered_.bind(this);
 
     /**
      * @private {?Promise}
@@ -246,7 +244,11 @@ export class Bind {
    */
   initialize_(rootNode) {
     dev().fine(TAG, 'Scanning DOM for bindings...');
-    let promise = this.addBindingsForNode_(rootNode);
+    let promise = this.addBindingsForNode_(rootNode).then(() => {
+      // Listen for template renders (e.g. amp-list) to rescan for bindings.
+      rootNode.addEventListener(
+          'amp:template-rendered', this.boundOnTemplateRendered_);
+    });
     // Check default values against initial expression results in development.
     if (getMode().development) {
       // Check default values against initial expression results.
@@ -344,7 +346,7 @@ export class Bind {
    *
    * Returns a promise that resolves after bindings have been removed.
    *
-   * @param {!Element} node
+   * @param {!Node} node
    * @return {!Promise}
    * @private
    */
@@ -418,10 +420,6 @@ export class Bind {
       }
       const element = dev().assertElement(node);
       const tagName = element.tagName;
-
-      // Observe elements that add/remove children during lifecycle
-      // so we can add/remove bindings as necessary in response.
-      this.observeDynamicChildrenOf_(element);
 
       let boundProperties = this.scanElement_(element);
       // Stop scanning once |limit| bindings are reached.
@@ -517,38 +515,6 @@ export class Bind {
     return null;
   }
 
-  /**
-   * Observes the dynamic children of `element` for mutations, if any,
-   * for rescanning for bindable attributes.
-   * @param {!Element} element
-   * @private
-   */
-  observeDynamicChildrenOf_(element) {
-    if (typeof element.getDynamicElementContainers === 'function') {
-      element.getDynamicElementContainers().forEach(this.observeElement_, this);
-    } else if (element.tagName === 'FORM') {
-      ampFormServiceForDoc(this.ampdoc).then(ampFormService => {
-        return ampFormService.whenInitialized();
-      }).then(() => {
-        const form = formOrNullForElement(element);
-        dev().assert(form, 'Could not find form implementation for element.');
-        form.getDynamicElementContainers().forEach(this.observeElement_, this);
-      });
-    }
-  }
-
-  /**
-   * Observes `element` for child mutations.
-   * @param {!Element} element
-   * @private
-   */
-  observeElement_(element) {
-    if (!this.mutationObserver_) {
-      this.mutationObserver_ =
-          new MutationObserver(this.onMutationsObserved_.bind(this));
-    }
-    this.mutationObserver_.observe(element, {childList: true});
-  }
 
   /**
    * Asynchronously reevaluates all expressions and returns a map of
@@ -861,45 +827,14 @@ export class Bind {
   }
 
   /**
-   * Respond to observed mutations. Adds all bindings for newly added elements
-   * removes bindings for removed elements, then immediately applies the current
-   * scope to the new bindings.
-   *
-   * @param mutations {Array<MutationRecord>}
-   * @private
+   * @param {!Event} event
    */
-  onMutationsObserved_(mutations) {
-    mutations.forEach(mutation => {
-      // Add bindings for new nodes first to ensure that a binding isn't removed
-      // and then subsequently re-added.
-      const addPromises = [];
-      const addedNodes = mutation.addedNodes;
-      for (let i = 0; i < addedNodes.length; i++) {
-        const addedNode = addedNodes[i];
-        if (addedNode.nodeType == Node.ELEMENT_NODE) {
-          const addedElement = dev().assertElement(addedNode);
-          addPromises.push(this.addBindingsForNode_(addedElement));
-        }
-      }
-      const mutationPromise = Promise.all(addPromises).then(() => {
-        const removePromises = [];
-        const removedNodes = mutation.removedNodes;
-        for (let i = 0; i < removedNodes.length; i++) {
-          const removedNode = removedNodes[i];
-          if (removedNode.nodeType == Node.ELEMENT_NODE) {
-            const removedElement = dev().assertElement(removedNode);
-            removePromises.push(this.removeBindingsForNode_(removedElement));
-          }
-        }
-        return Promise.all(removePromises);
-      });
-      // TODO(kmh287): Come up with a strategy for evaluating new bindings
-      // added here that mitigates FOUC.
-      if (getMode().test) {
-        mutationPromise.then(() => {
-          this.dispatchEventForTesting_('amp:bind:mutated');
-        });
-      }
+  onTemplateRendered_(event) {
+    const templateContainer = dev().assertElement(event.target);
+    this.removeBindingsForNode_(templateContainer).then(() => {
+      return this.addBindingsForNode_(templateContainer);
+    }).then(() => {
+      this.dispatchEventForTesting_('amp:bind:rescan-template');
     });
   }
 

@@ -24,14 +24,14 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   let ampdoc;
   let sandbox;
   let numSetStates;
-  let numMutated;
+  let numTemplated;
 
   this.timeout(5000);
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     numSetStates = 0;
-    numMutated = 0;
+    numTemplated = 0;
   });
 
   afterEach(() => {
@@ -61,9 +61,9 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   }
 
   /** @return {!Promise} */
-  function waitForAllMutations() {
+  function waitForTemplateRescan() {
     return bindForDoc(ampdoc).then(unusedBind =>
-        fixture.awaitEvent('amp:bind:mutated', ++numMutated));
+        fixture.awaitEvent('amp:bind:rescan-template', ++numTemplated));
   }
 
   describe('with [text] and [class]', () => {
@@ -92,50 +92,37 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
     });
   });
 
-  // TODO(choumx, #8673): Unskip when race condition is fixed.
-  describe.skip('with bindings in dynamic content', () => {
+  describe('with <amp-form>', () => {
     beforeEach(() => {
-      return setupWithFixture('test/fixtures/bind-live-list.html');
+      return setupWithFixture('test/fixtures/bind-form.html');
     });
 
-    it('should NOT bind blacklisted attributes', () => {
-      const dynamicTag = fixture.doc.getElementById('dynamicTag');
-      const div = fixture.doc.createElement('div');
-      div.innerHTML = '<p [onclick]="javascript:alert(document.cookie)" ' +
-                         '[onmouseover]="javascript:alert()" ' +
-                         '[style]="background=color:black" ' +
-                         '[text]="dynamicText"></p>';
-      const textElement = div.firstElementChild;
-      // for amp-live-list, dynamic element is <div items>, which is a child
-      // of the list.
-      dynamicTag.firstElementChild.appendChild(textElement);
-      expect(textElement.getAttribute('onclick')).to.be.null;
-      expect(textElement.getAttribute('onmouseover')).to.be.null;
-      expect(textElement.getAttribute('style')).to.be.null;
-      expect(textElement.textContent).to.equal('');
-      return waitForAllMutations().then(() => {
-        fixture.doc.getElementById('changeDynamicTextButton').click();
-        return waitForBindApplication();
-      }).then(() => {
-        expect(textElement.getAttribute('onclick')).to.be.null;
-        expect(textElement.getAttribute('onmouseover')).to.be.null;
-        expect(textElement.getAttribute('style')).to.be.null;
-        expect(textElement.textContent).to.equal('bound');
-      });
-    });
+    it('should NOT allow invalid bindings or values', () => {
+      const xhrText = fixture.doc.getElementById('xhrText');
+      const templatedText = fixture.doc.getElementById('templatedText');
+      const illegalHref = fixture.doc.getElementById('illegalHref');
+      const submitButton = fixture.doc.getElementById('submitButton');
 
-    it('should NOT allow unsecure attribute values', () => {
-      const div = fixture.doc.createElement('div');
-      div.innerHTML = '<a [href]="javascript:alert(1)"></a>';
-      const aElement = div.firstElementChild;
-      const dynamicTag = fixture.doc.getElementById('dynamicTag');
-      dynamicTag.firstElementChild.appendChild(aElement);
-      return waitForAllMutations().then(() => {
-        // Force bind to apply bindings
-        fixture.doc.getElementById('triggerBindApplicationButton').click();
-        return waitForBindApplication();
-      }).then(() => {
-        expect(aElement.getAttribute('href')).to.be.null;
+      expect(xhrText.textContent).to.equal('');
+      expect(illegalHref.getAttribute('href')).to.be.null;
+      expect(templatedText.getAttribute('onclick')).to.be.null;
+      expect(templatedText.getAttribute('onmouseover')).to.be.null;
+      expect(templatedText.getAttribute('style')).to.be.null;
+      expect(templatedText.textContent).to.equal('');
+
+      submitButton.click();
+
+      // The <amp-form> has on="submit-success:AMP.setState(...)".
+      return waitForBindApplication().then(() => {
+        // References to XHR JSON data should work on submit-success.
+        expect(xhrText.textContent).to.equal('John Miller');
+        // Illegal bindings/values should not be applied to DOM.
+        expect(illegalHref.getAttribute('href')).to.be.null;
+        expect(templatedText.getAttribute('onclick')).to.be.null;
+        expect(templatedText.getAttribute('onmouseover')).to.be.null;
+        expect(templatedText.getAttribute('style')).to.be.null;
+        // [text] is ok.
+        expect(templatedText.textContent).to.equal('textIsLegal');
       });
     });
   });
@@ -329,8 +316,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
       });
     });
 
-    // TODO(choumx, #8673): Unskip when race condition is fixed.
-    it.skip('should apply scope to bindings in new list items', () => {
+    it('should apply scope to bindings in new list items', () => {
       const liveList = fixture.doc.getElementById('liveList');
       const liveListItems = fixture.doc.getElementById('liveListItems');
       expect(liveListItems.children.length).to.equal(1);
@@ -350,7 +336,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
       fixture.doc.getElementById('liveListUpdateButton').click();
 
       let newItem;
-      return waitForAllMutations().then(() => {
+      return waitForTemplateRescan().then(() => {
         expect(liveListItems.children.length).to.equal(2);
         newItem = fixture.doc.getElementById('newItem');
         fixture.doc.getElementById('changeLiveListTextButton').click();
@@ -536,8 +522,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
     });
   });
 
-  // TODO(choumx, #8673): Unskip when race condition is fixed.
-  describe.skip('with <amp-list>', () => {
+  describe('with <amp-list>', () => {
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-list.html');
     });
