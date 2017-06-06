@@ -1,10 +1,4 @@
 {
-  "baiduanalytics": {
-    "host": "https://hm.baidu.com",
-    "base": "https://hm.baidu.com/hm.gif?si=$token&nv=0&st=4&v=pixel-1.0&rnd=_timestamp_",
-    "pageview": "https://hm.baidu.com/hm.gif?si=$token&nv=0&st=4&v=pixel-1.0&rnd=_timestamp_&et=0",
-    "event": "https://hm.baidu.com/hm.gif?si=$token&nv=0&st=4&v=pixel-1.0&rnd=_timestamp_&ep=$category*$action*$label*$value&et=4&api=8_0"
-  },
   "acquialift": {
    "base": "https://us-east-1-decisionapi.lift.acquia.com/capture?account_id=xxxxxxxx&site_id=xxxxxxxx",
    "basicCapture": "https://us-east-1-decisionapi.lift.acquia.com/capture?account_id=xxxxxxxx&site_id=xxxxxxxx&ident=_client_id_&identsrc=amp&es=Amp&url=_canonical_url_&rurl=_document_referrer_&cttl=_title_",
@@ -22,6 +16,12 @@
     "suffix": "&medium=amp&&ref=_document_referrer_",
     "pageview": "https://$log$domain/hit.xiti?s=$site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_&p=_title_&s2=$level2&medium=amp&&ref=_document_referrer_",
     "click": "https://$log$domain/hit.xiti?s=$site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_&pclick=_title_&s2click=$level2&p=$label&s2=$level2Click&type=click&click=$type&medium=amp&&ref=_document_referrer_"
+  },
+  "baiduanalytics": {
+    "host": "https://hm.baidu.com",
+    "base": "https://hm.baidu.com/hm.gif?si=$token&nv=0&st=4&v=pixel-1.0&rnd=_timestamp_",
+    "pageview": "https://hm.baidu.com/hm.gif?si=$token&nv=0&st=4&v=pixel-1.0&rnd=_timestamp_&et=0",
+    "event": "https://hm.baidu.com/hm.gif?si=$token&nv=0&st=4&v=pixel-1.0&rnd=_timestamp_&ep=$category*$action*$label*$value&et=4&api=8_0"
   },
   "burt": {
     "host": "//ignore.c.richmetrics.com/",
@@ -67,6 +67,21 @@
     "pageview": "https://$analyticsHost/col2/-/_random_?euid-amp=_client_id_&url=_source_url_&rf=_document_referrer_&sd=_screen_width_x_screen_height_&sd=_screen_color_depth_&elg=_browser_language_",
     "action": "https://$analyticsHost/action/-/_random_?euid-amp=_client_id_&url=_source_url_&eact=$actionCode&actr=$actionRef",
     "user": "https://$analyticsHost/uparam/-/_random_?euid-amp=_client_id_&url=_source_url_&euk$userParamKey=$userParamVal"
+  },
+  "facebookpixel": {
+    "host": "https://www.facebook.com",
+    "base": "https://www.facebook.com/tr?noscript=1",
+    "pageview": "https://www.facebook.com/tr?noscript=1&ev=PageView&id=PIXEL-ID",
+    "event": "https://www.facebook.com/tr?noscript=1&ev=$eventName&id=PIXEL-ID&cd[content_name]=$content_name",
+    "eventViewContent": "https://www.facebook.com/tr?noscript=1&ev=ViewContent&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_name]=$content_name&cd[content_type]=$content_type&cd[content_ids]=$content_ids",
+    "eventSearch": "https://www.facebook.com/tr?noscript=1&ev=Search&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_category]=$content_category&cd[content_ids]=$content_ids&cd[search_string]=$search_string",
+    "eventAddToCart": "https://www.facebook.com/tr?noscript=1&ev=AddToCart&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_name]=$content_name&cd[content_type]=$content_type&cd[content_ids]=$content_ids",
+    "eventAddToWishlist": "https://www.facebook.com/tr?noscript=1&ev=AddToWishlist&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_name]=$content_name&cd[content_category]=$content_category&cd[content_ids]=$content_ids",
+    "eventInitiateCheckout": "https://www.facebook.com/tr?noscript=1&ev=InitiateCheckout&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_name]=$content_name&cd[content_category]=$content_category&cd[num_items]=$num_items&cd[content_ids]=$content_ids",
+    "eventAddPaymentInfo": "https://www.facebook.com/tr?noscript=1&ev=AddPaymentInfo&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_category]=$content_category&cd[content_ids]=$content_ids",
+    "eventPurchase": "https://www.facebook.com/tr?noscript=1&ev=Purchase&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_name]=$content_name&cd[content_type]=$content_type&cd[content_ids]=$content_ids&cd[num_items]=$num_items",
+    "eventLead": "https://www.facebook.com/tr?noscript=1&ev=Lead&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_name]=$content_name&cd[content_category]=$content_category",
+    "eventCompleteRegistration": "https://www.facebook.com/tr?noscript=1&ev=CompleteRegistration&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_name]=$content_name&cd[status]=$status"
   },
   "gemius": {
     "base": "https://$prefix.hit.gemius.pl/__timestamp_/redot.gif?l=91&id=$identifier&screen=_screen_width_x_screen_height_&window=_viewport_width_x_viewport_height_&fr=1&href=_source_url_&ref=_document_referrer_&extra=gemamp%3D1%7Campid%3D_client_id_%7C$extraparams",
