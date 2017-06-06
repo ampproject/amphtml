@@ -184,12 +184,12 @@ function declareExtensionVersionAlias(name, version, lastestVersion, hasCss) {
 
 
 /**
- * Logs a build step to the console, unless we are on Travis, where we don't.
+ * Logs a build step to the console, unless we are on Travis.
  * @param {string} stepName Name of an action, like 'Bundling' or 'Compiling'
  * @param {string} targetName Name of the target, like a filename or path
  */
 function logBuildStep(stepName, targetName) {
-  if(!process.env.TRAVIS) {
+  if (!process.env.TRAVIS) {
     $$.util.log(stepName, $$.util.colors.cyan(targetName));
   }
 }
