@@ -236,14 +236,18 @@ describes.fakeWin('amp-form async verification', {}, env => {
         'fails to verify', () => {
       const errorMessage = 'Zip code and city do not match';
       const errorResponse = {
-        responseJson: {
-          verifyErrors: [{
-            name: 'zip',
-            message: errorMessage,
-          }],
+        json() {
+          return Promise.resolve({
+            verifyErrors: [{
+              name: 'zip',
+              message: errorMessage,
+            }],
+          });
         },
       };
-      const xhrSpy = sandbox.spy(() => Promise.reject(errorResponse));
+      const xhrSpy = sandbox.spy(() => Promise.reject({
+        response: errorResponse,
+      }));
       const form = getForm(env.win.document);
       const verifier = getFormVerifier(form, xhrSpy);
 
@@ -263,14 +267,18 @@ describes.fakeWin('amp-form async verification', {}, env => {
         'is mutated', () => {
       const errorMessage = 'Zip code and city do not match';
       const errorResponse = {
-        responseJson: {
-          verifyErrors: [{
-            name: 'zip',
-            message: errorMessage,
-          }],
+        json() {
+          return Promise.resolve({
+            verifyErrors: [{
+              name: 'zip',
+              message: errorMessage,
+            }],
+          });
         },
       };
-      const xhrSpy = sandbox.spy(() => Promise.reject(errorResponse));
+      const xhrSpy = sandbox.spy(() => Promise.reject({
+        response: errorResponse,
+      }));
       const form = getForm(env.win.document);
       const verifier = getFormVerifier(form, xhrSpy);
 
@@ -293,17 +301,21 @@ describes.fakeWin('amp-form async verification', {}, env => {
       const zipMessage = 'Zip code and city do not match.';
       const emailMessage = 'This email is already taken.';
       const errorResponse = {
-        responseJson: {
-          verifyErrors: [{
-            name: 'zip',
-            message: zipMessage,
-          },{
-            name: 'email',
-            message: emailMessage,
-          }],
+        json() {
+          return Promise.resolve({
+            verifyErrors: [{
+              name: 'zip',
+              message: zipMessage,
+            },{
+              name: 'email',
+              message: emailMessage,
+            }],
+          });
         },
       };
-      const xhrSpy = sandbox.spy(() => Promise.reject(errorResponse));
+      const xhrSpy = sandbox.spy(() => Promise.reject({
+        response: errorResponse,
+      }));
       const form = getForm(env.win.document);
       const verifier = getFormVerifier(form, xhrSpy);
 

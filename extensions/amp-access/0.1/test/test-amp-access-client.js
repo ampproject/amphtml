@@ -159,7 +159,11 @@ describes.realWin('AccessClientAdapter', {
             .withExactArgs('https://acme.com/a?rid=reader1', {
               credentials: 'include',
             })
-            .returns(Promise.resolve({access: 'A'}))
+            .returns(Promise.resolve({
+              json() {
+                return Promise.resolve({access: 'A'});
+              },
+            }))
             .once();
         return adapter.authorize().then(response => {
           expect(response).to.exist;

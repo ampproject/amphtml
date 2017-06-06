@@ -19,7 +19,6 @@ import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
 import {
   xhrServiceForTesting,
   fetchPolyfill,
-  FetchError,
   FetchResponse,
   assertSuccess,
 } from '../../src/service/xhr-impl';
@@ -294,7 +293,7 @@ describe('XHR', function() {
         it('should reject if error', () => {
           mockXhr.status = 500;
           return assertSuccess(createResponseInstance('', mockXhr))
-              .should.be.rejectedWith(FetchError);
+              .should.be.rejected;
         });
 
         it('should include response in error', () => {
@@ -303,30 +302,6 @@ describe('XHR', function() {
               .catch(error => {
                 expect(error.response).to.be.defined;
                 expect(error.response.status).to.equal(500);
-              });
-        });
-
-        it('should parse json content when error', () => {
-          mockXhr.status = 500;
-          mockXhr.responseText = '{"a": "hello"}';
-          mockXhr.headers['Content-Type'] = 'application/json';
-          mockXhr.getResponseHeader = () => 'application/json';
-          return assertSuccess(createResponseInstance('{"a": 2}', mockXhr))
-              .catch(error => {
-                expect(error.responseJson).to.be.defined;
-                expect(error.responseJson.a).to.equal(2);
-              });
-        });
-
-        it('should parse json content with charset when error', () => {
-          mockXhr.status = 500;
-          mockXhr.responseText = '{"a": "hello"}';
-          mockXhr.headers['Content-Type'] = 'application/json; charset=utf-8';
-          mockXhr.getResponseHeader = () => 'application/json; charset=utf-8';
-          return assertSuccess(createResponseInstance('{"a": 2}', mockXhr))
-              .catch(error => {
-                expect(error.responseJson).to.be.defined;
-                expect(error.responseJson.a).to.equal(2);
               });
         });
 
@@ -341,19 +316,23 @@ describe('XHR', function() {
       });
 
       it('should do simple JSON fetch', () => {
-        return xhr.fetchJson('http://localhost:31862/get?k=v1').then(res => {
-          expect(res).to.exist;
-          expect(res['args']['k']).to.equal('v1');
-        });
+        return xhr.fetchJson('http://localhost:31862/get?k=v1')
+            .then(res => res.json())
+            .then(res => {
+              expect(res).to.exist;
+              expect(res['args']['k']).to.equal('v1');
+            });
       });
 
       it('should redirect fetch', () => {
         const url = 'http://localhost:31862/redirect-to?url=' + encodeURIComponent(
             'http://localhost:31862/get?k=v2');
-        return xhr.fetchJson(url, {ampCors: false}).then(res => {
-          expect(res).to.exist;
-          expect(res['args']['k']).to.equal('v2');
-        });
+        return xhr.fetchJson(url, {ampCors: false})
+            .then(res => res.json())
+            .then(res => {
+              expect(res).to.exist;
+              expect(res['args']['k']).to.equal('v2');
+            });
       });
 
       it('should fail fetch for 400-error', () => {
@@ -361,7 +340,7 @@ describe('XHR', function() {
         return xhr.fetchJson(url).then(() => {
           throw new Error('UNREACHABLE');
         }, error => {
-          expect(error.error.message).to.contain('HTTP error 404');
+          expect(error.message).to.contain('HTTP error 404');
         });
       });
 
@@ -370,7 +349,7 @@ describe('XHR', function() {
         return xhr.fetchJson(url).then(() => {
           throw new Error('UNREACHABLE');
         }, error => {
-          expect(error.error.message).to.contain('HTTP error 500');
+          expect(error.message).to.contain('HTTP error 500');
         });
       });
 
@@ -602,7 +581,7 @@ describe('XHR', function() {
           body: {
             hello: 'world',
           },
-        }).then(res => {
+        }).then(res => res.json()).then(res => {
           expect(res.json).to.jsonEqual({
             hello: 'world',
           });

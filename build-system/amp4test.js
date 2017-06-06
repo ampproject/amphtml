@@ -31,7 +31,7 @@ app.get('/compose-doc', function(req, res) {
 <body>
 ${req.query.body}
 </body>
-</html>  
+</html>
 `);
 });
 

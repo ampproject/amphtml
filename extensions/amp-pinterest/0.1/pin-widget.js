@@ -67,9 +67,9 @@ export class PinWidget {
     const query = `pin_ids=${this.pinId}&sub=www&base_scheme=https`;
     return this.xhr.fetchJson(baseUrl + query, {
       requireAmpResponseSourceOrigin: false,
-    }).then(response => {
+    }).then(res => res.json()).then(json => {
       try {
-        return response.data[0];
+        return json.data[0];
       } catch (e) { return null; }
     });
   }

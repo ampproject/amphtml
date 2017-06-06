@@ -193,17 +193,21 @@ export class LaterpayVendor {
       this.emptyContainer_();
       return {access: response.access};
     }, err => {
-      const status = err && err.response && err.response.status;
-      if (status === 402) {
-        this.purchaseConfig_ = err.responseJson;
+      if (!err || !err.response) {
+        throw err;
+      }
+      const {response} = err;
+      if (response.status !== 402) {
+        throw err;
+      }
+      return response.json().catch(() => undefined).then(responseJson => {
+        this.purchaseConfig_ = responseJson;
         // empty before rendering, in case authorization is being called again
         // with the same state
         this.emptyContainer_()
           .then(this.renderPurchaseOverlay_.bind(this));
-      } else {
-        throw err;
-      }
-      return {access: false};
+        return {access: false};
+      });
     });
   }
 
@@ -224,7 +228,7 @@ export class LaterpayVendor {
           AUTHORIZATION_TIMEOUT,
           this.xhr_.fetchJson(url, {
             credentials: 'include',
-          }));
+          })).then(res => res.json());
     });
   }
 
