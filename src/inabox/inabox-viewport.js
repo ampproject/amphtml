@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {childElementByTag} from '../../src/dom.js';
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
 import {viewerForDoc} from '../services';
 import {Viewport, ViewportBindingDef} from '../service/viewport-impl';
@@ -26,9 +27,75 @@ import {layoutRectLtwh} from '../layout-rect';
 import {Observable} from '../observable';
 import {MessageType} from '../../src/3p-frame-messaging';
 import {dev} from '../log';
+import {vsyncFor} from '../../src/services';
+import {px, setStyles} from '../../src/style';
+
 
 /** @const {string} */
 const TAG = 'inabox-viewport';
+
+
+/**
+ * @param {!HTMLBodyElement} bodyElement
+ * @return {!Element}
+ * @visibleForTesting
+ */
+ // TODO(alanorozco):
+//   Move this where it makes sense
+export function getFixedContainer(bodyElement) {
+  return dev().assertElement(childElementByTag(
+      dev().assertElement(bodyElement), 'amp-ad-banner'));
+}
+
+
+/** @visibleForTesting */
+export function prepareFixedContainer(win, fixedContainer) {
+  return vsyncFor(win).runPromise({
+    measure: state => {
+      state.boundingRect = fixedContainer./*OK*/getBoundingClientRect();
+    },
+    mutate: state => {
+      setStyles(/** @type {!Element} */ (win.document.body), {
+        'background': 'transparent',
+      });
+
+      setStyles(fixedContainer, {
+        'position': 'absolute',
+        'left': '50%',
+        'top': '50%',
+        'right': 'auto',
+        'bottom': 'auto',
+        'width': px(state.boundingRect.width),
+        'height': px(state.boundingRect.height),
+        'margin-left': px(-(state.boundingRect.width / 2)),
+        'margin-top': px(-(state.boundingRect.height / 2)),
+      });
+    },
+  }, {});
+}
+
+
+/** @visibleForTesting */
+export function resetFixedContainer(win, fixedContainer) {
+  return vsyncFor(win).mutatePromise(() => {
+    setStyles(/** @type {!Element} */ (win.document.body), {
+      'background': 'transparent',
+    });
+
+    setStyles(fixedContainer, {
+      'position': null,
+      'left': null,
+      'top': null,
+      'right': null,
+      'bottom': null,
+      'width': null,
+      'height': null,
+      'margin-left': null,
+      'margin-top': null,
+    });
+  });
+}
+
 
 /**
  * Implementation of ViewportBindingDef that works inside an non-scrollable
@@ -157,6 +224,102 @@ export class ViewportBindingInabox {
     }
   }
 
+  /** @override */
+  updateLightboxMode(lightboxMode) {
+    if (lightboxMode) {
+      return this.tryToEnterOverlayMode_();
+    }
+    return this.leaveOverlayMode_();
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  tryToEnterOverlayMode_() {
+    // TODO(alanorozco): Update viewport measurement from host message.
+    return this.prepareFixedContainer_()
+        .then(() => this.requestFullOverlayFrame_());
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  leaveOverlayMode_() {
+    return this.requestResetFullOverlayFrame_()
+        .then(() => this.resetFixedContainer_());
+  }
+
+  /**
+   * Prepares the "fixed" container before expanding frame.
+   * @return {!Promise}
+   * @private
+   */
+  prepareFixedContainer_() {
+    const fixedContainer = this.getFixedContainer_();
+
+    if (!fixedContainer) {
+      dev().warn(TAG, 'No fixed container inside frame, content will shift.');
+      return Promise.resolve();
+    }
+
+    return prepareFixedContainer(this.win, dev().assertElement(fixedContainer));
+  }
+
+  /**
+   * Resets the "fixed" container to its original position after collapse.
+   * @return {!Promise}
+   * @private
+   */
+  resetFixedContainer_() {
+    const fixedContainer = this.getFixedContainer_();
+
+    if (!fixedContainer) {
+      dev().warn(TAG, 'No fixed container inside frame, content will shift.');
+      return Promise.resolve();
+    }
+
+    return resetFixedContainer(this.win, dev().assertElement(fixedContainer));
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  requestFullOverlayFrame_() {
+    return new Promise((resolve, reject) => {
+      this.iframeClient_.makeRequest(
+          MessageType.FULL_OVERLAY_FRAME,
+          MessageType.FULL_OVERLAY_FRAME_RESPONSE,
+          response => {
+            if (response.content.accept) {
+              resolve();
+            } else {
+              reject('Request to open lightbox rejected by host document');
+            }
+          });
+    });
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  requestResetFullOverlayFrame_() {
+    return new Promise(resolve => {
+      this.iframeClient_.makeRequest(
+          MessageType.RESET_FULL_OVERLAY_FRAME,
+          MessageType.RESET_FULL_OVERLAY_FRAME_RESPONSE,
+          resolve);
+    });
+  }
+
+  getFixedContainer_() {
+    return getFixedContainer(
+        /** @type {!HTMLBodyElement} */ (dev().assert(this.win.document.body)));
+  }
+
   /** @override */ disconnect() {/* no-op */}
   /** @override */ updatePaddingTop() {/* no-op */}
   /** @override */ hideViewerHeader() {/* no-op */}
@@ -164,7 +327,6 @@ export class ViewportBindingInabox {
   /** @override */ disableScroll() {/* no-op */}
   /** @override */ resetScroll() {/* no-op */}
   /** @override */ ensureReadyForElements() {/* no-op */}
-  /** @override */ updateLightboxMode() {/* no-op */}
   /** @override */ setScrollTop() {/* no-op */}
   /** @override */ getScrollWidth() {return 0;}
   /** @override */ getScrollHeight() {return 0;}

@@ -1409,14 +1409,16 @@ describes.realWin('ViewportBindingNaturalIosEmbed', {ampCss: true}, env => {
         .equal('31px solid transparent');
     expect(win.document.body.style.borderTopStyle).to.equal('solid');
 
-    binding.updateLightboxMode(true);
-    expect(win.document.body.style.borderTopStyle).to.equal('none');
+    binding.updateLightboxMode(true).then(() => {
+      expect(win.document.body.style.borderTopStyle).to.equal('none');
+    });
 
-    binding.updateLightboxMode(false);
-    expect(win.document.body.style.borderTopStyle).to.equal('solid');
-    expect(win.document.body.style.borderBottomStyle).to.not.equal('solid');
-    expect(win.document.body.style.borderLeftStyle).to.not.equal('solid');
-    expect(win.document.body.style.borderRightStyle).to.not.equal('solid');
+    binding.updateLightboxMode(false).then(() => {
+      expect(win.document.body.style.borderTopStyle).to.equal('solid');
+      expect(win.document.body.style.borderBottomStyle).to.not.equal('solid');
+      expect(win.document.body.style.borderLeftStyle).to.not.equal('solid');
+      expect(win.document.body.style.borderRightStyle).to.not.equal('solid');
+    });
   });
 
   it('should calculate size', () => {

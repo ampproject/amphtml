@@ -36,11 +36,16 @@ export const MessageType = {
   EMBED_SIZE_DENIED: 'embed-size-denied',
   NO_CONTENT: 'no-content',
 
+  // For the frame to be placed in full overlay mode for lightboxes
+  FULL_OVERLAY_FRAME: 'full-overlay-frame',
+  FULL_OVERLAY_FRAME_RESPONSE: 'full-overlay-frame-response',
+  RESET_FULL_OVERLAY_FRAME: 'reset-full-overlay-frame',
+  RESET_FULL_OVERLAY_FRAME_RESPONSE: 'reset-full-overlay-frame-response',
+
   // For amp-inabox
   SEND_POSITIONS: 'send-positions',
   POSITION: 'position',
 };
-
 
 /**
  * Listens for the specified event on the element.
