@@ -216,9 +216,6 @@ const command = {
   runLintChecks: function() {
     timedExecOrDie(`${gulp} lint`);
   },
-  buildRuntimeCssOnly: function() {
-    timedExecOrDie(`${gulp} build --css-only`);
-  },
   buildRuntime: function() {
     timedExecOrDie(`${gulp} build`);
   },
@@ -275,7 +272,6 @@ function runAllCommands() {
   }
   if (process.env.BUILD_SHARD == "integration_tests") {
     command.cleanBuild();
-    command.buildRuntimeCssOnly();
     command.buildRuntimeMinified();
     command.runPresubmitTests();  // Needs runtime to be built and served.
     command.runVisualDiffTests();  // Only called during push builds.
