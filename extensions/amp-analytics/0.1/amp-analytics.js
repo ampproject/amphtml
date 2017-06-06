@@ -303,11 +303,11 @@ export class AmpAnalytics extends AMP.BaseElement {
   /**
    * Receives any response that may be sent from the cross-domain iframe
    * @param {!string} type The type parameter of the cross-domain iframe
-   * @param {string} response The response message from the iframe
+   * @param {Object} response The response message from the iframe
    * was specified in the amp-analytics config
    */
   processCrossDomainIframeResponse_(type, response) {
-    const creativeUrl = this.win.document.baseURI;
+    const creativeUrl = /** @type {string} */ (this.win.document.baseURI);
     ResponseMap.add(type, creativeUrl, response);
   }
 

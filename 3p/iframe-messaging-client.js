@@ -34,7 +34,7 @@ export class IframeMessagingClient {
     this.win_ = win;
     /** @private {?string} */
     this.rtvVersion_ = getMode().rtvVersion || null;
-    /** @private {!Window|Object} */
+    /** @private {!(Window|Element)} */
     this.hostWindow_ = win.parent;
     /** @private {?string} */
     this.sentinel_ = null;
@@ -129,7 +129,9 @@ export class IframeMessagingClient {
   }
 
   /**
-   * @param {!Window} win
+   * @param {!(Window|Element)} win The window to communicate with. This may
+   * be set to a newly-created iframe instead, since its contentWindow will
+   * be null until it renders.
    */
   setHostWindow(win) {
     this.hostWindow_ = win;

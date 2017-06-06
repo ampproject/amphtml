@@ -27,7 +27,7 @@ import {loadPromise} from '../../../src/event-helper';
 import {timerFor} from '../../../src/services';
 import {removeElement} from '../../../src/dom';
 import {setStyle, setStyles} from '../../../src/style';
-import {hasOwn, map} from '../../../src/utils/object';
+import {hasOwn} from '../../../src/utils/object';
 import {IframeMessagingClient} from '../../../3p/iframe-messaging-client';
 import {MessageTypes} from '../../../src/3p-analytics-common';
 
@@ -151,7 +151,7 @@ export class Transport {
    * @param {!HTMLDocument} ampDoc The AMP document
    * @param {!Object<string,string>} transportOptions The 'transport' portion
    * of the amp-analytics config object
-   * @param {function(!string,string)=} opt_processResponse An optional
+   * @param {function(!string,Object)=} opt_processResponse An optional
    * function to receive any response messages back from the cross-domain iframe
    */
   processCrossDomainIframe(ampDoc, transportOptions, opt_processResponse) {
@@ -329,7 +329,8 @@ export class Transport {
    * @private
    */
   sendRequestUsingCrossDomainIframe_(request, transportOptions) {
-    const frameData = Transport.crossDomainIframes_[transportOptions['iframe']];
+    const frameData =
+      (Transport.crossDomainIframes_[transportOptions['iframe']]);
     dev().assert(frameData, 'Trying to send message to non-existent frame');
     this.enqueueMessageForCrossDomainIframe_(frameData,
       MessageTypes.ampAnalytics3pEvent, request);
@@ -387,13 +388,15 @@ export class Transport {
   }
 }
 
-/** @private @const {!Map<string,string>} */
-Transport.usedIds_ = map();
+/** @private @const {!Object<string,boolean>} */
+Transport.usedIds_ = {};
 
-/** @private @const {!Map<string,string>} */
-Transport.crossDomainIframes_ = map();
+// TODO: Note in the PR that using map() results in a ton of:
+// ERROR - Cannot do '[]' access on a struct
+/** @private @const {Object<string,Object<string,*>>} */
+Transport.crossDomainIframes_ = {};
 
-/** @private @const {!Timer} */
+/** @private @const {!Object} */
 Transport.timer_ = timerFor(AMP.win);
 
 /**
@@ -412,7 +415,7 @@ export function sendRequestUsingIframe(win, request) {
   const iframe = win.document.createElement('iframe');
   setStyle(iframe, 'display', 'none');
   iframe.onload = iframe.onerror = () => {
-    Transport.timer_(win).delay(() => {
+    Transport.timer_.delay(() => {
       removeElement(iframe);
     }, 5000);
   };
