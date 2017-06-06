@@ -302,7 +302,6 @@ Example:
 
 Font providers can be whitelisted if they support CSS-only integrations and serve over HTTPS. The following origins are currently allowed for font serving via link tags:
 
-- Typography.com: https://cloud.typography.com
 - Fonts.com: https://fast.fonts.net
 - Google Fonts: https://fonts.googleapis.com
 - Font Awesome: https://maxcdn.bootstrapcdn.com
