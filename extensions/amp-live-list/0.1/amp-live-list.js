@@ -15,6 +15,7 @@
  */
 
 
+import {actionServiceForDoc} from '../../../src/action';
 import {CSS} from '../../../build/amp-live-list-0.1.css';
 import {childElementByAttr} from '../../../src/dom';
 import {liveListManagerForDoc, LiveListManager} from './live-list-manager';
@@ -169,6 +170,9 @@ export class AmpLiveList extends AMP.BaseElement {
 
     /** @private @const {function(!Element, !Element): number} */
     this.comparator_ = this.sortByDataSortTime_.bind(this);
+
+    /** @private {?../../../src/service/action-impl.ActionService} */
+    this.actions_ = null;
   }
 
   /** @override */
@@ -221,6 +225,8 @@ export class AmpLiveList extends AMP.BaseElement {
 
     this.curNumOfLiveItems_ = this.validateLiveListItems_(
         this.itemsSlot_, true);
+
+    this.actions_ = actionServiceForDoc(this.getAmpDoc());
 
     this.registerAction('update', this.updateAction_.bind(this));
 
@@ -290,9 +296,8 @@ export class AmpLiveList extends AMP.BaseElement {
   updateAction_() {
     const hasInsertItems = this.pendingItemsInsert_.length > 0;
     const hasTombstoneItems = this.pendingItemsTombstone_.length > 0;
-
-    const shouldSendAmpDomUpdateEvent = this.pendingItemsInsert_.length > 0 ||
-        this.pendingItemsReplace_.length > 0;
+    const hasReplaceItems = this.pendingItemsReplace_.length > 0;
+    const shouldSendAmpDomUpdateEvent = hasInsertItems || hasReplaceItems;
 
     let promise = this.mutateElement(() => {
 
@@ -310,12 +315,12 @@ export class AmpLiveList extends AMP.BaseElement {
         this.pendingItemsInsert_.length = 0;
       }
 
-      if (this.pendingItemsReplace_.length > 0) {
+      if (hasReplaceItems) {
         this.replace_(itemsSlot, this.pendingItemsReplace_);
         this.pendingItemsReplace_.length = 0;
       }
 
-      if (this.pendingItemsTombstone_.length > 0) {
+      if (hasTombstoneItems) {
         this.curNumOfLiveItems_ -= this.tombstone_(
             itemsSlot, this.pendingItemsTombstone_);
         this.pendingItemsTombstone_.length = 0;
@@ -345,6 +350,7 @@ export class AmpLiveList extends AMP.BaseElement {
     if (shouldSendAmpDomUpdateEvent) {
       promise = promise.then(() => {
         this.sendAmpDomUpdateEvent_();
+        this.actions_.trigger(this.element, 'update', /* event */ null);
       });
     }
 

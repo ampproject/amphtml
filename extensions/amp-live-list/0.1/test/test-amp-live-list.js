@@ -280,18 +280,22 @@ describe('amp-live-list', () => {
       liveList.buildCallback();
     });
 
-    it('sends amp-dom-update event on new items', () => {
+    it('sends amp-dom-update and amp-live-list.update ' +
+       'events on new items', () => {
       buildElement(elem, dftAttrs);
       liveList.buildCallback();
-      const spy = sandbox.spy(liveList, 'sendAmpDomUpdateEvent_');
+      const domUpdateSpy = sandbox.spy(liveList, 'sendAmpDomUpdateEvent_');
+      const triggerSpy = sandbox.spy(liveList.actions_, 'trigger');
       const fromServer1 = createFromServer([{id: 'id0'}]);
       liveList.update(fromServer1);
       return liveList.updateAction_().then(() => {
-        expect(spy).to.have.been.calledOnce;
+        expect(domUpdateSpy).to.have.been.calledOnce;
+        expect(triggerSpy).to.have.been.calledWith(elem, 'update', null);
       });
     });
 
-    it('sends amp-dom-update event on replace items', () => {
+    it('sends amp-dom-update and amp-live-list.update ' +
+       'events on replace items', () => {
       const child1 = document.createElement('div');
       const child2 = document.createElement('div');
       child1.setAttribute('id', 'id1');
@@ -306,17 +310,20 @@ describe('amp-live-list', () => {
       const fromServer1 = createFromServer([
         {id: 'id1', updateTime: 125},
       ]);
-      const spy = sandbox.spy(liveList, 'sendAmpDomUpdateEvent_');
+      const domUpdateSpy = sandbox.spy(liveList, 'sendAmpDomUpdateEvent_');
+      const triggerSpy = sandbox.spy(liveList.actions_, 'trigger');
       // We stub and restore to not trigger `update` calling `updateAction_`.
       const stub = sinon./*OK*/stub(liveList, 'updateAction_');
       liveList.update(fromServer1);
       stub./*OK*/restore();
       return liveList.updateAction_().then(() => {
-        expect(spy).to.have.been.calledOnce;
+        expect(domUpdateSpy).to.have.been.calledOnce;
+        expect(triggerSpy).to.have.been.calledWith(elem, 'update', null);
       });
     });
 
-    it('sends amp-dom-update event on tombstone items', () => {
+    it('should NOT send amp-dom-update and amp-live-list.update ' +
+       'events on tombstone items', () => {
       const child1 = document.createElement('div');
       const child2 = document.createElement('div');
       child1.setAttribute('id', 'id1');
@@ -331,13 +338,15 @@ describe('amp-live-list', () => {
       const fromServer1 = createFromServer([
         {id: 'id1', tombstone: null},
       ]);
-      const spy = sandbox.spy(liveList, 'sendAmpDomUpdateEvent_');
+      const domUpdateSpy = sandbox.spy(liveList, 'sendAmpDomUpdateEvent_');
+      const triggerSpy = sandbox.spy(liveList.actions_, 'trigger');
       // We stub and restore to not trigger `update` calling `updateAction_`.
       const stub = sinon./*OK*/stub(liveList, 'updateAction_');
       liveList.update(fromServer1);
       stub./*OK*/restore();
       return liveList.updateAction_().then(() => {
-        expect(spy).to.not.have.been.called;
+        expect(domUpdateSpy).to.not.have.been.called;
+        expect(triggerSpy).to.not.have.been.called;
       });
     });
 

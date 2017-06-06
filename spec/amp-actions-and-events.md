@@ -157,6 +157,18 @@ Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and
   </tr>
 </table>
 
+### amp-live-list
+<table>
+  <tr>
+    <th>Event</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>update</td>
+    <td>Fired when the list's DOM items are inserted or replaced.</td>
+  </tr>
+</table>
+
 ### amp-selector
 <table>
   <tr>

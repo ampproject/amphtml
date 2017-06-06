@@ -16,6 +16,7 @@
     <article>
       <div class="content-container">
         <div class="article-body" itemprop="articleBody">
+          <p>Updated <span [text]="numUpdates == 1 ? numUpdates + ' time' : numUpdates + ' times' ">0 times</span></p>
           <h2> Select your favorite food </h2>
           <button on="tap:AMP.setState({favoriteFood: 'pizza'})">Pizza</button>
           <button on="tap:AMP.setState({favoriteFood: 'pasta'})">Pasta</button>
@@ -24,7 +25,8 @@
             layout="container"
             data-poll-interval="15000"
             data-max-items-per-page="5"
-            id="live-blog-1">
+            id="live-blog-1"
+            on="update:AMP.setState({numUpdates: (numUpdates || 0) + 1})">
             <button id="live-list-update-button" update class="button"
                 on="tap:live-blog-1.update">You have updates</button>
             <div items>
