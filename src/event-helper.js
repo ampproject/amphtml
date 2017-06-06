@@ -29,8 +29,8 @@ const LOAD_FAILURE_PREFIX = 'Failed to load:';
  * @return {!Event}
  */
 export function createCustomEvent(win, type, detail, opt_eventInit) {
-  const eventInit = /** @type {CustomEventInit} */ (opt_eventInit || {});
-  eventInit['detail'] = detail;
+  const eventInit = /** @type {CustomEventInit} */ ({detail});
+  Object.assign(eventInit, opt_eventInit);
   // win.CustomEvent is a function on Edge, Chrome, FF, Safari but
   // is an object on IE 11.
   if (typeof win.CustomEvent == 'function') {

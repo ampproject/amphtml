@@ -625,7 +625,7 @@ describes.repeated('', {
         const spy = sandbox.spy(successContainer, 'dispatchEvent');
         sandbox.stub(ampForm.xhr_, 'fetch')
             .returns(Promise.resolve({
-              json: () => {
+              json() {
                 return Promise.resolve({'message': 'What What'});
               },
             }));

@@ -83,16 +83,15 @@ export class AmpList extends AMP.BaseElement {
    */
   populateList_() {
     const itemsExpr = this.element.getAttribute('items') || 'items';
-    return fetchBatchedJsonFor(
-        this.getAmpDoc(), this.element, itemsExpr).then(items => {
-          user().assert(isArray(items),
-              'Response must contain an array at "%s". %s',
-              itemsExpr, this.element);
-          return templatesFor(this.win).findAndRenderTemplateArray(
-              this.element, items).then(this.rendered_.bind(this));
-        }, error => {
-          throw user().createError('Error fetching amp-list', error);
-        });
+    return this.fetchItems_(itemsExpr).then(items => {
+      user().assert(isArray(items),
+          'Response must contain an array at "%s". %s',
+          itemsExpr, this.element);
+      return templatesFor(this.win).findAndRenderTemplateArray(
+          this.element, items).then(this.rendered_.bind(this));
+    }, error => {
+      throw user().createError('Error fetching amp-list', error);
+    });
   }
 
   /**
@@ -122,6 +121,13 @@ export class AmpList extends AMP.BaseElement {
     });
   }
 
+  /**
+   * @param {string} itemsExpr
+   * @visibleForTesting
+   */
+  fetchItems_(itemsExpr) {
+    return fetchBatchedJsonFor(this.getAmpDoc(), this.element, itemsExpr);
+  }
 }
 
 AMP.registerElement('amp-list', AmpList);

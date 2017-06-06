@@ -830,7 +830,7 @@ export class Bind {
    * @param {!Event} event
    */
   onTemplateRendered_(event) {
-    const templateContainer = /** @type {!Element} */ (event.target);
+    const templateContainer = dev().assertElement(event.target);
     this.removeBindingsForNode_(templateContainer).then(() => {
       return this.addBindingsForNode_(templateContainer);
     }).then(() => {
