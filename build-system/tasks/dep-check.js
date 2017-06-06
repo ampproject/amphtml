@@ -299,4 +299,8 @@ function flatten(arr) {
   return [].concat.apply([], arr);
 }
 
-gulp.task('dep-check', 'Runs a dependency check on each module', depCheck);
+gulp.task(
+    'dep-check',
+    'Runs a dependency check on each module',
+    ['css'],  // Defined in gulpfile.js, and must be run before dep-check.
+    depCheck);
