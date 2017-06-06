@@ -15,8 +15,6 @@
  */
 
 import {LaterpayVendor} from '../laterpay-impl';
-import {toggleExperiment} from '../../../../src/experiments';
-
 
 describes.fakeWin('LaterpayVendor', {
   amp: true,
@@ -54,21 +52,12 @@ describes.fakeWin('LaterpayVendor', {
 
     vendor = new LaterpayVendor(accessService);
     xhrMock = sandbox.mock(vendor.xhr_);
-    toggleExperiment(win, 'amp-access-laterpay', true);
   });
 
   afterEach(() => {
     articleTitle.parentNode.removeChild(articleTitle);
-    toggleExperiment(win, 'amp-access-laterpay', false);
     accessServiceMock.verify();
     xhrMock.verify();
-  });
-
-  it('should fail without experiment', () => {
-    toggleExperiment(win, 'amp-access-laterpay', false);
-    expect(() => {
-      vendor.authorize();
-    }).to.throw(/experiment/);
   });
 
   describe('authorize', () => {
