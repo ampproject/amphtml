@@ -24,7 +24,7 @@ import {dict, hasOwn, map} from '../../../src/utils/object';
 import {sendRequestUsingIframe, Transport} from './transport';
 import {urlReplacementsForDoc} from '../../../src/services';
 import {userNotificationManagerFor} from '../../../src/services';
-import {ResponseMap} from '../../../src/anchor-click-interceptor';
+import {ResponseMap} from '../../../src/3p-analytics-common';
 import {cryptoFor} from '../../../src/crypto';
 import {timerFor, viewerForDoc, xhrFor} from '../../../src/services';
 import {toggle} from '../../../src/style';
@@ -208,7 +208,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /**
    * Handle successful fetching of (possibly) remote config.
-   * @return {!Promise|undefined}
+   * @return {!(Promise|undefined)}
    * @private
    */
   onFetchRemoteConfigSuccess_() {
@@ -569,7 +569,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @param {string} request The request to process.
    * @param {!JsonObject} trigger JSON config block that resulted in this event.
    * @param {!Object} event Object with details about the event.
-   * @return {!Promise<string|undefined>} The request that was sent out.
+   * @return {!Promise<(string|undefined)>} The request that was sent out.
    * @private
    */
   handleRequestForEvent_(request, trigger, event) {
@@ -799,8 +799,8 @@ export class AmpAnalytics extends AMP.BaseElement {
    * Merges two objects. If the value is array or plain object, the values are
    * merged otherwise the value is overwritten.
    *
-   * @param {Object|Array} from Object or array to merge from
-   * @param {Object|Array} to Object or Array to merge into
+   * @param {(Object|Array)} from Object or array to merge from
+   * @param {(Object|Array)} to Object or Array to merge into
    * @param {boolean=} opt_predefinedConfig
    * @private
    */
@@ -842,8 +842,8 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Object<string, Object<string, string|Array<string>>>} source1
-   * @param {!Object<string, Object<string, string|Array<string>>>} source2
+   * @param {!Object<string, Object<string, (string|Array<string>)>>} source1
+   * @param {!Object<string, Object<string, (string|Array<string>)>>} source2
    * @param {number=} opt_iterations
    * @param {boolean=} opt_noEncode
    * @return {!ExpansionOptions}

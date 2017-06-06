@@ -29,6 +29,7 @@ import {removeElement} from '../../../src/dom';
 import {setStyle, setStyles} from '../../../src/style';
 import {hasOwn, map} from '../../../src/utils/object';
 import {IframeMessagingClient} from '../../../3p/iframe-messaging-client';
+import {MessageTypes} from '../../../src/3p-analytics-common';
 
 /** @private @const {string} */
 const TAG_ = 'amp-analytics.Transport';
@@ -154,27 +155,28 @@ export class Transport {
    * function to receive any response messages back from the cross-domain iframe
    */
   processCrossDomainIframe(ampDoc, transportOptions, opt_processResponse) {
-    dev().assert(transportOptions['iframe'],
-      'Cross-domain frame parameters missing');
-    const frameUrl = transportOptions['iframe'];
+    const frameUrl = dev().assertString(transportOptions['iframe'],
+      'Cross-domain frame parameters missing ${this.type_}');
     this.beginUsingCrossDomainIframe_(ampDoc, frameUrl,
       transportOptions['extraData']);
     const frameData = Transport.crossDomainIframes_[frameUrl];
     const iframeMessagingClient = frameData.iframeMessagingClient;
     iframeMessagingClient.registerCallback(
-      'ampAnalytics3pReady', () => {
+      MessageTypes.ampAnalytics3pReady, () => {
         iframeMessagingClient.setHostWindow(frameData.frame.contentWindow);
         Transport.setIsReady_(frameUrl);
       });
-    if (!opt_processResponse) {
-      return;
-    }
     iframeMessagingClient.registerCallback(
-      'ampAnalytics3pResponse', response => {
-        if (!response || !response.ampAnalytics3pResponse) {
-          return;
+      MessageTypes.ampAnalytics3pResponse, response => {
+        dev().assert(response &&
+          response[MessageTypes.ampAnalytics3pResponse],
+          'Received empty response from 3p analytics frame');
+        if (!opt_processResponse) {
+          dev().warn(TAG_, 'Received response from 3p analytics frame when' +
+            ' none was expected');
         }
-        opt_processResponse(this.type_, response.ampAnalytics3pResponse);
+        opt_processResponse(this.type_,
+          response[MessageTypes.ampAnalytics3pResponse]);
       });
   }
 
@@ -276,8 +278,10 @@ export class Transport {
       messageQueue: [],
       usageCount: 1,
       send: messages => {
-        iframeMessagingClient.sendMessage('ampAnalytics3pMessages',
-          {ampAnalytics3pMessages: messages});
+        const envelope = {};
+        envelope[MessageTypes.ampAnalytics3pMessages] = messages;
+        iframeMessagingClient.sendMessage(MessageTypes.ampAnalytics3pMessages,
+          envelope);
       },
       iframeMessagingClient,
       sendTimer: null,
@@ -328,7 +332,7 @@ export class Transport {
     const frameData = Transport.crossDomainIframes_[transportOptions['iframe']];
     dev().assert(frameData, 'Trying to send message to non-existent frame');
     this.enqueueMessageForCrossDomainIframe_(frameData,
-      'ampAnalytics3pEvent', request);
+      MessageTypes.ampAnalytics3pEvent, request);
   }
 
   /**
@@ -343,7 +347,7 @@ export class Transport {
     }
     const frameData = Transport.crossDomainIframes_[frameUrl];
     this.enqueueMessageForCrossDomainIframe_(frameData,
-      'ampAnalytics3pExtraData', opt_extraData);
+      MessageTypes.ampAnalytics3pExtraData, opt_extraData);
   }
 
   enqueueMessageForCrossDomainIframe_(frameData, messageType, message) {
@@ -369,7 +373,7 @@ export class Transport {
 
   /**
    * Send an array of messages to a cross-domain iframe
-   * @param {!Object} frameData  The cross-domain iframe
+   * @param {!Object<string,*>} frameData  The cross-domain iframe
    * @private
    */
   static sendQueuedMessagesToCrossDomainIframe_(frameData) {
@@ -383,10 +387,10 @@ export class Transport {
   }
 }
 
-/** @private @const {!Map} */
+/** @private @const {!Map<string,string>} */
 Transport.usedIds_ = map();
 
-/** @private @const {!Map} */
+/** @private @const {!Map<string,string>} */
 Transport.crossDomainIframes_ = map();
 
 /** @private @const {!Timer} */

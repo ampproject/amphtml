@@ -25,14 +25,6 @@
               {'status': 'received', 'somethingElse': '42'});
           });
         });
-        // The following is optional:
-        ampAnalytics.registerAmpAnalytics3pExtraDataListener(extraDataMsgs => {
-          extraDataMsgs.forEach(extraData => {
-            console.log("Received extra setup data: " +
-              extraData.ampAnalytics3pExtraData + " from: " +
-              extraData.senderId);
-          });
-        });
       };
 
       // Load the script specified in the iframe’s name attribute:

@@ -19,7 +19,7 @@ import {
 } from './dom';
 import {dev} from './log';
 import {urlReplacementsForDoc} from './services';
-import {map} from './utils/object';
+import {ResponseMap} from './3p-analytics-common';
 
 /** @private @const {string} */
 const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';
@@ -90,52 +90,4 @@ function maybeExpandUrlParams(ampdoc, e) {
 export function maybeExpandUrlParamsForTesting(ampdoc, e) {
   maybeExpandUrlParams(ampdoc, e);
 }
-
-/**
- * A class for holding AMP Analytics third-party vendors responses to frames.
- * TODO: Move this somewhere else?
- */
-export class ResponseMap {
-  /**
-   * Add a response
-   * @param {!string} frameType The identifier for the third-party frame that
-   * responded
-   * @param {!string} creativeUrl The URL of the creative being responded to
-   * @param {Object} response What the response was
-   */
-  static add(frameType, creativeUrl, response) {
-    if (!AMP.responseMap_[frameType]) {
-      AMP.responseMap_[frameType] = map();
-    }
-    AMP.responseMap_[frameType][creativeUrl] = response;
-  }
-
-  /**
-   * Remove a response, for instance if a third-party frame is being destroyed
-   * @param {!string} frameType The identifier for the third-party frame
-   * whose responses are to be removed
-   */
-  static remove(frameType) {
-    delete AMP.responseMap_[frameType];
-  }
-
-  /**
-   * Gets the most recent response given by a certain frame to a certain
-   * creative
-   * @param {!string} frameType The identifier for the third-party frame
-   * whose response is sought
-   * @param {!string} creativeUrl The URL of the creative that the sought
-   * response was about
-   * @returns {?Object}
-   */
-  static get(frameType, creativeUrl) {
-    if (AMP.responseMap_[frameType] &&
-      AMP.responseMap_[frameType][creativeUrl]) {
-      return AMP.responseMap_[frameType][creativeUrl];
-    }
-    return '';
-  }
-}
-/** @private @const {Map} */
-AMP.responseMap_ = AMP.responseMap_ || map();
 
