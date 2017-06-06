@@ -16,7 +16,6 @@
 
 import {CSS} from '../../../build/amp-access-laterpay-0.1.css';
 import {dev, user} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
 import {installStyles} from '../../../src/style-installer';
 import {installStylesForShadowRoot} from '../../../src/shadow-embed';
 import {getMode} from '../../../src/mode';
@@ -180,8 +179,6 @@ export class LaterpayVendor {
    * @return {!Promise<!JSONType>}
    */
   authorize() {
-    user().assert(isExperimentOn(this.ampdoc.win, TAG),
-        'Enable "amp-access-laterpay" experiment');
     return this.getPurchaseConfig_()
     .then(response => {
       if (response.status === 204) {
