@@ -102,7 +102,7 @@ function filterWhitelistedLinks(markdown) {
   var filteredMarkdown = markdown;
 
   // localhost links (not served on Travis)
-  filteredMarkdown = filteredMarkdown.replace(/http:\/\/localhost:8000/g, '');
+  filteredMarkdown = filteredMarkdown.replace(/http:\/\/localhost:8000(\/)?/g, '');
 
   // Links in script tags (illustrative, and not always valid)
   filteredMarkdown = filteredMarkdown.replace(/src="http.*?"/g, '');
