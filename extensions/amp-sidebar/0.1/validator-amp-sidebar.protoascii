@@ -17,12 +17,11 @@
 tags: {  # amp-sidebar
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-sidebar extension .js script"
   extension_spec: {
     name: "amp-sidebar"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    deprecated_recommends_usage_of_tag: "amp-sidebar"
+    requires_usage: DEPRECATED_WARNING
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -32,13 +31,12 @@ tags: {  # <amp-sidebar>
   tag_name: "AMP-SIDEBAR"
   mandatory_parent: "BODY"
   disallowed_ancestor: "AMP-SIDEBAR"
-  requires: "amp-sidebar extension .js script"
+  requires_extension: "amp-sidebar"
   attrs: {
     name: "side"
     value_regex: "(left|right)"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-sidebar"
   amp_layout: {
     supported_layouts: NODISPLAY
   }

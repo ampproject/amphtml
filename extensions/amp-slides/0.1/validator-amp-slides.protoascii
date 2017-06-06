@@ -24,6 +24,7 @@ tags: {  # amp-slides
     name: "amp-slides"
     allowed_versions: "0.1"
     allowed_versions: "latest"
+    requires_usage: NONE
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"

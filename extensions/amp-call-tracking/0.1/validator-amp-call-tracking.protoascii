@@ -17,19 +17,18 @@
 tags: {  # amp-call-tracking
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-call-tracking extension .js script"
   extension_spec: {
     name: "amp-call-tracking"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    deprecated_recommends_usage_of_tag: "amp-call-tracking"
+    requires_usage: DEPRECATED_WARNING
   }
   attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-call-tracking>
   html_format: AMP
   tag_name: "AMP-CALL-TRACKING"
-  requires: "amp-call-tracking extension .js script"
+  requires_extension: "amp-call-tracking"
   attrs: {
     name: "config"
     mandatory: true

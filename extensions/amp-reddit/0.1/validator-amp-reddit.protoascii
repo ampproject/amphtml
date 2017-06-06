@@ -17,13 +17,10 @@
 tags: {  # amp-reddit
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-reddit extension .js script"
-  requires: "amp-reddit"
   extension_spec: {
     name: "amp-reddit"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    deprecated_recommends_usage_of_tag: "amp-reddit"
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -31,9 +28,8 @@ tags: {  # amp-reddit
 tags: {  # <amp-reddit>
   html_format: AMP
   tag_name: "AMP-REDDIT"
-  satisfies: "amp-reddit"
+  requires_extension: "amp-reddit"
   disallowed_ancestor: "AMP-SIDEBAR"
-  requires: "amp-reddit extension .js script"
   attrs: {
     name: "data-embedlive"
     value_regex_casei: "(false|true)"
@@ -52,7 +48,6 @@ tags: {  # <amp-reddit>
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-reddit"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

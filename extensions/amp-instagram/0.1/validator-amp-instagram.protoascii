@@ -17,12 +17,11 @@
 tags: {  # amp-instagram
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-instagram extension .js script"
   extension_spec: {
     name: "amp-instagram"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    deprecated_recommends_usage_of_tag: "amp-instagram"
+    requires_usage: DEPRECATED_WARNING
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -31,14 +30,13 @@ tags: {  # <amp-instagram>
   html_format: AMP
   tag_name: "AMP-INSTAGRAM"
   disallowed_ancestor: "AMP-SIDEBAR"
-  requires: "amp-instagram extension .js script"
+  requires_extension: "amp-instagram"
   attrs: { name: "alt" }
   attrs: {
     name: "data-shortcode"
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-instagram"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

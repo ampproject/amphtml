@@ -15,19 +15,18 @@
 #
 tags: {  # amp-accordion
   tag_name: "SCRIPT"
-  satisfies: "amp-accordion extension .js script"
   extension_spec: {
     name: "amp-accordion"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    deprecated_recommends_usage_of_tag: "amp-accordion"
+    requires_usage: DEPRECATED_WARNING
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-accordion>
   tag_name: "AMP-ACCORDION"
-  requires: "amp-accordion extension .js script"
+  requires_extension: "amp-accordion"
   attrs: { name: "disable-session-states" value: "" }
   child_tags: {
     child_tag_name_oneof: "SECTION"

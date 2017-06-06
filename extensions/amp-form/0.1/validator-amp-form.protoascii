@@ -17,14 +17,12 @@ tags: {  # amp-form
   # Accepted form elements can be found in validator-main.protoascii
   # under section "4.10 Forms"
   tag_name: "SCRIPT"
-  satisfies: "amp-form extension .js script"
   extension_spec: {
     name: "amp-form"
     allowed_versions: "0.1"
     allowed_versions: "latest"
     deprecated_allow_duplicates: true
-    deprecated_recommends_usage_of_tag: "FORM [method=GET]"
-    deprecated_recommends_usage_of_tag: "FORM [method=POST]"
+    requires_usage: DEPRECATED_WARNING
   }
   attr_lists: "common-extension-attrs"
 }

@@ -17,12 +17,11 @@
 tags: {  # amp-lightbox
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-lightbox extension .js script"
   extension_spec: {
     name: "amp-lightbox"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    deprecated_recommends_usage_of_tag: "amp-lightbox"
+    requires_usage: DEPRECATED_WARNING
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -31,12 +30,11 @@ tags: {  # <amp-lightbox>
   html_format: AMP
   tag_name: "AMP-LIGHTBOX"
   disallowed_ancestor: "AMP-SIDEBAR"
-  requires: "amp-lightbox extension .js script"
+  requires_extension: "amp-lightbox"
   attrs: { name: "controls" }
   attrs: { name: "from" }
   attrs: { name: "scrollable" }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-lightbox"
   amp_layout: {
     supported_layouts: NODISPLAY
   }

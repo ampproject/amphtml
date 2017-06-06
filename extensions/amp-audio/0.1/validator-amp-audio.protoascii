@@ -15,16 +15,12 @@
 #
 tags: {  # amp-audio
   tag_name: "SCRIPT"
-  satisfies: "amp-audio extension .js script"
   extension_spec: {
     name: "amp-audio"
     allowed_versions: "0.1"
     allowed_versions: "latest"
     deprecated_allow_duplicates: true
-    # Due to the fact that one of these tags is not available in each
-    # html_format, we currently cannot support this feature for amp-audio.
-    #deprecated_recommends_usage_of_tag: "amp-audio"
-    #deprecated_recommends_usage_of_tag: "amp-audio (A4A)"
+    requires_usage: DEPRECATED_WARNING
   }
   attr_lists: "common-extension-attrs"
 }
@@ -46,7 +42,7 @@ tags: {  # <amp-audio> for AMP (autoplay attribute allowed)
   html_format: AMP
   tag_name: "AMP-AUDIO"
   disallowed_ancestor: "AMP-SIDEBAR"
-  requires: "amp-audio extension .js script"
+  requires_extension: "amp-audio"
   attrs: {
     name: "autoplay"
     value: ""
@@ -70,7 +66,7 @@ tags: {  # <amp-audio> for A4A (autoplay attribute disallowed)
   tag_name: "AMP-AUDIO"
   spec_name: "amp-audio (A4A)"
   disallowed_ancestor: "AMP-SIDEBAR"
-  requires: "amp-audio extension .js script"
+  requires_extension: "amp-audio"
   attr_lists: "amp-audio-common"
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-audio"

@@ -17,12 +17,11 @@
 tags: {  # amp-twitter
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-twitter extension .js script"
   extension_spec: {
     name: "amp-twitter"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    deprecated_recommends_usage_of_tag: "amp-twitter"
+    requires_usage: DEPRECATED_WARNING
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -31,13 +30,12 @@ tags: {  # <amp-twitter>
   html_format: AMP
   tag_name: "AMP-TWITTER"
   disallowed_ancestor: "AMP-SIDEBAR"
-  requires: "amp-twitter extension .js script"
+  requires_extension: "amp-twitter"
   attrs: {
     name: "data-tweetid"
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-twitter"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

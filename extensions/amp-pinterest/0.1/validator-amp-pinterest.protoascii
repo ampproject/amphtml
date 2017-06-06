@@ -17,13 +17,11 @@
 tags: {  # amp-pinterest
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-pinterest extension .js script"
-  mandatory_parent: "HEAD"
   extension_spec: {
     name: "amp-pinterest"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    deprecated_recommends_usage_of_tag: "amp-pinterest"
+    requires_usage: DEPRECATED_WARNING
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -35,7 +33,7 @@ tags: {  # <amp-pinterest>
   html_format: AMP
   tag_name: "AMP-PINTEREST"
   disallowed_ancestor: "AMP-SIDEBAR"
-  requires: "amp-pinterest extension .js script"
+  requires_extension: "amp-pinterest"
   # data-* is generally allowed, but it's not generally mandatory.
   attrs: {
     name: "data-do"

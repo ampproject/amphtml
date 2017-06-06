@@ -17,8 +17,6 @@
 tags: {  # amp-animation
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-animation extension .js script"
-  requires: "amp-animation"
   extension_spec: {
     name: "amp-animation"
     allowed_versions: "0.1"
@@ -31,8 +29,8 @@ tags: {  # <amp-animation> (json)
   tag_name: "SCRIPT"
   spec_name: "amp-animation extension .json script"
   mandatory_parent: "AMP-ANIMATION"
+  requires_extension: "amp-animation"
   satisfies: "amp-animation extension .json script"
-  requires: "amp-animation extension .js script"
   attrs: { name: "nonce" }
   attrs: {
     name: "type"
@@ -46,14 +44,12 @@ tags: {  # <amp-animation> (json)
       error_message: "html comments"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-animation"
 }
 tags: {  # <amp-animation>
   html_format: AMP
   tag_name: "AMP-ANIMATION"
   mandatory_parent: "BODY"
-  satisfies: "amp-animation"
-  requires: "amp-animation extension .js script"
+  requires_extension: "amp-animation"
   requires: "amp-animation extension .json script"
   attrs: {
     name: "trigger"
@@ -64,7 +60,6 @@ tags: {  # <amp-animation>
     child_tag_name_oneof: "SCRIPT"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-animation"
   amp_layout: {
     supported_layouts: NODISPLAY
   }

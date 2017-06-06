@@ -16,12 +16,11 @@
 
 tags: {  # amp-carousel
   tag_name: "SCRIPT"
-  satisfies: "amp-carousel extension .js script"
   extension_spec: {
     name: "amp-carousel"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    deprecated_recommends_usage_of_tag: "amp-carousel"
+    requires_usage: DEPRECATED_WARNING
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -29,7 +28,7 @@ tags: {  # amp-carousel
 tags: {  # <amp-carousel>
   tag_name: "AMP-CAROUSEL"
   disallowed_ancestor: "AMP-SIDEBAR"
-  requires: "amp-carousel extension .js script"
+  requires_extension: "amp-carousel"
   attrs: {
     name: "arrows"
     value: ""

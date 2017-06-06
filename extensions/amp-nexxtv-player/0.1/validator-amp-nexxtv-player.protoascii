@@ -17,8 +17,6 @@
 tags: {  # amp-nexxtv-player
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-nexxtv-player extension .js script"
-  requires: "amp-nexxtv-player"
   extension_spec: {
     name: "amp-nexxtv-player"
     allowed_versions: "0.1"
@@ -30,8 +28,7 @@ tags: {  # <amp-nexxtv-player>
   html_format: AMP
   tag_name: "AMP-NEXXTV-PLAYER"
   disallowed_ancestor: "AMP-SIDEBAR"
-  satisfies: "amp-nexxtv-player"
-  requires: "amp-nexxtv-player extension .js script"
+  requires_extension: "amp-nexxtv-player"
   attrs: {
     name: "data-client"
     mandatory: true
@@ -61,7 +58,6 @@ tags: {  # <amp-nexxtv-player>
     value_regex: "album|audio|live|playlist|playlist-marked|video"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-nexxtv-player"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

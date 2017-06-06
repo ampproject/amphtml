@@ -16,12 +16,11 @@
 tags: {  # <script custom-element="amp-fx-flying-carpet">
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-fx-flying-carpet extension .js script"
   extension_spec: {
     name: "amp-fx-flying-carpet"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    deprecated_recommends_usage_of_tag: "amp-fx-flying-carpet"
+    requires_usage: DEPRECATED_WARNING
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -30,11 +29,10 @@ tags: {  # <amp-fx-flying-carpet>
   html_format: AMP
   tag_name: "AMP-FX-FLYING-CARPET"
   disallowed_ancestor: "AMP-SIDEBAR"
-  requires: "amp-fx-flying-carpet extension .js script"
+  requires_extension: "amp-fx-flying-carpet"
   attr_lists: "extended-amp-global"
   attrs: {
     name: "height"
     mandatory: true
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-fx-flying-carpet"
 }
