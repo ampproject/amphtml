@@ -42,6 +42,7 @@ import {platformFor} from '../../../src/services';
 import {cryptoFor} from '../../../src/crypto';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
+import {assertHttpsUrl} from '../../../src/url';
 import {handleClick} from '../../../ads/alp/handler';
 import {
   getDefaultBootstrapBaseUrl,
@@ -475,6 +476,15 @@ export class AmpA4A extends AMP.BaseElement {
    */
   getResource() {
     return this.element.getResources().getResourceForElement(this.element);
+  }
+
+  /**
+   * @return {boolean} whether adPromise was initialized (indicator of
+   *    element validity).
+   * @protected
+   */
+  hasAdPromise() {
+    return !!this.adPromise_;
   }
 
   /**
@@ -1236,6 +1246,7 @@ export class AmpA4A extends AMP.BaseElement {
       this.creativeBody_ = null;  // Free resources.
       return renderPromise;
     } else if (this.adUrl_) {
+      assertHttpsUrl(this.adUrl_, this.element);
       return this.renderViaCachedContentIframe_(this.adUrl_);
     } else {
       // Ad URL may not exist if buildAdUrl throws error or returns empty.

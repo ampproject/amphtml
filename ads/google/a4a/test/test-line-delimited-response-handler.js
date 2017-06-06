@@ -29,7 +29,6 @@ describe('#line-delimited-response-handler', () => {
   let response;
 
   /**
-   * @param {!Array<!{{creative:string,headers:!Object<string,string>}}>} slotData
    * @return {string} slot data written in expected stream response format
    */
   function generateResponseFormat() {
