@@ -586,7 +586,11 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
               'https://www.google.com/bind/second/source',
               sinon.match.any)
           .returns(Promise.resolve({
-            stateSrc: 'https://www.google.com/bind/first/source',
+            json() {
+              return Promise.resolve({
+                stateSrc: 'https://www.google.com/bind/first/source',
+              });
+            },
           }));
       // Changes amp-state's src from .../first/source to .../second/source.
       changeAmpStateSrcButton.click();

@@ -412,9 +412,9 @@ export class AmpForm {
         })
         .then(() => this.doXhr_())
         .then(response => this.handleXhrSubmitSuccess_(response),
-            error => this.handleXhrSubmitFailure_(
-                /** @type {!../../../src/service/xhr-impl.FetchError} */ (
-                    error)));
+            error => {
+              return this.handleXhrSubmitFailure_(/** @type {!Error} */(error));
+            });
 
     if (getMode().test) {
       this.xhrSubmitPromise_ = p;
@@ -488,19 +488,25 @@ export class AmpForm {
 
   /**
    * Transition the form the the submit error state.
-   * @param {../../../src/service/xhr-impl.FetchError} errorResponse
+   * @param {!Error} error
    * @private
    */
-  handleXhrSubmitFailure_(errorResponse) {
-    const error = (errorResponse && errorResponse.error) || errorResponse;
-    this.triggerAction_(
-        /* success */ false, errorResponse ? errorResponse.responseJson : null);
-    this.analyticsEvent_('amp-form-submit-error');
-    this.cleanupRenderedTemplate_();
-    this.setState_(FormState_.SUBMIT_ERROR);
-    this.renderTemplate_(errorResponse.responseJson || {});
-    this.maybeHandleRedirect_(errorResponse.response);
-    user().error(TAG, `Form submission failed: ${error}`);
+  handleXhrSubmitFailure_(error) {
+    let promise;
+    if (error && error.response) {
+      promise = error.response.json().catch(() => null);
+    } else {
+      promise = Promise.resolve(null);
+    }
+    return promise.then(responseJson => {
+      this.triggerAction_(/* success */ false, responseJson);
+      this.analyticsEvent_('amp-form-submit-error');
+      this.cleanupRenderedTemplate_();
+      this.setState_(FormState_.SUBMIT_ERROR);
+      this.renderTemplate_(responseJson || {});
+      this.maybeHandleRedirect_(error.response);
+      user().error(TAG, `Form submission failed: ${error}`);
+    });
   }
 
   /** @private */
@@ -549,7 +555,7 @@ export class AmpForm {
 
   /**
    * Handles response redirect throught the AMP-Redirect-To response header.
-   * @param {!../../../src/service/xhr-impl.FetchResponse} response
+   * @param {../../../src/service/xhr-impl.FetchResponse} response
    * @private
    */
   maybeHandleRedirect_(response) {
