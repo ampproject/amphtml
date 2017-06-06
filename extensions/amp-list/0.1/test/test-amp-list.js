@@ -99,6 +99,26 @@ describe('amp-list component', () => {
     });
   });
 
+  it('should dispatch "amp:template-rendered" event after render', () => {
+    const items = [{title: 'Title1'}];
+    const itemElement = document.createElement('div');
+    const xhrPromise = Promise.resolve({items});
+    const renderPromise = Promise.resolve([itemElement]);
+    xhrMock.expects('fetchJson').withArgs().returns(xhrPromise);
+    templatesMock.expects('findAndRenderTemplateArray').withArgs()
+        .returns(renderPromise).once();
+    const spy = sandbox.spy(list.container_, 'dispatchEvent');
+    return list.layoutCallback().then(() => {
+      return Promise.all([xhrPromise, renderPromise]);
+    }).then(() => {
+      expect(spy).to.have.been.calledOnce;
+      expect(spy).calledWithMatch({
+        type: 'amp:template-rendered',
+        bubbles: true,
+      });
+    });
+  });
+
   it('should reload data if the src attribute changes', () => {
     const initialItems = [
       {title: 'Title1'},
