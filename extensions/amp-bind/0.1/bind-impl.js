@@ -347,7 +347,7 @@ export class Bind {
    *
    * Returns a promise that resolves after bindings have been removed.
    *
-   * @param {!Element} node
+   * @param {!Node} node
    * @return {!Promise}
    * @private
    */

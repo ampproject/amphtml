@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {BaseElementEvents} from '../../../src/base-element'
+import {BaseElementEvents} from '../../../src/base-element';
 import {installFormProxy} from './form-proxy';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {createCustomEvent} from '../../../src/event-helper';
-import {installStylesForShadowRoot} from '../../../src/shadow-embed';
 import {documentInfoForDoc} from '../../../src/services';
+import {installStylesForShadowRoot} from '../../../src/shadow-embed';
 import {iterateCursor} from '../../../src/dom';
 import {formOrNullForElement, setFormForElement} from '../../../src/form';
 import {
@@ -683,8 +683,12 @@ export class AmpForm {
               rendered.id = messageId;
               rendered.setAttribute('i-amphtml-rendered', '');
               container.appendChild(rendered);
-              container.dispatchEvent(
-                  new Event(BaseElementEvents.Templated, {bubbles: true}));
+              const templatedEvent = createCustomEvent(
+                  this.win_,
+                  BaseElementEvents.Templated,
+                  /* detail */ null,
+                  {bubbles: true});
+              container.dispatchEvent(templatedEvent);
             });
       } else {
         // TODO(vializ): This is to let AMP know that the AMP elements inside

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createCustomEvent} from '../../../src/event-helper';
 import {fetchBatchedJsonFor} from '../../../src/batched-json';
 import {isArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -108,8 +109,9 @@ export class AmpList extends AMP.BaseElement {
       this.container_.appendChild(element);
     });
 
-    this.container_.dispatchEvent(
-        new Event(BaseElementEvents.Templated, {bubbles: true}));
+    const templatedEvent = createCustomEvent(this.win,
+        BaseElementEvents.Templated, /* detail */ null, {bubbles: true});
+    this.container_.dispatchEvent(templatedEvent);
 
     // Change height if needed.
     this.getVsync().measure(() => {

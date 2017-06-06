@@ -17,6 +17,7 @@
 import {BaseElementEvents} from '../../../src/base-element';
 import {CSS} from '../../../build/amp-live-list-0.1.css';
 import {childElementByAttr} from '../../../src/dom';
+import {createCustomEvent} from '../../../src/event-helper';
 import {liveListManagerForDoc, LiveListManager} from './live-list-manager';
 import {isLayoutSizeDefined, Layout} from '../../../src/layout';
 import {user} from '../../../src/log';
@@ -345,8 +346,9 @@ export class AmpLiveList extends AMP.BaseElement {
       promise = promise.then(() => {
         this.sendAmpDomUpdateEvent_();
 
-        this.itemsSlot_.dispatchEvent(
-            new Event(BaseElementEvents.Templated, {bubbles: true}));
+        const templatedEvent = createCustomEvent(this.win,
+            BaseElementEvents.Templated, /* detail */ null, {bubbles: true});
+        this.itemsSlot_.dispatchEvent(templatedEvent);
       });
     }
 

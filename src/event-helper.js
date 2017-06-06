@@ -25,18 +25,21 @@ const LOAD_FAILURE_PREFIX = 'Failed to load:';
  * @param {!Window} win
  * @param {string} type
  * @param {Object} detail
+ * @param {EventInit=} opt_eventInit
  * @return {!Event}
  */
-export function createCustomEvent(win, type, detail) {
+export function createCustomEvent(win, type, detail, opt_eventInit) {
+  const eventInit = /** @type {CustomEventInit} */ (opt_eventInit || {});
+  eventInit['detail'] = detail;
   // win.CustomEvent is a function on Edge, Chrome, FF, Safari but
   // is an object on IE 11.
   if (typeof win.CustomEvent == 'function') {
-    return new win.CustomEvent(type, {detail});
+    return new win.CustomEvent(type, eventInit);
   } else {
     // Deprecated fallback for IE.
     const e = win.document.createEvent('CustomEvent');
     e.initCustomEvent(
-        type, /* canBubble */ false, /* cancelable */ false, detail);
+        type, !!eventInit.bubbles, !!eventInit.cancelable, detail);
     return e;
   }
 }
