@@ -208,7 +208,7 @@ export class AmpSlideScroll extends BaseSlides {
     this.registerAction('goToSlide', invocation => {
       const args = invocation.args;
       if (args) {
-        this.showSlideWhenReady_(args['index']);
+        this.showSlideWhenReady(args['index']);
       }
     });
   }
@@ -222,7 +222,7 @@ export class AmpSlideScroll extends BaseSlides {
   mutatedAttributesCallback(mutations) {
     const slide = mutations['slide'];
     if (slide !== undefined) {
-      this.showSlideWhenReady_(slide);
+      this.showSlideWhenReady(slide);
     }
   }
 
@@ -493,9 +493,8 @@ export class AmpSlideScroll extends BaseSlides {
    * Parses given value as integer and shows the slide with that index value
    * when element has been laid out.
    * @param {*} value
-   * @private
    */
-  showSlideWhenReady_(value) {
+  showSlideWhenReady(value) {
     const index = parseInt(value, 10);
     if (isFinite(index) && index >= 0 && index < this.noOfSlides_) {
       // If we haven't been laid out yet, set `initialSlideIndex_` instead.
