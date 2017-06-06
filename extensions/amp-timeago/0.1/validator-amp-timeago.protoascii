@@ -17,8 +17,6 @@
 tags: {  # amp-timeago
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-timeago extension .js script"
-  requires: "amp-timeago"
   extension_spec: {
     name: "amp-timeago"
     allowed_versions: "0.1"
@@ -29,8 +27,7 @@ tags: {  # amp-timeago
 tags: {  # <amp-timeago>
   html_format: AMP
   tag_name: "AMP-TIMEAGO"
-  satisfies: "amp-timeago"
-  requires: "amp-timeago extension .js script"
+  requires_extension: "amp-timeago"
   attrs: {
     name: "datetime"
     mandatory: true

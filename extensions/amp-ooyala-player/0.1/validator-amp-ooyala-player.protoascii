@@ -17,8 +17,6 @@
 tags: {  # amp-ooyala-player
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-ooyala-player extension .js script"
-  requires: "amp-ooyala-player"
   extension_spec: {
     name: "amp-ooyala-player"
     allowed_versions: "0.1"
@@ -29,8 +27,7 @@ tags: {  # amp-ooyala-player
 tags: {  # <amp-ooyala-player>
   html_format: AMP
   tag_name: "AMP-OOYALA-PLAYER"
-  satisfies: "amp-ooyala-player"
-  requires: "amp-ooyala-player extension .js script"
+  requires_extension: "amp-ooyala-player"
   attrs: {
     name: "data-embedcode"
     mandatory: true
@@ -44,7 +41,6 @@ tags: {  # <amp-ooyala-player>
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ooyala-player"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
