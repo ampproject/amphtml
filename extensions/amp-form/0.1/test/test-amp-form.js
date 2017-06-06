@@ -610,6 +610,48 @@ describes.repeated('', {
       });
     });
 
+    it('should dispatch "amp:template-rendered" event after render', () => {
+      return getAmpForm(getForm(env.win.document, true)).then(ampForm => {
+        const form = ampForm.form_;
+
+        const successContainer = document.createElement('div');
+        successContainer.setAttribute('submit-success', '');
+        form.appendChild(successContainer);
+        const successTemplate = document.createElement('template');
+        successTemplate.setAttribute('type', 'amp-mustache');
+        successContainer.appendChild(successTemplate);
+        const renderedTemplate = document.createElement('div');
+
+        const spy = sandbox.spy(successContainer, 'dispatchEvent');
+        sandbox.stub(ampForm.xhr_, 'fetch')
+            .returns(Promise.resolve({
+              json() {
+                return Promise.resolve({'message': 'What What'});
+              },
+            }));
+        const findAndRenderTemplateStub = sandbox.stub(ampForm.templates_,
+            'findAndRenderTemplate');
+        findAndRenderTemplateStub.returns(Promise.resolve(renderedTemplate));
+
+        const event = {
+          stopImmediatePropagation: sandbox.spy(),
+          target: form,
+          preventDefault: sandbox.spy(),
+        };
+        ampForm.handleSubmitEvent_(event);
+
+        return ampForm.xhrSubmitPromiseForTesting().then(() => {
+          return ampForm.renderTemplatePromiseForTesting();
+        }).then(() => {
+          expect(spy.calledOnce).to.be.true;
+          expect(spy).calledWithMatch({
+            type: 'amp:template-rendered',
+            bubbles: true,
+          });
+        });
+      });
+    });
+
     it('should call fetch with the xhr action and form data', () => {
       return getAmpForm(getForm()).then(ampForm => {
         sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());

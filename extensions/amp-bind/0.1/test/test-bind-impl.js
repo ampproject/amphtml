@@ -182,14 +182,13 @@ describes.realWin('Bind', {
     const doc = env.win.document;
     const dynamicTag = doc.createElement('div');
     parent.appendChild(dynamicTag);
-    parent.getDynamicElementContainers = () => {
-      return [dynamicTag];
-    };
     return onBindReady().then(() => {
       expect(bind.boundElements_.length).to.equal(0);
       const elementWithBinding = createElementWithBinding('[text]="1+1"');
       dynamicTag.appendChild(elementWithBinding);
-      return waitForEvent('amp:bind:mutated');
+      dynamicTag.dispatchEvent(
+          new Event('amp:template-rendered', {bubbles: true}));
+      return waitForEvent('amp:bind:rescan-template');
     }).then(() => {
       expect(bind.boundElements_.length).to.equal(1);
     });

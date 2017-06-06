@@ -22,7 +22,6 @@ import {viewportForDoc} from './services';
 import {vsyncFor} from './services';
 import {user} from './log';
 
-
 /**
  * Base class for all custom element implementations. Instead of inheriting
  * from Element this class has an Element. Among other things this allows
@@ -911,18 +910,6 @@ export class BaseElement {
    */
   mutatedAttributesCallback(unusedMutations) {
     // Subclasses may override.
-  }
-
-  /**
-   * Returns an array of elements in this element's subtree that this
-   * element owns that could have children added or removed dynamically.
-   * The array should not contain any ancestors of this element, but could
-   * contain this element itself.
-   * @return {!Array<!Element>}
-   * @public
-   */
-  getDynamicElementContainers() {
-    return [];
   }
 
   /**

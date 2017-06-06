@@ -27,7 +27,7 @@
   <p [text]="ampState.items[0].title">This text will be updated with amp-state's XHR results.</p>
 
   <form method="GET" action="/bind/form/get" action-xhr="/bind/form/get" target="_blank"
-      on="submit-success:formState">
+      on="submit-success:AMP.setState({formState: event.response})">
     <input type="submit" value="Submit">
   </form>
 
