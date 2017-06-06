@@ -17,8 +17,6 @@
 tags: {  # amp-3q-player
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-3q-player extension .js script"
-  requires: "amp-3q-player"
   extension_spec: {
     name: "amp-3q-player"
     allowed_versions: "0.1"
@@ -29,8 +27,7 @@ tags: {  # amp-3q-player
 tags: {  # <amp-3q-player>
   html_format: AMP
   tag_name: "AMP-3Q-PLAYER"
-  satisfies: "amp-3q-player"
-  requires: "amp-3q-player extension .js script"
+  requires_extension: "amp-3q-player"
   attrs: {
     name: "autoplay"
     value: ""
@@ -40,7 +37,6 @@ tags: {  # <amp-3q-player>
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-3q-player"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

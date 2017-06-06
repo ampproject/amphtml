@@ -17,12 +17,11 @@
 tags: {  # amp-install-serviceworker
   html_format: AMP  # Ads cannot install serviceworkers
   tag_name: "SCRIPT"
-  satisfies: "amp-install-serviceworker extension .js script"
   extension_spec: {
     name: "amp-install-serviceworker"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    deprecated_recommends_usage_of_tag: "amp-install-serviceworker"
+    requires_usage: DEPRECATED_WARNING
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -31,7 +30,7 @@ tags: {  # <amp-install-serviceworker>
   html_format: AMP  # Ads cannot install serviceworkers
   tag_name: "AMP-INSTALL-SERVICEWORKER"
   disallowed_ancestor: "AMP-SIDEBAR"
-  requires: "amp-install-serviceworker extension .js script"
+  requires_extension: "amp-install-serviceworker"
   attrs: {
     name: "src"
     mandatory: true
@@ -49,8 +48,6 @@ tags: {  # <amp-install-serviceworker>
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
-
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-install-serviceworker"
   amp_layout: {
     supported_layouts: NODISPLAY
   }
