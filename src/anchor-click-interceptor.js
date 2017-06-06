@@ -61,7 +61,8 @@ function maybeExpandUrlParams(ampdoc, e) {
       return e.pageY;
     },
     '3PANALYTICS': (frameType, key) => {
-      const responses = ResponseMap.get(frameType, target.baseURI);
+      const responses = ResponseMap.get(frameType,
+        /** @type {!string} */ (target.baseURI));
       if (responses && responses[key]) {
         return responses[key];
       }

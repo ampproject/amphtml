@@ -391,8 +391,6 @@ export class Transport {
 /** @private @const {!Object<string,boolean>} */
 Transport.usedIds_ = {};
 
-// TODO: Note in the PR that using map() results in a ton of:
-// ERROR - Cannot do '[]' access on a struct
 /** @private @const {Object<string,Object<string,*>>} */
 Transport.crossDomainIframes_ = {};
 
