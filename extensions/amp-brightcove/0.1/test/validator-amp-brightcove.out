@@ -1,3 +1,4 @@
 FAIL
+amp-brightcove/0.1/test/validator-amp-brightcove.html:31:2 The tag 'amp-brightcove' requires including the 'amp-brightcove' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-brightcove) [AMP_TAG_PROBLEM]
+amp-brightcove/0.1/test/validator-amp-brightcove.html:39:2 The tag 'amp-brightcove' requires including the 'amp-brightcove' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-brightcove) [AMP_TAG_PROBLEM]
 amp-brightcove/0.1/test/validator-amp-brightcove.html:45:2 The mandatory attribute 'data-account' is missing in tag 'amp-brightcove'. (see https://www.ampproject.org/docs/reference/components/amp-brightcove) [AMP_TAG_PROBLEM]
-amp-brightcove/0.1/test/validator-amp-brightcove.html:49:7 The tag 'amp-brightcove extension .js script' is missing or incorrect, but required by 'amp-brightcove'. (see https://www.ampproject.org/docs/reference/components/amp-brightcove) [AMP_TAG_PROBLEM]

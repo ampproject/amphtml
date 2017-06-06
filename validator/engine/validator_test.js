@@ -649,36 +649,6 @@ describe('ValidatorRulesMakeSense', () => {
              expect(tagSpec.attrLists.length).toEqual(1);
              expect(tagSpec.attrLists[0]).toEqual('common-extension-attrs');
            });
-        // We want the extension to be present only when there is a matching
-        // tag on the page which requires the extension. These extensions don't
-        // have a single matching tag, so we allow these extensions to not
-        // also require an additional tag.
-        const extensionExceptions = {
-          // This can be present based on 'amp-access', which isn't allowed in
-          // AMP4ADS, which makes checking tricky.
-          'amp-analytics': 0,
-          // There are two variants of amp-audio, one for each html_format.
-          // The references break when we filter by format, so currently this
-          // does not require another tag to indicate usage.
-          // TODO(gregable): Fix above.
-          'amp-audio': 0,
-          // amp-dynamic-css-classes corresponds to no specific tag.
-          'amp-dynamic-css-classes': 0,
-          // amp-slides is deprecated in favor of amp-carousel, so we don't
-          // want to be recommending adding <amp-slides> to any page.
-          'amp-slides': 0
-        };
-        if (!extensionExceptions.hasOwnProperty(extensionSpec.name)) {
-          it('Extension ' + extensionSpec.name + ' does not identify' +
-                 ' any required tags indicating usage. Please add a `requires:`' +
-                 ' field to the TagSpec.',
-             () => {
-               expect(
-                   tagSpec.requires.length +
-                   tagSpec.extensionSpec.deprecatedRecommendsUsageOfTag.length)
-                   .toBeGreaterThan(0);
-             });
-        }
       }
 
       if (attrSpec.dispatchKey) {

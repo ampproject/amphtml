@@ -16,12 +16,11 @@
 tags: {  # amp-dailymotion
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-dailymotion extension .js script"
   extension_spec: {
     name: "amp-dailymotion"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    deprecated_recommends_usage_of_tag: "amp-dailymotion"
+    requires_usage: DEPRECATED_WARNING
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -30,7 +29,7 @@ tags: {  # <amp-dailymotion>
   html_format: AMP
   tag_name: "AMP-DAILYMOTION"
   disallowed_ancestor: "AMP-SIDEBAR"
-  requires: "amp-dailymotion extension .js script"
+  requires_extension: "amp-dailymotion"
   attrs: {
     name: "data-endscreen-enable"
     value_regex: "true|false"
