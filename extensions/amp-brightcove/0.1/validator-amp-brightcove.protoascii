@@ -17,12 +17,11 @@
 tags: {  # amp-brightcove
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-brightcove extension .js script"
   extension_spec: {
     name: "amp-brightcove"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    deprecated_recommends_usage_of_tag: "amp-brightcove"
+    requires_usage: DEPRECATED_WARNING
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -31,7 +30,7 @@ tags: {  # <amp-brightcove>
   html_format: AMP
   tag_name: "AMP-BRIGHTCOVE"
   disallowed_ancestor: "AMP-SIDEBAR"
-  requires: "amp-brightcove extension .js script"
+  requires_extension: "amp-brightcove"
   attrs: {
     name: "data-account"
     mandatory: true

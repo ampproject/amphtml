@@ -16,12 +16,11 @@
 
 tags: {  # amp-font
   tag_name: "SCRIPT"
-  satisfies: "amp-font extension .js script"
   extension_spec: {
     name: "amp-font"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    deprecated_recommends_usage_of_tag: "amp-font"
+    requires_usage: DEPRECATED_WARNING
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -29,7 +28,7 @@ tags: {  # amp-font
 tags: {  # <amp-font>
   tag_name: "AMP-FONT"
   disallowed_ancestor: "AMP-SIDEBAR"
-  requires: "amp-font extension .js script"
+  requires_extension: "amp-font"
   attrs: {
     name: "font-family"
     mandatory: true
@@ -46,7 +45,6 @@ tags: {  # <amp-font>
   attrs: { name: "on-load-add-class" }
   attrs: { name: "on-load-remove-class" }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-font"
   amp_layout: {
     supported_layouts: NODISPLAY
   }

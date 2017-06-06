@@ -16,21 +16,20 @@
 tags: {  # amp-live-list
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-live-list extension .js script"
   mandatory_parent: "HEAD"
   unique_warning: true
   extension_spec: {
     name: "amp-live-list"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    deprecated_recommends_usage_of_tag: "amp-live-list"
+    requires_usage: DEPRECATED_WARNING
   }
   attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-live-list>
   html_format: AMP
   tag_name: "AMP-LIVE-LIST"
-  requires: "amp-live-list extension .js script"
+  requires_extension: "amp-live-list"
   attrs: {
     name: "data-max-items-per-page"
     mandatory: true
@@ -66,7 +65,6 @@ tags: {  # <amp-live-list>
     supported_layouts: CONTAINER
     supported_layouts: FIXED_HEIGHT
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-live-list"
 }
 tags: {
   html_format: AMP

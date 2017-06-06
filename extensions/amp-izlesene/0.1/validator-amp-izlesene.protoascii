@@ -17,12 +17,11 @@
 tags: {  # amp-izlesene
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-izlesene extension .js script"
   extension_spec: {
     name: "amp-izlesene"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    deprecated_recommends_usage_of_tag: "amp-izlesene"
+    requires_usage: DEPRECATED_WARNING
   }
   attr_lists: "common-extension-attrs"
 }
@@ -30,14 +29,13 @@ tags: {  # <amp-izlesene>
   html_format: AMP
   tag_name: "AMP-IZLESENE"
   disallowed_ancestor: "AMP-SIDEBAR"
-  requires: "amp-izlesene extension .js script"
+  requires_extension: "amp-izlesene"
   attrs: {
     name: "data-videoid"
     mandatory: true
     value_regex: "[0-9]+"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-izlesene"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

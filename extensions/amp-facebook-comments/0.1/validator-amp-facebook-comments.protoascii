@@ -17,8 +17,6 @@
 tags: {  # amp-facebook-comments
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-facebook-comments extension .js script"
-  requires: "amp-facebook-comments"
   extension_spec: {
     name: "amp-facebook-comments"
     allowed_versions: "0.1"
@@ -30,15 +28,13 @@ tags: {  # <amp-facebook-comments>
   html_format: AMP
   tag_name: "AMP-FACEBOOK-COMMENTS"
   disallowed_ancestor: "AMP-SIDEBAR"
-  satisfies: "amp-facebook-comments"
-  requires: "amp-facebook-comments extension .js script"
+  requires_extension: "amp-facebook-comments"
   # data-* is generally allowed, but it's not generally mandatory.
   attrs: {
     name: "data-href"
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-facebook-comments"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

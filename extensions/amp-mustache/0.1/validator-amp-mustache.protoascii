@@ -17,18 +17,17 @@
 # Specific URL to reference for violations having to do with mustache
 # templates. These are specific to any particular tag, so must live at
 # the top level of this rules file.
-template_spec_url: "https://www.ampproject.org/docs/reference/components/amp-mustache"
+template_spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache"
 
 tags: {  # amp-mustache
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-mustache extension .js script"
   extension_spec: {
     name: "amp-mustache"
     is_custom_template: true
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    deprecated_recommends_usage_of_tag: "template"
+    requires_usage: DEPRECATED_WARNING
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -39,11 +38,10 @@ tags: {
   tag_name: "TEMPLATE"
   # <template> tags may not be nested inside other <template> tags.
   disallowed_ancestor: "TEMPLATE"
-  requires: "amp-mustache extension .js script"
+  requires_extension: "amp-mustache"
   attrs: {
     name: "type"
     mandatory: true
     value: "amp-mustache"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-mustache"
 }

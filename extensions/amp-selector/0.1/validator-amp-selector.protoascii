@@ -16,23 +16,20 @@
 tags: {
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-selector extension .js script"
-  requires: "amp-selector"
   extension_spec: {
     name: "amp-selector"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    deprecated_recommends_usage_of_tag: "amp-selector"
+    requires_usage: DEPRECATED_WARNING
   }
   attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-selector> for AMP (autoplay attribute allowed)
   html_format: AMP
   tag_name: "AMP-SELECTOR"
-  satisfies: "amp-selector"
   disallowed_ancestor: "AMP-SELECTOR"
   disallowed_ancestor: "AMP-SIDEBAR"
-  requires: "amp-selector extension .js script"
+  requires_extension: "amp-selector"
   attrs: {
     name: "disabled"
     value: ""
@@ -56,7 +53,6 @@ tags: {  # <amp-selector> for AMP (autoplay attribute allowed)
   }
   attr_lists: "extended-amp-global"
   attr_lists: "input-name-attr"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-selector"
   amp_layout {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -81,18 +77,9 @@ tags: {
   html_format: AMP
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-SELECTOR option"
-  attrs: {
-    name: "disabled"
-    value: ""
-  }
-  attrs: {
-    name: "option"
-    mandatory: true
-  }
-  attrs: {
-    name: "selected"
-    value: ""
-  }
+  attrs: { name: "option" mandatory: true }
+  attrs: { name: "disabled" value: "" }
+  attrs: { name: "selected" value: "" }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-selector"
 }
 tags: {

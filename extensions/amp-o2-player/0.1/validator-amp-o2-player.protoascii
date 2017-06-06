@@ -17,12 +17,11 @@
 tags: {  # amp-o2-player
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-o2-player extension .js script"
   extension_spec: {
     name: "amp-o2-player"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    deprecated_recommends_usage_of_tag: "amp-o2-player"
+    requires_usage: DEPRECATED_WARNING
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -31,7 +30,7 @@ tags: {  # <amp-o2-player>
   html_format: AMP
   tag_name: "AMP-O2-PLAYER"
   disallowed_ancestor: "AMP-SIDEBAR"
-  requires: "amp-o2-player extension .js script"
+  requires_extension: "amp-o2-player"
   attrs: {
     name: "data-bcid"
     mandatory: true
@@ -41,7 +40,6 @@ tags: {  # <amp-o2-player>
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-o2-player"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

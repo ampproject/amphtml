@@ -16,8 +16,6 @@
 tags: {  # <script custom-element="amp-sticky-ad">
   html_format: AMP  # Ads are not allowed inside ads.
   tag_name: "SCRIPT"
-  satisfies: "amp-app-banner extension .js script"
-  requires: "amp-app-banner"
   extension_spec: {
     name: "amp-app-banner"
     allowed_versions: "0.1"
@@ -29,11 +27,9 @@ tags: {  # <script custom-element="amp-sticky-ad">
 tags: {  # <amp-app-banner>
   html_format: AMP
   tag_name: "AMP-APP-BANNER"
-  spec_name: "amp-app-banner"
-  satisfies: "amp-app-banner"
   mandatory_parent: "BODY"
+  requires_extension: "amp-app-banner"
   requires: "amp-app-banner data source"
-  requires: "amp-app-banner extension .js script"
   # The "amp-app-banner button[open-button]" tag is in
   # validator-main.protoascii and in turn has an "AMP-APP-BANNER"
   # mandatory_parent.

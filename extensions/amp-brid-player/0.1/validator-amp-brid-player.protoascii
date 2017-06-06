@@ -17,12 +17,11 @@
 tags: {  # amp-brid-player
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-brid-player extension .js script"
   extension_spec: {
     name: "amp-brid-player"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    deprecated_recommends_usage_of_tag: "amp-brid-player"
+    requires_usage: DEPRECATED_WARNING
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -31,7 +30,7 @@ tags: {  # <amp-brid-player>
   html_format: AMP
   tag_name: "AMP-BRID-PLAYER"
   disallowed_ancestor: "AMP-SIDEBAR"
-  requires: "amp-brid-player extension .js script"
+  requires_extension: "amp-brid-player"
   attrs: { name: "autoplay" }
   attrs: {
     name: "data-partner"

@@ -17,8 +17,6 @@
 tags: {  # amp-gist
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-gist extension .js script"
-  requires: "amp-gist"
   extension_spec: {
     name: "amp-gist"
     allowed_versions: "0.1"
@@ -29,8 +27,7 @@ tags: {  # amp-gist
 tags: {  # <amp-gist>
   html_format: AMP
   tag_name: "AMP-GIST"
-  satisfies: "amp-gist"
-  requires: "amp-gist extension .js script"
+  requires_extension: "amp-gist"
   attrs: {
     name: "data-file"
     value: ""

@@ -16,12 +16,11 @@
 tags: {  # amp-access
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-access extension .js script"
   extension_spec: {
     name: "amp-access"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    deprecated_recommends_usage_of_tag: "amp-access extension .json script"
+    requires_usage: DEPRECATED_WARNING
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -32,8 +31,8 @@ tags: {  # amp-access (json)
   spec_name: "amp-access extension .json script"
   unique: true
   mandatory_parent: "HEAD"
-  requires: "amp-access extension .js script"
-  requires: "amp-analytics extension .js script"
+  requires_extension: "amp-access"
+  requires_extension: "amp-analytics"
   attrs: {
     name: "id"
     mandatory: true
@@ -52,5 +51,4 @@ tags: {  # amp-access (json)
       error_message: "html comments"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-access"
 }

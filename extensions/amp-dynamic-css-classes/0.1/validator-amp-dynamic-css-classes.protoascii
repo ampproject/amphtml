@@ -22,6 +22,7 @@ tags: {  # amp-dynamic-css-classes
     allowed_versions: "0.1"
     allowed_versions: "latest"
     deprecated_allow_duplicates: true
+    requires_usage: NONE
   }
   attr_lists: "common-extension-attrs"
 }

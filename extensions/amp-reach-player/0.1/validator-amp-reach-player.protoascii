@@ -17,12 +17,11 @@
 tags: {  # amp-reach-player
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-reach-player extension .js script"
   extension_spec: {
     name: "amp-reach-player"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    deprecated_recommends_usage_of_tag: "amp-reach-player"
+    requires_usage: DEPRECATED_WARNING
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -31,7 +30,7 @@ tags: {  # <amp-reach-player>
   html_format: AMP
   tag_name: "AMP-REACH-PLAYER"
   disallowed_ancestor: "AMP-SIDEBAR"
-  requires: "amp-reach-player extension .js script"
+  requires_extension: "amp-reach-player"
   attrs: {
     name: "data-embed-id"
     mandatory: true
@@ -39,7 +38,6 @@ tags: {  # <amp-reach-player>
     value_regex: "[0-9a-z-]+"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-reach-player"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

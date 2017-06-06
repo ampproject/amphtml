@@ -17,12 +17,11 @@
 tags: {  # amp-apester-media
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-apester-media extension .js script"
   extension_spec: {
     name: "amp-apester-media"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    deprecated_recommends_usage_of_tag: "amp-apester-media"
+    requires_usage: DEPRECATED_WARNING
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -30,7 +29,7 @@ tags: {  # amp-apester-media
 tags: {  # <amp-apester-media>
   html_format: AMP
   tag_name: "AMP-APESTER-MEDIA"
-  requires: "amp-apester-media extension .js script"
+  requires_extension: "amp-apester-media"
   attrs: {
     name: "data-apester-media-id"
     mandatory_oneof: "['data-apester-media-id', 'data-apester-channel-token']"

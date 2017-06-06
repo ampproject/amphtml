@@ -17,8 +17,6 @@
 tags: {  # amp-playbuzz
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-playbuzz extension .js script"
-  requires: "amp-playbuzz"
   extension_spec: {
     name: "amp-playbuzz"
     allowed_versions: "0.1"
@@ -29,8 +27,7 @@ tags: {  # amp-playbuzz
 tags: {  # <amp-playbuzz>
   html_format: AMP
   tag_name: "AMP-PLAYBUZZ"
-  satisfies: "amp-playbuzz"
-  requires: "amp-playbuzz extension .js script"
+  requires_extension: "amp-playbuzz"
   attrs: {
     name: "src"
     mandatory_oneof: "['src', 'data-item']"
@@ -52,7 +49,6 @@ tags: {  # <amp-playbuzz>
     value_regex_casei: "(false|true)"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-playbuzz"
   amp_layout: {
     supported_layouts: RESPONSIVE
     supported_layouts: FIXED_HEIGHT
