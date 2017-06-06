@@ -21,7 +21,6 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
 import {templatesFor} from '../../../src/services';
 import {user} from '../../../src/log';
-import {BaseElementEvents} from '../../../src/base-element';
 
 /**
  * The implementation of `amp-list` component. See {@link ../amp-list.md} for
@@ -110,7 +109,7 @@ export class AmpList extends AMP.BaseElement {
     });
 
     const templatedEvent = createCustomEvent(this.win,
-        BaseElementEvents.Templated, /* detail */ null, {bubbles: true});
+        'amp:template-rendered', /* detail */ null, {bubbles: true});
     this.container_.dispatchEvent(templatedEvent);
 
     // Change height if needed.

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {BaseElementEvents} from '../../../src/base-element';
 import {BindExpressionResultDef} from './bind-expression';
 import {BindingDef} from './bind-evaluator';
 import {BindValidator} from './bind-validator';
@@ -248,7 +247,7 @@ export class Bind {
     let promise = this.addBindingsForNode_(rootNode).then(() => {
       // Listen for template renders (e.g. amp-list) to rescan for bindings.
       rootNode.addEventListener(
-          BaseElementEvents.Templated, this.boundOnElementTemplated_);
+          'amp:template-rendered', this.boundOnElementTemplated_);
     });
     // Check default values against initial expression results in development.
     if (getMode().development) {

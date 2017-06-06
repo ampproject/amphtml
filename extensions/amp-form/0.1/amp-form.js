@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {BaseElementEvents} from '../../../src/base-element';
 import {installFormProxy} from './form-proxy';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {createCustomEvent} from '../../../src/event-helper';
@@ -685,7 +684,7 @@ export class AmpForm {
               container.appendChild(rendered);
               const templatedEvent = createCustomEvent(
                   this.win_,
-                  BaseElementEvents.Templated,
+                  'amp:template-rendered',
                   /* detail */ null,
                   {bubbles: true});
               container.dispatchEvent(templatedEvent);

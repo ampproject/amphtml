@@ -23,16 +23,6 @@ import {vsyncFor} from './services';
 import {user} from './log';
 
 /**
- * @enum {string}
- */
-export const BaseElementEvents = {
-  // Dispatched by elements that contain templated children when said template
-  // is rendered. The event target is the template container element.
-  // The event bubbles and is not cancelable.
-  Templated: 'templated',
-};
-
-/**
  * Base class for all custom element implementations. Instead of inheriting
  * from Element this class has an Element. Among other things this allows
  * switching the element implementation when going from a stub to the full
