@@ -17,8 +17,6 @@
 tags: {  # amp-facebook-like
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-facebook-like extension .js script"
-  requires: "amp-facebook-like"
   extension_spec: {
     name: "amp-facebook-like"
     allowed_versions: "0.1"
@@ -29,8 +27,7 @@ tags: {  # amp-facebook-like
 tags: {  # <amp-facebook-like>
   html_format: AMP
   tag_name: "AMP-FACEBOOK-LIKE"
-  satisfies: "amp-facebook-like"
-  requires: "amp-facebook-like extension .js script"
+  requires_extension: "amp-facebook-like"
   # data-* is generally allowed, but it's not generally mandatory.
   attrs: {
     name: "data-href"
@@ -42,7 +39,6 @@ tags: {  # <amp-facebook-like>
     }
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-facebook-like"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

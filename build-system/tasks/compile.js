@@ -98,7 +98,9 @@ function compile(entryModuleFilenames, outputDir,
     var intermediateFilename = 'build/cc/' +
         entryModuleFilename.replace(/\//g, '_').replace(/^\./, '');
     if (!process.env.TRAVIS) {
-      util.log('Starting closure compiler for', entryModuleFilenames);
+      util.log(
+          'Starting closure compiler for',
+          util.colors.cyan(entryModuleFilenames));
     }
     // If undefined/null or false then we're ok executing the deletions
     // and mkdir.
@@ -340,8 +342,13 @@ function compile(entryModuleFilenames, outputDir,
         .pipe(gulp.dest(outputDir))
         .on('end', function() {
           if (!process.env.TRAVIS) {
-            util.log('Compiled', entryModuleFilename, 'to',
-                outputDir + '/' + outputFilename, 'via', intermediateFilename);
+            util.log(
+                'Compiled',
+                util.colors.cyan(entryModuleFilename),
+                'to',
+                outputDir + '/' + outputFilename,
+                'via',
+                intermediateFilename);
           }
           gulp.src(intermediateFilename + '.map')
               .pipe(rename(outputFilename + '.map'))

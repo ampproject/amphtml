@@ -279,8 +279,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.updateInViewport(this.container_, true);
     this.scheduleLayout(this.container_);
 
-    this.carousel_.implementation_.showSlideWhenReady_(element.lightboxItemId);
     this.currentElementId_ = element.lightboxItemId;
+    this.carousel_.implementation_.showSlideWhenReady(this.currentElementId_);
 
     this.win.document.documentElement.addEventListener(
         'keydown', this.boundHandleKeyboardEvents_);
@@ -412,11 +412,14 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     imgElement.classList.add('i-amphtml-lbv-gallery-thumbnail-img');
     imgElement.setAttribute('src', thumbnailObj.url);
     element.appendChild(imgElement);
-    const redirect = event => {
+    const closeGallaryAndShowTargetSlide = event => {
       this.closeGallery_();
+      this.currentElementId_ = thumbnailObj.element.lightboxItemId;
+      this.updateDescriptionBox_();
+      this.carousel_.implementation_.showSlideWhenReady(this.currentElementId_);
       event.stopPropagation();
     };
-    element.addEventListener('click', redirect);
+    element.addEventListener('click', closeGallaryAndShowTargetSlide);
     return element;
   }
 }

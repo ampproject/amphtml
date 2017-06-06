@@ -35,6 +35,7 @@ import {
 } from '../src/error';
 import {resetExperimentTogglesForTesting} from '../src/experiments';
 import * as describes from '../testing/describes';
+import {installYieldIt} from '../testing/yield';
 import stringify from 'json-stable-stringify';
 
 
@@ -206,6 +207,8 @@ class TestConfig {
 describe.configure = function() {
   return new TestConfig(describe);
 };
+
+installYieldIt(it);
 
 it.configure = function() {
   return new TestConfig(it);

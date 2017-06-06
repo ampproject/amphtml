@@ -31,7 +31,7 @@ This is the name of the event that an element exposes.
 
 **targetId**
 __required__
-This is the DOM id for the element you'd like to execute an action on in response to the event. In the following example, the `targetId` is the DOM id of the `amp-lightbox` target, `photo-slides`.
+This is the DOM id for the element, or a predefined [special target](#special-targets) you'd like to execute an action on in response to the event. In the following example, the `targetId` is the DOM id of the `amp-lightbox` target, `photo-slides`.
 
 ```html
 <amp-lightbox id="photo-slides"></amp-lightbox>
@@ -93,8 +93,7 @@ For example, the following is possible in AMP.
   </tr>
 </table>
 
-
-### Input Elements (any that fires `change` event)
+### Input Elements (any that fires `change` and `input` event)
 
 Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and `select`.
 
@@ -106,7 +105,12 @@ Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and
   </tr>
   <tr>
     <td>change</td>
-    <td>Fired when the value of the element is changed.</td>
+    <td>Fired when the value of the element is changed and committed.</td>
+    <td>Various, see below.</td>
+  </tr>
+  <tr>
+    <td>input-debounced</td>
+    <td>Fired when the value of the element is changed. This is similar to the standard input event, but it only fires when 300ms have passed after the value of the input has stopped changing.</td>
     <td>Various, see below.</td>
   </tr>
 </table>
@@ -133,8 +137,11 @@ Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and
     <td>Checkbox</td>
     <td><code>event.checked</code> : If the element is checked</td>
   </tr>
+  <tr>
+    <td>Text</td>
+    <td><code>event.value</code> : The text currently in the text box
+  </tr>
 </table>
-
 
 ### amp-carousel[type="slides"]
 <table>
@@ -332,9 +339,25 @@ Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and
   </tr>
 </table>
 
-## `AMP` target
+### form
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>submit</td>
+    <td>Submits the form.</td>
+  </tr>
+</table>
 
-`AMP` target is a special target. It's provided by the AMP runtime and implements top-level
+## Special targets
+
+The following are targets provided by the AMP system that have special requirements:
+
+### `AMP`
+
+The `AMP` target is provided by the AMP runtime and implements top-level
 actions that apply to the whole document.
 
 <table>
@@ -351,3 +374,13 @@ actions that apply to the whole document.
     <td>Updates <code>amp-bind</code>'s state. See <a href="../extensions/amp-bind/amp-bind.md#ampsetstate">details</a>.</td>
   </tr>
 </table>
+
+### `amp-access`
+
+The `amp-access` target is provided by the [AMP Access extension](../extensions/amp-access/amp-access.md).
+
+It's special because
+1. You can't give an arbitrary ID to this target. The target is always `amp-access`.
+2. The actions for `amp-access` are dynamic depending on the structure of the [AMP Access Configruation](../extensions/amp-access/amp-access.md#configuration).
+
+See [details](../extensions/amp-access/amp-access.md#login-link) about using the `amp-access` target.

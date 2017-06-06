@@ -19,13 +19,14 @@ import {batchedXhrFor, bindForDoc} from '../../src/services';
 import {ampdocServiceFor} from '../../src/ampdoc';
 import * as sinon from 'sinon';
 
-// TODO(choumx): Unskip once #9571 is fixed.
-describe.skip('amp-bind', function() {
+describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   let fixture;
   let ampdoc;
   let sandbox;
   let numSetStates;
   let numMutated;
+
+  this.timeout(5000);
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -65,9 +66,9 @@ describe.skip('amp-bind', function() {
         fixture.awaitEvent('amp:bind:mutated', ++numMutated));
   }
 
-  describe('[text] and [class] integration', () => {
+  describe('with [text] and [class]', () => {
     beforeEach(() => {
-      return setupWithFixture('test/fixtures/bind-text-integration.html');
+      return setupWithFixture('test/fixtures/bind-basic.html');
     });
 
     it('should update text when text attribute binding changes', () => {
@@ -91,9 +92,10 @@ describe.skip('amp-bind', function() {
     });
   });
 
-  describe('detecting bindings under dynamic tags', () => {
+  // TODO(choumx, #8673): Unskip when race condition is fixed.
+  describe.skip('with bindings in dynamic content', () => {
     beforeEach(() => {
-      return setupWithFixture('test/fixtures/bind-integrations.html');
+      return setupWithFixture('test/fixtures/bind-live-list.html');
     });
 
     it('should NOT bind blacklisted attributes', () => {
@@ -138,12 +140,12 @@ describe.skip('amp-bind', function() {
     });
   });
 
-  describe('input integration', () => {
+  describe('with <input>', () => {
     beforeEach(() => {
-      return setupWithFixture('test/fixtures/bind-integrations.html');
+      return setupWithFixture('test/fixtures/bind-basic.html');
     });
 
-    it('should update dependent bindings on range input changes', () => {
+    it('should update on range input changes', () => {
       const rangeText = fixture.doc.getElementById('rangeText');
       const range = fixture.doc.getElementById('range');
       expect(rangeText.textContent).to.equal('Unbound');
@@ -156,7 +158,7 @@ describe.skip('amp-bind', function() {
       });
     });
 
-    it('should update dependent bindings on checkbox input changes', () => {
+    it('should update on checkbox input changes', () => {
       const checkboxText = fixture.doc.getElementById('checkboxText');
       const checkbox = fixture.doc.getElementById('checkbox');
       expect(checkboxText.textContent).to.equal('Unbound');
@@ -166,7 +168,7 @@ describe.skip('amp-bind', function() {
       });
     });
 
-    it('should update checkbox checked attr when its binding changes', () => {
+    it('should update input[checked] when its binding changes', () => {
       // Does *NOT* have the `checked` attribute.
       const checkbox = fixture.doc.getElementById('checkedBound');
       const button = fixture.doc.getElementById('toggleCheckedButton');
@@ -190,7 +192,7 @@ describe.skip('amp-bind', function() {
       });
     });
 
-    it('should update dependent bindings on radio input changes', () => {
+    it('should update on radio input changes', () => {
       const radioText = fixture.doc.getElementById('radioText');
       const radio = fixture.doc.getElementById('radio');
       expect(radioText.textContent).to.equal('Unbound');
@@ -201,12 +203,13 @@ describe.skip('amp-bind', function() {
     });
   });
 
-  describe('with amp-carousel', () => {
+  // TODO(choumx): Flaky on Edge for some reason.
+  describe.configure().skipEdge().run('with <amp-carousel>', () => {
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-carousel.html');
     });
 
-    it('should update dependent bindings on carousel slide changes', () => {
+    it('should update on carousel slide changes', () => {
       const slideNumber = fixture.doc.getElementById('slideNumber');
       expect(slideNumber.textContent).to.equal('0');
 
@@ -240,9 +243,9 @@ describe.skip('amp-bind', function() {
     });
   });
 
-  describe('amp-img integration', () => {
+  describe('with <amp-img>', () => {
     beforeEach(() => {
-      return setupWithFixture('test/fixtures/bind-integrations.html');
+      return setupWithFixture('test/fixtures/bind-basic.html');
     });
 
     it('should change src when the src attribute binding changes', () => {
@@ -306,9 +309,9 @@ describe.skip('amp-bind', function() {
     });
   });
 
-  describe('amp-live-list integration', () => {
+  describe('with <amp-live-list>', () => {
     beforeEach(() => {
-      return setupWithFixture('test/fixtures/bind-integrations.html');
+      return setupWithFixture('test/fixtures/bind-live-list.html');
     });
 
     it('should detect bindings in initial live-list elements', () => {
@@ -326,7 +329,8 @@ describe.skip('amp-bind', function() {
       });
     });
 
-    it('should apply scope to bindings in new list items', () => {
+    // TODO(choumx, #8673): Unskip when race condition is fixed.
+    it.skip('should apply scope to bindings in new list items', () => {
       const liveList = fixture.doc.getElementById('liveList');
       const liveListItems = fixture.doc.getElementById('liveListItems');
       expect(liveListItems.children.length).to.equal(1);
@@ -360,12 +364,12 @@ describe.skip('amp-bind', function() {
     });
   });
 
-  describe('amp-selector integration', () => {
+  describe('with <amp-selector>', () => {
     beforeEach(() => {
-      return setupWithFixture('test/fixtures/bind-integrations.html');
+      return setupWithFixture('test/fixtures/bind-selector.html');
     });
 
-    it('should update dependent bindings when selection changes', () => {
+    it('should update when selection changes', () => {
       const selectionText = fixture.doc.getElementById('selectionText');
       const img1 = fixture.doc.getElementById('selectorImg1');
       const img2 = fixture.doc.getElementById('selectorImg2');
@@ -404,10 +408,9 @@ describe.skip('amp-bind', function() {
     });
   });
 
-  // TODO(choumx): Unskip once #9571 is fixed.
-  describe.skip('amp-video integration', () => {
+  describe('with <amp-video>', () => {
     beforeEach(() => {
-      return setupWithFixture('test/fixtures/bind-integrations.html');
+      return setupWithFixture('test/fixtures/bind-video.html');
     });
 
     it('should support binding to src', () => {
@@ -475,9 +478,9 @@ describe.skip('amp-bind', function() {
     });
   });
 
-  describe('amp-youtube', () => {
+  describe('with <amp-youtube>', () => {
     beforeEach(() => {
-      return setupWithFixture('test/fixtures/bind-integrations.html');
+      return setupWithFixture('test/fixtures/bind-youtube.html');
     });
 
     it('should support binding to data-video-id', () => {
@@ -491,9 +494,9 @@ describe.skip('amp-bind', function() {
     });
   });
 
-  describe('amp-brightcove', () => {
+  describe('with <amp-brightcove>', () => {
     beforeEach(() => {
-      return setupWithFixture('test/fixtures/bind-integrations.html');
+      return setupWithFixture('test/fixtures/bind-brightcove.html');
     });
 
     it('should support binding to data-account', () => {
@@ -510,9 +513,9 @@ describe.skip('amp-bind', function() {
     });
   });
 
-  describe('amp-iframe', () => {
+  describe('with <amp-iframe>', () => {
     beforeEach(() => {
-      return setupWithFixture('test/fixtures/bind-integrations.html');
+      return setupWithFixture('test/fixtures/bind-iframe.html');
     });
 
     it('should support binding to src', () => {
@@ -533,9 +536,10 @@ describe.skip('amp-bind', function() {
     });
   });
 
-  describe('amp-list', () => {
+  // TODO(choumx, #8673): Unskip when race condition is fixed.
+  describe.skip('with <amp-list>', () => {
     beforeEach(() => {
-      return setupWithFixture('test/fixtures/bind-integrations.html');
+      return setupWithFixture('test/fixtures/bind-list.html');
     });
 
     it('should support binding to src', () => {
@@ -563,10 +567,9 @@ describe.skip('amp-bind', function() {
     });
   });
 
-  // TODO(choumx): Unskip once #9571 is fixed.
-  describe.skip('amp-state', () => {
+  describe('with <amp-state>', () => {
     beforeEach(() => {
-      return setupWithFixture('test/fixtures/bind-integrations.html');
+      return setupWithFixture('test/fixtures/bind-basic.html');
     });
 
     it('should not loop infinitely if updates change its src binding', () => {

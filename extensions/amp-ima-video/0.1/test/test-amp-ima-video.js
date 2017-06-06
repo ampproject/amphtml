@@ -132,7 +132,8 @@ describe('amp-ima-video', () => {
         src: srcUrl,
         tag: adTagUrl,
       });
-      window.google = {
+      const mockGlobal = {};
+      mockGlobal.google = {
         ima: {
           ViewMode: {
             NORMAL: 'normal',
@@ -147,7 +148,7 @@ describe('amp-ima-video', () => {
       imaVideoObj.setAdsManagerForTesting(mockAdsManager);
       imaVideoObj.setVideoWidthAndHeightForTesting(100, 200);
 
-      imaVideoObj.playAds();
+      imaVideoObj.playAds(mockGlobal);
 
       expect(initSpy).to.be.calledWith(100, 200, 'normal');
       expect(startSpy).to.be.called;
@@ -213,21 +214,22 @@ describe('amp-ima-video', () => {
         tag: adTagUrl,
       });
       const mockAdsRenderingSettings = {};
-      window.google = {};
-      window.google.ima = {};
-      window.google.ima.AdsRenderingSettings = function() {
+      const mockGlobal = {};
+      mockGlobal.google = {};
+      mockGlobal.google.ima = {};
+      mockGlobal.google.ima.AdsRenderingSettings = function() {
         return mockAdsRenderingSettings;
       };
-      window.google.ima.UiElements = {
+      mockGlobal.google.ima.UiElements = {
         AD_ATTRIBUTION: 'adattr',
         COUNTDOWN: 'countdown',
       };
-      window.google.ima.AdErrorEvent = {};
-      window.google.ima.AdErrorEvent.Type = {
+      mockGlobal.google.ima.AdErrorEvent = {};
+      mockGlobal.google.ima.AdErrorEvent.Type = {
         AD_ERROR: 'aderror',
       };
-      window.google.ima.AdEvent = {};
-      window.google.ima.AdEvent.Type = {
+      mockGlobal.google.ima.AdEvent = {};
+      mockGlobal.google.ima.AdEvent.Type = {
         CONTENT_PAUSE_REQUESTED: 'cpr',
         CONTENT_RESUME_REQUESTED: 'crr',
       };
@@ -247,7 +249,7 @@ describe('amp-ima-video', () => {
       imaVideoObj.setVideoPlayerForTesting(mockVideoPlayer);
       imaVideoObj.setMuteAdsManagerOnLoadedForTesting(false);
 
-      imaVideoObj.onAdsManagerLoaded(mockAdsManagerLoadedEvent);
+      imaVideoObj.onAdsManagerLoaded(mockGlobal, mockAdsManagerLoadedEvent);
 
       expect(
           mockAdsRenderingSettings.restoreCustomPlaybackStateOnAdBreakComplete)
@@ -275,21 +277,22 @@ describe('amp-ima-video', () => {
         tag: adTagUrl,
       });
       const mockAdsRenderingSettings = {};
-      window.google = {};
-      window.google.ima = {};
-      window.google.ima.AdsRenderingSettings = function() {
+      const mockGlobal = {};
+      mockGlobal.google = {};
+      mockGlobal.google.ima = {};
+      mockGlobal.google.ima.AdsRenderingSettings = function() {
         return mockAdsRenderingSettings;
       };
-      window.google.ima.UiElements = {
+      mockGlobal.google.ima.UiElements = {
         AD_ATTRIBUTION: 'adattr',
         COUNTDOWN: 'countdown',
       };
-      window.google.ima.AdErrorEvent = {};
-      window.google.ima.AdErrorEvent.Type = {
+      mockGlobal.google.ima.AdErrorEvent = {};
+      mockGlobal.google.ima.AdErrorEvent.Type = {
         AD_ERROR: 'aderror',
       };
-      window.google.ima.AdEvent = {};
-      window.google.ima.AdEvent.Type = {
+      mockGlobal.google.ima.AdEvent = {};
+      mockGlobal.google.ima.AdEvent.Type = {
         CONTENT_PAUSE_REQUESTED: 'cpr',
         CONTENT_RESUME_REQUESTED: 'crr',
       };
@@ -310,7 +313,7 @@ describe('amp-ima-video', () => {
       imaVideoObj.setVideoPlayerForTesting(mockVideoPlayer);
       imaVideoObj.setMuteAdsManagerOnLoadedForTesting(true);
 
-      imaVideoObj.onAdsManagerLoaded(mockAdsManagerLoadedEvent);
+      imaVideoObj.onAdsManagerLoaded(mockGlobal, mockAdsManagerLoadedEvent);
 
       expect(
           mockAdsRenderingSettings.restoreCustomPlaybackStateOnAdBreakComplete)
@@ -430,7 +433,8 @@ describe('amp-ima-video', () => {
       imaVideoObj.setVideoPlayerForTesting(videoMock);
       const adsManagerMock = {};
       adsManagerMock.resize = function() {};
-      window.google = {
+      const mockGlobal = {};
+      mockGlobal.google = {
         ima: {
           ViewMode: {
             NORMAL: 'normal',
@@ -441,7 +445,7 @@ describe('amp-ima-video', () => {
       imaVideoObj.setAdsManagerDimensionsOnLoadForTesting(100, 200);
       imaVideoObj.setAdsManagerForTesting(adsManagerMock);
 
-      imaVideoObj.onContentPauseRequested();
+      imaVideoObj.onContentPauseRequested(mockGlobal);
 
       expect(resizeSpy).to.have.been.calledWith(100, 200, 'normal');
       expect(imaVideoObj.getPropertiesForTesting().adsManagerWidthOnLoad)

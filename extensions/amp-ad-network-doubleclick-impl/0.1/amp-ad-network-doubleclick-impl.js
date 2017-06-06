@@ -256,6 +256,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.attemptChangeSize(height, width).catch(() => {});
     }
   }
+
+  /** @override */
+  getPreconnectUrls() {
+    return ['https://partner.googleadservices.com',
+            'https://tpc.googlesyndication.com'];
+  }
 }
 
 AMP.registerElement(

@@ -1,0 +1,36 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-bind : amp-live-list</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="/dist/amp.js"></script>
+  <script async custom-element="amp-bind" src="/dist/v0/amp-bind-0.1.max.js"></script>
+  <script async custom-element="amp-live-list" src="/dist/v0/amp-live-list-0.1.max.js"></script>
+</head>
+<body>
+  <!-- bindings in dynamic content -->
+  <button on="tap:AMP.setState({dynamicText: 'bound'})" id="changeDynamicTextButton"></button>
+  <amp-live-list id="dynamicTag" data-poll-interval="15000" data-max-items-per-page="2">
+    <div items>
+      <!-- children with bindings added in test -->
+    </div>
+    <button update></button>
+  </amp-live-list>
+
+  <!-- amp-live-list -->
+  <button on="tap:AMP.setState({liveListText: 'hello world'})" id="changeLiveListTextButton"></button>
+  <amp-live-list id="liveList" data-poll-interval="20000" data-max-items-per-page="2">
+    <button update id="liveListUpdateButton" on="tap:liveList.update"></button>
+    <div items id="liveListItems">
+      <div id="liveListItem1" data-sort-time="123456789">
+        <p [text]="liveListText">unbound</p>
+      </div>
+    </div>
+  </amp-live-list>
+
+  <button id="triggerBindApplicationButton" on="tap:AMP.setState({})">Trigger application</button>
+</body>
+</html>
