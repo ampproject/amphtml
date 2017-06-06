@@ -81,8 +81,9 @@ function checkLinks() {
         util.log(
             util.colors.red('ERROR'),
             'Possible dead link(s) found.',
-            'Please update, or whitelist in build-system/tasks/check-links.js.',
-            util.colors.magenta(filesWithDeadLinks.join(',')));
+            'Please update',
+            util.colors.magenta(filesWithDeadLinks.join(',')),
+            'or whitelist in build-system/tasks/check-links.js');
             process.exit(1);
     } else {
         util.log(
@@ -101,8 +102,9 @@ function checkLinks() {
 function filterWhitelistedLinks(markdown) {
   var filteredMarkdown = markdown;
 
-  // localhost links (not served on Travis)
-  filteredMarkdown = filteredMarkdown.replace(/http:\/\/localhost:8000(\/)?/g, '');
+  // localhost links optionally preceded by ( or [ (not served on Travis)
+  filteredMarkdown =
+      filteredMarkdown.replace(/(\(|\[)?http:\/\/localhost:8000/g, '');
 
   // Links in script tags (illustrative, and not always valid)
   filteredMarkdown = filteredMarkdown.replace(/src="http.*?"/g, '');
