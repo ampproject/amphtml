@@ -136,19 +136,21 @@ export function getMultiSizeDimensions(
 function validateDimensions(width, height, widthCond, heightCond,
     errorBuilder, reportError) {
   let badParams = null;
-  if (widthCond(width) && heightCond(height)) {
+  const isWidthIllegal = widthCond(width);
+  const isHeightIllegal = heightCond(height);
+  if (isWidthIllegal && isHeightIllegal) {
     badParams = {
       badDim: 'width and height',
       badVal: width + 'x' + height,
     };
   }
-  else if (widthCond(width)) {
+  else if (isWidthIllegal) {
     badParams = {
       badDim: 'width',
       badVal: width,
     };
   }
-  else if (heightCond(height)) {
+  else if (isHeightIllegal) {
     badParams = {
       badDim: 'height',
       badVal: height,

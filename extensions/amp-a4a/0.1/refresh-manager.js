@@ -17,6 +17,14 @@
 import {analyticsForDoc} from '../../../src/analytics';
 import {refreshConfigs} from '../../../ads/_a4a-config';
 import {timerFor} from '../../../src/services';
+// TODO(levitzky)
+// I'm not happy with the idea of importing something for A4A from a google
+// specific directory, and so will gladly move this utility function to a better
+// location upon suggestion.
+import {
+  getEnclosingContainerTypes,
+  ValidAdContainerTypes,
+} from '../../../ads/google/a4a/utils';
 
 /**
  * visibilePercentageMin - The percentage of pixels that need to be on screen
@@ -57,12 +65,20 @@ export class RefreshManager {
     this.adType_ = this.element_.getAttribute('type');
 
     /**
-     * This must be defined before getConfiguration_ is called, since that
-     * function can override this value.
+     * Represents the refresh interval in between refresh events. This is a
+     * string because this value comes directly from the data-attribute on the
+     * ad slot, and may have the value "false", indicating that this slot should
+     * not be refresh-enabled, the value "", indicating that the
+     * network-default refresh interval should be used, and null, indicating
+     * that the publisher has not enabled this slot for refresh.
      *
-     * @private {boolean}
-     */
-    this.enabled_ = false;
+     * Note: a value of "false" differs from null in that the former implies
+     * that refresh is globally enabled on the page, but disabled for this
+     * specific slot, whereas null indicates that the publisher has not enabled
+     * refresh on the page (and therefore this slot) altogether.
+     *
+     * @const @private {?string} */
+    this.refreshInterval_ = this.getPublisherSpecifiedRefreshInterval_();
 
     /** @const @private {!RefreshConfig} */
     this.config_ = this.getConfiguration_();
@@ -80,7 +96,7 @@ export class RefreshManager {
    * element.
    */
   initiateRefreshCycle() {
-    if (!this.enabled_) {
+    if (!this.isEligibleForRefresh()) {
       // This instance of AmpA4A is not eligible for refresh, or does not have
       // it enabled.
       return;
@@ -113,33 +129,66 @@ export class RefreshManager {
   }
 
   /**
-   * Retrieves the refresh configuration for this slot. The base of the
-   * configuration is set by the network, but the refresh interval must be set
-   * at the page or slot level in order for the slot to be refresh-enabled.
+   * Retrieves the refresh configuration for this slot, as set by the ad
+   * network.
    *
    * @return {!RefreshConfig}
    */
   getConfiguration_() {
-    const networkConfig = refreshConfigs[this.adType_];
+    const config = refreshConfigs[this.adType_];
+    if (this.refreshInterval_ && this.refreshInterval_ != 'false') {
+      config['refreshInterval'] = this.refreshInterval_;
+    }
+    return config;
+  }
+
+  /**
+   * Retrieves the publisher-specified refresh interval, if one were set.
+   *
+   * @return {?string}
+   */
+  getPublisherSpecifiedRefreshInterval_() {
     let metaTag = [];
-    const refreshInterval = this.element_.getAttribute('data-enable-refresh') ||
-        ((metaTag = this.win_.document.getElementsByName(
-            `amp-ad-enable-refresh:${this.adType_}`)) && metaTag[0] &&
-         metaTag[0].getAttribute('content'));
+    let refreshInterval = this.element_.getAttribute('data-enable-refresh')
+        || ((metaTag = this.win_.document.getElementsByName(
+            `amp-ad-enable-refresh:${this.adType_}`))
+            && metaTag[0]
+            && metaTag[0].getAttribute('content'));
     if (refreshInterval != 'false' && !isNaN(refreshInterval)) {
       if (refreshInterval) {
         // If we're here, then data-enable-refresh is set, and it's a number.
         // This check is needed because isNaN(undefined) and isNaN('') are both
         // false, so it's possible that refreshInterval == undefined or
         // refreshInterval == '' after first check.
-        networkConfig['refreshInterval'] =
-            // TODO(levitzky) Using 5 only for testing.
-            Math.max(5, Number(refreshInterval));
+
+        // TODO(levitzky) Using 5 here only for testing. Will use 30 in prod.
+        refreshInterval = String(Math.max(5, Number(refreshInterval)));
         // TODO(levitzky) Should we print some error to the console if the
         // publisher's refresh interval is less than 30?
       }
-      this.enabled_ = true;
+      return refreshInterval;
     }
-    return networkConfig;
+    return null;
+  }
+
+  /**
+   * Returns true if this slot is eligible and enabled for refresh. A slot is
+   * eligible for refresh if it is of a network type that has opted in to
+   * refresh eligibility, and is not the child of an invalid container type
+   * (the only valid types are carousel and sticky-ad). The slot is
+   * refresh-enabled if the publisher has supplied an appropriate data
+   * attribute either on the slot or as part of a meta tag.
+   *
+   * @return {boolean}
+   */
+  isEligibleForRefresh() {
+    return this.config_  // The network has opted into refresh.
+        // The publisher has enabled refresh on this slot.
+        && (this.refreshInterval_ || this.refreshInterval_ == '')
+        // The slot is contained only within container types eligible for
+        // refresh.
+        && !getEnclosingContainerTypes(this.element_).filter(container =>
+            container != ValidAdContainerTypes['AMP-CAROUSEL']
+            && container != ValidAdContainerTypes['AMP-STICKY-AD']).length;
   }
 }
