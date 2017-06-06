@@ -622,30 +622,32 @@ function checkTypes() {
     return './extensions/' + extension.name + '/' +
         extension.version + '/' + extension.name + '.js';
   }).sort();
-  return Promise.all([
-    closureCompile(compileSrcs.concat(extensionSrcs), './dist',
-        'check-types.js', {
+  return compileCss().then(() => {
+    return Promise.all([
+      closureCompile(compileSrcs.concat(extensionSrcs), './dist',
+          'check-types.js', {
+            include3pDirectories: true,
+            includePolyfills: true,
+            extraGlobs: ['src/inabox/*.js'],
+            checkTypes: true,
+          }),
+      // Type check 3p/ads code.
+      closureCompile(['./3p/integration.js'], './dist',
+        'integration-check-types.js', {
+          externs: ['ads/ads.extern.js'],
           include3pDirectories: true,
           includePolyfills: true,
-          extraGlobs: ['src/inabox/*.js'],
           checkTypes: true,
         }),
-    // Type check 3p/ads code.
-    closureCompile(['./3p/integration.js'], './dist',
-      'integration-check-types.js', {
-        externs: ['ads/ads.extern.js'],
-        include3pDirectories: true,
-        includePolyfills: true,
-        checkTypes: true,
-      }),
-    closureCompile(['./3p/ampcontext-lib.js'], './dist',
-      'ampcontext-check-types.js', {
-        externs: ['ads/ads.extern.js'],
-        include3pDirectories: true,
-        includePolyfills: true,
-        checkTypes: true,
-      }),
-  ]);
+      closureCompile(['./3p/ampcontext-lib.js'], './dist',
+        'ampcontext-check-types.js', {
+          externs: ['ads/ads.extern.js'],
+          include3pDirectories: true,
+          includePolyfills: true,
+          checkTypes: true,
+        }),
+    ]);
+  });
 }
 
 /**
