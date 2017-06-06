@@ -31,6 +31,7 @@ import {macroTask} from '../../testing/yield';
 import * as sinon from 'sinon';
 import {createAmpElementProto} from '../../src/custom-element';
 import {CommonSignals} from '../../src/common-signals';
+import {macroTask} from '../../testing/yield';
 
 describes.realWin('analytics', {amp: true}, env => {
   let sandbox;
