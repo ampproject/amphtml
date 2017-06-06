@@ -400,6 +400,7 @@ function watch() {
   });
 
   return Promise.all([
+    compileCss(),
     buildAlp({watch: true}),
     buildExaminer({watch: true}),
     buildExtensions({watch: true}),
