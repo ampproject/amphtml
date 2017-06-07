@@ -258,7 +258,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     super.onCreativeRender(isVerifiedAmpCreative);
     if (this.ampAnalyticsConfig_) {
       dev().assert(!this.ampAnalyticsElement_);
-      dev().assert(this.qqid_);
       addCsiSignalsToAmpAnalyticsConfig(
           this.win,
           this.element,
