@@ -17,14 +17,11 @@
 import {analyticsForDoc} from '../../../src/analytics';
 import {refreshConfigs} from '../../../ads/_a4a-config';
 import {timerFor} from '../../../src/services';
-// TODO(levitzky)
-// I'm not happy with the idea of importing something for A4A from a google
-// specific directory, and so will gladly move this utility function to a better
-// location upon suggestion.
 import {
   getEnclosingContainerTypes,
   ValidAdContainerTypes,
 } from '../../../ads/google/a4a/utils';
+import {user} from '../../../src/log';
 
 /**
  * visibilePercentageMin - The percentage of pixels that need to be on screen
@@ -44,6 +41,10 @@ import {
  * }}
  */
 export let RefreshConfig;
+
+export const MIN_REFRESH_INTERVAL = 30;
+export const DATA_ATTR_NAME = 'data-enable-refresh';
+export const METADATA_NAME = 'amp-ad-enable-refresh';
 
 export class RefreshManager {
 
@@ -94,22 +95,21 @@ export class RefreshManager {
   /**
    * Initiates the refresh cycle by initiating the visibility manager on the
    * element.
+   *
+   * @return {?Promise} Promise that resolves after refresh event. This promise
+   *   is useful to have for test purposes.
    */
   initiateRefreshCycle() {
-    if (!this.isEligibleForRefresh()) {
-      // This instance of AmpA4A is not eligible for refresh, or does not have
-      // it enabled.
-      return;
-    }
-    analyticsForDoc(this.element_, true).then(analytics => {
-      analytics.getAnalyticsRoot(this.element_).getVisibilityManager()
-          .listenElement(this.element_, this.config_, null, null, () => {
-            this.refreshTimeoutId_ = this.timer_.delay(() => {
-              this.a4a_.refresh(() => {
-                this.initiateRefreshCycle();
-              });
-            }, this.config_.refreshInterval);
-          });
+    return new Promise(resolve => {
+      analyticsForDoc(this.element_, true).then(analytics => {
+        analytics.getAnalyticsRoot(this.element_).getVisibilityManager()
+            .listenElement(this.element_, this.config_, null, null, () => {
+              this.refreshTimeoutId_ = this.timer_.delay(() => {
+                this.a4a_.refresh(() => this.initiateRefreshCycle());
+                resolve();
+              }, this.config_.refreshInterval * 1000);
+            });
+      });
     });
   }
 
@@ -117,15 +117,12 @@ export class RefreshManager {
    * Terminates the current refresh cycle, if one currently exists. This
    * function also returns a courtesy callback, which, if invoked, will
    * initiate a new refresh cycle.
-   *
-   * @return {function()} Initiate refresh callback.
    */
   stopRefreshCycle() {
     if (this.refreshTimeoutId_) {
       this.timer_.cancel(this.refreshTimeoutId_);
       this.refreshTimeoutId_ = null;
     }
-    return () => this.initiateRefreshCycle();
   }
 
   /**
@@ -149,9 +146,9 @@ export class RefreshManager {
    */
   getPublisherSpecifiedRefreshInterval_() {
     let metaTag = [];
-    let refreshInterval = this.element_.getAttribute('data-enable-refresh')
+    let refreshInterval = this.element_.getAttribute(DATA_ATTR_NAME)
         || ((metaTag = this.win_.document.getElementsByName(
-            `amp-ad-enable-refresh:${this.adType_}`))
+            `${METADATA_NAME}:${this.adType_}`))
             && metaTag[0]
             && metaTag[0].getAttribute('content'));
     if (refreshInterval != 'false' && !isNaN(refreshInterval)) {
@@ -160,11 +157,11 @@ export class RefreshManager {
         // This check is needed because isNaN(undefined) and isNaN('') are both
         // false, so it's possible that refreshInterval == undefined or
         // refreshInterval == '' after first check.
-
-        // TODO(levitzky) Using 5 here only for testing. Will use 30 in prod.
-        refreshInterval = String(Math.max(5, Number(refreshInterval)));
-        // TODO(levitzky) Should we print some error to the console if the
-        // publisher's refresh interval is less than 30?
+        if (refreshInterval < MIN_REFRESH_INTERVAL) {
+          user().warn(
+              `refresh interval must be at least ${MIN_REFRESH_INTERVAL}s`);
+          refreshInterval = String(MIN_REFRESH_INTERVAL);
+        }
       }
       return refreshInterval;
     }
@@ -182,13 +179,14 @@ export class RefreshManager {
    * @return {boolean}
    */
   isEligibleForRefresh() {
-    return this.config_  // The network has opted into refresh.
+        // The network has opted into refresh.
+    return !!(this.config_
         // The publisher has enabled refresh on this slot.
         && (this.refreshInterval_ || this.refreshInterval_ == '')
         // The slot is contained only within container types eligible for
         // refresh.
         && !getEnclosingContainerTypes(this.element_).filter(container =>
             container != ValidAdContainerTypes['AMP-CAROUSEL']
-            && container != ValidAdContainerTypes['AMP-STICKY-AD']).length;
+            && container != ValidAdContainerTypes['AMP-STICKY-AD']).length);
   }
 }
