@@ -15,6 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-sidebar-1.0.css';
+import {Layout} from '../../../src/layout';
 
 export class AmpSidebar extends AMP.BaseElement {
   /** @param {!AmpElement} element */
