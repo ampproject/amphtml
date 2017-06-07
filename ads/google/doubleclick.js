@@ -65,15 +65,31 @@ export function doubleclick(global, data) {
     transform: 'translate(-50%, -50%)',
   });
 
+  let url = 'https://www.googletagservices.com/tag/js/';
+  let sf = false;
+
+  if (data['experimentId'] && data['experimentId'].split(",").includes('21060540')) {
+    url += 'gpt_sf_a.js';
+    sf = true;
+  } else if (data['experimentId'] && data['experimentId'].split(",").includes('21060541')) {
+    url += 'gpt_sf_b.js';
+    sf = true;
+  } else {
+    url += 'gpt.js';
+  }
+
   if (data.useSameDomainRenderingUntilDeprecated != undefined ||
       data.multiSize) {
-    doubleClickWithGpt(global, data, GladeExperiment.GLADE_OPT_OUT);
-  } else {
+    doubleClickWithGpt(global, data, GladeExperiment.GLADE_OPT_OUT, url);
+  } else if (sf) {
+    doubleClickWithGpt(global, data, GladeExperiment.GLADE_OPT_OUT, url);
+  }
+  else {
     const dice = Math.random();
     const href = global.context.location.href;
     if ((href.indexOf('google_glade=0') > 0 || dice < experimentFraction)
         && href.indexOf('google_glade=1') < 0) {
-      doubleClickWithGpt(global, data, GladeExperiment.GLADE_CONTROL);
+      doubleClickWithGpt(global, data, GladeExperiment.GLADE_CONTROL, url);
     } else {
       const exp = (dice < 2 * experimentFraction) ?
         GladeExperiment.GLADE_EXPERIMENT : GladeExperiment.NO_EXPERIMENT;
@@ -86,8 +102,9 @@ export function doubleclick(global, data) {
  * @param {!Window} global
  * @param {!Object} data
  * @param {!GladeExperiment} gladeExperiment
+ * @param {string} url
  */
-function doubleClickWithGpt(global, data, gladeExperiment) {
+function doubleClickWithGpt(global, data, gladeExperiment, url) {
   const dimensions = [[
     parseInt(data.overrideWidth || data.width, 10),
     parseInt(data.overrideHeight || data.height, 10),
@@ -108,7 +125,7 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
         dimensions);
   }
 
-  loadScript(global, 'https://www.googletagservices.com/tag/js/gpt.js', () => {
+  loadScript(global, url, () => {
     global.googletag.cmd.push(() => {
       const googletag = global.googletag;
       const pubads = googletag.pubads();
