@@ -72,7 +72,7 @@ The URL for your VAST ad document.
 
 **data-src** (optional)
 
-The URL of your video content.
+DEPRECATED Prefer `<source>` child elements. The URL of your video content.
 
 **data-poster** (optional)
 
