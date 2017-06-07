@@ -758,8 +758,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         });
       };
       Object.keys(grouping).forEach(networkId => {
-        const impls = grouping[networkId];
-        const validInstances = doubleclickInstances.filter(impl =>
+        const validInstances = grouping[networkId].filter(impl =>
           impl.element.getAttribute('data-test-invalid') != 'true');
         const isSra = validInstances.length > 1;
         const sraResponses = [];
