@@ -348,6 +348,11 @@ export const adConfig = {
 
   ibillboard: {},
 
+  imedia: {
+    prefetch: 'https://i.imedia.cz/js/im3.js',
+    renderStartImplemented: true,
+  },
+
   imobile: {
     prefetch: 'https://spamp.i-mobile.co.jp/script/amp.js',
     preconnect: 'https://spad.i-mobile.co.jp',

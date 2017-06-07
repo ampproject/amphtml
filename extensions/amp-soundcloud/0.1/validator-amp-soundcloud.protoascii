@@ -17,12 +17,11 @@
 tags: {  # amp-soundcloud
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-soundcloud extension .js script"
   extension_spec: {
     name: "amp-soundcloud"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    deprecated_recommends_usage_of_tag: "amp-soundcloud"
+    requires_usage: DEPRECATED_WARNING
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -31,7 +30,7 @@ tags: {  # <amp-soundcloud>
   html_format: AMP
   tag_name: "AMP-SOUNDCLOUD"
   disallowed_ancestor: "AMP-SIDEBAR"
-  requires: "amp-soundcloud extension .js script"
+  requires_extension: "amp-soundcloud"
   attrs: {
     name: "data-color"
     value_regex_casei: "([0-9a-f]{3}){1,2}"
@@ -50,7 +49,6 @@ tags: {  # <amp-soundcloud>
     value_regex: "true|false"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-soundcloud"
   amp_layout: {
     supported_layouts: FIXED_HEIGHT
   }

@@ -17,8 +17,8 @@
 import {installFormProxy} from './form-proxy';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {createCustomEvent} from '../../../src/event-helper';
-import {installStylesForShadowRoot} from '../../../src/shadow-embed';
 import {documentInfoForDoc} from '../../../src/services';
+import {installStylesForShadowRoot} from '../../../src/shadow-embed';
 import {iterateCursor} from '../../../src/dom';
 import {formOrNullForElement, setFormForElement} from '../../../src/form';
 import {
@@ -412,9 +412,9 @@ export class AmpForm {
         })
         .then(() => this.doXhr_())
         .then(response => this.handleXhrSubmitSuccess_(response),
-            error => this.handleXhrSubmitFailure_(
-                /** @type {!../../../src/service/xhr-impl.FetchError} */ (
-                    error)));
+            error => {
+              return this.handleXhrSubmitFailure_(/** @type {!Error} */(error));
+            });
 
     if (getMode().test) {
       this.xhrSubmitPromise_ = p;
@@ -488,19 +488,25 @@ export class AmpForm {
 
   /**
    * Transition the form the the submit error state.
-   * @param {../../../src/service/xhr-impl.FetchError} errorResponse
+   * @param {!Error} error
    * @private
    */
-  handleXhrSubmitFailure_(errorResponse) {
-    const error = (errorResponse && errorResponse.error) || errorResponse;
-    this.triggerAction_(
-        /* success */ false, errorResponse ? errorResponse.responseJson : null);
-    this.analyticsEvent_('amp-form-submit-error');
-    this.cleanupRenderedTemplate_();
-    this.setState_(FormState_.SUBMIT_ERROR);
-    this.renderTemplate_(errorResponse.responseJson || {});
-    this.maybeHandleRedirect_(errorResponse.response);
-    user().error(TAG, `Form submission failed: ${error}`);
+  handleXhrSubmitFailure_(error) {
+    let promise;
+    if (error && error.response) {
+      promise = error.response.json().catch(() => null);
+    } else {
+      promise = Promise.resolve(null);
+    }
+    return promise.then(responseJson => {
+      this.triggerAction_(/* success */ false, responseJson);
+      this.analyticsEvent_('amp-form-submit-error');
+      this.cleanupRenderedTemplate_();
+      this.setState_(FormState_.SUBMIT_ERROR);
+      this.renderTemplate_(responseJson || {});
+      this.maybeHandleRedirect_(error.response);
+      user().error(TAG, `Form submission failed: ${error}`);
+    });
   }
 
   /** @private */
@@ -549,7 +555,7 @@ export class AmpForm {
 
   /**
    * Handles response redirect throught the AMP-Redirect-To response header.
-   * @param {!../../../src/service/xhr-impl.FetchResponse} response
+   * @param {../../../src/service/xhr-impl.FetchResponse} response
    * @private
    */
   maybeHandleRedirect_(response) {
@@ -676,6 +682,12 @@ export class AmpForm {
               rendered.id = messageId;
               rendered.setAttribute('i-amphtml-rendered', '');
               container.appendChild(rendered);
+              const templatedEvent = createCustomEvent(
+                  this.win_,
+                  'amp:template-rendered',
+                  /* detail */ null,
+                  {bubbles: true});
+              container.dispatchEvent(templatedEvent);
             });
       } else {
         // TODO(vializ): This is to let AMP know that the AMP elements inside
@@ -706,25 +718,6 @@ export class AmpForm {
     if (previousRender) {
       removeElement(previousRender);
     }
-  }
-
-  /**
-   * @return {Array<!Element>}
-   * @public
-   */
-  getDynamicElementContainers() {
-    const dynamicElements = [];
-    const successDiv =
-        this.form_./*OK*/querySelector(`[${FormState_.SUBMIT_SUCCESS}]`);
-    const errorDiv =
-        this.form_./*OK*/querySelector(`[${FormState_.SUBMIT_ERROR}]`);
-    if (successDiv) {
-      dynamicElements.push(successDiv);
-    }
-    if (errorDiv) {
-      dynamicElements.push(errorDiv);
-    }
-    return dynamicElements;
   }
 
   /**

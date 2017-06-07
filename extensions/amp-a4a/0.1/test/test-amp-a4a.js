@@ -92,8 +92,11 @@ describe('amp-a4a', () => {
         method: 'GET',
         ampCors: false,
         credentials: 'omit',
-      }).returns(
-        Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]}));
+      }).returns(Promise.resolve({
+        json() {
+          return Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]});
+        },
+      }));
     viewerWhenVisibleMock = sandbox.stub(Viewer.prototype, 'whenFirstVisible');
     viewerWhenVisibleMock.returns(Promise.resolve());
     mockResponse = {
@@ -2003,8 +2006,11 @@ describe('amp-a4a', () => {
             method: 'GET',
             ampCors: false,
             credentials: 'omit',
-          }).returns(
-          Promise.resolve({keys: [testKey, testKey, testKey]}));
+          }).returns(Promise.resolve({
+            json() {
+              return Promise.resolve({keys: [testKey, testKey, testKey]});
+            },
+          }));
       expect(win.ampA4aValidationKeys).not.to.exist;
       // Key fetch happens on A4A class construction.
       const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
@@ -2041,8 +2047,13 @@ describe('amp-a4a', () => {
             method: 'GET',
             ampCors: false,
             credentials: 'omit',
-          }).returns(
-              Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]}));
+          }).returns(Promise.resolve({
+            json() {
+              return Promise.resolve({keys: [
+                JSON.parse(validCSSAmp.publicKey),
+              ]});
+            },
+          }));
       expect(win.ampA4aValidationKeys).not.to.exist;
       // Key fetch happens on A4A class construction.
       const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
@@ -2073,7 +2084,11 @@ describe('amp-a4a', () => {
             method: 'GET',
             ampCors: false,
             credentials: 'omit',
-          }).returns(Promise.resolve({keys: ['invalid key data']}));
+          }).returns(Promise.resolve({
+            json() {
+              return Promise.resolve({keys: ['invalid key data']});
+            },
+          }));
       expect(win.ampA4aValidationKeys).not.to.exist;
       // Key fetch happens on A4A class construction.
       const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars

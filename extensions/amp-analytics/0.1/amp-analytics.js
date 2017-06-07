@@ -357,6 +357,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           remoteConfigUrl = expandedUrl;
           return xhrFor(ampdoc.win).fetchJson(remoteConfigUrl, fetchConfig);
         })
+        .then(res => res.json())
         .then(jsonValue => {
           this.remoteConfig_ = jsonValue;
           dev().fine(TAG, 'Remote config loaded', remoteConfigUrl);

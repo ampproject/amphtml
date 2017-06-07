@@ -216,9 +216,6 @@ const command = {
   runLintChecks: function() {
     timedExecOrDie(`${gulp} lint`);
   },
-  buildRuntimeCssOnly: function() {
-    timedExecOrDie(`${gulp} build --css-only`);
-  },
   buildRuntime: function() {
     timedExecOrDie(`${gulp} build`);
   },
@@ -275,7 +272,8 @@ function runAllCommands() {
   }
   if (process.env.BUILD_SHARD == "integration_tests") {
     command.cleanBuild();
-    command.buildRuntimeCssOnly();
+    // TODO(jridgewell, 9757): Remove this after fixing integration test.
+    command.buildRuntime();
     command.buildRuntimeMinified();
     command.runPresubmitTests();  // Needs runtime to be built and served.
     command.runVisualDiffTests();  // Only called during push builds.
@@ -359,14 +357,14 @@ function main(argv) {
     if (buildTargets.has('RUNTIME')) {
       command.cleanBuild();
       command.buildRuntime();
-      command.runLintChecks();
-      command.runDepAndTypeChecks();
-      command.runUnitTests();
       // Ideally, we'd run presubmit tests after `gulp dist`, as some checks run
       // through the dist/ folder. However, to speed up the Travis queue, we no
       // longer do a dist build for PRs, so this call won't cover dist/.
       // TODO(rsimha-amp): Move this once integration tests are enabled.
       command.runPresubmitTests();
+      command.runLintChecks();
+      command.runDepAndTypeChecks();
+      command.runUnitTests();
     }
     if (buildTargets.has('VALIDATOR_WEBUI')) {
       command.buildValidatorWebUI();

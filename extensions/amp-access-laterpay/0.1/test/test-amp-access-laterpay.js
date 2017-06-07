@@ -15,8 +15,6 @@
  */
 
 import {LaterpayVendor} from '../laterpay-impl';
-import {toggleExperiment} from '../../../../src/experiments';
-
 
 describes.fakeWin('LaterpayVendor', {
   amp: true,
@@ -54,21 +52,12 @@ describes.fakeWin('LaterpayVendor', {
 
     vendor = new LaterpayVendor(accessService);
     xhrMock = sandbox.mock(vendor.xhr_);
-    toggleExperiment(win, 'amp-access-laterpay', true);
   });
 
   afterEach(() => {
     articleTitle.parentNode.removeChild(articleTitle);
-    toggleExperiment(win, 'amp-access-laterpay', false);
     accessServiceMock.verify();
     xhrMock.verify();
-  });
-
-  it('should fail without experiment', () => {
-    toggleExperiment(win, 'amp-access-laterpay', false);
-    expect(() => {
-      vendor.authorize();
-    }).to.throw(/experiment/);
   });
 
   describe('authorize', () => {
@@ -91,7 +80,11 @@ describes.fakeWin('LaterpayVendor', {
         .withExactArgs('https://builturl', {
           credentials: 'include',
         })
-        .returns(Promise.resolve({access: true}))
+        .returns(Promise.resolve({
+          json() {
+            return Promise.resolve({access: true});
+          },
+        }))
         .once();
       return vendor.authorize().then(resp => {
         expect(resp.access).to.be.true;
@@ -129,8 +122,12 @@ describes.fakeWin('LaterpayVendor', {
           credentials: 'include',
         })
         .returns(Promise.reject({
-          response: {status: 402},
-          responseJson: {access: false},
+          response: {
+            status: 402,
+            json() {
+              return Promise.resolve({access: false});
+            },
+          },
         }))
         .once();
       emptyContainerStub.returns(Promise.resolve());

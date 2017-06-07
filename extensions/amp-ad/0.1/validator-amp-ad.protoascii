@@ -27,8 +27,7 @@ tags: {  # amp-ad
     name: "amp-ad"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    deprecated_recommends_usage_of_tag: "amp-embed"
-    deprecated_recommends_usage_of_tag: "amp-ad"
+    requires_usage: DEPRECATED_WARNING
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -39,6 +38,7 @@ tags: {  # <amp-ad>
   # Typically we'd require the extension j/s, but for historical reasons
   # many pages don't have it, so it ends up late loaded and we warn, instead
   # of making this a validation error.
+  # requires_extension: "amp-ad"
   also_requires_tag_warning: "amp-ad extension .js script"
   # If modifying disallowed_ancestors, then please also edit
   # extensions/amp-auto-ads/*/placement.js
@@ -66,13 +66,61 @@ tags: {  # <amp-ad>
     supported_layouts: RESPONSIVE
   }
 }
+tags: {  # <amp-ad data-multi-size>
+  html_format: AMP  # Ads are not allowed inside ads
+  tag_name: "AMP-AD"
+  spec_name: "amp-ad with data-multi-size attribute"
+  # Typically we'd require the extension j/s, but for historical reasons
+  # many pages don't have it, so it ends up late loaded and we warn, instead
+  # of making this a validation error.
+  also_requires_tag_warning: "amp-ad extension .js script"
+  # If modifying disallowed_ancestors, then please also edit
+  # extensions/amp-auto-ads/*/placement.js
+  disallowed_ancestor: "AMP-APP-BANNER"
+  disallowed_ancestor: "AMP-SIDEBAR"
+  # amp-ad elements cannot be both children of an amp ad container and have
+  # data-multi-size attribute.
+  disallowed_ancestor: "AMP-CAROUSEL"
+  disallowed_ancestor: "AMP-FX-FLYING-CARPET"
+  disallowed_ancestor: "AMP-LIGHTBOX"
+  disallowed_ancestor: "AMP-STICKY-AD"
+  attrs: { name: "alt" }
+  attrs: {
+    name: "data-multi-size"
+    mandatory: true
+    value: ""
+    dispatch_key: true
+  }
+  attrs: { name: "json" }
+  attrs: {
+    name: "src"
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  attrs: { name: "type" mandatory: true }
+  attr_lists: "extended-amp-global"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ad"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
 tags: {  # <amp-embed>
   html_format: AMP
   tag_name: "AMP-EMBED"
   # Typically we'd require the extension j/s, but for historical reasons
   # many pages don't have it, so it ends up late loaded and we warn, instead
   # of making this a validation error.
+  # requires_extension: "amp-ad"
   also_requires_tag_warning: "amp-ad extension .js script"
+  disallowed_ancestor: "AMP-APP-BANNER"
   disallowed_ancestor: "AMP-SIDEBAR"
   attrs: { name: "alt" }
   attrs: { name: "json" }
@@ -96,3 +144,48 @@ tags: {  # <amp-embed>
     supported_layouts: RESPONSIVE
   }
 }
+tags: {  # <amp-embed data-multi-size>
+  html_format: AMP
+  tag_name: "AMP-EMBED"
+  spec_name: "amp-embed with data-multi-size attribute"
+  # Typically we'd require the extension j/s, but for historical reasons
+  # many pages don't have it, so it ends up late loaded and we warn, instead
+  # of making this a validation error.
+  also_requires_tag_warning: "amp-ad extension .js script"
+  disallowed_ancestor: "AMP-APP-BANNER"
+  disallowed_ancestor: "AMP-SIDEBAR"
+  # amp-embed elements cannot be both children of an amp ad container and have
+  # data-multi-size attribute.
+  disallowed_ancestor: "AMP-CAROUSEL"
+  disallowed_ancestor: "AMP-FX-FLYING-CARPET"
+  disallowed_ancestor: "AMP-LIGHTBOX"
+  disallowed_ancestor: "AMP-STICKY-AD"
+  attrs: { name: "alt" }
+  attrs: {
+    name: "data-multi-size"
+    mandatory: true
+    value: ""
+    dispatch_key: true
+  }
+  attrs: { name: "json" }
+  attrs: {
+    name: "src"
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  attrs: { name: "type" mandatory: true }
+  attr_lists: "extended-amp-global"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ad"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+

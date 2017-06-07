@@ -20,5 +20,6 @@
   "a4aFastFetchAdSenseLaunched": 0,
   "pump-early-frame": 1,
   "a4a-measure-get-ad-urls": 0,
+  "amp-bind": 1,
   "ad-loader-v2": 1
 }

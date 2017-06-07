@@ -145,7 +145,7 @@ class AmpApesterMedia extends AMP.BaseElement {
     const url = this.buildUrl_();
     return xhrFor(this.win).fetchJson(url, {
       requireAmpResponseSourceOrigin: false,
-    });
+    }).then(res => res.json());
   }
 
   /** @param {string} id

@@ -117,7 +117,7 @@ function invoke(win, clickUrl) {
   }
   return xhrFor(win).fetchJson(clickUrl, {
     credentials: 'include',
-  });
+  }).then(res => res.json());
 }
 
 /**

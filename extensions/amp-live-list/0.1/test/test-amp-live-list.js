@@ -341,6 +341,35 @@ describe('amp-live-list', () => {
       });
     });
 
+    it('dispatches "amp:template-rendered" event after render', () => {
+      const child1 = document.createElement('div');
+      const child2 = document.createElement('div');
+      child1.setAttribute('id', 'id1');
+      child2.setAttribute('id', 'id2');
+      child1.setAttribute('data-sort-time', '123');
+      child2.setAttribute('data-sort-time', '124');
+      itemsSlot.appendChild(child1);
+      itemsSlot.appendChild(child2);
+      buildElement(elem, dftAttrs);
+      liveList.buildCallback();
+
+      const fromServer1 = createFromServer([
+        {id: 'id1', updateTime: 125},
+      ]);
+      const spy = sandbox.spy(liveList.itemsSlot_, 'dispatchEvent');
+      // We stub and restore to not trigger `update` calling `updateAction_`.
+      const stub = sinon./*OK*/stub(liveList, 'updateAction_');
+      liveList.update(fromServer1);
+      stub./*OK*/restore();
+      return liveList.updateAction_().then(() => {
+        expect(spy).to.have.been.calledOnce;
+        expect(spy).calledWithMatch({
+          type: 'amp:template-rendered',
+          bubbles: true,
+        });
+      });
+    });
+
     it('validates children during update', () => {
       const update = document.createElement('div');
       const updateLiveListItems = document.createElement('div');
