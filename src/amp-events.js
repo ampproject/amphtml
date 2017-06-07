@@ -21,15 +21,3 @@ export const AmpEvents = {
   },
   ERROR: 'amp:error',
 };
-// 'amp:visibilitychange'
-// 'amp:bind:setState'
-// 'amp:template-rendered'
-// 'amp:bind:initialize'
-// 'amp:bind:rescan-template'
-// 'amp:dom-update'
-// 'amp:built'
-// 'amp:attached'
-// 'amp:stubbed'
-// 'amp:load:start'
-// 'amp:load:end'
-// 'amp:error'

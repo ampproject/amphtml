@@ -18,6 +18,7 @@ import {
   createFixtureIframe,
   expectBodyToBecomeVisible,
 } from '../../testing/iframe.js';
+import {AmpEvents} from '../../src/amp-events';
 
 describe.configure().retryOnSaucelabs().run('Rendering of amp-img', function() {
   this.timeout(5000);
@@ -36,19 +37,19 @@ describe.configure().retryOnSaucelabs().run('Rendering of amp-img', function() {
   it('should be present', () => {
     expect(fixture.doc.querySelectorAll('amp-img')).to.have.length(15);
     // 5 image visible in 500 pixel height.
-    return fixture.awaitEvent('amp:load:start', 3).then(function() {
+    return fixture.awaitEvent(AmpEvents.LOAD.START, 3).then(function() {
       expect(fixture.doc.querySelectorAll('amp-img img[src]')).to
           .have.length(3);
     });
   });
 
   it('should resize and load more elements', () => {
-    const p = fixture.awaitEvent('amp:load:start', 11).then(function() {
+    const p = fixture.awaitEvent(AmpEvents.LOAD.START, 11).then(function() {
       expect(fixture.doc.querySelectorAll('amp-img img[src]'))
           .to.have.length(11);
       fixture.iframe.height = 2000;
       fixture.win.dispatchEvent(new fixture.win.Event('resize'));
-      return fixture.awaitEvent('amp:load:start', 13).then(function() {
+      return fixture.awaitEvent(AmpEvents.LOAD.START, 13).then(function() {
         expect(fixture.doc.querySelectorAll('amp-img img[src]'))
             .to.have.length(13);
       });
@@ -59,7 +60,7 @@ describe.configure().retryOnSaucelabs().run('Rendering of amp-img', function() {
   });
 
   it('should respect media queries', () => {
-    return fixture.awaitEvent('amp:load:start', 3).then(function() {
+    return fixture.awaitEvent(AmpEvents.LOAD.START, 3).then(function() {
       const smallScreen = fixture.doc.getElementById('img3');
       const largeScreen = fixture.doc.getElementById('img3_1');
       expect(smallScreen.className)
@@ -69,7 +70,7 @@ describe.configure().retryOnSaucelabs().run('Rendering of amp-img', function() {
       expect(largeScreen.offsetHeight).to.equal(0);
       fixture.iframe.width = 600;
       fixture.win.dispatchEvent(new fixture.win.Event('resize'));
-      return fixture.awaitEvent('amp:load:start', 4).then(function() {
+      return fixture.awaitEvent(AmpEvents.LOAD.START, 4).then(function() {
         expect(smallScreen.className)
             .to.match(/i-amphtml-hidden-by-media-query/);
         expect(largeScreen.className)

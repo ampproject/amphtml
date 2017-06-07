@@ -30,6 +30,7 @@ import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
 import {installStyles} from '../src/style-installer';
 import {resourcesForDoc} from '../src/services';
+import {AmpEvents} from '../src/amp-events';
 
 let iframeCount = 0;
 
@@ -64,13 +65,13 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
   return new Promise((resolve, reject) => {
     // Counts the supported custom events.
     const events = {
-      'amp:attached': 0,
-      'amp:bind:initialize': 0,
-      'amp:bind:setState': 0,
-      'amp:bind:rescan-template': 0,
-      'amp:error': 0,
-      'amp:load:start': 0,
-      'amp:stubbed': 0,
+      [AmpEvents.ATTACHED]: 0,
+      [AmpEvents.BIND.INITIALIZE]: 0,
+      [AmpEvents.BIND.SET_STATE]: 0,
+      [AmpEvents.BIND.RESCAN_TEMPLATE]: 0,
+      [AmpEvents.ERROR]: 0,
+      [AmpEvents.LOAD.START]: 0,
+      [AmpEvents.STUBBED]: 0,
     };
     const messages = [];
     let html = __html__[fixture];

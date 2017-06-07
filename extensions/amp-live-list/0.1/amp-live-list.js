@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-live-list-0.1.css';
 import {childElementByAttr} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
@@ -346,7 +347,7 @@ export class AmpLiveList extends AMP.BaseElement {
         this.sendAmpDomUpdateEvent_();
 
         const templatedEvent = createCustomEvent(this.win,
-            'amp:template-rendered', /* detail */ null, {bubbles: true});
+            AmpEvents.TEMPLATE_RENDERED, /* detail */ null, {bubbles: true});
         this.itemsSlot_.dispatchEvent(templatedEvent);
       });
     }
@@ -863,7 +864,7 @@ export class AmpLiveList extends AMP.BaseElement {
 
   sendAmpDomUpdateEvent_() {
     const event = this.win.document.createEvent('Event');
-    event.initEvent('amp:dom-update', true, true);
+    event.initEvent(AmpEvents.DOM_UPDATE, true, true);
     this.win.document.dispatchEvent(event);
   }
 }

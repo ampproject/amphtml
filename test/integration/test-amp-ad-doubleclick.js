@@ -19,6 +19,7 @@ import {
   pollForLayout,
   poll,
 } from '../../testing/iframe';
+import {AmpEvents} from '../../src/amp-events';
 
 describe.configure().retryOnSaucelabs().run('Rendering of one ad', () => {
   let fixture;
@@ -122,7 +123,7 @@ describe.configure().retryOnSaucelabs().run('Rendering of one ad', () => {
     }).then(() => {
       expect(iframe.contentWindow.context.hidden).to.be.false;
       return new Promise(resolve => {
-        iframe.contentWindow.addEventListener('amp:visibilitychange', resolve);
+        iframe.contentWindow.addEventListener(AmpEvents.VISIBILITY_CHANGE, resolve);
         fixture.win.AMP.viewer.receiveMessage('visibilitychange', {
           state: 'hidden',
         });
