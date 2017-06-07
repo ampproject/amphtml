@@ -371,36 +371,38 @@ parse: function parse(input) {
     var symbol, preErrorSymbol, state, action, a, r, yyval = {}, p, len, newState, expected;
     while (true) {
         state = stack[stack.length - 1];
-        if (this.defaultActions[state]) {
-            action = this.defaultActions[state];
+        const a = this.defaultActions[state];
+        if (a) {
+            action = a;
         } else {
-            if (symbol === null || typeof symbol == 'undefined') {
+            if (symbol === null || symbol === undefined) {
                 symbol = lex();
             }
-            action = table[state] && table[state][symbol];
+            const tableState = table[state];
+            action = tableState && tableState[symbol];
         }
-                    if (typeof action === 'undefined' || !action.length || !action[0]) {
-                var errStr = '';
-                expected = [];
-                for (p in table[state]) {
-                    if (this.terminals_[p] && p > TERROR) {
-                        expected.push('\'' + this.terminals_[p] + '\'');
-                    }
+        if (action === undefined || !action.length || !action[0]) {
+            var errStr = '';
+            expected = [];
+            for (p in table[state]) {
+                if (p > TERROR && this.terminals_[p]) {
+                    expected.push('\'' + this.terminals_[p] + '\'');
                 }
-                if (lexer.showPosition) {
-                    errStr = 'Parse error on line ' + (yylineno + 1) + ':\n' + lexer.showPosition() + '\nExpecting ' + expected.join(', ') + ', got \'' + (this.terminals_[symbol] || symbol) + '\'';
-                } else {
-                    errStr = 'Parse error on line ' + (yylineno + 1) + ': Unexpected ' + (symbol == EOF ? 'end of input' : '\'' + (this.terminals_[symbol] || symbol) + '\'');
-                }
-                this.parseError(errStr, {
-                    text: lexer.match,
-                    token: this.terminals_[symbol] || symbol,
-                    line: lexer.yylineno,
-                    loc: yyloc,
-                    expected: expected
-                });
             }
-        if (action[0] instanceof Array && action.length > 1) {
+            if (lexer.showPosition) {
+                errStr = 'Parse error on line ' + (yylineno + 1) + ':\n' + lexer.showPosition() + '\nExpecting ' + expected.join(', ') + ', got \'' + (this.terminals_[symbol] || symbol) + '\'';
+            } else {
+                errStr = 'Parse error on line ' + (yylineno + 1) + ': Unexpected ' + (symbol == EOF ? 'end of input' : '\'' + (this.terminals_[symbol] || symbol) + '\'');
+            }
+            this.parseError(errStr, {
+                text: lexer.match,
+                token: this.terminals_[symbol] || symbol,
+                line: lexer.yylineno,
+                loc: yyloc,
+                expected: expected
+            });
+        }
+        if (Array.isArray(action[0]) && action.length > 1) {
             throw new Error('Parse Error: multiple actions possible at state: ' + state + ', token: ' + symbol);
         }
         switch (action[0]) {
@@ -426,16 +428,18 @@ parse: function parse(input) {
         case 2:
             len = this.productions_[action[1]][1];
             yyval.$ = vstack[vstack.length - len];
+            const firstYyloc = lstack[lstack.length - (len || 1)];
+            const lastYyloc = lstack[lstack.length - 1];
             yyval._$ = {
-                first_line: lstack[lstack.length - (len || 1)].first_line,
-                last_line: lstack[lstack.length - 1].last_line,
-                first_column: lstack[lstack.length - (len || 1)].first_column,
-                last_column: lstack[lstack.length - 1].last_column
+                first_line: firstYyloc.first_line,
+                last_line: lastYyloc.last_line,
+                first_column: firstYyloc.first_column,
+                last_column: lastYyloc.last_column
             };
             if (ranges) {
                 yyval._$.range = [
-                    lstack[lstack.length - (len || 1)].range[0],
-                    lstack[lstack.length - 1].range[1]
+                    firstYyloc.range[0],
+                    lastYyloc.range[1]
                 ];
             }
             r = this.performAction.apply(yyval, [
@@ -447,7 +451,7 @@ parse: function parse(input) {
                 vstack,
                 lstack
             ].concat(args));
-            if (typeof r !== 'undefined') {
+            if (r !== undefined) {
                 return r;
             }
             if (len) {
@@ -641,8 +645,9 @@ test_match:function (match, indexed_rule) {
                 backup.yylloc.range = this.yylloc.range.slice(0);
             }
         }
-
-        lines = match[0].match(/(?:\r\n?|\n).*/g);
+        if (match[0].indexOf('\n') != -1 || match[0].indexOf('\r\n') != -1) {
+            lines = match[0].match(/(?:\r\n?|\n).*/g);
+        }
         if (lines) {
             this.yylineno += lines.length;
         }
@@ -693,19 +698,20 @@ next:function () {
         var token,
             match,
             tempMatch,
-            index;
+            matchRule;
         if (!this._more) {
             this.yytext = '';
             this.match = '';
         }
         var rules = this._currentRules();
-        for (var i = 0; i < rules.length; i++) {
-            tempMatch = this._input.match(this.rules[rules[i]]);
+        for (var i = 0, n = rules.length; i < n; i++) {
+            const ruleNum = rules[i];
+            tempMatch = this._input.match(this.rules[ruleNum]);
             if (tempMatch && (!match || tempMatch[0].length > match[0].length)) {
                 match = tempMatch;
-                index = i;
+                matchRule = rules[ruleNum];
                 if (this.options.backtrack_lexer) {
-                    token = this.test_match(tempMatch, rules[i]);
+                    token = this.test_match(tempMatch, ruleNum);
                     if (token !== false) {
                         return token;
                     } else if (this._backtrack) {
@@ -721,12 +727,7 @@ next:function () {
             }
         }
         if (match) {
-            token = this.test_match(match, rules[index]);
-            if (token !== false) {
-                return token;
-            }
-            // else: this is a lexer rule which consumes input without producing a token (e.g. whitespace)
-            return false;
+            return this.test_match(match, matchRule);
         }
         if (this._input === "") {
             return this.EOF;
@@ -741,12 +742,11 @@ next:function () {
 
 // return next match that has a token
 lex:function lex() {
-        var r = this.next();
-        if (r) {
-            return r;
-        } else {
-            return this.lex();
+        let r;
+        while(!r) {
+            r = this.next();
         }
+        return r;
     },
 
 // activates a new lexer condition state (pushes the new lexer condition state onto the condition stack)
