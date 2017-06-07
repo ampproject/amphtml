@@ -40,6 +40,7 @@ import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {utf8Encode} from '../../../../src/utils/bytes';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
+import {BaseElement} from '../../../../src/base-element';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {toggleExperiment} from '../../../../src/experiments';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
@@ -606,15 +607,15 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     }
 
     function generateSraXhrMockCall(
-        grouping, networkId, responses, opt_xhrFail, opt_allInvalid) {
-      dev().assert(grouping[networkId].length > 1);
+        validInstances, networkId, responses, opt_xhrFail, opt_allInvalid) {
+      dev().assert(validInstances.length > 1);
       dev().assert(!(opt_xhrFail && opt_allInvalid));
       // Start with nameframe method, SRA will override to use safeframe.
       const headers = {};
       headers[RENDERING_TYPE_HEADER] = XORIGIN_MODE.NAMEFRAME;
       // Assume all implementations have same data slot.
       const iuParts = encodeURIComponent(
-        grouping[networkId][0].element.getAttribute('data-slot').split(/\//)
+        validInstances[0].element.getAttribute('data-slot').split(/\//)
         .splice(1).join());
       const xhrWithArgs = xhrMock.withArgs(
         sinon.match(
@@ -690,6 +691,9 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       const xhrFailingNetworks = {};
       const allInvalidNetworks = {};
       const instances = [];
+      const attemptCollapseSpy =
+        sandbox.spy(BaseElement.prototype, 'attemptCollapse');
+      let expectedAttemptCollapseCalls = 0;
       items.forEach(network => {
         if (typeof network == 'number') {
           network = {networkId: network, instances: 1};
@@ -700,7 +704,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
             const impl = createInstance(network.networkId);
             instances.push(impl);
             if (invalid) {
-              sandbox.stub(impl, 'isValidElement').returns(() => false);
+              sandbox.stub(impl, 'isValidElement').returns(false);
               impl.element.setAttribute('data-test-invalid', 'true');
             }
           }
@@ -710,6 +714,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         allInvalidNetworks[network.networkId] =
           network.invalidInstances && !network.instances;
         xhrFailingNetworks[network.networkId] = !!network.xhrFail;
+        expectedAttemptCollapseCalls += network.xhrFail ? network.instances : 0;
       });
       const grouping = {};
       const groupingPromises = {};
@@ -746,10 +751,11 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       };
       Object.keys(grouping).forEach(networkId => {
         const impls = grouping[networkId];
-        const isSra = impls.map(impl =>
-          impl.element.getAttribute('data-test-invalid') != 'true').length > 1;
+        const validInstances = impls.filter(impl =>
+          impl.element.getAttribute('data-test-invalid') != 'true');
+        const isSra = validInstances.length > 1;
         const sraResponses = [];
-        impls.forEach(impl => {
+        validInstances.forEach(impl => {
           const creative = `slot${idx++}`;
           if (isSra) {
             sraResponses.push({creative, headers: {slot: idx}});
@@ -758,15 +764,16 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           }
           layoutCallbacks.push(getLayoutCallback(
             impl, creative, isSra,
-            xhrFailingNetworks[networkId] || allInvalidNetworks[networkId]));
+            xhrFailingNetworks[networkId] ||
+            impl.element.getAttribute('data-test-invalid') == 'true'));
         });
         if (isSra) {
-          generateSraXhrMockCall(
-            grouping, networkId, sraResponses, xhrFailingNetworks[networkId],
-            allInvalidNetworks[networkId]);
+          generateSraXhrMockCall(validInstances, networkId, sraResponses,
+            xhrFailingNetworks[networkId], allInvalidNetworks[networkId]);
         }
       });
-      return Promise.all(layoutCallbacks);
+      return Promise.all(layoutCallbacks).then(() => expect(
+          attemptCollapseSpy.callCount).to.equal(expectedAttemptCollapseCalls));
     }
 
     beforeEach(() => {
@@ -796,18 +803,13 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       resetSraStateForTesting();
     });
 
-    // TODO(keithwrightbos): verify collapse on xhr failure
-    it('should not use SRA if single slot', () => {
-      return executeTest([1234]);
-    });
+    it('should not use SRA if single slot', () => executeTest([1234]));
 
-    it('should not use SRA if single slot, multiple networks', () => {
-      return executeTest([1234, 4567]);
-    });
+    it('should not use SRA if single slot, multiple networks',
+      () => executeTest([1234, 4567]));
 
-    it('should correctly use SRA for multiple slots', () => {
-      return executeTest([1234, 1234]);
-    });
+    it('should correctly use SRA for multiple slots',
+      () => executeTest([1234, 1234]));
 
     it('should not send SRA request if slots are invalid', () => {
       return executeTest([{networkId: 1234, invalidInstances: 2}]);
@@ -818,7 +820,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         [{networkId: 1234, instances: 2, invalidInstances: 2}]);
     });
 
-    it('should not send SRA request if only 1 slot is vald', () => {
+    it('should not send SRA request if only 1 slot is valid', () => {
       return executeTest(
         [{networkId: 1234, instances: 1, invalidInstances: 2}]);
     });

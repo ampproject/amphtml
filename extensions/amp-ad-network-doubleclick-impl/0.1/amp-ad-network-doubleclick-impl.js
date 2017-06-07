@@ -453,7 +453,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.initiateSraRequests();
     // Null response indicates single slot should execute using non-SRA method.
     return this.sraResponsePromise_.then(
-      response => response || super.sendXhrRequest(adUrl));
+      response => {
+        return response || super.sendXhrRequest(adUrl);
+      });
   }
 
   /**
@@ -541,7 +543,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                     headers,
                     arrayBuffer: () => utf8Encode(creative),
                   });
-                sraRequestAdUrlResolvers.shift()(fetchResponse);
+                dev().assert(sraRequestAdUrlResolvers.shift())(fetchResponse);
               });
             // TODO(keithwrightbos) - how do we handle per slot 204 response?
             return constructSRARequest_(
