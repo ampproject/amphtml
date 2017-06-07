@@ -40,12 +40,19 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
 
   /**
    * @param {string} fixtureLocation
+   * @param {number=} opt_numberOfAmpElements
    * @return {!Promise}
    */
-  function setupWithFixture(fixtureLocation) {
+  function setupWithFixture(fixtureLocation, opt_numberOfAmpElements) {
     return createFixtureIframe(fixtureLocation).then(f => {
       fixture = f;
-      return fixture.awaitEvent('amp:bind:initialize', 1);
+      // Most fixtures have a single AMP element that will be laid out.
+      const loadStartsToExpect =
+          (opt_numberOfAmpElements === undefined) ? 1 : opt_numberOfAmpElements;
+      return Promise.all([
+        fixture.awaitEvent('amp:bind:initialize', 1),
+        fixture.awaitEvent('amp:load:start', loadStartsToExpect),
+      ]);
     }).then(() => {
       const ampdocService = ampdocServiceFor(fixture.win);
       ampdoc = ampdocService.getAmpDoc(fixture.doc);
@@ -95,7 +102,8 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   // TODO(choumx, #9759): Remove Chrome-only condition.
   describe.configure().ifChrome().run('with <amp-form>', () => {
     beforeEach(() => {
-      return setupWithFixture('test/fixtures/bind-form.html')
+      // <form> is not an AMP element.
+      return setupWithFixture('test/fixtures/bind-form.html', 0)
           // Wait for AmpFormService to register <form> elements.
           .then(() => fixture.awaitEvent('amp:form-service:initialize', 1));
     });
@@ -196,7 +204,8 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   // TODO(choumx): Flaky on Edge for some reason.
   describe.configure().skipEdge().run('with <amp-carousel>', () => {
     beforeEach(() => {
-      return setupWithFixture('test/fixtures/bind-carousel.html');
+      // One <amp-carousel> plus two <amp-img> elements.
+      return setupWithFixture('test/fixtures/bind-carousel.html', 3);
     });
 
     it('should update on carousel slide changes', () => {
@@ -355,7 +364,8 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
 
   describe('with <amp-selector>', () => {
     beforeEach(() => {
-      return setupWithFixture('test/fixtures/bind-selector.html');
+      // One <amp-selector> and three <amp-img> elements.
+      return setupWithFixture('test/fixtures/bind-selector.html', 4);
     });
 
     it('should update when selection changes', () => {
@@ -491,8 +501,6 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
     it('should support binding to data-account', () => {
       const button = fixture.doc.getElementById('brightcoveButton');
       const bc = fixture.doc.getElementById('brightcove');
-      // Force layout in case element is not in viewport.
-      bc.implementation_.layoutCallback();
       const iframe = bc.querySelector('iframe');
       expect(iframe.src).to.not.contain('bound');
       button.click();
@@ -504,16 +512,14 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
 
   describe('with <amp-iframe>', () => {
     beforeEach(() => {
-      return setupWithFixture('test/fixtures/bind-iframe.html');
+      // <amp-iframe> and its placeholder <amp-img>.
+      return setupWithFixture('test/fixtures/bind-iframe.html', 2);
     });
 
     it('should support binding to src', () => {
       const button = fixture.doc.getElementById('iframeButton');
       const ampIframe = fixture.doc.getElementById('ampIframe');
-      // Force layout in case element is not in viewport.
-      ampIframe.implementation_.layoutCallback();
       const iframe = ampIframe.querySelector('iframe');
-
       const newSrc = 'https://giphy.com/embed/DKG1OhBUmxL4Q';
       expect(ampIframe.getAttribute('src')).to.not.contain(newSrc);
       expect(iframe.src).to.not.contain(newSrc);
