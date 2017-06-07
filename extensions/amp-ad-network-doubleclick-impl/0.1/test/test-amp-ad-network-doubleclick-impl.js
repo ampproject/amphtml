@@ -579,7 +579,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     let fixture;
     let xhrMock;
 
-    function createInstance(networkId) {
+    function createA4aSraInstance(networkId) {
       const doc = fixture.doc;
       const element =
         createElementWithAttributes(doc, 'amp-ad', {
@@ -681,16 +681,24 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     }
 
     /**
+     * Tests SRA behavior by creating multiple doubleclick instances with the
+     * following dimensions: networkId, number of instances, number of
+     * invalid instances (meaning isValidElement returns false), and if SRA
+     * XHR should fail.  Generates expected behaviors including XHR
+     * requests, layoutCallback iframe state, and collapse.
+     *
      * @param {!Array<number|{{
      *    networkId:number,
      *    instances:number,
      *    xhrFail:boolean|undefined,
-     *    invalidInstances:number}}>} networkIds
+     *    invalidInstances:number}}>} items
      */
     function executeTest(items) {
-      const xhrFailingNetworks = {};
-      const allInvalidNetworks = {};
-      const instances = [];
+      // Store if XHR will fail by networkId.
+      const networkXhrFailure = {};
+      // Store if all elements for a given network are invalid.
+      const networkValidity = {};
+      const doubleclickInstances = [];
       const attemptCollapseSpy =
         sandbox.spy(BaseElement.prototype, 'attemptCollapse');
       let expectedAttemptCollapseCalls = 0;
@@ -701,8 +709,8 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         dev().assert(network.instances || network.invalidInstances);
         const createInstances = (instanceCount, invalid) => {
           for (let i = 0; i < instanceCount; i++) {
-            const impl = createInstance(network.networkId);
-            instances.push(impl);
+            const impl = createA4aSraInstance(network.networkId);
+            doubleclickInstances.push(impl);
             if (invalid) {
               sandbox.stub(impl, 'isValidElement').returns(false);
               impl.element.setAttribute('data-test-invalid', 'true');
@@ -711,14 +719,14 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         };
         createInstances(network.instances);
         createInstances(network.invalidInstances, true);
-        allInvalidNetworks[network.networkId] =
+        networkValidity[network.networkId] =
           network.invalidInstances && !network.instances;
-        xhrFailingNetworks[network.networkId] = !!network.xhrFail;
+        networkXhrFailure[network.networkId] = !!network.xhrFail;
         expectedAttemptCollapseCalls += network.xhrFail ? network.instances : 0;
       });
       const grouping = {};
       const groupingPromises = {};
-      instances.forEach(impl => {
+      doubleclickInstances.forEach(impl => {
         const networkId = getNetworkId(impl.element);
         (grouping[networkId] || (grouping[networkId] = []))
           .push(impl);
@@ -751,7 +759,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       };
       Object.keys(grouping).forEach(networkId => {
         const impls = grouping[networkId];
-        const validInstances = impls.filter(impl =>
+        const validInstances = doubleclickInstances.filter(impl =>
           impl.element.getAttribute('data-test-invalid') != 'true');
         const isSra = validInstances.length > 1;
         const sraResponses = [];
@@ -764,12 +772,12 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           }
           layoutCallbacks.push(getLayoutCallback(
             impl, creative, isSra,
-            xhrFailingNetworks[networkId] ||
+            networkXhrFailure[networkId] ||
             impl.element.getAttribute('data-test-invalid') == 'true'));
         });
         if (isSra) {
           generateSraXhrMockCall(validInstances, networkId, sraResponses,
-            xhrFailingNetworks[networkId], allInvalidNetworks[networkId]);
+            networkXhrFailure[networkId], networkValidity[networkId]);
         }
       });
       return Promise.all(layoutCallbacks).then(() => expect(
