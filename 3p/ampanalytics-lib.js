@@ -15,7 +15,6 @@
  */
 
 import './polyfills';
-import {map} from '../src/utils/object';
 import {dev} from '../src/log';
 import {initLogConstructor, setReportError} from '../src/log';
 import {reportError} from '../src/error';
@@ -28,39 +27,28 @@ setReportError(reportError);
 const TAG_ = 'ampanalytics-lib';
 
 /**
- * This provides the "glue" between the AMP Analytics tag and the third-party
- * vendor's metrics-collection page.
- *
- * The vendor's page must implement onNewAmpAnalyticsInstance().
+ * Receives messages bound for this cross-domain iframe, from all creatives
  */
-class AmpAnalytics3pRemoteFrameHelper {
-  /** @Param {!Window} win */
+class AmpAnalytics3pMessageRouter {
+  /** @param {!Window} win */
   constructor(win) {
-    /**
-     * @type {!Array<!function(Array)>}
-     * @private
-     */
-    this.eventsListeners_ = [];
 
-    /**
-     * @type {!Array<Object<string,*>>}
-     * @private
-     */
-    this.receivedMessagesQueue_ = [];
+    /** @private {!Window} */
+    this.win_ = win;
 
-    /**
-     * Holds a mapping between sender ID and extra data
-     * @private {!Map<string,string>}
-     */
-    this.senderIdToExtraData_ = map();
+    /** @private {string} */
+    this.sentinel_ = null;
+
+    /** @private {Object<string, AmpAnalytics3pCreativeMessageRouter>} */
+    this.creativeMessageRouters_ = [];
 
     /**
      * Simple requestIdleCallback polyfill
      * @type {!function(!function(), number)}
-     * @private
      */
-    this.requestIdleCallback_ =
-      win.requestIdleCallback.bind(win) || (cb => setTimeout(cb, 1));
+    this.requestIdleCallback =
+      this.win_.requestIdleCallback.bind(this.win_) ||
+      (cb => setTimeout(cb, 1));
 
     /**
      * Handles communication between frames
@@ -68,49 +56,43 @@ class AmpAnalytics3pRemoteFrameHelper {
      */
     this.iframeMessagingClient_ = new IframeMessagingClient(win);
     try {
-      const frameNameData = JSON.parse(window.name);
+      const frameNameData = JSON.parse(this.win_.name);
       if (frameNameData.sentinel) {
-        this.iframeMessagingClient_.setSentinel(frameNameData.sentinel);
+        this.sentinel_ = frameNameData.sentinel;
+        this.iframeMessagingClient_.setSentinel(this.sentinel_);
       }
     } catch (e) {
       dev().warn(TAG_, 'Unable to set sentinel');
+      return;
     }
     this.iframeMessagingClient_.registerCallback(
       MessageTypes.ampAnalytics3pMessages,
-      received => this.onReceivedMessagesFromCreative_(received));
-
+      messages => {
+        // All the messages are for this frame, but may come from different
+        // creatives.
+        messages[MessageTypes.ampAnalytics3pMessages].forEach(msg => {
+          if (!this.creativeMessageRouters_[msg.senderId]) {
+            this.creativeMessageRouters_[msg.senderId] =
+              new AmpAnalytics3pCreativeMessageRouter(this, this.sentinel_,
+                msg.senderId);
+          }
+          this.creativeMessageRouters_[msg.senderId].receiveMessage(msg);
+        });
+        Object.entries(this.creativeMessageRouters_).forEach(
+          entry => {
+            const creativeMessageRouter = entry[1];
+            creativeMessageRouter.sendQueuedMessagesToListeners();
+          });
+      });
     this.sendReadyMessageToCreative_();
   }
 
   /**
-   * Registers a callback function to be called when AMP Analytics events occur
-   * @param {!function(!Array)} listener A function that takes an array of event
-   * strings, and does something with them.
+   * Gets a handle to the window (or testing object that mocks window)
+   * @returns {!Window}
    */
-  registerAmpAnalytics3pEventsListener(listener) {
-    this.eventsListeners_.push(listener);
-  }
-
-  /**
-   * Sends a message from the third-party vendor's metrics-collection page back
-   * to the creative.
-   * @param {!string} message The message to send.
-   */
-  sendMessageToCreative(message) {
-    const envelope = {senderId: this.id_};
-    envelope[MessageTypes.ampAnalytics3pResponse] = message;
-    this.iframeMessagingClient_.sendMessage(
-      MessageTypes.ampAnalytics3pResponse, envelope);
-  }
-
-  /**
-   * Gets any optional extra data that should be made available to the
-   * cross-domain frame, in the context of a particular creative.
-   * @param {number} senderId The ID of the creative that sent the extra data
-   * @returns {?string}
-   */
-  getExtraData(senderId) {
-    return this.senderIdToExtraData_[senderId];
+  getWindow() {
+    return this.win_;
   }
 
   /**
@@ -120,28 +102,90 @@ class AmpAnalytics3pRemoteFrameHelper {
    */
   sendReadyMessageToCreative_() {
     this.iframeMessagingClient_.sendMessage(MessageTypes.ampAnalytics3pReady,
-      {senderId: this.id_});
+      {senderId: this.sentinel_});
   }
 
   /**
-   * Handles messages received from the creative, by enqueueing them to
-   * be sent to the third-party vendor's metrics-collection page
-   * @param {!Array<!Object<string,*>>} received The messages that were received
-   * from the creative
-   * @private
+   * Sends a message back to the host window
+   * @param {string} type The type of message to send.
+   * @param {Object=} opt_payload The payload of message to send.
    */
-  onReceivedMessagesFromCreative_(received) {
-    if (!received || !received[MessageTypes.ampAnalytics3pMessages]) {
-      return;
+  sendMessage(type, opt_payload) {
+    this.iframeMessagingClient_.sendMessage(type, opt_payload);
+  }
+}
+
+/**
+ * @private @const {!AmpAnalytics3pMessageRouter}
+ */
+new AmpAnalytics3pMessageRouter(window);
+
+/**
+ * Receives messages bound for this cross-domain iframe, from a particular
+ * creative
+ */
+class AmpAnalytics3pCreativeMessageRouter {
+  /**
+   * @param {!AmpAnalytics3pMessageRouter} parent
+   * @param {!string} sentinel
+   * @param {!string} creativeId
+   */
+  constructor(parent, sentinel, creativeId) {
+    /** @private {!Window} */
+    this.parent_ = parent;
+
+    /**
+     * @private {string}
+     */
+    this.sentinel_ = sentinel;
+
+    /**
+     * @private {string}
+     */
+    this.creativeId_ = creativeId;
+
+    /**
+     * @private {string}
+     */
+    this.extraData_ = null;
+
+    /**
+     * @private {!Array<Object<string,*>>}
+     */
+    this.receivedMessagesQueue_ = [];
+
+    /**
+     * @private {!Array<!function(Array)>}
+     */
+    this.eventListeners_ = [];
+
+    if (this.parent_.getWindow().onNewAmpAnalyticsInstance) {
+      this.parent_.getWindow().onNewAmpAnalyticsInstance(this);
+    } else {
+      dev().error(TAG_, 'Vendor page must implement onNewAmpAnalyticsInstance' +
+        ' prior to loading library script.');
     }
-    received[MessageTypes.ampAnalytics3pMessages].forEach(submessage => {
-      this.receivedMessagesQueue_.push(submessage);
-      if (submessage[MessageTypes.ampAnalytics3pExtraData]) {
-        this.senderIdToExtraData_[submessage.senderId] =
-          submessage[MessageTypes.ampAnalytics3pExtraData];
-      }
-    });
-    this.sendQueuedMessagesToListeners_();
+  }
+
+  /**
+   * Registers a callback function to be called when AMP Analytics events occur
+   * @param {!function(!Array)} listener A function that takes an array of event
+   * strings, and does something with them.
+   */
+  registerAmpAnalytics3pEventsListener(listener) {
+    this.eventListeners_.push(listener);
+  }
+
+  /**
+   * Receives a message from a creative for the cross-domain iframe
+   * @param Object<string,*> message The message that was received
+   */
+  receiveMessage(message) {
+    if (message[MessageTypes.ampAnalytics3pNewCreative]) {
+      this.extraData_ = message[MessageTypes.ampAnalytics3pNewCreative];
+    } else {
+      this.receivedMessagesQueue_.push(message);
+    }
   }
 
   /**
@@ -151,14 +195,13 @@ class AmpAnalytics3pRemoteFrameHelper {
    * sent to those listener(s) and the queue will be emptied. This means
    * that the first event listener will receive messages that predate its
    * creation, but if there are additional event listeners, they may not.
-   * @private
    */
-  sendQueuedMessagesToListeners_() {
+  sendQueuedMessagesToListeners() {
     if (this.receivedMessagesQueue_.length == 0 ||
-      this.eventsListeners_.length == 0) {
+      this.eventListeners_.length == 0) {
       return;
     }
-    this.eventsListeners_.forEach(listener => {
+    this.eventListeners_.forEach(listener => {
       this.dispatch_(this.receivedMessagesQueue_, listener);
     });
     this.receivedMessagesQueue_ = [];
@@ -172,24 +215,34 @@ class AmpAnalytics3pRemoteFrameHelper {
    * @private
    */
   dispatch_(dataToSend, listener) {
-    this.requestIdleCallback_(() => {
+    this.parent_.requestIdleCallback(() => {
       try {
         listener(dataToSend);
       } catch (e) {
-        dev.warn(TAG_, 'Caught exception dispatching messages: ' + e.message);
+        dev().warn(TAG_, 'Caught exception dispatching messages: ' + e.message);
       }
     });
   }
-};
 
-/**
- * @private @const {!AmpAnalytics3pRemoteFrameHelper}
- */
-const remoteFrameHelper_ = new AmpAnalytics3pRemoteFrameHelper(window);
+  /**
+   * Gets any optional extra data that should be made available to the
+   * cross-domain frame, in the context of a particular creative.
+   * @returns {?string}
+   */
+  getExtraData() {
+    return this.extraData_;
+  }
 
-if (window.onNewAmpAnalyticsInstance) {
-  window.onNewAmpAnalyticsInstance(remoteFrameHelper_);
-} else {
-  dev().error(TAG_, 'Vendor page must implement onNewAmpAnalyticsInstance' +
-    ' prior to loading library script.');
+  /**
+   * Sends a message from the third-party vendor's metrics-collection page back
+   * to the creative.
+   * @param {!string} message The message to send.
+   */
+  sendMessageToCreative(message) {
+    const envelope = {senderId: this.sentinel_, destination: this.creativeId_};
+    envelope[MessageTypes.ampAnalytics3pResponse] = message;
+    this.parent_.sendMessage(
+      MessageTypes.ampAnalytics3pResponse, envelope);
+  }
 }
+

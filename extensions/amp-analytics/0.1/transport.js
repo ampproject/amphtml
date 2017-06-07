@@ -190,7 +190,7 @@ export class Transport {
   beginUsingCrossDomainIframe_(ampDoc, frameUrl, opt_extraData) {
     if (Transport.hasCrossDomainIframe_(frameUrl)) {
       Transport.incrementIframeUsageCount_(frameUrl);
-      this.sendExtraData_(frameUrl, opt_extraData);
+      this.informCrossDomainIframeOfNewCreative_(frameUrl, opt_extraData);
     } else {
       const frame = this.createCrossDomainIframe_(ampDoc, frameUrl,
         opt_extraData);
@@ -286,11 +286,8 @@ export class Transport {
       iframeMessagingClient,
       sendTimer: null,
     };
-    this.sendExtraData_(frameUrl, opt_extraData);
-    frame.src = frameUrl; // Intentionally doing this after creating load
-    // promise, rather than in the object supplied to
-    // createElementWithAttribute() above. Want to be absolutely
-    // certain that we don't lose the loaded event.
+    this.informCrossDomainIframeOfNewCreative_(frameUrl, opt_extraData);
+    frame.src = frameUrl;
     return frame;
   }
 
@@ -342,15 +339,22 @@ export class Transport {
    * @param {!string} frameUrl The URL of the frame to send the data to
    * @param {string=} opt_extraData The data to send to the frame
    */
-  sendExtraData_(frameUrl, opt_extraData) {
-    if (!opt_extraData) {
-      return;
-    }
+  informCrossDomainIframeOfNewCreative_(frameUrl, opt_extraData) {
+    opt_extraData = opt_extraData || {}; // Still send the message to
+    // indicate there is a new creative
     const frameData = Transport.crossDomainIframes_[frameUrl];
     this.enqueueMessageForCrossDomainIframe_(frameData,
-      MessageTypes.ampAnalytics3pExtraData, opt_extraData);
+      MessageTypes.ampAnalytics3pNewCreative, opt_extraData);
   }
 
+  /**
+   * Enqueues a message (event or extra data) to be sent to a cross-domain
+   * iframe.
+   * @param {!Object<string,*>} frameData  The cross-domain iframe
+   * @param {!string} messageType
+   * @param {!Object} message
+   * @private
+   */
   enqueueMessageForCrossDomainIframe_(frameData, messageType, message) {
     if (frameData.messageQueue.length > MAX_QUEUE_SIZE_) {
       dev().warn(TAG_, 'Queue has exceeded maximum size');

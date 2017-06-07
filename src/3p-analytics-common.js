@@ -16,13 +16,14 @@
 
 /** @private @const {Object<string,string>} */
 export const MessageTypes = {
-  ampAnalytics3pReady: 'ampAnalytics3pExtraData',
-  ampAnalytics3pExtraData: 'ampAnalytics3pExtraData',
+  ampAnalytics3pReady: 'ampAnalytics3pReady',
+  ampAnalytics3pNewCreative: 'ampAnalytics3pNewCreative',
   ampAnalytics3pMessages: 'ampAnalytics3pMessages',
-  /* ampAnalytics3pEvent may only be contained within ampAnalytics3pMessages */
   ampAnalytics3pEvent: 'ampAnalytics3pEvent',
   ampAnalytics3pResponse: 'ampAnalytics3pResponse',
 };
+/* ampAnalytics3pEvent and ampAnalytics3pNewCreative may only be contained
+ within ampAnalytics3pMessages */
 
 /**
  * A class for holding AMP Analytics third-party vendors responses to frames.
