@@ -72,7 +72,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
       [BindEvents.SET_STATE]: 0,
       [BindEvents.RESCAN_TEMPLATE]: 0,
       [AmpEvents.ERROR]: 0,
-      [AmpEvents.LOAD.START]: 0,
+      [AmpEvents.LOAD_START]: 0,
       [AmpEvents.STUBBED]: 0,
     };
     const messages = [];

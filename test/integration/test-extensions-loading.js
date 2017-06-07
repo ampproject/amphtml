@@ -41,7 +41,7 @@ function testLoadOrderFixture(fixtureName, testElements) {
       expect(fixture.doc.querySelectorAll(testElements[i]))
           .to.have.length(1);
     }
-    return fixture.awaitEvent(AmpEvents.LOAD.START, testElements.length);
+    return fixture.awaitEvent(AmpEvents.LOAD_START, testElements.length);
   }).then(() => {
     for (let i = 0; i < testElements.length; i++) {
       const testElement = fixture.doc.querySelectorAll(testElements[i])[0];
