@@ -15,7 +15,7 @@
  */
 
 import * as sinon from 'sinon';
-import {AmpEvents} from '../../../../amp-events';
+import {AmpEvents} from '../../../../src/amp-events';
 import {Bind} from '../bind-impl';
 import {chunkInstanceForTesting} from '../../../../src/chunk';
 import {installTimerService} from '../../../../src/service/timer-impl';
