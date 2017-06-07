@@ -24,6 +24,7 @@ import {
   AmpA4A,
   RENDERING_TYPE_HEADER,
   XORIGIN_MODE,
+  DEFAULT_SAFEFRAME_VERSION,
 } from '../../amp-a4a/0.1/amp-a4a';
 import {
   isInManualExperiment,
@@ -71,7 +72,7 @@ const DOUBLECLICK_BASE_URL =
 /** @private @const {!Object<string,string>} */
 const PAGE_LEVEL_PARAMS_ = {
   'gdfp_req': '1',
-  'sfv': 'A',
+  'sfv': DEFAULT_SAFEFRAME_VERSION,
   'u_sd': window.devicePixelRatio,
 };
 
