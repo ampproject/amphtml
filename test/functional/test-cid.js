@@ -25,7 +25,7 @@ import {
   cidServiceForDocForTesting,
   getProxySourceOrigin,
   viewerBaseCid,
-} from '../../extensions/amp-analytics/0.1/cid-impl';
+} from '../../src/cid-impl';
 import {installCryptoService, Crypto} from '../../src/service/crypto-impl';
 import {cryptoFor} from '../../src/crypto';
 import {installDocService} from '../../src/service/ampdoc-impl';

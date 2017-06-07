@@ -98,10 +98,10 @@ export function bindForDoc(nodeOrDoc) {
 
 /**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!Promise<!../extensions/amp-analytics/0.1/cid-impl.Cid>}
+ * @return {!Promise<!./cid-impl.Cid>}
  */
 export function cidForDoc(nodeOrDoc) {
-  return /** @type {!Promise<!../extensions/amp-analytics/0.1/cid-impl.Cid>} */ ( // eslint-disable-line max-len
+  return /** @type {!Promise<!./cid-impl.Cid>} */ ( // eslint-disable-line max-len
       getElementServiceForDoc(nodeOrDoc, 'cid', 'amp-analytics'));
 }
 
@@ -109,10 +109,10 @@ export function cidForDoc(nodeOrDoc) {
  * Returns a promise for the CID service or a promise for null if the service
  * is not available on the current page.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!Promise<?../extensions/amp-analytics/0.1/cid-impl.Cid>}
+ * @return {!Promise<?./cid-impl.Cid>}
  */
 export function cidForDocOrNull(nodeOrDoc) {
-  return /** @type {!Promise<?../extensions/amp-analytics/0.1/cid-impl.Cid>} */ ( // eslint-disable-line max-len
+  return /** @type {!Promise<?./cid-impl.Cid>} */ ( // eslint-disable-line max-len
       getElementServiceIfAvailableForDoc(nodeOrDoc, 'cid', 'amp-analytics'));
 }
 
