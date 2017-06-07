@@ -248,27 +248,27 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
       includePolyfills: true,
     }),
     compileJs('./3p/', 'ampcontext-lib.js',
-      './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
-        minifiedName: 'ampcontext-v0.js',
-        checkTypes: opt_checkTypes,
-        watch: watch,
-        minify: shouldMinify,
-        preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-        externs: ['ads/ads.extern.js',],
-        include3pDirectories: true,
-        includePolyfills: false,
-      }),
-      compileJs('./3p/', 'ampanalytics-lib.js',
-          './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
-        minifiedName: 'ampanalytics-v0.js',
-        checkTypes: opt_checkTypes,
-        watch: watch,
-        minify: shouldMinify,
-        preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-        externs: ['ads/ads.extern.js',],
-        include3pDirectories: true,
-        includePolyfills: false,
-      }),
+        './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
+      minifiedName: 'ampcontext-v0.js',
+      checkTypes: opt_checkTypes,
+      watch: watch,
+      minify: shouldMinify,
+      preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+      externs: ['ads/ads.extern.js',],
+      include3pDirectories: true,
+      includePolyfills: false,
+    }),
+    compileJs('./3p/', 'ampanalytics-lib.js',
+        './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
+      minifiedName: 'ampanalytics-v0.js',
+      checkTypes: opt_checkTypes,
+      watch: watch,
+      minify: shouldMinify,
+      preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+      externs: ['ads/ads.extern.js',],
+      include3pDirectories: true,
+      includePolyfills: false,
+    }),
     // For compilation with babel we start with the amp-babel entry point,
     // but then rename to the amp.js which we've been using all along.
     compileJs('./src/', 'amp-babel.js', './dist', {
@@ -638,30 +638,32 @@ function checkTypes() {
     return './extensions/' + extension.name + '/' +
         extension.version + '/' + extension.name + '.js';
   }).sort();
-  return Promise.all([
-    closureCompile(compileSrcs.concat(extensionSrcs), './dist',
+  return compileCss().then(() => {
+    return Promise.all([
+      closureCompile(compileSrcs.concat(extensionSrcs), './dist',
         'check-types.js', {
           include3pDirectories: true,
           includePolyfills: true,
           extraGlobs: ['src/inabox/*.js'],
           checkTypes: true,
         }),
-    // Type check 3p/ads code.
-    closureCompile(['./3p/integration.js'], './dist',
-      'integration-check-types.js', {
-        externs: ['ads/ads.extern.js'],
-        include3pDirectories: true,
-        includePolyfills: true,
-        checkTypes: true,
-      }),
-    closureCompile(['./3p/ampcontext-lib.js'], './dist',
-      'ampcontext-check-types.js', {
-        externs: ['ads/ads.extern.js'],
-        include3pDirectories: true,
-        includePolyfills: true,
-        checkTypes: true,
-      }),
-  ]);
+      // Type check 3p/ads code.
+      closureCompile(['./3p/integration.js'], './dist',
+        'integration-check-types.js', {
+          externs: ['ads/ads.extern.js'],
+          include3pDirectories: true,
+          includePolyfills: true,
+          checkTypes: true,
+        }),
+      closureCompile(['./3p/ampcontext-lib.js'], './dist',
+        'ampcontext-check-types.js', {
+          externs: ['ads/ads.extern.js'],
+          include3pDirectories: true,
+          includePolyfills: true,
+          checkTypes: true,
+        }),
+    ]);
+  });
 }
 
 /**
