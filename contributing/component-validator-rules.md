@@ -77,8 +77,6 @@ file, followed by line-by-line explanations of what's inside.
 tags: {  # amp-cat
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-cat extension .js script"
-  requires: "amp-cat"
   extension_spec: {
     name: "amp-cat"
     allowed_versions: "0.1"
@@ -90,14 +88,12 @@ tags: {  # amp-cat
 tags: {  # <amp-cat>
   html_format: AMP
   tag_name: "AMP-CAT"
-  satisfies: "amp-cat"
-  requires: "amp-cat extension .js script"
+  requires_extension: "amp-cat"
   attrs: {
     name: "data-selected-cat"
     value_regex_casei: "(oscar|chloe|bella)"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-cat"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -164,30 +160,6 @@ added later.
 
 This tells the validator that we are defining a tag with the `<script>` name.
 
-```
-  satisfies: "amp-cat extension .js script"
-  requires: "amp-cat"
-```
-
-The presence of certain tags can add validation requirements to the
-document. The presence of other tags can satisfy validation requirements. 
-These requirements are indicated as arbitrary strings such as the ones in
-these fields. The strings are used in validation error messages to developers
-debugging their amp documents.
-
-In this case, these fields indicate that the presence of the amp-cat script tag
-adds a requirement of `"amp-cat"` which as we will see below is satisfied by the
-`<amp-cat>` tag. This amp-cat script tag also satisfies the requirement for
-`"amp-cat extension .js script"` which will be a requirement of the `<amp-cat>`
-tag below.
-
-In this way, these two tags must both be present or neither be present on a
-valid amp page. We need the `<script>` tag present if the `<amp-cat>` tag is on
-the page so that the amp runtime can render the `<amp-cat>` tag. Similarly, we
-require the `<amp-cat>` tag on the page if the `<script>` tag is present so that
-pages don't include extra JavaScript that isn't used, ensuring a fast loading
-experience.
-
 The following fields describe the HTML Tag attributes we expect for this
 `<script>` tag to be valid:
 
@@ -195,6 +167,7 @@ The following fields describe the HTML Tag attributes we expect for this
   extension_spec: {
     name: "amp-cat"
 ```
+
 The `extension_spec` field indicates that this `<script>` tag is a new amp
 extension with the "amp-cat" name. This will add requirements for the
 `custom-element=amp-cat` attribute, specific values for the `src` attribute,
@@ -205,6 +178,7 @@ as well as a link to documentation on ampproject.org for all error messages.
     allowed_versions: "latest"
   }
 ```
+
 These fields define a list of all allowed version numbers. Currently, almost all
 extended components are at version `0.1`, and we also allow `latest` to be specified.
 
@@ -225,6 +199,7 @@ That's all for the extended component script tag. Now let's look at the actual
 ```
 tags: {  # <amp-cat>
 ```
+
 This tells the validator that we want to define a new tag. In this case, we want
 to validate a tag that looks something like the following:
 
@@ -233,21 +208,22 @@ to validate a tag that looks something like the following:
 ```
   html_format: AMP
 ```
+
 Same as the extended component tag above, this tells the validator that this tag is only
 valid for AMP format documents.
+
 ```
   tag_name: "AMP-CAT"
 ```
+
 This tells the validator that the html tag name is 'AMP-CAT'.
 
 ```
-  satisfies: "amp-cat"
-  requires: "amp-cat extension .js script"
-
+  requires_extension: "amp-cat"
 ```
-These are the opposite pair of satisfy/requires as in the extended component above. In
-this case we specify that this tag requires the extended component and satisfies the use
-of the extended component, "amp-cat" in this case.
+
+This tells the validator that the `amp-cat` tag requires the inclusion of the
+matching extension script tag that we defined above. 
 
 ```
   attrs: {
@@ -267,15 +243,6 @@ essentially means the value must be one of those 3 options.
 
 This adds the `media` and `noloading` attributes which are allowed on all amp
 tags.
-
-```
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-cat"
-```
-
-This URL is used in validation errors to point the user debugging issues to the
-reference document for this tag. For all amp-tags, the documentation URLs
-will follow the above structure. Feel free to insert the URL even if it is not
-yet live.
 
 ```
   amp_layout: {
