@@ -22,6 +22,8 @@ This guide is intended for people who don't know much about Git/GitHub and the t
 
 If you're already familiar with Git/GitHub/etc. or you just want to know what commands to type in instead of what they're doing take a look at the much shorter [Quick Start Guide](getting-started-quick.md).
 
+If you do not yet have a specific code contribution project in mind as you go through this guide, consider grabbing one of the [Great First Issues](https://github.com/ampproject/amphtml/labels/Great%20First%20Issue) we have created for new contributors.
+
 - [How to get help](#how-to-get-help)
 - [Intro to Git and GitHub](#intro-to-git-and-github)
 - [Set up your GitHub account and Git](#set-up-your-github-account-and-git)
@@ -50,7 +52,7 @@ If you have a question or are unsure about something while following this end-to
 
 * If you are tackling a [Great First Issue](https://github.com/ampproject/amphtml/labels/Great%20First%20Issue) or other GitHub issue you can ask a question as a comment on the issue directly.  This works particularly well if the question is about how to make progress on that specific issue.
 
-* The [#welcome-contributors](https://amphtml.slack.com/messages/welcome-contributors/) channel on Slack is a place for new contributors getting up to speed in the AMP Project to find help.  You should feel comfortable asking any question in there no matter how basic it may seem to you (e.g. problems getting Git set up, errors during a build, etc.).  If you haven't already signed up for our Slack, you'll need to [request an invitation](https://docs.google.com/forms/d/e/1FAIpQLSd83J2IZA6cdR6jPwABGsJE8YL4pkypAbKMGgUZZriU7Qu6Tg/viewform?fbzx=4406980310789882877).
+* The [#welcome-contributors](https://amphtml.slack.com/messages/welcome-contributors/) channel on Slack is a place for new contributors getting up to speed in the AMP Project to find help.  You should feel comfortable asking any question in there no matter how basic it may seem to you (e.g. problems getting Git set up, errors during a build, etc.).  We'll send you an [invitation](https://docs.google.com/forms/d/e/1FAIpQLSd83J2IZA6cdR6jPwABGsJE8YL4pkypAbKMGgUZZriU7Qu6Tg/viewform?fbzx=4406980310789882877) if you're not already on the AMP Slack.
 
 * You can also ask questions on [amphtml-discuss@googlegroups.com](https://groups.google.com/forum/#!forum/amphtml-discuss).
 
@@ -314,7 +316,7 @@ Before sending your code changes for review, you will want to make sure that all
 
 ## Running tests locally
 
-Make sure you are in the branch that has your changes (`git branch <branch name>`), pull in the latest changes from the remote amphtml repository and then simply run:
+Make sure you are in the branch that has your changes (`git checkout <branch name>`), pull in the latest changes from the remote amphtml repository and then simply run:
 
 `gulp test`
 
@@ -463,12 +465,15 @@ The [Release Schedule](release-schedule.md) doc has more details on the release 
 
 # ⚡⚡⚡... (Next steps)
 
-Now that you know the process for making changes to the AMP Project you already have most of the heavy lifting done.  **We look forward to seeing your future contributions to the project.** :)
+Now that you know the process for making changes to the AMP Project you already have most of the heavy lifting done.  **We look forward to seeing your future [contributions](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md) to the project.** :)
+
+If you're looking for ideas on your next contribution feel free to reach out to anyone you worked with on your first contribution or let us know in the [#welcome-contributors](https://amphtml.slack.com/messages/welcome-contributors/) channel on Slack.  (We'll send you an [invitation](https://docs.google.com/forms/d/e/1FAIpQLSd83J2IZA6cdR6jPwABGsJE8YL4pkypAbKMGgUZZriU7Qu6Tg/viewform?fbzx=4406980310789882877) if you're not already on the AMP Slack.)
 
 # Other resources
 
 This end-to-end guide provided enough details to get a basic understanding of a typical workflow for contributing code to the AMP Project.  If you find yourself wanting to know more there are a lot of resources available.  Here are a few:
 
+* The ["Creating your first AMP Component" codelab](https://codelabs.developers.google.com/codelabs/creating-your-first-amp-component/index.html) provides step-by-step instructions for a common type of code contribution to the AMP Project.  Even if your project involves modifying an existing AMP component this codelab will give you an overview of how AMP components work. 
 * GitHub has a lot of helpful introductory material, including:
    * a [Hello World tutorial](https://guides.github.com/activities/hello-world/) that's a bit less in depth than this guide, but it covers things like creating a new repository and merging in code after a pull request
    * the [Git cheat sheet](https://services.github.com/on-demand/downloads/github-git-cheat-sheet.pdf) from GitHub provides a quick reference to some common commands, including many we didn't cover in this guide (such as [diff](https://www.git-tower.com/learn/git/ebook/en/command-line/advanced-topics/diffs) and [log](https://git-scm.com/book/en/v2/Git-Basics-Viewing-the-Commit-History))
