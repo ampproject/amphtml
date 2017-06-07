@@ -12,7 +12,7 @@
     <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
     <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
     <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
-    <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js?10"></script>
+    <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js"></script>
     <style amp-custom>
         input.user-invalid {
             background-color: #dc4e41;
@@ -143,9 +143,9 @@
             position: absolute;
         }
         amp-selector [option] {
-            box-sizing: border-box !important;
+            box-sizing: border-box;
             display: inline-block;
-            position: relative !important;
+            position: relative;
         }
         amp-selector[disabled],
         amp-selector [disabled] {
@@ -270,12 +270,16 @@
       </template>
     </div>
     <div submit-success>
-      Success! Thanks for subscribing! Please make sure to check your email
-      to confirm!
+      <template type="amp-mustache">
+        Success! Thanks for subscribing! Please make sure to check your email
+        to confirm!
+      </template>
     </div>
     <div submit-error>
-      <amp-img width="32" height="32" src="/examples/x-icon.png"></amp-img>
-      Oops! We apologize, something went wrong. Please try again later.
+      <template type="amp-mustache">
+        <amp-img width="32" height="32" src="/examples/x-icon.png"></amp-img>
+        Oops! We apologize, something went wrong. Please try again later.
+      </template>
     </div>
 </form>
 
@@ -656,8 +660,7 @@
   method="post"
   action-xhr="/form/verify-search-json/post"
   target="_blank"
-  class="verification-form"
->
+  class="verification-form">
     <script type="application/json">
     {
       "verificationGroups": [
@@ -729,8 +732,7 @@
   method="get"
   action="/form/search-html/get"
   action-xhr="/form/search-json/get"
-  target="_blank"
->
+  target="_blank">
     <fieldset>
         <label>
             <span>Search for</span>
