@@ -31,7 +31,7 @@ import {installExtensionsService} from '../src/service/extensions-impl';
 import {installStyles} from '../src/style-installer';
 import {resourcesForDoc} from '../src/services';
 import {AmpEvents} from '../src/amp-events';
-import {BindEvents} from '../extensions/amp-bind/0.1';
+import {BindEvents} from '../extensions/amp-bind/0.1/bind-events';
 
 let iframeCount = 0;
 

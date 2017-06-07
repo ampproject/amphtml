@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {AmpEvents} from '../../src/amp-events';
-import {BindEvents} from '../../extensions/amp-bind/0.1';
+import {BindEvents} from '../../extensions/amp-bind/0.1/bind-events';
 import {createFixtureIframe} from '../../testing/iframe';
 import {batchedXhrFor, bindForDoc} from '../../src/services';
 import {ampdocServiceFor} from '../../src/ampdoc';
