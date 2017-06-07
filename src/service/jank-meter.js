@@ -188,9 +188,10 @@ function isLongTaskApiSupported(win) {
 }
 
 /**
- * @param {!Window} win
+ * @param {!Window} unusedWin
  * @returns {boolean}
  */
-function isBatteryApiSupported(win) {
-  return typeof win.navigator.getBattery === 'function';
+function isBatteryApiSupported(unusedWin) {
+  // TODO: (@lannka, #9749)
+  return false;
 }
