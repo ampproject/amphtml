@@ -326,10 +326,10 @@ export class Transport {
    * @private
    */
   sendRequestUsingCrossDomainIframe_(request, transportOptions) {
-    const frameData =
-      (Transport.crossDomainIframes_[transportOptions['iframe']]);
+    const frameData = Transport.crossDomainIframes_[transportOptions['iframe']];
     dev().assert(frameData, 'Trying to send message to non-existent frame');
-    this.enqueueMessageForCrossDomainIframe_(frameData,
+    this.enqueueMessageForCrossDomainIframe_(
+      /** @type {!Object<string,*>} */ (frameData),
       MessageTypes.ampAnalytics3pEvent, request);
   }
 
@@ -340,10 +340,12 @@ export class Transport {
    * @param {string=} opt_extraData The data to send to the frame
    */
   informCrossDomainIframeOfNewCreative_(frameUrl, opt_extraData) {
-    opt_extraData = opt_extraData || {}; // Still send the message to
+    opt_extraData = opt_extraData || ''; // Still send the message to
     // indicate there is a new creative
     const frameData = Transport.crossDomainIframes_[frameUrl];
-    this.enqueueMessageForCrossDomainIframe_(frameData,
+    dev().assert(frameData, 'Trying to send message to non-existent frame');
+    this.enqueueMessageForCrossDomainIframe_(
+      /** @type {!Object<string,*>} */ (frameData),
       MessageTypes.ampAnalytics3pNewCreative, opt_extraData);
   }
 
@@ -351,8 +353,8 @@ export class Transport {
    * Enqueues a message (event or extra data) to be sent to a cross-domain
    * iframe.
    * @param {!Object<string,*>} frameData  The cross-domain iframe
-   * @param {!string} messageType
-   * @param {!Object} message
+   * @param {!string} messageType The type of the message (see MessageTypes)
+   * @param {!string} message
    * @private
    */
   enqueueMessageForCrossDomainIframe_(frameData, messageType, message) {
