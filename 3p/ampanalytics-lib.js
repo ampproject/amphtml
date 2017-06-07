@@ -19,7 +19,7 @@ import {dev} from '../src/log';
 import {initLogConstructor, setReportError} from '../src/log';
 import {reportError} from '../src/error';
 import {IframeMessagingClient} from './iframe-messaging-client';
-import {MessageTypes} from '../src/3p-analytics-common';
+import {AMP_ANALYTICS_3P_MESSAGE_TYPE} from '../src/3p-analytics-common';
 initLogConstructor();
 setReportError(reportError);
 
@@ -36,19 +36,13 @@ class AmpAnalytics3pMessageRouter {
     /** @private {!Window} */
     this.win_ = win;
 
+    // The sentinel is required by iframe-messaging-client, and is used to
+    // uniquely identify the frame as part of message routing
     /** @private {string} */
     this.sentinel_ = null;
 
-    /** @private {Object<string, AmpAnalytics3pCreativeMessageRouter>} */
-    this.creativeMessageRouters_ = [];
-
-    /**
-     * Simple requestIdleCallback polyfill
-     * @type {!function(!function(), number)}
-     */
-    this.requestIdleCallback =
-      this.win_.requestIdleCallback.bind(this.win_) ||
-      (cb => setTimeout(cb, 1));
+    /** @private {!Object<string, !AmpAnalytics3pCreativeMessageRouter>} */
+    this.creativeMessageRouters_ = {};
 
     /**
      * Handles communication between frames
@@ -62,15 +56,16 @@ class AmpAnalytics3pMessageRouter {
         this.iframeMessagingClient_.setSentinel(this.sentinel_);
       }
     } catch (e) {
-      dev().warn(TAG_, 'Unable to set sentinel');
+      dev().warn(TAG_, 'Unable to set sentinel from name attr: ' +
+        this.win_.name);
       return;
     }
     this.iframeMessagingClient_.registerCallback(
-      MessageTypes.ampAnalytics3pMessages,
+      AMP_ANALYTICS_3P_MESSAGE_TYPE.MESSAGES,
       messages => {
         // All the messages are for this frame, but may come from different
         // creatives.
-        messages[MessageTypes.ampAnalytics3pMessages].forEach(msg => {
+        messages[AMP_ANALYTICS_3P_MESSAGE_TYPE.MESSAGES].forEach(msg => {
           if (!this.creativeMessageRouters_[msg.senderId]) {
             this.creativeMessageRouters_[msg.senderId] =
               new AmpAnalytics3pCreativeMessageRouter(this, this.sentinel_,
@@ -101,23 +96,21 @@ class AmpAnalytics3pMessageRouter {
    * @private
    */
   sendReadyMessageToCreative_() {
-    this.iframeMessagingClient_.sendMessage(MessageTypes.ampAnalytics3pReady,
-      {senderId: this.sentinel_});
+    this.iframeMessagingClient_.sendMessage(AMP_ANALYTICS_3P_MESSAGE_TYPE.READY,
+      {});
   }
 
   /**
    * Sends a message back to the host window
    * @param {string} type The type of message to send.
-   * @param {Object=} opt_payload The payload of message to send.
+   * @param {(ampAnalytics3pReadyMessage|ampAnalytics3pResponse)} opt_payload
+   * The payload of message to send.
    */
   sendMessage(type, opt_payload) {
     this.iframeMessagingClient_.sendMessage(type, opt_payload);
   }
 }
 
-/**
- * @private @const {!AmpAnalytics3pMessageRouter}
- */
 new AmpAnalytics3pMessageRouter(window);
 
 /**
@@ -127,17 +120,11 @@ new AmpAnalytics3pMessageRouter(window);
 class AmpAnalytics3pCreativeMessageRouter {
   /**
    * @param {!AmpAnalytics3pMessageRouter} parent
-   * @param {!string} sentinel
    * @param {!string} creativeId
    */
-  constructor(parent, sentinel, creativeId) {
-    /** @private {!Window} */
+  constructor(parent, creativeId) {
+    /** @private {!AmpAnalytics3pMessageRouter} */
     this.parent_ = parent;
-
-    /**
-     * @private {string}
-     */
-    this.sentinel_ = sentinel;
 
     /**
      * @private {string}
@@ -178,23 +165,22 @@ class AmpAnalytics3pCreativeMessageRouter {
 
   /**
    * Receives a message from a creative for the cross-domain iframe
-   * @param Object<string,*> message The message that was received
+   * @param {Object<string,*>} message The message that was received
    */
   receiveMessage(message) {
-    if (message[MessageTypes.ampAnalytics3pNewCreative]) {
-      this.extraData_ = message[MessageTypes.ampAnalytics3pNewCreative];
+    if (message[AMP_ANALYTICS_3P_MESSAGE_TYPE.NEW]) {
+      this.extraData_ = message[AMP_ANALYTICS_3P_MESSAGE_TYPE.NEW];
     } else {
       this.receivedMessagesQueue_.push(message);
     }
   }
 
   /**
-   * Sends enqueued messages to the third-party vendor's metrics-collection page
-   * If there are no event listeners on the page, event messages will remain
-   * in the queue. But if there is at least one event listener, messages will be
-   * sent to those listener(s) and the queue will be emptied. This means
-   * that the first event listener will receive messages that predate its
-   * creation, but if there are additional event listeners, they may not.
+   * If an event listener has been created on the third-party vendor's
+   * metrics-collection page, this method passes the queued events to that
+   * listener.
+   * If there is no event listener on the page yet, event messages will remain
+   * in the queue.
    */
   sendQueuedMessagesToListeners() {
     if (this.receivedMessagesQueue_.length == 0 ||
@@ -202,26 +188,9 @@ class AmpAnalytics3pCreativeMessageRouter {
       return;
     }
     this.eventListeners_.forEach(listener => {
-      this.dispatch_(this.receivedMessagesQueue_, listener);
+      listener(this.receivedMessagesQueue_);
     });
     this.receivedMessagesQueue_ = [];
-  }
-
-  /**
-   * Sends an array of messages to a single listener, using
-   * requestIdleCallback()
-   * @param {!Array<Object<string,*>>} dataToSend The array of messages
-   * @param {!function(!Array)} listener The listener
-   * @private
-   */
-  dispatch_(dataToSend, listener) {
-    this.parent_.requestIdleCallback(() => {
-      try {
-        listener(dataToSend);
-      } catch (e) {
-        dev().warn(TAG_, 'Caught exception dispatching messages: ' + e.message);
-      }
-    });
   }
 
   /**
@@ -236,13 +205,13 @@ class AmpAnalytics3pCreativeMessageRouter {
   /**
    * Sends a message from the third-party vendor's metrics-collection page back
    * to the creative.
-   * @param {!string} message The message to send.
+   * @param {!Object} message The message to send.
    */
   sendMessageToCreative(message) {
-    const envelope = {senderId: this.sentinel_, destination: this.creativeId_};
-    envelope[MessageTypes.ampAnalytics3pResponse] = message;
+    const envelope = {destination: this.creativeId_};
+    envelope[AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE] = message;
     this.parent_.sendMessage(
-      MessageTypes.ampAnalytics3pResponse, envelope);
+      AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE, envelope);
   }
 }
 

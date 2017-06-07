@@ -15,15 +15,85 @@
  */
 
 /** @private @const {Object<string,string>} */
-export const MessageTypes = {
-  ampAnalytics3pReady: 'ampAnalytics3pReady',
-  ampAnalytics3pNewCreative: 'ampAnalytics3pNewCreative',
-  ampAnalytics3pMessages: 'ampAnalytics3pMessages',
-  ampAnalytics3pEvent: 'ampAnalytics3pEvent',
-  ampAnalytics3pResponse: 'ampAnalytics3pResponse',
+export const AMP_ANALYTICS_3P_MESSAGE_TYPE = {
+  READY: 'Ready',
+  NEW: 'New',
+  MESSAGES: 'Messages',
+  EVENT: 'Event',
+  RESPONSE: 'Response',
 };
 /* ampAnalytics3pEvent and ampAnalytics3pNewCreative may only be contained
- within ampAnalytics3pMessages */
+ within MESSAGES */
+
+/** @typedef {{
+ *    sentinel: (string|undefined),
+ *    type: !string
+ *  }} */
+export let ampAnalytics3pReadyMessage;
+// Example:
+// {
+//   "sentinel":"20354662305315974",
+//   "type":"ampAnalytics3pReady"
+// }
+// The sentinel value will be present when received but the sender doesn't
+// need to add it, this is done by iframe-messaging-client.
+
+/** @typedef {{
+ *    senderId: !string,
+ *    type: !string,
+ *    ampAnalytics3pNewCreative: !string
+ *  }} */
+export let ampAnalytics3pNewCreative;
+// Example:
+// {
+//   "senderId":"8117602251459417",
+//   "type":"ampAnalytics3pNewCreative",
+//   "ampAnalytics3pNewCreative":"ThisIsExtraData"
+// }
+
+/** @typedef {{
+ *    senderId: !string,
+ *    type: !string,
+ *    ampAnalytics3pEvent: !string
+ *  }} */
+export let ampAnalytics3pEvent;
+// Example:
+// {
+//   "senderId":"8117602251459417",
+//   "type":"ampAnalytics3pEvent",
+//   "ampAnalytics3pEvent":"viewed=true&...etc."
+// }
+
+/** @typedef {{
+ *    sentinel: (string|undefined),
+ *    destination: !string,
+ *    ampAnalytics3pResponse: ?Object
+ *  }} */
+export let ampAnalytics3pResponse;
+// Example:
+// {
+//   "sentinel":"20354662305315974",
+//   "destination":"8117602251459417",
+//   "ampAnalytics3pResponse":{"status":"received","somethingElse":"42"}
+// }
+// The sentinel value will be present when received but the sender doesn't
+// need to add it, this is done by iframe-messaging-client.
+
+/** @typedef {{
+ *    sentinel: (string|undefined),
+ *    type: !string,
+ *    ampAnalytics3pMessages: Array<(ampAnalytics3pNewCreative|ampAnalytics3pEvent)>
+ *  }} */
+export let ampAnalytics3pMessages;
+// Example: {
+//   "type":"ampAnalytics3pMessages",
+//   "sentinel":"20354662305315974",
+//   "ampAnalytics3pMessages":[
+//     ...
+//   ]
+// }
+// The sentinel value will be present when received but the sender doesn't
+// need to add it, this is done by iframe-messaging-client.
 
 /**
  * A class for holding AMP Analytics third-party vendors responses to frames.
@@ -31,13 +101,13 @@ export const MessageTypes = {
 export class ResponseMap {
   /**
    * Gets the backing data structure
-   * TODO: Is there a better place in the runtime object hierarchy to hang this?
+   * TODO(jonkeller): Is there a better place in the runtime object hierarchy to
+   * hang this?
    * @returns {Object}
    * @private
    */
   static getMap_() {
-    AMP.responseMap_ = AMP.responseMap_ || {};
-    return AMP.responseMap_;
+    return AMP.responseMap_ || (AMP.responseMap_ = {});
   }
 
   /**
@@ -48,9 +118,7 @@ export class ResponseMap {
    * @param {Object} response What the response was
    */
   static add(frameType, creativeUrl, response) {
-    if (!ResponseMap.getMap_()[frameType]) {
-      ResponseMap.getMap_()[frameType] = {};
-    }
+    ResponseMap.getMap_()[frameType] = ResponseMap.getMap_()[frameType] || {};
     ResponseMap.getMap_()[frameType][creativeUrl] = response;
   }
 
