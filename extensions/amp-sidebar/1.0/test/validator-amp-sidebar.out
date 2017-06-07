@@ -1,3 +1,0 @@
-FAIL
-amp-sidebar/0.1/test/validator-amp-sidebar.html:51:4 The tag 'amp-ad' may not appear as a descendant of tag 'amp-sidebar'. (see https://www.ampproject.org/docs/reference/components/amp-ad) [AMP_TAG_PROBLEM]
-amp-sidebar/0.1/test/validator-amp-sidebar.html:54:2 The attribute 'side' in tag 'amp-sidebar' is set to the invalid value 'center'. (see https://www.ampproject.org/docs/reference/components/amp-sidebar) [AMP_TAG_PROBLEM]
