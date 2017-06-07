@@ -107,16 +107,11 @@ function timedExecOrDie(cmd) {
  * @return {!Array<string>}
  */
 function filesInPr() {
-  const branches = `master ${process.env.TRAVIS_PULL_REQUEST_SHA}`;
-  const commonAncestor =
-      getStdout(`git merge-base --fork-point ${branches}`).trim();
-  const travisCommitRange  =
-      `${commonAncestor}...${process.env.TRAVIS_PULL_REQUEST_SHA}`;
-  const files =
-      getStdout(`git diff --name-only ${travisCommitRange}`).trim().split('\n');
-  const changeSummary =
-      getStdout(`git -c color.ui=always diff --stat ${travisCommitRange}`);
-  console.log(fileLogPrefix, 'Changes in this PR:');
+  const files = getStdout(`git diff --name-only master`).trim().split('\n');
+  const changeSummary = getStdout(`git -c color.ui=always diff --stat master`);
+  console.log(fileLogPrefix,
+      'Testing the following changes at commit',
+      util.colors.cyan(process.env.TRAVIS_PULL_REQUEST_SHA));
   console.log(changeSummary);
   return files;
 }
