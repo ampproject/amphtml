@@ -68,7 +68,7 @@ function stopTimer(functionName, startTime) {
  * @return {!Array<string>}
  */
 function getStdout(cmd) {
-  return child_process.execSync(cmd, {'encoding': 'utf-8'}).trim();
+  return child_process.execSync(cmd, {'encoding': 'utf-8'});
 }
 
 /**
@@ -100,12 +100,13 @@ function timedExecOrDie(cmd) {
 function filesInPr() {
   const branches = `master ${process.env.TRAVIS_PULL_REQUEST_SHA}`;
   const commonAncestor =
-      getStdout(`git merge-base --fork-point ${branches}`);
+      getStdout(`git merge-base --fork-point ${branches}`).trim();
   const travisCommitRange  =
       `${commonAncestor}...${process.env.TRAVIS_PULL_REQUEST_SHA}`;
   const files =
-      getStdout(`git diff --name-only ${travisCommitRange}`).split('\n');
-  const changeSummary = getStdout(`git diff --stat ${travisCommitRange}`);
+      getStdout(`git diff --name-only ${travisCommitRange}`).trim().split('\n');
+  const changeSummary =
+      getStdout(`git -c color.ui=always diff --stat ${travisCommitRange}`);
   console.log(fileLogPrefix, 'Changes in this PR:');
   console.log(changeSummary);
   return files;
