@@ -66,6 +66,19 @@ let reportingBackoff = function(work) {
 };
 
 /**
+ * Attempts to stringify a value, falling back to String.
+ * @param {*} value
+ * @return {string}
+ */
+function tryJsonStringify(value) {
+  try {
+    return JSON.stringify(value);
+  } catch (e) {
+    return String(value);
+  }
+}
+
+/**
  * The true JS engine, as detected by inspecting an Error stack. This should be
  * used with the userAgent to tell definitely. I.e., Chrome on iOS is really a
  * Safari JS engine.
@@ -93,7 +106,7 @@ export function reportError(error, opt_associatedElement) {
         isValidError = true;
       } else {
         const origError = error;
-        error = new Error(String(origError));
+        error = new Error(tryJsonStringify(origError));
         error.origError = origError;
       }
     } else {
