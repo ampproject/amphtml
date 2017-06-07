@@ -203,12 +203,12 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     util.log(util.colors.yellow(
         'Shutting down test responses server on localhost:31862'));
     server.emit('kill');
-    if (exitCode && typeof exitCode !== 'Error') {
-      var error = new Error('Karma test failed (error code: ' + exitCode + ')');
-      error.showStack = false;
+    if (exitCode) {
+      var error = new Error(
+          util.colors.red('Karma test failed (error code: ' + exitCode + ')'));
       done(error);
     } else {
-      done(exitCode);
+      done();
     }
   }).start();
 }, {
