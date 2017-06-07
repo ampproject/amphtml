@@ -873,14 +873,12 @@ export class AmpA4A extends AMP.BaseElement {
 
     // Add `type` to the message. Ensure to preserve the original stack.
     const type = this.element.getAttribute('type') || 'notype';
-    error.message = `${TAG}: ${type}: ${error.message}`;
+    if (error.message.indexOf(`${TAG}: ${type}:`) != 0) {
+      error.message = `${TAG}: ${type}: ${error.message}`;
+    }
 
     // Additional arguments.
-    const adQueryIdx = this.adUrl_ ? this.adUrl_.indexOf('?') : -1;
-    error.args = {
-      'au': adQueryIdx < 0 ? '' :
-          this.adUrl_.substring(adQueryIdx + 1, adQueryIdx + 251),
-    };
+    assignAdUrlToError(/** @type {!Error} */(error), this.adUrl_);
 
     if (getMode().development || getMode().localDev || getMode().log) {
       user().error(TAG, error);
@@ -1594,3 +1592,20 @@ export class AmpA4A extends AMP.BaseElement {
    */
   emitLifecycleEvent(unusedEventName, opt_extraVariables) {}
 }
+
+/**
+ * Attachs query string portion of ad url to error.
+ * @param {!Error} error
+ * @param {string} adUrl
+ */
+export function assignAdUrlToError(error, adUrl) {
+  if (!adUrl || (error.args && error.args['au'])) {
+    return;
+  }
+  const adQueryIdx = adUrl.indexOf('?');
+  if (adQueryIdx == -1) {
+    return;
+  }
+  (error.args || (error.args = {}))['au'] =
+    adUrl.substring(adQueryIdx + 1, adQueryIdx + 251);
+};

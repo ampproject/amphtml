@@ -25,6 +25,7 @@ import {
   RENDERING_TYPE_HEADER,
   XORIGIN_MODE,
   DEFAULT_SAFEFRAME_VERSION,
+  assignAdUrlToError,
 } from '../../amp-a4a/0.1/amp-a4a';
 import {
   isInManualExperiment,
@@ -549,14 +550,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                 // Pop head off of the array of resolvers as the response
                 // should match the order of blocks declared in the ad url.
                 // This allows the block to start rendering while the SRA
-                // response is streaming back to the client.              
+                // response is streaming back to the client.
                 dev().assert(sraRequestAdUrlResolvers.shift())(fetchResponse);
               });
             // TODO(keithwrightbos) - how do we handle per slot 204 response?
+            let sraUrl;
             return constructSRARequest_(
                 this.win, this.getAmpDoc(), typeInstances)
-              .then(sraUrl => {
+              .then(sraUrlIn => {
                 checkStillCurrent();
+                sraUrl = sraUrlIn;
                 return xhrFor(this.win).fetch(sraUrl, {
                   mode: 'cors',
                   method: 'GET',
@@ -568,6 +571,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                 return lineDelimitedStreamer(this.win, response, slotCallback);
               })
               .catch(error => {
+                assignAdUrlToError(/** @type {!Error} */(error), sraUrl);
                 const canceled = isCancellation(error);
                 if (!canceled) {
                   user().error(TAG, 'SRA request failure', error);
