@@ -796,6 +796,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       resetSraStateForTesting();
     });
 
+    // TODO(keithwrightbos): verify collapse on xhr failure
     it('should not use SRA if single slot', () => {
       return executeTest([1234]);
     });

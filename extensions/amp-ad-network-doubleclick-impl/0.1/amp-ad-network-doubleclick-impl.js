@@ -448,7 +448,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (!this.useSra_) {
       return super.sendXhrRequest(adUrl);
     }
-    // Wait for SRA request which will ncall response promise when this block's
+    // Wait for SRA request which will call response promise when this block's
     // response has been returned.
     this.initiateSraRequests();
     // Null response indicates single slot should execute using non-SRA method.
@@ -500,7 +500,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               .filter(instance => {
                 const isValid = instance.hasAdPromise();
                 if (!isValid) {
-                  dev().info(
+                  dev().info(TAG,
                     'Ignoring instance without ad promise as likely invalid',
                     instance.element);
                 }
@@ -570,7 +570,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                   // explicit is required!
                   instance.resetAdUrl();
                   if (!canceled) {
-                    instance.attemptChangeHeight(0);
+                    instance.attemptCollapse();
                   }
                   instance.sraResponseRejector(error);
                 });
