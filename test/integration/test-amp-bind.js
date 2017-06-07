@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// Test change to integration test file. NOT TO BE MERGED.
+
 import {createFixtureIframe} from '../../testing/iframe';
 import {batchedXhrFor, bindForDoc} from '../../src/services';
 import {ampdocServiceFor} from '../../src/ampdoc';
