@@ -205,8 +205,8 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     server.emit('kill');
     var error = exitCode;
     if (exitCode && typeof exitCode !== 'Error') {
-        error = new Error('Karma test failed (error code: ' + exitCode + ')');
-        error.showStack = false;
+      error = new Error('Karma test failed (error code: ' + exitCode + ')');
+      error.showStack = false;
     }
     done(error);
   }).start();
