@@ -13,3 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import {CSS} from '../../../build/amp-sidebar-1.0.css';
+
+export class AmpSidebar extends AMP.BaseElement {
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+  }
+
+  /** @override */
+  isLayoutSupported(layout) {
+    return layout == Layout.NODISPLAY;
+  }
+
+  /** @override */
+  buildCallback() {
+
+  }
+}
+
+AMP.registerElement('amp-sidebar', AmpSidebar, CSS);
