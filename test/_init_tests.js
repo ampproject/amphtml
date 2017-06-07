@@ -15,7 +15,6 @@
  */
 
 // This must load before all other tests.
-import '../third_party/babel/custom-babel-helpers';
 import '../src/polyfills';
 import {Services} from '../src/services';
 import {removeElement} from '../src/dom';

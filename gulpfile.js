@@ -817,7 +817,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
   }
 
   var bundler = browserify(srcDir + srcFilename, {debug: true})
-      .transform(babel, {loose: argv.strictBabelTransform ? undefined : 'all'});
+      .transform(babel, {});
   if (options.watch) {
     bundler = watchify(bundler);
   }
@@ -842,9 +842,9 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     return toPromise(bundler.bundle()
       .on('error', function(err) {
         if (err instanceof SyntaxError) {
-          console.error($$.util.colors.red('Syntax error:', err.message));
+          console.error($$.util.colors.red('Syntax error:', err));
         } else {
-          console.error($$.util.colors.red(err.message));
+          console.error($$.util.colors.red(err));
         }
       })
       .pipe(lazybuild())
