@@ -62,13 +62,22 @@ function stopTimer(functionName, startTime) {
 }
 
 /**
- * Executes the provided command, returning its stdout as an array of lines.
+ * Executes the provided command, returning its stdout.
  * This will throw an exception if something goes wrong.
  * @param {string} cmd
  * @return {!Array<string>}
  */
 function getStdout(cmd) {
-  return child_process.execSync(cmd, {'encoding': 'utf-8'}).trim().split('\n');
+  let p = child_process.spawnSync(
+      '/bin/sh',
+      ['-c', cmd],
+      {
+        'cwd': process.cwd(),
+        'env': process.env,
+        'stdio': 'pipe',
+        'encoding': 'utf-8'
+      });
+  return p.stdout;
 }
 
 /**
@@ -93,13 +102,20 @@ function timedExecOrDie(cmd) {
 }
 
 /**
- * For a provided commit range identifiying a pull request (PR),
- * yields the list of files.
- * @param {string} travisCommitRange
+ * Returns a list of files in the commit range within this pull request (PR)
+ * after filtering out commits to master from other PRs.
  * @return {!Array<string>}
  */
-function filesInPr(travisCommitRange) {
-  return getStdout(`git diff --name-only ${travisCommitRange}`);
+function filesInPr() {
+  const files =
+      getStdout(`git diff --name-only master...HEAD`).trim().split('\n');
+  const changeSummary =
+      getStdout(`git -c color.ui=always diff --stat master...HEAD`);
+  console.log(fileLogPrefix,
+      'Testing the following changes at commit',
+      util.colors.cyan(process.env.TRAVIS_PULL_REQUEST_SHA));
+  console.log(changeSummary);
+  return files;
 }
 
 /**
@@ -161,7 +177,7 @@ function isDocFile(filePath) {
  * @return {boolean}
  */
 function isIntegrationTest(filePath) {
-  if (filePath.startsWith('test/integration/')) return true;
+  return filePath.startsWith('test/integration/');
 }
 
 /**
@@ -304,7 +320,8 @@ function main(argv) {
   const startTime = startTimer('pr-check.js');
   console.log(
       fileLogPrefix, 'Running build shard',
-      util.colors.cyan(process.env.BUILD_SHARD));
+      util.colors.cyan(process.env.BUILD_SHARD),
+      '\n');
 
   // If $TRAVIS_PULL_REQUEST_SHA is empty then it is a push build and not a PR.
   if (!process.env.TRAVIS_PULL_REQUEST_SHA) {
@@ -313,31 +330,21 @@ function main(argv) {
     stopTimer('pr-check.js', startTime);
     return 0;
   }
-  const travisCommitRange = `master...${process.env.TRAVIS_PULL_REQUEST_SHA}`;
-  const files = filesInPr(travisCommitRange);
+  const files = filesInPr();
   const buildTargets = determineBuildTargets(files);
 
-  if (buildTargets.has('FLAG_CONFIG')) {
-    files.forEach((file) => {
-      if (!isFlagConfig(file)) {
-        console.log(fileLogPrefix, util.colors.red('ERROR:'),
-            'PRs may not include *config.json files and non-flag-config ' +
-            'files. Please make the changes in separate PRs.');
-        console.log(fileLogPrefix, util.colors.yellow('NOTE:'),
-            'If you see a long list of unrelated files below, it is likely ' +
-            'that your private branch is significantly out of sync.');
-        console.log(fileLogPrefix,
-            'A sync to upstream/master and a push to origin should clear' +
-            ' this error. If a normal push doesn\'t work, try a force push:');
-        console.log(util.colors.cyan('\t git fetch upstream master'));
-        console.log(util.colors.cyan('\t git rebase upstream/master'));
-        console.log(util.colors.cyan('\t git push origin --force'));
-        console.log('\nFull list of files in this PR:');
-        files.forEach((file) => { console.log('\t' + file); });
-        stopTimer('pr-check.js', startTime);
-        process.exit(1);
-      }
-    });
+  // Exit early if flag-config files are mixed with non-flag-config files.
+  if (buildTargets.has('FLAG_CONFIG') && buildTargets.size !== 1) {
+    console.log(fileLogPrefix, util.colors.red('ERROR:'),
+        'Looks like your PR contains',
+        util.colors.cyan('{prod|canary}-config.json'),
+        'in addition to some other files');
+    const nonFlagConfigFiles = files.filter(file => !isFlagConfig(file));
+    console.log(fileLogPrefix, util.colors.red('ERROR:'),
+        'Please move these files to a separate PR:',
+        util.colors.cyan(nonFlagConfigFiles.join(', ')));
+    stopTimer('pr-check.js', startTime);
+    process.exit(1);
   }
 
   //if (files.includes('package.json') ?
