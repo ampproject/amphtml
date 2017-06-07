@@ -1,5 +1,7 @@
-/*
+/**
 * Enum used to specify custom Amp Events
+*
+* @constant {!Object<string, string>}
 */
 export const AmpEvents = {
   VISIBILITY_CHANGE: 'amp:visibilitychange',
