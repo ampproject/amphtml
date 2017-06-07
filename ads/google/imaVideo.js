@@ -317,9 +317,22 @@ export function imaVideo(global, data) {
   setStyle(videoPlayer, 'width', '100%');
   setStyle(videoPlayer, 'height', '100%');
   setStyle(videoPlayer, 'background-color', 'black');
-  videoPlayer.setAttribute('src', data.src);
   videoPlayer.setAttribute('poster', data.poster);
   videoPlayer.setAttribute('playsinline', true);
+  // Set video player source, first based on source child elements if present.
+  // If not, then based on data-src.
+  if (data.sources) {
+    const sources = JSON.parse(data.sources);
+    sources.some(source => {
+      if (videoPlayer.canPlayType(source.type)) {
+        videoPlayer.setAttribute('src', source.src);
+        return true;
+      }
+    });
+  } else {
+    videoPlayer.setAttribute('src', data.src);
+  }
+
 
   contentDiv.appendChild(videoPlayer);
   wrapperDiv.appendChild(contentDiv);

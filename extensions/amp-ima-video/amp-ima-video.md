@@ -66,13 +66,13 @@ VAST-compliant ad response (for examples, see
 
 ## Attributes
 
-**data-src** (required)
-
-The URL of your video content.
-
 **data-tag** (required)
 
 The URL for your VAST ad document.
+
+**data-src** (optional)
+
+The URL of your video content.
 
 **data-poster** (optional)
 

@@ -64,16 +64,29 @@ class AmpImaVideo extends AMP.BaseElement {
     assertHttpsUrl(this.element.getAttribute('data-tag'),
         'The data-tag attribute is required for <amp-video-ima> and must be ' +
             'https');
-    assertHttpsUrl(this.element.getAttribute('data-src'),
-        'The data-src attribute is required for <amp-video-ima> and must be ' +
-            'https');
+
+    // Set data-sources attribute based on source child elements.
+    const sourceElements = this.element.getElementsByTagName('source');
+    if (sourceElements.length > 0) {
+      const sources = [];
+      Array.from(sourceElements).forEach(source => {
+        sources.push({
+          'src': source.src,
+          'type': source.type,
+        });
+      });
+      this.element.setAttribute('data-sources', JSON.stringify(sources));
+    }
   }
 
   /** @override */
   preconnectCallback() {
     this.preconnect.preload(
         'https://imasdk.googleapis.com/js/sdkloader/ima3.js', 'script');
-    this.preconnect.url(this.element.getAttribute('data-src'));
+    const source = this.element.getAttribute('data-src');
+    if (source) {
+      this.preconnect.url(source);
+    }
     this.preconnect.url(this.element.getAttribute('data-tag'));
     preloadBootstrap(this.win, this.preconnect);
   }

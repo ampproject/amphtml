@@ -35,7 +35,7 @@ tags: {  # <amp-ima-video>
   # data-* is generally allowed, but it's not generally mandatory.
   attrs: {
     name: "data-src"
-    mandatory: true
+    mandatory: false
     value_url: {
       allowed_protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
