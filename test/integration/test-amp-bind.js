@@ -15,13 +15,11 @@
  */
 
 import {createFixtureIframe} from '../../testing/iframe';
-import {batchedXhrFor, bindForDoc} from '../../src/services';
-import {ampdocServiceFor} from '../../src/ampdoc';
+import {batchedXhrFor} from '../../src/services';
 import * as sinon from 'sinon';
 
 describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   let fixture;
-  let ampdoc;
   let sandbox;
   let numSetStates;
   let numTemplated;
@@ -53,24 +51,17 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
         fixture.awaitEvent('amp:bind:initialize', 1),
         fixture.awaitEvent('amp:load:start', loadStartsToExpect),
       ]);
-    }).then(() => {
-      const ampdocService = ampdocServiceFor(fixture.win);
-      ampdoc = ampdocService.getAmpDoc(fixture.doc);
     });
   }
 
   /** @return {!Promise} */
   function waitForBindApplication() {
-    // Bind should be available, but need to wait for actions to resolve
-    // service promise for bind and call setState.
-    return bindForDoc(ampdoc).then(unusedBind =>
-        fixture.awaitEvent('amp:bind:setState', ++numSetStates));
+    return fixture.awaitEvent('amp:bind:setState', ++numSetStates);
   }
 
   /** @return {!Promise} */
   function waitForTemplateRescan() {
-    return bindForDoc(ampdoc).then(unusedBind =>
-        fixture.awaitEvent('amp:bind:rescan-template', ++numTemplated));
+    return fixture.awaitEvent('amp:bind:rescan-template', ++numTemplated);
   }
 
   describe('with [text] and [class]', () => {
@@ -99,7 +90,8 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
     });
   });
 
-  // TODO(choumx, #9759): Remove Chrome-only condition.
+  // TODO(choumx, #9759): Seems like old browsers give up when hitting expected
+  // user errors due to illegal bindings in the form's template.
   describe.configure().ifChrome().run('with <amp-form>', () => {
     beforeEach(() => {
       // <form> is not an AMP element.
@@ -201,8 +193,8 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
     });
   });
 
-  // TODO(choumx): Flaky on Edge for some reason.
-  describe.configure().skipEdge().run('with <amp-carousel>', () => {
+  // TODO(choumx): Flaky on Edge/Firefox for some reason.
+  describe.configure().ifChrome().run('with <amp-carousel>', () => {
     beforeEach(() => {
       // One <amp-carousel> plus two <amp-img> elements.
       return setupWithFixture('test/fixtures/bind-carousel.html', 3);

@@ -13,9 +13,9 @@
 
 <body>
   <!-- amp-list -->
-  <button id='listSrcButton' on="tap:AMP.setState({listSrc: 'https://www.google.com/bound.json'})">Change amp-list</button>
-  <button id='httpListSrcButton' on="tap:AMP.setState({listSrc: 'http://www.google.com/justhttp.json'})">Change amp-list</button>
-  <amp-list id='list' src="https://www.google.com/unbound.json" [src]=listSrc>
+  <button id="listSrcButton" on="tap:AMP.setState({listSrc: 'https://www.google.com/bound.json'})">Change amp-list</button>
+  <button id="httpListSrcButton" on="tap:AMP.setState({listSrc: 'http://www.google.com/justhttp.json'})">Change amp-list</button>
+  <amp-list id="list" width=100 height=100 src="https://www.google.com/unbound.json" [src]=listSrc>
   </amp-list>
 </body>
 </html>
