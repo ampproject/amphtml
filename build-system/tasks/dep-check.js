@@ -203,7 +203,9 @@ function getGraph(entryModule) {
  */
 function getEntryModule(extensionFolder) {
   // TODO (@zhouyx, #9642): Remove the special check and handle more than just 0.1
-  if (extensionFolder == 'extensions/amp-sticky-ad') {
+  if (extensionFolder == 'extensions/amp-sticky-ad' ||
+    extensionFolder == 'extensions/amp-sidebar'
+  ) {
     return `${extensionFolder}/1.0/${path.basename(extensionFolder)}.js`;
   }
   return `${extensionFolder}/0.1/${path.basename(extensionFolder)}.js`;
