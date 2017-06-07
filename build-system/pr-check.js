@@ -272,6 +272,8 @@ function runAllCommands() {
   }
   if (process.env.BUILD_SHARD == "integration_tests") {
     command.cleanBuild();
+    // TODO(jridgewell, 9757): Remove this after fixing integration test.
+    command.buildRuntime();
     command.buildRuntimeMinified();
     command.runPresubmitTests();  // Needs runtime to be built and served.
     command.runVisualDiffTests();  // Only called during push builds.
