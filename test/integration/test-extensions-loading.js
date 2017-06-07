@@ -15,6 +15,7 @@
  */
 
 import {createFixtureIframe} from '../../testing/iframe';
+import {AmpEvents} from '../../src/amp-events';
 
 // Checks if an amp element gets upgraded.
 function checkElementUpgrade(element) {
@@ -40,7 +41,7 @@ function testLoadOrderFixture(fixtureName, testElements) {
       expect(fixture.doc.querySelectorAll(testElements[i]))
           .to.have.length(1);
     }
-    return fixture.awaitEvent('amp:load:start', testElements.length);
+    return fixture.awaitEvent(AmpEvents.LOAD.START, testElements.length);
   }).then(() => {
     for (let i = 0; i < testElements.length; i++) {
       const testElement = fixture.doc.querySelectorAll(testElements[i])[0];

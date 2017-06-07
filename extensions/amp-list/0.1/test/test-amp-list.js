@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../../../../src/amp-events';
 import {AmpList} from '../amp-list';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {templatesFor} from '../../../../src/services';
@@ -99,7 +100,7 @@ describe('amp-list component', () => {
     }).then(() => {
       expect(spy).to.have.been.calledOnce;
       expect(spy).calledWithMatch({
-        type: 'amp:template-rendered',
+        type: AmpEvents.TEMPLATE_RENDERED,
         bubbles: true,
       });
     });

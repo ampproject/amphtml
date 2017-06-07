@@ -36,6 +36,7 @@ import {reportError} from '../../../src/error';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
 import {waitForBodyPromise} from '../../../src/dom';
 import {AmpEvents} from '../../../src/amp-events';
+import {BindEvents} from './bind-events';
 
 const TAG = 'amp-bind';
 
@@ -202,7 +203,7 @@ export class Bind {
 
     if (getMode().test) {
       promise.then(() => {
-        this.dispatchEventForTesting_(AmpEvents.BIND.SET_STATE);
+        this.dispatchEventForTesting_(BindEvents.SET_STATE);
       });
     }
 
@@ -260,7 +261,7 @@ export class Bind {
     if (getMode().test) {
       // Signal init completion for integration tests.
       promise.then(() => {
-        this.dispatchEventForTesting_(AmpEvents.BIND.INITIALIZE);
+        this.dispatchEventForTesting_(BindEvents.INITIALIZE);
       });
     }
     return promise;
@@ -835,7 +836,7 @@ export class Bind {
     this.removeBindingsForNode_(templateContainer).then(() => {
       return this.addBindingsForNode_(templateContainer);
     }).then(() => {
-      this.dispatchEventForTesting_(AmpEvents.BIND.RESCAN_TEMPLATE);
+      this.dispatchEventForTesting_(BindEvents.RESCAN_TEMPLATE);
     });
   }
 
