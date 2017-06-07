@@ -42,7 +42,7 @@ import {
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {map} from '../../../../src/utils/object';
 import {cidServiceForDocForTesting,} from
-    '../../../../extensions/amp-analytics/0.1/cid-impl';
+    '../../../../src/cid-impl';
 import {urlReplacementsForDoc} from '../../../../src/services';
 import * as sinon from 'sinon';
 
