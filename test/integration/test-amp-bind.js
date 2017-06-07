@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {AmpEvents} from '../../src/amp-events';
+import {BindEvents} from '../../extensions/amp-bind/0.1';
 import {createFixtureIframe} from '../../testing/iframe';
 import {batchedXhrFor, bindForDoc} from '../../src/services';
 import {ampdocServiceFor} from '../../src/ampdoc';
@@ -45,7 +46,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   function setupWithFixture(fixtureLocation) {
     return createFixtureIframe(fixtureLocation).then(f => {
       fixture = f;
-      return fixture.awaitEvent(AmpEvents.BIND.INITIALIZE, 1);
+      return fixture.awaitEvent(BindEvents.INITIALIZE, 1);
     }).then(() => {
       const ampdocService = ampdocServiceFor(fixture.win);
       ampdoc = ampdocService.getAmpDoc(fixture.doc);
@@ -57,13 +58,13 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
     // Bind should be available, but need to wait for actions to resolve
     // service promise for bind and call setState.
     return bindForDoc(ampdoc).then(unusedBind =>
-        fixture.awaitEvent(AmpEvents.BIND.SET_STATE, ++numSetStates));
+        fixture.awaitEvent(BindEvents.SET_STATE, ++numSetStates));
   }
 
   /** @return {!Promise} */
   function waitForTemplateRescan() {
     return bindForDoc(ampdoc).then(unusedBind =>
-        fixture.awaitEvent(AmpEvents.BIND.RESCAN_TEMPLATE, ++numTemplated));
+        fixture.awaitEvent(BindEvents.RESCAN_TEMPLATE, ++numTemplated));
   }
 
   describe('with [text] and [class]', () => {

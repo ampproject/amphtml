@@ -15,18 +15,12 @@
  */
 
 /**
-* Enum used to specify custom Amp Events
+* Enum used to specify Events for the Amp Bind extension
 *
 * @enum {string}
 */
-export const AmpEvents = {
-  VISIBILITY_CHANGE: 'amp:visibilitychange',
-  TEMPLATE_RENDERED: 'amp:template-rendered',
-  DOM_UPDATE: 'amp:dom-update',
-  BUILT: 'amp:built',
-  ATTACHED: 'amp:attached',
-  STUBBED: 'amp:stubbed',
-  LOAD_START: 'amp:load:start',
-  LOAD_END: 'amp:load:end',
-  ERROR: 'amp:error',
+export const BindEvents = {
+  INITIALIZE: 'amp:bind:initialize',
+  RESCAN_TEMPLATE: 'amp:bind:rescan-template',
+  SET_STATE: 'amp:bind:setState',
 };

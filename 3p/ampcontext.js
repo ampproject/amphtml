@@ -19,7 +19,7 @@ import {MessageType} from '../src/3p-frame-messaging';
 import {nextTick} from './3p';
 import {tryParseJson} from '../src/json';
 import {isObject} from '../src/types';
-import {AmpEvents} from '../src/amp-events'
+import {AmpEvents} from '../src/amp-events';
 
 export class AbstractAmpContext {
 

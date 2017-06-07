@@ -31,6 +31,7 @@ import {installExtensionsService} from '../src/service/extensions-impl';
 import {installStyles} from '../src/style-installer';
 import {resourcesForDoc} from '../src/services';
 import {AmpEvents} from '../src/amp-events';
+import {BindEvents} from '../extensions/amp-bind/0.1';
 
 let iframeCount = 0;
 
@@ -66,9 +67,9 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
     // Counts the supported custom events.
     const events = {
       [AmpEvents.ATTACHED]: 0,
-      [AmpEvents.BIND.INITIALIZE]: 0,
-      [AmpEvents.BIND.SET_STATE]: 0,
-      [AmpEvents.BIND.RESCAN_TEMPLATE]: 0,
+      [BindEvents.INITIALIZE]: 0,
+      [BindEvents.SET_STATE]: 0,
+      [BindEvents.RESCAN_TEMPLATE]: 0,
       [AmpEvents.ERROR]: 0,
       [AmpEvents.LOAD_START]: 0,
       [AmpEvents.STUBBED]: 0,
