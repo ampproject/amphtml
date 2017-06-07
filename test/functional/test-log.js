@@ -303,7 +303,7 @@ describe('Logging', () => {
       try {
         log.assert(false, '123');
       } catch (e) {
-        expect(e.message).to.equal('123' + USER_ERROR_SENTINEL);
+        expect(e.message).to.contain('123' + USER_ERROR_SENTINEL);
         return;
       }
       // Unreachable
@@ -337,7 +337,7 @@ describe('Logging', () => {
         error = e;
       }
       expect(error).to.be.instanceof(Error);
-      expect(error.message).to.equal('1 a 2 b 3' + USER_ERROR_SENTINEL);
+      expect(error.message).to.contain('1 a 2 b 3' + USER_ERROR_SENTINEL);
       expect(error.messageArray).to.deep.equal([1, 'a', 2, 'b', 3]);
     });
 
