@@ -164,7 +164,7 @@ function isDocFile(filePath) {
  * @return {boolean}
  */
 function isIntegrationTest(filePath) {
-  if (filePath.startsWith('test/integration/')) return true;
+  return filePath.startsWith('test/integration/');
 }
 
 /**
