@@ -68,7 +68,16 @@ function stopTimer(functionName, startTime) {
  * @return {!Array<string>}
  */
 function getStdout(cmd) {
-  return child_process.execSync(cmd, {'encoding': 'utf-8'});
+  let p = child_process.spawnSync(
+      '/bin/sh',
+      ['-c', cmd],
+      {
+        'cwd': process.cwd(),
+        'env': process.env,
+        'stdio': 'pipe',
+        'encoding': 'utf-8'
+      });
+  return p.stdout;
 }
 
 /**
