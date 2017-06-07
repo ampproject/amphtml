@@ -1,0 +1,271 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-bind</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Questrial" rel="stylesheet" type="text/css">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-accordion" src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+  <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+
+  <style amp-custom>
+    body {
+      margin: auto;
+      font-family: sans-serif;
+    }
+    h1.header {
+      background-color: red;
+      color: white;
+      text-align: center;
+      margin: 0;
+      padding: 10px;
+      font-size: 24px;
+    }
+    .container {
+      padding: 0 10px;
+    }
+    button.buy {
+      margin: 20px 0;
+      width: 100%;
+      padding: 10px;
+      background-color: green;
+      color: white;
+      font-weight: bold;
+    }
+    button[disabled] {
+      background-color: red;
+    }
+    .thumbnails, .color {
+      margin-top: 10px;
+    }
+    .thumbnails amp-img {
+      border: solid 2px transparent;
+      padding: 2px;
+    }
+    .thumbnails amp-img[selected] {
+      border: solid 2px gray;
+    }
+    .thumbnails amp-img[out-of-stock] {
+      background-color: red;
+    }
+    amp-accordion {
+      margin-top: 10px;
+    }
+    .sizes button {
+      display: block;
+      width: 100%;
+      border: solid 1px gray;
+      padding: 5px;
+      background-color: #eee;
+    }
+    .change-size {
+      display: block;
+      width: 200px;
+      height: 30px;
+      padding: 5px;
+      background-color: #666;
+      color: white;
+    }
+    button[hidden] {
+      display: none;
+    }
+    p[hidden] {
+      display:none;
+    }
+  </style>
+</head>
+
+<body>
+  <h1 class="header">AMPWEAR</h1>
+  <div class="container">
+    <h2>MEN'S COTTON SHORT SLEEVE T-SHIRT</h2>
+
+    <amp-bind-dataset layout=nodisplay>
+      <script type="application/json">
+        {
+          "items": [
+            {
+              "id": "0",
+              "name": "09 BLACK",
+              "image": "./shirts/black.jpeg",
+              "sizes": ["S", "L"]
+            },
+            {
+              "id": "1",
+              "name": "34 BROWN",
+              "image": "./shirts/brown.jpeg",
+              "sizes": ["M", "L"]
+            },
+            {
+              "id": "2",
+              "name": "03 GRAY",
+              "image": "./shirts/gray.jpeg",
+              "sizes": ["S"]
+            },
+            {
+              "id": "3",
+              "name": "69 NAVY",
+              "image": "./shirts/navy.jpeg",
+              "sizes": ["S", "L"]
+            },
+            {
+              "id": "4",
+              "name": "19 WINE",
+              "image": "./shirts/wine.jpeg",
+              "sizes": []
+            },
+            {
+              "id": "5",
+              "name": "61 BLUE",
+              "image": "./shirts/blue.jpeg",
+              "sizes": ["L"]
+            },
+            {
+              "id": "6",
+              "name": "59 DARK GREEN",
+              "image": "./shirts/dark-green.jpeg",
+              "sizes": ["S"]
+            },
+            {
+              "id": "7",
+              "name": "02 LIGHT GRAY",
+              "image": "./shirts/light-gray.jpeg",
+              "sizes": ["S", "M", "L"]
+            },
+            {
+              "id": "8",
+              "name": "00 WHITE",
+              "image": "./shirts/white.jpeg",
+              "sizes": []
+            }
+          ]
+        }
+      </script>
+    </amp-bind-dataset>
+
+    <amp-carousel slide=0 id="carousel-1" width=1 height=1 layout=responsive type=slides controls
+        bind-attr="{slide: selected}"
+        on="slidechange:setState({selected: ampEventData})">
+
+      <amp-img src="./shirts/black.jpeg" width=1 height=1 layout=responsive></amp-img>
+      <amp-img src="./shirts/brown.jpeg" width=1 height=1 layout=responsive></amp-img>
+      <amp-img src="./shirts/gray.jpeg" width=1 height=1 layout=responsive></amp-img>
+      <amp-img src="./shirts/navy.jpeg" width=1 height=1 layout=responsive></amp-img>
+      <amp-img src="./shirts/wine.jpeg" width=1 height=1 layout=responsive></amp-img>
+      <amp-img src="./shirts/blue.jpeg" width=1 height=1 layout=responsive></amp-img>
+      <amp-img src="./shirts/dark-green.jpeg" width=1 height=1 layout=responsive></amp-img>
+      <amp-img src="./shirts/light-gray.jpeg" width=1 height=1 layout=responsive></amp-img>
+      <amp-img src="./shirts/white.jpeg" width=1 height=1 layout=responsive></amp-img>
+    </amp-carousel>
+
+    <amp-img class="color" width=355 height=50 src="https://placehold.it/355x50?text=COLOR%20???"
+        bind-src="https://placehold.it/300x400?text=COLOR%20{{items[selected].name}}">
+    </amp-img>
+
+    <div class="thumbnails">
+      <amp-img src="./shirts/black.jpeg" width=50 height=50 layout=fixed
+          on="tap:setState({selected: 0})"
+          bind-attr="{selected: selected === 0}"
+          bind-class="{outOfStock: !items[0].sizes.length}">
+      </amp-img>
+
+      <amp-img src="./shirts/brown.jpeg" width=50 height=50 layout=fixed
+          on="tap:setState({selected: 1})"
+          bind-attr="{selected: selected === 1}"
+          bind-class="{outOfStock: !items[1].sizes.length}">
+      </amp-img>
+
+      <amp-img src="./shirts/gray.jpeg" width=50 height=50 layout=fixed
+          on="tap:setState({selected: 2})"
+          bind-attr="{selected: selected === 2}"
+          bind-class="{outOfStock: !items[2].sizes.length}">
+      </amp-img>
+
+      <amp-img src="./shirts/navy.jpeg" width=50 height=50 layout=fixed
+        on="tap:setState({selected: 3})"
+        bind-attr="{selected: selected === 3}"
+        bind-class="{outOfStock: !items[3].sizes.length}">
+      </amp-img>
+
+      <amp-img src="./shirts/wine.jpeg" width=50 height=50 layout=fixed
+        on="tap:setState({selected: 4})"
+        bind-attr="{selected: selected === 4}"
+        bind-class="{outOfStock: !items[4].sizes.length}">
+      </amp-img>
+
+      <amp-img src="./shirts/blue.jpeg" width=50 height=50 layout=fixed
+        on="tap:setState({selected: 5})"
+        bind-attr="{selected: selected === 5}"
+        bind-class="{outOfStock: !items[5].sizes.length}">
+      </amp-img>
+
+      <amp-img src="./shirts/dark-green.jpeg" width=50 height=50 layout=fixed
+        on="tap:setState({selected: 6})"
+        bind-attr="{selected: selected === 6}"
+        bind-class="{outOfStock: !items[6].sizes.length}">
+      </amp-img>
+
+      <amp-img src="./shirts/light-gray.jpeg" width=50 height=50 layout=fixed
+        on="tap:setState({selected: 7})"
+        bind-attr="{selected: selected === 7}"
+        bind-class="{outOfStock: !items[7].sizes.length}">
+      </amp-img>
+
+      <amp-img src="./shirts/white.jpeg" width=50 height=50 layout=fixed
+        on="tap:setState({selected: 8})"
+        bind-attr="{selected: selected === 8}"
+        bind-class="{outOfStock: !items[8].sizes.length}">
+      </amp-img>
+    </div>
+
+    <amp-accordion>
+      <section expanded bind-attr="{expanded: !size}">
+        <!-- Nested here due to accordion's child limit. -->
+        <amp-img width=355 height=50 src="https://placehold.it/355x50?text=SIZE%20???"
+            bind-src="https://placehold.it/355x50?text=SIZE%20{{size}}">
+        </amp-img>
+
+        <div class="sizes">
+          <button
+              on="tap:setState({size: 'SMALL'})"
+              bind-class="{hidden: items[selected].sizes.indexOf('S') < 0}">
+            SMALL - 38"
+          </button>
+          <button
+              on="tap:setState({size: 'MEDIUM'})"
+              bind-class="{hidden: items[selected].sizes.indexOf('M') < 0}">
+            MEDIUM - 38"
+          </button>
+          <button
+              on="tap:setState({size: 'LARGE'})"
+              bind-class="{hidden: items[selected].sizes.indexOf('L') < 0}">
+            LARGE - 46"
+          </button>
+        </div>
+      </section>
+    </amp-accordion>
+
+    <button class="change-size"
+        on="tap:setState({size: ''})"
+        bind-class="{hidden: !size}">
+      Change Size
+    </button>
+
+    <p bind-class="{hidden: items[selected].sizes.length > 0}">
+      All sizes of this color are out of stock online
+    </p>
+
+    <button class="buy"
+        bind-attr="{disabled: items[selected].sizes.length === 0}">
+      <span>ADD TO BAG</span>
+    </button>
+  </div>
+</body>
+</html>
