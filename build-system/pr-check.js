@@ -107,8 +107,10 @@ function timedExecOrDie(cmd) {
  * @return {!Array<string>}
  */
 function filesInPr() {
-  const files = getStdout(`git diff --name-only master`).trim().split('\n');
-  const changeSummary = getStdout(`git -c color.ui=always diff --stat master`);
+  const files =
+      getStdout(`git diff --name-only master...HEAD`).trim().split('\n');
+  const changeSummary =
+      getStdout(`git -c color.ui=always diff --stat master...HEAD`);
   console.log(fileLogPrefix,
       'Testing the following changes at commit',
       util.colors.cyan(process.env.TRAVIS_PULL_REQUEST_SHA));
