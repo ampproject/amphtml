@@ -93,12 +93,15 @@ function timedExecOrDie(cmd) {
 }
 
 /**
- * For a provided commit range identifiying a pull request (PR),
- * yields the list of files.
- * @param {string} travisCommitRange
+ * Returns a list of files in the commit range within this pull request (PR)
+ * after filtering out commits to master from other PRs.
  * @return {!Array<string>}
  */
-function filesInPr(travisCommitRange) {
+function filesInPr() {
+  const branches = `master ${process.env.TRAVIS_PULL_REQUEST_SHA}`;
+  const commonAncestor = getStdout(`git merge-base ${branches}`);
+  const travisCommitRange  =
+      `${commonAncestor}...${process.env.TRAVIS_PULL_REQUEST_SHA}`;
   return getStdout(`git diff --name-only ${travisCommitRange}`);
 }
 
@@ -313,31 +316,21 @@ function main(argv) {
     stopTimer('pr-check.js', startTime);
     return 0;
   }
-  const travisCommitRange = `master...${process.env.TRAVIS_PULL_REQUEST_SHA}`;
-  const files = filesInPr(travisCommitRange);
+  const files = filesInPr();
   const buildTargets = determineBuildTargets(files);
 
-  if (buildTargets.has('FLAG_CONFIG')) {
-    files.forEach((file) => {
-      if (!isFlagConfig(file)) {
-        console.log(fileLogPrefix, util.colors.red('ERROR:'),
-            'PRs may not include *config.json files and non-flag-config ' +
-            'files. Please make the changes in separate PRs.');
-        console.log(fileLogPrefix, util.colors.yellow('NOTE:'),
-            'If you see a long list of unrelated files below, it is likely ' +
-            'that your private branch is significantly out of sync.');
-        console.log(fileLogPrefix,
-            'A sync to upstream/master and a push to origin should clear' +
-            ' this error. If a normal push doesn\'t work, try a force push:');
-        console.log(util.colors.cyan('\t git fetch upstream master'));
-        console.log(util.colors.cyan('\t git rebase upstream/master'));
-        console.log(util.colors.cyan('\t git push origin --force'));
-        console.log('\nFull list of files in this PR:');
-        files.forEach((file) => { console.log('\t' + file); });
-        stopTimer('pr-check.js', startTime);
-        process.exit(1);
-      }
-    });
+  // Exit early if flag-config files are mixed with non-flag-config files.
+  if (buildTargets.has('FLAG_CONFIG') && buildTargets.size !== 1) {
+    console.log(fileLogPrefix, util.colors.red('ERROR:'),
+        'Looks like your PR contains',
+        util.colors.cyan('{prod|canary}-config.json'),
+        'in addition to some other files');
+    const nonFlagConfigFiles = files.filter(file => !isFlagConfig(file));
+    console.log(fileLogPrefix, util.colors.red('ERROR:'),
+        'Please move these files to a separate PR:',
+        util.colors.cyan(nonFlagConfigFiles.join(', ')));
+    stopTimer('pr-check.js', startTime);
+    process.exit(1);
   }
 
   //if (files.includes('package.json') ?
