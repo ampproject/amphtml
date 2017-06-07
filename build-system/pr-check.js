@@ -99,9 +99,9 @@ function timedExecOrDie(cmd) {
  */
 function filesInPr() {
   const branches = `master ${process.env.TRAVIS_PULL_REQUEST_SHA}`;
-  const commonAncestors = getStdout(`git merge-base ${branches}`);
+  const commonAncestor = getStdout(`git merge-base --fork-point ${branches}`);
   const travisCommitRange  =
-      `${commonAncestors[0]}...${process.env.TRAVIS_PULL_REQUEST_SHA}`;
+      `${commonAncestor}...${process.env.TRAVIS_PULL_REQUEST_SHA}`;
   return getStdout(`git diff --name-only ${travisCommitRange}`);
 }
 
