@@ -532,16 +532,10 @@ export function mergeExperimentIds(newIds, currentIdString) {
  * Adds two CSI signals to the given amp-analytics configuration object, one
  * for render-start, and one for ini-load.
  *
-<<<<<<< HEAD
- * @param {!JsonObject} config The original config object.
-=======
  * @param {!Window} win
  * @param {!Element} element The ad slot.
  * @param {!JSONType} config The original config object.
->>>>>>> PR feedback + test fixes.
- * @param {?../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
- *   XHR service FetchResponseHeaders object containing the response
- *   headers.
+ * @param {?string} qqid
  * @param {number} deltaTime The time difference, in ms, between the lifecycle
  *   reporter's initialization and now.
  * @param {number} initTime The initialization time, in ms, of the lifecycle
@@ -550,12 +544,10 @@ export function mergeExperimentIds(newIds, currentIdString) {
  * @return {?JsonObject} config or null if invalid/missing.
  */
 export function addCsiSignalsToAmpAnalyticsConfig(win, element, config,
-    responseHeaders, isVerifiedAmpCreative, deltaTime, initTime) {
+    qqid, isVerifiedAmpCreative, deltaTime, initTime) {
   // Add CSI pingbacks.
   const correlator = getCorrelator(win);
-  const slotId = element.getAttribute('data-amp-slot-index');
-  const qqid = (responseHeaders && responseHeaders.has(QQID_HEADER))
-      ? responseHeaders.get(QQID_HEADER) : 'null';
+  const slotId = Number(element.getAttribute('data-amp-slot-index'));
   const eids = encodeURIComponent(
       element.getAttribute(EXPERIMENT_ATTRIBUTE));
   const adType = element.getAttribute('type');

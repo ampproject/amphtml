@@ -31,6 +31,7 @@ import {
   isGoogleAdsA4AValidEnvironment,
   extractAmpAnalyticsConfig,
   addCsiSignalsToAmpAnalyticsConfig,
+  QQID_HEADER,
 } from '../../../ads/google/a4a/utils';
 import {
   googleLifecycleReporterFactory,
@@ -117,8 +118,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     /** @private {?Element} */
     this.ampAnalyticsElement_ = null;
 
-    /** @private {?../../../src/service/xhr-impl.FetchResponseHeaders} */
-    this.responseHeaders_ = null;
+    /** @private {?string} */
+    this.qqid_ = null;
   }
 
   /** @override */
@@ -196,7 +197,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   extractCreativeAndSignature(responseText, responseHeaders) {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
     this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
-    this.responseHeaders_ = responseHeaders;
+    this.qqid_ = responseHeaders.get(QQID_HEADER);
     if (this.ampAnalyticsConfig_) {
       // Load amp-analytics extensions
       this.extensions_./*OK*/loadExtension('amp-analytics');
@@ -257,12 +258,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     super.onCreativeRender(isVerifiedAmpCreative);
     if (this.ampAnalyticsConfig_) {
       dev().assert(!this.ampAnalyticsElement_);
-      dev().assert(this.responseHeaders_);
+      dev().assert(this.qqid_);
       addCsiSignalsToAmpAnalyticsConfig(
           this.win,
           this.element,
           this.ampAnalyticsConfig_,
-          this.responseHeaders_,
+          this.qqid_,
           isVerifiedAmpCreative,
           this.lifecycleReporter_.getDeltaTime(),
           this.lifecycleReporter_.getInitTime());
@@ -292,7 +293,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       this.ampAnalyticsElement_ = null;
     }
     this.ampAnalyticsConfig_ = null;
-    this.responseHeaders_ = null;
+    this.qqid_ = null;
   }
 
   /** @override */

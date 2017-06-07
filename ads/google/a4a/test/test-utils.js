@@ -236,20 +236,9 @@ describe('Google A4A utils', () => {
           }
         },
       };
-      const headers = {
-        get: function(name) {
-          if (name == 'X-QQID') {
-            return 'qqid_string';
-          }
-        },
-        has: function(name) {
-          if (name == 'X-QQID') {
-            return true;
-          }
-        },
-      };
+      const qqid = 'qqid_string';
       let newConfig = addCsiSignalsToAmpAnalyticsConfig(
-          window, mockElement, builtConfig, headers,
+          window, mockElement, builtConfig, qqid,
           /* isVerifiedAmpCreative */ true,
           /* lifecycle time events; not relevant here */ -1, -1);
 
@@ -277,7 +266,7 @@ describe('Google A4A utils', () => {
         expect(newConfig.requests.renderStartCsi).to.match(regExp);
       });
       newConfig = addCsiSignalsToAmpAnalyticsConfig(
-          window, mockElement, builtConfig, headers,
+          window, mockElement, builtConfig, qqid,
           /* isVerifiedAmpCreative */ false,
           /* lifecycle time events; not relevant here */ -1, -1);
       getRegExps('iniLoadCsiCrossDomain').forEach(regExp => {
