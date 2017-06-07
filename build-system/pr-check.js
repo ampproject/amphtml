@@ -62,13 +62,13 @@ function stopTimer(functionName, startTime) {
 }
 
 /**
- * Executes the provided command, returning its stdout as an array of lines.
+ * Executes the provided command, returning its stdout.
  * This will throw an exception if something goes wrong.
  * @param {string} cmd
  * @return {!Array<string>}
  */
 function getStdout(cmd) {
-  return child_process.execSync(cmd, {'encoding': 'utf-8'}).trim().split('\n');
+  return child_process.execSync(cmd, {'encoding': 'utf-8'}).trim();
 }
 
 /**
@@ -99,10 +99,16 @@ function timedExecOrDie(cmd) {
  */
 function filesInPr() {
   const branches = `master ${process.env.TRAVIS_PULL_REQUEST_SHA}`;
-  const commonAncestor = getStdout(`git merge-base --fork-point ${branches}`);
+  const commonAncestor =
+      getStdout(`git merge-base --fork-point ${branches}`);
   const travisCommitRange  =
       `${commonAncestor}...${process.env.TRAVIS_PULL_REQUEST_SHA}`;
-  return getStdout(`git diff --name-only ${travisCommitRange}`);
+  const files =
+      getStdout(`git diff --name-only ${travisCommitRange}`).split('\n');
+  const changeSummary = getStdout(`git diff --stat ${travisCommitRange}`);
+  console.log(fileLogPrefix, 'Changes in this PR:');
+  console.log(changeSummary);
+  return files;
 }
 
 /**
@@ -307,7 +313,8 @@ function main(argv) {
   const startTime = startTimer('pr-check.js');
   console.log(
       fileLogPrefix, 'Running build shard',
-      util.colors.cyan(process.env.BUILD_SHARD));
+      util.colors.cyan(process.env.BUILD_SHARD),
+      '\n');
 
   // If $TRAVIS_PULL_REQUEST_SHA is empty then it is a push build and not a PR.
   if (!process.env.TRAVIS_PULL_REQUEST_SHA) {
