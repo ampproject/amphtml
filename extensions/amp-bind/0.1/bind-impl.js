@@ -35,6 +35,7 @@ import {map} from '../../../src/utils/object';
 import {reportError} from '../../../src/error';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
 import {waitForBodyPromise} from '../../../src/dom';
+import {AmpEvents} from '../../../src/amp-events';
 
 const TAG = 'amp-bind';
 
@@ -201,7 +202,7 @@ export class Bind {
 
     if (getMode().test) {
       promise.then(() => {
-        this.dispatchEventForTesting_('amp:bind:setState');
+        this.dispatchEventForTesting_(AmpEvents.BIND.SET_STATE);
       });
     }
 
@@ -247,7 +248,7 @@ export class Bind {
     let promise = this.addBindingsForNode_(rootNode).then(() => {
       // Listen for template renders (e.g. amp-list) to rescan for bindings.
       rootNode.addEventListener(
-          'amp:template-rendered', this.boundOnTemplateRendered_);
+          AmpEvents.TEMPLATE_RENDERED, this.boundOnTemplateRendered_);
     });
     // Check default values against initial expression results in development.
     if (getMode().development) {
@@ -259,7 +260,7 @@ export class Bind {
     if (getMode().test) {
       // Signal init completion for integration tests.
       promise.then(() => {
-        this.dispatchEventForTesting_('amp:bind:initialize');
+        this.dispatchEventForTesting_(AmpEvents.BIND.INITIALIZE);
       });
     }
     return promise;
@@ -834,7 +835,7 @@ export class Bind {
     this.removeBindingsForNode_(templateContainer).then(() => {
       return this.addBindingsForNode_(templateContainer);
     }).then(() => {
-      this.dispatchEventForTesting_('amp:bind:rescan-template');
+      this.dispatchEventForTesting_(AmpEvents.BIND.RESCAN_TEMPLATE);
     });
   }
 

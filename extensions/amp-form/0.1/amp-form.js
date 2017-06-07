@@ -55,7 +55,7 @@ import {
   getFormVerifier,
 } from './form-verifiers';
 import {deepMerge} from '../../../src/utils/object';
-
+import {AmpEvents} from '../../../src/amp-events';
 
 /** @type {string} */
 const TAG = 'amp-form';
@@ -684,7 +684,7 @@ export class AmpForm {
               container.appendChild(rendered);
               const templatedEvent = createCustomEvent(
                   this.win_,
-                  'amp:template-rendered',
+                  AmpEvents.TEMPLATE_RENDERED,
                   /* detail */ null,
                   {bubbles: true});
               container.dispatchEvent(templatedEvent);
@@ -974,7 +974,7 @@ export class AmpFormService {
    * @private
    */
   installGlobalEventListener_(doc) {
-    doc.addEventListener('amp:dom-update', () => {
+    doc.addEventListener(AmpEvents.DOM_UPDATE, () => {
       this.installSubmissionHandlers_(doc.querySelectorAll('form'));
     });
   }
