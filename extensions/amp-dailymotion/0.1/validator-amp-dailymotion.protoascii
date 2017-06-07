@@ -63,6 +63,7 @@ tags: {  # <amp-dailymotion>
     mandatory: true
     value_regex_casei: "[a-z0-9]+"
   }
+  attrs: { name: "autoplay" }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-dailymotion"
   amp_layout: {
