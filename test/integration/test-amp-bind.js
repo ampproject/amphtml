@@ -93,7 +93,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   });
 
   // TODO(choumx, #9759): Remove Chrome-only condition.
-  describe.ifChrome().run('with <amp-form>', () => {
+  describe.configure().ifChrome().run('with <amp-form>', () => {
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-form.html');
     });
