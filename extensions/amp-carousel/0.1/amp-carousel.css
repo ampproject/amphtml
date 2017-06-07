@@ -186,7 +186,6 @@ amp-carousel .amp-carousel-button.amp-disabled {
   margin-left: 8px;
 }
 
-/*TODO(dvoytenko): this has to be customizable*/
 .amp-scrollable-carousel-slide:first-child {
   margin-left: 0px;
 }
