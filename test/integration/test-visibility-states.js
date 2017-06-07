@@ -14,37 +14,29 @@
  * limitations under the License.
  */
 
-import {
-  createFixtureIframe,
-  expectBodyToBecomeVisible,
-} from '../../testing/iframe.js';
 import {BaseElement} from '../../src/base-element';
-import {createAmpElementProto} from '../../src/custom-element';
+import {registerElement} from '../../src/custom-element';
 import {viewerForDoc} from '../../src/services';
+import {documentStateFor} from '../../src/service/document-state';
 import {resourcesForDoc} from '../../src/services';
 import {VisibilityState} from '../../src/visibility-state';
+import {getVendorJsPropertyName} from '../../src/style';
+import {createCustomEvent} from '../../src/event-helper';
 import * as sinon from 'sinon';
 
 describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
-
-  // This test only works with uncompiled JS, because it stubs out
-  // private properties.
-  let origUseCompiledJs;
-  beforeEach(() => {
-    origUseCompiledJs = window.ampTestRuntimeConfig.useCompiledJs;
-    window.ampTestRuntimeConfig.useCompiledJs = false;
-  });
-  afterEach(() => {
-    window.ampTestRuntimeConfig.useCompiledJs = origUseCompiledJs;
-  });
 
   let sandbox;
 
   function noop() {}
 
-  // TODO(lannka, #3561): unmute the test.
-  describe.configure().skipSafari().run('Element Transitions', () => {
-    let fixture;
+  describes.integration('Element Transitions', {
+    body: `<amp-test width=100 height=100></amp-test>`,
+    hash: 'visibilityState=prerender',
+  }, env => {
+    let win;
+    let sandbox;
+
     let resources;
     let viewer;
     let protoElement;
@@ -55,29 +47,23 @@ describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
     let docHidden;
     let unselect;
 
+    function visChangeEventName() {
+      const hiddenName = getVendorJsPropertyName(win.document, 'hidden', true);
+      const index = hiddenName.indexOf('Hidden');
+      if (index == -1) {
+        return 'visibilitychange';
+      }
+      return hidden.substr(0, index) + 'Visibilitychange';
+    }
     function changeVisibility(vis) {
       docHidden.returns(vis === 'hidden');
-      viewer.docState_.onVisibilityChanged_();
+      win.document.dispatchEvent(createCustomEvent(win, visChangeEventName(),
+          /* detail */ null));
     }
 
     let shouldPass = false;
     let doPass_;
     let notifyPass = noop;
-    function doPass() {
-      if (shouldPass) {
-        doPass_.call(this);
-        shouldPass = false;
-        notifyPass();
-      }
-    }
-
-    function waitForNextPass() {
-      return new Promise(resolve => {
-        shouldPass = true;
-        notifyPass = resolve;
-        resources.schedulePass();
-      });
-    }
 
     class TestElement extends BaseElement {
       // Basic setup
@@ -101,52 +87,51 @@ describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
       resumeCallback() {}
     }
 
+    function doPass() {
+      if (shouldPass) {
+        doPass_.call(this);
+        shouldPass = false;
+        notifyPass();
+      }
+    }
+
+    function waitForNextPass() {
+      return new Promise(resolve => {
+        shouldPass = true;
+        notifyPass = resolve;
+        resources.schedulePass();
+      });
+    }
+
     function setupSpys() {
-      layoutCallback = sandbox.spy(protoElement, 'layoutCallback');
-      unlayoutCallback = sandbox.spy(protoElement, 'unlayoutCallback');
-      pauseCallback = sandbox.spy(protoElement, 'pauseCallback');
-      resumeCallback = sandbox.spy(protoElement, 'resumeCallback');
+      layoutCallback = sandbox.spy(TestElement.prototype, 'layoutCallback');
+      unlayoutCallback = sandbox.spy(TestElement.prototype, 'unlayoutCallback');
+      pauseCallback = sandbox.spy(TestElement.prototype, 'pauseCallback');
+      resumeCallback = sandbox.spy(TestElement.prototype, 'resumeCallback');
       unselect = sandbox.spy();
-      sandbox.stub(fixture.win, 'getSelection').returns({
+      sandbox.stub(win, 'getSelection').returns({
         removeAllRanges: unselect,
       });
     }
 
-    beforeEach(function() {
-      this.timeout(5000);
-      sandbox = sinon.sandbox.create();
+    beforeEach(() => {
+      win = env.win;
+      sandbox = env.sandbox;
       notifyPass = noop;
       shouldPass = false;
 
-      return createFixtureIframe('test/fixtures/visibility-state.html', 10000)
-      .then(f => {
-        fixture = f;
-        fixture.win.name = '__AMP__visibilityState=prerender';
-        return expectBodyToBecomeVisible(fixture.win);
-      }).then(() => {
-        viewer = viewerForDoc(fixture.win.document);
-        docHidden = sandbox.stub(viewer.docState_, 'isHidden').returns(false);
+      viewer = viewerForDoc(win.document);
+      const docState = documentStateFor(win);
+      docHidden = sandbox.stub(docState, 'isHidden').returns(false);
 
-        protoElement = createAmpElementProto(
-          fixture.win,
-          'amp-test',
-          TestElement
-        );
+      registerElement(win, 'amp-test', TestElement);
 
-        fixture.doc.registerElement('amp-test', {
-          prototype: protoElement,
-        });
-        resources = resourcesForDoc(fixture.win.document);
-        doPass_ = resources.doPass_;
-        sandbox.stub(resources, 'doPass_', doPass);
-      });
+      resources = resourcesForDoc(win.document);
+      doPass_ = resources.doPass;
+      sandbox.stub(resources, 'doPass', doPass);
     });
 
-    afterEach(() => {
-      sandbox.restore();
-    });
-
-    describe.skip('from in the PRERENDER state', () => {
+    describe('from in the PRERENDER state', () => {
       beforeEach(() => {
         return waitForNextPass().then(setupSpys);
       });
@@ -164,7 +149,7 @@ describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
 
       // TODO(jridgewell): Need to test non-prerenderable element already
       // laid-out, and prerenderable is not.
-      it('calls layout when going to VISIBLE', () => {
+      it.only('calls layout when going to VISIBLE', () => {
         viewer.setVisibilityState_(VisibilityState.VISIBLE);
         return waitForNextPass().then(() => {
           expect(layoutCallback).to.have.been.called;
