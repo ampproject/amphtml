@@ -2168,26 +2168,38 @@ describe('amp-a4a', () => {
         setupForAdTesting(fixture);
         const a4aElement = createA4aElement(fixture.doc);
         const a4a = new MockA4AImpl(a4aElement);
+        a4a.adPromise_ = Promise.resolve();
 
         let resolver;
         const promise = new Promise(resolve => resolver = resolve);
 
-        const initiateAdRequestSpy =
-            sandbox.spy(AmpA4A.prototype, 'initiateAdRequest');
-        const tearDownSlotSpy = sandbox.spy(AmpA4A.prototype, 'tearDownSlot');
-        const destroyFrameSpy = sandbox.spy(AmpA4A.prototype, 'destroyFrame');
-        const togglePlaceholderSpy =
-            sandbox.spy(AmpA4A.prototype, 'togglePlaceholder');
+        // We don't really care about the behavior of the following methods, so
+        // long as they're called the appropriate number of times. We stub them
+        // out here because they would otherwise throw errors unrelated to the
+        // behavior actually being tested.
+        const initiateAdRequestMock =
+            sandbox.stub(AmpA4A.prototype, 'initiateAdRequest');
+        initiateAdRequestMock.returns(undefined);
+        const tearDownSlotMock = sandbox.stub(AmpA4A.prototype, 'tearDownSlot');
+        tearDownSlotMock.returns(undefined);
+        const destroyFrameMock = sandbox.stub(AmpA4A.prototype, 'destroyFrame');
+        destroyFrameMock.returns(undefined);
+        const togglePlaceholderMock =
+            sandbox.stub(AmpA4A.prototype, 'togglePlaceholder');
+        togglePlaceholderMock.returns(undefined);
+
         const refreshEndCallback = () => {
-          expect(initiateAdRequestSpy).to.be.calledOnce;
-          expect(tearDownSlotSpy).to.be.calledOnce;
-          expect(destroyFrameSpy).to.be.calledOnce;
-          expect(togglePlaceholderSpy).to.be.calledTwice;
-          expect(a4a.isRefreshing_).to.be.false;
+          expect(initiateAdRequestMock).to.be.calledOnce;
+          expect(tearDownSlotMock).to.be.calledOnce;
+          expect(destroyFrameMock).to.be.calledOnce;
+          expect(togglePlaceholderMock).to.be.calledTwice;
+          expect(a4a.isRefreshing).to.be.false;
           resolver();
         };
 
+        expect(a4a.isRefreshing).to.be.false;
         a4a.refresh(refreshEndCallback);
+        expect(a4a.isRefreshing).to.be.true;
         return promise;
       });
     });
