@@ -894,6 +894,16 @@ export class AmpFormService {
     /** @const @private {!Promise} */
     this.whenInitialized_ = this.installStyles_(ampdoc)
         .then(() => this.installHandlers_(ampdoc));
+
+    // Dispatch a test-only event for integration tests.
+    if (getMode().test) {
+      this.whenInitialized_.then(() => {
+        const win = ampdoc.win;
+        const event = createCustomEvent(
+            win, 'amp:form-service:initialize', null, {bubbles: true});
+        win.dispatchEvent(event);
+      });
+    }
   }
 
   /**
