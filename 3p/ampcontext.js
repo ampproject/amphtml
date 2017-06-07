@@ -19,6 +19,7 @@ import {MessageType} from '../src/3p-frame-messaging';
 import {nextTick} from './3p';
 import {tryParseJson} from '../src/json';
 import {isObject} from '../src/types';
+import {AmpEvents} from '../src/amp-events'
 
 export class AbstractAmpContext {
 
@@ -128,7 +129,7 @@ export class AbstractAmpContext {
   dispatchVisibilityChangeEvent_() {
     const event = this.win_.document.createEvent('Event');
     event.data = {hidden: this.hidden};
-    event.initEvent('amp:visibilitychange', true, true);
+    event.initEvent(AmpEvents.VISIBILITY_CHANGE, true, true);
     this.win_.dispatchEvent(event);
   }
 
