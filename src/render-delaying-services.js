@@ -23,6 +23,17 @@ import {timerFor} from './services';
  * and the value is a DOM query which is used to check if the service is needed
  * in the current document.
  * Do not add a service unless absolutely necessary.
+ *
+ * \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  / _____|
+ *  \   \/    \/   / /  ^  \    |  |_)  |    |   \|  | |  | |   \|  | |  |  __
+ *   \            / /  /_\  \   |      /     |  . `  | |  | |  . `  | |  | |_ |
+ *    \    /\    / /  _____  \  |  |\  \----.|  |\   | |  | |  |\   | |  |__| |
+ *     \__/  \__/ /__/     \__\ | _| `._____||__| \__| |__| |__| \__|  \______|
+ *
+ * The equivalent of this list is used for server-side rendering (SSR) and any
+ * changes made to it must be made in coordination with caches that implement
+ * SSR. For more information on SSR see bit.ly/amp-ssr.
+ *
  * @const {!Object<string, string>}
  */
 const SERVICES = {
