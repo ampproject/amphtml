@@ -811,37 +811,26 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     it('should correctly use SRA for multiple slots',
       () => executeTest([1234, 1234]));
 
-    it('should not send SRA request if slots are invalid', () => {
-      return executeTest([{networkId: 1234, invalidInstances: 2}]);
-    });
+    it('should not send SRA request if slots are invalid',
+      () => executeTest([{networkId: 1234, invalidInstances: 2}]));
 
-    it('should send SRA request if more than 1 slot is valid', () => {
-      return executeTest(
-        [{networkId: 1234, instances: 2, invalidInstances: 2}]);
-    });
+    it('should send SRA request if more than 1 slot is valid', () =>
+      executeTest([{networkId: 1234, instances: 2, invalidInstances: 2}]));
 
-    it('should not send SRA request if only 1 slot is valid', () => {
-      return executeTest(
-        [{networkId: 1234, instances: 1, invalidInstances: 2}]);
-    });
+    it('should not send SRA request if only 1 slot is valid', () =>
+      executeTest([{networkId: 1234, instances: 1, invalidInstances: 2}]));
 
-    it('should handle xhr failure by not sending subsequent request', () => {
-      return executeTest([{networkId: 1234, instances: 2, xhrFail: true}]);
-    });
+    it('should handle xhr failure by not sending subsequent request',
+      () => executeTest([{networkId: 1234, instances: 2, xhrFail: true}]));
 
-    it('should handle mixture of xhr and non xhr failures', () => {
-      return executeTest(
-        [{networkId: 1234, instances: 2, xhrFail: true}, 4567, 4567]);
-    });
+    it('should handle mixture of xhr and non xhr failures', () => executeTest(
+        [{networkId: 1234, instances: 2, xhrFail: true}, 4567, 4567]));
 
-    it('should correctly use SRA for multiple slots. multiple networks', () => {
-      return executeTest([1234, 4567, 1234, 4567]);
-    });
+    it('should correctly use SRA for multiple slots. multiple networks',
+      () => executeTest([1234, 4567, 1234, 4567]));
 
-    it('should handle mixture of all possible scenarios', () => {
-      return executeTest([
-        1234, 1234, 101, {networkId: 4567, instances: 2, xhrFail: true}, 202,
-        {networkId: 8901, instances: 3, invalidInstances: 1}]);
-    });
+    it('should handle mixture of all possible scenarios', () => executeTest(
+      [1234, 1234, 101, {networkId: 4567, instances: 2, xhrFail: true}, 202,
+        {networkId: 8901, instances: 3, invalidInstances: 1}]));
   });
 });
