@@ -17,7 +17,7 @@
 /**
 * Enum used to specify custom Amp Events
 *
-* @constant {!Object<string, string>}
+* @enum {string}
 */
 export const AmpEvents = {
   VISIBILITY_CHANGE: 'amp:visibilitychange',
@@ -31,9 +31,7 @@ export const AmpEvents = {
   BUILT: 'amp:built',
   ATTACHED: 'amp:attached',
   STUBBED: 'amp:stubbed',
-  LOAD: {
-    START: 'amp:load:start',
-    END: 'amp:load:end',
-  },
+  LOAD_START: 'amp:load:start',
+  LOAD_END: 'amp:load:end',
   ERROR: 'amp:error',
 };

@@ -37,7 +37,7 @@ describe('Configuration', function() {
     config.thirdPartyFrameRegex = /a-website\.com/;
     config.errorReportingUrl = 'http://error.foo.com';
 
-    return fixture.awaitEvent(AmpEvents.LOAD.START, 1).then(() => {
+    return fixture.awaitEvent(AmpEvents.LOAD_START, 1).then(() => {
       expect(fixture.win.AMP.config.urls.cdn).to.equal(config.cdnUrl);
       expect(fixture.win.AMP.config.urls.thirdParty)
       .to.equal(config.thirdPartyUrl);

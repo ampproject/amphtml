@@ -1254,7 +1254,7 @@ function createBaseCustomElementClass(win) {
       assertNotTemplate(this);
       dev().assert(this.isBuilt(),
         'Must be built to receive viewport events');
-      this.dispatchCustomEventForTesting(AmpEvents.LOAD.START);
+      this.dispatchCustomEventForTesting(AmpEvents.LOAD_START);
       const isLoadEvent = (this.layoutCount_ == 0);  // First layout is "load".
       if (isLoadEvent) {
         this.signals_.signal(CommonSignals.LOAD_START);
@@ -1279,7 +1279,7 @@ function createBaseCustomElementClass(win) {
           this.isFirstLayoutCompleted_ = true;
           // TODO(dvoytenko, #7389): cleanup once amp-sticky-ad signals are
           // in PROD.
-          this.dispatchCustomEvent(AmpEvents.LOAD.END);
+          this.dispatchCustomEvent(AmpEvents.LOAD_END);
         }
       }, reason => {
         // add layoutCount_ by 1 despite load fails or not
