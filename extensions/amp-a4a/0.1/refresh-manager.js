@@ -107,7 +107,7 @@ export class RefreshManager {
               this.refreshTimeoutId_ = this.timer_.delay(() => {
                 this.a4a_.refresh(() => this.initiateRefreshCycle());
                 resolve();
-              }, this.config_.refreshInterval * 1000);
+              }, this.config_.refreshInterval);
             });
       });
     });
@@ -136,6 +136,10 @@ export class RefreshManager {
     if (this.refreshInterval_ && this.refreshInterval_ != 'false') {
       config['refreshInterval'] = this.refreshInterval_;
     }
+    // Convert seconds to milliseconds.
+    config['totalTimeMin'] *= 1000;
+    config['continuousTimeMin'] *= 1000;
+    config['refreshInterval'] *= 1000;
     return config;
   }
 

@@ -224,6 +224,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {?RefreshManager} */
     this.refreshManager_ = null;
+
+    /** @private {number} */
+    this.refreshCount_ = 0;
   }
 
   /** @override */
@@ -290,6 +293,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           (this.jsonTargeting_ && this.jsonTargeting_['targeting']) || null,
           (this.jsonTargeting_ &&
             this.jsonTargeting_['categoryExclusions']) || null),
+      'rc': this.refreshCount_ ? this.refreshCount_ : null,
     }, googleBlockParameters(this));
   }
 
@@ -405,6 +409,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       }
     }
     return superReturnValue;
+  }
+
+  /**
+   * @param {function()} refreshEndCallback
+   *
+   * @override
+   */
+  refresh(refreshEndCallback) {
+    super.refresh(refreshEndCallback);
+    this.refreshCount_++;
   }
 
   /**
