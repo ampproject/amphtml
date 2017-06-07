@@ -1,5 +1,9 @@
 /**
+<<<<<<< HEAD
  * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+=======
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+>>>>>>> fix: add Apache License comment to src/amp-events.js
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
