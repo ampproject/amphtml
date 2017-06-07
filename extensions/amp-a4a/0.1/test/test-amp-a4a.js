@@ -2159,6 +2159,39 @@ describe('amp-a4a', () => {
     });
   });
 
+  describe('refresh', () => {
+    it('should effectively reset the slot and invoke given callback', () => {
+      const sandbox = sinon.sandbox.create();
+      return createIframePromise().then(f => {
+        const fixture = f;
+        setupForAdTesting(fixture);
+        const a4aElement = createA4aElement(fixture.doc);
+        const a4a = new MockA4AImpl(a4aElement);
+
+        let resolver;
+        const promise = new Promise(resolve => resolver = resolve);
+
+        const initiateAdRequestSpy =
+            sandbox.spy(AmpA4A.prototype, 'initiateAdRequest');
+        const tearDownSlotSpy = sandbox.spy(AmpA4A.prototype, 'tearDownSlot');
+        const destroyFrameSpy = sandbox.spy(AmpA4A.prototype, 'destroyFrame');
+        const togglePlaceholderSpy =
+            sandbox.spy(AmpA4A.prototype, 'togglePlaceholder');
+        const refreshEndCallback = () => {
+          expect(initiateAdRequestSpy).to.be.calledOnce;
+          expect(tearDownSlotSpy).to.be.calledOnce;
+          expect(destroyFrameSpy).to.be.calledOnce;
+          expect(togglePlaceholderSpy).to.be.calledTwice;
+          expect(a4a.isRefreshing_).to.be.false;
+          resolver();
+        };
+
+        a4a.refresh(refreshEndCallback);
+        return promise;
+      });
+    });
+  });
+
   // TODO(tdrl): Other cases to handle for parsing JSON metadata:
   //   - Metadata tag(s) missing
   //   - JSON parse failure

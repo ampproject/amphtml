@@ -15,102 +15,82 @@
  */
 
 import {
-  refreshManagerFor,
-  resetRefreshManagerFor,
-  REFRESH_REFERENCE_ATTRIBUTE,
+  RefreshManager,
+  DATA_ATTR_NAME,
 } from '../refresh-manager';
-import * as sinon from 'sinon'; // eslint-disable-line no-unused-vars
-
-function getNumElementsRegistered(refreshManager) {
-  return Object.keys(refreshManager.registeredElementWrappers_).length;
-}
+import * as sinon from 'sinon';
 
 function getTestElement() {
   const div = window.document.createElement('div');
   div.setAttribute('style', 'width:1px; height:1px;');
+  // This is the only network currently opted-in.
+  div.setAttribute('type', 'doubleclick');
+  div.setAttribute(DATA_ATTR_NAME, '35');
   return div;
 }
 
 
 describe('refresh-manager', () => {
-  let refreshManager;
-  let testElement;
-
-  const noop = () => {};
+  let clock;
+  let mockA4a;
+  let sandbox;
 
   beforeEach(() => {
-    refreshManager = refreshManagerFor(window);
-    testElement = getTestElement();
+    sandbox = sinon.sandbox.create();
+    mockA4a = {
+      win: window,
+      element: getTestElement(),
+      refresh: () => {},
+    };
+    clock = sinon.useFakeTimers();
   });
 
   afterEach(() => {
-    refreshManager = null;
-    testElement = null;
-    resetRefreshManagerFor(window);
+    sandbox.restore();
+    clock.restore();
   });
 
-  describe('#registerElement', () => {
-
-    it('should have no registered elements', () => {
-      expect(getNumElementsRegistered(refreshManager)).to.equal(0);
-    });
-
-    it('should have one registered element', () => {
-      expect(getNumElementsRegistered(refreshManager)).to.equal(0);
-      refreshManager.registerElement(testElement, noop);
-      expect(getNumElementsRegistered(refreshManager)).to.equal(1);
-    });
-
-    it('should add correct attribute to element', () => {
-      refreshManager.registerElement(testElement, noop);
-      expect(testElement.getAttribute(REFRESH_REFERENCE_ATTRIBUTE))
-          .to.equal('0');
-    });
-
-    it('should have multiple registered elements', () => {
-      expect(getNumElementsRegistered(refreshManager)).to.equal(0);
-      refreshManager.registerElement(testElement, noop);
-      refreshManager.registerElement(getTestElement(), noop);
-      refreshManager.registerElement(getTestElement(), noop);
-      refreshManager.registerElement(getTestElement(), noop);
-      refreshManager.registerElement(getTestElement(), noop);
-      expect(getNumElementsRegistered(refreshManager)).to.equal(5);
-    });
+  it('should call getPublisherSpecifiedRefreshInterval_', () => {
+    const getPublisherSpecifiedRefreshIntervalSpy = sandbox.spy(
+        RefreshManager.prototype, 'getPublisherSpecifiedRefreshInterval_');
+    const refreshManager = new RefreshManager(mockA4a);
+    expect(getPublisherSpecifiedRefreshIntervalSpy).to.be.calledOnce;
+    expect(refreshManager.refreshInterval_).to.equal('35');
   });
 
-  describe('#resetManager', () => {
-    it('should reset manager to initial state', () => {
-      expect(getNumElementsRegistered(refreshManager)).to.equal(0);
-      refreshManager.registerElement(testElement, noop);
-      refreshManager.registerElement(getTestElement(), noop);
-      refreshManager.registerElement(getTestElement(), noop);
-      refreshManager.registerElement(getTestElement(), noop);
-      refreshManager.registerElement(getTestElement(), noop);
-      expect(getNumElementsRegistered(refreshManager)).to.equal(5);
-      expect(refreshManager.elementReferenceId_).to.equal(5);
-      refreshManager.resetManager();
-      expect(getNumElementsRegistered(refreshManager)).to.equal(0);
-      expect(refreshManager.elementReferenceId_).to.equal(0);
-    });
+  it('should call getConfiguration_', () => {
+    const getConfigurationSpy = sandbox.spy(
+        RefreshManager.prototype, 'getConfiguration_');
+    const refreshManager = new RefreshManager(mockA4a);
+    expect(getConfigurationSpy).to.be.calledOnce;
+    expect(refreshManager.config_).to.not.be.null;
   });
 
-  describe('visibility detection', () => {
-    it('should refresh right away', () => {
-      let resolver;
-      const promise = new Promise(resolve => {
-        resolver = resolve;
-      });
-      refreshManager.registerElement(
-          testElement, () => {
-            expect(false).to.be.true;
-            resolver();
-          }, {
-            minOnScreenTimeThrehold: 0,
-            // Not allowed in practice, but for this test the delay doesn't
-            // matter.
-            refreshInterval: 0,
-          });
-      return promise;
+  it('should be eligible for refresh', () => {
+    const refreshManager = new RefreshManager(mockA4a);
+    expect(refreshManager.isEligibleForRefresh()).to.be.true;
+  });
+
+  it('should NOT be eligible for refresh', () => {
+    mockA4a.element.removeAttribute(DATA_ATTR_NAME);
+    const refreshManager = new RefreshManager(mockA4a);
+    expect(refreshManager.isEligibleForRefresh()).to.be.false;
+  });
+
+  it('should execute the refresh event correctly', () => {
+    // Attach element to DOM, as is necessary for request ampdoc.
+    window.document.body.appendChild(mockA4a.element);
+    const refreshSpy = sandbox.spy(mockA4a, 'refresh');
+    const refreshManager = new RefreshManager(mockA4a);
+    // So the test doesn't hang for the required minimum 30s interval, or the
+    // 1s ActiveView visibility definition.
+    refreshManager.config_ = {
+      refreshInterval: 0,
+      visiblePercentageMin: 0,
+      continuousTimeMin: 0,
+    };
+    return refreshManager.initiateRefreshCycle().then(() => {
+      expect(refreshSpy).to.be.calledOnce;
     });
   });
 });
