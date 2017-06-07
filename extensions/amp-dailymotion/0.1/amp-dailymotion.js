@@ -24,7 +24,15 @@ import {listen} from '../../../src/event-helper';
 import {videoManagerForDoc} from '../../../src/services';
 import {parseQueryString} from '../../../src/url';
 
-const PlayerEvents = {
+/**
+ * @enum {string}
+ * @private
+ */
+
+// Events reverse-engineered from the Dailymotion API
+// 'unstarted' isn't part of the API, just a placeholder as an initial state
+
+const DailymotionEvents = {
   UNSTARTED: 'unstarted',
   API_READY: 'apiready',
   // Events fired for both the original content or ads
@@ -45,13 +53,16 @@ const PlayerEvents = {
   LOADED: 'progress',
 };
 
+/**
+ * @implements {../../../src/video-interface.VideoInterface}
+ */
 class AmpDailymotion extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-    /** @private {number} */
-    this.playerState_ = PlayerEvents.UNSTARTED;
+    /** @private {string} */
+    this.playerState_ = DailymotionEvents.UNSTARTED;
 
     /** @private {?string}  */
     this.videoid_ = null;
@@ -88,6 +99,8 @@ class AmpDailymotion extends AMP.BaseElement {
   */
   preconnectCallback(opt_onLayout) {
     this.preconnect.url('https://www.dailymotion.com', opt_onLayout);
+    // Host that Dailymotion uses to serve JS needed by player.
+    this.preconnect.url('https://static1.dmcdn.net', opt_onLayout);
   }
 
   /**
@@ -119,6 +132,13 @@ class AmpDailymotion extends AMP.BaseElement {
   buildCallback() {
     installVideoManagerForDoc(this.element);
     videoManagerForDoc(this.element).register(this);
+    this.playerReadyPromise_ = new Promise(resolve => {
+      this.playerReadyResolver_ = resolve;
+    });
+
+    this.loadedPromise_ = new Promise(resolve => {
+      this.loadingResolver_ = resolve;
+    });
   }
 
   /** @override */
@@ -142,14 +162,6 @@ class AmpDailymotion extends AMP.BaseElement {
       'message',
       this.handleEvents_.bind(this)
     );
-
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
-
-    this.loadedPromise_ = new Promise(resolve => {
-      this.loadingResolver_ = resolve;
-    });
 
     this.hasAutoplay_ = this.element.hasAttribute('autoplay');
 
@@ -179,30 +191,31 @@ class AmpDailymotion extends AMP.BaseElement {
     }
 
     switch (data.event) {
-      case PlayerEvents.API_READY:
+      case DailymotionEvents.API_READY:
         this.playerReadyResolver_(true);
         this.element.dispatchCustomEvent(VideoEvents.LOAD);
         break;
-      case PlayerEvents.END:
-      case PlayerEvents.PAUSE:
+      case DailymotionEvents.END:
+      case DailymotionEvents.PAUSE:
         this.element.dispatchCustomEvent(VideoEvents.PAUSE);
-        this.playerState_ = PlayerEvents.PAUSE;
+        this.playerState_ = DailymotionEvents.PAUSE;
         break;
-      case PlayerEvents.PLAY:
+      case DailymotionEvents.PLAY:
         this.element.dispatchCustomEvent(VideoEvents.PLAY);
-        this.playerState_ = PlayerEvents.PLAY;
+        this.playerState_ = DailymotionEvents.PLAY;
         break;
-      case PlayerEvents.VOLUMECHANGE:
-        if (this.muted != (data.muted == 'true')) {
-          this.muted = (data.muted == 'true');
-          if (data.volume == 0 || this.muted) {
+      case DailymotionEvents.VOLUMECHANGE:
+        if (this.playerState_ == DailymotionEvents.UNSTARTED
+           || this.muted_ != (data.volume == 0 || (data.muted == 'true'))) {
+          this.muted_ = (data.volume == 0 || (data.muted == 'true'));
+          if (this.muted_) {
             this.element.dispatchCustomEvent(VideoEvents.MUTED);
           } else {
             this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
           }
         }
         break;
-      case PlayerEvents.LOADED:
+      case DailymotionEvents.LOADED:
         this.loadingResolver_(true);
         break;
       default:
@@ -256,7 +269,8 @@ class AmpDailymotion extends AMP.BaseElement {
 
   /** @override */
   pauseCallback() {
-    if (this.iframe_ && this.iframe_.contentWindow) {
+    if (this.iframe_ && this.iframe_.contentWindow
+       && this.playerState_ == DailymotionEvents.PLAY) {
       this.pause();
     }
   }
@@ -268,7 +282,7 @@ class AmpDailymotion extends AMP.BaseElement {
     this.sendCommand_('play');
     // Hack to solve autoplay problem on Chrome Android
     // (first play always fails)
-    if (isAutoplay) {
+    if (isAutoplay && this.playerState_ != DailymotionEvents.PAUSE) {
       this.loadedPromise_.then(() => {
         this.sendCommand_('play');
       });
@@ -289,9 +303,10 @@ class AmpDailymotion extends AMP.BaseElement {
     this.sendCommand_('muted', [true]);
     // Hack to simulate firing mute events when video is not playing
     // since Dailymotion only fires volume changes when the video has started
-    if (this.playerState_ == PlayerEvents.UNSTARTED) {
-      this.element.dispatchCustomEvent(PlayerEvents.MUTED);
-    }
+    this.playerReadyPromise_.then(() => {
+      this.element.dispatchCustomEvent(VideoEvents.MUTED);
+      this.muted_ = true;
+    });
   }
 
   /**
@@ -301,9 +316,10 @@ class AmpDailymotion extends AMP.BaseElement {
     this.sendCommand_('muted', [false]);
     // Hack to simulate firing mute events when video is not playing
     // since Dailymotion only fires volume changes when the video has started
-    if (this.playerState_ == PlayerEvents.UNSTARTED) {
-      this.element.dispatchCustomEvent(PlayerEvents.UNMUTED);
-    }
+    this.playerReadyPromise_.then(() => {
+      this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
+      this.muted_ = false;
+    });
   }
 
   /**
