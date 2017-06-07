@@ -28,7 +28,7 @@ import {timerFor, viewerForDoc, xhrFor} from '../../../src/services';
 import {toggle} from '../../../src/style';
 import {isEnumValue} from '../../../src/types';
 import {Activity} from './activity-impl';
-import {Cid} from './cid-impl';
+import {Cid} from '../../../src/cid-impl';
 import {
     InstrumentationService,
     instrumentationServicePromiseForDoc,

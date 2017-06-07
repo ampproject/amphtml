@@ -18,7 +18,7 @@ import {adConfig} from '../../ads/_config';
 import {ampdocServiceFor} from '../../src/ampdoc';
 import {
   cidServiceForDocForTesting,
-} from '../../extensions/amp-analytics/0.1/cid-impl';
+} from '../../src/cid-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {getAdCid} from '../../src/ad-cid';
