@@ -223,7 +223,7 @@ This tells the validator that the html tag name is 'AMP-CAT'.
 ```
 
 This tells the validator that the `amp-cat` tag requires the inclusion of the
-matchint extension script tag that we defined above.
+matching extension script tag that we defined above.
 
 ```
   attrs: {
