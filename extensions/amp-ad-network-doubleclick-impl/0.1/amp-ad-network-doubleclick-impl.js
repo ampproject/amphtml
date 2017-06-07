@@ -532,6 +532,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                 checkStillCurrent();
                 // Force safeframe rendering method.
                 headersObj[RENDERING_TYPE_HEADER] = XORIGIN_MODE.SAFEFRAME;
+                // Construct pseudo fetch response to be passed down the A4A
+                // promise chain for this block.
                 const headers =
                   /** @type {?../../../src/service/xhr-impl.FetchResponseHeaders} */
                   ({
@@ -544,6 +546,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                     headers,
                     arrayBuffer: () => utf8Encode(creative),
                   });
+                // Pop head off of the array of resolvers as the response
+                // should match the order of blocks declared in the ad url.
+                // This allows the block to start rendering while the SRA
+                // response is streaming back to the client.              
                 dev().assert(sraRequestAdUrlResolvers.shift())(fetchResponse);
               });
             // TODO(keithwrightbos) - how do we handle per slot 204 response?
@@ -557,8 +563,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                   credentials: 'include',
                 });
               })
-              .then(response =>
-                lineDelimitedStreamer(this.win, response, slotCallback))
+              .then(response => {
+                checkStillCurrent();
+                return lineDelimitedStreamer(this.win, response, slotCallback);
+              })
               .catch(error => {
                 const canceled = isCancellation(error);
                 if (!canceled) {
