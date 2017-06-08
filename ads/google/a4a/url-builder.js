@@ -21,7 +21,8 @@ export let QueryParameterDef;
  * Builds a URL from query parameters, truncating to a maximum length if
  * necessary.
  * @param {string} baseUrl scheme, domain, and path for the URL.
- * @param {!Array<!QueryParameterDef>} queryParams query parameters for the URL.
+ * @param {!Object<string,!string|number|null>} queryParams query parameters for
+ *     the URL.
  * @param {number} maxLength length to truncate the URL to if necessary.
  * @param {?QueryParameterDef=} opt_truncationQueryParam query parameter to
  *     append to the URL iff any query parameters were truncated.
@@ -41,13 +42,15 @@ export function buildUrl(
   if (encodedTruncationParam) {
     capacity -= encodedTruncationParam.length + 1;
   }
-  for (let i = 0; i < queryParams.length; i++) {
-    const param = queryParams[i];
-    if (param.value == null || param.value === '') {
+  const keys = Object.keys(queryParams);
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    const value = queryParams[key];
+    if (value == null || value === '') {
       continue;
     }
-    const encodedNameAndSep = encodeURIComponent(param.name) + '=';
-    const encodedValue = encodeURIComponent(String(param.value));
+    const encodedNameAndSep = encodeURIComponent(key) + '=';
+    const encodedValue = encodeURIComponent(String(value));
     const fullLength = encodedNameAndSep.length + encodedValue.length + 1;
     if (fullLength > capacity) {
       const truncatedValue = encodedValue

@@ -34,7 +34,7 @@ export function getAdCid(adElement) {
 }
 
 /**
- * @param {!./service/ampdoc-impl.AmpDoc} ampDoc
+ * @param {!./service/ampdoc-impl.AmpDoc|!Node} ampDoc
  * @param {!string} clientIdScope
  * @param {string=} opt_clientIdCookieName
  * @return {!Promise<string|undefined>} A promise for a CID or undefined.

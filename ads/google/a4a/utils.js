@@ -22,7 +22,11 @@ import {documentInfoForDoc} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isProxyOrigin} from '../../../src/url';
-import {viewerForDoc} from '../../../src/services';
+import {
+  resourcesForDoc,
+  viewerForDoc,
+  viewportForDoc,
+} from '../../../src/services';
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 import {domFingerprint} from '../../../src/utils/dom-fingerprint';
 import {
@@ -124,117 +128,150 @@ export function isReportingEnabled(ampElement) {
 }
 
 /**
+ * Has side-effect of incrementing ifi counter on window.
+ * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
+ * @param {!Array<string>=} opt_experimentIds Any experiments IDs (in addition
+ *     to those specified on the ad element) that should be included in the
+ *     request.
+ * @return {!Object<string,null|number|string>} block level parameters
+ */
+export function googleBlockParameters(a4a, opt_experimentIds) {
+  const adElement = a4a.element;
+  const win = a4a.win;
+  win['ampAdGoogleIfiCounter'] = win['ampAdGoogleIfiCounter'] || 1;
+  const slotRect = a4a.getPageLayoutBox();
+  const iframeDepth = iframeNestingDepth(win);
+  // Detect container types.
+  const containerTypeSet = {};
+  for (let el = adElement.parentElement, counter = 0;
+      el && counter < 20; el = el.parentElement, counter++) {
+    const tagName = el.tagName.toUpperCase();
+    if (ValidAdContainerTypes[tagName]) {
+      containerTypeSet[ValidAdContainerTypes[tagName]] = true;
+    }
+  }
+  const pfx =
+      (containerTypeSet[ValidAdContainerTypes['AMP-FX-FLYING-CARPET']]
+       || containerTypeSet[ValidAdContainerTypes['AMP-STICKY-AD']])
+      ? '1' : '0';
+  let eids = adElement.getAttribute('data-experiment-id');
+  if (opt_experimentIds) {
+    eids = mergeExperimentIds(opt_experimentIds, eids);
+  }
+  const containerTypeArray = Object.keys(containerTypeSet);
+  return {
+    'ifi': win['ampAdGoogleIfiCounter']++,
+    'adf': domFingerprint(adElement),
+    'nhd': iframeDepth,
+    'eid': eids,
+    'adx': slotRect.left,
+    'ady': slotRect.top,
+    'oid': '2',
+    pfx,
+    'rc': a4a.fromResumeCallback ? 1 : null,
+    'act': containerTypeArray.length ? containerTypeArray.join() : null,
+  };
+}
+
+/**
+ * @param {!Window} win
+ * @param {string} type matching typing attribute.
+ * @param {!function(!Element):string} groupFn
+ * @return {!Promise<!Object<string,!Array<!Promise<!../../../src/base-element.BaseElement>>>>}
+ */
+export function groupAmpAdsByType(win, type, groupFn) {
+  return resourcesForDoc(win.document).getMeasuredResources(win,
+      r => r.element.tagName == 'AMP-AD' &&
+        r.element.getAttribute('type') == type)
+      .then(resources => {
+        const result = {};
+        resources.forEach(r => {
+          const groupId = groupFn(r.element);
+          (result[groupId] || (result[groupId] = [])).push(r.element.getImpl());
+        });
+        return result;
+      });
+}
+
+/**
+ * @param {!Window} win
+ * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} doc
+ * @param {number} startTime
+ * @param {string=} output default is 'html'
+ * @return {!Promise<!Object<string,null|number|string>>}
+ */
+export function googlePageParameters(win, doc, startTime, output = 'html') {
+  const referrerPromise = viewerForDoc(doc).getReferrerUrl();
+  return getOrCreateAdCid(doc, 'AMP_ECID_GOOGLE', '_ga')
+    .then(clientId => referrerPromise.then(referrer => {
+      const documentInfo = documentInfoForDoc(win.document);
+        // Read by GPT for GA/GPT integration.
+      win.gaGlobal = win.gaGlobal ||
+        {cid: clientId, hid: documentInfo.pageViewId};
+      const screen = win.screen;
+      const viewport = viewportForDoc(win.document);
+      const viewportRect = viewport.getRect();
+      const viewportSize = viewport.getSize();
+      return {
+        'is_amp': AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
+        'amp_v': '$internalRuntimeVersion$',
+        'd_imp': '1',
+        'c': getCorrelator(win, clientId),
+        'dt': startTime,
+        output,
+        'biw': viewportRect.width,
+        'bih': viewportRect.height,
+        'u_aw': screen ? screen.availWidth : null,
+        'u_ah': screen ? screen.availHeight : null,
+        'u_cd': screen ? screen.colorDepth : null,
+        'u_w': screen ? screen.width : null,
+        'u_h': screen ? screen.height : null,
+        'u_tz': -new Date().getTimezoneOffset(),
+        'u_his': getHistoryLength(win),
+        'brdim': additionalDimensions(win, viewportSize),
+        'isw': viewportSize.width,
+        'ish': viewportSize.height,
+        'art': isCanary(win) ? '2' : null,
+        'url': documentInfo.canonicalUrl,
+        'top': win != win.top ? topWindowUrlOrDomain(win) : null,
+        'loc': win.location.href == documentInfo.canonicalUrl ?
+          null : win.location.href,
+        'ref': referrer,
+      };
+    }));
+}
+
+/**
  * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
  * @param {string} baseUrl
  * @param {number} startTime
- * @param {!Array<!./url-builder.QueryParameterDef>} queryParams
- * @param {!Array<!./url-builder.QueryParameterDef>} unboundedQueryParams
- *     Parameters that will be put at the end of the URL, where they may be
- *     elided for length reasons. Intended for parameters with potentially
- *     long values, like URLs.
+ * @param {!Object<string,null|number|string>} parameters
  * @param {!Array<string>=} opt_experimentIds Any experiments IDs (in addition
  *     to those specified on the ad element) that should be included in the
  *     request.
  * @return {!Promise<string>}
  */
 export function googleAdUrl(
-    a4a, baseUrl, startTime, queryParams, unboundedQueryParams,
-    opt_experimentIds) {
+    a4a, baseUrl, startTime, parameters, opt_experimentIds) {
   // TODO: Maybe add checks in case these promises fail.
-  /** @const {!Promise<string>} */
-  const referrerPromise = viewerForDoc(a4a.getAmpDoc()).getReferrerUrl();
-  return getOrCreateAdCid(a4a.getAmpDoc(), 'AMP_ECID_GOOGLE', '_ga')
-      .then(clientId => referrerPromise.then(referrer => {
-        const adElement = a4a.element;
-        window['ampAdGoogleIfiCounter'] = window['ampAdGoogleIfiCounter'] || 1;
-        const slotNumber = window['ampAdGoogleIfiCounter']++;
-        const win = a4a.win;
-        const documentInfo = documentInfoForDoc(adElement);
-      // Read by GPT for GA/GPT integration.
-        win.gaGlobal = win.gaGlobal ||
-      {cid: clientId, hid: documentInfo.pageViewId};
-        const slotRect = a4a.getPageLayoutBox();
-        const screen = win.screen;
-        const viewport = a4a.getViewport();
-        const viewportRect = viewport.getRect();
-        const iframeDepth = iframeNestingDepth(win);
-        const viewportSize = viewport.getSize();
-    // Detect container types.
-        const containerTypeSet = {};
-        for (let el = adElement.parentElement, counter = 0;
-        el && counter < 20; el = el.parentElement, counter++) {
-          const tagName = el.tagName.toUpperCase();
-          if (ValidAdContainerTypes[tagName]) {
-            containerTypeSet[ValidAdContainerTypes[tagName]] = true;
-          }
-        }
-        const pfx =
-        (containerTypeSet[ValidAdContainerTypes['AMP-FX-FLYING-CARPET']]
-         || containerTypeSet[ValidAdContainerTypes['AMP-STICKY-AD']])
-        ? '1' : '0';
-        queryParams.push({name: 'act', value:
-      Object.keys(containerTypeSet).join()});
-        if (isCanary(win)) {
-      // The semantics here are:
-      //   0: production branch (this is never actually sent)
-      //   1: control branch (this is not yet supported, so is never sent)
-      //   2: canary branch
-          queryParams.push({name: 'art', value: '2'});
-        }
-        let eids = adElement.getAttribute('data-experiment-id');
-        if (opt_experimentIds) {
-          eids = mergeExperimentIds(opt_experimentIds, eids);
-        }
-        const allQueryParams = queryParams.concat(
-          [
-            {
-              name: 'is_amp',
-              value: AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
-            },
-        {name: 'amp_v', value: '$internalRuntimeVersion$'},
-        {name: 'd_imp', value: '1'},
-        {name: 'dt', value: startTime},
-        {name: 'ifi', value: slotNumber},
-        {name: 'adf', value: domFingerprint(adElement)},
-        {name: 'c', value: getCorrelator(win, clientId)},
-        {name: 'output', value: 'html'},
-        {name: 'nhd', value: iframeDepth},
-        {name: 'iu', value: adElement.getAttribute('data-ad-slot')},
-        {name: 'eid', value: eids},
-        {name: 'biw', value: viewportRect.width},
-        {name: 'bih', value: viewportRect.height},
-        {name: 'adx', value: slotRect.left},
-        {name: 'ady', value: slotRect.top},
-        {name: 'u_aw', value: screen ? screen.availWidth : null},
-        {name: 'u_ah', value: screen ? screen.availHeight : null},
-        {name: 'u_cd', value: screen ? screen.colorDepth : null},
-        {name: 'u_w', value: screen ? screen.width : null},
-        {name: 'u_h', value: screen ? screen.height : null},
-        {name: 'u_tz', value: -new Date().getTimezoneOffset()},
-        {name: 'u_his', value: getHistoryLength(win)},
-        {name: 'oid', value: '2'},
-        {name: 'brdim', value: additionalDimensions(win, viewportSize)},
-        {name: 'isw', value: viewportSize.width},
-        {name: 'ish', value: viewportSize.height},
-        {name: 'pfx', value: pfx},
-        {name: 'rc', value: a4a.fromResumeCallback ? 1 : null},
-          ],
-      unboundedQueryParams,
-          [
-        {name: 'url', value: documentInfo.canonicalUrl},
-        {name: 'top', value: iframeDepth ? topWindowUrlOrDomain(win) : null},
-            {
-              name: 'loc',
-              value: win.location.href == documentInfo.canonicalUrl ?
-            null : win.location.href,
-            },
-        {name: 'ref', value: referrer},
-          ]
-    );
-        const url = buildUrl(baseUrl, allQueryParams, MAX_URL_LENGTH - 10,
-                         {name: 'trunc', value: '1'});
-        return url + '&dtd=' + elapsedTimeWithCeiling(Date.now(), startTime);
-      }));
+  const blockLevelParameters = googleBlockParameters(a4a, opt_experimentIds);
+  return googlePageParameters(a4a.win, a4a.getAmpDoc(), startTime)
+    .then(pageLevelParameters => {
+      Object.assign(parameters, blockLevelParameters, pageLevelParameters);
+      return truncAndTimeUrl(baseUrl, parameters, startTime);
+    });
+}
+
+/**
+ * @param {string} baseUrl
+ * @param {!Object<string,null|number|string>} parameters
+ * @param {number} startTime
+ * @return {string}
+ */
+export function truncAndTimeUrl(baseUrl, parameters, startTime) {
+  return buildUrl(
+    baseUrl, parameters, MAX_URL_LENGTH - 10, {name: 'trunc', value: '1'})
+    + '&dtd=' + elapsedTimeWithCeiling(Date.now(), startTime);
 }
 
 /**

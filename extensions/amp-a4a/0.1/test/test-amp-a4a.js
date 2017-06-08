@@ -26,6 +26,7 @@ import {
   DEFAULT_SAFEFRAME_VERSION,
   SAFEFRAME_VERSION_HEADER,
   protectFunctionWrapper,
+  assignAdUrlToError,
 } from '../amp-a4a';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {Signals} from '../../../../src/utils/signals';
@@ -1463,98 +1464,6 @@ describe('amp-a4a', () => {
     // FAILURE cases here
   });
 
-  describe('SRA Ads Delay Measure', () => {
-    let fixture;
-    beforeEach(() => {
-      xhrMock.withArgs(TEST_URL, {
-        mode: 'cors',
-        method: 'GET',
-        credentials: 'include',
-      }).onFirstCall().returns(Promise.resolve(mockResponse));
-      return createIframePromise().then(f => {
-        setupForAdTesting(f);
-        fixture = f;
-        return fixture;
-      });
-    });
-    it('sends as expected', () => {
-      const win = fixture.win;
-      const a4a = new MockA4AImpl(createA4aElement(fixture.doc, win));
-      a4a.buildCallback();
-      const emitLifecycleEventSpy =
-        sandbox.spy(a4a, 'protectedEmitLifecycleEvent_');
-      a4a.onLayoutMeasure();
-      expect(a4a.adPromise_).to.be.ok;
-      return a4a.adPromise_.then(() => {
-        expect(win['a4a-measuring-ad-urls-adsense']).to.be.ok;
-        expect(win['a4a-measuring-ad-urls-doubleclick']).to.not.be.ok;
-        return win['a4a-measuring-ad-urls-adsense'].then(() => {
-          // TODO: get resources to include element so reported object can
-          // be verified.
-          expect(emitLifecycleEventSpy.withArgs(
-            'sraBuildRequestDelay',
-            {
-              'met.delta.AD_SLOT_ID': sinon.match.number,
-              'totalSlotCount.AD_SLOT_ID': 0,
-              'totalUrlCount.AD_SLOT_ID': 0,
-              'type.AD_SLOT_ID': 'adsense',
-              'totalQueriedSlotCount.AD_SLOT_ID': 0,
-            })).to.be.calledOnce;
-        });
-      });
-    });
-    it('does not execute if already present', () => {
-      const win = fixture.win;
-      win['a4a-measuring-ad-urls-adsense'] = true;
-      const a4aElement = createA4aElement(fixture.doc, win);
-      const a4a = new MockA4AImpl(a4aElement);
-      a4a.buildCallback();
-      const emitLifecycleEventSpy =
-        sandbox.spy(a4a, 'protectedEmitLifecycleEvent_');
-      a4a.onLayoutMeasure();
-      expect(a4a.adPromise_).to.be.ok;
-      return a4a.adPromise_.then(() => {
-        expect(emitLifecycleEventSpy).to.not.be.calledWith(
-          'sraBuildRequestDelay', sinon.match.object);
-      });
-    });
-    it('creates separate executions for doubleclick vs adsense', () => {
-      const win = fixture.win;
-      const adsenseA4a = new MockA4AImpl(createA4aElement(fixture.doc, win));
-      adsenseA4a.buildCallback();
-      const adSenseEmitLifecycleEventSpy =
-        sandbox.spy(adsenseA4a, 'protectedEmitLifecycleEvent_');
-      adsenseA4a.onLayoutMeasure();
-      expect(adsenseA4a.adPromise_).to.be.ok;
-      const doubleclickElement = createA4aElement(fixture.doc, win);
-      doubleclickElement.setAttribute('type', 'doubleclick');
-      const doubleclickA4a = new MockA4AImpl(doubleclickElement);
-      const doubleclickEmitLifecycleEventSpy =
-        sandbox.spy(doubleclickA4a, 'protectedEmitLifecycleEvent_');
-      doubleclickA4a.buildCallback();
-      doubleclickA4a.onLayoutMeasure();
-      expect(doubleclickA4a.adPromise_).to.be.ok;
-      return Promise.all(
-        [adsenseA4a.adPromise_, doubleclickA4a.adPromise_]).then(() => {
-          expect(win['a4a-measuring-ad-urls-adsense']).to.be.ok;
-          expect(win['a4a-measuring-ad-urls-doubleclick']).to.be.ok;
-          const checks = {adsense: adSenseEmitLifecycleEventSpy,
-            doubleclick: doubleclickEmitLifecycleEventSpy};
-          Object.keys(checks).forEach(type => {
-            expect(checks[type].withArgs(
-              'sraBuildRequestDelay',
-              {
-                'met.delta.AD_SLOT_ID': sinon.match.number,
-                'totalSlotCount.AD_SLOT_ID': 0,
-                'totalUrlCount.AD_SLOT_ID': 0,
-                'type.AD_SLOT_ID': type,
-                'totalQueriedSlotCount.AD_SLOT_ID': 0,
-              })).to.be.calledOnce;
-          });
-        });
-    });
-  });
-
   describe('#renderOutsideViewport', () => {
     let a4aElement;
     let a4a;
@@ -2224,6 +2133,29 @@ describe('amp-a4a', () => {
         expect(serviceInfo['keys']).to.be.an.instanceof(Array);
         expect(serviceInfo['keys']).to.be.empty;
       });
+    });
+  });
+
+  describe('#assignAdUrlToError', () => {
+
+    it('should attach info to error correctly', () => {
+      const error = new Error('foo');
+      let queryString = '';
+      while (queryString.length < 300) {
+        queryString += 'def=abcdefg&';
+      }
+      const url = 'https://foo.com?' + queryString;
+      assignAdUrlToError(error, url);
+      expect(error.args).to.jsonEqual({au: queryString.substring(0, 250)});
+      // Calling again with different url has no effect.
+      assignAdUrlToError(error, 'https://someothersite.com?bad=true');
+      expect(error.args).to.jsonEqual({au: queryString.substring(0, 250)});
+    });
+
+    it('should not modify if no query string', () => {
+      const error = new Error('foo');
+      assignAdUrlToError(error, 'https://foo.com');
+      expect(error.args).to.not.be.ok;
     });
   });
 

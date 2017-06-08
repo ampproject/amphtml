@@ -93,16 +93,11 @@ class AdSenseNetworkConfig {
   getConfigUrl() {
     const docInfo = documentInfoForDoc(this.autoAmpAdsElement_);
     const canonicalHostname = parseUrl(docInfo.canonicalUrl).hostname;
-    return buildUrl('//pagead2.googlesyndication.com/getconfig/ama', [
-      {
-        name: 'client',
-        value: this.autoAmpAdsElement_.getAttribute('data-ad-client'),
-      },
-      {
-        name: 'plah',
-        value: canonicalHostname},
-      {name: 'ama_t', value: 'amp'},
-    ], 4096);
+    return buildUrl('//pagead2.googlesyndication.com/getconfig/ama', {
+      'client': this.autoAmpAdsElement_.getAttribute('data-ad-client'),
+      'plah': canonicalHostname,
+      'ama_t': 'amp',
+    }, 4096);
   }
 
   /** @override */
