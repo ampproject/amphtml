@@ -19,6 +19,7 @@ var argv = require('minimist')(process.argv.slice(2));
 var BBPromise = require('bluebird');
 var chalk = require('chalk');
 var fs = require('fs-extra');
+var getStdout = require('../exec.js').getStdout;
 var gulp = require('gulp-help')(require('gulp'));
 var markdownLinkCheck = BBPromise.promisify(require('markdown-link-check'));
 var path = require('path');
@@ -56,6 +57,10 @@ function checkLinks() {
           'Checking links in',
           util.colors.magenta(markdownFiles[index]), '...');
       results.forEach(function (result) {
+        // Skip links to files that were added by the PR.
+        if (isLinkToFileAddedInPR(result.link)) {
+          return;
+        }
         if(result.status === 'dead') {
           deadLinksFound = true;
           deadLinksFoundInFile = true;
@@ -91,6 +96,22 @@ function checkLinks() {
             'All links in all markdown files in this PR are alive.');
     }
   });
+}
+
+/**
+ * Determines if a link points to a file added in the PR.
+ *
+ * @param {string} link Link being tested.
+ * @return {boolean} True if the link points to a file added in the PR.
+ */
+function isLinkToFileAddedInPR(link) {
+  var filesAdded = getStdout(
+      `git diff --name-only --diff-filter=A master...HEAD`).trim().split('\n');
+  var addedInPr = false;
+  filesAdded.forEach(function(file) {
+    if (file.length > 0 && link.includes(file)) addedInPr = true;
+  });
+  return addedInPr;
 }
 
 /**
