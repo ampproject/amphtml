@@ -26,6 +26,7 @@ import {
   DEFAULT_SAFEFRAME_VERSION,
   SAFEFRAME_VERSION_HEADER,
   protectFunctionWrapper,
+  assignAdUrlToError,
 } from '../amp-a4a';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {Signals} from '../../../../src/utils/signals';
@@ -2194,6 +2195,29 @@ describe('amp-a4a', () => {
         expect(serviceInfo['keys']).to.be.an.instanceof(Array);
         expect(serviceInfo['keys']).to.be.empty;
       });
+    });
+  });
+
+  describe.only('#assignAdUrlToError', () => {
+
+    it('should attach info to error correctly', () => {
+      const error = new Error('foo');
+      let queryString = '';
+      while (queryString.length < 300) {
+        queryString += 'def=abcdefg&';
+      }
+      const url = 'https://foo.com?' + queryString;
+      assignAdUrlToError(error, url);
+      expect(error.args).to.jsonEqual({au: queryString.substring(0, 250)});
+      // Calling again with different url has no effect.
+      assignAdUrlToError(error, 'https://someothersite.com?bad=true');
+      expect(error.args).to.jsonEqual({au: queryString.substring(0, 250)});
+    });
+
+    it('should not modify if no query string', () => {
+      const error = new Error('foo');
+      assignAdUrlToError(error, 'https://foo.com');
+      expect(error.args).to.not.be.ok;
     });
   });
 

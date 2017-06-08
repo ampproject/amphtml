@@ -455,9 +455,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.initiateSraRequests();
     // Null response indicates single slot should execute using non-SRA method.
     return this.sraResponsePromise_.then(
-      response => {
-        return response || super.sendXhrRequest(adUrl);
-      });
+      response => response || super.sendXhrRequest(adUrl));
   }
 
   /**
@@ -529,7 +527,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             const sraRequestAdUrlResolvers =
               typeInstances.map(instance => instance.sraResponseResolver);
             const slotCallback = metaJsonCreativeGrouper(
-              (creative, headersObj) => {
+              (creative, headersObj, done) => {
                 checkStillCurrent();
                 // Force safeframe rendering method.
                 headersObj[RENDERING_TYPE_HEADER] = XORIGIN_MODE.SAFEFRAME;
@@ -552,6 +550,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                 // This allows the block to start rendering while the SRA
                 // response is streaming back to the client.
                 dev().assert(sraRequestAdUrlResolvers.shift())(fetchResponse);
+                // If done, expect array to be empty (ensures ad response
+                // included data for all slots).
+                if (done && sraRequestAdUrlResolvers.length) {
+                  dev().warn(TAG, 'Premature end of SRA response',
+                    sraRequestAdUrlResolvers.length, sraUrl);
+                }
               });
             // TODO(keithwrightbos) - how do we handle per slot 204 response?
             let sraUrl;
@@ -593,7 +597,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           });
         });
       });
-    return sraRequests;
   }
 
   getPreconnectUrls() {

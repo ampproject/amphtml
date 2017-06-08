@@ -904,12 +904,10 @@ export class AmpA4A extends AMP.BaseElement {
     // most comparable with the layout callback for 3p ads.
     this.protectedEmitLifecycleEvent_('preAdThrottle');
     const layoutCallbackStart = this.getNow_();
-    const promiseId = this.promiseId_;
+    const checkStillCurrent = this.verifyStillCurrent();
     // Promise chain will have determined if creative is valid AMP.
     return this.adPromise_.then(creativeMetaData => {
-      if (promiseId != this.promiseId_) {
-        throw cancellation();
-      }
+      checkStillCurrent();
       const delta = this.getNow_() - layoutCallbackStart;
       this.protectedEmitLifecycleEvent_('layoutAdPromiseDelay', {
         layoutAdPromiseDelay: Math.round(delta),
@@ -931,9 +929,7 @@ export class AmpA4A extends AMP.BaseElement {
       // Must be an AMP creative.
       return this.renderAmpCreative_(creativeMetaData)
           .catch(err => {
-            if (promiseId != this.promiseId_) {
-              throw cancellation();
-            }
+            checkStillCurrent();
             // Failed to render via AMP creative path so fallback to non-AMP
             // rendering within cross domain iframe.
             user().error(TAG, this.element.getAttribute('type'),
@@ -1291,7 +1287,7 @@ export class AmpA4A extends AMP.BaseElement {
         }
       });
     }
-    const promiseId = this.promiseId_;
+    const checkStillCurrent = this.verifyStillCurrent();
     return installFriendlyIframeEmbed(
         this.iframe, this.element, {
           host: this.element,
@@ -1303,9 +1299,7 @@ export class AmpA4A extends AMP.BaseElement {
           installUrlReplacementsForEmbed(this.getAmpDoc(), embedWin,
             new A4AVariableSource(this.getAmpDoc(), embedWin));
         }).then(friendlyIframeEmbed => {
-          if (promiseId != this.promiseId_) {
-            throw cancellation();
-          }
+          checkStillCurrent();
           this.friendlyIframeEmbed_ = friendlyIframeEmbed;
           setFriendlyIframeEmbedVisible(
               friendlyIframeEmbed, this.isInViewport());
@@ -1322,9 +1316,7 @@ export class AmpA4A extends AMP.BaseElement {
           getTimingDataAsync(
               friendlyIframeEmbed.win,
               'navigationStart', 'loadEventEnd').then(delta => {
-                if (promiseId != this.promiseId_) {
-                  throw cancellation();
-                }
+                checkStillCurrent();
                 this.protectedEmitLifecycleEvent_('friendlyIframeLoaded', {
                   'navStartToLoadEndDelta.AD_SLOT_ID': Math.round(delta),
                 });
@@ -1341,9 +1333,7 @@ export class AmpA4A extends AMP.BaseElement {
           // after the initial load.
           return friendlyIframeEmbed.whenIniLoaded();
         }).then(() => {
-          if (promiseId != this.promiseId_) {
-            throw cancellation();
-          }
+          checkStillCurrent();
           // Capture ini-load ping.
           this.protectedEmitLifecycleEvent_('friendlyIframeIniLoad');
         });
@@ -1420,11 +1410,9 @@ export class AmpA4A extends AMP.BaseElement {
         method == XORIGIN_MODE.NAMEFRAME,
         'Unrecognized A4A cross-domain rendering mode: %s', method);
     this.protectedEmitLifecycleEvent_('renderSafeFrameStart');
-    const promiseId = this.promiseId_;
+    const checkStillCurrent = this.verifyStillCurrent();
     return utf8Decode(creativeBody).then(creative => {
-      if (promiseId != this.promiseId_) {
-        throw cancellation();
-      }
+      checkStillCurrent();
       let srcPath;
       let name = '';
       switch (method) {
