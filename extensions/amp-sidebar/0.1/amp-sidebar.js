@@ -323,4 +323,6 @@ export class AmpSidebar extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-sidebar', AmpSidebar, CSS);
+AMP.extension('amp-sidebar', '0.1', AMP => {
+  AMP.registerElement('amp-sidebar', AmpSidebar, CSS);
+});

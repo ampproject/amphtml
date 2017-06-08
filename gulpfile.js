@@ -110,6 +110,7 @@ declareExtension('amp-reach-player', '0.1', false);
 declareExtension('amp-reddit', '0.1', false);
 declareExtension('amp-share-tracking', '0.1', false);
 declareExtension('amp-sidebar', '0.1', true);
+declareExtension('amp-sidebar', '1.0', true);
 declareExtension('amp-soundcloud', '0.1', false);
 declareExtension('amp-springboard-player', '0.1', false);
 declareExtension('amp-sticky-ad', '1.0', true);
@@ -167,6 +168,10 @@ function declareExtension(name, version, hasCssOrOptions, opt_noTypeCheck,
 }
 
 /**
+ * This function is used for declaring deprecated extensions. It simply places the current
+ * version code in place of the latest versions.
+ * This has the ability to break an extension verison, so please be sure that this is
+ * the correct one to use.
  * @param {string} name
  * @param {string} version E.g. 0.1
  * @param {string} lastestVersion
