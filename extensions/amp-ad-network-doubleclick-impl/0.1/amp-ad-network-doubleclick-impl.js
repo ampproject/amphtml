@@ -403,7 +403,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // Will initiate the refresh lifecycle iff the slot has been enabled to
       // do so through an appropriate data attribute, or a page-level meta tag.
       this.refreshManager_ = new RefreshManager(this);
-      if (this.refreshManager_.isEligibleForRefresh()) {
+      if (this.refreshManager_.isRefreshable()) {
         this.refreshManager_.initiateRefreshCycle();
       }
     }
