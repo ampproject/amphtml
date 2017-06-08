@@ -1040,10 +1040,10 @@ describe('Resources discoverWork', () => {
     resources.documentReady_ = true;
     resources.firstPassAfterDocumentReady_ = true;
     sandbox.stub(resources.visibilityStateMachine_, 'setState');
-    resources.doPass_();
+    resources.doPass();
     expect(resources.ampdoc.signals().get('ready-scan')).to.be.null;
     resources.ampInitComplete();
-    resources.doPass_();
+    resources.doPass();
     resources.isRuntimeOn_ = false;
     expect(resources.ampdoc.signals().get('ready-scan')).to.be.ok;
   });
@@ -1562,7 +1562,7 @@ describes.realWin('Resources scrollHeight', {
     });
     resources.maybeChangeHeight_ = true;
 
-    resources.doPass_();
+    resources.doPass();
 
     expect(resources.maybeChangeHeight_).to.equal(false);
     expect(resources.scrollHeight_).to.equal(200);
@@ -1575,7 +1575,7 @@ describes.realWin('Resources scrollHeight', {
     const scrollHeight = resources.viewport_.getScrollHeight();
     resources.maybeChangeHeight_ = true;
 
-    resources.doPass_();
+    resources.doPass();
 
     expect(resources.maybeChangeHeight_).to.equal(false);
     expect(resources.scrollHeight_).to.equal(scrollHeight);

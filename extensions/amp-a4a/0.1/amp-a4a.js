@@ -456,8 +456,7 @@ export class AmpA4A extends AMP.BaseElement {
   resumeCallback() {
     // FIE that was not destroyed on unlayoutCallback does not require a new
     // ad request.
-    if (!isExperimentOn(this.win, 'a4a-fie-unlayout-enabled') &&
-        this.friendlyIframeEmbed_) {
+    if (this.friendlyIframeEmbed_) {
       return;
     }
     this.protectedEmitLifecycleEvent_('resumeCallback');
@@ -954,8 +953,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override  */
   unlayoutCallback() {
-    if (!isExperimentOn(this.win, 'a4a-fie-unlayout-enabled') &&
-        this.friendlyIframeEmbed_) {
+    if (this.friendlyIframeEmbed_) {
       return false;
     }
     // Increment promiseId to cause any pending promise to cancel.
@@ -1160,49 +1158,47 @@ export class AmpA4A extends AMP.BaseElement {
       const currServiceName = serviceName;
       if (url) {
         // Delay request until document is not in a prerender state.
-        const firstVisiblePromise =
-          isExperimentOn(this.win, 'a4a-disable-cryptokey-viewer-check') ?
-          Promise.resolve() : viewerForDoc(this.getAmpDoc()).whenFirstVisible();
-        return firstVisiblePromise.then(() => xhrFor(this.win).fetchJson(url, {
-          mode: 'cors',
-          method: 'GET',
-          // Set ampCors false so that __amp_source_origin is not
-          // included in XHR CORS request allowing for keyset to be cached
-          // across pages.
-          ampCors: false,
-          credentials: 'omit',
-        }).then(res => res.json()).then(jwkSetObj => {
-          const result = {serviceName: currServiceName};
-          if (isObject(jwkSetObj) && Array.isArray(jwkSetObj.keys) &&
-              jwkSetObj.keys.every(isObject)) {
-            result.keys = jwkSetObj.keys;
-          } else {
-            user().error(TAG, this.element.getAttribute('type'),
-                `Invalid response from signing server ${currServiceName}`,
-                this.element);
-            result.keys = [];
-          }
-          return result;
-        })).then(jwkSet => {
-          return {
-            serviceName: jwkSet.serviceName,
-            keys: jwkSet.keys.map(jwk =>
-                this.crypto_.importPublicKey(jwkSet.serviceName, jwk)
-                .catch(err => {
-                  user().error(TAG, this.element.getAttribute('type'),
-                      `error importing keys for service: ${jwkSet.serviceName}`,
-                      err, this.element);
-                  return null;
-                })),
-          };
-        }).catch(err => {
-          user().error(
-              TAG, this.element.getAttribute('type'), err, this.element);
-          // TODO(a4a-team): This is a failure in the initial attempt to get
-          // the keys, probably b/c of a network condition.  We should
-          // re-trigger key fetching later.
-          return {serviceName: currServiceName, keys: []};
-        });
+        return viewerForDoc(this.getAmpDoc()).whenFirstVisible()
+          .then(() => xhrFor(this.win).fetchJson(url, {
+            mode: 'cors',
+            method: 'GET',
+            // Set ampCors false so that __amp_source_origin is not
+            // included in XHR CORS request allowing for keyset to be cached
+            // across pages.
+            ampCors: false,
+            credentials: 'omit',
+          }).then(res => res.json()).then(jwkSetObj => {
+            const result = {serviceName: currServiceName};
+            if (isObject(jwkSetObj) && Array.isArray(jwkSetObj.keys) &&
+                jwkSetObj.keys.every(isObject)) {
+              result.keys = jwkSetObj.keys;
+            } else {
+              user().error(TAG, this.element.getAttribute('type'),
+                  `Invalid response from signing server ${currServiceName}`,
+                  this.element);
+              result.keys = [];
+            }
+            return result;
+          })).then(jwkSet => {
+            return {
+              serviceName: jwkSet.serviceName,
+              keys: jwkSet.keys.map(jwk =>
+                  this.crypto_.importPublicKey(jwkSet.serviceName, jwk)
+                  .catch(err => {
+                    user().error(TAG, this.element.getAttribute('type'),
+                        `error importing keys for: ${jwkSet.serviceName}`,
+                        err, this.element);
+                    return null;
+                  })),
+            };
+          }).catch(err => {
+            user().error(
+                TAG, this.element.getAttribute('type'), err, this.element);
+            // TODO(a4a-team): This is a failure in the initial attempt to get
+            // the keys, probably b/c of a network condition.  We should
+            // re-trigger key fetching later.
+            return {serviceName: currServiceName, keys: []};
+          });
       } else {
         // The given serviceName does not have a corresponding URL in
         // _a4a-config.js.
