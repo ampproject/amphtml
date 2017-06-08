@@ -37,10 +37,21 @@ class AmpAnalytics3pMessageRouter {
     /** @private {!Window} */
     this.win_ = win;
 
-    // The sentinel is required by iframe-messaging-client, and is used to
-    // uniquely identify the frame as part of message routing
-    /** @private {string} */
-    this.sentinel_ = null;
+    try {
+      const frameNameData = JSON.parse(this.win_.name);
+      if (!frameNameData.sentinel) {
+        const ex = {message: 'JSON parsed, but did not include sentinel.'};
+        throw ex;
+      }
+      // The sentinel is required by iframe-messaging-client, and is used to
+      // uniquely identify the frame as part of message routing
+      /** @const {string} */
+      this.sentinel_ = frameNameData.sentinel;
+    } catch (e) {
+      dev().warn(TAG_, 'Unable to set sentinel from name attr: ' +
+        this.win_.name + ': ' + e.message);
+      return;
+    }
 
     /** @private {!Object<string, !AmpAnalytics3pCreativeMessageRouter>} */
     this.creativeMessageRouters_ = {};
@@ -50,17 +61,7 @@ class AmpAnalytics3pMessageRouter {
      * @private {!IframeMessagingClient}
      */
     this.iframeMessagingClient_ = new IframeMessagingClient(win);
-    try {
-      const frameNameData = JSON.parse(this.win_.name);
-      if (frameNameData.sentinel) {
-        this.sentinel_ = frameNameData.sentinel;
-        this.iframeMessagingClient_.setSentinel(this.sentinel_);
-      }
-    } catch (e) {
-      dev().warn(TAG_, 'Unable to set sentinel from name attr: ' +
-        this.win_.name);
-      return;
-    }
+    this.iframeMessagingClient_.setSentinel(this.sentinel_);
     this.iframeMessagingClient_.registerCallback(
       AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVES,
       envelope => {

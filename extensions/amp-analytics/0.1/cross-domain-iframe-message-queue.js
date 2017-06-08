@@ -154,7 +154,7 @@ export class CrossDomainIframeMessageQueue {
     }
     const envelope = {};
     envelope[this.envelopeType_] = this.queue_;
-    this.iframeMessagingClient_.sendMessage(this.envelopeType_, envelope);
+    this.iframeMessagingClient_./*OK*/sendMessage(this.envelopeType_, envelope);
     this.queue_ = [];
   }
 }
