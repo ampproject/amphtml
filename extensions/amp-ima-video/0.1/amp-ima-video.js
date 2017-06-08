@@ -21,7 +21,10 @@ import {
 } from '../../../src/service/video-manager-impl';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {isObject} from '../../../src/types';
+import {
+  isObject,
+  toArray,
+} from '../../../src/types';
 import {
   listen,
 } from '../../../src/event-helper';
@@ -54,6 +57,9 @@ class AmpImaVideo extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
+
+    /** @private {?String} */
+    this.preconnectSource_ = null;
   }
 
   /** @override */
@@ -69,11 +75,13 @@ class AmpImaVideo extends AMP.BaseElement {
     const sourceElements = this.element.getElementsByTagName('source');
     if (sourceElements.length > 0) {
       const sources = [];
-      Array.from(sourceElements).forEach(source => {
-        sources.push({
-          'src': source.src,
-          'type': source.type,
-        });
+      toArray(sourceElements).forEach(source => {
+        if (!this.preconnectSource_) {
+          this.preconnectSource_ = source.src;
+        }
+        var tmp = document.createElement('div');
+        tmp.appendChild(source);
+        sources.push(tmp.innerHTML);
       });
       this.element.setAttribute('data-sources', JSON.stringify(sources));
     }
@@ -86,6 +94,9 @@ class AmpImaVideo extends AMP.BaseElement {
     const source = this.element.getAttribute('data-src');
     if (source) {
       this.preconnect.url(source);
+    }
+    if (this.preconnectSource_) {
+      this.preconnect.url(this.preconnectSource_);
     }
     this.preconnect.url(this.element.getAttribute('data-tag'));
     preloadBootstrap(this.win, this.preconnect);

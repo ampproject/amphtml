@@ -319,18 +319,18 @@ export function imaVideo(global, data) {
   setStyle(videoPlayer, 'background-color', 'black');
   videoPlayer.setAttribute('poster', data.poster);
   videoPlayer.setAttribute('playsinline', true);
-  // Set video player source, first based on source child elements if present.
-  // If not, then based on data-src.
+  // Set video player source, first based on data-src then on source child
+  // elements.
+  if (data.src) {
+    const sourceElement = document.createElement('source');
+    sourceElement.setAttribute('src', data.src);
+    videoPlayer.appendChild(sourceElement);
+  }
   if (data.sources) {
     const sources = JSON.parse(data.sources);
-    sources.some(source => {
-      if (videoPlayer.canPlayType(source.type)) {
-        videoPlayer.setAttribute('src', source.src);
-        return true;
-      }
+    sources.forEach(source => {
+      videoPlayer.appendChild(htmlToElement(source));
     });
-  } else {
-    videoPlayer.setAttribute('src', data.src);
   }
 
 
@@ -408,6 +408,12 @@ export function imaVideo(global, data) {
     adRequestFailed = false;
     adsLoader.requestAds(adsRequest);
   });
+}
+
+function htmlToElement(html) {
+  var template = document.createElement('template');
+  template.innerHTML = html;
+  return template.content.firstChild;  
 }
 
 /**
