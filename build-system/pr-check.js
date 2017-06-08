@@ -381,16 +381,20 @@ function main(argv) {
     // integration test. Otherwise, the shard can be skipped.
     if (buildTargets.has('INTEGRATION_TEST')) {
       console.log(fileLogPrefix,
-          'Running integration_tests since this PR touches',
+          'Running the',
+          util.colors.cyan('integration_tests'),
+          'build shard since this PR touches',
           util.colors.cyan('test/integration'));
       command.cleanBuild();
       command.buildRuntimeMinified();
       command.runIntegrationTests();
     } else {
-      console.log(fileLogPrefix, 'Skipping integration_tests for this PR');
+      console.log(fileLogPrefix,
+          'Skipping the',
+          util.colors.cyan('integration_tests'),
+          'build shard for this PR');
     }
   }
-
 
   stopTimer('pr-check.js', startTime);
   return 0;
