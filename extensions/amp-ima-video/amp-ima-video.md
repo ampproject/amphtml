@@ -32,7 +32,7 @@ limitations under the License.
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-ima-video" src="https://cdn.ampproject.org/v0/amp-ima-video-0.1.js">&lt;/script></code></td>
   </tr>
-  <tr>
+  <tr
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>fixed, responsive</td>
   </tr>
@@ -44,8 +44,8 @@ limitations under the License.
 
 ## Overview
 
-You can use the `amp-ima-video` component to embed an <a
-href="https://developers.google.com/interactive-media-ads/docs/sdks/html5/">IMA
+You can use the `amp-ima-video` component to embed an
+<a href="https://developers.google.com/interactive-media-ads/docs/sdks/html5/">IMA
 SDK</a> enabled video player.
 
 To embed a video, provide a source URL for your
