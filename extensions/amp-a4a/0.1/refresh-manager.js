@@ -21,7 +21,7 @@ import {
   getEnclosingContainerTypes,
   ValidAdContainerTypes,
 } from '../../../ads/google/a4a/utils';
-import {dev, user} from '../../../src/log';
+import {user} from '../../../src/log';
 
 /**
  * visibilePercentageMin - The percentage of pixels that need to be on screen

@@ -62,7 +62,6 @@ import {insertAnalyticsElement} from '../../../src/analytics';
 import {setStyles} from '../../../src/style';
 import {utf8Encode} from '../../../src/utils/bytes';
 import {isCancellation} from '../../../src/error';
-import {timerFor} from '../../../src/services';
 import {RefreshManager} from '../../amp-a4a/0.1/refresh-manager';
 
 /** @type {string} */
@@ -274,7 +273,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // dimensions in an array.
       const dimensions = getMultiSizeDimensions(
           multiSizeDataStr,
-          width, height,
+          this.size_.width, this.size_.height,
           multiSizeValidation == 'true',
           /* Use strict mode only in non-refresh case */ !this.isRefreshing);
       sizeStr += '|' + dimensions
