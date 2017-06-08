@@ -2136,7 +2136,7 @@ describe('amp-a4a', () => {
     });
   });
 
-  describe.only('#assignAdUrlToError', () => {
+  describe('#assignAdUrlToError', () => {
 
     it('should attach info to error correctly', () => {
       const error = new Error('foo');
