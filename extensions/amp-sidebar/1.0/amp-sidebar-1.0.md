@@ -27,7 +27,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-1.0.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
@@ -115,7 +115,7 @@ The `amp-sidebar` component can be styled with standard CSS.
 - The current state of the sidebar is exposed via the `open` attribute that is set on the `amp-sidebar` tag when the side bar is open on the page.
 
 ## Actions
-The `amp-sidebar` exposes the following actions you can use [AMP on-syntax to trigger](../../../src/spec/amp-actions-and-events.md):
+The `amp-sidebar` exposes the following actions you can use [AMP on-syntax to trigger](../../../spec/amp-actions-and-events.md):
 
 <table>
   <tr>
@@ -157,4 +157,4 @@ For this reason, we recommend that affordances to open the sidebar are not place
 
 ## Validation
 
-See [amp-sidebar rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-sidebar/0.1/validator-amp-sidebar.protoascii) in the AMP validator specification.
+See [amp-sidebar rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-sidebar/1.0/validator-amp-sidebar.protoascii) in the AMP validator specification.

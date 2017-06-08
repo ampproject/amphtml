@@ -420,7 +420,8 @@
        });
      });
 
-     it('should not close sidebar if clicked on a new origin navigation', () => {
+     it('should not close sidebar if \
+       clicked on a new origin navigation', () => {
        return getAmpSidebar().then(obj => {
          const sidebarElement = obj.ampSidebar;
          const anchor = sidebarElement.getElementsByTagName('a')[0];
