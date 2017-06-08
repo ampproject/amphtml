@@ -187,13 +187,19 @@ Running the `gulp` command will compile the code and start up a Node.js server l
 
 You can browse the [http://localhost:8000/examples](http://localhost:8000/examples) directory to see some demo pages for various AMP components and combination of components.
 
-Note that by default each of the pages in the /examples directory actually uses the production version of AMP JavaScript; you can verify this by loading an example page in your browser, viewing the source and seeing that it is loading the AMP JavaScript from cdn.ampproject.org.
+Note that by default each of the pages in the /examples directory uses the unminified AMP JavaScript from your local server. You can also change which JS to load from local server by hitting the `/serve_mode=<mode>` endpoint:
 
-For local development you will usually want to load the JS from your local server to test your changes.  You can do this by changing the URL suffix from .html to .max.html, e.g.
+- [http://localhost:8000/serve_mode=default](http://localhost:8000/serve_mode=default)
 
-* [http://localhost:8000/examples/article.amp.html](http://localhost:8000/examples/article.amp.html) loads an example page that uses AMP JS from cdn.ampproject.org
+  This is the default. Unminified AMP JavaScript is served from the local server. For local development you will usually want to serve unminified JS to test your changes.
 
-* [http://localhost:8000/examples/article.amp.max.html](http://localhost:8000/examples/article.amp.max.html) loads an example page that uses the locally built JS  (if you view the source of the .max.html files, you'll see that it is loading the JS from your local `/dist` directory)
+- [http://localhost:8000/serve_mode=compiled](http://localhost:8000/serve_mode=compiled)
+
+  Minified AMP JavaScript is served from the local server. This is only available after running `gulp dist --fortesting`.
+
+- [http://localhost:8000/serve_mode=cdn](http://localhost:8000/serve_mode=cdn)
+
+  Minified AMP JavaScript is served from `cdn.ampproject.org`.
 
 When you're ready to make changes, you'll want to follow the steps below for creating a branch, testing and sending your changes for review.
 
