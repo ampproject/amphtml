@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,16 +29,25 @@ import {removeElement} from '../../../src/dom';
 import {setStyle, setStyles} from '../../../src/style';
 import {hasOwn} from '../../../src/utils/object';
 import {IframeMessagingClient} from '../../../3p/iframe-messaging-client';
-import {AMP_ANALYTICS_3P_MESSAGE_TYPE} from '../../../src/3p-analytics-common';
+import {
+  AMP_ANALYTICS_3P_MESSAGE_TYPE,
+} from '../../../src/3p-analytics-common';
+import {
+  CrossDomainIframeMessageQueue,
+} from './cross-domain-iframe-message-queue';
 
 /** @private @const {string} */
 const TAG_ = 'amp-analytics.Transport';
 
-/** @private @const {number} */
-const MESSAGE_THROTTLE_TIME_ = 100;
-
-/** @private @const {number} */
-const MAX_QUEUE_SIZE_ = 100;
+/** @typedef {{
+ *    frame: Element,
+ *    sentinel: !string,
+ *    usageCount: number,
+ *    iframeMessagingClient: IframeMessagingClient,
+ *    newCreativeMessageQueue: CrossDomainIframeMessageQueue,
+ *    eventQueue: CrossDomainIframeMessageQueue,
+ *  }} */
+export let FrameData;
 
 /**
  * @visibleForTesting
@@ -163,20 +172,22 @@ export class Transport {
     iframeMessagingClient.registerCallback(
       AMP_ANALYTICS_3P_MESSAGE_TYPE.READY, () => {
         iframeMessagingClient.setHostWindow(frameData.frame.contentWindow);
-        Transport.setIsReady_(frameData);
+        frameData.newCreativeMessageQueue.setIsReady();
+        frameData.eventQueue.setIsReady();
       });
     iframeMessagingClient.registerCallback(
-      AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE, response => {
-        dev().assert(response &&
-          response[AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE],
-          'Received empty response from 3p analytics frame');
-        if (!opt_processResponse) {
-          dev().warn(TAG_, 'Received response from 3p analytics frame when' +
-            ' none was expected');
-        }
-        opt_processResponse(this.type_,
-          response[AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE]);
-      });
+      AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE,
+        response => {
+          dev().assert(response &&
+            response[AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE],
+            'Received empty response from 3p analytics frame');
+          if (!opt_processResponse) {
+            dev().warn(TAG_, 'Received response from 3p analytics frame when' +
+              ' none was expected');
+          }
+          opt_processResponse(this.type_,
+            response[AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE]);
+        });
   }
 
   /**
@@ -184,25 +195,24 @@ export class Transport {
    * @param {!HTMLDocument} ampDoc The AMP document
    * @param {!string} frameUrl The URL of the frame to send the data to
    * @param {string=} opt_extraData The data to send to the frame
-   * @return {!Object<string,*>}
+   * @return {!FrameData}
    * @private
    */
   useExistingOrCreateCrossDomainIframe_(ampDoc, frameUrl, opt_extraData) {
     let frameData;
     if (Transport.hasCrossDomainIframe_(frameUrl)) {
-      frameData = Transport.crossDomainIframes_[frameUrl];
+      frameData = Transport.getFrameData_(frameUrl);
       Transport.incrementIframeUsageCount_(
-        /** @type{!Object<string,*>} */ (frameData));
+        /** @type{!FrameData} */ (frameData));
     } else {
       frameData = this.createCrossDomainIframe_(ampDoc, frameUrl);
       ampDoc.body.appendChild(frameData.frame);
     }
-    dev().assert(frameData, 'Trying to send message to non-existent frame');
-    const assuredNonNullFrameData = /** @type{!Object<string,*>} */ (frameData);
-    // Still send the message to indicate there is a new creative
-    opt_extraData = opt_extraData || '';
-    this.enqueueMessageForCrossDomainIframe_(assuredNonNullFrameData,
-      AMP_ANALYTICS_3P_MESSAGE_TYPE.NEW, opt_extraData);
+    dev().assert(frameData, 'Trying to use non-existent frame');
+    const assuredNonNullFrameData = /** @type{!FrameData} */ (frameData);
+    assuredNonNullFrameData.newCreativeMessageQueue.enqueue(
+      CrossDomainIframeMessageQueue.buildNewCreativeMessage(
+        frameData.sentinel, opt_extraData));
     return assuredNonNullFrameData;
   }
 
@@ -217,18 +227,18 @@ export class Transport {
    */
   static doneUsingCrossDomainIframe(ampDoc, transportOptions) {
     const frameUrl = transportOptions['iframe'];
-    const frameData = Transport.crossDomainIframes_[frameUrl];
+    const frameData = Transport.getFrameData_(frameUrl);
     if (!frameData) {
       // Didn't exist
       return;
     }
     if (Transport.decrementIframeUsageCount_(
-      /** @type{!Object<string,*>} */ (frameData)) > 0) {
+      /** @type{!FrameData} */ (frameData)) > 0) {
       // Some other instance is still using it
       return;
     }
-    if (frameData.sendTimer) {
-      frameData.sendTimer.cancel();
+    if (frameData.eventQueue) {
+      frameData.eventQueue.destroy();
     }
     ampDoc.body.removeChild(frameData.frame);
     delete Transport.crossDomainIframes_[frameUrl];
@@ -236,7 +246,7 @@ export class Transport {
 
   /**
    * Record that one more creative is using this cross-domain iframe
-   * @param {!Object<string,*>} frameData  The cross-domain iframe and
+   * @param {!FrameData} frameData  The cross-domain iframe and
    * associated data
    * @return {number}
    * @private
@@ -247,7 +257,7 @@ export class Transport {
 
   /**
    * Record that one fewer creative is using this cross-domain iframe
-   * @param {!Object<string,*>} frameData  The cross-domain iframe and
+   * @param {!FrameData} frameData  The cross-domain iframe and
    * associated data
    * @return {number}
    * @private
@@ -270,7 +280,7 @@ export class Transport {
    * Create a cross-domain iframe for third-party vendor anaytlics
    * @param {!HTMLDocument} ampDoc  The document node of the parent page
    * @param {!string} frameUrl  The URL of the cross-domain iframe
-   * @return {!Object<string,*>}
+   * @return {!FrameData}
    */
   createCrossDomainIframe_(ampDoc, frameUrl) {
     const sentinel = Transport.createUniqueId_();
@@ -288,23 +298,18 @@ export class Transport {
     iframeMessagingClient.setSentinel(sentinel);
     iframeMessagingClient.setHostWindow(frame);
     setStyles(frame,
-        {width: 0, height: 0, display: 'none',
-         position: 'absolute', top: 0, left: 0});
+      {width: 0, height: 0, display: 'none',
+       position: 'absolute', top: 0, left: 0});
+    /** @const {FrameData} */
     const frameData = {
       frame,
       sentinel,
-      isReady: false,
-      messageQueue: [],
       usageCount: 1,
-      send: messages => {
-        const envelope = {};
-        envelope[AMP_ANALYTICS_3P_MESSAGE_TYPE.MESSAGES] = messages;
-        iframeMessagingClient.sendMessage(
-          AMP_ANALYTICS_3P_MESSAGE_TYPE.MESSAGES,
-          envelope);
-      },
       iframeMessagingClient,
-      sendTimer: null,
+      newCreativeMessageQueue: new CrossDomainIframeMessageQueue(
+        iframeMessagingClient, AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVES),
+      eventQueue: new CrossDomainIframeMessageQueue(
+        iframeMessagingClient, AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENTS),
     };
     Transport.crossDomainIframes_[frameUrl] = frameData;
     frame.src = frameUrl;
@@ -322,18 +327,6 @@ export class Transport {
   }
 
   /**
-   * Indicate that a cross-domain frame is ready to receive messages, and
-   * send all messages that were previously queued for it.
-   * @param {!Object<string,*>} frameData  The cross-domain iframe and
-   * associated data
-   * @private
-   */
-  static setIsReady_(frameData) {
-    frameData.isReady = true;
-    Transport.sendQueuedMessagesToCrossDomainIframe_(frameData);
-  }
-
-  /**
    * Sends an Amp Analytics trigger event to a vendor's cross-domain iframe,
    * or queues the message if the frame is not yet ready to receive messages.
    * @param {string} request
@@ -341,70 +334,23 @@ export class Transport {
    * @private
    */
   sendRequestUsingCrossDomainIframe_(request, transportOptions) {
-    const frameData = Transport.crossDomainIframes_[transportOptions['iframe']];
+    const frameData = Transport.getFrameData_(transportOptions['iframe']);
     dev().assert(frameData, 'Trying to send message to non-existent frame');
-    this.enqueueMessageForCrossDomainIframe_(
-      /** @type {!Object<string,*>} */ (frameData),
-      AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT, request);
+    frameData.eventQueue.enqueue(
+      CrossDomainIframeMessageQueue.buildEventMessage(
+        frameData.sentinel, request));
   }
 
-  /**
-   * Enqueues a message (event or extra data) to be sent to a cross-domain
-   * iframe.
-   * @param {!Object<string,*>} frameData  The cross-domain iframe and
-   * associated data
-   * @param {!string} messageType The type of the message (see
-   * AMP_ANALYTICS_3P_MESSAGE_TYPE)
-   * @param {!string} message
-   * @private
-   */
-  enqueueMessageForCrossDomainIframe_(frameData, messageType, message) {
-    if (frameData.messageQueue.length > MAX_QUEUE_SIZE_) {
-      dev().warn(TAG_, 'Queue has exceeded maximum size');
-      frameData.messageQueue.shift();
-    }
-    const messageObject = {
-      senderId: this.id_,
-      type: messageType,
-    };
-    messageObject[messageType] = message;
-    frameData.messageQueue.push(messageObject);
-    if (frameData.sendTimer) {
-      return; // Timer is already about to fire, no need to set a new one
-    }
-    frameData.sendTimer = Transport.timer_.delay(() => {
-      if (frameData.isReady) {
-        Transport.sendQueuedMessagesToCrossDomainIframe_(frameData);
-      }
-      frameData.sendTimer = null;
-    }, MESSAGE_THROTTLE_TIME_);
-  }
-
-  /**
-   * Send an array of messages to a cross-domain iframe
-   * @param {!Object<string,*>} frameData  The cross-domain iframe and
-   * associated data
-   * @private
-   */
-  static sendQueuedMessagesToCrossDomainIframe_(frameData) {
-    dev().assert(frameData && frameData.send,
-      'Message bound for frame that does not exist');
-    if (!frameData.messageQueue || frameData.messageQueue.length < 0) {
-      return;
-    }
-    frameData.send(frameData.messageQueue);
-    frameData.messageQueue = [];
+  static getFrameData_(frameUrl) {
+    return Transport.crossDomainIframes_[frameUrl];
   }
 }
 
 /** @private @const {!Object<string,boolean>} */
 Transport.usedIds_ = {};
 
-/** @private @const {Object<string,Object<string,*>>} */
+/** @private @const {Object<string,FrameData>} */
 Transport.crossDomainIframes_ = {};
-
-/** @private @const {!Object} */
-Transport.timer_ = timerFor(AMP.win);
 
 /** @private {number} */
 Transport.nextId_ = 0;
@@ -425,7 +371,7 @@ export function sendRequestUsingIframe(win, request) {
   const iframe = win.document.createElement('iframe');
   setStyle(iframe, 'display', 'none');
   iframe.onload = iframe.onerror = () => {
-    Transport.timer_.delay(() => {
+    timerFor(win).delay(() => {
       removeElement(iframe);
     }, 5000);
   };

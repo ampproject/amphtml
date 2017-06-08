@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
+// TODO(jonkeller): Extern this
 /** @private @const {Object<string,string>} */
 export const AMP_ANALYTICS_3P_MESSAGE_TYPE = {
   READY: 'Ready',
-  NEW: 'New',
-  MESSAGES: 'Messages',
-  EVENT: 'Event',
+  CREATIVES: 'Creatives',
+  CREATIVE: 'Creative', /* Can't be sent standalone, only within CREATIVES */
+  EVENTS: 'Events',
+  EVENT: 'Event', /* Can't be sent standalone, only within EVENTS */
   RESPONSE: 'Response',
 };
-/* ampAnalytics3pEvent and ampAnalytics3pNewCreative may only be contained
- within MESSAGES */
 
 /** @typedef {{
  *    sentinel: (string|undefined),
@@ -39,6 +39,21 @@ export let ampAnalytics3pReadyMessage;
 // need to add it, this is done by iframe-messaging-client.
 
 /** @typedef {{
+ *    sentinel: (string|undefined),
+ *    type: !string,
+ *    ampAnalytics3pNewCreatives: Array<ampAnalytics3pEvent>
+ *  }} */
+export let ampAnalytics3pNewCreatives;
+// Example:
+// {
+//   "sentinel":"20354662305315974",
+//   "type":"ampAnalytics3pNewCreatives",
+//   "ampAnalytics3pNewCreatives":[
+//     ...
+//   ]
+// }
+
+/** @typedef {{
  *    senderId: !string,
  *    type: !string,
  *    ampAnalytics3pNewCreative: !string
@@ -50,6 +65,22 @@ export let ampAnalytics3pNewCreative;
 //   "type":"ampAnalytics3pNewCreative",
 //   "ampAnalytics3pNewCreative":"ThisIsExtraData"
 // }
+
+/** @typedef {{
+ *    sentinel: (string|undefined),
+ *    type: !string,
+ *    ampAnalytics3pEvents: Array<ampAnalytics3pEvent>
+ *  }} */
+export let ampAnalytics3pEvents;
+// Example: {
+//   "sentinel":"20354662305315974",
+//   "type":"ampAnalytics3pEvents",
+//   "ampAnalytics3pEvents":[
+//     ...
+//   ]
+// }
+// The sentinel value will be present when received but the sender doesn't
+// need to add it, this is done by iframe-messaging-client.
 
 /** @typedef {{
  *    senderId: !string,
@@ -75,22 +106,6 @@ export let ampAnalytics3pResponse;
 //   "sentinel":"20354662305315974",
 //   "destination":"8117602251459417",
 //   "ampAnalytics3pResponse":{"status":"received","somethingElse":"42"}
-// }
-// The sentinel value will be present when received but the sender doesn't
-// need to add it, this is done by iframe-messaging-client.
-
-/** @typedef {{
- *    sentinel: (string|undefined),
- *    type: !string,
- *    ampAnalytics3pMessages: Array<(ampAnalytics3pNewCreative|ampAnalytics3pEvent)>
- *  }} */
-export let ampAnalytics3pMessages;
-// Example: {
-//   "type":"ampAnalytics3pMessages",
-//   "sentinel":"20354662305315974",
-//   "ampAnalytics3pMessages":[
-//     ...
-//   ]
 // }
 // The sentinel value will be present when received but the sender doesn't
 // need to add it, this is done by iframe-messaging-client.

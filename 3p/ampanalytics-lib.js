@@ -17,11 +17,12 @@
 import './polyfills';
 import {dev} from '../src/log';
 import {initLogConstructor, setReportError} from '../src/log';
-import {reportError} from '../src/error';
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {AMP_ANALYTICS_3P_MESSAGE_TYPE} from '../src/3p-analytics-common';
 initLogConstructor();
-setReportError(reportError);
+// TODO(alanorozco): Refactor src/error.reportError so it does not contain big
+// transitive dependencies and can be included here.
+setReportError(() => {});
 
 /** @private @const {string} */
 const TAG_ = 'ampanalytics-lib';
@@ -61,23 +62,36 @@ class AmpAnalytics3pMessageRouter {
       return;
     }
     this.iframeMessagingClient_.registerCallback(
-      AMP_ANALYTICS_3P_MESSAGE_TYPE.MESSAGES,
-      messages => {
-        // All the messages are for this frame, but may come from different
-        // creatives.
-        messages[AMP_ANALYTICS_3P_MESSAGE_TYPE.MESSAGES].forEach(msg => {
-          if (!this.creativeMessageRouters_[msg.senderId]) {
-            this.creativeMessageRouters_[msg.senderId] =
-              new AmpAnalytics3pCreativeMessageRouter(this, this.sentinel_,
-                msg.senderId);
-          }
-          this.creativeMessageRouters_[msg.senderId].receiveMessage(msg);
+      AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVES,
+      envelope => {
+        dev().assert(envelope[AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVES],
+          'Received empty events envelope');
+        // Iterate through the array of "new creative" events, and for each
+        // one, create an AmpAnalytics3pCreativeMessageRouter.
+        envelope[AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVES].forEach(creative => {
+          this.creativeMessageRouters_[creative.senderId] =
+            this.creativeMessageRouters_[creative.senderId] ||
+            new AmpAnalytics3pCreativeMessageRouter(this, this.sentinel_,
+              creative.senderId);
+          this.creativeMessageRouters_[creative.senderId]
+            .receiveNewCreativeMessage(creative);
         });
-        Object.entries(this.creativeMessageRouters_).forEach(
-          entry => {
-            const creativeMessageRouter = entry[1];
-            creativeMessageRouter.sendQueuedMessagesToListeners();
-          });
+      });
+    this.iframeMessagingClient_.registerCallback(
+      AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENTS,
+      envelope => {
+        dev().assert(envelope[AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENTS],
+          'Received empty events envelope');
+        // Iterate through the array of events, dispatching each to the
+        // listener for the appropriate creative
+        envelope[AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENTS].forEach(event => {
+          dev().assert(this.creativeMessageRouters_[event.senderId],
+            'Received event message prior to new creative message.' +
+            ' Discarding.');
+          this.creativeMessageRouters_[event.senderId]
+            .receiveEventMessage(event);
+        });
+        this.flushQueues_();
       });
     this.sendReadyMessageToCreative_();
   }
@@ -109,6 +123,24 @@ class AmpAnalytics3pMessageRouter {
   sendMessage(type, opt_payload) {
     this.iframeMessagingClient_.sendMessage(type, opt_payload);
   }
+
+  /**
+   * Instructs each AmpAnalytics3pCreativeMessageRouter instances to send its
+   * queued messages to its listener (if if has a listener yet).
+   * @private
+   */
+  flushQueues_() {
+    Object.entries(this.creativeMessageRouters_).forEach(
+      entry => {
+        try {
+          const creativeMessageRouter = entry[1];
+          creativeMessageRouter.sendQueuedMessagesToListener();
+        } catch (e) {
+          dev().error(TAG_, 'Caught exception executing listener for ' +
+            entry[0] + ': ' + e.message);
+        }
+      });
+  }
 }
 
 new AmpAnalytics3pMessageRouter(window);
@@ -137,14 +169,14 @@ class AmpAnalytics3pCreativeMessageRouter {
     this.extraData_ = null;
 
     /**
-     * @private {!Array<Object<string,*>>}
+     * private {!Array<ampAnalytics3pEvent>}
      */
     this.receivedMessagesQueue_ = [];
 
     /**
-     * @private {!Array<!function(Array)>}
+     * private {function(Array<ampAnalytics3pEvent>)=}
      */
-    this.eventListeners_ = [];
+    this.eventListener_ = null;
 
     if (this.parent_.getWindow().onNewAmpAnalyticsInstance) {
       this.parent_.getWindow().onNewAmpAnalyticsInstance(this);
@@ -155,24 +187,30 @@ class AmpAnalytics3pCreativeMessageRouter {
   }
 
   /**
-   * Registers a callback function to be called when AMP Analytics events occur
-   * @param {!function(!Array)} listener A function that takes an array of event
-   * strings, and does something with them.
+   * Registers a callback function to be called when AMP Analytics events occur.
+   * There may only be one listener. If another function has previously been
+   * registered as a listener, it will no longer receive events.
+   * @param {!function(!Array<ampAnalytics3pEvent>)} listener A function
+   * that takes an array of event strings, and does something with them.
    */
   registerAmpAnalytics3pEventsListener(listener) {
-    this.eventListeners_.push(listener);
+    this.eventListener_ = listener;
   }
 
   /**
    * Receives a message from a creative for the cross-domain iframe
-   * @param {Object<string,*>} message The message that was received
+   * @param {ampAnalytics3pNewCreative} message The message that was received
    */
-  receiveMessage(message) {
-    if (message[AMP_ANALYTICS_3P_MESSAGE_TYPE.NEW]) {
-      this.extraData_ = message[AMP_ANALYTICS_3P_MESSAGE_TYPE.NEW];
-    } else {
-      this.receivedMessagesQueue_.push(message);
-    }
+  receiveNewCreativeMessage(message) {
+    this.extraData_ = message[AMP_ANALYTICS_3P_MESSAGE_TYPE.NEW];
+  }
+
+  /**
+   * Receives a message from a creative for the cross-domain iframe
+   * @param {ampAnalytics3pEvent} message The message that was received
+   */
+  receiveEventMessage(message) {
+    this.receivedMessagesQueue_.push(message);
   }
 
   /**
@@ -182,14 +220,11 @@ class AmpAnalytics3pCreativeMessageRouter {
    * If there is no event listener on the page yet, event messages will remain
    * in the queue.
    */
-  sendQueuedMessagesToListeners() {
-    if (this.receivedMessagesQueue_.length == 0 ||
-      this.eventListeners_.length == 0) {
+  sendQueuedMessagesToListener() {
+    if (!this.receivedMessagesQueue_ || !this.eventListener_) {
       return;
     }
-    this.eventListeners_.forEach(listener => {
-      listener(this.receivedMessagesQueue_);
-    });
+    this.eventListener_(this.receivedMessagesQueue_);
     this.receivedMessagesQueue_ = [];
   }
 
@@ -205,7 +240,7 @@ class AmpAnalytics3pCreativeMessageRouter {
   /**
    * Sends a message from the third-party vendor's metrics-collection page back
    * to the creative.
-   * @param {!Object} message The message to send.
+   * @param {!ampAnalytics3pResponse} message The message to send.
    */
   sendMessageToCreative(message) {
     const envelope = {destination: this.creativeId_};
