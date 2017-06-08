@@ -43,6 +43,7 @@ env:
   global:
     - SAUCE_USERNAME="amphtml"
     - NPM_CONFIG_PROGRESS="false"
+    - SAUCE_USERNAME="amphtml"
   matrix:
     - BUILD_SHARD="pre_build_checks_and_unit_tests"
     - BUILD_SHARD="integration_tests"
