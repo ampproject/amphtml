@@ -81,7 +81,7 @@ class AmpImaVideo extends AMP.BaseElement {
         }
         const tmp = document.createElement('div');
         tmp.appendChild(source);
-        sources.push(tmp.innerHTML);
+        sources.push(tmp./*REVIEW*/innerHTML);
       });
       this.element.setAttribute('data-sources', JSON.stringify(sources));
     }
