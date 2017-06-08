@@ -47,7 +47,7 @@ import {parseQueryString} from '../../../src/url';
 export let A4aExperimentBranches;
 
 /** @type {!string} @private */
-const MANUAL_EXPERIMENT_ID = '117152632';
+export const MANUAL_EXPERIMENT_ID = '117152632';
 
 /** @type {!string} @private */
 const EXTERNALLY_SELECTED_ID = '2088461';
