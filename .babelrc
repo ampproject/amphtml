@@ -3,7 +3,7 @@
     ["env", {
       "loose": true,
       "targets": {
-        "browsers": ["Last 1 Chrome versions"]
+        "browsers": ["Last 2 versions"]
       },
       "modules": "commonjs"
     }]

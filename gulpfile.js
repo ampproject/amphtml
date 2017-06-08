@@ -820,7 +820,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
   if (process.env.TRAVIS) {
     browsers.push('last 2 versions', 'safari >= 9');
   } else {
-    browsers.push('Last 1 Chrome versions');
+    browsers.push('Last 4 Chrome versions');
   }
 
   var bundler = browserify(srcDir + srcFilename, {debug: true})
