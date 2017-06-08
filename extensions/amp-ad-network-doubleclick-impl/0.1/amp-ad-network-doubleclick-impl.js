@@ -385,7 +385,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.sraResponseResolver = sraInitializer.resolver;
     this.sraResponseRejector = sraInitializer.rejector;
     this.sraResponsePromise_ = sraInitializer.promise;
-    this.responseHeaders_ = null;
     this.qqid_ = null;
   }
 
