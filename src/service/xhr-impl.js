@@ -468,6 +468,9 @@ export class FetchResponse {
 
     /** @type {boolean} */
     this.bodyUsed = false;
+
+    /** @type {?ReadableStream} */
+    this.body = null;
   }
 
   /**
