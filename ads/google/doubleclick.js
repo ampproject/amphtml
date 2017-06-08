@@ -67,13 +67,12 @@ export function doubleclick(global, data) {
 
   let url = 'https://www.googletagservices.com/tag/js/';
   let sf = false;
+  const expIds = data['experimentId'];
 
-  if (data['experimentId'] && data['experimentId'].split(',')
-      .includes('21060540')) {
+  if (expIds && expIds.indexOf('21060540') > -1) {
     url += 'gpt_sf_a.js';
     sf = true;
-  } else if (data['experimentId'] && data['experimentId'].split(',')
-      .includes('21060541')) {
+  } else if (expIds && expIds.indexOf('21060541') > -1) {
     url += 'gpt_sf_b.js';
     sf = true;
   } else {
