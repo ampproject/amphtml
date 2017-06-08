@@ -143,24 +143,17 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
   win['ampAdGoogleIfiCounter'] = win['ampAdGoogleIfiCounter'] || 1;
   const slotRect = a4a.getPageLayoutBox();
   const iframeDepth = iframeNestingDepth(win);
-  // Detect container types.
-  const containerTypeSet = {};
-  for (let el = adElement.parentElement, counter = 0;
-      el && counter < 20; el = el.parentElement, counter++) {
-    const tagName = el.tagName.toUpperCase();
-    if (ValidAdContainerTypes[tagName]) {
-      containerTypeSet[ValidAdContainerTypes[tagName]] = true;
-    }
-  }
+  const enclosingContainers = getEnclosingContainerTypes(adElement);
   const pfx =
-      (containerTypeSet[ValidAdContainerTypes['AMP-FX-FLYING-CARPET']]
-       || containerTypeSet[ValidAdContainerTypes['AMP-STICKY-AD']])
+      (enclosingContainers.indexOf(
+          ValidAdContainerTypes['AMP-FX-FLYING-CARPET']) != -1
+       || enclosingContainers.indexOf(
+           ValidAdContainerTypes['AMP-STICKY-AD']) != -1)
       ? '1' : '0';
   let eids = adElement.getAttribute('data-experiment-id');
   if (opt_experimentIds) {
     eids = mergeExperimentIds(opt_experimentIds, eids);
   }
-  const containerTypeArray = Object.keys(containerTypeSet);
   return {
     'ifi': win['ampAdGoogleIfiCounter']++,
     'adf': domFingerprint(adElement),
@@ -171,7 +164,7 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
     'oid': '2',
     pfx,
     'rc': a4a.fromResumeCallback ? 1 : null,
-    'act': containerTypeArray.length ? containerTypeArray.join() : null,
+    'act': enclosingContainers.length ? enclosingContainers.join() : null,
   };
 }
 
@@ -274,93 +267,6 @@ export function truncAndTimeUrl(baseUrl, parameters, startTime) {
   return buildUrl(
       baseUrl, parameters, MAX_URL_LENGTH - 10, {name: 'trunc', value: '1'})
     + '&dtd=' + elapsedTimeWithCeiling(Date.now(), startTime);
-  /** @const {!Promise<string>} */
-  const referrerPromise = viewerForDoc(a4a.getAmpDoc()).getReferrerUrl();
-  return getOrCreateAdCid(a4a.getAmpDoc(), 'AMP_ECID_GOOGLE', '_ga')
-      .then(clientId => referrerPromise.then(referrer => {
-        const adElement = a4a.element;
-        window['ampAdGoogleIfiCounter'] = window['ampAdGoogleIfiCounter'] || 1;
-        const slotNumber = window['ampAdGoogleIfiCounter']++;
-        const win = a4a.win;
-        const documentInfo = documentInfoForDoc(adElement);
-        // Read by GPT for GA/GPT integration.
-        win.gaGlobal = win.gaGlobal
-            || {cid: clientId, hid: documentInfo.pageViewId};
-        const slotRect = a4a.getPageLayoutBox();
-        const screen = win.screen;
-        const viewport = a4a.getViewport();
-        const viewportRect = viewport.getRect();
-        const iframeDepth = iframeNestingDepth(win);
-        const viewportSize = viewport.getSize();
-        const enclosingContainers = getEnclosingContainerTypes(adElement);
-        const pfx =
-            (enclosingContainers.indexOf(
-                ValidAdContainerTypes['AMP-FX-FLYING-CARPET']) != -1
-             || enclosingContainers.indexOf(
-                 ValidAdContainerTypes['AMP-STICKY-AD']) != -1)
-            ? '1' : '0';
-        queryParams.push({name: 'act', value: enclosingContainers.join()});
-        if (isCanary(win)) {
-          // The semantics here are:
-          //   0: production branch (this is never actually sent)
-          //   1: control branch (this is not yet supported, so is never sent)
-          //   2: canary branch
-          queryParams.push({name: 'art', value: '2'});
-        }
-        let eids = adElement.getAttribute('data-experiment-id');
-        if (opt_experimentIds) {
-          eids = mergeExperimentIds(opt_experimentIds, eids);
-        }
-        const allQueryParams = queryParams.concat(
-          [
-            {
-              name: 'is_amp',
-              value: AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
-            },
-        {name: 'amp_v', value: '$internalRuntimeVersion$'},
-        {name: 'd_imp', value: '1'},
-        {name: 'dt', value: startTime},
-        {name: 'ifi', value: slotNumber},
-        {name: 'adf', value: domFingerprint(adElement)},
-        {name: 'c', value: getCorrelator(win, clientId)},
-        {name: 'output', value: 'html'},
-        {name: 'nhd', value: iframeDepth},
-        {name: 'iu', value: adElement.getAttribute('data-ad-slot')},
-        {name: 'eid', value: eids},
-        {name: 'biw', value: viewportRect.width},
-        {name: 'bih', value: viewportRect.height},
-        {name: 'adx', value: slotRect.left},
-        {name: 'ady', value: slotRect.top},
-        {name: 'u_aw', value: screen ? screen.availWidth : null},
-        {name: 'u_ah', value: screen ? screen.availHeight : null},
-        {name: 'u_cd', value: screen ? screen.colorDepth : null},
-        {name: 'u_w', value: screen ? screen.width : null},
-        {name: 'u_h', value: screen ? screen.height : null},
-        {name: 'u_tz', value: -new Date().getTimezoneOffset()},
-        {name: 'u_his', value: getHistoryLength(win)},
-        {name: 'oid', value: '2'},
-        {name: 'brdim', value: additionalDimensions(win, viewportSize)},
-        {name: 'isw', value: viewportSize.width},
-        {name: 'ish', value: viewportSize.height},
-        {name: 'pfx', value: pfx},
-        {name: 'rc', value: a4a.fromResumeCallback ? 1 : null},
-          ],
-      unboundedQueryParams,
-          [
-        {name: 'url', value: documentInfo.canonicalUrl},
-        {name: 'top', value: iframeDepth ? topWindowUrlOrDomain(win) : null},
-            {
-              name: 'loc',
-              value: win.location.href == documentInfo.canonicalUrl ?
-            null : win.location.href,
-            },
-        {name: 'ref', value: referrer},
-          ]
-    );
-        const url = buildUrl(baseUrl, allQueryParams, MAX_URL_LENGTH - 10,
-                         {name: 'trunc', value: '1'});
-        return url + '&dtd=' + elapsedTimeWithCeiling(Date.now(), startTime);
-      }));
 }
 
 /**

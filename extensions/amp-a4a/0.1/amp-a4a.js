@@ -45,7 +45,6 @@ import {cryptoFor} from '../../../src/crypto';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
 import {assertHttpsUrl} from '../../../src/url';
-import {timerFor} from '../../../src/services';
 import {handleClick} from '../../../ads/alp/handler';
 import {
   getDefaultBootstrapBaseUrl,
@@ -798,52 +797,6 @@ export class AmpA4A extends AMP.BaseElement {
         });
       }, 250);
     });
-  }
-
-  /**
-   * Measures the amount of time until last ad url generation for all amp-ad
-   * elements of this type.
-   * @private
-   */
-  measureGetAdUrlsDelay_() {
-    const startTime = Date.now();
-    const type = this.element.getAttribute('type');
-    const promiseId = this.promiseId_;
-    // Only execute once per page, this includes potential pauseCallback flows.
-    if ((type != 'adsense' && type != 'doubleclick') ||
-      this.win[`a4a-measuring-ad-urls-${type}`]) {
-      return;
-    }
-    this.win[`a4a-measuring-ad-urls-${type}`] =
-     resourcesForDoc(this.element).getMeasuredResources(this.win,
-       r => {
-         return r.element.tagName == 'AMP-AD' &&
-           r.element.getAttribute('type') == type;
-       })
-     .then(resources => {
-       if (promiseId != this.promiseId_) {
-         throw cancellation();
-       }
-       const getAdUrlsPromise = resources.map(r => r.element.getImpl().then(
-         // Note that ad url promise could be null if isValidElement returns
-         // false.
-         instance => instance.adUrlsPromise_));
-       return Promise.all(getAdUrlsPromise).then(adUrls => {
-         if (promiseId != this.promiseId_) {
-           throw cancellation();
-         }
-         this.protectedEmitLifecycleEvent_(
-             'sraBuildRequestDelay', {
-               'met.delta.AD_SLOT_ID': Math.round(Date.now() - startTime),
-               'totalSlotCount.AD_SLOT_ID': adUrls.length,
-               'totalUrlCount.AD_SLOT_ID': adUrls.filter(url => !!url).length,
-               'type.AD_SLOT_ID': type,
-               'totalQueriedSlotCount.AD_SLOT_ID':
-                  this.win.document.querySelectorAll(`amp-ad[type=${type}]`)
-                    .length,
-             });
-       });
-     });
   }
 
   /**
