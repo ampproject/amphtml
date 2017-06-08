@@ -154,7 +154,7 @@ export class Resources {
     this.lastVelocity_ = 0;
 
     /** @const {!Pass} */
-    this.pass_ = new Pass(this.win, () => this.doPass_());
+    this.pass_ = new Pass(this.win, () => this.doPass());
 
     /** @const {!TaskQueue} */
     this.exec_ = new TaskQueue();
@@ -969,7 +969,7 @@ export class Resources {
       return;
     }
     this.vsyncScheduled_ = true;
-    this.vsync_.mutate(() => this.doPass_());
+    this.vsync_.mutate(() => this.doPass());
   }
 
   /**
@@ -981,8 +981,7 @@ export class Resources {
     this.schedulePass();
   }
 
-  /** @private */
-  doPass_() {
+  doPass() {
     if (!this.isRuntimeOn_) {
       dev().fine(TAG_, 'runtime is off');
       return;

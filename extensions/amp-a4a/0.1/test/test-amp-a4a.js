@@ -34,7 +34,6 @@ import {Extensions} from '../../../../src/service/extensions-impl';
 import {Viewer} from '../../../../src/service/viewer-impl';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {cryptoFor} from '../../../../src/crypto';
-import {isExperimentOn, toggleExperiment} from '../../../../src/experiments';
 import {cancellation} from '../../../../src/error';
 import {
   data as validCSSAmp,
@@ -92,8 +91,11 @@ describe('amp-a4a', () => {
         method: 'GET',
         ampCors: false,
         credentials: 'omit',
-      }).returns(
-        Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]}));
+      }).returns(Promise.resolve({
+        json() {
+          return Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]});
+        },
+      }));
     viewerWhenVisibleMock = sandbox.stub(Viewer.prototype, 'whenFirstVisible');
     viewerWhenVisibleMock.returns(Promise.resolve());
     mockResponse = {
@@ -368,20 +370,6 @@ describe('amp-a4a', () => {
         expect(a4a.unlayoutCallback()).to.be.false;
         expect(a4a.friendlyIframeEmbed_).to.exist;
         expect(destroySpy).to.not.be.called;
-      });
-    });
-
-    it('should reset state to null on FIE unlayoutCallback if exp set', () => {
-      toggleExperiment(fixture.win, 'a4a-fie-unlayout-enabled', true, true);
-      a4a.buildCallback();
-      a4a.onLayoutMeasure();
-      return a4a.layoutCallback().then(() => {
-        expect(a4a.friendlyIframeEmbed_).to.exist;
-        const destroySpy = sandbox.spy();
-        a4a.friendlyIframeEmbed_.destroy = destroySpy;
-        expect(a4a.unlayoutCallback()).to.be.true;
-        expect(a4a.friendlyIframeEmbed_).to.not.exist;
-        expect(destroySpy).to.be.calledOnce;
       });
     });
 
@@ -807,34 +795,6 @@ describe('amp-a4a', () => {
           a4a.resumeCallback();
           expect(onLayoutMeasureSpy).to.not.be.called;
           expect(a4a.fromResumeCallback).to.be.false;
-        });
-      });
-    });
-    it('resumeCallback does call onLayoutMeasure for FIE if exp set', () => {
-      xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
-      return createIframePromise().then(fixture => {
-        setupForAdTesting(fixture);
-        const doc = fixture.doc;
-        const a4aElement = createA4aElement(doc);
-        const s = doc.createElement('style');
-        s.textContent = '.fixed {position:fixed;}';
-        doc.head.appendChild(s);
-        toggleExperiment(fixture.win, 'a4a-fie-unlayout-enabled', true, true);
-        const a4a = new MockA4AImpl(a4aElement);
-        const renderAmpCreativeSpy = sandbox.spy(a4a, 'renderAmpCreative_');
-        a4a.buildCallback();
-        a4a.onLayoutMeasure();
-        expect(a4a.adPromise_).to.be.ok;
-        return a4a.layoutCallback().then(() => {
-          expect(renderAmpCreativeSpy.calledOnce,
-              'renderAmpCreative_ called exactly once').to.be.true;
-          a4a.unlayoutCallback();
-          const onLayoutMeasureSpy = sandbox.spy(a4a, 'onLayoutMeasure');
-          sandbox.stub(AmpA4A.prototype, 'getResource').returns(
-            {'hasBeenMeasured': () => true, 'isMeasureRequested': () => false});
-          a4a.resumeCallback();
-          expect(onLayoutMeasureSpy).to.be.called;
-          expect(a4a.fromResumeCallback).to.be.true;
         });
       });
     });
@@ -2007,8 +1967,6 @@ describe('amp-a4a', () => {
         fixture = f;
         win = fixture.win;
         a4aElement = createA4aElement(fixture.doc);
-        toggleExperiment(
-          win, 'a4a-disable-cryptokey-viewer-check', false, true);
         return fixture;
       });
     });
@@ -2069,23 +2027,6 @@ describe('amp-a4a', () => {
       });
     });
 
-    it('should not wait for first visible if exp disabled', () => {
-      toggleExperiment(win, 'a4a-disable-cryptokey-viewer-check', true, true);
-      expect(isExperimentOn(win, 'a4a-disable-cryptokey-viewer-check'))
-        .to.be.true;
-      expect(win.ampA4aValidationKeys).not.to.exist;
-      // Key fetch happens on A4A class construction.
-      const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
-      a4a.buildCallback();
-      const result = win.ampA4aValidationKeys;
-      expect(result).to.be.instanceof(Array);
-      expect(result).to.have.lengthOf(1);  // Only one service.
-      return Promise.all(result).then(() => {
-        expect(viewerWhenVisibleMock).to.not.be.called;
-        expect(xhrMockJson).to.be.calledOnce;
-      });
-    });
-
     it('should fetch multiple keys', () => {
       // For our purposes, re-using the same key is fine.
       const testKey = JSON.parse(validCSSAmp.publicKey);
@@ -2095,8 +2036,11 @@ describe('amp-a4a', () => {
             method: 'GET',
             ampCors: false,
             credentials: 'omit',
-          }).returns(
-          Promise.resolve({keys: [testKey, testKey, testKey]}));
+          }).returns(Promise.resolve({
+            json() {
+              return Promise.resolve({keys: [testKey, testKey, testKey]});
+            },
+          }));
       expect(win.ampA4aValidationKeys).not.to.exist;
       // Key fetch happens on A4A class construction.
       const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
@@ -2133,8 +2077,13 @@ describe('amp-a4a', () => {
             method: 'GET',
             ampCors: false,
             credentials: 'omit',
-          }).returns(
-              Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]}));
+          }).returns(Promise.resolve({
+            json() {
+              return Promise.resolve({keys: [
+                JSON.parse(validCSSAmp.publicKey),
+              ]});
+            },
+          }));
       expect(win.ampA4aValidationKeys).not.to.exist;
       // Key fetch happens on A4A class construction.
       const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
@@ -2165,7 +2114,11 @@ describe('amp-a4a', () => {
             method: 'GET',
             ampCors: false,
             credentials: 'omit',
-          }).returns(Promise.resolve({keys: ['invalid key data']}));
+          }).returns(Promise.resolve({
+            json() {
+              return Promise.resolve({keys: ['invalid key data']});
+            },
+          }));
       expect(win.ampA4aValidationKeys).not.to.exist;
       // Key fetch happens on A4A class construction.
       const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
