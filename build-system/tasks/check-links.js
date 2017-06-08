@@ -16,6 +16,7 @@
 'use strict';
 
 var argv = require('minimist')(process.argv.slice(2));
+var path = require('path');
 var BBPromise = require('bluebird');
 var chalk = require('chalk');
 var fs = require('fs-extra');
@@ -107,11 +108,9 @@ function checkLinks() {
 function isLinkToFileAddedInPR(link) {
   var filesAdded = getStdout(
       `git diff --name-only --diff-filter=A master...HEAD`).trim().split('\n');
-  var addedInPr = false;
-  filesAdded.forEach(function(file) {
-    if (file.length > 0 && link.includes(file)) addedInPr = true;
+  return filesAdded.some(function(file) {
+    return (file.length > 0 && link.includes(path.parse(file).base));
   });
-  return addedInPr;
 }
 
 /**
