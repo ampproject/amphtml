@@ -37,10 +37,7 @@ import {rewriteAttributeValue} from '../../../src/sanitizer';
 import {waitForBodyPromise} from '../../../src/dom';
 import {AmpEvents} from '../../../src/amp-events';
 import {BindEvents} from './bind-events';
-<<<<<<< HEAD
 
-=======
->>>>>>> refactor: create separate Bind Events enum file
 const TAG = 'amp-bind';
 
 /**

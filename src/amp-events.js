@@ -1,6 +1,7 @@
 /**
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
  * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 =======
  * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
@@ -8,6 +9,9 @@
 =======
  * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 >>>>>>> refactor: create separate Bind Events enum file
+=======
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+>>>>>>> 8bc197821b7802c0b7796cf9fee34dbf9c658706
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

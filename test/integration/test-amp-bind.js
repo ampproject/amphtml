@@ -56,7 +56,10 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
 
   /** @return {!Promise} */
   function waitForBindApplication() {
-    return fixture.awaitEvent(BindEvents.SET_STATE, ++numSetStates);
+    // Bind should be available, but need to wait for actions to resolve
+    // service promise for bind and call setState.
+    return bindForDoc(ampdoc).then(unusedBind =>
+        fixture.awaitEvent(BindEvents.SET_STATE, ++numSetStates));
   }
 
   /** @return {!Promise} */
