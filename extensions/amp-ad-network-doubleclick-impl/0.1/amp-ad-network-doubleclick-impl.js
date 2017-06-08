@@ -26,11 +26,14 @@ import {
 } from '../../../ads/google/a4a/traffic-experiments';
 import {
   extractGoogleAdCreativeAndSignature,
-  googleAdUrl,
+  googleQueryParams,
   isGoogleAdsA4AValidEnvironment,
   AmpAnalyticsConfigDef,
   extractAmpAnalyticsConfig,
+  elapsedTimeWithCeiling,
+  MAX_URL_LENGTH,
 } from '../../../ads/google/a4a/utils';
+import {buildUrl} from '../../../ads/google/a4a/url-builder';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {
   googleLifecycleReporterFactory,
@@ -38,8 +41,9 @@ import {
 } from '../../../ads/google/a4a/google-data-reporter';
 import {stringHash32} from '../../../src/crypto';
 import {removeElement} from '../../../src/dom';
+import {tryParseJson} from '../../../src/json';
 import {dev} from '../../../src/log';
-import {extensionsFor} from '../../../src/services';
+import {extensionsFor, timerFor, xhrFor} from '../../../src/services';
 import {isExperimentOn} from '../../../src/experiments';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {insertAnalyticsElement} from '../../../src/analytics';
@@ -94,6 +98,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getAdUrl() {
     // TODO: Check for required and allowed parameters. Probably use
     // validateData, from 3p/3p/js, after noving it someplace common.
+    const rtcConfig = tryParseJson(
+        document.getElementById('amp-rtc').innerHTML);
+    const rtcRequestPromise = (rtcConfig && typeof rtcConfig == 'object') ?
+        this.sendRtcRequestPromise(/** @type {!Object} */(rtcConfig)) : null;
+    let queryParams;
+
     const startTime = Date.now();
     const global = this.win;
     const width = Number(this.element.getAttribute('width'));
@@ -130,7 +140,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           .join('|');
     }
 
-    return googleAdUrl(this, DOUBLECLICK_BASE_URL, startTime, [
+    return googleQueryParams(this, DOUBLECLICK_BASE_URL, startTime, [
       {name: 'iu', value: this.element.getAttribute('data-slot')},
       {name: 'co', value: jsonParameters['cookieOptOut'] ? '1' : null},
       {name: 'adk', value: this.adKey_(sizeStr)},
@@ -149,7 +159,34 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             jsonParameters['targeting'] || null,
             jsonParameters['categoryExclusions'] || null),
       },
-    ], ['108809080']);
+    ], ['108809080']).then(allQueryParams => {
+      queryParams = allQueryParams;
+      return rtcRequestPromise;
+    }).then(targeting => {
+      let index;
+      if (targeting) {
+        for (let i = 0; i < queryParams.length; i++) {
+          if (queryParams[i].name == 'scp') {
+            index = i;
+            break;
+          }
+        }
+        const jsonTargeting = JSON.parse(jsonParamters['targeting']);
+        if (jsonTargeting && typeof jsonTargeting == 'object') {
+          queryParams[index].value = serializeTargeting(
+              Object.assign(/** @type {!Object} */(jsonTargeting),
+                  JSON.parse(targeting)),
+              jsonParameters['categoryExclusions'] || null);
+        } else {
+          queryParams[index].value = serializeTargeting(
+              JSON.parse(targeting),
+              jsonParameters['categoryExclusions'] || null);
+        }
+      }
+      const url = buildUrl(DOUBLECLICK_BASE_URL, queryParams,
+                           MAX_URL_LENGTH - 10, {name: 'trunc', value: '1'});
+      return url + '&dtd=' + elapsedTimeWithCeiling(Date.now(), startTime);
+    });
   }
 
   /** @override */
@@ -255,6 +292,34 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         && (width <= pWidth && height <= pHeight)) {
       this.attemptChangeSize(height, width).catch(() => {});
     }
+  }
+
+  /**
+   * Sends RTC request as specified by rtcConfig. Returns promise which
+   * resolves to the targeting informtation from the request response.
+   * @param {!Object} rtcConfig
+   * @return {?Promise} The rtc targeting info to attach to the ad url.
+   * @private
+   */
+  sendRtcRequestPromise(rtcConfig) {
+    let endpoint;
+    const init = {
+      headers: {
+        'Access-Control-Allow-Credentials': true
+      }
+    };
+
+    try {
+      endpoint = rtcConfig['doubleclick']['endpoint'];
+    } catch (err) {
+      // report error
+      return null;
+    }
+
+    const rtcResponse = xhrFor(this.win).fetchJson(endpoint);
+
+    const timeout = timerFor(window).timeoutPromise(2000);
+    return Promise.race([rtcResponse, timeout]);
   }
 
   /** @override */

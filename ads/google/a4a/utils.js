@@ -40,7 +40,7 @@ const CREATIVE_SIZE_HEADER = 'X-CreativeSize';
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
 
 /** @const {number} */
-const MAX_URL_LENGTH = 4096;
+export const MAX_URL_LENGTH = 4096;
 
 /** @enum {string} */
 const AmpAdImplementation = {
@@ -140,6 +140,18 @@ export function isReportingEnabled(ampElement) {
 export function googleAdUrl(
     a4a, baseUrl, startTime, queryParams, unboundedQueryParams,
     opt_experimentIds) {
+  return googleQueryParams(
+      a4a, baseUrl, startTime, queryParams, unboundedQueryParams,
+      opt_experimentIds).then(allQueryParams => {
+        const url = buildUrl(baseUrl, allQueryParams, MAX_URL_LENGTH - 10,
+                             {name: 'trunc', value: '1'});
+        return url + '&dtd=' + elapsedTimeWithCeiling(Date.now(), startTime);
+      });
+}
+
+export function googleQueryParams(
+    a4a, baseUrl, startTime, queryParams, unboundedQueryParams,
+    opt_experimentIds) {
   // TODO: Maybe add checks in case these promises fail.
   /** @const {!Promise<string>} */
   const referrerPromise = viewerForDoc(a4a.getAmpDoc()).getReferrerUrl();
@@ -231,10 +243,8 @@ export function googleAdUrl(
         {name: 'ref', value: referrer},
           ]
     );
-        const url = buildUrl(baseUrl, allQueryParams, MAX_URL_LENGTH - 10,
-                         {name: 'trunc', value: '1'});
-        return url + '&dtd=' + elapsedTimeWithCeiling(Date.now(), startTime);
-      }));
+    return allQueryParams;
+  }));
 }
 
 /**
@@ -346,7 +356,7 @@ function secondWindowFromTop(win) {
  * @param {number} start
  * @return {(number|string)}
  */
-function elapsedTimeWithCeiling(time, start) {
+export function elapsedTimeWithCeiling(time, start) {
   const duration = time - start;
   if (duration >= 1e6) {
     return 'M';
