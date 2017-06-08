@@ -1224,28 +1224,28 @@ export class AmpA4A extends AMP.BaseElement {
     this.promiseErrorHandler_(
         new Error('fallback to 3p'),
         /* ignoreStack */ true);
-    incrementLoadingAds(this.win);
     // Haven't rendered yet, so try rendering via one of our
     // cross-domain iframe solutions.
     const method = this.experimentalNonAmpCreativeRenderMethod_;
+    let renderPromise = Promise.resolve(false);
     if ((method == XORIGIN_MODE.SAFEFRAME ||
          method == XORIGIN_MODE.NAMEFRAME) &&
         this.creativeBody_) {
-      const renderPromise = this.renderViaNameAttrOfXOriginIframe_(
+      renderPromise = this.renderViaNameAttrOfXOriginIframe_(
           this.creativeBody_);
       this.creativeBody_ = null;  // Free resources.
-      return renderPromise;
     } else if (this.adUrl_) {
       assertHttpsUrl(this.adUrl_, this.element);
-      return this.renderViaCachedContentIframe_(this.adUrl_);
+      renderPromise = this.renderViaCachedContentIframe_(this.adUrl_);
     } else {
       // Ad URL may not exist if buildAdUrl throws error or returns empty.
       // If error occurred, it would have already been reported but let's
       // report to user in case of empty.
       user().warn(TAG, this.element.getAttribute('type'),
         'No creative or URL available -- A4A can\'t render any ad');
-      return Promise.resolve(false);
     }
+    incrementLoadingAds(this.win, renderPromise);
+    return renderPromise;
   }
 
   /**
