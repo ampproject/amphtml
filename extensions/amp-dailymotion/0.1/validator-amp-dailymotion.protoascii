@@ -29,7 +29,7 @@ tags: {  # <amp-dailymotion>
   html_format: AMP
   tag_name: "AMP-DAILYMOTION"
   disallowed_ancestor: "AMP-SIDEBAR"
-  requires: "amp-dailymotion extension .js script"
+  requires_extension: "amp-dailymotion"
   attrs: { name: "autoplay" }
   attrs: {
     name: "data-endscreen-enable"

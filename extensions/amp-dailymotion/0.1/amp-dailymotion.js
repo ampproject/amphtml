@@ -15,7 +15,7 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {VideoEvents} from '../../../src/video-interface';
 import {
   installVideoManagerForDoc,
@@ -130,6 +130,11 @@ class AmpDailymotion extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.videoid_ = user().assert(
+        this.element.getAttribute('data-videoid'),
+        'The data-videoid attribute is required for <amp-dailymotion> %s',
+        this.element);
+
     installVideoManagerForDoc(this.element);
     videoManagerForDoc(this.element).register(this);
     this.playerReadyPromise_ = new Promise(resolve => {
@@ -143,15 +148,12 @@ class AmpDailymotion extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.videoid_ = user().assert(
-        this.element.getAttribute('data-videoid'),
-        'The data-videoid attribute is required for <amp-dailymotion> %s',
-        this.element);
     const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
+    dev().assert(this.videoid_);
     iframe.src = 'https://www.dailymotion.com/embed/video/' + encodeURIComponent(
-        this.videoid_) + '?' + this.getQuery_();
+        this.videoid_ || '') + '?' + this.getQuery_();
 
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
@@ -165,7 +167,7 @@ class AmpDailymotion extends AMP.BaseElement {
 
     this.hasAutoplay_ = this.element.hasAttribute('autoplay');
 
-    return this.playerReadyPromise_;
+    return this.loadPromise(this.iframe_);
   }
 
   /** @private */
@@ -326,14 +328,14 @@ class AmpDailymotion extends AMP.BaseElement {
    * @override
    */
   showControls() {
-    // Not supported.
+    // Not supported
   }
 
   /**
    * @override
    */
   hideControls() {
-    // Not supported.
+    // Not supported
   }
 };
 

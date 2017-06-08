@@ -50,7 +50,8 @@ describe.skip('amp-youtube', () => {
   });
 });
 
-describe.configure().run('amp-dailymotion', () => {
+//TODO(aghassemi, #9379): unskip
+describe.skip('amp-dailymotion', () => {
   runVideoPlayerIntegrationTests(fixture => {
     const video = fixture.doc.createElement('amp-dailymotion');
     video.setAttribute('data-videoid', 'x3rdtfy');
