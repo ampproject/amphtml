@@ -224,6 +224,7 @@ const command = {
     timedExecOrDie(`${gulp} clean`);
   },
   runLintChecks: function() {
+    timedExecOrDie(`${gulp} json-syntax`);
     timedExecOrDie(`${gulp} lint`);
   },
   buildRuntime: function() {
