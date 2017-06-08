@@ -31,7 +31,6 @@ function getTestElement() {
 
 
 describe('refresh-manager', () => {
-  let clock;
   let mockA4a;
   let sandbox;
 
@@ -42,12 +41,10 @@ describe('refresh-manager', () => {
       element: getTestElement(),
       refresh: () => {},
     };
-    clock = sinon.useFakeTimers();
   });
 
   afterEach(() => {
     sandbox.restore();
-    clock.restore();
   });
 
   it('should call getPublisherSpecifiedRefreshInterval_', () => {
