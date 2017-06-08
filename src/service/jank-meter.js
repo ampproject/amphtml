@@ -182,7 +182,10 @@ function isJankMeterEnabled(win) {
  * @returns {boolean}
  */
 function isLongTaskApiSupported(win) {
-  return !!win.PerformanceObserver
+  // TODO (@lannka, #9749) Turn performanceObserver on.
+  const tempOff = false;
+  return tempOff
+      && !!win.PerformanceObserver
       && !!win.TaskAttributionTiming
       && ('containerName' in win.TaskAttributionTiming.prototype);
 }
