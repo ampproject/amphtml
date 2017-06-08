@@ -21,7 +21,7 @@ import {
   getEnclosingContainerTypes,
   ValidAdContainerTypes,
 } from '../../../ads/google/a4a/utils';
-import {user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 
 /**
  * visibilePercentageMin - The percentage of pixels that need to be on screen
@@ -29,22 +29,21 @@ import {user} from '../../../src/log';
  * totalTimeMin - The total amount of time, in milliseconds, that the creative
  *   must be on screen in order to be considered "visible".
  * continuousTimeMin - The amount of continuous time, in milliseconds, that the
- *   creative must be on screen for in oreder to be considered "visible"
- * refreshInterval - The amount of time, in milliseconds, that must pass in
- *   between the creative being "seen" and the refresh trigger.
+ *   creative must be on screen for in oreder to be considered "visible".
  *
  * @typedef {{
  *   visiblePercentageMin: number,
  *   totalTimeMin: number,
  *   continuousTimeMin: number,
- *   refreshInterval: number,
  * }}
  */
 export let RefreshConfig;
 
 export const MIN_REFRESH_INTERVAL = 30;
 export const DATA_ATTR_NAME = 'data-enable-refresh';
-export const METADATA_NAME = 'amp-ad-enable-refresh';
+export const METATAG_NAME = 'amp-ad-enable-refresh';
+
+const TAG = 'AMP-AD';
 
 export class RefreshManager {
 
@@ -65,20 +64,7 @@ export class RefreshManager {
     /** @const @private {string} */
     this.adType_ = this.element_.getAttribute('type');
 
-    /**
-     * Represents the refresh interval in between refresh events. This is a
-     * string because this value comes directly from the data-attribute on the
-     * ad slot, and may have the value "false", indicating that this slot should
-     * not be refresh-enabled, the value "", indicating that the
-     * network-default refresh interval should be used, and null, indicating
-     * that the publisher has not enabled this slot for refresh.
-     *
-     * Note: a value of "false" differs from null in that the former implies
-     * that refresh is globally enabled on the page, but disabled for this
-     * specific slot, whereas null indicates that the publisher has not enabled
-     * refresh on the page (and therefore this slot) altogether.
-     *
-     * @const @private {?string} */
+    /** @const @private {?number} */
     this.refreshInterval_ = this.getPublisherSpecifiedRefreshInterval_();
 
     /** @const @private {!RefreshConfig} */
@@ -89,6 +75,9 @@ export class RefreshManager {
 
     /** @private {?(number|string)} */
     this.refreshTimeoutId_ = null;
+
+    /** @private {?boolean} */
+    this.enabled_ = null;
   }
 
 
@@ -100,6 +89,9 @@ export class RefreshManager {
    *   is useful to have for test purposes.
    */
   initiateRefreshCycle() {
+    if (!this.isEligibleForRefresh()) {
+      return null;
+    }
     return new Promise(resolve => {
       analyticsForDoc(this.element_, true).then(analytics => {
         analytics.getAnalyticsRoot(this.element_).getVisibilityManager()
@@ -107,22 +99,23 @@ export class RefreshManager {
               this.refreshTimeoutId_ = this.timer_.delay(() => {
                 this.a4a_.refresh(() => this.initiateRefreshCycle());
                 resolve();
-              }, this.config_.refreshInterval);
+              }, /** @type {number} */ (this.refreshInterval_));
             });
       });
     });
   }
 
   /**
-   * Terminates the current refresh cycle, if one currently exists. This
-   * function also returns a courtesy callback, which, if invoked, will
-   * initiate a new refresh cycle.
+   * Terminates the current refresh cycle, if one currently exists. Returns
+   * true if the cycle was canceled successfully, false otherwise.
    */
   stopRefreshCycle() {
     if (this.refreshTimeoutId_) {
       this.timer_.cancel(this.refreshTimeoutId_);
       this.refreshTimeoutId_ = null;
+      return true;
     }
+    return false;
   }
 
   /**
@@ -133,43 +126,60 @@ export class RefreshManager {
    */
   getConfiguration_() {
     const config = refreshConfigs[this.adType_];
-    if (this.refreshInterval_ && this.refreshInterval_ != 'false') {
-      config['refreshInterval'] = this.refreshInterval_;
-    }
     // Convert seconds to milliseconds.
     config['totalTimeMin'] *= 1000;
     config['continuousTimeMin'] *= 1000;
-    config['refreshInterval'] *= 1000;
     return config;
   }
 
   /**
    * Retrieves the publisher-specified refresh interval, if one were set.
    *
-   * @return {?string}
+   * @return {?number}
    */
   getPublisherSpecifiedRefreshInterval_() {
-    let metaTag = [];
-    let refreshInterval = this.element_.getAttribute(DATA_ATTR_NAME)
-        || ((metaTag = this.win_.document.getElementsByName(
-            `${METADATA_NAME}:${this.adType_}`))
-            && metaTag[0]
-            && metaTag[0].getAttribute('content'));
-    if (refreshInterval != 'false' && !isNaN(refreshInterval)) {
-      if (refreshInterval) {
-        // If we're here, then data-enable-refresh is set, and it's a number.
-        // This check is needed because isNaN(undefined) and isNaN('') are both
-        // false, so it's possible that refreshInterval == undefined or
-        // refreshInterval == '' after first check.
-        if (refreshInterval < MIN_REFRESH_INTERVAL) {
-          user().warn('AMP-AD',
-              `refresh interval must be at least ${MIN_REFRESH_INTERVAL}s`);
-          refreshInterval = String(MIN_REFRESH_INTERVAL);
-        }
+    const refreshInterval = this.element_.getAttribute(DATA_ATTR_NAME);
+    if (refreshInterval) {
+      return this.checkAndSanitizeRefreshInterval_(refreshInterval);
+    }
+    let metaTag;
+    const metaTagContent = ((metaTag = this.win_.document
+          .getElementsByName(METATAG_NAME))
+        && metaTag[0]
+        && metaTag[0].getAttribute('content'));
+    const networkIntervalPairs =
+        metaTagContent ? metaTagContent.split(',') : [];
+    for (let i = 0; i < networkIntervalPairs.length; i++) {
+      const pair = networkIntervalPairs[i].split('=');
+      if (pair.length != 2) {
+        user().warn(TAG,
+            'refresh metadata config must be of the form ' +
+            '`network_type=refresh_interval`');
+      } else if (pair[0] == this.adType_) {
+        return this.checkAndSanitizeRefreshInterval_(pair[1]);
       }
-      return refreshInterval;
     }
     return null;
+  }
+
+  /**
+   * Ensures that refreshInterval is a number no less than 30. Returns null if
+   * the given input fails to meet these criteria. This also converts from
+   * seconds to milliseconds.
+   *
+   * @param {(number|string)} refreshInterval
+   * @return {?number}
+   */
+  checkAndSanitizeRefreshInterval_(refreshInterval) {
+    if (isNaN(refreshInterval) || refreshInterval == '') {
+      user().warn(TAG, 'refresh interval must be a number');
+      return null;
+    } else if (refreshInterval < MIN_REFRESH_INTERVAL) {
+      user().warn(TAG,
+          `refresh interval must be at least ${MIN_REFRESH_INTERVAL}s`);
+      return MIN_REFRESH_INTERVAL * 1000;
+    }
+    return Number(refreshInterval) * 1000;
   }
 
   /**
@@ -183,14 +193,17 @@ export class RefreshManager {
    * @return {boolean}
    */
   isEligibleForRefresh() {
-        // The network has opted into refresh.
-    return !!(this.config_
-        // The publisher has enabled refresh on this slot.
-        && (this.refreshInterval_ || this.refreshInterval_ == '')
-        // The slot is contained only within container types eligible for
-        // refresh.
-        && !getEnclosingContainerTypes(this.element_).filter(container =>
+    if (this.enabled_ == null) {
+      // The network has opted into refresh.
+      this.enabled_ = !!(this.config_
+          // The publisher has enabled refresh on this slot.
+          && (this.refreshInterval_ || this.refreshInterval_ == '')
+          // The slot is contained only within container types eligible for
+          // refresh.
+          && !getEnclosingContainerTypes(this.element_).filter(container =>
             container != ValidAdContainerTypes['AMP-CAROUSEL']
             && container != ValidAdContainerTypes['AMP-STICKY-AD']).length);
+    }
+    return this.enabled_;
   }
 }
