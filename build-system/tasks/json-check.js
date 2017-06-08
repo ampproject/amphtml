@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ function checkValidJson() {
         try {
           JSON.parse(file.contents.toString());
         } catch (e) {
-          util.log(util.colors.red('Invalid JSON in "'
+          util.log(util.colors.red('Invalid JSON in '
               + file.relative + ': ' + e.message));
           hasError = true;
         }

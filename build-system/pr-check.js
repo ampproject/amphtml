@@ -223,7 +223,7 @@ const command = {
   cleanBuild: function() {
     timedExecOrDie(`${gulp} clean`);
   },
-  runLintChecks: function() {
+  runJsonAndLintChecks: function() {
     timedExecOrDie(`${gulp} json-syntax`);
     timedExecOrDie(`${gulp} lint`);
   },
@@ -274,7 +274,7 @@ function runAllCommands() {
     command.testBuildSystem();
     command.cleanBuild();
     command.buildRuntime();
-    command.runLintChecks();
+    command.runJsonAndLintChecks();
     command.runDepAndTypeChecks();
     command.runUnitTests();
     // command.testDocumentLinks() is skipped during push builds.
@@ -362,7 +362,7 @@ function main(argv) {
       // longer do a dist build for PRs, so this call won't cover dist/.
       // TODO(rsimha-amp): Move this once integration tests are enabled.
       command.runPresubmitTests();
-      command.runLintChecks();
+      command.runJsonAndLintChecks();
       command.runDepAndTypeChecks();
       // Skip unit tests if the PR only contains changes to integration tests.
       if (buildTargets.has('RUNTIME')) {
