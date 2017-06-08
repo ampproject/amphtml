@@ -17,10 +17,11 @@
 import {isJsonScriptTag} from '../../../src/dom';
 import {assertHttpsUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 import {dev, rethrowAsync, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {expandTemplate} from '../../../src/string';
 import {isArray, isObject} from '../../../src/types';
 import {hasOwn, map} from '../../../src/utils/object';
-import {sendRequest, sendRequestUsingIframe} from './transport';
+import {sendRequest, sendRequestUsingIframe, Transport} from './transport';
 import {urlReplacementsForDoc} from '../../../src/services';
 import {userNotificationManagerFor} from '../../../src/services';
 import {cryptoFor} from '../../../src/crypto';
@@ -159,6 +160,13 @@ export class AmpAnalytics extends AMP.BaseElement {
     return this.ensureInitialized_();
   }
 
+  /* @ override */
+  unlayoutCallback() {
+    Transport.doneWithCrossDomainIframe(this.getAmpDoc().win.document,
+      this.config_['transport']);
+    return true;
+  }
+
   /** @override */
   detachedCallback() {
     if (this.analyticsGroup_) {
@@ -219,6 +227,19 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     this.analyticsGroup_ =
         this.instrumentation_.createAnalyticsGroup(this.element);
+
+    if (this.config_['transport'] && this.config_['transport']['iframe']) {
+      Transport.processCrossDomainIframe(this.getAmpDoc().win.document,
+        this.config_['transport'],
+        msg => {
+          try {
+            if (this.element.ownerDocument.location.href !== 'about:srcdoc') {
+              this.element.ownerDocument.location.href += msg;
+            }
+          } catch (err) {
+          }
+        });
+    }
 
     const promises = [];
     // Trigger callback can be synchronous. Do the registration at the end.
@@ -399,6 +420,20 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
     const typeConfig = this.predefinedConfig_[type] || {};
 
+    // transport.iframe is only allowed to be specified in typeConfig, not
+    // the others. Allowed when running locally for testing purposes.
+    [defaultConfig, inlineConfig, this.remoteConfig_].forEach(config => {
+      if (config && config.transport && config.transport.iframe) {
+        if (!getMode().localDev) {
+          user().warn('invalid config contains iframe transport, but okay' +
+              ' since in local dev mode', config);
+        } else {
+          user().error('invalid config contains iframe transport', config);
+          return;
+        }
+      }
+    });
+
     this.mergeObjects_(defaultConfig, config);
     this.mergeObjects_(typeConfig, config, /* predefined */ true);
     this.mergeObjects_(inlineConfig, config);
@@ -574,6 +609,25 @@ export class AmpAnalytics extends AMP.BaseElement {
           return request;
         });
   }
+/* TODO REMOVE THIS BEFORE CHECKING IN!
+    return Promise.all(requestPromises)
+      .then(() => {
+        request = this.addParamsToUrl_(request, params);
+        this.config_['vars']['requestCount']++;
+        const expansionOptions = this.expansionOptions_(event, trigger);
+        return this.variableService_.expandTemplate(request, expansionOptions);
+      })
+      .then(request => {
+        const whiteList = this.isSandbox_ ? SANDBOX_AVAILABLE_VARS : undefined;
+        // For consistency with amp-pixel we also expand any url replacements.
+        return urlReplacementsForDoc(this.element).expandAsync(
+            request, undefined, whiteList);
+      })
+      .then(request => {
+        this.sendRequest_(request, trigger);
+        return request;
+      });
+*/
 
   /**
    * @param {!JSONType} trigger JSON config block that resulted in this event.
