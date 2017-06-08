@@ -65,25 +65,20 @@ export function doubleclick(global, data) {
     transform: 'translate(-50%, -50%)',
   });
 
-  let url = 'https://www.googletagservices.com/tag/js/';
-  let sf = false;
-  const expIds = data['experimentId'];
-
-  if (expIds && expIds.indexOf('21060540') > -1) {
-    url += 'gpt_sf_a.js';
-    sf = true;
-  } else if (expIds && expIds.indexOf('21060541') > -1) {
-    url += 'gpt_sf_b.js';
-    sf = true;
-  } else {
-    url += 'gpt.js';
-  }
-
-  if (data.useSameDomainRenderingUntilDeprecated != undefined ||
-      data.multiSize || sf) {
+  const fileExperimentConfig = {
+    21060540: 'gpt_sf_a.js',
+    21060541: 'gpt_sf_b.js',
+  };
+// Note that reduce will return the first item that matches but it is expected
+// that only one of the experiment ids will be present.
+  const expFilename = data['experimentId'] && data['experimentId'].split(',')
+    .reduce(expId => fileExperimentConfig[expId]);
+  const url = `https://www.googletagservices.com/tag/js/` +
+                `${expFilename || 'gpt.js'}`;
+  if (data.useSameDomainRenderingUntilDeprecated != undefined || data.multiSize
+      || expFilename) {
     doubleClickWithGpt(global, data, GladeExperiment.GLADE_OPT_OUT, url);
-  }
-  else {
+  } else {
     const dice = Math.random();
     const href = global.context.location.href;
     if ((href.indexOf('google_glade=0') > 0 || dice < experimentFraction)
@@ -101,7 +96,7 @@ export function doubleclick(global, data) {
  * @param {!Window} global
  * @param {!Object} data
  * @param {!GladeExperiment} gladeExperiment
- * @param {string} url
+ * @param {!string} url
  */
 function doubleClickWithGpt(global, data, gladeExperiment, url) {
   const dimensions = [[
