@@ -411,9 +411,9 @@ export function imaVideo(global, data) {
 }
 
 function htmlToElement(html) {
-  var template = document.createElement('template');
+  const template = document.createElement('template');
   template.innerHTML = html;
-  return template.content.firstChild;  
+  return template.content.firstChild;
 }
 
 /**
