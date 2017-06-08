@@ -162,7 +162,7 @@ export class RefreshManager {
         // false, so it's possible that refreshInterval == undefined or
         // refreshInterval == '' after first check.
         if (refreshInterval < MIN_REFRESH_INTERVAL) {
-          user().warn(
+          user().warn('AMP-AD',
               `refresh interval must be at least ${MIN_REFRESH_INTERVAL}s`);
           refreshInterval = String(MIN_REFRESH_INTERVAL);
         }
