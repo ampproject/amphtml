@@ -66,7 +66,7 @@ export function incrementLoadingAds(win, opt_loadingPromise) {
   }
   win[LOADING_ADS_WIN_ID_]++;
   timerFor(win)
-      .timeoutPromise(1000, opt_loadingPromise || new Promise(() => {}))
+      .timeoutPromise(1000, opt_loadingPromise)
       .catch(() => {})
       .then(() => {
         win[LOADING_ADS_WIN_ID_]--;
