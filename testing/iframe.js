@@ -31,7 +31,11 @@ import {installExtensionsService} from '../src/service/extensions-impl';
 import {installStyles} from '../src/style-installer';
 import {resourcesForDoc} from '../src/services';
 import {AmpEvents} from '../src/amp-events';
+<<<<<<< HEAD
 import {BindEvents} from '../extensions/amp-bind/0.1/bind-events';
+=======
+import {BindEvents} from '../extensions/amp-bind/0.1';
+>>>>>>> refactor: create separate Bind Events enum file
 
 let iframeCount = 0;
 

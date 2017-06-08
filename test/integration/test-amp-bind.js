@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 import {AmpEvents} from '../../src/amp-events';
+<<<<<<< HEAD
 import {BindEvents} from '../../extensions/amp-bind/0.1/bind-events';
+=======
+import {BindEvents} from '../../extensions/amp-bind/0.1';
+>>>>>>> refactor: create separate Bind Events enum file
 import {createFixtureIframe} from '../../testing/iframe';
 import {batchedXhrFor} from '../../src/services';
 import * as sinon from 'sinon';
@@ -45,6 +49,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   function setupWithFixture(fixtureLocation, opt_numberOfAmpElements) {
     return createFixtureIframe(fixtureLocation).then(f => {
       fixture = f;
+<<<<<<< HEAD
       // Most fixtures have a single AMP element that will be laid out.
       const loadStartsToExpect =
           (opt_numberOfAmpElements === undefined) ? 1 : opt_numberOfAmpElements;
@@ -52,17 +57,35 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
         fixture.awaitEvent(BindEvents.INITIALIZE, 1),
         fixture.awaitEvent(AmpEvents.LOAD_START, loadStartsToExpect),
       ]);
+=======
+      return fixture.awaitEvent(BindEvents.INITIALIZE, 1);
+    }).then(() => {
+      const ampdocService = ampdocServiceFor(fixture.win);
+      ampdoc = ampdocService.getAmpDoc(fixture.doc);
+>>>>>>> refactor: create separate Bind Events enum file
     });
   }
 
   /** @return {!Promise} */
   function waitForBindApplication() {
+<<<<<<< HEAD
     return fixture.awaitEvent(BindEvents.SET_STATE, ++numSetStates);
+=======
+    // Bind should be available, but need to wait for actions to resolve
+    // service promise for bind and call setState.
+    return bindForDoc(ampdoc).then(unusedBind =>
+        fixture.awaitEvent(BindEvents.SET_STATE, ++numSetStates));
+>>>>>>> refactor: create separate Bind Events enum file
   }
 
   /** @return {!Promise} */
   function waitForTemplateRescan() {
+<<<<<<< HEAD
     return fixture.awaitEvent(BindEvents.RESCAN_TEMPLATE, ++numTemplated);
+=======
+    return bindForDoc(ampdoc).then(unusedBind =>
+        fixture.awaitEvent(BindEvents.RESCAN_TEMPLATE, ++numTemplated));
+>>>>>>> refactor: create separate Bind Events enum file
   }
 
   describe('with [text] and [class]', () => {
