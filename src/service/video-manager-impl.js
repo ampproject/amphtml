@@ -22,7 +22,7 @@ import {platformFor} from '../services';
 import {registerServiceBuilderForDoc} from '../service';
 import {setStyles} from '../style';
 import {isFiniteNumber} from '../types';
-import {VideoEvents, VideoAttributes, PlayingStates} from '../video-interface';
+import {VideoEvents, VideoAttributes} from '../video-interface';
 import {viewerForDoc} from '../services';
 import {viewportForDoc} from '../services';
 import {vsyncFor} from '../services';
@@ -32,6 +32,45 @@ import {vsyncFor} from '../services';
  * is considered visible.
  */
 const VISIBILITY_PERCENT = 75;
+
+/**
+ * Playing States
+ *
+ * Internal playing states used to distinguish between video playing on user's
+ * command and videos playing automatically
+ *
+ * @constant {!Object<string, string>}
+ */
+const PlayingStates = {
+  /**
+   * playing_manual
+   *
+   * When the video user manually interacted with the video and the video
+   * is now playing
+   *
+   * @event playing_manual
+   */
+  PLAYING_MANUAL: 'playing_manual',
+
+  /**
+   * playing_auto
+   *
+   * When the video has autoplay and the user hasn't interacted with it yet
+   *
+   * @event playing_auto
+   */
+  PLAYING_AUTO: 'playing_auto',
+
+  /**
+   * paused
+   *
+   * When the video is paused.
+   *
+   * @event paused
+   */
+  PAUSED: 'paused',
+};
+
 
 /**
  * VideoManager keeps track of all AMP video players that implement
@@ -65,12 +104,6 @@ export class VideoManager {
     dev().assert(video);
 
     this.registerCommonActions_(video);
-
-    // TODO(aghassemi): Remove this later. For now, VideoManager only matters
-    // for autoplay videos so no point in registering arbitrary videos yet.
-    // if (!video.element.hasAttribute(VideoAttributes.AUTOPLAY)) {
-    //   return;
-    // }
 
     if (!video.supportsPlatform()) {
       return;
@@ -110,6 +143,13 @@ export class VideoManager {
    * @private
    */
   maybeInstallVisibilityObserver_(entry) {
+    // TODO(aghassemi): Remove this later. For now, the visibility observer
+    // only matters for autoplay videos so no point in monitoring arbitrary
+    // videos yet.
+    // if (!video.element.hasAttribute(VideoAttributes.AUTOPLAY)) {
+    //   return;
+    // }
+
     listen(entry.video.element, VideoEvents.VISIBILITY, () => {
       entry.updateVisibility();
     });
@@ -133,26 +173,21 @@ export class VideoManager {
   }
 
   /**
-   * Returns whether the video is paused or playing after the user interacted
-   * with it or playing through autoplay
+   * Returns the entry in the video manager corresponding to the video
+   * provided
    *
-   * @param {VideoEntry} entry
-   * @return {!../video-interface.VideoInterface} PlayingStates
+   * @param {!../video-interface.VideoInterface} video
+   * @return {VideoEntry} entry
    * @private
    */
-  getPlayingState_(entry) {
-    return entry.getPlayingState();
-  }
-
-  /**
-   * Returns whether the video was interacted with or not
-   *
-   * @param {VideoEntry} entry
-   * @return {boolean}
-   * @private
-   */
-  userInteracted_(entry) {
-    return entry.userInteracted();
+  getEntryForVideo_(video) {
+    for (let i = 0; i < this.entries_.length; i++) {
+      if (this.entries_[i].video === video) {
+        return this.entries_[i];
+      }
+    }
+    dev().assert(false, 'video is not registered to this video manager');
+    return null;
   }
 
   /**
@@ -163,12 +198,7 @@ export class VideoManager {
    * @return {!../video-interface.VideoInterface} PlayingStates
    */
   getPlayingState(video) {
-    for (let i = 0; i < this.entries_.length; i++) {
-      if (this.entries_[i].video === video) {
-        return this.entries_[i].getPlayingState();
-      }
-    }
-    return PlayingStates.PAUSED;
+    return this.getEntryForVideo_(video).getPlayingState();
   }
 
   /**
@@ -178,12 +208,7 @@ export class VideoManager {
    * @return {boolean}
    */
   userInteracted(video) {
-    for (let i = 0; i < this.entries_.length; i++) {
-      if (this.entries_[i].video === video) {
-        return this.entries_[i].userInteracted();
-      }
-    }
-    return false;
+    return this.getEntryForVideo_(video).userInteracted();
   }
 
 
@@ -231,22 +256,17 @@ class VideoEntry {
     this.hasAutoplay_ = element.hasAttribute(VideoAttributes.AUTOPLAY);
 
     /** @private {boolean} */
-    this.userInteracted_ = !this.hasAutoplay_;
+    this.userInteracted_ = false;
 
     listenOncePromise(element, VideoEvents.LOAD)
         .then(() => this.videoLoaded_());
 
 
-    const updatePlayStatus = playing => {
-      this.isPlaying_ = playing;
-    };
-
-
     listen(this.video.element, VideoEvents.PAUSE,
-      updatePlayStatus.bind(this, /*playing*/ false));
+      this.videoPaused_.bind(this));
 
     listen(this.video.element, VideoEvents.PLAY,
-      updatePlayStatus.bind(this, /*playing*/ true));
+      this.videoPlayed_.bind(this));
 
 
     // Currently we only register after video player is build.
@@ -262,6 +282,22 @@ class VideoEntry {
     if (this.hasAutoplay_) {
       this.autoplayVideoBuilt_();
     }
+  }
+
+  /**
+   * Callback for when the video starts playing
+   * @private
+   */
+  videoPlayed_() {
+    this.isPlaying_ = true;
+  }
+
+  /**
+  * Callback for when the video has been paused
+   * @private
+   */
+  videoPaused_() {
+    this.isPlaying_ = false;
   }
 
   /**
