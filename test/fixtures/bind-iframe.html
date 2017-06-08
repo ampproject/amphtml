@@ -9,18 +9,13 @@
   <script async src="/dist/amp.js"></script>
   <script async custom-element="amp-bind" src="/dist/v0/amp-bind-0.1.max.js"></script>
   <script async custom-element="amp-iframe" src="/dist/v0/amp-iframe-0.1.max.js"></script>
-  <style amp-custom>
-    amp-iframe {
-      margin-top: 600px; /* iframes must not be in initial viewport as a rule */
-    }
-  </style>
 </head>
-
 <body>
   <!-- amp-iframe -->
   <button id="iframeButton" on="tap:AMP.setState({iframe: 'https://giphy.com/embed/DKG1OhBUmxL4Q'})">Change amp-iframe</button>
   <amp-iframe width=100 height=100 id="ampIframe" sandbox="allow-scripts allow-same-origin allow-popups"
       src="https://player.vimeo.com/video/140261016" [src]="iframe">
+    <amp-img layout="fill" src="https://foo.com/foo.png" placeholder></amp-img>
   </amp-iframe>
 </body>
 </html>
