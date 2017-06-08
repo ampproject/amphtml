@@ -17,6 +17,7 @@
 import {
   RefreshManager,
   DATA_ATTR_NAME,
+  METATAG_NAME,
 } from '../refresh-manager';
 import * as sinon from 'sinon';
 
@@ -47,13 +48,27 @@ describe('refresh-manager', () => {
     sandbox.restore();
   });
 
-  it('should call getPublisherSpecifiedRefreshInterval_', () => {
+  it('should get refreshInterval from slot', () => {
     const getPublisherSpecifiedRefreshIntervalSpy = sandbox.spy(
         RefreshManager.prototype, 'getPublisherSpecifiedRefreshInterval_');
     const refreshManager = new RefreshManager(mockA4a);
     expect(getPublisherSpecifiedRefreshIntervalSpy).to.be.calledOnce;
-    expect(refreshManager.refreshInterval_).to.equal('35');
+    expect(refreshManager.refreshInterval_).to.equal(35000);
   });
+
+  it('should get refreshInterval from meta tag', () => {
+    const getPublisherSpecifiedRefreshIntervalSpy = sandbox.spy(
+        RefreshManager.prototype, 'getPublisherSpecifiedRefreshInterval_');
+    mockA4a.element.removeAttribute(DATA_ATTR_NAME);
+    const meta = window.document.createElement('meta');
+    meta.setAttribute('name', METATAG_NAME);
+    meta.setAttribute('content', 'doubleclick=40');
+    window.document.head.appendChild(meta);
+    const refreshManager = new RefreshManager(mockA4a);
+    expect(getPublisherSpecifiedRefreshIntervalSpy).to.be.calledOnce;
+    expect(refreshManager.refreshInterval_).to.equal(40000);
+  });
+
 
   it('should call getConfiguration_', () => {
     const getConfigurationSpy = sandbox.spy(
@@ -82,10 +97,10 @@ describe('refresh-manager', () => {
     // So the test doesn't hang for the required minimum 30s interval, or the
     // 1s ActiveView visibility definition.
     refreshManager.config_ = {
-      refreshInterval: 0,
       visiblePercentageMin: 0,
       continuousTimeMin: 0,
     };
+    refreshManager.refreshInterval_ = 0;
     return refreshManager.initiateRefreshCycle().then(() => {
       expect(refreshSpy).to.be.calledOnce;
     });
