@@ -70,20 +70,18 @@ export function doubleclick(global, data) {
 
   if (data['experimentId'] && data['experimentId'].split(',')
       .includes('21060540')) {
-        url += 'gpt_sf_a.js';
-        sf = true;
+    url += 'gpt_sf_a.js';
+    sf = true;
   } else if (data['experimentId'] && data['experimentId'].split(',')
       .includes('21060541')) {
-        url += 'gpt_sf_b.js';
-        sf = true;
+    url += 'gpt_sf_b.js';
+    sf = true;
   } else {
-        url += 'gpt.js';
+    url += 'gpt.js';
   }
 
   if (data.useSameDomainRenderingUntilDeprecated != undefined ||
-      data.multiSize) {
-    doubleClickWithGpt(global, data, GladeExperiment.GLADE_OPT_OUT, url);
-  } else if (sf) {
+      data.multiSize || sf) {
     doubleClickWithGpt(global, data, GladeExperiment.GLADE_OPT_OUT, url);
   }
   else {
