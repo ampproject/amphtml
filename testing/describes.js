@@ -348,6 +348,10 @@ class IntegrationFixture {
   constructor(spec) {
     /** @const */
     this.spec = spec;
+
+    /** @const {string} */
+    this.hash = spec.hash || '';
+    delete spec.hash;
   }
 
   /** @override */
@@ -358,9 +362,9 @@ class IntegrationFixture {
   /** @override */
   setup(env) {
     const spec = this.spec;
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
       env.iframe = createElementWithAttributes(document, 'iframe', {
-        src: addParamsToUrl('/amp4test/compose-doc', spec),
+        src: addParamsToUrl('/amp4test/compose-doc', spec) + `#${this.hash}`,
       });
       env.iframe.onload = function() {
         env.win = env.iframe.contentWindow;
@@ -425,7 +429,7 @@ class RealWinFixture {
   /** @override */
   setup(env) {
     const spec = this.spec;
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
       const iframe = document.createElement('iframe');
       env.iframe = iframe;
       iframe.name = 'test_' + iframeCount++;
