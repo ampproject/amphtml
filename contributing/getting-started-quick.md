@@ -27,6 +27,7 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 
 * Install [NodeJS](https://nodejs.org/)
 
+* Install [Invalid Link](https://website-that-does-not-exist.org/)
 * Install [yarn](https://yarnpkg.com/en/docs/install)
 
 * Install Gulp by running `yarn global add gulp`
