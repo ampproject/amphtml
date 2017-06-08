@@ -67,7 +67,6 @@ import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {setStyles} from '../../../src/style';
 import {utf8Encode} from '../../../src/utils/bytes';
 import {isCancellation} from '../../../src/error';
-import {timerFor} from '../../../src/services';
 import {RefreshManager} from '../../amp-a4a/0.1/refresh-manager';
 
 /** @type {string} */
