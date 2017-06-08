@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {BaseElement} from '../../src/base-element';
-import {registerElement} from '../../src/custom-element';
 import {viewerPromiseForDoc} from '../../src/services';
 import {documentStateFor} from '../../src/service/document-state';
 import {resourcesForDoc} from '../../src/services';
@@ -149,7 +147,7 @@ describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
 
         it('calls layout when going to VISIBLE', () => {
           viewer.receiveMessage('visibilitychange',
-            {state: VisibilityState.VISIBLE});
+              {state: VisibilityState.VISIBLE});
           return waitForNextPass().then(() => {
             expect(layoutCallback).to.have.been.called;
             expect(unlayoutCallback).not.to.have.been.called;
@@ -160,7 +158,7 @@ describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
 
         it('does not call callbacks when going to HIDDEN', () => {
           viewer.receiveMessage('visibilitychange',
-            {state: VisibilityState.VISIBLE});
+              {state: VisibilityState.VISIBLE});
           changeVisibility('hidden');
           return waitForNextPass().then(() => {
             expect(layoutCallback).not.to.have.been.called;
@@ -172,7 +170,7 @@ describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
 
         it('does not call callbacks when going to INACTIVE', () => {
           viewer.receiveMessage('visibilitychange',
-            {state: VisibilityState.INACTIVE});
+              {state: VisibilityState.INACTIVE});
           return waitForNextPass().then(() => {
             expect(layoutCallback).not.to.have.been.called;
             expect(unlayoutCallback).not.to.have.been.called;
@@ -183,7 +181,7 @@ describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
 
         it('does not call callbacks when going to PAUSED', () => {
           viewer.receiveMessage('visibilitychange',
-            {state: VisibilityState.PAUSED});
+              {state: VisibilityState.PAUSED});
           return waitForNextPass().then(() => {
             expect(layoutCallback).not.to.have.been.called;
             expect(unlayoutCallback).not.to.have.been.called;
@@ -205,7 +203,7 @@ describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
 
         it('calls layout when going to VISIBLE', () => {
           viewer.receiveMessage('visibilitychange',
-            {state: VisibilityState.VISIBLE});
+              {state: VisibilityState.VISIBLE});
           return waitForNextPass().then(() => {
             expect(layoutCallback).to.have.been.called;
             expect(unlayoutCallback).not.to.have.been.called;
@@ -216,7 +214,7 @@ describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
 
         it('does not call callbacks when going to HIDDEN', () => {
           viewer.receiveMessage('visibilitychange',
-            {state: VisibilityState.VISIBLE});
+              {state: VisibilityState.VISIBLE});
           changeVisibility('hidden');
           return waitForNextPass().then(() => {
             expect(layoutCallback).not.to.have.been.called;
@@ -228,7 +226,7 @@ describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
 
         it('does not call callbacks when going to INACTIVE', () => {
           viewer.receiveMessage('visibilitychange',
-            {state: VisibilityState.INACTIVE});
+              {state: VisibilityState.INACTIVE});
           return waitForNextPass().then(() => {
             expect(layoutCallback).not.to.have.been.called;
             expect(unlayoutCallback).not.to.have.been.called;
@@ -239,7 +237,7 @@ describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
 
         it('does not call callbacks when going to PAUSED', () => {
           viewer.receiveMessage('visibilitychange',
-            {state: VisibilityState.PAUSED});
+              {state: VisibilityState.PAUSED});
           return waitForNextPass().then(() => {
             expect(layoutCallback).not.to.have.been.called;
             expect(unlayoutCallback).not.to.have.been.called;
