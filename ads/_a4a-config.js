@@ -90,7 +90,6 @@ const DEFAULT_REFRESH_CONFIG = {
   visiblePercentageMin: 50,
   totalTimeMin: 0,
   continuousTimeMin: 1,
-  refreshInterval: 30,
 };
 
 /**
