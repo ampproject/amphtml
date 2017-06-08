@@ -127,7 +127,7 @@ describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
       sandbox.stub(resources, 'doPass', doPass);
     });
 
-    describe('from in the PRERENDER state', () => {
+    describe.skip('from in the PRERENDER state', () => {
       beforeEach(() => {
         return waitForNextPass().then(setupSpys);
       });
