@@ -58,7 +58,7 @@ The following table lists the features that enable variable substitutions, as we
     <td width="25%">None</td>
   </tr>
   <tr>
-    <td width="25%">Links (<code>&lt;a&gt;</code>)</td>
+    <td width="25%">Links (<code><a></code>)</td>
     <td width="25%">
       HTTPS URL and URL matching either:
       <ul>

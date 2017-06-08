@@ -29,7 +29,7 @@ limitations under the License.
     <td width="40%"><strong>Required Script</strong></td>
     <td>
       <div>
-        <code>&lt;script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js">&lt;/script></code>
+        <code><script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script></code>
       </div>
     </td>
   </tr>

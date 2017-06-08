@@ -31,10 +31,10 @@ limitations under the License.
     <td class="col-fourty"><strong>Required Script</strong></td>
     <td>
       <div>
-        <code>&lt;script async custom-element="amp-access" src="https://cdn.ampproject.org/v0/amp-access-0.1.js">&lt;/script></code>
+        <code><script async custom-element="amp-access" src="https://cdn.ampproject.org/v0/amp-access-0.1.js"></script></code>
       </div>
       <div>
-        <code>&lt;script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js">&lt;/script></code>
+        <code><script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script></code>
       </div>
       <small>Notice that both "amp-access" and "amp-analytics" scripts are required.</small>
     </td>
@@ -132,12 +132,12 @@ The following properties are defined in this configuration:
   </tr>
   <tr>
     <td class="col-fourty"><code>authorization</code></td>
-    <td>&lt;URL&gt;</td>
+    <td><URL></td>
     <td>The HTTPS URL for the Authorization endpoint.</td>
   </tr>
   <tr>
     <td class="col-fourty"><code>pingback</code></td>
-    <td>&lt;URL&gt;</td>
+    <td><URL></td>
     <td>The HTTPS URL for the Pingback endpoint.</td>
   </tr>
   <tr>
@@ -147,17 +147,17 @@ The following properties are defined in this configuration:
   </tr>
   <tr>
     <td class="col-fourty"><code>login</code></td>
-    <td class="col-twenty">&lt;URL&gt; or<br>&lt;Map[string, URL]&gt;</td>
+    <td class="col-twenty"><URL> or<br><Map[string, URL]></td>
     <td>The HTTPS URL for the Login Page or a set of URLs for different types of login pages.</td>
   </tr>
   <tr>
     <td class="col-fourty"><code>authorizationFallbackResponse</code></td>
-    <td>&lt;object&gt;</td>
+    <td><object></td>
     <td>The JSON object to be used in place of the authorization response if it fails.</td>
   </tr>
   <tr>
     <td class="col-fourty"><code>authorizationTimeout</code></td>
-    <td>&lt;number&gt;</td>
+    <td><number></td>
     <td>Timeout (in milliseconds) after which the authorization request is considered as failed. Default is 3000. Values greater than 3000 are allowed only in dev environment. </td>
   </tr>
   <tr>
@@ -167,7 +167,7 @@ The following properties are defined in this configuration:
   </tr>
 </table>
 
-*&lt;URL&gt;* values specify HTTPS URLs with substitution variables. The substitution variables are covered in more detail in the [Access URL Variables][7] section below.
+*<URL>* values specify HTTPS URLs with substitution variables. The substitution variables are covered in more detail in the [Access URL Variables][7] section below.
 
 Here’s an example of the AMP Access configuration:
 

@@ -31,8 +31,8 @@ limitations under the License.
     <td width="40%"><strong>Required Script</strong></td>
     <td>
       <code>
-        &lt;script async custom-element="amp-auto-ads"
-        src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">&lt;/script>
+        <script async custom-element="amp-auto-ads"
+        src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js"></script>
       </code>
     </td>
   </tr>
@@ -128,13 +128,13 @@ The fields to specify in the configuration object:
   </tr>
   <tr>
     <td><code>placements</code></td>
-    <td>Array&lt;!PlacementObj&gt;</td>
+    <td>Array<!PlacementObj></td>
     <td>A <strong>required</strong> field that indicates the potential places where ads can be inserted on the page.</td>
   </tr>
   <tr>
     <td><code>attributes</code></td>
-    <td>Object&lt;string, string&gt;</td>
-    <td>An <em>optional</em> field that specifies a mapping from the attribute name to attribute values to apply to all <code>&lt;amp-ad&gt;</code> elements injected using this configuration. Only the following attribute names are allowed:
+    <td>Object<string, string></td>
+    <td>An <em>optional</em> field that specifies a mapping from the attribute name to attribute values to apply to all <code><amp-ad></code> elements injected using this configuration. Only the following attribute names are allowed:
       <ul>
         <li>type</li>
         <li>layout</li>
@@ -178,8 +178,8 @@ The fields to specify in the `placements` configuration object:
   </tr>
   <tr>
     <td><code>attributes</code></td>
-    <td>Object&lt;string, string&gt;</td>
-    <td>An <em>optional</em> field for a  map from attribute name to value for attributes to apply to all <code>&lt;amp-ad&gt;</code> elements injected using this placement. An attribute specified here overrides any with the same name that is also specified on the parent <code>ConfigObj</code>. Only the following attribute names are allowed:
+    <td>Object<string, string></td>
+    <td>An <em>optional</em> field for a  map from attribute name to value for attributes to apply to all <code><amp-ad></code> elements injected using this placement. An attribute specified here overrides any with the same name that is also specified on the parent <code>ConfigObj</code>. Only the following attribute names are allowed:
       <ul>
         <li>type</li>
         <li>layout</li>
