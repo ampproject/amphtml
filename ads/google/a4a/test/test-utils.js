@@ -234,6 +234,7 @@ describe('Google A4A utils', () => {
             case 'data-amp-slot-index':
               return '0';
           }
+          return null;
         },
       };
       const qqid = 'qqid_string';
@@ -246,15 +247,15 @@ describe('Google A4A utils', () => {
       expect(newConfig.requests.renderStartCsi).to.not.be.null;
       const getRegExps = metricName => [
         /^https:\/\/csi\.gstatic\.com\/csi\?/,
-        /s=a4a/,
-        /&c=[0-9]+/,
-        /&slotId=0/,
-        /&qqid\.0=[a-zA-Z_]+/,
-        new RegExp(`&met\\.a4a\\.0=${metricName}\\.-?[0-9]+`),
-        /&dt=-?[0-9]+/,
-        /e\.0=00000001%2C00000002/,
-        /rls=\$internalRuntimeVersion\$/,
-        /adt.0=fake-type/,
+        /(\?|&)s=a4a(&|$)/,
+        /(\?|&)c=[0-9]+(&|$)/,
+        /(\?|&)slotId=0(&|$)/,
+        /(\?|&)qqid\.0=[a-zA-Z_]+(&|$)/,
+        new RegExp(`(\\?|&)met\\.a4a\\.0=${metricName}\\.-?[0-9]+(&|$)`),
+        /(\?|&)dt=-?[0-9]+(&|$)/,
+        /(\?|&)e\.0=00000001%2C00000002(&|$)/,
+        /(\?|&)rls=\$internalRuntimeVersion\$(&|$)/,
+        /(\?|&)adt.0=fake-type(&|$)/,
       ];
       getRegExps('visibilityCsi').forEach(regExp => {
         expect(newConfig.requests.visibilityCsi).to.match(regExp);
