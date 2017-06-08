@@ -36,3 +36,19 @@ tags: {  # <amp-auto-ads>
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-auto-ads"
 }
+tags: {
+  html_format: AMP
+  tag_name: "META"
+  requires: "amp-auto-ads extension .js script"
+  satisfies: "amp-auto-ads"
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "name"
+    mandatory: true
+    value_casei: "amp-auto-ads-setup"
+  }
+  attrs: {
+    name: "type"
+    mandatory: true
+  }
+}

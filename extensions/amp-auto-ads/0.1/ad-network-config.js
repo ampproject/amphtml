@@ -33,10 +33,9 @@ class AdNetworkConfigDef {
 
   /**
    * Indicates whether amp-auto-ads should be enabled on this pageview.
-   * @param {!Window} unusedWin
    * @return {boolean} true if amp-auto-ads should be enabled on this pageview.
    */
-  isEnabled(unusedWin) {}
+  isEnabled() {}
 
   /**
    * @return {string}
@@ -59,13 +58,14 @@ class AdNetworkConfigDef {
 
 /**
  * Builds and returns an AdNetworkConfig instance for the given type.
+ * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {string} type
- * @param {!Element} autoAmpAdsElement
+ * @param {!Object<string, string>} setupParams
  * @return {?AdNetworkConfigDef}
  */
-export function getAdNetworkConfig(type, autoAmpAdsElement) {
+export function getAdNetworkConfig(ampdoc, type, setupParams) {
   if (type == 'adsense') {
-    return new AdSenseNetworkConfig(autoAmpAdsElement);
+    return new AdSenseNetworkConfig(ampdoc, setupParams);
   }
   return null;
 }
@@ -75,28 +75,28 @@ export function getAdNetworkConfig(type, autoAmpAdsElement) {
  */
 class AdSenseNetworkConfig {
   /**
-   * @param {!Element} autoAmpAdsElement
+   * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Object<string, string>} setupParams
    */
-  constructor(autoAmpAdsElement) {
-    this.autoAmpAdsElement_ = autoAmpAdsElement;
+  constructor(ampdoc, setupParams) {
+    this.ampdoc_ = ampdoc;
+    this.setupParams_ = setupParams;
   }
 
-  /**
-   * @param {!Window} win
-   */
-  isEnabled(win) {
-    const branch = getAdSenseAmpAutoAdsExpBranch(win);
+  /** @override */
+  isEnabled() {
+    const branch = getAdSenseAmpAutoAdsExpBranch(this.ampdoc_.win);
     return branch != AdSenseAmpAutoAdsHoldoutBranches.CONTROL;
   }
 
   /** @override */
   getConfigUrl() {
-    const docInfo = documentInfoForDoc(this.autoAmpAdsElement_);
+    const docInfo = documentInfoForDoc(this.ampdoc_);
     const canonicalHostname = parseUrl(docInfo.canonicalUrl).hostname;
     return buildUrl('//pagead2.googlesyndication.com/getconfig/ama', [
       {
         name: 'client',
-        value: this.autoAmpAdsElement_.getAttribute('data-ad-client'),
+        value: this.setupParams_['adClient'],
       },
       {
         name: 'plah',
@@ -109,14 +109,13 @@ class AdSenseNetworkConfig {
   getAttributes() {
     return {
       'type': 'adsense',
-      'data-ad-client': this.autoAmpAdsElement_.getAttribute('data-ad-client'),
+      'data-ad-client': this.setupParams_['adClient'],
     };
   }
 
   /** @override */
   getAdConstraints() {
-    const viewportHeight =
-        viewportForDoc(this.autoAmpAdsElement_).getSize().height;
+    const viewportHeight = viewportForDoc(this.ampdoc_).getSize().height;
     return {
       initialMinSpacing: viewportHeight,
       subsequentMinSpacing: [

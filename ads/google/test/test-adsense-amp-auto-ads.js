@@ -64,6 +64,28 @@ describes.realWin('adsense-amp-auto-ads', {}, env => {
         .to.equal(AdSenseAmpAutoAdsHoldoutBranches.EXPERIMENT);
   });
 
+  it('should pick the control branch when experiment on and amp-auto-ads ' +
+      'setup element present.', () => {
+    const ampAutoAdsSetupNode = win.document.createElement('meta');
+    ampAutoAdsSetupNode.setAttribute('name', 'amp-auto-ads-setup');
+    win.document.head.appendChild(ampAutoAdsSetupNode);
+    toggleExperiment(win, ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME, true);
+    RANDOM_NUMBER_GENERATORS.accuratePrng.onFirstCall().returns(0.4);
+    expect(getAdSenseAmpAutoAdsExpBranch(win))
+        .to.equal(AdSenseAmpAutoAdsHoldoutBranches.CONTROL);
+  });
+
+  it('should pick the experiment branch when experiment on and amp-auto-ads ' +
+      'setup element present.', () => {
+    const ampAutoAdsSetupNode = win.document.createElement('meta');
+    ampAutoAdsSetupNode.setAttribute('name', 'amp-auto-ads-setup');
+    win.document.head.appendChild(ampAutoAdsSetupNode);
+    toggleExperiment(win, ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME, true);
+    RANDOM_NUMBER_GENERATORS.accuratePrng.onFirstCall().returns(0.6);
+    expect(getAdSenseAmpAutoAdsExpBranch(win))
+        .to.equal(AdSenseAmpAutoAdsHoldoutBranches.EXPERIMENT);
+  });
+
   it('should not pick a branch when experiment off.', () => {
     const ampAutoAdsEl = win.document.createElement('amp-auto-ads');
     win.document.body.appendChild(ampAutoAdsEl);

@@ -37,7 +37,9 @@ export const AdSenseAmpAutoAdsHoldoutBranches = {
 
 /** @const {!../../src/experiments.ExperimentInfo} */
 const ADSENSE_AMP_AUTO_ADS_EXPERIMENT_INFO = {
-  isTrafficEligible: win => !!win.document.querySelector('AMP-AUTO-ADS'),
+  isTrafficEligible: win => !!(
+      win.document.querySelector('meta[name="amp-auto-ads-setup"]') ||
+      win.document.querySelector('amp-auto-ads')),
   branches: [
     AdSenseAmpAutoAdsHoldoutBranches.CONTROL,
     AdSenseAmpAutoAdsHoldoutBranches.EXPERIMENT,
