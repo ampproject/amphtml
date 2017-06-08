@@ -80,13 +80,13 @@ describe('refresh-manager', () => {
 
   it('should be eligible for refresh', () => {
     const refreshManager = new RefreshManager(mockA4a);
-    expect(refreshManager.isEligibleForRefresh()).to.be.true;
+    expect(refreshManager.isRefreshable()).to.be.true;
   });
 
   it('should NOT be eligible for refresh', () => {
     mockA4a.element.removeAttribute(DATA_ATTR_NAME);
     const refreshManager = new RefreshManager(mockA4a);
-    expect(refreshManager.isEligibleForRefresh()).to.be.false;
+    expect(refreshManager.isRefreshable()).to.be.false;
   });
 
   it('should execute the refresh event correctly', () => {

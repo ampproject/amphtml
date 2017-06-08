@@ -76,8 +76,15 @@ export class RefreshManager {
     /** @private {?(number|string)} */
     this.refreshTimeoutId_ = null;
 
-    /** @private {?boolean} */
-    this.enabled_ = null;
+    /** @private {boolean} */
+    this.isRefreshable_ = !!(this.config_  // The network has opted-in.
+        // The publisher has enabled refresh on this slot.
+        && (this.refreshInterval_ || this.refreshInterval_ == '')
+        // The slot is contained only within container types eligible for
+        // refresh.
+        && !getEnclosingContainerTypes(this.element_).filter(container =>
+          container != ValidAdContainerTypes['AMP-CAROUSEL']
+          && container != ValidAdContainerTypes['AMP-STICKY-AD']).length);
   }
 
 
@@ -89,7 +96,7 @@ export class RefreshManager {
    *   is useful to have for test purposes.
    */
   initiateRefreshCycle() {
-    if (!this.isEligibleForRefresh()) {
+    if (!this.isRefreshable()) {
       return null;
     }
     return new Promise(resolve => {
@@ -192,18 +199,7 @@ export class RefreshManager {
    *
    * @return {boolean}
    */
-  isEligibleForRefresh() {
-    if (this.enabled_ == null) {
-      // The network has opted into refresh.
-      this.enabled_ = !!(this.config_
-          // The publisher has enabled refresh on this slot.
-          && (this.refreshInterval_ || this.refreshInterval_ == '')
-          // The slot is contained only within container types eligible for
-          // refresh.
-          && !getEnclosingContainerTypes(this.element_).filter(container =>
-            container != ValidAdContainerTypes['AMP-CAROUSEL']
-            && container != ValidAdContainerTypes['AMP-STICKY-AD']).length);
-    }
-    return this.enabled_;
+  isRefreshable() {
+    return this.isRefreshable_;
   }
 }
