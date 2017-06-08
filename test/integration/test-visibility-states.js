@@ -22,11 +22,8 @@ import {resourcesForDoc} from '../../src/services';
 import {VisibilityState} from '../../src/visibility-state';
 import {getVendorJsPropertyName} from '../../src/style';
 import {createCustomEvent} from '../../src/event-helper';
-import * as sinon from 'sinon';
 
 describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
-
-  let sandbox;
 
   function noop() {}
 
@@ -39,7 +36,6 @@ describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
 
     let resources;
     let viewer;
-    let protoElement;
     let layoutCallback;
     let unlayoutCallback;
     let pauseCallback;
@@ -53,7 +49,7 @@ describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
       if (index == -1) {
         return 'visibilitychange';
       }
-      return hidden.substr(0, index) + 'Visibilitychange';
+      return hiddenName.substr(0, index) + 'Visibilitychange';
     }
     function changeVisibility(vis) {
       docHidden.returns(vis === 'hidden');
@@ -149,7 +145,7 @@ describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
 
       // TODO(jridgewell): Need to test non-prerenderable element already
       // laid-out, and prerenderable is not.
-      it.only('calls layout when going to VISIBLE', () => {
+      it('calls layout when going to VISIBLE', () => {
         viewer.setVisibilityState_(VisibilityState.VISIBLE);
         return waitForNextPass().then(() => {
           expect(layoutCallback).to.have.been.called;

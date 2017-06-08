@@ -981,7 +981,6 @@ export class Resources {
     this.schedulePass();
   }
 
-  /** @private */
   doPass() {
     if (!this.isRuntimeOn_) {
       dev().fine(TAG_, 'runtime is off');
