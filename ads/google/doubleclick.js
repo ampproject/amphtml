@@ -71,8 +71,9 @@ export function doubleclick(global, data) {
   };
 // Note that reduce will return the first item that matches but it is expected
 // that only one of the experiment ids will be present.
-  const expFilename = data['experimentId'] && data['experimentId'].split(',')
-    .reduce(expId => fileExperimentConfig[expId]);
+let expFilename;
+(data['experimentId'] || '').split(',').
+  forEach(val => expFilename = expFilename || fileExperimentConfig[val]);
   const url = `https://www.googletagservices.com/tag/js/` +
                 `${expFilename || 'gpt.js'}`;
   if (data.useSameDomainRenderingUntilDeprecated != undefined || data.multiSize
