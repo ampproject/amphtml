@@ -387,3 +387,9 @@ function main(argv) {
 }
 
 process.exit(main());
+
+//  Whitespace change for testing the Travis queue. Not to be merged to master.
+//  Whitespace change #2. Commit #2.
+//  Whitespace change #3. Commit #3.
+//  Whitespace change #4. Commit #4.
+//  Whitespace change #5. Commit #5. Pushed to branch together with Commit #4.
