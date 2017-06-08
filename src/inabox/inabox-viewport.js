@@ -247,7 +247,7 @@ export class ViewportBindingInabox {
    * @private
    */
   leaveOverlayMode_() {
-    return this.requestResetFullOverlayFrame_()
+    return this.requestCancelFullOverlayFrame_()
         .then(() => this.resetFixedContainer_());
   }
 
@@ -306,11 +306,11 @@ export class ViewportBindingInabox {
    * @return {!Promise}
    * @private
    */
-  requestResetFullOverlayFrame_() {
+  requestCancelFullOverlayFrame_() {
     return new Promise(resolve => {
       this.iframeClient_.makeRequest(
-          MessageType.RESET_FULL_OVERLAY_FRAME,
-          MessageType.RESET_FULL_OVERLAY_FRAME_RESPONSE,
+          MessageType.CANCEL_FULL_OVERLAY_FRAME,
+          MessageType.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
           resolve);
     });
   }

@@ -206,7 +206,7 @@ describes.realWin('inabox-host:position-observer', {}, env => {
         origin: 'www.example.com',
         data: 'amp-' + JSON.stringify({
           sentinel: '0-123',
-          type: 'reset-full-overlay-frame',
+          type: 'cancel-full-overlay-frame',
         }),
       });
 

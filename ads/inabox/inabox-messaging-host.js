@@ -27,11 +27,18 @@ import {expandFrame, collapseFrame} from './frame-overlay-helper';
 const TAG = 'InaboxMessagingHost';
 
 
+
+/** Simple helper for named callbacks. */
 class NamedObservable {
+
   constructor() {
     this.map_ = {};
   }
 
+  /**
+   * @param {string} key
+   * @param {!Function} callback
+   */
   listen(key, callback) {
     if (key in this.map_) {
       dev().fine(TAG, `Overriding message callback [${key}]`);
@@ -39,6 +46,12 @@ class NamedObservable {
     this.map_[key] = callback;
   }
 
+  /**
+   * @param {string} key
+   * @param {*} thisArg
+   * @param {!Array} args
+   * @retun {boolean} True when a callback was found and successfully executed.
+   */
   fire(key, thisArg, args) {
     if (key in this.map_) {
       return this.map_[key].apply(thisArg, args);
@@ -65,7 +78,7 @@ export class InaboxMessagingHost {
         MessageType.FULL_OVERLAY_FRAME, this.handleEnterFullOverlay_);
 
     this.msgObservable_.listen(
-        MessageType.RESET_FULL_OVERLAY_FRAME, this.handleResetFullOverlay_);
+        MessageType.CANCEL_FULL_OVERLAY_FRAME, this.handleResetFullOverlay_);
   }
 
   /**
