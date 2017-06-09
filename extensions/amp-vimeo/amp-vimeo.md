@@ -50,7 +50,7 @@ With responsive layout, the width and height from the example should yield corre
 
 **data-videoid** (required)
 
-The Vimeo video id found in every Vimeo video page URL For example, `27246366` is the video id for the following url: https://vimeo.com/27246366.
+The Vimeo video id found in every Vimeo video page URL For example, `27246366` is the video id for the following url: `https://vimeo.com/27246366`.
 
 **common attributes**
 
