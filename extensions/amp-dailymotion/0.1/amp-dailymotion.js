@@ -86,10 +86,10 @@ class AmpDailymotion extends AMP.BaseElement {
     this.playerReadyResolver_ = null;
 
     /** @private {?Promise} */
-    this.loadedPromise_ = null;
+    this.startedBufferingPromise_ = null;
 
     /** @private {?Function} */
-    this.loadingResolver_ = null;
+    this.startedBufferingResolver_ = null;
 
   }
 
@@ -112,8 +112,8 @@ class AmpDailymotion extends AMP.BaseElement {
 
   /** @override */
   isInteractive() {
-    // Dailymotion videos are always interactive. There is no Dailymotion param that
-    // makes the video non-interactive. Even controls=false will not
+    // Dailymotion videos are always interactive. There is no Dailymotion param
+    // that makes the video non-interactive. Even controls=false will not
     // prevent user from pausing or resuming the video.
     return true;
   }
@@ -141,8 +141,8 @@ class AmpDailymotion extends AMP.BaseElement {
       this.playerReadyResolver_ = resolve;
     });
 
-    this.loadedPromise_ = new Promise(resolve => {
-      this.loadingResolver_ = resolve;
+    this.startedBufferingPromise_ = new Promise(resolve => {
+      this.startedBufferingResolver_ = resolve;
     });
   }
 
@@ -152,8 +152,8 @@ class AmpDailymotion extends AMP.BaseElement {
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     dev().assert(this.videoid_);
-    iframe.src = 'https://www.dailymotion.com/embed/video/' + encodeURIComponent(
-        this.videoid_ || '') + '?' + this.getQuery_();
+    iframe.src = 'https://www.dailymotion.com/embed/video/' +
+     encodeURIComponent(this.videoid_ || '') + '?' + this.getQuery_();
 
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
@@ -218,7 +218,7 @@ class AmpDailymotion extends AMP.BaseElement {
         }
         break;
       case DailymotionEvents.STARTED_BUFFERING:
-        this.loadingResolver_(true);
+        this.startedBufferingResolver_(true);
         break;
       default:
 
@@ -282,7 +282,7 @@ class AmpDailymotion extends AMP.BaseElement {
     // Hack to solve autoplay problem on Chrome Android
     // (first play always fails)
     if (isAutoplay && this.playerState_ != DailymotionEvents.PAUSE) {
-      this.loadedPromise_.then(() => {
+      this.startedBufferingPromise_.then(() => {
         this.sendCommand_('play');
       });
     }
