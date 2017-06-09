@@ -39,7 +39,7 @@ import {user} from '../../../src/log';
  */
 export let RefreshConfig;
 
-export const MIN_REFRESH_INTERVAL = 30;
+export const MIN_REFRESH_INTERVAL = 3;
 export const DATA_ATTR_NAME = 'data-enable-refresh';
 export const METATAG_NAME = 'amp-ad-enable-refresh';
 
