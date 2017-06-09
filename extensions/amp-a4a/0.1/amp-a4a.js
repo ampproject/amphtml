@@ -36,6 +36,7 @@ import {isArray, isObject, isEnumValue} from '../../../src/types';
 import {some} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
 import {viewerForDoc} from '../../../src/services';
+import {timerFor} from '../../../src/services';
 import {xhrFor} from '../../../src/services';
 import {endsWith} from '../../../src/string';
 import {platformFor} from '../../../src/services';
@@ -216,8 +217,8 @@ export class AmpA4A extends AMP.BaseElement {
    */
   constructor(element) {
     super(element);
-    dev().assert(AMP.AmpAdUIHandler);
-    dev().assert(AMP.AmpAdXOriginIframeHandler);
+//    dev().assert(AMP.AmpAdUIHandler);
+//    dev().assert(AMP.AmpAdXOriginIframeHandler);
 
     /** @private {?Promise<?CreativeMetaDataDef>} */
     this.adPromise_ = null;
@@ -340,6 +341,13 @@ export class AmpA4A extends AMP.BaseElement {
 
     /** @private {string} */
     this.safeframeVersion_ = DEFAULT_SAFEFRAME_VERSION;
+
+    /**
+     * Indicates whether the ad is currently in the process of being refreshed.
+     *
+     * @protected {boolean}
+     */
+    this.isRefreshing = false;
   }
 
   /** @override */
@@ -521,6 +529,19 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
+    this.initiateAdRequest();
+  }
+
+  /**
+   * This is the entry point into the ad promise chain.
+   *
+   * Calling this function will initiate the following sequence of events: ad
+   * url construction, ad request issuance, creative verification, and metadata
+   * parsing.
+   *
+   * @protected
+   */
+  initiateAdRequest() {
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.onLayoutMeasure();
     }
@@ -744,6 +765,44 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * Refreshes ad slot by fetching a new creative and rendering it. This leaves
+   * the current creative displayed until the next one is ready.
+   *
+   * @param {function()} refreshEndCallback When called, this function will
+   *   restart the refresh cycle.
+   */
+  refresh(refreshEndCallback) {
+    this.isRefreshing = true;
+    this.tearDownSlot();
+    this.initiateAdRequest();
+    const promiseId = this.promiseId_;
+    this.adPromise_.then(() => {
+      if (!this.isRefreshing || promiseId != this.promiseId_) {
+        // If this refresh cycle was canceled, such as in a no-content
+        // response case, keep showing the old creative.
+        refreshEndCallback();
+        return;
+      }
+      this.togglePlaceholder(true);
+      this.destroyFrame(true);
+      // We don't want the next creative to appear too suddenly, so we
+      // show the loader for a quarter of a second before switching to
+      // the new creative.
+      timerFor(this.win).delay(() => {
+        this.getResource().whenWithinRenderOutsideViewport().then(() => {
+          this.vsync_.mutate(() => {
+            this.attemptToRenderCreative().then(() => {
+              this.isRefreshing = false;
+              this.togglePlaceholder(false);
+              refreshEndCallback();
+            });
+          });
+        });
+      }, 250);
+    });
+  }
+
+  /**
    * Attempts to validate the creative signature against every key currently in
    * our possession. This should never be called before at least one key fetch
    * attempt is made.
@@ -892,6 +951,17 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    return this.attemptToRenderCreative();
+  }
+
+  /**
+   * Attemps to render the returned creative following the resolution of the
+   * adPromise.
+   *
+   * @return {!Promise} Whether the creative was successfully rendered.
+   * @protected
+   */
+  attemptToRenderCreative() {
     // Promise may be null if element was determined to be invalid for A4A.
     if (!this.adPromise_) {
       if (this.shouldInitializePromiseChain_()) {
@@ -915,9 +985,10 @@ export class AmpA4A extends AMP.BaseElement {
       if (this.isCollapsed_) {
         return Promise.resolve();
       }
-      // If this.iframe already exists, bail out here. This should only happen in
+      // If this.iframe already exists, and we're not currently in the middle
+      // of refreshing, bail out here. This should only happen in
       // testing context, not in production.
-      if (this.iframe) {
+      if (this.iframe && !this.isRefreshing) {
         this.protectedEmitLifecycleEvent_('iframeAlreadyExists');
         return Promise.resolve();
       }
@@ -956,6 +1027,15 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.friendlyIframeEmbed_) {
       return false;
     }
+    this.tearDownSlot();
+    return true;
+  }
+
+  /**
+   * Attempts to tear down and set all state variables to initial conditions.
+   * @protected
+   */
+  tearDownSlot() {
     // Increment promiseId to cause any pending promise to cancel.
     this.promiseId_++;
     this.protectedEmitLifecycleEvent_('adSlotCleared');
@@ -976,17 +1056,8 @@ export class AmpA4A extends AMP.BaseElement {
 
     this.isCollapsed_ = false;
 
-    // Allow embed to release its resources.
-    if (this.friendlyIframeEmbed_) {
-      this.friendlyIframeEmbed_.destroy();
-      this.friendlyIframeEmbed_ = null;
-    }
-
     // Remove rendering frame, if it exists.
-    if (this.iframe && this.iframe.parentElement) {
-      this.iframe.parentElement.removeChild(this.iframe);
-      this.iframe = null;
-    }
+    this.destroyFrame();
 
     this.adPromise_ = null;
     this.adUrl_ = null;
@@ -995,11 +1066,34 @@ export class AmpA4A extends AMP.BaseElement {
     this.fromResumeCallback = false;
     this.experimentalNonAmpCreativeRenderMethod_ =
         platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
+  }
+
+  /**
+   * Attempts to remove the current frame and free any associated resources.
+   * This function will no-op if this ad slot is currently in the process of
+   * being refreshed.
+   *
+   * @param {boolean=} force Forces the removal of the frame, even if
+   *   this.isRefreshing is true.
+   * @protected
+   */
+  destroyFrame(force) {
+    if (!force && this.isRefreshing) {
+      return;
+    }
+    if (this.iframe && this.iframe.parentElement) {
+      this.iframe.parentElement.removeChild(this.iframe);
+      this.iframe = null;
+    }
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.freeXOriginIframe();
       this.xOriginIframeHandler_ = null;
     }
-    return true;
+    // Allow embed to release its resources.
+    if (this.friendlyIframeEmbed_) {
+      this.friendlyIframeEmbed_.destroy();
+      this.friendlyIframeEmbed_ = null;
+    }
   }
 
   /** @override  */
@@ -1075,6 +1169,12 @@ export class AmpA4A extends AMP.BaseElement {
    * @visibleForTesting
    */
   forceCollapse() {
+    if (this.isRefreshing) {
+      // If, for whatever reason, the new creative would collapse this slot,
+      // stick with the old creative until the next refresh cycle.
+      this.isRefreshing = false;
+      return;
+    }
     dev().assert(this.uiHandler);
     // Store original size to allow for reverting on unlayoutCallback so that
     // subsequent pageview allows for ad request.
