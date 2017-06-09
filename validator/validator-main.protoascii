@@ -25,7 +25,7 @@ min_validator_revision_required: 234
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 431
+spec_file_revision: 433
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 
@@ -1552,6 +1552,7 @@ tags: {
   tag_name: "SOURCE"
   spec_name: "amp-ima-video > source"
   mandatory_parent: "AMP-IMA-VIDEO"
+  requires_extension: "amp-ima-video"
   attrs: { name: "media" }
   attrs: {
     name: "src"
@@ -1565,7 +1566,6 @@ tags: {
   # <amp-bind>
   attrs: { name: "[src]" }
   attrs: { name: "[type]" }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ima-video"
 }
 # 4.7.8 The track element
 # We have two attr_list variants to encode the requirement that if
@@ -3074,6 +3074,32 @@ tags: {
     name: "type"
     mandatory: true
     value_casei: "application/ld+json"
+    dispatch_key: true
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+}
+# AMP RTC (Real Time Config)
+tags: {
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "script id=amp-rtc"
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: { name: "nonce" }
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+  }
+  attrs: {
+    name: "id"
+    mandatory: true
+    value_casei: "amp-rtc"
     dispatch_key: true
   }
   cdata: {

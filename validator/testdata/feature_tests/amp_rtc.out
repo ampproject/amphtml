@@ -1,0 +1,2 @@
+FAIL
+feature_tests/amp_rtc.html:44:2 The tag 'script' is disallowed except in specific forms. [CUSTOM_JAVASCRIPT_DISALLOWED]
