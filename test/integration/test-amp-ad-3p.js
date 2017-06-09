@@ -25,7 +25,7 @@ import {toggleExperiment} from '../../src/experiments';
 
 
 // TODO(@alanorozco): Inline this once 3p-use-ampcontext experiment is removed
-function createIframeWithApis(fixture, unusedOpt_checkForNewImpl) {
+function createIframeWithApis(fixture, unusedOptCheckForNewImpl) {
   this.timeout(20000);
   let iframe;
   let ampAd;
