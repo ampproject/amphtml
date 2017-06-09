@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {listenOncePromise} from '../../src/event-helper';
 import {ampdocServiceFor} from '../../src/ampdoc';
 import {isLayoutSizeDefined} from '../../src/layout';
 import {VideoEvents} from '../../src/video-interface';
@@ -22,6 +23,7 @@ import {
   installVideoManagerForDoc,
   supportsAutoplay,
   clearSupportsAutoplayCacheForTesting,
+  PlayingStates,
 } from '../../src/service/video-manager-impl';
 import {
   runVideoPlayerIntegrationTests,
@@ -46,24 +48,139 @@ describes.fakeWin('VideoManager', {
 }, env => {
   let sandbox;
   let videoManager;
+  let klass;
+  let video;
+  let impl;
+  let spy;
 
   it('should register common actions', () => {
-    const klass = createFakeVideoPlayerClass(env.win);
-    const video = env.createAmpElement('amp-test-fake-videoplayer', klass);
-    const impl = video.implementation_;
-    const spy = sandbox.spy(impl, 'registerAction');
-    videoManager.register(impl);
-
     expect(spy).to.have.been.calledWith('play');
     expect(spy).to.have.been.calledWith('pause');
     expect(spy).to.have.been.calledWith('mute');
     expect(spy).to.have.been.calledWith('unmute');
   });
 
+  it('should be paused if autoplay is not set', () => {
+    impl.hasAutoplay_ = false;
+    impl.isVisible_ = false;
+    const curState = videoManager.getPlayingState(impl);
+    expect(curState).to.equal(PlayingStates.PAUSED);
+  });
+
+
+  it('autoplay - should be manually playing if user interacted', () => {
+    impl.hasAutoplay_ = true;
+    impl.isVisible_ = false;
+    impl.play();
+    listenOncePromise(video, VideoEvents.PLAY).then(() => {
+      const curState = videoManager.getPlayingState(impl);
+      expect(curState).to.equal(PlayingStates.PLAYING_MANUAL);
+    });
+  });
+
+  it('autoplay - should be paused if the user pressed pause after playing',
+  () => {
+    impl.hasAutoplay_ = true;
+    impl.isVisible_ = false;
+    impl.play();
+    listenOncePromise(video, VideoEvents.PLAY).then(() => {
+      impl.pause();
+      listenOncePromise(video, VideoEvents.PAUSE).then(() => {
+        const curState = videoManager.getPlayingState(impl);
+        expect(curState).to.equal(PlayingStates.PAUSED);
+      });
+    });
+  });
+
+  it('autoplay - initially there should be no user interaction', () => {
+    impl.hasAutoplay_ = true;
+    impl.isVisible_ = false;
+    const userInteracted = videoManager.userInteracted(impl);
+    expect(userInteracted).to.be.false;
+  });
+
+
+  it('autoplay - should register user interaction', () => {
+    impl.hasAutoplay_ = true;
+    impl.isVisible_ = false;
+    impl.play();
+    listenOncePromise(video, VideoEvents.PLAY).then(() => {
+      const userInteracted = videoManager.userInteracted(impl);
+      expect(userInteracted).to.be.true;
+    });
+  });
+
+  it('no autoplay - should be autoplaying if autoplay is set', () => {
+    impl.hasAutoplay_ = true;
+    impl.isVisible_ = false;
+    listenOncePromise(video, VideoEvents.PLAY).then(() => {
+      const curState = videoManager.getPlayingState(impl);
+      expect(curState).to.equal(PlayingStates.PLAYING_AUTO);
+    });
+  });
+
+  it(`no autoplay - should pause if autoplaying and the
+    video is outside of view`, () => {
+    impl.hasAutoplay_ = true;
+    impl.isVisible_ = true;
+    impl.play();
+    impl.isVisible_ = false;
+    const curState = videoManager.getPlayingState(impl);
+    expect(curState).to.equal(PlayingStates.PAUSED);
+  });
+
+  it('no autoplay - should be manually playing if user interacted', () => {
+    impl.hasAutoplay_ = true;
+    impl.isVisible_ = true;
+    impl.play();
+    listenOncePromise(video, VideoEvents.PLAY).then(() => {
+      const curState = videoManager.getPlayingState(impl);
+      expect(curState).to.equal(PlayingStates.PLAYING_MANUAL);
+    });
+  });
+
+  it(`no autoplay - should be paused if the
+    user pressed pause after playing`, () => {
+    impl.hasAutoplay_ = true;
+    impl.isVisible_ = true;
+    impl.play();
+    listenOncePromise(video, VideoEvents.PLAY).then(() => {
+      impl.pause();
+      listenOncePromise(video, VideoEvents.PAUSE).then(() => {
+        const curState = videoManager.getPlayingState(impl);
+        expect(curState).to.equal(PlayingStates.PAUSED);
+      });
+    });
+  });
+
+
+  it('no autoplay - initially there should be no user interaction', () => {
+    impl.hasAutoplay_ = true;
+    impl.isVisible_ = true;
+    const userInteracted = videoManager.userInteracted(impl);
+    expect(userInteracted).to.be.false;
+  });
+
+
+  it('no autoplay - should register user interaction', () => {
+    impl.hasAutoplay_ = true;
+    impl.isVisible_ = true;
+    impl.play();
+    listenOncePromise(video, VideoEvents.PLAY).then(() => {
+      const userInteracted = videoManager.userInteracted(impl);
+      expect(userInteracted).to.be.true;
+    });
+  });
+
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     installVideoManagerForDoc(env.ampdoc);
     videoManager = videoManagerForDoc(env.ampdoc);
+    klass = createFakeVideoPlayerClass(env.win);
+    video = env.createAmpElement('amp-test-fake-videoplayer', klass);
+    impl = video.implementation_;
+    spy = sandbox.spy(impl, 'registerAction');
+    videoManager.register(impl);
   });
 });
 

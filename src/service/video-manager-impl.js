@@ -41,7 +41,7 @@ const VISIBILITY_PERCENT = 75;
  *
  * @constant {!Object<string, string>}
  */
-const PlayingStates = {
+export const PlayingStates = {
   /**
    * playing_manual
    *

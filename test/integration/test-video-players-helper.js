@@ -15,12 +15,11 @@
  */
 
 import {listenOncePromise} from '../../src/event-helper';
-import {timerFor, videoManagerForDoc} from '../../src/services';
+import {timerFor} from '../../src/services';
 import {toggleExperiment} from '../../src/experiments';
 import {
   VideoInterface,
   VideoEvents,
-  PlayingStates,
 } from '../../src/video-interface';
 import {supportsAutoplay} from '../../src/service/video-manager-impl';
 import {
@@ -205,158 +204,6 @@ export function runVideoPlayerIntegrationTests(
     before(function() {
       this.timeout(TIMEOUT);
   // Skip autoplay tests if browser does not support autoplay.
-      return supportsAutoplay(window, false).then(supportsAutoplay => {
-        if (!supportsAutoplay) {
-          this.skip();
-        }
-      });
-    });
-
-    afterEach(cleanUp);
-  });
-
-  describe.configure().retryOnSaucelabs()
-  .run('Playing Status', function() {
-    this.timeout(TIMEOUT);
-    describe('without-autoplay', () => {
-      it('should be paused if autoplay is not set', () => {
-        return getVideoPlayer({outsideView: false, autoplay: false}).then(r => {
-          const videoObj = r.video.implementation_;
-          const vidManager = videoManagerForDoc(videoObj.element);
-          const curState = vidManager.getPlayingState(videoObj);
-          expect(curState).to.equal(PlayingStates.PAUSED);
-        });
-      });
-
-
-      it('should be manually playing if user interacted', () => {
-        return getVideoPlayer({outsideView: false, autoplay: true}).then(r => {
-          const videoObj = r.video.implementation_;
-          videoObj.play();
-          listenOncePromise(r.video, VideoEvents.PLAY).then(() => {
-            const vidManager = videoManagerForDoc(videoObj.element);
-            const curState = vidManager.getPlayingState(videoObj);
-            expect(curState).to.equal(PlayingStates.PLAYING_MANUAL);
-          });
-        });
-      });
-
-      it('should be paused if the user pressed pause after playing', () => {
-        return getVideoPlayer({outsideView: false, autoplay: true}).then(r => {
-          const videoObj = r.video.implementation_;
-          videoObj.play();
-          listenOncePromise(r.video, VideoEvents.PLAY).then(() => {
-            videoObj.pause();
-            listenOncePromise(r.video, VideoEvents.PAUSE).then(() => {
-              const vidManager = videoManagerForDoc(videoObj.element);
-              const curState = vidManager.getPlayingState(videoObj);
-              expect(curState).to.equal(PlayingStates.PAUSED);
-            });
-          });
-        });
-      });
-
-      it('initially there should be no user interaction', () => {
-        return getVideoPlayer({outsideView: false, autoplay: true}).then(r => {
-          const videoObj = r.video.implementation_;
-          const vidManager = videoManagerForDoc(videoObj.element);
-          const userInteracted = vidManager.userInteracted(videoObj);
-          expect(userInteracted).to.be.false;
-        });
-      });
-
-
-      it('should register user interaction', () => {
-        return getVideoPlayer({outsideView: false, autoplay: true}).then(r => {
-          const videoObj = r.video.implementation_;
-          videoObj.play();
-          listenOncePromise(r.video, VideoEvents.PLAY).then(() => {
-            const vidManager = videoManagerForDoc(videoObj.element);
-            const userInteracted = vidManager.userInteracted(videoObj);
-            expect(userInteracted).to.be.true;
-          });
-        });
-      });
-
-
-    });
-
-    describe('with-autoplay', () => {
-      it('should be autoplaying if autoplay is set', () => {
-        return getVideoPlayer({outsideView: false, autoplay: true}).then(r => {
-          const videoObj = r.video.implementation_;
-          listenOncePromise(r.video, VideoEvents.PLAY).then(() => {
-            const vidManager = videoManagerForDoc(videoObj.element);
-            const curState = vidManager.getPlayingState(videoObj);
-            expect(curState).to.equal(PlayingStates.PLAYING_AUTO);
-          });
-        });
-      });
-
-      it('should pause if autoplaying and the video is outside of view', () => {
-        return getVideoPlayer({outsideView: true, autoplay: true}).then(r => {
-          const videoObj = r.video.implementation_;
-          const vidManager = videoManagerForDoc(videoObj.element);
-          const curState = vidManager.getPlayingState(videoObj);
-          expect(curState).to.equal(PlayingStates.PAUSED);
-        });
-      });
-
-      it('should be manually playing if user interacted', () => {
-        return getVideoPlayer({outsideView: false, autoplay: true}).then(r => {
-          const videoObj = r.video.implementation_;
-          videoObj.play();
-          listenOncePromise(r.video, VideoEvents.PLAY).then(() => {
-            const vidManager = videoManagerForDoc(videoObj.element);
-            const curState = vidManager.getPlayingState(videoObj);
-            expect(curState).to.equal(PlayingStates.PLAYING_MANUAL);
-          });
-        });
-      });
-
-      it('should be paused if the user pressed pause after playing', () => {
-        return getVideoPlayer({outsideView: false, autoplay: true}).then(r => {
-          const videoObj = r.video.implementation_;
-          videoObj.play();
-          listenOncePromise(r.video, VideoEvents.PLAY).then(() => {
-            videoObj.pause();
-            listenOncePromise(r.video, VideoEvents.PAUSE).then(() => {
-              const vidManager = videoManagerForDoc(videoObj.element);
-              const curState = vidManager.getPlayingState(videoObj);
-              expect(curState).to.equal(PlayingStates.PAUSED);
-            });
-          });
-        });
-      });
-
-
-      it('initially there should be no user interaction', () => {
-        return getVideoPlayer({outsideView: false, autoplay: true}).then(r => {
-          const videoObj = r.video.implementation_;
-          const vidManager = videoManagerForDoc(videoObj.element);
-          const userInteracted = vidManager.userInteracted(videoObj);
-          expect(userInteracted).to.be.false;
-        });
-      });
-
-
-      it('should register user interaction', () => {
-        return getVideoPlayer({outsideView: false, autoplay: true}).then(r => {
-          const videoObj = r.video.implementation_;
-          videoObj.play();
-          listenOncePromise(r.video, VideoEvents.PLAY).then(() => {
-            const vidManager = videoManagerForDoc(videoObj.element);
-            const userInteracted = vidManager.userInteracted(videoObj);
-            expect(userInteracted).to.be.true;
-          });
-        });
-      });
-
-    });
-
-    before(function() {
-      this.timeout(TIMEOUT);
-      // Skip autoplay tests if browser does not support autoplay.
       return supportsAutoplay(window, false).then(supportsAutoplay => {
         if (!supportsAutoplay) {
           this.skip();
