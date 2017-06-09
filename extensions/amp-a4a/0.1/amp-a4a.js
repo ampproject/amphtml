@@ -348,6 +348,23 @@ export class AmpA4A extends AMP.BaseElement {
      * @protected {boolean}
      */
     this.isRefreshing = false;
+
+    /**
+     * Resolver for creativeRenderedPromise_. This is then'd onto
+     * attemptToRenderCreative in layoutCallback.
+     *
+     * @private {?function()}
+     */
+    this.creativeRenderedPromiseResolver_ = null;
+
+    /**
+     * Promise that resolves to true when the creative renders correctly, or to
+     * false when the creative fails to render.
+     *
+     * @private {Promise<boolean>}
+     */
+    this.creativeRenderedPromise_ = new Promise(
+        resolve => this.creativeRenderedPromiseResolver_ = resolve);
   }
 
   /** @override */
@@ -768,10 +785,10 @@ export class AmpA4A extends AMP.BaseElement {
    * Refreshes ad slot by fetching a new creative and rendering it. This leaves
    * the current creative displayed until the next one is ready.
    *
-   * @param {function()} restartRefresh When called, this function will restart
-   *   the refresh cycle.
+   * @param {function()} refreshEndCallback When called, this function will
+   *   restart the refresh cycle.
    */
-  refresh(restartRefresh) {
+  refresh(refreshEndCallback) { debugger;
     this.isRefreshing = true;
     this.tearDownSlot();
     this.initiateAdRequest();
@@ -780,7 +797,7 @@ export class AmpA4A extends AMP.BaseElement {
       if (!this.isRefreshing || promiseId != this.promiseId_) {
         // If this refresh cycle was canceled, such as in a no-content
         // response case, keep showing the old creative.
-        restartRefresh();
+        refreshEndCallback();
         return;
       }
       this.togglePlaceholder(true);
@@ -792,10 +809,19 @@ export class AmpA4A extends AMP.BaseElement {
         this.attemptToRenderCreative().then(() => {
           this.isRefreshing = false;
           this.togglePlaceholder(false);
-          restartRefresh();
+          refreshEndCallback();
         });
       }, 250);
     });
+  }
+
+  /**
+   * Resets the creativeRenderedPromise to a new promise, and sets
+   * this.creativeRenderedPromiseResolver_ to its resolve function.
+   */
+  resetCreativeRenderedPromise_() {
+    this.creativeRenderedPromise_ = new Promise(
+        resolve => this.creativeRenderedPromiseResolver_ = resolve);
   }
 
   /**
@@ -946,7 +972,7 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /** @override */
-  layoutCallback() {
+  layoutCallback() { debugger;
     return this.attemptToRenderCreative();
   }
 
