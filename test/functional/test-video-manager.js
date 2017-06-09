@@ -95,7 +95,7 @@ describes.fakeWin('VideoManager', {
   it('autoplay - initially there should be no user interaction', () => {
     impl.hasAutoplay_ = true;
     impl.isVisible_ = false;
-    const userInteracted = videoManager.userInteracted(impl);
+    const userInteracted = videoManager.userInteractedWithAutoPlay(impl);
     expect(userInteracted).to.be.false;
   });
 
@@ -105,7 +105,7 @@ describes.fakeWin('VideoManager', {
     impl.isVisible_ = false;
     impl.play();
     listenOncePromise(video, VideoEvents.PLAY).then(() => {
-      const userInteracted = videoManager.userInteracted(impl);
+      const userInteracted = videoManager.userInteractedWithAutoPlay(impl);
       expect(userInteracted).to.be.true;
     });
   });
@@ -157,7 +157,7 @@ describes.fakeWin('VideoManager', {
   it('no autoplay - initially there should be no user interaction', () => {
     impl.hasAutoplay_ = true;
     impl.isVisible_ = true;
-    const userInteracted = videoManager.userInteracted(impl);
+    const userInteracted = videoManager.userInteractedWithAutoPlay(impl);
     expect(userInteracted).to.be.false;
   });
 
@@ -167,7 +167,7 @@ describes.fakeWin('VideoManager', {
     impl.isVisible_ = true;
     impl.play();
     listenOncePromise(video, VideoEvents.PLAY).then(() => {
-      const userInteracted = videoManager.userInteracted(impl);
+      const userInteracted = videoManager.userInteractedWithAutoPlay(impl);
       expect(userInteracted).to.be.true;
     });
   });

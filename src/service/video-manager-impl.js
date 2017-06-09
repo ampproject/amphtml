@@ -146,9 +146,9 @@ export class VideoManager {
     // TODO(aghassemi): Remove this later. For now, the visibility observer
     // only matters for autoplay videos so no point in monitoring arbitrary
     // videos yet.
-    // if (!video.element.hasAttribute(VideoAttributes.AUTOPLAY)) {
-    //   return;
-    // }
+    if (!video.element.hasAttribute(VideoAttributes.AUTOPLAY)) {
+      return;
+    }
 
     listen(entry.video.element, VideoEvents.VISIBILITY, () => {
       entry.updateVisibility();
@@ -207,8 +207,8 @@ export class VideoManager {
    * @param {!../video-interface.VideoInterface} video
    * @return {boolean}
    */
-  userInteracted(video) {
-    return this.getEntryForVideo_(video).userInteracted();
+  userInteractedWithAutoPlay(video) {
+    return this.getEntryForVideo_(video).userInteractedWithAutoPlay();
   }
 
 
@@ -256,7 +256,10 @@ class VideoEntry {
     this.hasAutoplay_ = element.hasAttribute(VideoAttributes.AUTOPLAY);
 
     /** @private {boolean} */
-    this.userInteracted_ = false;
+    this.userInteractedWithAutoPlay_ = false;
+
+    /** @private {boolean} */
+    this.playCalledByAutoplay_ = false;
 
     listenOncePromise(element, VideoEvents.LOAD)
         .then(() => this.videoLoaded_());
@@ -399,7 +402,7 @@ class VideoEntry {
         toggleAnimation.bind(this, /*playing*/ true));
 
     function onInteraction() {
-      this.userInteracted_ = true;
+      this.userInteractedWithAutoPlay_ = true;
       this.video.showControls();
       this.video.unmute();
       unlistenInteraction();
@@ -415,7 +418,7 @@ class VideoEntry {
    * @private
    */
   autoplayLoadedVideoVisibilityChanged_() {
-    if (this.userInteracted_ || !viewerForDoc(this.ampdoc_).isVisible()) {
+    if (this.userInteractedWithAutoPlay_ || !viewerForDoc(this.ampdoc_).isVisible()) {
       return;
     }
 
@@ -426,6 +429,7 @@ class VideoEntry {
 
       if (this.isVisible_) {
         this.video.play(/*autoplay*/ true);
+        this.playCalledByAutoplay_ = true;
       } else {
         this.video.pause();
       }
@@ -524,21 +528,25 @@ class VideoEntry {
    * @return {!../video-interface.VideoInterface} PlayingStates
    */
   getPlayingState() {
-    if (this.userInteracted_ && this.isPlaying_) {
-      return PlayingStates.PLAYING_MANUAL;
-    } else if (this.isPlaying_) {
-      return PlayingStates.PLAYING_AUTO;
-    } else {
+    if(!this.isPlaying_) {
       return PlayingStates.PAUSED;
     }
+
+    if(this.isPlaying_
+      && this.playCalledByAutoplay_
+      && !this.userInteractedWithAutoPlay_) {
+      return PlayingStates.PLAYING_AUTO;
+    }
+
+    return PlayingStates.PLAYING_MANUAL;
   }
 
   /**
    * Returns whether the video was interacted with or not
    * @return {boolean}
    */
-  userInteracted() {
-    return this.userInteracted_;
+  userInteractedWithAutoPlay() {
+    return this.userInteractedWithAutoPlay_;
   }
 }
 
