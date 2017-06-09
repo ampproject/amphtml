@@ -17,6 +17,12 @@
       font-family: 'Open Sans';
     }
 
+    @media (min-width: 768px) {
+      .toolbar-media-hide {
+        display: none;
+      }
+    }
+
     .ad-container {
       display: flex;
       justify-content: center;
@@ -231,7 +237,7 @@
         <li>
           <a href="#">
             Home
-            <amp-img src="img/ampicon.png" width="15" height="15" toolbar-only></amp-img>
+            <amp-img src="img/ampicon.png" width="15" height="15"></amp-img>
           </a>
         </li>
         <li toolbar-only><a href="#">Toolbar Only Example</a></li>
@@ -267,7 +273,7 @@
     <button on="tap:sidebar.toggle" class="menu" title="Toggle Sidebar" >
       ☰
     </button>
-    <span class="brand-logo">
+    <span class="brand-logo toolbar-media-hide">
       PublisherLogo
     </span>
   </header>
