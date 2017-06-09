@@ -31,7 +31,7 @@ import * as sinon from 'sinon';
 import '../../../amp-mustache/0.1/amp-mustache';
 import {
   cidServiceForDocForTesting,
-} from '../../../../src/cid-impl';
+} from '../../../../src/service/cid-impl';
 import {
   actionServiceForDoc,
   documentInfoForDoc,

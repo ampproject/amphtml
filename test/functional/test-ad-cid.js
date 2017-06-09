@@ -18,7 +18,7 @@ import {adConfig} from '../../ads/_config';
 import {ampdocServiceFor} from '../../src/ampdoc';
 import {
   cidServiceForDocForTesting,
-} from '../../src/cid-impl';
+} from '../../src/service/cid-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {getAdCid} from '../../src/ad-cid';

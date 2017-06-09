@@ -22,23 +22,23 @@
  * For details, see https://goo.gl/Mwaacs
  */
 
-import {getCookie, setCookie} from './cookies';
+import {getCookie, setCookie} from '../cookies';
 import {
   registerServiceBuilderForDoc,
   getServiceForDoc,
-} from './service';
+} from '../service';
 import {
   getSourceOrigin,
   isProxyOrigin,
   parseUrl,
-} from './url';
-import {isIframed} from './dom';
-import {getCryptoRandomBytesArray} from './utils/bytes';
-import {viewerForDoc} from './services';
-import {cryptoFor} from './crypto';
-import {tryParseJson} from './json';
-import {timerFor} from './services';
-import {user, rethrowAsync} from './log';
+} from '../url';
+import {isIframed} from '../dom';
+import {getCryptoRandomBytesArray} from '../utils/bytes';
+import {viewerForDoc} from '../services';
+import {cryptoFor} from '../crypto';
+import {tryParseJson} from '../json';
+import {timerFor} from '../services';
+import {user, rethrowAsync} from '../log';
 
 const ONE_DAY_MILLIS = 24 * 3600 * 1000;
 
