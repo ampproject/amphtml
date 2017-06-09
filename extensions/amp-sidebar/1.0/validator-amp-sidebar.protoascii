@@ -13,3 +13,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the license.
 #
+
+tags: {  # amp-sidebar
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-sidebar"
+    allowed_versions: "1.0"
+    allowed_versions: "latest"
+    requires_usage: DEPRECATED_WARNING
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-sidebar>
+  html_format: AMP
+  tag_name: "AMP-SIDEBAR"
+  mandatory_parent: "BODY"
+  disallowed_ancestor: "AMP-SIDEBAR"
+  requires_extension: "amp-sidebar"
+  attrs: {
+    name: "side"
+    value_regex: "(left|right)"
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
+}
