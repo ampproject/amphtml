@@ -139,14 +139,15 @@ describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
           setupSpys();
         });
 
-        it('does layout when going to PRERENDER', () => {
-          return waitForNextPass().then(() => {
-            expect(layoutCallback).to.have.been.called;
-            expect(unlayoutCallback).not.to.have.been.called;
-            expect(pauseCallback).not.to.have.been.called;
-            expect(resumeCallback).not.to.have.been.called;
-          });
-        });
+        it.configure().skipSafari().run('does layout when going to PRERENDER',
+            () => {
+              return waitForNextPass().then(() => {
+                expect(layoutCallback).to.have.been.called;
+                expect(unlayoutCallback).not.to.have.been.called;
+                expect(pauseCallback).not.to.have.been.called;
+                expect(resumeCallback).not.to.have.been.called;
+              });
+            });
 
         it('calls layout when going to VISIBLE', () => {
           viewer.receiveMessage('visibilitychange',
