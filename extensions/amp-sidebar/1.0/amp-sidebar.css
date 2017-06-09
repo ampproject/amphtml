@@ -49,6 +49,20 @@
    transition: transform 233ms cubic-bezier(0,0,.21,1);
  }
 
+  header[toolbar] nav[toolbar] {
+    display: inline-block;
+  }
+
+  header[toolbar] nav[toolbar] ul {
+    padding-left: 0px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+  }
+
+  header[toolbar] nav[toolbar] li {
+    margin-bottom: 0px;
+  }
+
  .i-amphtml-sidebar-mask {
    position: fixed !important;
    top: 0 !important;

@@ -224,7 +224,9 @@
 </head>
 <body>
   <amp-sidebar id="sidebar" layout="nodisplay">
-    <nav>
+
+    <!-- Toolbar/sidebar elements -->
+    <nav toolbar="(max-width: 768px)">
       <ul>
         <li>
           <a href="#">
@@ -232,15 +234,19 @@
             <amp-img src="img/ampicon.png" width="15" height="15"></amp-img>
           </a>
         </li>
-        <li><a href="#">Link 1</a></li>
-        <li><a href="#">Link 2</a></li>
-        <li><a href="#">Link 3</a></li>
-        <li><a href="#">Link 4</a></li>
-        <li><a href="#section1">Section 1</a></li>
-        <li><a href="#section2">Section 2</a></li>
-        <li><a href="#section3">Section 3</a></li>
       </ul>
     </nav>
+
+    <!-- Sidebar only elements -->
+    <ul>
+      <li><a href="#">Link 1</a></li>
+      <li><a href="#">Link 2</a></li>
+      <li><a href="#">Link 3</a></li>
+      <li><a href="#">Link 4</a></li>
+      <li><a href="#section1">Section 1</a></li>
+      <li><a href="#section2">Section 2</a></li>
+      <li><a href="#section3">Section 3</a></li>
+    </ul>
   </amp-sidebar>
   <amp-app-banner layout="nodisplay" id="demo-app-banner-2134">
     <div class="content">

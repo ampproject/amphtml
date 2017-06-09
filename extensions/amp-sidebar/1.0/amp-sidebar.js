@@ -56,6 +56,18 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private {?string} */
     this.side_ = null;
 
+    /** @private {string|undefined} */
+    this.toolbar_ = undefined;
+
+    /** @private {?Element} */
+    this.toolbarNav_ = undefined;
+
+    /** @private {?Element} */
+    this.toolbarClone_ = undefined;
+
+    /** @private {?Element} */
+    this.toolbarHeader_ = undefined;
+
     const platform = platformFor(this.win);
 
     /** @private @const {boolean} */
@@ -97,6 +109,23 @@ export class AmpSidebar extends AMP.BaseElement {
           'ltr';
       this.side_ = (pageDir == 'rtl') ? 'right' : 'left';
       this.element.setAttribute('side', this.side_);
+    }
+
+    // Get the toolbar attribute from the nav
+    if(this.element.hasChildNodes && this.element.getElementsByTagName('nav').length === 1) {
+      const navElement = this.element.getElementsByTagName('nav')[0];
+      if(navElement.hasAttribute('toolbar')) {
+        this.toolbarNav_ = navElement;
+        this.toolbar_ = navElement.getAttribute('toolbar');
+      }
+
+      // Find or create a header element on the document for our toolbar
+      if (this.element.ownerDocument.getElementsByTagName('header').length > 0) {
+        this.toolbarHeader_ = this.element.ownerDocument.getElementsByTagName('header')[0];
+      } else {
+        this.toolbarHeader_ = this.element.ownerDocument.createElement("div");
+        this.element.ownerDocument.insertBefore(this.toolbarHeader_, this.element);
+      }
     }
 
     if (this.isIosSafari_) {
@@ -159,6 +188,27 @@ export class AmpSidebar extends AMP.BaseElement {
     }, true);
   }
 
+  /** @override */
+  onLayoutMeasure() {
+    // Remove and add the toolbar dynamically
+    if (this.isToolbar_() && !this.toolbarHeader_.hasAttribute('toolbar')) {
+      // Add the toolbar elements
+      this.toolbarClone_ = this.toolbarNav_.cloneNode(true);
+      this.toolbarHeader_.appendChild(this.toolbarClone_);
+      if(this.toolbarNav_.hasAttribute('toolbar-only')) {
+        this.toolbarNav_.style.display = 'none';
+      }
+      this.toolbarHeader_.setAttribute('toolbar', '');
+    } else if (!this.isToolbar_() && this.toolbarHeader_.hasAttribute('toolbar')) {
+      // Remove the elements and the attribute
+      this.toolbarHeader_.removeChild(this.toolbarClone_);
+      if(this.toolbarNav_.hasAttribute('toolbar-only')) {
+        this.toolbarNav_.style.display = null;
+      }
+      this.toolbarHeader_.removeAttribute('toolbar');
+    }
+  }
+
   /**
    * Returns true if the sidebar is opened.
    * @returns {boolean}
@@ -166,6 +216,19 @@ export class AmpSidebar extends AMP.BaseElement {
    */
   isOpen_() {
     return this.element.hasAttribute('open');
+  }
+
+  /**
+   * Returns if the sidebar is currently in toolbar media query
+   * @returns {boolean}
+   * @private
+   */
+  isToolbar_() {
+    if(!this.toolbar_) {
+      return false;
+    } else {
+      return this.element.ownerDocument.defaultView.matchMedia(this.toolbar_).matches;
+    }
   }
 
   /** @override */
