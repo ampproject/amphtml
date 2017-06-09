@@ -25,13 +25,13 @@ import {videoManagerForDoc} from '../../../src/services';
 import {parseQueryString} from '../../../src/url';
 
 /**
+ * Player events reverse-engineered from the Dailymotion API
+ * NOTE: 'unstarted' isn't part of the API, just a placeholder
+ * as an initial state
+ *
  * @enum {string}
  * @private
  */
-
-// Events reverse-engineered from the Dailymotion API
-// 'unstarted' isn't part of the API, just a placeholder as an initial state
-
 const DailymotionEvents = {
   UNSTARTED: 'unstarted',
   API_READY: 'apiready',
@@ -50,7 +50,7 @@ const DailymotionEvents = {
   VIDEO_END: 'video_end',
   // Other events
   VOLUMECHANGE: 'volumechange',
-  LOADED: 'progress',
+  STARTED_BUFFERING: 'progress',
 };
 
 /**
@@ -112,8 +112,8 @@ class AmpDailymotion extends AMP.BaseElement {
 
   /** @override */
   isInteractive() {
-    // Dailymotion videos are always interactive. There is no YouTube param that
-    // makes the video non-interactive. Even data-param-control=0 will not
+    // Dailymotion videos are always interactive. There is no Dailymotion param that
+    // makes the video non-interactive. Even controls=false will not
     // prevent user from pausing or resuming the video.
     return true;
   }
@@ -217,7 +217,7 @@ class AmpDailymotion extends AMP.BaseElement {
           }
         }
         break;
-      case DailymotionEvents.LOADED:
+      case DailymotionEvents.STARTED_BUFFERING:
         this.loadingResolver_(true);
         break;
       default:
@@ -271,10 +271,7 @@ class AmpDailymotion extends AMP.BaseElement {
 
   /** @override */
   pauseCallback() {
-    if (this.iframe_ && this.iframe_.contentWindow
-       && this.playerState_ == DailymotionEvents.PLAY) {
-      this.pause();
-    }
+    this.pause();
   }
 
   /**
