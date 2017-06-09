@@ -479,7 +479,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
             expect(impl.iframe).to.be.ok;
             expect(impl.ampAnalyticsConfig_).to.be.ok;
             expect(impl.element.querySelector('iframe')).to.be.ok;
-            expect(impl.element.querySelector('amp-analytics')).to.be.ok;
+            expect(impl.element.querySelector('amp-analytics')).to.be.ok; debugger;
             impl.unlayoutCallback();
             expect(impl.element.querySelector('div[placeholder]')).to.be.ok;
             expect(impl.element.querySelector('div[fallback]')).to.be.ok;
