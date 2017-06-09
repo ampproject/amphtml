@@ -17,8 +17,6 @@
 tags: {  # amp-hulu
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-hulu extension .js script"
-  requires: "amp-hulu"
   extension_spec: {
     name: "amp-hulu"
     allowed_versions: "0.1"
@@ -29,9 +27,8 @@ tags: {  # amp-hulu
 tags: {  # <amp-hulu>
   html_format: AMP
   tag_name: "AMP-HULU"
-  satisfies: "amp-hulu"
   disallowed_ancestor: "AMP-SIDEBAR"
-  requires: "amp-hulu extension .js script"
+  requires_extension: "amp-hulu"
   attrs: {
     name: "data-eid"
     mandatory: true

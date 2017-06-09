@@ -17,12 +17,11 @@
 tags: {  # amp-jwplayer
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-jwplayer extension .js script"
   extension_spec: {
     name: "amp-jwplayer"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    deprecated_recommends_usage_of_tag: "amp-jwplayer"
+    requires_usage: DEPRECATED_WARNING
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -31,7 +30,7 @@ tags: {  # <amp-jwplayer>
   html_format: AMP
   tag_name: "AMP-JWPLAYER"
   disallowed_ancestor: "AMP-SIDEBAR"
-  requires: "amp-jwplayer extension .js script"
+  requires_extension: "amp-jwplayer"
   attrs: {
     name: "data-media-id"
     mandatory_oneof: "data-media-id or data-playlist-id"
@@ -47,7 +46,6 @@ tags: {  # <amp-jwplayer>
     mandatory_oneof: "data-media-id or data-playlist-id"
     value_regex_casei: "[0-9a-z]{8}"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-jwplayer"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

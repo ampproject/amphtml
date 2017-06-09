@@ -47,7 +47,7 @@ import {parseQueryString} from '../../../src/url';
 export let A4aExperimentBranches;
 
 /** @type {!string} @private */
-const MANUAL_EXPERIMENT_ID = '117152632';
+export const MANUAL_EXPERIMENT_ID = '117152632';
 
 /** @type {!string} @private */
 const EXTERNALLY_SELECTED_ID = '2088461';
@@ -77,11 +77,14 @@ const INTERNALLY_SELECTED_ID = '2088462';
  * @param {!A4aExperimentBranches} internalBranches experiment and control
  *   branch IDs to use when experiment is triggered internally (i.e., via
  *   client-side selection).
+ * @param {!A4aExperimentBranches} delayedExternalBranches
+ * @param {!A4aExperimentBranches=} opt_sfgInternalBranches
  * @return {boolean} Whether Google Ads should attempt to render via the A4A
  *   pathway.
  */
 export function googleAdsIsA4AEnabled(win, element, experimentName,
-    externalBranches, internalBranches, delayedExternalBranches) {
+    externalBranches, internalBranches, delayedExternalBranches,
+    opt_sfgInternalBranches) {
   if (!isGoogleAdsA4AValidEnvironment(win)) {
     // Serving location doesn't qualify for A4A treatment
     return false;
@@ -91,6 +94,8 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
       experimentName, externalBranches.control,
       externalBranches.experiment, delayedExternalBranches.control,
       delayedExternalBranches.experiment,
+      opt_sfgInternalBranches ? opt_sfgInternalBranches.control : null,
+      opt_sfgInternalBranches ? opt_sfgInternalBranches.experiment : null,
       MANUAL_EXPERIMENT_ID);
   const experimentInfoMap = {};
   const branches = [
@@ -180,7 +185,7 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
  */
 function maybeSetExperimentFromUrl(win, element, experimentName,
     controlBranchId, treatmentBranchId, delayedControlId,
-    delayedTreatmentBrandId, manualId) {
+    delayedTreatmentBrandId, sfgControlId, sfgTreatmentId, manualId) {
   const expParam = viewerForDoc(element).getParam('exp') ||
       parseQueryString(win.location.search)['exp'];
   if (!expParam) {
@@ -201,6 +206,8 @@ function maybeSetExperimentFromUrl(win, element, experimentName,
     '2': treatmentBranchId,
     '3': delayedControlId,
     '4': delayedTreatmentBrandId,
+    '5': sfgControlId,
+    '6': sfgTreatmentId,
   };
   if (argMapping.hasOwnProperty(arg)) {
     forceExperimentBranch(win, experimentName, argMapping[arg]);

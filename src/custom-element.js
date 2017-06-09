@@ -219,7 +219,11 @@ export function copyElementToChildWindow(parentWin, childWin, name) {
  */
 export function upgradeElementInChildWindow(parentWin, childWin, name) {
   const toClass = getExtendedElements(parentWin)[name];
-  dev().assert(toClass, '%s is not stubbed yet', name);
+  // Some extensions unofficially register unstubbed elements, e.g. amp-bind.
+  // Can be changed to assert() once official support (#9143) is implemented.
+  if (!toClass) {
+    dev().warn(TAG_, '%s is not stubbed yet', name);
+  }
   dev().assert(toClass != ElementStub, '%s is not upgraded yet', name);
   upgradeOrRegisterElement(childWin, name, toClass);
 }
@@ -1108,7 +1112,7 @@ function createBaseCustomElementClass(win) {
       const win = this.ownerDocument.defaultView;
       const event = win.document.createEvent('Event');
       event.data = data;
-      event.initEvent(name, true, true);
+      event.initEvent(name, /* bubbles */ true, /* cancelable */ true);
       this.dispatchEvent(event);
     }
 
@@ -1463,18 +1467,6 @@ function createBaseCustomElementClass(win) {
      */
     mutatedAttributesCallback(mutations) {
       this.implementation_.mutatedAttributesCallback(mutations);
-    }
-
-    /**
-     * Returns an array of elements in this element's subtree that this
-     * element owns that could have children added or removed dynamically.
-     * The array should not contain any ancestors of this element, but could
-     * contain this element itself.
-     * @return {Array<!Element>}
-     * @public
-     */
-    getDynamicElementContainers() {
-      return this.implementation_.getDynamicElementContainers();
     }
 
     /**

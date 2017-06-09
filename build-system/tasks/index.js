@@ -27,6 +27,7 @@ require('./csvify-size');
 require('./dep-check');
 require('./get-zindex');
 require('./extension-generator');
+require('./json-check');
 require('./lint');
 require('./prepend-global');
 require('./presubmit-checks');

@@ -16,12 +16,11 @@
 
 tags: {  # amp-anim
   tag_name: "SCRIPT"
-  satisfies: "amp-anim extension .js script"
   extension_spec: {
     name: "amp-anim"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    deprecated_recommends_usage_of_tag: "amp-anim"
+    requires_usage: DEPRECATED_WARNING
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -29,7 +28,7 @@ tags: {  # amp-anim
 tags: {  # <amp-anim>
   tag_name: "AMP-ANIM"
   disallowed_ancestor: "AMP-SIDEBAR"
-  requires: "amp-anim extension .js script"
+  requires_extension: "amp-anim"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "controls" }

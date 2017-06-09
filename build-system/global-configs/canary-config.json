@@ -18,10 +18,10 @@
   "slidescroll-disable-css-snap": 1,
   "visibility-v3": 1,
   "as-use-attr-for-format": 1,
-  "web-worker": 1,
   "a4aFastFetchDoubleclickLaunched": 0,
   "a4aFastFetchAdSenseLaunched": 0,
   "a4a-measure-get-ad-urls": 1,
+  "amp-bind": 1,
   "ad-loader-v2": 1,
   "3p-use-ampcontext": 1
 }

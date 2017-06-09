@@ -17,11 +17,12 @@
 tags: {  # amp-access-laterpay
   html_format: AMP
   tag_name: "SCRIPT"
-  requires: "amp-access extension .js script"
+  requires_extension: "amp-access"
   extension_spec: {
     name: "amp-access-laterpay"
     allowed_versions: "0.1"
     allowed_versions: "latest"
+    requires_usage: NONE
   }
   attr_lists: "common-extension-attrs"
 }

@@ -108,15 +108,6 @@ function getAdTypes() {
  * Run tests.
  */
 gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
-  if (argv.saucelabs && process.env.MAIN_REPO &&
-      // Sauce Labs does not work on Pull Requests directly.
-      // The @ampsauce bot builds these.
-      process.env.TRAVIS_PULL_REQUEST != 'false') {
-    console./*OK*/info('Deactivated for pull requests. ' +
-        'The @ampsauce bots build eligible PRs.');
-    return;
-  }
-
   if (!argv.integration && process.env.AMPSAUCE_REPO) {
     console./*OK*/info('Deactivated for ampsauce repo')
   }
@@ -203,7 +194,13 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     util.log(util.colors.yellow(
         'Shutting down test responses server on localhost:31862'));
     server.emit('kill');
-    done(exitCode);
+    if (exitCode) {
+      var error = new Error(
+          util.colors.red('Karma test failed (error code: ' + exitCode + ')'));
+      done(error);
+    } else {
+      done();
+    }
   }).start();
 }, {
   options: {

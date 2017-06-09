@@ -17,8 +17,6 @@
 tags: {  # amp-ima-video
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-ima-video extension .js script"
-  requires: "amp-ima-video"
   extension_spec: {
     name: "amp-ima-video"
     allowed_versions: "0.1"
@@ -30,12 +28,10 @@ tags: {  # <amp-ima-video>
   html_format: AMP
   tag_name: "AMP-IMA-VIDEO"
   disallowed_ancestor: "AMP-SIDEBAR"
-  satisfies: "amp-ima-video"
-  requires: "amp-ima-video extension .js script"
+  requires_extension: "amp-ima-video"
   # data-* is generally allowed, but it's not generally mandatory.
   attrs: {
     name: "data-src"
-    mandatory: true
     value_url: {
       allowed_protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
@@ -53,7 +49,10 @@ tags: {  # <amp-ima-video>
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-ima-video"
   amp_layout: {
+    supported_layouts: FILL
     supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
 }

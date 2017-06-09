@@ -25,6 +25,13 @@
  * @extend {EventTarget}
  */
 class Animation {
+  constructor() {
+    /**
+     * Current time of the animation.
+     * @type {number}
+     */
+    this.currentTime;
+  }
 
   /**
    * Starts or resumes playing of an animation, or begins the animation again

@@ -16,8 +16,6 @@
 tags: {  # amp-auto-ads
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-auto-ads extension .js script"
-  requires: "amp-auto-ads"
   extension_spec: {
     name: "amp-auto-ads"
     allowed_versions: "0.1"
@@ -28,10 +26,9 @@ tags: {  # amp-auto-ads
 tags: {  # <amp-auto-ads>
   html_format: AMP
   tag_name: "AMP-AUTO-ADS"
-  satisfies: "amp-auto-ads"
   disallowed_ancestor: "AMP-AUTO-ADS"
   disallowed_ancestor: "AMP-SIDEBAR"
-  requires: "amp-auto-ads extension .js script"
+  requires_extension: "amp-auto-ads"
   attrs: {
     name: "type"
     mandatory: true

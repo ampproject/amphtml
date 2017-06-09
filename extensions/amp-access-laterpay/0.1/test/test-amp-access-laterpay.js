@@ -15,8 +15,6 @@
  */
 
 import {LaterpayVendor} from '../laterpay-impl';
-import {toggleExperiment} from '../../../../src/experiments';
-
 
 describes.fakeWin('LaterpayVendor', {
   amp: true,
@@ -43,6 +41,7 @@ describes.fakeWin('LaterpayVendor', {
       getAdapterConfig: () => { return laterpayConfig; },
       buildUrl: () => {},
       loginWithUrl: () => {},
+      getLoginUrl: () => {},
     };
     accessServiceMock = sandbox.mock(accessService);
 
@@ -53,21 +52,12 @@ describes.fakeWin('LaterpayVendor', {
 
     vendor = new LaterpayVendor(accessService);
     xhrMock = sandbox.mock(vendor.xhr_);
-    toggleExperiment(win, 'amp-access-laterpay', true);
   });
 
   afterEach(() => {
     articleTitle.parentNode.removeChild(articleTitle);
-    toggleExperiment(win, 'amp-access-laterpay', false);
     accessServiceMock.verify();
     xhrMock.verify();
-  });
-
-  it('should fail without experiment', () => {
-    toggleExperiment(win, 'amp-access-laterpay', false);
-    expect(() => {
-      vendor.authorize();
-    }).to.throw(/experiment/);
   });
 
   describe('authorize', () => {
@@ -83,12 +73,18 @@ describes.fakeWin('LaterpayVendor', {
         .withExactArgs('https://baseurl?param&article_title=test%20title', false)
         .returns(Promise.resolve('https://builturl'))
         .once();
+      accessServiceMock.expects('getLoginUrl')
+        .returns(Promise.resolve('https://builturl'))
+        .once();
       xhrMock.expects('fetchJson')
         .withExactArgs('https://builturl', {
           credentials: 'include',
-          requireAmpResponseSourceOrigin: true,
         })
-        .returns(Promise.resolve({access: true}))
+        .returns(Promise.resolve({
+          json() {
+            return Promise.resolve({access: true});
+          },
+        }))
         .once();
       return vendor.authorize().then(resp => {
         expect(resp.access).to.be.true;
@@ -100,10 +96,12 @@ describes.fakeWin('LaterpayVendor', {
       accessServiceMock.expects('buildUrl')
         .returns(Promise.resolve('https://builturl'))
         .once();
+      accessServiceMock.expects('getLoginUrl')
+        .returns(Promise.resolve('https://builturl'))
+        .once();
       xhrMock.expects('fetchJson')
         .withExactArgs('https://builturl', {
           credentials: 'include',
-          requireAmpResponseSourceOrigin: true,
         })
         .returns(Promise.resolve({status: 204}))
         .once();
@@ -116,14 +114,20 @@ describes.fakeWin('LaterpayVendor', {
       accessServiceMock.expects('buildUrl')
         .returns(Promise.resolve('https://builturl'))
         .once();
+      accessServiceMock.expects('getLoginUrl')
+        .returns(Promise.resolve('https://builturl'))
+        .once();
       xhrMock.expects('fetchJson')
         .withExactArgs('https://builturl', {
           credentials: 'include',
-          requireAmpResponseSourceOrigin: true,
         })
         .returns(Promise.reject({
-          response: {status: 402},
-          responseJson: {access: false},
+          response: {
+            status: 402,
+            json() {
+              return Promise.resolve({access: false});
+            },
+          },
         }))
         .once();
       emptyContainerStub.returns(Promise.resolve());
@@ -145,6 +149,9 @@ describes.fakeWin('LaterpayVendor', {
         premiumcontent: {
           price: {},
         },
+        subscriptions: [
+          {price: {}},
+        ],
         timepasses: [
           {price: {}},
         ],
@@ -160,8 +167,8 @@ describes.fakeWin('LaterpayVendor', {
       expect(container.querySelector('ul')).to.not.be.null;
     });
 
-    it('renders 2 purchase options', () => {
-      expect(container.querySelector('ul').childNodes.length).to.equal(2);
+    it('renders 3 purchase options', () => {
+      expect(container.querySelector('ul').childNodes.length).to.equal(3);
     });
 
   });
@@ -177,6 +184,9 @@ describes.fakeWin('LaterpayVendor', {
         premiumcontent: {
           price: {},
         },
+        subscriptions: [
+          {price: {}},
+        ],
         timepasses: [
           {price: {}},
         ],
@@ -209,6 +219,9 @@ describes.fakeWin('LaterpayVendor', {
         premiumcontent: {
           price: {},
         },
+        subscriptions: [
+          {price: {}},
+        ],
         timepasses: [
           {price: {}},
         ],
