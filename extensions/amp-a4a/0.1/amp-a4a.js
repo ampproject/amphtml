@@ -217,8 +217,8 @@ export class AmpA4A extends AMP.BaseElement {
    */
   constructor(element) {
     super(element);
-//    dev().assert(AMP.AmpAdUIHandler);
-//    dev().assert(AMP.AmpAdXOriginIframeHandler);
+    dev().assert(AMP.AmpAdUIHandler);
+    dev().assert(AMP.AmpAdXOriginIframeHandler);
 
     /** @private {?Promise<?CreativeMetaDataDef>} */
     this.adPromise_ = null;
