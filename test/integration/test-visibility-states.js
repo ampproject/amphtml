@@ -19,6 +19,7 @@ import {documentStateFor} from '../../src/service/document-state';
 import {resourcesForDoc} from '../../src/services';
 import {VisibilityState} from '../../src/visibility-state';
 import {getVendorJsPropertyName} from '../../src/style';
+import {whenUpgradedToCustomElement} from '../../src/dom';
 import {createCustomEvent} from '../../src/event-helper';
 
 describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
@@ -105,6 +106,8 @@ describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
         img.setAttribute('layout', 'fixed');
         win.document.body.appendChild(img);
 
+        return whenUpgradedToCustomElement(img);
+      }).then(img => {
         layoutCallback = sandbox.stub(img.implementation_, 'layoutCallback');
         unlayoutCallback = sandbox.stub(img.implementation_,
             'unlayoutCallback');
@@ -136,14 +139,15 @@ describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
           setupSpys();
         });
 
-        it('does layout when going to PRERENDER', () => {
-          return waitForNextPass().then(() => {
-            expect(layoutCallback).to.have.been.called;
-            expect(unlayoutCallback).not.to.have.been.called;
-            expect(pauseCallback).not.to.have.been.called;
-            expect(resumeCallback).not.to.have.been.called;
-          });
-        });
+        it.configure().skipSafari().run('does layout when going to PRERENDER',
+            () => {
+              return waitForNextPass().then(() => {
+                expect(layoutCallback).to.have.been.called;
+                expect(unlayoutCallback).not.to.have.been.called;
+                expect(pauseCallback).not.to.have.been.called;
+                expect(resumeCallback).not.to.have.been.called;
+              });
+            });
 
         it('calls layout when going to VISIBLE', () => {
           viewer.receiveMessage('visibilitychange',
