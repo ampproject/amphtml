@@ -68,6 +68,9 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private {?Element} */
     this.toolbarHeader_ = undefined;
 
+    /** @private {?Array} */
+    this.toolbarOnlyElements_ = undefined;
+
     const platform = platformFor(this.win);
 
     /** @private @const {boolean} */
@@ -112,20 +115,39 @@ export class AmpSidebar extends AMP.BaseElement {
     }
 
     // Get the toolbar attribute from the nav
-    if(this.element.hasChildNodes && this.element.getElementsByTagName('nav').length === 1) {
-      const navElement = this.element.getElementsByTagName('nav')[0];
-      if(navElement.hasAttribute('toolbar')) {
-        this.toolbarNav_ = navElement;
-        this.toolbar_ = navElement.getAttribute('toolbar');
-      }
+    if(this.element.hasChildNodes && this.element.getElementsByTagName('nav').length > 0) {
+      const childNavElements = Array.from(this.element.getElementsByTagName('nav'));
+      childNavElements.some((navElement) => {
+        if(navElement.hasAttribute('toolbar')) {
+          this.toolbarNav_ = navElement;
+          this.toolbar_ = navElement.getAttribute('toolbar');
 
-      // Find or create a header element on the document for our toolbar
-      if (this.element.ownerDocument.getElementsByTagName('header').length > 0) {
-        this.toolbarHeader_ = this.element.ownerDocument.getElementsByTagName('header')[0];
-      } else {
-        this.toolbarHeader_ = this.element.ownerDocument.createElement("div");
-        this.element.ownerDocument.insertBefore(this.toolbarHeader_, this.element);
-      }
+          // Find or create a header element on the document for our toolbar
+          if (this.element.ownerDocument.getElementsByTagName('header').length > 0) {
+            this.toolbarHeader_ = this.element.ownerDocument.getElementsByTagName('header')[0];
+          } else {
+            this.toolbarHeader_ = this.element.ownerDocument.createElement("div");
+            this.element.ownerDocument.insertBefore(this.toolbarHeader_, this.element);
+          }
+
+          //Finally, find our tool-bar only elements
+          if(this.toolbarNav_.hasAttribute('toolbar-only')) {
+            this.toolbarOnlyElements_ = [];
+            this.toolbarOnlyElements_.push(this.toolbarNav_);
+          } else if(!this.toolbarNav_.hasAttribute('toolbar-only') &&
+            this.toolbarNav_.getElementsByTagName('*').length > 0) {
+            this.toolbarOnlyElements_ = [];
+            // Check the nav's children for toolbar-only
+            Array.from(this.toolbarNav_.getElementsByTagName('*')).forEach(element => {
+              if(element.hasAttribute('toolbar-only')) {
+                this.toolbarOnlyElements_.push(element);
+              }
+            });
+          }
+          return true;
+        }
+        return false;
+      });
     }
 
     if (this.isIosSafari_) {
@@ -195,15 +217,19 @@ export class AmpSidebar extends AMP.BaseElement {
       // Add the toolbar elements
       this.toolbarClone_ = this.toolbarNav_.cloneNode(true);
       this.toolbarHeader_.appendChild(this.toolbarClone_);
-      if(this.toolbarNav_.hasAttribute('toolbar-only')) {
-        this.toolbarNav_.style.display = 'none';
+      if(this.toolbarOnlyElements_) {
+        this.toolbarOnlyElements_.forEach(element => {
+          element.style.display = 'none';
+        });
       }
       this.toolbarHeader_.setAttribute('toolbar', '');
     } else if (!this.isToolbar_() && this.toolbarHeader_.hasAttribute('toolbar')) {
       // Remove the elements and the attribute
       this.toolbarHeader_.removeChild(this.toolbarClone_);
-      if(this.toolbarNav_.hasAttribute('toolbar-only')) {
-        this.toolbarNav_.style.display = null;
+      if(this.toolbarOnlyElements_) {
+        this.toolbarOnlyElements_.forEach(element => {
+          element.style.display = null;
+        });
       }
       this.toolbarHeader_.removeAttribute('toolbar');
     }
