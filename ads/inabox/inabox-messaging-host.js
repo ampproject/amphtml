@@ -171,7 +171,7 @@ export class InaboxMessagingHost {
     collapseFrame(this.win_, iframe, () => {
       source./*OK*/postMessage(
           serializeMessage(
-              MessageType.RESET_FULL_OVERLAY_FRAME_RESPONSE,
+              MessageType.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
               request.sentinel,
               {content: {accept: true}}),
           origin);
