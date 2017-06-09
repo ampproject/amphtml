@@ -478,7 +478,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
             expect(impl.iframe).to.be.ok;
             expect(impl.ampAnalyticsConfig_).to.be.ok;
             expect(impl.element.querySelector('iframe')).to.be.ok;
-            expect(impl.element.querySelector('amp-analytics')).to.be.ok; debugger;
+            expect(impl.element.querySelector('amp-analytics')).to.be.ok;
             impl.unlayoutCallback();
             expect(impl.element.querySelector('div[placeholder]')).to.be.ok;
             expect(impl.element.querySelector('div[fallback]')).to.be.ok;
@@ -739,7 +739,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       const layoutCallbacks = [];
       const getLayoutCallback = (impl, creative, isSra, noRender) => {
         impl.buildCallback();
-        impl.onLayoutMeasure(); debugger;
+        impl.onLayoutMeasure();
         return impl.layoutCallback().then(() => {
           if (noRender) {
             expect(impl.iframe).to.not.be.ok;
