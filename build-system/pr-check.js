@@ -24,9 +24,9 @@
  * This script attempts to introduce some granularity for our
  * presubmit checking, via the determineBuildTargets method.
  */
-const child_process = require('child_process');
 const exec = require('./exec.js').exec;
 const execOrDie = require('./exec.js').execOrDie;
+const getStdout = require('./exec.js').getStdout;
 const path = require('path');
 const minimist = require('minimist');
 const util = require('gulp-util');
@@ -59,25 +59,6 @@ function stopTimer(functionName, startTime) {
   console.log(
       fileLogPrefix, 'Done running', util.colors.cyan(functionName),
       'Total time:', util.colors.green(mins + 'm ' + secs + 's'));
-}
-
-/**
- * Executes the provided command, returning its stdout.
- * This will throw an exception if something goes wrong.
- * @param {string} cmd
- * @return {!Array<string>}
- */
-function getStdout(cmd) {
-  let p = child_process.spawnSync(
-      '/bin/sh',
-      ['-c', cmd],
-      {
-        'cwd': process.cwd(),
-        'env': process.env,
-        'stdio': 'pipe',
-        'encoding': 'utf-8'
-      });
-  return p.stdout;
 }
 
 /**
@@ -242,7 +223,8 @@ const command = {
   cleanBuild: function() {
     timedExecOrDie(`${gulp} clean`);
   },
-  runLintChecks: function() {
+  runJsonAndLintChecks: function() {
+    timedExecOrDie(`${gulp} json-syntax`);
     timedExecOrDie(`${gulp} lint`);
   },
   buildRuntime: function() {
@@ -292,7 +274,7 @@ function runAllCommands() {
     command.testBuildSystem();
     command.cleanBuild();
     command.buildRuntime();
-    command.runLintChecks();
+    command.runJsonAndLintChecks();
     command.runDepAndTypeChecks();
     command.runUnitTests();
     // command.testDocumentLinks() is skipped during push builds.
@@ -301,8 +283,6 @@ function runAllCommands() {
   }
   if (process.env.BUILD_SHARD == "integration_tests") {
     command.cleanBuild();
-    // TODO(jridgewell, 9757): Remove this after fixing integration test.
-    command.buildRuntime();
     command.buildRuntimeMinified();
     command.runPresubmitTests();  // Needs runtime to be built and served.
     command.runVisualDiffTests();  // Only called during push builds.
@@ -382,7 +362,7 @@ function main(argv) {
       // longer do a dist build for PRs, so this call won't cover dist/.
       // TODO(rsimha-amp): Move this once integration tests are enabled.
       command.runPresubmitTests();
-      command.runLintChecks();
+      command.runJsonAndLintChecks();
       command.runDepAndTypeChecks();
       // Skip unit tests if the PR only contains changes to integration tests.
       if (buildTargets.has('RUNTIME')) {
@@ -398,10 +378,24 @@ function main(argv) {
   }
 
   if (process.env.BUILD_SHARD == "integration_tests") {
-    // The integration_tests shard can be skipped for PRs.
-    console.log(fileLogPrefix, 'Skipping integration_tests for PRs');
+    // Run the integration_tests shard for a PR only if it is modifying an
+    // integration test. Otherwise, the shard can be skipped.
+    if (buildTargets.has('INTEGRATION_TEST')) {
+      console.log(fileLogPrefix,
+          'Running the',
+          util.colors.cyan('integration_tests'),
+          'build shard since this PR touches',
+          util.colors.cyan('test/integration'));
+      command.cleanBuild();
+      command.buildRuntimeMinified();
+      command.runIntegrationTests();
+    } else {
+      console.log(fileLogPrefix,
+          'Skipping the',
+          util.colors.cyan('integration_tests'),
+          'build shard for this PR');
+    }
   }
-
 
   stopTimer('pr-check.js', startTime);
   return 0;

@@ -32,7 +32,7 @@ limitations under the License.
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-ima-video" src="https://cdn.ampproject.org/v0/amp-ima-video-0.1.js">&lt;/script></code></td>
   </tr>
-  <tr>
+  <tr
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>fixed, responsive</td>
   </tr>
@@ -64,13 +64,13 @@ VAST-compliant ad response (for examples, see
 
 ## Attributes
 
-**data-src** (required)
-
-The URL of your video content.
-
 **data-tag** (required)
 
 The URL for your VAST ad document.
+
+**data-src** (required if no `<source>` children are present)
+
+The URL of your video content.
 
 **data-poster** (optional)
 

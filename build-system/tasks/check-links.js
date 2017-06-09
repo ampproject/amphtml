@@ -16,9 +16,11 @@
 'use strict';
 
 var argv = require('minimist')(process.argv.slice(2));
+var path = require('path');
 var BBPromise = require('bluebird');
 var chalk = require('chalk');
 var fs = require('fs-extra');
+var getStdout = require('../exec.js').getStdout;
 var gulp = require('gulp-help')(require('gulp'));
 var markdownLinkCheck = BBPromise.promisify(require('markdown-link-check'));
 var path = require('path');
@@ -52,10 +54,11 @@ function checkLinks() {
         return;
       }
       var deadLinksFoundInFile = false;
-      util.log(
-          'Checking links in',
-          util.colors.magenta(markdownFiles[index]), '...');
       results.forEach(function (result) {
+        // Skip links to files that were added by the PR.
+        if (isLinkToFileAddedInPR(result.link)) {
+          return;
+        }
         if(result.status === 'dead') {
           deadLinksFound = true;
           deadLinksFoundInFile = true;
@@ -80,7 +83,7 @@ function checkLinks() {
     if (deadLinksFound) {
         util.log(
             util.colors.red('ERROR'),
-            'Possible dead link(s) found.',
+            'Possible dead link(s) found in this PR.',
             'Please update',
             util.colors.magenta(filesWithDeadLinks.join(',')),
             'or whitelist in build-system/tasks/check-links.js');
@@ -90,6 +93,20 @@ function checkLinks() {
             util.colors.green('SUCCESS'),
             'All links in all markdown files in this PR are alive.');
     }
+  });
+}
+
+/**
+ * Determines if a link points to a file added in the PR.
+ *
+ * @param {string} link Link being tested.
+ * @return {boolean} True if the link points to a file added in the PR.
+ */
+function isLinkToFileAddedInPR(link) {
+  var filesAdded = getStdout(
+      `git diff --name-only --diff-filter=A master...HEAD`).trim().split('\n');
+  return filesAdded.some(function(file) {
+    return (file.length > 0 && link.includes(path.parse(file).base));
   });
 }
 
