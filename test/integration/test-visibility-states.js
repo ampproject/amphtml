@@ -19,6 +19,7 @@ import {documentStateFor} from '../../src/service/document-state';
 import {resourcesForDoc} from '../../src/services';
 import {VisibilityState} from '../../src/visibility-state';
 import {getVendorJsPropertyName} from '../../src/style';
+import {whenUpgradedToCustomElement} from '../../src/dom';
 import {createCustomEvent} from '../../src/event-helper';
 
 describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
@@ -105,6 +106,8 @@ describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
         img.setAttribute('layout', 'fixed');
         win.document.body.appendChild(img);
 
+        return whenUpgradedToCustomElement(img);
+      }).then(img => {
         layoutCallback = sandbox.stub(img.implementation_, 'layoutCallback');
         unlayoutCallback = sandbox.stub(img.implementation_,
             'unlayoutCallback');
