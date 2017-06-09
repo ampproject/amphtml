@@ -1,5 +1,5 @@
 #
-# Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+# Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ tags: {  # amp-sidebar
   extension_spec: {
     name: "amp-sidebar"
     allowed_versions: "0.1"
+    allowed_versions: "1.0"
     allowed_versions: "latest"
     requires_usage: DEPRECATED_WARNING
     deprecated_allow_duplicates: true
