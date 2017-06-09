@@ -788,7 +788,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @param {function()} refreshEndCallback When called, this function will
    *   restart the refresh cycle.
    */
-  refresh(refreshEndCallback) { debugger;
+  refresh(refreshEndCallback) {
     this.isRefreshing = true;
     this.tearDownSlot();
     this.initiateAdRequest();
@@ -806,10 +806,14 @@ export class AmpA4A extends AMP.BaseElement {
       // show the loader for a quarter of a second before switching to
       // the new creative.
       timerFor(this.win).delay(() => {
-        this.attemptToRenderCreative().then(() => {
-          this.isRefreshing = false;
-          this.togglePlaceholder(false);
-          refreshEndCallback();
+        this.getResource().whenWithinRenderOutsideViewport().then(() => {
+          this.vsync_.mutate(() => {
+            this.attemptToRenderCreative().then(() => {
+              this.isRefreshing = false;
+              this.togglePlaceholder(false);
+              refreshEndCallback();
+            });
+          });
         });
       }, 250);
     });
@@ -972,7 +976,7 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /** @override */
-  layoutCallback() { debugger;
+  layoutCallback() {
     return this.attemptToRenderCreative();
   }
 

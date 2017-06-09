@@ -740,7 +740,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       const layoutCallbacks = [];
       const getLayoutCallback = (impl, creative, isSra, noRender) => {
         impl.buildCallback();
-        impl.onLayoutMeasure();
+        impl.onLayoutMeasure(); debugger;
         return impl.layoutCallback().then(() => {
           if (noRender) {
             expect(impl.iframe).to.not.be.ok;
