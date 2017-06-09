@@ -25,7 +25,7 @@ import {toggleExperiment} from '../../src/experiments';
 
 
 // TODO(@alanorozco): Inline this once 3p-use-ampcontext experiment is removed
-function createIframeWithApis(fixture, unusedOptCheckForNewImpl) {
+function createIframeWithApis(fixture) {
   this.timeout(20000);
   let iframe;
   let ampAd;
@@ -61,12 +61,6 @@ function createIframeWithApis(fixture, unusedOptCheckForNewImpl) {
           'http://localhost:' + location.port);
     }
 
-    // Skipping for now, makes things red 🔥
-    // TODO(alanorozco): re-enable
-    // if (opt_checkForNewImpl) {
-    //   expect(context._ampInternalIsNewImpl).to.be.true;
-    // }
-
     expect(context.canonicalUrl).to.equal(
         'https://www.example.com/doubleclick.html');
     expect(context.clientId).to.be.defined;
@@ -82,19 +76,6 @@ function createIframeWithApis(fixture, unusedOptCheckForNewImpl) {
     expect(context.computeInMasterFrame).to.be.defined;
     expect(context.location).to.be.defined;
     expect(context.sourceUrl).to.be.a('string');
-    expect(context.reportRenderedEntityIdentifier).to.be.defined;
-    expect(context.renderStart).to.be.defined;
-    expect(context.bootstrapLoaded).to.be.defined;
-    expect(context.updateDimensions).to.be.defined;
-    expect(context.isMaster).to.be.defined;
-    expect(context.onPageVisibilityChange).to.be.defined;
-    expect(context.observeIntersection).to.be.defined;
-    expect(context.requestResize).to.be.defined;
-    expect(context.onResizeSuccess).to.be.defined;
-    expect(context.onResizeDenied).to.be.defined;
-    expect(context.addContextToIframe).to.be.defined;
-    expect(context.noContentAvailable).to.be.defined;
-
   }).then(() => {
     // test iframe will send out render-start to amp-ad
     return poll('render-start message received', () => {
@@ -176,18 +157,13 @@ describes.realWin('3P Ad (with AmpContext experiment)', {
       return createFixture().then(f => {
         fixture = f;
         toggleExperiment(fixture.win, '3p-use-ampcontext', /* opt_on */ true,
-            /* opt_transientExperiment */ false);
+            /* opt_transientExperiment */ true);
         installPlatformService(fixture.win);
       });
     });
 
-    afterEach(() => {
-      toggleExperiment(fixture.win, '3p-use-ampcontext', /* opt_on */ false,
-            /* opt_transientExperiment */ false);
-    });
-
     it('create an iframe with APIs', function() {
-      return createIframeWithApis.call(this, fixture, true);
+      return createIframeWithApis.call(this, fixture);
     });
   });
 });
