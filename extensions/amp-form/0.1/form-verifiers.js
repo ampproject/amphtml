@@ -220,11 +220,11 @@ export class AsyncVerifier extends FormVerifier {
    */
   maybeVerify_(afterVerify) {
     if (this.shouldVerify_()) {
-      const xhrConsumeErrors = this.doXhr_().then(() => {
-        return [];
-      }, error => {
-        return getResponseErrorData_(/** @type {!Error} */(error));
-      });
+      const xhrConsumeErrors = this.doXhr_().then(res => {
+        return res.json();
+      }).then(json => {
+        return json.verifyErrors || [];
+      }).catch(() => []);
 
       const p = this.addToResolver_(xhrConsumeErrors)
           .then(errors => this.verify_(errors))
@@ -406,19 +406,4 @@ class VerificationGroup {
   clearErrors() {
     this.elements_.forEach(element => element.setCustomValidity(''));
   }
-}
-
-/**
- * @param {!Error} error
- * @return {!Promise<!Array<VerificationErrorDef>>}
- * @private
- */
-function getResponseErrorData_(error) {
-  const {response} = error;
-  if (!response) {
-    return Promise.resolve([]);
-  }
-  return response.json().then(json => {
-    return json.verifyErrors || [];
-  }, () => []);
 }
