@@ -412,7 +412,7 @@ export function imaVideo(global, data) {
 
 function htmlToElement(html) {
   const template = document.createElement('template');
-  template./*REVIEW*/innerHTML = html;
+  template./*OK*/innerHTML = html;
   return template.content.firstChild;
 }
 

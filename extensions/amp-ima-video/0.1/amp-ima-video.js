@@ -79,9 +79,7 @@ class AmpImaVideo extends AMP.BaseElement {
         if (!this.preconnectSource_) {
           this.preconnectSource_ = source.src;
         }
-        const tmp = document.createElement('div');
-        tmp.appendChild(source);
-        sources.push(tmp./*REVIEW*/innerHTML);
+        sources.push(source./*OK*/outerHTML);
       });
       this.element.setAttribute('data-sources', JSON.stringify(sources));
     }
