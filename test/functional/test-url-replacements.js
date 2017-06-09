@@ -23,7 +23,7 @@ import {
   resetScheduledElementForTesting,
 } from '../../src/custom-element';
 import {cidServiceForDocForTesting,} from
-    '../../src/cid-impl';
+    '../../src/service/cid-impl';
 import {installCryptoService} from '../../src/service/crypto-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentInfoServiceForDoc,} from

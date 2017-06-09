@@ -42,7 +42,7 @@ import {
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {map} from '../../../../src/utils/object';
 import {cidServiceForDocForTesting,} from
-    '../../../../src/cid-impl';
+    '../../../../src/service/cid-impl';
 import {urlReplacementsForDoc} from '../../../../src/services';
 import * as sinon from 'sinon';
 

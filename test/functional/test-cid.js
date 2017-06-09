@@ -25,7 +25,7 @@ import {
   cidServiceForDocForTesting,
   getProxySourceOrigin,
   viewerBaseCid,
-} from '../../src/cid-impl';
+} from '../../src/service/cid-impl';
 import {installCryptoService, Crypto} from '../../src/service/crypto-impl';
 import {cryptoFor} from '../../src/crypto';
 import {installDocService} from '../../src/service/ampdoc-impl';
