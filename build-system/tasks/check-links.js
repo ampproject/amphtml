@@ -54,9 +54,6 @@ function checkLinks() {
         return;
       }
       var deadLinksFoundInFile = false;
-      util.log(
-          'Checking links in',
-          util.colors.magenta(markdownFiles[index]), '...');
       results.forEach(function (result) {
         // Skip links to files that were added by the PR.
         if (isLinkToFileAddedInPR(result.link)) {
@@ -86,7 +83,7 @@ function checkLinks() {
     if (deadLinksFound) {
         util.log(
             util.colors.red('ERROR'),
-            'Possible dead link(s) found.',
+            'Possible dead link(s) found in this PR.',
             'Please update',
             util.colors.magenta(filesWithDeadLinks.join(',')),
             'or whitelist in build-system/tasks/check-links.js');
