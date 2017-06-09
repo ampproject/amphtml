@@ -1548,6 +1548,25 @@ tags: {
   attrs: { name: "media" }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-video"
 }
+tags: {
+  tag_name: "SOURCE"
+  spec_name: "amp-ima-video > source"
+  mandatory_parent: "AMP-IMA-VIDEO"
+  attrs: { name: "media" }
+  attrs: {
+    name: "src"
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  attrs: { name: "type" }
+  # <amp-bind>
+  attrs: { name: "[src]" }
+  attrs: { name: "[type]" }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ima-video"
+}
 # 4.7.8 The track element
 # We have two attr_list variants to encode the requirement that if
 # the attribute kind has the value 'subtitles', then the tag must
