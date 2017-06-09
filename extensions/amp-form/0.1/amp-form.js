@@ -411,10 +411,15 @@ export class AmpForm {
           this.actions_.trigger(this.form_, 'submit', /*event*/ null);
         })
         .then(() => this.doXhr_())
-        .then(response => this.handleXhrSubmitSuccess_(response),
-            error => {
-              return this.handleXhrSubmitFailure_(/** @type {!Error} */(error));
-            });
+        .then(response => {
+          if (response.ok) {
+            this.handleXhrSubmitSuccess_(response);
+          } else {
+            this.handleXhrSubmitFailure_(response);
+          }
+        }, () => {
+          return this.handleXhrSubmitFailure_(null);
+        });
 
     if (getMode().test) {
       this.xhrSubmitPromise_ = p;
@@ -464,7 +469,7 @@ export class AmpForm {
       headers: {
         Accept: 'application/json',
       },
-    });
+    }, /* opt_allowFailure */ true);
   }
 
   /**
@@ -488,13 +493,14 @@ export class AmpForm {
 
   /**
    * Transition the form the the submit error state.
-   * @param {!Error} error
+   * @param {?FetchResponse} response
    * @private
    */
-  handleXhrSubmitFailure_(error) {
+  handleXhrSubmitFailure_(response) {
     let promise;
-    if (error && error.response) {
-      promise = error.response.json().catch(() => null);
+    // TODO
+    if (response) {
+      promise = response.json().catch(() => null);
     } else {
       promise = Promise.resolve(null);
     }
@@ -505,7 +511,7 @@ export class AmpForm {
       this.setState_(FormState_.SUBMIT_ERROR);
       this.renderTemplate_(responseJson || {});
       this.maybeHandleRedirect_(error.response);
-      user().error(TAG, `Form submission failed: ${error}`);
+      user().error(TAG, `Form submission failed`);
     });
   }
 

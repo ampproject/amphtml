@@ -213,7 +213,7 @@ export class Xhr {
       init.headers['Content-Type'] = 'application/json;charset=utf-8';
       init.body = JSON.stringify(init.body);
     }
-    return this.fetch(input, init);
+    return this.fetch(input, init, opt_allowFailure);
   }
 
   /**
@@ -226,10 +226,12 @@ export class Xhr {
    *
    * @param {string} input
    * @param {?FetchInitDef=} opt_init
+   * @param {boolean=} opt_allowFailure Allows non-2XX status codes to fulfill.
    * @return {!Promise<!FetchResponse>}
    */
-  fetchText(input, opt_init) {
-    return this.fetch(input, setupInit(opt_init, 'text/plain'));
+  fetchText(input, opt_init, opt_allowFailure) {
+    return this.fetch(input, setupInit(opt_init, 'text/plain'),
+        opt_allowFailure);
   }
 
   /**
@@ -240,24 +242,29 @@ export class Xhr {
    *
    * @param {string} input
    * @param {?FetchInitDef=} opt_init
+   * @param {boolean=} opt_allowFailure Allows non-2XX status codes to fulfill.
    * @return {!Promise<!Document>}
    */
-  fetchDocument(input, opt_init) {
+  fetchDocument(input, opt_init, opt_allowFailure) {
     const init = setupInit(opt_init, 'text/html');
     init.responseType = 'document';
-    return this.fetch(input, init)
+    return this.fetch(input, init, opt_allowFailure)
         .then(response => response.document_());
   }
 
   /**
    * @param {string} input URL
    * @param {?FetchInitDef=} opt_init Fetch options object.
+   * @param {boolean=} opt_allowFailure Allows non-2XX status codes to fulfill.
    * @return {!Promise<!FetchResponse>}
    */
-  fetch(input, opt_init) {
+  fetch(input, opt_init, opt_allowFailure) {
     const init = setupInit(opt_init);
-    return this.fetchAmpCors_(input, init).then(response =>
-        assertSuccess(response));
+    const fetch = this.fetchAmpCors_(input, init);
+    if (opt_allowFailure) {
+      return fetch;
+    }
+    return fetch.then(response => assertSuccess(response));
   }
 
   /**
@@ -436,9 +443,6 @@ export function assertSuccess(response) {
     const {status} = response;
     const err = user().createError(`HTTP error ${status}`);
     err.retriable = isRetriable(status);
-    // TODO(@jridgewell, #9448): Callers who need the response should
-    // skip processing.
-    err.response = response;
     throw err;
   });
 }

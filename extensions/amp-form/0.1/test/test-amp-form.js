@@ -1593,21 +1593,22 @@ describes.repeated('', {
           }
         },
       };
-      const fetchResolvePromise = Promise.resolve({
-        json: () => Promise.resolve(),
-        headers: headersMock,
-      });
-      const error = new Error('Error');
-      error.response = {
+      const response = {
+        ok: true,
         headers: headersMock,
         json() {
           return Promise.resolve();
         },
       };
-      const fetchRejectPromise = Promise.reject(error);
-      fetchRejectPromise.catch(() => {
-        // Just avoiding a global uncaught promise exception.
-      });
+      const failResponse = {
+        ok: false,
+        headers: headersMock,
+        json() {
+          return Promise.resolve();
+        },
+      };
+      const fetchResolvePromise = Promise.resolve(response);
+      const fetchRejectPromise = Promise.resolve(failResponse);
 
       beforeEach(() => {
         form = getForm(env.win.document);

@@ -180,34 +180,40 @@ export class LaterpayVendor {
    */
   authorize() {
     return this.getPurchaseConfig_()
-    .then(response => {
-      if (response.status === 204) {
-        throw user()
-          .createError('No merchant domains have been matched for this ' +
-            'article, or no paid content configurations are setup.');
-      }
+      .then(this.decodeConfigResponse_)
+      .then(decoded => {
+        const empty = this.emptyContainer_();
+        if (decoded.ok) {
+          if (this.laterpayConfig_.scrollToTopAfterAuth) {
+            this.vsync_.mutate(() => this.viewport_.setScrollTop(0));
+          }
+        } else {
+          empty.then(this.renderPurchaseOverlay_.bind(this));
+        }
 
-      if (this.laterpayConfig_.scrollToTopAfterAuth) {
-        this.vsync_.mutate(() => this.viewport_.setScrollTop(0));
-      }
-      this.emptyContainer_();
-      return {access: response.access};
-    }, err => {
-      if (!err || !err.response) {
-        throw err;
-      }
-      const {response} = err;
-      if (response.status !== 402) {
-        throw err;
-      }
-      return response.json().catch(() => undefined).then(responseJson => {
-        this.purchaseConfig_ = responseJson;
-        // empty before rendering, in case authorization is being called again
-        // with the same state
-        this.emptyContainer_()
-          .then(this.renderPurchaseOverlay_.bind(this));
-        return {access: false};
+        return {access: decoded.access};
       });
+  }
+
+  /**
+   * @return {!Promise<{ok: boolean, json: !JSONType}>}
+   */
+  decodeConfigResponse_(response) {
+    if (response.status === 204) {
+      throw user()
+        .createError('No merchant domains have been matched for this ' +
+          'article, or no paid content configurations are setup.');
+    }
+    if (!response.ok && response.status !== 402) {
+      throw user.createError('Invalid error response status received.' +
+          ` Expected 402, got ${response.status}.`);
+    }
+
+    return response.json().catch(() => {access: false}).then(json => {
+      return {
+        access: json.access,
+        ok: response.ok,
+      };
     });
   }
 
@@ -228,7 +234,7 @@ export class LaterpayVendor {
           AUTHORIZATION_TIMEOUT,
           this.xhr_.fetchJson(url, {
             credentials: 'include',
-          })).then(res => res.json());
+          }));
     });
   }
 
