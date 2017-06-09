@@ -2256,7 +2256,7 @@ describe('amp-a4a', () => {
               return Promise.resolve();
             },
           };
-        }
+        };
 
         let resolver;
         const promise = new Promise(resolve => resolver = resolve);
