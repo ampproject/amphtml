@@ -415,10 +415,12 @@ export class AmpForm {
           if (response.ok) {
             this.handleXhrSubmitSuccess_(response);
           } else {
-            this.handleXhrSubmitFailure_(response);
+            this.handleXhrSubmitFailure_(response, user().createError(
+              `Request return status ${response.status}`));
           }
-        }, () => {
-          return this.handleXhrSubmitFailure_(null);
+        }, err => {
+          return this.handleXhrSubmitFailure_(null,
+              /** @type {!Error} */ (err));
         });
 
     if (getMode().test) {
@@ -494,13 +496,15 @@ export class AmpForm {
   /**
    * Transition the form the the submit error state.
    * @param {?../../../src/service/xhr-impl.FetchResponse} response
+   * @param {Error=} error
    * @private
    */
-  handleXhrSubmitFailure_(response) {
+  handleXhrSubmitFailure_(response, error) {
     let promise;
-    // TODO
     if (response) {
-      promise = response.json().catch(() => null);
+      promise = response.json().catch(decodeError => {
+        error = /** @type {!Error} */ (decodeError);
+      });
     } else {
       promise = Promise.resolve(null);
     }
@@ -511,7 +515,7 @@ export class AmpForm {
       this.setState_(FormState_.SUBMIT_ERROR);
       this.renderTemplate_(responseJson || {});
       this.maybeHandleRedirect_(response);
-      user().error(TAG, `Form submission failed`);
+      user().error(TAG, `Form submission failed: ${error}`);
     });
   }
 
