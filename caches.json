@@ -1,0 +1,10 @@
+{
+  "caches": [
+    {
+      "id": "google",
+      "name": "Google AMP Cache",
+      "docs": "https://developers.google.com/amp/cache/",
+      "updatePingApiUrlPrefix": "https://cdn.ampproject.org/"
+    }
+  ]
+}

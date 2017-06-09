@@ -30,6 +30,7 @@ const getStdout = require('./exec.js').getStdout;
 const path = require('path');
 const minimist = require('minimist');
 const util = require('gulp-util');
+const extensionsVersions = require('./extensions-versions-config');
 
 const gulp = 'node_modules/gulp/bin/gulp.js';
 const fileLogPrefix = util.colors.yellow.bold('pr-check.js:');
@@ -134,9 +135,27 @@ function isBuildSystemFile(filePath) {
  */
 function isValidatorFile(filePath) {
   if (filePath.startsWith('validator/')) return true;
-  if (!path.dirname(filePath).endsWith('0.1') &&
-      !path.dirname(filePath).endsWith('test'))
+
+  // validator files for each extension
+  if (!filePath.startsWith('extensions/')) {
     return false;
+  }
+
+  // Get extension name
+  const pathArray = path.dirname(filePath).split(path.sep);
+  if (pathArray.length < 3) {
+    // At least 3 with ['extensions', '{$name}', '{$version}']
+    return false;
+  }
+  const extension = pathArray[1];
+  const supportVersions = extensionsVersions[extension] || ['0.1'];
+
+  for (let i = 0; i < supportVersions.length; i++) {
+    if (!path.dirname(filePath).endsWith(supportVersions[i]) &&
+      !path.dirname(filePath).endsWith(path.join(supportVersions[i], 'test')))
+      return false;
+  }
+
   const name = path.basename(filePath);
   return name.startsWith('validator-') &&
       (name.endsWith('.out') || name.endsWith('.html') ||
@@ -223,7 +242,8 @@ const command = {
   cleanBuild: function() {
     timedExecOrDie(`${gulp} clean`);
   },
-  runLintChecks: function() {
+  runJsonAndLintChecks: function() {
+    timedExecOrDie(`${gulp} json-syntax`);
     timedExecOrDie(`${gulp} lint`);
   },
   buildRuntime: function() {
@@ -273,7 +293,7 @@ function runAllCommands() {
     command.testBuildSystem();
     command.cleanBuild();
     command.buildRuntime();
-    command.runLintChecks();
+    command.runJsonAndLintChecks();
     command.runDepAndTypeChecks();
     command.runUnitTests();
     // command.testDocumentLinks() is skipped during push builds.
@@ -361,7 +381,7 @@ function main(argv) {
       // longer do a dist build for PRs, so this call won't cover dist/.
       // TODO(rsimha-amp): Move this once integration tests are enabled.
       command.runPresubmitTests();
-      command.runLintChecks();
+      command.runJsonAndLintChecks();
       command.runDepAndTypeChecks();
       // Skip unit tests if the PR only contains changes to integration tests.
       if (buildTargets.has('RUNTIME')) {
@@ -377,10 +397,24 @@ function main(argv) {
   }
 
   if (process.env.BUILD_SHARD == "integration_tests") {
-    // The integration_tests shard can be skipped for PRs.
-    console.log(fileLogPrefix, 'Skipping integration_tests for PRs');
+    // Run the integration_tests shard for a PR only if it is modifying an
+    // integration test. Otherwise, the shard can be skipped.
+    if (buildTargets.has('INTEGRATION_TEST')) {
+      console.log(fileLogPrefix,
+          'Running the',
+          util.colors.cyan('integration_tests'),
+          'build shard since this PR touches',
+          util.colors.cyan('test/integration'));
+      command.cleanBuild();
+      command.buildRuntimeMinified();
+      command.runIntegrationTests();
+    } else {
+      console.log(fileLogPrefix,
+          'Skipping the',
+          util.colors.cyan('integration_tests'),
+          'build shard for this PR');
+    }
   }
-
 
   stopTimer('pr-check.js', startTime);
   return 0;
