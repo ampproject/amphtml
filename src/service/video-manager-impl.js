@@ -146,7 +146,7 @@ export class VideoManager {
     // TODO(aghassemi): Remove this later. For now, the visibility observer
     // only matters for autoplay videos so no point in monitoring arbitrary
     // videos yet.
-    if (!video.element.hasAttribute(VideoAttributes.AUTOPLAY)) {
+    if (!entry.video.element.hasAttribute(VideoAttributes.AUTOPLAY)) {
       return;
     }
 
@@ -418,7 +418,8 @@ class VideoEntry {
    * @private
    */
   autoplayLoadedVideoVisibilityChanged_() {
-    if (this.userInteractedWithAutoPlay_ || !viewerForDoc(this.ampdoc_).isVisible()) {
+    if (this.userInteractedWithAutoPlay_
+       || !viewerForDoc(this.ampdoc_).isVisible()) {
       return;
     }
 
@@ -528,13 +529,13 @@ class VideoEntry {
    * @return {!../video-interface.VideoInterface} PlayingStates
    */
   getPlayingState() {
-    if(!this.isPlaying_) {
+    if (!this.isPlaying_) {
       return PlayingStates.PAUSED;
     }
 
-    if(this.isPlaying_
-      && this.playCalledByAutoplay_
-      && !this.userInteractedWithAutoPlay_) {
+    if (this.isPlaying_
+       && this.playCalledByAutoplay_
+       && !this.userInteractedWithAutoPlay_) {
       return PlayingStates.PLAYING_AUTO;
     }
 
