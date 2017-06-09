@@ -319,20 +319,17 @@ export function imaVideo(global, data) {
   setStyle(videoPlayer, 'background-color', 'black');
   videoPlayer.setAttribute('poster', data.poster);
   videoPlayer.setAttribute('playsinline', true);
-  // Set video player source, first based on data-src then on source child
-  // elements.
   if (data.src) {
     const sourceElement = document.createElement('source');
     sourceElement.setAttribute('src', data.src);
     videoPlayer.appendChild(sourceElement);
   }
-  if (data.sources) {
-    const sources = JSON.parse(data.sources);
-    sources.forEach(source => {
-      videoPlayer.appendChild(htmlToElement(source));
+  if (data.childElements) {
+    const children = JSON.parse(data.childElements);
+    children.forEach(child => {
+      videoPlayer.appendChild(htmlToElement(child));
     });
   }
-
 
   contentDiv.appendChild(videoPlayer);
   wrapperDiv.appendChild(contentDiv);
