@@ -22,5 +22,6 @@
   "a4aFastFetchAdSenseLaunched": 0,
   "a4a-measure-get-ad-urls": 1,
   "amp-bind": 1,
-  "ad-loader-v2": 1
+  "ad-loader-v2": 1,
+  "3p-use-ampcontext": 1
 }
