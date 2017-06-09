@@ -306,7 +306,7 @@ reference point, and you can hook into this class to add transitions.
 (see Examples below)
 
 ## Actions
-The `amp-live-list` exposes the following actions you can use [AMP on-syntax to trigger](../../../src/spec/amp-actions-and-events.md):
+The `amp-live-list` exposes the following actions you can use [AMP on-syntax to trigger](../../spec/amp-actions-and-events.md):
 
 <table>
   <tr>
