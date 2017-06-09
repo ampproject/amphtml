@@ -271,10 +271,8 @@ const command = {
         `${gulp} test --nobuild --saucelabs --integration --compiled`);
   },
   runVisualDiffTests: function() {
-    // This must only be run for push builds, since Travis hides the encrypted
-    // environment variables required by Percy during pull request builds.
-    // For now, this is warning-only.
-    timedExec(`${gulp} visual-diff`);
+    timedExecOrDie(`${gulp} serve`);
+    timedExec(`ruby build-system/tasks/visual-diff.rb`);
   },
   runPresubmitTests: function() {
     timedExecOrDie(`${gulp} presubmit`);
@@ -295,6 +293,7 @@ function runAllCommands() {
     command.buildRuntime();
     command.runJsonAndLintChecks();
     command.runDepAndTypeChecks();
+    command.runVisualDiffTests();
     command.runUnitTests();
     // command.testDocumentLinks() is skipped during push builds.
     command.buildValidatorWebUI();
@@ -304,7 +303,6 @@ function runAllCommands() {
     command.cleanBuild();
     command.buildRuntimeMinified();
     command.runPresubmitTests();  // Needs runtime to be built and served.
-    // command.runVisualDiffTests();  // Only called during push builds.
     command.runIntegrationTests();
   }
 }
@@ -385,6 +383,7 @@ function main(argv) {
       command.runDepAndTypeChecks();
       // Skip unit tests if the PR only contains changes to integration tests.
       if (buildTargets.has('RUNTIME')) {
+        command.runVisualDiffTests();
         command.runUnitTests();
       }
     }

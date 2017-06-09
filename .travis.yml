@@ -27,7 +27,6 @@ before_install:
   - sudo dpkg -i google-chrome*.deb
 before_script:
   - pip install --user protobuf
-  - gem install percy-cli
 script: node build-system/pr-check.js
 branches:
   only:
@@ -42,6 +41,10 @@ env:
 matrix:
   include:
     - env: BUILD_SHARD="pre_build_checks_and_unit_tests"
+      before_script:
+        - gem install percy-capybara
+        - gem install phantomjs
+        - gem install poltergeist
     - env: BUILD_SHARD="integration_tests"
       addons:
         sauce_connect:
