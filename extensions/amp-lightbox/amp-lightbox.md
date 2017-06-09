@@ -22,10 +22,6 @@ limitations under the License.
     <td>Allows for a “lightbox” or similar experience where upon user interaction, a component expands to fill the viewport until it is closed again by the user.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js">&lt;/script></code></td>
   </tr>

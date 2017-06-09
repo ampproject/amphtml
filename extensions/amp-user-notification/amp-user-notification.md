@@ -24,10 +24,6 @@ limitations under the License.
     <td>Displays a dismissable notification to the user. </td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td>
       <div>
