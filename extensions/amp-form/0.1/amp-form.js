@@ -493,7 +493,7 @@ export class AmpForm {
 
   /**
    * Transition the form the the submit error state.
-   * @param {?FetchResponse} response
+   * @param {?../../../src/service/xhr-impl.FetchResponse} response
    * @private
    */
   handleXhrSubmitFailure_(response) {
@@ -510,7 +510,7 @@ export class AmpForm {
       this.cleanupRenderedTemplate_();
       this.setState_(FormState_.SUBMIT_ERROR);
       this.renderTemplate_(responseJson || {});
-      this.maybeHandleRedirect_(error.response);
+      this.maybeHandleRedirect_(response);
       user().error(TAG, `Form submission failed`);
     });
   }

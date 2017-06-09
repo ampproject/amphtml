@@ -489,12 +489,13 @@ describe('XHR', function() {
     describe('#fetchText', () => {
       const TEST_TEXT = 'test text';
       let fetchStub;
+      const mockXhr = {
+        status: 200,
+        responseText: TEST_TEXT,
+      };
 
       beforeEach(() => {
-        const mockXhr = {
-          status: 200,
-          responseText: TEST_TEXT,
-        };
+        mockXhr.status = 200;
         fetchStub = sandbox.stub(xhr, 'fetchAmpCors_',
             () => Promise.resolve(new FetchResponse(mockXhr)));
       });
@@ -528,12 +529,13 @@ describe('XHR', function() {
     describe('#fetchJson', () => {
       const TEST_JSON = {test: 'test'};
       let fetchStub;
+      const mockXhr = {
+        status: 200,
+        responseText: JSON.stringify(TEST_JSON),
+      };
 
       beforeEach(() => {
-        const mockXhr = {
-          status: 200,
-          responseText: JSON.stringify(TEST_JSON),
-        };
+        mockXhr.status = 200;
         fetchStub = sandbox.stub(xhr, 'fetchAmpCors_',
             () => Promise.resolve(new FetchResponse(mockXhr)));
       });

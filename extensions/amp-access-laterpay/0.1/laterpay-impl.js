@@ -209,7 +209,7 @@ export class LaterpayVendor {
           ` Expected 402, got ${response.status}.`);
     }
 
-    return response.json().catch(() => {access: false}).then(json => {
+    return response.json().catch(() => ({access: false})).then(json => {
       return {
         access: json.access,
         ok: response.ok,
