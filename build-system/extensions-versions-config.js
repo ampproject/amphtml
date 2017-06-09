@@ -16,6 +16,7 @@
  */
 
 var extensionsVersions = {
+  'amp-sidebar': ['0.1', '1.0'],
   'amp-sticky-ad': ['1.0'],
 };
 
