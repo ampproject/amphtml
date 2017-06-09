@@ -1,6 +1,6 @@
 # AMP Cache Debugging
 
-**Why is my doc broken on an AMP cache?**
+## Why is my doc broken on an AMP cache?
 
 Valid AMP documents typically appear and behave the same on AMP Caches as they
 do on the origin. However, there are some components and server configurations
