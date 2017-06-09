@@ -317,9 +317,22 @@ export function imaVideo(global, data) {
   setStyle(videoPlayer, 'width', '100%');
   setStyle(videoPlayer, 'height', '100%');
   setStyle(videoPlayer, 'background-color', 'black');
-  videoPlayer.setAttribute('src', data.src);
   videoPlayer.setAttribute('poster', data.poster);
   videoPlayer.setAttribute('playsinline', true);
+  // Set video player source, first based on data-src then on source child
+  // elements.
+  if (data.src) {
+    const sourceElement = document.createElement('source');
+    sourceElement.setAttribute('src', data.src);
+    videoPlayer.appendChild(sourceElement);
+  }
+  if (data.sources) {
+    const sources = JSON.parse(data.sources);
+    sources.forEach(source => {
+      videoPlayer.appendChild(htmlToElement(source));
+    });
+  }
+
 
   contentDiv.appendChild(videoPlayer);
   wrapperDiv.appendChild(contentDiv);
@@ -395,6 +408,12 @@ export function imaVideo(global, data) {
     adRequestFailed = false;
     adsLoader.requestAds(adsRequest);
   });
+}
+
+function htmlToElement(html) {
+  const template = document.createElement('template');
+  template./*OK*/innerHTML = html;
+  return template.content.firstChild;
 }
 
 /**

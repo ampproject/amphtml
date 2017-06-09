@@ -21,7 +21,10 @@ import {
 } from '../../../src/service/video-manager-impl';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {isObject} from '../../../src/types';
+import {
+  isObject,
+  toArray,
+} from '../../../src/types';
 import {
   listen,
 } from '../../../src/event-helper';
@@ -54,6 +57,9 @@ class AmpImaVideo extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
+
+    /** @private {?String} */
+    this.preconnectSource_ = null;
   }
 
   /** @override */
@@ -64,16 +70,32 @@ class AmpImaVideo extends AMP.BaseElement {
     assertHttpsUrl(this.element.getAttribute('data-tag'),
         'The data-tag attribute is required for <amp-video-ima> and must be ' +
             'https');
-    assertHttpsUrl(this.element.getAttribute('data-src'),
-        'The data-src attribute is required for <amp-video-ima> and must be ' +
-            'https');
+
+    // Set data-sources attribute based on source child elements.
+    const sourceElements = this.element.getElementsByTagName('source');
+    if (sourceElements.length > 0) {
+      const sources = [];
+      toArray(sourceElements).forEach(source => {
+        if (!this.preconnectSource_) {
+          this.preconnectSource_ = source.src;
+        }
+        sources.push(source./*OK*/outerHTML);
+      });
+      this.element.setAttribute('data-sources', JSON.stringify(sources));
+    }
   }
 
   /** @override */
   preconnectCallback() {
     this.preconnect.preload(
         'https://imasdk.googleapis.com/js/sdkloader/ima3.js', 'script');
-    this.preconnect.url(this.element.getAttribute('data-src'));
+    const source = this.element.getAttribute('data-src');
+    if (source) {
+      this.preconnect.url(source);
+    }
+    if (this.preconnectSource_) {
+      this.preconnect.url(this.preconnectSource_);
+    }
     this.preconnect.url(this.element.getAttribute('data-tag'));
     preloadBootstrap(this.win, this.preconnect);
   }
