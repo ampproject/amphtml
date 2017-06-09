@@ -158,8 +158,8 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
             .returns(Promise.resolve());
 
     const makeRequest = stubIframeClientMakeRequest((req, res, callback) => {
-      expect(req).to.equal('reset-full-overlay-frame');
-      expect(res).to.equal('reset-full-overlay-frame-response');
+      expect(req).to.equal('cancel-full-overlay-frame');
+      expect(res).to.equal('cancel-full-overlay-frame-response');
 
       callback();
     });

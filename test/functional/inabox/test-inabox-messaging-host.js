@@ -22,7 +22,7 @@ import {
 } from '../../../ads/inabox/frame-overlay-helper';
 import * as sinon from 'sinon';
 
-describes.realWin('inabox-host:position-observer', {}, env => {
+describes.realWin('inabox-host:messaging', {}, env => {
 
   let win;
   let host;
@@ -214,7 +214,7 @@ describes.realWin('inabox-host:position-observer', {}, env => {
           iframePostMessageSpy.getCall(0).args[0]);
 
       expect(collapseFrame).calledWith(win, iframe1, sinon.match.any);
-      expect(message.type).to.equal('reset-full-overlay-frame-response');
+      expect(message.type).to.equal('cancel-full-overlay-frame-response');
       expect(message.content).to.deep.equal({accept: true});
     });
 
