@@ -44,8 +44,7 @@ limitations under the License.
 
 ## Overview
 
-You can use the `amp-ima-video` component to embed an [IMA
-SDK](https://developers.google.com/interactive-media-ads/docs/sdks/html5/) enabled video player.
+You can use the `amp-ima-video` component to embed an [IMA SDK](https://developers.google.com/interactive-media-ads/docs/sdks/html5/) enabled video player.
 
 To embed a video, provide a source URL for your
 content video (`data-src`) and an ad tag (`data-tag`), which is a URL to a
