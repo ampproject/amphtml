@@ -2160,7 +2160,7 @@ describe('amp-a4a', () => {
     });
   });
 
-  describe('refresh', () => {
+  describe.skip('refresh', () => {
     it('should effectively reset the slot and invoke given callback', () => {
       const sandbox = sinon.sandbox.create();
       return createIframePromise().then(f => {
@@ -2169,6 +2169,14 @@ describe('amp-a4a', () => {
         const a4aElement = createA4aElement(fixture.doc);
         const a4a = new MockA4AImpl(a4aElement);
         a4a.adPromise_ = Promise.resolve();
+
+        a4a.getResource = () => {
+          return {
+            whenWithinRenderOutsideViewport: () => {
+              return Promise.resolve();
+            },
+          };
+        }
 
         let resolver;
         const promise = new Promise(resolve => resolver = resolve);

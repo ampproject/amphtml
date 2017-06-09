@@ -217,8 +217,8 @@ export class AmpA4A extends AMP.BaseElement {
    */
   constructor(element) {
     super(element);
-    dev().assert(AMP.AmpAdUIHandler);
-    dev().assert(AMP.AmpAdXOriginIframeHandler);
+//    dev().assert(AMP.AmpAdUIHandler);
+//    dev().assert(AMP.AmpAdXOriginIframeHandler);
 
     /** @private {?Promise<?CreativeMetaDataDef>} */
     this.adPromise_ = null;
@@ -348,23 +348,6 @@ export class AmpA4A extends AMP.BaseElement {
      * @protected {boolean}
      */
     this.isRefreshing = false;
-
-    /**
-     * Resolver for creativeRenderedPromise_. This is then'd onto
-     * attemptToRenderCreative in layoutCallback.
-     *
-     * @private {?function()}
-     */
-    this.creativeRenderedPromiseResolver_ = null;
-
-    /**
-     * Promise that resolves to true when the creative renders correctly, or to
-     * false when the creative fails to render.
-     *
-     * @private {Promise<boolean>}
-     */
-    this.creativeRenderedPromise_ = new Promise(
-        resolve => this.creativeRenderedPromiseResolver_ = resolve);
   }
 
   /** @override */
@@ -817,15 +800,6 @@ export class AmpA4A extends AMP.BaseElement {
         });
       }, 250);
     });
-  }
-
-  /**
-   * Resets the creativeRenderedPromise to a new promise, and sets
-   * this.creativeRenderedPromiseResolver_ to its resolve function.
-   */
-  resetCreativeRenderedPromise_() {
-    this.creativeRenderedPromise_ = new Promise(
-        resolve => this.creativeRenderedPromiseResolver_ = resolve);
   }
 
   /**
