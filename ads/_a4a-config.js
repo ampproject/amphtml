@@ -84,3 +84,19 @@ export const signingServerURLs = {
   'cloudflare': 'https://amp.cloudflare.com/amp-ad-verifying-keyset.json',
   'cloudflare-dev': 'https://amp.cloudflare.com/amp-ad-verifying-keyset-dev.json',
 };
+
+const DEFAULT_REFRESH_CONFIG = {
+  visiblePercentageMin: 50,
+  totalTimeMin: 0,
+  continuousTimeMin: 1,
+};
+
+/**
+ * An object mapping networks to refresh configuratons. No mapping implies the
+ * network has not opted in to become refresh-eligible. See
+ * ../extensions/amp-a4a/0.1/refresh-manager for the RefreshConfig definition.
+ *
+ */
+export const refreshConfigs = {
+  'doubleclick': DEFAULT_REFRESH_CONFIG,
+};
