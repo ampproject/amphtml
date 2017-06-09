@@ -337,8 +337,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getAdUrl() {
-    if (this.iframe) {
-      dev().warn(TAG, `Frame already exists, sra: ${this.useSra}`);
+    if (this.iframe && !this.isRefreshing) {
+      dev().warn(TAG, `Frame already exists, sra: ${this.useSra_}`);
       return '';
     }
     // TODO(keithwrightbos): SRA blocks currently unnecessarily generate full
@@ -425,14 +425,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   layoutCallback() {
     const superReturnValue = super.layoutCallback();
-    if (!this.refreshManager_) {
+    /*if (!this.refreshManager_) {
       // Will initiate the refresh lifecycle iff the slot has been enabled to
       // do so through an appropriate data attribute, or a page-level meta tag.
       this.refreshManager_ = new RefreshManager(this);
       if (this.refreshManager_.isRefreshable()) {
         this.refreshManager_.initiateRefreshCycle();
       }
-    }
+    }*/
     return superReturnValue;
   }
 
