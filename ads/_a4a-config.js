@@ -85,7 +85,6 @@ export const signingServerURLs = {
   'cloudflare-dev': 'https://amp.cloudflare.com/amp-ad-verifying-keyset-dev.json',
 };
 
-/** @type {!../extensions/amp-a4a/0.1/refresh-manager.RefreshConfig} */
 const DEFAULT_REFRESH_CONFIG = {
   visiblePercentageMin: 50,
   totalTimeMin: 0,
@@ -97,7 +96,6 @@ const DEFAULT_REFRESH_CONFIG = {
  * network has not opted in to become refresh-eligible. See
  * ../extensions/amp-a4a/0.1/refresh-manager for the RefreshConfig definition.
  *
- * @type {!Object<string, !../extensions/amp-a4a/0.1/refresh-manager.RefreshConfig>}
  */
 export const refreshConfigs = {
   'doubleclick': DEFAULT_REFRESH_CONFIG,
