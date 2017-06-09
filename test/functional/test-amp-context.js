@@ -71,20 +71,6 @@ describe('3p ampcontext.js', () => {
     expect(context.sentinel).to.equal('1-291921');
     expect(context.startTime).to.equal(0);
     expect(context.referrer).to.equal('baz.net');
-    expect(context.canary).to.equal(true);
-    expect(context.clientId).to.equal('a-client-id');
-    expect(context.hidden).to.equal(false);
-    expect(context.initialIntersection).to.deep.equal({
-      intersects: true,
-    });
-    expect(context.initialLayoutRect).to.deep.equal({
-      left: 10,
-      top: 20,
-      width: 400,
-      height: 300,
-    });
-    expect(context.sourceUrl).to.equal('www.example.com/mypage');
-    expect(context.tagName).to.equal('my-tag');
   });
 
   it('should add metadata to window.context using name as per A4A.', () => {
@@ -97,20 +83,6 @@ describe('3p ampcontext.js', () => {
     expect(context.sentinel).to.equal('1-291921');
     expect(context.startTime).to.equal(0);
     expect(context.referrer).to.equal('baz.net');
-    expect(context.canary).to.equal(true);
-    expect(context.clientId).to.equal('a-client-id');
-    expect(context.hidden).to.equal(false);
-    expect(context.initialIntersection).to.deep.equal({
-      intersects: true,
-    });
-    expect(context.initialLayoutRect).to.deep.equal({
-      left: 10,
-      top: 20,
-      width: 400,
-      height: 300,
-    });
-    expect(context.sourceUrl).to.equal('www.example.com/mypage');
-    expect(context.tagName).to.equal('my-tag');
   });
 
   it('should add metadata to window.context using window var.', () => {
@@ -123,20 +95,6 @@ describe('3p ampcontext.js', () => {
     expect(context.sentinel).to.equal('1-291921');
     expect(context.startTime).to.equal(0);
     expect(context.referrer).to.equal('baz.net');
-    expect(context.canary).to.equal(true);
-    expect(context.clientId).to.equal('a-client-id');
-    expect(context.hidden).to.equal(false);
-    expect(context.initialIntersection).to.deep.equal({
-      intersects: true,
-    });
-    expect(context.initialLayoutRect).to.deep.equal({
-      left: 10,
-      top: 20,
-      width: 400,
-      height: 300,
-    });
-    expect(context.sourceUrl).to.equal('www.example.com/mypage');
-    expect(context.tagName).to.equal('my-tag');
   });
 
   it('should set up only sentinel if no metadata provided.', () => {
@@ -371,21 +329,6 @@ function generateAttributes(opt_sentinel) {
     sentinel,
     startTime: 0,
     referrer: 'baz.net',
-    canary: true,
-    clientId: 'a-client-id',
-    hidden: false,
-    initialIntersection: {
-      // checking against arbitrary object, could benefit from stronger typing
-      intersects: true,
-    },
-    initialLayoutRect: {
-      left: 10,
-      top: 20,
-      width: 400,
-      height: 300,
-    },
-    sourceUrl: 'www.example.com/mypage',
-    tagName: 'my-tag',
   };
 
   return name;
@@ -405,21 +348,6 @@ function generateAttributesA4A(opt_sentinel) {
     sentinel,
     startTime: 0,
     referrer: 'baz.net',
-    canary: true,
-    clientId: 'a-client-id',
-    hidden: false,
-    initialIntersection: {
-      // checking against arbitrary object, could benefit from stronger typing
-      intersects: true,
-    },
-    initialLayoutRect: {
-      left: 10,
-      top: 20,
-      width: 400,
-      height: 300,
-    },
-    sourceUrl: 'www.example.com/mypage',
-    tagName: 'my-tag',
   };
 
   return attributes;

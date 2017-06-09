@@ -29,9 +29,6 @@ export class AbstractAmpContext {
     dev().assert(!this.isAbstractImplementation_(),
         'Should not construct AbstractAmpContext instances directly');
 
-    /** @visibleForTesting */
-    this._ampInternalIsNewImpl = true;
-
     /** @protected {!Window} */
     this.win_ = win;
 
