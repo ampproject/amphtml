@@ -5,9 +5,9 @@ The AMP Project community holds weekly design reviews via [video conference](htt
 * [Upcoming design reviews](https://github.com/ampproject/amphtml/labels/Type%3A%20Design%20Review)
 * [Past design reviews](https://github.com/ampproject/amphtml/issues?q=label%3A%22Type%3A+Design+Review%22+is%3Aclosed)
 
-The Design Review GitHub issue for a given week will have links to the designs being discussed that week as well as a link to the Hangout.  **When attending a design review please read through the designs _before_ the review starts.**
+The GitHub issue for a given week's design review will have links to the designs being discussed that week.  When the design review is over the GitHub issue will include notes from the design review discussion.
 
-Notes from the design review discussion will be posted in the Design Review GitHub issue shortly after the design review has finished.
+**When attending a design review please read through the designs _before_ the review starts.**
 
 ## Bringing your design to a design review
 
