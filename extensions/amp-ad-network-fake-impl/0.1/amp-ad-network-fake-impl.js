@@ -67,7 +67,6 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
           };
         }
       }
-
       // Normal mode: the content is a JSON structure with two fieleds:
       // `creative` and `signature`.
       const decoded = JSON.parse(deserialized);
