@@ -1,6 +1,6 @@
 # Design Reviews
 
-The AMP Project community holds weekly design reviews as video conferences via Google Hangouts on Wednesdays at [1pm Pacific](https://www.google.com/?#q=1pm+pacific+in+local+time).
+The AMP Project community holds weekly design reviews via [video conference](https://hangouts.google.com/hangouts/_/google.com/amp-eng-desrev) on Wednesdays at [1pm Pacific](https://www.google.com/?#q=1pm+pacific+in+local+time).
 
 * [Upcoming design reviews](https://github.com/ampproject/amphtml/labels/Type%3A%20Design%20Review)
 * [Past design reviews](https://github.com/ampproject/amphtml/issues?q=label%3A%22Type%3A+Design+Review%22+is%3Aclosed)
