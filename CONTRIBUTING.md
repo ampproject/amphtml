@@ -38,7 +38,7 @@ Questions and issues related to Google Search should be asked on [Google's AMP f
 
 The AMP Project is meant to evolve with feedback.  The project and its users appreciate your thoughts on ways to improve the design or features.
 
-To make a suggestion [file an issue](https://github.com/ampproject/amphtml/issues/new).
+To make a suggestion or feature request [file a GitHub issue](https://github.com/ampproject/amphtml/issues/new) describing your idea.
 
 If you are suggesting a feature that you are intending to implement, please see the [Contributing features](#contributing-features) section below for next steps.
 
