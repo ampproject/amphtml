@@ -5,15 +5,17 @@ The AMP Project community holds weekly design reviews as video conferences via G
 * [Upcoming design reviews](https://github.com/ampproject/amphtml/labels/Type%3A%20Design%20Review)
 * [Past design reviews](https://github.com/ampproject/amphtml/issues?q=label%3A%22Type%3A+Design+Review%22+is%3Aclosed)
 
-The Design Review issue for a given week will have links to the designs being discussed that week as well as a link to the Hangout.  **When attending a design review please read through the designs _before_ the review starts.**
+The Design Review GitHub issue for a given week will have links to the designs being discussed that week as well as a link to the Hangout.  **When attending a design review please read through the designs _before_ the review starts.**
 
-For those who cannot attend the design reviews we will generally include notes from the discussion in the design review issue.
+Notes from the design review discussion will be posted in the Design Review GitHub issue shortly after the design review has finished.
 
 ## Bringing your design to a design review
 
 If the design for an issue/feature you are working on has a scope larger than you can cover in a discussion in the GitHub issue or one of the other discussion channels, consider bringing it to a design review.
 
-Note that the design review is optional and is not required for every new feature.
+Note that the design review is optional and is not required for every new feature or bug fix.
+
+The process for bringing a design to the design review is as follows:
 
 * Create a software design document in a shared Google Document open to public comments.
   * A short design doc is fine as long as it covers your design in sufficient detail to allow for a review by other members of the community.
