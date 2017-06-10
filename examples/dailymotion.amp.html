@@ -7,6 +7,11 @@
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <link href="https://fonts.googleapis.com/css?family=Questrial" rel="stylesheet" type="text/css">
   <script async custom-element="amp-dailymotion" src="https://cdn.ampproject.org/v0/amp-dailymotion-0.1.js"></script>
+  <style amp-custom>
+    .spacer {
+      height: 100vh;
+    }
+  </style>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
@@ -39,9 +44,29 @@
     data-ui-highlight="444444"
     data-ui-logo="false"
     data-info="false"
+    id="myVideo"
     width="640"
     height="360">
   </amp-dailymotion>
+
+  <h3>Actions</h3>
+  <button on="tap:myVideo.play">Play</button>
+  <button on="tap:myVideo.pause">Pause</button>
+  <button on="tap:myVideo.mute">Mute</button>
+  <button on="tap:myVideo.unmute">Unmute</button>
+
+  <h4>Autoplay</h4>
+
+  <!-- Removed autoplay tag until validator is updated -->
+  <p>Autoplay tag is currently removed until prod. validator is updated</p>
+
+  <amp-dailymotion
+    data-videoid="x3rdtfy"
+    width="500"
+    height="281"
+    layout="responsive">
+  </amp-dailymotion>
+  <div class="spacer"></div>
 
 </body>
 </html>

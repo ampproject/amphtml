@@ -30,6 +30,7 @@ tags: {  # <amp-dailymotion>
   tag_name: "AMP-DAILYMOTION"
   disallowed_ancestor: "AMP-SIDEBAR"
   requires_extension: "amp-dailymotion"
+  attrs: { name: "autoplay" }
   attrs: {
     name: "data-endscreen-enable"
     value_regex: "true|false"

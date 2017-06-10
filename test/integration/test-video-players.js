@@ -50,6 +50,15 @@ describe.skip('amp-youtube', () => {
   });
 });
 
+//TODO(aghassemi, #9379): unskip
+describe.skip('amp-dailymotion', () => {
+  runVideoPlayerIntegrationTests(fixture => {
+    const video = fixture.doc.createElement('amp-dailymotion');
+    video.setAttribute('data-videoid', 'x3rdtfy');
+    return video;
+  });
+});
+
 describe.configure().skipIos().run('amp-3q-player', () => {
   runVideoPlayerIntegrationTests(fixture => {
     const video = fixture.doc.createElement('amp-3q-player');
@@ -92,4 +101,3 @@ describe.configure().skipIos().run('amp-brid-player', () => {
     return video;
   });
 });
-
