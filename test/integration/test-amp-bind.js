@@ -24,8 +24,6 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   let numSetStates;
   let numTemplated;
 
-  this.timeout(5000);
-
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     numSetStates = 0;
