@@ -33,7 +33,7 @@ limitations under the License.
     <td class="col-fourty"><strong>Required Script</strong></td>
     <td>
       <div>
-        <code>&lt;script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js">&lt;/script></code>
+        <code>&lt;script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js">&lt;/script&gt;</code>
       </div>
     </td>
   </tr>
@@ -313,97 +313,102 @@ Only binding to the following components and attributes are allowed:
     <th>Behavior</th>
   </tr>
   <tr>
-    <td class="col-thirty"><code>&lt;amp-brightcove></code></td>
+    <td class="col-thirty"><code>&lt;amp-brightcove&gt;</code></td>
     <td class="col-fourty"><code>[data-account]</code><br><code>[data-embed]</code><br><code>[data-player]</code><br><code>[data-player-id]</code><br><code>[data-playlist-id]</code><br><code>[data-video-id]</code></td>
     <td class="col-thirty">Changes the displayed Brightcove video.</td>
   </tr>
   <tr>
-    <td><code>&lt;amp-carousel type=slides></code></td>
+    <td><code>&lt;amp-carousel type=slides&gt;</code></td>
     <td><code>[slide]</code><sup>1</sup></td>
     <td>Changes the currently displayed slide index. <a href="https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind">See an example</a>.</td>
   </tr>
   <tr>
-    <td><code>&lt;amp-iframe></code></td>
+    <td><code>&lt;amp-iframe&gt;</code></td>
     <td><code>[src]</code></td>
     <td>Changes the iframe's source URL.</td>
   </tr>
   <tr>
-    <td><code>&lt;amp-img></code></td>
+    <td><code>&lt;amp-img&gt;</code></td>
     <td><code>[alt]</code><br><code>[attribution]</code><br><code>[src]</code><br><code>[srcset]</code></td>
     <td>See corresponding <a href="https://www.ampproject.org/docs/reference/components/media/amp-img#attributes">amp-img attributes</a>.</td>
   </tr>
   <tr>
-    <td><code>&lt;amp-list></code></td>
+    <td><code>&lt;amp-list&gt;</code></td>
     <td><code>[src]</code></td>
     <td>Fetches JSON from the new URL and re-renders, replacing old content.</td>
   </tr>
   <tr>
-    <td><code>&lt;amp-selector></code></td>
+    <td><code>&lt;amp-list&gt;</code></td>
+    <td><code>[state]</code></td>
+    <td>Renders using local JSON state at the provided expression.</td>
+  </tr>
+  <tr>
+    <td><code>&lt;amp-selector&gt;</code></td>
     <td><code>[selected]</code><sup>1</sup></td>
     <td>Changes the currently selected children element(s)<br>identified by their <code>option</code> attribute values. Supports a comma-separated list of values for multiple selection. <a href="https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind">See an example</a>.</td>
   </tr>
   <tr>
-    <td><code>&lt;amp-state></code></td>
+    <td><code>&lt;amp-state&gt;</code></td>
     <td><code>[src]</code></td>
     <td>Fetches JSON from the new URL and merges it into the existing state. <em>Note the following update will ignore <code>&lt;amp-state&gt;</code> elements to prevent cycles.</em></td>
   </tr>
   <tr>
-    <td><code>&lt;amp-video></code></td>
+    <td><code>&lt;amp-video&gt;</code></td>
     <td><code>[alt]</code><br><code>[attribution]</code><br><code>[controls]</code><br><code>[loop]</code><br><code>[poster]</code><br><code>[preload]</code><br><code>[src]</code></td>
     <td>See corresponding <a href="https://www.ampproject.org/docs/reference/components/media/amp-video#attributes">amp-video attributes</a>.</td>
   </tr>
   <tr>
-    <td><code>&lt;amp-youtube></code></td>
+    <td><code>&lt;amp-youtube&gt;</code></td>
     <td><code>[data-videoid]</code></td>
     <td>Changes the displayed YouTube video.</td>
   </tr>
   <tr>
-    <td><code>&lt;a></code></td>
+    <td><code>&lt;a&gt;</code></td>
     <td><code>[href]</code></td>
     <td>Changes the link.</td>
   </tr>
   <tr>
-    <td><code>&lt;button></code></td>
+    <td><code>&lt;button&gt;</code></td>
     <td><code>[disabled]</code><br><code>[type]</code><br><code>[value]</code></td>
     <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Attributes">button attributes</a>.</td>
   </tr>
   <tr>
-    <td><code>&lt;fieldset></code></td>
+    <td><code>&lt;fieldset&gt;</code></td>
     <td><code>[disabled]</code></td>
     <td>Enables or disables the fieldset.</td>
   </tr>
   <tr>
-    <td><code>&lt;input></code></td>
+    <td><code>&lt;input&gt;</code></td>
     <td><code>[accept]</code><br><code>[accessKey]</code><br><code>[autocomplete]</code><br><code>[checked]</code><br><code>[disabled]</code><br><code>[height]</code><br><code>[inputmode]</code><br><code>[max]</code><br><code>[maxlength]</code><br><code>[min]</code><br><code>[minlength]</code><br><code>[multiple]</code><br><code>[pattern]</code><br><code>[placeholder]</code><br><code>[readonly]</code><br><code>[required]</code><br><code>[selectiondirection]</code><br><code>[size]</code><br><code>[spellcheck]</code><br><code>[step]</code><br><code>[type]</code><br><code>[value]</code><br><code>[width]</code></td>
     <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#Attributes">input attributes</a>.</td>
   </tr>
   <tr>
-    <td><code>&lt;option></code></td>
+    <td><code>&lt;option&gt;</code></td>
     <td><code>[disabled]</code><br><code>[label]</code><br><code>[selected]</code><br><code>[value]</code></td>
     <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/option#Attributes">option attributes</a>.</td>
   </tr>
   <tr>
-    <td><code>&lt;optgroup></code></td>
+    <td><code>&lt;optgroup&gt;</code></td>
     <td><code>[disabled]</code><br><code>[label]</code></td>
     <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/optgroup#Attributes">optgroup attributes</a></td>
   </tr>
   <tr>
-    <td><code>&lt;select></code></td>
+    <td><code>&lt;select&gt;</code></td>
     <td><code>[autofocus]</code><br><code>[disabled]</code><br><code>[multiple]</code><br><code>[required]</code><br><code>[size]</code></td>
     <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select#Attributes">select attributes</a>.</td>
   </tr>
   <tr>
-    <td><code>&lt;source></code></td>
+    <td><code>&lt;source&gt;</code></td>
     <td><code>[src]</code><br><code>[type]</code></td>
     <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/source#Attributes">source attributes</a>.</td>
   </tr>
   <tr>
-    <td><code>&lt;track></code></td>
+    <td><code>&lt;track&gt;</code></td>
     <td><code>[label]</code><br><code>[src]</code><br><code>[srclang]</code></td>
     <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/track#Attributes">track attributes</a>.</td>
   </tr>
   <tr>
-    <td><code>&lt;textarea></code></td>
+    <td><code>&lt;textarea&gt;</code></td>
     <td><code>[autocomplete]</code><br><code>[autofocus]</code><br><code>[cols]</code><br><code>[disabled]</code><br><code>[maxlength]</code><br><code>[minlength]</code><br><code>[placeholder]</code><br><code>[readonly]</code><br><code>[required]</code><br><code>[rows]</code><br><code>[selectiondirection]</code><br><code>[selectionend]</code><br><code>[selectionstart]</code><br><code>[spellcheck]</code><br><code>[wrap]</code></td>
     <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea#Attributes">textarea attributes</a>.</td>
   </tr>
