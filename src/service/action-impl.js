@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../action-trust';
 import {KeyCodes} from '../utils/key-codes';
 import {debounce} from '../utils/rate-limit';
 import {dev, user} from '../log';
@@ -22,7 +23,7 @@ import {
   installServiceInEmbedScope,
 } from '../service';
 import {getMode} from '../mode';
-import {isArray} from '../types';
+import {isArray, isFiniteNumber} from '../types';
 import {map} from '../utils/object';
 import {timerFor} from '../services';
 import {vsyncFor} from '../services';
@@ -54,7 +55,6 @@ const DEFAULT_DEBOUNCE_WAIT = 300; // ms
 /** @const {!Object<string,!Array<string>>} */
 const ELEMENTS_ACTIONS_MAP_ = {
   'form': ['submit'],
-  'AMP': ['setState'],
 };
 
 /** @enum {string} */
@@ -101,12 +101,10 @@ let ActionInfoArgsDef;
  */
 let ActionInfoDef;
 
-
 /**
  * @typedef {Event|DeferredEvent}
  */
 export let ActionEventDef;
-
 
 /**
  * The structure that contains all details of the action method invocation.
@@ -122,8 +120,9 @@ export class ActionInvocation {
    * @param {?JSONType} args
    * @param {?Element} source
    * @param {?ActionEventDef} event
+   * @param {ActionTrust} trust
    */
-  constructor(target, method, args, source, event) {
+  constructor(target, method, args, source, event, trust) {
     /** @const {!Node} */
     this.target = target;
     /** @const {string} */
@@ -134,9 +133,30 @@ export class ActionInvocation {
     this.source = source;
     /** @const {?ActionEventDef} */
     this.event = event;
+    /** @const {ActionTrust} */
+    this.trust = trust;
+  }
+
+  /**
+   * Returns true if the trigger event has a trust equal to or greater than
+   * `minimumTrust`. Otherwise, throws a user error and returns false.
+   * @param {ActionTrust} minimumTrust
+   * @returns {boolean}
+   */
+  satisfiesTrust(minimumTrust) {
+    // Sanity check.
+    if (!isFiniteNumber(this.trust)) {
+      dev().error(TAG_, `Invalid trust for '${this.method}': ${this.trust}`);
+      return false;
+    }
+    if (this.trust < minimumTrust) {
+      user().error(TAG_, `Trust for '${this.method}' (${this.trust}) ` +
+          `insufficient (min: ${minimumTrust}).`);
+      return false;
+    }
+    return true;
   }
 }
-
 
 /**
  * TODO(dvoytenko): consider splitting this class into two:
@@ -192,40 +212,48 @@ export class ActionService {
       // fast-click.
       this.root_.addEventListener('click', event => {
         if (!event.defaultPrevented) {
-          this.trigger(dev().assertElement(event.target), name, event);
+          const element = dev().assertElement(event.target);
+          this.trigger(element, name, event, ActionTrust.HIGH);
         }
       });
       this.root_.addEventListener('keydown', event => {
+        const element = dev().assertElement(event.target);
         const keyCode = event.keyCode;
         if (keyCode == KeyCodes.ENTER || keyCode == KeyCodes.SPACE) {
-          const element = dev().assertElement(event.target);
           if (!event.defaultPrevented &&
               element.getAttribute('role') == 'button') {
             event.preventDefault();
-            this.trigger(element, name, event);
+            this.trigger(element, name, event, ActionTrust.HIGH);
           }
         }
       });
     } else if (name == 'submit') {
       this.root_.addEventListener(name, event => {
-        this.trigger(dev().assertElement(event.target), name, event);
+        const element = dev().assertElement(event.target);
+        this.trigger(element, name, event, ActionTrust.HIGH);
       });
     } else if (name == 'change') {
       this.root_.addEventListener(name, event => {
-        this.addInputMutateDetails_(event);
-        this.trigger(dev().assertElement(event.target), name, event);
+        const element = dev().assertElement(event.target);
+        // Only `change` events from <select> elements have high trust.
+        const trust = element.tagName == 'SELECT'
+            ? ActionTrust.HIGH
+            : ActionTrust.MEDIUM;
+        this.addInputDetails_(event);
+        this.trigger(element, name, event, trust);
       });
     } else if (name == 'input-debounced') {
       const debouncedInput = debounce(this.ampdoc.win, event => {
         const target = dev().assertElement(event.target);
-        this.trigger(target, name, /** @type {!ActionEventDef} */ (event));
+        this.trigger(target, name, /** @type {!ActionEventDef} */ (event),
+            ActionTrust.MEDIUM);
       }, DEFAULT_DEBOUNCE_WAIT);
 
       this.root_.addEventListener('input', event => {
         // Create a DeferredEvent to avoid races where the browser cleans up
         // the event object before the async debounced function is called.
         const deferredEvent = new DeferredEvent(event);
-        this.addInputMutateDetails_(deferredEvent);
+        this.addInputDetails_(deferredEvent);
         debouncedInput(deferredEvent);
       });
     }
@@ -237,7 +265,7 @@ export class ActionService {
    * the initial event.
    * @param {!ActionEventDef} event
    */
-  addInputMutateDetails_(event) {
+  addInputDetails_(event) {
     const detail = map();
     const target = event.target;
     const tagName = target.tagName.toLowerCase();
@@ -291,9 +319,10 @@ export class ActionService {
    * @param {!Element} target
    * @param {string} eventType
    * @param {?ActionEventDef} event
+   * @param {ActionTrust} trust
    */
-  trigger(target, eventType, event) {
-    this.action_(target, eventType, event);
+  trigger(target, eventType, event, trust) {
+    this.action_(target, eventType, event, trust);
   }
 
   /**
@@ -305,15 +334,18 @@ export class ActionService {
    * @param {?ActionEventDef} event
    */
   execute(target, method, args, source, event) {
-    this.invoke_(target, method, args, source, event, null);
+    // Invocation of actions by the runtime has the highest trust of all!
+    const trust = ActionTrust.HIGH;
+    this.invoke_(target, method, args, source, event, trust, null);
   }
 
   /**
    * Installs action handler for the specified element.
    * @param {!Element} target
    * @param {function(!ActionInvocation)} handler
+   * @param {ActionTrust=} opt_minTrust
    */
-  installActionHandler(target, handler) {
+  installActionHandler(target, handler, opt_minTrust) {
     // TODO(dvoytenko, #7063): switch back to `target.id` with form proxy.
     const targetId = target.getAttribute('id') || '';
     const debugid = target.tagName + '#' + targetId;
@@ -329,7 +361,15 @@ export class ActionService {
     /** @const {Array<!ActionInvocation>} */
     const currentQueue = target[ACTION_QUEUE_];
 
-    target[ACTION_HANDLER_] = handler;
+    const actionHandler = function actionTrustChecker(invocation) {
+      // Default to ActionTrust.MEDIUM.
+      const minTrust = opt_minTrust !== undefined
+          ? opt_minTrust : ActionTrust.MEDIUM;
+      if (invocation.satisfiesTrust(minTrust)) {
+        handler(invocation);
+      }
+    };
+    target[ACTION_HANDLER_] = actionHandler;
 
     // Dequeue the current queue.
     if (isArray(currentQueue)) {
@@ -337,7 +377,7 @@ export class ActionService {
         // TODO(dvoytenko, #1260): dedupe actions.
         currentQueue.forEach(invocation => {
           try {
-            handler(invocation);
+            actionHandler(invocation);
           } catch (e) {
             dev().error(TAG_, 'Action execution failed:', invocation, e);
           }
@@ -351,9 +391,10 @@ export class ActionService {
    * @param {!Element} source
    * @param {string} actionEventType
    * @param {?ActionEventDef} event
+   * @param {ActionTrust} trust
    * @private
    */
-  action_(source, actionEventType, event) {
+  action_(source, actionEventType, event, trust) {
     const action = this.findAction_(source, actionEventType);
     if (!action) {
       // TODO(dvoytenko): implement default (catch-all) actions.
@@ -374,13 +415,14 @@ export class ActionService {
             actionInfo.method,
             args,
             action.node,
-            event);
+            event,
+            trust);
         globalTarget(invocation);
       } else {
         const target = this.root_.getElementById(actionInfo.target);
         if (target) {
           this.invoke_(target, actionInfo.method, args,
-              action.node, event, actionInfo);
+              action.node, event, trust, actionInfo);
         } else {
           this.actionInfoError_('target not found', actionInfo, target);
         }
@@ -408,12 +450,13 @@ export class ActionService {
    * @param {?JSONType} args
    * @param {?Element} source
    * @param {?ActionEventDef} event
+   * @param {ActionTrust} trust
    * @param {?ActionInfoDef} actionInfo
    * @private visible for testing
    */
-  invoke_(target, method, args, source, event, actionInfo) {
+  invoke_(target, method, args, source, event, trust, actionInfo) {
     const invocation = new ActionInvocation(target, method, args,
-        source, event);
+        source, event, trust);
 
     // Try a global method handler first.
     if (this.globalMethodHandlers_[invocation.method]) {

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-trust';
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
 import {actionServiceForDoc} from '../../../src/services';
@@ -210,7 +211,7 @@ export class AmpSlideScroll extends BaseSlides {
       if (args) {
         this.showSlideWhenReady(args['index']);
       }
-    });
+    }, ActionTrust.LOW);
   }
 
   /** @override */
@@ -589,8 +590,9 @@ export class AmpSlideScroll extends BaseSlides {
       const name = 'slideChange';
       const event =
           createCustomEvent(this.win, `slidescroll.${name}`, {index: newIndex});
+      this.action_.trigger(this.element, name, event, ActionTrust.MEDIUM);
+
       this.element.dispatchCustomEvent(name, {index: newIndex});
-      this.action_.trigger(this.element, name, event);
     }
   }
 

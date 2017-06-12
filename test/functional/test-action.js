@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../src/action-trust';
 import {
   ActionService,
   DeferredEvent,
@@ -640,7 +641,7 @@ describe('Action method', () => {
     const target = document.createElement('form');
     action.installActionHandler(target, handlerSpy);
     action.invoke_(target, 'submit', /* args */ null,
-        'button', 'tap');
+        'button', 'tap', ActionTrust.HIGH);
     expect(handlerSpy).to.be.calledOnce;
     const callArgs = handlerSpy.getCall(0).args[0];
     expect(callArgs.target).to.be.equal(target);
@@ -790,8 +791,10 @@ describe('Action interceptor', () => {
   });
 
   it('should dequeue actions after handler set', () => {
-    action.invoke_(target, 'method1', /* args */ null, 'source1', 'event1');
-    action.invoke_(target, 'method2', /* args */ null, 'source2', 'event2');
+    action.invoke_(target, 'method1', /* args */ null, 'source1', 'event1',
+        ActionTrust.MEDIUM);
+    action.invoke_(target, 'method2', /* args */ null, 'source2', 'event2',
+        ActionTrust.MEDIUM);
 
     expect(Array.isArray(getQueue())).to.be.true;
     expect(getActionHandler()).to.be.undefined;
@@ -817,7 +820,8 @@ describe('Action interceptor', () => {
     expect(inv1.source).to.equal('source2');
     expect(inv1.event).to.equal('event2');
 
-    action.invoke_(target, 'method3', /* args */ null, 'source3', 'event3');
+    action.invoke_(target, 'method3', /* args */ null, 'source3', 'event3',
+        ActionTrust.MEDIUM);
     expect(handler).to.have.callCount(3);
     const inv2 = handler.getCall(2).args[0];
     expect(inv2.target).to.equal(target);

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-trust';
 import {installFormProxy} from './form-proxy';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {createCustomEvent} from '../../../src/event-helper';
@@ -193,7 +194,7 @@ export class AmpForm {
         this.form_, () => this.handleXhrVerify_());
 
     this.actions_.installActionHandler(
-        this.form_, this.actionHandler_.bind(this));
+        this.form_, this.actionHandler_.bind(this), ActionTrust.HIGH);
     this.installEventHandlers_();
 
     /** @private {?Promise} */
@@ -226,7 +227,7 @@ export class AmpForm {
    */
   actionHandler_(invocation) {
     if (invocation.method == 'submit') {
-      this.whenDependenciesReady_().then(this.handleSubmitAction_.bind(this));
+      this.whenDependenciesReady_().then(() => this.handleSubmitAction_());
     }
   }
 
@@ -347,7 +348,7 @@ export class AmpForm {
   }
 
   /**
-   * A helper method that actual handles the for different cases (post, get, xhr...).
+   * Helper method that actual handles the different cases (post, get, xhr...).
    * @private
    */
   submit_() {
@@ -421,7 +422,11 @@ export class AmpForm {
     const p = this.doVarSubs_(varSubsFields)
         .then(() => {
           this.triggerFormSubmitInAnalytics_();
-          this.actions_.trigger(this.form_, 'submit', /*event*/ null);
+          // A form can be submitted in several ways, but it's not necessary
+          // to plumb the source's trust through since ActionTrust.HIGH is
+          // required anyways.
+          this.actions_.trigger(
+              this.form_, 'submit', /* event */ null, ActionTrust.HIGH);
 
           // After variable substitution
           const values = this.getFormAsObject_();
@@ -627,7 +632,7 @@ export class AmpForm {
     const name = success ? FormState_.SUBMIT_SUCCESS : FormState_.SUBMIT_ERROR;
     const event =
         createCustomEvent(this.win_, `${TAG}.${name}`, {response: json});
-    this.actions_.trigger(this.form_, name, event);
+    this.actions_.trigger(this.form_, name, event, ActionTrust.MEDIUM);
   }
 
   /**

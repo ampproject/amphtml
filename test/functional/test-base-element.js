@@ -85,7 +85,7 @@ describe('BaseElement', () => {
   it('should register action', () => {
     const handler = () => {};
     element.registerAction('method1', handler);
-    expect(element.actionMap_['method1']).to.equal(handler);
+    expect(element.actionMap_['method1']).to.not.be.null;
   });
 
   it('should fail execution of unregistered action', () => {
@@ -97,14 +97,16 @@ describe('BaseElement', () => {
   it('should execute registered action', () => {
     const handler = sandbox.spy();
     element.registerAction('method1', handler);
-    element.executeAction({method: 'method1'}, false);
+    const invocation = {method: 'method1', satisfiesTrust: () => true};
+    element.executeAction(invocation, false);
     expect(handler).to.be.calledOnce;
   });
 
   it('should execute "activate" action without registration', () => {
     const handler = sandbox.spy();
     element.activate = handler;
-    element.executeAction({method: 'activate'}, false);
+    const invocation = {method: 'activate', satisfiesTrust: () => true};
+    element.executeAction(invocation, false);
     expect(handler).to.be.calledOnce;
   });
 

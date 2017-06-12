@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../action-trust';
 import {listen, listenOncePromise} from '../event-helper';
 import {dev} from '../log';
 import {getMode} from '../mode';
@@ -86,15 +87,16 @@ export class VideoManager {
    * so they can be called using AMP Actions.
    * For example: <button on="tap:myVideo.play">
    *
-   *
    * @param {!../video-interface.VideoInterface} video
    * @private
    */
   registerCommonActions_(video) {
-    video.registerAction('play', video.play.bind(video, /*isAutoplay*/ false));
-    video.registerAction('pause', video.pause.bind(video));
-    video.registerAction('mute', video.mute.bind(video));
-    video.registerAction('unmute', video.unmute.bind(video));
+    // TODO(choumx): Muted play should only require LOW trust.
+    video.registerAction('play',
+        video.play.bind(video, /* isAutoplay */ false), ActionTrust.HIGH);
+    video.registerAction('pause', video.pause.bind(video), ActionTrust.LOW);
+    video.registerAction('mute', video.mute.bind(video), ActionTrust.LOW);
+    video.registerAction('unmute', video.unmute.bind(video), ActionTrust.HIGH);
   }
 
   /**

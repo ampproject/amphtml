@@ -121,6 +121,7 @@ describes.realWin('amp-ad-exit', {
         method: 'exit',
         args: {target: 'not-a-real-target'},
         event: makeClickEvent(1001),
+        satisfiesTrust: () => true,
       });
       expect(open).to.not.have.been.called;
     } catch (expected) {}
@@ -132,6 +133,7 @@ describes.realWin('amp-ad-exit', {
       method: 'exit',
       args: {target: 'simple'},
       event,
+      satisfiesTrust: () => true,
     });
     expect(event.preventDefault).to.have.been.called;
   });
@@ -143,12 +145,14 @@ describes.realWin('amp-ad-exit', {
       method: 'exit',
       args: {target: 'simple'},
       event: makeClickEvent(999),
+      satisfiesTrust: () => true,
     });
 
     element.implementation_.executeAction({
       method: 'exit',
       args: {target: 'twoSecondDelay'},
       event: makeClickEvent(1000),  // 1000 ms + 999 from the previous exit.
+      satisfiesTrust: () => true,
     });
 
     expect(open).to.not.have.been.called;
@@ -163,6 +167,7 @@ describes.realWin('amp-ad-exit', {
       method: 'exit',
       args: {target: 'simple'},
       event: makeClickEvent(1001),
+      satisfiesTrust: () => true,
     });
 
     expect(open).to.have.been.calledOnce;
@@ -177,6 +182,7 @@ describes.realWin('amp-ad-exit', {
       method: 'exit',
       args: {target: 'simple'},
       event: makeClickEvent(1001),
+      satisfiesTrust: () => true,
     });
 
     expect(open).to.have.been.calledTwice;
@@ -196,6 +202,7 @@ describes.realWin('amp-ad-exit', {
       method: 'exit',
       args: {target: 'tracking'},
       event: makeClickEvent(1001),
+      satisfiesTrust: () => true,
     });
 
     expect(open).to.have.been.calledOnce;
@@ -223,6 +230,7 @@ describes.realWin('amp-ad-exit', {
       method: 'exit',
       args: {target: 'tracking'},
       event: makeClickEvent(1001),
+      satisfiesTrust: () => true,
     });
 
     expect(open).to.have.been.calledOnce;
@@ -249,6 +257,7 @@ describes.realWin('amp-ad-exit', {
       method: 'exit',
       args: {target: 'tracking'},
       event: makeClickEvent(1001),
+      satisfiesTrust: () => true,
     });
 
     expect(open).to.have.been.calledOnce;
@@ -281,6 +290,7 @@ describes.realWin('amp-ad-exit', {
       method: 'exit',
       args: {target: 'tracking'},
       event: makeClickEvent(1001),
+      satisfiesTrust: () => true,
     });
 
     expect(open).to.have.been.calledOnce;
@@ -307,6 +317,7 @@ describes.realWin('amp-ad-exit', {
       method: 'exit',
       args: {target: 'variables'},
       event: makeClickEvent(1001, 101, 102),
+      satisfiesTrust: () => true,
     });
 
     const urlMatcher = sinon.match(new RegExp(
@@ -334,6 +345,7 @@ describes.realWin('amp-ad-exit', {
       method: 'exit',
       args: {target: 'customVars', _foo: 'foo', _bar: 'bar'},
       event: makeClickEvent(1001, 101, 102),
+      satisfiesTrust: () => true,
     });
 
     expect(open).to.have.been.calledWith(

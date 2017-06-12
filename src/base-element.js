@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from './action-trust';
 import {Layout} from './layout';
 import {loadPromise} from './event-helper';
 import {preconnectForElement} from './preconnect';
@@ -491,6 +492,14 @@ export class BaseElement {
   }
 
   /**
+   * Minimum event trust required for activate().
+   * @return {ActionTrust}
+   */
+  activationTrust() {
+    return ActionTrust.MEDIUM;
+  }
+
+  /**
    * Returns a promise that will resolve or fail based on the element's 'load'
    * and 'error' events.
    * @param {T} element
@@ -511,13 +520,26 @@ export class BaseElement {
 
   /**
    * Registers the action handler for the method with the specified name.
+   *
+   * The handler is only invoked by events with trust equal to or greater than
+   * `opt_minTrust` (or ActionTrust.MEDIUM if not provided). Otherwise, a
+   * user error is thrown.
+   *
    * @param {string} method
    * @param {function(!./service/action-impl.ActionInvocation)} handler
+   * @param {ActionTrust=} opt_minTrust
    * @public
    */
-  registerAction(method, handler) {
+  registerAction(method, handler, opt_minTrust) {
     this.initActionMap_();
-    this.actionMap_[method] = handler;
+    this.actionMap_[method] = function actionTrustChecker(invocation) {
+      // Default to ActionTrust.MEDIUM.
+      const minTrust = opt_minTrust !== undefined
+          ? opt_minTrust : ActionTrust.MEDIUM;
+      if (invocation.satisfiesTrust(minTrust)) {
+        handler(invocation);
+      }
+    };
   }
 
   /**
@@ -532,7 +554,9 @@ export class BaseElement {
    */
   executeAction(invocation, unusedDeferred) {
     if (invocation.method == 'activate') {
-      this.activate(invocation);
+      if (invocation.satisfiesTrust(this.activationTrust())) {
+        this.activate(invocation);
+      }
     } else {
       this.initActionMap_();
       const handler = this.actionMap_[invocation.method];
