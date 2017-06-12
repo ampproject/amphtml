@@ -19,105 +19,14 @@ import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
-import {childElementByTag} from '../../../src/dom.js';
 import {dev} from '../../../src/log';
-import {getParentWindowFrameElement} from '../../../src/service';
 import {historyForDoc} from '../../../src/services';
-import {isExperimentOn} from '../../../src/experiments';
 import {vsyncFor} from '../../../src/services';
 import {timerFor} from '../../../src/services';
 import * as st from '../../../src/style';
 
 /** @const {string} */
 const TAG = 'amp-lightbox';
-
-/** @const {string} */
-const A4A_PROTOTYPE_EXPERIMENT = 'amp-lightbox-a4a-proto';
-
-
-
-/**
- * @param {!HTMLBodyElement} bodyElement
- * @return {!Element}
- */
- // TODO(alanorozco):
-//   Move this where it makes sense (possibly FriendlyIframeEmbed?)
-function getAdBannerRoot(bodyElement) {
-  return dev().assertElement(childElementByTag(
-      dev().assertElement(bodyElement), 'amp-ad-banner'));
-}
-
-
-// TODO(alanorozco):
-//   Move this where it makes sense (possibly FriendlyIframeEmbed?)
-/**
- * @param {!HTMLIFrameElement} iframe
- * @param {!Window} topLevelWindow
- */
-function enterFrameFullOverlayMode(iframe, topLevelWindow) {
-  // TODO(alanorozco): use viewport service
-  // TODO(alanorozco): move ad banner resizing logic to its extension class
-  // TODO(alanorozco): check for FriendlyIframeEmbed.win.document as iframeDoc
-  //                   fallback.
-  const iframeDoc = iframe.contentDocument;
-  const iframeBody = /** @type {!HTMLBodyElement} */ (iframeDoc.body);
-  const adBannerRoot = getAdBannerRoot(iframeBody);
-
-  vsyncFor(topLevelWindow).run({
-    measure: state => {
-      const iframeRect = iframe./*OK*/getBoundingClientRect();
-
-      const winWidth = topLevelWindow./*OK*/innerWidth;
-      const winHeight = topLevelWindow./*OK*/innerHeight;
-
-      state.adBannerRootStyle = {
-        'position': 'absolute',
-        'top': st.px(iframeRect.top),
-        'right': st.px(winWidth - iframeRect.right),
-        'left': st.px(iframeRect.left),
-        'bottom': st.px(winHeight - iframeRect.bottom),
-        'height': st.px(iframeRect.bottom - iframeRect.top),
-      };
-    },
-    mutate: state => {
-      st.setStyle(iframeBody, 'background', 'transparent');
-
-      st.setStyles(iframe, {
-        'position': 'fixed',
-      });
-
-      st.setStyles(adBannerRoot, state.adBannerRootStyle);
-    },
-  }, {});
-}
-
-
-// TODO(alanorozco):
-//   Move this where it makes sense (possibly FriendlyIframeEmbed?)
-/**
- * @param {!HTMLIFrameElement} iframe
- * @param {!Window} topLevelWindow
- */
-function leaveFrameFullOverlayMode(iframe, topLevelWindow) {
-  const iframeDoc = iframe.contentDocument;
-  const iframeBody = /** @type {!HTMLBodyElement} */ (iframeDoc.body);
-  const adBannerRoot = getAdBannerRoot(iframeBody);
-
-  vsyncFor(topLevelWindow).mutate(() => {
-    st.setStyles(adBannerRoot, {
-      'position': null,
-      'top': null,
-      'right': null,
-      'left': null,
-      'bottom': null,
-      'height': null,
-    });
-
-    st.setStyles(iframe, {
-      'position': null,
-    });
-  });
-}
 
 
 class AmpLightbox extends AMP.BaseElement {
@@ -217,14 +126,11 @@ class AmpLightbox extends AMP.BaseElement {
     this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
     this.win.document.documentElement.addEventListener(
         'keydown', this.boundCloseOnEscape_);
-    this.getViewport().enterLightboxMode()
+    this.getViewport().enterLightboxMode(this.element)
         .then(() => this.finalizeOpen_());
   }
 
   finalizeOpen_() {
-    // TODO(alanorozco): backport iframe overlay logic into viewport service
-    this.maybeEnterFrameFullOverlayMode_();
-
     if (this.isScrollable_) {
       st.setStyle(this.element, 'webkitOverflowScrolling', 'touch');
     }
@@ -258,48 +164,6 @@ class AmpLightbox extends AMP.BaseElement {
     this.active_ = true;
   }
 
-  /** @private */
-  maybeEnterFrameFullOverlayMode_() {
-    if (!isExperimentOn(this.getAmpDoc().win, A4A_PROTOTYPE_EXPERIMENT)) {
-      return;
-    }
-
-    if (this.isInMainDocument_()) {
-      return;
-    }
-
-    enterFrameFullOverlayMode(this.getIframe_(), this.getAmpDoc().win);
-  }
-
-  /** @private */
-  maybeLeaveFrameFullOverlayMode_() {
-    if (!isExperimentOn(this.getAmpDoc().win, A4A_PROTOTYPE_EXPERIMENT)) {
-      return;
-    }
-
-    if (this.isInMainDocument_()) {
-      return;
-    }
-
-    leaveFrameFullOverlayMode(this.getIframe_(), this.getAmpDoc().win);
-  }
-
-  /** @return {boolean} */
-  isInMainDocument_() {
-    return this.getAmpDoc().win == this.win;
-  }
-
-  /**
-   * @return {!HTMLIFrameElement}
-   * @private
-   */
-  getIframe_() {
-    const frameElement = getParentWindowFrameElement(this.element,
-        this.getAmpDoc().win);
-
-    return /** @type {!HTMLIFrameElement} */ (dev().assert(frameElement));
-  }
-
   /**
    * Handles closing the lightbox when the ESC key is pressed.
    * @param {!Event} event.
@@ -321,14 +185,11 @@ class AmpLightbox extends AMP.BaseElement {
     if (this.isScrollable_) {
       st.setStyle(this.element, 'webkitOverflowScrolling', '');
     }
-    this.getViewport().leaveLightboxMode()
+    this.getViewport().leaveLightboxMode(this.element)
         .then(() => this.finalizeClose_());
   }
 
   finalizeClose_() {
-    // TODO(alanorozco): backport iframe overlay logic into viewport service
-    this.maybeLeaveFrameFullOverlayMode_();
-
     this./*OK*/collapse();
     if (this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);
