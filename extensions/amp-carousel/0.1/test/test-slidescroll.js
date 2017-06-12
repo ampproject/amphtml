@@ -143,7 +143,7 @@ describe('SlideScroll', () => {
       const setControlsStateSpy = sandbox.spy(impl, 'setControlsState');
       const analyticsEventSpy = sandbox.spy(impl, 'analyticsEvent_');
 
-      impl.showSlide_(-1);
+      expect(impl.showSlide_(-1)).to.be.false;
       expect(updateInViewportSpy).to.not.have.been.called;
       expect(scheduleLayoutSpy).to.not.have.been.called;
       expect(schedulePreloadSpy).to.not.have.been.called;
@@ -151,7 +151,7 @@ describe('SlideScroll', () => {
       expect(setControlsStateSpy).to.not.have.been.called;
       expect(analyticsEventSpy).to.not.have.been.called;
 
-      impl.showSlide_(5);
+      expect(impl.showSlide_(5)).to.be.false;
       expect(updateInViewportSpy).to.not.have.been.called;
       expect(scheduleLayoutSpy).to.not.have.been.called;
       expect(schedulePreloadSpy).to.not.have.been.called;
@@ -159,7 +159,7 @@ describe('SlideScroll', () => {
       expect(setControlsStateSpy).to.not.have.been.called;
       expect(analyticsEventSpy).to.not.have.been.called;
 
-      impl.showSlide_(impl.slideIndex_);
+      expect(impl.showSlide_(impl.slideIndex_)).to.be.false;
       expect(updateInViewportSpy).to.not.have.been.called;
       expect(scheduleLayoutSpy).to.not.have.been.called;
       expect(schedulePreloadSpy).to.not.have.been.called;
@@ -167,7 +167,7 @@ describe('SlideScroll', () => {
       expect(setControlsStateSpy).to.not.have.been.called;
       expect(analyticsEventSpy).to.not.have.been.called;
 
-      impl.showSlide_(1);
+      expect(impl.showSlide_(1)).to.be.true;
       expect(updateInViewportSpy).to.have.been.calledWith(
           impl.slides_[0], false);
       expect(updateInViewportSpy).to.have.been.calledWith(
@@ -198,8 +198,7 @@ describe('SlideScroll', () => {
       expect(impl.slides_[1].getAttribute('aria-hidden')).to.equal('false');
       expect(impl.slides_[2].getAttribute('aria-hidden')).to.equal('true');
 
-      impl.showSlide_(0);
-
+      expect(impl.showSlide_(0)).to.be.true;
       expect(updateInViewportSpy).to.have.been.calledWith(
           impl.slides_[1], false);
       expect(updateInViewportSpy).to.have.been.calledWith(
@@ -228,8 +227,7 @@ describe('SlideScroll', () => {
       expect(impl.slides_[0].getAttribute('aria-hidden')).to.equal('false');
       expect(impl.slides_[1].getAttribute('aria-hidden')).to.equal('true');
 
-      impl.showSlide_(4);
-
+      expect(impl.showSlide_(4)).to.be.true;
       expect(updateInViewportSpy).to.have.been.calledWith(
           impl.slides_[0], false);
       expect(updateInViewportSpy).to.have.been.calledWith(
