@@ -15,8 +15,8 @@
  */
 
 import {dev} from '../../../src/log';
-import {timerFor} from '../../../src/services';
 import {AMP_ANALYTICS_3P_MESSAGE_TYPE} from '../../../src/3p-analytics-common';
+import {throttle} from '../../../src/utils/rate-limit';
 
 /** @private @const {string} */
 const TAG_ = 'amp-analytics.CrossDomainIframeMessageQueue';
@@ -33,38 +33,31 @@ const MAX_QUEUE_SIZE_ = 100;
 export class CrossDomainIframeMessageQueue {
   /**
    * Constructor
+   * @param {!Window} win The window element
    * @param {!../../../3p/iframe-messaging-client.IframeMessagingClient}
    *   iframeMessagingClient Facilitates
    * cross-frame communication
    * @param {!string} envelopeType The type that will be used to
    * contain the queued messages (see 3p-analytics-common)
    */
-  constructor(iframeMessagingClient, envelopeType) {
+  constructor(win, iframeMessagingClient, envelopeType) {
     /** @type {Object<string,!Array<(
     *            ../../../src/3p-analytics-common.AmpAnalytics3pEvent|
     *            ../../../src/3p-analytics-common.AmpAnalytics3pNewCreative
     *          )>>} */
     this.store_ = {};
 
-    /** @type {?number} */
-    this.timerId_ = null;
-
     /** @type {boolean} */
     this.isReady_ = false;
+
+    /** @type {!Window} */
+    this.win_ = win;
 
     /** @type {!../../../3p/iframe-messaging-client.IframeMessagingClient} */
     this.iframeMessagingClient_ = iframeMessagingClient;
 
     /** @type {string} */
     this.envelopeType_ = envelopeType;
-  }
-
-  /**
-   * Destructor
-   */
-  destroy() {
-    CrossDomainIframeMessageQueue.timer_.cancel(this.timerId_);
-    this.timerId_ = null;
   }
 
   /**
@@ -135,15 +128,9 @@ export class CrossDomainIframeMessageQueue {
       this.store_[senderId].shift();
     }
     this.store_[senderId].push(messageObject);
-    if (this.timerId_) {
-      return; // Timer is already about to fire, no need to set a new one
-    }
-    this.timerId_ = CrossDomainIframeMessageQueue.timer_.delay(() => {
-      if (this.isReady_) {
-        this.sendQueuedMessages_();
-      }
-      this.timerId_ = null;
-    }, MESSAGE_THROTTLE_TIME_);
+
+    throttle(this.win_, this.sendQueuedMessages_.bind(this),
+      MESSAGE_THROTTLE_TIME_);
   }
 
   /**
@@ -157,7 +144,4 @@ export class CrossDomainIframeMessageQueue {
     this.store_ = {};
   }
 }
-
-/** @private @const {!Object} */
-CrossDomainIframeMessageQueue.timer_ = timerFor(AMP.win);
 

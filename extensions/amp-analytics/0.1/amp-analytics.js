@@ -237,7 +237,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         this.instrumentation_.createAnalyticsGroup(this.element);
 
     if (this.config_['transport'] && this.config_['transport']['iframe']) {
-      this.transport_.processCrossDomainIframe(this.getAmpDoc().win.document,
+      this.transport_.processCrossDomainIframe(this.getAmpDoc().win,
         this.config_['transport'], (type, responseMessage) => {
           this.processCrossDomainIframeResponse_(type, responseMessage);
         });

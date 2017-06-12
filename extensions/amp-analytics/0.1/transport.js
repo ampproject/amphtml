@@ -155,7 +155,7 @@ export class Transport {
   /**
    * If iframe is specified in config/transport, check whether third-party
    * iframe already exists, and if not, create it.
-   * @param {!HTMLDocument} ampDoc The AMP document
+   * @param {!Window} win The window element
    * @param {!Object<string,string>} transportOptions The 'transport' portion
    * of the amp-analytics config object
    * @param {function(!string,
@@ -163,11 +163,11 @@ export class Transport {
    *   opt_processResponse An optional function to receive any response
    *   messages back from the cross-domain iframe
    */
-  processCrossDomainIframe(ampDoc, transportOptions, opt_processResponse) {
+  processCrossDomainIframe(win, transportOptions, opt_processResponse) {
     const frameUrl = dev().assertString(transportOptions['iframe'],
       'Cross-domain frame parameters missing ${this.type_}');
-    const frameData = this.useExistingOrCreateCrossDomainIframe_(ampDoc,
-      frameUrl, transportOptions['extraData']);
+    const frameData = this.useExistingOrCreateCrossDomainIframe_(
+      win, frameUrl, transportOptions['extraData']);
     const iframeMessagingClient = frameData.iframeMessagingClient;
     iframeMessagingClient.registerCallback(
       AMP_ANALYTICS_3P_MESSAGE_TYPE.READY, () => {
@@ -193,21 +193,21 @@ export class Transport {
 
   /**
    * If iframe doesn't exist for this iframe url, create it.
-   * @param {!HTMLDocument} ampDoc The AMP document
+   * @param {!Window} win The window element
    * @param {!string} frameUrl The URL of the frame to send the data to
    * @param {string=} opt_extraData The data to send to the frame
    * @return {!FrameData}
    * @private
    */
-  useExistingOrCreateCrossDomainIframe_(ampDoc, frameUrl, opt_extraData) {
+  useExistingOrCreateCrossDomainIframe_(win, frameUrl, opt_extraData) {
     let frameData;
     if (Transport.hasCrossDomainIframe_(frameUrl)) {
       frameData = Transport.getFrameData_(frameUrl);
       Transport.incrementIframeUsageCount_(
         /** @type{!FrameData} */ (frameData));
     } else {
-      frameData = this.createCrossDomainIframe_(ampDoc, frameUrl);
-      ampDoc.body.appendChild(frameData.frame);
+      frameData = this.createCrossDomainIframe_(win, frameUrl);
+      win.document.body.appendChild(frameData.frame);
     }
     dev().assert(frameData, 'Trying to use non-existent frame');
     const assuredNonNullFrameData = /** @type{!FrameData} */ (frameData);
@@ -238,9 +238,6 @@ export class Transport {
       /** @type{!FrameData} */ (frameData)) > 0) {
       // Some other instance is still using it
       return;
-    }
-    if (frameData.eventQueue) {
-      frameData.eventQueue.destroy();
     }
     ampDoc.body.removeChild(frameData.frame);
     delete Transport.crossDomainIframes_[frameUrl];
@@ -280,16 +277,16 @@ export class Transport {
 
   /**
    * Create a cross-domain iframe for third-party vendor anaytlics
-   * @param {!HTMLDocument} ampDoc  The document node of the parent page
+   * @param {!Window} win The window element
    * @param {!string} frameUrl  The URL of the cross-domain iframe
    * @return {!FrameData}
    */
-  createCrossDomainIframe_(ampDoc, frameUrl) {
+  createCrossDomainIframe_(win, frameUrl) {
     const sentinel = Transport.createUniqueId_();
     const scriptSrc = getMode().localDev
       ? '/dist.3p/current/ampanalytics-lib.js'
       : `${urls.thirdParty}/$internalRuntimeVersion$/ampanalytics-v0.js`;
-    const frame = createElementWithAttributes(ampDoc, 'iframe', {
+    const frame = createElementWithAttributes(win.document, 'iframe', {
       sandbox: 'allow-scripts',
       name: JSON.stringify({
         scriptSrc,
@@ -310,9 +307,9 @@ export class Transport {
       usageCount: 1,
       iframeMessagingClient,
       newCreativeMessageQueue: new CrossDomainIframeMessageQueue(
-        iframeMessagingClient, AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVES),
+        win, iframeMessagingClient, AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVES),
       eventQueue: new CrossDomainIframeMessageQueue(
-        iframeMessagingClient, AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENTS),
+        win, iframeMessagingClient, AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENTS),
     };
     Transport.crossDomainIframes_[frameUrl] = frameData;
     frame.src = frameUrl;
