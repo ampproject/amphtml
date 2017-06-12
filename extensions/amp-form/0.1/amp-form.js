@@ -149,22 +149,10 @@ export class AmpForm {
     this.target_ = this.form_.getAttribute('target');
 
     /** @const @private {?string} */
-    this.xhrAction_ = this.form_.getAttribute('action-xhr');
-    if (this.xhrAction_) {
-      assertHttpsUrl(this.xhrAction_, this.form_, 'action-xhr');
-      user().assert(!isProxyOrigin(this.xhrAction_),
-          'form action-xhr should not be on AMP CDN: %s',
-          this.form_);
-    }
+    this.xhrAction_ = this.getXhrUrl_('action-xhr');
 
     /** @const @private {?string} */
-    this.xhrVerify_ = this.form_.getAttribute('verify-xhr');
-    if (this.xhrVerify_) {
-      assertHttpsUrl(this.xhrVerify_, this.form_, 'verify-xhr');
-      user().assert(!isProxyOrigin(this.xhrVerify_),
-          'form verify-xhr should not be on AMP CDN: %s',
-          this.form_);
-    }
+    this.xhrVerify_ = this.getXhrUrl_('verify-xhr');
 
     /**
      * Indicates that the action will submit to canonical or not.
@@ -213,6 +201,23 @@ export class AmpForm {
 
     /** @private {?Promise} */
     this.renderTemplatePromise_ = null;
+  }
+
+  /**
+   * Gets and validates an attribute for form request URLs.
+   * @param {string} attribute
+   * @return {?string}
+   * @private
+   */
+  getXhrUrl_(attribute) {
+    const url = this.form_.getAttribute(attribute);
+    if (url) {
+      assertHttpsUrl(url, this.form_, attribute);
+      user().assert(!isProxyOrigin(url),
+          `form ${attribute} should not be on AMP CDN: %s`,
+          this.form_);
+    }
+    return url;
   }
 
   /**
