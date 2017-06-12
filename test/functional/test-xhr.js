@@ -295,24 +295,6 @@ describe('XHR', function() {
           return assertSuccess(createResponseInstance('', mockXhr))
               .should.be.rejected;
         });
-
-        it('should include response in error', () => {
-          mockXhr.status = 500;
-          return assertSuccess(createResponseInstance('', mockXhr))
-              .catch(error => {
-                expect(error.response).to.be.defined;
-                expect(error.response.status).to.equal(500);
-              });
-        });
-
-        it('should not resolve after rejecting promise', () => {
-          mockXhr.status = 500;
-          mockXhr.responseText = '{"a": "hello"}';
-          mockXhr.headers['Content-Type'] = 'application/json';
-          mockXhr.getResponseHeader = () => 'application/json';
-          return assertSuccess(createResponseInstance('{"a": 2}', mockXhr))
-              .should.not.be.fulfilled;
-        });
       });
 
       it('should do simple JSON fetch', () => {
@@ -486,17 +468,34 @@ describe('XHR', function() {
               .to.contain('responseXML should exist');
         });
       });
+
+      it('can skip success status assertions', () => {
+        setupMockXhr();
+        expect(requests[0]).to.be.undefined;
+        const promise = xhr.fetchDocument('/index.html', null,
+            /* opt_allowFailure */ true);
+        requests[0].respond(415, {
+          'Content-Type': 'text/xml',
+          'Access-Control-Expose-Headers':
+              'AMP-Access-Control-Allow-Source-Origin',
+          'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
+        }, '<html></html>');
+        return promise.then(doc => {
+          expect(doc.nodeType).to.equal(Node.DOCUMENT_NODE);
+        });
+      });
     });
 
     describe('#fetchText', () => {
       const TEST_TEXT = 'test text';
       let fetchStub;
+      const mockXhr = {
+        status: 200,
+        responseText: TEST_TEXT,
+      };
 
       beforeEach(() => {
-        const mockXhr = {
-          status: 200,
-          responseText: TEST_TEXT,
-        };
+        mockXhr.status = 200;
         fetchStub = sandbox.stub(xhr, 'fetchAmpCors_',
             () => Promise.resolve(new FetchResponse(mockXhr)));
       });
@@ -511,6 +510,58 @@ describe('XHR', function() {
           return res.text();
         }).then(text => {
           expect(text).to.equal(TEST_TEXT);
+        });
+      });
+
+      it('can skip success status assertions', () => {
+        mockXhr.status = 400;
+        const promise = xhr.fetchText('/text.html', null,
+            /* opt_allowFailure */ true);
+        return promise.then(res => {
+          expect(res.status).to.equal(400);
+          return res.text();
+        }).then(text => {
+          expect(text).to.equal(TEST_TEXT);
+        });
+      });
+    });
+
+    describe('#fetchJson', () => {
+      const TEST_JSON = {test: 'test'};
+      let fetchStub;
+      const mockXhr = {
+        status: 200,
+        responseText: JSON.stringify(TEST_JSON),
+      };
+
+      beforeEach(() => {
+        mockXhr.status = 200;
+        fetchStub = sandbox.stub(xhr, 'fetchAmpCors_',
+            () => Promise.resolve(new FetchResponse(mockXhr)));
+      });
+
+      it('should be able to fetch a document', () => {
+        const promise = xhr.fetchJson('/text.json');
+        expect(fetchStub.calledWith('/text.json', {
+          method: 'GET',
+          headers: {'Accept': 'text/plain'},
+        })).to.be.true;
+        return promise.then(res => {
+          return res.json();
+        }).then(json => {
+          expect(json).to.jsonEqual(TEST_JSON);
+        });
+      });
+
+      it('can skip success status assertions', () => {
+        mockXhr.status = 400;
+        const promise = xhr.fetchJson('/text.json', null,
+            /* opt_allowFailure */ true);
+        return promise.then(res => {
+          expect(res.status).to.equal(400);
+          return res.json();
+        }).then(json => {
+          expect(json).to.jsonEqual(TEST_JSON);
         });
       });
     });
