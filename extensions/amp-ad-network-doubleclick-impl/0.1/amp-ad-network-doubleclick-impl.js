@@ -36,7 +36,6 @@ import {
 } from '../../../ads/google/a4a/traffic-experiments';
 import {
   extractGoogleAdCreativeAndSignature,
-  googleAdUrl,
   truncAndTimeUrl,
   googleBlockParameters,
   googlePageParameters,
@@ -62,12 +61,13 @@ import {removeElement} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {extensionsFor, xhrFor} from '../../../src/services';
+import {extensionsFor, timerFor, xhrFor} from '../../../src/services';
 import {isExperimentOn} from '../../../src/experiments';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {insertAnalyticsElement} from '../../../src/analytics';
 import {setStyles} from '../../../src/style';
 import {utf8Encode} from '../../../src/utils/bytes';
+import {deepMerge} from '../../../src/utils/object';
 import {isCancellation} from '../../../src/error';
 
 /** @type {string} */
@@ -333,6 +333,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       dev().warn(TAG, `Frame already exists, sra: ${this.useSra}`);
       return '';
     }
+
+    const rtcConfig = tryParseJson(
+        document.getElementById('amp-rtc').innerHTML);
+    const rtcRequestPromise = (rtcConfig && typeof rtcConfig == 'object') ?
+        this.sendRtcRequestPromise_(/** @type {!Object} */(rtcConfig)) : null;
+
     // TODO(keithwrightbos): SRA blocks currently unnecessarily generate full
     // ad url.  This could be optimized however non-SRA ad url is required to
     // fallback to non-SRA if single block.
@@ -340,11 +346,30 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // TODO: Check for required and allowed parameters. Probably use
     // validateData, from 3p/3p/js, after noving it someplace common.
     const startTime = Date.now();
+    let pageLevelParameters;
+    let parameters;
     return getPageLevelParameters_(this.win, this.getAmpDoc(), startTime)
-        .then(pageLevelParameters =>
-        googleAdUrl(this, DOUBLECLICK_BASE_URL, startTime,
-            Object.assign(this.getBlockParameters_(), pageLevelParameters),
-          ['108809080']));
+        .then(p => {
+          pageLevelParameters = p;
+          return googlePageParameters(this.win, this.getAmpDoc(), startTime);
+        }).then(googlePageParameters => {
+          const blockLevelParameters = googleBlockParameters(this,
+                                                             ['108809080']);
+          parameters = Object.assign(this.getBlockParameters_(),
+                                     pageLevelParameters);
+          Object.assign(parameters, blockLevelParameters, googlePageParameters);
+          return rtcRequestPromise;
+        }).then(rtcResponse => {
+          if (rtcResponse) {
+            const targeting = deepMerge(this.jsonTargeting_['targeting'] || {},
+                                        rtcResponse['targeting'] || {});
+            const exclusions = deepMerge(
+                this.jsonTargeting_['categoryExclusions'] || {},
+                rtcResponse['exclusions'] || {});
+            parameters['scp'] = serializeTargeting_(targeting, exclusions);
+          }
+          return truncAndTimeUrl(DOUBLECLICK_BASE_URL, parameters, startTime);
+        });
   }
 
   /** @override */
@@ -479,6 +504,34 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         && (width <= pWidth && height <= pHeight)) {
       this.attemptChangeSize(height, width).catch(() => {});
     }
+  }
+
+  /**
+   * Sends RTC request as specified by rtcConfig. Returns promise which
+   * resolves to the targeting informtation from the request response.
+   * @param {!Object} rtcConfig
+   * @return {?Promise} The rtc targeting info to attach to the ad url.
+   * @private
+   */
+  sendRtcRequestPromise_(rtcConfig) {
+    let endpoint;
+
+    try {
+      endpoint = rtcConfig['doubleclick']['endpoint'];
+    } catch (err) {
+      // report error
+      return null;
+    }
+
+    const rtcResponse = xhrFor(this.win).fetchJson(endpoint, {
+      mode: 'cors',
+      method: 'GET',
+      ampCors: true,
+      credentials: 'include',
+    });
+
+    return timerFor(window).timeoutPromise(2000, rtcResponse).then(
+        res => res.json());
   }
 
   /** @override */
