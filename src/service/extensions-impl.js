@@ -622,7 +622,7 @@ export function stubLegacyElements(win) {
 function installPolyfillsInChildWindow(childWin) {
   installDocContains(childWin);
   installDOMTokenListToggle(childWin);
-  installCustomElements(childWin);
+  installCustomElements(childWin, 'auto');
 }
 
 
