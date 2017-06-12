@@ -1318,6 +1318,7 @@ describes.realWin('ViewportBindingNaturalIosEmbed', {ampCss: true}, env => {
     child.style.height = '300px';
     win.document.body.appendChild(child);
     installDocService(win, /* isSingleDoc */ true);
+    installVsyncService(win);
     const ampdoc = ampdocServiceFor(win).getAmpDoc();
     installPlatformService(win);
     installViewerServiceForDoc(ampdoc);
@@ -1409,14 +1410,16 @@ describes.realWin('ViewportBindingNaturalIosEmbed', {ampCss: true}, env => {
         .equal('31px solid transparent');
     expect(win.document.body.style.borderTopStyle).to.equal('solid');
 
-    binding.updateLightboxMode(true);
-    expect(win.document.body.style.borderTopStyle).to.equal('none');
+    return binding.updateLightboxMode(true).then(() => {
+      expect(win.document.body.style.borderTopStyle).to.equal('none');
 
-    binding.updateLightboxMode(false);
-    expect(win.document.body.style.borderTopStyle).to.equal('solid');
-    expect(win.document.body.style.borderBottomStyle).to.not.equal('solid');
-    expect(win.document.body.style.borderLeftStyle).to.not.equal('solid');
-    expect(win.document.body.style.borderRightStyle).to.not.equal('solid');
+      return binding.updateLightboxMode(false);
+    }).then(() => {
+      expect(win.document.body.style.borderTopStyle).to.equal('solid');
+      expect(win.document.body.style.borderBottomStyle).to.not.equal('solid');
+      expect(win.document.body.style.borderLeftStyle).to.not.equal('solid');
+      expect(win.document.body.style.borderRightStyle).to.not.equal('solid');
+    });
   });
 
   it('should calculate size', () => {

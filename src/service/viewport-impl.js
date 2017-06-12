@@ -444,22 +444,24 @@ export class Viewport {
 
   /**
    * Instruct the viewport to enter lightbox mode.
+   * @return {!Promise}
    */
   enterLightboxMode() {
     this.viewer_.sendMessage('requestFullOverlay', {}, /* cancelUnsent */true);
     this.enterOverlayMode();
     this.hideFixedLayer();
-    this.vsync_.mutate(() => this.binding_.updateLightboxMode(true));
+    return this.binding_.updateLightboxMode(true);
   }
 
   /**
    * Instruct the viewport to leave lightbox mode.
+   * @return {!Promise}
    */
   leaveLightboxMode() {
     this.viewer_.sendMessage('cancelFullOverlay', {}, /* cancelUnsent */true);
     this.showFixedLayer();
     this.leaveOverlayMode();
-    this.vsync_.mutate(() => this.binding_.updateLightboxMode(false));
+    return this.binding_.updateLightboxMode(false);
   }
 
   /*
@@ -882,6 +884,7 @@ export class ViewportBindingDef {
    * Updates the viewport whether it's currently in the lightbox or a normal
    * mode.
    * @param {boolean} unusedLightboxMode
+   * @return {!Promise}
    */
   updateLightboxMode(unusedLightboxMode) {}
 
@@ -1052,6 +1055,7 @@ export class ViewportBindingNatural_ {
   /** @override */
   updateLightboxMode(unusedLightboxMode) {
     // The layout is always accurate.
+    return Promise.resolve();
   }
 
   /** @override */
@@ -1357,8 +1361,12 @@ export class ViewportBindingNaturalIosEmbed_ {
   updateLightboxMode(lightboxMode) {
     // This code will no longer be needed with the newer iOS viewport
     // implementation.
-    onDocumentReady(this.win.document, doc => {
-      setStyle(doc.body, 'borderTopStyle', lightboxMode ? 'none' : 'solid');
+    return new Promise(resolve => {
+      onDocumentReady(this.win.document, doc => {
+        vsyncFor(this.win).mutatePromise(() => {
+          setStyle(doc.body, 'borderTopStyle', lightboxMode ? 'none' : 'solid');
+        }).then(resolve);
+      });
     });
   }
 
@@ -1650,6 +1658,7 @@ export class ViewportBindingIosEmbedWrapper_ {
   /** @override */
   updateLightboxMode(unusedLightboxMode) {
     // The layout is always accurate.
+    return Promise.resolve();
   }
 
   /** @override */
