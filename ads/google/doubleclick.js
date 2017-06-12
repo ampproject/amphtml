@@ -55,47 +55,12 @@ export function doubleclick(global, data) {
     };
   }
 
-  // Center the ad in the container.
-  const container = global.document.querySelector('#c');
-  setStyles(dev().assertElement(container), {
-    top: '50%',
-    left: '50%',
-    bottom: '',
-    right: '',
-    transform: 'translate(-50%, -50%)',
-  });
+  centerAd();
 
-  const fileExperimentConfig = {
-    21060540: 'gpt_sf_a.js',
-    21060541: 'gpt_sf_b.js',
-  };
-  // Note that reduce will return the first item that matches but it is
-  // expected that only one of the experiment ids will be present.
-  const expFilename = data['experimentId'] && data['experimentId'].split(',')
-  .reduce(expId => fileExperimentConfig[expId]);
-  const url = `https://www.googletagservices.com/tag/js/` +
-  `${expFilename || 'gpt.js'}`;
+  const url = getUrl(data);
 
-  if (data.useSameDomainRenderingUntilDeprecated != undefined
-    || data.multiSize || expFilename) {
-    doubleClickWithGpt(global, data, GladeExperiment.GLADE_OPT_OUT, url);
-  }
+  whichGladeExperimentBranch(data, url, experimentFraction);
 
-  if (data.useSameDomainRenderingUntilDeprecated != undefined ||
-      data.multiSize) {
-    doubleClickWithGpt(global, data, GladeExperiment.GLADE_OPT_OUT, url);
-  } else {
-    const dice = Math.random();
-    const href = global.context.location.href;
-    if ((href.indexOf('google_glade=0') > 0 || dice < experimentFraction)
-        && href.indexOf('google_glade=1') < 0) {
-      doubleClickWithGpt(global, data, GladeExperiment.GLADE_CONTROL, url);
-    } else {
-      const exp = (dice < 2 * experimentFraction) ?
-        GladeExperiment.GLADE_EXPERIMENT : GladeExperiment.NO_EXPERIMENT;
-      doubleClickWithGlade(global, data, exp);
-    }
-  }
 }
 
 /**
@@ -281,4 +246,51 @@ function doubleClickWithGlade(global, data, gladeExperiment) {
  */
 function getCorrelator(global) {
   return makeCorrelator(global.context.clientId, global.context.pageViewId);
+}
+
+function centerAd() {
+  const container = global.document.querySelector('#c');
+  setStyles(dev().assertElement(container), {
+    top: '50%',
+    left: '50%',
+    bottom: '',
+    right: '',
+    transform: 'translate(-50%, -50%)',
+  });
+}
+
+/**
+ * @param {Object} data
+ * @return {!string}
+ */
+export function getUrl(data) {
+  const fileExperimentConfig = {
+    21060540: 'gpt_sf_a.js',
+    21060541: 'gpt_sf_b.js',
+  };
+  // Note that reduce will return the first item that matches but it is
+  // expected that only one of the experiment ids will be present.
+  let expFilename;
+  (data['experimentId'] || '').split(',')
+  .forEach(val => expFilename = expFilename || fileExperimentConfig[val]);
+  return `https://www.googletagservices.com/tag/js/` +
+  `${expFilename || 'gpt.js'}`;
+}
+
+function whichGladeExperimentBranch(data, url, experimentFraction) {
+  if (data.useSameDomainRenderingUntilDeprecated != undefined
+    || data.multiSize || url.indexOf('sf_a') > -1 || url.indexOf('sf_b') > -1) {
+    doubleClickWithGpt(global, data, GladeExperiment.GLADE_OPT_OUT, url);
+  } else {
+    const dice = Math.random();
+    const href = global.context.location.href;
+    if ((href.indexOf('google_glade=0') > 0 || dice < experimentFraction)
+          && href.indexOf('google_glade=1') < 0) {
+      doubleClickWithGpt(global, data, GladeExperiment.GLADE_CONTROL, url);
+    } else {
+      const exp = (dice < 2 * experimentFraction) ?
+          GladeExperiment.GLADE_EXPERIMENT : GladeExperiment.NO_EXPERIMENT;
+      doubleClickWithGlade(global, data, exp);
+    }
+  }
 }
