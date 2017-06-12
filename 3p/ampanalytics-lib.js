@@ -15,7 +15,7 @@
  */
 
 import './polyfills';
-import {dev} from '../src/log';
+import {dev, user} from '../src/log';
 import {initLogConstructor, setReportError} from '../src/log';
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {AMP_ANALYTICS_3P_MESSAGE_TYPE} from '../src/3p-analytics-common';
@@ -27,33 +27,43 @@ setReportError(() => {});
 /** @private @const {string} */
 const TAG_ = 'ampanalytics-lib';
 
+/** @private @const {number} */
+const MAX_QUEUE_SIZE_ = 100;
+
 /**
  * Receives messages bound for this cross-domain iframe, from all creatives
  */
 class AmpAnalytics3pMessageRouter {
+
   /** @param {!Window} win */
   constructor(win) {
-
     /** @private {!Window} */
     this.win_ = win;
 
+    let frameNameData = null;
     try {
-      const frameNameData = JSON.parse(this.win_.name);
+      frameNameData = JSON.parse(this.win_.name);
       if (!frameNameData.sentinel) {
-        const ex = {message: 'JSON parsed, but did not include sentinel.'};
-        throw ex;
+        throw new Error('JSON parsed, but did not include sentinel.');
       }
       // The sentinel is required by iframe-messaging-client, and is used to
       // uniquely identify the frame as part of message routing
       /** @const {string} */
-      this.sentinel_ = frameNameData.sentinel;
     } catch (e) {
       dev().warn(TAG_, 'Unable to set sentinel from name attr: ' +
         this.win_.name + ': ' + e.message);
       return;
     }
+    this.sentinel_ = frameNameData && frameNameData.sentinel;
 
-    /** @private {!Object<string, !AmpAnalytics3pCreativeMessageRouter>} */
+    /**
+     * Multiple creatives on a page may wish to use the same type of
+     * amp-analytics tag. This object provides a mapping between the
+     * IDs which identify which amp-analytics tag a message is to/from,
+     * with each ID's corresponding AmpAnalytics3pCreativeMessageRouter,
+     * which is an object that handles messages to/from a particular creative.
+     * @private {!Object<string, !AmpAnalytics3pCreativeMessageRouter>}
+     */
     this.creativeMessageRouters_ = {};
 
     /**
@@ -64,37 +74,46 @@ class AmpAnalytics3pMessageRouter {
     this.iframeMessagingClient_.setSentinel(this.sentinel_);
     this.iframeMessagingClient_.registerCallback(
       AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVES,
-      envelope => {
-        dev().assert(envelope[AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVES],
+      messageContainer => {
+        dev().assert(messageContainer[AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVES],
           'Received empty events envelope');
-        // Iterate through the array of "new creative" events, and for each
+        // Iterate through the array of "new creative" messages, and for each
         // one, create an AmpAnalytics3pCreativeMessageRouter.
-        envelope[AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVES].forEach(creative => {
-          this.creativeMessageRouters_[creative.senderId] =
-            this.creativeMessageRouters_[creative.senderId] ||
-            new AmpAnalytics3pCreativeMessageRouter(this, this.sentinel_,
-              creative.senderId);
-          this.creativeMessageRouters_[creative.senderId]
-            .receiveNewCreativeMessage(creative);
-        });
+        Object.entries(
+          messageContainer[AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVES]).forEach(
+          entry => {
+            const creativeId = entry[0];
+            const messages = entry[1];
+            dev().assert(!this.creativeMessageRouters_.hasOwnProperty(
+              creativeId) && messages.length == 1,
+              'Duplicate new creative message for ' + creativeId);
+            this.creativeMessageRouters_[creativeId] =
+              this.creativeMessageRouters_[creativeId] ||
+              new AmpAnalytics3pCreativeMessageRouter(this,
+                creativeId,
+                messages[0]);
+          });
       });
     this.iframeMessagingClient_.registerCallback(
       AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENTS,
-      envelope => {
-        dev().assert(envelope[AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENTS],
-          'Received empty events envelope');
-        // Iterate through the array of events, dispatching each to the
-        // listener for the appropriate creative
-        envelope[AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENTS].forEach(event => {
-          dev().assert(this.creativeMessageRouters_[event.senderId],
-            'Received event message prior to new creative message.' +
-            ' Discarding.');
-          this.creativeMessageRouters_[event.senderId]
-            .receiveEventMessage(event);
-        });
+      messageContainer => {
+        Object.entries(
+          messageContainer[AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENTS]).forEach(
+            entry => {
+              const creativeId = entry[0];
+              const messages = entry[1];
+              dev().assert(messages.length > 0,
+                'Received empty events list');
+              dev().assert(this.creativeMessageRouters_[creativeId],
+                'Received event message prior to new creative message.' +
+                ' Discarding.');
+              this.creativeMessageRouters_[creativeId]
+                .receiveEventMessages(messages);
+            });
         this.flushQueues_();
       });
-    this.sendReadyMessageToCreative_();
+    this.iframeMessagingClient_.sendMessage(
+      AMP_ANALYTICS_3P_MESSAGE_TYPE.READY);
   }
 
   /**
@@ -106,40 +125,23 @@ class AmpAnalytics3pMessageRouter {
   }
 
   /**
-   * Sends a message from the third-party vendor's metrics-collection page back
-   * to the creative.
-   * @private
+   * Getter to expose iframeMessagingClient to instances of
+   * AmpAnalytics3pCreativeMessageRouter
+   * @returns {!IframeMessagingClient}
    */
-  sendReadyMessageToCreative_() {
-    this.iframeMessagingClient_.sendMessage(AMP_ANALYTICS_3P_MESSAGE_TYPE.READY,
-      {});
-  }
-
-  /**
-   * Sends a message back to the host window
-   * @param {string} type The type of message to send.
-   * @param {(ampAnalytics3pReadyMessage|ampAnalytics3pResponse)} opt_payload
-   * The payload of message to send.
-   */
-  sendMessage(type, opt_payload) {
-    this.iframeMessagingClient_.sendMessage(type, opt_payload);
+  getMessagingClient() {
+    return this.iframeMessagingClient_;
   }
 
   /**
    * Instructs each AmpAnalytics3pCreativeMessageRouter instances to send its
-   * queued messages to its listener (if if has a listener yet).
+   * queued messages to its listener (if it has a listener yet).
    * @private
    */
   flushQueues_() {
     Object.entries(this.creativeMessageRouters_).forEach(
       entry => {
-        try {
-          const creativeMessageRouter = entry[1];
-          creativeMessageRouter.sendQueuedMessagesToListener();
-        } catch (e) {
-          dev().error(TAG_, 'Caught exception executing listener for ' +
-            entry[0] + ': ' + e.message);
-        }
+        entry[1].sendQueuedMessagesToListener();
       });
   }
 }
@@ -148,34 +150,39 @@ new AmpAnalytics3pMessageRouter(window);
 
 /**
  * Receives messages bound for this cross-domain iframe, from a particular
- * creative
+ * creative. Also sends repsonse messages from the iframe meant for this
+ * particular creative.
  */
 class AmpAnalytics3pCreativeMessageRouter {
   /**
    * @param {!AmpAnalytics3pMessageRouter} parent
    * @param {!string} creativeId
+   * @param {string=} opt_extraData
    */
-  constructor(parent, creativeId) {
+  constructor(parent, creativeId, opt_extraData) {
     /** @private {!AmpAnalytics3pMessageRouter} */
     this.parent_ = parent;
 
+    /** @private {!IframeMessagingClient} */
+    this.iframeMessagingClient_ = parent.getMessagingClient();
+
     /**
-     * @private {string}
+     * @private {!string}
      */
     this.creativeId_ = creativeId;
 
     /**
-     * @private {string}
+     * @private {?string}
      */
-    this.extraData_ = null;
+    this.extraData_ = opt_extraData;
 
     /**
-     * private {!Array<ampAnalytics3pEvent>}
+     * private {!Array<!AmpAnalytics3pEvent>}
      */
     this.receivedMessagesQueue_ = [];
 
     /**
-     * private {function(Array<ampAnalytics3pEvent>)=}
+     * private {?function(!Array<!AmpAnalytics3pEvent>)=}
      */
     this.eventListener_ = null;
 
@@ -191,27 +198,28 @@ class AmpAnalytics3pCreativeMessageRouter {
    * Registers a callback function to be called when AMP Analytics events occur.
    * There may only be one listener. If another function has previously been
    * registered as a listener, it will no longer receive events.
-   * @param {!function(!Array<ampAnalytics3pEvent>)} listener A function
+   * @param {!function(!Array<AmpAnalytics3pEvent>)} listener A function
    * that takes an array of event strings, and does something with them.
    */
   registerAmpAnalytics3pEventsListener(listener) {
+    if (this.eventListener_) {
+      user().warn(TAG_, 'Replacing existing eventListener for ' +
+        this.creativeId_);
+    }
     this.eventListener_ = listener;
   }
 
   /**
    * Receives a message from a creative for the cross-domain iframe
-   * @param {ampAnalytics3pNewCreative} message The message that was received
+   * @param {!Array<AmpAnalytics3pEvent>} messages The message that was received
    */
-  receiveNewCreativeMessage(message) {
-    this.extraData_ = message[AMP_ANALYTICS_3P_MESSAGE_TYPE.NEW];
-  }
-
-  /**
-   * Receives a message from a creative for the cross-domain iframe
-   * @param {ampAnalytics3pEvent} message The message that was received
-   */
-  receiveEventMessage(message) {
-    this.receivedMessagesQueue_.push(message);
+  receiveEventMessages(messages) {
+    if (this.receivedMessagesQueue_.length >= MAX_QUEUE_SIZE_) {
+      dev().warn(TAG_, 'Queue has exceeded maximum size');
+      this.receivedMessagesQueue_ = this.receivedMessagesQueue_.splice(
+        0,MAX_QUEUE_SIZE_ - messages.length);
+    }
+    this.receivedMessagesQueue_ = this.receivedMessagesQueue_.concat(messages);
   }
 
   /**
@@ -225,7 +233,12 @@ class AmpAnalytics3pCreativeMessageRouter {
     if (!this.receivedMessagesQueue_ || !this.eventListener_) {
       return;
     }
-    this.eventListener_(this.receivedMessagesQueue_);
+    try {
+      this.eventListener_(this.receivedMessagesQueue_);
+    } catch (e) {
+      dev().error(TAG_, 'Caught exception executing listener for ' +
+        this.creativeId_ + ': ' + e.message);
+    }
     this.receivedMessagesQueue_ = [];
   }
 
@@ -241,13 +254,26 @@ class AmpAnalytics3pCreativeMessageRouter {
   /**
    * Sends a message from the third-party vendor's metrics-collection page back
    * to the creative.
-   * @param {!ampAnalytics3pResponse} message The message to send.
+   * @param {!Object} response The response to send.
    */
-  sendMessageToCreative(message) {
-    const envelope = {destination: this.creativeId_};
-    envelope[AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE] = message;
-    this.parent_.sendMessage(
-      AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE, envelope);
+  sendMessageToCreative(response) {
+    this.iframeMessagingClient_.sendMessage(
+      AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE,
+      this.buildAmpAnalytics3pResponse_(response));
+  }
+
+  /**
+   * Builds an instance of AmpAnalytics3pResponse
+   * @param {!Object} response The response from the iframe, which can be
+   * any object
+   * @returns {AmpAnalytics3pResponse}
+   */
+  buildAmpAnalytics3pResponse_(response) {
+    const messageObject = {destination: this.creativeId_};
+    messageObject[AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE] = response;
+    const typedMessageObject =
+      /** @type {AmpAnalytics3pResponse} */ (messageObject);
+    return typedMessageObject;
   }
 }
 

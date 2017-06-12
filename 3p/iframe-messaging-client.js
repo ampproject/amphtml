@@ -34,7 +34,7 @@ export class IframeMessagingClient {
     this.win_ = win;
     /** @private {?string} */
     this.rtvVersion_ = getMode().rtvVersion || null;
-    /** @private {!(Window|Element)} */
+    /** @private {!(Window|HTMLIFrameElement)} */
     this.hostWindow_ = win.parent;
     /** @private {?string} */
     this.sentinel_ = null;
@@ -102,9 +102,7 @@ export class IframeMessagingClient {
   setupEventListener_() {
     listen(this.win_, 'message', event => {
       try {
-        if (this.hostWindow_ && !this.hostWindow_.postMessage &&
-          this.hostWindow_.tagName == 'IFRAME' &&
-          this.hostWindow_.contentWindow) {
+        if (!this.hostWindow_.postMessage && this.hostWindow_.contentWindow) {
           // this.hostWindow_ can now be set to an iframe, after it has been
           // created but before it has finished loading. If we've gotten a
           // message from that iframe, then it must exist, so its
@@ -129,9 +127,9 @@ export class IframeMessagingClient {
   }
 
   /**
-   * @param {!(Window|Element)} win The window to communicate with. This may
-   * be set to a newly-created iframe instead, since its contentWindow will
-   * be null until it renders.
+   * @param {!(Window|HTMLIFrameElement)} win The window to communicate with.
+   * This may be set to a newly-created iframe instead, since its
+   * contentWindow will be null until it renders.
    */
   setHostWindow(win) {
     this.hostWindow_ = win;

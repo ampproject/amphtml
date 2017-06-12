@@ -16,9 +16,7 @@
 
 import {dev} from '../../../src/log';
 import {timerFor} from '../../../src/services';
-import {
-  AMP_ANALYTICS_3P_MESSAGE_TYPE,
-} from '../../../src/3p-analytics-common';
+import {AMP_ANALYTICS_3P_MESSAGE_TYPE} from '../../../src/3p-analytics-common';
 
 /** @private @const {string} */
 const TAG_ = 'amp-analytics.CrossDomainIframeMessageQueue';
@@ -38,15 +36,15 @@ export class CrossDomainIframeMessageQueue {
    * @param {!../../../3p/iframe-messaging-client.IframeMessagingClient}
    *   iframeMessagingClient Facilitates
    * cross-frame communication
-   * @param {!string} envelopeType The type of envelope that will be used to
+   * @param {!string} envelopeType The type that will be used to
    * contain the queued messages (see 3p-analytics-common)
    */
   constructor(iframeMessagingClient, envelopeType) {
-    /** @type {Array<(
-    *            ../../../src/3p-analytics-common.ampAnalytics3pEvent|
-    *            ../../../src/3p-analytics-common.ampAnalytics3pNewCreative
-    *          )>} */
-    this.queue_ = [];
+    /** @type {Object<string,!Array<(
+    *            ../../../src/3p-analytics-common.AmpAnalytics3pEvent|
+    *            ../../../src/3p-analytics-common.AmpAnalytics3pNewCreative
+    *          )>>} */
+    this.store_ = {};
 
     /** @type {?number} */
     this.timerId_ = null;
@@ -81,9 +79,9 @@ export class CrossDomainIframeMessageQueue {
 
   /**
    * Builds an event message to be passed to the cross-domain iframe(s)
-   * @param {!string} senderId
+   * @param {!string} senderId Identifies which creative is sending the message
    * @param {!string} message The data to send
-   * @return {../../../src/3p-analytics-common.ampAnalytics3pEvent}
+   * @return {../../../src/3p-analytics-common.AmpAnalytics3pEvent}
    */
   static buildEventMessage(senderId, message) {
     const messageObject = {
@@ -92,7 +90,7 @@ export class CrossDomainIframeMessageQueue {
     };
     messageObject[AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT] = message;
     const typedMessageObject =
-      /** @type {../../../src/3p-analytics-common.ampAnalytics3pEvent} */
+      /** @type {../../../src/3p-analytics-common.AmpAnalytics3pEvent} */
       (messageObject);
     return typedMessageObject;
   }
@@ -100,9 +98,9 @@ export class CrossDomainIframeMessageQueue {
   /**
    * Builds a message indicating that a new creative is now using the
    * cross-domain iframe. The message may include some extra config data.
-   * @param {!string} senderId
+   * @param {!string} senderId Identifies which creative is sending the message
    * @param {string=} opt_extraData The data to send to the frame
-   * @returns {../../../src/3p-analytics-common.ampAnalytics3pNewCreative}
+   * @returns {../../../src/3p-analytics-common.AmpAnalytics3pNewCreative}
    */
   static buildNewCreativeMessage(senderId, opt_extraData) {
     const messageObject = {
@@ -113,7 +111,7 @@ export class CrossDomainIframeMessageQueue {
     opt_extraData = opt_extraData || '';
     messageObject[AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVE] = opt_extraData;
     const typedMessageObject =
-      /** @type {../../../src/3p-analytics-common.ampAnalytics3pNewCreative} */
+      /** @type {../../../src/3p-analytics-common.AmpAnalytics3pNewCreative} */
       (messageObject);
     return typedMessageObject;
   }
@@ -121,18 +119,22 @@ export class CrossDomainIframeMessageQueue {
   /**
    * Enqueues a message (event or extra data) to be sent to a cross-domain
    * iframe.
+   * @param {!string} senderId Identifies which creative is sending the message
    * @param {!(
-   *           ../../../src/3p-analytics-common.ampAnalytics3pEvent|
-   *           ../../../src/3p-analytics-common.ampAnalytics3pNewCreative)
+   *           ../../../src/3p-analytics-common.AmpAnalytics3pEvent|
+   *           ../../../src/3p-analytics-common.AmpAnalytics3pNewCreative)
    *        } messageObject
    * The data to be enqueued and then sent to the iframe
    */
-  enqueue(messageObject) {
-    if (this.queue_.length > MAX_QUEUE_SIZE_) {
-      dev().warn(TAG_, 'Queue has exceeded maximum size');
-      this.queue_.shift();
+  enqueue(senderId, messageObject) {
+    if (!this.store_.hasOwnProperty(senderId)) {
+      this.store_[senderId] = [];
     }
-    this.queue_.push(messageObject);
+    if (this.store_[senderId].length >= MAX_QUEUE_SIZE_) {
+      dev().warn(TAG_, 'Queue has exceeded maximum size');
+      this.store_[senderId].shift();
+    }
+    this.store_[senderId].push(messageObject);
     if (this.timerId_) {
       return; // Timer is already about to fire, no need to set a new one
     }
@@ -149,13 +151,10 @@ export class CrossDomainIframeMessageQueue {
    * @private
    */
   sendQueuedMessages_() {
-    if (!this.queue_ || !this.queue_.length) {
-      return;
-    }
     const envelope = {};
-    envelope[this.envelopeType_] = this.queue_;
+    envelope[this.envelopeType_] = this.store_;
     this.iframeMessagingClient_./*OK*/sendMessage(this.envelopeType_, envelope);
-    this.queue_ = [];
+    this.store_ = {};
   }
 }
 

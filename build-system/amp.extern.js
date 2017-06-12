@@ -138,13 +138,22 @@ AmpViewerMessage.prototype.rsvp;
 AmpViewerMessage.prototype.error;
 
 // AMP-Analytics Cross-domain iframes
-let AMP_ANALYTICS_3P_MESSAGE_TYPE;
-let ampAnalytics3pReadyMessage;
-let ampAnalytics3pNewCreatives;
-let ampAnalytics3pNewCreative;
-let ampAnalytics3pEvents;
-let ampAnalytics3pEvent;
-let ampAnalytics3pResponse;
+/** @enum {string} */
+const AMP_ANALYTICS_3P_MESSAGE_TYPE = {
+  READY: 'Ready',
+  CREATIVES: 'Creatives',
+  CREATIVE: 'Creative', /* Can't be sent standalone, only within CREATIVES */
+  EVENTS: 'Events',
+  EVENT: 'Event', /* Can't be sent standalone, only within EVENTS */
+  RESPONSE: 'Response',
+};
+
+let AmpAnalytics3pReadyMessage;
+let AmpAnalytics3pNewCreatives;
+let AmpAnalytics3pNewCreative;
+let AmpAnalytics3pEvents;
+let AmpAnalytics3pEvent;
+let AmpAnalytics3pResponse;
 
 // amp-viz-vega related externs.
 /**

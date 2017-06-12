@@ -29,9 +29,7 @@ import {removeElement} from '../../../src/dom';
 import {setStyle, setStyles} from '../../../src/style';
 import {hasOwn} from '../../../src/utils/object';
 import {IframeMessagingClient} from '../../../3p/iframe-messaging-client';
-import {
-  AMP_ANALYTICS_3P_MESSAGE_TYPE,
-} from '../../../src/3p-analytics-common';
+import {AMP_ANALYTICS_3P_MESSAGE_TYPE} from '../../../src/3p-analytics-common';
 import {
   CrossDomainIframeMessageQueue,
 } from './cross-domain-iframe-message-queue';
@@ -160,8 +158,10 @@ export class Transport {
    * @param {!HTMLDocument} ampDoc The AMP document
    * @param {!Object<string,string>} transportOptions The 'transport' portion
    * of the amp-analytics config object
-   * @param {function(!string,Object)=} opt_processResponse An optional
-   * function to receive any response messages back from the cross-domain iframe
+   * @param {function(!string,
+   *   !../../../src/3p-analytics-common.AmpAnalytics3pResponse)=}
+   *   opt_processResponse An optional function to receive any response
+   *   messages back from the cross-domain iframe
    */
   processCrossDomainIframe(ampDoc, transportOptions, opt_processResponse) {
     const frameUrl = dev().assertString(transportOptions['iframe'],
@@ -185,8 +185,9 @@ export class Transport {
             dev().warn(TAG_, 'Received response from 3p analytics frame when' +
               ' none was expected');
           }
-          opt_processResponse(this.type_,
-            response[AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE]);
+          opt_processResponse(
+            this.type_,
+            /** @type {!../../../src/3p-analytics-common.AmpAnalytics3pResponse} */ (response)); // eslint-disable-line max-len
         });
   }
 
@@ -211,8 +212,9 @@ export class Transport {
     dev().assert(frameData, 'Trying to use non-existent frame');
     const assuredNonNullFrameData = /** @type{!FrameData} */ (frameData);
     assuredNonNullFrameData.newCreativeMessageQueue.enqueue(
+      this.id_,
       CrossDomainIframeMessageQueue.buildNewCreativeMessage(
-        frameData.sentinel, opt_extraData));
+        this.id_, opt_extraData));
     return assuredNonNullFrameData;
   }
 
@@ -296,7 +298,8 @@ export class Transport {
     });
     const iframeMessagingClient = new IframeMessagingClient(window);
     iframeMessagingClient.setSentinel(sentinel);
-    iframeMessagingClient.setHostWindow(frame);
+    iframeMessagingClient.setHostWindow(
+      /** @type {!HTMLIFrameElement} */ (frame));
     setStyles(frame,
       {width: 0, height: 0, display: 'none',
        position: 'absolute', top: 0, left: 0});
@@ -337,8 +340,8 @@ export class Transport {
     const frameData = Transport.getFrameData_(transportOptions['iframe']);
     dev().assert(frameData, 'Trying to send message to non-existent frame');
     frameData.eventQueue.enqueue(
-      CrossDomainIframeMessageQueue.buildEventMessage(
-        frameData.sentinel, request));
+      this.id_,
+      CrossDomainIframeMessageQueue.buildEventMessage(this.id_, request));
   }
 
   static getFrameData_(frameUrl) {
