@@ -132,7 +132,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
         .to.deep.equal(layoutRectLtwh(20, 20, 100, 100));
   });
 
-  it('should center content and request resize on enter overlay mode', done => {
+  it('should center content and request resize on enter overlay mode', () => {
     const prepareContainer =
         sandbox.stub(binding, 'prepareFixedContainer_')
             .returns(Promise.resolve());
@@ -141,14 +141,12 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       expect(req).to.equal('full-overlay-frame');
       expect(res).to.equal('full-overlay-frame-response');
 
-      callback({content: {accept: true}});
+      callback({success: true});
     });
 
-    binding.updateLightboxMode(true).then(() => {
+    return binding.updateLightboxMode(true).then(() => {
       expect(prepareContainer).to.be.calledOnce;
       expect(prepareContainer).to.be.calledBefore(makeRequest);
-
-      done();
     });
   });
 

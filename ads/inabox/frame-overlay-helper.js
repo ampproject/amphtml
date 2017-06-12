@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {fakeVsync, timer} from './util';
+import {restrictedVsync, timer} from './util';
 import {
   centerFrameUnderVsyncMutate,
   expandFrameUnderVsyncMutate,
@@ -33,7 +33,7 @@ const CENTER_TRANSITION_END_WAIT_TIME_MS = 200;
  * @private
  */
 const expandFrameImpl = function(win, iframe, onFinish) {
-  fakeVsync(win, {
+  restrictedVsync(win, {
     measure(state) {
       state.viewportSize = {
         width: win./*OK*/innerWidth,
@@ -46,7 +46,7 @@ const expandFrameImpl = function(win, iframe, onFinish) {
           CENTER_TRANSITION_TIME_MS);
 
       timer(() => {
-        fakeVsync(win, {
+        restrictedVsync(win, {
           mutate() {
             expandFrameUnderVsyncMutate(iframe, state.viewportSize);
             onFinish();
@@ -66,7 +66,7 @@ const expandFrameImpl = function(win, iframe, onFinish) {
  * @private
  */
 const collapseFrameImpl = function(win, iframe, onFinish) {
-  fakeVsync(win, {
+  restrictedVsync(win, {
     mutate() {
       collapseFrameUnderVsyncMutate(iframe);
       onFinish();

@@ -78,7 +78,7 @@ export class InaboxMessagingHost {
         MessageType.FULL_OVERLAY_FRAME, this.handleEnterFullOverlay_);
 
     this.msgObservable_.listen(
-        MessageType.CANCEL_FULL_OVERLAY_FRAME, this.handleResetFullOverlay_);
+        MessageType.CANCEL_FULL_OVERLAY_FRAME, this.handleCancelFullOverlay_);
   }
 
   /**
@@ -153,7 +153,7 @@ export class InaboxMessagingHost {
           serializeMessage(
               MessageType.FULL_OVERLAY_FRAME_RESPONSE,
               request.sentinel,
-              {content: {accept: true}}),
+              {success: true}),
           origin);
     });
 
@@ -167,13 +167,13 @@ export class InaboxMessagingHost {
    * @param {string} origin
    * @return {boolean}
    */
-  handleResetFullOverlay_(iframe, request, source, origin) {
+  handleCancelFullOverlay_(iframe, request, source, origin) {
     collapseFrame(this.win_, iframe, () => {
       source./*OK*/postMessage(
           serializeMessage(
               MessageType.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
               request.sentinel,
-              {content: {accept: true}}),
+              {success: true}),
           origin);
     });
 

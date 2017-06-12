@@ -191,7 +191,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
 
       expect(expandFrame).calledWith(win, iframe1, sinon.match.any);
       expect(message.type).to.equal('full-overlay-frame-response');
-      expect(message.content).to.deep.equal({accept: true});
+      expect(message.success).to.be.true;
     });
 
     it('should accept reset request and collapse', () => {
@@ -215,7 +215,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
 
       expect(collapseFrame).calledWith(win, iframe1, sinon.match.any);
       expect(message.type).to.equal('cancel-full-overlay-frame-response');
-      expect(message.content).to.deep.equal({accept: true});
+      expect(message.success).to.be.true;
     });
 
   });

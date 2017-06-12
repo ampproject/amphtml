@@ -293,7 +293,7 @@ export class ViewportBindingInabox {
           MessageType.FULL_OVERLAY_FRAME,
           MessageType.FULL_OVERLAY_FRAME_RESPONSE,
           response => {
-            if (response.content.accept) {
+            if (response.success) {
               resolve();
             } else {
               reject('Request to open lightbox rejected by host document');

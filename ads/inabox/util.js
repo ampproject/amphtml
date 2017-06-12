@@ -16,7 +16,7 @@
 
 
 /**
- * Executes a "fake vsync" read/write.
+ * Executes a "restricted" read/write vsync cycle.
  * This function exists mainly since the vsync service is not available for the
  * inabox host script.
  * It also helps with maintainability. Since the passed tasks have to define
@@ -31,7 +31,7 @@
  * @visibleForTesting
  */
 // TODO(alanorozco): Figure out a longer-term solution
-export function fakeVsync(win, task, opt_state) {
+export function restrictedVsync(win, task, opt_state) {
   win.requestAnimationFrame(() => {
     if (task.measure) {
       task.measure(opt_state);
