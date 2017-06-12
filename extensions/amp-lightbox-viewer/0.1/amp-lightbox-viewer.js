@@ -213,11 +213,12 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   buildControls_() {
     const close = this.close_.bind(this);
     const openGallery = this.openGallery_.bind(this);
+    const closeGallery = this.closeGallery_.bind(this);
 
     // TODO(aghassemi): i18n and customization. See https://git.io/v6JWu
     this.buildButton_('Close', 'amp-lbv-button-close', close);
-    this.buildButton_('Gallery', 'amp-lbv-button-gallery',
-        openGallery);
+    this.buildButton_('Gallery', 'amp-lbv-button-gallery', openGallery);
+    this.buildButton_('Content', 'amp-lbv-button-slide', closeGallery);
   }
 
   /**
@@ -368,11 +369,6 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.vsync_.mutate(() => {
       this.container_.appendChild(this.gallery_);
     });
-
-    // Add go back button
-    const back = this.closeGallery_.bind(this);
-    this.buildButton_('Back', 'amp-lbv-button-back', back);
-
   }
 
   /**

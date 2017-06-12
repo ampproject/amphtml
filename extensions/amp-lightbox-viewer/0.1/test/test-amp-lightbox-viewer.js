@@ -48,10 +48,10 @@ describe('amp-lightbox-viewer', () => {
         expect(carousel).to.exist;
 
         const btns = viewer.querySelectorAll('.i-amphtml-lbv > [role=button]');
-        expect(btns.length).to.equal(2);
+        expect(btns.length).to.equal(3);
         expect(btns[0].className).to.equal('amp-lbv-button-close');
-        expect(btns[1].className).to.equal(
-            'amp-lbv-button-gallery');
+        expect(btns[1].className).to.equal('amp-lbv-button-gallery');
+        expect(btns[2].className).to.equal('amp-lbv-button-slide');
       });
     });
 
