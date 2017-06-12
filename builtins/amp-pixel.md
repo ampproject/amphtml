@@ -48,7 +48,7 @@ In this basic example, the `amp-pixel` issues a simple GET request to the given 
 
 ##### src (required)
 
-A simple URL to a remote endpoint.
+A simple URL to a remote endpoint that must be `https` protocol.
 
 ##### referrerpolicy (optional)
 
