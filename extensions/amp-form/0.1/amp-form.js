@@ -258,7 +258,7 @@ export class AmpForm {
       this.validator_.onBlur(e);
     }, true);
 
-    const cleanup = () => {
+    const afterVerifierCommit = () => {
       // Move from the VERIFYING state back to INITIAL
       if (this.state_ === FormState_.VERIFYING) {
         this.setState_(FormState_.INITIAL);
@@ -272,7 +272,7 @@ export class AmpForm {
           }, () => {
             checkUserValidityAfterInteraction_(dev().assertElement(e.target));
           })
-          .then(cleanup, cleanup);
+          .then(afterVerifierCommit, afterVerifierCommit);
     });
 
     this.form_.addEventListener('input', e => {
@@ -455,6 +455,7 @@ export class AmpForm {
 
   /**
    * Send a request to the form's action endpoint.
+   * @return {!Promise<!../../../src/service/xhr-impl.FetchResponse>}
    * @private
    */
   doActionXhr_() {
@@ -463,6 +464,7 @@ export class AmpForm {
 
   /**
    * Send a request to the form's verify endpoint.
+   * @return {!Promise<!../../../src/service/xhr-impl.FetchResponse>}
    * @private
    */
   doVerifyXhr_() {
@@ -475,6 +477,7 @@ export class AmpForm {
    * @param {string} url
    * @param {string} method
    * @param {!Object<string, string>=} opt_extraFields
+   * @return {!Promise<!../../../src/service/xhr-impl.FetchResponse>}
    * @private
    */
   doXhr_(url, method, opt_extraFields) {

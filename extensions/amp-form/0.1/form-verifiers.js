@@ -100,6 +100,9 @@ export class FormVerifier {
     const form = this.form_;
     for (let i = 0; i < form.elements.length; i++) {
       const field = form.elements[i];
+      if (field.disabled) {
+        continue;
+      }
       switch (field.type) {
         case 'select-multiple':
         case 'select-one':
