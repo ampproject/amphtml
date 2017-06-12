@@ -3319,6 +3319,23 @@ attr_lists: {
   attrs: { name: "inlist" }
   attrs: { name: "prefix" }
   attrs: { name: "property" }
+  attrs: {
+    name: "rel"
+    blacklisted_value_regex: "(^|\\s)("  # Values are space separated
+        "canonical|"
+        "components|"
+        "dns-prefetch|"
+        "import|"
+        "manifest|"
+        "preconnect|"
+        "preload|"
+        "prerender|"
+        "serviceworker|"
+        "stylesheet|"
+        "subresource"
+        ")(\\s|$)"
+  }
+  attrs: { name: "rev" }
   attrs: { name: "resource" }
   attrs: { name: "typeof" }
   attrs: { name: "vocab" }
