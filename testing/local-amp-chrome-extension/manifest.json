@@ -10,6 +10,20 @@
     ],
     "persistent": true
   },
+  "icons": {
+    "16": "16x16.png",
+    "48": "48x48.png",
+    "128": "128x128.png"
+  },
+  "browser_action": {
+    "default_icon": {
+      "16": "16x16.png",
+      "48": "48x48.png",
+      "128": "128x128.png"
+    },
+    "default_title": "AMP Local Proxy",
+    "default_popup": "popup.html"
+  },
   "permissions": [
     "webRequest",
     "webRequestBlocking",
