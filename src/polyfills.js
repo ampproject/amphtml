@@ -36,7 +36,7 @@ import {getMode} from './mode';
   effect in importing the module.
 */
 if (!getMode().localDev) {
-  installCustomElements(self);
+  installCustomElements(self, 'auto');
 }
 installDOMTokenListToggle(self);
 installMathSign(self);
