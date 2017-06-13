@@ -85,4 +85,4 @@ impossible to specify `{{&var}}` expressions - they will always be escaped as `{
 
 ## Validation
 
-See [amp-mustache rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-mustache/0.1/validator-amp-mustache.protoascii) in the AMP validator specification.
+See [amp-mustache rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-mustache/validator-amp-mustache.protoascii) in the AMP validator specification.

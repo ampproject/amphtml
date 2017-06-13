@@ -84,7 +84,7 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 
 ## Validation 
 
-See [amp-o2-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-o2-player/0.1/validator-amp-o2-player.protoascii) in the AMP validator specification.
+See [amp-o2-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-o2-player/validator-amp-o2-player.protoascii) in the AMP validator specification.
 
 The following lists validation errors specific to the `amp-o2-player` tag:
 

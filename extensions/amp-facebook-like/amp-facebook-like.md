@@ -94,4 +94,4 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 
 ## Validation
 
-See [amp-facebook-like rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-facebook-like/0.1/validator-amp-facebook-like.protoascii) in the AMP validator specification.
+See [amp-facebook-like rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-facebook-like/validator-amp-facebook-like.protoascii) in the AMP validator specification.

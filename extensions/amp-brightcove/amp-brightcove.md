@@ -105,4 +105,4 @@ The followings script should be added to the configuration of Brightcove Players
 
 ## Validation
 
-See [amp-brightcove rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-brightcove/0.1/validator-amp-brightcove.protoascii) in the AMP validator specification.
+See [amp-brightcove rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-brightcove/validator-amp-brightcove.protoascii) in the AMP validator specification.

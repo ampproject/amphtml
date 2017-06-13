@@ -45,7 +45,7 @@ these files, using the `<amp-cat>` example above, would be:
 
 **Rules File**
 <pre>
-amphtml/extensions/<b>amp-cat</b>/0.1/validator-<b>amp-cat</b>.protoascii
+amphtml/extensions/<b>amp-cat</b>/validator-<b>amp-cat</b>.protoascii
 </pre>
 
 **Test Files**

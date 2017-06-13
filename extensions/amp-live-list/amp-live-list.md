@@ -405,4 +405,4 @@ the lowest one.
 ```
 
 ## Validation
-See [amp-live-list rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-live-list/0.1/validator-amp-live-list.protoascii) in the AMP validator specification.
+See [amp-live-list rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-live-list/validator-amp-live-list.protoascii) in the AMP validator specification.

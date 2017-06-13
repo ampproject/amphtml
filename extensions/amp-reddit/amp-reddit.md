@@ -103,4 +103,4 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 
 ## Validation
 
-See [amp-reddit rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-reddit/0.1/validator-amp-reddit.protoascii) in the AMP validator specification.
+See [amp-reddit rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-reddit/validator-amp-reddit.protoascii) in the AMP validator specification.
