@@ -150,10 +150,10 @@ export class AmpAnimation extends AMP.BaseElement {
 
   /**
    * Returns the animation spec.
-   * @return {?JSONType}
+   * @return {?JsonObject}
    */
   getAnimationSpec() {
-    return /** @type {?JSONType} */ (this.configJson_);
+    return /** @type {?JsonObject} */ (this.configJson_);
   }
 
   /** @override */
