@@ -144,7 +144,7 @@ var rules = depCheckConfig.rules.map(config => new Rule(config));
 /**
  * Returns a list of entryPoint modules.
  * extensions/{$extension}/{$version}/{$extension}.js
- * src//amp.js
+ * src/amp.js
  * 3p/integration.js
  *
  * @return {!Promise<!Array<string>>}
