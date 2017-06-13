@@ -23,7 +23,7 @@ import {whenDocumentComplete} from '../document-ready';
 import {getMode} from '../mode';
 import {isCanary} from '../experiments';
 import {throttle} from '../utils/rate-limit';
-import {map} from '../utils/object';
+import {dict, map} from '../utils/object';
 
 /**
  * Maximum number of tick events we allow to accumulate in the performance
