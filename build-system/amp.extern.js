@@ -24,6 +24,11 @@
  */
 function JsonObject() {}
 
+/**
+ * @typedef {?JsonObject|undefined|string|number|!Array<JsonValue>}
+ */
+var JsonValue;
+
 // Node.js global
 var process = {};
 process.env;

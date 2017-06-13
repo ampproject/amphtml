@@ -291,8 +291,9 @@ export class AmpForm {
     const formDataForAnalytics = {};
     const formObject = this.getFormAsObject_();
 
+
     for (const k in formObject) {
-      if (formObject.hasOwnProperty(k)) {
+      if (Object.prototype.hasOwnProperty.call(formObject, k)) {
         formDataForAnalytics['formFields[' + k + ']'] = formObject[k].join(',');
       }
     }
@@ -620,7 +621,7 @@ export class AmpForm {
   /**
    * Triggers either a submit-success or submit-error action with response data.
    * @param {boolean} success
-   * @param {?JSONType} json
+   * @param {?JsonObject} json
    * @private
    */
   triggerAction_(success, json) {
@@ -653,11 +654,11 @@ export class AmpForm {
 
   /**
    * Returns form data as an object.
-   * @return {!JSONType}
+   * @return {!JsonObject}
    * @private
    */
   getFormAsObject_() {
-    const data = /** @type {!JSONType} */ ({});
+    const data = /** @type {!JsonObject} */ ({});
     const inputs = this.form_.elements;
     const submittableTagsRegex = /^(?:input|select|textarea)$/i;
     const unsubmittableTypesRegex = /^(?:button|image|file|reset)$/i;
@@ -701,7 +702,7 @@ export class AmpForm {
   }
 
   /**
-   * @param {!JSONType} data
+   * @param {!JsonObject} data
    * @private
    */
   renderTemplate_(data) {
