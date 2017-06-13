@@ -45,7 +45,7 @@
       <input type="submit" value="Subscribe">
     </fieldset>
     <div submit-success><template type="amp-mustache">Success</template></div>
-    <div submit-error><template type="amp-mustache">Error</template></div>
+    <div submit-error>Error</div>
   </form>
   <!-- More valid tags (datalist and optgroup) -->
   <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
@@ -120,14 +120,6 @@
   <form action="/foo" target="_blank">
     <div validation-for="bar"></div>
     <div visibile-when-invalid="valueMissing"></div>
-  </form>
-  <!-- Invalid: template child missing from submit-success and submit-error,
-       misplaced submit-error -->
-  <form method="post" action-xhr="https://example.com/subscribe" target="_blank"
-    custom-validation-reporting="as-you-go">
-    <input submit-error type="submit" value="Subscribe">
-    <div submit-success></div>
-    <div submit-error></div>
   </form>
   <!-- Invalid: submit-success must be a div -->
   <form method="post" action-xhr="https://example.com/subscribe" target="_blank"
