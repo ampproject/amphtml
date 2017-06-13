@@ -29,6 +29,20 @@ import {setParentWindow} from '../../src/service';
 import * as sinon from 'sinon';
 
 
+/**
+ * @return {!ActionService}
+ */
+function actionService() {
+  const win = {
+    document: {body: {}},
+    services: {
+      vsync: {obj: {}},
+    },
+  };
+  return new ActionService(new AmpDocSingle(win), document);
+}
+
+
 function createExecElement(id, enqueAction) {
   const execElement = document.createElement('amp-element');
   execElement.setAttribute('id', id);
@@ -468,23 +482,16 @@ describe('Action parseActionMap', () => {
 
 
 describes.sandboxed('Action adoptEmbedWindow', {}, () => {
-  let win;
   let action;
   let embedWin;
 
   beforeEach(() => {
-    win = {
-      document: {body: {}},
-      services: {
-        vsync: {obj: {}},
-      },
-    };
-    action = new ActionService(new AmpDocSingle(win), document);
+    action = actionService();
     embedWin = {
       frameElement: document.createElement('div'),
       document: document.implementation.createHTMLDocument(''),
     };
-    setParentWindow(embedWin, win);
+    setParentWindow(embedWin, action.ampdoc.win);
   });
 
   it('should create embedded action service', () => {
@@ -500,18 +507,11 @@ describes.sandboxed('Action adoptEmbedWindow', {}, () => {
 
 describe('Action findAction', () => {
   let sandbox;
-  let win;
   let action;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    win = {
-      document: {body: {}},
-      services: {
-        vsync: {obj: {}},
-      },
-    };
-    action = new ActionService(new AmpDocSingle(win), document);
+    action = actionService();
   });
 
   afterEach(() => {
@@ -570,20 +570,13 @@ describe('Action findAction', () => {
 
 describe('Action method', () => {
   let sandbox;
-  let win;
   let action;
   let onEnqueue;
   let targetElement, parent, child, execElement;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    win = {
-      document: {body: {}},
-      services: {
-        vsync: {obj: {}},
-      },
-    };
-    action = new ActionService(new AmpDocSingle(win), document);
+    action = actionService();
     onEnqueue = sandbox.spy();
     targetElement = document.createElement('target');
     const id = ('E' + Math.random()).replace('.', '');
@@ -636,21 +629,6 @@ describe('Action method', () => {
     expect(onEnqueue).to.have.not.been.called;
   });
 
-  it('should invoke on non-AMP but whitelisted element', () => {
-    const handlerSpy = sandbox.spy();
-    const target = document.createElement('form');
-    action.installActionHandler(target, handlerSpy);
-    action.invoke_(target, 'submit', /* args */ null,
-        'button', 'tap', ActionTrust.HIGH);
-    expect(handlerSpy).to.be.calledOnce;
-    const callArgs = handlerSpy.getCall(0).args[0];
-    expect(callArgs.target).to.be.equal(target);
-    expect(callArgs.method).to.be.equal('submit');
-    expect(callArgs.args).to.be.equal(null);
-    expect(callArgs.source).to.be.equal('button');
-    expect(callArgs.event).to.be.equal('tap');
-  });
-
   it('should not allow invoke on unresolved AMP element', () => {
     expect(() => {
       action.invoke_({tagName: 'amp-img'}, 'method1', /* args */ null,
@@ -679,23 +657,62 @@ describe('Action method', () => {
   });
 });
 
+describe('installActionHandler', () => {
+  let sandbox;
+  let action;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    action = actionService();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  it('should invoke on non-AMP but whitelisted element', () => {
+    const handlerSpy = sandbox.spy();
+    const target = document.createElement('form');
+    action.installActionHandler(target, handlerSpy);
+    action.invoke_(target, 'submit', /* args */ null,
+        'button', 'tap', ActionTrust.HIGH);
+    expect(handlerSpy).to.be.calledOnce;
+    const callArgs = handlerSpy.getCall(0).args[0];
+    expect(callArgs.target).to.be.equal(target);
+    expect(callArgs.method).to.be.equal('submit');
+    expect(callArgs.args).to.be.equal(null);
+    expect(callArgs.source).to.be.equal('button');
+    expect(callArgs.event).to.be.equal('tap');
+  });
+
+  it('should check trust level before invoking action', () => {
+    const handlerSpy = sandbox.spy();
+    const target = document.createElement('form');
+    action.installActionHandler(target, handlerSpy, ActionTrust.HIGH);
+
+    action.invoke_(target, 'submit', /* args */ null,
+        'button', 'tap', ActionTrust.LOW);
+    expect(handlerSpy).to.not.be.called;
+
+    action.invoke_(target, 'submit', /* args */ null,
+        'button', 'tap', ActionTrust.MEDIUM);
+    expect(handlerSpy).to.not.be.called;
+
+    action.invoke_(target, 'submit', /* args */ null,
+        'button', 'tap', ActionTrust.HIGH);
+    expect(handlerSpy).to.be.calledOnce;
+  });
+});
 
 describe('Multiple handlers action method', () => {
   let sandbox;
-  let win;
   let action;
   let onEnqueue1, onEnqueue2;
   let targetElement, parent, child, execElement1, execElement2;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    win = {
-      document: {body: {}},
-      services: {
-        vsync: {obj: {}},
-      },
-    };
-    action = new ActionService(new AmpDocSingle(win), document);
+    action = actionService();
     onEnqueue1 = sandbox.spy();
     onEnqueue2 = sandbox.spy();
     targetElement = document.createElement('target');
@@ -733,7 +750,6 @@ describe('Multiple handlers action method', () => {
 
 describe('Action interceptor', () => {
   let sandbox;
-  let win;
   let clock;
   let action;
   let target;
@@ -741,13 +757,7 @@ describe('Action interceptor', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
-    win = {
-      document: {body: {}},
-      services: {
-        vsync: {obj: {}},
-      },
-    };
-    action = new ActionService(new AmpDocSingle(win), document);
+    action = actionService();
     target = document.createElement('target');
     target.setAttribute('id', 'amp-test-1');
   });
@@ -834,19 +844,12 @@ describe('Action interceptor', () => {
 
 describe('Action common handler', () => {
   let sandbox;
-  let win;
   let action;
   let target;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    win = {
-      document: {body: {}},
-      services: {
-        vsync: {obj: {}},
-      },
-    };
-    action = new ActionService(new AmpDocSingle(win), document);
+    action = actionService();
     target = document.createElement('target');
     target.setAttribute('id', 'amp-test-1');
 
@@ -877,17 +880,10 @@ describe('Action common handler', () => {
 
 
 describes.sandboxed('Action global target', {}, () => {
-  let win;
   let action;
 
   beforeEach(() => {
-    win = {
-      document: {body: {}},
-      services: {
-        vsync: {obj: {}},
-      },
-    };
-    action = new ActionService(new AmpDocSingle(win), document);
+    action = actionService();
   });
 
   it('should register global target', () => {

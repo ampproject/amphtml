@@ -110,6 +110,34 @@ describe('BaseElement', () => {
     expect(handler).to.be.calledOnce;
   });
 
+  it('should check trust before invocation', () => {
+    const handler = sandbox.spy();
+    const minTrust = 123;
+    element.registerAction('foo', handler, minTrust);
+    const activate = sandbox.stub(element, 'activate');
+
+    // Registered action.
+    element.executeAction({method: 'foo', satisfiesTrust: () => false}, false);
+    expect(handler).to.not.be.called;
+    element.executeAction({
+      method: 'foo',
+      satisfiesTrust: t => (t == minTrust),
+    }, false);
+    expect(handler).to.be.calledOnce;
+
+    // Unregistered action (activate).
+    element.executeAction({
+      method: 'activate',
+      satisfiesTrust: () => false,
+    }, false);
+    expect(activate).to.not.be.called;
+    element.executeAction({
+      method: 'activate',
+      satisfiesTrust: t => (t <= element.activationTrust()),
+    }, false);
+    expect(activate).to.be.calledOnce;
+  });
+
   it('should return correct layoutBox', () => {
     const resources = window.services.resources.obj;
     customElement.getResources = () => resources;
