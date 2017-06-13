@@ -60,16 +60,16 @@ export class AmpSidebar extends AMP.BaseElement {
     this.toolbar_ = undefined;
 
     /** @private {?Element} */
-    this.toolbarNav_ = undefined;
+    this.toolbarNav_ = null;
 
     /** @private {?Element} */
-    this.toolbarClone_ = undefined;
+    this.toolbarClone_ = null;
 
     /** @private {?Element} */
-    this.toolbarTarget_ = undefined;
+    this.toolbarTarget_ = null;
 
     /** @private {?Array} */
-    this.toolbarOnlyElements_ = undefined;
+    this.toolbarOnlyElements_ = null;
 
     const platform = platformFor(this.win);
 
@@ -119,7 +119,7 @@ export class AmpSidebar extends AMP.BaseElement {
       this.element.getElementsByTagName('nav').length > 0
     ) {
       const childNavElements =
-        Array.from(this.element.getElementsByTagName('nav'));
+      Array.prototype.slice.call(this.element.getElementsByTagName('nav'), 0);
       childNavElements.some(navElement => {
         if (navElement.hasAttribute('toolbar')) {
           this.toolbarNav_ = navElement;
@@ -145,8 +145,8 @@ export class AmpSidebar extends AMP.BaseElement {
             this.toolbarNav_.getElementsByTagName('*').length > 0) {
             this.toolbarOnlyElements_ = [];
             // Check the nav's children for toolbar-only
-            Array.from(this.toolbarNav_
-              .getElementsByTagName('*')).forEach(element => {
+            Array.prototype.slice.call(this.toolbarNav_
+              .getElementsByTagName('*'), 0).forEach(element => {
                 if (element.hasAttribute('toolbar-only')) {
                   this.toolbarOnlyElements_.push(element);
                 }
