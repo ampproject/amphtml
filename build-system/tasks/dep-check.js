@@ -206,7 +206,7 @@ function getEntryModule(extensionFolder) {
   return fs.readdirAsync(extensionFolder).then(dirItems => {
     return (dirItems
         .filter(x => fs.statSync(x).isDirectory())
-        .map(x => `${extensionFolder}/x/${extension}.js`)
+        .map(x => `${extensionFolder}/${x}/${extension}.js`)
         .filter(x => fs.statSync(x).isFile())
   });
 }
