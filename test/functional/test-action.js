@@ -866,15 +866,34 @@ describe('Action common handler', () => {
     action.addGlobalMethodHandler('action1', action1);
     action.addGlobalMethodHandler('action2', action2);
 
-    action.invoke_(target, 'action1', /* args */ null, 'source1', 'event1');
+    action.invoke_(target, 'action1', /* args */ null, 'source1', 'event1',
+        ActionTrust.HIGH);
     expect(action1).to.be.calledOnce;
     expect(action2).to.have.not.been.called;
 
-    action.invoke_(target, 'action2', /* args */ null, 'source2', 'event2');
+    action.invoke_(target, 'action2', /* args */ null, 'source2', 'event2',
+        ActionTrust.HIGH);
     expect(action2).to.be.calledOnce;
     expect(action1).to.be.calledOnce;
 
     expect(target['__AMP_ACTION_QUEUE__']).to.not.exist;
+  });
+
+  it('should check trust before invoking action', () => {
+    const handler = sandbox.spy();
+    action.addGlobalMethodHandler('foo', handler, ActionTrust.HIGH);
+
+    action.invoke_(target, 'foo', /* args */ null, 'source1', 'event1',
+        ActionTrust.LOW);
+    expect(handler).to.not.be.called;
+
+    action.invoke_(target, 'foo', /* args */ null, 'source1', 'event1',
+        ActionTrust.MEDIUM);
+    expect(handler).to.not.be.called;
+
+    action.invoke_(target, 'foo', /* args */ null, 'source1', 'event1',
+        ActionTrust.HIGH);
+    expect(handler).to.be.calledOnce;
   });
 });
 

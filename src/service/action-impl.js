@@ -182,7 +182,12 @@ export class ActionService {
     /** @const @private {!Object<string, function(!ActionInvocation)>} */
     this.globalTargets_ = map();
 
-    /** @const @private {!Object<string, function(!ActionInvocation)>} */
+    /**
+     * @const @private {!Object<string, {
+      *   handler: function(!ActionInvocation),
+      *   minTrust: ActionTrust,
+      * }>}
+      */
     this.globalMethodHandlers_ = map();
 
     /** @private {!./vsync-impl.Vsync} */
@@ -309,9 +314,12 @@ export class ActionService {
    * Registers the action handler for a common method.
    * @param {string} name
    * @param {function(!ActionInvocation)} handler
+   * @param {ActionTrust=} opt_minTrust
    */
-  addGlobalMethodHandler(name, handler) {
-    this.globalMethodHandlers_[name] = handler;
+  addGlobalMethodHandler(name, handler, opt_minTrust) {
+    const minTrust =
+        (opt_minTrust !== undefined) ? opt_minTrust : ActionTrust.MEDIUM;
+    this.globalMethodHandlers_[name] = {handler, minTrust};
   }
 
   /**
@@ -455,8 +463,9 @@ export class ActionService {
         source, event, trust);
 
     // Try a global method handler first.
-    if (this.globalMethodHandlers_[invocation.method]) {
-      this.globalMethodHandlers_[invocation.method](invocation);
+    const globalMethod = this.globalMethodHandlers_[invocation.method];
+    if (globalMethod && invocation.satisfiesTrust(globalMethod.minTrust)) {
+      globalMethod.handler(invocation);
       return;
     }
 

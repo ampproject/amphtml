@@ -154,9 +154,6 @@ export class StandardActions {
    * @param {!./action-impl.ActionInvocation} invocation
    */
   handleHide(invocation) {
-    if (!invocation.satisfiesTrust(ActionTrust.MEDIUM)) {
-      return;
-    }
     const target = dev().assertElement(invocation.target);
 
     this.resources_.mutateElement(target, () => {
@@ -174,9 +171,6 @@ export class StandardActions {
    * @param {!./action-impl.ActionInvocation} invocation
    */
   handleShow(invocation) {
-    if (!invocation.satisfiesTrust(ActionTrust.MEDIUM)) {
-      return;
-    }
     const target = dev().assertElement(invocation.target);
     const ownerWindow = target.ownerDocument.defaultView;
 
