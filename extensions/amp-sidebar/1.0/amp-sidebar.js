@@ -248,7 +248,6 @@ export class AmpSidebar extends AMP.BaseElement {
 
       // Check if our target still has elements, if not, do not display it
       if(!this.toolbarTarget_.hasChildNodes()) {
-        this.toolbarTarget_.style.display = 'none';
         setStyles(this.toolbarTarget_, {
           'display': 'none'
         });
