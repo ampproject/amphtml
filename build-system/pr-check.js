@@ -30,7 +30,6 @@ const getStdout = require('./exec.js').getStdout;
 const path = require('path');
 const minimist = require('minimist');
 const util = require('gulp-util');
-const extensionsVersions = require('./extensions-versions-config');
 
 const gulp = 'node_modules/gulp/bin/gulp.js';
 const fileLogPrefix = util.colors.yellow.bold('pr-check.js:');
@@ -141,21 +140,13 @@ function isValidatorFile(filePath) {
     return false;
   }
 
-  // Get extension name
   const pathArray = path.dirname(filePath).split(path.sep);
   if (pathArray.length < 3) {
     // At least 3 with ['extensions', '{$name}', '{$version}']
     return false;
   }
-  const extension = pathArray[1];
-  const supportVersions = extensionsVersions[extension] || ['0.1'];
 
-  for (let i = 0; i < supportVersions.length; i++) {
-    if (!path.dirname(filePath).endsWith(supportVersions[i]) &&
-      !path.dirname(filePath).endsWith(path.join(supportVersions[i], 'test')))
-      return false;
-  }
-
+  // Validator files take the form of vlaidator-.*\.(html|out|protoascii)
   const name = path.basename(filePath);
   return name.startsWith('validator-') &&
       (name.endsWith('.out') || name.endsWith('.html') ||
