@@ -64,12 +64,11 @@ export function doubleclick(global, data) {
 }
 
 /**
- * @param {!Window} global
  * @param {!Object} data
  * @param {!GladeExperiment} gladeExperiment
  * @param {!string} url
  */
-function doubleClickWithGpt(global, data, gladeExperiment, url) {
+function doubleClickWithGpt(data, gladeExperiment, url) {
   const dimensions = [[
     parseInt(data.overrideWidth || data.width, 10),
     parseInt(data.overrideHeight || data.height, 10),
@@ -184,11 +183,10 @@ function doubleClickWithGpt(global, data, gladeExperiment, url) {
 }
 
 /**
- * @param {!Window} global
  * @param {!Object} data
  * @param {!GladeExperiment} gladeExperiment
  */
-function doubleClickWithGlade(global, data, gladeExperiment) {
+function doubleClickWithGlade(data, gladeExperiment) {
   const requestHeight = parseInt(data.overrideHeight || data.height, 10);
   const requestWidth = parseInt(data.overrideWidth || data.width, 10);
 
@@ -273,24 +271,28 @@ export function getUrl(data) {
   let expFilename;
   (data['experimentId'] || '').split(',')
   .forEach(val => expFilename = expFilename || fileExperimentConfig[val]);
-  return `https://www.googletagservices.com/tag/js/` +
-  `${expFilename || 'gpt.js'}`;
+  return `https://www.googletagservices.com/tag/js/${expFilename || 'gpt.js'}`;
 }
 
-function whichGladeExperimentBranch(data, url, experimentFraction) {
+/**
+ * @param {Object} data
+ * @param {!string} url
+ * @param {number} experimentFraction
+ */
+export function whichGladeExperimentBranch(data, url, experimentFraction) {
   if (data.useSameDomainRenderingUntilDeprecated != undefined
     || data.multiSize || url.indexOf('sf_a') > -1 || url.indexOf('sf_b') > -1) {
-    doubleClickWithGpt(global, data, GladeExperiment.GLADE_OPT_OUT, url);
+    doubleClickWithGpt(data, GladeExperiment.GLADE_OPT_OUT, url);
   } else {
     const dice = Math.random();
     const href = global.context.location.href;
     if ((href.indexOf('google_glade=0') > 0 || dice < experimentFraction)
           && href.indexOf('google_glade=1') < 0) {
-      doubleClickWithGpt(global, data, GladeExperiment.GLADE_CONTROL, url);
+      doubleClickWithGpt(data, GladeExperiment.GLADE_CONTROL, url);
     } else {
       const exp = (dice < 2 * experimentFraction) ?
           GladeExperiment.GLADE_EXPERIMENT : GladeExperiment.NO_EXPERIMENT;
-      doubleClickWithGlade(global, data, exp);
+      doubleClickWithGlade(data, exp);
     }
   }
 }

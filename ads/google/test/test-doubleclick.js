@@ -13,10 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {getUrl,
-  whichGladeExperimentBranch,
-  doubleClickWithGpt} from '../doubleclick';
-import * as sinon from 'sinon';
+import {getUrl, whichGladeExperimentBranch} from '../doubleclick';
 
 describe('test the getUrl method', () => {
 
@@ -38,14 +35,44 @@ describe('test the whichGladeExperimentBranch function', () => {
   it('should use GPT and opt out of the GladeExperiment when' +
   'useSameDomainRenderingUntilDeprecated is not undefined', () => {
     const data = {useSameDomainRenderingUntilDeprecated: true};
-    const url = '';
+    const url = 'https://www.googletagservices.com/tag/js/gpt.js';
     const experimentFraction = 0.1;
-    const mockDoubleClickWithGpt = sinon.mock('doubleClickWithGpt');
-    const doubleClickWithGptExpectation = mockDoubleClickWithGpt.expects()
-    .once();
 
     whichGladeExperimentBranch(data, url, experimentFraction);
 
-    mockDoubleClickWithGpt.verify();
+    expect(document.querySelector('script[src="https://www.googletagservices.com/tag/js/gpt.js"]')).to.be.ok;
+  });
+
+  it('should use GPT and opt out of the GladeExperiment when multiSize is not' +
+  'null', () => {
+    const data = {multiSize: 'hey!'};
+    const url = 'https://www.googletagservices.com/tag/js/gpt.js';
+    const experimentFraction = 0.1;
+
+    whichGladeExperimentBranch(data, url, experimentFraction);
+
+    expect(document.querySelector('script[src="https://www.googletagservices.com/tag/js/gpt.js"]')).to.be.ok;
+  });
+
+  it('should use GPT and opt out of the GladeExperiment when in the control' +
+  'branch of the SingleFileGPT experiment', () => {
+    const data = {};
+    const url = 'https://www.googletagservices.com/tag/js/gpt_sf_a.js';
+    const experimentFraction = 0.1;
+
+    whichGladeExperimentBranch(data, url, experimentFraction);
+
+    expect(document.querySelector('script[src="https://www.googletagservices.com/tag/js/gpt_sf_a.js"]')).to.be.ok;
+  });
+
+  it('should use GPT and opt out of the GladeExperiment when in the' +
+  'experiment branch of the SingleFileGPT experiment', () => {
+    const data = {};
+    const url = 'https://www.googletagservices.com/tag/js/gpt_sf_b.js';
+    const experimentFraction = 0.1;
+
+    whichGladeExperimentBranch(data, url, experimentFraction);
+
+    expect(document.querySelector('script[src="https://www.googletagservices.com/tag/js/gpt_sf_b.js"]')).to.be.ok;
   });
 });
