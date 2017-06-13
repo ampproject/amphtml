@@ -12,7 +12,7 @@
     <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
     <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
     <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
-    <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js?10"></script>
+    <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js"></script>
     <style amp-custom>
         input.user-invalid {
             background-color: #dc4e41;
@@ -143,9 +143,9 @@
             position: absolute;
         }
         amp-selector [option] {
-            box-sizing: border-box !important;
+            box-sizing: border-box;
             display: inline-block;
-            position: relative !important;
+            position: relative;
         }
         amp-selector[disabled],
         amp-selector [disabled] {
@@ -657,8 +657,7 @@
   action-xhr="/form/verify-search-json/post"
   verify-xhr="/form/verify-search-json/post"
   target="_blank"
-  class="verification-form"
->
+  class="verification-form">
     <fieldset>
         <label>
             <span>Name</span>
@@ -712,8 +711,7 @@
   method="get"
   action="/form/search-html/get"
   action-xhr="/form/search-json/get"
-  target="_blank"
->
+  target="_blank">
     <fieldset>
         <label>
             <span>Search for</span>
