@@ -94,6 +94,7 @@ export class FormVerifier {
 
   /**
    * Checks if the form has been changed from its initial state.
+   * @return {boolean}
    * @private
    */
   isDirty_() {
