@@ -52,9 +52,19 @@ With responsive layout, the width and height from the example should yield corre
 
 ## Attributes
 
+**autoplay**
+
+If this attribute is present, and the browser supports autoplay:
+
+* the video is automatically muted before autoplay starts
+* when the video is scrolled out of view, the video is paused
+* when the video is scrolled into view, the video resumes playback
+* when the user taps the video, the video is unmuted
+* if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it.  For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused. 
+
 **data-videoid** (required)
 
-The Dailymotion video id found in every video page URL. For example, `"x2m8jpp"` is the video id for `https://www.dailymotion.com/video/x2m8jpp_dailymotion-spirit-movie_creation`. 
+The Dailymotion video id found in every video page URL. For example, `"x2m8jpp"` is the video id for `https://www.dailymotion.com/video/x2m8jpp_dailymotion-spirit-movie_creation`.
 
 **data-mute** (optional)
 
@@ -79,7 +89,7 @@ Indicates whether to display the sharing button.
 
 **data-start** (optional)
 
-Specifies the time (in seconds) from which the video should start playing. 
+Specifies the time (in seconds) from which the video should start playing.
 
 * Value: integer (number of seconds). For example, `data-start=45`.
 * Default value: `0`

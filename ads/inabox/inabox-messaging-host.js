@@ -21,9 +21,45 @@ import {
   MessageType,
 } from '../../src/3p-frame-messaging';
 import {dev} from '../../src/log';
+import {expandFrame, collapseFrame} from './frame-overlay-helper';
 
 /** @const */
 const TAG = 'InaboxMessagingHost';
+
+
+
+/** Simple helper for named callbacks. */
+class NamedObservable {
+
+  constructor() {
+    this.map_ = {};
+  }
+
+  /**
+   * @param {string} key
+   * @param {!Function} callback
+   */
+  listen(key, callback) {
+    if (key in this.map_) {
+      dev().fine(TAG, `Overriding message callback [${key}]`);
+    }
+    this.map_[key] = callback;
+  }
+
+  /**
+   * @param {string} key
+   * @param {*} thisArg
+   * @param {!Array} args
+   * @retun {boolean} True when a callback was found and successfully executed.
+   */
+  fire(key, thisArg, args) {
+    if (key in this.map_) {
+      return this.map_[key].apply(thisArg, args);
+    }
+    return false;
+  }
+}
+
 
 export class InaboxMessagingHost {
 
@@ -33,6 +69,16 @@ export class InaboxMessagingHost {
     this.iframeMap_ = Object.create(null);
     this.registeredIframeSentinels_ = Object.create(null);
     this.positionObserver_ = new PositionObserver(win);
+    this.msgObservable_ = new NamedObservable();
+
+    this.msgObservable_.listen(
+        MessageType.SEND_POSITIONS, this.handleSendPositions_);
+
+    this.msgObservable_.listen(
+        MessageType.FULL_OVERLAY_FRAME, this.handleEnterFullOverlay_);
+
+    this.msgObservable_.listen(
+        MessageType.CANCEL_FULL_OVERLAY_FRAME, this.handleCancelFullOverlay_);
   }
 
   /**
@@ -60,23 +106,78 @@ export class InaboxMessagingHost {
       return false;
     }
 
-    if (request.type == MessageType.SEND_POSITIONS) {
-      // To prevent double tracking for the same requester.
-      if (this.registeredIframeSentinels_[request.sentinel]) {
-        return false;
-      }
-      this.registeredIframeSentinels_[request.sentinel] = true;
-      this.positionObserver_.observe(iframe, data => {
-        dev().fine(TAG, `Sent position data to [${request.sentinel}]`, data);
-        message.source./*OK*/postMessage(
-            serializeMessage(MessageType.POSITION, request.sentinel, data),
-            message.origin);
-      });
-      return true;
-    } else {
+    if (!this.msgObservable_.fire(request.type, this,
+        [iframe, request, message.source, message.origin])) {
       dev().warn(TAG, 'Unprocessed AMP message:', message);
       return false;
     }
+
+    return true;
+  }
+
+  /**
+   * @param {!HTMLIFrameElement} iframe
+   * @param {!Object} request
+   * @param {!Window} source
+   * @param {string} origin
+   * @return {boolean}
+   */
+  handleSendPositions_(iframe, request, source, origin) {
+    // To prevent double tracking for the same requester.
+    if (this.registeredIframeSentinels_[request.sentinel]) {
+      return false;
+    }
+    this.registeredIframeSentinels_[request.sentinel] = true;
+    this.positionObserver_.observe(iframe, data => {
+      dev().fine(TAG, `Sent position data to [${request.sentinel}]`, data);
+      source./*OK*/postMessage(
+          serializeMessage(MessageType.POSITION, request.sentinel, data),
+          origin);
+    });
+    return true;
+  }
+
+  /**
+   * @param {!HTMLIFrameElement} iframe
+   * @param {!Object} request
+   * @param {!Window} source
+   * @param {string} origin
+   * @return {boolean}
+   */
+  // TODO(alanorozco):
+  // 1. Reject request if frame is out of focus
+  // 2. Disable zoom and scroll on parent doc
+  handleEnterFullOverlay_(iframe, request, source, origin) {
+    expandFrame(this.win_, iframe, () => {
+      source./*OK*/postMessage(
+          serializeMessage(
+              MessageType.FULL_OVERLAY_FRAME_RESPONSE,
+              request.sentinel,
+              {success: true}),
+          origin);
+    });
+
+    return true;
+  }
+
+  /**
+   * @param {!HTMLIFrameElement} iframe
+   * @param {!Object} request
+   * @param {!Window} source
+   * @param {string} origin
+   * @return {boolean}
+   */
+  handleCancelFullOverlay_(iframe, request, source, origin) {
+    collapseFrame(this.win_, iframe, () => {
+      source./*OK*/postMessage(
+          serializeMessage(
+              MessageType.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
+              request.sentinel,
+              {success: true}),
+          origin);
+    });
+
+    return true;
   }
 
   /**

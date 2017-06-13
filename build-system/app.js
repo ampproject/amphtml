@@ -865,13 +865,10 @@ app.use([cloudflareDataDir], function fakeCors(req, res, next) {
  */
 app.get([fakeAdNetworkDataDir + '/*', cloudflareDataDir + '/*'], (req, res) => {
   let filePath = req.path;
-  let unwrap = false;
-  if (req.path.endsWith('.html')) {
-    filePath = req.path.slice(0,-5);
-    unwrap = true;
-  }
+  let unwrap = !req.path.endsWith('.html');
   filePath = pc.cwd() + filePath;
   fs.readFileAsync(filePath).then(file => {
+    res.setHeader('X-AmpAdRender', 'nameframe');
     if (!unwrap) {
       res.end(file);
       return;

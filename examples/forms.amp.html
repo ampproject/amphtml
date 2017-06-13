@@ -659,26 +659,9 @@
 <form
   method="post"
   action-xhr="/form/verify-search-json/post"
+  verify-xhr="/form/verify-search-json/post"
   target="_blank"
   class="verification-form">
-    <script type="application/json">
-    {
-      "verificationGroups": [
-        {
-          "name": "coolName",
-          "elements": ["name"]
-        },
-        {
-          "name": "fullAddress",
-          "elements": ["addressLine2", "city", "zip"]
-        },
-        {
-          "name": "validCarrier",
-          "elements": ["phone"]
-        }
-      ]
-    }
-    </script>
     <fieldset>
         <label>
             <span>Name</span>

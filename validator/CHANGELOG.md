@@ -27,8 +27,30 @@ time as https://cdn.ampproject.org/v0/validator.js is updated.
 
 <!--
 Please add new release changes here. Use the time in UTC for the header and
-mention and release notes since the last change as well as the version numbers.
+mention any release notes since the last change as well as the version numbers.
 -->
+
+### 6:00 PM, June 8, 2017 UTC
+
+Validator Version 232
+Spec Version 427
+
+Includes:
+
+ - Disallow amp-embed as child of amp-app-banner
+ 
+### 6:00 PM, June 7, 2017 UTC
+
+Validator Version 232
+Spec Version 426
+
+Includes:
+
+ - #9434 amp-imgur
+ - #3578 allow style in svg > stop
+ - #9442 form > div [submitting]
+ - #9357 remove amp-sortable-table
+ - disallow v0.js for amp4ads documents
 
 ### 11:30 PM, May 22, 2017 UTC
 

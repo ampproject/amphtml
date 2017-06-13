@@ -35,7 +35,8 @@ import {startsWith} from '../../../src/string';
  * @private
  */
 
- // Correct PlayerStates taken from: https://developers.google.com/youtube/iframe_api_reference#Playback_status
+ // Correct PlayerStates taken from
+ // https://developers.google.com/youtube/iframe_api_reference#Playback_status
 const PlayerStates = {
   UNSTARTED: -1,
   ENDED: 0,

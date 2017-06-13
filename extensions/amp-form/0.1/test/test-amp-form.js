@@ -100,12 +100,9 @@ describes.repeated('', {
       return form;
     }
 
-    function getVerificationForm(doc = document, config) {
+    function getVerificationForm(doc = document) {
       const form = getForm(doc);
-      const script = doc.createElement('script');
-      script.textContent = config;
-      script.type = 'application/json';
-      form.appendChild(script);
+      form.setAttribute('verify-xhr', '');
       return form;
     }
 
@@ -437,29 +434,29 @@ describes.repeated('', {
     it('should allow verifying elements with a presubmit request', () => {
       toggleExperiment(env.win, FORM_VERIFY_EXPERIMENT, true);
       const formPromise = getAmpForm(getVerificationForm(
-          env.win.document, asyncVerifyConfig));
+          env.win.document));
+      const fetchRejectPromise = Promise.reject({
+        response: {
+          status: 400,
+          json() {
+            return Promise.resolve({
+              verifyErrors: [{
+                name: 'name',
+                message: 'This name is just wrong.',
+              }],
+            });
+          },
+        },
+      });
 
       return formPromise.then(ampForm => {
-        sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.reject({
-          response: {
-            status: 400,
-            json() {
-              return Promise.resolve({
-                verifyErrors: [{
-                  name: 'name',
-                  message: 'This name is just wrong.',
-                }],
-              });
-            },
-          },
-        }));
+        sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchRejectPromise);
 
         const form = ampForm.form_;
         const input = form.name;
-        input.dispatchEvent(new Event('input', {bubbles: true}));
-        input.dispatchEvent(new Event('change', {bubbles: true}));
+        form.name.value = 'Frank';
 
-        return ampForm.verifier_.xhrVerifyPromiseForTesting().then(() => {
+        return ampForm.verifier_.onCommit().then(() => {
           expect(input.validity.customError).to.be.true;
           expect(input.validationMessage).to.equal('This name is just wrong.');
         });
@@ -500,17 +497,14 @@ describes.repeated('', {
             });
           }, 10);
         }));
-
         const form = ampForm.form_;
         const input = form.name;
-        input.dispatchEvent(new Event('input', {bubbles: true}));
-        input.dispatchEvent(new Event('change', {bubbles: true}));
+        input.value = 'Carlos';
 
-        input.value = 'Frank';
-        input.dispatchEvent(new Event('input', {bubbles: true}));
-        input.dispatchEvent(new Event('change', {bubbles: true}));
-
-        return ampForm.verifier_.xhrVerifyPromiseForTesting().then(() => {
+        return ampForm.verifier_.onCommit().then(() => {
+          input.value = 'Frank';
+          return ampForm.verifier_.onCommit();
+        }).then(() => {
           expect(input.validity.customError).to.be.true;
           expect(input.validationMessage).to.equal('Second request error');
         });
