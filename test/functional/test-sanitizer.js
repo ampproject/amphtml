@@ -219,7 +219,7 @@ describe('resolveUrlAttr', () => {
     expect(() => resolveUrlAttr('a', 'href',
         '/doc2?__amp_source_origin=https://google.com',
         'http://acme.org/doc1'))
-            .to.throw(/Source origin is not allowed in/);
+        .to.throw(/Source origin is not allowed in/);
   });
 
   it('should be called by sanitizer', () => {

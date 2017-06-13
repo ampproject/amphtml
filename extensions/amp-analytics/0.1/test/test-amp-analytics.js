@@ -386,7 +386,7 @@ describe('amp-analytics', function() {
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
       expect(sendRequestSpy.args[0][0])
-        .to.equal('https://example.com/bar&f1&baz');
+          .to.equal('https://example.com/bar&f1&baz');
     });
   });
 
@@ -401,7 +401,7 @@ describe('amp-analytics', function() {
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
       expect(sendRequestSpy.args[0][0])
-        .to.equal('https://example.com/bar&c1&baz');
+          .to.equal('https://example.com/bar&c1&baz');
     });
   });
 
@@ -896,7 +896,7 @@ describe('amp-analytics', function() {
     '[target=_blank]', '[title~=flower]', '[lang|=en]', 'a[href^="https"]',
     'a[href$=".pdf"]', 'a[href="w3schools"]', 'a:active', 'p::after',
     'p:first-child', 'p:lang(it)', ':not(p)', 'p:nth-child(2)']
-        .map(selectorExpansionTest);
+      .map(selectorExpansionTest);
 
   it('does not expands selector with platform variable', () => {
     const tracker = ins.ampdocRoot_.getTracker('click', ClickEventTracker);
@@ -935,7 +935,7 @@ describe('amp-analytics', function() {
       analytics.predefinedConfig_.testVendor = {'optout': 'foo.bar'};
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy.withArgs('https://example.com/bar').calledOnce)
-                .to.be.true;
+            .to.be.true;
       });
     });
 
@@ -1262,7 +1262,7 @@ describe('amp-analytics', function() {
 
       const urlReplacements = urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
-      .returns({sync: 1});
+          .returns({sync: 1});
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy).to.be.calledOnce;
       });

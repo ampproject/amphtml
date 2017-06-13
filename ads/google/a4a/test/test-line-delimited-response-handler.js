@@ -71,7 +71,7 @@ describe('#line-delimited-response-handler', () => {
       });
       slotData.forEach(slot => {
         expect(chunkHandlerStub.withArgs(slot.creative, slot.headers).callCount)
-          .to.equal(calls[slot.creative + JSON.stringify(slot.headers)]);
+            .to.equal(calls[slot.creative + JSON.stringify(slot.headers)]);
       });
     });
   }

@@ -734,13 +734,13 @@ describes.repeated('', {
         };
         expect(ampForm.xhr_.fetch).to.have.not.been.called;
         expect(ampForm.urlReplacement_.expandInputValueSync)
-              .to.not.have.been.called;
+            .to.not.have.been.called;
         expect(ampForm.urlReplacement_.expandInputValueAsync)
-              .to.have.been.calledTwice;
+            .to.have.been.calledTwice;
         expect(ampForm.urlReplacement_.expandInputValueAsync)
-              .to.have.been.calledWith(clientIdField);
+            .to.have.been.calledWith(clientIdField);
         expect(ampForm.urlReplacement_.expandInputValueAsync)
-              .to.have.been.calledWith(canonicalUrlField);
+            .to.have.been.calledWith(canonicalUrlField);
         return whenCalled(ampForm.xhr_.fetch).then(() => {
           expect(ampForm.xhr_.fetch).to.be.called;
           expect(clientIdField.value).to.match(/amp-.+/);

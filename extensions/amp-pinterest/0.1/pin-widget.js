@@ -239,7 +239,7 @@ export class PinWidget {
     }
 
     return this.fetchPin()
-      .then(this.renderPin.bind(this));
+        .then(this.renderPin.bind(this));
   }
 
 };

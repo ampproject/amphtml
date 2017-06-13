@@ -249,7 +249,7 @@ describes.realWin('crypto-impl', {}, env => {
         if (!crypto.isCryptoAvailable()) { return; }
         return pubKeyInfoPromise.then(pubKeyInfo =>
             crypto.verifySignature(data, signature, pubKeyInfo)
-            .then(isvalid => expect(isvalid).to.be.true));
+                .then(isvalid => expect(isvalid).to.be.true));
       });
 
       it('should not validate with the correct key but wrong data', () => {
@@ -257,7 +257,7 @@ describes.realWin('crypto-impl', {}, env => {
         // Test with correct key, but wrong data.
         return pubKeyInfoPromise.then(pubKeyInfo =>
             crypto.verifySignature(wrongData, signature, pubKeyInfo)
-            .then(isvalid => expect(isvalid).to.be.false));
+                .then(isvalid => expect(isvalid).to.be.false));
       });
 
       it('should not validate with the correct key but modified signature',
@@ -279,7 +279,7 @@ describes.realWin('crypto-impl', {}, env => {
         if (!crypto.isCryptoAvailable()) { return; }
         return pubKeyInfoPromise1.then(pubKeyInfo1 =>
             crypto.verifySignature(data, signature, pubKeyInfo1)
-            .then(isvalid => expect(isvalid).to.be.false));
+                .then(isvalid => expect(isvalid).to.be.false));
       });
     });
   });

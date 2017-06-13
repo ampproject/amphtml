@@ -92,26 +92,26 @@ describe('amp-nexxtv-player', () => {
       const iframe = nexxtv.querySelector('iframe');
 
       return Promise.resolve()
-        .then(() => {
-          const p = listenOncePromise(nexxtv, VideoEvents.PLAY);
-          sendFakeMessage(nexxtv, iframe, {event: 'play'});
-          return p;
-        })
-        .then(() => {
-          const p = listenOncePromise(nexxtv, VideoEvents.MUTED);
-          sendFakeMessage(nexxtv, iframe, {event: 'mute'});
-          return p;
-        })
-        .then(() => {
-          const p = listenOncePromise(nexxtv, VideoEvents.PAUSE);
-          sendFakeMessage(nexxtv, iframe, {event: 'pause'});
-          return p;
-        })
-        .then(() => {
-          const p = listenOncePromise(nexxtv, VideoEvents.UNMUTED);
-          sendFakeMessage(nexxtv, iframe, {event: 'unmute'});
-          return p;
-        });
+          .then(() => {
+            const p = listenOncePromise(nexxtv, VideoEvents.PLAY);
+            sendFakeMessage(nexxtv, iframe, {event: 'play'});
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(nexxtv, VideoEvents.MUTED);
+            sendFakeMessage(nexxtv, iframe, {event: 'mute'});
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(nexxtv, VideoEvents.PAUSE);
+            sendFakeMessage(nexxtv, iframe, {event: 'pause'});
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(nexxtv, VideoEvents.UNMUTED);
+            sendFakeMessage(nexxtv, iframe, {event: 'unmute'});
+            return p;
+          });
     });
   });
 

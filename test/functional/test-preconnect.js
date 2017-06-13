@@ -128,7 +128,7 @@ describe('preconnect', () => {
       return visible.then(() => {
         expect(iframe.doc.querySelectorAll(
             'link[rel=prefetch],link[rel=preload]'))
-                .to.have.length(0);
+            .to.have.length(0);
         expect(open).to.have.not.been.called;
       });
     });

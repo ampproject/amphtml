@@ -165,9 +165,9 @@ describes.sandboxed('UrlReplacements', {}, () => {
   it('should replace COUNTER', () => {
     return expandAsync(
         'COUNTER(foo),COUNTER(bar),COUNTER(foo),COUNTER(bar),COUNTER(bar)')
-            .then(res => {
-              expect(res).to.equal('1,1,2,2,3');
-            });
+        .then(res => {
+          expect(res).to.equal('1,1,2,2,3');
+        });
   });
 
   it('should replace CANONICAL_URL', () => {
@@ -254,10 +254,10 @@ describes.sandboxed('UrlReplacements', {}, () => {
       });
     });
     return urlReplacementsForDoc(win.ampdoc)
-      .expandAsync('?url=SOURCE_URL')
-      .then(res => {
-        expect(res).to.contain('example.com');
-      });
+        .expandAsync('?url=SOURCE_URL')
+        .then(res => {
+          expect(res).to.contain('example.com');
+        });
   });
 
   it('should replace SOURCE_PATH', () => {
@@ -429,10 +429,10 @@ describes.sandboxed('UrlReplacements', {}, () => {
       obj: {isVisible: () => true},
     };
     return urlReplacementsForDoc(win.ampdoc)
-      .expandAsync('?sh=BACKGROUND_STATE')
-      .then(res => {
-        expect(res).to.equal('?sh=0');
-      });
+        .expandAsync('?sh=BACKGROUND_STATE')
+        .then(res => {
+          expect(res).to.equal('?sh=0');
+        });
   });
 
   it('Should replace BACKGROUND_STATE with 1', () => {
@@ -441,10 +441,10 @@ describes.sandboxed('UrlReplacements', {}, () => {
       obj: {isVisible: () => false},
     };
     return urlReplacementsForDoc(win.ampdoc)
-      .expandAsync('?sh=BACKGROUND_STATE')
-      .then(res => {
-        expect(res).to.equal('?sh=1');
-      });
+        .expandAsync('?sh=BACKGROUND_STATE')
+        .then(res => {
+          expect(res).to.equal('?sh=1');
+        });
   });
 
   describe('PAGE_LOAD_TIME', () => {
@@ -801,10 +801,10 @@ describes.sandboxed('UrlReplacements', {}, () => {
       });
     });
     return urlReplacementsForDoc(win.ampdoc)
-      .expandAsync('?sh=QUERY_PARAM(query_string_param1)&s')
-      .then(res => {
-        expect(res).to.match(/sh=foo&s/);
-      });
+        .expandAsync('?sh=QUERY_PARAM(query_string_param1)&s')
+        .then(res => {
+          expect(res).to.match(/sh=foo&s/);
+        });
   });
 
   it('should replace QUERY_PARAM with ""', () => {
@@ -814,10 +814,10 @@ describes.sandboxed('UrlReplacements', {}, () => {
       return Promise.resolve();
     });
     return urlReplacementsForDoc(win.ampdoc)
-      .expandAsync('?sh=QUERY_PARAM(query_string_param1)&s')
-      .then(res => {
-        expect(res).to.match(/sh=&s/);
-      });
+        .expandAsync('?sh=QUERY_PARAM(query_string_param1)&s')
+        .then(res => {
+          expect(res).to.match(/sh=&s/);
+        });
   });
 
   it('should replace QUERY_PARAM with default_value', () => {
@@ -827,10 +827,10 @@ describes.sandboxed('UrlReplacements', {}, () => {
       return Promise.resolve();
     });
     return urlReplacementsForDoc(win.ampdoc)
-      .expandAsync('?sh=QUERY_PARAM(query_string_param1,default_value)&s')
-      .then(res => {
-        expect(res).to.match(/sh=default_value&s/);
-      });
+        .expandAsync('?sh=QUERY_PARAM(query_string_param1,default_value)&s')
+        .then(res => {
+          expect(res).to.match(/sh=default_value&s/);
+        });
   });
 
   it('should collect vars', () => {

@@ -865,7 +865,7 @@ describe('amp-a4a', () => {
             expect(renderAmpCreativeSpy.calledOnce,
                 'renderAmpCreative_ called exactly once').to.be.true;
             expect(a4aElement.getElementsByTagName('iframe').length)
-              .to.equal(1);
+                .to.equal(1);
             const friendlyIframe = a4aElement.querySelector('iframe[srcdoc]');
             expect(friendlyIframe).to.not.be.null;
             expect(friendlyIframe.getAttribute('src')).to.be.null;
@@ -880,14 +880,14 @@ describe('amp-a4a', () => {
             const iframeDoc = friendlyIframe.contentDocument;
             expect(iframeDoc.querySelector('script[src]')).to.not.be.ok;
             expect(iframeDoc.querySelector('script[custom-element]'))
-              .to.not.be.ok;
+                .to.not.be.ok;
             expect(iframeDoc.querySelector('style[amp-boilerplate]'))
-              .to.not.be.ok;
+                .to.not.be.ok;
             expect(iframeDoc.querySelector('noscript')).to.not.be.ok;
             // Should contain font link and extension in main document.
             expect(iframeDoc.querySelector(
               'link[href="https://fonts.googleapis.com/css?family=Questrial"]'))
-              .to.be.ok;
+                .to.be.ok;
             expect(doc.querySelector('script[src*="amp-font-0.1"]')).to.be.ok;
             expect(onCreativeRenderSpy).to.be.calledOnce;
             expect(updatePriorityStub).to.be.calledOnce;
@@ -1167,13 +1167,13 @@ describe('amp-a4a', () => {
             expect(onCreativeRenderSpy).to.not.be.called;
             // call unlayout callback and verify it attempts to revert the size
             expect(a4a.originalSlotSize_).to.deep
-              .equal({width: 123, height: 456});
+                .equal({width: 123, height: 456});
             let attemptChangeSizeResolver;
             const attemptChangeSizePromise = new Promise(resolve => {
               attemptChangeSizeResolver = resolve;
             });
             sandbox.stub(AMP.BaseElement.prototype, 'attemptChangeSize')
-              .returns(attemptChangeSizePromise);
+                .returns(attemptChangeSizePromise);
             a4a.unlayoutCallback();
             expect(unlayoutUISpy).to.be.calledOnce;
             expect(a4a.originalSlotSize_).to.be.ok;
@@ -1221,13 +1221,13 @@ describe('amp-a4a', () => {
             expect(onCreativeRenderSpy).to.not.be.called;
             // call unlayout callback and verify it attempts to revert the size
             expect(a4a.originalSlotSize_).to.deep
-              .equal({width: 123, height: 456});
+                .equal({width: 123, height: 456});
             let attemptChangeSizeResolver;
             const attemptChangeSizePromise = new Promise(resolve => {
               attemptChangeSizeResolver = resolve;
             });
             sandbox.stub(AMP.BaseElement.prototype, 'attemptChangeSize')
-              .returns(attemptChangeSizePromise);
+                .returns(attemptChangeSizePromise);
             a4a.unlayoutCallback();
             expect(a4a.originalSlotSize_).to.be.ok;
             attemptChangeSizeResolver();
@@ -1720,13 +1720,14 @@ describe('amp-a4a', () => {
         })();
         stubVerifySignature.returns(Promise.resolve(false));
         return a4a.verifyCreativeSignature_('some_creative', 'some_sig')
-        .then(() => {
-          throw new Error('should have triggered rejection');
-        })
-        .catch(err => {
-          expect(stubVerifySignature).to.be.callCount(20);
-          expect(err).to.equal('No validation service could verify this key');
-        });
+            .then(() => {
+              throw new Error('should have triggered rejection');
+            })
+            .catch(err => {
+              expect(stubVerifySignature).to.be.callCount(20);
+              expect(err).to.equal(
+                  'No validation service could verify this key');
+            });
       });
 
       it('properly handles multiple keys for one provider', () => {
@@ -1742,10 +1743,10 @@ describe('amp-a4a', () => {
         stubVerifySignature.onCall(0).returns(Promise.resolve(false));
         stubVerifySignature.onCall(1).returns(Promise.resolve(true));
         return a4a.verifyCreativeSignature_(creative, 'some_sig')
-          .then(verifiedCreative => {
-            expect(stubVerifySignature).to.be.calledTwice;
-            expect(verifiedCreative).to.equal(creative);
-          });
+            .then(verifiedCreative => {
+              expect(stubVerifySignature).to.be.calledTwice;
+              expect(verifiedCreative).to.equal(creative);
+            });
       });
 
       it('properly stops verification at first valid key', () => {
@@ -1773,10 +1774,10 @@ describe('amp-a4a', () => {
         setTimeout(() => {keyInfoResolver({}); }, 0);
 
         return a4a.verifyCreativeSignature_(creative, signature)
-          .then(verifiedCreative => {
-            expect(stubVerifySignature).to.be.calledTwice;
-            expect(verifiedCreative).to.equal(creative);
-          });
+            .then(verifiedCreative => {
+              expect(stubVerifySignature).to.be.calledTwice;
+              expect(verifiedCreative).to.equal(creative);
+            });
       });
     });
   });

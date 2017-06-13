@@ -729,12 +729,12 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       doubleclickInstances.forEach(impl => {
         const networkId = getNetworkId(impl.element);
         (grouping[networkId] || (grouping[networkId] = []))
-          .push(impl);
+            .push(impl);
         (groupingPromises[networkId] || (groupingPromises[networkId] = []))
-          .push(Promise.resolve(impl));
+            .push(Promise.resolve(impl));
       });
       sandbox.stub(AmpAdNetworkDoubleclickImpl.prototype, 'groupSlotsForSra')
-        .returns(Promise.resolve(groupingPromises));
+          .returns(Promise.resolve(groupingPromises));
       let idx = 0;
       const layoutCallbacks = [];
       const getLayoutCallback = (impl, creative, isSra, noRender) => {

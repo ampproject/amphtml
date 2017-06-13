@@ -324,7 +324,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // validateData, from 3p/3p/js, after noving it someplace common.
     const startTime = Date.now();
     return getPageLevelParameters_(this.win, this.getAmpDoc(), startTime)
-      .then(pageLevelParameters =>
+        .then(pageLevelParameters =>
         googleAdUrl(this, DOUBLECLICK_BASE_URL, startTime,
           Object.assign(this.getBlockParameters_(), pageLevelParameters),
           ['108809080']));
@@ -636,11 +636,11 @@ export function getNetworkId(element) {
 function constructSRARequest_(win, doc, instances) {
   const startTime = Date.now();
   return getPageLevelParameters_(win, doc, startTime, true)
-    .then(pageLevelParameters => {
-      const blockParameters = constructSRABlockParameters(instances);
-      return truncAndTimeUrl(DOUBLECLICK_BASE_URL,
+      .then(pageLevelParameters => {
+        const blockParameters = constructSRABlockParameters(instances);
+        return truncAndTimeUrl(DOUBLECLICK_BASE_URL,
         Object.assign(blockParameters, pageLevelParameters), startTime);
-    });
+      });
 }
 
 /**
@@ -663,11 +663,11 @@ export function constructSRABlockParameters(instances) {
  */
 function getPageLevelParameters_(win, doc, startTime, isSra) {
   return googlePageParameters(win, doc, startTime, 'ldjh')
-    .then(pageLevelParameters => {
-      const parameters = Object.assign({}, PAGE_LEVEL_PARAMS_);
-      parameters['impl'] = isSra ? 'fifs' : 'ifr';
-      return Object.assign(parameters, pageLevelParameters);
-    });
+      .then(pageLevelParameters => {
+        const parameters = Object.assign({}, PAGE_LEVEL_PARAMS_);
+        parameters['impl'] = isSra ? 'fifs' : 'ifr';
+        return Object.assign(parameters, pageLevelParameters);
+      });
 }
 
 /**

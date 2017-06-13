@@ -371,7 +371,7 @@ describes.realWin('amp-sidebar 0.1 version', {
         expect(compensateIosBottombarSpy).to.be.calledOnce;
         // 10 lis + one top padding element inserted
         expect(sidebarElement.children.length)
-          .to.equal(initalChildrenCount + 1);
+            .to.equal(initalChildrenCount + 1);
       });
     });
 

@@ -142,10 +142,10 @@ export class AmpViewerIntegration {
       sourceUrl: srcUrl,
     },
     true /* awaitResponse */)
-      .then(() => {
-        dev().fine(TAG, 'Channel has been opened!');
-        this.setup_(messaging, viewer, origin);
-      });
+        .then(() => {
+          dev().fine(TAG, 'Channel has been opened!');
+          this.setup_(messaging, viewer, origin);
+        });
   }
 
   /**

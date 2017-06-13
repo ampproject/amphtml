@@ -107,9 +107,9 @@ describe('amp-playbuzz', () => {
       const iframe = ins.querySelector('iframe');
       testIframe(iframe, '//www.playbuzz.com/bob/bobs-life');
       expect(iframe.src)
-        .to.contain('&useComments=false')
-        .and.to.contain('&gameInfo=false')
-        .and.to.contain('&useShares=false');
+          .to.contain('&useComments=false')
+          .and.to.contain('&gameInfo=false')
+          .and.to.contain('&useShares=false');
     });
   });
 
@@ -138,9 +138,9 @@ describe('amp-playbuzz', () => {
       const iframe = ins.querySelector('iframe');
       testIframe(iframe, '//www.playbuzz.com/bob/bobs-life');
       expect(iframe.src)
-        .to.contain('&useComments=true')
-        .and.to.contain('&gameInfo=true')
-        .and.to.contain('&useShares=true');
+          .to.contain('&useComments=true')
+          .and.to.contain('&gameInfo=true')
+          .and.to.contain('&useShares=true');
     });
   });
 

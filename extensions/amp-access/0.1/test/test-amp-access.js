@@ -1490,15 +1490,15 @@ describes.fakeWin('AccessService login', {
         .returns(Promise.reject('abort'))
         .once();
     return service.loginWithType_('')
-    .then(() => 'S', () => 'ERROR').then(result => {
-      expect(result).to.equal('ERROR');
-      expect(service.loginPromise_).to.not.exist;
-      expect(service.runAuthorization_).to.have.not.been.called;
-      expect(service.analyticsEvent_).to.have.been.calledWith(
+        .then(() => 'S', () => 'ERROR').then(result => {
+          expect(result).to.equal('ERROR');
+          expect(service.loginPromise_).to.not.exist;
+          expect(service.runAuthorization_).to.have.not.been.called;
+          expect(service.analyticsEvent_).to.have.been.calledWith(
           'access-login-started');
-      expect(service.analyticsEvent_).to.have.been.calledWith(
+          expect(service.analyticsEvent_).to.have.been.calledWith(
           'access-login-failed');
-    });
+        });
   });
 
   it('should succeed login with success=true with multiple logins', () => {

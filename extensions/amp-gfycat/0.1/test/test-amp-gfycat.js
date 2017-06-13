@@ -68,7 +68,7 @@ describe('amp-gfycat', () => {
       const iframe = gfycat.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.src)
-        .to.equal('https://gfycat.com/ifr/LeanMediocreBeardeddragon?autoplay=0');
+          .to.equal('https://gfycat.com/ifr/LeanMediocreBeardeddragon?autoplay=0');
     });
   });
 

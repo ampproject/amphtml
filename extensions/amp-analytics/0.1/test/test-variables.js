@@ -53,14 +53,14 @@ describe('amp-analytics.VariableService', function() {
 
     it('expands zeros', () => {
       return variables.expandTemplate('${5}', new ExpansionOptions(vars))
-        .then(actual =>
+          .then(actual =>
           expect(actual).to.equal('0')
       );
     });
 
     it('expands nested vars', () => {
       return variables.expandTemplate('${1}', new ExpansionOptions(vars))
-        .then(actual =>
+          .then(actual =>
           expect(actual).to.equal('123%252524%25257B4%25257D')
       );
     });
@@ -68,40 +68,40 @@ describe('amp-analytics.VariableService', function() {
     it('expands nested vars (no encode)', () => {
       return variables.expandTemplate('${1}',
           new ExpansionOptions(vars, undefined, true))
-        .then(actual =>
+          .then(actual =>
           expect(actual).to.equal('123${4}')
         );
     });
 
     it('limits the recursion to n', () => {
       return variables.expandTemplate('${1}', new ExpansionOptions(vars, 3))
-        .then(actual =>
+          .then(actual =>
           expect(actual).to.equal('1234%25252524%2525257B1%2525257D'))
-        .then(() =>
+          .then(() =>
           variables.expandTemplate('${1}', new ExpansionOptions(vars, 5))
-            .then(actual => expect(actual).to
-              .equal('123412%252525252524%25252525257B3%25252525257D')
+              .then(actual => expect(actual).to
+                  .equal('123412%252525252524%25252525257B3%25252525257D')
       ));
     });
 
     it('works with complex params (1)', () => {
       const vars = new ExpansionOptions({'fooParam': 'QUERY_PARAM(foo,bar)'});
       return variables.expandTemplate('${fooParam}', vars)
-        .then(actual =>
+          .then(actual =>
           expect(actual).to.equal('QUERY_PARAM(foo,bar)'));
     });
 
     it('works with complex params (2)', () => {
       const vars = new ExpansionOptions({'fooParam': 'QUERY_PARAM'});
       return variables.expandTemplate('${fooParam(foo,bar)}', vars)
-        .then(actual => expect(actual).to.equal('QUERY_PARAM(foo,bar)'));
+          .then(actual => expect(actual).to.equal('QUERY_PARAM(foo,bar)'));
     });
   });
 
   it('default filterdoesn\'t work when experiment is off' , () =>
       variables.expandTemplate('${bar|default:baz}',
           new ExpansionOptions({'foo': ' Hello world! '}))
-    .then(actual => expect(actual).to.equal('')));
+          .then(actual => expect(actual).to.equal('')));
 
   describe('filter:', () => {
     const vars = new ExpansionOptions({'foo': ' Hello world! '});

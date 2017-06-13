@@ -59,11 +59,11 @@ describe('stringToBytes', function() {
 
   it('should generate random bytes array when win.crypto is availble', () => {
     expect(getCryptoRandomBytesArray(fakeWin, 1)).to.deep
-      .equal(new Uint8Array([1]));
+        .equal(new Uint8Array([1]));
     expect(getCryptoRandomBytesArray(fakeWin, 2)).to.deep
-      .equal(new Uint8Array([1, 2]));
+        .equal(new Uint8Array([1, 2]));
     expect(getCryptoRandomBytesArray(fakeWin, 3)).to.deep
-      .equal(new Uint8Array([1, 2, 3]));
+        .equal(new Uint8Array([1, 2, 3]));
   });
 
   it('should return null when trying to generate random bytes array if ' +

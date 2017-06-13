@@ -253,7 +253,7 @@ describe('amp-ima-video', () => {
 
       expect(
           mockAdsRenderingSettings.restoreCustomPlaybackStateOnAdBreakComplete)
-              .to.be.true;
+          .to.be.true;
       expect(mockAdsRenderingSettings.uiElements)
           .to.eql(['adattr', 'countdown']);
       expect(amleSpy).to.be.calledWith(
@@ -317,7 +317,7 @@ describe('amp-ima-video', () => {
 
       expect(
           mockAdsRenderingSettings.restoreCustomPlaybackStateOnAdBreakComplete)
-              .to.be.true;
+          .to.be.true;
       expect(mockAdsRenderingSettings.uiElements)
           .to.eql(['adattr', 'countdown']);
       expect(amleSpy).to.be.calledWith(
@@ -689,9 +689,9 @@ describe('amp-ima-video', () => {
       //expect(showControlsSpy).to.have.been.called;
       expect(
           imaVideoObj.getPropertiesForTesting().playPauseDiv.style.lineHeight)
-              .to.eql('1.4em');
+          .to.eql('1.4em');
       expect(imaVideoObj.getPropertiesForTesting().playPauseNode.textContent)
-        .to.eql(imaVideoObj.getPropertiesForTesting().pauseChars);
+          .to.eql(imaVideoObj.getPropertiesForTesting().pauseChars);
       expect(playSpy).to.have.been.called;
     });
   });
@@ -724,10 +724,10 @@ describe('amp-ima-video', () => {
       // TODO - Why doesn't this work?
       //expect(showControlsSpy).to.have.been.called;
       expect(imaVideoObj.getPropertiesForTesting().playPauseNode.textContent)
-        .to.eql(imaVideoObj.getPropertiesForTesting().playChar);
+          .to.eql(imaVideoObj.getPropertiesForTesting().playChar);
       expect(
           imaVideoObj.getPropertiesForTesting().playPauseDiv.style.lineHeight)
-              .to.eql('');
+          .to.eql('');
     });
   });
 
@@ -762,10 +762,10 @@ describe('amp-ima-video', () => {
       // TODO - Why doesn't this work?
       //expect(showControlsSpy).to.have.been.called;
       expect(imaVideoObj.getPropertiesForTesting().playPauseNode.textContent)
-        .to.eql(imaVideoObj.getPropertiesForTesting().playChar);
+          .to.eql(imaVideoObj.getPropertiesForTesting().playChar);
       expect(
           imaVideoObj.getPropertiesForTesting().playPauseDiv.style.lineHeight)
-              .to.eql('');
+          .to.eql('');
       expect(removeEventListenerSpy).to.have.been.called;
     });
   });

@@ -180,35 +180,35 @@ export class LaterpayVendor {
    */
   authorize() {
     return this.getPurchaseConfig_()
-    .then(response => {
-      if (response.status === 204) {
-        throw user()
-          .createError('No merchant domains have been matched for this ' +
+        .then(response => {
+          if (response.status === 204) {
+            throw user()
+                .createError('No merchant domains have been matched for this ' +
             'article, or no paid content configurations are setup.');
-      }
+          }
 
-      if (this.laterpayConfig_.scrollToTopAfterAuth) {
-        this.vsync_.mutate(() => this.viewport_.setScrollTop(0));
-      }
-      this.emptyContainer_();
-      return {access: response.access};
-    }, err => {
-      if (!err || !err.response) {
-        throw err;
-      }
-      const {response} = err;
-      if (response.status !== 402) {
-        throw err;
-      }
-      return response.json().catch(() => undefined).then(responseJson => {
-        this.purchaseConfig_ = responseJson;
+          if (this.laterpayConfig_.scrollToTopAfterAuth) {
+            this.vsync_.mutate(() => this.viewport_.setScrollTop(0));
+          }
+          this.emptyContainer_();
+          return {access: response.access};
+        }, err => {
+          if (!err || !err.response) {
+            throw err;
+          }
+          const {response} = err;
+          if (response.status !== 402) {
+            throw err;
+          }
+          return response.json().catch(() => undefined).then(responseJson => {
+            this.purchaseConfig_ = responseJson;
         // empty before rendering, in case authorization is being called again
         // with the same state
-        this.emptyContainer_()
-          .then(this.renderPurchaseOverlay_.bind(this));
-        return {access: false};
-      });
-    });
+            this.emptyContainer_()
+                .then(this.renderPurchaseOverlay_.bind(this));
+            return {access: false};
+          });
+        });
   }
 
   /**

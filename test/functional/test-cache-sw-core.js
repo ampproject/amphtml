@@ -725,9 +725,9 @@ runner.run('Cache SW', () => {
     it('defaults to requested version, if file no files are cached', () => {
       keys.length = 0;
       return sw.getCachedVersion(cache, prevRtv, '/v0.js')
-        .then(version => {
-          expect(version).to.equal(prevRtv);
-        });
+          .then(version => {
+            expect(version).to.equal(prevRtv);
+          });
     });
 
     it('returns version with most responses', () => {
@@ -748,9 +748,9 @@ runner.run('Cache SW', () => {
           {url: `https://cdn.ampproject.org/rtv/${rtv}/v0/amp-4-0.1.js`});
 
       return sw.getCachedVersion(cache, '01123', '/v0/amp-4-0.1.js')
-        .then(version => {
-          expect(version).to.equal(rtv);
-        });
+          .then(version => {
+            expect(version).to.equal(rtv);
+          });
     });
 
     it('heavily weights main binary version', () => {
@@ -760,9 +760,9 @@ runner.run('Cache SW', () => {
           {url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-3-0.1.js`},
           {url: `https://cdn.ampproject.org/rtv/${rtv}/v0.js`});
       return sw.getCachedVersion(cache, '01123', '/v0.js')
-        .then(version => {
-          expect(version).to.equal(rtv);
-        });
+          .then(version => {
+            expect(version).to.equal(rtv);
+          });
     });
 
     it('ignores cached blacklisted versions', () => {
@@ -788,18 +788,18 @@ runner.run('Cache SW', () => {
     describe('when requesting diversion', () => {
       it('returns diversion explicitly', () => {
         return sw.getCachedVersion(cache, diversionRtv, '/v0.js')
-          .then(version => {
-            expect(version).to.equal(diversionRtv);
-          });
+            .then(version => {
+              expect(version).to.equal(diversionRtv);
+            });
       });
 
       it('returns diversion explicitly, even with previous diversion', () => {
         keys.splice(0, 1,
             {url: `https://cdn.ampproject.org/rtv/${prevDiversionRtv}/v0.js`});
         return sw.getCachedVersion(cache, diversionRtv, '/v0.js')
-          .then(version => {
-            expect(version).to.equal(diversionRtv);
-          });
+            .then(version => {
+              expect(version).to.equal(diversionRtv);
+            });
       });
     });
   });

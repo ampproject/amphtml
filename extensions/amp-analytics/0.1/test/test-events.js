@@ -675,15 +675,15 @@ describes.realWin('Events', {amp: 1}, env => {
     it('should pass func to get reportReady with "hidden" trigger', () => {
       const config = {visibilitySpec: {selector: '.target', waitFor: 'none'}};
       visibilityManagerMock
-        .expects('listenElement')
-        .withExactArgs(
+          .expects('listenElement')
+          .withExactArgs(
             target,
             config.visibilitySpec,
             /* readyPromise */ null,
             /* createReadyReportPromiseFunc */ matchFunc,
             saveCallback)
-        .returns(null)
-        .once();
+          .returns(null)
+          .once();
       tracker.add(analyticsElement, 'hidden-v3', config, eventResolver);
       const unlistenReady = getAmpElementSpy.returnValues[0];
       // NOTE: createReadyReportPromiseFunc is
@@ -705,16 +705,16 @@ describes.realWin('Events', {amp: 1}, env => {
         expect(tracker.getReadyPromise(undefined, undefined)).to.be.null;
         // Default case: waitFor is not specified, no AMP element selected
         iniLoadTrackerMock
-          .expects('getRootSignal')
-          .returns(Promise.resolve())
-          .once();
+            .expects('getRootSignal')
+            .returns(Promise.resolve())
+            .once();
         const waitForTracker1 = tracker.getReadyPromise(undefined, ':root');
         return waitForTracker1.then(() => {
           iniLoadTrackerMock
-            .expects('getElementSignal')
-            .withExactArgs('ini-load', target)
-            .returns(Promise.resolve())
-            .once();
+              .expects('getElementSignal')
+              .withExactArgs('ini-load', target)
+              .returns(Promise.resolve())
+              .once();
           // Default case: waitFor is not specified, AMP element selected
           const promise2 = tracker.getReadyPromise(undefined, selector, target);
           target.signals().signal('ini-load');
@@ -733,9 +733,9 @@ describes.realWin('Events', {amp: 1}, env => {
 
       it('with waitFor INI_LOAD', () => {
         iniLoadTrackerMock
-          .expects('getRootSignal')
-          .returns(Promise.resolve())
-          .twice();
+            .expects('getRootSignal')
+            .returns(Promise.resolve())
+            .twice();
         const promise =
             tracker.getReadyPromise('ini-load', undefined, undefined);
         return promise.then(() => {
@@ -743,10 +743,10 @@ describes.realWin('Events', {amp: 1}, env => {
             tracker.getReadyPromise('ini-load', ':root', undefined);
           return promise1.then(() => {
             iniLoadTrackerMock
-              .expects('getElementSignal')
-              .withExactArgs('ini-load', target)
-              .returns(Promise.resolve())
-              .once();
+                .expects('getElementSignal')
+                .withExactArgs('ini-load', target)
+                .returns(Promise.resolve())
+                .once();
             const promise2 =
                 tracker.getReadyPromise('ini-load', selector, target);
             return promise2;
@@ -760,10 +760,10 @@ describes.realWin('Events', {amp: 1}, env => {
         const signalTrackerMock =
             sandbox.mock(tracker.waitForTrackers_['render-start']);
         signalTrackerMock
-          .expects('getRootSignal')
-          .withExactArgs('render-start')
-          .returns(Promise.resolve())
-          .twice();
+            .expects('getRootSignal')
+            .withExactArgs('render-start')
+            .returns(Promise.resolve())
+            .twice();
         const promise =
             tracker.getReadyPromise('render-start', undefined, undefined);
         return promise.then(() => {
@@ -771,10 +771,10 @@ describes.realWin('Events', {amp: 1}, env => {
               tracker.getReadyPromise('render-start', ':root', undefined);
           return promise1.then(() => {
             signalTrackerMock
-              .expects('getElementSignal')
-              .withExactArgs('render-start', target)
-              .returns(Promise.resolve())
-              .once();
+                .expects('getElementSignal')
+                .withExactArgs('render-start', target)
+                .returns(Promise.resolve())
+                .once();
             const promise2 =
                 tracker.getReadyPromise('render-start', selector, target);
             return promise2;

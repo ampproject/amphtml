@@ -239,7 +239,7 @@ describe('a4a_config', () => {
       toggleExperiment(win, EXP_ID, false, true);
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
         INTERNAL_BRANCHES, EXTERNAL_DELAYED_BRANCHES), 'googleAdsIsA4AEnabled')
-        .to.be.false;
+          .to.be.false;
       expect(win.document.cookie).to.be.null;
       expect(element.getAttribute('data-experiment-id')).to.not.be.ok;
     });
@@ -250,7 +250,7 @@ describe('a4a_config', () => {
       toggleExperiment(win, EXP_ID, false, true);
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
         INTERNAL_BRANCHES, EXTERNAL_DELAYED_BRANCHES), 'googleAdsIsA4AEnabled')
-        .to.be.false;
+          .to.be.false;
       expect(win.document.cookie).to.be.null;
       expect(element.getAttribute('data-experiment-id')).to.not.be.ok;
     });
@@ -260,7 +260,7 @@ describe('a4a_config', () => {
       rand.returns(0.75);  // Random value to select the 2nd branch
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
         INTERNAL_BRANCHES, EXTERNAL_DELAYED_BRANCHES), 'googleAdsIsA4AEnabled')
-        .to.be.true;
+          .to.be.true;
       expect(win.document.cookie).to.be.null;
       expectThereCanBeOnlyOne(element, INTERNAL_BRANCHES.experiment);
       expectInternallyTriggered(element);
@@ -271,7 +271,7 @@ describe('a4a_config', () => {
       rand.returns(0.75);  // Random value to select the 2nd branch
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
         INTERNAL_BRANCHES, EXTERNAL_DELAYED_BRANCHES), 'googleAdsIsA4AEnabled')
-        .to.be.true;
+          .to.be.true;
       expect(win.document.cookie).to.be.null;
       expectThereCanBeOnlyOne(element, INTERNAL_BRANCHES.experiment);
       expectInternallyTriggered(element);
@@ -293,7 +293,7 @@ describe('a4a_config', () => {
             expect(googleAdsIsA4AEnabled(
               win, element, EXP_ID, EXTERNAL_BRANCHES, INTERNAL_BRANCHES,
               EXTERNAL_DELAYED_BRANCHES), 'googleAdsIsA4AEnabled')
-              .to.equal(testCase.a4aEnabled);
+                .to.equal(testCase.a4aEnabled);
             expect(win.document.cookie).to.be.null;
             if (testCase.expId) {
               expectThereCanBeOnlyOne(element, testCase.expId);
@@ -310,7 +310,7 @@ describe('a4a_config', () => {
       // control experiment ID.
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
         INTERNAL_BRANCHES, EXTERNAL_DELAYED_BRANCHES), 'googleAdsIsA4AEnabled')
-        .to.be.true;
+          .to.be.true;
       expect(win.document.cookie).to.be.null;
       expect(isInManualExperiment(element), 'element in manual experiment')
           .to.be.true;
@@ -403,7 +403,7 @@ describe('a4a_config hash param parsing', () => {
       // control experiment ID.
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
         INTERNAL_BRANCHES, EXTERNAL_DELAYED_BRANCHES), 'googleAdsIsA4AEnabled')
-        .to.be.true;
+          .to.be.true;
       expect(win.document.cookie).to.be.null;
       expect(isInManualExperiment(element), 'element in manual experiment')
           .to.be.true;
@@ -428,7 +428,7 @@ describe('a4a_config hash param parsing', () => {
       installViewerServiceForDoc(ampdoc);
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
         INTERNAL_BRANCHES, EXTERNAL_DELAYED_BRANCHES), 'googleAdsIsA4AEnabled')
-        .to.be.true;
+          .to.be.true;
       expect(win.document.cookie).to.be.null;
       expectThereCanBeOnlyOne(element, EXTERNAL_BRANCHES.experiment);
       expectExternallyTriggered(element);

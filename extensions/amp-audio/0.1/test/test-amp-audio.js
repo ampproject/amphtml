@@ -110,10 +110,10 @@ describe('amp-audio', () => {
       expect(audio.hasAttribute('src')).to.be.false;
       expect(audio.childNodes[0].tagName).to.equal('SOURCE');
       expect(audio.childNodes[0].getAttribute('src'))
-        .to.equal('https://origin.com/audio.mp3');
+          .to.equal('https://origin.com/audio.mp3');
       expect(audio.childNodes[1].tagName).to.equal('SOURCE');
       expect(audio.childNodes[1].getAttribute('src'))
-        .to.equal('https://origin.com/audio.ogg');
+          .to.equal('https://origin.com/audio.ogg');
       expect(audio.childNodes[2].nodeType).to.equal(Node.TEXT_NODE);
       expect(audio.childNodes[2].textContent).to.equal('Unsupported.');
     });

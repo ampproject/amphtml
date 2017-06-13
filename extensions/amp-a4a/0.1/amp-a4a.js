@@ -832,21 +832,21 @@ export class AmpA4A extends AMP.BaseElement {
           });
         }))
         // some() returns an array of which we only need a single value.
-        .then(returnedArray => returnedArray[0], () => {
+            .then(returnedArray => returnedArray[0], () => {
           // Rejection occurs if all keys for this provider fail to validate.
-          return Promise.reject(
+              return Promise.reject(
               `All keys for ${keyInfoSet.serviceName} failed to verify`);
-        });
+            });
       });
     }))
-    .then(returnedArray => {
-      this.protectedEmitLifecycleEvent_('adResponseValidateEnd');
-      return returnedArray[0];
-    }, () => {
+        .then(returnedArray => {
+          this.protectedEmitLifecycleEvent_('adResponseValidateEnd');
+          return returnedArray[0];
+        }, () => {
       // rejection occurs if all providers fail to verify.
-      this.protectedEmitLifecycleEvent_('adResponseValidateEnd');
-      return Promise.reject('No validation service could verify this key');
-    });
+          this.protectedEmitLifecycleEvent_('adResponseValidateEnd');
+          return Promise.reject('No validation service could verify this key');
+        });
   }
 
   /**
@@ -963,15 +963,15 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.originalSlotSize_) {
       super.attemptChangeSize(
         this.originalSlotSize_.height, this.originalSlotSize_.width)
-        .then(() => {
-          this.originalSlotSize_ = null;
-        })
-        .catch(err => {
+          .then(() => {
+            this.originalSlotSize_ = null;
+          })
+          .catch(err => {
           // TODO(keithwrightbos): if we are unable to revert size, on next
           // trigger of promise chain the ad request may fail due to invalid
           // slot size.  Determine how to handle this case.
-          dev().warn(TAG, 'unable to revert to original size', err);
-        });
+            dev().warn(TAG, 'unable to revert to original size', err);
+          });
     }
 
     this.isCollapsed_ = false;
@@ -1159,46 +1159,46 @@ export class AmpA4A extends AMP.BaseElement {
       if (url) {
         // Delay request until document is not in a prerender state.
         return viewerForDoc(this.getAmpDoc()).whenFirstVisible()
-          .then(() => xhrFor(this.win).fetchJson(url, {
-            mode: 'cors',
-            method: 'GET',
+            .then(() => xhrFor(this.win).fetchJson(url, {
+              mode: 'cors',
+              method: 'GET',
             // Set ampCors false so that __amp_source_origin is not
             // included in XHR CORS request allowing for keyset to be cached
             // across pages.
-            ampCors: false,
-            credentials: 'omit',
-          }).then(res => res.json()).then(jwkSetObj => {
-            const result = {serviceName: currServiceName};
-            if (isObject(jwkSetObj) && Array.isArray(jwkSetObj.keys) &&
+              ampCors: false,
+              credentials: 'omit',
+            }).then(res => res.json()).then(jwkSetObj => {
+              const result = {serviceName: currServiceName};
+              if (isObject(jwkSetObj) && Array.isArray(jwkSetObj.keys) &&
                 jwkSetObj.keys.every(isObject)) {
-              result.keys = jwkSetObj.keys;
-            } else {
-              user().error(TAG, this.element.getAttribute('type'),
+                result.keys = jwkSetObj.keys;
+              } else {
+                user().error(TAG, this.element.getAttribute('type'),
                   `Invalid response from signing server ${currServiceName}`,
                   this.element);
-              result.keys = [];
-            }
-            return result;
-          })).then(jwkSet => {
-            return {
-              serviceName: jwkSet.serviceName,
-              keys: jwkSet.keys.map(jwk =>
+                result.keys = [];
+              }
+              return result;
+            })).then(jwkSet => {
+              return {
+                serviceName: jwkSet.serviceName,
+                keys: jwkSet.keys.map(jwk =>
                   this.crypto_.importPublicKey(jwkSet.serviceName, jwk)
-                  .catch(err => {
-                    user().error(TAG, this.element.getAttribute('type'),
+                      .catch(err => {
+                        user().error(TAG, this.element.getAttribute('type'),
                         `error importing keys for: ${jwkSet.serviceName}`,
                         err, this.element);
-                    return null;
-                  })),
-            };
-          }).catch(err => {
-            user().error(
+                        return null;
+                      })),
+              };
+            }).catch(err => {
+              user().error(
                 TAG, this.element.getAttribute('type'), err, this.element);
             // TODO(a4a-team): This is a failure in the initial attempt to get
             // the keys, probably b/c of a network condition.  We should
             // re-trigger key fetching later.
-            return {serviceName: currServiceName, keys: []};
-          });
+              return {serviceName: currServiceName, keys: []};
+            });
       } else {
         // The given serviceName does not have a corresponding URL in
         // _a4a-config.js.

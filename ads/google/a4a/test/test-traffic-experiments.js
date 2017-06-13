@@ -463,7 +463,7 @@ describe('all-traffic-experiments-tests', () => {
         expect(googleAdsIsA4AEnabled(win, element, 'expDoubleclickA4A',
           external, internal,
           DOUBLECLICK_A4A_EXTERNAL_DELAYED_EXPERIMENT_BRANCHES_PRE_LAUNCH))
-          .to.equal(test.shouldServeFastFetch);
+            .to.equal(test.shouldServeFastFetch);
         expectCorrectBranchOnly(element, test.branchId);
         expect(win.document.cookie).to.be.null;
         if (test.branchId) {

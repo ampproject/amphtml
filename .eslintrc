@@ -43,7 +43,7 @@
     "todo-format": 0,
     "eol-last": 2,
     "google-camelcase/google-camelcase": 2,
-    "indent": [2, 2, { "SwitchCase": 1, "VariableDeclarator": {"var": 2, "let": 2, "const": 2} }],
+    "indent": [2, 2, { "SwitchCase": 1, "VariableDeclarator": 2, "MemberExpression": 2, "ObjectExpression": 1 }],
     "key-spacing": 2,
     "max-len": [2, 80, 4, {
       "ignoreComments": true,

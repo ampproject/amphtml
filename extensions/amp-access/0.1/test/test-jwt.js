@@ -211,24 +211,24 @@ describe('JwtHelper', () => {
     it('should fetch they key and verify', () => {
       const key = 'KEY';
       subtleMock.expects('importKey')
-        .withExactArgs(
+          .withExactArgs(
           /* format */ 'spki',
           pemToBytes(PEM),
           {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}},
           /* extractable */ false,
           /* uses */ ['verify']
         )
-        .returns(Promise.resolve(key))
-        .once();
+          .returns(Promise.resolve(key))
+          .once();
       subtleMock.expects('verify')
-        .withExactArgs(
+          .withExactArgs(
           {name: 'RSASSA-PKCS1-v1_5'},
           key,
           /* sig */ sinon.match(() => true),
           /* verifiable */ sinon.match(() => true)
         )
-        .returns(Promise.resolve(true))
-        .once();
+          .returns(Promise.resolve(true))
+          .once();
       return helper.decodeAndVerify(TOKEN, Promise.resolve(PEM)).then(tok => {
         expect(tok['name']).to.equal('John Do');
       });

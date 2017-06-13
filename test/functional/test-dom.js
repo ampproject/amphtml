@@ -488,9 +488,9 @@ describes.sandboxed('DOM', {}, env => {
 
 
     expect(toArray(dom.scopedQuerySelectorAll(parent, 'div')))
-      .to.deep.equal([element1, element2]);
+        .to.deep.equal([element1, element2]);
     expect(toArray(dom.scopedQuerySelectorAll(grandparent, 'div div')))
-      .to.deep.equal([element1, element2]);
+        .to.deep.equal([element1, element2]);
   }
 
   it('scopedQuerySelectorAll should find all matches',

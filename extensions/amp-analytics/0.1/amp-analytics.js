@@ -264,10 +264,10 @@ export class AmpAnalytics extends AMP.BaseElement {
             // Expand the selector using variable expansion.
             return this.variableService_.expandTemplate(
                 trigger['selector'], expansionOptions)
-              .then(selector => {
-                trigger['selector'] = selector;
-                this.addTriggerNoInline_(trigger);
-              });
+                .then(selector => {
+                  trigger['selector'] = selector;
+                  this.addTriggerNoInline_(trigger);
+                });
           } else {
             this.addTriggerNoInline_(trigger);
           }
@@ -594,7 +594,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         if (typeof params[k] == 'string') {
           requestPromises.push(
               this.variableService_.expandTemplate(params[k], expansionOptions)
-                .then(value => { params[k] = value; }));
+                  .then(value => { params[k] = value; }));
         }
       }
     }
