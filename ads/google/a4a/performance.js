@@ -316,8 +316,8 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
 
       // 50% vis, ini-load and 1 sec
       vis.listenElement(element,
-                        {visiblePercentageMin: 1, waitFor: 'ini-load',
-                         totalTimeMin: 1000},
+        {visiblePercentageMin: 1, waitFor: 'ini-load',
+          totalTimeMin: 1000},
                         readyPromise, null,
                         () => {
                           this.sendPing('visLoadAndOneSec');

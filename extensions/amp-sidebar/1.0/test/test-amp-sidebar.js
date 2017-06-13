@@ -101,7 +101,7 @@
          const sidebarElement = obj.ampSidebar;
          const impl = sidebarElement.implementation_;
          impl.vsync_ = {
-           mutate: function(callback) {
+           mutate(callback) {
              callback();
            },
          };
@@ -139,18 +139,18 @@
          impl.scheduleLayout = sandbox.spy();
          impl.getHistory_ = function() {
            return {
-             push: function() {
+             push() {
                historyPushSpy();
                return Promise.resolve(11);
              },
-             pop: function() {
+             pop() {
                historyPopSpy();
                return Promise.resolve(11);
              },
            };
          };
          impl.vsync_ = {
-           mutate: function(callback) {
+           mutate(callback) {
              callback();
            },
          };
@@ -191,11 +191,11 @@
          impl.scheduleLayout = sandbox.spy();
          impl.getHistory_ = function() {
            return {
-             push: function() {
+             push() {
                historyPushSpy();
                return Promise.resolve(11);
              },
-             pop: function() {
+             pop() {
                historyPopSpy();
                return Promise.resolve(11);
              },
@@ -203,7 +203,7 @@
          };
          impl.historyId_ = 100;
          impl.vsync_ = {
-           mutate: function(callback) {
+           mutate(callback) {
              callback();
            },
          };
@@ -236,7 +236,7 @@
          impl.scheduleLayout = sandbox.spy();
          impl.schedulePause = sandbox.spy();
          impl.vsync_ = {
-           mutate: function(callback) {
+           mutate(callback) {
              callback();
            },
          };
@@ -268,7 +268,7 @@
          const impl = sidebarElement.implementation_;
          impl.schedulePause = sandbox.spy();
          impl.vsync_ = {
-           mutate: function(callback) {
+           mutate(callback) {
              callback();
            },
          };
@@ -303,7 +303,7 @@
          impl.schedulePause = sandbox.spy();
          impl.scheduleResume = sandbox.spy();
          impl.vsync_ = {
-           mutate: function(callback) {
+           mutate(callback) {
              callback();
            },
          };
@@ -339,7 +339,7 @@
          const sidebarElement = obj.ampSidebar;
          const impl = sidebarElement.implementation_;
          impl.vsync_ = {
-           mutate: function(callback) {
+           mutate(callback) {
              callback();
            },
          };
@@ -359,7 +359,7 @@
          const sidebarElement = obj.ampSidebar;
          const impl = sidebarElement.implementation_;
          impl.vsync_ = {
-           mutate: function(callback) {
+           mutate(callback) {
              callback();
            },
          };
@@ -385,7 +385,7 @@
          const impl = sidebarElement.implementation_;
          impl.schedulePause = sandbox.spy();
          impl.vsync_ = {
-           mutate: function(callback) {
+           mutate(callback) {
              callback();
            },
          };
@@ -429,7 +429,7 @@
          const impl = sidebarElement.implementation_;
          impl.schedulePause = sandbox.spy();
          impl.vsync_ = {
-           mutate: function(callback) {
+           mutate(callback) {
              callback();
            },
          };
@@ -473,7 +473,7 @@
          const impl = sidebarElement.implementation_;
          impl.schedulePause = sandbox.spy();
          impl.vsync_ = {
-           mutate: function(callback) {
+           mutate(callback) {
              callback();
            },
          };
@@ -517,7 +517,7 @@
          const impl = sidebarElement.implementation_;
          impl.schedulePause = sandbox.spy();
          impl.vsync_ = {
-           mutate: function(callback) {
+           mutate(callback) {
              callback();
            },
          };

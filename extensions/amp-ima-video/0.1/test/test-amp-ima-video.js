@@ -90,13 +90,13 @@ describe('amp-ima-video', () => {
         style: {
           display: '',
         },
-        removeEventListener: function() {},
+        removeEventListener() {},
       };
       const removeEventListenerSpy = sandbox.spy(
           bigPlayDivMock, 'removeEventListener');
-      const adDisplayContainerMock = {initialize: function() {}};
+      const adDisplayContainerMock = {initialize() {}};
       const initSpy = sandbox.spy(adDisplayContainerMock, 'initialize');
-      const videoPlayerMock = {load: function() {}};
+      const videoPlayerMock = {load() {}};
       const loadSpy = sandbox.spy(videoPlayerMock, 'load');
       //const playAdsSpy = sandbox.spy(imaVideoObj, 'playAds');
       //const playAdsFunc = imaVideoObj.playAds;
@@ -190,7 +190,7 @@ describe('amp-ima-video', () => {
         src: srcUrl,
         tag: adTagUrl,
       });
-      const mockAdsLoader = {contentComplete: function() {}};
+      const mockAdsLoader = {contentComplete() {}};
       const completeSpy = sandbox.spy(mockAdsLoader, 'contentComplete');
       imaVideoObj.setAdsLoaderForTesting(mockAdsLoader);
 
@@ -234,11 +234,11 @@ describe('amp-ima-video', () => {
         CONTENT_RESUME_REQUESTED: 'crr',
       };
       const mockAdsManager = {
-        addEventListener: function() {},
-        setVolume: function() {},
+        addEventListener() {},
+        setVolume() {},
       };
       const mockAdsManagerLoadedEvent = {
-        getAdsManager: function() {
+        getAdsManager() {
           return mockAdsManager;
         },
       };
@@ -297,11 +297,11 @@ describe('amp-ima-video', () => {
         CONTENT_RESUME_REQUESTED: 'crr',
       };
       const mockAdsManager = {
-        addEventListener: function() {},
-        setVolume: function() {},
+        addEventListener() {},
+        setVolume() {},
       };
       const mockAdsManagerLoadedEvent = {
-        getAdsManager: function() {
+        getAdsManager() {
           return mockAdsManager;
         },
       };
@@ -363,7 +363,7 @@ describe('amp-ima-video', () => {
         src: srcUrl,
         tag: adTagUrl,
       });
-      const adsManagerMock = {destroy: function() {}};
+      const adsManagerMock = {destroy() {}};
       const destroySpy = sandbox.spy(adsManagerMock, 'destroy');
       //const playVideoSpy = sandbox.spy(imaVideoObj, 'playVideo');
       imaVideoObj.setAdsManagerForTesting(adsManagerMock);

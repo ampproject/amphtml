@@ -601,7 +601,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   getPreconnectUrls() {
     return ['https://partner.googleadservices.com',
-            'https://tpc.googlesyndication.com'];
+      'https://tpc.googlesyndication.com'];
   }
 }
 

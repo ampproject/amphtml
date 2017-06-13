@@ -478,8 +478,8 @@ export function onAdsManagerLoaded(global, adsManagerLoadedEvent) {
   const adsRenderingSettings = new global.google.ima.AdsRenderingSettings();
   adsRenderingSettings.restoreCustomPlaybackStateOnAdBreakComplete = true;
   adsRenderingSettings.uiElements =
-      [global.google.ima.UiElements.AD_ATTRIBUTION,
-       global.google.ima.UiElements.COUNTDOWN];
+  [global.google.ima.UiElements.AD_ATTRIBUTION,
+    global.google.ima.UiElements.COUNTDOWN];
   adsManager = adsManagerLoadedEvent.getAdsManager(videoPlayer,
       adsRenderingSettings);
   adsManager.addEventListener(global.google.ima.AdErrorEvent.Type.AD_ERROR,

@@ -791,7 +791,7 @@ describe('FixedLayer', () => {
       expect(fe.element.style.top).to.equal('calc(17px + 11px)');
       // Remove.
       fixedLayer.vsync_ = {
-        mutate: function(callback) {
+        mutate(callback) {
           callback();
         },
       };
@@ -814,7 +814,7 @@ describe('FixedLayer', () => {
 
       // Remove.
       fixedLayer.vsync_ = {
-        mutate: function(callback) {
+        mutate(callback) {
           callback();
         },
       };

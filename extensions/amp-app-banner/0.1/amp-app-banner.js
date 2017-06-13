@@ -420,7 +420,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
     for (let i = 0; i < apps.length; i++) {
       const app = apps[i];
       if (app['platform'] == 'play') {
-        const installAppUrl = `https://play.google.com/store/apps/details` +
+        const installAppUrl = 'https://play.google.com/store/apps/details' +
             `?id=${app['id']}`;
         const openInAppUrl = this.getAndroidIntentForUrl_(app['id']);
         this.setupOpenButton_(this.openButton_, openInAppUrl, installAppUrl);

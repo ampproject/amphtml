@@ -507,12 +507,12 @@ describe('friendly-iframe-embed', () => {
             loadExtension: () => {},
           }},
         },
-        setInterval: function() {
+        setInterval() {
           const interval = window.setInterval.apply(window, arguments);
           polls.push(interval);
           return interval;
         },
-        clearInterval: function(interval) {
+        clearInterval(interval) {
           window.clearInterval.apply(window, arguments);
           const index = polls.indexOf(interval);
           if (index != -1) {

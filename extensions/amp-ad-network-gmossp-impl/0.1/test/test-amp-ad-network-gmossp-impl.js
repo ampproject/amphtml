@@ -116,7 +116,7 @@ document.createElement('amp-ad-network-gmossp-impl');
           creative,
           {
             get: function() { return undefined; },
-            has: function() { return false; },
+            has() { return false; },
           })).to.eventually.deep.equal(
             {creative, signature: null}
           );
@@ -127,10 +127,10 @@ document.createElement('amp-ad-network-gmossp-impl');
         return expect(gmosspImpl.extractCreativeAndSignature(
           creative,
           {
-            get: function(name) {
+            get(name) {
               return name == 'X-AmpAdSignature' ? 'AQAB' : undefined;
             },
-            has: function(name) {
+            has(name) {
               return name === 'X-AmpAdSignature';
             },
           })).to.eventually.deep.equal(

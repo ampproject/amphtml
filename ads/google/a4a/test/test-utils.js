@@ -148,7 +148,7 @@ describe('Google A4A utils', () => {
         setupForAdTesting(fixture);
         let url;
         const headers = {
-          get: function(name) {
+          get(name) {
             if (name == 'X-AmpAnalytics') {
               return JSON.stringify({url});
             }
@@ -156,7 +156,7 @@ describe('Google A4A utils', () => {
               return 'qqid_string';
             }
           },
-          has: function(name) {
+          has(name) {
             if (name == 'X-AmpAnalytics') {
               return true;
             }

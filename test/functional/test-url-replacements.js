@@ -22,11 +22,11 @@ import {
   markElementScheduledForTesting,
   resetScheduledElementForTesting,
 } from '../../src/custom-element';
-import {cidServiceForDocForTesting,} from
+import {cidServiceForDocForTesting} from
     '../../extensions/amp-analytics/0.1/cid-impl';
 import {installCryptoService} from '../../src/service/crypto-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
-import {installDocumentInfoServiceForDoc,} from
+import {installDocumentInfoServiceForDoc} from
     '../../src/service/document-info-impl';
 import {
   installActivityServiceForTesting,
@@ -110,7 +110,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
   function getFakeWindow() {
     loadObservable = new Observable();
     const win = {
-      addEventListener: function(type, callback) {
+      addEventListener(type, callback) {
         loadObservable.add(callback);
       },
       Object,
@@ -120,7 +120,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
           loadEventStart: 0,
         },
       },
-      removeEventListener: function(type, callback) {
+      removeEventListener(type, callback) {
         loadObservable.remove(callback);
       },
       document: {
@@ -859,7 +859,8 @@ describes.sandboxed('UrlReplacements', {}, () => {
   it('should reject javascript protocol', () => {
     const win = getFakeWindow();
     const urlReplacements = urlReplacementsForDoc(win.ampdoc);
-    return urlReplacements.expandAsync(`javascript://example.com/?r=RANDOM`)
+    /*eslint no-script-url: 0*/
+    return urlReplacements.expandAsync('javascript://example.com/?r=RANDOM')
         .then(
           () => { throw new Error('never here'); },
           err => {
@@ -910,7 +911,8 @@ describes.sandboxed('UrlReplacements', {}, () => {
       const win = getFakeWindow();
       const urlReplacements = urlReplacementsForDoc(win.ampdoc);
       expect(() => {
-        urlReplacements.expandSync(`javascript://example.com/?r=RANDOM`);
+        /*eslint no-script-url: 0*/
+        urlReplacements.expandSync('javascript://example.com/?r=RANDOM');
       }).to.throw('invalid protocol');
     });
   });

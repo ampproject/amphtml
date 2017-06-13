@@ -333,8 +333,8 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         return impl.extractCreativeAndSignature(
           creative,
           {
-            get: function() { return undefined; },
-            has: function() { return false; },
+            get() { return undefined; },
+            has() { return false; },
           }).then(adResponse => {
             expect(adResponse).to.deep.equal(
                   {creative, signature: null, size: null});
@@ -347,10 +347,10 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         return impl.extractCreativeAndSignature(
           creative,
           {
-            get: function(name) {
+            get(name) {
               return name == 'X-AmpAdSignature' ? 'AQAB' : undefined;
             },
-            has: function(name) {
+            has(name) {
               return name === 'X-AmpAdSignature';
             },
           }).then(adResponse => {
@@ -367,7 +367,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         return impl.extractCreativeAndSignature(
           creative,
           {
-            get: function(name) {
+            get(name) {
               switch (name) {
                 case 'X-AmpAnalytics':
                   return JSON.stringify({url});
@@ -377,7 +377,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
                   return undefined;
               }
             },
-            has: function(name) {
+            has(name) {
               return !!this.get(name);
             },
           }).then(adResponse => {

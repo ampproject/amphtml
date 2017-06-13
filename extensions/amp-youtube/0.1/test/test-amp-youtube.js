@@ -146,12 +146,12 @@ describe('amp-youtube', function() {
 
       // Fake out the 404 image response dimensions of YT.
       Object.defineProperty(imgPlaceholder, 'naturalWidth', {
-        get: function() {
+        get() {
           return 120;
         },
       });
       Object.defineProperty(imgPlaceholder, 'naturalHeight', {
-        get: function() {
+        get() {
           return 90;
         },
       });

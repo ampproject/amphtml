@@ -1388,7 +1388,7 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
       getState: () => {return ResourceState.LAYOUT_COMPLETE;},
     };
     element.resources_ = {
-      scheduleLayout: function(el, fb) {
+      scheduleLayout(el, fb) {
         if (el == element && fb == fallback) {
           resourcesSpy();
         }

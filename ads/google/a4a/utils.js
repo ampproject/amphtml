@@ -429,15 +429,15 @@ export function additionalDimensions(win, viewportSize) {
     innerHeight = viewportSize.height;
   } catch (e) {}
   return [win.screenLeft,
-          win.screenTop,
-          screenX,
-          screenY,
-          win.screen ? win.screen.availWidth : undefined,
-          win.screen ? win.screen.availTop : undefined,
-          outerWidth,
-          outerHeight,
-          innerWidth,
-          innerHeight].join();
+    win.screenTop,
+    screenX,
+    screenY,
+    win.screen ? win.screen.availWidth : undefined,
+    win.screen ? win.screen.availTop : undefined,
+    outerWidth,
+    outerHeight,
+    innerWidth,
+    innerHeight].join();
 };
 
 /**
@@ -504,7 +504,7 @@ export function extractAmpAnalyticsConfig(
     const baseCsiUrl = 'https://csi.gstatic.com/csi?s=a4a' +
         `&c=${correlator}&slotId=${slotId}&qqid.${slotId}=${qqid}` +
         `&dt=${opt_initTime}` +
-        (eids != 'null' ? `&e.${slotId}=${eids}` : ``) +
+        (eids != 'null' ? `&e.${slotId}=${eids}` : '') +
         `&rls=$internalRuntimeVersion$&adt.${slotId}=${adType}`;
     opt_deltaTime = Math.round(opt_deltaTime);
 

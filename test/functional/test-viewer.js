@@ -67,7 +67,7 @@ describe('Viewer', () => {
       defaultView: windowApi,
       hidden: false,
       visibilityState: 'visible',
-      addEventListener: function(type, listener) {
+      addEventListener(type, listener) {
         events[type] = listener;
       },
       referrer: '',

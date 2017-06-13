@@ -100,7 +100,7 @@ describe('amp-a4a', () => {
     viewerWhenVisibleMock = sandbox.stub(Viewer.prototype, 'whenFirstVisible');
     viewerWhenVisibleMock.returns(Promise.resolve());
     mockResponse = {
-      arrayBuffer: function() {
+      arrayBuffer() {
         return utf8Encode(validCSSAmp.reserialized);
       },
       bodyUsed: false,
@@ -550,7 +550,7 @@ describe('amp-a4a', () => {
                     // DOM mutations are actually completed before testing.
                     a4a.vsync_.runScheduledTasks_();
                     const nameChild = a4aElement.querySelector(
-                        `iframe[src^="nameframe"]`);
+                        'iframe[src^="nameframe"]');
                     expect(nameChild).to.not.be.ok;
                     if (headerVal != 'safeframe') {
                       const unsafeChild = a4aElement.querySelector('iframe');
@@ -1131,7 +1131,7 @@ describe('amp-a4a', () => {
     });
     it('should collapse for 204 response code', () => {
       xhrMock.onFirstCall().returns(Promise.resolve({
-        arrayBuffer: function() {
+        arrayBuffer() {
           return utf8Encode(validCSSAmp.reserialized);
         },
         bodyUsed: false,
@@ -1187,7 +1187,7 @@ describe('amp-a4a', () => {
     });
     it('should collapse for empty array buffer', () => {
       xhrMock.onFirstCall().returns(Promise.resolve({
-        arrayBuffer: function() {
+        arrayBuffer() {
           return utf8Encode('');
         },
         bodyUsed: false,

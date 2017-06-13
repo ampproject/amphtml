@@ -162,7 +162,7 @@ export class PinItButton {
     this.url = encodeURIComponent(this.element.getAttribute('data-url'));
 
     const query = [
-      `amp=1`,
+      'amp=1',
       `guid=${Util.guid}`,
       `url=${this.url}`,
       `media=${this.media}`,

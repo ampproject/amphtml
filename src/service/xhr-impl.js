@@ -176,12 +176,12 @@ export class Xhr {
       } else if (init.requireAmpResponseSourceOrigin) {
         // If the `AMP-Access-Control-Allow-Source-Origin` header is not
         // returned but required, return error.
-        user().assert(false, `Response must contain the` +
+        user().assert(false, 'Response must contain the' +
             ` ${ALLOW_SOURCE_ORIGIN_HEADER} header`);
       }
       return response;
     }, reason => {
-      throw user().createExpectedError('XHR', `Failed fetching` +
+      throw user().createExpectedError('XHR', 'Failed fetching' +
           ` (${targetOrigin}/...):`, reason && reason.message);
     });
   }

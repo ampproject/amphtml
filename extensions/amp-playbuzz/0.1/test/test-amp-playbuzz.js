@@ -40,11 +40,11 @@ describe('amp-playbuzz', () => {
 
   function createItemSrc() {
     return {
-      withUrl: function(itemUrl) {
+      withUrl(itemUrl) {
         this.itemUrl = itemUrl;
         return this;
       },
-      withItemId: function(itemId) {
+      withItemId(itemId) {
         this.itemId = itemId;
         return this;
       },

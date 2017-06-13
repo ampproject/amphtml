@@ -92,8 +92,8 @@ describe('amp-audio', () => {
       muted: '',
       loop: '',
     }, [
-        {tag: 'source', src: 'https://origin.com/audio.mp3',
-            type: 'audio/mpeg'},
+      {tag: 'source', src: 'https://origin.com/audio.mp3',
+        type: 'audio/mpeg'},
         {tag: 'source', src: 'https://origin.com/audio.ogg', type: 'audio/ogg'},
         {tag: 'text', text: 'Unsupported.'},
     ]).then(a => {

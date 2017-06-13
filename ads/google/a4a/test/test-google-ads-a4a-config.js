@@ -131,7 +131,7 @@ describe('a4a_config', () => {
         hidden: false,
         cookie: null,
         visibilityState: 'visible',
-        addEventListener: function(type, listener) {
+        addEventListener(type, listener) {
           events[type] = listener;
         },
       },
@@ -283,7 +283,7 @@ describe('a4a_config', () => {
       {param: '2', expId: EXTERNAL_BRANCHES.experiment, a4aEnabled: true},
       {param: '3', expId: EXTERNAL_DELAYED_BRANCHES.control, a4aEnabled: false},
       {param: '4', expId: EXTERNAL_DELAYED_BRANCHES.experiment,
-       a4aEnabled: true},
+        a4aEnabled: true},
     ];
     externalIdTestCases.forEach(testCase => {
       it(`should force experiment from URL param ${testCase.param}`,
@@ -359,7 +359,7 @@ describe('a4a_config hash param parsing', () => {
         hidden: false,
         cookie: null,
         visibilityState: 'visible',
-        addEventListener: function(type, listener) {
+        addEventListener(type, listener) {
           events[type] = listener;
         },
       },

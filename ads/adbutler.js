@@ -21,7 +21,6 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function adbutler(global,data) {
-  let placeholderID;
   validateData(
     data,
     ['account', 'zone', 'width', 'height'],
@@ -30,7 +29,7 @@ export function adbutler(global,data) {
 
   data['place'] = data['place'] || 0;
 
-  placeholderID = 'placement_' + data['zone'] + '_' + data['place'];
+  const placeholderID = 'placement_' + data['zone'] + '_' + data['place'];
 
   // placeholder div
   const d = global.document.createElement('div');
@@ -41,7 +40,7 @@ export function adbutler(global,data) {
   global.AdButler.ads = global.AdButler.ads || [];
 
   global.AdButler.ads.push({
-    handler: function(opt) {
+    handler(opt) {
       global.AdButler.register(
           data['account'],
           data['zone'],

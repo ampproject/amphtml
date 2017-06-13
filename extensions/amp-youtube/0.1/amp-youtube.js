@@ -117,9 +117,9 @@ class AmpYoutube extends AMP.BaseElement {
   }
 
    /** @override */
-   viewportCallback(visible) {
-     this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
-   }
+  viewportCallback(visible) {
+    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
+  }
 
   /** @override */
   buildCallback() {

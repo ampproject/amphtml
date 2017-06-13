@@ -115,8 +115,8 @@ document.createElement('amp-ad-network-triplelift-impl');
         return expect(tripleliftImpl.extractCreativeAndSignature(
           creative,
           {
-            get: function() { return undefined; },
-            has: function() { return false; },
+            get() { return undefined; },
+            has() { return false; },
           })).to.eventually.deep.equal(
             {creative, signature: null}
           );
@@ -127,10 +127,10 @@ document.createElement('amp-ad-network-triplelift-impl');
         return expect(tripleliftImpl.extractCreativeAndSignature(
           creative,
           {
-            get: function(name) {
+            get(name) {
               return name == 'X-AmpAdSignature' ? 'AQAB' : undefined;
             },
-            has: function(name) {
+            has(name) {
               return name === 'X-AmpAdSignature';
             },
           })).to.eventually.deep.equal(

@@ -286,7 +286,7 @@ describe('all-traffic-experiments-tests', () => {
           hidden: false,
           cookie: null,
           visibilityState: 'visible',
-          addEventListener: function(type, listener) {
+          addEventListener(type, listener) {
             events[type] = listener;
           },
         },
@@ -439,7 +439,7 @@ describe('all-traffic-experiments-tests', () => {
     ];
 
     tests.forEach(test => {
-      const desc = `should serve ` +
+      const desc = 'should serve ' +
         `${test.shouldServeFastFetch ? 'Fast' : 'Delayed'} Fetch to ` +
         `${test.hasLaunched ? 'launched' : 'unlaunched'} ` +
         `${test.adType} ${test.branchType} ` +

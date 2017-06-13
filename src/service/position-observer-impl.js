@@ -90,7 +90,7 @@ class AbstractPositionObserver {
       position: null,
       turn: (fidelity == PositionObserverFidelity.LOW) ?
           Math.floor(Math.random() * LOW_FIDELITY_FRAME_COUNT) : 0,
-      trigger: function(position) {
+      trigger(position) {
         const prePos = entry.position;
         if (prePos
             && layoutRectEquals(prePos.positionRect, position.positionRect)

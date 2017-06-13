@@ -165,16 +165,16 @@ runner.run('Cache SW', () => {
 
   describe('isCdnJsFile', () => {
     it('matches for CDN JS files', () => {
-      const rtvless = `https://cdn.ampproject.org/v0.js`;
+      const rtvless = 'https://cdn.ampproject.org/v0.js';
       expect(sw.isCdnJsFile(url)).to.be.true;
       expect(sw.isCdnJsFile(rtvless)).to.be.true;
     });
 
     it('matches for CDN JS extension files', () => {
       const url = `https://cdn.ampproject.org/rtv/${rtv}/v0/amp-comp-0.1.js`;
-      const rtvless = `https://cdn.ampproject.org/v0/amp-comp-0.1.js`;
+      const rtvless = 'https://cdn.ampproject.org/v0/amp-comp-0.1.js';
       const versioned = `https://cdn.ampproject.org/rtv/${rtv}/v0/amp-comp-0.1.js`;
-      const rtvlessVersioned = `https://cdn.ampproject.org/v0/amp-comp-0.1.js`;
+      const rtvlessVersioned = 'https://cdn.ampproject.org/v0/amp-comp-0.1.js';
       expect(sw.isCdnJsFile(url)).to.be.true;
       expect(sw.isCdnJsFile(rtvless)).to.be.true;
       expect(sw.isCdnJsFile(versioned)).to.be.true;
@@ -182,23 +182,23 @@ runner.run('Cache SW', () => {
     });
 
     it('does not match for fake extensions', () => {
-      expect(sw.isCdnJsFile(`https://cdn.ampproject.org/v0/experiments.js`))
+      expect(sw.isCdnJsFile('https://cdn.ampproject.org/v0/experiments.js'))
           .to.be.false;
-      expect(sw.isCdnJsFile(`https://cdn.ampproject.org/v0/validator.js`))
+      expect(sw.isCdnJsFile('https://cdn.ampproject.org/v0/validator.js'))
           .to.be.false;
     });
 
     it('does not match for other CDN files', () => {
-      expect(sw.isCdnJsFile(`https://cdn.ampproject.org/c/amp.js`)).to.be.false;
-      expect(sw.isCdnJsFile(`https://cdn.ampproject.org/v/amp.js`)).to.be.false;
-      expect(sw.isCdnJsFile(`https://cdn.ampproject.org/i/amp.js`)).to.be.false;
+      expect(sw.isCdnJsFile('https://cdn.ampproject.org/c/amp.js')).to.be.false;
+      expect(sw.isCdnJsFile('https://cdn.ampproject.org/v/amp.js')).to.be.false;
+      expect(sw.isCdnJsFile('https://cdn.ampproject.org/i/amp.js')).to.be.false;
       expect(sw.isCdnJsFile(`https://cdn.ampproject.org/rtv/${rtv}/v0.json`)).to.be.false;
-      expect(sw.isCdnJsFile(`https://cdn.ampproject.org/v0.json`)).to.be.false;
+      expect(sw.isCdnJsFile('https://cdn.ampproject.org/v0.json')).to.be.false;
     });
 
     it('does not match for non CDN domains', () => {
       const url = `https://www.malicious.com/rtv/${rtv}/v0.js`;
-      const rtvless = `https://www.malicious.com/v0.js`;
+      const rtvless = 'https://www.malicious.com/v0.js';
       expect(sw.isCdnJsFile(url)).to.be.false;
       expect(sw.isCdnJsFile(rtvless)).to.be.false;
     });
@@ -846,7 +846,7 @@ runner.run('Cache SW', () => {
       let rtvless;
 
       beforeEach(() => {
-        rtvless = new Request(`https://cdn.ampproject.org/v0.js`);
+        rtvless = new Request('https://cdn.ampproject.org/v0.js');
       });
 
       it('fetches current prod RTV', () => {
