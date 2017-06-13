@@ -174,17 +174,17 @@ export class Storage {
  */
 export class Store {
   /**
-   * @param {!JSONType} obj
+   * @param {!JsonObject} obj
    * @param {number=} opt_maxValues
    */
   constructor(obj, opt_maxValues) {
-    /** @const {!JSONType} */
-    this.obj = /** @type {!JSONType} */ (recreateNonProtoObject(obj));
+    /** @const {!JsonObject} */
+    this.obj = /** @type {!JsonObject} */ (recreateNonProtoObject(obj));
 
     /** @private @const {number} */
     this.maxValues_ = opt_maxValues || MAX_VALUES_PER_ORIGIN;
 
-    /** @private @const {!Object<string, !JSONType>} */
+    /** @private @const {!Object<string, !JsonObject>} */
     this.values_ = this.obj['vv'] || Object.create(null);
     if (!this.obj['vv']) {
       this.obj['vv'] = this.values_;
@@ -214,7 +214,7 @@ export class Store {
       item['v'] = value;
       item['t'] = Date.now();
     } else {
-      this.values_[name] = /** @type {!JSONType} */ ({
+      this.values_[name] = dict({
         'v': value,
         't': Date.now(),
       });

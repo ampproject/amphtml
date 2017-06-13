@@ -160,7 +160,7 @@ export class AccessService {
     /** @private {?Promise<string>} */
     this.readerIdPromise_ = null;
 
-    /** @private {?JSONType} */
+    /** @private {?JsonObject} */
     this.authResponse_ = null;
 
     /** @const @private {!SignInProtocol} */
@@ -494,7 +494,7 @@ export class AccessService {
   }
 
   /**
-   * @param {!JSONType} authResponse
+   * @param {!JsonObject} authResponse
    * @private
    */
   setAuthResponse_(authResponse) {

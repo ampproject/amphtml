@@ -55,8 +55,8 @@ let JSONValueDef;
 
 /**
  * Recreates objects with prototype-less copies.
- * @param {!JSONObjectDef} obj
- * @return {!JSONObjectDef}
+ * @param {!JsonObject} obj
+ * @return {!JsonObject}
  */
 export function recreateNonProtoObject(obj) {
   const copy = Object.create(null);
@@ -67,7 +67,7 @@ export function recreateNonProtoObject(obj) {
     const v = obj[k];
     copy[k] = isObject(v) ? recreateNonProtoObject(v) : v;
   }
-  return copy;
+  return /** @type {!JsonObject} */ (copy);
 }
 
 
@@ -77,9 +77,9 @@ export function recreateNonProtoObject(obj) {
  * field in a chain does not exist or is not an object, the returned value will
  * be `undefined`.
  *
- * @param {!JSONObjectDef} obj
+ * @param {!JsonObject} obj
  * @param {string} expr
- * @return {?JSONValueDef|undefined}
+ * @return {*}
  */
 export function getValueForExpr(obj, expr) {
   // The `.` indicates "the object itself".
