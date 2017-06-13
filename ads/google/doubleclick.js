@@ -64,11 +64,12 @@ export function doubleclick(global, data) {
 }
 
 /**
+ * @param {Window} global
  * @param {!Object} data
  * @param {!GladeExperiment} gladeExperiment
  * @param {!string} url
  */
-function doubleClickWithGpt(data, gladeExperiment, url) {
+function doubleClickWithGpt(global, data, gladeExperiment, url) {
   const dimensions = [[
     parseInt(data.overrideWidth || data.width, 10),
     parseInt(data.overrideHeight || data.height, 10),
@@ -183,10 +184,11 @@ function doubleClickWithGpt(data, gladeExperiment, url) {
 }
 
 /**
+ * @param {Window} global
  * @param {!Object} data
  * @param {!GladeExperiment} gladeExperiment
  */
-function doubleClickWithGlade(data, gladeExperiment) {
+function doubleClickWithGlade(global, data, gladeExperiment) {
   const requestHeight = parseInt(data.overrideHeight || data.height, 10);
   const requestWidth = parseInt(data.overrideWidth || data.width, 10);
 
