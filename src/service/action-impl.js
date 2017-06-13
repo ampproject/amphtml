@@ -218,7 +218,8 @@ export class ActionService {
       this.root_.addEventListener('click', event => {
         if (!event.defaultPrevented) {
           const element = dev().assertElement(event.target);
-          this.trigger(element, name, event, ActionTrust.HIGH);
+          // TODO(choumx, #9699): HIGH.
+          this.trigger(element, name, event, ActionTrust.MEDIUM);
         }
       });
       this.root_.addEventListener('keydown', event => {
@@ -228,21 +229,23 @@ export class ActionService {
           if (!event.defaultPrevented &&
               element.getAttribute('role') == 'button') {
             event.preventDefault();
-            this.trigger(element, name, event, ActionTrust.HIGH);
+            // TODO(choumx, #9699): HIGH.
+            this.trigger(element, name, event, ActionTrust.MEDIUM);
           }
         }
       });
     } else if (name == 'submit') {
       this.root_.addEventListener(name, event => {
         const element = dev().assertElement(event.target);
-        this.trigger(element, name, event, ActionTrust.HIGH);
+        // TODO(choumx, #9699): HIGH.
+        this.trigger(element, name, event, ActionTrust.MEDIUM);
       });
     } else if (name == 'change') {
       this.root_.addEventListener(name, event => {
         const element = dev().assertElement(event.target);
         // Only `change` events from <select> elements have high trust.
         const trust = element.tagName == 'SELECT'
-            ? ActionTrust.HIGH
+            ? ActionTrust.MEDIUM // TODO(choumx, #9699): HIGH.
             : ActionTrust.MEDIUM;
         this.addInputDetails_(event);
         this.trigger(element, name, event, trust);
@@ -342,8 +345,8 @@ export class ActionService {
    * @param {?ActionEventDef} event
    */
   execute(target, method, args, source, event) {
-    // Invocation of actions by the runtime has the highest trust of all!
-    const trust = ActionTrust.HIGH;
+    // Invocation of actions by the runtime has the highest trust of all.
+    const trust = ActionTrust.MEDIUM; // TODO(choumx, #9699): HIGH.
     this.invoke_(target, method, args, source, event, trust, null);
   }
 
