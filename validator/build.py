@@ -585,7 +585,6 @@ def Main():
   SetupOutDir(out_dir='dist')
   GenValidatorProtoascii(out_dir='dist')
   GenValidatorPb2Py(out_dir='dist')
-  GenValidatorProtoascii(out_dir='dist')
   GenValidatorGeneratedJs(out_dir='dist')
   GenValidatorGeneratedLightAmpJs(out_dir='dist')
   GenValidatorGeneratedMd(out_dir='dist')
