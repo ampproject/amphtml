@@ -98,6 +98,71 @@ export function resetFixedContainer(win, fixedContainer) {
 
 
 /**
+ * An observable that triggers with a cached value on demand, as long as the
+ * cahced value is valid.
+ * @template T
+ */
+class CachedValueObservable {
+
+  /**
+   * @param {T=} opt_initialValue
+   */
+  constructor(opt_initialValue) {
+    /** @type {!Observable<T>} */
+    this.observable_ = new Observable();
+
+    /** @type {?T} */
+    this.value_ = opt_initialValue || null;
+  }
+
+  /**
+   * @param {function(T)} handler
+   * @return {!UnlistenDef}
+   */
+  add(handler) {
+    return this.observable_.add(handler);
+  }
+
+  /**
+   * Invalidates cached value.
+   */
+  invalidateValue() {
+    this.value_ = null;
+  }
+
+  /**
+   * Sets cached value.
+   * @param {T} value
+   */
+  setValue(value) {
+    this.value_ = value;
+  }
+
+  /**
+   * @return {?T}
+   */
+  getValueOptional() {
+    return this.value_;
+  }
+
+  /**
+   * @param {T=} opt_value
+   */
+  fire(opt_value) {
+    const shouldExecute = !this.value_ !== !opt_value;
+
+    if (opt_value && !this.value_) {
+      this.setValue(dev().assert(opt_value));
+    }
+
+    if (shouldExecute) {
+      this.observable_.fire(dev().assert(this.value_));
+    }
+  }
+}
+
+
+/**
  * Implementation of ViewportBindingDef that works inside an non-scrollable
  * iframe box by listening to host doc for position and resize updates.
  *
@@ -142,34 +207,62 @@ export class ViewportBindingInabox {
      */
     this.boxRect_ = layoutRectLtwh(0, boxHeight + 1, boxWidth, boxHeight);
 
+    /**
+     * Keeps track of the iframe box rect when collapsed (full overlay mode) and
+     * fires observers if the rect is not stale.
+     * @private @const {!CachedValueObservable<!../layout-rect.LayoutRectDef>}
+     */
+    this.collapsedRectObservable_ = new CachedValueObservable(this.boxRect_);
+
+    /**
+     * @type {boolean}
+     * @visibleForTesting
+     */
+    this.inFullOverlayMode = false;
+
     /** @private @const {!../../3p/iframe-messaging-client.IframeMessagingClient} */
     this.iframeClient_ = iframeMessagingClientFor(win);
+
+    this.collapsedRectObservable_.add(collapsedBoxRect => {
+      this.updateBoxRect_(collapsedBoxRect);
+    });
 
     dev().fine(TAG, 'initialized inabox viewport');
   }
 
   /** @override */
   connect() {
+    this.listenForPosition_();
+    this.listenForHostRemeasure_();
+  }
+
+  /** @private */
+  listenForPosition_() {
     if (nativeIntersectionObserverSupported(this.win)) {
       // Using native IntersectionObserver, no position data needed
       // from host doc.
       return;
     }
+
     this.iframeClient_.makeRequest(
         MessageType.SEND_POSITIONS, MessageType.POSITION,
         data => {
           dev().fine(TAG, 'Position changed: ', data);
           const oldViewportRect = this.viewportRect_;
-          const oldSelfRect = this.boxRect_;
           this.viewportRect_ = data.viewport;
-          this.boxRect_ = data.target;
-          if (isChanged(this.boxRect_, oldSelfRect)) {
-            // Remeasure all AMP elements once iframe position is changed.
-            // Because all layout boxes are calculated relatively to the
-            // iframe position.
-            this.remeasureAllElements_();
-            // TODO: fire DOM mutation event once we handle them
+
+          this.updateBoxRect_(data.target);
+
+          // When the viewport changes it's possible that our cached rect for
+          // the collapsed frame box is stale, so we invalidate our cached
+          // value.
+          // TODO(alanorozco): Invalidate when using native InOb
+          if (this.inFullOverlayMode &&
+              isChanged(this.viewportRect_, oldViewportRect)) {
+
+            this.collapsedRectObservable_.invalidateValue();
           }
+
           if (isResized(this.viewportRect_, oldViewportRect)) {
             this.resizeObservable_.fire();
           }
@@ -177,6 +270,22 @@ export class ViewportBindingInabox {
             this.scrollObservable_.fire();
           }
         });
+  }
+
+  /** @private */
+  listenForHostRemeasure_() {
+    this.iframeClient_.registerCallback(
+        MessageType.CANCEL_FULL_OVERLAY_FRAME_REMEASURE,
+        data => this.handleCollapseOverlayRemeasure(data.collapsedRect));
+  }
+
+  /**
+   * @param {!../layout-rect.LayoutRectDef} rect
+   * @visibleForTesting
+   */
+  handleCollapseOverlayRemeasure(rect) {
+    // Host has remeasured box after collapse
+    this.collapsedRectObservable_.fire(rect);
   }
 
   /** @override */
@@ -217,11 +326,37 @@ export class ViewportBindingInabox {
     return this.viewportRect_.left;
   }
 
-  remeasureAllElements_() {
-    const resources = resourcesForDoc(this.win.document).get();
-    for (let i = 0; i < resources.length; i++) {
-      resources[i].measure();
+  /**
+   * @param {!../layout-rect.LayoutRectDef|undefined} boxRect
+   * @private
+   */
+  updateBoxRect_(boxRect) {
+    if (!boxRect) {
+      return;
     }
+    if (isChanged(boxRect, this.boxRect_)) {
+      dev().fine(TAG, 'Updating viewport box rect: ', boxRect);
+
+      this.boxRect_ = boxRect;
+      // Remeasure all AMP elements once iframe position or size are changed.
+      // Because all layout boxes are calculated relatively to the
+      // iframe position.
+      this.remeasureAllElements_();
+      // TODO: fire DOM mutation event once we handle them
+    }
+  }
+
+  /**
+   * @return {!Array<!../service/resource.Resource>}
+   * @visibleForTesting
+   */
+  getChildResources() {
+    return resourcesForDoc(this.win.document).get();
+  }
+
+  /** @private */
+  remeasureAllElements_() {
+    this.getChildResources().forEach(resource => resource.measure());
   }
 
   /** @override */
@@ -289,11 +424,18 @@ export class ViewportBindingInabox {
    */
   requestFullOverlayFrame_() {
     return new Promise((resolve, reject) => {
-      this.iframeClient_.makeRequest(
+      const unlisten = this.iframeClient_.makeRequest(
           MessageType.FULL_OVERLAY_FRAME,
           MessageType.FULL_OVERLAY_FRAME_RESPONSE,
           response => {
+            unlisten();
+
+            this.inFullOverlayMode = true;
+
             if (response.success) {
+              this.collapsedRectObservable_.setValue(response.collapsedRect);
+              this.updateBoxRect_(response.expandedRect);
+
               resolve();
             } else {
               reject('Request to open lightbox rejected by host document');
@@ -308,10 +450,21 @@ export class ViewportBindingInabox {
    */
   requestCancelFullOverlayFrame_() {
     return new Promise(resolve => {
-      this.iframeClient_.makeRequest(
+      const unlisten = this.iframeClient_.makeRequest(
           MessageType.CANCEL_FULL_OVERLAY_FRAME,
           MessageType.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
-          resolve);
+          () => {
+            unlisten();
+
+            this.inFullOverlayMode = false;
+
+            // Fire cached collapsed rect observable. If our viewport changed
+            // in the meantime, our value will be stale and the observable
+            // won't fire. In this case, we'll wait for remeasure.
+            // (See message handler for CANCEL_FULL_OVERLAY_FRAME_REMEASURE)
+            this.collapsedRectObservable_.fire();
+            resolve();
+          });
     });
   }
 

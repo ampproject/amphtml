@@ -149,12 +149,20 @@ export class InaboxMessagingHost {
   // 1. Reject request if frame is out of focus
   // 2. Disable zoom and scroll on parent doc
   handleEnterFullOverlay_(iframe, request, source, origin) {
-    expandFrame(this.win_, iframe, () => {
+    expandFrame(this.win_, iframe, (collapsedRect, expandedRect) => {
+      // Inform client of dimensions before and after expand.
+      // The rect value before expand is propagated so that the client has the
+      // option to update its own dimensions after collapse  without having to
+      // wait for remeasure.
       source./*OK*/postMessage(
           serializeMessage(
               MessageType.FULL_OVERLAY_FRAME_RESPONSE,
               request.sentinel,
-              dict({'success': true})),
+              dict({
+                'success': true,
+                'collapsedRect': collapsedRect,
+                'expandedRect': expandedRect,
+              })),
           origin);
     });
 
@@ -170,11 +178,22 @@ export class InaboxMessagingHost {
    */
   handleCancelFullOverlay_(iframe, request, source, origin) {
     collapseFrame(this.win_, iframe, () => {
+      // Inform client that the iframe has been collapsed.
+      // We send two separate messages for different events (collapsed/measure)
+      // as measure is asynchronous and we want the client to be able to update
+      // itself without waiting when possible.
       source./*OK*/postMessage(
           serializeMessage(
               MessageType.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
               request.sentinel,
               dict({'success': true})),
+          origin);
+    }, collapsedRect => {
+      source./*OK*/postMessage(
+          serializeMessage(
+              MessageType.CANCEL_FULL_OVERLAY_FRAME_REMEASURE,
+              request.sentinel,
+              dict({'collapsedRect': collapsedRect})),
           origin);
     });
 
