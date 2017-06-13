@@ -127,7 +127,9 @@ export class AmpSidebar extends AMP.BaseElement {
           this.toolbarTarget_ = this.element.ownerDocument.createElement("header");
           this.element.parentElement.insertBefore(this.toolbarTarget_, this.element);
           if(!this.isToolbar_()) {
-            this.toolbarTarget_.style.display = 'none';
+            setStyles(this.toolbarTarget_, {
+              'display': 'none'
+            });
           }
 
           //Finally, find our tool-bar only elements
@@ -219,11 +221,15 @@ export class AmpSidebar extends AMP.BaseElement {
       this.toolbarClone_ = this.toolbarNav_.cloneNode(true);
       this.toolbarTarget_.appendChild(this.toolbarClone_);
       if(this.toolbarTarget_.style.display === 'none') {
-        this.toolbarTarget_.style.display = null;
+        setStyles(this.toolbarTarget_, {
+          'display': null
+        });
       }
       if(this.toolbarOnlyElements_) {
         this.toolbarOnlyElements_.forEach(element => {
-          element.style.display = 'none';
+          setStyles(element, {
+            'display': 'none'
+          });
         });
       }
       this.toolbarTarget_.setAttribute('toolbar', '');
@@ -233,7 +239,9 @@ export class AmpSidebar extends AMP.BaseElement {
       this.toolbarTarget_.removeChild(this.toolbarClone_);
       if(this.toolbarOnlyElements_) {
         this.toolbarOnlyElements_.forEach(element => {
-          element.style.display = null;
+          setStyles(element, {
+            'display': null
+          });
         });
       }
       this.toolbarTarget_.removeAttribute('toolbar');
@@ -241,6 +249,9 @@ export class AmpSidebar extends AMP.BaseElement {
       // Check if our target still has elements, if not, do not display it
       if(!this.toolbarTarget_.hasChildNodes()) {
         this.toolbarTarget_.style.display = 'none';
+        setStyles(this.toolbarTarget_, {
+          'display': 'none'
+        });
       }
     }
   }
