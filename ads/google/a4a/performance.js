@@ -165,7 +165,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
 
     /** @const {!function():number} */
     this.getDeltaTime = (win.performance && win.performance.now.bind(
-            win.performance)) || (() => {return Date.now() - this.initTime_;});
+        win.performance)) || (() => {return Date.now() - this.initTime_;});
 
     /** (Not constant b/c this can be overridden for testing.) @private */
     this.pingbackAddress_ = 'https://csi.gstatic.com/csi';
@@ -286,21 +286,21 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
       // Element must be an AMP element at this time.
       // 50% vis w/o ini load
       vis.listenElement(element, {visiblePercentageMin: 50}, null, null,
-                        () => {
-                          this.sendPing('visHalf');
-                        });
+          () => {
+            this.sendPing('visHalf');
+          });
       // 50% vis w ini load
       vis.listenElement(element,
                         {visiblePercentageMin: 50},
-                        readyPromise, null,
-                        () => {
-                          this.sendPing('visHalfIniLoad');
-                        });
+          readyPromise, null,
+          () => {
+            this.sendPing('visHalfIniLoad');
+          });
       // first visible
       vis.listenElement(element, {visiblePercentageMin: 1}, null, null,
-                        () => {
-                          this.sendPing('firstVisible');
-                        });
+          () => {
+            this.sendPing('firstVisible');
+          });
 
       // ini load
       readyPromise.then(() => {
@@ -309,19 +309,19 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
 
       // first visible + ini-load
       vis.listenElement(element, {waitFor: 'ini-load'},
-                        readyPromise, null,
-                        () => {
-                          this.sendPing('visIniLoad');
-                        });
+          readyPromise, null,
+          () => {
+            this.sendPing('visIniLoad');
+          });
 
       // 50% vis, ini-load and 1 sec
       vis.listenElement(element,
-        {visiblePercentageMin: 1, waitFor: 'ini-load',
-          totalTimeMin: 1000},
-                        readyPromise, null,
-                        () => {
-                          this.sendPing('visLoadAndOneSec');
-                        });
+          {visiblePercentageMin: 1, waitFor: 'ini-load',
+            totalTimeMin: 1000},
+          readyPromise, null,
+          () => {
+            this.sendPing('visLoadAndOneSec');
+          });
     });
   }
 }

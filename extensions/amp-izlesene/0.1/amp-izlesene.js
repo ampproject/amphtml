@@ -48,9 +48,9 @@
   /** @override */
    buildCallback() {
      this.videoid_ = user().assert(
-        this.element.getAttribute('data-videoid'),
-        'The data-videoid attribute is required for <amp-izlesene> %s',
-        this.element);
+         this.element.getAttribute('data-videoid'),
+         'The data-videoid attribute is required for <amp-izlesene> %s',
+         this.element);
    }
 
   /** @return {string} */

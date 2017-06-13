@@ -447,7 +447,7 @@ describe('all-traffic-experiments-tests', () => {
       it(desc, () => {
         element.setAttribute('type', test.adType);
         toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched',
-          test.hasLaunched, true);
+            test.hasLaunched, true);
         if (test.urlParam) {
           win.location.search = test.urlParam;
         } else if (test.branchId != null) {
@@ -461,8 +461,8 @@ describe('all-traffic-experiments-tests', () => {
           DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
           DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH;
         expect(googleAdsIsA4AEnabled(win, element, 'expDoubleclickA4A',
-          external, internal,
-          DOUBLECLICK_A4A_EXTERNAL_DELAYED_EXPERIMENT_BRANCHES_PRE_LAUNCH))
+            external, internal,
+            DOUBLECLICK_A4A_EXTERNAL_DELAYED_EXPERIMENT_BRANCHES_PRE_LAUNCH))
             .to.equal(test.shouldServeFastFetch);
         expectCorrectBranchOnly(element, test.branchId);
         expect(win.document.cookie).to.be.null;

@@ -46,7 +46,7 @@ export function pubmine(global, data) {
       wr = global.document.write;
 
   wr.call(global.document,
-    `<script type="text/javascript">
+      `<script type="text/javascript">
       (function(g){g.__ATA.initAd(
         {sectionId:${o.sectionId}, width:${o.width}, height:${o.height}});
       })(window);

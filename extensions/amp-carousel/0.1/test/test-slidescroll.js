@@ -79,7 +79,7 @@ describe('SlideScroll', () => {
               .length).to.equal(1);
       expect(
           ampSlideScroll.querySelectorAll(
-            '.i-amphtml-slides-container > .i-amphtml-slide-item').length)
+              '.i-amphtml-slides-container > .i-amphtml-slide-item').length)
           .to.equal(5);
       expect(
           ampSlideScroll.getElementsByClassName('amp-carousel-slide').length)

@@ -83,7 +83,7 @@ export function assertConfig(config) {
 function assertTransport(transport) {
   for (const t in transport) {
     user().assert(t == TransportMode.BEACON || t == TransportMode.IMAGE,
-                  `Unknown transport option: '${t}'`);
+        `Unknown transport option: '${t}'`);
     user().assert(typeof transport[t] == 'boolean');
   }
 }
@@ -91,7 +91,7 @@ function assertTransport(transport) {
 function assertFilters(filters) {
   for (const name in filters) {
     user().assert(typeof filters[name] == 'object',
-                  'Filter specification \'%s\' is malformed', name);
+        'Filter specification \'%s\' is malformed', name);
     user().assert(
         filters[name].type == FilterType.CLICK_DELAY,
         'Only ClickDelayFilter is currently supported.');

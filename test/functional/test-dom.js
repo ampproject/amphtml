@@ -636,7 +636,7 @@ describes.sandboxed('DOM', {}, env => {
       const element = document.createElement('element');
       element.setAttribute('data-vars-event-name', 'click');
       const params = dom.getDataParamsFromAttributes(element, null,
-        /^vars(.+)/);
+          /^vars(.+)/);
       expect(params.eventName).to.be.equal('click');
     });
   });

@@ -429,7 +429,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
     }
 
     user().warn(TAG, 'Could not find a platform=play app in manifest: %s',
-      this.element);
+        this.element);
   }
 
   /** @private */

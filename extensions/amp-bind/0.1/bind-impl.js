@@ -405,7 +405,7 @@ export class Bind {
     const expressionToElements = Object.create(null);
 
     const doc = dev().assert(
-      node.ownerDocument, 'ownerDocument is null.');
+        node.ownerDocument, 'ownerDocument is null.');
     const walker = doc.createTreeWalker(node, NodeFilter.SHOW_ELEMENT);
 
     // Set to true if number of bindings in `node` exceeds `limit`.

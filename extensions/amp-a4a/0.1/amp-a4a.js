@@ -297,11 +297,11 @@ export class AmpA4A extends AMP.BaseElement {
      * @private {function(string, !Object=)}
      */
     this.protectedEmitLifecycleEvent_ = protectFunctionWrapper(
-      this.emitLifecycleEvent, this,
-      (err, varArgs) => {
-        dev().error(TAG, this.element.getAttribute('type'),
-            'Error on emitLifecycleEvent', err, varArgs) ;
-      });
+        this.emitLifecycleEvent, this,
+        (err, varArgs) => {
+          dev().error(TAG, this.element.getAttribute('type'),
+              'Error on emitLifecycleEvent', err, varArgs) ;
+        });
 
     /** @const {string} */
     this.sentinel = generateSentinel(window);
@@ -498,7 +498,7 @@ export class AmpA4A extends AMP.BaseElement {
     const slotRect = this.getIntersectionElementLayoutBox();
     if (slotRect.height == 0 || slotRect.width == 0) {
       dev().fine(
-        TAG, 'onLayoutMeasure canceled due height/width 0', this.element);
+          TAG, 'onLayoutMeasure canceled due height/width 0', this.element);
       return false;
     }
     if (!isAdPositionAllowed(this.element, this.win)) {
@@ -724,7 +724,7 @@ export class AmpA4A extends AMP.BaseElement {
           // is just to prefetch.
           const extensions = extensionsFor(this.win);
           creativeMetaDataDef.customElementExtensions.forEach(
-            extensionId => extensions.loadExtension(extensionId));
+              extensionId => extensions.loadExtension(extensionId));
           return creativeMetaDataDef;
         })
         .catch(error => {
@@ -826,8 +826,8 @@ export class AmpA4A extends AMP.BaseElement {
                 },
                 err => {
                   dev().error(
-                    TAG, this.element.getAttribute('type'), keyInfo.serviceName,
-                    err, this.element);
+                      TAG, this.element.getAttribute('type'),
+                      keyInfo.serviceName, err, this.element);
                 });
           });
         }))
@@ -835,7 +835,7 @@ export class AmpA4A extends AMP.BaseElement {
             .then(returnedArray => returnedArray[0], () => {
           // Rejection occurs if all keys for this provider fail to validate.
               return Promise.reject(
-              `All keys for ${keyInfoSet.serviceName} failed to verify`);
+                  `All keys for ${keyInfoSet.serviceName} failed to verify`);
             });
       });
     }))
@@ -932,7 +932,7 @@ export class AmpA4A extends AMP.BaseElement {
             // Failed to render via AMP creative path so fallback to non-AMP
             // rendering within cross domain iframe.
             user().error(TAG, this.element.getAttribute('type'),
-                         'Error injecting creative in friendly frame', err);
+                'Error injecting creative in friendly frame', err);
             this.promiseErrorHandler_(err);
             return this.renderNonAmpCreative_();
           });
@@ -962,7 +962,7 @@ export class AmpA4A extends AMP.BaseElement {
     this.uiHandler.applyUnlayoutUI();
     if (this.originalSlotSize_) {
       super.attemptChangeSize(
-        this.originalSlotSize_.height, this.originalSlotSize_.width)
+          this.originalSlotSize_.height, this.originalSlotSize_.width)
           .then(() => {
             this.originalSlotSize_ = null;
           })
@@ -1174,8 +1174,8 @@ export class AmpA4A extends AMP.BaseElement {
                 result.keys = jwkSetObj.keys;
               } else {
                 user().error(TAG, this.element.getAttribute('type'),
-                  `Invalid response from signing server ${currServiceName}`,
-                  this.element);
+                    `Invalid response from signing server ${currServiceName}`,
+                    this.element);
                 result.keys = [];
               }
               return result;
@@ -1186,14 +1186,14 @@ export class AmpA4A extends AMP.BaseElement {
                   this.crypto_.importPublicKey(jwkSet.serviceName, jwk)
                       .catch(err => {
                         user().error(TAG, this.element.getAttribute('type'),
-                        `error importing keys for: ${jwkSet.serviceName}`,
-                        err, this.element);
+                            `error importing keys for: ${jwkSet.serviceName}`,
+                            err, this.element);
                         return null;
                       })),
               };
             }).catch(err => {
               user().error(
-                TAG, this.element.getAttribute('type'), err, this.element);
+                  TAG, this.element.getAttribute('type'), err, this.element);
             // TODO(a4a-team): This is a failure in the initial attempt to get
             // the keys, probably b/c of a network condition.  We should
             // re-trigger key fetching later.
@@ -1218,7 +1218,7 @@ export class AmpA4A extends AMP.BaseElement {
   renderNonAmpCreative_() {
     if (this.element.getAttribute('disable3pfallback') == 'true') {
       user().warn(TAG, this.element.getAttribute('type'),
-        'fallback to 3p disabled');
+          'fallback to 3p disabled');
       return Promise.resolve(false);
     }
     this.promiseErrorHandler_(
@@ -1242,7 +1242,7 @@ export class AmpA4A extends AMP.BaseElement {
       // If error occurred, it would have already been reported but let's
       // report to user in case of empty.
       user().warn(TAG, this.element.getAttribute('type'),
-        'No creative or URL available -- A4A can\'t render any ad');
+          'No creative or URL available -- A4A can\'t render any ad');
     }
     incrementLoadingAds(this.win, renderPromise);
     return renderPromise;
@@ -1293,7 +1293,7 @@ export class AmpA4A extends AMP.BaseElement {
           fonts: fontsArray,
         }, embedWin => {
           installUrlReplacementsForEmbed(this.getAmpDoc(), embedWin,
-            new A4AVariableSource(this.getAmpDoc(), embedWin));
+              new A4AVariableSource(this.getAmpDoc(), embedWin));
         }).then(friendlyIframeEmbed => {
           checkStillCurrent();
           this.friendlyIframeEmbed_ = friendlyIframeEmbed;
@@ -1318,7 +1318,7 @@ export class AmpA4A extends AMP.BaseElement {
                 });
               }).catch(err => {
                 dev().error(TAG, this.element.getAttribute('type'),
-                  'getTimingDataAsync for renderFriendlyEnd failed: ', err);
+                    'getTimingDataAsync for renderFriendlyEnd failed: ', err);
               });
           protectFunctionWrapper(this.onCreativeRender, this, err => {
             dev().error(TAG, this.element.getAttribute('type'),
@@ -1478,7 +1478,7 @@ export class AmpA4A extends AMP.BaseElement {
     }
     try {
       const metaDataObj = JSON.parse(
-        creative.slice(metadataStart + metadataString.length, metadataEnd));
+          creative.slice(metadataStart + metadataString.length, metadataEnd));
       const ampRuntimeUtf16CharOffsets =
         metaDataObj['ampRuntimeUtf16CharOffsets'];
       if (!isArray(ampRuntimeUtf16CharOffsets) ||

@@ -401,7 +401,7 @@ describe('amp-ima-video', () => {
 
       expect(imaVideoObj.getPropertiesForTesting().adsActive).to.be.true;
       expect(removeEventListenerSpy).to.have.been.calledWith(
-        imaVideoObj.getPropertiesForTesting().interactEvent);
+          imaVideoObj.getPropertiesForTesting().interactEvent);
       expect(imaVideoObj.getPropertiesForTesting().adContainerDiv.style.display)
           .to.eql('block');
       expect(removeEventListenerSpy).to.have.been.calledWith('ended');
@@ -455,7 +455,7 @@ describe('amp-ima-video', () => {
 
       expect(imaVideoObj.getPropertiesForTesting().adsActive).to.be.true;
       expect(removeEventListenerSpy).to.have.been.calledWith(
-        imaVideoObj.getPropertiesForTesting().interactEvent);
+          imaVideoObj.getPropertiesForTesting().interactEvent);
       expect(imaVideoObj.getPropertiesForTesting().adContainerDiv.style.display)
           .to.eql('block');
       expect(removeEventListenerSpy).to.have.been.calledWith('ended');
@@ -489,7 +489,7 @@ describe('amp-ima-video', () => {
 
       expect(imaVideoObj.getPropertiesForTesting().adsActive).to.be.false;
       expect(addEventListenerSpy).to.have.been.calledWith(
-        imaVideoObj.getPropertiesForTesting().interactEvent);
+          imaVideoObj.getPropertiesForTesting().interactEvent);
       expect(addEventListenerSpy).to.have.been.calledWith('ended');
       // TODO - Fix when I can spy on internals.
       //expect(playVideoSpy).to.have.been.called;
@@ -520,7 +520,7 @@ describe('amp-ima-video', () => {
 
       expect(imaVideoObj.getPropertiesForTesting().adsActive).to.be.false;
       expect(addEventListenerSpy).to.have.been.calledWith(
-        imaVideoObj.getPropertiesForTesting().interactEvent);
+          imaVideoObj.getPropertiesForTesting().interactEvent);
       expect(addEventListenerSpy).to.not.have.been.calledWith('ended');
       // TODO - Fix when I can spy on internals.
       //expect(playVideoSpy).to.have.been.called;

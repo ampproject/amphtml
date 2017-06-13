@@ -116,15 +116,16 @@ describe('JwtHelper', () => {
 
     // TODO(aghassemi, 6292): Unskip for Safari after #6292
     it.configure().skipSafari().run('should decode and verify token correctly',
-    () => {
+        () => {
       // Skip on non-subtle browser.
-      if (!helper.isVerificationSupported()) {
-        return;
-      }
-      return helper.decodeAndVerify(TOKEN, Promise.resolve(PEM)).then(tok => {
-        expect(tok['name']).to.equal('John Do');
-      });
-    });
+          if (!helper.isVerificationSupported()) {
+            return;
+          }
+          return helper.decodeAndVerify(TOKEN, Promise.resolve(PEM))
+              .then(tok => {
+                expect(tok['name']).to.equal('John Do');
+              });
+        });
 
     it.configure().skipSafari().run('should fail invalid signature', () => {
       // Skip on non-subtle browser.

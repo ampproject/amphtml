@@ -286,7 +286,7 @@ describe('Resources', () => {
     };
     resources.visible_ = false;
     sandbox.stub(resources.viewer_, 'getVisibilityState').returns(
-      VisibilityState.PRERENDER
+        VisibilityState.PRERENDER
     );
     resources.scheduleLayoutOrPreload_(resource, true);
     expect(resources.queue_.getSize()).to.equal(0);
@@ -309,7 +309,7 @@ describe('Resources', () => {
     };
     resources.visible_ = false;
     sandbox.stub(resources.viewer_, 'getVisibilityState').returns(
-      VisibilityState.PRERENDER
+        VisibilityState.PRERENDER
     );
     resources.scheduleLayoutOrPreload_(resource, true);
     expect(resources.queue_.getSize()).to.equal(1);
@@ -333,7 +333,7 @@ describe('Resources', () => {
     };
     resources.visible_ = false;
     sandbox.stub(resources.viewer_, 'getVisibilityState').returns(
-      VisibilityState.HIDDEN
+        VisibilityState.HIDDEN
     );
     resources.scheduleLayoutOrPreload_(resource, true);
     expect(resources.queue_.getSize()).to.equal(0);
@@ -1051,7 +1051,7 @@ describe('Resources discoverWork', () => {
   it('should measure unbuilt elements', () => {
     resources.visible_ = true;
     sandbox.stub(resources.viewer_, 'getVisibilityState').returns(
-      VisibilityState.VISIBLE
+        VisibilityState.VISIBLE
     );
     viewportMock.expects('getRect').returns(
         layoutRectLtwh(0, 0, 300, 400)).once();
@@ -1069,7 +1069,7 @@ describe('Resources discoverWork', () => {
   it('should render two screens when visible', () => {
     resources.visible_ = true;
     sandbox.stub(resources.viewer_, 'getVisibilityState').returns(
-      VisibilityState.VISIBLE
+        VisibilityState.VISIBLE
     );
     viewportMock.expects('getRect').returns(
         layoutRectLtwh(0, 0, 300, 400)).once();
@@ -1086,7 +1086,7 @@ describe('Resources discoverWork', () => {
     resource2.state_ = ResourceState.LAYOUT_COMPLETE;
     resources.visible_ = true;
     sandbox.stub(resources.viewer_, 'getVisibilityState').returns(
-      VisibilityState.VISIBLE
+        VisibilityState.VISIBLE
     );
     viewportMock.expects('getRect').returns(
         layoutRectLtwh(0, 0, 300, 400)).once();
@@ -1107,7 +1107,7 @@ describe('Resources discoverWork', () => {
         () => layoutRectLtwh(10, 1010, 100, 101);
     resources.visible_ = true;
     sandbox.stub(resources.viewer_, 'getVisibilityState').returns(
-      VisibilityState.VISIBLE
+        VisibilityState.VISIBLE
     );
     resources.relayoutAll_ = false;
     resources.relayoutTop_ = 1000;
@@ -1126,7 +1126,7 @@ describe('Resources discoverWork', () => {
   it('should prerender only one screen with prerenderSize = 1', () => {
     resources.visible_ = false;
     sandbox.stub(resources.viewer_, 'getVisibilityState').returns(
-      VisibilityState.PRERENDER
+        VisibilityState.PRERENDER
     );
     resources.prerenderSize_ = 1;
     viewportMock.expects('getRect').returns(
@@ -1141,7 +1141,7 @@ describe('Resources discoverWork', () => {
   it('should NOT prerender anything with prerenderSize = 0', () => {
     resources.visible_ = false;
     sandbox.stub(resources.viewer_, 'getVisibilityState').returns(
-      VisibilityState.PRERENDER
+        VisibilityState.PRERENDER
     );
     resources.prerenderSize_ = 0;
     viewportMock.expects('getRect').returns(
@@ -1157,7 +1157,7 @@ describe('Resources discoverWork', () => {
     resource2.state_ = ResourceState.LAYOUT_COMPLETE;
     resources.visible_ = true;
     sandbox.stub(resources.viewer_, 'getVisibilityState').returns(
-      VisibilityState.VISIBLE
+        VisibilityState.VISIBLE
     );
     viewportMock.expects('getRect').returns(
         layoutRectLtwh(0, 0, 300, 400)).atLeast(1);
@@ -1352,7 +1352,7 @@ describe('Resources discoverWork', () => {
   it('should update inViewport before scheduling layouts', () => {
     resources.visible_ = true;
     sandbox.stub(resources.viewer_, 'getVisibilityState').returns(
-      VisibilityState.VISIBLE
+        VisibilityState.VISIBLE
     );
     viewportMock.expects('getRect').returns(
         layoutRectLtwh(0, 0, 300, 400)).once();
@@ -1875,7 +1875,7 @@ describe('Resources changeSize', () => {
     it('should change size when document is invisible', () => {
       resources.visible_ = false;
       sandbox.stub(resources.viewer_, 'getVisibilityState').returns(
-        VisibilityState.PRERENDER
+          VisibilityState.PRERENDER
       );
       resources.scheduleChangeSize_(resource1, 111, 222, undefined, false);
       resources.mutateWork_();
@@ -2157,8 +2157,8 @@ describe('Resources changeSize', () => {
       expect(overflowCallbackSpy).to.be.calledWith(true, 111, 222,
           {top: 1, right: 2, bottom: 3, left: 4});
       expect(resource1.getPendingChangeSize()).to.jsonEqual(
-        {height: 111, width: 222,
-          margins: {top: 1, right: 2, bottom: 3, left: 4}});
+          {height: 111, width: 222,
+            margins: {top: 1, right: 2, bottom: 3, left: 4}});
     });
 
     it('should NOT change size when resized margin in viewport and should ' +

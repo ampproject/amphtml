@@ -356,8 +356,8 @@ export class InaboxAmpDocPositionObserver extends AbstractPositionObserver {
     const win = this.ampdoc_.win;
     object.type = SEND_POSITIONS_HIGH_FIDELITY;
     this.ampdoc_.win.parent./*OK*/postMessage(serializeMessage(
-    SEND_POSITIONS_HIGH_FIDELITY, sentinel),
-    '*'
+        SEND_POSITIONS_HIGH_FIDELITY, sentinel),
+        '*'
     );
 
     this.ampdoc_.win.addEventListener('message', event => {
@@ -440,7 +440,8 @@ export class InaboxAmpDocPositionObserver extends AbstractPositionObserver {
  */
 export function installPositionObserverServiceForDoc(ampdoc) {
   dev().assert(isExperimentOn(ampdoc.win, 'amp-animation'),
-     'PositionObserver is experimental and used by amp-animation only for now');
+      'PositionObserver is experimental and used by amp-animation only for ' +
+      'now');
   registerServiceBuilderForDoc(ampdoc, 'position-observer', () => {
     if (getMode(ampdoc.win).runtime == 'inabox') {
       return new InaboxAmpDocPositionObserver(ampdoc);

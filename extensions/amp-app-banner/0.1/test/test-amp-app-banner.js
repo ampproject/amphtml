@@ -196,9 +196,9 @@ describes.realWin('amp-app-banner', {amp: true}, () => {
       return getAppBanner({iosMeta}).then(el => {
         expect(AbstractAppBanner.prototype.setupOpenButton_)
             .to.have.been.calledWith(
-                el.querySelector('button[open-button]'),
-                'medium://p/cb7f223fad86',
-                'https://itunes.apple.com/us/app/id828256236');
+            el.querySelector('button[open-button]'),
+            'medium://p/cb7f223fad86',
+            'https://itunes.apple.com/us/app/id828256236');
       });
     });
 

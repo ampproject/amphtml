@@ -252,8 +252,8 @@ describe('friendly-iframe-embed', () => {
     resourcesMock
         .expects('getResourcesInRect')
         .withExactArgs(
-            sinon.match(arg => arg == iframe.contentWindow),
-            sinon.match(arg =>
+        sinon.match(arg => arg == iframe.contentWindow),
+        sinon.match(arg =>
                 arg.left == 0 &&
                 arg.top == 0 &&
                 arg.width == iframe.contentWindow.innerWidth &&
@@ -286,8 +286,8 @@ describe('friendly-iframe-embed', () => {
     resourcesMock
         .expects('getResourcesInRect')
         .withExactArgs(
-            sinon.match(arg => arg == iframe.contentWindow),
-            sinon.match(arg =>
+        sinon.match(arg => arg == iframe.contentWindow),
+        sinon.match(arg =>
                 arg.left == 10 &&
                 arg.top == 10 &&
                 arg.width == 100 &&

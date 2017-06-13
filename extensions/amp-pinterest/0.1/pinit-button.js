@@ -42,11 +42,11 @@ export class PinItButton {
   /** @param {!Element} rootElement */
   constructor(rootElement) {
     user().assert(rootElement.getAttribute('data-url'),
-      'The data-url attribute is required for Pin It buttons');
+        'The data-url attribute is required for Pin It buttons');
     user().assert(rootElement.getAttribute('data-media'),
-      'The data-media attribute is required for Pin It buttons');
+        'The data-media attribute is required for Pin It buttons');
     user().assert(rootElement.getAttribute('data-description'),
-      'The data-description attribute is required for Pin It buttons');
+        'The data-description attribute is required for Pin It buttons');
     this.element = rootElement;
     this.xhr = xhrFor(rootElement.ownerDocument.defaultView);
     this.color = rootElement.getAttribute('data-color');

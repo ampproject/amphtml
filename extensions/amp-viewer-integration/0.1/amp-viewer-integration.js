@@ -82,14 +82,14 @@ export class AmpViewerIntegration {
       return this.webviewPreHandshakePromise_(source, origin)
           .then(receivedPort => {
             return this.openChannelAndStart_(viewer, ampdoc, origin,
-              new Messaging(this.win, receivedPort, this.isWebView_));
+                new Messaging(this.win, receivedPort, this.isWebView_));
           });
     }
 
     const port = new WindowPortEmulator(
       this.win, origin, this.win.parent/* target */);
     return this.openChannelAndStart_(
-      viewer, ampdoc, origin, new Messaging(this.win, port, this.isWebView_));
+        viewer, ampdoc, origin, new Messaging(this.win, port, this.isWebView_));
   }
 
   /**
@@ -141,7 +141,7 @@ export class AmpViewerIntegration {
       url: ampdocUrl,
       sourceUrl: srcUrl,
     },
-    true /* awaitResponse */)
+        true /* awaitResponse */)
         .then(() => {
           dev().fine(TAG, 'Channel has been opened!');
           this.setup_(messaging, viewer, origin);
@@ -158,13 +158,13 @@ export class AmpViewerIntegration {
   setup_(messaging, viewer, origin) {
     messaging.setDefaultHandler((type, payload, awaitResponse) => {
       return viewer.receiveMessage(
-        type, /** @type {!JSONType} */ (payload), awaitResponse);
+          type, /** @type {!JSONType} */ (payload), awaitResponse);
     });
 
     viewer.setMessageDeliverer(messaging.sendRequest.bind(messaging), origin);
 
     listenOnce(
-      this.win, 'unload', this.handleUnload_.bind(this, messaging));
+        this.win, 'unload', this.handleUnload_.bind(this, messaging));
 
     if (viewer.hasCapability('swipe')) {
       this.initTouchHandler_(messaging);

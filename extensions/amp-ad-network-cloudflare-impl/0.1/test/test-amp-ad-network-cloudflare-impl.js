@@ -57,11 +57,11 @@ describe('amp-ad-network-cloudflare-impl', () => {
     el.setAttribute('type', 'cloudflare');
     el.setAttribute('data-cf-network', 'cloudflare');
     el.setAttribute('src',
-      'https://firebolt.cloudflaredemo.com/a4a-ad.html');
+        'https://firebolt.cloudflaredemo.com/a4a-ad.html');
     sandbox.stub(AmpAdNetworkCloudflareImpl.prototype, 'getSigningServiceNames',
-      () => {
-        return ['cloudflare','cloudflare-dev'];
-      });
+        () => {
+          return ['cloudflare','cloudflare-dev'];
+        });
     sandbox.stub(vendors, 'NETWORKS', {
       cloudflare: {
         base: 'https://firebolt.cloudflaredemo.com',
@@ -95,27 +95,27 @@ describe('amp-ad-network-cloudflare-impl', () => {
   describe('#getAdUrl', () => {
     it('should be valid', () => {
       expect(cloudflareImpl.getAdUrl()).to.equal(
-        'https://firebolt.cloudflaredemo.com/_a4a/a4a-ad.html');
+          'https://firebolt.cloudflaredemo.com/_a4a/a4a-ad.html');
     });
 
     it('should handle non-a4a URLs', () => {
       el.setAttribute('data-cf-a4a', 'false');
       expect(cloudflareImpl.getAdUrl()).to.equal(
-        'https://firebolt.cloudflaredemo.com/a4a-ad.html');
+          'https://firebolt.cloudflaredemo.com/a4a-ad.html');
     });
 
     it('should accept a4a src', () => {
       el.setAttribute('src',
-        'https://firebolt.cloudflaredemo.com/_a4a/a4a-ad.html');
+          'https://firebolt.cloudflaredemo.com/_a4a/a4a-ad.html');
       expect(cloudflareImpl.getAdUrl()).to.equal(
-        'https://firebolt.cloudflaredemo.com/_a4a/a4a-ad.html');
+          'https://firebolt.cloudflaredemo.com/_a4a/a4a-ad.html');
     });
 
     it('should handle additional templated width/height', () => {
       el.setAttribute('src', 'https://firebolt.cloudflaredemo.com/'
         + 'ad?width=SLOT_WIDTH&height=SLOT_HEIGHT');
       expect(cloudflareImpl.getAdUrl()).to.equal(
-        'https://firebolt.cloudflaredemo.com/_a4a/ad?width=0&height=0');
+          'https://firebolt.cloudflaredemo.com/_a4a/ad?width=0&height=0');
     });
 
     function parseQuery(query) {
@@ -164,11 +164,11 @@ describe('amp-ad-network-cloudflare-impl', () => {
     it('without signature', () => {
       return utf8Encode('some creative').then(creative => {
         return expect(cloudflareImpl.extractCreativeAndSignature(
-          creative,
-          {
-            get() { return undefined; },
-            has() { return false; },
-          })).to.eventually.deep.equal(
+            creative,
+            {
+              get() { return undefined; },
+              has() { return false; },
+            })).to.eventually.deep.equal(
             {creative, signature: null}
           );
       });
@@ -176,15 +176,15 @@ describe('amp-ad-network-cloudflare-impl', () => {
     it('with signature', () => {
       return utf8Encode('some creative').then(creative => {
         return expect(cloudflareImpl.extractCreativeAndSignature(
-          creative,
-          {
-            get(name) {
-              return name == 'X-AmpAdSignature' ? 'AQAB' : undefined;
-            },
-            has(name) {
-              return name === 'X-AmpAdSignature';
-            },
-          })).to.eventually.deep.equal(
+            creative,
+            {
+              get(name) {
+                return name == 'X-AmpAdSignature' ? 'AQAB' : undefined;
+              },
+              has(name) {
+                return name === 'X-AmpAdSignature';
+              },
+            })).to.eventually.deep.equal(
             {creative, signature: base64UrlDecodeToBytes('AQAB')}
           );
       });

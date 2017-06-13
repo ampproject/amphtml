@@ -183,8 +183,8 @@ export class AmpLiveList extends AMP.BaseElement {
     this.manager_ = liveListManagerForDoc(this.getAmpDoc());
 
     this.updateSlot_ = user().assert(
-       this.getUpdateSlot_(this.element),
-       'amp-live-list must have an "update" slot.');
+        this.getUpdateSlot_(this.element),
+        'amp-live-list must have an "update" slot.');
 
     this.itemsSlot_ = user().assert(
         this.getItemsSlot_(this.element),

@@ -270,7 +270,7 @@ export function googleAdUrl(
  */
 export function truncAndTimeUrl(baseUrl, parameters, startTime) {
   return buildUrl(
-    baseUrl, parameters, MAX_URL_LENGTH - 10, {name: 'trunc', value: '1'})
+      baseUrl, parameters, MAX_URL_LENGTH - 10, {name: 'trunc', value: '1'})
     + '&dtd=' + elapsedTimeWithCeiling(Date.now(), startTime);
 }
 

@@ -151,7 +151,8 @@ describe('amp-analytics.VariableService', function() {
         check('${foo|substr:6|trim|toUpperCase}', 'WORLD!')).then(() =>
         check('${foo|substr:6|trim|toUpperCase|base64}', 'V09STEQh')).then(() =>
         check('${foo|substr:6|trim|toUpperCase|base64|hash}',
-          'OPTTt2IGW8-R31MrIF_cRUwLTZ9jLDOXEuhNz_QS7Uc5ZmODduHWdplzrZ7Jsnqx'));
+            'OPTTt2IGW8-R31MrIF_cRUwLTZ9jLDOXEuhNz_QS7Uc5ZmODduHWdplzrZ7Jsnqx')
+        );
     });
   });
 

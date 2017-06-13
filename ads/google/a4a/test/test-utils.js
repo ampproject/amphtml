@@ -138,7 +138,7 @@ describe('Google A4A utils', () => {
         height: '101px',
       };
       return expect(additionalDimensions(fakeWin, fakeSize)).to.equal(
-        '3,4,1,2,11,12,5,6,100px,101px');
+          '3,4,1,2,11,12,5,6,100px,101px');
     });
   });
 

@@ -523,10 +523,10 @@ describes.realWin('Events', {amp: 1}, env => {
       visibilityManagerMock
           .expects('listenRoot')
           .withExactArgs(
-              matchEmptySpec,
-              /* readyPromise */ null,
-              /* createReadyReportPromiseFunc */ null,
-              saveCallback)
+          matchEmptySpec,
+          /* readyPromise */ null,
+          /* createReadyReportPromiseFunc */ null,
+          saveCallback)
           .returns(unlisten)
           .once();
       const res = tracker.add(analyticsElement, 'visible', {}, eventResolver);
@@ -551,10 +551,10 @@ describes.realWin('Events', {amp: 1}, env => {
       visibilityManagerMock
           .expects('listenRoot')
           .withExactArgs(
-              matchEmptySpec,
-              readyPromise,
-              null,
-              saveCallback)
+          matchEmptySpec,
+          readyPromise,
+          null,
+          saveCallback)
           .returns(unlisten)
           .once();
       const res = tracker.add(analyticsElement,
@@ -580,10 +580,10 @@ describes.realWin('Events', {amp: 1}, env => {
       visibilityManagerMock
           .expects('listenRoot')
           .withExactArgs(
-              config.visibilitySpec,
-              readyPromise,
-              /* createReadyReportPromiseFunc */ null,
-              saveCallback)
+          config.visibilitySpec,
+          readyPromise,
+          /* createReadyReportPromiseFunc */ null,
+          saveCallback)
           .returns(unlisten)
           .once();
       const res = tracker.add(analyticsElement,
@@ -610,11 +610,11 @@ describes.realWin('Events', {amp: 1}, env => {
       visibilityManagerMock
           .expects('listenElement')
           .withExactArgs(
-              target,
-              config.visibilitySpec,
-              readyPromise,
-              /* createReadyReportPromiseFunc */ null,
-              saveCallback)
+          target,
+          config.visibilitySpec,
+          readyPromise,
+          /* createReadyReportPromiseFunc */ null,
+          saveCallback)
           .returns(unlisten)
           .once();
       const res = tracker.add(analyticsElement,
@@ -654,11 +654,11 @@ describes.realWin('Events', {amp: 1}, env => {
       visibilityManagerMock
           .expects('listenElement')
           .withExactArgs(
-              target,
-              matchEmptySpec,
-              readyPromise,
-              /* createReadyReportPromiseFunc */ null,
-              saveCallback)
+          target,
+          matchEmptySpec,
+          readyPromise,
+          /* createReadyReportPromiseFunc */ null,
+          saveCallback)
           .returns(unlisten)
           .once();
       tracker.add(analyticsElement, 'visible', config, eventResolver);
@@ -677,11 +677,11 @@ describes.realWin('Events', {amp: 1}, env => {
       visibilityManagerMock
           .expects('listenElement')
           .withExactArgs(
-            target,
-            config.visibilitySpec,
-            /* readyPromise */ null,
-            /* createReadyReportPromiseFunc */ matchFunc,
-            saveCallback)
+          target,
+          config.visibilitySpec,
+          /* readyPromise */ null,
+          /* createReadyReportPromiseFunc */ matchFunc,
+          saveCallback)
           .returns(null)
           .once();
       tracker.add(analyticsElement, 'hidden-v3', config, eventResolver);

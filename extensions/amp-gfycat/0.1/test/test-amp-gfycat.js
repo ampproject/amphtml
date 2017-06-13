@@ -74,6 +74,6 @@ describe('amp-gfycat', () => {
 
   it('requires data-gfyid', () => {
     return getGfycat('').should.eventually.be.rejectedWith(
-      /The data-gfyid attribute is required for/);
+        /The data-gfyid attribute is required for/);
   });
 });

@@ -76,12 +76,12 @@ describe('amp-ad-network-triplelift-impl', () => {
     tripleliftImplElem = document.createElement('amp-ad');
     tripleliftImplElem.setAttribute('type', 'triplelift');
     tripleliftImplElem.setAttribute('src',
-'https://ib.3lift.com/ttj?inv_code=ampforadstest_main_feed');
+        'https://ib.3lift.com/ttj?inv_code=ampforadstest_main_feed');
     tripleliftImplElem.setAttribute('data-use-a4a','true');
     sandbox.stub(AmpAdNetworkTripleliftImpl.prototype, 'getSigningServiceNames',
-      () => {
-        return ['cloudflare'];
-      });
+        () => {
+          return ['cloudflare'];
+        });
     tripleliftImpl = new AmpAdNetworkTripleliftImpl(tripleliftImplElem);
   });
 
@@ -105,7 +105,7 @@ document.createElement('amp-ad-network-triplelift-impl');
   describe('#getAdUrl', () => {
     it('should be valid', () => {
       expect(tripleliftImpl.getAdUrl()).to.equal(
-'https://amp.3lift.com/_a4a/amp/auction?inv_code=ampforadstest_main_feed');
+          'https://amp.3lift.com/_a4a/amp/auction?inv_code=ampforadstest_main_feed');
     });
   });
 
@@ -113,11 +113,11 @@ document.createElement('amp-ad-network-triplelift-impl');
     it('without signature', () => {
       return utf8Encode('some creative').then(creative => {
         return expect(tripleliftImpl.extractCreativeAndSignature(
-          creative,
-          {
-            get() { return undefined; },
-            has() { return false; },
-          })).to.eventually.deep.equal(
+            creative,
+            {
+              get() { return undefined; },
+              has() { return false; },
+            })).to.eventually.deep.equal(
             {creative, signature: null}
           );
       });
@@ -125,15 +125,15 @@ document.createElement('amp-ad-network-triplelift-impl');
     it('with signature', () => {
       return utf8Encode('some creative').then(creative => {
         return expect(tripleliftImpl.extractCreativeAndSignature(
-          creative,
-          {
-            get(name) {
-              return name == 'X-AmpAdSignature' ? 'AQAB' : undefined;
-            },
-            has(name) {
-              return name === 'X-AmpAdSignature';
-            },
-          })).to.eventually.deep.equal(
+            creative,
+            {
+              get(name) {
+                return name == 'X-AmpAdSignature' ? 'AQAB' : undefined;
+              },
+              has(name) {
+                return name === 'X-AmpAdSignature';
+              },
+            })).to.eventually.deep.equal(
             {creative, signature: base64UrlDecodeToBytes('AQAB')}
           );
       });

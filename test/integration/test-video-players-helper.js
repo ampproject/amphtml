@@ -40,7 +40,7 @@ export function runVideoPlayerIntegrationTests(
           .then(r => {
             const impl = r.video.implementation_;
             const methods = Object.getOwnPropertyNames(
-        Object.getPrototypeOf(new VideoInterface()));
+                Object.getPrototypeOf(new VideoInterface()));
 
             expect(methods.length).to.be.above(1);
             for (let i = 0; i < methods.length; i++) {

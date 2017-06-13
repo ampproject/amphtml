@@ -100,7 +100,7 @@ class AmpVideo extends AMP.BaseElement {
     const posterAttr = this.element.getAttribute('poster');
     if (!posterAttr && getMode().development) {
       console/*OK*/.error(
-            'No "poster" attribute has been provided for amp-video.');
+          'No "poster" attribute has been provided for amp-video.');
     }
 
       // Enable inline play for iOS.
@@ -109,7 +109,7 @@ class AmpVideo extends AMP.BaseElement {
       // Disable video preload in prerender mode.
     this.video_.setAttribute('preload', 'none');
     this.propagateAttributes(ATTRS_TO_PROPAGATE_ON_BUILD, this.video_,
-          /* opt_removeMissingAttrs */ true);
+        /* opt_removeMissingAttrs */ true);
     this.installEventHandlers_();
     this.applyFillContent(this.video_, true);
     this.element.appendChild(this.video_);
@@ -127,11 +127,11 @@ class AmpVideo extends AMP.BaseElement {
       assertHttpsUrl(this.element.getAttribute('src'), this.element);
     }
     const attrs = ATTRS_TO_PROPAGATE.filter(
-          value => mutations[value] !== undefined);
+        value => mutations[value] !== undefined);
     this.propagateAttributes(
-          attrs,
-          dev().assertElement(this.video_),
-          /* opt_removeMissingAttrs */ true);
+        attrs,
+        dev().assertElement(this.video_),
+        /* opt_removeMissingAttrs */ true);
     if (mutations['src']) {
       this.element.dispatchCustomEvent(VideoEvents.RELOAD);
     }
@@ -156,7 +156,7 @@ class AmpVideo extends AMP.BaseElement {
     }
 
     this.propagateAttributes(ATTRS_TO_PROPAGATE_ON_LAYOUT, this.video_,
-          /* opt_removeMissingAttrs */ true);
+        /* opt_removeMissingAttrs */ true);
 
     this.getRealChildNodes().forEach(child => {
         // Skip the video we already added to the element.
@@ -165,7 +165,7 @@ class AmpVideo extends AMP.BaseElement {
       }
       if (child.getAttribute && child.getAttribute('src')) {
         assertHttpsUrl(child.getAttribute('src'),
-              dev().assertElement(child));
+            dev().assertElement(child));
       }
       this.video_.appendChild(child);
     });

@@ -622,7 +622,7 @@ runner.run('Cache SW', () => {
 
       beforeEach(() => {
         fetch.onCall(1).returns(Promise.resolve(
-          new Response(`["${diversionRtv}","${prevDiversionRtv}"]`)));
+            new Response(`["${diversionRtv}","${prevDiversionRtv}"]`)));
         fetch.onCall(2).returns(Promise.resolve(new Response('02')));
         fetch.onCall(3).returns(Promise.resolve(new Response('03')));
       });
@@ -644,7 +644,7 @@ runner.run('Cache SW', () => {
         return waitForDiversions().then(() => {
           expect(fetch).calledTwice;
           expect(fetch.getCall(0).args[0].url).to.equal(
-            `https://cdn.ampproject.org/rtv/${diversionRtv}/v0.js`);
+              `https://cdn.ampproject.org/rtv/${diversionRtv}/v0.js`);
         });
       });
 
@@ -663,7 +663,7 @@ runner.run('Cache SW', () => {
       it('prunes old diversions of new script', () => {
         // Remove prevDiversionRtv from diversions response
         fetch.onCall(1).returns(Promise.resolve(
-          new Response(`["${diversionRtv}"]`)));
+            new Response(`["${diversionRtv}"]`)));
         return waitForDiversions().then(() => {
           expect(deleter).to.have.been.calledWith(cache.cached[2][0]);
         });
@@ -672,7 +672,7 @@ runner.run('Cache SW', () => {
       it('prunes old diversions of any other script', () => {
         // Remove prevDiversionRtv from diversions response
         fetch.onCall(1).returns(Promise.resolve(
-          new Response(`["${diversionRtv}"]`)));
+            new Response(`["${diversionRtv}"]`)));
         return waitForDiversions().then(() => {
           expect(deleter).to.have.been.calledWith(cache.cached[3][0]);
         });
@@ -895,9 +895,9 @@ runner.run('Cache SW', () => {
               sw.handleFetch(compRequest, clientId),
             ]).then(responses => {
               expect(rtvVersion(responses[0].url)).to.equal(
-                rtvVersion(prevRequest.url));
+                  rtvVersion(prevRequest.url));
               expect(rtvVersion(responses[1].url)).to.equal(
-                rtvVersion(prevRequest.url));
+                  rtvVersion(prevRequest.url));
             });
           });
         });
@@ -971,9 +971,9 @@ runner.run('Cache SW', () => {
               sw.handleFetch(prevRequest, clientId),
             ]).then(responses => {
               expect(rtvVersion(responses[0].url)).to.equal(
-                rtvVersion(request.url));
+                  rtvVersion(request.url));
               expect(rtvVersion(responses[1].url)).to.equal(
-                rtvVersion(request.url));
+                  rtvVersion(request.url));
             });
           });
         });

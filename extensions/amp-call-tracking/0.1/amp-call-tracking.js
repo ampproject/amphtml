@@ -86,8 +86,8 @@ export class AmpCallTracking extends AMP.BaseElement {
         .then(url => fetch_(this.win, url))
         .then(data => {
           user().assert('phoneNumber' in data,
-          'Response must contain a non-empty phoneNumber field %s',
-          this.element);
+              'Response must contain a non-empty phoneNumber field %s',
+              this.element);
 
           this.hyperlink_.setAttribute('href', `tel:${data['phoneNumber']}`);
           this.hyperlink_.textContent = data['formattedPhoneNumber']

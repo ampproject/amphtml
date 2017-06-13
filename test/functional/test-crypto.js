@@ -75,7 +75,7 @@ describes.realWin('crypto-impl', {}, env => {
       it('should hash [1,2,3] in sha384', () => {
         return expect(crypto.sha384Base64(uint8Array([1, 2, 3])))
             .to.eventually.equal(
-                'hiKdxtL_vqxzgHRBVKpwApHAZDUqDb3H' +
+            'hiKdxtL_vqxzgHRBVKpwApHAZDUqDb3H' +
                 'e57T8sjh2sTcMlhn053f8dJim3o5PUf2');
       });
 
@@ -261,19 +261,19 @@ describes.realWin('crypto-impl', {}, env => {
       });
 
       it('should not validate with the correct key but modified signature',
-        () => {
-          if (!crypto.isCryptoAvailable()) { return; }
-          pubKeyInfoPromise.then(pubKeyInfo => {
-            const arr = new Array(signature.length);
-            for (let i = 0; i < signature.length ; i++) {
-              const modifiedSig = signature.slice(0);
-              modifiedSig[i] += 1;
-              arr[i] = crypto.verifySignature(data, modifiedSig, pubKeyInfo)
+          () => {
+            if (!crypto.isCryptoAvailable()) { return; }
+            pubKeyInfoPromise.then(pubKeyInfo => {
+              const arr = new Array(signature.length);
+              for (let i = 0; i < signature.length ; i++) {
+                const modifiedSig = signature.slice(0);
+                modifiedSig[i] += 1;
+                arr[i] = crypto.verifySignature(data, modifiedSig, pubKeyInfo)
                   .then(isvalid => expect(isvalid).to.be.false);
-            };
-            return Promise.all(arr);
+              };
+              return Promise.all(arr);
+            });
           });
-        });
 
       it('should not validate with wrong key', () => {
         if (!crypto.isCryptoAvailable()) { return; }

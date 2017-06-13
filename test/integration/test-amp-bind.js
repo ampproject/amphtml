@@ -567,8 +567,8 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
       // the amp-state element back to its original source.
       sandbox.stub(batchedXhr, 'fetchJson')
           .withArgs(
-              'https://www.google.com/bind/second/source',
-              sinon.match.any)
+          'https://www.google.com/bind/second/source',
+          sinon.match.any)
           .returns(Promise.resolve({
             json() {
               return Promise.resolve({

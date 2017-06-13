@@ -142,9 +142,9 @@ export class BaseSlides extends BaseCarousel {
     }
     this.clearAutoplay();
     this.autoplayTimeoutId_ = timerFor(this.win).delay(
-       this.go.bind(
-           this, /* dir */ 1, /* animate */ true, /* autoplay */ true),
-       this.autoplayDelay_);
+        this.go.bind(
+            this, /* dir */ 1, /* animate */ true, /* autoplay */ true),
+        this.autoplayDelay_);
   }
 
  /**

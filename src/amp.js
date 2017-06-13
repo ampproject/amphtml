@@ -120,4 +120,4 @@ if (self.console) {
       self.location.href);
 }
 self.document.documentElement.setAttribute('amp-version',
-      '$internalRuntimeVersion$');
+    '$internalRuntimeVersion$');

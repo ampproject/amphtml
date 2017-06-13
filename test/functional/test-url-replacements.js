@@ -103,7 +103,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   function expandAsync(url, opt_bindings, opt_options) {
     return getReplacements(opt_options).then(
-          replacements => replacements.expandAsync(url, opt_bindings)
+        replacements => replacements.expandAsync(url, opt_bindings)
         );
   }
 
@@ -341,7 +341,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       ' SHARE_TRACKING_OUTGOING', () => {
     return expect(
         expandAsync('?in=SHARE_TRACKING_INCOMING&out=SHARE_TRACKING_OUTGOING',
-        /*opt_bindings*/undefined, {withShareTracking: true}))
+            /*opt_bindings*/undefined, {withShareTracking: true}))
         .to.eventually.equal('?in=12345&out=54321');
   });
 
@@ -729,9 +729,9 @@ describes.sandboxed('UrlReplacements', {}, () => {
   it('should expand bindings as functions', () => {
     return expandAsync('rid=FUNC(abc)?', {'FUNC': value => 'func_' + value})
         .then(
-          res => {
-            expect(res).to.match(/rid=func_abc\?$/);
-          });
+        res => {
+          expect(res).to.match(/rid=func_abc\?$/);
+        });
   });
 
   it('should expand bindings as functions with promise', () => {
@@ -776,9 +776,9 @@ describes.sandboxed('UrlReplacements', {}, () => {
     // RANDOM is a standard property and we add RANDOM_OTHER.
     return expandAsync('r=RANDOM&ro=RANDOM_OTHER?', {'RANDOM_OTHER': 'ABC'})
         .then(
-          res => {
-            expect(res).to.match(/r=(\d+(\.\d+)?)&ro=ABC\?$/);
-          });
+        res => {
+          expect(res).to.match(/r=(\d+(\.\d+)?)&ro=ABC\?$/);
+        });
   });
 
   it('should expand multiple vars', () => {
@@ -862,10 +862,10 @@ describes.sandboxed('UrlReplacements', {}, () => {
     /*eslint no-script-url: 0*/
     return urlReplacements.expandAsync('javascript://example.com/?r=RANDOM')
         .then(
-          () => { throw new Error('never here'); },
-          err => {
-            expect(err.message).to.match(/invalid protocol/);
-          }
+        () => { throw new Error('never here'); },
+        err => {
+          expect(err.message).to.match(/invalid protocol/);
+        }
         );
   });
 
@@ -876,13 +876,13 @@ describes.sandboxed('UrlReplacements', {}, () => {
       urlReplacements.ampdoc.win.performance.timing.loadEventStart = 109;
       const collectVars = {};
       const expanded = urlReplacements.expandSync(
-        'r=RANDOM&c=CONST&f=FUNCT(hello,world)&a=b&d=PROM&e=PAGE_LOAD_TIME',
-        {
-          'CONST': 'ABC',
-          'FUNCT': function(a, b) { return a + b; },
+          'r=RANDOM&c=CONST&f=FUNCT(hello,world)&a=b&d=PROM&e=PAGE_LOAD_TIME',
+          {
+            'CONST': 'ABC',
+            'FUNCT': function(a, b) { return a + b; },
           // Will ignore promise based result and instead insert empty string.
-          'PROM': function() { return Promise.resolve('boo'); },
-        }, collectVars);
+            'PROM': function() { return Promise.resolve('boo'); },
+          }, collectVars);
       expect(expanded).to.match(/^r=\d(\.\d+)?&c=ABC&f=helloworld&a=b&d=&e=9$/);
       expect(collectVars).to.deep.equal({
         'RANDOM': parseFloat(/^r=(\d+(\.\d+)?)/.exec(expanded)[1]),
@@ -921,15 +921,15 @@ describes.sandboxed('UrlReplacements', {}, () => {
     const win = getFakeWindow();
     const urlReplacements = urlReplacementsForDoc(win.ampdoc);
     const expanded = urlReplacements.expandSync(
-      'r=RANDOM&c=CONST&f=FUNCT(hello,world)&a=b&d=PROM&e=PAGE_LOAD_TIME',
-      {
-        'CONST': 'ABC',
-        'FUNCT': () => {
-          throw Error('Should not be called');
-        },
-      }, undefined, {
-        'CONST': true,
-      });
+        'r=RANDOM&c=CONST&f=FUNCT(hello,world)&a=b&d=PROM&e=PAGE_LOAD_TIME',
+        {
+          'CONST': 'ABC',
+          'FUNCT': () => {
+            throw Error('Should not be called');
+          },
+        }, undefined, {
+          'CONST': true,
+        });
     expect(expanded).to.equal('r=RANDOM&c=ABC&f=FUNCT(hello,world)' +
         '&a=b&d=PROM&e=PAGE_LOAD_TIME');
   });
@@ -1103,7 +1103,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       // No replacement without previous async replacement
       urlReplacements.maybeExpandLink(a);
       expect(a.href).to.equal(
-            'https://canonical.com/link?out=bar&c=');
+          'https://canonical.com/link?out=bar&c=');
       // Get a cid, then proceed.
       return urlReplacements.expandAsync('CLIENT_ID(abc)').then(() => {
         urlReplacements.maybeExpandLink(a);

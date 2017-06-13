@@ -78,12 +78,12 @@ describe('amp-nexxtv-player', () => {
 
   it('fails without mediaid', () => {
     return getNexxtv(null, '583').should.eventually.be.rejectedWith(
-      /The data-mediaid attribute is required/);
+        /The data-mediaid attribute is required/);
   });
 
   it('fails without client', () => {
     return getNexxtv('PTPFEC4U184674', null).should.eventually.be.rejectedWith(
-      /The data-client attribute is required/);
+        /The data-client attribute is required/);
   });
 
 

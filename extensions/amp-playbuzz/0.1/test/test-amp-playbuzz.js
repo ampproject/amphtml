@@ -171,6 +171,6 @@ describe('amp-playbuzz', () => {
   it('requires item attribute', () => {
     const src = createItemSrc().withUrl('');
     expect(getIns(src)).to.be.rejectedWith(
-      /The item attribute is required for/);
+        /The item attribute is required for/);
   });
 });
