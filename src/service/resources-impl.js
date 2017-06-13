@@ -1009,9 +1009,8 @@ export class Resources {
     }
 
     const viewportSize = this.viewport_.getSize();
-    const now = Date.now();
-    dev().fine(TAG_, 'PASS: at ' + now +
-        ', visible=', this.visible_,
+    dev().fine(TAG_,
+        'PASS: visible=', this.visible_,
         ', relayoutAll=', this.relayoutAll_,
         ', relayoutTop=', this.relayoutTop_,
         ', viewportSize=', viewportSize.width, viewportSize.height,
