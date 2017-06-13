@@ -343,22 +343,9 @@ Here's an example:
 <form
   method="post"
   action-xhr="/form/verify-json/post"
+  verify-xhr="/form/verify-json/post"
   target="_blank"
 >
-    <script type="application/json">
-    {
-      "verificationGroups": [
-        {
-          "name": "uniqueEmail",
-          "elements": ["email"]
-        },
-        {
-          "name": "fullAddress",
-          "elements": ["addressLine2", "city", "zip"]
-        },
-      ]
-    }
-    </script>
     <fieldset>
         <label>
             <span>Email</span>
