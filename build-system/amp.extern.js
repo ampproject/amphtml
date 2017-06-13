@@ -59,14 +59,30 @@ window.draw3p;
 window.AMP_TEST;
 window.AMP_TEST_IFRAME;
 window.AMP_TAG;
-window.AMP_CONFIG = {};
 window.AMP = {};
 
-window.AMP_CONFIG.thirdPartyUrl;
-window.AMP_CONFIG.thirdPartyFrameHost;
-window.AMP_CONFIG.thirdPartyFrameRegex;
-window.AMP_CONFIG.cdnUrl;
-window.AMP_CONFIG.errorReportingUrl;
+/** @constructor */
+function AmpConfigType() {}
+
+/* @public {string} */
+AmpConfigType.prototype.thirdPartyUrl;
+/* @public {string} */
+AmpConfigType.prototype.thirdPartyFrameHost;
+/* @public {string} */
+AmpConfigType.prototype.thirdPartyFrameRegex;
+/* @public {string} */
+AmpConfigType.prototype.cdnUrl;
+/* @public {string} */
+AmpConfigType.prototype.errorReportingUrl;
+/* @public {string} */
+AmpConfigType.prototype.localDev;
+/* @public {string} */
+AmpConfigType.prototype.v;
+/* @public {boolean} */
+AmpConfigType.prototype.canary;
+
+/** @type {!AmpConfigType}  */
+window.AMP_CONFIG;
 
 window.AMP_CONTEXT_DATA;
 
