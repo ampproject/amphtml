@@ -94,12 +94,13 @@ export class FormVerifier {
 
   /**
    * Checks if the form has been changed from its initial state.
+   * @return {boolean}
    * @private
    */
   isDirty_() {
-    const form = this.form_;
-    for (let i = 0; i < form.elements.length; i++) {
-      const field = form.elements[i];
+    const elements = this.form_.elements;
+    for (let i = 0; i < elements.length; i++) {
+      const field = elements[i];
       if (field.disabled) {
         continue;
       }
