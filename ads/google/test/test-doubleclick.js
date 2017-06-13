@@ -15,7 +15,7 @@
  */
 import {getUrl, whichGladeExperimentBranch} from '../doubleclick';
 
-describe('test the getUrl method', () => {
+describe('getUrl', () => {
 
   it('should use the correct URL given the experimental condition', () => {
     const controlData = {experimentId: '21060540'};
@@ -30,7 +30,7 @@ describe('test the getUrl method', () => {
   });
 });
 
-describe('test the whichGladeExperimentBranch function', () => {
+describe('whichGladeExperimentBranch', () => {
 
   it('should use GPT and opt out of the GladeExperiment when' +
   'useSameDomainRenderingUntilDeprecated is not undefined', () => {
