@@ -97,7 +97,7 @@ export class AmpSidebar extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     user().assert(isExperimentOn(this.win, 'amp-sidebar 1.0'),
-        `Experiment amp-sidebar 1.0 is disabled.`);
+        'Experiment amp-sidebar 1.0 is disabled.');
 
     this.side_ = this.element.getAttribute('side');
 
@@ -115,36 +115,42 @@ export class AmpSidebar extends AMP.BaseElement {
     }
 
     // Get the toolbar attribute from the nav
-    if(this.element.hasChildNodes && this.element.getElementsByTagName('nav').length > 0) {
-      const childNavElements = Array.from(this.element.getElementsByTagName('nav'));
-      childNavElements.some((navElement) => {
-        if(navElement.hasAttribute('toolbar')) {
+    if (this.element.hasChildNodes &&
+      this.element.getElementsByTagName('nav').length > 0
+    ) {
+      const childNavElements =
+        Array.from(this.element.getElementsByTagName('nav'));
+      childNavElements.some(navElement => {
+        if (navElement.hasAttribute('toolbar')) {
           this.toolbarNav_ = navElement;
           this.toolbar_ = navElement.getAttribute('toolbar');
 
           // Create a header element on the document for our toolbar
           // TODO: Allow specifying a target for the toolbar
-          this.toolbarTarget_ = this.element.ownerDocument.createElement("header");
-          this.element.parentElement.insertBefore(this.toolbarTarget_, this.element);
-          if(!this.isToolbar_()) {
+          this.toolbarTarget_ =
+            this.element.ownerDocument.createElement('header');
+          this.element.parentElement
+            .insertBefore(this.toolbarTarget_, this.element);
+          if (!this.isToolbar_()) {
             setStyles(this.toolbarTarget_, {
-              'display': 'none'
+              'display': 'none',
             });
           }
 
           //Finally, find our tool-bar only elements
-          if(this.toolbarNav_.hasAttribute('toolbar-only')) {
+          if (this.toolbarNav_.hasAttribute('toolbar-only')) {
             this.toolbarOnlyElements_ = [];
             this.toolbarOnlyElements_.push(this.toolbarNav_);
-          } else if(!this.toolbarNav_.hasAttribute('toolbar-only') &&
+          } else if (!this.toolbarNav_.hasAttribute('toolbar-only') &&
             this.toolbarNav_.getElementsByTagName('*').length > 0) {
             this.toolbarOnlyElements_ = [];
             // Check the nav's children for toolbar-only
-            Array.from(this.toolbarNav_.getElementsByTagName('*')).forEach(element => {
-              if(element.hasAttribute('toolbar-only')) {
-                this.toolbarOnlyElements_.push(element);
-              }
-            });
+            Array.from(this.toolbarNav_
+              .getElementsByTagName('*')).forEach(element => {
+                if (element.hasAttribute('toolbar-only')) {
+                  this.toolbarOnlyElements_.push(element);
+                }
+              });
           }
           return true;
         }
@@ -220,36 +226,38 @@ export class AmpSidebar extends AMP.BaseElement {
       // Add the toolbar elements
       this.toolbarClone_ = this.toolbarNav_.cloneNode(true);
       this.toolbarTarget_.appendChild(this.toolbarClone_);
-      if(this.toolbarTarget_.style.display === 'none') {
+      if (this.toolbarTarget_.style.display === 'none') {
         setStyles(this.toolbarTarget_, {
-          'display': null
+          'display': null,
         });
       }
-      if(this.toolbarOnlyElements_) {
+      if (this.toolbarOnlyElements_) {
         this.toolbarOnlyElements_.forEach(element => {
           setStyles(element, {
-            'display': 'none'
+            'display': 'none',
           });
         });
       }
       this.toolbarTarget_.setAttribute('toolbar', '');
-    } else if (!this.isToolbar_() && this.toolbarTarget_.hasAttribute('toolbar')) {
+    } else if (!this.isToolbar_() &&
+      this.toolbarTarget_.hasAttribute('toolbar')
+      ) {
       this.closeIfOpen_();
       // Remove the elements and the attribute
       this.toolbarTarget_.removeChild(this.toolbarClone_);
-      if(this.toolbarOnlyElements_) {
+      if (this.toolbarOnlyElements_) {
         this.toolbarOnlyElements_.forEach(element => {
           setStyles(element, {
-            'display': null
+            'display': null,
           });
         });
       }
       this.toolbarTarget_.removeAttribute('toolbar');
 
       // Check if our target still has elements, if not, do not display it
-      if(!this.toolbarTarget_.hasChildNodes()) {
+      if (!this.toolbarTarget_.hasChildNodes()) {
         setStyles(this.toolbarTarget_, {
-          'display': 'none'
+          'display': 'none',
         });
       }
     }
@@ -270,10 +278,11 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   isToolbar_() {
-    if(!this.toolbar_) {
+    if (!this.toolbar_) {
       return false;
     } else {
-      return this.element.ownerDocument.defaultView.matchMedia(this.toolbar_).matches;
+      return this.element.ownerDocument.defaultView
+        .matchMedia(this.toolbar_).matches;
     }
   }
 
@@ -282,7 +291,7 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   closeIfOpen_() {
-    if(this.isOpen_()) {
+    if (this.isOpen_()) {
       this.close_();
     }
   }
