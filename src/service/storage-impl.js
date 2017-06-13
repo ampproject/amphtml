@@ -148,7 +148,7 @@ export class Storage {
   /** @private */
   broadcastReset_() {
     dev().fine(TAG, 'Broadcasted reset message');
-    this.viewer_.broadcast(/** @type {!JSONType} */ ({
+    this.viewer_.broadcast(/** @type {!JsonObject} */ ({
       'type': 'amp-storage-reset',
       'origin': this.origin_,
     }));

@@ -14,6 +14,16 @@
  * limitations under the License.
  */
 
+/**
+ * A type for Objects that can be JSON serialized or that come from
+ * JSON serialization. Requires the objects fields to be accessed with
+ * bracket notation object['name'] to make sure the fields do not get
+ * obfuscated.
+ * @constructor
+ * @dict
+ */
+function JsonObject() {}
+
 // Node.js global
 var process = {};
 process.env;
@@ -62,7 +72,7 @@ window.AMP_CONTEXT_DATA;
 
 // amp-viz-vega related externs.
 /**
- * @typedef {{spec: function(!JSONType, function())}}
+ * @typedef {{spec: function(!JsonObject, function())}}
  */
 let VegaParser;
 /**

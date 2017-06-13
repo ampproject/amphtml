@@ -36,6 +36,13 @@ export function map(opt_initial) {
 }
 
 /**
+ * @return {!JsonObject}
+ */
+export function dict() {
+  return /** @type {!JsonObject} */ ({});
+}
+
+/**
  * Checks if the given key is a property in the map.
  *
  * @param {T}  obj a map like property.

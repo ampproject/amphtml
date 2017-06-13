@@ -782,7 +782,7 @@ export class HistoryBindingVirtual_ {
   }
 
   /**
-   * @param {!JSONType} data
+   * @param {!JsonObject} data
    * @private
    */
   onHistoryPopped_(data) {

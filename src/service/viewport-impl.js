@@ -633,7 +633,7 @@ export class Viewport {
   }
 
   /**
-   * @param {!JSONType} data
+   * @param {!JsonObject} data
    * @private
    */
   viewerSetScrollTop_(data) {
@@ -642,7 +642,7 @@ export class Viewport {
   }
 
   /**
-   * @param {!JSONType} data
+   * @param {!JsonObject} data
    * @private
    */
   updateOnViewportEvent_(data) {

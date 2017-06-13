@@ -70,7 +70,7 @@ export function triggerAnalyticsEvent(target, eventType, opt_vars) {
 /**
  * Method to create scoped analytics element for any element.
  * @param {!Element} parentElement
- * @param {!JSONType} config
+ * @param {!JsonObject} config
  * @param {boolean=} loadAnalytics
  * @return {!Element} created analytics element
  */

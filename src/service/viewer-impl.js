@@ -112,7 +112,7 @@ export class Viewer {
     /** @private {number} */
     this.prerenderSize_ = 1;
 
-    /** @private {!Object<string, !Observable<!JSONType>>} */
+    /** @private {!Object<string, !Observable<!JsonObject>>} */
     this.messageObservables_ = map();
 
     /** @private {!Observable<boolean>} */
@@ -121,7 +121,7 @@ export class Viewer {
     /** @private {!Observable} */
     this.visibilityObservable_ = new Observable();
 
-    /** @private {!Observable<!JSONType>} */
+    /** @private {!Observable<!JsonObject>} */
     this.broadcastObservable_ = new Observable();
 
     /** @private {?function(string, *, boolean):(Promise<*>|undefined)} */
@@ -723,7 +723,7 @@ export class Viewer {
   /**
    * Adds a eventType listener for viewer events.
    * @param {string} eventType
-   * @param {function(!JSONType)} handler
+   * @param {function(!JsonObject)} handler
    * @return {!UnlistenDef}
    */
   onMessage(eventType, handler) {
@@ -738,7 +738,7 @@ export class Viewer {
   /**
    * Requests AMP document to receive a message from Viewer.
    * @param {string} eventType
-   * @param {!JSONType} data
+   * @param {!JsonObject} data
    * @param {boolean} unusedAwaitResponse
    * @return {(!Promise<*>|undefined)}
    * @export
@@ -754,7 +754,7 @@ export class Viewer {
     }
     if (eventType == 'broadcast') {
       this.broadcastObservable_.fire(
-          /** @type {!JSONType|undefined} */ (data));
+          /** @type {!JsonObject|undefined} */ (data));
       return Promise.resolve();
     }
     const observable = this.messageObservables_[eventType];
@@ -901,7 +901,7 @@ export class Viewer {
    * will attempt to deliver messages when the messaging channel has been
    * established, but it will not fail if the channel is timed out.
    *
-   * @param {!JSONType} message
+   * @param {!JsonObject} message
    */
   broadcast(message) {
     if (!this.messagingMaybePromise_) {
@@ -914,7 +914,7 @@ export class Viewer {
 
   /**
    * Registers receiver for the broadcast events.
-   * @param {function(!JSONType)} handler
+   * @param {function(!JsonObject)} handler
    * @return {!UnlistenDef}
    */
   onBroadcast(handler) {
