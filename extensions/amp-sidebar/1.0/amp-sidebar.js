@@ -122,13 +122,10 @@ export class AmpSidebar extends AMP.BaseElement {
           this.toolbarNav_ = navElement;
           this.toolbar_ = navElement.getAttribute('toolbar');
 
-          // Find or create a header element on the document for our toolbar
-          if (this.element.ownerDocument.getElementsByTagName('header').length > 0) {
-            this.toolbarHeader_ = this.element.ownerDocument.getElementsByTagName('header')[0];
-          } else {
-            this.toolbarHeader_ = this.element.ownerDocument.createElement("div");
-            this.element.ownerDocument.insertBefore(this.toolbarHeader_, this.element);
-          }
+          // Create a header element on the document for our toolbar
+          // TODO: Allow specifying a target for the toolbar
+          this.toolbarHeader_ = this.element.ownerDocument.createElement("header");
+          this.element.parentElement.insertBefore(this.toolbarHeader_, this.element);
 
           //Finally, find our tool-bar only elements
           if(this.toolbarNav_.hasAttribute('toolbar-only')) {

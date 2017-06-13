@@ -50,17 +50,25 @@
  }
 
   header[toolbar] nav[toolbar] {
-    display: inline-block;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
   }
 
   header[toolbar] nav[toolbar] ul {
-    padding-left: 0px;
-    margin-top: 0px;
-    margin-bottom: 0px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+
+    padding: 0;
+    margin: 0;
   }
 
-  header[toolbar] nav[toolbar] li {
-    margin-bottom: 0px;
+  header[toolbar] nav[toolbar] ul li {
+    margin-bottom: 0;
+
+    margin-left: 5px;
+    margin-right: 5px;
   }
 
  .i-amphtml-sidebar-mask {
