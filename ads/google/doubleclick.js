@@ -36,8 +36,6 @@ const GladeExperiment = {
  * @param {!Object} data
  */
 export function doubleclick(global, data) {
-  const experimentFraction = 0.1;
-
   // TODO: check mandatory fields
   validateData(data, [], [
     'slot', 'targeting', 'categoryExclusions',
@@ -57,14 +55,13 @@ export function doubleclick(global, data) {
 
   centerAd();
 
-  const url = getUrl(data);
+  const gptFilename = selectGptExperiment(data);
 
-  whichGladeExperimentBranch(data, url, experimentFraction);
-
+  writeAdScript(data, gptFilename);
 }
 
 /**
- * @param {Window} global
+ * @param {!Window} global
  * @param {!Object} data
  * @param {!GladeExperiment} gladeExperiment
  * @param {!string} url
@@ -184,7 +181,7 @@ function doubleClickWithGpt(global, data, gladeExperiment, url) {
 }
 
 /**
- * @param {Window} global
+ * @param {!Window} global
  * @param {!Object} data
  * @param {!GladeExperiment} gladeExperiment
  */
@@ -249,8 +246,7 @@ function getCorrelator(global) {
 }
 
 function centerAd() {
-  const container = global.document.querySelector('#c');
-  setStyles(dev().assertElement(container), {
+  setStyles(dev().assertElement(global.document.querySelector('#c')), {
     top: '50%',
     left: '50%',
     bottom: '',
@@ -263,7 +259,7 @@ function centerAd() {
  * @param {Object} data
  * @return {!string}
  */
-export function getUrl(data) {
+export function selectGptExperiment(data) {
   const fileExperimentConfig = {
     21060540: 'gpt_sf_a.js',
     21060541: 'gpt_sf_b.js',
@@ -273,28 +269,26 @@ export function getUrl(data) {
   let expFilename;
   (data['experimentId'] || '').split(',')
   .forEach(val => expFilename = expFilename || fileExperimentConfig[val]);
-  return `https://www.googletagservices.com/tag/js/${expFilename || 'gpt.js'}`;
+  return expFilename;
 }
 
-/**
- * @param {Object} data
- * @param {!string} url
- * @param {number} experimentFraction
- */
-export function whichGladeExperimentBranch(data, url, experimentFraction) {
-  if (data.useSameDomainRenderingUntilDeprecated != undefined
-    || data.multiSize || url.indexOf('sf_a') > -1 || url.indexOf('sf_b') > -1) {
-    doubleClickWithGpt(data, GladeExperiment.GLADE_OPT_OUT, url);
+export function writeAdScript(data, gptFilename) {
+  const url =
+  `https://www.googletagservices.com/tag/js/${gptFilename || 'gpt.js'}`;
+  if (gptFilename || data.useSameDomainRenderingUntilDeprecated != undefined
+    || data.multiSize) {
+    doubleClickWithGpt(global, data, GladeExperiment.GLADE_OPT_OUT, url);
   } else {
+    const experimentFraction = 0.1;
     const dice = Math.random();
     const href = global.context.location.href;
     if ((href.indexOf('google_glade=0') > 0 || dice < experimentFraction)
           && href.indexOf('google_glade=1') < 0) {
-      doubleClickWithGpt(data, GladeExperiment.GLADE_CONTROL, url);
+      doubleClickWithGpt(global, data, GladeExperiment.GLADE_CONTROL, url);
     } else {
       const exp = (dice < 2 * experimentFraction) ?
           GladeExperiment.GLADE_EXPERIMENT : GladeExperiment.NO_EXPERIMENT;
-      doubleClickWithGlade(data, exp);
+      doubleClickWithGlade(global, data, exp);
     }
   }
 }

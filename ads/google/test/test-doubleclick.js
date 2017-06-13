@@ -13,32 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {getUrl, whichGladeExperimentBranch} from '../doubleclick';
+import {selectGptExperiment, writeAdScript} from '../doubleclick';
 
-describe('getUrl', () => {
+describe('selectGptExperiment', () => {
 
-  it('should use the correct URL given the experimental condition', () => {
+  it('should return the correct filename when given the experimental condition',
+  () => {
     const controlData = {experimentId: '21060540'};
     const experimentData = {experimentId: '21060541'};
     const notInEitherData = {};
-    expect(getUrl(controlData)).to
-    .equal('https://www.googletagservices.com/tag/js/gpt_sf_a.js');
-    expect(getUrl(experimentData)).to
-    .equal('https://www.googletagservices.com/tag/js/gpt_sf_b.js');
-    expect(getUrl(notInEitherData)).to
-    .equal('https://www.googletagservices.com/tag/js/gpt.js');
+    expect(selectGptExperiment(controlData)).to
+    .equal('gpt_sf_a.js');
+    expect(selectGptExperiment(experimentData)).to
+    .equal('gpt_sf_b.js');
+    expect(selectGptExperiment(notInEitherData)).to
+    .equal(undefined);
   });
 });
 
-describe('whichGladeExperimentBranch', () => {
+describe('writeAdScript', () => {
 
   it('should use GPT and opt out of the GladeExperiment when' +
   'useSameDomainRenderingUntilDeprecated is not undefined', () => {
     const data = {useSameDomainRenderingUntilDeprecated: true};
-    const url = 'https://www.googletagservices.com/tag/js/gpt.js';
-    const experimentFraction = 0.1;
+    const gptFilename = undefined;
 
-    whichGladeExperimentBranch(data, url, experimentFraction);
+    writeAdScript(data, gptFilename);
 
     expect(document.querySelector('script[src="https://www.googletagservices.com/tag/js/gpt.js"]')).to.be.ok;
   });
@@ -46,10 +46,9 @@ describe('whichGladeExperimentBranch', () => {
   it('should use GPT and opt out of the GladeExperiment when multiSize is not' +
   'null', () => {
     const data = {multiSize: 'hey!'};
-    const url = 'https://www.googletagservices.com/tag/js/gpt.js';
-    const experimentFraction = 0.1;
+    const gptFilename = undefined;
 
-    whichGladeExperimentBranch(data, url, experimentFraction);
+    writeAdScript(data, gptFilename);
 
     expect(document.querySelector('script[src="https://www.googletagservices.com/tag/js/gpt.js"]')).to.be.ok;
   });
@@ -57,10 +56,9 @@ describe('whichGladeExperimentBranch', () => {
   it('should use GPT and opt out of the GladeExperiment when in the control' +
   'branch of the SingleFileGPT experiment', () => {
     const data = {};
-    const url = 'https://www.googletagservices.com/tag/js/gpt_sf_a.js';
-    const experimentFraction = 0.1;
+    const gptFilename = 'gpt_sf_a.js';
 
-    whichGladeExperimentBranch(data, url, experimentFraction);
+    writeAdScript(data, gptFilename);
 
     expect(document.querySelector('script[src="https://www.googletagservices.com/tag/js/gpt_sf_a.js"]')).to.be.ok;
   });
@@ -68,10 +66,9 @@ describe('whichGladeExperimentBranch', () => {
   it('should use GPT and opt out of the GladeExperiment when in the' +
   'experiment branch of the SingleFileGPT experiment', () => {
     const data = {};
-    const url = 'https://www.googletagservices.com/tag/js/gpt_sf_b.js';
-    const experimentFraction = 0.1;
+    const gptFilename = 'gpt_sf_b.js';
 
-    whichGladeExperimentBranch(data, url, experimentFraction);
+    writeAdScript(data, gptFilename);
 
     expect(document.querySelector('script[src="https://www.googletagservices.com/tag/js/gpt_sf_b.js"]')).to.be.ok;
   });
