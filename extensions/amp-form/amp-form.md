@@ -54,7 +54,7 @@ The `amp-form` extension **MUST** be loaded if you're using `<form>` or any inpu
             resizable
             src="https://ampproject-b5f4c.firebaseapp.com/examples/ampform.basic.embed.html">
   <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div> 
+  <div placeholder></div>
   </amp-iframe>
 </div>
 
@@ -145,7 +145,7 @@ For example, a common use case is to submit a form on input change (selecting a 
             resizable
             src="https://ampproject-b5f4c.firebaseapp.com/examples/ampform.inputevent.embed.html">
   <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div> 
+  <div placeholder></div>
 </amp-iframe>
 </div>
 
@@ -310,7 +310,7 @@ Here's an example:
             resizable
             src="https://ampproject-b5f4c.firebaseapp.com/examples/ampform.customval.embed.html">
   <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div> 
+  <div placeholder></div>
 </amp-iframe>
 </div>
 
