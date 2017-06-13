@@ -142,7 +142,13 @@ export class BaseElement {
     /** @public @const {!Window} */
     this.win = element.ownerDocument.defaultView;
 
-    /** @private {?Object<string, function(!./service/action-impl.ActionInvocation)>} */
+    /**
+     * Maps action name to struct containing the action handler and minimum
+     * trust required to invoke the handler.
+     * @private {?Object<string, {
+     *   handler: function(!./service/action-impl.ActionInvocation),
+     *   minTrust: ActionTrust,
+     * }>} */
     this.actionMap_ = null;
 
     /** @public {!./preconnect.Preconnect} */
@@ -532,14 +538,10 @@ export class BaseElement {
    */
   registerAction(method, handler, opt_minTrust) {
     this.initActionMap_();
-    this.actionMap_[method] = function actionTrustChecker(invocation) {
-      // Default to ActionTrust.MEDIUM.
-      const minTrust = opt_minTrust !== undefined
-          ? opt_minTrust : ActionTrust.MEDIUM;
-      if (invocation.satisfiesTrust(minTrust)) {
-        handler(invocation);
-      }
-    };
+    // Default to ActionTrust.MEDIUM.
+    const minTrust =
+        (opt_minTrust !== undefined) ? opt_minTrust : ActionTrust.MEDIUM;
+    this.actionMap_[method] = {handler, minTrust};
   }
 
   /**
@@ -559,10 +561,13 @@ export class BaseElement {
       }
     } else {
       this.initActionMap_();
-      const handler = this.actionMap_[invocation.method];
-      user().assert(handler, `Method not found: ${invocation.method} in %s`,
+      const holder = this.actionMap_[invocation.method];
+      user().assert(holder, `Method not found: ${invocation.method} in %s`,
           this);
-      handler(invocation);
+      const {handler, minTrust} = holder;
+      if (invocation.satisfiesTrust(minTrust)) {
+        handler(invocation);
+      }
     }
   }
 

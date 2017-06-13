@@ -361,15 +361,9 @@ export class ActionService {
     /** @const {Array<!ActionInvocation>} */
     const currentQueue = target[ACTION_QUEUE_];
 
-    const actionHandler = function actionTrustChecker(invocation) {
-      // Default to ActionTrust.MEDIUM.
-      const minTrust = opt_minTrust !== undefined
-          ? opt_minTrust : ActionTrust.MEDIUM;
-      if (invocation.satisfiesTrust(minTrust)) {
-        handler(invocation);
-      }
-    };
-    target[ACTION_HANDLER_] = actionHandler;
+    const minTrust =
+        (opt_minTrust !== undefined) ? opt_minTrust : ActionTrust.MEDIUM;
+    target[ACTION_HANDLER_] = {handler, minTrust};
 
     // Dequeue the current queue.
     if (isArray(currentQueue)) {
@@ -377,7 +371,9 @@ export class ActionService {
         // TODO(dvoytenko, #1260): dedupe actions.
         currentQueue.forEach(invocation => {
           try {
-            actionHandler(invocation);
+            if (invocation.satisfiesTrust(minTrust)) {
+              handler(invocation);
+            }
           } catch (e) {
             dev().error(TAG_, 'Action execution failed:', invocation, e);
           }
@@ -484,9 +480,12 @@ export class ActionService {
     const targetId = target.getAttribute('id') || '';
     if ((targetId && targetId.substring(0, 4) == 'amp-') ||
         (supportedActions && supportedActions.indexOf(method) != -1)) {
-      const handler = target[ACTION_HANDLER_];
-      if (handler) {
-        handler(invocation);
+      const holder = target[ACTION_HANDLER_];
+      if (holder) {
+        const {handler, minTrust} = holder;
+        if (invocation.satisfiesTrust(minTrust)) {
+          handler(invocation);
+        }
       } else {
         target[ACTION_QUEUE_] = target[ACTION_QUEUE_] || [];
         target[ACTION_QUEUE_].push(invocation);
