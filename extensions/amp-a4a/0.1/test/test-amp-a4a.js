@@ -2160,9 +2160,18 @@ describe('amp-a4a', () => {
     });
   });
 
-  describe.skip('refresh', () => {
+  describe('refresh', () => {
+    let sandbox;
+
+    beforeEach(() => {
+      sandbox = sinon.sandbox.create();
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+    });
+
     it('should effectively reset the slot and invoke given callback', () => {
-      const sandbox = sinon.sandbox.create();
       return createIframePromise().then(f => {
         const fixture = f;
         setupForAdTesting(fixture);
