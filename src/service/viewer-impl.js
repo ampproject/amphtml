@@ -16,7 +16,7 @@
 
 import {Observable} from '../observable';
 import {findIndex} from '../utils/array';
-import {map} from '../utils/object';
+import {dict, map} from '../utils/object';
 import {documentStateFor} from './document-state';
 import {registerServiceBuilderForDoc} from '../service';
 import {dev, duplicateErrorIfNecessary} from '../log';
@@ -460,10 +460,10 @@ export class Viewer {
   navigateTo(url, requestedBy) {
     dev().assert(isProxyOrigin(url), 'Invalid A2A URL %s %s', url, requestedBy);
     if (this.hasCapability('a2a')) {
-      this.sendMessage('a2a', {
-        url,
-        requestedBy,
-      });
+      this.sendMessage('a2a', dict({
+        'url': url,
+        'requestedBy': requestedBy,
+      }));
     } else {
       this.win.top.location.href = url;
     }
@@ -816,7 +816,7 @@ export class Viewer {
    * This is a restricted API.
    *
    * @param {string} eventType
-   * @param {*} data
+   * @param {?JsonObject|string|undefined} data
    * @param {boolean=} cancelUnsent
    */
   sendMessage(eventType, data, cancelUnsent = false) {
@@ -831,9 +831,9 @@ export class Viewer {
    * This is a restricted API.
    *
    * @param {string} eventType
-   * @param {*} data
+   * @param {?JsonObject|string|undefined} data
    * @param {boolean=} cancelUnsent
-   * @return {!Promise<*>} the response promise
+   * @return {!Promise<(?JsonObject|string|undefined)>} the response promise
    */
   sendMessageAwaitResponse(eventType, data, cancelUnsent = false) {
     return this.sendMessageInternal_(eventType, data, cancelUnsent, true);
@@ -843,18 +843,19 @@ export class Viewer {
    * Sends the message to the viewer.
    *
    * @param {string} eventType
-   * @param {*} data
+   * @param {?JsonObject|string|undefined} data
    * @param {boolean} cancelUnsent
    * @param {boolean} awaitResponse
-   * @return {!Promise<*>} the response promise
+   * @return {!Promise<(?JsonObject|string|undefined)>} the response promise
    */
   sendMessageInternal_(eventType, data, cancelUnsent, awaitResponse) {
     if (this.messageDeliverer_) {
       // Certain message deliverers return fake "Promise" instances called
       // "Thenables". Convert from these values into trusted Promise instances,
       // assimilating with the resolved (or rejected) internal value.
-      return /** @type {!Promise<*>} */ (Promise.resolve(this.messageDeliverer_(
-          eventType, data, awaitResponse)));
+      return /** @type {!Promise<?JsonObject|string|undefined>} */ (
+          Promise.resolve(this.messageDeliverer_(
+              eventType, data, awaitResponse)));
     }
 
     if (!this.messagingReadyPromise_) {

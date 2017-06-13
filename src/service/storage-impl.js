@@ -17,6 +17,7 @@
 import {registerServiceBuilderForDoc} from '../service';
 import {getSourceOrigin} from '../url';
 import {dev} from '../log';
+import {dict} from '../utils/object';
 import {recreateNonProtoObject} from '../json';
 import {viewerForDoc} from '../services';
 
@@ -367,15 +368,14 @@ export class ViewerStorageBinding {
 
   /** @override */
   loadBlob(origin) {
-    return this.viewer_.sendMessageAwaitResponse('loadStore', {origin}).then(
-        response => response['blob']
-    );
+    return this.viewer_.sendMessageAwaitResponse('loadStore',
+        dict({'origin': origin})).then(response => response['blob']);
   }
 
   /** @override */
   saveBlob(origin, blob) {
     return /** @type {!Promise} */ (this.viewer_.sendMessageAwaitResponse(
-        'saveStore', {origin, blob}));
+        'saveStore', dict({'origin': origin, 'blob': blob})));
   }
 }
 
