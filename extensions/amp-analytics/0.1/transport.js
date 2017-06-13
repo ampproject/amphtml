@@ -31,8 +31,9 @@ import {hasOwn} from '../../../src/utils/object';
 import {IframeMessagingClient} from '../../../3p/iframe-messaging-client';
 import {AMP_ANALYTICS_3P_MESSAGE_TYPE} from '../../../src/3p-analytics-common';
 import {
-  CrossDomainIframeMessageQueue,
-} from './cross-domain-iframe-message-queue';
+  AmpAnalytics3pEventMessageQueue,
+  AmpAnalytics3pNewCreativeMessageQueue,
+} from './amp-analytics-3p-message-queue';
 
 /** @private @const {string} */
 const TAG_ = 'amp-analytics.Transport';
@@ -42,8 +43,8 @@ const TAG_ = 'amp-analytics.Transport';
  *    sentinel: !string,
  *    usageCount: number,
  *    iframeMessagingClient: IframeMessagingClient,
- *    newCreativeMessageQueue: CrossDomainIframeMessageQueue,
- *    eventQueue: CrossDomainIframeMessageQueue,
+ *    newCreativeMessageQueue: AmpAnalytics3pNewCreativeMessageQueue,
+ *    eventQueue: AmpAnalytics3pEventMessageQueue,
  *  }} */
 export let FrameData;
 
@@ -212,9 +213,7 @@ export class Transport {
     dev().assert(frameData, 'Trying to use non-existent frame');
     const assuredNonNullFrameData = /** @type{!FrameData} */ (frameData);
     assuredNonNullFrameData.newCreativeMessageQueue.enqueue(
-      this.id_,
-      CrossDomainIframeMessageQueue.buildNewCreativeMessage(
-        this.id_, opt_extraData));
+      this.id_, opt_extraData);
     return assuredNonNullFrameData;
   }
 
@@ -306,10 +305,10 @@ export class Transport {
       sentinel,
       usageCount: 1,
       iframeMessagingClient,
-      newCreativeMessageQueue: new CrossDomainIframeMessageQueue(
-        win, iframeMessagingClient, AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVES),
-      eventQueue: new CrossDomainIframeMessageQueue(
-        win, iframeMessagingClient, AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENTS),
+      newCreativeMessageQueue: new AmpAnalytics3pNewCreativeMessageQueue(
+        win, iframeMessagingClient),
+      eventQueue: new AmpAnalytics3pEventMessageQueue(
+        win, iframeMessagingClient),
     };
     Transport.crossDomainIframes_[frameUrl] = frameData;
     frame.src = frameUrl;
@@ -329,16 +328,16 @@ export class Transport {
   /**
    * Sends an Amp Analytics trigger event to a vendor's cross-domain iframe,
    * or queues the message if the frame is not yet ready to receive messages.
-   * @param {string} request
+   * @param {string} event A string describing the trigger event
    * @param {!Object<string, string>} transportOptions
    * @private
    */
-  sendRequestUsingCrossDomainIframe_(request, transportOptions) {
+  sendRequestUsingCrossDomainIframe_(event, transportOptions) {
     const frameData = Transport.getFrameData_(transportOptions['iframe']);
     dev().assert(frameData, 'Trying to send message to non-existent frame');
-    frameData.eventQueue.enqueue(
-      this.id_,
-      CrossDomainIframeMessageQueue.buildEventMessage(this.id_, request));
+    dev().assert(frameData.eventQueue,
+      'Event queue is missing for ' + this.id_);
+    frameData.eventQueue.enqueue(this.id_, event);
   }
 
   static getFrameData_(frameUrl) {

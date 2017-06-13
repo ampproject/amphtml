@@ -16,12 +16,10 @@
 
 /** @enum {string} */
 export const AMP_ANALYTICS_3P_MESSAGE_TYPE = {
-  READY: 'Ready',
-  CREATIVES: 'Creatives',
-  CREATIVE: 'Creative', /* Can't be sent standalone, only within CREATIVES */
-  EVENTS: 'Events',
-  EVENT: 'Event', /* Can't be sent standalone, only within EVENTS */
-  RESPONSE: 'Response',
+  READY: 'R',
+  CREATIVE: 'C',
+  EVENT: 'E',
+  RESPONSE: 'A',
 };
 
 /** @typedef {{
@@ -32,8 +30,7 @@ export let AmpAnalytics3pReadyMessage;
 // Example:
 // {
 //   "sentinel":"20354662305315974",
-//   "type":"
-// Ready"
+//   "type":AMP_ANALYTICS_3P_MESSAGE_TYPE.READY
 // }
 // The sentinel value will be present when received but the sender doesn't
 // need to add it, this is done by iframe-messaging-client.
@@ -41,71 +38,52 @@ export let AmpAnalytics3pReadyMessage;
 /** @typedef {{
  *    sentinel: (string|undefined),
  *    type: !string,
- *    Creatives: Array<AmpAnalytics3pEvent>
- *  }} */
-export let AmpAnalytics3pNewCreatives;
-// Example:
-// {
-//   "sentinel":"20354662305315974",
-//   "type":"Creatives",
-//   "Creatives":[
-//     ...
-//   ]
-// }
-
-/** @typedef {{
- *    senderId: !string,
- *    type: !string,
- *    Creative: !string
+ *    data: !Object<!string, !string>
  *  }} */
 export let AmpAnalytics3pNewCreative;
 // Example:
 // {
-//   "senderId":"8117602251459417",
-//   "type":"Creative",
-//   "Creative":"ThisIsExtraData"
-// }
-
-/** @typedef {{
- *    sentinel: (string|undefined),
- *    type: !string,
- *    Events: Array<AmpAnalytics3pEvent>
- *  }} */
-export let AmpAnalytics3pEvents;
-// Example: {
 //   "sentinel":"20354662305315974",
-//   "type":"Events",
-//   "Events":[
+//   "type":AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVE,
+//   "data": {
+//     "8117602251459417": "ThisIsExtraData",
 //     ...
-//   ]
+//   }
 // }
 // The sentinel value will be present when received but the sender doesn't
 // need to add it, this is done by iframe-messaging-client.
 
 /** @typedef {{
- *    senderId: !string,
+ *    sentinel: (string|undefined),
  *    type: !string,
- *    Event: !string
+ *    data: !Object<!string,!Array<!string>>
  *  }} */
 export let AmpAnalytics3pEvent;
 // Example:
 // {
-//   "senderId":"8117602251459417",
-//   "type":"Event",
-//   "Event":"viewed=true&...etc."
+//   "sentinel":"20354662305315974",
+//   "type":AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT,
+//   "data":{
+//     "8117602251459417": ["viewed=true&...etc.", ... ],
+//     ...
+//   }
 // }
+// The sentinel value will be present when received but the sender doesn't
+// need to add it, this is done by iframe-messaging-client.
 
 /** @typedef {{
  *    sentinel: (string|undefined),
  *    destination: !string,
- *    pResponse: ?Object
+ *    type: !string,
+ *    data: ?Object
  *  }} */
 export let AmpAnalytics3pResponse;
 // Example:
 // {
 //   "sentinel":"20354662305315974",
 //   "destination":"8117602251459417",
-//   "Response":{"status":"received","somethingElse":"42"}
+//   "type":AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE,
+//   "data":{"status":"received","somethingElse":"42"}
 // }
 // The sentinel value will be present when received but the sender doesn't
 // need to add it, this is done by iframe-messaging-client.

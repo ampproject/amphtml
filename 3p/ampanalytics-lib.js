@@ -73,43 +73,35 @@ class AmpAnalytics3pMessageRouter {
     this.iframeMessagingClient_ = new IframeMessagingClient(win);
     this.iframeMessagingClient_.setSentinel(this.sentinel_);
     this.iframeMessagingClient_.registerCallback(
-      AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVES,
+      AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVE,
       messageContainer => {
-        dev().assert(messageContainer[AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVES],
-          'Received empty events envelope');
-        // Iterate through the array of "new creative" messages, and for each
-        // one, create an AmpAnalytics3pCreativeMessageRouter.
-        Object.entries(
-          messageContainer[AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVES]).forEach(
-          entry => {
-            const creativeId = entry[0];
-            const messages = entry[1];
-            dev().assert(!this.creativeMessageRouters_.hasOwnProperty(
-              creativeId) && messages.length == 1,
-              'Duplicate new creative message for ' + creativeId);
-            this.creativeMessageRouters_[creativeId] =
-              this.creativeMessageRouters_[creativeId] ||
-              new AmpAnalytics3pCreativeMessageRouter(this,
-                creativeId,
-                messages[0]);
-          });
+        dev().assert(messageContainer.data,
+          'Received empty new creative message');
+        Object.entries(messageContainer.data).forEach(entry => {
+          const creativeId = entry[0];
+          const extraData = entry[1];
+          if (this.creativeMessageRouters_.hasOwnProperty(creativeId)) {
+            dev().warn(TAG_, 'Duplicate new creative message for ' + creativeId);
+          }
+          this.creativeMessageRouters_[creativeId] =
+            this.creativeMessageRouters_[creativeId] ||
+            new AmpAnalytics3pCreativeMessageRouter(this, creativeId,
+              extraData);
+        });
       });
     this.iframeMessagingClient_.registerCallback(
-      AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENTS,
+      AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT,
       messageContainer => {
-        Object.entries(
-          messageContainer[AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENTS]).forEach(
-            entry => {
-              const creativeId = entry[0];
-              const messages = entry[1];
-              dev().assert(messages.length > 0,
-                'Received empty events list');
-              dev().assert(this.creativeMessageRouters_[creativeId],
-                'Received event message prior to new creative message.' +
-                ' Discarding.');
-              this.creativeMessageRouters_[creativeId]
-                .receiveEventMessages(messages);
-            });
+        Object.entries(messageContainer.data).forEach(entry => {
+          const creativeId = entry[0];
+          const messages = entry[1];
+          dev().assert(messages.length > 0, 'Received empty events list');
+          dev().assert(this.creativeMessageRouters_[creativeId],
+            'Received event message prior to new creative message.' +
+            ' Discarding.');
+          this.creativeMessageRouters_[creativeId]
+            .receiveEventMessages(messages);
+        });
         this.flushQueues_();
       });
     this.iframeMessagingClient_.sendMessage(
@@ -230,7 +222,7 @@ class AmpAnalytics3pCreativeMessageRouter {
    * in the queue.
    */
   sendQueuedMessagesToListener() {
-    if (!this.receivedMessagesQueue_ || !this.eventListener_) {
+    if (this.receivedMessagesQueue_.length == 0 || !this.eventListener_) {
       return;
     }
     try {

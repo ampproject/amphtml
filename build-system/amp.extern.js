@@ -140,18 +140,14 @@ AmpViewerMessage.prototype.error;
 // AMP-Analytics Cross-domain iframes
 /** @enum {string} */
 const AMP_ANALYTICS_3P_MESSAGE_TYPE = {
-  READY: 'Ready',
-  CREATIVES: 'Creatives',
-  CREATIVE: 'Creative', /* Can't be sent standalone, only within CREATIVES */
-  EVENTS: 'Events',
-  EVENT: 'Event', /* Can't be sent standalone, only within EVENTS */
-  RESPONSE: 'Response',
+  READY: 'R',
+  CREATIVE: 'C',
+  EVENT: 'E',
+  RESPONSE: 'A',
 };
 
 let AmpAnalytics3pReadyMessage;
-let AmpAnalytics3pNewCreatives;
 let AmpAnalytics3pNewCreative;
-let AmpAnalytics3pEvents;
 let AmpAnalytics3pEvent;
 let AmpAnalytics3pResponse;
 
