@@ -31,29 +31,31 @@ export function runVideoPlayerIntegrationTests(
   let fixtureGlobal;
   let videoGlobal;
 
-  describe.configure().retryOnSaucelabs().run('Video Interface', function() {
+  describe.configure().retryOnSaucelabs()
+  .run('Video Interface', function() {
     this.timeout(TIMEOUT);
 
     it('should override the video interface methods', function() {
       this.timeout(TIMEOUT);
       return getVideoPlayer({outsideView: false, autoplay: true})
-          .then(r => {
-            const impl = r.video.implementation_;
-            const methods = Object.getOwnPropertyNames(
-                Object.getPrototypeOf(new VideoInterface()));
+      .then(r => {
+        const impl = r.video.implementation_;
+        const methods = Object.getOwnPropertyNames(
+            Object.getPrototypeOf(new VideoInterface()));
 
-            expect(methods.length).to.be.above(1);
-            for (let i = 0; i < methods.length; i++) {
-              const methodName = methods[i];
-              expect(impl[methodName]).to.exist;
-            }
-          });
+        expect(methods.length).to.be.above(1);
+        for (let i = 0; i < methods.length; i++) {
+          const methodName = methods[i];
+          expect(impl[methodName]).to.exist;
+        }
+      });
     });
 
     afterEach(cleanUp);
   });
 
-  describe.configure().retryOnSaucelabs().run('Actions', function() {
+  describe.configure().retryOnSaucelabs()
+  .run('Actions', function() {
     this.timeout(TIMEOUT);
 
     it('should support mute, play, pause, unmute actions', function() {
@@ -64,22 +66,22 @@ export function runVideoPlayerIntegrationTests(
         const muteButton = createButton(r, 'mute');
         const unmuteButton = createButton(r, 'unmute');
         return Promise.resolve()
-            .then(() => {
-              muteButton.click();
-              return listenOncePromise(r.video, VideoEvents.MUTED);
-            })
-            .then(() => {
-              playButton.click();
-              return listenOncePromise(r.video, VideoEvents.PLAY);
-            })
-            .then(() => {
-              pauseButton.click();
-              return listenOncePromise(r.video, VideoEvents.PAUSE);
-            })
-            .then(() => {
-              unmuteButton.click();
-              return listenOncePromise(r.video, VideoEvents.UNMUTED);
-            });
+        .then(() => {
+          muteButton.click();
+          return listenOncePromise(r.video, VideoEvents.MUTED);
+        })
+        .then(() => {
+          playButton.click();
+          return listenOncePromise(r.video, VideoEvents.PLAY);
+        })
+        .then(() => {
+          pauseButton.click();
+          return listenOncePromise(r.video, VideoEvents.PAUSE);
+        })
+        .then(() => {
+          unmuteButton.click();
+          return listenOncePromise(r.video, VideoEvents.UNMUTED);
+        });
       });
     });
 
@@ -109,7 +111,8 @@ export function runVideoPlayerIntegrationTests(
     afterEach(cleanUp);
   });
 
-  describe.configure().retryOnSaucelabs().run('Autoplay', function() {
+  describe.configure().retryOnSaucelabs()
+  .run('Autoplay', function() {
     this.timeout(TIMEOUT);
     describe('play/pause', () => {
       it('should play when in view port initially', () => {
@@ -180,12 +183,12 @@ export function runVideoPlayerIntegrationTests(
           const win = iconElement.ownerDocument.defaultView;
           const computedStyle = win.getComputedStyle(animElement);
           const isPaused =
-        (computedStyle.getPropertyValue('animation-play-state') == 'paused'
-        || computedStyle.getPropertyValue('-webkit-animation-play-state') ==
-          'paused'
-        || computedStyle.getPropertyValue('animation-name') == 'none'
-        || computedStyle.getPropertyValue('-webkit-animation-name') ==
-          'none');
+            (computedStyle.getPropertyValue('animation-play-state') == 'paused'
+            || computedStyle.getPropertyValue('-webkit-animation-play-state') ==
+              'paused'
+            || computedStyle.getPropertyValue('animation-name') == 'none'
+            || computedStyle.getPropertyValue('-webkit-animation-name') ==
+              'none');
           return isPaused;
         }
 
@@ -215,41 +218,41 @@ export function runVideoPlayerIntegrationTests(
     const top = options.outsideView ? '100vh' : '0';
     let fixture;
     return createFixtureIframe('test/fixtures/video-players.html', 1000)
-        .then(f => {
-          fixture = f;
-          if (opt_experiment) {
-            toggleExperiment(fixture.win, opt_experiment, true);
-          }
-          return expectBodyToBecomeVisible(fixture.win);
-        })
-        .then(() => {
-          const video = createVideoElementFunc(fixture);
-          if (options.autoplay) {
-            video.setAttribute('autoplay', '');
-          }
-          video.setAttribute('id', 'myVideo');
-          video.setAttribute('controls', '');
-          video.setAttribute('layout', 'fixed');
-          video.setAttribute('width', '300px');
-          video.setAttribute('height', '50vh');
+    .then(f => {
+      fixture = f;
+      if (opt_experiment) {
+        toggleExperiment(fixture.win, opt_experiment, true);
+      }
+      return expectBodyToBecomeVisible(fixture.win);
+    })
+    .then(() => {
+      const video = createVideoElementFunc(fixture);
+      if (options.autoplay) {
+        video.setAttribute('autoplay', '');
+      }
+      video.setAttribute('id', 'myVideo');
+      video.setAttribute('controls', '');
+      video.setAttribute('layout', 'fixed');
+      video.setAttribute('width', '300px');
+      video.setAttribute('height', '50vh');
 
-          video.style.position = 'absolute';
-          video.style.top = top;
+      video.style.position = 'absolute';
+      video.style.top = top;
 
-          const sizer = fixture.doc.createElement('div');
-          sizer.position = 'relative';
-          sizer.style.height = '200vh';
+      const sizer = fixture.doc.createElement('div');
+      sizer.position = 'relative';
+      sizer.style.height = '200vh';
 
-          fixture.doc.body.appendChild(sizer);
-          fixture.doc.body.appendChild(video);
-          fixtureGlobal = fixture;
-          videoGlobal = video;
-          return poll('video built', () => {
-            return video.implementation_ && video.implementation_.play;
-          },undefined, 5000).then(() => {
-            return {video, fixture};
-          });
-        });
+      fixture.doc.body.appendChild(sizer);
+      fixture.doc.body.appendChild(video);
+      fixtureGlobal = fixture;
+      videoGlobal = video;
+      return poll('video built', () => {
+        return video.implementation_ && video.implementation_.play;
+      },undefined, 5000).then(() => {
+        return {video, fixture};
+      });
+    });
   }
 
   function cleanUp() {

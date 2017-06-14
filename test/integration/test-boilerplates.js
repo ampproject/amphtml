@@ -25,9 +25,9 @@ describe.configure().retryOnSaucelabs().run('Old Opacity Boilerplate', () => {
   let fixture;
   beforeEach(() => {
     return createFixtureIframe(
-        'test/fixtures/boilerplate-old-opacity.html', 1000).then(f => {
-          fixture = f;
-        });
+      'test/fixtures/boilerplate-old-opacity.html', 1000).then(f => {
+        fixture = f;
+      });
   });
 
   it('should show the body when opacity boilerplate is used', () => {
@@ -43,9 +43,9 @@ describe('New Visibility Boilerplate', () => {
   let fixture;
   beforeEach(() => {
     return createFixtureIframe(
-        'test/fixtures/boilerplate-new-visibility.html', 10000).then(f => {
-          fixture = f;
-        });
+      'test/fixtures/boilerplate-new-visibility.html', 10000).then(f => {
+        fixture = f;
+      });
   });
 
   it('should show the body in boilerplate test', () => {
