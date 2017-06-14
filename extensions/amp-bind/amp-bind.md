@@ -333,12 +333,11 @@ Only binding to the following components and attributes are allowed:
     <td>See corresponding <a href="https://www.ampproject.org/docs/reference/components/media/amp-img#attributes">amp-img attributes</a>.</td>
   </tr>
   <tr>
-    <td><code>&lt;amp-list&gt;</code></td>
+    <td rowspan=2><code>&lt;amp-list&gt;</code></td>
     <td><code>[src]</code></td>
     <td>Fetches JSON from the new URL and re-renders, replacing old content.</td>
   </tr>
   <tr>
-    <td><code>&lt;amp-list&gt;</code></td>
     <td><code>[state]</code></td>
     <td>Renders using local JSON state at the provided expression.</td>
   </tr>
