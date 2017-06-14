@@ -19,7 +19,6 @@ import {setStyles} from '../../../src/style';
 export class Toolbar {
   /** @param {!Element} element */
   constructor(element) {
-    /** @private {?Element} */
     this.element = element;
 
     /** @private {?Element} */

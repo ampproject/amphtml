@@ -58,7 +58,7 @@ export class AmpSidebar extends AMP.BaseElement {
     this.side_ = null;
 
     /** @private {?Array} */
-    this.toolbars_ = undefined;
+    this.toolbars_ = null;
 
     const platform = platformFor(this.win);
 
