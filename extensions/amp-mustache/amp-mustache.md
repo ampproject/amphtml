@@ -22,10 +22,6 @@ limitations under the License.
     <td>Allows rendering of <a href="https://github.com/janl/mustache.js/">Mustache.js</a>.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td>
       <div>

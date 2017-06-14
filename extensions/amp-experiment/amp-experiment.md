@@ -22,10 +22,6 @@ limitations under the License.
     <td>Conduct user experience experiments on an AMP document and collect corresponding data with <code>amp-pixel</code> or <code>amp-analytics</code>.</td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-experiment" src="https://cdn.ampproject.org/v0/amp-experiment-0.1.js">&lt;/script></code></td>
   </tr>

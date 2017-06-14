@@ -22,10 +22,6 @@ limitations under the License.
     <td>Represents a control that presents a menu of options and lets the user choose from it.</td>
   </tr>
   <tr>
-    <td class="col-fourty" width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td class="col-fourty" width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js">&lt;/script></code></td>
   </tr>

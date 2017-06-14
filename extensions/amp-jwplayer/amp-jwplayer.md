@@ -22,10 +22,6 @@ limitations under the License.
     <td>Displays a cloud-hosted <a href="https://www.jwplayer.com/">JW Player</a>.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-jwplayer" src="https://cdn.ampproject.org/v0/amp-jwplayer-0.1.js">&lt;/script></code></td>
   </tr>
