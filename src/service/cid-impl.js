@@ -22,23 +22,23 @@
  * For details, see https://goo.gl/Mwaacs
  */
 
-import {getCookie, setCookie} from '../../../src/cookies';
+import {getCookie, setCookie} from '../cookies';
 import {
   registerServiceBuilderForDoc,
   getServiceForDoc,
-} from '../../../src/service';
+} from '../service';
 import {
   getSourceOrigin,
   isProxyOrigin,
   parseUrl,
-} from '../../../src/url';
-import {isIframed} from '../../../src/dom';
-import {getCryptoRandomBytesArray} from '../../../src/utils/bytes';
-import {viewerForDoc} from '../../../src/services';
-import {cryptoFor} from '../../../src/crypto';
-import {tryParseJson} from '../../../src/json';
-import {timerFor} from '../../../src/services';
-import {user, rethrowAsync} from '../../../src/log';
+} from '../url';
+import {isIframed} from '../dom';
+import {getCryptoRandomBytesArray} from '../utils/bytes';
+import {viewerForDoc} from '../services';
+import {cryptoFor} from '../crypto';
+import {tryParseJson} from '../json';
+import {timerFor} from '../services';
+import {user, rethrowAsync} from '../log';
 
 const ONE_DAY_MILLIS = 24 * 3600 * 1000;
 
@@ -69,7 +69,7 @@ let GetCidDef;
 
 
 export class Cid {
-  /** @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
+  /** @param {!./service/ampdoc-impl.AmpDoc} ampdoc */
   constructor(ampdoc) {
     /** @const */
     this.ampdoc = ampdoc;
@@ -271,7 +271,7 @@ function getBaseCid(cid, persistenceConsent) {
 /**
  * Stores a new cidString in localStorage. Adds the current time to the
  * stored value.
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Promise} persistenceConsent
  * @param {string} cidString Actual cid string to store.
  */
@@ -299,7 +299,7 @@ function store(ampdoc, persistenceConsent, cidString) {
 
 /**
  * Get/set the Base CID from/to the viewer.
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {string=} opt_data Stringified JSON object {cid, time}.
  * @return {!Promise<string|undefined>}
  */
@@ -350,7 +350,7 @@ function createCidData(cidString) {
  * Gets the persisted CID data as a promise. It tries to read from
  * localStorage first then from viewer if it is in embedded mode.
  * Returns null if none was found.
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @return {!Promise<?BaseCidInfoDef>}
  */
 function read(ampdoc) {
@@ -424,7 +424,7 @@ function getEntropy(win) {
 
 
 /**
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @return {!Cid}
  * @private visible for testing
  */
