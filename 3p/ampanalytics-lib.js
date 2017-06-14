@@ -27,9 +27,6 @@ setReportError(() => {});
 /** @private @const {string} */
 const TAG_ = 'ampanalytics-lib';
 
-/** @private @const {number} */
-const MAX_QUEUE_SIZE_ = 100;
-
 /**
  * Receives messages bound for this cross-domain iframe, from all creatives
  */
@@ -84,8 +81,8 @@ class AmpAnalytics3pMessageRouter {
           dev().assert(!this.creativeMessageRouters_[creativeId],
             'Duplicate new creative message for ' + creativeId);
           this.creativeMessageRouters_[creativeId] =
-            new AmpAnalytics3pCreativeMessageRouter(this, creativeId,
-              extraData);
+            new AmpAnalytics3pCreativeMessageRouter(
+              this.win_, this.iframeMessagingClient_, creativeId, extraData);
         });
       });
     this.iframeMessagingClient_.registerCallback(
@@ -94,29 +91,17 @@ class AmpAnalytics3pMessageRouter {
         Object.entries(messageContainer.data).forEach(entry => {
           const creativeId = entry[0];
           const messages = entry[1];
-          dev().assert(messages.length, 'Received empty events list');
+          dev().assert(messages && messages.length,
+            'Received empty events list for' + creativeId);
           dev().assert(this.creativeMessageRouters_[creativeId],
             'Discarding event message received prior to new creative message' +
             ' for' + creativeId);
           this.creativeMessageRouters_[creativeId]
-            .receiveEventMessages(messages);
+            .sendMessagesToListener(messages);
         });
-        this.flushQueues_();
       });
     this.iframeMessagingClient_.sendMessage(
       AMP_ANALYTICS_3P_MESSAGE_TYPE.READY);
-  }
-
-  /**
-   * Instructs each AmpAnalytics3pCreativeMessageRouter instances to send its
-   * queued messages to its listener (if it has a listener yet).
-   * @private
-   */
-  flushQueues_() {
-    Object.entries(this.creativeMessageRouters_).forEach(
-      entry => {
-        entry[1].sendQueuedMessagesToListener();
-      });
   }
 }
 
@@ -154,11 +139,6 @@ class AmpAnalytics3pCreativeMessageRouter {
     this.extraData_ = opt_extraData;
 
     /**
-     * private {!Array<!AmpAnalytics3pEvent>}
-     */
-    this.receivedMessagesQueue_ = [];
-
-    /**
      * private {?function(!Array<!AmpAnalytics3pEvent>)=}
      */
     this.eventListener_ = null;
@@ -167,7 +147,7 @@ class AmpAnalytics3pCreativeMessageRouter {
       this.win_.onNewAmpAnalyticsInstance(this);
     } else {
       dev().error(TAG_, 'Must implement onNewAmpAnalyticsInstance in' +
-        this.win_.document.location.href);
+        this.win_.location.href);
     }
   }
 
@@ -187,36 +167,21 @@ class AmpAnalytics3pCreativeMessageRouter {
   }
 
   /**
-   * Receives a message from a creative for the cross-domain iframe
+   * Receives message(s) from a creative for the cross-domain iframe
+   * and passes them to that iframe's listener, if a listener has been
+   * registered
    * @param {!Array<AmpAnalytics3pEvent>} messages The message that was received
    */
-  receiveEventMessages(messages) {
-    if (this.receivedMessagesQueue_.length >= MAX_QUEUE_SIZE_) {
-      dev().warn(TAG_, 'Queue has exceeded maximum size of ' + MAX_QUEUE_SIZE_);
-      this.receivedMessagesQueue_ = this.receivedMessagesQueue_.splice(
-        0,MAX_QUEUE_SIZE_ - messages.length);
-    }
-    this.receivedMessagesQueue_ = this.receivedMessagesQueue_.concat(messages);
-  }
-
-  /**
-   * If an event listener has been created on the third-party vendor's
-   * metrics-collection page, this method passes the queued events to that
-   * listener.
-   * If there is no event listener on the page yet, event messages will remain
-   * in the queue.
-   */
-  sendQueuedMessagesToListener() {
-    if (this.receivedMessagesQueue_.length == 0 || !this.eventListener_) {
+  sendMessagesToListener(messages) {
+    if (!messages.length || !this.eventListener_) {
       return;
     }
     try {
-      this.eventListener_(this.receivedMessagesQueue_);
+      this.eventListener_(messages);
     } catch (e) {
       dev().error(TAG_, 'Caught exception executing listener for ' +
         this.creativeId_ + ': ' + e.message);
     }
-    this.receivedMessagesQueue_ = [];
   }
 
   /**
