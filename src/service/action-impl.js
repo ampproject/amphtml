@@ -139,7 +139,7 @@ export class ActionInvocation {
 
   /**
    * Returns true if the trigger event has a trust equal to or greater than
-   * `minimumTrust`. Otherwise, throws a user error and returns false.
+   * `minimumTrust`. Otherwise, logs a user error and returns false.
    * @param {ActionTrust} minimumTrust
    * @returns {boolean}
    */
@@ -317,11 +317,9 @@ export class ActionService {
    * Registers the action handler for a common method.
    * @param {string} name
    * @param {function(!ActionInvocation)} handler
-   * @param {ActionTrust=} opt_minTrust
+   * @param {ActionTrust} minTrust
    */
-  addGlobalMethodHandler(name, handler, opt_minTrust) {
-    const minTrust =
-        (opt_minTrust !== undefined) ? opt_minTrust : ActionTrust.MEDIUM;
+  addGlobalMethodHandler(name, handler, minTrust = ActionTrust.MEDIUM) {
     this.globalMethodHandlers_[name] = {handler, minTrust};
   }
 
@@ -354,9 +352,9 @@ export class ActionService {
    * Installs action handler for the specified element.
    * @param {!Element} target
    * @param {function(!ActionInvocation)} handler
-   * @param {ActionTrust=} opt_minTrust
+   * @param {ActionTrust} minTrust
    */
-  installActionHandler(target, handler, opt_minTrust) {
+  installActionHandler(target, handler, minTrust = ActionTrust.MEDIUM) {
     // TODO(dvoytenko, #7063): switch back to `target.id` with form proxy.
     const targetId = target.getAttribute('id') || '';
     const debugid = target.tagName + '#' + targetId;
@@ -372,8 +370,6 @@ export class ActionService {
     /** @const {Array<!ActionInvocation>} */
     const currentQueue = target[ACTION_QUEUE_];
 
-    const minTrust =
-        (opt_minTrust !== undefined) ? opt_minTrust : ActionTrust.MEDIUM;
     target[ACTION_HANDLER_] = {handler, minTrust};
 
     // Dequeue the current queue.
@@ -382,7 +378,8 @@ export class ActionService {
         // TODO(dvoytenko, #1260): dedupe actions.
         currentQueue.forEach(invocation => {
           try {
-            if (invocation.satisfiesTrust(minTrust)) {
+            if (invocation.satisfiesTrust(
+                /** @type {ActionTrust} */ (minTrust))) {
               handler(invocation);
             }
           } catch (e) {

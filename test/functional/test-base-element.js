@@ -94,6 +94,16 @@ describe('BaseElement', () => {
     }).to.throw(/Method not found/);
   });
 
+  it('`this` context of handler should not be the holder', () => {
+    const handler = () => {
+      const holder = element.actionMap_['foo'];
+      expect(this).to.not.equal(holder);
+    };
+    element.registerAction('foo', handler);
+    const invocation = {method: 'foo', satisfiesTrust: () => true};
+    element.executeAction(invocation, false);
+  });
+
   it('should execute registered action', () => {
     const handler = sandbox.spy();
     element.registerAction('method1', handler);
