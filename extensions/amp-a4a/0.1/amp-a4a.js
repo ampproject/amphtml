@@ -810,13 +810,13 @@ export class AmpA4A extends AMP.BaseElement {
         refreshEndCallback();
         return;
       }
-      this.isRelayoutNeeded_ = true;
       this.togglePlaceholder(true);
       this.destroyFrame(true);
       // We don't want the next creative to appear too suddenly, so we
       // show the loader for a quarter of a second before switching to
       // the new creative.
       timerFor(this.win).delay(() => {
+        this.isRelayoutNeeded_ = true;
         this.getResource().layoutCanceled();
         resourcesForDoc(this.getAmpDoc()).schedulePass();
         this.refreshReadyPromise_.then(() => {
