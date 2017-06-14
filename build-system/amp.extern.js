@@ -91,6 +91,25 @@ window.AMP_CONFIG;
 
 window.AMP_CONTEXT_DATA;
 
+/** @constructor @struct */
+function AmpViewerMessage() {}
+
+/** @public {string}  */
+AmpViewerMessage.prototype.app;
+/** @public {string}  */
+AmpViewerMessage.prototype.type;
+/** @public {number}  */
+AmpViewerMessage.prototype.requestid;
+/** @public {string}  */
+AmpViewerMessage.prototype.name;
+/** @public {*}  */
+AmpViewerMessage.prototype.data;
+/** @public {boolean|undefined}  */
+AmpViewerMessage.prototype.rsvp;
+/** @public {string|undefined}  */
+AmpViewerMessage.prototype.error;
+
+
 // amp-viz-vega related externs.
 /**
  * @typedef {{spec: function(!JsonObject, function())}}

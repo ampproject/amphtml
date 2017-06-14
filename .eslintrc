@@ -90,7 +90,7 @@
       "objectsInObjects": false,
       "arraysInObjects": false
     }],
-    "object-shorthand": [2, "properties", { "avoidQuotes": true }],
+    "object-shorthand": [2, "properties"],
     "prefer-const": 2,
     "quotes": [2, "single", "avoid-escape"],
     "radix": 2,

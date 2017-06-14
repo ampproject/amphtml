@@ -45,7 +45,7 @@ export function map(opt_initial) {
  * @return {!JsonObject}
  */
 export function dict(opt_initial) {
-  return /** @type {!JsonObject} */ (map(obj_initial));
+  return /** @type {!JsonObject} */ (map(opt_initial));
 }
 
 /**
