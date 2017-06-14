@@ -33,6 +33,14 @@ describe('selectGptExperiment', () => {
 
 describe('writeAdScript', () => {
 
+  let win;
+  beforeEach(() => {
+    return createIframePromise().then(iframe => {
+      win = iframe.contentWindow;
+    });
+  });
+
+
   it('should use GPT and opt out of the GladeExperiment when' +
   'useSameDomainRenderingUntilDeprecated is not undefined', () => {
     const data = {useSameDomainRenderingUntilDeprecated: true};
