@@ -176,7 +176,7 @@ export class LaterpayVendor {
   }
 
   /**
-   * @return {!Promise<!JSONType>}
+   * @return {!Promise<!JsonObject>}
    */
   authorize() {
     return this.getPurchaseConfig_()

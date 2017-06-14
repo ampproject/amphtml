@@ -20,6 +20,7 @@ import {isCanary} from '../../../src/experiments';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {documentInfoForDoc} from '../../../src/services';
 import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isProxyOrigin} from '../../../src/url';
 import {
@@ -452,7 +453,7 @@ export function additionalDimensions(win, viewportSize) {
  * @param {number=} opt_initTime The initialization time, in ms, of the
  *   lifecycle reporter.
  *   TODO(levitzky) Remove the above two params once AV numbers stabilize.
- * @return {?JSONType} config or null if invalid/missing.
+ * @return {?JsonObject} config or null if invalid/missing.
  */
 export function extractAmpAnalyticsConfig(
     a4a, responseHeaders, opt_deltaTime = -1, opt_initTime = -1) {
@@ -468,7 +469,7 @@ export function extractAmpAnalyticsConfig(
       return null;
     }
 
-    const config = /** @type {JSONType}*/ ({
+    const config = /** @type {JsonObject}*/ ({
       'transport': {'beacon': false, 'xhrpost': false},
       'triggers': {
         'continuousVisible': {
@@ -509,7 +510,7 @@ export function extractAmpAnalyticsConfig(
     opt_deltaTime = Math.round(opt_deltaTime);
 
     // Duscover and build visibility endpoints.
-    const requests = {};
+    const requests = dict();
     for (let idx = 1; idx <= urls.length; idx++) {
       // TODO: Ensure url is valid and not freeform JS?
       requests[`visibility${idx}`] = `${urls[idx - 1]}`;

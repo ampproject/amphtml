@@ -98,7 +98,7 @@ export function isValidPercentage_(num) {
 
 /**
  * Checks and outputs information about visibilitySpecValidation.
- * @param {!JSONType} config Configuration for instrumentation.
+ * @param {!JsonObject} config Configuration for instrumentation.
  * @return {boolean} True if the spec is valid.
  * @private
  */

@@ -211,7 +211,7 @@ export class Placement {
 
 /**
  * @param {!Window} win
- * @param {!JSONType} configObj
+ * @param {!JsonObject} configObj
  * @return {!Array<!Placement>}
  */
 export function getPlacementsFromConfigObj(win, configObj) {

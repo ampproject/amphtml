@@ -84,7 +84,7 @@ export function serializeMessage(type, sentinel, data = {}, rtvVersion = null) {
  * Returns null if it's not valid AMP message format.
  *
  * @param {*} message
- * @returns {?JSONType}
+ * @returns {?JsonObject}
  */
 export function deserializeMessage(message) {
   if (!isAmpMessage(message)) {
@@ -93,7 +93,7 @@ export function deserializeMessage(message) {
   const startPos = message.indexOf('{');
   dev().assert(startPos != -1, 'JSON missing in %s', message);
   try {
-    return /** @type {!JSONType} */ (JSON.parse(message.substr(startPos)));
+    return /** @type {!JsonObject} */ (JSON.parse(message.substr(startPos)));
   } catch (e) {
     dev().error('MESSAGING', 'Failed to parse message: ' + message, e);
     return null;

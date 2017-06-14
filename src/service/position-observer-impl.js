@@ -351,7 +351,7 @@ export class InaboxAmpDocPositionObserver extends AbstractPositionObserver {
     const dataObject = tryParseJson(this.ampdoc_.win.name);
     let sentinel = null;
     if (dataObject) {
-      sentinel = dataObject._context.sentinel;
+      sentinel = dataObject['_context']['sentinel'];
     }
     const win = this.ampdoc_.win;
     object.type = SEND_POSITIONS_HIGH_FIDELITY;

@@ -64,7 +64,7 @@ export class BaseTemplate {
 
   /**
    * To be implemented by subclasses.
-   * @param {!JSONType} unusedData
+   * @param {!JsonObject} unusedData
    * @return {!Element}
    */
   render(unusedData) {
@@ -135,7 +135,7 @@ export class Templates {
   /**
    * Renders the specified template element using the supplied data.
    * @param {!Element} templateElement
-   * @param {!JSONType} data
+   * @param {!JsonObject} data
    * @return {!Promise<!Element>}
    */
   renderTemplate(templateElement, data) {
@@ -148,7 +148,7 @@ export class Templates {
    * Renders the specified template element using the supplied array of data
    * and returns an array of resulting elements.
    * @param {!Element} templateElement
-   * @param {!Array<!JSONType>} array
+   * @param {!Array<!JsonObject>} array
    * @return {!Promise<!Array<!Element>>}
    */
   renderTemplateArray(templateElement, array) {
@@ -168,7 +168,7 @@ export class Templates {
    * attribute  or as a child "template" element. When specified via "template"
    * attribute, the value indicates the ID of the template element.
    * @param {!Element} parent
-   * @param {!JSONType} data
+   * @param {!JsonObject} data
    * @return {!Promise<!Element>}
    */
   findAndRenderTemplate(parent, data) {
@@ -182,7 +182,7 @@ export class Templates {
    * attribute, the value indicates the ID of the template element. Returns
    * the array of the rendered elements.
    * @param {!Element} parent
-   * @param {!Array<!JSONType>} array
+   * @param {!Array<!JsonObject>} array
    * @return {!Promise<!Array<!Element>>}
    */
   findAndRenderTemplateArray(parent, array) {
@@ -328,7 +328,7 @@ export class Templates {
 
   /**
    * @param {!BaseTemplate} impl
-   * @param {!JSONType} data
+   * @param {!JsonObject} data
    * @private
    */
   render_(impl, data) {

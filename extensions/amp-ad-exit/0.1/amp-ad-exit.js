@@ -67,8 +67,8 @@ export class AmpAdExit extends AMP.BaseElement {
         isExperimentOn(this.win, 'amp-ad-exit'),
         'amp-ad-exit experiment is off.');
 
-    const target = this.targets_[args.target];
-    user().assert(target, `Exit target not found: '${args.target}'`);
+    const target = this.targets_[args['target']];
+    user().assert(target, `Exit target not found: '${args['target']}'`);
 
     event.preventDefault();
     if (!this.filter_(this.defaultFilters_, event) ||

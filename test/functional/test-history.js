@@ -377,28 +377,28 @@ describe('HistoryBindingVirtual', () => {
   let clock;
   let onStackIndexUpdated;
   let viewerHistoryPoppedHandler;
-  let viewerMock;
   let history;
+  let viewer;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
     onStackIndexUpdated = sandbox.spy();
     viewerHistoryPoppedHandler = undefined;
-    const viewer = {
+    viewer = {
       onMessage: (eventType, handler) => {
         viewerHistoryPoppedHandler = handler;
         return () => {};
       },
-      sendMessageAwaitResponse: () => {},
+      sendMessageAwaitResponse: sandbox.spy(() => {
+        return Promise.resolve();
+      }),
     };
-    viewerMock = sandbox.mock(viewer);
     history = new HistoryBindingVirtual_(window, viewer);
     history.setOnStackIndexUpdated(onStackIndexUpdated);
   });
 
   afterEach(() => {
-    viewerMock.verify();
     history.cleanup_();
     sandbox.restore();
   });
@@ -410,9 +410,12 @@ describe('HistoryBindingVirtual', () => {
   });
 
   it('should push new state to viewer and notify', () => {
-    viewerMock.expects('sendMessageAwaitResponse').withExactArgs(
-        'pushHistory', {stackIndex: 1}).once().returns(Promise.resolve());
     return history.push().then(stackIndex => {
+      expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
+      expect(viewer.sendMessageAwaitResponse.lastCall.args[0])
+          .to.equal('pushHistory');
+      expect(viewer.sendMessageAwaitResponse.lastCall.args[1].stackIndex)
+          .to.equal(1);
       expect(stackIndex).to.equal(1);
       expect(history.stackIndex_).to.equal(1);
       expect(onStackIndexUpdated).to.be.calledOnce;
@@ -421,11 +424,12 @@ describe('HistoryBindingVirtual', () => {
   });
 
   it('should pop a state from the window.history and notify', () => {
-    viewerMock.expects('sendMessageAwaitResponse').withExactArgs(
-        'pushHistory', {stackIndex: 1}).once().returns(Promise.resolve());
-    viewerMock.expects('sendMessageAwaitResponse').withExactArgs(
-        'popHistory', {stackIndex: 1}).once().returns(Promise.resolve());
     return history.push().then(stackIndex => {
+      expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
+      expect(viewer.sendMessageAwaitResponse.lastCall.args[0])
+          .to.equal('pushHistory');
+      expect(viewer.sendMessageAwaitResponse.lastCall.args[1].stackIndex)
+          .to.equal(1);
       expect(stackIndex).to.equal(1);
       expect(onStackIndexUpdated).to.be.calledOnce;
       expect(onStackIndexUpdated.getCall(0).args[0]).to.equal(1);
@@ -439,9 +443,12 @@ describe('HistoryBindingVirtual', () => {
   });
 
   it('should update its state and notify on history.back', () => {
-    viewerMock.expects('sendMessageAwaitResponse').withExactArgs(
-        'pushHistory', {stackIndex: 1}).once().returns(Promise.resolve());
     return history.push().then(stackIndex => {
+      expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
+      expect(viewer.sendMessageAwaitResponse.lastCall.args[0])
+          .to.equal('pushHistory');
+      expect(viewer.sendMessageAwaitResponse.lastCall.args[1].stackIndex)
+          .to.equal(1);
       expect(stackIndex).to.equal(1);
       expect(onStackIndexUpdated).to.be.calledOnce;
       expect(onStackIndexUpdated.getCall(0).args[0]).to.equal(1);
@@ -629,10 +636,16 @@ describes.fakeWin('Get and update fragment', {}, env => {
         new HistoryBindingVirtual_(env.win, viewer));
     viewerMock.expects('hasCapability').withExactArgs('fragment').once()
         .returns(true);
-    viewerMock.expects('sendMessageAwaitResponse').withExactArgs(
-        'replaceHistory', {fragment: 'fragment'}, true).once()
-        .returns(Promise.resolve());
-    return history.updateFragment('fragment').then(() => {});
+    let called = false;
+    viewer.sendMessageAwaitResponse = function(action, data) {
+      expect(action).to.equal('replaceHistory');
+      expect(data.fragment).to.equal('fragment');
+      called = true;
+      return Promise.resolve();
+    };
+    return history.updateFragment('fragment').then(() => {
+      expect(called).to.be.ok;
+    });
   });
 
   it('should NOT update fragment of the viewer on Virtual ' +

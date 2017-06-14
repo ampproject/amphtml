@@ -26,7 +26,7 @@ export class AccessOtherAdapter {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!JSONType} configJson
+   * @param {!JsonObject} configJson
    * @param {!AccessTypeAdapterContextDef} context
    */
   constructor(ampdoc, configJson, context) {
@@ -36,7 +36,7 @@ export class AccessOtherAdapter {
     /** @const @private {!AccessTypeAdapterContextDef} */
     this.context_ = context;
 
-    /** @private {?JSONType} */
+    /** @private {?JsonObject} */
     this.authorizationResponse_ =
         configJson['authorizationFallbackResponse'] || null;
 

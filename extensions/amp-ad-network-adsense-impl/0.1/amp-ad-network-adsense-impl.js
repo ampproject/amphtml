@@ -102,7 +102,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
     /**
      * Config to generate amp-analytics element for active view reporting.
-     * @type {?JSONType}
+     * @type {?JsonObject}
      * @private
      */
     this.ampAnalyticsConfig_ = null;

@@ -268,7 +268,7 @@ export function assertAbsoluteHttpOrHttpsUrl(urlString) {
  * dependency.
  *
  * @param {string} queryString
- * @return {!Object<string>}
+ * @return {!JsonObject}
  */
 export function parseQueryString(queryString) {
   return parseQueryString_(queryString);
