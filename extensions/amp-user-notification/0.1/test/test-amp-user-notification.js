@@ -468,7 +468,7 @@ describe('amp-user-notification', () => {
         }
         expect(el).to.have.class('amp-active');
         expect(stub2.calledOnce).to.be.false;
-        impl.executeAction({method: 'dismiss'});
+        impl.executeAction({method: 'dismiss', satisfiesTrust: () => true});
         expect(el).to.not.have.class('amp-active');
         expect(el).to.have.class('amp-hidden');
         expect(stub2.calledOnce).to.be.true;

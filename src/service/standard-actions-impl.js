@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../action-trust';
 import {OBJECT_STRING_ARGS_KEY} from '../service/action-impl';
 import {Layout, getLayoutClass} from '../layout';
 import {actionServiceForDoc} from '../services';
@@ -84,29 +85,52 @@ export class StandardActions {
   handleAmpTarget(invocation) {
     switch (invocation.method) {
       case 'setState':
-        bindForDoc(invocation.target).then(bind => {
-          const args = invocation.args;
-          const objectString = args[OBJECT_STRING_ARGS_KEY];
-          if (objectString) {
-            // Object string arg.
-            const scope = Object.create(null);
-            const event = invocation.event;
-            if (event && event.detail) {
-              scope['event'] = event.detail;
-            }
-            bind.setStateWithExpression(objectString, scope);
-          } else {
-            user().error('AMP-BIND', 'Please use the object-literal syntax, '
-                + 'e.g. "AMP.setState({foo: \'bar\'})" instead of '
-                + '"AMP.setState(foo=\'bar\')".');
-          }
-        });
+        this.handleAmpSetState_(invocation);
         return;
       case 'goBack':
-        historyForDoc(this.ampdoc).goBack();
+        this.handleAmpGoBack_(invocation);
         return;
     }
     throw user().createError('Unknown AMP action ', invocation.method);
+  }
+
+  /**
+   * @param {!./action-impl.ActionInvocation} invocation
+   * @private
+   */
+  handleAmpSetState_(invocation) {
+    if (!invocation.satisfiesTrust(ActionTrust.MEDIUM)) {
+      return;
+    }
+    bindForDoc(invocation.target).then(bind => {
+      const args = invocation.args;
+      const objectString = args[OBJECT_STRING_ARGS_KEY];
+      if (objectString) {
+        // Object string arg.
+        const scope = Object.create(null);
+        const event = invocation.event;
+        if (event && event.detail) {
+          scope['event'] = event.detail;
+        }
+        bind.setStateWithExpression(objectString, scope);
+      } else {
+        user().error('AMP-BIND', 'Please use the object-literal syntax, '
+            + 'e.g. "AMP.setState({foo: \'bar\'})" instead of '
+            + '"AMP.setState(foo=\'bar\')".');
+      }
+    });
+  }
+
+  /**
+   * @param {!./action-impl.ActionInvocation} invocation
+   * @private
+   */
+  handleAmpGoBack_(invocation) {
+    // TODO(choumx, #9699): HIGH.
+    if (!invocation.satisfiesTrust(ActionTrust.MEDIUM)) {
+      return;
+    }
+    historyForDoc(this.ampdoc).goBack();
   }
 
   /**

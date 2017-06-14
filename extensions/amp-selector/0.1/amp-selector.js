@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-trust';
 import {CSS} from '../../../build/amp-selector-0.1.css';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {actionServiceForDoc} from '../../../src/services';
@@ -291,7 +292,9 @@ export class AmpSelector extends AMP.BaseElement {
               targetOption: el.getAttribute('option'),
               selectedOptions: selectedValues,
             });
-        this.action_.trigger(this.element, name, selectEvent);
+        // TODO(choumx, #9699): HIGH.
+        this.action_.trigger(this.element, name, selectEvent,
+            ActionTrust.MEDIUM);
       }
     });
   }
