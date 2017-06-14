@@ -91,7 +91,7 @@ export class WindowPortEmulator {
   }
 
   /**
-   * @param {Object} data
+   * @param {JsonObject} data
    */
   postMessage(data) {
     this.target_./*OK*/postMessage(data, this.origin_);
@@ -251,7 +251,9 @@ export class Messaging {
    */
   sendMessage_(message) {
     this.port_./*OK*/postMessage(
-        this.isWebview_ ? JSON.stringify(message) : message);
+        this.isWebview_
+            ? JSON.stringify(message)
+            : message);
   }
 
   /**
