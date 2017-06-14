@@ -55,4 +55,4 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 
 ## Validation
 
-See [amp-hulu rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-hulu/0.1/validator-amp-hulu.protoascii) in the AMP validator specification.
+See [amp-hulu rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-hulu/validator-amp-hulu.protoascii) in the AMP validator specification.

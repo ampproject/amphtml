@@ -255,4 +255,4 @@ Optionally, you can delay generation of Client IDs used for analytics and simila
 
 ## Validation
 
-See [amp-user-notification rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-user-notification/0.1/validator-amp-user-notification.protoascii) in the AMP validator specification.
+See [amp-user-notification rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-user-notification/validator-amp-user-notification.protoascii) in the AMP validator specification.

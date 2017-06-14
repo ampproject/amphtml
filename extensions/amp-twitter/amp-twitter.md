@@ -70,4 +70,4 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 
 ## Validation
 
-See [amp-twitter rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-twitter/0.1/validator-amp-twitter.protoascii) in the AMP validator specification.
+See [amp-twitter rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-twitter/validator-amp-twitter.protoascii) in the AMP validator specification.

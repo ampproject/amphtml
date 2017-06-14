@@ -99,4 +99,4 @@ The attributes above behave the same way as they do on a standard HTML [`<option
 
 ## Validation
 
-See [amp-selector rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-selector/0.1/validator-amp-selector.protoascii) in the AMP validator specification.
+See [amp-selector rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-selector/validator-amp-selector.protoascii) in the AMP validator specification.

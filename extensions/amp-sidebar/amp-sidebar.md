@@ -142,4 +142,4 @@ For this reason, we recommend that affordances to open the sidebar are not place
 
 ## Validation
 
-See [amp-sidebar rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-sidebar/0.1/validator-amp-sidebar.protoascii) in the AMP validator specification.
+See [amp-sidebar rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-sidebar/validator-amp-sidebar.protoascii) in the AMP validator specification.

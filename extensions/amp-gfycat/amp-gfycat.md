@@ -101,4 +101,4 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 
 ## Validation
 
-See [amp-gfycat rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-gfycat/0.1/validator-amp-gfycat.protoascii) in the AMP validator specification.
+See [amp-gfycat rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-gfycat/validator-amp-gfycat.protoascii) in the AMP validator specification.

@@ -84,4 +84,4 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 
 ## Validation
 
-See [amp-springboard-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-springboard-player/0.1/validator-amp-springboard-player.protoascii) in the AMP validator specification.
+See [amp-springboard-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-springboard-player/validator-amp-springboard-player.protoascii) in the AMP validator specification.

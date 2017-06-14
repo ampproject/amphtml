@@ -80,4 +80,4 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 
 ## Validation
 
-See [amp-kaltura-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-kaltura-player/0.1/validator-amp-kaltura-player.protoascii) in the AMP validator specification.
+See [amp-kaltura-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-kaltura-player/validator-amp-kaltura-player.protoascii) in the AMP validator specification.

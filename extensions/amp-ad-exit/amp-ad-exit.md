@@ -247,4 +247,4 @@ amp-ad-exit needs an `id` to be referenced by tappable elements.
 
 ## Validation
 `amp-ad-exit` is only available for AMP4ADS documents. 
-See [amp-ad-exit rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-exit/0.1/validator-amp-ad-exit.protoascii) for the AMP validator specification.
+See [amp-ad-exit rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-exit/validator-amp-ad-exit.protoascii) for the AMP validator specification.
