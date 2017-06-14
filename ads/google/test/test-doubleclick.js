@@ -40,7 +40,9 @@ describe('writeAdScript', () => {
 
     writeAdScript(data, gptFilename);
 
-    expect(document.querySelector('script[src="https://www.googletagservices.com/tag/js/gpt.js"]')).to.be.ok;
+    expect(document.querySelector(
+      'script[src="https://www.googletagservices.com/tag/js/gpt.js"]'))
+      .to.be.ok;
   });
 
   it('should use GPT and opt out of the GladeExperiment when multiSize is not' +
@@ -62,7 +64,9 @@ describe('writeAdScript', () => {
 
     writeAdScript(data, gptFilename);
 
-    expect(document.querySelector('script[src="https://www.googletagservices.com/tag/js/gpt_sf_a.js"]')).to.be.ok;
+    expect(document.querySelector(
+      'script[src="https://www.googletagservices.com/tag/js/gpt_sf_a.js"]'))
+      .to.be.ok;
   });
 
   it('should use GPT and opt out of the GladeExperiment when in the' +
@@ -72,6 +76,8 @@ describe('writeAdScript', () => {
 
     writeAdScript(data, gptFilename);
 
-    expect(document.querySelector('script[src="https://www.googletagservices.com/tag/js/gpt_sf_b.js"]')).to.be.ok;
+    expect(document.querySelector(
+      'script[src="https://www.googletagservices.com/tag/js/gpt_sf_b.js"]'))
+      .to.be.ok;
   });
 });
