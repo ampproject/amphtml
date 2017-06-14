@@ -1260,26 +1260,8 @@
           <small>AMP by Example is a part of Accelarated Mobile Pages Project</small>
       </footer>
       <!-- End Footer -->
-        <amp-analytics type="googleanalytics" id="analytics">
-      <script type="application/json">
-        {
-          "vars": {
-            "account": "UA-73836974-1"
-          },
-          "triggers": {
-            "default pageview": {
-              "on": "visible",
-              "request": "pageview",
-              "vars": {
-                "title": "AMP by Example"
-              }
-            }
-          }
-        }
-      </script>
-    </amp-analytics>
     <amp-install-serviceworker
-      src="/sw.js"
+      src="/dist/sw.max.js"
       data-iframe-src="https://ampbyexample.com/sw.html"
       layout="nodisplay">
     </amp-install-serviceworker>
