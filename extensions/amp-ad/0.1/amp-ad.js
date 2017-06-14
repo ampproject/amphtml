@@ -76,10 +76,8 @@ export class AmpAd extends AMP.BaseElement {
 
       // TODO(tdrl): Check amp-ad registry to see if they have this already.
       if (!a4aRegistry[type] ||
-          // Do not allow Fast Fetch if remote HTML specified and type allows.
-          (!(adConfig[type] || {}).remoteHTMLDisabled &&
-           this.win.document.querySelector('meta[name=amp-3p-iframe-src]')) ||
-          // Note that predicate execution may have side effects.
+          (this.win.document.querySelector('meta[name=amp-3p-iframe-src]') &&
+          !this.win.document.getElementById('amp-rtc'))||
           !a4aRegistry[type](this.win, this.element)) {
         // Either this ad network doesn't support Fast Fetch, its Fast Fetch
         // implementation has explicitly opted not to handle this tag, or this
