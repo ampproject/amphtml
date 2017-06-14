@@ -2178,14 +2178,9 @@ describe('amp-a4a', () => {
         const a4aElement = createA4aElement(fixture.doc);
         const a4a = new MockA4AImpl(a4aElement);
         a4a.adPromise_ = Promise.resolve();
-
-        a4a.getResource = () => {
-          return {
-            whenWithinRenderOutsideViewport: () => {
-              return Promise.resolve();
-            },
-          };
-        };
+        a4a.getAmpDoc = () => a4a.win.document;
+        a4a.getResource = () => {};
+        a4a.refreshReadyPromise_ = Promise.resolve(true);
 
         let resolver;
         const promise = new Promise(resolve => resolver = resolve);

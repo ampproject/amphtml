@@ -40,6 +40,7 @@ import {timerFor} from '../../../src/services';
 import {xhrFor} from '../../../src/services';
 import {endsWith} from '../../../src/string';
 import {platformFor} from '../../../src/services';
+import {resourcesForDoc} from '../../../src/services';
 import {cryptoFor} from '../../../src/crypto';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
@@ -348,6 +349,27 @@ export class AmpA4A extends AMP.BaseElement {
      * @protected {boolean}
      */
     this.isRefreshing = false;
+
+    /** @private {boolean} */
+    this.isRelayoutNeeded_ = false;
+
+    /**
+     * Resolver for refreshReadyPromise_. This is then'd onto
+     * attemptToRenderCreative in layoutCallback.
+     *
+     * @private {?function()}
+     */
+    this.refreshReadyPromiseResolver_ = null;
+
+    /**
+     * Promise that resolves to true when the creative renders correctly, or to
+     * false when the creative fails to render. This promise is resolved in
+     * layoutCallback(), and reset in refresh().
+     *
+     * @private {Promise<boolean>}
+     */
+    this.refreshReadyPromise_ = new Promise(
+        resolve => this.refreshReadyPromiseResolver_ = resolve);
   }
 
   /** @override */
@@ -362,6 +384,11 @@ export class AmpA4A extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
+  }
+
+  /** @override */
+  isRelayoutNeeded() {
+    return this.isRelayoutNeeded_;
   }
 
   /** @override */
@@ -783,20 +810,23 @@ export class AmpA4A extends AMP.BaseElement {
         refreshEndCallback();
         return;
       }
+      this.isRelayoutNeeded_ = true;
       this.togglePlaceholder(true);
       this.destroyFrame(true);
       // We don't want the next creative to appear too suddenly, so we
       // show the loader for a quarter of a second before switching to
       // the new creative.
       timerFor(this.win).delay(() => {
-        this.getResource().whenWithinRenderOutsideViewport().then(() => {
-          this.vsync_.mutate(() => {
-            this.attemptToRenderCreative().then(() => {
-              this.isRefreshing = false;
-              this.togglePlaceholder(false);
-              refreshEndCallback();
-            });
-          });
+        this.getResource().layoutCanceled();
+        resourcesForDoc(this.getAmpDoc()).schedulePass();
+        this.refreshReadyPromise_.then(() => {
+          this.isRelayoutNeeded_ = false;
+          this.isRefreshing = false;
+          this.togglePlaceholder(false);
+          // Reset creative rendered promise.
+          this.refreshReadyPromise_ = new Promise(
+              resolve => this.refreshReadyPromiseResolver_ = resolve);
+          refreshEndCallback();
         });
       }, 250);
     });
@@ -951,7 +981,12 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    return this.attemptToRenderCreative();
+    return this.attemptToRenderCreative().then(result => {
+      if (this.isRefreshing) {
+        this.refreshReadyPromiseResolver_(result);
+      }
+      return result;
+    });
   }
 
   /**
