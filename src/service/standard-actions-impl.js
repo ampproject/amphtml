@@ -137,7 +137,8 @@ export class StandardActions {
     }
     const url = invocation.args['url'];
     const expandedUrl = this.urlReplacements_.expandUrlSync(url);
-    const win = invocation.target.ownerDocument.defaultView;
+    const node = invocation.target;
+    const win = (node.ownerDocument || node).defaultView;
     win.location = expandedUrl;
   }
 
