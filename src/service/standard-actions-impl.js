@@ -17,7 +17,7 @@
 import {ActionTrust} from '../action-trust';
 import {OBJECT_STRING_ARGS_KEY} from '../service/action-impl';
 import {Layout, getLayoutClass} from '../layout';
-import {actionServiceForDoc} from '../services';
+import {actionServiceForDoc, urlReplacementsForDoc} from '../services';
 import {bindForDoc} from '../services';
 import {dev, user} from '../log';
 import {registerServiceBuilderForDoc} from '../service';
@@ -54,6 +54,9 @@ export class StandardActions {
 
     /** @const @private {!./resources-impl.Resources} */
     this.resources_ = resourcesForDoc(ampdoc);
+
+    /** @const @private {!./url-replacements-impl.UrlReplacements} */
+    this.urlReplacements_ = urlReplacementsForDoc(ampdoc);
 
     this.installActions_(this.actions_);
   }
@@ -132,9 +135,10 @@ export class StandardActions {
     if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
       return;
     }
-    const win = invocation.target.ownerDocument.defaultView;
     const url = invocation.args['url'];
-    win.location = url;
+    const expandedUrl = this.urlReplacements_.expandUrlSync(url);
+    const win = invocation.target.ownerDocument.defaultView;
+    win.location = expandedUrl;
   }
 
   /**

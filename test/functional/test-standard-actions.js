@@ -164,6 +164,9 @@ describes.sandboxed('StandardActions', {}, () => {
 
   describe('"AMP" global target', () => {
     it('should implement navigateTo', () => {
+      const expandUrlStub = sandbox.stub(standardActions.urlReplacements_,
+          'expandUrlSync', url => url);
+
       const win = {
         location: 'http://foo.com',
       };
@@ -183,11 +186,13 @@ describes.sandboxed('StandardActions', {}, () => {
       invocation.satisfiesTrust = () => false;
       standardActions.handleAmpTarget(invocation);
       expect(win.location).to.equal('http://foo.com');
+      expect(expandUrlStub).to.not.be.called;
 
       // Should succeed.
       invocation.satisfiesTrust = () => true;
       standardActions.handleAmpTarget(invocation);
       expect(win.location).to.equal('http://bar.com');
+      expect(expandUrlStub.calledOnce);
     });
 
     it('should implement goBack', () => {
