@@ -340,6 +340,6 @@ describes.realWin('amp-ad-exit', {
         'http://localhost:8000/vars?foo=foo', '_blank');
     expect(sendBeacon)
         .to.have.been.calledWith(
-            'http://localhost:8000/tracking?bar=bar', '');
+        'http://localhost:8000/tracking?bar=bar', '');
   });
 });

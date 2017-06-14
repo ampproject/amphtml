@@ -161,7 +161,7 @@ export class AmpAdExit extends AMP.BaseElement {
 
     const children = this.element.children;
     user().assert(children.length == 1,
-                  'The tag should contain exactly one <script> child.');
+        'The tag should contain exactly one <script> child.');
     const child = children[0];
     user().assert(
         isJsonScriptTag(child),

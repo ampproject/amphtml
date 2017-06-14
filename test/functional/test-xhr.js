@@ -527,14 +527,16 @@ describe('XHR', function() {
           setupMockXhr();
           expect(requests[0]).to.be.undefined;
           const promise = xhr.fetch(
-            '/index.html').then(response => {
-              expect(response.headers.get('X-foo-header')).to.equal('foo data');
-              expect(response.headers.get('X-bar-header')).to.equal('bar data');
-              response.arrayBuffer().then(
-                bytes => utf8FromArrayBuffer(bytes)).then(text => {
-                  expect(text).to.equal(creative);
-                });
-            });
+              '/index.html').then(response => {
+                expect(response.headers.get('X-foo-header')).to
+                    .equal('foo data');
+                expect(response.headers.get('X-bar-header')).to
+                    .equal('bar data');
+                response.arrayBuffer().then(
+                    bytes => utf8FromArrayBuffer(bytes)).then(text => {
+                      expect(text).to.equal(creative);
+                    });
+              });
           requests[0].respond(200, {
             'Content-Type': 'text/xml',
             'Access-Control-Expose-Headers':

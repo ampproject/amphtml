@@ -77,9 +77,8 @@ describe('amp-ad-3p-impl', () => {
         expect(url).to.match(/^http:\/\/ads.localhost:/);
         expect(iframe.style.display).to.equal('');
 
-        let data;
         expect(url).to.match(/frame(.max)?.html/);
-        data = JSON.parse(iframe.name).attributes;
+        const data = JSON.parse(iframe.name).attributes;
         expect(data).to.have.property('type', '_ping_');
         expect(data).to.have.property('src', 'https://testsrc');
         expect(data).to.have.property('width', 300);

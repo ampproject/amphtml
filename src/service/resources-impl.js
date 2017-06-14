@@ -815,13 +815,13 @@ export class Resources {
   attemptChangeSize(element, newHeight, newWidth, opt_newMargins) {
     return new Promise((resolve, reject) => {
       this.scheduleChangeSize_(Resource.forElement(element), newHeight,
-        newWidth, opt_newMargins, /* force */ false, success => {
-          if (success) {
-            resolve();
-          } else {
-            reject(new Error('changeSize attempt denied'));
-          }
-        });
+          newWidth, opt_newMargins, /* force */ false, success => {
+            if (success) {
+              resolve();
+            } else {
+              reject(new Error('changeSize attempt denied'));
+            }
+          });
     });
   }
 
@@ -1476,7 +1476,7 @@ export class Resources {
       } else {
         task.resource.measure();
         if (this.isLayoutAllowed_(
-                task.resource, task.forceOutsideViewport)) {
+            task.resource, task.forceOutsideViewport)) {
           task.promise = task.callback();
           task.startTime = now;
           dev().fine(TAG_, 'exec:', task.id, 'at', task.startTime);

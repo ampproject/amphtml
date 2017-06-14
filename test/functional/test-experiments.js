@@ -999,8 +999,8 @@ describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
     }).then(result => {
       expect(result).to.be.false;
       expect(warnStub).to.have.been.calledWith(
-            'experiments',
-            sinon.match({message: 'Config does not match current origin'}));
+          'experiments',
+          sinon.match({message: 'Config does not match current origin'}));
     });
   });
 
@@ -1022,8 +1022,8 @@ describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
     }).then(result => {
       expect(result).to.be.false;
       expect(warnStub).to.have.been.calledWith(
-            'experiments',
-            sinon.match({message: 'Experiment amp-expired has expired'}));
+          'experiments',
+          sinon.match({message: 'Experiment amp-expired has expired'}));
     });
   });
 
