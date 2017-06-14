@@ -37,11 +37,12 @@ branches:
     - /^amp-release-.*$/
 env:
   global:
+    - SAUCE_USERNAME="amphtml"
     - NPM_CONFIG_PROGRESS="false"
 matrix:
   include:
     - env: BUILD_SHARD="pre_build_checks_and_unit_tests"
-    - env: BUILD_SHARD="integration_tests" SAUCE_USERNAME="amphtml"
+    - env: BUILD_SHARD="integration_tests"
       addons:
         sauce_connect:
           username: "amphtml"
