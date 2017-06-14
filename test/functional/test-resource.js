@@ -455,19 +455,19 @@ describe('Resource', () => {
 
 
   it('should ignore startLayout if already completed or failed or going',
-        () => {
-          elementMock.expects('layoutCallback').never();
+      () => {
+        elementMock.expects('layoutCallback').never();
 
-          resource.state_ = ResourceState.LAYOUT_COMPLETE;
-          resource.startLayout();
+        resource.state_ = ResourceState.LAYOUT_COMPLETE;
+        resource.startLayout();
 
-          resource.state_ = ResourceState.LAYOUT_FAILED;
-          resource.startLayout();
+        resource.state_ = ResourceState.LAYOUT_FAILED;
+        resource.startLayout();
 
-          resource.state_ = ResourceState.READY_FOR_LAYOUT;
-          resource.layoutPromise_ = {};
-          resource.startLayout();
-        });
+        resource.state_ = ResourceState.READY_FOR_LAYOUT;
+        resource.layoutPromise_ = {};
+        resource.startLayout();
+      });
 
   it('should fail startLayout if not built', () => {
     elementMock.expects('layoutCallback').never();

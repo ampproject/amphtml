@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {exponentialBackoff, exponentialBackoffClock,}
+import {exponentialBackoff, exponentialBackoffClock}
     from '../../src/exponential-backoff';
 import * as sinon from 'sinon';
 

@@ -18,7 +18,7 @@ import {Animation} from '../animation';
 import {FixedLayer} from './fixed-layer';
 import {Observable} from '../observable';
 import {VisibilityState} from '../visibility-state';
-import {checkAndFix as checkAndFixIosScrollfreezeBug,} from
+import {checkAndFix as checkAndFixIosScrollfreezeBug} from
     './ios-scrollfreeze-bug';
 import {
   getParentWindowFrameElement,

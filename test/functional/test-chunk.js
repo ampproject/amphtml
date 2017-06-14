@@ -147,37 +147,37 @@ describe('chunk', () => {
     });
 
     describe.configure().skip(() => !('onunhandledrejection' in window))
-    .run('error handling', () => {
-      let fakeWin;
-      let done;
+        .run('error handling', () => {
+          let fakeWin;
+          let done;
 
-      function onReject(event) {
-        expect(event.reason.message).to.match(/test async/);
-        done();
-      }
+          function onReject(event) {
+            expect(event.reason.message).to.match(/test async/);
+            done();
+          }
 
-      beforeEach(() => {
-        fakeWin = env.win;
-        const viewer = viewerForDoc(env.win.document);
-        env.sandbox.stub(viewer, 'isVisible', () => {
-          return true;
+          beforeEach(() => {
+            fakeWin = env.win;
+            const viewer = viewerForDoc(env.win.document);
+            env.sandbox.stub(viewer, 'isVisible', () => {
+              return true;
+            });
+            window.addEventListener('unhandledrejection', onReject);
+          });
+
+          afterEach(() => {
+            window.removeEventListener('unhandledrejection', onReject);
+          });
+
+          it('should proceed on error and rethrowAsync', d => {
+            startupChunk(fakeWin.document, () => {
+              throw new Error('test async');
+            });
+            startupChunk(fakeWin.document, () => {
+              done = d;
+            });
+          });
         });
-        window.addEventListener('unhandledrejection', onReject);
-      });
-
-      afterEach(() => {
-        window.removeEventListener('unhandledrejection', onReject);
-      });
-
-      it('should proceed on error and rethrowAsync', d => {
-        startupChunk(fakeWin.document, () => {
-          throw new Error('test async');
-        });
-        startupChunk(fakeWin.document, () => {
-          done = d;
-        });
-      });
-    });
 
     describe('invisible', () => {
       beforeEach(() => {

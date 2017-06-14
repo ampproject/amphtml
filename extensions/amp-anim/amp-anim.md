@@ -22,10 +22,6 @@ limitations under the License.
     <td>A runtime-managed animated image, typically a GIF.</td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js">&lt;/script></code></td>
   </tr>

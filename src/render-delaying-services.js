@@ -58,9 +58,9 @@ const LOAD_TIMEOUT = 3000;
 export function waitForServices(win) {
   const promises = includedServices(win).map(service => {
     return timerFor(win).timeoutPromise(
-      LOAD_TIMEOUT,
-      getServicePromise(win, service),
-      `Render timeout waiting for service ${service} to be ready.`
+        LOAD_TIMEOUT,
+        getServicePromise(win, service),
+        `Render timeout waiting for service ${service} to be ready.`
     );
   });
   return Promise.all(promises);

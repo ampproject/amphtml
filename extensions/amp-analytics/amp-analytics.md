@@ -326,7 +326,7 @@ The element visibility trigger can be configured for any AMP element or a docume
 }
 ```
 
-Notice that selector can be used to only specify a single element, not a collection. The element can be either an [AMP extended  element](https://github.xom/ampproject/amphtml/blob/master/spec/amp-tag-addendum.md#amp-specific-tags) or a document root.
+Notice that selector can be used to only specify a single element, not a collection. The element can be either an [AMP extended  element](https://github.com/ampproject/amphtml/blob/master/spec/amp-tag-addendum.md#amp-specific-tags) or a document root.
 
 The element visibility trigger waits for the signal specified by the `waitFor` property in `visibilitySpec` before tracking element visibility. If `waitFor` is not specified, it waits for element's [`ini-load`](#initial-load-trigger) signal. See `waitFor` docs for more details.
 

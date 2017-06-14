@@ -22,10 +22,6 @@ limitations under the License.
     <td>A wrapper and minimal UI for content that updates live in the client instance as new content is available in the source document.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td>
       <div>
@@ -310,7 +306,7 @@ reference point, and you can hook into this class to add transitions.
 (see Examples below)
 
 ## Actions
-The `amp-live-list` exposes the following actions you can use [AMP on-syntax to trigger](../../../src/spec/amp-actions-and-events.md):
+The `amp-live-list` exposes the following actions you can use [AMP on-syntax to trigger](https://github.com/ampproject/amphtml/blob/master/spec/amp-actions-and-events.md):
 
 <table>
   <tr>

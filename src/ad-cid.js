@@ -30,7 +30,7 @@ export function getAdCid(adElement) {
     return Promise.resolve();
   }
   return getOrCreateAdCid(adElement.getAmpDoc(), config.clientIdScope,
-                          config.clientIdCookieName);
+      config.clientIdCookieName);
 }
 
 /**
