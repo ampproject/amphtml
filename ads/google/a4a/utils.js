@@ -54,9 +54,10 @@ const AmpAdImplementation = {
 
 /** @const {!Object} */
 export const ValidAdContainerTypes = {
-  'AMP-STICKY-AD': 'sa',
+  'AMP-CAROUSEL': 'ac',
   'AMP-FX-FLYING-CARPET': 'fc',
   'AMP-LIGHTBOX': 'lb',
+  'AMP-STICKY-AD': 'sa',
 };
 
 /** @const {string} */
@@ -141,24 +142,17 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
   win['ampAdGoogleIfiCounter'] = win['ampAdGoogleIfiCounter'] || 1;
   const slotRect = a4a.getPageLayoutBox();
   const iframeDepth = iframeNestingDepth(win);
-  // Detect container types.
-  const containerTypeSet = {};
-  for (let el = adElement.parentElement, counter = 0;
-      el && counter < 20; el = el.parentElement, counter++) {
-    const tagName = el.tagName.toUpperCase();
-    if (ValidAdContainerTypes[tagName]) {
-      containerTypeSet[ValidAdContainerTypes[tagName]] = true;
-    }
-  }
+  const enclosingContainers = getEnclosingContainerTypes(adElement);
   const pfx =
-      (containerTypeSet[ValidAdContainerTypes['AMP-FX-FLYING-CARPET']]
-       || containerTypeSet[ValidAdContainerTypes['AMP-STICKY-AD']])
+      (enclosingContainers.indexOf(
+          ValidAdContainerTypes['AMP-FX-FLYING-CARPET']) != -1
+       || enclosingContainers.indexOf(
+           ValidAdContainerTypes['AMP-STICKY-AD']) != -1)
       ? '1' : '0';
   let eids = adElement.getAttribute('data-experiment-id');
   if (opt_experimentIds) {
     eids = mergeExperimentIds(opt_experimentIds, eids);
   }
-  const containerTypeArray = Object.keys(containerTypeSet);
   return {
     'ifi': win['ampAdGoogleIfiCounter']++,
     'adf': domFingerprint(adElement),
@@ -169,7 +163,7 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
     'oid': '2',
     pfx,
     'rc': a4a.fromResumeCallback ? 1 : null,
-    'act': containerTypeArray.length ? containerTypeArray.join() : null,
+    'act': enclosingContainers.length ? enclosingContainers.join() : null,
   };
 }
 
@@ -560,3 +554,24 @@ export function mergeExperimentIds(newIds, currentIdString) {
   return currentIdString + (currentIdString && newIdString ? ',' : '')
       + newIdString;
 }
+
+/**
+ * Returns an array of two-letter codes representing the amp-ad containers
+ * enclosing the given ad element.
+ *
+ * @param {!Element} adElement
+ * @return {!Array<string>}
+ */
+export function getEnclosingContainerTypes(adElement) {
+  // Detect container types.
+  const containerTypeSet = {};
+  for (let el = adElement.parentElement, counter = 0;
+      el && counter < 20; el = el.parentElement, counter++) {
+    const tagName = el.tagName.toUpperCase();
+    if (ValidAdContainerTypes[tagName]) {
+      containerTypeSet[ValidAdContainerTypes[tagName]] = true;
+    }
+  }
+  return Object.keys(containerTypeSet);
+}
+

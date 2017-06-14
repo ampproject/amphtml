@@ -62,6 +62,7 @@ import {insertAnalyticsElement} from '../../../src/analytics';
 import {setStyles} from '../../../src/style';
 import {utf8Encode} from '../../../src/utils/bytes';
 import {isCancellation} from '../../../src/error';
+import {RefreshManager} from '../../amp-a4a/0.1/refresh-manager';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -219,6 +220,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {!Promise<?../../../src/service/xhr-impl.FetchResponse>} */
     this.sraResponsePromise_ = sraInitializer.promise;
+
+    /** @private {?RefreshManager} */
+    this.refreshManager_ = null;
+
+    /** @private {number} */
+    this.refreshCount_ = 0;
   }
 
   /** @override */
@@ -266,9 +273,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // dimensions in an array.
       const dimensions = getMultiSizeDimensions(
           multiSizeDataStr,
-          Number(this.element.getAttribute('width')),
-          Number(this.element.getAttribute('height')),
-          multiSizeValidation == 'true');
+          this.size_.width, this.size_.height,
+          multiSizeValidation == 'true',
+          /* Use strict mode only in non-refresh case */ !this.isRefreshing);
       sizeStr += '|' + dimensions
           .map(dimension => dimension.join('x'))
           .join('|');
@@ -285,6 +292,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           (this.jsonTargeting_ && this.jsonTargeting_['targeting']) || null,
           (this.jsonTargeting_ &&
             this.jsonTargeting_['categoryExclusions']) || null),
+      'rc': this.refreshCount_ ? this.refreshCount_ : null,
     }, googleBlockParameters(this));
   }
 
@@ -312,7 +320,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getAdUrl() {
-    if (this.iframe) {
+    if (this.iframe && !this.isRefreshing) {
       dev().warn(TAG, `Frame already exists, sra: ${this.useSra_}`);
       return '';
     }
@@ -366,8 +374,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  unlayoutCallback() {
-    super.unlayoutCallback();
+  tearDownSlot() {
+    super.tearDownSlot();
     this.element.setAttribute('data-amp-slot-index',
         this.win.ampAdSlotIdCounter++);
     this.lifecycleReporter_ = this.initLifecycleReporter();
@@ -386,6 +394,30 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.sraResponseResolver = sraInitializer.resolver;
     this.sraResponseRejector = sraInitializer.rejector;
     this.sraResponsePromise_ = sraInitializer.promise;
+  }
+
+  /** @override */
+  layoutCallback() {
+    const superReturnValue = super.layoutCallback();
+    if (!this.refreshManager_) {
+      // Will initiate the refresh lifecycle iff the slot has been enabled to
+      // do so through an appropriate data attribute, or a page-level meta tag.
+      this.refreshManager_ = new RefreshManager(this);
+      if (this.refreshManager_.isRefreshable()) {
+        this.refreshManager_.initiateRefreshCycle();
+      }
+    }
+    return superReturnValue;
+  }
+
+  /**
+   * @param {function()} refreshEndCallback
+   *
+   * @override
+   */
+  refresh(refreshEndCallback) {
+    super.refresh(refreshEndCallback);
+    this.refreshCount_++;
   }
 
   /**
