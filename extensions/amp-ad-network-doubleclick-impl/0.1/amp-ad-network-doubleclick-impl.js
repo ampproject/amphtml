@@ -77,6 +77,8 @@ const TAG = 'amp-ad-network-doubleclick-impl';
 const DOUBLECLICK_BASE_URL =
     'https://securepubads.g.doubleclick.net/gampad/ads';
 
+const RTC_ERROR = "RTC_ERROR";
+
 /** @private @const {!Object<string,string>} */
 const PAGE_LEVEL_PARAMS_ = {
   'gdfp_req': '1',
@@ -361,12 +363,18 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           return rtcRequestPromise;
         }).then(rtcResponse => {
           if (rtcResponse) {
-            const targeting = deepMerge(this.jsonTargeting_['targeting'] || {},
-                                        rtcResponse['targeting'] || {});
-            const exclusions = deepMerge(
-                this.jsonTargeting_['categoryExclusions'] || {},
-                rtcResponse['exclusions'] || {});
-            parameters['scp'] = serializeTargeting_(targeting, exclusions);
+            if (rtcResponse != RTC_ERROR && !!rtcResponse['targeting']){
+              const targeting = deepMerge(this.jsonTargeting_['targeting'] || {},
+                                          rtcResponse['targeting'] || {});
+              const exclusions = deepMerge(
+                  this.jsonTargeting_['categoryExclusions'] || {},
+                  rtcResponse['exclusions'] || {});
+              parameters['scp'] = serializeTargeting_(targeting, exclusions);
+            } else {
+              if (rtcConfig['doubleclick']['sendAdRequestOnFailure'] === false) {
+                return;
+              }
+            }
           }
           return truncAndTimeUrl(DOUBLECLICK_BASE_URL, parameters, startTime);
         });
@@ -531,7 +539,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     });
 
     return timerFor(window).timeoutPromise(2000, rtcResponse).then(
-        res => res.json());
+        res => res.json()).catch(err => {
+          return RTC_ERROR;
+        });
   }
 
   /** @override */
