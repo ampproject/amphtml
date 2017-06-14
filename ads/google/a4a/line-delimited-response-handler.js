@@ -50,9 +50,9 @@
    reader.read().then(function chunk(result) {
      if (result.value) {
        streamer(
-         decoder.decode(
+           decoder.decode(
            /** @type {!ArrayBuffer} */(result.value), {'stream': true}),
-         result.done);
+           result.done);
      }
      if (!result.done) {
        // More chunks to read.
@@ -72,9 +72,9 @@
    return function(line, done) {
      if (first) {
        callback(
-         unescapeLineDelimitedHtml_(line),
+           unescapeLineDelimitedHtml_(line),
          /** @type {!Object<string, *>} */(tryParseJson(first) || {}),
-         done);
+           done);
        first = null;
      } else {
        first = line;
@@ -90,6 +90,6 @@
   */
  function unescapeLineDelimitedHtml_(html) {
    return html.replace(
-     /\\(n|r|\\)/g,
-     (_, match) => match == 'n' ? '\n' : match == 'r' ? '\r' : '\\');
+       /\\(n|r|\\)/g,
+       (_, match) => match == 'n' ? '\n' : match == 'r' ? '\r' : '\\');
  }

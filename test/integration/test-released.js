@@ -51,20 +51,20 @@ function runTest(shouldKillPolyfillableApis) {
     // at the rendering. The test passes when running locally in FF.
     // TODO(lannka, #3561): unmute the test.
     it.configure().skipFirefox().skipChrome()
-    .run('all components should get loaded', function() {
-      this.timeout(15000);
-      return pollForLayout(fixture.win, 13, 10000).then(() => {
-        expect(fixture.doc.querySelectorAll('.i-amphtml-element'))
-            .to.have.length(17);
-        expect(fixture.doc.querySelectorAll('.i-amphtml-layout'))
-            .to.have.length(13);
-        expect(fixture.doc.querySelectorAll('.i-amphtml-error'))
-            .to.have.length(0);
-        checkGlobalScope(fixture.win);
-      }).then(() => {
-        return expectBodyToBecomeVisible(fixture.win);
-      });
-    });
+        .run('all components should get loaded', function() {
+          this.timeout(15000);
+          return pollForLayout(fixture.win, 13, 10000).then(() => {
+            expect(fixture.doc.querySelectorAll('.i-amphtml-element'))
+                .to.have.length(17);
+            expect(fixture.doc.querySelectorAll('.i-amphtml-layout'))
+                .to.have.length(13);
+            expect(fixture.doc.querySelectorAll('.i-amphtml-error'))
+                .to.have.length(0);
+            checkGlobalScope(fixture.win);
+          }).then(() => {
+            return expectBodyToBecomeVisible(fixture.win);
+          });
+        });
 
     it('sanity for Firefox while we skip above', function() {
       this.timeout(15000);

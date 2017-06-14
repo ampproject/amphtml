@@ -167,7 +167,7 @@ describe('amp-fx-flying-carpet', () => {
       throw new Error('should never reach this');
     }, ref => {
       expect(ref.error.message).to.have.string(
-        'elements must be positioned after the 75% of first viewport'
+          'elements must be positioned after the 75% of first viewport'
       );
       expect(ref.flyingCarpet).to.not.display;
     });
@@ -186,7 +186,7 @@ describe('amp-fx-flying-carpet', () => {
       throw new Error('should never reach this');
     }, ref => {
       expect(ref.error.message).to.have.string(
-        'elements must be positioned before the last viewport'
+          'elements must be positioned before the last viewport'
       );
       expect(ref.flyingCarpet).to.not.display;
     });

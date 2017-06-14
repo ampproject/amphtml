@@ -468,13 +468,13 @@ describes.realWin('performance', {amp: true}, env => {
     resourcesMock
         .expects('getResourcesInRect')
         .withExactArgs(
-            perf.win,
-            sinon.match(arg =>
+        perf.win,
+        sinon.match(arg =>
                 arg.left == 0 &&
                 arg.top == 0 &&
                 arg.width == perf.win.innerWidth &&
                 arg.height == perf.win.innerHeight),
-            /* inPrerender */ true)
+        /* inPrerender */ true)
         .returns(Promise.resolve([res1, res2]))
         .once();
 

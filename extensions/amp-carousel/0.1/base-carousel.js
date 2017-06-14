@@ -71,10 +71,10 @@ export class BaseCarousel extends AMP.BaseElement {
     this.prevButton_.setAttribute('role', 'button');
     if (this.element.hasAttribute('data-previous-button-aria-label')) {
       this.prevButton_.setAttribute('aria-label',
-        this.element.getAttribute('data-previous-button-aria-label'));
+          this.element.getAttribute('data-previous-button-aria-label'));
     } else {
       this.prevButton_.setAttribute('aria-label',
-        'Previous item in carousel');
+          'Previous item in carousel');
     }
     this.prevButton_.setAttribute('tabindex', 0);
     this.prevButton_.onkeydown = event => {
@@ -96,10 +96,10 @@ export class BaseCarousel extends AMP.BaseElement {
     this.nextButton_.setAttribute('role', 'button');
     if (this.element.hasAttribute('data-next-button-aria-label')) {
       this.nextButton_.setAttribute('aria-label',
-        this.element.getAttribute('data-next-button-aria-label'));
+          this.element.getAttribute('data-next-button-aria-label'));
     } else {
       this.nextButton_.setAttribute('aria-label',
-        'Previous item in carousel');
+          'Previous item in carousel');
     }
     this.nextButton_.setAttribute('tabindex', 0);
     this.nextButton_.onkeydown = event => {

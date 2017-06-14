@@ -63,7 +63,7 @@ export class AmpAdNetworkTripleliftImpl extends AmpA4A {
   /** @override */
   getAdUrl() {
     return this.element.getAttribute('src').replace(TRIPLELIFT_BASE_URL_,
-      TRIPLELIFT_BASE_A4A_URL_);
+        TRIPLELIFT_BASE_A4A_URL_);
   }
 
   /**
@@ -80,7 +80,7 @@ export class AmpAdNetworkTripleliftImpl extends AmpA4A {
       if (responseHeaders.has(AMP_SIGNATURE_HEADER_)) {
         signature =
           base64UrlDecodeToBytes(dev().assertString(
-            responseHeaders.get(AMP_SIGNATURE_HEADER_)));
+              responseHeaders.get(AMP_SIGNATURE_HEADER_)));
       }
     } finally {
       return Promise.resolve(/** @type
@@ -92,4 +92,4 @@ export class AmpAdNetworkTripleliftImpl extends AmpA4A {
 }
 
 AMP.registerElement('amp-ad-network-triplelift-impl',
-  AmpAdNetworkTripleliftImpl);
+    AmpAdNetworkTripleliftImpl);

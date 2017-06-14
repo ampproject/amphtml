@@ -260,7 +260,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       const targetId = invocation.args.id;
       target = this.win.document.getElementById(targetId);
       user().assert(target,
-        'amp-lightbox-viewer.open: element with id: %s not found', targetId);
+          'amp-lightbox-viewer.open: element with id: %s not found', targetId);
     }
     return this.open_(target);
   }

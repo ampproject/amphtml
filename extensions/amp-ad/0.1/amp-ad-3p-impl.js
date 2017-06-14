@@ -23,7 +23,7 @@ import {
 import {getAdCid} from '../../../src/ad-cid';
 import {preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {isAdPositionAllowed, getAdContainer,}
+import {isAdPositionAllowed, getAdContainer}
     from '../../../src/ad-helper';
 import {adConfig} from '../../../ads/_config';
 import {

@@ -25,7 +25,7 @@ import {user} from '../src/log';
  * @type {!Array<string>}
  */
 const ATTRIBUTES_TO_PROPAGATE = ['alt', 'title', 'referrerpolicy', 'aria-label',
-      'aria-describedby', 'aria-labelledby'];
+  'aria-describedby', 'aria-labelledby'];
 
 export class AmpImg extends BaseElement {
 

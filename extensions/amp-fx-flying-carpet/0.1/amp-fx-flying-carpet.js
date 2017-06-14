@@ -112,19 +112,19 @@ class AmpFlyingCarpet extends AMP.BaseElement {
     const minTop = viewportHeight * 0.75;
     const maxTop = docHeight - viewportHeight * 0.95;
     user().assert(
-      layoutBox.top >= minTop,
-      '<amp-fx-flying-carpet> elements must be positioned after the 75% of' +
+        layoutBox.top >= minTop,
+        '<amp-fx-flying-carpet> elements must be positioned after the 75% of' +
       ' first viewport: %s Current position: %s. Min: %s',
-      this.element,
-      layoutBox.top,
-      minTop);
+        this.element,
+        layoutBox.top,
+        minTop);
     user().assert(
-      layoutBox.top <= maxTop,
-      '<amp-fx-flying-carpet> elements must be positioned before the last ' +
+        layoutBox.top <= maxTop,
+        '<amp-fx-flying-carpet> elements must be positioned before the last ' +
       'viewport: %s Current position: %s. Max: %s',
-      this.element,
-      layoutBox.top,
-      maxTop);
+        this.element,
+        layoutBox.top,
+        maxTop);
   }
 
   /** @override */

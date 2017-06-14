@@ -172,7 +172,7 @@ class VideoEntry {
     this.hasAutoplay_ = element.hasAttribute(VideoAttributes.AUTOPLAY);
 
     listenOncePromise(element, VideoEvents.LOAD)
-      .then(() => this.videoLoaded_());
+        .then(() => this.videoLoaded_());
 
     // Currently we only register after video player is build.
     this.videoBuilt_();

@@ -95,8 +95,8 @@ export class AmpSelector extends AMP.BaseElement {
       kbSelectMode = kbSelectMode.toLowerCase();
       user().assertEnumValue(KEYBOARD_SELECT_MODES, kbSelectMode);
       user().assert(
-        !(this.isMultiple_ && kbSelectMode == KEYBOARD_SELECT_MODES.SELECT),
-        '[keyboard-select-mode=select] not supported for multiple ' +
+          !(this.isMultiple_ && kbSelectMode == KEYBOARD_SELECT_MODES.SELECT),
+          '[keyboard-select-mode=select] not supported for multiple ' +
         'selection amp-selector');
     } else {
       kbSelectMode = KEYBOARD_SELECT_MODES.NONE;

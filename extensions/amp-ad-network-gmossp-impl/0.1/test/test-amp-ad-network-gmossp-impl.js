@@ -76,12 +76,12 @@ describe('amp-ad-network-gmossp-impl', () => {
     gmosspImplElem = document.createElement('amp-ad');
     gmosspImplElem.setAttribute('type', 'gmossp');
     gmosspImplElem.setAttribute('src',
-'https://sp.gmossp-sp.jp/ads/ssp.ad?space_id=33303&is_a4a=1');
+        'https://sp.gmossp-sp.jp/ads/ssp.ad?space_id=33303&is_a4a=1');
     gmosspImplElem.setAttribute('data-use-a4a', 'true');
     sandbox.stub(AmpAdNetworkGmosspImpl.prototype, 'getSigningServiceNames',
-      () => {
-        return ['google'];
-      });
+        () => {
+          return ['google'];
+        });
     gmosspImpl = new AmpAdNetworkGmosspImpl(gmosspImplElem);
   });
 
@@ -113,11 +113,11 @@ document.createElement('amp-ad-network-gmossp-impl');
     it('without signature', () => {
       return utf8Encode('some creative').then(creative => {
         return expect(gmosspImpl.extractCreativeAndSignature(
-          creative,
-          {
-            get: function() { return undefined; },
-            has: function() { return false; },
-          })).to.eventually.deep.equal(
+            creative,
+            {
+              get: function() { return undefined; },
+              has() { return false; },
+            })).to.eventually.deep.equal(
             {creative, signature: null}
           );
       });
@@ -125,15 +125,15 @@ document.createElement('amp-ad-network-gmossp-impl');
     it('with signature', () => {
       return utf8Encode('some creative').then(creative => {
         return expect(gmosspImpl.extractCreativeAndSignature(
-          creative,
-          {
-            get: function(name) {
-              return name == 'X-AmpAdSignature' ? 'AQAB' : undefined;
-            },
-            has: function(name) {
-              return name === 'X-AmpAdSignature';
-            },
-          })).to.eventually.deep.equal(
+            creative,
+            {
+              get(name) {
+                return name == 'X-AmpAdSignature' ? 'AQAB' : undefined;
+              },
+              has(name) {
+                return name === 'X-AmpAdSignature';
+              },
+            })).to.eventually.deep.equal(
             {creative, signature: base64UrlDecodeToBytes('AQAB')}
           );
       });

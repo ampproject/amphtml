@@ -192,7 +192,7 @@ export function computeInMasterFrame(global, taskId, work, cb) {
       cbs[i].call(null, result);
     }
     tasks[taskId] = {
-      push: function(cb) {
+      push(cb) {
         cb(result);
       },
     };

@@ -67,7 +67,7 @@ describe('amp-fresh', () => {
     fresh.buildCallback();
     expect(fresh.element.innerHTML).to.equal('<span>hello</span>');
     const doc = {
-      getElementById: function(id) {
+      getElementById(id) {
         const el = document.createElement('amp-fresh');
         el.innerHTML = '<span>hello</span><div>world</div>!';
         el.setAttribute('id', id);

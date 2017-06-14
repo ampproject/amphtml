@@ -628,7 +628,7 @@ function createBaseCustomElementClass(win) {
     getAmpDoc() {
       return /** @type {!./service/ampdoc-impl.AmpDoc} */ (
         dev().assert(this.ampdoc_,
-          'no ampdoc yet, since element is not attached'));
+            'no ampdoc yet, since element is not attached'));
     }
 
     /**
@@ -641,7 +641,7 @@ function createBaseCustomElementClass(win) {
     getResources() {
       return /** @type {!./service/resources-impl.Resources} */ (
         dev().assert(this.resources_,
-          'no resources yet, since element is not attached'));
+            'no resources yet, since element is not attached'));
     }
 
     /**
@@ -740,7 +740,7 @@ function createBaseCustomElementClass(win) {
      */
     getPriority() {
       dev().assert(
-        this.isUpgraded(), 'Cannot get priority of unupgraded element');
+          this.isUpgraded(), 'Cannot get priority of unupgraded element');
       return this.implementation_.getPriority();
     }
 
@@ -1252,7 +1252,7 @@ function createBaseCustomElementClass(win) {
     layoutCallback() {
       assertNotTemplate(this);
       dev().assert(this.isBuilt(),
-        'Must be built to receive viewport events');
+          'Must be built to receive viewport events');
       this.dispatchCustomEventForTesting('amp:load:start');
       const isLoadEvent = (this.layoutCount_ == 0);  // First layout is "load".
       if (isLoadEvent) {
@@ -1520,7 +1520,7 @@ function createBaseCustomElementClass(win) {
         this.implementation_.executeAction(invocation, deferred);
       } catch (e) {
         rethrowAsync('Action execution failed:', e,
-          invocation.target.tagName, invocation.method);
+            invocation.target.tagName, invocation.method);
       }
     }
 
@@ -1786,7 +1786,7 @@ function createBaseCustomElementClass(win) {
       if (!this.overflowElement_) {
         if (overflown) {
           user().warn(TAG_,
-            'Cannot resize element and overflow is not available', this);
+              'Cannot resize element and overflow is not available', this);
         }
       } else {
         this.overflowElement_.classList.toggle('amp-visible', overflown);
@@ -1794,10 +1794,10 @@ function createBaseCustomElementClass(win) {
         if (overflown) {
           this.overflowElement_.onclick = () => {
             this.getResources(). /*OK*/ changeSize(
-              this, requestedHeight, requestedWidth);
+                this, requestedHeight, requestedWidth);
             getVsync(this).mutate(() => {
               this.overflowCallback(
-                /* overflown */ false, requestedHeight, requestedWidth);
+                  /* overflown */ false, requestedHeight, requestedWidth);
             });
           };
         } else {

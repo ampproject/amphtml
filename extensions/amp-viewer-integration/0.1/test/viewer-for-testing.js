@@ -144,7 +144,7 @@ export class ViewerForTesting {
    */
   confirmHandshake() {
     this.iframe.contentWindow./*OK*/postMessage(
-      'amp-handshake-response', this.frameOrigin_);
+        'amp-handshake-response', this.frameOrigin_);
   }
 
   /**

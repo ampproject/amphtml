@@ -103,15 +103,15 @@ class AmpPlaybuzz extends AMP.BaseElement {
     // EXPERIMENT
     // AMP.toggleExperiment(EXPERIMENT, true); //for dev
     user().assert(isExperimentOn(this.win, EXPERIMENT),
-      `Enable ${EXPERIMENT} experiment`);
+        `Enable ${EXPERIMENT} experiment`);
 
     const e = this.element;
     const src = e.getAttribute('src');
     const itemId = e.getAttribute('data-item');
 
     user().assert(src || itemId,
-      'Either src or data-item attribute is required for <amp-playbuzz> %s',
-      this.element);
+        'Either src or data-item attribute is required for <amp-playbuzz> %s',
+        this.element);
 
     if (src) {
       assertAbsoluteHttpOrHttpsUrl(src);
@@ -180,7 +180,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
     iframe.src = this.generateEmbedSourceUrl_();
 
     this.listenToPlaybuzzItemMessage_('resize_height',
-      utils.debounce(this.itemHeightChanged_.bind(this), 100));
+        utils.debounce(this.itemHeightChanged_.bind(this), 100));
 
     this.element.appendChild(this.getOverflowElement_());
 
@@ -192,7 +192,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
       this.attemptChangeHeight(this.itemHeight_).catch(() => {/* die */ });
 
       const unlisten = this.getViewport().onChanged(
-        this.sendScrollDataToItem_.bind(this));
+          this.sendScrollDataToItem_.bind(this));
       this.unlisteners_.push(unlisten);
     }.bind(this));
   }
@@ -207,9 +207,10 @@ class AmpPlaybuzz extends AMP.BaseElement {
 
     const loadingPlaceholder =
       createElement('div', 'pb_feed_placeholder_container',
-        createElement('div', 'pb_feed_placeholder_inner',
-          createElement('div', 'pb_feed_placeholder_content',
-            createElement('div', 'pb_feed_placeholder_preloader', loaderImage)
+          createElement('div', 'pb_feed_placeholder_inner',
+              createElement('div', 'pb_feed_placeholder_content',
+                  createElement('div', 'pb_feed_placeholder_preloader',
+                      loaderImage)
           )));
 
     return loadingPlaceholder;
@@ -238,8 +239,8 @@ class AmpPlaybuzz extends AMP.BaseElement {
    */
   listenToPlaybuzzItemMessage_(messageName, handler) {
     const unlisten = events.listen(this.win, 'message',
-      event => utils.handleMessageByName(this.iframe_,
-        event, messageName, handler));
+        event => utils.handleMessageByName(this.iframe_,
+            event, messageName, handler));
     this.unlisteners_.push(unlisten);
   }
 

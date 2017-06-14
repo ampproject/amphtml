@@ -286,11 +286,11 @@ describe('GoogleAdLifecycleReporter', () => {
         expect(arg).not.to.have.string(
             '<script src="https://evil.com">doEvil()</script>');
         expect(arg).to.have.string('&evil=' + encodeURIComponent(
-                '<script src="https://evil.com">doEvil()</script>'));
+            '<script src="https://evil.com">doEvil()</script>'));
         expect(arg).not.to.have.string(
             '<script src="https://very.evil.com">doMoreEvil()</script>');
         expect(arg).to.have.string('&' + encodeURIComponent(
-                '<script src="https://very.evil.com">doMoreEvil()</script>') +
+            '<script src="https://very.evil.com">doMoreEvil()</script>') +
             '=3');
       });
     });

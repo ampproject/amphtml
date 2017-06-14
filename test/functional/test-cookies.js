@@ -95,7 +95,7 @@ describe('cookies', () => {
         expect(cookie).to.be.undefined;
       } else {
         expect(cookie).to.equal(
-           'c%261=v%261; path=/; domain=' + targetDomain +
+            'c%261=v%261; path=/; domain=' + targetDomain +
             '; expires=Fri, 13 Nov 2015 02:52:39 GMT');
       }
     }

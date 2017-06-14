@@ -51,11 +51,11 @@ class AmpReddit extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     user().assert(this.element.getAttribute('data-src'),
-      'The data-src attribute is required for <amp-reddit> %s',
-      this.element);
+        'The data-src attribute is required for <amp-reddit> %s',
+        this.element);
     user().assert(this.element.getAttribute('data-embedtype'),
-      'The data-embedtype attribute is required for <amp-reddit> %s',
-      this.element);
+        'The data-embedtype attribute is required for <amp-reddit> %s',
+        this.element);
 
     const iframe = getIframe(this.win, this.element, 'reddit');
     this.applyFillContent(iframe);

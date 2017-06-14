@@ -203,7 +203,7 @@ describes.fakeWin('runtime', {
       'when a renderDelayingExtension is present', () => {
     toggleExperiment(win, 'pump-early-frame', true);
     win.document.body.appendChild(
-            document.createElement('amp-experiment'));
+        document.createElement('amp-experiment'));
     extensionRegistrationTest();
   });
 
@@ -776,8 +776,8 @@ describes.realWin('runtime multidoc', {
 
       ampdocServiceMock.expects('installShadowDoc_')
           .withExactArgs(
-              docUrl,
-              sinon.match(arg => arg == getShadowRoot(hostElement)))
+          docUrl,
+          sinon.match(arg => arg == getShadowRoot(hostElement)))
           .returns(ampdoc)
           .atLeast(0);
       ampdocServiceMock.expects('getAmpDoc')
@@ -1068,8 +1068,8 @@ describes.realWin('runtime multidoc', {
 
       ampdocServiceMock.expects('installShadowDoc_')
           .withExactArgs(
-              docUrl,
-              sinon.match(arg => arg == getShadowRoot(hostElement)))
+          docUrl,
+          sinon.match(arg => arg == getShadowRoot(hostElement)))
           .returns(ampdoc)
           .atLeast(0);
       ampdocServiceMock.expects('getAmpDoc')
@@ -1415,8 +1415,8 @@ describes.realWin('runtime multidoc', {
 
       ampdocServiceMock.expects('installShadowDoc_')
           .withExactArgs(
-              docUrl,
-              sinon.match(arg => arg == getShadowRoot(hostElement)))
+          docUrl,
+          sinon.match(arg => arg == getShadowRoot(hostElement)))
           .returns(ampdoc)
           .atLeast(0);
       ampdocServiceMock.expects('getAmpDoc')

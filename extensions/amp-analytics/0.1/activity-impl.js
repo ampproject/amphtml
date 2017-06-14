@@ -217,7 +217,7 @@ export class Activity {
   setUpActivityListeners_() {
     for (let i = 0; i < ACTIVE_EVENT_TYPES.length; i++) {
       this.unlistenFuncs_.push(listen(this.ampdoc.getRootNode(),
-        ACTIVE_EVENT_TYPES[i], this.boundHandleActivity_));
+          ACTIVE_EVENT_TYPES[i], this.boundHandleActivity_));
     }
 
     this.unlistenFuncs_.push(

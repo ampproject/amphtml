@@ -139,7 +139,7 @@ describe('ActionService parseAction', () => {
 
   it('should parse args in more than one action', () => {
     const a = parseMultipleActions(
-      'event1:target1.methodA(key1=value1),target2.methodB(keyA=valueA)');
+        'event1:target1.methodA(key1=value1),target2.methodB(keyA=valueA)');
     expect(a[0].event).to.equal('event1');
     expect(a[0].target).to.equal('target1');
     expect(a[0].method).to.equal('methodA');

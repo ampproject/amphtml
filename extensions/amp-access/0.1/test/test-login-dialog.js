@@ -288,18 +288,18 @@ describes.sandboxed('WebLoginDialog', {}, () => {
   it('should have correct window.open params', () => {
     windowMock.expects('open')
         .withExactArgs(
-            'http://acme.com/login?return=' + RETURN_URL_ESC,
-            '_blank',
-            'height=450,width=700,left=150,top=275' +
+        'http://acme.com/login?return=' + RETURN_URL_ESC,
+        '_blank',
+        'height=450,width=700,left=150,top=275' +
             ',resizable=yes,scrollbars=yes')
         .returns(dialog)
         .once();
     dialogMock.expects('postMessage')
         .withExactArgs(
-            sinon.match(arg => {
-              return (arg.sentinel == 'amp' && arg.type == 'result-ack');
-            }),
-            'http://localhost:8000')
+        sinon.match(arg => {
+          return (arg.sentinel == 'amp' && arg.type == 'result-ack');
+        }),
+        'http://localhost:8000')
         .once();
     const promise = openLoginDialog(ampdoc, 'http://acme.com/login');
     return Promise.resolve()
@@ -315,9 +315,9 @@ describes.sandboxed('WebLoginDialog', {}, () => {
   it('should have correct URL with other parameters', () => {
     windowMock.expects('open')
         .withExactArgs(
-            'http://acme.com/login?a=1&return=' + RETURN_URL_ESC,
-            '_blank',
-            'height=450,width=700,left=150,top=275' +
+        'http://acme.com/login?a=1&return=' + RETURN_URL_ESC,
+        '_blank',
+        'height=450,width=700,left=150,top=275' +
             ',resizable=yes,scrollbars=yes')
         .returns(dialog)
         .once();
@@ -335,9 +335,9 @@ describes.sandboxed('WebLoginDialog', {}, () => {
   it('should substitute return URL', () => {
     windowMock.expects('open')
         .withExactArgs(
-            'http://acme.com/login?a=1&ret1=' + RETURN_URL_ESC,
-            '_blank',
-            'height=450,width=700,left=150,top=275' +
+        'http://acme.com/login?a=1&ret1=' + RETURN_URL_ESC,
+        '_blank',
+        'height=450,width=700,left=150,top=275' +
             ',resizable=yes,scrollbars=yes')
         .returns(dialog)
         .once();
@@ -357,7 +357,7 @@ describes.sandboxed('WebLoginDialog', {}, () => {
     viewer.getResolvedViewerUrl = () => 'http://acme.com/viewer1';
     windowMock.expects('open')
         .withArgs(
-            'http://acme.com/login?a=1&ret1=' +
+        'http://acme.com/login?a=1&ret1=' +
             encodeURIComponent('http://localhost:8000/extensions' +
                 '/amp-access/0.1/amp-login-done.html?url=' +
                 encodeURIComponent('http://acme.com/viewer1')))
@@ -408,7 +408,7 @@ describes.sandboxed('WebLoginDialog', {}, () => {
       return dialogObj.dialogReadyPromise_;
     }).then(() => {
       expect(dialogUrl).to.be.equal(
-        'http://acme.com/login?a=1&return=' + RETURN_URL_ESC);
+          'http://acme.com/login?a=1&return=' + RETURN_URL_ESC);
       succeed();
       return promise;
     }).then(result => {

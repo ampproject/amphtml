@@ -98,7 +98,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           });
 
           ampViewerIntegration.openChannelAndStart_(
-            viewer, env.ampdoc, origin, messaging);
+              viewer, env.ampdoc, origin, messaging);
 
           const ampdocUrl = env.ampdoc.getUrl();
           const srcUrl = getSourceUrl(ampdocUrl);
@@ -116,7 +116,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           const initTouchHandlerStub =
             sandbox.stub(ampViewerIntegration, 'initTouchHandler_');
           ampViewerIntegration.openChannelAndStart_(
-            viewer, env.ampdoc, origin, messaging);
+              viewer, env.ampdoc, origin, messaging);
 
           expect(initTouchHandlerStub).to.not.be.called;
         });
@@ -130,9 +130,9 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
             sandbox.stub(ampViewerIntegration, 'initTouchHandler_');
           ampViewerIntegration.unconfirmedViewerOrigin_ = '';
           ampViewerIntegration.openChannelAndStart_(
-            viewer, env.ampdoc, origin, messaging).then(() => {
-              expect(initTouchHandlerStub).to.be.called;
-            });
+              viewer, env.ampdoc, origin, messaging).then(() => {
+                expect(initTouchHandlerStub).to.be.called;
+              });
         });
       });
     });
@@ -286,8 +286,8 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
       expect(logErrorSpy).to.have.been.calledOnce;
 
       expect(logErrorSpy).to.have.been.calledWith(
-        'amp-viewer-messaging: handleResponse_ error: ',
-        'reason');
+          'amp-viewer-messaging: handleResponse_ error: ',
+          'reason');
     });
 
     it('sendRequest should call postMessage correctly', () => {

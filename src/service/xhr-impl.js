@@ -170,18 +170,18 @@ export class Xhr {
         // If the `AMP-Access-Control-Allow-Source-Origin` header is returned,
         // ensure that it's equal to the current source origin.
         user().assert(allowSourceOriginHeader == sourceOrigin,
-              `Returned ${ALLOW_SOURCE_ORIGIN_HEADER} is not` +
+            `Returned ${ALLOW_SOURCE_ORIGIN_HEADER} is not` +
               ` equal to the current: ${allowSourceOriginHeader}` +
               ` vs ${sourceOrigin}`);
       } else if (init.requireAmpResponseSourceOrigin) {
         // If the `AMP-Access-Control-Allow-Source-Origin` header is not
         // returned but required, return error.
-        user().assert(false, `Response must contain the` +
+        user().assert(false, 'Response must contain the' +
             ` ${ALLOW_SOURCE_ORIGIN_HEADER} header`);
       }
       return response;
     }, reason => {
-      throw user().createExpectedError('XHR', `Failed fetching` +
+      throw user().createExpectedError('XHR', 'Failed fetching' +
           ` (${targetOrigin}/...):`, reason && reason.message);
     });
   }
@@ -205,9 +205,9 @@ export class Xhr {
       // Assume JSON strict mode where only objects or arrays are allowed
       // as body.
       dev().assert(
-        allowedJsonBodyTypes_.some(test => test(init.body)),
-        'body must be of type object or array. %s',
-        init.body
+          allowedJsonBodyTypes_.some(test => test(init.body)),
+          'body must be of type object or array. %s',
+          init.body
       );
 
       init.headers['Content-Type'] = 'application/json;charset=utf-8';
@@ -302,10 +302,10 @@ function normalizeMethod_(method) {
   method = method.toUpperCase();
 
   dev().assert(
-    allowedMethods_.includes(method),
-    'Only one of %s is currently allowed. Got %s',
-    allowedMethods_.join(', '),
-    method
+      allowedMethods_.includes(method),
+      'Only one of %s is currently allowed. Got %s',
+      allowedMethods_.join(', '),
+      method
   );
 
   return method;

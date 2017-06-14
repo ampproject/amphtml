@@ -19,7 +19,7 @@ import {ScrollboundScene} from './scrollbound-scene';
 import {Pass} from '../../../src/pass';
 import {WebAnimationPlayState} from './web-animation-types';
 import {childElementByTag} from '../../../src/dom';
-import {getFriendlyIframeEmbedOptional,}
+import {getFriendlyIframeEmbedOptional}
     from '../../../src/friendly-iframe-embed';
 import {getMode} from '../../../src/mode';
 import {getParentWindowFrameElement} from '../../../src/service';

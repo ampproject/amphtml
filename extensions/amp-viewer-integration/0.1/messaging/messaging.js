@@ -242,7 +242,7 @@ export class Messaging {
   sendResponseError_(requestId, messageName, reason) {
     const errString = this.errorToString_(reason);
     this.logError_(
-      TAG + ': sendResponseError_, Message name: ' + messageName, errString);
+        TAG + ': sendResponseError_, Message name: ' + messageName, errString);
     this.sendMessage_({
       app: APP,
       requestid: requestId,
@@ -259,7 +259,7 @@ export class Messaging {
    */
   sendMessage_(message) {
     this.port_./*OK*/postMessage(
-      this.isWebview_ ? JSON.stringify(message) : message);
+        this.isWebview_ ? JSON.stringify(message) : message);
   }
 
   /**
@@ -286,7 +286,7 @@ export class Messaging {
       const requestId = message.requestid;
       if (!promise) {
         this.sendResponseError_(
-          requestId, message.name, new Error('no response'));
+            requestId, message.name, new Error('no response'));
         throw new Error('expected response but none given: ' + message.name);
       }
       promise.then(data => {
@@ -311,7 +311,7 @@ export class Messaging {
       if (message.error) {
         this.logError_(TAG + ': handleResponse_ error: ', message.error);
         pending.reject(
-          new Error(`Request ${message.name} failed: ${message.error}`));
+            new Error(`Request ${message.name} failed: ${message.error}`));
       } else {
         pending.resolve(message.data);
       }

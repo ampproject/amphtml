@@ -248,7 +248,7 @@ export class AmpUserNotification extends AMP.BaseElement {
       // (to never resolve).
       return cid.get(
         {scope: 'amp-user-notification', createCookieIfNotPresent: true},
-        Promise.resolve(), this.dialogPromise_);
+          Promise.resolve(), this.dialogPromise_);
     });
   }
 

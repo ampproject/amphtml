@@ -474,6 +474,7 @@ describe('vsync', () => {
       vsync.raf_ = handler => rafHandler = handler;
       viewer.isVisible = () => false;
 
+      /*eslint no-unused-vars: 0*/
       let result = '';
       const res = vsync.runAnim(contextNode, {
         mutate: () => {
@@ -491,6 +492,7 @@ describe('vsync', () => {
       vsync.raf_ = handler => rafHandler = handler;
       viewer.isVisible = () => false;
 
+      /*eslint no-unused-vars: 0*/
       let result = '';
       const task = vsync.createAnimTask(contextNode, {
         mutate: () => {
@@ -750,6 +752,7 @@ describe('vsync', () => {
       vsync.raf_ = handler => rafHandler = handler;
       docState.isHidden = () => true;
 
+      /*eslint no-unused-vars: 0*/
       let result = '';
       const res = vsync.runAnim(contextNode, {
         mutate: () => {
@@ -767,6 +770,7 @@ describe('vsync', () => {
       vsync.raf_ = handler => rafHandler = handler;
       docState.isHidden = () => true;
 
+      /*eslint no-unused-vars: 0*/
       let result = '';
       const task = vsync.createAnimTask(contextNode, {
         mutate: () => {

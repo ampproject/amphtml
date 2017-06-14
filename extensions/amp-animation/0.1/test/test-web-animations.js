@@ -292,7 +292,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       animations: [
         {target: target1, keyframes: {}, '--var1': '20px', '--var2': '30px'},
         {target: target2, duration: 300, keyframes: {},
-            '--var2': '40px', '--var3': 'var(--var4)'},
+          '--var2': '40px', '--var3': 'var(--var4)'},
       ],
     });
     expect(requests).to.have.length(2);
@@ -718,7 +718,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
   it('should not allow both selector and target spec', () => {
     expect(() => {
       scan([{selector: '#target1', target: 'target1',
-          duration: 400, keyframes: {}}]);
+        duration: 400, keyframes: {}}]);
     }).to.throw(/Both/);
   });
 

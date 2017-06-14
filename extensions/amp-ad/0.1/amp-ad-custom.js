@@ -98,12 +98,12 @@ export class AmpAdCustom extends AMP.BaseElement {
       if (templateData !== null && typeof templateData == 'object') {
         this.renderStarted();
         templatesFor(this.win).findAndRenderTemplate(element, templateData)
-          .then(renderedElement => {
+            .then(renderedElement => {
           // Get here when the template has been rendered
           // Clear out the template and replace it by the rendered version
-            removeChildren(element);
-            element.appendChild(renderedElement);
-          });
+              removeChildren(element);
+              element.appendChild(renderedElement);
+            });
       } else {
         this.uiHandler.applyNoContentUI();
       }
@@ -153,7 +153,7 @@ export class AmpAdCustom extends AMP.BaseElement {
       }
       for (const baseUrl in slots) {
         ampCustomadFullUrls[baseUrl] = addParamToUrl(baseUrl, 'ampslots',
-          slots[baseUrl].join(','));
+            slots[baseUrl].join(','));
       }
     }
     return ampCustomadFullUrls[this.url_];

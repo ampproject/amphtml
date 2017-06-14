@@ -93,9 +93,9 @@ export class JwtHelper {
         const sig = base64UrlDecodeToBytes(decoded.sig);
         return this.subtle_.verify(
           /* options */ {name: 'RSASSA-PKCS1-v1_5'},
-          key,
-          sig,
-          stringToBytes(decoded.verifiable)
+            key,
+            sig,
+            stringToBytes(decoded.verifiable)
         );
       }).then(isValid => {
         if (isValid) {
@@ -141,13 +141,13 @@ export class JwtHelper {
   importKey_(pemPromise) {
     return pemPromise.then(pem => {
       return this.subtle_.importKey(
-        /* format */ 'spki',
-        pemToBytes(pem),
-        /* algo options */ {
-          name: 'RSASSA-PKCS1-v1_5',
-          hash: {name: 'SHA-256'},
-        },
-        /* extractable */ false,
+          /* format */ 'spki',
+          pemToBytes(pem),
+          /* algo options */ {
+            name: 'RSASSA-PKCS1-v1_5',
+            hash: {name: 'SHA-256'},
+          },
+          /* extractable */ false,
         /* uses */ ['verify']);
     });
   }
