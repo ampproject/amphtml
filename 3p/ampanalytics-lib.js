@@ -15,7 +15,7 @@
  */
 
 import './polyfills';
-import {dev, user} from '../src/log';
+import {dev} from '../src/log';
 import {initLogConstructor, setReportError} from '../src/log';
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {AMP_ANALYTICS_3P_MESSAGE_TYPE} from '../src/3p-analytics-common';
@@ -43,18 +43,18 @@ class AmpAnalytics3pMessageRouter {
     let frameNameData = null;
     try {
       frameNameData = JSON.parse(this.win_.name);
-      if (!frameNameData.sentinel) {
-        throw new Error('JSON parsed, but did not include sentinel.');
-      }
-      // The sentinel is required by iframe-messaging-client, and is used to
-      // uniquely identify the frame as part of message routing
-      /** @const {string} */
     } catch (e) {
       dev().warn(TAG_, 'Unable to set sentinel from name attr: ' +
         this.win_.name + ': ' + e.message);
       return;
     }
-    this.sentinel_ = frameNameData && frameNameData.sentinel;
+    // The sentinel is required by iframe-messaging-client, and is used to
+    // uniquely identify the frame as part of message routing
+    /** @const {string} */
+    this.sentinel_ = dev().assertString(
+      frameNameData && frameNameData.sentinel,
+      'Invalid/missing sentinel on iframe name attribute' + this.win_.name);
+    if (!this.sentinel_) { return; }
 
     /**
      * Multiple creatives on a page may wish to use the same type of
@@ -75,16 +75,15 @@ class AmpAnalytics3pMessageRouter {
     this.iframeMessagingClient_.registerCallback(
       AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVE,
       messageContainer => {
-        dev().assert(messageContainer.data,
+        dev().assert(
+          messageContainer.data && Object.entries(messageContainer.data).length,
           'Received empty new creative message');
         Object.entries(messageContainer.data).forEach(entry => {
           const creativeId = entry[0];
           const extraData = entry[1];
-          if (this.creativeMessageRouters_.hasOwnProperty(creativeId)) {
-            dev().warn(TAG_, 'Duplicate new creative message for ' + creativeId);
-          }
+          dev().assert(!this.creativeMessageRouters_[creativeId],
+            'Duplicate new creative message for ' + creativeId);
           this.creativeMessageRouters_[creativeId] =
-            this.creativeMessageRouters_[creativeId] ||
             new AmpAnalytics3pCreativeMessageRouter(this, creativeId,
               extraData);
         });
@@ -95,10 +94,10 @@ class AmpAnalytics3pMessageRouter {
         Object.entries(messageContainer.data).forEach(entry => {
           const creativeId = entry[0];
           const messages = entry[1];
-          dev().assert(messages.length > 0, 'Received empty events list');
+          dev().assert(messages.length, 'Received empty events list');
           dev().assert(this.creativeMessageRouters_[creativeId],
-            'Received event message prior to new creative message.' +
-            ' Discarding.');
+            'Discarding event message received prior to new creative message' +
+            ' for' + creativeId);
           this.creativeMessageRouters_[creativeId]
             .receiveEventMessages(messages);
         });
@@ -106,23 +105,6 @@ class AmpAnalytics3pMessageRouter {
       });
     this.iframeMessagingClient_.sendMessage(
       AMP_ANALYTICS_3P_MESSAGE_TYPE.READY);
-  }
-
-  /**
-   * Gets a handle to the window (or testing object that mocks window)
-   * @returns {!Window}
-   */
-  getWindow() {
-    return this.win_;
-  }
-
-  /**
-   * Getter to expose iframeMessagingClient to instances of
-   * AmpAnalytics3pCreativeMessageRouter
-   * @returns {!IframeMessagingClient}
-   */
-  getMessagingClient() {
-    return this.iframeMessagingClient_;
   }
 
   /**
@@ -142,21 +124,24 @@ new AmpAnalytics3pMessageRouter(window);
 
 /**
  * Receives messages bound for this cross-domain iframe, from a particular
- * creative. Also sends repsonse messages from the iframe meant for this
+ * creative. Also sends response messages from the iframe meant for this
  * particular creative.
  */
 class AmpAnalytics3pCreativeMessageRouter {
   /**
-   * @param {!AmpAnalytics3pMessageRouter} parent
-   * @param {!string} creativeId
-   * @param {string=} opt_extraData
+   * @param {!Window} win The enclosing window object
+   * @param {!IframeMessagingClient} iframeMessagingClient Facilitates
+   * communication with the frame
+   * @param {!string} creativeId The ID of the creative to route messages
+   * to/from
+   * @param {string=} opt_extraData Extra data to be passed to the frame
    */
-  constructor(parent, creativeId, opt_extraData) {
-    /** @private {!AmpAnalytics3pMessageRouter} */
-    this.parent_ = parent;
+  constructor(win, iframeMessagingClient, creativeId, opt_extraData) {
+    /** @private {!Window} */
+    this.win_ = win;
 
     /** @private {!IframeMessagingClient} */
-    this.iframeMessagingClient_ = parent.getMessagingClient();
+    this.iframeMessagingClient_ = iframeMessagingClient;
 
     /**
      * @private {!string}
@@ -178,11 +163,11 @@ class AmpAnalytics3pCreativeMessageRouter {
      */
     this.eventListener_ = null;
 
-    if (this.parent_.getWindow().onNewAmpAnalyticsInstance) {
-      this.parent_.getWindow().onNewAmpAnalyticsInstance(this);
+    if (this.win_.onNewAmpAnalyticsInstance) {
+      this.win_.onNewAmpAnalyticsInstance(this);
     } else {
-      dev().error(TAG_, 'Vendor page must implement onNewAmpAnalyticsInstance' +
-        ' prior to loading library script.');
+      dev().error(TAG_, 'Must implement onNewAmpAnalyticsInstance in' +
+        this.win_.document.location.href);
     }
   }
 
@@ -195,7 +180,7 @@ class AmpAnalytics3pCreativeMessageRouter {
    */
   registerAmpAnalytics3pEventsListener(listener) {
     if (this.eventListener_) {
-      user().warn(TAG_, 'Replacing existing eventListener for ' +
+      dev().warn(TAG_, 'Replacing existing eventListener for ' +
         this.creativeId_);
     }
     this.eventListener_ = listener;
@@ -207,7 +192,7 @@ class AmpAnalytics3pCreativeMessageRouter {
    */
   receiveEventMessages(messages) {
     if (this.receivedMessagesQueue_.length >= MAX_QUEUE_SIZE_) {
-      dev().warn(TAG_, 'Queue has exceeded maximum size');
+      dev().warn(TAG_, 'Queue has exceeded maximum size of ' + MAX_QUEUE_SIZE_);
       this.receivedMessagesQueue_ = this.receivedMessagesQueue_.splice(
         0,MAX_QUEUE_SIZE_ - messages.length);
     }

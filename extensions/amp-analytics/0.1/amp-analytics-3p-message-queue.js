@@ -54,12 +54,11 @@ class AbstractAmpAnalytics3pMessageQueue {
     this.messageType_ = messageType;
 
     /** @type {!Object<string,!string|!Array<string>>} */
-    this.store_ = {};
+    this.creativeToPendingMessages_ = {};
 
     this.throttledFlushQueue_ = throttle(this.win_, () => {
       this.flushQueue_();
     }, MESSAGE_THROTTLE_TIME_);
-
   }
 
   /**
@@ -77,10 +76,10 @@ class AbstractAmpAnalytics3pMessageQueue {
    * @private
    */
   flushQueue_() {
-    if (this.isReady_ && Object.keys(this.store_).length > 0) {
+    if (this.isReady_ && Object.keys(this.creativeToPendingMessages_).length) {
       this.iframeMessagingClient_./*OK*/sendMessage(this.messageType_,
         this.buildMessage_());
-      this.store_ = {};
+      this.creativeToPendingMessages_ = {};
     }
   }
 
@@ -114,11 +113,9 @@ export class AmpAnalytics3pNewCreativeMessageQueue extends
    * iframe
    */
   enqueue(senderId, opt_data) {
-    if (this.store_.hasOwnProperty(senderId)) {
-      dev().warn(TAG_, 'Replacing existing extra data for: ' + senderId);
-    }
-    this.store_[senderId] = opt_data || '';
-
+    dev().assert(!this.creativeToPendingMessages_[senderId],
+      'Replacing existing extra data for: ' + senderId);
+    this.creativeToPendingMessages_[senderId] = opt_data || '';
     this.throttledFlushQueue_();
   }
 
@@ -130,7 +127,7 @@ export class AmpAnalytics3pNewCreativeMessageQueue extends
   buildMessage_() {
     const message = {};
     message.type = this.messageType_;
-    message.data = this.store_;
+    message.data = this.creativeToPendingMessages_;
     const typedMessage =
       /** @type {../../../src/3p-analytics-common.AmpAnalytics3pNewCreative} */
       (message);
@@ -158,14 +155,14 @@ export class AmpAnalytics3pEventMessageQueue extends
    * @param {!string} data The data to be enqueued and then sent to the iframe
    */
   enqueue(senderId, data) {
-    if (!this.store_.hasOwnProperty(senderId)) {
-      this.store_[senderId] = [];
+    if (!this.creativeToPendingMessages_.hasOwnProperty(senderId)) {
+      this.creativeToPendingMessages_[senderId] = [];
     }
-    if (this.store_[senderId].length >= MAX_QUEUE_SIZE_) {
+    if (this.creativeToPendingMessages_[senderId].length >= MAX_QUEUE_SIZE_) {
       dev().warn(TAG_, 'Exceeded maximum size of queue for: ' + senderId);
-      this.store_[senderId].shift();
+      this.creativeToPendingMessages_[senderId].shift();
     }
-    this.store_[senderId].push(data);
+    this.creativeToPendingMessages_[senderId].push(data);
 
     this.throttledFlushQueue_();
   }
@@ -178,7 +175,7 @@ export class AmpAnalytics3pEventMessageQueue extends
   buildMessage_() {
     const message = {};
     message.type = this.messageType_;
-    message.data = this.store_;
+    message.data = this.creativeToPendingMessages_;
     const typedMessage =
       /** @type {../../../src/3p-analytics-common.AmpAnalytics3pEvent} */
       (message);
