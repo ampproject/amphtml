@@ -75,7 +75,7 @@ export class AmpFresh extends AMP.BaseElement {
     // importing it shouldn't trigger.
     /** @const {!Element} */
     const orphanSurrogate = dev().assertElement(
-      this.win.document.adoptNode(surrogateAmpFresh));
+        this.win.document.adoptNode(surrogateAmpFresh));
     this.mutateElement(() => {
       this.element.textContent = '';
       copyChildren(orphanSurrogate, this.element);

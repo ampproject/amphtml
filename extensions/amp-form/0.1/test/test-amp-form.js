@@ -734,22 +734,22 @@ describes.repeated('', {
         };
         expect(ampForm.xhr_.fetch).to.have.not.been.called;
         expect(ampForm.urlReplacement_.expandInputValueSync)
-              .to.not.have.been.called;
+            .to.not.have.been.called;
         expect(ampForm.urlReplacement_.expandInputValueAsync)
-              .to.have.been.calledTwice;
+            .to.have.been.calledTwice;
         expect(ampForm.urlReplacement_.expandInputValueAsync)
-              .to.have.been.calledWith(clientIdField);
+            .to.have.been.calledWith(clientIdField);
         expect(ampForm.urlReplacement_.expandInputValueAsync)
-              .to.have.been.calledWith(canonicalUrlField);
+            .to.have.been.calledWith(canonicalUrlField);
         return whenCalled(ampForm.xhr_.fetch).then(() => {
           expect(ampForm.xhr_.fetch).to.be.called;
           expect(clientIdField.value).to.match(/amp-.+/);
           expect(canonicalUrlField.value).to.equal(
-                  'https%3A%2F%2Fexample.com%2Famps.html');
+              'https%3A%2F%2Fexample.com%2Famps.html');
 
           expect(ampForm.analyticsEvent_).to.be.calledWithMatch(
-                  'amp-form-submit',
-                  expectedFormData);
+              'amp-form-submit',
+              expectedFormData);
         });
       });
     });
@@ -1741,8 +1741,8 @@ describes.repeated('', {
         };
         expect(form.submit).to.have.been.called;
         expect(ampForm.analyticsEvent_).to.be.calledWith(
-          'amp-form-submit',
-          expectedFormData
+            'amp-form-submit',
+            expectedFormData
         );
       });
     });
@@ -1781,8 +1781,8 @@ describes.repeated('', {
           'formFields[clientId]': '',
         };
         expect(ampForm.analyticsEvent_).to.be.calledWith(
-          'amp-form-submit',
-          expectedFormData
+            'amp-form-submit',
+            expectedFormData
         );
         expect(ampForm.urlReplacement_.expandInputValueAsync)
             .to.not.have.been.called;

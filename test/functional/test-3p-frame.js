@@ -308,7 +308,7 @@ describe('3p-frame', () => {
     const fakeWin = {
       document,
       crypto: {
-        getRandomValues: function(arg) {
+        getRandomValues(arg) {
           arg[0] = 123;
           arg[1] = 987;
         },
@@ -321,7 +321,7 @@ describe('3p-frame', () => {
     const fakeWin = {
       document,
       Math: {
-        random: function() {
+        random() {
           return 0.567;
         },
       },

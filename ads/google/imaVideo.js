@@ -377,8 +377,8 @@ export function imaVideo(global, data) {
       'webkitfullscreenchange'];
     fullScreenEvents.forEach(fsEvent => {
       global.document.addEventListener(fsEvent,
-        onFullscreenChange.bind(null, global),
-        false);
+          onFullscreenChange.bind(null, global),
+          false);
     });
 
     adDisplayContainer =
@@ -478,8 +478,8 @@ export function onAdsManagerLoaded(global, adsManagerLoadedEvent) {
   const adsRenderingSettings = new global.google.ima.AdsRenderingSettings();
   adsRenderingSettings.restoreCustomPlaybackStateOnAdBreakComplete = true;
   adsRenderingSettings.uiElements =
-      [global.google.ima.UiElements.AD_ATTRIBUTION,
-       global.google.ima.UiElements.COUNTDOWN];
+  [global.google.ima.UiElements.AD_ATTRIBUTION,
+    global.google.ima.UiElements.COUNTDOWN];
   adsManager = adsManagerLoadedEvent.getAdsManager(videoPlayer,
       adsRenderingSettings);
   adsManager.addEventListener(global.google.ima.AdErrorEvent.Type.AD_ERROR,
@@ -526,9 +526,9 @@ export function onAdError() {
 export function onContentPauseRequested(global) {
   if (adsManagerWidthOnLoad) {
     adsManager.resize(
-      adsManagerWidthOnLoad,
-      adsManagerHeightOnLoad,
-      global.google.ima.ViewMode.NORMAL);
+        adsManagerWidthOnLoad,
+        adsManagerHeightOnLoad,
+        global.google.ima.ViewMode.NORMAL);
     adsManagerWidthOnLoad = null;
     adsManagerHeightOnLoad = null;
   }
