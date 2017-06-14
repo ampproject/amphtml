@@ -267,8 +267,8 @@ export function selectGptExperiment(data) {
   // Note that reduce will return the first item that matches but it is
   // expected that only one of the experiment ids will be present.
   let expFilename;
-  (data['experimentId'] || '').split(',')
-  .forEach(val => expFilename = expFilename || fileExperimentConfig[val]);
+  (data['experimentId'] || '').split(',').forEach(
+    val => expFilename = expFilename || fileExperimentConfig[val]);
   return expFilename;
 }
 

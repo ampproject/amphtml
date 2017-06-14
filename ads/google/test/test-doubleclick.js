@@ -50,7 +50,9 @@ describe('writeAdScript', () => {
 
     writeAdScript(data, gptFilename);
 
-    expect(document.querySelector('script[src="https://www.googletagservices.com/tag/js/gpt.js"]')).to.be.ok;
+    expect(document.querySelector(
+      'script[src="https://www.googletagservices.com/tag/js/gpt.js"]'))
+      .to.be.ok;
   });
 
   it('should use GPT and opt out of the GladeExperiment when in the control' +
