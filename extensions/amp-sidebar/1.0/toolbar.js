@@ -85,7 +85,6 @@ export class Toolbar {
    * @param {!Function} onChangeCallback - function called if toolbar changes on check
    */
   checkToolbar(onChangeCallback) {
-    console.log(this.toolbarMedia_);
     // Remove and add the toolbar dynamically
     if (this.isToolbarShown_() &&
       !this.toolbarTarget_.hasAttribute('toolbar')
