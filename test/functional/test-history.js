@@ -22,6 +22,7 @@ import {
   installHistoryServiceForDoc,
 } from '../../src/service/history-impl';
 import {historyForDoc} from '../../src/services';
+import {dict} from '../../src/utils/object';
 import {listenOncePromise} from '../../src/event-helper';
 import {installTimerService} from '../../src/service/timer-impl';
 import {timerFor} from '../../src/services';
@@ -411,7 +412,7 @@ describe('HistoryBindingVirtual', () => {
 
   it('should push new state to viewer and notify', () => {
     viewerMock.expects('sendMessageAwaitResponse').withExactArgs(
-        'pushHistory', {stackIndex: 1}).once().returns(Promise.resolve());
+        'pushHistory', dict({stackIndex: 1})).once().returns(Promise.resolve());
     return history.push().then(stackIndex => {
       expect(stackIndex).to.equal(1);
       expect(history.stackIndex_).to.equal(1);

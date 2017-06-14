@@ -19,7 +19,7 @@ import {assertHttpsUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 import {dev, rethrowAsync, user} from '../../../src/log';
 import {expandTemplate} from '../../../src/string';
 import {isArray, isObject} from '../../../src/types';
-import {hasOwn, map} from '../../../src/utils/object';
+import {dict, hasOwn, map} from '../../../src/utils/object';
 import {sendRequest, sendRequestUsingIframe} from './transport';
 import {urlReplacementsForDoc} from '../../../src/services';
 import {userNotificationManagerFor} from '../../../src/services';
@@ -96,12 +96,12 @@ export class AmpAnalytics extends AMP.BaseElement {
     /**
      * @private {JsonObject}
      */
-    this.config_ = /** @type {JsonObject} */ ({});
+    this.config_ = dict();
 
     /**
      * @private {JsonObject}
      */
-    this.remoteConfig_ = /** @type {JsonObject} */ ({});
+    this.remoteConfig_ = dict();
 
     /** @private {?./instrumentation.InstrumentationService} */
     this.instrumentation_ = null;
@@ -382,7 +382,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   mergeConfigs_() {
     const inlineConfig = this.getInlineConfigNoInline();
     // Initialize config with analytics related vars.
-    const config = /** @type {!JsonObject} */ ({
+    const config = dict({
       'vars': {
         'requestCount': 0,
       },
