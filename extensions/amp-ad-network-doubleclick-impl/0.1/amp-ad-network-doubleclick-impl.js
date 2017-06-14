@@ -37,6 +37,7 @@ import {
   googleBlockParameters,
   googlePageParameters,
   isGoogleAdsA4AValidEnvironment,
+  isReportingEnabled,
   AmpAnalyticsConfigDef,
   extractAmpAnalyticsConfig,
   groupAmpAdsByType,
@@ -400,14 +401,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     super.onCreativeRender(isVerifiedAmpCreative);
     if (this.ampAnalyticsConfig_) {
       dev().assert(!this.ampAnalyticsElement_);
-      addCsiSignalsToAmpAnalyticsConfig(
-          this.win,
-          this.element,
-          this.ampAnalyticsConfig_,
-          this.qqid_,
-          isVerifiedAmpCreative,
-          this.lifecycleReporter_.getDeltaTime(),
-          this.lifecycleReporter_.getInitTime());
+      if (isReportingEnabled(this)) {
+        addCsiSignalsToAmpAnalyticsConfig(
+            this.win,
+            this.element,
+            this.ampAnalyticsConfig_,
+            this.qqid_,
+            isVerifiedAmpCreative,
+            this.lifecycleReporter_.getDeltaTime(),
+            this.lifecycleReporter_.getInitTime());
+      }
       this.ampAnalyticsElement_ =
           insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
     }
