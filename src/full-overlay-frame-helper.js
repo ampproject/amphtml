@@ -62,8 +62,8 @@ export function expandFrameUnderVsyncMutate(iframe) {
     'right': 0,
     'top': 0,
     'bottom': 0,
-    'width': '100%',
-    'height': '100%',
+    'width': '100vw',
+    'height': '100vh',
     'transition': null,
     'transform': null,
   });
