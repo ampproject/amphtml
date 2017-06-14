@@ -83,7 +83,7 @@ export class EventTracker {
   /**
    * @param {!Element} unusedContext
    * @param {string} unusedEventType
-   * @param {!JSONType} unusedConfig
+   * @param {!JsonObject} unusedConfig
    * @param {function(!AnalyticsEvent)} unusedListener
    * @return {!UnlistenDef}
    * @abstract

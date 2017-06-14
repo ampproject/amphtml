@@ -192,7 +192,7 @@ class AmpDailymotion extends AMP.BaseElement {
       return; // The message isn't valid
     }
 
-    switch (data.event) {
+    switch (data['event']) {
       case DailymotionEvents.API_READY:
         this.playerReadyResolver_(true);
         this.element.dispatchCustomEvent(VideoEvents.LOAD);
@@ -208,8 +208,9 @@ class AmpDailymotion extends AMP.BaseElement {
         break;
       case DailymotionEvents.VOLUMECHANGE:
         if (this.playerState_ == DailymotionEvents.UNSTARTED
-           || this.muted_ != (data.volume == 0 || (data.muted == 'true'))) {
-          this.muted_ = (data.volume == 0 || (data.muted == 'true'));
+            || this.muted_ != (
+                data['volume'] == 0 || (data['muted'] == 'true'))) {
+          this.muted_ = (data['volume'] == 0 || (data['muted'] == 'true'));
           if (this.muted_) {
             this.element.dispatchCustomEvent(VideoEvents.MUTED);
           } else {

@@ -26,6 +26,7 @@ import {
 } from '../service';
 import {layoutRectLtwh} from '../layout-rect';
 import {dev} from '../log';
+import {dict} from '../utils/object';
 import {numeric} from '../transition';
 import {onDocumentReady, whenDocumentReady} from '../document-ready';
 import {platformFor} from '../services';
@@ -447,7 +448,8 @@ export class Viewport {
    * @return {!Promise}
    */
   enterLightboxMode() {
-    this.viewer_.sendMessage('requestFullOverlay', {}, /* cancelUnsent */true);
+    this.viewer_.sendMessage('requestFullOverlay', dict(),
+        /* cancelUnsent */true);
     this.enterOverlayMode();
     this.hideFixedLayer();
     return this.binding_.updateLightboxMode(true);
@@ -458,7 +460,8 @@ export class Viewport {
    * @return {!Promise}
    */
   leaveLightboxMode() {
-    this.viewer_.sendMessage('cancelFullOverlay', {}, /* cancelUnsent */true);
+    this.viewer_.sendMessage('cancelFullOverlay', dict(),
+        /* cancelUnsent */true);
     this.showFixedLayer();
     this.leaveOverlayMode();
     return this.binding_.updateLightboxMode(false);
@@ -633,7 +636,7 @@ export class Viewport {
   }
 
   /**
-   * @param {!JSONType} data
+   * @param {!JsonObject} data
    * @private
    */
   viewerSetScrollTop_(data) {
@@ -642,7 +645,7 @@ export class Viewport {
   }
 
   /**
-   * @param {!JSONType} data
+   * @param {!JsonObject} data
    * @private
    */
   updateOnViewportEvent_(data) {
@@ -781,7 +784,8 @@ export class Viewport {
       this.scrollAnimationFrameThrottled_ = true;
       this.vsync_.measure(() => {
         this.scrollAnimationFrameThrottled_ = false;
-        this.viewer_.sendMessage('scroll', {scrollTop: this.getScrollTop()},
+        this.viewer_.sendMessage('scroll',
+            dict({'scrollTop': this.getScrollTop()}),
             /* cancelUnsent */true);
       });
     }

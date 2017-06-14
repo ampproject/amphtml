@@ -27,15 +27,7 @@ export const MessageType = {
 };
 
 /**
- * @typedef {{
- *   app: string,
- *   type: string,
- *   requestid: number,
- *   name: string,
- *   data: *,
- *   rsvp: (boolean|undefined),
- *   error: (string|undefined),
- * }}
+ * @typedef {!AmpViewerMessage}
  */
 export let Message;
 
@@ -205,14 +197,14 @@ export class Messaging {
         this.waitingForResponse_[requestId] = {resolve, reject};
       });
     }
-    this.sendMessage_({
+    this.sendMessage_(/** @type {!AmpViewerMessage} */ ({
       app: APP,
       requestid: requestId,
       type: MessageType.REQUEST,
       name: messageName,
       data: messageData,
       rsvp: awaitResponse,
-    });
+    }));
     return promise;
   }
 
@@ -224,13 +216,13 @@ export class Messaging {
    * @private
    */
   sendResponse_(requestId, messageName, messageData) {
-    this.sendMessage_({
+    this.sendMessage_(/** @type {!AmpViewerMessage} */ ({
       app: APP,
       requestid: requestId,
       type: MessageType.RESPONSE,
       name: messageName,
       data: messageData,
-    });
+    }));
   }
 
   /**
@@ -243,14 +235,14 @@ export class Messaging {
     const errString = this.errorToString_(reason);
     this.logError_(
         TAG + ': sendResponseError_, Message name: ' + messageName, errString);
-    this.sendMessage_({
+    this.sendMessage_(/** @type {!AmpViewerMessage} */ ({
       app: APP,
       requestid: requestId,
       type: MessageType.RESPONSE,
       name: messageName,
       data: null,
       error: errString,
-    });
+    }));
   }
 
   /**
