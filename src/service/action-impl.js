@@ -119,7 +119,7 @@ export class ActionInvocation {
   /**
    * @param {!Node} target
    * @param {string} method
-   * @param {?JSONType} args
+   * @param {?JsonObject} args
    * @param {?Element} source
    * @param {?ActionEventDef} event
    */
@@ -128,7 +128,7 @@ export class ActionInvocation {
     this.target = target;
     /** @const {string} */
     this.method = method;
-    /** @const {?JSONType} */
+    /** @const {?JsonObject} */
     this.args = args;
     /** @const {?Element} */
     this.source = source;
@@ -300,7 +300,7 @@ export class ActionService {
    * Triggers execution of the method on a target/method.
    * @param {!Element} target
    * @param {string} method
-   * @param {?JSONType} args
+   * @param {?JsonObject} args
    * @param {?Element} source
    * @param {?ActionEventDef} event
    */
@@ -405,7 +405,7 @@ export class ActionService {
   /**
    * @param {!Element} target
    * @param {string} method
-   * @param {?JSONType} args
+   * @param {?JsonObject} args
    * @param {?Element} source
    * @param {?ActionEventDef} event
    * @param {?ActionInfoDef} actionInfo
@@ -746,7 +746,7 @@ function getActionInfoArgValue(tokens) {
  * with the data in the given event.
  * @param {?ActionInfoArgsDef} args
  * @param {?ActionEventDef} event
- * @return {?JSONType}
+ * @return {?JsonObject}
  * @private Visible for testing only.
  */
 export function applyActionInfoArgs(args, event) {

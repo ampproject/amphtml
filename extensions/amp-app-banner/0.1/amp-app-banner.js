@@ -406,7 +406,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
   }
 
   /**
-   * @param {!JSONType} manifestJson
+   * @param {!JsonObject} manifestJson
    * @private
    */
   parseManifest_(manifestJson) {

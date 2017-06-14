@@ -52,7 +52,7 @@ export class AmpAnimation extends AMP.BaseElement {
     /** @private {?../../../src/friendly-iframe-embed.FriendlyIframeEmbed} */
     this.embed_ = null;
 
-    /** @private {?JSONType} */
+    /** @private {?JsonObject} */
     this.configJson_ = null;
 
     /** @private {?./web-animations.WebAnimationRunner} */
@@ -291,7 +291,7 @@ export class AmpAnimation extends AMP.BaseElement {
   }
 
   /**
-   * @param {?JSONType=} opt_args
+   * @param {?JsonObject=} opt_args
    * @return {?Promise}
    * @private
    */
@@ -332,7 +332,7 @@ export class AmpAnimation extends AMP.BaseElement {
   }
 
   /**
-   * @param {?JSONType=} opt_args
+   * @param {?JsonObject=} opt_args
    * @return {!Promise<!./web-animations.WebAnimationRunner>}
    * @private
    */
