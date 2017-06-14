@@ -146,6 +146,14 @@ function isValidatorFile(filePath) {
     // At least 2 with ['extensions', '{$name}']
     return false;
   }
+  const extension = pathArray[1];
+  const supportVersions = extensionsVersions[extension] || ['0.1'];
+
+  for (let i = 0; i < supportVersions.length; i++) {
+    if (!path.dirname(filePath).endsWith(supportVersions[i]) &&
+      !path.dirname(filePath).endsWith(path.join(supportVersions[i], 'test')))
+      return false;
+  }
 
   // Validator files take the form of validator-.*\.(html|out|protoascii)
   const name = path.basename(filePath);
