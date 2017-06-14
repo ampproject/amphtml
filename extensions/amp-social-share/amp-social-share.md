@@ -228,4 +228,4 @@ You can use [global AMP variables substitution](https://github.com/ampproject/am
 
 ## Validation
 
-See [amp-social-share rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-social-share/0.1/validator-amp-social-share.protoascii) in the AMP validator specification.
+See [amp-social-share rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-social-share/validator-amp-social-share.protoascii) in the AMP validator specification.

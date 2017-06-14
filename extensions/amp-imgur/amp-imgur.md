@@ -62,4 +62,4 @@ The width of the imgur.
 The width of the imgur.
 
 ## Validation
-See [amp-imgur rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-imgur/0.1/validator-amp-imgur.protoascii) in the AMP validator specification.
+See [amp-imgur rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-imgur/validator-amp-imgur.protoascii) in the AMP validator specification.

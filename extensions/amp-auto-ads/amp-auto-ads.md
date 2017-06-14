@@ -304,4 +304,4 @@ The ENUM values for the `type` field in the `placements` configuration object:
 
 ## Validation
 
-See [amp-auto-ads rules](0.1/validator-amp-auto-ads.protoascii) in the AMP validator specification.
+See [amp-auto-ads rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-auto-ads/validator-amp-auto-ads.protoascii) in the AMP validator specification.

@@ -174,4 +174,4 @@ data-url="https://www.pinterest.com/pin/99360735500167749/"
 
 ## Validation
 
-See [amp-pinterest rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/0.1/validator-amp-pinterest.protoascii) in the AMP validator specification.
+See [amp-pinterest rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/validator-amp-pinterest.protoascii) in the AMP validator specification.

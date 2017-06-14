@@ -179,4 +179,4 @@ may make a request to something like `https://foo.com/list.json?0.8390278471201`
 
 ## Validation
 
-See [amp-list rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/0.1/validator-amp-list.protoascii) in the AMP validator specification.
+See [amp-list rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/validator-amp-list.protoascii) in the AMP validator specification.

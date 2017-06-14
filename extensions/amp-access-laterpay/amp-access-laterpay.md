@@ -244,4 +244,4 @@ The following message keys can be translated or customized, but be aware that th
 
 ## Validation
 
-See [amp-access-laterpay rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-access-laterpay/0.1/validator-amp-access-laterpay.protoascii) in the AMP validator specification.
+See [amp-access-laterpay rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-access-laterpay/validator-amp-access-laterpay.protoascii) in the AMP validator specification.

@@ -141,10 +141,9 @@ function isValidatorFile(filePath) {
     return false;
   }
 
-  // Get extension name
   const pathArray = path.dirname(filePath).split(path.sep);
-  if (pathArray.length < 3) {
-    // At least 3 with ['extensions', '{$name}', '{$version}']
+  if (pathArray.length < 2) {
+    // At least 2 with ['extensions', '{$name}']
     return false;
   }
   const extension = pathArray[1];
@@ -156,6 +155,7 @@ function isValidatorFile(filePath) {
       return false;
   }
 
+  // Validator files take the form of validator-.*\.(html|out|protoascii)
   const name = path.basename(filePath);
   return name.startsWith('validator-') &&
       (name.endsWith('.out') || name.endsWith('.html') ||
