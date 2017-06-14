@@ -26,7 +26,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>Experimental</td>
+    <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -38,15 +38,13 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>None</td>
+    <td><a href="https://ampbyexample.com/components/amp-ima/">Annotated code example for amp-ima-video</a></td>
   </tr>
 </table>
 
 ## Overview
 
-You can use the `amp-ima-video` component to embed an
-<a href="https://developers.google.com/interactive-media-ads/docs/sdks/html5/">IMA
-SDK</a> enabled video player.
+You can use the `amp-ima-video` component to embed an [IMA SDK](https://developers.google.com/interactive-media-ads/docs/sdks/html5/) enabled video player.
 
 The `amp-ima-video` component HTML accepts up to two unique types of HTML nodes
 as children - `source` tags for content video, and `track` tags for subtitles.

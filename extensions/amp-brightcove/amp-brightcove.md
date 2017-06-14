@@ -22,10 +22,6 @@ limitations under the License.
     <td>An <code>amp-brightcove</code> component displays the Brightcove Player as used in Brightcove's <a href="https://www.brightcove.com/en/online-video-platform">Video Cloud</a> or <a href="https://www.brightcove.com/en/perform">Perform</a> products.</td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-brightcove" src="https://cdn.ampproject.org/v0/amp-brightcove-0.1.js">&lt;/script></code></td>
   </tr>

@@ -22,10 +22,6 @@ limitations under the License.
     <td>Embeds videos from <a href="https://www.3qsdn.com/en/">3Q SDN</a>.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-3q-player" src="https://cdn.ampproject.org/v0/amp-3q-player-0.1.js">&lt;/script></code></td>
   </tr>
