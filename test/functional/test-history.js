@@ -22,7 +22,6 @@ import {
   installHistoryServiceForDoc,
 } from '../../src/service/history-impl';
 import {historyForDoc} from '../../src/services';
-import {dict} from '../../src/utils/object';
 import {listenOncePromise} from '../../src/event-helper';
 import {installTimerService} from '../../src/service/timer-impl';
 import {timerFor} from '../../src/services';
@@ -378,28 +377,28 @@ describe('HistoryBindingVirtual', () => {
   let clock;
   let onStackIndexUpdated;
   let viewerHistoryPoppedHandler;
-  let viewerMock;
   let history;
+  let viewer;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
     onStackIndexUpdated = sandbox.spy();
     viewerHistoryPoppedHandler = undefined;
-    const viewer = {
+    viewer = {
       onMessage: (eventType, handler) => {
         viewerHistoryPoppedHandler = handler;
         return () => {};
       },
-      sendMessageAwaitResponse: () => {},
+      sendMessageAwaitResponse: sandbox.spy(() => {
+        return Promise.resolve();
+      }),
     };
-    viewerMock = sandbox.mock(viewer);
     history = new HistoryBindingVirtual_(window, viewer);
     history.setOnStackIndexUpdated(onStackIndexUpdated);
   });
 
   afterEach(() => {
-    viewerMock.verify();
     history.cleanup_();
     sandbox.restore();
   });
@@ -411,9 +410,12 @@ describe('HistoryBindingVirtual', () => {
   });
 
   it('should push new state to viewer and notify', () => {
-    viewerMock.expects('sendMessageAwaitResponse').withExactArgs(
-        'pushHistory', dict({stackIndex: 1})).once().returns(Promise.resolve());
     return history.push().then(stackIndex => {
+      expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
+      expect(viewer.sendMessageAwaitResponse.lastCall.args[0])
+          .to.equal('pushHistory');
+      expect(viewer.sendMessageAwaitResponse.lastCall.args[1].stackIndex)
+          .to.equal(1);
       expect(stackIndex).to.equal(1);
       expect(history.stackIndex_).to.equal(1);
       expect(onStackIndexUpdated).to.be.calledOnce;
@@ -422,11 +424,12 @@ describe('HistoryBindingVirtual', () => {
   });
 
   it('should pop a state from the window.history and notify', () => {
-    viewerMock.expects('sendMessageAwaitResponse').withExactArgs(
-        'pushHistory', {stackIndex: 1}).once().returns(Promise.resolve());
-    viewerMock.expects('sendMessageAwaitResponse').withExactArgs(
-        'popHistory', {stackIndex: 1}).once().returns(Promise.resolve());
     return history.push().then(stackIndex => {
+      expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
+      expect(viewer.sendMessageAwaitResponse.lastCall.args[0])
+          .to.equal('pushHistory');
+      expect(viewer.sendMessageAwaitResponse.lastCall.args[1].stackIndex)
+          .to.equal(1);
       expect(stackIndex).to.equal(1);
       expect(onStackIndexUpdated).to.be.calledOnce;
       expect(onStackIndexUpdated.getCall(0).args[0]).to.equal(1);
@@ -440,9 +443,12 @@ describe('HistoryBindingVirtual', () => {
   });
 
   it('should update its state and notify on history.back', () => {
-    viewerMock.expects('sendMessageAwaitResponse').withExactArgs(
-        'pushHistory', {stackIndex: 1}).once().returns(Promise.resolve());
     return history.push().then(stackIndex => {
+      expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
+      expect(viewer.sendMessageAwaitResponse.lastCall.args[0])
+          .to.equal('pushHistory');
+      expect(viewer.sendMessageAwaitResponse.lastCall.args[1].stackIndex)
+          .to.equal(1);
       expect(stackIndex).to.equal(1);
       expect(onStackIndexUpdated).to.be.calledOnce;
       expect(onStackIndexUpdated.getCall(0).args[0]).to.equal(1);
