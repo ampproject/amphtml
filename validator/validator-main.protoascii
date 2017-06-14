@@ -1679,6 +1679,18 @@ tags: {
   attrs: { name: "[srclang]" }
   attr_lists: "track-attrs-subtitles"
 }
+tags: {
+  tag_name: "TRACK"
+  spec_name: "amp-ima-video > track[kind=subtitles]"
+  mandatory_parent: "AMP-IMA-VIDEO"
+  # <amp-bind>
+  attrs: { name: "[label]" }
+  attrs: { name: "[src]" }
+  attrs: { name: "[srclang]" }
+  attr_lists: "track-attrs-subtitles"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ima-video"
+}
+
 
 # 4.7.15 SVG
 # We allow some limited embedded SVG tags. We do not allow inline styles
