@@ -44,7 +44,7 @@
     "chalk": "1.1.3",
     "cssnano": "3.3.2",
     "del": "2.2.0",
-    "eslint": "3.14.1",
+    "eslint": "3.15.0",
     "eslint-plugin-google-camelcase": "0.0.2",
     "express": "4.14.0",
     "file-reader": "1.1.1",
