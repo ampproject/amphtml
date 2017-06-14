@@ -448,7 +448,7 @@ export class InstrumentationService {
    * @private
    */
   isTimerSpecValid_(timerSpec) {
-    if (!timerSpec) {
+    if (!timerSpec || typeof timerSpec != 'object') {
       user().error(TAG, 'Bad timer specification');
       return false;
     } else if (!('interval' in timerSpec)) {

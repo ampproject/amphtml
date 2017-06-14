@@ -636,10 +636,16 @@ describes.fakeWin('Get and update fragment', {}, env => {
         new HistoryBindingVirtual_(env.win, viewer));
     viewerMock.expects('hasCapability').withExactArgs('fragment').once()
         .returns(true);
-    viewerMock.expects('sendMessageAwaitResponse').withExactArgs(
-        'replaceHistory', {fragment: 'fragment'}, true).once()
-        .returns(Promise.resolve());
-    return history.updateFragment('fragment').then(() => {});
+    let called = false;
+    viewer.sendMessageAwaitResponse = function(action, data) {
+      expect(action).to.equal('replaceHistory');
+      expect(data.fragment).to.equal('fragment');
+      called = true;
+      return Promise.resolve();
+    };
+    return history.updateFragment('fragment').then(() => {
+      expect(called).to.be.ok;
+    });
   });
 
   it('should NOT update fragment of the viewer on Virtual ' +

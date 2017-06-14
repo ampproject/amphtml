@@ -594,8 +594,8 @@ describes.fakeWin('Viewport', {}, env => {
     clock.tick(6);
     expect(viewport.scrollAnimationFrameThrottled_).to.be.false;
     expect(viewer.sendMessage).to.have.been.calledOnce;
-    expect(viewer.sendMessage).to.have.been.calledWith('scroll',
-        {scrollTop: 30}, true);
+    expect(viewer.sendMessage.lastCall.args[0]).to.equal('scroll');
+    expect(viewer.sendMessage.lastCall.args[1].scrollTop).to.equal(30);
     // scroll to 40
     viewport.getScrollTop = () => 40;
     viewport.sendScrollMessage_();
@@ -631,8 +631,8 @@ describes.fakeWin('Viewport', {}, env => {
     // call viewer.postScroll, raf for viewer.postScroll
     expect(changeEvent).to.equal(null);
     expect(viewer.sendMessage).to.have.callCount(1);
-    expect(viewer.sendMessage).to.have.been.calledWith('scroll',
-        {scrollTop: 34}, true);
+    expect(viewer.sendMessage.lastCall.args[0]).to.equal('scroll');
+    expect(viewer.sendMessage.lastCall.args[1].scrollTop).to.equal(34);
     binding.getScrollTop = () => 35;
     viewport.scroll_();
 
