@@ -15,9 +15,9 @@
  */
 
 /**
- * @const {!JSONType}
+ * @const {!JsonObject}
  */
-export const NETWORKS = /** @type {!JSONType} */ ({
+export const NETWORKS = /** @type {!JsonObject} */ ({
   cloudflare: {
     base: 'https://firebolt.cloudflaredemo.com',
   },

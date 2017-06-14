@@ -34,7 +34,7 @@ import {parser} from './access-expr-impl';
  * - Boolean logic: `X = 1 OR Y = 1`, `X = 1 AND Y = 2`, `NOT X`, `NOT (X = 1)`.
  *
  * @param {string} expr
- * @param {!JSONType} data
+ * @param {!JsonObject} data
  * @return {boolean}
  */
 export function evaluateAccessExpr(expr, data) {

@@ -31,7 +31,7 @@ export class AccessVendorAdapter {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!JSONType} configJson
+   * @param {!JsonObject} configJson
    */
   constructor(ampdoc, configJson) {
     /** @const */
@@ -41,7 +41,7 @@ export class AccessVendorAdapter {
     this.vendorName_ = user().assert(configJson['vendor'],
         '"vendor" name must be specified');
 
-    /** @const @private {JSONType} */
+    /** @const @private {JsonObject} */
     this.vendorConfig_ = configJson[this.vendorName_];
 
     /** @const @private {boolean} */

@@ -504,10 +504,10 @@ export class FetchResponse {
 
   /**
    * Drains the response and returns the JSON object.
-   * @return {!Promise<!JSONType>}
+   * @return {!Promise<!JsonObject>}
    */
   json() {
-    return /** @type {!Promise<!JSONType>} */ (
+    return /** @type {!Promise<!JsonObject>} */ (
         this.drainText_().then(JSON.parse.bind(JSON)));
   }
 

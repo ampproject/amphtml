@@ -60,7 +60,7 @@ export class AccessServerAdapter {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!JSONType} configJson
+   * @param {!JsonObject} configJson
    * @param {!AccessTypeAdapterContextDef} context
    */
   constructor(ampdoc, configJson, context) {

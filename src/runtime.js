@@ -656,7 +656,7 @@ class MultidocManager {
     /**
      * Posts message to the ampdoc.
      * @param {string} eventType
-     * @param {!JSONType} data
+     * @param {!JsonObject} data
      * @param {boolean} unusedAwaitResponse
      * @return {(!Promise<*>|undefined)}
      */
@@ -948,7 +948,7 @@ class MultidocManager {
       const viewer = viewerForDoc(shadowRoot.AMP.ampdoc);
       this.timer_.delay(() => {
         viewer.receiveMessage('broadcast',
-            /** @type {!JSONType} */ (data),
+            /** @type {!JsonObject} */ (data),
             /* awaitResponse */ false);
       }, 0);
     });

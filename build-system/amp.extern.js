@@ -14,6 +14,21 @@
  * limitations under the License.
  */
 
+/**
+ * A type for Objects that can be JSON serialized or that come from
+ * JSON serialization. Requires the objects fields to be accessed with
+ * bracket notation object['name'] to make sure the fields do not get
+ * obfuscated.
+ * @constructor
+ * @dict
+ */
+function JsonObject() {}
+
+/**
+ * @typedef {?JsonObject|undefined|string|number|!Array<JsonValue>}
+ */
+var JsonValue;
+
 // Node.js global
 var process = {};
 process.env;
@@ -49,20 +64,55 @@ window.draw3p;
 window.AMP_TEST;
 window.AMP_TEST_IFRAME;
 window.AMP_TAG;
-window.AMP_CONFIG = {};
 window.AMP = {};
 
-window.AMP_CONFIG.thirdPartyUrl;
-window.AMP_CONFIG.thirdPartyFrameHost;
-window.AMP_CONFIG.thirdPartyFrameRegex;
-window.AMP_CONFIG.cdnUrl;
-window.AMP_CONFIG.errorReportingUrl;
+/** @constructor */
+function AmpConfigType() {}
+
+/* @public {string} */
+AmpConfigType.prototype.thirdPartyUrl;
+/* @public {string} */
+AmpConfigType.prototype.thirdPartyFrameHost;
+/* @public {string} */
+AmpConfigType.prototype.thirdPartyFrameRegex;
+/* @public {string} */
+AmpConfigType.prototype.cdnUrl;
+/* @public {string} */
+AmpConfigType.prototype.errorReportingUrl;
+/* @public {string} */
+AmpConfigType.prototype.localDev;
+/* @public {string} */
+AmpConfigType.prototype.v;
+/* @public {boolean} */
+AmpConfigType.prototype.canary;
+
+/** @type {!AmpConfigType}  */
+window.AMP_CONFIG;
 
 window.AMP_CONTEXT_DATA;
 
+/** @constructor @struct */
+function AmpViewerMessage() {}
+
+/** @public {string}  */
+AmpViewerMessage.prototype.app;
+/** @public {string}  */
+AmpViewerMessage.prototype.type;
+/** @public {number}  */
+AmpViewerMessage.prototype.requestid;
+/** @public {string}  */
+AmpViewerMessage.prototype.name;
+/** @public {*}  */
+AmpViewerMessage.prototype.data;
+/** @public {boolean|undefined}  */
+AmpViewerMessage.prototype.rsvp;
+/** @public {string|undefined}  */
+AmpViewerMessage.prototype.error;
+
+
 // amp-viz-vega related externs.
 /**
- * @typedef {{spec: function(!JSONType, function())}}
+ * @typedef {{spec: function(!JsonObject, function())}}
  */
 let VegaParser;
 /**

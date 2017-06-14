@@ -1567,8 +1567,9 @@ describes.realWin('Resources scrollHeight', {
     expect(resources.maybeChangeHeight_).to.equal(false);
     expect(resources.scrollHeight_).to.equal(200);
     expect(viewerSendMessageStub).to.be.calledOnce;
-    expect(viewerSendMessageStub).to.be.calledWith(
-        'documentHeight', {height: 200}, true);
+    expect(viewerSendMessageStub.lastCall.args[0]).to.equal('documentHeight');
+    expect(viewerSendMessageStub.lastCall.args[1].height).to.equal(200);
+    expect(viewerSendMessageStub.lastCall.args[2]).to.equal(true);
   });
 
   it('should not send scrollHeight to viewer if height is not changed', () => {

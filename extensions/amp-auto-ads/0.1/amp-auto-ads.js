@@ -66,7 +66,7 @@ export class AmpAutoAds extends AMP.BaseElement {
    * Tries to load an auto-ads configuration from the given URL. This uses a
    * non-credentialed request.
    * @param {string} configUrl
-   * @return {!Promise<!JSONType>}
+   * @return {!Promise<!JsonObject>}
    * @private
    */
   getConfig_(configUrl) {

@@ -15,9 +15,9 @@
  */
 
 /**
- * @const {!JSONType}
+ * @const {!JsonObject}
  */
-export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
+export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
 
   // Default parent configuration applied to all amp-analytics tags.
   'default': {

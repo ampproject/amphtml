@@ -760,7 +760,7 @@ export function ensureFramed(window) {
 /**
  * Expects the fragment to contain JSON.
  * @param {string} fragment Value of location.fragment
- * @return {?JSONType}
+ * @return {?JsonObject}
  * @visibleForTesting
  */
 export function parseFragment(fragment) {
@@ -772,7 +772,7 @@ export function parseFragment(fragment) {
     if (startsWith(json, '{%22')) {
       json = decodeURIComponent(json);
     }
-    return /** @type {!JSONType} */ (json ? JSON.parse(json) : {});
+    return /** @type {!JsonObject} */ (json ? JSON.parse(json) : {});
   } catch (err) {
     return null;
   }

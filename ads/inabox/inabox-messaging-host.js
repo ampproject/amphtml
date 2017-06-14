@@ -94,19 +94,19 @@ export class InaboxMessagingHost {
    */
   processMessage(message) {
     const request = deserializeMessage(message.data);
-    if (!request || !request.sentinel) {
+    if (!request || !request['sentinel']) {
       dev().fine(TAG, 'Ignored non-AMP message:', message);
       return false;
     }
 
     const iframe =
-        this.getFrameElement_(message.source, request.sentinel);
+        this.getFrameElement_(message.source, request['sentinel']);
     if (!iframe) {
       dev().info(TAG, 'Ignored message from untrusted iframe:', message);
       return false;
     }
 
-    if (!this.msgObservable_.fire(request.type, this,
+    if (!this.msgObservable_.fire(request['type'], this,
         [iframe, request, message.source, message.origin])) {
       dev().warn(TAG, 'Unprocessed AMP message:', message);
       return false;

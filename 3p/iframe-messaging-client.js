@@ -106,11 +106,11 @@ export class IframeMessagingClient {
       }
 
       const message = deserializeMessage(event.data);
-      if (!message || message.sentinel != this.sentinel_) {
+      if (!message || message['sentinel'] != this.sentinel_) {
         return;
       }
 
-      this.fireObservable_(message.type, message);
+      this.fireObservable_(message['type'], message);
     });
   }
 

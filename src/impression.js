@@ -109,7 +109,7 @@ export function doNotTrackImpression() {
  * Send the url to ad server and wait for its response
  * @param {!Window} win
  * @param {string} clickUrl
- * @return {!Promise<!JSONType>}
+ * @return {!Promise<!JsonObject>}
  */
 function invoke(win, clickUrl) {
   if (getMode().localDev && !getMode().test) {
@@ -124,7 +124,7 @@ function invoke(win, clickUrl) {
  * parse the response back from ad server
  * Set for analytics purposes
  * @param {!Window} win
- * @param {!Object} response
+ * @param {!JsonObject} response
  */
 function applyResponse(win, viewer, response) {
   const adLocation = response['location'];

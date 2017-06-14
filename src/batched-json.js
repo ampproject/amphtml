@@ -27,8 +27,8 @@ import {getValueForExpr} from './json';
  * @param {!Element} element
  * @param {string=} opt_expr Dot-syntax reference to subdata of JSON result
  *     to return. If not specified, entire JSON result is returned.
- * @return {!Promise<JSONType>} Resolved with JSON result or rejected if
- *     response is invalid.
+ * @return {!Promise<!JsonObject|!Array<JsonObject>>} Resolved with JSON
+ *     result or rejected if response is invalid.
  */
 export function fetchBatchedJsonFor(ampdoc, element, opt_expr) {
   const url = assertHttpsUrl(element.getAttribute('src'), element);
