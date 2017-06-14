@@ -59,16 +59,18 @@
          const anchor = iframe.doc.createElement('a');
          anchor.href = '#section1';
          ampSidebar.appendChild(anchor);
-         const navToolbar = iframe.doc.createElement('nav');
-         navToolbar.setAttribute('toolbar', TOOLBAR_MEDIA);
-         const toolbarList = iframe.doc.createElement('ul');
-         for (let i = 0; i < 3; i++) {
-           const li = iframe.doc.createElement('li');
-           li.innerHTML = 'Toolbar item ' + i;
-           toolbarList.appendChild(li);
+         if (options.toolbar) {
+           const navToolbar = iframe.doc.createElement('nav');
+           navToolbar.setAttribute('toolbar', TOOLBAR_MEDIA);
+           const toolbarList = iframe.doc.createElement('ul');
+           for (let i = 0; i < 3; i++) {
+             const li = iframe.doc.createElement('li');
+             li.innerHTML = 'Toolbar item ' + i;
+             toolbarList.appendChild(li);
+           }
+           navToolbar.appendChild(toolbarList);
+           ampSidebar.appendChild(navToolbar);
          }
-         navToolbar.appendChild(toolbarList);
-         ampSidebar.appendChild(navToolbar);
          if (options.side) {
            ampSidebar.setAttribute('side', options.side);
          }
@@ -557,9 +559,22 @@
      });
 
      // Tests for amp-sidebar 1.0
+     it('should not create toolbars without <nav toolbar />', () => {
+       return getAmpSidebar().then(obj => {
+         const sidebarElement = obj.ampSidebar;
+         const headerElements = sidebarElement.ownerDocument
+               .getElementsByTagName('header');
+         const toolbarElements = sidebarElement.ownerDocument
+               .querySelectorAll('*[toolbar]');
+         expect(headerElements.length).to.be.equal(0);
+         expect(toolbarElements.length).to.be.equal(0);
+       });
+     });
      it('should create a header element, \
      containing the navigation toolbar element', () => {
-       return getAmpSidebar().then(obj => {
+       return getAmpSidebar({
+         toolbar: true,
+       }).then(obj => {
          const sidebarElement = obj.ampSidebar;
          const headerElements = sidebarElement.ownerDocument
                .getElementsByTagName('header');
@@ -570,7 +585,9 @@
      });
 
      it('toolbar header should be hidden for the const TOOLBAR_MEDIA', () => {
-       return getAmpSidebar().then(obj => {
+       return getAmpSidebar({
+         toolbar: true,
+       }).then(obj => {
          const sidebarElement = obj.ampSidebar;
          const headerElements = sidebarElement.ownerDocument
                .getElementsByTagName('header');
