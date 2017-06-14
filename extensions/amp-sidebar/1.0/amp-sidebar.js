@@ -26,6 +26,7 @@ import {setStyles, toggle} from '../../../src/style';
 import {removeFragment, parseUrl} from '../../../src/url';
 import {vsyncFor} from '../../../src/services';
 import {timerFor} from '../../../src/services';
+import {Toolbar} from './toolbar';
 
 /** @const */
 const ANIMATION_TIMEOUT = 550;
@@ -56,20 +57,8 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private {?string} */
     this.side_ = null;
 
-    /** @private {string|undefined} */
-    this.toolbar_ = undefined;
-
-    /** @private {?Element} */
-    this.toolbarNav_ = null;
-
-    /** @private {?Element} */
-    this.toolbarClone_ = null;
-
-    /** @private {?Element} */
-    this.toolbarTarget_ = null;
-
     /** @private {?Array} */
-    this.toolbarOnlyElements_ = null;
+    this.toolbars_ = undefined;
 
     const platform = platformFor(this.win);
 
@@ -114,47 +103,16 @@ export class AmpSidebar extends AMP.BaseElement {
       this.element.setAttribute('side', this.side_);
     }
 
-    // Get the toolbar attribute from the nav
+    // Get the toolbar attribute from the child navs
     if (this.element.hasChildNodes &&
-      this.element.getElementsByTagName('nav').length > 0
+      this.element.querySelectorAll('nav[toolbar]').length > 0
     ) {
+      this.toolbars_ = [];
       const childNavElements =
-      Array.prototype.slice.call(this.element.getElementsByTagName('nav'), 0);
-      childNavElements.some(navElement => {
-        if (navElement.hasAttribute('toolbar')) {
-          this.toolbarNav_ = navElement;
-          this.toolbar_ = navElement.getAttribute('toolbar');
-
-          // Create a header element on the document for our toolbar
-          // TODO: Allow specifying a target for the toolbar
-          this.toolbarTarget_ =
-            this.element.ownerDocument.createElement('header');
-          this.element.parentElement
-            .insertBefore(this.toolbarTarget_, this.element);
-          if (!this.isToolbar_()) {
-            setStyles(this.toolbarTarget_, {
-              'display': 'none',
-            });
-          }
-
-          //Finally, find our tool-bar only elements
-          if (this.toolbarNav_.hasAttribute('toolbar-only')) {
-            this.toolbarOnlyElements_ = [];
-            this.toolbarOnlyElements_.push(this.toolbarNav_);
-          } else if (!this.toolbarNav_.hasAttribute('toolbar-only') &&
-            this.toolbarNav_.getElementsByTagName('*').length > 0) {
-            this.toolbarOnlyElements_ = [];
-            // Check the nav's children for toolbar-only
-            Array.prototype.slice.call(this.toolbarNav_
-              .getElementsByTagName('*'), 0).forEach(element => {
-                if (element.hasAttribute('toolbar-only')) {
-                  this.toolbarOnlyElements_.push(element);
-                }
-              });
-          }
-          return true;
-        }
-        return false;
+      Array.prototype.slice
+        .call(this.element.querySelectorAll('nav[toolbar]'), 0);
+      childNavElements.forEach(toolbarElement => {
+        this.toolbars_.push(new Toolbar(toolbarElement));
       });
     }
 
@@ -220,47 +178,15 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
-    // Remove and add the toolbar dynamically
-    if (this.isToolbar_() && !this.toolbarTarget_.hasAttribute('toolbar')) {
-      this.closeIfOpen_();
-      // Add the toolbar elements
-      this.toolbarClone_ = this.toolbarNav_.cloneNode(true);
-      this.toolbarTarget_.appendChild(this.toolbarClone_);
-      if (this.toolbarTarget_.style.display === 'none') {
-        setStyles(this.toolbarTarget_, {
-          'display': null,
-        });
-      }
-      if (this.toolbarOnlyElements_) {
-        this.toolbarOnlyElements_.forEach(element => {
-          setStyles(element, {
-            'display': 'none',
-          });
-        });
-      }
-      this.toolbarTarget_.setAttribute('toolbar', '');
-    } else if (!this.isToolbar_() &&
-      this.toolbarTarget_.hasAttribute('toolbar')
-      ) {
-      this.closeIfOpen_();
-      // Remove the elements and the attribute
-      this.toolbarTarget_.removeChild(this.toolbarClone_);
-      if (this.toolbarOnlyElements_) {
-        this.toolbarOnlyElements_.forEach(element => {
-          setStyles(element, {
-            'display': null,
-          });
-        });
-      }
-      this.toolbarTarget_.removeAttribute('toolbar');
+    // Check our toolbars for changes
+    this.toolbars_.forEach(toolbar => {
+      toolbar.checkToolbar(() => this.closeIfOpen_());
+    });
+  }
 
-      // Check if our target still has elements, if not, do not display it
-      if (!this.toolbarTarget_.hasChildNodes()) {
-        setStyles(this.toolbarTarget_, {
-          'display': 'none',
-        });
-      }
-    }
+  /** @override */
+  activate() {
+    this.open_();
   }
 
   /**
@@ -273,20 +199,6 @@ export class AmpSidebar extends AMP.BaseElement {
   }
 
   /**
-   * Returns if the sidebar is currently in toolbar media query
-   * @returns {boolean}
-   * @private
-   */
-  isToolbar_() {
-    if (!this.toolbar_) {
-      return false;
-    } else {
-      return this.element.ownerDocument.defaultView
-        .matchMedia(this.toolbar_).matches;
-    }
-  }
-
-  /**
    * Closes the sidebar if it is open
    * @private
    */
@@ -295,12 +207,6 @@ export class AmpSidebar extends AMP.BaseElement {
       this.close_();
     }
   }
-
-  /** @override */
-  activate() {
-    this.open_();
-  }
-
 
   /**
    * Toggles the open/close state of the sidebar.

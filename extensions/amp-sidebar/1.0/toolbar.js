@@ -20,7 +20,10 @@ export class Toolbar {
   /** @param {!Element} element */
   constructor(element) {
     /** @private {?Element} */
-    this.element_ = element;
+    this.element = element;
+
+    /** @private {?Element} */
+    this.sidebarElement_ = this.element.parentElement;
 
     /** @private {string|undefined} */
     this.toolbarMedia_ = undefined;
@@ -33,26 +36,59 @@ export class Toolbar {
 
     /** @private {?Array} */
     this.toolbarOnlyElements_ = null;
+
+    // Get our declared private variables
+    this.toolbarMedia_ = this.element.getAttribute('toolbar');
+
+    // Create a header element on the document for our toolbar
+    // TODO: Allow specifying a target for the toolbar
+    this.toolbarTarget_ =
+      this.element.ownerDocument.createElement('header');
+    this.sidebarElement_.parentElement
+      .insertBefore(this.toolbarTarget_, this.sidebarElement_);
+    if (!this.isToolbarShown_()) {
+      setStyles(this.toolbarTarget_, {
+        'display': 'none',
+      });
+    }
+
+    //Finally, find our tool-bar only elements
+    if (this.element.hasAttribute('toolbar-only')) {
+      this.toolbarOnlyElements_ = [];
+      this.toolbarOnlyElements_.push(this.element);
+    } else if (!this.element.hasAttribute('toolbar-only') &&
+      this.element.querySelectorAll('*[toolbar-only]').length > 0) {
+      this.toolbarOnlyElements_ = [];
+      // Check the nav's children for toolbar-only
+      Array.prototype.slice.call(this.element
+        .querySelectorAll('*[toolbar-only]'), 0).forEach(toolbarOnlyElement => {
+          this.toolbarOnlyElements_.push(toolbarOnlyElement);
+        });
+    }
+    return true;
   }
 
   /**
    * Returns if the sidebar is currently in toolbar media query
    * @returns {boolean}
+   * @private
    */
-  isToolbarShown() {
+  isToolbarShown_() {
     return this.element.ownerDocument.defaultView
       .matchMedia(this.toolbarMedia_).matches;
   }
 
   /**
    * Function called to check if we should show or hide the toolbar
+   * @param {!Function} onChangeCallback - function called if toolbar changes on check
    */
-  checkToolbar() {
+  checkToolbar(onChangeCallback) {
     // Remove and add the toolbar dynamically
-    if (this.isToolbar_() && !this.toolbarTarget_.hasAttribute('toolbar')) {
-      this.closeIfOpen_();
+    if (this.isToolbarShown_() &&
+      !this.toolbarTarget_.hasAttribute('toolbar')
+    ) {
       // Add the toolbar elements
-      this.toolbarClone_ = this.toolbarNav_.cloneNode(true);
+      this.toolbarClone_ = this.element.cloneNode(true);
       this.toolbarTarget_.appendChild(this.toolbarClone_);
       if (this.toolbarTarget_.style.display === 'none') {
         setStyles(this.toolbarTarget_, {
@@ -67,10 +103,10 @@ export class Toolbar {
         });
       }
       this.toolbarTarget_.setAttribute('toolbar', '');
-    } else if (!this.isToolbar_() &&
+      onChangeCallback();
+    } else if (!this.isToolbarShown_() &&
       this.toolbarTarget_.hasAttribute('toolbar')
       ) {
-      this.closeIfOpen_();
       // Remove the elements and the attribute
       this.toolbarTarget_.removeChild(this.toolbarClone_);
       if (this.toolbarOnlyElements_) {
@@ -88,6 +124,7 @@ export class Toolbar {
           'display': 'none',
         });
       }
+      onChangeCallback();
     }
   }
 }
