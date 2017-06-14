@@ -38,7 +38,8 @@ branches:
 env:
   global:
     - NPM_CONFIG_PROGRESS="false"
-  matrix:
+matrix:
+  include:
     - env: BUILD_SHARD="pre_build_checks_and_unit_tests"
     - env: BUILD_SHARD="integration_tests" SAUCE_USERNAME="amphtml"
       addons:
