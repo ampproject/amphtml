@@ -51,6 +51,7 @@ network’s JS inside that iframe sandbox.
 The `<amp-ad>` requires width and height values to be specified according to the [rule](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#tldr-summary-of-layout-requirements--behaviors) of its layout type. It requires a `type` argument that select what ad network is displayed. All `data-*` attributes on the tag are automatically passed as arguments to the code that eventually renders the ad. What `data-` attributes are required for a given type of network depends and must be documented with the ad network.
 
 #### Example: Displaying a few ads
+<!--embedded example - displays in ampproject.org -->
 <div>
 <amp-iframe height="522"
             layout="fixed-height"
