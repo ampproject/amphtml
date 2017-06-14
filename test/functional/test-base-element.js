@@ -85,7 +85,7 @@ describe('BaseElement', () => {
   it('should register action', () => {
     const handler = () => {};
     element.registerAction('method1', handler);
-    expect(element.actionMap_['method1']).to.equal(handler);
+    expect(element.actionMap_['method1']).to.not.be.null;
   });
 
   it('should fail execution of unregistered action', () => {
@@ -94,18 +94,58 @@ describe('BaseElement', () => {
     }).to.throw(/Method not found/);
   });
 
+  it('`this` context of handler should not be the holder', () => {
+    const handler = () => {
+      const holder = element.actionMap_['foo'];
+      expect(this).to.not.equal(holder);
+    };
+    element.registerAction('foo', handler);
+    const invocation = {method: 'foo', satisfiesTrust: () => true};
+    element.executeAction(invocation, false);
+  });
+
   it('should execute registered action', () => {
     const handler = sandbox.spy();
     element.registerAction('method1', handler);
-    element.executeAction({method: 'method1'}, false);
+    const invocation = {method: 'method1', satisfiesTrust: () => true};
+    element.executeAction(invocation, false);
     expect(handler).to.be.calledOnce;
   });
 
   it('should execute "activate" action without registration', () => {
     const handler = sandbox.spy();
     element.activate = handler;
-    element.executeAction({method: 'activate'}, false);
+    const invocation = {method: 'activate', satisfiesTrust: () => true};
+    element.executeAction(invocation, false);
     expect(handler).to.be.calledOnce;
+  });
+
+  it('should check trust before invocation', () => {
+    const handler = sandbox.spy();
+    const minTrust = 123;
+    element.registerAction('foo', handler, minTrust);
+    const activate = sandbox.stub(element, 'activate');
+
+    // Registered action.
+    element.executeAction({method: 'foo', satisfiesTrust: () => false}, false);
+    expect(handler).to.not.be.called;
+    element.executeAction({
+      method: 'foo',
+      satisfiesTrust: t => (t == minTrust),
+    }, false);
+    expect(handler).to.be.calledOnce;
+
+    // Unregistered action (activate).
+    element.executeAction({
+      method: 'activate',
+      satisfiesTrust: () => false,
+    }, false);
+    expect(activate).to.not.be.called;
+    element.executeAction({
+      method: 'activate',
+      satisfiesTrust: t => (t <= element.activationTrust()),
+    }, false);
+    expect(activate).to.be.calledOnce;
   });
 
   it('should return correct layoutBox', () => {

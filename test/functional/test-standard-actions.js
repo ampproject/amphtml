@@ -82,13 +82,15 @@ describes.sandboxed('StandardActions', {}, () => {
   describe('"hide" action', () => {
     it('should handle normal element', () => {
       const element = createElement();
-      standardActions.handleHide({target: element});
+      const invocation = {target: element, satisfiesTrust: () => true};
+      standardActions.handleHide(invocation);
       expectElementToHaveBeenHidden(element);
     });
 
     it('should handle AmpElement', () => {
       const element = createAmpElement();
-      standardActions.handleHide({target: element});
+      const invocation = {target: element, satisfiesTrust: () => true};
+      standardActions.handleHide(invocation);
       expectAmpElementToHaveBeenHidden(element);
     });
   });
@@ -97,21 +99,24 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should handle normal element (inline css)', () => {
       const element = createElement();
       element.style.display = 'none';
-      standardActions.handleShow({target: element});
+      const invocation = {target: element, satisfiesTrust: () => true};
+      standardActions.handleShow(invocation);
       expectElementToHaveBeenShown(element);
     });
 
     it('should handle normal element (hidden attribute)', () => {
       const element = createElement();
       element.setAttribute('hidden', '');
-      standardActions.handleShow({target: element});
+      const invocation = {target: element, satisfiesTrust: () => true};
+      standardActions.handleShow(invocation);
       expectElementToHaveBeenShown(element);
     });
 
     it('should handle AmpElement (inline css)', () => {
       const element = createAmpElement();
       element.style.display = 'none';
-      standardActions.handleShow({target: element});
+      const invocation = {target: element, satisfiesTrust: () => true};
+      standardActions.handleShow(invocation);
       expectAmpElementToHaveBeenShown(element);
     });
 
@@ -121,33 +126,38 @@ describes.sandboxed('StandardActions', {}, () => {
     it('should show normal element when hidden (inline css)', () => {
       const element = createElement();
       element.style.display = 'none';
-      standardActions.handleToggle({target: element});
+      const invocation = {target: element, satisfiesTrust: () => true};
+      standardActions.handleToggle(invocation);
       expectElementToHaveBeenShown(element);
     });
 
     it('should show normal element when hidden (hidden attribute)', () => {
       const element = createElement();
       element.setAttribute('hidden', '');
-      standardActions.handleToggle({target: element});
+      const invocation = {target: element, satisfiesTrust: () => true};
+      standardActions.handleToggle(invocation);
       expectElementToHaveBeenShown(element);
     });
 
     it('should hide normal element when shown', () => {
       const element = createElement();
-      standardActions.handleToggle({target: element});
+      const invocation = {target: element, satisfiesTrust: () => true};
+      standardActions.handleToggle(invocation);
       expectElementToHaveBeenHidden(element);
     });
 
     it('should show AmpElement when hidden (inline css)', () => {
       const element = createAmpElement();
       element.style.display = 'none';
-      standardActions.handleToggle({target: element});
+      const invocation = {target: element, satisfiesTrust: () => true};
+      standardActions.handleToggle(invocation);
       expectAmpElementToHaveBeenShown(element);
     });
 
     it('should hide AmpElement when shown', () => {
       const element = createAmpElement();
-      standardActions.handleToggle({target: element});
+      const invocation = {target: element, satisfiesTrust: () => true};
+      standardActions.handleToggle(invocation);
       expectAmpElementToHaveBeenHidden(element);
     });
   });
@@ -157,7 +167,8 @@ describes.sandboxed('StandardActions', {}, () => {
       installHistoryServiceForDoc(ampdoc);
       const history = historyForDoc(ampdoc);
       const goBackStub = sandbox.stub(history, 'goBack');
-      standardActions.handleAmpTarget({method: 'goBack'});
+      const invocation = {method: 'goBack', satisfiesTrust: () => true};
+      standardActions.handleAmpTarget(invocation);
       expect(goBackStub).to.be.calledOnce;
     });
 
@@ -172,11 +183,13 @@ describes.sandboxed('StandardActions', {}, () => {
       const args = {};
       args[OBJECT_STRING_ARGS_KEY] = '{foo: 123}';
 
-      standardActions.handleAmpTarget({
+      const invocation = {
         method: 'setState',
         args,
         target: ampdoc,
-      });
+        satisfiesTrust: () => true,
+      };
+      standardActions.handleAmpTarget(invocation);
       return bindForDoc(ampdoc).then(() => {
         expect(setStateWithExpressionSpy).to.be.calledOnce;
         expect(setStateWithExpressionSpy).to.be.calledWith('{foo: 123}');
