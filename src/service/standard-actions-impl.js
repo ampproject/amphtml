@@ -87,6 +87,9 @@ export class StandardActions {
       case 'setState':
         this.handleAmpSetState_(invocation);
         return;
+      case 'navigateTo':
+        this.handleAmpNavigateTo_(invocation);
+        return;
       case 'goBack':
         this.handleAmpGoBack_(invocation);
         return;
@@ -119,6 +122,19 @@ export class StandardActions {
             + '"AMP.setState(foo=\'bar\')".');
       }
     });
+  }
+
+  /**
+   * @param {!./action-impl.ActionInvocation} invocation
+   * @private
+   */
+  handleAmpNavigateTo_(invocation) {
+    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
+      return;
+    }
+    const win = invocation.target.ownerDocument.defaultView;
+    const url = invocation.args['url'];
+    win.location = url;
   }
 
   /**
