@@ -88,4 +88,4 @@ Set this attribute on a `<section>` to display the section as expanded on page l
 
 ## Validation
 
-See [amp-accordion rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-accordion/0.1/validator-amp-accordion.protoascii) in the AMP validator specification.
+See [amp-accordion rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-accordion/validator-amp-accordion.protoascii) in the AMP validator specification.

@@ -236,4 +236,4 @@ The `amp-iframe` component should be considered a fallback if the required user 
 
 ## Validation
 
-See [amp-iframe rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-iframe/0.1/validator-amp-iframe.protoascii) in the AMP validator specification.
+See [amp-iframe rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-iframe/validator-amp-iframe.protoascii) in the AMP validator specification.

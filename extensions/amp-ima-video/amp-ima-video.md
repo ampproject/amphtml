@@ -89,4 +89,4 @@ extended to AMP components.
 
 ## Validation
 
-See [amp-ima-video rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ima-video/0.1/validator-amp-ima-video.protoascii) in the AMP validator specification.
+See [amp-ima-video rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ima-video/validator-amp-ima-video.protoascii) in the AMP validator specification.

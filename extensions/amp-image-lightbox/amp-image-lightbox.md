@@ -100,4 +100,4 @@ Must be set to `nodisplay`.
 
 ## Validation
 
-See [amp-image-lightbox rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-image-lightbox/0.1/validator-amp-image-lightbox.protoascii) in the AMP validator specification.
+See [amp-image-lightbox rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-image-lightbox/validator-amp-image-lightbox.protoascii) in the AMP validator specification.

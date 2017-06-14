@@ -188,4 +188,4 @@ Not permitted: **disabled**
 
 ## Validation
 
-See [amp-app-banner rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-app-banner/0.1/validator-amp-app-banner.protoascii) in the AMP validator specification.
+See [amp-app-banner rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-app-banner/validator-amp-app-banner.protoascii) in the AMP validator specification.

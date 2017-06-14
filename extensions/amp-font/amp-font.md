@@ -104,4 +104,4 @@ Must be `nodisplay`.
 
 ## Validation
 
-See [amp-font rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-font/0.1/validator-amp-font.protoascii) in the AMP validator specification.
+See [amp-font rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-font/validator-amp-font.protoascii) in the AMP validator specification.

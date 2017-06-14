@@ -81,4 +81,4 @@ The JW Platform playlist id. This is an 8-digit alphanumeric sequence that can b
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
-See [amp-jwplayer rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-jwplayer/0.1/validator-amp-jwplayer.protoascii) in the AMP validator specification.
+See [amp-jwplayer rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-jwplayer/validator-amp-jwplayer.protoascii) in the AMP validator specification.

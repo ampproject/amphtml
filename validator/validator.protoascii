@@ -15,5 +15,5 @@
 #
 
 This file was split up into validator-main.protoascii (in this directory)
-and extensions/*/0.1/validator-*.protoascii. Please update your bookmarks
+and extensions/*/validator-*.protoascii. Please update your bookmarks
 and references.

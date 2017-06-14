@@ -179,7 +179,7 @@ This is due to the UX implications of full page overlay ads. It may be considere
 
 ## Validation
 
-See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad/0.1/validator-amp-ad.protoascii) in the AMP validator specification.
+See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad/validator-amp-ad.protoascii) in the AMP validator specification.
 
 ## Supported ad networks
 

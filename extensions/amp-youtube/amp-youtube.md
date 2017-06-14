@@ -80,4 +80,4 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 
 ## Validation
 
-See [amp-youtube rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/0.1/validator-amp-youtube.protoascii) in the AMP validator specification.
+See [amp-youtube rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/validator-amp-youtube.protoascii) in the AMP validator specification.

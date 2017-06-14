@@ -32,7 +32,7 @@ styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsi
 # Validator extensions.
 # =====================
 # In addition to the rules in this file, the Validator honors the rules
-# in the extensions/*/0.1/validator-*.protoascii files. This makes it
+# in the extensions/*/validator-*.protoascii files. This makes it
 # easy to organize the rules for extensions next to their Javascript
 # implementation.
 
@@ -3130,7 +3130,7 @@ tags: {
   disallowed_ancestor: "NOSCRIPT"
 }
 # 4.11.3 The template element
-# See extensions/amp-mustache/0.1/validator-amp-mustache.protoascii.
+# See extensions/amp-mustache/validator-amp-mustache.protoascii.
 
 # 11 Obsolute features
 # 11.2 Non-conforming features

@@ -78,4 +78,4 @@ The layout for `amp-soundcloud` is set to `fixed-height` and it fills all of the
 
 ## Validation
 
-See [amp-soundcloud rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-soundcloud/0.1/validator-amp-soundcloud.protoascii) in the AMP validator specification.
+See [amp-soundcloud rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-soundcloud/validator-amp-soundcloud.protoascii) in the AMP validator specification.
