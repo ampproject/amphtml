@@ -205,9 +205,11 @@ function getEntryModule(extensionFolder) {
   var extension = path.basename(extensionFolder);
   return fs.readdirAsync(extensionFolder).then(dirItems => {
     return (dirItems
+        .map(x => `${extensionFolder}/${x}`)
         .filter(x => fs.statSync(x).isDirectory())
-        .map(x => `${extensionFolder}/${x}/${extension}.js`)
-        .filter(x => fs.statSync(x).isFile())
+        .map(x => `${x}/${extension}.js`)
+        .filter(x => fs.existsSync(x))
+        .filter(x => fs.statSync(x).isFile()));
   });
 }
 
