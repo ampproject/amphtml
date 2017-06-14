@@ -17,12 +17,6 @@
       font-family: 'Open Sans';
     }
 
-    @media (min-width: 768px) {
-      .toolbar-media-hide {
-        display: none;
-      }
-    }
-
     .ad-container {
       display: flex;
       justify-content: center;
@@ -247,6 +241,16 @@
       <input placeholder="Search..."/>
     </nav>
 
+    <!-- Multiple / Complex Toolbars -->
+    <nav toolbar="(min-width: 0px) and (max-width: 767)" toolbar-only>
+      <input placeholder="Search..."/>
+    </nav>
+
+    <nav toolbar="(min-width: 375px) and (max-width: 767)" toolbar-only>
+      <amp-img src="https://cdn-images-1.medium.com/max/800/1*JLegdtjFMNgqHgnxdd04fg.png"
+               width="40" height="34"></amp-img>
+    </nav>
+
     <!-- Sidebar only elements -->
     <ul>
       <li><a href="#">Link 1</a></li>
@@ -277,7 +281,7 @@
       ☰
     </button>
 
-    <span class="brand-logo toolbar-media-hide">
+    <span class="brand-logo">
       PublisherLogo
     </span>
   </header>
