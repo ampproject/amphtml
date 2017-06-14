@@ -229,10 +229,6 @@ export class Transport {
   static doneUsingCrossDomainIframe(ampDoc, transportOptions) {
     const frameUrl = transportOptions['iframe'];
     const frameData = Transport.getFrameData_(frameUrl);
-    if (!frameData) {
-      // Didn't exist
-      return;
-    }
     if (Transport.decrementIframeUsageCount_(
       /** @type{!FrameData} */ (frameData)) > 0) {
       // Some other instance is still using it
@@ -299,8 +295,7 @@ export class Transport {
     setStyles(frame,
       {width: 0, height: 0, display: 'none',
        position: 'absolute', top: 0, left: 0});
-    /** @const {FrameData} */
-    const frameData = {
+    const frameData = /** @const {FrameData} */ ({
       frame,
       sentinel,
       usageCount: 1,
@@ -309,7 +304,7 @@ export class Transport {
         win, iframeMessagingClient),
       eventQueue: new AmpAnalytics3pEventMessageQueue(
         win, iframeMessagingClient),
-    };
+    });
     Transport.crossDomainIframes_[frameUrl] = frameData;
     frame.src = frameUrl;
     return frameData;
@@ -344,9 +339,6 @@ export class Transport {
     return Transport.crossDomainIframes_[frameUrl];
   }
 }
-
-/** @private @const {!Object<string,boolean>} */
-Transport.usedIds_ = {};
 
 /** @private @const {Object<string,FrameData>} */
 Transport.crossDomainIframes_ = {};

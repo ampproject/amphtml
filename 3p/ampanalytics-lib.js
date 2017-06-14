@@ -15,10 +15,11 @@
  */
 
 import './polyfills';
-import {dev} from '../src/log';
-import {initLogConstructor, setReportError} from '../src/log';
+import {tryParseJson} from '../src/json';
+import {dev, initLogConstructor, setReportError} from '../src/log';
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {AMP_ANALYTICS_3P_MESSAGE_TYPE} from '../src/3p-analytics-common';
+
 initLogConstructor();
 // TODO(alanorozco): Refactor src/error.reportError so it does not contain big
 // transitive dependencies and can be included here.
@@ -37,21 +38,15 @@ class AmpAnalytics3pMessageRouter {
     /** @private {!Window} */
     this.win_ = win;
 
-    let frameNameData = null;
-    try {
-      frameNameData = JSON.parse(this.win_.name);
-    } catch (e) {
-      dev().warn(TAG_, 'Unable to set sentinel from name attr: ' +
-        this.win_.name + ': ' + e.message);
-      return;
-    }
     // The sentinel is required by iframe-messaging-client, and is used to
     // uniquely identify the frame as part of message routing
     /** @const {string} */
     this.sentinel_ = dev().assertString(
-      frameNameData && frameNameData.sentinel,
+      tryParseJson(this.win_.name, {}).sentinel,
       'Invalid/missing sentinel on iframe name attribute' + this.win_.name);
-    if (!this.sentinel_) { return; }
+    if (!this.sentinel_) {
+      return;
+    }
 
     /**
      * Multiple creatives on a page may wish to use the same type of
@@ -72,10 +67,12 @@ class AmpAnalytics3pMessageRouter {
     this.iframeMessagingClient_.registerCallback(
       AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVE,
       messageContainer => {
+        let entries;
         dev().assert(
-          messageContainer.data && Object.entries(messageContainer.data).length,
+          messageContainer.data &&
+          (entries = Object.entries(messageContainer.data)).length,
           'Received empty new creative message');
-        Object.entries(messageContainer.data).forEach(entry => {
+        entries.forEach(entry => {
           const creativeId = entry[0];
           const extraData = entry[1];
           dev().assert(!this.creativeMessageRouters_[creativeId],
@@ -128,19 +125,13 @@ class AmpAnalytics3pCreativeMessageRouter {
     /** @private {!IframeMessagingClient} */
     this.iframeMessagingClient_ = iframeMessagingClient;
 
-    /**
-     * @private {!string}
-     */
+    /** @private {!string} */
     this.creativeId_ = creativeId;
 
-    /**
-     * @private {?string}
-     */
+    /** @private {?string} */
     this.extraData_ = opt_extraData;
 
-    /**
-     * private {?function(!Array<!AmpAnalytics3pEvent>)=}
-     */
+    /** @private {?function(!Array<!AmpAnalytics3pEvent>)} */
     this.eventListener_ = null;
 
     if (this.win_.onNewAmpAnalyticsInstance) {

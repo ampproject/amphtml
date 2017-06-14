@@ -138,14 +138,6 @@ AmpViewerMessage.prototype.rsvp;
 AmpViewerMessage.prototype.error;
 
 // AMP-Analytics Cross-domain iframes
-/** @enum {string} */
-const AMP_ANALYTICS_3P_MESSAGE_TYPE = {
-  READY: 'R',
-  CREATIVE: 'C',
-  EVENT: 'E',
-  RESPONSE: 'A',
-};
-
 let AmpAnalytics3pReadyMessage;
 let AmpAnalytics3pNewCreative;
 let AmpAnalytics3pEvent;

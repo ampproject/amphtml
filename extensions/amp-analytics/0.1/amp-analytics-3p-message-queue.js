@@ -41,21 +41,22 @@ class AbstractAmpAnalytics3pMessageQueue {
    * contain the queued data (see 3p-analytics-common)
    */
   constructor(win, iframeMessagingClient, messageType) {
-    /** @type {boolean} */
+    /** @typrivatepe {boolean} */
     this.isReady_ = false;
 
-    /** @type {!Window} */
+    /** @private {!Window} */
     this.win_ = win;
 
-    /** @type {!../../../3p/iframe-messaging-client.IframeMessagingClient} */
+    /** @private {!../../../3p/iframe-messaging-client.IframeMessagingClient} */
     this.iframeMessagingClient_ = iframeMessagingClient;
 
-    /** @type {string} */
+    /** @private {string} */
     this.messageType_ = messageType;
 
-    /** @type {!Object<string,!string|!Array<string>>} */
+    /** @private {!Object<string,!string|!Array<string>>} */
     this.creativeToPendingMessages_ = {};
 
+    /** @private {function(...*)} */
     this.throttledFlushQueue_ = throttle(this.win_, () => {
       this.flushQueue_();
     }, MESSAGE_THROTTLE_TIME_);
