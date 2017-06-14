@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {selectGptExperiment, writeAdScript} from '../doubleclick';
+import {createIframePromise} from '../../../testing/iframe';
 
 describe('selectGptExperiment', () => {
 
