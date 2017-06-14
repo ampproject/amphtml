@@ -62,9 +62,9 @@ class Amp3QPlayer extends AMP.BaseElement {
   buildCallback() {
 
     this.dataId = user().assert(
-      this.element.getAttribute('data-id'),
-      'The data-id attribute is required for <amp-3q-player> %s',
-      this.element);
+        this.element.getAttribute('data-id'),
+        'The data-id attribute is required for <amp-3q-player> %s',
+        this.element);
 
     this.playerReadyPromise_ = new Promise(resolve => {
       this.playerReadyResolver_ = resolve;
@@ -83,9 +83,9 @@ class Amp3QPlayer extends AMP.BaseElement {
     this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(
-      this.win,
-      'message',
-      this.sdnBridge_.bind(this)
+        this.win,
+        'message',
+        this.sdnBridge_.bind(this)
     );
 
     this.applyFillContent(iframe, true);

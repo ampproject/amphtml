@@ -1679,6 +1679,18 @@ tags: {
   attrs: { name: "[srclang]" }
   attr_lists: "track-attrs-subtitles"
 }
+tags: {
+  tag_name: "TRACK"
+  spec_name: "amp-ima-video > track[kind=subtitles]"
+  mandatory_parent: "AMP-IMA-VIDEO"
+  # <amp-bind>
+  attrs: { name: "[label]" }
+  attrs: { name: "[src]" }
+  attrs: { name: "[srclang]" }
+  attr_lists: "track-attrs-subtitles"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ima-video"
+}
+
 
 # 4.7.15 SVG
 # We allow some limited embedded SVG tags. We do not allow inline styles
@@ -2607,10 +2619,6 @@ tags {
     name: "submitting"
     mandatory: true
   }
-  child_tags: {
-    mandatory_num_child_tags: 1
-    first_child_tag_name_oneof: "TEMPLATE"
-  }
 }
 tags {
   tag_name: "DIV"
@@ -2621,10 +2629,6 @@ tags {
     name: "submit-success"
     mandatory: true
   }
-  child_tags: {
-    mandatory_num_child_tags: 1
-    first_child_tag_name_oneof: "TEMPLATE"
-  }
 }
 tags {
   tag_name: "DIV"
@@ -2634,10 +2638,6 @@ tags {
   attrs: {
     name: "submit-error"
     mandatory: true
-  }
-  child_tags: {
-    mandatory_num_child_tags: 1
-    first_child_tag_name_oneof: "TEMPLATE"
   }
 }
 attr_lists: {

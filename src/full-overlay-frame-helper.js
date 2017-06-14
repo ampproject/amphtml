@@ -53,9 +53,8 @@ export function centerFrameUnderVsyncMutate(
  * This function does direct DOM manipulation, so it needs to run under vsync
  * mutate context.
  * @param {!HTMLIFrameElement} iframe
- * @param {{width: number, height: number}} viewportSize
  */
-export function expandFrameUnderVsyncMutate(iframe, viewportSize) {
+export function expandFrameUnderVsyncMutate(iframe) {
   setStyles(iframe, {
     'position': 'fixed',
     'z-index': 1000,
@@ -63,8 +62,8 @@ export function expandFrameUnderVsyncMutate(iframe, viewportSize) {
     'right': 0,
     'top': 0,
     'bottom': 0,
-    'width': px(viewportSize.width),
-    'height': px(viewportSize.height),
+    'width': '100vw',
+    'height': '100vh',
     'transition': null,
     'transform': null,
   });
@@ -87,5 +86,7 @@ export function collapseFrameUnderVsyncMutate(iframe) {
     'bottom',
     'width',
     'height',
+    'min-width',
+    'min-height',
   ]);
 }

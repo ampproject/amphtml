@@ -139,9 +139,9 @@ class AmpBridPlayer extends AMP.BaseElement {
     this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(
-      this.win,
-      'message',
-      this. handleBridMessages_.bind(this)
+        this.win,
+        'message',
+        this. handleBridMessages_.bind(this)
     );
 
     this.element.appendChild(iframe);

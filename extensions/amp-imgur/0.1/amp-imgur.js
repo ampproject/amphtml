@@ -59,9 +59,9 @@ export class AmpImgur extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.imgurid_ = user().assert(
-      this.element.getAttribute('data-imgur-id'),
-      'The data-imgur-id attribute is required for <amp-imgur> %s',
-      this.element);
+        this.element.getAttribute('data-imgur-id'),
+        'The data-imgur-id attribute is required for <amp-imgur> %s',
+        this.element);
   }
 
   /** @override */
@@ -70,9 +70,9 @@ export class AmpImgur extends AMP.BaseElement {
     this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(
-      this.win,
-      'message',
-      this.hadleImgurMessages_.bind(this)
+        this.win,
+        'message',
+        this.hadleImgurMessages_.bind(this)
     );
 
     iframe.setAttribute('scrolling', 'no');

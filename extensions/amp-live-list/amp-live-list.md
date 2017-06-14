@@ -22,10 +22,6 @@ limitations under the License.
     <td>A wrapper and minimal UI for content that updates live in the client instance as new content is available in the source document.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td>
       <div>

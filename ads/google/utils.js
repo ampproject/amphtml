@@ -57,18 +57,18 @@ export function getMultiSizeDimensions(
 
     // Make sure that both dimensions given are numbers.
     if (!validateDimensions(width, height,
-          w => isNaN(w),
-          h => isNaN(h),
-          ({badDim, badVal}) =>
+        w => isNaN(w),
+        h => isNaN(h),
+        ({badDim, badVal}) =>
           `Invalid ${badDim} of ${badVal} given for secondary size.`)) {
       return;
     }
 
     // Check that secondary size is not larger than primary size.
     if (!validateDimensions(width, height,
-          w => w > primaryWidth,
-          h => h > primaryHeight,
-          ({badDim, badVal}) => `Secondary ${badDim} ${badVal} ` +
+        w => w > primaryWidth,
+        h => h > primaryHeight,
+        ({badDim, badVal}) => `Secondary ${badDim} ${badVal} ` +
           `can't be larger than the primary ${badDim}.`)) {
       return;
     }
@@ -82,9 +82,9 @@ export function getMultiSizeDimensions(
       const minWidth = minRatio * primaryWidth;
       const minHeight = minRatio * primaryHeight;
       if (!validateDimensions(width, height,
-            w => w < minWidth,
-            h => h < minHeight,
-            ({badDim, badVal}) => `Secondary ${badDim} ${badVal} is ` +
+          w => w < minWidth,
+          h => h < minHeight,
+          ({badDim, badVal}) => `Secondary ${badDim} ${badVal} is ` +
             `smaller than 2/3rds of the primary ${badDim}.`)) {
         return;
       }

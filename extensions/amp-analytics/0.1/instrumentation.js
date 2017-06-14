@@ -477,8 +477,8 @@ export class InstrumentationService {
     const hasImmediate = timerSpec.hasOwnProperty('immediate');
     const callImmediate = hasImmediate ? Boolean(timerSpec['immediate']) : true;
     const intervalId = this.ampdoc.win.setInterval(
-      listener.bind(null, this.createEventDepr_(AnalyticsEventType.TIMER)),
-      timerSpec['interval'] * 1000
+        listener.bind(null, this.createEventDepr_(AnalyticsEventType.TIMER)),
+        timerSpec['interval'] * 1000
     );
 
     if (callImmediate) {

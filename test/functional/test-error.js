@@ -105,7 +105,7 @@ describe('reportErrorToServer', () => {
     const e = new Error('XYZ');
     const url = parseUrl(
         getErrorReportUrl(undefined, undefined, undefined, undefined, e,
-          true));
+            true));
     const query = parseQueryString(url.search);
     expect(url.href.indexOf(
         'https://amp-error-reporting.appspot.com/r?')).to.equal(0);
@@ -131,7 +131,7 @@ describe('reportErrorToServer', () => {
     e.ignoreStack = true;
     const url = parseUrl(
         getErrorReportUrl(undefined, undefined, undefined, undefined, e,
-          true));
+            true));
     const query = parseQueryString(url.search);
     expect(query.s).to.be.undefined;
 
@@ -149,7 +149,7 @@ describe('reportErrorToServer', () => {
     e.args = {x: 1};
     const url = parseUrl(
         getErrorReportUrl(undefined, undefined, undefined, undefined, e,
-          true));
+            true));
     const query = parseQueryString(url.search);
 
     expect(query.args).to.equal(JSON.stringify({x: 1}));
@@ -379,7 +379,7 @@ describe('reportErrorToServer', () => {
     const e = user().createError('123');
     const url = parseUrl(
         getErrorReportUrl(undefined, undefined, undefined, undefined, e,
-          true));
+            true));
     const query = parseQueryString(url.search);
     expect(query.s).to.be.undefined;
   });
@@ -393,7 +393,7 @@ describe('reportErrorToServer', () => {
     const e = user().createError('123');
     const url = parseUrl(
         getErrorReportUrl(undefined, undefined, undefined, undefined, e,
-          true));
+            true));
     const query = parseQueryString(url.search);
     expect(query.exps).to.equal('test-exp=1,disabled-exp=0');
   });
