@@ -76,7 +76,7 @@ The `amp-image-lightbox-caption` class is also available to style the caption
 section.
 
 ## Actions
-The `amp-image-lightbox` exposes the following actions you can use [AMP on-syntax to trigger](../../../src/spec/amp-actions-and-events.md):
+The `amp-image-lightbox` exposes the following actions you can use [AMP on-syntax to trigger](https://github.com/ampproject/amphtml/blob/master/spec/amp-actions-and-events.md):
 
 <table>
   <tr>

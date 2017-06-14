@@ -115,7 +115,7 @@ The `amp-sidebar` component can be styled with standard CSS.
 - The current state of the sidebar is exposed via the `open` attribute that is set on the `amp-sidebar` tag when the side bar is open on the page.
 
 ## Actions
-The `amp-sidebar` exposes the following actions you can use [AMP on-syntax to trigger](../../../src/spec/amp-actions-and-events.md):
+The `amp-sidebar` exposes the following actions you can use [AMP on-syntax to trigger](https://github.com/ampproject/amphtml/blob/master/spec/amp-actions-and-events.md):
 
 <table>
   <tr>
