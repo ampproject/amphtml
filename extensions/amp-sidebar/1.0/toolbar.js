@@ -41,10 +41,10 @@ export class Toolbar {
 
     // Create a header element on the document for our toolbar
     // TODO: Allow specifying a target for the toolbar
+    const fragment = this.sidebarElement_
+      .ownerDocument.createDocumentFragment();
     this.toolbarTarget_ =
       this.element.ownerDocument.createElement('header');
-    this.sidebarElement_.parentElement
-      .insertBefore(this.toolbarTarget_, this.sidebarElement_);
     //Place the elements into the target
     this.toolbarClone_ = this.element.cloneNode(true);
     this.toolbarTarget_.appendChild(this.toolbarClone_);
@@ -53,6 +53,10 @@ export class Toolbar {
         'display': 'none',
       });
     }
+
+    fragment.appendChild(this.toolbarTarget_);
+    this.sidebarElement_.parentElement
+      .insertBefore(fragment, this.sidebarElement_);
 
     //Finally, find our tool-bar only elements
     if (this.element.hasAttribute('toolbar-only')) {

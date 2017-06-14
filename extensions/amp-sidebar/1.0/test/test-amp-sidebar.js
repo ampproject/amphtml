@@ -25,6 +25,9 @@
  import * as sinon from 'sinon';
  import '../amp-sidebar';
 
+ /** @const */
+ const TOOLBAR_MEDIA = '(min-width: 768px)';
+
  adopt(window);
 
  describes.realWin('amp-sidebar 1.0 version', {
@@ -56,6 +59,16 @@
          const anchor = iframe.doc.createElement('a');
          anchor.href = '#section1';
          ampSidebar.appendChild(anchor);
+         const navToolbar = iframe.doc.createElement('nav');
+         navToolbar.setAttribute('toolbar', TOOLBAR_MEDIA);
+         const toolbarList = iframe.doc.createElement('ul');
+         for (let i = 0; i < 3; i++) {
+           const li = iframe.doc.createElement('li');
+           li.innerHTML = 'Toolbar item ' + i;
+           toolbarList.appendChild(li);
+         }
+         navToolbar.appendChild(toolbarList);
+         ampSidebar.appendChild(navToolbar);
          if (options.side) {
            ampSidebar.setAttribute('side', options.side);
          }
@@ -540,6 +553,28 @@
          expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
          expect(sidebarElement.style.display).to.equal('');
          expect(impl.schedulePause).to.have.not.been.called;
+       });
+     });
+
+     // Tests for amp-sidebar 1.0
+     it('should create a header element, \
+     containing the navigation toolbar element', () => {
+       return getAmpSidebar().then(obj => {
+         const sidebarElement = obj.ampSidebar;
+         const headerElements = sidebarElement.ownerDocument
+               .getElementsByTagName('header');
+         expect(headerElements.length).to.be.above(0);
+         expect(headerElements[0].querySelectorAll('nav[toolbar]').length)
+          .to.be.above(0);
+       });
+     });
+
+     it('toolbar header should be hidden for the const TOOLBAR_MEDIA', () => {
+       return getAmpSidebar().then(obj => {
+         const sidebarElement = obj.ampSidebar;
+         const headerElements = sidebarElement.ownerDocument
+               .getElementsByTagName('header');
+         expect(headerElements[0].style.display).to.be.equal('none');
        });
      });
    });
