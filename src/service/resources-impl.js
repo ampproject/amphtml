@@ -26,17 +26,20 @@ import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {expandLayoutRect} from '../layout-rect';
 import {installInputService} from '../input';
 import {registerServiceBuilderForDoc} from '../service';
-import {inputFor} from '../services';
-import {viewerForDoc} from '../services';
-import {viewportForDoc} from '../services';
-import {vsyncFor} from '../services';
+import {
+  inputFor,
+  viewerForDoc,
+  viewportForDoc,
+  vsyncFor,
+  documentInfoForDoc,
+  layersForDoc,
+} from '../services';
 import {isArray} from '../types';
 import {dev} from '../log';
 import {reportError} from '../error';
 import {filterSplice} from '../utils/array';
 import {getSourceUrl} from '../url';
 import {areMarginsChanged} from '../layout-rect';
-import {documentInfoForDoc} from '../services';
 import {computedStyle} from '../style';
 
 const TAG_ = 'Resources';
@@ -184,6 +187,9 @@ export class Resources {
 
     /** @private @const {!./vsync-impl.Vsync} */
     this.vsync_ = vsyncFor(this.win);
+
+    /** @private @const {!./layers-impl.Layers} */
+    this.layers_ = layersForDoc(this.ampdoc);
 
     /** @private @const {!FocusHistory} */
     this.activeHistory_ = new FocusHistory(this.win, FOCUS_HISTORY_TIMEOUT_);
@@ -427,6 +433,14 @@ export class Resources {
   }
 
   /**
+   * Returns the layers instance
+   * @return {!./layers-impl.Layers}
+   */
+  getLayers() {
+    return this.layers_;
+  }
+
+  /**
    * Returns the viewport instance
    * @return {!./viewport-impl.Viewport}
    */
@@ -456,6 +470,7 @@ export class Resources {
     if (this.addCount_ == 1) {
       this.viewport_.ensureReadyForElements();
     }
+    this.getLayers().add(element);
 
     // First check if the resource is being reparented and if it requires
     // reconstruction. Only already built elements are eligible.
@@ -577,6 +592,7 @@ export class Resources {
       return;
     }
     this.removeResource_(resource);
+    this.getLayers().remove(element);
   }
 
   /**
@@ -920,10 +936,10 @@ export class Resources {
     /**
    * Collapses the element: ensures that it's `display:none`, notifies its
    * owner and updates the layout box.
-   * @param {!Element} element
+   * @param {!AmpElement} element
    */
   collapseElement(element) {
-    const box = this.viewport_.getLayoutRect(element);
+    const box = element.getLayoutBox();
     const resource = Resource.forElement(element);
     if (box.width != 0 && box.height != 0) {
       this.setRelayoutTop_(box.top);

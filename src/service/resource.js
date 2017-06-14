@@ -14,14 +14,10 @@
  * limitations under the License.
  */
 
-import {
-  layoutRectLtwh,
-  layoutRectsOverlap,
-  moveLayoutRect,
-} from '../layout-rect';
+import {layoutRectsOverlap} from '../layout-rect';
 import {dev} from '../log';
 import {startsWith} from '../string';
-import {toggle, computedStyle} from '../style';
+import {toggle} from '../style';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';
@@ -160,12 +156,6 @@ export class Resource {
     /** @private {*} */
     this.lastLayoutError_ = null;
 
-    /** @private {boolean} */
-    this.isFixed_ = false;
-
-    /** @private {!../layout-rect.LayoutRectDef} */
-    this.layoutBox_ = layoutRectLtwh(-10000, -10000, 0, 0);
-
     /** @private {?../layout-rect.LayoutRectDef} */
     this.initialLayoutBox_ = null;
 
@@ -302,7 +292,7 @@ export class Resource {
 
     if (this.hasBeenMeasured()) {
       this.state_ = ResourceState.READY_FOR_LAYOUT;
-      this.element.updateLayoutBox(this.layoutBox_);
+      this.element.updateLayoutBox(this.getPageLayoutBox());
     } else {
       this.state_ = ResourceState.NOT_LAID_OUT;
     }
@@ -388,48 +378,18 @@ export class Resource {
 
     this.isMeasureRequested_ = false;
 
-    let box = this.resources_.getViewport().getLayoutRect(this.element);
-    const oldBox = this.layoutBox_;
-    const viewport = this.resources_.getViewport();
-    this.layoutBox_ = box;
-
-    // Calculate whether the element is currently is or in `position:fixed`.
-    let isFixed = false;
-    if (this.isDisplayed()) {
-      const win = this.resources_.win;
-      const body = win.document.body;
-      for (let n = this.element; n && n != body; n = n./*OK*/offsetParent) {
-        if (n.isAlwaysFixed && n.isAlwaysFixed()) {
-          isFixed = true;
-          break;
-        }
-        if (viewport.isDeclaredFixed(n)
-            && computedStyle(win, n).position == 'fixed') {
-          isFixed = true;
-          break;
-        }
-      }
-    }
-    this.isFixed_ = isFixed;
-
-    if (isFixed) {
-      // For fixed position elements, we need the relative position to the
-      // viewport. When accessing the layoutBox through #getLayoutBox, we'll
-      // return the new absolute position.
-      box = this.layoutBox_ = moveLayoutRect(box, -viewport.getScrollLeft(),
-          -viewport.getScrollTop());
-    }
+    const oldBox = this.getPageLayoutBox();
+    const box = this.resources_.getLayers().remeasure(this.element);
 
     // Note that "left" doesn't affect readiness for the layout.
     if (this.state_ == ResourceState.NOT_LAID_OUT ||
-          oldBox.top != box.top ||
-          oldBox.width != box.width ||
-          oldBox.height != box.height) {
-
+        oldBox.top != box.top ||
+        oldBox.width != box.width ||
+        oldBox.height != box.height) {
       if (this.element.isUpgraded() &&
-              this.state_ != ResourceState.NOT_BUILT &&
-              (this.state_ == ResourceState.NOT_LAID_OUT ||
-                  this.element.isRelayoutNeeded())) {
+          this.state_ != ResourceState.NOT_BUILT &&
+          (this.state_ == ResourceState.NOT_LAID_OUT ||
+              this.element.isRelayoutNeeded())) {
         this.state_ = ResourceState.READY_FOR_LAYOUT;
       }
     }
@@ -447,12 +407,7 @@ export class Resource {
    */
   completeCollapse() {
     toggle(this.element, false);
-    this.layoutBox_ = layoutRectLtwh(
-        this.layoutBox_.left,
-        this.layoutBox_.top,
-        0, 0);
-    this.isFixed_ = false;
-    this.element.updateLayoutBox(this.layoutBox_);
+    this.requestMeasure();
     const owner = this.getOwner();
     if (owner) {
       owner.collapsedCallback(this.element);
@@ -502,12 +457,7 @@ export class Resource {
    * @return {!../layout-rect.LayoutRectDef}
    */
   getLayoutBox() {
-    if (!this.isFixed_) {
-      return this.layoutBox_;
-    }
-    const viewport = this.resources_.getViewport();
-    return moveLayoutRect(this.layoutBox_, viewport.getScrollLeft(),
-        viewport.getScrollTop());
+    return this.resources_.getLayers().getAbsoluteLayoutBox(this.element);
   }
 
   /**
@@ -516,7 +466,7 @@ export class Resource {
    * @return {!../layout-rect.LayoutRectDef}
    */
   getPageLayoutBox() {
-    return this.layoutBox_;
+    return this.resources_.getLayers().getPageLayoutBox(this.element);
   }
 
   /**
@@ -526,7 +476,7 @@ export class Resource {
   getInitialLayoutBox() {
     // Before the first measure, there will be no initial layoutBox.
     // Luckily, layoutBox will be present but essentially useless.
-    return this.initialLayoutBox_ || this.layoutBox_;
+    return this.initialLayoutBox_ || this.getPageLayoutBox();
   }
 
   /**
@@ -535,9 +485,10 @@ export class Resource {
    * @return {boolean}
    */
   isDisplayed() {
-    return (this.layoutBox_.height > 0 && this.layoutBox_.width > 0 &&
+    const box = this.getPageLayoutBox();
+    return box.height > 0 && box.width > 0 &&
         !!this.element.ownerDocument &&
-        !!this.element.ownerDocument.defaultView);
+        !!this.element.ownerDocument.defaultView;
   }
 
   /**
@@ -545,7 +496,7 @@ export class Resource {
    * @return {boolean}
    */
   isFixed() {
-    return this.isFixed_;
+    return this.resources_.getLayers().isFixed(this.element);
   }
 
   /**
