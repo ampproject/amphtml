@@ -488,9 +488,9 @@ describes.sandboxed('DOM', {}, env => {
 
 
     expect(toArray(dom.scopedQuerySelectorAll(parent, 'div')))
-      .to.deep.equal([element1, element2]);
+        .to.deep.equal([element1, element2]);
     expect(toArray(dom.scopedQuerySelectorAll(grandparent, 'div div')))
-      .to.deep.equal([element1, element2]);
+        .to.deep.equal([element1, element2]);
   }
 
   it('scopedQuerySelectorAll should find all matches',
@@ -636,7 +636,7 @@ describes.sandboxed('DOM', {}, env => {
       const element = document.createElement('element');
       element.setAttribute('data-vars-event-name', 'click');
       const params = dom.getDataParamsFromAttributes(element, null,
-        /^vars(.+)/);
+          /^vars(.+)/);
       expect(params.eventName).to.be.equal('click');
     });
   });

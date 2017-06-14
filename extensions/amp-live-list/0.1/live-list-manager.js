@@ -164,7 +164,7 @@ export class LiveListManager {
     const id = liveList.getAttribute('id');
     user().assert(id, 'amp-live-list must have an id.');
     user().assert(id in this.liveLists_, `amp-live-list#${id} found but did ` +
-        `not exist on original page load.`);
+        'not exist on original page load.');
     const inClientDomLiveList = this.liveLists_[id];
     inClientDomLiveList.toggle(!liveList.hasAttribute('disabled'));
 

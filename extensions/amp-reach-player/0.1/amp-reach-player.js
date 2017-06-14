@@ -57,8 +57,8 @@ class AmpReachPlayer extends AMP.BaseElement {
   pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
       this.iframe_.contentWindow./*OK*/postMessage(
-        'pause',
-        'https://player-cdn.beachfrontmedia.com'
+          'pause',
+          'https://player-cdn.beachfrontmedia.com'
       );
     }
   }

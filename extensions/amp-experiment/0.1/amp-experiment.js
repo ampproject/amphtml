@@ -37,9 +37,9 @@ export class AmpExperiment extends AMP.BaseElement {
     const variants = Object.keys(config).map(experimentName => {
       return allocateVariant(
           this.getAmpDoc(), experimentName, config[experimentName])
-              .then(variantName => {
-                results[experimentName] = variantName;
-              });
+          .then(variantName => {
+            results[experimentName] = variantName;
+          });
     });
 
 

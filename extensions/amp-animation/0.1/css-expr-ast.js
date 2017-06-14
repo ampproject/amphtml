@@ -307,11 +307,11 @@ export class CssNumericNode extends CssNode {
   }
 
   /**
-   * @param {number} percent
+   * @param {number} unusedPercent
    * @param {!CssContext} unusedContext
    * @return {!CssNumericNode}
    */
-  calcPercent(percent, unusedContext) {
+  calcPercent(unusedPercent, unusedContext) {
     throw new Error('cannot calculate percent for ' + this.type_);
   }
 }

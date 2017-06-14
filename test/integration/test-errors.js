@@ -44,9 +44,9 @@ describe.configure().retryOnSaucelabs().run('error page', function() {
   });
 
   it.configure().skipFirefox().skipEdge()
-  .run('should show the body in error test', () => {
-    return expectBodyToBecomeVisible(fixture.win);
-  });
+      .run('should show the body in error test', () => {
+        return expectBodyToBecomeVisible(fixture.win);
+      });
 
   function shouldFail(id) {
     // Skip for issue #110

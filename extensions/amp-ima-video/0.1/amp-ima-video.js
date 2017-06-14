@@ -119,9 +119,9 @@ class AmpImaVideo extends AMP.BaseElement {
     });
 
     this.unlistenMessage_ = listen(
-      this.win,
-      'message',
-      this.handlePlayerMessages_.bind(this)
+        this.win,
+        'message',
+        this.handlePlayerMessages_.bind(this)
     );
 
     this.element.appendChild(iframe);

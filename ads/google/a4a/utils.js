@@ -203,42 +203,42 @@ export function groupAmpAdsByType(win, type, groupFn) {
 export function googlePageParameters(win, doc, startTime, output = 'html') {
   const referrerPromise = viewerForDoc(doc).getReferrerUrl();
   return getOrCreateAdCid(doc, 'AMP_ECID_GOOGLE', '_ga')
-    .then(clientId => referrerPromise.then(referrer => {
-      const documentInfo = documentInfoForDoc(win.document);
+      .then(clientId => referrerPromise.then(referrer => {
+        const documentInfo = documentInfoForDoc(win.document);
         // Read by GPT for GA/GPT integration.
-      win.gaGlobal = win.gaGlobal ||
+        win.gaGlobal = win.gaGlobal ||
         {cid: clientId, hid: documentInfo.pageViewId};
-      const screen = win.screen;
-      const viewport = viewportForDoc(win.document);
-      const viewportRect = viewport.getRect();
-      const viewportSize = viewport.getSize();
-      return {
-        'is_amp': AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
-        'amp_v': '$internalRuntimeVersion$',
-        'd_imp': '1',
-        'c': getCorrelator(win, clientId),
-        'dt': startTime,
-        output,
-        'biw': viewportRect.width,
-        'bih': viewportRect.height,
-        'u_aw': screen ? screen.availWidth : null,
-        'u_ah': screen ? screen.availHeight : null,
-        'u_cd': screen ? screen.colorDepth : null,
-        'u_w': screen ? screen.width : null,
-        'u_h': screen ? screen.height : null,
-        'u_tz': -new Date().getTimezoneOffset(),
-        'u_his': getHistoryLength(win),
-        'brdim': additionalDimensions(win, viewportSize),
-        'isw': viewportSize.width,
-        'ish': viewportSize.height,
-        'art': isCanary(win) ? '2' : null,
-        'url': documentInfo.canonicalUrl,
-        'top': win != win.top ? topWindowUrlOrDomain(win) : null,
-        'loc': win.location.href == documentInfo.canonicalUrl ?
+        const screen = win.screen;
+        const viewport = viewportForDoc(win.document);
+        const viewportRect = viewport.getRect();
+        const viewportSize = viewport.getSize();
+        return {
+          'is_amp': AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
+          'amp_v': '$internalRuntimeVersion$',
+          'd_imp': '1',
+          'c': getCorrelator(win, clientId),
+          'dt': startTime,
+          output,
+          'biw': viewportRect.width,
+          'bih': viewportRect.height,
+          'u_aw': screen ? screen.availWidth : null,
+          'u_ah': screen ? screen.availHeight : null,
+          'u_cd': screen ? screen.colorDepth : null,
+          'u_w': screen ? screen.width : null,
+          'u_h': screen ? screen.height : null,
+          'u_tz': -new Date().getTimezoneOffset(),
+          'u_his': getHistoryLength(win),
+          'brdim': additionalDimensions(win, viewportSize),
+          'isw': viewportSize.width,
+          'ish': viewportSize.height,
+          'art': isCanary(win) ? '2' : null,
+          'url': documentInfo.canonicalUrl,
+          'top': win != win.top ? topWindowUrlOrDomain(win) : null,
+          'loc': win.location.href == documentInfo.canonicalUrl ?
           null : win.location.href,
-        'ref': referrer,
-      };
-    }));
+          'ref': referrer,
+        };
+      }));
 }
 
 /**
@@ -256,10 +256,10 @@ export function googleAdUrl(
   // TODO: Maybe add checks in case these promises fail.
   const blockLevelParameters = googleBlockParameters(a4a, opt_experimentIds);
   return googlePageParameters(a4a.win, a4a.getAmpDoc(), startTime)
-    .then(pageLevelParameters => {
-      Object.assign(parameters, blockLevelParameters, pageLevelParameters);
-      return truncAndTimeUrl(baseUrl, parameters, startTime);
-    });
+      .then(pageLevelParameters => {
+        Object.assign(parameters, blockLevelParameters, pageLevelParameters);
+        return truncAndTimeUrl(baseUrl, parameters, startTime);
+      });
 }
 
 /**
@@ -270,7 +270,7 @@ export function googleAdUrl(
  */
 export function truncAndTimeUrl(baseUrl, parameters, startTime) {
   return buildUrl(
-    baseUrl, parameters, MAX_URL_LENGTH - 10, {name: 'trunc', value: '1'})
+      baseUrl, parameters, MAX_URL_LENGTH - 10, {name: 'trunc', value: '1'})
     + '&dtd=' + elapsedTimeWithCeiling(Date.now(), startTime);
 }
 
@@ -429,15 +429,15 @@ export function additionalDimensions(win, viewportSize) {
     innerHeight = viewportSize.height;
   } catch (e) {}
   return [win.screenLeft,
-          win.screenTop,
-          screenX,
-          screenY,
-          win.screen ? win.screen.availWidth : undefined,
-          win.screen ? win.screen.availTop : undefined,
-          outerWidth,
-          outerHeight,
-          innerWidth,
-          innerHeight].join();
+    win.screenTop,
+    screenX,
+    screenY,
+    win.screen ? win.screen.availWidth : undefined,
+    win.screen ? win.screen.availTop : undefined,
+    outerWidth,
+    outerHeight,
+    innerWidth,
+    innerHeight].join();
 };
 
 /**
@@ -504,7 +504,7 @@ export function extractAmpAnalyticsConfig(
     const baseCsiUrl = 'https://csi.gstatic.com/csi?s=a4a' +
         `&c=${correlator}&slotId=${slotId}&qqid.${slotId}=${qqid}` +
         `&dt=${opt_initTime}` +
-        (eids != 'null' ? `&e.${slotId}=${eids}` : ``) +
+        (eids != 'null' ? `&e.${slotId}=${eids}` : '') +
         `&rls=$internalRuntimeVersion$&adt.${slotId}=${adType}`;
     opt_deltaTime = Math.round(opt_deltaTime);
 

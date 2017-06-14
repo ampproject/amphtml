@@ -57,7 +57,7 @@ function getAdInfo(e) {
   } else if (e.detail.isReady && (e.detail.width != e.target.width ||
       e.detail.width != e.target.width)) {
     global.context.renderStart({width: e.detail.width,
-        height: e.detail.height});
+      height: e.detail.height});
   } else {
     global.context.noContentAvailable();
   }

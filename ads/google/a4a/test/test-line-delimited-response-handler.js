@@ -59,7 +59,7 @@ describe('#line-delimited-response-handler', () => {
       chunkResolver();
     }
     lineDelimitedStreamer(
-      win, response, metaJsonCreativeGrouper(chunkHandlerWrapper));
+        win, response, metaJsonCreativeGrouper(chunkHandlerWrapper));
     return chunkPromise.then(() => {
       expect(chunkHandlerStub.callCount).to.equal(slotData.length);
       // Could have duplicate responses so need to iterate and get counts.
@@ -71,7 +71,7 @@ describe('#line-delimited-response-handler', () => {
       });
       slotData.forEach(slot => {
         expect(chunkHandlerStub.withArgs(slot.creative, slot.headers).callCount)
-          .to.equal(calls[slot.creative + JSON.stringify(slot.headers)]);
+            .to.equal(calls[slot.creative + JSON.stringify(slot.headers)]);
       });
     });
   }
@@ -131,7 +131,7 @@ describe('#line-delimited-response-handler', () => {
       let chunk = 0;
       do {
         const value = textEncoder.encode(responseString.substr(
-          chunk * CHUNK_SIZE, CHUNK_SIZE), {'stream': true});
+            chunk * CHUNK_SIZE, CHUNK_SIZE), {'stream': true});
         const done = chunk * CHUNK_SIZE >= responseString.length - 1;
         readStub.onCall(chunk).returns(Promise.resolve({value, done}));
       } while (chunk++ * CHUNK_SIZE < responseString.length);

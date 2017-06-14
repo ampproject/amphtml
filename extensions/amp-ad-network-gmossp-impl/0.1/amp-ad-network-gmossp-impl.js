@@ -47,8 +47,8 @@ export class AmpAdNetworkGmosspImpl extends AmpA4A {
   isValidElement() {
     return this.isAmpAdElement() &&
       startsWith(
-        this.element.getAttribute('src') || '',
-        GMOSSP_BASE_URL_
+          this.element.getAttribute('src') || '',
+          GMOSSP_BASE_URL_
       );
   }
 
@@ -73,7 +73,7 @@ export class AmpAdNetworkGmosspImpl extends AmpA4A {
       if (responseHeaders.has(AMP_SIGNATURE_HEADER_)) {
         signature =
           base64UrlDecodeToBytes(dev().assertString(
-            responseHeaders.get(AMP_SIGNATURE_HEADER_)));
+              responseHeaders.get(AMP_SIGNATURE_HEADER_)));
       }
     } finally {
       return Promise.resolve(/** @type
@@ -85,4 +85,4 @@ export class AmpAdNetworkGmosspImpl extends AmpA4A {
 }
 
 AMP.registerElement('amp-ad-network-gmossp-impl',
-  AmpAdNetworkGmosspImpl);
+    AmpAdNetworkGmosspImpl);

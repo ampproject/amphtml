@@ -71,7 +71,7 @@ export class StandardActions {
     actionService.addGlobalMethodHandler('hide', this.handleHide.bind(this));
     actionService.addGlobalMethodHandler('show', this.handleShow.bind(this));
     actionService.addGlobalMethodHandler(
-      'toggleVisibility', this.handleToggle.bind(this));
+        'toggleVisibility', this.handleToggle.bind(this));
   }
 
   /**
@@ -96,9 +96,9 @@ export class StandardActions {
             }
             bind.setStateWithExpression(objectString, scope);
           } else {
-            user().error('AMP-BIND', `Please use the object-literal syntax, `
-                + `e.g. "AMP.setState({foo: 'bar'})" instead of `
-                + `"AMP.setState(foo='bar')".`);
+            user().error('AMP-BIND', 'Please use the object-literal syntax, '
+                + 'e.g. "AMP.setState({foo: \'bar\'})" instead of '
+                + '"AMP.setState(foo=\'bar\')".');
           }
         });
         return;

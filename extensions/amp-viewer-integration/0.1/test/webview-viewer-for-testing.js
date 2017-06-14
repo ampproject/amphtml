@@ -179,7 +179,7 @@ export class WebviewViewerForTesting {
 
     this.messaging_.setDefaultHandler((type, payload, awaitResponse) => {
       console/*OK*/.log(
-        'viewer receiving message: ', type, payload, awaitResponse);
+          'viewer receiving message: ', type, payload, awaitResponse);
       return Promise.resolve();
     });
 

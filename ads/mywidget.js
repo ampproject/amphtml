@@ -74,5 +74,5 @@ export function mywidget(global, data) {
 
   // load the myWidget initializer asynchronously
   loadScript(global, 'https://likemore-go.imgsmail.ru/widget.amp.js', () => {},
-    global.context.noContentAvailable);
+      global.context.noContentAvailable);
 }

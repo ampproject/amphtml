@@ -114,7 +114,7 @@ describe('amp-img', () => {
 
       impl.getVsync = function() {
         return {
-          mutate: function(fn) {
+          mutate(fn) {
             fn();
           },
         };

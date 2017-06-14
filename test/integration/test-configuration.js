@@ -22,9 +22,9 @@ describe('Configuration', function() {
   let fixture;
   beforeEach(() => {
     return createFixtureIframe('test/fixtures/configuration.html', 500)
-    .then(f => {
-      fixture = f;
-    });
+        .then(f => {
+          fixture = f;
+        });
   });
 
   it('urls should be configurable', () => {
@@ -39,11 +39,11 @@ describe('Configuration', function() {
     return fixture.awaitEvent('amp:load:start', 1).then(() => {
       expect(fixture.win.AMP.config.urls.cdn).to.equal(config.cdnUrl);
       expect(fixture.win.AMP.config.urls.thirdParty)
-      .to.equal(config.thirdPartyUrl);
+          .to.equal(config.thirdPartyUrl);
       expect(fixture.win.AMP.config.urls.thirdPartyFrameRegex)
-      .to.equal(config.thirdPartyFrameRegex);
+          .to.equal(config.thirdPartyFrameRegex);
       expect(fixture.win.AMP.config.urls.errorReporting)
-      .to.equal(config.errorReportingUrl);
+          .to.equal(config.errorReportingUrl);
     });
   });
 });

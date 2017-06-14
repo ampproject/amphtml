@@ -70,7 +70,7 @@ class AmpSocialShare extends AMP.BaseElement {
       // Hide/ignore non-system component if system share wants to be unique
       const systemOnly = ('share' in navigator) &&
         !!this.win.document.querySelectorAll(
-          'amp-social-share[type=system][data-mode=replace]').length;
+            'amp-social-share[type=system][data-mode=replace]').length;
       if (systemOnly) {
         setStyle(this.element, 'display', 'none');
         return;

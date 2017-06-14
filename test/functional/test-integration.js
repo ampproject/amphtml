@@ -66,18 +66,18 @@ describe('3p integration.js', () => {
   });
 
   it('should throw in validateParentOrigin with incorrect ancestorOrigins',
-    () => {
-      const parent = {
-        origin: 'abc',
-      };
-      expect(() => {
-        validateParentOrigin({
-          location: {
-            ancestorOrigins: ['xyz'],
-          },
-        }, parent);
-      }).to.throw(/Parent origin mismatch/);
-    });
+      () => {
+        const parent = {
+          origin: 'abc',
+        };
+        expect(() => {
+          validateParentOrigin({
+            location: {
+              ancestorOrigins: ['xyz'],
+            },
+          }, parent);
+        }).to.throw(/Parent origin mismatch/);
+      });
 
   it('should parse JSON from fragment unencoded (most browsers)', () => {
     const unencoded = '#{"tweetid":"638793490521001985","width":390,' +

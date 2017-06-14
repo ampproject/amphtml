@@ -44,11 +44,11 @@ function fakeTouchEvent(type) {
     'pageY': 20,
     'thisshouldnotgetcopied': 'bla',
     touches:
-        [{'clientX': 20, 'clientY': 30, 'screenX': 10, 'screenY': 20,
-          'dontcopythis': 234}],
+    [{'clientX': 20, 'clientY': 30, 'screenX': 10, 'screenY': 20,
+      'dontcopythis': 234}],
     changedTouches:
         [{'clientX': 20, 'clientY': 30, 'screenX': 10, 'screenY': 20}],
-    preventDefault: function() {},
+    preventDefault() {},
   };
 }
 

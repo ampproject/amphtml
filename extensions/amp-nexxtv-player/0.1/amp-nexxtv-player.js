@@ -81,13 +81,13 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     }
 
     const mediaId = user().assert(
-      this.element.getAttribute('data-mediaid'),
-      'The data-mediaid attribute is required for <amp-nexxtv-player> %s',
-      this.element);
+        this.element.getAttribute('data-mediaid'),
+        'The data-mediaid attribute is required for <amp-nexxtv-player> %s',
+        this.element);
 
     const client = user().assert(this.element.getAttribute('data-client'),
-      'The data-client attribute is required for <amp-nexxtv-player> %s',
-      this.element);
+        'The data-client attribute is required for <amp-nexxtv-player> %s',
+        this.element);
 
     const start = this.element.getAttribute('data-seek-to') || '0';
     const mode = this.element.getAttribute('data-mode') || 'static';

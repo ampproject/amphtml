@@ -369,25 +369,25 @@ describe('IntersectionObserver', () => {
     element.win = window;
     element.getVsync = function() {
       return {
-        measure: function(fn) {
+        measure(fn) {
           fn();
         },
       };
     };
     element.getViewport = function() {
       return {
-        onScroll: function() {
+        onScroll() {
           onScrollSpy();
           return function() {};
         },
-        onChanged: function() {
+        onChanged() {
           onChangeSpy();
           return function() {};
         },
       };
     };
     element.element = {
-      getIntersectionChangeEntry: function() {
+      getIntersectionChangeEntry() {
         getIntersectionChangeEntrySpy();
         const rootBounds = layoutRectLtwh(198, 299, 100, 100);
         const layoutBox = layoutRectLtwh(50, 100, 150, 200);

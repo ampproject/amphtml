@@ -54,6 +54,6 @@ describe('amp-gist', () => {
 
   it('Rejects because data-gistid is missing', () => {
     expect(getIns('')).to.be.rejectedWith(
-      /The data-gistid attribute is required for/);
+        /The data-gistid attribute is required for/);
   });
 });

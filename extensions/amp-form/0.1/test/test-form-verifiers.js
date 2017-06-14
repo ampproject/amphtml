@@ -25,17 +25,17 @@ import {toggleExperiment} from '../../../../src/experiments';
 describes.fakeWin('amp-form async verification', {}, env => {
   function stubValidationMessage(input) {
     Object.defineProperty(input, 'validationMessage', {
-      get: function() {
+      get() {
         return this.fakeValidationMessage_;
       },
-      set: function(value) {
+      set(value) {
         this.fakeValidationMessage_ = value;
       },
     });
 
     const originalSetCustomValidity = input.setCustomValidity.bind(input);
     Object.defineProperty(input, 'setCustomValidity', {
-      value: function(message) {
+      value(message) {
         this.validationMessage = message;
         originalSetCustomValidity(message);
       },

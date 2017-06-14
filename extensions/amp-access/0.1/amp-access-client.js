@@ -123,10 +123,10 @@ export class AccessClientAdapter {
     return urlPromise.then(url => {
       dev().fine(TAG, 'Authorization URL: ', url);
       return this.timer_.timeoutPromise(
-        this.authorizationTimeout_,
-        this.xhr_.fetchJson(url, {
-          credentials: 'include',
-        })).then(res => res.json());
+          this.authorizationTimeout_,
+          this.xhr_.fetchJson(url, {
+            credentials: 'include',
+          })).then(res => res.json());
     });
   }
 

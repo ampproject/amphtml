@@ -114,7 +114,7 @@ describe('amp-call-tracking', () => {
         defaultContent,
       }).then(callTrackingEl => {
         expectHyperlinkToBe(
-          callTrackingEl, `tel:${phoneNumber}`, formattedPhoneNumber);
+            callTrackingEl, `tel:${phoneNumber}`, formattedPhoneNumber);
       });
     });
   });

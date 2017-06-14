@@ -103,7 +103,7 @@ export function adsenseIsA4AEnabled(win, element) {
 
   return !!element.getAttribute('data-ad-client') &&
       googleAdsIsA4AEnabled(
-        win, element, ADSENSE_A4A_EXPERIMENT_NAME,
-        externalBranches, internalBranches,
-        ADSENSE_A4A_EXTERNAL_DELAYED_EXPERIMENT_BRANCHES_PRE_LAUNCH);
+          win, element, ADSENSE_A4A_EXPERIMENT_NAME,
+          externalBranches, internalBranches,
+          ADSENSE_A4A_EXTERNAL_DELAYED_EXPERIMENT_BRANCHES_PRE_LAUNCH);
 }

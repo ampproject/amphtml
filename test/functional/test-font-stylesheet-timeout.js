@@ -34,12 +34,12 @@ describes.realWin('font-stylesheet-timeout', {
     readyState = 'interactive';
     responseStart = 0;
     Object.defineProperty(win.document, 'readyState', {
-      get: function() {
+      get() {
         return readyState;
       },
     });
     Object.defineProperty(win.performance.timing, 'responseStart', {
-      get: function() {
+      get() {
         return responseStart;
       },
     });

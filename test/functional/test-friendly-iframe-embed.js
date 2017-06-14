@@ -252,8 +252,8 @@ describe('friendly-iframe-embed', () => {
     resourcesMock
         .expects('getResourcesInRect')
         .withExactArgs(
-            sinon.match(arg => arg == iframe.contentWindow),
-            sinon.match(arg =>
+        sinon.match(arg => arg == iframe.contentWindow),
+        sinon.match(arg =>
                 arg.left == 0 &&
                 arg.top == 0 &&
                 arg.width == iframe.contentWindow.innerWidth &&
@@ -286,8 +286,8 @@ describe('friendly-iframe-embed', () => {
     resourcesMock
         .expects('getResourcesInRect')
         .withExactArgs(
-            sinon.match(arg => arg == iframe.contentWindow),
-            sinon.match(arg =>
+        sinon.match(arg => arg == iframe.contentWindow),
+        sinon.match(arg =>
                 arg.left == 10 &&
                 arg.top == 10 &&
                 arg.width == 100 &&
@@ -507,12 +507,12 @@ describe('friendly-iframe-embed', () => {
             loadExtension: () => {},
           }},
         },
-        setInterval: function() {
+        setInterval() {
           const interval = window.setInterval.apply(window, arguments);
           polls.push(interval);
           return interval;
         },
-        clearInterval: function(interval) {
+        clearInterval(interval) {
           window.clearInterval.apply(window, arguments);
           const index = polls.indexOf(interval);
           if (index != -1) {

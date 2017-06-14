@@ -337,7 +337,7 @@ describes.sandboxed('amp-accordion', {}, () => {
       return iframe.addElement(ampAccordion2).then(() => {
         ampAccordion1.implementation_.buildCallback();
         const headerElements1 = ampAccordion1.querySelectorAll(
-          'section > *:first-child');
+            'section > *:first-child');
         const clickEventElement = {
           target: headerElements1[0],
           currentTarget: headerElements1[0],
@@ -346,7 +346,7 @@ describes.sandboxed('amp-accordion', {}, () => {
         ampAccordion1.implementation_.onHeaderPicked_(clickEventElement);
         ampAccordion2.implementation_.buildCallback();
         const headerElements2 = ampAccordion2.querySelectorAll(
-          'section > *:first-child');
+            'section > *:first-child');
         expect(headerElements1[0].parentNode.hasAttribute('expanded'))
             .to.be.true;
         expect(headerElements2[0].parentNode.hasAttribute('expanded'))

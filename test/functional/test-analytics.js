@@ -62,7 +62,7 @@ describes.realWin('analytics', {amp: true}, env => {
 
     it('should trigger analytics event if analytics is installed', () => {
       registerServiceBuilderForDoc(
-        ampdoc, 'amp-analytics-instrumentation', MockInstrumentation);
+          ampdoc, 'amp-analytics-instrumentation', MockInstrumentation);
       // Force instantiation
       getServiceForDoc(ampdoc, 'amp-analytics-instrumentation');
       triggerAnalyticsEvent(ampdoc.win.document, 'hello');

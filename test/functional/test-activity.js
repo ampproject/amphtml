@@ -56,7 +56,7 @@ describe('Activity getTotalEngagedTime', () => {
 
     fakeDoc = {
       nodeType: /* DOCUMENT */ 9,
-      addEventListener: function(eventName, callback) {
+      addEventListener(eventName, callback) {
         if (eventName === 'mousedown') {
           mousedownObservable.add(callback);
         }

@@ -50,9 +50,9 @@ class AmpGfycat extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const gfyid = user().assert(
-      this.element.getAttribute('data-gfyid'),
-      'The data-gfyid attribute is required for <amp-gfycat> %s',
-      this.element);
+        this.element.getAttribute('data-gfyid'),
+        'The data-gfyid attribute is required for <amp-gfycat> %s',
+        this.element);
     const noautoplay = this.element.hasAttribute('noautoplay');
 
     const iframe = this.element.ownerDocument.createElement('iframe');

@@ -18,8 +18,8 @@ import {writeScript, validateData} from '../3p/3p';
 import {getSourceOrigin, getSourceUrl} from '../src/url';
 
 const pubmineOptional = ['adsafe', 'section', 'wordads'],
-  pubmineRequired = ['siteid'],
-  pubmineURL = 'https://s.pubmine.com/head.js';
+    pubmineRequired = ['siteid'],
+    pubmineURL = 'https://s.pubmine.com/head.js';
 
 /**
  * @param {!Window} global
@@ -39,14 +39,14 @@ export function pubmine(global, data) {
   writeScript(global, pubmineURL);
 
   const o = {
-      sectionId: data['siteid'] + ('section' in data ? data.section : '1'),
-      height: data.height,
-      width: data.width,
-    },
-    wr = global.document.write;
+        sectionId: data['siteid'] + ('section' in data ? data.section : '1'),
+        height: data.height,
+        width: data.width,
+      },
+      wr = global.document.write;
 
   wr.call(global.document,
-    `<script type="text/javascript">
+      `<script type="text/javascript">
       (function(g){g.__ATA.initAd(
         {sectionId:${o.sectionId}, width:${o.width}, height:${o.height}});
       })(window);

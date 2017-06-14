@@ -417,11 +417,11 @@ export class VisibilityTracker extends EventTracker {
         selectionMethod
         ).then(element => {
           return visibilityManager.listenElement(
-            element,
-            visibilitySpec,
-            this.getReadyPromise(waitForSpec, selector, element),
-            createReadyReportPromiseFunc,
-            this.onEvent_.bind(this, eventType, listener, element));
+              element,
+              visibilitySpec,
+              this.getReadyPromise(waitForSpec, selector, element),
+              createReadyReportPromiseFunc,
+              this.onEvent_.bind(this, eventType, listener, element));
         });
     return function() {
       unlistenPromise.then(unlisten => {

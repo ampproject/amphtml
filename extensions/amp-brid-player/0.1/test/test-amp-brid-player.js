@@ -121,26 +121,26 @@ describe('amp-brid-player', () => {
       const iframe = bc.querySelector('iframe');
 
       return Promise.resolve()
-        .then(() => {
-          const p = listenOncePromise(bc, VideoEvents.PLAY);
-          sendFakeMessage(bc, iframe, 'trigger|play');
-          return p;
-        })
-        .then(() => {
-          const p = listenOncePromise(bc, VideoEvents.MUTED);
-          sendFakeMessage(bc, iframe, 'volume|0');
-          return p;
-        })
-        .then(() => {
-          const p = listenOncePromise(bc, VideoEvents.PAUSE);
-          sendFakeMessage(bc, iframe, 'trigger|pause');
-          return p;
-        })
-        .then(() => {
-          const p = listenOncePromise(bc, VideoEvents.UNMUTED);
-          sendFakeMessage(bc, iframe, 'volume|1');
-          return p;
-        });
+          .then(() => {
+            const p = listenOncePromise(bc, VideoEvents.PLAY);
+            sendFakeMessage(bc, iframe, 'trigger|play');
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(bc, VideoEvents.MUTED);
+            sendFakeMessage(bc, iframe, 'volume|0');
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(bc, VideoEvents.PAUSE);
+            sendFakeMessage(bc, iframe, 'trigger|pause');
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(bc, VideoEvents.UNMUTED);
+            sendFakeMessage(bc, iframe, 'volume|1');
+            return p;
+          });
     });
   });
 

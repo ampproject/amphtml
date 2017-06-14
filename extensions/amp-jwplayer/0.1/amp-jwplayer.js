@@ -52,14 +52,14 @@ class AmpJWPlayer extends AMP.BaseElement {
     this.contentid_ = user().assert(
       (this.element.getAttribute('data-playlist-id') ||
       this.element.getAttribute('data-media-id')),
-      'Either the data-media-id or the data-playlist-id ' +
+        'Either the data-media-id or the data-playlist-id ' +
       'attributes must be specified for <amp-jwplayer> %s',
-      this.element);
+        this.element);
 
     this.playerid_ = user().assert(
-      this.element.getAttribute('data-player-id'),
-      'The data-player-id attribute is required for <amp-jwplayer> %s',
-      this.element);
+        this.element.getAttribute('data-player-id'),
+        'The data-player-id attribute is required for <amp-jwplayer> %s',
+        this.element);
   }
 
 
@@ -84,7 +84,7 @@ class AmpJWPlayer extends AMP.BaseElement {
       // The /players page can respond to "play" and "pause" commands from the
       // iframe's parent
       this.iframe_.contentWindow./*OK*/postMessage('pause',
-        'https://content.jwplatform.com');
+          'https://content.jwplatform.com');
     }
   }
 

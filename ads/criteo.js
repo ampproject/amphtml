@@ -58,8 +58,8 @@ function setTargeting(global, data) {
     const dblParams = {
       slot: data.slot,
       targeting: Criteo.ComputeDFPTargetingForAMP(
-        data.cookiename || Criteo.PubTag.RTA.DefaultCrtgRtaCookieName,
-        data.varname || Criteo.PubTag.RTA.DefaultCrtgContentName),
+          data.cookiename || Criteo.PubTag.RTA.DefaultCrtgRtaCookieName,
+          data.varname || Criteo.PubTag.RTA.DefaultCrtgContentName),
       width: data.width,
       height: data.height,
       type: 'criteo',

@@ -63,7 +63,7 @@ export const data = {
 <body>Hello, world.</body>
 </html>`,
 
-  signature: `ACWMjZEOeJKFek0b9LAGVFDsXPuGI8c1lFSUf+yVgVyswH0gBCoY9jaeNZnyWrKbSn2fNGp7F/tu5XGqkazkPatPRsUIRAII0aIbouiiRK/KUd+fX+gMiOssJH5yLBEukAMY5Te4pNSSOO27s0tzf/fhx9okOW2/23NkhazV9cGKAX6jxlMKSKgTQuZ3phynC3zyy1Tzn2r3jj1G9wvZXWqnexesOcbcX9BQYGvk5wGTjLUElA1QXqvhdzSQgyyX+ajvWBUNwVFHDQaQsV+2WGx0DhHaXmtgEBVnFSjzahELBPwH2SxrHzIfEZC4TP86VquNuAwetXulhwn5VjkbTOQoAeuw`,
+  signature: 'ACWMjZEOeJKFek0b9LAGVFDsXPuGI8c1lFSUf+yVgVyswH0gBCoY9jaeNZnyWrKbSn2fNGp7F/tu5XGqkazkPatPRsUIRAII0aIbouiiRK/KUd+fX+gMiOssJH5yLBEukAMY5Te4pNSSOO27s0tzf/fhx9okOW2/23NkhazV9cGKAX6jxlMKSKgTQuZ3phynC3zyy1Tzn2r3jj1G9wvZXWqnexesOcbcX9BQYGvk5wGTjLUElA1QXqvhdzSQgyyX+ajvWBUNwVFHDQaQsV+2WGx0DhHaXmtgEBVnFSjzahELBPwH2SxrHzIfEZC4TP86VquNuAwetXulhwn5VjkbTOQoAeuw',
 
   publicKey: `{
     "kty": "RSA",

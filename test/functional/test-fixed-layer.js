@@ -303,7 +303,7 @@ describe('FixedLayer', () => {
             `${expected.id}: wrong position`);
         expect(JSON.stringify(actual.selectors))
             .to.equal(JSON.stringify(expected.selectors),
-                `${expected.id}: wrong selectors`);
+            `${expected.id}: wrong selectors`);
       }
 
       expect(fixedLayer.elements_).to.have.length(5);
@@ -791,7 +791,7 @@ describe('FixedLayer', () => {
       expect(fe.element.style.top).to.equal('calc(17px + 11px)');
       // Remove.
       fixedLayer.vsync_ = {
-        mutate: function(callback) {
+        mutate(callback) {
           callback();
         },
       };
@@ -814,7 +814,7 @@ describe('FixedLayer', () => {
 
       // Remove.
       fixedLayer.vsync_ = {
-        mutate: function(callback) {
+        mutate(callback) {
           callback();
         },
       };

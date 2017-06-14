@@ -499,7 +499,7 @@ describe('amp-analytics.instrumentation OLD', function() {
         'verticalBoundaries': [0, 100],
         'horizontalBoundaries': [0, 100],
       }},
-      fn1);
+        fn1);
     ins.addListenerDepr_({'on': 'scroll', 'scrollSpec': {
       'verticalBoundaries': [92], 'horizontalBoundaries': [92]}}, fn2);
 
@@ -537,7 +537,7 @@ describe('amp-analytics.instrumentation OLD', function() {
         'verticalBoundaries': [0, 100],
         'horizontalBoundaries': [0, 100],
       }},
-      fn1);
+        fn1);
 
     // Scroll Down
     fakeViewport.getScrollTop.returns(10);
@@ -561,13 +561,13 @@ describe('amp-analytics.instrumentation OLD', function() {
       'scrollSpec': {
         'verticalBoundaries': undefined, 'horizontalBoundaries': undefined,
       }},
-      fn1);
+        fn1);
     expect(fn1).to.have.not.been.called;
 
     ins.addListenerDepr_({
       'on': 'scroll',
       'scrollSpec': {'verticalBoundaries': [], 'horizontalBoundaries': []}},
-      fn1);
+        fn1);
     expect(fn1).to.have.not.been.called;
 
     ins.addListenerDepr_({
@@ -575,7 +575,7 @@ describe('amp-analytics.instrumentation OLD', function() {
       'scrollSpec': {
         'verticalBoundaries': ['foo'], 'horizontalBoundaries': ['foo'],
       }},
-      fn1);
+        fn1);
     expect(fn1).to.have.not.been.called;
   });
 

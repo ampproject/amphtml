@@ -115,8 +115,8 @@ export function facebook(global, data) {
 
     FB.Event.subscribe('xfbml.resize', event => {
       context.updateDimensions(
-        parseInt(event.width, 10),
-        parseInt(event.height, 10) + /* margins */ 20);
+          parseInt(event.width, 10),
+          parseInt(event.height, 10) + /* margins */ 20);
     });
 
     FB.init({xfbml: true, version: 'v2.5'});

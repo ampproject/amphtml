@@ -65,4 +65,4 @@ if (self.console) {
       'Powered by AMP ⚡ HTML shadows – Version $internalRuntimeVersion$');
 }
 self.document.documentElement.setAttribute('amp-version',
-      '$internalRuntimeVersion$');
+    '$internalRuntimeVersion$');

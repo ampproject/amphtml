@@ -160,9 +160,9 @@ class AmpDailymotion extends AMP.BaseElement {
     this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(
-      this.win,
-      'message',
-      this.handleEvents_.bind(this)
+        this.win,
+        'message',
+        this.handleEvents_.bind(this)
     );
 
     this.hasAutoplay_ = this.element.hasAttribute('autoplay');

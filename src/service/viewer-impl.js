@@ -788,7 +788,7 @@ export class Viewer {
     }
     if (this.trustedViewerResolver_) {
       this.trustedViewerResolver_(
-        origin ? this.isTrustedViewerOrigin_(origin) : false);
+          origin ? this.isTrustedViewerOrigin_(origin) : false);
     }
     if (this.viewerOriginResolver_) {
       this.viewerOriginResolver_(origin || '');

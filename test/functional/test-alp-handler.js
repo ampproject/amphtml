@@ -33,7 +33,7 @@ describe('alp-handler', () => {
     win = {
       location: {},
       open: () => null,
-      Image: function() {
+      Image() {
         image = this;
       },
       postMessage: sandbox.stub(),

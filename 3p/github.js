@@ -39,9 +39,9 @@ function getGistJs(global, scriptSource, cb) {
  */
 export function github(global, data) {
   user().assert(
-    data.gistid,
-    'The data-gistid attribute is required for <amp-gist> %s',
-    data.element);
+      data.gistid,
+      'The data-gistid attribute is required for <amp-gist> %s',
+      data.element);
 
   let gistUrl = 'https://gist.github.com/' + encodeURIComponent(data.gistid) + '.js';
 
@@ -63,8 +63,8 @@ export function github(global, data) {
     }
 
     context.updateDimensions(
-      gistContainer./*OK*/offsetWidth,
-      gistContainer./*OK*/offsetHeight
+        gistContainer./*OK*/offsetWidth,
+        gistContainer./*OK*/offsetHeight
     );
   });
 }

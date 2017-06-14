@@ -17,7 +17,7 @@
 import {AmpForm, AmpFormService} from '../../amp-form';
 import {AmpMustache} from '../../../../amp-mustache/0.1/amp-mustache';
 import {poll} from '../../../../../testing/iframe';
-import {registerExtendedTemplate,} from
+import {registerExtendedTemplate} from
     '../../../../../src/service/template-impl';
 
 

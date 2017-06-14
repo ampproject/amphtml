@@ -144,7 +144,7 @@ export function composeEmbedUrl(options) {
 
 function sanitizeUrl(localtion) {
   return removeFragment(localtion.href)
-    .replace(localtion.protocol, ''); //remove scheme (cors) & fragment
+      .replace(localtion.protocol, ''); //remove scheme (cors) & fragment
 }
 
 export function composeItemSrcUrl(src, itemId) {

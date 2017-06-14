@@ -47,7 +47,7 @@ describe('EventHelper', () => {
       tagName: 'TEST',
       complete: false,
       readyState: '',
-      addEventListener: function(type, callback) {
+      addEventListener(type, callback) {
         if (type == 'load') {
           loadObservable.add(callback);
         } else if (type == 'error') {
@@ -56,7 +56,7 @@ describe('EventHelper', () => {
           expect(type).to.equal('load or error');
         }
       },
-      removeEventListener: function(type, callback) {
+      removeEventListener(type, callback) {
         if (type == 'load') {
           loadObservable.remove(callback);
         } else if (type == 'error') {
@@ -236,7 +236,7 @@ describe('EventHelper', () => {
     win.document = {};
     win.document.createEvent = function() {
       return {
-        initCustomEvent: function() {
+        initCustomEvent() {
           initCustomEventSpy();
         },
       };

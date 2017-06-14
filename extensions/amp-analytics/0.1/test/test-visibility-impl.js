@@ -536,7 +536,7 @@ describes.realWin('amp-analytics.visibility', {amp: true}, env => {
           .returns(resource);
       sandbox.stub(
           visibility.resourcesService_, 'getResourceForElementOptional')
-              .returns(resource);
+          .returns(resource);
       // no way to stub performance API so stub a private method instead
       sandbox.stub(visibility, 'getTotalTime_').returns(1234);
       return visibility;

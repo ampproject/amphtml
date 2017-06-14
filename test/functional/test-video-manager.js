@@ -34,7 +34,7 @@ describe('Fake Video Player Integration Tests', () => {
   // `amp-video` and `amp-youtube` as part of integration testing.
   runVideoPlayerIntegrationTests(fixture => {
     fixture.win.AMP.registerElement('amp-test-fake-videoplayer',
-      createFakeVideoPlayerClass(fixture.win));
+        createFakeVideoPlayerClass(fixture.win));
     return fixture.doc.createElement('amp-test-fake-videoplayer');
   });
 });

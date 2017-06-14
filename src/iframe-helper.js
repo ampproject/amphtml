@@ -203,10 +203,10 @@ function registerGlobalListenerIfNeeded(parentWin) {
     }
 
     const listenForEvents = getListenForEvents(
-      parentWin,
-      data.sentinel,
-      event.origin,
-      event.source
+        parentWin,
+        data.sentinel,
+        event.origin,
+        event.source
     );
     if (!listenForEvents) {
       return;
@@ -254,9 +254,9 @@ export function listenFor(
   registerGlobalListenerIfNeeded(parentWin);
 
   const listenForEvents = getOrCreateListenForEvents(
-    parentWin,
-    iframe,
-    opt_is3P
+      parentWin,
+      iframe,
+      opt_is3P
   );
 
 

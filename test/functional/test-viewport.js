@@ -490,7 +490,7 @@ describes.fakeWin('Viewport', {}, env => {
         .once();
     bindingMock.expects('hideViewerHeader').withArgs(true, 19).once();
     viewerViewportHandler({paddingTop: 0, duation: 300, curve: 'ease-in',
-        transient: true});
+      transient: true});
     bindingMock.verify();
     fixedLayerMock.verify();
   });
@@ -501,7 +501,7 @@ describes.fakeWin('Viewport', {}, env => {
     const fixedLayerMock = sandbox.mock(viewport.fixedLayer_);
     fixedLayerMock.expects('updatePaddingTop').withArgs(0).once();
     viewerViewportHandler({paddingTop: 0, duation: 300, curve: 'ease-in',
-        transient: 'true'});
+      transient: 'true'});
     fixedLayerMock.verify();
   });
 
@@ -1043,7 +1043,7 @@ describe('Viewport META', () => {
           documentElement: {
             style: {},
             classList: {
-              add: function() {},
+              add() {},
             },
           },
           querySelector: selector => {
