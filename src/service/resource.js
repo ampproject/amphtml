@@ -181,6 +181,9 @@ export class Resource {
     /** @private {?Function} */
     this.renderOutsideViewportResolve_ = null;
 
+    /** @private {number} */
+    this.renderOutsideViewportMultiplier_ = 1;
+
     /** @private {?Promise<undefined>} */
     this.layoutPromise_ = null;
 
@@ -566,16 +569,24 @@ export class Resource {
   }
 
   /**
+   * @param {number=} opt_multiplier an optional multipler such that promise
+   *    resolves when within that multiple of renderOutsideViewport (e.g. value
+   *    of 2 with standard 3 viewports would cause promise to resolve at 6 or
+   *    less).
    * @return {!Promise} resolves when underlying element is built and within the
    *    range specified by implementation's renderOutsideViewport
    */
-  whenWithinRenderOutsideViewport() {
+  whenWithinRenderOutsideViewport(opt_multiplier) {
+    dev().assert(!opt_multiplier || opt_multiplier > 0);
+    const multiplier = opt_multiplier || 1;
     if (!this.isLayoutPending()) {
       return Promise.resolve();
     }
     if (this.renderOutsideViewportPromise_) {
+      dev().assert(multiplier == this.renderOutsideViewportMultiplier_);
       return this.renderOutsideViewportPromise_;
     }
+    this.renderOutsideViewportMultiplier_ = multiplier;
     return this.renderOutsideViewportPromise_ = new Promise(resolver => {
       this.renderOutsideViewportResolve_ = resolver;
     });
@@ -592,6 +603,7 @@ export class Resource {
     this.renderOutsideViewportResolve_();
     this.renderOutsideViewportPromise_ = null;
     this.renderOutsideViewportResolve_ = null;
+    this.renderOutsideViewportMultiplier_ = 1;
   }
 
   /**
@@ -619,6 +631,7 @@ export class Resource {
       }
       return renders;
     }
+    dev().assertNumber(renders);
     // Numeric interface, element is allowed to render outside viewport when it
     // is within X times the viewport height of the current viewport.
     const viewportBox = this.resources_.getViewport().getRect();
@@ -653,11 +666,11 @@ export class Resource {
       this.resolveRenderOutsideViewport_();
       return true;
     }
-    const result = distance < viewportBox.height * multipler / scrollPenalty;
-    if (result) {
+    const calcDistance = viewportBox.height * multipler / scrollPenalty;
+    if (distance < calcDistance * this.renderOutsideViewportMultiplier_) {
       this.resolveRenderOutsideViewport_();
     }
-    return result;
+    return distance < calcDistance;
   }
 
   /**
