@@ -46,6 +46,9 @@ export class Toolbar {
       this.element.ownerDocument.createElement('header');
     this.sidebarElement_.parentElement
       .insertBefore(this.toolbarTarget_, this.sidebarElement_);
+    //Place the elements into the target
+    this.toolbarClone_ = this.element.cloneNode(true);
+    this.toolbarTarget_.appendChild(this.toolbarClone_);
     if (!this.isToolbarShown_()) {
       setStyles(this.toolbarTarget_, {
         'display': 'none',
@@ -65,7 +68,6 @@ export class Toolbar {
           this.toolbarOnlyElements_.push(toolbarOnlyElement);
         });
     }
-    return true;
   }
 
   /**
@@ -83,18 +85,15 @@ export class Toolbar {
    * @param {!Function} onChangeCallback - function called if toolbar changes on check
    */
   checkToolbar(onChangeCallback) {
+    console.log(this.toolbarMedia_);
     // Remove and add the toolbar dynamically
     if (this.isToolbarShown_() &&
       !this.toolbarTarget_.hasAttribute('toolbar')
     ) {
-      // Add the toolbar elements
-      this.toolbarClone_ = this.element.cloneNode(true);
-      this.toolbarTarget_.appendChild(this.toolbarClone_);
-      if (this.toolbarTarget_.style.display === 'none') {
-        setStyles(this.toolbarTarget_, {
-          'display': null,
-        });
-      }
+      // Display the elements
+      setStyles(this.toolbarTarget_, {
+        'display': null,
+      });
       if (this.toolbarOnlyElements_) {
         this.toolbarOnlyElements_.forEach(element => {
           setStyles(element, {
@@ -107,8 +106,10 @@ export class Toolbar {
     } else if (!this.isToolbarShown_() &&
       this.toolbarTarget_.hasAttribute('toolbar')
       ) {
-      // Remove the elements and the attribute
-      this.toolbarTarget_.removeChild(this.toolbarClone_);
+      // Hide the elements
+      setStyles(this.toolbarTarget_, {
+        'display': 'none',
+      });
       if (this.toolbarOnlyElements_) {
         this.toolbarOnlyElements_.forEach(element => {
           setStyles(element, {
@@ -117,13 +118,6 @@ export class Toolbar {
         });
       }
       this.toolbarTarget_.removeAttribute('toolbar');
-
-      // Check if our target still has elements, if not, do not display it
-      if (!this.toolbarTarget_.hasChildNodes()) {
-        setStyles(this.toolbarTarget_, {
-          'display': 'none',
-        });
-      }
       onChangeCallback();
     }
   }
