@@ -170,6 +170,7 @@ The structure created for the dialog looks as follows:
       Optional, appears if footer locale message is defined.
     </p>
   </div>
+  <p class="amp-access-laterpay-badge">Powered by <a href="https://laterpay.net" target="_blank">LaterPay</a></p>
 </div>
 ```
 
