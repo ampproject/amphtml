@@ -93,7 +93,7 @@ describe('Platform', () => {
     isIos = true;
     isSafari = true;
     isWebKit = true;
-    majorVersion = 0;
+    majorVersion = 9;
     iosVersion = '9.3';
     iosMajorVersion = 9;
     testUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 9_3 like Mac OS X)' +
