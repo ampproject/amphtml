@@ -69,7 +69,7 @@ const METADATA_STRING_NO_QUOTES =
 // acceptable solution to the 'Safari on iOS doesn't fetch iframe src from
 // cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
 /** @type {string} */
-export const DEFAULT_SAFEFRAME_VERSION = '1-0-8';
+export const DEFAULT_SAFEFRAME_VERSION = '1-0-9';
 
 /** @type {string} @visibleForTesting */
 export const RENDERING_TYPE_HEADER = 'X-AmpAdRender';
@@ -297,11 +297,11 @@ export class AmpA4A extends AMP.BaseElement {
      * @private {function(string, !Object=)}
      */
     this.protectedEmitLifecycleEvent_ = protectFunctionWrapper(
-      this.emitLifecycleEvent, this,
-      (err, varArgs) => {
-        dev().error(TAG, this.element.getAttribute('type'),
-            'Error on emitLifecycleEvent', err, varArgs) ;
-      });
+        this.emitLifecycleEvent, this,
+        (err, varArgs) => {
+          dev().error(TAG, this.element.getAttribute('type'),
+              'Error on emitLifecycleEvent', err, varArgs) ;
+        });
 
     /** @const {string} */
     this.sentinel = generateSentinel(window);
@@ -498,7 +498,7 @@ export class AmpA4A extends AMP.BaseElement {
     const slotRect = this.getIntersectionElementLayoutBox();
     if (slotRect.height == 0 || slotRect.width == 0) {
       dev().fine(
-        TAG, 'onLayoutMeasure canceled due height/width 0', this.element);
+          TAG, 'onLayoutMeasure canceled due height/width 0', this.element);
       return false;
     }
     if (!isAdPositionAllowed(this.element, this.win)) {
@@ -724,7 +724,7 @@ export class AmpA4A extends AMP.BaseElement {
           // is just to prefetch.
           const extensions = extensionsFor(this.win);
           creativeMetaDataDef.customElementExtensions.forEach(
-            extensionId => extensions.loadExtension(extensionId));
+              extensionId => extensions.loadExtension(extensionId));
           return creativeMetaDataDef;
         })
         .catch(error => {
@@ -826,27 +826,27 @@ export class AmpA4A extends AMP.BaseElement {
                 },
                 err => {
                   dev().error(
-                    TAG, this.element.getAttribute('type'), keyInfo.serviceName,
-                    err, this.element);
+                      TAG, this.element.getAttribute('type'),
+                      keyInfo.serviceName, err, this.element);
                 });
           });
         }))
         // some() returns an array of which we only need a single value.
-        .then(returnedArray => returnedArray[0], () => {
+            .then(returnedArray => returnedArray[0], () => {
           // Rejection occurs if all keys for this provider fail to validate.
-          return Promise.reject(
-              `All keys for ${keyInfoSet.serviceName} failed to verify`);
-        });
+              return Promise.reject(
+                  `All keys for ${keyInfoSet.serviceName} failed to verify`);
+            });
       });
     }))
-    .then(returnedArray => {
-      this.protectedEmitLifecycleEvent_('adResponseValidateEnd');
-      return returnedArray[0];
-    }, () => {
+        .then(returnedArray => {
+          this.protectedEmitLifecycleEvent_('adResponseValidateEnd');
+          return returnedArray[0];
+        }, () => {
       // rejection occurs if all providers fail to verify.
-      this.protectedEmitLifecycleEvent_('adResponseValidateEnd');
-      return Promise.reject('No validation service could verify this key');
-    });
+          this.protectedEmitLifecycleEvent_('adResponseValidateEnd');
+          return Promise.reject('No validation service could verify this key');
+        });
   }
 
   /**
@@ -932,7 +932,7 @@ export class AmpA4A extends AMP.BaseElement {
             // Failed to render via AMP creative path so fallback to non-AMP
             // rendering within cross domain iframe.
             user().error(TAG, this.element.getAttribute('type'),
-                         'Error injecting creative in friendly frame', err);
+                'Error injecting creative in friendly frame', err);
             this.promiseErrorHandler_(err);
             return this.renderNonAmpCreative_();
           });
@@ -962,16 +962,16 @@ export class AmpA4A extends AMP.BaseElement {
     this.uiHandler.applyUnlayoutUI();
     if (this.originalSlotSize_) {
       super.attemptChangeSize(
-        this.originalSlotSize_.height, this.originalSlotSize_.width)
-        .then(() => {
-          this.originalSlotSize_ = null;
-        })
-        .catch(err => {
+          this.originalSlotSize_.height, this.originalSlotSize_.width)
+          .then(() => {
+            this.originalSlotSize_ = null;
+          })
+          .catch(err => {
           // TODO(keithwrightbos): if we are unable to revert size, on next
           // trigger of promise chain the ad request may fail due to invalid
           // slot size.  Determine how to handle this case.
-          dev().warn(TAG, 'unable to revert to original size', err);
-        });
+            dev().warn(TAG, 'unable to revert to original size', err);
+          });
     }
 
     this.isCollapsed_ = false;
@@ -1159,46 +1159,46 @@ export class AmpA4A extends AMP.BaseElement {
       if (url) {
         // Delay request until document is not in a prerender state.
         return viewerForDoc(this.getAmpDoc()).whenFirstVisible()
-          .then(() => xhrFor(this.win).fetchJson(url, {
-            mode: 'cors',
-            method: 'GET',
+            .then(() => xhrFor(this.win).fetchJson(url, {
+              mode: 'cors',
+              method: 'GET',
             // Set ampCors false so that __amp_source_origin is not
             // included in XHR CORS request allowing for keyset to be cached
             // across pages.
-            ampCors: false,
-            credentials: 'omit',
-          }).then(res => res.json()).then(jwkSetObj => {
-            const result = {serviceName: currServiceName};
-            if (isObject(jwkSetObj) && Array.isArray(jwkSetObj.keys) &&
+              ampCors: false,
+              credentials: 'omit',
+            }).then(res => res.json()).then(jwkSetObj => {
+              const result = {serviceName: currServiceName};
+              if (isObject(jwkSetObj) && Array.isArray(jwkSetObj.keys) &&
                 jwkSetObj.keys.every(isObject)) {
-              result.keys = jwkSetObj.keys;
-            } else {
-              user().error(TAG, this.element.getAttribute('type'),
-                  `Invalid response from signing server ${currServiceName}`,
-                  this.element);
-              result.keys = [];
-            }
-            return result;
-          })).then(jwkSet => {
-            return {
-              serviceName: jwkSet.serviceName,
-              keys: jwkSet.keys.map(jwk =>
+                result.keys = jwkSetObj.keys;
+              } else {
+                user().error(TAG, this.element.getAttribute('type'),
+                    `Invalid response from signing server ${currServiceName}`,
+                    this.element);
+                result.keys = [];
+              }
+              return result;
+            })).then(jwkSet => {
+              return {
+                serviceName: jwkSet.serviceName,
+                keys: jwkSet.keys.map(jwk =>
                   this.crypto_.importPublicKey(jwkSet.serviceName, jwk)
-                  .catch(err => {
-                    user().error(TAG, this.element.getAttribute('type'),
-                        `error importing keys for: ${jwkSet.serviceName}`,
-                        err, this.element);
-                    return null;
-                  })),
-            };
-          }).catch(err => {
-            user().error(
-                TAG, this.element.getAttribute('type'), err, this.element);
+                      .catch(err => {
+                        user().error(TAG, this.element.getAttribute('type'),
+                            `error importing keys for: ${jwkSet.serviceName}`,
+                            err, this.element);
+                        return null;
+                      })),
+              };
+            }).catch(err => {
+              user().error(
+                  TAG, this.element.getAttribute('type'), err, this.element);
             // TODO(a4a-team): This is a failure in the initial attempt to get
             // the keys, probably b/c of a network condition.  We should
             // re-trigger key fetching later.
-            return {serviceName: currServiceName, keys: []};
-          });
+              return {serviceName: currServiceName, keys: []};
+            });
       } else {
         // The given serviceName does not have a corresponding URL in
         // _a4a-config.js.
@@ -1218,7 +1218,7 @@ export class AmpA4A extends AMP.BaseElement {
   renderNonAmpCreative_() {
     if (this.element.getAttribute('disable3pfallback') == 'true') {
       user().warn(TAG, this.element.getAttribute('type'),
-        'fallback to 3p disabled');
+          'fallback to 3p disabled');
       return Promise.resolve(false);
     }
     this.promiseErrorHandler_(
@@ -1242,7 +1242,7 @@ export class AmpA4A extends AMP.BaseElement {
       // If error occurred, it would have already been reported but let's
       // report to user in case of empty.
       user().warn(TAG, this.element.getAttribute('type'),
-        'No creative or URL available -- A4A can\'t render any ad');
+          'No creative or URL available -- A4A can\'t render any ad');
     }
     incrementLoadingAds(this.win, renderPromise);
     return renderPromise;
@@ -1293,7 +1293,7 @@ export class AmpA4A extends AMP.BaseElement {
           fonts: fontsArray,
         }, embedWin => {
           installUrlReplacementsForEmbed(this.getAmpDoc(), embedWin,
-            new A4AVariableSource(this.getAmpDoc(), embedWin));
+              new A4AVariableSource(this.getAmpDoc(), embedWin));
         }).then(friendlyIframeEmbed => {
           checkStillCurrent();
           this.friendlyIframeEmbed_ = friendlyIframeEmbed;
@@ -1318,7 +1318,7 @@ export class AmpA4A extends AMP.BaseElement {
                 });
               }).catch(err => {
                 dev().error(TAG, this.element.getAttribute('type'),
-                  'getTimingDataAsync for renderFriendlyEnd failed: ', err);
+                    'getTimingDataAsync for renderFriendlyEnd failed: ', err);
               });
           protectFunctionWrapper(this.onCreativeRender, this, err => {
             dev().error(TAG, this.element.getAttribute('type'),
@@ -1478,7 +1478,7 @@ export class AmpA4A extends AMP.BaseElement {
     }
     try {
       const metaDataObj = JSON.parse(
-        creative.slice(metadataStart + metadataString.length, metadataEnd));
+          creative.slice(metadataStart + metadataString.length, metadataEnd));
       const ampRuntimeUtf16CharOffsets =
         metaDataObj['ampRuntimeUtf16CharOffsets'];
       if (!isArray(ampRuntimeUtf16CharOffsets) ||

@@ -117,9 +117,9 @@ class AmpYoutube extends AMP.BaseElement {
   }
 
    /** @override */
-   viewportCallback(visible) {
-     this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
-   }
+  viewportCallback(visible) {
+    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
+  }
 
   /** @override */
   buildCallback() {
@@ -197,9 +197,9 @@ class AmpYoutube extends AMP.BaseElement {
     this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(
-      this.win,
-      'message',
-      this.handleYoutubeMessages_.bind(this)
+        this.win,
+        'message',
+        this.handleYoutubeMessages_.bind(this)
     );
 
     this.element.appendChild(this.iframe_);

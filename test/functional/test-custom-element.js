@@ -1326,7 +1326,7 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
     element.setAttribute('layout', 'nodisplay');
     win.document.body.appendChild(element);
     return poll('wait for static layout',
-            () => element.classList.contains('i-amphtml-layout-nodisplay'))
+        () => element.classList.contains('i-amphtml-layout-nodisplay'))
         .then(() => {
           // TODO(dvoytenko, #9353): once `toggleLayoutDisplay` API has been
           // deployed this will start `false`.
@@ -1388,7 +1388,7 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
       getState: () => {return ResourceState.LAYOUT_COMPLETE;},
     };
     element.resources_ = {
-      scheduleLayout: function(el, fb) {
+      scheduleLayout(el, fb) {
         if (el == element && fb == fallback) {
           resourcesSpy();
         }

@@ -22,10 +22,6 @@ limitations under the License.
     <td>Displays an <a href="https://www.ooyala.com/">Ooyala</a> video.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-ooyala-player" src="https://cdn.ampproject.org/v0/amp-ooyala-player-0.1.js">&lt;/script></code></td>
   </tr>
@@ -73,4 +69,4 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 
 ## Validation
 
-See [amp-ooyala-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ooyala-player/0.1/validator-amp-ooyala-player.protoascii) in the AMP validator specification.
+See [amp-ooyala-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ooyala-player/validator-amp-ooyala-player.protoascii) in the AMP validator specification.

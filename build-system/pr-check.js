@@ -141,12 +141,12 @@ function isValidatorFile(filePath) {
   }
 
   const pathArray = path.dirname(filePath).split(path.sep);
-  if (pathArray.length < 3) {
-    // At least 3 with ['extensions', '{$name}', '{$version}']
+  if (pathArray.length < 2) {
+    // At least 2 with ['extensions', '{$name}']
     return false;
   }
 
-  // Validator files take the form of vlaidator-.*\.(html|out|protoascii)
+  // Validator files take the form of validator-.*\.(html|out|protoascii)
   const name = path.basename(filePath);
   return name.startsWith('validator-') &&
       (name.endsWith('.out') || name.endsWith('.html') ||
@@ -295,7 +295,7 @@ function runAllCommands() {
     command.cleanBuild();
     command.buildRuntimeMinified();
     command.runPresubmitTests();  // Needs runtime to be built and served.
-    command.runVisualDiffTests();  // Only called during push builds.
+    // command.runVisualDiffTests();  // Only called during push builds.
     command.runIntegrationTests();
   }
 }

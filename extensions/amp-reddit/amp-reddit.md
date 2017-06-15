@@ -22,10 +22,6 @@ limitations under the License.
     <td>Displays a Reddit comment or post embed.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-reddit" src="https://cdn.ampproject.org/v0/amp-reddit-0.1.js">&lt;/script></code></td>
   </tr>
@@ -103,4 +99,4 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 
 ## Validation
 
-See [amp-reddit rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-reddit/0.1/validator-amp-reddit.protoascii) in the AMP validator specification.
+See [amp-reddit rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-reddit/validator-amp-reddit.protoascii) in the AMP validator specification.

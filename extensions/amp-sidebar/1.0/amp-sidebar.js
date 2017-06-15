@@ -82,7 +82,7 @@ export class AmpSidebar extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     user().assert(isExperimentOn(this.win, 'amp-sidebar 1.0'),
-        `Experiment amp-sidebar 1.0 is disabled.`);
+        'Experiment amp-sidebar 1.0 is disabled.');
 
     this.side_ = this.element.getAttribute('side');
 

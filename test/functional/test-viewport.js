@@ -490,7 +490,7 @@ describes.fakeWin('Viewport', {}, env => {
         .once();
     bindingMock.expects('hideViewerHeader').withArgs(true, 19).once();
     viewerViewportHandler({paddingTop: 0, duation: 300, curve: 'ease-in',
-        transient: true});
+      transient: true});
     bindingMock.verify();
     fixedLayerMock.verify();
   });
@@ -501,7 +501,7 @@ describes.fakeWin('Viewport', {}, env => {
     const fixedLayerMock = sandbox.mock(viewport.fixedLayer_);
     fixedLayerMock.expects('updatePaddingTop').withArgs(0).once();
     viewerViewportHandler({paddingTop: 0, duation: 300, curve: 'ease-in',
-        transient: 'true'});
+      transient: 'true'});
     fixedLayerMock.verify();
   });
 
@@ -594,8 +594,8 @@ describes.fakeWin('Viewport', {}, env => {
     clock.tick(6);
     expect(viewport.scrollAnimationFrameThrottled_).to.be.false;
     expect(viewer.sendMessage).to.have.been.calledOnce;
-    expect(viewer.sendMessage).to.have.been.calledWith('scroll',
-        {scrollTop: 30}, true);
+    expect(viewer.sendMessage.lastCall.args[0]).to.equal('scroll');
+    expect(viewer.sendMessage.lastCall.args[1].scrollTop).to.equal(30);
     // scroll to 40
     viewport.getScrollTop = () => 40;
     viewport.sendScrollMessage_();
@@ -631,8 +631,8 @@ describes.fakeWin('Viewport', {}, env => {
     // call viewer.postScroll, raf for viewer.postScroll
     expect(changeEvent).to.equal(null);
     expect(viewer.sendMessage).to.have.callCount(1);
-    expect(viewer.sendMessage).to.have.been.calledWith('scroll',
-        {scrollTop: 34}, true);
+    expect(viewer.sendMessage.lastCall.args[0]).to.equal('scroll');
+    expect(viewer.sendMessage.lastCall.args[1].scrollTop).to.equal(34);
     binding.getScrollTop = () => 35;
     viewport.scroll_();
 
@@ -1043,7 +1043,7 @@ describe('Viewport META', () => {
           documentElement: {
             style: {},
             classList: {
-              add: function() {},
+              add() {},
             },
           },
           querySelector: selector => {

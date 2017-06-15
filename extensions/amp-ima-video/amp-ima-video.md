@@ -26,41 +26,43 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>Experimental</td>
+    <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-ima-video" src="https://cdn.ampproject.org/v0/amp-ima-video-0.1.js">&lt;/script></code></td>
   </tr>
-  <tr
+  <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>fixed, responsive</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>None</td>
+    <td><a href="https://ampbyexample.com/components/amp-ima/">Annotated code example for amp-ima-video</a></td>
   </tr>
 </table>
 
 ## Overview
 
-You can use the `amp-ima-video` component to embed an
-<a href="https://developers.google.com/interactive-media-ads/docs/sdks/html5/">IMA
-SDK</a> enabled video player.
+You can use the `amp-ima-video` component to embed an [IMA SDK](https://developers.google.com/interactive-media-ads/docs/sdks/html5/) enabled video player.
 
-To embed a video, provide a source URL for your
-content video (`data-src`) and an ad tag (`data-tag`), which is a URL to a
+The `amp-ima-video` component HTML accepts up to two unique types of HTML nodes
+as children - `source` tags for content video, and `track` tags for subtitles.
+Both of these can be used in the same way as the standard `video` tag.
+
+The component requires an ad tag, provided in `data-tag`, which is a URL to a
 VAST-compliant ad response (for examples, see
 [IMA Sample Tags](https://developers.google.com/interactive-media-ads/docs/sdks/html5/tags)).
 
-**Example: Embedding a video**
+## Example
 
 ```html
 <amp-ima-video
     width=640 height=360 layout="responsive"
-    data-src="https://s0.2mdn.net/4253510/google_ddm_animation_480P.mp4"
-    data-tag="https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpost&cmsid=496&vid=short_onecue&correlator="
-    data-poster="path/to/poster.png">
+    data-tag="ads.xml" data-poster="poster.png">
+  <source src="foo.mp4" type="video/mp4">
+  <source src="foo.webm" type="video/webm">
+  <track label="English subtitles" kind="subtitles" srclang="en" src="subtitles.vtt">
 </amp-ima-video>
 ```
 
@@ -87,4 +89,4 @@ extended to AMP components.
 
 ## Validation
 
-See [amp-ima-video rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ima-video/0.1/validator-amp-ima-video.protoascii) in the AMP validator specification.
+See [amp-ima-video rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ima-video/validator-amp-ima-video.protoascii) in the AMP validator specification.

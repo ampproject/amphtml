@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../action-trust';
 import {listen, listenOncePromise} from '../event-helper';
 import {dev} from '../log';
 import {getMode} from '../mode';
@@ -86,15 +87,19 @@ export class VideoManager {
    * so they can be called using AMP Actions.
    * For example: <button on="tap:myVideo.play">
    *
-   *
    * @param {!../video-interface.VideoInterface} video
    * @private
    */
   registerCommonActions_(video) {
-    video.registerAction('play', video.play.bind(video, /*isAutoplay*/ false));
-    video.registerAction('pause', video.pause.bind(video));
-    video.registerAction('mute', video.mute.bind(video));
-    video.registerAction('unmute', video.unmute.bind(video));
+    // TODO(choumx, #9699): HIGH for unmuted play, LOW for muted play.
+    video.registerAction('play', video.play.bind(video, /* isAutoplay */ false),
+        ActionTrust.MEDIUM);
+    // TODO(choumx, #9699): LOW.
+    video.registerAction('pause', video.pause.bind(video), ActionTrust.MEDIUM);
+    video.registerAction('mute', video.mute.bind(video), ActionTrust.MEDIUM);
+    // TODO(choumx, #9699): HIGH.
+    video.registerAction('unmute', video.unmute.bind(video),
+        ActionTrust.MEDIUM);
   }
 
   /**
@@ -172,7 +177,7 @@ class VideoEntry {
     this.hasAutoplay_ = element.hasAttribute(VideoAttributes.AUTOPLAY);
 
     listenOncePromise(element, VideoEvents.LOAD)
-      .then(() => this.videoLoaded_());
+        .then(() => this.videoLoaded_());
 
     // Currently we only register after video player is build.
     this.videoBuilt_();

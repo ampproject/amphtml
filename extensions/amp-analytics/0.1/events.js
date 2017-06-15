@@ -83,7 +83,7 @@ export class EventTracker {
   /**
    * @param {!Element} unusedContext
    * @param {string} unusedEventType
-   * @param {!JSONType} unusedConfig
+   * @param {!JsonObject} unusedConfig
    * @param {function(!AnalyticsEvent)} unusedListener
    * @return {!UnlistenDef}
    * @abstract
@@ -417,11 +417,11 @@ export class VisibilityTracker extends EventTracker {
         selectionMethod
         ).then(element => {
           return visibilityManager.listenElement(
-            element,
-            visibilitySpec,
-            this.getReadyPromise(waitForSpec, selector, element),
-            createReadyReportPromiseFunc,
-            this.onEvent_.bind(this, eventType, listener, element));
+              element,
+              visibilitySpec,
+              this.getReadyPromise(waitForSpec, selector, element),
+              createReadyReportPromiseFunc,
+              this.onEvent_.bind(this, eventType, listener, element));
         });
     return function() {
       unlistenPromise.then(unlisten => {
