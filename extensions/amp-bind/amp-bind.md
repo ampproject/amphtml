@@ -26,10 +26,6 @@ limitations under the License.
     <td>Adds custom interactivity with data binding and expressions.</td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong>Availability</strong></td>
-    <td>In development</td>
-  </tr>
-  <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
     <td>
       <div>
@@ -50,10 +46,6 @@ limitations under the License.
   <tr>
     <td class="col-fourty"><strong>Codelabs</strong></td>
     <td><a href="https://codelabs.developers.google.com/codelabs/advanced-interactivity-in-amp/">Advanced Interactivity in AMP</a> highlights a sophisticated e-commerce use case.</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Origin Trials</strong></td>
-    <td><a href="https://docs.google.com/a/google.com/forms/d/e/1FAIpQLSfGCAjUU4pDu84Sclw6wjGVDiFJhVr61pYTMehIt6ex4wmr1Q/viewform">Register here</a> to enable <code>amp-bind</code> for your origin.</td>
   </tr>
 </table>
 
