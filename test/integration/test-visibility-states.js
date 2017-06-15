@@ -22,7 +22,11 @@ import {getVendorJsPropertyName} from '../../src/style';
 import {whenUpgradedToCustomElement} from '../../src/dom';
 import {createCustomEvent} from '../../src/event-helper';
 
-describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
+const config = describe.configure();
+config.skipEdge();
+config.skipIos();
+config.retryOnSaucelabs();
+config.run('Viewer Visibility State', () => {
 
   function noop() {}
 
