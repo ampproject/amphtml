@@ -62,12 +62,14 @@ export function getMultiSizeDimensions(
     const width = Number(size[0]);
     const height = Number(size[1]);
 
-    // Make sure that both dimensions given are numbers.
+    // Make sure that both dimensions given are positive numbers.
     if (!validateDimensions(width, height,
-          w => isNaN(w),
-          h => isNaN(h),
-          ({badDim, badVal}) =>
-          `Invalid ${badDim} of ${badVal} given for secondary size.`, strict)) {
+          w => isNaN(w) || w <= 0,
+          h => isNaN(h) || h <= 0,
+          badParams => badParams.map(badParam =>
+            `Invalid ${badParam.dim} of ${badParam.val} ` +
+            `given for secondary size.`).join(' '),
+          strict)) {
       if (strict) {
         return null;
       }
@@ -78,8 +80,10 @@ export function getMultiSizeDimensions(
     if (!validateDimensions(width, height,
           w => w > primaryWidth,
           h => h > primaryHeight,
-          ({badDim, badVal}) => `Secondary ${badDim} ${badVal} ` +
-          `can't be larger than the primary ${badDim}.`, strict)) {
+          badParams => badParams.map(badParam =>
+            `Secondary ${badParam.dim} ${badParam.val} ` +
+            `can't be larger than the primary ${badParam.dim}.`).join(' '),
+          strict)) {
       if (strict) {
         return null;
       }
@@ -97,8 +101,10 @@ export function getMultiSizeDimensions(
       if (!validateDimensions(width, height,
             w => w < minWidth,
             h => h < minHeight,
-            ({badDim, badVal}) => `Secondary ${badDim} ${badVal} is ` +
-            `smaller than 2/3rds of the primary ${badDim}.`, strict)) {
+            badParams => badParams.map(badParam =>
+              `Secondary ${badParam.dim} ${badParam.val} is ` +
+              `smaller than 2/3rds of the primary ${badParam.dim}.`).join(' '),
+            strict)) {
         if (strict) {
           return null;
         }
@@ -127,7 +133,7 @@ export function getMultiSizeDimensions(
  * @param {(number|string)} height
  * @param {function((number|string)): boolean} widthCond
  * @param {function((number|string)): boolean} heightCond
- * @param {function(!{badDim: string, badVal: (string|number)}): string=}
+ * @param {function(!Array<{dim: string, val: (number|string)}>): string=}
  *   errorBuilder A function that will produce an informative error message.
  * @param {boolean=} reportError If true, indicates that an error message
  *   should be logged to the console.
@@ -135,32 +141,15 @@ export function getMultiSizeDimensions(
  */
 function validateDimensions(width, height, widthCond, heightCond,
     errorBuilder, reportError) {
-  let badParams = null;
-  const isWidthIllegal = widthCond(width);
-  const isHeightIllegal = heightCond(height);
-  if (isWidthIllegal && isHeightIllegal) {
-    badParams = {
-      badDim: 'width and height',
-      badVal: width + 'x' + height,
-    };
+  const badParams = [];
+  if (widthCond(width)) {
+    badParams.push({dim: 'width', val: width});
   }
-  else if (isWidthIllegal) {
-    badParams = {
-      badDim: 'width',
-      badVal: width,
-    };
+  if (heightCond(height)) {
+    badParams.push({dim: 'height', val: height});
   }
-  else if (isHeightIllegal) {
-    badParams = {
-      badDim: 'height',
-      badVal: height,
-    };
+  if (reportError && badParams.length) {
+    user().error('AMP-AD', errorBuilder(badParams));
   }
-  if (badParams) {
-    if (reportError) {
-      user().error('AMP-AD', errorBuilder(badParams));
-    }
-    return false;
-  }
-  return true;
+  return !badParams.length;
 }
