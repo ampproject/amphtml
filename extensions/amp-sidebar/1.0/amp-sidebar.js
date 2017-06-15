@@ -198,12 +198,17 @@ export class AmpSidebar extends AMP.BaseElement {
     } else if (!this.isDocked_() && this.element.hasAttribute('docked')) {
       this.close_();
       this.element.removeAttribute('docked');
-      setStyles(this.document_.body, {
-        'border-right-width': null,
-        'border-right-style': null,
-        'border-left-width': null,
-        'border-left-style': null,
-      });
+      if (this.side_ === 'right') {
+        setStyles(this.document_.body, {
+          'border-right-width': null,
+          'border-right-style': null,
+        });
+      } else {
+        setStyles(this.document_.body, {
+          'border-left-width': null,
+          'border-left-style': null,
+        });
+      }
     }
   }
 
