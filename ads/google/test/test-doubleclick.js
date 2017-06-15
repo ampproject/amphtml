@@ -24,12 +24,12 @@ describe('selectGptExperiment', () => {
         const experimentData = {experimentId: '21060541'};
         const notInEitherData = {};
         expect(selectGptExperiment(controlData)).to
-        .equal('gpt_sf_a.js');
+            .equal('gpt_sf_a.js');
         expect(selectGptExperiment(experimentData)).to
-        .equal('gpt_sf_b.js');
+            .equal('gpt_sf_b.js');
         expect(selectGptExperiment(notInEitherData)).to
-        .equal(undefined);
-        });
+            .equal(undefined);
+      });
 });
 
 describe('writeAdScript', () => {
