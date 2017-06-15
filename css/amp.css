@@ -713,7 +713,7 @@ amp-accordion > section > * {
 }
 
 /* heading element*/
-amp-accordion > section:first-child {
+amp-accordion > section > :first-child {
   cursor: pointer;
   background-color: #efefef;
   padding-right: 20px;
