@@ -56,7 +56,7 @@ export class Toolbar {
 
     fragment.appendChild(this.toolbarTarget_);
     this.sidebarElement_.parentElement
-      .insertBefore(fragment, this.sidebarElement_);
+        .insertBefore(fragment, this.sidebarElement_);
 
     //Finally, find our tool-bar only elements
     if (this.element.hasAttribute('toolbar-only')) {
@@ -67,9 +67,10 @@ export class Toolbar {
       this.toolbarOnlyElements_ = [];
       // Check the nav's children for toolbar-only
       Array.prototype.slice.call(this.element
-        .querySelectorAll('*[toolbar-only]'), 0).forEach(toolbarOnlyElement => {
-          this.toolbarOnlyElements_.push(toolbarOnlyElement);
-        });
+          .querySelectorAll('*[toolbar-only]'), 0)
+          .forEach(toolbarOnlyElement => {
+            this.toolbarOnlyElements_.push(toolbarOnlyElement);
+          });
     }
   }
 
@@ -80,7 +81,7 @@ export class Toolbar {
    */
   isToolbarShown_() {
     return this.element.ownerDocument.defaultView
-      .matchMedia(this.toolbarMedia_).matches;
+        .matchMedia(this.toolbarMedia_).matches;
   }
 
   /**

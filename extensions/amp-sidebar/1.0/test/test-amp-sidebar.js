@@ -580,7 +580,7 @@
                .getElementsByTagName('header');
          expect(headerElements.length).to.be.above(0);
          expect(headerElements[0].querySelectorAll('nav[toolbar]').length)
-          .to.be.above(0);
+            .to.be.above(0);
        });
      });
 
