@@ -504,7 +504,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
       return;
     }
     element.getLayoutBox = () => {
-      return this.viewport_.getLayoutRect(element);
+      return this.viewport_.getDOMRect(element);
     };
     element.getOwner = () => null;
   }

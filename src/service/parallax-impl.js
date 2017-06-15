@@ -186,7 +186,7 @@ export class ParallaxElement {
    */
   shouldUpdate(viewport) {
     const viewportRect = viewport.getRect();
-    const elementRect = viewport.getLayoutRect(this.element_);
+    const elementRect = viewport.getDOMRect(this.element_);
     elementRect.top -= viewportRect.top;
     elementRect.bottom = elementRect.top + elementRect.height;
     return this.isRectInView_(elementRect, viewportRect.height);
@@ -194,7 +194,7 @@ export class ParallaxElement {
 
   /**
    * Check if a rectange is within the viewport.
-   * @param {!../layout-rect.LayoutRectDef} rect
+   * @param {!../DOM-rect.DOMRectDef} rect
    * @param {number} viewportHeight
    * @private
    */

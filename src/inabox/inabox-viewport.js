@@ -23,7 +23,7 @@ import {resourcesForDoc} from '../services';
 import {
   nativeIntersectionObserverSupported,
 } from '../../src/intersection-observer-polyfill';
-import {layoutRectLtwh} from '../layout-rect';
+import {DOMRectLtwh} from '../DOM-rect';
 import {Observable} from '../observable';
 import {MessageType} from '../../src/3p-frame-messaging';
 import {dev} from '../log';
@@ -128,19 +128,19 @@ export class ViewportBindingInabox {
      * and iframe position. 0 scroll is not a bad guess.
      * Meanwhile, use iframe box size as the viewport size gives a good
      * initial resource scheduling.
-     * @private {!../layout-rect.LayoutRectDef}
+     * @private {!../DOM-rect.DOMRectDef}
      */
-    this.viewportRect_ = layoutRectLtwh(0, 0, boxWidth, boxHeight);
+    this.viewportRect_ = DOMRectLtwh(0, 0, boxWidth, boxHeight);
 
     /**
-     * The current layout rect of the iframe box.
+     * The current DOM rect of the iframe box.
      * TODO(lannka, #7971): The best way to stop visibility from firing
      * is to move this functionality to the InOb polyfill.
      * ~To not trigger amp-analytics visibility immediately,
      * we start with an initial position right below the fold.~
-     * @private {!../layout-rect.LayoutRectDef}
+     * @private {!../DOM-rect.DOMRectDef}
      */
-    this.boxRect_ = layoutRectLtwh(0, boxHeight + 1, boxWidth, boxHeight);
+    this.boxRect_ = DOMRectLtwh(0, boxHeight + 1, boxWidth, boxHeight);
 
     /** @private @const {!../../3p/iframe-messaging-client.IframeMessagingClient} */
     this.iframeClient_ = iframeMessagingClientFor(win);
@@ -180,9 +180,9 @@ export class ViewportBindingInabox {
   }
 
   /** @override */
-  getLayoutRect(el) {
+  getDOMRect(el) {
     const b = el./*OK*/getBoundingClientRect();
-    return layoutRectLtwh(
+    return DOMRectLtwh(
         Math.round(b.left + this.boxRect_.left),
         Math.round(b.top + this.boxRect_.top),
         Math.round(b.width),
@@ -349,8 +349,8 @@ export function installInaboxViewportService(ampdoc) {
 }
 
 /**
- * @param {!../layout-rect.LayoutRectDef} newRect
- * @param {!../layout-rect.LayoutRectDef} oldRect
+ * @param {!../DOM-rect.DOMRectDef} newRect
+ * @param {!../DOM-rect.DOMRectDef} oldRect
  * @returns {boolean}
  */
 function isChanged(newRect, oldRect) {
@@ -358,8 +358,8 @@ function isChanged(newRect, oldRect) {
 }
 
 /**
- * @param {!../layout-rect.LayoutRectDef} newRect
- * @param {!../layout-rect.LayoutRectDef} oldRect
+ * @param {!../DOM-rect.DOMRectDef} newRect
+ * @param {!../DOM-rect.DOMRectDef} oldRect
  * @returns {boolean}
  */
 function isMoved(newRect, oldRect) {
@@ -367,8 +367,8 @@ function isMoved(newRect, oldRect) {
 }
 
 /**
- * @param {!../layout-rect.LayoutRectDef} newRect
- * @param {!../layout-rect.LayoutRectDef} oldRect
+ * @param {!../DOM-rect.DOMRectDef} newRect
+ * @param {!../DOM-rect.DOMRectDef} oldRect
  * @returns {boolean}
  */
 function isResized(newRect, oldRect) {

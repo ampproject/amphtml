@@ -818,7 +818,7 @@ function createBaseCustomElementClass(win) {
     /**
      * Updates the layout box of the element.
      * See {@link BaseElement.getLayoutWidth} for details.
-     * @param {!./layout-rect.LayoutRectDef} layoutBox
+     * @param {!./DOM-rect.DOMRectDef} layoutBox
      * @this {!Element}
      */
     updateLayoutBox(layoutBox) {
@@ -924,7 +924,7 @@ function createBaseCustomElementClass(win) {
      *
      * @param {number|undefined} newHeight
      * @param {number|undefined} newWidth
-     * @param {!./layout-rect.LayoutMarginsDef=} opt_newMargins
+     * @param {!./DOM-rect.DOMMarginsDef=} opt_newMargins
      * @final
      * @package @this {!Element}
      */
@@ -1161,7 +1161,7 @@ function createBaseCustomElementClass(win) {
      * Returns a previously measured layout box adjusted to the viewport. This
      * mainly affects fixed-position elements that are adjusted to be always
      * relative to the document position in the viewport.
-     * @return {!./layout-rect.LayoutRectDef}
+     * @return {!./DOM-rect.DOMRectDef}
      * @final @this {!Element}
      */
     getLayoutBox() {
@@ -1171,7 +1171,7 @@ function createBaseCustomElementClass(win) {
     /**
      * Returns a previously measured layout box relative to the page. The
      * fixed-position elements are relative to the top of the document.
-     * @return {!./layout-rect.LayoutRectDef}
+     * @return {!./DOM-rect.DOMRectDef}
      * @final @this {!Element}
      */
     getPageLayoutBox() {

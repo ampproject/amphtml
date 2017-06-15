@@ -43,7 +43,7 @@ import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {BaseElement} from '../../../../src/base-element';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {toggleExperiment} from '../../../../src/experiments';
-import {layoutRectLtwh} from '../../../../src/layout-rect';
+import {DOMRectLtwh} from '../../../../src/DOM-rect';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {Xhr, FetchResponseHeaders} from '../../../../src/service/xhr-impl';
 import {dev} from '../../../../src/log';
@@ -630,7 +630,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       };
       element.isBuilt = () => {return true;};
       element.getLayoutBox = () => {
-        return layoutRectLtwh(0, 0, 200, 50);
+        return DOMRectLtwh(0, 0, 200, 50);
       };
       element.getPageLayoutBox = () => {
         return element.getLayoutBox.apply(element, arguments);

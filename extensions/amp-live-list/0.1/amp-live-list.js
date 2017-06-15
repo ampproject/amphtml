@@ -855,7 +855,7 @@ export class AmpLiveList extends AMP.BaseElement {
    * @return {boolean}
    */
   isElementBelowViewport_(element) {
-    return this.viewport_.getLayoutRect(element).top >
+    return this.viewport_.getDOMRect(element).top >
         this.viewport_.getScrollTop() + this.viewport_.getSize().height;
   }
 

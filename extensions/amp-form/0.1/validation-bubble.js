@@ -132,7 +132,7 @@ function hideBubble(state) {
  * @private
  */
 function measureTargetElement(state) {
-  state.targetRect = state.viewport.getLayoutRect(state.targetElement);
+  state.targetRect = state.viewport.getDOMRect(state.targetElement);
 }
 
 

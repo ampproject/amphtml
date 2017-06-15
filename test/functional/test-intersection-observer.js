@@ -20,7 +20,7 @@ import {
   getIntersectionChangeEntry,
 } from '../../src/intersection-observer';
 import {createAmpElementProto} from '../../src/custom-element';
-import {layoutRectLtwh} from '../../src/layout-rect';
+import {DOMRectLtwh} from '../../src/DOM-rect';
 import * as sinon from 'sinon';
 
 
@@ -36,8 +36,8 @@ describe('getIntersectionChangeEntry', () => {
   });
 
   it('intersect correctly base', () => {
-    const rootBounds = layoutRectLtwh(0, 100, 100, 100);
-    const layoutBox = layoutRectLtwh(50, 50, 150, 200);
+    const rootBounds = DOMRectLtwh(0, 100, 100, 100);
+    const layoutBox = DOMRectLtwh(50, 50, 150, 200);
     const change = getIntersectionChangeEntry(layoutBox, null, rootBounds);
 
     expect(change).to.be.object;
@@ -77,8 +77,8 @@ describe('getIntersectionChangeEntry', () => {
   });
 
   it('intersects on the edge', () => {
-    const rootBounds = layoutRectLtwh(0, 100, 100, 100);
-    const layoutBox = layoutRectLtwh(50, 200, 150, 200);
+    const rootBounds = DOMRectLtwh(0, 100, 100, 100);
+    const layoutBox = DOMRectLtwh(50, 200, 150, 200);
     const change = getIntersectionChangeEntry(layoutBox, null, rootBounds);
 
     expect(change).to.be.object;
@@ -118,8 +118,8 @@ describe('getIntersectionChangeEntry', () => {
   });
 
   it('intersect correctly 2', () => {
-    const rootBounds = layoutRectLtwh(0, 100, 100, 100);
-    const layoutBox = layoutRectLtwh(50, 199, 150, 200);
+    const rootBounds = DOMRectLtwh(0, 100, 100, 100);
+    const layoutBox = DOMRectLtwh(50, 199, 150, 200);
     const change = getIntersectionChangeEntry(layoutBox, null, rootBounds);
 
     expect(change.intersectionRect).to.deep.equal({
@@ -135,8 +135,8 @@ describe('getIntersectionChangeEntry', () => {
   });
 
   it('intersect correctly 3', () => {
-    const rootBounds = layoutRectLtwh(198, 299, 100, 100);
-    const layoutBox = layoutRectLtwh(50, 100, 150, 200);
+    const rootBounds = DOMRectLtwh(198, 299, 100, 100);
+    const layoutBox = DOMRectLtwh(50, 100, 150, 200);
     const change = getIntersectionChangeEntry(layoutBox, null, rootBounds);
 
     expect(change.intersectionRect.height).to.equal(1);
@@ -144,8 +144,8 @@ describe('getIntersectionChangeEntry', () => {
   });
 
   it('intersect correctly 3', () => {
-    const rootBounds = layoutRectLtwh(202, 299, 100, 100);
-    const layoutBox = layoutRectLtwh(50, 100, 150, 200);
+    const rootBounds = DOMRectLtwh(202, 299, 100, 100);
+    const layoutBox = DOMRectLtwh(50, 100, 150, 200);
     const change = getIntersectionChangeEntry(layoutBox, null, rootBounds);
 
     expect(change.intersectionRect.height).to.equal(0);
@@ -153,9 +153,9 @@ describe('getIntersectionChangeEntry', () => {
   });
 
   it('intersects with an owner element', () => {
-    const rootBounds = layoutRectLtwh(0, 100, 100, 100);
-    const ownerBounds = layoutRectLtwh(40, 110, 20, 20);
-    const layoutBox = layoutRectLtwh(50, 50, 150, 200);
+    const rootBounds = DOMRectLtwh(0, 100, 100, 100);
+    const ownerBounds = DOMRectLtwh(40, 110, 20, 20);
+    const layoutBox = DOMRectLtwh(50, 50, 150, 200);
     const change = getIntersectionChangeEntry(layoutBox, ownerBounds,
         rootBounds);
 
@@ -196,9 +196,9 @@ describe('getIntersectionChangeEntry', () => {
   });
 
   it('does not intersect with an elements out of viewport', () => {
-    const rootBounds = layoutRectLtwh(0, 100, 100, 100);
-    const ownerBounds = layoutRectLtwh(0, 200, 100, 100);
-    const layoutBox = layoutRectLtwh(50, 225, 100, 100);
+    const rootBounds = DOMRectLtwh(0, 100, 100, 100);
+    const ownerBounds = DOMRectLtwh(0, 200, 100, 100);
+    const layoutBox = DOMRectLtwh(50, 225, 100, 100);
     const change = getIntersectionChangeEntry(layoutBox, ownerBounds,
         rootBounds);
 
@@ -239,9 +239,9 @@ describe('getIntersectionChangeEntry', () => {
   });
 
   it('does not intersect with an element out of viewport', () => {
-    const rootBounds = layoutRectLtwh(0, 100, 100, 100);
-    const ownerBounds = layoutRectLtwh(0, 100, 100, 100);
-    const layoutBox = layoutRectLtwh(50, 225, 100, 100);
+    const rootBounds = DOMRectLtwh(0, 100, 100, 100);
+    const ownerBounds = DOMRectLtwh(0, 100, 100, 100);
+    const layoutBox = DOMRectLtwh(50, 225, 100, 100);
     const change = getIntersectionChangeEntry(layoutBox, ownerBounds,
         rootBounds);
 
@@ -389,8 +389,8 @@ describe('IntersectionObserver', () => {
     element.element = {
       getIntersectionChangeEntry() {
         getIntersectionChangeEntrySpy();
-        const rootBounds = layoutRectLtwh(198, 299, 100, 100);
-        const layoutBox = layoutRectLtwh(50, 100, 150, 200);
+        const rootBounds = DOMRectLtwh(198, 299, 100, 100);
+        const layoutBox = DOMRectLtwh(50, 100, 150, 200);
         return getIntersectionChangeEntry(layoutBox, null, rootBounds);
       },
     };

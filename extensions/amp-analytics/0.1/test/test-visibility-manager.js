@@ -24,7 +24,7 @@ import {
 } from '../visibility-manager';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {documentStateFor} from '../../../../src/service/document-state';
-import {layoutRectLtwh, rectIntersection} from '../../../../src/layout-rect';
+import {DOMRectLtwh, rectIntersection} from '../../../../src/DOM-rect';
 
 class IntersectionObserverStub {
 
@@ -276,11 +276,11 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
 
     // Trigger tick.
     sandbox.stub(viewport, 'getRect', () => {
-      return layoutRectLtwh(0, 0, 100, 100);
+      return DOMRectLtwh(0, 0, 100, 100);
     });
-    sandbox.stub(viewport, 'getLayoutRect', element => {
+    sandbox.stub(viewport, 'getDOMRect', element => {
       if (element == rootElement) {
-        return layoutRectLtwh(0, 50, 100, 100);
+        return DOMRectLtwh(0, 50, 100, 100);
       }
       return null;
     });
@@ -861,7 +861,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
       const resource = resources.getResourceForElement(ampElement);
       scrollTop = 10;
       sandbox.stub(resource, 'getLayoutBox',
-          () => layoutRectLtwh(0, scrollTop, 100, 100));
+          () => DOMRectLtwh(0, scrollTop, 100, 100));
     });
   });
 
@@ -873,8 +873,8 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
   }
 
   function makeIntersectionEntry(boundingClientRect, rootBounds) {
-    boundingClientRect = layoutRectLtwh.apply(null, boundingClientRect);
-    rootBounds = layoutRectLtwh.apply(null, rootBounds);
+    boundingClientRect = DOMRectLtwh.apply(null, boundingClientRect);
+    rootBounds = DOMRectLtwh.apply(null, rootBounds);
     const intersect = rectIntersection(boundingClientRect, rootBounds);
     const ratio = (intersect.width * intersect.height) /
         (boundingClientRect.width * boundingClientRect.height);

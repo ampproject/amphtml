@@ -22,7 +22,7 @@ import {disposeServicesForEmbed, getTopWindow} from './service';
 import {escapeHtml} from './dom';
 import {extensionsFor} from './services';
 import {isDocumentReady} from './document-ready';
-import {layoutRectLtwh} from './layout-rect';
+import {DOMRectLtwh} from './DOM-rect';
 import {loadPromise} from './event-helper';
 import {resourcesForDoc} from './services';
 import {setStyle, setStyles} from './style';
@@ -409,7 +409,7 @@ export class FriendlyIframeEmbed {
     if (this.host) {
       rect = this.host.getLayoutBox();
     } else {
-      rect = layoutRectLtwh(
+      rect = DOMRectLtwh(
           0, 0,
           this.win./*OK*/innerWidth,
           this.win./*OK*/innerHeight);
@@ -460,7 +460,7 @@ export class FriendlyIframeEmbed {
  * have been loaded in the initially visible set.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} context
  * @param {!Window} hostWin
- * @param {!./layout-rect.LayoutRectDef} rect
+ * @param {!./DOM-rect.DOMRectDef} rect
  * @return {!Promise}
  */
 export function whenContentIniLoad(context, hostWin, rect) {

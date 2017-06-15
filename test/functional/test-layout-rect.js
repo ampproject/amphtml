@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import * as lr from '../../src/layout-rect';
+import * as lr from '../../src/DOM-rect';
 
-describe('LayoutRect', () => {
+describe('DOMRect', () => {
 
-  it('layoutRectLtwh', () => {
-    const rect = lr.layoutRectLtwh(1, 2, 3, 4);
+  it('DOMRectLtwh', () => {
+    const rect = lr.DOMRectLtwh(1, 2, 3, 4);
     expect(rect.left).to.equal(1);
     expect(rect.top).to.equal(2);
     expect(rect.width).to.equal(3);
@@ -28,18 +28,18 @@ describe('LayoutRect', () => {
     expect(rect.right).to.equal(4);
   });
 
-  it('layoutRectsOverlap', () => {
-    const rect1 = lr.layoutRectLtwh(10, 20, 30, 40);
-    const rect2 = lr.layoutRectLtwh(40, 60, 10, 10);
-    const rect3 = lr.layoutRectLtwh(41, 60, 10, 10);
-    expect(lr.layoutRectsOverlap(rect1, rect2)).to.equal(true);
-    expect(lr.layoutRectsOverlap(rect1, rect3)).to.equal(false);
-    expect(lr.layoutRectsOverlap(rect2, rect3)).to.equal(true);
+  it('DOMRectsOverlap', () => {
+    const rect1 = lr.DOMRectLtwh(10, 20, 30, 40);
+    const rect2 = lr.DOMRectLtwh(40, 60, 10, 10);
+    const rect3 = lr.DOMRectLtwh(41, 60, 10, 10);
+    expect(lr.DOMRectsOverlap(rect1, rect2)).to.equal(true);
+    expect(lr.DOMRectsOverlap(rect1, rect3)).to.equal(false);
+    expect(lr.DOMRectsOverlap(rect2, rect3)).to.equal(true);
   });
 
-  it('expandLayoutRect', () => {
-    const rect1 = lr.layoutRectLtwh(10, 20, 30, 40);
-    const rect2 = lr.expandLayoutRect(rect1, 2, 3);
+  it('expandDOMRect', () => {
+    const rect1 = lr.DOMRectLtwh(10, 20, 30, 40);
+    const rect2 = lr.expandDOMRect(rect1, 2, 3);
     expect(rect2.left).to.equal(10 - 30 * 2);
     expect(rect2.right).to.equal(40 + 30 * 2);
     expect(rect2.width).to.equal(30 + 30 * 4);
@@ -48,9 +48,9 @@ describe('LayoutRect', () => {
     expect(rect2.height).to.equal(40 + 40 * 6);
   });
 
-  it('moveLayoutRect', () => {
-    const rect1 = lr.layoutRectLtwh(10, 20, 30, 40);
-    const rect2 = lr.moveLayoutRect(rect1, 2, 3);
+  it('moveDOMRect', () => {
+    const rect1 = lr.DOMRectLtwh(10, 20, 30, 40);
+    const rect2 = lr.moveDOMRect(rect1, 2, 3);
     expect(rect2.left).to.equal(rect1.left + 2);
     expect(rect2.right).to.equal(rect1.right + 2);
     expect(rect2.width).to.equal(rect1.width);
@@ -59,23 +59,12 @@ describe('LayoutRect', () => {
     expect(rect2.height).to.equal(rect1.height);
   });
 
-  it('layoutRectFromDomRect', () => {
-    const rect = lr.layoutRectFromDomRect({top: 11, left: 12, width: 111,
-      height: 222});
-    expect(rect.top).to.equal(11);
-    expect(rect.left).to.equal(12);
-    expect(rect.width).to.equal(111);
-    expect(rect.height).to.equal(222);
-    expect(rect.bottom).to.equal(11 + 222);
-    expect(rect.right).to.equal(12 + 111);
-  });
-
   it('rectIntersection', () => {
-    const rect1 = lr.layoutRectLtwh(10, 20, 40, 50);
-    const rect2 = lr.layoutRectLtwh(40, 60, 10, 10);
-    const rect3 = lr.layoutRectLtwh(1000, 60, 10, 10);
-    const rect4 = lr.layoutRectLtwh(45, 65, 10, 10);
-    // the LayoutRect array can deal with speical array
+    const rect1 = lr.DOMRectLtwh(10, 20, 40, 50);
+    const rect2 = lr.DOMRectLtwh(40, 60, 10, 10);
+    const rect3 = lr.DOMRectLtwh(1000, 60, 10, 10);
+    const rect4 = lr.DOMRectLtwh(45, 65, 10, 10);
+    // the DOMRect array can deal with speical array
     expect(lr.rectIntersection(null, undefined)).to.be.null;
     expect(lr.rectIntersection()).to.be.null;
     expect(lr.rectIntersection(rect1)).to.jsonEqual(rect1);
@@ -86,8 +75,10 @@ describe('LayoutRect', () => {
       'height': 10,
       'bottom': 70,
       'right': 50,
+      'x': 40,
+      'y': 60,
     });
-    // the layoutRect array can deal with null/undefined input
+    // the DOMRect array can deal with null/undefined input
     expect(lr.rectIntersection(null, rect1, undefined, rect2)).to.jsonEqual({
       'left': 40,
       'top': 60,
@@ -95,6 +86,8 @@ describe('LayoutRect', () => {
       'height': 10,
       'bottom': 70,
       'right': 50,
+      'x': 40,
+      'y': 60,
     });
     expect(lr.rectIntersection(rect1, rect3)).to.be.null;
     expect(lr.rectIntersection(rect2, rect3)).to.be.null;
@@ -105,6 +98,8 @@ describe('LayoutRect', () => {
       'height': 5,
       'bottom': 70,
       'right': 50,
+      'x': 45,
+      'y': 65,
     });
     expect(lr.rectIntersection(rect1, rect2, rect3, rect4)).to.be.null;
   });

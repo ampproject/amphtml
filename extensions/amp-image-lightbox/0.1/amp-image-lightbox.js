@@ -30,10 +30,10 @@ import {continueMotion} from '../../../src/motion';
 import {historyForDoc} from '../../../src/services';
 import {isLoaded} from '../../../src/event-helper';
 import {
-  layoutRectFromDomRect,
-  layoutRectLtwh,
-  moveLayoutRect,
-} from '../../../src/layout-rect';
+  DOMRectLtwh,
+  moveDOMRect,
+  DOMRectFromClientRect,
+} from '../../../src/DOM-rect';
 import {srcsetFromElement} from '../../../src/srcset';
 import {timerFor, platformFor} from '../../../src/services';
 import {user, dev} from '../../../src/log';
@@ -107,11 +107,11 @@ export class ImageViewer {
     /** @private {number} */
     this.sourceHeight_ = 0;
 
-    /** @private {!../../../src/layout-rect.LayoutRectDef} */
-    this.viewerBox_ = layoutRectLtwh(0, 0, 0, 0);
+    /** @private {!../../../src/DOM-rect.DOMRectDef} */
+    this.viewerBox_ = DOMRectLtwh(0, 0, 0, 0);
 
-    /** @private {!../../../src/layout-rect.LayoutRectDef} */
-    this.imageBox_ = layoutRectLtwh(0, 0, 0, 0);
+    /** @private {!../../../src/DOM-rect.DOMRectDef} */
+    this.imageBox_ = DOMRectLtwh(0, 0, 0, 0);
 
     /** @private {number} */
     this.scale_ = 1;
@@ -165,7 +165,7 @@ export class ImageViewer {
 
   /**
    * Returns the boundaries of the viewer.
-   * @return {!../../../src/layout-rect.LayoutRectDef}
+   * @return {!../../../src/DOM-rect.DOMRectDef}
    */
   getViewerBox() {
     return this.viewerBox_;
@@ -173,7 +173,7 @@ export class ImageViewer {
 
   /**
    * Returns the boundaries of the image element.
-   * @return {!../../../src/layout-rect.LayoutRectDef}
+   * @return {!../../../src/DOM-rect.DOMRectDef}
    */
   getImageBox() {
     return this.imageBox_;
@@ -182,13 +182,13 @@ export class ImageViewer {
   /**
    * Returns the boundaries of the image element with the offset if it was
    * moved by a gesture.
-   * @return {!../../../src/layout-rect.LayoutRectDef}
+   * @return {!../../../src/DOM-rect.DOMRectDef}
    */
   getImageBoxWithOffset() {
     if (this.posX_ == 0 && this.posY_ == 0) {
       return this.imageBox_;
     }
-    return moveLayoutRect(this.imageBox_, this.posX_, this.posY_);
+    return moveDOMRect(this.imageBox_, this.posX_, this.posY_);
   }
 
   /**
@@ -202,7 +202,7 @@ export class ImageViewer {
     });
     this.image_.removeAttribute('aria-describedby');
     this.srcset_ = null;
-    this.imageBox_ = layoutRectLtwh(0, 0, 0, 0);
+    this.imageBox_ = DOMRectLtwh(0, 0, 0, 0);
     this.sourceWidth_ = 0;
     this.sourceHeight_ = 0;
 
@@ -257,9 +257,8 @@ export class ImageViewer {
    * @return {!Promise}
    */
   measure() {
-    this.viewerBox_ = layoutRectFromDomRect(this.viewer_
+    this.viewerBox_ = DOMRectFromClientRect(this.viewer_
         ./*OK*/getBoundingClientRect());
-
     const sf = Math.min(this.viewerBox_.width / this.sourceWidth_,
         this.viewerBox_.height / this.sourceHeight_);
     let width = Math.min(this.sourceWidth_ * sf, this.viewerBox_.width);
@@ -273,7 +272,7 @@ export class ImageViewer {
       height = this.sourceHeight_;
     }
 
-    this.imageBox_ = layoutRectLtwh(
+    this.imageBox_ = DOMRectLtwh(
         Math.round((this.viewerBox_.width - width) / 2),
         Math.round((this.viewerBox_.height - height) / 2),
         Math.round(width),
@@ -946,8 +945,7 @@ class AmpImageLightbox extends AMP.BaseElement {
       transLayer.classList.add('i-amphtml-image-lightbox-trans');
       this.element.ownerDocument.body.appendChild(transLayer);
 
-      const rect = layoutRectFromDomRect(this.sourceImage_
-          ./*OK*/getBoundingClientRect());
+      const rect = this.sourceImage_./*OK*/getBoundingClientRect();
       const imageBox = this.imageViewer_.getImageBox();
       const clone = this.sourceImage_.cloneNode(true);
       clone.className = '';
@@ -1023,8 +1021,8 @@ class AmpImageLightbox extends AMP.BaseElement {
       transLayer.classList.add('i-amphtml-image-lightbox-trans');
       this.element.ownerDocument.body.appendChild(transLayer);
 
-      const rect = layoutRectFromDomRect(this.sourceImage_
-          ./*OK*/getBoundingClientRect());
+      const rect = this.sourceImage_
+          ./*OK*/getBoundingClientRect();
       const clone = image.cloneNode(true);
       st.setStyles(clone, {
         position: 'absolute',

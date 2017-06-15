@@ -25,7 +25,7 @@ import {
 } from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {layoutRectLtwh} from '../../../src/layout-rect';
+import {DOMRectLtwh} from '../../../src/DOM-rect';
 import {map} from '../../../src/utils/object';
 import {
   viewerForDoc,
@@ -372,10 +372,10 @@ export class AmpdocAnalyticsRoot extends AnalyticsRoot {
       // creates a significant probability of risk condition.
       // Once address, we can simply switch to the 0/0 approach in the `else`
       // clause.
-      rect = viewport.getLayoutRect(this.getRootElement());
+      rect = viewport.getDOMRect(this.getRootElement());
     } else {
       const size = viewport.getSize();
-      rect = layoutRectLtwh(0, 0, size.width, size.height);
+      rect = DOMRectLtwh(0, 0, size.width, size.height);
     }
     return whenContentIniLoad(this.ampdoc, this.ampdoc.win, rect);
   }
