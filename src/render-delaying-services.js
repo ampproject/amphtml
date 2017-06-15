@@ -37,7 +37,6 @@ import {timerFor} from './services';
  * @const {!Object<string, string>}
  */
 const SERVICES = {
-  'amp-accordion': '[custom-element=amp-accordion]',
   'amp-dynamic-css-classes': '[custom-element=amp-dynamic-css-classes]',
   'variant': 'amp-experiment',
 };
