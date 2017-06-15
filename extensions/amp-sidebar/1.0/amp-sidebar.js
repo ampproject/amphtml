@@ -178,7 +178,7 @@ export class AmpSidebar extends AMP.BaseElement {
 
       // use calc to get our space for sidebar to docked
       const borderCalc =
-        `calc(${this.element.getBoundingClientRect().width}px)`;
+        `calc(${this.element./*REVIEW*/offsetWidth}px)`;
       const bodyElement = this.document_.body;
       if (this.side_ === 'right') {
         setStyles(bodyElement, {
