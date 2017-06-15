@@ -318,7 +318,9 @@ export class LaterpayVendor {
     purchaseButton.disabled = true;
     this.purchaseButton_ = purchaseButton;
     this.purchaseButtonListener_ = listen(purchaseButton, 'click', ev => {
-      this.handlePurchase_(ev, this.selectedPurchaseOption_.value);
+      const value = this.selectedPurchaseOption_.value;
+      const purchaseType = this.selectedPurchaseOption_.dataset.purchaseType;
+      this.handlePurchase_(ev, value, purchaseType);
     });
     dialogContainer.appendChild(listContainer);
     dialogContainer.appendChild(purchaseButton);
@@ -437,7 +439,7 @@ export class LaterpayVendor {
     a.href = href;
     a.textContent = this.i18n_.alreadyPurchasedLink;
     this.alreadyPurchasedListener_ = listen(a, 'click', ev => {
-      this.handlePurchase_(ev, href);
+      this.handlePurchase_(ev, href, 'alreadyPurchased');
     });
     p.appendChild(a);
     return p;
@@ -466,16 +468,17 @@ export class LaterpayVendor {
 
   /**
    * @param {!Event} ev
+   * @param {!string} purchaseUrl
+   * @param {!string} purchaseType
    * @private
    */
-  handlePurchase_(ev, purchaseUrl) {
+  handlePurchase_(ev, purchaseUrl, purchaseType) {
     ev.preventDefault();
     const urlPromise = this.accessService_.buildUrl(
         purchaseUrl, /* useAuthData */ false);
     return urlPromise.then(url => {
       dev().fine(TAG, 'Authorization URL: ', url);
-      this.accessService_.loginWithUrl(
-          url, this.selectedPurchaseOption_.dataset.purchaseType);
+      this.accessService_.loginWithUrl(url, purchaseType);
     });
   }
 
