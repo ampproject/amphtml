@@ -193,6 +193,12 @@ describes.sandboxed('StandardActions', {}, () => {
       standardActions.handleAmpTarget(invocation);
       expect(win.location).to.equal('http://bar.com');
       expect(expandUrlStub.calledOnce);
+
+      // Invalid protocols should fail.
+      invocation.args.url = /*eslint no-script-url: 0*/ 'javascript:alert(1)';
+      standardActions.handleAmpTarget(invocation);
+      expect(win.location).to.equal('http://bar.com');
+      expect(expandUrlStub.calledOnce);
     });
 
     it('should implement goBack', () => {

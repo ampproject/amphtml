@@ -19,11 +19,12 @@ import {OBJECT_STRING_ARGS_KEY} from '../service/action-impl';
 import {Layout, getLayoutClass} from '../layout';
 import {actionServiceForDoc, urlReplacementsForDoc} from '../services';
 import {bindForDoc} from '../services';
-import {dev, user} from '../log';
-import {registerServiceBuilderForDoc} from '../service';
-import {historyForDoc} from '../services';
-import {resourcesForDoc} from '../services';
 import {computedStyle, getStyle, toggle} from '../style';
+import {dev, user} from '../log';
+import {historyForDoc} from '../services';
+import {isProtocolValid} from '../url';
+import {registerServiceBuilderForDoc} from '../service';
+import {resourcesForDoc} from '../services';
 import {vsyncFor} from '../services';
 
 /**
@@ -136,6 +137,9 @@ export class StandardActions {
       return;
     }
     const url = invocation.args['url'];
+    if (!isProtocolValid(url)) {
+      return;
+    }
     const expandedUrl = this.urlReplacements_.expandUrlSync(url);
     const node = invocation.target;
     const win = (node.ownerDocument || node).defaultView;
