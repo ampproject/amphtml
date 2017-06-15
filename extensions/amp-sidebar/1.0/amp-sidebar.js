@@ -173,7 +173,7 @@ export class AmpSidebar extends AMP.BaseElement {
     }
     // Remove and add the docking dynamically
     if (this.isDocked_() && !this.element.hasAttribute('docked')) {
-      this.closeIfOpen_();
+      this.close_();
       this.element.setAttribute('docked', '');
 
       // use calc to get our space for sidebar to docked
@@ -196,7 +196,7 @@ export class AmpSidebar extends AMP.BaseElement {
         padding-left: //body width + side-bar width
       */
     } else if (!this.isDocked_() && this.element.hasAttribute('docked')) {
-      this.closeIfOpen_();
+      this.close_();
       this.element.removeAttribute('docked');
       setStyles(this.document_.body, {
         'border-right-width': null,
@@ -214,16 +214,6 @@ export class AmpSidebar extends AMP.BaseElement {
    */
   isOpen_() {
     return this.element.hasAttribute('open');
-  }
-
-  /**
-   * Closes the sidebar if it is open
-   * @private
-   */
-  closeIfOpen_() {
-    if (this.isOpen_()) {
-      this.close_();
-    }
   }
 
   /**
