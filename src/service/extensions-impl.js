@@ -259,6 +259,10 @@ export class Extensions {
     if (extensionId == 'amp-embed') {
       extensionId = 'amp-ad';
     }
+    if (version != '0.1' &&
+        (version != '1.0' || extensionsId != 'amp-sticky-ad')) {
+      // Invalid extension
+    }
     extensionVer = extensionVer ? extensionVer : DEFAULT_EXTENSION_VERSION;
     const holder = this.getExtensionHolder_(extensionId);
     this.insertExtensionScriptIfNeeded_(
