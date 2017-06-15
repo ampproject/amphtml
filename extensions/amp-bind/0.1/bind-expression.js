@@ -389,8 +389,10 @@ export class BindExpression {
    * @private
    */
   memberAccessWarning_(target, member) {
-    user().warn(TAG, `Cannot read property ${JSON.stringify(member)} of ` +
-        `${JSON.stringify(target)}; returning null.`);
+    // Cast valid, because we don't care for the logging.
+    const stringified = JSON.stringify(/** @type {!JsonObject} */ (member));
+    user().warn(TAG, `Cannot read property ${stringified} of ` +
+        `${stringified}; returning null.`);
   }
 
   /**

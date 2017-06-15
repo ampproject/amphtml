@@ -15,6 +15,7 @@
  */
 
 import {dev} from './log';
+import {dict} from './utils/object';
 import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
 import {SubscriptionApi} from './iframe-helper';
 
@@ -116,7 +117,7 @@ export class IntersectionObserverApi {
       for (let i = 0; i < entries.length; i++) {
         delete entries[i]['target'];
       }
-      this.subscriptionApi_.send('intersection', {changes: entries});
+      this.subscriptionApi_.send('intersection', dict({'changes': entries}));
     }, {threshold: DEFAULT_THRESHOLD});
     this.intersectionObserver_.tick(this.viewport_.getRect());
 

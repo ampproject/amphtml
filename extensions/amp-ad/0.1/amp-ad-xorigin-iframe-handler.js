@@ -26,6 +26,7 @@ import {
 } from '../../../src/iframe-helper';
 import {viewerForDoc} from '../../../src/services';
 import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {timerFor} from '../../../src/services';
 import {setStyle} from '../../../src/style';
 import {loadPromise} from '../../../src/event-helper';
@@ -122,9 +123,11 @@ export class AmpAdXOriginIframeHandler {
           this.positionObserver_.observe(
               dev().assertElement(this.iframe),
               PositionObserverFidelity.HIGH, pos => {
+                // Valid cast because it is an external object.
+                const posCast = /** @type {!JsonObject} */ (pos);
                 this.positionObserverHighFidelityApi_.send(
                     POSITION_HIGH_FIDELITY,
-                    pos);
+                    posCast);
               });
         });
     }
@@ -151,7 +154,10 @@ export class AmpAdXOriginIframeHandler {
 
           postMessageToWindows(
               this.iframe, [{win: source, origin}],
-              'get-html-result', {content, messageId}, true
+              'get-html-result', dict({
+                'content': content,
+                'messageId': messageId,
+              }), true
           );
         }, true, false));
 
@@ -385,7 +391,10 @@ export class AmpAdXOriginIframeHandler {
         this.iframe,
         [{win: source, origin}],
         success ? 'embed-size-changed' : 'embed-size-denied',
-        {requestedWidth, requestedHeight},
+        dict({
+          'requestedWidth': requestedWidth,
+          'requestedHeight': requestedHeight,
+        }),
         true);
   }
 
@@ -397,10 +406,10 @@ export class AmpAdXOriginIframeHandler {
     if (!this.embedStateApi_) {
       return;
     }
-    this.embedStateApi_.send('embed-state', {
-      inViewport,
-      pageHidden: !this.viewer_.isVisible(),
-    });
+    this.embedStateApi_.send('embed-state', dict({
+      'inViewport': inViewport,
+      'pageHidden': !this.viewer_.isVisible(),
+    }));
   }
 
   /**
