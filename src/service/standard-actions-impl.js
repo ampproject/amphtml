@@ -36,6 +36,9 @@ function isShowable(element) {
       || element.hasAttribute('hidden');
 }
 
+/** @const {string} */
+const TAG = 'STANDARD-ACTIONS';
+
 /**
  * This service contains implementations of some of the most typical actions,
  * such as hiding DOM elements.
@@ -138,6 +141,7 @@ export class StandardActions {
     }
     const url = invocation.args['url'];
     if (!isProtocolValid(url)) {
+      user().error(TAG, 'Cannot navigate to invalid protocol: ' + url);
       return;
     }
     const expandedUrl = this.urlReplacements_.expandUrlSync(url);
@@ -186,7 +190,7 @@ export class StandardActions {
 
     if (target.classList.contains(getLayoutClass(Layout.NODISPLAY))) {
       user().warn(
-          'STANDARD-ACTIONS',
+          TAG,
           'Elements with layout=nodisplay cannot be dynamically shown.',
           target);
 
@@ -198,7 +202,7 @@ export class StandardActions {
           !isShowable(target)) {
 
         user().warn(
-            'STANDARD-ACTIONS',
+            TAG,
             'Elements can only be dynamically shown when they have the ' +
             '"hidden" attribute set or when they were dynamically hidden.',
             target);
