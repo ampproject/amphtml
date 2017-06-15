@@ -203,14 +203,12 @@ function getGraph(entryModule) {
  */
 function getEntryModule(extensionFolder) {
   var extension = path.basename(extensionFolder);
-  return fs.readdirAsync(extensionFolder).then(dirItems => {
-    return (dirItems
-        .map(x => `${extensionFolder}/${x}`)
-        .filter(x => fs.statSync(x).isDirectory())
-        .map(x => `${x}/${extension}.js`)
-        .filter(x => fs.existsSync(x))
-        .filter(x => fs.statSync(x).isFile()));
-  });
+  return fs.readdirSync(extensionFolder)
+      .map(x => `${extensionFolder}/${x}`)
+      .filter(x => fs.statSync(x).isDirectory())
+      .map(x => `${x}/${extension}.js`)
+      .filter(x => fs.existsSync(x))
+      .filter(x => fs.statSync(x).isFile());
 }
 
 /**
