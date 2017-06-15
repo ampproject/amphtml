@@ -24,7 +24,6 @@ import * as sinon from 'sinon';
 function getTestElement() {
   const div = window.document.createElement('div');
   div.setAttribute('style', 'width:1px; height:1px;');
-  // This is the only network currently opted-in.
   div.setAttribute('type', 'doubleclick');
   div.setAttribute(DATA_ATTR_NAME, '35');
   return div;
@@ -34,6 +33,11 @@ function getTestElement() {
 describe('refresh-manager', () => {
   let mockA4a;
   let sandbox;
+  const config = {
+    visiblePercentageMin: 50,
+    totalTimeMin: 0,
+    continuousTimeMin: 1,
+  };
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -51,7 +55,7 @@ describe('refresh-manager', () => {
   it('should get refreshInterval from slot', () => {
     const getPublisherSpecifiedRefreshIntervalSpy = sandbox.spy(
         RefreshManager.prototype, 'getPublisherSpecifiedRefreshInterval_');
-    const refreshManager = new RefreshManager(mockA4a);
+    const refreshManager = new RefreshManager(mockA4a, config);
     expect(getPublisherSpecifiedRefreshIntervalSpy).to.be.calledOnce;
     expect(refreshManager.refreshInterval_).to.equal(35000);
   });
@@ -64,7 +68,7 @@ describe('refresh-manager', () => {
     meta.setAttribute('name', METATAG_NAME);
     meta.setAttribute('content', 'doubleclick=40');
     window.document.head.appendChild(meta);
-    const refreshManager = new RefreshManager(mockA4a);
+    const refreshManager = new RefreshManager(mockA4a, config);
     expect(getPublisherSpecifiedRefreshIntervalSpy).to.be.calledOnce;
     expect(refreshManager.refreshInterval_).to.equal(40000);
   });
@@ -73,19 +77,19 @@ describe('refresh-manager', () => {
   it('should call getConfiguration_', () => {
     const getConfigurationSpy = sandbox.spy(
         RefreshManager.prototype, 'getConfiguration_');
-    const refreshManager = new RefreshManager(mockA4a);
+    const refreshManager = new RefreshManager(mockA4a, config);
     expect(getConfigurationSpy).to.be.calledOnce;
     expect(refreshManager.config_).to.not.be.null;
   });
 
   it('should be eligible for refresh', () => {
-    const refreshManager = new RefreshManager(mockA4a);
+    const refreshManager = new RefreshManager(mockA4a, config);
     expect(refreshManager.isRefreshable()).to.be.true;
   });
 
   it('should NOT be eligible for refresh', () => {
     mockA4a.element.removeAttribute(DATA_ATTR_NAME);
-    const refreshManager = new RefreshManager(mockA4a);
+    const refreshManager = new RefreshManager(mockA4a, config);
     expect(refreshManager.isRefreshable()).to.be.false;
   });
 
@@ -93,7 +97,7 @@ describe('refresh-manager', () => {
     // Attach element to DOM, as is necessary for request ampdoc.
     window.document.body.appendChild(mockA4a.element);
     const refreshSpy = sandbox.spy(mockA4a, 'refresh');
-    const refreshManager = new RefreshManager(mockA4a);
+    const refreshManager = new RefreshManager(mockA4a, config);
     // So the test doesn't hang for the required minimum 30s interval, or the
     // 1s ActiveView visibility definition.
     refreshManager.config_ = {

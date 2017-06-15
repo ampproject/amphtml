@@ -15,7 +15,6 @@
  */
 
 import {analyticsForDoc} from '../../../src/analytics';
-import {refreshConfigs} from '../../../ads/_a4a-config';
 import {timerFor} from '../../../src/services';
 import {
   getEnclosingContainerTypes,
@@ -49,8 +48,9 @@ export class RefreshManager {
 
   /**
    * @param {!./amp-a4a.AmpA4A} a4a The AmpA4A instance to be refreshed.
+   * @param {!RefreshConfig} config
    */
-  constructor(a4a) {
+  constructor(a4a, config) {
 
     /** @const @private {!./amp-a4a.AmpA4A} */
     this.a4a_ = a4a;
@@ -68,7 +68,7 @@ export class RefreshManager {
     this.refreshInterval_ = this.getPublisherSpecifiedRefreshInterval_();
 
     /** @const @private {!RefreshConfig} */
-    this.config_ = this.getConfiguration_();
+    this.config_ = this.getConfiguration_(config);
 
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = timerFor(this.win_);
@@ -126,13 +126,10 @@ export class RefreshManager {
   }
 
   /**
-   * Retrieves the refresh configuration for this slot, as set by the ad
-   * network.
-   *
+   * Converts config to appropriate units.
    * @return {!RefreshConfig}
    */
-  getConfiguration_() {
-    const config = refreshConfigs[this.adType_];
+  getConfiguration_(config) {
     // Convert seconds to milliseconds.
     config['totalTimeMin'] *= 1000;
     config['continuousTimeMin'] *= 1000;
