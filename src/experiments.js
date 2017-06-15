@@ -44,7 +44,7 @@ let toggles_ = null;
 
 //TODO(kmh287, #8331) Uncomment and replace empty object literal with real
 // experiment public key jwk.
-/** @type {!Promise} */
+/** @type {!Promise<undefined>} */
 const originTrialsPromise = Promise.resolve();
 // const originTrialsPromise = enableExperimentsForOriginTrials(self, {});
 
@@ -74,18 +74,19 @@ export function isCanary(win) {
  *   3. The experiments data was not signed with our private key
  * @param {!Window} win
  * @param {string} token
- * @param {!Object} crypto Crypto service
- * @param {!Object} keyInfo Key info for the public key used to verify
- *    the token's signature.
- * @return {!Promise}
+ * @param {!./service/crypto-impl.Crypto} crypto Crypto service
+ * @param {!webCrypto.CryptoKey} key Public key used to verify the token's
+ *    signature.
+ * @return {!Promise<undefined>}
  */
-function enableExperimentsFromToken(win, token, crypto, keyInfo) {
-  if (!crypto.isCryptoAvailable()) {
+function enableExperimentsFromToken(win, token, crypto, key) {
+  if (!crypto.isPkcsAvailable()) {
     user().warn(TAG, 'Crypto is unavailable');
     return Promise.resolve();
   }
   /**
-   * token = encode64(version + length + config + sign(config, private_key))
+   * token = encode64(version + length + config +
+   *    sign(version + length + config, private_key))
    * version = 1 byte version of the token format (starting at 0x0)
    */
   let current = 0;
@@ -115,7 +116,7 @@ function enableExperimentsFromToken(win, token, crypto, keyInfo) {
   const signedBytes = bytes.subarray(0, current);
   const signatureBytes = bytes.subarray(current);
 
-  return crypto.verifySignature(signedBytes, signatureBytes, keyInfo)
+  return crypto.verifyPkcs(key, signatureBytes, signedBytes)
       .then(verified => {
         if (!verified) {
           throw new Error('Failed to verify config signature');
@@ -149,7 +150,7 @@ function enableExperimentsFromToken(win, token, crypto, keyInfo) {
  * tokens iff the token is well-formed. A token
  * @param {!Window} win
   *@param {!Object} publicJwk Used for testing only.
- * @return {!Promise}
+ * @return {!Promise<undefined>}
  */
 export function enableExperimentsForOriginTrials(win, publicJwk) {
   const metas =
@@ -159,16 +160,16 @@ export function enableExperimentsForOriginTrials(win, publicJwk) {
   }
   let crypto;
   return getServicePromise(win, 'crypto').then(c => {
-    crypto = c;
-    return crypto.importPublicKey('experiments', publicJwk);
-  }).then(keyInfo => {
+    crypto = /** @type {!./service/crypto-impl.Crypto} */ (c);
+    return crypto.importPkcsKey(publicJwk);
+  }).then(key => {
     const tokenPromises = [];
     for (let i = 0; i < metas.length; i++) {
       const meta = metas[i];
       const token = meta.getAttribute('content');
       if (token) {
         const tokenPromise =
-            enableExperimentsFromToken(win, token, crypto, keyInfo)
+            enableExperimentsFromToken(win, token, crypto, key)
                 .catch(err => {
                   // Log message but do not prevent scans of other tokens.
                   user().warn(TAG, err);
@@ -476,4 +477,3 @@ export function forceExperimentBranch(win, experimentName, branchId) {
   toggleExperiment(win, experimentName, !!branchId, true);
   win.experimentBranches[experimentName] = branchId;
 }
-
