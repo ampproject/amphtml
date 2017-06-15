@@ -47,6 +47,19 @@ import {getMode} from '../mode';
  */
 export let FetchInitDef;
 
+/**
+ * Special case for fetchJson
+ * @typedef {{
+ *   body: (!JsonObject|!FormData|undefined),
+ *   credentials: (string|undefined),
+ *   headers: (!Object|undefined),
+ *   method: (string|undefined),
+ *   requireAmpResponseSourceOrigin: (boolean|undefined),
+ *   ampCors: (boolean|undefined)
+ * }}
+ */
+export let FetchInitJsonDef;
+
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
 
@@ -195,7 +208,7 @@ export class Xhr {
    * See `fetchAmpCors_` for more detail.
    *
    * @param {string} input
-   * @param {?FetchInitDef=} opt_init
+   * @param {?FetchInitJsonDef=} opt_init
    * @param {boolean=} opt_allowFailure Allows non-2XX status codes to fulfill.
    * @return {!Promise<!FetchResponse>}
    */
@@ -211,7 +224,8 @@ export class Xhr {
       );
 
       init.headers['Content-Type'] = 'application/json;charset=utf-8';
-      init.body = JSON.stringify(init.body);
+      // Cast is valid, because we checked that it is not form data above.
+      init.body = JSON.stringify(/** @type {!JsonObject} */ (init.body));
     }
     return this.fetch(input, init);
   }

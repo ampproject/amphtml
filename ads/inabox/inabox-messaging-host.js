@@ -21,6 +21,7 @@ import {
   MessageType,
 } from '../../src/3p-frame-messaging';
 import {dev} from '../../src/log';
+import {dict} from '../../src/utils/object';
 import {expandFrame, collapseFrame} from './frame-overlay-helper';
 
 /** @const */
@@ -153,7 +154,7 @@ export class InaboxMessagingHost {
           serializeMessage(
               MessageType.FULL_OVERLAY_FRAME_RESPONSE,
               request.sentinel,
-              {success: true}),
+              dict({'success': true})),
           origin);
     });
 
@@ -173,7 +174,7 @@ export class InaboxMessagingHost {
           serializeMessage(
               MessageType.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
               request.sentinel,
-              {success: true}),
+              dict({'success': true})),
           origin);
     });
 

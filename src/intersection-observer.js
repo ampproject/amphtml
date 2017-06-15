@@ -15,6 +15,7 @@
  */
 
 import {dev} from './log';
+import {dict} from './utils/object';
 import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
 import {SubscriptionApi} from './iframe-helper';
 import {timerFor} from './services';
@@ -270,7 +271,9 @@ export class IntersectionObserver {
       return;
     }
     // Note that SubscribeApi multicasts the update to all interested windows.
-    this.postMessageApi_.send('intersection', {changes: this.pendingChanges_});
+    this.postMessageApi_.send('intersection', dict({
+      'changes': this.pendingChanges_,
+    }));
     this.pendingChanges_.length = 0;
   }
 

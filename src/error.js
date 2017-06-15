@@ -72,7 +72,8 @@ let reportingBackoff = function(work) {
  */
 function tryJsonStringify(value) {
   try {
-    return JSON.stringify(value);
+    // Cast is fine, because we really don't care here. Just trying.
+    return JSON.stringify(/** @type {!JsonObject} */ (value));
   } catch (e) {
     return String(value);
   }

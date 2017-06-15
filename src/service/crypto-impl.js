@@ -134,7 +134,7 @@ export class Crypto {
    * available using isCryptoAvailable before calling this function.
    *
    * @param {string} serviceName used to identify the signing service.
-   * @param {!Object} jwk An object which is hopefully an RSA JSON Web Key.  The
+   * @param {!JsonObject} jwk An object which is hopefully an RSA JSON Web Key.  The
    *     caller should verify that it is an object before calling this function.
    * @return {!Promise<!PublicKeyInfoDef>}
    */
@@ -153,11 +153,11 @@ export class Crypto {
           // We do the importKey first to allow the browser to check for
           // an invalid key.  This last check is in case the key is valid
           // but a different kind.
-          if (typeof jwk.n != 'string' || typeof jwk.e != 'string') {
+          if (typeof jwk['n'] != 'string' || typeof jwk['e'] != 'string') {
             throw new Error('missing fields in JSON Web Key');
           }
-          const mod = base64UrlDecodeToBytes(jwk.n);
-          const pubExp = base64UrlDecodeToBytes(jwk.e);
+          const mod = base64UrlDecodeToBytes(jwk['n']);
+          const pubExp = base64UrlDecodeToBytes(jwk['e']);
           const lenMod = lenPrefix(mod);
           const lenPubExp = lenPrefix(pubExp);
           const data = new Uint8Array(lenMod.length + lenPubExp.length);

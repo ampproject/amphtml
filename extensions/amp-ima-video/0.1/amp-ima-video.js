@@ -28,6 +28,7 @@ import {
 import {
   listen,
 } from '../../../src/event-helper';
+import {dict} from '../../../src/utils/object';
 import {removeElement} from '../../../src/dom';
 import {startsWith} from '../../../src/string';
 import {user} from '../../../src/log';
@@ -185,11 +186,11 @@ class AmpImaVideo extends AMP.BaseElement {
     if (this.iframe_ && this.iframe_.contentWindow)
     {
       this.playerReadyPromise_.then(() => {
-        this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify({
+        this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify(dict({
           'event': 'command',
           'func': command,
           'args': opt_args || '',
-        }), '*');
+        })), '*');
       });
     }
   }

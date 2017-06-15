@@ -327,7 +327,7 @@ export function listenForOncePromise(iframe, typeOfMessages, opt_is3P) {
  * Posts a message to the iframe.
  * @param {!Element} iframe The iframe.
  * @param {string} type Type of the message.
- * @param {!Object} object Message payload.
+ * @param {!JsonObject} object Message payload.
  * @param {string} targetOrigin origin of the target.
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
  */
@@ -345,15 +345,15 @@ export function postMessage(iframe, type, object, targetOrigin, opt_is3P) {
  * @param {!Array<{win: !Window, origin: string}>} targets to send the message
  *     to, pairs of window and its origin.
  * @param {string} type Type of the message.
- * @param {!Object} object Message payload.
+ * @param {!JsonObject} object Message payload.
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
  */
 export function postMessageToWindows(iframe, targets, type, object, opt_is3P) {
   if (!iframe.contentWindow) {
     return;
   }
-  object.type = type;
-  object.sentinel = getSentinel_(iframe, opt_is3P);
+  object['type'] = type;
+  object['sentinel'] = getSentinel_(iframe, opt_is3P);
   let payload = object;
   if (opt_is3P) {
     // Serialize ourselves because that is much faster in Chrome.
@@ -439,7 +439,7 @@ export class SubscriptionApi {
   /**
    * Sends a message to all subscribed windows.
    * @param {string} type Type of the message.
-   * @param {!Object} data Message payload.
+   * @param {!JsonObject} data Message payload.
    */
   send(type, data) {
     // Remove clients that have been removed from the DOM.

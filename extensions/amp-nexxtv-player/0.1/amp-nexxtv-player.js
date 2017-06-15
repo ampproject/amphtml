@@ -17,6 +17,7 @@
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {tryParseJson} from '../../../src/json';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {dict} from '../../../src/utils/object';
 import {user} from '../../../src/log';
 import {
   installVideoManagerForDoc,
@@ -172,7 +173,9 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
   sendCommand_(command) {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
-        this.iframe_.contentWindow./*OK*/postMessage({cmd: command}, '*');
+        this.iframe_.contentWindow./*OK*/postMessage(dict({
+          'cmd': command,
+        }), '*');
       }
     });
   };
