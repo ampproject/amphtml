@@ -534,13 +534,13 @@ export function mergeExperimentIds(newIds, currentIdString) {
  *
  * @param {!Window} win
  * @param {!Element} element The ad slot.
- * @param {!JSONType} config The original config object.
+ * @param {!JsonObject} config The original config object.
  * @param {?string} qqid
+ * @param {boolean} isVerifiedAmpCreative
  * @param {number} deltaTime The time difference, in ms, between the lifecycle
  *   reporter's initialization and now.
  * @param {number} initTime The initialization time, in ms, of the lifecycle
  *   reporter.
- *   TODO(levitzky) Remove the above two params once AV numbers stabilize.
  * @return {?JsonObject} config or null if invalid/missing.
  */
 export function addCsiSignalsToAmpAnalyticsConfig(win, element, config,
