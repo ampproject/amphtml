@@ -332,6 +332,7 @@ export class LaterpayVendor {
         this.createAlreadyPurchasedLink_(this.purchaseConfig_.apl));
     this.renderTextBlock_('footer');
     dialogContainer.appendChild(this.innerContainer_);
+    dialogContainer.appendChild(this.createLaterpayBadge_());
     this.containerEmpty_ = false;
   }
 
@@ -348,6 +349,21 @@ export class LaterpayVendor {
     }
   }
 
+  /**
+   * @private
+   * @return {!Node}
+   */
+  createLaterpayBadge_() {
+    const a = this.createElement_('a');
+    a.href = 'https://laterpay.net';
+    a.target = '_blank';
+    a.textContent = 'LaterPay';
+    const el = this.createElement_('p');
+    el.className = TAG + '-badge';
+    el.textContent = 'Powered by ';
+    el.appendChild(a);
+    return el;
+  }
 
   /**
    * @param {!PurchaseOptionDef} option

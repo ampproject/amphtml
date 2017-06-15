@@ -49,6 +49,14 @@
   align-items: center;
 }
 
+.amp-access-laterpay-badge {
+  text-align: center;
+  color: #999;
+}
+
+.amp-access-laterpay-badge a {
+  color: #8db444;
+}
 
 .amp-access-laterpay-header {
   font-size: 1.2em;
