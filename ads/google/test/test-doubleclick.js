@@ -19,16 +19,16 @@ import {createServedIframe} from '../../../testing/iframe';
 describe('selectGptExperiment', () => {
 
   it('should return the correct filename when given the experimental condition',
-  () => {
+        () => {
     const controlData = {experimentId: '21060540'};
     const experimentData = {experimentId: '21060541'};
     const notInEitherData = {};
     expect(selectGptExperiment(controlData)).to
-    .equal('gpt_sf_a.js');
+        .equal('gpt_sf_a.js');
     expect(selectGptExperiment(experimentData)).to
-    .equal('gpt_sf_b.js');
+        .equal('gpt_sf_b.js');
     expect(selectGptExperiment(notInEitherData)).to
-    .equal(undefined);
+        .equal(undefined);
   });
 });
 
@@ -50,8 +50,8 @@ describe('writeAdScript', () => {
     writeAdScript(win, data, gptFilename);
 
     expect(win.document.querySelector(
-      'script[src="https://www.googletagservices.com/tag/js/gpt.js"]'))
-      .to.be.ok;
+        'script[src="https://www.googletagservices.com/tag/js/gpt.js"]'))
+        .to.be.ok;
   });
 
   it('should use GPT and opt out of the GladeExperiment when multiSize is not' +
@@ -62,8 +62,8 @@ describe('writeAdScript', () => {
     writeAdScript(win, data, gptFilename);
 
     expect(win.document.querySelector(
-      'script[src="https://www.googletagservices.com/tag/js/gpt.js"]'))
-      .to.be.ok;
+        'script[src="https://www.googletagservices.com/tag/js/gpt.js"]'))
+        .to.be.ok;
   });
 
   it('should use GPT and opt out of the GladeExperiment when in the control' +
@@ -74,8 +74,8 @@ describe('writeAdScript', () => {
     writeAdScript(win, data, gptFilename);
 
     expect(win.document.querySelector(
-      'script[src="https://www.googletagservices.com/tag/js/gpt_sf_a.js"]'))
-      .to.be.ok;
+        'script[src="https://www.googletagservices.com/tag/js/gpt_sf_a.js"]'))
+        .to.be.ok;
   });
 
   it('should use GPT and opt out of the GladeExperiment when in the' +
@@ -86,7 +86,7 @@ describe('writeAdScript', () => {
     writeAdScript(win, data, gptFilename);
 
     expect(win.document.querySelector(
-      'script[src="https://www.googletagservices.com/tag/js/gpt_sf_b.js"]'))
-      .to.be.ok;
+        'script[src="https://www.googletagservices.com/tag/js/gpt_sf_b.js"]'))
+        .to.be.ok;
   });
 });

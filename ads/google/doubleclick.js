@@ -268,7 +268,7 @@ export function selectGptExperiment(data) {
   // expected that only one of the experiment ids will be present.
   let expFilename;
   (data['experimentId'] || '').split(',').forEach(
-    val => expFilename = expFilename || fileExperimentConfig[val]);
+      val => expFilename = expFilename || fileExperimentConfig[val]);
   return expFilename;
 }
 
