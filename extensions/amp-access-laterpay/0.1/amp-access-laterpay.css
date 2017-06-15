@@ -14,13 +14,6 @@
  * limitations under the License.
  */
 
-.amp-access-laterpay {
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
 @media (min-width: 420px) {
   .amp-access-laterpay {
     width: 420px;
@@ -48,6 +41,14 @@
 .amp-access-laterpay input {
   width: 20px;
 }
+
+.amp-access-laterpay-container {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 
 .amp-access-laterpay-header {
   font-size: 1.2em;
