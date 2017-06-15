@@ -202,11 +202,11 @@ class AmpAnalytics3pCreativeMessageRouter {
    * @returns {AmpAnalytics3pResponse}
    */
   buildAmpAnalytics3pResponse_(response) {
-    const messageObject = {destination: this.creativeId_};
-    messageObject[AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE] = response;
-    const typedMessageObject =
-      /** @type {AmpAnalytics3pResponse} */ (messageObject);
-    return typedMessageObject;
+    const messageObject = /** @type {AmpAnalytics3pResponse} */ ({
+      destination: this.creativeId_,
+      data: response,
+    });
+    return messageObject;
   }
 }
 

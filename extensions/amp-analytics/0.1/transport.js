@@ -179,16 +179,16 @@ export class Transport {
     iframeMessagingClient.registerCallback(
         AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE,
         response => {
-          dev().assert(response &&
-            response[AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE],
+          dev().assert(response && response.data,
               'Received empty response from 3p analytics frame');
-          if (!opt_processResponse) {
-            dev().warn(TAG_, 'Received response from 3p analytics frame when' +
-              ' none was expected');
-          }
+          dev().assert(opt_processResponse,
+              'Received response from 3p analytics frame when none was' +
+              ' expected');
           opt_processResponse(
               this.type_,
-            /** @type {!../../../src/3p-analytics-common.AmpAnalytics3pResponse} */ (response)); // eslint-disable-line max-len
+              /** @type
+               * {!../../../src/3p-analytics-common.AmpAnalytics3pResponse}
+               */ (response));
         });
   }
 
@@ -229,8 +229,7 @@ export class Transport {
   static doneUsingCrossDomainIframe(ampDoc, transportOptions) {
     const frameUrl = transportOptions['iframe'];
     const frameData = Transport.getFrameData_(frameUrl);
-    if (Transport.decrementIframeUsageCount_(
-      /** @type{!FrameData} */ (frameData)) > 0) {
+    if (Transport.decrementIframeUsageCount_(frameData)) {
       // Some other instance is still using it
       return;
     }
@@ -323,7 +322,7 @@ export class Transport {
   /**
    * Sends an Amp Analytics trigger event to a vendor's cross-domain iframe,
    * or queues the message if the frame is not yet ready to receive messages.
-   * @param {string} event A string describing the trigger event
+   * @param {!string} event A string describing the trigger event
    * @param {!Object<string, string>} transportOptions
    * @private
    */
@@ -335,6 +334,12 @@ export class Transport {
     frameData.eventQueue.enqueue(this.id_, event);
   }
 
+  /**
+   * Gets the FrameData associated with a particular cross-domain frame URL.
+   * @param frameUrl
+   * @returns {FrameData}
+   * @private
+   */
   static getFrameData_(frameUrl) {
     return Transport.crossDomainIframes_[frameUrl];
   }

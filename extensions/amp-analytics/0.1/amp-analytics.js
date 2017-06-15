@@ -304,12 +304,11 @@ export class AmpAnalytics extends AMP.BaseElement {
    * Receives any response that may be sent from the cross-domain iframe
    * @param {!string} type The type parameter of the cross-domain iframe
    * @param {!../../../src/3p-analytics-common.AmpAnalytics3pResponse} response
-   * The response message from the iframe was specified in the amp-analytics
-   * config
+   * The response message from the iframe that was specified in the
+   * amp-analytics config
    */
   processCrossDomainIframeResponse_(type, response) {
-    const creativeUrl = /** @type {string} */ (this.win.document.baseURI);
-    ResponseMap.add(type, creativeUrl,
+    ResponseMap.add(type, /** @type {string} */ (this.win.document.baseURI),
         response[AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE]);
   }
 
@@ -571,7 +570,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @param {string} request The request to process.
    * @param {!JsonObject} trigger JSON config block that resulted in this event.
    * @param {!Object} event Object with details about the event.
-   * @return {!Promise<(string|undefined)>} The request that was sent out.
+   * @return {!Promise<string|undefined>} The request that was sent out.
    * @private
    */
   handleRequestForEvent_(request, trigger, event) {

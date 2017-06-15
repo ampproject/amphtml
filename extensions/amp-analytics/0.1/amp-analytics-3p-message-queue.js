@@ -41,7 +41,7 @@ class AbstractAmpAnalytics3pMessageQueue {
    * contain the queued data (see 3p-analytics-common)
    */
   constructor(win, iframeMessagingClient, messageType) {
-    /** @typrivatepe {boolean} */
+    /** @private {boolean} */
     this.isReady_ = false;
 
     /** @private {!Window} */
@@ -65,7 +65,6 @@ class AbstractAmpAnalytics3pMessageQueue {
   /**
    * Indicate that a cross-domain frame is ready to receive messages, and
    * send all messages that were previously queued for it.
-   * associated data
    */
   setIsReady() {
     this.isReady_ = true;
@@ -74,6 +73,8 @@ class AbstractAmpAnalytics3pMessageQueue {
 
   /**
    * Send queued data (if there is any) to a cross-domain iframe
+   * This should never be called directly. Use this.throttledFlushQueue_()
+   * instead.
    * @private
    */
   flushQueue_() {
@@ -107,7 +108,7 @@ export class AmpAnalytics3pNewCreativeMessageQueue extends
   }
 
   /**
-   * Enqueues a message (event or extra data) to be sent to a cross-domain
+   * Enqueues an AmpAnalytics3pNewCreative message to be sent to a cross-domain
    * iframe.
    * @param {!string} senderId Identifies which creative is sending the message
    * @param {string=} opt_data The data to be enqueued and then sent to the
@@ -126,13 +127,13 @@ export class AmpAnalytics3pNewCreativeMessageQueue extends
    * @override
    */
   buildMessage_() {
-    const message = {};
-    message.type = this.messageType_;
-    message.data = this.creativeToPendingMessages_;
-    const typedMessage =
+    const message =
       /** @type {../../../src/3p-analytics-common.AmpAnalytics3pNewCreative} */
-      (message);
-    return typedMessage;
+      ({
+        type: this.messageType_,
+        data: this.creativeToPendingMessages_,
+      });
+    return message;
   }
 }
 
@@ -150,7 +151,7 @@ export class AmpAnalytics3pEventMessageQueue extends
   }
 
   /**
-   * Enqueues a message (event or extra data) to be sent to a cross-domain
+   * Enqueues an AmpAnalytics3pEvent message to be sent to a cross-domain
    * iframe.
    * @param {!string} senderId Identifies which creative is sending the message
    * @param {!string} data The data to be enqueued and then sent to the iframe
@@ -174,13 +175,13 @@ export class AmpAnalytics3pEventMessageQueue extends
    * @override
    */
   buildMessage_() {
-    const message = {};
-    message.type = this.messageType_;
-    message.data = this.creativeToPendingMessages_;
-    const typedMessage =
+    const message =
       /** @type {../../../src/3p-analytics-common.AmpAnalytics3pEvent} */
-      (message);
-    return typedMessage;
+      ({
+        type: this.messageType_,
+        data: this.creativeToPendingMessages_,
+      });
+    return message;
   }
 }
 
