@@ -16,8 +16,10 @@
 
 import {
   additionalDimensions,
+  addCsiSignalsToAmpAnalyticsConfig,
   extractAmpAnalyticsConfig,
   extractGoogleAdCreativeAndSignature,
+  EXPERIMENT_ATTRIBUTE,
   googleAdUrl,
   mergeExperimentIds,
 } from '../utils';
@@ -143,6 +145,37 @@ describe('Google A4A utils', () => {
   });
 
   describe('#ActiveView AmpAnalytics integration', () => {
+
+    const builtConfig = {
+      transport: {beacon: false, xhrpost: false},
+      requests: {
+        visibility1: 'https://foo.com?hello=world',
+        visibility2: 'https://bar.com?a=b',
+      },
+      triggers: {
+        continuousVisible: {
+          on: 'visible',
+          request: ['visibility1', 'visibility2'],
+          visibilitySpec: {
+            selector: 'amp-ad',
+            selectionMethod: 'closest',
+            visiblePercentageMin: 50,
+            continuousTimeMin: 1000,
+          },
+        },
+        continuousVisibleIniLoad: {
+          on: 'ini-load',
+          selector: 'amp-ad',
+          selectionMethod: 'closest',
+        },
+        continuousVisibleRenderStart: {
+          on: 'render-start',
+          selector: 'amp-ad',
+          selectionMethod: 'closest',
+        },
+      },
+    };
+
     it('should extract correct config from header', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
@@ -181,82 +214,82 @@ describe('Google A4A utils', () => {
 
         url = ['https://foo.com?hello=world', 'https://bar.com?a=b'];
         const config = extractAmpAnalyticsConfig(a4a, headers);
-        const visibilityCsiRequest = config.requests.visibilityCsi;
-        expect(config.triggers.continuousVisible.request)
-            .to.contain('visibilityCsi');
-        const iniLoadCsiRequest = config.requests.iniLoadCsi;
-        const renderStartCsiRequest = config.requests.renderStartCsi;
-        expect(visibilityCsiRequest).to.not.be.null;
-        expect(iniLoadCsiRequest).to.not.be.null;
-        expect(renderStartCsiRequest).to.not.be.null;
-        // We expect slotId == null, since no real element is created, and so
-        // no slot index is ever set. Additionally, below it is possible to
-        // have negative times, but only in in unit tests, never in production.
-        const getRegExps = metricName => [
-          /^https:\/\/csi\.gstatic\.com\/csi\?/,
-          /s=a4a/,
-          /&c=[0-9]+/,
-          /&slotId=null/,
-          /&qqid\.null=[a-zA-Z_]+/,
-          new RegExp(`&met\\.a4a\\.null=${metricName}\\.-?[0-9]+`),
-          /&dt=-?[0-9]+/,
-          /e\.null=00000001%2C0000002/,
-          /rls=\$internalRuntimeVersion\$/,
-          /adt.null=(doubleclick|adsense)/,
-        ];
-        getRegExps('visibilityCsi').forEach(regExp => {
-          expect(visibilityCsiRequest).to.match(regExp);
-        });
-        getRegExps('iniLoadCsi').forEach(regExp => {
-          expect(iniLoadCsiRequest).to.match(regExp);
-        });
-        getRegExps('renderStartCsi').forEach(regExp => {
-          expect(renderStartCsiRequest).to.match(regExp);
-        });
-        // Need to remove this request as it will vary in test execution.
-        delete config.requests.visibilityCsi;
-        config.triggers.continuousVisible.request.splice(
-            config.triggers.continuousVisible.request.indexOf('visibilityCsi'),
-            1);
-        delete config.requests.iniLoadCsi;
-        delete config.requests.renderStartCsi;
-        expect(config).to.jsonEqual({
-          transport: {beacon: false, xhrpost: false},
-          requests: {
-            visibility1: url[0],
-            visibility2: url[1],
-          },
-          triggers: {
-            continuousVisible: {
-              on: 'visible',
-              request: ['visibility1', 'visibility2'],
-              visibilitySpec: {
-                selector: 'amp-ad',
-                selectionMethod: 'closest',
-                visiblePercentageMin: 50,
-                continuousTimeMin: 1000,
-              },
-            },
-            continuousVisibleIniLoad: {
-              on: 'ini-load',
-              request: 'iniLoadCsi',
-              selector: 'amp-ad',
-              selectionMethod: 'closest',
-            },
-            continuousVisibleRenderStart: {
-              on: 'render-start',
-              request: 'renderStartCsi',
-              selector: 'amp-ad',
-              selectionMethod: 'closest',
-            },
-          },
-        });
+        expect(config).to.deep.equal(builtConfig);
         headers.has = function(name) {
           expect(name).to.equal('X-AmpAnalytics');
           return false;
         };
         expect(extractAmpAnalyticsConfig(a4a, headers)).to.not.be.ok;
       });
+    });
+
+    it('should add the correct CSI signals', () => {
+      const mockA4a = {
+        win: window,
+        element: {
+          getAttribute: function(name) {
+            switch (name) {
+              case EXPERIMENT_ATTRIBUTE:
+                return '00000001,00000002';
+              case 'type':
+                return 'fake-type';
+              case 'data-amp-slot-index':
+                return '0';
+            }
+          },
+        },
+      };
+      const headers = {
+        get: function(name) {
+          if (name == 'X-QQID') {
+            return 'qqid_string';
+          }
+        },
+        has: function(name) {
+          if (name == 'X-QQID') {
+            return true;
+          }
+        },
+      };
+      let newConfig = addCsiSignalsToAmpAnalyticsConfig(
+          mockA4a, builtConfig, headers,
+          true /* indicates that this is rendered via friendly frame */,
+          -1, -1  /* The lifecycle time fields don't matter for this test */);
+
+      expect(newConfig.requests.iniLoadCsi).to.not.be.null;
+      expect(newConfig.requests.renderStartCsi).to.not.be.null;
+      const getRegExps = metricName => [
+        /^https:\/\/csi\.gstatic\.com\/csi\?/,
+        /s=a4a/,
+        /&c=[0-9]+/,
+        /&slotId=0/,
+        /&qqid\.0=[a-zA-Z_]+/,
+        new RegExp(`&met\\.a4a\\.0=${metricName}\\.-?[0-9]+`),
+        /&dt=-?[0-9]+/,
+        /e\.0=00000001%2C00000002/,
+        /rls=\$internalRuntimeVersion\$/,
+        /adt.0=fake-type/,
+      ];
+      getRegExps('visibilityCsi').forEach(regExp => {
+        expect(newConfig.requests.visibilityCsi).to.match(regExp);
+      });
+      getRegExps('iniLoadCsiFriendly').forEach(regExp => {
+        expect(newConfig.requests.iniLoadCsi).to.match(regExp);
+      });
+      getRegExps('renderStartCsiFriendly').forEach(regExp => {
+        expect(newConfig.requests.renderStartCsi).to.match(regExp);
+      });
+      newConfig = addCsiSignalsToAmpAnalyticsConfig(
+          mockA4a, builtConfig, headers,
+          false /* indicates that this is rendered via friendly frame */,
+          -1, -1  /* The lifecycle time fields don't matter for this test */);
+      getRegExps('iniLoadCsiCrossDomain').forEach(regExp => {
+        expect(newConfig.requests.iniLoadCsi).to.match(regExp);
+      });
+      getRegExps('renderStartCsiCrossDomain').forEach(regExp => {
+        expect(newConfig.requests.renderStartCsi).to.match(regExp);
+      });
+
     });
   });
 

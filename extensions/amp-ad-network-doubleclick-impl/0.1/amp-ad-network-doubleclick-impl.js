@@ -40,6 +40,7 @@ import {
   AmpAnalyticsConfigDef,
   extractAmpAnalyticsConfig,
   groupAmpAdsByType,
+  addCsiSignalsToAmpAnalyticsConfig,
 } from '../../../ads/google/a4a/utils';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {
@@ -333,11 +334,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   extractCreativeAndSignature(responseText, responseHeaders) {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
-    this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(
-        this,
-        responseHeaders,
-        this.lifecycleReporter_.getDeltaTime(),
-        this.lifecycleReporter_.getInitTime());
+    this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
+    this.responseHeaders_ = responseHeaders;
     if (this.ampAnalyticsConfig_) {
       // Load amp-analytics extensions
       this.extensions_./*OK*/loadExtension('amp-analytics');
@@ -386,6 +384,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.sraResponseResolver = sraInitializer.resolver;
     this.sraResponseRejector = sraInitializer.rejector;
     this.sraResponsePromise_ = sraInitializer.promise;
+    this.responseHeaders_ = null;
   }
 
   /**
@@ -400,6 +399,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     super.onCreativeRender(isVerifiedAmpCreative);
     if (this.ampAnalyticsConfig_) {
       dev().assert(!this.ampAnalyticsElement_);
+      dev().assert(this.responseHeaders_);
+      addCsiSignalsToAmpAnalyticsConfig(
+          this,
+          this.ampAnalyticsConfig_,
+          this.responseHeaders_,
+          isVerifiedAmpCreative,
+          this.lifecycleReporter_.getDeltaTime(),
+          this.lifecycleReporter_.getInitTime());
       this.ampAnalyticsElement_ =
           insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
     }
