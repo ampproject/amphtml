@@ -346,8 +346,8 @@ message TagSpec {
     AMP = 1;
     AMP4ADS = 2;
   }
-  // Specifies which amp html document formats we allow this TagSpec to
-  // validate.
+  // Specifies which AMP HTML document formats we allow this TagSpec to
+  // validate. If empty, then this TagSpec validates all formats.
   repeated HtmlFormat html_format = 21;
 
   // Use UPPER-CASE tag names only. If adding the same tag twice, then they must
