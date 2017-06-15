@@ -448,15 +448,9 @@ export function additionalDimensions(win, viewportSize) {
  * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
  *   XHR service FetchResponseHeaders object containing the response
  *   headers.
- * @param {number=} opt_deltaTime The time difference, in ms, between the
- *   lifecycle reporter's initialization and now.
- * @param {number=} opt_initTime The initialization time, in ms, of the
- *   lifecycle reporter.
- *   TODO(levitzky) Remove the above two params once AV numbers stabilize.
  * @return {?JsonObject} config or null if invalid/missing.
  */
-export function extractAmpAnalyticsConfig(
-    a4a, responseHeaders, opt_deltaTime = -1, opt_initTime = -1) {
+export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
   if (!responseHeaders.has(AMP_ANALYTICS_HEADER)) {
     return null;
   }
@@ -494,44 +488,16 @@ export function extractAmpAnalyticsConfig(
       },
     });
 
-    // CSI base request.
-    const correlator = getCorrelator(a4a.win);
-    const slotId = a4a.element.getAttribute('data-amp-slot-index');
-    const qqid = (responseHeaders && responseHeaders.has(QQID_HEADER))
-        ? responseHeaders.get(QQID_HEADER) : 'null';
-    const eids = encodeURIComponent(
-        a4a.element.getAttribute(EXPERIMENT_ATTRIBUTE));
-    const adType = a4a.element.getAttribute('type');
-    const baseCsiUrl = 'https://csi.gstatic.com/csi?s=a4a' +
-        `&c=${correlator}&slotId=${slotId}&qqid.${slotId}=${qqid}` +
-        `&dt=${opt_initTime}` +
-        (eids != 'null' ? `&e.${slotId}=${eids}` : '') +
-        `&rls=$internalRuntimeVersion$&adt.${slotId}=${adType}`;
-    opt_deltaTime = Math.round(opt_deltaTime);
-
-    // Duscover and build visibility endpoints.
+    // Discover and build visibility endpoints.
     const requests = dict();
     for (let idx = 1; idx <= urls.length; idx++) {
       // TODO: Ensure url is valid and not freeform JS?
       requests[`visibility${idx}`] = `${urls[idx - 1]}`;
     }
-    // Add CSI ping for visibility.
-    requests['visibilityCsi'] = baseCsiUrl +
-        `&met.a4a.${slotId}=visibilityCsi.${opt_deltaTime}`;
     // Security review needed here.
     config['requests'] = requests;
     config['triggers']['continuousVisible']['request'] =
         Object.keys(requests);
-
-    // Add CSI pings for render-start and ini-load.
-    config['requests']['iniLoadCsi'] = baseCsiUrl +
-        `&met.a4a.${slotId}=iniLoadCsi.${opt_deltaTime}`;
-    config['requests']['renderStartCsi'] = baseCsiUrl +
-        `&met.a4a.${slotId}=renderStartCsi.${opt_deltaTime}`;
-    config['triggers']['continuousVisibleIniLoad']['request'] =
-        'iniLoadCsi';
-    config['triggers']['continuousVisibleRenderStart']['request'] =
-        'renderStartCsi';
     return config;
   } catch (err) {
     dev().error('AMP-A4A', 'Invalid analytics', err,
@@ -560,4 +526,50 @@ export function mergeExperimentIds(newIds, currentIdString) {
   currentIdString = currentIdString || '';
   return currentIdString + (currentIdString && newIdString ? ',' : '')
       + newIdString;
+}
+
+/**
+ * Adds two CSI signals to the given amp-analytics configuration object, one
+ * for render-start, and one for ini-load.
+ *
+ * @param {!Window} win
+ * @param {!Element} element The ad slot.
+ * @param {!JsonObject} config The original config object.
+ * @param {?string} qqid
+ * @param {boolean} isVerifiedAmpCreative
+ * @param {number} deltaTime The time difference, in ms, between the lifecycle
+ *   reporter's initialization and now.
+ * @param {number} initTime The initialization time, in ms, of the lifecycle
+ *   reporter.
+ * @return {?JsonObject} config or null if invalid/missing.
+ */
+export function addCsiSignalsToAmpAnalyticsConfig(win, element, config,
+    qqid, isVerifiedAmpCreative, deltaTime, initTime) {
+  // Add CSI pingbacks.
+  const correlator = getCorrelator(win);
+  const slotId = Number(element.getAttribute('data-amp-slot-index'));
+  const eids = encodeURIComponent(
+      element.getAttribute(EXPERIMENT_ATTRIBUTE));
+  const adType = element.getAttribute('type');
+  const baseCsiUrl = 'https://csi.gstatic.com/csi?s=a4a' +
+      `&c=${correlator}&slotId=${slotId}&qqid.${slotId}=${qqid}` +
+      `&dt=${initTime}` +
+      (eids != 'null' ? `&e.${slotId}=${eids}` : '') +
+      `&rls=$internalRuntimeVersion$&adt.${slotId}=${adType}`;
+  deltaTime = Math.round(deltaTime);
+  const isAmpSuffix = isVerifiedAmpCreative ? 'Friendly' : 'CrossDomain';
+  config['requests']['iniLoadCsi'] = baseCsiUrl +
+      `&met.a4a.${slotId}=iniLoadCsi${isAmpSuffix}.${deltaTime}`;
+  config['requests']['renderStartCsi'] = baseCsiUrl +
+      `&met.a4a.${slotId}=renderStartCsi${isAmpSuffix}.${deltaTime}`;
+  config['triggers']['continuousVisibleIniLoad']['request'] =
+      'iniLoadCsi';
+  config['triggers']['continuousVisibleRenderStart']['request'] =
+      'renderStartCsi';
+
+  // Add CSI ping for visibility.
+  config['requests']['visibilityCsi'] = baseCsiUrl +
+      `&met.a4a.${slotId}=visibilityCsi.${deltaTime}`;
+  config['triggers']['continuousVisible']['request'].push('visibilityCsi');
+  return config;
 }
