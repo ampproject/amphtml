@@ -19,6 +19,7 @@ import {getContextMetadata} from '../src/iframe-attributes';
 import {tryParseJson} from './json';
 import {getMode} from './mode';
 import {dashToCamelCase} from './string';
+import {dict} from './utils/object';
 import {parseUrl, assertHttpsUrl} from './url';
 import {urls} from './config';
 import {setStyle} from './style';
@@ -35,7 +36,7 @@ let overrideBootstrapBaseUrl;
  * @param {!AmpElement} element
  * @param {string=} opt_type
  * @param {Object=} opt_context
- * @return {!Object} Contains
+ * @return {!JsonObject} Contains
  *     - type, width, height, src attributes of <amp-ad> tag. These have
  *       precedence over the data- attributes.
  *     - data-* attributes of the <amp-ad> tag with the "data-" removed.
@@ -45,13 +46,13 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
   const type = opt_type || element.getAttribute('type');
   user().assert(type, 'Attribute type required for <amp-ad>: %s', element);
   const sentinel = generateSentinel(parentWindow);
-  let attributes = {};
+  let attributes = dict();
   // Do these first, as the other attributes have precedence.
   addDataAndJsonAttributes_(element, attributes);
   attributes = getContextMetadata(parentWindow, element, sentinel,
       attributes);
-  attributes.type = type;
-  Object.assign(attributes._context, opt_context);
+  attributes['type'] = type;
+  Object.assign(attributes['_context'], opt_context);
   return attributes;
 }
 
@@ -75,10 +76,10 @@ export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
       getFrameAttributes(parentWindow, parentElement, opt_type, opt_context);
   const iframe = parentWindow.document.createElement('iframe');
 
-  if (!count[attributes.type]) {
-    count[attributes.type] = 0;
+  if (!count[attributes['type']]) {
+    count[attributes['type']] = 0;
   }
-  count[attributes.type] += 1;
+  count[attributes['type']] += 1;
 
   const baseUrl = getBootstrapBaseUrl(parentWindow);
   const host = parseUrl(baseUrl).hostname;
@@ -86,23 +87,23 @@ export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
   // be the master frame. That is ok, as we will read the name off
   // for our uses before that would occur.
   // @see https://github.com/ampproject/amphtml/blob/master/3p/integration.js
-  const name = JSON.stringify({
-    host,
-    type: attributes.type,
+  const name = JSON.stringify(dict({
+    'host': host,
+    'type': attributes['type'],
     // https://github.com/ampproject/amphtml/pull/2955
-    count: count[attributes.type],
-    attributes,
-  });
+    'count': count[attributes['type']],
+    'attributes': attributes,
+  }));
 
   iframe.src = baseUrl;
   iframe.ampLocation = parseUrl(baseUrl);
   iframe.name = name;
   // Add the check before assigning to prevent IE throw Invalid argument error
-  if (attributes.width) {
-    iframe.width = attributes.width;
+  if (attributes['width']) {
+    iframe.width = attributes['width'];
   }
-  if (attributes.height) {
-    iframe.height = attributes.height;
+  if (attributes['height']) {
+    iframe.height = attributes['height'];
   }
   iframe.setAttribute('scrolling', 'no');
   setStyle(iframe, 'border', 'none');
@@ -111,7 +112,8 @@ export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
     // Chrome does not reflect the iframe readystate.
     this.readyState = 'complete';
   };
-  iframe.setAttribute('data-amp-3p-sentinel', attributes._context['sentinel']);
+  iframe.setAttribute('data-amp-3p-sentinel',
+      attributes['_context']['sentinel']);
   return iframe;
 }
 
@@ -121,7 +123,7 @@ export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
  * is an attribute called json, parses the JSON and adds it to the
  * attributes.
  * @param {!Element} element
- * @param {!Object} attributes The destination.
+ * @param {!JsonObject} attributes The destination.
  * visibleForTesting
  */
 export function addDataAndJsonAttributes_(element, attributes) {

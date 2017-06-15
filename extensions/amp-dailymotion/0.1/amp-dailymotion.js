@@ -16,6 +16,7 @@
 
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {VideoEvents} from '../../../src/video-interface';
 import {
   installVideoManagerForDoc,
@@ -229,17 +230,17 @@ class AmpDailymotion extends AMP.BaseElement {
   /**
    * Sends a command to the player through postMessage.
    * @param {string} command
-   * @param {Array=} opt_args
+   * @param {Array<boolean>=} opt_args
    * @private
    */
   sendCommand_(command, opt_args) {
     const endpoint = 'https://www.dailymotion.com';
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
-        const message = JSON.stringify({
-          command,
-          parameters: opt_args || [],
-        });
+        const message = JSON.stringify(dict({
+          'command': command,
+          'parameters': opt_args || [],
+        }));
         this.iframe_.contentWindow./*OK*/postMessage(message, endpoint);
       }
     });

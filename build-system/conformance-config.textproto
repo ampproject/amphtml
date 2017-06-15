@@ -154,3 +154,26 @@ requirement: {
   error_message: 'Symbol is not allowed'
   value: 'Symbol'
 }
+
+requirement: {
+  type: RESTRICTED_METHOD_CALL
+  error_message: 'postMessage must be called with a string or a JsonObject'
+  value: 'Window.prototype.postMessage:function((string|?JsonObject), string)'
+  # Guaranteed same version call
+  whitelist: 'src/web-worker/web-worker.js'
+  # Allowing violations in ads code for now.
+  # We would have to fix this to property obfuscated the 3p frame code.
+  whitelist: 'ads/google/doubleclick.js'
+  whitelist: 'ads/google/imaVideo.js'
+}
+
+requirement: {
+  type: RESTRICTED_NAME_CALL
+  error_message: 'JSON.stringify must be called with a JsonObject'
+  # Unfortunately the Array is untyped, because the compiler doesn't check
+  # for the template type.
+  value: 'JSON.stringify:function((?JsonObject|AmpViewerMessage|string|number|boolean|undefined|Array),!Function=)'
+  # Allowing violations in ads code for now.
+  # We would have to fix this to property obfuscated the 3p frame code.
+  whitelist: 'ads/google/doubleclick.js'
+}

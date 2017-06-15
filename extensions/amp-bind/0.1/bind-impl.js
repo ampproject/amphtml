@@ -23,7 +23,7 @@ import {
 } from '../../../src/services';
 import {chunk, ChunkPriority} from '../../../src/chunk';
 import {dev, user} from '../../../src/log';
-import {deepMerge} from '../../../src/utils/object';
+import {dict, deepMerge} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {filterSplice} from '../../../src/utils/array';
 import {installServiceInEmbedScope} from '../../../src/service';
@@ -130,8 +130,8 @@ export class Bind {
     /** @const @private {!./bind-validator.BindValidator} */
     this.validator_ = new BindValidator();
 
-    /** @const @private {!Object} */
-    this.scope_ = Object.create(null);
+    /** @const @private {!JsonObject} */
+    this.scope_ = dict();
 
     /** @const @private {!../../../src/service/resources-impl.Resources} */
     this.resources_ = resourcesForDoc(ampdoc);
@@ -617,7 +617,7 @@ export class Bind {
         return;
       }
       const promise = this.resources_.mutateElement(element, () => {
-        const mutations = {};
+        const mutations = dict();
         let width, height;
 
         updates.forEach(update => {

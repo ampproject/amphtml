@@ -20,6 +20,7 @@ import {
 } from '../../src/url';
 import {closest, openWindowDialog} from '../../src/dom';
 import {dev} from '../../src/log';
+import {dict} from '../../src/utils/object';
 import {urls} from '../../src/config';
 import {isProxyOrigin, isLocalhostOrigin, parseUrl} from '../../src/url';
 import {startsWith} from '../../src/string';
@@ -149,9 +150,9 @@ function navigateTo(win, a, url) {
   const target = (a.target || '_top').toLowerCase();
   const a2aAncestor = getA2AAncestor(win);
   if (a2aAncestor) {
-    a2aAncestor.win./*OK*/postMessage('a2a;' + JSON.stringify({
-      url,
-    }), a2aAncestor.origin);
+    a2aAncestor.win./*OK*/postMessage('a2a;' + JSON.stringify(dict({
+      'url': url,
+    })), a2aAncestor.origin);
     return;
   }
   openWindowDialog(win, url, target);

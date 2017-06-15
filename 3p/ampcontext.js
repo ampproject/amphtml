@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {dict} from '../src/utils/object';
 import {dev} from '../src/log';
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {MessageType} from '../src/3p-frame-messaging';
@@ -178,7 +179,10 @@ export class AbstractAmpContext {
    *  @param {number} height The new height for the ad we are requesting.
    */
   requestResize(width, height) {
-    this.client_.sendMessage(MessageType.EMBED_SIZE, {width, height});
+    this.client_.sendMessage(MessageType.EMBED_SIZE, dict({
+      'width': width,
+      'height': height,
+    }));
   };
 
   /**

@@ -16,6 +16,7 @@
 import {AbstractAmpContext} from './ampcontext';
 import {computeInMasterFrame} from './3p';
 import {dev, user} from '../src/log';
+import {dict} from '../src/utils/object';
 
 
 /**
@@ -101,7 +102,7 @@ export class IntegrationAmpContext extends AbstractAmpContext {
   }
 
   /**
-   * @param {{width, height}=} opt_data
+   * @param {!JsonObject=} opt_data Fields: width, height
    */
   renderStart(opt_data) {
     this.client_.sendMessage('render-start', opt_data);
@@ -119,9 +120,9 @@ export class IntegrationAmpContext extends AbstractAmpContext {
    * @param {string} entityId See comment above for content.
    */
   reportRenderedEntityIdentifier(entityId) {
-    this.client_.sendMessage('entity-id', {
-      id: user().assertString(entityId),
-    });
+    this.client_.sendMessage('entity-id', dict({
+      'id': user().assertString(entityId),
+    }));
   }
 
   /**

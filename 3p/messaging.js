@@ -17,15 +17,15 @@
 /**
  * Send messages to parent frame. These should not contain user data.
  * @param {string} type Type of messages
- * @param {*=} opt_object Data for the message.
+ * @param {!JsonObject=} opt_object Data for the message.
  */
 export function nonSensitiveDataPostMessage(type, opt_object) {
   if (window.parent == window) {
     return;  // Nothing to do.
   }
-  const object = opt_object || {};
-  object.type = type;
-  object.sentinel = window.context.sentinel;
+  const object = opt_object || /** @type {JsonObject} */ ({});
+  object['type'] = type;
+  object['sentinel'] = window.context.sentinel;
   window.parent./*OK*/postMessage(object,
       window.context.location.origin);
 }
