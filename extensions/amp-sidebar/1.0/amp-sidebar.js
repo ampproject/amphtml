@@ -56,6 +56,9 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private {?string} */
     this.side_ = null;
 
+    /** @private {string|undefined} */
+    this.dock_ = undefined;
+
     const platform = platformFor(this.win);
 
     /** @private @const {boolean} */
@@ -97,6 +100,10 @@ export class AmpSidebar extends AMP.BaseElement {
           'ltr';
       this.side_ = (pageDir == 'rtl') ? 'right' : 'left';
       this.element.setAttribute('side', this.side_);
+    }
+
+    if (this.element.hasAttribute('dock')) {
+      this.dock_ = this.element.getAttribute('dock');
     }
 
     if (this.isIosSafari_) {
@@ -159,6 +166,44 @@ export class AmpSidebar extends AMP.BaseElement {
     }, true);
   }
 
+  /** @override */
+  onLayoutMeasure() {
+    // Remove and add the docking dynamically
+    if (this.isDocked_() && !this.element.hasAttribute('docked')) {
+      this.closeIfOpen_();
+      this.element.setAttribute('docked', '');
+
+      // use calc to get our space for sidebar to docked
+      const borderCalc =
+        `calc(${this.element.offsetWidth}px)`;
+
+      if (this.side_ === 'right') {
+        setStyles(this.document_.body, {
+          'border-right-width': borderCalc,
+          'border-right-style': 'solid',
+        });
+      } else {
+        setStyles(this.document_.body, {
+          'border-left-width': borderCalc,
+          'border-left-style': 'solid',
+        });
+      }
+      /*
+        Add the following css to the body:
+        padding-left: //body width + side-bar width
+      */
+    } else if (!this.isDocked_() && this.element.hasAttribute('docked')) {
+      this.closeIfOpen_();
+      this.element.removeAttribute('docked');
+      setStyles(this.document_.body, {
+        'border-right-width': null,
+        'border-right-style': null,
+        'border-left-width': null,
+        'border-left-style': null,
+      });
+    }
+  }
+
   /**
    * Returns true if the sidebar is opened.
    * @returns {boolean}
@@ -167,6 +212,31 @@ export class AmpSidebar extends AMP.BaseElement {
   isOpen_() {
     return this.element.hasAttribute('open');
   }
+
+  /**
+   * Closes the sidebar if it is open
+   * @private
+   */
+  closeIfOpen_() {
+    if (this.isOpen_()) {
+      this.close_();
+    }
+  }
+
+  /**
+   * Returns if the sidebar is currently docked
+   * @returns {boolean}
+   * @private
+   */
+  isDocked_() {
+    if (!this.dock_) {
+      return false;
+    } else {
+      return this.element.ownerDocument
+          .defaultView.matchMedia(this.dock_).matches;
+    }
+  }
+
 
   /** @override */
   activate() {

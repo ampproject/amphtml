@@ -49,6 +49,11 @@
    transition: transform 233ms cubic-bezier(0,0,.21,1);
  }
 
+ amp-sidebar[docked] {
+  transform: translateX(0) !important;
+  display: block !important;
+ }
+
  .i-amphtml-sidebar-mask {
    position: fixed !important;
    top: 0 !important;
