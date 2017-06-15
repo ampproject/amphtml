@@ -166,28 +166,28 @@ export class Transport {
    */
   processCrossDomainIframe(win, transportOptions, opt_processResponse) {
     const frameUrl = dev().assertString(transportOptions['iframe'],
-      'Cross-domain frame parameters missing ${this.type_}');
+        'Cross-domain frame parameters missing ${this.type_}');
     const frameData = this.useExistingOrCreateCrossDomainIframe_(
-      win, frameUrl, transportOptions['extraData']);
+        win, frameUrl, transportOptions['extraData']);
     const iframeMessagingClient = frameData.iframeMessagingClient;
     iframeMessagingClient.registerCallback(
-      AMP_ANALYTICS_3P_MESSAGE_TYPE.READY, () => {
-        iframeMessagingClient.setHostWindow(frameData.frame.contentWindow);
-        frameData.newCreativeMessageQueue.setIsReady();
-        frameData.eventQueue.setIsReady();
-      });
+        AMP_ANALYTICS_3P_MESSAGE_TYPE.READY, () => {
+          iframeMessagingClient.setHostWindow(frameData.frame.contentWindow);
+          frameData.newCreativeMessageQueue.setIsReady();
+          frameData.eventQueue.setIsReady();
+        });
     iframeMessagingClient.registerCallback(
-      AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE,
+        AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE,
         response => {
           dev().assert(response &&
             response[AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE],
-            'Received empty response from 3p analytics frame');
+              'Received empty response from 3p analytics frame');
           if (!opt_processResponse) {
             dev().warn(TAG_, 'Received response from 3p analytics frame when' +
               ' none was expected');
           }
           opt_processResponse(
-            this.type_,
+              this.type_,
             /** @type {!../../../src/3p-analytics-common.AmpAnalytics3pResponse} */ (response)); // eslint-disable-line max-len
         });
   }
@@ -213,7 +213,7 @@ export class Transport {
     dev().assert(frameData, 'Trying to use non-existent frame');
     const assuredNonNullFrameData = /** @type{!FrameData} */ (frameData);
     assuredNonNullFrameData.newCreativeMessageQueue.enqueue(
-      this.id_, opt_extraData);
+        this.id_, opt_extraData);
     return assuredNonNullFrameData;
   }
 
@@ -283,18 +283,18 @@ export class Transport {
       : `${urls.thirdParty}/$internalRuntimeVersion$/ampanalytics-v0.js`;
     const frame = createElementWithAttributes(win.document, 'iframe', {
       sandbox: 'allow-scripts',
-      name: JSON.stringify({
+      name: JSON.stringify(/** @type {JsonObject} */ ({
         scriptSrc,
         sentinel,
-      }),
+      })),
     });
     const iframeMessagingClient = new IframeMessagingClient(window);
     iframeMessagingClient.setSentinel(sentinel);
     iframeMessagingClient.setHostWindow(
       /** @type {!HTMLIFrameElement} */ (frame));
     setStyles(frame,
-      {width: 0, height: 0, display: 'none',
-       position: 'absolute', top: 0, left: 0});
+        {width: 0, height: 0, display: 'none',
+          position: 'absolute', top: 0, left: 0});
     const frameData = /** @const {FrameData} */ ({
       frame,
       sentinel,
@@ -331,7 +331,7 @@ export class Transport {
     const frameData = Transport.getFrameData_(transportOptions['iframe']);
     dev().assert(frameData, 'Trying to send message to non-existent frame');
     dev().assert(frameData.eventQueue,
-      'Event queue is missing for ' + this.id_);
+        'Event queue is missing for ' + this.id_);
     frameData.eventQueue.enqueue(this.id_, event);
   }
 

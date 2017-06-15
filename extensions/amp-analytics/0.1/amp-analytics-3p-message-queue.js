@@ -78,8 +78,8 @@ class AbstractAmpAnalytics3pMessageQueue {
    */
   flushQueue_() {
     if (this.isReady_ && Object.keys(this.creativeToPendingMessages_).length) {
-      this.iframeMessagingClient_./*OK*/sendMessage(this.messageType_,
-        this.buildMessage_());
+      const jsonMsg = /** @type {JsonObject} */ (this.buildMessage_());
+      this.iframeMessagingClient_./*OK*/sendMessage(this.messageType_, jsonMsg);
       this.creativeToPendingMessages_ = {};
     }
   }
@@ -115,7 +115,7 @@ export class AmpAnalytics3pNewCreativeMessageQueue extends
    */
   enqueue(senderId, opt_data) {
     dev().assert(!this.creativeToPendingMessages_[senderId],
-      'Replacing existing extra data for: ' + senderId);
+        'Replacing existing extra data for: ' + senderId);
     this.creativeToPendingMessages_[senderId] = opt_data || '';
     this.throttledFlushQueue_();
   }

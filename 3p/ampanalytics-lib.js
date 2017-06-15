@@ -42,8 +42,8 @@ class AmpAnalytics3pMessageRouter {
     // uniquely identify the frame as part of message routing
     /** @const {string} */
     this.sentinel_ = dev().assertString(
-      tryParseJson(this.win_.name, {}).sentinel,
-      'Invalid/missing sentinel on iframe name attribute' + this.win_.name);
+        tryParseJson(this.win_.name, {}).sentinel,
+        'Invalid/missing sentinel on iframe name attribute' + this.win_.name);
     if (!this.sentinel_) {
       return;
     }
@@ -65,40 +65,40 @@ class AmpAnalytics3pMessageRouter {
     this.iframeMessagingClient_ = new IframeMessagingClient(win);
     this.iframeMessagingClient_.setSentinel(this.sentinel_);
     this.iframeMessagingClient_.registerCallback(
-      AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVE,
-      messageContainer => {
-        let entries;
-        dev().assert(
-          messageContainer.data &&
+        AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVE,
+        messageContainer => {
+          let entries;
+          dev().assert(
+              messageContainer.data &&
           (entries = Object.entries(messageContainer.data)).length,
-          'Received empty new creative message');
-        entries.forEach(entry => {
-          const creativeId = entry[0];
-          const extraData = entry[1];
-          dev().assert(!this.creativeMessageRouters_[creativeId],
-            'Duplicate new creative message for ' + creativeId);
-          this.creativeMessageRouters_[creativeId] =
+              'Received empty new creative message');
+          entries.forEach(entry => {
+            const creativeId = entry[0];
+            const extraData = entry[1];
+            dev().assert(!this.creativeMessageRouters_[creativeId],
+                'Duplicate new creative message for ' + creativeId);
+            this.creativeMessageRouters_[creativeId] =
             new AmpAnalytics3pCreativeMessageRouter(
               this.win_, this.iframeMessagingClient_, creativeId, extraData);
+          });
         });
-      });
     this.iframeMessagingClient_.registerCallback(
-      AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT,
-      messageContainer => {
-        Object.entries(messageContainer.data).forEach(entry => {
-          const creativeId = entry[0];
-          const messages = entry[1];
-          dev().assert(messages && messages.length,
-            'Received empty events list for' + creativeId);
-          dev().assert(this.creativeMessageRouters_[creativeId],
-            'Discarding event message received prior to new creative message' +
-            ' for' + creativeId);
-          this.creativeMessageRouters_[creativeId]
-            .sendMessagesToListener(messages);
+        AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT,
+        messageContainer => {
+          Object.entries(messageContainer.data).forEach(entry => {
+            const creativeId = entry[0];
+            const messages = entry[1];
+            dev().assert(messages && messages.length,
+                'Received empty events list for' + creativeId);
+            dev().assert(this.creativeMessageRouters_[creativeId],
+                'Discarding event message received prior to new creative' +
+                ' message for' + creativeId);
+            this.creativeMessageRouters_[creativeId]
+                .sendMessagesToListener(messages);
+          });
         });
-      });
     this.iframeMessagingClient_.sendMessage(
-      AMP_ANALYTICS_3P_MESSAGE_TYPE.READY);
+        AMP_ANALYTICS_3P_MESSAGE_TYPE.READY);
   }
 }
 
@@ -191,8 +191,8 @@ class AmpAnalytics3pCreativeMessageRouter {
    */
   sendMessageToCreative(response) {
     this.iframeMessagingClient_.sendMessage(
-      AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE,
-      this.buildAmpAnalytics3pResponse_(response));
+        AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE,
+        this.buildAmpAnalytics3pResponse_(response));
   }
 
   /**

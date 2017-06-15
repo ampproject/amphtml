@@ -170,8 +170,8 @@ export class AmpAnalytics extends AMP.BaseElement {
   /* @ override */
   unlayoutCallback() {
     Transport.doneUsingCrossDomainIframe(this.getAmpDoc().win.document,
-      this.config_['transport']);
-    ResponseMap.remove(this.config_.transport.type);
+        this.config_['transport']);
+    ResponseMap.remove(this.config_['transport']['type']);
     return true;
   }
 
@@ -238,9 +238,9 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     if (this.config_['transport'] && this.config_['transport']['iframe']) {
       this.transport_.processCrossDomainIframe(this.getAmpDoc().win,
-        this.config_['transport'], (type, responseMessage) => {
-          this.processCrossDomainIframeResponse_(type, responseMessage);
-        });
+          this.config_['transport'], (type, responseMessage) => {
+            this.processCrossDomainIframeResponse_(type, responseMessage);
+          });
     }
 
     const promises = [];
@@ -310,7 +310,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   processCrossDomainIframeResponse_(type, response) {
     const creativeUrl = /** @type {string} */ (this.win.document.baseURI);
     ResponseMap.add(type, creativeUrl,
-      response[AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE]);
+        response[AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE]);
   }
 
   /**
@@ -445,7 +445,7 @@ export class AmpAnalytics extends AMP.BaseElement {
             ' but in local dev mode, so okay', config);
         } else {
           user().error(TAG, 'Only typeConfig may specify iframe transport',
-            config);
+              config);
           return;
         }
       }
@@ -783,7 +783,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       sendRequestUsingIframe(this.win, request);
     } else {
       this.transport_.sendRequest(this.win, request,
-        this.config_['transport'] || {});
+          this.config_['transport'] || {});
     }
   }
 
