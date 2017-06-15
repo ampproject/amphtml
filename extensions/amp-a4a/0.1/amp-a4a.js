@@ -45,6 +45,16 @@ import {some} from '../../../src/utils/promise';
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 import {utf8Decode} from '../../../src/utils/bytes';
 import {endsWith} from '../../../src/string';
+import {
+  extensionsFor,
+  platformFor,
+  resourcesForDoc,
+  timerFor,
+  viewerForDoc,
+  xhrFor,
+} from '../../../src/services';
+import {endsWith} from '../../../src/string';
+import {cryptoFor} from '../../../src/crypto';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
 import {assertHttpsUrl} from '../../../src/url';
@@ -338,9 +348,8 @@ export class AmpA4A extends AMP.BaseElement {
     this.safeframeVersion_ = DEFAULT_SAFEFRAME_VERSION;
 
     /**
-     * Indicates whether the ad is currently in the process of being refreshed.
-     *
-     * @protected {boolean}
+     * @protected {boolean} Indicates whether the ad is currently in the
+     *    process of being refreshed.
      */
     this.isRefreshing = false;
 
@@ -348,19 +357,16 @@ export class AmpA4A extends AMP.BaseElement {
     this.isRelayoutNeeded_ = false;
 
     /**
-     * Resolver for refreshReadyPromise_. This is then'd onto
-     * attemptToRenderCreative in layoutCallback.
-     *
-     * @private {?function()}
+     * @private {?function()} Resolver for refreshReadyPromise_. This is then'd
+     *    onto attemptToRenderCreative in layoutCallback.
      */
     this.refreshReadyPromiseResolver_ = null;
 
     /**
-     * Promise that resolves to true when the creative renders correctly, or to
-     * false when the creative fails to render. This promise is resolved in
-     * layoutCallback(), and reset in refresh().
-     *
-     * @private {Promise<boolean>}
+     * @private {Promise<boolean>} Promise that resolves to true when the
+     *    creative renders correctly, or to false when the creative fails to
+     *    render. This promise is resolved in layoutCallback(), and reset in
+     *    refresh().
      */
     this.refreshReadyPromise_ = new Promise(
         resolve => this.refreshReadyPromiseResolver_ = resolve);
@@ -813,6 +819,7 @@ export class AmpA4A extends AMP.BaseElement {
    *   restart the refresh cycle.
    */
   refresh(refreshEndCallback) {
+    dev().assert(!this.isRefreshing);
     this.isRefreshing = true;
     this.tearDownSlot();
     this.initiateAdRequest();
@@ -824,25 +831,17 @@ export class AmpA4A extends AMP.BaseElement {
         refreshEndCallback();
         return;
       }
-      this.togglePlaceholder(true);
-      this.destroyFrame(true);
-      // We don't want the next creative to appear too suddenly, so we
-      // show the loader for a quarter of a second before switching to
-      // the new creative.
-      timerFor(this.win).delay(() => {
-        this.isRelayoutNeeded_ = true;
-        this.getResource().layoutCanceled();
-        resourcesForDoc(this.getAmpDoc()).schedulePass();
-        this.refreshReadyPromise_.then(() => {
-          this.isRelayoutNeeded_ = false;
-          this.isRefreshing = false;
-          this.togglePlaceholder(false);
-          // Reset creative rendered promise.
-          this.refreshReadyPromise_ = new Promise(
-              resolve => this.refreshReadyPromiseResolver_ = resolve);
-          refreshEndCallback();
-        });
-      }, 250);
+      this.isRelayoutNeeded_ = true;
+      this.getResource().layoutCanceled();
+      resourcesForDoc(this.getAmpDoc()).schedulePass();
+      this.refreshReadyPromise_.then(() => {
+        this.isRelayoutNeeded_ = false;
+        this.isRefreshing = false;
+        // Reset creative rendered promise.
+        this.refreshReadyPromise_ = new Promise(
+            resolve => this.refreshReadyPromiseResolver_ = resolve);
+        refreshEndCallback();
+      });
     });
   }
 
@@ -994,9 +993,19 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    if (this.isRefreshing) {
+      this.togglePlaceholder(true);
+      this.destroyFrame(true);
+    }
     return this.attemptToRenderCreative().then(result => {
       if (this.isRefreshing) {
-        this.refreshReadyPromiseResolver_(result);
+        // We don't want the next creative to appear too suddenly, so we
+        // show the loader for a quarter of a second before switching to
+        // the new creative.
+        timerFor(this.win).delay(() => {
+          this.renderStarted();
+          this.refreshReadyPromiseResolver_(result);
+        }, 1000);
       }
       return result;
     });
@@ -1549,8 +1558,8 @@ export class AmpA4A extends AMP.BaseElement {
     // Iframe is appended to element as part of xorigin frame handler init.
     // Executive onCreativeRender after init to ensure it can get reference
     // to frame but prior to load to allow for earlier access.
-    const frameLoadPromise =
-        this.xOriginIframeHandler_.init(this.iframe, /* opt_isA4A */ true);
+    const frameLoadPromise = this.xOriginIframeHandler_.init(
+        this.iframe, /* opt_isA4A */ true, this.isRefreshing);
     protectFunctionWrapper(this.onCreativeRender, this, err => {
       dev().error(TAG, this.element.getAttribute('type'),
           'Error executing onCreativeRender', err);

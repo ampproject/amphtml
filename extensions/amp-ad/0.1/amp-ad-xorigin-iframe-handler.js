@@ -87,9 +87,10 @@ export class AmpAdXOriginIframeHandler {
    * Sets up listeners and iframe state for iframe containing ad creative.
    * @param {!Element} iframe
    * @param {boolean=} opt_isA4A when true do not listen to ad response
+   * @param {boolean=} opt_isRefreshing when true, leave ad loader up
    * @return {!Promise} awaiting render complete promise
    */
-  init(iframe, opt_isA4A) {
+  init(iframe, opt_isA4A, opt_isRefreshing) {
     dev().assert(
         !this.iframe, 'multiple invocations of init without destroy!');
     this.iframe = iframe;
@@ -246,7 +247,7 @@ export class AmpAdXOriginIframeHandler {
       // impose no loader delay.  Network is using renderStart or
       // bootstrap-loaded to indicate ad request was sent, either way we know
       // that occurred for Fast Fetch.
-      this.renderStart_();
+      this.renderStart_(/* opt_info */ undefined, opt_isRefreshing);
       renderStartResolve();
     } else {
       // Set iframe initially hidden which will be removed on render-start or
@@ -277,8 +278,7 @@ export class AmpAdXOriginIframeHandler {
    * @param {{data: !JsonObject}=} opt_info
    * @private
    */
-  renderStart_(opt_info) {
-    this.baseInstance_.renderStarted();
+  renderStart_(opt_info, opt_isRefreshing) {
     if (!opt_info) {
       return;
     }

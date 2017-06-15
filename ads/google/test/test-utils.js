@@ -83,4 +83,12 @@ describe('#getMultiSizeDimensions', () => {
         /* Drop entire string on error */ true);
     expect(actual).to.be.null;
   });
+
+  it('should return null due to non-positive argument', () => {
+    const actual = getMultiSizeDimensions(
+        '-1x300,' + multiSizeDataStr, 300, 300,
+        /* Ignore lowerbound */ false,
+        /* Drop entire string on error */ true);
+    expect(actual).to.be.null;
+  });
 });
