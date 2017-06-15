@@ -168,6 +168,9 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
+    if (!this.document_.body) {
+      return;
+    }
     // Remove and add the docking dynamically
     if (this.isDocked_() && !this.element.hasAttribute('docked')) {
       this.closeIfOpen_();
@@ -175,15 +178,15 @@ export class AmpSidebar extends AMP.BaseElement {
 
       // use calc to get our space for sidebar to docked
       const borderCalc =
-        `calc(${this.element.offsetWidth}px)`;
-
+        `calc(${this.element.getBoundingClientRect().width}px)`;
+      const bodyElement = this.document_.body;
       if (this.side_ === 'right') {
-        setStyles(this.document_.body, {
+        setStyles(bodyElement, {
           'border-right-width': borderCalc,
           'border-right-style': 'solid',
         });
       } else {
-        setStyles(this.document_.body, {
+        setStyles(bodyElement, {
           'border-left-width': borderCalc,
           'border-left-style': 'solid',
         });
