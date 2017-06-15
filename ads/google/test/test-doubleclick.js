@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {selectGptExperiment, writeAdScript} from '../doubleclick';
-import {createIframePromise} from '../../../testing/iframe';
+import {createServedIframe} from '../../../testing/iframe';
 
 describe('selectGptExperiment', () => {
 
@@ -36,8 +36,8 @@ describe('writeAdScript', () => {
 
   let win;
   beforeEach(() => {
-    return createIframePromise().then(iframe => {
-      win = iframe.contentWindow;
+    return createServedIframe().then(iframe => {
+      win = iframe.win;
     });
   });
 
@@ -47,9 +47,9 @@ describe('writeAdScript', () => {
     const data = {useSameDomainRenderingUntilDeprecated: true};
     const gptFilename = undefined;
 
-    writeAdScript(data, gptFilename);
+    writeAdScript(win, data, gptFilename);
 
-    expect(document.querySelector(
+    expect(win.document.querySelector(
       'script[src="https://www.googletagservices.com/tag/js/gpt.js"]'))
       .to.be.ok;
   });
@@ -59,9 +59,9 @@ describe('writeAdScript', () => {
     const data = {multiSize: 'hey!'};
     const gptFilename = undefined;
 
-    writeAdScript(data, gptFilename);
+    writeAdScript(win, data, gptFilename);
 
-    expect(document.querySelector(
+    expect(win.document.querySelector(
       'script[src="https://www.googletagservices.com/tag/js/gpt.js"]'))
       .to.be.ok;
   });
@@ -71,9 +71,9 @@ describe('writeAdScript', () => {
     const data = {};
     const gptFilename = 'gpt_sf_a.js';
 
-    writeAdScript(data, gptFilename);
+    writeAdScript(win, data, gptFilename);
 
-    expect(document.querySelector(
+    expect(win.document.querySelector(
       'script[src="https://www.googletagservices.com/tag/js/gpt_sf_a.js"]'))
       .to.be.ok;
   });
@@ -83,9 +83,9 @@ describe('writeAdScript', () => {
     const data = {};
     const gptFilename = 'gpt_sf_b.js';
 
-    writeAdScript(data, gptFilename);
+    writeAdScript(win, data, gptFilename);
 
-    expect(document.querySelector(
+    expect(win.document.querySelector(
       'script[src="https://www.googletagservices.com/tag/js/gpt_sf_b.js"]'))
       .to.be.ok;
   });

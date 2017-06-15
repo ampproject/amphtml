@@ -57,7 +57,7 @@ export function doubleclick(global, data) {
 
   const gptFilename = selectGptExperiment(data);
 
-  writeAdScript(data, gptFilename);
+  writeAdScript(global, data, gptFilename);
 }
 
 /**
@@ -246,7 +246,7 @@ function getCorrelator(global) {
 }
 
 function centerAd() {
-  setStyles(dev().assertElement(global.document.querySelector('#c')), {
+  setStyles(dev().assertElement(global.document.getElementById('c')), {
     top: '50%',
     left: '50%',
     bottom: '',
@@ -256,7 +256,7 @@ function centerAd() {
 }
 
 /**
- * @param {Object} data
+ * @param {!Object} data
  * @return {!string}
  */
 export function selectGptExperiment(data) {
@@ -272,7 +272,12 @@ export function selectGptExperiment(data) {
   return expFilename;
 }
 
-export function writeAdScript(data, gptFilename) {
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ * @param {!string} gptFilename
+ */
+export function writeAdScript(global, data, gptFilename) {
   const url =
   `https://www.googletagservices.com/tag/js/${gptFilename || 'gpt.js'}`;
   if (gptFilename || data.useSameDomainRenderingUntilDeprecated != undefined
