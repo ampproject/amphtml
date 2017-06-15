@@ -265,11 +265,9 @@ class VideoEntry {
         .then(() => this.videoLoaded_());
 
 
-    listen(this.video.element, VideoEvents.PAUSE,
-      this.videoPaused_.bind(this));
+    listen(this.video.element, VideoEvents.PAUSE, this.videoPaused_.bind(this));
 
-    listen(this.video.element, VideoEvents.PLAY,
-      this.videoPlayed_.bind(this));
+    listen(this.video.element, VideoEvents.PLAY, this.videoPlayed_.bind(this));
 
 
     // Currently we only register after video player is build.
