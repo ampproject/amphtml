@@ -1700,7 +1700,7 @@ describe('amp-a4a', () => {
           const a4aElement = createA4aElement(fixture.doc);
           a4a = new MockA4AImpl(a4aElement);
           stubVerifySignature =
-              sandbox.stub(a4a.verifier_, 'verifySignature');
+              sandbox.stub(a4a.signatureVerifier_, 'verifySignature');
         });
       });
 

@@ -22,7 +22,7 @@ import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
  *
  * @typedef {{
  *   serviceName: string,
- *   hash: Uint8Array,
+ *   hash: !Uint8Array,
  *   cryptoKey: !webCrypto.CryptoKey
  * }}
  */

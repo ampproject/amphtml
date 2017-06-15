@@ -101,7 +101,6 @@ describe('A4A crypto', () => {
   });
 
   describe('verifySignature', function() {
-
     it('should validate with the correct key and signature', () => {
       if (!verifier.isAvailable()) { return; }
       return pubKeyInfoPromise.then(pubKeyInfo =>

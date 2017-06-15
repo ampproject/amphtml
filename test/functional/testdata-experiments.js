@@ -1,3 +1,18 @@
+/**
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 /* eslint-disable */
 // Generated from generate-testdata-experiments.js_.
 export const publicJwk = {"alg":"RS256","e":"AQAB","ext":true,"key_ops":["verify"],"kty":"RSA","n":"o9TRgIWUfKNbtdiuLIESc78RRix6wZjYM4pqkRXTDfeersCHQm_zkeOfhrlk6_7dxhd2Oi2zpeKDpG3ERXsRUvL7M39HT9ZfNDiEdMbxNn_3A3NdV3Lyu94iQ8pGtMiv6qmlILIG72zgVlyYFqYryI1wKrgkQER_GnNZf69lRc4EaB3pbPRq-uVR7aP98ysQz6JJ4JvcLJUF_qAVCqnDYUAuRy-Bl77s06f5i4HssHnZgG1nGv3BTkvwT5hTi3BefBvgpy0Nxiu-g3F3pkWAAibV51AUaK-RF9vKoC3-CNzfZ1bHEE3Y1oB4-4jzEo11gK0Bp1pBRVgMAQmwFVbEDQ"};

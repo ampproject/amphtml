@@ -254,7 +254,7 @@ export class AmpA4A extends AMP.BaseElement {
     this.isVerifiedAmpCreative_ = false;
 
     /** @private @const {!LegacySignatureVerifier} */
-    this.verifier_ = new LegacySignatureVerifier(this.win);
+    this.signatureVerifier_ = new LegacySignatureVerifier(this.win);
 
     /** @private {?ArrayBuffer} */
     this.creativeBody_ = null;
@@ -496,7 +496,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   shouldInitializePromiseChain_() {
-    if (!this.verifier_.isAvailable()) {
+    if (!this.signatureVerifier_.isAvailable()) {
       return false;
     }
     const slotRect = this.getIntersectionElementLayoutBox();
@@ -796,7 +796,7 @@ export class AmpA4A extends AMP.BaseElement {
             }
             const signatureVerifyStartTime = this.getNow_();
             // If the key exists, try verifying with it.
-            return this.verifier_.verifySignature(
+            return this.signatureVerifier_.verifySignature(
                 new Uint8Array(creative),
                 signature,
                 keyInfo)
@@ -1153,7 +1153,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   getKeyInfoSets_() {
-    if (!this.verifier_.isAvailable()) {
+    if (!this.signatureVerifier_.isAvailable()) {
       return [];
     }
     return this.getSigningServiceNames().map(serviceName => {
@@ -1187,7 +1187,8 @@ export class AmpA4A extends AMP.BaseElement {
               return {
                 serviceName: jwkSet.serviceName,
                 keys: jwkSet.keys.map(jwk =>
-                  this.verifier_.importPublicKey(jwkSet.serviceName, jwk)
+                  this.signatureVerifier_
+                      .importPublicKey(jwkSet.serviceName, jwk)
                       .catch(err => {
                         user().error(TAG, this.element.getAttribute('type'),
                             `error importing keys for: ${jwkSet.serviceName}`,
