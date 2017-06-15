@@ -21,6 +21,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
 import {urlReplacementsForDoc} from '../../../src/services';
 import {user} from '../../../src/log';
+import {parseJson} from '../../../src/json';
 
 const TAG = 'amp-ad-exit';
 
@@ -168,7 +169,7 @@ export class AmpAdExit extends AMP.BaseElement {
         'The amp-ad-exit config should ' +
         'be inside a <script> tag with type="application/json"');
     try {
-      const config = assertConfig(JSON.parse(child.textContent));
+      const config = assertConfig(parseJson(child.textContent));
       const userFilters = {};
       for (const name in config.filters) {
         userFilters[name] = createFilter(name, config.filters[name]);

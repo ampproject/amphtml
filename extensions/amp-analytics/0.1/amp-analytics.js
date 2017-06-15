@@ -27,6 +27,7 @@ import {cryptoFor} from '../../../src/crypto';
 import {timerFor, viewerForDoc, xhrFor} from '../../../src/services';
 import {toggle} from '../../../src/style';
 import {isEnumValue} from '../../../src/types';
+import {parseJson} from '../../../src/json';
 import {Activity} from './activity-impl';
 import {Cid} from './cid-impl';
 import {
@@ -422,7 +423,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       if (children.length == 1) {
         const child = children[0];
         if (isJsonScriptTag(child)) {
-          inlineConfig = JSON.parse(children[0].textContent);
+          inlineConfig = parseJson(children[0].textContent);
         } else {
           user().error(TAG, 'The analytics config should ' +
               'be put in a <script> tag with type="application/json"');

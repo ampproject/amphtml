@@ -23,6 +23,7 @@ import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isProxyOrigin} from '../../../src/url';
+import {parseJson} from '../../../src/json';
 import {
   resourcesForDoc,
   viewerForDoc,
@@ -456,9 +457,9 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
   }
   try {
     const analyticsConfig =
-      JSON.parse(responseHeaders.get(AMP_ANALYTICS_HEADER));
+        parseJson(responseHeaders.get(AMP_ANALYTICS_HEADER));
     dev().assert(Array.isArray(analyticsConfig['url']));
-    const urls = analyticsConfig.url;
+    const urls = analyticsConfig['url'];
     if (!urls.length) {
       return null;
     }
