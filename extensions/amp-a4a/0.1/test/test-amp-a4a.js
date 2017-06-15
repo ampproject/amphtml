@@ -2207,8 +2207,6 @@ describe('amp-a4a', () => {
         const refreshEndCallback = () => {
           expect(initiateAdRequestMock).to.be.calledOnce;
           expect(tearDownSlotMock).to.be.calledOnce;
-          expect(destroyFrameMock).to.be.calledOnce;
-          expect(togglePlaceholderMock).to.be.calledTwice;
           expect(a4a.isRefreshing).to.be.false;
           resolver();
         };
