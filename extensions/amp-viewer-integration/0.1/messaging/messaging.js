@@ -27,15 +27,7 @@ export const MessageType = {
 };
 
 /**
- * @typedef {{
- *   app: string,
- *   type: string,
- *   requestid: number,
- *   name: string,
- *   data: *,
- *   rsvp: (boolean|undefined),
- *   error: (string|undefined),
- * }}
+ * @typedef {!AmpViewerMessage}
  */
 export let Message;
 
@@ -99,7 +91,7 @@ export class WindowPortEmulator {
   }
 
   /**
-   * @param {Object} data
+   * @param {JsonObject} data
    */
   postMessage(data) {
     this.target_./*OK*/postMessage(data, this.origin_);
@@ -205,14 +197,14 @@ export class Messaging {
         this.waitingForResponse_[requestId] = {resolve, reject};
       });
     }
-    this.sendMessage_({
+    this.sendMessage_(/** @type {!AmpViewerMessage} */ ({
       app: APP,
       requestid: requestId,
       type: MessageType.REQUEST,
       name: messageName,
       data: messageData,
       rsvp: awaitResponse,
-    });
+    }));
     return promise;
   }
 
@@ -224,13 +216,13 @@ export class Messaging {
    * @private
    */
   sendResponse_(requestId, messageName, messageData) {
-    this.sendMessage_({
+    this.sendMessage_(/** @type {!AmpViewerMessage} */ ({
       app: APP,
       requestid: requestId,
       type: MessageType.RESPONSE,
       name: messageName,
       data: messageData,
-    });
+    }));
   }
 
   /**
@@ -242,15 +234,15 @@ export class Messaging {
   sendResponseError_(requestId, messageName, reason) {
     const errString = this.errorToString_(reason);
     this.logError_(
-      TAG + ': sendResponseError_, Message name: ' + messageName, errString);
-    this.sendMessage_({
+        TAG + ': sendResponseError_, Message name: ' + messageName, errString);
+    this.sendMessage_(/** @type {!AmpViewerMessage} */ ({
       app: APP,
       requestid: requestId,
       type: MessageType.RESPONSE,
       name: messageName,
       data: null,
       error: errString,
-    });
+    }));
   }
 
   /**
@@ -259,7 +251,9 @@ export class Messaging {
    */
   sendMessage_(message) {
     this.port_./*OK*/postMessage(
-      this.isWebview_ ? JSON.stringify(message) : message);
+        this.isWebview_
+            ? JSON.stringify(message)
+            : message);
   }
 
   /**
@@ -286,7 +280,7 @@ export class Messaging {
       const requestId = message.requestid;
       if (!promise) {
         this.sendResponseError_(
-          requestId, message.name, new Error('no response'));
+            requestId, message.name, new Error('no response'));
         throw new Error('expected response but none given: ' + message.name);
       }
       promise.then(data => {
@@ -311,7 +305,7 @@ export class Messaging {
       if (message.error) {
         this.logError_(TAG + ': handleResponse_ error: ', message.error);
         pending.reject(
-          new Error(`Request ${message.name} failed: ${message.error}`));
+            new Error(`Request ${message.name} failed: ${message.error}`));
       } else {
         pending.resolve(message.data);
       }

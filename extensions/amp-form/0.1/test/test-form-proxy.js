@@ -20,8 +20,8 @@ import {
 } from '../form-proxy';
 
 const PROPS = ['id', 'action', 'method', 'style', 'acceptCharset',
-    'attributes', 'elements', 'children', 'draggable', 'hidden',
-    'autocomplete'];
+  'attributes', 'elements', 'children', 'draggable', 'hidden',
+  'autocomplete'];
 
 
 describes.repeated('installFormProxy', {

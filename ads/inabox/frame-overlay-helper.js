@@ -48,7 +48,7 @@ const expandFrameImpl = function(win, iframe, onFinish) {
       timer(() => {
         restrictedVsync(win, {
           mutate() {
-            expandFrameUnderVsyncMutate(iframe, state.viewportSize);
+            expandFrameUnderVsyncMutate(iframe);
             onFinish();
           },
         });

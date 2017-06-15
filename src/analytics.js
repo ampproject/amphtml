@@ -38,7 +38,7 @@ export function analyticsForDoc(nodeOrDoc, loadAnalytics = false) {
   return (/** @type {!Promise<
             !../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
           >} */ (getElementServiceForDoc(
-                nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
+              nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
 }
 
 /**
@@ -49,7 +49,7 @@ export function analyticsForDocOrNull(nodeOrDoc) {
   return (/** @type {!Promise<
             ?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
           >} */ (getElementServiceIfAvailableForDoc(
-                nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
+              nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
 }
 
 /**
@@ -70,7 +70,7 @@ export function triggerAnalyticsEvent(target, eventType, opt_vars) {
 /**
  * Method to create scoped analytics element for any element.
  * @param {!Element} parentElement
- * @param {!JSONType} config
+ * @param {!JsonObject} config
  * @param {boolean=} loadAnalytics
  * @return {!Element} created analytics element
  */

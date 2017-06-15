@@ -72,28 +72,28 @@ function generateFunctionWhitelist() {
 
   const whitelist = {
     '[object Array]':
-      [
-        Array.prototype.concat,
-        Array.prototype.indexOf,
-        Array.prototype.join,
-        Array.prototype.lastIndexOf,
-        Array.prototype.slice,
-        Array.prototype.includes,
-      ],
+    [
+      Array.prototype.concat,
+      Array.prototype.indexOf,
+      Array.prototype.join,
+      Array.prototype.lastIndexOf,
+      Array.prototype.slice,
+      Array.prototype.includes,
+    ],
     '[object String]':
-      [
-        String.prototype.charAt,
-        String.prototype.charCodeAt,
-        String.prototype.concat,
-        String.prototype.indexOf,
-        String.prototype.lastIndexOf,
-        String.prototype.slice,
-        String.prototype.split,
-        String.prototype.substr,
-        String.prototype.substring,
-        String.prototype.toLowerCase,
-        String.prototype.toUpperCase,
-      ],
+    [
+      String.prototype.charAt,
+      String.prototype.charCodeAt,
+      String.prototype.concat,
+      String.prototype.indexOf,
+      String.prototype.lastIndexOf,
+      String.prototype.slice,
+      String.prototype.split,
+      String.prototype.substr,
+      String.prototype.substring,
+      String.prototype.toLowerCase,
+      String.prototype.toUpperCase,
+    ],
   };
   whitelist[BUILT_IN_FUNCTIONS] = [
     Math.abs,
@@ -155,7 +155,7 @@ export class BindExpression {
     const skipConstraint = getMode().localDev && !getMode().test;
     if (size > maxSize && !skipConstraint) {
       throw new Error(`Expression size (${size}) exceeds max (${maxSize}). ` +
-          `Please reduce number of operands.`);
+          'Please reduce number of operands.');
     }
   }
 
@@ -229,7 +229,7 @@ export class BindExpression {
         } else {
           if (caller === null) {
             user().warn(TAG, `Cannot invoke method ${method} on null; ` +
-                `returning null.`);
+                'returning null.');
             return null;
           }
           const callerType = Object.prototype.toString.call(caller);
@@ -389,8 +389,10 @@ export class BindExpression {
    * @private
    */
   memberAccessWarning_(target, member) {
-    user().warn(TAG, `Cannot read property ${JSON.stringify(member)} of ` +
-        `${JSON.stringify(target)}; returning null.`);
+    // Cast valid, because we don't care for the logging.
+    const stringified = JSON.stringify(/** @type {!JsonObject} */ (member));
+    user().warn(TAG, `Cannot read property ${stringified} of ` +
+        `${stringified}; returning null.`);
   }
 
   /**

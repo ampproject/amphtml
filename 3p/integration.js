@@ -41,6 +41,7 @@ import {urls} from '../src/config';
 import {endsWith} from '../src/string';
 import {parseUrl, getSourceUrl, isProxyOrigin} from '../src/url';
 import {dev, initLogConstructor, setReportError, user} from '../src/log';
+import {dict} from '../src/utils/object.js';
 import {getMode} from '../src/mode';
 import {startsWith} from '../src/string.js';
 
@@ -546,15 +547,21 @@ function triggerNoContentAvailable() {
 }
 
 function triggerDimensions(width, height) {
-  nonSensitiveDataPostMessage('embed-size', {width, height});
+  nonSensitiveDataPostMessage('embed-size', dict({
+    'width': width,
+    'height': height,
+  }));
 }
 
 function triggerResizeRequest(width, height) {
-  nonSensitiveDataPostMessage('embed-size', {width, height});
+  nonSensitiveDataPostMessage('embed-size', dict({
+    'width': width,
+    'height': height,
+  }));
 }
 
 /**
- * @param {{width, height}=} opt_data
+ * @param {!JsonObject=} opt_data fields: width, height
  */
 function triggerRenderStart(opt_data) {
   nonSensitiveDataPostMessage('render-start', opt_data);
@@ -574,7 +581,11 @@ let currentMessageId = 0;
  */
 function getHtml(selector, attributes, callback) {
   const messageId = currentMessageId++;
-  nonSensitiveDataPostMessage('get-html', {selector, attributes, messageId});
+  nonSensitiveDataPostMessage('get-html', dict({
+    'selector': selector,
+    'attributes': attributes,
+    'messageId': messageId,
+  }));
 
   const unlisten = listenParent(window, 'get-html-result', data => {
     if (data.messageId === messageId) {
@@ -658,9 +669,9 @@ function onResizeDenied(observerCallback) {
 function reportRenderedEntityIdentifier(entityId) {
   user().assert(typeof entityId == 'string',
       'entityId should be a string %s', entityId);
-  nonSensitiveDataPostMessage('entity-id', {
-    id: entityId,
-  });
+  nonSensitiveDataPostMessage('entity-id', dict({
+    'id': entityId,
+  }));
 }
 
 /**
@@ -760,7 +771,7 @@ export function ensureFramed(window) {
 /**
  * Expects the fragment to contain JSON.
  * @param {string} fragment Value of location.fragment
- * @return {?JSONType}
+ * @return {?JsonObject}
  * @visibleForTesting
  */
 export function parseFragment(fragment) {
@@ -772,7 +783,7 @@ export function parseFragment(fragment) {
     if (startsWith(json, '{%22')) {
       json = decodeURIComponent(json);
     }
-    return /** @type {!JSONType} */ (json ? JSON.parse(json) : {});
+    return /** @type {!JsonObject} */ (json ? JSON.parse(json) : {});
   } catch (err) {
     return null;
   }

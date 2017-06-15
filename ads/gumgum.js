@@ -25,31 +25,31 @@ export function gumgum(global, data) {
   validateData(data, ['zone', 'slot']);
 
   const
-    win = window,
-    ctx = win.context,
-    dom = global.document.getElementById('c'),
-    ampWidth = parseInt(data.width || '0', 10),
-    ampHeight = parseInt(data.height || '0', 10),
-    ggevents = global.ggevents || [];
+      win = window,
+      ctx = win.context,
+      dom = global.document.getElementById('c'),
+      ampWidth = parseInt(data.width || '0', 10),
+      ampHeight = parseInt(data.height || '0', 10),
+      ggevents = global.ggevents || [];
 
   const
-    max = Math.max,
-    slotId = parseInt(data.slot, 10),
-    onLoad = function(type) {
-      return function(evt) {
-        const
-          ad = Object.assign({width: 0, height: 0}, evt.ad || {}),
-          identifier = ['GUMGUM', type, evt.id].join('_');
-        ctx.reportRenderedEntityIdentifier(identifier);
-        ctx.renderStart({
-          width: max(ampWidth, ad.width),
-          height: max(ampHeight, ad.height),
-        });
+      max = Math.max,
+      slotId = parseInt(data.slot, 10),
+      onLoad = function(type) {
+        return function(evt) {
+          const
+              ad = Object.assign({width: 0, height: 0}, evt.ad || {}),
+              identifier = ['GUMGUM', type, evt.id].join('_');
+          ctx.reportRenderedEntityIdentifier(identifier);
+          ctx.renderStart({
+            width: max(ampWidth, ad.width),
+            height: max(ampHeight, ad.height),
+          });
+        };
+      },
+      noFill = function() {
+        ctx.noContentAvailable();
       };
-    },
-    noFill = function() {
-      ctx.noContentAvailable();
-    };
 
   // Ads logic starts
   global.ggv2id = data.zone;

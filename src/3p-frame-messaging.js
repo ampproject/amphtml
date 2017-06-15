@@ -15,6 +15,7 @@
  */
 
 import {dev} from './log';
+import {dict} from './utils/object';
 import {internalListenImplementation} from './event-helper-listen';
 
 
@@ -66,15 +67,16 @@ export function listen(element, eventType, listener, opt_capture) {
  * 'amp-011481323099490{"type":"position","sentinel":"12345","foo":"bar"}'
  * @param {string} type
  * @param {string} sentinel
- * @param {Object=} data
+ * @param {JsonObject=} data
  * @param {?string=} rtvVersion
  * @returns {string}
  */
-export function serializeMessage(type, sentinel, data = {}, rtvVersion = null) {
+export function serializeMessage(type, sentinel, data = dict(),
+    rtvVersion = null) {
   // TODO: consider wrap the data in a "data" field. { type, sentinal, data }
   const message = data;
-  message.type = type;
-  message.sentinel = sentinel;
+  message['type'] = type;
+  message['sentinel'] = sentinel;
   return AMP_MESSAGE_PREFIX + (rtvVersion || '') + JSON.stringify(message);
 }
 
@@ -84,7 +86,7 @@ export function serializeMessage(type, sentinel, data = {}, rtvVersion = null) {
  * Returns null if it's not valid AMP message format.
  *
  * @param {*} message
- * @returns {?JSONType}
+ * @returns {?JsonObject}
  */
 export function deserializeMessage(message) {
   if (!isAmpMessage(message)) {
@@ -93,7 +95,7 @@ export function deserializeMessage(message) {
   const startPos = message.indexOf('{');
   dev().assert(startPos != -1, 'JSON missing in %s', message);
   try {
-    return /** @type {!JSONType} */ (JSON.parse(message.substr(startPos)));
+    return /** @type {!JsonObject} */ (JSON.parse(message.substr(startPos)));
   } catch (e) {
     dev().error('MESSAGING', 'Failed to parse message: ' + message, e);
     return null;

@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-accordion-0.1.css';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {closest} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {removeFragment} from '../../../src/url';
-import {map} from '../../../src/utils/object';
+import {dict} from '../../../src/utils/object';
 import {tryFocus} from '../../../src/dom';
 
 class AmpAccordion extends AMP.BaseElement {
@@ -35,7 +34,7 @@ class AmpAccordion extends AMP.BaseElement {
     /** @private {?string} */
     this.sessionId_ = null;
 
-    /** @private {?Object<string,boolean>} */
+    /** @private {?JsonObject} */
     this.currentState_ = null;
 
     /** @private {boolean} */
@@ -69,34 +68,41 @@ class AmpAccordion extends AMP.BaseElement {
           'Each section must have exactly two children. ' +
           'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
           'amp-accordion/amp-accordion.md. Found in: %s', this.element);
-      this.mutateElement(() => {
-        const content = sectionComponents[1];
-        content.classList.add('i-amphtml-accordion-content');
-        let contentId = content.getAttribute('id');
-        if (!contentId) {
-          contentId = this.element.id + '_AMP_content_' + index;
-          content.setAttribute('id', contentId);
-        }
+      const content = sectionComponents[1];
+      let contentId = content.getAttribute('id');
+      if (!contentId) {
+        contentId = this.element.id + '_AMP_content_' + index;
+        content.setAttribute('id', contentId);
+      }
 
+
+
+      if (!this.currentState_[contentId] != null) {
         if (this.currentState_[contentId]) {
           section.setAttribute('expanded', '');
-        } else if (this.currentState_[contentId] == false) {
+        } else if (this.currentState_[contentId] === false) {
           section.removeAttribute('expanded');
         }
+        this.mutateElement(() => {
+          // Just mark this element as dirty since we changed the state
+          // based on runtime state. This triggers checking again
+          // whether children need layout.
+          // See https://github.com/ampproject/amphtml/issues/3586
+          // for details.
+        });
+      }
 
-        const header = sectionComponents[0];
-        header.classList.add('i-amphtml-accordion-header');
-        header.setAttribute('role', 'heading');
-        header.setAttribute('aria-controls', contentId);
-        header.setAttribute('aria-expanded',
-            section.hasAttribute('expanded').toString());
-        if (!header.hasAttribute('tabindex')) {
-          header.setAttribute('tabindex', 0);
-        }
-        this.headers_.push(header);
-        header.addEventListener('click', this.clickHandler_.bind(this));
-        header.addEventListener('keydown', this.keyDownHandler_.bind(this));
-      });
+      const header = sectionComponents[0];
+      header.setAttribute('role', 'heading');
+      header.setAttribute('aria-controls', contentId);
+      header.setAttribute('aria-expanded',
+          section.hasAttribute('expanded').toString());
+      if (!header.hasAttribute('tabindex')) {
+        header.setAttribute('tabindex', 0);
+      }
+      this.headers_.push(header);
+      header.addEventListener('click', this.clickHandler_.bind(this));
+      header.addEventListener('keydown', this.keyDownHandler_.bind(this));
     });
   }
 
@@ -113,23 +119,24 @@ class AmpAccordion extends AMP.BaseElement {
 
   /**
    * Get previous state from sessionStorage.
-   * @return {!Object}
+   * @return {!JsonObject}
    * @private
    */
   getSessionState_() {
     if (this.sessionOptOut_) {
-      return map();
+      return dict();
     }
     try {
       const sessionStr =
           this.win./*OK*/sessionStorage.getItem(
-          dev().assertString(this.sessionId_));
+              dev().assertString(this.sessionId_));
       return sessionStr
-          ? /** @type {!Object} */ (JSON.parse(dev().assertString(sessionStr)))
-          : map();
+          ? /** @type {!JsonObject} */ (
+              JSON.parse(dev().assertString(sessionStr)))
+          : dict();
     } catch (e) {
       dev().fine('AMP-ACCORDION', e.message, e.stack);
-      return map();
+      return dict();
     }
   }
 
@@ -243,4 +250,4 @@ class AmpAccordion extends AMP.BaseElement {
 
 }
 
-AMP.registerElement('amp-accordion', AmpAccordion, CSS);
+AMP.registerElement('amp-accordion', AmpAccordion);

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-trust';
 import {CSS} from '../../../build/amp-selector-0.1.css';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {actionServiceForDoc} from '../../../src/services';
@@ -95,8 +96,8 @@ export class AmpSelector extends AMP.BaseElement {
       kbSelectMode = kbSelectMode.toLowerCase();
       user().assertEnumValue(KEYBOARD_SELECT_MODES, kbSelectMode);
       user().assert(
-        !(this.isMultiple_ && kbSelectMode == KEYBOARD_SELECT_MODES.SELECT),
-        '[keyboard-select-mode=select] not supported for multiple ' +
+          !(this.isMultiple_ && kbSelectMode == KEYBOARD_SELECT_MODES.SELECT),
+          '[keyboard-select-mode=select] not supported for multiple ' +
         'selection amp-selector');
     } else {
       kbSelectMode = KEYBOARD_SELECT_MODES.NONE;
@@ -291,7 +292,9 @@ export class AmpSelector extends AMP.BaseElement {
               targetOption: el.getAttribute('option'),
               selectedOptions: selectedValues,
             });
-        this.action_.trigger(this.element, name, selectEvent);
+        // TODO(choumx, #9699): HIGH.
+        this.action_.trigger(this.element, name, selectEvent,
+            ActionTrust.MEDIUM);
       }
     });
   }

@@ -16,6 +16,7 @@
 
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {VideoEvents} from '../../../src/video-interface';
 import {
   installVideoManagerForDoc,
@@ -160,9 +161,9 @@ class AmpDailymotion extends AMP.BaseElement {
     this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(
-      this.win,
-      'message',
-      this.handleEvents_.bind(this)
+        this.win,
+        'message',
+        this.handleEvents_.bind(this)
     );
 
     this.hasAutoplay_ = this.element.hasAttribute('autoplay');
@@ -192,7 +193,7 @@ class AmpDailymotion extends AMP.BaseElement {
       return; // The message isn't valid
     }
 
-    switch (data.event) {
+    switch (data['event']) {
       case DailymotionEvents.API_READY:
         this.playerReadyResolver_(true);
         this.element.dispatchCustomEvent(VideoEvents.LOAD);
@@ -208,8 +209,9 @@ class AmpDailymotion extends AMP.BaseElement {
         break;
       case DailymotionEvents.VOLUMECHANGE:
         if (this.playerState_ == DailymotionEvents.UNSTARTED
-           || this.muted_ != (data.volume == 0 || (data.muted == 'true'))) {
-          this.muted_ = (data.volume == 0 || (data.muted == 'true'));
+            || this.muted_ != (
+                data['volume'] == 0 || (data['muted'] == 'true'))) {
+          this.muted_ = (data['volume'] == 0 || (data['muted'] == 'true'));
           if (this.muted_) {
             this.element.dispatchCustomEvent(VideoEvents.MUTED);
           } else {
@@ -228,17 +230,17 @@ class AmpDailymotion extends AMP.BaseElement {
   /**
    * Sends a command to the player through postMessage.
    * @param {string} command
-   * @param {Array=} opt_args
+   * @param {Array<boolean>=} opt_args
    * @private
    */
   sendCommand_(command, opt_args) {
     const endpoint = 'https://www.dailymotion.com';
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
-        const message = JSON.stringify({
-          command,
-          parameters: opt_args || [],
-        });
+        const message = JSON.stringify(dict({
+          'command': command,
+          'parameters': opt_args || [],
+        }));
         this.iframe_.contentWindow./*OK*/postMessage(message, endpoint);
       }
     });

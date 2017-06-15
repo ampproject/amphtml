@@ -79,13 +79,13 @@ describe('SlideScroll', () => {
               .length).to.equal(1);
       expect(
           ampSlideScroll.querySelectorAll(
-            '.i-amphtml-slides-container > .i-amphtml-slide-item').length)
-                .to.equal(5);
+              '.i-amphtml-slides-container > .i-amphtml-slide-item').length)
+          .to.equal(5);
       expect(
           ampSlideScroll.getElementsByClassName('amp-carousel-slide').length)
-              .to.equal(5);
+          .to.equal(5);
       expect(ampSlideScroll.querySelector('.i-amphtml-slides-container')
-            .getAttribute('aria-live')).to.equal('polite');
+          .getAttribute('aria-live')).to.equal('polite');
       const impl = ampSlideScroll.implementation_;
       expect(impl.slideWrappers_[0].classList.contains(SHOW_CLASS))
           .to.be.true;
@@ -975,29 +975,30 @@ describe('SlideScroll', () => {
         const ampSlideScroll = obj.ampSlideScroll;
         const impl = ampSlideScroll.implementation_;
         const showSlideSpy = sandbox.spy(impl, 'showSlide_');
+        const satisfiesTrust = () => true;
 
         let args = {'index': '123'};
-        impl.executeAction({method: 'goToSlide', args});
+        impl.executeAction({method: 'goToSlide', args, satisfiesTrust});
         expect(showSlideSpy).to.not.have.been.called;
 
         args = {'index': '5'};
-        impl.executeAction({method: 'goToSlide', args});
+        impl.executeAction({method: 'goToSlide', args, satisfiesTrust});
         expect(showSlideSpy).to.not.have.been.called;
 
         args = {'index': 'ssds11'};
-        impl.executeAction({method: 'goToSlide', args});
+        impl.executeAction({method: 'goToSlide', args, satisfiesTrust});
         expect(showSlideSpy).to.not.have.been.called;
 
         args = {'index': '-1'};
-        impl.executeAction({method: 'goToSlide', args});
+        impl.executeAction({method: 'goToSlide', args, satisfiesTrust});
         expect(showSlideSpy).to.not.have.been.called;
 
         args = {'index': '0'};
-        impl.executeAction({method: 'goToSlide', args});
+        impl.executeAction({method: 'goToSlide', args, satisfiesTrust});
         expect(showSlideSpy).to.have.been.calledWith(0);
 
         args = {'index': '4'};
-        impl.executeAction({method: 'goToSlide', args});
+        impl.executeAction({method: 'goToSlide', args, satisfiesTrust});
         expect(showSlideSpy).to.have.been.calledWith(4);
       });
     });
@@ -1012,9 +1013,10 @@ describe('SlideScroll', () => {
         iframe.addElement(ampSlideScroll);
         const impl = ampSlideScroll.implementation_;
         const showSlideSpy = sandbox.spy(impl, 'showSlide_');
+        const satisfiesTrust = () => true;
 
         const args = {'index': '3'};
-        impl.executeAction({method: 'goToSlide', args});
+        impl.executeAction({method: 'goToSlide', args, satisfiesTrust});
         expect(showSlideSpy).to.not.have.been.called;
 
         impl.mutatedAttributesCallback({slide: 2});

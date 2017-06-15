@@ -36,6 +36,19 @@ export function map(opt_initial) {
 }
 
 /**
+ * Returns a `map`, and will always return a at-dict like object.
+ * The JsonObject type is just a simple object that is a dict.
+ * See
+ * https://github.com/google/closure-compiler/wiki/@struct-and-@dict-Annotations
+ * for what a dict is type-wise.
+ * @param {!Object=} opt_initial
+ * @return {!JsonObject}
+ */
+export function dict(opt_initial) {
+  return /** @type {!JsonObject} */ (map(opt_initial));
+}
+
+/**
  * Checks if the given key is a property in the map.
  *
  * @param {T}  obj a map like property.

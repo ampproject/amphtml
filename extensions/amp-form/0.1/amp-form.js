@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-trust';
 import {installFormProxy} from './form-proxy';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {createCustomEvent} from '../../../src/event-helper';
@@ -192,8 +193,9 @@ export class AmpForm {
     this.verifier_ = getFormVerifier(
         this.form_, () => this.handleXhrVerify_());
 
+    // TODO(choumx, #9699): HIGH.
     this.actions_.installActionHandler(
-        this.form_, this.actionHandler_.bind(this));
+        this.form_, this.actionHandler_.bind(this), ActionTrust.MEDIUM);
     this.installEventHandlers_();
 
     /** @private {?Promise} */
@@ -226,7 +228,9 @@ export class AmpForm {
    */
   actionHandler_(invocation) {
     if (invocation.method == 'submit') {
-      this.whenDependenciesReady_().then(this.handleSubmitAction_.bind(this));
+      this.whenDependenciesReady_().then(() => {
+        this.handleSubmitAction_(invocation);
+      });
     }
   }
 
@@ -291,8 +295,9 @@ export class AmpForm {
     const formDataForAnalytics = {};
     const formObject = this.getFormAsObject_();
 
+
     for (const k in formObject) {
-      if (formObject.hasOwnProperty(k)) {
+      if (Object.prototype.hasOwnProperty.call(formObject, k)) {
         formDataForAnalytics['formFields[' + k + ']'] = formObject[k].join(',');
       }
     }
@@ -304,13 +309,15 @@ export class AmpForm {
   /**
    * Handles submissions through action service invocations.
    *   e.g. <img on=tap:form.submit>
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
    * @private
    */
-  handleSubmitAction_() {
+  handleSubmitAction_(invocation) {
     if (this.state_ == FormState_.SUBMITTING || !this.checkValidity_()) {
       return;
     }
-    this.submit_();
+    // `submit` has the same trust level as the AMP Action that caused it.
+    this.submit_(invocation.trust);
     if (this.method_ == 'GET' && !this.xhrAction_) {
       // Trigger the actual submit of GET non-XHR.
       this.form_.submit();
@@ -343,17 +350,19 @@ export class AmpForm {
     if (this.xhrAction_ || this.method_ == 'POST') {
       event.preventDefault();
     }
-    this.submit_();
+    // Submits caused by user input have high trust.
+    this.submit_(ActionTrust.MEDIUM); // TODO(choumx, #9699): HIGH.
   }
 
   /**
-   * A helper method that actual handles the for different cases (post, get, xhr...).
+   * Helper method that actual handles the different cases (post, get, xhr...).
+   * @param {ActionTrust} trust
    * @private
    */
-  submit_() {
+  submit_(trust) {
     const varSubsFields = this.getVarSubsFields_();
     if (this.xhrAction_) {
-      this.handleXhrSubmit_(varSubsFields);
+      this.handleXhrSubmit_(varSubsFields, trust);
     } else if (this.method_ == 'POST') {
       this.handleNonXhrPost_();
     } else if (this.method_ == 'GET') {
@@ -413,25 +422,26 @@ export class AmpForm {
 
   /**
    * @param {!IArrayLike<!HTMLInputElement>} varSubsFields
+   * @param {ActionTrust} trust
    * @private
    */
-  handleXhrSubmit_(varSubsFields) {
+  handleXhrSubmit_(varSubsFields, trust) {
     this.setState_(FormState_.SUBMITTING);
 
     const p = this.doVarSubs_(varSubsFields)
         .then(() => {
           this.triggerFormSubmitInAnalytics_();
-          this.actions_.trigger(this.form_, 'submit', /*event*/ null);
-
+          this.actions_.trigger(
+              this.form_, 'submit', /* event */ null, trust);
           // After variable substitution
           const values = this.getFormAsObject_();
           this.renderTemplate_(values);
         })
         .then(() => this.doActionXhr_())
         .then(response => this.handleXhrSubmitSuccess_(response),
-            error => {
-              return this.handleXhrSubmitFailure_(/** @type {!Error} */(error));
-            });
+        error => {
+          return this.handleXhrSubmitFailure_(/** @type {!Error} */(error));
+        });
 
     if (getMode().test) {
       this.xhrSubmitPromise_ = p;
@@ -620,14 +630,14 @@ export class AmpForm {
   /**
    * Triggers either a submit-success or submit-error action with response data.
    * @param {boolean} success
-   * @param {?JSONType} json
+   * @param {?JsonObject} json
    * @private
    */
   triggerAction_(success, json) {
     const name = success ? FormState_.SUBMIT_SUCCESS : FormState_.SUBMIT_ERROR;
     const event =
         createCustomEvent(this.win_, `${TAG}.${name}`, {response: json});
-    this.actions_.trigger(this.form_, name, event);
+    this.actions_.trigger(this.form_, name, event, ActionTrust.MEDIUM);
   }
 
   /**
@@ -653,11 +663,11 @@ export class AmpForm {
 
   /**
    * Returns form data as an object.
-   * @return {!JSONType}
+   * @return {!JsonObject}
    * @private
    */
   getFormAsObject_() {
-    const data = /** @type {!JSONType} */ ({});
+    const data = /** @type {!JsonObject} */ ({});
     const inputs = this.form_.elements;
     const submittableTagsRegex = /^(?:input|select|textarea)$/i;
     const unsubmittableTypesRegex = /^(?:button|image|file|reset)$/i;
@@ -701,7 +711,7 @@ export class AmpForm {
   }
 
   /**
-   * @param {!JSONType} data
+   * @param {!JsonObject} data
    * @private
    */
   renderTemplate_(data) {

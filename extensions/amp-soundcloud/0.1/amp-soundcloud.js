@@ -29,6 +29,7 @@
  */
 
 import {Layout} from '../../../src/layout';
+import {dict} from '../../../src/utils/object';
 import {user} from '../../../src/log';
 
 
@@ -100,8 +101,8 @@ class AmpSoundcloud extends AMP.BaseElement {
   pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
       this.iframe_.contentWindow./*OK*/postMessage(
-        JSON.stringify({method: 'pause'}),
-        'https://w.soundcloud.com');
+          JSON.stringify(dict({'method': 'pause'})),
+          'https://w.soundcloud.com');
     }
   }
 };
