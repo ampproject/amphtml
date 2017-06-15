@@ -2013,7 +2013,7 @@ describe('amp-a4a', () => {
               ]});
             },
           }));
-    expect(win.ampA4aValidationKeys).not.to.exist;
+      expect(win.ampA4aValidationKeys).not.to.exist;
       // Key fetch happens on A4A class construction.
       const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
       a4a.buildCallback();
