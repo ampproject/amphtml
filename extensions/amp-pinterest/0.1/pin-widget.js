@@ -35,7 +35,7 @@ export class PinWidget {
   /** @param {!Element} rootElement */
   constructor(rootElement) {
     user().assert(rootElement.getAttribute('data-url'),
-      'The data-url attribute is required for Pin widgets');
+        'The data-url attribute is required for Pin widgets');
     this.element = rootElement;
     this.xhr = xhrFor(rootElement.ownerDocument.defaultView);
   }
@@ -234,12 +234,12 @@ export class PinWidget {
       this.pinId = this.pinUrl.split('/pin/')[1].split('/')[0];
     } catch (err) {
       return Promise.reject(
-        user().createError('Invalid pinterest url: ' + this.pinUrl)
+          user().createError('Invalid pinterest url: ' + this.pinUrl)
       );
     }
 
     return this.fetchPin()
-      .then(this.renderPin.bind(this));
+        .then(this.renderPin.bind(this));
   }
 
 };

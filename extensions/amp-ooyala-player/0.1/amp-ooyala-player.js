@@ -69,17 +69,17 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const embedCode = user().assert(
-      this.element.getAttribute('data-embedcode'),
-      'The data-embedcode attribute is required for <amp-ooyala-player> %s',
-      this.element);
+        this.element.getAttribute('data-embedcode'),
+        'The data-embedcode attribute is required for <amp-ooyala-player> %s',
+        this.element);
     const pCode = user().assert(
-      this.element.getAttribute('data-pcode'),
-      'The data-pcode attribute is required for <amp-ooyala-player> %s',
-      this.element);
+        this.element.getAttribute('data-pcode'),
+        'The data-pcode attribute is required for <amp-ooyala-player> %s',
+        this.element);
     const playerId = user().assert(
-      this.element.getAttribute('data-playerid'),
-      'The data-playerid attribute is required for <amp-ooyala-player> %s',
-      this.element);
+        this.element.getAttribute('data-playerid'),
+        'The data-playerid attribute is required for <amp-ooyala-player> %s',
+        this.element);
 
     let src = 'https://player.ooyala.com/iframe.html?platform=html5-priority';
     const playerVersion = this.element.getAttribute('data-playerversion') || '';

@@ -19,7 +19,7 @@ import {assertHttpsUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 import {dev, rethrowAsync, user} from '../../../src/log';
 import {expandTemplate} from '../../../src/string';
 import {isArray, isObject} from '../../../src/types';
-import {hasOwn, map} from '../../../src/utils/object';
+import {dict, hasOwn, map} from '../../../src/utils/object';
 import {sendRequest, sendRequestUsingIframe} from './transport';
 import {urlReplacementsForDoc} from '../../../src/services';
 import {userNotificationManagerFor} from '../../../src/services';
@@ -64,7 +64,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     super(element);
 
     /**
-     * @const {!JSONType} Copied here for tests.
+     * @const {!JsonObject} Copied here for tests.
      * @private
      */
     this.predefinedConfig_ = ANALYTICS_CONFIG;
@@ -94,14 +94,14 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.requests_ = {};
 
     /**
-     * @private {JSONType}
+     * @private {JsonObject}
      */
-    this.config_ = /** @type {JSONType} */ ({});
+    this.config_ = dict();
 
     /**
-     * @private {JSONType}
+     * @private {JsonObject}
      */
-    this.remoteConfig_ = /** @type {JSONType} */ ({});
+    this.remoteConfig_ = dict();
 
     /** @private {?./instrumentation.InstrumentationService} */
     this.instrumentation_ = null;
@@ -264,10 +264,10 @@ export class AmpAnalytics extends AMP.BaseElement {
             // Expand the selector using variable expansion.
             return this.variableService_.expandTemplate(
                 trigger['selector'], expansionOptions)
-              .then(selector => {
-                trigger['selector'] = selector;
-                this.addTriggerNoInline_(trigger);
-              });
+                .then(selector => {
+                  trigger['selector'] = selector;
+                  this.addTriggerNoInline_(trigger);
+                });
           } else {
             this.addTriggerNoInline_(trigger);
           }
@@ -281,7 +281,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * Calls `AnalyticsGroup.addTrigger` and reports any errors. "NoInline" is
    * to avoid inlining this method so that `try/catch` does it veto
    * optimizations.
-   * @param {!JSONType} config
+   * @param {!JsonObject} config
    * @private
    */
   addTriggerNoInline_(config) {
@@ -320,8 +320,8 @@ export class AmpAnalytics extends AMP.BaseElement {
 
         for (const extraUrlParamsKey in params) {
           const newkey = extraUrlParamsKey.replace(
-            replaceMapKey,
-            replaceMap[replaceMapKey]
+              replaceMapKey,
+              replaceMap[replaceMapKey]
           );
           if (extraUrlParamsKey != newkey) {
             const value = params[extraUrlParamsKey];
@@ -377,12 +377,12 @@ export class AmpAnalytics extends AMP.BaseElement {
    * - Default config: Built-in config shared by all amp-analytics tags.
    *
    * @private
-   * @return {!JSONType}
+   * @return {!JsonObject}
    */
   mergeConfigs_() {
     const inlineConfig = this.getInlineConfigNoInline();
     // Initialize config with analytics related vars.
-    const config = /** @type {!JSONType} */ ({
+    const config = dict({
       'vars': {
         'requestCount': 0,
       },
@@ -408,7 +408,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /**
    * @private
-   * @return {!JSONType}
+   * @return {!JsonObject}
    */
   getInlineConfigNoInline() {
     if (this.element.CONFIG) {
@@ -436,7 +436,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       user().error(TAG, 'Analytics config could not be ' +
           'parsed. Is it in a valid JSON format?', er);
     }
-    return /** @type {!JSONType} */ (inlineConfig);
+    return /** @type {!JsonObject} */ (inlineConfig);
   }
 
   /**
@@ -496,7 +496,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * Callback for events that are registered by the config's triggers. This
    * method generates requests and sends them out.
    *
-   * @param {!JSONType} trigger JSON config block that resulted in this event.
+   * @param {!JsonObject} trigger JSON config block that resulted in this event.
    * @param {!Object} event Object with details about the event.
    * @return {!Promise} The request that was sent out.
    * @private
@@ -517,7 +517,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * Processes a request for an event callback and sends it out.
    *
    * @param {string} request The request to process.
-   * @param {!JSONType} trigger JSON config block that resulted in this event.
+   * @param {!JsonObject} trigger JSON config block that resulted in this event.
    * @param {!Object} event Object with details about the event.
    * @return {!Promise<string|undefined>} The request that was sent out.
    * @private
@@ -547,7 +547,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /**
    * @param {string} request The request to process.
-   * @param {!JSONType} trigger JSON config block that resulted in this event.
+   * @param {!JsonObject} trigger JSON config block that resulted in this event.
    * @param {!Object} event Object with details about the event.
    * @return {!Promise<string>} The request that was sent out.
    * @private
@@ -576,7 +576,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
-   * @param {!JSONType} trigger JSON config block that resulted in this event.
+   * @param {!JsonObject} trigger JSON config block that resulted in this event.
    * @param {!Object} event Object with details about the event.
    * @return {!Promise<T>} Map of the resolved parameters.
    * @template T
@@ -594,7 +594,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         if (typeof params[k] == 'string') {
           requestPromises.push(
               this.variableService_.expandTemplate(params[k], expansionOptions)
-                .then(value => { params[k] = value; }));
+                  .then(value => { params[k] = value; }));
         }
       }
     }
@@ -602,13 +602,13 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
-   * @param {!JSONType} trigger The config to use to determine sampling.
+   * @param {!JsonObject} trigger The config to use to determine sampling.
    * @return {!Promise<boolean>} Whether the request should be sampled in or
    * not based on sampleSpec.
    * @private
    */
   isSampledIn_(trigger) {
-    /** @const {!JSONType} */
+    /** @const {!JsonObject} */
     const spec = trigger['sampleSpec'];
     const resolve = Promise.resolve(true);
     const TAG = this.getName_();
@@ -633,7 +633,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /**
    * Checks if request for a trigger is enabled.
-   * @param {!JSONType} trigger The config to use to determine if trigger is
+   * @param {!JsonObject} trigger The config to use to determine if trigger is
    * enabled.
    * @param {!Object} event Object with details about the event.
    * @return {!Promise<boolean>} Whether trigger must be called.
@@ -716,7 +716,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /**
    * @param {string} request The full request string to send.
-   * @param {!JSONType} trigger
+   * @param {!JsonObject} trigger
    * @private
    */
   sendRequest_(request, trigger) {

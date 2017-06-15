@@ -61,7 +61,7 @@ describe('LayoutRect', () => {
 
   it('layoutRectFromDomRect', () => {
     const rect = lr.layoutRectFromDomRect({top: 11, left: 12, width: 111,
-        height: 222});
+      height: 222});
     expect(rect.top).to.equal(11);
     expect(rect.left).to.equal(12);
     expect(rect.width).to.equal(111);

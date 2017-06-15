@@ -734,22 +734,22 @@ describes.repeated('', {
         };
         expect(ampForm.xhr_.fetch).to.have.not.been.called;
         expect(ampForm.urlReplacement_.expandInputValueSync)
-              .to.not.have.been.called;
+            .to.not.have.been.called;
         expect(ampForm.urlReplacement_.expandInputValueAsync)
-              .to.have.been.calledTwice;
+            .to.have.been.calledTwice;
         expect(ampForm.urlReplacement_.expandInputValueAsync)
-              .to.have.been.calledWith(clientIdField);
+            .to.have.been.calledWith(clientIdField);
         expect(ampForm.urlReplacement_.expandInputValueAsync)
-              .to.have.been.calledWith(canonicalUrlField);
+            .to.have.been.calledWith(canonicalUrlField);
         return whenCalled(ampForm.xhr_.fetch).then(() => {
           expect(ampForm.xhr_.fetch).to.be.called;
           expect(clientIdField.value).to.match(/amp-.+/);
           expect(canonicalUrlField.value).to.equal(
-                  'https%3A%2F%2Fexample.com%2Famps.html');
+              'https%3A%2F%2Fexample.com%2Famps.html');
 
           expect(ampForm.analyticsEvent_).to.be.calledWithMatch(
-                  'amp-form-submit',
-                  expectedFormData);
+              'amp-form-submit',
+              expectedFormData);
         });
       });
     });
@@ -1435,7 +1435,7 @@ describes.repeated('', {
           sandbox.stub(ampForm.urlReplacement_, 'expandInputValueAsync');
           sandbox.spy(ampForm.urlReplacement_, 'expandInputValueSync');
 
-          ampForm.handleSubmitAction_();
+          ampForm.handleSubmitAction_(/* invocation */ {});
           expect(ampForm.urlReplacement_.expandInputValueAsync)
               .to.not.have.been.called;
           expect(ampForm.urlReplacement_.expandInputValueSync)
@@ -1477,7 +1477,7 @@ describes.repeated('', {
           sandbox.stub(ampForm, 'handleXhrSubmitSuccess_');
           sandbox.stub(ampForm.urlReplacement_, 'expandInputValueAsync');
           sandbox.spy(ampForm.urlReplacement_, 'expandInputValueSync');
-          ampForm.handleSubmitAction_();
+          ampForm.handleSubmitAction_(/* invocation */ {});
           expect(ampForm.urlReplacement_.expandInputValueAsync)
               .to.not.have.been.called;
           expect(ampForm.urlReplacement_.expandInputValueSync)
@@ -1515,7 +1515,7 @@ describes.repeated('', {
           sandbox.stub(ampForm.urlReplacement_, 'expandInputValueAsync');
           sandbox.spy(ampForm.urlReplacement_, 'expandInputValueSync');
 
-          ampForm.handleSubmitAction_();
+          ampForm.handleSubmitAction_(/* invocation */ {});
           expect(ampForm.urlReplacement_.expandInputValueAsync)
               .to.not.have.been.called;
           expect(ampForm.urlReplacement_.expandInputValueSync)
@@ -1552,7 +1552,7 @@ describes.repeated('', {
           sandbox.stub(ampForm, 'handleXhrSubmitSuccess_');
           sandbox.stub(ampForm.urlReplacement_, 'expandInputValueAsync');
           sandbox.spy(ampForm.urlReplacement_, 'expandInputValueSync');
-          ampForm.handleSubmitAction_();
+          ampForm.handleSubmitAction_(/* invocation */ {});
           expect(ampForm.urlReplacement_.expandInputValueAsync)
               .to.not.have.been.called;
           expect(ampForm.urlReplacement_.expandInputValueSync)
@@ -1615,7 +1615,7 @@ describes.repeated('', {
         it('should redirect users if header is set', () => {
           sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchResolvePromise);
           redirectToValue = 'https://google.com/';
-          ampForm.handleSubmitAction_();
+          ampForm.handleSubmitAction_(/* invocation */ {});
 
           return ampForm.xhrSubmitPromiseForTesting().then(() => {
             expect(env.win.top.location.href).to.be.equal(redirectToValue);
@@ -1625,7 +1625,7 @@ describes.repeated('', {
         it('should fail to redirect to non-secure urls', () => {
           sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchResolvePromise);
           redirectToValue = 'http://google.com/';
-          ampForm.handleSubmitAction_();
+          ampForm.handleSubmitAction_(/* invocation */ {});
 
           return ampForm.xhrSubmitPromiseForTesting().then(() => {
             assert.fail('Submit should have failed.');
@@ -1638,7 +1638,7 @@ describes.repeated('', {
         it('should fail to redirect to non-absolute urls', () => {
           sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchResolvePromise);
           redirectToValue = '/hello';
-          ampForm.handleSubmitAction_();
+          ampForm.handleSubmitAction_(/* invocation */ {});
 
           return ampForm.xhrSubmitPromiseForTesting().then(() => {
             assert.fail('Submit should have failed.');
@@ -1652,7 +1652,7 @@ describes.repeated('', {
           ampForm.target_ = '_blank';
           sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchResolvePromise);
           redirectToValue = 'http://google.com/';
-          ampForm.handleSubmitAction_();
+          ampForm.handleSubmitAction_(/* invocation */ {});
 
           return ampForm.xhrSubmitPromiseForTesting().then(() => {
             assert.fail('Submit should have failed.');
@@ -1666,7 +1666,7 @@ describes.repeated('', {
           sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchRejectPromise);
           redirectToValue = 'https://example2.com/hello';
           const logSpy = sandbox.spy(user(), 'error');
-          ampForm.handleSubmitAction_();
+          ampForm.handleSubmitAction_(/* invocation */ {});
 
           return ampForm.xhrSubmitPromiseForTesting().then(() => {
             expect(logSpy).to.be.calledOnce;
@@ -1687,7 +1687,7 @@ describes.repeated('', {
           sandbox.stub(form, 'submit');
           sandbox.stub(form, 'checkValidity').returns(true);
           sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
-          ampForm.handleSubmitAction_();
+          ampForm.handleSubmitAction_(/* invocation */ {});
           expect(form.submit).to.have.been.called;
         });
       });
@@ -1733,7 +1733,7 @@ describes.repeated('', {
         sandbox.stub(form, 'checkValidity').returns(true);
         sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
         sandbox.stub(ampForm, 'analyticsEvent_');
-        ampForm.handleSubmitAction_();
+        ampForm.handleSubmitAction_(/* invocation */ {});
         const expectedFormData = {
           'formId': 'registration',
           'formFields[name]': 'John Miller',
@@ -1741,8 +1741,8 @@ describes.repeated('', {
         };
         expect(form.submit).to.have.been.called;
         expect(ampForm.analyticsEvent_).to.be.calledWith(
-          'amp-form-submit',
-          expectedFormData
+            'amp-form-submit',
+            expectedFormData
         );
       });
     });
@@ -1772,7 +1772,7 @@ describes.repeated('', {
         sandbox.stub(ampForm.urlReplacement_, 'expandInputValueAsync');
         sandbox.spy(ampForm.urlReplacement_, 'expandInputValueSync');
         sandbox.stub(ampForm, 'analyticsEvent_');
-        ampForm.handleSubmitAction_();
+        ampForm.handleSubmitAction_(/* invocation */ {});
 
         const expectedFormData = {
           'formId': 'registration',
@@ -1781,8 +1781,8 @@ describes.repeated('', {
           'formFields[clientId]': '',
         };
         expect(ampForm.analyticsEvent_).to.be.calledWith(
-          'amp-form-submit',
-          expectedFormData
+            'amp-form-submit',
+            expectedFormData
         );
         expect(ampForm.urlReplacement_.expandInputValueAsync)
             .to.not.have.been.called;

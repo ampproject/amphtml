@@ -32,6 +32,7 @@ import {viewportForDoc} from '../services';
 import {vsyncFor} from '../services';
 import {isArray} from '../types';
 import {dev} from '../log';
+import {dict} from '../utils/object';
 import {reportError} from '../error';
 import {filterSplice} from '../utils/array';
 import {getSourceUrl} from '../url';
@@ -815,13 +816,13 @@ export class Resources {
   attemptChangeSize(element, newHeight, newWidth, opt_newMargins) {
     return new Promise((resolve, reject) => {
       this.scheduleChangeSize_(Resource.forElement(element), newHeight,
-        newWidth, opt_newMargins, /* force */ false, success => {
-          if (success) {
-            resolve();
-          } else {
-            reject(new Error('changeSize attempt denied'));
-          }
-        });
+          newWidth, opt_newMargins, /* force */ false, success => {
+            if (success) {
+              resolve();
+            } else {
+              reject(new Error('changeSize attempt denied'));
+            }
+          });
     });
   }
 
@@ -995,16 +996,16 @@ export class Resources {
     if (firstPassAfterDocumentReady) {
       this.firstPassAfterDocumentReady_ = false;
       const doc = this.win.document;
-      this.viewer_.sendMessage('documentLoaded', {
-        title: doc.title,
-        sourceUrl: getSourceUrl(this.ampdoc.getUrl()),
-        serverLayout: doc.documentElement.hasAttribute('i-amphtml-element'),
-        linkRels: documentInfoForDoc(this.ampdoc).linkRels,
-      }, /* cancelUnsent */true);
+      this.viewer_.sendMessage('documentLoaded', dict({
+        'title': doc.title,
+        'sourceUrl': getSourceUrl(this.ampdoc.getUrl()),
+        'serverLayout': doc.documentElement.hasAttribute('i-amphtml-element'),
+        'linkRels': documentInfoForDoc(this.ampdoc).linkRels,
+      }), /* cancelUnsent */true);
 
       this.scrollHeight_ = this.viewport_.getScrollHeight();
       this.viewer_.sendMessage('documentHeight',
-          {height: this.scrollHeight_}, /* cancelUnsent */true);
+          dict({'height': this.scrollHeight_}), /* cancelUnsent */true);
       dev().fine(TAG_, 'document height on load: ' + this.scrollHeight_);
     }
 
@@ -1036,7 +1037,7 @@ export class Resources {
         const measuredScrollHeight = this.viewport_.getScrollHeight();
         if (measuredScrollHeight != this.scrollHeight_) {
           this.viewer_.sendMessage('documentHeight',
-              {height: measuredScrollHeight}, /* cancelUnsent */true);
+              dict({'height': measuredScrollHeight}), /* cancelUnsent */true);
           this.scrollHeight_ = measuredScrollHeight;
           dev().fine(TAG_, 'document height changed: ' + this.scrollHeight_);
         }
@@ -1476,7 +1477,7 @@ export class Resources {
       } else {
         task.resource.measure();
         if (this.isLayoutAllowed_(
-                task.resource, task.forceOutsideViewport)) {
+            task.resource, task.forceOutsideViewport)) {
           task.promise = task.callback();
           task.startTime = now;
           dev().fine(TAG_, 'exec:', task.id, 'at', task.startTime);

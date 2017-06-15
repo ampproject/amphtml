@@ -156,8 +156,8 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
         adapter.serviceUrl_ = 'http://localhost:8000/af';
         contextMock.expects('collectUrlVars')
             .withExactArgs(
-                'https://acme.com/a?rid=READER_ID',
-                /* useAuthData */ false)
+            'https://acme.com/a?rid=READER_ID',
+            /* useAuthData */ false)
             .returns(Promise.resolve({
               'READER_ID': 'reader1',
               'OTHER': 123,
@@ -197,8 +197,8 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
         adapter.serviceUrl_ = 'http://localhost:8000/af';
         contextMock.expects('collectUrlVars')
             .withExactArgs(
-                'https://acme.com/a?rid=READER_ID',
-                /* useAuthData */ false)
+            'https://acme.com/a?rid=READER_ID',
+            /* useAuthData */ false)
             .returns(Promise.resolve({
               'READER_ID': 'reader1',
               'OTHER': 123,
@@ -234,8 +234,8 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
         adapter.serviceUrl_ = 'http://localhost:8000/af';
         contextMock.expects('collectUrlVars')
             .withExactArgs(
-                'https://acme.com/a?rid=READER_ID',
-                /* useAuthData */ false)
+            'https://acme.com/a?rid=READER_ID',
+            /* useAuthData */ false)
             .returns(Promise.resolve({
               'READER_ID': 'reader1',
               'OTHER': 123,

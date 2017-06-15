@@ -139,7 +139,7 @@ class AmpApesterMedia extends AMP.BaseElement {
   }
 
   /**
-   * @return {!Promise<!JSONType>}
+   * @return {!Promise<!JsonObject>}
    **/
   queryMedia_() {
     const url = this.buildUrl_();

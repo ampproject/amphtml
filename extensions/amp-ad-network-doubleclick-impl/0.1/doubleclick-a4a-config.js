@@ -131,10 +131,10 @@ export function doubleclickIsA4AEnabled(win, element) {
     internalBranches = DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH;
   }
   const enableA4A = googleAdsIsA4AEnabled(
-          win, element, DOUBLECLICK_A4A_EXPERIMENT_NAME,
-          externalBranches, internalBranches,
-          DOUBLECLICK_A4A_EXTERNAL_DELAYED_EXPERIMENT_BRANCHES_PRE_LAUNCH,
-          DOUBLECLICK_SFG_INTERNAL_EXPERIMENT_BRANCHES) ||
+      win, element, DOUBLECLICK_A4A_EXPERIMENT_NAME,
+      externalBranches, internalBranches,
+      DOUBLECLICK_A4A_EXTERNAL_DELAYED_EXPERIMENT_BRANCHES_PRE_LAUNCH,
+      DOUBLECLICK_SFG_INTERNAL_EXPERIMENT_BRANCHES) ||
       (a4aRequested && (isProxyOrigin(win.location) ||
        getMode(win).localDev || getMode(win).test));
   if (enableA4A && a4aRequested && !isInManualExperiment(element)) {

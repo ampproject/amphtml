@@ -100,8 +100,8 @@ class AmpSoundcloud extends AMP.BaseElement {
   pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
       this.iframe_.contentWindow./*OK*/postMessage(
-        JSON.stringify({method: 'pause'}),
-        'https://w.soundcloud.com');
+          JSON.stringify({method: 'pause'}),
+          'https://w.soundcloud.com');
     }
   }
 };
