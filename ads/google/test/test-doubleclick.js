@@ -19,17 +19,17 @@ import {createServedIframe} from '../../../testing/iframe';
 describe('selectGptExperiment', () => {
 
   it('should return the correct filename when given the experimental condition',
-        () => {
-    const controlData = {experimentId: '21060540'};
-    const experimentData = {experimentId: '21060541'};
-    const notInEitherData = {};
-    expect(selectGptExperiment(controlData)).to
+      () => {
+        const controlData = {experimentId: '21060540'};
+        const experimentData = {experimentId: '21060541'};
+        const notInEitherData = {};
+        expect(selectGptExperiment(controlData)).to
         .equal('gpt_sf_a.js');
-    expect(selectGptExperiment(experimentData)).to
+        expect(selectGptExperiment(experimentData)).to
         .equal('gpt_sf_b.js');
-    expect(selectGptExperiment(notInEitherData)).to
+        expect(selectGptExperiment(notInEitherData)).to
         .equal(undefined);
-  });
+        });
 });
 
 describe('writeAdScript', () => {
