@@ -23,8 +23,8 @@ import {
   installServiceInEmbedScope,
 } from '../service';
 import {getMode} from '../mode';
+import {hasOwn, map} from '../utils/object';
 import {isArray, isFiniteNumber} from '../types';
-import {map} from '../utils/object';
 import {timerFor} from '../services';
 import {vsyncFor} from '../services';
 
@@ -772,7 +772,7 @@ function getActionInfoArgValue(tokens) {
       // Traverse properties of `data` per token values.
       for (let i = 0; i < tokens.length; i++) {
         const value = tokens[i].value;
-        if (current && current.hasOwnProperty(value)) {
+        if (current && hasOwn(current, value)) {
           current = current[value];
         } else {
           return null;
