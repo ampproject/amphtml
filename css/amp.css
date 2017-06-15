@@ -683,3 +683,49 @@ i-amphtml-video-mask, i-amp-video-mask {
   0% {transform: translateY(100%);}
   100% {transform: translateY(0);}
 }
+
+/**
+ * amp-accordion to avoid FOUC.
+ */
+
+/* Non-overridable properties */
+amp-accordion {
+  display: block !important;
+}
+
+/* Make sections non-floatable */
+amp-accordion > section {
+  float: none !important;
+}
+
+/*  Display the first 2 elements (heading and content) */
+amp-accordion > section > * {
+  float: none !important;
+  display: block !important;
+  overflow: hidden !important; /* clearfix */
+  position: relative !important;
+}
+
+amp-accordion,
+amp-accordion > section,
+amp-accordion > section > * {
+  margin: 0;
+}
+
+/* heading element*/
+amp-accordion > section:first-child {
+  cursor: pointer;
+  background-color: #efefef;
+  padding-right: 20px;
+  border: solid 1px #dfdfdf;
+}
+
+/* Collapse content by default. */
+amp-accordion > section > :last-child {
+  display: none !important;
+}
+
+/* Expand content when needed. */
+amp-accordion > section[expanded] > :last-child {
+  display: block !important;
+}

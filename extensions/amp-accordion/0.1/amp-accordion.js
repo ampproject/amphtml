@@ -69,34 +69,30 @@ class AmpAccordion extends AMP.BaseElement {
           'Each section must have exactly two children. ' +
           'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
           'amp-accordion/amp-accordion.md. Found in: %s', this.element);
-      this.mutateElement(() => {
-        const content = sectionComponents[1];
-        content.classList.add('i-amphtml-accordion-content');
-        let contentId = content.getAttribute('id');
-        if (!contentId) {
-          contentId = this.element.id + '_AMP_content_' + index;
-          content.setAttribute('id', contentId);
-        }
+      const content = sectionComponents[1];
+      let contentId = content.getAttribute('id');
+      if (!contentId) {
+        contentId = this.element.id + '_AMP_content_' + index;
+        content.setAttribute('id', contentId);
+      }
 
-        if (this.currentState_[contentId]) {
-          section.setAttribute('expanded', '');
-        } else if (this.currentState_[contentId] == false) {
-          section.removeAttribute('expanded');
-        }
+      if (this.currentState_[contentId]) {
+        section.setAttribute('expanded', '');
+      } else if (this.currentState_[contentId] == false) {
+        section.removeAttribute('expanded');
+      }
 
-        const header = sectionComponents[0];
-        header.classList.add('i-amphtml-accordion-header');
-        header.setAttribute('role', 'heading');
-        header.setAttribute('aria-controls', contentId);
-        header.setAttribute('aria-expanded',
-            section.hasAttribute('expanded').toString());
-        if (!header.hasAttribute('tabindex')) {
-          header.setAttribute('tabindex', 0);
-        }
-        this.headers_.push(header);
-        header.addEventListener('click', this.clickHandler_.bind(this));
-        header.addEventListener('keydown', this.keyDownHandler_.bind(this));
-      });
+      const header = sectionComponents[0];
+      header.setAttribute('role', 'heading');
+      header.setAttribute('aria-controls', contentId);
+      header.setAttribute('aria-expanded',
+          section.hasAttribute('expanded').toString());
+      if (!header.hasAttribute('tabindex')) {
+        header.setAttribute('tabindex', 0);
+      }
+      this.headers_.push(header);
+      header.addEventListener('click', this.clickHandler_.bind(this));
+      header.addEventListener('keydown', this.keyDownHandler_.bind(this));
     });
   }
 
