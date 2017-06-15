@@ -149,9 +149,11 @@ export class Crypto {
     return /** @type {!Promise<!webCrypto.CryptoKey>} */ (
         this.subtle_.importKey(
             'jwk',
-            // WebKit wants this as an ArrayBufferView.
-            this.isWebkit_ ? utf8EncodeSync(JSON.stringify(jwk)) :
-                             /** @type {!webCrypto.JsonWebKey} */ (jwk),
+            this.isWebkit_ ?
+                // WebKit wants this as an ArrayBufferView.
+                utf8EncodeSync(JSON.stringify(
+                    /** @type {!JsonObject} */ (jwk))) :
+                /** @type {!webCrypto.JsonWebKey} */ (jwk),
             {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}}, true,
             ['verify']));
   }
