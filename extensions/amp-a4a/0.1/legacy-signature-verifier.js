@@ -116,7 +116,7 @@ export class LegacySignatureVerifier {
  * @param {!PublicKeyInfoDef} publicKeyInfo the RSA public key.
  * @return {boolean} whether signature was generated using hash.
  */
-function verifyHashVersion(signature, publicKeyInfo) {
+export function verifyHashVersion(signature, publicKeyInfo) {
   // The signature has the following format:
   // 1-byte version + 4-byte key hash + raw RSA signature where
   // the raw RSA signature is computed over (data || 1-byte version).

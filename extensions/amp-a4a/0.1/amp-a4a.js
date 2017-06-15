@@ -15,6 +15,7 @@
  */
 
 import {
+  verifyHashVersion,
   LegacySignatureVerifier,
   PublicKeyInfoDef,
 } from './legacy-signature-verifier';
@@ -817,8 +818,7 @@ export class AmpA4A extends AMP.BaseElement {
                   // necessary, because we checked that above.  But
                   // Closure type compiler can't seem to recognize that, so
                   // this guarantees it to the compiler.
-                  if (keyInfo &&
-                      this.crypto_.verifyHashVersion(signature, keyInfo)) {
+                  if (keyInfo && verifyHashVersion(signature, keyInfo)) {
                     user().error(TAG, this.element.getAttribute('type'),
                         'Key failed to validate creative\'s signature',
                         keyInfo.serviceName, keyInfo.cryptoKey);
