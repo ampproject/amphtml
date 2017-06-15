@@ -771,7 +771,7 @@ function getActionInfoArgValue(tokens) {
       let current = data;
       // Traverse properties of `data` per token values.
       for (let i = 0; i < tokens.length; i++) {
-        const value = tokens[i].value;
+        const value = String(tokens[i].value);
         if (current && hasOwn(current, value)) {
           current = current[value];
         } else {
