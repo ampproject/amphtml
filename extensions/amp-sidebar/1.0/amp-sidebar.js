@@ -29,6 +29,9 @@ import {timerFor} from '../../../src/services';
 import {Toolbar} from './toolbar';
 
 /** @const */
+const TAG = 'amp-sidebar 1.0';
+
+/** @const */
 const ANIMATION_TIMEOUT = 550;
 
 /** @const */
@@ -57,8 +60,8 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private {?string} */
     this.side_ = null;
 
-    /** @private {?Array} */
-    this.toolbars_ = null;
+    /** @private {Array} */
+    this.toolbars_ = [];
 
     const platform = platformFor(this.win);
 
@@ -104,17 +107,16 @@ export class AmpSidebar extends AMP.BaseElement {
     }
 
     // Get the toolbar attribute from the child navs
-    if (this.element.hasChildNodes &&
-      this.element.querySelectorAll('nav[toolbar]').length > 0
-    ) {
-      this.toolbars_ = [];
-      const childNavElements =
-      Array.prototype.slice
-        .call(this.element.querySelectorAll('nav[toolbar]'), 0);
-      childNavElements.forEach(toolbarElement => {
+    const toolbarElements =
+    Array.prototype.slice
+      .call(this.element.querySelectorAll('nav[toolbar]'), 0);
+    toolbarElements.forEach(toolbarElement => {
+      try {
         this.toolbars_.push(new Toolbar(toolbarElement));
-      });
-    }
+      } catch (e) {
+        user().error(TAG, 'Failed to instantiate toolbar', e);
+      }
+    });
 
     if (this.isIosSafari_) {
       this.fixIosElasticScrollLeak_();
@@ -180,7 +182,7 @@ export class AmpSidebar extends AMP.BaseElement {
   onLayoutMeasure() {
     // Check our toolbars for changes
     this.toolbars_.forEach(toolbar => {
-      toolbar.checkToolbar(() => this.closeIfOpen_());
+      toolbar.checkToolbar(() => this.close_());
     });
   }
 
@@ -196,16 +198,6 @@ export class AmpSidebar extends AMP.BaseElement {
    */
   isOpen_() {
     return this.element.hasAttribute('open');
-  }
-
-  /**
-   * Closes the sidebar if it is open
-   * @private
-   */
-  closeIfOpen_() {
-    if (this.isOpen_()) {
-      this.close_();
-    }
   }
 
   /**
