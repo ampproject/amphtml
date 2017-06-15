@@ -47,7 +47,7 @@ describe('EventHelper', () => {
       tagName: 'TEST',
       complete: false,
       readyState: '',
-      addEventListener: function(type, callback) {
+      addEventListener(type, callback) {
         if (type == 'load') {
           loadObservable.add(callback);
         } else if (type == 'error') {
@@ -56,7 +56,7 @@ describe('EventHelper', () => {
           expect(type).to.equal('load or error');
         }
       },
-      removeEventListener: function(type, callback) {
+      removeEventListener(type, callback) {
         if (type == 'load') {
           loadObservable.remove(callback);
         } else if (type == 'error') {
@@ -210,13 +210,19 @@ describe('EventHelper', () => {
   });
 
   it('should polyfill CustomEvent constructor', () => {
-    const native = createCustomEvent(window, 'foo', {bar: 123});
+    const native = createCustomEvent(window, 'foo', {bar: 123},
+        {bubbles: true, cancelable: true});
     expect(native.type).to.equal('foo');
     expect(native.detail).to.deep.equal({bar: 123});
+    expect(native.bubbles).to.be.true;
+    expect(native.cancelable).to.be.true;
 
-    const polyfilled = createCustomEvent({document}, 'foo', {bar: 123});
+    const polyfilled = createCustomEvent({document}, 'foo', {bar: 123},
+        {bubbles: true, cancelable: true});
     expect(polyfilled.type).to.equal('foo');
     expect(polyfilled.detail).to.deep.equal({bar: 123});
+    expect(polyfilled.bubbles).to.be.true;
+    expect(polyfilled.cancelable).to.be.true;
   });
 
   it('should create the correct custom event for IE11', () => {
@@ -230,7 +236,7 @@ describe('EventHelper', () => {
     win.document = {};
     win.document.createEvent = function() {
       return {
-        initCustomEvent: function() {
+        initCustomEvent() {
           initCustomEventSpy();
         },
       };

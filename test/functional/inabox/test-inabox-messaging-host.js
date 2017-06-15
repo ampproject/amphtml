@@ -16,8 +16,13 @@
 
 import {InaboxMessagingHost} from '../../../ads/inabox/inabox-messaging-host';
 import {deserializeMessage} from '../../../src/3p-frame-messaging';
+import {
+  stubCollapseFrameForTesting,
+  stubExpandFrameForTesting,
+} from '../../../ads/inabox/frame-overlay-helper';
+import * as sinon from 'sinon';
 
-describes.realWin('inabox-host:position-observer', {}, env => {
+describes.realWin('inabox-host:messaging', {}, env => {
 
   let win;
   let host;
@@ -154,5 +159,64 @@ describes.realWin('inabox-host:position-observer', {}, env => {
       callback({x: 1});
       expect(postMessageSpy).to.be.calledOnce;
     });
+  });
+
+  describe('full-overlay-frame', () => {
+
+    let iframePostMessageSpy;
+
+    beforeEach(() => {
+      iframe1.contentWindow.postMessage = iframePostMessageSpy = sandbox.stub();
+    });
+
+
+    it('should accept request and expand', () => {
+      const expandFrame = sandbox.spy((win, iframe, onFinish) => {
+        onFinish();
+      });
+
+      stubExpandFrameForTesting(expandFrame);
+
+      host.processMessage({
+        source: iframe1.contentWindow,
+        origin: 'www.example.com',
+        data: 'amp-' + JSON.stringify({
+          sentinel: '0-123',
+          type: 'full-overlay-frame',
+        }),
+      });
+
+      const message = deserializeMessage(
+          iframePostMessageSpy.getCall(0).args[0]);
+
+      expect(expandFrame).calledWith(win, iframe1, sinon.match.any);
+      expect(message.type).to.equal('full-overlay-frame-response');
+      expect(message.success).to.be.true;
+    });
+
+    it('should accept reset request and collapse', () => {
+      const collapseFrame = sandbox.spy((win, iframe, onFinish) => {
+        onFinish();
+      });
+
+      stubCollapseFrameForTesting(collapseFrame);
+
+      host.processMessage({
+        source: iframe1.contentWindow,
+        origin: 'www.example.com',
+        data: 'amp-' + JSON.stringify({
+          sentinel: '0-123',
+          type: 'cancel-full-overlay-frame',
+        }),
+      });
+
+      const message = deserializeMessage(
+          iframePostMessageSpy.getCall(0).args[0]);
+
+      expect(collapseFrame).calledWith(win, iframe1, sinon.match.any);
+      expect(message.type).to.equal('cancel-full-overlay-frame-response');
+      expect(message.success).to.be.true;
+    });
+
   });
 });

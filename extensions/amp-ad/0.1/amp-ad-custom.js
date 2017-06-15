@@ -83,7 +83,8 @@ export class AmpAdCustom extends AMP.BaseElement {
     // If this promise has no URL yet, create one for it.
     if (!(fullUrl in ampCustomadXhrPromises)) {
       // Here is a promise that will return the data for this URL
-      ampCustomadXhrPromises[fullUrl] = xhrFor(this.win).fetchJson(fullUrl);
+      ampCustomadXhrPromises[fullUrl] = xhrFor(this.win).fetchJson(fullUrl)
+          .then(res => res.json());
     }
     return ampCustomadXhrPromises[fullUrl].then(data => {
       const element = this.element;
@@ -97,12 +98,12 @@ export class AmpAdCustom extends AMP.BaseElement {
       if (templateData !== null && typeof templateData == 'object') {
         this.renderStarted();
         templatesFor(this.win).findAndRenderTemplate(element, templateData)
-          .then(renderedElement => {
+            .then(renderedElement => {
           // Get here when the template has been rendered
           // Clear out the template and replace it by the rendered version
-            removeChildren(element);
-            element.appendChild(renderedElement);
-          });
+              removeChildren(element);
+              element.appendChild(renderedElement);
+            });
       } else {
         this.uiHandler.applyNoContentUI();
       }
@@ -152,7 +153,7 @@ export class AmpAdCustom extends AMP.BaseElement {
       }
       for (const baseUrl in slots) {
         ampCustomadFullUrls[baseUrl] = addParamToUrl(baseUrl, 'ampslots',
-          slots[baseUrl].join(','));
+            slots[baseUrl].join(','));
       }
     }
     return ampCustomadFullUrls[this.url_];

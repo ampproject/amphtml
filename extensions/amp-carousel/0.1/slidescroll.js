@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-trust';
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
 import {actionServiceForDoc} from '../../../src/services';
@@ -208,9 +209,9 @@ export class AmpSlideScroll extends BaseSlides {
     this.registerAction('goToSlide', invocation => {
       const args = invocation.args;
       if (args) {
-        this.showSlideWhenReady_(args['index']);
+        this.showSlideWhenReady(args['index']);
       }
-    });
+    }, ActionTrust.MEDIUM); // TODO(choumx, #9699): LOW.
   }
 
   /** @override */
@@ -222,7 +223,7 @@ export class AmpSlideScroll extends BaseSlides {
   mutatedAttributesCallback(mutations) {
     const slide = mutations['slide'];
     if (slide !== undefined) {
-      this.showSlideWhenReady_(slide);
+      this.showSlideWhenReady(slide);
     }
   }
 
@@ -493,9 +494,8 @@ export class AmpSlideScroll extends BaseSlides {
    * Parses given value as integer and shows the slide with that index value
    * when element has been laid out.
    * @param {*} value
-   * @private
    */
-  showSlideWhenReady_(value) {
+  showSlideWhenReady(value) {
     const index = parseInt(value, 10);
     if (isFinite(index) && index >= 0 && index < this.noOfSlides_) {
       // If we haven't been laid out yet, set `initialSlideIndex_` instead.
@@ -514,6 +514,7 @@ export class AmpSlideScroll extends BaseSlides {
    *     it available for display.
    * @note Element must be laid out.
    * @param {number} newIndex Index of the slide to be displayed.
+   * @return {boolean} true if the slide changed, otherwise false.
    * @private
    */
   showSlide_(newIndex) {
@@ -522,7 +523,7 @@ export class AmpSlideScroll extends BaseSlides {
     if (newIndex < 0 ||
         newIndex >= noOfSlides_ ||
         this.slideIndex_ == newIndex) {
-      return;
+      return false;
     }
     const prevIndex = (newIndex - 1 >= 0) ? newIndex - 1 :
         (this.shouldLoop) ? noOfSlides_ - 1 : null;
@@ -550,7 +551,7 @@ export class AmpSlideScroll extends BaseSlides {
         'noOfSlides': noOfSlides_,
       };
       dev().error(TAG, error);
-      return;
+      return false;
     }
 
     this.updateInViewport(newSlideInView, true);
@@ -574,6 +575,7 @@ export class AmpSlideScroll extends BaseSlides {
     this.slideIndex_ = newIndex;
     this.hideRestOfTheSlides_(showIndexArr);
     this.setControlsState();
+    return true;
   }
 
   /**
@@ -582,13 +584,16 @@ export class AmpSlideScroll extends BaseSlides {
    * @private
    */
   showSlideAndTriggerAction_(newIndex) {
-    this.showSlide_(newIndex);
+    const slideChanged = this.showSlide_(newIndex);
 
-    const name = 'slideChange';
-    const event =
-        createCustomEvent(this.win, `slidescroll.${name}`, {index: newIndex});
-    this.element.dispatchCustomEvent(name, {index: newIndex});
-    this.action_.trigger(this.element, name, event);
+    if (slideChanged) {
+      const name = 'slideChange';
+      const event =
+          createCustomEvent(this.win, `slidescroll.${name}`, {index: newIndex});
+      this.action_.trigger(this.element, name, event, ActionTrust.MEDIUM);
+
+      this.element.dispatchCustomEvent(name, {index: newIndex});
+    }
   }
 
   /**

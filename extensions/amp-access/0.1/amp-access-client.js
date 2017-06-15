@@ -32,7 +32,7 @@ export class AccessClientAdapter {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!JSONType} configJson
+   * @param {!JsonObject} configJson
    * @param {!AccessTypeAdapterContextDef} context
    */
   constructor(ampdoc, configJson, context) {
@@ -69,7 +69,7 @@ export class AccessClientAdapter {
   }
 
   /**
-   * @param {!JSONType} configJson
+   * @param {!JsonObject} configJson
    * @return {number}
    */
   buildConfigAuthorizationTimeout_(configJson) {
@@ -126,7 +126,7 @@ export class AccessClientAdapter {
           this.authorizationTimeout_,
           this.xhr_.fetchJson(url, {
             credentials: 'include',
-          }));
+          })).then(res => res.json());
     });
   }
 

@@ -112,7 +112,11 @@ describes.realWin('amp-app-banner', {amp: true}, () => {
         manifest.setAttribute('href', manifestObj.href);
         iframe.doc.head.appendChild(manifest);
         sandbox.mock(xhrFor(iframe.win)).expects('fetchJson')
-            .returns(Promise.resolve(manifestObj.content));
+            .returns(Promise.resolve({
+              json() {
+                return Promise.resolve(manifestObj.content);
+              },
+            }));
       }
 
       const banner = iframe.doc.createElement('amp-app-banner');
@@ -192,9 +196,9 @@ describes.realWin('amp-app-banner', {amp: true}, () => {
       return getAppBanner({iosMeta}).then(el => {
         expect(AbstractAppBanner.prototype.setupOpenButton_)
             .to.have.been.calledWith(
-                el.querySelector('button[open-button]'),
-                'medium://p/cb7f223fad86',
-                'https://itunes.apple.com/us/app/id828256236');
+            el.querySelector('button[open-button]'),
+            'medium://p/cb7f223fad86',
+            'https://itunes.apple.com/us/app/id828256236');
       });
     });
 

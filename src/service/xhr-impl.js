@@ -48,24 +48,17 @@ import {getMode} from '../mode';
 export let FetchInitDef;
 
 /**
- * A custom error that encapsulates an XHR error message
- * with the corresponding response data.
+ * Special case for fetchJson
+ * @typedef {{
+ *   body: (!JsonObject|!FormData|undefined),
+ *   credentials: (string|undefined),
+ *   headers: (!Object|undefined),
+ *   method: (string|undefined),
+ *   requireAmpResponseSourceOrigin: (boolean|undefined),
+ *   ampCors: (boolean|undefined)
+ * }}
  */
-export class FetchError {
-  /**
-   * @param {!Error} error
-   * @param {!FetchResponse} response
-   * @param {boolean=} opt_retriable
-   * @param {?JSONType=} opt_responseJson
-   */
-  constructor(error, response, opt_retriable, opt_responseJson) {
-    this.error = error;
-    this.response = response;
-    this.retriable = opt_retriable;
-    this.responseJson = opt_responseJson;
-  }
-}
-
+export let FetchInitJsonDef;
 
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
@@ -190,49 +183,51 @@ export class Xhr {
         // If the `AMP-Access-Control-Allow-Source-Origin` header is returned,
         // ensure that it's equal to the current source origin.
         user().assert(allowSourceOriginHeader == sourceOrigin,
-              `Returned ${ALLOW_SOURCE_ORIGIN_HEADER} is not` +
+            `Returned ${ALLOW_SOURCE_ORIGIN_HEADER} is not` +
               ` equal to the current: ${allowSourceOriginHeader}` +
               ` vs ${sourceOrigin}`);
       } else if (init.requireAmpResponseSourceOrigin) {
         // If the `AMP-Access-Control-Allow-Source-Origin` header is not
         // returned but required, return error.
-        user().assert(false, `Response must contain the` +
+        user().assert(false, 'Response must contain the' +
             ` ${ALLOW_SOURCE_ORIGIN_HEADER} header`);
       }
       return response;
     }, reason => {
-      throw user().createExpectedError('XHR', `Failed fetching` +
+      throw user().createExpectedError('XHR', 'Failed fetching' +
           ` (${targetOrigin}/...):`, reason && reason.message);
     });
   }
 
   /**
-   * Fetches and constructs JSON object based on the fetch polyfill.
+   * Fetches a JSON response. Note this returns the response object, not the
+   * response's JSON. #fetchJson merely sets up the request to accept JSON.
    *
    * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
    *
    * See `fetchAmpCors_` for more detail.
    *
    * @param {string} input
-   * @param {?FetchInitDef=} opt_init
-   * @return {!Promise<!JSONType>}
+   * @param {?FetchInitJsonDef=} opt_init
+   * @param {boolean=} opt_allowFailure Allows non-2XX status codes to fulfill.
+   * @return {!Promise<!FetchResponse>}
    */
-  fetchJson(input, opt_init) {
+  fetchJson(input, opt_init, opt_allowFailure) {
     const init = setupInit(opt_init, 'application/json');
     if (init.method == 'POST' && !isFormData(init.body)) {
       // Assume JSON strict mode where only objects or arrays are allowed
       // as body.
       dev().assert(
-        allowedJsonBodyTypes_.some(test => test(init.body)),
-        'body must be of type object or array. %s',
-        init.body
+          allowedJsonBodyTypes_.some(test => test(init.body)),
+          'body must be of type object or array. %s',
+          init.body
       );
 
       init.headers['Content-Type'] = 'application/json;charset=utf-8';
-      init.body = JSON.stringify(init.body);
+      // Cast is valid, because we checked that it is not form data above.
+      init.body = JSON.stringify(/** @type {!JsonObject} */ (init.body));
     }
-    return this.fetch(input, init)
-        .then(response => response.json());
+    return this.fetch(input, init);
   }
 
   /**
@@ -253,7 +248,9 @@ export class Xhr {
 
   /**
    * Creates an XHR request with responseType=document
-   * and returns the `FetchResponse` object.
+   * and returns a promise for the initialized `Document`.
+   * Note this does not return a `Response`, since this is not a standard
+   * Fetch response type.
    *
    * @param {string} input
    * @param {?FetchInitDef=} opt_init
@@ -319,10 +316,10 @@ function normalizeMethod_(method) {
   method = method.toUpperCase();
 
   dev().assert(
-    allowedMethods_.includes(method),
-    'Only one of %s is currently allowed. Got %s',
-    allowedMethods_.join(', '),
-    method
+      allowedMethods_.includes(method),
+      'Only one of %s is currently allowed. Got %s',
+      allowedMethods_.join(', '),
+      method
   );
 
   return method;
@@ -445,28 +442,18 @@ function isRetriable(status) {
  * @private Visible for testing
  */
 export function assertSuccess(response) {
-  return new Promise((resolve, reject) => {
-    const status = response.status;
-    if (status < 200 || status >= 300) {
-      const retriable = isRetriable(status);
-      const err = new FetchError(
-          user().createError(`HTTP error ${status}`), response, retriable);
-      const contentType = response.headers.get('Content-Type') || '';
-      if (contentType.split(';')[0] == 'application/json') {
-        response.json().then(json => {
-          err.responseJson = json;
-          reject(err);
-        }, () => {
-          // Ignore a failed json parsing and just throw the error without
-          // setting responseJson.
-          reject(err);
-        });
-      } else {
-        reject(err);
-      }
-    } else {
-      resolve(response);
+  return new Promise(resolve => {
+    if (response.ok) {
+      return resolve(response);
     }
+
+    const {status} = response;
+    const err = user().createError(`HTTP error ${status}`);
+    err.retriable = isRetriable(status);
+    // TODO(@jridgewell, #9448): Callers who need the response should
+    // skip processing.
+    err.response = response;
+    throw err;
   });
 }
 
@@ -484,14 +471,20 @@ export class FetchResponse {
     /** @private @const {!XMLHttpRequest|!XDomainRequest} */
     this.xhr_ = xhr;
 
-    /** @type {number} */
+    /** @const {number} */
     this.status = this.xhr_.status;
+
+    /** @const {boolean} */
+    this.ok = this.status >= 200 && this.status < 300;
 
     /** @const {!FetchResponseHeaders} */
     this.headers = new FetchResponseHeaders(xhr);
 
     /** @type {boolean} */
     this.bodyUsed = false;
+
+    /** @type {?ReadableStream} */
+    this.body = null;
   }
 
   /**
@@ -525,10 +518,10 @@ export class FetchResponse {
 
   /**
    * Drains the response and returns the JSON object.
-   * @return {!Promise<!JSONType>}
+   * @return {!Promise<!JsonObject>}
    */
   json() {
-    return /** @type {!Promise<!JSONType>} */ (
+    return /** @type {!Promise<!JsonObject>} */ (
         this.drainText_().then(JSON.parse.bind(JSON)));
   }
 

@@ -1,0 +1,51 @@
+#
+# Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS-IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the license.
+#
+
+tags: {  # amp-timeago
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-timeago"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-timeago>
+  html_format: AMP
+  tag_name: "AMP-TIMEAGO"
+  requires_extension: "amp-timeago"
+  attrs: {
+    name: "datetime"
+    mandatory: true
+    # Regex: \d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d(:[0-5]\d(\.\d+)?)?Z
+    # Values such as: 2017-04-11T00:37:33.809Z
+    value_regex: "\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d(:[0-5]\\d(\\.\\d+)?)?Z"
+  }
+  attrs: { name: "locale" }
+  attr_lists: "extended-amp-global"
+  cdata: {
+    # Regex: \s*[\w.,:/+-]+(\s*[\w.,:/+-]+)*\s*
+    # CDATA such as: Saturday 11 April 2017 00.37
+    cdata_regex: "\\s*[\\w\\.,:/+-]+(\\s*[\\w\\.,:/+-]+)*\\s*"
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-timeago"
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: RESPONSIVE
+  }
+}

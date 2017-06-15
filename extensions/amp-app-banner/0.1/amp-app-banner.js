@@ -15,6 +15,7 @@
  */
 
 import {Layout} from '../../../src/layout';
+import {dict} from '../../../src/utils/object';
 import {user, dev, rethrowAsync} from '../../../src/log';
 import {platformFor} from '../../../src/services';
 import {viewerForDoc} from '../../../src/services';
@@ -268,9 +269,9 @@ export class AmpIosAppBanner extends AbstractAppBanner {
       openWindowDialog(this.win, openInAppUrl, '_top');
     } else {
       timerFor(this.win).delay(() => {
-        this.viewer_.sendMessage('navigateTo', {url: installAppUrl});
+        this.viewer_.sendMessage('navigateTo', dict({'url': installAppUrl}));
       }, OPEN_LINK_TIMEOUT);
-      this.viewer_.sendMessage('navigateTo', {url: openInAppUrl});
+      this.viewer_.sendMessage('navigateTo', dict({'url': openInAppUrl}));
     }
   }
 
@@ -383,7 +384,8 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
 
     return xhrFor(this.win).fetchJson(this.manifestHref_, {
       requireAmpResponseSourceOrigin: false,
-    }).then(response => this.parseManifest_(response))
+    }).then(res => res.json())
+        .then(json => this.parseManifest_(json))
         .catch(error => {
           this.hide_();
           rethrowAsync(error);
@@ -404,7 +406,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
   }
 
   /**
-   * @param {!JSONType} manifestJson
+   * @param {!JsonObject} manifestJson
    * @private
    */
   parseManifest_(manifestJson) {
@@ -419,7 +421,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
     for (let i = 0; i < apps.length; i++) {
       const app = apps[i];
       if (app['platform'] == 'play') {
-        const installAppUrl = `https://play.google.com/store/apps/details` +
+        const installAppUrl = 'https://play.google.com/store/apps/details' +
             `?id=${app['id']}`;
         const openInAppUrl = this.getAndroidIntentForUrl_(app['id']);
         this.setupOpenButton_(this.openButton_, openInAppUrl, installAppUrl);
@@ -428,7 +430,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
     }
 
     user().warn(TAG, 'Could not find a platform=play app in manifest: %s',
-      this.element);
+        this.element);
   }
 
   /** @private */

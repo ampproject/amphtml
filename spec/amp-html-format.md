@@ -184,7 +184,7 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
   </tr>
   <tr>
     <td width="30%"><code><a name="cust"></a>style</code></td>
-    <td><a href="#opacity">Required style tags for adjusting opacity</a>. One additional style tag is allowed in head tag for the purpose of custom styling. This style tag must have the attribute <code>amp-custom</code>. <a href="#cust">🔗</a></td>
+    <td><a href="#boilerplate">Required style tag for amp-boilerplate</a>. One additional style tag is allowed in head tag for the purpose of custom styling. This style tag must have the attribute <code>amp-custom</code>. <a href="#cust">🔗</a></td>
   </tr>
   <tr>
     <td width="30%">link</td>
@@ -302,7 +302,6 @@ Example:
 
 Font providers can be whitelisted if they support CSS-only integrations and serve over HTTPS. The following origins are currently allowed for font serving via link tags:
 
-- Typography.com: https://cloud.typography.com
 - Fonts.com: https://fast.fonts.net
 - Google Fonts: https://fonts.googleapis.com
 - Font Awesome: https://maxcdn.bootstrapcdn.com

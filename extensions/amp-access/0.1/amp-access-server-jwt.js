@@ -78,7 +78,7 @@ export class AccessServerJwtAdapter {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!JSONType} configJson
+   * @param {!JsonObject} configJson
    * @param {!AccessTypeAdapterContextDef} context
    */
   constructor(ampdoc, configJson, context) {
@@ -277,7 +277,7 @@ export class AccessServerJwtAdapter {
   }
 
   /**
-   * @return {!Promise<!JSONType>}
+   * @return {!Promise<!JsonObject>}
    * @private
    */
   authorizeOnClient_() {
@@ -289,7 +289,7 @@ export class AccessServerJwtAdapter {
   }
 
   /**
-   * @return {!Promise<!JSONType>}
+   * @return {!Promise<!JsonObject>}
    * @private
    */
   authorizeOnServer_() {

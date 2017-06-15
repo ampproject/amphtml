@@ -138,7 +138,7 @@ describe('Google A4A utils', () => {
         height: '101px',
       };
       return expect(additionalDimensions(fakeWin, fakeSize)).to.equal(
-        '3,4,1,2,11,12,5,6,100px,101px');
+          '3,4,1,2,11,12,5,6,100px,101px');
     });
   });
 
@@ -148,7 +148,7 @@ describe('Google A4A utils', () => {
         setupForAdTesting(fixture);
         let url;
         const headers = {
-          get: function(name) {
+          get(name) {
             if (name == 'X-AmpAnalytics') {
               return JSON.stringify({url});
             }
@@ -156,7 +156,7 @@ describe('Google A4A utils', () => {
               return 'qqid_string';
             }
           },
-          has: function(name) {
+          has(name) {
             if (name == 'X-AmpAnalytics') {
               return true;
             }
@@ -379,7 +379,7 @@ describe('Google A4A utils', () => {
         const impl = new MockA4AImpl(elem);
         noopMethods(impl, doc, sandbox);
         return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', 0, [], [], ['789', '098']).then(url1 => {
+          return googleAdUrl(impl, '', 0, {}, ['789', '098']).then(url1 => {
             expect(url1).to.match(/eid=123%2C456%2C789%2C098/);
           });
         });

@@ -20,10 +20,6 @@ limitations under the License.
     <td>Allows publishers to easily integrate with the <a href="https://www.laterpay.net">LaterPay</a> micropayments platform. <code>amp-access-laterpay</code> is based on, and requires <a href="https://www.ampproject.org/docs/reference/components/amp-access">AMP Access</a>.</td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong>Availability</strong></td>
-    <td>Experimental</td>
-  </tr>
-  <tr>
     <td class="col-fourty"><strong>Required Scripts</strong></td>
     <td>
         <small>Notice that you need scripts for "amp-access-laterpay", "amp-access" and "amp-analytics".</small>
@@ -248,4 +244,4 @@ The following message keys can be translated or customized, but be aware that th
 
 ## Validation
 
-See [amp-access-laterpay rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-access-laterpay/0.1/validator-amp-access-laterpay.protoascii) in the AMP validator specification.
+See [amp-access-laterpay rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-access-laterpay/validator-amp-access-laterpay.protoascii) in the AMP validator specification.

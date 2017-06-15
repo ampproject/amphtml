@@ -20,7 +20,7 @@ import {Layout} from '../../../src/layout';
 import {closest} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {removeFragment} from '../../../src/url';
-import {map} from '../../../src/utils/object';
+import {dict} from '../../../src/utils/object';
 import {tryFocus} from '../../../src/dom';
 
 class AmpAccordion extends AMP.BaseElement {
@@ -35,7 +35,7 @@ class AmpAccordion extends AMP.BaseElement {
     /** @private {?string} */
     this.sessionId_ = null;
 
-    /** @private {?Object<string,boolean>} */
+    /** @private {?JsonObject} */
     this.currentState_ = null;
 
     /** @private {boolean} */
@@ -113,23 +113,24 @@ class AmpAccordion extends AMP.BaseElement {
 
   /**
    * Get previous state from sessionStorage.
-   * @return {!Object}
+   * @return {!JsonObject}
    * @private
    */
   getSessionState_() {
     if (this.sessionOptOut_) {
-      return map();
+      return dict();
     }
     try {
       const sessionStr =
           this.win./*OK*/sessionStorage.getItem(
-          dev().assertString(this.sessionId_));
+              dev().assertString(this.sessionId_));
       return sessionStr
-          ? /** @type {!Object} */ (JSON.parse(dev().assertString(sessionStr)))
-          : map();
+          ? /** @type {!JsonObject} */ (
+              JSON.parse(dev().assertString(sessionStr)))
+          : dict();
     } catch (e) {
       dev().fine('AMP-ACCORDION', e.message, e.stack);
-      return map();
+      return dict();
     }
   }
 

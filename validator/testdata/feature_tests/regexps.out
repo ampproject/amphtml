@@ -20,5 +20,5 @@ feature_tests/regexps.html:119:2 The attribute 'name' in tag 'input' is set to t
 feature_tests/regexps.html:120:2 The attribute 'name' in tag 'input' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 feature_tests/regexps.html:121:2 The attribute 'name' in tag 'input' is set to the invalid value 'webkitRequestFullscreen'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 feature_tests/regexps.html:124:7 The tag 'head > style[amp-boilerplate]' is missing or incorrect, but required by 'noscript > style[amp-boilerplate]'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [GENERIC]
-feature_tests/regexps.html:124:7 The tag 'amp-hulu' is missing or incorrect, but required by 'amp-hulu extension .js script'. (see https://www.ampproject.org/docs/reference/components/amp-hulu) [AMP_TAG_PROBLEM]
-feature_tests/regexps.html:124:7 The extension 'amp-vine extension .js script' was found on this page, but is unused (no 'amp-vine' tag seen). This may become an error in the future. (see https://www.ampproject.org/docs/reference/components/amp-vine) [DEPRECATION]
+feature_tests/regexps.html:124:7 The extension 'amp-hulu' was found on this page, but is unused. Please remove this extension. [AMP_TAG_PROBLEM]
+feature_tests/regexps.html:124:7 The extension 'amp-vine' was found on this page, but is unused (no 'amp-vine' tag seen). This may become an error in the future. [DEPRECATION]

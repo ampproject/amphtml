@@ -47,7 +47,7 @@ function testLoadOrderFixture(fixtureName, testElements) {
       checkElementUpgrade(testElement);
       if (testElement.tagName == 'AMP-FIT-TEXT') {
         expect(fixture.doc.getElementsByClassName('i-amphtml-fit-text-content'))
-          .to.have.length(1);
+            .to.have.length(1);
       }
     }
   });

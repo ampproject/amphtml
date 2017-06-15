@@ -102,7 +102,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
     /**
      * Config to generate amp-analytics element for active view reporting.
-     * @type {?JSONType}
+     * @type {?JsonObject}
      * @private
      */
     this.ampAnalyticsConfig_ = null;
@@ -157,34 +157,26 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     this.uniqueSlotId_ = slotId + adk;
     const sharedStateParams = sharedState.addNewSlot(
         format, this.uniqueSlotId_, adClientId);
-    const paramList = [
-      {name: 'client', value: adClientId},
-      {name: 'format', value: format},
-      {name: 'w', value: this.size_.width},
-      {name: 'h', value: this.size_.height},
-      {name: 'adtest', value: adTestOn ? 'on' : null},
-      {name: 'adk', value: adk},
-      {name: 'raru', value: 1},
-      {
-        name: 'bc',
-        value: global.SVGElement && global.document.createElementNS ?
-            '1' : null,
-      },
-      {name: 'ctypes', value: this.getCtypes_()},
-      {name: 'host', value: this.element.getAttribute('data-ad-host')},
-      {name: 'to', value: this.element.getAttribute('data-tag-origin')},
-      {name: 'pv', value: sharedStateParams.pv},
-      {name: 'channel', value: this.element.getAttribute('data-ad-channel')},
-      {name: 'vis', value: visibilityStateCodes[visibilityState] || '0'},
-      {name: 'wgl', value: global['WebGLRenderingContext'] ? '1' : '0'},
-      {name: 'asnt', value: this.sentinel},
-      {name: 'dff',
-        value: computedStyle(this.win, this.element)['font-family']},
-    ];
-
-    if (sharedStateParams.prevFmts) {
-      paramList.push({name: 'prev_fmts', value: sharedStateParams.prevFmts});
-    }
+    const parameters = {
+      'client': adClientId,
+      format,
+      'w': this.size_.width,
+      'h': this.size_.height,
+      'adtest': adTestOn ? 'on' : null,
+      adk,
+      'raru': 1,
+      'bc': global.SVGElement && global.document.createElementNS ? '1' : null,
+      'ctypes': this.getCtypes_(),
+      'host': this.element.getAttribute('data-ad-host'),
+      'to': this.element.getAttribute('data-tag-origin'),
+      'pv': sharedStateParams.pv,
+      'channel': this.element.getAttribute('data-ad-channel'),
+      'vis': visibilityStateCodes[visibilityState] || '0',
+      'wgl': global['WebGLRenderingContext'] ? '1' : '0',
+      'asnt': this.sentinel,
+      'dff': computedStyle(this.win, this.element)['font-family'],
+      'prev_fmts': sharedStateParams.prevFmts || null,
+    };
 
     const experimentIds = [];
     const ampAutoAdsBranch = getAdSenseAmpAutoAdsExpBranch(this.win);
@@ -193,7 +185,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     }
 
     return googleAdUrl(
-        this, ADSENSE_BASE_URL, startTime, paramList, [], experimentIds);
+        this, ADSENSE_BASE_URL, startTime, parameters, experimentIds);
   }
 
   /** @override */

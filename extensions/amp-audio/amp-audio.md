@@ -22,10 +22,6 @@ limitations under the License.
     <td>A replacement for the HTML5 <code>audio</code> tag. The <code>amp-audio</code> component is only to be used for direct HTML5 audio file embeds.</td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js">&lt;/script></code></td>
   </tr>
@@ -84,4 +80,4 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 
 ## Validation
 
-See [amp-audio rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/0.1/validator-amp-audio.protoascii) in the AMP validator specification.
+See [amp-audio rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/validator-amp-audio.protoascii) in the AMP validator specification.

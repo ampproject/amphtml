@@ -107,9 +107,8 @@ export class Timer {
    */
   promise(opt_delay) {
     return new Promise(resolve => {
-      let timerKey;
       // Avoid wrapping in closure if no specific result is produced.
-      timerKey = this.delay(resolve, opt_delay);
+      const timerKey = this.delay(resolve, opt_delay);
       if (timerKey == -1) {
         throw new Error('Failed to schedule timer.');
       }

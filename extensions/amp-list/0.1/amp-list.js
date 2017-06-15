@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createCustomEvent} from '../../../src/event-helper';
 import {fetchBatchedJsonFor} from '../../../src/batched-json';
 import {isArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -75,11 +76,6 @@ export class AmpList extends AMP.BaseElement {
     }
   }
 
-  /** @override */
-  getDynamicElementContainers() {
-    return [this.container_];
-  }
-
   /**
    * Request list data from `src` and return a promise that resolves when
    * the list has been populated with rendered list items.
@@ -87,16 +83,15 @@ export class AmpList extends AMP.BaseElement {
    */
   populateList_() {
     const itemsExpr = this.element.getAttribute('items') || 'items';
-    return fetchBatchedJsonFor(
-        this.getAmpDoc(), this.element, itemsExpr).then(items => {
-          user().assert(isArray(items),
-              'Response must contain an array at "%s". %s',
-              itemsExpr, this.element);
-          return templatesFor(this.win).findAndRenderTemplateArray(
-              this.element, items).then(this.rendered_.bind(this));
-        }, error => {
-          throw user().createError('Error fetching amp-list', error);
-        });
+    return this.fetchItems_(itemsExpr).then(items => {
+      user().assert(isArray(items),
+          'Response must contain an array at "%s". %s',
+          itemsExpr, this.element);
+      return templatesFor(this.win).findAndRenderTemplateArray(
+          this.element, items).then(this.rendered_.bind(this));
+    }, error => {
+      throw user().createError('Error fetching amp-list', error);
+    });
   }
 
   /**
@@ -112,6 +107,10 @@ export class AmpList extends AMP.BaseElement {
       this.container_.appendChild(element);
     });
 
+    const templatedEvent = createCustomEvent(this.win,
+        'amp:template-rendered', /* detail */ null, {bubbles: true});
+    this.container_.dispatchEvent(templatedEvent);
+
     // Change height if needed.
     this.getVsync().measure(() => {
       const scrollHeight = this.container_./*OK*/scrollHeight;
@@ -122,6 +121,13 @@ export class AmpList extends AMP.BaseElement {
     });
   }
 
+  /**
+   * @param {string} itemsExpr
+   * @visibleForTesting
+   */
+  fetchItems_(itemsExpr) {
+    return fetchBatchedJsonFor(this.getAmpDoc(), this.element, itemsExpr);
+  }
 }
 
 AMP.registerElement('amp-list', AmpList);

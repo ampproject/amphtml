@@ -282,6 +282,19 @@ const EXPERIMENTS = [
     id: 'amp-ima-video',
     name: 'IMA-integrated Video Player',
   },
+  {
+    id: 'amp-ad-exit',
+    name: 'Enable amp-ad-exit component',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9502',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-exit/amp-ad-exit.md',
+  },
+  {
+    id: 'amp-sidebar 1.0',
+    name: 'Amp sidebar 1.0 extension',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9803',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+      'amp-sidebar/1.0/amp-sidebar-1.0.md',
+  },
 ];
 
 if (getMode().localDev) {

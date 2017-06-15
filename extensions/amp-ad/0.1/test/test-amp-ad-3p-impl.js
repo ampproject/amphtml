@@ -21,6 +21,7 @@ import {createElementWithAttributes} from '../../../../src/dom';
 import * as adCid from '../../../../src/ad-cid';
 import '../../../amp-ad/0.1/amp-ad';
 import '../../../amp-sticky-ad/1.0/amp-sticky-ad';
+import {macroTask} from '../../../../testing/yield';
 import * as lolex from 'lolex';
 import * as sinon from 'sinon';
 
@@ -76,9 +77,8 @@ describe('amp-ad-3p-impl', () => {
         expect(url).to.match(/^http:\/\/ads.localhost:/);
         expect(iframe.style.display).to.equal('');
 
-        let data;
         expect(url).to.match(/frame(.max)?.html/);
-        data = JSON.parse(iframe.name).attributes;
+        const data = JSON.parse(iframe.name).attributes;
         expect(data).to.have.property('type', '_ping_');
         expect(data).to.have.property('src', 'https://testsrc');
         expect(data).to.have.property('width', 300);
@@ -216,7 +216,7 @@ describe('amp-ad-3p-impl', () => {
       expect(ad3p.renderOutsideViewport()).to.equal(1.25);
     });
 
-    it('should only allow rendering one ad a time', () => {
+    it('should only allow rendering one ad per second', function* () {
       const clock = lolex.install(win);
       const ad3p2 = createAmpAd(win);
       expect(ad3p.renderOutsideViewport()).to.equal(3);
@@ -227,8 +227,23 @@ describe('amp-ad-3p-impl', () => {
 
       // Ad loading should only block 1s.
       clock.tick(999);
+      yield macroTask();
       expect(ad3p2.renderOutsideViewport()).to.equal(false);
       clock.tick(1);
+      yield macroTask();
+      expect(ad3p2.renderOutsideViewport()).to.equal(3);
+    });
+
+    it('should only allow rendering one ad a time', function* () {
+      const ad3p2 = createAmpAd(win);
+      expect(ad3p.renderOutsideViewport()).to.equal(3);
+      expect(ad3p2.renderOutsideViewport()).to.equal(3);
+
+      const layoutPromise = ad3p.layoutCallback();
+      expect(ad3p2.renderOutsideViewport()).to.equal(false);
+
+      // load ad one a time
+      yield layoutPromise;
       expect(ad3p2.renderOutsideViewport()).to.equal(3);
     });
   });

@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-trust';
 import {installFormProxy} from './form-proxy';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {createCustomEvent} from '../../../src/event-helper';
-import {installStylesForShadowRoot} from '../../../src/shadow-embed';
 import {documentInfoForDoc} from '../../../src/services';
+import {installStylesForShadowRoot} from '../../../src/shadow-embed';
 import {iterateCursor} from '../../../src/dom';
 import {formOrNullForElement, setFormForElement} from '../../../src/form';
 import {
@@ -88,10 +89,6 @@ const UserValidityState = {
 };
 
 
-/** @typedef {!HTMLInputElement|!HTMLSelectElement|!HTMLTextAreaElement} */
-let FormFieldDef;
-
-
 /** @private @const {string} */
 const REDIRECT_TO_HEADER = 'AMP-Redirect-To';
 
@@ -153,13 +150,10 @@ export class AmpForm {
     this.target_ = this.form_.getAttribute('target');
 
     /** @const @private {?string} */
-    this.xhrAction_ = this.form_.getAttribute('action-xhr');
-    if (this.xhrAction_) {
-      assertHttpsUrl(this.xhrAction_, this.form_, 'action-xhr');
-      user().assert(!isProxyOrigin(this.xhrAction_),
-          'form action-xhr should not be on AMP CDN: %s',
-          this.form_);
-    }
+    this.xhrAction_ = this.getXhrUrl_('action-xhr');
+
+    /** @const @private {?string} */
+    this.xhrVerify_ = this.getXhrUrl_('verify-xhr');
 
     /**
      * Indicates that the action will submit to canonical or not.
@@ -182,8 +176,8 @@ export class AmpForm {
     /** @const @private {!Array<!Element>} */
     this.submitButtons_ = toArray(submitButtons);
 
-    /** @private {?string} */
-    this.state_ = null;
+    /** @private {!FormState_} */
+    this.state_ = FormState_.INITIAL;
 
     const inputs = this.form_.elements;
     for (let i = 0; i < inputs.length; i++) {
@@ -199,8 +193,9 @@ export class AmpForm {
     this.verifier_ = getFormVerifier(
         this.form_, () => this.handleXhrVerify_());
 
+    // TODO(choumx, #9699): HIGH.
     this.actions_.installActionHandler(
-        this.form_, this.actionHandler_.bind(this));
+        this.form_, this.actionHandler_.bind(this), ActionTrust.MEDIUM);
     this.installEventHandlers_();
 
     /** @private {?Promise} */
@@ -211,12 +206,31 @@ export class AmpForm {
   }
 
   /**
+   * Gets and validates an attribute for form request URLs.
+   * @param {string} attribute
+   * @return {?string}
+   * @private
+   */
+  getXhrUrl_(attribute) {
+    const url = this.form_.getAttribute(attribute);
+    if (url) {
+      assertHttpsUrl(url, this.form_, attribute);
+      user().assert(!isProxyOrigin(url),
+          `form ${attribute} should not be on AMP CDN: %s`,
+          this.form_);
+    }
+    return url;
+  }
+
+  /**
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
    * @private
    */
   actionHandler_(invocation) {
     if (invocation.method == 'submit') {
-      this.whenDependenciesReady_().then(this.handleSubmitAction_.bind(this));
+      this.whenDependenciesReady_().then(() => {
+        this.handleSubmitAction_(invocation);
+      });
     }
   }
 
@@ -242,27 +256,32 @@ export class AmpForm {
   installEventHandlers_() {
     this.form_.addEventListener(
         'submit', this.handleSubmitEvent_.bind(this), true);
+
     this.form_.addEventListener('blur', e => {
       checkUserValidityAfterInteraction_(dev().assertElement(e.target));
       this.validator_.onBlur(e);
     }, true);
+
+    const afterVerifierCommit = () => {
+      // Move from the VERIFYING state back to INITIAL
+      if (this.state_ === FormState_.VERIFYING) {
+        this.setState_(FormState_.INITIAL);
+      }
+    };
     this.form_.addEventListener('change', e => {
-      const input = dev().assertElement(e.target);
-      this.verifier_.onCommit(input, updatedElements => {
-        updatedElements.forEach(updatedElement => {
-          checkUserValidityAfterInteraction_(updatedElement);
-        });
-        this.validator_.onBlur(e);
-        // Move from the VERIFYING state back to INITIAL
-        if (this.state_ === FormState_.VERIFYING) {
-          this.setState_(FormState_.INITIAL);
-        }
-      });
+      this.verifier_.onCommit()
+          .then(updatedElements => {
+            updatedElements.forEach(checkUserValidityAfterInteraction_);
+            this.validator_.onBlur(e);
+          }, () => {
+            checkUserValidityAfterInteraction_(dev().assertElement(e.target));
+          })
+          .then(afterVerifierCommit, afterVerifierCommit);
     });
+
     this.form_.addEventListener('input', e => {
       checkUserValidityAfterInteraction_(dev().assertElement(e.target));
       this.validator_.onInput(e);
-      this.verifier_.onMutate(dev().assertElement(e.target));
     });
   }
 
@@ -276,8 +295,9 @@ export class AmpForm {
     const formDataForAnalytics = {};
     const formObject = this.getFormAsObject_();
 
+
     for (const k in formObject) {
-      if (formObject.hasOwnProperty(k)) {
+      if (Object.prototype.hasOwnProperty.call(formObject, k)) {
         formDataForAnalytics['formFields[' + k + ']'] = formObject[k].join(',');
       }
     }
@@ -289,13 +309,15 @@ export class AmpForm {
   /**
    * Handles submissions through action service invocations.
    *   e.g. <img on=tap:form.submit>
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
    * @private
    */
-  handleSubmitAction_() {
+  handleSubmitAction_(invocation) {
     if (this.state_ == FormState_.SUBMITTING || !this.checkValidity_()) {
       return;
     }
-    this.submit_();
+    // `submit` has the same trust level as the AMP Action that caused it.
+    this.submit_(invocation.trust);
     if (this.method_ == 'GET' && !this.xhrAction_) {
       // Trigger the actual submit of GET non-XHR.
       this.form_.submit();
@@ -328,17 +350,19 @@ export class AmpForm {
     if (this.xhrAction_ || this.method_ == 'POST') {
       event.preventDefault();
     }
-    this.submit_();
+    // Submits caused by user input have high trust.
+    this.submit_(ActionTrust.MEDIUM); // TODO(choumx, #9699): HIGH.
   }
 
   /**
-   * A helper method that actual handles the for different cases (post, get, xhr...).
+   * Helper method that actual handles the different cases (post, get, xhr...).
+   * @param {ActionTrust} trust
    * @private
    */
-  submit_() {
+  submit_(trust) {
     const varSubsFields = this.getVarSubsFields_();
     if (this.xhrAction_) {
-      this.handleXhrSubmit_(varSubsFields);
+      this.handleXhrSubmit_(varSubsFields, trust);
     } else if (this.method_ == 'POST') {
       this.handleNonXhrPost_();
     } else if (this.method_ == 'GET') {
@@ -392,29 +416,32 @@ export class AmpForm {
     }
     this.setState_(FormState_.VERIFYING);
 
-    const verifyXhr = this.doVarSubs_(this.getVarSubsFields_())
-        .then(() => this.doXhr_({[FORM_VERIFY_PARAM]: true}));
-    return verifyXhr;
+    return this.doVarSubs_(this.getVarSubsFields_())
+        .then(() => this.doVerifyXhr_());
   }
 
   /**
    * @param {!IArrayLike<!HTMLInputElement>} varSubsFields
+   * @param {ActionTrust} trust
    * @private
    */
-  handleXhrSubmit_(varSubsFields) {
-    this.cleanupRenderedTemplate_();
+  handleXhrSubmit_(varSubsFields, trust) {
     this.setState_(FormState_.SUBMITTING);
 
     const p = this.doVarSubs_(varSubsFields)
         .then(() => {
           this.triggerFormSubmitInAnalytics_();
-          this.actions_.trigger(this.form_, 'submit', /*event*/ null);
+          this.actions_.trigger(
+              this.form_, 'submit', /* event */ null, trust);
+          // After variable substitution
+          const values = this.getFormAsObject_();
+          this.renderTemplate_(values);
         })
-        .then(() => this.doXhr_())
+        .then(() => this.doActionXhr_())
         .then(response => this.handleXhrSubmitSuccess_(response),
-            error => this.handleXhrSubmitFailure_(
-                /** @type {!../../../src/service/xhr-impl.FetchError} */ (
-                    error)));
+        error => {
+          return this.handleXhrSubmitFailure_(/** @type {!Error} */(error));
+        });
 
     if (getMode().test) {
       this.xhrSubmitPromise_ = p;
@@ -438,28 +465,52 @@ export class AmpForm {
 
   /**
    * Send a request to the form's action endpoint.
-   * @param {!Object<string, string>=} opt_extraValues
+   * @return {!Promise<!../../../src/service/xhr-impl.FetchResponse>}
    * @private
    */
-  doXhr_(opt_extraValues) {
-    const isHeadOrGet = this.method_ == 'GET' || this.method_ == 'HEAD';
-    const values = this.getFormAsObject_(opt_extraValues);
-    this.renderTemplate_(values);
+  doActionXhr_() {
+    return this.doXhr_(dev().assertString(this.xhrAction_), this.method_);
+  }
 
+  /**
+   * Send a request to the form's verify endpoint.
+   * @return {!Promise<!../../../src/service/xhr-impl.FetchResponse>}
+   * @private
+   */
+  doVerifyXhr_() {
+    return this.doXhr_(dev().assertString(this.xhrVerify_), this.method_,
+        {[FORM_VERIFY_PARAM]: true});
+  }
+
+  /**
+   * Send a request to a form endpoint.
+   * @param {string} url
+   * @param {string} method
+   * @param {!Object<string, string>=} opt_extraFields
+   * @return {!Promise<!../../../src/service/xhr-impl.FetchResponse>}
+   * @private
+   */
+  doXhr_(url, method, opt_extraFields) {
     let xhrUrl, body;
+    const isHeadOrGet = method == 'GET' || method == 'HEAD';
+
     if (isHeadOrGet) {
-      xhrUrl = addParamsToUrl(dev().assertString(this.xhrAction_), values);
+      const values = this.getFormAsObject_();
+      if (opt_extraFields) {
+        deepMerge(values, opt_extraFields);
+      }
+      xhrUrl = addParamsToUrl(url, values);
     } else {
-      xhrUrl = this.xhrAction_;
+      xhrUrl = url;
       body = new FormData(this.form_);
-      for (const key in opt_extraValues) {
-        body.append(key, opt_extraValues[key]);
+      for (const key in opt_extraFields) {
+        body.append(key, opt_extraFields[key]);
       }
     }
 
-    return this.xhr_.fetch(dev().assertString(xhrUrl), {
+    return this.xhr_.fetch(xhrUrl, {
       body,
-      method: this.method_,
+      method,
       credentials: 'include',
       headers: {
         Accept: 'application/json',
@@ -471,13 +522,12 @@ export class AmpForm {
    * Transition the form to the submit success state.
    * @param {!../../../src/service/xhr-impl.FetchResponse} response
    * @return {!Promise}
-   * @private
+   * @private visible for testing
    */
   handleXhrSubmitSuccess_(response) {
     return response.json().then(json => {
       this.triggerAction_(/* success */ true, json);
       this.analyticsEvent_('amp-form-submit-success');
-      this.cleanupRenderedTemplate_();
       this.setState_(FormState_.SUBMIT_SUCCESS);
       this.renderTemplate_(json || {});
       this.maybeHandleRedirect_(response);
@@ -488,19 +538,24 @@ export class AmpForm {
 
   /**
    * Transition the form the the submit error state.
-   * @param {../../../src/service/xhr-impl.FetchError} errorResponse
+   * @param {!Error} error
    * @private
    */
-  handleXhrSubmitFailure_(errorResponse) {
-    const error = (errorResponse && errorResponse.error) || errorResponse;
-    this.triggerAction_(
-        /* success */ false, errorResponse ? errorResponse.responseJson : null);
-    this.analyticsEvent_('amp-form-submit-error');
-    this.cleanupRenderedTemplate_();
-    this.setState_(FormState_.SUBMIT_ERROR);
-    this.renderTemplate_(errorResponse.responseJson || {});
-    this.maybeHandleRedirect_(errorResponse.response);
-    user().error(TAG, `Form submission failed: ${error}`);
+  handleXhrSubmitFailure_(error) {
+    let promise;
+    if (error && error.response) {
+      promise = error.response.json().catch(() => null);
+    } else {
+      promise = Promise.resolve(null);
+    }
+    return promise.then(responseJson => {
+      this.triggerAction_(/* success */ false, responseJson);
+      this.analyticsEvent_('amp-form-submit-error');
+      this.setState_(FormState_.SUBMIT_ERROR);
+      this.renderTemplate_(responseJson || {});
+      this.maybeHandleRedirect_(error.response);
+      user().error(TAG, `Form submission failed: ${error}`);
+    });
   }
 
   /** @private */
@@ -549,7 +604,7 @@ export class AmpForm {
 
   /**
    * Handles response redirect throught the AMP-Redirect-To response header.
-   * @param {!../../../src/service/xhr-impl.FetchResponse} response
+   * @param {../../../src/service/xhr-impl.FetchResponse} response
    * @private
    */
   maybeHandleRedirect_(response) {
@@ -575,14 +630,14 @@ export class AmpForm {
   /**
    * Triggers either a submit-success or submit-error action with response data.
    * @param {boolean} success
-   * @param {?JSONType} json
+   * @param {?JsonObject} json
    * @private
    */
   triggerAction_(success, json) {
     const name = success ? FormState_.SUBMIT_SUCCESS : FormState_.SUBMIT_ERROR;
     const event =
         createCustomEvent(this.win_, `${TAG}.${name}`, {response: json});
-    this.actions_.trigger(this.form_, name, event);
+    this.actions_.trigger(this.form_, name, event, ActionTrust.MEDIUM);
   }
 
   /**
@@ -608,12 +663,11 @@ export class AmpForm {
 
   /**
    * Returns form data as an object.
-   * @param {!Object<string, string>=} opt_extraFields
-   * @return {!JSONType}
+   * @return {!JsonObject}
    * @private
    */
-  getFormAsObject_(opt_extraFields) {
-    const data = /** @type {!JSONType} */ ({});
+  getFormAsObject_() {
+    const data = /** @type {!JsonObject} */ ({});
     const inputs = this.form_.elements;
     const submittableTagsRegex = /^(?:input|select|textarea)$/i;
     const unsubmittableTypesRegex = /^(?:button|image|file|reset)$/i;
@@ -632,21 +686,20 @@ export class AmpForm {
       }
       data[input.name].push(input.value);
     }
-    if (opt_extraFields) {
-      deepMerge(data, opt_extraFields);
-    }
+
     return data;
   }
 
   /**
    * Adds proper classes for the state passed.
-   * @param {string} newState
+   * @param {!FormState_} newState
    * @private
    */
   setState_(newState) {
     const previousState = this.state_;
     this.form_.classList.remove(`amp-form-${previousState}`);
     this.form_.classList.add(`amp-form-${newState}`);
+    this.cleanupRenderedTemplate_(previousState);
     this.state_ = newState;
     this.submitButtons_.forEach(button => {
       if (newState == FormState_.SUBMITTING) {
@@ -658,7 +711,7 @@ export class AmpForm {
   }
 
   /**
-   * @param {!JSONType} data
+   * @param {!JsonObject} data
    * @private
    */
   renderTemplate_(data) {
@@ -676,6 +729,12 @@ export class AmpForm {
               rendered.id = messageId;
               rendered.setAttribute('i-amphtml-rendered', '');
               container.appendChild(rendered);
+              const templatedEvent = createCustomEvent(
+                  this.win_,
+                  'amp:template-rendered',
+                  /* detail */ null,
+                  {bubbles: true});
+              container.dispatchEvent(templatedEvent);
             });
       } else {
         // TODO(vializ): This is to let AMP know that the AMP elements inside
@@ -695,10 +754,12 @@ export class AmpForm {
   }
 
   /**
+   * Removes the template for the passed state.
+   * @param {!FormState_} state
    * @private
    */
-  cleanupRenderedTemplate_() {
-    const container = this.form_./*OK*/querySelector(`[${this.state_}]`);
+  cleanupRenderedTemplate_(state) {
+    const container = this.form_./*OK*/querySelector(`[${state}]`);
     if (!container) {
       return;
     }
@@ -706,25 +767,6 @@ export class AmpForm {
     if (previousRender) {
       removeElement(previousRender);
     }
-  }
-
-  /**
-   * @return {Array<!Element>}
-   * @public
-   */
-  getDynamicElementContainers() {
-    const dynamicElements = [];
-    const successDiv =
-        this.form_./*OK*/querySelector(`[${FormState_.SUBMIT_SUCCESS}]`);
-    const errorDiv =
-        this.form_./*OK*/querySelector(`[${FormState_.SUBMIT_ERROR}]`);
-    if (successDiv) {
-      dynamicElements.push(successDiv);
-    }
-    if (errorDiv) {
-      dynamicElements.push(errorDiv);
-    }
-    return dynamicElements;
   }
 
   /**
@@ -762,10 +804,8 @@ function reportValidity(state) {
  * @return {boolean} Whether the form is currently valid or not.
  */
 function checkUserValidityOnSubmission(form) {
-  const inputs = form.querySelectorAll('input,select,textarea,fieldset');
-  for (let i = 0; i < inputs.length; i++) {
-    checkUserValidity(inputs[i]);
-  }
+  const elements = form.querySelectorAll('input,select,textarea,fieldset');
+  iterateCursor(elements, element => checkUserValidity(element));
   return checkUserValidity(form);
 }
 
@@ -901,6 +941,16 @@ export class AmpFormService {
     /** @const @private {!Promise} */
     this.whenInitialized_ = this.installStyles_(ampdoc)
         .then(() => this.installHandlers_(ampdoc));
+
+    // Dispatch a test-only event for integration tests.
+    if (getMode().test) {
+      this.whenInitialized_.then(() => {
+        const win = ampdoc.win;
+        const event = createCustomEvent(
+            win, 'amp:form-service:initialize', null, {bubbles: true});
+        win.dispatchEvent(event);
+      });
+    }
   }
 
   /**

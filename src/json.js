@@ -55,8 +55,8 @@ let JSONValueDef;
 
 /**
  * Recreates objects with prototype-less copies.
- * @param {!JSONObjectDef} obj
- * @return {!JSONObjectDef}
+ * @param {!JsonObject} obj
+ * @return {!JsonObject}
  */
 export function recreateNonProtoObject(obj) {
   const copy = Object.create(null);
@@ -67,7 +67,7 @@ export function recreateNonProtoObject(obj) {
     const v = obj[k];
     copy[k] = isObject(v) ? recreateNonProtoObject(v) : v;
   }
-  return copy;
+  return /** @type {!JsonObject} */ (copy);
 }
 
 
@@ -77,9 +77,9 @@ export function recreateNonProtoObject(obj) {
  * field in a chain does not exist or is not an object, the returned value will
  * be `undefined`.
  *
- * @param {!JSONObjectDef} obj
+ * @param {!JsonObject} obj
  * @param {string} expr
- * @return {?JSONValueDef|undefined}
+ * @return {*}
  */
 export function getValueForExpr(obj, expr) {
   // The `.` indicates "the object itself".
@@ -113,11 +113,12 @@ export function getValueForExpr(obj, expr) {
  * @param {*} json JSON string to parse
  * @param {function(!Error)=} opt_onFailed Optional function that will be called with
  *     the error if parsing fails.
- * @return {?JSONValueDef|undefined}
+ * @return {?JsonObject|undefined} May be extend to parse arrays.
  */
 export function tryParseJson(json, opt_onFailed) {
   try {
-    return JSON.parse(/** @type {string} */ (json));
+    return /** @type {?JsonObject|undefined} */(
+        JSON.parse(/** @type {string} */ (json)));
   } catch (e) {
     if (opt_onFailed) {
       opt_onFailed(e);
