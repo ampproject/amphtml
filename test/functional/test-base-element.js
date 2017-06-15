@@ -17,7 +17,7 @@
 import {BaseElement} from '../../src/base-element';
 import {Resource} from '../../src/service/resource';
 import {createAmpElementProto} from '../../src/custom-element';
-import {layoutRectLtwh} from '../../src/layout-rect';
+import {DOMRectLtwh} from '../../src/DOM-rect';
 import {listenOncePromise} from '../../src/event-helper';
 import {timerFor} from '../../src/services';
 import * as sinon from 'sinon';
@@ -115,8 +115,8 @@ describe('BaseElement', () => {
     sandbox.stub(resources, 'getResourceForElement')
         .withArgs(customElement)
         .returns(resource);
-    const layoutBox = layoutRectLtwh(0, 50, 100, 200);
-    const pageLayoutBox = layoutRectLtwh(0, 0, 100, 200);
+    const layoutBox = DOMRectLtwh(0, 50, 100, 200);
+    const pageLayoutBox = DOMRectLtwh(0, 0, 100, 200);
     sandbox.stub(resource, 'getLayoutBox', () => layoutBox);
     sandbox.stub(resource, 'getPageLayoutBox', () => pageLayoutBox);
     expect(element.getLayoutBox()).to.eql(layoutBox);

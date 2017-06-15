@@ -28,7 +28,7 @@ import {timerFor} from '../../../src/services';
 import {user, dev} from '../../../src/log';
 import {utf8EncodeSync} from '../../../src/utils/bytes.js';
 import {urls} from '../../../src/config';
-import {moveLayoutRect} from '../../../src/layout-rect';
+import {moveDOMRect} from '../../../src/DOM-rect';
 import {setStyle} from '../../../src/style';
 
 /** @const {string} */
@@ -204,7 +204,7 @@ export class AmpIframe extends AMP.BaseElement {
 
     /**
      * The (relative) layout box of the ad iframe to the amp-ad tag.
-     * @private {?../../../src/layout-rect.LayoutRectDef}
+     * @private {?../../../src/DOM-rect.DOMRectDef}
      */
     this.iframeLayoutBox_ = null;
 
@@ -252,12 +252,12 @@ export class AmpIframe extends AMP.BaseElement {
    */
   measureIframeLayoutBox_() {
     if (this.iframe_) {
-      const iframeBox = this.getViewport().getLayoutRect(this.iframe_);
+      const iframeBox = this.getViewport().getDOMRect(this.iframe_);
       const box = this.getLayoutBox();
       // Cache the iframe's relative position to the amp-iframe. This is
       // necessary for fixed-position containers which "move" with the
       // viewport.
-      this.iframeLayoutBox_ = moveLayoutRect(iframeBox, -box.left, -box.top);
+      this.iframeLayoutBox_ = moveDOMRect(iframeBox, -box.left, -box.top);
     }
   }
 
@@ -273,9 +273,9 @@ export class AmpIframe extends AMP.BaseElement {
       this.measureIframeLayoutBox_();
     }
 
-    const iframe = /** @type {!../../../src/layout-rect.LayoutRectDef} */(
+    const iframe = /** @type {!../../../src/DOM-rect.DOMRectDef} */(
         dev().assert(this.iframeLayoutBox_));
-    return moveLayoutRect(iframe, box.left, box.top);
+    return moveDOMRect(iframe, box.left, box.top);
   }
 
   /** @override */

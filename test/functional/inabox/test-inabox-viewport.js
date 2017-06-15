@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {layoutRectLtwh} from '../../../src/layout-rect';
+import {DOMRectLtwh} from '../../../src/DOM-rect';
 import {resourcesForDoc} from '../../../src/services';
 import {ViewportBindingInabox} from '../../../src/inabox/inabox-viewport';
 import {
@@ -46,7 +46,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     measureSpy = sandbox.spy();
     element = {
       getBoundingClientRect() {
-        return layoutRectLtwh(0, 0, 100, 100);
+        return DOMRectLtwh(0, 0, 100, 100);
       },
       measure: measureSpy,
     };
@@ -64,58 +64,58 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   it('should work', () => {
     // Initial state
     expect(binding.getSize()).to.deep.equal({width: 200, height: 150});
-    expect(binding.getLayoutRect(element))
-        .to.deep.equal(layoutRectLtwh(0, 151, 100, 100));
+    expect(binding.getDOMRect(element))
+        .to.deep.equal(DOMRectLtwh(0, 151, 100, 100));
 
     // Initial position received
     positionCallback({
-      viewport: layoutRectLtwh(0, 0, 100, 100),
-      target: layoutRectLtwh(10, 20, 50, 50),
+      viewport: DOMRectLtwh(0, 0, 100, 100),
+      target: DOMRectLtwh(10, 20, 50, 50),
     });
 
     expect(onScrollCallback).to.not.be.called;
     expect(onResizeCallback).to.be.calledOnce;
     expect(measureSpy).to.be.calledOnce;
-    expect(binding.getLayoutRect(element))
-        .to.deep.equal(layoutRectLtwh(10, 20, 100, 100));
+    expect(binding.getDOMRect(element))
+        .to.deep.equal(DOMRectLtwh(10, 20, 100, 100));
     sandbox.reset();
 
     // Scroll, viewport position changed
     positionCallback({
-      viewport: layoutRectLtwh(0, 10, 100, 100),
-      target: layoutRectLtwh(10, 20, 50, 50),
+      viewport: DOMRectLtwh(0, 10, 100, 100),
+      target: DOMRectLtwh(10, 20, 50, 50),
     });
 
     expect(onScrollCallback).to.be.calledOnce;
     expect(onResizeCallback).to.not.be.called;
     expect(measureSpy).to.not.be.called;
-    expect(binding.getLayoutRect(element))
-        .to.deep.equal(layoutRectLtwh(10, 20, 100, 100));
+    expect(binding.getDOMRect(element))
+        .to.deep.equal(DOMRectLtwh(10, 20, 100, 100));
     sandbox.reset();
 
     // Resize, viewport size changed
     positionCallback({
-      viewport: layoutRectLtwh(0, 10, 200, 100),
-      target: layoutRectLtwh(10, 20, 50, 50),
+      viewport: DOMRectLtwh(0, 10, 200, 100),
+      target: DOMRectLtwh(10, 20, 50, 50),
     });
 
     expect(onScrollCallback).to.not.be.called;
     expect(onResizeCallback).to.be.calledOnce;
     expect(measureSpy).to.not.be.called;
-    expect(binding.getLayoutRect(element))
-        .to.deep.equal(layoutRectLtwh(10, 20, 100, 100));
+    expect(binding.getDOMRect(element))
+        .to.deep.equal(DOMRectLtwh(10, 20, 100, 100));
     sandbox.reset();
 
     // DOM change, target position changed
     positionCallback({
-      viewport: layoutRectLtwh(0, 10, 200, 100),
-      target: layoutRectLtwh(20, 20, 50, 50),
+      viewport: DOMRectLtwh(0, 10, 200, 100),
+      target: DOMRectLtwh(20, 20, 50, 50),
     });
 
     expect(onScrollCallback).to.not.be.called;
     expect(onResizeCallback).to.not.be.called;
     expect(measureSpy).to.be.calledOnce;
-    expect(binding.getLayoutRect(element))
-        .to.deep.equal(layoutRectLtwh(20, 20, 100, 100));
+    expect(binding.getDOMRect(element))
+        .to.deep.equal(DOMRectLtwh(20, 20, 100, 100));
   });
 });

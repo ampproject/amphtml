@@ -540,7 +540,7 @@ export class Visibility {
    * Trigger listener callback.
    * @param {!Array<VisibilityListenerDef>} listeners
    * @param {!VisibilityListenerDef} listener
-   * @param {!../../../src/layout-rect.LayoutRectDef} layoutBox The bounding rectangle
+   * @param {!../../../src/DOM-rect.DOMRectDef} layoutBox The bounding rectangle
    *     for the element
    * @private
    */
@@ -558,7 +558,7 @@ export class Visibility {
   /**
    * Sets variable values for callback. Cleans up existing values.
    * @param {Object<string, *>} state The state object to populate
-   * @param {!../../../src/layout-rect.LayoutRectDef} layoutBox The bounding rectangle
+   * @param {!../../../src/DOM-rect.DOMRectDef} layoutBox The bounding rectangle
    *     for the element
    * @private
    */

@@ -25,11 +25,12 @@
  *   left: number,
  *   right: number,
  *   width: number,
- *   height: number
+ *   height: number,
+ *   x: number,
+ *   y: number
  * }}
  */
-export let LayoutRectDef;
-
+export let DOMRectDef;
 
 /**
  * The structure that represents the margins of an Element.
@@ -41,8 +42,7 @@ export let LayoutRectDef;
  *   left: number
  * }}
  */
-export let LayoutMarginsDef;
-
+export let DOMMarginsDef;
 
 /**
  * The structure that represents a requested change to the margins of an
@@ -56,19 +56,19 @@ export let LayoutMarginsDef;
  *   left: (number|undefined)
  * }}
  */
-export let LayoutMarginsChangeDef;
+export let DOMMarginsChangeDef;
 
 
 /**
- * Creates a layout rect based on the left, top, width and height parameters
+ * Creates a DOM rect based on the left, top, width and height parameters
  * in that order.
  * @param {number} left
  * @param {number} top
  * @param {number} width
  * @param {number} height
- * @return {!LayoutRectDef}
+ * @return {!DOMRectDef}
  */
-export function layoutRectLtwh(left, top, width, height) {
+export function DOMRectLtwh(left, top, width, height) {
   return {
     left,
     top,
@@ -76,28 +76,29 @@ export function layoutRectLtwh(left, top, width, height) {
     height,
     bottom: top + height,
     right: left + width,
+    x: left,
+    y: top,
   };
 }
 
-
 /**
- * Creates a layout rect based on the DOMRect, e.g. obtained from calling
+ * Creates a DOM rect based on the rect, e.g. obtained from calling
  * getBoundingClientRect.
  * @param {!ClientRect} rect
- * @return {!LayoutRectDef}
+ * @return {!DOMRectDef}
  */
-export function layoutRectFromDomRect(rect) {
-  return layoutRectLtwh(Number(rect.left), Number(rect.top),
-      Number(rect.width), Number(rect.height));
+export function DOMRectFromClientRect(rect) {
+  return DOMRectLtwh(Number(rect.left), Number(rect.top),
+        Number(rect.width), Number(rect.height));
 }
 
 /**
  * Returns true if the specified two rects overlap by a single pixel.
- * @param {!LayoutRectDef} r1
- * @param {!LayoutRectDef} r2
+ * @param {!DOMRectDef} r1
+ * @param {!DOMRectDef} r2
  * @return {boolean}
  */
-export function layoutRectsOverlap(r1, r2) {
+export function DOMRectsOverlap(r1, r2) {
   return (r1.top <= r2.bottom && r2.top <= r1.bottom &&
       r1.left <= r2.right && r2.left <= r1.right);
 }
@@ -105,8 +106,8 @@ export function layoutRectsOverlap(r1, r2) {
 
 /**
  * Returns the intersection between a, b or null if there is none.
- * @param {...?LayoutRectDef|undefined} var_args
- * @return {?LayoutRectDef}
+ * @param {...?DOMRectDef|undefined} var_args
+ * @return {?DOMRectDef}
  */
 export function rectIntersection(var_args) {
   let x0 = -Infinity;
@@ -129,18 +130,20 @@ export function rectIntersection(var_args) {
   if (x1 == Infinity) {
     return null;
   }
-  return layoutRectLtwh(x0, y0, x1 - x0, y1 - y0);
+  return DOMRectLtwh(x0, y0, x1 - x0, y1 - y0);
 }
-
 
 /**
  * Expand the layout rect using multiples of width and height.
- * @param {!LayoutRectDef} rect Original rect.
+ * @param {!DOMRectDef} rect Original rect.
  * @param {number} dw Expansion in width, specified as a multiple of width.
  * @param {number} dh Expansion in height, specified as a multiple of height.
- * @return {!LayoutRectDef}
+ * @return {!DOMRectDef}
  */
-export function expandLayoutRect(rect, dw, dh) {
+
+//not sure x + y
+
+export function expandDOMRect(rect, dw, dh) {
   return {
     top: rect.top - rect.height * dh,
     bottom: rect.bottom + rect.height * dh,
@@ -148,30 +151,32 @@ export function expandLayoutRect(rect, dw, dh) {
     right: rect.right + rect.width * dw,
     width: rect.width * (1 + dw * 2),
     height: rect.height * (1 + dh * 2),
+    x: rect.x - rect.width * dw,
+    y: rect.y - rect.height * dh,
   };
 }
 
 
 /**
- * Moves the layout rect using dx and dy.
- * @param {!LayoutRectDef} rect Original rect.
+ * Moves the DOM rect using dx and dy.
+ * @param {!DOMRectDef} rect Original rect.
  * @param {number} dx Move horizontally with this value.
  * @param {number} dy Move vertically with this value.
- * @return {!LayoutRectDef}
+ * @return {!DOMRectDef}
  */
-export function moveLayoutRect(rect, dx, dy) {
+export function moveDOMRect(rect, dx, dy) {
   if ((dx == 0 && dy == 0) ||
       (rect.width == 0 && rect.height == 0)) {
     return rect;
   }
-  return layoutRectLtwh(rect.left + dx, rect.top + dy,
+  return DOMRectLtwh(rect.left + dx, rect.top + dy,
       rect.width, rect.height);
 }
 
 
 /**
- * @param {!LayoutMarginsDef} margins
- * @param {!LayoutMarginsChangeDef} change
+ * @param {!DOMMarginsDef} margins
+ * @param {!DOMMarginsChangeDef} change
  * @return {boolean}
  */
 export function areMarginsChanged(margins, change) {
@@ -182,14 +187,17 @@ export function areMarginsChanged(margins, change) {
 }
 
 /**
- * @param {?LayoutRectDef} r1
- * @param {?LayoutRectDef} r2
+ * @param {?DOMRectDef} r1
+ * @param {?DOMRectDef} r2
  * @return {boolean}
  */
-export function layoutRectEquals(r1, r2) {
+export function DOMRectEquals(r1, r2) {
   if (!r1 || !r2) {
     return false;
   }
   return r1.left == r2.left && r1.top == r2.top &&
       r1.width == r2.width && r1.height == r2.height;
 }
+
+
+

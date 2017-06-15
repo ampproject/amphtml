@@ -261,14 +261,14 @@ export class AmpA4A extends AMP.BaseElement {
      * extractCreativeAndSignature. Note: Either value may be 'auto' (i.e.,
      * non-numeric).
      *
-     * @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)}
+     * @private {?({width, height}|../../../src/DOM-rect.DOMRectDef)}
      */
     this.creativeSize_ = {
       width: this.element.getAttribute('width'),
       height: this.element.getAttribute('height'),
     };
 
-    /** @private {?../../../src/layout-rect.LayoutRectDef} */
+    /** @private {?../../../src/DOM-rect.DOMRectDef} */
     this.originalSlotSize_ = null;
 
     /**

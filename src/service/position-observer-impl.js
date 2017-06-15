@@ -19,12 +19,11 @@ import {viewportForDoc, vsyncFor} from '../services';
 import {getMode} from '../mode';
 import {dev} from '../log';
 import {
-  moveLayoutRect,
-  layoutRectEquals,
-  layoutRectsOverlap,
-  layoutRectFromDomRect,
-  layoutRectLtwh,
-} from '../layout-rect';
+  moveDOMRect,
+  DOMRectEquals,
+  DOMRectsOverlap,
+  DOMRectLtwh,
+} from '../DOM-rect';
 import {isExperimentOn} from '../../src/experiments';
 import {serializeMessage} from '../../src/3p-frame-messaging';
 import {tryParseJson} from '../../src/json.js';
@@ -43,8 +42,8 @@ export const POSITION_HIGH_FIDELITY = 'position-high-fidelity';
  * relative to viewport. And viewport rect which always has top 0, left 0, and
  * viewport width and height.
  * @typedef {{
- *  positionRect: ?../layout-rect.LayoutRectDef,
- *  viewportRect: !../layout-rect.LayoutRectDef,
+ *  positionRect: ?../DOM-rect.DOMRectDef,
+ *  viewportRect: !../DOM-rect.DOMRectDef,
  * }}
  */
 export let PositionInViewportEntryDef;
@@ -93,12 +92,12 @@ class AbstractPositionObserver {
       trigger: function(position) {
         const prePos = entry.position;
         if (prePos
-            && layoutRectEquals(prePos.positionRect, position.positionRect)
-            && layoutRectEquals(prePos.viewportRect, position.viewportRect)) {
+            && DOMRectEquals(prePos.positionRect, position.positionRect)
+            && DOMRectEquals(prePos.viewportRect, position.viewportRect)) {
           // position doesn't change, do nothing.
           return;
         }
-        if (layoutRectsOverlap(position.positionRect, position.viewportRect)) {
+        if (DOMRectsOverlap(position.positionRect, position.viewportRect)) {
           entry.position = position;
           // Only call handler if entry element overlap with viewport.
           try {
@@ -296,14 +295,12 @@ export class AmpDocPositionObserver extends AbstractPositionObserver {
    */
   updateEntryPosition(entry) {
     // get layoutBoxes relative to doc.
-    const elementBox = layoutRectFromDomRect(
-        entry.element./*OK*/getBoundingClientRect());
-
+    const elementBox = entry.element./*OK*/getBoundingClientRect();
     const viewportSize = this.viewport_.getSize();
     const viewportBox =
-        layoutRectLtwh(0, 0, viewportSize.width, viewportSize.height);
+        DOMRectLtwh(0, 0, viewportSize.width, viewportSize.height);
 
-    // Return { positionRect: <LayoutRectDef>, viewportRect: <LayoutRectDef>}
+    // Return { positionRect: <DOMRectDef>, viewportRect: <DOMRectDef>}
     entry.trigger(/** @type {PositionInViewportEntryDef}*/ ({
       positionRect: elementBox,
       viewportRect: viewportBox,
@@ -427,7 +424,7 @@ export class InaboxAmpDocPositionObserver extends AbstractPositionObserver {
     const viewportBox = this.iframePosition_.viewportRect;
     // Adjust element rect relative to viewportBox
     let elementBox = entry.element.inIframePositionRect;
-    elementBox = moveLayoutRect(elementBox, iframeBox.left, iframeBox.top);
+    elementBox = moveDOMRect(elementBox, iframeBox.left, iframeBox.top);
     entry.trigger(/** @type {PositionInViewportEntryDef}*/ ({
       positionRect: elementBox,
       viewportRect: viewportBox,

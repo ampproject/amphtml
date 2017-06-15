@@ -18,7 +18,7 @@ import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Resources} from '../../src/service/resources-impl';
 import {Resource, ResourceState} from '../../src/service/resource';
 import {VisibilityState} from '../../src/visibility-state';
-import {layoutRectLtwh} from '../../src/layout-rect';
+import {DOMRectLtwh} from '../../src/DOM-rect';
 import * as sinon from 'sinon';
 
 /*eslint "google-camelcase/google-camelcase": 0*/
@@ -55,14 +55,14 @@ describe('Resources', () => {
   }
 
   it('should calculate correct calcTaskScore', () => {
-    const viewportRect = layoutRectLtwh(0, 100, 300, 400);
+    const viewportRect = DOMRectLtwh(0, 100, 300, 400);
     sandbox.stub(resources.viewport_, 'getRect', () => viewportRect);
 
     // Task 1 is right in the middle of the viewport and priority 0
     const task_in_viewport_p0 = {
       resource: {
         getLayoutBox() {
-          return layoutRectLtwh(0, 200, 300, 100);
+          return DOMRectLtwh(0, 200, 300, 100);
         },
         isFixed() {
           return false;
@@ -74,7 +74,7 @@ describe('Resources', () => {
     const task_in_viewport_p1 = {
       resource: {
         getLayoutBox() {
-          return layoutRectLtwh(0, 200, 300, 100);
+          return DOMRectLtwh(0, 200, 300, 100);
         },
         isFixed() {
           return false;
@@ -86,7 +86,7 @@ describe('Resources', () => {
     const task_above_viewport_p0 = {
       resource: {
         getLayoutBox() {
-          return layoutRectLtwh(0, 0, 300, 50);
+          return DOMRectLtwh(0, 0, 300, 50);
         },
         isFixed() {
           return false;
@@ -98,7 +98,7 @@ describe('Resources', () => {
     const task_above_viewport_p1 = {
       resource: {
         getLayoutBox() {
-          return layoutRectLtwh(0, 0, 300, 50);
+          return DOMRectLtwh(0, 0, 300, 50);
         },
         isFixed() {
           return false;
@@ -110,7 +110,7 @@ describe('Resources', () => {
     const task_below_viewport_p0 = {
       resource: {
         getLayoutBox() {
-          return layoutRectLtwh(0, 600, 300, 50);
+          return DOMRectLtwh(0, 600, 300, 50);
         },
         isFixed() {
           return false;
@@ -122,7 +122,7 @@ describe('Resources', () => {
     const task_below_viewport_p1 = {
       resource: {
         getLayoutBox() {
-          return layoutRectLtwh(0, 600, 300, 50);
+          return DOMRectLtwh(0, 600, 300, 50);
         },
         isFixed() {
           return false;
@@ -134,7 +134,7 @@ describe('Resources', () => {
     const task_fixed_in_viewport_p0 = {
       resource: {
         getLayoutBox() {
-          return layoutRectLtwh(0, 200, 300, 100);
+          return DOMRectLtwh(0, 200, 300, 100);
         },
         isFixed() {
           return false;
@@ -146,7 +146,7 @@ describe('Resources', () => {
     const task_fixed_in_viewport_p1 = {
       resource: {
         getLayoutBox() {
-          return layoutRectLtwh(0, 200, 300, 100);
+          return DOMRectLtwh(0, 200, 300, 100);
         },
         isFixed() {
           return false;
@@ -158,7 +158,7 @@ describe('Resources', () => {
     const task_fixed_above_viewport_p0 = {
       resource: {
         getLayoutBox() {
-          return layoutRectLtwh(0, 0, 300, 50);
+          return DOMRectLtwh(0, 0, 300, 50);
         },
         isFixed() {
           return false;
@@ -170,7 +170,7 @@ describe('Resources', () => {
     const task_fixed_above_viewport_p1 = {
       resource: {
         getLayoutBox() {
-          return layoutRectLtwh(0, 0, 300, 50);
+          return DOMRectLtwh(0, 0, 300, 50);
         },
         isFixed() {
           return false;
@@ -182,7 +182,7 @@ describe('Resources', () => {
     const task_fixed_below_viewport_p0 = {
       resource: {
         getLayoutBox() {
-          return layoutRectLtwh(0, 600, 300, 50);
+          return DOMRectLtwh(0, 600, 300, 50);
         },
         isFixed() {
           return false;
@@ -194,7 +194,7 @@ describe('Resources', () => {
     const task_fixed_below_viewport_p1 = {
       resource: {
         getLayoutBox() {
-          return layoutRectLtwh(0, 600, 300, 50);
+          return DOMRectLtwh(0, 600, 300, 50);
         },
         isFixed() {
           return false;
@@ -398,7 +398,7 @@ describe('Resources', () => {
   it('should require layout for non-scheduled element', () => {
     const element = createAmpElement();
     sandbox.stub(element, 'getBoundingClientRect',
-        () => layoutRectLtwh(0, 0, 100, 100));
+        () => DOMRectLtwh(0, 0, 100, 100));
     const resource = new Resource(1, element, resources);
     const measureSpy = sandbox.spy(resource, 'measure');
     const buildSpy = sandbox.spy(resource.element, 'whenBuilt');
@@ -415,7 +415,7 @@ describe('Resources', () => {
   it('should require layout for scheduled element', () => {
     const element = createAmpElement();
     sandbox.stub(element, 'getBoundingClientRect',
-        () => layoutRectLtwh(0, 0, 100, 100));
+        () => DOMRectLtwh(0, 0, 100, 100));
     const resource = new Resource(1, element, resources);
     resource.layoutScheduled();
     const measureSpy = sandbox.spy(resource, 'measure');
@@ -431,7 +431,7 @@ describe('Resources', () => {
   it('should not require layout for undisplayed element', () => {
     const element = createAmpElement();
     sandbox.stub(element, 'getBoundingClientRect',
-        () => layoutRectLtwh(0, 0, 0, 0));
+        () => DOMRectLtwh(0, 0, 0, 0));
     const resource = new Resource(1, element, resources);
     const measureSpy = sandbox.spy(resource, 'measure');
     const scheduleStub = sandbox.stub(resources, 'scheduleLayoutOrPreload_');
@@ -445,7 +445,7 @@ describe('Resources', () => {
   it('should not require layout for already completed element', () => {
     const element = createAmpElement();
     sandbox.stub(element, 'getBoundingClientRect',
-        () => layoutRectLtwh(0, 0, 0, 0));
+        () => DOMRectLtwh(0, 0, 0, 0));
     const resource = new Resource(1, element, resources);
     resource.layoutComplete_(true);
     const measureSpy = sandbox.spy(resource, 'measure');
@@ -462,7 +462,7 @@ describe('Resources', () => {
     const element = createAmpElement();
     parentElement.appendChild(element);
     sandbox.stub(element, 'getBoundingClientRect',
-        () => layoutRectLtwh(0, 0, 10, 10));
+        () => DOMRectLtwh(0, 0, 10, 10));
     sandbox.stub(element, 'isBuilt', () => true);
     const parentResource = new Resource(1, parentElement, resources);
     const resource = new Resource(2, element, resources);
@@ -479,7 +479,7 @@ describe('Resources', () => {
     const element = createAmpElement();
     parentElement.appendChild(element);
     sandbox.stub(element, 'getBoundingClientRect',
-        () => layoutRectLtwh(0, 0, 10, 10));
+        () => DOMRectLtwh(0, 0, 10, 10));
     sandbox.stub(element, 'isBuilt', () => false);
     const parentResource = new Resource(1, parentElement, resources);
     const resource = new Resource(2, element, resources);
@@ -1021,8 +1021,8 @@ describe('Resources discoverWork', () => {
       },
     };
 
-    resource1 = createResource(1, layoutRectLtwh(10, 10, 100, 100));
-    resource2 = createResource(2, layoutRectLtwh(10, 1010, 100, 100));
+    resource1 = createResource(1, DOMRectLtwh(10, 10, 100, 100));
+    resource2 = createResource(2, DOMRectLtwh(10, 1010, 100, 100));
     resources.resources_ = [resource1, resource2];
     resources.vsync_ = {
       mutate: callback => callback(),
@@ -1054,7 +1054,7 @@ describe('Resources discoverWork', () => {
       VisibilityState.VISIBLE
     );
     viewportMock.expects('getRect').returns(
-        layoutRectLtwh(0, 0, 300, 400)).once();
+        DOMRectLtwh(0, 0, 300, 400)).once();
     resource1.isBuilt = () => false;
     const mediaSpy = sandbox.stub(resource1.element, 'applySizesAndMediaQuery');
     expect(resource1.hasBeenMeasured()).to.be.false;
@@ -1072,7 +1072,7 @@ describe('Resources discoverWork', () => {
       VisibilityState.VISIBLE
     );
     viewportMock.expects('getRect').returns(
-        layoutRectLtwh(0, 0, 300, 400)).once();
+        DOMRectLtwh(0, 0, 300, 400)).once();
 
     resources.discoverWork_();
 
@@ -1089,7 +1089,7 @@ describe('Resources discoverWork', () => {
       VisibilityState.VISIBLE
     );
     viewportMock.expects('getRect').returns(
-        layoutRectLtwh(0, 0, 300, 400)).once();
+        DOMRectLtwh(0, 0, 300, 400)).once();
 
     resources.discoverWork_();
 
@@ -1102,9 +1102,9 @@ describe('Resources discoverWork', () => {
     resource1.hasBeenMeasured = () => true;
     resource2.hasBeenMeasured = () => true;
     resource1.element.getBoundingClientRect =
-        () => layoutRectLtwh(10, 10, 100, 101);
+        () => DOMRectLtwh(10, 10, 100, 101);
     resource2.element.getBoundingClientRect =
-        () => layoutRectLtwh(10, 1010, 100, 101);
+        () => DOMRectLtwh(10, 1010, 100, 101);
     resources.visible_ = true;
     sandbox.stub(resources.viewer_, 'getVisibilityState').returns(
       VisibilityState.VISIBLE
@@ -1112,7 +1112,7 @@ describe('Resources discoverWork', () => {
     resources.relayoutAll_ = false;
     resources.relayoutTop_ = 1000;
     viewportMock.expects('getRect').returns(
-        layoutRectLtwh(0, 0, 300, 400)).once();
+        DOMRectLtwh(0, 0, 300, 400)).once();
 
     resources.discoverWork_();
 
@@ -1130,7 +1130,7 @@ describe('Resources discoverWork', () => {
     );
     resources.prerenderSize_ = 1;
     viewportMock.expects('getRect').returns(
-        layoutRectLtwh(0, 0, 300, 1009)).once();
+        DOMRectLtwh(0, 0, 300, 1009)).once();
 
     resources.discoverWork_();
 
@@ -1145,7 +1145,7 @@ describe('Resources discoverWork', () => {
     );
     resources.prerenderSize_ = 0;
     viewportMock.expects('getRect').returns(
-        layoutRectLtwh(0, 0, 300, 400)).once();
+        DOMRectLtwh(0, 0, 300, 400)).once();
 
     resources.discoverWork_();
 
@@ -1160,7 +1160,7 @@ describe('Resources discoverWork', () => {
       VisibilityState.VISIBLE
     );
     viewportMock.expects('getRect').returns(
-        layoutRectLtwh(0, 0, 300, 400)).atLeast(1);
+        DOMRectLtwh(0, 0, 300, 400)).atLeast(1);
 
     const resource1MeasureStub = sandbox.stub(resource1, 'measure',
         resource1.measure.bind(resource1));
@@ -1189,7 +1189,7 @@ describe('Resources discoverWork', () => {
     expect(resource1.isMeasureRequested()).to.be.true;
     expect(resource2.isMeasureRequested()).to.be.true;
     resource2.element.getBoundingClientRect =
-        () => layoutRectLtwh(0, 0, 0, 0);  // Equiv to display:none.
+        () => DOMRectLtwh(0, 0, 0, 0);  // Equiv to display:none.
     resources.discoverWork_();
     expect(resource1MeasureStub).to.have.callCount(2);
     expect(resource1UnloadStub).to.have.not.been.called;
@@ -1198,7 +1198,7 @@ describe('Resources discoverWork', () => {
   });
 
   it('should eject stale tasks when element unloaded', () => {
-    const pendingResource = createResource(5, layoutRectLtwh(0, 0, 0, 0));
+    const pendingResource = createResource(5, DOMRectLtwh(0, 0, 0, 0));
     pendingResource.state_ = ResourceState.NOT_BUILT;
     resources.pendingBuildResources_ = [pendingResource];
     resources.visible_ = true;
@@ -1215,7 +1215,7 @@ describe('Resources discoverWork', () => {
         VisibilityState.VISIBLE
     );
     viewportMock.expects('getRect').returns(
-        layoutRectLtwh(0, 0, 300, 400)).atLeast(1);
+        DOMRectLtwh(0, 0, 300, 400)).atLeast(1);
 
     resources.discoverWork_();
     expect(resources.queue_.getSize()).to.equal(2);
@@ -1355,7 +1355,7 @@ describe('Resources discoverWork', () => {
       VisibilityState.VISIBLE
     );
     viewportMock.expects('getRect').returns(
-        layoutRectLtwh(0, 0, 300, 400)).once();
+        DOMRectLtwh(0, 0, 300, 400)).once();
     const setInViewport = sandbox.spy(resource1, 'setInViewport');
     const schedule = sandbox.spy(resources, 'scheduleLayoutOrPreload_');
 
@@ -1444,7 +1444,7 @@ describe('Resources discoverWork', () => {
     });
 
     it('should wait until ready-scan', () => {
-      const rect = layoutRectLtwh(0, 0, 100, 100);
+      const rect = DOMRectLtwh(0, 0, 100, 100);
       resources.ampdoc.signals().reset('ready-scan');
       expect(resource1.hasBeenMeasured()).to.be.false;
       const promise = resources.getResourcesInRect(window, rect);
@@ -1457,7 +1457,7 @@ describe('Resources discoverWork', () => {
     });
 
     it('should measure when needed only', () => {
-      const rect = layoutRectLtwh(0, 0, 100, 100);
+      const rect = DOMRectLtwh(0, 0, 100, 100);
       expect(resource1.hasBeenMeasured()).to.be.false;
       expect(resource2.hasBeenMeasured()).to.be.false;
       resource1.measure();
@@ -1470,7 +1470,7 @@ describe('Resources discoverWork', () => {
     });
 
     it('should measure only filtered elements', () => {
-      const rect = layoutRectLtwh(0, 0, 100, 100);
+      const rect = DOMRectLtwh(0, 0, 100, 100);
       expect(resource1.hasBeenMeasured()).to.be.false;
       expect(resource2.hasBeenMeasured()).to.be.false;
       resource1.hostWin = {};
@@ -1484,7 +1484,7 @@ describe('Resources discoverWork', () => {
     });
 
     it('should resolve visible elements', () => {
-      const rect = layoutRectLtwh(0, 0, 100, 1500);
+      const rect = DOMRectLtwh(0, 0, 100, 1500);
       return resources.getResourcesInRect(window, rect).then(res => {
         expect(res).to.have.length(2);
         expect(res[0]).to.equal(resource1);
@@ -1493,9 +1493,9 @@ describe('Resources discoverWork', () => {
     });
 
     it('should ignore invisible elements', () => {
-      const rect = layoutRectLtwh(0, 0, 100, 1500);
+      const rect = DOMRectLtwh(0, 0, 100, 1500);
       resource2.element.getBoundingClientRect =
-          () => layoutRectLtwh(0, 0, 0, 0);
+          () => DOMRectLtwh(0, 0, 0, 0);
       return resources.getResourcesInRect(window, rect).then(res => {
         expect(res).to.have.length(1);
         expect(res[0]).to.equal(resource1);
@@ -1503,7 +1503,7 @@ describe('Resources discoverWork', () => {
     });
 
     it('should ignore out-of-rect elements', () => {
-      const rect = layoutRectLtwh(0, 0, 100, 100);
+      const rect = DOMRectLtwh(0, 0, 100, 100);
       return resources.getResourcesInRect(window, rect).then(res => {
         expect(res).to.have.length(1);
         expect(res[0]).to.equal(resource1);
@@ -1511,7 +1511,7 @@ describe('Resources discoverWork', () => {
     });
 
     it('should allow out-of-rect fixed elements', () => {
-      const rect = layoutRectLtwh(0, 0, 100, 100);
+      const rect = DOMRectLtwh(0, 0, 100, 100);
       resource2.isFixed = () => true;
       return resources.getResourcesInRect(window, rect).then(res => {
         expect(res).to.have.length(2);
@@ -1521,7 +1521,7 @@ describe('Resources discoverWork', () => {
     });
 
     it('should filter out elements', () => {
-      const rect = layoutRectLtwh(0, 0, 100, 1500);
+      const rect = DOMRectLtwh(0, 0, 100, 1500);
       resource1.hostWin = {};
       resource2.hasOwner = () => true;
       return resources.getResourcesInRect(window, rect).then(res => {
@@ -1655,8 +1655,8 @@ describe('Resources changeSize', () => {
     };
     viewportMock = sandbox.mock(resources.viewport_);
 
-    resource1 = createResource(1, layoutRectLtwh(10, 10, 100, 100));
-    resource2 = createResource(2, layoutRectLtwh(10, 1010, 100, 100));
+    resource1 = createResource(1, DOMRectLtwh(10, 10, 100, 100));
+    resource2 = createResource(2, DOMRectLtwh(10, 1010, 100, 100));
     resources.resources_ = [resource1, resource2];
   });
 
@@ -2260,7 +2260,7 @@ describe('Resources changeSize', () => {
       viewportMock.expects('getRect').returns(
           {top: 0, left: 0, right: 100, bottom: 10000, height: 200}).atLeast(1);
       resource1.layoutBox_ = resource1.initialLayoutBox_ =
-          layoutRectLtwh(0, 10, 100, 100);
+          DOMRectLtwh(0, 10, 100, 100);
     });
 
     it('should NOT change size when far the bottom of the document', () => {
@@ -2369,16 +2369,16 @@ describe('Resources mutateElement and collapse', () => {
     relayoutTopStub = sandbox.stub(resources, 'setRelayoutTop_');
     sandbox.stub(resources, 'schedulePass');
 
-    resource1 = createResource(1, layoutRectLtwh(10, 10, 100, 100));
-    resource2 = createResource(2, layoutRectLtwh(10, 1010, 100, 100));
+    resource1 = createResource(1, DOMRectLtwh(10, 10, 100, 100));
+    resource2 = createResource(2, DOMRectLtwh(10, 1010, 100, 100));
     resources.resources_ = [resource1, resource2];
 
     resource1RequestMeasureStub = sandbox.stub(resource1, 'requestMeasure');
     resource2RequestMeasureStub = sandbox.stub(resource2, 'requestMeasure');
 
-    parent1 = createElement(layoutRectLtwh(10, 10, 100, 100),
+    parent1 = createElement(DOMRectLtwh(10, 10, 100, 100),
         /* isAmp */ false);
-    parent2 = createElement(layoutRectLtwh(10, 1010, 100, 100),
+    parent2 = createElement(DOMRectLtwh(10, 1010, 100, 100),
         /* isAmp */ false);
 
     parent1.getElementsByClassName = className => {
@@ -2401,7 +2401,7 @@ describe('Resources mutateElement and collapse', () => {
   it('should mutate from visible to invisible', () => {
     const mutateSpy = sandbox.spy();
     const promise = resources.mutateElement(parent1, () => {
-      parent1.getBoundingClientRect = () => layoutRectLtwh(0, 0, 0, 0);
+      parent1.getBoundingClientRect = () => DOMRectLtwh(0, 0, 0, 0);
       mutateSpy();
     });
     return promise.then(() => {
@@ -2417,7 +2417,7 @@ describe('Resources mutateElement and collapse', () => {
     const mutateSpy = sandbox.spy();
     const promise = resources.mutateElement(resource1.element, () => {
       resource1.element.getBoundingClientRect =
-          () => layoutRectLtwh(0, 0, 0, 0);
+          () => DOMRectLtwh(0, 0, 0, 0);
       mutateSpy();
     });
     return promise.then(() => {
@@ -2431,9 +2431,9 @@ describe('Resources mutateElement and collapse', () => {
 
   it('should mutate from invisible to visible', () => {
     const mutateSpy = sandbox.spy();
-    parent1.getBoundingClientRect = () => layoutRectLtwh(0, 0, 0, 0);
+    parent1.getBoundingClientRect = () => DOMRectLtwh(0, 0, 0, 0);
     const promise = resources.mutateElement(parent1, () => {
-      parent1.getBoundingClientRect = () => layoutRectLtwh(10, 10, 100, 100);
+      parent1.getBoundingClientRect = () => DOMRectLtwh(10, 10, 100, 100);
       mutateSpy();
     });
     return promise.then(() => {
@@ -2447,9 +2447,9 @@ describe('Resources mutateElement and collapse', () => {
 
   it('should mutate from visible to visible', () => {
     const mutateSpy = sandbox.spy();
-    parent1.getBoundingClientRect = () => layoutRectLtwh(10, 10, 100, 100);
+    parent1.getBoundingClientRect = () => DOMRectLtwh(10, 10, 100, 100);
     const promise = resources.mutateElement(parent1, () => {
-      parent1.getBoundingClientRect = () => layoutRectLtwh(10, 1010, 100, 100);
+      parent1.getBoundingClientRect = () => DOMRectLtwh(10, 1010, 100, 100);
       mutateSpy();
     });
     return promise.then(() => {
@@ -2573,7 +2573,7 @@ describe('Resources.add/upgrade/remove', () => {
       applySizesAndMediaQuery() {},
       updateLayoutBox() {},
       getBoundingClientRect() {
-        return layoutRectLtwh(0, 0, 0, 0);
+        return DOMRectLtwh(0, 0, 0, 0);
       },
     };
     element.build = sandbox.spy();

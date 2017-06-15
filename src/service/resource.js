@@ -15,10 +15,10 @@
  */
 
 import {
-  layoutRectLtwh,
-  layoutRectsOverlap,
-  moveLayoutRect,
-} from '../layout-rect';
+  DOMRectLtwh,
+  DOMRectsOverlap,
+  moveDOMRect,
+} from '../DOM-rect';
 import {dev} from '../log';
 import {startsWith} from '../string';
 import {toggle, computedStyle} from '../style';
@@ -163,10 +163,10 @@ export class Resource {
     /** @private {boolean} */
     this.isFixed_ = false;
 
-    /** @private {!../layout-rect.LayoutRectDef} */
-    this.layoutBox_ = layoutRectLtwh(-10000, -10000, 0, 0);
+    /** @private {!../DOM-rect.DOMRectDef} */
+    this.layoutBox_ = DOMRectLtwh(-10000, -10000, 0, 0);
 
-    /** @private {?../layout-rect.LayoutRectDef} */
+    /** @private {?../DOM-rect.DOMRectDef} */
     this.initialLayoutBox_ = null;
 
     /** @private {boolean} */
@@ -323,7 +323,7 @@ export class Resource {
    * awaiting the measure and possibly layout.
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
-   * @param {!../layout-rect.LayoutMarginsChangeDef=} opt_newMargins
+   * @param {!../DOM-rect.DOMMarginsChangeDef=} opt_newMargins
    */
   changeSize(newHeight, newWidth, opt_newMargins) {
     this.element./*OK*/changeSize(newHeight, newWidth, opt_newMargins);
@@ -339,7 +339,7 @@ export class Resource {
    * @param {boolean} overflown
    * @param {number|undefined} requestedHeight
    * @param {number|undefined} requestedWidth
-   * @param {!../layout-rect.LayoutMarginsChangeDef|undefined}
+   * @param {!../DOM-rect.DOMMarginsChangeDef|undefined}
    *     requestedMargins
    */
   overflowCallback(overflown, requestedHeight, requestedWidth,
@@ -388,7 +388,7 @@ export class Resource {
 
     this.isMeasureRequested_ = false;
 
-    let box = this.resources_.getViewport().getLayoutRect(this.element);
+    let box = this.resources_.getViewport().getDOMRect(this.element);
     const oldBox = this.layoutBox_;
     const viewport = this.resources_.getViewport();
     this.layoutBox_ = box;
@@ -416,7 +416,7 @@ export class Resource {
       // For fixed position elements, we need the relative position to the
       // viewport. When accessing the layoutBox through #getLayoutBox, we'll
       // return the new absolute position.
-      box = this.layoutBox_ = moveLayoutRect(box, -viewport.getScrollLeft(),
+      box = this.layoutBox_ = moveDOMRect(box, -viewport.getScrollLeft(),
           -viewport.getScrollTop());
     }
 
@@ -447,7 +447,7 @@ export class Resource {
    */
   completeCollapse() {
     toggle(this.element, false);
-    this.layoutBox_ = layoutRectLtwh(
+    this.layoutBox_ = DOMRectLtwh(
         this.layoutBox_.left,
         this.layoutBox_.top,
         0, 0);
@@ -499,21 +499,21 @@ export class Resource {
    * Returns a previously measured layout box adjusted to the viewport. This
    * mainly affects fixed-position elements that are adjusted to be always
    * relative to the document position in the viewport.
-   * @return {!../layout-rect.LayoutRectDef}
+   * @return {!../DOM-rect.DOMRectDef}
    */
   getLayoutBox() {
     if (!this.isFixed_) {
       return this.layoutBox_;
     }
     const viewport = this.resources_.getViewport();
-    return moveLayoutRect(this.layoutBox_, viewport.getScrollLeft(),
+    return moveDOMRect(this.layoutBox_, viewport.getScrollLeft(),
         viewport.getScrollTop());
   }
 
   /**
    * Returns a previously measured layout box relative to the page. The
    * fixed-position elements are relative to the top of the document.
-   * @return {!../layout-rect.LayoutRectDef}
+   * @return {!../DOM-rect.DOMRectDef}
    */
   getPageLayoutBox() {
     return this.layoutBox_;
@@ -521,7 +521,7 @@ export class Resource {
 
   /**
    * Returns the first measured layout box.
-   * @return {!../layout-rect.LayoutRectDef}
+   * @return {!../DOM-rect.DOMRectDef}
    */
   getInitialLayoutBox() {
     // Before the first measure, there will be no initial layoutBox.
@@ -550,11 +550,11 @@ export class Resource {
 
   /**
    * Whether the element's layout box overlaps with the specified rect.
-   * @param {!../layout-rect.LayoutRectDef} rect
+   * @param {!../DOM-rect.DOMRectDef} rect
    * @return {boolean}
    */
   overlaps(rect) {
-    return layoutRectsOverlap(this.getLayoutBox(), rect);
+    return DOMRectsOverlap(this.getLayoutBox(), rect);
   }
 
   /**

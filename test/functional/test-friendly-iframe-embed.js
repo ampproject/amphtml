@@ -27,7 +27,7 @@ import {Signals} from '../../src/utils/signals';
 import {getStyle} from '../../src/style';
 import {extensionsFor} from '../../src/services';
 import {installServiceInEmbedScope} from '../../src/service';
-import {layoutRectLtwh} from '../../src/layout-rect';
+import {DOMRectLtwh} from '../../src/DOM-rect';
 import {loadPromise} from '../../src/event-helper';
 import {resourcesForDoc} from '../../src/services';
 import * as sinon from 'sinon';
@@ -235,7 +235,7 @@ describe('friendly-iframe-embed', () => {
     const hostSignals = new Signals();
     host.signals = () => hostSignals;
     host.renderStarted = sandbox.spy();
-    host.getLayoutBox = () => layoutRectLtwh(10, 10, 100, 200);
+    host.getLayoutBox = () => DOMRectLtwh(10, 10, 100, 200);
     const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
       url: 'https://acme.org/url1',
       html: '<amp-test></amp-test>',
@@ -275,7 +275,7 @@ describe('friendly-iframe-embed', () => {
   });
 
   it('should await initial with host', () => {
-    const rect = layoutRectLtwh(10, 10, 100, 200);
+    const rect = DOMRectLtwh(10, 10, 100, 200);
     const host = document.createElement('amp-host');
     const hostSignals = new Signals();
     host.signals = () => hostSignals;
