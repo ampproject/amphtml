@@ -68,7 +68,7 @@ import {insertAnalyticsElement} from '../../../src/analytics';
 import {setStyles} from '../../../src/style';
 import {utf8Encode} from '../../../src/utils/bytes';
 import {deepMerge} from '../../../src/utils/object';
-import {isCancellation} from '../../../src/error';
+import {cancellation, isCancellation} from '../../../src/error';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -372,7 +372,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               parameters['scp'] = serializeTargeting_(targeting, exclusions);
             } else {
               if (rtcConfig['doubleclick']['sendAdRequestOnFailure'] === false) {
-                return;
+                throw cancellation();
               }
             }
           }
