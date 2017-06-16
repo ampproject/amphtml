@@ -186,7 +186,7 @@ export class Messaging {
   /**
    * I'm sending Bob a new outgoing request.
    * @param {string} messageName
-   * @param {*} messageData
+   * @param {?JsonObject|string|undefined} messageData
    * @param {boolean} awaitResponse
    * @return {!Promise<*>|undefined}
    */
