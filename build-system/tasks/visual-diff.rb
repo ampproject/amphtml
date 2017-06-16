@@ -30,24 +30,11 @@ DEFAULT_WIDTHS = [375, 411]  # CSS widths: iPhone: 375, Pixel: 411.
 HOST = 'localhost'
 PORT = '8000'
 
-# Checks if a webserver is up and running.
-#
+
+# Launches a background AMP webserver for unminified js using gulp.
 #
 # Returns:
-# - true if the server returns an OK (200) response code
-def up
-  http = Net::HTTP.start(HOST, PORT)
-  response = http.head("/")
-  response.code == "200"
-rescue SystemCallError
-  false
-end
-
-
-# Launches a background AMP webserver for unminified js using gulp
-#
-# Returns:
-# - Process ID of server process
+# - Process ID of server process.
 def launchWebServer()
   webserverCmd = 'gulp serve --host ' + HOST + ' --port ' + PORT
   webserverUrl = 'http://' + HOST + ':' + PORT
@@ -63,15 +50,28 @@ end
 # Waits up to 10 seconds for the webserver to start up.
 #
 # Returns:
-# - Process ID of server process
+# - true if webserver is running.
 def waitForWebServer()
   tries = 0
-  until up()
+  until isWebServerRunning()
     sleep(1)
     tries += 1
     break if tries > 10
   end
-  up()
+  isWebServerRunning()
+end
+
+
+# Checks if a webserver is up and running.
+#
+# Returns:
+# - true if the server returns an OK (200) response code.
+def isWebServerRunning()
+  http = Net::HTTP.start(HOST, PORT)
+  response = http.head("/")
+  response.code == "200"
+rescue SystemCallError
+  false
 end
 
 
@@ -85,10 +85,10 @@ end
 # Loads the test config from a well-known json config file.
 def loadConfigJson()
   jsonFile = File.open(
-    File.join(
-      File.dirname(__FILE__),
-      '../../test/visual-diff/visual-tests.json'),
-    "r")
+      File.join(
+          File.dirname(__FILE__),
+          '../../test/visual-diff/visual-tests.json'),
+      "r")
   jsonContent = jsonFile.read
 end
 
@@ -97,10 +97,10 @@ end
 #
 # Args:
 # - server: URL of the webserver.
-# - assets_dir: Path to assets (images, etc.) used by the webpage
-# - assets_base_url: Base URL of assets on webserver
-# - url: Relative URL of page to be snapshotted
-# - name: Name of snapshot on Percy
+# - assets_dir: Path to assets (images, etc.) used by the webpage.
+# - assets_base_url: Base URL of assets on webserver.
+# - url: Relative URL of page to be snapshotted.
+# - name: Name of snapshot on Percy.
 def generateSnapshot(server, assets_dir, assets_base_url, url, name)
   Percy::Capybara::Anywhere.run(
       server, assets_dir, assets_base_url) do |page|
