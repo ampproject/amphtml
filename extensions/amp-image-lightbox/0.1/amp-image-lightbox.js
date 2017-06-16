@@ -748,8 +748,11 @@ class AmpImageLightbox extends AMP.BaseElement {
     const screenReaderCloseButton = this.element.ownerDocument
         .createElement('button');
     // TODO(aghassemi, #4146) i18n
-    screenReaderCloseButton.textContent = 'Close the lightbox';
+    const ariaLabel = this.element.getAttribute('data-close-button-aria-label')
+        || 'Close the lightbox';
+    screenReaderCloseButton.textContent = ariaLabel;
     screenReaderCloseButton.classList.add('i-amphtml-screen-reader');
+
     // This is for screen-readers only, should not get a tab stop.
     screenReaderCloseButton.tabIndex = -1;
     screenReaderCloseButton.addEventListener('click', () => {
