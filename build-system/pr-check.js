@@ -24,6 +24,7 @@
  * This script attempts to introduce some granularity for our
  * presubmit checking, via the determineBuildTargets method.
  */
+const atob = require('atob');
 const exec = require('./exec.js').exec;
 const execOrDie = require('./exec.js').execOrDie;
 const extensionsVersions = require('./extensions-versions-config');
@@ -263,9 +264,7 @@ const command = {
         `${gulp} test --nobuild --saucelabs --integration --compiled`);
   },
   runVisualDiffTests: function() {
-    // This must only be run for push builds, since Travis hides the encrypted
-    // environment variables required by Percy during pull request builds.
-    // For now, this is warning-only.
+    process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
     timedExec(`ruby ${path.resolve('build-system/tasks/visual-diff.rb')}`);
   },
   runPresubmitTests: function() {
@@ -285,7 +284,7 @@ function runAllCommands() {
     command.testBuildSystem();
     command.cleanBuild();
     command.buildRuntime();
-    command.runVisualDiffTests();  // Only called during push builds.
+    command.runVisualDiffTests();
     command.runJsonAndLintChecks();
     command.runDepAndTypeChecks();
     command.runUnitTests();
@@ -368,6 +367,7 @@ function main(argv) {
     if (buildTargets.has('RUNTIME') || buildTargets.has('INTEGRATION_TEST')) {
       command.cleanBuild();
       command.buildRuntime();
+      command.runVisualDiffTests();
       // Ideally, we'd run presubmit tests after `gulp dist`, as some checks run
       // through the dist/ folder. However, to speed up the Travis queue, we no
       // longer do a dist build for PRs, so this call won't cover dist/.
