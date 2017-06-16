@@ -15,6 +15,7 @@
  */
 
 import {parseJson} from '../../../../src/json';
+import {getData} from '../../../../src/event-helper';
 
 const TAG = 'amp-viewer-messaging';
 export const APP = '__AMPHTML__';
@@ -85,7 +86,7 @@ export class WindowPortEmulator {
   addEventListener(eventType, handler) {
     this.win.addEventListener('message', e => {
       if (e.origin == this.origin_ &&
-          e.source == this.target_ && e.data.app == APP) {
+          e.source == this.target_ && getData(e)['app'] == APP) {
         handler(e);
       }
     });
@@ -172,7 +173,7 @@ export class Messaging {
    * @private
    */
   handleMessage_(event) {
-    const message = parseMessage(event.data);
+    const message = parseMessage(getData(event));
     if (!message) {
       return;
     }

@@ -23,7 +23,7 @@ import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {removeElement} from '../../../src/dom';
-import {listen} from '../../../src/event-helper';
+import {getData, listen} from '../../../src/event-helper';
 import {isObject} from '../../../src/types';
 import {VideoEvents} from '../../../src/video-interface';
 import {videoManagerForDoc} from '../../../src/services';
@@ -182,22 +182,25 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
 
   // emitter
   handleNexxMessages_(event) {
-    if (!event.data || event.source !== this.iframe_.contentWindow) {
+    if (!getData(event) || event.source !== this.iframe_.contentWindow) {
       return;
     }
 
-    const data = isObject(event.data) ? event.data : tryParseJson(event.data);
-    if (data === undefined) {
+    /** @const {?JsonObject} */
+    const data = /** @type {?JsonObject} */ (isObject(getData(event))
+        ? getData(event)
+        : tryParseJson(getData(event)));
+    if (!data) {
       return;
     }
 
-    if (data.event == 'play') {
+    if (data['event'] == 'play') {
       this.element.dispatchCustomEvent(VideoEvents.PLAY);
-    } else if (data.event == 'pause') {
+    } else if (data['event'] == 'pause') {
       this.element.dispatchCustomEvent(VideoEvents.PAUSE);
-    } else if (data.event == 'mute') {
+    } else if (data['event'] == 'mute') {
       this.element.dispatchCustomEvent(VideoEvents.MUTED);
-    } else if (data.event == 'unmute') {
+    } else if (data['event'] == 'unmute') {
       this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
     }
   }

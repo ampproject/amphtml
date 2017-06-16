@@ -28,6 +28,7 @@ import {
 import {isExperimentOn} from '../../src/experiments';
 import {serializeMessage} from '../../src/3p-frame-messaging';
 import {parseJson, tryParseJson} from '../../src/json.js';
+import {getData} from '../../src/event-helper';
 
 /** @const @private */
 const TAG = 'POSITION_OBSERVER';
@@ -362,12 +363,13 @@ export class InaboxAmpDocPositionObserver extends AbstractPositionObserver {
 
     this.ampdoc_.win.addEventListener('message', event => {
     // Cheap operations first, so we don't parse JSON unless we have to.
-      if (event.source != win.parent || typeof event.data != 'string' ||
-          event.data.indexOf('amp-') != 0) {
+      if (event.source != win.parent || typeof getData(event) != 'string' ||
+          dev().assertString(getData(event)).indexOf('amp-') != 0) {
         return;
       }
       // Parse JSON only once per message.
-      const data = parseJson(event.data.substr(4));
+      const data = parseJson(
+          dev().assertString(getData(event)).substr(4));
       if (data['sentinel'] != sentinel) {
         return;
       }

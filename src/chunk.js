@@ -16,6 +16,7 @@
 
 import PriorityQueue from './utils/priority-queue';
 import {dev} from './log';
+import {getData} from './event-helper';
 import {registerServiceBuilderForDoc, getServiceForDoc} from './service';
 import {makeBodyVisible} from './style-installer';
 import {viewerPromiseForDoc} from './services';
@@ -317,7 +318,7 @@ class Chunks {
     this.viewerPromise_ = viewerPromiseForDoc(ampDoc);
 
     this.win_.addEventListener('message', e => {
-      if (e.data == 'amp-macro-task') {
+      if (getData(e) == 'amp-macro-task') {
         this.execute_(/* idleDeadline */ null);
       }
     });
