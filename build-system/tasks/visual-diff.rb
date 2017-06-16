@@ -47,6 +47,19 @@ def launchWebServer()
 end
 
 
+# Checks if a webserver is up and running.
+#
+# Returns:
+# - true if the server returns an OK (200) response code.
+def isWebServerRunning()
+  http = Net::HTTP.start(HOST, PORT)
+  response = http.head("/")
+  response.code == "200"
+rescue SystemCallError
+  false
+end
+
+
 # Waits up to 10 seconds for the webserver to start up.
 #
 # Returns:
@@ -62,20 +75,10 @@ def waitForWebServer()
 end
 
 
-# Checks if a webserver is up and running.
-#
-# Returns:
-# - true if the server returns an OK (200) response code.
-def isWebServerRunning()
-  http = Net::HTTP.start(HOST, PORT)
-  response = http.head("/")
-  response.code == "200"
-rescue SystemCallError
-  false
-end
-
-
 # Closes the webserver process with the given process ID.
+#
+# Args:
+# - pid: Process ID of the webserver.
 def closeWebServer(pid)
   Process.kill('INT', pid)
   Process.wait(pid, Process::WNOHANG)
