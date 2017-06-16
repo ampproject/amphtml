@@ -33,7 +33,7 @@ import {
   DOMRectLtwh,
   moveDOMRect,
   DOMRectFromClientRect,
-} from '../../../src/DOM-rect';
+} from '../../../src/dom-rect';
 import {srcsetFromElement} from '../../../src/srcset';
 import {timerFor, platformFor} from '../../../src/services';
 import {user, dev} from '../../../src/log';
@@ -107,10 +107,10 @@ export class ImageViewer {
     /** @private {number} */
     this.sourceHeight_ = 0;
 
-    /** @private {!../../../src/DOM-rect.DOMRectDef} */
+    /** @private {!../../../src/dom-rect.DOMRectDef} */
     this.viewerBox_ = DOMRectLtwh(0, 0, 0, 0);
 
-    /** @private {!../../../src/DOM-rect.DOMRectDef} */
+    /** @private {!../../../src/dom-rect.DOMRectDef} */
     this.imageBox_ = DOMRectLtwh(0, 0, 0, 0);
 
     /** @private {number} */
@@ -165,7 +165,7 @@ export class ImageViewer {
 
   /**
    * Returns the boundaries of the viewer.
-   * @return {!../../../src/DOM-rect.DOMRectDef}
+   * @return {!../../../src/dom-rect.DOMRectDef}
    */
   getViewerBox() {
     return this.viewerBox_;
@@ -173,7 +173,7 @@ export class ImageViewer {
 
   /**
    * Returns the boundaries of the image element.
-   * @return {!../../../src/DOM-rect.DOMRectDef}
+   * @return {!../../../src/dom-rect.DOMRectDef}
    */
   getImageBox() {
     return this.imageBox_;
@@ -182,7 +182,7 @@ export class ImageViewer {
   /**
    * Returns the boundaries of the image element with the offset if it was
    * moved by a gesture.
-   * @return {!../../../src/DOM-rect.DOMRectDef}
+   * @return {!../../../src/dom-rect.DOMRectDef}
    */
   getImageBoxWithOffset() {
     if (this.posX_ == 0 && this.posY_ == 0) {

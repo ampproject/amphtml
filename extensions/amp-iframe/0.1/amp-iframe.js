@@ -28,7 +28,7 @@ import {timerFor} from '../../../src/services';
 import {user, dev} from '../../../src/log';
 import {utf8EncodeSync} from '../../../src/utils/bytes.js';
 import {urls} from '../../../src/config';
-import {moveDOMRect} from '../../../src/DOM-rect';
+import {moveDOMRect} from '../../../src/dom-rect';
 import {setStyle} from '../../../src/style';
 
 /** @const {string} */
@@ -204,7 +204,7 @@ export class AmpIframe extends AMP.BaseElement {
 
     /**
      * The (relative) layout box of the ad iframe to the amp-ad tag.
-     * @private {?../../../src/DOM-rect.DOMRectDef}
+     * @private {?../../../src/dom-rect.DOMRectDef}
      */
     this.iframeLayoutBox_ = null;
 
@@ -273,7 +273,7 @@ export class AmpIframe extends AMP.BaseElement {
       this.measureIframeLayoutBox_();
     }
 
-    const iframe = /** @type {!../../../src/DOM-rect.DOMRectDef} */(
+    const iframe = /** @type {!../../../src/dom-rect.DOMRectDef} */(
         dev().assert(this.iframeLayoutBox_));
     return moveDOMRect(iframe, box.left, box.top);
   }

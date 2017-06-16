@@ -50,7 +50,7 @@ import {platformFor, timerFor} from '../../../../src/services';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {dev, user} from '../../../../src/log';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {DOMRectLtwh} from '../../../../src/DOM-rect';
+import {DOMRectLtwh} from '../../../../src/dom-rect';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import * as sinon from 'sinon';
 

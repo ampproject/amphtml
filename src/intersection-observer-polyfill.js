@@ -16,7 +16,7 @@
 
 import {dev} from './log';
 import {dict} from './utils/object';
-import {DOMRectLtwh, rectIntersection, moveDOMRect} from './DOM-rect';
+import {DOMRectLtwh, rectIntersection, moveDOMRect} from './dom-rect';
 import {SubscriptionApi} from './iframe-helper';
 
 /**
@@ -57,9 +57,9 @@ const INIT_TIME = Date.now();
  * regardless of the intersetion ratio. Only available when element is not
  * nested in a container iframe.
  * TODO: support opt_iframe if there's valid use cases.
- * @param {!./DOM-rect.DOMRectDef} element element's rect
- * @param {?./DOM-rect.DOMRectDef} owner element's owner rect
- * @param {!./DOM-rect.DOMRectDef} hostViewport hostViewport's rect
+ * @param {!./dom-rect.DOMRectDef} element element's rect
+ * @param {?./dom-rect.DOMRectDef} owner element's owner rect
+ * @param {!./dom-rect.DOMRectDef} hostViewport hostViewport's rect
  * @return {!IntersectionObserverEntry} A change entry.
  */
 export function getIntersectionChangeEntry(
@@ -203,10 +203,10 @@ export class IntersectionObserverPolyfill {
         this.threshold_[this.threshold_.length - 1] <= 1,
         'Threshold should be in the range from "[0, 1]"');
 
-    /** @private {?./DOM-rect.DOMRectDef} */
+    /** @private {?./dom-rect.DOMRectDef} */
     this.lastViewportRect_ = null;
 
-    /** @private {./DOM-rect.DOMRectDef|undefined} */
+    /** @private {./dom-rect.DOMRectDef|undefined} */
     this.lastIframeRect_ = undefined;
 
     /**
@@ -279,8 +279,8 @@ export class IntersectionObserverPolyfill {
    * Caller needs to make sure to pass in the correct container.
    * Note: the opt_iframe param is the iframe position relative to the host doc,
    * The iframe must be a non-scrollable iframe.
-   * @param {!./DOM-rect.DOMRectDef} hostViewport.
-   * @param {./DOM-rect.DOMRectDef=} opt_iframe
+   * @param {!./dom-rect.DOMRectDef} hostViewport.
+   * @param {./dom-rect.DOMRectDef=} opt_iframe
    */
   tick(hostViewport, opt_iframe) {
 
@@ -317,8 +317,8 @@ export class IntersectionObserverPolyfill {
    * the function will return null.
    *
    * @param {!ElementIntersectionStateDef} state
-   * @param {!./DOM-rect.DOMRectDef} hostViewport hostViewport's rect
-   * @param {./DOM-rect.DOMRectDef=} opt_iframe. iframe container rect
+   * @param {!./dom-rect.DOMRectDef} hostViewport hostViewport's rect
+   * @param {./dom-rect.DOMRectDef=} opt_iframe. iframe container rect
    * @return {?IntersectionObserverEntry} A valid change entry or null if ratio
    * @private
    */
@@ -361,8 +361,8 @@ export class IntersectionObserverPolyfill {
 
 /**
  * Returns the ratio of the smaller box's area to the larger box's area.
- * @param {!./DOM-rect.DOMRectDef} smaller
- * @param {!./DOM-rect.DOMRectDef} larger
+ * @param {!./dom-rect.DOMRectDef} smaller
+ * @param {!./dom-rect.DOMRectDef} larger
  * @return {number}
  */
 function intersectionRatio(smaller, larger) {
@@ -399,9 +399,9 @@ export function getThresholdSlot(sortedThreshold, ratio) {
 
 /**
  * Helper function to calculate the IntersectionObserver change entry.
- * @param {!./DOM-rect.DOMRectDef} element element's rect
- * @param {?./DOM-rect.DOMRectDef} hostViewport hostViewport's rect
- * @param {!./DOM-rect.DOMRectDef} intersection
+ * @param {!./dom-rect.DOMRectDef} element element's rect
+ * @param {?./dom-rect.DOMRectDef} hostViewport hostViewport's rect
+ * @param {!./dom-rect.DOMRectDef} intersection
  * @param {number} ratio
  * @return {!IntersectionObserverEntry}}
  */
@@ -420,7 +420,7 @@ function calculateChangeEntry(
   if (hostViewport) {
     // If element not in an iframe.
     // adjust all DOMRect to hostViewport Origin.
-    rootBounds = /** @type {!./DOM-rect.DOMRectDef} */ (rootBounds);
+    rootBounds = /** @type {!./dom-rect.DOMRectDef} */ (rootBounds);
     intersection = moveDOMRect(intersection, -hostViewport.left,
         -hostViewport.top);
     // The element is relative to (0, 0), while the viewport moves. So, we must

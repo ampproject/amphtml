@@ -16,7 +16,7 @@
 
 import {dev} from './log';
 import {dict} from './utils/object';
-import {DOMRectLtwh, rectIntersection, moveDOMRect} from './DOM-rect';
+import {DOMRectLtwh, rectIntersection, moveDOMRect} from './dom-rect';
 import {SubscriptionApi} from './iframe-helper';
 import {timerFor} from './services';
 
@@ -39,8 +39,8 @@ export let DOMRect;
 
 /**
  * Returns the ratio of the smaller box's area to the larger box's area.
- * @param {!./DOM-rect.DOMRectDef} smaller
- * @param {!./DOM-rect.DOMRectDef} larger
+ * @param {!./dom-rect.DOMRectDef} smaller
+ * @param {!./dom-rect.DOMRectDef} larger
  * @return {number}
  */
 function intersectionRatio(smaller, larger) {
@@ -53,10 +53,10 @@ function intersectionRatio(smaller, larger) {
  *
  * Mutates passed in rootBounds to have x and y according to spec.
  *
- * @param {!./DOM-rect.DOMRectDef} element The element's DOM rectangle
- * @param {?./DOM-rect.DOMRectDef} owner The owner's DOM rect, if
+ * @param {!./dom-rect.DOMRectDef} element The element's DOM rectangle
+ * @param {?./dom-rect.DOMRectDef} owner The owner's DOM rect, if
  *     there is an owner.
- * @param {!./DOM-rect.DOMRectDef} viewport The viewport's DOM rect.
+ * @param {!./dom-rect.DOMRectDef} viewport The viewport's DOM rect.
  * @return {!IntersectionObserverEntry} A change entry.
  * @private
  */

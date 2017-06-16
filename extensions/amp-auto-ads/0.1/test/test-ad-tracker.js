@@ -16,7 +16,7 @@
 
 
 import {AdTracker, getExistingAds} from '../ad-tracker';
-import {DOMRectLtwh} from '../../../../src/DOM-rect';
+import {DOMRectLtwh} from '../../../../src/dom-rect';
 import {resourcesForDoc} from '../../../../src/services';
 import * as sinon from 'sinon';
 

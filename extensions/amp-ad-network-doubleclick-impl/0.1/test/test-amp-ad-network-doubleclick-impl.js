@@ -43,7 +43,7 @@ import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {BaseElement} from '../../../../src/base-element';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {toggleExperiment} from '../../../../src/experiments';
-import {DOMRectLtwh} from '../../../../src/DOM-rect';
+import {DOMRectLtwh} from '../../../../src/dom-rect';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {Xhr, FetchResponseHeaders} from '../../../../src/service/xhr-impl';
 import {dev} from '../../../../src/log';

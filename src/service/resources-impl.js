@@ -23,7 +23,7 @@ import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../visibility-state';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {closest, hasNextNodeInDocumentOrder} from '../dom';
-import {expandDOMRect} from '../DOM-rect';
+import {expandDOMRect} from '../dom-rect';
 import {installInputService} from '../input';
 import {registerServiceBuilderForDoc} from '../service';
 import {inputFor} from '../services';
@@ -36,7 +36,7 @@ import {dict} from '../utils/object';
 import {reportError} from '../error';
 import {filterSplice} from '../utils/array';
 import {getSourceUrl} from '../url';
-import {areMarginsChanged} from '../DOM-rect';
+import {areMarginsChanged} from '../dom-rect';
 import {documentInfoForDoc} from '../services';
 import {computedStyle} from '../style';
 
@@ -57,8 +57,8 @@ const FOUR_FRAME_DELAY_ = 70;
 /**
  * The internal structure of a ChangeHeightRequest.
  * @typedef {{
- *   newMargins: !../DOM-rect.DOMMarginsChangeDef,
- *   currentMargins: !../DOM-rect.DOMMarginsDef
+ *   newMargins: !../dom-rect.DOMMarginsChangeDef,
+ *   currentMargins: !../dom-rect.DOMMarginsDef
  * }}
  */
 let MarginChangeDef;
@@ -314,7 +314,7 @@ export class Resources {
    * Returns a subset of resources which are (1) belong to the specified host
    * window, and (2) positioned in the specified rect.
    * @param {!Window} hostWin
-   * @param {!../DOM-rect.DOMRectDef} rect
+   * @param {!../dom-rect.DOMRectDef} rect
    * @param {boolean=} opt_isInPrerender signifies if we are in prerender mode.
    * @return {!Promise<!Array<!Resource>>}
    */
@@ -400,7 +400,7 @@ export class Resources {
    * resource-backed then makes use of the resource layoutBox, otherwise
    * measures the element directly.
    * @param {!Element} element
-   * @return {!Promise<!../DOM-rect.DOMRectDef>}
+   * @return {!Promise<!../dom-rect.DOMRectDef>}
    */
   getElementLayoutBox(element) {
     const resource = this.getResourceForElementOptional(element);
@@ -414,7 +414,7 @@ export class Resources {
 
   /**
    * @param {!Resource} resource
-   * @return {!Promise<!../DOM-rect.DOMRectDef>}
+   * @return {!Promise<!../dom-rect.DOMRectDef>}
    * @private
    */
   ensuredMeasured_(resource) {
@@ -788,7 +788,7 @@ export class Resources {
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
    * @param {function()=} opt_callback A callback function.
-   * @param {!../DOM-rect.DOMMarginsChangeDef=} opt_newMargins
+   * @param {!../dom-rect.DOMMarginsChangeDef=} opt_newMargins
    */
   changeSize(element, newHeight, newWidth, opt_callback, opt_newMargins) {
     this.scheduleChangeSize_(Resource.forElement(element), newHeight,
@@ -810,7 +810,7 @@ export class Resources {
    * @param {!Element} element
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
-   * @param {!../DOM-rect.DOMMarginsChangeDef=} opt_newMargins
+   * @param {!../dom-rect.DOMMarginsChangeDef=} opt_newMargins
    * @return {!Promise}
    */
   attemptChangeSize(element, newHeight, newWidth, opt_newMargins) {
@@ -1620,7 +1620,7 @@ export class Resources {
    * @param {!Resource} resource
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
-   * @param {!../DOM-rect.DOMMarginsChangeDef|undefined} newMargins
+   * @param {!../dom-rect.DOMMarginsChangeDef|undefined} newMargins
    * @param {boolean} force
    * @param {function(boolean)=} opt_callback A callback function
    * @private
@@ -1653,7 +1653,7 @@ export class Resources {
   /**
    * Returns the layout margins for the resource.
    * @param {!Resource} resource
-   * @return {!../DOM-rect.DOMMarginsDef}
+   * @return {!../dom-rect.DOMMarginsDef}
    * @private
    */
   getDOMMargins_(resource) {
@@ -2083,7 +2083,7 @@ function elements_(elements) {
  * @typedef {{
  *   height: (number|undefined),
  *   width: (number|undefined),
- *   margins: (!../DOM-rect.DOMMarginsChangeDef|undefined)
+ *   margins: (!../dom-rect.DOMMarginsChangeDef|undefined)
  * }}
  */
 export let SizeDef;

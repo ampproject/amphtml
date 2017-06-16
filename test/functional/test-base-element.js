@@ -17,7 +17,7 @@
 import {BaseElement} from '../../src/base-element';
 import {Resource} from '../../src/service/resource';
 import {createAmpElementProto} from '../../src/custom-element';
-import {DOMRectLtwh} from '../../src/DOM-rect';
+import {DOMRectLtwh} from '../../src/dom-rect';
 import {listenOncePromise} from '../../src/event-helper';
 import {timerFor} from '../../src/services';
 import * as sinon from 'sinon';

@@ -194,7 +194,7 @@ export class ParallaxElement {
 
   /**
    * Check if a rectange is within the viewport.
-   * @param {!../DOM-rect.DOMRectDef} rect
+   * @param {!../dom-rect.DOMRectDef} rect
    * @param {number} viewportHeight
    * @private
    */

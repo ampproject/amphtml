@@ -22,7 +22,7 @@ import {disposeServicesForEmbed, getTopWindow} from './service';
 import {escapeHtml} from './dom';
 import {extensionsFor} from './services';
 import {isDocumentReady} from './document-ready';
-import {DOMRectLtwh} from './DOM-rect';
+import {DOMRectLtwh} from './dom-rect';
 import {loadPromise} from './event-helper';
 import {resourcesForDoc} from './services';
 import {setStyle, setStyles} from './style';
@@ -460,7 +460,7 @@ export class FriendlyIframeEmbed {
  * have been loaded in the initially visible set.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} context
  * @param {!Window} hostWin
- * @param {!./DOM-rect.DOMRectDef} rect
+ * @param {!./dom-rect.DOMRectDef} rect
  * @return {!Promise}
  */
 export function whenContentIniLoad(context, hostWin, rect) {

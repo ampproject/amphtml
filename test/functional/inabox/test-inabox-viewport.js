@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {DOMRectLtwh} from '../../../src/DOM-rect';
+import {DOMRectLtwh} from '../../../src/dom-rect';
 import {resourcesForDoc} from '../../../src/services';
 import {
   prepareFixedContainer,

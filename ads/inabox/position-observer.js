@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {DOMRectLtwh, DOMRectDef} from '../../src/DOM-rect';
+import {DOMRectLtwh, DOMRectDef} from '../../src/dom-rect';
 import {Observable} from '../../src/observable';
 import {throttle} from '../../src/utils/rate-limit';
 

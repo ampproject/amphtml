@@ -196,7 +196,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {?string} */
     this.qqid_ = null;
 
-    /** @private {?({width, height}|../../../src/DOM-rect.DOMRectDef)} */
+    /** @private {?({width, height}|../../../src/dom-rect.DOMRectDef)} */
     this.size_ = null;
 
     /** @private {?Element} */

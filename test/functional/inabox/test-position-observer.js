@@ -15,7 +15,7 @@
  */
 
 import {PositionObserver} from '../../../ads/inabox/position-observer';
-import {DOMRectLtwh} from '../../../src/DOM-rect';
+import {DOMRectLtwh} from '../../../src/dom-rect';
 
 describes.realWin('inabox-host:position-observer', {}, env => {
 

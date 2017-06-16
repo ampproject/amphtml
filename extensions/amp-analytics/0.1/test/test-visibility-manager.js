@@ -24,7 +24,7 @@ import {
 } from '../visibility-manager';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {documentStateFor} from '../../../../src/service/document-state';
-import {DOMRectLtwh, rectIntersection} from '../../../../src/DOM-rect';
+import {DOMRectLtwh, rectIntersection} from '../../../../src/dom-rect';
 
 class IntersectionObserverStub {
 

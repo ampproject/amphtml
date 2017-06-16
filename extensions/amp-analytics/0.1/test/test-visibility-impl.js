@@ -21,7 +21,7 @@ import {
   isVisibilitySpecValid,
   Visibility,
 } from '../visibility-impl';
-import {DOMRectLtwh, rectIntersection} from '../../../../src/DOM-rect';
+import {DOMRectLtwh, rectIntersection} from '../../../../src/dom-rect';
 import * as inob from '../../../../src/intersection-observer-polyfill';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {viewerForDoc} from '../../../../src/services';

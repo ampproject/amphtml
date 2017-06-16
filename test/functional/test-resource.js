@@ -17,7 +17,7 @@
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Resources} from '../../src/service/resources-impl';
 import {Resource, ResourceState} from '../../src/service/resource';
-import {DOMRectLtwh} from '../../src/DOM-rect';
+import {DOMRectLtwh} from '../../src/dom-rect';
 import {viewerForDoc} from '../../src/services';
 import * as sinon from 'sinon';
 

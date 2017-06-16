@@ -20,7 +20,7 @@ import {
   getIntersectionChangeEntry,
 } from '../../src/intersection-observer';
 import {createAmpElementProto} from '../../src/custom-element';
-import {DOMRectLtwh} from '../../src/DOM-rect';
+import {DOMRectLtwh} from '../../src/dom-rect';
 import * as sinon from 'sinon';
 
 

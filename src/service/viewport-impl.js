@@ -24,7 +24,7 @@ import {
   getParentWindowFrameElement,
   registerServiceBuilderForDoc,
 } from '../service';
-import {DOMRectLtwh} from '../DOM-rect';
+import {DOMRectLtwh} from '../dom-rect';
 import {dev} from '../log';
 import {dict} from '../utils/object';
 import {numeric} from '../transition';
@@ -84,7 +84,7 @@ export class Viewport {
 
     /**
      * Used to cache the rect of the viewport.
-     * @private {?../DOM-rect.DOMRectDef}
+     * @private {?../dom-rect.DOMRectDef}
      */
     this.rect_ = null;
 
@@ -336,7 +336,7 @@ export class Viewport {
 
   /**
    * Returns the rect of the viewport which includes scroll positions and size.
-   * @return {!../DOM-rect.DOMRectDef}}
+   * @return {!../dom-rect.DOMRectDef}}
    */
   getRect() {
     if (this.rect_ == null) {
@@ -352,7 +352,7 @@ export class Viewport {
   /**
    * Returns the rect of the element within the document.
    * @param {!Element} el
-   * @return {!../DOM-rect.DOMRectDef}}
+   * @return {!../dom-rect.DOMRectDef}}
    */
   getDOMRect(el) {
     const scrollLeft = this.getScrollLeft();
@@ -938,7 +938,7 @@ export class ViewportBindingDef {
    *     pass in, if they cached these values and would like to avoid
    *     remeasure. Requires appropriate updating the values on scroll.
    * @param {number=} unusedScrollTop Same comment as above.
-   * @return {!../DOM-rect.DOMRectDef}
+   * @return {!../dom-rect.DOMRectDef}
    */
   getDOMRect(unusedEl, unusedScrollLeft, unusedScrollTop) {}
 }

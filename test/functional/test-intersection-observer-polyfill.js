@@ -21,7 +21,7 @@ import {
   DEFAULT_THRESHOLD,
   getIntersectionChangeEntry,
 } from '../../src/intersection-observer-polyfill';
-import {DOMRectLtwh} from '../../src/DOM-rect';
+import {DOMRectLtwh} from '../../src/dom-rect';
 import * as sinon from 'sinon';
 
 describe('IntersectionObserverApi', () => {

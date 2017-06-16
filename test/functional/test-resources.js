@@ -18,7 +18,7 @@ import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Resources} from '../../src/service/resources-impl';
 import {Resource, ResourceState} from '../../src/service/resource';
 import {VisibilityState} from '../../src/visibility-state';
-import {DOMRectLtwh} from '../../src/DOM-rect';
+import {DOMRectLtwh} from '../../src/dom-rect';
 import * as sinon from 'sinon';
 
 /*eslint "google-camelcase/google-camelcase": 0*/

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as lr from '../../src/DOM-rect';
+import * as lr from '../../src/dom-rect';
 
 describe('DOMRect', () => {
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {DOMRectLtwh} from '../DOM-rect';
+import {DOMRectLtwh} from '../dom-rect';
 import {registerServiceBuilder, getService} from '../service';
 import {resourcesForDoc} from '../services';
 import {viewerForDoc} from '../services';

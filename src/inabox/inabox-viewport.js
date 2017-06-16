@@ -23,7 +23,7 @@ import {resourcesForDoc} from '../services';
 import {
   nativeIntersectionObserverSupported,
 } from '../../src/intersection-observer-polyfill';
-import {DOMRectLtwh} from '../DOM-rect';
+import {DOMRectLtwh} from '../dom-rect';
 import {Observable} from '../observable';
 import {MessageType} from '../../src/3p-frame-messaging';
 import {dev} from '../log';
@@ -128,7 +128,7 @@ export class ViewportBindingInabox {
      * and iframe position. 0 scroll is not a bad guess.
      * Meanwhile, use iframe box size as the viewport size gives a good
      * initial resource scheduling.
-     * @private {!../DOM-rect.DOMRectDef}
+     * @private {!../dom-rect.DOMRectDef}
      */
     this.viewportRect_ = DOMRectLtwh(0, 0, boxWidth, boxHeight);
 
@@ -138,7 +138,7 @@ export class ViewportBindingInabox {
      * is to move this functionality to the InOb polyfill.
      * ~To not trigger amp-analytics visibility immediately,
      * we start with an initial position right below the fold.~
-     * @private {!../DOM-rect.DOMRectDef}
+     * @private {!../dom-rect.DOMRectDef}
      */
     this.boxRect_ = DOMRectLtwh(0, boxHeight + 1, boxWidth, boxHeight);
 
@@ -349,8 +349,8 @@ export function installInaboxViewportService(ampdoc) {
 }
 
 /**
- * @param {!../DOM-rect.DOMRectDef} newRect
- * @param {!../DOM-rect.DOMRectDef} oldRect
+ * @param {!../dom-rect.DOMRectDef} newRect
+ * @param {!../dom-rect.DOMRectDef} oldRect
  * @returns {boolean}
  */
 function isChanged(newRect, oldRect) {
@@ -358,8 +358,8 @@ function isChanged(newRect, oldRect) {
 }
 
 /**
- * @param {!../DOM-rect.DOMRectDef} newRect
- * @param {!../DOM-rect.DOMRectDef} oldRect
+ * @param {!../dom-rect.DOMRectDef} newRect
+ * @param {!../dom-rect.DOMRectDef} oldRect
  * @returns {boolean}
  */
 function isMoved(newRect, oldRect) {
@@ -367,8 +367,8 @@ function isMoved(newRect, oldRect) {
 }
 
 /**
- * @param {!../DOM-rect.DOMRectDef} newRect
- * @param {!../DOM-rect.DOMRectDef} oldRect
+ * @param {!../dom-rect.DOMRectDef} newRect
+ * @param {!../dom-rect.DOMRectDef} oldRect
  * @returns {boolean}
  */
 function isResized(newRect, oldRect) {

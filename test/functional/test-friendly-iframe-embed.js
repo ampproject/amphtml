@@ -27,7 +27,7 @@ import {Signals} from '../../src/utils/signals';
 import {getStyle} from '../../src/style';
 import {extensionsFor} from '../../src/services';
 import {installServiceInEmbedScope} from '../../src/service';
-import {DOMRectLtwh} from '../../src/DOM-rect';
+import {DOMRectLtwh} from '../../src/dom-rect';
 import {loadPromise} from '../../src/event-helper';
 import {resourcesForDoc} from '../../src/services';
 import * as sinon from 'sinon';

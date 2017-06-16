@@ -23,7 +23,7 @@ import {
   DOMRectEquals,
   DOMRectsOverlap,
   DOMRectLtwh,
-} from '../DOM-rect';
+} from '../dom-rect';
 import {isExperimentOn} from '../../src/experiments';
 import {serializeMessage} from '../../src/3p-frame-messaging';
 import {tryParseJson} from '../../src/json.js';
@@ -42,8 +42,8 @@ export const POSITION_HIGH_FIDELITY = 'position-high-fidelity';
  * relative to viewport. And viewport rect which always has top 0, left 0, and
  * viewport width and height.
  * @typedef {{
- *  positionRect: ?../DOM-rect.DOMRectDef,
- *  viewportRect: !../DOM-rect.DOMRectDef,
+ *  positionRect: ?../dom-rect.DOMRectDef,
+ *  viewportRect: !../dom-rect.DOMRectDef,
  * }}
  */
 export let PositionInViewportEntryDef;

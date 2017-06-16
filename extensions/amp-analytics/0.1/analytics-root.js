@@ -25,7 +25,7 @@ import {
 } from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {DOMRectLtwh} from '../../../src/DOM-rect';
+import {DOMRectLtwh} from '../../../src/dom-rect';
 import {map} from '../../../src/utils/object';
 import {
   viewerForDoc,

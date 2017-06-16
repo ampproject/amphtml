@@ -18,7 +18,7 @@ import {
   DOMRectLtwh,
   DOMRectsOverlap,
   moveDOMRect,
-} from '../DOM-rect';
+} from '../dom-rect';
 import {dev} from '../log';
 import {startsWith} from '../string';
 import {toggle, computedStyle} from '../style';
@@ -163,10 +163,10 @@ export class Resource {
     /** @private {boolean} */
     this.isFixed_ = false;
 
-    /** @private {!../DOM-rect.DOMRectDef} */
+    /** @private {!../dom-rect.DOMRectDef} */
     this.layoutBox_ = DOMRectLtwh(-10000, -10000, 0, 0);
 
-    /** @private {?../DOM-rect.DOMRectDef} */
+    /** @private {?../dom-rect.DOMRectDef} */
     this.initialLayoutBox_ = null;
 
     /** @private {boolean} */
@@ -323,7 +323,7 @@ export class Resource {
    * awaiting the measure and possibly layout.
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
-   * @param {!../DOM-rect.DOMMarginsChangeDef=} opt_newMargins
+   * @param {!../dom-rect.DOMMarginsChangeDef=} opt_newMargins
    */
   changeSize(newHeight, newWidth, opt_newMargins) {
     this.element./*OK*/changeSize(newHeight, newWidth, opt_newMargins);
@@ -339,7 +339,7 @@ export class Resource {
    * @param {boolean} overflown
    * @param {number|undefined} requestedHeight
    * @param {number|undefined} requestedWidth
-   * @param {!../DOM-rect.DOMMarginsChangeDef|undefined}
+   * @param {!../dom-rect.DOMMarginsChangeDef|undefined}
    *     requestedMargins
    */
   overflowCallback(overflown, requestedHeight, requestedWidth,
@@ -499,7 +499,7 @@ export class Resource {
    * Returns a previously measured layout box adjusted to the viewport. This
    * mainly affects fixed-position elements that are adjusted to be always
    * relative to the document position in the viewport.
-   * @return {!../DOM-rect.DOMRectDef}
+   * @return {!../dom-rect.DOMRectDef}
    */
   getLayoutBox() {
     if (!this.isFixed_) {
@@ -513,7 +513,7 @@ export class Resource {
   /**
    * Returns a previously measured layout box relative to the page. The
    * fixed-position elements are relative to the top of the document.
-   * @return {!../DOM-rect.DOMRectDef}
+   * @return {!../dom-rect.DOMRectDef}
    */
   getPageLayoutBox() {
     return this.layoutBox_;
@@ -521,7 +521,7 @@ export class Resource {
 
   /**
    * Returns the first measured layout box.
-   * @return {!../DOM-rect.DOMRectDef}
+   * @return {!../dom-rect.DOMRectDef}
    */
   getInitialLayoutBox() {
     // Before the first measure, there will be no initial layoutBox.
@@ -550,7 +550,7 @@ export class Resource {
 
   /**
    * Whether the element's layout box overlaps with the specified rect.
-   * @param {!../DOM-rect.DOMRectDef} rect
+   * @param {!../dom-rect.DOMRectDef} rect
    * @return {boolean}
    */
   overlaps(rect) {

@@ -113,7 +113,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     /** @private {!../../../src/service/extensions-impl.Extensions} */
     this.extensions_ = extensionsFor(this.win);
 
-    /** @private {?({width, height}|../../../src/DOM-rect.DOMRectDef)} */
+    /** @private {?({width, height}|../../../src/dom-rect.DOMRectDef)} */
     this.size_ = null;
 
     /** @private {?Element} */
