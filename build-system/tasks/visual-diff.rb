@@ -43,12 +43,21 @@ end
 def launchWebServer()
   webserverCmd = 'gulp serve --host ' + HOST + ' --port ' + PORT
   webserverUrl = 'http://' + HOST + ':' + PORT
-  webserver = fork do
+  @pid = fork do
+    Signal.trap('INT') { exit }
     exec webserverCmd
   end
+  Process.detach(@pid)
   until up(HOST, PORT)
     sleep(1)
   end
+  @pid
+end
+
+
+def closeWebServer(pid)
+  Process.kill('INT', pid)
+  Process.wait
 end
 
 
@@ -75,7 +84,7 @@ end
 
 
 def main()
-  launchWebServer()
+  pid = launchWebServer()
   configJson = loadConfigJson()
   config = JSON.parse(configJson)
   server = 'http://' + HOST + ':' + PORT
@@ -89,6 +98,7 @@ def main()
     name = webpage["name"]
     generateSnapshot(server, assets_dir, assets_base_url, url, name)
   end
+  closeWebServer(pid)
 end
 
 
