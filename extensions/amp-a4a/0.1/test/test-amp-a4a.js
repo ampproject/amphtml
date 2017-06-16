@@ -34,7 +34,6 @@ import {Xhr} from '../../../../src/service/xhr-impl';
 import {Extensions} from '../../../../src/service/extensions-impl';
 import {Viewer} from '../../../../src/service/viewer-impl';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
-import {cryptoFor} from '../../../../src/crypto';
 import {cancellation} from '../../../../src/error';
 import {
   data as validCSSAmp,
@@ -1698,10 +1697,10 @@ describe('amp-a4a', () => {
       beforeEach(() => {
         return createIframePromise().then(fixture => {
           setupForAdTesting(fixture);
-          stubVerifySignature =
-              sandbox.stub(cryptoFor(fixture.win), 'verifySignature');
           const a4aElement = createA4aElement(fixture.doc);
           a4a = new MockA4AImpl(a4aElement);
+          stubVerifySignature =
+              sandbox.stub(a4a.signatureVerifier_, 'verifySignature');
         });
       });
 
@@ -1912,7 +1911,7 @@ describe('amp-a4a', () => {
         expect(serviceInfo['keys']).to.be.an.instanceof(Array);
         expect(serviceInfo['keys']).to.have.lengthOf(1);
         const keyInfoPromise = serviceInfo['keys'][0];
-        expect(keyInfoPromise).to.be.an.instanceof(Promise);
+        expect(keyInfoPromise).to.be.an.instanceof(win.Promise);
         return keyInfoPromise.then(keyInfo => {
           verifyIsKeyInfo(keyInfo);
         });
@@ -2009,7 +2008,7 @@ describe('amp-a4a', () => {
           expect(serviceInfo['keys']).to.be.an.instanceof(Array);
           expect(serviceInfo['keys']).to.have.lengthOf(1);
           const keyInfoPromise = serviceInfo['keys'][0];
-          expect(keyInfoPromise).to.be.an.instanceof(Promise);
+          expect(keyInfoPromise).to.be.an.instanceof(win.Promise);
           return keyInfoPromise.then(keyInfo => {
             verifyIsKeyInfo(keyInfo);
           });
@@ -2101,7 +2100,7 @@ describe('amp-a4a', () => {
             if (serviceName == 'google') {
               expect(serviceInfo['keys']).to.have.lengthOf(1);
               const keyInfoPromise = serviceInfo['keys'][0];
-              expect(keyInfoPromise).to.be.an.instanceof(Promise);
+              expect(keyInfoPromise).to.be.an.instanceof(win.Promise);
               return keyInfoPromise.then(keyInfo => {
                 verifyIsKeyInfo(keyInfo);
               });

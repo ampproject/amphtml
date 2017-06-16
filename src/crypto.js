@@ -17,17 +17,6 @@
 import {getService} from './service';
 
 /**
- * An object holding the public key and its hash.
- *
- * @typedef {{
- *   serviceName: string,
- *   hash: Uint8Array,
- *   cryptoKey: !webCrypto.CryptoKey
- * }}
- */
-export let PublicKeyInfoDef;
-
-/**
  * @param {!Window} window
  * @return {!./service/crypto-impl.Crypto}
  */
