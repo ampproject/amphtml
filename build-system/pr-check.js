@@ -26,11 +26,11 @@
  */
 const exec = require('./exec.js').exec;
 const execOrDie = require('./exec.js').execOrDie;
-const getStdout = require('./exec.js').getStdout;
-const path = require('path');
-const minimist = require('minimist');
-const util = require('gulp-util');
 const extensionsVersions = require('./extensions-versions-config');
+const getStdout = require('./exec.js').getStdout;
+const minimist = require('minimist');
+const path = require('path');
+const util = require('gulp-util');
 
 const gulp = 'node_modules/gulp/bin/gulp.js';
 const fileLogPrefix = util.colors.yellow.bold('pr-check.js:');
@@ -274,7 +274,7 @@ const command = {
     // This must only be run for push builds, since Travis hides the encrypted
     // environment variables required by Percy during pull request builds.
     // For now, this is warning-only.
-    timedExec(`${gulp} visual-diff`);
+    timedExec(`ruby ${path.resolve('build-system/tasks/visual-diff.rb')}`);
   },
   runPresubmitTests: function() {
     timedExecOrDie(`${gulp} presubmit`);
@@ -293,6 +293,7 @@ function runAllCommands() {
     command.testBuildSystem();
     command.cleanBuild();
     command.buildRuntime();
+    command.runVisualDiffTests();  // Only called during push builds.
     command.runJsonAndLintChecks();
     command.runDepAndTypeChecks();
     command.runUnitTests();
@@ -304,7 +305,6 @@ function runAllCommands() {
     command.cleanBuild();
     command.buildRuntimeMinified();
     command.runPresubmitTests();  // Needs runtime to be built and served.
-    // command.runVisualDiffTests();  // Only called during push builds.
     command.runIntegrationTests();
   }
 }
