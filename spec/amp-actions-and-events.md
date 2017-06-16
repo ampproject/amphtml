@@ -81,6 +81,7 @@ For example, the following is possible in AMP.
 ```
 
 ## Element Specific Events
+
 ### * - all elements
 <table>
   <tr>
@@ -93,36 +94,19 @@ For example, the following is possible in AMP.
   </tr>
 </table>
 
-### Input Elements (any that fires `change` and `input` event)
-
-Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and `select`.
-
+### Input Elements
 <table>
   <tr>
     <th>Event</th>
     <th>Description</th>
+    <th>Elements</th>
     <th>Data</th>
   </tr>
+  <!-- change -->
   <tr>
-    <td>change</td>
-    <td>Fired when the value of the element is changed and committed.</td>
-    <td>Various, see below.</td>
-  </tr>
-  <tr>
-    <td>input-debounced</td>
-    <td>Fired when the value of the element is changed. This is similar to the standard input event, but it only fires when 300ms have passed after the value of the input has stopped changing.</td>
-    <td>Various, see below.</td>
-  </tr>
-</table>
-
-#### `change` event data
-<table>
-  <tr>
-    <th>Input Type</th>
-    <th>Data</th>
-  </tr>
-  <tr>
-    <td>Range</td>
+    <td rowspan=3><code>change</code></td>
+    <td rowspan=3>Fired when the value of the element is changed and committed.</td>
+    <td>input[type="range"]</td>
     <td>
       <code>event.min</code> : The minimum value of the range<br>
       <code>event.value</code> : The current value of the range<br>
@@ -130,16 +114,23 @@ Including: `input[type=radio]`, `input[type=checkbox]`, `input[type=range]`, and
     </td>
   </tr>
   <tr>
-    <td>Radio</td>
-    <td><code>event.checked</code> : If the element is checked</td>
+    <td>input[type="radio"], input[type="checkbox"]</td>
+    <td>
+      <code>event.checked</code> : If the element is checked
+    </td>
   </tr>
   <tr>
-    <td>Checkbox</td>
-    <td><code>event.checked</code> : If the element is checked</td>
+    <td>input[type="text"], select</td>
+    <td>
+      <code>event.value</code> : String of the text or selected option
+    </td>
   </tr>
+  <!-- input-debounced -->
   <tr>
-    <td>Text</td>
-    <td><code>event.value</code> : The text currently in the text box
+    <td><code>input-debounced</code></td>
+    <td>Fired when the value of the element is changed. This is similar to the standard <code>input</code> event, but it only fires when 300ms have passed after the value of the input has stopped changing.</td>
+    <td>Elements that fire <code>input</code> event.</td>
+    <td>Same as above.</td>
   </tr>
 </table>
 
@@ -364,6 +355,10 @@ actions that apply to the whole document.
   <tr>
     <th>Action</th>
     <th>Description</th>
+  </tr>
+  <tr>
+    <td>navigateTo(url=STRING)</td>
+    <td>Navigates current window to given URL. Supports <a href="./amp-var-substitutions.md">standard URL subsitutions</a>. Can only be invoked via <code>tap</code> or <code>change</code> events.</td>
   </tr>
   <tr>
     <td>goBack</td>
