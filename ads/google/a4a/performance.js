@@ -147,7 +147,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
     this.slotId_ = slotId;
 
     /** @private {number} @const */
-    this.correlator_ = getCorrelator(win);
+    this.correlator_ = getCorrelator(win, /* opt_cid */ undefined, element);
 
     /** @private {string} @const */
     this.slotName_ = this.namespace_ + '.' + this.slotId_;

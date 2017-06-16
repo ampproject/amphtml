@@ -71,7 +71,7 @@ app.get([
 app.use('/pwa', (req, res) => {
   let file;
   let contentType;
-  if (!req.url || req.url == '/') {
+  if (!req.url || req.path == '/') {
     // pwa.html
     contentType = 'text/html';
     file = '/examples/pwa/pwa.html';
