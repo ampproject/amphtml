@@ -183,8 +183,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'asnt': this.sentinel,
       'dff': computedStyle(this.win, this.element)['font-family'],
       'prev_fmts': sharedStateParams.prevFmts || null,
-      'isw': this.win != this.win.top ? viewportSize.width : null,
-      'ish': this.win != this.win.top ? viewportSize.height : null,
       'brdim': additionalDimensions(this.win, viewportSize),
     };
 
