@@ -26,6 +26,7 @@ import {
 } from '../../../ads/google/a4a/traffic-experiments';
 import {isExperimentOn} from '../../../src/experiments';
 import {
+  additionalDimensions,
   extractGoogleAdCreativeAndSignature,
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
@@ -163,6 +164,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     this.uniqueSlotId_ = slotId + adk;
     const sharedStateParams = sharedState.addNewSlot(
         format, this.uniqueSlotId_, adClientId);
+    const viewportSize = this.getViewport().getSize();
     const parameters = {
       'client': adClientId,
       format,
@@ -170,7 +172,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'h': this.size_.height,
       'adtest': adTestOn ? 'on' : null,
       adk,
-      'raru': 1,
       'bc': global.SVGElement && global.document.createElementNS ? '1' : null,
       'ctypes': this.getCtypes_(),
       'host': this.element.getAttribute('data-ad-host'),
@@ -182,6 +183,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'asnt': this.sentinel,
       'dff': computedStyle(this.win, this.element)['font-family'],
       'prev_fmts': sharedStateParams.prevFmts || null,
+      'isw': this.win != this.win.top ? viewportSize.width : null,
+      'ish': this.win != this.win.top ? viewportSize.height : null,
+      'brdim': additionalDimensions(this.win, viewportSize),
     };
 
     const experimentIds = [];

@@ -138,7 +138,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       'ga_vid', 'ga_hid', 'iag', 'icsg', 'nhd', 'dssz', 'mdo', 'mso', 'u_tz',
       'u_his', 'u_java', 'u_h', 'u_w', 'u_ah', 'u_aw', 'u_cd', 'u_nplug',
       'u_nmime', 'dff', 'adx', 'ady', 'biw', 'isw', 'ish', 'ifk', 'oid', 'loc',
-      'rx', 'eae', 'pc', 'brdim', 'vis', 'rsz', 'abl', 'ppjl', 'pfx', 'fu',
+      'rx', 'eae', 'pc', 'vis', 'rsz', 'abl', 'ppjl', 'pfx', 'fu',
       'bc', 'ifi', 'dtd',
     ];
     // Skipping this test until all AdSense parameters are standardized, and
@@ -487,7 +487,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       // attributes, or the actual size of the frame. To make this less of a
       // hassle, we'll just match against regexp.
       expect(style.transform).to.match(new RegExp(
-          'matrix\\(1, 0, 0, 1, -[0-9]+, -[0-9]+\\)'));
+          'matrix\\(1, 0, 0, 1, -\d+, -\d+\\)'));
     }
 
     afterEach(() => document.body.removeChild(impl.element));
@@ -572,7 +572,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       return impl.getAdUrl().then(url =>
         // With exp as-use-attr-for-format off, we can't test for specific
         // numbers, but we know that the values should be numeric.
-        expect(url).to.match(/format=[0-9]+x[0-9]+&w=[0-9]+&h=[0-9]+/));
+        expect(url).to.match(/format=\d+x\d+&w=\d+&h=\d+/));
     });
     it('has correct format when height == "auto"', () => {
       element.setAttribute('height', 'auto');
@@ -582,7 +582,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       return impl.getAdUrl().then(url =>
         // With exp as-use-attr-for-format off, we can't test for specific
         // numbers, but we know that the values should be numeric.
-        expect(url).to.match(/format=[0-9]+x[0-9]+&w=[0-9]+&h=[0-9]+/));
+        expect(url).to.match(/format=\d+x\d+&w=\d+&h=\d+/));
     });
     it('has correct format when as-use-attr-for-format is on', () => {
       toggleExperiment(window, 'as-use-attr-for-format', true);
@@ -605,7 +605,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           impl.onLayoutMeasure();
           return impl.getAdUrl().then(url =>
               // Ensure that "auto" doesn't appear anywhere here:
-              expect(url).to.match(/format=[0-9]+x[0-9]+&w=[0-9]+&h=[0-9]+/));
+              expect(url).to.match(/format=\d+x\d+&w=\d+&h=\d+/));
         });
     it('includes eid when in amp-auto-ads holdout control', () => {
       forceExperimentBranch(window,
@@ -627,6 +627,45 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       return impl.getAdUrl().then(url => {
         expect(url).to.match(new RegExp(
             `eid=[^&]*${AdSenseAmpAutoAdsHoldoutBranches.EXPERIMENT}`));
+      });
+    });
+    it('returns the right URL', () => {
+      new AmpAd(element).upgradeCallback();
+      return impl.getAdUrl().then(url => {
+        [
+          /^https:\/\/googleads\.g\.doubleclick\.net\/pagead\/ads/,
+          /(\?|&)adk=\d+(&|$)/,
+          /(\?|&)is_amp=3(&|$)/,
+          /(\?|&)amp_v=%24internalRuntimeVersion%24(&|$)/,
+          /(\?|&)client=ca-adsense(&|$)/,
+          /(\?|&)format=\d+x\d+(&|$)/,
+          /(\?|&)w=\d+(&|$)/,
+          /(\?|&)h=\d+(&|$)/,
+          /(\?|&)d_imp=1(&|$)/,
+          /(\?|&)dt=\d+(&|$)/,
+          /(\?|&)ifi=\d+(&|$)/,
+          /(\?|&)adf=\d+(&|$)/,
+          /(\?|&)c=\d+(&|$)/,
+          /(\?|&)biw=\d+(&|$)/,
+          /(\?|&)bih=\d+(&|$)/,
+          /(\?|&)adx=-?\d+(&|$)/,
+          /(\?|&)ady=-?\d+(&|$)/,
+          /(\?|&)u_aw=\d+(&|$)/,
+          /(\?|&)u_ah=\d+(&|$)/,
+          /(\?|&)u_cd=24(&|$)/,
+          /(\?|&)u_w=\d+(&|$)/,
+          /(\?|&)u_h=\d+(&|$)/,
+          /(\?|&)u_tz=-?\d+(&|$)/,
+          /(\?|&)u_his=\d+(&|$)/,
+          /(\?|&)oid=2(&|$)/,
+          /(\?|&)isw=\d+(&|$)/,
+          /(\?|&)ish=\d+(&|$)/,
+          /(\?|&)pfx=(1|0)(&|$)/,
+          /(\?|&)url=https?%3A%2F%2F[a-zA-Z0-9.:%]+(&|$)/,
+          /(\?|&)top=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D\d+(&|$)/,
+          /(\?|&)ref=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D\d+(&|$)/,
+          /(\?|&)dtd=\d+(&|$)/,
+        ].forEach(regexp => expect(url).to.match(regexp));
       });
     });
   });

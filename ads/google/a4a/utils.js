@@ -213,7 +213,6 @@ export function googlePageParameters(win, doc, startTime, output = 'html') {
         const screen = win.screen;
         const viewport = viewportForDoc(win.document);
         const viewportRect = viewport.getRect();
-        const viewportSize = viewport.getSize();
         return {
           'is_amp': AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
           'amp_v': '$internalRuntimeVersion$',
@@ -230,9 +229,6 @@ export function googlePageParameters(win, doc, startTime, output = 'html') {
           'u_h': screen ? screen.height : null,
           'u_tz': -new Date().getTimezoneOffset(),
           'u_his': getHistoryLength(win),
-          'brdim': additionalDimensions(win, viewportSize),
-          'isw': viewportSize.width,
-          'ish': viewportSize.height,
           'art': isCanary(win) ? '2' : null,
           'url': documentInfo.canonicalUrl,
           'top': win != win.top ? topWindowUrlOrDomain(win) : null,
