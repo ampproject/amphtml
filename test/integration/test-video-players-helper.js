@@ -17,10 +17,7 @@
 import {listenOncePromise} from '../../src/event-helper';
 import {timerFor} from '../../src/services';
 import {toggleExperiment} from '../../src/experiments';
-import {
-  VideoInterface,
-  VideoEvents,
-} from '../../src/video-interface';
+import {VideoInterface, VideoEvents} from '../../src/video-interface';
 import {supportsAutoplay} from '../../src/service/video-manager-impl';
 import {
   createFixtureIframe,
@@ -94,12 +91,12 @@ export function runVideoPlayerIntegrationTests(
       return button;
     }
 
-    // Although these tests are not about autoplay, we can only run them in
-    // browsers that do support autoplay, this is because a synthetic click
-    // event will not be considered a user-action and mobile browsers that
-    // don't support muted autoplay will block it. In real life, the click
-    // would be considered a user-initiated action, but no way to do that in a
-    // scripted test environment.
+// Although these tests are not about autoplay, we can ony run them in
+// browsers that do support autoplay, this is because a synthetic click
+// event will not be considered a user-action and mobile browsers that
+// don't support muted autoplay will block it. In real life, the click
+// would be considered a user-initiated action, but no way to do that in a
+// scripted test environment.
     before(function() {
       this.timeout(TIMEOUT);
   // Skip autoplay tests if browser does not support autoplay.
