@@ -48,16 +48,24 @@ def launchWebServer()
     exec webserverCmd
   end
   Process.detach(@pid)
+  @pid
+end
+
+
+def waitForWebServer()
+  tries = 0
   until up(HOST, PORT)
     sleep(1)
+    tries += 1
+    break if tries > 10
   end
-  @pid
+  up(HOST, PORT)
 end
 
 
 def closeWebServer(pid)
   Process.kill('INT', pid)
-  Process.wait
+  Process.wait(pid, Process::WNOHANG)
 end
 
 
@@ -85,6 +93,11 @@ end
 
 def main()
   pid = launchWebServer()
+  if not waitForWebServer()
+    puts 'Failed to start webserver'
+    closeWebServer(pid)
+    exit(false)
+  end
   configJson = loadConfigJson()
   config = JSON.parse(configJson)
   server = 'http://' + HOST + ':' + PORT

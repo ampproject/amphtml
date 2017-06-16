@@ -28,8 +28,8 @@ const exec = require('./exec.js').exec;
 const execOrDie = require('./exec.js').execOrDie;
 const extensionsVersions = require('./extensions-versions-config');
 const getStdout = require('./exec.js').getStdout;
-const path = require('path');
 const minimist = require('minimist');
+const path = require('path');
 const resolve = require('path').resolve;
 const util = require('gulp-util');
 
@@ -377,7 +377,6 @@ function main(argv) {
     if (buildTargets.has('RUNTIME') || buildTargets.has('INTEGRATION_TEST')) {
       command.cleanBuild();
       command.buildRuntime();
-      command.runVisualDiffTests();  // Temporary for testing.
       // Ideally, we'd run presubmit tests after `gulp dist`, as some checks run
       // through the dist/ folder. However, to speed up the Travis queue, we no
       // longer do a dist build for PRs, so this call won't cover dist/.
