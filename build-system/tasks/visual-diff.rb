@@ -16,6 +16,9 @@
 #
 #
 # Visual diff generator for AMP webpages using Percy.
+#
+# Note: This is done in ruby to use Percy's API for snapshotting pages served by
+# a localhost server. See https://percy.io/docs/clients/ruby/percy-anywhere.
 
 
 require 'percy/capybara/anywhere'
@@ -36,10 +39,10 @@ PORT = '8000'
 # Returns:
 # - Process ID of server process.
 def launchWebServer()
-  webserverCmd = 'gulp serve --host ' + HOST + ' --port ' + PORT
-  webserverUrl = 'http://' + HOST + ':' + PORT
+  webserverCmd = "gulp serve --host #{HOST} --port #{PORT}"
+  webserverUrl = "http://#{HOST}:#{PORT}"
   @pid = fork do
-    Signal.trap('INT') { exit }
+    Signal.trap("INT") { exit }
     exec webserverCmd
   end
   Process.detach(@pid)
@@ -60,7 +63,7 @@ rescue SystemCallError
 end
 
 
-# Waits up to 10 seconds for the webserver to start up.
+# Waits up to 15 seconds for the webserver to start up.
 #
 # Returns:
 # - true if webserver is running.
@@ -69,7 +72,7 @@ def waitForWebServer()
   until isWebServerRunning()
     sleep(1)
     tries += 1
-    break if tries > 10
+    break if tries > 15
   end
   isWebServerRunning()
 end
@@ -80,17 +83,17 @@ end
 # Args:
 # - pid: Process ID of the webserver.
 def closeWebServer(pid)
-  Process.kill('INT', pid)
+  Process.kill("INT", pid)
   Process.wait(pid, Process::WNOHANG)
 end
 
 
-# Loads the test config from a well-known json config file.
-def loadConfigJson()
+# Loads the list of pages to snapshot from a well-known json config file.
+def loadPagesToSnapshotJson()
   jsonFile = File.open(
       File.join(
           File.dirname(__FILE__),
-          '../../test/visual-diff/visual-tests.json'),
+          "../../test/visual-diff/visual-tests.json"),
       "r")
   jsonContent = jsonFile.read
 end
@@ -120,18 +123,18 @@ end
 def main()
   pid = launchWebServer()
   if not waitForWebServer()
-    puts 'Failed to start webserver'
+    puts "Failed to start webserver"
     closeWebServer(pid)
     exit(false)
   end
-  configJson = loadConfigJson()
-  config = JSON.parse(configJson)
-  server = 'http://' + HOST + ':' + PORT
-  webpages = config["webpages"]
+  pagesToSnapshotJson = loadPagesToSnapshotJson()
+  pagesToSnapshot = JSON.parse(pagesToSnapshotJson)
+  server = "http://#{HOST}:#{PORT}"
+  webpages = pagesToSnapshot["webpages"]
   webpages.each do |webpage|
     assets_base_url = webpage["assets_base_url"]
     assets_dir = File.expand_path(
-        '../../../' + webpage["assets_dir"],
+        "../../../#{webpage["assets_dir"]}",
         __FILE__)
     url = webpage["url"]
     name = webpage["name"]

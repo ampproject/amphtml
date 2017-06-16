@@ -30,7 +30,6 @@ const extensionsVersions = require('./extensions-versions-config');
 const getStdout = require('./exec.js').getStdout;
 const minimist = require('minimist');
 const path = require('path');
-const resolve = require('path').resolve;
 const util = require('gulp-util');
 
 const gulp = 'node_modules/gulp/bin/gulp.js';
@@ -275,7 +274,7 @@ const command = {
     // This must only be run for push builds, since Travis hides the encrypted
     // environment variables required by Percy during pull request builds.
     // For now, this is warning-only.
-    timedExec(`ruby ${resolve('build-system/tasks/visual-diff.rb')}`);
+    timedExec(`ruby ${path.resolve('build-system/tasks/visual-diff.rb')}`);
   },
   runPresubmitTests: function() {
     timedExecOrDie(`${gulp} presubmit`);
