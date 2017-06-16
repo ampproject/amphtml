@@ -22,10 +22,35 @@ require 'percy/capybara/anywhere'
 require 'capybara/poltergeist'
 require 'phantomjs'
 require 'json'
+require "net/http"
 
 
 ENV['PERCY_DEBUG'] = '1'  # Enable debugging output.
 DEFAULT_WIDTHS = [375, 411]  # CSS widths: iPhone: 375, Pixel: 411.
+HOST = 'localhost'
+PORT = '8000'
+
+
+def up?(server, port)
+  http = Net::HTTP.start(server, port, {open_timeout: 5, read_timeout: 5})
+  response = http.head("/")
+  response.code == "200"
+rescue SystemCallError
+  false
+end
+
+
+def launchWebServer()
+  webserverCmd = 'gulp serve --host ' + HOST + ' --port ' + PORT
+  webserverUrl = 'http://' + HOST + ':' + PORT
+  puts 'Starting webserver at ' + webserverUrl + '...'
+  webserver = fork do
+    exec webserverCmd
+  end
+  until up?(HOST, PORT)
+    sleep(1)
+  end
+end
 
 
 def loadConfigJson()
@@ -39,6 +64,7 @@ end
 
 
 def generateSnapshot(server, assets_dir, assets_base_url, url, name)
+  puts 'Generating snapshot...'
   Percy::Capybara::Anywhere.run(
       server, assets_dir, assets_base_url) do |page|
     page.driver.options[:phantomjs] = Phantomjs.path
@@ -51,9 +77,10 @@ end
 
 
 def main()
+  launchWebServer()
   configJson = loadConfigJson()
   config = JSON.parse(configJson)
-  server = config["server"]
+  server = 'http://' + HOST + ':' + PORT
   webpages = config["webpages"]
   webpages.each do |webpage|
     assets_base_url = webpage["assets_base_url"]

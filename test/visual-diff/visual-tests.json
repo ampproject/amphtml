@@ -1,6 +1,5 @@
 {
   "_comment": "HTML file(s) used for visual diff tests. Paths relative to src.",
-  "server": "http://localhost:8000",
   "webpages": [
     {
       "assets_dir": "examples/amp-by-example",

@@ -373,12 +373,12 @@ function main(argv) {
       // through the dist/ folder. However, to speed up the Travis queue, we no
       // longer do a dist build for PRs, so this call won't cover dist/.
       // TODO(rsimha-amp): Move this once integration tests are enabled.
-      // command.runPresubmitTests();
-      // command.runJsonAndLintChecks();
-      // command.runDepAndTypeChecks();
+      command.runPresubmitTests();
+      command.runJsonAndLintChecks();
+      command.runDepAndTypeChecks();
       // Skip unit tests if the PR only contains changes to integration tests.
       if (buildTargets.has('RUNTIME')) {
-        // command.runUnitTests();
+        command.runUnitTests();
       }
     }
     if (buildTargets.has('VALIDATOR_WEBUI')) {
