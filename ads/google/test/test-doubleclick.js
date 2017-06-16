@@ -22,12 +22,12 @@ function verifyScript(win, name) {
   scripts.forEach(script => {
     if (script == 'glade.js') {
       expect(!!win.document.querySelector(
-    'script[src="https://securepubads.g.doubleclick.net/static/glade.js"]'))
-    .to.equal(script == name);
+          'script[src="https://securepubads.g.doubleclick.net/static/glade.js"]'))
+          .to.equal(script == name);
     } else {
       expect(!!win.document.querySelector(
-        `script[src="https://www.googletagservices.com/tag/js/${script}"]`))
-        .to.equal(script == name);
+          `script[src="https://www.googletagservices.com/tag/js/${script}"]`))
+          .to.equal(script == name);
     }
   });
 };
