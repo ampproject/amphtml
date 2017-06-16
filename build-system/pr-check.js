@@ -26,7 +26,6 @@
  */
 const exec = require('./exec.js').exec;
 const execOrDie = require('./exec.js').execOrDie;
-const extensionsVersions = require('./extensions-versions-config');
 const getStdout = require('./exec.js').getStdout;
 const minimist = require('minimist');
 const path = require('path');
