@@ -254,12 +254,14 @@ export function runVideoPlayerIntegrationTests(
   }
 
   function cleanUp() {
-    if (fixtureGlobal) {
-      if (opt_experiment) {
-        toggleExperiment(fixtureGlobal.win, opt_experiment, false);
+    try {
+      if (fixtureGlobal) {
+        if (opt_experiment) {
+          toggleExperiment(fixtureGlobal.win, opt_experiment, false);
+        }
+        fixtureGlobal.doc.body.removeChild(videoGlobal);
+        fixtureGlobal.iframe.remove();
       }
-      fixtureGlobal.doc.body.removeChild(videoGlobal);
-      fixtureGlobal.iframe.remove();
-    }
+    } catch (e) {}
   }
 }
