@@ -297,8 +297,8 @@ expand beyond an iframe.  Support may be added for this in the future, if there
 is demonstrated desire for it.
 
 <table>
-  <tr><td>amp-ad-exit</td></tr>
   <tr><td>amp-accordion</td></tr>
+  <tr><td>amp-ad-exit</td></tr>
   <tr><td>amp-analytics</td></tr>
   <tr><td>amp-anim</td></tr>
   <tr><td>amp-audio</td></tr>
