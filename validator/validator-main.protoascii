@@ -32,7 +32,7 @@ styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsi
 # Validator extensions.
 # =====================
 # In addition to the rules in this file, the Validator honors the rules
-# in the extensions/*/0.1/validator-*.protoascii files. This makes it
+# in the extensions/*/validator-*.protoascii files. This makes it
 # easy to organize the rules for extensions next to their Javascript
 # implementation.
 
@@ -1679,6 +1679,18 @@ tags: {
   attrs: { name: "[srclang]" }
   attr_lists: "track-attrs-subtitles"
 }
+tags: {
+  tag_name: "TRACK"
+  spec_name: "amp-ima-video > track[kind=subtitles]"
+  mandatory_parent: "AMP-IMA-VIDEO"
+  # <amp-bind>
+  attrs: { name: "[label]" }
+  attrs: { name: "[src]" }
+  attrs: { name: "[srclang]" }
+  attr_lists: "track-attrs-subtitles"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ima-video"
+}
+
 
 # 4.7.15 SVG
 # We allow some limited embedded SVG tags. We do not allow inline styles
@@ -2607,10 +2619,6 @@ tags {
     name: "submitting"
     mandatory: true
   }
-  child_tags: {
-    mandatory_num_child_tags: 1
-    first_child_tag_name_oneof: "TEMPLATE"
-  }
 }
 tags {
   tag_name: "DIV"
@@ -2621,10 +2629,6 @@ tags {
     name: "submit-success"
     mandatory: true
   }
-  child_tags: {
-    mandatory_num_child_tags: 1
-    first_child_tag_name_oneof: "TEMPLATE"
-  }
 }
 tags {
   tag_name: "DIV"
@@ -2634,10 +2638,6 @@ tags {
   attrs: {
     name: "submit-error"
     mandatory: true
-  }
-  child_tags: {
-    mandatory_num_child_tags: 1
-    first_child_tag_name_oneof: "TEMPLATE"
   }
 }
 attr_lists: {
@@ -3130,7 +3130,7 @@ tags: {
   disallowed_ancestor: "NOSCRIPT"
 }
 # 4.11.3 The template element
-# See extensions/amp-mustache/0.1/validator-amp-mustache.protoascii.
+# See extensions/amp-mustache/validator-amp-mustache.protoascii.
 
 # 11 Obsolute features
 # 11.2 Non-conforming features
@@ -3319,6 +3319,23 @@ attr_lists: {
   attrs: { name: "inlist" }
   attrs: { name: "prefix" }
   attrs: { name: "property" }
+  attrs: {
+    name: "rel"
+    blacklisted_value_regex: "(^|\\s)("  # Values are space separated
+        "canonical|"
+        "components|"
+        "dns-prefetch|"
+        "import|"
+        "manifest|"
+        "preconnect|"
+        "preload|"
+        "prerender|"
+        "serviceworker|"
+        "stylesheet|"
+        "subresource"
+        ")(\\s|$)"
+  }
+  attrs: { name: "rev" }
   attrs: { name: "resource" }
   attrs: { name: "typeof" }
   attrs: { name: "vocab" }

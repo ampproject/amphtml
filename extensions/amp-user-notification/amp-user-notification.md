@@ -24,10 +24,6 @@ limitations under the License.
     <td>Displays a dismissable notification to the user. </td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td>
       <div>
@@ -236,7 +232,7 @@ amp-user-notification.amp-active {
 ```
 
 ## Actions
-The `amp-user-notification` exposes the following actions that you can use [AMP on-syntax to trigger](../../../src/spec/amp-actions-and-events.md):
+The `amp-user-notification` exposes the following actions that you can use [AMP on-syntax to trigger](https://github.com/ampproject/amphtml/blob/master/spec/amp-actions-and-events.md):
 
 <table>
   <tr>
@@ -259,4 +255,4 @@ Optionally, you can delay generation of Client IDs used for analytics and simila
 
 ## Validation
 
-See [amp-user-notification rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-user-notification/0.1/validator-amp-user-notification.protoascii) in the AMP validator specification.
+See [amp-user-notification rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-user-notification/validator-amp-user-notification.protoascii) in the AMP validator specification.

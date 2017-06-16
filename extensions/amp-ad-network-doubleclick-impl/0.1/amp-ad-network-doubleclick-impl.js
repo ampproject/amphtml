@@ -37,9 +37,12 @@ import {
   googleBlockParameters,
   googlePageParameters,
   isGoogleAdsA4AValidEnvironment,
+  isReportingEnabled,
   AmpAnalyticsConfigDef,
   extractAmpAnalyticsConfig,
   groupAmpAdsByType,
+  addCsiSignalsToAmpAnalyticsConfig,
+  QQID_HEADER,
 } from '../../../ads/google/a4a/utils';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {
@@ -182,7 +185,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /**
      * Config to generate amp-analytics element for active view reporting.
-     * @type {?JSONType}
+     * @type {?JsonObject}
      * @private
      */
     this.ampAnalyticsConfig_ = null;
@@ -190,8 +193,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {!../../../src/service/extensions-impl.Extensions} */
     this.extensions_ = extensionsFor(this.win);
 
-    /** @private {../../../src/service/xhr-impl.FetchResponseHeaders} */
-    this.responseHeaders_ = null;
+    /** @private {?string} */
+    this.qqid_ = null;
 
     /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
     this.size_ = null;
@@ -324,20 +327,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // validateData, from 3p/3p/js, after noving it someplace common.
     const startTime = Date.now();
     return getPageLevelParameters_(this.win, this.getAmpDoc(), startTime)
-      .then(pageLevelParameters =>
+        .then(pageLevelParameters =>
         googleAdUrl(this, DOUBLECLICK_BASE_URL, startTime,
-          Object.assign(this.getBlockParameters_(), pageLevelParameters),
+            Object.assign(this.getBlockParameters_(), pageLevelParameters),
           ['108809080']));
   }
 
   /** @override */
   extractCreativeAndSignature(responseText, responseHeaders) {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
-    this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(
-        this,
-        responseHeaders,
-        this.lifecycleReporter_.getDeltaTime(),
-        this.lifecycleReporter_.getInitTime());
+    this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
+    this.qqid_ = responseHeaders.get(QQID_HEADER);
     if (this.ampAnalyticsConfig_) {
       // Load amp-analytics extensions
       this.extensions_./*OK*/loadExtension('amp-analytics');
@@ -386,6 +386,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.sraResponseResolver = sraInitializer.resolver;
     this.sraResponseRejector = sraInitializer.rejector;
     this.sraResponsePromise_ = sraInitializer.promise;
+    this.qqid_ = null;
   }
 
   /**
@@ -400,6 +401,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     super.onCreativeRender(isVerifiedAmpCreative);
     if (this.ampAnalyticsConfig_) {
       dev().assert(!this.ampAnalyticsElement_);
+      if (isReportingEnabled(this)) {
+        addCsiSignalsToAmpAnalyticsConfig(
+            this.win,
+            this.element,
+            this.ampAnalyticsConfig_,
+            this.qqid_,
+            isVerifiedAmpCreative,
+            this.lifecycleReporter_.getDeltaTime(),
+            this.lifecycleReporter_.getInitTime());
+      }
       this.ampAnalyticsElement_ =
           insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
     }
@@ -455,7 +466,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.initiateSraRequests();
     // Null response indicates single slot should execute using non-SRA method.
     return this.sraResponsePromise_.then(
-      response => response || super.sendXhrRequest(adUrl));
+        response => response || super.sendXhrRequest(adUrl));
   }
 
   /**
@@ -503,8 +514,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                 const isValid = instance.hasAdPromise();
                 if (!isValid) {
                   dev().info(TAG,
-                    'Ignoring instance without ad promise as likely invalid',
-                    instance.element);
+                      'Ignoring instance without ad promise as likely invalid',
+                      instance.element);
                 }
                 return isValid;
               });
@@ -527,19 +538,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             const sraRequestAdUrlResolvers =
               typeInstances.map(instance => instance.sraResponseResolver);
             const slotCallback = metaJsonCreativeGrouper(
-              (creative, headersObj, done) => {
-                checkStillCurrent();
+                (creative, headersObj, done) => {
+                  checkStillCurrent();
                 // Force safeframe rendering method.
-                headersObj[RENDERING_TYPE_HEADER] = XORIGIN_MODE.SAFEFRAME;
+                  headersObj[RENDERING_TYPE_HEADER] = XORIGIN_MODE.SAFEFRAME;
                 // Construct pseudo fetch response to be passed down the A4A
                 // promise chain for this block.
-                const headers =
+                  const headers =
                   /** @type {?../../../src/service/xhr-impl.FetchResponseHeaders} */
                   ({
                     get: name => headersObj[name],
                     has: name => !!headersObj[name],
                   });
-                const fetchResponse =
+                  const fetchResponse =
                   /** @type {?../../../src/service/xhr-impl.FetchResponse} */
                   ({
                     headers,
@@ -549,14 +560,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                 // should match the order of blocks declared in the ad url.
                 // This allows the block to start rendering while the SRA
                 // response is streaming back to the client.
-                dev().assert(sraRequestAdUrlResolvers.shift())(fetchResponse);
+                  dev().assert(sraRequestAdUrlResolvers.shift())(fetchResponse);
                 // If done, expect array to be empty (ensures ad response
                 // included data for all slots).
-                if (done && sraRequestAdUrlResolvers.length) {
-                  dev().warn(TAG, 'Premature end of SRA response',
-                    sraRequestAdUrlResolvers.length, sraUrl);
-                }
-              });
+                  if (done && sraRequestAdUrlResolvers.length) {
+                    dev().warn(TAG, 'Premature end of SRA response',
+                        sraRequestAdUrlResolvers.length, sraUrl);
+                  }
+                });
             // TODO(keithwrightbos) - how do we handle per slot 204 response?
             let sraUrl;
             return constructSRARequest_(
@@ -601,7 +612,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   getPreconnectUrls() {
     return ['https://partner.googleadservices.com',
-            'https://tpc.googlesyndication.com'];
+      'https://tpc.googlesyndication.com'];
   }
 }
 
@@ -621,7 +632,7 @@ export function resetSraStateForTesting() {
  */
 export function getNetworkId(element) {
   const networkId = /^(?:\/)?(\d+)/.exec(
-    dev().assertString(element.getAttribute('data-slot')));
+      dev().assertString(element.getAttribute('data-slot')));
   // TODO: guarantee data-ad-slot format as part of isValidElement?
   return networkId ? networkId[1] : '';
 }
@@ -636,11 +647,11 @@ export function getNetworkId(element) {
 function constructSRARequest_(win, doc, instances) {
   const startTime = Date.now();
   return getPageLevelParameters_(win, doc, startTime, true)
-    .then(pageLevelParameters => {
-      const blockParameters = constructSRABlockParameters(instances);
-      return truncAndTimeUrl(DOUBLECLICK_BASE_URL,
-        Object.assign(blockParameters, pageLevelParameters), startTime);
-    });
+      .then(pageLevelParameters => {
+        const blockParameters = constructSRABlockParameters(instances);
+        return truncAndTimeUrl(DOUBLECLICK_BASE_URL,
+            Object.assign(blockParameters, pageLevelParameters), startTime);
+      });
 }
 
 /**
@@ -650,7 +661,7 @@ function constructSRARequest_(win, doc, instances) {
 export function constructSRABlockParameters(instances) {
   const parameters = {};
   BLOCK_SRA_COMBINERS_.forEach(
-    combiner => Object.assign(parameters, combiner(instances)));
+      combiner => Object.assign(parameters, combiner(instances)));
   return parameters;
 }
 
@@ -663,11 +674,11 @@ export function constructSRABlockParameters(instances) {
  */
 function getPageLevelParameters_(win, doc, startTime, isSra) {
   return googlePageParameters(win, doc, startTime, 'ldjh')
-    .then(pageLevelParameters => {
-      const parameters = Object.assign({}, PAGE_LEVEL_PARAMS_);
-      parameters['impl'] = isSra ? 'fifs' : 'ifr';
-      return Object.assign(parameters, pageLevelParameters);
-    });
+      .then(pageLevelParameters => {
+        const parameters = Object.assign({}, PAGE_LEVEL_PARAMS_);
+        parameters['impl'] = isSra ? 'fifs' : 'ifr';
+        return Object.assign(parameters, pageLevelParameters);
+      });
 }
 
 /**

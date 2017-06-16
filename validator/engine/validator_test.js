@@ -76,7 +76,8 @@ function isValidRegex(regex) {
 /**
  * Returns all html files underneath the testdata roots. This looks
  * both for feature_tests/*.html and for tests in extension directories.
- * E.g.: extensions/amp-accordion/0.1/test/*.html and
+ * E.g.: extensions/amp-accordion/0.1/test/*.html,
+ *       extensions/amp-sidebar/1.0/test/*.html, and
  *       testdata/feature_tests/amp_accordion.html.
  * @return {!Array<string>}
  */
@@ -87,12 +88,12 @@ function findHtmlFilesRelativeToTestdata() {
       for (const extension of readdir(root)) {
         const extensionFolder = path.join(root, extension);
         if (!isdir(extensionFolder)) {
-          // Skip if not an extension folder
+          // Skip if not a folder
           continue;
         }
-        // get all versions:
-        for (const version of readdir(extensionFolder)) {
-          const testPath = path.join(extension, version, 'test');
+        // Get all versions
+        for (const possibleVersion of readdir(extensionFolder)) {
+          const testPath = path.join(extension, possibleVersion, 'test');
           if (isdir(path.join(root, testPath))) {
             testSubdirs.push({root: root, subdir: testPath});
           }

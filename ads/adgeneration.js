@@ -55,7 +55,7 @@ export function adgeneration(global, data) {
 function encodeQueryValue(str) {
   return str.split('&').map(v => {
     const key = v.split('=')[0],
-      val = v.split('=')[1];
+        val = v.split('=')[1];
     return encodeURIComponent(key) + '=' + encodeURIComponent(val);
   }).join('&');
 }

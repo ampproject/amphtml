@@ -29,7 +29,10 @@ import {
   extractGoogleAdCreativeAndSignature,
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
+  isReportingEnabled,
   extractAmpAnalyticsConfig,
+  addCsiSignalsToAmpAnalyticsConfig,
+  QQID_HEADER,
 } from '../../../ads/google/a4a/utils';
 import {
   googleLifecycleReporterFactory,
@@ -102,7 +105,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
     /**
      * Config to generate amp-analytics element for active view reporting.
-     * @type {?JSONType}
+     * @type {?JsonObject}
      * @private
      */
     this.ampAnalyticsConfig_ = null;
@@ -115,6 +118,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
     /** @private {?Element} */
     this.ampAnalyticsElement_ = null;
+
+    /** @private {?string} */
+    this.qqid_ = null;
   }
 
   /** @override */
@@ -191,11 +197,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   extractCreativeAndSignature(responseText, responseHeaders) {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
-    this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(
-        this,
-        responseHeaders,
-        this.lifecycleReporter_.getDeltaTime(),
-        this.lifecycleReporter_.getInitTime());
+    this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
+    this.qqid_ = responseHeaders.get(QQID_HEADER);
     if (this.ampAnalyticsConfig_) {
       // Load amp-analytics extensions
       this.extensions_./*OK*/loadExtension('amp-analytics');
@@ -256,6 +259,16 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     super.onCreativeRender(isVerifiedAmpCreative);
     if (this.ampAnalyticsConfig_) {
       dev().assert(!this.ampAnalyticsElement_);
+      if (isReportingEnabled(this)) {
+        addCsiSignalsToAmpAnalyticsConfig(
+            this.win,
+            this.element,
+            this.ampAnalyticsConfig_,
+            this.qqid_,
+            isVerifiedAmpCreative,
+            this.lifecycleReporter_.getDeltaTime(),
+            this.lifecycleReporter_.getInitTime());
+      }
       this.ampAnalyticsElement_ =
           insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
     }
@@ -282,6 +295,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       this.ampAnalyticsElement_ = null;
     }
     this.ampAnalyticsConfig_ = null;
+    this.qqid_ = null;
   }
 
   /** @override */

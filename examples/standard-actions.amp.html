@@ -40,6 +40,17 @@
 <body>
 
 <div class="button-set">
+  <h3>AMP.navigateTo()</h3>
+  <button on="tap:AMP.navigateTo(url='http://google.com')">google.com</button>
+
+  <select on="change:AMP.navigateTo(url=event.value)">
+    <option value="http://google.com">google.com</option>
+    <option value="http://yahoo.com">yahoo.com</option>
+    <option value="http://bing.com">bing.com</option>
+  </select>
+</div>
+
+<div class="button-set">
   <h3>amp-img:</h3>
   <button on="tap:img-on-viewport.show">Show</button>
   <button on="tap:img-on-viewport.hide">Hide</button>

@@ -23,7 +23,7 @@ import {
 } from '../../../src/services';
 import {chunk, ChunkPriority} from '../../../src/chunk';
 import {dev, user} from '../../../src/log';
-import {deepMerge} from '../../../src/utils/object';
+import {dict, deepMerge} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {filterSplice} from '../../../src/utils/array';
 import {installServiceInEmbedScope} from '../../../src/service';
@@ -130,8 +130,8 @@ export class Bind {
     /** @const @private {!./bind-validator.BindValidator} */
     this.validator_ = new BindValidator();
 
-    /** @const @private {!Object} */
-    this.scope_ = Object.create(null);
+    /** @const @private {!JsonObject} */
+    this.scope_ = dict();
 
     /** @const @private {!../../../src/service/resources-impl.Resources} */
     this.resources_ = resourcesForDoc(ampdoc);
@@ -311,15 +311,15 @@ export class Bind {
           `${boundElements.length} elements.`);
 
       if (limitExceeded) {
-        user().error(TAG, `Maximum number of bindings reached ` +
+        user().error(TAG, 'Maximum number of bindings reached ' +
             `(${this.maxNumberOfBindings_}). Additional elements with ` +
-            `bindings will be ignored.`);
+            'bindings will be ignored.');
       }
 
       if (bindings.length == 0) {
         return {};
       } else {
-        dev().fine(TAG, `Asking worker to parse expressions...`);
+        dev().fine(TAG, 'Asking worker to parse expressions...');
         return this.ww_('bind.addBindings', [bindings]);
       }
     }).then(parseErrors => {
@@ -336,7 +336,7 @@ export class Bind {
         }
       });
 
-      dev().fine(TAG, `Finished parsing expressions with ` +
+      dev().fine(TAG, 'Finished parsing expressions with ' +
           `${Object.keys(parseErrors).length} errors.`);
     });
   }
@@ -373,7 +373,7 @@ export class Bind {
 
     // Remove the bindings from the evaluator.
     if (deletedExpressions.length > 0) {
-      dev().fine(TAG, `Asking worker to remove expressions...`);
+      dev().fine(TAG, 'Asking worker to remove expressions...');
       return this.ww_(
           'bind.removeBindingsWithExpressionStrings', [deletedExpressions]);
     } else {
@@ -405,7 +405,7 @@ export class Bind {
     const expressionToElements = Object.create(null);
 
     const doc = dev().assert(
-      node.ownerDocument, 'ownerDocument is null.');
+        node.ownerDocument, 'ownerDocument is null.');
     const walker = doc.createTreeWalker(node, NodeFilter.SHOW_ELEMENT);
 
     // Set to true if number of bindings in `node` exceeds `limit`.
@@ -585,11 +585,11 @@ export class Bind {
       const newValue = results[expressionString];
       if (newValue === undefined ||
           this.shallowEquals_(newValue, previousResult)) {
-        user().fine(TAG, `Expression result unchanged or missing: ` +
+        user().fine(TAG, 'Expression result unchanged or missing: ' +
             `"${expressionString}"`);
       } else {
         boundProperty.previousResult = newValue;
-        user().fine(TAG, `New expression result: ` +
+        user().fine(TAG, 'New expression result: ' +
             `"${expressionString}" -> ${newValue}`);
         updates.push({boundProperty, newValue});
       }
@@ -617,7 +617,7 @@ export class Bind {
         return;
       }
       const promise = this.resources_.mutateElement(element, () => {
-        const mutations = {};
+        const mutations = dict();
         let width, height;
 
         updates.forEach(update => {
@@ -821,7 +821,7 @@ export class Bind {
       const err = user().createError(`${TAG}: ` +
         `Default value for [${property}] does not match first expression ` +
         `result (${expectedValue}). This can result in unexpected behavior ` +
-        `after the next state change.`);
+        'after the next state change.');
       reportError(err, element);
     }
   }

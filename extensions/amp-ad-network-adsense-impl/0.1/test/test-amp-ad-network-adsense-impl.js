@@ -331,66 +331,68 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
     it('without signature', () => {
       return utf8Encode('some creative').then(creative => {
         return impl.extractCreativeAndSignature(
-          creative,
-          {
-            get: function() { return undefined; },
-            has: function() { return false; },
-          }).then(adResponse => {
-            expect(adResponse).to.deep.equal(
+            creative,
+            {
+              get() { return undefined; },
+              has() { return false; },
+            }).then(adResponse => {
+              expect(adResponse).to.deep.equal(
                   {creative, signature: null, size: null});
-            expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
-          });
+              expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be
+                  .called;
+            });
       });
     });
     it('with signature', () => {
       return utf8Encode('some creative').then(creative => {
         return impl.extractCreativeAndSignature(
-          creative,
-          {
-            get: function(name) {
-              return name == 'X-AmpAdSignature' ? 'AQAB' : undefined;
-            },
-            has: function(name) {
-              return name === 'X-AmpAdSignature';
-            },
-          }).then(adResponse => {
-            expect(adResponse).to.deep.equal(
-              {creative, signature: base64UrlDecodeToBytes('AQAB'),
-                size: null});
-            expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
-          });
+            creative,
+            {
+              get(name) {
+                return name == 'X-AmpAdSignature' ? 'AQAB' : undefined;
+              },
+              has(name) {
+                return name === 'X-AmpAdSignature';
+              },
+            }).then(adResponse => {
+              expect(adResponse).to.deep.equal(
+                  {creative, signature: base64UrlDecodeToBytes('AQAB'),
+                    size: null});
+              expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be
+                  .called;
+            });
       });
     });
     it('with analytics', () => {
       return utf8Encode('some creative').then(creative => {
         const url = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
         return impl.extractCreativeAndSignature(
-          creative,
-          {
-            get: function(name) {
-              switch (name) {
-                case 'X-AmpAnalytics':
-                  return JSON.stringify({url});
-                case 'X-AmpAdSignature':
-                  return 'AQAB';
-                default:
-                  return undefined;
-              }
-            },
-            has: function(name) {
-              return !!this.get(name);
-            },
-          }).then(adResponse => {
-            expect(adResponse).to.deep.equal(
-              {
-                creative,
-                signature: base64UrlDecodeToBytes('AQAB'),
-                size: null,
-              });
-            expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
+            creative,
+            {
+              get(name) {
+                switch (name) {
+                  case 'X-AmpAnalytics':
+                    return JSON.stringify({url});
+                  case 'X-AmpAdSignature':
+                    return 'AQAB';
+                  default:
+                    return undefined;
+                }
+              },
+              has(name) {
+                return !!this.get(name);
+              },
+            }).then(adResponse => {
+              expect(adResponse).to.deep.equal(
+                  {
+                    creative,
+                    signature: base64UrlDecodeToBytes('AQAB'),
+                    size: null,
+                  });
+              expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
             // exact value of ampAnalyticsConfig_ covered in
             // ads/google/test/test-utils.js
-          });
+            });
       });
     });
   });
@@ -412,9 +414,45 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
 
     it('injects amp analytics', () => {
       impl.ampAnalyticsConfig_ = {
-        'request': 'www.example.com',
-        'triggers': {
-          'on': 'visible',
+        transport: {beacon: false, xhrpost: false},
+        requests: {
+          visibility1: 'https://foo.com?hello=world',
+          visibility2: 'https://bar.com?a=b',
+        },
+        triggers: {
+          continuousVisible: {
+            on: 'visible',
+            request: ['visibility1', 'visibility2'],
+            visibilitySpec: {
+              selector: 'amp-ad',
+              selectionMethod: 'closest',
+              visiblePercentageMin: 50,
+              continuousTimeMin: 1000,
+            },
+          },
+          continuousVisibleIniLoad: {
+            on: 'ini-load',
+            selector: 'amp-ad',
+            selectionMethod: 'closest',
+          },
+          continuousVisibleRenderStart: {
+            on: 'render-start',
+            selector: 'amp-ad',
+            selectionMethod: 'closest',
+          },
+        },
+      };
+      // To placate assertion.
+      impl.responseHeaders_ = {
+        get: function(name) {
+          if (name == 'X-QQID') {
+            return 'qqid_string';
+          }
+        },
+        has: function(name) {
+          if (name == 'X-QQID') {
+            return true;
+          }
         },
       };
       // Next two lines are to ensure that internal parts not relevant for this

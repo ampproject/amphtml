@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-trust';
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
 import {actionServiceForDoc} from '../../../src/services';
@@ -210,7 +211,7 @@ export class AmpSlideScroll extends BaseSlides {
       if (args) {
         this.showSlideWhenReady(args['index']);
       }
-    });
+    }, ActionTrust.LOW);
   }
 
   /** @override */
@@ -513,6 +514,7 @@ export class AmpSlideScroll extends BaseSlides {
    *     it available for display.
    * @note Element must be laid out.
    * @param {number} newIndex Index of the slide to be displayed.
+   * @return {boolean} true if the slide changed, otherwise false.
    * @private
    */
   showSlide_(newIndex) {
@@ -521,7 +523,7 @@ export class AmpSlideScroll extends BaseSlides {
     if (newIndex < 0 ||
         newIndex >= noOfSlides_ ||
         this.slideIndex_ == newIndex) {
-      return;
+      return false;
     }
     const prevIndex = (newIndex - 1 >= 0) ? newIndex - 1 :
         (this.shouldLoop) ? noOfSlides_ - 1 : null;
@@ -549,7 +551,7 @@ export class AmpSlideScroll extends BaseSlides {
         'noOfSlides': noOfSlides_,
       };
       dev().error(TAG, error);
-      return;
+      return false;
     }
 
     this.updateInViewport(newSlideInView, true);
@@ -573,6 +575,7 @@ export class AmpSlideScroll extends BaseSlides {
     this.slideIndex_ = newIndex;
     this.hideRestOfTheSlides_(showIndexArr);
     this.setControlsState();
+    return true;
   }
 
   /**
@@ -581,13 +584,16 @@ export class AmpSlideScroll extends BaseSlides {
    * @private
    */
   showSlideAndTriggerAction_(newIndex) {
-    this.showSlide_(newIndex);
+    const slideChanged = this.showSlide_(newIndex);
 
-    const name = 'slideChange';
-    const event =
-        createCustomEvent(this.win, `slidescroll.${name}`, {index: newIndex});
-    this.element.dispatchCustomEvent(name, {index: newIndex});
-    this.action_.trigger(this.element, name, event);
+    if (slideChanged) {
+      const name = 'slideChange';
+      const event =
+          createCustomEvent(this.win, `slidescroll.${name}`, {index: newIndex});
+      this.action_.trigger(this.element, name, event, ActionTrust.MEDIUM);
+
+      this.element.dispatchCustomEvent(name, {index: newIndex});
+    }
   }
 
   /**

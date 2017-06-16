@@ -193,7 +193,7 @@ export class AmpFont extends AMP.BaseElement {
         DEFAULT_TIMEOUT_ : timeoutInMs;
     timeoutInMs = Math.max(
       (timeoutInMs - timerFor(this.win).timeSinceStart()),
-      CACHED_FONT_LOAD_TIME_
+        CACHED_FONT_LOAD_TIME_
     );
     return timeoutInMs;
   }

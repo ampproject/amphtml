@@ -18,7 +18,7 @@ import {Animation} from '../animation';
 import {FixedLayer} from './fixed-layer';
 import {Observable} from '../observable';
 import {VisibilityState} from '../visibility-state';
-import {checkAndFix as checkAndFixIosScrollfreezeBug,} from
+import {checkAndFix as checkAndFixIosScrollfreezeBug} from
     './ios-scrollfreeze-bug';
 import {
   getParentWindowFrameElement,
@@ -26,6 +26,7 @@ import {
 } from '../service';
 import {layoutRectLtwh} from '../layout-rect';
 import {dev} from '../log';
+import {dict} from '../utils/object';
 import {numeric} from '../transition';
 import {onDocumentReady, whenDocumentReady} from '../document-ready';
 import {platformFor} from '../services';
@@ -444,22 +445,26 @@ export class Viewport {
 
   /**
    * Instruct the viewport to enter lightbox mode.
+   * @return {!Promise}
    */
   enterLightboxMode() {
-    this.viewer_.sendMessage('requestFullOverlay', {}, /* cancelUnsent */true);
+    this.viewer_.sendMessage('requestFullOverlay', dict(),
+        /* cancelUnsent */true);
     this.enterOverlayMode();
     this.hideFixedLayer();
-    this.vsync_.mutate(() => this.binding_.updateLightboxMode(true));
+    return this.binding_.updateLightboxMode(true);
   }
 
   /**
    * Instruct the viewport to leave lightbox mode.
+   * @return {!Promise}
    */
   leaveLightboxMode() {
-    this.viewer_.sendMessage('cancelFullOverlay', {}, /* cancelUnsent */true);
+    this.viewer_.sendMessage('cancelFullOverlay', dict(),
+        /* cancelUnsent */true);
     this.showFixedLayer();
     this.leaveOverlayMode();
-    this.vsync_.mutate(() => this.binding_.updateLightboxMode(false));
+    return this.binding_.updateLightboxMode(false);
   }
 
   /*
@@ -631,7 +636,7 @@ export class Viewport {
   }
 
   /**
-   * @param {!JSONType} data
+   * @param {!JsonObject} data
    * @private
    */
   viewerSetScrollTop_(data) {
@@ -640,7 +645,7 @@ export class Viewport {
   }
 
   /**
-   * @param {!JSONType} data
+   * @param {!JsonObject} data
    * @private
    */
   updateOnViewportEvent_(data) {
@@ -779,7 +784,8 @@ export class Viewport {
       this.scrollAnimationFrameThrottled_ = true;
       this.vsync_.measure(() => {
         this.scrollAnimationFrameThrottled_ = false;
-        this.viewer_.sendMessage('scroll', {scrollTop: this.getScrollTop()},
+        this.viewer_.sendMessage('scroll',
+            dict({'scrollTop': this.getScrollTop()}),
             /* cancelUnsent */true);
       });
     }
@@ -882,6 +888,7 @@ export class ViewportBindingDef {
    * Updates the viewport whether it's currently in the lightbox or a normal
    * mode.
    * @param {boolean} unusedLightboxMode
+   * @return {!Promise}
    */
   updateLightboxMode(unusedLightboxMode) {}
 
@@ -1052,6 +1059,7 @@ export class ViewportBindingNatural_ {
   /** @override */
   updateLightboxMode(unusedLightboxMode) {
     // The layout is always accurate.
+    return Promise.resolve();
   }
 
   /** @override */
@@ -1357,8 +1365,12 @@ export class ViewportBindingNaturalIosEmbed_ {
   updateLightboxMode(lightboxMode) {
     // This code will no longer be needed with the newer iOS viewport
     // implementation.
-    onDocumentReady(this.win.document, doc => {
-      setStyle(doc.body, 'borderTopStyle', lightboxMode ? 'none' : 'solid');
+    return new Promise(resolve => {
+      onDocumentReady(this.win.document, doc => {
+        vsyncFor(this.win).mutatePromise(() => {
+          setStyle(doc.body, 'borderTopStyle', lightboxMode ? 'none' : 'solid');
+        }).then(resolve);
+      });
     });
   }
 
@@ -1650,6 +1662,7 @@ export class ViewportBindingIosEmbedWrapper_ {
   /** @override */
   updateLightboxMode(unusedLightboxMode) {
     // The layout is always accurate.
+    return Promise.resolve();
   }
 
   /** @override */

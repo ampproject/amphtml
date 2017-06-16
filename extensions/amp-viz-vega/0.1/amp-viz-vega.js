@@ -34,7 +34,7 @@ export class AmpVizVega extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?JSONType} */
+    /** @private {?JsonObject} */
     this.data_ = null;
 
     /** @private {?string} */

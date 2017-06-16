@@ -26,6 +26,7 @@ import {
 } from '../../../src/iframe-helper';
 import {viewerForDoc} from '../../../src/services';
 import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {timerFor} from '../../../src/services';
 import {setStyle} from '../../../src/style';
 import {loadPromise} from '../../../src/event-helper';
@@ -120,12 +121,14 @@ export class AmpAdXOriginIframeHandler {
           this.positionObserver_ = getServiceForDoc(ampdoc,
               'position-observer');
           this.positionObserver_.observe(
-            dev().assertElement(this.iframe),
-            PositionObserverFidelity.HIGH, pos => {
-              this.positionObserverHighFidelityApi_.send(
-                POSITION_HIGH_FIDELITY,
-                pos);
-            });
+              dev().assertElement(this.iframe),
+              PositionObserverFidelity.HIGH, pos => {
+                // Valid cast because it is an external object.
+                const posCast = /** @type {!JsonObject} */ (pos);
+                this.positionObserverHighFidelityApi_.send(
+                    POSITION_HIGH_FIDELITY,
+                    posCast);
+              });
         });
     }
 
@@ -137,23 +140,26 @@ export class AmpAdXOriginIframeHandler {
         });
 
     this.unlisteners_.push(listenFor(this.iframe, 'get-html',
-      (info, source, origin) => {
-        if (!this.iframe) {
-          return;
-        }
+        (info, source, origin) => {
+          if (!this.iframe) {
+            return;
+          }
 
-        const {selector, attributes, messageId} = info;
-        let content = '';
+          const {selector, attributes, messageId} = info;
+          let content = '';
 
-        if (this.element_.hasAttribute('data-html-access-allowed')) {
-          content = getHtml(this.baseInstance_.win, selector, attributes);
-        }
+          if (this.element_.hasAttribute('data-html-access-allowed')) {
+            content = getHtml(this.baseInstance_.win, selector, attributes);
+          }
 
-        postMessageToWindows(
-            this.iframe, [{win: source, origin}],
-            'get-html-result', {content, messageId}, true
+          postMessageToWindows(
+              this.iframe, [{win: source, origin}],
+              'get-html-result', dict({
+                'content': content,
+                'messageId': messageId,
+              }), true
           );
-      }, true, false));
+        }, true, false));
 
     // Install iframe resize API.
     this.unlisteners_.push(listenFor(this.iframe, 'embed-size',
@@ -359,10 +365,10 @@ export class AmpAdXOriginIframeHandler {
       const iframeHeight = this.iframe./*OK*/offsetHeight;
       const iframeWidth = this.iframe./*OK*/offsetWidth;
       this.uiHandler_.updateSize(height, width, iframeHeight,
-        iframeWidth).then(info => {
-          this.sendEmbedSizeResponse_(info.success,
-              info.newWidth, info.newHeight, source, origin);
-        }, () => {});
+          iframeWidth).then(info => {
+            this.sendEmbedSizeResponse_(info.success,
+                info.newWidth, info.newHeight, source, origin);
+          }, () => {});
     });
   }
 
@@ -385,7 +391,10 @@ export class AmpAdXOriginIframeHandler {
         this.iframe,
         [{win: source, origin}],
         success ? 'embed-size-changed' : 'embed-size-denied',
-        {requestedWidth, requestedHeight},
+        dict({
+          'requestedWidth': requestedWidth,
+          'requestedHeight': requestedHeight,
+        }),
         true);
   }
 
@@ -397,10 +406,10 @@ export class AmpAdXOriginIframeHandler {
     if (!this.embedStateApi_) {
       return;
     }
-    this.embedStateApi_.send('embed-state', {
-      inViewport,
-      pageHidden: !this.viewer_.isVisible(),
-    });
+    this.embedStateApi_.send('embed-state', dict({
+      'inViewport': inViewport,
+      'pageHidden': !this.viewer_.isVisible(),
+    }));
   }
 
   /**

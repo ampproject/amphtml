@@ -352,8 +352,8 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
         const encoded = 'rAnDoM';
         contextMock.expects('buildUrl')
             .withExactArgs(
-                'https://acme.com/a?rid=READER_ID',
-                /* useAuthData */ false)
+            'https://acme.com/a?rid=READER_ID',
+            /* useAuthData */ false)
             .returns(Promise.resolve('https://acme.com/a?rid=r1'))
             .once();
         xhrMock.expects('fetchText')
@@ -380,8 +380,8 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
       it('should fail when JWT fetch fails', () => {
         contextMock.expects('buildUrl')
             .withExactArgs(
-                'https://acme.com/a?rid=READER_ID',
-                /* useAuthData */ false)
+            'https://acme.com/a?rid=READER_ID',
+            /* useAuthData */ false)
             .returns(Promise.resolve('https://acme.com/a?rid=r1'))
             .once();
         xhrMock.expects('fetchText')
@@ -402,8 +402,8 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
       it('should fail when JWT fetch times out', () => {
         contextMock.expects('buildUrl')
             .withExactArgs(
-                'https://acme.com/a?rid=READER_ID',
-                /* useAuthData */ false)
+            'https://acme.com/a?rid=READER_ID',
+            /* useAuthData */ false)
             .returns(Promise.resolve('https://acme.com/a?rid=r1'))
             .once();
         xhrMock.expects('fetchText')
@@ -432,8 +432,8 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
         const pemPromise = Promise.resolve(pem);
         contextMock.expects('buildUrl')
             .withExactArgs(
-                'https://acme.com/a?rid=READER_ID',
-                /* useAuthData */ false)
+            'https://acme.com/a?rid=READER_ID',
+            /* useAuthData */ false)
             .returns(Promise.resolve('https://acme.com/a?rid=r1'))
             .once();
         xhrMock.expects('fetchText')
@@ -482,8 +482,8 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
         adapter.key_ = pem;
         contextMock.expects('buildUrl')
             .withExactArgs(
-                'https://acme.com/a?rid=READER_ID',
-                /* useAuthData */ false)
+            'https://acme.com/a?rid=READER_ID',
+            /* useAuthData */ false)
             .returns(Promise.resolve('https://acme.com/a?rid=r1'))
             .once();
         xhrMock.expects('fetchText')
@@ -532,8 +532,8 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
         const encoded = 'rAnDoM';
         contextMock.expects('buildUrl')
             .withExactArgs(
-                'https://acme.com/a?rid=READER_ID',
-                /* useAuthData */ false)
+            'https://acme.com/a?rid=READER_ID',
+            /* useAuthData */ false)
             .returns(Promise.resolve('https://acme.com/a?rid=r1'))
             .once();
         xhrMock.expects('fetchText')

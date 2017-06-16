@@ -21,6 +21,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
 import {urlReplacementsForDoc} from '../../../src/services';
 import {user} from '../../../src/log';
+import {parseJson} from '../../../src/json';
 
 const TAG = 'amp-ad-exit';
 
@@ -67,8 +68,8 @@ export class AmpAdExit extends AMP.BaseElement {
         isExperimentOn(this.win, 'amp-ad-exit'),
         'amp-ad-exit experiment is off.');
 
-    const target = this.targets_[args.target];
-    user().assert(target, `Exit target not found: '${args.target}'`);
+    const target = this.targets_[args['target']];
+    user().assert(target, `Exit target not found: '${args['target']}'`);
 
     event.preventDefault();
     if (!this.filter_(this.defaultFilters_, event) ||
@@ -161,14 +162,14 @@ export class AmpAdExit extends AMP.BaseElement {
 
     const children = this.element.children;
     user().assert(children.length == 1,
-                  'The tag should contain exactly one <script> child.');
+        'The tag should contain exactly one <script> child.');
     const child = children[0];
     user().assert(
         isJsonScriptTag(child),
         'The amp-ad-exit config should ' +
         'be inside a <script> tag with type="application/json"');
     try {
-      const config = assertConfig(JSON.parse(child.textContent));
+      const config = assertConfig(parseJson(child.textContent));
       const userFilters = {};
       for (const name in config.filters) {
         userFilters[name] = createFilter(name, config.filters[name]);

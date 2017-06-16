@@ -9,10 +9,6 @@ notifications:
   webhooks:
     - http://savage.nonblocking.io:8080/savage/travis
 addons:
-  sauce_connect:
-    username: "amphtml"
-  jwt:
-    secure: "Wze0F0vGL0UcxryOx1n/vcuD5LIMGyR+69Nc6IWLoRvZBbbIpFwVFhDE6rE9ranIXiA2Hc684N4sV8ASfNDF8RRSB+jyLov159qwgji2rBxIfQ/4kuDV2vYoAJvYMz8m42kwx5FV2VV9awqMMt8mwU3wYIrKIaVCxB34uV86KIlDlbrHxt17Bm5EIiUmwi9r1AAnW/63vVRUN264D77oB4j9UQ759PfD6BDwEt54O87KurNIaLseNCr1IvzfL8veEsZ3uTbLC1GtgHfR4IGgkS2YyN2QIk06VZWeRDEOalS3RcY0nDkbCmBywxIGObnrpEMzOpjBiOb2fxLoLvvpjlla5W84zJGfWE6q4T9IvkyHuDJE+sft5B+arjMIeA6PIeUhKdV27+6qqDEf7fILZ/U/Ekn9ds4zSV8hekAZPUyyPncOeyWppCIJ8sOeCrsebkRjH1BoX/d+FE+nP0bN/XkBpIi/nManx5FyS/kqjQWGKmvsFQfEWlSUaZi7XtEQEjvBizRkzvpJanSDaoiTDS2Keulmwii3XRId51FuGtnfDZFeggLaMTKGfBX9DlPkccwYAZe6vPNfYk1pNgEj6AtnifEhYVEO+aAuWhEnJ86od+1wDOL/h+a2XY6h8/gFBywsD95p7sXPfdVDCKgwagiBo+Hw5MNjztVF7lszg1A="
   hosts:
     - ads.localhost
     - iframe.localhost
@@ -29,9 +25,6 @@ before_install:
   - sh -e /etc/init.d/xvfb start
   - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
   - sudo dpkg -i google-chrome*.deb
-before_script:
-  - pip install --user protobuf
-  - gem install percy-cli
 script: node build-system/pr-check.js
 branches:
   only:
@@ -43,9 +36,22 @@ env:
   global:
     - SAUCE_USERNAME="amphtml"
     - NPM_CONFIG_PROGRESS="false"
-  matrix:
-    - BUILD_SHARD="pre_build_checks_and_unit_tests"
-    - BUILD_SHARD="integration_tests"
+matrix:
+  include:
+    - env: BUILD_SHARD="pre_build_checks_and_unit_tests"
+      before_script:
+        - pip install --user protobuf
+        - gem install percy-capybara
+        - gem install phantomjs
+        - gem install poltergeist
+    - env: BUILD_SHARD="integration_tests"
+      before_script:
+        - pip install --user protobuf
+      addons:
+        sauce_connect:
+          username: "amphtml"
+        jwt:
+          secure: "Wze0F0vGL0UcxryOx1n/vcuD5LIMGyR+69Nc6IWLoRvZBbbIpFwVFhDE6rE9ranIXiA2Hc684N4sV8ASfNDF8RRSB+jyLov159qwgji2rBxIfQ/4kuDV2vYoAJvYMz8m42kwx5FV2VV9awqMMt8mwU3wYIrKIaVCxB34uV86KIlDlbrHxt17Bm5EIiUmwi9r1AAnW/63vVRUN264D77oB4j9UQ759PfD6BDwEt54O87KurNIaLseNCr1IvzfL8veEsZ3uTbLC1GtgHfR4IGgkS2YyN2QIk06VZWeRDEOalS3RcY0nDkbCmBywxIGObnrpEMzOpjBiOb2fxLoLvvpjlla5W84zJGfWE6q4T9IvkyHuDJE+sft5B+arjMIeA6PIeUhKdV27+6qqDEf7fILZ/U/Ekn9ds4zSV8hekAZPUyyPncOeyWppCIJ8sOeCrsebkRjH1BoX/d+FE+nP0bN/XkBpIi/nManx5FyS/kqjQWGKmvsFQfEWlSUaZi7XtEQEjvBizRkzvpJanSDaoiTDS2Keulmwii3XRId51FuGtnfDZFeggLaMTKGfBX9DlPkccwYAZe6vPNfYk1pNgEj6AtnifEhYVEO+aAuWhEnJ86od+1wDOL/h+a2XY6h8/gFBywsD95p7sXPfdVDCKgwagiBo+Hw5MNjztVF7lszg1A="
 cache:
   yarn: true
   directories:

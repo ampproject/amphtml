@@ -21,6 +21,7 @@ import {
   getCorsUrl,
   parseUrl,
 } from '../url';
+import {parseJson} from '../json';
 import {isArray, isObject, isFormData} from '../types';
 import {utf8EncodeSync} from '../utils/bytes';
 import {ampdocServiceFor} from '../ampdoc';
@@ -46,6 +47,19 @@ import {getMode} from '../mode';
  * }}
  */
 export let FetchInitDef;
+
+/**
+ * Special case for fetchJson
+ * @typedef {{
+ *   body: (!JsonObject|!FormData|undefined),
+ *   credentials: (string|undefined),
+ *   headers: (!Object|undefined),
+ *   method: (string|undefined),
+ *   requireAmpResponseSourceOrigin: (boolean|undefined),
+ *   ampCors: (boolean|undefined)
+ * }}
+ */
+export let FetchInitJsonDef;
 
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
@@ -170,18 +184,18 @@ export class Xhr {
         // If the `AMP-Access-Control-Allow-Source-Origin` header is returned,
         // ensure that it's equal to the current source origin.
         user().assert(allowSourceOriginHeader == sourceOrigin,
-              `Returned ${ALLOW_SOURCE_ORIGIN_HEADER} is not` +
+            `Returned ${ALLOW_SOURCE_ORIGIN_HEADER} is not` +
               ` equal to the current: ${allowSourceOriginHeader}` +
               ` vs ${sourceOrigin}`);
       } else if (init.requireAmpResponseSourceOrigin) {
         // If the `AMP-Access-Control-Allow-Source-Origin` header is not
         // returned but required, return error.
-        user().assert(false, `Response must contain the` +
+        user().assert(false, 'Response must contain the' +
             ` ${ALLOW_SOURCE_ORIGIN_HEADER} header`);
       }
       return response;
     }, reason => {
-      throw user().createExpectedError('XHR', `Failed fetching` +
+      throw user().createExpectedError('XHR', 'Failed fetching' +
           ` (${targetOrigin}/...):`, reason && reason.message);
     });
   }
@@ -195,7 +209,7 @@ export class Xhr {
    * See `fetchAmpCors_` for more detail.
    *
    * @param {string} input
-   * @param {?FetchInitDef=} opt_init
+   * @param {?FetchInitJsonDef=} opt_init
    * @param {boolean=} opt_allowFailure Allows non-2XX status codes to fulfill.
    * @return {!Promise<!FetchResponse>}
    */
@@ -205,13 +219,14 @@ export class Xhr {
       // Assume JSON strict mode where only objects or arrays are allowed
       // as body.
       dev().assert(
-        allowedJsonBodyTypes_.some(test => test(init.body)),
-        'body must be of type object or array. %s',
-        init.body
+          allowedJsonBodyTypes_.some(test => test(init.body)),
+          'body must be of type object or array. %s',
+          init.body
       );
 
       init.headers['Content-Type'] = 'application/json;charset=utf-8';
-      init.body = JSON.stringify(init.body);
+      // Cast is valid, because we checked that it is not form data above.
+      init.body = JSON.stringify(/** @type {!JsonObject} */ (init.body));
     }
     return this.fetch(input, init);
   }
@@ -302,10 +317,10 @@ function normalizeMethod_(method) {
   method = method.toUpperCase();
 
   dev().assert(
-    allowedMethods_.includes(method),
-    'Only one of %s is currently allowed. Got %s',
-    allowedMethods_.join(', '),
-    method
+      allowedMethods_.includes(method),
+      'Only one of %s is currently allowed. Got %s',
+      allowedMethods_.join(', '),
+      method
   );
 
   return method;
@@ -504,11 +519,11 @@ export class FetchResponse {
 
   /**
    * Drains the response and returns the JSON object.
-   * @return {!Promise<!JSONType>}
+   * @return {!Promise<!JsonObject>}
    */
   json() {
-    return /** @type {!Promise<!JSONType>} */ (
-        this.drainText_().then(JSON.parse.bind(JSON)));
+    return /** @type {!Promise<!JsonObject>} */ (
+        this.drainText_().then(parseJson));
   }
 
   /**

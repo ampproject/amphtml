@@ -1,0 +1,123 @@
+<!doctype html>
+<html>
+  <head>
+    <title>AMP Proxy</title>
+    <style>
+    body {
+      overflow: hidden;
+      margin: 0px;
+      padding: 20px;
+      border-radius: 3px;
+      background: white;
+      width: 200px;
+      text-align: center;
+    }
+
+    p {
+      color: gray;
+      font-size: 12px;
+    }
+
+    #copyright {
+      color: lightgray;
+      font-size: 10px;
+    }
+
+    #logo {
+      width: 100px;
+    }
+
+    #switch-holder {
+      display: flex;
+      align-items: center;
+    }
+
+    #left {
+      flex-basis: 100%;
+      text-align: right;
+      padding-right: 10px;
+    }
+
+    #right {
+      flex-basis: 100%;
+      text-align: left;
+      padding-left: 10px;
+    }
+
+    #switch-container {
+      display: inline-block;
+      width: 40px;
+      height: 22px;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    #switch-container input[type="checkbox"] {
+      display:none;
+    }
+
+    #switch {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #0389ff;
+      -webkit-transition: .4s;
+      transition: .4s;
+      border-radius: 20px;
+    }
+
+    #switch:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      -webkit-transition: .4s;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input[type="checkbox"]:checked + #switch {
+      background-color: #2196F3;
+    }
+
+    input[type="checkbox"]:focus + #switch {
+      box-shadow: 0 0 1px #2196F3;
+    }
+
+    input:checked + #switch:before {
+      -webkit-transform: translateX(18px);
+      -ms-transform: translateX(18px);
+      transform: translateX(18px);
+    }
+    </style>
+    <script src="popup.js"></script>
+  </head>
+  <body>
+    <img id = "logo" src="logo.svg" /><br><br>
+    <p>Switch between using a local distribution of AMP HTML or the online
+    distribution hosted at https://cdn.ampproject.org/</p>
+    <br>
+    <div id = "switch-holder">
+      <span id = "left">
+        Online CDN
+      </span>
+      <label id="switch-container">
+        <input type="checkbox">
+        <div id="switch"></div>
+      </label>
+      <span id = "right">
+        Local AMP
+       </span>
+    </div>
+    <br><br>
+    <span id="copyright">
+      &copy; Copyright 2017 The AMP HTML Authors.<br> All Rights Reserved.
+    </span>
+  </body>
+</html>
