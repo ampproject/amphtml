@@ -103,10 +103,11 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           const ampdocUrl = env.ampdoc.getUrl();
           const srcUrl = getSourceUrl(ampdocUrl);
 
-          expect(sendRequestSpy).to.have.been.calledWith('channelOpen', {
-            sourceUrl: srcUrl,
-            url: ampdocUrl,
-          }, true);
+          expect(sendRequestSpy).to.have.been.calledOnce;
+          expect(sendRequestSpy.lastCall.args[0]).to.equal('channelOpen');
+          expect(sendRequestSpy.lastCall.args[1].sourceUrl).to.equal(srcUrl);
+          expect(sendRequestSpy.lastCall.args[1].url).to.equal(ampdocUrl);
+          expect(sendRequestSpy.lastCall.args[2]).to.equal(true);
         });
 
         it('should not initiate the Touch Handler', () => {

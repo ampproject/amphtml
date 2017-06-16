@@ -24,6 +24,7 @@ import {getAmpDoc} from '../../../src/ampdoc';
 import {isIframed} from '../../../src/dom';
 import {listen, listenOnce} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getSourceUrl} from '../../../src/url';
 import {viewerForDoc} from '../../../src/services';
 
@@ -137,10 +138,10 @@ export class AmpViewerIntegration {
     dev().fine(TAG, 'Send a handshake request');
     const ampdocUrl = ampdoc.getUrl();
     const srcUrl = getSourceUrl(ampdocUrl);
-    return messaging.sendRequest(RequestNames.CHANNEL_OPEN, {
-      url: ampdocUrl,
-      sourceUrl: srcUrl,
-    },
+    return messaging.sendRequest(RequestNames.CHANNEL_OPEN, dict({
+      'url': ampdocUrl,
+      'sourceUrl': srcUrl,
+    }),
         true /* awaitResponse */)
         .then(() => {
           dev().fine(TAG, 'Channel has been opened!');
@@ -178,7 +179,7 @@ export class AmpViewerIntegration {
    * @private
    */
   handleUnload_(messaging) {
-    return messaging.sendRequest(RequestNames.UNLOADED, {}, true);
+    return messaging.sendRequest(RequestNames.UNLOADED, dict(), true);
   }
 
   /**
