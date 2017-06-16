@@ -69,6 +69,7 @@ describe('refresh-manager', () => {
     meta.setAttribute('content', 'doubleclick=40');
     window.document.head.appendChild(meta);
     const refreshManager = new RefreshManager(mockA4a, config);
+    window.document.head.removeChild(meta);
     expect(getPublisherSpecifiedRefreshIntervalSpy).to.be.calledOnce;
     expect(refreshManager.refreshInterval_).to.equal(40000);
   });
@@ -93,20 +94,20 @@ describe('refresh-manager', () => {
     expect(refreshManager.isRefreshable()).to.be.false;
   });
 
-  it.skip('should execute the refresh event correctly', () => {
+  it('should execute the refresh event correctly', () => {
     // Attach element to DOM, as is necessary for request ampdoc.
     window.document.body.appendChild(mockA4a.element);
     const refreshSpy = sandbox.spy(mockA4a, 'refresh');
-    const refreshManager = new RefreshManager(mockA4a, config);
-    // So the test doesn't hang for the required minimum 30s interval, or the
-    // 1s ActiveView visibility definition.
-    refreshManager.config_ = {
+    const refreshManager = new RefreshManager(mockA4a, {
       visiblePercentageMin: 0,
+      totalTimeMin: 0,
       continuousTimeMin: 0,
-    };
+    });
+    // So the test doesn't hang for the required minimum 30s interval.
     refreshManager.refreshInterval_ = 0;
     return refreshManager.initiateRefreshCycle().then(() => {
       expect(refreshSpy).to.be.calledOnce;
+      window.document.body.removeChild(mockA4a.element);
     });
   });
 });
