@@ -98,6 +98,10 @@ The `amp-image-lightbox` exposes the following actions you can use [AMP on-synta
 
 Must be set to `nodisplay`.
 
+**data-close-button-aria-label**
+
+Optional string used as ARIA label for close button.
+
 ## Validation
 
 See [amp-image-lightbox rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-image-lightbox/validator-amp-image-lightbox.protoascii) in the AMP validator specification.
