@@ -235,8 +235,7 @@ export class ActionService {
     } else if (name == 'submit') {
       this.root_.addEventListener(name, event => {
         const element = dev().assertElement(event.target);
-        // TODO(choumx, #9699): HIGH.
-        this.trigger(element, name, event, ActionTrust.MEDIUM);
+        this.trigger(element, name, event, ActionTrust.HIGH);
       });
     } else if (name == 'change') {
       this.root_.addEventListener(name, event => {
