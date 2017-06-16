@@ -213,7 +213,7 @@ export function googlePageParameters(win, doc, startTime, output = 'html') {
         const screen = win.screen;
         const viewport = viewportForDoc(win.document);
         const viewportRect = viewport.getRect();
-        const viewportSize = this.getViewport().getSize();
+        const viewportSize = viewport.getSize();
         return {
           'is_amp': AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
           'amp_v': '$internalRuntimeVersion$',
