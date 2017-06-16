@@ -16,6 +16,7 @@
 
 
 import {listen} from '../../../src/event-helper';
+import {dict} from '../../../src/utils/object';
 
 
 /**
@@ -112,17 +113,17 @@ export class TouchHandler {
   /**
    * Makes a partial copy of the event.
    * @param {!Event} e The event object to be copied.
-   * @return {!Object}
+   * @return {!JsonObject}
    * @private
    */
   copyTouchEvent_(e) {
     const copiedEvent =
         this.copyProperties_(e, EVENT_PROPERTIES);
     if (e.touches) {
-      copiedEvent.touches = this.copyTouches_(e.touches);
+      copiedEvent['touches'] = this.copyTouches_(e.touches);
     }
     if (e.changedTouches) {
-      copiedEvent.changedTouches = this.copyTouches_(e.changedTouches);
+      copiedEvent['changedTouches'] = this.copyTouches_(e.changedTouches);
     }
     return copiedEvent;
   }
@@ -146,11 +147,11 @@ export class TouchHandler {
    * Copies specified properties of o to a new object.
    * @param {!Object} o The source object.
    * @param {!Array<string>} properties The properties to copy.
-   * @return {!Object} The copy of o.
+   * @return {!JsonObject} The copy of o.
    * @private
    */
   copyProperties_(o, properties) {
-    const copy = {};
+    const copy = dict();
     for (let i = 0; i < properties.length; i++) {
       const p = properties[i];
       if (o[p] !== undefined) {
