@@ -17,30 +17,50 @@
 import {setStyles} from '../../../src/style';
 
 export class Toolbar {
-  /** @param {!Element} element */
-  constructor(element) {
+  /**
+  * @param {!Element} element
+  * @param {!BaseElement} baseElement
+  */
+  constructor(element, baseElement) {
     this.element = element;
 
     /** @private {?Element} */
-    this.sidebarElement_ = this.element.parentElement;
+    this.sidebarElement_ = baseElement;
 
-    /** @private {string|undefined} */
-    this.toolbarMedia_ = undefined;
+    /** @private {?string} */
+    this.toolbarMedia_ = this.element.getAttribute('toolbar');
 
     /** @private {?Element} */
     this.toolbarClone_ = null;
 
-    /** @private {?Element} */
-    this.toolbarTarget_ = null;
+    /** @private {Element|undefined} */
+    this.toolbarTarget_ = undefined;
 
-    /** @private {?Array} */
-    this.toolbarOnlyElements_ = null;
+    /** @private {Array} */
+    this.toolbarOnlyElements_ = [];
 
-    // Get our declared private variables
-    this.toolbarMedia_ = this.element.getAttribute('toolbar');
+    this.buildToolbar_();
 
-    // Create a header element on the document for our toolbar
-    // TODO: Allow specifying a target for the toolbar
+    //Finally, find our tool-bar only elements
+    if (this.element.hasAttribute('toolbar-only')) {
+      this.toolbarOnlyElements_.push(this.element);
+    } else if (!this.element.hasAttribute('toolbar-only') &&
+      this.element.querySelectorAll('*[toolbar-only]').length > 0) {
+      // Check the nav's children for toolbar-only
+      Array.prototype.slice.call(this.element
+          .querySelectorAll('*[toolbar-only]'), 0)
+          .forEach(toolbarOnlyElement => {
+            this.toolbarOnlyElements_.push(toolbarOnlyElement);
+          });
+    }
+  }
+
+  /**
+   * Private function to build the DOM element for the toolbar
+   * TODO: Allow specifying a target for the toolbar
+   * @private
+   */
+  buildToolbar_() {
     const fragment = this.sidebarElement_
       .ownerDocument.createDocumentFragment();
     this.toolbarTarget_ =
@@ -57,21 +77,6 @@ export class Toolbar {
     fragment.appendChild(this.toolbarTarget_);
     this.sidebarElement_.parentElement
         .insertBefore(fragment, this.sidebarElement_);
-
-    //Finally, find our tool-bar only elements
-    if (this.element.hasAttribute('toolbar-only')) {
-      this.toolbarOnlyElements_ = [];
-      this.toolbarOnlyElements_.push(this.element);
-    } else if (!this.element.hasAttribute('toolbar-only') &&
-      this.element.querySelectorAll('*[toolbar-only]').length > 0) {
-      this.toolbarOnlyElements_ = [];
-      // Check the nav's children for toolbar-only
-      Array.prototype.slice.call(this.element
-          .querySelectorAll('*[toolbar-only]'), 0)
-          .forEach(toolbarOnlyElement => {
-            this.toolbarOnlyElements_.push(toolbarOnlyElement);
-          });
-    }
   }
 
   /**
