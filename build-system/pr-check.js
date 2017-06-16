@@ -275,7 +275,7 @@ const command = {
     // This must only be run for push builds, since Travis hides the encrypted
     // environment variables required by Percy during pull request builds.
     // For now, this is warning-only.
-    timedExec(`ruby ${resolve('tasks/visual-diff.rb')}`);
+    timedExec(`ruby ${resolve('build-system/tasks/visual-diff.rb')}`);
   },
   runPresubmitTests: function() {
     timedExecOrDie(`${gulp} presubmit`);

@@ -31,8 +31,8 @@ HOST = 'localhost'
 PORT = '8000'
 
 
-def up?(server, port)
-  http = Net::HTTP.start(server, port, {open_timeout: 5, read_timeout: 5})
+def up(server, port)
+  http = Net::HTTP.start(server, port)
   response = http.head("/")
   response.code == "200"
 rescue SystemCallError
@@ -43,11 +43,10 @@ end
 def launchWebServer()
   webserverCmd = 'gulp serve --host ' + HOST + ' --port ' + PORT
   webserverUrl = 'http://' + HOST + ':' + PORT
-  puts 'Starting webserver at ' + webserverUrl + '...'
   webserver = fork do
     exec webserverCmd
   end
-  until up?(HOST, PORT)
+  until up(HOST, PORT)
     sleep(1)
   end
 end
@@ -64,7 +63,6 @@ end
 
 
 def generateSnapshot(server, assets_dir, assets_base_url, url, name)
-  puts 'Generating snapshot...'
   Percy::Capybara::Anywhere.run(
       server, assets_dir, assets_base_url) do |page|
     page.driver.options[:phantomjs] = Phantomjs.path
