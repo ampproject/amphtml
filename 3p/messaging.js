@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {parseJson} from '../src/json';
+
 /**
  * Send messages to parent frame. These should not contain user data.
  * @param {string} type Type of messages
@@ -77,9 +79,8 @@ function startListening(win) {
       return;
     }
     // Parse JSON only once per message.
-    const data = /** @type {!Object} */ (
-        JSON.parse(event.data.substr(4)));
-    if (win.context.sentinel && data.sentinel != win.context.sentinel) {
+    const data = parseJson(event.data.substr(4));
+    if (win.context.sentinel && data['sentinel'] != win.context.sentinel) {
       return;
     }
     // Don't let other message handlers interpret our events.
@@ -88,7 +89,7 @@ function startListening(win) {
     }
     // Find all the listeners for this type.
     for (let i = 0; i < listeners.length; i++) {
-      if (listeners[i].type != data.type) {
+      if (listeners[i].type != data['type']) {
         continue;
       }
       const cb = listeners[i].cb;

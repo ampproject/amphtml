@@ -156,6 +156,18 @@ requirement: {
 }
 
 requirement: {
+  type: BANNED_NAME
+  error_message: 'Use jsonParse instead. Usage in 3p ads can be whitelisted for now.'
+  value: 'JSON.parse'
+  whitelist: 'ads/adfox.js'
+  whitelist: 'ads/imedia.js'
+  whitelist: 'ads/kargo.js'
+  whitelist: 'ads/mads.js'
+  whitelist: 'ads/google/imaVideo.js'
+  whitelist: 'src/json.js' # Where jsonParse itself is implemented.
+}
+
+requirement: {
   type: RESTRICTED_METHOD_CALL
   error_message: 'postMessage must be called with a string or a JsonObject'
   value: 'Window.prototype.postMessage:function((string|?JsonObject), string)'
