@@ -98,6 +98,14 @@ export class Platform {
   }
 
   /**
+   * Whether the current browser is based on the WebKit engine.
+   * @return {boolean}
+   */
+  isStandalone() {
+    return;
+  }
+
+  /**
    * Returns the major version of the browser.
    * @return {number}
    */

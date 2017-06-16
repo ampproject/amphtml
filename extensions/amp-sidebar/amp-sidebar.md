@@ -126,6 +126,10 @@ This attribute is present when the sidebar is open.
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
+##### data-close-button-aria-label attribute
+
+This element includes the value of the aria label attribute for the screenReaderCloseButton text.
+
 ## Styling
 
 The `amp-sidebar` component can be styled with standard CSS.
