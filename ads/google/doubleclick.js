@@ -213,7 +213,7 @@ function doubleClickWithGlade(global, data, gladeExperiment) {
   }
 
 
-  const slot = global.document.querySelector('#c');
+  const slot = global.document.getElementById('c');
   slot.setAttribute('data-glade', '');
   slot.setAttribute('data-amp-ad', '');
   slot.setAttribute('data-ad-unit-path', data.slot);
@@ -285,7 +285,7 @@ export function writeAdScript(global, data, gptFilename) {
     doubleClickWithGpt(global, data, GladeExperiment.GLADE_OPT_OUT, url);
   } else {
     const experimentFraction = 0.1;
-    const dice = Math.random();
+    const dice = global.Math.random();
     const href = global.context.location.href;
     if ((href.indexOf('google_glade=0') > 0 || dice < experimentFraction)
           && href.indexOf('google_glade=1') < 0) {

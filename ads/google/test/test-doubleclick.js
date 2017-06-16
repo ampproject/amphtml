@@ -16,6 +16,22 @@
 import {selectGptExperiment, writeAdScript} from '../doubleclick';
 import {createServedIframe} from '../../../testing/iframe';
 
+function verifyScript(win, name) {
+  const scripts = ['gpt.js', 'gpt_sf_a.js', 'gpt_sf_b.js', 'glade.js'];
+  assert(scripts.includes(name));
+  scripts.forEach(script => {
+    if (script == 'glade.js') {
+      expect(!!win.document.querySelector(
+    'script[src="https://securepubads.g.doubleclick.net/static/glade.js"]'))
+    .to.equal(script == name);
+    } else {
+      expect(!!win.document.querySelector(
+        `script[src="https://www.googletagservices.com/tag/js/${script}"]`))
+        .to.equal(script == name);
+    }
+  });
+};
+
 describe('selectGptExperiment', () => {
 
   it('should return the correct filename when given the experimental condition',
@@ -32,13 +48,17 @@ describe('selectGptExperiment', () => {
       });
 });
 
-describe('writeAdScript', () => {
+describes.sandboxed('writeAdScript', {}, env => {
 
   let win;
   beforeEach(() => {
     return createServedIframe().then(iframe => {
       win = iframe.win;
     });
+  });
+
+  afterEach(() => {
+    env.sandbox.restore();
   });
 
 
@@ -49,9 +69,7 @@ describe('writeAdScript', () => {
 
     writeAdScript(win, data, gptFilename);
 
-    expect(win.document.querySelector(
-        'script[src="https://www.googletagservices.com/tag/js/gpt.js"]'))
-        .to.be.ok;
+    verifyScript(win, 'gpt.js');
   });
 
   it('should use GPT and opt out of the GladeExperiment when multiSize is not' +
@@ -61,9 +79,7 @@ describe('writeAdScript', () => {
 
     writeAdScript(win, data, gptFilename);
 
-    expect(win.document.querySelector(
-        'script[src="https://www.googletagservices.com/tag/js/gpt.js"]'))
-        .to.be.ok;
+    verifyScript(win, 'gpt.js');
   });
 
   it('should use GPT and opt out of the GladeExperiment when in the control' +
@@ -73,9 +89,7 @@ describe('writeAdScript', () => {
 
     writeAdScript(win, data, gptFilename);
 
-    expect(win.document.querySelector(
-        'script[src="https://www.googletagservices.com/tag/js/gpt_sf_a.js"]'))
-        .to.be.ok;
+    verifyScript(win, 'gpt_sf_a.js');
   });
 
   it('should use GPT and opt out of the GladeExperiment when in the' +
@@ -85,8 +99,73 @@ describe('writeAdScript', () => {
 
     writeAdScript(win, data, gptFilename);
 
-    expect(win.document.querySelector(
-        'script[src="https://www.googletagservices.com/tag/js/gpt_sf_b.js"]'))
-        .to.be.ok;
+    verifyScript(win, 'gpt_sf_b.js');
+  });
+
+  it('should use GPT based on experimentFraction value and' +
+  'absence of google_glade=1 in url', () => {
+    env.sandbox.stub(win.Math, 'random').returns(0);
+    const div = win.document.createElement('div');
+    div.setAttribute('id', 'c');
+    env.sandbox.stub(win.document, 'getElementById').returns(div);
+    win.context = {};
+    win.context.location = {};
+    win.context.location.href = 'http://www.example.com';
+    const data = {};
+    const gptFilename = undefined;
+
+    writeAdScript(win, data, gptFilename);
+
+    verifyScript(win, 'gpt.js');
+  });
+
+  it('should use GPT based on presence of google_glade=0' +
+  'and absence of google_glade=1 in the url', () => {
+    env.sandbox.stub(win.Math, 'random').returns(1);
+    const div = win.document.createElement('div');
+    div.setAttribute('id', 'c');
+    env.sandbox.stub(win.document, 'getElementById').returns(div);
+    win.context = {};
+    win.context.location = {};
+    win.context.location.href = 'http://www.example.com?google_glade=0';
+    const data = {};
+    const gptFilename = undefined;
+
+    writeAdScript(win, data, gptFilename);
+
+    verifyScript(win, 'gpt.js');
+  });
+
+  it('should use Glade based on presence of google_glade=1 in url', () => {
+    env.sandbox.stub(win.Math, 'random').returns(1);
+    const div = win.document.createElement('div');
+    div.setAttribute('id', 'c');
+    env.sandbox.stub(win.document, 'getElementById').returns(div);
+    win.context = {};
+    win.context.location = {};
+    win.context.location.href = 'http://www.example.com?google_glade=1';
+    const data = {};
+    const gptFilename = undefined;
+
+    writeAdScript(win, data, gptFilename);
+
+    verifyScript(win, 'glade.js');
+  });
+
+  it('should use doubleClickWithGlade based on absence of google_glade=0' +
+  'in url and experimentFraction value', () => {
+    env.sandbox.stub(win.Math, 'random').returns(1);
+    const div = win.document.createElement('div');
+    div.setAttribute('id', 'c');
+    env.sandbox.stub(win.document, 'getElementById').returns(div);
+    win.context = {};
+    win.context.location = {};
+    win.context.location.href = 'http://www.example.com';
+    const data = {};
+    const gptFilename = undefined;
+
+    writeAdScript(win, data, gptFilename);
+
+    verifyScript(win, 'glade.js');
   });
 });
