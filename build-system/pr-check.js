@@ -270,10 +270,6 @@ const command = {
     timedExecOrDie(
         `${gulp} test --nobuild --saucelabs --integration --compiled`);
   },
-  runVisualDiffTests: function() {
-    timedExecOrDie(`${gulp} serve`);
-    timedExec(`ruby build-system/tasks/visual-diff.rb`);
-  },
   runPresubmitTests: function() {
     timedExecOrDie(`${gulp} presubmit`);
   },
@@ -293,7 +289,6 @@ function runAllCommands() {
     command.buildRuntime();
     command.runJsonAndLintChecks();
     command.runDepAndTypeChecks();
-    command.runVisualDiffTests();
     command.runUnitTests();
     // command.testDocumentLinks() is skipped during push builds.
     command.buildValidatorWebUI();
@@ -383,7 +378,6 @@ function main(argv) {
       command.runDepAndTypeChecks();
       // Skip unit tests if the PR only contains changes to integration tests.
       if (buildTargets.has('RUNTIME')) {
-        command.runVisualDiffTests();
         command.runUnitTests();
       }
     }
