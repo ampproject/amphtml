@@ -184,10 +184,7 @@ describe('amp-ad-3p-impl', () => {
       ad3p.buildCallback();
       ad3p.preconnectCallback();
       return whenFirstVisible.then(() => {
-        let fetches = win.document.querySelectorAll('link[rel=prefetch]');
-        if (!fetches.length) {
-          fetches = win.document.querySelectorAll('link[rel=preload]');
-        }
+        const fetches = win.document.querySelectorAll('link[rel=preload]');
         expect(fetches).to.have.length(2);
         expect(fetches[0]).to.have.property('href',
             'http://ads.localhost:9876/dist.3p/current/frame.max.html');
