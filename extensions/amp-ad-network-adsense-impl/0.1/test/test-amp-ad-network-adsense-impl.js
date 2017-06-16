@@ -487,7 +487,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       // attributes, or the actual size of the frame. To make this less of a
       // hassle, we'll just match against regexp.
       expect(style.transform).to.match(new RegExp(
-          'matrix\\(1, 0, 0, 1, -\d+, -\d+\\)'));
+          'matrix\\(1, 0, 0, 1, -[0-9]+, -[0-9]+\\)'));
     }
 
     afterEach(() => document.body.removeChild(impl.element));
