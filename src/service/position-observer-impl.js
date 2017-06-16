@@ -27,7 +27,7 @@ import {
 } from '../layout-rect';
 import {isExperimentOn} from '../../src/experiments';
 import {serializeMessage} from '../../src/3p-frame-messaging';
-import {tryParseJson} from '../../src/json.js';
+import {parseJson, tryParseJson} from '../../src/json.js';
 
 /** @const @private */
 const TAG = 'POSITION_OBSERVER';
@@ -367,13 +367,12 @@ export class InaboxAmpDocPositionObserver extends AbstractPositionObserver {
         return;
       }
       // Parse JSON only once per message.
-      const data = /** @type {!Object} */ (
-      JSON.parse(event.data.substr(4)));
-      if (data.sentinel != sentinel) {
+      const data = parseJson(event.data.substr(4));
+      if (data['sentinel'] != sentinel) {
         return;
       }
 
-      if (data.type != POSITION_HIGH_FIDELITY) {
+      if (data['type'] != POSITION_HIGH_FIDELITY) {
         return;
       }
 

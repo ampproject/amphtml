@@ -21,6 +21,7 @@ import {dev, user} from '../../../src/log';
 import {removeFragment} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {tryFocus} from '../../../src/dom';
+import {parseJson} from '../../../src/json';
 
 class AmpAccordion extends AMP.BaseElement {
 
@@ -132,7 +133,7 @@ class AmpAccordion extends AMP.BaseElement {
               dev().assertString(this.sessionId_));
       return sessionStr
           ? /** @type {!JsonObject} */ (
-              JSON.parse(dev().assertString(sessionStr)))
+              dev().assert(parseJson(dev().assertString(sessionStr))))
           : dict();
     } catch (e) {
       dev().fine('AMP-ACCORDION', e.message, e.stack);

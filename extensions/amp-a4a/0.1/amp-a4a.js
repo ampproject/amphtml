@@ -43,6 +43,7 @@ import {cryptoFor} from '../../../src/crypto';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
 import {assertHttpsUrl} from '../../../src/url';
+import {parseJson} from '../../../src/json';
 import {handleClick} from '../../../ads/alp/handler';
 import {
   getDefaultBootstrapBaseUrl,
@@ -1477,7 +1478,7 @@ export class AmpA4A extends AMP.BaseElement {
       return null;
     }
     try {
-      const metaDataObj = JSON.parse(
+      const metaDataObj = parseJson(
           creative.slice(metadataStart + metadataString.length, metadataEnd));
       const ampRuntimeUtf16CharOffsets =
         metaDataObj['ampRuntimeUtf16CharOffsets'];

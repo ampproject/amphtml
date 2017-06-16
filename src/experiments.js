@@ -26,6 +26,7 @@ import {getCookie, setCookie} from './cookies';
 import {getServicePromise} from './service';
 import {getSourceOrigin, parseQueryString, parseUrl} from './url';
 import {user} from './log';
+import {parseJson} from './json';
 
 /** @const {string} */
 const TAG = 'experiments';
@@ -121,7 +122,7 @@ function enableExperimentsFromToken(win, token, crypto, keyInfo) {
           throw new Error('Failed to verify config signature');
         }
         const configStr = utf8DecodeSync(configBytes);
-        const config = JSON.parse(configStr);
+        const config = parseJson(configStr);
 
         const approvedOrigin = parseUrl(config['origin']).origin;
         const sourceOrigin = getSourceOrigin(win.location);

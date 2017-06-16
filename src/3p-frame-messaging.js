@@ -17,6 +17,7 @@
 import {dev} from './log';
 import {dict} from './utils/object';
 import {internalListenImplementation} from './event-helper-listen';
+import {parseJson} from './json';
 
 
 /** @const */
@@ -86,7 +87,7 @@ export function serializeMessage(type, sentinel, data = dict(),
  * Returns null if it's not valid AMP message format.
  *
  * @param {*} message
- * @returns {?JsonObject}
+ * @returns {?JsonObject|undefined}
  */
 export function deserializeMessage(message) {
   if (!isAmpMessage(message)) {
@@ -95,7 +96,7 @@ export function deserializeMessage(message) {
   const startPos = message.indexOf('{');
   dev().assert(startPos != -1, 'JSON missing in %s', message);
   try {
-    return /** @type {!JsonObject} */ (JSON.parse(message.substr(startPos)));
+    return parseJson(message.substr(startPos));
   } catch (e) {
     dev().error('MESSAGING', 'Failed to parse message: ' + message, e);
     return null;

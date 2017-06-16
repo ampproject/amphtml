@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {parseJson} from '../../../../src/json';
 
 const TAG = 'amp-viewer-messaging';
 export const APP = '__AMPHTML__';
@@ -50,7 +51,7 @@ export function parseMessage(message) {
 
   try {
     return /** @type {?Message} */ (
-      JSON.parse(/** @type {string} */ (message)));
+        /** @type {?} */ (parseJson(/** @type {string} */ (message))));
   } catch (e) {
     return null;
   }
