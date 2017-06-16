@@ -50,7 +50,7 @@ matrix:
         - gem install poltergeist
       script:
         - node build-system/pr-check.js
-        - gulp serve &
+        - gulp serve
         - ruby build-system/tasks/visual-diff.rb
     - env: BUILD_SHARD="integration_tests"
       addons:
