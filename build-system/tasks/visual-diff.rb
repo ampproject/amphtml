@@ -30,9 +30,13 @@ DEFAULT_WIDTHS = [375, 411]  # CSS widths: iPhone: 375, Pixel: 411.
 HOST = 'localhost'
 PORT = '8000'
 
-
-def up(server, port)
-  http = Net::HTTP.start(server, port)
+# Checks if a webserver is up and running.
+#
+#
+# Returns:
+# - true if the server returns an OK (200) response code
+def up
+  http = Net::HTTP.start(HOST, PORT)
   response = http.head("/")
   response.code == "200"
 rescue SystemCallError
@@ -40,6 +44,10 @@ rescue SystemCallError
 end
 
 
+# Launches a background AMP webserver for unminified js using gulp
+#
+# Returns:
+# - Process ID of server process
 def launchWebServer()
   webserverCmd = 'gulp serve --host ' + HOST + ' --port ' + PORT
   webserverUrl = 'http://' + HOST + ':' + PORT
@@ -52,23 +60,29 @@ def launchWebServer()
 end
 
 
+# Waits up to 10 seconds for the webserver to start up.
+#
+# Returns:
+# - Process ID of server process
 def waitForWebServer()
   tries = 0
-  until up(HOST, PORT)
+  until up()
     sleep(1)
     tries += 1
     break if tries > 10
   end
-  up(HOST, PORT)
+  up()
 end
 
 
+# Closes the webserver process with the given process ID.
 def closeWebServer(pid)
   Process.kill('INT', pid)
   Process.wait(pid, Process::WNOHANG)
 end
 
 
+# Loads the test config from a well-known json config file.
 def loadConfigJson()
   jsonFile = File.open(
     File.join(
@@ -79,6 +93,14 @@ def loadConfigJson()
 end
 
 
+# Generates a percy snapshot for a given webpage.
+#
+# Args:
+# - server: URL of the webserver.
+# - assets_dir: Path to assets (images, etc.) used by the webpage
+# - assets_base_url: Base URL of assets on webserver
+# - url: Relative URL of page to be snapshotted
+# - name: Name of snapshot on Percy
 def generateSnapshot(server, assets_dir, assets_base_url, url, name)
   Percy::Capybara::Anywhere.run(
       server, assets_dir, assets_base_url) do |page|
@@ -91,6 +113,7 @@ def generateSnapshot(server, assets_dir, assets_base_url, url, name)
 end
 
 
+# Launches a webserver, loads test pages, and generates Percy snapshots.
 def main()
   pid = launchWebServer()
   if not waitForWebServer()
