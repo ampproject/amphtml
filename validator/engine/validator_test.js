@@ -86,9 +86,14 @@ function findHtmlFilesRelativeToTestdata() {
   for (const root of process.env['TESTDATA_ROOTS'].split(':')) {
     if (path.basename(root) === 'extensions') {
       for (const extension of readdir(root)) {
-        const extensionVersions = ['0.1', '1.0'];
-        for (const extensionVersion of extensionVersions) {
-          const testPath = path.join(extension, extensionVersion, 'test');
+        const extensionFolder = path.join(root, extension);
+        if (!isdir(extensionFolder)) {
+          // Skip if not a folder
+          continue;
+        }
+        // Get all versions
+        for (const possibleVersion of readdir(extensionFolder)) {
+          const testPath = path.join(extension, possibleVersion, 'test');
           if (isdir(path.join(root, testPath))) {
             testSubdirs.push({root: root, subdir: testPath});
           }
