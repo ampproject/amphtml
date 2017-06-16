@@ -811,7 +811,7 @@ export class AmpA4A extends AMP.BaseElement {
       }
       this.isRelayoutNeeded_ = true;
       this.getResource().layoutCanceled();
-      resourcesForDoc(this.getAmpDoc())./*REVIEW*/schedulePass();
+      resourcesForDoc(this.getAmpDoc())./*REVIEW*/requireLayout(this.element);
       this.refreshReadyPromise_.then(() => {
         this.isRelayoutNeeded_ = false;
         this.isRefreshing = false;
