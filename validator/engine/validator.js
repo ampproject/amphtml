@@ -1936,20 +1936,6 @@ class Context {
      */
     this.firstUrlSeenTag_ = null;
 
-    if (!amp.validator.LIGHT) {
-      /**
-       * @type {?LineCol}
-       * @private
-       */
-      this.encounteredBodyLineCol_ = null;
-    }
-
-    /**
-     * @type {?Array<string>}
-     * @private
-     */
-    this.encounteredBodyAttrs_ = null;
-
     /**
      * Extension-specific context.
      * @type {!ExtensionsContext}
@@ -2142,26 +2128,6 @@ class Context {
   /** @return {!ExtensionsContext} */
   getExtensions() {
     return this.extensions_;
-  }
-
-  /** @param {!Array<string>} attrs */
-  recordBodyTag(attrs) {
-    // Must copy because parser reuses the attrs array.
-    this.encounteredBodyAttrs_ = attrs.slice();
-    if (!amp.validator.LIGHT) {
-      this.encounteredBodyLineCol_ =
-          new LineCol(this.docLocator_.getLine(), this.docLocator_.getCol());
-    }
-  }
-
-  /** @return {?Array<string>} */
-  getEncounteredBodyAttrs() {
-    return this.encounteredBodyAttrs_;
-  }
-
-  /** @return {?LineCol} */
-  getEncounteredBodyLineCol() {
-    return this.encounteredBodyLineCol_;
   }
 }
 
@@ -4534,46 +4500,6 @@ amp.validator.ValidationHandler =
   }
 
   /**
-   * Callback for the attributes from all the body tags encountered
-   * within the document.
-   * @override
-   */
-  effectiveBodyTag(attributes) {
-    var encounteredAttrs = this.context_.getEncounteredBodyAttrs();
-    // If we never recorded a body tag with attributes, it was manufactured.
-    // In which case we've already logged an error for that. Doing more here
-    // would be confusing.
-    if (encounteredAttrs === null) return;
-    // So now we compare the attributes from the tag that we encountered
-    // (HtmlParser sent us a startTag event for it earlier) with the attributes
-    // from the effective body tag that we're just receiving now, which contains
-    // all attributes on body tags within the doc. It's correct to think of this
-    // synthetic tag simply as a concatenation - there is in general no
-    // elimination of duplicate attributes or overriding behavior. Thus, if the
-    // second body tag has any attribute this will result in an error.
-    var differenceSeen = attributes.length !== encounteredAttrs.length;
-    if (!differenceSeen) {
-      for (var ii = 0; ii < attributes.length; ii++) {
-        if (attributes[ii] !== encounteredAttrs[ii]) {
-          differenceSeen = true;
-          break;
-        }
-      }
-    }
-    if (!differenceSeen) return;
-    if (amp.validator.LIGHT) {
-      this.validationResult_.status =
-          amp.validator.ValidationResult.Status.FAIL;
-      return;
-    }
-    this.context_.addError(
-        amp.validator.ValidationError.Severity.ERROR,
-        amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG,
-        this.context_.getEncounteredBodyLineCol(),
-        /* params */['BODY'], /* url */ '', this.validationResult_);
-  }
-
-  /**
    * Callback for the end of a new HTML document. Triggers validation of
    * mandatory
    * tag presence.
@@ -4640,10 +4566,7 @@ amp.validator.ValidationHandler =
     if (referencePointMatcher !== null) {
       referencePointMatcher.match(attrs, this.context_, this.validationResult_);
     }
-    if ('BODY' === tagName) {
-      this.context_.recordBodyTag(attrs);
-      this.emitMissingExtensionErrors();
-    }
+    if ('BODY' === tagName) this.emitMissingExtensionErrors();
     this.validateTag(tagName, attrs);
     this.context_.getTagStack().matchChildTagName(
         this.context_, this.validationResult_);

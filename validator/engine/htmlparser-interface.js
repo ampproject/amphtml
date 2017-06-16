@@ -78,15 +78,6 @@ amp.htmlparser.HtmlSaxHandler = class {
    * actual body tag in question.
    */
   markManufacturedBody() {}
-
-  /**
-   * HTML5 defines how parsers treat documents with multiple body tags: they
-   * merge the attributes from the later ones into the first one. Therefore,
-   * just before the parser sends the endDoc event, it will also send this
-   * event which will provide the attributes from the effective body tag
-   * to the client (the handler).
-   */
-  effectiveBodyTag(attributes) {}
 };
 
 
