@@ -89,7 +89,7 @@ export function DOMRectLtwh(left, top, width, height) {
  */
 export function DOMRectFromClientRect(rect) {
   return DOMRectLtwh(Number(rect.left), Number(rect.top),
-        Number(rect.width), Number(rect.height));
+      Number(rect.width), Number(rect.height));
 }
 
 /**

@@ -176,7 +176,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
 
     const el = {
       getBoundingClientRect() {
-        return Ltwh(123, 456, w, h);
+        return DOMRectLtwh(123, 456, w, h);
       },
       style: {},
     };
@@ -199,10 +199,9 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   it('should undo styling when the fixed container is reset', done => {
     const w = 120;
     const h = 90;
-
     const el = {
       getBoundingClientRect() {
-        return Ltwh(123, 456, w, h);
+        return DOMRectLtwh(123, 456, w, h);
       },
       style: {},
     };
