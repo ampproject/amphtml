@@ -313,7 +313,7 @@ export class Resources {
   /**
    * Returns a subset of resources which are (1) belong to the specified host
    * window, and (2) positioned in the specified rect.
-   * @param {!Window} host
+   * @param {!Window} hostWin
    * @param {!../DOM-rect.DOMRectDef} rect
    * @param {boolean=} opt_isInPrerender signifies if we are in prerender mode.
    * @return {!Promise<!Array<!Resource>>}
