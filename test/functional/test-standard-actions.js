@@ -163,6 +163,44 @@ describes.sandboxed('StandardActions', {}, () => {
   });
 
   describe('"AMP" global target', () => {
+    it('should implement navigateTo', () => {
+      const expandUrlStub = sandbox.stub(standardActions.urlReplacements_,
+          'expandUrlSync', url => url);
+
+      const win = {
+        location: 'http://foo.com',
+      };
+      const invocation = {
+        method: 'navigateTo',
+        args: {
+          url: 'http://bar.com',
+        },
+        target: {
+          ownerDocument: {
+            defaultView: win,
+          },
+        },
+      };
+
+      // Should check trust and fail.
+      invocation.satisfiesTrust = () => false;
+      standardActions.handleAmpTarget(invocation);
+      expect(win.location).to.equal('http://foo.com');
+      expect(expandUrlStub).to.not.be.called;
+
+      // Should succeed.
+      invocation.satisfiesTrust = () => true;
+      standardActions.handleAmpTarget(invocation);
+      expect(win.location).to.equal('http://bar.com');
+      expect(expandUrlStub.calledOnce);
+
+      // Invalid protocols should fail.
+      invocation.args.url = /*eslint no-script-url: 0*/ 'javascript:alert(1)';
+      standardActions.handleAmpTarget(invocation);
+      expect(win.location).to.equal('http://bar.com');
+      expect(expandUrlStub.calledOnce);
+    });
+
     it('should implement goBack', () => {
       installHistoryServiceForDoc(ampdoc);
       const history = historyForDoc(ampdoc);
@@ -173,10 +211,10 @@ describes.sandboxed('StandardActions', {}, () => {
     });
 
     it('should implement setState', () => {
-      const setStateWithExpressionSpy = sandbox.spy();
+      const spy = sandbox.spy();
       window.services.bind = {
         obj: {
-          setStateWithExpression: setStateWithExpressionSpy,
+          setStateWithExpression: spy,
         },
       };
 
@@ -191,8 +229,8 @@ describes.sandboxed('StandardActions', {}, () => {
       };
       standardActions.handleAmpTarget(invocation);
       return bindForDoc(ampdoc).then(() => {
-        expect(setStateWithExpressionSpy).to.be.calledOnce;
-        expect(setStateWithExpressionSpy).to.be.calledWith('{foo: 123}');
+        expect(spy).to.be.calledOnce;
+        expect(spy).to.be.calledWith('{foo: 123}');
       });
     });
   });

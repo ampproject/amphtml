@@ -23,8 +23,8 @@ import {
   installServiceInEmbedScope,
 } from '../service';
 import {getMode} from '../mode';
+import {hasOwn, map} from '../utils/object';
 import {isArray, isFiniteNumber} from '../types';
-import {map} from '../utils/object';
 import {timerFor} from '../services';
 import {vsyncFor} from '../services';
 
@@ -218,8 +218,7 @@ export class ActionService {
       this.root_.addEventListener('click', event => {
         if (!event.defaultPrevented) {
           const element = dev().assertElement(event.target);
-          // TODO(choumx, #9699): HIGH.
-          this.trigger(element, name, event, ActionTrust.MEDIUM);
+          this.trigger(element, name, event, ActionTrust.HIGH);
         }
       });
       this.root_.addEventListener('keydown', event => {
@@ -229,8 +228,7 @@ export class ActionService {
           if (!event.defaultPrevented &&
               element.getAttribute('role') == 'button') {
             event.preventDefault();
-            // TODO(choumx, #9699): HIGH.
-            this.trigger(element, name, event, ActionTrust.MEDIUM);
+            this.trigger(element, name, event, ActionTrust.HIGH);
           }
         }
       });
@@ -245,7 +243,7 @@ export class ActionService {
         const element = dev().assertElement(event.target);
         // Only `change` events from <select> elements have high trust.
         const trust = element.tagName == 'SELECT'
-            ? ActionTrust.MEDIUM // TODO(choumx, #9699): HIGH.
+            ? ActionTrust.HIGH
             : ActionTrust.MEDIUM;
         this.addInputDetails_(event);
         this.trigger(element, name, event, trust);
@@ -341,10 +339,9 @@ export class ActionService {
    * @param {?JsonObject} args
    * @param {?Element} source
    * @param {?ActionEventDef} event
+   * @param {ActionTrust} trust
    */
-  execute(target, method, args, source, event) {
-    // Invocation of actions by the runtime has the highest trust of all.
-    const trust = ActionTrust.MEDIUM; // TODO(choumx, #9699): HIGH.
+  execute(target, method, args, source, event, trust) {
     this.invoke_(target, method, args, source, event, trust, null);
   }
 
@@ -774,8 +771,8 @@ function getActionInfoArgValue(tokens) {
       let current = data;
       // Traverse properties of `data` per token values.
       for (let i = 0; i < tokens.length; i++) {
-        const value = tokens[i].value;
-        if (current && current.hasOwnProperty(value)) {
+        const value = String(tokens[i].value);
+        if (current && hasOwn(current, value)) {
           current = current[value];
         } else {
           return null;
