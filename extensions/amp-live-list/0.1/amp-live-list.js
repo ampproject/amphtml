@@ -223,9 +223,8 @@ export class AmpLiveList extends AMP.BaseElement {
     this.curNumOfLiveItems_ = this.validateLiveListItems_(
         this.itemsSlot_, true);
 
-    // TODO(choumx, #9699): LOW.
     this.registerAction(
-        'update', this.updateAction_.bind(this), ActionTrust.MEDIUM);
+        'update', this.updateAction_.bind(this), ActionTrust.LOW);
 
     if (!this.element.hasAttribute('aria-live')) {
       this.element.setAttribute('aria-live', 'polite');

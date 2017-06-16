@@ -155,8 +155,7 @@ export class StandardActions {
    * @private
    */
   handleAmpGoBack_(invocation) {
-    // TODO(choumx, #9699): HIGH.
-    if (!invocation.satisfiesTrust(ActionTrust.MEDIUM)) {
+    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
       return;
     }
     historyForDoc(this.ampdoc).goBack();

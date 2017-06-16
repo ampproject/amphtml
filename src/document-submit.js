@@ -131,7 +131,6 @@ export function onDocumentFormSubmit_(e) {
     e.stopImmediatePropagation();
 
     const actions = actionServiceForDoc(form);
-    // TODO(choumx, #9699): HIGH.
-    actions.execute(form, 'submit', /*args*/ null, form, e, ActionTrust.MEDIUM);
+    actions.execute(form, 'submit', /*args*/ null, form, e, ActionTrust.HIGH);
   }
 }
