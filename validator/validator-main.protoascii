@@ -25,7 +25,7 @@ min_validator_revision_required: 234
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 438
+spec_file_revision: 439
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 
@@ -1679,6 +1679,18 @@ tags: {
   attrs: { name: "[srclang]" }
   attr_lists: "track-attrs-subtitles"
 }
+tags: {
+  tag_name: "TRACK"
+  spec_name: "amp-ima-video > track[kind=subtitles]"
+  mandatory_parent: "AMP-IMA-VIDEO"
+  # <amp-bind>
+  attrs: { name: "[label]" }
+  attrs: { name: "[src]" }
+  attrs: { name: "[srclang]" }
+  attr_lists: "track-attrs-subtitles"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ima-video"
+}
+
 
 # 4.7.15 SVG
 # We allow some limited embedded SVG tags. We do not allow inline styles
