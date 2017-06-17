@@ -28,10 +28,7 @@ tags: {  # <amp-gist>
   html_format: AMP
   tag_name: "AMP-GIST"
   requires_extension: "amp-gist"
-  attrs: {
-    name: "data-file"
-    value: ""
-  }
+  # data-file is allowed, but not required
   attrs: {
     name: "data-gistid"
     mandatory: true
