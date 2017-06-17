@@ -25,7 +25,7 @@ adopt(window);
 
 describe('amp-gist', () => {
 
-  function getIns(gistid, opt_attrs, file) {
+  function getIns(gistid, file) {
     return createIframePromise().then(iframe => {
       doNotLoadExternalResourcesInTest(iframe.win);
       const ins = iframe.doc.createElement('amp-gist');
@@ -33,12 +33,6 @@ describe('amp-gist', () => {
       ins.setAttribute('height', '237');
       if (file) {
         ins.setAttribute('data-file', file);
-      }
-
-      if (opt_attrs) {
-        for (const attr in opt_attrs) {
-          ins.setAttribute(attr, opt_attrs[attr]);
-        }
       }
 
       return iframe.addElement(ins);
@@ -54,11 +48,12 @@ describe('amp-gist', () => {
   });
 
   it('renders responsively with specific file', () => {
-    return getIns('b9bb35bc68df68259af94430f012425f').then(ins => {
-      const iframe = ins.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      expect(iframe.className).to.match(/i-amphtml-fill-content/);
-    });
+    return getIns('b9bb35bc68df68259af94430f012425f', 'hello-world.html')
+        .then(ins => {
+          const iframe = ins.querySelector('iframe');
+          expect(iframe).to.not.be.null;
+          expect(iframe.className).to.match(/i-amphtml-fill-content/);
+        });
   });
 
   it('Rejects because data-gistid is missing', () => {
