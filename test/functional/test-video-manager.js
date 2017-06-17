@@ -48,11 +48,11 @@ describes.fakeWin('VideoManager', {
 }, env => {
   let sandbox;
   let videoManager;
+  let klass;
+  let video;
+  let impl;
 
   it('should register common actions', () => {
-    const klass = createFakeVideoPlayerClass(env.win);
-    const video = env.createAmpElement('amp-test-fake-videoplayer', klass);
-    const impl = video.implementation_;
     const spy = sandbox.spy(impl, 'registerAction');
     videoManager.register(impl);
 
@@ -63,10 +63,6 @@ describes.fakeWin('VideoManager', {
   });
 
   it('should be paused if autoplay is not set', () => {
-    const klass = createFakeVideoPlayerClass(env.win);
-    const video = env.createAmpElement('amp-test-fake-videoplayer', klass);
-    const impl = video.implementation_;
-
 
     videoManager.register(impl);
     const entry = videoManager.getEntryForVideo_(impl);
@@ -78,9 +74,6 @@ describes.fakeWin('VideoManager', {
 
 
   it('autoplay - should be PLAYING_MANUAL if user interacted', () => {
-    const klass = createFakeVideoPlayerClass(env.win);
-    const video = env.createAmpElement('amp-test-fake-videoplayer', klass);
-    const impl = video.implementation_;
 
     video.setAttribute('autoplay', '');
 
@@ -89,6 +82,7 @@ describes.fakeWin('VideoManager', {
     const entry = videoManager.getEntryForVideo_(impl);
     entry.userInteractedWithAutoPlay_ = true;
     entry.isVisible_ = true;
+    entry.loaded_ = true;
 
     impl.play();
     return listenOncePromise(video, VideoEvents.PLAY).then(() => {
@@ -99,9 +93,6 @@ describes.fakeWin('VideoManager', {
 
 
   it('autoplay - should be PLAYING_AUTO if user did not interact', () => {
-    const klass = createFakeVideoPlayerClass(env.win);
-    const video = env.createAmpElement('amp-test-fake-videoplayer', klass);
-    const impl = video.implementation_;
 
     video.setAttribute('autoplay', '');
     videoManager.register(impl);
@@ -123,9 +114,6 @@ describes.fakeWin('VideoManager', {
   });
 
   it('autoplay - autoplay not supported should behave like manual play', () => {
-    const klass = createFakeVideoPlayerClass(env.win);
-    const video = env.createAmpElement('amp-test-fake-videoplayer', klass);
-    const impl = video.implementation_;
 
     video.setAttribute('autoplay', '');
     videoManager.register(impl);
@@ -156,9 +144,6 @@ describes.fakeWin('VideoManager', {
   });
 
   it('autoplay - should be PAUSED if pause after playing', () => {
-    const klass = createFakeVideoPlayerClass(env.win);
-    const video = env.createAmpElement('amp-test-fake-videoplayer', klass);
-    const impl = video.implementation_;
 
     video.setAttribute('autoplay', '');
 
@@ -178,9 +163,6 @@ describes.fakeWin('VideoManager', {
   });
 
   it('autoplay - initially there should be no user interaction', () => {
-    const klass = createFakeVideoPlayerClass(env.win);
-    const video = env.createAmpElement('amp-test-fake-videoplayer', klass);
-    const impl = video.implementation_;
 
     video.setAttribute('autoplay', '');
 
@@ -194,18 +176,21 @@ describes.fakeWin('VideoManager', {
 
 
   it('autoplay - PAUSED if autoplaying and video is outside of view', () => {
-    const klass = createFakeVideoPlayerClass(env.win);
-    const video = env.createAmpElement('amp-test-fake-videoplayer', klass);
-    const impl = video.implementation_;
 
     video.setAttribute('autoplay', '');
 
     videoManager.register(impl);
+
+    const visibilityStub = sandbox.stub(viewerForDoc(env.ampdoc), 'isVisible');
+    visibilityStub.onFirstCall().returns(true);
+
     const entry = videoManager.getEntryForVideo_(impl);
     entry.isVisible_ = true;
+    entry.loaded_ = true;
+    entry.videoVisibilityChanged_();
 
-    impl.play();
     entry.isVisible_ = false;
+    entry.videoVisibilityChanged_();
     const curState = videoManager.getPlayingState(impl);
     expect(curState).to.equal(PlayingStates.PAUSED);
   });
@@ -213,10 +198,6 @@ describes.fakeWin('VideoManager', {
 
   it(`no autoplay - should be paused if the
     user pressed pause after playing`, () => {
-    const klass = createFakeVideoPlayerClass(env.win);
-    const video = env.createAmpElement('amp-test-fake-videoplayer', klass);
-    const impl = video.implementation_;
-
 
     videoManager.register(impl);
     const entry = videoManager.getEntryForVideo_(impl);
@@ -233,10 +214,6 @@ describes.fakeWin('VideoManager', {
   });
 
   it('no autoplay - should be playing manual whenever video is playing', () => {
-    const klass = createFakeVideoPlayerClass(env.win);
-    const video = env.createAmpElement('amp-test-fake-videoplayer', klass);
-    const impl = video.implementation_;
-
 
     videoManager.register(impl);
     const entry = videoManager.getEntryForVideo_(impl);
@@ -252,9 +229,13 @@ describes.fakeWin('VideoManager', {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    klass = createFakeVideoPlayerClass(env.win);
+    video = env.createAmpElement('amp-test-fake-videoplayer', klass);
+    impl = video.implementation_;
     installVideoManagerForDoc(env.ampdoc);
     videoManager = videoManagerForDoc(env.ampdoc);
   });
+
   afterEach(() => {
     sandbox.restore();
   });
