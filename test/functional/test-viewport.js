@@ -490,7 +490,7 @@ describes.fakeWin('Viewport', {}, env => {
         .once();
     bindingMock.expects('hideViewerHeader').withArgs(true, 19).once();
     viewerViewportHandler({paddingTop: 0, duation: 300, curve: 'ease-in',
-        transient: true});
+      transient: true});
     bindingMock.verify();
     fixedLayerMock.verify();
   });
@@ -501,7 +501,7 @@ describes.fakeWin('Viewport', {}, env => {
     const fixedLayerMock = sandbox.mock(viewport.fixedLayer_);
     fixedLayerMock.expects('updatePaddingTop').withArgs(0).once();
     viewerViewportHandler({paddingTop: 0, duation: 300, curve: 'ease-in',
-        transient: 'true'});
+      transient: 'true'});
     fixedLayerMock.verify();
   });
 
@@ -594,8 +594,8 @@ describes.fakeWin('Viewport', {}, env => {
     clock.tick(6);
     expect(viewport.scrollAnimationFrameThrottled_).to.be.false;
     expect(viewer.sendMessage).to.have.been.calledOnce;
-    expect(viewer.sendMessage).to.have.been.calledWith('scroll',
-        {scrollTop: 30}, true);
+    expect(viewer.sendMessage.lastCall.args[0]).to.equal('scroll');
+    expect(viewer.sendMessage.lastCall.args[1].scrollTop).to.equal(30);
     // scroll to 40
     viewport.getScrollTop = () => 40;
     viewport.sendScrollMessage_();
@@ -631,8 +631,8 @@ describes.fakeWin('Viewport', {}, env => {
     // call viewer.postScroll, raf for viewer.postScroll
     expect(changeEvent).to.equal(null);
     expect(viewer.sendMessage).to.have.callCount(1);
-    expect(viewer.sendMessage).to.have.been.calledWith('scroll',
-        {scrollTop: 34}, true);
+    expect(viewer.sendMessage.lastCall.args[0]).to.equal('scroll');
+    expect(viewer.sendMessage.lastCall.args[1].scrollTop).to.equal(34);
     binding.getScrollTop = () => 35;
     viewport.scroll_();
 
@@ -1043,7 +1043,7 @@ describe('Viewport META', () => {
           documentElement: {
             style: {},
             classList: {
-              add: function() {},
+              add() {},
             },
           },
           querySelector: selector => {
@@ -1304,7 +1304,7 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
   });
 });
 
-describes.realWin('ViewportBindingNaturalIosEmbed', {}, env => {
+describes.realWin('ViewportBindingNaturalIosEmbed', {ampCss: true}, env => {
   let binding;
   let win;
 
@@ -1318,10 +1318,12 @@ describes.realWin('ViewportBindingNaturalIosEmbed', {}, env => {
     child.style.height = '300px';
     win.document.body.appendChild(child);
     installDocService(win, /* isSingleDoc */ true);
+    installVsyncService(win);
     const ampdoc = ampdocServiceFor(win).getAmpDoc();
     installPlatformService(win);
     installViewerServiceForDoc(ampdoc);
 
+    win.document.documentElement.classList.add('i-amphtml-singledoc');
     binding = new ViewportBindingNaturalIosEmbed_(win, ampdoc);
     return Promise.resolve();
   });
@@ -1341,6 +1343,9 @@ describes.realWin('ViewportBindingNaturalIosEmbed', {}, env => {
     const body = win.document.body;
     expect(documentElement.style.overflowY).to.equal('auto');
     expect(documentElement.style.webkitOverflowScrolling).to.equal('touch');
+    expect(win.getComputedStyle(documentElement).overflowY).to.equal('auto');
+
+    // Assigned styles.
     expect(body.style.overflowX).to.equal('hidden');
     expect(body.style.overflowY).to.equal('auto');
     expect(body.style.webkitOverflowScrolling).to.equal('touch');
@@ -1349,6 +1354,16 @@ describes.realWin('ViewportBindingNaturalIosEmbed', {}, env => {
     expect(body.style.left).to.equal('0px');
     expect(body.style.right).to.equal('0px');
     expect(body.style.bottom).to.equal('0px');
+
+    // Resolved styles.
+    const resolvedBodyStyle = win.getComputedStyle(body);
+    expect(resolvedBodyStyle.overflowX).to.equal('hidden');
+    expect(resolvedBodyStyle.overflowY).to.equal('auto');
+    expect(resolvedBodyStyle.position).to.equal('absolute');
+    expect(resolvedBodyStyle.top).to.equal('0px');
+    expect(resolvedBodyStyle.left).to.equal('0px');
+    expect(resolvedBodyStyle.right).to.equal('0px');
+    expect(resolvedBodyStyle.bottom).to.equal('0px');
 
     const scrollpos = body.querySelector('#i-amphtml-scrollpos');
     expect(scrollpos).to.be.ok;
@@ -1395,14 +1410,16 @@ describes.realWin('ViewportBindingNaturalIosEmbed', {}, env => {
         .equal('31px solid transparent');
     expect(win.document.body.style.borderTopStyle).to.equal('solid');
 
-    binding.updateLightboxMode(true);
-    expect(win.document.body.style.borderTopStyle).to.equal('none');
+    return binding.updateLightboxMode(true).then(() => {
+      expect(win.document.body.style.borderTopStyle).to.equal('none');
 
-    binding.updateLightboxMode(false);
-    expect(win.document.body.style.borderTopStyle).to.equal('solid');
-    expect(win.document.body.style.borderBottomStyle).to.not.equal('solid');
-    expect(win.document.body.style.borderLeftStyle).to.not.equal('solid');
-    expect(win.document.body.style.borderRightStyle).to.not.equal('solid');
+      return binding.updateLightboxMode(false);
+    }).then(() => {
+      expect(win.document.body.style.borderTopStyle).to.equal('solid');
+      expect(win.document.body.style.borderBottomStyle).to.not.equal('solid');
+      expect(win.document.body.style.borderLeftStyle).to.not.equal('solid');
+      expect(win.document.body.style.borderRightStyle).to.not.equal('solid');
+    });
   });
 
   it('should calculate size', () => {
@@ -1533,7 +1550,7 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     env.iframe.style.width = '100px';
     env.iframe.style.height = '100px';
     win = env.win;
-    win.document.documentElement.className = 'top';
+    win.document.documentElement.className = 'top i-amphtml-singledoc';
     child = win.document.createElement('div');
     child.style.width = '200px';
     child.style.height = '300px';

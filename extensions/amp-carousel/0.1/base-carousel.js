@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Keycodes} from '../../../src/utils/keycodes';
+import {KeyCodes} from '../../../src/utils/key-codes';
 import {timerFor} from '../../../src/services';
 
 /**
@@ -69,12 +69,16 @@ export class BaseCarousel extends AMP.BaseElement {
     this.prevButton_.classList.add('amp-carousel-button');
     this.prevButton_.classList.add('amp-carousel-button-prev');
     this.prevButton_.setAttribute('role', 'button');
-    // TODO(erwinm): Does label need i18n support in the future? or provide
-    // a way to be overridden.
-    this.prevButton_.setAttribute('aria-label', 'Previous item in carousel');
+    if (this.element.hasAttribute('data-previous-button-aria-label')) {
+      this.prevButton_.setAttribute('aria-label',
+          this.element.getAttribute('data-previous-button-aria-label'));
+    } else {
+      this.prevButton_.setAttribute('aria-label',
+          'Previous item in carousel');
+    }
     this.prevButton_.setAttribute('tabindex', 0);
     this.prevButton_.onkeydown = event => {
-      if (event.keyCode == Keycodes.ENTER || event.keyCode == Keycodes.SPACE) {
+      if (event.keyCode == KeyCodes.ENTER || event.keyCode == KeyCodes.SPACE) {
         if (!event.defaultPrevented) {
           event.preventDefault();
           this.interactionPrev();
@@ -90,10 +94,16 @@ export class BaseCarousel extends AMP.BaseElement {
     this.nextButton_.classList.add('amp-carousel-button');
     this.nextButton_.classList.add('amp-carousel-button-next');
     this.nextButton_.setAttribute('role', 'button');
-    this.nextButton_.setAttribute('aria-label', 'Next item in carousel');
+    if (this.element.hasAttribute('data-next-button-aria-label')) {
+      this.nextButton_.setAttribute('aria-label',
+          this.element.getAttribute('data-next-button-aria-label'));
+    } else {
+      this.nextButton_.setAttribute('aria-label',
+          'Previous item in carousel');
+    }
     this.nextButton_.setAttribute('tabindex', 0);
     this.nextButton_.onkeydown = event => {
-      if (event.keyCode == Keycodes.ENTER || event.keyCode == Keycodes.SPACE) {
+      if (event.keyCode == KeyCodes.ENTER || event.keyCode == KeyCodes.SPACE) {
         if (!event.defaultPrevented) {
           event.preventDefault();
           this.interactionNext();

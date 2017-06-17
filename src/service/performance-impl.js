@@ -23,7 +23,7 @@ import {whenDocumentComplete} from '../document-ready';
 import {getMode} from '../mode';
 import {isCanary} from '../experiments';
 import {throttle} from '../utils/rate-limit';
-import {map} from '../utils/object';
+import {dict, map} from '../utils/object';
 
 /**
  * Maximum number of tick events we allow to accumulate in the performance
@@ -33,11 +33,13 @@ import {map} from '../utils/object';
 const QUEUE_LIMIT = 50;
 
 /**
- * @typedef {{
+ * Fields:
+ * {{
  *   label: string,
  *   delta: (number|null|undefined),
  *   value: (number|null|undefined)
  * }}
+ * @typedef {!JsonObject}
  */
 let TickEventDef;
 
@@ -108,6 +110,8 @@ export class Performance {
       this.onload_();
       this.flush();
     });
+
+    this.registerPaintTimingObserver_();
   }
 
   /**
@@ -162,13 +166,52 @@ export class Performance {
 
   onload_() {
     this.tick('ol');
+    this.tickLegacyFirstPaintTime_();
+  }
+
+  /**
+   * Reports first pain and first contentful paint timings.
+   * See https://github.com/WICG/paint-timing
+   */
+  registerPaintTimingObserver_() {
+    if (!this.win.PerformancePaintTiming) {
+      return;
+    }
+    const observer = new this.win.PerformanceObserver(list => {
+      list.getEntries().forEach(entry => {
+        if (entry.name == 'first-paint') {
+          this.tickDelta('fp', entry.startTime + entry.duration);
+        }
+        else if (entry.name == 'first-contentful-paint') {
+          this.tickDelta('fcp', entry.startTime + entry.duration);
+        }
+      });
+    });
+
+    observer.observe({entryTypes: ['paint']});
+  }
+
+  /**
+   * Tick fp time based on Chrome's legacy paint timing API when
+   * appropriate.
+   * `registerPaintTimingObserver_` calls the standards based API and this
+   * method does nothing if it is available.
+   */
+  tickLegacyFirstPaintTime_() {
     // Detect deprecated first pain time API
     // https://bugs.chromium.org/p/chromium/issues/detail?id=621512
     // We'll use this until something better is available.
-    if (this.win.chrome && typeof this.win.chrome.loadTimes == 'function') {
-      this.tickDelta('fp',
-          this.win.chrome.loadTimes().firstPaintTime * 1000 -
-              this.win.performance.timing.navigationStart);
+    if (!this.win.PerformancePaintTiming
+        && this.win.chrome
+        && typeof this.win.chrome.loadTimes == 'function') {
+      const fpTime = this.win.chrome.loadTimes().firstPaintTime
+          * 1000 - this.win.performance.timing.navigationStart;
+      if (fpTime <= 1) {
+        // Throw away bad data generated from an apparent Chrome bug
+        // that is fixed in later Chrome versions.
+        return;
+      }
+      this.tickDelta('fp', fpTime);
     }
   }
 
@@ -226,7 +269,7 @@ export class Performance {
     const size = viewportForDoc(this.win.document).getSize();
     const rect = layoutRectLtwh(0, 0, size.width, size.height);
     return this.resources_.getResourcesInRect(
-            this.win, rect, /* isInPrerender */ true)
+        this.win, rect, /* isInPrerender */ true)
         .then(resources => Promise.all(resources.map(r => r.loadedOnce())));
   }
 
@@ -242,12 +285,12 @@ export class Performance {
   tick(label, opt_delta) {
     const value = (opt_delta == undefined) ? this.win.Date.now() : undefined;
 
-    const data = {
-      label,
-      value,
-      // Delta can be 0 or negative, but will always be changed to 1.
-      delta: opt_delta != null ? Math.max(opt_delta, 1) : undefined,
-    };
+    const data = dict({
+      'label': label,
+      'value': value,
+      // Delta can negative, but will always be changed to 0.
+      'delta': opt_delta != null ? Math.max(opt_delta, 0) : undefined,
+    });
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
       this.viewer_.sendMessage('tick', data);
     } else {
@@ -289,9 +332,9 @@ export class Performance {
    */
   flush() {
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
-      this.viewer_.sendMessage('sendCsi', {
-        ampexp: this.ampexp_,
-      }, /* cancelUnsent */true);
+      this.viewer_.sendMessage('sendCsi', dict({
+        'ampexp': this.ampexp_,
+      }), /* cancelUnsent */true);
     }
   }
 
@@ -357,7 +400,7 @@ export class Performance {
    */
   prerenderComplete_(value) {
     if (this.viewer_) {
-      this.viewer_.sendMessage('prerenderComplete', {value},
+      this.viewer_.sendMessage('prerenderComplete', dict({'value': value}),
           /* cancelUnsent */true);
     }
   }

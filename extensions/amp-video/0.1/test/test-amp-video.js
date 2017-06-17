@@ -367,31 +367,31 @@ describe(TAG, () => {
     }).then(v => {
       const impl = v.implementation_;
       return Promise.resolve()
-      .then(() => {
-        impl.mute();
-        return listenOncePromise(v, VideoEvents.MUTED);
-      })
-      .then(() => {
-        impl.play();
-        return listenOncePromise(v, VideoEvents.PLAY);
-      })
-      .then(() => {
-        impl.pause();
-        return listenOncePromise(v, VideoEvents.PAUSE);
-      })
-      .then(() => {
-        impl.unmute();
-        return listenOncePromise(v, VideoEvents.UNMUTED);
-      })
-      .then(() => {
+          .then(() => {
+            impl.mute();
+            return listenOncePromise(v, VideoEvents.MUTED);
+          })
+          .then(() => {
+            impl.play();
+            return listenOncePromise(v, VideoEvents.PLAY);
+          })
+          .then(() => {
+            impl.pause();
+            return listenOncePromise(v, VideoEvents.PAUSE);
+          })
+          .then(() => {
+            impl.unmute();
+            return listenOncePromise(v, VideoEvents.UNMUTED);
+          })
+          .then(() => {
         // Should not send the unmute event twice if already sent once.
-        const p = listenOncePromise(v, VideoEvents.UNMUTED).then(() => {
-          assert.fail('Should not have dispatch unmute message twice');
-        });
-        v.querySelector('video').dispatchEvent(new Event('volumechange'));
-        const successTimeout = timer.timeoutPromise(10, true);
-        return Promise.race([p, successTimeout]);
-      });
+            const p = listenOncePromise(v, VideoEvents.UNMUTED).then(() => {
+              assert.fail('Should not have dispatch unmute message twice');
+            });
+            v.querySelector('video').dispatchEvent(new Event('volumechange'));
+            const successTimeout = timer.promise(10);
+            return Promise.race([p, successTimeout]);
+          });
     });
   });
 });

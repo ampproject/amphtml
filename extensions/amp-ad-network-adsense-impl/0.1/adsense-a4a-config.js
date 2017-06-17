@@ -57,6 +57,11 @@ export const ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH = {
   experiment: '117152653',
 };
 
+export const ADSENSE_A4A_EXTERNAL_DELAYED_EXPERIMENT_BRANCHES_PRE_LAUNCH = {
+  control: '117152654',
+  experiment: '117152655',
+};
+
 /**
  * const {!../../../ads/google/a4a/traffic-experiments.A4aExperimentBranches}
  */
@@ -98,6 +103,7 @@ export function adsenseIsA4AEnabled(win, element) {
 
   return !!element.getAttribute('data-ad-client') &&
       googleAdsIsA4AEnabled(
-        win, element, ADSENSE_A4A_EXPERIMENT_NAME,
-        externalBranches, internalBranches);
+          win, element, ADSENSE_A4A_EXPERIMENT_NAME,
+          externalBranches, internalBranches,
+          ADSENSE_A4A_EXTERNAL_DELAYED_EXPERIMENT_BRANCHES_PRE_LAUNCH);
 }

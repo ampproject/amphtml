@@ -15,6 +15,17 @@
  */
 
 /**
+ * @typedef {{
+ *   prefetch: (string|undefined),
+ *   preconnect: (string|undefined),
+ *   renderStartImplemented: (boolean|undefined),
+ *   clientIdScope: (string|undefined),
+ *   clientIdCookieName: (string|undefined),
+ * }}
+ */
+let AdNetworkConfigDef;
+
+/**
  * The config of each ad network.
  * Please keep the list alphabetic order.
  *
@@ -26,14 +37,19 @@
  *   // List of hosts for preconnect
  *   preconnect: string|array
  *
- *   // The externalCidScope used to provide CIDs to ads
+ *   // The scope used to provide CIDs to ads
  *   clientIdScope: string
+ *
+ *  // The cookie name to store the CID. In absence, `clientIdScope` is used.
+ *   clientIdCookieName: string
  *
  *   // Whether render-start API has been implemented
  *   // We highly recommend all networks to implement the API,
  *   // see details in the README.md
  *   renderStartImplemented: boolean
  * }
+ *
+ * @const {!Object<string, !AdNetworkConfigDef>}}
  */
 export const adConfig = {
   _ping_: {
@@ -68,6 +84,11 @@ export const adConfig = {
 
   adform: {},
 
+  adfox: {
+    prefetch: 'https://yastatic.net/pcode/adfox/loader.js',
+    renderStartImplemented: true,
+  },
+
   adgeneration: {
     prefetch: 'https://i.socdm.com/sdk/js/adg-script-loader.js',
   },
@@ -80,12 +101,17 @@ export const adConfig = {
 
   adman: {},
 
+  admanmedia: {
+    renderStartImplemented: true,
+  },
+
   adreactor: {},
 
   adsense: {
     prefetch: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
     preconnect: 'https://googleads.g.doubleclick.net',
     clientIdScope: 'AMP_ECID_GOOGLE',
+    clientIdCookieName: '_ga',
   },
 
   adsnative: {
@@ -175,7 +201,18 @@ export const adConfig = {
     prefetch: 'https://s.ato.mx/p.js',
   },
 
+  bidtellect: {},
+
   brainy: {},
+
+  bringhub: {
+    renderStartImplemented: true,
+    preconnect: [
+      'https://static.bh-cdn.com',
+      'https://core-api.bringhub.io',
+    ],
+  },
+
 
   caajainfeed: {
     prefetch: [
@@ -239,6 +276,7 @@ export const adConfig = {
       'https://tpc.googlesyndication.com',
     ],
     clientIdScope: 'AMP_ECID_GOOGLE',
+    clientIdCookieName: '_ga',
     renderStartImplemented: true,
   },
 
@@ -261,6 +299,11 @@ export const adConfig = {
 
   f1e: {
     prefetch: 'https://img.ak.impact-ad.jp/util/f1e_amp.min.js',
+  },
+
+  f1h: {
+    preconnect: 'https://img.ak.impact-ad.jp',
+    renderStartImplemented: true,
   },
 
   fake: {},
@@ -305,6 +348,11 @@ export const adConfig = {
 
   ibillboard: {},
 
+  imedia: {
+    prefetch: 'https://i.imedia.cz/js/im3.js',
+    renderStartImplemented: true,
+  },
+
   imobile: {
     prefetch: 'https://spamp.i-mobile.co.jp/script/amp.js',
     preconnect: 'https://spad.i-mobile.co.jp',
@@ -331,6 +379,7 @@ export const adConfig = {
       'https://js-sec.indexww.com/apl/amp.js',
     ],
     preconnect: 'https://as-sec.casalemedia.com',
+    renderStartImplemented: true,
   },
 
   kargo: {},
@@ -448,6 +497,13 @@ export const adConfig = {
     ],
   },
 
+  netletix: {
+    preconnect: [
+      'https://call.netzathleten-media.de',
+    ],
+    renderStartImplemented: true,
+  },
+
   nokta: {
     prefetch: 'https://static.virgul.com/theme/mockups/noktaamp/ampjs.js',
     renderStartImplemented: true,
@@ -474,6 +530,15 @@ export const adConfig = {
   },
 
   plista: {},
+
+  polymorphicads: {
+    prefetch: 'https://www.polymorphicads.jp/js/amp.js',
+    preconnect: [
+      'https://img.polymorphicads.jp',
+      'https://ad.polymorphicads.jp',
+    ],
+    renderStartImplemented: true,
+  },
 
   popin: {
     renderStartImplemented: true,
@@ -562,6 +627,11 @@ export const adConfig = {
     prefetch: 'https://ap.lijit.com/www/sovrn_amp/sovrn_ads.js',
   },
 
+  spotx: {
+    preconnect: 'https://js.spotx.tv',
+    renderStartImplemented: true,
+  },
+
   sunmedia: {
     prefetch: 'https://vod.addevweb.com/sunmedia/amp/ads/sunmedia.js',
     preconnect: 'https://static.addevweb.com',
@@ -632,6 +702,11 @@ export const adConfig = {
       'https://yads.c.yimg.jp/js/yads.js',
     ],
     preconnect: 'https://yads.yahoo.co.jp',
+  },
+
+  yandex: {
+    prefetch: 'https://yastatic.net/partner-code/loaders/context_amp.js',
+    renderStartImplemented: true,
   },
 
   yieldbot: {

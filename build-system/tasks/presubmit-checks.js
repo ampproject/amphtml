@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 var gulp = require('gulp-help')(require('gulp'));
 var path = require('path');
@@ -585,8 +586,8 @@ var forbidden3pTerms = {
   '\\.then\\((?!callNext)': ThreePTermsMessage,
 };
 
-var bannedTermsHelpString = 'Please review viewport.js for a helper method ' +
-    'or mark with `/*OK*/` or `/*REVIEW*/` and consult the AMP team. ' +
+var bannedTermsHelpString = 'Please review viewport service for helper ' +
+    'methods or mark with `/*OK*/` or `/*REVIEW*/` and consult the AMP team. ' +
     'Most of the forbidden property/method access banned on the ' +
     '`forbiddenTermsSrcInclusive` object can be found in ' +
     '[What forces layout / reflow gist by Paul Irish]' +
@@ -694,6 +695,7 @@ var forbiddenTermsSrcInclusive = {
         'error.cancellation() may be applicable.',
     whitelist: [
       'extensions/amp-access/0.1/access-expr-impl.js',
+      'extensions/amp-animation/0.1/css-expr-impl.js',
       'extensions/amp-bind/0.1/bind-expr-impl.js',
     ],
   },
@@ -706,6 +708,7 @@ var forbiddenTermsSrcInclusive = {
       'src/service/performance-impl.js',
       'src/service/url-replacements-impl.js',
       'src/service/variable-source.js',
+      'src/validator-integration.js',
       'extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js',
       'extensions/amp-image-lightbox/0.1/amp-image-lightbox.js',
       'extensions/amp-analytics/0.1/transport.js',
@@ -755,6 +758,7 @@ var forbiddenTermsSrcInclusive = {
       'tools/errortracker/errortracker.go',
       'validator/nodejs/index.js',
       'validator/webui/serve-standalone.go',
+      'build-system/tasks/check-links.js',
       'build-system/tasks/extension-generator/index.js',
     ],
   },

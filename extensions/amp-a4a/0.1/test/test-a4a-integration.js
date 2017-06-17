@@ -96,13 +96,17 @@ describe('integration test: a4a', () => {
     const fetchJsonMock = sandbox.stub(Xhr.prototype, 'fetchJson');
     for (const serviceName in signingServerURLs) {
       fetchJsonMock.withArgs(signingServerURLs[serviceName],
-        {
-          mode: 'cors',
-          method: 'GET',
-          ampCors: false,
-          credentials: 'omit',
-        }).returns(
-          Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]}));
+          {
+            mode: 'cors',
+            method: 'GET',
+            ampCors: false,
+            credentials: 'omit',
+          }).returns(Promise.resolve({
+            json() {
+              return Promise.resolve(
+                  {keys: [JSON.parse(validCSSAmp.publicKey)]});
+            },
+          }));
     }
     // Expect ad request.
     headers = {};

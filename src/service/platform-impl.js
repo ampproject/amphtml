@@ -52,8 +52,8 @@ export class Platform {
    * @return {boolean}
    */
   isSafari() {
-    return /Safari/i.test(this.navigator_.userAgent) && !this.isChrome() &&
-        !this.isEdge();
+    return /Safari/i.test(this.navigator_.userAgent) &&
+        !this.isChrome() && !this.isIe() && !this.isEdge() && !this.isFirefox();
   }
 
   /**
@@ -70,7 +70,7 @@ export class Platform {
    * @return {boolean}
    */
   isFirefox() {
-    return /Firefox/i.test(this.navigator_.userAgent) && !this.isEdge();
+    return /Firefox|FxiOS/i.test(this.navigator_.userAgent) && !this.isEdge();
   }
 
   /**
@@ -103,13 +103,14 @@ export class Platform {
    */
   getMajorVersion() {
     if (this.isSafari()) {
-      return this.evalMajorVersion_(/\sVersion\/(\d+)/, 1);
+      return this.isIos() ? (this.getIosMajorVersion() || 0) :
+          this.evalMajorVersion_(/\sVersion\/(\d+)/, 1);
     }
     if (this.isChrome()) {
       return this.evalMajorVersion_(/(Chrome|CriOS)\/(\d+)/, 2);
     }
     if (this.isFirefox()) {
-      return this.evalMajorVersion_(/Firefox\/(\d+)/, 1);
+      return this.evalMajorVersion_(/(Firefox|FxiOS)\/(\d+)/, 2);
     }
     if (this.isIe()) {
       return this.evalMajorVersion_(/MSIE\s(\d+)/, 1);
@@ -151,7 +152,7 @@ export class Platform {
       return '';
     }
     let version = this.navigator_.userAgent
-        .match(/OS ([0-9]+_[0-9]+(_[0-9]+)?)\b/);
+        .match(/OS ([0-9]+[_.][0-9]+([_.][0-9]+)?)\b/);
     if (!version) {
       return '';
     }

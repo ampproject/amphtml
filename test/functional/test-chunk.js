@@ -60,27 +60,30 @@ describe('chunk', () => {
       });
     });
 
-    it('should execute chunks', done => {
+    it('should execute chunks', () => {
       let count = 0;
       let progress = '';
-      function complete(str) {
-        return function(unusedIdleDeadline) {
-          progress += str;
-          if (++count == 6) {
-            expect(progress).to.equal('abcdef');
-            done();
-          }
-        };
-      }
-      startupChunk(fakeWin.document, complete('a'));
-      startupChunk(fakeWin.document, complete('b'));
-      startupChunk(fakeWin.document, function() {
-        complete('c')();
+      return new Promise(resolve => {
+        function complete(str) {
+          return function(unusedIdleDeadline) {
+            progress += str;
+            if (++count == 6) {
+              resolve();
+            }
+          };
+        }
+        startupChunk(fakeWin.document, complete('a'));
+        startupChunk(fakeWin.document, complete('b'));
         startupChunk(fakeWin.document, function() {
-          complete('d')();
-          startupChunk(fakeWin.document, complete('e'));
-          startupChunk(fakeWin.document, complete('f'));
+          complete('c')();
+          startupChunk(fakeWin.document, function() {
+            complete('d')();
+            startupChunk(fakeWin.document, complete('e'));
+            startupChunk(fakeWin.document, complete('f'));
+          });
         });
+      }).then(() => {
+        expect(progress).to.equal('abcdef');
       });
     });
   }
@@ -144,37 +147,37 @@ describe('chunk', () => {
     });
 
     describe.configure().skip(() => !('onunhandledrejection' in window))
-    .run('error handling', () => {
-      let fakeWin;
-      let done;
+        .run('error handling', () => {
+          let fakeWin;
+          let done;
 
-      function onReject(event) {
-        expect(event.reason.message).to.match(/test async/);
-        done();
-      }
+          function onReject(event) {
+            expect(event.reason.message).to.match(/test async/);
+            done();
+          }
 
-      beforeEach(() => {
-        fakeWin = env.win;
-        const viewer = viewerForDoc(env.win.document);
-        env.sandbox.stub(viewer, 'isVisible', () => {
-          return true;
+          beforeEach(() => {
+            fakeWin = env.win;
+            const viewer = viewerForDoc(env.win.document);
+            env.sandbox.stub(viewer, 'isVisible', () => {
+              return true;
+            });
+            window.addEventListener('unhandledrejection', onReject);
+          });
+
+          afterEach(() => {
+            window.removeEventListener('unhandledrejection', onReject);
+          });
+
+          it('should proceed on error and rethrowAsync', d => {
+            startupChunk(fakeWin.document, () => {
+              throw new Error('test async');
+            });
+            startupChunk(fakeWin.document, () => {
+              done = d;
+            });
+          });
         });
-        window.addEventListener('unhandledrejection', onReject);
-      });
-
-      afterEach(() => {
-        window.removeEventListener('unhandledrejection', onReject);
-      });
-
-      it('should proceed on error and rethrowAsync', d => {
-        startupChunk(fakeWin.document, () => {
-          throw new Error('test async');
-        });
-        startupChunk(fakeWin.document, () => {
-          done = d;
-        });
-      });
-    });
 
     describe('invisible', () => {
       beforeEach(() => {

@@ -32,11 +32,12 @@ import {
   isProxyOrigin,
   parseUrl,
 } from '../../../src/url';
+import {dict} from '../../../src/utils/object';
 import {isIframed} from '../../../src/dom';
 import {getCryptoRandomBytesArray} from '../../../src/utils/bytes';
 import {viewerForDoc} from '../../../src/services';
 import {cryptoFor} from '../../../src/crypto';
-import {tryParseJson} from '../../../src/json';
+import {parseJson, tryParseJson} from '../../../src/json';
 import {timerFor} from '../../../src/services';
 import {user, rethrowAsync} from '../../../src/log';
 
@@ -46,6 +47,8 @@ const ONE_DAY_MILLIS = 24 * 3600 * 1000;
  * We ignore base cids that are older than (roughly) one year.
  */
 const BASE_CID_MAX_AGE_MILLIS = 365 * ONE_DAY_MILLIS;
+
+const SCOPE_NAME_VALIDATOR = /^[a-zA-Z0-9-_.]+$/;
 
 /**
  * A base cid string value and the time it was last read / stored.
@@ -88,10 +91,8 @@ export class Cid {
   }
 
   /**
-   * @param {string|!GetCidDef} externalCidScope Name of the fallback cookie
-   *     for the case where this doc is not served by an AMP proxy. GetCidDef
-   *     structure can also instruct CID to create a cookie if one doesn't yet
-   *     exist in a non-proxy case.
+   * @param {!GetCidDef} getCidStruct an object provides CID scope name for
+   *     proxy case and cookie name for non-proxy case.
    * @param {!Promise} consent Promise for when the user has given consent
    *     (if deemed necessary by the publisher) for use of the client
    *     identifier.
@@ -110,17 +111,13 @@ export class Cid {
    *      This promise may take a long time to resolve if consent isn't
    *      given.
    */
-  get(externalCidScope, consent, opt_persistenceConsent) {
-    /** @type {!GetCidDef} */
-    let getCidStruct;
-    if (typeof externalCidScope == 'string') {
-      getCidStruct = {scope: externalCidScope};
-    } else {
-      getCidStruct = /** @type {!GetCidDef} */ (externalCidScope);
-    }
-    user().assert(/^[a-zA-Z0-9-_.]+$/.test(getCidStruct.scope),
-        'The client id name must only use the characters ' +
-        '[a-zA-Z0-9-_.]+\nInstead found: %s', getCidStruct.scope);
+  get(getCidStruct, consent, opt_persistenceConsent) {
+    user().assert(
+        SCOPE_NAME_VALIDATOR.test(getCidStruct.scope)
+            && SCOPE_NAME_VALIDATOR.test(getCidStruct.cookieName),
+        'The CID scope and cookie name must only use the characters ' +
+        '[a-zA-Z0-9-_.]+\nInstead found: %s',
+        getCidStruct.scope);
     return consent.then(() => {
       return viewerForDoc(this.ampdoc).whenFirstVisible();
     }).then(() => {
@@ -319,10 +316,10 @@ export function viewerBaseCid(ampdoc, opt_data) {
           // For backward compatibility: #4029
           if (data && !tryParseJson(data)) {
             // TODO(dvoytenko, #9019): use this for reporting: dev().error('cid', 'invalid cid format');
-            return JSON.stringify({
-              time: Date.now(), // CID returned from old API is always fresh
-              cid: data,
-            });
+            return JSON.stringify(dict({
+              'time': Date.now(), // CID returned from old API is always fresh
+              'cid': data,
+            }));
           }
           return data;
         });
@@ -344,10 +341,10 @@ export function viewerBaseCid(ampdoc, opt_data) {
  * @return {string}
  */
 function createCidData(cidString) {
-  return JSON.stringify({
-    time: Date.now(),
-    cid: cidString,
-  });
+  return JSON.stringify(dict({
+    'time': Date.now(),
+    'cid': cidString,
+  }));
 }
 
 /**
@@ -374,7 +371,7 @@ function read(ampdoc) {
     if (!data) {
       return null;
     }
-    const item = JSON.parse(data);
+    const item = parseJson(data);
     return {
       time: item['time'],
       cid: item['cid'],

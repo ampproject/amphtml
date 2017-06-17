@@ -173,16 +173,20 @@ amp-carousel .amp-carousel-button.amp-disabled {
 .i-amphtml-slidescroll-no-snap .i-amphtml-slide-item {
   scroll-snap-coordinate: none !important;
 }
+
+.i-amphtml-slidescroll-no-snap.i-amphtml-slides-container.i-amphtml-no-scroll {
+  -webkit-overflow-scrolling: auto !important;
+}
+
 /* End SlideScroll */
 
 /* Begin ScrollableCarousel */
-.i-amphtml-scrollable-carousel-container .amp-carousel-slide {
+.amp-scrollable-carousel-slide {
   display: inline-block !important;
   margin-left: 8px;
 }
 
-/*TODO(dvoytenko): this has to be customizable*/
-.i-amphtml-scrollable-carousel-container .amp-carousel-slide:first-child {
+.amp-scrollable-carousel-slide:first-child {
   margin-left: 0px;
 }
 

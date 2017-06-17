@@ -15,7 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
-import {Keycodes} from '../../../src/utils/keycodes';
+import {KeyCodes} from '../../../src/utils/key-codes';
 import {closestByTag, tryFocus} from '../../../src/dom';
 import {Layout} from '../../../src/layout';
 import {dev} from '../../../src/log';
@@ -58,7 +58,10 @@ export class AmpSidebar extends AMP.BaseElement {
     const platform = platformFor(this.win);
 
     /** @private @const {boolean} */
-    this.isIosSafari_ = platform.isIos() && platform.isSafari();
+    this.isIos_ = platform.isIos();
+
+    /** @private @const {boolean} */
+    this.isSafari_ = platform.isSafari();
 
     /** @private {number} */
     this.historyId_ = -1;
@@ -95,7 +98,7 @@ export class AmpSidebar extends AMP.BaseElement {
       this.element.setAttribute('side', this.side_);
     }
 
-    if (this.isIosSafari_) {
+    if (this.isIos_) {
       this.fixIosElasticScrollLeak_();
     }
 
@@ -113,7 +116,7 @@ export class AmpSidebar extends AMP.BaseElement {
 
     this.documentElement_.addEventListener('keydown', event => {
       // Close sidebar on ESC.
-      if (event.keyCode == Keycodes.ESCAPE) {
+      if (event.keyCode == KeyCodes.ESCAPE) {
         this.close_();
       }
     });
@@ -194,7 +197,7 @@ export class AmpSidebar extends AMP.BaseElement {
     this.vsync_.mutate(() => {
       toggle(this.element, /* display */true);
       this.openMask_();
-      if (this.isIosSafari_) {
+      if (this.isIos_ && this.isSafari_) {
         this.compensateIosBottombar_();
       }
       this.element./*OK*/scrollTop = 1;
@@ -323,4 +326,6 @@ export class AmpSidebar extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-sidebar', AmpSidebar, CSS);
+AMP.extension('amp-sidebar', '0.1', AMP => {
+  AMP.registerElement('amp-sidebar', AmpSidebar, CSS);
+});

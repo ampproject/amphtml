@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-trust';
 import {CSS} from '../../../build/amp-selector-0.1.css';
-import {Keycodes} from '../../../src/utils/keycodes';
+import {KeyCodes} from '../../../src/utils/key-codes';
 import {actionServiceForDoc} from '../../../src/services';
 import {closestBySelector, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
@@ -95,8 +96,8 @@ export class AmpSelector extends AMP.BaseElement {
       kbSelectMode = kbSelectMode.toLowerCase();
       user().assertEnumValue(KEYBOARD_SELECT_MODES, kbSelectMode);
       user().assert(
-        !(this.isMultiple_ && kbSelectMode == KEYBOARD_SELECT_MODES.SELECT),
-        '[keyboard-select-mode=select] not supported for multiple ' +
+          !(this.isMultiple_ && kbSelectMode == KEYBOARD_SELECT_MODES.SELECT),
+          '[keyboard-select-mode=select] not supported for multiple ' +
         'selection amp-selector');
     } else {
       kbSelectMode = KEYBOARD_SELECT_MODES.NONE;
@@ -291,7 +292,8 @@ export class AmpSelector extends AMP.BaseElement {
               targetOption: el.getAttribute('option'),
               selectedOptions: selectedValues,
             });
-        this.action_.trigger(this.element, name, selectEvent);
+        this.action_.trigger(this.element, name, selectEvent,
+            ActionTrust.HIGH);
       }
     });
   }
@@ -320,16 +322,16 @@ export class AmpSelector extends AMP.BaseElement {
   keyDownHandler_(event) {
     const keyCode = event.keyCode;
     switch (keyCode) {
-      case Keycodes.LEFT_ARROW: /* fallthrough */
-      case Keycodes.UP_ARROW: /* fallthrough */
-      case Keycodes.RIGHT_ARROW: /* fallthrough */
-      case Keycodes.DOWN_ARROW: /* fallthrough */
+      case KeyCodes.LEFT_ARROW: /* fallthrough */
+      case KeyCodes.UP_ARROW: /* fallthrough */
+      case KeyCodes.RIGHT_ARROW: /* fallthrough */
+      case KeyCodes.DOWN_ARROW:
         if (this.kbSelectMode_ != KEYBOARD_SELECT_MODES.NONE) {
           this.navigationKeyDownHandler_(event);
         }
         return;
-      case Keycodes.ENTER: /* fallthrough */
-      case Keycodes.SPACE:
+      case KeyCodes.ENTER: /* fallthrough */
+      case KeyCodes.SPACE:
         this.selectionKeyDownHandler_(event);
         return;
     }
@@ -344,19 +346,19 @@ export class AmpSelector extends AMP.BaseElement {
     const isLtr = this.win.document.body.getAttribute('dir') != 'rtl';
     let dir = 0;
     switch (event.keyCode) {
-      case Keycodes.LEFT_ARROW:
+      case KeyCodes.LEFT_ARROW:
         // Left is considered 'previous' in LTR and 'next' in RTL.
         dir = isLtr ? -1 : 1;
         break;
-      case Keycodes.UP_ARROW:
+      case KeyCodes.UP_ARROW:
         // Up is considered 'previous' in both LTR and RTL.
         dir = -1;
         break;
-      case Keycodes.RIGHT_ARROW:
+      case KeyCodes.RIGHT_ARROW:
         // Right is considered 'next' in LTR and 'previous' in RTL.
         dir = isLtr ? 1 : -1;
         break;
-      case Keycodes.DOWN_ARROW:
+      case KeyCodes.DOWN_ARROW:
         // Down is considered 'next' in both LTR and RTL.
         dir = 1;
         break;
@@ -394,7 +396,7 @@ export class AmpSelector extends AMP.BaseElement {
    */
   selectionKeyDownHandler_(event) {
     const keyCode = event.keyCode;
-    if (keyCode == Keycodes.SPACE || keyCode == Keycodes.ENTER) {
+    if (keyCode == KeyCodes.SPACE || keyCode == KeyCodes.ENTER) {
       if (this.options_.includes(event.target)) {
         event.preventDefault();
         const el = dev().assertElement(event.target);

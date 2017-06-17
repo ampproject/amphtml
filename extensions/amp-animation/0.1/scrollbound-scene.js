@@ -46,9 +46,9 @@ export class ScrollboundScene {
     this.positionObserver_ = getServiceForDoc(ampdoc, 'position-observer');
 
     getServiceForDoc(ampdoc, 'position-observer').observe(
-      this.element_,
-      PositionObserverFidelity.HIGH,
-      this.onPositionChanged_.bind(this)
+        this.element_,
+        PositionObserverFidelity.HIGH,
+        this.onPositionChanged_.bind(this)
     );
   }
 

@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 
 var argv = require('minimist')(process.argv.slice(2));
 var config = require('../config');
 var eslint = require('gulp-eslint');
-var exec = require('child_process').exec;
 var gulp = require('gulp-help')(require('gulp'));
 var gulpIf = require('gulp-if');
 var lazypipe = require('lazypipe');

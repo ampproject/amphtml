@@ -17,7 +17,7 @@
 import {AmpForm, AmpFormService} from '../../amp-form';
 import {AmpMustache} from '../../../../amp-mustache/0.1/amp-mustache';
 import {poll} from '../../../../../testing/iframe';
-import {registerExtendedTemplate,} from
+import {registerExtendedTemplate} from
     '../../../../../src/service/template-impl';
 
 
@@ -158,11 +158,12 @@ describes.realWin('AmpForm Integration', {
       const ampForm = new AmpForm(form, 'form1');
       const fetch = poll('submit request sent',
           () => ampForm.xhrSubmitPromiseForTesting());
-      const render = poll('render completes',
-          () => form.querySelector('[i-amphtml-rendered]'));
+      const render = poll('render finished',
+          () => ampForm.renderTemplatePromiseForTesting());
 
       form.dispatchEvent(new Event('submit'));
-      return fetch.then(() => render).then(rendered => {
+      return fetch.then(() => render).then(() => {
+        const rendered = form.querySelector('[i-amphtml-rendered]');
         expect(rendered.textContent).to.equal(
             'Thanks John Miller for adding your interests: ' +
             'Football Basketball Writing .');
@@ -188,13 +189,16 @@ describes.realWin('AmpForm Integration', {
       const ampForm = new AmpForm(form, 'form1');
       const fetchSpy = sandbox.spy(ampForm.xhr_, 'fetch');
       const fetch = poll('submit request sent', () => fetchSpy.returnValues[0]);
-      const render = poll('render completes',
-          () => form.querySelector('[i-amphtml-rendered]'));
+      const render = poll('render finished',
+          () => ampForm.renderTemplatePromiseForTesting());
 
       form.dispatchEvent(new Event('submit'));
-      return fetch.catch(fetchError => fetchError).then(fetchError => {
-        expect(fetchError.error.message).to.match(/HTTP error 500/);
-        return render.then(rendered => {
+      return fetch.then(() => {
+        throw new Error('UNREACHABLE');
+      }, fetchError => {
+        expect(fetchError.message).to.match(/HTTP error 500/);
+        return render.then(() => {
+          const rendered = form.querySelector('[i-amphtml-rendered]');
           expect(rendered.textContent).to.equal(
               'Oops. John Miller your email john@miller.what is already ' +
               'subscribed.');
@@ -219,9 +223,11 @@ describes.realWin('AmpForm Integration', {
       const ampForm = new AmpForm(form, 'form1');
       const fetch = poll('submit request sent',
           () => ampForm.xhrSubmitPromiseForTesting());
+      const render = poll('render finished',
+          () => ampForm.renderTemplatePromiseForTesting());
 
       form.dispatchEvent(new Event('submit'));
-      return fetch.then(() => {
+      return fetch.then(() => render).then(() => {
         const rendered = form.querySelectorAll('[i-amphtml-rendered]');
         expect(rendered.length).to.equal(1);
         expect(rendered[0].textContent).to.equal(
@@ -249,13 +255,16 @@ describes.realWin('AmpForm Integration', {
       const ampForm = new AmpForm(form, 'form1');
       const fetchSpy = sandbox.spy(ampForm.xhr_, 'fetch');
       const fetch = poll('submit request sent', () => fetchSpy.returnValues[0]);
-      const render = poll('render completes',
-          () => form.querySelector('[i-amphtml-rendered]'));
+      const render = poll('render finished',
+          () => ampForm.renderTemplatePromiseForTesting());
 
       form.dispatchEvent(new Event('submit'));
-      return fetch.catch(fetchError => fetchError).then(fetchError => {
-        expect(fetchError.error.message).to.match(/HTTP error 500/);
-        return render.then(rendered => {
+      return fetch.then(() => {
+        throw new Error('UNREACHABLE');
+      }, fetchError => {
+        expect(fetchError.message).to.match(/HTTP error 500/);
+        return render.then(() => {
+          const rendered = form.querySelector('[i-amphtml-rendered]');
           expect(rendered.textContent).to.equal(
               'Oops. John Miller your email john@miller.what is already ' +
               'subscribed.');
@@ -289,8 +298,10 @@ describes.realWin('AmpForm Integration', {
           () => form.querySelector('amp-img img'));
 
       form.dispatchEvent(new Event('submit'));
-      return fetch.catch(fetchError => fetchError).then(fetchError => {
-        expect(fetchError.error.message).to.match(/HTTP error 500/);
+      return fetch.then(() => {
+        throw new Error('UNREACHABLE');
+      }, fetchError => {
+        expect(fetchError.message).to.match(/HTTP error 500/);
 
         // It shouldn't have the i-amphtml-rendered attribute since no
         // template was rendered.

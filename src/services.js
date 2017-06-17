@@ -24,6 +24,7 @@ import {
 import {
   getElementService,
   getElementServiceForDoc,
+  getElementServiceForDocInEmbedScope,
   getElementServiceIfAvailable,
   getElementServiceIfAvailableForDoc,
 } from './element-service';
@@ -69,15 +70,6 @@ export function activityForDoc(nodeOrDoc) {
 }
 
 /**
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!Promise<!../extensions/amp-form/0.1/amp-form.AmpFormService>}
- */
-export function ampFormServiceForDoc(nodeOrDoc) {
-  return /** @type {!Promise<!../extensions/amp-form/0.1/amp-form.AmpFormService>} */ ( // eslint-disable-line max-len
-    getElementServiceForDoc(nodeOrDoc, 'amp-form', 'amp-form'));
-}
-
-/**
  * @param {!Window} window
  * @return {!./service/batched-xhr-impl.BatchedXhr}
  */
@@ -92,7 +84,7 @@ export function batchedXhrFor(window) {
  */
 export function bindForDoc(nodeOrDoc) {
   return /** @type {!Promise<!../extensions/amp-bind/0.1/bind-impl.Bind>} */ (
-      getElementServiceForDoc(nodeOrDoc, 'bind', 'amp-bind'));
+      getElementServiceForDocInEmbedScope(nodeOrDoc, 'bind', 'amp-bind'));
 }
 
 /**
@@ -203,8 +195,8 @@ export function resourcesForDoc(nodeOrDoc) {
 export function shareTrackingForOrNull(win) {
   return (/** @type {
     !Promise<?{incomingFragment: string, outgoingFragment: string}>} */ (
-      getElementServiceIfAvailable(win, 'share-tracking',
-          'amp-share-tracking')));
+    getElementServiceIfAvailable(win, 'share-tracking', 'amp-share-tracking',
+        true)));
 }
 
 /**
@@ -261,7 +253,7 @@ export function userNotificationManagerFor(window) {
  */
 export function variantForOrNull(win) {
   return /** @type {!Promise<?Object<string>>} */ (
-      getElementServiceIfAvailable(win, 'variant', 'amp-experiment'));
+      getElementServiceIfAvailable(win, 'variant', 'amp-experiment', true));
 }
 
 /**

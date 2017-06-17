@@ -78,7 +78,7 @@ export class AccessServerJwtAdapter {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!JSONType} configJson
+   * @param {!JsonObject} configJson
    * @param {!AccessTypeAdapterContextDef} context
    */
   constructor(ampdoc, configJson, context) {
@@ -197,6 +197,8 @@ export class AccessServerJwtAdapter {
           this.xhr_.fetchText(url, {
             credentials: 'include',
           }));
+    }).then(resp => {
+      return resp.text();
     }).then(encoded => {
       const jwt = this.jwtHelper_.decode(encoded);
       user().assert(jwt['amp_authdata'],
@@ -233,7 +235,7 @@ export class AccessServerJwtAdapter {
     if (this.key_) {
       return Promise.resolve(this.key_);
     }
-    return this.xhr_.fetchText(this.keyUrl_);
+    return this.xhr_.fetchText(this.keyUrl_).then(res => res.text());
   }
 
   /**
@@ -275,7 +277,7 @@ export class AccessServerJwtAdapter {
   }
 
   /**
-   * @return {!Promise<!JSONType>}
+   * @return {!Promise<!JsonObject>}
    * @private
    */
   authorizeOnClient_() {
@@ -287,7 +289,7 @@ export class AccessServerJwtAdapter {
   }
 
   /**
-   * @return {!Promise<!JSONType>}
+   * @return {!Promise<!JsonObject>}
    * @private
    */
   authorizeOnServer_() {

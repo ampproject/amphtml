@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-
+import {ActionTrust} from '../../../src/action-trust';
 import {CSS} from '../../../build/amp-live-list-0.1.css';
 import {childElementByAttr} from '../../../src/dom';
-import {liveListManagerFor, LiveListManager} from './live-list-manager';
+import {createCustomEvent} from '../../../src/event-helper';
+import {liveListManagerForDoc, LiveListManager} from './live-list-manager';
 import {isLayoutSizeDefined, Layout} from '../../../src/layout';
 import {user} from '../../../src/log';
 
@@ -180,11 +181,11 @@ export class AmpLiveList extends AMP.BaseElement {
   buildCallback() {
     this.viewport_ = this.getViewport();
 
-    this.manager_ = liveListManagerFor(this.win);
+    this.manager_ = liveListManagerForDoc(this.getAmpDoc());
 
     this.updateSlot_ = user().assert(
-       this.getUpdateSlot_(this.element),
-       'amp-live-list must have an "update" slot.');
+        this.getUpdateSlot_(this.element),
+        'amp-live-list must have an "update" slot.');
 
     this.itemsSlot_ = user().assert(
         this.getItemsSlot_(this.element),
@@ -202,7 +203,7 @@ export class AmpLiveList extends AMP.BaseElement {
     const maxItems = this.element.getAttribute('data-max-items-per-page');
     user().assert(Number(maxItems) > 0,
         `amp-live-list#${this.liveListId_} must have ` +
-        `data-max-items-per-page attribute with numeric value. ` +
+        'data-max-items-per-page attribute with numeric value. ' +
         `Found ${maxItems}`);
 
     const actualCount = ([].slice.call(this.itemsSlot_.children)
@@ -222,7 +223,8 @@ export class AmpLiveList extends AMP.BaseElement {
     this.curNumOfLiveItems_ = this.validateLiveListItems_(
         this.itemsSlot_, true);
 
-    this.registerAction('update', this.updateAction_.bind(this));
+    this.registerAction(
+        'update', this.updateAction_.bind(this), ActionTrust.LOW);
 
     if (!this.element.hasAttribute('aria-live')) {
       this.element.setAttribute('aria-live', 'polite');
@@ -290,12 +292,11 @@ export class AmpLiveList extends AMP.BaseElement {
   updateAction_() {
     const hasInsertItems = this.pendingItemsInsert_.length > 0;
     const hasTombstoneItems = this.pendingItemsTombstone_.length > 0;
+    const hasReplaceItems = this.pendingItemsReplace_.length > 0;
 
-    const shouldSendAmpDomUpdateEvent = this.pendingItemsInsert_.length > 0 ||
-        this.pendingItemsReplace_.length > 0;
+    const updateHasNewItems = hasInsertItems || hasReplaceItems;
 
     let promise = this.mutateElement(() => {
-
       const itemsSlot = user().assertElement(this.itemsSlot_);
 
       if (hasInsertItems) {
@@ -342,9 +343,13 @@ export class AmpLiveList extends AMP.BaseElement {
       // TODO(erwinm, #3332) compensate scroll position here.
     });
 
-    if (shouldSendAmpDomUpdateEvent) {
+    if (updateHasNewItems) {
       promise = promise.then(() => {
         this.sendAmpDomUpdateEvent_();
+
+        const templatedEvent = createCustomEvent(this.win,
+            'amp:template-rendered', /* detail */ null, {bubbles: true});
+        this.itemsSlot_.dispatchEvent(templatedEvent);
       });
     }
 
@@ -746,8 +751,8 @@ export class AmpLiveList extends AMP.BaseElement {
     });
     user().assert(!foundInvalid,
         `All amp-live-list-items under amp-live-list#${this.liveListId_} ` +
-        `children must have id and data-sort-time attributes. ` +
-        `data-sort-time must be a Number greater than 0.`);
+        'children must have id and data-sort-time attributes. ' +
+        'data-sort-time must be a Number greater than 0.');
     return numItems;
   }
 
@@ -858,11 +863,6 @@ export class AmpLiveList extends AMP.BaseElement {
     return this.updateTime_;
   }
 
-  /** @override */
-  getDynamicElementContainers() {
-    return this.itemsSlot_ ? [this.itemsSlot_] : [];
-  }
-
   sendAmpDomUpdateEvent_() {
     const event = this.win.document.createEvent('Event');
     event.initEvent('amp:dom-update', true, true);
@@ -870,4 +870,7 @@ export class AmpLiveList extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-live-list', AmpLiveList, CSS);
+
+AMP.extension('amp-live-list', '0.1', function(AMP) {
+  AMP.registerElement('amp-live-list', AmpLiveList, CSS);
+});

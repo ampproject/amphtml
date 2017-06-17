@@ -79,7 +79,7 @@ export class IframeMessagingClient {
   /**
    *  Send a postMessage to Host Window
    *  @param {string} type The type of message to send.
-   *  @param {Object=} opt_payload The payload of message to send.
+   *  @param {JsonObject=} opt_payload The payload of message to send.
    */
   sendMessage(type, opt_payload) {
     this.hostWindow_.postMessage/*OK*/(
@@ -106,11 +106,11 @@ export class IframeMessagingClient {
       }
 
       const message = deserializeMessage(event.data);
-      if (!message || message.sentinel != this.sentinel_) {
+      if (!message || message['sentinel'] != this.sentinel_) {
         return;
       }
 
-      this.fireObservable_(message.type, message);
+      this.fireObservable_(message['type'], message);
     });
   }
 

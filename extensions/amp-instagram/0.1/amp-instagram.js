@@ -161,9 +161,9 @@ class AmpInstagram extends AMP.BaseElement {
     this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(
-      this.win,
-      'message',
-      this.handleInstagramMessages_.bind(this)
+        this.win,
+        'message',
+        this.handleInstagramMessages_.bind(this)
     );
 
     iframe.setAttribute('scrolling', 'no');

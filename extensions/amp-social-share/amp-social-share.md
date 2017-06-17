@@ -170,6 +170,13 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
       </ul>
     </td>
   </tr>
+  <tr>
+    <td>SMS</td>
+    <td>
+      <ul>
+        <li><code>data-param-body</code>: optional, defaults to: <code>rel=title - rel=canonical</code> URL</li></ul>
+    </td>
+  </tr>
 </table>
 
 
@@ -221,4 +228,4 @@ You can use [global AMP variables substitution](https://github.com/ampproject/am
 
 ## Validation
 
-See [amp-social-share rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-social-share/0.1/validator-amp-social-share.protoascii) in the AMP validator specification.
+See [amp-social-share rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-social-share/validator-amp-social-share.protoascii) in the AMP validator specification.

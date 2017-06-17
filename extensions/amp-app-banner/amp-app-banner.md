@@ -22,10 +22,6 @@ limitations under the License.
     <td>A wrapper and minimal UI for a cross-platform, fixed-position banner showing a call-to-action to install an app. Includes conditional logic to direct to the right app on the right platform, and to hide permanently if the user dismisses the banner.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td>
       <div>
@@ -94,7 +90,7 @@ android-app://${appId}/${protocol}/${host}${pathname}
 
 One required UI element is the `button[open-button]` button, which is the click target for the banner to install the app, or open the deep-link if the app is already installed.
 
-###OS/Browser/Viewer Dependencies
+### OS/Browser/Viewer Dependencies
 
 Because native app banners currently are not shown in the viewer context, `<amp-app-banner>` is shown inside of the viewer when the appropriate markup is present. Because system-level app banners are already shown in Android/Chrome and iOS/Safari OS/Browser combinations, `<amp-app-banner>` is hidden in those contexts to avoid redundancy.
 
@@ -120,7 +116,7 @@ Because native app banners currently are not shown in the viewer context, `<amp-
 </table>
 
 
-##Dismissal Persistence
+## Dismissal Persistence
 Currently, the banner will be displayed always unless it was dismissed. Once dismissed, the banner will never be displayed on that domain unless the user visits on a different browser or clears their local storage.
 
 
@@ -192,4 +188,4 @@ Not permitted: **disabled**
 
 ## Validation
 
-See [amp-app-banner rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-app-banner/0.1/validator-amp-app-banner.protoascii) in the AMP validator specification.
+See [amp-app-banner rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-app-banner/validator-amp-app-banner.protoascii) in the AMP validator specification.

@@ -34,7 +34,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
 import {listenOnce} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
-import {openLoginDialog} from './login-dialog';
+import {getLoginUrl, openLoginDialog} from './login-dialog';
 import {parseQueryString} from '../../../src/url';
 import {performanceForOrNull} from '../../../src/services';
 import {resourcesForDoc} from '../../../src/services';
@@ -115,7 +115,7 @@ export class AccessService {
     /** @const @private {!Object<string, string>} */
     this.loginConfig_ = this.buildConfigLoginMap_(configJson);
 
-    /** @const @private {!JSONType} */
+    /** @const @private {!JsonObject} */
     this.authorizationFallbackResponse_ =
         configJson['authorizationFallbackResponse'];
 
@@ -160,7 +160,7 @@ export class AccessService {
     /** @private {?Promise<string>} */
     this.readerIdPromise_ = null;
 
-    /** @private {?JSONType} */
+    /** @private {?JsonObject} */
     this.authResponse_ = null;
 
     /** @const @private {!SignInProtocol} */
@@ -210,7 +210,7 @@ export class AccessService {
   }
 
   /**
-   * @param {!JSONType} configJson
+   * @param {!JsonObject} configJson
    * @return {!AccessTypeAdapterDef}
    * @private
    */
@@ -240,14 +240,14 @@ export class AccessService {
   }
 
   /**
-   * @return {!JSONType}
+   * @return {!JsonObject}
    */
   getAdapterConfig() {
     return this.adapter_.getConfig();
   }
 
   /**
-   * @param {!JSONType} configJson
+   * @param {!JsonObject} configJson
    * @return {!AccessType}
    */
   buildConfigType_(configJson) {
@@ -273,7 +273,7 @@ export class AccessService {
   }
 
   /**
-   * @param {!JSONType} configJson
+   * @param {!JsonObject} configJson
    * @return {?Object<string, string>}
    * @private
    */
@@ -321,7 +321,7 @@ export class AccessService {
    * @private
    */
   analyticsEvent_(eventType) {
-    triggerAnalyticsEvent(this.ampdoc, eventType);
+    triggerAnalyticsEvent(this.getRootElement_(), eventType);
   }
 
   /**
@@ -494,7 +494,7 @@ export class AccessService {
   }
 
   /**
-   * @param {!JSONType} authResponse
+   * @param {!JsonObject} authResponse
    * @private
    */
   setAuthResponse_(authResponse) {
@@ -547,7 +547,7 @@ export class AccessService {
   }
 
   /**
-   * @param {!JSONTypeDef} response
+   * @param {!JsonObjectDef} response
    * @return {!Promise}
    * @private
    */
@@ -562,7 +562,7 @@ export class AccessService {
 
   /**
    * @param {!Element} element
-   * @param {!JSONTypeDef} response
+   * @param {!JsonObjectDef} response
    * @return {!Promise}
    * @private
    */
@@ -603,7 +603,7 @@ export class AccessService {
   /**
    * Discovers and renders templates.
    * @param {!Element} element
-   * @param {!JSONTypeDef} response
+   * @param {!JsonObjectDef} response
    * @return {!Promise}
    * @private
    */
@@ -627,7 +627,7 @@ export class AccessService {
   /**
    * @param {!Element} element
    * @param {!Element} templateOrPrev
-   * @param {!JSONTypeDef} response
+   * @param {!JsonObjectDef} response
    * @return {!Promise}
    * @private
    */
@@ -794,6 +794,15 @@ export class AccessService {
   }
 
   /**
+   * Expose the getLoginUrl method with the current ampdoc context
+   * @param {string|!Promise<string>} urlOrPromise
+   * @return {!Promise<string>}
+   */
+  getLoginUrl(urlOrPromise) {
+    return getLoginUrl(this.ampdoc, urlOrPromise);
+  }
+
+  /**
    * Runs the login flow using one of the predefined urls in the amp-access config
    *
    * @private
@@ -919,8 +928,8 @@ export class AccessService {
     }
     return Promise.all(promises);
   }
-}
 
+}
 
 /**
  * @typedef {{
@@ -938,7 +947,7 @@ let AccessTypeAdapterContextDef;
 class AccessTypeAdapterDef {
 
   /**
-   * @return {!JSONType}
+   * @return {!JsonObject}
    */
   getConfig() {}
 
@@ -948,7 +957,7 @@ class AccessTypeAdapterDef {
   isAuthorizationEnabled() {}
 
   /**
-   * @return {!Promise<!JSONType>}
+   * @return {!Promise<!JsonObject>}
    */
   authorize() {}
 

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,8 +39,10 @@ import {
 } from './3p';
 import {urls} from '../src/config';
 import {endsWith} from '../src/string';
+import {parseJson} from '../src/json';
 import {parseUrl, getSourceUrl, isProxyOrigin} from '../src/url';
 import {dev, initLogConstructor, setReportError, user} from '../src/log';
+import {dict} from '../src/utils/object.js';
 import {getMode} from '../src/mode';
 import {startsWith} from '../src/string.js';
 
@@ -58,10 +60,12 @@ import {accesstrade} from '../ads/accesstrade';
 import {adblade, industrybrains} from '../ads/adblade';
 import {adbutler} from '../ads/adbutler';
 import {adform} from '../ads/adform';
+import {adfox} from '../ads/adfox';
 import {adgeneration} from '../ads/adgeneration';
 import {adhese} from '../ads/adhese';
 import {adition} from '../ads/adition';
 import {adman} from '../ads/adman';
+import {admanmedia} from '../ads/admanmedia';
 import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/google/adsense';
 import {adsnative} from '../ads/adsnative';
@@ -78,7 +82,9 @@ import {affiliateb} from '../ads/affiliateb';
 import {amoad} from '../ads/amoad';
 import {appnexus} from '../ads/appnexus';
 import {atomx} from '../ads/atomx';
+import {bidtellect} from '../ads/bidtellect';
 import {brainy} from '../ads/brainy';
+import {bringhub} from '../ads/bringhub';
 import {caajainfeed} from '../ads/caajainfeed';
 import {capirs} from '../ads/capirs';
 import {caprofitx} from '../ads/caprofitx';
@@ -94,6 +100,7 @@ import {doubleclick} from '../ads/google/doubleclick';
 import {eas} from '../ads/eas';
 import {eplanning} from '../ads/eplanning';
 import {f1e} from '../ads/f1e';
+import {f1h} from '../ads/f1h';
 import {felmat} from '../ads/felmat';
 import {flite} from '../ads/flite';
 import {fluct} from '../ads/fluct';
@@ -104,6 +111,7 @@ import {gumgum} from '../ads/gumgum';
 import {holder} from '../ads/holder';
 import {ibillboard} from '../ads/ibillboard';
 import {imaVideo} from '../ads/google/imaVideo';
+import {imedia} from '../ads/imedia';
 import {imobile} from '../ads/imobile';
 import {improvedigital} from '../ads/improvedigital';
 import {inmobi} from '../ads/inmobi';
@@ -125,11 +133,13 @@ import {mywidget} from '../ads/mywidget';
 import {nativo} from '../ads/nativo';
 import {navegg} from '../ads/navegg';
 import {nend} from '../ads/nend';
+import {netletix} from '../ads/netletix';
 import {nokta} from '../ads/nokta';
 import {openadstream} from '../ads/openadstream';
 import {openx} from '../ads/openx';
 import {outbrain} from '../ads/outbrain';
 import {plista} from '../ads/plista';
+import {polymorphicads} from '../ads/polymorphicads';
 import {popin} from '../ads/popin';
 import {pubmatic} from '../ads/pubmatic';
 import {pubmine} from '../ads/pubmine';
@@ -145,6 +155,7 @@ import {smartadserver} from '../ads/smartadserver';
 import {smartclip} from '../ads/smartclip';
 import {sortable} from '../ads/sortable';
 import {sovrn} from '../ads/sovrn';
+import {spotx} from '../ads/spotx';
 import {sunmedia} from '../ads/sunmedia';
 import {swoop} from '../ads/swoop';
 import {taboola} from '../ads/taboola';
@@ -157,6 +168,7 @@ import {widespace} from '../ads/widespace';
 import {xlift} from '../ads/xlift';
 import {yahoo} from '../ads/yahoo';
 import {yahoojp} from '../ads/yahoojp';
+import {yandex} from '../ads/yandex';
 import {yieldbot} from '../ads/yieldbot';
 import {yieldmo} from '../ads/yieldmo';
 import {yieldone} from '../ads/yieldone';
@@ -171,6 +183,7 @@ import {zucks} from '../ads/zucks';
  */
 const AMP_EMBED_ALLOWED = {
   _ping_: true,
+  bringhub: true,
   'mantis-recommend': true,
   mywidget: true,
   outbrain: true,
@@ -181,10 +194,10 @@ const AMP_EMBED_ALLOWED = {
 };
 
 
-/** @const {!Object} */
-const FALLBACK_CONTEXT_DATA = {
-  _context: {},
-};
+/** @const {!JsonObject} */
+const FALLBACK_CONTEXT_DATA = dict({
+  '_context': dict(),
+});
 
 
 // Need to cache iframeName as it will be potentially overwritten by
@@ -192,7 +205,7 @@ const FALLBACK_CONTEXT_DATA = {
 const iframeName = window.name;
 const data = getData(iframeName);
 
-window.context = data._context;
+window.context = data['_context'];
 
 // This should only be invoked after window.context is set
 initLogConstructor();
@@ -213,10 +226,12 @@ register('accesstrade', accesstrade);
 register('adblade', adblade);
 register('adbutler', adbutler);
 register('adform', adform);
+register('adfox', adfox);
 register('adgeneration', adgeneration);
 register('adhese', adhese);
 register('adition', adition);
 register('adman', adman);
+register('admanmedia', admanmedia);
 register('adreactor', adreactor);
 register('adsense', adsense);
 register('adsnative', adsnative);
@@ -233,7 +248,9 @@ register('affiliateb', affiliateb);
 register('amoad', amoad);
 register('appnexus', appnexus);
 register('atomx', atomx);
+register('bidtellect', bidtellect);
 register('brainy', brainy);
+register('bringhub', bringhub);
 register('caajainfeed', caajainfeed);
 register('capirs', capirs);
 register('caprofitx', caprofitx);
@@ -249,6 +266,7 @@ register('eas', eas);
 register('eplanning', eplanning);
 register('ezoic', ezoic);
 register('f1e', f1e);
+register('f1h', f1h);
 register('facebook', facebook);
 register('felmat', felmat);
 register('flite', flite);
@@ -261,6 +279,7 @@ register('gumgum', gumgum);
 register('holder', holder);
 register('ibillboard', ibillboard);
 register('ima-video', imaVideo);
+register('imedia', imedia);
 register('imobile', imobile);
 register('improvedigital', improvedigital);
 register('industrybrains', industrybrains);
@@ -284,11 +303,13 @@ register('mywidget', mywidget);
 register('nativo', nativo);
 register('navegg', navegg);
 register('nend', nend);
+register('netletix', netletix);
 register('nokta', nokta);
 register('openadstream', openadstream);
 register('openx', openx);
 register('outbrain', outbrain);
 register('plista', plista);
+register('polymorphicads', polymorphicads);
 register('popin', popin);
 register('pubmatic', pubmatic);
 register('pubmine', pubmine);
@@ -305,6 +326,7 @@ register('smartadserver', smartadserver);
 register('smartclip', smartclip);
 register('sortable', sortable);
 register('sovrn', sovrn);
+register('spotx', spotx);
 register('sunmedia', sunmedia);
 register('swoop', swoop);
 register('taboola', taboola);
@@ -318,6 +340,7 @@ register('widespace', widespace);
 register('xlift' , xlift);
 register('yahoo', yahoo);
 register('yahoojp', yahoojp);
+register('yandex', yandex);
 register('yieldbot', yieldbot);
 register('yieldmo', yieldmo);
 register('zergnet', zergnet);
@@ -342,13 +365,13 @@ const defaultAllowedTypesInCustomFrame = [
 
 /**
  * Gets data encoded in iframe name attribute.
- * @return {!Object}
+ * @return {!JsonObject}
  */
 function getData(iframeName) {
   try {
     // TODO(bradfrizzell@): Change the data structure of the attributes
     //    to make it less terrible.
-    return JSON.parse(iframeName).attributes;
+    return parseJson(iframeName)['attributes'];
   } catch (err) {
     if (!getMode().test) {
       dev().info(
@@ -408,16 +431,16 @@ function isMaster() {
 window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     opt_allowedEmbeddingOrigins) {
   try {
-    const location = parseUrl(data._context.location.href);
+    const location = parseUrl(data['_context']['location']['href']);
 
     ensureFramed(window);
     validateParentOrigin(window, location);
-    validateAllowedTypes(window, data.type, opt_allowed3pTypes);
+    validateAllowedTypes(window, data['type'], opt_allowed3pTypes);
     if (opt_allowedEmbeddingOrigins) {
       validateAllowedEmbeddingOrigins(window, opt_allowedEmbeddingOrigins);
     }
     installContext(window);
-    delete data._context;
+    delete data['_context'];
     manageWin(window);
     installEmbedStateListener();
     draw3p(window, data, opt_configCallback);
@@ -478,7 +501,7 @@ function installContextUsingStandardImpl(win) {
   // Define master related properties to be lazily read.
   Object.defineProperties(win.context, {
     master: {
-      get: () => masterSelection(win, data.type),
+      get: () => masterSelection(win, data['type']),
     },
     isMaster: {
       get: isMaster,
@@ -486,13 +509,13 @@ function installContextUsingStandardImpl(win) {
   });
 
   win.context.data = data;
-  win.context.location = parseUrl(data._context.location.href);
+  win.context.location = parseUrl(data['_context']['location']['href']);
   win.context.noContentAvailable = triggerNoContentAvailable;
   win.context.requestResize = triggerResizeRequest;
   win.context.renderStart = triggerRenderStart;
 
-  if (data.type === 'facebook' || data.type === 'twitter'
-    || data.type === 'github') {
+  const type = data['type'];
+  if (type === 'facebook' || type === 'twitter' || type === 'github') {
     // Only make this available to selected embeds until the
     // generic solution is available.
     win.context.updateDimensions = triggerDimensions;
@@ -525,15 +548,21 @@ function triggerNoContentAvailable() {
 }
 
 function triggerDimensions(width, height) {
-  nonSensitiveDataPostMessage('embed-size', {width, height});
+  nonSensitiveDataPostMessage('embed-size', dict({
+    'width': width,
+    'height': height,
+  }));
 }
 
 function triggerResizeRequest(width, height) {
-  nonSensitiveDataPostMessage('embed-size', {width, height});
+  nonSensitiveDataPostMessage('embed-size', dict({
+    'width': width,
+    'height': height,
+  }));
 }
 
 /**
- * @param {{width, height}=} opt_data
+ * @param {!JsonObject=} opt_data fields: width, height
  */
 function triggerRenderStart(opt_data) {
   nonSensitiveDataPostMessage('render-start', opt_data);
@@ -553,7 +582,11 @@ let currentMessageId = 0;
  */
 function getHtml(selector, attributes, callback) {
   const messageId = currentMessageId++;
-  nonSensitiveDataPostMessage('get-html', {selector, attributes, messageId});
+  nonSensitiveDataPostMessage('get-html', dict({
+    'selector': selector,
+    'attributes': attributes,
+    'messageId': messageId,
+  }));
 
   const unlisten = listenParent(window, 'get-html-result', data => {
     if (data.messageId === messageId) {
@@ -637,9 +670,9 @@ function onResizeDenied(observerCallback) {
 function reportRenderedEntityIdentifier(entityId) {
   user().assert(typeof entityId == 'string',
       'entityId should be a string %s', entityId);
-  nonSensitiveDataPostMessage('entity-id', {
-    id: entityId,
-  });
+  nonSensitiveDataPostMessage('entity-id', dict({
+    'id': entityId,
+  }));
 }
 
 /**
@@ -739,7 +772,7 @@ export function ensureFramed(window) {
 /**
  * Expects the fragment to contain JSON.
  * @param {string} fragment Value of location.fragment
- * @return {?JSONType}
+ * @return {?JsonObject}
  * @visibleForTesting
  */
 export function parseFragment(fragment) {
@@ -751,7 +784,7 @@ export function parseFragment(fragment) {
     if (startsWith(json, '{%22')) {
       json = decodeURIComponent(json);
     }
-    return /** @type {!JSONType} */ (json ? JSON.parse(json) : {});
+    return /** @type {!JsonObject} */ (json ? parseJson(json) : dict());
   } catch (err) {
     return null;
   }

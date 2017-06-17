@@ -17,11 +17,12 @@
 import {isExperimentOn} from '../../../src/experiments';
 import {xhrFor} from '../../../src/services';
 import {historyForDoc} from '../../../src/services';
-import {getService} from '../../../src/service';
+import {registerServiceBuilder} from '../../../src/service';
 import {Layout} from '../../../src/layout';
 import {base64UrlEncodeFromBytes} from '../../../src/utils/base64';
 import {getCryptoRandomBytesArray} from '../../../src/utils/bytes';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 
 /** @private @const {string} */
 const TAG = 'amp-share-tracking';
@@ -40,9 +41,6 @@ export class AmpShareTracking extends AMP.BaseElement {
 
     /** @private {string} */
     this.vendorHref_ = '';
-
-    /** @private {?Promise<!Object<string, string>>} */
-    this.shareTrackingFragments_ = null;
 
     /** @private {string} */
     this.originalViewerFragment_ = '';
@@ -64,15 +62,16 @@ export class AmpShareTracking extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     if (!this.isExperimentOn_()) {
-      getService(this.win, 'share-tracking',
-          () => Promise.reject(user().createError(TAG + ' disabled')));
+      registerServiceBuilder(this.win, 'share-tracking', function() {
+        return Promise.reject(user().createError(TAG + ' disabled'));
+      });
       user().assert(false, `${TAG} experiment is disabled`);
     }
 
     this.vendorHref_ = this.element.getAttribute('data-href');
     dev().fine(TAG, 'vendorHref_: ', this.vendorHref_);
 
-    this.shareTrackingFragments_ = Promise.all(
+    const shareTrackingFragments = Promise.all(
       [this.getIncomingFragment_(), this.getOutgoingFragment_()]
     ).then(results => {
       const incomingFragment = results[0];
@@ -86,8 +85,9 @@ export class AmpShareTracking extends AMP.BaseElement {
       }
       return {incomingFragment, outgoingFragment};
     });
-
-    getService(this.win, 'share-tracking', () => this.shareTrackingFragments_);
+    registerServiceBuilder(this.win, 'share-tracking', function() {
+      return shareTrackingFragments;
+    });
   }
 
   /**
@@ -141,19 +141,22 @@ export class AmpShareTracking extends AMP.BaseElement {
     const postReq = {
       method: 'POST',
       credentials: 'include',
-      body: {},
+      body: dict(),
     };
-    return xhrFor(this.win).fetchJson(vendorUrl, postReq).then(response => {
-      if (response.fragment) {
-        return response.fragment;
-      }
-      user().error(TAG, 'The response from [' + vendorUrl + '] does not ' +
-          'have a fragment value.');
-      return '';
-    }, err => {
-      user().error(TAG, 'The request to share-tracking endpoint failed:' + err);
-      return '';
-    });
+    return xhrFor(this.win).fetchJson(vendorUrl, postReq)
+        .then(res => res.json())
+        .then(json => {
+          if (json.fragment) {
+            return json.fragment;
+          }
+          user().error(TAG, 'The response from [' + vendorUrl + '] does not ' +
+            'have a fragment value.');
+          return '';
+        }, err => {
+          user().error(TAG, 'The request to share-tracking endpoint failed:',
+              err);
+          return '';
+        });
   }
 
   /**

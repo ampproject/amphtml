@@ -21,28 +21,15 @@ import {
 } from '../service';
 import {getMode} from '../mode';
 import {dev} from '../log';
+import {dict, map} from '../utils/object';
 import {timerFor} from '../services';
 import {viewerForDoc} from '../services';
-
 
 /** @private @const */
 const TAG_ = 'History';
 
-
 /** @private @const */
 const HISTORY_PROP_ = 'AMP.History';
-
-
-/**
- * @return {*}
- * @private
- */
-function historyState_(stackIndex) {
-  const state = {};
-  state[HISTORY_PROP_] = stackIndex;
-  return state;
-}
-
 
 /** @typedef {number} */
 let HistoryIdDef;
@@ -371,7 +358,7 @@ export class HistoryBindingNatural_ {
     this.supportsState_ = 'state' in history;
 
     /** @private {*} */
-    this.unsupportedState_ = historyState_(this.stackIndex_);
+    this.unsupportedState_ = this.historyState_(this.stackIndex_);
 
     // There are still browsers who do not support push/replaceState.
     let pushState, replaceState;
@@ -421,7 +408,8 @@ export class HistoryBindingNatural_ {
     this.replaceState_ = replaceState;
 
     try {
-      this.replaceState_(historyState_(this.stackIndex_));
+      this.replaceState_(this.historyState_(this.stackIndex_,
+          /* replace */ true));
     } catch (e) {
       dev().error(TAG_, 'Initial replaceState failed: ' + e.message);
     }
@@ -458,6 +446,17 @@ export class HistoryBindingNatural_ {
       this.win.history.replaceState = this.origReplaceState_;
     }
     this.win.removeEventListener('popstate', this.popstateHandler_);
+  }
+
+  /**
+   * @param {boolean=} opt_replace
+   * @return {*}
+   * @private
+   */
+  historyState_(stackIndex, opt_replace) {
+    const state = map(opt_replace ? this.getState_() : undefined);
+    state[HISTORY_PROP_] = stackIndex;
+    return state;
   }
 
   /** @override */
@@ -601,7 +600,7 @@ export class HistoryBindingNatural_ {
     if (steps <= 0) {
       return Promise.resolve(this.stackIndex_);
     }
-    this.unsupportedState_ = historyState_(this.stackIndex_ - steps);
+    this.unsupportedState_ = this.historyState_(this.stackIndex_ - steps);
     const promise = this.wait_();
     this.win.history.go(-steps);
     return promise.then(() => {
@@ -765,7 +764,7 @@ export class HistoryBindingVirtual_ {
     // Current implementation doesn't wait for response from viewer.
     this.updateStackIndex_(this.stackIndex_ + 1);
     return this.viewer_.sendMessageAwaitResponse(
-        'pushHistory', {stackIndex: this.stackIndex_}).then(() => {
+        'pushHistory', dict({'stackIndex': this.stackIndex_})).then(() => {
           return this.stackIndex_;
         });
   }
@@ -776,14 +775,14 @@ export class HistoryBindingVirtual_ {
       return Promise.resolve(this.stackIndex_);
     }
     return this.viewer_.sendMessageAwaitResponse(
-        'popHistory', {stackIndex: this.stackIndex_}).then(() => {
+        'popHistory', dict({'stackIndex': this.stackIndex_})).then(() => {
           this.updateStackIndex_(stackIndex - 1);
           return this.stackIndex_;
         });
   }
 
   /**
-   * @param {!JSONType} data
+   * @param {!JsonObject} data
    * @private
    */
   onHistoryPopped_(data) {
@@ -812,10 +811,11 @@ export class HistoryBindingVirtual_ {
     }
     return this.viewer_.sendMessageAwaitResponse('getFragment', undefined,
         /* cancelUnsent */true).then(
-        hash => {
-          if (!hash) {
+        data => {
+          if (!data) {
             return '';
           }
+          let hash = dev().assertString(data);
           /* Strip leading '#'*/
           if (hash[0] == '#') {
             hash = hash.substr(1);
@@ -830,7 +830,8 @@ export class HistoryBindingVirtual_ {
       return Promise.resolve();
     }
     return /** @type {!Promise} */ (this.viewer_.sendMessageAwaitResponse(
-        'replaceHistory', {fragment}, /* cancelUnsent */true));
+        'replaceHistory', dict({'fragment': fragment}),
+        /* cancelUnsent */true));
   }
 }
 
@@ -863,9 +864,5 @@ function createHistory(ampdoc) {
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  */
 export function installHistoryServiceForDoc(ampdoc) {
-  registerServiceBuilderForDoc(
-      ampdoc,
-      'history',
-      /* opt_constructor */ undefined,
-      ampdoc => createHistory(ampdoc));
+  registerServiceBuilderForDoc(ampdoc, 'history', createHistory);
 }

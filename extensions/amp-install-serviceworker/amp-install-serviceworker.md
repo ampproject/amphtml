@@ -22,10 +22,6 @@ limitations under the License.
     <td>Installs a <a href="https://developers.google.com/web/fundamentals/primers/service-worker/">ServiceWorker</a> for the current page.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-install-serviceworker" src="https://cdn.ampproject.org/v0/amp-install-serviceworker-0.1.js">&lt;/script></code></td>
   </tr>
@@ -130,4 +126,4 @@ For the preload to be effective, of course, the shell response must have appropr
 
 ## Validation
 
-See [amp-install-serviceworker rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-install-serviceworker/0.1/validator-amp-install-serviceworker.protoascii) in the AMP validator specification.
+See [amp-install-serviceworker rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-install-serviceworker/validator-amp-install-serviceworker.protoascii) in the AMP validator specification.

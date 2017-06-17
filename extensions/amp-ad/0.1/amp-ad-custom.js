@@ -21,7 +21,7 @@ import {xhrFor} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
 import {ancestorElementsByTag} from '../../../src/dom';
 import {removeChildren} from '../../../src/dom';
-import {AdDisplayState, AmpAdUIHandler} from './amp-ad-ui';
+import {AmpAdUIHandler} from './amp-ad-ui';
 
 /** @const {!string} Tag name for custom ad implementation. */
 export const TAG_AD_CUSTOM = 'amp-ad-custom';
@@ -74,7 +74,6 @@ export class AmpAdCustom extends AMP.BaseElement {
         'custom ad slot should be alphanumeric: ' + this.slot_);
 
     this.uiHandler = new AmpAdUIHandler(this);
-    this.uiHandler.init();
   }
 
   /** @override */
@@ -84,10 +83,10 @@ export class AmpAdCustom extends AMP.BaseElement {
     // If this promise has no URL yet, create one for it.
     if (!(fullUrl in ampCustomadXhrPromises)) {
       // Here is a promise that will return the data for this URL
-      ampCustomadXhrPromises[fullUrl] = xhrFor(this.win).fetchJson(fullUrl);
+      ampCustomadXhrPromises[fullUrl] = xhrFor(this.win).fetchJson(fullUrl)
+          .then(res => res.json());
     }
     return ampCustomadXhrPromises[fullUrl].then(data => {
-      this.uiHandler.setDisplayState(AdDisplayState.LOADING);
       const element = this.element;
       // We will get here when the data has been fetched from the server
       let templateData = data;
@@ -97,24 +96,29 @@ export class AmpAdCustom extends AMP.BaseElement {
       }
       // Set UI state
       if (templateData !== null && typeof templateData == 'object') {
-        this.uiHandler.setDisplayState(AdDisplayState.LOADED_RENDER_START);
+        this.renderStarted();
         templatesFor(this.win).findAndRenderTemplate(element, templateData)
-          .then(renderedElement => {
+            .then(renderedElement => {
           // Get here when the template has been rendered
           // Clear out the template and replace it by the rendered version
-            removeChildren(element);
-            element.appendChild(renderedElement);
-          });
+              removeChildren(element);
+              element.appendChild(renderedElement);
+            });
       } else {
-        this.uiHandler.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
+        this.uiHandler.applyNoContentUI();
       }
     });
   }
 
   /** @override  */
   unlayoutCallback() {
-    this.uiHandler.setDisplayState(AdDisplayState.NOT_LAID_OUT);
+    this.uiHandler.applyUnlayoutUI();
     return true;
+  }
+
+  /** @override */
+  createPlaceholderCallback() {
+    return this.uiHandler.createPlaceholder();
   }
 
   /**
@@ -149,7 +153,7 @@ export class AmpAdCustom extends AMP.BaseElement {
       }
       for (const baseUrl in slots) {
         ampCustomadFullUrls[baseUrl] = addParamToUrl(baseUrl, 'ampslots',
-          slots[baseUrl].join(','));
+            slots[baseUrl].join(','));
       }
     }
     return ampCustomadFullUrls[this.url_];

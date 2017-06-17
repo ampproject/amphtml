@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 /**
  * - type - Is assumed to be "forbidden" if not provided.
@@ -134,6 +135,8 @@ exports.rules = [
           'extensions/amp-ad-network-triplelift-impl/0.1/triplelift-a4a-config.js',
       'ads/_a4a-config.js->' +
           'extensions/amp-ad-network-cloudflare-impl/0.1/cloudflare-a4a-config.js',
+      'ads/_a4a-config.js->' +
+          'extensions/amp-ad-network-gmossp-impl/0.1/gmossp-a4a-config.js',
       'ads/google/a4a/google-data-reporter.js->' +
           'extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config.js',
       'ads/google/a4a/google-data-reporter.js->' +
@@ -162,6 +165,8 @@ exports.rules = [
       'extensions/amp-ooyala-player/0.1/amp-ooyala-player.js->' +
           'src/service/video-manager-impl.js',
       'extensions/amp-youtube/0.1/amp-youtube.js->' +
+          'src/service/video-manager-impl.js',
+      'extensions/amp-dailymotion/0.1/amp-dailymotion.js->' +
           'src/service/video-manager-impl.js',
       'extensions/amp-brid-player/0.1/amp-brid-player.js->' +
           'src/service/video-manager-impl.js',

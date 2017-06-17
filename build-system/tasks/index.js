@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 require('./babel-helpers');
 require('./changelog');
@@ -21,10 +22,12 @@ require('./clean');
 require('./compile');
 require('./compile-access-expr');
 require('./compile-bind-expr');
+require('./compile-css-expr');
 require('./csvify-size');
 require('./dep-check');
 require('./get-zindex');
 require('./extension-generator');
+require('./json-check');
 require('./lint');
 require('./prepend-global');
 require('./presubmit-checks');
@@ -34,4 +37,3 @@ require('./serve');
 require('./size');
 require('./todos');
 require('./validator');
-require('./visual-diff');

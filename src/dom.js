@@ -16,6 +16,7 @@
 
 import {dev} from './log';
 import {cssEscape} from '../third_party/css-escape/css-escape';
+import {startsWith} from './string';
 
 const HTML_ESCAPE_CHARS = {
   '&': '&amp;',
@@ -26,6 +27,14 @@ const HTML_ESCAPE_CHARS = {
   '`': '&#x60;',
 };
 const HTML_ESCAPE_REGEX = /(&|<|>|"|'|`)/g;
+
+/** @const {string} */
+export const UPGRADE_TO_CUSTOMELEMENT_PROMISE =
+    '__AMP_UPG_PRM';
+
+/** @const {string} */
+export const UPGRADE_TO_CUSTOMELEMENT_RESOLVER =
+    '__AMP_UPG_RES';
 
 
 /**
@@ -161,6 +170,40 @@ export function createElementWithAttributes(doc, tagName, attributes) {
   return addAttributesToElement(element, attributes);
 }
 
+/**
+ * Returns true if node is connected (attached).
+ * @param {!Node} node
+ * @return {boolean}
+ * @see https://dom.spec.whatwg.org/#connected
+ */
+export function isConnectedNode(node) {
+  // "An element is connected if its shadow-including root is a document."
+  let n = node;
+  do {
+    n = rootNodeFor(n);
+    if (n.host) {
+      n = n.host;
+    } else {
+      break;
+    }
+  } while (true);
+  return n.nodeType === Node.DOCUMENT_NODE;
+}
+
+/**
+ * Returns the root for a given node. Does not cross shadow DOM boundary.
+ * @param {!Node} node
+ * @return {!Node}
+ */
+export function rootNodeFor(node) {
+  if (Node.prototype.getRootNode) {
+    // Type checker says `getRootNode` may return null.
+    return node.getRootNode() || node;
+  }
+  let n;
+  for (n = node; !!n.parentNode; n = n.parentNode) {}
+  return n;
+}
 
 /**
  * Finds the closest element that satisfies the callback from this element
@@ -429,7 +472,7 @@ export function scopedQuerySelector(root, selector) {
   }
 
   // Only IE.
-  const unique = `i-amphtml-scoped`;
+  const unique = 'i-amphtml-scoped';
   root.classList.add(unique);
   const element = root./*OK*/querySelector(`.${unique} ${selector}`);
   root.classList.remove(unique);
@@ -453,7 +496,7 @@ export function scopedQuerySelectorAll(root, selector) {
   }
 
   // Only IE.
-  const unique = `i-amphtml-scoped`;
+  const unique = 'i-amphtml-scoped';
   root.classList.add(unique);
   const elements = root./*OK*/querySelectorAll(`.${unique} ${selector}`);
   root.classList.remove(unique);
@@ -492,15 +535,17 @@ export function getDataParamsFromAttributes(element, opt_computeParamNameFunc,
  *  a. The element itself has a nextSibling.
  *  b. Any of the element ancestors has a nextSibling.
  * @param {!Element} element
+ * @param {?Node} opt_stopNode
  * @return {boolean}
  */
-export function hasNextNodeInDocumentOrder(element) {
+export function hasNextNodeInDocumentOrder(element, opt_stopNode) {
   let currentElement = element;
   do {
     if (currentElement.nextSibling) {
       return true;
     }
-  } while ((currentElement = currentElement.parentNode));
+  } while ((currentElement = currentElement.parentNode) &&
+            currentElement != opt_stopNode);
   return false;
 }
 
@@ -652,4 +697,41 @@ export function tryFocus(element) {
  */
 export function isIframed(win) {
   return win.parent && win.parent != win;
+}
+
+/**
+ * Determines if this element is an AMP element
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isAmpElement(element) {
+  const tag = element.tagName;
+  // Use prefix to recognize AMP element. This is necessary because stub
+  // may not be attached yet.
+  return startsWith(tag, 'AMP-') &&
+      // Some "amp-*" elements are not really AMP elements. :smh:
+      !(tag == 'AMP-STICKY-AD-TOP-PADDING' || tag == 'AMP-BODY');
+}
+
+/**
+ * Return a promise that resolve when an AMP element upgrade from HTMLElement
+ * to CustomElement
+ * @param {!Element} element
+ * @return {!Promise<!Element>}
+ */
+export function whenUpgradedToCustomElement(element) {
+  dev().assert(isAmpElement(element), 'element is not AmpElement');
+  if (element.createdCallback) {
+    // Element already is CustomElement;
+    return Promise.resolve(element);
+  }
+  // If Element is still HTMLElement, wait for it to upgrade to customElement
+  // Note: use pure string to avoid obfuscation between versions.
+  if (!element[UPGRADE_TO_CUSTOMELEMENT_PROMISE]) {
+    element[UPGRADE_TO_CUSTOMELEMENT_PROMISE] = new Promise(resolve => {
+      element[UPGRADE_TO_CUSTOMELEMENT_RESOLVER] = resolve;
+    });
+  }
+
+  return element[UPGRADE_TO_CUSTOMELEMENT_PROMISE];
 }

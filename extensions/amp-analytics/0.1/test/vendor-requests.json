@@ -17,6 +17,12 @@
     "pageview": "https://$log$domain/hit.xiti?s=$site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_&p=_title_&s2=$level2&medium=amp&&ref=_document_referrer_",
     "click": "https://$log$domain/hit.xiti?s=$site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_&pclick=_title_&s2click=$level2&p=$label&s2=$level2Click&type=click&click=$type&medium=amp&&ref=_document_referrer_"
   },
+  "baiduanalytics": {
+    "host": "https://hm.baidu.com",
+    "base": "https://hm.baidu.com/hm.gif?si=$token&nv=0&st=4&v=pixel-1.0&rnd=_timestamp_",
+    "pageview": "https://hm.baidu.com/hm.gif?si=$token&nv=0&st=4&v=pixel-1.0&rnd=_timestamp_&et=0",
+    "event": "https://hm.baidu.com/hm.gif?si=$token&nv=0&st=4&v=pixel-1.0&rnd=_timestamp_&ep=$category*$action*$label*$value&et=4&api=8_0"
+  },
   "burt": {
     "host": "//ignore.c.richmetrics.com/",
     "base": "//ignore.c.richmetrics.com/imglog?e=ignore&pi=ignore|_page_view_id_|_canonical_path_|_client_id_&ui=_client_id_&v=amp&ts=_timestamp_&sn=3&",
@@ -61,6 +67,21 @@
     "pageview": "https://$analyticsHost/col2/-/_random_?euid-amp=_client_id_&url=_source_url_&rf=_document_referrer_&sd=_screen_width_x_screen_height_&sd=_screen_color_depth_&elg=_browser_language_",
     "action": "https://$analyticsHost/action/-/_random_?euid-amp=_client_id_&url=_source_url_&eact=$actionCode&actr=$actionRef",
     "user": "https://$analyticsHost/uparam/-/_random_?euid-amp=_client_id_&url=_source_url_&euk$userParamKey=$userParamVal"
+  },
+  "facebookpixel": {
+    "host": "https://www.facebook.com",
+    "base": "https://www.facebook.com/tr?noscript=1",
+    "pageview": "https://www.facebook.com/tr?noscript=1&ev=PageView&id=PIXEL-ID",
+    "event": "https://www.facebook.com/tr?noscript=1&ev=$eventName&id=PIXEL-ID&cd[content_name]=$content_name",
+    "eventViewContent": "https://www.facebook.com/tr?noscript=1&ev=ViewContent&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_name]=$content_name&cd[content_type]=$content_type&cd[content_ids]=$content_ids",
+    "eventSearch": "https://www.facebook.com/tr?noscript=1&ev=Search&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_category]=$content_category&cd[content_ids]=$content_ids&cd[search_string]=$search_string",
+    "eventAddToCart": "https://www.facebook.com/tr?noscript=1&ev=AddToCart&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_name]=$content_name&cd[content_type]=$content_type&cd[content_ids]=$content_ids",
+    "eventAddToWishlist": "https://www.facebook.com/tr?noscript=1&ev=AddToWishlist&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_name]=$content_name&cd[content_category]=$content_category&cd[content_ids]=$content_ids",
+    "eventInitiateCheckout": "https://www.facebook.com/tr?noscript=1&ev=InitiateCheckout&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_name]=$content_name&cd[content_category]=$content_category&cd[num_items]=$num_items&cd[content_ids]=$content_ids",
+    "eventAddPaymentInfo": "https://www.facebook.com/tr?noscript=1&ev=AddPaymentInfo&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_category]=$content_category&cd[content_ids]=$content_ids",
+    "eventPurchase": "https://www.facebook.com/tr?noscript=1&ev=Purchase&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_name]=$content_name&cd[content_type]=$content_type&cd[content_ids]=$content_ids&cd[num_items]=$num_items",
+    "eventLead": "https://www.facebook.com/tr?noscript=1&ev=Lead&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_name]=$content_name&cd[content_category]=$content_category",
+    "eventCompleteRegistration": "https://www.facebook.com/tr?noscript=1&ev=CompleteRegistration&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_name]=$content_name&cd[status]=$status"
   },
   "gemius": {
     "base": "https://$prefix.hit.gemius.pl/__timestamp_/redot.gif?l=91&id=$identifier&screen=_screen_width_x_screen_height_&window=_viewport_width_x_viewport_height_&fr=1&href=_source_url_&ref=_document_referrer_&extra=gemamp%3D1%7Campid%3D_client_id_%7C$extraparams",
@@ -135,6 +156,10 @@
     "pageview": "https://pixels.mparticle.com/v1/$apiKey/Pixel?dt=ScreenView&n=_canonical_path_&hn=_ampdoc_url_&ttl=_title_&et=Unknown&amp_id=_client_id_&attrs_k=$eventAttributes_Keys&attrs_v=$eventAttributes_Values&ua_k=$userAttributes_Keys&ua_v=$userAttributes_Values&ui_t=$userIdentities_Types&ui_v=$userIdentities_Values&flags_k=$customFlags_Keys&flags_v=$customFlags_Values&ct=_timestamp_&dbg=false&lc=$location&av=$appVersion",
     "event": "https://pixels.mparticle.com/v1/$apiKey/Pixel?dt=AppEvent&n=$eventName&et=Unknown&amp_id=_client_id_&attrs_k=$eventAttributes_Keys&attrs_v=$eventAttributes_Values&ua_k=$userAttributes_Keys&ua_v=$userAttributes_Values&ui_t=$userIdentities_Types&ui_v=$userIdentities_Values&flags_k=$customFlags_Keys&flags_v=$customFlags_Values&ct=_timestamp_&dbg=false&lc=$location&av=$appVersion"
   },
+  "nielsen": {
+    "session": "https://uaid-linkage.imrworldwide.com/cgi-bin/gn?prd=session&c13=asid,P$apid&sessionId=_client_id_,&pingtype=4&enc=false&c61=createtm,_timestamp_&rnd=_random_",
+    "cloudapi": "https://cloudapi.imrworldwide.com/nmapi/v2/$apid/_client_id_/a?b=%7B%22devInfo%22%3A%7B%22devId%22%3A%22_client_id_%22%2C%22apn%22%3A%22$apn%22%2C%22apv%22%3A%22$apv%22%2C%22apid%22%3A%22$apid%22%7D%2C%22metadata%22%3A%7B%22static%22%3A%7B%22type%22%3A%22static%22%2C%22section%22%3A%22$section%22%2C%22assetid%22%3A%22_page_view_id_%22%2C%22segA%22%3A%22$segA%22%2C%22segB%22%3A%22$segB%22%2C%22segC%22%3A%22$segC%22%2C%22adModel%22%3A%220%22%2C%22dataSrc%22%3A%22cms%22%7D%2C%22content%22%3A%7B%7D%2C%22ad%22%3A%7B%7D%7D%2C%22event%22%3A%22playhead%22%2C%22position%22%3A%22_timestamp_%22%2C%22data%22%3A%7B%22hidden%22%3A%22_background_state_%22%2C%22blur%22%3A%22_background_state_%22%2C%22position%22%3A%22_timestamp_%22%7D%2C%22type%22%3A%22static%22%2C%22utc%22%3A%22_timestamp_%22%2C%22index%22%3A%223%22%7D",
+  },
   "parsely": {
     "host": "https://srv.pixel.parsely.com",
     "basePrefix": "https://srv.pixel.parsely.com/plogger/?rand=_timestamp_&idsite=$apikey&url=_ampdoc_url_&urlref=_document_referrer_&screen=_screen_width_x_screen_height_%7C_available_screen_width_x_available_screen_height_%7C_screen_color_depth_&title=_title_&date=_timestamp_&ampid=_client_id_",
@@ -178,10 +203,10 @@
     "track": "https://api.segment.io/v1/pixel/track?writeKey=$writeKey&context.library.name=amp&anonymousId=_client_id_&context.locale=_browser_language_&context.page.path=_canonical_path_&context.page.url=_canonical_url_&context.page.referrer=_document_referrer_&context.page.title=_title_&context.screen.width=_screen_width_&context.screen.height=_screen_height_&event=$event"
   },
   "snowplow": {
-    "aaVersion": "amp-0.1",
-    "basePrefix": "https://$collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_&aid=$appId&p=web&tv=amp-0.1",
-    "pageView": "https://$collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_&aid=$appId&p=web&tv=amp-0.1&e=pv",
-    "structEvent": "https://$collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_&aid=$appId&p=web&tv=amp-0.1&e=se&se_ca=$structEventCategory&se_ac=$structEventAction&se_la=$structEventLabel&se_pr=$structEventProperty&se_va=$structEventValue"
+    "aaVersion": "amp-0.2",
+    "basePrefix": "https://$collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_&aid=$appId&p=web&tv=amp-0.2&cd=_screen_color_depth_&cs=_document_charset_&duid=_client_id_&lang=_browser_language_&refr=_document_referrer_&stm=_timezone_&vp=_viewport_width_x_viewport_height_",
+    "pageView": "https://$collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_&aid=$appId&p=web&tv=amp-0.2&cd=_screen_color_depth_&cs=_document_charset_&duid=_client_id_&lang=_browser_language_&refr=_document_referrer_&stm=_timezone_&vp=_viewport_width_x_viewport_height_&e=pv",
+    "structEvent": "https://$collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_&aid=$appId&p=web&tv=amp-0.2&cd=_screen_color_depth_&cs=_document_charset_&duid=_client_id_&lang=_browser_language_&refr=_document_referrer_&stm=_timezone_&vp=_viewport_width_x_viewport_height_&e=se&se_ca=$structEventCategory&se_ac=$structEventAction&se_la=$structEventLabel&se_pr=$structEventProperty&se_va=$structEventValue"
   },
   "webtrekk": {
     "trackURL": "https://$trackDomain/$trackId/wt",

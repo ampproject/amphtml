@@ -1,0 +1,38 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-bind: XHR</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Questrial" rel="stylesheet" type="text/css">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+</head>
+<body>
+
+  <button on="tap:AMP.setState({listSrc:'/list/fruit-data/get'})">Show Fruit</button>
+  <button on="tap:AMP.setState({listSrc:'/list/vegetable-data/get'})">Show Vegetables</button>
+    <button on="tap:AMP.setState({
+    localState: [{
+      name: 'pizza',
+      quantity: 1976,
+      unitPrice: 3.50
+    }, {
+      name: 'ice cream',
+      quantity: 108,
+      unitPrice: 6.50
+    }]
+  })">Show Other Foods</button>
+
+  <amp-list layout="responsive" src="/list/fruit-data/get" [src]="listSrc || '/list/fruit-data/get'" width="600" height="600" [state]="localState">
+    <template type="amp-mustache">
+      <strong>Product</strong>: {{name}}
+      <strong>Quantity:</strong>: {{quantity}}
+      <strong>Unit Price</strong>: ${{unitPrice}}
+    </template>
+  </amp-list>
+</body>

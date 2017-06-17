@@ -22,10 +22,6 @@ limitations under the License.
     <td>Displays the AOL O2Player.</td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-o2-player" src="https://cdn.ampproject.org/v0/amp-o2-player-0.1.js">&lt;/script></code></td>
   </tr>
@@ -84,7 +80,7 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 
 ## Validation 
 
-See [amp-o2-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-o2-player/0.1/validator-amp-o2-player.protoascii) in the AMP validator specification.
+See [amp-o2-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-o2-player/validator-amp-o2-player.protoascii) in the AMP validator specification.
 
 The following lists validation errors specific to the `amp-o2-player` tag:
 

@@ -22,10 +22,6 @@ limitations under the License.
     <td>Displays a cloud-hosted <a href="https://www.jwplayer.com/">JW Player</a>.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-jwplayer" src="https://cdn.ampproject.org/v0/amp-jwplayer-0.1.js">&lt;/script></code></td>
   </tr>
@@ -85,4 +81,4 @@ The JW Platform playlist id. This is an 8-digit alphanumeric sequence that can b
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
-See [amp-jwplayer rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-jwplayer/0.1/validator-amp-jwplayer.protoascii) in the AMP validator specification.
+See [amp-jwplayer rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-jwplayer/validator-amp-jwplayer.protoascii) in the AMP validator specification.

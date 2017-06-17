@@ -48,10 +48,10 @@ describe('amp-lightbox-viewer', () => {
         expect(carousel).to.exist;
 
         const btns = viewer.querySelectorAll('.i-amphtml-lbv > [role=button]');
-        expect(btns.length).to.equal(2);
+        expect(btns.length).to.equal(3);
         expect(btns[0].className).to.equal('amp-lbv-button-close');
-        expect(btns[1].className).to.equal(
-            'amp-lbv-button-gallery');
+        expect(btns[1].className).to.equal('amp-lbv-button-gallery');
+        expect(btns[2].className).to.equal('amp-lbv-button-slide');
       });
     });
 
@@ -130,11 +130,11 @@ describe('amp-lightbox-viewer', () => {
         return impl.activate({source: item1}).then(() => {
           impl.openGallery_();
           const container = viewer.querySelector('.i-amphtml-lbv');
-          expect(container.getAttribute('gallery-view')).to.equal('');
+          expect(container.hasAttribute('gallery-view')).to.be.true;
           const gallery = viewer.querySelector('.i-amphtml-lbv-gallery');
           expect(gallery.childNodes).to.have.length(3);
           gallery.childNodes[1].dispatchEvent(new Event('click'));
-          expect(container.getAttribute('gallery-view')).to.be.null;
+          expect(container.hasAttribute('gallery-view')).to.be.false;
         });
       });
     });

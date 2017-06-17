@@ -15,11 +15,14 @@
  */
 
 import '../../../../third_party/babel/custom-babel-helpers';
-import {initLogConstructor} from '../../../../src/log';
-import {APP, Messaging, MessageType, WindowPortEmulator} from '../messaging';
+import {
+  APP,
+  Messaging,
+  MessageType,
+  WindowPortEmulator,
+} from '../messaging/messaging';
 import {listen} from '../../../../src/event-helper';
 
-initLogConstructor();
 const CHANNEL_OPEN_MSG = 'channelOpen';
 
 /**
@@ -54,7 +57,7 @@ export class AmpViewerHost {
     if (this.isWebview_ || opt_isHandshakePoll) {
       /** @private {number} */
       this.pollingIntervalId_ = setInterval(
-        this.initiateHandshake_.bind(this, this.intervalCtr) , 1000); //poll every second
+          this.initiateHandshake_.bind(this, this.intervalCtr) , 1000); //poll every second
     } else {
       this.waitForHandshake_(frameOrigin);
     }
@@ -73,7 +76,7 @@ export class AmpViewerHost {
       };
       message = this.isWebview_ ? JSON.stringify(message) : message;
       this.ampIframe_.contentWindow./*OK*/postMessage(
-        message, '*', [channel.port2]);
+          message, '*', [channel.port2]);
 
       channel.port1.onmessage = function(e) {
         const data = this.isWebview_ ? JSON.parse(e.data) : e.data;

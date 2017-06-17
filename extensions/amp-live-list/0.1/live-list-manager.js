@@ -17,28 +17,37 @@
 import {Poller} from './poller';
 import {addParamToUrl} from '../../../src/url';
 import {getMode} from '../../../src/mode';
-import {registerServiceBuilder, getService} from '../../../src/service';
+import {
+  getServiceForDoc,
+  registerServiceBuilderForDoc,
+} from '../../../src/service';
 import {user} from '../../../src/log';
 import {viewerForDoc} from '../../../src/services';
-import {whenDocumentReady} from '../../../src/document-ready';
 import {xhrFor} from '../../../src/services';
+
+const SERVICE_ID = 'liveListManager';
 
 
 /**
  * Manages registered AmpLiveList components.
  * Primarily handles network requests and updates the components
  * if necessary.
+ * @implements {../../../src/service.Disposable}
  */
 export class LiveListManager {
 
-  constructor(win) {
-    this.win = win;
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   */
+  constructor(ampdoc) {
+    /** @const */
+    this.ampdoc = ampdoc;
 
     /** @private @const {!Object<string, !./amp-live-list.AmpLiveList>} */
     this.liveLists_ = Object.create(null);
 
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = viewerForDoc(this.win.document);
+    this.viewer_ = viewerForDoc(this.ampdoc);
 
     /** @private {number} */
     this.interval_ = 15000;
@@ -50,7 +59,7 @@ export class LiveListManager {
     this.poller_ = null;
 
     /** @private @const {string} */
-    this.url_ = this.win.location.href;
+    this.url_ = this.ampdoc.getUrl();
 
     /** @private {time} */
     this.latestUpdateTime_ = 0;
@@ -70,15 +79,17 @@ export class LiveListManager {
 
       // For testing purposes only, we speed up the interval of the update.
       // This should NEVER be allowed in production.
-      if (getMode().localDev && (this.win.location.pathname == '/examples' +
-            '/live-list-update.amp.max.html' ||
-            this.win.location.pathname == '/examples/live-blog.amp' +
-            '.max.html' || this.win.location.pathname == '/examples/' +
-            'live-blog-non-floating-button.amp.max.html')) {
-        this.interval_ = 5000;
+      if (getMode().localDev) {
+        const path = this.ampdoc.win.location.pathname;
+        if (path.indexOf('/examples/live-list-update.amp.html') != -1 ||
+            path.indexOf('/examples/live-blog.amp.html') != -1 ||
+            path.indexOf(
+                '/examples/live-blog-non-floating-button.amp.html') != -1) {
+          this.interval_ = 5000;
+        }
       }
 
-      this.poller_ = new Poller(this.win, this.interval_, this.work_);
+      this.poller_ = new Poller(this.ampdoc.win, this.interval_, this.work_);
 
       // If no live-list is active on dom ready, we don't need to poll at all.
       if (this.viewer_.isVisible() && this.hasActiveLiveLists_()) {
@@ -86,6 +97,11 @@ export class LiveListManager {
       }
       this.setupVisibilityHandler_();
     });
+  }
+
+  /** @override */
+  dispose() {
+    this.poller_.stop();
   }
 
   /**
@@ -111,7 +127,7 @@ export class LiveListManager {
       url = addParamToUrl(url, 'amp_latest_update_time',
           String(this.latestUpdateTime_));
     }
-    return xhrFor(this.win)
+    return xhrFor(this.ampdoc.win)
         // TODO(erwinm): add update time here when possible.
         .fetchDocument(url, {
           requireAmpResponseSourceOrigin: false,
@@ -148,7 +164,7 @@ export class LiveListManager {
     const id = liveList.getAttribute('id');
     user().assert(id, 'amp-live-list must have an id.');
     user().assert(id in this.liveLists_, `amp-live-list#${id} found but did ` +
-        `not exist on original page load.`);
+        'not exist on original page load.');
     const inClientDomLiveList = this.liveLists_[id];
     inClientDomLiveList.toggle(!liveList.hasAttribute('disabled'));
 
@@ -178,7 +194,7 @@ export class LiveListManager {
    * @private
    */
   whenDocReady_() {
-    return whenDocumentReady(this.win.document);
+    return this.ampdoc.whenReady();
   }
 
   /**
@@ -219,17 +235,21 @@ export class LiveListManager {
 }
 
 /**
- * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  */
-export function installLiveListManager(win) {
-  registerServiceBuilder(win, 'liveListManager', LiveListManager);
+function installLiveListManager(ampdoc) {
+  registerServiceBuilderForDoc(
+      ampdoc,
+      SERVICE_ID,
+      LiveListManager,
+      /* instantiate */ true);
 }
 
 /**
- * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @return {!LiveListManager}
  */
-export function liveListManagerFor(win) {
-  installLiveListManager(win);
-  return getService(win, 'liveListManager');
+export function liveListManagerForDoc(ampdoc) {
+  installLiveListManager(ampdoc);
+  return getServiceForDoc(ampdoc, SERVICE_ID);
 }

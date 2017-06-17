@@ -162,8 +162,6 @@
     }
   </style>
 
-  <script src="./viewer-integr-messaging.js"></script>
-
   <script>
     var allViewers = [];
     var currentContainerId = null;
@@ -260,8 +258,8 @@
       if (updateToggle) {
         this.updateVisibilityToggle_();
       }
-    };    
-    
+    };
+
     Viewer.prototype.loaded_ = function() {
       if (this.alreadyLoaded_) {
         return;
@@ -379,7 +377,7 @@
 
     Viewer.prototype.scrollAmpDoc = function(scrollTop) {
       log('viewer scroll amp doc: ', scrollTop);
-      this.ampViewerHost_.sendRequest('scroll', {scrollTop}, true);
+      this.ampViewerHost_.sendRequest('scroll', {scrollTop: scrollTop}, true);
     };
 
 

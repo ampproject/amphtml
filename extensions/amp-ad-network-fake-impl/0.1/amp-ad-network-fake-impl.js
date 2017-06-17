@@ -20,6 +20,7 @@ import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {resolveRelativeUrl} from '../../../src/url';
 import {utf8EncodeSync, utf8Decode} from '../../../src/utils/bytes';
+import {parseJson} from '../../../src/json';
 
 
 export class AmpAdNetworkFakeImpl extends AmpA4A {
@@ -59,19 +60,18 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
           // See DEVELOPING.md for more info.
           const creative = this.transformCreativeLocalDev_(deserialized);
           return {
-            creative: utf8EncodeSync(creative),
+            creative: utf8EncodeSync(creative).buffer,
             signature: 'FAKESIG',
           };
         }
       }
-
       // Normal mode: the content is a JSON structure with two fieleds:
       // `creative` and `signature`.
-      const decoded = JSON.parse(deserialized);
+      const decoded = parseJson(deserialized);
       dev().info('AMP-AD-FAKE', 'Decoded response text =', decoded['creative']);
       dev().info('AMP-AD-FAKE', 'Decoded signature =', decoded['signature']);
       return {
-        creative: utf8EncodeSync(decoded['creative']),
+        creative: utf8EncodeSync(decoded['creative']).buffer,
         signature: base64DecodeToBytes(decoded['signature']),
       };
     });

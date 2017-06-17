@@ -37,7 +37,7 @@ describe('sanitizeHtml', () => {
         '<h1>a<i>b</i>c' +
         '<amp-img src="http://example.com/1.png"></amp-img></h1>'))
         .to.be.equal(
-            '<h1>a<i>b</i>c' +
+        '<h1>a<i>b</i>c' +
             '<amp-img src="http://example.com/1.png"></amp-img></h1>');
   });
 
@@ -219,7 +219,7 @@ describe('resolveUrlAttr', () => {
     expect(() => resolveUrlAttr('a', 'href',
         '/doc2?__amp_source_origin=https://google.com',
         'http://acme.org/doc1'))
-            .to.throw(/Source origin is not allowed in/);
+        .to.throw(/Source origin is not allowed in/);
   });
 
   it('should be called by sanitizer', () => {

@@ -22,10 +22,6 @@ limitations under the License.
     <td> Displays a <a href="https://soundcloud.com/">Soundcloud</a> clip.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-soundcloud" src="https://cdn.ampproject.org/v0/amp-soundcloud-0.1.js">&lt;/script></code></td>
   </tr>
@@ -82,4 +78,4 @@ The layout for `amp-soundcloud` is set to `fixed-height` and it fills all of the
 
 ## Validation
 
-See [amp-soundcloud rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-soundcloud/0.1/validator-amp-soundcloud.protoascii) in the AMP validator specification.
+See [amp-soundcloud rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-soundcloud/validator-amp-soundcloud.protoascii) in the AMP validator specification.

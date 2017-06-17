@@ -2,14 +2,13 @@ language: node_js
 sudo: required  # See http://docs.travis-ci.com/user/trusty-ci-environment/
 dist: trusty
 node_js:
-  - "stable"
+  - "4"
 python:
   - "2.7"
 notifications:
   webhooks:
     - http://savage.nonblocking.io:8080/savage/travis
 addons:
-  sauce_connect: true
   hosts:
     - ads.localhost
     - iframe.localhost
@@ -26,9 +25,6 @@ before_install:
   - sh -e /etc/init.d/xvfb start
   - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
   - sudo dpkg -i google-chrome*.deb
-before_script:
-  - pip install --user protobuf
-  - gem install percy-cli
 script: node build-system/pr-check.js
 branches:
   only:
@@ -38,9 +34,24 @@ branches:
     - /^amp-release-.*$/
 env:
   global:
+    - SAUCE_USERNAME="amphtml"
     - NPM_CONFIG_PROGRESS="false"
-    - secure: nvLqQdU2CGwvsQ3E1M/6HgBJAfmSzd90bDYQ1vkAkwGj+VOVQauqj7RDJACJS2XysJjzIvzNUOtKFvTSzThye167sKAZnQMmj9U8ATdlJfv5xq88QkkoCuJIOPtVnOWS8gBrDAy9d+Xwi22ZcE5kAAov1gNDmnX6YcPwW8y09vD+Jb1WkxofwTR5U3dP7pxVNRwgXY12g2lmbj+TZy5RHvjs1/ESSVtt/5Wq+Ubv9O6KAVPrh/VdVTYyvgynvwzz5jG3qe7981W8rUNIt+ihzdxJMSaoQkiBs5UM3qi8ibqKI2KHdDmGQg+vc/c5mjCCd9FAz7lF+fJJQ3YThTLmIN3u7Hil+o92OaAt2knwtZ3HRv/jbVQfnU0L9hqHw/kBYE37O4x4/ToJyR3EgbvFXqgiVph0eDUnsmi8PZc5FUiwb8r85thQmfUB+urkOXbnOyHQ9B74T+UjAvlaqLdQ53/9UTzgvLNm2z6RU65G9QYJVMSzj82K2rZ9AyVwjZMp/iuQDoUcUsuMhKDh2genHnxRtQa/TbLQM05oYHRqFa9oT3Q7C7QSSL8mmi/QMfGlTfxhM49CZsbcU2qbMCMCL7ZGWaSiXiEy7XICOzJnOiKFowDK5ihAZaQpRNquMwUSIMnnqrFgfWDbQSUmkOAwSm+2u2+SsXhT+WQfraRfSSI=
-    - secure: Yy/T45bp95od5bugtZFnr8e/YSc+8aPaiPQiI+Ms7T6TF/7NsjqwLHCgpd6TlSnkmuusHuI1N6foEHl9tu4XFjDdIl7qZvGLpNodSo5bFnKz8fVxHiZeCn6x6EMIx2QOw7Matrp6P7E2wV9DgQsmMhQQ2BNPu7XyJx8K6DbE654IFsHO9N3y9qO4TiZ2hfypGM7XCGZsLGo+amS/XbfJZDCupK3GTmWoA4M/liUSdRjM+9ienXC76bDw2Mf06WJ9RpsdYI4nVFRe1kkEUzu/1DJSh5oqkxtbYph4KHjh/2cTmzYGG03rPGxE07ndZKcBhdaiYuECTqps4zQ8ST4DouwxPecwbMZ0lpzUFYtSrZOC+iplxiaOWeombNsLRgswy4L+mOpqyQjsWQ8vLUqhSxyMY8BAXSJVOeBeMOLvYfC2UVscqcQsX2MwQA/izDWMFZrpqGBCPIieoWBatAb2QzCHGtL3K5cvnwSK6O+LC+nZJ8kR3Yl6zSyfKnnx46tyzqkNRQ11gvLCrnBOtjGtOt48Z3GmXb0KONCF8nu2Wb2ZbgN9Mi2KyI3+3gDRANzOqfjhByLyvuwCI8fWnogJIy5ZPVpZQC85GTUZBOMZMpQiVtcfv50qByRvtnn3aavE1KtcEFwj9Gaen/A+yO8EMnBJhc3SNf1ggJ2B18O6CBQ=
+matrix:
+  include:
+    - env: BUILD_SHARD="pre_build_checks_and_unit_tests"
+      before_script:
+        - pip install --user protobuf
+        - gem install percy-capybara
+        - gem install phantomjs
+        - gem install poltergeist
+    - env: BUILD_SHARD="integration_tests"
+      before_script:
+        - pip install --user protobuf
+      addons:
+        sauce_connect:
+          username: "amphtml"
+        jwt:
+          secure: "Wze0F0vGL0UcxryOx1n/vcuD5LIMGyR+69Nc6IWLoRvZBbbIpFwVFhDE6rE9ranIXiA2Hc684N4sV8ASfNDF8RRSB+jyLov159qwgji2rBxIfQ/4kuDV2vYoAJvYMz8m42kwx5FV2VV9awqMMt8mwU3wYIrKIaVCxB34uV86KIlDlbrHxt17Bm5EIiUmwi9r1AAnW/63vVRUN264D77oB4j9UQ759PfD6BDwEt54O87KurNIaLseNCr1IvzfL8veEsZ3uTbLC1GtgHfR4IGgkS2YyN2QIk06VZWeRDEOalS3RcY0nDkbCmBywxIGObnrpEMzOpjBiOb2fxLoLvvpjlla5W84zJGfWE6q4T9IvkyHuDJE+sft5B+arjMIeA6PIeUhKdV27+6qqDEf7fILZ/U/Ekn9ds4zSV8hekAZPUyyPncOeyWppCIJ8sOeCrsebkRjH1BoX/d+FE+nP0bN/XkBpIi/nManx5FyS/kqjQWGKmvsFQfEWlSUaZi7XtEQEjvBizRkzvpJanSDaoiTDS2Keulmwii3XRId51FuGtnfDZFeggLaMTKGfBX9DlPkccwYAZe6vPNfYk1pNgEj6AtnifEhYVEO+aAuWhEnJ86od+1wDOL/h+a2XY6h8/gFBywsD95p7sXPfdVDCKgwagiBo+Hw5MNjztVF7lszg1A="
 cache:
   yarn: true
   directories:

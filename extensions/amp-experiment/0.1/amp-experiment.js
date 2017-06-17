@@ -18,7 +18,7 @@ import {user} from '../../../src/log';
 import {Layout} from '../../../src/layout';
 import {waitForBodyPromise} from '../../../src/dom';
 import {allocateVariant} from './variant';
-import {getService} from '../../../src/service';
+import {registerServiceBuilder} from '../../../src/service';
 
 /** @const */
 const ATTR_PREFIX = 'amp-x-';
@@ -37,17 +37,20 @@ export class AmpExperiment extends AMP.BaseElement {
     const variants = Object.keys(config).map(experimentName => {
       return allocateVariant(
           this.getAmpDoc(), experimentName, config[experimentName])
-              .then(variantName => {
-                results[experimentName] = variantName;
-              });
+          .then(variantName => {
+            results[experimentName] = variantName;
+          });
     });
 
+
     /** @private @const {!Promise<!Object<string, ?string>>} */
-    this.experimentVariants_ = Promise.all(variants)
+    const experimentVariants = Promise.all(variants)
         .then(() => results)
         .then(this.addToBody_.bind(this));
 
-    getService(this.win, 'variant', () => this.experimentVariants_);
+    registerServiceBuilder(this.win, 'variant', function() {
+      return experimentVariants;
+    });
   }
 
   getConfig_() {

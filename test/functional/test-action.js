@@ -14,17 +14,33 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../src/action-trust';
 import {
   ActionService,
+  DeferredEvent,
   OBJECT_STRING_ARGS_KEY,
   applyActionInfoArgs,
   parseActionMap,
 } from '../../src/service/action-impl';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {Keycodes} from '../../src/utils/keycodes';
+import {KeyCodes} from '../../src/utils/key-codes';
 import {createCustomEvent} from '../../src/event-helper';
 import {setParentWindow} from '../../src/service';
 import * as sinon from 'sinon';
+
+
+/**
+ * @return {!ActionService}
+ */
+function actionService() {
+  const win = {
+    document: {body: {}},
+    services: {
+      vsync: {obj: {}},
+    },
+  };
+  return new ActionService(new AmpDocSingle(win), document);
+}
 
 
 function createExecElement(id, enqueAction) {
@@ -138,7 +154,7 @@ describe('ActionService parseAction', () => {
 
   it('should parse args in more than one action', () => {
     const a = parseMultipleActions(
-      'event1:target1.methodA(key1=value1),target2.methodB(keyA=valueA)');
+        'event1:target1.methodA(key1=value1),target2.methodB(keyA=valueA)');
     expect(a[0].event).to.equal('event1');
     expect(a[0].target).to.equal('target1');
     expect(a[0].method).to.equal('methodA');
@@ -466,23 +482,16 @@ describe('Action parseActionMap', () => {
 
 
 describes.sandboxed('Action adoptEmbedWindow', {}, () => {
-  let win;
   let action;
   let embedWin;
 
   beforeEach(() => {
-    win = {
-      document: {body: {}},
-      services: {
-        vsync: {obj: {}},
-      },
-    };
-    action = new ActionService(new AmpDocSingle(win), document);
+    action = actionService();
     embedWin = {
       frameElement: document.createElement('div'),
       document: document.implementation.createHTMLDocument(''),
     };
-    setParentWindow(embedWin, win);
+    setParentWindow(embedWin, action.ampdoc.win);
   });
 
   it('should create embedded action service', () => {
@@ -498,18 +507,11 @@ describes.sandboxed('Action adoptEmbedWindow', {}, () => {
 
 describe('Action findAction', () => {
   let sandbox;
-  let win;
   let action;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    win = {
-      document: {body: {}},
-      services: {
-        vsync: {obj: {}},
-      },
-    };
-    action = new ActionService(new AmpDocSingle(win), document);
+    action = actionService();
   });
 
   afterEach(() => {
@@ -568,20 +570,13 @@ describe('Action findAction', () => {
 
 describe('Action method', () => {
   let sandbox;
-  let win;
   let action;
   let onEnqueue;
   let targetElement, parent, child, execElement;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    win = {
-      document: {body: {}},
-      services: {
-        vsync: {obj: {}},
-      },
-    };
-    action = new ActionService(new AmpDocSingle(win), document);
+    action = actionService();
     onEnqueue = sandbox.spy();
     targetElement = document.createElement('target');
     const id = ('E' + Math.random()).replace('.', '');
@@ -634,21 +629,6 @@ describe('Action method', () => {
     expect(onEnqueue).to.have.not.been.called;
   });
 
-  it('should invoke on non-AMP but whitelisted element', () => {
-    const handlerSpy = sandbox.spy();
-    const target = document.createElement('form');
-    action.installActionHandler(target, handlerSpy);
-    action.invoke_(target, 'submit', /* args */ null,
-        'button', 'tap');
-    expect(handlerSpy).to.be.calledOnce;
-    const callArgs = handlerSpy.getCall(0).args[0];
-    expect(callArgs.target).to.be.equal(target);
-    expect(callArgs.method).to.be.equal('submit');
-    expect(callArgs.args).to.be.equal(null);
-    expect(callArgs.source).to.be.equal('button');
-    expect(callArgs.event).to.be.equal('tap');
-  });
-
   it('should not allow invoke on unresolved AMP element', () => {
     expect(() => {
       action.invoke_({tagName: 'amp-img'}, 'method1', /* args */ null,
@@ -677,23 +657,62 @@ describe('Action method', () => {
   });
 });
 
+describe('installActionHandler', () => {
+  let sandbox;
+  let action;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    action = actionService();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  it('should invoke on non-AMP but whitelisted element', () => {
+    const handlerSpy = sandbox.spy();
+    const target = document.createElement('form');
+    action.installActionHandler(target, handlerSpy);
+    action.invoke_(target, 'submit', /* args */ null,
+        'button', 'tap', ActionTrust.HIGH);
+    expect(handlerSpy).to.be.calledOnce;
+    const callArgs = handlerSpy.getCall(0).args[0];
+    expect(callArgs.target).to.be.equal(target);
+    expect(callArgs.method).to.be.equal('submit');
+    expect(callArgs.args).to.be.equal(null);
+    expect(callArgs.source).to.be.equal('button');
+    expect(callArgs.event).to.be.equal('tap');
+  });
+
+  it('should check trust level before invoking action', () => {
+    const handlerSpy = sandbox.spy();
+    const target = document.createElement('form');
+    action.installActionHandler(target, handlerSpy, ActionTrust.HIGH);
+
+    action.invoke_(target, 'submit', /* args */ null,
+        'button', 'tap', ActionTrust.LOW);
+    expect(handlerSpy).to.not.be.called;
+
+    action.invoke_(target, 'submit', /* args */ null,
+        'button', 'tap', ActionTrust.MEDIUM);
+    expect(handlerSpy).to.not.be.called;
+
+    action.invoke_(target, 'submit', /* args */ null,
+        'button', 'tap', ActionTrust.HIGH);
+    expect(handlerSpy).to.be.calledOnce;
+  });
+});
 
 describe('Multiple handlers action method', () => {
   let sandbox;
-  let win;
   let action;
   let onEnqueue1, onEnqueue2;
   let targetElement, parent, child, execElement1, execElement2;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    win = {
-      document: {body: {}},
-      services: {
-        vsync: {obj: {}},
-      },
-    };
-    action = new ActionService(new AmpDocSingle(win), document);
+    action = actionService();
     onEnqueue1 = sandbox.spy();
     onEnqueue2 = sandbox.spy();
     targetElement = document.createElement('target');
@@ -731,7 +750,6 @@ describe('Multiple handlers action method', () => {
 
 describe('Action interceptor', () => {
   let sandbox;
-  let win;
   let clock;
   let action;
   let target;
@@ -739,13 +757,7 @@ describe('Action interceptor', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
-    win = {
-      document: {body: {}},
-      services: {
-        vsync: {obj: {}},
-      },
-    };
-    action = new ActionService(new AmpDocSingle(win), document);
+    action = actionService();
     target = document.createElement('target');
     target.setAttribute('id', 'amp-test-1');
   });
@@ -789,8 +801,10 @@ describe('Action interceptor', () => {
   });
 
   it('should dequeue actions after handler set', () => {
-    action.invoke_(target, 'method1', /* args */ null, 'source1', 'event1');
-    action.invoke_(target, 'method2', /* args */ null, 'source2', 'event2');
+    action.invoke_(target, 'method1', /* args */ null, 'source1', 'event1',
+        ActionTrust.MEDIUM);
+    action.invoke_(target, 'method2', /* args */ null, 'source2', 'event2',
+        ActionTrust.MEDIUM);
 
     expect(Array.isArray(getQueue())).to.be.true;
     expect(getActionHandler()).to.be.undefined;
@@ -816,7 +830,8 @@ describe('Action interceptor', () => {
     expect(inv1.source).to.equal('source2');
     expect(inv1.event).to.equal('event2');
 
-    action.invoke_(target, 'method3', /* args */ null, 'source3', 'event3');
+    action.invoke_(target, 'method3', /* args */ null, 'source3', 'event3',
+        ActionTrust.MEDIUM);
     expect(handler).to.have.callCount(3);
     const inv2 = handler.getCall(2).args[0];
     expect(inv2.target).to.equal(target);
@@ -829,19 +844,12 @@ describe('Action interceptor', () => {
 
 describe('Action common handler', () => {
   let sandbox;
-  let win;
   let action;
   let target;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    win = {
-      document: {body: {}},
-      services: {
-        vsync: {obj: {}},
-      },
-    };
-    action = new ActionService(new AmpDocSingle(win), document);
+    action = actionService();
     target = document.createElement('target');
     target.setAttribute('id', 'amp-test-1');
 
@@ -858,31 +866,43 @@ describe('Action common handler', () => {
     action.addGlobalMethodHandler('action1', action1);
     action.addGlobalMethodHandler('action2', action2);
 
-    action.invoke_(target, 'action1', /* args */ null, 'source1', 'event1');
+    action.invoke_(target, 'action1', /* args */ null, 'source1', 'event1',
+        ActionTrust.HIGH);
     expect(action1).to.be.calledOnce;
     expect(action2).to.have.not.been.called;
 
-    action.invoke_(target, 'action2', /* args */ null, 'source2', 'event2');
+    action.invoke_(target, 'action2', /* args */ null, 'source2', 'event2',
+        ActionTrust.HIGH);
     expect(action2).to.be.calledOnce;
     expect(action1).to.be.calledOnce;
 
     expect(target['__AMP_ACTION_QUEUE__']).to.not.exist;
   });
+
+  it('should check trust before invoking action', () => {
+    const handler = sandbox.spy();
+    action.addGlobalMethodHandler('foo', handler, ActionTrust.HIGH);
+
+    action.invoke_(target, 'foo', /* args */ null, 'source1', 'event1',
+        ActionTrust.LOW);
+    expect(handler).to.not.be.called;
+
+    action.invoke_(target, 'foo', /* args */ null, 'source1', 'event1',
+        ActionTrust.MEDIUM);
+    expect(handler).to.not.be.called;
+
+    action.invoke_(target, 'foo', /* args */ null, 'source1', 'event1',
+        ActionTrust.HIGH);
+    expect(handler).to.be.calledOnce;
+  });
 });
 
 
 describes.sandboxed('Action global target', {}, () => {
-  let win;
   let action;
 
   beforeEach(() => {
-    win = {
-      document: {body: {}},
-      services: {
-        vsync: {obj: {}},
-      },
-    };
-    action = new ActionService(new AmpDocSingle(win), document);
+    action = actionService();
   });
 
   it('should register global target', () => {
@@ -923,27 +943,32 @@ describes.sandboxed('Action global target', {}, () => {
 });
 
 
-describe('Core events', () => {
+describes.fakeWin('Core events', {amp: true}, env => {
   let sandbox;
-  let win;
+  let window;
+  let document;
   let action;
+  let triggerPromise;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    window = env.win;
+    document = window.document;
+    sandbox = env.sandbox;
     sandbox.stub(window.document, 'addEventListener');
-    win = {
-      document: {body: {}},
-      services: {
-        vsync: {obj: {}},
-      },
-    };
-    action = new ActionService(new AmpDocSingle(win), document);
-    sandbox.stub(action, 'trigger');
+    const ampdoc = env.ampdoc;
+    action = new ActionService(ampdoc, document);
+    const originalTrigger = action.trigger;
+    triggerPromise = new Promise((resolve, reject) => {
+      sandbox.stub(action, 'trigger', () => {
+        try {
+          originalTrigger.apply(action, action.trigger.getCall(0).args);
+          resolve();
+        } catch (e) {
+          reject(e);
+        }
+      });
+    });
     action.vsync_ = {mutate: callback => callback()};
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('should trigger tap event on click', () => {
@@ -963,7 +988,7 @@ describe('Core events', () => {
     element.setAttribute('role', 'button');
     const event = {
       target: element,
-      keyCode: Keycodes.ENTER,
+      keyCode: KeyCodes.ENTER,
       preventDefault: sandbox.stub()};
     handler(event);
     expect(event.preventDefault).to.have.been.called;
@@ -976,7 +1001,7 @@ describe('Core events', () => {
     const handler = window.document.addEventListener.getCall(1).args[1];
     const element = document.createElement('div');
     element.setAttribute('role', 'not-a-button');
-    const event = {target: element, keyCode: Keycodes.ENTER};
+    const event = {target: element, keyCode: KeyCodes.ENTER};
     handler(event);
     expect(action.trigger).to.not.have.been.called;
   });
@@ -1028,6 +1053,7 @@ describe('Core events', () => {
     element.selectedIndex = 2;
     const event = {target: element};
     handler(event);
+
     expect(action.trigger).to.have.been.calledWith(
         element,
         'change',
@@ -1037,4 +1063,56 @@ describe('Core events', () => {
         }));
   });
 
+  it('should trigger input-debounced event on input', () => {
+    sandbox.stub(action, 'invoke_');
+    const handler = window.document.addEventListener.getCall(4).args[1];
+    const element = document.createElement('input');
+    element.id = 'test';
+    element.setAttribute('on', 'input-debounced:test.hide');
+    element.value = 'foo bar baz';
+    const event = {target: element};
+    document.body.appendChild(element);
+    handler(event);
+
+    return triggerPromise.then(() => {
+      expect(action.trigger).to.have.been.calledWith(
+          element,
+          'input-debounced',
+          sinon.match(event => {
+            const value = event.target.value;
+            return value == 'foo bar baz';
+          }));
+    });
+  });
+
+  describe('DeferredEvent', () => {
+    it('should copy the properties of an event object', () => {
+      const event = createCustomEvent(window, 'MyEvent', {foo: 'bar'});
+      const deferredEvent = new DeferredEvent(event);
+
+      for (const key in deferredEvent) {
+        if (typeof deferredEvent[key] !== 'function') {
+          expect(deferredEvent[key]).to.deep.equal(event[key]);
+        }
+      }
+    });
+
+    it('should replace functions with throws', () => {
+      const event = createCustomEvent(window, 'MyEvent', {foo: 'bar'});
+      const deferredEvent = new DeferredEvent(event);
+      const errorText = 'cannot access native event functions';
+
+      // Specifically test these commonly used functions
+      expect(() => deferredEvent.preventDefault()).to.throw(errorText);
+      expect(() => deferredEvent.stopPropagation()).to.throw(errorText);
+
+      // Test all functions
+      for (const key in deferredEvent) {
+        const value = deferredEvent[key];
+        if (typeof value === 'function') {
+          expect(() => value()).to.throw(errorText);
+        }
+      }
+    });
+  });
 });

@@ -18,16 +18,16 @@ Before you can add your analytics service to AMP HTML runtime, you may need to:
 ## Adding your configuration to the AMP HTML runtime
 
 1. Create an [Intent-To-Implement issue](../../CONTRIBUTING.md#contributing-features) stating that you'll be adding your analytics service's configuration to AMP HTML's runtime.
-2. Develop a patch that implements the following:
- * A new block in [vendors.js](0.1/vendors.js) including any options above and beyond the default, such as:
-  * "vars": {} for additional default variables.
-  * "requests": {} for requests that your service will use.
-  * "optout": if needed.  We currently don't have a great opt-out system, so please reach out to help us design one that works well for you.
- * An example in the [examples/ dir](examples/)
-3. A line for your analytics service in the 'type' attribute section of the [amp-analytics](amp-analytics.md) usage reference.
-Test the patch to ensure the hits from the example are working as expected.  For example, the data needed is being collected and displayed in your analytics dashboard.
-4. Submit a Pull Request with this patch, referencing the Intent-To-Implement issue.
-5. Update your service's usage documentation and inform your customers.
+1. Develop a patch that implements the following:
+    1. A new block in [vendors.js](0.1/vendors.js) including any options above and beyond the default, such as:
+        1. "vars": {} for additional default variables.
+        1. "requests": {} for requests that your service will use.
+        1. "optout": if needed.  We currently don't have a great opt-out system, so please reach out to help us design one that works well for you.
+    1. An example in the [examples/analytics-vendors.amp.html](../../examples/analytics-vendors.amp.html)
+    1. A line for your analytics service in the 'type' attribute section of the [amp-analytics](amp-analytics.md) usage reference.
+1. Test the new example you put in [examples/analytics-vendors.amp.html](../../examples/analytics-vendors.amp.html) to ensure the hits from the example are working as expected. For example, the data needed is being collected and displayed in your analytics dashboard.
+1. Submit a Pull Request with this patch, referencing the Intent-To-Implement issue.
+1. Update your service's usage documentation and inform your customers.
 
 
 ## Tag Managers

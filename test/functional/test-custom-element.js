@@ -18,9 +18,14 @@ import {BaseElement} from '../../src/base-element';
 import {ElementStub, setLoadingCheckForTests} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
 import {installResourcesServiceForDoc} from '../../src/service/resources-impl';
+import {poll} from '../../testing/iframe';
+import {ResourceState} from '../../src/service/resource';
 import {resourcesForDoc} from '../../src/services';
 import {vsyncFor} from '../../src/services';
-import {getService, resetServiceForTesting} from '../../src/service';
+import {
+  registerServiceBuilder,
+  resetServiceForTesting,
+} from '../../src/service';
 import {
   copyElementToChildWindow,
   createAmpElementProto,
@@ -927,7 +932,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
     expect(element2.sizerElement_.style.paddingTop).to.equal('1%');
   });
 
-  it('should rediscover sizer to apply heights', () => {
+  it('should rediscover sizer to apply heights in SSR', () => {
     const element1 = new ElementClass();
     element1.setAttribute('i-amphtml-layout', 'responsive');
     element1.setAttribute('layout', 'responsive');
@@ -944,7 +949,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
     expect(sizer.style.paddingTop).to.equal('99%');
   });
 
-  it('should NOT rediscover sizer after reset', () => {
+  it('should NOT rediscover sizer after reset in SSR', () => {
     const element1 = new ElementClass();
     element1.setAttribute('i-amphtml-layout', 'responsive');
     element1.setAttribute('layout', 'responsive');
@@ -959,6 +964,17 @@ describes.realWin('CustomElement', {amp: true}, env => {
     element1.applySizesAndMediaQuery();
     expect(element1.sizerElement_).to.be.null;
     expect(sizer.style.paddingTop).to.equal('');
+  });
+
+  it('should reapply layout=nodisplay in SSR', () => {
+    const element1 = new ElementClass();
+    element1.setAttribute('i-amphtml-layout', 'nodisplay');
+    element1.setAttribute('layout', 'nodisplay');
+    container.appendChild(element1);
+    // TODO(dvoytenko, #9353): cleanup once `toggleLayoutDisplay` API has been
+    // fully migrated.
+    expect(element1.style.display).to.equal('none');
+    expect(element1).to.have.class('i-amphtml-display');
   });
 
   it('should change size without sizer', () => {
@@ -1306,6 +1322,30 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
     expect(elements[0].tagName.toLowerCase()).to.equal('content');
   });
 
+  it('toggleLayoutDisplay should add/remove display class', () => {
+    element.setAttribute('layout', 'nodisplay');
+    win.document.body.appendChild(element);
+    return poll('wait for static layout',
+        () => element.classList.contains('i-amphtml-layout-nodisplay'))
+        .then(() => {
+          // TODO(dvoytenko, #9353): once `toggleLayoutDisplay` API has been
+          // deployed this will start `false`.
+          expect(element.classList.contains('i-amphtml-display')).to.be.true;
+
+          element.style.display = 'block';
+          element.toggleLayoutDisplay(true);
+          expect(element.classList.contains('i-amphtml-display')).to.be.true;
+          expect(win.getComputedStyle(element).display).to.equal('block');
+
+          element.toggleLayoutDisplay(false);
+          expect(element.classList.contains('i-amphtml-display')).to.be.false;
+          expect(win.getComputedStyle(element).display).to.equal('none');
+
+          element.toggleLayoutDisplay(true);
+          expect(element.classList.contains('i-amphtml-display')).to.be.true;
+          expect(win.getComputedStyle(element).display).to.equal('block');
+        });
+  });
 
   it('getPlaceholder should return nothing', () => {
     expect(element.getPlaceholder()).to.be.null;
@@ -1344,21 +1384,49 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
   });
 
   it('toggleFallback should toggle unsupported class', () => {
-    const fallback = element.appendChild(createWithAttr('fallback'));
-    const resourcesSpy = sandbox.spy();
+    element.resource = {
+      getState: () => {return ResourceState.LAYOUT_COMPLETE;},
+    };
     element.resources_ = {
-      scheduleLayout: function(el, fb) {
+      scheduleLayout(el, fb) {
         if (el == element && fb == fallback) {
           resourcesSpy();
         }
       },
+      getResourceForElement: element => {
+        return element.resource;
+      },
     };
+    const fallback = element.appendChild(createWithAttr('fallback'));
+    const resourcesSpy = sandbox.spy();
     element.toggleFallback(true);
     expect(element).to.have.class('amp-notsupported');
     expect(resourcesSpy).to.be.calledOnce;
 
     element.toggleFallback(false);
     expect(element).to.not.have.class('amp-notsupported');
+  });
+
+  it('toggleFallback should not display fallback before element layout', () => {
+    let resourceState = ResourceState.NOT_LAID_OUT;
+    element.resource = {
+      getState: () => {return resourceState;},
+    };
+    element.resources_ = {
+      scheduleLayout: () => {},
+      getResourceForElement: element => {
+        return element.resource;
+      },
+    };
+    element.appendChild(createWithAttr('fallback'));
+    element.toggleFallback(true);
+    expect(element).to.not.have.class('amp-notsupported');
+    resourceState = ResourceState.READY_FOR_LAYOUT;
+    element.toggleFallback(true);
+    expect(element).to.not.have.class('amp-notsupported');
+    resourceState = ResourceState.LAYOUT_COMPLETE;
+    element.toggleFallback(true);
+    expect(element).to.have.class('amp-notsupported');
   });
 
   it('togglePlaceholder should NOT call in template', () => {
@@ -1962,15 +2030,15 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
 
         // Resolve body.
         markElementScheduledForTesting(win, 'element-1');
-        getService(win, 'e1', function() {
-          return 'fake1';
+        registerServiceBuilder(win, 'e1', function() {
+          return {str: 'fake1'};
         });
         doc.body = {};
         intervalCallback();
         return p1;
       }).then(service => {
-        expect(resolvedService).to.equal('fake1');
-        expect(service).to.equal('fake1');
+        expect(resolvedService).to.deep.equal({str: 'fake1'});
+        expect(service).to.deep.equal({str: 'fake1'});
       });
     });
 
@@ -1980,14 +2048,12 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
       const p1 = getElementServiceIfAvailable(win, 'e1', 'element-1');
       return Promise.resolve().then(() => {
         expect(intervalCallback).to.be.undefined;
-
-        // Resolve service.
-        getService(win, 'e1', function() {
-          return 'fake1';
+        registerServiceBuilder(win, 'e1', function() {
+          return {str: 'fake1'};
         });
         return p1;
       }).then(service => {
-        expect(service).to.equal('fake1');
+        expect(service).to.deep.equal({str: 'fake1'});
       });
     });
   });
@@ -2011,12 +2077,12 @@ describes.realWin('services', {
     const p1 = getElementService(env.win, 'e1', 'element-1');
     const p2 = getElementService(env.win, 'e1', 'element-1');
 
-    getService(env.win, 'e1', function() {
-      return 'from e1';
+    registerServiceBuilder(env.win, 'e1', function() {
+      return {str: 'from e1'};
     });
 
     return p1.then(s1 => {
-      expect(s1).to.equal('from e1');
+      expect(s1).to.deep.equal({str: 'from e1'});
       return p2.then(s2 => {
         expect(s1).to.equal(s2);
       });
@@ -2040,11 +2106,11 @@ describes.realWin('services', {
     markElementScheduledForTesting(env.win, 'element-1');
     const p1 = getElementServiceIfAvailable(env.win, 'e1', 'element-1');
     const p2 = getElementServiceIfAvailable(env.win, 'e2', 'not-available');
-    getService(env.win, 'e1', function() {
-      return 'from e1';
+    registerServiceBuilder(env.win, 'e1', function() {
+      return {str: 'from e1'};
     });
     return p1.then(s1 => {
-      expect(s1).to.equal('from e1');
+      expect(s1).to.deep.equal({str: 'from e1'});
       return p2.then(s2 => {
         expect(s2).to.be.null;
       });
@@ -2056,12 +2122,12 @@ describes.realWin('services', {
     const p1 = getElementServiceForDoc(env.ampdoc, 'e1', 'element-1');
     const p2 = getElementServiceForDoc(env.ampdoc, 'e1', 'element-1');
 
-    getService(env.win, 'e1', function() {
-      return 'from e1';
+    registerServiceBuilder(env.win, 'e1', function() {
+      return {str: 'from e1'};
     });
 
     return p1.then(s1 => {
-      expect(s1).to.equal('from e1');
+      expect(s1).to.deep.equal({str: 'from e1'});
       return p2.then(s2 => {
         expect(s1).to.equal(s2);
       });
@@ -2087,11 +2153,11 @@ describes.realWin('services', {
         env.ampdoc, 'e1', 'element-1');
     const p2 = getElementServiceIfAvailableForDoc(
         env.ampdoc, 'e2', 'not-available');
-    getService(env.win, 'e1', function() {
-      return 'from e1';
+    registerServiceBuilder(env.win, 'e1', function() {
+      return {str: 'from e1'};
     });
     return p1.then(s1 => {
-      expect(s1).to.equal('from e1');
+      expect(s1).to.deep.equal({str: 'from e1'});
       return p2.then(s2 => {
         expect(s2).to.be.null;
       });
@@ -2147,14 +2213,14 @@ describes.realWin('services', {
 
       // Resolve body.
       markElementScheduledForTesting(env.win, 'element-1');
-      getService(env.win, 'e1', function() {
-        return 'fake1';
+      registerServiceBuilder(env.win, 'e1', function() {
+        return {str: 'fake1'};
       });
       bodyResolver();
       return p1;
     }).then(service => {
-      expect(resolvedService).to.equal('fake1');
-      expect(service).to.equal('fake1');
+      expect(resolvedService).to.deep.equal({str: 'fake1'});
+      expect(service).to.deep.equal({str: 'fake1'});
     });
   });
 
@@ -2163,13 +2229,12 @@ describes.realWin('services', {
     const p1 = getElementServiceIfAvailableForDoc(
         env.ampdoc, 'e1', 'element-1');
     return Promise.resolve().then(() => {
-      // Resolve service.
-      getService(env.win, 'e1', function() {
-        return 'fake1';
+      registerServiceBuilder(env.win, 'e1', function() {
+        return {str: 'fake1'};
       });
       return p1;
     }).then(service => {
-      expect(service).to.equal('fake1');
+      expect(service).to.deep.equal({str: 'fake1'});
     });
   });
 });

@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-trust';
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
 import {actionServiceForDoc} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
+import {isConnectedNode} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getStyle, setStyle} from '../../../src/style';
 import {numeric} from '../../../src/transition';
@@ -157,13 +159,11 @@ export class AmpSlideScroll extends BaseSlides {
     // to it (such after pressing next) should be announced to the
     // user.
     this.slidesContainer_.setAttribute('aria-live', 'polite');
-
     // Snap point is buggy in IOS 10.3 (beta), so it is disabled in beta.
     // https://bugs.webkit.org/show_bug.cgi?id=169800
     if (this.shouldDisableCssSnap_) {
       this.slidesContainer_.classList.add('i-amphtml-slidescroll-no-snap');
     }
-
     // Workaround - https://bugs.webkit.org/show_bug.cgi?id=158821
     if (this.hasNativeSnapPoints_) {
       const start = this.win.document.createElement('div');
@@ -174,21 +174,26 @@ export class AmpSlideScroll extends BaseSlides {
       end.classList.add('i-amphtml-carousel-end-marker');
       this.slidesContainer_.appendChild(end);
     }
+    this.element.appendChild(this.slidesContainer_);
 
     this.slides_.forEach((slide, index) => {
       this.dataSlideIdArr_.push(
           slide.getAttribute('data-slide-id') || index.toString());
       this.setAsOwner(slide);
-      const slideWrapper = this.win.document.createElement('div');
       slide.classList.add('amp-carousel-slide');
-      slideWrapper.appendChild(slide);
-      slideWrapper.classList.add('i-amphtml-slide-item');
 
+      const slideWrapper = this.win.document.createElement('div');
+      slideWrapper.classList.add('i-amphtml-slide-item');
       this.slidesContainer_.appendChild(slideWrapper);
+
+      // Slides must only be re-parented to DOM-connected nodes to avoid
+      // errors when used in a shadow document (#9291).
+      dev().assert(isConnectedNode(slideWrapper),
+          'Slides must only be re-parented to connected nodes.');
+      slideWrapper.appendChild(slide);
+
       this.slideWrappers_.push(slideWrapper);
     });
-
-    this.element.appendChild(this.slidesContainer_);
 
     this.cancelTouchEvents_();
 
@@ -204,9 +209,9 @@ export class AmpSlideScroll extends BaseSlides {
     this.registerAction('goToSlide', invocation => {
       const args = invocation.args;
       if (args) {
-        this.showSlideWhenReady_(args['index']);
+        this.showSlideWhenReady(args['index']);
       }
-    });
+    }, ActionTrust.LOW);
   }
 
   /** @override */
@@ -218,7 +223,7 @@ export class AmpSlideScroll extends BaseSlides {
   mutatedAttributesCallback(mutations) {
     const slide = mutations['slide'];
     if (slide !== undefined) {
-      this.showSlideWhenReady_(slide);
+      this.showSlideWhenReady(slide);
     }
   }
 
@@ -489,9 +494,8 @@ export class AmpSlideScroll extends BaseSlides {
    * Parses given value as integer and shows the slide with that index value
    * when element has been laid out.
    * @param {*} value
-   * @private
    */
-  showSlideWhenReady_(value) {
+  showSlideWhenReady(value) {
     const index = parseInt(value, 10);
     if (isFinite(index) && index >= 0 && index < this.noOfSlides_) {
       // If we haven't been laid out yet, set `initialSlideIndex_` instead.
@@ -510,6 +514,7 @@ export class AmpSlideScroll extends BaseSlides {
    *     it available for display.
    * @note Element must be laid out.
    * @param {number} newIndex Index of the slide to be displayed.
+   * @return {boolean} true if the slide changed, otherwise false.
    * @private
    */
   showSlide_(newIndex) {
@@ -518,7 +523,7 @@ export class AmpSlideScroll extends BaseSlides {
     if (newIndex < 0 ||
         newIndex >= noOfSlides_ ||
         this.slideIndex_ == newIndex) {
-      return;
+      return false;
     }
     const prevIndex = (newIndex - 1 >= 0) ? newIndex - 1 :
         (this.shouldLoop) ? noOfSlides_ - 1 : null;
@@ -546,7 +551,7 @@ export class AmpSlideScroll extends BaseSlides {
         'noOfSlides': noOfSlides_,
       };
       dev().error(TAG, error);
-      return;
+      return false;
     }
 
     this.updateInViewport(newSlideInView, true);
@@ -570,6 +575,7 @@ export class AmpSlideScroll extends BaseSlides {
     this.slideIndex_ = newIndex;
     this.hideRestOfTheSlides_(showIndexArr);
     this.setControlsState();
+    return true;
   }
 
   /**
@@ -578,12 +584,16 @@ export class AmpSlideScroll extends BaseSlides {
    * @private
    */
   showSlideAndTriggerAction_(newIndex) {
-    this.showSlide_(newIndex);
+    const slideChanged = this.showSlide_(newIndex);
 
-    const name = 'slideChange';
-    const event =
-        createCustomEvent(this.win, `slidescroll.${name}`, {index: newIndex});
-    this.action_.trigger(this.element, name, event);
+    if (slideChanged) {
+      const name = 'slideChange';
+      const event =
+          createCustomEvent(this.win, `slidescroll.${name}`, {index: newIndex});
+      this.action_.trigger(this.element, name, event, ActionTrust.MEDIUM);
+
+      this.element.dispatchCustomEvent(name, {index: newIndex});
+    }
   }
 
   /**

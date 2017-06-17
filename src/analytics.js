@@ -38,7 +38,7 @@ export function analyticsForDoc(nodeOrDoc, loadAnalytics = false) {
   return (/** @type {!Promise<
             !../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
           >} */ (getElementServiceForDoc(
-                nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
+              nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
 }
 
 /**
@@ -49,28 +49,28 @@ export function analyticsForDocOrNull(nodeOrDoc) {
   return (/** @type {!Promise<
             ?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
           >} */ (getElementServiceIfAvailableForDoc(
-                nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
+              nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
 }
 
 /**
  * Helper method to trigger analytics event if amp-analytics is available.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Element} target
  * @param {string} eventType
  * @param {!Object<string, string>=} opt_vars A map of vars and their values.
  */
-export function triggerAnalyticsEvent(nodeOrDoc, eventType, opt_vars) {
-  analyticsForDocOrNull(nodeOrDoc).then(analytics => {
+export function triggerAnalyticsEvent(target, eventType, opt_vars) {
+  analyticsForDocOrNull(target).then(analytics => {
     if (!analytics) {
       return;
     }
-    analytics.triggerEvent(eventType, opt_vars);
+    analytics.triggerEventForTarget(target, eventType, opt_vars);
   });
 }
 
 /**
  * Method to create scoped analytics element for any element.
  * @param {!Element} parentElement
- * @param {!JSONType} config
+ * @param {!JsonObject} config
  * @param {boolean=} loadAnalytics
  * @return {!Element} created analytics element
  */

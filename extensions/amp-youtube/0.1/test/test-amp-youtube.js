@@ -146,12 +146,12 @@ describe('amp-youtube', function() {
 
       // Fake out the 404 image response dimensions of YT.
       Object.defineProperty(imgPlaceholder, 'naturalWidth', {
-        get: function() {
+        get() {
           return 120;
         },
       });
       Object.defineProperty(imgPlaceholder, 'naturalHeight', {
-        get: function() {
+        get() {
           return 90;
         },
       });
@@ -173,7 +173,7 @@ describe('amp-youtube', function() {
       const iframe = yt.querySelector('iframe');
       expect(iframe).to.not.be.null;
 
-      expect(yt.implementation_.playerState_).to.equal(0);
+      expect(yt.implementation_.playerState_).to.equal(-1);
 
       sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 1});
 
@@ -260,34 +260,41 @@ describe('amp-youtube', function() {
       const iframe = yt.querySelector('iframe');
 
       return Promise.resolve()
-      .then(() => {
-        const p = listenOncePromise(yt, VideoEvents.MUTED);
-        sendFakeInfoDeliveryMessage(yt, iframe, {muted: true});
-        return p;
-      })
-      .then(() => {
-        const p = listenOncePromise(yt, VideoEvents.PLAY);
-        sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 1});
-        return p;
-      })
-      .then(() => {
-        const p = listenOncePromise(yt, VideoEvents.PAUSE);
-        sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 2});
-        return p;
-      })
-      .then(() => {
-        const p = listenOncePromise(yt, VideoEvents.UNMUTED);
-        sendFakeInfoDeliveryMessage(yt, iframe, {muted: false});
-        return p;
-      }).then(() => {
+          .then(() => {
+            const p = listenOncePromise(yt, VideoEvents.MUTED);
+            sendFakeInfoDeliveryMessage(yt, iframe, {muted: true});
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(yt, VideoEvents.PLAY);
+            sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 1});
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(yt, VideoEvents.PAUSE);
+            sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 2});
+            return p;
+          })
+          .then(() => {
+        // Make sure pause is triggered when video stops
+            const p = listenOncePromise(yt, VideoEvents.PAUSE);
+            sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 1});
+            sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 0});
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(yt, VideoEvents.UNMUTED);
+            sendFakeInfoDeliveryMessage(yt, iframe, {muted: false});
+            return p;
+          }).then(() => {
         // Should not send the unmute event twice if already sent once.
-        const p = listenOncePromise(yt, VideoEvents.UNMUTED).then(() => {
-          assert.fail('Should not have dispatch unmute message twice');
-        });
-        sendFakeInfoDeliveryMessage(yt, iframe, {muted: false});
-        const successTimeout = timer.timeoutPromise(10, true);
-        return Promise.race([p, successTimeout]);
-      });
+            const p = listenOncePromise(yt, VideoEvents.UNMUTED).then(() => {
+              assert.fail('Should not have dispatch unmute message twice');
+            });
+            sendFakeInfoDeliveryMessage(yt, iframe, {muted: false});
+            const successTimeout = timer.promise(10);
+            return Promise.race([p, successTimeout]);
+          });
     });
   });
 

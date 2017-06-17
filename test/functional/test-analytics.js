@@ -36,8 +36,8 @@ describes.realWin('analytics', {amp: true}, env => {
     let triggerEventSpy;
 
     class MockInstrumentation {
-      triggerEvent(eventType, opt_vars) {
-        triggerEventSpy(eventType, opt_vars);
+      triggerEventForTarget(nodeOrDoc, eventType, opt_vars) {
+        triggerEventSpy(nodeOrDoc, eventType, opt_vars);
       }
     }
 
@@ -54,7 +54,7 @@ describes.realWin('analytics', {amp: true}, env => {
     });
 
     it('should not do anything if analytics is not installed', () => {
-      triggerAnalyticsEvent(ampdoc, 'hello');
+      triggerAnalyticsEvent(ampdoc.win.document, 'hello');
       return timer.promise(50).then(() => {
         expect(triggerEventSpy).to.have.not.been.called;
       });
@@ -62,13 +62,14 @@ describes.realWin('analytics', {amp: true}, env => {
 
     it('should trigger analytics event if analytics is installed', () => {
       registerServiceBuilderForDoc(
-        ampdoc, 'amp-analytics-instrumentation', MockInstrumentation);
+          ampdoc, 'amp-analytics-instrumentation', MockInstrumentation);
       // Force instantiation
       getServiceForDoc(ampdoc, 'amp-analytics-instrumentation');
-      triggerAnalyticsEvent(ampdoc, 'hello');
+      triggerAnalyticsEvent(ampdoc.win.document, 'hello');
       return timer.promise(50).then(() => {
         expect(triggerEventSpy).to.have.been.called;
-        expect(triggerEventSpy).to.have.been.calledWith('hello');
+        expect(triggerEventSpy).to.have.been.calledWith(
+            ampdoc.win.document, 'hello');
       });
     });
   });

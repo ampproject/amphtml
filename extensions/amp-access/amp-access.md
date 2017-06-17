@@ -1,6 +1,6 @@
-# <a name="amp-access-"></a> AMP Access Specification
+# <a name="amp-access-"></a> amp-access
 
-**This extension is under active development, and the version number of the specification section should provide guidance to its evolution.**
+[TOC]
 
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
@@ -22,10 +22,6 @@ limitations under the License.
   <tr>
     <td class="col-fourty"><strong>Description</strong></td>
     <td>AMP Access or “AMP paywall and subscription support” gives Publishers control over which content can be accessed by a Reader and with what restrictions, based on the Reader’s subscription status, number of views, and other factors.</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Availability</strong></td>
-    <td>Stable</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
@@ -107,7 +103,7 @@ Login Page is implemented and served by the Publisher and called by the AMP Runt
 
 Login Page is triggered when the Reader taps on the Login Link which can be placed by the Publisher anywhere in the document.
 
-## Specification v0.5
+## Specification v0.1
 
 ### Configuration
 
@@ -573,4 +569,4 @@ This section will cover a detailed explanation of the design underlying the amp-
 
 ## Validation
 
-See [amp-access rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-access/0.1/validator-amp-access.protoascii) in the AMP validator specification.
+See [amp-access rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-access/validator-amp-access.protoascii) in the AMP validator specification.

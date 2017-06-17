@@ -19,7 +19,6 @@ import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
 import {
   xhrServiceForTesting,
   fetchPolyfill,
-  FetchError,
   FetchResponse,
   assertSuccess,
 } from '../../src/service/xhr-impl';
@@ -198,10 +197,7 @@ describe('XHR', function() {
                 'AMP-Access-Control-Allow-Source-Origin',
             'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
           }, '{}');
-          return promise.then(() => 'SUCCESS', reason => 'ERROR: ' + reason)
-              .then(res => {
-                expect(res).to.equal('SUCCESS');
-              });
+          return promise;
         });
 
         it('should deny AMP origin for different origin in response', () => {
@@ -212,11 +208,11 @@ describe('XHR', function() {
                 'AMP-Access-Control-Allow-Source-Origin',
             'AMP-Access-Control-Allow-Source-Origin': 'https://other.com',
           }, '{}');
-          return promise.then(() => 'SUCCESS', reason => 'ERROR: ' + reason)
-              .then(res => {
-                expect(res).to.match(/ERROR/);
-                expect(res).to.match(/Returned AMP-Access-.* is not equal/);
-              });
+          return promise.then(() => {
+            throw new Error('UNREACHABLE');
+          }, res => {
+            expect(res).to.match(/Returned AMP-Access-.* is not equal/);
+          });
         });
 
         it('should require AMP origin in response for when request', () => {
@@ -224,11 +220,11 @@ describe('XHR', function() {
           requests[0].respond(200, {
             'Content-Type': 'application/json',
           }, '{}');
-          return promise.then(() => 'SUCCESS', reason => 'ERROR: ' + reason)
-              .then(res => {
-                expect(res).to.match(/ERROR/);
-                expect(res).to.match(/Response must contain/);
-              });
+          return promise.then(() => {
+            throw new Error('UNREACHABLE');
+          }, error => {
+            expect(error.message).to.contain('Response must contain');
+          });
         });
       });
     }
@@ -297,7 +293,7 @@ describe('XHR', function() {
         it('should reject if error', () => {
           mockXhr.status = 500;
           return assertSuccess(createResponseInstance('', mockXhr))
-              .should.be.rejectedWith(FetchError);
+              .should.be.rejected;
         });
 
         it('should include response in error', () => {
@@ -306,30 +302,6 @@ describe('XHR', function() {
               .catch(error => {
                 expect(error.response).to.be.defined;
                 expect(error.response.status).to.equal(500);
-              });
-        });
-
-        it('should parse json content when error', () => {
-          mockXhr.status = 500;
-          mockXhr.responseText = '{"a": "hello"}';
-          mockXhr.headers['Content-Type'] = 'application/json';
-          mockXhr.getResponseHeader = () => 'application/json';
-          return assertSuccess(createResponseInstance('{"a": 2}', mockXhr))
-              .catch(error => {
-                expect(error.responseJson).to.be.defined;
-                expect(error.responseJson.a).to.equal(2);
-              });
-        });
-
-        it('should parse json content with charset when error', () => {
-          mockXhr.status = 500;
-          mockXhr.responseText = '{"a": "hello"}';
-          mockXhr.headers['Content-Type'] = 'application/json; charset=utf-8';
-          mockXhr.getResponseHeader = () => 'application/json; charset=utf-8';
-          return assertSuccess(createResponseInstance('{"a": 2}', mockXhr))
-              .catch(error => {
-                expect(error.responseJson).to.be.defined;
-                expect(error.responseJson.a).to.equal(2);
               });
         });
 
@@ -344,40 +316,40 @@ describe('XHR', function() {
       });
 
       it('should do simple JSON fetch', () => {
-        return xhr.fetchJson('http://localhost:31862/get?k=v1').then(res => {
-          expect(res).to.exist;
-          expect(res['args']['k']).to.equal('v1');
-        });
+        return xhr.fetchJson('http://localhost:31862/get?k=v1')
+            .then(res => res.json())
+            .then(res => {
+              expect(res).to.exist;
+              expect(res['args']['k']).to.equal('v1');
+            });
       });
 
       it('should redirect fetch', () => {
         const url = 'http://localhost:31862/redirect-to?url=' + encodeURIComponent(
             'http://localhost:31862/get?k=v2');
-        return xhr.fetchJson(url, {ampCors: false}).then(res => {
-          expect(res).to.exist;
-          expect(res['args']['k']).to.equal('v2');
-        });
+        return xhr.fetchJson(url, {ampCors: false})
+            .then(res => res.json())
+            .then(res => {
+              expect(res).to.exist;
+              expect(res['args']['k']).to.equal('v2');
+            });
       });
 
       it('should fail fetch for 400-error', () => {
         const url = 'http://localhost:31862/status/404';
-        return xhr.fetchJson(url).then(unusedRes => {
-          return 'SUCCESS';
-        }, fetchError => {
-          return 'ERROR: ' + fetchError.error;
-        }).then(status => {
-          expect(status).to.match(/^ERROR:.*HTTP error 404/);
+        return xhr.fetchJson(url).then(() => {
+          throw new Error('UNREACHABLE');
+        }, error => {
+          expect(error.message).to.contain('HTTP error 404');
         });
       });
 
       it('should fail fetch for 500-error', () => {
-        const url = 'http://localhost:31862/status/500';
-        return xhr.fetchJson(url).then(unusedRes => {
-          return 'SUCCESS';
-        }, fetchError => {
-          return 'ERROR: ' + fetchError.error;
-        }).then(status => {
-          expect(status).to.match(/^ERROR.*HTTP error 500/);
+        const url = 'http://localhost:31862/status/500?CID=cid';
+        return xhr.fetchJson(url).then(() => {
+          throw new Error('UNREACHABLE');
+        }, error => {
+          expect(error.message).to.contain('HTTP error 500');
         });
       });
 
@@ -420,6 +392,18 @@ describe('XHR', function() {
             'AMP-Header=Value1&Access-Control-Expose-Headers=AMP-Header';
         return xhr.fetchAmpCors_(url, {ampCors: false}).then(res => {
           expect(res.headers.get('AMP-Header')).to.equal('Value1');
+        });
+      });
+
+      it('should omit request details for privacy', () => {
+        // NOTE THIS IS A BAD PORT ON PURPOSE.
+        return xhr.fetchJson('http://localhost:31863/status/500').then(() => {
+          throw new Error('UNREACHABLE');
+        }, error => {
+          const message = error.message;
+          expect(message).to.contain('http://localhost:31863');
+          expect(message).not.to.contain('status/500');
+          expect(message).not.to.contain('CID');
         });
       });
     });
@@ -499,7 +483,7 @@ describe('XHR', function() {
         }, '{"hello": "world"}');
         return promise.catch(e => {
           expect(e.message)
-              .to.match(/responseXML should exist/);
+              .to.contain('responseXML should exist');
         });
       });
     });
@@ -523,7 +507,9 @@ describe('XHR', function() {
           method: 'GET',
           headers: {'Accept': 'text/plain'},
         })).to.be.true;
-        return promise.then(text => {
+        return promise.then(res => {
+          return res.text();
+        }).then(text => {
           expect(text).to.equal(TEST_TEXT);
         });
       });
@@ -541,14 +527,16 @@ describe('XHR', function() {
           setupMockXhr();
           expect(requests[0]).to.be.undefined;
           const promise = xhr.fetch(
-            '/index.html').then(response => {
-              expect(response.headers.get('X-foo-header')).to.equal('foo data');
-              expect(response.headers.get('X-bar-header')).to.equal('bar data');
-              response.arrayBuffer().then(
-                bytes => utf8FromArrayBuffer(bytes)).then(text => {
-                  expect(text).to.equal(creative);
-                });
-            });
+              '/index.html').then(response => {
+                expect(response.headers.get('X-foo-header')).to
+                    .equal('foo data');
+                expect(response.headers.get('X-bar-header')).to
+                    .equal('bar data');
+                response.arrayBuffer().then(
+                    bytes => utf8FromArrayBuffer(bytes)).then(text => {
+                      expect(text).to.equal(creative);
+                    });
+              });
           requests[0].respond(200, {
             'Content-Type': 'text/xml',
             'Access-Control-Expose-Headers':
@@ -595,7 +583,7 @@ describe('XHR', function() {
           body: {
             hello: 'world',
           },
-        }).then(res => {
+        }).then(res => res.json()).then(res => {
           expect(res.json).to.jsonEqual({
             hello: 'world',
           });

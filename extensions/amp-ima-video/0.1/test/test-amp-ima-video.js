@@ -90,13 +90,13 @@ describe('amp-ima-video', () => {
         style: {
           display: '',
         },
-        removeEventListener: function() {},
+        removeEventListener() {},
       };
       const removeEventListenerSpy = sandbox.spy(
           bigPlayDivMock, 'removeEventListener');
-      const adDisplayContainerMock = {initialize: function() {}};
+      const adDisplayContainerMock = {initialize() {}};
       const initSpy = sandbox.spy(adDisplayContainerMock, 'initialize');
-      const videoPlayerMock = {load: function() {}};
+      const videoPlayerMock = {load() {}};
       const loadSpy = sandbox.spy(videoPlayerMock, 'load');
       //const playAdsSpy = sandbox.spy(imaVideoObj, 'playAds');
       //const playAdsFunc = imaVideoObj.playAds;
@@ -132,7 +132,8 @@ describe('amp-ima-video', () => {
         src: srcUrl,
         tag: adTagUrl,
       });
-      window.google = {
+      const mockGlobal = {};
+      mockGlobal.google = {
         ima: {
           ViewMode: {
             NORMAL: 'normal',
@@ -147,7 +148,7 @@ describe('amp-ima-video', () => {
       imaVideoObj.setAdsManagerForTesting(mockAdsManager);
       imaVideoObj.setVideoWidthAndHeightForTesting(100, 200);
 
-      imaVideoObj.playAds();
+      imaVideoObj.playAds(mockGlobal);
 
       expect(initSpy).to.be.calledWith(100, 200, 'normal');
       expect(startSpy).to.be.called;
@@ -189,7 +190,7 @@ describe('amp-ima-video', () => {
         src: srcUrl,
         tag: adTagUrl,
       });
-      const mockAdsLoader = {contentComplete: function() {}};
+      const mockAdsLoader = {contentComplete() {}};
       const completeSpy = sandbox.spy(mockAdsLoader, 'contentComplete');
       imaVideoObj.setAdsLoaderForTesting(mockAdsLoader);
 
@@ -213,30 +214,31 @@ describe('amp-ima-video', () => {
         tag: adTagUrl,
       });
       const mockAdsRenderingSettings = {};
-      window.google = {};
-      window.google.ima = {};
-      window.google.ima.AdsRenderingSettings = function() {
+      const mockGlobal = {};
+      mockGlobal.google = {};
+      mockGlobal.google.ima = {};
+      mockGlobal.google.ima.AdsRenderingSettings = function() {
         return mockAdsRenderingSettings;
       };
-      window.google.ima.UiElements = {
+      mockGlobal.google.ima.UiElements = {
         AD_ATTRIBUTION: 'adattr',
         COUNTDOWN: 'countdown',
       };
-      window.google.ima.AdErrorEvent = {};
-      window.google.ima.AdErrorEvent.Type = {
+      mockGlobal.google.ima.AdErrorEvent = {};
+      mockGlobal.google.ima.AdErrorEvent.Type = {
         AD_ERROR: 'aderror',
       };
-      window.google.ima.AdEvent = {};
-      window.google.ima.AdEvent.Type = {
+      mockGlobal.google.ima.AdEvent = {};
+      mockGlobal.google.ima.AdEvent.Type = {
         CONTENT_PAUSE_REQUESTED: 'cpr',
         CONTENT_RESUME_REQUESTED: 'crr',
       };
       const mockAdsManager = {
-        addEventListener: function() {},
-        setVolume: function() {},
+        addEventListener() {},
+        setVolume() {},
       };
       const mockAdsManagerLoadedEvent = {
-        getAdsManager: function() {
+        getAdsManager() {
           return mockAdsManager;
         },
       };
@@ -247,11 +249,11 @@ describe('amp-ima-video', () => {
       imaVideoObj.setVideoPlayerForTesting(mockVideoPlayer);
       imaVideoObj.setMuteAdsManagerOnLoadedForTesting(false);
 
-      imaVideoObj.onAdsManagerLoaded(mockAdsManagerLoadedEvent);
+      imaVideoObj.onAdsManagerLoaded(mockGlobal, mockAdsManagerLoadedEvent);
 
       expect(
           mockAdsRenderingSettings.restoreCustomPlaybackStateOnAdBreakComplete)
-              .to.be.true;
+          .to.be.true;
       expect(mockAdsRenderingSettings.uiElements)
           .to.eql(['adattr', 'countdown']);
       expect(amleSpy).to.be.calledWith(
@@ -275,30 +277,31 @@ describe('amp-ima-video', () => {
         tag: adTagUrl,
       });
       const mockAdsRenderingSettings = {};
-      window.google = {};
-      window.google.ima = {};
-      window.google.ima.AdsRenderingSettings = function() {
+      const mockGlobal = {};
+      mockGlobal.google = {};
+      mockGlobal.google.ima = {};
+      mockGlobal.google.ima.AdsRenderingSettings = function() {
         return mockAdsRenderingSettings;
       };
-      window.google.ima.UiElements = {
+      mockGlobal.google.ima.UiElements = {
         AD_ATTRIBUTION: 'adattr',
         COUNTDOWN: 'countdown',
       };
-      window.google.ima.AdErrorEvent = {};
-      window.google.ima.AdErrorEvent.Type = {
+      mockGlobal.google.ima.AdErrorEvent = {};
+      mockGlobal.google.ima.AdErrorEvent.Type = {
         AD_ERROR: 'aderror',
       };
-      window.google.ima.AdEvent = {};
-      window.google.ima.AdEvent.Type = {
+      mockGlobal.google.ima.AdEvent = {};
+      mockGlobal.google.ima.AdEvent.Type = {
         CONTENT_PAUSE_REQUESTED: 'cpr',
         CONTENT_RESUME_REQUESTED: 'crr',
       };
       const mockAdsManager = {
-        addEventListener: function() {},
-        setVolume: function() {},
+        addEventListener() {},
+        setVolume() {},
       };
       const mockAdsManagerLoadedEvent = {
-        getAdsManager: function() {
+        getAdsManager() {
           return mockAdsManager;
         },
       };
@@ -310,11 +313,11 @@ describe('amp-ima-video', () => {
       imaVideoObj.setVideoPlayerForTesting(mockVideoPlayer);
       imaVideoObj.setMuteAdsManagerOnLoadedForTesting(true);
 
-      imaVideoObj.onAdsManagerLoaded(mockAdsManagerLoadedEvent);
+      imaVideoObj.onAdsManagerLoaded(mockGlobal, mockAdsManagerLoadedEvent);
 
       expect(
           mockAdsRenderingSettings.restoreCustomPlaybackStateOnAdBreakComplete)
-              .to.be.true;
+          .to.be.true;
       expect(mockAdsRenderingSettings.uiElements)
           .to.eql(['adattr', 'countdown']);
       expect(amleSpy).to.be.calledWith(
@@ -360,7 +363,7 @@ describe('amp-ima-video', () => {
         src: srcUrl,
         tag: adTagUrl,
       });
-      const adsManagerMock = {destroy: function() {}};
+      const adsManagerMock = {destroy() {}};
       const destroySpy = sandbox.spy(adsManagerMock, 'destroy');
       //const playVideoSpy = sandbox.spy(imaVideoObj, 'playVideo');
       imaVideoObj.setAdsManagerForTesting(adsManagerMock);
@@ -398,7 +401,7 @@ describe('amp-ima-video', () => {
 
       expect(imaVideoObj.getPropertiesForTesting().adsActive).to.be.true;
       expect(removeEventListenerSpy).to.have.been.calledWith(
-        imaVideoObj.getPropertiesForTesting().interactEvent);
+          imaVideoObj.getPropertiesForTesting().interactEvent);
       expect(imaVideoObj.getPropertiesForTesting().adContainerDiv.style.display)
           .to.eql('block');
       expect(removeEventListenerSpy).to.have.been.calledWith('ended');
@@ -430,7 +433,8 @@ describe('amp-ima-video', () => {
       imaVideoObj.setVideoPlayerForTesting(videoMock);
       const adsManagerMock = {};
       adsManagerMock.resize = function() {};
-      window.google = {
+      const mockGlobal = {};
+      mockGlobal.google = {
         ima: {
           ViewMode: {
             NORMAL: 'normal',
@@ -441,7 +445,7 @@ describe('amp-ima-video', () => {
       imaVideoObj.setAdsManagerDimensionsOnLoadForTesting(100, 200);
       imaVideoObj.setAdsManagerForTesting(adsManagerMock);
 
-      imaVideoObj.onContentPauseRequested();
+      imaVideoObj.onContentPauseRequested(mockGlobal);
 
       expect(resizeSpy).to.have.been.calledWith(100, 200, 'normal');
       expect(imaVideoObj.getPropertiesForTesting().adsManagerWidthOnLoad)
@@ -451,7 +455,7 @@ describe('amp-ima-video', () => {
 
       expect(imaVideoObj.getPropertiesForTesting().adsActive).to.be.true;
       expect(removeEventListenerSpy).to.have.been.calledWith(
-        imaVideoObj.getPropertiesForTesting().interactEvent);
+          imaVideoObj.getPropertiesForTesting().interactEvent);
       expect(imaVideoObj.getPropertiesForTesting().adContainerDiv.style.display)
           .to.eql('block');
       expect(removeEventListenerSpy).to.have.been.calledWith('ended');
@@ -485,7 +489,7 @@ describe('amp-ima-video', () => {
 
       expect(imaVideoObj.getPropertiesForTesting().adsActive).to.be.false;
       expect(addEventListenerSpy).to.have.been.calledWith(
-        imaVideoObj.getPropertiesForTesting().interactEvent);
+          imaVideoObj.getPropertiesForTesting().interactEvent);
       expect(addEventListenerSpy).to.have.been.calledWith('ended');
       // TODO - Fix when I can spy on internals.
       //expect(playVideoSpy).to.have.been.called;
@@ -516,7 +520,7 @@ describe('amp-ima-video', () => {
 
       expect(imaVideoObj.getPropertiesForTesting().adsActive).to.be.false;
       expect(addEventListenerSpy).to.have.been.calledWith(
-        imaVideoObj.getPropertiesForTesting().interactEvent);
+          imaVideoObj.getPropertiesForTesting().interactEvent);
       expect(addEventListenerSpy).to.not.have.been.calledWith('ended');
       // TODO - Fix when I can spy on internals.
       //expect(playVideoSpy).to.have.been.called;
@@ -685,9 +689,9 @@ describe('amp-ima-video', () => {
       //expect(showControlsSpy).to.have.been.called;
       expect(
           imaVideoObj.getPropertiesForTesting().playPauseDiv.style.lineHeight)
-              .to.eql('1.4em');
+          .to.eql('1.4em');
       expect(imaVideoObj.getPropertiesForTesting().playPauseNode.textContent)
-        .to.eql(imaVideoObj.getPropertiesForTesting().pauseChars);
+          .to.eql(imaVideoObj.getPropertiesForTesting().pauseChars);
       expect(playSpy).to.have.been.called;
     });
   });
@@ -720,10 +724,10 @@ describe('amp-ima-video', () => {
       // TODO - Why doesn't this work?
       //expect(showControlsSpy).to.have.been.called;
       expect(imaVideoObj.getPropertiesForTesting().playPauseNode.textContent)
-        .to.eql(imaVideoObj.getPropertiesForTesting().playChar);
+          .to.eql(imaVideoObj.getPropertiesForTesting().playChar);
       expect(
           imaVideoObj.getPropertiesForTesting().playPauseDiv.style.lineHeight)
-              .to.eql('');
+          .to.eql('');
     });
   });
 
@@ -758,10 +762,10 @@ describe('amp-ima-video', () => {
       // TODO - Why doesn't this work?
       //expect(showControlsSpy).to.have.been.called;
       expect(imaVideoObj.getPropertiesForTesting().playPauseNode.textContent)
-        .to.eql(imaVideoObj.getPropertiesForTesting().playChar);
+          .to.eql(imaVideoObj.getPropertiesForTesting().playChar);
       expect(
           imaVideoObj.getPropertiesForTesting().playPauseDiv.style.lineHeight)
-              .to.eql('');
+          .to.eql('');
       expect(removeEventListenerSpy).to.have.been.called;
     });
   });

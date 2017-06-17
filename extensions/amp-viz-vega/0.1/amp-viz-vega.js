@@ -34,7 +34,7 @@ export class AmpVizVega extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?JSONType} */
+    /** @private {?JsonObject} */
     this.data_ = null;
 
     /** @private {?string} */
@@ -160,7 +160,7 @@ export class AmpVizVega extends AMP.BaseElement {
 
       return xhrFor(this.win).fetchJson(dev().assertString(this.src_), {
         requireAmpResponseSourceOrigin: false,
-      }).then(data => {
+      }).then(res => res.json()).then(data => {
         this.data_ = data;
       });
     }

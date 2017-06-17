@@ -18,16 +18,15 @@ import {BindExpressionResultDef} from './bind-expression';
 import {BindingDef} from './bind-evaluator';
 import {BindValidator} from './bind-validator';
 import {
-  ampFormServiceForDoc,
   resourcesForDoc,
   viewerForDoc,
 } from '../../../src/services';
 import {chunk, ChunkPriority} from '../../../src/chunk';
 import {dev, user} from '../../../src/log';
-import {deepMerge} from '../../../src/utils/object';
+import {dict, deepMerge} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {filterSplice} from '../../../src/utils/array';
-import {formOrNullForElement} from '../../../src/form';
+import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isObject, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
@@ -35,6 +34,7 @@ import {isFiniteNumber} from '../../../src/types';
 import {map} from '../../../src/utils/object';
 import {reportError} from '../../../src/error';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
+import {waitForBodyPromise} from '../../../src/dom';
 
 const TAG = 'amp-bind';
 
@@ -79,18 +79,22 @@ let BoundElementDef;
  */
 const BIND_ONLY_ATTRIBUTES = map({
   'AMP-CAROUSEL': ['slide'],
+  'AMP-LIST': ['state'],
   'AMP-SELECTOR': ['selected'],
 });
 
 /**
- * Bind is the service that handles the Bind lifecycle, from identifying
- * bindings in the document to scope mutations to reevaluating expressions.
+ * Bind is an ampdoc-scoped service that handles the Bind lifecycle, from
+ * scanning for bindings to evaluating expressions to mutating elements.
+ * @implements {../../../src/service.EmbeddableService}
  */
 export class Bind {
   /**
+   * If `opt_win` is provided, scans its document for bindings instead.
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Window=} opt_win
    */
-  constructor(ampdoc) {
+  constructor(ampdoc, opt_win) {
     // Allow integration test to access this class in testing mode.
     /** @const @private {boolean} */
     this.enabled_ = isBindEnabledFor(ampdoc.win);
@@ -101,6 +105,12 @@ export class Bind {
 
     /** @const @private {!Window} */
     this.win_ = ampdoc.win;
+
+    /**
+     * The window containing the document to scan.
+     * May differ from the `ampdoc`'s window e.g. in FIE.
+     * @const @private {!Window} */
+    this.localWin_ = opt_win || ampdoc.win;
 
     /** @private {!Array<BoundElementDef>} */
     this.boundElements_ = [];
@@ -120,26 +130,29 @@ export class Bind {
     /** @const @private {!./bind-validator.BindValidator} */
     this.validator_ = new BindValidator();
 
-    /** @const @private {!Object} */
-    this.scope_ = Object.create(null);
+    /** @const @private {!JsonObject} */
+    this.scope_ = dict();
 
     /** @const @private {!../../../src/service/resources-impl.Resources} */
     this.resources_ = resourcesForDoc(ampdoc);
-
-    /** @private {MutationObserver} */
-    this.mutationObserver_ = null;
 
     /** @const @private {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = viewerForDoc(this.ampdoc);
 
     /**
-     * Resolved when the service is fully initialized.
+     * Resolved when the service finishes scanning the document for bindings.
      * @const @private {Promise}
      */
     this.initializePromise_ = Promise.all([
-      this.ampdoc.whenReady(),
+      waitForBodyPromise(this.localWin_.document), // Wait for body.
       this.viewer_.whenFirstVisible(), // Don't initialize in prerender mode.
-    ]).then(() => this.initialize_());
+    ]).then(() => {
+      const rootNode = dev().assertElement(this.localWin_.document.body);
+      return this.initialize_(rootNode);
+    });
+
+    /** @const @private {!Function} */
+    this.boundOnTemplateRendered_ = this.onTemplateRendered_.bind(this);
 
     /**
      * @private {?Promise}
@@ -147,9 +160,15 @@ export class Bind {
     this.setStatePromise_ = null;
 
     // Expose for testing on dev.
-    if (getMode().localDev) {
+    if (getMode().development || getMode().localDev) {
       AMP.printState = this.printState_.bind(this);
     }
+  }
+
+  /** @override */
+  adoptEmbedWindow(embedWin) {
+    installServiceInEmbedScope(
+        embedWin, 'bind', new Bind(this.ampdoc, embedWin));
   }
 
   /**
@@ -202,8 +221,7 @@ export class Bind {
     this.setStatePromise_ = this.initializePromise_.then(() => {
       // Allow expression to reference current scope in addition to event scope.
       Object.assign(scope, this.scope_);
-      return invokeWebWorker(
-          this.win_, 'bind.evaluateExpression', [expression, scope]);
+      return this.ww_('bind.evaluateExpression', [expression, scope]);
     }).then(returnValue => {
       const {result, error} = returnValue;
       if (error) {
@@ -220,12 +238,17 @@ export class Bind {
 
   /**
    * Scans the ampdoc for bindings and creates the expression evaluator.
+   * @param {!Node} rootNode
    * @return {!Promise}
    * @private
    */
-  initialize_() {
+  initialize_(rootNode) {
     dev().fine(TAG, 'Scanning DOM for bindings...');
-    let promise = this.addBindingsForNode_(this.ampdoc.getBody());
+    let promise = this.addBindingsForNode_(rootNode).then(() => {
+      // Listen for template renders (e.g. amp-list) to rescan for bindings.
+      rootNode.addEventListener(
+          'amp:template-rendered', this.boundOnTemplateRendered_);
+    });
     // Check default values against initial expression results in development.
     if (getMode().development) {
       // Check default values against initial expression results.
@@ -262,12 +285,12 @@ export class Bind {
   }
 
   /**
-   * Scans the substree rooted at `node` and adds bindings for nodes
+   * Scans `node` and its descendants and adds bindings for nodes
    * that contain bindable elements. This function is not idempotent.
    *
    * Returns a promise that resolves after bindings have been added.
    *
-   * @param {!Element} node
+   * @param {!Node} node
    * @return {!Promise}
    * @private
    */
@@ -288,16 +311,16 @@ export class Bind {
           `${boundElements.length} elements.`);
 
       if (limitExceeded) {
-        user().error(TAG, `Maximum number of bindings reached ` +
+        user().error(TAG, 'Maximum number of bindings reached ' +
             `(${this.maxNumberOfBindings_}). Additional elements with ` +
-            `bindings will be ignored.`);
+            'bindings will be ignored.');
       }
 
       if (bindings.length == 0) {
         return {};
       } else {
-        dev().fine(TAG, `Asking worker to parse expressions...`);
-        return invokeWebWorker(this.win_, 'bind.addBindings', [bindings]);
+        dev().fine(TAG, 'Asking worker to parse expressions...');
+        return this.ww_('bind.addBindings', [bindings]);
       }
     }).then(parseErrors => {
       // Report each parse error.
@@ -313,7 +336,7 @@ export class Bind {
         }
       });
 
-      dev().fine(TAG, `Finished parsing expressions with ` +
+      dev().fine(TAG, 'Finished parsing expressions with ' +
           `${Object.keys(parseErrors).length} errors.`);
     });
   }
@@ -323,7 +346,7 @@ export class Bind {
    *
    * Returns a promise that resolves after bindings have been removed.
    *
-   * @param {!Element} node
+   * @param {!Node} node
    * @return {!Promise}
    * @private
    */
@@ -350,8 +373,8 @@ export class Bind {
 
     // Remove the bindings from the evaluator.
     if (deletedExpressions.length > 0) {
-      dev().fine(TAG, `Asking worker to remove expressions...`);
-      return invokeWebWorker(this.win_,
+      dev().fine(TAG, 'Asking worker to remove expressions...');
+      return this.ww_(
           'bind.removeBindingsWithExpressionStrings', [deletedExpressions]);
     } else {
       return Promise.resolve();
@@ -382,7 +405,7 @@ export class Bind {
     const expressionToElements = Object.create(null);
 
     const doc = dev().assert(
-      node.ownerDocument, 'ownerDocument is null.');
+        node.ownerDocument, 'ownerDocument is null.');
     const walker = doc.createTreeWalker(node, NodeFilter.SHOW_ELEMENT);
 
     // Set to true if number of bindings in `node` exceeds `limit`.
@@ -397,10 +420,6 @@ export class Bind {
       }
       const element = dev().assertElement(node);
       const tagName = element.tagName;
-
-      // Observe elements that add/remove children during lifecycle
-      // so we can add/remove bindings as necessary in response.
-      this.observeDynamicChildrenOf_(element);
 
       let boundProperties = this.scanElement_(element);
       // Stop scanning once |limit| bindings are reached.
@@ -496,38 +515,6 @@ export class Bind {
     return null;
   }
 
-  /**
-   * Observes the dynamic children of `element` for mutations, if any,
-   * for rescanning for bindable attributes.
-   * @param {!Element} element
-   * @private
-   */
-  observeDynamicChildrenOf_(element) {
-    if (typeof element.getDynamicElementContainers === 'function') {
-      element.getDynamicElementContainers().forEach(this.observeElement_, this);
-    } else if (element.tagName === 'FORM') {
-      ampFormServiceForDoc(this.ampdoc).then(ampFormService => {
-        return ampFormService.whenInitialized();
-      }).then(() => {
-        const form = formOrNullForElement(element);
-        dev().assert(form, 'Could not find form implementation for element.');
-        form.getDynamicElementContainers().forEach(this.observeElement_, this);
-      });
-    }
-  }
-
-  /**
-   * Observes `element` for child mutations.
-   * @param {!Element} element
-   * @private
-   */
-  observeElement_(element) {
-    if (!this.mutationObserver_) {
-      this.mutationObserver_ =
-          new MutationObserver(this.onMutationsObserved_.bind(this));
-    }
-    this.mutationObserver_.observe(element, {childList: true});
-  }
 
   /**
    * Asynchronously reevaluates all expressions and returns a map of
@@ -539,8 +526,7 @@ export class Bind {
    */
   evaluate_() {
     user().fine(TAG, 'Asking worker to re-evaluate expressions...');
-    const evaluatePromise =
-        invokeWebWorker(this.win_, 'bind.evaluateBindings', [this.scope_]);
+    const evaluatePromise = this.ww_('bind.evaluateBindings', [this.scope_]);
     return evaluatePromise.then(returnValue => {
       const {results, errors} = returnValue;
       // Report evaluation errors.
@@ -599,11 +585,11 @@ export class Bind {
       const newValue = results[expressionString];
       if (newValue === undefined ||
           this.shallowEquals_(newValue, previousResult)) {
-        user().fine(TAG, `Expression result unchanged or missing: ` +
+        user().fine(TAG, 'Expression result unchanged or missing: ' +
             `"${expressionString}"`);
       } else {
         boundProperty.previousResult = newValue;
-        user().fine(TAG, `New expression result: ` +
+        user().fine(TAG, 'New expression result: ' +
             `"${expressionString}" -> ${newValue}`);
         updates.push({boundProperty, newValue});
       }
@@ -631,7 +617,7 @@ export class Bind {
         return;
       }
       const promise = this.resources_.mutateElement(element, () => {
-        const mutations = {};
+        const mutations = dict();
         let width, height;
 
         updates.forEach(update => {
@@ -708,10 +694,22 @@ export class Bind {
         break;
 
       default:
+        // Some input elements treat some of their attributes as initial values.
+        // Once the user interacts with these elements, the JS properties
+        // underlying these attributes must be updated for the change to be
+        // visible to the user.
+        const updateElementProperty =
+            element.tagName == 'INPUT' && property in element;
         const oldValue = element.getAttribute(property);
 
         let attributeChanged = false;
         if (typeof newValue === 'boolean') {
+          if (updateElementProperty && element[property] !== newValue) {
+            // Property value *must* be read before the attribute is changed.
+            // Before user interaction, attribute updates affect the property.
+            element[property] = newValue;
+            attributeChanged = true;
+          }
           if (newValue && oldValue !== '') {
             element.setAttribute(property, '');
             attributeChanged = true;
@@ -735,6 +733,9 @@ export class Bind {
           // Rewriting can fail due to e.g. invalid URL.
           if (rewrittenNewValue !== undefined) {
             element.setAttribute(property, rewrittenNewValue);
+            if (updateElementProperty) {
+              element[property] = rewrittenNewValue;
+            }
             attributeChanged = true;
           }
         }
@@ -820,52 +821,31 @@ export class Bind {
       const err = user().createError(`${TAG}: ` +
         `Default value for [${property}] does not match first expression ` +
         `result (${expectedValue}). This can result in unexpected behavior ` +
-        `after the next state change.`);
+        'after the next state change.');
       reportError(err, element);
     }
   }
 
   /**
-   * Respond to observed mutations. Adds all bindings for newly added elements
-   * removes bindings for removed elements, then immediately applies the current
-   * scope to the new bindings.
-   *
-   * @param mutations {Array<MutationRecord>}
-   * @private
+   * @param {!Event} event
    */
-  onMutationsObserved_(mutations) {
-    mutations.forEach(mutation => {
-      // Add bindings for new nodes first to ensure that a binding isn't removed
-      // and then subsequently re-added.
-      const addPromises = [];
-      const addedNodes = mutation.addedNodes;
-      for (let i = 0; i < addedNodes.length; i++) {
-        const addedNode = addedNodes[i];
-        if (addedNode.nodeType == Node.ELEMENT_NODE) {
-          const addedElement = dev().assertElement(addedNode);
-          addPromises.push(this.addBindingsForNode_(addedElement));
-        }
-      }
-      const mutationPromise = Promise.all(addPromises).then(() => {
-        const removePromises = [];
-        const removedNodes = mutation.removedNodes;
-        for (let i = 0; i < removedNodes.length; i++) {
-          const removedNode = removedNodes[i];
-          if (removedNode.nodeType == Node.ELEMENT_NODE) {
-            const removedElement = dev().assertElement(removedNode);
-            removePromises.push(this.removeBindingsForNode_(removedElement));
-          }
-        }
-        return Promise.all(removePromises);
-      });
-      // TODO(kmh287): Come up with a strategy for evaluating new bindings
-      // added here that mitigates FOUC.
-      if (getMode().test) {
-        mutationPromise.then(() => {
-          this.dispatchEventForTesting_('amp:bind:mutated');
-        });
-      }
+  onTemplateRendered_(event) {
+    const templateContainer = dev().assertElement(event.target);
+    this.removeBindingsForNode_(templateContainer).then(() => {
+      return this.addBindingsForNode_(templateContainer);
+    }).then(() => {
+      this.dispatchEventForTesting_('amp:bind:rescan-template');
     });
+  }
+
+  /**
+   * Helper for invoking a method on web worker.
+   * @param {string} method
+   * @param {!Array=} opt_args
+   * @return {!Promise}
+   */
+  ww_(method, opt_args) {
+    return invokeWebWorker(this.win_, method, opt_args, this.localWin_);
   }
 
   /**
@@ -955,7 +935,7 @@ export class Bind {
       }
       return value;
     });
-    dev().info(TAG, s);
+    user().info(TAG, s);
   }
 
   /**
@@ -985,7 +965,14 @@ export class Bind {
    */
   dispatchEventForTesting_(name) {
     if (getMode().test) {
-      this.win_.dispatchEvent(new Event(name));
+      let event;
+      if (typeof this.localWin_.Event === 'function') {
+        event = new Event(name, {bubbles: true, cancelable: true});
+      } else {
+        event = this.localWin_.document.createEvent('Event');
+        event.initEvent(name, /* bubbles */ true, /* cancelable */ true);
+      }
+      this.localWin_.dispatchEvent(event);
     }
   }
 }

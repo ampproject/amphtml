@@ -13,18 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 /**
  * @fileoverview Creates an http server to handle static
  * files and list directories for use with the gulp live server
  */
-var app = require(require.resolve('./app.js'));
-var webserver = require('gulp-webserver');
-var gulp = require('gulp-help')(require('gulp'));
-var morgan = require('morgan');
-var host = process.env.SERVE_HOST;
-var port = process.env.SERVE_PORT;
-var useHttps = process.env.SERVE_USEHTTPS == 'true' ? true : false;
+const app = require(require.resolve('./app.js'));
+const webserver = require('gulp-webserver');
+const gulp = require('gulp-help')(require('gulp'));
+const morgan = require('morgan');
+const host = process.env.SERVE_HOST;
+const port = process.env.SERVE_PORT;
+const useHttps = process.env.SERVE_USEHTTPS == 'true' ? true : false;
 
 // Start gulp webserver
 gulp.src(process.cwd())

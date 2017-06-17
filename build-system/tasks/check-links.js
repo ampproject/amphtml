@@ -13,11 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 var argv = require('minimist')(process.argv.slice(2));
+var path = require('path');
 var BBPromise = require('bluebird');
 var chalk = require('chalk');
 var fs = require('fs-extra');
+var getStdout = require('../exec.js').getStdout;
 var gulp = require('gulp-help')(require('gulp'));
 var markdownLinkCheck = BBPromise.promisify(require('markdown-link-check'));
 var path = require('path');
@@ -46,26 +49,30 @@ function checkLinks() {
     var deadLinksFound = false;
     var filesWithDeadLinks = [];
     allResults.map(function(results, index) {
+      // Skip files that were deleted by the PR.
+      if (!fs.existsSync(markdownFiles[index])) {
+        return;
+      }
       var deadLinksFoundInFile = false;
-      util.log(
-          'Checking links in',
-          util.colors.magenta(markdownFiles[index]), '...');
       results.forEach(function (result) {
+        // Skip links to files that were introduced by the PR.
+        if (isLinkToFileIntroducedByPR(result.link)) {
+          return;
+        }
         if(result.status === 'dead') {
           deadLinksFound = true;
           deadLinksFoundInFile = true;
           util.log('[%s] %s', chalk.red('✖'), result.link);
-        } else {
-          util.log('[%s] %s', chalk.green('✓'), result.link);
         }
       });
       if(deadLinksFoundInFile) {
         filesWithDeadLinks.push(markdownFiles[index]);
         util.log(
-            util.colors.yellow('WARNING'),
+            util.colors.red('ERROR'),
             'Possible dead link(s) found in',
             util.colors.magenta(markdownFiles[index]),
-            '(please update if necessary).');
+            '(please update, or whitelist in',
+            'build-system/tasks/check-links.js).');
       } else {
         util.log(
             util.colors.green('SUCCESS'),
@@ -75,10 +82,12 @@ function checkLinks() {
     });
     if (deadLinksFound) {
         util.log(
-            util.colors.yellow('WARNING'),
-            'Possible dead link(s) found. Please update',
+            util.colors.red('ERROR'),
+            'Possible dead link(s) found in this PR.',
+            'Please update',
             util.colors.magenta(filesWithDeadLinks.join(',')),
-            'if necessary.');
+            'or whitelist in build-system/tasks/check-links.js');
+            process.exit(1);
     } else {
         util.log(
             util.colors.green('SUCCESS'),
@@ -88,22 +97,40 @@ function checkLinks() {
 }
 
 /**
- * Filters out markdown elements that contain localhost links.
- * TODO(rsimha-amp): Simplify this into a single regex.
+ * Determines if a link points to a file added, copied, or renamed in the PR.
+ *
+ * @param {string} link Link being tested.
+ * @return {boolean} True if the link points to a file introduced by the PR.
+ */
+function isLinkToFileIntroducedByPR(link) {
+  var filesAdded =
+      getStdout(`git diff --name-only --diff-filter=ARC master...HEAD`)
+      .trim().split('\n');
+  return filesAdded.some(function(file) {
+    return (file.length > 0 && link.includes(path.parse(file).base));
+  });
+}
+
+/**
+ * Filters out whitelisted links before running the link checker.
  *
  * @param {string} markdown Original markdown.
- * @return {string} Markdown after filtering out localhost links.
+ * @return {string} Markdown after filtering out whitelisted links.
  */
-function filterLocalhostLinks(markdown) {
-  var localhostPattern = 'http:\/\/localhost:8000';
-  var parenLinks = new RegExp('\\('+ localhostPattern + '[^\\)]*\\)', 'g');
-  var bracketLinks = new RegExp('\\['+ localhostPattern + '[^\\]]*\\]', 'g');
-  var rawLinks = new RegExp(localhostPattern, 'g');
-
+function filterWhitelistedLinks(markdown) {
   var filteredMarkdown = markdown;
-  filteredMarkdown = filteredMarkdown.replace(parenLinks, '');
-  filteredMarkdown = filteredMarkdown.replace(bracketLinks, '');
-  filteredMarkdown = filteredMarkdown.replace(rawLinks, '');
+
+  // localhost links optionally preceded by ( or [ (not served on Travis)
+  filteredMarkdown =
+      filteredMarkdown.replace(/(\(|\[)?http:\/\/localhost:8000/g, '');
+
+  // Links in script tags (illustrative, and not always valid)
+  filteredMarkdown = filteredMarkdown.replace(/src="http.*?"/g, '');
+
+  // Direct links to the https://cdn.ampproject.org domain (not a valid page)
+  filteredMarkdown =
+      filteredMarkdown.replace(/https:\/\/cdn.ampproject.org(?!\/)/g, '');
+
   return filteredMarkdown;
 }
 
@@ -115,8 +142,12 @@ function filterLocalhostLinks(markdown) {
  * @return {Promise} Used to wait until the async link checker is done.
  */
 function runLinkChecker(markdownFile) {
+  // Skip files that were deleted by the PR.
+  if (!fs.existsSync(markdownFile)) {
+    return Promise.resolve();
+  }
   var markdown = fs.readFileSync(markdownFile).toString();
-  var filteredMarkdown = filterLocalhostLinks(markdown);
+  var filteredMarkdown = filterWhitelistedLinks(markdown);
   var opts = {
     baseUrl : 'file://' + path.dirname(path.resolve((markdownFile)))
   };

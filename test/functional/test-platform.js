@@ -93,7 +93,7 @@ describe('Platform', () => {
     isIos = true;
     isSafari = true;
     isWebKit = true;
-    majorVersion = 0;
+    majorVersion = 9;
     iosVersion = '9.3';
     iosMajorVersion = 9;
     testUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 9_3 like Mac OS X)' +
@@ -161,6 +161,18 @@ describe('Platform', () => {
     majorVersion = 40;
     testUserAgent('Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) ' +
         'Gecko/20100101 Firefox/40.1');
+  });
+
+  it('Firefox ios', () => {
+    isIos = true;
+    isFirefox = true;
+    isWebKit = true;
+    majorVersion = 7;
+    iosVersion = '10.3.1';
+    iosMajorVersion = 10;
+    testUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X)' +
+        ' AppleWebKit/603.1.30 (KHTML, like Gecko) FxiOS/7.5b3349' +
+        ' Mobile/14E304 Safari/603.1.30');
   });
 
   it('IE', () => {
