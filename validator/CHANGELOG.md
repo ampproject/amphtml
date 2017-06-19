@@ -32,6 +32,8 @@ mention any release notes since the last change as well as the version numbers.
 
 ### 11:00 PM, June 16, 2017 UTC
 
+**Rolled Back**
+
 Validator Version 234
 Spec Version 433
 
