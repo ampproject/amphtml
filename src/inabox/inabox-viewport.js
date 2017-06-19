@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {childElementByTag} from '../../src/dom.js';
+import {getFixedContainer} from '../../src/full-overlay-frame-child-helper';
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
 import {viewerForDoc} from '../services';
 import {Viewport, ViewportBindingDef} from '../service/viewport-impl';
@@ -33,19 +33,6 @@ import {px, setStyles} from '../../src/style';
 
 /** @const {string} */
 const TAG = 'inabox-viewport';
-
-
-/**
- * @param {!HTMLBodyElement} bodyElement
- * @return {!Element}
- * @visibleForTesting
- */
- // TODO(alanorozco):
-//   Move this where it makes sense
-export function getFixedContainer(bodyElement) {
-  return dev().assertElement(childElementByTag(
-      dev().assertElement(bodyElement), 'amp-ad-banner'));
-}
 
 
 /** @visibleForTesting */
