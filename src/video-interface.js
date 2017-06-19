@@ -142,6 +142,15 @@ export const VideoAttributes = {
    *
    */
   AUTOPLAY: 'autoplay',
+  /**
+  * NOTE: Experimental
+  * dock
+  *
+  * Setting the `autoplay` attribute on the component makes the video minimize
+  * to the corner when scrolled
+  * out of view and has already been interacted with.
+  */
+  DOCK: 'dock',
 };
 
 

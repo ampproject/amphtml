@@ -111,6 +111,124 @@ export function runVideoPlayerIntegrationTests(
     afterEach(cleanUp);
   });
 
+  describe.configure().retryOnSaucelabs().run('Video Docking', function() {
+    this.timeout(TIMEOUT);
+
+    describe('General Behavior', () => {
+      it('should have class when attribute is set (autoplay)', function() {
+        return getVideoPlayer({outsideView: false, autoplay: true, dock: true}).then(r => {
+          return poll('polling for video build', () => {
+            return r.video.classList.contains('i-amphtml-dockable-video');
+          }, undefined, TIMEOUT);
+        });
+      });
+
+      it('should have class when attribute is set (no-autoplay)', function() {
+        return getVideoPlayer({outsideView: false, autoplay: false, dock: true}).then(r => {
+          return poll('polling for video build', () => {
+            return r.video.classList.contains('i-amphtml-dockable-video');
+          }, undefined, TIMEOUT);
+        });
+      });
+    });
+
+    describe('without-autoplay', () => {
+      it('should minimize when out of viewport', function() {
+        let viewport;
+        return getVideoPlayer({outsideView: false, autoplay: false, dock: true}).then(r => {
+          const playButton = createButton(r, 'play');
+          viewport = r.video.implementation_.getViewport();
+          playButton.click();
+          // scroll to the bottom, make video fully visible
+          viewport.scrollIntoView(r.video);
+          return listenOncePromise(r.video, VideoEvents.PLAY).then(() => {
+            viewport.setScrollTop(0);
+            const insideElement = r.video.querySelector('video, iframe');
+            const insideClasses = insideElement.classList;
+            expect(
+              insideClasses.contains('i-amphtml-dockable-video-minimizing')
+            ).to.be.true;
+            expect(
+              insideElement.offsetWidth
+            ).to.be.at.most(r.video.offsetWidth);
+          });
+        });
+      });
+    });
+
+    describe('with-autoplay', () => {
+      it('should minimize when out of viewport', function() {
+        let viewport;
+        return getVideoPlayer({outsideView: false, autoplay: true, dock: true}).then(r => {
+          const playButton = createButton(r, 'play');
+          viewport = r.video.implementation_.getViewport();
+          playButton.click();
+          // scroll to the bottom, make video fully visible
+          viewport.scrollIntoView(r.video);
+
+          const insideElement = r.video.querySelector('video, iframe');
+          const insideClasses = insideElement.classList;
+
+          return listenOncePromise(r.video, VideoEvents.PLAY).then(() => {
+            viewport.setScrollTop(0);
+            expect(
+              insideClasses.contains('i-amphtml-dockable-video-minimizing')
+            ).to.be.true;
+            expect(
+              insideElement.offsetWidth
+            ).to.be.at.most(r.video.offsetWidth);
+          });
+        });
+      });
+
+      it('should only minimize when video is manually playing', function() {
+        let viewport;
+        return getVideoPlayer({outsideView: false, autoplay: true, dock: true}).then(r => {
+          const playButton = createButton(r, 'play');
+          viewport = r.video.implementation_.getViewport();
+          // scroll to the bottom, make video fully visible
+          viewport.scrollIntoView(r.video);
+          return listenOncePromise(r.video, VideoEvents.PLAY).then(() => {
+            viewport.setScrollTop(0);
+            const insideElement = r.video.querySelector('video, iframe');
+            const insideClasses = insideElement.classList;
+            expect(
+              insideClasses.contains('i-amphtml-dockable-video-minimizing')
+            ).to.be.false;
+            expect(
+              insideElement.offsetWidth
+            ).to.equal(r.video.offsetWidth);
+          });
+        });
+      });
+    });
+
+    function createButton(r, action) {
+      const button = r.fixture.doc.createElement('button');
+      button.setAttribute('on', 'tap:myVideo.' + action);
+      r.fixture.doc.body.appendChild(button);
+      return button;
+    }
+
+// Although these tests are not about autoplay, we can ony run them in
+// browsers that do support autoplay, this is because a synthetic click
+// event will not be considered a user-action and mobile browsers that
+// don't support muted autoplay will block it. In real life, the click
+// would be considered a user-initiated action, but no way to do that in a
+// scripted test environment.
+    before(function() {
+      this.timeout(TIMEOUT);
+  // Skip autoplay tests if browser does not support autoplay.
+      return supportsAutoplay(window, false).then(supportsAutoplay => {
+        if (!supportsAutoplay) {
+          this.skip();
+        }
+      });
+    });
+
+    afterEach(cleanUp);
+  });
+
   describe.configure().retryOnSaucelabs().run('Autoplay', function() {
     this.timeout(TIMEOUT);
     describe('play/pause', () => {
@@ -228,6 +346,9 @@ export function runVideoPlayerIntegrationTests(
           const video = createVideoElementFunc(fixture);
           if (options.autoplay) {
             video.setAttribute('autoplay', '');
+          }
+          if (options.dock) {
+            video.setAttribute('dock', '');
           }
           video.setAttribute('id', 'myVideo');
           video.setAttribute('controls', '');

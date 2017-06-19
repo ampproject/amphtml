@@ -12,115 +12,90 @@
       margin: 0;
       font-family: 'Georgia', Serif;
     }
-
     .brand-logo {
       font-family: 'Open Sans';
     }
-
     .ad-container {
       display: flex;
       justify-content: center;
     }
-
     .content-container p {
       line-height: 24px;
     }
-
     header,
     .article-body {
       padding: 15px;
     }
-
     /* In the shadow-doc mode, the parent shell already has header and nav. */
     .amp-shadow header {
       display: none;
     }
-
     .lightbox {
       background: #222;
     }
-
     .full-bleed {
       margin: 0 -15px;
     }
-
     .lightbox-content {
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-
       display: flex;
       flex-direction: column;
       flex-wrap: nowrap;
       justify-content: center;
       align-items: center;
     }
-
     .lightbox-content p {
       color: #fff;
       padding: 15px;
     }
-
     .lightbox amp-img {
       width: 100%;
     }
-
     figure {
       margin: 0;
     }
-
     figcaption {
       color: #6f757a;
       padding: 15px 0;
       font-size: .9em;
     }
-
     .author {
       display: flex;
       align-items: center;
-
       background: #f4f4f4;
       padding: 0 15px;
-
       font-size: .8em;
-
       border: solid #dcdcdc;
       border-width: 1px 0;
     }
-
     .header-time {
       color: #a8a3ae;
       font-family: 'Roboto';
       font-size: 12px;
     }
-
     .author p {
       margin: 5px;
     }
-
     .byline {
       font-family: 'Roboto';
       display: inline-block;
     }
-
     .byline p {
       line-height: normal;
     }
-
     .byline .brand {
       color: #6f757a;
     }
-
     .standfirst {
       color: #6f757a;
     }
-
     .mailto {
       text-decoration: none;
     }
-
     #author-avatar {
       margin: 10px;
       border: 5px solid #fff;
@@ -128,12 +103,10 @@
       height: 50px;
       border-radius: 50%;
     }
-
     h1 {
       margin: 5px 0;
       font-weight: normal;
     }
-
     footer {
       display: flex;
       align-items: center;
@@ -142,48 +115,38 @@
       background: #f4f4f4;
       margin-bottom: 20px;
     }
-
     hr {
       margin: 0;
     }
-
     amp-app-banner {
       padding: 10px;
     }
-
     amp-app-banner .content {
       display: flex;
       align-items: center;
       justify-content: center;
     }
-
     amp-img {
       background-color: #f4f4f4;
     }
-
     .slot-fallback {
       padding: 16px;
       background: yellow;
     }
-
     amp-app-banner amp-img {
       background-color: transparent;
       margin-right: 15px
     }
-
     amp-app-banner .description {
       margin-right: 20px;
     }
-
     amp-app-banner h5 {
       margin: 0;
     }
-
     amp-app-banner p {
       font-size: 10px;
       margin: 3px 0;
     }
-
     amp-app-banner .actions button {
       padding: 5px;
       width: 70px;
@@ -196,21 +159,17 @@
       text-align: right;
       font-size: 14px;
     }
-
     amp-sidebar {
       width: 150px;
     }
-
     nav li {
       list-style: none;
       margin-bottom: 10px;
     }
-
     nav li a {
       text-decoration: none;
       color: #666666;
     }
-
   </style>
   <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
   <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
@@ -379,6 +338,39 @@
             ac molestie nulla porttitor ac. Donec porta risus ut enim
             pellentesque, id placerat elit ornare.
           </p>
+
+          <figure>
+            <amp-video
+              autoplay
+              dock
+              src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
+              width="720"
+              height="405"
+              layout="responsive"
+              controls>
+            </amp-video>
+            <figcaption>
+              Fusce pretium tempor justo, vitae consequat dolor maximus eget.
+            </figcaption>
+          </figure>
+
+          <p>
+            Sed pharetra semper fringilla. Nulla fringilla, neque eget
+            varius suscipit, mi turpis congue odio, quis dignissim nisi
+            nulla at erat. Duis non nibh vel erat vehicula hendrerit eget
+            vel velit. Donec congue augue magna, nec eleifend dui porttitor
+            sed. Cras orci quam, dignissim nec elementum ac, bibendum et purus.
+            Ut elementum mi eget felis ultrices tempus. Maecenas nec sodales
+            ex. Phasellus ultrices, purus non egestas ullamcorper, felis
+            lorem ultrices nibh, in tristique mauris justo sed ante.
+            Nunc commodo purus feugiat metus bibendum consequat. Duis
+            finibus urna ut ligula auctor, sed vehicula ex aliquam.
+            Sed sed augue auctor, porta turpis ultrices, cursus diam.
+            In venenatis aliquet porta. Sed volutpat fermentum quam,
+            ac molestie nulla porttitor ac. Donec porta risus ut enim
+            pellentesque, id placerat elit ornare.
+          </p>
+
           <p id="section1">
             Curabitur convallis, urna quis pulvinar feugiat, purus diam
             posuere turpis, sit amet tincidunt purus justo et mi. Donec
@@ -399,9 +391,9 @@
             <amp-img class="full-bleed" placeholder
                 src="img/sea@1x.jpg"
                 srcset="img/sea@1x.jpg 1x, img/sea@2x.jpg 2x"
-                layout="responsive" width="360"
+                layout="responsive" width="320"
                 alt="Fusce pretium tempor justo, vitae consequat dolor maximus eget."
-                height="216">
+                height="180">
             </amp-img>
             <figcaption>
               Fusce pretium tempor justo, vitae consequat dolor maximus eget.
