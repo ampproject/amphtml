@@ -39,6 +39,13 @@
   <amp-brightcove
       data-account="906043040001"
       layout="responsive" width="480" height="270">
+  <!-- Valid: most "data-*" attributes are bindable. -->
+  <amp-brightcove
+      data-account="906043040001"
+      layout="responsive" width="480" height="270"
+      [data-account]="foo.bar" [data-embed]="foo.bar" [data-player]="foo.bar"
+      [data-player-id]="foo.bar" [data-playlist-id]="foo.bar"
+      [data-video-id]="foo.bar">
   </amp-brightcove>
   <!-- Invalid: data-account is mandatory;
        leaving them out results in an error. -->

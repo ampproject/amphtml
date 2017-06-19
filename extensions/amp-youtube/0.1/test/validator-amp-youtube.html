@@ -32,6 +32,10 @@
   <amp-youtube width="480" height="270"
                data-videoid="dQw4w9WgXcQ">
   </amp-youtube>
+  <!-- Valid: with bindable [data-videoid] attribute -->
+  <amp-youtube width="480" height="270"
+               data-videoid="dQw4w9WgXcQ" [data-videoid]="foo.bar">
+  </amp-youtube>
   <!-- Invalid: data-videoid missing. -->
   <amp-youtube width="480" height="270"></amp-youtube>
   <!-- Invalid: dimensions are missing. -->
