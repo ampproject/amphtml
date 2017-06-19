@@ -121,14 +121,16 @@ export class Toolbar {
     }
 
     // Display the elements
-    this.toolbarTarget_.setAttribute('show', '');
-    if (this.toolbarOnlyElements_) {
-      this.toolbarOnlyElements_.forEach(element => {
-        toggle(element, false);
-      });
-    }
-    this.toolbarShown_ = true;
-    onChangeCallback();
+    this.sidebar.mutateElement(() => {
+      this.toolbarTarget_.setAttribute('show', '');
+      if (this.toolbarOnlyElements_) {
+        this.toolbarOnlyElements_.forEach(element => {
+          toggle(element, false);
+        });
+      }
+      this.toolbarShown_ = true;
+      onChangeCallback();
+    });
   }
 
   /**
@@ -141,14 +143,16 @@ export class Toolbar {
       return;
     }
 
-    // Hide the elements
-    this.toolbarTarget_.removeAttribute('show');
-    if (this.toolbarOnlyElements_) {
-      this.toolbarOnlyElements_.forEach(element => {
-        toggle(element, true);
-      });
-    }
-    this.toolbarShown_ = false;
-    onChangeCallback();
+    this.sidebar.mutateElement(() => {
+      // Hide the elements
+      this.toolbarTarget_.removeAttribute('show');
+      if (this.toolbarOnlyElements_) {
+        this.toolbarOnlyElements_.forEach(element => {
+          toggle(element, true);
+        });
+      }
+      this.toolbarShown_ = false;
+      onChangeCallback();
+    });
   }
 }
