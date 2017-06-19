@@ -1,4 +1,2 @@
 FAIL
-amp-carousel/0.1/test/validator-amp-carousel.html:31:2 The attribute 'delay' in tag 'amp-carousel' is set to the invalid value ''. (see https://www.ampproject.org/docs/reference/components/amp-carousel) [AMP_TAG_PROBLEM]
-amp-carousel/0.1/test/validator-amp-carousel.html:34:2 The tag 'amp-carousel' requires including the 'amp-carousel' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-carousel) [AMP_TAG_PROBLEM]
-amp-carousel/0.1/test/validator-amp-carousel.html:37:2 The tag 'amp-carousel' requires including the 'amp-carousel' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-carousel) [AMP_TAG_PROBLEM]
+amp-carousel/0.1/test/validator-amp-carousel.html:32:2 The attribute 'delay' in tag 'amp-carousel' is set to the invalid value ''. (see https://www.ampproject.org/docs/reference/components/amp-carousel) [AMP_TAG_PROBLEM]
