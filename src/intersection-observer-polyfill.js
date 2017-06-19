@@ -360,24 +360,6 @@ export class IntersectionObserverPolyfill {
 }
 
 /**
- * Transforms a LayoutRect into a DOMRect for use in intersection observers.
- * @param {!./layout-rect.LayoutRectDef} rect
- * @return {!DOMRect}
- */
-function DomRectFromLayoutRect(rect) {
-  return {
-    left: rect.left,
-    top: rect.top,
-    width: rect.width,
-    height: rect.height,
-    bottom: rect.bottom,
-    right: rect.right,
-    x: rect.left,
-    y: rect.top,
-  };
-}
-
-/**
  * Returns the ratio of the smaller box's area to the larger box's area.
  * @param {!./layout-rect.LayoutRectDef} smaller
  * @param {!./layout-rect.LayoutRectDef} larger
@@ -453,9 +435,9 @@ function calculateChangeEntry(
   return /** @type {!IntersectionObserverEntry} */ ({
     time: (typeof performance !== 'undefined' && performance.now) ?
         performance.now() : Date.now() - INIT_TIME,
-    rootBounds: rootBounds && DomRectFromLayoutRect(rootBounds),
-    boundingClientRect: DomRectFromLayoutRect(boundingClientRect),
-    intersectionRect: DomRectFromLayoutRect(intersection),
+    rootBounds: rootBounds && rootBounds,
+    boundingClientRect,
+    intersectionRect: intersection,
     intersectionRatio: ratio,
   });
 }
