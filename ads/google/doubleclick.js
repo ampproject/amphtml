@@ -72,13 +72,12 @@ function doubleClickWithGpt(global, data, gladeExperiment, url) {
   const primaryWidth = parseInt(data.overrideWidth || data.width, 10);
   const primaryHeight = parseInt(data.overrideHeight || data.height, 10);
   let dimensions;
-  if (multiSizeDataStr) {
-    dimensions = getMultiSizeDimensions(
+  if (multiSizeDataStr && (dimensions = getMultiSizeDimensions(
         multiSizeDataStr,
         primaryWidth,
         primaryHeight,
         (data.multiSizeValidation || 'true') == 'true',
-        true);
+        true))) {
     dimensions.unshift([primaryWidth, primaryHeight]);
   } else {
     dimensions = [[primaryWidth, primaryHeight]];
