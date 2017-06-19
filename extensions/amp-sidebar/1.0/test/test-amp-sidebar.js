@@ -28,6 +28,9 @@
  /** @const */
  const TOOLBAR_MEDIA = '(min-width: 768px)';
 
+ /** @const */
+ const TOOLBAR_TARGET_CLASS = 'i-amphtml-sidebar-toolbar';
+
  adopt(window);
 
  describes.realWin('amp-sidebar 1.0 version', {
@@ -570,17 +573,17 @@
          expect(toolbarElements.length).to.be.equal(0);
        });
      });
-     it('should create a header element, \
+     it('should create a toolbar target element, \
      containing the navigation toolbar element', () => {
        return getAmpSidebar({
          toolbar: true,
        }).then(obj => {
          const sidebarElement = obj.ampSidebar;
-         const headerElements = sidebarElement.ownerDocument
-               .getElementsByTagName('header');
-         expect(headerElements.length).to.be.above(0);
-         expect(headerElements[0].querySelectorAll('nav[toolbar]').length)
-             .to.be.above(0);
+         const toolbarTargetElements = sidebarElement.ownerDocument
+               .getElementsByClassName(TOOLBAR_TARGET_CLASS);
+         expect(toolbarTargetElements.length).to.be.above(0);
+         expect(toolbarTargetElements[0]
+             .querySelectorAll('nav[toolbar]').length).to.be.above(0);
        });
      });
 
@@ -589,9 +592,9 @@
          toolbar: true,
        }).then(obj => {
          const sidebarElement = obj.ampSidebar;
-         const headerElements = sidebarElement.ownerDocument
-               .getElementsByTagName('header');
-         expect(headerElements[0].style.display).to.be.equal('none');
+         const toolbarTargetElements = sidebarElement.ownerDocument
+               .getElementsByClassName(TOOLBAR_TARGET_CLASS);
+         expect(toolbarTargetElements[0].hasAttribute('show')).to.be.false;
        });
      });
    });
