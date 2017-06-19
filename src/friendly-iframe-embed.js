@@ -24,7 +24,7 @@ import {extensionsFor} from './services';
 import {isDocumentReady} from './document-ready';
 import {layoutRectLtwh} from './layout-rect';
 import {loadPromise} from './event-helper';
-import {resourcesForDoc} from './services';
+import {platformFor, resourcesForDoc} from './services';
 import {setStyle, setStyles} from './style';
 
 
@@ -449,7 +449,22 @@ export class FriendlyIframeEmbed {
   setVisible_(visible) {
     if (this.visible_ != visible) {
       this.visible_ = visible;
+      this.setCssAnimPlayingState_(visible);
       this.visibilityObservable_.fire(this.visible_);
+    }
+  }
+
+  /**
+   * @param {boolean} running
+   * @private
+   */
+  setCssAnimPlayingState_(running) {
+    if (platformFor(this.win).isIos()) {
+      this.win.document.documentElement.classList.toggle(
+          'i-amphtml-animations-reset', !running);
+    } else {
+      this.win.document.documentElement.classList.toggle(
+          'i-amphtml-animations-paused', !running);
     }
   }
 }
