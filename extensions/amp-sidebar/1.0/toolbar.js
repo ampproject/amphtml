@@ -16,16 +16,22 @@
 
 import {toggle} from '../../../src/style';
 
+/** @const */
+const TOOLBAR_TARGET_CLASS = 'i-amphtml-sidebar-toolbar';
+
 export class Toolbar {
   /**
   * @param {!Element} element
-  * @param {!BaseElement} baseElement
+  * @param {!BaseElement} sidebar
   */
-  constructor(element, baseElement) {
+  constructor(element, sidebar) {
     this.element = element;
 
-    /** @private {?Element} */
-    this.sidebarElement_ = baseElement;
+    /** @private {!BaseElement} **/
+    this.sidebar_ = sidebar;
+
+    /** @private {!Element} */
+    this.sidebarElement_ = this.sidebar_.element;
 
     /** @private {?string} */
     this.toolbarMedia_ = this.element.getAttribute('toolbar');
@@ -38,7 +44,6 @@ export class Toolbar {
 
     /** @private {!boolean} **/
     this.toolbarShown_ = false;
-    this.updateToolbarShown_();
 
     /** @private {Array} */
     this.toolbarOnlyElements_ = [];
@@ -60,6 +65,23 @@ export class Toolbar {
   }
 
   /**
+   * Function called to check if we should show or hide the toolbar
+   * @param {!Function} onChangeCallback - function called if toolbar changes on check
+   */
+  checkToolbar(onChangeCallback) {
+    // Get if we match the current toolbar media
+    const matchesMedia = this.element.ownerDocument.defaultView
+        .matchMedia(this.toolbarMedia_).matches;
+
+    // Remove and add the toolbar dynamically
+    if (matchesMedia) {
+      this.attemptShow_(onChangeCallback);
+    } else {
+      this.hideToolbar_(onChangeCallback);
+    }
+  }
+
+  /**
    * Private function to build the DOM element for the toolbar
    * TODO: Allow specifying a target for the toolbar
    * @private
@@ -69,29 +91,14 @@ export class Toolbar {
       .ownerDocument.createDocumentFragment();
     this.toolbarTarget_ =
       this.element.ownerDocument.createElement('header');
+    this.toolbarTarget_.className = TOOLBAR_TARGET_CLASS;
     //Place the elements into the target
     this.toolbarClone_ = this.element.cloneNode(true);
     this.toolbarTarget_.appendChild(this.toolbarClone_);
-    if (!this.isToolbarShown_()) {
-      toggle(this.toolbarTarget_, false);
-    }
 
     fragment.appendChild(this.toolbarTarget_);
     this.sidebarElement_.parentElement
         .insertBefore(fragment, this.sidebarElement_);
-  }
-
-  /**
-   * Function to update the toolbar shown state
-   * @private
-   */
-  updateToolbarShown_() {
-    if (this.toolbarMedia_) {
-      this.toolbarShown_ = this.element.ownerDocument.defaultView
-          .matchMedia(this.toolbarMedia_).matches;
-    } else {
-      this.toolbarShown_ = false;
-    }
   }
 
   /**
@@ -104,38 +111,44 @@ export class Toolbar {
   }
 
   /**
-   * Function called to check if we should show or hide the toolbar
+   * Function to attempt to show the toolbar
    * @param {!Function} onChangeCallback - function called if toolbar changes on check
+   * @private
    */
-  checkToolbar(onChangeCallback) {
-    //Update our shown state
-    this.updateToolbarShown_();
-
-    // Remove and add the toolbar dynamically
-    if (this.isToolbarShown_() &&
-      !this.toolbarTarget_.hasAttribute('toolbar')
-    ) {
-      // Display the elements
-      toggle(this.toolbarTarget_, true);
-      if (this.toolbarOnlyElements_) {
-        this.toolbarOnlyElements_.forEach(element => {
-          toggle(element, false);
-        });
-      }
-      this.toolbarTarget_.setAttribute('toolbar', '');
-      onChangeCallback();
-    } else if (!this.isToolbarShown_() &&
-      this.toolbarTarget_.hasAttribute('toolbar')
-      ) {
-      // Hide the elements
-      toggle(this.toolbarTarget_, false);
-      if (this.toolbarOnlyElements_) {
-        this.toolbarOnlyElements_.forEach(element => {
-          toggle(element, true);
-        });
-      }
-      this.toolbarTarget_.removeAttribute('toolbar');
-      onChangeCallback();
+  attemptShow_(onChangeCallback) {
+    if(this.isToolbarShown_()) {
+      return;
     }
+
+    // Display the elements
+    this.toolbarTarget_.setAttribute('show', '');
+    if (this.toolbarOnlyElements_) {
+      this.toolbarOnlyElements_.forEach(element => {
+        toggle(element, false);
+      });
+    }
+    this.toolbarShown_ = true;
+    onChangeCallback();
+  }
+
+  /**
+   * Function to hide the toolbar
+   * @param {!Function} onChangeCallback - function called if toolbar changes on check
+   * @private
+   */
+  hideToolbar_(onChangeCallback) {
+    if(!this.isToolbarShown_()) {
+      return;
+    }
+
+    // Hide the elements
+    this.toolbarTarget_.removeAttribute('show');
+    if (this.toolbarOnlyElements_) {
+      this.toolbarOnlyElements_.forEach(element => {
+        toggle(element, true);
+      });
+    }
+    this.toolbarShown_ = false;
+    onChangeCallback();
   }
 }
