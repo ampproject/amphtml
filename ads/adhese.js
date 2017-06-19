@@ -44,13 +44,16 @@ export function adhese(global, data) {
   const co = global.document.querySelector('#c');
   co.width = data['width'];
   co.height = data['height'];
-  co.addEventListener('adhLoaded', getAdInfo, false);
+  co.addEventListener('adhLoaded', e => {
+    getAdInfo(e, global);
+  }, false);
 }
 
 /**
  * @param {!Object} e
+ * @param {!Window} global
  */
-function getAdInfo(e) {
+function getAdInfo(e, global) {
   if (e.detail.isReady && e.detail.width == e.target.width &&
       e.detail.height == e.target.height) {
     global.context.renderStart();
