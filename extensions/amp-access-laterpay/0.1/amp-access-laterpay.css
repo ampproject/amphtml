@@ -14,13 +14,6 @@
  * limitations under the License.
  */
 
-.amp-access-laterpay {
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
 @media (min-width: 420px) {
   .amp-access-laterpay {
     width: 420px;
@@ -42,11 +35,30 @@
 
 .amp-access-laterpay label {
   display: flex;
-  padding-left: 5px;
+  padding-right: 10px;
 }
 
 .amp-access-laterpay input {
   width: 20px;
+}
+
+.amp-access-laterpay-container {
+  padding: 16px;
+  padding-right: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 12px;
+  box-shadow: 0 0 10px -1px rgba(0,0,0,.25);
+}
+
+.amp-access-laterpay-badge {
+  text-align: center;
+  color: #999;
+}
+
+.amp-access-laterpay-badge a {
+  color: #8db444;
 }
 
 .amp-access-laterpay-header {

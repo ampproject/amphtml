@@ -119,6 +119,9 @@ export class LaterpayVendor {
     this.containerEmpty_ = true;
 
     /** @private {?Node} */
+    this.innerContainer_ = null;
+
+    /** @private {?Node} */
     this.selectedPurchaseOption_ = null;
 
     /** @private {?Node} */
@@ -289,6 +292,7 @@ export class LaterpayVendor {
     }
     return this.vsync_.mutatePromise(() => {
       this.containerEmpty_ = true;
+      this.innerContainer_ = null;
       removeChildren(this.getContainer_());
     });
   }
@@ -298,6 +302,8 @@ export class LaterpayVendor {
    */
   renderPurchaseOverlay_() {
     const dialogContainer = this.getContainer_();
+    this.innerContainer_ = this.createElement_('div');
+    this.innerContainer_.className = TAG + '-container';
     this.renderTextBlock_('header');
     const listContainer = this.createElement_('ul');
     this.purchaseConfig_.premiumcontent['tp_title'] =
@@ -320,11 +326,13 @@ export class LaterpayVendor {
     this.purchaseButtonListener_ = listen(purchaseButton, 'click', ev => {
       this.handlePurchase_(ev, this.selectedPurchaseOption_.value);
     });
-    dialogContainer.appendChild(listContainer);
-    dialogContainer.appendChild(purchaseButton);
-    dialogContainer.appendChild(
+    this.innerContainer_.appendChild(listContainer);
+    this.innerContainer_.appendChild(purchaseButton);
+    this.innerContainer_.appendChild(
         this.createAlreadyPurchasedLink_(this.purchaseConfig_.apl));
     this.renderTextBlock_('footer');
+    dialogContainer.appendChild(this.innerContainer_);
+    dialogContainer.appendChild(this.createLaterpayBadge_());
     this.containerEmpty_ = false;
   }
 
@@ -337,10 +345,25 @@ export class LaterpayVendor {
       const el = this.createElement_('p');
       el.className = TAG + '-' + area;
       el.textContent = this.i18n_[area];
-      this.getContainer_().appendChild(el);
+      this.innerContainer_.appendChild(el);
     }
   }
 
+  /**
+   * @private
+   * @return {!Node}
+   */
+  createLaterpayBadge_() {
+    const a = this.createElement_('a');
+    a.href = 'https://laterpay.net';
+    a.target = '_blank';
+    a.textContent = 'LaterPay';
+    const el = this.createElement_('p');
+    el.className = TAG + '-badge';
+    el.textContent = 'Powered by ';
+    el.appendChild(a);
+    return el;
+  }
 
   /**
    * @param {!PurchaseOptionDef} option
