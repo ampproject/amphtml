@@ -36,6 +36,7 @@
     "ava": "0.15.2",
     "babel-core": "6.24.1",
     "babel-eslint": "6.1.2",
+    "babel-plugin-transform-regenerator": "^6.24.1",
     "babel-plugin-transform-remove-strict-mode": "0.0.2",
     "babel-preset-env": "1.5.2",
     "babelify": "7.3.0",
