@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {setStyles} from '../../../src/style';
+import {toggle} from '../../../src/style';
 
 export class Toolbar {
   /**
@@ -35,6 +35,10 @@ export class Toolbar {
 
     /** @private {Element|undefined} */
     this.toolbarTarget_ = undefined;
+
+    /** @private {!boolean} **/
+    this.toolbarShown_ = false;
+    this.updateToolbarShown_();
 
     /** @private {Array} */
     this.toolbarOnlyElements_ = [];
@@ -69,9 +73,7 @@ export class Toolbar {
     this.toolbarClone_ = this.element.cloneNode(true);
     this.toolbarTarget_.appendChild(this.toolbarClone_);
     if (!this.isToolbarShown_()) {
-      setStyles(this.toolbarTarget_, {
-        'display': 'none',
-      });
+      toggle(this.toolbarTarget_, false);
     }
 
     fragment.appendChild(this.toolbarTarget_);
@@ -80,13 +82,25 @@ export class Toolbar {
   }
 
   /**
+   * Function to update the toolbar shown state
+   * @private
+   */
+  updateToolbarShown_() {
+    if (this.toolbarMedia_) {
+      this.toolbarShown_ = this.element.ownerDocument.defaultView
+          .matchMedia(this.toolbarMedia_).matches;
+    } else {
+      this.toolbarShown_ = false;
+    }
+  }
+
+  /**
    * Returns if the sidebar is currently in toolbar media query
    * @returns {boolean}
    * @private
    */
   isToolbarShown_() {
-    return this.element.ownerDocument.defaultView
-        .matchMedia(this.toolbarMedia_).matches;
+    return this.toolbarShown_;
   }
 
   /**
@@ -94,19 +108,18 @@ export class Toolbar {
    * @param {!Function} onChangeCallback - function called if toolbar changes on check
    */
   checkToolbar(onChangeCallback) {
+    //Update our shown state
+    this.updateToolbarShown_();
+
     // Remove and add the toolbar dynamically
     if (this.isToolbarShown_() &&
       !this.toolbarTarget_.hasAttribute('toolbar')
     ) {
       // Display the elements
-      setStyles(this.toolbarTarget_, {
-        'display': null,
-      });
+      toggle(this.toolbarTarget_, true);
       if (this.toolbarOnlyElements_) {
         this.toolbarOnlyElements_.forEach(element => {
-          setStyles(element, {
-            'display': 'none',
-          });
+          toggle(element, false);
         });
       }
       this.toolbarTarget_.setAttribute('toolbar', '');
@@ -115,14 +128,10 @@ export class Toolbar {
       this.toolbarTarget_.hasAttribute('toolbar')
       ) {
       // Hide the elements
-      setStyles(this.toolbarTarget_, {
-        'display': 'none',
-      });
+      toggle(this.toolbarTarget_, false);
       if (this.toolbarOnlyElements_) {
         this.toolbarOnlyElements_.forEach(element => {
-          setStyles(element, {
-            'display': null,
-          });
+          toggle(element, true);
         });
       }
       this.toolbarTarget_.removeAttribute('toolbar');
