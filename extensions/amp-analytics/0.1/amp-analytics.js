@@ -309,7 +309,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    */
   processCrossDomainIframeResponse_(type, response) {
     ResponseMap.add(type, /** @type {string} */ (this.win.document.baseURI),
-        response[AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE]);
+        response.data);
   }
 
   /**
