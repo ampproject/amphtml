@@ -738,7 +738,7 @@ describes.fakeWin('Viewport', {}, env => {
   it('should change scrollTop for scrollIntoView and respect padding', () => {
     const element = document.createElement('div');
     const bindingMock = sandbox.mock(binding);
-    bindingMock.expects('getLayoutRect').withArgs(element)
+    bindingMock.expects('getDOMRect').withArgs(element)
         .returns({top: 111}).once();
     bindingMock.expects('setScrollTop').withArgs(111 - /* padding */ 19).once();
     viewport.scrollIntoView(element);
@@ -749,7 +749,7 @@ describes.fakeWin('Viewport', {}, env => {
     'padding', () => {
     const element = document.createElement('div');
     const bindingMock = sandbox.mock(binding);
-    bindingMock.expects('getLayoutRect').withArgs(element)
+    bindingMock.expects('getDOMRect').withArgs(element)
         .returns({top: 111}).once();
     bindingMock.expects('setScrollTop').withArgs(111 - /* padding */ 19).once();
     const duration = 1000;
@@ -764,7 +764,7 @@ describes.fakeWin('Viewport', {}, env => {
   it('should not change scrollTop for animateScrollIntoView', () => {
     const element = document.createElement('div');
     const bindingMock = sandbox.mock(binding);
-    bindingMock.expects('getLayoutRect').withArgs(element)
+    bindingMock.expects('getDOMRect').withArgs(element)
         .returns({top: 111}).once();
     viewport.paddingTop_ = 0;
     sandbox.stub(viewport, 'getScrollTop').returns(111);
@@ -778,14 +778,14 @@ describes.fakeWin('Viewport', {}, env => {
     return promise;
   });
 
-  it('should send cached scroll pos to getLayoutRect', () => {
+  it('should send cached scroll pos to getDOMRect', () => {
     const element = document.createElement('div');
     const bindingMock = sandbox.mock(binding);
     viewport.scrollTop_ = 111;
     viewport.scrollLeft_ = 222;
-    bindingMock.expects('getLayoutRect').withArgs(element, 222, 111)
+    bindingMock.expects('getDOMRect').withArgs(element, 222, 111)
         .returns('sentinel').once();
-    expect(viewport.getLayoutRect(element)).to.equal('sentinel');
+    expect(viewport.getDOMRect(element)).to.equal('sentinel');
   });
 
   it('should deletegate scrollWidth', () => {
@@ -876,14 +876,14 @@ describes.fakeWin('Viewport', {}, env => {
       viewport.scrollTop_ = 0;
       const element = iframeWin.document.createElement('div');
       iframeWin.document.body.appendChild(element);
-      bindingMock.expects('getLayoutRect')
+      bindingMock.expects('getDOMRect')
           .withExactArgs(element, 0, 0)
           .returns({left: 20, top: 10}).once();
-      bindingMock.expects('getLayoutRect')
+      bindingMock.expects('getDOMRect')
           .withExactArgs(iframe, 0, 0)
           .returns({left: 211, top: 111}).once();
 
-      const rect = viewport.getLayoutRect(element);
+      const rect = viewport.getDOMRect(element);
       expect(rect.left).to.equal(211 + 20);
       expect(rect.top).to.equal(111 + 10);
     });
@@ -893,14 +893,14 @@ describes.fakeWin('Viewport', {}, env => {
       viewport.scrollTop_ = 100;
       const element = iframeWin.document.createElement('div');
       iframeWin.document.body.appendChild(element);
-      bindingMock.expects('getLayoutRect')
+      bindingMock.expects('getDOMRect')
           .withExactArgs(element, 0, 0)
           .returns({left: 20, top: 10}).once();
-      bindingMock.expects('getLayoutRect')
+      bindingMock.expects('getDOMRect')
           .withExactArgs(iframe, 200, 100)
           .returns({left: 211, top: 111}).once();
 
-      const rect = viewport.getLayoutRect(element);
+      const rect = viewport.getDOMRect(element);
       expect(rect.left).to.equal(211 + 20);
       expect(rect.top).to.equal(111 + 10);
     });
@@ -1304,7 +1304,7 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
         return {left: 11.5, top: 12.5, width: 13.5, height: 14.5};
       },
     };
-    const rect = binding.getLayoutRect(el);
+    const rect = binding.getDOMRect(el);
     expect(rect.left).to.equal(12);  // round(0 + 11.5)
     expect(rect.top).to.equal(213);  // round(200 + 12.5)
     expect(rect.width).to.equal(14);  // round(13.5)
@@ -1320,7 +1320,7 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
         return {left: 11.5, top: 12.5, width: 13.5, height: 14.5};
       },
     };
-    const rect = binding.getLayoutRect(el, 100, 200);
+    const rect = binding.getDOMRect(el, 100, 200);
     expect(rect.left).to.equal(112);  // round(100 + 11.5)
     expect(rect.top).to.equal(213);  // round(200 + 12.5)
     expect(rect.width).to.equal(14);  // round(13.5)
@@ -1514,7 +1514,7 @@ describes.realWin('ViewportBindingNaturalIosEmbed', {ampCss: true}, env => {
         return {left: 11.5, top: 12.5, width: 13.5, height: 14.5};
       },
     };
-    const rect = binding.getLayoutRect(el);
+    const rect = binding.getDOMRect(el);
     expect(rect.left).to.equal(12);  // round(0 + 11.5)
     expect(rect.top).to.equal(113);  // round(100 + 12.5)
     expect(rect.width).to.equal(14);  // round(13.5)
@@ -1753,7 +1753,7 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
         return {left: 11.5, top: 12.5, width: 13.5, height: 14.5};
       },
     };
-    const rect = binding.getLayoutRect(el);
+    const rect = binding.getDOMRect(el);
     expect(rect.top).to.equal(213);  // round(200 + 12.5)
     expect(rect.width).to.equal(14);  // round(13.5)
     expect(rect.height).to.equal(15);  // round(14.5)
@@ -1766,7 +1766,7 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
         return {left: 11.5, top: 12.5, width: 13.5, height: 14.5};
       },
     };
-    const rect = binding.getLayoutRect(el, 100, 200);
+    const rect = binding.getDOMRect(el, 100, 200);
     expect(rect.left).to.equal(112);  // round(100 + 11.5)
     expect(rect.top).to.equal(213);  // round(200 + 12.5)
     expect(rect.width).to.equal(14);  // round(13.5)

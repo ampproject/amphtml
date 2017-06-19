@@ -17,7 +17,7 @@
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Resources} from '../../src/service/resources-impl';
 import {Resource, ResourceState} from '../../src/service/resource';
-import {layoutRectLtwh} from '../../src/layout-rect';
+import {DOMRectLtwh} from '../../src/dom-rect';
 import {viewerForDoc} from '../../src/services';
 import * as sinon from 'sinon';
 
@@ -149,7 +149,7 @@ describe('Resource', () => {
   });
 
   it('should mark as ready for layout if already measured', () => {
-    const box = layoutRectLtwh(0, 0, 100, 200);
+    const box = DOMRectLtwh(0, 0, 100, 200);
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock.expects('build').once();
     elementMock.expects('updateLayoutBox')
@@ -174,8 +174,8 @@ describe('Resource', () => {
   it('should allow to measure when not upgraded', () => {
     elementMock.expects('isUpgraded').returns(false).atLeast(1);
     const viewport = {
-      getLayoutRect() {
-        return layoutRectLtwh(0, 100, 300, 100);
+      getDOMRect() {
+        return DOMRectLtwh(0, 100, 300, 100);
       },
       isDeclaredFixed() {
         return false;
@@ -185,16 +185,16 @@ describe('Resource', () => {
     expect(() => {
       resource.measure();
     }).to.not.throw();
-    expect(resource.getLayoutBox()).to.eql(layoutRectLtwh(0, 100, 300, 100));
+    expect(resource.getLayoutBox()).to.eql(DOMRectLtwh(0, 100, 300, 100));
     // pageLayoutBox == layoutBox
     expect(resource.getPageLayoutBox()).to.eql(
-        layoutRectLtwh(0, 100, 300, 100));
+        DOMRectLtwh(0, 100, 300, 100));
   });
 
   it('should allow measure even when not built', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock.expects('getBoundingClientRect').returns(
-        layoutRectLtwh(0, 0, 0, 0)).once();
+        DOMRectLtwh(0, 0, 0, 0)).once();
     resource.measure();
     expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
     expect(resource.isFixed()).to.be.false;
@@ -309,7 +309,7 @@ describe('Resource', () => {
   it('should calculate NOT fixed for non-displayed elements', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock.expects('getBoundingClientRect').returns(
-        layoutRectLtwh(0, 0, 0, 0)).once();
+        DOMRectLtwh(0, 0, 0, 0)).once();
     element.isAlwaysFixed = () => true;
     resource.measure();
     expect(resource.isFixed()).to.be.false;
@@ -318,7 +318,7 @@ describe('Resource', () => {
   it('should calculate fixed for always-fixed parent', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock.expects('getBoundingClientRect').returns(
-        layoutRectLtwh(0, 0, 10, 10)).once();
+        DOMRectLtwh(0, 0, 10, 10)).once();
     viewportMock.expects('getScrollTop').returns(11).atLeast(0);
     element.offsetParent = {
       isAlwaysFixed: () => true,
@@ -326,14 +326,14 @@ describe('Resource', () => {
     resource.measure();
     expect(resource.isFixed()).to.be.true;
     // layoutBox != pageLayoutBox
-    expect(resource.getLayoutBox()).to.eql(layoutRectLtwh(0, 11, 10, 10));
-    expect(resource.getPageLayoutBox()).to.eql(layoutRectLtwh(0, 0, 10, 10));
+    expect(resource.getLayoutBox()).to.eql(DOMRectLtwh(0, 11, 10, 10));
+    expect(resource.getPageLayoutBox()).to.eql(DOMRectLtwh(0, 0, 10, 10));
   });
 
   it('should calculate fixed for fixed-style parent', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock.expects('getBoundingClientRect').returns(
-        layoutRectLtwh(0, 0, 10, 10)).once();
+        DOMRectLtwh(0, 0, 10, 10)).once();
     viewportMock.expects('getScrollTop').returns(11).atLeast(0);
     const fixedParent = document.createElement('div');
     fixedParent.style.position = 'fixed';
@@ -350,8 +350,8 @@ describe('Resource', () => {
     resource.measure();
     expect(resource.isFixed()).to.be.true;
     // layoutBox != pageLayoutBox
-    expect(resource.getLayoutBox()).to.eql(layoutRectLtwh(0, 11, 10, 10));
-    expect(resource.getPageLayoutBox()).to.eql(layoutRectLtwh(0, 0, 10, 10));
+    expect(resource.getLayoutBox()).to.eql(DOMRectLtwh(0, 11, 10, 10));
+    expect(resource.getPageLayoutBox()).to.eql(DOMRectLtwh(0, 0, 10, 10));
   });
 
   describe('placeholder measure', () => {
@@ -893,7 +893,7 @@ describe('Resource renderOutsideViewport', () => {
     resource = new Resource(1, element, resources);
     viewport = resources.viewport_;
     renderOutsideViewport = sandbox.stub(element, 'renderOutsideViewport');
-    sandbox.stub(viewport, 'getRect').returns(layoutRectLtwh(0, 0, 100, 100));
+    sandbox.stub(viewport, 'getRect').returns(DOMRectLtwh(0, 0, 100, 100));
     resolveRenderOutsideViewportSpy =
       sandbox.spy(resource, 'resolveRenderOutsideViewport_');
   });
@@ -911,13 +911,13 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is inside viewport', () => {
         it('should allow rendering when bottom falls outside', () => {
-          resource.layoutBox_ = layoutRectLtwh(0, 10, 100, 100);
+          resource.layoutBox_ = DOMRectLtwh(0, 10, 100, 100);
           expect(resource.renderOutsideViewport()).to.equal(true);
           expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         it('should allow rendering when top falls outside', () => {
-          resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
+          resource.layoutBox_ = DOMRectLtwh(0, -10, 100, 100);
           expect(resource.renderOutsideViewport()).to.equal(true);
           expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
@@ -928,13 +928,13 @@ describe('Resource renderOutsideViewport', () => {
           });
 
           it('should allow rendering when bottom falls outside', () => {
-            resource.layoutBox_ = layoutRectLtwh(0, 10, 100, 100);
+            resource.layoutBox_ = DOMRectLtwh(0, 10, 100, 100);
             expect(resource.renderOutsideViewport()).to.equal(true);
             expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
 
           it('should allow rendering when top falls outside', () => {
-            resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
+            resource.layoutBox_ = DOMRectLtwh(0, -10, 100, 100);
             expect(resource.renderOutsideViewport()).to.equal(true);
             expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
@@ -943,7 +943,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is just below viewport', () => {
         beforeEach(() => {
-          resource.layoutBox_ = layoutRectLtwh(0, 110, 100, 100);
+          resource.layoutBox_ = DOMRectLtwh(0, 110, 100, 100);
         });
 
         it('should allow rendering when scrolling towards', () => {
@@ -979,7 +979,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is marginally below viewport', () => {
         beforeEach(() => {
-          resource.layoutBox_ = layoutRectLtwh(0, 250, 100, 100);
+          resource.layoutBox_ = DOMRectLtwh(0, 250, 100, 100);
         });
 
         it('should allow rendering when scrolling towards', () => {
@@ -1015,7 +1015,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is wayyy below viewport', () => {
         beforeEach(() => {
-          resource.layoutBox_ = layoutRectLtwh(0, 1000, 100, 100);
+          resource.layoutBox_ = DOMRectLtwh(0, 1000, 100, 100);
         });
 
         it('should allow rendering', () => {
@@ -1061,7 +1061,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is just above viewport', () => {
         beforeEach(() => {
-          resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
+          resource.layoutBox_ = DOMRectLtwh(0, -10, 100, 100);
         });
 
         it('should allow rendering when scrolling towards', () => {
@@ -1097,7 +1097,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is marginally above viewport', () => {
         beforeEach(() => {
-          resource.layoutBox_ = layoutRectLtwh(0, -250, 100, 100);
+          resource.layoutBox_ = DOMRectLtwh(0, -250, 100, 100);
         });
 
         it('should allow rendering when scrolling towards', () => {
@@ -1133,7 +1133,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is wayyy above viewport', () => {
         beforeEach(() => {
-          resource.layoutBox_ = layoutRectLtwh(0, -1000, 100, 100);
+          resource.layoutBox_ = DOMRectLtwh(0, -1000, 100, 100);
         });
 
         it('should allow rendering', () => {
@@ -1185,13 +1185,13 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is inside viewport', () => {
         it('should allow rendering when bottom falls outside', () => {
-          resource.layoutBox_ = layoutRectLtwh(0, 10, 100, 100);
+          resource.layoutBox_ = DOMRectLtwh(0, 10, 100, 100);
           expect(resource.renderOutsideViewport()).to.equal(false);
           expect(resolveRenderOutsideViewportSpy).to.not.be.called;
         });
 
         it('should allow rendering when top falls outside', () => {
-          resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
+          resource.layoutBox_ = DOMRectLtwh(0, -10, 100, 100);
           expect(resource.renderOutsideViewport()).to.equal(false);
           expect(resolveRenderOutsideViewportSpy).to.not.be.called;
         });
@@ -1202,13 +1202,13 @@ describe('Resource renderOutsideViewport', () => {
           });
 
           it('should allow rendering when bottom falls outside', () => {
-            resource.layoutBox_ = layoutRectLtwh(0, 10, 100, 100);
+            resource.layoutBox_ = DOMRectLtwh(0, 10, 100, 100);
             expect(resource.renderOutsideViewport()).to.equal(true);
             expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
 
           it('should allow rendering when top falls outside', () => {
-            resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
+            resource.layoutBox_ = DOMRectLtwh(0, -10, 100, 100);
             expect(resource.renderOutsideViewport()).to.equal(true);
             expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
           });
@@ -1217,7 +1217,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is just below viewport', () => {
         beforeEach(() => {
-          resource.layoutBox_ = layoutRectLtwh(0, 110, 100, 100);
+          resource.layoutBox_ = DOMRectLtwh(0, 110, 100, 100);
         });
 
         it('should disallow rendering when scrolling towards', () => {
@@ -1253,7 +1253,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is marginally below viewport', () => {
         beforeEach(() => {
-          resource.layoutBox_ = layoutRectLtwh(0, 250, 100, 100);
+          resource.layoutBox_ = DOMRectLtwh(0, 250, 100, 100);
         });
 
         it('should disallow rendering when scrolling towards', () => {
@@ -1289,7 +1289,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is wayyy below viewport', () => {
         beforeEach(() => {
-          resource.layoutBox_ = layoutRectLtwh(0, 1000, 100, 100);
+          resource.layoutBox_ = DOMRectLtwh(0, 1000, 100, 100);
         });
 
         it('should disallow rendering', () => {
@@ -1335,7 +1335,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is just above viewport', () => {
         beforeEach(() => {
-          resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
+          resource.layoutBox_ = DOMRectLtwh(0, -10, 100, 100);
         });
 
         it('should disallow rendering when scrolling towards', () => {
@@ -1371,7 +1371,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is marginally above viewport', () => {
         beforeEach(() => {
-          resource.layoutBox_ = layoutRectLtwh(0, -250, 100, 100);
+          resource.layoutBox_ = DOMRectLtwh(0, -250, 100, 100);
         });
 
         it('should disallow rendering when scrolling towards', () => {
@@ -1407,7 +1407,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is wayyy above viewport', () => {
         beforeEach(() => {
-          resource.layoutBox_ = layoutRectLtwh(0, -1000, 100, 100);
+          resource.layoutBox_ = DOMRectLtwh(0, -1000, 100, 100);
         });
 
         it('should disallow rendering', () => {
@@ -1460,13 +1460,13 @@ describe('Resource renderOutsideViewport', () => {
 
     describe('when element is inside viewport', () => {
       it('should allow rendering when bottom falls outside', () => {
-        resource.layoutBox_ = layoutRectLtwh(0, 10, 100, 100);
+        resource.layoutBox_ = DOMRectLtwh(0, 10, 100, 100);
         expect(resource.renderOutsideViewport()).to.equal(true);
         expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
       });
 
       it('should allow rendering when top falls outside', () => {
-        resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
+        resource.layoutBox_ = DOMRectLtwh(0, -10, 100, 100);
         expect(resource.renderOutsideViewport()).to.equal(true);
         expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
       });
@@ -1477,13 +1477,13 @@ describe('Resource renderOutsideViewport', () => {
         });
 
         it('should allow rendering when bottom falls outside', () => {
-          resource.layoutBox_ = layoutRectLtwh(0, 10, 100, 100);
+          resource.layoutBox_ = DOMRectLtwh(0, 10, 100, 100);
           expect(resource.renderOutsideViewport()).to.equal(true);
           expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
 
         it('should allow rendering when top falls outside', () => {
-          resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
+          resource.layoutBox_ = DOMRectLtwh(0, -10, 100, 100);
           expect(resource.renderOutsideViewport()).to.equal(true);
           expect(resolveRenderOutsideViewportSpy).to.be.calledOnce;
         });
@@ -1492,7 +1492,7 @@ describe('Resource renderOutsideViewport', () => {
 
     describe('when element is just below viewport', () => {
       beforeEach(() => {
-        resource.layoutBox_ = layoutRectLtwh(0, 110, 100, 100);
+        resource.layoutBox_ = DOMRectLtwh(0, 110, 100, 100);
       });
 
       it('should allow rendering when scrolling towards', () => {
@@ -1528,7 +1528,7 @@ describe('Resource renderOutsideViewport', () => {
 
     describe('when element is marginally below viewport', () => {
       beforeEach(() => {
-        resource.layoutBox_ = layoutRectLtwh(0, 250, 100, 100);
+        resource.layoutBox_ = DOMRectLtwh(0, 250, 100, 100);
       });
 
       it('should allow rendering when scrolling towards', () => {
@@ -1564,7 +1564,7 @@ describe('Resource renderOutsideViewport', () => {
 
     describe('when element is wayyy below viewport', () => {
       beforeEach(() => {
-        resource.layoutBox_ = layoutRectLtwh(0, 1000, 100, 100);
+        resource.layoutBox_ = DOMRectLtwh(0, 1000, 100, 100);
       });
 
       it('should disallow rendering', () => {
@@ -1610,7 +1610,7 @@ describe('Resource renderOutsideViewport', () => {
 
     describe('when element is just above viewport', () => {
       beforeEach(() => {
-        resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
+        resource.layoutBox_ = DOMRectLtwh(0, -10, 100, 100);
       });
 
       it('should allow rendering when scrolling towards', () => {
@@ -1646,7 +1646,7 @@ describe('Resource renderOutsideViewport', () => {
 
     describe('when element is marginally above viewport', () => {
       beforeEach(() => {
-        resource.layoutBox_ = layoutRectLtwh(0, -250, 100, 100);
+        resource.layoutBox_ = DOMRectLtwh(0, -250, 100, 100);
       });
 
       it('should allow rendering when scrolling towards', () => {
@@ -1682,7 +1682,7 @@ describe('Resource renderOutsideViewport', () => {
 
     describe('when element is wayyy above viewport', () => {
       beforeEach(() => {
-        resource.layoutBox_ = layoutRectLtwh(0, -1000, 100, 100);
+        resource.layoutBox_ = DOMRectLtwh(0, -1000, 100, 100);
       });
 
       it('should disallow rendering', () => {
@@ -1728,7 +1728,7 @@ describe('Resource renderOutsideViewport', () => {
 
     describe('when element is on the left of viewport', () => {
       beforeEach(() => {
-        resource.layoutBox_ = layoutRectLtwh(-200, 0, 100, 100);
+        resource.layoutBox_ = DOMRectLtwh(-200, 0, 100, 100);
       });
 
       it('should disallow rendering', () => {
@@ -1774,7 +1774,7 @@ describe('Resource renderOutsideViewport', () => {
 
     describe('when element is on the right of viewport', () => {
       beforeEach(() => {
-        resource.layoutBox_ = layoutRectLtwh(200, 0, 100, 100);
+        resource.layoutBox_ = DOMRectLtwh(200, 0, 100, 100);
       });
 
       it('should disallow rendering', () => {
@@ -1820,7 +1820,7 @@ describe('Resource renderOutsideViewport', () => {
 
     describe('when element is fully in viewport', () => {
       beforeEach(() => {
-        resource.layoutBox_ = layoutRectLtwh(0, 0, 100, 100);
+        resource.layoutBox_ = DOMRectLtwh(0, 0, 100, 100);
       });
 
       it('should allow rendering', () => {
@@ -1866,7 +1866,7 @@ describe('Resource renderOutsideViewport', () => {
 
     describe('when element is partially in viewport', () => {
       beforeEach(() => {
-        resource.layoutBox_ = layoutRectLtwh(-50, -50, 100, 100);
+        resource.layoutBox_ = DOMRectLtwh(-50, -50, 100, 100);
       });
 
       it('should allow rendering', () => {

@@ -23,7 +23,7 @@ import {escapeHtml} from './dom';
 import {extensionsFor} from './services';
 import {getFixedContainer} from './full-overlay-frame-child-helper';
 import {isDocumentReady} from './document-ready';
-import {layoutRectLtwh} from './layout-rect';
+import {DOMRectLtwh} from './dom-rect';
 import {loadPromise} from './event-helper';
 import {px, resetStyles, setStyle, setStyles} from './style';
 import {resourcesForDoc} from './services';
@@ -411,7 +411,7 @@ export class FriendlyIframeEmbed {
     if (this.host) {
       rect = this.host.getLayoutBox();
     } else {
-      rect = layoutRectLtwh(
+      rect = DOMRectLtwh(
           0, 0,
           this.win./*OK*/innerWidth,
           this.win./*OK*/innerHeight);
@@ -600,7 +600,7 @@ export class FriendlyIframeEmbed {
  * have been loaded in the initially visible set.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} context
  * @param {!Window} hostWin
- * @param {!./layout-rect.LayoutRectDef} rect
+ * @param {!./dom-rect.DOMRectDef} rect
  * @return {!Promise}
  */
 export function whenContentIniLoad(context, hostWin, rect) {

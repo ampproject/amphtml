@@ -200,7 +200,7 @@ export class BaseElement {
    * Returns a previously measured layout box adjusted to the viewport. This
    * mainly affects fixed-position elements that are adjusted to be always
    * relative to the document position in the viewport.
-   * @return {!./layout-rect.LayoutRectDef}
+   * @return {!./dom-rect.DOMRectDef}
    */
   getLayoutBox() {
     return this.element.getLayoutBox();
@@ -209,7 +209,7 @@ export class BaseElement {
   /**
    * Returns a previously measured layout box relative to the page. The
    * fixed-position elements are relative to the top of the document.
-   * @return {!./layout-rect.LayoutRectDef}
+   * @return {!./dom-rect.DOMRectDef}
    */
   getPageLayoutBox() {
     return this.element.getPageLayoutBox();
@@ -736,7 +736,7 @@ export class BaseElement {
   /**
    * Returns the layout rectangle used for when calculating this element's
    * intersection with the viewport.
-   * @return {!./layout-rect.LayoutRectDef}
+   * @return {!./dom-rect.DOMRectDef}
    */
   getIntersectionElementLayoutBox() {
     return this.getLayoutBox();

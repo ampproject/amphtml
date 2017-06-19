@@ -49,7 +49,7 @@ import {platformFor, timerFor} from '../../../../src/services';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {dev, user} from '../../../../src/log';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {layoutRectLtwh} from '../../../../src/layout-rect';
+import {DOMRectLtwh} from '../../../../src/dom-rect';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import * as sinon from 'sinon';
 
@@ -131,7 +131,7 @@ describe('amp-a4a', () => {
     };
     element.isBuilt = () => {return true;};
     element.getLayoutBox = () => {
-      return opt_rect || layoutRectLtwh(0, 0, 200, 50);
+      return opt_rect || DOMRectLtwh(0, 0, 200, 50);
     };
     element.getPageLayoutBox = () => {
       return element.getLayoutBox.apply(element, arguments);
@@ -915,7 +915,7 @@ describe('amp-a4a', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
-        const rect = layoutRectLtwh(0, 0, 200, 0);
+        const rect = DOMRectLtwh(0, 0, 200, 0);
         const a4aElement = createA4aElement(doc, rect);
         const a4a = new MockA4AImpl(a4aElement);
         // test 0 height

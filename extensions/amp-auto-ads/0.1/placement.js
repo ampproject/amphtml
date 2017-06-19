@@ -89,7 +89,7 @@ export class Placement {
    * @param {!Position} position
    * @param {!function(!Element, !Element)} injector
    * @param {!Object<string, string>} attributes
-   * @param {!../../../src/layout-rect.LayoutMarginsChangeDef=} opt_margins
+   * @param {!../../../src/dom-rect.DOMMarginsChangeDef=} opt_margins
    */
   constructor(win, resources, anchorElement, position, injector, attributes,
       opt_margins) {
@@ -113,7 +113,7 @@ export class Placement {
 
     /**
      * @const
-     * @private {!../../../src/layout-rect.LayoutMarginsChangeDef|undefined}
+     * @private {!../../../src/dom-rect.DOMMarginsChangeDef|undefined}
      */
     this.margins_ = opt_margins;
 
@@ -145,7 +145,7 @@ export class Placement {
   }
 
   /**
-   * @param {!../../../src/layout-rect.LayoutRectDef} anchorLayout
+   * @param {!../../../src/dom-rect.DOMRectDef} anchorLayout
    * @return {number}
    * @private
    */

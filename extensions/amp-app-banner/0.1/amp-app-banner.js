@@ -473,7 +473,7 @@ function hideBanner(state) {
  * @param {!Object} state
  */
 function measureBanner(state) {
-  state.bannerHeight = state.viewport.getLayoutRect(state.element).height;
+  state.bannerHeight = state.viewport.getDOMRect(state.element).height;
 }
 
 

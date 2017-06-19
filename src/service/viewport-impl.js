@@ -24,7 +24,7 @@ import {
   getParentWindowFrameElement,
   registerServiceBuilderForDoc,
 } from '../service';
-import {layoutRectLtwh} from '../layout-rect';
+import {DOMRectLtwh} from '../dom-rect';
 import {dev} from '../log';
 import {dict} from '../utils/object';
 import {getFriendlyIframeEmbedOptional} from '../friendly-iframe-embed';
@@ -90,7 +90,7 @@ export class Viewport {
 
     /**
      * Used to cache the rect of the viewport.
-     * @private {?../layout-rect.LayoutRectDef}
+     * @private {?../dom-rect.DOMRectDef}
      */
     this.rect_ = null;
 
@@ -342,7 +342,7 @@ export class Viewport {
 
   /**
    * Returns the rect of the viewport which includes scroll positions and size.
-   * @return {!../layout-rect.LayoutRectDef}}
+   * @return {!../dom-rect.DOMRectDef}}
    */
   getRect() {
     if (this.rect_ == null) {
@@ -350,7 +350,7 @@ export class Viewport {
       const scrollLeft = this.getScrollLeft();
       const size = this.getSize();
       this.rect_ =
-          layoutRectLtwh(scrollLeft, scrollTop, size.width, size.height);
+          DOMRectLtwh(scrollLeft, scrollTop, size.width, size.height);
     }
     return this.rect_;
   }
@@ -358,25 +358,25 @@ export class Viewport {
   /**
    * Returns the rect of the element within the document.
    * @param {!Element} el
-   * @return {!../layout-rect.LayoutRectDef}}
+   * @return {!../dom-rect.DOMRectDef}}
    */
-  getLayoutRect(el) {
+  getDOMRect(el) {
     const scrollLeft = this.getScrollLeft();
     const scrollTop = this.getScrollTop();
 
     // Go up the window hierarchy through friendly iframes.
     const frameElement = getParentWindowFrameElement(el, this.ampdoc.win);
     if (frameElement) {
-      const b = this.binding_.getLayoutRect(el, 0, 0);
-      const c = this.binding_.getLayoutRect(
+      const b = this.binding_.getDOMRect(el, 0, 0);
+      const c = this.binding_.getDOMRect(
           frameElement, scrollLeft, scrollTop);
-      return layoutRectLtwh(Math.round(b.left + c.left),
+      return DOMRectLtwh(Math.round(b.left + c.left),
           Math.round(b.top + c.top),
           Math.round(b.width),
           Math.round(b.height));
     }
 
-    return this.binding_.getLayoutRect(el, scrollLeft, scrollTop);
+    return this.binding_.getDOMRect(el, scrollLeft, scrollTop);
   }
 
   /**
@@ -395,7 +395,7 @@ export class Viewport {
    * @param {!Element} element
    */
   scrollIntoView(element) {
-    const elementTop = this.binding_.getLayoutRect(element).top;
+    const elementTop = this.binding_.getDOMRect(element).top;
     const newScrollTop = Math.max(0, elementTop - this.paddingTop_);
     this.binding_.setScrollTop(newScrollTop);
   }
@@ -411,7 +411,7 @@ export class Viewport {
    * @return {!Promise}
    */
   animateScrollIntoView(element, duration = 500, curve = 'ease-in') {
-    const elementTop = this.binding_.getLayoutRect(element).top;
+    const elementTop = this.binding_.getDOMRect(element).top;
     const newScrollTop = Math.max(0, elementTop - this.paddingTop_);
     const curScrollTop = this.getScrollTop();
     if (newScrollTop == curScrollTop) {
@@ -1017,9 +1017,9 @@ export class ViewportBindingDef {
    *     pass in, if they cached these values and would like to avoid
    *     remeasure. Requires appropriate updating the values on scroll.
    * @param {number=} unusedScrollTop Same comment as above.
-   * @return {!../layout-rect.LayoutRectDef}
+   * @return {!../dom-rect.DOMRectDef}
    */
-  getLayoutRect(unusedEl, unusedScrollLeft, unusedScrollTop) {}
+  getDOMRect(unusedEl, unusedScrollLeft, unusedScrollTop) {}
 }
 
 
@@ -1182,7 +1182,7 @@ export class ViewportBindingNatural_ {
   }
 
   /** @override */
-  getLayoutRect(el, opt_scrollLeft, opt_scrollTop) {
+  getDOMRect(el, opt_scrollLeft, opt_scrollTop) {
     const scrollTop = opt_scrollTop != undefined
         ? opt_scrollTop
         : this.getScrollTop();
@@ -1190,7 +1190,8 @@ export class ViewportBindingNatural_ {
         ? opt_scrollLeft
         : this.getScrollLeft();
     const b = el./*OK*/getBoundingClientRect();
-    return layoutRectLtwh(Math.round(b.left + scrollLeft),
+    return DOMRectLtwh(
+        Math.round(b.left + scrollLeft),
         Math.round(b.top + scrollTop),
         Math.round(b.width),
         Math.round(b.height));
@@ -1505,9 +1506,9 @@ export class ViewportBindingNaturalIosEmbed_ {
   }
 
   /** @override */
-  getLayoutRect(el) {
+  getDOMRect(el) {
     const b = el./*OK*/getBoundingClientRect();
-    return layoutRectLtwh(Math.round(b.left + this.pos_.x),
+    return DOMRectLtwh(Math.round(b.left + this.pos_.x),
         Math.round(b.top + this.pos_.y),
         Math.round(b.width),
         Math.round(b.height));
@@ -1775,7 +1776,7 @@ export class ViewportBindingIosEmbedWrapper_ {
   }
 
   /** @override */
-  getLayoutRect(el, opt_scrollLeft, opt_scrollTop) {
+  getDOMRect(el, opt_scrollLeft, opt_scrollTop) {
     const scrollTop = opt_scrollTop != undefined
         ? opt_scrollTop
         : this.getScrollTop();
@@ -1783,7 +1784,7 @@ export class ViewportBindingIosEmbedWrapper_ {
         ? opt_scrollLeft
         : this.getScrollLeft();
     const b = el./*OK*/getBoundingClientRect();
-    return layoutRectLtwh(Math.round(b.left + scrollLeft),
+    return DOMRectLtwh(Math.round(b.left + scrollLeft),
         Math.round(b.top + scrollTop),
         Math.round(b.width),
         Math.round(b.height));

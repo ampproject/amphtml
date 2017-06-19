@@ -15,7 +15,7 @@
  */
 
 import {PositionObserver} from '../../../ads/inabox/position-observer';
-import {layoutRectLtwh} from '../../../src/layout-rect';
+import {DOMRectLtwh} from '../../../src/dom-rect';
 
 describes.realWin('inabox-host:position-observer', {}, env => {
 
@@ -38,22 +38,22 @@ describes.realWin('inabox-host:position-observer', {}, env => {
     observer = new PositionObserver(win);
 
     target1 = {
-      getBoundingClientRect: () => layoutRectLtwh(1, 2, 30, 40),
+      getBoundingClientRect: () => DOMRectLtwh(1, 2, 30, 40),
     };
 
     target2 = {
-      getBoundingClientRect: () => layoutRectLtwh(3, 4, 30, 40),
+      getBoundingClientRect: () => DOMRectLtwh(3, 4, 30, 40),
     };
   });
 
   it('observe should work', () => {
     let position1 = {
-      viewport: layoutRectLtwh(0, 0, 200, 300),
-      target: layoutRectLtwh(1, 2, 30, 40),
+      viewport: DOMRectLtwh(0, 0, 200, 300),
+      target: DOMRectLtwh(1, 2, 30, 40),
     };
     let position2 = {
-      viewport: layoutRectLtwh(0, 0, 200, 300),
-      target: layoutRectLtwh(3, 4, 30, 40),
+      viewport: DOMRectLtwh(0, 0, 200, 300),
+      target: DOMRectLtwh(3, 4, 30, 40),
     };
     const callbackSpy11 = sandbox.stub();
     const callbackSpy12 = sandbox.stub();
@@ -69,12 +69,12 @@ describes.realWin('inabox-host:position-observer', {}, env => {
     return new Promise(resolve => {
       setTimeout(() => {
         position1 = {
-          viewport: layoutRectLtwh(10, 20, 200, 300),
-          target: layoutRectLtwh(11, 22, 30, 40),
+          viewport: DOMRectLtwh(10, 20, 200, 300),
+          target: DOMRectLtwh(11, 22, 30, 40),
         };
         position2 = {
-          viewport: layoutRectLtwh(10, 20, 200, 300),
-          target: layoutRectLtwh(13, 24, 30, 40),
+          viewport: DOMRectLtwh(10, 20, 200, 300),
+          target: DOMRectLtwh(13, 24, 30, 40),
         };
         resolve();
       }, 100);

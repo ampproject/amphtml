@@ -21,7 +21,7 @@ import {
   isVisibilitySpecValid,
   Visibility,
 } from '../visibility-impl';
-import {layoutRectLtwh, rectIntersection} from '../../../../src/layout-rect';
+import {DOMRectLtwh, rectIntersection} from '../../../../src/dom-rect';
 import * as inob from '../../../../src/intersection-observer-polyfill';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {viewerForDoc} from '../../../../src/services';
@@ -526,7 +526,7 @@ describes.realWin('amp-analytics.visibility', {amp: true}, env => {
       const resourceLoadedPromise =
           new Promise(resolve => resourceLoadedResolver = resolve);
       const resource = {
-        getLayoutBox: () => layoutRectLtwh(0, scrollTop, 100, 100),
+        getLayoutBox: () => DOMRectLtwh(0, scrollTop, 100, 100),
         element: {getIntersectionChangeEntry: getIntersectionStub},
         getId: getIdStub,
         hasLoadedOnce: () => true,
@@ -552,8 +552,8 @@ describes.realWin('amp-analytics.visibility', {amp: true}, env => {
 });
 
 function makeIntersectionEntry(boundingClientRect, rootBounds) {
-  boundingClientRect = layoutRectLtwh.apply(null, boundingClientRect);
-  rootBounds = layoutRectLtwh.apply(null, rootBounds);
+  boundingClientRect = DOMRectLtwh.apply(null, boundingClientRect);
+  rootBounds = DOMRectLtwh.apply(null, rootBounds);
   const intersect = rectIntersection(boundingClientRect, rootBounds);
   const ratio = (intersect.width * intersect.height)
       / (boundingClientRect.width * boundingClientRect.height);

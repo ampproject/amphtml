@@ -23,7 +23,7 @@ import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../visibility-state';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {closest, hasNextNodeInDocumentOrder} from '../dom';
-import {expandLayoutRect} from '../layout-rect';
+import {expandDOMRect} from '../dom-rect';
 import {installInputService} from '../input';
 import {registerServiceBuilderForDoc} from '../service';
 import {inputFor} from '../services';
@@ -36,7 +36,7 @@ import {dict} from '../utils/object';
 import {reportError} from '../error';
 import {filterSplice} from '../utils/array';
 import {getSourceUrl} from '../url';
-import {areMarginsChanged} from '../layout-rect';
+import {areMarginsChanged} from '../dom-rect';
 import {documentInfoForDoc} from '../services';
 import {computedStyle} from '../style';
 
@@ -57,8 +57,8 @@ const FOUR_FRAME_DELAY_ = 70;
 /**
  * The internal structure of a ChangeHeightRequest.
  * @typedef {{
- *   newMargins: !../layout-rect.LayoutMarginsChangeDef,
- *   currentMargins: !../layout-rect.LayoutMarginsDef
+ *   newMargins: !../dom-rect.DOMMarginsChangeDef,
+ *   currentMargins: !../dom-rect.DOMMarginsDef
  * }}
  */
 let MarginChangeDef;
@@ -314,7 +314,7 @@ export class Resources {
    * Returns a subset of resources which are (1) belong to the specified host
    * window, and (2) positioned in the specified rect.
    * @param {!Window} hostWin
-   * @param {!../layout-rect.LayoutRectDef} rect
+   * @param {!../dom-rect.DOMRectDef} rect
    * @param {boolean=} opt_isInPrerender signifies if we are in prerender mode.
    * @return {!Promise<!Array<!Resource>>}
    */
@@ -400,7 +400,7 @@ export class Resources {
    * resource-backed then makes use of the resource layoutBox, otherwise
    * measures the element directly.
    * @param {!Element} element
-   * @return {!Promise<!../layout-rect.LayoutRectDef>}
+   * @return {!Promise<!../dom-rect.DOMRectDef>}
    */
   getElementLayoutBox(element) {
     const resource = this.getResourceForElementOptional(element);
@@ -408,13 +408,13 @@ export class Resources {
       return this.ensuredMeasured_(resource);
     }
     return this.vsync_.measurePromise(() => {
-      return this.getViewport().getLayoutRect(element);
+      return this.getViewport().getDOMRect(element);
     });
   }
 
   /**
    * @param {!Resource} resource
-   * @return {!Promise<!../layout-rect.LayoutRectDef>}
+   * @return {!Promise<!../dom-rect.DOMRectDef>}
    * @private
    */
   ensuredMeasured_(resource) {
@@ -788,7 +788,7 @@ export class Resources {
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
    * @param {function()=} opt_callback A callback function.
-   * @param {!../layout-rect.LayoutMarginsChangeDef=} opt_newMargins
+   * @param {!../dom-rect.DOMMarginsChangeDef=} opt_newMargins
    */
   changeSize(element, newHeight, newWidth, opt_callback, opt_newMargins) {
     this.scheduleChangeSize_(Resource.forElement(element), newHeight,
@@ -810,7 +810,7 @@ export class Resources {
    * @param {!Element} element
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
-   * @param {!../layout-rect.LayoutMarginsChangeDef=} opt_newMargins
+   * @param {!../dom-rect.DOMMarginsChangeDef=} opt_newMargins
    * @return {!Promise}
    */
   attemptChangeSize(element, newHeight, newWidth, opt_newMargins) {
@@ -852,7 +852,7 @@ export class Resources {
    */
   mutateElement(element, mutator) {
     const calcRelayoutTop = () => {
-      const box = this.viewport_.getLayoutRect(element);
+      const box = this.viewport_.getDOMRect(element);
       if (box.width != 0 && box.height != 0) {
         return box.top;
       }
@@ -924,7 +924,7 @@ export class Resources {
    * @param {!Element} element
    */
   collapseElement(element) {
-    const box = this.viewport_.getLayoutRect(element);
+    const box = this.viewport_.getDOMRect(element);
     const resource = Resource.forElement(element);
     if (box.width != 0 && box.height != 0) {
       this.setRelayoutTop_(box.top);
@@ -1368,9 +1368,9 @@ export class Resources {
     // depending on prerenderSize in pre-render mode.
     let loadRect;
     if (this.visible_) {
-      loadRect = expandLayoutRect(viewportRect, 0.25, 2);
+      loadRect = expandDOMRect(viewportRect, 0.25, 2);
     } else if (this.prerenderSize_ > 0) {
-      loadRect = expandLayoutRect(viewportRect, 0, this.prerenderSize_ - 1);
+      loadRect = expandDOMRect(viewportRect, 0, this.prerenderSize_ - 1);
     } else {
       loadRect = null;
     }
@@ -1379,7 +1379,7 @@ export class Resources {
       // When the doc is visible, consider the viewport to be 25% larger,
       // to minimize effect from small scrolling and notify things that
       // they are in viewport just before they are actually visible.
-      ? expandLayoutRect(viewportRect, 0.25, 0.25)
+      ? expandDOMRect(viewportRect, 0.25, 0.25)
       : viewportRect;
 
     // Phase 3: Trigger "viewport enter/exit" events.
@@ -1620,7 +1620,7 @@ export class Resources {
    * @param {!Resource} resource
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
-   * @param {!../layout-rect.LayoutMarginsChangeDef|undefined} newMargins
+   * @param {!../dom-rect.DOMMarginsChangeDef|undefined} newMargins
    * @param {boolean} force
    * @param {function(boolean)=} opt_callback A callback function
    * @private
@@ -1642,7 +1642,7 @@ export class Resources {
         }
         const marginChange = newMargins ? {
           newMargins,
-          currentMargins: this.getLayoutMargins_(resource),
+          currentMargins: this.getDOMMargins_(resource),
         } : undefined;
         this.completeScheduleChangeSize_(resource, newHeight, newWidth,
             marginChange, force, opt_callback);
@@ -1653,10 +1653,10 @@ export class Resources {
   /**
    * Returns the layout margins for the resource.
    * @param {!Resource} resource
-   * @return {!../layout-rect.LayoutMarginsDef}
+   * @return {!../dom-rect.DOMMarginsDef}
    * @private
    */
-  getLayoutMargins_(resource) {
+  getDOMMargins_(resource) {
     const style = computedStyle(this.win, resource.element);
     return {
       top: parseInt(style.marginTop, 10) || 0,
@@ -2083,7 +2083,7 @@ function elements_(elements) {
  * @typedef {{
  *   height: (number|undefined),
  *   width: (number|undefined),
- *   margins: (!../layout-rect.LayoutMarginsChangeDef|undefined)
+ *   margins: (!../dom-rect.DOMMarginsChangeDef|undefined)
  * }}
  */
 export let SizeDef;

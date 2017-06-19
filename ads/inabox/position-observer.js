@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {layoutRectLtwh, LayoutRectDef} from '../../src/layout-rect';
+import {DOMRectLtwh, DOMRectDef} from '../../src/dom-rect';
 import {Observable} from '../../src/observable';
 import {throttle} from '../../src/utils/rate-limit';
 
 /**
  * @typedef {{
- *   viewport: !LayoutRectDef,
- *   target: !LayoutRectDef
+ *   viewport: !DOMRectDef,
+ *   target: !DOMRectDef
  * }}
  */
 let PositionEntryDef;
@@ -45,7 +45,7 @@ export class PositionObserver {
     this.scrollLeft_ = null;
     /** @private {?number} */
     this.scrollTop_ = null;
-    /** @private {?LayoutRectDef} */
+    /** @private {?DOMRectDef} */
     this.viewportRect_ = null;
   }
 
@@ -78,7 +78,7 @@ export class PositionObserver {
         || this.win_./*OK*/pageXOffset;
     this.scrollTop_ = this.scrollingElement_./*OK*/scrollTop
         || this.win_./*OK*/pageYOffset;
-    this.viewportRect_ = layoutRectLtwh(
+    this.viewportRect_ = DOMRectLtwh(
         Math.round(this.scrollLeft_),
         Math.round(this.scrollTop_),
         this.win_./*OK*/innerWidth,
@@ -93,9 +93,9 @@ export class PositionObserver {
   getPositionEntry_(element) {
     const b = element./*OK*/getBoundingClientRect();
     return {
-      viewport: /** @type {!LayoutRectDef} */(this.viewportRect_),
+      viewport: /** @type {!DOMRectDef} */(this.viewportRect_),
       // relative position to host doc
-      target: layoutRectLtwh(
+      target: DOMRectLtwh(
           Math.round(b.left + this.scrollLeft_),
           Math.round(b.top + this.scrollTop_),
           Math.round(b.width),

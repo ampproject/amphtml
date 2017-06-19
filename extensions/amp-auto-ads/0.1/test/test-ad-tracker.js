@@ -16,7 +16,7 @@
 
 
 import {AdTracker, getExistingAds} from '../ad-tracker';
-import {layoutRectLtwh} from '../../../../src/layout-rect';
+import {DOMRectLtwh} from '../../../../src/dom-rect';
 import {resourcesForDoc} from '../../../../src/services';
 import * as sinon from 'sinon';
 
@@ -72,11 +72,11 @@ describe('ad-tracker', () => {
     };
 
     const adTracker = new AdTracker([
-      addAd(layoutRectLtwh(0, 0, 300, 50)),
+      addAd(DOMRectLtwh(0, 0, 300, 50)),
     ], adConstraints);
     expect(adTracker.getAdCount()).to.equal(1);
 
-    adTracker.addAd(addAd(layoutRectLtwh(0, 100, 300, 50)));
+    adTracker.addAd(addAd(DOMRectLtwh(0, 100, 300, 50)));
     expect(adTracker.getAdCount()).to.equal(2);
   });
 
@@ -88,7 +88,7 @@ describe('ad-tracker', () => {
     };
 
     const adTracker = new AdTracker([
-      addAd(layoutRectLtwh(0, 0, 300, 50)),
+      addAd(DOMRectLtwh(0, 0, 300, 50)),
     ], adConstraints);
     return adTracker.isTooNearAnAd(149).then(tooNear => {
       expect(tooNear).to.equal(true);
@@ -103,7 +103,7 @@ describe('ad-tracker', () => {
     };
 
     const adTracker = new AdTracker([
-      addAd(layoutRectLtwh(0, 100, 300, 50)),
+      addAd(DOMRectLtwh(0, 100, 300, 50)),
     ], adConstraints);
     return adTracker.isTooNearAnAd(1).then(tooNear => {
       expect(tooNear).to.equal(true);
@@ -118,7 +118,7 @@ describe('ad-tracker', () => {
     };
 
     const adTracker = new AdTracker([
-      addAd(layoutRectLtwh(0, 0, 300, 50)),
+      addAd(DOMRectLtwh(0, 0, 300, 50)),
     ], adConstraints);
     return adTracker.isTooNearAnAd(25).then(tooNear => {
       expect(tooNear).to.equal(true);
@@ -133,8 +133,8 @@ describe('ad-tracker', () => {
     };
 
     const adTracker = new AdTracker([
-      addAd(layoutRectLtwh(0, 0, 300, 50)),
-      addAd(layoutRectLtwh(0, 250, 300, 50)),
+      addAd(DOMRectLtwh(0, 0, 300, 50)),
+      addAd(DOMRectLtwh(0, 250, 300, 50)),
     ], adConstraints);
     return adTracker.isTooNearAnAd(150).then(tooNear => {
       expect(tooNear).to.equal(false);
@@ -149,7 +149,7 @@ describe('ad-tracker', () => {
     };
 
     const adTracker = new AdTracker([
-      addAd(layoutRectLtwh(0, 0, 300, 50)),
+      addAd(DOMRectLtwh(0, 0, 300, 50)),
     ], adConstraints);
     return checkMinSpacing(adTracker, 549, 550);
   });
@@ -164,7 +164,7 @@ describe('ad-tracker', () => {
     };
 
     const adTracker = new AdTracker([
-      addAd(layoutRectLtwh(0, 0, 300, 50)),
+      addAd(DOMRectLtwh(0, 0, 300, 50)),
     ], adConstraints);
     return checkMinSpacing(adTracker, 649, 650);
   });
@@ -180,8 +180,8 @@ describe('ad-tracker', () => {
     };
 
     const adTracker = new AdTracker([
-      addAd(layoutRectLtwh(0, 0, 300, 50)),
-      addAd(layoutRectLtwh(0, 0, 300, 50)),
+      addAd(DOMRectLtwh(0, 0, 300, 50)),
+      addAd(DOMRectLtwh(0, 0, 300, 50)),
     ], adConstraints);
     return checkMinSpacing(adTracker, 749, 750);
   });
@@ -198,14 +198,14 @@ describe('ad-tracker', () => {
     };
 
     const adTracker = new AdTracker([
-      addAd(layoutRectLtwh(0, 0, 300, 50)),
+      addAd(DOMRectLtwh(0, 0, 300, 50)),
     ], adConstraints);
     return checkMinSpacing(adTracker, 649, 650).then(() => {
-      adTracker.addAd(addAd(layoutRectLtwh(0, 0, 300, 50)));
+      adTracker.addAd(addAd(DOMRectLtwh(0, 0, 300, 50)));
       return checkMinSpacing(adTracker, 649, 650).then(() => {
-        adTracker.addAd(addAd(layoutRectLtwh(0, 0, 300, 50)));
+        adTracker.addAd(addAd(DOMRectLtwh(0, 0, 300, 50)));
         return checkMinSpacing(adTracker, 749, 750).then(() => {
-          adTracker.addAd(addAd(layoutRectLtwh(0, 0, 300, 50)));
+          adTracker.addAd(addAd(DOMRectLtwh(0, 0, 300, 50)));
           return checkMinSpacing(adTracker, 849, 850);
         });
       });
@@ -220,9 +220,9 @@ describe('ad-tracker', () => {
     };
 
     const adTracker = new AdTracker([
-      addAd(layoutRectLtwh(0, 0, 300, 50)),
+      addAd(DOMRectLtwh(0, 0, 300, 50)),
     ], adConstraints);
-    adTracker.addAd(addAd(layoutRectLtwh(0, 100, 300, 50)));
+    adTracker.addAd(addAd(DOMRectLtwh(0, 100, 300, 50)));
     return adTracker.isTooNearAnAd(150).then(tooNear => {
       expect(tooNear).to.equal(true);
     });

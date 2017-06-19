@@ -16,7 +16,7 @@
 
 import {dev} from './log';
 import {dict} from './utils/object';
-import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
+import {DOMRectLtwh, rectIntersection, moveDOMRect} from './dom-rect';
 import {SubscriptionApi} from './iframe-helper';
 import {timerFor} from './services';
 
@@ -36,28 +36,11 @@ import {timerFor} from './services';
  */
 export let DOMRect;
 
-/**
- * Transforms a LayoutRect into a DOMRect for use in intersection observers.
- * @param {!./layout-rect.LayoutRectDef} rect
- * @return {!DOMRect}
- */
-function DomRectFromLayoutRect(rect) {
-  return {
-    left: rect.left,
-    top: rect.top,
-    width: rect.width,
-    height: rect.height,
-    bottom: rect.bottom,
-    right: rect.right,
-    x: rect.left,
-    y: rect.top,
-  };
-}
 
 /**
  * Returns the ratio of the smaller box's area to the larger box's area.
- * @param {!./layout-rect.LayoutRectDef} smaller
- * @param {!./layout-rect.LayoutRectDef} larger
+ * @param {!./dom-rect.DOMRectDef} smaller
+ * @param {!./dom-rect.DOMRectDef} larger
  * @return {number}
  */
 function intersectionRatio(smaller, larger) {
@@ -70,10 +53,10 @@ function intersectionRatio(smaller, larger) {
  *
  * Mutates passed in rootBounds to have x and y according to spec.
  *
- * @param {!./layout-rect.LayoutRectDef} element The element's layout rectangle
- * @param {?./layout-rect.LayoutRectDef} owner The owner's layout rect, if
+ * @param {!./dom-rect.DOMRectDef} element The element's DOM rectangle
+ * @param {?./dom-rect.DOMRectDef} owner The owner's DOM rect, if
  *     there is an owner.
- * @param {!./layout-rect.LayoutRectDef} viewport The viewport's layout rect.
+ * @param {!./dom-rect.DOMRectDef} viewport The viewport's DOM rect.
  * @return {!IntersectionObserverEntry} A change entry.
  * @private
  */
@@ -86,33 +69,33 @@ export function getIntersectionChangeEntry(element, owner, viewport) {
   if (owner) {
     intersectionRect = rectIntersection(owner, element) ||
         // No intersection.
-        layoutRectLtwh(0, 0, 0, 0);
+        DOMRectLtwh(0, 0, 0, 0);
   }
   intersectionRect = rectIntersection(viewport, intersectionRect) ||
       // No intersection.
-      layoutRectLtwh(0, 0, 0, 0);
+      DOMRectLtwh(0, 0, 0, 0);
 
   // The element is relative to (0, 0), while the viewport moves. So, we must
   // adjust.
-  const boundingClientRect = moveLayoutRect(element, -viewport.left,
+  const boundingClientRect = moveDOMRect(element, -viewport.left,
       -viewport.top);
-  intersectionRect = moveLayoutRect(intersectionRect, -viewport.left,
+  intersectionRect = moveDOMRect(intersectionRect, -viewport.left,
       -viewport.top);
   // Now, move the viewport to (0, 0)
-  const rootBounds = moveLayoutRect(viewport, -viewport.left, -viewport.top);
+  const rootBounds = moveDOMRect(viewport, -viewport.left, -viewport.top);
 
   return /** @type {!IntersectionObserverEntry} */ ({
     time: Date.now(),
-    rootBounds: DomRectFromLayoutRect(rootBounds),
-    boundingClientRect: DomRectFromLayoutRect(boundingClientRect),
-    intersectionRect: DomRectFromLayoutRect(intersectionRect),
+    rootBounds,
+    boundingClientRect,
+    intersectionRect,
     intersectionRatio: intersectionRatio(intersectionRect, element),
   });
 }
 
 /**
  * The IntersectionObserver class lets any element share its viewport
- * intersection data with an iframe of its choice (most likely contained within
+ * intersection data‰ with an iframe of its choice (most likely contained within
  * the element itself.). When instantiated the class will start listening for
  * a 'send-intersections' postMessage from the iframe, and only then  would start
  * sending intersection data to the iframe. The intersection data would be sent

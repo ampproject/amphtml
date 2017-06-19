@@ -33,7 +33,7 @@ import {
 import {user, dev} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
-import {moveLayoutRect} from '../../../src/layout-rect';
+import {moveDOMRect} from '../../../src/dom-rect';
 import {AmpAdUIHandler} from './amp-ad-ui';
 
 /** @const {!string} Tag name for 3P AD implementation. */
@@ -70,7 +70,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
     /**
      * The (relative) layout box of the ad iframe to the amp-ad tag.
-     * @private {?../../../src/layout-rect.LayoutRectDef}
+     * @private {?../../../src/dom-rect.DOMRectDef}
      */
     this.iframeLayoutBox_ = null;
 
@@ -184,12 +184,12 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   measureIframeLayoutBox_() {
     if (this.xOriginIframeHandler_ && this.xOriginIframeHandler_.iframe) {
       const iframeBox =
-          this.getViewport().getLayoutRect(this.xOriginIframeHandler_.iframe);
+          this.getViewport().getDOMRect(this.xOriginIframeHandler_.iframe);
       const box = this.getLayoutBox();
       // Cache the iframe's relative position to the amp-ad. This is
       // necessary for fixed-position containers which "move" with the
       // viewport.
-      this.iframeLayoutBox_ = moveLayoutRect(iframeBox, -box.left, -box.top);
+      this.iframeLayoutBox_ = moveDOMRect(iframeBox, -box.left, -box.top);
     }
   }
 
@@ -205,9 +205,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       this.measureIframeLayoutBox_();
     }
 
-    const iframe = /** @type {!../../../src/layout-rect.LayoutRectDef} */(
+    const iframe = /** @type {!../../../src/dom-rect.DOMRectDef} */(
         dev().assert(this.iframeLayoutBox_));
-    return moveLayoutRect(iframe, box.left, box.top);
+    return moveDOMRect(iframe, box.left, box.top);
   }
 
   /** @override */
