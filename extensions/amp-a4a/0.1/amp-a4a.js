@@ -54,12 +54,10 @@ import {
   xhrFor,
 } from '../../../src/services';
 import {endsWith} from '../../../src/string';
-import {cryptoFor} from '../../../src/crypto';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
 import {assertHttpsUrl} from '../../../src/url';
 import {parseJson} from '../../../src/json';
-import {timerFor} from '../../../src/services';
 import {handleClick} from '../../../ads/alp/handler';
 import {
   getDefaultBootstrapBaseUrl,
