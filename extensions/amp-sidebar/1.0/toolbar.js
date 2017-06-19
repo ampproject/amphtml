@@ -22,12 +22,12 @@ const TOOLBAR_TARGET_CLASS = 'i-amphtml-sidebar-toolbar';
 export class Toolbar {
   /**
   * @param {!Element} element
-  * @param {!BaseElement} sidebar
+  * @param {!AMP.BaseElement} sidebar
   */
   constructor(element, sidebar) {
     this.element = element;
 
-    /** @private {!BaseElement} **/
+    /** @private {!AMP.BaseElement} **/
     this.sidebar_ = sidebar;
 
     /** @private {!Element} */
@@ -116,12 +116,12 @@ export class Toolbar {
    * @private
    */
   attemptShow_(onChangeCallback) {
-    if(this.isToolbarShown_()) {
+    if (this.isToolbarShown_()) {
       return;
     }
 
     // Display the elements
-    this.sidebar.mutateElement(() => {
+    this.sidebar_.mutateElement(() => {
       this.toolbarTarget_.setAttribute('show', '');
       if (this.toolbarOnlyElements_) {
         this.toolbarOnlyElements_.forEach(element => {
@@ -139,11 +139,11 @@ export class Toolbar {
    * @private
    */
   hideToolbar_(onChangeCallback) {
-    if(!this.isToolbarShown_()) {
+    if (!this.isToolbarShown_()) {
       return;
     }
 
-    this.sidebar.mutateElement(() => {
+    this.sidebar_.mutateElement(() => {
       // Hide the elements
       this.toolbarTarget_.removeAttribute('show');
       if (this.toolbarOnlyElements_) {
