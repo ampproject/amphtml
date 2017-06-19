@@ -112,8 +112,6 @@ function appnexusAst(global, data) {
     apntag.onEvent('adAvailable', data.target, adObj => {
       global.context.renderStart({width: adObj.width, height: adObj.height});
       apntag.showTag(data.target, global.window);
-      console.log(adObj.width);
-      console.log(adObj.height);
     });
 
     apntag.onEvent('adNoBid', data.target, () => {
