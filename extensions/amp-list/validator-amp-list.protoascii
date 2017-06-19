@@ -44,6 +44,9 @@ tags: {  # <amp-list>
   # TODO(gregable): Implement validation that requires the template attr value
   # to reference the id of an existing template element.
   attrs: { name: "template" }
+  # <amp-bind>
+  attrs: { name: "[src]" }
+  attrs: { name: "[state]" }
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: FILL
