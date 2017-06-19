@@ -70,13 +70,13 @@
    display: block;
  }
 
- .i-amphtml-sidebar-toolbar nav[toolbar] {
+ .i-amphtml-sidebar-toolbar > nav[toolbar] {
    display: flex;
    justify-content: flex-start;
    align-items: center;
  }
 
- .i-amphtml-sidebar-toolbar nav[toolbar] ul {
+ .i-amphtml-sidebar-toolbar > nav[toolbar] > ul {
    display: flex;
    justify-content: flex-start;
    align-items: center;
@@ -85,6 +85,6 @@
    margin: 0;
  }
 
- .i-amphtml-sidebar-toolbar nav[toolbar] ul li {
+ .i-amphtml-sidebar-toolbar > nav[toolbar] > ul > li {
    margin-bottom: 0;
  }
