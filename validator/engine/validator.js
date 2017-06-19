@@ -1713,6 +1713,11 @@ class ExtensionsContext {
      */
     this.extensionsLoaded_ = Object.create(null);
 
+    // AMP-AD is grandfathered in to not require the respective extension
+    // javascript file for historical reasons. We still need to mark that
+    // the extension is used if we see the tags.
+    this.extensionsLoaded_["amp-ad"] = true;
+
     /**
      * @type {!Array<string>}
      * @private
@@ -4051,8 +4056,14 @@ class ParsedValidatorRules {
       }
       // Produce a mapping from every extension to an example tag which
       // requires that extension.
-      for (var extension of tag.requiresExtension) {
-        this.exampleUsageByExtension_[extension] = getTagSpecName(tag);
+      for (let i = 0; i < tag.requiresExtension.length; ++i) {
+        const extension = tag.requiresExtension[i];
+        // Some extensions have multiple tags that require them. Some tags
+        // require multiple extensions. If we have two tags requiring an
+        // extension, we prefer to use the one that lists the extension first
+        // (i === 0) as an example of that extension.
+        if (!this.exampleUsageByExtension_.hasOwnProperty(extension) || i === 0)
+          this.exampleUsageByExtension_[extension] = getTagSpecName(tag);
       }
     }
     // The amp-ad tag doesn't require amp-ad javascript for historical

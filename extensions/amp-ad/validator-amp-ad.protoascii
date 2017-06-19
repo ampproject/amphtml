@@ -13,8 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the license.
 
-# In the AMP Runtime, amp-ad and amp-embed are implemented in the samei
-# extension, so we include them both here.
+# AMP-AD is full of special cases for validation rules that are partly
+# implemented in code, so be very careful when editing this file.
+# Historically, amp-ad/amp-embed javascript were embedded into the main
+# runtime (v0.js), so there are many pages that do not include the amp-ad
+# extension. We want to warn for these.
+# AMP-EMBED requires the amp-ad extension, not amp-embed.
+# Including the amp-ad extension, but not an AMP-AD/AMP-EMBED tag should only
+# produce a warning.
+#
+# To implement this, we mark the tags as requires_extension amp-ad, but the
+# main validator also considers the amp-ad extension to always be present
+# We then use also_requires_tag_warning to give a warning if the extension
+# is missing.
 
 tags: {  # amp-ad
   html_format: AMP  # Ads are not allowed inside ads
@@ -35,10 +46,7 @@ tags: {  # amp-ad
 tags: {  # <amp-ad>
   html_format: AMP  # Ads are not allowed inside ads
   tag_name: "AMP-AD"
-  # Typically we'd require the extension j/s, but for historical reasons
-  # many pages don't have it, so it ends up late loaded and we warn, instead
-  # of making this a validation error.
-  # requires_extension: "amp-ad"
+  requires_extension: "amp-ad"  # See note at top of file
   also_requires_tag_warning: "amp-ad extension .js script"
   # If modifying disallowed_ancestors, then please also edit
   # extensions/amp-auto-ads/*/placement.js
@@ -70,9 +78,7 @@ tags: {  # <amp-ad data-multi-size>
   html_format: AMP  # Ads are not allowed inside ads
   tag_name: "AMP-AD"
   spec_name: "amp-ad with data-multi-size attribute"
-  # Typically we'd require the extension j/s, but for historical reasons
-  # many pages don't have it, so it ends up late loaded and we warn, instead
-  # of making this a validation error.
+  requires_extension: "amp-ad"  # See note at top of file
   also_requires_tag_warning: "amp-ad extension .js script"
   # If modifying disallowed_ancestors, then please also edit
   # extensions/amp-auto-ads/*/placement.js
@@ -115,10 +121,7 @@ tags: {  # <amp-ad data-multi-size>
 tags: {  # <amp-embed>
   html_format: AMP
   tag_name: "AMP-EMBED"
-  # Typically we'd require the extension j/s, but for historical reasons
-  # many pages don't have it, so it ends up late loaded and we warn, instead
-  # of making this a validation error.
-  # requires_extension: "amp-ad"
+  requires_extension: "amp-ad"  # See note at top of file
   also_requires_tag_warning: "amp-ad extension .js script"
   disallowed_ancestor: "AMP-APP-BANNER"
   disallowed_ancestor: "AMP-SIDEBAR"
@@ -148,9 +151,7 @@ tags: {  # <amp-embed data-multi-size>
   html_format: AMP
   tag_name: "AMP-EMBED"
   spec_name: "amp-embed with data-multi-size attribute"
-  # Typically we'd require the extension j/s, but for historical reasons
-  # many pages don't have it, so it ends up late loaded and we warn, instead
-  # of making this a validation error.
+  requires_extension: "amp-ad"  # See note at top of file
   also_requires_tag_warning: "amp-ad extension .js script"
   disallowed_ancestor: "AMP-APP-BANNER"
   disallowed_ancestor: "AMP-SIDEBAR"
