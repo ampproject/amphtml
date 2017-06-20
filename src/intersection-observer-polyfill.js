@@ -435,7 +435,7 @@ function calculateChangeEntry(
   return /** @type {!IntersectionObserverEntry} */ ({
     time: (typeof performance !== 'undefined' && performance.now) ?
         performance.now() : Date.now() - INIT_TIME,
-    rootBounds: rootBounds && rootBounds,
+    rootBounds,
     boundingClientRect,
     intersectionRect: intersection,
     intersectionRatio: ratio,
