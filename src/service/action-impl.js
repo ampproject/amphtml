@@ -23,8 +23,9 @@ import {
   installServiceInEmbedScope,
 } from '../service';
 import {getMode} from '../mode';
-import {hasOwn, map} from '../utils/object';
+import {getValueForExpr} from '../json';
 import {isArray, isFiniteNumber} from '../types';
+import {map} from '../utils/object';
 import {timerFor} from '../services';
 import {vsyncFor} from '../services';
 
@@ -83,10 +84,20 @@ const WHITELISTED_INPUT_DATA_ = {
 };
 
 /**
- * A map of method argument keys to functions that generate the argument values
- * given a local scope object. The function allows argument values to reference
- * data in the event that generated the action.
- * @typedef {Object<string,function(!Object):string>}
+ * An expression arg value, e.g. `foo.bar` in `e:t.m(arg=foo.bar)`.
+ * @typedef {{expression: string}}
+ */
+let ActionInfoArgExpressionDef;
+
+/**
+ * An arg value.
+ * @typedef {(boolean|number|string|ActionInfoArgExpressionDef)}
+ */
+let ActionInfoArgValueDef;
+
+/**
+ * Map of arg names to their values, e.g. {arg: 123} in `e:t.m(arg=123)`.
+ * @typedef {Object<string, ActionInfoArgValueDef>}
  */
 let ActionInfoArgsDef;
 
@@ -404,8 +415,8 @@ export class ActionService {
     for (let i = 0; i < action.actionInfos.length; i++) {
       const actionInfo = action.actionInfos[i];
 
-      // Replace any variables in args with data in `event`.
-      const args = applyActionInfoArgs(actionInfo.args, event);
+      // Replace any expressions in args with data in `event`.
+      const args = dereferenceExprsInArgs(actionInfo.args, event);
 
       // Global target, e.g. `AMP`.
       const globalTarget = this.globalTargets_[actionInfo.target];
@@ -704,7 +715,7 @@ function tokenizeMethodArguments(toks, assertToken, assertAction) {
     // fragment and delegate to specific action handler.
     args = map();
     const value = toks.next().value;
-    args[OBJECT_STRING_ARGS_KEY] = () => value;
+    args[OBJECT_STRING_ARGS_KEY] = value;
     assertToken(toks.next(), [TokenType.SEPARATOR], ')');
   } else {
     // Key-value pairs. Format: key = value, ....
@@ -717,11 +728,11 @@ function tokenizeMethodArguments(toks, assertToken, assertAction) {
       } else if (type == TokenType.LITERAL || type == TokenType.ID) {
         // Key: "key = "
         assertToken(toks.next(), [TokenType.SEPARATOR], '=');
-        // Value is either a literal or a variable: "foo.bar.baz"
+        // Value is either a literal or an expression: "foo.bar.baz"
         tok = assertToken(toks.next(/* convertValue */ true),
             [TokenType.LITERAL, TokenType.ID]);
         const argValueTokens = [tok];
-        // Variables have one or more dereferences: ".identifier"
+        // Expressions have one or more dereferences: ".identifier"
         if (tok.type == TokenType.ID) {
           for (peek = toks.peek();
               peek.type == TokenType.SEPARATOR && peek.value == '.';
@@ -731,7 +742,7 @@ function tokenizeMethodArguments(toks, assertToken, assertAction) {
             argValueTokens.push(tok);
           }
         }
-        const argValue = getActionInfoArgValue(argValueTokens);
+        const argValue = argValueForTokens(argValueTokens);
         if (!args) {
           args = map();
         }
@@ -751,62 +762,49 @@ function tokenizeMethodArguments(toks, assertToken, assertAction) {
 }
 
 /**
- * Returns a function that generates a method argument value for a given token.
- * The function takes a single object argument `data`.
- * If the token is an identifier `foo`, the function returns `data[foo]`.
- * Otherwise, the function returns the token value.
  * @param {Array<!TokenDef>} tokens
- * @return {?function(!Object):string}
+ * @return {?ActionInfoArgValueDef}
  * @private
  */
-function getActionInfoArgValue(tokens) {
+function argValueForTokens(tokens) {
   if (tokens.length == 0) {
     return null;
-  }
-  if (tokens.length == 1) {
-    return () => tokens[0].value;
+  } else if (tokens.length == 1) {
+    return /** @type {(boolean|number|string)} */ (tokens[0].value);
   } else {
-    return data => {
-      let current = data;
-      // Traverse properties of `data` per token values.
-      for (let i = 0; i < tokens.length; i++) {
-        const value = String(tokens[i].value);
-        if (current && hasOwn(current, value)) {
-          current = current[value];
-        } else {
-          return null;
-        }
-      }
-      // Only allow dereferencing of primitives.
-      const type = typeof current;
-      if (type === 'string' || type === 'number' || type === 'boolean') {
-        return current;
-      } else {
-        return null;
-      }
-    };
+    const values = tokens.map(token => token.value);
+    const expression = values.join('.');
+    return /** @type {ActionInfoArgExpressionDef} */ ({expression});
   }
 }
 
 /**
- * Generates method arg values for each key in the given ActionInfoArgsDef
- * with the data in the given event.
+ * Dereferences expression args in `args` using data in `event`.
  * @param {?ActionInfoArgsDef} args
  * @param {?ActionEventDef} event
  * @return {?JsonObject}
- * @private Visible for testing only.
+ * @private
+ * @visibleForTesting
  */
-export function applyActionInfoArgs(args, event) {
+export function dereferenceExprsInArgs(args, event) {
   if (!args) {
     return args;
   }
-  const data = {};
+  const data = map();
   if (event && event.detail) {
     data['event'] = event.detail;
   }
   const applied = map();
   Object.keys(args).forEach(key => {
-    applied[key] = args[key].call(null, data);
+    let value = args[key];
+    if (typeof value == 'object' && value.expression) {
+      const expr =
+          /** @type {ActionInfoArgExpressionDef} */ (value).expression;
+      const exprValue = getValueForExpr(data, expr);
+      // If expr can't be found in data, use null instead of undefined.
+      value = (exprValue === undefined) ? null : exprValue;
+    }
+    applied[key] = value;
   });
   return applied;
 }
