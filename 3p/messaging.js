@@ -15,6 +15,7 @@
  */
 
 import {parseJson} from '../src/json';
+import {getData} from '../src/event-helper';
 
 /**
  * Send messages to parent frame. These should not contain user data.
@@ -34,7 +35,7 @@ export function nonSensitiveDataPostMessage(type, opt_object) {
 
 /**
  * Message event listeners.
- * @const {!Array<{type: string, cb: function(!Object)}>}
+ * @const {!Array<{type: string, cb: function(!JsonObject)}>}
  */
 const listeners = [];
 
@@ -42,7 +43,7 @@ const listeners = [];
  * Listen to message events from document frame.
  * @param {!Window} win
  * @param {string} type Type of messages
- * @param {function(*)} callback Called with data payload of message.
+ * @param {function(!JsonObject)} callback Called with data payload of message.
  * @return {function()} function to unlisten for messages.
  */
 export function listenParent(win, type, callback) {
@@ -72,14 +73,16 @@ function startListening(win) {
   win.AMP_LISTENING = true;
   win.addEventListener('message', function(event) {
     // Cheap operations first, so we don't parse JSON unless we have to.
+    const eventData = getData(event);
     if (event.source != win.parent ||
         event.origin != win.context.location.origin ||
-        typeof event.data != 'string' ||
-        event.data.indexOf('amp-') != 0) {
+        typeof eventData != 'string' ||
+        eventData.indexOf('amp-') != 0) {
       return;
     }
     // Parse JSON only once per message.
-    const data = parseJson(event.data.substr(4));
+    const data = /** @type {!JsonObject} */ (
+        parseJson(/**@type {string} */ (getData(event)).substr(4)));
     if (win.context.sentinel && data['sentinel'] != win.context.sentinel) {
       return;
     }
