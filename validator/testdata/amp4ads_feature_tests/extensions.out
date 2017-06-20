@@ -29,7 +29,6 @@ amp4ads_feature_tests/extensions.html:105:2 The tag 'script' is disallowed excep
 amp4ads_feature_tests/extensions.html:107:2 The tag 'script' is disallowed except in specific forms. [CUSTOM_JAVASCRIPT_DISALLOWED]
 amp4ads_feature_tests/extensions.html:109:2 The tag 'script' is disallowed except in specific forms. [CUSTOM_JAVASCRIPT_DISALLOWED]
 amp4ads_feature_tests/extensions.html:111:2 The tag 'script' is disallowed except in specific forms. [CUSTOM_JAVASCRIPT_DISALLOWED]
-amp4ads_feature_tests/extensions.html:113:2 The tag 'script' is disallowed except in specific forms. [CUSTOM_JAVASCRIPT_DISALLOWED]
 amp4ads_feature_tests/extensions.html:116:2 The tag 'script' is disallowed except in specific forms. [CUSTOM_JAVASCRIPT_DISALLOWED]
 amp4ads_feature_tests/extensions.html:119:20 The extension 'amp-accordion' was found on this page, but is unused (no 'amp-accordion' tag seen). This may become an error in the future. [DEPRECATION]
 amp4ads_feature_tests/extensions.html:119:20 The extension 'amp-analytics' was found on this page, but is unused (no 'amp-analytics' tag seen). This may become an error in the future. [DEPRECATION]
@@ -40,3 +39,4 @@ amp4ads_feature_tests/extensions.html:119:20 The extension 'amp-fit-text' was fo
 amp4ads_feature_tests/extensions.html:119:20 The extension 'amp-font' was found on this page, but is unused (no 'amp-font' tag seen). This may become an error in the future. [DEPRECATION]
 amp4ads_feature_tests/extensions.html:119:20 The extension 'amp-form' was found on this page, but is unused (no 'FORM [method=POST]' tag seen). This may become an error in the future. [DEPRECATION]
 amp4ads_feature_tests/extensions.html:119:20 The extension 'amp-social-share' was found on this page, but is unused (no 'amp-social-share' tag seen). This may become an error in the future. [DEPRECATION]
+amp4ads_feature_tests/extensions.html:119:20 The extension 'amp-youtube' was found on this page, but is unused (no 'amp-youtube' tag seen). This may become an error in the future. [DEPRECATION]
