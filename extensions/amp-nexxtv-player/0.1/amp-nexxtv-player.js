@@ -108,7 +108,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     src += `&datamode=${encodeURIComponent(mode)}&amp=1`;
 
     if (disableAds === '1') {
-      src += `&disableAds=${encodeURIComponent(disableAds)}`;
+      src += `&disableAds=1`;
     }
 
     this.videoIframeSrc_ = assertAbsoluteHttpOrHttpsUrl(src);
