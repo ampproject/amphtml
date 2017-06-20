@@ -56,7 +56,7 @@
       <option>colanalytics</option>
       <option>comscore</option>
       <option>cxense</option>
-      <option>dynatrace</option>      
+      <option>dynatrace</option>
       <option>euleriananalytics</option>
       <option>facebook-pixel</option>
       <option>gemius</option>
@@ -69,6 +69,7 @@
       <option>mediametrie</option>
       <option>mparticle</option>
       <option>mpulse</option>
+      <option>nielsen-marketing-cloud</option>
       <option>oewa</option>
       <option>oewadirect</option>
       <option>parsely</option>
@@ -620,6 +621,29 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Nielsen example -->
+
+<!-- Nielsen Marketing Cloud example -->
+<amp-analytics type="nielsen-marketing-cloud" id="nielsen-marketing-cloud">
+  <script type="application/json">
+    {
+      "vars": {
+        "pubId": "123",
+        "siteId": "001"
+      },
+      "triggers": {
+        "trackAppEvent": {
+          "on": "click",
+          "selector": "#test1",
+          "request": "trackurl",
+          "extraUrlParams": {
+            "extraparam": "testclick"
+          }
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End Nielsen Marketing Cloud example -->
 
 <!-- OEWA example -->
 <amp-analytics type="oewa" id="oewa">
