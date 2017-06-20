@@ -203,7 +203,8 @@ function maybeSetExperimentFromUrl(win, element, experimentName,
   let arg;
   let match;
   expKeys.forEach(key => arg = arg ||
-    (match = new RegExp(`(?:^|,)${key}:(-?\\d+)`).exec(expParam)) && match[1]);
+    ((match = new RegExp(`(?:^|,)${key}:(-?\\d+)`).exec(expParam)) &&
+      match[1]));
   if (!arg) {
     return false;
   }
