@@ -37,7 +37,7 @@ tags: {  # amp-access (json)
     name: "id"
     mandatory: true
     value: "amp-access"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: { name: "nonce" }
   attrs: {
