@@ -124,7 +124,7 @@ describe.configure().retryOnSaucelabs().run('Rendering of one ad', () => {
       expect(iframe.contentWindow.context.hidden).to.be.false;
       return new Promise(resolve => {
         iframe.contentWindow.addEventListener(
-          AmpEvents.VISIBILITY_CHANGE, resolve);
+            AmpEvents.VISIBILITY_CHANGE, resolve);
         fixture.win.AMP.viewer.receiveMessage('visibilitychange', {
           state: 'hidden',
         });
