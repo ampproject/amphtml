@@ -153,6 +153,7 @@ The AMP Cache rewrites URLs found in the AMP HTML for two purposes. One is to re
 | `<amp-img srcset="https://example.com/bar.png 1080w, https://example.com/bar-400.png 400w">`| `<amp-img src="/i/s/example.com/bar.png 1080w, /i/s/example.com/bar-400.png 400w">` |
 | `<amp-anim src=foo.gif></amp-anim>` | `<amp-anim src=/i/s/example.com/foo.gif></amp-anim>` |
 | `<amp-video poster=bar.png>` | `<amp-video poster=/i/s/example.com/bar.png>` |
+| `<svg class="icon" xmlns:xlink="http://www.w3.org/1999/xlink"><use xlink:href="https://example.com/test.svg#icon"></use></svg>` | `<svg class=icon xmlns:xlink="http://www.w3.org/1999/xlink"><use xlink:href="/i/s/example.com/test.svg#icon"></use></svg>` |
 
 </details>
 
