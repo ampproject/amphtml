@@ -2,23 +2,23 @@
 
 We want to make the AMP Project as welcoming as possible, both because we :sparkling_heart: new contributors (and want more of them) and because most people prefer to work on a project with a friendly community.
 
-Here are some ways you can help make the AMP Project even more welcoming.  The TL;DR is "be friendly and helpful." :)
+Here are some ways you can help make the AMP Project even more welcoming.  **The TL;DR is "be friendly and helpful."** :)
 
 - Be welcoming in everything you do in AMP.
   - Think about how intimidating it can be to join a new community (will this new group ignore me?  will they treat me like I'm not smart?) and then work to make the AMP Project community less intimidating.  People that see that the current environment is friendly and helpful will be more willing to take the plunge to help out.
   - Familiarize yourself with our [Code of Conduct](../CODE_OF_CONDUCT.md).  In addition to a list of "don't's" the Code of Conduct includes some of our ideals like "we are committed to providing a friendly, safe and welcoming environment for everyone."
   - Think about how the words you use can affect how people perceive the community.  A [jsconf talk from Harriet Lawrence](https://www.youtube.com/watch?v=WGE3-aBR4i8) makes some good points, including:
-    - Things that may sound innocuous at first can actually be stumbling blocks for people thinking about joining a community.  For example docs that say "these short and easy instructions" can turn away contributors who don't actually find the instructions easy and then feel like they aren't qualified to participate in the community.
+    - Things that may sound innocuous can actually be stumbling blocks for people thinking about joining a community.  For example docs that say "these short and easy instructions" can turn away contributors who don't actually find the instructions easy and then feel like they aren't qualified to participate in the community.
     - The communication between people already in the community is one way people judge whether to join in.  Be conscious of this when you talk to others (on issues, code reviews, etc.).  Your joking insult on a PR with someone you know well may look like hostility to someone who doesn't know you.
 - Don't let people feel ignored.
   - Keep an eye out for issues/comments/PRs on GitHub or comments on Slack that aren't being responded to and either respond yourself or find an appropriate person to do so.  If you aren't sure who can help, ping [mrjoro](https://amphtml.slack.com/threads/team/mrjoro) on Slack.
-  - If you can't respond to a question on a PR/issue, acknowledge that (e.g. "I won't have time to get to this today, but plan on reviewing it on Friday") so the contributor knows someone is paying attention.
+  - If you can't immediately respond in detail to something in a PR/issue let the contributor know that with an estimate of when you'll be able to get to it (e.g. "I won't have time to get to this today, but plan on reviewing it on Friday").
   - Pay particular attention to [Great First Issues](https://github.com/ampproject/amphtml/labels/Great%20First%20Issue) since the people working on them are generally brand new to the community.
 - Understand the motivations of our contributors.
-  - There are a lot of different reasons someone may be contributing to AMP and understanding the motivations of contributors you're working with can help you point them in the right direction.
+  - There are a lot of different reasons someone may be contributing to AMP.  Understanding the motivations of contributors you're working with can help you point them in the right direction.
   - Some of the many reasons people contribute to AMP:
     - A developer using AMP that wants to fix something that isn't working for them (bug or new feature).
-    - An ad network / analytics provider / video player that wants to add support for their service.
+    - Someone from an ad network/analytics provider/video player/etc. that wants to add support for their service.
     - People that want to get involved in open source and found AMP (through news, tweets, open source new contributor events, etc.).
 - Get an understanding of what new contributors are interested in helping out with (a new feature?  just finding some way to help?) and point them to the relevant section of [bit.ly/helpamp](https://bit.ly/helpamp).
   - If you are working with a new contributor and they are not familiar with Git/GitHub or contributing to open source projects, point them to the Getting Started End-to-end guide at [bit.ly/helpamp-e2e](https://bit.ly/helpamp-e2e).
@@ -33,7 +33,7 @@ Here are some ways you can help make the AMP Project even more welcoming.  The T
   - Contributors will need to fill out a [single-question form](https://docs.google.com/forms/d/1wAE8w3K5preZnBkRk-MD1QkX8FmlRDxd_vs4bFSeJlQ/viewform?fbzx=4406980310789882877) to get an invite.
   - Point contributors to the Slack channel(s) that they'll likely get the most value out of, e.g. [#welcome-contributors](https://amphtml.slack.com/messages/C432AFMFE/) if they're brand new to the project, [#docs](https://amphtml.slack.com/messages/C3AU36BM0/) if they're planning on making documentation contributions.
   - Let contributors know they can Direct Message you with questions on Slack (if you're comfortable doing so).
-  - It can be helpful to have conversations about issues in the issue itself so it's a more permanent record that others can read in the future, but contributors may be more comfortable asking questions/etc. on a less public platform.  Having these conversations on Slack is fine in these cases.
+  - Having conversations about issues/PRs on the issue/PRs themselves is ideal since this provides a more permanent record that may help other contributors.  Many contributors are more comfotable asking questions on a less public platform, though, so having these conversations on Slack is fine.  (In these cases summarize any clarifications/designs/etc. in the issue/PR after the discussion if it makes sense.)
 - Encourage ongoing participation.
   - Make sure people who introduce a new component are added to the relevant OWNERS.yaml and let them know about our [OWNERS](https://github.com/ampproject/amphtml/blob/master/contributing/owners-and-committers.md) process.  We want contributors to have a sense of ownership over the things they contribute.
   - Help people who finish a Great First Issue find a new project to tackle and encourage them to take it on.  If you don't already have a project in mind, gauge their interests and skill level and work with the rest of the community (or [mrjoro](https://amphtml.slack.com/threads/team/mrjoro)) to find a project suitable for them.
@@ -42,7 +42,7 @@ Here are some ways you can help make the AMP Project even more welcoming.  The T
   - Design reviews provide an opportunity for the community to meet "face to face" (over video conference) and learn from each other.
   - Everyone is welcome to attend any design review (even if they aren't presenting a design).
   - If it makes sense, encourage contributors you are working with to bring their projects to a design review.  (This is optional and shouldn't stand in the way of a new contributor making fast progress.)
-  - Design docs are great, but we've also had successful design reviews with detailed GitHub issues.
-  - If the contributor is in a time zone that makes it hard for them to attend the 1pm Pacific time let [mrjoro](https://amphtml.slack.com/threads/team/mrjoro) know and we can move the time around.
+  - Design docs are great, but we've also had successful design reviews with detailed GitHub issues for smaller design questions.
+  - If the contributor is in a time zone that makes it hard for them to attend the design reviews let [mrjoro](https://amphtml.slack.com/threads/team/mrjoro) know and we can move the time around.
 - Follow up when you don't hear from a contributor in a while.
-  - Sometimes new contributors express interest, propose a new feature that sounds good, or maybe starts on a PR but then we stop hearing from them.  Make an effort to follow up with the contributor (in the issue/PR, over Slack DM, etc.) to see if there's anything we can do to help them make progress.
+  - Sometimes new contributors express interest, propose a new feature, or maybe even starts on a PR but then we stop hearing from them.  Make an effort to follow up with the contributor (in the issue/PR, over Slack DM, etc.) to see if there's anything we can do to help them make progress.
