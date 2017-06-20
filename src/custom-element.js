@@ -1253,7 +1253,7 @@ function createBaseCustomElementClass(win) {
     layoutCallback() {
       assertNotTemplate(this);
       dev().assert(this.isBuilt(),
-        'Must be built to receive viewport events');
+          'Must be built to receive viewport events');
       this.dispatchCustomEventForTesting(AmpEvents.LOAD_START);
       const isLoadEvent = (this.layoutCount_ == 0);  // First layout is "load".
       if (isLoadEvent) {
