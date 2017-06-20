@@ -4,7 +4,7 @@ We want to make the AMP Project as welcoming as possible, both because we :spark
 
 Here are some ways you can help make the AMP Project even more welcoming.  **The TL;DR is "be friendly and helpful."** :)
 
-- Be welcoming in everything you do in AMP.
+- Be welcoming in everything you do in the AMP Project.
   - Think about how intimidating it can be to join a new community (will this new group ignore me?  will they treat me like I'm not smart?) and then work to make the AMP Project community less intimidating.  People that see that the current environment is friendly and helpful will be more willing to take the plunge to help out.
   - Familiarize yourself with our [Code of Conduct](../CODE_OF_CONDUCT.md).  In addition to a list of "don't's" the Code of Conduct includes some of our ideals like "we are committed to providing a friendly, safe and welcoming environment for everyone."
   - Think about how the words you use can affect how people perceive the community.  A [jsconf talk from Harriet Lawrence](https://www.youtube.com/watch?v=WGE3-aBR4i8) makes some good points, including:
@@ -14,7 +14,7 @@ Here are some ways you can help make the AMP Project even more welcoming.  **The
   - Keep an eye out for issues/comments/PRs on GitHub or comments on Slack that aren't being responded to and either respond yourself or find an appropriate person to do so.  If you aren't sure who can help, ping [mrjoro](https://amphtml.slack.com/threads/team/mrjoro) on Slack.
   - If you can't immediately respond in detail to something in a PR/issue let the contributor know that with an estimate of when you'll be able to get to it (e.g. "I won't have time to get to this today, but plan on reviewing it on Friday").
   - Pay particular attention to [Great First Issues](https://github.com/ampproject/amphtml/labels/Great%20First%20Issue) since the people working on them are generally brand new to the community.
-- Understand the motivations of our contributors.
+- Understand the motivations of contributors to AMP.
   - There are a lot of different reasons someone may be contributing to AMP.  Understanding the motivations of contributors you're working with can help you point them in the right direction.
   - Some of the many reasons people contribute to AMP:
     - A developer using AMP that wants to fix something that isn't working for them (bug or new feature).
