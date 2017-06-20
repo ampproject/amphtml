@@ -30,6 +30,9 @@ import {dev} from './log';
 import {dict} from './utils/object';
 import {isArray} from './types';
 
+const BUFFER_SIZE_LIMIT = 50;
+const TAG = 'SANDBOX-ANALYTICS-ADAPTER';
+
 
 /**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
@@ -80,7 +83,6 @@ export function triggerAnalyticsEvent(target, eventType, opt_vars) {
  * @param {!Element} parentElement
  * @param {!JsonObject} config
  * @param {boolean=} loadAnalytics
- * @param {bool}
  * @return {!Element} created analytics element
  */
 export function insertAnalyticsElement(
@@ -108,10 +110,9 @@ export function insertAnalyticsElement(
     extensions./*OK*/loadExtension('amp-analytics');
   } else {
     analyticsForDocOrNull(parentElement).then(analytics => {
-      //dev().assert(analytics);
+      dev().assert(analytics);
     });
   }
-  console.log('get here!!!');
   parentElement.appendChild(analyticsElem);
   return analyticsElem;
 }

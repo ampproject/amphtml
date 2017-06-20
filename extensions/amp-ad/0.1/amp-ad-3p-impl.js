@@ -34,6 +34,7 @@ import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
 import {moveLayoutRect} from '../../../src/layout-rect';
 import {AmpAdUIHandler} from './amp-ad-ui';
+import {SandboxAnalyticsAdapter} from '../../../src/analytics';
 
 /** @const {!string} Tag name for 3P AD implementation. */
 export const TAG_3P_IMPL = 'amp-ad-3p-impl';
@@ -126,8 +127,37 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         this.config, `Type "${this.type_}" is not supported in amp-ad`);
 
     this.uiHandler = new AmpAdUIHandler(this);
+    // DO NOT SUBMIT
+    const config = {
+      'requests': {
+        'pageview': 'https://example.com/analytics',
+        'pagemanual1': 'https://example.com/manual1',
+        'pagemanual2': 'https://example.com/manual2',
+      },
+      'triggers': {
+        'trackPageview': {
+          'on': 'visible-v3',
+          'request': 'pageview',
+        },
+        'manual1': {
+          'on': 'manual1',
+          'request': 'pagemanual1',
+        },
+        'manual2': {
+          'on': 'manual2',
+          'request': 'pagemanual2',
+        },
+      },
+    };
+    this.sandboxAnalyticsAdapter_ =
+        new SandboxAnalyticsAdapter(this.element, () => {
+          return Promise.resolve(config);
+        });
 
     setupA2AListener(this.win);
+
+    this.sandboxAnalyticsAdapter_.triggerAnalyticsEventOnReady(
+        this.element, 'manual1', {a: Date.now()});
   }
 
   /**
@@ -245,6 +275,10 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override  */
   viewportCallback(inViewport) {
+    if (inViewport) {
+      this.sandboxAnalyticsAdapter_.triggerAnalyticsEventOnReady(
+          this.element, 'manual2', {a: Date.now()});
+    }
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.viewportCallback(inViewport);
     }

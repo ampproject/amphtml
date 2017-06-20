@@ -33,7 +33,10 @@ import {createAmpElementProto} from '../../src/custom-element';
 import {CommonSignals} from '../../src/common-signals';
 import {macroTask} from '../../testing/yield';
 
-describes.realWin('analytics', {amp: true}, env => {
+
+describes.realWin('analytics', {
+  amp: true,
+}, env => {
   let sandbox;
   let timer;
   let ampdoc;
@@ -271,5 +274,6 @@ describes.realWin('analytics', {amp: true}, env => {
         expect(e.message).to.equal('Cannot trigger non initiated eventType');
       }
     });
+
   });
 });
