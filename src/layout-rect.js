@@ -145,18 +145,11 @@ export function rectIntersection(var_args) {
  * @return {!LayoutRectDef}
  */
 export function expandLayoutRect(rect, dw, dh) {
-  return {
-    top: rect.top - rect.height * dh,
-    bottom: rect.bottom + rect.height * dh,
-    left: rect.left - rect.width * dw,
-    right: rect.right + rect.width * dw,
-    width: rect.width * (1 + dw * 2),
-    height: rect.height * (1 + dh * 2),
-    x: rect.x - rect.width * dw,
-    y: rect.y - rect.height * dh,
-  };
+  return layoutRectLtwh(rect.left - rect.width * dw,
+      rect.top - rect.height * dh,
+      rect.width * (1 + dw * 2),
+      rect.height * (1 + dh * 2));
 }
-
 
 /**
  * Moves the layout rect using dx and dy.
