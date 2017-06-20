@@ -28,6 +28,12 @@ import {
 
 export function runVideoPlayerIntegrationTests(
     createVideoElementFunc, opt_experiment) {
+
+  /**
+   * @const {number} Height of the fixture iframe
+   */
+  const FRAME_HEIGHT = 1000;
+
   const TIMEOUT = 20000;
   let fixtureGlobal;
   let videoGlobal;
@@ -116,17 +122,29 @@ export function runVideoPlayerIntegrationTests(
 
     describe('General Behavior', () => {
       it('should have class when attribute is set (autoplay)', function() {
-        return getVideoPlayer({outsideView: false, autoplay: true, dock: true}).then(r => {
-          return poll('polling for video build', () => {
-            return r.video.classList.contains('i-amphtml-dockable-video');
+        return getVideoPlayer(
+            {
+              outsideView: false,
+              autoplay: true,
+              dock: true,
+            }
+        ).then(r => {
+          return poll('checking class list', () => {
+            return !!r.video.classList.contains('i-amphtml-dockable-video');
           }, undefined, TIMEOUT);
         });
       });
 
       it('should have class when attribute is set (no-autoplay)', function() {
-        return getVideoPlayer({outsideView: false, autoplay: false, dock: true}).then(r => {
-          return poll('polling for video build', () => {
-            return r.video.classList.contains('i-amphtml-dockable-video');
+        return getVideoPlayer(
+            {
+              outsideView: false,
+              autoplay: false,
+              dock: true,
+            }
+        ).then(r => {
+          return poll('checking class list', () => {
+            return !!r.video.classList.contains('i-amphtml-dockable-video');
           }, undefined, TIMEOUT);
         });
       });
@@ -135,23 +153,37 @@ export function runVideoPlayerIntegrationTests(
     describe('without-autoplay', () => {
       it('should minimize when out of viewport', function() {
         let viewport;
-        return getVideoPlayer({outsideView: false, autoplay: false, dock: true}).then(r => {
+        let video;
+        return getVideoPlayer(
+            {
+              outsideView: true,
+              autoplay: false,
+              dock: true,
+            }
+        ).then(r => {
+          video = r.video;
           const playButton = createButton(r, 'play');
-          viewport = r.video.implementation_.getViewport();
           playButton.click();
+          return listenOncePromise(video, VideoEvents.PLAY);
+        }).then(() => {
+          viewport = video.implementation_.getViewport();
           // scroll to the bottom, make video fully visible
-          viewport.scrollIntoView(r.video);
-          return listenOncePromise(r.video, VideoEvents.PLAY).then(() => {
-            viewport.setScrollTop(0);
-            const insideElement = r.video.querySelector('video, iframe');
-            const insideClasses = insideElement.classList;
-            expect(
-              insideClasses.contains('i-amphtml-dockable-video-minimizing')
-            ).to.be.true;
-            expect(
-              insideElement.offsetWidth
-            ).to.be.at.most(r.video.offsetWidth);
-          });
+          viewport.scrollIntoView(video);
+          return poll('wait for scroll', () => {
+            return video.querySelector('video, iframe')
+             && viewport.getScrollTop() != 0;
+          }, undefined, TIMEOUT);
+        }).then(() => {
+          viewport.setScrollTop(0);
+          return poll('waiting for scroll', () => {
+            return viewport.getScrollTop() == 0;
+          }, undefined, TIMEOUT);
+        }).then(() => {
+          return poll('checking class list', () => {
+            const insideElement = video.querySelector('video, iframe');
+            const classes = insideElement.classList;
+            return !!classes.contains('i-amphtml-dockable-video-minimizing');
+          }, undefined, TIMEOUT);
         });
       });
     });
@@ -159,46 +191,64 @@ export function runVideoPlayerIntegrationTests(
     describe('with-autoplay', () => {
       it('should minimize when out of viewport', function() {
         let viewport;
-        return getVideoPlayer({outsideView: false, autoplay: true, dock: true}).then(r => {
-          const playButton = createButton(r, 'play');
-          viewport = r.video.implementation_.getViewport();
-          playButton.click();
-          // scroll to the bottom, make video fully visible
-          viewport.scrollIntoView(r.video);
-
-          const insideElement = r.video.querySelector('video, iframe');
-          const insideClasses = insideElement.classList;
-
-          return listenOncePromise(r.video, VideoEvents.PLAY).then(() => {
-            viewport.setScrollTop(0);
-            expect(
-              insideClasses.contains('i-amphtml-dockable-video-minimizing')
-            ).to.be.true;
-            expect(
-              insideElement.offsetWidth
-            ).to.be.at.most(r.video.offsetWidth);
+        let video;
+        return getVideoPlayer(
+            {
+              outsideView: false,
+              autoplay: true,
+              dock: true,
+            }
+        ).then(r => {
+          video = r.video;
+          viewport = video.implementation_.getViewport();
+          return listenOncePromise(video, VideoEvents.PLAY);
+        }).then(() => {
+          return poll('wait for mask', () => {
+            return !!video.querySelector('i-amphtml-video-mask');
+          }, undefined, TIMEOUT);
+        }).then(() => {
+          video.querySelector('i-amphtml-video-mask').click();
+          return poll('wait for mask to hide', () => {
+            return !video.querySelector('i-amphtml-video-mask');
           });
+        }).then(() => {
+          viewport.setScrollTop(FRAME_HEIGHT);
+          return poll('wait for video/iframe', () => {
+            return !!video.querySelector('video, iframe');
+          }, undefined, TIMEOUT);
+        }).then(() => {
+          return poll('check for class', () => {
+            const insideElement = video.querySelector('video, iframe');
+            const classes = insideElement.classList;
+            return !!classes.contains('i-amphtml-dockable-video-minimizing');
+          }, undefined, TIMEOUT);
         });
       });
 
       it('should only minimize when video is manually playing', function() {
         let viewport;
-        return getVideoPlayer({outsideView: false, autoplay: true, dock: true}).then(r => {
-          const playButton = createButton(r, 'play');
+        let video;
+        return getVideoPlayer(
+            {
+              outsideView: false,
+              autoplay: true,
+              dock: true,
+            }
+        ).then(r => {
+          video = r.video;
           viewport = r.video.implementation_.getViewport();
-          // scroll to the bottom, make video fully visible
-          viewport.scrollIntoView(r.video);
-          return listenOncePromise(r.video, VideoEvents.PLAY).then(() => {
-            viewport.setScrollTop(0);
-            const insideElement = r.video.querySelector('video, iframe');
-            const insideClasses = insideElement.classList;
-            expect(
-              insideClasses.contains('i-amphtml-dockable-video-minimizing')
-            ).to.be.false;
-            expect(
-              insideElement.offsetWidth
-            ).to.equal(r.video.offsetWidth);
-          });
+          return listenOncePromise(video, VideoEvents.PLAY);
+        }).then(() => {
+          viewport.setScrollTop(FRAME_HEIGHT);
+          return poll('wait for video/iframe', () => {
+            return !!video.querySelector('video, iframe');
+          }, undefined, TIMEOUT);
+        }).then(() => {
+          return poll('check for class', () => {
+            const insideElement = video.querySelector('video, iframe');
+            const classes = insideElement.classList;
+            return !classes.contains('i-amphtml-dockable-video-minimizing');
+          }, undefined, TIMEOUT);
         });
       });
     });
@@ -334,7 +384,7 @@ export function runVideoPlayerIntegrationTests(
     options = options || {};
     const top = options.outsideView ? '100vh' : '0';
     let fixture;
-    return createFixtureIframe('test/fixtures/video-players.html', 1000)
+    return createFixtureIframe('test/fixtures/video-players.html', FRAME_HEIGHT)
         .then(f => {
           fixture = f;
           if (opt_experiment) {
@@ -347,17 +397,21 @@ export function runVideoPlayerIntegrationTests(
           if (options.autoplay) {
             video.setAttribute('autoplay', '');
           }
+
+          video.setAttribute('id', 'myVideo');
+
           if (options.dock) {
             video.setAttribute('dock', '');
           }
-          video.setAttribute('id', 'myVideo');
+
+          video.style.position = 'absolute';
+          video.style.top = top;
+
           video.setAttribute('controls', '');
           video.setAttribute('layout', 'fixed');
           video.setAttribute('width', '300px');
           video.setAttribute('height', '50vh');
 
-          video.style.position = 'absolute';
-          video.style.top = top;
 
           const sizer = fixture.doc.createElement('div');
           sizer.position = 'relative';

@@ -24,16 +24,21 @@ import {setStyles} from '../style';
 import {isFiniteNumber} from '../types';
 import {mapRange} from '../utils/math';
 import {VideoEvents, VideoAttributes} from '../video-interface';
+import {toggleExperiment} from '../../src/experiments';
 import {
   viewerForDoc,
   viewportForDoc,
   vsyncFor,
-  platformFor
+  platformFor,
 } from '../services';
 import {
   installPositionObserverServiceForDoc,
   PositionObserverFidelity,
+  PositionInViewportEntryDef,
 } from './position-observer-impl';
+import {
+  scopedQuerySelector,
+} from '../dom';
 
 /**
  * @const {number} Percentage of the video that should be in viewport before it
@@ -88,7 +93,8 @@ export const PlayingStates = {
 * @constant {!Object<string, number>}
 */
 export const MinimizePositions = {
-  INVIEW: -1,
+  DEFAULT: -1,
+  INVIEW: 0,
   TOP: 1,
   BOTTOM: 2,
 };
@@ -211,11 +217,15 @@ export class VideoManager {
       return;
     }
 
+    // TODO(@wassgha) remove this once PositionObserver
+    // is no longer experimental
+    toggleExperiment(this.ampdoc_.win, 'amp-animation', true);
+
     if (!this.positionObserver_) {
       installPositionObserverServiceForDoc(this.ampdoc_);
       this.positionObserver_ = getServiceForDoc(
-        this.ampdoc_,
-        'position-observer'
+          this.ampdoc_,
+          'position-observer'
       );
     }
 
@@ -225,9 +235,9 @@ export class VideoManager {
 
 
     this.positionObserver_.observe(
-      entry.video.element,
-      PositionObserverFidelity.HIGH,
-      positionListener.bind(this)
+        entry.video.element,
+        PositionObserverFidelity.HIGH,
+        positionListener.bind(this)
     );
   }
 
@@ -330,11 +340,8 @@ class VideoEntry {
     /** @private {number} */
     this.initialLeft_ = 0;
 
-    /** @private {boolean} */
-    this.firstTime_ = true;
-
     /** @private {number} */
-    this.minimizePosition_ = MinimizePositions.INVIEW;
+    this.minimizePosition_ = MinimizePositions.DEFAULT;
 
 
     listenOncePromise(element, VideoEvents.LOAD)
@@ -422,7 +429,7 @@ class VideoEntry {
   dockableVideoBuilt_() {
     this.video.element.classList.add('i-amphtml-dockable-video');
 
-    const vidRect = this.video.element.getBoundingClientRect();
+    const vidRect = this.video.element./*OK*/getBoundingClientRect();
 
     this.initialWidth_ = vidRect.width;
     this.initialHeight_ = vidRect.height;
@@ -535,135 +542,133 @@ class VideoEntry {
 
   /**
    * Called when the video's position in the viewport changed.
-   * @param {number} newPos
+   * @param {PositionInViewportEntryDef} newPos
    * @private
    */
-   onPositionChanged_(newPos) {
+  onPositionChanged_(newPos) {
 
-     const vidElement = this.video.element.querySelector('video, iframe');
-     const vidStyle = vidElement.style;
+    const vidElement = scopedQuerySelector(this.video.element, 'video, iframe');
+    const vidStyle = vidElement.style;
 
-     // How much to scale the video by when minimized
-     const SCALE = 0.6;
+    // How much to scale the video by when minimized
+    const SCALE = 0.6;
 
-     // Temporary fix until PositionObserver somehow tracks objects outside of
-     // the viewport
-     if (!newPos.positionRect
+    // Temporary fix until PositionObserver somehow tracks objects outside of
+    // the viewport
+    if (!newPos.positionRect
        && this.getPlayingState() == PlayingStates.PLAYING_MANUAL
-       && !this.firstTime_) {
-       // Hide the controls.
-       this.video.hideControls();
-       vidElement.classList.add('i-amphtml-dockable-video-minimizing');
-       vidStyle.height = SCALE * this.initialHeight_ + 'px';
-       vidStyle.width = SCALE * this.initialWidth_ + 'px';
-       vidStyle.borderRadius = '6px';
-       vidStyle.left = '20px';
-       vidStyle.boxShadow = '0px 0px 20px 0px rgba(0, 0, 0, 0.3)';
-       if (this.minimizePosition_ == MinimizePositions.BOTTOM) {
-         this.minimizePosition_ = MinimizePositions.TOP;
-         vidStyle.bottom = '20px';
-         vidStyle.top = 'auto';
-       } else {
-         this.minimizePosition_ = MinimizePositions.BOTTOM;
-         vidStyle.top = '20px';
-         vidStyle.bottom = 'auto';
-       }
-     }
+       && this.minimizePosition_ != MinimizePositions.DEFAULT) {
+      // Hide the controls.
+      this.video.hideControls();
+      vidElement.classList.add('i-amphtml-dockable-video-minimizing');
+      vidStyle.height = SCALE * this.initialHeight_ + 'px';
+      vidStyle.width = SCALE * this.initialWidth_ + 'px';
+      vidStyle.borderRadius = '6px';
+      vidStyle.left = '20px';
+      vidStyle.boxShadow = '0px 0px 20px 0px rgba(0, 0, 0, 0.3)';
+      if (this.minimizePosition_ == MinimizePositions.BOTTOM) {
+        this.minimizePosition_ = MinimizePositions.TOP;
+        vidStyle.bottom = '20px';
+        vidStyle.top = 'auto';
+      } else {
+        this.minimizePosition_ = MinimizePositions.BOTTOM;
+        vidStyle.top = '20px';
+        vidStyle.bottom = 'auto';
+      }
+      return;
+    }
 
-     const docViewTop = newPos.viewportRect.top;
-     const docViewBottom = newPos.viewportRect.bottom;
+    const docViewTop = newPos.viewportRect.top;
+    const docViewBottom = newPos.viewportRect.bottom;
 
-     const elemTop = newPos.positionRect.top;
-     const elemBottom = newPos.positionRect.bottom;
+    const elemTop = newPos.positionRect.top;
+    const elemBottom = newPos.positionRect.bottom;
 
-     this.minimizePosition_ = MinimizePositions.INVIEW;
-     let inViewportHeight = 0;
+    let inViewportHeight = 0;
 
-     // Calculate height currently displayed
-     if (elemTop <= docViewTop) {
-       inViewportHeight = elemBottom - docViewTop;
-       this.minimizePosition_ = MinimizePositions.TOP;
-     } else if (elemBottom >= docViewBottom) {
-       inViewportHeight = docViewBottom - elemTop;
-       this.minimizePosition_ = MinimizePositions.BOTTOM;
-     } else {
-       this.minimizePosition_ = MinimizePositions.INVIEW;
-     }
+    // Calculate height currently displayed
+    if (elemTop <= docViewTop) {
+      inViewportHeight = elemBottom - docViewTop;
+      this.minimizePosition_ = MinimizePositions.TOP;
+    } else if (elemBottom >= docViewBottom) {
+      inViewportHeight = docViewBottom - elemTop;
+      this.minimizePosition_ = MinimizePositions.BOTTOM;
+    } else {
+      this.minimizePosition_ = MinimizePositions.INVIEW;
+    }
 
-     if (this.minimizePosition_ != MinimizePositions.INVIEW
+    if (this.minimizePosition_ != MinimizePositions.INVIEW
       && this.getPlayingState() == PlayingStates.PLAYING_MANUAL
-      && !this.firstTime_) {
+      && this.minimizePosition_ != MinimizePositions.DEFAULT) {
 
-       // Minimize the video
+      // Minimize the video
 
-       this.video.hideControls();
+      this.video.hideControls();
 
-       vidElement.classList.add('i-amphtml-dockable-video-minimizing');
+      vidElement.classList.add('i-amphtml-dockable-video-minimizing');
 
-       vidStyle.height = mapRange(inViewportHeight,
-         0, this.initialHeight_,
-         SCALE * this.initialHeight_, this.initialHeight_
-       ) + 'px';
+      vidStyle.height = mapRange(inViewportHeight,
+          0, this.initialHeight_,
+          SCALE * this.initialHeight_, this.initialHeight_
+      ) + 'px';
 
-       vidStyle.width = mapRange(inViewportHeight,
-         0, this.initialHeight_,
-         SCALE * this.initialWidth_, this.initialWidth_
-       ) + 'px';
+      vidStyle.width = mapRange(inViewportHeight,
+          0, this.initialHeight_,
+          SCALE * this.initialWidth_, this.initialWidth_
+      ) + 'px';
 
-       vidStyle.borderRadius = mapRange(inViewportHeight,
-         this.initialHeight_, 0,
-         0, 6
-       ) + 'px';
+      vidStyle.borderRadius = mapRange(inViewportHeight,
+          this.initialHeight_, 0,
+          0, 6
+      ) + 'px';
 
-       const shdw = mapRange(inViewportHeight,
-         this.initialHeight_, 0,
-         0, 0.3
-       );
+      const shdw = mapRange(inViewportHeight,
+          this.initialHeight_, 0,
+          0, 0.3
+      );
 
-       vidStyle.boxShadow = '0px 0px 20px 0px rgba(0, 0, 0, ' + shdw + ')';
+      vidStyle.boxShadow = '0px 0px 20px 0px rgba(0, 0, 0, ' + shdw + ')';
 
-       vidStyle.left = mapRange(inViewportHeight,
-         this.initialHeight_, 0,
-         this.initialLeft_, 20
-       ) + 'px';
+      vidStyle.left = mapRange(inViewportHeight,
+          this.initialHeight_, 0,
+          this.initialLeft_, 20
+      ) + 'px';
 
-       // Different behavior based on whether the video got minimized
-       // from the top or the bottom
-       if (this.minimizePosition_ == MinimizePositions.TOP) {
+      // Different behavior based on whether the video got minimized
+      // from the top or the bottom
+      if (this.minimizePosition_ == MinimizePositions.TOP) {
 
-         vidStyle.top = mapRange(inViewportHeight,
-           this.initialHeight_, 0,
-           0, 20
-         ) + 'px';
+        vidStyle.top = mapRange(inViewportHeight,
+            this.initialHeight_, 0,
+            0, 20
+        ) + 'px';
 
-         vidStyle.bottom = 'auto';
+        vidStyle.bottom = 'auto';
 
-       } else {
+      } else {
 
-         vidStyle.bottom = mapRange(inViewportHeight,
-           this.initialHeight_, 0,
-           0, 20
-         ) + 'px';
+        vidStyle.bottom = mapRange(inViewportHeight,
+            this.initialHeight_, 0,
+            0, 20
+        ) + 'px';
 
-         vidStyle.top = 'auto';
-       }
+        vidStyle.top = 'auto';
+      }
 
-       // TODO(@wassim) Make minimized video draggable
+      // TODO(@wassim) Make minimized video draggable
 
-     } else if (this.minimizePosition_ == MinimizePositions.INVIEW) {
+    } else if (this.minimizePosition_ == MinimizePositions.INVIEW) {
 
-       // Restore the video inline
-       vidElement.classList.remove('i-amphtml-dockable-video-minimizing');
-       vidElement.setAttribute('style', '');
-       this.firstTime_ = false;
-       if (!this.hasAutoplay_ || this.userInteractedWithAutoPlay_) {
-         this.video.showControls();
-       }
+      // Restore the video inline
+      vidElement.classList.remove('i-amphtml-dockable-video-minimizing');
+      vidElement.setAttribute('style', '');
+      if (!this.hasAutoplay_ || this.userInteractedWithAutoPlay_) {
+        this.video.showControls();
+      }
+    }
 
-     }
-
-     vidStyle.maxWidth = this.initialWidth_ + 'px';
-   }
+    vidStyle.maxWidth = this.initialWidth_ + 'px';
+  }
 
   /**
    * Creates a pure CSS animated equalizer icon.

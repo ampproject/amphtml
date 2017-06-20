@@ -290,11 +290,6 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
       'amp-sidebar/1.0/amp-sidebar-1.0.md',
   },
-  {
-    id: 'video-dock',
-    name: 'Videos minimize to the corner on scroll (prototype).',
-    spec: 'https://github.com/ampproject/amphtml/issues/8088',
-  },
 ];
 
 if (getMode().localDev) {
