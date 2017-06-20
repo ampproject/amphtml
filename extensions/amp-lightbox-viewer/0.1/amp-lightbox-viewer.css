@@ -56,7 +56,6 @@
   height: 50px;
   overflow: hidden !important;
   background-color: rgba(0,0,0,0.7);
-  background: -webkit-linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0));
   background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0));
   transition: opacity 1s;
   z-index: 1;
