@@ -29,7 +29,7 @@ import {masterFrameAccessibleTypes} from '../ads/_a4a-config';
  * @param {string} type
  * @return {!Window}
  */
-export function masterSelection(win, type) { debugger;
+export function masterSelection(win, type) {
   // The master has a special name.
   const allowedTypes = (masterFrameAccessibleTypes[type] || []).slice();
   allowedTypes.push(type);
