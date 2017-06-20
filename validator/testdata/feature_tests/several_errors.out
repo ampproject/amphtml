@@ -1,5 +1,5 @@
 FAIL
-feature_tests/several_errors.html:23:2 The attribute 'charset' may not appear in tag 'meta name= and content='. [DISALLOWED_HTML]
+feature_tests/several_errors.html:23:2 The attribute 'charset' in tag 'meta charset=utf-8' is set to the invalid value 'pick-a-key'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
 feature_tests/several_errors.html:26:2 The tag 'script' is disallowed except in specific forms. [CUSTOM_JAVASCRIPT_DISALLOWED]
 feature_tests/several_errors.html:32:2 The mandatory attribute 'height' is missing in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_LAYOUT_PROBLEM]
 feature_tests/several_errors.html:34:2 The attribute 'width' in tag 'amp-ad' is set to the invalid value '100%'. (see https://www.ampproject.org/docs/reference/components/amp-ad) [AMP_LAYOUT_PROBLEM]

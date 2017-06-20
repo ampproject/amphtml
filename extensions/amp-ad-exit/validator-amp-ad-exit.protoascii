@@ -48,7 +48,7 @@ tags: {  # amp-ad-exit config JSON
     name: "type"
     mandatory: true
     value: "application/json"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-ad-exit"
 }

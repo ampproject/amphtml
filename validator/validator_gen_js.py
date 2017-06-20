@@ -772,12 +772,17 @@ def DispatchKeyForTagSpecOrNone(tag_spec):
     a string indicating the dispatch key, or None.
   """
   for attr in tag_spec.attrs:
-    if attr.dispatch_key:
+    if attr.dispatch_key != attr.NONE_DISPATCH:
       mandatory_parent = tag_spec.mandatory_parent or ''
       attr_name = attr.name
       attr_value = attr.value_casei or attr.value.lower()
       assert attr_value is not None
-      return '%s\\0%s\\0%s' % (attr_name, attr_value, mandatory_parent)
+      if attr.dispatch_key == attr.NAME_DISPATCH:
+        return '%s' % attr_name
+      if attr.dispatch_key == attr.NAME_VALUE_DISPATCH:
+        return '%s\\0%s' % (attr_name, attr_value)
+      if attr.dispatch_key == attr.NAME_VALUE_PARENT_DISPATCH:
+        return '%s\\0%s\\0%s' % (attr_name, attr_value, mandatory_parent)
   return None
 
 

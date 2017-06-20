@@ -108,11 +108,21 @@ message AttrSpec {
   // If provided, a URL which links to the AMP HTML spec for this deprecation.
   optional string deprecation_url = 8;
 
+  enum DispatchKeyType {
+    // Indicates that the attribute does not form a dispatch key.
+    NONE_DISPATCH = 0;
+    // Indicates that the name of the attribute alone forms a dispatch key.
+    NAME_DISPATCH = 1;
+    // Indicates that the name + value of the attribute forms a dispatch key.
+    NAME_VALUE_DISPATCH = 2;
+    // Indicates that the name + value + mandatory parent forms a dispatch key.
+    NAME_VALUE_PARENT_DISPATCH = 3;
+  }
   // If set true, the TagSpec containing this AttrSpec will be evaluated first
   // for any encountered tag which matches the tag name and this attribute spec.
   // May only be set for an AttrSpec where mandatory=true and the value field
   // is set.
-  optional bool dispatch_key = 13;
+  optional DispatchKeyType dispatch_key = 13 [default = NONE_DISPATCH];
 
   // If set to true, the TagSpec containing this AttrSpec implicitly has this
   // attribute and the attribute is considered valid.
