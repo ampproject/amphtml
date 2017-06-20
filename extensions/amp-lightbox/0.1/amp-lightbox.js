@@ -208,6 +208,11 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   scrollHandler_() {
+    // If scroll top is 0, it's set to 1 to avoid scroll-freeze issue.
+    if (this.element./*OK*/scrollTop == 0) {
+      this.element./*OK*/scrollTop = 1;
+      this.update_(1);
+    }
     const currentScrollTop = this.element./*OK*/scrollTop;
     this.pos_ = currentScrollTop;
 
@@ -245,6 +250,7 @@ class AmpLightbox extends AMP.BaseElement {
   update_(pos) {
     dev().fine(TAG, 'update_');
     this.updateChildrenInViewport_(pos, this.oldPos_);
+    this.scrollHandler_();
     this.oldPos_ = pos;
     this.pos_ = pos;
   }
