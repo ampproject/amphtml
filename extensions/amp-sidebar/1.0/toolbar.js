@@ -17,7 +17,13 @@
 import {toggle} from '../../../src/style';
 
 /** @const */
-const TOOLBAR_CLASS = 'i-amphtml-sidebar-toolbar';
+const TOOLBAR_ELEMENT_CLASS = 'i-amphtml-toolbar';
+
+/** @const */
+const TOOLBAR_CONTAINER_CLASS = 'i-amphtml-toolbar-container';
+
+/** @const */
+const TOOLBAR_PLACEHOLDER_CLASS = 'i-amphtml-toolbar-placeholder';
 
 export class Toolbar {
   /**
@@ -25,8 +31,8 @@ export class Toolbar {
   * @param {!AMP.BaseElement} sidebar
   */
   constructor(element, sidebar) {
-    /** @public {!Element} */
-    this.toolbarDOMElement = element;
+    /** @private {!Element} */
+    this.toolbarDOMElement_ = element;
 
     /** @private {!AMP.BaseElement} **/
     this.sidebar_ = sidebar;
@@ -35,7 +41,7 @@ export class Toolbar {
     this.sidebarElement_ = this.sidebar_.element;
 
     /** @private {!string} */
-    this.toolbarMedia_ = this.toolbarDOMElement.getAttribute('toolbar');
+    this.toolbarMedia_ = this.toolbarDOMElement_.getAttribute('toolbar');
 
     /** @private {Element|undefined} */
     this.toolbarClone_ = undefined;
@@ -52,12 +58,12 @@ export class Toolbar {
     this.buildToolbar_();
 
     //Finally, find our tool-bar only elements
-    if (this.toolbarDOMElement.hasAttribute('toolbar-only')) {
-      this.toolbarOnlyElementsInSidebar_.push(this.toolbarDOMElement);
+    if (this.toolbarDOMElement_.hasAttribute('toolbar-only')) {
+      this.toolbarOnlyElementsInSidebar_.push(this.toolbarDOMElement_);
     } else {
       // Get our toolbar only elements
       const toolbarOnlyQuery =
-        this.toolbarDOMElement.querySelectorAll('[toolbar-only]');
+        this.toolbarDOMElement_.querySelectorAll('[toolbar-only]');
       if (toolbarOnlyQuery.length > 0) {
         // Check the nav's children for toolbar-only
         this.toolbarOnlyElementsInSidebar_ =
@@ -92,11 +98,15 @@ export class Toolbar {
     const fragment = this.sidebarElement_
       .ownerDocument.createDocumentFragment();
     this.targetElement_ =
-      this.toolbarDOMElement.ownerDocument.createElement('header');
+      this.toolbarDOMElement_.ownerDocument.createElement('header');
+    this.targetElement_.className = TOOLBAR_CONTAINER_CLASS;
     //Place the elements into the target
-    this.toolbarClone_ = this.toolbarDOMElement.cloneNode(true);
-    this.toolbarClone_.className = TOOLBAR_CLASS;
+    this.toolbarClone_ = this.toolbarDOMElement_.cloneNode(true);
+    this.toolbarClone_.className = TOOLBAR_ELEMENT_CLASS;
     this.targetElement_.appendChild(this.toolbarClone_);
+    const toolbarPlaceholder = this.toolbarClone_.cloneNode(true);
+    toolbarPlaceholder.className = TOOLBAR_PLACEHOLDER_CLASS;
+    this.targetElement_.appendChild(toolbarPlaceholder);
     toggle(this.targetElement_, false);
     fragment.appendChild(this.targetElement_);
     this.sidebarElement_.parentElement
@@ -113,7 +123,10 @@ export class Toolbar {
   }
 
   /**
-   * Function to attempt to show the toolbar
+   * Function to attempt to show the toolbar,
+   * and hide toolbar-only element in the sidebar.
+   * Returns true, if the toolbar will be shown in the next sidebar mutate elemnt,
+   * false otherwise.
    * @returns {boolean}
    * @private
    */
@@ -123,7 +136,7 @@ export class Toolbar {
     }
 
     // Display the elements
-    this.sidebar_.mutateElement(() => {
+    this.sidebar_.vsync_.mutate(() => {
       if (this.targetElement_) {
         toggle(this.targetElement_, true);
       }
@@ -138,7 +151,10 @@ export class Toolbar {
   }
 
   /**
-   * Function to hide the toolbar
+  * Function to hide the toolbar,
+  * and show toolbar-only element in the sidebar.
+  * Returns true, if the toolbar will be hidden in the next sidebar mutate elemnt,
+  * false otherwise.
    * @returns {boolean}
    * @private
    */
@@ -147,7 +163,7 @@ export class Toolbar {
       return false;
     }
 
-    this.sidebar_.mutateElement(() => {
+    this.sidebar_.vsync_.mutate(() => {
       // Hide the elements
       if (this.targetElement_) {
         toggle(this.targetElement_, false);
