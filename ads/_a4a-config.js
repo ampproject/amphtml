@@ -86,6 +86,8 @@ export const signingServerURLs = {
 };
 
 /**
+ * Allows networks to specify other networks with which it may share a master
+ * frame.
  * @type {!Object<string, !Array<string>>}
  */
 export const masterFrameAccessibleTypes = {
