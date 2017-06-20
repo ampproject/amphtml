@@ -321,7 +321,6 @@ export class LaterpayVendor {
     const purchaseButton = this.createElement_('button');
     purchaseButton.className = TAG + '-purchase-button';
     purchaseButton.textContent = this.i18n_.defaultButton;
-    purchaseButton.disabled = true;
     this.purchaseButton_ = purchaseButton;
     this.purchaseButtonListener_ = listen(purchaseButton, 'click', ev => {
       this.handlePurchase_(ev, this.selectedPurchaseOption_.value);
@@ -334,6 +333,17 @@ export class LaterpayVendor {
     dialogContainer.appendChild(this.innerContainer_);
     dialogContainer.appendChild(this.createLaterpayBadge_());
     this.containerEmpty_ = false;
+    this.preselectFirstOption_(listContainer.firstElementChild);
+  }
+
+  /**
+   * @private
+   * @param {!Node} firstOption
+   */
+  preselectFirstOption_(firstOption) {
+    const firstInput = firstOption.querySelector('input[type="radio"]');
+    firstInput.checked = true;
+    this.selectPurchaseOption_(firstInput);
   }
 
   /**
@@ -472,18 +482,23 @@ export class LaterpayVendor {
    */
   handlePurchaseOptionSelection_(ev) {
     ev.preventDefault();
+    this.selectPurchaseOption_(ev.target);
+  }
+
+  /**
+   * @param {!Node} target
+   * @private
+   */
+  selectPurchaseOption_(target) {
     const selectedOptionClassname = TAG + '-selected';
     const prevPurchaseOption = this.selectedPurchaseOption_;
-    const purchaseActionLabel = ev.target.dataset.purchaseActionLabel;
+    const purchaseActionLabel = target.dataset.purchaseActionLabel;
     if (prevPurchaseOption &&
         prevPurchaseOption.classList.contains(selectedOptionClassname)) {
       prevPurchaseOption.classList.remove(selectedOptionClassname);
     }
-    this.selectedPurchaseOption_ = ev.target;
+    this.selectedPurchaseOption_ = target;
     this.selectedPurchaseOption_.classList.add(selectedOptionClassname);
-    if (this.purchaseButton_.disabled) {
-      this.purchaseButton_.disabled = false;
-    }
     this.purchaseButton_.textContent = purchaseActionLabel;
   }
 
