@@ -95,7 +95,7 @@ export class Toolbar {
     //Place the elements into the target
     this.toolbarClone_ = this.element.cloneNode(true);
     this.toolbarTarget_.appendChild(this.toolbarClone_);
-
+    toggle(this.toolbarTarget_, false);
     fragment.appendChild(this.toolbarTarget_);
     this.sidebarElement_.parentElement
         .insertBefore(fragment, this.sidebarElement_);
@@ -122,7 +122,7 @@ export class Toolbar {
 
     // Display the elements
     this.sidebar_.mutateElement(() => {
-      this.toolbarTarget_.setAttribute('show', '');
+      toggle(this.toolbarTarget_, true);
       if (this.toolbarOnlyElements_) {
         this.toolbarOnlyElements_.forEach(element => {
           toggle(element, false);
@@ -145,7 +145,7 @@ export class Toolbar {
 
     this.sidebar_.mutateElement(() => {
       // Hide the elements
-      this.toolbarTarget_.removeAttribute('show');
+      toggle(this.toolbarTarget_, false);
       if (this.toolbarOnlyElements_) {
         this.toolbarOnlyElements_.forEach(element => {
           toggle(element, true);
