@@ -11,56 +11,58 @@ requirement: {
 
 requirement: {
   type: BANNED_PROPERTY_CALL
-  error_message: 'String.prototype.padStart is not allowed'
-  value: 'String.prototype.padStart'
+  error_message: 'string.prototype.padStart is not allowed'
+  value: 'string.prototype.padStart'
 }
 
 requirement: {
   type: BANNED_PROPERTY_CALL
-  error_message: 'String.prototype.padEnd is not allowed'
-  value: 'String.prototype.padEnd'
+  error_message: 'string.prototype.padEnd is not allowed'
+  value: 'string.prototype.padEnd'
 }
 
 requirement: {
   type: BANNED_PROPERTY_CALL
-  error_message: 'String.prototype.startsWith is not allowed'
-  value: 'String.prototype.startsWith'
+  error_message: 'string.prototype.startsWith is not allowed'
+  value: 'string.prototype.startsWith'
 }
 
 requirement: {
   type: BANNED_PROPERTY_CALL
-  error_message: 'String.prototype.endsWith is not allowed'
-  value: 'String.prototype.endsWith'
+  error_message: 'string.prototype.endsWith is not allowed'
+  value: 'string.prototype.endsWith'
 }
 
 requirement: {
   type: BANNED_PROPERTY_CALL
-  error_message: 'String.prototype.includes is not allowed'
-  value: 'String.prototype.includes'
+  error_message: 'string.prototype.includes is not allowed'
+  value: 'string.prototype.includes'
+  # SW code is modern-browser-only.
+  whitelist: 'src/service-worker/core.js'
 }
 
 requirement: {
   type: BANNED_PROPERTY_CALL
-  error_message: 'String.prototype.repeat is not allowed'
-  value: 'String.prototype.repeat'
+  error_message: 'string.prototype.repeat is not allowed'
+  value: 'string.prototype.repeat'
 }
 
 requirement: {
   type: BANNED_PROPERTY_CALL
-  error_message: 'String.prototype.normalize is not allowed'
-  value: 'String.prototype.normalize'
+  error_message: 'string.prototype.normalize is not allowed'
+  value: 'string.prototype.normalize'
 }
 
 requirement: {
   type: BANNED_PROPERTY_CALL
-  error_message: 'String.prototype.codePointAt is not allowed'
-  value: 'String.prototype.codePointAt'
+  error_message: 'string.prototype.codePointAt is not allowed'
+  value: 'string.prototype.codePointAt'
 }
 
 requirement: {
   type: BANNED_NAME
   error_message: 'String.fromCodePoint is not allowed'
-  value: 'Sring.fromCodePoint'
+  value: 'String.fromCodePoint'
 }
 
 # Array
