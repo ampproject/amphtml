@@ -317,9 +317,19 @@ export function imaVideo(global, data) {
   setStyle(videoPlayer, 'width', '100%');
   setStyle(videoPlayer, 'height', '100%');
   setStyle(videoPlayer, 'background-color', 'black');
-  videoPlayer.setAttribute('src', data.src);
   videoPlayer.setAttribute('poster', data.poster);
   videoPlayer.setAttribute('playsinline', true);
+  if (data.src) {
+    const sourceElement = document.createElement('source');
+    sourceElement.setAttribute('src', data.src);
+    videoPlayer.appendChild(sourceElement);
+  }
+  if (data.childElements) {
+    const children = JSON.parse(data.childElements);
+    children.forEach(child => {
+      videoPlayer.appendChild(htmlToElement(child));
+    });
+  }
 
   contentDiv.appendChild(videoPlayer);
   wrapperDiv.appendChild(contentDiv);
@@ -364,8 +374,8 @@ export function imaVideo(global, data) {
       'webkitfullscreenchange'];
     fullScreenEvents.forEach(fsEvent => {
       global.document.addEventListener(fsEvent,
-        onFullscreenChange.bind(null, global),
-        false);
+          onFullscreenChange.bind(null, global),
+          false);
     });
 
     adDisplayContainer =
@@ -395,6 +405,12 @@ export function imaVideo(global, data) {
     adRequestFailed = false;
     adsLoader.requestAds(adsRequest);
   });
+}
+
+function htmlToElement(html) {
+  const template = document.createElement('template');
+  template./*OK*/innerHTML = html;
+  return template.content.firstChild;
 }
 
 /**
@@ -459,8 +475,8 @@ export function onAdsManagerLoaded(global, adsManagerLoadedEvent) {
   const adsRenderingSettings = new global.google.ima.AdsRenderingSettings();
   adsRenderingSettings.restoreCustomPlaybackStateOnAdBreakComplete = true;
   adsRenderingSettings.uiElements =
-      [global.google.ima.UiElements.AD_ATTRIBUTION,
-       global.google.ima.UiElements.COUNTDOWN];
+  [global.google.ima.UiElements.AD_ATTRIBUTION,
+    global.google.ima.UiElements.COUNTDOWN];
   adsManager = adsManagerLoadedEvent.getAdsManager(videoPlayer,
       adsRenderingSettings);
   adsManager.addEventListener(global.google.ima.AdErrorEvent.Type.AD_ERROR,
@@ -507,9 +523,9 @@ export function onAdError() {
 export function onContentPauseRequested(global) {
   if (adsManagerWidthOnLoad) {
     adsManager.resize(
-      adsManagerWidthOnLoad,
-      adsManagerHeightOnLoad,
-      global.google.ima.ViewMode.NORMAL);
+        adsManagerWidthOnLoad,
+        adsManagerHeightOnLoad,
+        global.google.ima.ViewMode.NORMAL);
     adsManagerWidthOnLoad = null;
     adsManagerHeightOnLoad = null;
   }

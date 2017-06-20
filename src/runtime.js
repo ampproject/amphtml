@@ -69,9 +69,9 @@ import {installStorageServiceForDoc} from './service/storage-impl';
 import {installStyles} from './style-installer';
 import {installTimerService} from './service/timer-impl';
 import {installTemplatesService} from './service/template-impl';
-import {installUrlReplacementsServiceForDoc,} from
+import {installUrlReplacementsServiceForDoc} from
     './service/url-replacements-impl';
-import {installViewerServiceForDoc, setViewerVisibilityState,} from
+import {installViewerServiceForDoc, setViewerVisibilityState} from
     './service/viewer-impl';
 import {installViewportServiceForDoc} from './service/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
@@ -266,12 +266,12 @@ function adoptShared(global, opts, callback) {
 
   /**
    * Sets the function to forward tick events to.
-   * @param {function(string,?string=,number=)} fn
+   * @param {function(string,?string=,number=)} unusedFn
    * @param {function()=} opt_flush
    * @deprecated
    * @export
    */
-  global.AMP.setTickFunction = (fn, opt_flush) => {};
+  global.AMP.setTickFunction = (unusedFn, opt_flush) => {};
 
   // Run specific setup for a single-doc or shadow-doc mode.
   callback(global, extensions);
@@ -371,7 +371,7 @@ function adoptShared(global, opts, callback) {
   // immediately we need to keep pushing onto preregisteredExtensions
   if (!global.AMP.push) {
     global.AMP.push = preregisteredExtensions.push.bind(
-      preregisteredExtensions);
+        preregisteredExtensions);
   }
 
   installAutoLoadExtensions();
@@ -575,9 +575,9 @@ function registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory) {
   // TODO(kmh287): Investigate removing the opt_instantiate arg after
   // all other services have been refactored.
   registerServiceBuilderForDoc(ampdoc,
-                               name,
-                               ctor,
-                               /* opt_instantiate */ true);
+      name,
+      ctor,
+      /* opt_instantiate */ true);
 }
 
 
@@ -656,7 +656,7 @@ class MultidocManager {
     /**
      * Posts message to the ampdoc.
      * @param {string} eventType
-     * @param {!JSONType} data
+     * @param {!JsonObject} data
      * @param {boolean} unusedAwaitResponse
      * @return {(!Promise<*>|undefined)}
      */
@@ -948,7 +948,7 @@ class MultidocManager {
       const viewer = viewerForDoc(shadowRoot.AMP.ampdoc);
       this.timer_.delay(() => {
         viewer.receiveMessage('broadcast',
-            /** @type {!JSONType} */ (data),
+            /** @type {!JsonObject} */ (data),
             /* awaitResponse */ false);
       }, 0);
     });
@@ -1081,7 +1081,7 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
   // The :not is an extra prevention of recursion because it will be
   // added to script tags that go into the code path below.
   const scriptInHead = win.document.head./*OK*/querySelector(
-          `[custom-element="${fnOrStruct.n}"]:not([i-amphtml-inserted])`);
+      `[custom-element="${fnOrStruct.n}"]:not([i-amphtml-inserted])`);
   dev().assert(scriptInHead, 'Expected to find script for extension: %s',
       fnOrStruct.n);
   if (!scriptInHead) {

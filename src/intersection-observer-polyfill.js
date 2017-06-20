@@ -15,6 +15,7 @@
  */
 
 import {dev} from './log';
+import {dict} from './utils/object';
 import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
 import {SubscriptionApi} from './iframe-helper';
 
@@ -36,7 +37,7 @@ export let DOMRect;
 
 export const DEFAULT_THRESHOLD =
     [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4,
-    0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1];
+      0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1];
 
 /** @typedef {{
  *    element: !Element,
@@ -116,7 +117,7 @@ export class IntersectionObserverApi {
       for (let i = 0; i < entries.length; i++) {
         delete entries[i]['target'];
       }
-      this.subscriptionApi_.send('intersection', {changes: entries});
+      this.subscriptionApi_.send('intersection', dict({'changes': entries}));
     }, {threshold: DEFAULT_THRESHOLD});
     this.intersectionObserver_.tick(this.viewport_.getRect());
 
@@ -325,14 +326,13 @@ export class IntersectionObserverPolyfill {
     const element = state.element;
 
     // Normalize container LayoutRect to be relative to page
-    let elementRect;
     let ownerRect = null;
 
     // If opt_iframe is provided, all LayoutRect has position relative to
     // the iframe.
     // If opt_iframe is not provided, all LayoutRect has position relative to
     // the host document.
-    elementRect = element.getLayoutBox();
+    const elementRect = element.getLayoutBox();
     const owner = element.getOwner();
     ownerRect = owner && owner.getLayoutBox();
 

@@ -1,5 +1,5 @@
 #
-# Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+# Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,43 +14,31 @@
 # limitations under the license.
 #
 
-tags: {  # amp-list
+tags: {  # amp-sidebar
   html_format: AMP
   tag_name: "SCRIPT"
   extension_spec: {
-    name: "amp-list"
+    name: "amp-sidebar"
     allowed_versions: "0.1"
+    allowed_versions: "1.0"
     allowed_versions: "latest"
     requires_usage: DEPRECATED_WARNING
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-list>
+tags: {  # <amp-sidebar>
   html_format: AMP
-  tag_name: "AMP-LIST"
-  requires_extension: "amp-list"
-  attrs: { name: "credentials" }
+  tag_name: "AMP-SIDEBAR"
+  mandatory_parent: "BODY"
+  disallowed_ancestor: "AMP-SIDEBAR"
+  requires_extension: "amp-sidebar"
   attrs: {
-    name: "src"
-    mandatory: true
-    value_url: {
-      allowed_protocol: "https"
-      allow_relative: true  # Will be set to false at a future date.
-    }
-    blacklisted_value_regex: "__amp_source_origin"
+    name: "side"
+    value_regex: "(left|right)"
   }
-  attrs: { name: "items" }
-  # TODO(gregable): Implement validation that requires the template attr value
-  # to reference the id of an existing template element.
-  attrs: { name: "template" }
   attr_lists: "extended-amp-global"
   amp_layout: {
-    supported_layouts: FILL
-    supported_layouts: FIXED
-    supported_layouts: FIXED_HEIGHT
-    supported_layouts: FLEX_ITEM
     supported_layouts: NODISPLAY
-    supported_layouts: RESPONSIVE
   }
 }

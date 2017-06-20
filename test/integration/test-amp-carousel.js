@@ -25,9 +25,9 @@ describe.skip('integration amp-carousel', () => {
   let fixture;
   beforeEach(() => {
     return createFixtureIframe('test/fixtures/carousels.html', 1000)
-      .then(f => {
-        fixture = f;
-      });
+        .then(f => {
+          fixture = f;
+        });
   });
 
   it('should show the body in carousel test', () => {

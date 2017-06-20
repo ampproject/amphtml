@@ -14,24 +14,25 @@
 # limitations under the license.
 #
 
-tags: {  # amp-ima-video
+tags: {  # amp-list
   html_format: AMP
   tag_name: "SCRIPT"
   extension_spec: {
-    name: "amp-ima-video"
+    name: "amp-list"
     allowed_versions: "0.1"
     allowed_versions: "latest"
+    requires_usage: DEPRECATED_WARNING
+    deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-ima-video>
+tags: {  # <amp-list>
   html_format: AMP
-  tag_name: "AMP-IMA-VIDEO"
-  disallowed_ancestor: "AMP-SIDEBAR"
-  requires_extension: "amp-ima-video"
-  # data-* is generally allowed, but it's not generally mandatory.
+  tag_name: "AMP-LIST"
+  requires_extension: "amp-list"
+  attrs: { name: "credentials" }
   attrs: {
-    name: "data-src"
+    name: "src"
     mandatory: true
     value_url: {
       allowed_protocol: "https"
@@ -39,20 +40,19 @@ tags: {  # <amp-ima-video>
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
-  attrs: {
-    name: "data-tag"
-    mandatory: true
-    value_url: {
-      allowed_protocol: "https"
-      allow_relative: true  # Will be set to false at a future date.
-    }
-  }
+  attrs: { name: "items" }
+  # TODO(gregable): Implement validation that requires the template attr value
+  # to reference the id of an existing template element.
+  attrs: { name: "template" }
+  # <amp-bind>
+  attrs: { name: "[src]" }
+  attrs: { name: "[state]" }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ima-video"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }

@@ -37,7 +37,6 @@ import {timerFor} from './services';
  * @const {!Object<string, string>}
  */
 const SERVICES = {
-  'amp-accordion': '[custom-element=amp-accordion]',
   'amp-dynamic-css-classes': '[custom-element=amp-dynamic-css-classes]',
   'variant': 'amp-experiment',
 };
@@ -58,9 +57,9 @@ const LOAD_TIMEOUT = 3000;
 export function waitForServices(win) {
   const promises = includedServices(win).map(service => {
     return timerFor(win).timeoutPromise(
-      LOAD_TIMEOUT,
-      getServicePromise(win, service),
-      `Render timeout waiting for service ${service} to be ready.`
+        LOAD_TIMEOUT,
+        getServicePromise(win, service),
+        `Render timeout waiting for service ${service} to be ready.`
     );
   });
   return Promise.all(promises);

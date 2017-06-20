@@ -23,7 +23,7 @@ import {whenDocumentComplete} from '../document-ready';
 import {getMode} from '../mode';
 import {isCanary} from '../experiments';
 import {throttle} from '../utils/rate-limit';
-import {map} from '../utils/object';
+import {dict, map} from '../utils/object';
 
 /**
  * Maximum number of tick events we allow to accumulate in the performance
@@ -33,11 +33,13 @@ import {map} from '../utils/object';
 const QUEUE_LIMIT = 50;
 
 /**
- * @typedef {{
+ * Fields:
+ * {{
  *   label: string,
  *   delta: (number|null|undefined),
  *   value: (number|null|undefined)
  * }}
+ * @typedef {!JsonObject}
  */
 let TickEventDef;
 
@@ -267,7 +269,7 @@ export class Performance {
     const size = viewportForDoc(this.win.document).getSize();
     const rect = layoutRectLtwh(0, 0, size.width, size.height);
     return this.resources_.getResourcesInRect(
-            this.win, rect, /* isInPrerender */ true)
+        this.win, rect, /* isInPrerender */ true)
         .then(resources => Promise.all(resources.map(r => r.loadedOnce())));
   }
 
@@ -283,12 +285,12 @@ export class Performance {
   tick(label, opt_delta) {
     const value = (opt_delta == undefined) ? this.win.Date.now() : undefined;
 
-    const data = {
-      label,
-      value,
+    const data = dict({
+      'label': label,
+      'value': value,
       // Delta can negative, but will always be changed to 0.
-      delta: opt_delta != null ? Math.max(opt_delta, 0) : undefined,
-    };
+      'delta': opt_delta != null ? Math.max(opt_delta, 0) : undefined,
+    });
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
       this.viewer_.sendMessage('tick', data);
     } else {
@@ -330,9 +332,9 @@ export class Performance {
    */
   flush() {
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
-      this.viewer_.sendMessage('sendCsi', {
-        ampexp: this.ampexp_,
-      }, /* cancelUnsent */true);
+      this.viewer_.sendMessage('sendCsi', dict({
+        'ampexp': this.ampexp_,
+      }), /* cancelUnsent */true);
     }
   }
 
@@ -398,7 +400,7 @@ export class Performance {
    */
   prerenderComplete_(value) {
     if (this.viewer_) {
-      this.viewer_.sendMessage('prerenderComplete', {value},
+      this.viewer_.sendMessage('prerenderComplete', dict({'value': value}),
           /* cancelUnsent */true);
     }
   }

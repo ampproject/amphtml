@@ -89,18 +89,18 @@ describe('base64 <> utf-8 encode/decode', () => {
 describe('base64UrlDecodeToBytes', () => {
   it('should map a sample string appropriately', () => {
     expect(base64UrlDecodeToBytes('AQAB'))
-      .to.deep.equal(new Uint8Array([1, 0, 1]));
+        .to.deep.equal(new Uint8Array([1, 0, 1]));
     expect(base64UrlDecodeToBytes('_-..'))
-      .to.deep.equal(new Uint8Array([255]));
+        .to.deep.equal(new Uint8Array([255]));
   });
 
   it('should handle padded and unpadded input', () => {
     expect(base64UrlDecodeToBytes('cw')).to.deep.equal(stringToBytes('s'));
     expect(base64UrlDecodeToBytes('cw'))
-      .to.deep.equal(base64UrlDecodeToBytes('cw..'));
+        .to.deep.equal(base64UrlDecodeToBytes('cw..'));
     expect(base64UrlDecodeToBytes('c3U')).to.deep.equal(stringToBytes('su'));
     expect(base64UrlDecodeToBytes('c3U'))
-      .to.deep.equal(base64UrlDecodeToBytes('c3U.'));
+        .to.deep.equal(base64UrlDecodeToBytes('c3U.'));
     expect(base64UrlDecodeToBytes('c3Vy')).to.deep.equal(stringToBytes('sur'));
   });
 
@@ -116,18 +116,18 @@ describe('base64UrlDecodeToBytes', () => {
 describe('base64DecodeToBytes', () => {
   it('should map a sample string appropriately', () => {
     expect(base64DecodeToBytes('AQAB'))
-      .to.deep.equal(new Uint8Array([1, 0, 1]));
+        .to.deep.equal(new Uint8Array([1, 0, 1]));
     expect(base64DecodeToBytes('/+=='))
-      .to.deep.equal(new Uint8Array([255]));
+        .to.deep.equal(new Uint8Array([255]));
   });
 
   it('should handle padded and unpadded input', () => {
     expect(base64DecodeToBytes('cw')).to.deep.equal(stringToBytes('s'));
     expect(base64DecodeToBytes('cw'))
-      .to.deep.equal(base64DecodeToBytes('cw=='));
+        .to.deep.equal(base64DecodeToBytes('cw=='));
     expect(base64DecodeToBytes('c3U')).to.deep.equal(stringToBytes('su'));
     expect(base64DecodeToBytes('c3U'))
-      .to.deep.equal(base64DecodeToBytes('c3U='));
+        .to.deep.equal(base64DecodeToBytes('c3U='));
     expect(base64DecodeToBytes('c3Vy')).to.deep.equal(stringToBytes('sur'));
   });
 
@@ -143,27 +143,27 @@ describe('base64DecodeToBytes', () => {
 describe('base64EncodeFromBytes', () => {
   it('should encode a bytes array to base64url string correctly', () => {
     expect(base64UrlEncodeFromBytes(new Uint8Array()))
-      .to.equal('');
+        .to.equal('');
     expect(base64UrlEncodeFromBytes(stringToBytes('s')))
-      .to.equal('cw..');
+        .to.equal('cw..');
     expect(base64UrlEncodeFromBytes(stringToBytes('su')))
-      .to.equal('c3U.');
+        .to.equal('c3U.');
     expect(base64UrlEncodeFromBytes(stringToBytes('sur')))
-      .to.equal('c3Vy');
+        .to.equal('c3Vy');
     expect(base64UrlEncodeFromBytes(new Uint8Array([255, 239])))
-      .to.equal('_-8.');
+        .to.equal('_-8.');
   });
 
   it('should encode a bytes array to base64 string correctly', () => {
     expect(base64EncodeFromBytes(new Uint8Array()))
-      .to.equal('');
+        .to.equal('');
     expect(base64EncodeFromBytes(stringToBytes('s')))
-      .to.equal('cw==');
+        .to.equal('cw==');
     expect(base64EncodeFromBytes(stringToBytes('su')))
-      .to.equal('c3U=');
+        .to.equal('c3U=');
     expect(base64EncodeFromBytes(stringToBytes('sur')))
-      .to.equal('c3Vy');
+        .to.equal('c3Vy');
     expect(base64EncodeFromBytes(new Uint8Array([255, 239])))
-      .to.equal('/+8=');
+        .to.equal('/+8=');
   });
 });

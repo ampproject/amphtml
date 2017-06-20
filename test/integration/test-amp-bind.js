@@ -25,8 +25,6 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
   let numSetStates;
   let numTemplated;
 
-  this.timeout(5000);
-
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     numSetStates = 0;
@@ -335,11 +333,11 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
       const impl = liveList.implementation_;
       const update = document.createElement('div');
       update.innerHTML =
-          `<div items>` +
+          '<div items>' +
           ` <div id="newItem" data-sort-time=${Date.now()}>` +
-          `    <p [text]="liveListText">unbound</p>` +
-          ` </div>` +
-          `</div>`;
+          '    <p [text]="liveListText">unbound</p>' +
+          ' </div>' +
+          '</div>';
       impl.update(update);
       fixture.doc.getElementById('liveListUpdateButton').click();
 
@@ -573,8 +571,8 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
       // the amp-state element back to its original source.
       sandbox.stub(batchedXhr, 'fetchJson')
           .withArgs(
-              'https://www.google.com/bind/second/source',
-              sinon.match.any)
+          'https://www.google.com/bind/second/source',
+          sinon.match.any)
           .returns(Promise.resolve({
             json() {
               return Promise.resolve({

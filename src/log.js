@@ -203,11 +203,11 @@ export class Log {
 
   /**
    * Reports an error message.
-   * @param {string} tag
+   * @param {string} unusedTag
    * @param {...*} var_args
    * @return {!Error|undefined}
    */
-  error(tag, var_args) {
+  error(unusedTag, var_args) {
     const error = this.error_.apply(this, arguments);
     if (error) {
       // reportError is installed globally per window in the entry point.
@@ -218,10 +218,10 @@ export class Log {
   /**
    * Reports an error message and marks with an expected property. If the
    * logging is disabled, the error is rethrown asynchronously.
-   * @param {string} tag
+   * @param {string} unusedTag
    * @param {...*} var_args
    */
-  expectedError(tag, var_args) {
+  expectedError(unusedTag, var_args) {
     const error = this.error_.apply(this, arguments);
     if (error) {
       error.expected = true;

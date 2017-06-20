@@ -206,10 +206,10 @@ describes.realWin('Bind', {
 
   it('should verify class bindings in dev mode', () => {
     window.AMP_MODE = {development: true, test: true};
-    createElementWithBinding(`[class]="'foo'" class="foo"`);
-    createElementWithBinding(`[class]="'foo'" class=" foo "`);
-    createElementWithBinding(`[class]="''"`);
-    createElementWithBinding(`[class]="'bar'" class="qux"`); // Error.
+    createElementWithBinding('[class]="\'foo\'" class="foo"');
+    createElementWithBinding('[class]="\'foo\'" class=" foo "');
+    createElementWithBinding('[class]="\'\'"');
+    createElementWithBinding('[class]="\'bar\'" class="qux"'); // Error.
     const errorSpy = env.sandbox.spy(user(), 'createError');
     return onBindReady().then(() => {
       expect(errorSpy).to.be.calledOnce;
@@ -220,7 +220,7 @@ describes.realWin('Bind', {
   it('should verify string attribute bindings in dev mode', () => {
     window.AMP_MODE = {development: true, test: true};
     // Only the initial value for [a] binding does not match.
-    createElementWithBinding(`[text]="'a'" [class]="'b'" class="b"`);
+    createElementWithBinding('[text]="\'a\'" [class]="\'b\'" class="b"');
     const errorSpy = env.sandbox.spy(user(), 'createError');
     return onBindReady().then(() => {
       expect(errorSpy).to.be.calledOnce;
@@ -269,7 +269,7 @@ describes.realWin('Bind', {
   });
 
   it('should support binding to Node.textContent', () => {
-    const element = createElementWithBinding(`[text]="'a' + 'b' + 'c'"`);
+    const element = createElementWithBinding('[text]="\'a\' + \'b\' + \'c\'"');
     expect(element.textContent).to.equal('');
     return onBindReadyAndSetState({}).then(() => {
       expect(element.textContent).to.equal('abc');
@@ -277,7 +277,7 @@ describes.realWin('Bind', {
   });
 
   it('should support binding to CSS classes with strings', () => {
-    const element = createElementWithBinding(`[class]="['abc']"`);
+    const element = createElementWithBinding('[class]="[\'abc\']"');
     expect(toArray(element.classList)).to.deep.equal([]);
     return onBindReadyAndSetState({}).then(() => {
       expect(toArray(element.classList)).to.deep.equal(['abc']);
@@ -285,7 +285,7 @@ describes.realWin('Bind', {
   });
 
   it('should support binding to CSS classes with arrays', () => {
-    const element = createElementWithBinding(`[class]="['a','b']"`);
+    const element = createElementWithBinding('[class]="[\'a\',\'b\']"');
     expect(toArray(element.classList)).to.deep.equal([]);
     return onBindReadyAndSetState({}).then(() => {
       expect(toArray(element.classList)).to.deep.equal(['a', 'b']);
@@ -293,7 +293,7 @@ describes.realWin('Bind', {
   });
 
   it('should support parsing exprs in `setStateWithExpression`', () => {
-    const element = createElementWithBinding(`[text]="onePlusOne"`);
+    const element = createElementWithBinding('[text]="onePlusOne"');
     expect(element.textContent).to.equal('');
     const promise = onBindReadyAndSetStateWithExpression(
         '{"onePlusOne": one + one}', {one: 1});
@@ -303,7 +303,7 @@ describes.realWin('Bind', {
   });
 
   it('should ignore <amp-state> updates if specified in `setState`', () => {
-    const element = createElementWithBinding(`[src]="foo"`, 'amp-state');
+    const element = createElementWithBinding('[src]="foo"', 'amp-state');
     expect(element.getAttribute('src')).to.be.null;
     const promise = onBindReadyAndSetState(
         {foo: '/foo'}, /* opt_isAmpStateMutation */ true);
@@ -314,7 +314,7 @@ describes.realWin('Bind', {
   });
 
   it('should support NOT override internal AMP CSS classes', () => {
-    const element = createElementWithBinding(`[class]="['abc']"`,
+    const element = createElementWithBinding('[class]="[\'abc\']"',
         /* opt_tagName */ undefined, /* opt_isAmpElement */ true);
     expect(toArray(element.classList)).to.deep.equal(
         ['i-amphtml-foo', '-amp-foo', 'amp-foo']);
@@ -325,8 +325,8 @@ describes.realWin('Bind', {
   });
 
   it('should call mutatedAttributesCallback on AMP elements', () => {
-    const binding = `[text]="1+1" [value]="'4'" value="4" `
-        + `checked [checked]="false" [disabled]="true" [multiple]="false"`;
+    const binding = '[text]="1+1" [value]="\'4\'" value="4" '
+        + 'checked [checked]="false" [disabled]="true" [multiple]="false"';
     const element = createElementWithBinding(binding,
         /* opt_tagName */ 'input', /* opt_isAmpElement */ true);
     const spy = env.sandbox.spy(element, 'mutatedAttributesCallback');
@@ -346,7 +346,7 @@ describes.realWin('Bind', {
   });
 
   it('should support scope variable references', () => {
-    const binding = `[text]="foo + bar + baz.qux.join(',')"`;
+    const binding = '[text]="foo + bar + baz.qux.join(\',\')"';
     const element = createElementWithBinding(binding);
     expect(element.textContent).to.equal('');
     return onBindReadyAndSetState({
@@ -361,7 +361,7 @@ describes.realWin('Bind', {
   });
 
   it('should NOT mutate elements if expression result is unchanged', () => {
-    const binding = `[value]="1+1" [class]="'abc'" [text]="'a'+'b'"`;
+    const binding = '[value]="1+1" [class]="\'abc\'" [text]="\'a\'+\'b\'"';
     const element = createElementWithBinding(binding, 'input');
     return onBindReadyAndSetState({}).then(() => {
       expect(element.textContent.length).to.not.equal(0);
@@ -384,15 +384,15 @@ describes.realWin('Bind', {
   });
 
   it('should NOT evaluate expression if binding is NOT allowed', () => {
-    const element = createElementWithBinding(`[invalidBinding]="1+1"`);
+    const element = createElementWithBinding('[invalidBinding]="1+1"');
     return onBindReadyAndSetState({}).then(() => {
       expect(element.getAttribute('invalidbinding')).to.be.null;
     });
   });
 
   it('should rewrite attribute values regardless of result type', () => {
-    const withString = createElementWithBinding(`[href]="foo"`, 'a');
-    const withArray = createElementWithBinding(`[href]="bar"`, 'a');
+    const withString = createElementWithBinding('[href]="foo"', 'a');
+    const withArray = createElementWithBinding('[href]="bar"', 'a');
     return onBindReadyAndSetState({
       foo: '?__amp_source_origin',
       bar: ['?__amp_source_origin'],
@@ -406,9 +406,9 @@ describes.realWin('Bind', {
     bind.setMaxNumberOfBindingsForTesting(2);
     const errorStub = env.sandbox.stub(user(), 'error');
 
-    const foo = createElementWithBinding(`[text]="foo"`);
-    const bar = createElementWithBinding(`[text]="bar" [class]="baz"`);
-    const qux = createElementWithBinding(`[text]="qux"`);
+    const foo = createElementWithBinding('[text]="foo"');
+    const bar = createElementWithBinding('[text]="bar" [class]="baz"');
+    const qux = createElementWithBinding('[text]="qux"');
 
     return onBindReadyAndSetState({
       foo: 1, bar: 2, baz: 3, qux: 4,

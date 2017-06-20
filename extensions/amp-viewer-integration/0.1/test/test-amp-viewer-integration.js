@@ -98,15 +98,16 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           });
 
           ampViewerIntegration.openChannelAndStart_(
-            viewer, env.ampdoc, origin, messaging);
+              viewer, env.ampdoc, origin, messaging);
 
           const ampdocUrl = env.ampdoc.getUrl();
           const srcUrl = getSourceUrl(ampdocUrl);
 
-          expect(sendRequestSpy).to.have.been.calledWith('channelOpen', {
-            sourceUrl: srcUrl,
-            url: ampdocUrl,
-          }, true);
+          expect(sendRequestSpy).to.have.been.calledOnce;
+          expect(sendRequestSpy.lastCall.args[0]).to.equal('channelOpen');
+          expect(sendRequestSpy.lastCall.args[1].sourceUrl).to.equal(srcUrl);
+          expect(sendRequestSpy.lastCall.args[1].url).to.equal(ampdocUrl);
+          expect(sendRequestSpy.lastCall.args[2]).to.equal(true);
         });
 
         it('should not initiate the Touch Handler', () => {
@@ -116,7 +117,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           const initTouchHandlerStub =
             sandbox.stub(ampViewerIntegration, 'initTouchHandler_');
           ampViewerIntegration.openChannelAndStart_(
-            viewer, env.ampdoc, origin, messaging);
+              viewer, env.ampdoc, origin, messaging);
 
           expect(initTouchHandlerStub).to.not.be.called;
         });
@@ -130,9 +131,9 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
             sandbox.stub(ampViewerIntegration, 'initTouchHandler_');
           ampViewerIntegration.unconfirmedViewerOrigin_ = '';
           ampViewerIntegration.openChannelAndStart_(
-            viewer, env.ampdoc, origin, messaging).then(() => {
-              expect(initTouchHandlerStub).to.be.called;
-            });
+              viewer, env.ampdoc, origin, messaging).then(() => {
+                expect(initTouchHandlerStub).to.be.called;
+              });
         });
       });
     });
@@ -286,8 +287,8 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
       expect(logErrorSpy).to.have.been.calledOnce;
 
       expect(logErrorSpy).to.have.been.calledWith(
-        'amp-viewer-messaging: handleResponse_ error: ',
-        'reason');
+          'amp-viewer-messaging: handleResponse_ error: ',
+          'reason');
     });
 
     it('sendRequest should call postMessage correctly', () => {

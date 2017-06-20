@@ -19,7 +19,7 @@ import {ScrollboundScene} from './scrollbound-scene';
 import {Pass} from '../../../src/pass';
 import {WebAnimationPlayState} from './web-animation-types';
 import {childElementByTag} from '../../../src/dom';
-import {getFriendlyIframeEmbedOptional,}
+import {getFriendlyIframeEmbedOptional}
     from '../../../src/friendly-iframe-embed';
 import {getMode} from '../../../src/mode';
 import {getParentWindowFrameElement} from '../../../src/service';
@@ -52,7 +52,7 @@ export class AmpAnimation extends AMP.BaseElement {
     /** @private {?../../../src/friendly-iframe-embed.FriendlyIframeEmbed} */
     this.embed_ = null;
 
-    /** @private {?JSONType} */
+    /** @private {?JsonObject} */
     this.configJson_ = null;
 
     /** @private {?./web-animations.WebAnimationRunner} */
@@ -150,10 +150,10 @@ export class AmpAnimation extends AMP.BaseElement {
 
   /**
    * Returns the animation spec.
-   * @return {?JSONType}
+   * @return {?JsonObject}
    */
   getAnimationSpec() {
-    return /** @type {?JSONType} */ (this.configJson_);
+    return /** @type {?JsonObject} */ (this.configJson_);
   }
 
   /** @override */
@@ -291,7 +291,7 @@ export class AmpAnimation extends AMP.BaseElement {
   }
 
   /**
-   * @param {?JSONType=} opt_args
+   * @param {?JsonObject=} opt_args
    * @return {?Promise}
    * @private
    */
@@ -332,7 +332,7 @@ export class AmpAnimation extends AMP.BaseElement {
   }
 
   /**
-   * @param {?JSONType=} opt_args
+   * @param {?JsonObject=} opt_args
    * @return {!Promise<!./web-animations.WebAnimationRunner>}
    * @private
    */

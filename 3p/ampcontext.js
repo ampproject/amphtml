@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {dict} from '../src/utils/object';
 import {dev} from '../src/log';
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {MessageType} from '../src/3p-frame-messaging';
@@ -142,7 +143,7 @@ export class AbstractAmpContext {
    */
   onPageVisibilityChange(callback) {
     return this.client_.registerCallback(MessageType.EMBED_STATE, data => {
-      callback({hidden: data.pageHidden});
+      callback({hidden: data['pageHidden']});
     });
   }
 
@@ -179,7 +180,10 @@ export class AbstractAmpContext {
    *  @param {number} height The new height for the ad we are requesting.
    */
   requestResize(width, height) {
-    this.client_.sendMessage(MessageType.EMBED_SIZE, {width, height});
+    this.client_.sendMessage(MessageType.EMBED_SIZE, dict({
+      'width': width,
+      'height': height,
+    }));
   };
 
   /**
@@ -191,7 +195,7 @@ export class AbstractAmpContext {
    */
   onResizeSuccess(callback) {
     this.client_.registerCallback(MessageType.EMBED_SIZE_CHANGED, obj => {
-      callback(obj.requestedHeight, obj.requestedWidth); });
+      callback(obj['requestedHeight'], obj['requestedWidth']); });
   };
 
   /**
@@ -203,7 +207,7 @@ export class AbstractAmpContext {
    */
   onResizeDenied(callback) {
     this.client_.registerCallback(MessageType.EMBED_SIZE_DENIED, obj => {
-      callback(obj.requestedHeight, obj.requestedWidth);
+      callback(obj['requestedHeight'], obj['requestedWidth']);
     });
   };
 

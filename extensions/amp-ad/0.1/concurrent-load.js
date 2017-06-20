@@ -58,16 +58,17 @@ export function getAmpAdRenderOutsideViewport(element) {
 /**
  * Increments loading ads count for throttling.
  * @param {!Window} win
+ * @param {!Promise=} opt_loadingPromise
  */
-export function incrementLoadingAds(win) {
+export function incrementLoadingAds(win, opt_loadingPromise) {
   if (win[LOADING_ADS_WIN_ID_] === undefined) {
     win[LOADING_ADS_WIN_ID_] = 0;
   }
   win[LOADING_ADS_WIN_ID_]++;
-  timerFor(win).delay(() => {
-    // Unfortunately we don't really have a good way to measure how long it
-    // takes to load an ad, so we'll just pretend it takes 1 second for
-    // now.
-    win[LOADING_ADS_WIN_ID_]--;
-  }, 1000);
+  timerFor(win)
+      .timeoutPromise(1000, opt_loadingPromise)
+      .catch(() => {})
+      .then(() => {
+        win[LOADING_ADS_WIN_ID_]--;
+      });
 }

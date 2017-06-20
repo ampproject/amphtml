@@ -29,10 +29,6 @@ tags: {  # <amp-gist>
   tag_name: "AMP-GIST"
   requires_extension: "amp-gist"
   attrs: {
-    name: "data-file"
-    value: ""
-  }
-  attrs: {
     name: "data-gistid"
     mandatory: true
   }
