@@ -85,6 +85,9 @@ export const signingServerURLs = {
   'cloudflare-dev': 'https://amp.cloudflare.com/amp-ad-verifying-keyset-dev.json',
 };
 
+/**
+ * @type {!Object<string, !Array<string>>}
+ */
 export const masterFrameAccessibleTypes = {
   adsense: ['doubleclick'],
   doubleclick: ['adsense'],

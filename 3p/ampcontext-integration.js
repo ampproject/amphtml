@@ -29,9 +29,9 @@ import {masterFrameAccessibleTypes} from '../ads/_a4a-config';
  * @param {string} type
  * @return {!Window}
  */
-export function masterSelection(win, type) {
+export function masterSelection(win, type) { debugger;
   // The master has a special name.
-  const allowedTypes = masterFrameAccessibleTypes || [];
+  const allowedTypes = (masterFrameAccessibleTypes[type] || []).slice();
   allowedTypes.push(type);
   // Sort to ensure consistency across types.
   const masterName = `frame_${allowedTypes.sort().join()}_master`;
