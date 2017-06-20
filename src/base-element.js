@@ -16,6 +16,7 @@
 
 import {ActionTrust} from './action-trust';
 import {Layout} from './layout';
+import {getData} from './event-helper';
 import {loadPromise} from './event-helper';
 import {preconnectForElement} from './preconnect';
 import {isArray} from './types';
@@ -617,7 +618,7 @@ export class BaseElement {
     events = isArray(events) ? events : [events];
     for (let i = 0; i < events.length; i++) {
       element.addEventListener(events[i], event => {
-        this.element.dispatchCustomEvent(events[i], event.data || {});
+        this.element.dispatchCustomEvent(events[i], getData(event) || {});
       });
     }
   }

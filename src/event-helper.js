@@ -57,6 +57,14 @@ export function listen(element, eventType, listener, opt_capture) {
       element, eventType, listener, opt_capture);
 }
 
+/**
+ * Returns the data property of an event with the correct type.
+ * @param {!Event|{data: !JsonObject}} event
+ * @return {?JsonObject|string|undefined}
+ */
+export function getData(event) {
+  return /** @type {?JsonObject|string|undefined} */ (event.data);
+}
 
 /**
  * Listens for the specified event on the element and removes the listener

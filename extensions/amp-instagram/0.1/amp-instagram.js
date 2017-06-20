@@ -53,7 +53,7 @@ import {removeElement} from '../../../src/dom';
 import {user} from '../../../src/log';
 import {tryParseJson} from '../../../src/json';
 import {isObject} from '../../../src/types';
-import {listen} from '../../../src/event-helper';
+import {getData, listen} from '../../../src/event-helper';
 import {startsWith} from '../../../src/string';
 
 /*
@@ -195,15 +195,17 @@ class AmpInstagram extends AMP.BaseElement {
         event.source != this.iframe_.contentWindow) {
       return;
     }
-    if (!event.data || !(isObject(event.data) || startsWith(event.data, '{'))) {
+    const eventData = getData(event);
+    if (!eventData || !(isObject(eventData)
+        || startsWith(/** @type {string} */ (eventData), '{'))) {
       return;  // Doesn't look like JSON.
     }
-    const data = isObject(event.data) ? event.data : tryParseJson(event.data);
+    const data = isObject(eventData) ? eventData : tryParseJson(eventData);
     if (data === undefined) {
       return; // We only process valid JSON.
     }
-    if (data.type == 'MEASURE' && data.details) {
-      const height = data.details.height;
+    if (data['type'] == 'MEASURE' && data['details']) {
+      const height = data['details']['height'];
       this.getVsync().measure(() => {
         if (this.iframe_ && this.iframe_./*OK*/offsetHeight !== height) {
           // Height returned by Instagram includes header, so

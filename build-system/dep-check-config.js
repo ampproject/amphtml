@@ -81,6 +81,8 @@ exports.rules = [
       '3p/**->src/observable.js',
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
+      '3p/messaging.js->src/event-helper.js',
+      '3p/iframe-messaging-client.js->src/event-helper.js',
     ],
   },
   {

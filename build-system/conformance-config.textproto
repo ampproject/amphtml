@@ -168,6 +168,22 @@ requirement: {
 }
 
 requirement: {
+  type: BANNED_PROPERTY_READ
+  error_message: 'Use eventHelper#getData to read the data property. OK to whitelist 3p ads for now.'
+  value: 'Event.prototype.data'
+  value: 'MessageEvent.prototype.data'
+  whitelist: 'src/event-helper.js' # getData is implemented here
+  whitelist: 'src/web-worker/amp-worker.js' # OK to use in version bound worker
+  whitelist: 'src/web-worker/web-worker.js' # OK to use in version bound worker
+
+  # 3p ads are OK
+  whitelist: 'ads/adfox.js'
+  whitelist: 'ads/google/imaVideo.js'
+  whitelist: 'ads/netletix.js'
+  whitelist: 'ads/yandex.js'
+}
+
+requirement: {
   type: RESTRICTED_METHOD_CALL
   error_message: 'postMessage must be called with a string or a JsonObject'
   value: 'Window.prototype.postMessage:function((string|?JsonObject), string)'

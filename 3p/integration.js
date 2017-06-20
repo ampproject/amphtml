@@ -589,8 +589,8 @@ function getHtml(selector, attributes, callback) {
   }));
 
   const unlisten = listenParent(window, 'get-html-result', data => {
-    if (data.messageId === messageId) {
-      callback(data.content);
+    if (data['messageId'] === messageId) {
+      callback(data['content']);
       unlisten();
     }
   });
@@ -610,7 +610,7 @@ function observeIntersection(observerCallback) {
   // Send request to received records.
   nonSensitiveDataPostMessage('send-intersections');
   return listenParent(window, 'intersection', data => {
-    observerCallback(data.changes);
+    observerCallback(data['changes']);
   });
 }
 
@@ -621,8 +621,8 @@ function observeIntersection(observerCallback) {
  */
 function updateVisibilityState(global) {
   listenParent(window, 'embed-state', function(data) {
-    global.context.hidden = data.pageHidden;
-    dispatchVisibilityChangeEvent(global, data.pageHidden);
+    global.context.hidden = data['pageHidden'];
+    dispatchVisibilityChangeEvent(global, data['pageHidden']);
   });
 }
 
@@ -642,7 +642,7 @@ function dispatchVisibilityChangeEvent(win, isHidden) {
  */
 function onResizeSuccess(observerCallback) {
   return listenParent(window, 'embed-size-changed', data => {
-    observerCallback(data.requestedHeight, data.requestedWidth);
+    observerCallback(data['requestedHeight'], data['requestedWidth']);
   });
 }
 
@@ -654,7 +654,7 @@ function onResizeSuccess(observerCallback) {
  */
 function onResizeDenied(observerCallback) {
   return listenParent(window, 'embed-size-denied', data => {
-    observerCallback(data.requestedHeight, data.requestedWidth);
+    observerCallback(data['requestedHeight'], data['requestedWidth']);
   });
 }
 
