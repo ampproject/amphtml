@@ -24,10 +24,10 @@ const regex = /(?:^[#?]?|&)([^=&]+)(?:=([^&]*))?/g;
  * from `src/url.js`.
  *
  * @param {string} queryString
- * @return {!Object<string>}
+ * @return {!JsonObject}
  */
 export function parseQueryString_(queryString) {
-  const params = Object.create(null);
+  const params = /** @type {!JsonObject} */ (Object.create(null));
   if (!queryString) {
     return params;
   }

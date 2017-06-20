@@ -138,7 +138,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       'ga_vid', 'ga_hid', 'iag', 'icsg', 'nhd', 'dssz', 'mdo', 'mso', 'u_tz',
       'u_his', 'u_java', 'u_h', 'u_w', 'u_ah', 'u_aw', 'u_cd', 'u_nplug',
       'u_nmime', 'dff', 'adx', 'ady', 'biw', 'isw', 'ish', 'ifk', 'oid', 'loc',
-      'rx', 'eae', 'pc', 'brdim', 'vis', 'rsz', 'abl', 'ppjl', 'pfx', 'fu',
+      'rx', 'eae', 'pc', 'vis', 'rsz', 'abl', 'ppjl', 'pfx', 'fu',
       'bc', 'ifi', 'dtd',
     ];
     // Skipping this test until all AdSense parameters are standardized, and
@@ -331,66 +331,68 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
     it('without signature', () => {
       return utf8Encode('some creative').then(creative => {
         return impl.extractCreativeAndSignature(
-          creative,
-          {
-            get: function() { return undefined; },
-            has: function() { return false; },
-          }).then(adResponse => {
-            expect(adResponse).to.deep.equal(
+            creative,
+            {
+              get() { return undefined; },
+              has() { return false; },
+            }).then(adResponse => {
+              expect(adResponse).to.deep.equal(
                   {creative, signature: null, size: null});
-            expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
-          });
+              expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be
+                  .called;
+            });
       });
     });
     it('with signature', () => {
       return utf8Encode('some creative').then(creative => {
         return impl.extractCreativeAndSignature(
-          creative,
-          {
-            get: function(name) {
-              return name == 'X-AmpAdSignature' ? 'AQAB' : undefined;
-            },
-            has: function(name) {
-              return name === 'X-AmpAdSignature';
-            },
-          }).then(adResponse => {
-            expect(adResponse).to.deep.equal(
-              {creative, signature: base64UrlDecodeToBytes('AQAB'),
-                size: null});
-            expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
-          });
+            creative,
+            {
+              get(name) {
+                return name == 'X-AmpAdSignature' ? 'AQAB' : undefined;
+              },
+              has(name) {
+                return name === 'X-AmpAdSignature';
+              },
+            }).then(adResponse => {
+              expect(adResponse).to.deep.equal(
+                  {creative, signature: base64UrlDecodeToBytes('AQAB'),
+                    size: null});
+              expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be
+                  .called;
+            });
       });
     });
     it('with analytics', () => {
       return utf8Encode('some creative').then(creative => {
         const url = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
         return impl.extractCreativeAndSignature(
-          creative,
-          {
-            get: function(name) {
-              switch (name) {
-                case 'X-AmpAnalytics':
-                  return JSON.stringify({url});
-                case 'X-AmpAdSignature':
-                  return 'AQAB';
-                default:
-                  return undefined;
-              }
-            },
-            has: function(name) {
-              return !!this.get(name);
-            },
-          }).then(adResponse => {
-            expect(adResponse).to.deep.equal(
-              {
-                creative,
-                signature: base64UrlDecodeToBytes('AQAB'),
-                size: null,
-              });
-            expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
+            creative,
+            {
+              get(name) {
+                switch (name) {
+                  case 'X-AmpAnalytics':
+                    return JSON.stringify({url});
+                  case 'X-AmpAdSignature':
+                    return 'AQAB';
+                  default:
+                    return undefined;
+                }
+              },
+              has(name) {
+                return !!this.get(name);
+              },
+            }).then(adResponse => {
+              expect(adResponse).to.deep.equal(
+                  {
+                    creative,
+                    signature: base64UrlDecodeToBytes('AQAB'),
+                    size: null,
+                  });
+              expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
             // exact value of ampAnalyticsConfig_ covered in
             // ads/google/test/test-utils.js
-          });
+            });
       });
     });
   });
@@ -412,9 +414,45 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
 
     it('injects amp analytics', () => {
       impl.ampAnalyticsConfig_ = {
-        'request': 'www.example.com',
-        'triggers': {
-          'on': 'visible',
+        transport: {beacon: false, xhrpost: false},
+        requests: {
+          visibility1: 'https://foo.com?hello=world',
+          visibility2: 'https://bar.com?a=b',
+        },
+        triggers: {
+          continuousVisible: {
+            on: 'visible',
+            request: ['visibility1', 'visibility2'],
+            visibilitySpec: {
+              selector: 'amp-ad',
+              selectionMethod: 'closest',
+              visiblePercentageMin: 50,
+              continuousTimeMin: 1000,
+            },
+          },
+          continuousVisibleIniLoad: {
+            on: 'ini-load',
+            selector: 'amp-ad',
+            selectionMethod: 'closest',
+          },
+          continuousVisibleRenderStart: {
+            on: 'render-start',
+            selector: 'amp-ad',
+            selectionMethod: 'closest',
+          },
+        },
+      };
+      // To placate assertion.
+      impl.responseHeaders_ = {
+        get: function(name) {
+          if (name == 'X-QQID') {
+            return 'qqid_string';
+          }
+        },
+        has: function(name) {
+          if (name == 'X-QQID') {
+            return true;
+          }
         },
       };
       // Next two lines are to ensure that internal parts not relevant for this
@@ -534,7 +572,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       return impl.getAdUrl().then(url =>
         // With exp as-use-attr-for-format off, we can't test for specific
         // numbers, but we know that the values should be numeric.
-        expect(url).to.match(/format=[0-9]+x[0-9]+&w=[0-9]+&h=[0-9]+/));
+        expect(url).to.match(/format=\d+x\d+&w=\d+&h=\d+/));
     });
     it('has correct format when height == "auto"', () => {
       element.setAttribute('height', 'auto');
@@ -544,7 +582,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       return impl.getAdUrl().then(url =>
         // With exp as-use-attr-for-format off, we can't test for specific
         // numbers, but we know that the values should be numeric.
-        expect(url).to.match(/format=[0-9]+x[0-9]+&w=[0-9]+&h=[0-9]+/));
+        expect(url).to.match(/format=\d+x\d+&w=\d+&h=\d+/));
     });
     it('has correct format when as-use-attr-for-format is on', () => {
       toggleExperiment(window, 'as-use-attr-for-format', true);
@@ -567,7 +605,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           impl.onLayoutMeasure();
           return impl.getAdUrl().then(url =>
               // Ensure that "auto" doesn't appear anywhere here:
-              expect(url).to.match(/format=[0-9]+x[0-9]+&w=[0-9]+&h=[0-9]+/));
+              expect(url).to.match(/format=\d+x\d+&w=\d+&h=\d+/));
         });
     it('includes eid when in amp-auto-ads holdout control', () => {
       forceExperimentBranch(window,
@@ -589,6 +627,45 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       return impl.getAdUrl().then(url => {
         expect(url).to.match(new RegExp(
             `eid=[^&]*${AdSenseAmpAutoAdsHoldoutBranches.EXPERIMENT}`));
+      });
+    });
+    it('returns the right URL', () => {
+      new AmpAd(element).upgradeCallback();
+      return impl.getAdUrl().then(url => {
+        [
+          /^https:\/\/googleads\.g\.doubleclick\.net\/pagead\/ads/,
+          /(\?|&)adk=\d+(&|$)/,
+          /(\?|&)is_amp=3(&|$)/,
+          /(\?|&)amp_v=%24internalRuntimeVersion%24(&|$)/,
+          /(\?|&)client=ca-adsense(&|$)/,
+          /(\?|&)format=\d+x\d+(&|$)/,
+          /(\?|&)w=\d+(&|$)/,
+          /(\?|&)h=\d+(&|$)/,
+          /(\?|&)d_imp=1(&|$)/,
+          /(\?|&)dt=\d+(&|$)/,
+          /(\?|&)ifi=\d+(&|$)/,
+          /(\?|&)adf=\d+(&|$)/,
+          /(\?|&)c=\d+(&|$)/,
+          /(\?|&)biw=\d+(&|$)/,
+          /(\?|&)bih=\d+(&|$)/,
+          /(\?|&)adx=-?\d+(&|$)/,
+          /(\?|&)ady=-?\d+(&|$)/,
+          /(\?|&)u_aw=\d+(&|$)/,
+          /(\?|&)u_ah=\d+(&|$)/,
+          /(\?|&)u_cd=24(&|$)/,
+          /(\?|&)u_w=\d+(&|$)/,
+          /(\?|&)u_h=\d+(&|$)/,
+          /(\?|&)u_tz=-?\d+(&|$)/,
+          /(\?|&)u_his=\d+(&|$)/,
+          /(\?|&)oid=2(&|$)/,
+          /(\?|&)isw=\d+(&|$)/,
+          /(\?|&)ish=\d+(&|$)/,
+          /(\?|&)pfx=(1|0)(&|$)/,
+          /(\?|&)url=https?%3A%2F%2F[a-zA-Z0-9.:%]+(&|$)/,
+          /(\?|&)top=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D\d+(&|$)/,
+          /(\?|&)ref=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D\d+(&|$)/,
+          /(\?|&)dtd=\d+(&|$)/,
+        ].forEach(regexp => expect(url).to.match(regexp));
       });
     });
   });

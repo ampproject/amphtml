@@ -27,9 +27,35 @@ time as https://cdn.ampproject.org/v0/validator.js is updated.
 
 <!--
 Please add new release changes here. Use the time in UTC for the header and
-mention and release notes since the last change as well as the version numbers.
+mention any release notes since the last change as well as the version numbers.
 -->
 
+### 11:00 PM, June 16, 2017 UTC
+
+**Rolled Back**
+
+Validator Version 234
+Spec Version 433
+
+Includes:
+
+ - amp-ad-exit #9390
+ - amp-state update #9721
+ - requires_extension refactor
+ - amp-ima-video test files #9770
+ - amp-rtc #9800
+ - version 1.0 extensions
+ - amp-video-ima update
+
+### 6:00 PM, June 8, 2017 UTC
+
+Validator Version 232
+Spec Version 427
+
+Includes:
+
+ - Disallow amp-embed as child of amp-app-banner
+ 
 ### 6:00 PM, June 7, 2017 UTC
 
 Validator Version 232

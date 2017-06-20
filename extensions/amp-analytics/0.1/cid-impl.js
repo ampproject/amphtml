@@ -32,11 +32,12 @@ import {
   isProxyOrigin,
   parseUrl,
 } from '../../../src/url';
+import {dict} from '../../../src/utils/object';
 import {isIframed} from '../../../src/dom';
 import {getCryptoRandomBytesArray} from '../../../src/utils/bytes';
 import {viewerForDoc} from '../../../src/services';
 import {cryptoFor} from '../../../src/crypto';
-import {tryParseJson} from '../../../src/json';
+import {parseJson, tryParseJson} from '../../../src/json';
 import {timerFor} from '../../../src/services';
 import {user, rethrowAsync} from '../../../src/log';
 
@@ -315,10 +316,10 @@ export function viewerBaseCid(ampdoc, opt_data) {
           // For backward compatibility: #4029
           if (data && !tryParseJson(data)) {
             // TODO(dvoytenko, #9019): use this for reporting: dev().error('cid', 'invalid cid format');
-            return JSON.stringify({
-              time: Date.now(), // CID returned from old API is always fresh
-              cid: data,
-            });
+            return JSON.stringify(dict({
+              'time': Date.now(), // CID returned from old API is always fresh
+              'cid': data,
+            }));
           }
           return data;
         });
@@ -340,10 +341,10 @@ export function viewerBaseCid(ampdoc, opt_data) {
  * @return {string}
  */
 function createCidData(cidString) {
-  return JSON.stringify({
-    time: Date.now(),
-    cid: cidString,
-  });
+  return JSON.stringify(dict({
+    'time': Date.now(),
+    'cid': cidString,
+  }));
 }
 
 /**
@@ -370,7 +371,7 @@ function read(ampdoc) {
     if (!data) {
       return null;
     }
-    const item = JSON.parse(data);
+    const item = parseJson(data);
     return {
       time: item['time'],
       cid: item['cid'],

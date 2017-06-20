@@ -23,13 +23,14 @@ var child_process = require('child_process');
 var util = require('gulp-util');
 
 /**
- * Spawns the given command in a child process.
+ * Spawns the given command in a child process with the given options.
  *
  * @param {string} cmd
+ * @param {<Object>} options
  * @return {<Object>} Process info.
  */
-function spawnProcess(cmd){
-  return child_process.spawnSync('/bin/sh', ['-c', cmd], {'stdio': 'inherit'});
+function spawnProcess(cmd, options){
+  return child_process.spawnSync('/bin/sh', ['-c', cmd], options);
 }
 
 /**
@@ -38,7 +39,7 @@ function spawnProcess(cmd){
  * @param {string} cmd Command line to execute.
  */
 exports.exec = function(cmd) {
-  var p = spawnProcess(cmd);
+  const p = spawnProcess(cmd, {'stdio': 'inherit'});
   if (p.status != 0) {
     console/*OK*/.log(util.colors.yellow('\nCommand failed: ' + cmd));
   }
@@ -50,9 +51,27 @@ exports.exec = function(cmd) {
  * @param {string} cmd Command line to execute.
  */
 exports.execOrDie = function(cmd) {
-  const p = spawnProcess(cmd);
+  const p = spawnProcess(cmd, {'stdio': 'inherit'});
   if (p.status != 0) {
     console/*OK*/.error(util.colors.red('\nCommand failed: ' + cmd));
     process.exit(p.status)
   }
+}
+
+/**
+ * Executes the provided command, returning its stdout.
+ * This will throw an exception if something goes wrong.
+ * @param {string} cmd
+ * @return {!Array<string>}
+ */
+exports.getStdout = function(cmd) {
+  const p = spawnProcess(
+      cmd,
+      {
+        'cwd': process.cwd(),
+        'env': process.env,
+        'stdio': 'pipe',
+        'encoding': 'utf-8'
+      });
+  return p.stdout;
 }

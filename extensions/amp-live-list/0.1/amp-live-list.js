@@ -15,6 +15,7 @@
  */
 
 import {AmpEvents} from '../../../src/amp-events';
+import {ActionTrust} from '../../../src/action-trust';
 import {CSS} from '../../../build/amp-live-list-0.1.css';
 import {childElementByAttr} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
@@ -184,8 +185,8 @@ export class AmpLiveList extends AMP.BaseElement {
     this.manager_ = liveListManagerForDoc(this.getAmpDoc());
 
     this.updateSlot_ = user().assert(
-       this.getUpdateSlot_(this.element),
-       'amp-live-list must have an "update" slot.');
+        this.getUpdateSlot_(this.element),
+        'amp-live-list must have an "update" slot.');
 
     this.itemsSlot_ = user().assert(
         this.getItemsSlot_(this.element),
@@ -203,7 +204,7 @@ export class AmpLiveList extends AMP.BaseElement {
     const maxItems = this.element.getAttribute('data-max-items-per-page');
     user().assert(Number(maxItems) > 0,
         `amp-live-list#${this.liveListId_} must have ` +
-        `data-max-items-per-page attribute with numeric value. ` +
+        'data-max-items-per-page attribute with numeric value. ' +
         `Found ${maxItems}`);
 
     const actualCount = ([].slice.call(this.itemsSlot_.children)
@@ -223,7 +224,8 @@ export class AmpLiveList extends AMP.BaseElement {
     this.curNumOfLiveItems_ = this.validateLiveListItems_(
         this.itemsSlot_, true);
 
-    this.registerAction('update', this.updateAction_.bind(this));
+    this.registerAction(
+        'update', this.updateAction_.bind(this), ActionTrust.LOW);
 
     if (!this.element.hasAttribute('aria-live')) {
       this.element.setAttribute('aria-live', 'polite');
@@ -750,8 +752,8 @@ export class AmpLiveList extends AMP.BaseElement {
     });
     user().assert(!foundInvalid,
         `All amp-live-list-items under amp-live-list#${this.liveListId_} ` +
-        `children must have id and data-sort-time attributes. ` +
-        `data-sort-time must be a Number greater than 0.`);
+        'children must have id and data-sort-time attributes. ' +
+        'data-sort-time must be a Number greater than 0.');
     return numItems;
   }
 

@@ -309,13 +309,13 @@ export class VisibilityManager {
 
   /**
    * Observes the intersections of the specified element in the viewport.
-   * @param {!Element} element
+   * @param {!Element} unusedElement
    * @param {function(number)} unusedListener
    * @return {!UnlistenDef}
    * @protected
    * @abstract
    */
-  observe(element, unusedListener) {}
+  observe(unusedElement, unusedListener) {}
 
   /**
    * @param {!Element} unusedElement

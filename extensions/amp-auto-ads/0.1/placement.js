@@ -182,13 +182,13 @@ export class Placement {
         this.injector_(this.anchorElement_, this.adElement_);
         return this.resources_.attemptChangeSize(this.adElement_,
             TARGET_AD_HEIGHT_PX, undefined, this.margins_)
-                .then(() => {
-                  this.state_ = PlacementState.PLACED;
-                  return this.state_;
-                }, () => {
-                  this.state_ = PlacementState.RESIZE_FAILED;
-                  return this.state_;
-                });
+            .then(() => {
+              this.state_ = PlacementState.PLACED;
+              return this.state_;
+            }, () => {
+              this.state_ = PlacementState.RESIZE_FAILED;
+              return this.state_;
+            });
       });
     });
   }
@@ -211,7 +211,7 @@ export class Placement {
 
 /**
  * @param {!Window} win
- * @param {!JSONType} configObj
+ * @param {!JsonObject} configObj
  * @return {!Array<!Placement>}
  */
 export function getPlacementsFromConfigObj(win, configObj) {

@@ -238,7 +238,7 @@ export class InstrumentationService {
   }
 
   /**
-   * @param {!JSONType} config Configuration for instrumentation.
+   * @param {!JsonObject} config Configuration for instrumentation.
    * @param {function(!AnalyticsEvent)} listener The callback to call when the event
    *  occurs.
    * @param {!Element} analyticsElement The element associated with the
@@ -299,7 +299,7 @@ export class InstrumentationService {
    * the conditions are met.
    * @param {function(!AnalyticsEvent)} callback The callback to call when the
    *   event occurs.
-   * @param {!JSONType} config Configuration for instrumentation.
+   * @param {!JsonObject} config Configuration for instrumentation.
    * @param {AnalyticsEventType} eventType Event type for which the callback is triggered.
    * @param {!Element} analyticsElement The element assoicated with the
    *   config.
@@ -311,7 +311,7 @@ export class InstrumentationService {
         'createVisibilityListener should be called with visible or hidden ' +
         'eventType');
     const shouldBeVisible = eventType == AnalyticsEventType.VISIBLE;
-    /** @const {!JSONType} */
+    /** @const {!JsonObject} */
     const spec = config['visibilitySpec'];
     if (spec) {
       if (!isVisibilitySpecValid(config)) {
@@ -357,7 +357,7 @@ export class InstrumentationService {
   /**
    * Register for a listener to be called when the boundaries specified in
    * config are reached.
-   * @param {!JSONType} config the config that specifies the boundaries.
+   * @param {!JsonObject} config the config that specifies the boundaries.
    * @param {function(!AnalyticsEvent)} listener
    * @private
    */
@@ -444,21 +444,21 @@ export class InstrumentationService {
   }
 
   /**
-   * @param {JSONType} timerSpec
+   * @param {JsonObject} timerSpec
    * @private
    */
   isTimerSpecValid_(timerSpec) {
-    if (!timerSpec) {
+    if (!timerSpec || typeof timerSpec != 'object') {
       user().error(TAG, 'Bad timer specification');
       return false;
-    } else if (!timerSpec.hasOwnProperty('interval')) {
+    } else if (!('interval' in timerSpec)) {
       user().error(TAG, 'Timer interval specification required');
       return false;
     } else if (typeof timerSpec['interval'] !== 'number' ||
                timerSpec['interval'] < MIN_TIMER_INTERVAL_SECONDS_) {
       user().error(TAG, 'Bad timer interval specification');
       return false;
-    } else if (timerSpec.hasOwnProperty('maxTimerLength') &&
+    } else if (('maxTimerLength' in timerSpec) &&
               (typeof timerSpec['maxTimerLength'] !== 'number' ||
                   timerSpec['maxTimerLength'] <= 0)) {
       user().error(TAG, 'Bad maxTimerLength specification');
@@ -470,15 +470,15 @@ export class InstrumentationService {
 
   /**
    * @param {!function(!AnalyticsEvent)} listener
-   * @param {JSONType} timerSpec
+   * @param {JsonObject} timerSpec
    * @private
    */
   createTimerListener_(listener, timerSpec) {
-    const hasImmediate = timerSpec.hasOwnProperty('immediate');
+    const hasImmediate = 'immediate' in timerSpec;
     const callImmediate = hasImmediate ? Boolean(timerSpec['immediate']) : true;
     const intervalId = this.ampdoc.win.setInterval(
-      listener.bind(null, this.createEventDepr_(AnalyticsEventType.TIMER)),
-      timerSpec['interval'] * 1000
+        listener.bind(null, this.createEventDepr_(AnalyticsEventType.TIMER)),
+        timerSpec['interval'] * 1000
     );
 
     if (callImmediate) {
@@ -553,7 +553,7 @@ export class AnalyticsGroup {
    * Triggers registered on a group are automatically released when the
    * group is disposed.
    *
-   * @param {!JSONType} config
+   * @param {!JsonObject} config
    * @param {function(!AnalyticsEvent)} handler
    */
   addTrigger(config, handler) {

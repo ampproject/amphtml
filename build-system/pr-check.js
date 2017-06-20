@@ -24,11 +24,12 @@
  * This script attempts to introduce some granularity for our
  * presubmit checking, via the determineBuildTargets method.
  */
-const child_process = require('child_process');
+const atob = require('atob');
 const exec = require('./exec.js').exec;
 const execOrDie = require('./exec.js').execOrDie;
-const path = require('path');
+const getStdout = require('./exec.js').getStdout;
 const minimist = require('minimist');
+const path = require('path');
 const util = require('gulp-util');
 
 const gulp = 'node_modules/gulp/bin/gulp.js';
@@ -59,25 +60,6 @@ function stopTimer(functionName, startTime) {
   console.log(
       fileLogPrefix, 'Done running', util.colors.cyan(functionName),
       'Total time:', util.colors.green(mins + 'm ' + secs + 's'));
-}
-
-/**
- * Executes the provided command, returning its stdout.
- * This will throw an exception if something goes wrong.
- * @param {string} cmd
- * @return {!Array<string>}
- */
-function getStdout(cmd) {
-  let p = child_process.spawnSync(
-      '/bin/sh',
-      ['-c', cmd],
-      {
-        'cwd': process.cwd(),
-        'env': process.env,
-        'stdio': 'pipe',
-        'encoding': 'utf-8'
-      });
-  return p.stdout;
 }
 
 /**
@@ -153,9 +135,19 @@ function isBuildSystemFile(filePath) {
  */
 function isValidatorFile(filePath) {
   if (filePath.startsWith('validator/')) return true;
-  if (!path.dirname(filePath).endsWith('0.1') &&
-      !path.dirname(filePath).endsWith('test'))
+
+  // validator files for each extension
+  if (!filePath.startsWith('extensions/')) {
     return false;
+  }
+
+  const pathArray = path.dirname(filePath).split(path.sep);
+  if (pathArray.length < 2) {
+    // At least 2 with ['extensions', '{$name}']
+    return false;
+  }
+
+  // Validator files take the form of validator-.*\.(html|out|protoascii)
   const name = path.basename(filePath);
   return name.startsWith('validator-') &&
       (name.endsWith('.out') || name.endsWith('.html') ||
@@ -242,7 +234,8 @@ const command = {
   cleanBuild: function() {
     timedExecOrDie(`${gulp} clean`);
   },
-  runLintChecks: function() {
+  runJsonAndLintChecks: function() {
+    timedExecOrDie(`${gulp} json-syntax`);
     timedExecOrDie(`${gulp} lint`);
   },
   buildRuntime: function() {
@@ -270,10 +263,8 @@ const command = {
         `${gulp} test --nobuild --saucelabs --integration --compiled`);
   },
   runVisualDiffTests: function() {
-    // This must only be run for push builds, since Travis hides the encrypted
-    // environment variables required by Percy during pull request builds.
-    // For now, this is warning-only.
-    timedExec(`${gulp} visual-diff`);
+    process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
+    timedExec(`ruby ${path.resolve('build-system/tasks/visual-diff.rb')}`);
   },
   runPresubmitTests: function() {
     timedExecOrDie(`${gulp} presubmit`);
@@ -292,7 +283,8 @@ function runAllCommands() {
     command.testBuildSystem();
     command.cleanBuild();
     command.buildRuntime();
-    command.runLintChecks();
+    command.runVisualDiffTests();
+    command.runJsonAndLintChecks();
     command.runDepAndTypeChecks();
     command.runUnitTests();
     // command.testDocumentLinks() is skipped during push builds.
@@ -301,11 +293,8 @@ function runAllCommands() {
   }
   if (process.env.BUILD_SHARD == "integration_tests") {
     command.cleanBuild();
-    // TODO(jridgewell, 9757): Remove this after fixing integration test.
-    command.buildRuntime();
     command.buildRuntimeMinified();
     command.runPresubmitTests();  // Needs runtime to be built and served.
-    command.runVisualDiffTests();  // Only called during push builds.
     command.runIntegrationTests();
   }
 }
@@ -377,12 +366,13 @@ function main(argv) {
     if (buildTargets.has('RUNTIME') || buildTargets.has('INTEGRATION_TEST')) {
       command.cleanBuild();
       command.buildRuntime();
+      command.runVisualDiffTests();
       // Ideally, we'd run presubmit tests after `gulp dist`, as some checks run
       // through the dist/ folder. However, to speed up the Travis queue, we no
       // longer do a dist build for PRs, so this call won't cover dist/.
       // TODO(rsimha-amp): Move this once integration tests are enabled.
       command.runPresubmitTests();
-      command.runLintChecks();
+      command.runJsonAndLintChecks();
       command.runDepAndTypeChecks();
       // Skip unit tests if the PR only contains changes to integration tests.
       if (buildTargets.has('RUNTIME')) {
@@ -398,10 +388,24 @@ function main(argv) {
   }
 
   if (process.env.BUILD_SHARD == "integration_tests") {
-    // The integration_tests shard can be skipped for PRs.
-    console.log(fileLogPrefix, 'Skipping integration_tests for PRs');
+    // Run the integration_tests shard for a PR only if it is modifying an
+    // integration test. Otherwise, the shard can be skipped.
+    if (buildTargets.has('INTEGRATION_TEST')) {
+      console.log(fileLogPrefix,
+          'Running the',
+          util.colors.cyan('integration_tests'),
+          'build shard since this PR touches',
+          util.colors.cyan('test/integration'));
+      command.cleanBuild();
+      command.buildRuntimeMinified();
+      command.runIntegrationTests();
+    } else {
+      console.log(fileLogPrefix,
+          'Skipping the',
+          util.colors.cyan('integration_tests'),
+          'build shard for this PR');
+    }
   }
-
 
   stopTimer('pr-check.js', startTime);
   return 0;

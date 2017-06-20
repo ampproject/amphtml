@@ -14,11 +14,11 @@
 # limitations under the license.
 #
 
-tags: {  # amp-sidebar
+tags: {  # amp-user-notification
   html_format: AMP
   tag_name: "SCRIPT"
   extension_spec: {
-    name: "amp-sidebar"
+    name: "amp-user-notification"
     allowed_versions: "0.1"
     allowed_versions: "latest"
     requires_usage: DEPRECATED_WARNING
@@ -26,18 +26,33 @@ tags: {  # amp-sidebar
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-sidebar>
+tags: {  # <amp-user-notification>
   html_format: AMP
-  tag_name: "AMP-SIDEBAR"
-  mandatory_parent: "BODY"
+  tag_name: "AMP-USER-NOTIFICATION"
   disallowed_ancestor: "AMP-SIDEBAR"
-  requires_extension: "amp-sidebar"
-  attrs: {
-    name: "side"
-    value_regex: "(left|right)"
-  }
+  requires_extension: "amp-user-notification"
+  requires_extension: "amp-analytics"
   attr_lists: "extended-amp-global"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-user-notification"
   amp_layout: {
     supported_layouts: NODISPLAY
+  }
+  # These attributes are allowed implicitly as data-* attributes,
+  # but we make additional constraints on validating URLs.
+  attrs: {
+    name: "data-dismiss-href"
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: false
+      allow_empty: false
+    }
+  }
+  attrs: {
+    name: "data-show-if-href"
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: false
+      allow_empty: false
+    }
   }
 }

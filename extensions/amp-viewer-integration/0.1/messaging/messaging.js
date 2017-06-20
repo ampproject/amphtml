@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {parseJson} from '../../../../src/json';
+import {getData} from '../../../../src/event-helper';
 
 const TAG = 'amp-viewer-messaging';
 export const APP = '__AMPHTML__';
@@ -27,15 +29,7 @@ export const MessageType = {
 };
 
 /**
- * @typedef {{
- *   app: string,
- *   type: string,
- *   requestid: number,
- *   name: string,
- *   data: *,
- *   rsvp: (boolean|undefined),
- *   error: (string|undefined),
- * }}
+ * @typedef {!AmpViewerMessage}
  */
 export let Message;
 
@@ -58,7 +52,7 @@ export function parseMessage(message) {
 
   try {
     return /** @type {?Message} */ (
-      JSON.parse(/** @type {string} */ (message)));
+        /** @type {?} */ (parseJson(/** @type {string} */ (message))));
   } catch (e) {
     return null;
   }
@@ -92,14 +86,14 @@ export class WindowPortEmulator {
   addEventListener(eventType, handler) {
     this.win.addEventListener('message', e => {
       if (e.origin == this.origin_ &&
-          e.source == this.target_ && e.data.app == APP) {
+          e.source == this.target_ && getData(e)['app'] == APP) {
         handler(e);
       }
     });
   }
 
   /**
-   * @param {Object} data
+   * @param {JsonObject} data
    */
   postMessage(data) {
     this.target_./*OK*/postMessage(data, this.origin_);
@@ -179,7 +173,7 @@ export class Messaging {
    * @private
    */
   handleMessage_(event) {
-    const message = parseMessage(event.data);
+    const message = parseMessage(getData(event));
     if (!message) {
       return;
     }
@@ -193,7 +187,7 @@ export class Messaging {
   /**
    * I'm sending Bob a new outgoing request.
    * @param {string} messageName
-   * @param {*} messageData
+   * @param {?JsonObject|string|undefined} messageData
    * @param {boolean} awaitResponse
    * @return {!Promise<*>|undefined}
    */
@@ -205,14 +199,14 @@ export class Messaging {
         this.waitingForResponse_[requestId] = {resolve, reject};
       });
     }
-    this.sendMessage_({
+    this.sendMessage_(/** @type {!AmpViewerMessage} */ ({
       app: APP,
       requestid: requestId,
       type: MessageType.REQUEST,
       name: messageName,
       data: messageData,
       rsvp: awaitResponse,
-    });
+    }));
     return promise;
   }
 
@@ -224,13 +218,13 @@ export class Messaging {
    * @private
    */
   sendResponse_(requestId, messageName, messageData) {
-    this.sendMessage_({
+    this.sendMessage_(/** @type {!AmpViewerMessage} */ ({
       app: APP,
       requestid: requestId,
       type: MessageType.RESPONSE,
       name: messageName,
       data: messageData,
-    });
+    }));
   }
 
   /**
@@ -242,15 +236,15 @@ export class Messaging {
   sendResponseError_(requestId, messageName, reason) {
     const errString = this.errorToString_(reason);
     this.logError_(
-      TAG + ': sendResponseError_, Message name: ' + messageName, errString);
-    this.sendMessage_({
+        TAG + ': sendResponseError_, Message name: ' + messageName, errString);
+    this.sendMessage_(/** @type {!AmpViewerMessage} */ ({
       app: APP,
       requestid: requestId,
       type: MessageType.RESPONSE,
       name: messageName,
       data: null,
       error: errString,
-    });
+    }));
   }
 
   /**
@@ -259,7 +253,9 @@ export class Messaging {
    */
   sendMessage_(message) {
     this.port_./*OK*/postMessage(
-      this.isWebview_ ? JSON.stringify(message) : message);
+        this.isWebview_
+            ? JSON.stringify(message)
+            : message);
   }
 
   /**
@@ -286,7 +282,7 @@ export class Messaging {
       const requestId = message.requestid;
       if (!promise) {
         this.sendResponseError_(
-          requestId, message.name, new Error('no response'));
+            requestId, message.name, new Error('no response'));
         throw new Error('expected response but none given: ' + message.name);
       }
       promise.then(data => {
@@ -311,7 +307,7 @@ export class Messaging {
       if (message.error) {
         this.logError_(TAG + ': handleResponse_ error: ', message.error);
         pending.reject(
-          new Error(`Request ${message.name} failed: ${message.error}`));
+            new Error(`Request ${message.name} failed: ${message.error}`));
       } else {
         pending.resolve(message.data);
       }

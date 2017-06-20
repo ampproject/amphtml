@@ -284,8 +284,7 @@ describe('3p-frame', () => {
     preloadBootstrap(window, preconnect);
     // Wait for visible promise
     return Promise.resolve().then(() => {
-      const fetches = document.querySelectorAll(
-          'link[rel=prefetch],link[rel=preload]');
+      const fetches = document.querySelectorAll('link[rel=preload]');
       expect(fetches).to.have.length(2);
       expect(fetches[0]).to.have.property('href',
           'http://ads.localhost:9876/dist.3p/current/frame.max.html');
@@ -308,7 +307,7 @@ describe('3p-frame', () => {
     const fakeWin = {
       document,
       crypto: {
-        getRandomValues: function(arg) {
+        getRandomValues(arg) {
           arg[0] = 123;
           arg[1] = 987;
         },
@@ -321,7 +320,7 @@ describe('3p-frame', () => {
     const fakeWin = {
       document,
       Math: {
-        random: function() {
+        random() {
           return 0.567;
         },
       },

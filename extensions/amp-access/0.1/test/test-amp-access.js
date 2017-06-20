@@ -21,9 +21,9 @@ import {AccessServerJwtAdapter} from '../amp-access-server-jwt';
 import {AccessVendorAdapter} from '../amp-access-vendor';
 import {AccessService} from '../amp-access';
 import {Observable} from '../../../../src/observable';
-import {cidServiceForDocForTesting,} from
+import {cidServiceForDocForTesting} from
     '../../../../extensions/amp-analytics/0.1/cid-impl';
-import {installPerformanceService,} from
+import {installPerformanceService} from
     '../../../../src/service/performance-impl';
 import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
@@ -563,7 +563,7 @@ describes.fakeWin('AccessService authorization', {
     cidMock.expects('get')
         .withExactArgs(
             {scope: 'amp-access', createCookieIfNotPresent: true},
-            sinon.match(() => true))
+        sinon.match(() => true))
         .returns(Promise.resolve(result))
         .once();
   }
@@ -762,7 +762,7 @@ describes.fakeWin('AccessService authorization', {
 
     // Broadcast with the right origin.
     broadcastHandler({type: 'amp-access-reauthorize',
-        origin: service.pubOrigin_});
+      origin: service.pubOrigin_});
     expect(service.runAuthorization_).to.be.calledOnce;
   });
 });
@@ -993,7 +993,7 @@ describes.fakeWin('AccessService pingback', {
     cidMock.expects('get')
         .withExactArgs(
             {scope: 'amp-access', createCookieIfNotPresent: true},
-            sinon.match(() => true))
+        sinon.match(() => true))
         .returns(Promise.resolve(result))
         .once();
   }
@@ -1065,7 +1065,7 @@ describes.fakeWin('AccessService pingback', {
       expect(service.analyticsEvent_.callCount).to.equal(triggerStart);
       firstAuthorizationResolver();
       return Promise.all([service.firstAuthorizationPromise_,
-          service.reportViewPromise_]);
+        service.reportViewPromise_]);
     }).then(() => {
       expect(service.reportViewToServer_).to.be.calledOnce;
       expect(service.analyticsEvent_.callCount).to.equal(triggerStart + 1);
@@ -1091,7 +1091,7 @@ describes.fakeWin('AccessService pingback', {
       expect(service.analyticsEvent_.callCount).to.equal(triggerStart);
       lastAuthorizationResolver();
       return Promise.all([service.lastAuthorizationPromise_,
-          service.reportViewPromise_]);
+        service.reportViewPromise_]);
     }).then(() => {
       expect(service.reportViewToServer_).to.be.calledOnce;
       expect(service.analyticsEvent_.callCount).to.equal(triggerStart + 1);
@@ -1332,7 +1332,7 @@ describes.fakeWin('AccessService login', {
     cidMock.expects('get')
         .withExactArgs(
             {scope: 'amp-access', createCookieIfNotPresent: true},
-            sinon.match(() => true))
+        sinon.match(() => true))
         .returns(Promise.resolve('reader1'))
         .once();
     return service.buildLoginUrls_().then(urls => {
@@ -1350,7 +1350,7 @@ describes.fakeWin('AccessService login', {
     cidMock.expects('get')
         .withExactArgs(
             {scope: 'amp-access', createCookieIfNotPresent: true},
-            sinon.match(() => true))
+        sinon.match(() => true))
         .returns(Promise.resolve('reader1'))
         .atLeast(1);
     return service.buildLoginUrls_().then(urls => {
@@ -1384,7 +1384,7 @@ describes.fakeWin('AccessService login', {
     cidMock.expects('get')
         .withExactArgs(
             {scope: 'amp-access', createCookieIfNotPresent: true},
-            sinon.match(() => true))
+        sinon.match(() => true))
         .returns(Promise.resolve('reader1'))
         .once();
     return service.buildLoginUrls_().then(urls => {
@@ -1490,15 +1490,15 @@ describes.fakeWin('AccessService login', {
         .returns(Promise.reject('abort'))
         .once();
     return service.loginWithType_('')
-    .then(() => 'S', () => 'ERROR').then(result => {
-      expect(result).to.equal('ERROR');
-      expect(service.loginPromise_).to.not.exist;
-      expect(service.runAuthorization_).to.have.not.been.called;
-      expect(service.analyticsEvent_).to.have.been.calledWith(
-          'access-login-started');
-      expect(service.analyticsEvent_).to.have.been.calledWith(
-          'access-login-failed');
-    });
+        .then(() => 'S', () => 'ERROR').then(result => {
+          expect(result).to.equal('ERROR');
+          expect(service.loginPromise_).to.not.exist;
+          expect(service.runAuthorization_).to.have.not.been.called;
+          expect(service.analyticsEvent_).to.have.been.calledWith(
+              'access-login-started');
+          expect(service.analyticsEvent_).to.have.been.calledWith(
+              'access-login-failed');
+        });
   });
 
   it('should succeed login with success=true with multiple logins', () => {

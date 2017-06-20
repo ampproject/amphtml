@@ -81,6 +81,8 @@ exports.rules = [
       '3p/**->src/observable.js',
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
+      '3p/messaging.js->src/event-helper.js',
+      '3p/iframe-messaging-client.js->src/event-helper.js',
     ],
   },
   {
@@ -165,6 +167,8 @@ exports.rules = [
       'extensions/amp-ooyala-player/0.1/amp-ooyala-player.js->' +
           'src/service/video-manager-impl.js',
       'extensions/amp-youtube/0.1/amp-youtube.js->' +
+          'src/service/video-manager-impl.js',
+      'extensions/amp-dailymotion/0.1/amp-dailymotion.js->' +
           'src/service/video-manager-impl.js',
       'extensions/amp-brid-player/0.1/amp-brid-player.js->' +
           'src/service/video-manager-impl.js',

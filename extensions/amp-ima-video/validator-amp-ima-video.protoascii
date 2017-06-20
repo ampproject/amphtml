@@ -14,45 +14,45 @@
 # limitations under the license.
 #
 
-tags: {  # amp-user-notification
+tags: {  # amp-ima-video
   html_format: AMP
   tag_name: "SCRIPT"
   extension_spec: {
-    name: "amp-user-notification"
+    name: "amp-ima-video"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    requires_usage: DEPRECATED_WARNING
-    deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-user-notification>
+tags: {  # <amp-ima-video>
   html_format: AMP
-  tag_name: "AMP-USER-NOTIFICATION"
+  tag_name: "AMP-IMA-VIDEO"
   disallowed_ancestor: "AMP-SIDEBAR"
-  requires_extension: "amp-analytics"
-  requires_extension: "amp-user-notification"
+  requires_extension: "amp-ima-video"
+  # data-* is generally allowed, but it's not generally mandatory.
+  attrs: {
+    name: "data-src"
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  attrs: {
+    name: "data-tag"
+    mandatory: true
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+  }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-user-notification"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ima-video"
   amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
     supported_layouts: NODISPLAY
-  }
-  # These attributes are allowed implicitly as data-* attributes,
-  # but we make additional constraints on validating URLs.
-  attrs: {
-    name: "data-dismiss-href"
-    value_url: {
-      allowed_protocol: "https"
-      allow_relative: false
-      allow_empty: false
-    }
-  }
-  attrs: {
-    name: "data-show-if-href"
-    value_url: {
-      allowed_protocol: "https"
-      allow_relative: false
-      allow_empty: false
-    }
+    supported_layouts: RESPONSIVE
   }
 }
