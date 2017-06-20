@@ -243,8 +243,11 @@ describes.realWin('getExistingAds', {}, env => {
     doc.body.appendChild(ad1);
     const ad2 = doc.createElement('amp-ad');
     doc.body.appendChild(ad2);
-    const ad3 = doc.createElement('amp-a4a');
+    const ad3 = doc.createElement('amp-ad');
     doc.body.appendChild(ad3);
+    const ad4 = doc.createElement('amp-sticky-ad');
+    doc.body.appendChild(ad4);
+    ad4.appendChild(doc.createElement('amp-ad'));
 
     const ads = getExistingAds(win);
     expect(ads).to.have.lengthOf(3);
