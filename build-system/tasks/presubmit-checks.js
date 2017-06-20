@@ -174,7 +174,7 @@ var forbiddenTerms = {
   'cidServiceForDocForTesting': {
     message: privateServiceFactory,
     whitelist: [
-      'src/service/cid-impl',
+      'src/service/cid-impl.js',
     ],
   },
   'installCryptoService': {
@@ -326,7 +326,7 @@ var forbiddenTerms = {
       'src/service/viewer-impl.js',
       'src/service/storage-impl.js',
       'src/service/history-impl.js',
-      'src/service/cid-impl',
+      'src/service/cid-impl.js',
       'extensions/amp-access/0.1/login-dialog.js',
       'extensions/amp-access/0.1/signin.js',
     ],
@@ -347,7 +347,7 @@ var forbiddenTerms = {
   'getBaseCid': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'src/service/cid-impl',
+      'src/service/cid-impl.js',
       'src/service/viewer-impl.js',
     ],
   },
@@ -356,7 +356,7 @@ var forbiddenTerms = {
     whitelist: [
       'build-system/test-server.js',
       'src/cookies.js',
-      'src/service/cid-impl',
+      'src/service/cid-impl.js',
       'extensions/amp-analytics/0.1/vendors.js',
       'testing/fake-dom.js',
     ],
@@ -364,7 +364,7 @@ var forbiddenTerms = {
   'getCookie\\W': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'src/service/cid-impl',
+      'src/service/cid-impl.js',
       'src/cookies.js',
       'src/experiments.js',
       'tools/experiments/experiments.js',
@@ -373,7 +373,7 @@ var forbiddenTerms = {
   'setCookie\\W': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'src/service/cid-impl',
+      'src/service/cid-impl.js',
       'src/cookies.js',
       'src/experiments.js',
       'tools/experiments/experiments.js',
@@ -384,7 +384,7 @@ var forbiddenTerms = {
     whitelist: [
       'src/service/viewer-impl.js',
       'src/inabox/inabox-viewer.js',
-      'src/service/cid-impl',
+      'src/service/cid-impl.js',
     ],
   },
   'eval\\(': {
@@ -404,7 +404,7 @@ var forbiddenTerms = {
   'localStorage': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'src/service/cid-impl',
+      'src/service/cid-impl.js',
       'src/service/storage-impl.js',
       'testing/fake-dom.js',
     ],
