@@ -185,48 +185,48 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
  * @return {boolean}  Whether the experiment state was set from a command-line
  *   parameter or not.
  */
- function maybeSetExperimentFromUrl(win, element, experimentName,
+function maybeSetExperimentFromUrl(win, element, experimentName,
      controlBranchId, treatmentBranchId, delayedControlId,
      delayedTreatmentBrandId, sfgControlId, sfgTreatmentId, manualId) {
-   const expParam = viewerForDoc(element).getParam('exp') ||
-       parseQueryString(win.location.search)['exp'];
-   if (!expParam) {
-     return false;
-   }
-   // Allow for per type experiment control with Doubleclick key set for 'da'
-   // and AdSense using 'aa'.  Fallbsck to 'a4a' if type specific is missing.
-   const expKeys = [
-     (element.getAttribute('type') || '').toLowerCase() == 'doubleclick' ?
-       'da' : 'aa',
-     'a4a',
-   ];
-   let arg;
-   let match;
-   expKeys.forEach(key => arg = arg ||
-     (match = new RegExp(`(?:^|,)${key}:(\\d+)`).exec(expParam)) && match[1]);
-   if (!arg) {
-     return false;
-   }
-   const argMapping = {
-     '-1': manualId,
-     '0': null,
-     '1': controlBranchId,
-     '2': treatmentBranchId,
-     '3': delayedControlId,
-     '4': delayedTreatmentBrandId,
-     '5': sfgControlId,
-     '6': sfgTreatmentId,
-   };
-   if (argMapping.hasOwnProperty(arg)) {
-     forceExperimentBranch(win, experimentName, argMapping[arg]);
-     return true;
-   } else {
-     dev().warn('A4A-CONFIG', 'Unknown a4a URL parameter: ', arg,
-         ' expected one of -1 (manual), 0 (not in experiment), 1 (control ' +
-         'branch), or 2 (a4a experiment branch)');
-     return false;
-   }
- }
+  const expParam = viewerForDoc(element).getParam('exp') ||
+    parseQueryString(win.location.search)['exp'];
+  if (!expParam) {
+    return false;
+  }
+  // Allow for per type experiment control with Doubleclick key set for 'da'
+  // and AdSense using 'aa'.  Fallbsck to 'a4a' if type specific is missing.
+  const expKeys = [
+    (element.getAttribute('type') || '').toLowerCase() == 'doubleclick' ?
+      'da' : 'aa',
+    'a4a',
+  ];
+  let arg;
+  let match;
+  expKeys.forEach(key => arg = arg ||
+    (match = new RegExp(`(?:^|,)${key}:(\\d+)`).exec(expParam)) && match[1]);
+  if (!arg) {
+    return false;
+  }
+  const argMapping = {
+    '-1': manualId,
+    '0': null,
+    '1': controlBranchId,
+    '2': treatmentBranchId,
+    '3': delayedControlId,
+    '4': delayedTreatmentBrandId,
+    '5': sfgControlId,
+    '6': sfgTreatmentId,
+  };
+  if (argMapping.hasOwnProperty(arg)) {
+    forceExperimentBranch(win, experimentName, argMapping[arg]);
+    return true;
+  } else {
+    dev().warn('A4A-CONFIG', 'Unknown a4a URL parameter: ', arg,
+        ' expected one of -1 (manual), 0 (not in experiment), 1 (control ' +
+        'branch), or 2 (a4a experiment branch)');
+    return false;
+  }
+}
 
 /**
  * Sets of experiment IDs can be attached to Elements via attributes.  In
