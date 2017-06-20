@@ -161,6 +161,12 @@ export class AdTracker {
  * @return {!Array<!Element>}
  */
 export function getExistingAds(win) {
-  return [].slice.call(win.document.getElementsByTagName('AMP-AD')).concat(
-      [].slice.call(win.document.getElementsByTagName('AMP-A4A')));
+  return [].slice.call(win.document.getElementsByTagName('AMP-AD'))
+      .filter(ad => {
+        // Filters out AMP-STICKY-AD.
+        if (ad.parentElement && ad.parentElement.tagName == 'AMP-STICKY-AD') {
+          return false;
+        }
+        return true;
+      });
 }
