@@ -16,9 +16,6 @@
 
 import {toggle} from '../../../src/style';
 
-/** @const */
-const TOOLBAR_TARGET_CLASS = 'i-amphtml-sidebar-toolbar';
-
 export class Toolbar {
   /**
   * @param {!Element} element
@@ -36,8 +33,8 @@ export class Toolbar {
     /** @private {?string} */
     this.toolbarMedia_ = this.element.getAttribute('toolbar');
 
-    /** @private {?Element} */
-    this.toolbarClone_ = null;
+    /** @private {Element|undefined} */
+    this.toolbarClone_ = undefined;
 
     /** @private {Element|undefined} */
     this.toolbarTarget_ = undefined;
@@ -68,7 +65,7 @@ export class Toolbar {
    * Function called to check if we should show or hide the toolbar
    * @param {!Function} onChangeCallback - function called if toolbar changes on check
    */
-  checkToolbar(onChangeCallback) {
+  onLayoutMeasure(onChangeCallback) {
     // Get if we match the current toolbar media
     const matchesMedia = this.element.ownerDocument.defaultView
         .matchMedia(this.toolbarMedia_).matches;
@@ -91,7 +88,6 @@ export class Toolbar {
       .ownerDocument.createDocumentFragment();
     this.toolbarTarget_ =
       this.element.ownerDocument.createElement('header');
-    this.toolbarTarget_.className = TOOLBAR_TARGET_CLASS;
     //Place the elements into the target
     this.toolbarClone_ = this.element.cloneNode(true);
     this.toolbarTarget_.appendChild(this.toolbarClone_);
@@ -122,7 +118,9 @@ export class Toolbar {
 
     // Display the elements
     this.sidebar_.mutateElement(() => {
-      toggle(this.toolbarTarget_, true);
+      if(this.toolbarTarget_) {
+        toggle(this.toolbarTarget_, true);
+      }
       if (this.toolbarOnlyElements_) {
         this.toolbarOnlyElements_.forEach(element => {
           toggle(element, false);
@@ -145,7 +143,9 @@ export class Toolbar {
 
     this.sidebar_.mutateElement(() => {
       // Hide the elements
-      toggle(this.toolbarTarget_, false);
+      if(this.toolbarTarget_) {
+        toggle(this.toolbarTarget_, false);
+      }
       if (this.toolbarOnlyElements_) {
         this.toolbarOnlyElements_.forEach(element => {
           toggle(element, true);

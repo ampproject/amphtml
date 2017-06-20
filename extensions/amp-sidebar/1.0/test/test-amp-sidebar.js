@@ -28,8 +28,6 @@
  /** @const */
  const TOOLBAR_MEDIA = '(min-width: 768px)';
 
- /** @const */
- const TOOLBAR_TARGET_CLASS = 'i-amphtml-sidebar-toolbar';
 
  adopt(window);
 
@@ -579,11 +577,10 @@
          toolbar: true,
        }).then(obj => {
          const sidebarElement = obj.ampSidebar;
-         const toolbarTargetElements = sidebarElement.ownerDocument
-               .getElementsByClassName(TOOLBAR_TARGET_CLASS);
-         expect(toolbarTargetElements.length).to.be.above(0);
-         expect(toolbarTargetElements[0]
-             .querySelectorAll('nav[toolbar]').length).to.be.above(0);
+         const toolbarNavElements = Array.prototype
+                .slice.call(sidebarElement.ownerDocument
+                .querySelectorAll('nav[toolbar]'), 0);
+         expect(toolbarNavElements.length).to.be.above(1);
        });
      });
 
@@ -592,9 +589,16 @@
          toolbar: true,
        }).then(obj => {
          const sidebarElement = obj.ampSidebar;
-         const toolbarTargetElements = sidebarElement.ownerDocument
-               .getElementsByClassName(TOOLBAR_TARGET_CLASS);
-         expect(toolbarTargetElements[0].hasAttribute('show')).to.be.false;
+         const toolbarNavElements = Array.prototype
+                .slice.call(sidebarElement.ownerDocument
+                .querySelectorAll('nav[toolbar]'), 0);
+         expect(toolbarNavElements.length).to.be.above(1);
+         expect(toolbarNavElements.some(navElement => {
+           if (navElement.parentElement.style.display == 'none') {
+             return true;
+           }
+           return false;
+         })).to.be.true;
        });
      });
    });
