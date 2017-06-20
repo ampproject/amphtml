@@ -15,6 +15,7 @@
 
 import {closestByTag} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
+import {getData} from '../../../src/event-helper';
 import {user} from '../../../src/log';
 import {viewerForDoc} from '../../../src/services';
 import {isProxyOrigin} from '../../../src/url';
@@ -45,7 +46,7 @@ export function setupA2AListener(win) {
  * @visibleForTesting
  */
 export function handleMessageEvent(win, event) {
-  const data = event.data;
+  const data = getData(event);
   // Only handle messages starting with the magic string.
   if (typeof data != 'string' || data.indexOf('a2a;') != 0) {
     return;

@@ -142,7 +142,7 @@ export class AbstractAmpContext {
    */
   onPageVisibilityChange(callback) {
     return this.client_.registerCallback(MessageType.EMBED_STATE, data => {
-      callback({hidden: data.pageHidden});
+      callback({hidden: data['pageHidden']});
     });
   }
 
@@ -194,7 +194,7 @@ export class AbstractAmpContext {
    */
   onResizeSuccess(callback) {
     this.client_.registerCallback(MessageType.EMBED_SIZE_CHANGED, obj => {
-      callback(obj.requestedHeight, obj.requestedWidth); });
+      callback(obj['requestedHeight'], obj['requestedWidth']); });
   };
 
   /**
@@ -206,7 +206,7 @@ export class AbstractAmpContext {
    */
   onResizeDenied(callback) {
     this.client_.registerCallback(MessageType.EMBED_SIZE_DENIED, obj => {
-      callback(obj.requestedHeight, obj.requestedWidth);
+      callback(obj['requestedHeight'], obj['requestedWidth']);
     });
   };
 

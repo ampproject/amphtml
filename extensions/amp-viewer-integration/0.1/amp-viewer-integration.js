@@ -25,6 +25,7 @@ import {isIframed} from '../../../src/dom';
 import {listen, listenOnce} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {getData} from '../../../src/event-helper';
 import {getSourceUrl} from '../../../src/url';
 import {viewerForDoc} from '../../../src/services';
 
@@ -102,8 +103,9 @@ export class AmpViewerIntegration {
   webviewPreHandshakePromise_(source, origin) {
     return new Promise(resolve => {
       const unlisten = listen(this.win, 'message', e => {
-        dev().fine(TAG, 'AMPDOC got a pre-handshake message:', e.type, e.data);
-        const data = parseMessage(e.data);
+        dev().fine(TAG, 'AMPDOC got a pre-handshake message:', e.type,
+            getData(e));
+        const data = parseMessage(getData(e));
         if (!data) {
           return;
         }

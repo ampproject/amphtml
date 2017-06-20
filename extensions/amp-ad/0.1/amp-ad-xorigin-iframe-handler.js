@@ -29,7 +29,7 @@ import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {timerFor} from '../../../src/services';
 import {setStyle} from '../../../src/style';
-import {loadPromise} from '../../../src/event-helper';
+import {getData, loadPromise} from '../../../src/event-helper';
 import {getHtml} from '../../../src/get-html';
 import {removeElement} from '../../../src/dom';
 import {getServiceForDoc} from '../../../src/service';
@@ -136,7 +136,7 @@ export class AmpAdXOriginIframeHandler {
     // iframe.
     listenForOncePromise(this.iframe, 'entity-id', true)
         .then(info => {
-          this.element_.creativeId = info.data.id;
+          this.element_.creativeId = info.data['id'];
         });
 
     this.unlisteners_.push(listenFor(this.iframe, 'get-html',
@@ -145,7 +145,9 @@ export class AmpAdXOriginIframeHandler {
             return;
           }
 
-          const {selector, attributes, messageId} = info;
+          const selector = info['selector'];
+          const attributes = info['attributes'];
+          const messageId = info['messageId'];
           let content = '';
 
           if (this.element_.hasAttribute('data-html-access-allowed')) {
@@ -164,7 +166,7 @@ export class AmpAdXOriginIframeHandler {
     // Install iframe resize API.
     this.unlisteners_.push(listenFor(this.iframe, 'embed-size',
         (data, source, origin) => {
-          this.handleResize_(data.height, data.width, source, origin);
+          this.handleResize_(data['height'], data['width'], source, origin);
         }, true, true));
 
     this.unlisteners_.push(this.viewer_.onVisibilityChanged(() => {
@@ -204,7 +206,7 @@ export class AmpAdXOriginIframeHandler {
       listenForOncePromise(this.iframe,
           ['render-start', 'no-content'], true).then(info => {
             const data = info.data;
-            if (data.type == 'render-start') {
+            if (data['type'] == 'render-start') {
               this.renderStart_(info);
               renderStartResolve();
             } else {
@@ -273,7 +275,7 @@ export class AmpAdXOriginIframeHandler {
 
   /**
    * callback functon on receiving render-start
-   * @param {!Object=} opt_info
+   * @param {{data: !JsonObject}=} opt_info
    * @private
    */
   renderStart_(opt_info) {
@@ -281,9 +283,9 @@ export class AmpAdXOriginIframeHandler {
     if (!opt_info) {
       return;
     }
-    const data = opt_info.data;
+    const data = getData(opt_info);
     this.handleResize_(
-        data.height, data.width, opt_info.source, opt_info.origin);
+        data['height'], data['width'], opt_info['source'], opt_info['origin']);
     if (this.baseInstance_.emitLifecycleEvent) {
       this.baseInstance_.emitLifecycleEvent('renderCrossDomainStart');
     }

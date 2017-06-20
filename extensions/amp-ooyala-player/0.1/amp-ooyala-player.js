@@ -22,7 +22,7 @@ import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {isObject} from '../../../src/types';
-import {listen} from '../../../src/event-helper';
+import {getData, listen} from '../../../src/event-helper';
 import {VideoEvents} from '../../../src/video-interface';
 import {videoManagerForDoc} from '../../../src/services';
 
@@ -155,17 +155,20 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
   /** @private */
   handleOoyalaMessages_(event) {
-    const data = isObject(event.data) ? event.data : tryParseJson(event.data);
+    /** @const {?JsonObject|undefined} */
+    const data = /** @type {?JsonObject} */ (isObject(getData(event))
+        ? getData(event)
+        : tryParseJson(getData(event)));
     if (data === undefined) {
       return; // We only process valid JSON.
     }
-    if (data.data == 'playing') {
+    if (data['data'] == 'playing') {
       this.element.dispatchCustomEvent(VideoEvents.PLAY);
-    } else if (data.data == 'paused') {
+    } else if (data['data'] == 'paused') {
       this.element.dispatchCustomEvent(VideoEvents.PAUSE);
-    } else if (data.data == 'muted') {
+    } else if (data['data'] == 'muted') {
       this.element.dispatchCustomEvent('mute');
-    } else if (data.data == 'unmuted') {
+    } else if (data['data'] == 'unmuted') {
       this.element.dispatchCustomEvent('unmute');
     }
   }

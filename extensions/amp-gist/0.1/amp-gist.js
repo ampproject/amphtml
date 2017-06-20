@@ -62,7 +62,7 @@ export class AmpGist extends AMP.BaseElement {
     this.applyFillContent(iframe);
     // Triggered by window.context.requestResize() inside the iframe.
     listenFor(iframe, 'embed-size', data => {
-      this./*OK*/changeHeight(data.height);
+      this./*OK*/changeHeight(data['height']);
     }, /* opt_is3P */true);
 
     this.element.appendChild(iframe);
