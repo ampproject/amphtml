@@ -86,7 +86,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.type_ = null;
 
     /** @private {!boolean} */
-    this.isSandbox_ = element.hasAttribute('sandbox');
+    this.isSandbox_ = false;
 
     /**
      * @private {Object<string, string>} A map of request names to the request
@@ -138,6 +138,8 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.isSandbox_ = this.element.hasAttribute('sandbox');
+
     this.element.setAttribute('aria-hidden', 'true');
 
     this.consentNotificationId_ = this.element
