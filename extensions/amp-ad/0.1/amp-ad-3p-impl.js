@@ -130,7 +130,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     // DO NOT SUBMIT
     const config = {
       'requests': {
-        'pageview': 'https://example.com/analytics',
+        'pageview': 'https://example.com/analytics/pid=PAGE_VIEW_ID',
         'pagemanual1': 'https://example.com/manual1',
         'pagemanual2': 'https://example.com/manual2',
       },
