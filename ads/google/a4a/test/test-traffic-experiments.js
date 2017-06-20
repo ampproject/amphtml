@@ -111,6 +111,38 @@ describe('all-traffic-experiments-tests', () => {
       expect(isInternallyTriggeredExperiment(element)).to.be.false;
     });
 
+    it('should use AdSense specific A4A experiment from URL', () => {
+      element.setAttribute('type', 'adsense');
+      const externalBranches = {control: '12', experiment: '34'};
+      const internalBranches = {control: '56', experiment: '78'};
+      const externalDelayedBranches = {control: '90', experiment: '13'};
+
+      sandbox.win.location.search = '?exp=a4a:1,aa:2,da:0';
+
+      const renderViaA4a = googleAdsIsA4AEnabled(
+          sandbox.win, element, 'exp_name', externalBranches, internalBranches,
+          externalDelayedBranches);
+      expect(renderViaA4a).to.be.true;
+      expect(isInExperiment(element, '12')).to.be.false;
+      expect(isInExperiment(element, '34')).to.be.true;
+    });
+
+    it('should use Doubleclick specific A4A experiment from URL', () => {
+      element.setAttribute('type', 'doubleclick');
+      const externalBranches = {control: '12', experiment: '34'};
+      const internalBranches = {control: '56', experiment: '78'};
+      const externalDelayedBranches = {control: '90', experiment: '13'};
+
+      sandbox.win.location.search = '?exp=a4a:0,aa:1,da:2';
+
+      const renderViaA4a = googleAdsIsA4AEnabled(
+          sandbox.win, element, 'exp_name', externalBranches, internalBranches,
+          externalDelayedBranches);
+      expect(renderViaA4a).to.be.true;
+      expect(isInExperiment(element, '12')).to.be.false;
+      expect(isInExperiment(element, '34')).to.be.true;
+    });
+
     it('should enable the external A4A control from the URL', () => {
       const externalBranches = {control: '12', experiment: '34'};
       const internalBranches = {control: '56', experiment: '78'};

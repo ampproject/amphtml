@@ -169,6 +169,8 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
  *   - `2`: Ad is on the experimental branch of the overall A4A-vs-3p iframe
  *     experiment.  Ad will render via the A4A path, including early ad
  *     request and (possibly) early rendering in shadow DOM or iframe.
+ * Allows for per network selection using exp=aa:# for AdSense and exp=da:# for
+ * Doubleclick.
  *
  * @param {!Window} win  Window.
  * @param {!Element} element Ad tag Element.
@@ -184,21 +186,28 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
  *   parameter or not.
  */
 function maybeSetExperimentFromUrl(win, element, experimentName,
-    controlBranchId, treatmentBranchId, delayedControlId,
-    delayedTreatmentBrandId, sfgControlId, sfgTreatmentId, manualId) {
+     controlBranchId, treatmentBranchId, delayedControlId,
+     delayedTreatmentBrandId, sfgControlId, sfgTreatmentId, manualId) {
   const expParam = viewerForDoc(element).getParam('exp') ||
-      parseQueryString(win.location.search)['exp'];
+    parseQueryString(win.location.search)['exp'];
   if (!expParam) {
     return false;
   }
-  const match = /(^|,)(a4a:[^,]*)/.exec(expParam);
-  const a4aParam = match && match[2];
-  if (!a4aParam) {
+  // Allow for per type experiment control with Doubleclick key set for 'da'
+  // and AdSense using 'aa'.  Fallbsck to 'a4a' if type specific is missing.
+  const expKeys = [
+    (element.getAttribute('type') || '').toLowerCase() == 'doubleclick' ?
+      'da' : 'aa',
+    'a4a',
+  ];
+  let arg;
+  let match;
+  expKeys.forEach(key => arg = arg ||
+    ((match = new RegExp(`(?:^|,)${key}:(-?\\d+)`).exec(expParam)) &&
+      match[1]));
+  if (!arg) {
     return false;
   }
-  // In the future, we may want to specify multiple experiments in the a4a
-  // arg.  For the moment, however, assume that it's just a single flag.
-  const arg = a4aParam.split(':', 2)[1];
   const argMapping = {
     '-1': manualId,
     '0': null,
@@ -213,14 +222,12 @@ function maybeSetExperimentFromUrl(win, element, experimentName,
     forceExperimentBranch(win, experimentName, argMapping[arg]);
     return true;
   } else {
-    dev().warn('A4A-CONFIG', 'Unknown a4a URL parameter: ', a4aParam,
+    dev().warn('A4A-CONFIG', 'Unknown a4a URL parameter: ', arg,
         ' expected one of -1 (manual), 0 (not in experiment), 1 (control ' +
         'branch), or 2 (a4a experiment branch)');
     return false;
   }
 }
-
-
 
 /**
  * Sets of experiment IDs can be attached to Elements via attributes.  In
