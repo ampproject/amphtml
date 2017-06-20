@@ -84,13 +84,3 @@ export const signingServerURLs = {
   'cloudflare': 'https://amp.cloudflare.com/amp-ad-verifying-keyset.json',
   'cloudflare-dev': 'https://amp.cloudflare.com/amp-ad-verifying-keyset-dev.json',
 };
-
-/**
- * Allows networks to specify other networks with which it may share a master
- * frame.
- * @type {!Object<string, !Array<string>>}
- */
-export const masterFrameAccessibleTypes = {
-  adsense: ['doubleclick'],
-  doubleclick: ['adsense'],
-};

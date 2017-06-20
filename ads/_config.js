@@ -114,6 +114,7 @@ export const adConfig = {
     clientIdScope: 'AMP_ECID_GOOGLE',
     clientIdCookieName: '_ga',
     remoteHTMLDisabled: true,
+    masterFrameAccessibleTypes: ['doubleclick'],
   },
 
   adsnative: {
@@ -279,6 +280,7 @@ export const adConfig = {
     ],
     clientIdScope: 'AMP_ECID_GOOGLE',
     clientIdCookieName: '_ga',
+    masterFrameAccessibleTypes: ['adsense'],
     renderStartImplemented: true,
   },
 
