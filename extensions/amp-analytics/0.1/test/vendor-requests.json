@@ -161,7 +161,9 @@
     "cloudapi": "https://cloudapi.imrworldwide.com/nmapi/v2/$apid/_client_id_/a?b=%7B%22devInfo%22%3A%7B%22devId%22%3A%22_client_id_%22%2C%22apn%22%3A%22$apn%22%2C%22apv%22%3A%22$apv%22%2C%22apid%22%3A%22$apid%22%7D%2C%22metadata%22%3A%7B%22static%22%3A%7B%22type%22%3A%22static%22%2C%22section%22%3A%22$section%22%2C%22assetid%22%3A%22_page_view_id_%22%2C%22segA%22%3A%22$segA%22%2C%22segB%22%3A%22$segB%22%2C%22segC%22%3A%22$segC%22%2C%22adModel%22%3A%220%22%2C%22dataSrc%22%3A%22cms%22%7D%2C%22content%22%3A%7B%7D%2C%22ad%22%3A%7B%7D%7D%2C%22event%22%3A%22playhead%22%2C%22position%22%3A%22_timestamp_%22%2C%22data%22%3A%7B%22hidden%22%3A%22_background_state_%22%2C%22blur%22%3A%22_background_state_%22%2C%22position%22%3A%22_timestamp_%22%7D%2C%22type%22%3A%22static%22%2C%22utc%22%3A%22_timestamp_%22%2C%22index%22%3A%223%22%7D",
   },
   "nielsen-marketing-cloud": {
-    "trackurl": "https://loadeu.exelator.com/load/?p=${pubId}&g=${siteId}&j=0"
+    "host": "loadeu.exelator.com",
+    "pathPrefix": "load/",
+    "trackurl": "https://loadeu.exelator.com/load/?p=$pubId&g=$siteId&j=0"
   },
   "parsely": {
     "host": "https://srv.pixel.parsely.com",
