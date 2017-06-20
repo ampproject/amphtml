@@ -95,7 +95,7 @@ tags: {  # <amp-ad data-multi-size>
     name: "data-multi-size"
     mandatory: true
     value: ""
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: { name: "json" }
   attrs: {
@@ -166,7 +166,7 @@ tags: {  # <amp-embed data-multi-size>
     name: "data-multi-size"
     mandatory: true
     value: ""
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: { name: "json" }
   attrs: {
