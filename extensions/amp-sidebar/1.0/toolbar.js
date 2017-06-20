@@ -118,7 +118,7 @@ export class Toolbar {
 
     // Display the elements
     this.sidebar_.mutateElement(() => {
-      if(this.toolbarTarget_) {
+      if (this.toolbarTarget_) {
         toggle(this.toolbarTarget_, true);
       }
       if (this.toolbarOnlyElements_) {
@@ -143,7 +143,7 @@ export class Toolbar {
 
     this.sidebar_.mutateElement(() => {
       // Hide the elements
-      if(this.toolbarTarget_) {
+      if (this.toolbarTarget_) {
         toggle(this.toolbarTarget_, false);
       }
       if (this.toolbarOnlyElements_) {
