@@ -21,11 +21,11 @@
 # a localhost server. See https://percy.io/docs/clients/ruby/percy-anywhere.
 
 
-require 'percy/capybara/anywhere'
 require 'capybara/poltergeist'
-require 'phantomjs'
 require 'json'
-require "net/http"
+require 'net/http'
+require 'percy/capybara/anywhere'
+require 'phantomjs'
 
 
 ENV['PERCY_DEBUG'] = '1'  # Enable debugging output.
@@ -113,6 +113,7 @@ def generateSnapshot(server, assets_dir, assets_base_url, url, name)
     page.driver.options[:phantomjs] = Phantomjs.path
     page.driver.options[:js_errors] = false
     page.visit(url)
+    page.has_no_css?('.i-amphtml-loader-dot')  # Implicitly waits for page load.
     Percy.config.default_widths = DEFAULT_WIDTHS
     Percy::Capybara.snapshot(page, name: name)
  end
