@@ -149,6 +149,7 @@ class AmpLightbox extends AMP.BaseElement {
       if (!this.isScrollable_) {
         this.updateInViewport(container, true);
       } else {
+        this.scrollHandler_();
         this.updateChildrenInViewport_(this.pos_, this.pos_);
       }
       // TODO: instead of laying out children all at once, layout children based
@@ -208,7 +209,10 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   scrollHandler_() {
-    const currentScrollTop = this.element./*OK*/scrollTop;
+    // If scroll top is 0, it's set to 1 to avoid scroll-freeze issue.
+    const currentScrollTop = this.element./*OK*/scrollTop || 1;
+    this.element./*OK*/scrollTop = currentScrollTop;
+
     this.pos_ = currentScrollTop;
 
     if (this.scrollTimerId_ === null) {
