@@ -16,6 +16,8 @@
 
 import {LaterpayVendor} from '../laterpay-impl';
 
+const TAG = 'amp-access-laterpay';
+
 describes.fakeWin('LaterpayVendor', {
   amp: true,
   location: 'https://pub.com/doc1',
@@ -142,7 +144,7 @@ describes.fakeWin('LaterpayVendor', {
     let container;
     beforeEach(() => {
       container = document.createElement('div');
-      container.id = 'amp-access-laterpay-dialog';
+      container.id = TAG + '-dialog';
       document.body.appendChild(container);
       vendor.i18n_ = {};
       vendor.purchaseConfig_ = {
@@ -177,7 +179,7 @@ describes.fakeWin('LaterpayVendor', {
     let container;
     beforeEach(() => {
       container = document.createElement('div');
-      container.id = 'amp-access-laterpay-dialog';
+      container.id = TAG + '-dialog';
       document.body.appendChild(container);
       vendor.i18n_ = {};
       vendor.purchaseConfig_ = {
@@ -203,7 +205,7 @@ describes.fakeWin('LaterpayVendor', {
     it('purchase option is selected', () => {
       expect(vendor.selectedPurchaseOption_).to.not.be.null;
       expect(vendor.selectedPurchaseOption_.classList
-          .contains('amp-access-laterpay-selected')).to.be.true;
+          .contains(TAG + '-selected')).to.be.true;
     });
 
   });
@@ -212,7 +214,7 @@ describes.fakeWin('LaterpayVendor', {
     let container;
     beforeEach(() => {
       container = document.createElement('div');
-      container.id = 'amp-access-laterpay-dialog';
+      container.id = TAG + '-dialog';
       document.body.appendChild(container);
       vendor.i18n_ = {};
       vendor.purchaseConfig_ = {
@@ -225,10 +227,9 @@ describes.fakeWin('LaterpayVendor', {
         timepasses: [
           {price: {}},
         ],
+        apl: 'http://apllink',
       };
       vendor.renderPurchaseOverlay_();
-      const changeEv = new Event('change');
-      container.querySelector('input').dispatchEvent(changeEv);
     });
 
     afterEach(() => {
@@ -236,6 +237,8 @@ describes.fakeWin('LaterpayVendor', {
     });
 
     it('sends request for purchase', done => {
+      const changeEv = new Event('change');
+      container.querySelector('input').dispatchEvent(changeEv);
       accessServiceMock.expects('buildUrl')
           .returns(Promise.resolve('https://builturl'))
           .once();
@@ -245,6 +248,20 @@ describes.fakeWin('LaterpayVendor', {
       container.querySelector('button').dispatchEvent(clickEv);
       setTimeout(() => {done();}, 500);
     });
+
+    it('sends request for already purchased', done => {
+      accessServiceMock.expects('buildUrl')
+          .returns(Promise.resolve('https://apllink'))
+          .once();
+      accessServiceMock.expects('loginWithUrl')
+          .once();
+      const clickEv = new Event('click');
+      container
+          .querySelector('.' + TAG + '-already-purchased-link-container > a')
+          .dispatchEvent(clickEv);
+      setTimeout(() => {done();}, 500);
+    });
+
 
   });
 });
