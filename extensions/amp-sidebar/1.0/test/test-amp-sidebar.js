@@ -69,6 +69,16 @@
            return {iframe, ampSidebar};
          });
        });
+
+       it('should replace text to screen reader \
+       button in data-close-button-aria-label', () => {
+         return getAmpSidebar().then(obj => {
+           if (options.closeText) {
+             ampsetbar.setAttribute('data-close-button-aria-label', options.closeText);
+           };
+           expect(closeButton.textContent).to.equal(options.closeText);
+         });
+       });
      }
 
      beforeEach(() => {
@@ -128,16 +138,6 @@
          expect(impl.close_).to.have.not.been.called;
          closeButton.click();
          expect(impl.close_).to.be.calledOnce;
-       });
-     });
-
-     it('should replace text to screen reader \
-     button in data-close-button-aria-label', () => {
-       return getAmpSidebar().then(obj => {
-         if (options.closeText) {
-           ampsetbar.setAttribute('data-close-button-aria-label', options.closeText);
-         };
-         expect(closeButton.textContent).to.equal(options.closeText);
        });
      });
 
