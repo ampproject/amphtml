@@ -100,7 +100,8 @@ class AmpAnalytics3pMessageRouter {
               this.creativeMessageRouters_[creativeId]
                   .sendMessagesToListener(messages);
             } catch (e) {
-              dev.error('Failed to send message to listener: ' + e.message);
+              dev().error(TAG_, 'Failed to send message to listener: ' +
+                  e.message);
             }
           });
         });

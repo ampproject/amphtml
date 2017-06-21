@@ -169,9 +169,10 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /* @ override */
   unlayoutCallback() {
-    Transport.doneUsingCrossDomainIframe(this.getAmpDoc().win.document,
+    const ampDoc = this.getAmpDoc();
+    Transport.doneUsingCrossDomainIframe(ampDoc.win.document,
         this.config_['transport']);
-    ResponseMap.remove(this.config_['transport']['type']);
+    ResponseMap.remove(ampDoc, this.config_['transport']['type']);
     return true;
   }
 
@@ -308,7 +309,9 @@ export class AmpAnalytics extends AMP.BaseElement {
    * amp-analytics config
    */
   processCrossDomainIframeResponse_(type, response) {
-    ResponseMap.add(type, /** @type {string} */ (this.win.document.baseURI),
+    ResponseMap.add(this.getAmpDoc(),
+        type,
+        /** @type {string} */ (this.win.document.baseURI),
         response.data);
   }
 

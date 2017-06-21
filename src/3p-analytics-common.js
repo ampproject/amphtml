@@ -93,35 +93,16 @@ export let AmpAnalytics3pResponse;
  */
 export class ResponseMap {
   /**
-   * Gets the backing data structure
-   * TODO(jonkeller): Is there a better place in the runtime object hierarchy to
-   * hang this?
-   * @returns {Object}
-   * @private
-   */
-  static getMap_() {
-    return AMP.responseMap_ || (AMP.responseMap_ = {});
-  }
-
-  /**
    * Add a response
    * @param {!string} frameType The identifier for the third-party frame that
    * responded
    * @param {!string} creativeUrl The URL of the creative being responded to
    * @param {Object} response What the response was
    */
-  static add(frameType, creativeUrl, response) {
-    ResponseMap.getMap_()[frameType] = ResponseMap.getMap_()[frameType] || {};
-    ResponseMap.getMap_()[frameType][creativeUrl] = response;
-  }
-
-  /**
-   * Remove a response, for instance if a third-party frame is being destroyed
-   * @param {!string} frameType The identifier for the third-party frame
-   * whose responses are to be removed
-   */
-  static remove(frameType) {
-    delete ResponseMap.getMap_()[frameType];
+  static add(ampDoc, frameType, creativeUrl, response) {
+    const map = ampDoc.getAnchorClickListenerBinding();
+    map[frameType] = map[frameType] || {};
+    map[frameType][creativeUrl] = response;
   }
 
   /**
@@ -133,11 +114,23 @@ export class ResponseMap {
    * response was about
    * @returns {?Object}
    */
-  static get(frameType, creativeUrl) {
-    if (ResponseMap.getMap_()[frameType] &&
-      ResponseMap.getMap_()[frameType][creativeUrl]) {
-      return ResponseMap.getMap_()[frameType][creativeUrl];
+  static get(ampDoc, frameType, creativeUrl) {
+    const map = ampDoc.getAnchorClickListenerBinding();
+    if (map[frameType] && map[frameType][creativeUrl]) {
+      return map[frameType][creativeUrl];
     }
     return {};
+  }
+
+  /**
+   * Remove a response, for instance if a third-party frame is being destroyed
+   * @param {!string} frameType The identifier for the third-party frame
+   * whose responses are to be removed
+   */
+  static remove(ampDoc, frameType) {
+    const map = ampDoc.getAnchorClickListenerBinding();
+    if (map[frameType]) {
+      delete map[frameType];
+    }
   }
 }
