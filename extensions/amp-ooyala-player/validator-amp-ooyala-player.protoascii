@@ -41,6 +41,7 @@ tags: {  # <amp-ooyala-player>
     mandatory: true
   }
   attr_lists: "extended-amp-global"
+  attr_lists: "implements-video-interface"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
