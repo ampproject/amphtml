@@ -816,6 +816,8 @@ export class AmpA4A extends AMP.BaseElement {
       }
       this.getVsync().mutate(() => {
         this.togglePlaceholder(true);
+        // This delay provides a 1 second buffer where the ad loader is
+        // displayed in between the creatives.
         timerFor(this.win).delay(() => {
           this.isRelayoutNeededFlag = true;
           this.getResource().layoutCanceled();
