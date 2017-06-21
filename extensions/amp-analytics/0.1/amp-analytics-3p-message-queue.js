@@ -91,7 +91,6 @@ class AbstractAmpAnalytics3pMessageQueue {
    * @abstract
    */
   buildMessage_() {
-    throw new Error('Not yet implemented?!');
   }
 }
 
