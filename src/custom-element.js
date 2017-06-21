@@ -1168,6 +1168,11 @@ function createBaseCustomElementClass(win) {
       return this.getResources().getResourceForElement(this).getLayoutBox();
     }
 
+    /** @return {!Layout} */
+    getLayout() {
+      return this.layout_;
+    }
+
     /**
      * Returns a previously measured layout box relative to the page. The
      * fixed-position elements are relative to the top of the document.
