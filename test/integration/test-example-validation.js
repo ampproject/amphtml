@@ -30,7 +30,7 @@ if (!window.validatorLoad) {
   })();
 }
 
-describe.configure().retryOnSaucelabs().run('example', function() {
+describe.skip('example', function() {
   // TODO(@cramforce): Remove when test is hermetic.
   this.timeout(5000);
 
