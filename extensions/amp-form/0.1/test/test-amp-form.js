@@ -41,6 +41,7 @@ import '../../../amp-selector/0.1/amp-selector';
 import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
 import {whenCalled} from '../../../../testing/test-helper.js';
+import {AmpEvents} from '../../../../src/amp-events';
 
 describes.repeated('', {
   'single ampdoc': {ampdoc: 'single'},
@@ -639,7 +640,7 @@ describes.repeated('', {
         }).then(() => {
           expect(spy.calledOnce).to.be.true;
           expect(spy).calledWithMatch({
-            type: 'amp:template-rendered',
+            type: AmpEvents.TEMPLATE_RENDERED,
             bubbles: true,
           });
         });

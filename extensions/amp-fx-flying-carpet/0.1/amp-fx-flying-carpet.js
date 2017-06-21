@@ -19,6 +19,7 @@ import {Layout} from '../../../src/layout';
 import {user, dev} from '../../../src/log';
 import {setStyle} from '../../../src/style';
 import {listen} from '../../../src/event-helper';
+import {AmpEvents} from '../../../src/amp-events';
 
 class AmpFlyingCarpet extends AMP.BaseElement {
 
@@ -137,7 +138,7 @@ class AmpFlyingCarpet extends AMP.BaseElement {
       throw e;
     }
     this.scheduleLayout(this.children_);
-    listen(this.element, 'amp:built', this.layoutBuiltChild_.bind(this));
+    listen(this.element, AmpEvents.BUILT, this.layoutBuiltChild_.bind(this));
     return Promise.resolve();
   }
 
