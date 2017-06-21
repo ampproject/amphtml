@@ -179,7 +179,7 @@ export class Transport {
     iframeMessagingClient.registerCallback(
         AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE,
         response => {
-          dev().assert(response && response.data,
+          dev().assert(response && response['data'],
               'Received empty response from 3p analytics frame');
           dev().assert(opt_processResponse,
               'Received response from 3p analytics frame when none was' +
