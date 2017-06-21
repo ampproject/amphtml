@@ -26,6 +26,10 @@
       line-height: 24px;
     }
 
+    .menu-right {
+      float: right;
+    }
+
     header,
     .article-body {
       padding: 15px;
@@ -223,7 +227,7 @@
   <link rel="manifest" href="medium-manifest.json">
 </head>
 <body>
-  <amp-sidebar id="sidebar" layout="nodisplay">
+  <amp-sidebar id="sidebar" layout="nodisplay" dock="(min-width: 768px)">
     <nav>
       <ul>
         <li>
@@ -242,6 +246,15 @@
       </ul>
     </nav>
   </amp-sidebar>
+
+  <amp-sidebar id="sidebar2" side="right" layout="nodisplay" dock="(min-width: 1024px)">
+    <nav>
+      <ul>
+        <li><a href="#">Testing Sidebar 2</a></li>
+      </ul>
+    </nav>
+  </amp-sidebar>
+
   <amp-app-banner layout="nodisplay" id="demo-app-banner-2134">
     <div class="content">
       <amp-img src="https://cdn-images-1.medium.com/max/800/1*JLegdtjFMNgqHgnxdd04fg.png"
@@ -263,6 +276,9 @@
     <span class="brand-logo">
       PublisherLogo
     </span>
+    <button on="tap:sidebar2.toggle" class="menu menu-right" title="Toggle Sidebar" >
+      ☰
+    </button>
   </header>
 
   <!--
