@@ -27,6 +27,6 @@ Keep these qualities in mind when creating your Great First Issues:
 
 * We ask new contributors to claim a Great First Issue by adding a comment.  Please keep an eye out for these and respond as soon as possible on the issue welcoming the new contributor and letting them know they can ask you questions.
 * Please add the [GFI Claimed!](https://github.com/ampproject/amphtml/labels/GFI%20Claimed!) label to the issue once someone claims it so others can quickly see that someone is working on it.
-* Encourage the person working on the GFI to [join the AMP Project](https://goo.gl/forms/T65peVtfQfEoDWeD3), which will let us assign the GFI to them.  (Alternatively let [mrjoro](https://amphtml.slack.com/team/mrjoro/) know and he can send an invite directly.)
+* Encourage the person working on the GFI to [join the AMP Project](https://goo.gl/forms/T65peVtfQfEoDWeD3), which will let us assign the GFI to them.  (Alternatively you can let [mrjoro](https://amphtml.slack.com/team/mrjoro/) know and he can send an invite to the new contributor directly.)
 * Keep an eye on the new contributor's progress on the GFI, and offer to help if they seem stuck or if you haven't heard any updates in a few days.
 * Once the GFI is complete help the new contributor find other projects to work on in AMP based on their interests.
