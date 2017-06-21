@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "document-register-element": "1.5.0",
+    "global": "^4.3.2",
     "promise-pjs": "1.1.2",
     "web-animations-js": "2.2.2"
   },
@@ -52,12 +53,12 @@
     "formidable": "1.0.17",
     "fs-extra": "0.27.0",
     "glob": "7.1.2",
-    "gulp": "3.9.1",
+    "gulp": "^3.9.1",
     "gulp-closure-compiler": "0.4.0",
     "gulp-eslint": "3.0.1",
     "gulp-exec": "2.1.2",
     "gulp-file": "0.2.0",
-    "gulp-git": "1.7.2",
+    "gulp-git": "^2.4.1",
     "gulp-help": "1.6.1",
     "gulp-if": "2.0.0",
     "gulp-load-plugins": "1.2.0",
