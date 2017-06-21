@@ -86,6 +86,8 @@ describe('LayoutRect', () => {
       'height': 10,
       'bottom': 70,
       'right': 50,
+      'x': 40,
+      'y': 60,
     });
     // the layoutRect array can deal with null/undefined input
     expect(lr.rectIntersection(null, rect1, undefined, rect2)).to.jsonEqual({
@@ -95,6 +97,8 @@ describe('LayoutRect', () => {
       'height': 10,
       'bottom': 70,
       'right': 50,
+      'x': 40,
+      'y': 60,
     });
     expect(lr.rectIntersection(rect1, rect3)).to.be.null;
     expect(lr.rectIntersection(rect2, rect3)).to.be.null;
@@ -105,6 +109,8 @@ describe('LayoutRect', () => {
       'height': 5,
       'bottom': 70,
       'right': 50,
+      'x': 45,
+      'y': 65,
     });
     expect(lr.rectIntersection(rect1, rect2, rect3, rect4)).to.be.null;
   });
