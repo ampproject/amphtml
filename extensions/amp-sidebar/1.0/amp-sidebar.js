@@ -128,8 +128,8 @@ export class AmpSidebar extends AMP.BaseElement {
 
     // Invisible close button at the end of sidebar for screen-readers.
     const screenReaderCloseButton = this.document_.createElement('button');
-    screenReaderCloseButton.innerText = button.textContent = ariaLabel;
 
+    screenReaderCloseButton.textContent = ariaLabel;
     screenReaderCloseButton.classList.add('i-amphtml-screen-reader');
     // This is for screen-readers only, should not get a tab stop.
     screenReaderCloseButton.tabIndex = -1;
