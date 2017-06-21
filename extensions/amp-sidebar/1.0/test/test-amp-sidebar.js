@@ -19,6 +19,7 @@
  import {adopt} from '../../../../src/runtime';
  import {createIframePromise} from '../../../../testing/iframe';
  import {platformFor} from '../../../../src/services';
+ import {vsyncFor} from '../../../../src/services';
  import {timerFor} from '../../../../src/services';
  import {assertScreenReaderElement} from '../../../../testing/test-helper';
  import {toggleExperiment} from '../../../../src/experiments';
@@ -48,6 +49,7 @@
      let sandbox;
      let platform;
      let timer;
+     let vsync;
 
      function getAmpSidebar(options) {
        options = options || {};
@@ -85,6 +87,7 @@
          ampSidebar.setAttribute('layout', 'nodisplay');
          return iframe.addElement(ampSidebar).then(() => {
            timer = timerFor(iframe.win);
+           vsync = vsyncFor(iframe.win);
            return {iframe, ampSidebar};
          });
        });
@@ -596,11 +599,12 @@
                 .slice.call(sidebarElement.ownerDocument
                 .getElementsByClassName(TOOLBAR_CLASS), 0);
          expect(toolbarElements.length).to.be.above(0);
-         expect(toolbarElements[0].style.display).to.be.equal('none');
+         expect(toolbarElements[0].parentElement.style.display)
+             .to.be.equal('none');
        });
      });
 
-     it('toolbar header should be created for the const TOOLBAR_MEDIA', () => {
+     it('toolbar header should be shown for the const TOOLBAR_MEDIA', () => {
        return getAmpSidebar({
          toolbar: true,
        }).then(obj => {
@@ -608,8 +612,19 @@
          const toolbarElements = Array.prototype
                 .slice.call(sidebarElement.ownerDocument
                 .getElementsByClassName(TOOLBAR_CLASS), 0);
-         expect(toolbarElements.length).to.be.above(0);
-         expect(toolbarElements[0].style.display).to.be.equal('');
+         const iframe = obj.iframe.iframe;
+         iframe.style.width = '1024px';
+         iframe.style.position = 'absolute';
+         console.log(iframe);
+         //Wait for the window async window vsync to occur
+         vsync.mutate(() => {
+           vsync.mutate(() => {
+             debugger;
+             expect(toolbarElements.length).to.be.above(0);
+             expect(toolbarElements[0].parentElement.style.display)
+                 .to.be.equal('');
+           });
+         });
        });
      });
    });

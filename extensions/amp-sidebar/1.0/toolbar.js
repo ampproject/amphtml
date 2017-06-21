@@ -75,12 +75,14 @@ export class Toolbar {
    * @param {!Function} onShowCallback - function called if toolbar is shown on check
    */
   onLayoutChange(onShowCallback) {
+    console.log('hi');
     // Get if we match the current toolbar media
     const matchesMedia = this.sidebar_.win
         .matchMedia(this.toolbarMedia_).matches;
 
     // Remove and add the toolbar dynamically
     if (matchesMedia) {
+      console.log('matches media!');
       const showResponse = this.attemptShow_();
       if (showResponse) {
         showResponse.then(onShowCallback);
