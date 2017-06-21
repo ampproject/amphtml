@@ -170,6 +170,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       format,
       'w': this.size_.width,
       'h': this.size_.height,
+      'iu': this.element.getAttribute('data-ad-slot'),
       'adtest': adTestOn ? 'on' : null,
       adk,
       'bc': global.SVGElement && global.document.createElementNS ? '1' : null,
