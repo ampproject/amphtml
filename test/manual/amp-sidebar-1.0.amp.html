@@ -6,13 +6,7 @@
   <link rel="canonical" href="https://medium.com/p/cb7f223fad86" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <script async src="https://cdn.ampproject.org/v0.js"></script>
-
   <style amp-custom>
-    body {
-      margin: 0;
-      font-family: 'Georgia', Serif;
-    }
-
     .brand-logo {
       font-family: 'Open Sans';
     }
@@ -24,16 +18,6 @@
 
     .content-container p {
       line-height: 24px;
-    }
-
-    header,
-    .article-body {
-      padding: 15px;
-    }
-
-    /* In the shadow-doc mode, the parent shell already has header and nav. */
-    .amp-shadow header {
-      display: none;
     }
 
     .lightbox {
@@ -196,21 +180,6 @@
       text-align: right;
       font-size: 14px;
     }
-
-    amp-sidebar {
-      width: 150px;
-    }
-
-    nav li {
-      list-style: none;
-      margin-bottom: 10px;
-    }
-
-    nav li a {
-      text-decoration: none;
-      color: #666666;
-    }
-
   </style>
   <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
   <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
@@ -224,23 +193,75 @@
 </head>
 <body>
   <amp-sidebar id="sidebar" layout="nodisplay">
-    <nav>
+
+    <nav toolbar="(min-width: 0px)" toolbar-only>
+      <ul>
+        <li>
+          <button on="tap:sidebar.toggle" class="menu" title="Toggle Sidebar" >
+            ☰
+          </button>
+        </li>
+        <li>
+          <span class="brand-logo">
+            PublisherLogo
+          </span>
+        </li>
+        <li>
+          <a href="#">Wrap Example</a>
+        </li>
+        <li>
+          <a href="#">Wrap Example</a>
+        </li>
+        <li>
+          <a href="#">Wrap Example</a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Multiple / Complex Toolbars -->
+    <nav toolbar="(max-width: 767px)" toolbar-only>
+      <ul>
+        <li>
+          <input placeholder="Search..."/>
+        </li>
+      </ul>
+    </nav>
+
+    <nav toolbar="(min-width: 375px) and (max-width: 767px)" toolbar-only>
+      <ul>
+        <li>
+          <amp-img src="https://cdn-images-1.medium.com/max/800/1*JLegdtjFMNgqHgnxdd04fg.png"
+               width="40" height="34"></amp-img>
+       </li>
+     </ul>
+    </nav>
+
+    <nav toolbar="(min-width: 768px)">
       <ul>
         <li>
           <a href="#">
             Home
-            <amp-img src="img/ampicon.png" width="15" height="15"></amp-img>
+            <amp-img src="../../examples/img/ampicon.png" width="15" height="15"></amp-img>
           </a>
         </li>
-        <li><a href="#">Link 1</a></li>
-        <li><a href="#">Link 2</a></li>
-        <li><a href="#">Link 3</a></li>
-        <li><a href="#">Link 4</a></li>
-        <li><a href="#section1">Section 1</a></li>
-        <li><a href="#section2">Section 2</a></li>
-        <li><a href="#section3">Section 3</a></li>
+        <li toolbar-only><a href="#">Toolbar Only Example</a></li>
+        <li>
+          <!-- Example Search Input field -->
+          <input placeholder="Search..."/>
+        </li>
       </ul>
     </nav>
+
+    <!-- Sidebar only elements -->
+    <ul>
+      <li><a href="#">Link 1</a></li>
+      <li><a href="#">Link 2</a></li>
+      <li><a href="#">Link 3</a></li>
+      <li><a href="#">Link 4</a></li>
+      <li><a href="#section1">Section 1</a></li>
+      <li><a href="#section2">Section 2</a></li>
+      <li><a href="#section3">Section 3</a></li>
+    </ul>
   </amp-sidebar>
   <amp-app-banner layout="nodisplay" id="demo-app-banner-2134">
     <div class="content">
@@ -256,13 +277,8 @@
     </div>
   </amp-app-banner>
 
-  <header>
-    <button on="tap:sidebar.toggle" class="menu" title="Toggle Sidebar" >
-      ☰
-    </button>
-    <span class="brand-logo">
-      PublisherLogo
-    </span>
+  <header class="slot-fallback">
+      I Should be seen with any amount of toolbars
   </header>
 
   <!--
@@ -279,8 +295,8 @@
     <article>
       <figure>
         <amp-img id="hero-img"
-            src="img/hero@1x.jpg"
-            srcset="img/hero@1x.jpg 1x, img/hero@2x.jpg 2x"
+            src="../../examples/img/hero@1x.jpg"
+            srcset="../../examples/img/hero@1x.jpg 1x, ../../examples/img/hero@2x.jpg 2x"
             layout="responsive" width="360" placeholder
             alt="Picture of two chairs on a lake shore with big pine trees"
             title="Opens image in a lightbox"
@@ -294,8 +310,8 @@
 
         <div class="lightbox-content">
           <amp-img id="floating-headline-img"
-              src="img/hero@1x.jpg"
-              srcset="img/hero@1x.jpg 1x, img/hero@2x.jpg 2x"
+              src="../../examples/img/hero@1x.jpg"
+              srcset="../../examples/img/hero@1x.jpg 1x, ../../examples/img/hero@2x.jpg 2x"
               alt="Two chairs on a lake shore with big pine trees"
               placeholder
               width="360" height="216" layout="responsive">
@@ -321,7 +337,7 @@
         </header>
 
         <div class="author">
-          <amp-img src="img/sample.jpg" id="author-avatar" placeholder
+          <amp-img src="../../examples/img/sample.jpg" id="author-avatar" placeholder
               height="50" width="50">
           </amp-img>
           <div class="byline">
@@ -397,8 +413,8 @@
 
           <figure>
             <amp-img class="full-bleed" placeholder
-                src="img/sea@1x.jpg"
-                srcset="img/sea@1x.jpg 1x, img/sea@2x.jpg 2x"
+                src="../../examples/img/sea@1x.jpg"
+                srcset="../../examples/img/sea@1x.jpg 1x, ../../examples/img/sea@2x.jpg 2x"
                 layout="responsive" width="360"
                 alt="Fusce pretium tempor justo, vitae consequat dolor maximus eget."
                 height="216">
