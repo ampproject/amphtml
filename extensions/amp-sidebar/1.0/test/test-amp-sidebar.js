@@ -127,6 +127,9 @@
          expect(impl.close_).to.have.not.been.called;
          closeButton.click();
          expect(impl.close_).to.be.calledOnce;
+          if (options.closeText) {
+            ampsetbar.setAttribute('data-close-button-aria-label', options.closeText)
+          }
        });
      });
 

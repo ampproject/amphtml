@@ -122,13 +122,13 @@ export class AmpSidebar extends AMP.BaseElement {
       }
     });
 
-    var ariaLabel  = this.element.getAttribute('data-close-button-aria-label')
+    const ariaLabel  = this.element.getAttribute('data-close-button-aria-label')
 
     // Invisible close button at the end of sidebar for screen-readers.
     const screenReaderCloseButton = this.document_.createElement('button');
 
     // TODO(aghassemi, #4146) i18n
-    if(ariaLabel) {
+    if (ariaLabel) {
       screenReaderCloseButton.textContent = ariaLabel;
     } else {
       screenReaderCloseButton.textContent = 'Close the sidebar';
