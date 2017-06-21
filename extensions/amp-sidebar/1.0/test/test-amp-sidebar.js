@@ -63,7 +63,7 @@
          const anchor = iframe.doc.createElement('a');
          anchor.href = '#section1';
          ampSidebar.appendChild(anchor);
-         if (options.toolbar) {
+         if (options.toolbars) {
            // Stub our sidebar operations, doing this here as it will
            // Ease testing our media queries
            const impl = ampSidebar.implementation_;
@@ -76,20 +76,23 @@
                  callback();
                  return Promise.resolve();
                });
-           const navToolbar = iframe.doc.createElement('nav');
-           if (typeof options.toolbar === 'string') {
-             navToolbar.setAttribute('toolbar', options.toolbar);
-           } else {
-             navToolbar.setAttribute('toolbar', DEFAULT_TOOLBAR_MEDIA);
-           }
-           const toolbarList = iframe.doc.createElement('ul');
-           for (let i = 0; i < 3; i++) {
-             const li = iframe.doc.createElement('li');
-             li.innerHTML = 'Toolbar item ' + i;
-             toolbarList.appendChild(li);
-           }
-           navToolbar.appendChild(toolbarList);
-           ampSidebar.appendChild(navToolbar);
+           // Create our individual toolbars
+           options.toolbars.forEach(toolbar => {
+             const navToolbar = iframe.doc.createElement('nav');
+             if (typeof toolbar === 'string') {
+               navToolbar.setAttribute('toolbar', toolbar);
+             } else {
+               navToolbar.setAttribute('toolbar', DEFAULT_TOOLBAR_MEDIA);
+             }
+             const toolbarList = iframe.doc.createElement('ul');
+             for (let i = 0; i < 3; i++) {
+               const li = iframe.doc.createElement('li');
+               li.innerHTML = 'Toolbar item ' + i;
+               toolbarList.appendChild(li);
+             }
+             navToolbar.appendChild(toolbarList);
+             ampSidebar.appendChild(navToolbar);
+           });
          }
          if (options.side) {
            ampSidebar.setAttribute('side', options.side);
@@ -101,7 +104,7 @@
          ampSidebar.setAttribute('layout', 'nodisplay');
          return iframe.addElement(ampSidebar).then(() => {
            timer = timerFor(iframe.win);
-           if (options.toolbar) {
+           if (options.toolbars) {
              sandbox.stub(timer, 'delay', function(callback) {
                callback();
              });
@@ -600,25 +603,42 @@
                .querySelectorAll('*[toolbar]');
          expect(headerElements.length).to.be.equal(0);
          expect(toolbarElements.length).to.be.equal(0);
+         expect(sidebarElement.implementation_.toolbars_.length).to.be.equal(0);
        });
      });
+
      it('should create a toolbar target element, \
      containing the navigation toolbar element', () => {
        return getAmpSidebar({
-         toolbar: true,
+         toolbars: [true],
        }).then(obj => {
          const sidebarElement = obj.ampSidebar;
          const toolbarNavElements = Array.prototype
                 .slice.call(sidebarElement.ownerDocument
                 .querySelectorAll('nav[toolbar]'), 0);
          expect(toolbarNavElements.length).to.be.above(1);
+         expect(sidebarElement.implementation_.toolbars_.length).to.be.equal(1);
+       });
+     });
+
+     it('should create multiple toolbar target elements, \
+     containing the navigation toolbar element', () => {
+       return getAmpSidebar({
+         toolbars: [true, '(min-width: 1024px)'],
+       }).then(obj => {
+         const sidebarElement = obj.ampSidebar;
+         const toolbarNavElements = Array.prototype
+                .slice.call(sidebarElement.ownerDocument
+                .querySelectorAll('nav[toolbar]'), 0);
+         expect(toolbarNavElements.length).to.be.equal(4);
+         expect(sidebarElement.implementation_.toolbars_.length).to.be.equal(2);
        });
      });
 
      it('toolbar header should be hidden for a \
      window size less than DEFAULT_TOOLBAR_MEDIA', () => {
        return getAmpSidebar({
-         toolbar: true,
+         toolbars: [true],
        }).then(obj => {
          const sidebarElement = obj.ampSidebar;
          const toolbarElements = Array.prototype
@@ -638,7 +658,7 @@
      it('toolbar header should be shown for a \
      window size more than DEFAULT_TOOLBAR_MEDIA', () => {
        return getAmpSidebar({
-         toolbar: true,
+         toolbars: [true],
        }).then(obj => {
          const sidebarElement = obj.ampSidebar;
          const toolbarElements = Array.prototype
@@ -658,15 +678,14 @@
      it('toolbar should be in the hidden state \
      when it is not being displayed', () => {
        return getAmpSidebar({
-         toolbar: true,
+         toolbars: [true],
        }).then(obj => {
-         const sidebarElement = obj.ampSidebar;
+         const toolbars = obj.ampSidebar.implementation_.toolbars_;
          resizeIframeToWidth(obj.iframe, '1px', () => {
-           sidebarElement.implementation_.toolbars_.forEach(toolbar => {
+           toolbars.forEach(toolbar => {
              toolbar.onLayoutChange();
+             expect(toolbar.isToolbarShown_()).to.be.false;
            });
-           expect(sidebarElement.implementation_.toolbars_[0].isToolbarShown_())
-               .to.be.false;
          });
        });
      });
@@ -674,15 +693,14 @@
      it('toolbar should be in the shown state \
      when it is being displayed', () => {
        return getAmpSidebar({
-         toolbar: true,
+         toolbars: [true],
        }).then(obj => {
-         const sidebarElement = obj.ampSidebar;
+         const toolbars = obj.ampSidebar.implementation_.toolbars_;
          resizeIframeToWidth(obj.iframe, '4000px', () => {
-           sidebarElement.implementation_.toolbars_.forEach(toolbar => {
+           toolbars.forEach(toolbar => {
              toolbar.onLayoutChange();
+             expect(toolbar.isToolbarShown_()).to.be.true;
            });
-           expect(sidebarElement.implementation_.toolbars_[0].isToolbarShown_())
-               .to.be.true;
          });
        });
      });
@@ -690,15 +708,14 @@
      it('toolbar should not be able to be shown \
      if already in the shown state', () => {
        return getAmpSidebar({
-         toolbar: true,
+         toolbars: [true],
        }).then(obj => {
-         const sidebarElement = obj.ampSidebar;
+         const toolbars = obj.ampSidebar.implementation_.toolbars_;
          resizeIframeToWidth(obj.iframe, '4000px', () => {
-           sidebarElement.implementation_.toolbars_.forEach(toolbar => {
+           toolbars.forEach(toolbar => {
              toolbar.onLayoutChange();
+             expect(toolbar.attemptShow_()).to.be.undefined;
            });
-           expect(sidebarElement.implementation_.toolbars_[0].attemptShow_())
-               .to.be.undefined;
          });
        });
      });
@@ -706,15 +723,14 @@
      it('toolbar should be able to be shown \
      if not in the shown state, and return a promise', () => {
        return getAmpSidebar({
-         toolbar: true,
+         toolbars: [true],
        }).then(obj => {
-         const sidebarElement = obj.ampSidebar;
+         const toolbars = obj.ampSidebar.implementation_.toolbars_;
          resizeIframeToWidth(obj.iframe, '1px', () => {
-           sidebarElement.implementation_.toolbars_.forEach(toolbar => {
+           toolbars.forEach(toolbar => {
              toolbar.onLayoutChange();
+             expect(toolbar).to.exist;
            });
-           expect(sidebarElement.implementation_
-               .toolbars_[0].attemptShow_().then).to.exist;
          });
        });
      });
