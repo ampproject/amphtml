@@ -26,6 +26,7 @@ describe('Platform', () => {
   let isIe;
   let isEdge;
   let isWebKit;
+  let isStandAlone;
   let majorVersion;
   let iosVersion;
   let iosMajorVersion;
@@ -39,6 +40,7 @@ describe('Platform', () => {
     isIe = false;
     isEdge = false;
     isWebKit = false;
+    isStandAlone = false;
     majorVersion = 0;
     iosVersion = '';
     iosMajorVersion = null;
@@ -57,6 +59,16 @@ describe('Platform', () => {
     expect(platform.getMajorVersion()).to.equal(majorVersion);
     expect(platform.getIosVersionString()).to.equal(iosVersion);
     expect(platform.getIosMajorVersion()).to.equal(iosMajorVersion);
+  }
+
+  function testStandAlone(userAgentString, standAloneBoolean) {
+    const platform = new Platform({
+      navigator: {
+        standalone: standAloneBoolean,
+        userAgent: userAgentString,
+      },
+    });
+    expect(platform.isStandAlone()).to.equal(isStandAlone);
   }
 
   it('should tolerate empty or null', () => {
@@ -195,5 +207,12 @@ describe('Platform', () => {
     testUserAgent('Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36' +
         ' (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36' +
         ' Edge/12.10136');
+  });
+
+  it('StandAlone', () => {
+    isStandAlone = true;
+    testStandAlone('Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X)' +
+        ' AppleWebKit/603.1.30 (KHTML, like Gecko) FxiOS/7.5b3349' +
+        ' Mobile/14E304 Safari/603.1.30', isStandAlone);
   });
 });
