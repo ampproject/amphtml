@@ -25,6 +25,10 @@
  import * as sinon from 'sinon';
  import '../amp-sidebar';
 
+ /** @const */
+ const TOOLBAR_MEDIA = '(min-width: 768px)';
+
+
  adopt(window);
 
  describes.realWin('amp-sidebar 1.0 version', {
@@ -56,6 +60,18 @@
          const anchor = iframe.doc.createElement('a');
          anchor.href = '#section1';
          ampSidebar.appendChild(anchor);
+         if (options.toolbar) {
+           const navToolbar = iframe.doc.createElement('nav');
+           navToolbar.setAttribute('toolbar', TOOLBAR_MEDIA);
+           const toolbarList = iframe.doc.createElement('ul');
+           for (let i = 0; i < 3; i++) {
+             const li = iframe.doc.createElement('li');
+             li.innerHTML = 'Toolbar item ' + i;
+             toolbarList.appendChild(li);
+           }
+           navToolbar.appendChild(toolbarList);
+           ampSidebar.appendChild(navToolbar);
+         }
          if (options.side) {
            ampSidebar.setAttribute('side', options.side);
          }
@@ -540,6 +556,49 @@
          expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
          expect(sidebarElement.style.display).to.equal('');
          expect(impl.schedulePause).to.have.not.been.called;
+       });
+     });
+
+     // Tests for amp-sidebar 1.0
+     it('should not create toolbars without <nav toolbar />', () => {
+       return getAmpSidebar().then(obj => {
+         const sidebarElement = obj.ampSidebar;
+         const headerElements = sidebarElement.ownerDocument
+               .getElementsByTagName('header');
+         const toolbarElements = sidebarElement.ownerDocument
+               .querySelectorAll('*[toolbar]');
+         expect(headerElements.length).to.be.equal(0);
+         expect(toolbarElements.length).to.be.equal(0);
+       });
+     });
+     it('should create a toolbar target element, \
+     containing the navigation toolbar element', () => {
+       return getAmpSidebar({
+         toolbar: true,
+       }).then(obj => {
+         const sidebarElement = obj.ampSidebar;
+         const toolbarNavElements = Array.prototype
+                .slice.call(sidebarElement.ownerDocument
+                .querySelectorAll('nav[toolbar]'), 0);
+         expect(toolbarNavElements.length).to.be.above(1);
+       });
+     });
+
+     it('toolbar header should be hidden for the const TOOLBAR_MEDIA', () => {
+       return getAmpSidebar({
+         toolbar: true,
+       }).then(obj => {
+         const sidebarElement = obj.ampSidebar;
+         const toolbarNavElements = Array.prototype
+                .slice.call(sidebarElement.ownerDocument
+                .querySelectorAll('nav[toolbar]'), 0);
+         expect(toolbarNavElements.length).to.be.above(1);
+         expect(toolbarNavElements.some(navElement => {
+           if (navElement.parentElement.style.display == 'none') {
+             return true;
+           }
+           return false;
+         })).to.be.true;
        });
      });
    });

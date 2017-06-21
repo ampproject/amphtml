@@ -26,6 +26,10 @@ import {setStyles, toggle} from '../../../src/style';
 import {removeFragment, parseUrl} from '../../../src/url';
 import {vsyncFor} from '../../../src/services';
 import {timerFor} from '../../../src/services';
+import {Toolbar} from './toolbar';
+
+/** @const */
+const TAG = 'amp-sidebar 1.0';
 
 /** @const */
 const ANIMATION_TIMEOUT = 550;
@@ -55,6 +59,9 @@ export class AmpSidebar extends AMP.BaseElement {
 
     /** @private {?string} */
     this.side_ = null;
+
+    /** @private {Array} */
+    this.toolbars_ = [];
 
     const platform = platformFor(this.win);
 
@@ -98,6 +105,18 @@ export class AmpSidebar extends AMP.BaseElement {
       this.side_ = (pageDir == 'rtl') ? 'right' : 'left';
       this.element.setAttribute('side', this.side_);
     }
+
+    // Get the toolbar attribute from the child navs
+    const toolbarElements =
+    Array.prototype.slice
+      .call(this.element.querySelectorAll('nav[toolbar]'), 0);
+    toolbarElements.forEach(toolbarElement => {
+      try {
+        this.toolbars_.push(new Toolbar(toolbarElement, this, this.vsync_));
+      } catch (e) {
+        user().error(TAG, 'Failed to instantiate toolbar', e);
+      }
+    });
 
     if (this.isIosSafari_) {
       this.fixIosElasticScrollLeak_();
@@ -159,6 +178,27 @@ export class AmpSidebar extends AMP.BaseElement {
     }, true);
   }
 
+  /** @override */
+  onLayoutMeasure() {
+    // Check our toolbars for changes
+    this.toolbars_.forEach(toolbar => {
+      toolbar.onLayoutChange(() => this.onToolbarOpen_());
+    });
+  }
+
+  /** @override */
+  activate() {
+    this.open_();
+  }
+
+  /**
+   * Function called whenever a tollbar is opened.
+   * @private
+   */
+  onToolbarOpen_() {
+    this.close_();
+  }
+
   /**
    * Returns true if the sidebar is opened.
    * @returns {boolean}
@@ -167,12 +207,6 @@ export class AmpSidebar extends AMP.BaseElement {
   isOpen_() {
     return this.element.hasAttribute('open');
   }
-
-  /** @override */
-  activate() {
-    this.open_();
-  }
-
 
   /**
    * Toggles the open/close state of the sidebar.
