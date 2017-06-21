@@ -124,12 +124,14 @@
          expect(closeButton).to.exist;
          expect(closeButton.tagName).to.equal('BUTTON');
          assertScreenReaderElement(closeButton);
+         expect(closeButton.textContent)to.equal('Close the sidebar');
          expect(impl.close_).to.have.not.been.called;
          closeButton.click();
          expect(impl.close_).to.be.calledOnce;
           if (options.closeText) {
             ampsetbar.setAttribute('data-close-button-aria-label', options.closeText)
           }
+          expect(closeButton.textContent).to.not.equal(!('Close the sidebar'));
        });
      });
 
