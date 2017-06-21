@@ -211,6 +211,8 @@ class AmpLightbox extends AMP.BaseElement {
   scrollHandler_() {
     // If scroll top is 0, it's set to 1 to avoid scroll-freeze issue.
     const currentScrollTop = this.element./*OK*/scrollTop || 1;
+    this.element./*OK*/scrollTop = currentScrollTop;
+
     this.pos_ = currentScrollTop;
 
     if (this.scrollTimerId_ === null) {
