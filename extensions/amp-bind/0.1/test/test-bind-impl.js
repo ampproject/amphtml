@@ -15,7 +15,9 @@
  */
 
 import * as sinon from 'sinon';
+import {AmpEvents} from '../../../../src/amp-events';
 import {Bind} from '../bind-impl';
+import {BindEvents} from '../bind-events';
 import {chunkInstanceForTesting} from '../../../../src/chunk';
 import {installTimerService} from '../../../../src/service/timer-impl';
 import {toArray} from '../../../../src/types';
@@ -187,8 +189,8 @@ describes.realWin('Bind', {
       const elementWithBinding = createElementWithBinding('[text]="1+1"');
       dynamicTag.appendChild(elementWithBinding);
       dynamicTag.dispatchEvent(
-          new Event('amp:template-rendered', {bubbles: true}));
-      return waitForEvent('amp:bind:rescan-template');
+          new Event(AmpEvents.TEMPLATE_RENDERED, {bubbles: true}));
+      return waitForEvent(BindEvents.RESCAN_TEMPLATE);
     }).then(() => {
       expect(bind.boundElements_.length).to.equal(1);
     });

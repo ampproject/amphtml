@@ -30,7 +30,7 @@ import {isCanary, experimentTogglesOrNull} from './experiments';
 import {makeBodyVisible} from './style-installer';
 import {startsWith} from './string';
 import {urls} from './config';
-
+import {AmpEvents} from './amp-events';
 
 /**
  * @const {string}
@@ -153,7 +153,7 @@ export function reportError(error, opt_associatedElement) {
       }
     }
     if (element && element.dispatchCustomEventForTesting) {
-      element.dispatchCustomEventForTesting('amp:error', error.message);
+      element.dispatchCustomEventForTesting(AmpEvents.ERROR, error.message);
     }
 
     // 'call' to make linter happy. And .call to make compiler happy

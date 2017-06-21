@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import {AmpEvents} from '../../src/amp-events';
+import {BindEvents} from '../../extensions/amp-bind/0.1/bind-events';
 import {createFixtureIframe} from '../../testing/iframe';
 import {batchedXhrFor} from '../../src/services';
 import * as sinon from 'sinon';
@@ -46,20 +47,22 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
       const loadStartsToExpect =
           (opt_numberOfAmpElements === undefined) ? 1 : opt_numberOfAmpElements;
       return Promise.all([
-        fixture.awaitEvent('amp:bind:initialize', 1),
-        fixture.awaitEvent('amp:load:start', loadStartsToExpect),
+        fixture.awaitEvent(BindEvents.INITIALIZE, 1),
+        fixture.awaitEvent(AmpEvents.LOAD_START, loadStartsToExpect),
       ]);
     });
   }
 
   /** @return {!Promise} */
   function waitForBindApplication() {
-    return fixture.awaitEvent('amp:bind:setState', ++numSetStates);
+    // Bind should be available, but need to wait for actions to resolve
+    // service promise for bind and call setState.
+    return fixture.awaitEvent(BindEvents.SET_STATE, ++numSetStates);
   }
 
   /** @return {!Promise} */
   function waitForTemplateRescan() {
-    return fixture.awaitEvent('amp:bind:rescan-template', ++numTemplated);
+    return fixture.awaitEvent(BindEvents.RESCAN_TEMPLATE, ++numTemplated);
   }
 
   describe('with [text] and [class]', () => {

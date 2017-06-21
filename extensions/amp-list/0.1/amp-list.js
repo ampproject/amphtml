@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../../../src/amp-events';
 import {createCustomEvent} from '../../../src/event-helper';
 import {fetchBatchedJsonFor} from '../../../src/batched-json';
 import {isArray} from '../../../src/types';
@@ -108,7 +109,7 @@ export class AmpList extends AMP.BaseElement {
     });
 
     const templatedEvent = createCustomEvent(this.win,
-        'amp:template-rendered', /* detail */ null, {bubbles: true});
+        AmpEvents.TEMPLATE_RENDERED, /* detail */ null, {bubbles: true});
     this.container_.dispatchEvent(templatedEvent);
 
     // Change height if needed.
