@@ -203,10 +203,10 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
           analyticsElement, 'ini-load', config, handler);
     });
 
-    it('should add "visible-v3" trigger', () => {
-      const config = {on: 'visible-v3'};
+    it('should add "visible" trigger', () => {
+      const config = {on: 'visible'};
       group.addTrigger(config, handler);
-      const tracker = root.getTrackerOptional('visible-v3');
+      const tracker = root.getTrackerOptional('visible');
       expect(tracker).to.be.instanceOf(VisibilityTracker);
 
       const unlisten = function() {};
@@ -215,36 +215,20 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
       group.addTrigger(config, handler);
       expect(stub).to.be.calledOnce;
       expect(stub).to.be.calledWith(
-          analyticsElement, 'visible-v3', config, handler);
+          analyticsElement, 'visible', config, handler);
     });
 
-    it('should add "visible-v3" trigger for hidden', () => {
+    it('should add "visible" trigger for hidden', () => {
       group = service.createAnalyticsGroup(analyticsElement);
       const config = {on: 'hidden'};
       const getTrackerSpy = sandbox.spy(root, 'getTracker');
       group.addTrigger(config, () => {});
-      expect(getTrackerSpy).to.be.calledWith('visible-v3');
-      const tracker = root.getTrackerOptional('visible-v3');
+      expect(getTrackerSpy).to.be.calledWith('visible');
+      const tracker = root.getTrackerOptional('visible');
       const unlisten = function() {};
       const stub = sandbox.stub(tracker, 'add', () => unlisten);
       group.addTrigger(config, () => {});
-      expect(stub).to.be.calledWith(analyticsElement, 'hidden-v3', config);
-    });
-
-    it('should use "visible-v3" for "visible"', () => {
-      group = service.createAnalyticsGroup(analyticsElement);
-      const config = {on: 'visible'};
-      group.addTrigger(config, handler);
-      const tracker = root.getTrackerOptional('visible-v3');
-      expect(tracker).to.be.instanceOf(VisibilityTracker);
-
-      const unlisten = function() {};
-      const stub = sandbox.stub(tracker, 'add', () => unlisten);
-      const handler = function() {};
-      group.addTrigger(config, handler);
-      expect(stub).to.be.calledOnce;
-      expect(stub).to.be.calledWith(
-          analyticsElement, 'visible-v3', config, handler);
+      expect(stub).to.be.calledWith(analyticsElement, 'hidden', config);
     });
   });
 });
