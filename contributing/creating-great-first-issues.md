@@ -22,3 +22,11 @@ Keep these qualities in mind when creating your Great First Issues:
 * When you identify an issue that would make a Great First Issue, create a new issue using the [Great First Issues Template](great-first-issues-template.md) (inspired by Hoodie's [template](https://github.com/hoodiehq/camp/blob/gh-pages/ISSUE_TEMPLATE.md)).  Copy the [raw markdown](https://raw.githubusercontent.com/ampproject/amphtml/master/contributing/great-first-issues-template.md) into your issue and follow the guidance in the comments.
 * Add the [Great First Issue label](https://github.com/ampproject/amphtml/labels/Great%20First%20Issue) and add the issue to the [Great First Issues milestone](https://github.com/ampproject/amphtml/milestone/25).  (The redundancy is intentional.  Most other open source projects use a label for tracking these types of issues, so we do too... but we also ensure every bug is triaged to the right milestone.)
 * If you come across a good candidate for a Great First Issue but are momentarily unable to spend the time filling out the template add the [GFI Candidate](https://github.com/ampproject/amphtml/labels/GFI%20Candidate) label to the issue.  The time spent converting GFI Candidates to Great First Issues will pay off for the AMP Project so please remember to come back to issues you labeled as a GFI Candidate.
+
+## Next steps for your Great First Issue
+
+* We ask new contributors to claim a Great First Issue by adding a comment.  Please keep an eye out for these and respond as soon as possible on the issue welcoming the new contributor and letting them know they can ask you questions.
+* Please add the [GFI Claimed!](https://github.com/ampproject/amphtml/labels/GFI%20Claimed!) label to the issue once someone claims it so others can quickly see that someone is working on it.
+* Encourage the person working on the GFI to [join the AMP Project](https://goo.gl/forms/T65peVtfQfEoDWeD3), which will let us assign the GFI to them.  (Alternatively let [mrjoro](https://amphtml.slack.com/team/mrjoro/) know and he can send an invite directly.)
+* Keep an eye on the new contributor's progress on the GFI, and offer to help if they seem stuck or if you haven't heard any updates in a few days.
+* Once the GFI is complete help the new contributor find other projects to work on in AMP based on their interests.
