@@ -975,4 +975,15 @@ export class BaseElement {
   user() {
     return user(this.element);
   }
+
+  /**
+   * Declares a child element (or ourselves) as a Layer
+   * @param {!Element=} opt_element
+   */
+  declareLayer(opt_element) {
+    if (opt_element) {
+      dev().assert(this.element.contains(opt_element));
+    }
+    return this.element.getLayers().declareLayer(opt_element || this.element);
+  }
 }

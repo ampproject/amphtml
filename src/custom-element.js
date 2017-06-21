@@ -172,6 +172,12 @@ function createBaseCustomElementClass(win) {
        */
       this.resources_ = null;
 
+      /**
+       * Layers can only be looked up when an element is attached.
+       * @private {?./service/layers-impl.LayoutLayers}
+       */
+      this.layers_ = null;
+
       /** @private {!Layout} */
       this.layout_ = Layout.NODISPLAY;
 
@@ -316,6 +322,19 @@ function createBaseCustomElementClass(win) {
       return /** @type {!./service/resources-impl.Resources} */ (
         dev().assert(this.resources_,
             'no resources yet, since element is not attached'));
+    }
+
+    /**
+     * Returns LayoutLayers. Only available after attachment. It throws
+     * exception before the element is attached.
+     * @return {!./service/layers-impl.LayoutLayers}
+     * @final @this {!Element}
+     * @package
+     */
+    getLayers() {
+      return /** @type {!./service/layers-impl.LayoutLayers} */ (
+        dev().assert(this.layers_,
+          'no layers yet, since element is not attached'));
     }
 
     /**
@@ -690,6 +709,10 @@ function createBaseCustomElementClass(win) {
       if (!this.resources_) {
         // Resources can now be initialized since the ampdoc is now available.
         this.resources_ = Services.resourcesForDoc(this.ampdoc_);
+      }
+      if (!this.layers_) {
+        // Resources can now be initialized since the ampdoc is now available.
+        this.layers_ = Services.layersForDoc(this.ampdoc_);
       }
       this.getResources().add(this);
 

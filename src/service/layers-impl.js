@@ -77,6 +77,10 @@ export class LayoutLayers {
   changeSize(element, size, force = false) {
   }
 
+  /**
+   * Eagerly creates a LayoutLayer for the element.
+   * @param {!Element} element
+   */
   declareLayer(element) {
     dev().assert(!LayoutLayer.forOptional(element));
     const layer = new LayoutLayer(element);
@@ -159,7 +163,7 @@ class LayoutLayer {
    */
   dispose() {
     this.root_[LAYOUT_LAYER_PROP] = null;
-    this.moveAmpElements(this.getParentLayer(), true);
+    this.moveAmpElements(this.getParentLayer());
   }
 
   contains(element) {
