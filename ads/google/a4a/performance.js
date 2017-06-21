@@ -17,6 +17,7 @@
 import {getCorrelator} from './utils';
 import {LIFECYCLE_STAGES} from '../../../extensions/amp-a4a/0.1/amp-a4a';
 import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {serializeQueryString} from '../../../src/url';
 import {getTimingDataSync} from '../../../src/service/variable-source';
 import {urlReplacementsForDoc} from '../../../src/services';
@@ -46,10 +47,10 @@ import {analyticsForDoc} from '../../../src/analytics';
 export class BaseLifecycleReporter {
   constructor() {
     /**
-     * @type {!Object<string, string>}
+     * @type {!JsonObject}
      * @private
      */
-    this.extraVariables_ = new Object(null);
+    this.extraVariables_ = dict();
   }
 
   /**
@@ -106,7 +107,7 @@ export class BaseLifecycleReporter {
    * variables that have been set via #setPingParameter.
    */
   reset() {
-    this.extraVariables_ = new Object(null);
+    this.extraVariables_ = dict();
   }
 
   /**
