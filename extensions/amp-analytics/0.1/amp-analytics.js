@@ -29,7 +29,7 @@ import {toggle} from '../../../src/style';
 import {isEnumValue} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {Activity} from './activity-impl';
-import {Cid} from './cid-impl';
+import {Cid} from '../../../src/service/cid-impl';
 import {
     InstrumentationService,
     instrumentationServicePromiseForDoc,

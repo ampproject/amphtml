@@ -22,7 +22,7 @@ import {AccessVendorAdapter} from '../amp-access-vendor';
 import {AccessService} from '../amp-access';
 import {Observable} from '../../../../src/observable';
 import {cidServiceForDocForTesting} from
-    '../../../../extensions/amp-analytics/0.1/cid-impl';
+    '../../../../src/service/cid-impl';
 import {installPerformanceService} from
     '../../../../src/service/performance-impl';
 import {toggleExperiment} from '../../../../src/experiments';
