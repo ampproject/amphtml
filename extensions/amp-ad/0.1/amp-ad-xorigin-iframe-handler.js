@@ -26,7 +26,11 @@ import {
 } from '../../../src/iframe-helper';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
+<<<<<<< HEAD
 import {dict} from '../../../src/utils/object';
+=======
+import {timerFor} from '../../../src/services';
+>>>>>>> Moved more logic from amp-a4a to doubleclick impl.
 import {setStyle} from '../../../src/style';
 import {getData, loadPromise} from '../../../src/event-helper';
 import {getHtml} from '../../../src/get-html';
@@ -87,10 +91,9 @@ export class AmpAdXOriginIframeHandler {
    * Sets up listeners and iframe state for iframe containing ad creative.
    * @param {!Element} iframe
    * @param {boolean=} opt_isA4A when true do not listen to ad response
-   * @param {boolean=} opt_isRefreshing when true, leave ad loader up
    * @return {!Promise} awaiting render complete promise
    */
-  init(iframe, opt_isA4A, opt_isRefreshing) {
+  init(iframe, opt_isA4A) {
     dev().assert(
         !this.iframe, 'multiple invocations of init without destroy!');
     this.iframe = iframe;
@@ -121,14 +124,12 @@ export class AmpAdXOriginIframeHandler {
           this.positionObserver_ = getServiceForDoc(ampdoc,
               'position-observer');
           this.positionObserver_.observe(
-              dev().assertElement(this.iframe),
-              PositionObserverFidelity.HIGH, pos => {
-                // Valid cast because it is an external object.
-                const posCast = /** @type {!JsonObject} */ (pos);
-                this.positionObserverHighFidelityApi_.send(
-                    POSITION_HIGH_FIDELITY,
-                    posCast);
-              });
+            dev().assertElement(this.iframe),
+            PositionObserverFidelity.HIGH, pos => {
+              this.positionObserverHighFidelityApi_.send(
+                POSITION_HIGH_FIDELITY,
+                pos);
+            });
         });
     }
 
@@ -140,28 +141,25 @@ export class AmpAdXOriginIframeHandler {
         });
 
     this.unlisteners_.push(listenFor(this.iframe, 'get-html',
-        (info, source, origin) => {
-          if (!this.iframe) {
-            return;
-          }
+      (info, source, origin) => {
+        if (!this.iframe) {
+          return;
+        }
 
-          const selector = info['selector'];
-          const attributes = info['attributes'];
-          const messageId = info['messageId'];
-          let content = '';
+        const selector = info['selector'];
+        const attributes = info['attributes'];
+        const messageId = info['messageId'];
+        let content = '';
 
-          if (this.element_.hasAttribute('data-html-access-allowed')) {
-            content = getHtml(this.baseInstance_.win, selector, attributes);
-          }
+        if (this.element_.hasAttribute('data-html-access-allowed')) {
+          content = getHtml(this.baseInstance_.win, selector, attributes);
+        }
 
-          postMessageToWindows(
-              this.iframe, [{win: source, origin}],
-              'get-html-result', dict({
-                'content': content,
-                'messageId': messageId,
-              }), true
+        postMessageToWindows(
+            this.iframe, [{win: source, origin}],
+            'get-html-result', {content, messageId}, true
           );
-        }, true, false));
+      }, true, false));
 
     // Install iframe resize API.
     this.unlisteners_.push(listenFor(this.iframe, 'embed-size',
@@ -247,7 +245,7 @@ export class AmpAdXOriginIframeHandler {
       // impose no loader delay.  Network is using renderStart or
       // bootstrap-loaded to indicate ad request was sent, either way we know
       // that occurred for Fast Fetch.
-      this.renderStart_(/* opt_info */ undefined, opt_isRefreshing);
+      this.renderStart_();
       renderStartResolve();
     } else {
       // Set iframe initially hidden which will be removed on render-start or
@@ -278,7 +276,8 @@ export class AmpAdXOriginIframeHandler {
    * @param {{data: !JsonObject}=} opt_info
    * @private
    */
-  renderStart_(opt_info, opt_isRefreshing) {
+  renderStart_(opt_info) {
+    this.baseInstance_.renderStarted();
     if (!opt_info) {
       return;
     }
@@ -366,10 +365,10 @@ export class AmpAdXOriginIframeHandler {
       const iframeHeight = this.iframe./*OK*/offsetHeight;
       const iframeWidth = this.iframe./*OK*/offsetWidth;
       this.uiHandler_.updateSize(height, width, iframeHeight,
-          iframeWidth).then(info => {
-            this.sendEmbedSizeResponse_(info.success,
-                info.newWidth, info.newHeight, source, origin);
-          }, () => {});
+        iframeWidth).then(info => {
+          this.sendEmbedSizeResponse_(info.success,
+              info.newWidth, info.newHeight, source, origin);
+        }, () => {});
     });
   }
 
@@ -392,10 +391,7 @@ export class AmpAdXOriginIframeHandler {
         this.iframe,
         [{win: source, origin}],
         success ? 'embed-size-changed' : 'embed-size-denied',
-        dict({
-          'requestedWidth': requestedWidth,
-          'requestedHeight': requestedHeight,
-        }),
+        {requestedWidth, requestedHeight},
         true);
   }
 
@@ -407,10 +403,10 @@ export class AmpAdXOriginIframeHandler {
     if (!this.embedStateApi_) {
       return;
     }
-    this.embedStateApi_.send('embed-state', dict({
-      'inViewport': inViewport,
-      'pageHidden': !this.viewer_.isVisible(),
-    }));
+    this.embedStateApi_.send('embed-state', {
+      inViewport,
+      pageHidden: !this.viewer_.isVisible(),
+    });
   }
 
   /**
