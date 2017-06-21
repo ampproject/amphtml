@@ -19,7 +19,6 @@
  import {adopt} from '../../../../src/runtime';
  import {createIframePromise} from '../../../../testing/iframe';
  import {platformFor} from '../../../../src/services';
- import {vsyncFor} from '../../../../src/services';
  import {timerFor} from '../../../../src/services';
  import {assertScreenReaderElement} from '../../../../testing/test-helper';
  import {toggleExperiment} from '../../../../src/experiments';
@@ -49,7 +48,6 @@
      let sandbox;
      let platform;
      let timer;
-     let vsync;
 
      function getAmpSidebar(options) {
        options = options || {};
@@ -66,6 +64,18 @@
          anchor.href = '#section1';
          ampSidebar.appendChild(anchor);
          if (options.toolbar) {
+           // Stub our sidebar operations, doing this here as it will
+           // Ease testing our media queries
+           const impl = ampSidebar.implementation_;
+           sandbox.stub(impl.vsync_,
+               'mutate', callback => {
+                 callback();
+               });
+           sandbox.stub(impl.vsync_,
+               'mutatePromise', callback => {
+                 callback();
+                 return Promise.resolve();
+               });
            const navToolbar = iframe.doc.createElement('nav');
            navToolbar.setAttribute('toolbar', TOOLBAR_MEDIA);
            const toolbarList = iframe.doc.createElement('ul');
@@ -87,7 +97,11 @@
          ampSidebar.setAttribute('layout', 'nodisplay');
          return iframe.addElement(ampSidebar).then(() => {
            timer = timerFor(iframe.win);
-           vsync = vsyncFor(iframe.win);
+           if (options.toolbar) {
+             sandbox.stub(timer, 'delay', function(callback) {
+               callback();
+             });
+           }
            return {iframe, ampSidebar};
          });
        });
@@ -612,19 +626,15 @@
          const toolbarElements = Array.prototype
                 .slice.call(sidebarElement.ownerDocument
                 .getElementsByClassName(TOOLBAR_CLASS), 0);
-         const iframe = obj.iframe.iframe;
-         iframe.style.width = '1024px';
-         iframe.style.position = 'absolute';
-         console.log(iframe);
-         //Wait for the window async window vsync to occur
-         vsync.mutate(() => {
-           vsync.mutate(() => {
-             debugger;
-             expect(toolbarElements.length).to.be.above(0);
-             expect(toolbarElements[0].parentElement.style.display)
-                 .to.be.equal('');
-           });
-         });
+         // Resize our iframe, and force a repaint
+         const iframeElement = obj.iframe.iframe;
+         iframeElement.setAttribute('width', '1024px');
+         obj.iframe.win.innerWidth;
+         sidebarElement.implementation_.onLayoutMeasure();
+         expect(toolbarElements.length).to.be.above(0);
+         //expect(toolbarElements.length).to.be.above(50);
+         expect(toolbarElements[0].parentElement.style.display)
+             .to.be.equal('');
        });
      });
    });
