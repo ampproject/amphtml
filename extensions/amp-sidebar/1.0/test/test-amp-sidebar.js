@@ -28,6 +28,9 @@
  /** @const */
  const TOOLBAR_MEDIA = '(min-width: 768px)';
 
+ /** @const */
+ const TOOLBAR_CLASS = 'i-amphtml-toolbar';
+
 
  adopt(window);
 
@@ -589,16 +592,24 @@
          toolbar: true,
        }).then(obj => {
          const sidebarElement = obj.ampSidebar;
-         const toolbarNavElements = Array.prototype
+         const toolbarElements = Array.prototype
                 .slice.call(sidebarElement.ownerDocument
-                .querySelectorAll('nav[toolbar]'), 0);
-         expect(toolbarNavElements.length).to.be.above(1);
-         expect(toolbarNavElements.some(navElement => {
-           if (navElement.parentElement.style.display == 'none') {
-             return true;
-           }
-           return false;
-         })).to.be.true;
+                .getElementsByClassName(TOOLBAR_CLASS), 0);
+         expect(toolbarElements.length).to.be.above(0);
+         expect(toolbarElements[0].style.display).to.be.equal('none');
+       });
+     });
+
+     it('toolbar header should be created for the const TOOLBAR_MEDIA', () => {
+       return getAmpSidebar({
+         toolbar: true,
+       }).then(obj => {
+         const sidebarElement = obj.ampSidebar;
+         const toolbarElements = Array.prototype
+                .slice.call(sidebarElement.ownerDocument
+                .getElementsByClassName(TOOLBAR_CLASS), 0);
+         expect(toolbarElements.length).to.be.above(0);
+         expect(toolbarElements[0].style.display).to.be.equal('');
        });
      });
    });
