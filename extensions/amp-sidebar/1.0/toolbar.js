@@ -41,8 +41,8 @@ export class Toolbar {
     /** @private {!string} */
     this.toolbarMedia_ = this.toolbarDOMElement_.getAttribute('toolbar');
 
-    /** @private {Element|undefined} */
-    this.toolbarClone_ = undefined;
+    /** @private {?Element} */
+    this.toolbarClone_ = null;
 
     /** @private {Element|undefined} */
     this.targetElement_ = undefined;
@@ -80,9 +80,12 @@ export class Toolbar {
         .matchMedia(this.toolbarMedia_).matches;
 
     // Remove and add the toolbar dynamically
-    if (matchesMedia && this.attemptShow_()) {
-      onShowCallback();
-    } else if (!matchesMedia) {
+    if (matchesMedia) {
+      const showResponse = this.attemptShow_();
+      if (showResponse) {
+        showResponse.then(onShowCallback);
+      }
+    } else {
       this.hideToolbar_();
     }
   }
@@ -119,18 +122,16 @@ export class Toolbar {
   /**
    * Function to attempt to show the toolbar,
    * and hide toolbar-only element in the sidebar.
-   * Returns true, if the toolbar will be shown in the next sidebar mutate elemnt,
-   * false otherwise.
-   * @returns {boolean}
+   * @returns {Promise|undefined}
    * @private
    */
   attemptShow_() {
     if (this.isToolbarShown_()) {
-      return false;
+      return;
     }
 
     // Display the elements
-    this.vsync_.mutate(() => {
+    return this.vsync_.mutatePromise(() => {
       if (this.targetElement_) {
         toggle(this.targetElement_, true);
       }
@@ -141,20 +142,16 @@ export class Toolbar {
       }
       this.toolbarShown_ = true;
     });
-    return true;
   }
 
   /**
   * Function to hide the toolbar,
   * and show toolbar-only element in the sidebar.
-  * Returns true, if the toolbar will be hidden in the next sidebar mutate elemnt,
-  * false otherwise.
-   * @returns {boolean}
-   * @private
+  * @private
    */
   hideToolbar_() {
     if (!this.isToolbarShown_()) {
-      return false;
+      return;
     }
 
     this.vsync_.mutate(() => {
@@ -169,6 +166,5 @@ export class Toolbar {
       }
       this.toolbarShown_ = false;
     });
-    return true;
   }
 }
