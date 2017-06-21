@@ -43,6 +43,7 @@ With the responsive layout, the width and height from the example should yield c
     data-seek-to="2"
     data-mode="static"
     data-origin="https://embed.nexx.cloud/"
+    data-disable-ads="1"
     layout="responsive"
     width="480" height="270"></amp-nexxtv-player>
 ```
@@ -80,6 +81,10 @@ Indicates the data mode, which can be `static` (default) or `api`.
 **data-origin** (optional)
 
 Indicates the source from which the embedded domain media is played. By default this is set to `https://embed.nexx.cloud/`.
+
+**data-disable-ads** (optional)
+
+Ads are enabled by default. Set value to 1 to disable.
 
 
 **common attributes**

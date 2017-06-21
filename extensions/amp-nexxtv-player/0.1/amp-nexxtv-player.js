@@ -95,6 +95,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     const streamtype = this.element.getAttribute('data-streamtype') || 'video';
     const origin = this.element.getAttribute('data-origin')
       || 'https://embed.nexx.cloud/';
+    const disableAds = this.element.getAttribute('data-disable-ads');
 
     let src = origin;
 
@@ -106,6 +107,10 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     src += encodeURIComponent(mediaId);
     src += `?start=${encodeURIComponent(start)}`;
     src += `&datamode=${encodeURIComponent(mode)}&amp=1`;
+
+    if (disableAds === '1') {
+      src += '&disableAds=1';
+    }
 
     this.videoIframeSrc_ = assertAbsoluteHttpOrHttpsUrl(src);
 
