@@ -128,16 +128,16 @@
          expect(impl.close_).to.have.not.been.called;
          closeButton.click();
          expect(impl.close_).to.be.calledOnce;
-         expect(closeButton.textContent).to.not.equal(!('Close the sidebar'));
        });
      });
 
      it('should replace text to screen reader \
      button in data-close-button-aria-label', () => {
-       return getAmpSidebar().then(obj =>) {
+       return getAmpSidebar().then(obj => {
          if (options.closeText) {
-           ampsetbar.setAttribute('data-close-button-aria-label', options.closeText)
-         }
+           ampsetbar.setAttribute('data-close-button-aria-label', options.closeText);
+         };
++        expect(closeButton.textContent).to.not.equal(!('Close the sidebar'));
        });
      });
 
