@@ -27,11 +27,7 @@ export function vmfive(global, data) {
 
   const {appKey, placementId, adType} = data;
 
-  global._vmfive_amp = {
-    appKey: appKey,
-    placementId: placementId,
-    adType: adType,
-  };
+  global._vmfive_amp = {appKey, placementId, adType};
 
   validateData(data, mandatory_fields, optional_fields);
 
@@ -41,24 +37,24 @@ export function vmfive(global, data) {
 }
 
 function loadScripts(win) {
-  return Promise.all([loadMANScript(win), loadSDKScript(win)])
+  return Promise.all([loadMANScript(win), loadSDKScript(win)]);
 }
 
 function loadMANScript(win) {
   return new Promise((resolve, reject) => {
     const s = win.document.createElement('script');
     s.src = 'https://vawpro.vm5apis.com/man.js';
-    s.id = "vm5ad-js-sdk";
+    s.id = 'vm5ad-js-sdk';
     s.onload = resolve;
     s.onerror = reject;
     win.document.body.appendChild(s);
-  })
+  });
 }
 
 function loadSDKScript(win) {
   return new Promise((resolve, reject) => {
     loadScript(win, 'https://man.vm5apis.com/dist/adn-web-sdk.js', resolve, reject);
-  })
+  });
 }
 
 function createAdUnit(win, placementId, adType) {
@@ -70,6 +66,6 @@ function createAdUnit(win, placementId, adType) {
 
 function setupSDKReadyCallback(win, appKey) {
   win.onVM5AdSDKReady = function() {
-    VM5AdSDK.init({ appKey: appKey });
+    win.VM5AdSDK.init({appKey});
   };
 }
