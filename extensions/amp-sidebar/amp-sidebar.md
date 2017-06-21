@@ -70,7 +70,7 @@ Example:
 
 ### Opening and closing the sidebar
 
-To toggle, open, or close the sidebar when an element is tapped or clicked, set the [`on`](../../spec/amp-actions-and-events.md) action attribute on the element, and specify one of the following action methods: 
+To toggle, open, or close the sidebar when an element is tapped or clicked, set the [`on`](../../spec/amp-actions-and-events.md) action attribute on the element, and specify one of the following action methods:
 
 <table>
   <tr>
@@ -126,7 +126,7 @@ This attribute is present when the sidebar is open.
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
-##### data-close-button-aria-label attribute
+##### data-close-button-aria-label**
 
 This element includes the value of the aria label attribute for the screenReaderCloseButton text.
 
