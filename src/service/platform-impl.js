@@ -103,7 +103,7 @@ export class Platform {
    */
   isStandAlone() {
     return /iPhone|iPad|iPod/i.test(this.navigator_.userAgent) &&
-        this.navigator_.standalone;
+        ('standalone' in this.navigator_) && this.navigator_.standalone;
   }
 
   /**
