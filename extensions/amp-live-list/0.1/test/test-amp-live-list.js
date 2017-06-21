@@ -19,6 +19,7 @@ import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {AmpLiveList, getNumberMaxOrDefault} from '../amp-live-list';
 import {LiveListManager} from '../live-list-manager';
 import {adopt} from '../../../../src/runtime';
+import {AmpEvents} from '../../../../src/amp-events';
 
 adopt(window);
 
@@ -364,7 +365,7 @@ describe('amp-live-list', () => {
       return liveList.updateAction_().then(() => {
         expect(spy).to.have.been.calledOnce;
         expect(spy).calledWithMatch({
-          type: 'amp:template-rendered',
+          type: AmpEvents.TEMPLATE_RENDERED,
           bubbles: true,
         });
       });

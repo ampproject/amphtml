@@ -45,6 +45,7 @@ import {dev, initLogConstructor, setReportError, user} from '../src/log';
 import {dict} from '../src/utils/object.js';
 import {getMode} from '../src/mode';
 import {startsWith} from '../src/string.js';
+import {AmpEvents} from '../src/amp-events';
 
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
@@ -630,7 +631,7 @@ function updateVisibilityState(global) {
 function dispatchVisibilityChangeEvent(win, isHidden) {
   const event = win.document.createEvent('Event');
   event.data = {hidden: isHidden};
-  event.initEvent('amp:visibilitychange', true, true);
+  event.initEvent(AmpEvents.VISIBILITY_CHANGE, true, true);
   win.dispatchEvent(event);
 }
 

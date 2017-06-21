@@ -22,6 +22,7 @@ import {
 import {dev} from '../log';
 import {startsWith} from '../string';
 import {toggle, computedStyle} from '../style';
+import {AmpEvents} from '../amp-events';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';
@@ -308,7 +309,7 @@ export class Resource {
     }
     // TODO(dvoytenko, #7389): cleanup once amp-sticky-ad signals are
     // in PROD.
-    this.element.dispatchCustomEvent('amp:built');
+    this.element.dispatchCustomEvent(AmpEvents.BUILT);
   }
 
   /**

@@ -79,6 +79,7 @@ exports.rules = [
       '3p/**->src/json.js',
       '3p/**->src/3p-frame-messaging.js',
       '3p/**->src/observable.js',
+      '3p/**->src/amp-events.js',
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
       '3p/messaging.js->src/event-helper.js',
