@@ -50,22 +50,9 @@
  }
 
  .i-amphtml-toolbar-container {
- }
-
- .i-amphtml-toolbar-placeholder {
-   visibility: hidden;
- }
-
- .i-amphtml-toolbar-placeholder > ul {
+   z-index: 2147483646;
    width: 100%;
-   display: flex;
-   justify-content: flex-start;
-   flex-wrap: wrap;
-   overflow: auto;
-   list-style-type: none;
-
-   padding: 0;
-   margin: 0;
+   position: fixed;
  }
 
  .i-amphtml-toolbar > ul {
@@ -74,10 +61,6 @@
    flex-wrap: wrap;
    overflow: auto;
    list-style-type: none;
-   position: fixed;
-   z-index: 2147483646;
-   background-color: white;
-   width: 100%;
 
    padding: 0;
    margin: 0;

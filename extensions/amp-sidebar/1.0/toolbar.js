@@ -22,19 +22,16 @@ const TOOLBAR_ELEMENT_CLASS = 'i-amphtml-toolbar';
 /** @const */
 const TOOLBAR_CONTAINER_CLASS = 'i-amphtml-toolbar-container';
 
-/** @const */
-const TOOLBAR_PLACEHOLDER_CLASS = 'i-amphtml-toolbar-placeholder';
-
 export class Toolbar {
   /**
   * @param {!Element} element
-  * @param {!AMP.BaseElement} sidebar
+  * @param {!./amp-sidebar.AmpSidebar} sidebar
   */
   constructor(element, sidebar) {
     /** @private {!Element} */
     this.toolbarDOMElement_ = element;
 
-    /** @private {!AMP.BaseElement} **/
+    /** @private {!./amp-sidebar.AmpSidebar} **/
     this.sidebar_ = sidebar;
 
     /** @private {!Element} */
@@ -104,9 +101,6 @@ export class Toolbar {
     this.toolbarClone_ = this.toolbarDOMElement_.cloneNode(true);
     this.toolbarClone_.className = TOOLBAR_ELEMENT_CLASS;
     this.targetElement_.appendChild(this.toolbarClone_);
-    const toolbarPlaceholder = this.toolbarClone_.cloneNode(true);
-    toolbarPlaceholder.className = TOOLBAR_PLACEHOLDER_CLASS;
-    this.targetElement_.appendChild(toolbarPlaceholder);
     toggle(this.targetElement_, false);
     fragment.appendChild(this.targetElement_);
     this.sidebarElement_.parentElement
@@ -136,7 +130,7 @@ export class Toolbar {
     }
 
     // Display the elements
-    this.sidebar_.vsync_.mutate(() => {
+    this.sidebar_.vsync.mutate(() => {
       if (this.targetElement_) {
         toggle(this.targetElement_, true);
       }
@@ -163,7 +157,7 @@ export class Toolbar {
       return false;
     }
 
-    this.sidebar_.vsync_.mutate(() => {
+    this.sidebar_.vsync.mutate(() => {
       // Hide the elements
       if (this.targetElement_) {
         toggle(this.targetElement_, false);

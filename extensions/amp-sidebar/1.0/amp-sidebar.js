@@ -45,8 +45,8 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private {?../../../src/service/viewport-impl.Viewport} */
     this.viewport_ = null;
 
-    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(this.win);
+    /** @const @public {!../../../src/service/vsync-impl.Vsync} */
+    this.vsync = vsyncFor(this.win);
 
     /** @private {?Element} */
     this.maskElement_ = null;
@@ -221,7 +221,7 @@ export class AmpSidebar extends AMP.BaseElement {
       return;
     }
     this.viewport_.enterOverlayMode();
-    this.vsync_.mutate(() => {
+    this.vsync.mutate(() => {
       toggle(this.element, /* display */true);
       this.openMask_();
       if (this.isIosSafari_) {
@@ -229,7 +229,7 @@ export class AmpSidebar extends AMP.BaseElement {
       }
       this.element./*OK*/scrollTop = 1;
       // Start animation in a separate vsync due to display:block; set above.
-      this.vsync_.mutate(() => {
+      this.vsync.mutate(() => {
         this.element.setAttribute('open', '');
         this.element.setAttribute('aria-hidden', 'false');
         if (this.openOrCloseTimeOut_) {
@@ -258,7 +258,7 @@ export class AmpSidebar extends AMP.BaseElement {
       return;
     }
     this.viewport_.leaveOverlayMode();
-    this.vsync_.mutate(() => {
+    this.vsync.mutate(() => {
       this.closeMask_();
       this.element.removeAttribute('open');
       this.element.setAttribute('aria-hidden', 'true');
@@ -267,7 +267,7 @@ export class AmpSidebar extends AMP.BaseElement {
       }
       this.openOrCloseTimeOut_ = this.timer_.delay(() => {
         if (!this.isOpen_()) {
-          this.vsync_.mutate(() => {
+          this.vsync.mutate(() => {
             toggle(this.element, /* display */false);
             this.schedulePause(this.getRealChildren());
           });
