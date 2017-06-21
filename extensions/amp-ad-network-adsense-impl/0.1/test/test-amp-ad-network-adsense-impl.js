@@ -630,6 +630,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       });
     });
     it('returns the right URL', () => {
+      element.setAttribute('data-ad-slot', 'some_slot');
       new AmpAd(element).upgradeCallback();
       return impl.getAdUrl().then(url => {
         [
@@ -639,6 +640,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
           /(\?|&)amp_v=%24internalRuntimeVersion%24(&|$)/,
           /(\?|&)client=ca-adsense(&|$)/,
           /(\?|&)format=\d+x\d+(&|$)/,
+          /(\?|&)iu=some_slot(&|$)/,
           /(\?|&)w=\d+(&|$)/,
           /(\?|&)h=\d+(&|$)/,
           /(\?|&)d_imp=1(&|$)/,
