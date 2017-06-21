@@ -47,7 +47,6 @@ import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 AMP.registerServiceForDoc(
     'amp-analytics-instrumentation', InstrumentationService);
 AMP.registerServiceForDoc('activity', Activity);
-AMP.registerServiceForDoc('cid', Cid);
 
 installVariableService(AMP.win);
 

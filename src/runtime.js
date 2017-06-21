@@ -51,6 +51,7 @@ import {
   hasRenderDelayingServices,
 } from './render-delaying-services';
 import {installActionServiceForDoc} from './service/action-impl';
+import {installCidService} from './service/cid-impl';
 import {installCryptoService} from './service/crypto-impl';
 import {installDocumentInfoServiceForDoc} from './service/document-info-impl';
 import {installGlobalClickListenerForDoc} from './service/document-click';
@@ -139,6 +140,7 @@ export function installRuntimeServices(global) {
  * @param {!Object<string, string>=} opt_initParams
  */
 export function installAmpdocServices(ampdoc, opt_initParams) {
+  installCidService(ampdoc);
   installDocumentInfoServiceForDoc(ampdoc);
   installViewerServiceForDoc(ampdoc, opt_initParams);
   installViewportServiceForDoc(ampdoc);

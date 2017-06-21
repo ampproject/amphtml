@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {cidForDocOrNull, timerFor} from './services';
+import {cidForDoc, timerFor} from './services';
 import {adConfig} from '../ads/_config';
 import {dev} from '../src/log';
 
@@ -41,7 +41,7 @@ export function getAdCid(adElement) {
  */
 export function getOrCreateAdCid(
     ampDoc, clientIdScope, opt_clientIdCookieName) {
-  const cidPromise = cidForDocOrNull(ampDoc).then(cidService => {
+  const cidPromise = cidForDoc(ampDoc).then(cidService => {
     if (!cidService) {
       return;
     }

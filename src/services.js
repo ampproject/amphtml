@@ -93,18 +93,7 @@ export function bindForDoc(nodeOrDoc) {
  */
 export function cidForDoc(nodeOrDoc) {
   return /** @type {!Promise<!./service/cid-impl.Cid>} */ ( // eslint-disable-line max-len
-      getElementServiceForDoc(nodeOrDoc, 'cid', 'amp-analytics'));
-}
-
-/**
- * Returns a promise for the CID service or a promise for null if the service
- * is not available on the current page.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!Promise<!./service/cid-impl.Cid>}
- */
-export function cidForDocOrNull(nodeOrDoc) {
-  return /** @type {!Promise<!./service/cid-impl.Cid>} */ ( // eslint-disable-line max-len
-      getElementServiceIfAvailableForDoc(nodeOrDoc, 'cid', 'amp-analytics'));
+      getServicePromiseForDoc(nodeOrDoc, 'cid'));
 }
 
 /**
