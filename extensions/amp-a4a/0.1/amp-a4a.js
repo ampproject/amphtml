@@ -821,7 +821,8 @@ export class AmpA4A extends AMP.BaseElement {
         timerFor(this.win).delay(() => {
           this.isRelayoutNeededFlag = true;
           this.getResource().layoutCanceled();
-          resourcesForDoc(this.getAmpDoc())./*REVIEW*/requireLayout(this.element);
+          resourcesForDoc(this.getAmpDoc())
+              ./*REVIEW*/requireLayout(this.element);
         }, 1000);
       });
     });

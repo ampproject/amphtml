@@ -425,26 +425,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   layoutCallback() {
     const superReturnValue = super.layoutCallback();
-    if (!this.refreshManager_) {
-      // Will initiate the refresh lifecycle iff the slot has been enabled to
-      // do so through an appropriate data attribute, or a page-level meta tag.
-      this.refreshManager_ = new RefreshManager(this, {
-        visiblePercentageMin: 50,
-        totalTimeMin: 0,
-        continuousTimeMin: 1,
-      });
-      if (this.refreshManager_.isRefreshable()) {
-        this.refreshManager_.initiateRefreshCycle();
-      }
-    }
+    this.refreshManager_ = this.refreshManager_ || new RefreshManager(this, {
+      visiblePercentageMin: 50,
+      totalTimeMin: 0,
+      continuousTimeMin: 1,
+    });
     return superReturnValue;
   }
 
-  /**
-   * @param {function()} refreshEndCallback
-   *
-   * @override
-   */
+  /** @override */
   refresh(refreshEndCallback) {
     super.refresh(refreshEndCallback);
     this.refreshCount_++;

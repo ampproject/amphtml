@@ -134,12 +134,9 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
   const slotRect = a4a.getPageLayoutBox();
   const iframeDepth = iframeNestingDepth(win);
   const enclosingContainers = getEnclosingContainerTypes(adElement);
-  const pfx =
-      (enclosingContainers.indexOf(
-          ValidAdContainerTypes['AMP-FX-FLYING-CARPET']) != -1
-       || enclosingContainers.indexOf(
-           ValidAdContainerTypes['AMP-STICKY-AD']) != -1)
-      ? '1' : '0';
+  const pfx = enclosingContainers.includes(
+      ValidAdContainerTypes['AMP-FX-FLYING-CARPET']) ||
+      enclosingContainers.includes(ValidAdContainerTypes['AMP-STICKY-AD']);
   let eids = adElement.getAttribute('data-experiment-id');
   if (opt_experimentIds) {
     eids = mergeExperimentIds(opt_experimentIds, eids);
@@ -152,7 +149,7 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
     'adx': slotRect.left,
     'ady': slotRect.top,
     'oid': '2',
-    pfx,
+    'pfx': pfx ? '1' : '0',
     'rc': a4a.fromResumeCallback ? 1 : null,
     'act': enclosingContainers.length ? enclosingContainers.join() : null,
   };

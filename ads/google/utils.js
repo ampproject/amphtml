@@ -30,7 +30,7 @@ import {user} from '../../src/log';
  *   their primary dimension's counterpart.
  * @param {boolean} strict If set to true, this indicates that a single
  *   malformed size should cause the entire multi-size data string to be
- *   abnadoned. If set to false, then malformed sizes will be ignored, and the
+ *   abandoned. If set to false, then malformed sizes will be ignored, and the
  *   remainder of the string will be parsed for any additional sizes.
  *   Additionally, errors will only be reported if this flag is set to true.
  * @return {?Array<Array<number>>} An array of dimensions.

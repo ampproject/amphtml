@@ -62,13 +62,13 @@ export class RefreshManager {
     this.element_ = a4a.element;
 
     /** @const @private {string} */
-    this.adType_ = this.element_.getAttribute('type');
+    this.adType_ = this.element_.getAttribute('type').toLowerCase();
 
     /** @const @private {?number} */
     this.refreshInterval_ = this.getPublisherSpecifiedRefreshInterval_();
 
     /** @const @private {!RefreshConfig} */
-    this.config_ = this.getConfiguration_(config);
+    this.config_ = this.convertConfiguration_(config);
 
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = timerFor(this.win_);
@@ -85,6 +85,10 @@ export class RefreshManager {
         && !getEnclosingContainerTypes(this.element_).filter(container =>
           container != ValidAdContainerTypes['AMP-CAROUSEL']
           && container != ValidAdContainerTypes['AMP-STICKY-AD']).length);
+
+    if (this.isRefreshable_) {
+      this.initiateRefreshCycle();
+    }
   }
 
 
@@ -115,6 +119,8 @@ export class RefreshManager {
   /**
    * Terminates the current refresh cycle, if one currently exists. Returns
    * true if the cycle was canceled successfully, false otherwise.
+   *
+   * @return {boolean}
    */
   stopRefreshCycle() {
     if (this.refreshTimeoutId_) {
@@ -127,9 +133,10 @@ export class RefreshManager {
 
   /**
    * Converts config to appropriate units.
+   * @param {!RefreshConfig} config
    * @return {!RefreshConfig}
    */
-  getConfiguration_(config) {
+  convertConfiguration_(config) {
     // Convert seconds to milliseconds.
     config['totalTimeMin'] *= 1000;
     config['continuousTimeMin'] *= 1000;
@@ -137,7 +144,9 @@ export class RefreshManager {
   }
 
   /**
-   * Retrieves the publisher-specified refresh interval, if one were set.
+   * Retrieves the publisher-specified refresh interval, if one were set. This
+   * function first checks for appropriate slot attributes and then for
+   * metadata tags, preferring whichever it finds first.
    *
    * @return {?number}
    */
@@ -151,15 +160,15 @@ export class RefreshManager {
           .getElementsByName(METATAG_NAME))
         && metaTag[0]
         && metaTag[0].getAttribute('content'));
-    const networkIntervalPairs =
-        metaTagContent ? metaTagContent.split(',') : [];
+    if (!metaTagContent) {
+      return null;
+    }
+    const networkIntervalPairs = metaTagContent.split(',');
     for (let i = 0; i < networkIntervalPairs.length; i++) {
       const pair = networkIntervalPairs[i].split('=');
-      if (pair.length != 2) {
-        user().warn(TAG,
-            'refresh metadata config must be of the form ' +
-            '`network_type=refresh_interval`');
-      } else if (pair[0] == this.adType_) {
+      user().assert(pair.length == 2, 'refresh metadata config must be of ' +
+          'the form `network_type=refresh_interval`');
+      if (pair[0].toLowerCase() == this.adType_) {
         return this.checkAndSanitizeRefreshInterval_(pair[1]);
       }
     }
@@ -175,15 +184,15 @@ export class RefreshManager {
    * @return {?number}
    */
   checkAndSanitizeRefreshInterval_(refreshInterval) {
-    if (isNaN(refreshInterval) || refreshInterval == '') {
-      user().warn(TAG, 'refresh interval must be a number');
-      return null;
-    } else if (refreshInterval < MIN_REFRESH_INTERVAL) {
+    const refreshIntervalNum = Number(refreshInterval);
+    if (isNaN(refreshIntervalNum) ||
+        refreshIntervalNum < MIN_REFRESH_INTERVAL) {
       user().warn(TAG,
-          `refresh interval must be at least ${MIN_REFRESH_INTERVAL}s`);
-      return MIN_REFRESH_INTERVAL * 1000;
+          'invalid refresh interval, must be a number no less than ' +
+          `${MIN_REFRESH_INTERVAL}: ${refreshInterval}`);
+      return null;
     }
-    return Number(refreshInterval) * 1000;
+    return refreshIntervalNum * 1000;
   }
 
   /**
@@ -194,6 +203,7 @@ export class RefreshManager {
    * refresh-enabled if the publisher has supplied an appropriate data
    * attribute either on the slot or as part of a meta tag.
    *
+   * @VisibleForTesting
    * @return {boolean}
    */
   isRefreshable() {
