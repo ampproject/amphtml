@@ -135,7 +135,7 @@ describes.realWin('amp-sidebar 0.1 version', {
         if (options.closeText) {
           ampsetbar.setAttribute('data-close-button-aria-label', options.closeText);
         };
-+        expect(closeButton.textContent).to.not.equal(!('Close the sidebar'));
+        expect(closeButton.textContent).to.not.equal(!('Close the sidebar'));
       });
     });
 
