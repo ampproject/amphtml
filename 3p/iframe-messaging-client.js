@@ -101,15 +101,13 @@ export class IframeMessagingClient {
    */
   setupEventListener_() {
     listen(this.win_, 'message', event => {
-      try {
-        if (!this.hostWindow_.postMessage && this.hostWindow_.contentWindow) {
-          // this.hostWindow_ can now be set to an iframe, after it has been
-          // created but before it has finished loading. If we've gotten a
-          // message from that iframe, then it must exist, so its
-          // contentWindow is now non-null.
-          this.hostWindow_ = this.hostWindow_.contentWindow;
-        }
-      } catch (e) {
+      if (this.hostWindowIsActuallyAnIframe_()) {
+        // this.hostWindow_ can now be set to an iframe, after it has been
+        // created but before it has finished loading. If we've gotten a
+        // message from that iframe, then it must exist, so its
+        // contentWindow is now non-null.
+        this.hostWindow_ =
+          /** @type {!Window} */ (this.hostWindow_.contentWindow);
       }
 
       // Does it look a message from AMP?
@@ -124,6 +122,17 @@ export class IframeMessagingClient {
 
       this.fireObservable_(message['type'], message);
     });
+  }
+
+  /**
+   * Determines whether frameOrWindow is a frame, or a window.
+   * @returns {boolean}
+   */
+  hostWindowIsActuallyAnIframe_() {
+    // If it's a window, it will have .postMessage
+    // We check for that before .contentWindow, since a cross-domain window
+    // may throw if we try to access anything unsafe
+    return (!this.hostWindow_.postMessage && !!this.hostWindow_.contentWindow);
   }
 
   /**

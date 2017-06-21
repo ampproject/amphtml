@@ -41,9 +41,6 @@ class AbstractAmpAnalytics3pMessageQueue {
    * contain the queued data (see 3p-analytics-common)
    */
   constructor(win, iframeMessagingClient, messageType) {
-    /** @private {boolean} */
-    this.isReady_ = false;
-
     /** @private {!Window} */
     this.win_ = win;
 
@@ -52,6 +49,9 @@ class AbstractAmpAnalytics3pMessageQueue {
 
     /** @private {string} */
     this.messageType_ = messageType;
+
+    /** @private {boolean} */
+    this.isReady_ = false;
 
     /** @private {!Object<string,!string|!Array<string>>} */
     this.creativeToPendingMessages_ = {};
@@ -91,6 +91,7 @@ class AbstractAmpAnalytics3pMessageQueue {
    * @abstract
    */
   buildMessage_() {
+    throw new Error('Not yet implemented?!');
   }
 }
 

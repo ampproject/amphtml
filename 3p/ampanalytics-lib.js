@@ -68,9 +68,8 @@ class AmpAnalytics3pMessageRouter {
         AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVE,
         messageContainer => {
           let entries;
-          dev().assert(
-              messageContainer.data &&
-          (entries = Object.entries(messageContainer.data)).length,
+          dev().assert(messageContainer.data &&
+              (entries = Object.entries(messageContainer.data)).length,
               'Received empty new creative message');
           entries.forEach(entry => {
             const creativeId = entry[0];
@@ -78,23 +77,31 @@ class AmpAnalytics3pMessageRouter {
             dev().assert(!this.creativeMessageRouters_[creativeId],
                 'Duplicate new creative message for ' + creativeId);
             this.creativeMessageRouters_[creativeId] =
-            new AmpAnalytics3pCreativeMessageRouter(
-              this.win_, this.iframeMessagingClient_, creativeId, extraData);
+              new AmpAnalytics3pCreativeMessageRouter(
+                this.win_, this.iframeMessagingClient_, creativeId, extraData);
           });
         });
     this.iframeMessagingClient_.registerCallback(
         AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT,
         messageContainer => {
-          Object.entries(messageContainer.data).forEach(entry => {
+          let entries;
+          dev().assert(messageContainer.data &&
+              (entries = Object.entries(messageContainer.data)).length,
+              'Received empty events message');
+          entries.forEach(entry => {
             const creativeId = entry[0];
             const messages = entry[1];
-            dev().assert(messages && messages.length,
-                'Received empty events list for' + creativeId);
-            dev().assert(this.creativeMessageRouters_[creativeId],
-                'Discarding event message received prior to new creative' +
-                ' message for' + creativeId);
-            this.creativeMessageRouters_[creativeId]
-                .sendMessagesToListener(messages);
+            try {
+              dev().assert(messages && messages.length,
+                  'Received empty events list for' + creativeId);
+              dev().assert(this.creativeMessageRouters_[creativeId],
+                  'Discarding event message received prior to new creative' +
+                  ' message for' + creativeId);
+              this.creativeMessageRouters_[creativeId]
+                  .sendMessagesToListener(messages);
+            } catch (e) {
+              dev.error('Failed to send message to listener: ' + e.message);
+            }
           });
         });
     this.iframeMessagingClient_.sendMessage(
@@ -135,7 +142,12 @@ class AmpAnalytics3pCreativeMessageRouter {
     this.eventListener_ = null;
 
     if (this.win_.onNewAmpAnalyticsInstance) {
-      this.win_.onNewAmpAnalyticsInstance(this);
+      try {
+        this.win_.onNewAmpAnalyticsInstance(this);
+      } catch (e) {
+        dev().error(TAG_, 'Exception thrown by onNewAmpAnalyticsInstance in' +
+          this.win_.location.href + ': ' + e.message);
+      }
     } else {
       dev().error(TAG_, 'Must implement onNewAmpAnalyticsInstance in' +
         this.win_.location.href);
