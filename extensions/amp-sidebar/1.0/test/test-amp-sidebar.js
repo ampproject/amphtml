@@ -26,7 +26,7 @@
  import '../amp-sidebar';
 
  /** @const */
- const TOOLBAR_MEDIA = '(min-width: 768px)';
+ const DEFAULT_TOOLBAR_MEDIA = '(min-width: 768px)';
 
  /** @const */
  const TOOLBAR_CLASS = 'i-amphtml-toolbar';
@@ -77,7 +77,11 @@
                  return Promise.resolve();
                });
            const navToolbar = iframe.doc.createElement('nav');
-           navToolbar.setAttribute('toolbar', TOOLBAR_MEDIA);
+           if (typeof options.toolbar === 'string') {
+             navToolbar.setAttribute('toolbar', options.toolbar);
+           } else {
+             navToolbar.setAttribute('toolbar', DEFAULT_TOOLBAR_MEDIA);
+           }
            const toolbarList = iframe.doc.createElement('ul');
            for (let i = 0; i < 3; i++) {
              const li = iframe.doc.createElement('li');
@@ -105,6 +109,13 @@
            return {iframe, ampSidebar};
          });
        });
+     }
+
+     function resizeIframeToWidth(iframeObject, width, callback) {
+       iframeObject.iframe.setAttribute('width', width);
+       // Force the browser to re-draw
+       iframeObject.win.innerWidth;
+       callback();
      }
 
      beforeEach(() => {
@@ -604,7 +615,8 @@
        });
      });
 
-     it('toolbar header should be hidden for the const TOOLBAR_MEDIA', () => {
+     it('toolbar header should be hidden for a \
+     window size less than DEFAULT_TOOLBAR_MEDIA', () => {
        return getAmpSidebar({
          toolbar: true,
        }).then(obj => {
@@ -612,13 +624,19 @@
          const toolbarElements = Array.prototype
                 .slice.call(sidebarElement.ownerDocument
                 .getElementsByClassName(TOOLBAR_CLASS), 0);
-         expect(toolbarElements.length).to.be.above(0);
-         expect(toolbarElements[0].parentElement.style.display)
-             .to.be.equal('none');
+         resizeIframeToWidth(obj.iframe, '1px', () => {
+           expect(toolbarElements.length).to.be.above(0);
+           sidebarElement.implementation_.toolbars_.forEach(toolbar => {
+             toolbar.onLayoutChange();
+           });
+           expect(toolbarElements[0].parentElement.style.display)
+               .to.be.equal('none');
+         });
        });
      });
 
-     it('toolbar header should be shown for the const TOOLBAR_MEDIA', () => {
+     it('toolbar header should be shown for a \
+     window size more than DEFAULT_TOOLBAR_MEDIA', () => {
        return getAmpSidebar({
          toolbar: true,
        }).then(obj => {
@@ -626,15 +644,78 @@
          const toolbarElements = Array.prototype
                 .slice.call(sidebarElement.ownerDocument
                 .getElementsByClassName(TOOLBAR_CLASS), 0);
-         // Resize our iframe, and force a repaint
-         const iframeElement = obj.iframe.iframe;
-         iframeElement.setAttribute('width', '1024px');
-         obj.iframe.win.innerWidth;
-         sidebarElement.implementation_.onLayoutMeasure();
-         expect(toolbarElements.length).to.be.above(0);
-         //expect(toolbarElements.length).to.be.above(50);
-         expect(toolbarElements[0].parentElement.style.display)
-             .to.be.equal('');
+         resizeIframeToWidth(obj.iframe, '4000px', () => {
+           expect(toolbarElements.length).to.be.above(0);
+           sidebarElement.implementation_.toolbars_.forEach(toolbar => {
+             toolbar.onLayoutChange();
+           });
+           expect(toolbarElements[0].parentElement.style.display)
+               .to.be.equal('');
+         });
+       });
+     });
+
+     it('toolbar should be in the hidden state \
+     when it is not being displayed', () => {
+       return getAmpSidebar({
+         toolbar: true,
+       }).then(obj => {
+         const sidebarElement = obj.ampSidebar;
+         resizeIframeToWidth(obj.iframe, '1px', () => {
+           sidebarElement.implementation_.toolbars_.forEach(toolbar => {
+             toolbar.onLayoutChange();
+           });
+           expect(sidebarElement.implementation_.toolbars_[0].isToolbarShown_())
+               .to.be.false;
+         });
+       });
+     });
+
+     it('toolbar should be in the shown state \
+     when it is being displayed', () => {
+       return getAmpSidebar({
+         toolbar: true,
+       }).then(obj => {
+         const sidebarElement = obj.ampSidebar;
+         resizeIframeToWidth(obj.iframe, '4000px', () => {
+           sidebarElement.implementation_.toolbars_.forEach(toolbar => {
+             toolbar.onLayoutChange();
+           });
+           expect(sidebarElement.implementation_.toolbars_[0].isToolbarShown_())
+               .to.be.true;
+         });
+       });
+     });
+
+     it('toolbar should not be able to be shown \
+     if already in the shown state', () => {
+       return getAmpSidebar({
+         toolbar: true,
+       }).then(obj => {
+         const sidebarElement = obj.ampSidebar;
+         resizeIframeToWidth(obj.iframe, '4000px', () => {
+           sidebarElement.implementation_.toolbars_.forEach(toolbar => {
+             toolbar.onLayoutChange();
+           });
+           expect(sidebarElement.implementation_.toolbars_[0].attemptShow_())
+               .to.be.undefined;
+         });
+       });
+     });
+
+     it('toolbar should be able to be shown \
+     if not in the shown state, and return a promise', () => {
+       return getAmpSidebar({
+         toolbar: true,
+       }).then(obj => {
+         const sidebarElement = obj.ampSidebar;
+         resizeIframeToWidth(obj.iframe, '1px', () => {
+           sidebarElement.implementation_.toolbars_.forEach(toolbar => {
+             toolbar.onLayoutChange();
+           });
+           expect(sidebarElement.implementation_
+               .toolbars_[0].attemptShow_().then).to.exist;
+         });
        });
      });
    });
