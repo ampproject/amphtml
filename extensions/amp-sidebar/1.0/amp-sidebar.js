@@ -45,8 +45,8 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private {?../../../src/service/viewport-impl.Viewport} */
     this.viewport_ = null;
 
-    /** @const @public {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync = vsyncFor(this.win);
+    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = vsyncFor(this.win);
 
     /** @private {?Element} */
     this.maskElement_ = null;
@@ -112,7 +112,7 @@ export class AmpSidebar extends AMP.BaseElement {
       .call(this.element.querySelectorAll('nav[toolbar]'), 0);
     toolbarElements.forEach(toolbarElement => {
       try {
-        this.toolbars_.push(new Toolbar(toolbarElement, this));
+        this.toolbars_.push(new Toolbar(toolbarElement, this, this.vsync_));
       } catch (e) {
         user().error(TAG, 'Failed to instantiate toolbar', e);
       }
@@ -182,13 +182,21 @@ export class AmpSidebar extends AMP.BaseElement {
   onLayoutMeasure() {
     // Check our toolbars for changes
     this.toolbars_.forEach(toolbar => {
-      toolbar.onLayoutChange(() => this.close_());
+      toolbar.onLayoutChange(() => this.onToolbarOpen_());
     });
   }
 
   /** @override */
   activate() {
     this.open_();
+  }
+
+  /**
+   * Function called whenever a tollbar is opened.
+   * @private
+   */
+  onToolbarOpen_() {
+    this.close_();
   }
 
   /**
@@ -221,7 +229,7 @@ export class AmpSidebar extends AMP.BaseElement {
       return;
     }
     this.viewport_.enterOverlayMode();
-    this.vsync.mutate(() => {
+    this.vsync_.mutate(() => {
       toggle(this.element, /* display */true);
       this.openMask_();
       if (this.isIosSafari_) {
@@ -229,7 +237,7 @@ export class AmpSidebar extends AMP.BaseElement {
       }
       this.element./*OK*/scrollTop = 1;
       // Start animation in a separate vsync due to display:block; set above.
-      this.vsync.mutate(() => {
+      this.vsync_.mutate(() => {
         this.element.setAttribute('open', '');
         this.element.setAttribute('aria-hidden', 'false');
         if (this.openOrCloseTimeOut_) {
@@ -258,7 +266,7 @@ export class AmpSidebar extends AMP.BaseElement {
       return;
     }
     this.viewport_.leaveOverlayMode();
-    this.vsync.mutate(() => {
+    this.vsync_.mutate(() => {
       this.closeMask_();
       this.element.removeAttribute('open');
       this.element.setAttribute('aria-hidden', 'true');
@@ -267,7 +275,7 @@ export class AmpSidebar extends AMP.BaseElement {
       }
       this.openOrCloseTimeOut_ = this.timer_.delay(() => {
         if (!this.isOpen_()) {
-          this.vsync.mutate(() => {
+          this.vsync_.mutate(() => {
             toggle(this.element, /* display */false);
             this.schedulePause(this.getRealChildren());
           });

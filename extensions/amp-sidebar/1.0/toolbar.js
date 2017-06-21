@@ -19,15 +19,13 @@ import {toggle} from '../../../src/style';
 /** @const */
 const TOOLBAR_ELEMENT_CLASS = 'i-amphtml-toolbar';
 
-/** @const */
-const TOOLBAR_CONTAINER_CLASS = 'i-amphtml-toolbar-container';
-
 export class Toolbar {
   /**
   * @param {!Element} element
   * @param {!./amp-sidebar.AmpSidebar} sidebar
+  * @param {!../../../src/service/vsync-impl.Vsync} vsync
   */
-  constructor(element, sidebar) {
+  constructor(element, sidebar, vsync) {
     /** @private {!Element} */
     this.toolbarDOMElement_ = element;
 
@@ -36,6 +34,9 @@ export class Toolbar {
 
     /** @private {!Element} */
     this.sidebarElement_ = this.sidebar_.element;
+
+    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = vsync;
 
     /** @private {!string} */
     this.toolbarMedia_ = this.toolbarDOMElement_.getAttribute('toolbar');
@@ -96,7 +97,6 @@ export class Toolbar {
       .ownerDocument.createDocumentFragment();
     this.targetElement_ =
       this.toolbarDOMElement_.ownerDocument.createElement('header');
-    this.targetElement_.className = TOOLBAR_CONTAINER_CLASS;
     //Place the elements into the target
     this.toolbarClone_ = this.toolbarDOMElement_.cloneNode(true);
     this.toolbarClone_.className = TOOLBAR_ELEMENT_CLASS;
@@ -130,7 +130,7 @@ export class Toolbar {
     }
 
     // Display the elements
-    this.sidebar_.vsync.mutate(() => {
+    this.vsync_.mutate(() => {
       if (this.targetElement_) {
         toggle(this.targetElement_, true);
       }
@@ -157,7 +157,7 @@ export class Toolbar {
       return false;
     }
 
-    this.sidebar_.vsync.mutate(() => {
+    this.vsync_.mutate(() => {
       // Hide the elements
       if (this.targetElement_) {
         toggle(this.targetElement_, false);
