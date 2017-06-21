@@ -591,6 +591,47 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
             `eid=[^&]*${AdSenseAmpAutoAdsHoldoutBranches.EXPERIMENT}`));
       });
     });
+    it('returns the right URL', () => {
+      element.setAttribute('data-ad-slot', 'some_slot');
+      new AmpAd(element).upgradeCallback();
+      return impl.getAdUrl().then(url => {
+        [
+          /^https:\/\/googleads\.g\.doubleclick\.net\/pagead\/ads/,
+          /(\?|&)adk=\d+(&|$)/,
+          /(\?|&)is_amp=3(&|$)/,
+          /(\?|&)amp_v=%24internalRuntimeVersion%24(&|$)/,
+          /(\?|&)client=ca-adsense(&|$)/,
+          /(\?|&)format=\d+x\d+(&|$)/,
+          /(\?|&)iu=some_slot(&|$)/,
+          /(\?|&)w=\d+(&|$)/,
+          /(\?|&)h=\d+(&|$)/,
+          /(\?|&)d_imp=1(&|$)/,
+          /(\?|&)dt=\d+(&|$)/,
+          /(\?|&)ifi=\d+(&|$)/,
+          /(\?|&)adf=\d+(&|$)/,
+          /(\?|&)c=\d+(&|$)/,
+          /(\?|&)biw=\d+(&|$)/,
+          /(\?|&)bih=\d+(&|$)/,
+          /(\?|&)adx=-?\d+(&|$)/,
+          /(\?|&)ady=-?\d+(&|$)/,
+          /(\?|&)u_aw=\d+(&|$)/,
+          /(\?|&)u_ah=\d+(&|$)/,
+          /(\?|&)u_cd=24(&|$)/,
+          /(\?|&)u_w=\d+(&|$)/,
+          /(\?|&)u_h=\d+(&|$)/,
+          /(\?|&)u_tz=-?\d+(&|$)/,
+          /(\?|&)u_his=\d+(&|$)/,
+          /(\?|&)oid=2(&|$)/,
+          /(\?|&)isw=\d+(&|$)/,
+          /(\?|&)ish=\d+(&|$)/,
+          /(\?|&)pfx=(1|0)(&|$)/,
+          /(\?|&)url=https?%3A%2F%2F[a-zA-Z0-9.:%]+(&|$)/,
+          /(\?|&)top=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D\d+(&|$)/,
+          /(\?|&)ref=https?%3A%2F%2Flocalhost%3A9876%2F%3Fid%3D\d+(&|$)/,
+          /(\?|&)dtd=\d+(&|$)/,
+        ].forEach(regexp => expect(url).to.match(regexp));
+      });
+    });
   });
 
   describe('#unlayoutCallback', () => {
