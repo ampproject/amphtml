@@ -668,6 +668,8 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  vmfive: {},
+
   webediads: {
     prefetch: 'https://eu1.wbdds.com/amp.min.js',
     preconnect: [
