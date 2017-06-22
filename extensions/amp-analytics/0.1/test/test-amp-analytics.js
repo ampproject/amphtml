@@ -121,10 +121,11 @@ describe('amp-analytics', function() {
   });
 
   afterEach(() => {
+    windowApi.document.body.classList.remove('i-amphtml-element');
     sandbox.restore();
   });
 
-  function getAnalyticsTag(config, attrs) {
+  function getAnalyticsTag(config, attrs, opt_sandbox) {
     config = JSON.stringify(config);
     const el = windowApi.document.createElement('amp-analytics');
     const script = windowApi.document.createElement('script');
@@ -134,7 +135,15 @@ describe('amp-analytics', function() {
     for (const k in attrs) {
       el.setAttribute(k, attrs[k]);
     }
+
+    if (opt_sandbox) {
+      // Unfortunately need to fake sandbox analytics element's parent
+      // to an AMP element
+      windowApi.document.body.classList.add('i-amphtml-element');
+    }
+
     windowApi.document.body.appendChild(el);
+
     el.connectedCallback();
     const analytics = new AmpAnalytics(el);
     analytics.createdCallback();
@@ -370,7 +379,7 @@ describe('amp-analytics', function() {
       vars: {foo: 'bar'},
     }, {
       'sandbox': 'true',
-    });
+    }, true);
 
     return waitForNoSendRequest(analytics).then(() => {
       expect(addStub).to.not.be.called;;
@@ -397,7 +406,7 @@ describe('amp-analytics', function() {
       'triggers': [{'on': 'visible', 'request': 'foo'}],
     }, {
       'sandbox': 'true',
-    });
+    }, true);
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
       expect(sendRequestSpy.args[0][0])
@@ -475,7 +484,7 @@ describe('amp-analytics', function() {
       'triggers': [{'on': 'visible', 'request': 'foo'}],
     }, {
       'sandbox': 'true',
-    });
+    }, true);
 
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
@@ -490,7 +499,7 @@ describe('amp-analytics', function() {
       'triggers': [{'on': 'visible', 'request': 'foo'}],
     }, {
       'sandbox': 'true',
-    });
+    }, true);
 
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
@@ -507,7 +516,7 @@ describe('amp-analytics', function() {
       'triggers': [{'on': 'visible', 'request': 'foo'}],
     }, {
       'sandbox': 'true',
-    });
+    }, true);
 
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
@@ -603,7 +612,7 @@ describe('amp-analytics', function() {
         },
       }]}, {
         'sandbox': 'true',
-      });
+      }, true);
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
       expect(sendRequestSpy.args[0][0]).to.equal(
@@ -791,7 +800,7 @@ describe('amp-analytics', function() {
         },
       }]}, {
         'sandbox': 'true',
-      });
+      }, true);
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
       expect(sendRequestSpy.args[0][0]).to.equal(
@@ -858,14 +867,14 @@ describe('amp-analytics', function() {
   });
 
   it('replace selector and selectionMethod when in scope', () => {
-    const tracker = ins.ampdocRoot_.getTracker('visible-v3', VisibilityTracker);
+    const tracker = ins.ampdocRoot_.getTracker('visible', VisibilityTracker);
     const addStub = sandbox.stub(tracker, 'add');
     const analytics = getAnalyticsTag({
       requests: {foo: 'https://example.com/bar'},
-      triggers: [{on: 'visible-v3', selector: 'amp-iframe', request: 'foo'}],
+      triggers: [{on: 'visible', selector: 'amp-iframe', request: 'foo'}],
     }, {
       'sandbox': 'true',
-    });
+    }, true);
     return waitForNoSendRequest(analytics).then(() => {
       expect(addStub).to.be.calledOnce;
       const config = addStub.args[0][2];
@@ -1039,7 +1048,7 @@ describe('amp-analytics', function() {
     }, {
       'config': 'config1',
       'sandbox': 'true',
-    });
+    }, true);
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/local');
     });
@@ -1137,7 +1146,7 @@ describe('amp-analytics', function() {
       config.triggers.sampled.sampleSpec.sampleOn = '${clientId}';
       const analytics = getAnalyticsTag(config, {
         'sandbox': 'true',
-      });
+      }, true);
 
       const urlReplacements = urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(0);
