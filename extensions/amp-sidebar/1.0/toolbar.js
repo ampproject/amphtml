@@ -111,7 +111,7 @@ export class Toolbar {
       this.toolbarDOMElement_.ownerDocument.createElement('header');
     //Place the elements into the target
     this.toolbarClone_ = this.toolbarDOMElement_.cloneNode(true);
-    this.toolbarClone_.className = TOOLBAR_ELEMENT_CLASS;
+    this.toolbarClone_.classList.add(TOOLBAR_ELEMENT_CLASS);
     this.targetElement_.appendChild(this.toolbarClone_);
     this.placeholder_ =
       this.toolbarDOMElement_.ownerDocument.createElement('div');

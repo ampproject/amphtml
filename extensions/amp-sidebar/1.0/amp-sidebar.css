@@ -53,9 +53,10 @@
    z-index: 2147483646;
    width: 100%;
    position: fixed;
+   background-color: white;
  }
 
- .i-amphtml-toolbar > ul {
+ .i-amphtml-toolbar > ul:first-child {
    display: flex;
    justify-content: flex-start;
    flex-wrap: wrap;

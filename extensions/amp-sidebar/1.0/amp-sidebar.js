@@ -110,6 +110,7 @@ export class AmpSidebar extends AMP.BaseElement {
     const toolbarElements =
     Array.prototype.slice
       .call(this.element.querySelectorAll('nav[toolbar]'), 0);
+    toolbarElements.reverse();
     toolbarElements.forEach(toolbarElement => {
       try {
         const toolbar = new Toolbar(toolbarElement, this.win, this.vsync_);
