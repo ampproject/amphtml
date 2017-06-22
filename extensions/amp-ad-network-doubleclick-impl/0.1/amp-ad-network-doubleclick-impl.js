@@ -532,16 +532,22 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
 
     const rtcResponse = xhrFor(this.win).fetchJson(endpoint, {
-      mode: 'cors',
-      method: 'GET',
-      ampCors: true,
       credentials: 'include',
     });
 
-    return timerFor(window).timeoutPromise(2000, rtcResponse).then(
-        res => res.json()).catch(err => {
-          return RTC_ERROR;
-        });
+    return timerFor(window).timeoutPromise(1000, rtcResponse).then(res => {
+      xhrFor(this.win).fetchJson(endpoint, {
+        credentials: 'include',
+        cache: 'no-cache',
+        cache-control: 'no-cache' // TODO: Something is wrong with this, it's not busting cache
+      });
+      return res.json();
+    }).catch(err => {
+      if ((const errorUrl = rtcConfig['doubleclick']['errorReportingUrl'])) {
+        // TODO : Log the error to the pub server
+      }
+      return RTC_ERROR;
+    });
   }
 
   /** @override */
