@@ -22,6 +22,7 @@ import {createElementWithAttributes} from './dom';
 import {getAmpdoc} from './service';
 import {extensionsFor} from './services';
 import {dev} from './log';
+import {dict} from './utils/object';
 
 
 /**
@@ -79,15 +80,15 @@ export function insertAnalyticsElement(
   const doc = /** @type {!Document} */ (parentElement.ownerDocument);
   const analyticsElem = createElementWithAttributes(
       doc,
-      'amp-analytics', {
+      'amp-analytics', dict({
         'sandbox': 'true',
         'trigger': 'immediate',
-      });
+      }));
   const scriptElem = createElementWithAttributes(
       doc,
-      'script', {
+      'script', dict({
         'type': 'application/json',
-      });
+      }));
   scriptElem.textContent = JSON.stringify(config);
   analyticsElem.appendChild(scriptElem);
   analyticsElem.CONFIG = config;
