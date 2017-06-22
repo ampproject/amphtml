@@ -126,13 +126,21 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     c.files = [].concat(config.commonTestPaths, argv.files);
   } else if (argv.integration) {
     c.files = config.integrationTestPaths;
-  } else if (argv.randomize || argv.glob) {
+  } else if (argv.randomize || argv.glob || argv.a4a) {
     /** Randomize the order of the test running */
-    var testPaths = [
-      'test/**/*.js',
-      'ads/**/test/test-*.js',
-      'extensions/**/test/**/*.js',
-    ];
+    var testPaths;
+    if (argv.a4a) {
+      testPaths = [
+        'extensions/amp-a4a/**/test/**/*.js',
+        'extensions/amp-ad-network-*/**/test/**/*.js'
+      ];
+    } else {
+      testPaths = [
+        'test/**/*.js',
+        'ads/**/test/test-*.js',
+        'extensions/**/test/**/*.js',
+      ];
+    }
 
     var testFiles = [];
 
