@@ -121,32 +121,56 @@ export class Cid {
     return consent.then(() => {
       return viewerForDoc(this.ampdoc).whenFirstVisible();
     }).then(() => {
-      return getExternalCid(this, getCidStruct,
-          opt_persistenceConsent || consent);
+      const cidPromise = this.getExternalCid_(
+          getCidStruct, opt_persistenceConsent || consent);
+      // Getting the CID might involve an HTTP request. We timeout after 10s.
+      return timerFor(this.ampdoc.win)
+          .timeoutPromise(10000, cidPromise,
+              `Getting cid for "${getCidStruct.scope}" timed out`)
+          .catch(error => {
+            rethrowAsync(error);
+          });
     });
   }
-}
 
-/**
- * Returns the "external cid". This is a cid for a specific purpose
- * (Say Analytics provider X). It is unique per user, that purpose
- * and the AMP origin site.
- * @param {!Cid} cid
- * @param {!GetCidDef} getCidStruct
- * @param {!Promise} persistenceConsent
- * @return {!Promise<?string>}
- */
-function getExternalCid(cid, getCidStruct, persistenceConsent) {
-  /** @const {!Location} */
-  const url = parseUrl(cid.ampdoc.win.location.href);
-  if (!isProxyOrigin(url)) {
-    return getOrCreateCookie(cid, getCidStruct, persistenceConsent);
+  /**
+   * Returns the "external cid". This is a cid for a specific purpose
+   * (Say Analytics provider X). It is unique per user, that purpose
+   * and the AMP origin site.
+   * @param {!GetCidDef} getCidStruct
+   * @param {!Promise} persistenceConsent
+   * @return {!Promise<?string>}
+   */
+  getExternalCid_(getCidStruct, persistenceConsent) {
+    /** @const {!Location} */
+    const url = parseUrl(this.ampdoc.win.location.href);
+    if (!isProxyOrigin(url)) {
+      return getOrCreateCookie(this, getCidStruct, persistenceConsent);
+    }
+    const viewer = viewerForDoc(this.ampdoc);
+    if (viewer.hasCapability('cid')) {
+      return this.getScopedCidFromViewer_(getCidStruct.scope);
+    }
+    return getBaseCid(this, persistenceConsent)
+        .then(baseCid => {
+          return cryptoFor(this.ampdoc.win).sha384Base64(
+              baseCid + getProxySourceOrigin(url) + getCidStruct.scope);
+        });
   }
-  return getBaseCid(cid, persistenceConsent)
-      .then(baseCid => {
-        return cryptoFor(cid.ampdoc.win).sha384Base64(
-            baseCid + getProxySourceOrigin(url) + getCidStruct.scope);
-      });
+
+  /**
+   * @param {!string} scope
+   * @return {!Promise<?string>}
+   */
+  getScopedCidFromViewer_(scope) {
+    const viewer = viewerForDoc(this.ampdoc);
+    return viewer.isTrustedViewer().then(trusted => {
+      if (!trusted) {
+        return;
+      }
+      return viewer.sendMessageAwaitResponse('cid', {scope});
+    });
+  }
 }
 
 /**
@@ -310,7 +334,7 @@ export function viewerBaseCid(ampdoc, opt_data) {
     if (!trusted) {
       return undefined;
     }
-    const cidPromise = viewer.sendMessageAwaitResponse('cid', opt_data)
+    return viewer.sendMessageAwaitResponse('cid', opt_data)
         .then(data => {
           // TODO(dvoytenko, #9019): cleanup the legacy CID format.
           // For backward compatibility: #4029
@@ -322,14 +346,6 @@ export function viewerBaseCid(ampdoc, opt_data) {
             }));
           }
           return data;
-        });
-    // Getting the CID may take some time (waits for JS file to
-    // load, might hit GC), but we do not wait indefinitely. Typically
-    // it should resolve in milli seconds.
-    return timerFor(ampdoc.win).timeoutPromise(10000, cidPromise, 'base cid')
-        .catch(error => {
-          rethrowAsync(error);
-          return undefined;
         });
   });
 }
