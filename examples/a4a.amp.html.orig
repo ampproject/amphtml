@@ -156,11 +156,10 @@
 
   <!-- amg-img doesn't work here for some reason? -->
   <div class="poodles">
-    <img
-        src="https://www.pets4homes.co.uk/images/articles/4005/large/is-the-poodle-falling-in-popularity-in-the-uk-58d2a9f294c24.jpg"
-        width="289" height="193"
-        alt="Poodles"
-        class="poodles"></img>
+    <img src="https://www.pets4homes.co.uk/images/articles/4005/large/is-the-poodle-falling-in-popularity-in-the-uk-58d2a9f294c24.jpg"
+             width="289" height="193"
+             alt="Poodles"
+             class="poodles"></img>
   </div>
 
   <p>The poodle has been bred in at least three sizes, including Standard, Miniature, and Toy.
@@ -246,6 +245,70 @@
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>
+
+<<<<<<< HEAD
+  <p><a name="last">The British Kennel Club</a> also says recognises three sizes, stating that the
+    miniature and toy
+    are scaled down
+    versions of the standard.[2] The Fédération Cynologique Internationale (FCI) recognizes four
+    sizes of one breed:
+    standard, medium, miniature, and toy. Poodles exist in many coat colors. Despite the Standard
+    Poodle's claim to
+    greater age than the other varieties, some evidence shows the smaller types developed only a
+    short time after
+    the breed assumed the general type by which it is recognized today.</p>
+
+  <p class="rtl_test">RTL test: (NB this doesn't work yet)</p>
+  <div dir="rtl">
+    <p>[עריכת קוד מקור | עריכה]
+      זהו גזע פופולרי בגודל בינוני בעל מבנה גוף שרירי וסיבולת גבוהה. פרוות הדלמטים קצרה, קשה וצפופה.
+      פרוותם בצבע
+      לבן
+      ועליה נקודות שחורות, אך לעתים חומות. צבע האף והעיניים חום או שחור, בהתאם לצבע הנקודות. גורי
+      הדלמטי נולדים
+      לבנים
+      לחלוטין. עם הזמן, בשל הופעת כתמים שחורים (או חומים) על העור, הפרווה משנה את צבעה בהתאם. במשך
+      כל חייהם, כתמים
+      חדשים ימשיכו להופיע על הכלבים הדלמטיים, אם כי </p>
+
+    <amp-ad width="100vw" height=100
+            type="adsense"
+            data-ad-client="ca-pub-2383777339857329"
+            data-ad-slot="4121425836"
+            data-adtest="on"
+            data-auto-format="rspv">
+      <div placeholder></div>
+      <div fallback></div>
+    </amp-ad>
+
+    <p>[עריכת קוד מקור | עריכה]
+      זהו גזע פופולרי בגודל בינוני בעל מבנה גוף שרירי וסיבולת גבוהה. פרוות הדלמטים קצרה, קשה וצפופה.
+      פרוותם בצבע
+      לבן
+      ועליה נקודות שחורות, אך לעתים חומות. צבע האף והעיניים חום או שחור, בהתאם לצבע הנקודות. גורי
+      הדלמטי נולדים
+      לבנים
+      לחלוטין. עם הזמן, בשל הופעת כתמים שחורים (או חומים) על העור, הפרווה משנה את צבעה בהתאם. במשך
+      כל חייהם, כתמים
+      חדשים ימשיכו להופיע על הכלבים הדלמטיים, אם כי </p>
+  </div>
 </div>
+=======
+  <h2>GMOSSP ad network</h2>
+  <amp-ad width="300" height="250"
+      type="gmossp"
+      data-use-a4a="true"
+      data-id="33303"
+      src="https://sp.gmossp-sp.jp/ads/ssp.ad?space_id=33303&is_a4a=1">
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+
+  <h2>Doubleclick</h2>
+  <amp-ad width="320" height="50"
+      type="doubleclick"
+      data-slot="/4119129/mobile_ad_banner">
+  </amp-ad>
+>>>>>>> upstream/master
 </body>
 </html>

@@ -90,19 +90,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     this.layoutPromise_ = null;
 
     /** @type {!../../../ads/google/a4a/performance.BaseLifecycleReporter} */
-<<<<<<< HEAD
-    this.lifecycleReporter = getLifecycleReporter(this, ReporterNamespace.AMP,
-        this.element.getAttribute('data-amp-slot-index'));
-
-    /** @private {!./layout-delay-meter.LayoutDelayMeter} */
-    this.layoutDelayMeter_ = new LayoutDelayMeter(this.win);
-    this.lifecycleReporter.sendPing('adSlotBuilt');
-
-    console.log('!!!! it lives! %o', this);
-=======
     this.lifecycleReporter = googleLifecycleReporterFactory(
         this, ReporterNamespace.AMP);
->>>>>>> upstream/master
   }
 
   /** @override */

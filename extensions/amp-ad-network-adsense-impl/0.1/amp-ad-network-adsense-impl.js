@@ -167,8 +167,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const height = Number(this.element.getAttribute('height'));
     // Need to ensure these are numbers since width can be set to 'auto'.
     // Checking height just in case.
-    this.size_ = isExperimentOn(this.win, 'as-use-attr-for-format')
-        && !isNaN(width) && width > 0 && !isNaN(height) && height > 0
+    // TODO(charliereams): Figure out this experiment.
+    this.size_ = false && isExperimentOn(this.win, 'as-use-attr-for-format')
+    && !isNaN(width) && width > 0 && !isNaN(height) && height > 0
         ? {width, height}
         : this.getIntersectionElementLayoutBox();
     const format = `${this.size_.width}x${this.size_.height}`;
@@ -203,32 +204,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'prev_fmts': sharedStateParams.prevFmts || null,
       'brdim': additionalDimensions(this.win, viewportSize),
     };
-
-    const paramList = [
-      {name: 'client', value: adClientId},
-      {name: 'format', value: format},
-      {name: 'w', value: slotRect.width},
-      {name: 'h', value: slotRect.height},
-      {name: 'adtest', value: adTestOn},
-      {name: 'adk', value: adk},
-      {
-        name: 'bc',
-        value: global.SVGElement && global.document.createElementNS ? '1'
-            : null,
-      },
-      {name: 'ctypes', value: this.getCtypes_()},
-      {name: 'host', value: this.element.getAttribute('data-ad-host')},
-      {name: 'to', value: this.element.getAttribute('data-tag-origin')},
-      {name: 'pv', value: sharedStateParams.pv},
-      {name: 'channel', value: this.element.getAttribute('data-ad-channel')},
-      {name: 'vis', value: visibilityStateCodes[visibilityState] || '0'},
-      {name: 'wgl', value: global['WebGLRenderingContext'] ? '1' : '0'},
-      {name: 'asnt', value: this.sentinel},
-    ];
-
-    if (sharedStateParams.prevFmts) {
-      paramList.push({name: 'prev_fmts', value: sharedStateParams.prevFmts});
-    }
 
     const experimentIds = [];
     const ampAutoAdsBranch = getAdSenseAmpAutoAdsExpBranch(this.win);
@@ -342,7 +317,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
       // Nudge responsive ads into the correct horizontal position.
 
-
       var at = this.element.getBoundingClientRect();
       // NB: can't use attemptChangeSize here, this must succeed. But it doesn't
       // actually change the size (it just changes the horizontal margins).
@@ -364,8 +338,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     if (this.uniqueSlotId_) {
       sharedState.removeSlot(this.uniqueSlotId_);
     }
-<<<<<<< HEAD
-    this.ampAnalyticsConfig = null;
+    if (this.ampAnalyticsElement_) {
+      removeElement(this.ampAnalyticsElement_);
+      this.ampAnalyticsElement_ = null;
+    }
+    this.ampAnalyticsConfig_ = null;
+    this.qqid_ = null;
   }
 
   /** @override */
@@ -395,26 +373,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const idealHeight = Math.round(width / 1.2);
     console.log('min=%o max=%o ideal=%o', minHeight, maxHeight, idealHeight);
     return Math.max(minHeight, Math.min(maxHeight, idealHeight));
-  }
-
-  /**
-   * @return {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
-   */
-  initLifecycleReporter() {
-    return googleLifecycleReporterFactory(this);
-  }
-
-  /** @override */
-  onCreativeRender(isVerifiedAmpCreative) {
-    super.onCreativeRender(isVerifiedAmpCreative);
-    injectActiveViewAmpAnalyticsElement(
-        this, this.extensions_, this.ampAnalyticsConfig);
-    if (this.ampAnalyticsElement_) {
-      removeElement(this.ampAnalyticsElement_);
-      this.ampAnalyticsElement_ = null;
-    }
-    this.ampAnalyticsConfig_ = null;
-    this.qqid_ = null;
   }
 
   /** @override */
