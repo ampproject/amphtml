@@ -89,6 +89,15 @@ export class Toolbar {
     } else {
       this.hideToolbar_();
     }
+
+    // Use the placeholder to fill the height of the toolbar
+    if (this.placeholder_) {
+      this.vsync_.mutate(() => {
+        setStyles(this.placeholder_, {
+          'height': this.toolbarClone_.offsetHeight + 'px',
+        });
+      });
+    }
   }
 
   /**
@@ -142,11 +151,6 @@ export class Toolbar {
           toggle(element, false);
         });
       }
-      console.log(this.toolbarClone_.offsetHeight);
-      // Use the placeholder to fill the height of the toolbar
-      setStyles(this.placeholder_, {
-        'height': this.toolbarClone_.offsetHeight + 'px',
-      });
       this.toolbarShown_ = true;
     });
   }

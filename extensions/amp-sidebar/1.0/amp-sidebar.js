@@ -194,6 +194,15 @@ export class AmpSidebar extends AMP.BaseElement {
   }
 
   /** @override */
+  viewportCallback() {
+    console.log('callback!');
+    // Check our toolbars for changes
+    this.toolbars_.forEach(toolbar => {
+      toolbar.onLayoutChange(() => this.onToolbarOpen_());
+    });
+  }
+
+  /** @override */
   activate() {
     this.open_();
   }
