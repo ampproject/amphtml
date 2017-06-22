@@ -24,5 +24,6 @@
   "a4a-measure-get-ad-urls": 1,
   "amp-bind": 1,
   "ad-loader-v2": 1,
-  "3p-use-ampcontext": 1
+  "3p-use-ampcontext": 1,
+  "amp-ad-exit": 1
 }
