@@ -76,7 +76,7 @@ describes.realWin('amp-sidebar 0.1 version', {
           const closeButton = sidebarElement.lastElementChild;
           if (options.closeText) {
             obj.ampSidebar.setAttribute('data-close-button-aria-label',
-            options.closeText);
+              options.closeText);
           };
           expect(closeButton.textContent).to.equal(options.closeText);
         });
