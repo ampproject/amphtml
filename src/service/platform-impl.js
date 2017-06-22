@@ -98,12 +98,11 @@ export class Platform {
   }
 
   /**
-   * Whether the current browser is isStandAlone.
+   * Whether the current browser is isStandalone.
    * @return {boolean}
    */
-  isStandAlone() {
-    return /iPhone|iPad|iPod/i.test(this.navigator_.userAgent) &&
-        ('standalone' in this.navigator_) && this.navigator_.standalone;
+  isStandalone() {
+    return this.isIos() && this.navigator_.standalone;
   }
 
   /**

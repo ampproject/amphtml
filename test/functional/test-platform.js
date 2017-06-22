@@ -26,7 +26,7 @@ describe('Platform', () => {
   let isIe;
   let isEdge;
   let isWebKit;
-  let isStandAlone;
+  let isStandalone;
   let majorVersion;
   let iosVersion;
   let iosMajorVersion;
@@ -40,7 +40,7 @@ describe('Platform', () => {
     isIe = false;
     isEdge = false;
     isWebKit = false;
-    isStandAlone = false;
+    isStandalone = false;
     majorVersion = 0;
     iosVersion = '';
     iosMajorVersion = null;
@@ -68,7 +68,7 @@ describe('Platform', () => {
         userAgent: userAgentString,
       },
     });
-    expect(platform.isStandAlone()).to.equal(isStandAlone);
+    expect(platform.isStandalone()).to.equal(isStandalone);
   }
 
   it('should tolerate empty or null', () => {
@@ -210,9 +210,15 @@ describe('Platform', () => {
   });
 
   it('StandAlone', () => {
-    isStandAlone = true;
+    isStandalone = true;
     testStandAlone('Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X)' +
         ' AppleWebKit/603.1.30 (KHTML, like Gecko) FxiOS/7.5b3349' +
-        ' Mobile/14E304 Safari/603.1.30', isStandAlone);
+        ' Mobile/14E304 Safari/603.1.30', isStandalone);
+  });
+
+  it('Not StandAlone', () => {
+    testStandAlone('Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X)' +
+        ' AppleWebKit/603.1.30 (KHTML, like Gecko) FxiOS/7.5b3349' +
+        ' Mobile/14E304 Safari/603.1.30', isStandalone);
   });
 });
