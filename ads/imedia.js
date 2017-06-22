@@ -40,7 +40,7 @@ export function imedia(global, data) {
     loadScript(global, 'https://i.imedia.cz/js/im3.js', () => {
       if (global.im != null) {
         mW.im = global.im;
-        mW.im.conf.referer = context.location.href;
+        mW.im.conf.referer = context.canonicalUrl;
 
         // send request to get all ads
         mW.im.getAds(positions, {AMPcallback: ads => {
