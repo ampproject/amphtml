@@ -461,6 +461,12 @@ export class GlobalVariableSource extends VariableSource {
     this.set('BACKGROUND_STATE', () => {
       return viewerForDoc(this.ampdoc).isVisible() ? '0' : '1';
     });
+
+    // Returns the user agent.
+    this.set('USER_AGENT', () => {
+      const nav = this.ampdoc.win.navigator;
+      return nav.userAgent;
+    });
   }
 
   /**
