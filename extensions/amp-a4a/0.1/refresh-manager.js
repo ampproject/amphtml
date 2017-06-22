@@ -96,12 +96,13 @@ export class RefreshManager {
    * Initiates the refresh cycle by initiating the visibility manager on the
    * element.
    *
-   * @return {?Promise} Promise that resolves after refresh event. This promise
-   *   is useful to have for test purposes.
+   * @return {!Promise<boolean>} Promise that resolves to true if refresh event
+   *    completes successfully and false otherwise. This is particularly useful
+   *    for testing.
    */
   initiateRefreshCycle() {
     if (!this.isRefreshable()) {
-      return null;
+      return Promise.resolve(false);
     }
     return new Promise(resolve => {
       analyticsForDoc(this.element_, true).then(analytics => {
@@ -109,7 +110,7 @@ export class RefreshManager {
             .listenElement(this.element_, this.config_, null, null, () => {
               this.refreshTimeoutId_ = this.timer_.delay(() => {
                 this.a4a_.refresh(() => this.initiateRefreshCycle());
-                resolve();
+                resolve(true);
               }, /** @type {number} */ (this.refreshInterval_));
             });
       });
