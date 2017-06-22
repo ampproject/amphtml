@@ -91,7 +91,7 @@ export class Toolbar {
     this.vsync_.mutate(() => {
       if (this.placeholder_) {
         setStyles(this.placeholder_, {
-          'height': this.toolbarClone_.offsetHeight + 'px',
+          'height': this.toolbarClone_./*REVIEW*/offsetHeight + 'px',
         });
       }
     });
