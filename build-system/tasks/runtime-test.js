@@ -136,7 +136,7 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
 
     var testFiles = [];
 
-    for (index in testPaths) {
+    for (var index in testPaths) {
       testFiles = testFiles.concat(glob.sync(testPaths[index]));
     }
 
