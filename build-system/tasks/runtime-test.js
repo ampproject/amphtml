@@ -132,7 +132,8 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     if (argv.a4a) {
       testPaths = [
         'extensions/amp-a4a/**/test/**/*.js',
-        'extensions/amp-ad-network-*/**/test/**/*.js'
+        'extensions/amp-ad-network-*/**/test/**/*.js',
+        'ads/google/a4a/test/*.js'
       ];
     } else {
       testPaths = [
