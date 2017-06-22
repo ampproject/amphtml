@@ -74,9 +74,9 @@ describe('refresh-manager', () => {
   });
 
 
-  it('should call getConfiguration_', () => {
+  it('should call convertConfiguration_', () => {
     const getConfigurationSpy = sandbox.spy(
-        RefreshManager.prototype, 'getConfiguration_');
+        RefreshManager.prototype, 'convertConfiguration_');
     const refreshManager = new RefreshManager(mockA4a, config);
     expect(getConfigurationSpy).to.be.calledOnce;
     expect(refreshManager.config_).to.not.be.null;
@@ -93,7 +93,7 @@ describe('refresh-manager', () => {
     expect(refreshManager.isRefreshable()).to.be.false;
   });
 
-  it.skip('should execute the refresh event correctly', () => {
+  it('should execute the refresh event correctly', () => {
     // Attach element to DOM, as is necessary for request ampdoc.
     window.document.body.appendChild(mockA4a.element);
     const refreshSpy = sandbox.spy(mockA4a, 'refresh');
@@ -106,7 +106,9 @@ describe('refresh-manager', () => {
     };
     refreshManager.refreshInterval_ = 0;
     return refreshManager.initiateRefreshCycle().then(() => {
-      expect(refreshSpy).to.be.calledOnce;
+      // Twice because constructor calls initiateRefreshCycle().
+      expect(refreshSpy).to.be.calledTwice;
+      window.document.body.removeChild(mockA4a.element);
     });
   });
 });

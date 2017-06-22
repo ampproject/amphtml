@@ -435,8 +435,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   refresh(refreshEndCallback) {
-    super.refresh(refreshEndCallback);
+    const promise = super.refresh(refreshEndCallback);
     this.refreshCount_++;
+    return promise;
   }
 
   /**

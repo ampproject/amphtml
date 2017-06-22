@@ -2264,10 +2264,11 @@ describe('amp-a4a', () => {
             layoutCanceled: () => {},
           };
         };
-        a4a.refreshReadyPromise_ = Promise.resolve(true);
-
-        let resolver;
-        const promise = new Promise(resolve => resolver = resolve);
+        a4a.getVsync = () => {
+          return {
+            mutate: func => func(),
+          };
+        };
 
         // We don't really care about the behavior of the following methods, so
         // long as they're called the appropriate number of times. We stub them
@@ -2284,17 +2285,14 @@ describe('amp-a4a', () => {
             sandbox.stub(AmpA4A.prototype, 'togglePlaceholder');
         togglePlaceholderMock.returns(undefined);
 
-        const refreshEndCallback = () => {
+        expect(a4a.isRefreshing).to.be.false;
+        return a4a.refresh(() => {}).then(() => {
           expect(initiateAdRequestMock).to.be.calledOnce;
           expect(tearDownSlotMock).to.be.calledOnce;
-          expect(a4a.isRefreshing).to.be.false;
-          resolver();
-        };
-
-        expect(a4a.isRefreshing).to.be.false;
-        a4a.refresh(refreshEndCallback);
-        expect(a4a.isRefreshing).to.be.true;
-        return promise;
+          expect(togglePlaceholderMock).to.be.calledOnce;
+          expect(a4a.isRefreshing).to.be.true;
+          expect(a4a.isRelayoutNeededFlag).to.be.true;
+        });
       });
     });
   });
