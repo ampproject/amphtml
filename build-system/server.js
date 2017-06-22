@@ -29,10 +29,11 @@ const webserver = require('gulp-webserver');
 const host = process.env.SERVE_HOST;
 const port = process.env.SERVE_PORT;
 const useHttps = process.env.SERVE_USEHTTPS == 'true' ? true : false;
+const gulpProcess = process.env.SERVE_PROCESS_ID;
 
-// Exit in the event of a crash in the parent process.
+// Exit in the event of a crash in the parent gulp process.
 setInterval(function() {
-  if (!isRunning(process.env.SERVE_PROCESS_ID)) {
+  if (!isRunning(gulpProcess)) {
     util.log(util.colors.red('Gulp process terminated, shutting down server'));
     process.exit(1);
   }
