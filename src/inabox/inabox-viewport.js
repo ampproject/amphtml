@@ -14,21 +14,75 @@
  * limitations under the License.
  */
 
-import {viewerForDoc} from '../viewer';
+import {getFixedContainer} from '../../src/full-overlay-frame-child-helper';
+import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
+import {viewerForDoc} from '../services';
 import {Viewport, ViewportBindingDef} from '../service/viewport-impl';
-import {getServiceForDoc} from '../service';
-import {resourcesForDoc} from '../../src/resources';
+import {registerServiceBuilderForDoc} from '../service';
+import {resourcesForDoc} from '../services';
 import {
   nativeIntersectionObserverSupported,
 } from '../../src/intersection-observer-polyfill';
 import {layoutRectLtwh} from '../layout-rect';
 import {Observable} from '../observable';
-import {MessageType} from '../../src/3p-frame';
-import {IframeMessagingClient} from '../../3p/iframe-messaging-client';
+import {MessageType} from '../../src/3p-frame-messaging';
 import {dev} from '../log';
+import {vsyncFor} from '../../src/services';
+import {px, setStyles} from '../../src/style';
+
 
 /** @const {string} */
 const TAG = 'inabox-viewport';
+
+
+/** @visibleForTesting */
+export function prepareFixedContainer(win, fixedContainer) {
+  return vsyncFor(win).runPromise({
+    measure: state => {
+      state.boundingRect = fixedContainer./*OK*/getBoundingClientRect();
+    },
+    mutate: state => {
+      setStyles(dev().assertElement(win.document.body), {
+        'background': 'transparent',
+      });
+
+      setStyles(fixedContainer, {
+        'position': 'absolute',
+        'left': '50%',
+        'top': '50%',
+        'right': 'auto',
+        'bottom': 'auto',
+        'width': px(state.boundingRect.width),
+        'height': px(state.boundingRect.height),
+        'margin-left': px(-(state.boundingRect.width / 2)),
+        'margin-top': px(-(state.boundingRect.height / 2)),
+      });
+    },
+  }, {});
+}
+
+
+/** @visibleForTesting */
+export function resetFixedContainer(win, fixedContainer) {
+  return vsyncFor(win).mutatePromise(() => {
+    setStyles(dev().assertElement(win.document.body), {
+      'background': 'transparent',
+    });
+
+    setStyles(fixedContainer, {
+      'position': null,
+      'left': null,
+      'top': null,
+      'right': null,
+      'bottom': null,
+      'width': null,
+      'height': null,
+      'margin-left': null,
+      'margin-top': null,
+    });
+  });
+}
+
 
 /**
  * Implementation of ViewportBindingDef that works inside an non-scrollable
@@ -67,22 +121,16 @@ export class ViewportBindingInabox {
 
     /**
      * The current layout rect of the iframe box.
-     * To not trigger amp-analytics visibility immediately,
-     * we start with an initial position right below the fold.
+     * TODO(lannka, #7971): The best way to stop visibility from firing
+     * is to move this functionality to the InOb polyfill.
+     * ~To not trigger amp-analytics visibility immediately,
+     * we start with an initial position right below the fold.~
      * @private {!../layout-rect.LayoutRectDef}
      */
     this.boxRect_ = layoutRectLtwh(0, boxHeight + 1, boxWidth, boxHeight);
 
-    /** @private @const {!IframeMessagingClient} */
-    this.iframeClient_ = new IframeMessagingClient(win);
-    this.iframeClient_.setSentinel(getRandom(win));
-
-    // Bet the top window is the scrollable window and loads host script.
-    // TODOs:
-    // 1) check window ancestor origin, if the top window is in same origin,
-    // don't bother to use post messages.
-    // 2) broadcast the request
-    this.iframeClient_.setHostWindow(win.top);
+    /** @private @const {!../../3p/iframe-messaging-client.IframeMessagingClient} */
+    this.iframeClient_ = iframeMessagingClientFor(win);
 
     dev().fine(TAG, 'initialized inabox viewport');
   }
@@ -163,6 +211,102 @@ export class ViewportBindingInabox {
     }
   }
 
+  /** @override */
+  updateLightboxMode(lightboxMode) {
+    if (lightboxMode) {
+      return this.tryToEnterOverlayMode_();
+    }
+    return this.leaveOverlayMode_();
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  tryToEnterOverlayMode_() {
+    // TODO(alanorozco): Update viewport measurement from host message.
+    return this.prepareFixedContainer_()
+        .then(() => this.requestFullOverlayFrame_());
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  leaveOverlayMode_() {
+    return this.requestCancelFullOverlayFrame_()
+        .then(() => this.resetFixedContainer_());
+  }
+
+  /**
+   * Prepares the "fixed" container before expanding frame.
+   * @return {!Promise}
+   * @private
+   */
+  prepareFixedContainer_() {
+    const fixedContainer = this.getFixedContainer_();
+
+    if (!fixedContainer) {
+      dev().warn(TAG, 'No fixed container inside frame, content will shift.');
+      return Promise.resolve();
+    }
+
+    return prepareFixedContainer(this.win, dev().assertElement(fixedContainer));
+  }
+
+  /**
+   * Resets the "fixed" container to its original position after collapse.
+   * @return {!Promise}
+   * @private
+   */
+  resetFixedContainer_() {
+    const fixedContainer = this.getFixedContainer_();
+
+    if (!fixedContainer) {
+      dev().warn(TAG, 'No fixed container inside frame, content will shift.');
+      return Promise.resolve();
+    }
+
+    return resetFixedContainer(this.win, dev().assertElement(fixedContainer));
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  requestFullOverlayFrame_() {
+    return new Promise((resolve, reject) => {
+      this.iframeClient_.makeRequest(
+          MessageType.FULL_OVERLAY_FRAME,
+          MessageType.FULL_OVERLAY_FRAME_RESPONSE,
+          response => {
+            if (response.success) {
+              resolve();
+            } else {
+              reject('Request to open lightbox rejected by host document');
+            }
+          });
+    });
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  requestCancelFullOverlayFrame_() {
+    return new Promise(resolve => {
+      this.iframeClient_.makeRequest(
+          MessageType.CANCEL_FULL_OVERLAY_FRAME,
+          MessageType.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
+          resolve);
+    });
+  }
+
+  getFixedContainer_() {
+    return getFixedContainer(
+        /** @type {!HTMLBodyElement} */ (dev().assert(this.win.document.body)));
+  }
+
   /** @override */ disconnect() {/* no-op */}
   /** @override */ updatePaddingTop() {/* no-op */}
   /** @override */ hideViewerHeader() {/* no-op */}
@@ -170,31 +314,25 @@ export class ViewportBindingInabox {
   /** @override */ disableScroll() {/* no-op */}
   /** @override */ resetScroll() {/* no-op */}
   /** @override */ ensureReadyForElements() {/* no-op */}
-  /** @override */ updateLightboxMode() {/* no-op */}
   /** @override */ setScrollTop() {/* no-op */}
   /** @override */ getScrollWidth() {return 0;}
   /** @override */ getScrollHeight() {return 0;}
+  /** @override */ getBorderTop() {return 0;}
   /** @override */ requiresFixedLayerTransfer() {return false;}
 }
 
 /**
  * @param {!../service/ampdoc-impl.AmpDoc} ampdoc
- * @return {!Viewport}
  */
 export function installInaboxViewportService(ampdoc) {
   const binding = new ViewportBindingInabox(ampdoc.win);
   const viewer = viewerForDoc(ampdoc);
-  const viewport = new Viewport(ampdoc, binding, viewer);
-  return /** @type {!Viewport} */(getServiceForDoc(
-      ampdoc, 'viewport', () => viewport));
-}
-
-/**
- * @param {!Window} win
- * @returns {string}
- */
-function getRandom(win) {
-  return String(win.Math.random()).substr(2);
+  registerServiceBuilderForDoc(ampdoc,
+      'viewport',
+      function() {
+        return new Viewport(ampdoc, binding, viewer);
+      },
+      /* opt_instantiate */ true);
 }
 
 /**

@@ -22,8 +22,8 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {isObject, isFiniteNumber} from '../../../src/types';
 import {assertHttpsUrl} from '../../../src/url';
-import {vsyncFor} from '../../../src/vsync';
-import {xhrFor} from '../../../src/xhr';
+import {vsyncFor} from '../../../src/services';
+import {xhrFor} from '../../../src/services';
 
 /** @const */
 const EXPERIMENT = 'amp-viz-vega';
@@ -34,7 +34,7 @@ export class AmpVizVega extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?JSONType} */
+    /** @private {?JsonObject} */
     this.data_ = null;
 
     /** @private {?string} */
@@ -160,7 +160,7 @@ export class AmpVizVega extends AMP.BaseElement {
 
       return xhrFor(this.win).fetchJson(dev().assertString(this.src_), {
         requireAmpResponseSourceOrigin: false,
-      }).then(data => {
+      }).then(res => res.json()).then(data => {
         this.data_ = data;
       });
     }

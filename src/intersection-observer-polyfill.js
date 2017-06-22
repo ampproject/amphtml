@@ -15,6 +15,7 @@
  */
 
 import {dev} from './log';
+import {dict} from './utils/object';
 import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
 import {SubscriptionApi} from './iframe-helper';
 
@@ -36,14 +37,14 @@ export let DOMRect;
 
 export const DEFAULT_THRESHOLD =
     [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4,
-    0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1];
+      0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1];
 
 /** @typedef {{
  *    element: !Element,
  *    currentThresholdSlot: number,
  *  }}
  */
-let IntersectionStateDef;
+let ElementIntersectionStateDef;
 
 /** @const @private */
 const TAG = 'INTERSECTION-OBSERVER';
@@ -116,8 +117,9 @@ export class IntersectionObserverApi {
       for (let i = 0; i < entries.length; i++) {
         delete entries[i]['target'];
       }
-      this.subscriptionApi_.send('intersection', {changes: entries});
+      this.subscriptionApi_.send('intersection', dict({'changes': entries}));
     }, {threshold: DEFAULT_THRESHOLD});
+    this.intersectionObserver_.tick(this.viewport_.getRect());
 
     /** @const {function()} */
     this.fire = () => {
@@ -201,12 +203,24 @@ export class IntersectionObserverPolyfill {
         this.threshold_[this.threshold_.length - 1] <= 1,
         'Threshold should be in the range from "[0, 1]"');
 
+    /** @private {?./layout-rect.LayoutRectDef} */
+    this.lastViewportRect_ = null;
+
+    /** @private {./layout-rect.LayoutRectDef|undefined} */
+    this.lastIframeRect_ = undefined;
+
     /**
      * Store a list of observed elements and their current threshold slot which
      * their intersection ratio fills, range from [0, this.threshold_.length]
-     * @private {Array<!IntersectionStateDef>}
+     * @private {Array<!ElementIntersectionStateDef>}
      */
     this.observeEntries_ = [];
+  }
+
+  /**
+   */
+  disconnect() {
+    this.observeEntries_.length = 0;
   }
 
   /**
@@ -216,8 +230,8 @@ export class IntersectionObserverPolyfill {
    * @param {!Element} element
    */
   observe(element) {
-    // Check the element is an AMP element
-    dev().assert(element.isBuilt && element.isBuilt());
+    // Check the element is an AMP element.
+    dev().assert(element.getLayoutBox);
 
     // If the element already exists in current observeEntries, do nothing
     for (let i = 0; i < this.observeEntries_.length; i++) {
@@ -227,11 +241,22 @@ export class IntersectionObserverPolyfill {
       }
     }
 
-    // push new observed element
-    this.observeEntries_.push({
+    const newState = {
       element,
       currentThresholdSlot: 0,
-    });
+    };
+
+    // Get the new observed element's first changeEntry based on last viewport
+    if (this.lastViewportRect_) {
+      const change = this.getValidIntersectionChangeEntry_(
+          newState, this.lastViewportRect_, this.lastIframeRect_);
+      if (change) {
+        this.callback_([change]);
+      }
+    }
+
+    // push new observed element
+    this.observeEntries_.push(newState);
   }
 
   /**
@@ -267,6 +292,9 @@ export class IntersectionObserverPolyfill {
           moveLayoutRect(opt_iframe, -opt_iframe.left, -opt_iframe.top);
     }
 
+    this.lastViewportRect_ = hostViewport;
+    this.lastIframeRect_ = opt_iframe;
+
     const changes = [];
 
     for (let i = 0; i < this.observeEntries_.length; i++) {
@@ -288,24 +316,23 @@ export class IntersectionObserverPolyfill {
    * When the new intersection ratio doesn't cross one of a threshold value,
    * the function will return null.
    *
-   * @param {!IntersectionStateDef} entry
+   * @param {!ElementIntersectionStateDef} state
    * @param {!./layout-rect.LayoutRectDef} hostViewport hostViewport's rect
    * @param {./layout-rect.LayoutRectDef=} opt_iframe. iframe container rect
    * @return {?IntersectionObserverEntry} A valid change entry or null if ratio
    * @private
    */
-  getValidIntersectionChangeEntry_(entry, hostViewport, opt_iframe) {
-    const element = entry.element;
+  getValidIntersectionChangeEntry_(state, hostViewport, opt_iframe) {
+    const element = state.element;
 
     // Normalize container LayoutRect to be relative to page
-    let elementRect;
     let ownerRect = null;
 
     // If opt_iframe is provided, all LayoutRect has position relative to
     // the iframe.
     // If opt_iframe is not provided, all LayoutRect has position relative to
     // the host document.
-    elementRect = element.getLayoutBox();
+    const elementRect = element.getLayoutBox();
     const owner = element.getOwner();
     ownerRect = owner && owner.getLayoutBox();
 
@@ -318,10 +345,10 @@ export class IntersectionObserverPolyfill {
     const ratio = intersectionRatio(intersectionRect, elementRect);
     const newThresholdSlot = getThresholdSlot(this.threshold_, ratio);
 
-    if (newThresholdSlot == entry.currentThresholdSlot) {
+    if (newThresholdSlot == state.currentThresholdSlot) {
       return null;
     }
-    entry.currentThresholdSlot = newThresholdSlot;
+    state.currentThresholdSlot = newThresholdSlot;
 
     // To get same behavior as native IntersectionObserver set hostViewport null
     // if inside an iframe
@@ -330,24 +357,6 @@ export class IntersectionObserverPolyfill {
     changeEntry.target = element;
     return changeEntry;
   }
-}
-
-/**
- * Transforms a LayoutRect into a DOMRect for use in intersection observers.
- * @param {!./layout-rect.LayoutRectDef} rect
- * @return {!DOMRect}
- */
-function DomRectFromLayoutRect(rect) {
-  return {
-    left: rect.left,
-    top: rect.top,
-    width: rect.width,
-    height: rect.height,
-    bottom: rect.bottom,
-    right: rect.right,
-    x: rect.left,
-    y: rect.top,
-  };
 }
 
 /**
@@ -426,9 +435,9 @@ function calculateChangeEntry(
   return /** @type {!IntersectionObserverEntry} */ ({
     time: (typeof performance !== 'undefined' && performance.now) ?
         performance.now() : Date.now() - INIT_TIME,
-    rootBounds: rootBounds && DomRectFromLayoutRect(rootBounds),
-    boundingClientRect: DomRectFromLayoutRect(boundingClientRect),
-    intersectionRect: DomRectFromLayoutRect(intersection),
+    rootBounds,
+    boundingClientRect,
+    intersectionRect: intersection,
     intersectionRatio: ratio,
   });
 }

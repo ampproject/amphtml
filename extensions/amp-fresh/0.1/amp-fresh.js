@@ -16,7 +16,10 @@
 
 import {CSS} from '../../../build/amp-fresh-0.1.css';
 import {copyChildren} from '../../../src/dom';
-import {getOrInsallAmpFreshManager} from './amp-fresh-manager';
+import {
+  ampFreshManagerForDoc,
+  installAmpFreshManagerForDoc,
+} from './amp-fresh-manager';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
@@ -54,9 +57,13 @@ export class AmpFresh extends AMP.BaseElement {
     this.ampFreshId_ = user().assert(this.element.getAttribute('id'),
         'amp-fresh must have an id.');
 
-    this.manager_ = getOrInsallAmpFreshManager(this.element);
-
+    installAmpFreshManagerForDoc(this.element);
+    this.manager_ = ampFreshManagerForDoc(this.element);
     this.manager_.register(this.ampFreshId_, this);
+
+    if (!this.element.hasAttribute('aria-live')) {
+      this.element.setAttribute('aria-live', 'polite');
+    }
   }
 
   /**
@@ -68,7 +75,7 @@ export class AmpFresh extends AMP.BaseElement {
     // importing it shouldn't trigger.
     /** @const {!Element} */
     const orphanSurrogate = dev().assertElement(
-      this.win.document.adoptNode(surrogateAmpFresh));
+        this.win.document.adoptNode(surrogateAmpFresh));
     this.mutateElement(() => {
       this.element.textContent = '';
       copyChildren(orphanSurrogate, this.element);

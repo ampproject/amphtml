@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+form.amp-form-submitting [submitting],
 form.amp-form-submit-success [submit-success],
 form.amp-form-submit-error [submit-error] {
   display: block;
 }
 
 
-.-amp-validation-bubble {
+.i-amphtml-validation-bubble {
   transform: translate(-50%, -100%);
   background-color: white;
   box-shadow: 0 5px 15px 0 rgba(0, 0, 0, .5);
@@ -32,7 +33,7 @@ form.amp-form-submit-error [submit-error] {
   border-radius: 5px;
 }
 
-.-amp-validation-bubble:after {
+.i-amphtml-validation-bubble:after {
   content: ' ';
   position: absolute;
   bottom: -8px;

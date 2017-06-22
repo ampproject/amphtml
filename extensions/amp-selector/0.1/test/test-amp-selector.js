@@ -15,6 +15,7 @@
  */
 
 import '../amp-selector';
+import {KeyCodes} from '../../../../src/utils/key-codes';
 
 describes.realWin('amp-selector', {
   win: { /* window spec */
@@ -80,6 +81,16 @@ describes.realWin('amp-selector', {
       return ampSelector;
     }
 
+    function keyPress(ampSelector, key, opt_target) {
+      const impl = ampSelector.implementation_;
+      const event = {
+        keyCode: key,
+        preventDefault: () => {},
+        target: opt_target,
+      };
+      impl.keyDownHandler_(event);
+    }
+
     it('should build properly', () => {
       let ampSelector = getSelector({});
       let impl = ampSelector.implementation_;
@@ -125,6 +136,7 @@ describes.realWin('amp-selector', {
 
       let ampSelector = getSelector({});
       let impl = ampSelector.implementation_;
+      impl.mutateElement = fn => fn();
       let setInputsSpy = sandbox.spy(impl, 'setInputs_');
       let initSpy = sandbox.spy(impl, 'init_');
       ampSelector.build();
@@ -408,6 +420,7 @@ describes.realWin('amp-selector', {
         },
       });
       let impl = ampSelector.implementation_;
+      impl.mutateElement = fn => fn();
       ampSelector.build();
       let clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
       let setSelectionSpy = sandbox.spy(impl, 'setSelection_');
@@ -450,6 +463,7 @@ describes.realWin('amp-selector', {
       });
 
       impl = ampSelector.implementation_;
+      impl.mutateElement = fn => fn();
       ampSelector.build();
       clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
       setSelectionSpy = sandbox.spy(impl, 'setSelection_');
@@ -492,6 +506,7 @@ describes.realWin('amp-selector', {
       });
 
       impl = ampSelector.implementation_;
+      impl.mutateElement = fn => fn();
       ampSelector.build();
       clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
       setSelectionSpy = sandbox.spy(impl, 'setSelection_');
@@ -501,6 +516,89 @@ describes.realWin('amp-selector', {
       };
 
       impl.clickHandler_(e);
+      expect(setSelectionSpy).to.not.have.been.called;
+      expect(clearSelectionSpy).to.not.have.been.called;
+    });
+
+    it('should handle keyboard selection', () => {
+      let ampSelector = getSelector({
+        attributes: {
+          name: 'single_select',
+        },
+        config: {
+          count: 4,
+          selectedCount: 2,
+        },
+      });
+      let impl = ampSelector.implementation_;
+      impl.mutateElement = fn => fn();
+      ampSelector.build();
+      let clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
+      let setSelectionSpy = sandbox.spy(impl, 'setSelection_');
+      keyPress(ampSelector, KeyCodes.ENTER, impl.options_[3]);
+      expect(impl.options_[3].hasAttribute('selected')).to.be.true;
+      expect(setSelectionSpy).to.have.been.calledWith(impl.options_[3]);
+      expect(clearSelectionSpy).to.have.been.calledWith(impl.options_[1]);
+      expect(setSelectionSpy).to.have.been.calledOnce;
+      expect(clearSelectionSpy).to.have.been.calledOnce;
+
+      keyPress(ampSelector, KeyCodes.ENTER, impl.options_[3]);
+      expect(setSelectionSpy).to.have.been.calledOnce;
+      expect(clearSelectionSpy).to.have.been.calledOnce;
+
+      ampSelector = getSelector({
+        attributes: {
+          name: 'muti_select',
+          multiple: true,
+        },
+        config: {
+          count: 5,
+          selectedCount: 2,
+        },
+      });
+
+      impl = ampSelector.implementation_;
+      impl.mutateElement = fn => fn();
+      ampSelector.build();
+      clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
+      setSelectionSpy = sandbox.spy(impl, 'setSelection_');
+
+      keyPress(ampSelector, KeyCodes.SPACE, impl.options_[4]);
+      expect(impl.options_[4].hasAttribute('selected')).to.be.true;
+      expect(setSelectionSpy).to.have.been.calledWith(impl.options_[4]);
+      expect(setSelectionSpy).to.have.been.calledOnce;
+      expect(clearSelectionSpy).to.not.have.been.called;
+
+      keyPress(ampSelector, KeyCodes.SPACE, impl.options_[4]);
+      expect(impl.options_[4].hasAttribute('selected')).to.be.false;
+      expect(clearSelectionSpy).to.have.been.calledWith(impl.options_[4]);
+      expect(setSelectionSpy).to.have.been.calledOnce;
+      expect(clearSelectionSpy).to.have.been.calledOnce;
+
+      keyPress(ampSelector, KeyCodes.ENTER, impl.options_[2]);
+      expect(impl.options_[2].hasAttribute('selected')).to.be.true;
+      expect(setSelectionSpy).to.have.been.calledWith(impl.options_[2]);
+      expect(setSelectionSpy).to.have.been.calledTwice;
+      expect(clearSelectionSpy).to.have.been.calledOnce;
+
+      ampSelector = getSelector({
+        attributes: {
+          name: 'muti_select',
+          multiple: true,
+        },
+        config: {
+          count: 5,
+          disabledCount: 2,
+        },
+      });
+
+      impl = ampSelector.implementation_;
+      impl.mutateElement = fn => fn();
+      ampSelector.build();
+      clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
+      setSelectionSpy = sandbox.spy(impl, 'setSelection_');
+
+      keyPress(ampSelector, KeyCodes.SPACE, impl.element.children[0]);
       expect(setSelectionSpy).to.not.have.been.called;
       expect(clearSelectionSpy).to.not.have.been.called;
     });
@@ -543,6 +641,7 @@ describes.realWin('amp-selector', {
       });
       ampSelector.build();
       const impl = ampSelector.implementation_;
+      impl.mutateElement = fn => fn();
       const triggerSpy = sandbox.spy(impl.action_, 'trigger');
 
       impl.clickHandler_({target: impl.options_[3]});
@@ -551,6 +650,160 @@ describes.realWin('amp-selector', {
           sandbox.match.has('detail', sandbox.match.has('targetOption', '3'));
       expect(triggerSpy).to.have.been.calledWith(
           ampSelector, 'select', /* CustomEvent */ eventMatcher);
+    });
+
+    describe('keyboard-select-mode', () => {
+
+      it('should have `none` mode by default', () => {
+        const ampSelector = getSelector({});
+        ampSelector.build();
+        expect(ampSelector.implementation_.kbSelectMode_).to.equal('none');
+      });
+
+      it('should initially focus selected option ONLY if ' +
+         'it exists for single-select, otherwise first option', () => {
+        const selectorWithNoSelection = getSelector({
+          attributes: {
+            'keyboard-select-mode': 'focus',
+          },
+        });
+        selectorWithNoSelection.build();
+        expect(selectorWithNoSelection.children[0].tabIndex).to.equal(0);
+        for (let i = 1; i < selectorWithNoSelection.children.length; i++) {
+          // No other options should be reachable by
+          expect(selectorWithNoSelection.children[i].tabIndex).to.equal(-1);
+        }
+
+        const selectorWithSelection = getSelector({
+          attributes: {
+            'keyboard-select-mode': 'focus',
+          },
+          config: {
+            count: 3,
+          },
+        });
+        selectorWithSelection.children[1].setAttribute('selected', '');
+        selectorWithSelection.build();
+        expect(selectorWithSelection.children[0].tabIndex).to.equal(-1);
+        expect(selectorWithSelection.children[1].tabIndex).to.equal(0);
+        expect(selectorWithSelection.children[2].tabIndex).to.equal(-1);
+      });
+
+      it('should initially focus first option for multi-select', () => {
+        const ampSelector = getSelector({
+          attributes: {
+            multiple: true,
+            'keyboard-select-mode': 'focus',
+          },
+          config: {
+            count: 3,
+          },
+        });
+        ampSelector.children[1].setAttribute('selected', '');
+        ampSelector.build();
+        expect(ampSelector.children[0].tabIndex).to.equal(0);
+        expect(ampSelector.children[1].tabIndex).to.equal(-1);
+        expect(ampSelector.children[2].tabIndex).to.equal(-1);
+      });
+
+      it('should NOT update focus if keyboard-select-mode is disabled', () => {
+        const ampSelector = getSelector({
+          attributes: {
+            'keyboard-select-mode': 'none',
+          },
+          config: {
+            count: 3,
+          },
+        });
+        const spy = sandbox.spy(
+            ampSelector.implementation_,
+            'navigationKeyDownHandler_');
+        ampSelector.build();
+        keyPress(ampSelector, KeyCodes.RIGHT_ARROW);
+        expect(spy).to.not.have.been.called;
+      });
+
+      it('should update focus when the user presses the arrow keys when ' +
+         'keyboard-select-mode is enabled', () => {
+        const ampSelector = getSelector({
+          attributes: {
+            'keyboard-select-mode': 'focus',
+          },
+          config: {
+            count: 3,
+          },
+        });
+        ampSelector.build();
+        expect(ampSelector.children[0].tabIndex).to.equal(0);
+        expect(ampSelector.children[1].tabIndex).to.equal(-1);
+        expect(ampSelector.children[2].tabIndex).to.equal(-1);
+        keyPress(ampSelector, KeyCodes.LEFT_ARROW);
+        expect(ampSelector.children[0].tabIndex).to.equal(-1);
+        expect(ampSelector.children[1].tabIndex).to.equal(-1);
+        expect(ampSelector.children[2].tabIndex).to.equal(0);
+        keyPress(ampSelector, KeyCodes.RIGHT_ARROW);
+        expect(ampSelector.children[0].tabIndex).to.equal(0);
+        expect(ampSelector.children[1].tabIndex).to.equal(-1);
+        expect(ampSelector.children[2].tabIndex).to.equal(-1);
+      });
+
+      it('should update focus for single-select when ' +
+         'selection is changed without user interaction', () => {
+        const ampSelector = getSelector({
+          attributes: {
+            'keyboard-select-mode': 'focus',
+          },
+          config: {
+            count: 3,
+          },
+        });
+        ampSelector.children[1].setAttribute('selected', '');
+        ampSelector.build();
+        expect(ampSelector.children[0].tabIndex).to.equal(-1);
+        expect(ampSelector.children[1].tabIndex).to.equal(0);
+        expect(ampSelector.children[2].tabIndex).to.equal(-1);
+
+        ampSelector.implementation_.mutatedAttributesCallback({selected: 2});
+        expect(ampSelector.children[0].tabIndex).to.equal(-1);
+        expect(ampSelector.children[1].tabIndex).to.equal(-1);
+        expect(ampSelector.children[2].tabIndex).to.equal(0);
+      });
+
+      it('should NOT allow `select` mode for multi-select selectors', () => {
+        const ampSelector = getSelector({
+          attributes: {
+            'keyboard-select-mode': 'select',
+            multiple: true,
+          },
+        });
+        expect(() => ampSelector.build())
+            .to.throw(/not supported for multiple selection amp-selector​​​/);
+      });
+
+      it('should ONLY change selection in `select` mode', () => {
+        const ampSelector = getSelector({
+          attributes: {
+            'keyboard-select-mode': 'select',
+          },
+          config: {
+            count: 3,
+          },
+        });
+        ampSelector.build();
+        const impl = ampSelector.implementation_;
+        impl.mutateElement = fn => fn();
+        expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
+        expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
+        expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
+        keyPress(ampSelector, KeyCodes.DOWN_ARROW);
+        expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
+        expect(ampSelector.children[1].hasAttribute('selected')).to.be.true;
+        expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
+        keyPress(ampSelector, KeyCodes.UP_ARROW);
+        expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
+        expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
+        expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
+      });
     });
   });
 });

@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
+import {KeyCodes} from '../../../src/utils/key-codes';
 import {addParamsToUrl, parseUrl, parseQueryString} from '../../../src/url';
 import {setStyle} from '../../../src/style';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {getSocialConfig} from './amp-social-share-config';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {openWindowDialog} from '../../../src/dom';
-import {urlReplacementsForDoc} from '../../../src/url-replacements';
+import {urlReplacementsForDoc} from '../../../src/services';
 import {CSS} from '../../../build/amp-social-share-0.1.css';
-import {platformFor} from '../../../src/platform';
+import {platformFor} from '../../../src/services';
 
 
 class AmpSocialShare extends AMP.BaseElement {
@@ -34,8 +36,8 @@ class AmpSocialShare extends AMP.BaseElement {
     /** @private {?string} */
     this.shareEndpoint_ = null;
 
-    /** @private {!Object} */
-    this.params_ = {};
+    /** @private @const {!JsonObject} */
+    this.params_ = dict();
 
     /** @private {?../../../src/service/platform-impl.Platform} */
     this.platform_ = null;
@@ -69,18 +71,18 @@ class AmpSocialShare extends AMP.BaseElement {
       // Hide/ignore non-system component if system share wants to be unique
       const systemOnly = ('share' in navigator) &&
         !!this.win.document.querySelectorAll(
-          'amp-social-share[type=system][data-mode=replace]').length;
+            'amp-social-share[type=system][data-mode=replace]').length;
       if (systemOnly) {
         setStyle(this.element, 'display', 'none');
         return;
       }
     }
-    const typeConfig = getSocialConfig(typeAttr) || {};
+    const typeConfig = getSocialConfig(typeAttr) || dict();
     this.shareEndpoint_ = user().assert(
         this.element.getAttribute('data-share-endpoint') ||
-        typeConfig.shareEndpoint,
+        typeConfig['shareEndpoint'],
         'The data-share-endpoint attribute is required. %s', this.element);
-    this.params_ = Object.assign({}, typeConfig.defaultParams,
+    Object.assign(this.params_, typeConfig['defaultParams'],
         getDataParamsFromAttributes(this.element));
     this.platform_ = platformFor(this.win);
 
@@ -88,19 +90,53 @@ class AmpSocialShare extends AMP.BaseElement {
     const urlReplacements = urlReplacementsForDoc(this.getAmpDoc());
     urlReplacements.expandAsync(hrefWithVars).then(href => {
       this.href_ = href;
-      // mailto: protocol breaks when opened in _blank on iOS Safari.
-      const isMailTo = /^mailto:$/.test(parseUrl(href).protocol);
+      // mailto:, whatsapp: protocols breaks when opened in _blank on iOS Safari
+      const protocol = parseUrl(href).protocol;
+      const isMailTo = protocol === 'mailto:';
+      const isWhatsApp = protocol === 'whatsapp:';
+      const isSms = protocol === 'sms:';
       const isIosSafari = this.platform_.isIos() && this.platform_.isSafari();
-      this.target_ = (isIosSafari && isMailTo) ? '_top' : '_blank';
+      this.target_ = (isIosSafari && (isMailTo || isWhatsApp || isSms))
+          ? '_top' : '_blank';
+      if (isSms) {
+        // http://stackoverflow.com/a/19126326
+        // This code path seems to be stable for both iOS and Android.
+        this.href_ = this.href_.replace('?', '?&');
+      }
     });
 
-    this.element.setAttribute('role', 'link');
+    this.element.setAttribute('role', 'button');
+    if (!this.element.hasAttribute('tabindex')) {
+      this.element.setAttribute('tabindex', '0');
+    }
     this.element.addEventListener('click', () => this.handleClick_());
+    this.element.addEventListener('keydown', this.handleKeyPress_.bind(this));
     this.element.classList.add(`amp-social-share-${typeAttr}`);
   }
 
-  /** @private */
+  /**
+   * Handle key presses on the element.
+   * @param {!Event} event
+   * @private
+   */
+  handleKeyPress_(event) {
+    const keyCode = event.keyCode;
+    if (keyCode == KeyCodes.SPACE || keyCode == KeyCodes.ENTER) {
+      event.preventDefault();
+      this.handleActivation_();
+    }
+  }
+
+  /**
+   * Handle clicks on the element.
+   * @private
+   */
   handleClick_() {
+    this.handleActivation_();
+  }
+
+  /** @private */
+  handleActivation_() {
     user().assert(this.href_ && this.target_, 'Clicked before href is set.');
     const href = dev().assertString(this.href_);
     const target = dev().assertString(this.target_);

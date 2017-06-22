@@ -16,15 +16,15 @@
 
 import {dev, user} from './log';
 import {isExperimentOn} from './experiments';
-import {viewerForDoc} from './viewer';
-import {xhrFor} from './xhr';
+import {viewerForDoc} from './services';
+import {xhrFor} from './services';
 import {
   isProxyOrigin,
   parseUrl,
   parseQueryString,
   addParamsToUrl,
 } from './url';
-import {timerFor} from './timer';
+import {timerFor} from './services';
 import {getMode} from './mode';
 
 const TIMEOUT_VALUE = 8000;
@@ -99,10 +99,17 @@ export function maybeTrackImpression(win) {
 }
 
 /**
+ * Signal that impression tracking is not relevant in this environment.
+ */
+export function doNotTrackImpression() {
+  trackImpressionPromise = Promise.resolve();
+}
+
+/**
  * Send the url to ad server and wait for its response
  * @param {!Window} win
  * @param {string} clickUrl
- * @return {!Promise<!JSONType>}
+ * @return {!Promise<!JsonObject>}
  */
 function invoke(win, clickUrl) {
   if (getMode().localDev && !getMode().test) {
@@ -110,14 +117,14 @@ function invoke(win, clickUrl) {
   }
   return xhrFor(win).fetchJson(clickUrl, {
     credentials: 'include',
-  });
+  }).then(res => res.json());
 }
 
 /**
  * parse the response back from ad server
  * Set for analytics purposes
  * @param {!Window} win
- * @param {!Object} response
+ * @param {!JsonObject} response
  */
 function applyResponse(win, viewer, response) {
   const adLocation = response['location'];

@@ -24,10 +24,15 @@ import {dev} from './log';
  * - obj: Actual service implementation when available.
  * - promise: Promise for the obj.
  * - resolve: Function to resolve the promise with the object.
+ * - context: Argument for ctor, either a window or an ampdoc.
+ * - ctor: Function that constructs and returns the service.
  * @typedef {{
  *   obj: (?Object),
- *   promise: (?Promise|undefined),
- *   resolve: (?function(!Object)|undefined),
+ *   promise: (?Promise),
+ *   resolve: (?function(!Object)),
+ *   context: (?Window|?./service/ampdoc-impl.AmpDoc),
+ *   ctor: (?function(new:Object, !Window)|
+ *          ?function(new:Object, !./service/ampdoc-impl.AmpDoc)),
  * }}
  */
 let ServiceHolderDef;
@@ -63,64 +68,37 @@ export class EmbeddableService {
   adoptEmbedWindow(unusedEmbedWin) {}
 }
 
-
-/**
- * Returns a service with the given id. Assumes that it has been constructed
- * already.
- * @param {!Window} win
- * @param {string} id
- * @return {!Object} The service.
- */
-export function getExistingServiceForWindow(win, id) {
-  const exists = getExistingServiceForWindowOrNull(win, id);
-  return dev().assert(/** @type {!Object} */ (exists),
-      `${id} service not found. Make sure it is installed.`);
-}
-
 /**
  * Returns a service or null with the given id.
  * @param {!Window} win
  * @param {string} id
  * @return {?Object} The service.
  */
-export function getExistingServiceForWindowOrNull(win, id) {
+export function getExistingServiceOrNull(win, id) {
   win = getTopWindow(win);
-  return win.services && win.services[id] && win.services[id].obj;
+  if (isServiceRegistered(win, id)) {
+    return getServiceInternal(win, id);
+  } else {
+    return null;
+  }
 }
 
 /**
- * Returns a service with the given id. Assumes that it has been constructed
+ * Returns a service with the given id. Assumes that it has been registered
  * already.
  * @param {!Window} win
  * @param {string} id
  * @return {!Object} The service.
  */
-export function getExistingServiceForWindowInEmbedScope(win, id) {
+export function getExistingServiceInEmbedScope(win, id) {
   // First, try to resolve via local (embed) window.
   const local = getLocalExistingServiceForEmbedWinOrNull(win, id);
   if (local) {
     return local;
   }
   // Fallback to top-level window.
-  return getExistingServiceForWindow(win, id);
+  return getService(win, id);
 }
-
-
-/**
- * Returns a service with the given id. Assumes that it has been constructed
- * already.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @param {string} id
- * @return {!Object} The service.
- */
-export function getExistingServiceForDoc(nodeOrDoc, id) {
-  const serviceHolder = getAmpdocServiceHolder(nodeOrDoc);
-  const exists = serviceHolder && serviceHolder.services &&
-      serviceHolder.services[id] && serviceHolder.services[id].obj;
-  return dev().assert(exists, `${id} doc service not found. Make sure it is ` +
-      `installed.`);
-}
-
 
 /**
  * Returns a service with the given id. Assumes that it has been constructed
@@ -141,9 +119,8 @@ export function getExistingServiceForDocInEmbedScope(nodeOrDoc, id) {
     }
   }
   // Fallback to ampdoc.
-  return getExistingServiceForDoc(nodeOrDoc, id);
+  return getServiceForDoc(nodeOrDoc, id);
 }
-
 
 /**
  * Installs a service override on amp-doc level.
@@ -157,9 +134,14 @@ export function installServiceInEmbedScope(embedWin, id, service) {
       'Service override can only be installed in embed window: %s', id);
   dev().assert(!getLocalExistingServiceForEmbedWinOrNull(embedWin, id),
       'Service override has already been installed: %s', id);
-  getServiceInternal(embedWin, embedWin, id, () => service);
+  registerServiceInternal(
+      embedWin,
+      embedWin,
+      id,
+      () => service);
+  // Force service to build
+  getServiceInternal(embedWin, id);
 }
-
 
 /**
  * @param {!Window} embedWin
@@ -171,52 +153,65 @@ function getLocalExistingServiceForEmbedWinOrNull(embedWin, id) {
   // It does not try to go all the way up the parent window chain. We can change
   // this in the future, but for now this gives us a better performance.
   const topWin = getTopWindow(embedWin);
-  if (embedWin != topWin &&
-          embedWin.services &&
-          embedWin.services[id] &&
-          embedWin.services[id].obj) {
-    return embedWin.services[id].obj;
+  if (embedWin != topWin && isServiceRegistered(embedWin, id)) {
+    return getServiceInternal(embedWin, id);
+  } else {
+    return null;
   }
-  return null;
 }
-
 
 /**
  * Returns a service for the given id and window (a per-window singleton).
- * If the service is not yet available the factory function is invoked and
- * expected to return the service.
  * Users should typically wrap this as a special purpose function (e.g.
  * `vsyncFor(win)`) for type safety and because the factory should not be
  * passed around.
  * @param {!Window} win
  * @param {string} id of the service.
- * @param {function(!Window):T=} opt_factory Should create the service
- *     if it does not exist yet. If the factory is not given, it is an error
- *     if the service does not exist yet.
  * @template T
  * @return {T}
  */
-export function getService(win, id, opt_factory) {
+export function getService(win, id) {
   win = getTopWindow(win);
-  return getServiceInternal(win, win, id,
-      opt_factory ? opt_factory : undefined);
+  return getServiceInternal(win, id);
 }
 
+/**
+ * Registers a service given a class to be used as implementation.
+ * @param {!Window} win
+ * @param {string} id of the service.
+ * @param {function(new:Object, !Window)} constructor
+ * @param {boolean=} opt_instantiate Whether to immediately create the service
+ */
+export function registerServiceBuilder(win,
+                                       id,
+                                       constructor,
+                                       opt_instantiate) {
+  win = getTopWindow(win);
+  registerServiceInternal(win, win, id, constructor);
+  if (opt_instantiate) {
+    getServiceInternal(win, id);
+  }
+}
 
 /**
  * Returns a service and registers it given a class to be used as
  * implementation.
- * @param {!Window} win
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
- * @param {function(new:T, !Window)} constructor
- * @return {T}
- * @template T
+ * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)} constructor
+ * @param {boolean=} opt_instantiate Whether to immediately create the service
  */
-export function fromClass(win, id, constructor) {
-  win = getTopWindow(win);
-  return getServiceInternal(win, win, id, undefined, constructor);
+export function registerServiceBuilderForDoc(nodeOrDoc,
+                                             id,
+                                             constructor,
+                                             opt_instantiate) {
+  const ampdoc = getAmpdoc(nodeOrDoc);
+  const holder = getAmpdocServiceHolder(ampdoc);
+  registerServiceInternal(holder, ampdoc, id, constructor);
+  if (opt_instantiate) {
+    getServiceInternal(holder, id);
+  }
 }
-
 
 /**
  * Returns a promise for a service for the given id and window. Also expects
@@ -244,48 +239,18 @@ export function getServicePromiseOrNull(win, id) {
   return getServicePromiseOrNullInternal(win, id);
 }
 
-
 /**
  * Returns a service for the given id and ampdoc (a per-ampdoc singleton).
- * If the service is not yet available the factory function is invoked and
- * expected to return the service.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
- * @param {function(!./service/ampdoc-impl.AmpDoc):T=} opt_factory
- *     Should create the service if it does not exist yet. If the factory is
- *     not given, it is an error if the service does not exist yet.
  * @return {T}
  * @template T
  */
-export function getServiceForDoc(nodeOrDoc, id, opt_factory) {
+export function getServiceForDoc(nodeOrDoc, id) {
   const ampdoc = getAmpdoc(nodeOrDoc);
-  return getServiceInternal(
-      getAmpdocServiceHolder(ampdoc),
-      ampdoc,
-      id,
-      opt_factory);
+  const holder = getAmpdocServiceHolder(ampdoc);
+  return getServiceInternal(holder, id);
 }
-
-
-/**
- * Returns a service and registers it given a class to be used as
- * implementation.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @param {string} id of the service.
- * @param {function(new:T, !./service/ampdoc-impl.AmpDoc)} constructor
- * @return {T}
- * @template T
- */
-export function fromClassForDoc(nodeOrDoc, id, constructor) {
-  const ampdoc = getAmpdoc(nodeOrDoc);
-  return getServiceInternal(
-      getAmpdocServiceHolder(ampdoc),
-      ampdoc,
-      id,
-      undefined,
-      constructor);
-}
-
 
 /**
  * Returns a promise for a service for the given id and ampdoc. Also expects
@@ -314,7 +279,6 @@ export function getServicePromiseOrNullForDoc(nodeOrDoc, id) {
       getAmpdocServiceHolder(nodeOrDoc),
       id);
 }
-
 
 /**
  * Set the parent and top windows on a child window (friendly iframe).
@@ -404,36 +368,25 @@ function getAmpdocService(win) {
 
 
 /**
+ * Get service `id` from `holder`. Assumes the service
+ * has already been registered.
  * @param {!Object} holder Object holding the service instance.
- * @param {!Window|!./service/ampdoc-impl.AmpDoc} context Win or AmpDoc.
  * @param {string} id of the service.
- * @param {function(?):T=} opt_factory
- *     Should create the service if it does not exist yet. If the factory
- *     is not given, it is an error if the service does not exist yet.
- *     Called with context.
- * @param {function(new:T, ?)=} opt_constructor
- *     Constructor function to new the service. Called with context.
- * @return {*}
+ * @return {Object}
  * @template T
  */
-function getServiceInternal(holder, context, id, opt_factory,
-    opt_constructor) {
+function getServiceInternal(holder, id) {
+  dev().assert(isServiceRegistered(holder, id),
+      `Expected service ${id} to be registered`);
   const services = getServices(holder);
-  let s = services[id];
-  if (!s) {
-    s = services[id] = {
-      obj: null,
-      promise: null,
-      resolve: null,
-    };
-  }
-
+  const s = services[id];
   if (!s.obj) {
-    dev().assert(opt_factory || opt_constructor,
-        'Factory or class not given and service missing %s', id);
-    s.obj = opt_constructor
-        ? new opt_constructor(context)
-        : opt_factory(context);
+    dev().assert(s.ctor, `Service ${id} registered without ctor nor impl.`);
+    dev().assert(s.context, `Service ${id} registered without context.`);
+    s.obj = new s.ctor(s.context);
+    dev().assert(s.obj, `Service ${id} constructed to null.`);
+    s.ctor = null;
+    s.context = null;
     // The service may have been requested already, in which case we have a
     // pending promise we need to fulfill.
     if (s.resolve) {
@@ -443,6 +396,43 @@ function getServiceInternal(holder, context, id, opt_factory,
   return s.obj;
 }
 
+/**
+ * @param {!Object} holder Object holding the service instance.
+ * @param {!Window|!./service/ampdoc-impl.AmpDoc} context Win or AmpDoc.
+ * @param {string} id of the service.
+ * @param {?function(new:Object, !Window)|
+ *         ?function(new:Object, !./service/ampdoc-impl.AmpDoc)}
+ *     ctor Constructor function to new the service. Called with context.
+ */
+function registerServiceInternal(holder, context, id, ctor) {
+  const services = getServices(holder);
+  let s = services[id];
+
+  if (!s) {
+    s = services[id] = {
+      obj: null,
+      promise: null,
+      resolve: null,
+      context: null,
+      ctor: null,
+    };
+  }
+
+  if (s.ctor || s.obj) {
+    // Service already registered.
+    return;
+  }
+
+  s.ctor = ctor;
+  s.context = context;
+
+  // The service may have been requested already, in which case there is a
+  // pending promise that needs to fulfilled.
+  if (s.resolve) {
+    // getServiceInternal will resolve the promise.
+    getServiceInternal(holder, id);
+  }
+}
 
 /**
  * @param {!Object} holder
@@ -454,25 +444,29 @@ function getServicePromiseInternal(holder, id) {
   if (cached) {
     return cached;
   }
-  const services = getServices(holder);
+  // Service is not registered.
 
   // TODO(@cramforce): Add a check that if the element is eventually registered
   // that the service is actually provided and this promise resolves.
   let resolve;
-  const p = new Promise(r => {
+  const promise = new Promise(r => {
     resolve = r;
   });
+  const services = getServices(holder);
   services[id] = {
     obj: null,
-    promise: p,
+    promise,
     resolve,
+    context: null,
+    ctor: null,
   };
-
-  return p;
+  return promise;
 }
 
 
 /**
+ * Returns a promise for service `id` if the service has been registered
+ * on `holder`.
  * @param {!Object} holder
  * @param {string} id of the service.
  * @return {?Promise<!Object>}
@@ -481,14 +475,13 @@ function getServicePromiseOrNullInternal(holder, id) {
   const services = getServices(holder);
   const s = services[id];
   if (s) {
-    const p = s.promise;
-    if (p) {
-      return p;
+    if (s.promise) {
+      return s.promise;
+    } else {
+      // Instantiate service if not already instantiated.
+      getServiceInternal(holder, id);
+      return s.promise = Promise.resolve(/** @type {!Object} */ (s.obj));
     }
-    if (s.obj) {
-      return s.promise = Promise.resolve(s.obj);
-    }
-    dev().assert(false, 'Expected object or promise to be present');
   }
   return null;
 }
@@ -601,15 +594,15 @@ export function isEmbeddable(service) {
 
 
 /**
- * Asserts that the specified service implements `EmbeddableService` interface
- * and typecasts the instance to `EmbeddableService`.
- * @param {!Object} service
- * @return {!EmbeddableService}
+ * Adopts an embeddable (implements `EmbeddableService` interface) service
+ * in embed scope.
+ * @param {!Window} embedWin
+ * @param {string} serviceId
  */
-export function assertEmbeddable(service) {
-  dev().assert(isEmbeddable(service),
-      'required to implement EmbeddableService');
-  return /** @type {!EmbeddableService} */ (service);
+export function adoptServiceForEmbed(embedWin, serviceId) {
+  const adopted = adoptServiceForEmbedIfEmbeddable(embedWin, serviceId);
+  dev().assert(adopted,
+      `${serviceId} required to implement EmbeddableService.`);
 }
 
 
@@ -618,13 +611,18 @@ export function assertEmbeddable(service) {
  * in embed scope.
  * @param {!Window} embedWin
  * @param {string} serviceId
+ * @return {boolean}
  */
-export function adoptServiceForEmbed(embedWin, serviceId) {
+export function adoptServiceForEmbedIfEmbeddable(embedWin, serviceId) {
   const frameElement = /** @type {!Node} */ (dev().assert(
       embedWin.frameElement,
       'frameElement not found for embed'));
-  const service = getExistingServiceForDoc(frameElement, serviceId);
-  assertEmbeddable(service).adoptEmbedWindow(embedWin);
+  const service = getServiceForDoc(frameElement, serviceId);
+  if (isEmbeddable(service)) {
+    service.adoptEmbedWindow(embedWin);
+    return true;
+  }
+  return false;
 }
 
 
@@ -637,4 +635,15 @@ export function resetServiceForTesting(holder, id) {
   if (holder.services) {
     holder.services[id] = null;
   }
+}
+
+/**
+ * @param {!Object} holder Object holding the service instance.
+ * @param {string} id of the service.
+ * @return {boolean}
+ */
+function isServiceRegistered(holder, id) {
+  const service = holder.services && holder.services[id];
+  // All registered services must have an implementation or a constructor.
+  return !!(service && (service.ctor || service.obj));
 }

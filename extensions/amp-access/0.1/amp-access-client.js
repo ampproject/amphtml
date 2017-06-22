@@ -16,8 +16,8 @@
 
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
-import {timerFor} from '../../../src/timer';
-import {xhrFor} from '../../../src/xhr';
+import {timerFor} from '../../../src/services';
+import {xhrFor} from '../../../src/services';
 import {getMode} from '../../../src/mode';
 
 /** @const {string} */
@@ -31,13 +31,13 @@ const DEFAULT_AUTHORIZATION_TIMEOUT = 3000;
 export class AccessClientAdapter {
 
   /**
-   * @param {!Window} win
-   * @param {!JSONType} configJson
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!JsonObject} configJson
    * @param {!AccessTypeAdapterContextDef} context
    */
-  constructor(win, configJson, context) {
-    /** @const {!Window} */
-    this.win = win;
+  constructor(ampdoc, configJson, context) {
+    /** @const */
+    this.ampdoc = ampdoc;
 
     /** @const @private {!AccessTypeAdapterContextDef} */
     this.context_ = context;
@@ -62,14 +62,14 @@ export class AccessClientAdapter {
         configJson);
 
     /** @const @private {!Xhr} */
-    this.xhr_ = xhrFor(win);
+    this.xhr_ = xhrFor(ampdoc.win);
 
     /** @const @private {!Timer} */
-    this.timer_ = timerFor(win);
+    this.timer_ = timerFor(ampdoc.win);
   }
 
   /**
-   * @param {!JSONType} configJson
+   * @param {!JsonObject} configJson
    * @return {number}
    */
   buildConfigAuthorizationTimeout_(configJson) {
@@ -126,7 +126,7 @@ export class AccessClientAdapter {
           this.authorizationTimeout_,
           this.xhr_.fetchJson(url, {
             credentials: 'include',
-          }));
+          })).then(res => res.json());
     });
   }
 

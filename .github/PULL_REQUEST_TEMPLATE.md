@@ -11,6 +11,7 @@ Bullet points like
 - Implements aspect X
 - Leaves out feature Y because of A
 - Improves performance by B
+- Improves accessibility by C
 
 really help with making this more readable.
 

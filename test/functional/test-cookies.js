@@ -19,7 +19,7 @@ import {getCookie, setCookie} from '../../src/cookies';
 
 describe('cookies', () => {
 
-  function expectCookie(cookiesString, cookieName) {
+  function expectCookie(cookiesString, cookieName, opt_locationHref) {
     return expect(getCookie({
       document: {
         cookie: cookiesString,
@@ -52,13 +52,18 @@ describe('cookies', () => {
 
   it('should write the cookie', () => {
     const doc = {};
-    setCookie({document: doc}, 'c&1', 'v&1', 1447383159853);
+    setCookie({
+      document: doc,
+      location: {
+        href: 'https://www.example.com/test',
+      },
+    }, 'c&1', 'v&1', 1447383159853);
     expect(doc.cookie).to.equal(
         'c%261=v%261; path=/; expires=Fri, 13 Nov 2015 02:52:39 GMT');
   });
 
   it('should write the cookie to the right domain', () => {
-    function test(hostname, targetDomain, opt_noset) {
+    function test(hostname, targetDomain, opt_noset, opt_allowOnProxyOrigin) {
       let cookie;
       const doc = {
         set cookie(val) {
@@ -76,15 +81,21 @@ describe('cookies', () => {
           return cookie;
         },
       };
-      setCookie({document: doc, location: {hostname}},
+      setCookie({
+        document: doc,
+        location: {
+          hostname,
+          href: 'https://' + hostname + ':8000/test.html',
+        }},
           'c&1', 'v&1', 1447383159853, {
             highestAvailableDomain: true,
+            allowOnProxyOrigin: !!opt_allowOnProxyOrigin,
           });
       if (opt_noset) {
         expect(cookie).to.be.undefined;
       } else {
         expect(cookie).to.equal(
-           'c%261=v%261; path=/; domain=' + targetDomain +
+            'c%261=v%261; path=/; domain=' + targetDomain +
             '; expires=Fri, 13 Nov 2015 02:52:39 GMT');
       }
     }
@@ -95,9 +106,29 @@ describe('cookies', () => {
     test('123.www.example.com', '123.www.example.com');
     test('www.example.net', 'example.com', true);
     test('example.net', 'example.com', true);
-    test('www.ampproject.org', 'ampproject.org', true);
-    test('cdn.ampproject.org', 'ampproject.org', true);
+    test('cdn.ampproject.org', 'ampproject.org', true, true);
+    expect(() => {
+      test('cdn.ampproject.org', 'ampproject.org', true);
+    }).to.throw(/Should never attempt to set cookie on proxy origin\: c\&1/);
+    expect(() => {
+      test('CDN.ampproject.org', 'ampproject.org', true);
+    }).to.throw(/Should never attempt to set cookie on proxy origin\: c\&1/);
+    expect(() => {
+      test('CDN.ampproject.org', 'AMPproject.org', true);
+    }).to.throw(/Should never attempt to set cookie on proxy origin\: c\&1/);
     test('www.ampproject.org', 'www.ampproject.org');
-    test('cdn.ampproject.org', 'cdn.ampproject.org');
+    test('cdn.ampproject.org', 'cdn.ampproject.org', false, true);
+    expect(() => {
+      test('cdn.ampproject.org', 'cdn.ampproject.org', false);
+    }).to.throw(/Should never attempt to set cookie on proxy origin\: c\&1/);
+    expect(() => {
+      test('foo.bar.cdn.ampproject.org', 'foo.bar.cdn.ampproject.org', false);
+    }).to.throw(/in depth check/);
+    expect(() => {
+      test('&&&.cdn.ampproject.org', '&&&.cdn.ampproject.org', false);
+    }).to.throw(/in depth check/);
+    expect(() => {
+      test('&&&.CDN.ampproject.org', '&&&.cdn.AMPproject.org', false);
+    }).to.throw(/in depth check/);
   });
 });

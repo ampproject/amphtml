@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-import {timerFor} from '../../../src/timer';
+import {timerFor} from '../../../src/services';
+import {user} from '../../../src/log';
 
 /**
  * Store loading ads info within window to ensure it can be properly stored
@@ -36,28 +37,38 @@ export function is3pThrottled(win) {
  *    default should be used.
  */
 export function getAmpAdRenderOutsideViewport(element) {
+  const rawValue = element.getAttribute('data-loading-strategy');
+  if (rawValue == null) {
+    return null;
+  }
   // Ad opts into lazier loading strategy where we only load ads that are
-  // at closer than 1.25 viewports away.
-  if (element.getAttribute('data-loading-strategy') ==
-      'prefer-viewability-over-views') {
+  // at closer given number of viewports away.
+  if (rawValue == 'prefer-viewability-over-views' || rawValue == '') {
     return 1.25;
   }
-  return null;
+  const errorMessage =
+      'Value of data-loading-strategy should be a float number in range ' +
+      'of [0, 3], but got ' + rawValue;
+  const viewportNumber =
+      user().assertNumber(parseFloat(rawValue), errorMessage);
+  user().assert(viewportNumber >= 0 && viewportNumber <= 3, errorMessage);
+  return viewportNumber;
 }
 
 /**
  * Increments loading ads count for throttling.
  * @param {!Window} win
+ * @param {!Promise=} opt_loadingPromise
  */
-export function incrementLoadingAds(win) {
+export function incrementLoadingAds(win, opt_loadingPromise) {
   if (win[LOADING_ADS_WIN_ID_] === undefined) {
     win[LOADING_ADS_WIN_ID_] = 0;
   }
   win[LOADING_ADS_WIN_ID_]++;
-  timerFor(win).delay(() => {
-    // Unfortunately we don't really have a good way to measure how long it
-    // takes to load an ad, so we'll just pretend it takes 1 second for
-    // now.
-    win[LOADING_ADS_WIN_ID_]--;
-  }, 1000);
+  timerFor(win)
+      .timeoutPromise(1000, opt_loadingPromise)
+      .catch(() => {})
+      .then(() => {
+        win[LOADING_ADS_WIN_ID_]--;
+      });
 }

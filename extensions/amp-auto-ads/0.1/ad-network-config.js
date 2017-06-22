@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
+import {
+  AdSenseAmpAutoAdsHoldoutBranches,
+  getAdSenseAmpAutoAdsExpBranch,
+} from '../../../ads/google/adsense-amp-auto-ads';
 import {buildUrl} from '../../../ads/google/a4a/url-builder';
-import {documentInfoForDoc} from '../../../src/document-info';
+import {documentInfoForDoc} from '../../../src/services';
 import {parseUrl} from '../../../src/url';
+import {viewportForDoc} from '../../../src/services';
+
 
 /**
  * An interface intended to be implemented by any ad-networks wishing to support
@@ -24,6 +30,13 @@ import {parseUrl} from '../../../src/url';
  * @interface
  */
 class AdNetworkConfigDef {
+
+  /**
+   * Indicates whether amp-auto-ads should be enabled on this pageview.
+   * @param {!Window} unusedWin
+   * @return {boolean} true if amp-auto-ads should be enabled on this pageview.
+   */
+  isEnabled(unusedWin) {}
 
   /**
    * @return {string}
@@ -36,6 +49,12 @@ class AdNetworkConfigDef {
    * @return {!Object<string, string>}
    */
   getAttributes() {}
+
+  /**
+   * Network specific constraints on the placement of ads on the page.
+   * @return {!./ad-tracker.AdConstraints}
+   */
+  getAdConstraints() {}
 }
 
 /**
@@ -62,20 +81,23 @@ class AdSenseNetworkConfig {
     this.autoAmpAdsElement_ = autoAmpAdsElement;
   }
 
+  /**
+   * @param {!Window} win
+   */
+  isEnabled(win) {
+    const branch = getAdSenseAmpAutoAdsExpBranch(win);
+    return branch != AdSenseAmpAutoAdsHoldoutBranches.CONTROL;
+  }
+
   /** @override */
   getConfigUrl() {
     const docInfo = documentInfoForDoc(this.autoAmpAdsElement_);
     const canonicalHostname = parseUrl(docInfo.canonicalUrl).hostname;
-    return buildUrl('//pagead2.googlesyndication.com/getconfig/ama', [
-      {
-        name: 'client',
-        value: this.autoAmpAdsElement_.getAttribute('data-ad-client'),
-      },
-      {
-        name: 'plah',
-        value: canonicalHostname},
-      {name: 'ama_t', value: 'amp'},
-    ], 4096);
+    return buildUrl('//pagead2.googlesyndication.com/getconfig/ama', {
+      'client': this.autoAmpAdsElement_.getAttribute('data-ad-client'),
+      'plah': canonicalHostname,
+      'ama_t': 'amp',
+    }, 4096);
   }
 
   /** @override */
@@ -83,6 +105,20 @@ class AdSenseNetworkConfig {
     return {
       'type': 'adsense',
       'data-ad-client': this.autoAmpAdsElement_.getAttribute('data-ad-client'),
+    };
+  }
+
+  /** @override */
+  getAdConstraints() {
+    const viewportHeight =
+        viewportForDoc(this.autoAmpAdsElement_).getSize().height;
+    return {
+      initialMinSpacing: viewportHeight,
+      subsequentMinSpacing: [
+        {adCount: 3, spacing: viewportHeight * 2},
+        {adCount: 6, spacing: viewportHeight * 3},
+      ],
+      maxAdCount: 8,
     };
   }
 }

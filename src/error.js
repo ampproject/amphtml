@@ -23,13 +23,14 @@ import {
 import {
   USER_ERROR_SENTINEL,
   isUserErrorMessage,
+  duplicateErrorIfNecessary,
 } from './log';
 import {isProxyOrigin} from './url';
-import {isCanary} from './experiments';
+import {isCanary, experimentTogglesOrNull} from './experiments';
 import {makeBodyVisible} from './style-installer';
 import {startsWith} from './string';
 import {urls} from './config';
-
+import {AmpEvents} from './amp-events';
 
 /**
  * @const {string}
@@ -65,6 +66,20 @@ let reportingBackoff = function(work) {
 };
 
 /**
+ * Attempts to stringify a value, falling back to String.
+ * @param {*} value
+ * @return {string}
+ */
+function tryJsonStringify(value) {
+  try {
+    // Cast is fine, because we really don't care here. Just trying.
+    return JSON.stringify(/** @type {!JsonObject} */ (value));
+  } catch (e) {
+    return String(value);
+  }
+}
+
+/**
  * The true JS engine, as detected by inspecting an Error stack. This should be
  * used with the userAgent to tell definitely. I.e., Chrome on iOS is really a
  * Safari JS engine.
@@ -88,10 +103,11 @@ export function reportError(error, opt_associatedElement) {
     let isValidError;
     if (error) {
       if (error.message !== undefined) {
+        error = duplicateErrorIfNecessary(/** @type {!Error} */(error));
         isValidError = true;
       } else {
         const origError = error;
-        error = new Error(String(origError));
+        error = new Error(tryJsonStringify(origError));
         error.origError = origError;
       }
     } else {
@@ -137,7 +153,7 @@ export function reportError(error, opt_associatedElement) {
       }
     }
     if (element && element.dispatchCustomEventForTesting) {
-      element.dispatchCustomEventForTesting('amp:error', error.message);
+      element.dispatchCustomEventForTesting(AmpEvents.ERROR, error.message);
     }
 
     // 'call' to make linter happy. And .call to make compiler happy
@@ -339,7 +355,15 @@ export function getErrorReportUrl(message, filename, line, col, error,
   if (!detectedJsEngine) {
     detectedJsEngine = detectJsEngineFromStack();
   }
-  url += `&jse=${detectJsEngineFromStack}`;
+  url += `&jse=${detectedJsEngine}`;
+
+  const exps = [];
+  const experiments = experimentTogglesOrNull();
+  for (const exp in experiments) {
+    const on = experiments[exp];
+    exps.push(`${exp}=${on ? '1' : '0'}`);
+  }
+  url += `&exps=${encodeURIComponent(exps.join(','))}`;
 
   if (error) {
     const tagName = error && error.associatedElement
@@ -350,8 +374,10 @@ export function getErrorReportUrl(message, filename, line, col, error,
       url += `&args=${encodeURIComponent(JSON.stringify(error.args))}`;
     }
 
-    if (!isUserError) {
-      url += `&s=${encodeURIComponent(error.stack || '')}`;
+    if (!isUserError && !error.ignoreStack && error.stack) {
+      // Shorten
+      const stack = (error.stack || '').substr(0, 1000);
+      url += `&s=${encodeURIComponent(stack)}`;
     }
 
     error.message += ' _reported_';
@@ -366,6 +392,14 @@ export function getErrorReportUrl(message, filename, line, col, error,
   url += '&fr=' + encodeURIComponent(self.location.originalHash
       || self.location.hash);
 
+  // Google App Engine maximum URL length.
+  if (url.length >= 2072) {
+    url = url.substr(0, 2072 - 8 /* length of suffix */)
+        // Full remove last URL encoded entity.
+        .replace(/\%[^&%]+$/, '')
+        // Sentinel
+        + '&SHORT=1';
+  }
   return url;
 }
 
@@ -399,38 +433,40 @@ export function resetAccumulatedErrorMessagesForTesting() {
  * @visibleForTesting
  */
 export function detectJsEngineFromStack() {
-  const object = Object.create({
-    // DO NOT rename this property.
-    // DO NOT transform into shorthand method syntax.
-    t: function() {
-      throw new Error('message');
-    },
-  });
+  /** @constructor */
+  function Fn() {}
+  Fn.prototype.t = function() {
+    throw new Error('message');
+  };
+  const object = new Fn();
   try {
     object.t();
   } catch (e) {
     const stack = e.stack;
-    // Firefox uses a "<." to show prototype method.
-    if (stack.indexOf('<.t@') > -1) {
-      return 'Firefox';
+
+    // Safari only mentions the method name.
+    if (startsWith(stack, 't@')) {
+      return 'Safari';
     }
 
-    // Safari does not show the context ("object."), just the function name.
-    if (stack.indexOf('t@') === 0) {
-      return 'Safari';
+    // Firefox mentions "prototype".
+    if (stack.indexOf('.prototype.t@') > -1) {
+      return 'Firefox';
     }
 
     // IE looks like Chrome, but includes a context for the base stack line.
     // Explicitly, we're looking for something like:
-    // "    at Global code https://example.com/app.js:1:200" or
-    // "    at Anonymous function https://example.com/app.js:1:200"
+    // "    at Global code (https://example.com/app.js:1:200)" or
+    // "    at Anonymous function (https://example.com/app.js:1:200)"
+    // vs Chrome which has:
+    // "    at https://example.com/app.js:1:200"
     const last = stack.split('\n').pop();
-    if (/\bat \w+ /i.test(last)) {
+    if (/\bat .* \(/i.test(last)) {
       return 'IE';
     }
 
     // Finally, chrome includes the error message in the stack.
-    if (stack.indexOf('message') > -1) {
+    if (startsWith(stack, 'Error: message')) {
       return 'Chrome';
     }
   }

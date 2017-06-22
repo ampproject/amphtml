@@ -16,8 +16,9 @@
 
 import {Vsync} from '../../src/service/vsync-impl';
 import {AmpDocShadow, installDocService} from '../../src/service/ampdoc-impl';
+import {ampdocServiceFor} from '../../src/ampdoc';
 import {installTimerService} from '../../src/service/timer-impl';
-import {viewerPromiseForDoc} from '../../src/viewer';
+import {viewerPromiseForDoc} from '../../src/services';
 import * as sinon from 'sinon';
 
 
@@ -39,9 +40,14 @@ describe('vsync', () => {
         nodeType: /* DOCUMENT */ 9,
         body: {},
       },
+      navigator: {
+      },
       services: {},
       setTimeout: (fn, t) => {
-        window.setTimeout(fn, t);
+        return window.setTimeout(fn, t);
+      },
+      clearTimeout: index => {
+        window.clearTimeout(index);
       },
       requestAnimationFrame: window.requestAnimationFrame.bind(window),
     };
@@ -77,8 +83,8 @@ describe('vsync', () => {
     let vsync;
 
     beforeEach(() => {
-      const ampdocService = installDocService(win, /* isSingleDoc */ true);
-      ampdoc = ampdocService.getAmpDoc();
+      installDocService(win, /* isSingleDoc */ true);
+      ampdoc = ampdocServiceFor(win).getAmpDoc();
       win.services['viewer'] = {obj: viewer};
       vsync = new Vsync(win);
       return viewerPromiseForDoc(ampdoc);
@@ -272,13 +278,15 @@ describe('vsync', () => {
       expect(vsync.tasks_).to.have.length(1);
       expect(vsync.scheduled_).to.be.true;
       expect(rafHandler).to.exist;
-      expect(vsync.pass_.isPending()).to.be.false;
+      expect(vsync.invisiblePass_.isPending()).to.be.false;
+      expect(vsync.backupPass_.isPending()).to.be.true;
 
       rafHandler();
       expect(result).to.equal('mu1');
       expect(vsync.tasks_).to.have.length(0);
       expect(vsync.scheduled_).to.be.false;
-      expect(vsync.pass_.isPending()).to.be.false;
+      expect(vsync.invisiblePass_.isPending()).to.be.false;
+      expect(vsync.backupPass_.isPending()).to.be.false;
     });
 
     it('should schedule via timer frames when doc is not visible', () => {
@@ -296,13 +304,48 @@ describe('vsync', () => {
       expect(vsync.tasks_).to.have.length(1);
       expect(vsync.scheduled_).to.be.true;
       expect(rafHandler).to.be.undefined;
-      expect(vsync.pass_.isPending()).to.be.true;
+      expect(vsync.invisiblePass_.isPending()).to.be.true;
 
       clock.tick(17);
       expect(result).to.equal('mu1');
       expect(vsync.tasks_).to.have.length(0);
       expect(vsync.scheduled_).to.be.false;
-      expect(vsync.pass_.isPending()).to.be.false;
+      expect(vsync.invisiblePass_.isPending()).to.be.false;
+    });
+
+    it('should run via backup timer if rAF somehow doesnt fire', () => {
+      let rafHandler;
+      vsync.raf_ = function() {
+        // intentionally empty
+      };
+      viewer.isVisible = () => true;
+
+      let result = '';
+      vsync.run({
+        mutate: () => {
+          result += 'mu1';
+        },
+      });
+
+      expect(vsync.tasks_).to.have.length(1);
+      expect(vsync.scheduled_).to.be.true;
+      expect(rafHandler).to.be.undefined;
+      expect(vsync.invisiblePass_.isPending()).to.be.false;
+      expect(vsync.backupPass_.isPending()).to.be.true;
+
+      clock.tick(17);
+      expect(result).to.equal('');
+      expect(vsync.tasks_).to.have.length(1);
+      expect(vsync.scheduled_).to.be.true;
+      expect(vsync.invisiblePass_.isPending()).to.be.false;
+      expect(vsync.backupPass_.isPending()).to.be.true;
+
+      clock.tick(240);
+      expect(result).to.equal('mu1');
+      expect(vsync.tasks_).to.have.length(0);
+      expect(vsync.scheduled_).to.be.false;
+      expect(vsync.invisiblePass_.isPending()).to.be.false;
+      expect(vsync.backupPass_.isPending()).to.be.false;
     });
 
     it('should re-schedule when doc goes invisible', () => {
@@ -320,20 +363,20 @@ describe('vsync', () => {
       expect(vsync.tasks_).to.have.length(1);
       expect(vsync.scheduled_).to.be.true;
       expect(rafHandler).to.exist;
-      expect(vsync.pass_.isPending()).to.be.false;
+      expect(vsync.invisiblePass_.isPending()).to.be.false;
 
       viewer.isVisible = () => false;
       viewerVisibilityChangedHandler();
 
       expect(vsync.tasks_).to.have.length(1);
       expect(vsync.scheduled_).to.be.true;
-      expect(vsync.pass_.isPending()).to.be.true;
+      expect(vsync.invisiblePass_.isPending()).to.be.true;
 
       clock.tick(17);
       expect(result).to.equal('mu1');
       expect(vsync.tasks_).to.have.length(0);
       expect(vsync.scheduled_).to.be.false;
-      expect(vsync.pass_.isPending()).to.be.false;
+      expect(vsync.invisiblePass_.isPending()).to.be.false;
     });
 
     it('should re-schedule when doc goes visible', () => {
@@ -351,7 +394,7 @@ describe('vsync', () => {
       expect(vsync.tasks_).to.have.length(1);
       expect(vsync.scheduled_).to.be.true;
       expect(rafHandler).to.be.undefined;
-      expect(vsync.pass_.isPending()).to.be.true;
+      expect(vsync.invisiblePass_.isPending()).to.be.true;
 
       viewer.isVisible = () => true;
       viewerVisibilityChangedHandler();
@@ -374,7 +417,7 @@ describe('vsync', () => {
       expect(vsync.tasks_).to.have.length(0);
       expect(vsync.scheduled_).to.be.false;
       expect(rafHandler).to.be.undefined;
-      expect(vsync.pass_.isPending()).to.be.false;
+      expect(vsync.invisiblePass_.isPending()).to.be.false;
 
       viewer.isVisible = () => false;
       viewerVisibilityChangedHandler();
@@ -382,7 +425,7 @@ describe('vsync', () => {
       expect(vsync.tasks_).to.have.length(0);
       expect(vsync.scheduled_).to.be.false;
       expect(rafHandler).to.be.undefined;
-      expect(vsync.pass_.isPending()).to.be.false;
+      expect(vsync.invisiblePass_.isPending()).to.be.false;
     });
 
     it('should run anim task when visible', () => {
@@ -431,6 +474,7 @@ describe('vsync', () => {
       vsync.raf_ = handler => rafHandler = handler;
       viewer.isVisible = () => false;
 
+      /*eslint no-unused-vars: 0*/
       let result = '';
       const res = vsync.runAnim(contextNode, {
         mutate: () => {
@@ -448,6 +492,7 @@ describe('vsync', () => {
       vsync.raf_ = handler => rafHandler = handler;
       viewer.isVisible = () => false;
 
+      /*eslint no-unused-vars: 0*/
       let result = '';
       const task = vsync.createAnimTask(contextNode, {
         mutate: () => {
@@ -515,7 +560,7 @@ describe('vsync', () => {
 
     beforeEach(() => {
       installDocService(win, /* isSingleDoc */ false);
-      root = document.createElement('i-amp-shadow-root');
+      root = document.createElement('i-amphtml-shadow-root');
       document.body.appendChild(root);
       ampdoc = new AmpDocShadow(win, 'https://acme.org/', root);
       ampdoc.services = {};
@@ -549,7 +594,7 @@ describe('vsync', () => {
       expect(vsync.tasks_).to.have.length(1);
       expect(vsync.scheduled_).to.be.true;
       expect(rafHandler).to.exist;
-      expect(vsync.pass_.isPending()).to.be.false;
+      expect(vsync.invisiblePass_.isPending()).to.be.false;
 
       rafHandler();
       expect(result).to.equal('mu1');
@@ -572,13 +617,13 @@ describe('vsync', () => {
       expect(vsync.tasks_).to.have.length(1);
       expect(vsync.scheduled_).to.be.true;
       expect(rafHandler).to.be.undefined;
-      expect(vsync.pass_.isPending()).to.be.true;
+      expect(vsync.invisiblePass_.isPending()).to.be.true;
 
       clock.tick(17);
       expect(result).to.equal('mu1');
       expect(vsync.tasks_).to.have.length(0);
       expect(vsync.scheduled_).to.be.false;
-      expect(vsync.pass_.isPending()).to.be.false;
+      expect(vsync.invisiblePass_.isPending()).to.be.false;
     });
 
     it('should re-schedule when doc goes invisible', () => {
@@ -596,20 +641,20 @@ describe('vsync', () => {
       expect(vsync.tasks_).to.have.length(1);
       expect(vsync.scheduled_).to.be.true;
       expect(rafHandler).to.exist;
-      expect(vsync.pass_.isPending()).to.be.false;
+      expect(vsync.invisiblePass_.isPending()).to.be.false;
 
       docState.isHidden = () => true;
       docVisibilityHandler();
 
       expect(vsync.tasks_).to.have.length(1);
       expect(vsync.scheduled_).to.be.true;
-      expect(vsync.pass_.isPending()).to.be.true;
+      expect(vsync.invisiblePass_.isPending()).to.be.true;
 
       clock.tick(17);
       expect(result).to.equal('mu1');
       expect(vsync.tasks_).to.have.length(0);
       expect(vsync.scheduled_).to.be.false;
-      expect(vsync.pass_.isPending()).to.be.false;
+      expect(vsync.invisiblePass_.isPending()).to.be.false;
     });
 
     it('should re-schedule when doc goes visible', () => {
@@ -627,7 +672,7 @@ describe('vsync', () => {
       expect(vsync.tasks_).to.have.length(1);
       expect(vsync.scheduled_).to.be.true;
       expect(rafHandler).to.be.undefined;
-      expect(vsync.pass_.isPending()).to.be.true;
+      expect(vsync.invisiblePass_.isPending()).to.be.true;
 
       docState.isHidden = () => false;
       docVisibilityHandler();
@@ -650,7 +695,7 @@ describe('vsync', () => {
       expect(vsync.tasks_).to.have.length(0);
       expect(vsync.scheduled_).to.be.false;
       expect(rafHandler).to.be.undefined;
-      expect(vsync.pass_.isPending()).to.be.false;
+      expect(vsync.invisiblePass_.isPending()).to.be.false;
 
       docState.isHidden = () => true;
       docVisibilityHandler();
@@ -658,7 +703,7 @@ describe('vsync', () => {
       expect(vsync.tasks_).to.have.length(0);
       expect(vsync.scheduled_).to.be.false;
       expect(rafHandler).to.be.undefined;
-      expect(vsync.pass_.isPending()).to.be.false;
+      expect(vsync.invisiblePass_.isPending()).to.be.false;
     });
 
     it('should run anim task when visible', () => {
@@ -707,6 +752,7 @@ describe('vsync', () => {
       vsync.raf_ = handler => rafHandler = handler;
       docState.isHidden = () => true;
 
+      /*eslint no-unused-vars: 0*/
       let result = '';
       const res = vsync.runAnim(contextNode, {
         mutate: () => {
@@ -724,6 +770,7 @@ describe('vsync', () => {
       vsync.raf_ = handler => rafHandler = handler;
       docState.isHidden = () => true;
 
+      /*eslint no-unused-vars: 0*/
       let result = '';
       const task = vsync.createAnimTask(contextNode, {
         mutate: () => {

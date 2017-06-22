@@ -19,6 +19,7 @@ import {Layout} from '../../../src/layout';
 import {user, dev} from '../../../src/log';
 import {setStyle} from '../../../src/style';
 import {listen} from '../../../src/event-helper';
+import {AmpEvents} from '../../../src/amp-events';
 
 class AmpFlyingCarpet extends AMP.BaseElement {
 
@@ -75,8 +76,8 @@ class AmpFlyingCarpet extends AMP.BaseElement {
     this.children_.forEach(child => this.setAsOwner(child));
 
     const clip = doc.createElement('div');
-    clip.setAttribute('class', '-amp-fx-flying-carpet-clip');
-    container.setAttribute('class', '-amp-fx-flying-carpet-container');
+    clip.setAttribute('class', 'i-amphtml-fx-flying-carpet-clip');
+    container.setAttribute('class', 'i-amphtml-fx-flying-carpet-container');
 
     childNodes.forEach(child => container.appendChild(child));
     clip.appendChild(container);
@@ -109,22 +110,22 @@ class AmpFlyingCarpet extends AMP.BaseElement {
     const viewportHeight = viewport.getHeight();
     const docHeight = viewport.getScrollHeight();
     // Hmm, can the page height change and affect us?
+    const minTop = viewportHeight * 0.75;
+    const maxTop = docHeight - viewportHeight * 0.95;
     user().assert(
-      layoutBox.top >= viewportHeight,
-      '<amp-fx-flying-carpet> elements must be positioned after the first ' +
-      'viewport: %s Current position: %s. Min: %s',
-      this.element,
-      layoutBox.top,
-      viewportHeight
-    );
+        layoutBox.top >= minTop,
+        '<amp-fx-flying-carpet> elements must be positioned after the 75% of' +
+      ' first viewport: %s Current position: %s. Min: %s',
+        this.element,
+        layoutBox.top,
+        minTop);
     user().assert(
-      layoutBox.bottom <= docHeight - viewportHeight,
-      '<amp-fx-flying-carpet> elements must be positioned before the last ' +
+        layoutBox.top <= maxTop,
+        '<amp-fx-flying-carpet> elements must be positioned before the last ' +
       'viewport: %s Current position: %s. Max: %s',
-      this.element,
-      layoutBox.bottom,
-      docHeight - viewportHeight
-    );
+        this.element,
+        layoutBox.top,
+        maxTop);
   }
 
   /** @override */
@@ -137,7 +138,7 @@ class AmpFlyingCarpet extends AMP.BaseElement {
       throw e;
     }
     this.scheduleLayout(this.children_);
-    listen(this.element, 'amp:built', this.layoutBuiltChild_.bind(this));
+    listen(this.element, AmpEvents.BUILT, this.layoutBuiltChild_.bind(this));
     return Promise.resolve();
   }
 

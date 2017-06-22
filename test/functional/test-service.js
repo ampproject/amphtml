@@ -16,22 +16,24 @@
 
 import {
   adoptServiceForEmbed,
+  adoptServiceForEmbedIfEmbeddable,
   assertDisposable,
-  assertEmbeddable,
   disposeServicesForDoc,
-  fromClass,
   getExistingServiceForDocInEmbedScope,
-  getExistingServiceForWindowInEmbedScope,
-  getExistingServiceForDoc,
-  getExistingServiceForWindow,
+  getExistingServiceInEmbedScope,
+  getExistingServiceOrNull,
   getParentWindowFrameElement,
   getService,
-  getServicePromise,
   getServiceForDoc,
+  getServicePromise,
   getServicePromiseForDoc,
+  getServicePromiseOrNull,
+  getServicePromiseOrNullForDoc,
   installServiceInEmbedScope,
   isDisposable,
   isEmbeddable,
+  registerServiceBuilder,
+  registerServiceBuilderForDoc,
   resetServiceForTesting,
   setParentWindow,
 } from '../../src/service';
@@ -81,14 +83,14 @@ describe('service', () => {
 
     beforeEach(() => {
       count = 0;
-      factory = sandbox.spy(() => {
-        return ++count;
-      });
       Class = class {
         constructor() {
           this.count = ++count;
         }
       };
+      factory = sandbox.spy(() => {
+        return new Class();
+      });
       resetServiceForTesting(window, 'a');
       resetServiceForTesting(window, 'b');
       resetServiceForTesting(window, 'c');
@@ -96,68 +98,67 @@ describe('service', () => {
     });
 
     it('should make per window singletons', () => {
-      const a1 = getService(window, 'a', factory);
-      const a2 = getService(window, 'a', factory);
+      registerServiceBuilder(window, 'a', factory);
+      const a1 = getService(window, 'a');
+      registerServiceBuilder(window, 'a', factory);
+      const a2 = getService(window, 'a');
       expect(a1).to.equal(a2);
-      expect(a1).to.equal(1);
+      expect(a1).to.deep.equal({count: 1});
       expect(factory).to.be.calledOnce;
       expect(factory.args[0][0]).to.equal(window);
 
-      const b1 = getService(window, 'b', factory);
-      const b2 = getService(window, 'b', factory);
+      registerServiceBuilder(window, 'b', factory);
+      const b1 = getService(window, 'b');
+      registerServiceBuilder(window, 'b', factory);
+      const b2 = getService(window, 'b');
       expect(b1).to.equal(b2);
       expect(b1).to.not.equal(a1);
       expect(factory).to.have.callCount(2);
       expect(factory.args[1][0]).to.equal(window);
     });
 
-    it('should make instances from class', () => {
-
-      const a1 = fromClass(window, 'a', Class);
-      const a2 = fromClass(window, 'a', Class);
-      expect(a1).to.equal(a2);
-      expect(a1.count).to.equal(1);
-
-      const b1 = fromClass(window, 'b', Class);
-      const b2 = fromClass(window, 'b', Class);
-      expect(b1).to.equal(b2);
-      expect(b1).to.not.equal(a1);
+    it('should not instantiate service when registered', () => {
+      registerServiceBuilder(window, 'a', Class);
+      expect(count).to.equal(0);
+      getService(window, 'a');
+      expect(count).to.equal(1);
     });
 
-    it('should work without a factory', () => {
-      const c1 = getService(window, 'c', factory);
-      const c2 = getService(window, 'c');
-      expect(c1).to.equal(c2);
-      expect(factory).to.be.calledOnce;
+    it('should only instantiate the service once', () => {
+      registerServiceBuilder(window, 'b', Class);
+      expect(count).to.equal(0);
+      getService(window, 'b');
+      getService(window, 'b');
+      expect(count).to.equal(1);
     });
 
     it('should return the service when it exists', () => {
-      const c1 = getService(window, 'c', factory);
-      const c2 = getExistingServiceForWindow(window, 'c');
+      registerServiceBuilder(window, 'c', factory);
+      const c1 = getService(window, 'c');
+      const c2 = getExistingServiceOrNull(window, 'c');
       expect(c1).to.equal(c2);
     });
 
-    it('should throw before creation', () => {
-      getService(window, 'another service to avoid NPE', () => {});
+    it('should throw before creation if factory is not provided', () => {
       expect(() => {
-        getExistingServiceForWindow(window, 'c');
+        getService(window, 'c');
       }).to.throw();
     });
 
     it('should fail without factory on initial setup', () => {
       expect(() => {
         getService(window, 'not-present');
-      }).to.throw(/not given and service missing not-present/);
+      }).to.throw(/Expected service not-present to be registered/);
     });
 
-    it('should provide a promise that resolves when registered', () => {
+    it('should provide a promise that resolves when instantiated', () => {
       const p1 = getServicePromise(window, 'e1');
       const p2 = getServicePromise(window, 'e1');
-      getService(window, 'e1', function() {
-        return 'from e1';
+      registerServiceBuilder(window, 'e1', function() {
+        return {str: 'from e1'};
       });
       return p1.then(s1 => {
-        expect(s1).to.equal('from e1');
+        expect(s1).to.deep.equal({str: 'from e1'});
         return p2.then(s2 => {
           expect(s2).to.equal(s1);
           expect(factory).to.have.not.been.called;
@@ -165,20 +166,63 @@ describe('service', () => {
       });
     });
 
+    it('should resolve existing service promise on registering service', () => {
+      const p = getServicePromise(window, 'a');
+      registerServiceBuilder(window, 'a', Class);
+      expect(count).to.equal(1);
+      return p.then(() => {
+        expect(count).to.equal(1);
+      });
+    });
+
+    it('should resolve service promise if service is registered', () => {
+      registerServiceBuilder(window, 'a', Class);
+      expect(count).to.equal(0);
+      return getServicePromise(window, 'a').then(() => {
+        expect(count).to.equal(1);
+      });
+    });
+
+    it('should provide promise without clobbering registered services', () => {
+      registerServiceBuilder(window, 'a', Class);
+      expect(count).to.equal(0);
+      const p = getServicePromise(window, 'a');
+      expect(getService(window, 'a')).to.not.throw;
+      return p.then(() => {
+        expect(count).to.equal(1);
+      });
+    });
+
+    it('should NOT return null promise for registered services', () => {
+      registerServiceBuilder(window, 'a', Class);
+      const p = getServicePromiseOrNull(window, 'a');
+      expect(p).to.not.be.null;
+    });
+
+    it('should set service builders to null after instantiation', () => {
+      registerServiceBuilder(window, 'a', Class);
+      expect(window.services['a'].obj).to.be.null;
+      expect(window.services['a'].ctor).to.not.be.null;
+      getService(window, 'a');
+      expect(window.services['a'].obj).to.not.be.null;
+      expect(window.services['a'].ctor).to.be.null;
+    });
+
     it('should resolve service for a child window', () => {
-      const c = getService(window, 'c', factory);
+      registerServiceBuilder(window, 'c', factory);
+      const c = getService(window, 'c');
 
       // A child.
       const child = {};
       setParentWindow(child, window);
-      expect(getService(child, 'c', factory)).to.equal(c);
-      expect(getExistingServiceForWindow(child, 'c')).to.equal(c);
+      expect(getService(child, 'c')).to.equal(c);
+      expect(getExistingServiceOrNull(child, 'c')).to.equal(c);
 
       // A grandchild.
       const grandchild = {};
       setParentWindow(grandchild, child);
-      expect(getService(grandchild, 'c', factory)).to.equal(c);
-      expect(getExistingServiceForWindow(grandchild, 'c')).to.equal(c);
+      expect(getService(grandchild, 'c')).to.equal(c);
+      expect(getExistingServiceOrNull(grandchild, 'c')).to.equal(c);
     });
 
     describe('embed service', () => {
@@ -194,34 +238,35 @@ describe('service', () => {
         grandchildWin = {};
         setParentWindow(grandchildWin, childWin);
 
-        topService = getService(window, 'c', factory);
+        registerServiceBuilder(window, 'c', factory);
+        topService = getService(window, 'c');
       });
 
       it('should return top service for top window', () => {
-        expect(getExistingServiceForWindowInEmbedScope(window, 'c'))
+        expect(getExistingServiceInEmbedScope(window, 'c'))
             .to.equal(topService);
       });
 
       it('should return top service when not overriden', () => {
-        expect(getExistingServiceForWindowInEmbedScope(childWin, 'c'))
+        expect(getExistingServiceInEmbedScope(childWin, 'c'))
             .to.equal(topService);
-        expect(getExistingServiceForWindowInEmbedScope(grandchildWin, 'c'))
+        expect(getExistingServiceInEmbedScope(grandchildWin, 'c'))
             .to.equal(topService);
       });
 
       it('should return overriden service', () => {
         const overridenService = {};
         installServiceInEmbedScope(childWin, 'c', overridenService);
-        expect(getExistingServiceForWindowInEmbedScope(childWin, 'c'))
+        expect(getExistingServiceInEmbedScope(childWin, 'c'))
             .to.equal(overridenService);
         // Top-level service doesn't change.
-        expect(getExistingServiceForWindow(window, 'c'))
+        expect(getExistingServiceOrNull(window, 'c'))
             .to.equal(topService);
 
         // Notice that only direct overrides are allowed for now. This is
         // arbitrary can change in the future to allow hierarchical lookup
         // up the window chain.
-        expect(getExistingServiceForWindow(grandchildWin, 'c'))
+        expect(getExistingServiceOrNull(grandchildWin, 'c'))
             .to.equal(topService);
       });
     });
@@ -238,8 +283,13 @@ describe('service', () => {
 
     beforeEach(() => {
       count = 0;
-      factory = sandbox.spy(() => {
-        return ++count;
+      const Class = class {
+        constructor() {
+          this.count = ++count;
+        }
+      };
+      factory = sandbox.spy(function() {
+        return new Class();
       });
       windowApi = {};
       ampdoc = {
@@ -248,8 +298,9 @@ describe('service', () => {
       };
       ampdocMock = sandbox.mock(ampdoc);
       const ampdocServiceApi = {getAmpDoc: () => ampdoc};
-
-      getService(windowApi, 'ampdoc', () => ampdocServiceApi);
+      registerServiceBuilder(windowApi, 'ampdoc', function() {
+        return ampdocServiceApi;
+      });
       node = {nodeType: 1, ownerDocument: {defaultView: windowApi}};
       resetServiceForTesting(windowApi, 'a');
       resetServiceForTesting(windowApi, 'b');
@@ -261,21 +312,21 @@ describe('service', () => {
 
     it('should make per ampdoc singletons and store them in window', () => {
       ampdocMock.expects('isSingleDoc').returns(true).atLeast(1);
-
-      const a1 = getServiceForDoc(node, 'a', factory);
-      const a2 = getServiceForDoc(node, 'a', factory);
+      registerServiceBuilderForDoc(node, 'a', factory);
+      const a1 = getServiceForDoc(node, 'a');
+      registerServiceBuilderForDoc(node, 'a', factory);
+      const a2 = getServiceForDoc(node, 'a');
       expect(a1).to.equal(a2);
-      expect(a1).to.equal(1);
+      expect(a1).to.deep.equal({count: 1});
       expect(factory).to.be.calledOnce;
       expect(factory.args[0][0]).to.equal(ampdoc);
       expect(windowApi.services['a']).to.exist;
       expect(ampdoc.services).to.not.exist;
 
-      const b1 = getServiceForDoc(node, 'b', factory);
-      const b2 = getServiceForDoc(node, 'b', factory);
-      const b3 = getExistingServiceForDoc(node, 'b');
+      registerServiceBuilderForDoc(node, 'b', factory);
+      const b1 = getServiceForDoc(node, 'b');
+      const b2 = getServiceForDoc(node, 'b');
       expect(b1).to.equal(b2);
-      expect(b1).to.equal(b3);
       expect(b1).to.not.equal(a1);
       expect(factory).to.have.callCount(2);
       expect(factory.args[1][0]).to.equal(ampdoc);
@@ -285,13 +336,12 @@ describe('service', () => {
 
     it('should make per ampdoc singletons via ampdoc', () => {
       ampdocMock.expects('isSingleDoc').returns(true).atLeast(1);
-
-      const a1 = getServiceForDoc(ampdoc, 'a', factory);
-      const a2 = getServiceForDoc(ampdoc, 'a', factory);
-      const a3 = getExistingServiceForDoc(ampdoc, 'a', factory);
+      registerServiceBuilderForDoc(ampdoc, 'a', factory);
+      const a1 = getServiceForDoc(ampdoc, 'a');
+      registerServiceBuilderForDoc(ampdoc, 'a', factory);
+      const a2 = getServiceForDoc(ampdoc, 'a');
       expect(a1).to.equal(a2);
-      expect(a1).to.equal(a3);
-      expect(a1).to.equal(1);
+      expect(a1).to.deep.equal({count: 1});
       expect(factory).to.be.calledOnce;
       expect(factory.args[0][0]).to.equal(ampdoc);
       expect(windowApi.services['a']).to.exist;
@@ -300,18 +350,21 @@ describe('service', () => {
 
     it('should make per ampdoc singletons and store them in ampdoc', () => {
       ampdocMock.expects('isSingleDoc').returns(false).atLeast(1);
-
-      const a1 = getServiceForDoc(node, 'a', factory);
-      const a2 = getServiceForDoc(node, 'a', factory);
+      registerServiceBuilderForDoc(node, 'a', factory);
+      const a1 = getServiceForDoc(node, 'a');
+      registerServiceBuilderForDoc(node, 'a', factory);
+      const a2 = getServiceForDoc(node, 'a');
       expect(a1).to.equal(a2);
-      expect(a1).to.equal(1);
+      expect(a1).to.deep.equal({count: 1});
       expect(factory).to.be.calledOnce;
       expect(factory.args[0][0]).to.equal(ampdoc);
       expect(windowApi.services['a']).to.not.exist;
       expect(ampdoc.services['a']).to.exist;
 
-      const b1 = getServiceForDoc(node, 'b', factory);
-      const b2 = getServiceForDoc(node, 'b', factory);
+      registerServiceBuilderForDoc(node, 'b', factory);
+      const b1 = getServiceForDoc(node, 'b');
+      registerServiceBuilderForDoc(node, 'b', factory);
+      const b2 = getServiceForDoc(node, 'b');
       expect(b1).to.equal(b2);
       expect(b1).to.not.equal(a1);
       expect(factory).to.have.callCount(2);
@@ -320,27 +373,38 @@ describe('service', () => {
       expect(ampdoc.services['b']).to.exist;
     });
 
-    it('should work without a factory', () => {
-      const c1 = getServiceForDoc(node, 'c', factory);
-      const c2 = getServiceForDoc(node, 'c');
-      expect(c1).to.equal(c2);
-      expect(factory).to.be.calledOnce;
+    it('should not instantiate service when registered', () => {
+      registerServiceBuilderForDoc(ampdoc, 'fake service', factory);
+      expect(count).to.equal(0);
+      getServicePromiseForDoc(ampdoc, 'fake service');
+      getServiceForDoc(ampdoc, 'fake service');
+      expect(count).to.equal(1);
+    });
+
+    it('should not instantiate service when registered (race)', () => {
+      getServicePromiseForDoc(ampdoc, 'fake service');
+      registerServiceBuilderForDoc(ampdoc, 'fake service', factory);
+      expect(count).to.equal(1);
+      getServiceForDoc(ampdoc, 'fake service');
+      return Promise.resolve().then(() => {
+        expect(count).to.equal(1);
+      });
     });
 
     it('should fail without factory on initial setup', () => {
       expect(() => {
         getServiceForDoc(node, 'not-present');
-      }).to.throw(/not given and service missing not-present/);
+      }).to.throw(/Expected service not-present to be registered/);
     });
 
-    it('should provide a promise that resolves when registered', () => {
+    it('should provide a promise that resolves when instantiated', () => {
       const p1 = getServicePromiseForDoc(node, 'e1');
       const p2 = getServicePromiseForDoc(node, 'e1');
-      getServiceForDoc(node, 'e1', function() {
-        return 'from e1';
+      registerServiceBuilderForDoc(node, 'e1', function() {
+        return {str: 'from e1'};
       });
       return p1.then(s1 => {
-        expect(s1).to.equal('from e1');
+        expect(s1).to.deep.equal({str: 'from e1'});
         return p2.then(s2 => {
           expect(s2).to.equal(s1);
           expect(factory).to.have.not.been.called;
@@ -348,25 +412,30 @@ describe('service', () => {
       });
     });
 
+    it('should NOT return null promise for registered services', () => {
+      registerServiceBuilderForDoc(ampdoc, 'a', factory);
+      const p = getServicePromiseOrNullForDoc(ampdoc, 'a');
+      expect(p).to.not.be.null;
+    });
+
     it('should resolve service for a child window', () => {
       ampdocMock.expects('isSingleDoc').returns(true).atLeast(1);
-      const c = getServiceForDoc(node, 'c', factory);
+      registerServiceBuilderForDoc(node, 'c', factory);
+      const c = getServiceForDoc(node, 'c');
 
       // A child.
       const childWin = {};
       const childWinNode =
           {nodeType: 1, ownerDocument: {defaultView: childWin}};
       setParentWindow(childWin, windowApi);
-      expect(getServiceForDoc(childWinNode, 'c', factory)).to.equal(c);
-      expect(getExistingServiceForDoc(childWinNode, 'c')).to.equal(c);
+      expect(getServiceForDoc(childWinNode, 'c')).to.equal(c);
 
       // A grandchild.
       const grandchildWin = {};
       const grandChildWinNode =
           {nodeType: 1, ownerDocument: {defaultView: grandchildWin}};
       setParentWindow(grandchildWin, childWin);
-      expect(getServiceForDoc(grandChildWinNode, 'c', factory)).to.equal(c);
-      expect(getExistingServiceForDoc(grandChildWinNode, 'c')).to.equal(c);
+      expect(getServiceForDoc(grandChildWinNode, 'c')).to.equal(c);
     });
 
     it('should dispose disposable services', () => {
@@ -375,20 +444,25 @@ describe('service', () => {
           dispose: sandbox.spy(),
         };
       };
-      const disposable = getServiceForDoc(node, 'a', disposableFactory);
-      const disposableWithError = getServiceForDoc(node, 'b', function() {
+      registerServiceBuilderForDoc(node, 'a', disposableFactory);
+      const disposable = getServiceForDoc(node, 'a');
+
+      registerServiceBuilderForDoc(node, 'b', function() {
         return {
-          dispose: function() {},
+          dispose: sandbox.stub().throws('intentional'),
         };
       });
-      sandbox.stub(disposableWithError, 'dispose', function() {
-        throw new Error('intentional');
-      });
+      const disposableWithError = getServiceForDoc(node, 'b');
+
       const disposableDeferredPromise = getServicePromiseForDoc(node, 'c');
-      const nonDisposable = getServiceForDoc(node, 'd', () => {
+
+      registerServiceBuilderForDoc(node, 'd', function() {
         return {};
       });
-      const windowDisposable = getService(windowApi, 'e', disposableFactory);
+      const nonDisposable = getServiceForDoc(node, 'd');
+
+      registerServiceBuilder(windowApi, 'e', disposableFactory);
+      const windowDisposable = getService(windowApi, 'e');
 
       disposeServicesForDoc(ampdoc);
 
@@ -405,7 +479,8 @@ describe('service', () => {
       expect(windowDisposable.dispose).to.not.be.called;
 
       // Deffered.
-      const disposableDeferred = getServiceForDoc(node, 'c', disposableFactory);
+      registerServiceBuilderForDoc(node, 'c', disposableFactory);
+      const disposableDeferred = getServiceForDoc(node, 'c');
       expect(disposableDeferred.dispose).to.not.be.called;
       return disposableDeferredPromise.then(() => {
         expect(disposableDeferred.dispose).to.be.calledOnce;
@@ -422,7 +497,7 @@ describe('service', () => {
         childWin = {};
         childWinNode =
           {nodeType: 1, ownerDocument: {defaultView: childWin}};
-        setParentWindow(childWin, window);
+        setParentWindow(childWin, windowApi);
 
         // A grandchild.
         grandchildWin = {};
@@ -430,7 +505,8 @@ describe('service', () => {
             {nodeType: 1, ownerDocument: {defaultView: grandchildWin}};
         setParentWindow(grandchildWin, childWin);
 
-        topService = getServiceForDoc(ampdoc, 'c', factory);
+        registerServiceBuilderForDoc(ampdoc, 'c', factory);
+        topService = getServiceForDoc(ampdoc, 'c');
       });
 
       it('should return top service for ampdoc', () => {
@@ -479,19 +555,17 @@ describe('service', () => {
         };
         nonEmbeddable = {};
         embeddable = {adoptEmbedWindow: sandbox.spy()};
-        getServiceForDoc(ampdoc, 'embeddable', () => embeddable);
-        getServiceForDoc(ampdoc, 'nonEmbeddable', () => nonEmbeddable);
+        registerServiceBuilderForDoc(ampdoc, 'embeddable', function() {
+          return embeddable;
+        });
+        registerServiceBuilderForDoc(ampdoc, 'nonEmbeddable', function() {
+          return nonEmbeddable;
+        });
       });
 
       it('should test embeddable interface', () => {
         expect(isEmbeddable(embeddable)).to.be.true;
         expect(isEmbeddable(nonEmbeddable)).to.be.false;
-      });
-
-      it('should assert embeddable interface', () => {
-        expect(assertEmbeddable(embeddable)).to.equal(embeddable);
-        expect(() => assertEmbeddable(nonEmbeddable))
-            .to.throw(/required to implement EmbeddableService/);
       });
 
       it('should adopt embeddable', () => {
@@ -504,6 +578,14 @@ describe('service', () => {
         expect(() => {
           adoptServiceForEmbed(embedWin, 'nonEmbeddable');
         }).to.throw(/required to implement EmbeddableService/);
+      });
+
+      it('should adopt embeddable if embeddable', () => {
+        adoptServiceForEmbedIfEmbeddable(embedWin, 'embeddable');
+        expect(embeddable.adoptEmbedWindow).to.be.calledOnce;
+        expect(embeddable.adoptEmbedWindow.args[0][0]).to.equal(embedWin);
+
+        adoptServiceForEmbedIfEmbeddable(embedWin, 'nonEmbeddable'); // No-op.
       });
 
       it('should refuse adopt of unknown service', () => {

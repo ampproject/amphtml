@@ -17,7 +17,7 @@
 import {assertHttpsUrl} from '../../../src/url';
 import {openWindowDialog} from '../../../src/dom';
 import {user} from '../../../src/log';
-import {xhrFor} from '../../../src/xhr';
+import {xhrFor} from '../../../src/services';
 
 import {Util} from './util';
 
@@ -35,7 +35,7 @@ export class PinWidget {
   /** @param {!Element} rootElement */
   constructor(rootElement) {
     user().assert(rootElement.getAttribute('data-url'),
-      'The data-url attribute is required for Pin widgets');
+        'The data-url attribute is required for Pin widgets');
     this.element = rootElement;
     this.xhr = xhrFor(rootElement.ownerDocument.defaultView);
   }
@@ -67,9 +67,9 @@ export class PinWidget {
     const query = `pin_ids=${this.pinId}&sub=www&base_scheme=https`;
     return this.xhr.fetchJson(baseUrl + query, {
       requireAmpResponseSourceOrigin: false,
-    }).then(response => {
+    }).then(res => res.json()).then(json => {
       try {
-        return response.data[0];
+        return json.data[0];
       } catch (e) { return null; }
     });
   }
@@ -94,10 +94,7 @@ export class PinWidget {
     }
 
     const structure = Util.make(this.element.ownerDocument, {'span': {}});
-    // TODO(dvoytenko, #6794): Remove old `-amp-fill-content` form after the new
-    // form is in PROD for 1-2 weeks.
-    structure.className = className +
-        ' -amp-fill-content i-amphtml-fill-content';
+    structure.className = className + ' i-amphtml-fill-content';
 
     const container = Util.make(this.element.ownerDocument, {'span': {
       'className': '-amp-pinterest-embed-pin-inner',
@@ -235,10 +232,14 @@ export class PinWidget {
     this.pinId = '';
     try {
       this.pinId = this.pinUrl.split('/pin/')[1].split('/')[0];
-    } catch (err) { return; }
+    } catch (err) {
+      return Promise.reject(
+          user().createError('Invalid pinterest url: ' + this.pinUrl)
+      );
+    }
 
     return this.fetchPin()
-      .then(this.renderPin.bind(this));
+        .then(this.renderPin.bind(this));
   }
 
 };

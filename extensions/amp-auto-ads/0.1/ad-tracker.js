@@ -14,20 +14,60 @@
  * limitations under the License.
  */
 
-import {resourcesForDoc} from '../../../src/resources';
+import {resourcesForDoc} from '../../../src/services';
+
+/**
+ * Structure for defining contraints about the placement of ads.
+ *
+ * initialMinSpacing - gives the minimum vertical spacing (in pixels) that
+ *                     should be between any two ads on the page. This is used
+ *                     up to the point where a rule in subsequentMinSpacing
+ *                     matches the number of ads on the page.
+ *
+ * subsequentMinSpacing - an array of rules that change the minimum vertical
+ *                        spacing required between ads as a function of how
+ *                        many ads are on the page. adCount matches the number
+ *                        of ads on the page (both hard-coded and those inserted
+ *                        by amp-auto-ads), and spacing defines the vertical
+ *                        spacing for the matching condition.
+ *
+ * maxAdCount - specifies the maximum number of ads that should be on the page.
+ *              Both hard-coded ads and those inserted by amp-auto-ads count
+ *              towards this. Once this limit is reached, amp-auto-ads will
+ *              stop trying to insert additional ads.
+ *
+ * @typedef {{
+ *   initialMinSpacing: number,
+ *   subsequentMinSpacing: !Array<!{adCount: number, spacing: number}>,
+ *   maxAdCount: number
+ * }}
+ */
+export let AdConstraints;
 
 export class AdTracker {
 
   /**
    * @param {!Array<!Element>} ads
-   * @param {number} minAdSpacing
+   * @param {!AdConstraints} adConstraints
    */
-  constructor(ads, minAdSpacing) {
+  constructor(ads, adConstraints) {
     /** @type {!Array<!Element>} */
     this.ads_ = ads;
 
     /** @type {number} */
-    this.minAdSpacing_ = minAdSpacing;
+    this.initialMinSpacing_ = adConstraints.initialMinSpacing;
+
+    /** @type {!Array<!{adCount: number, spacing: number}>} */
+    this.subsequentMinSpacing_ = adConstraints.subsequentMinSpacing.slice(0)
+        .sort((a, b) => {
+          return a.adCount - b.adCount;
+        });
+
+    /** @type {number} */
+    this.maxAdCount_ = adConstraints.maxAdCount;
+
+    /** @type {number} */
+    this.minAdSpacing_ = this.getMinAdSpacing_();
   }
 
   /**
@@ -35,6 +75,7 @@ export class AdTracker {
    */
   addAd(ad) {
     this.ads_.push(ad);
+    this.minAdSpacing_ = this.getMinAdSpacing_();
   }
 
   /**
@@ -42,6 +83,13 @@ export class AdTracker {
    */
   getAdCount() {
     return this.ads_.length;
+  }
+
+  /**
+   * @return {boolean}
+   */
+  isMaxAdCountReached() {
+    return this.getAdCount() >= this.maxAdCount_;
   }
 
   /**
@@ -90,6 +138,22 @@ export class AdTracker {
       }
     });
   }
+
+  /**
+   * @private
+   * @return {number}
+   */
+  getMinAdSpacing_() {
+    const adCount = this.getAdCount();
+    let spacing = this.initialMinSpacing_;
+    for (let i = 0; i < this.subsequentMinSpacing_.length; i++) {
+      const item = this.subsequentMinSpacing_[i];
+      if (item.adCount <= adCount) {
+        spacing = item.spacing;
+      }
+    }
+    return spacing;
+  }
 }
 
 /**
@@ -97,6 +161,12 @@ export class AdTracker {
  * @return {!Array<!Element>}
  */
 export function getExistingAds(win) {
-  return [].slice.call(win.document.getElementsByTagName('AMP-AD')).concat(
-      [].slice.call(win.document.getElementsByTagName('AMP-A4A')));
+  return [].slice.call(win.document.getElementsByTagName('AMP-AD'))
+      .filter(ad => {
+        // Filters out AMP-STICKY-AD.
+        if (ad.parentElement && ad.parentElement.tagName == 'AMP-STICKY-AD') {
+          return false;
+        }
+        return true;
+      });
 }

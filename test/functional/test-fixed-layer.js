@@ -231,6 +231,9 @@ describe('FixedLayer', () => {
     };
     Object.defineProperty(elem, 'offsetTop', {
       get: () => {
+        if (elem.overrideOffsetTop != null) {
+          return elem.overrideOffsetTop;
+        }
         if (elem.style.top == 'auto' || elem.computedStyle.top == 'auto' ||
                 elem.computedStyle.top == '') {
           return elem.autoOffsetTop;
@@ -283,7 +286,7 @@ describe('FixedLayer', () => {
 
     beforeEach(() => {
       fixedLayer = new FixedLayer(ampdoc, vsyncApi,
-          /* paddingTop */ 11, /* transfer */ false);
+          /* borderTop */ 0, /* paddingTop */ 11, /* transfer */ false);
       fixedLayer.setup();
     });
 
@@ -300,7 +303,7 @@ describe('FixedLayer', () => {
             `${expected.id}: wrong position`);
         expect(JSON.stringify(actual.selectors))
             .to.equal(JSON.stringify(expected.selectors),
-                `${expected.id}: wrong selectors`);
+            `${expected.id}: wrong selectors`);
       }
 
       expect(fixedLayer.elements_).to.have.length(5);
@@ -550,6 +553,51 @@ describe('FixedLayer', () => {
       expect(state['F4'].top).to.equal('');
     });
 
+    it('should work around top=0 for sticky', () => {
+      // See http://crbug.com/703816.
+      element5.computedStyle['position'] = 'sticky';
+      element5.computedStyle['top'] = '0px';
+      element5.autoOffsetTop = 12;
+      element5.overrideOffsetTop = 12;
+
+      expect(vsyncTasks).to.have.length(1);
+      const state = {};
+      vsyncTasks[0].measure(state);
+
+      expect(state['F4'].sticky).to.be.true;
+      expect(state['F4'].top).to.equal('');
+    });
+
+    it('should NOT work around top=0 for sticky when offset = 0', () => {
+      // See http://crbug.com/703816.
+      element5.computedStyle['position'] = 'sticky';
+      element5.computedStyle['top'] = '0px';
+      element5.autoOffsetTop = 0;
+      element5.overrideOffsetTop = 0;
+
+      expect(vsyncTasks).to.have.length(1);
+      const state = {};
+      vsyncTasks[0].measure(state);
+
+      expect(state['F4'].sticky).to.be.true;
+      expect(state['F4'].top).to.equal('0px');
+    });
+
+    it('should NOT work around top=0 for sticky for non-implicit top', () => {
+      // See http://crbug.com/703816.
+      element5.computedStyle['position'] = 'sticky';
+      element5.computedStyle['top'] = '0px';
+      element5.autoOffsetTop = 12;
+      element5.overrideOffsetTop = 11;
+
+      expect(vsyncTasks).to.have.length(1);
+      const state = {};
+      vsyncTasks[0].measure(state);
+
+      expect(state['F4'].sticky).to.be.true;
+      expect(state['F4'].top).to.equal('0px');
+    });
+
     it('should collect for implicit top = auto, but not update top', () => {
       element1.computedStyle['position'] = 'fixed';
       element1.computedStyle['top'] = '12px';
@@ -580,6 +628,28 @@ describe('FixedLayer', () => {
       element5.computedStyle['position'] = 'sticky';
       element5.computedStyle['top'] = '11px';
       element5.autoOffsetTop = 11;
+
+      expect(vsyncTasks).to.have.length(1);
+      const state = {};
+      vsyncTasks[0].measure(state);
+
+      expect(state['F0'].fixed).to.be.true;
+      expect(state['F0'].top).to.equal('0px');
+
+      expect(state['F4'].sticky).to.be.true;
+      expect(state['F4'].top).to.equal('0px');
+    });
+
+    it('should override implicit top = auto to 0 and padding + border', () => {
+      fixedLayer.borderTop_ = 1;
+      element1.computedStyle['position'] = 'fixed';
+      element1.computedStyle['top'] = '12px';
+      element1.autoOffsetTop = 12;
+      element1.offsetWidth = 10;
+      element1.offsetHeight = 10;
+      element5.computedStyle['position'] = 'sticky';
+      element5.computedStyle['top'] = '12px';
+      element5.autoOffsetTop = 12;
 
       expect(vsyncTasks).to.have.length(1);
       const state = {};
@@ -721,7 +791,7 @@ describe('FixedLayer', () => {
       expect(fe.element.style.top).to.equal('calc(17px + 11px)');
       // Remove.
       fixedLayer.vsync_ = {
-        mutate: function(callback) {
+        mutate(callback) {
           callback();
         },
       };
@@ -744,7 +814,7 @@ describe('FixedLayer', () => {
 
       // Remove.
       fixedLayer.vsync_ = {
-        mutate: function(callback) {
+        mutate(callback) {
           callback();
         },
       };
@@ -848,7 +918,7 @@ describe('FixedLayer', () => {
 
     beforeEach(() => {
       fixedLayer = new FixedLayer(ampdoc, vsyncApi,
-          /* paddingTop */ 11, /* transfer */ true);
+          /* borderTop */ 0, /* paddingTop */ 11, /* transfer */ true);
       fixedLayer.setup();
     });
 

@@ -39,7 +39,7 @@ Reasons include:
 
 ## The iframe sandbox
 
-The ad itself is hosted within a document that has an origin different from the primary page. The iframe by default loads a [bootstrap HTML](../3p/frame.max.html), which provides a container `div` to hold your content together with a set of APIs. Note that the container `div` (with `id="c"`) is absolute positioned and takes the whole space of the iframe, so you will want to append your content as a child of the container (don't append to `body`).  
+The ad itself is hosted within a document that has an origin different from the primary page. The iframe by default loads a [bootstrap HTML](../3p/frame.max.html), which provides a container `div` to hold your content together with a set of APIs. Note that the container `div` (with `id="c"`) is absolute positioned and takes the whole space of the iframe, so you will want to append your content as a child of the container (don't append to `body`).
 
 ### Available information
 We will provide the following information to the ad:
@@ -53,7 +53,7 @@ We will provide the following information to the ad:
 - `window.context.canonicalUrl` contains the canonical URL of the primary document as defined by its `link rel=canonical` tag.
 - `window.context.sourceUrl` contains the source URL of the original AMP document. See details [here](../spec/amp-var-substitutions.md#source-url).
 - `window.context.clientId` contains a unique id that is persistently the same for a given user and AMP origin site in their current browser until local data is deleted or the value expires (expiration is currently set to 1 year).
-  - Ad networks must register their cid scope in the variable clientIdScope in [_config.js](./_config.js).
+  - Ad networks must register their cid scope in the variable `clientIdScope` in [_config.js](./_config.js). Use `clientIdCookieName` to provide a cookie name for non-proxy case, otherwise value of `clientIdScope` is used.
   - Only available on pages that load `amp-analytics`. The clientId will be null if `amp-analytics` was not loaded on the given page.
 - `window.context.pageViewId` contains a relatively low entropy id that is the same for all ads shown on a page.
 - [ad viewability](#ad-viewability)
@@ -105,9 +105,13 @@ Example usage:
   unlisten();
 ```
 
-##### Initial position
+##### Initial layout rect
 
-The value `window.context.initialIntersection` contains the initial intersection record at the time the iframe was created.
+The value `window.context.initialLayoutRect` contains the initial rect of the ad's position in the page.
+
+##### Initial viewport intersection
+
+The value `window.context.initialIntersection` contains the initial viewport intersection record at the time the iframe was created.
 
 #### Page visibility
 
@@ -149,6 +153,18 @@ Here are some factors that affect whether the resize will be executed:
 - Whether the resize is requested for a currently active ad;
 - Whether the resize is requested for an ad below the viewport or above the viewport.
 
+#### Specifying an overflow element
+
+You can specify an `overflow` element that is only shown when a resize request is declined. When the user clicks the overflow element, the resize will pass the "interaction" rule and will resize.
+
+Example: Using an `overflow` element
+
+```html
+<amp-ad type="...">
+  <div overflow>Click to resize</div>
+  <!-- whatever else -->
+</amp-ad>
+```
 
 ### Support for multi-size ad requests
 Allowing more than a single ad size to fill a slot improves ad server competition. Increased competition gives the publisher better monetization for the same slot, therefore increasing overall revenue earned by the publisher.
@@ -216,7 +232,8 @@ Access to a publishers 1st party cookies may be achieved through a custom ad boo
 If the publisher would like to add custom JavaScript in the `remote.html` file that wants to read or write to the publisher owned cookies, then the publisher needs to ensure that the `remote.html` file is hosted on a sub-domain of the publisher URL. e.g. if the publisher hosts a webpage on https://nytimes.com, then the remote file should be hosted on something similar to https://sub-domain.nytimes.com for the custom JavaScript to have the abiity to read or write cookies for nytimes.com.
 
 ## Developer guidelines for a pull request
-Please read through [DEVELOPING.md](contributing/DEVELOPING.md) before contributing to this code repository.
+
+Please read through [DEVELOPING.md](../contributing/DEVELOPING.md) before contributing to this code repository.
 
 ### Files to change
 

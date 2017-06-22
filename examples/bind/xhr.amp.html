@@ -22,16 +22,26 @@
   <button onclick="AMP.toggleExperiment('amp-bind');window.location.href=window.location.href;">Toggle &lt;amp-bind&gt; experiment</button>
 
   <h2>XHR</h2>
-  <p [text]="myState.bindXhrResult">This text will be updated with XHR results.</p>
+  <p [text]="formState.bindXhrResult">This text will be updated with the form's XHR results.</p>
+
+  <p [text]="ampState.items[0].title">This text will be updated with amp-state's XHR results.</p>
+
   <form method="GET" action="/bind/form/get" action-xhr="/bind/form/get" target="_blank"
-      on="submit-success:myState">
+      on="submit-success:AMP.setState({formState: event.response})">
     <input type="submit" value="Submit">
   </form>
 
-  <amp-state id="myState">
+  <amp-state id="formState">
     <script type="application/json">
       {
-        bindXhrResult: 'Not fetched yet...'
+        "bindXhrResult": "Not fetched yet..."
+      }
+    </script>
+  </amp-state>
+
+  <amp-state id="ampState" src="/test/manual/amp-list-data.json?RANDOM">
+    <script type="application/json">
+      {
       }
     </script>
   </amp-state>

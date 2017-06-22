@@ -22,10 +22,6 @@ limitations under the License.
     <td>A flying carpet wraps its children in a unique full-screen scrolling container. In particular, this allows you to display a full-screen ad without taking up the entire viewport, making for a better user experience.</td>
   </tr>
   <tr>
-    <td class="col-fourty" width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-fx-flying-carpet" src="https://cdn.ampproject.org/v0/amp-fx-flying-carpet-0.1.js">&lt;/script></code></td>
   </tr>
@@ -47,6 +43,10 @@ Example:
 </amp-fx-flying-carpet>
 ```
 
+The following requirements are imposed on `amp-fx-flying-carpet` positioning:
+ - It should be positioned so that it doesn't obscure the first viewport (outside of top 75%).
+ - It should be positioned so that its top can reach or be above the top of the last viewport when scrolled.
+
 ## Attributes
 
 **height**
@@ -64,4 +64,4 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 
 ## Validation
 
-See [amp-fx-flying-carpet rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-fx-flying-carpet/0.1/validator-amp-fx-flying-carpet.protoascii) in the AMP validator specification.
+See [amp-fx-flying-carpet rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-fx-flying-carpet/validator-amp-fx-flying-carpet.protoascii) in the AMP validator specification.

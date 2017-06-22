@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import {bindForDoc} from '../../../src/bind';
-import {isExperimentOn} from '../../../src/experiments';
+import {bindForDoc, viewerForDoc} from '../../../src/services';
+import {fetchBatchedJsonFor} from '../../../src/batched-json';
+import {isBindEnabledFor} from './bind-impl';
 import {isJsonScriptTag} from '../../../src/dom';
 import {toggle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
-import {user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 
 export class AmpState extends AMP.BaseElement {
   /** @override */
@@ -39,37 +40,38 @@ export class AmpState extends AMP.BaseElement {
   }
 
   /** @override */
-  activate(invocation) {
-    const event = invocation.event;
-    if (event && event.detail) {
-      this.updateState_(event.detail.response);
-    }
+  activate(unusedInvocation) {
+    // TODO(choumx): Remove this after a few weeks in production.
+    const TAG = this.getName_();
+    user().error(TAG,
+        'Please use AMP.setState() action explicitly, e.g. ' +
+        'on="submit-success:AMP.setState({myAmpState: event.response})"');
   }
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, 'amp-bind'),
-        `Experiment "amp-bind" is disabled.`);
+    user().assert(isBindEnabledFor(this.win),
+        'Experiment "amp-bind" is disabled.');
 
-    const TAG = this.getName_();
-
-    toggle(this.element, false);
+    toggle(this.element, /* opt_display */ false);
     this.element.setAttribute('aria-hidden', 'true');
 
-    const children = this.element.children;
-    if (children.length == 1) {
-      const child = children[0];
-      if (isJsonScriptTag(child)) {
-        const json = tryParseJson(children[0].textContent, e => {
-          user().error(TAG, 'Failed to parse state. Is it valid JSON?', e);
-        });
-        this.updateState_(json, /* opt_isInit */ true);
-      } else {
-        user().error(TAG,
-            'State should be in a <script> tag with type="application/json"');
-      }
-    } else if (children.length > 1) {
-      user().error(TAG, 'Should contain only one <script> child.');
+    // Don't parse or fetch in prerender mode.
+    const viewer = viewerForDoc(this.getAmpDoc());
+    viewer.whenFirstVisible().then(() => this.initialize_());
+  }
+
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    const viewer = viewerForDoc(this.getAmpDoc());
+    if (!viewer.isVisible()) {
+      const TAG = this.getName_();
+      dev().error(TAG, 'Viewer must be visible before mutation.');
+      return;
+    }
+    const src = mutations['src'];
+    if (src !== undefined) {
+      this.fetchSrcAndUpdateState_(/* isInit */ false);
     }
   }
 
@@ -79,26 +81,86 @@ export class AmpState extends AMP.BaseElement {
     return true;
   }
 
+  /** @private */
+  initialize_() {
+    // Parse child script tag and/or fetch JSON from endpoint at `src`
+    // attribute, with the latter taking priority.
+    const children = this.element.children;
+    if (children.length > 0) {
+      this.parseChildAndUpdateState_();
+    }
+    if (this.element.hasAttribute('src')) {
+      this.fetchSrcAndUpdateState_(/* isInit */ true);
+    }
+  }
+
   /**
-   * @param {*} json
-   * @param {boolean=} opt_isInit
+   * Parses JSON in child script element and updates state.
    * @private
    */
-  updateState_(json, opt_isInit) {
+  parseChildAndUpdateState_() {
+    const TAG = this.getName_();
+    const children = this.element.children;
+    if (children.length != 1) {
+      user().error(TAG, 'Should contain exactly one <script> child.');
+      return;
+    }
+    const firstChild = children[0];
+    if (!isJsonScriptTag(firstChild)) {
+      user().error(TAG,
+          'State should be in a <script> tag with type="application/json".');
+      return;
+    }
+    const json = tryParseJson(firstChild.textContent, e => {
+      user().error(TAG, 'Failed to parse state. Is it valid JSON?', e);
+    });
+    this.updateState_(json, /* isInit */ true);
+  }
+
+  /**
+   * Wrapper to stub during testing.
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Element} element
+   * @return {!Promise}
+   * @visibleForTesting
+   */
+  fetchBatchedJsonFor_(ampdoc, element) {
+    return fetchBatchedJsonFor(ampdoc, element);
+  }
+
+  /**
+   * @param {boolean} isInit
+   * @returm {!Promise}
+   * @private
+   */
+  fetchSrcAndUpdateState_(isInit) {
+    const ampdoc = this.getAmpDoc();
+    return this.fetchBatchedJsonFor_(ampdoc, this.element).then(json => {
+      this.updateState_(json, isInit);
+    });
+  }
+
+  /**
+   * @param {*} json
+   * @param {boolean} isInit
+   * @private
+   */
+  updateState_(json, isInit) {
     if (json === undefined || json === null) {
       return;
     }
     const id = user().assert(this.element.id, '<amp-state> must have an id.');
     const state = Object.create(null);
     state[id] = json;
-    bindForDoc(this.getAmpDoc()).then(bind => {
-      bind.setState(state, opt_isInit);
+    bindForDoc(this.element).then(bind => {
+      bind.setState(state,
+          /* opt_skipEval */ isInit, /* opt_isAmpStateMutation */ !isInit);
     });
   }
 
   /**
    * @return {string} Returns a string to identify this tag. May not be unique
-   * if the element id is not unique.
+   *     if the element id is not unique.
    * @private
    */
   getName_() {

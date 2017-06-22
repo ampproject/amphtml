@@ -15,7 +15,7 @@
  */
 
 import {parseUrl, serializeQueryString} from '../../../../src/url';
-import {Messaging} from '../messaging';
+import {Messaging} from '../messaging/messaging';
 
 const APP = '__AMPHTML__';
 const MessageType = {
@@ -128,11 +128,12 @@ export class WebviewViewerForTesting {
         name: 'handshake-poll',
       };
       this.iframe.contentWindow./*OK*/postMessage(
-          message, '*', [channel.port2]);
+          JSON.stringify(message), '*', [channel.port2]);
       channel.port1.onmessage = function(e) {
         if (this.isChannelOpen_(e)) {
           window.clearInterval(this.pollingIntervalIds_[intervalCtr]);
-          this.completeHandshake_(channel, e.data.requestid);
+          const data = JSON.parse(e.data);
+          this.completeHandshake_(channel, data.requestid);
         } else {
           this.handleMessage_(e);
         }
@@ -141,8 +142,9 @@ export class WebviewViewerForTesting {
   }
 
   isChannelOpen_(e) {
-    return e.type == 'message' && e.data.app == APP &&
-      e.data.name == 'channelOpen';
+    const data = JSON.parse(e.data);
+    return e.type == 'message' && data.app == APP &&
+      data.name == 'channelOpen';
   };
 
 
@@ -153,8 +155,8 @@ export class WebviewViewerForTesting {
       requestid: requestId,
       type: MessageType.RESPONSE,
     };
-    this.log('############## viewer posting Message', message);
-    channel.port1./*OK*/postMessage(message);
+    this.log('############## viewer posting1 Message', message);
+    channel.port1./*OK*/postMessage(JSON.stringify(message));
 
     class WindowPortEmulator {
       constructor(messageHandlers, id, log) {
@@ -167,19 +169,17 @@ export class WebviewViewerForTesting {
         this.messageHandlers_[this.id_] = messageHandler;
       }
       postMessage(data) {
-        this.log_('############## viewer posting Message', data);
-        channel.port1./*OK*/postMessage(data);
+        this.log_('############## viewer posting2 Message', data);
+        channel.port1./*OK*/postMessage(JSON.stringify(data));
       }
       start() {}
     }
     this.messaging_ = new Messaging(this.win,
       new WindowPortEmulator(this.messageHandlers_, this.id, this.log));
 
-
-    // const handleMessage = this.handleMessage_;
     this.messaging_.setDefaultHandler((type, payload, awaitResponse) => {
       console/*OK*/.log(
-        'viewer receiving message: ', type, payload, awaitResponse);
+          'viewer receiving message: ', type, payload, awaitResponse);
       return Promise.resolve();
     });
 
@@ -216,9 +216,9 @@ export class WebviewViewerForTesting {
     return this.documentLoadedPromise_;
   }
 
-  processRequest_(data) {
-    const type = data.name;
-    switch (type) {
+  processRequest_(eventData) {
+    const data = JSON.parse(eventData);
+    switch (data.name) {
       case 'documentLoaded':
         this.log('documentLoaded!');
         this.documentLoadedResolve_();
@@ -237,7 +237,7 @@ export class WebviewViewerForTesting {
       case 'visibilitychange':
         return;
       default:
-        return Promise.reject('request not supported: ' + type);
+        return Promise.reject('request not supported: ' + data.name);
     }
   };
 

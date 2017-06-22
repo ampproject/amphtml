@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl} from '../../../src/url';
-import {getValueForExpr} from '../../../src/json';
+import {AmpEvents} from '../../../src/amp-events';
+import {createCustomEvent} from '../../../src/event-helper';
+import {fetchBatchedJsonFor} from '../../../src/batched-json';
+import {isArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {templatesFor} from '../../../src/template';
-import {urlReplacementsForDoc} from '../../../src/url-replacements';
+import {removeChildren} from '../../../src/dom';
+import {templatesFor} from '../../../src/services';
 import {user} from '../../../src/log';
-import {xhrFor} from '../../../src/xhr';
-
 
 /**
  * The implementation of `amp-list` component. See {@link ../amp-list.md} for
@@ -40,12 +40,14 @@ export class AmpList extends AMP.BaseElement {
     this.container_ = this.win.document.createElement('div');
     this.applyFillContent(this.container_, true);
     this.element.appendChild(this.container_);
+
     if (!this.container_.hasAttribute('role')) {
       this.container_.setAttribute('role', 'list');
     }
 
-    /** @private @const {!UrlReplacements} */
-    this.urlReplacements_ = urlReplacementsForDoc(this.getAmpDoc());
+    if (!this.element.hasAttribute('aria-live')) {
+      this.element.setAttribute('aria-live', 'polite');
+    }
   }
 
   /** @override */
@@ -55,26 +57,42 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    return this.urlReplacements_.expandAsync(assertHttpsUrl(
-        this.element.getAttribute('src'), this.element)).then(src => {
-          const opts = {};
-          if (this.element.hasAttribute('credentials')) {
-            opts.credentials = this.element.getAttribute('credentials');
-          }
-          if (!opts.credentials) {
-            opts.requireAmpResponseSourceOrigin = false;
-          }
-          return xhrFor(this.win).fetchJson(src, opts);
-        }).then(data => {
-          user().assert(data != null, 'Response is undefined %s', this.element);
-          const itemsExpr = this.element.getAttribute('items') || 'items';
-          const items = getValueForExpr(data, itemsExpr);
-          user().assert(items && Array.isArray(items),
-              'Response must contain an array at "%s". %s %s',
-              itemsExpr, this.element, data);
-          return templatesFor(this.win).findAndRenderTemplateArray(
-              this.element, items).then(this.rendered_.bind(this));
-        });
+    return this.populateList_();
+  }
+
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    const srcMutation = mutations['src'];
+    const stateMutation = mutations['state'];
+    if (srcMutation != undefined) {
+      this.populateList_();
+    } else if (stateMutation != undefined) {
+      const items = isArray(stateMutation) ? stateMutation : [stateMutation];
+      templatesFor(this.win).findAndRenderTemplateArray(
+          this.element, items).then(this.rendered_.bind(this));
+    }
+    if (srcMutation != undefined && stateMutation != undefined) {
+      user().warn('AMP-LIST', '[src] and [state] mutated simultaneously.' +
+          'The [state] mutation will be dropped.');
+    }
+  }
+
+  /**
+   * Request list data from `src` and return a promise that resolves when
+   * the list has been populated with rendered list items.
+   * @return {!Promise}
+   */
+  populateList_() {
+    const itemsExpr = this.element.getAttribute('items') || 'items';
+    return this.fetchItems_(itemsExpr).then(items => {
+      user().assert(isArray(items),
+          'Response must contain an array at "%s". %s',
+          itemsExpr, this.element);
+      return templatesFor(this.win).findAndRenderTemplateArray(
+          this.element, items).then(this.rendered_.bind(this));
+    }, error => {
+      throw user().createError('Error fetching amp-list', error);
+    });
   }
 
   /**
@@ -82,12 +100,17 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   rendered_(elements) {
+    removeChildren(this.container_);
     elements.forEach(element => {
       if (!element.hasAttribute('role')) {
         element.setAttribute('role', 'listitem');
       }
       this.container_.appendChild(element);
     });
+
+    const templatedEvent = createCustomEvent(this.win,
+        AmpEvents.TEMPLATE_RENDERED, /* detail */ null, {bubbles: true});
+    this.container_.dispatchEvent(templatedEvent);
 
     // Change height if needed.
     this.getVsync().measure(() => {
@@ -97,6 +120,14 @@ export class AmpList extends AMP.BaseElement {
         this.attemptChangeHeight(scrollHeight).catch(() => {});
       }
     });
+  }
+
+  /**
+   * @param {string} itemsExpr
+   * @visibleForTesting
+   */
+  fetchItems_(itemsExpr) {
+    return fetchBatchedJsonFor(this.getAmpDoc(), this.element, itemsExpr);
   }
 }
 

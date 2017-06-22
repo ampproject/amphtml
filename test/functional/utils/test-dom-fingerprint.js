@@ -20,16 +20,17 @@ import {
 } from '../../../src/utils/dom-fingerprint';
 
 
-describe('domFingerprint', () => {
+describes.realWin('domFingerprint', {}, env => {
+  let body;
   let div1;
   let ampAd;
-  const body = document.body;
+
   beforeEach(() => {
+    const doc = env.win.document;
     // Start with empty body.
-    while (body.firstChild) {
-      body.removeChild(body.firstChild);
-    }
-    div1 = document.createElement('div');
+    body = doc.body;
+    body.textContent = '';
+    div1 = doc.createElement('div');
     div1.id = 'id1';
     div1.innerHTML =
       `<div id='id2'>
@@ -45,18 +46,15 @@ describe('domFingerprint', () => {
       </div>`;
 
     body.appendChild(div1);
-    ampAd = document.getElementsByTagName('amp-ad')[0];
+    ampAd = doc.getElementsByTagName('amp-ad')[0];
   });
 
   it('should map a sample DOM structure to the right string', () => {
     expect(domFingerprintPlain(ampAd)).to.equal(
-      'amp-ad.0,td.1,tr.0,tbody.0,table.0,div/id2.0,div/id1.0,body.0,html.0');
-  });
-  it('should map a sample DOM structure to the right hashed value', () => {
-    expect(domFingerprint(ampAd)).to.equal('2437661740');
+        'amp-ad.0,td.1,tr.0,tbody.0,table.0,div/id2.0,div/id1.0,body.0,html.0');
   });
 
-  afterEach(() => {
-    body.removeChild(div1);
+  it('should map a sample DOM structure to the right hashed value', () => {
+    expect(domFingerprint(ampAd)).to.equal('2437661740');
   });
 });

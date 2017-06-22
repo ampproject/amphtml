@@ -17,10 +17,9 @@
 import * as sinon from 'sinon';
 import '../amp-carousel';
 import {createIframePromise} from '../../../../testing/iframe';
-import {toggleExperiment} from '../../../../src/experiments';
 
 describe('SlideScroll', () => {
-  const SHOW_CLASS = '-amp-slide-item-show';
+  const SHOW_CLASS = 'i-amphtml-slide-item-show';
   let sandbox;
 
   beforeEach(() => {
@@ -34,7 +33,6 @@ describe('SlideScroll', () => {
   function getAmpSlideScroll(
       opt_hasLooping, opt_slideCount = 5, opt_attachToDom = true) {
     return createIframePromise().then(iframe => {
-      toggleExperiment(iframe.win, 'amp-slidescroll', true);
       iframe.width = '1000';
       iframe.height = '1000';
       const imgUrl = 'https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-' +
@@ -77,16 +75,17 @@ describe('SlideScroll', () => {
     return getAmpSlideScroll().then(obj => {
       const ampSlideScroll = obj.ampSlideScroll;
       expect(
-          ampSlideScroll.getElementsByClassName('-amp-slides-container').length)
-              .to.equal(1);
+          ampSlideScroll.getElementsByClassName('i-amphtml-slides-container')
+              .length).to.equal(1);
       expect(
           ampSlideScroll.querySelectorAll(
-            '.-amp-slides-container > .-amp-slide-item').length).to.equal(5);
+              '.i-amphtml-slides-container > .i-amphtml-slide-item').length)
+          .to.equal(5);
       expect(
           ampSlideScroll.getElementsByClassName('amp-carousel-slide').length)
-              .to.equal(5);
-      expect(ampSlideScroll.querySelector('.-amp-slides-container')
-            .getAttribute('aria-live')).to.equal('polite');
+          .to.equal(5);
+      expect(ampSlideScroll.querySelector('.i-amphtml-slides-container')
+          .getAttribute('aria-live')).to.equal('polite');
       const impl = ampSlideScroll.implementation_;
       expect(impl.slideWrappers_[0].classList.contains(SHOW_CLASS))
           .to.be.true;
@@ -107,10 +106,10 @@ describe('SlideScroll', () => {
       impl.buildCarousel();
       expect(
           ampSlideScroll.getElementsByClassName(
-              '-amp-carousel-start-marker').length).to.be.at.least(1);
+              'i-amphtml-carousel-start-marker').length).to.be.at.least(1);
       expect(
           ampSlideScroll.getElementsByClassName(
-              '-amp-carousel-end-marker').length).to.be.at.least(1);
+              'i-amphtml-carousel-end-marker').length).to.be.at.least(1);
     });
   });
 
@@ -144,7 +143,7 @@ describe('SlideScroll', () => {
       const setControlsStateSpy = sandbox.spy(impl, 'setControlsState');
       const analyticsEventSpy = sandbox.spy(impl, 'analyticsEvent_');
 
-      impl.showSlide_(-1);
+      expect(impl.showSlide_(-1)).to.be.false;
       expect(updateInViewportSpy).to.not.have.been.called;
       expect(scheduleLayoutSpy).to.not.have.been.called;
       expect(schedulePreloadSpy).to.not.have.been.called;
@@ -152,7 +151,7 @@ describe('SlideScroll', () => {
       expect(setControlsStateSpy).to.not.have.been.called;
       expect(analyticsEventSpy).to.not.have.been.called;
 
-      impl.showSlide_(5);
+      expect(impl.showSlide_(5)).to.be.false;
       expect(updateInViewportSpy).to.not.have.been.called;
       expect(scheduleLayoutSpy).to.not.have.been.called;
       expect(schedulePreloadSpy).to.not.have.been.called;
@@ -160,7 +159,7 @@ describe('SlideScroll', () => {
       expect(setControlsStateSpy).to.not.have.been.called;
       expect(analyticsEventSpy).to.not.have.been.called;
 
-      impl.showSlide_(impl.slideIndex_);
+      expect(impl.showSlide_(impl.slideIndex_)).to.be.false;
       expect(updateInViewportSpy).to.not.have.been.called;
       expect(scheduleLayoutSpy).to.not.have.been.called;
       expect(schedulePreloadSpy).to.not.have.been.called;
@@ -168,7 +167,7 @@ describe('SlideScroll', () => {
       expect(setControlsStateSpy).to.not.have.been.called;
       expect(analyticsEventSpy).to.not.have.been.called;
 
-      impl.showSlide_(1);
+      expect(impl.showSlide_(1)).to.be.true;
       expect(updateInViewportSpy).to.have.been.calledWith(
           impl.slides_[0], false);
       expect(updateInViewportSpy).to.have.been.calledWith(
@@ -199,8 +198,7 @@ describe('SlideScroll', () => {
       expect(impl.slides_[1].getAttribute('aria-hidden')).to.equal('false');
       expect(impl.slides_[2].getAttribute('aria-hidden')).to.equal('true');
 
-      impl.showSlide_(0);
-
+      expect(impl.showSlide_(0)).to.be.true;
       expect(updateInViewportSpy).to.have.been.calledWith(
           impl.slides_[1], false);
       expect(updateInViewportSpy).to.have.been.calledWith(
@@ -229,8 +227,7 @@ describe('SlideScroll', () => {
       expect(impl.slides_[0].getAttribute('aria-hidden')).to.equal('false');
       expect(impl.slides_[1].getAttribute('aria-hidden')).to.equal('true');
 
-      impl.showSlide_(4);
-
+      expect(impl.showSlide_(4)).to.be.true;
       expect(updateInViewportSpy).to.have.been.calledWith(
           impl.slides_[0], false);
       expect(updateInViewportSpy).to.have.been.calledWith(
@@ -566,7 +563,6 @@ describe('SlideScroll', () => {
 
   describe('Looping', () => {
     beforeEach(() => {
-      toggleExperiment(window, 'amp-slidescroll', true);
       sandbox = sinon.sandbox.create();
     });
 
@@ -978,19 +974,32 @@ describe('SlideScroll', () => {
       return getAmpSlideScroll(true).then(obj => {
         const ampSlideScroll = obj.ampSlideScroll;
         const impl = ampSlideScroll.implementation_;
-        let args = {'index': '123'};
         const showSlideSpy = sandbox.spy(impl, 'showSlide_');
+        const satisfiesTrust = () => true;
 
-        impl.executeAction({method: 'goToSlide', args});
-        expect(showSlideSpy).to.have.been.calledWith(123);
+        let args = {'index': '123'};
+        impl.executeAction({method: 'goToSlide', args, satisfiesTrust});
+        expect(showSlideSpy).to.not.have.been.called;
+
+        args = {'index': '5'};
+        impl.executeAction({method: 'goToSlide', args, satisfiesTrust});
+        expect(showSlideSpy).to.not.have.been.called;
 
         args = {'index': 'ssds11'};
-        impl.executeAction({method: 'goToSlide', args});
-        expect(showSlideSpy).to.be.calledOnce;
+        impl.executeAction({method: 'goToSlide', args, satisfiesTrust});
+        expect(showSlideSpy).to.not.have.been.called;
+
+        args = {'index': '-1'};
+        impl.executeAction({method: 'goToSlide', args, satisfiesTrust});
+        expect(showSlideSpy).to.not.have.been.called;
 
         args = {'index': '0'};
-        impl.executeAction({method: 'goToSlide', args});
+        impl.executeAction({method: 'goToSlide', args, satisfiesTrust});
         expect(showSlideSpy).to.have.been.calledWith(0);
+
+        args = {'index': '4'};
+        impl.executeAction({method: 'goToSlide', args, satisfiesTrust});
+        expect(showSlideSpy).to.have.been.calledWith(4);
       });
     });
 
@@ -1002,21 +1011,22 @@ describe('SlideScroll', () => {
         // Layout happens asynchronously after attaching to DOM, so we can
         // test pre-layoutCallback logic now.
         iframe.addElement(ampSlideScroll);
-
         const impl = ampSlideScroll.implementation_;
         const showSlideSpy = sandbox.spy(impl, 'showSlide_');
+        const satisfiesTrust = () => true;
 
-        const args = {'index': '123'};
-        impl.executeAction({method: 'goToSlide', args});
-        expect(showSlideSpy.called).to.be.false;
+        const args = {'index': '3'};
+        impl.executeAction({method: 'goToSlide', args, satisfiesTrust});
+        expect(showSlideSpy).to.not.have.been.called;
 
-        impl.mutatedAttributesCallback({slide: 321});
-        expect(showSlideSpy.called).to.be.false;
+        impl.mutatedAttributesCallback({slide: 2});
+        expect(showSlideSpy).to.not.have.been.called;
 
+        impl.onLayoutMeasure();
         ampSlideScroll.layoutCallback();
 
         // Should show the last slide index requested before layout.
-        expect(showSlideSpy).to.have.been.calledWith(321);
+        expect(showSlideSpy).to.have.been.calledWith(2);
         expect(showSlideSpy).to.be.calledOnce;
       });
     });

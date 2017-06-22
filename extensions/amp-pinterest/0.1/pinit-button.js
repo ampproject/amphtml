@@ -15,7 +15,7 @@
  */
 import {openWindowDialog} from '../../../src/dom';
 import {user} from '../../../src/log';
-import {xhrFor} from '../../../src/xhr';
+import {xhrFor} from '../../../src/services';
 
 import {Util} from './util';
 
@@ -42,11 +42,11 @@ export class PinItButton {
   /** @param {!Element} rootElement */
   constructor(rootElement) {
     user().assert(rootElement.getAttribute('data-url'),
-      'The data-url attribute is required for Pin It buttons');
+        'The data-url attribute is required for Pin It buttons');
     user().assert(rootElement.getAttribute('data-media'),
-      'The data-media attribute is required for Pin It buttons');
+        'The data-media attribute is required for Pin It buttons');
     user().assert(rootElement.getAttribute('data-description'),
-      'The data-description attribute is required for Pin It buttons');
+        'The data-description attribute is required for Pin It buttons');
     this.element = rootElement;
     this.xhr = xhrFor(rootElement.ownerDocument.defaultView);
     this.color = rootElement.getAttribute('data-color');
@@ -76,7 +76,7 @@ export class PinItButton {
     const url = `https://widgets.pinterest.com/v1/urls/count.json?return_jsonp=false&url=${this.url}`;
     return this.xhr.fetchJson(url, {
       requireAmpResponseSourceOrigin: false,
-    });
+    }).then(res => res.json());
   }
 
   /**
@@ -126,11 +126,8 @@ export class PinItButton {
       color: ['red', 'white'].indexOf(this.color) !== -1 ? this.color : 'gray',
     };
 
-    // TODO(dvoytenko, #6794): Remove old `-amp-fill-content` form after the new
-    // form is in PROD for 1-2 weeks.
     const clazz = [
       `-amp-pinterest${CLASS.shape}${CLASS.height}`,
-      '-amp-fill-content',
       'i-amphtml-fill-content',
     ];
 
@@ -165,7 +162,7 @@ export class PinItButton {
     this.url = encodeURIComponent(this.element.getAttribute('data-url'));
 
     const query = [
-      `amp=1`,
+      'amp=1',
       `guid=${Util.guid}`,
       `url=${this.url}`,
       `media=${this.media}`,

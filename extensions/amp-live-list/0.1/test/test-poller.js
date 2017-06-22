@@ -17,7 +17,7 @@
 
 import * as sinon from 'sinon';
 import {Poller} from '../poller';
-import {timerFor} from '../../../../src/timer';
+import {timerFor} from '../../../../src/services';
 
 
 describe('Poller', () => {
@@ -31,7 +31,7 @@ describe('Poller', () => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
     const obj = {
-      work: function() {},
+      work() {},
     };
     workStub = sandbox.stub(obj, 'work');
     sandbox.stub(Math, 'random', () => 1);

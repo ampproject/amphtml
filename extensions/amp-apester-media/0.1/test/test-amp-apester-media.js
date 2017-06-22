@@ -19,7 +19,7 @@ import {
 } from '../../../../testing/iframe';
 import '../amp-apester-media';
 import {adopt} from '../../../../src/runtime';
-import {xhrFor} from '../../../../src/xhr';
+import {xhrFor} from '../../../../src/services';
 import * as sinon from 'sinon';
 
 adopt(window);
@@ -67,7 +67,11 @@ describe('amp-apester-media', () => {
       attemptChangeSizeSpy = sandbox.spy(
           media.implementation_, 'attemptChangeHeight');
       xhrMock = sandbox.mock(xhrFor(iframe.win));
-      xhrMock.expects('fetchJson').returns(Promise.resolve(response));
+      xhrMock.expects('fetchJson').returns(Promise.resolve({
+        json() {
+          return Promise.resolve(response);
+        },
+      }));
       for (const key in attributes) {
         media.setAttribute(key, attributes[key]);
 

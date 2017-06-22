@@ -16,14 +16,16 @@
 
 
 /**
- * @typedef {!WebMultiAnimationDef|!WebKeyframeAnimationDef}
+ * @typedef {!WebMultiAnimationDef|!WebCompAnimationDef|!WebKeyframeAnimationDef}
  */
 export let WebAnimationDef;
 
 
 /**
+ * @mixes WebAnimationSelectorDef
  * @mixes WebAnimationTimingDef
- * @mixes WebAnimationMediaDef
+ * @mixes WebAnimationVarsDef
+ * @mixes WebAnimationConditionalDef
  * @typedef {{
  *   animations: !Array<!WebAnimationDef>,
  * }}
@@ -32,11 +34,24 @@ export let WebMultiAnimationDef;
 
 
 /**
+ * @mixes WebAnimationSelectorDef
  * @mixes WebAnimationTimingDef
- * @mixes WebAnimationMediaDef
+ * @mixes WebAnimationVarsDef
+ * @mixes WebAnimationConditionalDef
  * @typedef {{
- *   target: (string|!Element),
- *   keyframes: !WebKeyframesDef,
+ *   animation: string,
+ * }}
+ */
+export let WebCompAnimationDef;
+
+
+/**
+ * @mixes WebAnimationSelectorDef
+ * @mixes WebAnimationTimingDef
+ * @mixes WebAnimationVarsDef
+ * @mixes WebAnimationConditionalDef
+ * @typedef {{
+ *   keyframes: (string|!WebKeyframesDef),
  * }}
  */
 export let WebKeyframeAnimationDef;
@@ -61,9 +76,20 @@ export let WebKeyframesDef;
  *   easing: (string|undefined),
  *   direction: (!WebAnimationTimingDirection|undefined),
  *   fill: (!WebAnimationTimingFill|undefined),
+ *   ticker: (string|undefined)
  * }}
  */
 export let WebAnimationTimingDef;
+
+
+/**
+ * Indicates an extension to a type that allows specifying vars. Vars are
+ * specified as properties with the name in the format of `--varName`.
+ *
+ * @mixin
+ * @typedef {Object}
+ */
+export let WebAnimationVarsDef;
 
 
 /**
@@ -74,7 +100,29 @@ export let WebAnimationTimingDef;
  *   media: (string|undefined),
  * }}
  */
-export let WebAnimationMediaDef;
+export let WebAnimationConditionalDef;
+
+
+/**
+ * @typedef {{
+ *   target: (!Element|undefined),
+ *   selector: (string|undefined),
+ *   subtargets: (!Array<!WebAnimationSubtargetDef>|undefined),
+ * }}
+ */
+export let WebAnimationSelectorDef;
+
+
+/**
+ * @mixes WebAnimationTimingDef
+ * @mixes WebAnimationVarsDef
+ * @typedef {{
+ *   matcher: (function(!Element, number):boolean|undefined),
+ *   index: (number|undefined),
+ *   selector: (string|undefined),
+ * }}
+ */
+export let WebAnimationSubtargetDef;
 
 
 /**
@@ -120,6 +168,8 @@ const WHITELISTED_RPOPS = {
   'opacity': true,
   'transform': true,
   'visibility': true,
+  'offset-distance': true,
+  'offsetDistance': true,
 };
 
 

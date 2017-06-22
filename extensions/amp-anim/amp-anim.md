@@ -22,10 +22,6 @@ limitations under the License.
     <td>A runtime-managed animated image, typically a GIF.</td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js">&lt;/script></code></td>
   </tr>
@@ -41,9 +37,7 @@ limitations under the License.
 
 ## Behavior
 
-The `amp-anim` component is very similar to the `amp-img` element, and provides additional functionality to manage loading and playing of animated images such as GIFs.
-
-The `amp-anim` component can also have an optional placeholder child, to display while the `src` file is loading. The placeholder is specified via the `placeholder` attribute:
+The `amp-anim` component is almost identical to the `amp-img` element, but allows the AMP runtime to reduce CPU usage when the animation is off-screen. Like [other elements](https://www.ampproject.org/docs/guides/author-develop/responsive/placeholders), it supports an optional `placeholder` child, to display while the `src` file is loading:
 
 ```html
 <amp-anim width=400 height=300 src="my-gif.gif">
@@ -51,6 +45,9 @@ The `amp-anim` component can also have an optional placeholder child, to display
   </amp-img>
 </amp-anim>
 ```
+
+In the future, additional functionality, such as animation playback control, could be added.
+
 ## Attributes
 
 **src**
@@ -91,4 +88,4 @@ amp-anim {
 ```
 ## Validation
 
-See [amp-anim rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-anim/0.1/validator-amp-anim.protoascii) in the AMP validator specification.
+See [amp-anim rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-anim/validator-amp-anim.protoascii) in the AMP validator specification.

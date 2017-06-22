@@ -15,10 +15,12 @@
  */
 
 import {Viewer} from '../../src/service/viewer-impl';
+import {ampdocServiceFor} from '../../src/ampdoc';
 import {dev} from '../../src/log';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
+import {parseUrl, removeFragment} from '../../src/url';
 import * as sinon from 'sinon';
 
 
@@ -65,7 +67,7 @@ describe('Viewer', () => {
       defaultView: windowApi,
       hidden: false,
       visibilityState: 'visible',
-      addEventListener: function(type, listener) {
+      addEventListener(type, listener) {
         events[type] = listener;
       },
       referrer: '',
@@ -75,10 +77,13 @@ describe('Viewer', () => {
     };
     windowApi.navigator = window.navigator;
     windowApi.history = {
-      replaceState: sandbox.spy(),
+      replaceState: () => {},
     };
-    const ampdocService = installDocService(windowApi, /* isSingleDoc */ true);
-    ampdoc = ampdocService.getAmpDoc();
+    sandbox.stub(windowApi.history, 'replaceState', (state, title, url) => {
+      windowApi.location.href = url;
+    });
+    installDocService(windowApi, /* isSingleDoc */ true);
+    ampdoc = ampdocServiceFor(windowApi).getAmpDoc();
     installPlatformService(windowApi);
     installTimerService(windowApi);
     events = {};
@@ -223,6 +228,100 @@ describe('Viewer', () => {
       paddingTop: 19,
     });
     expect(viewportEvent).to.not.equal(null);
+  });
+
+  describe('replaceUrl', () => {
+    function setUrl(href) {
+      const url = parseUrl(href);
+      windowApi.location.href = url.href;
+      windowApi.location.hash = url.hash;
+    }
+
+    it('should replace URL for the same non-proxy origin', () => {
+      const fragment = '#replaceUrl=http://www.example.com/two%3Fa%3D1&b=1';
+      setUrl('http://www.example.com/one' + fragment);
+      new Viewer(ampdoc);
+      expect(windowApi.history.replaceState).to.be.calledOnce;
+      expect(windowApi.history.replaceState).to.be.calledWith({}, '',
+          'http://www.example.com/two?a=1' + fragment);
+      expect(ampdoc.getUrl())
+          .to.equal('http://www.example.com/two?a=1' + fragment);
+      expect(windowApi.location.originalHref)
+          .to.equal('http://www.example.com/one' + fragment);
+    });
+
+    it('should ignore replacement fragment', () => {
+      const fragment = '#replaceUrl=http://www.example.com/two%23b=2&b=1';
+      setUrl('http://www.example.com/one' + fragment);
+      new Viewer(ampdoc);
+      expect(windowApi.history.replaceState).to.be.calledOnce;
+      expect(windowApi.history.replaceState).to.be.calledWith({}, '',
+          'http://www.example.com/two' + fragment);
+      expect(windowApi.location.originalHref)
+          .to.equal('http://www.example.com/one' + fragment);
+    });
+
+    it('should replace relative URL for the same non-proxy origin', () => {
+      const fragment = '#replaceUrl=/two&b=1';
+      setUrl(removeFragment(window.location.href) + fragment);
+      new Viewer(ampdoc);
+      expect(windowApi.history.replaceState).to.be.calledOnce;
+      expect(windowApi.history.replaceState).to.be.calledWith({}, '',
+          window.location.origin + '/two' + fragment);
+      expect(windowApi.location.originalHref)
+          .to.equal(removeFragment(window.location.href) + fragment);
+    });
+
+    it('should fail to replace URL for a wrong non-proxy origin', () => {
+      const fragment = '#replaceUrl=http://other.example.com/two&b=1';
+      setUrl('http://www.example.com/one' + fragment);
+      new Viewer(ampdoc);
+      expect(windowApi.history.replaceState).to.not.be.called;
+      expect(windowApi.location.originalHref).to.be.undefined;
+    });
+
+    it('should tolerate errors when trying to replace URL', () => {
+      const fragment = '#replaceUrl=http://www.example.com/two&b=1';
+      setUrl('http://www.example.com/one' + fragment);
+      windowApi.history.replaceState.restore();
+      sandbox.stub(windowApi.history, 'replaceState', () => {
+        throw new Error('intentional');
+      });
+      expect(() => {
+        new Viewer(ampdoc);
+      }).to.not.throw();
+      expect(windowApi.location.originalHref).to.be.undefined;
+    });
+
+    it('should replace URL for the same source origin on proxy', () => {
+      const fragment =
+          '#replaceUrl=https://cdn.ampproject.org/c/www.example.com/two&b=1';
+      setUrl('https://cdn.ampproject.org/c/www.example.com/one' + fragment);
+      new Viewer(ampdoc);
+      expect(windowApi.history.replaceState).to.be.calledOnce;
+      expect(windowApi.history.replaceState).to.be.calledWith({}, '',
+          'https://cdn.ampproject.org/c/www.example.com/two' + fragment);
+      expect(windowApi.location.originalHref)
+          .to.equal('https://cdn.ampproject.org/c/www.example.com/one' +
+              fragment);
+    });
+
+    it('should fail replace URL for wrong source origin on proxy', () => {
+      const fragment =
+          '#replaceUrl=https://cdn.ampproject.org/c/other.example.com/two&b=1';
+      setUrl('https://cdn.ampproject.org/c/www.example.com/one' + fragment);
+      new Viewer(ampdoc);
+      expect(windowApi.history.replaceState).to.not.be.called;
+      expect(windowApi.location.originalHref).to.be.undefined;
+    });
+
+    it('should NOT replace URL in shadow doc', () => {
+      const fragment = '#replaceUrl=http://www.example.com/two&b=1';
+      setUrl('http://www.example.com/one' + fragment);
+      sandbox.stub(ampdoc, 'isSingleDoc', () => false);
+      new Viewer(ampdoc);
+      expect(windowApi.history.replaceState).to.not.be.called;
+    });
   });
 
   describe('should receive the visibilitychange event', () => {
@@ -910,15 +1009,15 @@ describe('Viewer', () => {
     });
 
     describe('should NOT trust wrong or non-whitelisted domain variations',
-      () => {
-        test('https://google.net', false);
-        test('https://google.other.com', false);
-        test('https://www.google.other.com', false);
-        test('https://withgoogle.com', false);
-        test('https://acme.com', false);
-        test('https://google', false);
-        test('https://www.google', false);
-      });
+        () => {
+          test('https://google.net', false);
+          test('https://google.other.com', false);
+          test('https://www.google.other.com', false);
+          test('https://withgoogle.com', false);
+          test('https://acme.com', false);
+          test('https://google', false);
+          test('https://www.google', false);
+        });
 
     describe('tests for b/32626673', () => {
       test('www.google.com', true, true);

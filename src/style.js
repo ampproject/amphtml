@@ -16,6 +16,7 @@
 
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
 import {map} from './utils/object.js';
+import {startsWith} from './string';
 
 
 /** @type {Object<string, string>} */
@@ -64,6 +65,10 @@ function getVendorJsPropertyName_(style, titleCase) {
  * @return {string}
  */
 export function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
+  if (startsWith(camelCase, '--')) {
+    // CSS vars are returned as is.
+    return camelCase;
+  }
   if (!propertyNameCache) {
     propertyNameCache = map();
   }
@@ -221,4 +226,18 @@ export function removeAlphaFromColor(rgbaColor) {
 export function computedStyle(win, el) {
   const style = /** @type {?CSSStyleDeclaration} */(win.getComputedStyle(el));
   return /** @type {!Object<string, string>} */(style) || map();
+}
+
+
+/**
+ * Resets styles that were set dynamically (i.e. inline)
+ * @param {!Element} element
+ * @param {!Array<string>} properties
+ */
+export function resetStyles(element, properties) {
+  const styleObj = {};
+  properties.forEach(prop => {
+    styleObj[prop] = null;
+  });
+  setStyles(element, styleObj);
 }

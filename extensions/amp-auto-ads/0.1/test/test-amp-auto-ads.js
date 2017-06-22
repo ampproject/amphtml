@@ -14,10 +14,19 @@
  * limitations under the License.
  */
 
+import '../../../amp-ad/0.1/amp-ad';
 import {AmpAutoAds} from '../amp-auto-ads';
-import {toggleExperiment} from '../../../../src/experiments';
-import {xhrFor} from '../../../../src/xhr';
+import {
+  toggleExperiment,
+  forceExperimentBranch,
+} from '../../../../src/experiments';
+import {xhrFor} from '../../../../src/services';
 import {waitForChild} from '../../../../src/dom';
+import {viewportForDoc} from '../../../../src/services';
+import {
+  ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
+  AdSenseAmpAutoAdsHoldoutBranches,
+} from '../../../../ads/google/adsense-amp-auto-ads';
 
 describes.realWin('amp-auto-ads', {
   amp: {
@@ -28,6 +37,7 @@ describes.realWin('amp-auto-ads', {
 }, env => {
 
   const AD_CLIENT = 'ca-pub-1234';
+  const OPT_IN_STATUS_ANCHOR_ADS = 2;
 
   let sandbox;
   let container;
@@ -53,6 +63,10 @@ describes.realWin('amp-auto-ads', {
 
     toggleExperiment(env.win, 'amp-auto-ads', true);
     sandbox = env.sandbox;
+
+    const viewportMock = sandbox.mock(viewportForDoc(env.win.document));
+    viewportMock.expects('getSize').returns(
+        {width: 320, height: 500}).atLeast(1);
 
     container = env.win.document.createElement('div');
     env.win.document.body.appendChild(container);
@@ -119,11 +133,16 @@ describes.realWin('amp-auto-ads', {
           type: 1,
         },
       ],
+      optInStatus: [1],
     };
 
     xhr = xhrFor(env.win);
     xhr.fetchJson = () => {
-      return Promise.resolve(configObj);
+      return Promise.resolve({
+        json() {
+          return Promise.resolve(configObj);
+        },
+      });
     };
     sandbox.spy(xhr, 'fetchJson');
 
@@ -154,6 +173,51 @@ describes.realWin('amp-auto-ads', {
         verifyAdElement(anchor4.childNodes[0]);
         resolve();
       });
+    });
+  });
+
+  it('should insert ads on the page when in holdout experiment branch', () => {
+    forceExperimentBranch(env.win,
+        ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
+        AdSenseAmpAutoAdsHoldoutBranches.EXPERIMENT);
+
+    ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
+    ampAutoAdsElem.setAttribute('type', 'adsense');
+    ampAutoAds.buildCallback();
+
+    return new Promise(resolve => {
+      waitForChild(anchor4, parent => {
+        return parent.childNodes.length > 0;
+      }, () => {
+        expect(anchor1.childNodes).to.have.lengthOf(1);
+        expect(anchor2.childNodes).to.have.lengthOf(1);
+        expect(anchor3.childNodes).to.have.lengthOf(0);
+        expect(anchor4.childNodes).to.have.lengthOf(1);
+        verifyAdElement(anchor1.childNodes[0]);
+        verifyAdElement(anchor2.childNodes[0]);
+        verifyAdElement(anchor4.childNodes[0]);
+        resolve();
+      });
+    });
+  });
+
+  it('should not insert ads on the page when in holdout control branch', () => {
+    forceExperimentBranch(env.win,
+        ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
+        AdSenseAmpAutoAdsHoldoutBranches.CONTROL);
+
+    ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
+    ampAutoAdsElem.setAttribute('type', 'adsense');
+    ampAutoAds.buildCallback();
+
+    return new Promise(resolve => {
+      setTimeout(() => {
+        expect(anchor1.childNodes).to.have.lengthOf(0);
+        expect(anchor2.childNodes).to.have.lengthOf(0);
+        expect(anchor3.childNodes).to.have.lengthOf(0);
+        expect(anchor4.childNodes).to.have.lengthOf(0);
+        resolve();
+      }, 500);
     });
   });
 
@@ -266,5 +330,72 @@ describes.realWin('amp-auto-ads', {
     expect(() => ampAutoAds.buildCallback())
         .to.throw(/Experiment is off​​​/);
     expect(xhr.fetchJson).not.to.have.been.called;
+  });
+
+  describe('Anchor Ad', () => {
+    it('should not insert anchor ad if not opted in', () => {
+      ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
+      ampAutoAdsElem.setAttribute('type', 'adsense');
+      ampAutoAds.buildCallback();
+
+      return new Promise(resolve => {
+        setTimeout(() => {
+          expect(env.win.document.getElementsByTagName('AMP-STICKY-AD'))
+              .to.have.lengthOf(0);
+          resolve();
+        }, 500);
+      });
+    });
+
+    it('should insert three ads plus anchor ad', () => {
+      configObj['optInStatus'].push(OPT_IN_STATUS_ANCHOR_ADS);
+
+      ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
+      ampAutoAdsElem.setAttribute('type', 'adsense');
+      ampAutoAds.buildCallback();
+
+      const bannerAdsPromise = new Promise(resolve => {
+        waitForChild(anchor4, parent => {
+          return parent.childNodes.length > 0;
+        }, () => {
+          expect(anchor1.childNodes).to.have.lengthOf(1);
+          expect(anchor2.childNodes).to.have.lengthOf(1);
+          expect(anchor3.childNodes).to.have.lengthOf(0);
+          expect(anchor4.childNodes).to.have.lengthOf(1);
+          verifyAdElement(anchor1.childNodes[0]);
+          verifyAdElement(anchor2.childNodes[0]);
+          verifyAdElement(anchor4.childNodes[0]);
+          resolve();
+        });
+      });
+
+      const anchorAdPromise = new Promise(resolve => {
+        waitForChild(env.win.document.body, parent => {
+          return parent.firstChild.tagName == 'AMP-STICKY-AD';
+        }, () => {
+          resolve();
+        });
+      });
+
+      return Promise.all([bannerAdsPromise, anchorAdPromise]);
+    });
+
+    it('should insert anchor anchor ad only', () => {
+      configObj = {
+        optInStatus: [2],
+      };
+
+      ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
+      ampAutoAdsElem.setAttribute('type', 'adsense');
+      ampAutoAds.buildCallback();
+
+      return new Promise(resolve => {
+        waitForChild(env.win.document.body, parent => {
+          return parent.firstChild.tagName == 'AMP-STICKY-AD';
+        }, () => {
+          resolve();
+        });
+      });
+    });
   });
 });

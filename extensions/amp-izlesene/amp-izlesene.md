@@ -22,10 +22,6 @@ limitations under the License.
     <td>Displays an embedded <a href="https://www.izlesene.com/">Izlesene</a> video.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Coming Soon; Available on <a href="https://www.ampproject.org/docs/reference/experimental#opt-into-the-amp-dev-channel">Dev Channel</a></td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-izlesene" src="https://cdn.ampproject.org/v0/amp-izlesene-0.1.js">&lt;/script></code></td>
   </tr>
@@ -72,4 +68,4 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 
 ## Validation
 
-See [amp-izlesene rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-izlesene/0.1/validator-amp-izlesene.protoascii) in the AMP validator specification.
+See [amp-izlesene rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-izlesene/validator-amp-izlesene.protoascii) in the AMP validator specification.

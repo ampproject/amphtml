@@ -16,14 +16,12 @@ limitations under the License.
 
 # <a name="amp-pixel"></a> `amp-pixel`
 
+[TOC]
+
 <table>
   <tr>
     <td class="col-fourty"><strong>Description</strong></td>
-    <td>The <code>amp-pixel</code> element is meant to be used as a typical tracking pixel - to count page views.</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Availability</strong></td>
-    <td>Stable</td>
+    <td>Can be used as a typical tracking pixel to count pageviews.</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
@@ -31,30 +29,51 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/everything.amp.html">everything.amp.html</a></td>
+    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-pixel/">amp-pixel example</a>.</td>
   </tr>
 </table>
 
 ## Behavior
 
-The `amp-pixel` component behaves like a simple tracking pixel `img`. It takes a single URL, but provides variables that can be replaced by the component in the URL string when making the request. See the `src` attribute for more information.
+The `amp-pixel` component behaves like a simple tracking pixel `img`. It takes a single URL, but provides variables that can be replaced by the component in the URL string when making the request. See the [substitutions](#substitutions) section for further details.
+
+In this basic example, the `amp-pixel` issues a simple GET request to the given URL and ignores the result.
+
+```html
+<amp-pixel src="https://foo.com/tracker/foo"
+    layout="nodisplay"></amp-pixel>
+```
 
 ## Attributes
 
-**src** (required)
+##### src (required)
 
-A simple URL to send a GET request to when the tracking pixel is loaded.
+A simple URL to a remote endpoint that must be `https` protocol.
+
+##### referrerpolicy (optional)
+
+This attribute is similar to the `referrerpolicy` attribute on `<img>`, however `no-referrer` is the only accepted value. If `referrerpolicy=no-referrer` is specified, the `referrer` header is removed from the HTTP request.
+
+```html
+<amp-pixel src="https://foo.com/tracker/foo"
+    layout="nodisplay"
+    referrerpolicy="no-referrer"></amp-pixel>
+```
+##### common attributes
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Substitutions
 
 The `amp-pixel` allows all standard URL variable substitutions.
-See [Substitutions Guide](../spec/amp-var-substitutions.md) for more info.
+See the [Substitutions Guide](../spec/amp-var-substitutions.md) for more information.
 
-For instance:
+In the following example, a request might be made to something like `https://foo.com/pixel?0.8390278471201` where the RANDOM value is randomly generated upon each impression.
+
 ```html
-<amp-pixel src="https://foo.com/pixel?RANDOM"></amp-pixel>
+<amp-pixel src="https://foo.com/pixel?RANDOM"
+    layout="nodisplay"></amp-pixel>
 ```
-may make a request to something like `https://foo.com/pixel?0.8390278471201` where the RANDOM value is randomly generated upon each impression.
 
 ## Styling
 

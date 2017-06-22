@@ -34,12 +34,12 @@ describes.realWin('font-stylesheet-timeout', {
     readyState = 'interactive';
     responseStart = 0;
     Object.defineProperty(win.document, 'readyState', {
-      get: function() {
+      get() {
         return readyState;
       },
     });
     Object.defineProperty(win.performance.timing, 'responseStart', {
-      get: function() {
+      get() {
         return responseStart;
       },
     });
@@ -74,24 +74,27 @@ describes.realWin('font-stylesheet-timeout', {
         'link[rel="stylesheet"]')).to.equal(link);
   });
 
-  it('should time out if doc is not interactive', done => {
+  it('should time out if doc is not interactive', () => {
     readyState = 'loading';
     const link = addLink();
     fontStylesheetTimeout(win);
     clock.tick(999);
     expect(win.document.querySelectorAll(
-        'link[rel="stylesheet"][i-amp-timeout]')).to.have.length(0);
+        'link[rel="stylesheet"][i-amphtml-timeout]')).to.have.length(0);
     clock.tick(1);
     expect(win.document.querySelectorAll(
-        'link[rel="stylesheet"][i-amp-timeout]')).to.have.length(1);
+        'link[rel="stylesheet"][i-amphtml-timeout]')).to.have.length(1);
     const after = win.document.querySelector(
         'link[rel="stylesheet"]');
     expect(after).to.not.equal(link);
     expect(after.href).to.equal(link.href);
     expect(after.media).to.equal('not-matching');
-    after.addEventListener('load', () => {
+    return new Promise(resolve => {
+      after.addEventListener('load', () => {
+        resolve();
+      });
+    }).then(() => {
       expect(after.media).to.equal('all');
-      done();
     });
   });
 
@@ -103,10 +106,10 @@ describes.realWin('font-stylesheet-timeout', {
     fontStylesheetTimeout(win);
     clock.tick(499);
     expect(win.document.querySelectorAll(
-        'link[rel="stylesheet"][i-amp-timeout]')).to.have.length(0);
+        'link[rel="stylesheet"][i-amphtml-timeout]')).to.have.length(0);
     clock.tick(1);
     expect(win.document.querySelectorAll(
-        'link[rel="stylesheet"][i-amp-timeout]')).to.have.length(1);
+        'link[rel="stylesheet"][i-amphtml-timeout]')).to.have.length(1);
     expect(win.document.querySelector(
         'link[rel="stylesheet"]')).to.not.equal(link);
     expect(win.document.querySelector(
@@ -121,10 +124,10 @@ describes.realWin('font-stylesheet-timeout', {
     const link1 = addLink(2);
     fontStylesheetTimeout(win);
     expect(win.document.querySelectorAll(
-        'link[rel="stylesheet"][i-amp-timeout]')).to.have.length(0);
+        'link[rel="stylesheet"][i-amphtml-timeout]')).to.have.length(0);
     clock.tick(1);
     expect(win.document.querySelectorAll(
-        'link[rel="stylesheet"][i-amp-timeout]')).to.have.length(2);
+        'link[rel="stylesheet"][i-amphtml-timeout]')).to.have.length(2);
     expect(win.document.querySelector(
         'link[rel="stylesheet"]')).to.not.equal(link0);
     expect(win.document.querySelectorAll(

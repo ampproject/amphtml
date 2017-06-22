@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
-import {installLiveListManager, LiveListManager} from '../live-list-manager';
-import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
-import {resetServiceForTesting} from '../../../../src/service';
-import {toggleExperiment} from '../../../../src/experiments';
+import {liveListManagerForDoc, LiveListManager} from '../live-list-manager';
+import {viewerForDoc} from '../../../../src/services';
 
-describe('LiveListManager', () => {
+
+describes.fakeWin('LiveListManager', {amp: true}, env => {
   const jitterOffset = 1000;
+  let win, doc;
+  let ampdoc;
   let manager;
-  let sandbox;
   let liveList;
   let requests;
   let clock;
@@ -32,8 +30,9 @@ describe('LiveListManager', () => {
   let ready;
 
   beforeEach(() => {
-    toggleExperiment(window, 'amp-live-list', true);
-    sandbox = sinon.sandbox.create();
+    win = env.win;
+    doc = win.document;
+    ampdoc = env.ampdoc;
     const docReadyPromise = new Promise(resolve => { ready = resolve; });
     sandbox.stub(LiveListManager.prototype, 'whenDocReady_')
         .returns(docReadyPromise);
@@ -43,16 +42,10 @@ describe('LiveListManager', () => {
     mockXhr.onCreate = function(xhr) {
       requests.push(xhr);
     };
-    viewer = installViewerServiceForDoc(new AmpDocSingle(window));
-    manager = installLiveListManager(window);
+    viewer = viewerForDoc(ampdoc);
+    manager = liveListManagerForDoc(ampdoc);
     liveList = getLiveList({'data-sort-time': '1111'});
     sandbox.stub(liveList, 'getInterval', () => 5000);
-  });
-
-  afterEach(() => {
-    toggleExperiment(window, 'amp-live-list', false);
-    resetServiceForTesting(window, 'liveListManager');
-    sandbox.restore();
   });
 
   /** @implements {!LiveListInterface} */
@@ -63,10 +56,11 @@ describe('LiveListManager', () => {
     }
 
     buildCallback() {
-      this.manager_ = installLiveListManager(window);
+      this.manager_ = liveListManagerForDoc(ampdoc);
       this.updateTime_ = Number(this.element.getAttribute('data-sort-time'));
       this.manager_.register(this.element.getAttribute('id'), this);
     }
+
     getInterval() {
       return Number(this.element.getAttribute('data-poll-interval'));
     }
@@ -84,17 +78,18 @@ describe('LiveListManager', () => {
         this.element.setAttribute('disabled', '');
       }
     }
+
     getUpdateTime() {
       return this.updateTime_;
     }
   }
 
   function getLiveList(attrs = {}, opt_id) {
-    const el = document.createElement('amp-live-list');
+    const el = doc.createElement('amp-live-list');
     el.setAttribute('id', opt_id || 'id-1');
     el.setAttribute('data-max-items-per-page', '10');
-    const updateSlot = document.createElement('div');
-    const itemsSlot = document.createElement('div');
+    const updateSlot = doc.createElement('div');
+    const itemsSlot = doc.createElement('div');
     updateSlot.setAttribute('update', '');
     itemsSlot.setAttribute('items', '');
     el.appendChild(updateSlot);
@@ -115,7 +110,7 @@ describe('LiveListManager', () => {
     expect(manager.liveLists_['id-1']).to.equal(liveList);
   });
 
-  it('should start poller when document is ready', () => {
+  it('should start poller when doc is ready', () => {
     sandbox.stub(viewer, 'isVisible').returns(true);
     expect(manager.poller_).to.be.null;
     liveList.buildCallback();
@@ -223,10 +218,10 @@ describe('LiveListManager', () => {
     return manager.whenDocReady_().then(() => {
       expect(manager.poller_.isRunning()).to.be.true;
 
-      const fromServer1 = document.createElement('div');
-      const fromServer1List1 = document.createElement('amp-live-list');
+      const fromServer1 = doc.createElement('div');
+      const fromServer1List1 = doc.createElement('amp-live-list');
       fromServer1List1.setAttribute('id', 'id-1');
-      const fromServer1List2 = document.createElement('amp-live-list');
+      const fromServer1List2 = doc.createElement('amp-live-list');
       fromServer1List2.setAttribute('id', 'id-2');
       fromServer1List2.setAttribute('disabled', '');
       fromServer1.appendChild(fromServer1List1);
@@ -242,8 +237,8 @@ describe('LiveListManager', () => {
       expect(liveList2.isEnabled()).to.be.false;
       expect(manager.poller_.isRunning()).to.be.true;
 
-      const fromServer2 = document.createElement('div');
-      const fromServer2List1 = document.createElement('amp-live-list');
+      const fromServer2 = doc.createElement('div');
+      const fromServer2List1 = doc.createElement('amp-live-list');
       fromServer2List1.setAttribute('id', 'id-1');
       fromServer2List1.setAttribute('disabled', '');
       fromServer2.appendChild(fromServer2List1);
@@ -269,10 +264,10 @@ describe('LiveListManager', () => {
     expect(liveList.isEnabled()).to.be.true;
     expect(liveList2.isEnabled()).to.be.false;
 
-    const fromServer1 = document.createElement('div');
-    const fromServer1List1 = document.createElement('amp-live-list');
+    const fromServer1 = doc.createElement('div');
+    const fromServer1List1 = doc.createElement('amp-live-list');
     fromServer1List1.setAttribute('id', 'id-1');
-    const fromServer1List2 = document.createElement('amp-live-list');
+    const fromServer1List2 = doc.createElement('amp-live-list');
     fromServer1List2.setAttribute('id', 'id-2');
     // We have to set this here so that it actually is disabled
     fromServer1List2.setAttribute('disabled', '');
@@ -287,12 +282,12 @@ describe('LiveListManager', () => {
     expect(updateSpy1).to.be.calledOnce;
     expect(updateSpy2).to.have.not.been.called;
 
-    const fromServer2 = document.createElement('div');
-    const fromServer2List1 = document.createElement('amp-live-list');
+    const fromServer2 = doc.createElement('div');
+    const fromServer2List1 = doc.createElement('amp-live-list');
     fromServer2List1.setAttribute('id', 'id-1');
     // No disabled attribute here which re-enables updates to
     // amp-live-list#id-2
-    const fromServer2List2 = document.createElement('amp-live-list');
+    const fromServer2List2 = doc.createElement('amp-live-list');
     fromServer2List2.setAttribute('id', 'id-2');
     fromServer2.appendChild(fromServer2List1);
     fromServer2.appendChild(fromServer2List2);

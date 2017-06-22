@@ -44,20 +44,21 @@ export function adhese(global, data) {
   const co = global.document.querySelector('#c');
   co.width = data['width'];
   co.height = data['height'];
-  co.addEventListener('adhLoaded', getAdInfo, false);
+  co.addEventListener('adhLoaded', getAdInfo.bind(null, global), false);
 }
 
 /**
  * @param {!Object} e
+ * @param {!Window} global
  */
-function getAdInfo(e) {
+function getAdInfo(global, e) {
   if (e.detail.isReady && e.detail.width == e.target.width &&
       e.detail.height == e.target.height) {
     global.context.renderStart();
   } else if (e.detail.isReady && (e.detail.width != e.target.width ||
       e.detail.width != e.target.width)) {
     global.context.renderStart({width: e.detail.width,
-        height: e.detail.height});
+      height: e.detail.height});
   } else {
     global.context.noContentAvailable();
   }

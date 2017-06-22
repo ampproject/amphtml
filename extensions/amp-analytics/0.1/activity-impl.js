@@ -19,9 +19,10 @@
  * has performed on the page.
  */
 
-import {viewerForDoc} from '../../../src/viewer';
-import {viewportForDoc} from '../../../src/viewport';
+import {viewerForDoc} from '../../../src/services';
+import {viewportForDoc} from '../../../src/services';
 import {listen} from '../../../src/event-helper';
+import {registerServiceBuilderForDoc} from '../../../src/service';
 
 
 /**
@@ -119,6 +120,13 @@ const ACTIVE_EVENT_TYPES = [
   'mousedown', 'mouseup', 'mousemove', 'keydown', 'keyup',
 ];
 
+/**
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
+ */
+export function installActivityServiceForTesting(ampDoc) {
+  registerServiceBuilderForDoc(ampDoc, 'activity', Activity);
+}
+
 export class Activity {
 
   /**
@@ -209,7 +217,7 @@ export class Activity {
   setUpActivityListeners_() {
     for (let i = 0; i < ACTIVE_EVENT_TYPES.length; i++) {
       this.unlistenFuncs_.push(listen(this.ampdoc.getRootNode(),
-        ACTIVE_EVENT_TYPES[i], this.boundHandleActivity_));
+          ACTIVE_EVENT_TYPES[i], this.boundHandleActivity_));
     }
 
     this.unlistenFuncs_.push(

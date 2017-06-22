@@ -13,27 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {documentInfoForDoc} from './document-info';
-import {isExperimentOn} from './experiments';
-import {viewerForDoc} from './viewer';
+import {urls} from './config';
+import {documentInfoForDoc} from './services';
+import {experimentToggles, isCanary} from './experiments';
+import {viewerForDoc} from './services';
 import {getLengthNumeral} from './layout';
+import {getModeObject} from './mode-object';
+import {domFingerprint} from './utils/dom-fingerprint';
+import {dict} from './utils/object.js';
 
 /**
  * Produces the attributes for the ad template.
  * @param {!Window} parentWindow
- * @param {!Element} element
+ * @param {!AmpElement} element
  * @param {!string} sentinel
- * @param {!Object<string, string>=} attributes
- * @return {!Object}
+ * @param {!JsonObject=} attributes
+ * @return {!JsonObject}
  */
 export function getContextMetadata(
     parentWindow, element, sentinel, attributes) {
   const startTime = Date.now();
   const width = element.getAttribute('width');
   const height = element.getAttribute('height');
-  attributes = attributes ? attributes : {};
-  attributes.width = getLengthNumeral(width);
-  attributes.height = getLengthNumeral(height);
+  attributes = attributes ? attributes : dict();
+  attributes['width'] = getLengthNumeral(width);
+  attributes['height'] = getLengthNumeral(height);
   let locationHref = parentWindow.location.href;
   // This is really only needed for tests, but whatever. Children
   // see us as the logical origin, so telling them we are about:srcdoc
@@ -43,31 +47,42 @@ export function getContextMetadata(
   }
 
   const docInfo = documentInfoForDoc(element);
-  const referrer = viewerForDoc(element).getUnconfirmedReferrerUrl();
+  const viewer = viewerForDoc(element);
+  const referrer = viewer.getUnconfirmedReferrerUrl();
 
-  const sentinelNameChange = isExperimentOn(
-      parentWindow, 'sentinel-name-change');
-  attributes._context = {
-    ampcontextVersion: '$internalRuntimeVersion$',
-    sourceUrl: docInfo.sourceUrl,
-    referrer,
-    canonicalUrl: docInfo.canonicalUrl,
-    pageViewId: docInfo.pageViewId,
-    location: {
-      href: locationHref,
+  // TODO(alanorozco): Redesign data structure so that fields not exposed by
+  // AmpContext are not part of this object.
+  const layoutRect = element.getPageLayoutBox();
+  attributes['_context'] = dict({
+    'ampcontextVersion': '$internalRuntimeVersion$',
+    'ampcontextFilepath': urls.cdn + '/$internalRuntimeVersion$' +
+        '/ampcontext-v0.js',
+    'sourceUrl': docInfo.sourceUrl,
+    'referrer': referrer,
+    'canonicalUrl': docInfo.canonicalUrl,
+    'pageViewId': docInfo.pageViewId,
+    'location': {
+      'href': locationHref,
     },
-    startTime,
-  };
-  attributes._context[sentinelNameChange ? 'sentinel' : 'amp3pSentinel'] =
-      sentinel;
+    'startTime': startTime,
+    'tagName': element.tagName,
+    'mode': getModeObject(),
+    'canary': isCanary(parentWindow),
+    'hidden': !viewer.isVisible(),
+    'initialLayoutRect': layoutRect ? {
+      'left': layoutRect.left,
+      'top': layoutRect.top,
+      'width': layoutRect.width,
+      'height': layoutRect.height,
+    } : null,
+    'initialIntersection': element.getIntersectionChangeEntry(),
+    'domFingerprint': domFingerprint(element),
+    'experimentToggles': experimentToggles(parentWindow),
+    'sentinel': sentinel,
+  });
   const adSrc = element.getAttribute('src');
   if (adSrc) {
-    attributes.src = adSrc;
+    attributes['src'] = adSrc;
   }
   return attributes;
-}
-
-export function getNameAttribute(parentWindow, element, sentinel) {
-  const attributes = getContextMetadata(parentWindow, element, sentinel);
-  return encodeURIComponent(JSON.stringify(attributes));
 }

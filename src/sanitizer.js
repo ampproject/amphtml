@@ -108,6 +108,7 @@ const WHITELISTED_ATTRS = [
   'href',
   'on',
   'placeholder',
+  'option',
   /* Attributes added for amp-bind */
   // TODO(kmh287): Add more whitelisted attributes for bind?
   'text',
@@ -140,10 +141,6 @@ const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = {
 
 /** @const {!Array<string>} */
 const BLACKLISTED_FIELDS_ATTR = [
-  // TODO(#5539): Consider allowing these, the only reason to strip these is to be
-  // more inline with the validator rules. Consider allowing these if/when
-  // allowed in validator. Even without this blacklist, Caja or Mustache is
-  // removing the values for these attributes.
   'form',
   'formaction',
   'formmethod',
@@ -308,7 +305,7 @@ export function sanitizeHtml(html) {
 export function sanitizeFormattingHtml(html) {
   return htmlSanitizer.sanitizeWithPolicy(html,
       function(tagName, unusedAttrs) {
-        if (WHITELISTED_FORMAT_TAGS.indexOf(tagName) == -1) {
+        if (!WHITELISTED_FORMAT_TAGS.includes(tagName)) {
           return null;
         }
         return {

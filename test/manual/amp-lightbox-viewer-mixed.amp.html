@@ -1,0 +1,65 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>Lightbox Viewer (Opt-in)</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-lightbox-viewer" src="https://cdn.ampproject.org/v0/amp-lightbox-viewer-0.1.js"></script>
+  <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
+  <script async custom-element="amp-twitter" src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    body {
+      font-family: sans-serif;
+    }
+    blockquote {
+      background: #EDE7F6;
+      border-left: 10px solid #6A1B9A;
+      margin: 10px;
+      padding: 10px;
+      font-family: Georgia, serif;
+      font-size: 18px;
+      font-style: italic;
+    }
+
+    blockquote:before {
+      color: #FF4081;
+      content: open-quote;
+      font-size: 36pt;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    // Enable the experiments automatically if they are not enabled.
+    setTimeout(function() {
+      if (!AMP.isExperimentOn('amp-lightbox-viewer') || !AMP.isExperimentOn('amp-lightbox-viewer-auto')) {
+        if (!AMP.isExperimentOn('amp-lightbox-viewer')) {
+          AMP.toggleExperiment('amp-lightbox-viewer');
+        }
+        if (!AMP.isExperimentOn('amp-lightbox-viewer-auto')) {
+          AMP.toggleExperiment('amp-lightbox-viewer-auto');
+        }
+        location.reload();
+      }
+    }, 1000);
+  </script>
+  <h1>Lightbox Viewer (Mixed Opt-out and Opt-in)</h1>
+
+  <amp-lightbox-viewer id="myLightboxViewer" layout="nodisplay"></amp-lightbox-viewer>
+
+  <h2>Image</h2>
+  <amp-img src="http://placehold.it/800x600/F50057?text=1" layout="responsive" width="8" height="6"></amp-img>
+
+  <h2>Image - Not Lightboxable</h2>
+  <amp-img lightbox="none" src="http://placehold.it/800x600/FFC400?text=2" layout="responsive" width="8" height="6"></amp-img>
+
+  <h2>Blockquote with tap - Manually opted in</h2>
+  <blockquote lightbox on="tap:myLightboxViewer.activate">
+    Some say that his tears are adhesive, and that if he caught fire, he'd burn for a thousand days... all we know is, he's called the Stig
+  </blockquote>
+
+</body>
+</html>

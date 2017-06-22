@@ -29,8 +29,9 @@ import {
 } from './runtime';
 import {bodyAlwaysVisible} from './style-installer';
 import {deactivateChunking} from './chunk';
+import {doNotTrackImpression} from './impression';
 import {stubElements} from './custom-element';
-import {maybeTrackImpression} from './impression';
+
 
 // PWA shell manages its own visibility and shadow ampdocs their own.
 bodyAlwaysVisible(self);
@@ -45,7 +46,9 @@ installDocService(self, /* isSingleDoc */ false);
 // Core services.
 installRuntimeServices(self);
 
-maybeTrackImpression(self);
+// Impression tracking for PWA is not meaningful, but the dependent code
+// has to be unblocked.
+doNotTrackImpression();
 
 // Builtins.
 installBuiltins(self);
@@ -62,4 +65,4 @@ if (self.console) {
       'Powered by AMP ⚡ HTML shadows – Version $internalRuntimeVersion$');
 }
 self.document.documentElement.setAttribute('amp-version',
-      '$internalRuntimeVersion$');
+    '$internalRuntimeVersion$');

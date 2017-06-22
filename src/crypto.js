@@ -14,18 +14,7 @@
  * limitations under the License.
  */
 
-import {getExistingServiceForWindow} from './service';
-
-/**
- * An object holding the public key and its hash.
- *
- * @typedef {{
- *   serviceName: string,
- *   hash: Uint8Array,
- *   cryptoKey: !webCrypto.CryptoKey
- * }}
- */
-export let PublicKeyInfoDef;
+import {getService} from './service';
 
 /**
  * @param {!Window} window
@@ -33,7 +22,7 @@ export let PublicKeyInfoDef;
  */
 export function cryptoFor(window) {
   return (/** @type {!./service/crypto-impl.Crypto} */ (
-      getExistingServiceForWindow(window, 'crypto')));
+      getService(window, 'crypto')));
 }
 
 /**

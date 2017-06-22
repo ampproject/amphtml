@@ -3,7 +3,7 @@
 build
 .amp-build
 c
-dist
+/dist
 dist.3p
 dist.tools
 examples.min

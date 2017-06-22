@@ -15,15 +15,16 @@
  */
 
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
+import {KeyCodes} from '../../../src/utils/key-codes';
 import {closestByTag, tryFocus} from '../../../src/dom';
 import {Layout} from '../../../src/layout';
 import {dev} from '../../../src/log';
-import {historyForDoc} from '../../../src/history';
-import {platformFor} from '../../../src/platform';
+import {historyForDoc} from '../../../src/services';
+import {platformFor} from '../../../src/services';
 import {setStyles, toggle} from '../../../src/style';
 import {removeFragment, parseUrl} from '../../../src/url';
-import {vsyncFor} from '../../../src/vsync';
-import {timerFor} from '../../../src/timer';
+import {vsyncFor} from '../../../src/services';
+import {timerFor} from '../../../src/services';
 
 /** @const */
 const ANIMATION_TIMEOUT = 550;
@@ -57,7 +58,10 @@ export class AmpSidebar extends AMP.BaseElement {
     const platform = platformFor(this.win);
 
     /** @private @const {boolean} */
-    this.isIosSafari_ = platform.isIos() && platform.isSafari();
+    this.isIos_ = platform.isIos();
+
+    /** @private @const {boolean} */
+    this.isSafari_ = platform.isSafari();
 
     /** @private {number} */
     this.historyId_ = -1;
@@ -94,7 +98,7 @@ export class AmpSidebar extends AMP.BaseElement {
       this.element.setAttribute('side', this.side_);
     }
 
-    if (this.isIosSafari_) {
+    if (this.isIos_) {
       this.fixIosElasticScrollLeak_();
     }
 
@@ -112,7 +116,7 @@ export class AmpSidebar extends AMP.BaseElement {
 
     this.documentElement_.addEventListener('keydown', event => {
       // Close sidebar on ESC.
-      if (event.keyCode == 27) {
+      if (event.keyCode == KeyCodes.ESCAPE) {
         this.close_();
       }
     });
@@ -121,7 +125,7 @@ export class AmpSidebar extends AMP.BaseElement {
     const screenReaderCloseButton = this.document_.createElement('button');
     // TODO(aghassemi, #4146) i18n
     screenReaderCloseButton.textContent = 'Close the sidebar';
-    screenReaderCloseButton.classList.add('-amp-screen-reader');
+    screenReaderCloseButton.classList.add('i-amphtml-screen-reader');
     // This is for screen-readers only, should not get a tab stop.
     screenReaderCloseButton.tabIndex = -1;
     screenReaderCloseButton.addEventListener('click', () => {
@@ -133,8 +137,6 @@ export class AmpSidebar extends AMP.BaseElement {
     this.registerAction('open', this.open_.bind(this));
     this.registerAction('close', this.close_.bind(this));
 
-    // TODO(mkhatib, #6589): Consider exposing onLocalNavigation from
-    // document-click service to simplifiy this.
     this.element.addEventListener('click', e => {
       const target = closestByTag(dev().assertElement(e.target), 'A');
       if (target && target.href) {
@@ -195,7 +197,7 @@ export class AmpSidebar extends AMP.BaseElement {
     this.vsync_.mutate(() => {
       toggle(this.element, /* display */true);
       this.openMask_();
-      if (this.isIosSafari_) {
+      if (this.isIos_ && this.isSafari_) {
         this.compensateIosBottombar_();
       }
       this.element./*OK*/scrollTop = 1;
@@ -203,8 +205,6 @@ export class AmpSidebar extends AMP.BaseElement {
       this.vsync_.mutate(() => {
         this.element.setAttribute('open', '');
         this.element.setAttribute('aria-hidden', 'false');
-        // Focus on the sidebar for a11y.
-        tryFocus(this.element);
         if (this.openOrCloseTimeOut_) {
           this.timer_.cancel(this.openOrCloseTimeOut_);
         }
@@ -212,6 +212,8 @@ export class AmpSidebar extends AMP.BaseElement {
           const children = this.getRealChildren();
           this.scheduleLayout(children);
           this.scheduleResume(children);
+          // Focus on the sidebar for a11y.
+          tryFocus(this.element);
         }, ANIMATION_TIMEOUT);
       });
     });
@@ -257,7 +259,7 @@ export class AmpSidebar extends AMP.BaseElement {
   openMask_() {
     if (!this.maskElement_) {
       const mask = this.document_.createElement('div');
-      mask.classList.add('-amp-sidebar-mask');
+      mask.classList.add('i-amphtml-sidebar-mask');
       mask.addEventListener('click', () => {
         this.close_();
       });
@@ -324,4 +326,6 @@ export class AmpSidebar extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-sidebar', AmpSidebar, CSS);
+AMP.extension('amp-sidebar', '0.1', AMP => {
+  AMP.registerElement('amp-sidebar', AmpSidebar, CSS);
+});

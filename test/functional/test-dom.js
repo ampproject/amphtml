@@ -15,18 +15,18 @@
  */
 
 import * as dom from '../../src/dom';
-import * as sinon from 'sinon';
 import {loadPromise} from '../../src/event-helper';
 import {toArray} from '../../src/types';
+import {BaseElement} from '../../src/base-element';
+import {createAmpElementProto} from '../../src/custom-element';
 
 
-
-describe('DOM', () => {
+describes.sandboxed('DOM', {}, env => {
 
   let sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = env.sandbox;
   });
 
   afterEach(() => {
@@ -64,6 +64,40 @@ describe('DOM', () => {
     expect(other.firstChild).to.not.equal(null);
     expect(other.firstChild.tagName).to.equal('DIV');
     expect(other.textContent).to.equal('ABC');
+  });
+
+  it('isConnectedNode', () => {
+    expect(dom.isConnectedNode(document)).to.be.true;
+
+    const a = document.createElement('div');
+    expect(dom.isConnectedNode(a)).to.be.false;
+
+    const b = document.createElement('div');
+    b.appendChild(a);
+
+    document.body.appendChild(b);
+    expect(dom.isConnectedNode(a)).to.be.true;
+
+    const shadow = a.attachShadow({mode: 'open'});
+    const c = document.createElement('div');
+    shadow.appendChild(c);
+    expect(dom.isConnectedNode(c)).to.be.true;
+
+    document.body.removeChild(b);
+    expect(dom.isConnectedNode(c)).to.be.false;
+  });
+
+  it('rootNodeFor', () => {
+    const a = document.createElement('div');
+    expect(dom.rootNodeFor(a)).to.equal(a);
+
+    const b = document.createElement('div');
+    a.appendChild(b);
+    expect(dom.rootNodeFor(b)).to.equal(a);
+
+    const c = document.createElement('div');
+    b.appendChild(c);
+    expect(dom.rootNodeFor(c)).to.equal(a);
   });
 
   it('closest should find itself', () => {
@@ -399,6 +433,27 @@ describe('DOM', () => {
         .to.be.equal(0);
   });
 
+  it('iterateCursor should loop through every element in a NodeList', () => {
+    const fragment = document.createDocumentFragment();
+    [0, 1, 2].forEach(() => fragment.appendChild(document.createElement('i')));
+
+    const iSpy = sandbox.spy();
+    dom.iterateCursor(fragment.querySelectorAll('i'), iSpy);
+    expect(iSpy).to.be.calledThrice;
+
+    const bSpy = sandbox.spy();
+    dom.iterateCursor(fragment.querySelectorAll('b'), bSpy);
+    expect(bSpy).to.be.notCalled;
+  });
+
+  it('iterateCursor should allow null elements in a list', () => {
+    const list = ['wow', null, 'cool'];
+
+    const spy = sandbox.spy();
+    dom.iterateCursor(list, spy);
+    expect(spy).to.be.calledThrice;
+  });
+
   function testScopedQuerySelector() {
     const grandparent = document.createElement('div');
 
@@ -433,9 +488,9 @@ describe('DOM', () => {
 
 
     expect(toArray(dom.scopedQuerySelectorAll(parent, 'div')))
-      .to.deep.equal([element1, element2]);
+        .to.deep.equal([element1, element2]);
     expect(toArray(dom.scopedQuerySelectorAll(grandparent, 'div div')))
-      .to.deep.equal([element1, element2]);
+        .to.deep.equal([element1, element2]);
   }
 
   it('scopedQuerySelectorAll should find all matches',
@@ -581,7 +636,7 @@ describe('DOM', () => {
       const element = document.createElement('element');
       element.setAttribute('data-vars-event-name', 'click');
       const params = dom.getDataParamsFromAttributes(element, null,
-        /^vars(.+)/);
+          /^vars(.+)/);
       expect(params.eventName).to.be.equal('click');
     });
   });
@@ -608,6 +663,18 @@ describe('DOM', () => {
       ancestor.appendChild(uncle);
       parent.appendChild(element);
       expect(dom.hasNextNodeInDocumentOrder(element)).to.be.true;
+    });
+
+    it('should return false when ancestor with sibling with stop node', () => {
+      const element = document.createElement('div');
+      const parent = document.createElement('div');
+      const uncle = document.createElement('div');
+      const ancestor = document.createElement('div');
+      ancestor.appendChild(parent);
+      ancestor.appendChild(uncle);
+      parent.appendChild(element);
+      expect(dom.hasNextNodeInDocumentOrder(element)).to.be.true;
+      expect(dom.hasNextNodeInDocumentOrder(element, parent)).to.be.false;
     });
   });
 
@@ -833,6 +900,47 @@ describe('DOM', () => {
       expect(dom.matches(div, 'div')).to.be.true;
       [ampEl, img1, iframe].map(el => {
         expect(dom.matches(el, 'div')).to.be.false;
+      });
+    });
+  });
+});
+
+describes.realWin('DOM', {
+  amp: { /* amp spec */
+    ampdoc: 'single',
+  },
+}, env => {
+  let doc;
+  class TestElement extends BaseElement {};
+  describe('whenUpgradeToCustomElement function', () => {
+    beforeEach(() => {
+      doc = env.win.document;
+    });
+
+    it('should not continue if element is not AMP element', () => {
+      const element = doc.createElement('div');
+      expect(() => dom.whenUpgradedToCustomElement(element)).to.throw(
+          'element is not AmpElement');
+    });
+
+    it('should resolve if element has already upgrade', () => {
+      const element = doc.createElement('amp-img');
+      doc.body.appendChild(element);
+      return dom.whenUpgradedToCustomElement(element).then(element => {
+        expect(element.whenBuilt).to.not.be.undefined;
+      });
+    });
+
+    it('should resolve when element upgrade', () => {
+      const element = doc.createElement('amp-test');
+      doc.body.appendChild(element);
+      env.win.setTimeout(() => {
+        doc.registerElement('amp-test', {
+          prototype: createAmpElementProto(env.win, 'amp-test', TestElement),
+        });
+      }, 100);
+      return dom.whenUpgradedToCustomElement(element).then(element => {
+        expect(element.whenBuilt).to.not.be.undefined;
       });
     });
   });

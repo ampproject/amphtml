@@ -14,31 +14,22 @@
  * limitations under the License.
  */
 
-import {fromClass, getServiceForDoc} from '../service';
+import {
+  registerServiceBuilder,
+  registerServiceBuilderForDoc,
+  getService,
+} from '../service';
 import {getMode} from '../mode';
 import {dev} from '../log';
-import {timerFor} from '../timer';
-import {viewerForDoc} from '../viewer';
-
+import {dict, map} from '../utils/object';
+import {timerFor} from '../services';
+import {viewerForDoc} from '../services';
 
 /** @private @const */
 const TAG_ = 'History';
 
-
 /** @private @const */
 const HISTORY_PROP_ = 'AMP.History';
-
-
-/**
- * @return {*}
- * @private
- */
-function historyState_(stackIndex) {
-  const state = {};
-  state[HISTORY_PROP_] = stackIndex;
-  return state;
-}
-
 
 /** @typedef {number} */
 let HistoryIdDef;
@@ -66,7 +57,13 @@ export class History {
     /** @private {!Array<!Function|undefined>} */
     this.stackOnPop_ = [];
 
-    /** @private {!Array<!{callback:function():!Promise, resolve:!Function,reject:!Function}>} */
+    /**
+     * @private {!Array<!{
+     *   callback: function():!Promise,
+     *   resolve: !Function,
+     *   reject: !Function,
+     *   trace: (!Error|undefined)
+     * }>} */
     this.queue_ = [];
 
     this.binding_.setOnStackIndexUpdated(this.onStackIndexUpdated_.bind(this));
@@ -92,7 +89,7 @@ export class History {
         }
         return stackIndex;
       });
-    });
+    }, 'push');
   }
 
   /**
@@ -107,7 +104,7 @@ export class History {
       return this.binding_.pop(stateId).then(stackIndex => {
         this.onStackIndexUpdated_(stackIndex);
       });
-    });
+    }, 'pop');
   }
 
   /**
@@ -127,7 +124,7 @@ export class History {
       return this.binding_.pop(this.stackIndex_).then(stackIndex => {
         this.onStackIndexUpdated_(stackIndex);
       });
-    });
+    }, 'goBack');
   }
 
   /**
@@ -203,11 +200,12 @@ export class History {
 
   /**
    * @param {function():!Promise<RESULT>} callback
+   * @param {string} name
    * @return {!Promise<RESULT>}
    * @template RESULT
    * @private
    */
-  enque_(callback) {
+  enque_(callback, name) {
     let resolve;
     let reject;
     const promise = new Promise((aResolve, aReject) => {
@@ -215,11 +213,12 @@ export class History {
       reject = aReject;
     });
 
-    this.queue_.push({callback, resolve, reject});
+    // TODO(dvoytenko, #8785): cleanup after tracing.
+    const trace = new Error('history trace for ' + name + ': ');
+    this.queue_.push({callback, resolve, reject, trace});
     if (this.queue_.length == 1) {
       this.deque_();
     }
-
     return promise;
   }
 
@@ -243,6 +242,11 @@ export class History {
       task.resolve(result);
     }, reason => {
       dev().error(TAG_, 'failed to execute a task:', reason);
+      // TODO(dvoytenko, #8785): cleanup after tracing.
+      if (task.trace) {
+        task.trace.message += reason;
+        dev().error(TAG_, task.trace);
+      }
       task.reject(reason);
     }).then(() => {
       this.queue_.splice(0, 1);
@@ -354,7 +358,7 @@ export class HistoryBindingNatural_ {
     this.supportsState_ = 'state' in history;
 
     /** @private {*} */
-    this.unsupportedState_ = historyState_(this.stackIndex_);
+    this.unsupportedState_ = this.historyState_(this.stackIndex_);
 
     // There are still browsers who do not support push/replaceState.
     let pushState, replaceState;
@@ -404,7 +408,8 @@ export class HistoryBindingNatural_ {
     this.replaceState_ = replaceState;
 
     try {
-      this.replaceState_(historyState_(this.stackIndex_));
+      this.replaceState_(this.historyState_(this.stackIndex_,
+          /* replace */ true));
     } catch (e) {
       dev().error(TAG_, 'Initial replaceState failed: ' + e.message);
     }
@@ -441,6 +446,17 @@ export class HistoryBindingNatural_ {
       this.win.history.replaceState = this.origReplaceState_;
     }
     this.win.removeEventListener('popstate', this.popstateHandler_);
+  }
+
+  /**
+   * @param {boolean=} opt_replace
+   * @return {*}
+   * @private
+   */
+  historyState_(stackIndex, opt_replace) {
+    const state = map(opt_replace ? this.getState_() : undefined);
+    state[HISTORY_PROP_] = stackIndex;
+    return state;
   }
 
   /** @override */
@@ -584,7 +600,7 @@ export class HistoryBindingNatural_ {
     if (steps <= 0) {
       return Promise.resolve(this.stackIndex_);
     }
-    this.unsupportedState_ = historyState_(this.stackIndex_ - steps);
+    this.unsupportedState_ = this.historyState_(this.stackIndex_ - steps);
     const promise = this.wait_();
     this.win.history.go(-steps);
     return promise.then(() => {
@@ -748,7 +764,7 @@ export class HistoryBindingVirtual_ {
     // Current implementation doesn't wait for response from viewer.
     this.updateStackIndex_(this.stackIndex_ + 1);
     return this.viewer_.sendMessageAwaitResponse(
-        'pushHistory', {stackIndex: this.stackIndex_}).then(() => {
+        'pushHistory', dict({'stackIndex': this.stackIndex_})).then(() => {
           return this.stackIndex_;
         });
   }
@@ -759,14 +775,14 @@ export class HistoryBindingVirtual_ {
       return Promise.resolve(this.stackIndex_);
     }
     return this.viewer_.sendMessageAwaitResponse(
-        'popHistory', {stackIndex: this.stackIndex_}).then(() => {
+        'popHistory', dict({'stackIndex': this.stackIndex_})).then(() => {
           this.updateStackIndex_(stackIndex - 1);
           return this.stackIndex_;
         });
   }
 
   /**
-   * @param {!JSONType} data
+   * @param {!JsonObject} data
    * @private
    */
   onHistoryPopped_(data) {
@@ -795,10 +811,11 @@ export class HistoryBindingVirtual_ {
     }
     return this.viewer_.sendMessageAwaitResponse('getFragment', undefined,
         /* cancelUnsent */true).then(
-        hash => {
-          if (!hash) {
+        data => {
+          if (!data) {
             return '';
           }
+          let hash = dev().assertString(data);
           /* Strip leading '#'*/
           if (hash[0] == '#') {
             hash = hash.substr(1);
@@ -813,7 +830,8 @@ export class HistoryBindingVirtual_ {
       return Promise.resolve();
     }
     return /** @type {!Promise} */ (this.viewer_.sendMessageAwaitResponse(
-        'replaceHistory', {fragment}, /* cancelUnsent */true));
+        'replaceHistory', dict({'fragment': fragment}),
+        /* cancelUnsent */true));
   }
 }
 
@@ -832,8 +850,11 @@ function createHistory(ampdoc) {
   } else {
     // Only one global "natural" binding is allowed since it works with the
     // global history stack.
-    binding = fromClass(ampdoc.win, 'global-history-binding',
+    registerServiceBuilder(
+        ampdoc.win,
+        'global-history-binding',
         HistoryBindingNatural_);
+    binding = getService(ampdoc.win, 'global-history-binding');
   }
   return new History(ampdoc, binding);
 }
@@ -841,9 +862,7 @@ function createHistory(ampdoc) {
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @return {!History}
  */
 export function installHistoryServiceForDoc(ampdoc) {
-  return /** @type {!History} */ (getServiceForDoc(ampdoc, 'history',
-      ampdoc => createHistory(ampdoc)));
+  registerServiceBuilderForDoc(ampdoc, 'history', createHistory);
 }

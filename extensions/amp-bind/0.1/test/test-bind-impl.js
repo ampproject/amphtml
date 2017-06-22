@@ -14,116 +14,150 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
+import {AmpEvents} from '../../../../src/amp-events';
 import {Bind} from '../bind-impl';
-import {BindExpression} from '../bind-expression';
-import {BindValidator} from '../bind-validator';
+import {BindEvents} from '../bind-events';
 import {chunkInstanceForTesting} from '../../../../src/chunk';
+import {installTimerService} from '../../../../src/service/timer-impl';
 import {toArray} from '../../../../src/types';
 import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
-import {installTimerService} from '../../../../src/service/timer-impl';
 
-describes.realWin('amp-bind', {
+////////////////////////////////////////////////////////////////////////////////
+// Curried test helpers
+////////////////////////////////////////////////////////////////////////////////
+
+function createElementWithBinding_(parent, env) {
+  /**
+   * @param {string} binding
+   * @param {string=} opt_tagName
+   * @param {boolean=} opt_isAmpElement
+   * @return {!Element}
+   */
+  return function(binding, opt_tagName, opt_isAmpElement) {
+    const tag = opt_tagName || 'p';
+    const div = env.win.document.createElement('div');
+    div.innerHTML = `<${tag} ${binding}></${tag}>`;
+    const newElement = div.firstElementChild;
+    if (opt_isAmpElement) {
+      newElement.className = 'i-amphtml-foo -amp-foo amp-foo';
+      newElement.mutatedAttributesCallback = () => {};
+    }
+    parent.appendChild(newElement);
+    return newElement;
+  };
+}
+
+function onBindReady_(bind, env) {
+  /**
+   * @return {!Promise}
+   */
+  return function() {
+    return bind.initializePromiseForTesting().then(() => {
+      env.flushVsync();
+    });
+  };
+}
+
+function onBindReadyAndSetState_(bind, env) {
+  /**
+   * @param {!Object} state
+   * @param {boolean=} opt_isAmpStateMutation
+   * @return {!Promise}
+   */
+  return function(state, opt_isAmpStateMutation) {
+    return bind.initializePromiseForTesting().then(() => {
+      return bind.setState(
+          state, /* opt_skipEval */ undefined, opt_isAmpStateMutation);
+    }).then(() => {
+      env.flushVsync();
+      return bind.setStatePromiseForTesting();
+    });
+  };
+}
+
+function onBindReadyAndSetStateWithExpression_(bind, env) {
+  /**
+   * @param {string} expression
+   * @param {!Object} scope
+   * @return {!Promise}
+   */
+  return function(expression, scope) {
+    return bind.setStateWithExpression(expression, scope).then(() => {
+      env.flushVsync();
+    });
+  };
+}
+
+function waitForEvent_(bind, env) {
+  /**
+   * @param {string} name
+   * @return {!Promise}
+   */
+  return function(name) {
+    return new Promise(resolve => {
+      function callback() {
+        resolve();
+        env.win.removeEventListener(name, callback);
+      };
+      env.win.addEventListener(name, callback);
+    });
+  };
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Unit tests
+////////////////////////////////////////////////////////////////////////////////
+
+describes.realWin('Bind', {
   amp: {
     runtimeOn: false,
   },
 }, env => {
   let bind;
+  let parent; // A connected <div> created by describes.
 
-  // BindValidator method stubs.
-  let canBindStub;
+  let createElementWithBinding;
+  let onBindReady;
+  let onBindReadyAndSetState;
+  let onBindReadyAndSetStateWithExpression;
+  let waitForEvent;
 
   beforeEach(() => {
     installTimerService(env.win);
     toggleExperiment(env.win, 'amp-bind', true);
 
-    // Stub validator methods to return true for ease of testing.
-    canBindStub = env.sandbox.stub(
-        BindValidator.prototype, 'canBind').returns(true);
-    env.sandbox.stub(
-        BindValidator.prototype, 'isResultValid').returns(true);
-
     // Make sure we have a chunk instance for testing.
     chunkInstanceForTesting(env.ampdoc);
 
     bind = new Bind(env.ampdoc);
+    parent = env.win.document.getElementById('parent');
+
+    // TODO(choumx): Use better names in a follow-up PR.
+    createElementWithBinding = createElementWithBinding_(parent, env);
+    onBindReady = onBindReady_(bind, env);
+    onBindReadyAndSetState = onBindReadyAndSetState_(bind, env);
+    onBindReadyAndSetStateWithExpression =
+        onBindReadyAndSetStateWithExpression_(bind, env);
+    waitForEvent = waitForEvent_(bind, env);
   });
 
   afterEach(() => {
     toggleExperiment(env.win, 'amp-bind', false);
   });
 
-  /**
-   * @param {!string} binding
-   * @return {!Element}
-   */
-  function createElementWithBinding(binding) {
-    const div = env.win.document.createElement('div');
-    div.innerHTML = '<p ' + binding + '></p>';
-    const newElement = div.firstElementChild;
-    const parent = env.win.document.getElementById('parent');
-    parent.appendChild(newElement);
-    return newElement;
-  }
-
-  /**
-   * @param {!string} binding
-   * @return {!Element}
-   */
-  function createAmpElementWithBinding(binding) {
-    const parent = env.win.document.getElementById('parent');
-    const ampCss = 'i-amphtml-foo -amp-foo amp-foo';
-    parent.innerHTML = `<p class="${ampCss}" ${binding}></p>`;
-    const fakeAmpElement = parent.firstElementChild;
-    fakeAmpElement.mutatedAttributesCallback = () => {};
-    return fakeAmpElement;
-  }
-
-  /**
-   * Resolves when Bind service is fully initialized.
-   * @return {!Promise}
-   */
-  function onBindReady() {
-    return bind.initializePromiseForTesting().then(() => {
-      env.flushVsync();
-    });
-  }
-
-  /**
-   * Calls `callback` when digest that updates bind state to `state` completes.
-   * @param {!Object} state
-   * @return {!Promise}
-   */
-  function onBindReadyAndSetState(state) {
-    return bind.initializePromiseForTesting().then(() => {
-      return bind.setState(state);
-    }).then(() => {
-      env.flushVsync();
-      return bind.setStatePromiseForTesting();
-    });
-  }
-
-  /**
-   * Calls `callback` when digest that updates bind state to `state` completes.
-   * @param {!Object} state
-   * @param {!Function} callback
-   * @return {!Promise}
-   */
-  function onBindReadyAndSetStateWithExpression(expression, scope) {
-    return bind.setStateWithExpression(expression, scope).then(() => {
-      env.flushVsync();
-    });
-  }
-
   it('should throw error if experiment is not enabled', () => {
     toggleExperiment(env.win, 'amp-bind', false);
+    // Experiment check is bypassed on test mode -- make sure it isn't.
+    window.AMP_MODE = {test: false};
     expect(() => {
       new Bind(env.ampdoc);
     }).to.throw('Experiment "amp-bind" is disabled.');
   });
 
   it('should scan for bindings when ampdoc is ready', () => {
-    createElementWithBinding('[onePlusOne]="1+1"');
+    createElementWithBinding('[text]="1+1"');
     expect(bind.boundElements_.length).to.equal(0);
     return onBindReady().then(() => {
       expect(bind.boundElements_.length).to.equal(1);
@@ -131,143 +165,111 @@ describes.realWin('amp-bind', {
   });
 
   it('should have same state after removing + re-adding a subtree', () => {
-    const doc = env.win.document;
     for (let i = 0; i < 5; i++) {
-      createElementWithBinding('[onePlusOne]="1+1"');
+      createElementWithBinding('[text]="1+1"');
     }
     expect(bind.boundElements_.length).to.equal(0);
     return onBindReady().then(() => {
       expect(bind.boundElements_.length).to.equal(5);
-      return bind.removeBindingsForNode_(doc.getElementById('parent'));
+      return bind.removeBindingsForNode_(parent);
     }).then(() => {
       expect(bind.boundElements_.length).to.equal(0);
-      return bind.addBindingsForNode_(doc.getElementById('parent'));
+      return bind.addBindingsForNode_(parent);
     }).then(() => {
       expect(bind.boundElements_.length).to.equal(5);
     });
   });
 
-  describe('under dynamic tags', () => {
-    it('should dynamically detect new bindings', () => {
-      const doc = env.win.document;
-      const template = doc.createElement('template');
-      doc.getElementById('parent').appendChild(template);
-      return onBindReady().then(() => {
-        expect(bind.boundElements_.length).to.equal(0);
-        createElementWithBinding('[onePlusOne]="1+1"');
-        return bind.waitForAllMutationsForTesting();
-      }).then(() => {
-        expect(bind.boundElements_.length).to.equal(1);
-      });
-    });
-
-    //TODO(kmh287): Move to integration test
-    it('should NOT bind blacklisted attributes', () => {
-      // Restore real implementations of canBind and isResultValid
-      sandbox.restore();
-      const doc = env.win.document;
-      const template = doc.createElement('template');
-      let textElement;
-      doc.getElementById('parent').appendChild(template);
-      return onBindReady().then(() => {
-        expect(bind.boundElements_.length).to.equal(0);
-        const binding = '[onclick]="\'alert(document.cookie)\'" ' +
-          '[onmouseover]="\'alert()\'" ' +
-          '[style]="\'background=color:black\'"';
-        textElement = createElementWithBinding(binding);
-        return bind.waitForAllMutationsForTesting();
-      }).then(() => {
-        expect(bind.boundElements_.length).to.equal(0);
-        expect(textElement.getAttribute('onclick')).to.be.null;
-        expect(textElement.getAttribute('onmouseover')).to.be.null;
-        expect(textElement.getAttribute('style')).to.be.null;
-      });
-    });
-
-    //TODO(kmh287): Move to integration test
-    it('should NOT allow unsecure attribute values', () => {
-      // Restore real implementations of canBind and isResultValid
-      sandbox.restore();
-      const doc = env.win.document;
-      const template = doc.createElement('template');
-      let aElement;
-      doc.getElementById('parent').appendChild(template);
-      return onBindReady().then(() => {
-        expect(bind.boundElements_.length).to.equal(0);
-        const binding = '[href]="javascript:alert(1)"';
-        const div = env.win.document.createElement('div');
-        div.innerHTML = '<a ' + binding + '></a>';
-        aElement = div.firstElementChild;
-        // Templated HTML is added as a sibling to the template,
-        // not as a child
-        doc.getElementById('parent').appendChild(aElement);
-        return bind.waitForAllMutationsForTesting();
-      }).then(() => {
-        expect(aElement.getAttribute('href')).to.be.null;
-      });
+  it('should dynamically detect new bindings under dynamic tags', () => {
+    const doc = env.win.document;
+    const dynamicTag = doc.createElement('div');
+    parent.appendChild(dynamicTag);
+    return onBindReady().then(() => {
+      expect(bind.boundElements_.length).to.equal(0);
+      const elementWithBinding = createElementWithBinding('[text]="1+1"');
+      dynamicTag.appendChild(elementWithBinding);
+      dynamicTag.dispatchEvent(
+          new Event(AmpEvents.TEMPLATE_RENDERED, {bubbles: true}));
+      return waitForEvent(BindEvents.RESCAN_TEMPLATE);
+    }).then(() => {
+      expect(bind.boundElements_.length).to.equal(1);
     });
   });
 
-
   it('should NOT apply expressions on first load', () => {
-    const element = createElementWithBinding('[onePlusOne]="1+1"');
-    expect(element.getAttribute('onePlusOne')).to.equal(null);
+    const element = createElementWithBinding('[text]="1+1"');
+    expect(element.textContent).to.equal('');
     return onBindReady().then(() => {
-      expect(element.getAttribute('onePlusOne')).to.equal(null);
+      expect(element.textContent).to.equal('');
+    });
+  });
+
+  it('should verify class bindings in dev mode', () => {
+    window.AMP_MODE = {development: true, test: true};
+    createElementWithBinding('[class]="\'foo\'" class="foo"');
+    createElementWithBinding('[class]="\'foo\'" class=" foo "');
+    createElementWithBinding('[class]="\'\'"');
+    createElementWithBinding('[class]="\'bar\'" class="qux"'); // Error.
+    const errorSpy = env.sandbox.spy(user(), 'createError');
+    return onBindReady().then(() => {
+      expect(errorSpy).to.be.calledOnce;
+      expect(errorSpy).calledWithMatch(/bar/);
     });
   });
 
   it('should verify string attribute bindings in dev mode', () => {
-    env.sandbox.stub(window, 'AMP_MODE', {development: true});
+    window.AMP_MODE = {development: true, test: true};
     // Only the initial value for [a] binding does not match.
-    createElementWithBinding('[a]="a" [b]="b" b="b"');
-    const errorStub = env.sandbox.stub(user(), 'createError');
+    createElementWithBinding('[text]="\'a\'" [class]="\'b\'" class="b"');
+    const errorSpy = env.sandbox.spy(user(), 'createError');
     return onBindReady().then(() => {
-      expect(errorStub).to.be.calledOnce;
+      expect(errorSpy).to.be.calledOnce;
     });
   });
 
   it('should verify boolean attribute bindings in dev mode', () => {
-    env.sandbox.stub(window, 'AMP_MODE', {development: true});
-    // Only the initial value for [c] binding does not match.
-    createElementWithBinding(`a [a]="true" [b]="false" c="false" [c]="false"`);
-    const errorStub = env.sandbox.stub(user(), 'createError');
+    window.AMP_MODE = {development: true, test: true};
+    createElementWithBinding('[disabled]="true" disabled', 'button');
+    createElementWithBinding('[disabled]="false"', 'button');
+    createElementWithBinding('[disabled]="true"', 'button'); // Mismatch.
+    const errorSpy = env.sandbox.spy(user(), 'createError');
     return onBindReady().then(() => {
-      expect(errorStub).to.be.calledOnce;
+      expect(errorSpy).to.be.calledOnce;
     });
   });
 
   it('should skip digest if specified in setState()', () => {
-    const element = createElementWithBinding('[onePlusOne]="1+1"');
-    expect(element.getAttribute('onePlusOne')).to.equal(null);
+    const element = createElementWithBinding('[text]="1+1"');
+    expect(element.textContent).to.equal('');
     return onBindReady().then(() => {
       bind.setState({}, /* opt_skipDigest */ true);
       env.flushVsync();
-      expect(element.getAttribute('onePlusOne')).to.equal(null);
+      expect(element.textContent).to.equal('');
     });
   });
 
   it('should support binding to string attributes', () => {
-    const element = createElementWithBinding('[onePlusOne]="1+1"');
-    expect(element.getAttribute('onePlusOne')).to.equal(null);
+    const element = createElementWithBinding('[text]="1+1"');
+    expect(element.textContent).to.equal('');
     return onBindReadyAndSetState({}).then(() => {
-      expect(element.getAttribute('onePlusOne')).to.equal('2');
+      expect(element.textContent).to.equal('2');
     });
   });
 
   it('should support binding to boolean attributes', () => {
-    const element =
-        createElementWithBinding('[true]="true" [false]="false" false');
-    expect(element.getAttribute('true')).to.equal(null);
-    expect(element.getAttribute('false')).to.equal('');
+    const element = createElementWithBinding(
+        '[checked]="true" [disabled]="false" disabled',
+        /* opt_tagName */ 'input');
+    expect(element.getAttribute('checked')).to.equal(null);
+    expect(element.getAttribute('disabled')).to.equal('');
     return onBindReadyAndSetState({}).then(() => {
-      expect(element.getAttribute('true')).to.equal('');
-      expect(element.getAttribute('false')).to.equal(null);
+      expect(element.getAttribute('checked')).to.equal('');
+      expect(element.getAttribute('disabled')).to.equal(null);
     });
   });
 
   it('should support binding to Node.textContent', () => {
-    const element = createElementWithBinding(`[text]="'a' + 'b' + 'c'"`);
+    const element = createElementWithBinding('[text]="\'a\' + \'b\' + \'c\'"');
     expect(element.textContent).to.equal('');
     return onBindReadyAndSetState({}).then(() => {
       expect(element.textContent).to.equal('abc');
@@ -275,7 +277,7 @@ describes.realWin('amp-bind', {
   });
 
   it('should support binding to CSS classes with strings', () => {
-    const element = createElementWithBinding(`[class]="['abc']"`);
+    const element = createElementWithBinding('[class]="[\'abc\']"');
     expect(toArray(element.classList)).to.deep.equal([]);
     return onBindReadyAndSetState({}).then(() => {
       expect(toArray(element.classList)).to.deep.equal(['abc']);
@@ -283,7 +285,7 @@ describes.realWin('amp-bind', {
   });
 
   it('should support binding to CSS classes with arrays', () => {
-    const element = createElementWithBinding(`[class]="['a','b']"`);
+    const element = createElementWithBinding('[class]="[\'a\',\'b\']"');
     expect(toArray(element.classList)).to.deep.equal([]);
     return onBindReadyAndSetState({}).then(() => {
       expect(toArray(element.classList)).to.deep.equal(['a', 'b']);
@@ -291,7 +293,7 @@ describes.realWin('amp-bind', {
   });
 
   it('should support parsing exprs in `setStateWithExpression`', () => {
-    const element = createElementWithBinding(`[text]="onePlusOne"`);
+    const element = createElementWithBinding('[text]="onePlusOne"');
     expect(element.textContent).to.equal('');
     const promise = onBindReadyAndSetStateWithExpression(
         '{"onePlusOne": one + one}', {one: 1});
@@ -300,8 +302,20 @@ describes.realWin('amp-bind', {
     });
   });
 
+  it('should ignore <amp-state> updates if specified in `setState`', () => {
+    const element = createElementWithBinding('[src]="foo"', 'amp-state');
+    expect(element.getAttribute('src')).to.be.null;
+    const promise = onBindReadyAndSetState(
+        {foo: '/foo'}, /* opt_isAmpStateMutation */ true);
+    return promise.then(() => {
+      // Should _not_ be updated if `opt_isAmpStateMutation` is true.
+      expect(element.getAttribute('src')).to.be.null;
+    });
+  });
+
   it('should support NOT override internal AMP CSS classes', () => {
-    const element = createAmpElementWithBinding(`[class]="['abc']"`);
+    const element = createElementWithBinding('[class]="[\'abc\']"',
+        /* opt_tagName */ undefined, /* opt_isAmpElement */ true);
     expect(toArray(element.classList)).to.deep.equal(
         ['i-amphtml-foo', '-amp-foo', 'amp-foo']);
     return onBindReadyAndSetState({}).then(() => {
@@ -311,29 +325,28 @@ describes.realWin('amp-bind', {
   });
 
   it('should call mutatedAttributesCallback on AMP elements', () => {
-    const binding = '[onePlusOne]="1+1" [twoPlusTwo]="2+2" twoPlusTwo="4"'
-        + '[add]="true" alreadyAdded [alreadyAdded]="true"'
-        + 'remove [remove]="false" [nothingToRemove]="false"';
-    const element = createAmpElementWithBinding(binding);
+    const binding = '[text]="1+1" [value]="\'4\'" value="4" '
+        + 'checked [checked]="false" [disabled]="true" [multiple]="false"';
+    const element = createElementWithBinding(binding,
+        /* opt_tagName */ 'input', /* opt_isAmpElement */ true);
     const spy = env.sandbox.spy(element, 'mutatedAttributesCallback');
     return onBindReadyAndSetState({}).then(() => {
-      // Attribute names are automatically lower-cased.
       expect(spy).calledWithMatch({
-        oneplusone: 2,
-        add: true,
-        remove: false,
+        checked: false,
+        disabled: true,
       });
-      // Callback shouldn't include attributes whose values haven't changed.
+      // Callback shouldn't include global attributes (text, class) or those
+      // whose values haven't changed.
       expect(spy.neverCalledWithMatch({
-        twoplustwo: 4,
-        alreadyadded: true,
-        nothingtoremove: false,
+        text: 2,
+        value: 4,
+        multiple: false,
       })).to.be.true; // sinon-chai doesn't support "never" API.
     });
   });
 
   it('should support scope variable references', () => {
-    const binding = `[text]="foo + bar + baz.qux.join(',')"`;
+    const binding = '[text]="foo + bar + baz.qux.join(\',\')"';
     const element = createElementWithBinding(binding);
     expect(element.textContent).to.equal('');
     return onBindReadyAndSetState({
@@ -348,8 +361,8 @@ describes.realWin('amp-bind', {
   });
 
   it('should NOT mutate elements if expression result is unchanged', () => {
-    const binding = `[onePlusOne]="1+1" [class]="'abc'" [text]="'a'+'b'"`;
-    const element = createElementWithBinding(binding);
+    const binding = '[value]="1+1" [class]="\'abc\'" [text]="\'a\'+\'b\'"';
+    const element = createElementWithBinding(binding, 'input');
     return onBindReadyAndSetState({}).then(() => {
       expect(element.textContent.length).to.not.equal(0);
       expect(element.classList.length).to.not.equal(0);
@@ -370,21 +383,100 @@ describes.realWin('amp-bind', {
     });
   });
 
-  it('should only evaluate duplicate expressions once', () => {
-    createElementWithBinding(`[a]="1+1" [b]="1+1"`);
-    const stub = env.sandbox.stub(BindExpression.prototype, 'evaluate');
-    stub.returns('stubbed');
+  it('should NOT evaluate expression if binding is NOT allowed', () => {
+    const element = createElementWithBinding('[invalidBinding]="1+1"');
     return onBindReadyAndSetState({}).then(() => {
-      expect(stub.calledOnce).to.be.true;
+      expect(element.getAttribute('invalidbinding')).to.be.null;
     });
   });
 
-  it('should NOT evaluate expression if binding is NOT allowed', () => {
-    canBindStub.returns(false);
-    const element = createElementWithBinding(`[onePlusOne]="1+1"`);
-    return onBindReadyAndSetState({}).then(() => {
-      expect(canBindStub.calledOnce).to.be.true;
-      expect(element.getAttribute('oneplusone')).to.be.null;
+  it('should rewrite attribute values regardless of result type', () => {
+    const withString = createElementWithBinding('[href]="foo"', 'a');
+    const withArray = createElementWithBinding('[href]="bar"', 'a');
+    return onBindReadyAndSetState({
+      foo: '?__amp_source_origin',
+      bar: ['?__amp_source_origin'],
+    }).then(() => {
+      expect(withString.getAttribute('href')).to.equal(null);
+      expect(withArray.getAttribute('href')).to.equal(null);
+    });
+  });
+
+  it('should stop scanning once max number of bindings is reached', () => {
+    bind.setMaxNumberOfBindingsForTesting(2);
+    const errorStub = env.sandbox.stub(user(), 'error');
+
+    const foo = createElementWithBinding('[text]="foo"');
+    const bar = createElementWithBinding('[text]="bar" [class]="baz"');
+    const qux = createElementWithBinding('[text]="qux"');
+
+    return onBindReadyAndSetState({
+      foo: 1, bar: 2, baz: 3, qux: 4,
+    }).then(() => {
+      expect(foo.textContent).to.equal('1');
+      expect(bar.textContent).to.equal('2');
+      // Max number of bindings exceeded with [baz].
+      expect(bar.className).to.be.equal('');
+      expect(qux.textContent).to.be.equal('');
+
+      expect(errorStub).to.have.been.calledWith('amp-bind',
+          sinon.match(/Maximum number of bindings reached/));
+    });
+  });
+
+  describes.realWin('in embedded window', {
+    amp: {
+      runtimeOn: false,
+    },
+  }, otherEnv => {
+    let otherBind;
+    let otherParent;
+
+    let otherElementWithBinding;
+    let onOtherBindReady;
+    let onOtherBindReadyAndSetState;
+
+    beforeEach(() => {
+      // `otherBind` mimics an adopted embed window of `bind` -- it shares an
+      // ampdoc service instance but has a different root node and var scope.
+      // @see Bind#adoptEmbedWindow
+      otherBind = new Bind(env.ampdoc, otherEnv.win);
+      otherParent = otherEnv.win.document.getElementById('parent');
+
+      // TODO(choumx): Better names in a follow-up PR.
+      otherElementWithBinding =
+          createElementWithBinding_(otherParent, otherEnv);
+      onOtherBindReady = onBindReady_(otherBind, otherEnv);
+      onOtherBindReadyAndSetState =
+          onBindReadyAndSetState_(otherBind, otherEnv);
+    });
+
+    it('should only scan the elements in the provided window', () => {
+      createElementWithBinding('[text]="1+1"');
+      otherElementWithBinding('[text]="2+2"');
+
+      expect(otherBind.boundElements_.length).to.equal(0);
+      return onOtherBindReady().then(() => {
+        // `otherBind` shouldn't detect the "1+1" binding.
+        expect(otherBind.boundElements_.length).to.equal(1);
+      });
+    });
+
+    it('should not be able to access variables from other windows', () => {
+      const element = createElementWithBinding('[text]="foo + bar"');
+      const otherElement =
+          otherElementWithBinding('[text]="foo + bar"');
+
+      const promises = [
+        onBindReadyAndSetState({foo: '123', bar: '456'}),
+        onOtherBindReadyAndSetState({foo: 'ABC', bar: 'DEF'}),
+      ];
+
+      return Promise.all(promises).then(() => {
+        // `element` only sees `foo` and `otherElement` only sees `bar`.
+        expect(element.textContent).to.equal('123456');
+        expect(otherElement.textContent).to.equal('ABCDEF');
+      });
     });
   });
 });

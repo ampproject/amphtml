@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-import {adoptServiceForEmbed, fromClass, setParentWindow} from '../service';
+import {
+  adoptServiceForEmbed,
+  adoptServiceForEmbedIfEmbeddable,
+  registerServiceBuilder,
+  setParentWindow,
+} from '../service';
 import {
   copyElementToChildWindow,
   stubElementIfNotKnown,
@@ -53,10 +58,10 @@ let ExtensionElementDef;
 
 /**
  * The structure that contains the resources declared by an extension.
- * Currently only limitted to elements.
  *
  * @typedef {{
  *   elements: !Object<string, !ExtensionElementDef>,
+ *   services: !Array<string>,
  * }}
  */
 let ExtensionDef;
@@ -84,13 +89,11 @@ let ExtensionHolderDef;
 /**
  * Install extensions service.
  * @param {!Window} window
- * @return {!Extensions}
  * @restricted
  */
 export function installExtensionsService(window) {
-  return fromClass(window, 'extensions', Extensions);
+  registerServiceBuilder(window, 'extensions', Extensions);
 }
-
 
 /**
  * Register and process the specified extension. The factory is called
@@ -136,6 +139,17 @@ export function addElementToExtension(
   extensions.addElement_(name, implementationClass, css);
 }
 
+/**
+ * Add a service to the extension currently being registered. This is a
+ * restricted method and it's allowed to be called only during the overall
+ * extension registration.
+ * @param {!Extensions} extensions
+ * @param {string} name
+ * @restricted
+ */
+export function addServiceToExtension(extensions, name) {
+  extensions.addService_(name);
+}
 
 /**
  * Add a ampdoc factory to the extension currently being registered. This is a
@@ -277,6 +291,15 @@ export class Extensions {
   }
 
   /**
+   * Adds `name` to the list of services registered by the current extension.
+   * @param {string} name
+   */
+  addService_(name) {
+    const holder = this.getCurrentExtensionHolder_();
+    holder.extension.services.push(name);
+  }
+
+  /**
    * Registers an ampdoc factory.
    * @param {function(!./ampdoc-impl.AmpDoc)} factory
    * @param {string=} opt_forName
@@ -387,7 +410,7 @@ export class Extensions {
     }
 
     // Adopt embeddable services.
-    adoptServicesForEmbed(childWin);
+    adoptStandardServicesForEmbed(childWin);
 
     // Install built-ins and legacy elements.
     copyBuiltinElementsToChildWindow(topWin, childWin);
@@ -398,15 +421,16 @@ export class Extensions {
       // This will extend automatic upgrade of custom elements from top
       // window to the child window.
       stubElementIfNotKnown(topWin, extensionId);
-      if (LEGACY_ELEMENTS.indexOf(extensionId) == -1) {
+      if (!LEGACY_ELEMENTS.includes(extensionId)) {
         stubElementInChildWindow(childWin, extensionId);
       }
 
       // Install CSS.
       const promise = this.loadExtension(extensionId).then(extension => {
-        // TODO(dvoytenko): Adopt embeddable services from the extension when
-        // becomes necessary. This will require refactoring of extension
-        // loader that can be resolved via the parent ampdoc.
+        // Adopt embeddable extension services.
+        extension.services.forEach(service => {
+          adoptServiceForEmbedIfEmbeddable(childWin, service);
+        });
 
         // Adopt the custom element.
         const elementDef = extension.elements[extensionId];
@@ -418,12 +442,15 @@ export class Extensions {
                 /* completeCallback */ resolve,
                 /* isRuntime */ false,
                 extensionId);
-          });
+          }).then(() => extension); // Forward `extension` to chained Promise.
         }
-      }).then(() => {
+        return extension;
+      }).then(extension => {
         // Notice that stubbing happens much sooner above
         // (see stubElementInChildWindow).
-        upgradeElementInChildWindow(topWin, childWin, extensionId);
+        Object.keys(extension.elements).forEach(element => {
+          upgradeElementInChildWindow(topWin, childWin, element);
+        });
       });
       promises.push(promise);
     });
@@ -439,9 +466,10 @@ export class Extensions {
   getExtensionHolder_(extensionId) {
     let holder = this.extensions_[extensionId];
     if (!holder) {
-      const extension = {
+      const extension = /** @type {ExtensionDef} */ ({
         elements: {},
-      };
+        services: [],
+      });
       holder = /** @type {ExtensionHolderDef} */ ({
         extension,
         docFactories: [],
@@ -548,23 +576,12 @@ export class Extensions {
     if (getMode().test && this.win.testLocation) {
       loc = this.win.testLocation;
     }
-    const useCompiledJs = shouldUseCompiledJs();
     const scriptSrc = calculateExtensionScriptUrl(loc, extensionId,
-        getMode().localDev, getMode().test, useCompiledJs);
+        getMode().localDev);
     scriptElement.src = scriptSrc;
     return scriptElement;
   }
 }
-
-
-/**
- * @return {boolean}
- */
-function shouldUseCompiledJs() {
-  return getMode().test && self.ampTestRuntimeConfig &&
-      self.ampTestRuntimeConfig.useCompiledJs;
-}
-
 
 /**
  * Install builtins.
@@ -605,7 +622,7 @@ export function stubLegacyElements(win) {
 function installPolyfillsInChildWindow(childWin) {
   installDocContains(childWin);
   installDOMTokenListToggle(childWin);
-  installCustomElements(childWin);
+  installCustomElements(childWin, 'auto');
 }
 
 
@@ -613,10 +630,11 @@ function installPolyfillsInChildWindow(childWin) {
  * Adopt predefined core services for the child window (friendly iframe).
  * @param {!Window} childWin
  */
-function adoptServicesForEmbed(childWin) {
+function adoptStandardServicesForEmbed(childWin) {
   // The order of service adoptations is important.
   // TODO(dvoytenko): Refactor service registration if this set becomes
   // to pass the "embeddable" flag if this set becomes too unwieldy.
   adoptServiceForEmbed(childWin, 'action');
   adoptServiceForEmbed(childWin, 'standard-actions');
+  adoptServiceForEmbed(childWin, 'clickhandler');
 }

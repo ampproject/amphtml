@@ -15,18 +15,35 @@
  */
 
 import {getAdNetworkConfig} from '../ad-network-config';
+import {
+  toggleExperiment,
+  forceExperimentBranch,
+} from '../../../../src/experiments';
+import {viewportForDoc} from '../../../../src/services';
+import {
+  ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
+  AdSenseAmpAutoAdsHoldoutBranches,
+} from '../../../../ads/google/adsense-amp-auto-ads';
 
-describe('ad-network-config', () => {
+describes.realWin('ad-network-config', {
+  amp: {
+    canonicalUrl: 'https://foo.bar/baz',
+    runtimeOn: true,
+    ampdoc: 'single',
+  },
+}, env => {
 
   let ampAutoAdsElem;
+  let document;
 
   beforeEach(() => {
+    document = env.win.document;
     ampAutoAdsElem = document.createElement('amp-auto-ads');
-    document.body.appendChild(ampAutoAdsElem);
+    env.win.document.body.appendChild(ampAutoAdsElem);
   });
 
   afterEach(() => {
-    document.body.removeChild(ampAutoAdsElem);
+    env.win.document.body.removeChild(ampAutoAdsElem);
   });
 
   describe('AdSense', () => {
@@ -35,6 +52,31 @@ describe('ad-network-config', () => {
 
     beforeEach(() => {
       ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
+    });
+
+    it('should report enabled when holdout experiment not on', () => {
+      toggleExperiment(
+          env.win, ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME, false);
+      const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
+      expect(adNetwork.isEnabled(env.win)).to.equal(true);
+    });
+
+    it('should report enabled when holdout experiment on and experiment ' +
+        'branch picked', () => {
+      forceExperimentBranch(env.win,
+          ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
+          AdSenseAmpAutoAdsHoldoutBranches.EXPERIMENT);
+      const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
+      expect(adNetwork.isEnabled(env.win)).to.equal(true);
+    });
+
+    it('should report disabled when holdout experiment on and control ' +
+        'branch picked', () => {
+      forceExperimentBranch(env.win,
+          ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
+          AdSenseAmpAutoAdsHoldoutBranches.CONTROL);
+      const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
+      expect(adNetwork.isEnabled(env.win)).to.equal(false);
     });
 
     it('should generate the config fetch URL', () => {
@@ -49,6 +91,22 @@ describe('ad-network-config', () => {
       expect(adNetwork.getAttributes()).to.deep.equal({
         'type': 'adsense',
         'data-ad-client': 'ca-pub-1234',
+      });
+    });
+
+    it('should get the ad constraints', () => {
+      const viewportMock = sandbox.mock(viewportForDoc(env.win.document));
+      viewportMock.expects('getSize').returns(
+          {width: 320, height: 500}).atLeast(1);
+
+      const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
+      expect(adNetwork.getAdConstraints()).to.deep.equal({
+        initialMinSpacing: 500,
+        subsequentMinSpacing: [
+          {adCount: 3, spacing: 1000},
+          {adCount: 6, spacing: 1500},
+        ],
+        maxAdCount: 8,
       });
     });
   });

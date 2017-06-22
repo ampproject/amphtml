@@ -25,6 +25,7 @@ import {
   setStyle,
   removeAlphaFromColor,
 } from '../../../src/style';
+import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 /** @const */
 const EARLY_LOAD_EXPERIMENT = 'sticky-ad-early-load';
@@ -58,17 +59,24 @@ class AmpStickyAd extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.viewport_ = this.getViewport();
-
-    toggle(this.element, true);
-    this.element.classList.add('-amp-sticky-ad-layout');
+    this.element.classList.add('i-amphtml-sticky-ad-layout');
     const children = this.getRealChildren();
     user().assert((children.length == 1 && children[0].tagName == 'AMP-AD'),
         'amp-sticky-ad must have a single amp-ad child');
 
     this.ad_ = children[0];
     this.setAsOwner(this.ad_);
+
+    whenUpgradedToCustomElement(dev().assertElement(this.ad_)).then(ad => {
+      return ad.whenBuilt();
+    }).then(() => {
+      this.mutateElement(() => {
+        toggle(this.element, true);
+      });
+    });
+
     const paddingBar = this.win.document.createElement(
-         'amp-sticky-ad-top-padding');
+        'amp-sticky-ad-top-padding');
     this.element.insertBefore(paddingBar, this.ad_);
 
     // On viewport scroll, check requirements for amp-stick-ad to display.
@@ -130,12 +138,12 @@ class AmpStickyAd extends AMP.BaseElement {
    * @private
    */
   onScroll_() {
-    if (isExperimentOn(this.win, EARLY_LOAD_EXPERIMENT)) {
+    const scrollTop = this.viewport_.getScrollTop();
+    if (isExperimentOn(this.win, EARLY_LOAD_EXPERIMENT) && scrollTop > 1) {
       this.display_();
       return;
     }
 
-    const scrollTop = this.viewport_.getScrollTop();
     const viewportHeight = this.viewport_.getSize().height;
     // Check user has scrolled at least one viewport from init position.
     if (scrollTop > viewportHeight) {
@@ -151,9 +159,10 @@ class AmpStickyAd extends AMP.BaseElement {
     this.removeOnScrollListener_();
     this.deferMutate(() => {
       this.visible_ = true;
-      this.viewport_.addToFixedLayer(this.element);
       this.addCloseButton_();
-      this.scheduleLayoutForAd_();
+      this.viewport_.addToFixedLayer(
+          this.element, /* forceTransfer */ true)
+          .then(() => this.scheduleLayoutForAd_());
     });
   }
 
@@ -163,11 +172,9 @@ class AmpStickyAd extends AMP.BaseElement {
    * @private
    */
   scheduleLayoutForAd_() {
-    if (this.ad_.isBuilt()) {
-      this.layoutAd_();
-    } else {
-      this.ad_.whenBuilt().then(this.layoutAd_.bind(this));
-    }
+    whenUpgradedToCustomElement(dev().assertElement(this.ad_)).then(ad => {
+      ad.whenBuilt().then(this.layoutAd_.bind(this));
+    });
   }
 
   /**

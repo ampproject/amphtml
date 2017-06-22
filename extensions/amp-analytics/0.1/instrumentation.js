@@ -24,6 +24,7 @@ import {
   CustomEventTracker,
   IniLoadTracker,
   SignalTracker,
+  VisibilityTracker,
 } from './events';
 import {Observable} from '../../../src/observable';
 import {Visibility} from './visibility-impl';
@@ -33,12 +34,17 @@ import {getElement, isVisibilitySpecValid} from './visibility-impl';
 import {
   getFriendlyIframeEmbedOptional,
 } from '../../../src/friendly-iframe-embed';
-import {getParentWindowFrameElement} from '../../../src/service';
-import {getServicePromiseForDoc} from '../../../src/service';
+import {
+  getParentWindowFrameElement,
+  getServiceForDoc,
+  getServicePromiseForDoc,
+  registerServiceBuilderForDoc,
+} from '../../../src/service';
 import {isEnumValue} from '../../../src/types';
-import {timerFor} from '../../../src/timer';
-import {viewerForDoc} from '../../../src/viewer';
-import {viewportForDoc} from '../../../src/viewport';
+import {isExperimentOn} from '../../../src/experiments';
+import {timerFor} from '../../../src/services';
+import {viewerForDoc} from '../../../src/services';
+import {viewportForDoc} from '../../../src/services';
 
 const MIN_TIMER_INTERVAL_SECONDS_ = 0.5;
 const DEFAULT_MAX_TIMER_LENGTH_SECONDS_ = 7200;
@@ -92,6 +98,16 @@ const EVENT_TRACKERS = {
     name: 'ini-load',
     allowedFor: ALLOWED_FOR_ALL,
     klass: IniLoadTracker,
+  },
+  'visible-v3': {
+    name: 'visible-v3',
+    allowedFor: ALLOWED_FOR_ALL,
+    klass: VisibilityTracker,
+  },
+  'hidden-v3': {
+    name: 'visible-v3', // Reuse tracker with visibility
+    allowedFor: ALLOWED_FOR_ALL,
+    klass: VisibilityTracker,
   },
 };
 
@@ -153,6 +169,14 @@ export class InstrumentationService {
   }
 
   /**
+   * @param {!Node} context
+   * @return {!./analytics-root.AnalyticsRoot}
+   */
+  getAnalyticsRoot(context) {
+    return this.findRoot_(context);
+  }
+
+  /**
    * @param {!Element} analyticsElement
    * @return {!AnalyticsGroup}
    */
@@ -175,18 +199,6 @@ export class InstrumentationService {
     const tracker = /** @type {!CustomEventTracker} */ (
         root.getTracker('custom', CustomEventTracker));
     tracker.trigger(event);
-  }
-
-  /**
-   * Triggers the analytics event with the specified type.
-   *
-   * @param {string} eventType
-   * @param {!Object<string, string>=} opt_vars A map of vars and their values.
-   */
-  triggerEvent(eventType, opt_vars) {
-    // TODO(dvoytenko): deprecate/remove in preference of triggerEventForTarget.
-    this.triggerEventForTarget(
-        this.ampdocRoot_.getRootElement(), eventType, opt_vars);
   }
 
   /**
@@ -226,7 +238,7 @@ export class InstrumentationService {
   }
 
   /**
-   * @param {!JSONType} config Configuration for instrumentation.
+   * @param {!JsonObject} config Configuration for instrumentation.
    * @param {function(!AnalyticsEvent)} listener The callback to call when the event
    *  occurs.
    * @param {!Element} analyticsElement The element associated with the
@@ -287,7 +299,7 @@ export class InstrumentationService {
    * the conditions are met.
    * @param {function(!AnalyticsEvent)} callback The callback to call when the
    *   event occurs.
-   * @param {!JSONType} config Configuration for instrumentation.
+   * @param {!JsonObject} config Configuration for instrumentation.
    * @param {AnalyticsEventType} eventType Event type for which the callback is triggered.
    * @param {!Element} analyticsElement The element assoicated with the
    *   config.
@@ -299,7 +311,7 @@ export class InstrumentationService {
         'createVisibilityListener should be called with visible or hidden ' +
         'eventType');
     const shouldBeVisible = eventType == AnalyticsEventType.VISIBLE;
-    /** @const {!JSONType} */
+    /** @const {!JsonObject} */
     const spec = config['visibilitySpec'];
     if (spec) {
       if (!isVisibilitySpecValid(config)) {
@@ -345,8 +357,8 @@ export class InstrumentationService {
   /**
    * Register for a listener to be called when the boundaries specified in
    * config are reached.
-   * @param {!JSONType} config the config that specifies the boundaries.
-   * @param {Function} listener
+   * @param {!JsonObject} config the config that specifies the boundaries.
+   * @param {function(!AnalyticsEvent)} listener
    * @private
    */
   registerScrollTrigger_(config, listener) {
@@ -432,21 +444,21 @@ export class InstrumentationService {
   }
 
   /**
-   * @param {JSONType} timerSpec
+   * @param {JsonObject} timerSpec
    * @private
    */
   isTimerSpecValid_(timerSpec) {
-    if (!timerSpec) {
+    if (!timerSpec || typeof timerSpec != 'object') {
       user().error(TAG, 'Bad timer specification');
       return false;
-    } else if (!timerSpec.hasOwnProperty('interval')) {
+    } else if (!('interval' in timerSpec)) {
       user().error(TAG, 'Timer interval specification required');
       return false;
     } else if (typeof timerSpec['interval'] !== 'number' ||
                timerSpec['interval'] < MIN_TIMER_INTERVAL_SECONDS_) {
       user().error(TAG, 'Bad timer interval specification');
       return false;
-    } else if (timerSpec.hasOwnProperty('maxTimerLength') &&
+    } else if (('maxTimerLength' in timerSpec) &&
               (typeof timerSpec['maxTimerLength'] !== 'number' ||
                   timerSpec['maxTimerLength'] <= 0)) {
       user().error(TAG, 'Bad maxTimerLength specification');
@@ -457,16 +469,16 @@ export class InstrumentationService {
   }
 
   /**
-   * @param {!Function} listener
-   * @param {JSONType} timerSpec
+   * @param {!function(!AnalyticsEvent)} listener
+   * @param {JsonObject} timerSpec
    * @private
    */
   createTimerListener_(listener, timerSpec) {
-    const hasImmediate = timerSpec.hasOwnProperty('immediate');
+    const hasImmediate = 'immediate' in timerSpec;
     const callImmediate = hasImmediate ? Boolean(timerSpec['immediate']) : true;
     const intervalId = this.ampdoc.win.setInterval(
-      listener.bind(null, this.createEventDepr_(AnalyticsEventType.TIMER)),
-      timerSpec['interval'] * 1000
+        listener.bind(null, this.createEventDepr_(AnalyticsEventType.TIMER)),
+        timerSpec['interval'] * 1000
     );
 
     if (callImmediate) {
@@ -490,7 +502,7 @@ export class InstrumentationService {
    */
   isTriggerAllowed_(triggerType, element) {
     if (element.ownerDocument.defaultView != this.ampdoc.win) {
-      return ALLOWED_IN_EMBED.indexOf(triggerType) > -1;
+      return ALLOWED_IN_EMBED.includes(triggerType);
     }
     return true;
   }
@@ -521,6 +533,10 @@ export class AnalyticsGroup {
 
     /** @private @const {!Array<!UnlistenDef>} */
     this.listeners_ = [];
+
+    // TODO(dvoytenko, #8121): Cleanup visibility-v3 experiment.
+    /** @private @const {boolean} */
+    this.visibilityV3_ = isExperimentOn(root.ampdoc.win, 'visibility-v3');
   }
 
   /** @override */
@@ -537,11 +553,16 @@ export class AnalyticsGroup {
    * Triggers registered on a group are automatically released when the
    * group is disposed.
    *
-   * @param {!JSONType} config
+   * @param {!JsonObject} config
    * @param {function(!AnalyticsEvent)} handler
    */
   addTrigger(config, handler) {
-    const eventType = dev().assertString(config['on']);
+    let eventType = dev().assertString(config['on']);
+    // TODO(dvoytenko, #8121): Cleanup visibility-v3 experiment.
+    if ((eventType == 'visible' || eventType == 'hidden')
+        && this.visibilityV3_) {
+      eventType += '-v3';
+    }
     let trackerProfile = EVENT_TRACKERS[eventType];
     if (!trackerProfile && !isEnumValue(AnalyticsEventType, eventType)) {
       trackerProfile = EVENT_TRACKERS['custom'];
@@ -573,7 +594,17 @@ export class AnalyticsGroup {
  * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!Promise<InstrumentationService>}
  */
-export function instrumentationServiceForDoc(nodeOrDoc) {
+export function instrumentationServicePromiseForDoc(nodeOrDoc) {
   return /** @type {!Promise<InstrumentationService>} */ (
       getServicePromiseForDoc(nodeOrDoc, 'amp-analytics-instrumentation'));
+}
+
+/*
+ * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @return {!InstrumentationService}
+ */
+export function instrumentationServiceForDocForTesting(nodeOrDoc) {
+  registerServiceBuilderForDoc(
+      nodeOrDoc, 'amp-analytics-instrumentation', InstrumentationService);
+  return getServiceForDoc(nodeOrDoc, 'amp-analytics-instrumentation');
 }

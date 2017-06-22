@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from './action-trust';
 import {Layout} from './layout';
+import {getData} from './event-helper';
 import {loadPromise} from './event-helper';
 import {preconnectForElement} from './preconnect';
 import {isArray} from './types';
-import {viewportForDoc} from './viewport';
-import {vsyncFor} from './vsync';
+import {viewportForDoc} from './services';
+import {vsyncFor} from './services';
 import {user} from './log';
-
 
 /**
  * Base class for all custom element implementations. Instead of inheriting
@@ -142,7 +143,13 @@ export class BaseElement {
     /** @public @const {!Window} */
     this.win = element.ownerDocument.defaultView;
 
-    /** @private {?Object<string, function(!./service/action-impl.ActionInvocation)>} */
+    /**
+     * Maps action name to struct containing the action handler and minimum
+     * trust required to invoke the handler.
+     * @private {?Object<string, {
+     *   handler: function(!./service/action-impl.ActionInvocation),
+     *   minTrust: ActionTrust,
+     * }>} */
     this.actionMap_ = null;
 
     /** @public {!./preconnect.Preconnect} */
@@ -191,11 +198,22 @@ export class BaseElement {
   }
 
   /**
-   * Returns a previously measured layout box of the element.
+   * Returns a previously measured layout box adjusted to the viewport. This
+   * mainly affects fixed-position elements that are adjusted to be always
+   * relative to the document position in the viewport.
    * @return {!./layout-rect.LayoutRectDef}
    */
   getLayoutBox() {
     return this.element.getLayoutBox();
+  }
+
+  /**
+   * Returns a previously measured layout box relative to the page. The
+   * fixed-position elements are relative to the top of the document.
+   * @return {!./layout-rect.LayoutRectDef}
+   */
+  getPageLayoutBox() {
+    return this.element.getPageLayoutBox();
   }
 
   /**
@@ -481,17 +499,23 @@ export class BaseElement {
   }
 
   /**
+   * Minimum event trust required for activate().
+   * @return {ActionTrust}
+   */
+  activationTrust() {
+    return ActionTrust.MEDIUM;
+  }
+
+  /**
    * Returns a promise that will resolve or fail based on the element's 'load'
-   * and 'error' events. Optionally this method takes a timeout, which will reject
-   * the promise if the resource has not loaded by then.
+   * and 'error' events.
    * @param {T} element
-   * @param {number=} opt_timeout
    * @return {!Promise<T>}
    * @template T
    * @final
    */
-  loadPromise(element, opt_timeout) {
-    return loadPromise(element, opt_timeout);
+  loadPromise(element) {
+    return loadPromise(element);
   }
 
   /** @private */
@@ -503,13 +527,19 @@ export class BaseElement {
 
   /**
    * Registers the action handler for the method with the specified name.
+   *
+   * The handler is only invoked by events with trust equal to or greater than
+   * `minTrust` (or ActionTrust.MEDIUM if not provided). Otherwise, a
+   * user error is logged.
+   *
    * @param {string} method
    * @param {function(!./service/action-impl.ActionInvocation)} handler
+   * @param {ActionTrust} minTrust
    * @public
    */
-  registerAction(method, handler) {
+  registerAction(method, handler, minTrust = ActionTrust.MEDIUM) {
     this.initActionMap_();
-    this.actionMap_[method] = handler;
+    this.actionMap_[method] = {handler, minTrust};
   }
 
   /**
@@ -524,13 +554,18 @@ export class BaseElement {
    */
   executeAction(invocation, unusedDeferred) {
     if (invocation.method == 'activate') {
-      this.activate(invocation);
+      if (invocation.satisfiesTrust(this.activationTrust())) {
+        this.activate(invocation);
+      }
     } else {
       this.initActionMap_();
-      const handler = this.actionMap_[invocation.method];
-      user().assert(handler, `Method not found: ${invocation.method} in %s`,
+      const holder = this.actionMap_[invocation.method];
+      user().assert(holder, `Method not found: ${invocation.method} in %s`,
           this);
-      handler(invocation);
+      const {handler, minTrust} = holder;
+      if (invocation.satisfiesTrust(minTrust)) {
+        handler(invocation);
+      }
     }
   }
 
@@ -583,9 +618,18 @@ export class BaseElement {
     events = isArray(events) ? events : [events];
     for (let i = 0; i < events.length; i++) {
       element.addEventListener(events[i], event => {
-        this.element.dispatchCustomEvent(events[i], event.data || {});
+        this.element.dispatchCustomEvent(events[i], getData(event) || {});
       });
     }
+  }
+
+  /**
+   * Must be executed in the mutate context. Removes `display:none` from the
+   * element set via `layout=nodisplay`.
+   * @param {boolean} displayOn
+   */
+  toggleLayoutDisplay(displayOn) {
+    this.element.toggleLayoutDisplay(displayOn);
   }
 
   /**
@@ -676,15 +720,9 @@ export class BaseElement {
    * @public @final
    */
   applyFillContent(element, opt_replacedContent) {
-    // TODO(dvoytenko, #6794): Remove old `-amp-fill-content` form after the new
-    // form is in PROD for 1-2 weeks.
     element.classList.add('i-amphtml-fill-content');
-    element.classList.add('-amp-fill-content');
     if (opt_replacedContent) {
-      // TODO(dvoytenko, #6794): Remove old `-amp-replaced-content` form after the new
-      // form is in PROD for 1-2 weeks.
       element.classList.add('i-amphtml-replaced-content');
-      element.classList.add('-amp-replaced-content');
     }
   }
 

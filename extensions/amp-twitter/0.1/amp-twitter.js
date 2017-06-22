@@ -36,14 +36,15 @@ class AmpTwitter extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
+    preloadBootstrap(this.win, this.preconnect);
+    // Hosts the script that renders tweets.
+    this.preconnect.preload(
+        'https://platform.twitter.com/widgets.js', 'script');
     // This domain serves the actual tweets as JSONP.
     this.preconnect.url('https://syndication.twitter.com', opt_onLayout);
     // All images
     this.preconnect.url('https://pbs.twimg.com', opt_onLayout);
-    // Hosts the script that renders tweets.
-    this.preconnect.preload(
-        'https://platform.twitter.com/widgets.js', 'script');
-    preloadBootstrap(this.win, this.preconnect);
+    this.preconnect.url('https://cdn.syndication.twimg.com', opt_onLayout);
   }
 
   /** @override */
@@ -64,7 +65,7 @@ class AmpTwitter extends AMP.BaseElement {
       // We only get the message if and when there is a tweet to display,
       // so hide the placeholder.
       this.togglePlaceholder(false);
-      this./*OK*/changeHeight(data.height);
+      this./*OK*/changeHeight(data['height']);
     }, /* opt_is3P */true);
     this.element.appendChild(iframe);
     this.iframe_ = iframe;

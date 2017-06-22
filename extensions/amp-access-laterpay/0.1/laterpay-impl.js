@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-import {accessServiceFor} from '../../../src/access-service';
 import {CSS} from '../../../build/amp-access-laterpay-0.1.css';
 import {dev, user} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
 import {installStyles} from '../../../src/style-installer';
+import {installStylesForShadowRoot} from '../../../src/shadow-embed';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
 import {removeChildren} from '../../../src/dom';
-import {timerFor} from '../../../src/timer';
-import {viewportForDoc} from '../../../src/viewport';
-import {vsyncFor} from '../../../src/vsync';
-import {xhrFor} from '../../../src/xhr';
+import {timerFor} from '../../../src/services';
+import {viewportForDoc} from '../../../src/services';
+import {vsyncFor} from '../../../src/services';
+import {xhrFor} from '../../../src/services';
 
 const TAG = 'amp-access-laterpay';
 const CONFIG_URL = 'https://connector.laterpay.net';
@@ -76,7 +75,8 @@ let PurchaseOptionDef;
  *   access: boolean,
  *   apl: string,
  *   premiumcontent: !PurchaseOptionDef,
- *   timepasses: Array<PurchaseOptionDef>=
+ *   timepasses: Array<PurchaseOptionDef>=,
+ *   subscriptions: Array<PurchaseOptionDef>=
  * }}
  */
 let PurchaseConfigDef;
@@ -91,17 +91,14 @@ export class LaterpayVendor {
    * @param {!AccessService} accessService
    */
   constructor(accessService) {
+    /** @const */
+    this.ampdoc = accessService.ampdoc;
+
     /** @const @private {!AccessService} */
     this.accessService_ = accessService;
 
-    /** @const @private {!Window} */
-    this.win_ = this.accessService_.win;
-
-    /** @const @private {!Document} */
-    this.doc_ = this.win_.document;
-
     /** @private @const {!Viewport} */
-    this.viewport_ = viewportForDoc(this.win_.document);
+    this.viewport_ = viewportForDoc(this.ampdoc);
 
     /** @const @private {!LaterpayConfigDef} */
     this.laterpayConfig_ = this.accessService_.getAdapterConfig();
@@ -122,6 +119,9 @@ export class LaterpayVendor {
     this.containerEmpty_ = true;
 
     /** @private {?Node} */
+    this.innerContainer_ = null;
+
+    /** @private {?Node} */
     this.selectedPurchaseOption_ = null;
 
     /** @private {?Node} */
@@ -132,7 +132,7 @@ export class LaterpayVendor {
 
     /** @private {Object} */
     this.i18n_ = Object.assign({}, DEFAULT_MESSAGES,
-                  this.laterpayConfig_.localeMessages || {});
+        this.laterpayConfig_.localeMessages || {});
 
     /** @private {string} */
     this.purchaseConfigBaseUrl_ = this.getConfigUrl_() + CONFIG_BASE_PATH;
@@ -143,15 +143,22 @@ export class LaterpayVendor {
     }
 
     /** @const @private {!Timer} */
-    this.timer_ = timerFor(this.win_);
+    this.timer_ = timerFor(this.ampdoc.win);
 
     /** @const @private {!Vsync} */
-    this.vsync_ = vsyncFor(this.win_);
+    this.vsync_ = vsyncFor(this.ampdoc.win);
 
     /** @const @private {!Xhr} */
-    this.xhr_ = xhrFor(this.win_);
+    this.xhr_ = xhrFor(this.ampdoc.win);
 
-    installStyles(this.win_.document, CSS, () => {}, false, TAG);
+    // Install styles.
+    if (this.ampdoc.isSingleDoc()) {
+      const root = /** @type {!Document} */ (this.ampdoc.getRootNode());
+      installStyles(root, CSS, () => {}, false, TAG);
+    } else {
+      const root = /** @type {!ShadowRoot} */ (this.ampdoc.getRootNode());
+      installStylesForShadowRoot(root, CSS, false, TAG);
+    }
   }
 
   /**
@@ -172,37 +179,39 @@ export class LaterpayVendor {
   }
 
   /**
-   * @return {!Promise<!JSONType>}
+   * @return {!Promise<!JsonObject>}
    */
   authorize() {
-    user().assert(isExperimentOn(this.win_, TAG),
-        'Enable "amp-access-laterpay" experiment');
     return this.getPurchaseConfig_()
-    .then(response => {
-      if (response.status === 204) {
-        throw user()
-          .createError('No merchant domains have been matched for this ' +
+        .then(response => {
+          if (response.status === 204) {
+            throw user()
+                .createError('No merchant domains have been matched for this ' +
             'article, or no paid content configurations are setup.');
-      }
+          }
 
-      if (this.laterpayConfig_.scrollToTopAfterAuth) {
-        this.vsync_.mutate(() => this.viewport_.setScrollTop(0));
-      }
-      this.emptyContainer_();
-      return {access: response.access};
-    }, err => {
-      const status = err && err.response && err.response.status;
-      if (status === 402) {
-        this.purchaseConfig_ = err.responseJson;
+          if (this.laterpayConfig_.scrollToTopAfterAuth) {
+            this.vsync_.mutate(() => this.viewport_.setScrollTop(0));
+          }
+          this.emptyContainer_();
+          return {access: response.access};
+        }, err => {
+          if (!err || !err.response) {
+            throw err;
+          }
+          const {response} = err;
+          if (response.status !== 402) {
+            throw err;
+          }
+          return response.json().catch(() => undefined).then(responseJson => {
+            this.purchaseConfig_ = responseJson;
         // empty before rendering, in case authorization is being called again
         // with the same state
-        this.emptyContainer_()
-          .then(this.renderPurchaseOverlay_.bind(this));
-      } else {
-        throw err;
-      }
-      return {access: false};
-    });
+            this.emptyContainer_()
+                .then(this.renderPurchaseOverlay_.bind(this));
+            return {access: false};
+          });
+        });
   }
 
   /**
@@ -213,16 +222,25 @@ export class LaterpayVendor {
     const url = this.purchaseConfigBaseUrl_ +
                 '&article_title=' + encodeURIComponent(this.getArticleTitle_());
     const urlPromise = this.accessService_.buildUrl(
-      url, /* useAuthData */ false);
+        url, /* useAuthData */ false);
     return urlPromise.then(url => {
-      dev().fine(TAG, 'Authorization URL: ', url);
+      return this.accessService_.getLoginUrl(url);
+    }).then(url => {
+      dev().info(TAG, 'Authorization URL: ', url);
       return this.timer_.timeoutPromise(
           AUTHORIZATION_TIMEOUT,
           this.xhr_.fetchJson(url, {
             credentials: 'include',
-            requireAmpResponseSourceOrigin: true,
-          }));
+          })).then(res => res.json());
     });
+  }
+
+  /**
+   * @return {!Element}
+   * @private
+   */
+  createElement_(name) {
+    return this.ampdoc.win.document.createElement(name);
   }
 
   /**
@@ -230,11 +248,11 @@ export class LaterpayVendor {
    * @private
    */
   getArticleTitle_() {
-    const title = this.doc_.querySelector(
-      this.laterpayConfig_.articleTitleSelector);
+    const title = this.ampdoc.getRootNode().querySelector(
+        this.laterpayConfig_.articleTitleSelector);
     user().assert(
-      title, 'No article title element found with selector %s',
-      this.laterpayConfig_.articleTitleSelector);
+        title, 'No article title element found with selector %s',
+        this.laterpayConfig_.articleTitleSelector);
     return title.textContent.trim();
   }
 
@@ -244,10 +262,10 @@ export class LaterpayVendor {
    */
   getContainer_() {
     const id = TAG + '-dialog';
-    const dialogContainer = this.doc_.getElementById(id);
+    const dialogContainer = this.ampdoc.getElementById(id);
     return user().assert(
-      dialogContainer,
-      'No element found with id %s', id
+        dialogContainer,
+        'No element found with id %s', id
     );
   }
 
@@ -274,6 +292,7 @@ export class LaterpayVendor {
     }
     return this.vsync_.mutatePromise(() => {
       this.containerEmpty_ = true;
+      this.innerContainer_ = null;
       removeChildren(this.getContainer_());
     });
   }
@@ -283,31 +302,50 @@ export class LaterpayVendor {
    */
   renderPurchaseOverlay_() {
     const dialogContainer = this.getContainer_();
+    this.innerContainer_ = this.createElement_('div');
+    this.innerContainer_.className = TAG + '-container';
     this.renderTextBlock_('header');
-    const listContainer = this.doc_.createElement('ul');
+    const listContainer = this.createElement_('ul');
     this.purchaseConfig_.premiumcontent['tp_title'] =
       this.i18n_.premiumContentTitle;
     this.purchaseConfig_.premiumcontent.description = this.getArticleTitle_();
     listContainer.appendChild(
-      this.createPurchaseOption_(this.purchaseConfig_.premiumcontent)
+        this.createPurchaseOption_(this.purchaseConfig_.premiumcontent)
     );
     this.purchaseConfig_.timepasses.forEach(timepass => {
       listContainer.appendChild(this.createPurchaseOption_(timepass));
     });
-    const purchaseButton = this.doc_.createElement('button');
+    this.purchaseConfig_.subscriptions.forEach(subscription => {
+      listContainer.appendChild(this.createPurchaseOption_(subscription));
+    });
+    const purchaseButton = this.createElement_('button');
     purchaseButton.className = TAG + '-purchase-button';
     purchaseButton.textContent = this.i18n_.defaultButton;
-    purchaseButton.disabled = true;
     this.purchaseButton_ = purchaseButton;
     this.purchaseButtonListener_ = listen(purchaseButton, 'click', ev => {
-      this.handlePurchase_(ev, this.selectedPurchaseOption_.value);
+      const value = this.selectedPurchaseOption_.value;
+      const purchaseType = this.selectedPurchaseOption_.dataset.purchaseType;
+      this.handlePurchase_(ev, value, purchaseType);
     });
-    dialogContainer.appendChild(listContainer);
-    dialogContainer.appendChild(purchaseButton);
-    dialogContainer.appendChild(
-      this.createAlreadyPurchasedLink_(this.purchaseConfig_.apl));
+    this.innerContainer_.appendChild(listContainer);
+    this.innerContainer_.appendChild(purchaseButton);
+    this.innerContainer_.appendChild(
+        this.createAlreadyPurchasedLink_(this.purchaseConfig_.apl));
     this.renderTextBlock_('footer');
+    dialogContainer.appendChild(this.innerContainer_);
+    dialogContainer.appendChild(this.createLaterpayBadge_());
     this.containerEmpty_ = false;
+    this.preselectFirstOption_(listContainer.firstElementChild);
+  }
+
+  /**
+   * @private
+   * @param {!Node} firstOption
+   */
+  preselectFirstOption_(firstOption) {
+    const firstInput = firstOption.querySelector('input[type="radio"]');
+    firstInput.checked = true;
+    this.selectPurchaseOption_(firstInput);
   }
 
   /**
@@ -316,13 +354,28 @@ export class LaterpayVendor {
    */
   renderTextBlock_(area) {
     if (this.i18n_[area]) {
-      const el = this.doc_.createElement('p');
+      const el = this.createElement_('p');
       el.className = TAG + '-' + area;
       el.textContent = this.i18n_[area];
-      this.getContainer_().appendChild(el);
+      this.innerContainer_.appendChild(el);
     }
   }
 
+  /**
+   * @private
+   * @return {!Node}
+   */
+  createLaterpayBadge_() {
+    const a = this.createElement_('a');
+    a.href = 'https://laterpay.net';
+    a.target = '_blank';
+    a.textContent = 'LaterPay';
+    const el = this.createElement_('p');
+    el.className = TAG + '-badge';
+    el.textContent = 'Powered by ';
+    el.appendChild(a);
+    return el;
+  }
 
   /**
    * @param {!PurchaseOptionDef} option
@@ -330,17 +383,17 @@ export class LaterpayVendor {
    * @private
    */
   createPurchaseOption_(option) {
-    const li = this.doc_.createElement('li');
-    const control = this.doc_.createElement('label');
+    const li = this.createElement_('li');
+    const control = this.createElement_('label');
     control.for = option.tp_title;
     control.appendChild(this.createRadioControl_(option));
-    const metadataContainer = this.doc_.createElement('div');
+    const metadataContainer = this.createElement_('div');
     metadataContainer.className = TAG + '-metadata';
-    const title = this.doc_.createElement('span');
+    const title = this.createElement_('span');
     title.className = TAG + '-title';
     title.textContent = option.tp_title;
     metadataContainer.appendChild(title);
-    const description = this.doc_.createElement('p');
+    const description = this.createElement_('p');
     description.className = TAG + '-description';
     description.textContent = option.description;
     metadataContainer.appendChild(description);
@@ -356,7 +409,7 @@ export class LaterpayVendor {
    * @private
    */
   createRadioControl_(option) {
-    const radio = this.doc_.createElement('input');
+    const radio = this.createElement_('input');
     radio.name = 'purchaseOption';
     radio.type = 'radio';
     radio.id = option.tp_title;
@@ -368,7 +421,7 @@ export class LaterpayVendor {
     radio.setAttribute('data-purchase-action-label', purchaseActionLabel);
     radio.setAttribute('data-purchase-type', purchaseType);
     this.purchaseOptionListeners_.push(listen(
-      radio, 'change', this.handlePurchaseOptionSelection_.bind(this)
+        radio, 'change', this.handlePurchaseOptionSelection_.bind(this)
     ));
     return radio;
   }
@@ -381,13 +434,13 @@ export class LaterpayVendor {
   createPrice_(price) {
     const currency = Object.keys(price)[0];
     const formattedPrice = this.formatPrice_(price[currency]);
-    const valueEl = this.doc_.createElement('span');
+    const valueEl = this.createElement_('span');
     valueEl.className = TAG + '-price';
     valueEl.textContent = formattedPrice;
-    const currencyEl = this.doc_.createElement('sup');
+    const currencyEl = this.createElement_('sup');
     currencyEl.className = TAG + '-currency';
     currencyEl.textContent = currency;
-    const priceEl = this.doc_.createElement('p');
+    const priceEl = this.createElement_('p');
     priceEl.className = TAG + '-price-container';
     priceEl.appendChild(valueEl);
     priceEl.appendChild(currencyEl);
@@ -413,13 +466,13 @@ export class LaterpayVendor {
    * @return {!Node}
   */
   createAlreadyPurchasedLink_(href) {
-    const p = this.doc_.createElement('p');
+    const p = this.createElement_('p');
     p.className = TAG + '-already-purchased-link-container';
-    const a = this.doc_.createElement('a');
+    const a = this.createElement_('a');
     a.href = href;
     a.textContent = this.i18n_.alreadyPurchasedLink;
     this.alreadyPurchasedListener_ = listen(a, 'click', ev => {
-      this.handlePurchase_(ev, href);
+      this.handlePurchase_(ev, href, 'alreadyPurchased');
     });
     p.appendChild(a);
     return p;
@@ -431,37 +484,39 @@ export class LaterpayVendor {
    */
   handlePurchaseOptionSelection_(ev) {
     ev.preventDefault();
+    this.selectPurchaseOption_(ev.target);
+  }
+
+  /**
+   * @param {!Node} target
+   * @private
+   */
+  selectPurchaseOption_(target) {
     const selectedOptionClassname = TAG + '-selected';
     const prevPurchaseOption = this.selectedPurchaseOption_;
-    const purchaseActionLabel = ev.target.dataset.purchaseActionLabel;
+    const purchaseActionLabel = target.dataset.purchaseActionLabel;
     if (prevPurchaseOption &&
         prevPurchaseOption.classList.contains(selectedOptionClassname)) {
       prevPurchaseOption.classList.remove(selectedOptionClassname);
     }
-    this.selectedPurchaseOption_ = ev.target;
+    this.selectedPurchaseOption_ = target;
     this.selectedPurchaseOption_.classList.add(selectedOptionClassname);
-    if (this.purchaseButton_.disabled) {
-      this.purchaseButton_.disabled = false;
-    }
     this.purchaseButton_.textContent = purchaseActionLabel;
   }
 
   /**
    * @param {!Event} ev
+   * @param {!string} purchaseUrl
+   * @param {!string} purchaseType
    * @private
    */
-  handlePurchase_(ev, purchaseUrl) {
+  handlePurchase_(ev, purchaseUrl, purchaseType) {
     ev.preventDefault();
-    const configuredUrl = purchaseUrl +
-                '?return_url=RETURN_URL' +
-                '&article_url=SOURCE_URL' +
-                '&amp_reader_id=READER_ID';
     const urlPromise = this.accessService_.buildUrl(
-      configuredUrl, /* useAuthData */ false);
+        purchaseUrl, /* useAuthData */ false);
     return urlPromise.then(url => {
       dev().fine(TAG, 'Authorization URL: ', url);
-      this.accessService_.loginWithUrl(
-        url, this.selectedPurchaseOption_.dataset.purchaseType);
+      this.accessService_.loginWithUrl(url, purchaseType);
     });
   }
 
@@ -471,12 +526,4 @@ export class LaterpayVendor {
   pingback() {
     return Promise.resolve();
   }
-}
-
-export function installAmpAccessLaterPay() {
-  // Register the vendor within the access service.
-  accessServiceFor(AMP.win).then(accessService => {
-    accessService.registerVendor('laterpay',
-        new LaterpayVendor(accessService));
-  });
 }

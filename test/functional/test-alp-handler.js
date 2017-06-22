@@ -33,7 +33,7 @@ describe('alp-handler', () => {
     win = {
       location: {},
       open: () => null,
-      Image: function() {
+      Image() {
         image = this;
       },
       postMessage: sandbox.stub(),
@@ -307,10 +307,15 @@ describe('alp-handler', () => {
 
   it('should warmup dynamically', () => {
     warmupDynamic(event);
-    expect(win.document.head.appendChild).to.be.calledOnce;
-    const link = win.document.head.appendChild.lastCall.args[0];
-    expect(link.rel).to.equal('preload');
-    expect(link.href).to.equal(
+    expect(win.document.head.appendChild).to.be.callCount(2);
+    const link0 = win.document.head.appendChild.firstCall.args[0];
+    expect(link0.rel).to.equal('preload');
+    expect(link0.href).to.equal(
+        'https://cdn.ampproject.org/c/www.example.com/amp.html');
+    const link1 = win.document.head.appendChild.secondCall.args[0];
+    expect(link1.rel).to.equal('preload');
+    expect(link1.as).to.equal('fetch');
+    expect(link1.href).to.equal(
         'https://cdn.ampproject.org/c/www.example.com/amp.html');
   });
 

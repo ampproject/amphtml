@@ -12,7 +12,7 @@
     <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
     <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
     <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
-    <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js?10"></script>
+    <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js"></script>
     <style amp-custom>
         input.user-invalid {
             background-color: #dc4e41;
@@ -55,6 +55,34 @@
 
         form.amp-form-submit-error [submit-error] {
             color: #dc4e41;
+        }
+
+        .verification-form label {
+          display: block;
+        }
+
+        .spinner,
+        .spinner:after {
+          border-radius: 50%;
+          width: 18px;
+          height: 18px;
+        }
+
+        .spinner {
+          visibility: hidden;
+          margin: 5px;
+          border: 9px solid rgba(0, 0, 0, 0.3);
+          border-left-color: #fff;
+          animation: spin 1.1s infinite linear;
+        }
+
+        .amp-form-verifying .spinner {
+          visibility: visible;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
 
         .lightbox {
@@ -115,9 +143,9 @@
             position: absolute;
         }
         amp-selector [option] {
-            box-sizing: border-box !important;
+            box-sizing: border-box;
             display: inline-block;
-            position: relative !important;
+            position: relative;
         }
         amp-selector[disabled],
         amp-selector [disabled] {
@@ -236,17 +264,18 @@
         </label>
         <input type="submit" value="Subscribe">
     </fieldset>
-
+    <div submitting>
+      <template type="amp-mustache">
+        Please wait, {{name}}.
+      </template>
+    </div>
     <div submit-success>
-        <template type="amp-mustache">
-            Success! Thanks {{name}} for subscribing! Please make sure to check your email {{email}}
-        to confirm!
-        </template>
+      Success! Thanks for subscribing! Please make sure to check your email
+      to confirm!
     </div>
     <div submit-error>
-        <template type="amp-mustache">
-            Oops! {{name}}, We apologies something went wrong. Please try again later.
-        </template>
+      <amp-img width="32" height="32" src="/examples/x-icon.png"></amp-img>
+      Oops! We apologize, something went wrong. Please try again later.
     </div>
 </form>
 
@@ -557,7 +586,7 @@
 <form method="post"
       action-xhr="/form/echo-json/post"
       target="_blank">
-    <amp-selector layout="container" name="multi_image_select" multiple>
+    <amp-selector layout="container" name="multi_image_select" multiple keyboard-select-mode="focus">
         <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no" width=50 height=50 option="1" selected></amp-img>
         <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no" width=50 height=50 option="2"></amp-img>
         <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h300-no" width=50 height=50 option="3" selected></amp-img>
@@ -617,6 +646,86 @@
     <div submit-error>
         <template type="amp-mustache">
             Oops! {{name}}, We apologies something went wrong. Please try again later.
+        </template>
+    </div>
+</form>
+
+<h4>Asynchronous verification example</h4>
+
+<form
+  method="post"
+  action-xhr="/form/verify-search-json/post"
+  verify-xhr="/form/verify-search-json/post"
+  target="_blank"
+  class="verification-form">
+    <fieldset>
+        <label>
+            <span>Name</span>
+            <input type="text" name="name" id="nameId" required>
+        </label>
+        <label>
+            <span>Phone</span>
+            <input type="tel" name="phone" required>
+        </label>
+        <label>
+            <span>Address line 2 (optional)</span>
+            <input type="text" name="addressLine2">
+        </label>
+        <label>
+            <span>Zip Code</span>
+            <input type="tel" name="zip" required pattern="[0-9]{5}">
+        </label>
+        <label>
+            <span>City</span>
+            <input type="text" name="city" required>
+        </label>
+        <p>Throw an error?</p>
+        <label>Yes: <input type="radio" name="error" value="true" required></label>
+        <label>No: <input type="radio" name="error" value="false" required checked></label>
+        <div class="spinner"></div>
+        <input type="submit" value="Search">
+    </fieldset>
+    <div submit-success>
+        <template type="amp-mustache">
+            <h1>Here are your results:</h1>
+            <ul>
+                {{#results}}<li>{{title}}</li>{{/results}}
+            </ul>
+        </template>
+    </div>
+    <div submit-error>
+        <template type="amp-mustache">
+            {{#verifyErrors}}
+                <p>{{message}}</p>
+            {{/verifyErrors}}
+            {{^verifyErrors}}
+                <p>Something went wrong. Try again later?</p>
+            {{/verifyErrors}}
+        </template>
+    </div>
+</form>
+
+<h4>Debounced search</h4>
+<form
+  id="debounced-search"
+  method="get"
+  action="/form/search-html/get"
+  action-xhr="/form/search-json/get"
+  target="_blank">
+    <fieldset>
+        <label>
+            <span>Search for</span>
+            <input type="search" on="input-debounced:debounced-search.submit" name="term" required>
+        </label>
+        <input type="submit" value="Search">
+    </fieldset>
+
+    <div submit-success>
+        <template type="amp-mustache">
+            <h1>Here are the results for the search: {{term}}</h1>
+            <ul>
+                {{#results}}<li>{{title}}</li>{{/results}}
+            </ul>
         </template>
     </div>
 </form>

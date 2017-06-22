@@ -13,11 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 var argv = require('minimist')(process.argv.slice(2));
 var gulp = require('gulp-help')(require('gulp'));
+var glob = require('glob');
 var Karma = require('karma').Server;
 var config = require('../config');
+var read = require('file-reader');
 var fs = require('fs');
 var path = require('path');
 var util = require('gulp-util');
@@ -33,9 +36,11 @@ function getConfig() {
   if (argv.safari) {
     return Object.assign({}, karmaDefault, {browsers: ['Safari']});
   }
-
   if (argv.firefox) {
     return Object.assign({}, karmaDefault, {browsers: ['Firefox']});
+  }
+  if (argv.edge) {
+    return Object.assign({}, karmaDefault, {browsers: ['Edge']});
   }
 
   if (argv.saucelabs) {
@@ -103,15 +108,6 @@ function getAdTypes() {
  * Run tests.
  */
 gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
-  if (argv.saucelabs && process.env.MAIN_REPO &&
-      // Sauce Labs does not work on Pull Requests directly.
-      // The @ampsauce bot builds these.
-      process.env.TRAVIS_PULL_REQUEST != 'false') {
-    console./*OK*/info('Deactivated for pull requests. ' +
-        'The @ampsauce bots build eligible PRs.');
-    return;
-  }
-
   if (!argv.integration && process.env.AMPSAUCE_REPO) {
     console./*OK*/info('Deactivated for ampsauce repo')
   }
@@ -130,6 +126,36 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     c.files = [].concat(config.commonTestPaths, argv.files);
   } else if (argv.integration) {
     c.files = config.integrationTestPaths;
+  } else if (argv.randomize || argv.glob) {
+    /** Randomize the order of the test running */
+    var testPaths = [
+      'test/**/*.js',
+      'ads/**/test/test-*.js',
+      'extensions/**/test/**/*.js',
+    ];
+
+    var testFiles = [];
+
+    for (index in testPaths) {
+      testFiles = testFiles.concat(glob.sync(testPaths[index]));
+    }
+
+    if (argv.randomize) {
+      testFiles = shuffleArray(testFiles);
+    }
+    // we need to replace the test init with something that won't match
+    // any file. _init_tests gets added twice due to the regex matching.
+    testFiles[testFiles.indexOf('test/_init_tests.js')] = '_WONTMATCH.qqq';
+    c.files = config.commonTestPaths.concat(testFiles);
+
+    util.log(util.colors.blue(JSON.stringify(c.files)));
+    util.log(util.colors.yellow("Save the above files in a .json file to reuse"));
+
+  } else if (argv.testlist) {
+    var file = read.file(argv.testlist);
+    util.log(file);
+    c.files = file;
+
   } else {
     c.files = config.testPaths;
   }
@@ -140,6 +166,12 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     saucelabs: !!argv.saucelabs,
     adTypes: getAdTypes(),
   };
+
+  if (argv.compiled) {
+    process.env.SERVE_MODE = 'compiled';
+  } else {
+    process.env.SERVE_MODE = 'default';
+  }
 
   if (argv.grep) {
     c.client.mocha = {
@@ -162,7 +194,13 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     util.log(util.colors.yellow(
         'Shutting down test responses server on localhost:31862'));
     server.emit('kill');
-    done(exitCode);
+    if (exitCode) {
+      var error = new Error(
+          util.colors.red('Karma test failed (error code: ' + exitCode + ')'));
+      done(error);
+    } else {
+      done();
+    }
   }).start();
 }, {
   options: {
@@ -171,11 +209,27 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     'saucelabs': '  Runs test on saucelabs (requires setup)',
     'safari': '  Runs tests in Safari',
     'firefox': '  Runs tests in Firefox',
+    'edge': '  Runs tests in Edge',
     'integration': 'Run only integration tests.',
     'compiled': 'Changes integration tests to use production JS ' +
         'binaries for execution',
     'oldchrome': 'Runs test with an old chrome. Saucelabs only.',
     'grep': 'Runs tests that match the pattern',
     'files': 'Runs tests for specific files',
+    'randomize': 'Runs entire test suite in random order',
+    'testlist': 'Runs tests specified in JSON by supplied file',
+    'glob': 'Explicility expands test paths using glob before passing' +
+        'to Karma',
   }
 });
+
+
+function shuffleArray(array) {
+    for (var i = array.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+    return array;
+}

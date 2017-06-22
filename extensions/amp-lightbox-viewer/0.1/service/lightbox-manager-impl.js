@@ -18,7 +18,7 @@ import {whenDocumentReady} from '../../../../src/document-ready';
 import {isExperimentOn} from '../../../../src/experiments';
 import {autoDiscoverLightboxables} from './lightbox-manager-discovery';
 import {dev} from '../../../../src/log';
-import {timerFor} from '../../../../src/timer';
+import {timerFor} from '../../../../src/services';
 
 
 /**
@@ -158,6 +158,14 @@ export class LightboxManager {
         }
       }
     });
+  }
+
+  /**
+   * Return a list of lightboxable elements
+   * @return {!Promise<?Array<!Element>>}
+   */
+  getElements() {
+    return this.maybeInit_().then(() => this.elements_);
   }
 
   /**

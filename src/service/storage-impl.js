@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import {getServiceForDoc} from '../service';
+import {registerServiceBuilderForDoc} from '../service';
 import {getSourceOrigin} from '../url';
 import {dev} from '../log';
-import {recreateNonProtoObject} from '../json';
-import {viewerForDoc} from '../viewer';
+import {dict} from '../utils/object';
+import {parseJson, recreateNonProtoObject} from '../json';
+import {viewerForDoc} from '../services';
 
 /** @const */
 const TAG = 'Storage';
@@ -109,7 +110,7 @@ export class Storage {
   getStore_() {
     if (!this.storePromise_) {
       this.storePromise_ = this.binding_.loadBlob(this.origin_)
-          .then(blob => blob ? JSON.parse(atob(blob)) : {})
+          .then(blob => blob ? parseJson(atob(blob)) : {})
           .catch(reason => {
             dev().expectedError(TAG, 'Failed to load store: ', reason);
             return {};
@@ -148,7 +149,7 @@ export class Storage {
   /** @private */
   broadcastReset_() {
     dev().fine(TAG, 'Broadcasted reset message');
-    this.viewer_.broadcast(/** @type {!JSONType} */ ({
+    this.viewer_.broadcast(/** @type {!JsonObject} */ ({
       'type': 'amp-storage-reset',
       'origin': this.origin_,
     }));
@@ -173,17 +174,17 @@ export class Storage {
  */
 export class Store {
   /**
-   * @param {!JSONType} obj
+   * @param {!JsonObject} obj
    * @param {number=} opt_maxValues
    */
   constructor(obj, opt_maxValues) {
-    /** @const {!JSONType} */
-    this.obj = /** @type {!JSONType} */ (recreateNonProtoObject(obj));
+    /** @const {!JsonObject} */
+    this.obj = /** @type {!JsonObject} */ (recreateNonProtoObject(obj));
 
     /** @private @const {number} */
     this.maxValues_ = opt_maxValues || MAX_VALUES_PER_ORIGIN;
 
-    /** @private @const {!Object<string, !JSONType>} */
+    /** @private @const {!Object<string, !JsonObject>} */
     this.values_ = this.obj['vv'] || Object.create(null);
     if (!this.obj['vv']) {
       this.obj['vv'] = this.values_;
@@ -213,7 +214,7 @@ export class Store {
       item['v'] = value;
       item['t'] = Date.now();
     } else {
-      this.values_[name] = /** @type {!JSONType} */ ({
+      this.values_[name] = dict({
         'v': value,
         't': Date.now(),
       });
@@ -367,30 +368,32 @@ export class ViewerStorageBinding {
 
   /** @override */
   loadBlob(origin) {
-    return this.viewer_.sendMessageAwaitResponse('loadStore', {origin}).then(
-      response => response['blob']
-    );
+    return this.viewer_.sendMessageAwaitResponse('loadStore',
+        dict({'origin': origin})).then(response => response['blob']);
   }
 
   /** @override */
   saveBlob(origin, blob) {
     return /** @type {!Promise} */ (this.viewer_.sendMessageAwaitResponse(
-        'saveStore', {origin, blob}));
+        'saveStore', dict({'origin': origin, 'blob': blob})));
   }
 }
 
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @return {!Storage}
  */
 export function installStorageServiceForDoc(ampdoc) {
-  return /** @type {!Storage} */ (getServiceForDoc(ampdoc, 'storage', () => {
-    const viewer = viewerForDoc(ampdoc);
-    const overrideStorage = parseInt(viewer.getParam('storage'), 10);
-    const binding = overrideStorage ?
-        new ViewerStorageBinding(viewer) :
-        new LocalStorageBinding(ampdoc.win);
-    return new Storage(ampdoc, viewer, binding).start_();
-  }));
+  registerServiceBuilderForDoc(
+      ampdoc,
+      'storage',
+      function() {
+        const viewer = viewerForDoc(ampdoc);
+        const overrideStorage = parseInt(viewer.getParam('storage'), 10);
+        const binding = overrideStorage ?
+            new ViewerStorageBinding(viewer) :
+            new LocalStorageBinding(ampdoc.win);
+        return new Storage(ampdoc, viewer, binding).start_();
+      },
+      /* opt_instantiate */ true);
 }

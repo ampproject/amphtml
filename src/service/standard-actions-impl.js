@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../action-trust';
 import {OBJECT_STRING_ARGS_KEY} from '../service/action-impl';
 import {Layout, getLayoutClass} from '../layout';
-import {actionServiceForDoc} from '../action';
-import {bindForDoc} from '../bind';
-import {dev, user} from '../log';
-import {fromClassForDoc} from '../service';
-import {historyForDoc} from '../history';
-import {installResourcesServiceForDoc} from './resources-impl';
+import {actionServiceForDoc, urlReplacementsForDoc} from '../services';
+import {bindForDoc} from '../services';
 import {computedStyle, getStyle, toggle} from '../style';
-import {vsyncFor} from '../vsync';
-
+import {dev, user} from '../log';
+import {historyForDoc} from '../services';
+import {isProtocolValid} from '../url';
+import {registerServiceBuilderForDoc} from '../service';
+import {resourcesForDoc} from '../services';
+import {vsyncFor} from '../services';
 
 /**
  * @param {!Element} element
@@ -34,6 +35,9 @@ function isShowable(element) {
   return getStyle(element, 'display') == 'none'
       || element.hasAttribute('hidden');
 }
+
+/** @const {string} */
+const TAG = 'STANDARD-ACTIONS';
 
 /**
  * This service contains implementations of some of the most typical actions,
@@ -53,7 +57,10 @@ export class StandardActions {
     this.actions_ = actionServiceForDoc(ampdoc);
 
     /** @const @private {!./resources-impl.Resources} */
-    this.resources_ = installResourcesServiceForDoc(ampdoc);
+    this.resources_ = resourcesForDoc(ampdoc);
+
+    /** @const @private {!./url-replacements-impl.UrlReplacements} */
+    this.urlReplacements_ = urlReplacementsForDoc(ampdoc);
 
     this.installActions_(this.actions_);
   }
@@ -72,7 +79,7 @@ export class StandardActions {
     actionService.addGlobalMethodHandler('hide', this.handleHide.bind(this));
     actionService.addGlobalMethodHandler('show', this.handleShow.bind(this));
     actionService.addGlobalMethodHandler(
-      'toggleVisibility', this.handleToggle.bind(this));
+        'toggleVisibility', this.handleToggle.bind(this));
   }
 
   /**
@@ -85,28 +92,73 @@ export class StandardActions {
   handleAmpTarget(invocation) {
     switch (invocation.method) {
       case 'setState':
-        bindForDoc(this.ampdoc).then(bind => {
-          const args = invocation.args;
-          const objectString = args[OBJECT_STRING_ARGS_KEY];
-          if (objectString) {
-            // Object string arg.
-            const scope = Object.create(null);
-            const event = invocation.event;
-            if (event && event.detail) {
-              scope['event'] = event.detail;
-            }
-            bind.setStateWithExpression(objectString, scope);
-          } else {
-            // Key-value args.
-            bind.setState(args);
-          }
-        });
+        this.handleAmpSetState_(invocation);
+        return;
+      case 'navigateTo':
+        this.handleAmpNavigateTo_(invocation);
         return;
       case 'goBack':
-        historyForDoc(this.ampdoc).goBack();
+        this.handleAmpGoBack_(invocation);
         return;
     }
     throw user().createError('Unknown AMP action ', invocation.method);
+  }
+
+  /**
+   * @param {!./action-impl.ActionInvocation} invocation
+   * @private
+   */
+  handleAmpSetState_(invocation) {
+    if (!invocation.satisfiesTrust(ActionTrust.MEDIUM)) {
+      return;
+    }
+    bindForDoc(invocation.target).then(bind => {
+      const args = invocation.args;
+      const objectString = args[OBJECT_STRING_ARGS_KEY];
+      if (objectString) {
+        // Object string arg.
+        const scope = Object.create(null);
+        const event = invocation.event;
+        if (event && event.detail) {
+          scope['event'] = event.detail;
+        }
+        bind.setStateWithExpression(objectString, scope);
+      } else {
+        user().error('AMP-BIND', 'Please use the object-literal syntax, '
+            + 'e.g. "AMP.setState({foo: \'bar\'})" instead of '
+            + '"AMP.setState(foo=\'bar\')".');
+      }
+    });
+  }
+
+  /**
+   * @param {!./action-impl.ActionInvocation} invocation
+   * @private
+   */
+  handleAmpNavigateTo_(invocation) {
+    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
+      return;
+    }
+    const url = invocation.args['url'];
+    if (!isProtocolValid(url)) {
+      user().error(TAG, 'Cannot navigate to invalid protocol: ' + url);
+      return;
+    }
+    const expandedUrl = this.urlReplacements_.expandUrlSync(url);
+    const node = invocation.target;
+    const win = (node.ownerDocument || node).defaultView;
+    win.location = expandedUrl;
+  }
+
+  /**
+   * @param {!./action-impl.ActionInvocation} invocation
+   * @private
+   */
+  handleAmpGoBack_(invocation) {
+    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
+      return;
+    }
+    historyForDoc(this.ampdoc).goBack();
   }
 
   /**
@@ -137,7 +189,7 @@ export class StandardActions {
 
     if (target.classList.contains(getLayoutClass(Layout.NODISPLAY))) {
       user().warn(
-          'STANDARD-ACTIONS',
+          TAG,
           'Elements with layout=nodisplay cannot be dynamically shown.',
           target);
 
@@ -149,7 +201,7 @@ export class StandardActions {
           !isShowable(target)) {
 
         user().warn(
-            'STANDARD-ACTIONS',
+            TAG,
             'Elements can only be dynamically shown when they have the ' +
             '"hidden" attribute set or when they were dynamically hidden.',
             target);
@@ -185,9 +237,11 @@ export class StandardActions {
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @return {!StandardActions}
  */
 export function installStandardActionsForDoc(ampdoc) {
-  return fromClassForDoc(
-      ampdoc, 'standard-actions', StandardActions);
+  registerServiceBuilderForDoc(
+      ampdoc,
+      'standard-actions',
+      StandardActions,
+      /* opt_instantiate */ true);
 };

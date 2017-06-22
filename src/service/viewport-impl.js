@@ -17,26 +17,33 @@
 import {Animation} from '../animation';
 import {FixedLayer} from './fixed-layer';
 import {Observable} from '../observable';
-import {checkAndFix as checkAndFixIosScrollfreezeBug,} from
+import {VisibilityState} from '../visibility-state';
+import {checkAndFix as checkAndFixIosScrollfreezeBug} from
     './ios-scrollfreeze-bug';
 import {
   getParentWindowFrameElement,
-  getServiceForDoc,
+  registerServiceBuilderForDoc,
 } from '../service';
 import {layoutRectLtwh} from '../layout-rect';
 import {dev} from '../log';
+import {dict} from '../utils/object';
+import {getFriendlyIframeEmbedOptional} from '../friendly-iframe-embed';
+import {isExperimentOn} from '../experiments';
 import {numeric} from '../transition';
 import {onDocumentReady, whenDocumentReady} from '../document-ready';
-import {platformFor} from '../platform';
+import {platformFor} from '../services';
 import {px, setStyle, setStyles, computedStyle} from '../style';
-import {timerFor} from '../timer';
-import {installVsyncService} from './vsync-impl';
-import {viewerForDoc} from '../viewer';
-import {isExperimentOn} from '../experiments';
+import {timerFor} from '../services';
+import {vsyncFor} from '../services';
+import {viewerForDoc} from '../services';
 import {waitForBody, isIframed} from '../dom';
 import {getMode} from '../mode';
 
 const TAG_ = 'Viewport';
+
+
+/** @const {string} */
+const A4A_LIGHTBOX_EXPERIMENT = 'amp-lightbox-a4a-proto';
 
 
 /**
@@ -114,7 +121,7 @@ export class Viewport {
     this.timer_ = timerFor(this.ampdoc.win);
 
     /** @private {!./vsync-impl.Vsync} */
-    this.vsync_ = installVsyncService(this.ampdoc.win);
+    this.vsync_ = vsyncFor(this.ampdoc.win);
 
     /** @private {boolean} */
     this.scrollTracking_ = false;
@@ -138,6 +145,7 @@ export class Viewport {
     this.fixedLayer_ = new FixedLayer(
         this.ampdoc,
         this.vsync_,
+        this.binding_.getBorderTop(),
         this.paddingTop_,
         this.binding_.requiresFixedLayerTransfer());
     this.ampdoc.whenReady().then(() => this.fixedLayer_.setup());
@@ -171,13 +179,8 @@ export class Viewport {
     if (isIframed(this.ampdoc.win)) {
       this.globalDoc_.documentElement.classList.add('i-amphtml-iframed');
     }
-
-    // TODO(sriramkrish85, #5319): Cleanup the experiment by making the effects
-    // on CSS permanent and removing the code block below.
-    if (this.ampdoc.isSingleDoc() &&
-            isExperimentOn(this.ampdoc.win, 'make-body-block')) {
-      this.globalDoc_.documentElement.classList.add(
-          'i-amphtml-make-body-block');
+    if (viewer.getParam('webview') === '1') {
+      this.globalDoc_.documentElement.classList.add('i-amphtml-webview');
     }
 
     // To avoid browser restore scroll position when traverse history
@@ -285,7 +288,18 @@ export class Viewport {
     if (this.size_) {
       return this.size_;
     }
-    return this.size_ = this.binding_.getSize();
+    this.size_ = this.binding_.getSize();
+    if (this.size_.width == 0 || this.size_.height == 0) {
+      // Only report when the visibility is "visible" or "prerender".
+      const visibilityState = this.viewer_.getVisibilityState();
+      if (visibilityState == VisibilityState.PRERENDER ||
+          visibilityState == VisibilityState.VISIBLE) {
+        if (Math.random() < 0.01) {
+          dev().error(TAG_, 'viewport has zero dimensions');
+        }
+      }
+    }
+    return this.size_;
   }
 
   /**
@@ -408,7 +422,6 @@ export class Viewport {
     // TODO(erwinm): the duration should not be a constant and should
     // be done in steps for better transition experience when things
     // are closer vs farther.
-    // TODO(dvoytenko, #3742): documentElement will be replaced by ampdoc.
     return Animation.animate(this.ampdoc.getRootNode(), pos => {
       this.binding_.setScrollTop(interpolate(pos));
     }, duration, curve).then();
@@ -438,22 +451,99 @@ export class Viewport {
 
   /**
    * Instruct the viewport to enter lightbox mode.
+   * Requesting element is necessary to be able to enter lightbox mode under FIE
+   * cases.
+   * @param {!Element=} opt_requestingElement
+   * @return {!Promise}
    */
-  enterLightboxMode() {
-    this.viewer_.sendMessage('requestFullOverlay', {}, /* cancelUnsent */true);
+  enterLightboxMode(opt_requestingElement) {
+    this.viewer_.sendMessage(
+        'requestFullOverlay', dict(), /* cancelUnsent */ true);
+
     this.enterOverlayMode();
     this.hideFixedLayer();
-    this.vsync_.mutate(() => this.binding_.updateLightboxMode(true));
+
+    if (opt_requestingElement) {
+      this.maybeEnterFieLightboxMode(
+          dev().assertElement(opt_requestingElement));
+    }
+
+    return this.binding_.updateLightboxMode(true);
   }
 
   /**
    * Instruct the viewport to leave lightbox mode.
+   * Requesting element is necessary to be able to enter lightbox mode under FIE
+   * cases.
+   * @param {!Element=} opt_requestingElement
+   * @return {!Promise}
    */
-  leaveLightboxMode() {
-    this.viewer_.sendMessage('cancelFullOverlay', {}, /* cancelUnsent */true);
+  leaveLightboxMode(opt_requestingElement) {
+    this.viewer_.sendMessage(
+        'cancelFullOverlay', dict(), /* cancelUnsent */ true);
+
     this.showFixedLayer();
     this.leaveOverlayMode();
-    this.vsync_.mutate(() => this.binding_.updateLightboxMode(false));
+
+    if (opt_requestingElement) {
+      this.maybeLeaveFieLightboxMode(
+          dev().assertElement(opt_requestingElement));
+    }
+
+    return this.binding_.updateLightboxMode(false);
+  }
+
+  /**
+   * @return {boolean}
+   * @visibleForTesting
+   */
+  isLightboxExperimentOn() {
+    return isExperimentOn(this.ampdoc.win, A4A_LIGHTBOX_EXPERIMENT);
+  }
+
+  /**
+   * Enters frame lightbox mode if under a Friendly Iframe Embed.
+   * @param {!Element} requestingElement
+   * @visibleForTesting
+   */
+  maybeEnterFieLightboxMode(requestingElement) {
+    const fieOptional = this.getFriendlyIframeEmbed_(requestingElement);
+
+    if (fieOptional) {
+      dev().assert(this.isLightboxExperimentOn(),
+          'Lightbox mode for A4A is only available when ' +
+          `'${A4A_LIGHTBOX_EXPERIMENT}' experiment is on`);
+
+      dev().assert(fieOptional).enterFullOverlayMode();
+    }
+  }
+
+  /**
+   * Leaves frame lightbox mode if under a Friendly Iframe Embed.
+   * @param {!Element} requestingElement
+   * @visibleForTesting
+   */
+  maybeLeaveFieLightboxMode(requestingElement) {
+    const fieOptional = this.getFriendlyIframeEmbed_(requestingElement);
+
+    if (fieOptional) {
+      dev().assert(fieOptional).leaveFullOverlayMode();
+    }
+  }
+
+  /**
+   * Get FriendlyIframeEmbed if available.
+   * @param {!Element} element Element supposedly inside the FIE.
+   * @return {?../friendly-iframe-embed.FriendlyIframeEmbed}
+   * @private
+   */
+  getFriendlyIframeEmbed_(element) {
+    const iframeOptional =
+        getParentWindowFrameElement(element, this.ampdoc.win);
+
+    return iframeOptional && getFriendlyIframeEmbedOptional(
+        /** @type {!HTMLIFrameElement} */
+        (dev().assertElement(iframeOptional)));
   }
 
   /*
@@ -576,9 +666,10 @@ export class Viewport {
    * @param {!Element} element
    * @param {boolean=} opt_forceTransfer If set to true , then the element needs
    *    to be forcefully transferred to the fixed layer.
+   * @return {!Promise}
    */
   addToFixedLayer(element, opt_forceTransfer) {
-    this.fixedLayer_.addElement(element, opt_forceTransfer);
+    return this.fixedLayer_.addElement(element, opt_forceTransfer);
   }
 
   /**
@@ -624,7 +715,7 @@ export class Viewport {
   }
 
   /**
-   * @param {!JSONType} data
+   * @param {!JsonObject} data
    * @private
    */
   viewerSetScrollTop_(data) {
@@ -633,7 +724,7 @@ export class Viewport {
   }
 
   /**
-   * @param {!JSONType} data
+   * @param {!JsonObject} data
    * @private
    */
   updateOnViewportEvent_(data) {
@@ -772,7 +863,8 @@ export class Viewport {
       this.scrollAnimationFrameThrottled_ = true;
       this.vsync_.measure(() => {
         this.scrollAnimationFrameThrottled_ = false;
-        this.viewer_.sendMessage('scroll', {scrollTop: this.getScrollTop()},
+        this.viewer_.sendMessage('scroll',
+            dict({'scrollTop': this.getScrollTop()}),
             /* cancelUnsent */true);
       });
     }
@@ -813,6 +905,13 @@ export class ViewportBindingDef {
    * Remove listeners for global resources.
    */
   disconnect() {}
+
+  /**
+   * Returns the width of top border if this type of viewport needs border
+   * offsetting. This is currently only needed for iOS to avoid scroll freeze.
+   * @return {number}
+   */
+  getBorderTop() {}
 
   /**
    * Whether the binding requires fixed elements to be transfered to a
@@ -868,6 +967,7 @@ export class ViewportBindingDef {
    * Updates the viewport whether it's currently in the lightbox or a normal
    * mode.
    * @param {boolean} unusedLightboxMode
+   * @return {!Promise}
    */
   updateLightboxMode(unusedLightboxMode) {}
 
@@ -936,14 +1036,18 @@ export class ViewportBindingDef {
 export class ViewportBindingNatural_ {
 
   /**
-   * @param {!Window} win
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!./viewer-impl.Viewer} viewer
    */
-  constructor(win, viewer) {
+  constructor(ampdoc, viewer) {
+    /** @const {!./ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampdoc;
+
     /** @const {!Window} */
-    this.win = win;
+    this.win = ampdoc.win;
 
     /** @const {!../service/platform-impl.Platform} */
-    this.platform_ = platformFor(win);
+    this.platform_ = platformFor(this.win);
 
     /** @private @const {!./viewer-impl.Viewer} */
     this.viewer_ = viewer;
@@ -959,37 +1063,6 @@ export class ViewportBindingNatural_ {
 
     /** @const {function()} */
     this.boundResizeEventListener_ = () => this.resizeObservable_.fire();
-
-    if (this.win.document.defaultView) {
-      waitForBody(this.win.document, () => {
-        const body = dev().assertElement(this.win.document.body);
-        // Override a user-supplied `body{overflow}` to be always visible. This
-        // style is set in runtime vs css to avoid conflicts with ios-embedded
-        // mode and fixed transfer layer.
-        setStyle(body, 'overflow', 'visible');
-
-        // Set `body {overflow-x: hidden}` for iOS WebView. This is b/c iOS
-        // WebView does NOT respect `html {overflow-x: hidden}`.
-        // Note! For all other cases body's style should be
-        // `body {overflow: visible}` to avoid visibility issues with iframes.
-        if (this.platform_.isIos() &&
-            this.viewer_.getParam('webview') === '1') {
-          setStyles(body, {
-            overflowX: 'hidden',
-            overflowY: 'visible',
-          });
-        }
-
-        // Require `body{position:relative}`.
-        // TODO(dvoytenko, #5660): cleanup "make-body-relative" experiment by
-        // merging this style into `amp.css`.
-        if (isExperimentOn(this.win, 'make-body-relative')) {
-          setStyles(body, {
-            position: 'relative',
-          });
-        }
-      });
-    }
 
     dev().fine(TAG_, 'initialized natural viewport');
   }
@@ -1009,6 +1082,11 @@ export class ViewportBindingNatural_ {
   /** @override */
   ensureReadyForElements() {
     // Nothing.
+  }
+
+  /** @override */
+  getBorderTop() {
+    return 0;
   }
 
   /** @override */
@@ -1060,6 +1138,7 @@ export class ViewportBindingNatural_ {
   /** @override */
   updateLightboxMode(unusedLightboxMode) {
     // The layout is always accurate.
+    return Promise.resolve();
   }
 
   /** @override */
@@ -1079,8 +1158,10 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   getScrollTop() {
-    return this.getScrollingElement_()./*OK*/scrollTop ||
+    const pageScrollTop = this.getScrollingElement_()./*OK*/scrollTop ||
         this.win./*OK*/pageYOffset;
+    const host = this.ampdoc.getRootNode().host;
+    return (host ? pageScrollTop - host./*OK*/offsetTop : pageScrollTop);
   }
 
   /** @override */
@@ -1187,6 +1268,10 @@ export class ViewportBindingNaturalIosEmbed_ {
     /** @private {number} */
     this.paddingTop_ = 0;
 
+    // Mark as a legacy viewport.
+    this.win.document.documentElement.classList.add(
+        'i-amphtml-ios-embed-legacy');
+
     // Microtask is necessary here to let Safari to recalculate scrollWidth
     // post DocumentReady signal.
     whenDocumentReady(this.win.document).then(() => this.setup_());
@@ -1198,6 +1283,11 @@ export class ViewportBindingNaturalIosEmbed_ {
   /** @override */
   ensureReadyForElements() {
     // Nothing.
+  }
+
+  /** @override */
+  getBorderTop() {
+    return 0;
   }
 
   /** @override */
@@ -1354,8 +1444,12 @@ export class ViewportBindingNaturalIosEmbed_ {
   updateLightboxMode(lightboxMode) {
     // This code will no longer be needed with the newer iOS viewport
     // implementation.
-    onDocumentReady(this.win.document, doc => {
-      setStyle(doc.body, 'borderTopStyle', lightboxMode ? 'none' : 'solid');
+    return new Promise(resolve => {
+      onDocumentReady(this.win.document, doc => {
+        vsyncFor(this.win).mutatePromise(() => {
+          setStyle(doc.body, 'borderTopStyle', lightboxMode ? 'none' : 'solid');
+        }).then(resolve);
+      });
     });
   }
 
@@ -1477,6 +1571,8 @@ export class ViewportBindingNaturalIosEmbed_ {
     // Scroll document into a safe position to avoid scroll freeze on iOS.
     // This means avoiding scrollTop to be minimum (0) or maximum value.
     // This is very sad but very necessary. See #330 for more details.
+    // Unfortunately, the same is very expensive to do on the bottom, due to
+    // costly scrollHeight.
     const scrollTop = -this.scrollPosEl_./*OK*/getBoundingClientRect().top +
         this.paddingTop_;
     if (scrollTop == 0) {
@@ -1486,10 +1582,6 @@ export class ViewportBindingNaturalIosEmbed_ {
       }
       return;
     }
-
-    // TODO(dvoytenko, #330): Ideally we would do the same for the overscroll
-    // on the bottom. Unfortunately, iOS Safari misreports scrollHeight in
-    // this case.
   }
 }
 
@@ -1536,6 +1628,13 @@ export class ViewportBindingIosEmbedWrapper_ {
     /** @private {boolean} */
     this.setupDone_ = false;
     waitForBody(this.win.document, this.setup_.bind(this));
+
+    // Set overscroll (`-webkit-overflow-scrolling: touch`) later to avoid
+    // iOS rendering bugs. See #8798 for details.
+    whenDocumentReady(this.win.document).then(() => {
+      this.win.document.documentElement.classList.add(
+          'i-amphtml-ios-overscroll');
+    });
 
     dev().fine(TAG_, 'initialized ios-embed-wrapper viewport');
   }
@@ -1590,6 +1689,12 @@ export class ViewportBindingIosEmbedWrapper_ {
   }
 
   /** @override */
+  getBorderTop() {
+    // iOS needs an extra pixel to avoid scroll freezing.
+    return 1;
+  }
+
+  /** @override */
   requiresFixedLayerTransfer() {
     return true;
   }
@@ -1636,6 +1741,7 @@ export class ViewportBindingIosEmbedWrapper_ {
   /** @override */
   updateLightboxMode(unusedLightboxMode) {
     // The layout is always accurate.
+    return Promise.resolve();
   }
 
   /** @override */
@@ -1698,9 +1804,8 @@ export class ViewportBindingIosEmbedWrapper_ {
     // Scroll document into a safe position to avoid scroll freeze on iOS.
     // This means avoiding scrollTop to be minimum (0) or maximum value.
     // This is very sad but very necessary. See #330 for more details.
-    // TODO(dvoytenko, #330): Ideally we would do the same for the overscroll
-    // on the bottom. Unfortunately, iOS Safari misreports scrollHeight in
-    // this case.
+    // Unfortunately, the same is very expensive to do on the bottom, due to
+    // costly scrollHeight.
     if (this.wrapper_./*OK*/scrollTop == 0) {
       this.wrapper_./*OK*/scrollTop = 1;
       if (opt_event) {
@@ -1811,16 +1916,15 @@ function createViewport(ampdoc) {
   let binding;
   if (ampdoc.isSingleDoc() &&
       getViewportType(ampdoc.win, viewer) == ViewportType.NATURAL_IOS_EMBED) {
-    if (isExperimentOn(ampdoc.win, 'ios-embed-wrapper')
-        // The overriding of document.body fails in iOS7.
-        // Also, iOS8 sometimes freezes scrolling.
-        && platformFor(ampdoc.win).getMajorVersion() > 8) {
+    // The overriding of document.body fails in iOS7.
+    // Also, iOS8 sometimes freezes scrolling.
+    if (platformFor(ampdoc.win).getIosMajorVersion() > 8) {
       binding = new ViewportBindingIosEmbedWrapper_(ampdoc.win);
     } else {
       binding = new ViewportBindingNaturalIosEmbed_(ampdoc.win, ampdoc);
     }
   } else {
-    binding = new ViewportBindingNatural_(ampdoc.win, viewer);
+    binding = new ViewportBindingNatural_(ampdoc, viewer);
   }
   return new Viewport(ampdoc, binding, viewer);
 }
@@ -1869,7 +1973,6 @@ function getViewportType(win, viewer) {
   }
 
   // Override to ios-embed for iframe-viewer mode.
-  // TODO(lannka, #6213): Reimplement binding selection for in-a-box.
   if (isIframed(win) && viewer.isEmbedded()) {
     return ViewportType.NATURAL_IOS_EMBED;
   }
@@ -1878,9 +1981,10 @@ function getViewportType(win, viewer) {
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @return {!Viewport}
  */
 export function installViewportServiceForDoc(ampdoc) {
-  return /** @type {!Viewport} */ (getServiceForDoc(ampdoc, 'viewport',
-      ampdoc => createViewport(ampdoc)));
+  registerServiceBuilderForDoc(ampdoc,
+      'viewport',
+      createViewport,
+      /* opt_instantiate */ true);
 }

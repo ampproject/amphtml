@@ -14,25 +14,28 @@
  * limitations under the License.
  */
 
+import {parseJson} from '../src/json';
+import {getData} from '../src/event-helper';
+
 /**
  * Send messages to parent frame. These should not contain user data.
  * @param {string} type Type of messages
- * @param {*=} opt_object Data for the message.
+ * @param {!JsonObject=} opt_object Data for the message.
  */
 export function nonSensitiveDataPostMessage(type, opt_object) {
   if (window.parent == window) {
     return;  // Nothing to do.
   }
-  const object = opt_object || {};
-  object.type = type;
-  object.sentinel = window.context.sentinel || window.context.amp3pSentinel;
+  const object = opt_object || /** @type {JsonObject} */ ({});
+  object['type'] = type;
+  object['sentinel'] = window.context.sentinel;
   window.parent./*OK*/postMessage(object,
       window.context.location.origin);
 }
 
 /**
  * Message event listeners.
- * @const {!Array<{type: string, cb: function(!Object)}>}
+ * @const {!Array<{type: string, cb: function(!JsonObject)}>}
  */
 const listeners = [];
 
@@ -40,7 +43,7 @@ const listeners = [];
  * Listen to message events from document frame.
  * @param {!Window} win
  * @param {string} type Type of messages
- * @param {function(*)} callback Called with data payload of message.
+ * @param {function(!JsonObject)} callback Called with data payload of message.
  * @return {function()} function to unlisten for messages.
  */
 export function listenParent(win, type, callback) {
@@ -67,21 +70,20 @@ function startListening(win) {
   if (win.AMP_LISTENING) {
     return;
   }
-  win.context.sentinel = win.context.sentinel ||
-      win.context.amp3pSentinel;
   win.AMP_LISTENING = true;
   win.addEventListener('message', function(event) {
     // Cheap operations first, so we don't parse JSON unless we have to.
+    const eventData = getData(event);
     if (event.source != win.parent ||
         event.origin != win.context.location.origin ||
-        typeof event.data != 'string' ||
-        event.data.indexOf('amp-') != 0) {
+        typeof eventData != 'string' ||
+        eventData.indexOf('amp-') != 0) {
       return;
     }
     // Parse JSON only once per message.
-    const data = /** @type {!Object} */ (
-        JSON.parse(event.data.substr(4)));
-    if (win.context.sentinel && data.sentinel != win.context.sentinel) {
+    const data = /** @type {!JsonObject} */ (
+        parseJson(/**@type {string} */ (getData(event)).substr(4)));
+    if (win.context.sentinel && data['sentinel'] != win.context.sentinel) {
       return;
     }
     // Don't let other message handlers interpret our events.
@@ -90,7 +92,7 @@ function startListening(win) {
     }
     // Find all the listeners for this type.
     for (let i = 0; i < listeners.length; i++) {
-      if (listeners[i].type != data.type) {
+      if (listeners[i].type != data['type']) {
         continue;
       }
       const cb = listeners[i].cb;

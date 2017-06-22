@@ -15,22 +15,22 @@
  */
 
 import {Layout} from '../../../src/layout';
+import {dict} from '../../../src/utils/object';
 import {user, dev, rethrowAsync} from '../../../src/log';
-import {platformFor} from '../../../src/platform';
-import {viewerForDoc} from '../../../src/viewer';
+import {platformFor} from '../../../src/services';
+import {viewerForDoc} from '../../../src/services';
 import {CSS} from '../../../build/amp-app-banner-0.1.css';
-import {documentInfoForDoc} from '../../../src/document-info';
-import {xhrFor} from '../../../src/xhr';
+import {documentInfoForDoc} from '../../../src/services';
+import {xhrFor} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {removeElement, openWindowDialog} from '../../../src/dom';
-import {storageForDoc} from '../../../src/storage';
-import {timerFor} from '../../../src/timer';
+import {storageForDoc} from '../../../src/services';
+import {timerFor} from '../../../src/services';
 import {parseUrl} from '../../../src/url';
-import {setStyles} from '../../../src/style';
-import {isProxyOrigin} from '../../../src/url';
+import {isProxyOrigin, isProtocolValid} from '../../../src/url';
 
 const TAG = 'amp-app-banner';
-
+const OPEN_LINK_TIMEOUT = 1500;
 
 /**
  * visible for testing.
@@ -54,34 +54,20 @@ export class AbstractAppBanner extends AMP.BaseElement {
     return layout == Layout.NODISPLAY;
   }
 
+  /**
+   * Subclasses should override this method to specify action when open button
+   * is clicked.
+   * @protected
+   */
+  openButtonClicked(unusedOpenInAppUrl, unusedInstallAppUrl) {
+    // Subclasses may override.
+  }
+
   /** @protected */
   setupOpenButton_(openButton, openInAppUrl, installAppUrl) {
     openButton.addEventListener('click', () => {
-      this.openButtonClicked_(openInAppUrl, installAppUrl);
+      this.openButtonClicked(openInAppUrl, installAppUrl);
     });
-  }
-
-
-  /** @private */
-  openButtonClicked_(openInAppUrl, installAppUrl) {
-    // This redirect-after-timeout workaround will trigger if the user has not
-    // been already navigated away to the app itself. This will only trigger
-    // if the user doesn't have the app installed and will redirect the user
-    // to the app store to install the app.
-    // The 1500ms delay is very important, any smaller timeouts and Safari
-    // iOS would execute the redirect without allowing the user to confirm
-    // navigation to the app. That would cause the redirect to always happen
-    // regardless if the user have the app installed or not.
-    timerFor(this.win).delay(() => {
-      this.redirectTopLocation_(installAppUrl);
-    }, 1500);
-    openWindowDialog(this.win, openInAppUrl, '_top');
-  }
-
-
-  /** @private */
-  redirectTopLocation_(link) {
-    this.win.top.location.assign(link);
   }
 
   /**
@@ -90,7 +76,7 @@ export class AbstractAppBanner extends AMP.BaseElement {
    */
   addDismissButton_() {
     const paddingBar = this.win.document.createElement(
-        'i-amp-app-banner-top-padding');
+        'i-amphtml-app-banner-top-padding');
     this.element.appendChild(paddingBar);
     const dismissButton = this.win.document.createElement('button');
     dismissButton.classList.add('amp-app-banner-dismiss-button');
@@ -141,11 +127,9 @@ export class AbstractAppBanner extends AMP.BaseElement {
       if (isDismissed) {
         this.hide_();
       } else {
-        setStyles(this.element, {
-          visibility: '',
-        });
         this.addDismissButton_();
         this.updateViewportPadding_();
+        this./*OK*/expand();
       }
     });
   }
@@ -201,7 +185,6 @@ export class AmpAppBanner extends AbstractAppBanner {
   }
 }
 
-
 /**
  * @private visible for testing.
  */
@@ -211,11 +194,11 @@ export class AmpIosAppBanner extends AbstractAppBanner {
   constructor(element) {
     super(element);
 
+    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = viewerForDoc(this.getAmpDoc());
+
     /** @private {?Element} */
     this.metaTag_ = null;
-
-    /** @private {boolean} */
-    this.isEmbeddedSafari_ = false;
   }
 
   /**
@@ -232,16 +215,10 @@ export class AmpIosAppBanner extends AbstractAppBanner {
 
   /** @override */
   buildCallback() {
-    // To allow layout to be scheduled.
-    setStyles(this.element, {
-      display: '',
-      visibility: 'hidden',
-    });
-
     // We want to fallback to browser builtin mechanism when possible.
     const platform = platformFor(this.win);
-    const viewer = viewerForDoc(this.getAmpDoc());
-    this.canShowBuiltinBanner_ = !viewer.isEmbedded() && platform.isSafari();
+    this.canShowBuiltinBanner_ = !this.viewer_.isEmbedded()
+        && platform.isSafari();
     if (this.canShowBuiltinBanner_) {
       user().info(TAG,
           'Browser supports builtin banners. Not rendering amp-app-banner.');
@@ -249,12 +226,8 @@ export class AmpIosAppBanner extends AbstractAppBanner {
       return;
     }
 
-    this.isEmbeddedSafari_ = viewer.isEmbedded() && platform.isSafari();
-    if (this.isEmbeddedSafari_) {
-      user().warn(TAG,
-          'Due to a bug in browser, we are unable to show amp-app-banner. ' +
-          'Please refer to https://github.com/ampproject/amphtml/issues/6454 ' +
-          'for more details.');
+    if (this.viewer_.isEmbedded() &&
+        !this.viewer_.hasCapability('navigateTo')) {
       this.hide_();
       return;
     }
@@ -270,6 +243,7 @@ export class AmpIosAppBanner extends AbstractAppBanner {
         this.element.querySelector('button[open-button]'),
         '<button open-button> is required inside %s: %s', TAG, this.element);
 
+    this.parseIosMetaContent_(this.metaTag_.getAttribute('content'));
     this.checkIfDismissed_();
   }
 
@@ -283,12 +257,22 @@ export class AmpIosAppBanner extends AbstractAppBanner {
       return Promise.resolve();
     }
 
-    if (this.isEmbeddedSafari_) {
-      return Promise.resolve();
-    }
-
-    this.parseIosMetaContent_(this.metaTag_.getAttribute('content'));
     return Promise.resolve();
+  }
+
+  /** @override */
+  openButtonClicked(openInAppUrl, installAppUrl) {
+    if (!this.viewer_.isEmbedded()) {
+      timerFor(this.win).delay(() => {
+        openWindowDialog(this.win, installAppUrl, '_top');
+      }, OPEN_LINK_TIMEOUT);
+      openWindowDialog(this.win, openInAppUrl, '_top');
+    } else {
+      timerFor(this.win).delay(() => {
+        this.viewer_.sendMessage('navigateTo', dict({'url': installAppUrl}));
+      }, OPEN_LINK_TIMEOUT);
+      this.viewer_.sendMessage('navigateTo', dict({'url': openInAppUrl}));
+    }
   }
 
   /**
@@ -305,6 +289,12 @@ export class AmpIosAppBanner extends AbstractAppBanner {
 
     const appId = config['app-id'];
     const openUrl = config['app-argument'];
+
+    if (openUrl) {
+      user().assert(isProtocolValid(openUrl),
+          'The url in app-argument has invalid protocol: %s', openUrl);
+    }
+
     const installAppUrl = `https://itunes.apple.com/us/app/id${appId}`;
     const openInAppUrl = openUrl || installAppUrl;
     this.setupOpenButton_(this.openButton_, openInAppUrl, installAppUrl);
@@ -348,12 +338,6 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
 
   /** @override */
   buildCallback() {
-    // To allow layout to be scheduled.
-    setStyles(this.element, {
-      display: '',
-      visibility: 'hidden',
-    });
-
     const viewer = viewerForDoc(this.getAmpDoc());
     this.manifestLink_ = this.win.document.head.querySelector(
         'link[rel=manifest],link[rel=origin-manifest]');
@@ -400,15 +384,29 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
 
     return xhrFor(this.win).fetchJson(this.manifestHref_, {
       requireAmpResponseSourceOrigin: false,
-    }).then(response => this.parseManifest_(response))
+    }).then(res => res.json())
+        .then(json => this.parseManifest_(json))
         .catch(error => {
           this.hide_();
           rethrowAsync(error);
         });
   }
 
+  /** @override */
+  openButtonClicked(openInAppUrl, installAppUrl) {
+    timerFor(this.win).delay(() => {
+      this.redirectTopLocation_(installAppUrl);
+    }, OPEN_LINK_TIMEOUT);
+    openWindowDialog(this.win, openInAppUrl, '_top');
+  }
+
+  /** @private */
+  redirectTopLocation_(link) {
+    this.win.top.location.assign(link);
+  }
+
   /**
-   * @param {!JSONType} manifestJson
+   * @param {!JsonObject} manifestJson
    * @private
    */
   parseManifest_(manifestJson) {
@@ -423,7 +421,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
     for (let i = 0; i < apps.length; i++) {
       const app = apps[i];
       if (app['platform'] == 'play') {
-        const installAppUrl = `https://play.google.com/store/apps/details` +
+        const installAppUrl = 'https://play.google.com/store/apps/details' +
             `?id=${app['id']}`;
         const openInAppUrl = this.getAndroidIntentForUrl_(app['id']);
         this.setupOpenButton_(this.openButton_, openInAppUrl, installAppUrl);
@@ -432,7 +430,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
     }
 
     user().warn(TAG, 'Could not find a platform=play app in manifest: %s',
-      this.element);
+        this.element);
   }
 
   /** @private */

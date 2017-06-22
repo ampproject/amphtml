@@ -16,9 +16,9 @@
 
 import {isObject} from '../../../src/types';
 import {user} from '../../../src/log';
-import {cidForDoc} from '../../../src/cid';
-import {viewerForDoc} from '../../../src/viewer';
-import {userNotificationManagerFor} from '../../../src/user-notification';
+import {cidForDoc} from '../../../src/services';
+import {viewerForDoc} from '../../../src/services';
+import {userNotificationManagerFor} from '../../../src/services';
 import {cryptoFor} from '../../../src/crypto';
 
 const ATTR_PREFIX = 'amp-x-';
@@ -89,7 +89,7 @@ export function allocateVariant(ampdoc, experimentName, config) {
 function validateConfig(config) {
   const variants = config.variants;
   user().assert(isObject(variants) && Object.keys(variants).length > 0,
-    'Missing experiment variants config.');
+      'Missing experiment variants config.');
   if (config.group) {
     assertName(config.group);
   }
@@ -126,7 +126,7 @@ function getBucketTicket(ampdoc, group, opt_cidScope) {
 
   const cidPromise = cidForDoc(ampdoc).then(cidService => cidService.get(
         {scope: opt_cidScope, createCookieIfNotPresent: true},
-        Promise.resolve()));
+      Promise.resolve()));
 
   return Promise.all([cidPromise, cryptoFor(ampdoc.win)])
       .then(results => results[1].uniform(group + ':' + results[0]))

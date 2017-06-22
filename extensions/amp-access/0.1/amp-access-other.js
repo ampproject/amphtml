@@ -25,23 +25,23 @@ const TAG = 'amp-access-other';
 export class AccessOtherAdapter {
 
   /**
-   * @param {!Window} win
-   * @param {!JSONType} configJson
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!JsonObject} configJson
    * @param {!AccessTypeAdapterContextDef} context
    */
-  constructor(win, configJson, context) {
-    /** @const {!Window} */
-    this.win = win;
+  constructor(ampdoc, configJson, context) {
+    /** @const */
+    this.ampdoc = ampdoc;
 
     /** @const @private {!AccessTypeAdapterContextDef} */
     this.context_ = context;
 
-    /** @private {?JSONType} */
+    /** @private {?JsonObject} */
     this.authorizationResponse_ =
         configJson['authorizationFallbackResponse'] || null;
 
     /** @const @private {boolean} */
-    this.isProxyOrigin_ = isProxyOrigin(win.location);
+    this.isProxyOrigin_ = isProxyOrigin(ampdoc.win.location);
   }
 
   /** @override */

@@ -14,40 +14,56 @@
  * limitations under the License.
  */
 
-
+import {ampdocServiceFor} from '../../../../src/ampdoc';
+import {installDocService} from '../../../../src/service/ampdoc-impl';
+import {
+  addExperimentIdToElement,
+  isInExperiment,
+  isExternallyTriggeredExperiment,
+  isInternallyTriggeredExperiment,
+  validateExperimentIds,
+  googleAdsIsA4AEnabled,
+} from '../traffic-experiments';
 import {
   RANDOM_NUMBER_GENERATORS,
-  addExperimentIdToElement,
-  getPageExperimentBranch,
-  mergeExperimentIds,
-  isInExperiment,
-  randomlySelectUnsetPageExperiments,
-  validateExperimentIds,
-} from '../traffic-experiments';
-import {isExperimentOn, toggleExperiment} from '../../../../src/experiments';
+  toggleExperiment,
+  forceExperimentBranch,
+} from '../../../../src/experiments';
+import {installPlatformService} from '../../../../src/service/platform-impl';
+import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
+import {
+  registerServiceBuilder,
+  resetServiceForTesting,
+} from '../../../../src/service';
+import {
+  installDocumentStateService,
+} from '../../../../src/service/document-state';
+import {
+  DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
+  DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
+  DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
+  DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
+  DOUBLECLICK_A4A_EXTERNAL_DELAYED_EXPERIMENT_BRANCHES_PRE_LAUNCH,
+} from '../../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config.js'; // eslint-disable-line
 import {EXPERIMENT_ATTRIBUTE} from '../utils';
-import {dev} from '../../../../src/log';
 import * as sinon from 'sinon';
-
-/** @private @const Tag used in dev log messages */
-const TAG_ = 'test-amp-ad';
 
 describe('all-traffic-experiments-tests', () => {
 
-  describe('#randomlySelectUnsetPageExperiments', () => {
+  describes.realWin('#googleAdsIsA4AEnabled', {
+    amp: {
+      runtimeOn: true,
+      ampdoc: 'single',
+    },
+  }, env => {
     let sandbox;
     let accurateRandomStub;
     let cachedAccuratePrng;
-    let testExperimentSet;
+    let element;
+
     beforeEach(() => {
       const experimentFrequency = 1.0;
-      testExperimentSet = {
-        testExperimentId: {
-          control: 'control_branch_id',
-          experiment: 'experiment_branch_id',
-        },
-      };
-      sandbox = sinon.sandbox.create();
+      sandbox = env.sandbox;
       sandbox.win = {
         location: {
           hostname: 'test.server.name.com',
@@ -59,186 +75,131 @@ describe('all-traffic-experiments-tests', () => {
           cookie: null,
           querySelector: () => {},
         },
+        crypto: {
+          subtle: {},
+        },
       };
       accurateRandomStub = sandbox.stub().returns(-1);
       cachedAccuratePrng = RANDOM_NUMBER_GENERATORS.accuratePrng;
       RANDOM_NUMBER_GENERATORS.accuratePrng = accurateRandomStub;
+
+      element = document.createElement('div');
+      env.win.document.body.appendChild(element);
     });
+
     afterEach(() => {
       sandbox.restore();
       RANDOM_NUMBER_GENERATORS.accuratePrng = cachedAccuratePrng;
     });
 
-    it('handles empty experiments list', () => {
-      // Opt out of experiment.
-      toggleExperiment(sandbox.win, 'testExperimentId', false, true);
-      randomlySelectUnsetPageExperiments(sandbox.win, {});
-      expect(isExperimentOn(sandbox.win, 'testExperimentId'),
-          'experiment is on').to.be.false;
-      expect(sandbox.win.pageExperimentBranches).to.be.empty;
+    it('should enable the external A4A experiment from the URL', () => {
+      const externalBranches = {control: '12', experiment: '34'};
+      const internalBranches = {control: '56', experiment: '78'};
+      const externalDelayedBranches = {control: '90', experiment: '13'};
+
+      sandbox.win.location.search = '?exp=a4a:2';
+
+      const renderViaA4a = googleAdsIsA4AEnabled(
+          sandbox.win, element, 'exp_name', externalBranches, internalBranches,
+          externalDelayedBranches);
+      expect(renderViaA4a).to.be.true;
+      expect(isInExperiment(element, '12')).to.be.false;
+      expect(isInExperiment(element, '34')).to.be.true;
+      expect(isInExperiment(element, '56')).to.be.false;
+      expect(isInExperiment(element, '78')).to.be.false;
+      expect(isExternallyTriggeredExperiment(element)).to.be.true;
+      expect(isInternallyTriggeredExperiment(element)).to.be.false;
     });
-    it('handles experiment not diverted path', () => {
-      // Opt out of experiment.
-      toggleExperiment(sandbox.win, 'testExperimentId', false, true);
-      randomlySelectUnsetPageExperiments(sandbox.win, testExperimentSet);
-      expect(isExperimentOn(sandbox.win, 'testExperimentId'),
-          'experiment is on').to.be.false;
-      expect(getPageExperimentBranch(sandbox.win,
-          'testExperimentId')).to.not.be.ok;
+
+    it('should use AdSense specific A4A experiment from URL', () => {
+      element.setAttribute('type', 'adsense');
+      const externalBranches = {control: '12', experiment: '34'};
+      const internalBranches = {control: '56', experiment: '78'};
+      const externalDelayedBranches = {control: '90', experiment: '13'};
+
+      sandbox.win.location.search = '?exp=a4a:1,aa:2,da:0';
+
+      const renderViaA4a = googleAdsIsA4AEnabled(
+          sandbox.win, element, 'exp_name', externalBranches, internalBranches,
+          externalDelayedBranches);
+      expect(renderViaA4a).to.be.true;
+      expect(isInExperiment(element, '12')).to.be.false;
+      expect(isInExperiment(element, '34')).to.be.true;
     });
-    it('handles experiment diverted path: control', () => {
-      // Force experiment on.
-      toggleExperiment(sandbox.win, 'testExperimentId', true, true);
-      // force the control branch to be chosen by making the accurate PRNG
-      // return a value < 0.5.
-      RANDOM_NUMBER_GENERATORS.accuratePrng.onFirstCall().returns(0.3);
-      randomlySelectUnsetPageExperiments(sandbox.win, testExperimentSet);
-      expect(isExperimentOn(sandbox.win, 'testExperimentId'),
-          'experiment is on').to.be.true;
-      expect(getPageExperimentBranch(sandbox.win, 'testExperimentId')).to.equal(
-          testExperimentSet['testExperimentId'].control);
+
+    it('should use Doubleclick specific A4A experiment from URL', () => {
+      element.setAttribute('type', 'doubleclick');
+      const externalBranches = {control: '12', experiment: '34'};
+      const internalBranches = {control: '56', experiment: '78'};
+      const externalDelayedBranches = {control: '90', experiment: '13'};
+
+      sandbox.win.location.search = '?exp=a4a:0,aa:1,da:2';
+
+      const renderViaA4a = googleAdsIsA4AEnabled(
+          sandbox.win, element, 'exp_name', externalBranches, internalBranches,
+          externalDelayedBranches);
+      expect(renderViaA4a).to.be.true;
+      expect(isInExperiment(element, '12')).to.be.false;
+      expect(isInExperiment(element, '34')).to.be.true;
     });
-    it('handles experiment diverted path: experiment', () => {
-      // Force experiment on.
-      toggleExperiment(sandbox.win, 'testExperimentId', true, true);
-      // Force the experiment branch to be chosen by making the accurate PRNG
-      // return a value > 0.5.
+
+    it('should enable the external A4A control from the URL', () => {
+      const externalBranches = {control: '12', experiment: '34'};
+      const internalBranches = {control: '56', experiment: '78'};
+      const externalDelayedBranches = {control: '90', experiment: '13'};
+
+      sandbox.win.location.search = '?exp=a4a:1';
+
+      const renderViaA4a = googleAdsIsA4AEnabled(
+          sandbox.win, element, 'exp_name', externalBranches, internalBranches,
+          externalDelayedBranches);
+      expect(renderViaA4a).to.be.false;
+      expect(isInExperiment(element, '12')).to.be.true;
+      expect(isInExperiment(element, '34')).to.be.false;
+      expect(isInExperiment(element, '56')).to.be.false;
+      expect(isInExperiment(element, '78')).to.be.false;
+      expect(isExternallyTriggeredExperiment(element)).to.be.true;
+      expect(isInternallyTriggeredExperiment(element)).to.be.false;
+    });
+
+    it('should enable the internal A4A experiment', () => {
+      toggleExperiment(sandbox.win, 'exp_name', true, true);
+      const externalBranches = {control: '12', experiment: '34'};
+      const internalBranches = {control: '56', experiment: '78'};
+      const externalDelayedBranches = {control: '90', experiment: '13'};
+
       RANDOM_NUMBER_GENERATORS.accuratePrng.onFirstCall().returns(0.6);
-      randomlySelectUnsetPageExperiments(sandbox.win, testExperimentSet);
-      expect(isExperimentOn(sandbox.win, 'testExperimentId'),
-          'experiment is on').to.be.true;
-      expect(getPageExperimentBranch(sandbox.win, 'testExperimentId')).to.equal(
-          testExperimentSet['testExperimentId'].experiment);
-    });
-    it('handles multiple experiments', () => {
-      toggleExperiment(sandbox.win, 'expt_0', true, true);
-      toggleExperiment(sandbox.win, 'expt_1', false, true);
-      toggleExperiment(sandbox.win, 'expt_2', true, true);
-      toggleExperiment(sandbox.win, 'expt_3', true, true);
 
-      const experimentInfo = {
-        'expt_0': {
-          control: '0_c',
-          experiment: '0_e',
-        },
-        'expt_1': {
-          control: '1_c',
-          experiment: '1_e',
-        },
-        'expt_2': {
-          control: '2_c',
-          experiment: '2_e',
-        },
-        // expt_3 omitted.
-      };
-      RANDOM_NUMBER_GENERATORS.accuratePrng.returns(0.6);
-      randomlySelectUnsetPageExperiments(sandbox.win, experimentInfo);
-      expect(isExperimentOn(sandbox.win, 'expt_0'),
-          'expt_0 is on').to.be.true;
-      expect(isExperimentOn(sandbox.win, 'expt_1'),
-          'expt_1 is on').to.be.false;
-      expect(isExperimentOn(sandbox.win, 'expt_2'),
-          'expt_2 is on').to.be.true;
-      // Note: calling isExperimentOn('expt_3') would actually evaluate the
-      // frequency for expt_3, possibly enabling it.  Since we wanted it to be
-      // omitted altogether, we'll evaluate it only via its branch.
-      expect(getPageExperimentBranch(sandbox.win, 'expt_0')).to.equal(
-          '0_e');
-      expect(getPageExperimentBranch(sandbox.win, 'expt_1')).to.not.be.ok;
-      expect(getPageExperimentBranch(sandbox.win, 'expt_2')).to.equal(
-          '2_e');
-      expect(getPageExperimentBranch(sandbox.win, 'expt_3')).to.not.be.ok;
-    });
-    it('handles multi-way branches', () => {
-      dev().info(TAG_, 'Testing multi-way branches');
-      toggleExperiment(sandbox.win, 'expt_0', true, true);
-      const experimentInfo = {
-        'expt_0': {
-          b0: '0_0',
-          b1: '0_1',
-          b2: '0_2',
-          b3: '0_3',
-          b4: '0_4',
-        },
-      };
-      RANDOM_NUMBER_GENERATORS.accuratePrng.returns(0.7);
-      randomlySelectUnsetPageExperiments(sandbox.win, experimentInfo);
-      expect(isExperimentOn(sandbox.win, 'expt_0'),
-          'expt_0 is on').to.be.true;
-      expect(getPageExperimentBranch(sandbox.win, 'expt_0')).to.equal(
-          '0_3');
-    });
-    it('handles multiple experiments with multi-way branches', () => {
-      toggleExperiment(sandbox.win, 'expt_0', true, true);
-      toggleExperiment(sandbox.win, 'expt_1', false, true);
-      toggleExperiment(sandbox.win, 'expt_2', true, true);
-      toggleExperiment(sandbox.win, 'expt_3', true, true);
-
-      const experimentInfo = {
-        'expt_0': {
-          b0: '0_0',
-          b1: '0_1',
-          b2: '0_2',
-          b3: '0_3',
-          b4: '0_4',
-        },
-        'expt_1': {
-          b0: '1_0',
-          b1: '1_1',
-          b2: '1_2',
-          b3: '1_3',
-          b4: '1_4',
-        },
-        'expt_2': {
-          b0: '2_0',
-          b1: '2_1',
-          b2: '2_2',
-          b3: '2_3',
-          b4: '2_4',
-        },
-      };
-      RANDOM_NUMBER_GENERATORS.accuratePrng.onFirstCall().returns(0.7);
-      RANDOM_NUMBER_GENERATORS.accuratePrng.onSecondCall().returns(0.3);
-      randomlySelectUnsetPageExperiments(sandbox.win, experimentInfo);
-      expect(isExperimentOn(sandbox.win, 'expt_0'),
-          'expt_0 is on').to.be.true;
-      expect(isExperimentOn(sandbox.win, 'expt_1'),
-          'expt_1 is on').to.be.false;
-      expect(isExperimentOn(sandbox.win, 'expt_2'),
-          'expt_2 is on').to.be.true;
-      // Note: calling isExperimentOn('expt_3') would actually evaluate the
-      // frequency for expt_3, possibly enabling it.  Since we wanted it to be
-      // omitted altogether, we'll evaluate it only via its branch.
-      expect(getPageExperimentBranch(sandbox.win, 'expt_0')).to.equal(
-          '0_3');
-      expect(getPageExperimentBranch(sandbox.win, 'expt_1')).to.not.be.ok;
-      expect(getPageExperimentBranch(sandbox.win, 'expt_2')).to.equal(
-          '2_1');
-      expect(getPageExperimentBranch(sandbox.win, 'expt_3')).to.not.be.ok;
+      const renderViaA4a = googleAdsIsA4AEnabled(
+          sandbox.win, element, 'exp_name', externalBranches, internalBranches,
+          externalDelayedBranches);
+      expect(renderViaA4a).to.be.true;
+      expect(isInExperiment(element, '12')).to.be.false;
+      expect(isInExperiment(element, '34')).to.be.false;
+      expect(isInExperiment(element, '56')).to.be.false;
+      expect(isInExperiment(element, '78')).to.be.true;
+      expect(isExternallyTriggeredExperiment(element)).to.be.false;
+      expect(isInternallyTriggeredExperiment(element)).to.be.true;
     });
 
-    it('should not process the same experiment twice', () => {
-      const exptAInfo = {
-        'fooExpt': {
-          control: '012345',
-          experiment: '987654',
-        },
-      };
-      const exptBInfo = {
-        'fooExpt': {
-          control: '246810',
-          experiment: '108642',
-        },
-      };
-      toggleExperiment(sandbox.win, 'fooExpt', false, true);
-      randomlySelectUnsetPageExperiments(sandbox.win, exptAInfo);
-      randomlySelectUnsetPageExperiments(sandbox.win, exptBInfo);
-      // Even though we tried to set up a second time, using a config
-      // parameter that should ensure that the experiment was activated, the
-      // experiment framework should evaluate each experiment only once per
-      // page and should not enable it.
-      expect(isExperimentOn(sandbox.win, 'fooExpt')).to.be.false;
-      expect(getPageExperimentBranch(sandbox.win, 'fooExpt')).to.not.be.ok;
+    it('should enable the internal A4A control', () => {
+      toggleExperiment(sandbox.win, 'exp_name', true, true);
+      const externalBranches = {control: '12', experiment: '34'};
+      const internalBranches = {control: '56', experiment: '78'};
+      const externalDelayedBranches = {control: '90', experiment: '13'};
+
+      RANDOM_NUMBER_GENERATORS.accuratePrng.onFirstCall().returns(0.3);
+
+      const renderViaA4a = googleAdsIsA4AEnabled(
+          sandbox.win, element, 'exp_name', externalBranches, internalBranches,
+          externalDelayedBranches);
+      expect(renderViaA4a).to.be.false;
+      expect(isInExperiment(element, '12')).to.be.false;
+      expect(isInExperiment(element, '34')).to.be.false;
+      expect(isInExperiment(element, '56')).to.be.true;
+      expect(isInExperiment(element, '78')).to.be.false;
+      expect(isExternallyTriggeredExperiment(element)).to.be.false;
+      expect(isInternallyTriggeredExperiment(element)).to.be.true;
     });
   });
 
@@ -296,21 +257,6 @@ describe('all-traffic-experiments-tests', () => {
     });
   });
 
-  describe('#mergeExperimentIds', () => {
-    it('should merge a single id to itself', () => {
-      expect(mergeExperimentIds('12345')).to.equal('12345');
-    });
-    it('should merge a single ID to a list', () => {
-      expect(mergeExperimentIds('12345', '3,4,5,6')).to.equal('3,4,5,6,12345');
-    });
-    it('should discard invalid ID', () => {
-      expect(mergeExperimentIds('frob', '3,4,5,6')).to.equal('3,4,5,6');
-    });
-    it('should return empty string for invalid input', () => {
-      expect(mergeExperimentIds('frob')).to.equal('');
-    });
-  });
-
   describe('#isInExperiment', () => {
     it('should return false for empty element and any query', () => {
       const element = document.createElement('div');
@@ -344,6 +290,221 @@ describe('all-traffic-experiments-tests', () => {
       expect(isInExperiment(element, 'frob')).to.be.true;
       expect(isInExperiment(element, 'gunk')).to.be.true;
       expect(isInExperiment(element, 'zort')).to.be.true;
+    });
+  });
+
+  describe('A4A Launch Flags', () => {
+    let sandbox;
+    let win;
+    let events;
+    let element;
+    let addEnabledExperimentSpy;
+
+    beforeEach(() => {
+      sandbox = sinon.sandbox.create();
+      win = {
+        AMP_MODE: {
+          localDev: true,
+        },
+        location: {
+          href: 'https://cdn.ampproject.org/fnord',
+          pathname: '/fnord',
+          origin: 'https://cdn.ampproject.org',
+          hash: '',
+          hostname: 'cdn.ampproject.org',
+        },
+        document: {
+          nodeType: /* DOCUMENT */ 9,
+          hidden: false,
+          cookie: null,
+          visibilityState: 'visible',
+          addEventListener(type, listener) {
+            events[type] = listener;
+          },
+        },
+        crypto: {
+          subtle: true,
+          webkitSubtle: true,
+        },
+        navigator: window.navigator,
+        pageExperimentBranches: {},
+      };
+      win.document.defaultView = win;
+      installDocService(win, /* isSingleDoc */ true);
+      const ampdoc = ampdocServiceFor(win).getAmpDoc();
+      events = {};
+      installDocumentStateService(win);
+      installPlatformService(win);
+      installViewerServiceForDoc(ampdoc);
+      element = document.createElement('div');
+      document.body.appendChild(element);
+      addEnabledExperimentSpy = sandbox.stub();
+      registerServiceBuilder(win, 'performance', function() {
+        return {
+          addEnabledExperiment: addEnabledExperimentSpy,
+        };
+      });
+    });
+
+    afterEach(() => {
+      resetServiceForTesting(win, 'viewer');
+      sandbox.restore();
+      document.body.removeChild(element);
+    });
+
+    function expectCorrectBranchOnly(element, expectedBranchId) {
+      const branchIds = [
+        DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control,
+        DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment,
+        DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control,
+        DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment,
+        DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control,
+        DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment,
+        DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control,
+        DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment,
+      ];
+      for (const bId in branchIds) {
+        expect(isInExperiment(element, bId)).to.equal(bId === expectedBranchId);
+      }
+    }
+
+    const tests = [
+      {
+        branchType: 'filler',
+        adType: 'doubleclick',
+        hasLaunched: false,
+        shouldServeFastFetch: false,
+        branchId: null,
+      },
+      {
+        branchType: 'control',
+        adType: 'doubleclick',
+        hasLaunched: false,
+        shouldServeFastFetch: false,
+        branchId:
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control,
+      },
+      {
+        branchType: 'experiment',
+        adType: 'doubleclick',
+        hasLaunched: false,
+        shouldServeFastFetch: true,
+        branchId:
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment,
+      },
+      {
+        adType: 'doubleclick',
+        hasLaunched: true,
+        shouldServeFastFetch: true,
+        branchType: 'filler',
+        branchId: null,
+      },
+      {
+        adType: 'doubleclick',
+        hasLaunched: true,
+        shouldServeFastFetch: true,
+        branchType: 'control',
+        branchId:
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control,
+      },
+      {
+        adType: 'doubleclick',
+        hasLaunched: true,
+        shouldServeFastFetch: false,
+        branchType: 'experiment',
+        branchId:
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment,
+      },
+      {
+        adType: 'doubleclick',
+        hasLaunched: false,
+        shouldServeFastFetch: false,
+        urlParam: '?exp=a4a:0',
+        branchType: 'filler',
+        branchId: null,
+      },
+      {
+        adType: 'doubleclick',
+        hasLaunched: false,
+        shouldServeFastFetch: false,
+        urlParam: '?exp=a4a:1',
+        branchType: 'control',
+        branchId:
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control,
+      },
+      {
+        adType: 'doubleclick',
+        hasLaunched: false,
+        shouldServeFastFetch: true,
+        urlParam: '?exp=a4a:2',
+        branchType: 'experiment',
+        branchId:
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment,
+      },
+      {
+        adType: 'doubleclick',
+        hasLaunched: true,
+        shouldServeFastFetch: true,
+        urlParam: '?exp=a4a:0',
+        branchType: 'filler',
+        branchId: null,
+      },
+      {
+        adType: 'doubleclick',
+        hasLaunched: true,
+        shouldServeFastFetch: true,
+        urlParam: '?exp=a4a:1',
+        branchType: 'control',
+        branchId:
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control,
+      },
+      {
+        adType: 'doubleclick',
+        hasLaunched: true,
+        shouldServeFastFetch: false,
+        urlParam: '?exp=a4a:2',
+        branchType: 'experiment',
+        branchId:
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment,
+      },
+      // TODO(jonkeller): Need AdSense tests also
+    ];
+
+    tests.forEach(test => {
+      const desc = 'should serve ' +
+        `${test.shouldServeFastFetch ? 'Fast' : 'Delayed'} Fetch to ` +
+        `${test.hasLaunched ? 'launched' : 'unlaunched'} ` +
+        `${test.adType} ${test.branchType} ` +
+        `${test.urlParam ? 'via URL ' : ''}`;
+      it(desc, () => {
+        element.setAttribute('type', test.adType);
+        toggleExperiment(win, 'a4aFastFetchDoubleclickLaunched',
+            test.hasLaunched, true);
+        if (test.urlParam) {
+          win.location.search = test.urlParam;
+        } else if (test.branchId != null) {
+          toggleExperiment(win, 'expDoubleclickA4A', true, true);
+          forceExperimentBranch(win, 'expDoubleclickA4A', test.branchId);
+        }
+        const external = test.hasLaunched ?
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH;
+        const internal = test.hasLaunched ?
+          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH :
+          DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH;
+        expect(googleAdsIsA4AEnabled(win, element, 'expDoubleclickA4A',
+            external, internal,
+            DOUBLECLICK_A4A_EXTERNAL_DELAYED_EXPERIMENT_BRANCHES_PRE_LAUNCH))
+            .to.equal(test.shouldServeFastFetch);
+        expectCorrectBranchOnly(element, test.branchId);
+        expect(win.document.cookie).to.be.null;
+        if (test.branchId) {
+          expect(addEnabledExperimentSpy)
+              .to.be.calledWith('expDoubleclickA4A-' + test.branchId);
+        } else {
+          expect(addEnabledExperimentSpy).to.not.be.called;
+        }
+      });
     });
   });
 });

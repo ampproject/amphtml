@@ -16,18 +16,19 @@
 
 import {Observable} from '../observable';
 import {findIndex} from '../utils/array';
-import {map} from '../utils/object';
+import {dict, map} from '../utils/object';
 import {documentStateFor} from './document-state';
-import {getServiceForDoc} from '../service';
-import {dev} from '../log';
+import {registerServiceBuilderForDoc} from '../service';
+import {dev, duplicateErrorIfNecessary} from '../log';
 import {isIframed} from '../dom';
 import {
+  getSourceOrigin,
   parseQueryString,
   parseUrl,
   removeFragment,
   isProxyOrigin,
 } from '../url';
-import {timerFor} from '../timer';
+import {timerFor} from '../services';
 import {reportError} from '../error';
 import {VisibilityState} from '../visibility-state';
 
@@ -111,7 +112,7 @@ export class Viewer {
     /** @private {number} */
     this.prerenderSize_ = 1;
 
-    /** @private {!Object<string, !Observable<!JSONType>>} */
+    /** @private {!Object<string, !Observable<!JsonObject>>} */
     this.messageObservables_ = map();
 
     /** @private {!Observable<boolean>} */
@@ -120,10 +121,13 @@ export class Viewer {
     /** @private {!Observable} */
     this.visibilityObservable_ = new Observable();
 
-    /** @private {!Observable<!JSONType>} */
+    /** @private {!Observable<!JsonObject>} */
     this.broadcastObservable_ = new Observable();
 
-    /** @private {?function(string, *, boolean):(Promise<*>|undefined)} */
+    /**
+     * @private {?function(string, (?JsonObject|string|undefined), boolean):
+     *     (Promise<*>|undefined)}
+     */
     this.messageDeliverer_ = null;
 
     /** @private {?string} */
@@ -132,7 +136,7 @@ export class Viewer {
     /**
      * @private {!Array<!{
      *   eventType: string,
-     *   data: *,
+     *   data: (?JsonObject|string|undefined),
      *   awaitResponse: boolean,
      *   responsePromise: (Promise<*>|undefined),
      *   responseResolver: function(*)
@@ -362,6 +366,27 @@ export class Viewer {
       }
     });
 
+    // Replace URL if requested.
+    const replaceUrlParam = this.params_['replaceUrl'];
+    if (ampdoc.isSingleDoc() &&
+        replaceUrlParam &&
+        this.win.history.replaceState) {
+      try {
+        // The origin and source origin must match.
+        const url = parseUrl(this.win.location.href);
+        const replaceUrl = parseUrl(
+            removeFragment(replaceUrlParam) + this.win.location.hash);
+        if (url.origin == replaceUrl.origin &&
+            getSourceOrigin(url) == getSourceOrigin(replaceUrl)) {
+          this.win.history.replaceState({}, '', replaceUrl.href);
+          this.win.location.originalHref = url.href;
+          dev().fine(TAG_, 'replace url:' + replaceUrl.href);
+        }
+      } catch (e) {
+        dev().error(TAG_, 'replaceUrl failed', e);
+      }
+    }
+
     // Remove hash when we have an incoming click tracking string
     // (see impression.js).
     if (this.params_['click']) {
@@ -373,7 +398,7 @@ export class Viewer {
           this.win.location.originalHash = this.win.location.hash;
         }
         this.win.history.replaceState({}, '', newUrl);
-        dev().fine(TAG_, 'replace url:' + this.win.location.href);
+        dev().fine(TAG_, 'replace fragment:' + this.win.location.href);
       }
     }
 
@@ -438,10 +463,10 @@ export class Viewer {
   navigateTo(url, requestedBy) {
     dev().assert(isProxyOrigin(url), 'Invalid A2A URL %s %s', url, requestedBy);
     if (this.hasCapability('a2a')) {
-      this.sendMessage('a2a', {
-        url,
-        requestedBy,
-      });
+      this.sendMessage('a2a', dict({
+        'url': url,
+        'requestedBy': requestedBy,
+      }));
     } else {
       this.win.top.location.href = url;
     }
@@ -701,7 +726,7 @@ export class Viewer {
   /**
    * Adds a eventType listener for viewer events.
    * @param {string} eventType
-   * @param {function(!JSONType)} handler
+   * @param {function(!JsonObject)} handler
    * @return {!UnlistenDef}
    */
   onMessage(eventType, handler) {
@@ -716,7 +741,7 @@ export class Viewer {
   /**
    * Requests AMP document to receive a message from Viewer.
    * @param {string} eventType
-   * @param {!JSONType} data
+   * @param {!JsonObject} data
    * @param {boolean} unusedAwaitResponse
    * @return {(!Promise<*>|undefined)}
    * @export
@@ -732,7 +757,7 @@ export class Viewer {
     }
     if (eventType == 'broadcast') {
       this.broadcastObservable_.fire(
-          /** @type {!JSONType|undefined} */ (data));
+          /** @type {!JsonObject|undefined} */ (data));
       return Promise.resolve();
     }
     const observable = this.messageObservables_[eventType];
@@ -747,7 +772,8 @@ export class Viewer {
   /**
    * Provides a message delivery mechanism by which AMP document can send
    * messages to the viewer.
-   * @param {function(string, *, boolean):(!Promise<*>|undefined)} deliverer
+   * @param {function(string, (?JsonObject|string|undefined), boolean):
+   *     (!Promise<*>|undefined)} deliverer
    * @param {string} origin
    * @export
    */
@@ -766,7 +792,7 @@ export class Viewer {
     }
     if (this.trustedViewerResolver_) {
       this.trustedViewerResolver_(
-        origin ? this.isTrustedViewerOrigin_(origin) : false);
+          origin ? this.isTrustedViewerOrigin_(origin) : false);
     }
     if (this.viewerOriginResolver_) {
       this.viewerOriginResolver_(origin || '');
@@ -777,7 +803,9 @@ export class Viewer {
       this.messageQueue_ = [];
       queue.forEach(message => {
         const responsePromise = this.messageDeliverer_(
-            message.eventType, message.data, message.awaitResponse);
+            message.eventType,
+            message.data,
+            message.awaitResponse);
 
         if (message.awaitResponse) {
           message.responseResolver(responsePromise);
@@ -794,7 +822,7 @@ export class Viewer {
    * This is a restricted API.
    *
    * @param {string} eventType
-   * @param {*} data
+   * @param {?JsonObject|string|undefined} data
    * @param {boolean=} cancelUnsent
    */
   sendMessage(eventType, data, cancelUnsent = false) {
@@ -809,9 +837,9 @@ export class Viewer {
    * This is a restricted API.
    *
    * @param {string} eventType
-   * @param {*} data
+   * @param {?JsonObject|string|undefined} data
    * @param {boolean=} cancelUnsent
-   * @return {!Promise<*>} the response promise
+   * @return {!Promise<(?JsonObject|string|undefined)>} the response promise
    */
   sendMessageAwaitResponse(eventType, data, cancelUnsent = false) {
     return this.sendMessageInternal_(eventType, data, cancelUnsent, true);
@@ -821,18 +849,21 @@ export class Viewer {
    * Sends the message to the viewer.
    *
    * @param {string} eventType
-   * @param {*} data
+   * @param {?JsonObject|string|undefined} data
    * @param {boolean} cancelUnsent
    * @param {boolean} awaitResponse
-   * @return {!Promise<*>} the response promise
+   * @return {!Promise<(?JsonObject|string|undefined)>} the response promise
    */
   sendMessageInternal_(eventType, data, cancelUnsent, awaitResponse) {
     if (this.messageDeliverer_) {
       // Certain message deliverers return fake "Promise" instances called
       // "Thenables". Convert from these values into trusted Promise instances,
       // assimilating with the resolved (or rejected) internal value.
-      return /** @type {!Promise<*>} */ (Promise.resolve(this.messageDeliverer_(
-          eventType, data, awaitResponse)));
+      return /** @type {!Promise<?JsonObject|string|undefined>} */ (
+          Promise.resolve(this.messageDeliverer_(
+              eventType,
+              /** @type {?JsonObject|string|undefined} */ (data),
+              awaitResponse)));
     }
 
     if (!this.messagingReadyPromise_) {
@@ -879,7 +910,7 @@ export class Viewer {
    * will attempt to deliver messages when the messaging channel has been
    * established, but it will not fail if the channel is timed out.
    *
-   * @param {!JSONType} message
+   * @param {!JsonObject} message
    */
   broadcast(message) {
     if (!this.messagingMaybePromise_) {
@@ -892,7 +923,7 @@ export class Viewer {
 
   /**
    * Registers receiver for the broadcast events.
-   * @param {function(!JSONType)} handler
+   * @param {function(!JsonObject)} handler
    * @return {!UnlistenDef}
    */
   onBroadcast(handler) {
@@ -934,11 +965,13 @@ function parseParams_(str, allParams) {
  */
 function getChannelError(opt_reason) {
   if (opt_reason instanceof Error) {
+    opt_reason = duplicateErrorIfNecessary(opt_reason);
     opt_reason.message = 'No messaging channel: ' + opt_reason.message;
     return opt_reason;
   }
   return new Error('No messaging channel: ' + opt_reason);
 }
+
 
 /**
  * Sets the viewer visibility state. This calls is restricted to runtime only.
@@ -953,9 +986,12 @@ export function setViewerVisibilityState(viewer, state) {
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @param {!Object<string, string>=} opt_initParams
- * @return {!Viewer}
  */
 export function installViewerServiceForDoc(ampdoc, opt_initParams) {
-  return getServiceForDoc(ampdoc, 'viewer',
-      () => new Viewer(ampdoc, opt_initParams));
+  registerServiceBuilderForDoc(ampdoc,
+      'viewer',
+      function() {
+        return new Viewer(ampdoc, opt_initParams);
+      },
+      /* opt_instantiate */ true);
 }

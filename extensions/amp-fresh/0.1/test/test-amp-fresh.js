@@ -16,7 +16,10 @@
 
 import * as sinon from 'sinon';
 import {AmpFresh} from '../amp-fresh';
-import {getOrInsallAmpFreshManager} from '../amp-fresh-manager';
+import {
+  ampFreshManagerForDoc,
+  installAmpFreshManagerForDoc,
+} from '../amp-fresh-manager';
 import {resetServiceForTesting} from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';
 
@@ -35,7 +38,8 @@ describe('amp-fresh', () => {
     const span = document.createElement('span');
     span.textContent = 'hello';
     elem.appendChild(span);
-    manager = getOrInsallAmpFreshManager(window.document);
+    installAmpFreshManagerForDoc(window.document);
+    manager = ampFreshManagerForDoc(window.document);
     fresh = new AmpFresh(elem);
     sandbox = sinon.sandbox.create();
     fresh.mutateElement = function(cb) {
@@ -63,7 +67,7 @@ describe('amp-fresh', () => {
     fresh.buildCallback();
     expect(fresh.element.innerHTML).to.equal('<span>hello</span>');
     const doc = {
-      getElementById: function(id) {
+      getElementById(id) {
         const el = document.createElement('amp-fresh');
         el.innerHTML = '<span>hello</span><div>world</div>!';
         el.setAttribute('id', id);
@@ -73,5 +77,16 @@ describe('amp-fresh', () => {
     manager.update_(doc);
     expect(fresh.element.innerHTML).to.equal(
         '<span>hello</span><div>world</div>!');
+  });
+
+  it('should have aria-live=polite by default', () => {
+    fresh.buildCallback();
+    expect(fresh.element.getAttribute('aria-live')).to.equal('polite');
+  });
+
+  it('should use explicitly defined aria-live attribute value', () => {
+    elem.setAttribute('aria-live', 'assertive');
+    fresh.buildCallback();
+    expect(fresh.element.getAttribute('aria-live')).to.equal('assertive');
   });
 });

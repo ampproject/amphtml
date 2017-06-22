@@ -25,7 +25,9 @@
  *   left: number,
  *   right: number,
  *   width: number,
- *   height: number
+ *   height: number,
+ *   x: number,
+ *   y: number
  * }}
  */
 export let LayoutRectDef;
@@ -76,6 +78,8 @@ export function layoutRectLtwh(left, top, width, height) {
     height,
     bottom: top + height,
     right: left + width,
+    x: left,
+    y: top,
   };
 }
 
@@ -141,16 +145,11 @@ export function rectIntersection(var_args) {
  * @return {!LayoutRectDef}
  */
 export function expandLayoutRect(rect, dw, dh) {
-  return {
-    top: rect.top - rect.height * dh,
-    bottom: rect.bottom + rect.height * dh,
-    left: rect.left - rect.width * dw,
-    right: rect.right + rect.width * dw,
-    width: rect.width * (1 + dw * 2),
-    height: rect.height * (1 + dh * 2),
-  };
+  return layoutRectLtwh(rect.left - rect.width * dw,
+      rect.top - rect.height * dh,
+      rect.width * (1 + dw * 2),
+      rect.height * (1 + dh * 2));
 }
-
 
 /**
  * Moves the layout rect using dx and dy.
@@ -179,4 +178,17 @@ export function areMarginsChanged(margins, change) {
       (change.right !== undefined && change.right != margins.right) ||
       (change.bottom !== undefined && change.bottom != margins.bottom) ||
       (change.left !== undefined && change.left != margins.left);
+}
+
+/**
+ * @param {?LayoutRectDef} r1
+ * @param {?LayoutRectDef} r2
+ * @return {boolean}
+ */
+export function layoutRectEquals(r1, r2) {
+  if (!r1 || !r2) {
+    return false;
+  }
+  return r1.left == r2.left && r1.top == r2.top &&
+      r1.width == r2.width && r1.height == r2.height;
 }

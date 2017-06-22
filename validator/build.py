@@ -164,11 +164,11 @@ def GenValidatorProtoascii(out_dir):
   assert re.match(r'^[a-zA-Z_\-0-9]+$', out_dir), 'bad out_dir: %s' % out_dir
 
   protoascii_segments = [open('validator-main.protoascii').read()]
-  extensions = glob.glob('extensions/*/0.1/validator-*.protoascii')
+  extensions = glob.glob('extensions/*/validator-*.protoascii')
   # In the Github project, the extensions are located in a sibling directory
   # to the validator rather than a child directory.
   if not extensions:
-    extensions = glob.glob('../extensions/*/0.1/validator-*.protoascii')
+    extensions = glob.glob('../extensions/*/validator-*.protoascii')
   extensions.sort()
   for extension in extensions:
     protoascii_segments.append(open(extension).read())
@@ -284,7 +284,7 @@ def CompileWithClosure(js_files, closure_entry_points, output_file):
 
   cmd = [
       'java', '-jar', 'node_modules/google-closure-compiler/compiler.jar',
-      '--language_in=ECMASCRIPT6_STRICT', '--language_out=ES5_STRICT',
+      '--language_out=ES5_STRICT',
       '--js_output_file=%s' % output_file, '--only_closure_dependencies'
   ]
   cmd += ['--closure_entry_point=%s' % e for e in closure_entry_points]
@@ -583,7 +583,6 @@ def Main():
   SetupOutDir(out_dir='dist')
   GenValidatorProtoascii(out_dir='dist')
   GenValidatorPb2Py(out_dir='dist')
-  GenValidatorProtoascii(out_dir='dist')
   GenValidatorGeneratedJs(out_dir='dist')
   GenValidatorGeneratedLightAmpJs(out_dir='dist')
   GenValidatorGeneratedMd(out_dir='dist')

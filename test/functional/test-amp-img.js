@@ -17,7 +17,7 @@
 import {createIframePromise} from '../../testing/iframe';
 import {BaseElement} from '../../src/base-element';
 import {installImg, AmpImg} from '../../builtins/amp-img';
-import {resourcesForDoc} from '../../src/resources';
+import {resourcesForDoc} from '../../src/services';
 import * as sinon from 'sinon';
 
 describe('amp-img', () => {
@@ -114,7 +114,7 @@ describe('amp-img', () => {
 
       impl.getVsync = function() {
         return {
-          mutate: function(fn) {
+          mutate(fn) {
             fn();
           },
         };
@@ -199,12 +199,12 @@ describe('amp-img', () => {
       return impl.layoutCallback().catch(() => {
         expect(toggleElSpy).to.be.calledOnce;
         expect(toggleElSpy.getCall(0).args[0]).to.be.true;
-        expect(impl.img_).to.have.class('-amp-ghost');
+        expect(impl.img_).to.have.class('i-amphtml-ghost');
         impl.img_.setAttribute('src', 'test-1000.jpg');
         return impl.layoutCallback().then(() => {
           expect(toggleElSpy).to.have.callCount(2);
           expect(toggleElSpy.getCall(1).args[0]).to.be.false;
-          expect(impl.img_).to.not.have.class('-amp-ghost');
+          expect(impl.img_).to.not.have.class('i-amphtml-ghost');
         });
       });
     });
@@ -215,15 +215,15 @@ describe('amp-img', () => {
       loadStub.returns(Promise.resolve());
       impl.buildCallback();
 
-      expect(el).to.not.have.class('-amp-ghost');
+      expect(el).to.not.have.class('i-amphtml-ghost');
       expect(toggleElSpy).to.have.not.been.called;
       return impl.layoutCallback().catch(() => {
         expect(toggleElSpy).to.be.calledOnce;
         expect(toggleElSpy.getCall(0).args[0]).to.be.true;
-        expect(impl.img_).to.have.class('-amp-ghost');
+        expect(impl.img_).to.have.class('i-amphtml-ghost');
         return impl.layoutCallback().then(() => {
           expect(toggleElSpy).to.be.calledOnce;
-          expect(impl.img_).to.have.class('-amp-ghost');
+          expect(impl.img_).to.have.class('i-amphtml-ghost');
         });
       });
     });
@@ -234,16 +234,16 @@ describe('amp-img', () => {
       loadStub.returns(Promise.reject());
       impl.buildCallback();
 
-      expect(el).to.not.have.class('-amp-ghost');
+      expect(el).to.not.have.class('i-amphtml-ghost');
       expect(toggleElSpy).to.have.not.been.called;
       return impl.layoutCallback().catch(() => {
         expect(toggleElSpy).to.be.calledOnce;
         expect(toggleElSpy.getCall(0).args[0]).to.be.true;
-        expect(impl.img_).to.have.class('-amp-ghost');
+        expect(impl.img_).to.have.class('i-amphtml-ghost');
         impl.img_.setAttribute('src', 'test-1000.jpg');
         return impl.layoutCallback().catch(() => {
           expect(toggleElSpy).to.be.calledOnce;
-          expect(impl.img_).to.have.class('-amp-ghost');
+          expect(impl.img_).to.have.class('i-amphtml-ghost');
         });
       });
     });

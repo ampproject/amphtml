@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import {endsWith} from './string';
+import {startsWith, endsWith} from './string';
 import {user} from './log';
 import {getMode} from './mode';
 import {urls} from './config';
 import {isArray} from './types';
+import {parseQueryString_} from './url-parse-query-string';
 
 /**
  * Cached a-tag to avoid memory allocation during URL parsing.
@@ -36,6 +37,12 @@ let cache;
 
 /** @private @const Matches amp_js_* paramters in query string. */
 const AMP_JS_PARAMS_REGEX = /[?&]amp_js[^&]*/;
+
+const INVALID_PROTOCOLS = [
+  /*eslint no-script-url: 0*/ 'javascript:',
+  /*eslint no-script-url: 0*/ 'data:',
+  /*eslint no-script-url: 0*/ 'vbscript:',
+];
 
 /** @const {string} */
 export const SOURCE_ORIGIN_PARAM = '__amp_source_origin';
@@ -59,11 +66,31 @@ export function parseUrl(url, opt_nocache) {
   if (fromCache) {
     return fromCache;
   }
+
+  const info = parseUrlWithA(a, url);
+
+  // Freeze during testing to avoid accidental mutation.
+  const frozen = (getMode().test && Object.freeze) ? Object.freeze(info) : info;
+
+  if (opt_nocache) {
+    return frozen;
+  }
+  return cache[url] = frozen;
+}
+
+/**
+ * Returns a Location-like object for the given URL. If it is relative,
+ * the URL gets resolved.
+ * @param {!HTMLAnchorElement} a
+ * @param {string} url
+ * @return {!Location}
+ * @restricted
+ */
+export function parseUrlWithA(a, url) {
   a.href = url;
+
   // IE11 doesn't provide full URL components when parsing relative URLs.
-  // Assigning to itself again does the trick.
-  // TODO(lannka, #3449): Remove all the polyfills once we don't support IE11
-  // and it passes tests in all browsers.
+  // Assigning to itself again does the trick #3449.
   if (!a.protocol) {
     a.href = a.href;
   }
@@ -103,13 +130,7 @@ export function parseUrl(url, opt_nocache) {
   } else {
     info.origin = info.protocol + '//' + info.host;
   }
-  // Freeze during testing to avoid accidental mutation.
-  const frozen = (getMode().test && Object.freeze) ? Object.freeze(info) : info;
-
-  if (opt_nocache) {
-    return frozen;
-  }
-  return cache[url] = frozen;
+  return info;
 }
 
 /**
@@ -155,7 +176,7 @@ export function addParamToUrl(url, key, value, opt_addToFront) {
  * Appends query string fields and values to a url. The `params` objects'
  * `key`s and `value`s will be transformed into query string keys/values.
  * @param {string} url
- * @param {!Object<string, string|!Array<string>>} params
+ * @param {!JsonObject<string, string|!Array<string>>} params
  * @return {string}
  */
 export function addParamsToUrl(url, params) {
@@ -165,7 +186,7 @@ export function addParamsToUrl(url, params) {
 /**
  * Serializes the passed parameter map into a query string with both keys
  * and values encoded.
- * @param {!Object<string, string|!Array<string>>} params
+ * @param {!JsonObject<string, string|!Array<string>>} params
  * @return {string}
  */
 export function serializeQueryString(params) {
@@ -242,37 +263,16 @@ export function assertAbsoluteHttpOrHttpsUrl(urlString) {
 /**
  * Parses the query string of an URL. This method returns a simple key/value
  * map. If there are duplicate keys the latest value is returned.
+ *
+ * This function is implemented in a separate file to avoid a circular
+ * dependency.
+ *
  * @param {string} queryString
- * @return {!Object<string>}
+ * @return {!JsonObject}
  */
 export function parseQueryString(queryString) {
-  const params = Object.create(null);
-  if (!queryString) {
-    return params;
-  }
-  if (queryString.indexOf('?') == 0 || queryString.indexOf('#') == 0) {
-    queryString = queryString.substr(1);
-  }
-  const pairs = queryString.split('&');
-  for (let i = 0; i < pairs.length; i++) {
-    const pair = pairs[i];
-    const eqIndex = pair.indexOf('=');
-    let name;
-    let value;
-    if (eqIndex != -1) {
-      name = decodeURIComponent(pair.substring(0, eqIndex)).trim();
-      value = decodeURIComponent(pair.substring(eqIndex + 1)).trim();
-    } else {
-      name = decodeURIComponent(pair).trim();
-      value = '';
-    }
-    if (name) {
-      params[name] = value;
-    }
-  }
-  return params;
+  return parseQueryString_(queryString);
 }
-
 
 /**
  * Returns the URL without fragment. If URL doesn't contain fragment, the same
@@ -288,6 +288,19 @@ export function removeFragment(url) {
   return url.substring(0, index);
 }
 
+/**
+ * Returns the fragment from the URL. If the URL doesn't contain fragment,
+ * the empty string is returned.
+ * @param {string} url
+ * @return {string}
+ */
+export function getFragment(url) {
+  const index = url.indexOf('#');
+  if (index == -1) {
+    return '';
+  }
+  return url.substring(index);
+}
 
 /**
  * Returns whether the URL has the origin of a proxy.
@@ -311,6 +324,22 @@ export function isLocalhostOrigin(url) {
     url = parseUrl(url);
   }
   return urls.localhostRegex.test(url.origin);
+}
+
+/**
+ * Returns whether the URL has valid protocol.
+ * Deep link protocol is valid, but not javascript etc.
+ * @param {string|!Location} url
+ * @return {boolean}
+ */
+export function isProtocolValid(url) {
+  if (!url) {
+    return true;
+  }
+  if (typeof url == 'string') {
+    url = parseUrl(url);
+  }
+  return !INVALID_PROTOCOLS.includes(url.protocol);
 }
 
 /**
@@ -351,7 +380,7 @@ export function getSourceUrl(url) {
   // The /s/ is optional and signals a secure origin.
   const path = url.pathname.split('/');
   const prefix = path[1];
-  user().assert(prefix == 'c' || prefix == 'v',
+  user().assert(prefix == 'a' || prefix == 'c' || prefix == 'v',
       'Unknown path prefix in url %s', url.href);
   const domainOrHttpsSignal = path[2];
   const origin = domainOrHttpsSignal == 's'
@@ -405,27 +434,23 @@ export function resolveRelativeUrlFallback_(relativeUrlString, baseUrl) {
   const relativeUrl = parseUrl(relativeUrlString);
 
   // Absolute URL.
-  if (relativeUrlString.toLowerCase().indexOf(relativeUrl.protocol) == 0) {
+  if (startsWith(relativeUrlString.toLowerCase(), relativeUrl.protocol)) {
     return relativeUrl.href;
   }
 
   // Protocol-relative URL.
-  if (relativeUrlString.indexOf('//') == 0) {
+  if (startsWith(relativeUrlString, '//')) {
     return baseUrl.protocol + relativeUrlString;
   }
 
   // Absolute path.
-  if (relativeUrlString.indexOf('/') == 0) {
+  if (startsWith(relativeUrlString, '/')) {
     return baseUrl.origin + relativeUrlString;
   }
 
   // Relative path.
-  const basePath = baseUrl.pathname.split('/');
-  return baseUrl.origin +
-      (basePath.length > 1 ?
-          basePath.slice(0, basePath.length - 1).join('/') :
-          '') +
-      '/' + relativeUrlString;
+  return baseUrl.origin + baseUrl.pathname.replace(/\/[^/]*$/, '/')
+      + relativeUrlString;
 }
 
 

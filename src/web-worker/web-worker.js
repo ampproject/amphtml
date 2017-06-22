@@ -22,46 +22,45 @@
  */
 
 import '../../third_party/babel/custom-babel-helpers';
+import './web-worker-polyfills';
 import {BindEvaluator} from '../../extensions/amp-bind/0.1/bind-evaluator';
 import {FromWorkerMessageDef, ToWorkerMessageDef} from './web-worker-defines';
+import {initLogConstructor} from '../log';
 import {installWorkerErrorReporting} from '../worker-error-reporting';
 
+initLogConstructor();
 installWorkerErrorReporting('ww');
 
-/** @private {BindEvaluator} */
-let evaluator_;
+/**
+ * Element `i` contains the evaluator for scope `i`.
+ * @private {!Array<!BindEvaluator>}
+ */
+const evaluators_ = [];
 
 self.addEventListener('message', function(event) {
-  const {method, args, id} = /** @type {ToWorkerMessageDef} */ (event.data);
+  const {method, args, id, scope} =
+      /** @type {ToWorkerMessageDef} */ (event.data);
 
   let returnValue;
 
+  if (!evaluators_[scope]) {
+    evaluators_[scope] = new BindEvaluator();
+  }
+  const evaluator = evaluators_[scope];
+
   switch (method) {
     case 'bind.addBindings':
-      evaluator_ = evaluator_ || new BindEvaluator();
-      returnValue = evaluator_.addBindings.apply(evaluator_, args);
+      returnValue = evaluator.addBindings.apply(evaluator, args);
       break;
-    case 'bind.removeBindings':
-      if (evaluator_) {
-        const removeBindings = evaluator_.removeBindingsWithExpressionStrings;
-        returnValue = removeBindings.apply(evaluator_, args);
-      } else {
-        throw new Error(`${method}: BindEvaluator is not initialized.`);
-      }
+    case 'bind.removeBindingsWithExpressionStrings':
+      const removeBindings = evaluator.removeBindingsWithExpressionStrings;
+      returnValue = removeBindings.apply(evaluator, args);
       break;
     case 'bind.evaluateBindings':
-      if (evaluator_) {
-        returnValue = evaluator_.evaluateBindings.apply(evaluator_, args);
-      } else {
-        throw new Error(`${method}: BindEvaluator is not initialized.`);
-      }
+      returnValue = evaluator.evaluateBindings.apply(evaluator, args);
       break;
     case 'bind.evaluateExpression':
-      if (evaluator_) {
-        returnValue = evaluator_.evaluateExpression.apply(evaluator_, args);
-      } else {
-        throw new Error(`${method}: BindEvaluator is not initialized.`);
-      }
+      returnValue = evaluator.evaluateExpression.apply(evaluator, args);
       break;
     default:
       throw new Error(`Unrecognized method: ${method}`);

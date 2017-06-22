@@ -16,15 +16,13 @@ limitations under the License.
 
 # <a name="amp-list"></a> `amp-list`
 
+[TOC]
+
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
     <td>Fetches content dynamically from a CORS JSON endpoint and renders it
 using a supplied template.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -42,44 +40,82 @@ using a supplied template.</td>
 
 ## Usage
 
-The `amp-list` defines data source using the following attributes:
+The `amp-list` component fetches dynamic content from a CORS JSON endpoint. The response from the endpoint contains an array, which is rendered in the specified template.  
 
-- `src` defines a CORS URL. The URL's protocol must be HTTPS.
-- `credentials` defines a `credentials` option as specified by the
-[Fetch API](https://fetch.spec.whatwg.org/). To send credentials, pass the
-value of "include". If this is set, the response must follow the [AMP CORS security guidelines](../../spec/amp-cors-requests.md).
+{% call callout('Important', type='caution') %}
+Your endpoint must implement the requirements specified in the [CORS Requests in AMP](../../spec/amp-cors-requests.md) spec.
+{% endcall %}
 
-The response is expected to contain the array that will be rendered. The path to the array
-is specified using the optional `items` attribute. This attribute contains the dot-notated path
-to the array within the response object. The default value is "items". To indicate that the
-response itself is an array, the "." value can be used. The array can be nested within the
-response and accessed using, e.g. `items="field1.field2"` expression.
+You can specify a template in one of two ways:
 
-Thus, when `items="items"` is specified (the default) the response must be a JSON object that
-contains an array property "items":
-```text
+- a `template` attribute that references an ID of an existing `template` element.
+- a `template` element nested directly inside the `amp-list` element.
+  
+For more details on templates, see [AMP HTML Templates](../../spec/amp-html-templates.md).
+
+In the following example, we retrieve JSON data that contains image URLs and titles, and render the content in a nested [amp-mustache template](https://www.ampproject.org/docs/reference/components/amp-mustache).
+
+```html
+<amp-list src="https://data.com/images.json"
+    width="300" height="200" layout="responsive">
+  <template type="amp-mustache">
+    <div>
+      <amp-img src="{{imageUrl}}" width="50" height="50"></amp-img>
+      {{title}}
+    </div>
+  </template>
+</amp-list>
+```
+
+JSON data:
+
+```json
 {
-  "items": [...]
+  "items": [
+    {
+      "title": "Image 01",
+      "imageUrl": "https://example.com/images/flowers.jpg"
+    },
+
+    {
+      "title": "Image 02",
+      "imageUrl": "https://example.com/images/sunset.jpg"
+    }
+  ]
 }
 ```
 
-The template can be specified using either of the following two ways:
+## Behavior
 
-- `template` attribute that references an ID of an existing `template` element.
-- `template` element nested directly inside of this `amp-list` element.
+The request is always made from the client, even if the document was served from the AMP Cache. Loading is triggered using normal AMP rules depending on how far the element is from
+the current viewport.
 
-For more details on templates, see [AMP HTML Templates](../../spec/amp-html-templates.md).
+If `amp-list` needs more space after loading, it requests the AMP runtime to update its
+height using the normal AMP flow. If the AMP runtime cannot satisfy the request for the new
+height, it will display the `overflow` element when available. Notice however, that the typical
+placement of `amp-list` elements at the bottom of the document almost always guarantees
+that the AMP runtime can resize them.
 
-Optionally, `amp-list` element can contain an element with `overflow` attribute. This
-element will be shown if AMP Runtime cannot resize the `amp-list` element as requested.
+By default, `amp-list` adds a `list` ARIA role to the list element and a `listitem` role to item
+elements rendered via the template.
 
-Example: Using overflow
+### Specifying an overflow
+
+Optionally, the `amp-list` element can contain an element with an `overflow` attribute. This element is shown if the AMP Runtime cannot resize the `amp-list` element as requested.
+
+```css
+.list-overflow[overflow] {
+  position: absolute;
+  bottom: 0;
+}
+```
+
 ```html
 <amp-list src="https://data.com/articles.json?ref=CANONICAL_URL"
     width=300 height=200 layout=responsive>
   <template type="amp-mustache">
     <div>
-      <amp-img src="{{imageUrl}}" width=50 height=50></amp-img>
+      <amp-img src="{{imageUrl}}" width="50" height="50"></amp-img>
       {{title}}
     </div>
   </template>
@@ -89,17 +125,50 @@ Example: Using overflow
 </amp-list>
 ```
 
-```css
-.list-overflow[overflow] {
-  position: absolute;
-  bottom: 0;
+## Attributes
+
+**src** (required)
+
+The URL of the remote endpoint that returns the JSON that will be rendered
+within this `amp-list`. This must be a CORS HTTP service. The URL's protocol must be HTTPS.
+
+{% call callout('Important', type='caution') %}
+Your endpoint must implement the requirements specified in the [CORS Requests in AMP](../../spec/amp-cors-requests.md) spec.
+{% endcall %}
+
+**credentials** (optional)
+
+Defines a `credentials` option as specified by the [Fetch API](https://fetch.spec.whatwg.org/).
+
+* Supported values: `omit`, `include`
+* Default: `omit`
+
+To send credentials, pass the value of `include`. If this value is set, the response must follow the [AMP CORS security guidelines](../../spec/amp-cors-requests.md).
+
+**items** (optional)
+
+Defines the expression to locate the array to be rendered within the response. This is a dot-notated expression that navigates via fields of the JSON response.
+
+- The default value is `"items"`. The expected response: `{items: [...]}`.
+- If the response itself is the desired array, use the value of `"."`. The expected response is: `[...]`.
+- Nested navigation is permitted (e.g., `"field1.field2"`). The expected response is: `{field1: {field2: [...]}}`.
+
+
+When `items="items"` is specified (which, is the default) the response must be a JSON object that contains an array property called `"items"`:
+```text
+{
+  "items": [...]
 }
 ```
+
+**common attributes**
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Substitutions
 
 The `amp-list` allows all standard URL variable substitutions.
-See [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
+See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
 
 For example:
 ```html
@@ -107,49 +176,7 @@ For example:
 ```
 may make a request to something like `https://foo.com/list.json?0.8390278471201` where the RANDOM value is randomly generated upon each impression.
 
-## Behavior
-
-The request is always made from the client, even if the document was served from the AMP
-cache. Loading is triggered using normal AMP rules depending on how far the element is from
-the current viewport.
-
-If `amp-list` needs more space after loading it requests the AMP runtime to update its
-height using the normal AMP flow. If AMP Runtime cannot satisfy the request for new
-height, it will display `overflow` element when available. Notice however, the typical
-placement of `amp-list` elements at the bottom of the document almost always guarantees
-that AMP Runtime can resize it.
-
-By default, `amp-list` adds `list` ARIA role to the list element and `listitem` role to item
-elements rendered via the template.
-
-## Attributes
-
-**src** (required)
-
-The URL location of the remote endpoint that will return the JSON that will be rendered
-within this `amp-list`. This must be a CORS HTTP service.
-
-**credentials** (optional)
-
-Defines a `credentials` option as specified by the [Fetch API](https://fetch.spec.whatwg.org/).
-To send credentials, pass the value of "include". If this is set, the response must follow
-the [AMP CORS security guidelines](../../spec/amp-cors-requests.md).
-
-The support values are "omit" and "include". Default is "omit".
-
-**items**
-
-Defines the expression to locate the array to be rendered within the response. It's a dot-notated
-expression that navigates via fields of the JSON response. Notice:
-
-- The default value is "items". The expected response: `{items: [...]}`.
-- If the response itself is the desired array, use the value of ".". The expected response is: `[...]`.
-- Nest navigation is permitted (e.g., "field1.field2"). The expected response is: `{field1: {field2: [...]}}`.
-
-**common attributes**
-
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
 
-See [amp-list rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/0.1/validator-amp-list.protoascii) in the AMP validator specification.
+See [amp-list rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/validator-amp-list.protoascii) in the AMP validator specification.

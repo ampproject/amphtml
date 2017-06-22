@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import {KeyCodes} from '../../../../src/utils/key-codes';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 import * as sinon from 'sinon';
 import '../amp-social-share';
-import {platformFor} from '../../../../src/platform';
+import {platformFor} from '../../../../src/services';
 
 adopt(window);
 
@@ -88,20 +89,20 @@ describe('amp-social-share', () => {
     return createIframePromise().then(iframe => {
       const share = iframe.doc.createElement('amp-social-share');
       share.setAttribute('type', 'unknown-provider');
-      expect(() => {
-        share.tryUpgrade_();
-        share.build(true);
-      }).to.throw('data-share-endpoint attribute is required');
+      iframe.doc.body.appendChild(share);
+      return expect(share.whenBuilt())
+          .to.be.eventually.rejectedWith(
+          /data-share-endpoint attribute is required/
+          );
     });
   });
 
   it('errors if type is missing', () => {
     return createIframePromise().then(iframe => {
       const share = iframe.doc.createElement('amp-social-share');
-      expect(() => {
-        share.tryUpgrade_();
-        share.build(true);
-      }).to.throw('type attribute is required');
+      iframe.doc.body.appendChild(share);
+      return expect(share.whenBuilt())
+          .to.be.eventually.rejectedWith(/type attribute is required/);
     });
   });
 
@@ -109,10 +110,11 @@ describe('amp-social-share', () => {
     return createIframePromise().then(iframe => {
       const share = iframe.doc.createElement('amp-social-share');
       share.setAttribute('type', 'hello world');
-      expect(() => {
-        share.tryUpgrade_();
-        share.build(true);
-      }).to.throw('Space characters are not allowed in type attribute value');
+      iframe.doc.body.appendChild(share);
+      return expect(share.whenBuilt())
+          .to.be.eventually.rejectedWith(
+          /Space characters are not allowed in type attribute value/
+          );
     });
   });
 
@@ -150,8 +152,9 @@ describe('amp-social-share', () => {
           'https://twitter.com/intent/tweet');
 
       expect(el.implementation_.href_).to.not.contain('TITLE');
-      expect(el.addEventListener).to.be.calledOnce;
+      expect(el.addEventListener).to.be.calledTwice;
       expect(el.addEventListener).to.be.calledWith('click');
+      expect(el.addEventListener).to.be.calledWith('keydown');
     });
   });
 
@@ -180,7 +183,7 @@ describe('amp-social-share', () => {
       el.implementation_.handleClick_();
       expect(el.implementation_.win.open).to.be.calledOnce;
       expect(el.implementation_.win.open).to.be.calledWith(
-        'https://twitter.com/intent/tweet?text=doc%20title&' +
+          'https://twitter.com/intent/tweet?text=doc%20title&' +
           'url=https%3A%2F%2Fcanonicalexample.com%2F',
           '_blank', 'resizable,scrollbars,width=640,height=480'
       );
@@ -200,4 +203,46 @@ describe('amp-social-share', () => {
       );
     });
   });
+
+  it('opens sms: window in _top on iOS Safari', () => {
+    isIos = true;
+    isSafari = true;
+    return getShare('sms').then(el => {
+      el.implementation_.handleClick_();
+      expect(el.implementation_.win.open).to.be.calledOnce;
+      expect(el.implementation_.win.open).to.be.calledWith(
+          'sms:?&body=doc%20title%20-%20https%3A%2F%2Fcanonicalexample.com%2F',
+          '_top', 'resizable,scrollbars,width=640,height=480'
+      );
+    });
+  });
+
+  it('should handle key presses', () => {
+    return getShare('twitter').then(el => {
+      const nonActivationEvent = {
+        preventDefault: () => {},
+        keyCode: KeyCodes.RIGHT_ARROW,
+      };
+      const activationEvent = {
+        preventDefault: () => {},
+        keyCode: KeyCodes.SPACE,
+      };
+      el.implementation_.handleKeyPress_(nonActivationEvent);
+      expect(el.implementation_.win.open).to.not.have.been.called;
+      el.implementation_.handleKeyPress_(activationEvent);
+      expect(el.implementation_.win.open).to.be.calledOnce;
+      expect(el.implementation_.win.open).to.be.calledWith(
+          'https://twitter.com/intent/tweet?text=doc%20title&' +
+          'url=https%3A%2F%2Fcanonicalexample.com%2F',
+          '_blank', 'resizable,scrollbars,width=640,height=480'
+      );
+    });
+  });
+
+  it('has tabindex set to 0 by default', () => {
+    return getShare('twitter').then(el => {
+      expect(el.getAttribute('tabindex')).to.equal('0');
+    });
+  });
+
 });

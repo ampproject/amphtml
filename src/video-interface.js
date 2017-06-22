@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from './action-trust'; /* eslint no-unused-vars: 0 */
 
 /**
  * VideoInterface defines a common video API which any AMP component that plays
@@ -104,9 +105,10 @@ export class VideoInterface {
    *
    * @param {string} unusedMethod
    * @param {function(!./service/action-impl.ActionInvocation)} unusedHandler
+   * @param {ActionTrust} minTrust
    * @public
    */
-  registerAction(unusedMethod, unusedHandler) {}
+  registerAction(unusedMethod, unusedHandler, minTrust) {}
 }
 
 
@@ -208,4 +210,13 @@ export const VideoEvents = {
    * @property {boolean} visible Whether the video player is visible or not.
    */
   VISIBILITY: 'amp:video:visibility',
+
+  /**
+   * reload
+   *
+   * Fired when the video's src changes.
+   *
+   * @event reload
+   */
+  RELOAD: 'reloaded',
 };

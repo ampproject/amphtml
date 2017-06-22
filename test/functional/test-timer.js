@@ -88,10 +88,10 @@ describes.fakeWin('Timer', {}, env => {
     }), 111).returns(1).once();
 
     let c = 0;
-    return timer.promise(111, 'A').then(result => {
+    return timer.promise(111).then(result => {
       c++;
       expect(c).to.equal(1);
-      expect(result).to.equal('A');
+      expect(result).to.be.undefined;
     });
   });
 
@@ -144,29 +144,27 @@ describes.fakeWin('Timer', {}, env => {
     });
   });
 
-  it('poll - resolves only when condition is true', done => {
+  it('poll - resolves only when condition is true', () => {
     const realTimer = new Timer(env.win);
     let predicate = false;
-    realTimer.poll(10, () => {
-      return predicate;
-    }).then(() => {
-      expect(predicate).to.be.true;
-      done();
-    });
     setTimeout(() => {
       predicate = true;
     }, 15);
+    return realTimer.poll(10, () => {
+      return predicate;
+    }).then(() => {
+      expect(predicate).to.be.true;
+    });
   });
 
-  it('poll - clears out interval when complete', done => {
+  it('poll - clears out interval when complete', () => {
     const realTimer = new Timer(env.win);
     const clearIntervalStub = sandbox.stub();
     env.win.clearInterval = clearIntervalStub;
-    realTimer.poll(111, () => {
+    return realTimer.poll(111, () => {
       return true;
     }).then(() => {
       expect(clearIntervalStub).to.have.been.calledOnce;
-      done();
     });
   });
 

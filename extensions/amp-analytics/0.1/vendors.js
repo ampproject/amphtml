@@ -15,9 +15,9 @@
  */
 
 /**
- * @const {!JSONType}
+ * @const {!JsonObject}
  */
-export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
+export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
 
   // Default parent configuration applied to all amp-analytics tags.
   'default': {
@@ -78,7 +78,6 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'viewportWidth': 'VIEWPORT_WIDTH',
     },
   },
-
   'acquialift': {
     'vars': {
       'decisionApiUrl': 'us-east-1-decisionapi.lift.acquia.com',
@@ -154,6 +153,22 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
         'p=${label}&' +
         's2=${level2Click}&' +
         'type=click&click=${type}${suffix}',
+    },
+  },
+
+  'baiduanalytics': {
+    'requests': {
+      'host': 'https://hm.baidu.com',
+      'base': '${host}/hm.gif?' +
+          'si=${token}&nv=0&st=4&v=pixel-1.0&rnd=${timestamp}',
+      'pageview': '${base}&et=0',
+      'event': '${base}&ep=${category}*${action}*' +
+          '${label}*${value}&et=4&api=8_0',
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
     },
   },
 
@@ -394,6 +409,67 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     },
   },
 
+  'dynatrace': {
+    'requests': {
+      'endpoint': '${protocol}://${tenant}.${environment}:${port}/ampbf',
+      'pageview': '${endpoint}?type=js&' +
+        'flavor=amp&' +
+        'v=1&' +
+        'a=1%7C1%7C_load_%7C_load_%7C-%7C${navTiming(navigationStart)}%7C' +
+		'${navTiming(domContentLoadedEventEnd)}%7C0%2C2%7C2%7C_onload_%7C' +
+		'_load_%7C-%7C${navTiming(domContentLoadedEventStart)}%7C' +
+		'${navTiming(domContentLoadedEventEnd)}%7C0&' +
+        'fId=${pageViewId}&' +
+        'vID=${clientId(rxVisitor)}&' +
+        'referer=${sourceUrl}&' +
+        'title=${title}&' +
+        'sw=${screenWidth}&' +
+        'sh=${screenHeight}&' +
+        'w=${viewportWidth}&' +
+        'h=${viewportHeight}&' +
+        'nt=a${navType}' +
+        'b${navTiming(navigationStart)}' +
+        'c${navTiming(navigationStart,redirectStart)}' +
+        'd${navTiming(navigationStart,redirectEnd)}' +
+        'e${navTiming(navigationStart,fetchStart)}' +
+        'f${navTiming(navigationStart,domainLookupStart)}' +
+        'g${navTiming(navigationStart,domainLookupEnd)}' +
+        'h${navTiming(navigationStart,connectStart)}' +
+        'i${navTiming(navigationStart,connectEnd)}' +
+        'j${navTiming(navigationStart,secureConnectionStart)}' +
+        'k${navTiming(navigationStart,requestStart)}' +
+        'l${navTiming(navigationStart,responseStart)}' +
+        'm${navTiming(navigationStart,responseEnd)}' +
+        'n${navTiming(navigationStart,domLoading)}' +
+        'o${navTiming(navigationStart,domInteractive)}' +
+        'p${navTiming(navigationStart,domContentLoadedEventStart)}' +
+        'q${navTiming(navigationStart,domContentLoadedEventEnd)}' +
+        'r${navTiming(navigationStart,domComplete)}' +
+        's${navTiming(navigationStart,loadEventStart)}' +
+        't${navTiming(navigationStart,loadEventEnd)}&' +
+        'app=${app}&' +
+        'time=${timestamp}',
+    },
+    'triggers': {
+      'trackPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+    'vars': {
+      'app': 'ampapp',
+      'protocol': 'https',
+      'tenant': '',
+      'environment': 'live.dynatrace.com',
+      'port': '443',
+    },
+  },
+
   'euleriananalytics': {
     'vars': {
       'analyticsHost': '',
@@ -419,6 +495,89 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'beacon': false,
       'xhrpost': false,
       'image': true,
+    },
+  },
+
+  'facebookpixel': {
+    'vars': {
+      'pixelId': 'PIXEL-ID',
+    },
+    'requests': {
+      'host': 'https://www.facebook.com',
+      'base': '${host}/tr?noscript=1',
+      'pageview': '${base}&ev=PageView&' +
+          'id=${pixelId}',
+      'event': '${base}&ev=${eventName}&' +
+          'id=${pixelId}' +
+          '&cd[content_name]=${content_name}',
+      'eventViewContent': '${base}&ev=ViewContent&' +
+          'id=${pixelId}' +
+          '&cd[value]=${value}' +
+          '&cd[currency]=${currency}' +
+          '&cd[content_name]=${content_name}' +
+          '&cd[content_type]=${content_type}' +
+          '&cd[content_ids]=${content_ids}',
+      'eventSearch': '${base}&ev=Search&' +
+          'id=${pixelId}' +
+          '&cd[value]=${value}' +
+          '&cd[currency]=${currency}' +
+          '&cd[content_category]=${content_category}' +
+          '&cd[content_ids]=${content_ids}' +
+          '&cd[search_string]=${search_string}',
+      'eventAddToCart': '${base}&ev=AddToCart&' +
+          'id=${pixelId}' +
+          '&cd[value]=${value}' +
+          '&cd[currency]=${currency}' +
+          '&cd[content_name]=${content_name}' +
+          '&cd[content_type]=${content_type}' +
+          '&cd[content_ids]=${content_ids}',
+      'eventAddToWishlist': '${base}&ev=AddToWishlist&' +
+          'id=${pixelId}' +
+          '&cd[value]=${value}' +
+          '&cd[currency]=${currency}' +
+          '&cd[content_name]=${content_name}' +
+          '&cd[content_category]=${content_category}' +
+          '&cd[content_ids]=${content_ids}',
+      'eventInitiateCheckout': '${base}&ev=InitiateCheckout&' +
+          'id=${pixelId}' +
+          '&cd[value]=${value}' +
+          '&cd[currency]=${currency}' +
+          '&cd[content_name]=${content_name}' +
+          '&cd[content_category]=${content_category}' +
+          '&cd[num_items]=${num_items}' +
+          '&cd[content_ids]=${content_ids}',
+      'eventAddPaymentInfo': '${base}&ev=AddPaymentInfo&' +
+          'id=${pixelId}' +
+          '&cd[value]=${value}' +
+          '&cd[currency]=${currency}' +
+          '&cd[content_category]=${content_category}' +
+          '&cd[content_ids]=${content_ids}',
+      'eventPurchase': '${base}&ev=Purchase&' +
+          'id=${pixelId}' +
+          '&cd[value]=${value}' +
+          '&cd[currency]=${currency}' +
+          '&cd[content_name]=${content_name}' +
+          '&cd[content_type]=${content_type}' +
+          '&cd[content_ids]=${content_ids}' +
+          '&cd[num_items]=${num_items}',
+      'eventLead': '${base}&ev=Lead&' +
+          'id=${pixelId}' +
+          '&cd[value]=${value}' +
+          '&cd[currency]=${currency}' +
+          '&cd[content_name]=${content_name}' +
+          '&cd[content_category]=${content_category}',
+      'eventCompleteRegistration': '${base}&ev=CompleteRegistration&' +
+          'id=${pixelId}' +
+          '&cd[value]=${value}' +
+          '&cd[currency]=${currency}' +
+          '&cd[content_name]=${content_name}' +
+          '&cd[status]=${status}',
+    },
+    'triggers': {
+      'trackPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
     },
   },
 
@@ -476,19 +635,22 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     },
   },
 
+  // Important: please keep this in sync with the following config
+  // 'googleanalytics-alpha'.
   'googleanalytics': {
     'vars': {
       'eventValue': '0',
       'documentLocation': 'SOURCE_URL',
-      'clientId': 'CLIENT_ID(AMP_ECID_GOOGLE)',
+      'clientId': 'CLIENT_ID(AMP_ECID_GOOGLE,,_ga)',
       'dataSource': 'AMP',
+      'anonymizeIP': 'aip',
     },
     'requests': {
       'host': 'https://www.google-analytics.com',
       'basePrefix': 'v=1&' +
           '_v=a1&' +
           'ds=${dataSource}&' +
-          'aip=true&' +
+          '${anonymizeIP}&' +
           '_s=${requestCount}&' +
           'dt=${title}&' +
           'sr=${screenWidth}x${screenHeight}&' +
@@ -523,7 +685,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
           'st=${socialTarget}' +
           '${baseSuffix}',
       'timing': '${host}/collect?${basePrefix}&' +
-          't=timing&' +
+          't=${timingRequestType}&' +
           'jid=&' +
           'plt=${pageLoadTime}&' +
           'dns=${domainLookupTime}&' +
@@ -542,6 +704,109 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
         'sampleSpec': {
           'sampleOn': '${clientId}',
           'threshold': 1,
+        },
+        'vars': {
+          'timingRequestType': 'timing',
+        },
+      },
+      'adwordsTiming': {
+        'on': 'visible',
+        'request': 'timing',
+        'enabled': '${queryParam(gclid)}',
+        'vars': {
+          'timingRequestType': 'adtiming',
+        },
+      },
+    },
+    'extraUrlParamsReplaceMap': {
+      'dimension': 'cd',
+      'metric': 'cm',
+    },
+    'optout': '_gaUserPrefs.ioo',
+  },
+
+  // USE WITH CAUTION (unless told by Google Analytics representatives)
+  // googleanalytics-alpha configuration is not planned to be supported
+  // long-term. Avoid use of this value for amp-analytics config attribute
+  // unless you plan to migrate before deprecation' #5761
+  'googleanalytics-alpha': {
+    'vars': {
+      'eventValue': '0',
+      'documentLocation': 'SOURCE_URL',
+      'clientId': 'CLIENT_ID(AMP_ECID_GOOGLE,,_ga)',
+      'dataSource': 'AMP',
+      'anonymizeIP': 'aip',
+    },
+    'requests': {
+      'host': 'https://www.google-analytics.com',
+      'basePrefix': 'v=1&' +
+      '_v=a1&' +
+      'ds=${dataSource}&' +
+      '${anonymizeIP}&' +
+      '_s=${requestCount}&' +
+      'dt=${title}&' +
+      'sr=${screenWidth}x${screenHeight}&' +
+      '_utmht=${timestamp}&' +
+      'cid=${clientId}&' +
+      'tid=${account}&' +
+      'dl=${documentLocation}&' +
+      'dr=${documentReferrer}&' +
+      'sd=${screenColorDepth}&' +
+      'ul=${browserLanguage}&' +
+      'de=${documentCharset}',
+      'baseSuffix': '&a=${pageViewId}&' +
+      'z=${random}',
+      'pageview': '${host}/r/collect?${basePrefix}&' +
+      't=pageview&' +
+      'jid=${random}&' +
+      '_r=1' +
+      '${baseSuffix}',
+      'event': '${host}/collect?${basePrefix}&' +
+      't=event&' +
+      'jid=&' +
+      'ec=${eventCategory}&' +
+      'ea=${eventAction}&' +
+      'el=${eventLabel}&' +
+      'ev=${eventValue}' +
+      '${baseSuffix}',
+      'social': '${host}/collect?${basePrefix}&' +
+      't=social&' +
+      'jid=&' +
+      'sa=${socialAction}&' +
+      'sn=${socialNetwork}&' +
+      'st=${socialTarget}' +
+      '${baseSuffix}',
+      'timing': '${host}/collect?${basePrefix}&' +
+      't=${timingRequestType}&' +
+      'jid=&' +
+      'plt=${pageLoadTime}&' +
+      'dns=${domainLookupTime}&' +
+      'tcp=${tcpConnectTime}&' +
+      'rrt=${redirectTime}&' +
+      'srt=${serverResponseTime}&' +
+      'pdt=${pageDownloadTime}&' +
+      'clt=${contentLoadTime}&' +
+      'dit=${domInteractiveTime}' +
+      '${baseSuffix}',
+    },
+    'triggers': {
+      'performanceTiming': {
+        'on': 'visible',
+        'request': 'timing',
+        'sampleSpec': {
+          'sampleOn': '${clientId}',
+          'threshold': 1,
+        },
+        'vars': {
+          'timingRequestType': 'timing',
+        },
+      },
+      'adwordsTiming': {
+        'on': 'visible',
+        'request': 'timing',
+        'enabled': '${queryParam(gclid)}',
+        'vars': {
+          'timingRequestType': 'adtiming',
         },
       },
     },
@@ -723,6 +988,40 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     },
   },
 
+  'nielsen': {
+    'vars': {
+      'sessionId': 'CLIENT_ID(imrworldwide)',
+    },
+    'requests': {
+      'session': 'https://uaid-linkage.imrworldwide.com/cgi-bin/gn?prd=session&c13=asid,P${apid}&sessionId=${sessionId},&pingtype=4&enc=false&c61=createtm,${timestamp}&rnd=${random}',
+      'cloudapi': 'https://cloudapi.imrworldwide.com/nmapi/v2/${apid}/${sessionId}/a?b=%7B%22devInfo%22%3A%7B%22devId%22%3A%22${sessionId}%22%2C%22apn%22%3A%22${apn}%22%2C%22apv%22%3A%22${apv}%22%2C%22apid%22%3A%22${apid}%22%7D%2C%22metadata%22%3A%7B%22static%22%3A%7B%22type%22%3A%22static%22%2C%22section%22%3A%22${section}%22%2C%22assetid%22%3A%22${pageViewId}%22%2C%22segA%22%3A%22${segA}%22%2C%22segB%22%3A%22${segB}%22%2C%22segC%22%3A%22${segC}%22%2C%22adModel%22%3A%220%22%2C%22dataSrc%22%3A%22cms%22%7D%2C%22content%22%3A%7B%7D%2C%22ad%22%3A%7B%7D%7D%2C%22event%22%3A%22playhead%22%2C%22position%22%3A%22${timestamp}%22%2C%22data%22%3A%7B%22hidden%22%3A%22${backgroundState}%22%2C%22blur%22%3A%22${backgroundState}%22%2C%22position%22%3A%22${timestamp}%22%7D%2C%22type%22%3A%22static%22%2C%22utc%22%3A%22${timestamp}%22%2C%22index%22%3A%22${requestCount}%22%7D',
+    },
+    'triggers': {
+      'visible': {
+        'on': 'visible',
+        'request': ['session', 'cloudapi'],
+      },
+      'hidden': {
+        'on': 'hidden',
+        'request': 'cloudapi',
+      },
+      'duration': {
+        'on': 'timer',
+        'timerSpec': {
+          'interval': 10,
+          'maxTimerLength': 86400,
+          'immediate': false,
+        },
+        'request': 'cloudapi',
+      },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
   'oewadirect': {
     'transport': {'beacon': false, 'xhrpost': false, 'image': true},
     'requests': {
@@ -767,9 +1066,6 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
         'date=${timestamp}&' +
         'ampid=${clientId(_parsely_visitor)}',
       'pageview': '${basePrefix}&action=pageview',
-      // TODO(#1612): client-side session support
-      // TODO(#1296): active engaged time support
-      // 'heartbeat': '${basePrefix}&action=heartbeat&inc=${engagedTime}'
     },
     'triggers': {
       'defaultPageview': {
@@ -958,11 +1254,18 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
   },
 
   'snowplow': {
+    'vars': {
+      'duid': 'CLIENT_ID(_sp_id)',
+    },
     'requests': {
-      'aaVersion': 'amp-0.1',
+      'aaVersion': 'amp-0.2',
       'basePrefix': 'https://${collectorHost}/i?url=${canonicalUrl}&page=${title}&' +
           'res=${screenWidth}x${screenHeight}&stm=${timestamp}&' +
-          'tz=${timezone}&aid=${appId}&p=web&tv=${aaVersion}',
+          'tz=${timezone}&aid=${appId}&p=web&tv=${aaVersion}&' +
+          'cd=${screenColorDepth}&cs=${documentCharset}&' +
+          'duid=${duid}&' +
+          'lang=${browserLanguage}&refr=${documentReferrer}&stm=${timezone}&' +
+          'vp=${viewportWidth}x${viewportHeight}',
       'pageView': '${basePrefix}&e=pv',
       'structEvent': '${basePrefix}&e=se&' +
           'se_ca=${structEventCategory}&se_ac=${structEventAction}&' +
@@ -1144,6 +1447,62 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'beacon': false,
       'xhrpost': false,
       'image': true,
+    },
+  },
+  'rakam': {
+    'vars': {
+      'deviceId': 'CLIENT_ID(rakam_device_id)',
+    },
+    'requests': {
+      'base': '?api.api_key=${writeKey}' +
+        '&prop._platform=amp' +
+        '&prop._device_id=${deviceId}' +
+        '&prop.locale=${browserLanguage}' +
+        '&prop.path=${canonicalPath}' +
+        '&prop.url=${canonicalUrl}' +
+        '&prop.color_depth=${screenColorDepth}' +
+        '&prop._referrer=${documentReferrer}' +
+        '&prop.title=${title}' +
+        '&prop.timezone=${timezone}' +
+        '&prop._time=${timestamp}' +
+        '&prop.resolution=${screenWidth} × ${screenHeight}',
+      'pageview': 'https://${apiEndpoint}/event/pixel${base}&collection=${pageViewName}',
+      'custom': 'https://${apiEndpoint}/event/pixel${base}&collection=${collection}',
+    },
+  },
+  'ibeatanalytics': {
+    'requests': {
+      'host': 'https://ibeat.indiatimes.com',
+      'base': 'https://ibeat.indiatimes.com/iBeat/pageTrendlogAmp.html',
+      'pageview': '${base}?' +
+                '&h=${h}' +
+                '&d=${h}' +
+                '&url=${url}' +
+                '&k=${key}' +
+                '&ts=${time}' +
+                '&ch=${channel}' +
+                '&sid=${uid}' +
+                '&at=${agentType}' +
+                '&ref=${documentReferrer}' +
+                '&aid=${aid}' +
+                '&loc=1' +
+                '&ct=1' +
+                '&cat=${cat}' +
+                '&scat=${scat}' +
+                '&ac=1' +
+                '&tg=${tags}' +
+                '&ctids=${catIds}' +
+                '&pts=${pagePublishTime}' +
+                '&auth=${author}' +
+                '&pos=${position}' +
+                '&iBeatField=${ibeatFields}' +
+                '&cid=${clientId(MSCSAuthDetails)}',
+    },
+    'triggers': {
+      'defaultPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
     },
   },
 });

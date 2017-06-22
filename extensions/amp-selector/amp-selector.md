@@ -22,10 +22,6 @@ limitations under the License.
     <td>Represents a control that presents a menu of options and lets the user choose from it.</td>
   </tr>
   <tr>
-    <td class="col-fourty" width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td class="col-fourty" width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js">&lt;/script></code></td>
   </tr>
@@ -83,15 +79,15 @@ Example:
 </amp-selector>
 ```
 
-##Attributes
+## Attributes
 
-###Attributes on `<amp-selector>`
+### Attributes on `<amp-selector>`
 
 **disabled, form, multiple, name**
 
 The attributes above behave the same way as they do on a standard HTML [`<select>`](https://developer.mozilla.org/en/docs/Web/HTML/Element/select) element.
 
-###Attributes on `<amp-selector>` options
+### Attributes on `<amp-selector>` options
 
 **option**
 
@@ -103,4 +99,4 @@ The attributes above behave the same way as they do on a standard HTML [`<option
 
 ## Validation
 
-See [amp-selector rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-selector/0.1/validator-amp-selector.protoascii) in the AMP validator specification.
+See [amp-selector rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-selector/validator-amp-selector.protoascii) in the AMP validator specification.

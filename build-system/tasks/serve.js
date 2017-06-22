@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 var argv = require('minimist')(process.argv.slice(2));
 var gulp = require('gulp-help')(require('gulp'));
 var util = require('gulp-util');
-var webserver = require('gulp-webserver');
-var app = require('../server').app;
-var morgan = require('morgan');
+var nodemon = require('nodemon');
+
 var host = argv.host || 'localhost';
 var port = argv.port || process.env.PORT || 8000;
 var useHttps = argv.https != undefined;
@@ -28,19 +28,34 @@ var useHttps = argv.https != undefined;
  * Starts a simple http server at the repository root
  */
 function serve() {
-  var server = gulp.src(process.cwd())
-      .pipe(webserver({
-        port,
-        host,
-        directoryListing: true,
-        https: useHttps,
-        middleware: [morgan('dev'), app],
-      }));
+  // Get the serve mode
+  if (argv.compiled) {
+    process.env.SERVE_MODE = 'compiled';
+    util.log(util.colors.green('Serving minified js'));
+  } else if (argv.cdn) {
+    process.env.SERVE_MODE = 'cdn';
+    util.log(util.colors.green('Serving current prod js'));
+  } else {
+    process.env.SERVE_MODE = 'default';
+    util.log(util.colors.green('Serving unminified js'));
+  }
 
+  nodemon({
+    script: require.resolve('../server.js'),
+    watch: [require.resolve('../app.js'),
+        require.resolve('../server.js')],
+    env: {'NODE_ENV': 'development',
+      'SERVE_PORT': port,
+      'SERVE_HOST': host,
+      'SERVE_USEHTTPS': useHttps},
+  })
+  .once('exit', function () {
+    util.log(util.colors.green('Shutting down server'));
+    process.exit();
+  });
   util.log(util.colors.yellow('Run `gulp build` then go to '
-      + getHost() + '/examples/article.amp.max.html'
+      + getHost() + '/examples/article.amp.html'
   ));
-  return server;
 }
 
 gulp.task(
@@ -59,3 +74,4 @@ gulp.task(
 function getHost() {
   return (useHttps ? 'https' : 'http') + '://' + host + ':' + port;
 }
+

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 
 var $$ = require('gulp-load-plugins')();
@@ -45,6 +46,9 @@ cssnano = cssnano({
   mergeIdents: true,
   reduceIdents: false,
   zindex: false,
+  svgo: {
+    encode: true,
+  }
 });
 
 

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {actionServiceForDoc} from './action';
-import {getServiceForDoc} from './service';
+import {ActionTrust} from './action-trust';
+import {actionServiceForDoc} from './services';
 import {dev, user} from './log';
 import {
   assertHttpsUrl,
@@ -28,11 +28,7 @@ import {
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  */
 export function installGlobalSubmitListenerForDoc(ampdoc) {
-  return getServiceForDoc(ampdoc, 'submit', ampdoc => {
-    ampdoc.getRootNode().addEventListener(
-        'submit', onDocumentFormSubmit_, true);
-    return {};
-  });
+  ampdoc.getRootNode().addEventListener('submit', onDocumentFormSubmit_, true);
 }
 
 
@@ -133,6 +129,8 @@ export function onDocumentFormSubmit_(e) {
     // handling of the event in cases were we are delegating to action service
     // to deliver the submission event.
     e.stopImmediatePropagation();
-    actionServiceForDoc(form).execute(form, 'submit', /*args*/ null, form, e);
+
+    const actions = actionServiceForDoc(form);
+    actions.execute(form, 'submit', /*args*/ null, form, e, ActionTrust.HIGH);
   }
 }

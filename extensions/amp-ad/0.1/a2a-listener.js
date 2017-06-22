@@ -15,9 +15,11 @@
 
 import {closestByTag} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
+import {getData} from '../../../src/event-helper';
 import {user} from '../../../src/log';
-import {viewerForDoc} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/services';
 import {isProxyOrigin} from '../../../src/url';
+import {parseJson} from '../../../src/json';
 
 /**
  * Sets up a special document wide listener that relays requests
@@ -44,19 +46,20 @@ export function setupA2AListener(win) {
  * @visibleForTesting
  */
 export function handleMessageEvent(win, event) {
-  const data = event.data;
+  const data = getData(event);
   // Only handle messages starting with the magic string.
   if (typeof data != 'string' || data.indexOf('a2a;') != 0) {
     return;
   }
   const origin = event.origin;
-  const nav = JSON.parse(data.substr(/* 'a2a;'.length */ 4));
+  const nav = parseJson(data.substr(/* 'a2a;'.length */ 4));
+  const url = nav['url'];
   const source = event.source;
   const activeElement = win.document.activeElement;
   // Check that the active element is an iframe.
   user().assert(activeElement.tagName == 'IFRAME',
       'A2A request with invalid active element %s %s %s',
-      activeElement, nav.url, origin);
+      activeElement, url, origin);
   let found = false;
   let sourceParent = source;
   const activeWindow = activeElement.contentWindow;
@@ -70,12 +73,12 @@ export function handleMessageEvent(win, event) {
   // Check that the active iframe contains the iframe that sent us
   // the message.
   user().assert(found,
-      'A2A request from invalid source win %s %s', nav.url, origin);
+      'A2A request from invalid source win %s %s', url, origin);
   // Check that the iframe is contained in an ad.
   user().assert(closestByTag(activeElement, 'amp-ad'),
-      'A2A request from non-ad frame %s %s', nav.url, origin);
+      'A2A request from non-ad frame %s %s', url, origin);
   // We only allow AMP shaped URLs.
-  user().assert(isProxyOrigin(nav.url), 'Invalid ad A2A URL %s %s',
-      nav.url, origin);
-  viewerForDoc(win.document).navigateTo(nav.url, 'ad-' + origin);
+  user().assert(isProxyOrigin(url), 'Invalid ad A2A URL %s %s',
+      url, origin);
+  viewerForDoc(win.document).navigateTo(url, 'ad-' + origin);
 }

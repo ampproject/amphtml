@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {timerFor} from '../../../../src/timer';
+import {KeyCodes} from '../../../../src/utils/key-codes';
+import {timerFor} from '../../../../src/services';
 import {createIframePromise} from '../../../../testing/iframe';
 import '../amp-image-lightbox';
 import {
@@ -35,7 +36,6 @@ describe('amp-image-lightbox component', () => {
       el.setAttribute('layout', 'nodisplay');
       iframe.doc.body.appendChild(el);
       return timerFor(window).promise(16).then(() => {
-        el.implementation_.buildCallback();
         return el;
       });
     });
@@ -51,20 +51,48 @@ describe('amp-image-lightbox component', () => {
     sandbox.restore();
   });
 
-  it('should render correctly', () => {
+  it('should not render if not activated', () => {
     return getImageLightbox().then(lightbox => {
       const container = lightbox
-          .querySelector('.-amp-image-lightbox-container');
+          .querySelector('.i-amphtml-image-lightbox-container');
+      expect(container).to.equal(null);
+    });
+  });
+
+  it('should render correctly', () => {
+    return getImageLightbox().then(lightbox => {
+      const impl = lightbox.implementation_;
+      const noop = () => {};
+      impl.getViewport = () => {return {
+        onChanged: noop,
+        enterLightboxMode: noop,
+      };};
+      impl.getHistory_ = () => {
+        return {push: () => {
+          return Promise.resolve();
+        }};
+      };
+      impl.enter_ = noop;
+
+      const ampImage = document.createElement('amp-img');
+      ampImage.setAttribute('src', 'data:');
+      impl.activate({source: ampImage});
+
+      const container = lightbox
+          .querySelector('.i-amphtml-image-lightbox-container');
       expect(container).to.not.equal(null);
 
-      const caption = container.querySelector('.-amp-image-lightbox-caption');
+      const caption = container.querySelector(
+          '.i-amphtml-image-lightbox-caption');
       expect(caption).to.not.equal(null);
       expect(caption).to.have.class('amp-image-lightbox-caption');
 
-      const viewer = container.querySelector('.-amp-image-lightbox-viewer');
+      const viewer = container.querySelector(
+          '.i-amphtml-image-lightbox-viewer');
       expect(viewer).to.not.equal(null);
 
-      const image = viewer.querySelector('.-amp-image-lightbox-viewer-image');
+      const image = viewer.querySelector(
+          '.i-amphtml-image-lightbox-viewer-image');
       expect(image).to.not.equal(null);
 
       // Very important. Image must have transform-origin=50% 50%.
@@ -172,7 +200,7 @@ describe('amp-image-lightbox component', () => {
       ampImage.setAttribute('width', '100');
       ampImage.setAttribute('height', '100');
       impl.activate({source: ampImage});
-      impl.closeOnEscape_({keyCode: 27});
+      impl.closeOnEscape_({keyCode: KeyCodes.ESCAPE});
       expect(setupCloseSpy).to.be.calledOnce;
 
       // Regression test: ensure escape event listener is bound properly

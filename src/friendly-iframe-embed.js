@@ -20,12 +20,14 @@ import {Signals} from './utils/signals';
 import {dev, rethrowAsync} from './log';
 import {disposeServicesForEmbed, getTopWindow} from './service';
 import {escapeHtml} from './dom';
-import {extensionsFor} from './extensions';
+import {extensionsFor} from './services';
+import {getFixedContainer} from './full-overlay-frame-child-helper';
 import {isDocumentReady} from './document-ready';
 import {layoutRectLtwh} from './layout-rect';
 import {loadPromise} from './event-helper';
-import {resourcesForDoc} from './resources';
-import {setStyle, setStyles} from './style';
+import {px, resetStyles, setStyle, setStyles} from './style';
+import {resourcesForDoc} from './services';
+import {vsyncFor} from './services';
 
 
 /** @const {string} */
@@ -312,6 +314,9 @@ export class FriendlyIframeEmbed {
     /** @const {?AmpElement} */
     this.host = spec.host || null;
 
+    /** @const @private {time} */
+    this.startTime_ = Date.now();
+
     /**
      * Starts out as invisible. The interpretation of this flag is up to
      * the emded parent.
@@ -335,6 +340,21 @@ export class FriendlyIframeEmbed {
   destroy() {
     resourcesForDoc(this.iframe).removeForChildWindow(this.win);
     disposeServicesForEmbed(this.win);
+  }
+
+  /**
+   * @return {time}
+   */
+  getStartTime() {
+    return this.startTime_;
+  }
+
+  /**
+   * Returns the base URL for the embedded document.
+   * @return {string}
+   */
+  getUrl() {
+    return this.spec.url;
   }
 
   /** @return {!Signals} */
@@ -387,9 +407,18 @@ export class FriendlyIframeEmbed {
     }
 
     // Initial load signal signal.
+    let rect;
+    if (this.host) {
+      rect = this.host.getLayoutBox();
+    } else {
+      rect = layoutRectLtwh(
+          0, 0,
+          this.win./*OK*/innerWidth,
+          this.win./*OK*/innerHeight);
+    }
     Promise.all([
       this.whenReady(),
-      whenContentIniLoad(this.iframe, this.win),
+      whenContentIniLoad(this.iframe, this.win, rect),
     ]).then(() => {
       this.signals_.signal(CommonSignals.INI_LOAD);
     });
@@ -425,6 +454,144 @@ export class FriendlyIframeEmbed {
       this.visibilityObservable_.fire(this.visible_);
     }
   }
+
+  /**
+   * @return {!HTMLBodyElement}
+   * @visibleForTesting
+   */
+  getBodyElement() {
+    return /** @type {!HTMLBodyElement} */ (
+        (this.iframe.contentDocument || this.iframe.contentWindow.document)
+            .body);
+  }
+
+  /**
+   * @return {!./service/vsync-impl.Vsync}
+   * @visibleForTesting
+   */
+  getVsync() {
+    return vsyncFor(this.win);
+  }
+
+  /**
+   * @return {!./service/resources-impl.Resources}
+   * @visibleForTesting
+   */
+  getResources() {
+    return resourcesForDoc(this.iframe);
+  }
+
+  /**
+   * Runs a measure/mutate cycle ensuring that the iframe change is propagated
+   * to the resource manager.
+   * @param {{measure: (Function|undefined), mutate: (Function|undefined)}} task
+   * @param {!Object=} opt_state
+   * @return {!Promise}
+   * @private
+   */
+  runVsyncOnIframe_(task, opt_state) {
+    if (task.mutate && !task.measure) {
+      return this.getResources().mutateElement(this.iframe, () => {
+        task.mutate(opt_state);
+      });
+    }
+    return new Promise(resolve => {
+      this.getVsync().measure(() => {
+        task.measure(opt_state);
+
+        if (!task.mutate) {
+          return resolve();
+        }
+
+        this.runVsyncOnIframe_({mutate: task.mutate}, opt_state)
+            .then(resolve);
+      });
+    });
+  }
+
+  /**
+   * @return {!Promise}
+   */
+  enterFullOverlayMode() {
+    const iframeBody = this.getBodyElement();
+    const fixedContainer = this.getFixedContainer();
+
+    return this.runVsyncOnIframe_({
+      measure: state => {
+        const iframeRect = this.iframe./*OK*/getBoundingClientRect();
+
+        const winWidth = this.win./*OK*/innerWidth;
+        const winHeight = this.win./*OK*/innerHeight;
+
+        state.fixedContainerStyle = {
+          'position': 'absolute',
+          'top': px(iframeRect.top),
+          'right': px(winWidth - iframeRect.right),
+          'left': px(iframeRect.left),
+          'bottom': px(winHeight - iframeRect.bottom),
+          'width': px(iframeRect.width),
+          'height': px(iframeRect.height),
+        };
+      },
+      mutate: state => {
+        setStyle(iframeBody, 'background', 'transparent');
+
+        setStyles(this.iframe, {
+          'position': 'fixed',
+          'left': 0,
+          'right': 0,
+          'top': 0,
+          'bottom': 0,
+          'width': '100vw',
+          'height': '100vh',
+        });
+
+        setStyles(fixedContainer, state.fixedContainerStyle);
+      },
+    }, {});
+  }
+
+  /**
+   * @return {!Promise}
+   */
+  leaveFullOverlayMode() {
+    const iframeBody = this.getBodyElement();
+    const fixedContainer = this.getFixedContainer();
+
+    return this.runVsyncOnIframe_({
+      mutate: () => {
+        resetStyles(iframeBody, ['background']);
+
+        resetStyles(this.iframe, [
+          'position',
+          'left',
+          'right',
+          'top',
+          'bottom',
+          'width',
+          'height',
+        ]);
+
+        resetStyles(fixedContainer, [
+          'position',
+          'top',
+          'right',
+          'left',
+          'bottom',
+          'width',
+          'height',
+        ]);
+      },
+    });
+  }
+
+  /**
+   * @return {!Element}
+   * @visibleForTesting
+   */
+  getFixedContainer() {
+    return getFixedContainer(this.getBodyElement());
+  }
 }
 
 
@@ -433,17 +600,16 @@ export class FriendlyIframeEmbed {
  * have been loaded in the initially visible set.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} context
  * @param {!Window} hostWin
+ * @param {!./layout-rect.LayoutRectDef} rect
+ * @return {!Promise}
  */
-export function whenContentIniLoad(context, hostWin) {
-  const width = hostWin./*OK*/innerWidth;
-  const height = hostWin./*OK*/innerHeight;
-  const rect = layoutRectLtwh(0, 0, width, height);
+export function whenContentIniLoad(context, hostWin, rect) {
   return resourcesForDoc(context)
       .getResourcesInRect(hostWin, rect)
       .then(resources => {
         const promises = [];
         resources.forEach(r => {
-          if (EXCLUDE_INI_LOAD.indexOf(r.element.tagName) == -1) {
+          if (!EXCLUDE_INI_LOAD.includes(r.element.tagName)) {
             promises.push(r.loadedOnce());
           }
         });

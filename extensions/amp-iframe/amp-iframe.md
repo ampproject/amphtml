@@ -16,14 +16,12 @@ limitations under the License.
 
 # <a name="amp-iframe"></a> `amp-iframe`
 
+[TOC]
+
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
     <td>Displays an iframe.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -43,20 +41,34 @@ limitations under the License.
 
 `amp-iframe` has several important differences from vanilla iframes that are designed to make it more secure and avoid AMP files that are dominated by a single iframe:
 
-- `amp-iframe` may not appear close to the top of the document (except for iframes that use `placeholder` as described below). They must be either 600px away from the top or not within the first 75% of the viewport when scrolled to the top – whichever is smaller. NOTE: We are currently looking for feedback as to how well this restriction works in practice.
-- By default, an amp-iframe is sandboxed ([details](#sandbox)).
-- They must only request resources via HTTPS or from a data-URI or via the srcdoc attribute.
-- They must not be in the same origin as the container unless they do not allow `allow-same-origin` in the sandbox attribute. See the doc ["Iframe origin policy"](../../spec/amp-iframe-origin-policy.md) for further details on allowed origins for iframes.
+- An `amp-iframe` may not appear close to the top of the document (except for iframes that use `placeholder` as described [below](#iframe-with-placeholder)). The iframe must be either 600 px away from the top or not within the first 75% of the viewport when scrolled to the top, whichever is smaller. 
+- By default, an amp-iframe is sandboxed (see [details](#sandbox)).
+- An `amp-iframe` must only request resources via HTTPS, from a data-URI, or via the `srcdoc` attribute.
+- An `amp-iframe` must not be in the same origin as the container unless they do not allow `allow-same-origin` in the `sandbox` attribute. See the ["Iframe origin policy"](../../spec/amp-iframe-origin-policy.md) doc for further details on allowed origins for iframes.
 
-Example:
+*Example: Embedded a Google Map in an amp-iframe*
+
 ```html
-<amp-iframe width=300 height=300
+<amp-iframe width="200" height="100"
     sandbox="allow-scripts allow-same-origin"
     layout="responsive"
     frameborder="0"
-    src="https://foo.com/iframe">
+    src="https://www.google.com/maps/embed/v1/place?key=AIzaSyDG9YXIhKBhqclZizcSzJ0ROiE0qgVfwzI&q=iceland">
 </amp-iframe>
 ```
+
+Renders as: 
+
+<amp-iframe width="200" height="100"
+    sandbox="allow-scripts allow-same-origin"
+    layout="responsive"
+    frameborder="0"
+    src="https://www.google.com/maps/embed/v1/place?key=AIzaSyDG9YXIhKBhqclZizcSzJ0ROiE0qgVfwzI&q=iceland">
+</amp-iframe>
+
+{% call callout('Tip', type='success') %}
+To see more demos of the `amp-iframe`, visit [AMP By Example](https://ampbyexample.com/components/amp-iframe/).
+{% endcall %}
 
 ## Usage of amp-iframe for advertising
 
@@ -73,19 +85,19 @@ The reasons for this policy are that:
 
 ## Attributes
 
-**src**
+##### src
 
 The `src` attribute behaves mainly like on a standard iframe with one exception: the `#amp=1` fragment is added to the URL to allow
 source documents to know that they are embedded in the AMP context. This fragment is only added if the URL specified by `src` does
 not already have a fragment.
 
-**srcdoc, frameborder, allowfullscreen, allowtransparency, referrerpolicy**
+#####  srcdoc, frameborder, allowfullscreen, allowpaymentrequest, allowtransparency, referrerpolicy
 
-The attributes above should all behave like they do on standard iframes.
+These attributes should all behave like they do on standard iframes.
 
 If `frameborder` is not specified, by default, it will be set to `0`.
 
-<a id="sandbox"></a>**sandbox**
+##### sandbox
 
 Iframes created by `amp-iframe` always have the `sandbox` attribute defined on them. By default, the value is empty, which means that they are "maximum sandboxed". By setting `sandbox` values, one can opt the iframe into being less sandboxed. All values supported by browsers are allowed. For example, setting `sandbox="allow-scripts"` allows the iframe to run JavaScript, or `sandbox="allow-scripts allow-same-origin"` allows the iframe to run JavaScript, make non-CORS XHRs, and read/write cookies.
 
@@ -95,7 +107,7 @@ Note also, that the sandbox applies to all windows opened from a sandboxed ifram
 
 See the [docs on MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-sandbox) for further details on the sandbox attribute.
 
-**common attributes**
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
@@ -111,7 +123,8 @@ it's possible to resize an `amp-iframe` at runtime. To do so:
 
 Notice that `resizable` overrides the value of `scrolling` to `no`.
 
-Example: `amp-iframe` with `overflow` element
+*Example: `amp-iframe` with `overflow` element*
+
 ```html
 <amp-iframe width=300 height=300
     layout="responsive"
@@ -122,7 +135,7 @@ Example: `amp-iframe` with `overflow` element
 </amp-iframe>
 ```
 
-Example: iframe resize request
+*Example: iframe resize request*
 
 ```javascript
 window.parent.postMessage({
@@ -145,6 +158,11 @@ Here are some factors that affect how fast the resize will be executed:
 
 It is possible to have an `amp-iframe` appear at the top of a document when the `amp-iframe` has a `placeholder` element as shown in the example below.
 
+- The `amp-iframe` must contain an element with the `placeholder` attribute, (for instance an `amp-img` element) which would be rendered as a placeholder until the iframe is ready to be displayed.
+- Iframe readiness can be known by listening to `onload` of the iframe or an `embed-ready` `postMessage`, which would be sent by the iframe document, whichever comes first.
+
+*Example: Iframe with a placeholder*
+
 ```html
 <amp-iframe width=300 height=300
    layout="responsive"
@@ -153,10 +171,9 @@ It is possible to have an `amp-iframe` appear at the top of a document when the 
  <amp-img layout="fill" src="https://foo.com/foo.png" placeholder></amp-img>
 </amp-iframe>
 ```
-- The `amp-iframe` must contain an element with the `placeholder` attribute, (for instance an `amp-img` element) which would be rendered as a placeholder until the iframe is ready to be displayed.
-- Iframe readiness can be known by listening to `onload` of the iframe or an `embed-ready` postMessage which would be sent by the iframe document, whichever comes first.
 
-Example: Iframe embed-ready request
+*Example: Iframe embed-ready request*
+
 ```javascript
 window.parent.postMessage({
   sentinel: 'amp',
@@ -166,9 +183,10 @@ window.parent.postMessage({
 
 ## Iframe viewability
 
-Iframes can send a `send-intersections` message to their parents to start receiving IntersectionObserver style [change records](http://rawgit.com/slightlyoff/IntersectionObserver/master/index.html#intersectionobserverentry) of the iframe's intersection with the parent viewport.
+Iframes can send a `send-intersections` message to their parents to start receiving IntersectionObserver style [change records](https://wicg.github.io/IntersectionObserver/#intersectionobserverentry) of the iframe's intersection with the parent viewport.
 
-Example: iframe `send-intersections` request
+*Example: iframe `send-intersections` request*
+
 ```javascript
 window.parent.postMessage({
   sentinel: 'amp',
@@ -178,7 +196,8 @@ window.parent.postMessage({
 
 The iframe can listen to an `intersection` message from the parent window to receive the intersection data.
 
-Example: iframe `send-intersections` request
+*Example: iframe `send-intersections` request*
+
 ```javascript
 window.addEventListener('message', function(event) {
   const listener = function(event) {
@@ -192,6 +211,7 @@ window.addEventListener('message', function(event) {
     event.data.changes.forEach(function (change) {
       console.log(change);
     });
+  };
 });
 ```
 
@@ -205,15 +225,15 @@ AMP only allows a single iframe that is used for analytics and tracking purposes
 
 Iframes are identified as tracking/analytics iframes if they appear to serve no direct user purpose such as being invisible or small.
 
-## Validation
+## Guideline: Use existing AMP components over amp-iframe
 
-See [amp-iframe rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-iframe/0.1/validator-amp-iframe.protoascii) in the AMP validator specification.
-
-## Guideline: prefer [specific AMP components](https://github.com/ampproject/amphtml/tree/master/extensions) to `amp-iframe`
-
-`amp-iframe` should be considered a fallback if the required user experience is not possible by other means in AMP. This is because there are many benefits to using a component tailored for a specific use-case instead, such as
+The `amp-iframe` component should be considered a fallback if the required user experience is not possible by other means in AMP, that is, there's not already an existing [AMP component](https://www.ampproject.org/docs/reference/components) for the use case. This is because there are many benefits to using an AMP component tailored for a specific use-case such as:
 
 - Better resource management and performance
 - Custom components can provide built-in placeholder images in some cases. This means getting, say, the right video thumbnail before a video loads, and reduces the coding effort to add a placeholder manually.
 - Built-in resizing. This means that iframe content with unpredictable size can more often appear to the user as if it were native to the page, rather than in a scrollable frame
 - Other additional features  can be built in (for instance, auto-play for video players)
+
+## Validation
+
+See [amp-iframe rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-iframe/validator-amp-iframe.protoascii) in the AMP validator specification.

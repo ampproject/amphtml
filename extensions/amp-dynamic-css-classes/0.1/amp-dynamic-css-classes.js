@@ -15,8 +15,8 @@
  */
 
 import {parseUrl} from '../../../src/url';
-import {viewerForDoc} from '../../../src/viewer';
-import {vsyncFor} from '../../../src/vsync';
+import {viewerForDoc} from '../../../src/services';
+import {vsyncFor} from '../../../src/services';
 
 
 /**
@@ -164,8 +164,7 @@ export function installDynamicClassesForTesting(ampdoc) {
 // Register doc-service factory.
 AMP.registerServiceForDoc(
     'amp-dynamic-css-classes',
-    /* ctor */ undefined,
-    ampdoc => {
+    function(ampdoc) {
       addRuntimeClasses(ampdoc);
       return {};
     });

@@ -18,7 +18,7 @@ import {Signals} from '../utils/signals';
 import {dev} from '../log';
 import {
   getParentWindowFrameElement,
-  getService,
+  registerServiceBuilder,
 } from '../service';
 import {getShadowRootNode} from '../shadow-embed';
 import {isDocumentReady, whenDocumentReady} from '../document-ready';
@@ -321,9 +321,7 @@ export class AmpDocSingle extends AmpDoc {
         waitForBodyPromise(this.win.document).then(() => this.getBody());
 
     /** @private @const {!Promise} */
-    this.readyPromise_ = isDocumentReady(this.win.document) ?
-        Promise.resolve() :
-        whenDocumentReady(this.win.document);
+    this.readyPromise_ = whenDocumentReady(this.win.document);
   }
 
   /** @override */
@@ -476,10 +474,12 @@ export class AmpDocShadow extends AmpDoc {
  * initial configuration.
  * @param {!Window} win
  * @param {boolean} isSingleDoc
- * @return {!AmpDocService}
  */
 export function installDocService(win, isSingleDoc) {
-  return /** @type {!AmpDocService} */ (getService(win, 'ampdoc', () => {
-    return new AmpDocService(win, isSingleDoc);
-  }));
+  registerServiceBuilder(
+      win,
+      'ampdoc',
+      function() {
+        return new AmpDocService(win, isSingleDoc);
+      });
 };

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 /**
  * - type - Is assumed to be "forbidden" if not provided.
@@ -50,13 +51,17 @@ exports.rules = [
           'third_party/closure-library/sha384-generated.js',
       'extensions/amp-mustache/0.1/amp-mustache.js->' +
           'third_party/mustache/mustache.js',
+      'extensions/amp-timeago/0.1/amp-timeago.js->' +
+          'third_party/timeagojs/timeago.js',
       '3p/polyfills.js->third_party/babel/custom-babel-helpers.js',
       'src/sanitizer.js->third_party/caja/html-sanitizer.js',
       'extensions/amp-viz-vega/**->third_party/vega/vega.js',
       'extensions/amp-viz-vega/**->third_party/d3/d3.js',
       'src/dom.js->third_party/css-escape/css-escape.js',
       'src/shadow-embed.js->third_party/webcomponentsjs/ShadowCSS.js',
-    ]
+      'third_party/timeagojs/timeago.js->' +
+          'third_party/timeagojs/timeago-locales.js',
+    ],
   },
   // Rules for 3p
   {
@@ -71,8 +76,14 @@ exports.rules = [
       '3p/**->src/url.js',
       '3p/**->src/config.js',
       '3p/**->src/mode.js',
+      '3p/**->src/json.js',
+      '3p/**->src/3p-frame-messaging.js',
+      '3p/**->src/observable.js',
+      '3p/**->src/amp-events.js',
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
+      '3p/messaging.js->src/event-helper.js',
+      '3p/iframe-messaging-client.js->src/event-helper.js',
     ],
   },
   {
@@ -93,17 +104,17 @@ exports.rules = [
       'ads/**->src/types.js',
       'ads/**->src/string.js',
       'ads/**->src/style.js',
+      'ads/google/adsense-amp-auto-ads.js->src/experiments.js',
       // ads/google/a4a doesn't contain 3P ad code and should probably move
       // somewhere else at some point
       'ads/google/a4a/**->src/ad-cid.js',
-      'ads/google/a4a/**->src/document-info.js',
       'ads/google/a4a/**->src/dom.js',
       'ads/google/a4a/**->src/experiments.js',
-      'ads/google/a4a/**->src/timer.js',
-      'ads/google/a4a/**->src/viewer.js',
-      'ads/google/a4a/**->src/viewport.js',
-      'ads/google/a4a/performance.js->src/url-replacements.js',
+      'ads/google/a4a/**->src/services.js',
+      'ads/google/a4a/performance.js->src/services.js',
       'ads/google/a4a/performance.js->src/service/variable-source.js',
+      'ads/google/a4a/performance.js->src/common-signals.js',
+      'ads/google/a4a/performance.js->src/analytics.js',
       // alp handler needs to depend on src files
       'ads/alp/handler.js->src/dom.js',
       'ads/alp/handler.js->src/config.js',
@@ -127,6 +138,8 @@ exports.rules = [
           'extensions/amp-ad-network-triplelift-impl/0.1/triplelift-a4a-config.js',
       'ads/_a4a-config.js->' +
           'extensions/amp-ad-network-cloudflare-impl/0.1/cloudflare-a4a-config.js',
+      'ads/_a4a-config.js->' +
+          'extensions/amp-ad-network-gmossp-impl/0.1/gmossp-a4a-config.js',
       'ads/google/a4a/google-data-reporter.js->' +
           'extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config.js',
       'ads/google/a4a/google-data-reporter.js->' +
@@ -156,9 +169,26 @@ exports.rules = [
           'src/service/video-manager-impl.js',
       'extensions/amp-youtube/0.1/amp-youtube.js->' +
           'src/service/video-manager-impl.js',
+      'extensions/amp-dailymotion/0.1/amp-dailymotion.js->' +
+          'src/service/video-manager-impl.js',
+      'extensions/amp-brid-player/0.1/amp-brid-player.js->' +
+          'src/service/video-manager-impl.js',
       'extensions/amp-a4a/0.1/amp-a4a.js->src/service/variable-source.js',
+      'extensions/amp-nexxtv-player/0.1/amp-nexxtv-player.js->' +
+          'src/service/video-manager-impl.js',
+      'extensions/amp-3q-player/0.1/amp-3q-player.js->' +
+        'src/service/video-manager-impl.js',
+      'extensions/amp-ima-video/0.1/amp-ima-video.js->' +
+        'src/service/video-manager-impl.js',
       'extensions/amp-fx-parallax/0.1/amp-fx-parallax.js->' +
           'src/service/parallax-impl.js',
+      // TODO(@zhouyx, #9213) Remove this item.
+      'extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js->' +
+          'src/service/position-observer-impl.js',
+      'extensions/amp-animation/0.1/scrollbound-scene.js->' +
+          'src/service/position-observer-impl.js',
+      'extensions/amp-analytics/0.1/amp-analytics.js->' +
+          'src/service/cid-impl.js',
     ],
   },
   {

@@ -19,7 +19,7 @@ import {listen} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {openWindowDialog} from '../../../src/dom';
 import {parseUrl} from '../../../src/url';
-import {viewerForDoc} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/services';
 import {urls} from '../../../src/config';
 
 /** @const */
@@ -28,22 +28,41 @@ const TAG = 'amp-access-login';
 /** @const {!RegExp} */
 const RETURN_URL_REGEX = new RegExp('RETURN_URL');
 
+/**
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {string|!Promise<string>} urlOrPromise
+ * @return {!WebLoginDialog|!ViewerLoginDialog}
+ */
+export function createLoginDialog(ampdoc, urlOrPromise) {
+  const viewer = viewerForDoc(ampdoc);
+  const overrideDialog = parseInt(viewer.getParam('dialog'), 10);
+  if (overrideDialog) {
+    return new ViewerLoginDialog(viewer, urlOrPromise);
+  }
+  return new WebLoginDialog(ampdoc.win, viewer, urlOrPromise);
+}
+
 
 /**
  * Opens the login dialog for the specified URL. If the login dialog succeeds,
  * the returned promised is resolved with the dialog's response. Otherwise, the
  * returned promise is rejected.
- * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {string|!Promise<string>} urlOrPromise
  * @return {!Promise<string>}
  */
-export function openLoginDialog(win, urlOrPromise) {
-  const viewer = viewerForDoc(win.document);
-  const overrideDialog = parseInt(viewer.getParam('dialog'), 10);
-  if (overrideDialog) {
-    return new ViewerLoginDialog(viewer, urlOrPromise).open();
-  }
-  return new WebLoginDialog(win, viewer, urlOrPromise).open();
+export function openLoginDialog(ampdoc, urlOrPromise) {
+  return createLoginDialog(ampdoc, urlOrPromise).open();
+}
+
+/**
+ * Gets the final login URL with all the performed replacements.
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {string|!Promise<string>} urlOrPromise
+ * @return {!Promise<string>}
+ */
+export function getLoginUrl(ampdoc, urlOrPromise) {
+  return createLoginDialog(ampdoc, urlOrPromise).getLoginUrl();
 }
 
 
@@ -64,12 +83,9 @@ class ViewerLoginDialog {
   }
 
   /**
-   * Opens the dialog. Returns the promise that will yield with the dialog's
-   * result or will be rejected if dialog fails. The dialog's result is
-   * typically a hash string from the return URL.
-   * @return {!Promise<string>}
-   */
-  open() {
+  * @return {!Promise<string>}
+  */
+  getLoginUrl() {
     let urlPromise;
     if (typeof this.urlOrPromise == 'string') {
       urlPromise = Promise.resolve(this.urlOrPromise);
@@ -77,13 +93,26 @@ class ViewerLoginDialog {
       urlPromise = this.urlOrPromise;
     }
     return urlPromise.then(url => {
-      const loginUrl = buildLoginUrl(url, 'RETURN_URL');
+      return buildLoginUrl(url, 'RETURN_URL');
+    });
+  }
+
+
+  /**
+   * Opens the dialog. Returns the promise that will yield with the dialog's
+   * result or will be rejected if dialog fails. The dialog's result is
+   * typically a hash string from the return URL.
+   * @return {!Promise<string>}
+   */
+  open() {
+    return this.getLoginUrl().then(loginUrl => {
       dev().fine(TAG, 'Open viewer dialog: ', loginUrl);
       return this.viewer.sendMessageAwaitResponse('openDialog', {
         'url': loginUrl,
       });
     });
   }
+
 }
 
 
@@ -170,6 +199,21 @@ export class WebLoginDialog {
       this.messageUnlisten_();
       this.messageUnlisten_ = null;
     }
+  }
+
+  /**
+  * @return {!Promise<string>}
+  */
+  getLoginUrl() {
+    let urlPromise;
+    if (typeof this.urlOrPromise == 'string') {
+      urlPromise = Promise.resolve(this.urlOrPromise);
+    } else {
+      urlPromise = this.urlOrPromise;
+    }
+    return urlPromise.then(url => {
+      return buildLoginUrl(url, this.getReturnUrl_());
+    });
   }
 
   /** @private */

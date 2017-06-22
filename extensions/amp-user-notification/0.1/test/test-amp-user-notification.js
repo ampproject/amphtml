@@ -19,7 +19,7 @@ import {
   UserNotificationManager,
 } from '../amp-user-notification';
 import {createIframePromise} from '../../../../testing/iframe';
-import {getExistingServiceForDoc} from '../../../../src/service';
+import {getServiceForDoc} from '../../../../src/service';
 import * as sinon from 'sinon';
 
 
@@ -50,7 +50,7 @@ describe('amp-user-notification', () => {
   function getUserNotification(attrs = {}) {
     return createIframePromise().then(iframe_ => {
       iframe = iframe_;
-      storage = getExistingServiceForDoc(iframe.ampdoc, 'storage');
+      storage = getServiceForDoc(iframe.ampdoc, 'storage');
       storageMock = sandbox.mock(storage);
       return buildElement(iframe.doc, iframe.ampdoc, attrs);
     });
@@ -67,7 +67,7 @@ describe('amp-user-notification', () => {
     button.setAttribute('on', 'tap:' + elem.getAttribute('id') + 'dismiss');
     elem.appendChild(button);
 
-    elem.tryUpgrade_();
+    doc.body.appendChild(elem);
     const impl = elem.implementation_;
     impl.storagePromise_ = Promise.resolve(storage);
     impl.userNotificationManager_ = {
@@ -468,7 +468,7 @@ describe('amp-user-notification', () => {
         }
         expect(el).to.have.class('amp-active');
         expect(stub2.calledOnce).to.be.false;
-        impl.executeAction({method: 'dismiss'});
+        impl.executeAction({method: 'dismiss', satisfiesTrust: () => true});
         expect(el).to.not.have.class('amp-active');
         expect(el).to.have.class('amp-hidden');
         expect(stub2.calledOnce).to.be.true;

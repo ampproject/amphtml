@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {fromClassForDoc} from '../service';
 import {parseUrl, getSourceUrl} from '../url';
 import {map} from '../utils/object';
 import {isArray} from '../types';
+import {registerServiceBuilderForDoc} from '../service';
 
 /** @private @const {!Array<string>} */
 const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
@@ -44,10 +44,9 @@ export let DocumentInfoDef;
 
 /**
  * @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!DocInfo} Info about the doc
  */
 export function installDocumentInfoServiceForDoc(nodeOrDoc) {
-  return fromClassForDoc(nodeOrDoc, 'documentInfo', DocInfo);
+  return registerServiceBuilderForDoc(nodeOrDoc, 'documentInfo', DocInfo);
 }
 
 
@@ -110,7 +109,7 @@ function getPageViewId(win) {
  * Returns a map object of link tag relations in document head.
  * Key is the link rel, value is a list of corresponding hrefs.
  * @param {!Document} doc
- * @return {!Object<string, string|!Array<string>>}
+ * @return {!JsonObject<string, string|!Array<string>>}
  */
 function getLinkRels(doc) {
   const linkRels = map();
