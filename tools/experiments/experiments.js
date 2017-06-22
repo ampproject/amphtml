@@ -187,11 +187,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
   },
   {
-    id: 'visibility-v3',
-    name: 'Visibility tracking with FIE and in-a-box support',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8121',
-  },
-  {
     id: 'variable-filters',
     name: 'Format to apply filters to analytics variables',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',

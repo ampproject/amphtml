@@ -684,7 +684,7 @@ describes.realWin('Events', {amp: 1}, env => {
           saveCallback)
           .returns(null)
           .once();
-      tracker.add(analyticsElement, 'hidden-v3', config, eventResolver);
+      tracker.add(analyticsElement, 'hidden', config, eventResolver);
       const unlistenReady = getAmpElementSpy.returnValues[0];
       // NOTE: createReadyReportPromiseFunc is
       // fully tested in test-visibility-manager
@@ -692,7 +692,7 @@ describes.realWin('Events', {amp: 1}, env => {
         saveCallback.callback({totalVisibleTime: 10});
         return eventPromise.then(event => {
           expect(event.vars.totalVisibleTime).to.equal(10);
-          expect(event.type).to.equal('hidden-v3');
+          expect(event.type).to.equal('hidden');
         });
       });
     });
