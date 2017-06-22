@@ -26,62 +26,65 @@ import {
   withdrawRequest,
 } from '../../testing/test-helper';
 
-describe.configure().retryOnSaucelabs().run('Inserted analytics', function() {
-  this.timeout(5000);
+describe.configure().skipEdge().skipFirefox().skipIos().retryOnSaucelabs().run(
+    'Inserted analytics', function() {
+      this.timeout(5000);
 
-  let fixture;
-  beforeEach(() => {
-    return createFixtureIframe('test/fixtures/inserted-analytics.html', 500).then(f => {
-      fixture = f;
-      return expectBodyToBecomeVisible(fixture.win);
-    }).then(() => {
-      const config = {
-        'requests': {
-          'pageview': depositRequestUrl('visible/random=RANDOM'),
-          'requestmanual': depositRequestUrl('manual/cid=CLIENT_ID'),
-        },
-        'triggers': {
-          'trackPageview': {
-            'on': 'visible-v3',
-            'request': 'pageview',
-          },
-          'manual': {
-            'on': 'manual',
-            'request': 'requestmanual',
-          },
-        },
-      };
-      class AmpTest extends BaseElement {
-        buildCallback() {
-          this.sandboxAnalyticsAdapter_ =
-              new SandboxAnalyticsAdapter(this.element, () => {
-                return Promise.resolve(config);
+      let fixture;
+      beforeEach(() => {
+        return createFixtureIframe('test/fixtures/inserted-analytics.html',
+            500).then(f => {
+              fixture = f;
+              return expectBodyToBecomeVisible(fixture.win);
+            }).then(() => {
+              const config = {
+                'requests': {
+                  'pageview': depositRequestUrl('visible/random=RANDOM'),
+                  'requestmanual': depositRequestUrl('manual/cid=CLIENT_ID'),
+                },
+                'triggers': {
+                  'trackPageview': {
+                    'on': 'visible-v3',
+                    'request': 'pageview',
+                  },
+                  'manual': {
+                    'on': 'manual',
+                    'request': 'requestmanual',
+                  },
+                },
+              };
+              class AmpTest extends BaseElement {
+                buildCallback() {
+                  this.sandboxAnalyticsAdapter_ =
+                      new SandboxAnalyticsAdapter(this.element, () => {
+                        return Promise.resolve(config);
+                      });
+                  this.sandboxAnalyticsAdapter_.triggerAnalyticsEventOnReady(
+                      this.element, 'manual');
+                }
+
+                isLayoutSupported(unusedLayout) {
+                  return true;
+                }
+              }
+              fixture.win.document.registerElement('amp-test', {
+                prototype: createAmpElementProto(
+                    fixture.win, 'amp-test', AmpTest),
               });
-          this.sandboxAnalyticsAdapter_.triggerAnalyticsEventOnReady(
-              this.element, 'manual');
-        }
+            });
+      });
 
-        isLayoutSupported(unusedLayout) {
-          return true;
-        }
-      }
-      fixture.win.document.registerElement('amp-test', {
-        prototype: createAmpElementProto(fixture.win, 'amp-test', AmpTest),
+      it.skip('should send analytics pings on visible trigger', () => {
+        return withdrawRequest(fixture.win, 'visible').then(request => {
+          // should replace white listed variable
+          expect(request.path).to.not.equal('/random=RANDOM');
+        });
+      });
+
+      it('should send analytics pings on manual trigger', () => {
+        return withdrawRequest(fixture.win, 'manual').then(request => {
+          // should not replace non white listed variable
+          expect(request.path).to.equal('/cid=CLIENT_ID');
+        });
       });
     });
-  });
-
-  it('should send analytics pings on visible trigger', () => {
-    return withdrawRequest(fixture.win, 'visible').then(request => {
-      // should replace white listed variable
-      expect(request.path).to.not.equal('/random=RANDOM');
-    });
-  });
-
-  it('should send analytics pings on manual trigger', () => {
-    return withdrawRequest(fixture.win, 'manual').then(request => {
-      // should not replace non white listed variable
-      expect(request.path).to.equal('/cid=CLIENT_ID');
-    });
-  });
-});
