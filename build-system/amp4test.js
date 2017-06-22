@@ -45,7 +45,7 @@ const bank = {};
  * Deposit a request. An ID has to be specified. Will override previous request
  * if the same ID already exists.
  */
-app.get('/request-bank/deposit/:id', (req, res) => {
+app.use('/request-bank/deposit/:id', (req, res) => {
   if (typeof bank[req.params.id] === 'function') {
     bank[req.params.id](req);
   } else {
@@ -67,6 +67,7 @@ app.get('/request-bank/withdraw/:id', (req, res) => {
   const callback = function(result) {
     res.json({
       headers: result.headers,
+      path: result.path,
     });
     delete bank[req.params.id];
   };
