@@ -22,7 +22,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {Layout} from '../../../src/layout';
 import {user, dev} from '../../../src/log';
 import {extensionsFor} from '../../../src/services';
-import {toggle} from '../../../src/style';
+import {toggle, setStyle} from '../../../src/style';
 import {listen} from '../../../src/event-helper';
 import {LightboxManager} from './service/lightbox-manager-impl';
 
@@ -81,6 +81,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.descriptionBox_ = null;
+
+    /** @private {?Element} */
+    this.descriptionTextArea_ = null;
 
     /** @private {!Array<!Element>} */
     this.clonedLightboxableElements_ = [];
@@ -176,9 +179,18 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     dev().assert(this.container_);
     this.descriptionBox_ = this.win.document.createElement('div');
     this.descriptionBox_.classList.add('i-amphtml-lbv-desc-box');
+    this.descriptionBox_.classList.add('standard');
+
+    this.descriptionTextArea_ = this.win.document.createElement('div');
+    this.descriptionTextArea_.classList.add('i-amphtml-lbv-desc-text');
+    this.descriptionBox_.appendChild(this.descriptionTextArea_);
 
     const toggleDescription = this.toggleDescriptionBox_.bind(this);
     listen(this.container_, 'click', toggleDescription);
+    this.descriptionBox_.addEventListener('click', event => {
+      this.toggleDescriptionOverflow_();
+      event.stopPropagation();
+    });
     this.container_.appendChild(this.descriptionBox_);
   }
 
@@ -189,7 +201,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   updateDescriptionBox_() {
     const descText = this.clonedLightboxableElements_[this.currentElementId_]
         .descriptionText;
-    this.descriptionBox_.textContent = descText;
+    this.descriptionTextArea_.textContent = descText;
     if (!descText) {
       this.descriptionBox_.classList.add('hide');
     }
@@ -203,6 +215,25 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.updateDescriptionBox_();
     if (this.descriptionBox_.textContent) {
       this.descriptionBox_.classList.toggle('hide');
+    }
+  }
+
+  /**
+   * Toggle the overflow state of description box
+   * @private
+   */
+  toggleDescriptionOverflow_() {
+    if (this.descriptionBox_.classList.contains('standard')) {
+      this.descriptionBox_.classList.remove('standard');
+      this.descriptionBox_.classList.add('overflow');
+      if (this.descriptionTextArea_./*OK*/scrollHeight
+          > this.descriptionBox_./*OK*/clientHeight) {
+        setStyle(this.descriptionTextArea_, 'bottom', 'auto');
+      }
+    } else if (this.descriptionBox_.classList.contains('overflow')) {
+      this.descriptionBox_.classList.remove('overflow');
+      this.descriptionBox_.classList.add('standard');
+      setStyle(this.descriptionTextArea_, 'bottom', '');
     }
   }
 
