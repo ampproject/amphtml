@@ -121,7 +121,7 @@ export class AmpSidebar extends AMP.BaseElement {
       }
     });
 
-    //replacement label for invisible close button set value in amp sidebar
+    // replacement label for invisible close button set value in amp sidebar
     const ariaLabel = this.element.getAttribute
     ('data-close-button-aria-label') || 'Close the sidebar';
 
