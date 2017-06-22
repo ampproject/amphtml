@@ -56,6 +56,7 @@
     "express": "4.14.0",
     "fetch-mock": "5.12.2",
     "file-reader": "1.1.1",
+    "fix-babel-class": "^0.1.0",
     "formidable": "1.0.17",
     "fs-extra": "0.27.0",
     "glob": "7.1.2",

@@ -39,7 +39,6 @@ import * as describes from '../testing/describes';
 import {installYieldIt} from '../testing/yield';
 import stringify from 'json-stable-stringify';
 
-
 // All exposed describes.
 global.describes = describes;
 
