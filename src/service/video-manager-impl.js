@@ -25,6 +25,7 @@ import {registerServiceBuilderForDoc, getServiceForDoc} from '../service';
 import {setStyles} from '../style';
 import {isFiniteNumber} from '../types';
 import {mapRange} from '../utils/math';
+import {startsWith} from '../string.js';
 import {
   PlayingStates,
   VideoAnalyticsEvents,
@@ -39,6 +40,8 @@ import {
 } from './position-observer-impl';
 import {
   scopedQuerySelector,
+  fullscreenEnter,
+  fullscreenExit,
 } from '../dom';
 import {layoutRectLtwh, RelativePositions} from '../layout-rect';
 import * as st from '../style';
@@ -169,6 +172,7 @@ export class VideoManager {
     const entry = new VideoEntry(this, video);
     this.maybeInstallVisibilityObserver_(entry);
     this.maybeInstallPositionObserver_(entry);
+    this.maybeInstallOrientationObserver_(entry);
     this.entries_.push(entry);
     video.element.dispatchCustomEvent(VideoEvents.REGISTERED);
   }
@@ -223,6 +227,47 @@ export class VideoManager {
       viewport.onScroll(scrollListener);
       viewport.onChanged(scrollListener);
       this.scrollListenerInstalled_ = true;
+    }
+  }
+
+
+  /**
+   * Install the necessary listeners to be notified when the user changes
+   * the orientation of their device
+   *
+   * @param {VideoEntry} entry
+   * @private
+   */
+  maybeInstallOrientationObserver_(entry) {
+    // The orientation observer is only useful for automatically putting videos
+    // in fullscreen.
+    if (!entry.video.element.hasAttribute(VideoAttributes.AUTOFULLSCREEN)) {
+      return;
+    }
+
+    // TODO(@wassgha) Check support status for orientation API and update
+    // this as needed.
+    const screen = this.ampdoc_.win.screen;
+    const win = this.ampdoc_.win;
+    const handleOrientationChange = () => {
+      let isLandscape;
+      if (screen && 'orientation' in screen) {
+        isLandscape = startsWith(screen.orientation.type, 'landscape');
+      } else {
+        isLandscape = win.orientation == -90 || win.orientation == 90;
+      }
+      entry.orientationChanged_(isLandscape);
+    };
+    // Chrome apparently considers 'orientationchange' to be an untrusted
+    // event, while 'change' on screen.orientation is considered a user
+    // interaction
+    if (screen && 'orientation' in screen) {
+      const orient = /** @type {!ScreenOrientation} */ (screen.orientation);
+      listen(orient, 'change', handleOrientationChange.bind(this));
+    } else {
+      // iOS Safari does not have screen.orientation but classifies
+      // 'orientationchange' as a user interaction.
+      listen(win, 'orientationchange', handleOrientationChange.bind(this));
     }
   }
 
@@ -368,6 +413,9 @@ class VideoEntry {
     /** @private {boolean} */
     this.isVisible_ = false;
 
+    /** @private {boolean} */
+    this.isFullscreenByOrientationChange_ = false;
+
     /** @private @const {!../service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.ampdoc_.win);
 
@@ -427,6 +475,8 @@ class VideoEntry {
     this.hasDocking = element.hasAttribute(VideoAttributes.DOCK);
 
     this.hasAutoplay = element.hasAttribute(VideoAttributes.AUTOPLAY);
+
+    this.hasAutoFs = element.hasAttribute(VideoAttributes.AUTOFULLSCREEN);
 
     listenOncePromise(element, VideoEvents.LOAD)
         .then(() => this.videoLoaded());
@@ -522,6 +572,44 @@ class VideoEntry {
     if (this.loaded_) {
       this.loadedVideoVisibilityChanged_();
     }
+  }
+
+  /**
+   * Called when the orientation of the device changes
+   * @param {boolean} isLandscape
+   * @private
+   */
+  orientationChanged_(isLandscape) {
+    if (!viewerForDoc(this.ampdoc_).isVisible()) {
+      return;
+    }
+    // Put the video in/out of fullscreen depending on orientation
+    if (!isLandscape && this.isFullscreenByOrientationChange_) {
+    	this.exitFullscreen_();
+    }
+    if (isLandscape
+        && this.isVisible_
+        && this.getPlayingState() == PlayingStates.PLAYING_MANUAL) {
+    	this.enterFullscreen_();
+    }
+  }
+
+  /**
+   * Makes the video element go fullscreen and updates its status
+   * @private
+   */
+  enterFullscreen_() {
+    fullscreenEnter(this.internalElement_);
+    this.isFullscreenByOrientationChange_ = true;
+  }
+
+  /**
+   * Makes the video element quit fullscreen and updates its status
+   * @private
+   */
+  exitFullscreen_() {
+    fullscreenExit(this.ampdoc_.win.document);
+    this.isFullscreenByOrientationChange_ = false;
   }
 
   /**
