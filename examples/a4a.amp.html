@@ -2,32 +2,61 @@
 <html ⚡>
 <head>
   <meta charset="utf-8">
-  <title>AMP A4A examples</title>
-  <link rel="canonical" href="http://nonblocking.io/" >
+  <title>Adsense examples</title>
+  <link rel="canonical" href="http://nonblocking.io/">
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
-  <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
-  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
-  <script async src="https://cdn.ampproject.org/v0.js"></script>
-  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
-  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
   <style amp-custom>
-    amp-ad {
-      border: 1px solid #ccc;
-      max-width: 500px;
+    body {
+      background-color: #DDDDDD;
     }
+
+    .everything {
+      margin-left: 15px;
+      margin-right: 12px;
+    }
+
+    h1 {
+      padding: 12px 0;
+      margin: 0;
+    }
+
+    p {
+      margin: 0;
+      padding: 6px 2px;
+    }
+
+    h1, .everything {
+      background-color: #999999;
+    }
+
+    amp-ad {
+    }
+
+    .red {
+      background-color: red;
+    }
+
+    .talldiv {
+      height: 2000px;
+    }
+
     amp-ad div[placeholder] {
       background-color: lightgray;
     }
+
     amp-ad div[fallback] {
       background-color: black;
     }
+
     amp-ad div[placeholder]::after {
       content: "loading ...";
     }
+
     amp-ad div[fallback]::after {
       content: "No ad";
       color: white;
     }
+
     amp-ad div[placeholder]::after,
     amp-ad div[fallback]::after {
       font-size: 20px;
@@ -38,39 +67,230 @@
       right: 0;
       top: calc(50% - 15px);
     }
+
+    amp-user-notification {
+      background-color: lightgray;
+      padding: 5px;
+    }
+
+    .rtl_test {
+      background-color: black;
+      color: red;
+      font-weight: bold;
+    }
+
+    .poodles {
+      margin: 0 auto;
+      text-align: center;
+    }
   </style>
+  <style amp-boilerplate>body {
+    -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+    -moz-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+    -ms-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+    animation: -amp-start 8s steps(1, end) 0s 1 normal both
+  }
+
+  @-webkit-keyframes -amp-start {
+    from {
+      visibility: hidden
+    }
+    to {
+      visibility: visible
+    }
+  }
+
+  @-moz-keyframes -amp-start {
+    from {
+      visibility: hidden
+    }
+    to {
+      visibility: visible
+    }
+  }
+
+  @-ms-keyframes -amp-start {
+    from {
+      visibility: hidden
+    }
+    to {
+      visibility: visible
+    }
+  }
+
+  @-o-keyframes -amp-start {
+    from {
+      visibility: hidden
+    }
+    to {
+      visibility: visible
+    }
+  }
+
+  @keyframes -amp-start {
+    from {
+      visibility: hidden
+    }
+    to {
+      visibility: visible
+    }
+  }</style>
+  <noscript>
+    <style amp-boilerplate>body {
+      -webkit-animation: none;
+      -moz-animation: none;
+      -ms-animation: none;
+      animation: none
+    }</style>
+  </noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-analytics"
+          src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async custom-element="amp-user-notification"
+          src="https://cdn.ampproject.org/v0/amp-user-notification-0.1.js"></script>
+  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
 </head>
 <body>
-  <h1>A4A Examples</h1>
+<h1>Poodles!</h1>
+<div class="everything">
 
-  <h2>Fake ad network</h2>
-  <amp-ad width="300" height="400"
-      type="fake"
-      data-use-a4a="true"
-      data-vars-analytics-var="bar"
-      src="fake_amp.json">
+  <!-- amg-img doesn't work here for some reason? -->
+  <div class="poodles">
+    <img src="https://www.pets4homes.co.uk/images/articles/4005/large/is-the-poodle-falling-in-popularity-in-the-uk-58d2a9f294c24.jpg"
+             width="289" height="193"
+             alt="Poodles"
+             class="poodles"></img>
+  </div>
+
+  <p>The poodle has been bred in at least three sizes, including Standard, Miniature, and Toy.
+    According to the
+    American Kennel Club, which recognised the breed in 1887,[14] the Standard Poodle is the oldest
+    of the three
+    varieties,[15] and was later bred down to the miniature and toy sizes.</p>
+
+  <amp-ad width="100vw" height=100
+          type="adsense"
+          data-ad-client="ca-pub-2383777339857329"
+          data-ad-slot="4121425836"
+          data-auto-format="rspv">
+  </amp-ad>
+
+  <p>The poodle has been bred in at least three sizes, including Standard, Miniature, and Toy.
+    According to the
+    American Kennel Club, which recognised the breed in 1887,[14] the Standard Poodle is the oldest
+    of the three
+    varieties,[15] and was later bred down to the miniature and toy sizes.</p>
+
+  <amp-ad width="100vw" height=100
+          type="adsense"
+          data-ad-client="ca-pub-2383777339857329"
+          data-ad-slot="4121425836"
+          data-auto-format="rspv">
+  </amp-ad>
+
+  <p>
+    Traditionally the Standard Poodle, the largest of the breed, was a retriever or gun dog, used in
+    particular for
+    duck hunting and sometimes upland bird hunting. The breed has been used for fowl hunting in US
+    and Canada since
+    the early 1990s, in and out of hunting tests. The modern Standard retains many of the traits
+    prized by their
+    original owners: a keen working intelligence that makes the dog easy to command, webbed feet
+    that make it an
+    agile swimmer (all of the poodle's ancestors and descendants had or share the love of water)
+    athletic stamina,
+    and a moisture-resistant, curly coat that acts like a wool jumper in damp conditions. Towards
+    the second half of
+    the nineteenth century their use in hunting declined in favour of their use in circuses and
+    status symbols of
+    the wealthy, so that by the 20th century they were only found as companions or circus dogs.[18]
+    However, in the
+    past 20 years, some breeders in the United States and Canada have been selecting for dogs with
+    drive for birds
+    in order to revive the breed for hunting, with some success.[19] The Canadian Kennel Club
+    admitted the Standard
+    Poodle for hunting trials in 1996 and the American Kennel Club in 1998, respectively.[20]
+  </p>
+
+  <p>
+    Traditionally the Standard Poodle, the largest of the breed, was a retriever or gun dog, used in
+    particular for
+    duck hunting and sometimes upland bird hunting. The breed has been used for fowl hunting in US
+    and Canada since
+    the early 1990s, in and out of hunting tests. The modern Standard retains many of the traits
+    prized by their
+    original owners: a keen working intelligence that makes the dog easy to command, webbed feet
+    that make it an
+    agile swimmer (all of the poodle's ancestors and descendants had or share the love of water)
+    athletic stamina,
+    and a moisture-resistant, curly coat that acts like a wool jumper in damp conditions. Towards
+    the second half of
+    the nineteenth century their use in hunting declined in favour of their use in circuses and
+    status symbols of
+    the wealthy, so that by the 20th century they were only found as companions or circus dogs.[18]
+    However, in the
+    past 20 years, some breeders in the United States and Canada have been selecting for dogs with
+    drive for birds
+    in order to revive the breed for hunting, with some success.[19] The Canadian Kennel Club
+    admitted the Standard
+    Poodle for hunting trials in 1996 and the American Kennel Club in 1998, respectively.[20]
+  </p>
+
+  <amp-ad width="100vw" height=100
+          type="adsense"
+          data-ad-client="ca-pub-2383777339857329"
+          data-ad-slot="4121425836"
+          data-adtest="on"
+          data-auto-format="rspv">
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>
 
-  <h2>TripleLift ad network</h2>
-  <amp-ad width="297" height="410"
-      type="triplelift"
-      data-use-a4a="true"
-      src="https://ib.3lift.com/ttj?inv_code=ampforadstest_main_feed">
-    <div placeholder></div>
-    <div fallback></div>
-  </amp-ad>
+  <p><a name="last">The British Kennel Club</a> also says recognises three sizes, stating that the
+    miniature and toy
+    are scaled down
+    versions of the standard.[2] The Fédération Cynologique Internationale (FCI) recognizes four
+    sizes of one breed:
+    standard, medium, miniature, and toy. Poodles exist in many coat colors. Despite the Standard
+    Poodle's claim to
+    greater age than the other varieties, some evidence shows the smaller types developed only a
+    short time after
+    the breed assumed the general type by which it is recognized today.</p>
 
-  <h2>Fake cloudflare as ad network ad</h2>
-  <amp-ad width="300" height="150"
-      type="cloudflare"
-      data-cf-network="cloudflare"
-      data-cf-a4a="true"
-      src="/fake_a4a.json.html">
-    <div placeholder></div>
-    <div fallback></div>
-  </amp-ad>
+  <p class="rtl_test">RTL test: (NB this doesn't work yet)</p>
+  <div dir="rtl">
+    <p>[עריכת קוד מקור | עריכה]
+      זהו גזע פופולרי בגודל בינוני בעל מבנה גוף שרירי וסיבולת גבוהה. פרוות הדלמטים קצרה, קשה וצפופה.
+      פרוותם בצבע
+      לבן
+      ועליה נקודות שחורות, אך לעתים חומות. צבע האף והעיניים חום או שחור, בהתאם לצבע הנקודות. גורי
+      הדלמטי נולדים
+      לבנים
+      לחלוטין. עם הזמן, בשל הופעת כתמים שחורים (או חומים) על העור, הפרווה משנה את צבעה בהתאם. במשך
+      כל חייהם, כתמים
+      חדשים ימשיכו להופיע על הכלבים הדלמטיים, אם כי </p>
 
+    <amp-ad width="100vw" height=100
+            type="adsense"
+            data-ad-client="ca-pub-2383777339857329"
+            data-ad-slot="4121425836"
+            data-adtest="on"
+            data-auto-format="rspv">
+      <div placeholder></div>
+      <div fallback></div>
+    </amp-ad>
+
+    <p>[עריכת קוד מקור | עריכה]
+      זהו גזע פופולרי בגודל בינוני בעל מבנה גוף שרירי וסיבולת גבוהה. פרוות הדלמטים קצרה, קשה וצפופה.
+      פרוותם בצבע
+      לבן
+      ועליה נקודות שחורות, אך לעתים חומות. צבע האף והעיניים חום או שחור, בהתאם לצבע הנקודות. גורי
+      הדלמטי נולדים
+      לבנים
+      לחלוטין. עם הזמן, בשל הופעת כתמים שחורים (או חומים) על העור, הפרווה משנה את צבעה בהתאם. במשך
+      כל חייהם, כתמים
+      חדשים ימשיכו להופיע על הכלבים הדלמטיים, אם כי </p>
+  </div>
+</div>
 </body>
 </html>

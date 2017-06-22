@@ -97,6 +97,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** @private {!./layout-delay-meter.LayoutDelayMeter} */
     this.layoutDelayMeter_ = new LayoutDelayMeter(this.win);
     this.lifecycleReporter.sendPing('adSlotBuilt');
+
+    console.log('!!!! it lives! %o', this);
   }
 
   /** @override */

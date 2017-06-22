@@ -101,6 +101,23 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
     /** @private {!../../../src/service/extensions-impl.Extensions} */
     this.extensions_ = extensionsFor(this.win);
+
+    /**
+     * For full-width responsive ads, whether the alignment change (which nudges
+     * the edge of the add up to the edge of the viewport) has happened.
+     * @private {boolean}
+     */
+    this.hasBeenAligned_ = false;
+
+    /** @private {string} */
+    this.autoFormat_ = this.element.getAttribute('data-auto-format') || '';
+
+    console.log('it lives! %o', this);
+  }
+
+  /** @return {boolean} */
+  isResponsive() {
+    return this.autoFormat_ == 'rspv';
   }
 
   /** @override */
@@ -140,8 +157,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       {name: 'adk', value: adk},
       {
         name: 'bc',
-        value: global.SVGElement && global.document.createElementNS ?
-            '1' : null,
+        value: global.SVGElement && global.document.createElementNS ? '1'
+            : null,
       },
       {name: 'ctypes', value: this.getCtypes_()},
       {name: 'host', value: this.element.getAttribute('data-ad-host')},
@@ -206,6 +223,34 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
+  onLayoutMeasure() {
+    super.onLayoutMeasure();
+
+    if (this.isResponsive() && !this.hasBeenAligned_) {
+      this.hasBeenAligned_ = 1;
+
+      // Create a dummy zero-size element so that attemptChangeSize has
+      // something to show if the resize fails.
+      const dummyOverflowElement = document.createElement('div');
+      dummyOverflowElement.setAttribute('overflow', '1');
+      this.element.appendChild(dummyOverflowElement);
+
+      // Nudge responsive ads into the correct horizontal position.
+
+
+      var at = this.element.getBoundingClientRect();
+      // NB: can't use attemptChangeSize here, this must succeed. But it doesn't
+      // actually change the size (it just changes the horizontal margins).
+      // TODO(charliereams): This is wrong for RTL.
+      this.element.getResources().changeSize(
+          this.element, undefined, undefined, undefined,
+          {left: -1 * at.left});
+      this.element.style.zIndex = 30;
+      console.log('aligning: at=%o el=%o', at, this.element);
+    }
+  }
+
+  /** @override */
   unlayoutCallback() {
     super.unlayoutCallback();
     this.element.setAttribute('data-amp-slot-index',
@@ -215,6 +260,35 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       sharedState.removeSlot(this.uniqueSlotId_);
     }
     this.ampAnalyticsConfig = null;
+  }
+
+  /** @override */
+  buildCallback() {
+    super.buildCallback();
+
+    console.log('change size??');
+    this.attemptChangeSize(
+        AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext(
+            window.innerWidth),
+        undefined).then(
+        () => {
+          console.log('resized');
+        },
+        () => {
+          console.log('not resized');
+        });
+  }
+
+  /**
+   * @param {number} width
+   * @return {number}
+   */
+  static getResponsiveHeightForContext(width) {
+    const minHeight = 100;
+    const maxHeight = Math.min(300, window.innerHeight);
+    const idealHeight = Math.round(width / 1.2);
+    console.log('min=%o max=%o ideal=%o', minHeight, maxHeight, idealHeight);
+    return Math.max(minHeight, Math.min(maxHeight, idealHeight));
   }
 
   /**
@@ -228,7 +302,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   onCreativeRender(isVerifiedAmpCreative) {
     super.onCreativeRender(isVerifiedAmpCreative);
     injectActiveViewAmpAnalyticsElement(
-      this, this.extensions_, this.ampAnalyticsConfig);
+        this, this.extensions_, this.ampAnalyticsConfig);
   }
 }
 
