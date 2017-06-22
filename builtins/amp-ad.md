@@ -52,7 +52,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 </amp-ad>
 ```
 ```html
-<amp-ad width=320 height=145
+<amp-ad width=320 height=140
     type="colombia"
     layout=responsive
     data-clmb_slot="129883"

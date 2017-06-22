@@ -41,5 +41,5 @@ export function colombia(global, data) {
       }
     });
   });
-  loadScript(global, 'https://static.clmbtech.com/ctn/commons/js/colombia-amp.js');
+  loadScript(global, 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js');
 }

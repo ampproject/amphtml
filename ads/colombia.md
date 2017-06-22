@@ -34,6 +34,6 @@ For semantics of configuration, Please see ad network documentation.For support 
 
 Supported parameters:
 
-- data-clmb_slot : Adunit Slot
-- data-clmb_position : Adunit Position
-- data-clmb_section : Adunit Sections
+- data-clmb_slot : Ad Slot
+- data-clmb_position : Ad Position
+- data-clmb_section : Ad Sections
