@@ -115,10 +115,4 @@ describes.realWin('ad-cid', {}, env => {
     });
     return expect(getAdCid(adElement)).to.eventually.be.undefined;
   });
-
-  it('should return null if cid service not available', () => {
-    resetServiceForTesting(win, 'cid');
-    config.clientIdScope = cidScope;
-    return expect(getAdCid(adElement)).to.eventually.be.undefined;
-  });
 });
