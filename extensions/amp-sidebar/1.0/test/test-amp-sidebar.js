@@ -73,11 +73,10 @@
        it('should replace text to screen reader \
        button in data-close-button-aria-label', () => {
          return getAmpSidebar().then(obj => {
-           const ampSidebar = iframe.doc.createElement('amp-sidebar');
            const sidebarElement = obj.ampSidebar;
            const closeButton = sidebarElement.lastElementChild;
            if (options.closeText) {
-             ampSidebar.setAttribute('data-close-button-aria-label',
+             obj.ampSidebar.setAttribute('data-close-button-aria-label',
              options.closeText);
            };
            expect(closeButton.textContent).to.equal(options.closeText);
