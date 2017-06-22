@@ -503,7 +503,7 @@ export class AmpIframe extends AMP.BaseElement {
       }, () => {});
     } else {
       user().error(TAG_,
-          'Ignoring embed-size request because'
+          'Ignoring embed-size request because '
           + 'no width or height value is provided',
           this.element);
     }

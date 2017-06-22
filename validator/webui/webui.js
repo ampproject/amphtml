@@ -38,8 +38,8 @@ function removeParamFromLocationHashParams(param) {
 
 // Sets window.location hash based on a dictionary of parameters.
 function setLocationHashParams(params) {
-  out = [];
-  for (key in params) {
+  var out = [];
+  for (var key in params) {
     if (params.hasOwnProperty(key)) {
       out.push(key + '=' + encodeURIComponent(params[key]));
     }

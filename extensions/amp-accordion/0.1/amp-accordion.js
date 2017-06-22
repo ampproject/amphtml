@@ -78,20 +78,18 @@ class AmpAccordion extends AMP.BaseElement {
 
 
 
-      if (!this.currentState_[contentId] != null) {
-        if (this.currentState_[contentId]) {
-          section.setAttribute('expanded', '');
-        } else if (this.currentState_[contentId] === false) {
-          section.removeAttribute('expanded');
-        }
-        this.mutateElement(() => {
-          // Just mark this element as dirty since we changed the state
-          // based on runtime state. This triggers checking again
-          // whether children need layout.
-          // See https://github.com/ampproject/amphtml/issues/3586
-          // for details.
-        });
+      if (this.currentState_[contentId]) {
+        section.setAttribute('expanded', '');
+      } else if (this.currentState_[contentId] === false) {
+        section.removeAttribute('expanded');
       }
+      this.mutateElement(() => {
+        // Just mark this element as dirty since we changed the state
+        // based on runtime state. This triggers checking again
+        // whether children need layout.
+        // See https://github.com/ampproject/amphtml/issues/3586
+        // for details.
+      });
 
       const header = sectionComponents[0];
       header.setAttribute('role', 'heading');
