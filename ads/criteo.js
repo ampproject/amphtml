@@ -17,6 +17,8 @@
 import {computeInMasterFrame, loadScript} from '../3p/3p';
 import {doubleclick} from '../ads/google/doubleclick';
 import {tryParseJson} from '../src/json';
+import {listen, getData} from '../src/event-helper';
+import {isObject} from '../src/types';
 
 /* global Criteo: false */
 
@@ -39,7 +41,11 @@ export function criteo(global, data) {
         Criteo.CallRTA(params);
         resultCallback(null);
       }, () => {});
-      setTargeting(global, data);
+      setTargeting(global, data, null);
+    } else if (data.tagtype === 'standalone') {
+      computeInMasterFrame(window, 'call-standalone', resultCallback => {
+        criteoStandalone(global, data, resultCallback);
+      }, () => {});
     } else if (!data.tagtype || data.tagtype === 'passback') {
       Criteo.DisplayAd({
         zoneid: data.zone,
@@ -53,8 +59,60 @@ export function criteo(global, data) {
 /**
  * @param {!Window} global
  * @param {!Object} data
+ * @param {!function(*)} resultCallback
  */
-function setTargeting(global, data) {
+function criteoStandalone(global, data, resultCallback) {
+  const adUnitParams = {
+    'integrationmode': 'amp',
+    'placements': [
+      {
+        'slotid': data.slot,
+        'zoneid': data.zone,
+      },
+    ],
+  };
+  Criteo.RequestBids(adUnitParams, bids => {
+    listenForCreativeRequests();
+    for (const i in bids) {
+      const bid = bids[i];
+      if (data.adserver === 'DFP') {
+        const lir = data.lineItemRanges;
+        const targeting = Criteo.ComputeStandaloneDFPTargeting(bid, lir);
+        setTargeting(global, data, targeting);
+      }
+    }
+    resultCallback(null);
+  }, data.timeout);
+}
+
+function listenForCreativeRequests() {
+  const bids = Criteo.GetBids();
+  listen(window, 'message', ev => {
+    const rawData = getData(event);
+    const data = isObject(rawData) ? rawData : tryParseJson(rawData);
+    if (!data || !data['bidId']) {
+      return;
+    }
+    for (const i in bids) {
+      const bid = bids[i];
+      if (bid.id == data['bidId']) {
+        const message = /** @type {!JsonObject} */ ({
+          'message': 'Criteo creative',
+          'creative': bid.creative,
+          'displayUrl': bid.displayUrl,
+        });
+        ev.source.postMessage(JSON.stringify(message), '*');
+      }
+    }
+  }, false);
+}
+
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ * @param {?Object} targeting
+ */
+function setTargeting(global, data, targeting) {
   if (data.adserver === 'DFP') {
     const dblParams = tryParseJson(data.doubleclick) || {};
     dblParams['slot'] = data.slot;
@@ -63,9 +121,11 @@ function setTargeting(global, data) {
     dblParams['height'] = data.height;
     dblParams['type'] = 'criteo';
 
-    const targeting = Criteo.ComputeDFPTargetingForAMP(
-        data.cookiename || Criteo.PubTag.RTA.DefaultCrtgRtaCookieName,
-        data.varname || Criteo.PubTag.RTA.DefaultCrtgContentName);
+    if (!targeting && data.tagtype === 'rta') {
+      targeting = Criteo.ComputeDFPTargetingForAMP(
+          data.cookiename || Criteo.PubTag.RTA.DefaultCrtgRtaCookieName,
+          data.varname || Criteo.PubTag.RTA.DefaultCrtgContentName);
+    }
     for (const i in targeting) {
       dblParams['targeting'][i] = targeting[i];
     }
