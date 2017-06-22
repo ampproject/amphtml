@@ -41,10 +41,7 @@ import {
   POSITION_HIGH_FIDELITY,
 } from '../../../src/service/position-observer-impl';
 
-
-
 const VISIBILITY_TIMEOUT = 10000;
-
 
 export class AmpAdXOriginIframeHandler {
 
@@ -111,25 +108,25 @@ export class AmpAdXOriginIframeHandler {
     if (isExperimentOn(this.baseInstance_.win, 'amp-animation')) {
       let posObInstalled = false;
       this.positionObserverHighFidelityApi_ = new SubscriptionApi(
-        this.iframe, SEND_POSITIONS_HIGH_FIDELITY, true, () => {
-          const ampdoc = this.baseInstance_.getAmpDoc();
-          // TODO (#9232) May crash PWA
-          if (!posObInstalled) {
-            installPositionObserverServiceForDoc(ampdoc);
-            posObInstalled = true;
-          }
-          this.positionObserver_ = getServiceForDoc(ampdoc,
-              'position-observer');
-          this.positionObserver_.observe(
-              dev().assertElement(this.iframe),
-              PositionObserverFidelity.HIGH, pos => {
-                // Valid cast because it is an external object.
-                const posCast = /** @type {!JsonObject} */ (pos);
-                this.positionObserverHighFidelityApi_.send(
-                    POSITION_HIGH_FIDELITY,
-                    posCast);
-              });
-        });
+          this.iframe, SEND_POSITIONS_HIGH_FIDELITY, true, () => {
+            const ampdoc = this.baseInstance_.getAmpDoc();
+            // TODO (#9232) May crash PWA
+            if (!posObInstalled) {
+              installPositionObserverServiceForDoc(ampdoc);
+              posObInstalled = true;
+            }
+            this.positionObserver_ = getServiceForDoc(ampdoc,
+                'position-observer');
+            this.positionObserver_.observe(
+                dev().assertElement(this.iframe),
+                PositionObserverFidelity.HIGH, pos => {
+                  // Valid cast because it is an external object.
+                  const posCast = /** @type {!JsonObject} */ (pos);
+                  this.positionObserverHighFidelityApi_.send(
+                      POSITION_HIGH_FIDELITY,
+                      posCast);
+                });
+          });
     }
 
     // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad
@@ -200,20 +197,20 @@ export class AmpAdXOriginIframeHandler {
       noContentResolve = resolve;
     });
     if (this.baseInstance_.config &&
-            this.baseInstance_.config.renderStartImplemented) {
+        this.baseInstance_.config.renderStartImplemented) {
       // When `render-start` is supported, these signals are mutually
       // exclusive. Whichever arrives first wins.
       listenForOncePromise(this.iframe,
           ['render-start', 'no-content'], true).then(info => {
-            const data = info.data;
-            if (data['type'] == 'render-start') {
-              this.renderStart_(info);
-              renderStartResolve();
-            } else {
-              this.noContent_();
-              noContentResolve();
-            }
-          });
+        const data = info.data;
+        if (data['type'] == 'render-start') {
+          this.renderStart_(info);
+          renderStartResolve();
+        } else {
+          this.noContent_();
+          noContentResolve();
+        }
+      });
     } else {
       // If `render-start` is not supported, listen to `bootstrap-loaded`.
       // This will avoid keeping the Ad empty until it's fully loaded, which
@@ -368,9 +365,10 @@ export class AmpAdXOriginIframeHandler {
       const iframeWidth = this.iframe./*OK*/offsetWidth;
       this.uiHandler_.updateSize(height, width, iframeHeight,
           iframeWidth).then(info => {
-            this.sendEmbedSizeResponse_(info.success,
-                info.newWidth, info.newHeight, source, origin);
-          }, () => {});
+        this.sendEmbedSizeResponse_(info.success,
+            info.newWidth, info.newHeight, source, origin);
+      }, () => {
+      });
     });
   }
 
@@ -424,7 +422,6 @@ export class AmpAdXOriginIframeHandler {
     }
     this.sendEmbedInfo_(inViewport);
   }
-
 
   /**
    * See BaseElement method.
