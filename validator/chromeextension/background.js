@@ -59,9 +59,9 @@ function hex2rgba(hex) {
  * @return {Object}
  */
 function getErrorSeverityCounts(errors) {
-  numErrors = 0;
-  numWarnings = 0;
-  for (error in errors) {
+  var numErrors = 0;
+  var numWarnings = 0;
+  for (var error in errors) {
     if (errors[error].severity == 'ERROR') numErrors += 1;
     if (errors[error].severity == 'WARNING') numWarnings += 1;
   }
@@ -117,7 +117,7 @@ function handleAmpCache(tabId, ampHref) {
  * @param {!Object<!ValidationResult>} validationResult
  */
 function handleAmpFail(tabId, validationResult) {
-  numErrors = getNumberOfErrors(validationResult.errors);
+  var numErrors = getNumberOfErrors(validationResult.errors);
   updateTabStatus(
       tabId, globals.invalidAmpIconPrefix, globals.invalidAmpTitle,
       numErrors.toString(), globals.invalidAmpBgcolor);
