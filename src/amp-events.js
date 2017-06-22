@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,28 +15,18 @@
  */
 
 /**
- * @const {!JsonObject}
- */
-export const NETWORKS = /** @type {!JsonObject} */ ({
-  'cloudflare': {
-    'base': 'https://firebolt.cloudflaredemo.com',
-  },
-
-  'adzerk': {
-    'base': 'https://engine.betazerk.com',
-  },
-
-  'celtra': {
-    'base': 'https://ads-amp.celtra.com',
-  },
-
-  'dianomi': {
-    'base': 'https://www.dianomi.com',
-    'src': 'https://www.dianomi.com/smartads.pl?format=a4a',
-  },
-
-  'yieldmo': {
-    'base': 'https://yieldmo-amp.club',
-    'src': 'https://yieldmo-amp.club/ads',
-  },
-});
+* Enum used to specify custom Amp Events
+*
+* @enum {string}
+*/
+export const AmpEvents = {
+  VISIBILITY_CHANGE: 'amp:visibilitychange',
+  TEMPLATE_RENDERED: 'amp:template-rendered',
+  DOM_UPDATE: 'amp:dom-update',
+  BUILT: 'amp:built',
+  ATTACHED: 'amp:attached',
+  STUBBED: 'amp:stubbed',
+  LOAD_START: 'amp:load:start',
+  LOAD_END: 'amp:load:end',
+  ERROR: 'amp:error',
+};

@@ -41,6 +41,7 @@ import * as dom from './dom';
 import {setStyle, setStyles} from './style';
 import {LayoutDelayMeter} from './layout-delay-meter';
 import {ResourceState} from './service/resource';
+import {AmpEvents} from './amp-events';
 
 const TAG_ = 'CustomElement';
 
@@ -696,7 +697,7 @@ function createBaseCustomElementClass(win) {
       this.implementation_.layout_ = this.layout_;
       this.implementation_.layoutWidth_ = this.layoutWidth_;
       this.implementation_.firstAttachedCallback();
-      this.dispatchCustomEventForTesting('amp:attached');
+      this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
       this.getResources().upgraded(this);
     }
 
@@ -1005,7 +1006,7 @@ function createBaseCustomElementClass(win) {
           if (reconstruct) {
             this.getResources().upgraded(this);
           }
-          this.dispatchCustomEventForTesting('amp:attached');
+          this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
         }
       } else {
         this.everAttached = true;
@@ -1023,7 +1024,7 @@ function createBaseCustomElementClass(win) {
           this.classList.add('i-amphtml-unresolved');
           // amp:attached is dispatched from the ElementStub class when it
           // replayed the firstAttachedCallback call.
-          this.dispatchCustomEventForTesting('amp:stubbed');
+          this.dispatchCustomEventForTesting(AmpEvents.STUBBED);
         }
       }
     }
@@ -1253,7 +1254,7 @@ function createBaseCustomElementClass(win) {
       assertNotTemplate(this);
       dev().assert(this.isBuilt(),
           'Must be built to receive viewport events');
-      this.dispatchCustomEventForTesting('amp:load:start');
+      this.dispatchCustomEventForTesting(AmpEvents.LOAD_START);
       const isLoadEvent = (this.layoutCount_ == 0);  // First layout is "load".
       if (isLoadEvent) {
         this.signals_.signal(CommonSignals.LOAD_START);
@@ -1278,7 +1279,7 @@ function createBaseCustomElementClass(win) {
           this.isFirstLayoutCompleted_ = true;
           // TODO(dvoytenko, #7389): cleanup once amp-sticky-ad signals are
           // in PROD.
-          this.dispatchCustomEvent('amp:load:end');
+          this.dispatchCustomEvent(AmpEvents.LOAD_END);
         }
       }, reason => {
         // add layoutCount_ by 1 despite load fails or not
