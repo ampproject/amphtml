@@ -176,7 +176,7 @@ export function addParamToUrl(url, key, value, opt_addToFront) {
  * Appends query string fields and values to a url. The `params` objects'
  * `key`s and `value`s will be transformed into query string keys/values.
  * @param {string} url
- * @param {!Object<string, string|!Array<string>>} params
+ * @param {!JsonObject<string, string|!Array<string>>} params
  * @return {string}
  */
 export function addParamsToUrl(url, params) {
@@ -186,7 +186,7 @@ export function addParamsToUrl(url, params) {
 /**
  * Serializes the passed parameter map into a query string with both keys
  * and values encoded.
- * @param {!Object<string, string|!Array<string>>} params
+ * @param {!JsonObject<string, string|!Array<string>>} params
  * @return {string}
  */
 export function serializeQueryString(params) {

@@ -21,6 +21,7 @@ import {
   getCorsUrl,
   parseUrl,
 } from '../url';
+import {parseJson} from '../json';
 import {isArray, isObject, isFormData} from '../types';
 import {utf8EncodeSync} from '../utils/bytes';
 import {ampdocServiceFor} from '../ampdoc';
@@ -522,7 +523,7 @@ export class FetchResponse {
    */
   json() {
     return /** @type {!Promise<!JsonObject>} */ (
-        this.drainText_().then(JSON.parse.bind(JSON)));
+        this.drainText_().then(parseJson));
   }
 
   /**

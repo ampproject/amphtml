@@ -124,7 +124,10 @@ export class Viewer {
     /** @private {!Observable<!JsonObject>} */
     this.broadcastObservable_ = new Observable();
 
-    /** @private {?function(string, *, boolean):(Promise<*>|undefined)} */
+    /**
+     * @private {?function(string, (?JsonObject|string|undefined), boolean):
+     *     (Promise<*>|undefined)}
+     */
     this.messageDeliverer_ = null;
 
     /** @private {?string} */
@@ -133,7 +136,7 @@ export class Viewer {
     /**
      * @private {!Array<!{
      *   eventType: string,
-     *   data: *,
+     *   data: (?JsonObject|string|undefined),
      *   awaitResponse: boolean,
      *   responsePromise: (Promise<*>|undefined),
      *   responseResolver: function(*)
@@ -769,7 +772,8 @@ export class Viewer {
   /**
    * Provides a message delivery mechanism by which AMP document can send
    * messages to the viewer.
-   * @param {function(string, *, boolean):(!Promise<*>|undefined)} deliverer
+   * @param {function(string, (?JsonObject|string|undefined), boolean):
+   *     (!Promise<*>|undefined)} deliverer
    * @param {string} origin
    * @export
    */
@@ -799,7 +803,9 @@ export class Viewer {
       this.messageQueue_ = [];
       queue.forEach(message => {
         const responsePromise = this.messageDeliverer_(
-            message.eventType, message.data, message.awaitResponse);
+            message.eventType,
+            message.data,
+            message.awaitResponse);
 
         if (message.awaitResponse) {
           message.responseResolver(responsePromise);
@@ -855,7 +861,9 @@ export class Viewer {
       // assimilating with the resolved (or rejected) internal value.
       return /** @type {!Promise<?JsonObject|string|undefined>} */ (
           Promise.resolve(this.messageDeliverer_(
-              eventType, data, awaitResponse)));
+              eventType,
+              /** @type {?JsonObject|string|undefined} */ (data),
+              awaitResponse)));
     }
 
     if (!this.messagingReadyPromise_) {

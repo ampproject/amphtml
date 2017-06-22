@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../../../src/amp-events';
 import {ActionTrust} from '../../../src/action-trust';
 import {CSS} from '../../../build/amp-live-list-0.1.css';
 import {childElementByAttr} from '../../../src/dom';
@@ -223,9 +224,8 @@ export class AmpLiveList extends AMP.BaseElement {
     this.curNumOfLiveItems_ = this.validateLiveListItems_(
         this.itemsSlot_, true);
 
-    // TODO(choumx, #9699): LOW.
     this.registerAction(
-        'update', this.updateAction_.bind(this), ActionTrust.MEDIUM);
+        'update', this.updateAction_.bind(this), ActionTrust.LOW);
 
     if (!this.element.hasAttribute('aria-live')) {
       this.element.setAttribute('aria-live', 'polite');
@@ -349,7 +349,7 @@ export class AmpLiveList extends AMP.BaseElement {
         this.sendAmpDomUpdateEvent_();
 
         const templatedEvent = createCustomEvent(this.win,
-            'amp:template-rendered', /* detail */ null, {bubbles: true});
+            AmpEvents.TEMPLATE_RENDERED, /* detail */ null, {bubbles: true});
         this.itemsSlot_.dispatchEvent(templatedEvent);
       });
     }
@@ -866,7 +866,7 @@ export class AmpLiveList extends AMP.BaseElement {
 
   sendAmpDomUpdateEvent_() {
     const event = this.win.document.createEvent('Event');
-    event.initEvent('amp:dom-update', true, true);
+    event.initEvent(AmpEvents.DOM_UPDATE, true, true);
     this.win.document.dispatchEvent(event);
   }
 }

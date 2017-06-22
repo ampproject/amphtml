@@ -30,7 +30,6 @@ var path = require('path');
 var source = require('vinyl-source-stream');
 var through = require('through2');
 var util = require('gulp-util');
-var extensionsVersions = require('../extensions-versions-config');
 
 
 var root = process.cwd();
@@ -144,7 +143,9 @@ var rules = depCheckConfig.rules.map(config => new Rule(config));
 
 /**
  * Returns a list of entryPoint modules.
- * extenstions/{$version}/*.js/amp.js/integration.js
+ * extensions/{$extension}/{$version}/{$extension}.js
+ * src/amp.js
+ * 3p/integration.js
  *
  * @return {!Promise<!Array<string>>}
  */
@@ -154,8 +155,6 @@ function getSrcs() {
     return flatten(dirItems
       .map(x => `extensions/${x}`)
       .filter(x => fs.statSync(x).isDirectory())
-      // If we ever need more than 0.1, just return an array and flatten
-      // the Array.
       .map(getEntryModule)
       // Concat the core binary and integration binary as entry points.
       .concat(`src/amp.js`, `3p/integration.js`));
@@ -204,9 +203,12 @@ function getGraph(entryModule) {
  */
 function getEntryModule(extensionFolder) {
   var extension = path.basename(extensionFolder);
-  var versions = extensionsVersions[extension] || ['0.1'];
-  return versions.map(v =>
-      `${extensionFolder}/${v}/${extension}.js`);
+  return fs.readdirSync(extensionFolder)
+      .map(x => `${extensionFolder}/${x}`)
+      .filter(x => fs.statSync(x).isDirectory())
+      .map(x => `${x}/${extension}.js`)
+      .filter(x => fs.existsSync(x))
+      .filter(x => fs.statSync(x).isFile());
 }
 
 /**

@@ -18,7 +18,6 @@ import {ActionTrust} from '../../../src/action-trust';
 import {installFormProxy} from './form-proxy';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {createCustomEvent} from '../../../src/event-helper';
-import {documentInfoForDoc} from '../../../src/services';
 import {installStylesForShadowRoot} from '../../../src/shadow-embed';
 import {iterateCursor} from '../../../src/dom';
 import {formOrNullForElement, setFormForElement} from '../../../src/form';
@@ -28,7 +27,6 @@ import {
   addParamsToUrl,
   SOURCE_ORIGIN_PARAM,
   isProxyOrigin,
-  parseUrl,
 } from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
@@ -56,7 +54,7 @@ import {
   getFormVerifier,
 } from './form-verifiers';
 import {deepMerge} from '../../../src/utils/object';
-
+import {AmpEvents} from '../../../src/amp-events';
 
 /** @type {string} */
 const TAG = 'amp-form';
@@ -193,9 +191,8 @@ export class AmpForm {
     this.verifier_ = getFormVerifier(
         this.form_, () => this.handleXhrVerify_());
 
-    // TODO(choumx, #9699): HIGH.
     this.actions_.installActionHandler(
-        this.form_, this.actionHandler_.bind(this), ActionTrust.MEDIUM);
+        this.form_, this.actionHandler_.bind(this), ActionTrust.HIGH);
     this.installEventHandlers_();
 
     /** @private {?Promise} */
@@ -351,7 +348,7 @@ export class AmpForm {
       event.preventDefault();
     }
     // Submits caused by user input have high trust.
-    this.submit_(ActionTrust.MEDIUM); // TODO(choumx, #9699): HIGH.
+    this.submit_(ActionTrust.HIGH);
   }
 
   /**
@@ -376,33 +373,8 @@ export class AmpForm {
    * @private
    */
   getVarSubsFields_() {
-    // Only allow variable substitutions for inputs if the form action origin
-    // is the canonical origin.
-    // TODO(mkhatib, #7168): Consider relaxing this.
-    if (this.isSubmittingToCanonical_()) {
-      // Fields that support var substitutions.
-      return this.form_.querySelectorAll('[type="hidden"][data-amp-replace]');
-    } else {
-      user().warn(TAG, 'Variable substitutions disabled for non-canonical ' +
-          'origin submit action: %s', this.form_);
-      return [];
-    }
-  }
-
-  /**
-   * Checks whether the submissions are going to go through to the canonical origin
-   * or not.
-   * @private
-   */
-  isSubmittingToCanonical_() {
-    if (this.isCanonicalAction_ !== undefined) {
-      return this.isCanonicalAction_;
-    }
-
-    const docInfo = documentInfoForDoc(this.form_);
-    const canonicalOrigin = parseUrl(docInfo.canonicalUrl).origin;
-    const url = this.xhrAction_ || this.form_.getAttribute('action');
-    return this.isCanonicalAction_ = parseUrl(url).origin == canonicalOrigin;
+    // Fields that support var substitutions.
+    return this.form_.querySelectorAll('[type="hidden"][data-amp-replace]');
   }
 
   /**
@@ -731,7 +703,7 @@ export class AmpForm {
               container.appendChild(rendered);
               const templatedEvent = createCustomEvent(
                   this.win_,
-                  'amp:template-rendered',
+                  AmpEvents.TEMPLATE_RENDERED,
                   /* detail */ null,
                   {bubbles: true});
               container.dispatchEvent(templatedEvent);
@@ -1021,7 +993,7 @@ export class AmpFormService {
    * @private
    */
   installGlobalEventListener_(doc) {
-    doc.addEventListener('amp:dom-update', () => {
+    doc.addEventListener(AmpEvents.DOM_UPDATE, () => {
       this.installSubmissionHandlers_(doc.querySelectorAll('form'));
     });
   }

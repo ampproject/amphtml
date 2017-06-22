@@ -39,11 +39,13 @@ import {
 } from './3p';
 import {urls} from '../src/config';
 import {endsWith} from '../src/string';
+import {parseJson} from '../src/json';
 import {parseUrl, getSourceUrl, isProxyOrigin} from '../src/url';
 import {dev, initLogConstructor, setReportError, user} from '../src/log';
 import {dict} from '../src/utils/object.js';
 import {getMode} from '../src/mode';
 import {startsWith} from '../src/string.js';
+import {AmpEvents} from '../src/amp-events';
 
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
@@ -193,10 +195,10 @@ const AMP_EMBED_ALLOWED = {
 };
 
 
-/** @const {!Object} */
-const FALLBACK_CONTEXT_DATA = {
-  _context: {},
-};
+/** @const {!JsonObject} */
+const FALLBACK_CONTEXT_DATA = dict({
+  '_context': dict(),
+});
 
 
 // Need to cache iframeName as it will be potentially overwritten by
@@ -204,7 +206,7 @@ const FALLBACK_CONTEXT_DATA = {
 const iframeName = window.name;
 const data = getData(iframeName);
 
-window.context = data._context;
+window.context = data['_context'];
 
 // This should only be invoked after window.context is set
 initLogConstructor();
@@ -364,13 +366,13 @@ const defaultAllowedTypesInCustomFrame = [
 
 /**
  * Gets data encoded in iframe name attribute.
- * @return {!Object}
+ * @return {!JsonObject}
  */
 function getData(iframeName) {
   try {
     // TODO(bradfrizzell@): Change the data structure of the attributes
     //    to make it less terrible.
-    return JSON.parse(iframeName).attributes;
+    return parseJson(iframeName)['attributes'];
   } catch (err) {
     if (!getMode().test) {
       dev().info(
@@ -430,16 +432,16 @@ function isMaster() {
 window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     opt_allowedEmbeddingOrigins) {
   try {
-    const location = parseUrl(data._context.location.href);
+    const location = parseUrl(data['_context']['location']['href']);
 
     ensureFramed(window);
     validateParentOrigin(window, location);
-    validateAllowedTypes(window, data.type, opt_allowed3pTypes);
+    validateAllowedTypes(window, data['type'], opt_allowed3pTypes);
     if (opt_allowedEmbeddingOrigins) {
       validateAllowedEmbeddingOrigins(window, opt_allowedEmbeddingOrigins);
     }
     installContext(window);
-    delete data._context;
+    delete data['_context'];
     manageWin(window);
     installEmbedStateListener();
     draw3p(window, data, opt_configCallback);
@@ -500,7 +502,7 @@ function installContextUsingStandardImpl(win) {
   // Define master related properties to be lazily read.
   Object.defineProperties(win.context, {
     master: {
-      get: () => masterSelection(win, data.type),
+      get: () => masterSelection(win, data['type']),
     },
     isMaster: {
       get: isMaster,
@@ -508,13 +510,13 @@ function installContextUsingStandardImpl(win) {
   });
 
   win.context.data = data;
-  win.context.location = parseUrl(data._context.location.href);
+  win.context.location = parseUrl(data['_context']['location']['href']);
   win.context.noContentAvailable = triggerNoContentAvailable;
   win.context.requestResize = triggerResizeRequest;
   win.context.renderStart = triggerRenderStart;
 
-  if (data.type === 'facebook' || data.type === 'twitter'
-    || data.type === 'github') {
+  const type = data['type'];
+  if (type === 'facebook' || type === 'twitter' || type === 'github') {
     // Only make this available to selected embeds until the
     // generic solution is available.
     win.context.updateDimensions = triggerDimensions;
@@ -588,8 +590,8 @@ function getHtml(selector, attributes, callback) {
   }));
 
   const unlisten = listenParent(window, 'get-html-result', data => {
-    if (data.messageId === messageId) {
-      callback(data.content);
+    if (data['messageId'] === messageId) {
+      callback(data['content']);
       unlisten();
     }
   });
@@ -609,7 +611,7 @@ function observeIntersection(observerCallback) {
   // Send request to received records.
   nonSensitiveDataPostMessage('send-intersections');
   return listenParent(window, 'intersection', data => {
-    observerCallback(data.changes);
+    observerCallback(data['changes']);
   });
 }
 
@@ -620,8 +622,8 @@ function observeIntersection(observerCallback) {
  */
 function updateVisibilityState(global) {
   listenParent(window, 'embed-state', function(data) {
-    global.context.hidden = data.pageHidden;
-    dispatchVisibilityChangeEvent(global, data.pageHidden);
+    global.context.hidden = data['pageHidden'];
+    dispatchVisibilityChangeEvent(global, data['pageHidden']);
   });
 }
 
@@ -629,7 +631,7 @@ function updateVisibilityState(global) {
 function dispatchVisibilityChangeEvent(win, isHidden) {
   const event = win.document.createEvent('Event');
   event.data = {hidden: isHidden};
-  event.initEvent('amp:visibilitychange', true, true);
+  event.initEvent(AmpEvents.VISIBILITY_CHANGE, true, true);
   win.dispatchEvent(event);
 }
 
@@ -641,7 +643,7 @@ function dispatchVisibilityChangeEvent(win, isHidden) {
  */
 function onResizeSuccess(observerCallback) {
   return listenParent(window, 'embed-size-changed', data => {
-    observerCallback(data.requestedHeight, data.requestedWidth);
+    observerCallback(data['requestedHeight'], data['requestedWidth']);
   });
 }
 
@@ -653,7 +655,7 @@ function onResizeSuccess(observerCallback) {
  */
 function onResizeDenied(observerCallback) {
   return listenParent(window, 'embed-size-denied', data => {
-    observerCallback(data.requestedHeight, data.requestedWidth);
+    observerCallback(data['requestedHeight'], data['requestedWidth']);
   });
 }
 
@@ -783,7 +785,7 @@ export function parseFragment(fragment) {
     if (startsWith(json, '{%22')) {
       json = decodeURIComponent(json);
     }
-    return /** @type {!JsonObject} */ (json ? JSON.parse(json) : {});
+    return /** @type {!JsonObject} */ (json ? parseJson(json) : dict());
   } catch (err) {
     return null;
   }

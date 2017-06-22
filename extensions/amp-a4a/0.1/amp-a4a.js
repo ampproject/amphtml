@@ -13,6 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import {
+  verifyHashVersion,
+  LegacySignatureVerifier,
+  PublicKeyInfoDef,
+} from './legacy-signature-verifier';
 import {
   is3pThrottled,
   getAmpAdRenderOutsideViewport,
@@ -39,10 +45,10 @@ import {viewerForDoc} from '../../../src/services';
 import {xhrFor} from '../../../src/services';
 import {endsWith} from '../../../src/string';
 import {platformFor} from '../../../src/services';
-import {cryptoFor} from '../../../src/crypto';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
 import {assertHttpsUrl} from '../../../src/url';
+import {parseJson} from '../../../src/json';
 import {handleClick} from '../../../ads/alp/handler';
 import {
   getDefaultBootstrapBaseUrl,
@@ -121,7 +127,7 @@ let CreativeMetaDataDef;
  * (promises to) keys, in the order given by the return value from the
  * signing service.
  *
- * @typedef {{serviceName: string, keys: !Array<!Promise<!../../../src/crypto.PublicKeyInfoDef>>}}
+ * @typedef {{serviceName: string, keys: !Array<!Promise<!PublicKeyInfoDef>>}}
  */
 let CryptoKeysDef;
 
@@ -249,8 +255,8 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {boolean} whether creative has been verified as AMP */
     this.isVerifiedAmpCreative_ = false;
 
-    /** @private @const {!../../../src/service/crypto-impl.Crypto} */
-    this.crypto_ = cryptoFor(this.win);
+    /** @private @const {!LegacySignatureVerifier} */
+    this.signatureVerifier_ = new LegacySignatureVerifier(this.win);
 
     /** @private {?ArrayBuffer} */
     this.creativeBody_ = null;
@@ -492,7 +498,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   shouldInitializePromiseChain_() {
-    if (!this.crypto_.isCryptoAvailable()) {
+    if (!this.signatureVerifier_.isAvailable()) {
       return false;
     }
     const slotRect = this.getIntersectionElementLayoutBox();
@@ -792,7 +798,7 @@ export class AmpA4A extends AMP.BaseElement {
             }
             const signatureVerifyStartTime = this.getNow_();
             // If the key exists, try verifying with it.
-            return this.crypto_.verifySignature(
+            return this.signatureVerifier_.verifySignature(
                 new Uint8Array(creative),
                 signature,
                 keyInfo)
@@ -813,8 +819,7 @@ export class AmpA4A extends AMP.BaseElement {
                   // necessary, because we checked that above.  But
                   // Closure type compiler can't seem to recognize that, so
                   // this guarantees it to the compiler.
-                  if (keyInfo &&
-                      this.crypto_.verifyHashVersion(signature, keyInfo)) {
+                  if (keyInfo && verifyHashVersion(signature, keyInfo)) {
                     user().error(TAG, this.element.getAttribute('type'),
                         'Key failed to validate creative\'s signature',
                         keyInfo.serviceName, keyInfo.cryptoKey);
@@ -1149,7 +1154,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   getKeyInfoSets_() {
-    if (!this.crypto_.isCryptoAvailable()) {
+    if (!this.signatureVerifier_.isAvailable()) {
       return [];
     }
     return this.getSigningServiceNames().map(serviceName => {
@@ -1183,7 +1188,8 @@ export class AmpA4A extends AMP.BaseElement {
               return {
                 serviceName: jwkSet.serviceName,
                 keys: jwkSet.keys.map(jwk =>
-                  this.crypto_.importPublicKey(jwkSet.serviceName, jwk)
+                  this.signatureVerifier_
+                      .importPublicKey(jwkSet.serviceName, jwk)
                       .catch(err => {
                         user().error(TAG, this.element.getAttribute('type'),
                             `error importing keys for: ${jwkSet.serviceName}`,
@@ -1477,7 +1483,7 @@ export class AmpA4A extends AMP.BaseElement {
       return null;
     }
     try {
-      const metaDataObj = JSON.parse(
+      const metaDataObj = parseJson(
           creative.slice(metadataStart + metadataString.length, metadataEnd));
       const ampRuntimeUtf16CharOffsets =
         metaDataObj['ampRuntimeUtf16CharOffsets'];

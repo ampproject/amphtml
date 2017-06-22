@@ -21,7 +21,7 @@ import {VideoEvents} from '../../../src/video-interface';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
-import {listen} from '../../../src/event-helper';
+import {getData, listen} from '../../../src/event-helper';
 import {videoManagerForDoc} from '../../../src/services';
 import {parseQueryString} from '../../../src/url';
 
@@ -185,10 +185,10 @@ class AmpDailymotion extends AMP.BaseElement {
         event.source != this.iframe_.contentWindow) {
       return;
     }
-    if (!event.data || !event.type || event.type != 'message') {
+    if (!getData(event) || !event.type || event.type != 'message') {
       return;  // Event empty
     }
-    const data = parseQueryString(event.data);
+    const data = parseQueryString(/** @type {string} */ (getData(event)));
     if (data === undefined) {
       return; // The message isn't valid
     }

@@ -1,0 +1,102 @@
+/**
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// To generate testdata-experiments.js, copy-paste the contents of this file
+// into a Chrome developer console, then paste the results from the clipboard.
+
+crypto.subtle
+    .generateKey(
+    {
+      name: 'RSASSA-PKCS1-v1_5',
+      modulusLength: 2048,
+      publicExponent: Uint8Array.of(1, 0, 1),
+      hash: {name: 'SHA-256'},
+    },
+    true, ['sign', 'verify'])
+    .then(({publicKey, privateKey}) => {
+      const toBinary = config =>
+          new TextEncoder().encode(JSON.stringify(config));
+      const pack = (version, length, binaryConfig) => {
+        const data = new Uint8Array(binaryConfig.length + 5);
+        data[0] = version;
+        new DataView(data.buffer).setUint32(1, length, false);
+        data.set(binaryConfig, 5);
+        return data;
+      };
+      const toBase64 = (data, signature) => {
+        const token = new Uint8Array(data.length + signature.length);
+        token.set(data);
+        token.set(signature, data.length);
+        return btoa(token.reduce(
+            (base64, octet) => base64 + String.fromCharCode(octet), ''));
+      };
+      const sign = data =>
+          crypto.subtle
+              .sign(
+                  {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}},
+              privateKey, data)
+              .then(signature => toBase64(data, new Uint8Array(signature)));
+      const correctBinaryConfig = toBinary({
+        origin: 'https://www.google.com',
+        experiment: 'amp-expires-later',
+        expiration: 95617602000000,
+      });
+      const expiredBinaryConfig = toBinary({
+        origin: 'https://www.google.com',
+        experiment: 'amp-expired',
+        expiration: 1232427600000,
+      });
+      const correctData =
+          pack(0, correctBinaryConfig.length, correctBinaryConfig);
+      return Promise
+          .all([
+            crypto.subtle.exportKey('jwk', publicKey).then(JSON.stringify),
+            sign(correctData),
+            sign(pack(47, correctBinaryConfig.length, correctBinaryConfig)),
+            sign(pack(0, 999999, correctBinaryConfig)),
+            toBase64(correctData, crypto.getRandomValues(new Uint8Array(256))),
+            sign(pack(0, expiredBinaryConfig.length, expiredBinaryConfig)),
+          ])
+          .then(
+          results => `/**
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/* eslint-disable */
+// Generated from generate-testdata-experiments.js_.
+export const publicJwk = ${results[0]};
+export const correctToken = '${results[1]}';
+export const tokenWithBadVersion = '${results[2]}';
+export const tokenWithBadConfigLength = '${results[3]}';
+export const tokenWithBadSignature = '${results[4]}';
+export const tokenWithExpiredExperiment = '${results[5]}';
+`);
+    })
+    .then(copy)
+    .then(() => {
+      console.log('Generated code copied to clipboard.');
+    });

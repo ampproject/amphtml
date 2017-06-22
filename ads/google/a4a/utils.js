@@ -23,6 +23,7 @@ import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isProxyOrigin} from '../../../src/url';
+import {parseJson} from '../../../src/json';
 import {
   resourcesForDoc,
   viewerForDoc,
@@ -55,9 +56,10 @@ const AmpAdImplementation = {
 
 /** @const {!Object} */
 export const ValidAdContainerTypes = {
-  'AMP-STICKY-AD': 'sa',
+  'AMP-CAROUSEL': 'ac',
   'AMP-FX-FLYING-CARPET': 'fc',
   'AMP-LIGHTBOX': 'lb',
+  'AMP-STICKY-AD': 'sa',
 };
 
 /** @const {string} */
@@ -205,12 +207,12 @@ export function googlePageParameters(win, doc, startTime, output = 'html') {
   const referrerPromise = viewerForDoc(doc).getReferrerUrl();
   return getOrCreateAdCid(doc, 'AMP_ECID_GOOGLE', '_ga')
       .then(clientId => referrerPromise.then(referrer => {
-        const documentInfo = documentInfoForDoc(win.document);
+        const documentInfo = documentInfoForDoc(doc);
         // Read by GPT for GA/GPT integration.
         win.gaGlobal = win.gaGlobal ||
         {cid: clientId, hid: documentInfo.pageViewId};
         const screen = win.screen;
-        const viewport = viewportForDoc(win.document);
+        const viewport = viewportForDoc(doc);
         const viewportRect = viewport.getRect();
         const viewportSize = viewport.getSize();
         return {
@@ -229,9 +231,8 @@ export function googlePageParameters(win, doc, startTime, output = 'html') {
           'u_h': screen ? screen.height : null,
           'u_tz': -new Date().getTimezoneOffset(),
           'u_his': getHistoryLength(win),
-          'brdim': additionalDimensions(win, viewportSize),
-          'isw': viewportSize.width,
-          'ish': viewportSize.height,
+          'isw': win != win.top ? viewportSize.width : null,
+          'ish': win != win.top ? viewportSize.height : null,
           'art': isCanary(win) ? '2' : null,
           'url': documentInfo.canonicalUrl,
           'top': win != win.top ? topWindowUrlOrDomain(win) : null,
@@ -397,12 +398,13 @@ function elapsedTimeWithCeiling(time, start) {
 /**
  * @param {!Window} win
  * @param {string=} opt_cid
+ * @param {(!Node|!../../../src/service/ampdoc-impl.AmpDoc)=} opt_nodeOrDoc
  * @return {number} The correlator.
  */
-export function getCorrelator(win, opt_cid) {
+export function getCorrelator(win, opt_cid, opt_nodeOrDoc) {
   if (!win.ampAdPageCorrelator) {
     win.ampAdPageCorrelator = makeCorrelator(
-        opt_cid, documentInfoForDoc(win.document).pageViewId);
+        opt_cid, documentInfoForDoc(opt_nodeOrDoc || win.document).pageViewId);
   }
   return win.ampAdPageCorrelator;
 }
@@ -448,23 +450,17 @@ export function additionalDimensions(win, viewportSize) {
  * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
  *   XHR service FetchResponseHeaders object containing the response
  *   headers.
- * @param {number=} opt_deltaTime The time difference, in ms, between the
- *   lifecycle reporter's initialization and now.
- * @param {number=} opt_initTime The initialization time, in ms, of the
- *   lifecycle reporter.
- *   TODO(levitzky) Remove the above two params once AV numbers stabilize.
  * @return {?JsonObject} config or null if invalid/missing.
  */
-export function extractAmpAnalyticsConfig(
-    a4a, responseHeaders, opt_deltaTime = -1, opt_initTime = -1) {
+export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
   if (!responseHeaders.has(AMP_ANALYTICS_HEADER)) {
     return null;
   }
   try {
     const analyticsConfig =
-      JSON.parse(responseHeaders.get(AMP_ANALYTICS_HEADER));
+        parseJson(responseHeaders.get(AMP_ANALYTICS_HEADER));
     dev().assert(Array.isArray(analyticsConfig['url']));
-    const urls = analyticsConfig.url;
+    const urls = analyticsConfig['url'];
     if (!urls.length) {
       return null;
     }
@@ -494,44 +490,16 @@ export function extractAmpAnalyticsConfig(
       },
     });
 
-    // CSI base request.
-    const correlator = getCorrelator(a4a.win);
-    const slotId = a4a.element.getAttribute('data-amp-slot-index');
-    const qqid = (responseHeaders && responseHeaders.has(QQID_HEADER))
-        ? responseHeaders.get(QQID_HEADER) : 'null';
-    const eids = encodeURIComponent(
-        a4a.element.getAttribute(EXPERIMENT_ATTRIBUTE));
-    const adType = a4a.element.getAttribute('type');
-    const baseCsiUrl = 'https://csi.gstatic.com/csi?s=a4a' +
-        `&c=${correlator}&slotId=${slotId}&qqid.${slotId}=${qqid}` +
-        `&dt=${opt_initTime}` +
-        (eids != 'null' ? `&e.${slotId}=${eids}` : '') +
-        `&rls=$internalRuntimeVersion$&adt.${slotId}=${adType}`;
-    opt_deltaTime = Math.round(opt_deltaTime);
-
-    // Duscover and build visibility endpoints.
+    // Discover and build visibility endpoints.
     const requests = dict();
     for (let idx = 1; idx <= urls.length; idx++) {
       // TODO: Ensure url is valid and not freeform JS?
       requests[`visibility${idx}`] = `${urls[idx - 1]}`;
     }
-    // Add CSI ping for visibility.
-    requests['visibilityCsi'] = baseCsiUrl +
-        `&met.a4a.${slotId}=visibilityCsi.${opt_deltaTime}`;
     // Security review needed here.
     config['requests'] = requests;
     config['triggers']['continuousVisible']['request'] =
         Object.keys(requests);
-
-    // Add CSI pings for render-start and ini-load.
-    config['requests']['iniLoadCsi'] = baseCsiUrl +
-        `&met.a4a.${slotId}=iniLoadCsi.${opt_deltaTime}`;
-    config['requests']['renderStartCsi'] = baseCsiUrl +
-        `&met.a4a.${slotId}=renderStartCsi.${opt_deltaTime}`;
-    config['triggers']['continuousVisibleIniLoad']['request'] =
-        'iniLoadCsi';
-    config['triggers']['continuousVisibleRenderStart']['request'] =
-        'renderStartCsi';
     return config;
   } catch (err) {
     dev().error('AMP-A4A', 'Invalid analytics', err,
@@ -560,4 +528,50 @@ export function mergeExperimentIds(newIds, currentIdString) {
   currentIdString = currentIdString || '';
   return currentIdString + (currentIdString && newIdString ? ',' : '')
       + newIdString;
+}
+
+/**
+ * Adds two CSI signals to the given amp-analytics configuration object, one
+ * for render-start, and one for ini-load.
+ *
+ * @param {!Window} win
+ * @param {!Element} element The ad slot.
+ * @param {!JsonObject} config The original config object.
+ * @param {?string} qqid
+ * @param {boolean} isVerifiedAmpCreative
+ * @param {number} deltaTime The time difference, in ms, between the lifecycle
+ *   reporter's initialization and now.
+ * @param {number} initTime The initialization time, in ms, of the lifecycle
+ *   reporter.
+ * @return {?JsonObject} config or null if invalid/missing.
+ */
+export function addCsiSignalsToAmpAnalyticsConfig(win, element, config,
+    qqid, isVerifiedAmpCreative, deltaTime, initTime) {
+  // Add CSI pingbacks.
+  const correlator = getCorrelator(win);
+  const slotId = Number(element.getAttribute('data-amp-slot-index'));
+  const eids = encodeURIComponent(
+      element.getAttribute(EXPERIMENT_ATTRIBUTE));
+  const adType = element.getAttribute('type');
+  const baseCsiUrl = 'https://csi.gstatic.com/csi?s=a4a' +
+      `&c=${correlator}&slotId=${slotId}&qqid.${slotId}=${qqid}` +
+      `&dt=${initTime}` +
+      (eids != 'null' ? `&e.${slotId}=${eids}` : '') +
+      `&rls=$internalRuntimeVersion$&adt.${slotId}=${adType}`;
+  deltaTime = Math.round(deltaTime);
+  const isAmpSuffix = isVerifiedAmpCreative ? 'Friendly' : 'CrossDomain';
+  config['requests']['iniLoadCsi'] = baseCsiUrl +
+      `&met.a4a.${slotId}=iniLoadCsi${isAmpSuffix}.${deltaTime}`;
+  config['requests']['renderStartCsi'] = baseCsiUrl +
+      `&met.a4a.${slotId}=renderStartCsi${isAmpSuffix}.${deltaTime}`;
+  config['triggers']['continuousVisibleIniLoad']['request'] =
+      'iniLoadCsi';
+  config['triggers']['continuousVisibleRenderStart']['request'] =
+      'renderStartCsi';
+
+  // Add CSI ping for visibility.
+  config['requests']['visibilityCsi'] = baseCsiUrl +
+      `&met.a4a.${slotId}=visibilityCsi.${deltaTime}`;
+  config['triggers']['continuousVisible']['request'].push('visibilityCsi');
+  return config;
 }

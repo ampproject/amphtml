@@ -17,13 +17,14 @@
 import {ActionTrust} from '../action-trust';
 import {OBJECT_STRING_ARGS_KEY} from '../service/action-impl';
 import {Layout, getLayoutClass} from '../layout';
-import {actionServiceForDoc} from '../services';
+import {actionServiceForDoc, urlReplacementsForDoc} from '../services';
 import {bindForDoc} from '../services';
-import {dev, user} from '../log';
-import {registerServiceBuilderForDoc} from '../service';
-import {historyForDoc} from '../services';
-import {resourcesForDoc} from '../services';
 import {computedStyle, getStyle, toggle} from '../style';
+import {dev, user} from '../log';
+import {historyForDoc} from '../services';
+import {isProtocolValid} from '../url';
+import {registerServiceBuilderForDoc} from '../service';
+import {resourcesForDoc} from '../services';
 import {vsyncFor} from '../services';
 
 /**
@@ -34,6 +35,9 @@ function isShowable(element) {
   return getStyle(element, 'display') == 'none'
       || element.hasAttribute('hidden');
 }
+
+/** @const {string} */
+const TAG = 'STANDARD-ACTIONS';
 
 /**
  * This service contains implementations of some of the most typical actions,
@@ -54,6 +58,9 @@ export class StandardActions {
 
     /** @const @private {!./resources-impl.Resources} */
     this.resources_ = resourcesForDoc(ampdoc);
+
+    /** @const @private {!./url-replacements-impl.UrlReplacements} */
+    this.urlReplacements_ = urlReplacementsForDoc(ampdoc);
 
     this.installActions_(this.actions_);
   }
@@ -86,6 +93,9 @@ export class StandardActions {
     switch (invocation.method) {
       case 'setState':
         this.handleAmpSetState_(invocation);
+        return;
+      case 'navigateTo':
+        this.handleAmpNavigateTo_(invocation);
         return;
       case 'goBack':
         this.handleAmpGoBack_(invocation);
@@ -125,9 +135,27 @@ export class StandardActions {
    * @param {!./action-impl.ActionInvocation} invocation
    * @private
    */
+  handleAmpNavigateTo_(invocation) {
+    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
+      return;
+    }
+    const url = invocation.args['url'];
+    if (!isProtocolValid(url)) {
+      user().error(TAG, 'Cannot navigate to invalid protocol: ' + url);
+      return;
+    }
+    const expandedUrl = this.urlReplacements_.expandUrlSync(url);
+    const node = invocation.target;
+    const win = (node.ownerDocument || node).defaultView;
+    win.location = expandedUrl;
+  }
+
+  /**
+   * @param {!./action-impl.ActionInvocation} invocation
+   * @private
+   */
   handleAmpGoBack_(invocation) {
-    // TODO(choumx, #9699): HIGH.
-    if (!invocation.satisfiesTrust(ActionTrust.MEDIUM)) {
+    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
       return;
     }
     historyForDoc(this.ampdoc).goBack();
@@ -161,7 +189,7 @@ export class StandardActions {
 
     if (target.classList.contains(getLayoutClass(Layout.NODISPLAY))) {
       user().warn(
-          'STANDARD-ACTIONS',
+          TAG,
           'Elements with layout=nodisplay cannot be dynamically shown.',
           target);
 
@@ -173,7 +201,7 @@ export class StandardActions {
           !isShowable(target)) {
 
         user().warn(
-            'STANDARD-ACTIONS',
+            TAG,
             'Elements can only be dynamically shown when they have the ' +
             '"hidden" attribute set or when they were dynamically hidden.',
             target);

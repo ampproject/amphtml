@@ -48,8 +48,11 @@ function serve() {
       'SERVE_PORT': port,
       'SERVE_HOST': host,
       'SERVE_USEHTTPS': useHttps},
+  })
+  .once('exit', function () {
+    util.log(util.colors.green('Shutting down server'));
+    process.exit();
   });
-
   util.log(util.colors.yellow('Run `gulp build` then go to '
       + getHost() + '/examples/article.amp.html'
   ));

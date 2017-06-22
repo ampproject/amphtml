@@ -27,8 +27,9 @@ import {cryptoFor} from '../../../src/crypto';
 import {timerFor, viewerForDoc, xhrFor} from '../../../src/services';
 import {toggle} from '../../../src/style';
 import {isEnumValue} from '../../../src/types';
+import {parseJson} from '../../../src/json';
 import {Activity} from './activity-impl';
-import {Cid} from './cid-impl';
+import {Cid} from '../../../src/service/cid-impl';
 import {
     InstrumentationService,
     instrumentationServicePromiseForDoc,
@@ -85,7 +86,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.type_ = null;
 
     /** @private {!boolean} */
-    this.isSandbox_ = element.hasAttribute('sandbox');
+    this.isSandbox_ = false;
 
     /**
      * @private {Object<string, string>} A map of request names to the request
@@ -137,6 +138,8 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.isSandbox_ = this.element.hasAttribute('sandbox');
+
     this.element.setAttribute('aria-hidden', 'true');
 
     this.consentNotificationId_ = this.element
@@ -422,7 +425,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       if (children.length == 1) {
         const child = children[0];
         if (isJsonScriptTag(child)) {
-          inlineConfig = JSON.parse(children[0].textContent);
+          inlineConfig = parseJson(children[0].textContent);
         } else {
           user().error(TAG, 'The analytics config should ' +
               'be put in a <script> tag with type="application/json"');

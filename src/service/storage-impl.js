@@ -18,7 +18,7 @@ import {registerServiceBuilderForDoc} from '../service';
 import {getSourceOrigin} from '../url';
 import {dev} from '../log';
 import {dict} from '../utils/object';
-import {recreateNonProtoObject} from '../json';
+import {parseJson, recreateNonProtoObject} from '../json';
 import {viewerForDoc} from '../services';
 
 /** @const */
@@ -110,7 +110,7 @@ export class Storage {
   getStore_() {
     if (!this.storePromise_) {
       this.storePromise_ = this.binding_.loadBlob(this.origin_)
-          .then(blob => blob ? JSON.parse(atob(blob)) : {})
+          .then(blob => blob ? parseJson(atob(blob)) : {})
           .catch(reason => {
             dev().expectedError(TAG, 'Failed to load store: ', reason);
             return {};

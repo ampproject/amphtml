@@ -38,15 +38,13 @@ limitations under the License.
 ## Behavior
 
 The `amp-audio` component loads the audio resource specified by its `src` attribute at a time determined by the runtime. It can be controlled in much the same way as a standard HTML5 `audio` tag.
-Like all embedded external resources in an AMP file, the audio is "lazily" loaded, only when the `amp-audio` element is in or near the viewport.
+Like all embedded external resources in an AMP file, the audio is "lazily" loaded, only when the `amp-audio` element is in or near the viewport
 
-The `amp-audio` component HTML accepts up to three unique types of HTML nodes as children - `source` tags, a placeholder for before the audio starts, and a fallback if the browser doesn’t support HTML5 audio.
+The `amp-audio` component accepts up to three unique types of HTML nodes as children:
 
-`source` tag children can be used in the same way as the standard `audio` tag, to specify different source files to play.
-
-One or zero immediate child nodes can have the `placeholder` attribute. If present, this node and its children form a placeholder that will display instead of the audio. A click or tap anywhere inside of the `amp-audio` container will replace the placeholder with the audio itself.
-
-One or zero immediate child nodes can have the `fallback` attribute. If present, this node and its children form the content that will be displayed if HTML5 audio is not supported on the user’s browser.
+- `source` tags: Just like in the HTML `<audio>` tag, you can add `<source>` tag children to specify different source media files to play.
+-  a placeholder for before the audio starts: One or zero immediate child nodes can have the `placeholder` attribute. If present, this node and its children form a placeholder that will display instead of the audio. A click or tap anywhere inside of the `amp-audio` container will replace the placeholder with the audio itself.
+-  a fallback if the browser doesn’t support HTML5 audio: One or zero immediate child nodes can have the `fallback` attribute. If present, this node and its children form the content that displays if HTML5 audio is not supported on the user’s browser.
 
 For example:
 ```html
@@ -61,20 +59,24 @@ For example:
 
 ## Attributes
 
-**autoplay**
+##### src 
+
+Required if no `<source>` children are present. Must be HTTPS.
+
+##### autoplay
 
 If present, the attribute implies that the audio will start playing as soon as
 it is ready.
 
-**loop**
+##### loop
 
-If present, will automatically loop the audio back to the start upon reaching the end.
+If present, the audio will automatically loop back to the start upon reaching the end.
 
-**muted**
+##### muted
 
 If present, will mute the audio by default.
 
-**common attributes**
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 

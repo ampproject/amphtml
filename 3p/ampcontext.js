@@ -20,6 +20,7 @@ import {MessageType} from '../src/3p-frame-messaging';
 import {nextTick} from './3p';
 import {tryParseJson} from '../src/json';
 import {isObject} from '../src/types';
+import {AmpEvents} from '../src/amp-events';
 
 export class AbstractAmpContext {
 
@@ -129,7 +130,7 @@ export class AbstractAmpContext {
   dispatchVisibilityChangeEvent_() {
     const event = this.win_.document.createEvent('Event');
     event.data = {hidden: this.hidden};
-    event.initEvent('amp:visibilitychange', true, true);
+    event.initEvent(AmpEvents.VISIBILITY_CHANGE, true, true);
     this.win_.dispatchEvent(event);
   }
 
@@ -142,7 +143,7 @@ export class AbstractAmpContext {
    */
   onPageVisibilityChange(callback) {
     return this.client_.registerCallback(MessageType.EMBED_STATE, data => {
-      callback({hidden: data.pageHidden});
+      callback({hidden: data['pageHidden']});
     });
   }
 
@@ -194,7 +195,7 @@ export class AbstractAmpContext {
    */
   onResizeSuccess(callback) {
     this.client_.registerCallback(MessageType.EMBED_SIZE_CHANGED, obj => {
-      callback(obj.requestedHeight, obj.requestedWidth); });
+      callback(obj['requestedHeight'], obj['requestedWidth']); });
   };
 
   /**
@@ -206,7 +207,7 @@ export class AbstractAmpContext {
    */
   onResizeDenied(callback) {
     this.client_.registerCallback(MessageType.EMBED_SIZE_DENIED, obj => {
-      callback(obj.requestedHeight, obj.requestedWidth);
+      callback(obj['requestedHeight'], obj['requestedWidth']);
     });
   };
 

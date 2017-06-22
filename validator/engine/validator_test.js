@@ -86,9 +86,14 @@ function findHtmlFilesRelativeToTestdata() {
   for (const root of process.env['TESTDATA_ROOTS'].split(':')) {
     if (path.basename(root) === 'extensions') {
       for (const extension of readdir(root)) {
-        const extensionVersions = ['0.1', '1.0'];
-        for (const extensionVersion of extensionVersions) {
-          const testPath = path.join(extension, extensionVersion, 'test');
+        const extensionFolder = path.join(root, extension);
+        if (!isdir(extensionFolder)) {
+          // Skip if not a folder
+          continue;
+        }
+        // Get all versions
+        for (const possibleVersion of readdir(extensionFolder)) {
+          const testPath = path.join(extension, possibleVersion, 'test');
           if (isdir(path.join(root, testPath))) {
             testSubdirs.push({root: root, subdir: testPath});
           }
@@ -543,8 +548,8 @@ describe('ValidatorRulesMakeSense', () => {
       // AMP4ADS Creative Format document is the source of this whitelist.
       // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
       const whitelistedAmp4AdsExtensions = {
-        'AMP-AD-EXIT': 0,
         'AMP-ACCORDION': 0,
+        'AMP-AD-EXIT': 0,
         'AMP-ANALYTICS': 0,
         'AMP-ANIM': 0,
         'AMP-AUDIO': 0,
@@ -555,7 +560,8 @@ describe('ValidatorRulesMakeSense', () => {
         'AMP-IMG': 0,
         'AMP-PIXEL': 0,
         'AMP-SOCIAL-SHARE': 0,
-        'AMP-VIDEO': 0
+        'AMP-VIDEO': 0,
+        'AMP-YOUTUBE': 0
       };
       it(tagSpec.tagName + ' has html_format either explicitly or implicitly' +
           ' set for AMP4ADS but ' + tagSpec.tagName + ' is not whitelisted' +

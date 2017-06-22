@@ -119,6 +119,9 @@ export class LaterpayVendor {
     this.containerEmpty_ = true;
 
     /** @private {?Node} */
+    this.innerContainer_ = null;
+
+    /** @private {?Node} */
     this.selectedPurchaseOption_ = null;
 
     /** @private {?Node} */
@@ -289,6 +292,7 @@ export class LaterpayVendor {
     }
     return this.vsync_.mutatePromise(() => {
       this.containerEmpty_ = true;
+      this.innerContainer_ = null;
       removeChildren(this.getContainer_());
     });
   }
@@ -298,6 +302,8 @@ export class LaterpayVendor {
    */
   renderPurchaseOverlay_() {
     const dialogContainer = this.getContainer_();
+    this.innerContainer_ = this.createElement_('div');
+    this.innerContainer_.className = TAG + '-container';
     this.renderTextBlock_('header');
     const listContainer = this.createElement_('ul');
     this.purchaseConfig_.premiumcontent['tp_title'] =
@@ -315,17 +321,31 @@ export class LaterpayVendor {
     const purchaseButton = this.createElement_('button');
     purchaseButton.className = TAG + '-purchase-button';
     purchaseButton.textContent = this.i18n_.defaultButton;
-    purchaseButton.disabled = true;
     this.purchaseButton_ = purchaseButton;
     this.purchaseButtonListener_ = listen(purchaseButton, 'click', ev => {
-      this.handlePurchase_(ev, this.selectedPurchaseOption_.value);
+      const value = this.selectedPurchaseOption_.value;
+      const purchaseType = this.selectedPurchaseOption_.dataset.purchaseType;
+      this.handlePurchase_(ev, value, purchaseType);
     });
-    dialogContainer.appendChild(listContainer);
-    dialogContainer.appendChild(purchaseButton);
-    dialogContainer.appendChild(
+    this.innerContainer_.appendChild(listContainer);
+    this.innerContainer_.appendChild(purchaseButton);
+    this.innerContainer_.appendChild(
         this.createAlreadyPurchasedLink_(this.purchaseConfig_.apl));
     this.renderTextBlock_('footer');
+    dialogContainer.appendChild(this.innerContainer_);
+    dialogContainer.appendChild(this.createLaterpayBadge_());
     this.containerEmpty_ = false;
+    this.preselectFirstOption_(listContainer.firstElementChild);
+  }
+
+  /**
+   * @private
+   * @param {!Node} firstOption
+   */
+  preselectFirstOption_(firstOption) {
+    const firstInput = firstOption.querySelector('input[type="radio"]');
+    firstInput.checked = true;
+    this.selectPurchaseOption_(firstInput);
   }
 
   /**
@@ -337,10 +357,25 @@ export class LaterpayVendor {
       const el = this.createElement_('p');
       el.className = TAG + '-' + area;
       el.textContent = this.i18n_[area];
-      this.getContainer_().appendChild(el);
+      this.innerContainer_.appendChild(el);
     }
   }
 
+  /**
+   * @private
+   * @return {!Node}
+   */
+  createLaterpayBadge_() {
+    const a = this.createElement_('a');
+    a.href = 'https://laterpay.net';
+    a.target = '_blank';
+    a.textContent = 'LaterPay';
+    const el = this.createElement_('p');
+    el.className = TAG + '-badge';
+    el.textContent = 'Powered by ';
+    el.appendChild(a);
+    return el;
+  }
 
   /**
    * @param {!PurchaseOptionDef} option
@@ -437,7 +472,7 @@ export class LaterpayVendor {
     a.href = href;
     a.textContent = this.i18n_.alreadyPurchasedLink;
     this.alreadyPurchasedListener_ = listen(a, 'click', ev => {
-      this.handlePurchase_(ev, href);
+      this.handlePurchase_(ev, href, 'alreadyPurchased');
     });
     p.appendChild(a);
     return p;
@@ -449,33 +484,39 @@ export class LaterpayVendor {
    */
   handlePurchaseOptionSelection_(ev) {
     ev.preventDefault();
+    this.selectPurchaseOption_(ev.target);
+  }
+
+  /**
+   * @param {!Node} target
+   * @private
+   */
+  selectPurchaseOption_(target) {
     const selectedOptionClassname = TAG + '-selected';
     const prevPurchaseOption = this.selectedPurchaseOption_;
-    const purchaseActionLabel = ev.target.dataset.purchaseActionLabel;
+    const purchaseActionLabel = target.dataset.purchaseActionLabel;
     if (prevPurchaseOption &&
         prevPurchaseOption.classList.contains(selectedOptionClassname)) {
       prevPurchaseOption.classList.remove(selectedOptionClassname);
     }
-    this.selectedPurchaseOption_ = ev.target;
+    this.selectedPurchaseOption_ = target;
     this.selectedPurchaseOption_.classList.add(selectedOptionClassname);
-    if (this.purchaseButton_.disabled) {
-      this.purchaseButton_.disabled = false;
-    }
     this.purchaseButton_.textContent = purchaseActionLabel;
   }
 
   /**
    * @param {!Event} ev
+   * @param {!string} purchaseUrl
+   * @param {!string} purchaseType
    * @private
    */
-  handlePurchase_(ev, purchaseUrl) {
+  handlePurchase_(ev, purchaseUrl, purchaseType) {
     ev.preventDefault();
     const urlPromise = this.accessService_.buildUrl(
         purchaseUrl, /* useAuthData */ false);
     return urlPromise.then(url => {
       dev().fine(TAG, 'Authorization URL: ', url);
-      this.accessService_.loginWithUrl(
-          url, this.selectedPurchaseOption_.dataset.purchaseType);
+      this.accessService_.loginWithUrl(url, purchaseType);
     });
   }
 

@@ -240,9 +240,44 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
 
     it('injects amp analytics', () => {
       impl.ampAnalyticsConfig_ = {
-        'request': 'www.example.com',
-        'triggers': {
-          'on': 'visible',
+        transport: {beacon: false, xhrpost: false},
+        requests: {
+          visibility1: 'https://foo.com?hello=world',
+          visibility2: 'https://bar.com?a=b',
+        },
+        triggers: {
+          continuousVisible: {
+            on: 'visible',
+            request: ['visibility1', 'visibility2'],
+            visibilitySpec: {
+              selector: 'amp-ad',
+              selectionMethod: 'closest',
+              visiblePercentageMin: 50,
+              continuousTimeMin: 1000,
+            },
+          },
+          continuousVisibleIniLoad: {
+            on: 'ini-load',
+            selector: 'amp-ad',
+            selectionMethod: 'closest',
+          },
+          continuousVisibleRenderStart: {
+            on: 'render-start',
+            selector: 'amp-ad',
+            selectionMethod: 'closest',
+          },
+        },
+      };      // To placate assertion.
+      impl.responseHeaders_ = {
+        get: function(name) {
+          if (name == 'X-QQID') {
+            return 'qqid_string';
+          }
+        },
+        has: function(name) {
+          if (name == 'X-QQID') {
+            return true;
+          }
         },
       };
       impl.onCreativeRender(false);
@@ -390,7 +425,6 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           /(\?|&)u_tz=-?[0-9]+(&|$)/,
           /(\?|&)u_his=[0-9]+(&|$)/,
           /(\?|&)oid=2(&|$)/,
-          /(\?|&)brdim=-?[0-9]+(%2C-?[0-9]+){9}(&|$)/,
           /(\?|&)isw=[0-9]+(&|$)/,
           /(\?|&)ish=[0-9]+(&|$)/,
           /(\?|&)pfx=(1|0)(&|$)/,
