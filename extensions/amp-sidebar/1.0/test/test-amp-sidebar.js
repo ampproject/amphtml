@@ -79,10 +79,13 @@
            // Create our individual toolbars
            options.toolbars.forEach(toolbar => {
              const navToolbar = iframe.doc.createElement('nav');
-             if (typeof toolbar === 'string') {
-               navToolbar.setAttribute('toolbar', toolbar);
+             if (toolbar.media) {
+               navToolbar.setAttribute('toolbar', toolbar.media);
              } else {
                navToolbar.setAttribute('toolbar', DEFAULT_TOOLBAR_MEDIA);
+             }
+             if (toolbar.toolbarOnlyOnNav) {
+               navToolbar.setAttribute('toolbar-only', 'true');
              }
              const toolbarList = iframe.doc.createElement('ul');
              for (let i = 0; i < 3; i++) {
@@ -624,7 +627,11 @@
      it('should create multiple toolbar target elements, \
      containing the navigation toolbar element', () => {
        return getAmpSidebar({
-         toolbars: [true, '(min-width: 1024px)'],
+         toolbars: [true,
+           {
+             media: '(min-width: 1024px)',
+           },
+         ],
        }).then(obj => {
          const sidebarElement = obj.ampSidebar;
          const toolbarNavElements = Array.prototype
@@ -636,7 +643,7 @@
      });
 
      it('toolbar header should be hidden for a \
-     window size less than DEFAULT_TOOLBAR_MEDIA', () => {
+     invalid window size for DEFAULT_TOOLBAR_MEDIA', () => {
        return getAmpSidebar({
          toolbars: [true],
        }).then(obj => {
@@ -656,7 +663,7 @@
      });
 
      it('toolbar header should be shown for a \
-     window size more than DEFAULT_TOOLBAR_MEDIA', () => {
+     valid window size for DEFAULT_TOOLBAR_MEDIA', () => {
        return getAmpSidebar({
          toolbars: [true],
        }).then(obj => {
@@ -671,6 +678,33 @@
            });
            expect(toolbarElements[0].parentElement.style.display)
                .to.be.equal('');
+         });
+       });
+     });
+
+     it('should hide <nav toolbar> elements with toolbar-only, \
+     inside the sidebar, but not inside the toolbar, for a valid \
+     window size for DEFAULT_TOOLBAR_MEDIA', () => {
+       return getAmpSidebar({
+         toolbars: [{
+           toolbarOnlyOnNav: true,
+         }],
+       }).then(obj => {
+         const sidebarElement = obj.ampSidebar;
+         const toolbars = sidebarElement.implementation_.toolbars_;
+         resizeIframeToWidth(obj.iframe, '4000px', () => {
+           toolbars.forEach(toolbar => {
+             toolbar.onLayoutChange();
+           });
+           const toolbarNavElements = Array.prototype
+                  .slice.call(sidebarElement.ownerDocument
+                  .querySelectorAll('nav[toolbar]'), 0);
+           const hiddenToolbarNavElements = Array.prototype
+                  .slice.call(sidebarElement.ownerDocument
+                  .querySelectorAll('nav[style]'), 0);
+           expect(toolbarNavElements.length).to.be.equal(2);
+           expect(hiddenToolbarNavElements.length).to.be.equal(1);
+           expect(toolbars.length).to.be.equal(1);
          });
        });
      });
