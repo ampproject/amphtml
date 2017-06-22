@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {toggle} from '../../../src/style';
+import {toggle, setStyles} from '../../../src/style';
 
 /** @const */
 const TOOLBAR_ELEMENT_CLASS = 'i-amphtml-toolbar';
@@ -32,6 +32,9 @@ export class Toolbar {
     /** @private {!Object} **/
     this.win_ = win;
 
+    /** @private {!Element} */
+    this.body_ = this.sidebarElement_.ownerDocument.body;
+
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = vsync;
 
@@ -43,6 +46,9 @@ export class Toolbar {
 
     /** @private {Element|undefined} */
     this.targetElement_ = undefined;
+
+    /** @private {Element|undefined} */
+    this.placeholder_ = undefined;
 
     /** @private {!boolean} **/
     this.toolbarShown_ = false;
@@ -98,6 +104,9 @@ export class Toolbar {
     this.toolbarClone_ = this.toolbarDOMElement_.cloneNode(true);
     this.toolbarClone_.className = TOOLBAR_ELEMENT_CLASS;
     this.targetElement_.appendChild(this.toolbarClone_);
+    this.placeholder_ =
+      this.toolbarDOMElement_.ownerDocument.createElement('div');
+    this.targetElement_.appendChild(this.placeholder_);
     toggle(this.targetElement_, false);
     fragment.appendChild(this.targetElement_);
     return fragment;
@@ -133,6 +142,11 @@ export class Toolbar {
           toggle(element, false);
         });
       }
+      console.log(this.toolbarClone_.offsetHeight);
+      // Use the placeholder to fill the height of the toolbar
+      setStyles(this.placeholder_, {
+        'height': this.toolbarClone_.offsetHeight + 'px',
+      });
       this.toolbarShown_ = true;
     });
   }
