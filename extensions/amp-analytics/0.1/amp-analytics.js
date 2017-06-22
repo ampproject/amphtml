@@ -302,7 +302,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
-   * Receives any response that may be sent from the cross-domain iframe
+   * Receives any response that may be sent from the cross-domain iframe.
    * @param {!string} type The type parameter of the cross-domain iframe
    * @param {!../../../src/3p-analytics-common.AmpAnalytics3pResponse} response
    * The response message from the iframe that was specified in the
