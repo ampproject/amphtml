@@ -17,7 +17,7 @@
 const FINAL_URL_RE = /^(data|https)\:/i;
 const DEG_TO_RAD = 2 * Math.PI / 360;
 const GRAD_TO_RAD = Math.PI / 200;
-const VAR_CSS_RE = /(calc|var|url)\(/i;
+const VAR_CSS_RE = /(calc|var|url|rand|width|height)\(/i;
 const INFINITY_RE = /^(infinity|infinite)$/i;
 
 
@@ -77,6 +77,14 @@ export class CssContext {
    * @return {!{width: number, height: number}}
    */
   getCurrentElementSize() {}
+
+  /**
+   * Returns the specified element's size.
+   * @param {string} unusedSelector
+   * @param {?string} unusedSelectionMethod
+   * @return {!{width: number, height: number}}
+   */
+  getElementSize(unusedSelector, unusedSelectionMethod) {}
 
   /**
    * Returns the dimension: "w" for width or "h" for height.
@@ -299,11 +307,11 @@ export class CssNumericNode extends CssNode {
   }
 
   /**
-   * @param {number} percent
+   * @param {number} unusedPercent
    * @param {!CssContext} unusedContext
    * @return {!CssNumericNode}
    */
-  calcPercent(percent, unusedContext) {
+  calcPercent(unusedPercent, unusedContext) {
     throw new Error('cannot calculate percent for ' + this.type_);
   }
 }
@@ -418,10 +426,7 @@ export class CssLengthNode extends CssNumericNode {
   calcPercent(percent, context) {
     const dim = context.getDimension();
     const size = context.getCurrentElementSize();
-    const side =
-        dim == 'w' ? size.width :
-        dim == 'h' ? size.height :
-        0;
+    const side = getDimSide(dim, size);
     return new CssLengthNode(side * percent / 100, 'px');
   }
 }
@@ -591,6 +596,115 @@ export class CssTranslateNode extends CssFuncNode {
         suffix == '3d' ? ['w', 'h', 'z'] : null);
     /** @const @private {string} */
     this.suffix_ = suffix;
+  }
+}
+
+
+/**
+ * AMP-specific `width()` and `height()` functions.
+ */
+export class CssDimSizeNode extends CssNode {
+  /**
+   * @param {string} dim
+   * @param {?string=} opt_selector
+   * @param {?string=} opt_selectionMethod Either `undefined` or "closest".
+   */
+  constructor(dim, opt_selector, opt_selectionMethod) {
+    super();
+    /** @const @private */
+    this.dim_ = dim;
+    /** @const @private */
+    this.selector_ = opt_selector || null;
+    /** @const @private */
+    this.selectionMethod_ = opt_selectionMethod || null;
+  }
+
+  /** @override */
+  css() {
+    throw noCss();
+  }
+
+  /** @override */
+  isConst() {
+    return false;
+  }
+
+  /** @override */
+  calc(context) {
+    const size =
+        this.selector_ ?
+        context.getElementSize(this.selector_, this.selectionMethod_) :
+        context.getCurrentElementSize();
+    return new CssLengthNode(getDimSide(this.dim_, size), 'px');
+  }
+}
+
+
+/**
+ * AMP-specific `rand()` function. Has two forms:
+ * - `rand()` - returns a random number value between 0 and 1.
+ * - `rand(left, right)` - returns a random value between `left` and
+ *   `right`. The `left` and `right` are any number-based values in this
+ *   case, such as a length (`10px`), a time (`1s`), an angle (`1rad`), etc.
+ *   The returned value is the same type - a length, time angle, etc. Thus,
+ *   `rand(1s, 5s)` may return a value of `rand(2.1s)`.
+ */
+export class CssRandNode extends CssNode {
+  /**
+   * @param {?CssNode=} left
+   * @param {?CssNode=} right
+   */
+  constructor(left = null, right = null) {
+    super();
+    /** @const @private */
+    this.left_ = left;
+    /** @const @private */
+    this.right_ = right;
+  }
+
+  /** @override */
+  css() {
+    throw noCss();
+  }
+
+  /** @override */
+  isConst() {
+    return false;
+  }
+
+  /** @override */
+  calc(context) {
+    // No arguments: return a random node between 0 and 1.
+    if (this.left_ == null || this.right_ == null) {
+      return new CssNumberNode(Math.random());
+    }
+
+    // Arguments: do a min/max random math.
+    let left = this.left_.resolve(context);
+    let right = this.right_.resolve(context);
+    if (left == null || right == null) {
+      return null;
+    }
+    if (!(left instanceof CssNumericNode) ||
+        !(right instanceof CssNumericNode)) {
+      throw new Error('left and right must be both numerical');
+    }
+    if (left.type_ != right.type_) {
+      throw new Error('left and right must be the same type');
+    }
+
+    // Units are the same, the math is simple: numerals are summed. Otherwise,
+    // the units neeed to be normalized first.
+    if (left.units_ != right.units_) {
+      left = left.norm(context);
+      right = right.norm(context);
+    }
+    const min = Math.min(left.num_, right.num_);
+    const max = Math.max(left.num_, right.num_);
+    const rand = Math.random();
+    // Formula: rand(A, B) = A * (1 - R) + B * R
+    const num = min * (1 - rand) + max * rand;
+    return left.createSameUnits(num);
   }
 }
 
@@ -822,4 +936,22 @@ export class CssCalcProductNode extends CssNode {
  */
 function unknownUnits(units) {
   return new Error('unknown units: ' + units);
+}
+
+
+/**
+ * @return {!Error}
+ */
+function noCss() {
+  return new Error('no css');
+}
+
+
+/**
+ * @param {?string} dim
+ * @param {!{width: number, height: number}} size
+ * @return {number}
+ */
+function getDimSide(dim, size) {
+  return (dim == 'w' ? size.width : dim == 'h' ? size.height : 0);
 }

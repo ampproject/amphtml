@@ -22,10 +22,6 @@ limitations under the License.
     <td>Trigger and monitor the loading of custom fonts on AMP pages.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-font" src="https://cdn.ampproject.org/v0/amp-font-0.1.js">&lt;/script></code></td>
   </tr>
@@ -108,4 +104,4 @@ Must be `nodisplay`.
 
 ## Validation
 
-See [amp-font rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-font/0.1/validator-amp-font.protoascii) in the AMP validator specification.
+See [amp-font rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-font/validator-amp-font.protoascii) in the AMP validator specification.

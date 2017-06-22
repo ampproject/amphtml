@@ -94,7 +94,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.buildMask_();
     this.buildCarousel_();
     this.buildDescriptionBox_();
-    this.buildControls_();
+    this.buildTopBar_();
+
     this.element.appendChild(this.container_);
   }
 
@@ -206,18 +207,34 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   }
 
   /**
-   * Builds the controls (i.e. Next, Previous and Close buttons) and appends
-   * them to the container.
+   * Toggle lightbox top bar
    * @private
    */
-  buildControls_() {
+  toggleTopBar_() {
+    this.topBar_.classList.toggle('hide');
+  }
+
+  /**
+   * Builds the top bar containing buttons and appends them to the container.
+   * @private
+   */
+  buildTopBar_() {
+    dev().assert(this.container_);
+    this.topBar_ = this.win.document.createElement('div');
+    this.topBar_.classList.add('i-amphtml-lbv-top-bar');
+
     const close = this.close_.bind(this);
     const openGallery = this.openGallery_.bind(this);
+    const closeGallery = this.closeGallery_.bind(this);
 
     // TODO(aghassemi): i18n and customization. See https://git.io/v6JWu
     this.buildButton_('Close', 'amp-lbv-button-close', close);
-    this.buildButton_('Gallery', 'amp-lbv-button-gallery',
-        openGallery);
+    this.buildButton_('Gallery', 'amp-lbv-button-gallery', openGallery);
+    this.buildButton_('Content', 'amp-lbv-button-slide', closeGallery);
+
+    const toggleTopBar = this.toggleTopBar_.bind(this);
+    listen(this.container_, 'click', toggleTopBar);
+    this.container_.appendChild(this.topBar_);
   }
 
   /**
@@ -228,6 +245,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   buildButton_(label, className, action) {
+    dev().assert(this.topBar_);
     const button = this.win.document.createElement('div');
 
     button.setAttribute('role', 'button');
@@ -238,7 +256,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       event.stopPropagation();
     });
 
-    this.container_.appendChild(button);
+    this.topBar_.appendChild(button);
   }
 
   /**
@@ -259,7 +277,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       const targetId = invocation.args.id;
       target = this.win.document.getElementById(targetId);
       user().assert(target,
-        'amp-lightbox-viewer.open: element with id: %s not found', targetId);
+          'amp-lightbox-viewer.open: element with id: %s not found', targetId);
     }
     return this.open_(target);
   }
@@ -279,8 +297,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.updateInViewport(this.container_, true);
     this.scheduleLayout(this.container_);
 
-    this.carousel_.implementation_.showSlideWhenReady_(element.lightboxItemId);
     this.currentElementId_ = element.lightboxItemId;
+    this.carousel_.implementation_.showSlideWhenReady(this.currentElementId_);
 
     this.win.document.documentElement.addEventListener(
         'keydown', this.boundHandleKeyboardEvents_);
@@ -368,11 +386,6 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.vsync_.mutate(() => {
       this.container_.appendChild(this.gallery_);
     });
-
-    // Add go back button
-    const back = this.closeGallery_.bind(this);
-    this.buildButton_('Back', 'amp-lbv-button-back', back);
-
   }
 
   /**
@@ -412,11 +425,14 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     imgElement.classList.add('i-amphtml-lbv-gallery-thumbnail-img');
     imgElement.setAttribute('src', thumbnailObj.url);
     element.appendChild(imgElement);
-    const redirect = event => {
+    const closeGallaryAndShowTargetSlide = event => {
       this.closeGallery_();
+      this.currentElementId_ = thumbnailObj.element.lightboxItemId;
+      this.updateDescriptionBox_();
+      this.carousel_.implementation_.showSlideWhenReady(this.currentElementId_);
       event.stopPropagation();
     };
-    element.addEventListener('click', redirect);
+    element.addEventListener('click', closeGallaryAndShowTargetSlide);
     return element;
   }
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 var argv = require('minimist')(process.argv.slice(2));
 var gulp = require('gulp-help')(require('gulp'));
@@ -47,8 +48,11 @@ function serve() {
       'SERVE_PORT': port,
       'SERVE_HOST': host,
       'SERVE_USEHTTPS': useHttps},
+  })
+  .once('exit', function () {
+    util.log(util.colors.green('Shutting down server'));
+    process.exit();
   });
-
   util.log(util.colors.yellow('Run `gulp build` then go to '
       + getHost() + '/examples/article.amp.html'
   ));

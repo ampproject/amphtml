@@ -11,56 +11,58 @@ requirement: {
 
 requirement: {
   type: BANNED_PROPERTY_CALL
-  error_message: 'String.prototype.padStart is not allowed'
-  value: 'String.prototype.padStart'
+  error_message: 'string.prototype.padStart is not allowed'
+  value: 'string.prototype.padStart'
 }
 
 requirement: {
   type: BANNED_PROPERTY_CALL
-  error_message: 'String.prototype.padEnd is not allowed'
-  value: 'String.prototype.padEnd'
+  error_message: 'string.prototype.padEnd is not allowed'
+  value: 'string.prototype.padEnd'
 }
 
 requirement: {
   type: BANNED_PROPERTY_CALL
-  error_message: 'String.prototype.startsWith is not allowed'
-  value: 'String.prototype.startsWith'
+  error_message: 'string.prototype.startsWith is not allowed'
+  value: 'string.prototype.startsWith'
 }
 
 requirement: {
   type: BANNED_PROPERTY_CALL
-  error_message: 'String.prototype.endsWith is not allowed'
-  value: 'String.prototype.endsWith'
+  error_message: 'string.prototype.endsWith is not allowed'
+  value: 'string.prototype.endsWith'
 }
 
 requirement: {
   type: BANNED_PROPERTY_CALL
-  error_message: 'String.prototype.includes is not allowed'
-  value: 'String.prototype.includes'
+  error_message: 'string.prototype.includes is not allowed'
+  value: 'string.prototype.includes'
+  # SW code is modern-browser-only.
+  whitelist: 'src/service-worker/core.js'
 }
 
 requirement: {
   type: BANNED_PROPERTY_CALL
-  error_message: 'String.prototype.repeat is not allowed'
-  value: 'String.prototype.repeat'
+  error_message: 'string.prototype.repeat is not allowed'
+  value: 'string.prototype.repeat'
 }
 
 requirement: {
   type: BANNED_PROPERTY_CALL
-  error_message: 'String.prototype.normalize is not allowed'
-  value: 'String.prototype.normalize'
+  error_message: 'string.prototype.normalize is not allowed'
+  value: 'string.prototype.normalize'
 }
 
 requirement: {
   type: BANNED_PROPERTY_CALL
-  error_message: 'String.prototype.codePointAt is not allowed'
-  value: 'String.prototype.codePointAt'
+  error_message: 'string.prototype.codePointAt is not allowed'
+  value: 'string.prototype.codePointAt'
 }
 
 requirement: {
   type: BANNED_NAME
   error_message: 'String.fromCodePoint is not allowed'
-  value: 'Sring.fromCodePoint'
+  value: 'String.fromCodePoint'
 }
 
 # Array
@@ -153,4 +155,55 @@ requirement: {
   type: BANNED_NAME
   error_message: 'Symbol is not allowed'
   value: 'Symbol'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Use jsonParse instead. Usage in 3p ads can be whitelisted for now.'
+  value: 'JSON.parse'
+  whitelist: 'ads/adfox.js'
+  whitelist: 'ads/imedia.js'
+  whitelist: 'ads/kargo.js'
+  whitelist: 'ads/mads.js'
+  whitelist: 'ads/google/imaVideo.js'
+  whitelist: 'src/json.js' # Where jsonParse itself is implemented.
+}
+
+requirement: {
+  type: BANNED_PROPERTY_READ
+  error_message: 'Use eventHelper#getData to read the data property. OK to whitelist 3p ads for now.'
+  value: 'Event.prototype.data'
+  value: 'MessageEvent.prototype.data'
+  whitelist: 'src/event-helper.js' # getData is implemented here
+  whitelist: 'src/web-worker/amp-worker.js' # OK to use in version bound worker
+  whitelist: 'src/web-worker/web-worker.js' # OK to use in version bound worker
+
+  # 3p ads are OK
+  whitelist: 'ads/adfox.js'
+  whitelist: 'ads/google/imaVideo.js'
+  whitelist: 'ads/netletix.js'
+  whitelist: 'ads/yandex.js'
+}
+
+requirement: {
+  type: RESTRICTED_METHOD_CALL
+  error_message: 'postMessage must be called with a string or a JsonObject'
+  value: 'Window.prototype.postMessage:function((string|?JsonObject), string)'
+  # Guaranteed same version call
+  whitelist: 'src/web-worker/web-worker.js'
+  # Allowing violations in ads code for now.
+  # We would have to fix this to property obfuscated the 3p frame code.
+  whitelist: 'ads/google/doubleclick.js'
+  whitelist: 'ads/google/imaVideo.js'
+}
+
+requirement: {
+  type: RESTRICTED_NAME_CALL
+  error_message: 'JSON.stringify must be called with a JsonObject'
+  # Unfortunately the Array is untyped, because the compiler doesn't check
+  # for the template type.
+  value: 'JSON.stringify:function((?JsonObject|AmpViewerMessage|string|number|boolean|undefined|Array),!Function=)'
+  # Allowing violations in ads code for now.
+  # We would have to fix this to property obfuscated the 3p frame code.
+  whitelist: 'ads/google/doubleclick.js'
 }

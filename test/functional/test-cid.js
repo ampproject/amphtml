@@ -25,7 +25,7 @@ import {
   cidServiceForDocForTesting,
   getProxySourceOrigin,
   viewerBaseCid,
-} from '../../extensions/amp-analytics/0.1/cid-impl';
+} from '../../src/service/cid-impl';
 import {installCryptoService, Crypto} from '../../src/service/crypto-impl';
 import {cryptoFor} from '../../src/crypto';
 import {installDocService} from '../../src/service/ampdoc-impl';
@@ -643,7 +643,7 @@ describe('cid', () => {
 
       return cid.get({scope: 'cookie_name'}, hasConsent).then(c => {
         expect(fakeWin.document.cookie).to.equal(
-          'cookie_name=' + encodeURIComponent(c) +
+            'cookie_name=' + encodeURIComponent(c) +
           '; path=/' +
           '; domain=abc.org' +
           '; expires=Fri, 01 Jan 1971 00:00:00 GMT'  // 1 year from 0.

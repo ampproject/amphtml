@@ -14,21 +14,15 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../../../../src/amp-events';
 import {AmpList} from '../amp-list';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
-import {batchedXhrServiceForTesting,} from
-    '../../../../src/service/batched-xhr-impl';
 import {templatesFor} from '../../../../src/services';
 import * as sinon from 'sinon';
 
-
 describe('amp-list component', () => {
-
   let sandbox;
-  let templates;
   let templatesMock;
-  let xhr;
-  let xhrMock;
   let element;
   let list;
   let listMock;
@@ -36,17 +30,15 @@ describe('amp-list component', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
 
-    templates = templatesFor(window);
+    const templates = templatesFor(window);
     templatesMock = sandbox.mock(templates);
-
-    xhr = batchedXhrServiceForTesting(window);
-    xhrMock = sandbox.mock(xhr);
 
     const ampdoc = ampdocServiceFor(window).getAmpDoc();
 
     element = document.createElement('div');
     element.setAttribute('src', 'https://data.com/list.json');
     element.getAmpDoc = () => ampdoc;
+
     list = new AmpList(element);
     list.buildCallback();
     listMock = sandbox.mock(list);
@@ -58,7 +50,6 @@ describe('amp-list component', () => {
   afterEach(() => {
     document.body.removeChild(element);
     templatesMock.verify();
-    xhrMock.verify();
     listMock.verify();
     sandbox.restore();
   });
@@ -70,11 +61,10 @@ describe('amp-list component', () => {
     const newHeight = 127;
     const itemElement = document.createElement('div');
     itemElement.style.height = newHeight + 'px';
-    const xhrPromise = Promise.resolve({items});
+    const fetchPromise = Promise.resolve(items);
     const renderPromise = Promise.resolve([itemElement]);
-    xhrMock.expects('fetchJson').withExactArgs('https://data.com/list.json',
-        sinon.match(opts => opts.credentials === undefined))
-        .returns(xhrPromise).once();
+    listMock.expects('fetchItems_').withExactArgs('items')
+        .returns(fetchPromise).once();
     templatesMock.expects('findAndRenderTemplateArray').withExactArgs(
         element, items)
         .returns(renderPromise).once();
@@ -87,11 +77,32 @@ describe('amp-list component', () => {
     listMock.expects('attemptChangeHeight').withExactArgs(newHeight).returns(
         Promise.resolve());
     return list.layoutCallback().then(() => {
-      return Promise.all([xhrPromise, renderPromise]);
+      return Promise.all([fetchPromise, renderPromise]);
     }).then(() => {
       expect(list.container_.contains(itemElement)).to.be.true;
       expect(measureFunc).to.exist;
       measureFunc();
+    });
+  });
+
+  it('should dispatch "amp:template-rendered" event after render', () => {
+    const items = [{title: 'Title1'}];
+    const itemElement = document.createElement('div');
+    const fetchPromise = Promise.resolve(items);
+    const renderPromise = Promise.resolve([itemElement]);
+    listMock.expects('fetchItems_').withExactArgs('items')
+        .returns(fetchPromise).once();
+    templatesMock.expects('findAndRenderTemplateArray').withArgs()
+        .returns(renderPromise).once();
+    const spy = sandbox.spy(list.container_, 'dispatchEvent');
+    return list.layoutCallback().then(() => {
+      return Promise.all([fetchPromise, renderPromise]);
+    }).then(() => {
+      expect(spy).to.have.been.calledOnce;
+      expect(spy).calledWithMatch({
+        type: AmpEvents.TEMPLATE_RENDERED,
+        bubbles: true,
+      });
     });
   });
 
@@ -105,11 +116,10 @@ describe('amp-list component', () => {
     const itemElement = document.createElement('div');
     const itemElement2 = document.createElement('div');
     const itemElement3 = document.createElement('div');
-    const xhrPromise = Promise.resolve({items: initialItems});
+    const fetchPromise = Promise.resolve(initialItems);
     const renderPromise = Promise.resolve([itemElement]);
-    xhrMock.expects('fetchJson').withExactArgs('https://data.com/list.json',
-        sinon.match(opts => opts.credentials === undefined))
-        .returns(xhrPromise);
+    listMock.expects('fetchItems_').withExactArgs('items')
+        .returns(fetchPromise).once();
     templatesMock.expects('findAndRenderTemplateArray').withExactArgs(
         element, initialItems)
         .returns(renderPromise);
@@ -117,14 +127,13 @@ describe('amp-list component', () => {
       measure: () => {},
     }).twice();
     return list.layoutCallback().then(() => {
-      return Promise.all([xhrPromise, renderPromise]);
+      return Promise.all([fetchPromise, renderPromise]);
     }).then(() => {
       expect(list.container_.contains(itemElement)).to.be.true;
-      const newXhrPromise = Promise.resolve({items: newItems});
+      const newFetchPromise = Promise.resolve(newItems);
       const newRenderPromise = Promise.resolve([itemElement2, itemElement3]);
-      xhrMock.expects('fetchJson').withExactArgs('https://data2.com/list.json',
-          sinon.match(opts => opts.credentials === undefined))
-          .returns(newXhrPromise).once();
+      listMock.expects('fetchItems_').withExactArgs('items')
+          .returns(newFetchPromise).once();
       templatesMock.expects('findAndRenderTemplateArray').withExactArgs(
           element, newItems)
           .returns(newRenderPromise).once();
@@ -136,7 +145,7 @@ describe('amp-list component', () => {
   });
 
   it('should fail to load b/c data is absent', () => {
-    xhrMock.expects('fetchJson')
+    listMock.expects('fetchItems_')
         .returns(Promise.resolve({})).once();
     templatesMock.expects('findAndRenderTemplateArray').never();
     return expect(list.layoutCallback()).to.eventually.be
@@ -149,8 +158,8 @@ describe('amp-list component', () => {
     ];
     element.setAttribute('items', 'different');
     const itemElement = document.createElement('div');
-    xhrMock.expects('fetchJson')
-        .returns(Promise.resolve({different})).once();
+    listMock.expects('fetchItems_')
+        .returns(Promise.resolve(different)).once();
     templatesMock.expects('findAndRenderTemplateArray')
         .withExactArgs(element, different)
         .returns(Promise.resolve([itemElement])).once();
@@ -164,16 +173,15 @@ describe('amp-list component', () => {
       {title: 'Title1'},
     ];
     const itemElement = document.createElement('div');
-    const xhrPromise = Promise.resolve({items});
+    const fetchPromise = Promise.resolve(items);
     const renderPromise = Promise.resolve([itemElement]);
-    xhrMock.expects('fetchJson').withExactArgs('https://data.com/list.json',
-        sinon.match(opts => opts.credentials === undefined))
-        .returns(xhrPromise).once();
+    listMock.expects('fetchItems_').withExactArgs('items')
+        .returns(fetchPromise).once();
     templatesMock.expects('findAndRenderTemplateArray').withExactArgs(
         element, items)
         .returns(renderPromise).once();
     return list.layoutCallback().then(() => {
-      return Promise.all([xhrPromise, renderPromise]).then(() => {
+      return Promise.all([fetchPromise, renderPromise]).then(() => {
         expect(list.container_.getAttribute('role')).to.equal('list');
         expect(itemElement.getAttribute('role')).to.equal('listitem');
       });
@@ -187,34 +195,18 @@ describe('amp-list component', () => {
     element.setAttribute('role', 'list1');
     const itemElement = document.createElement('div');
     itemElement.setAttribute('role', 'listitem1');
-    const xhrPromise = Promise.resolve({items});
+    const fetchPromise = Promise.resolve(items);
     const renderPromise = Promise.resolve([itemElement]);
-    xhrMock.expects('fetchJson').withExactArgs('https://data.com/list.json',
-        sinon.match(opts => opts.credentials === undefined))
-        .returns(xhrPromise).once();
+    listMock.expects('fetchItems_').withExactArgs('items')
+        .returns(fetchPromise).once();
     templatesMock.expects('findAndRenderTemplateArray').withExactArgs(
         element, items)
         .returns(renderPromise).once();
     return list.layoutCallback().then(() => {
-      return Promise.all([xhrPromise, renderPromise]).then(() => {
+      return Promise.all([fetchPromise, renderPromise]).then(() => {
         expect(list.element.getAttribute('role')).to.equal('list1');
         expect(itemElement.getAttribute('role')).to.equal('listitem1');
       });
     });
-  });
-
-  it('should request credentials', () => {
-    const items = [];
-    const xhrPromise = Promise.resolve({items});
-    element.setAttribute('credentials', 'include');
-    xhrMock.expects('fetchJson').withExactArgs('https://data.com/list.json',
-        sinon.match(opts => {
-          return opts.credentials == 'include';
-        }))
-        .returns(xhrPromise).once();
-    templatesMock.expects('findAndRenderTemplateArray').withExactArgs(
-        element, items)
-        .returns(Promise.resolve([])).once();
-    return list.layoutCallback();
   });
 });

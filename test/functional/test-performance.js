@@ -73,7 +73,7 @@ describes.realWin('performance', {amp: true}, env => {
       expect(perf.events_[c])
           .to.be.jsonEqual({
             label: 'test1',
-            delta: 1,
+            delta: 0,
           });
 
       c++;
@@ -82,7 +82,7 @@ describes.realWin('performance', {amp: true}, env => {
       expect(perf.events_[c])
           .to.be.jsonEqual({
             label: 'test2',
-            delta: 1,
+            delta: 0,
           });
 
       c++;
@@ -427,21 +427,17 @@ describes.realWin('performance', {amp: true}, env => {
       });
 
       it('should call the flush callback', () => {
-        const payload = {
-          ampexp: 'rtv-' + getMode(win).rtvVersion,
-        };
-        expect(viewerSendMessageStub.withArgs('sendCsi', payload,
-            /* cancelUnsent */true)).to.have.callCount(0);
+        expect(viewerSendMessageStub.withArgs('sendCsi')).to.have.callCount(0);
         // coreServicesAvailable calls flush once.
         return perf.coreServicesAvailable().then(() => {
-          expect(viewerSendMessageStub.withArgs('sendCsi', payload,
-              /* cancelUnsent */true)).to.have.callCount(1);
+          expect(viewerSendMessageStub.withArgs('sendCsi'))
+              .to.have.callCount(1);
           perf.flush();
-          expect(viewerSendMessageStub.withArgs('sendCsi', payload,
-              /* cancelUnsent */true)).to.have.callCount(2);
+          expect(viewerSendMessageStub.withArgs('sendCsi'))
+              .to.have.callCount(2);
           perf.flush();
-          expect(viewerSendMessageStub.withArgs('sendCsi', payload,
-              /* cancelUnsent */true)).to.have.callCount(3);
+          expect(viewerSendMessageStub.withArgs('sendCsi'))
+              .to.have.callCount(3);
         });
       });
     });
@@ -468,13 +464,13 @@ describes.realWin('performance', {amp: true}, env => {
     resourcesMock
         .expects('getResourcesInRect')
         .withExactArgs(
-            perf.win,
-            sinon.match(arg =>
+        perf.win,
+        sinon.match(arg =>
                 arg.left == 0 &&
                 arg.top == 0 &&
                 arg.width == perf.win.innerWidth &&
                 arg.height == perf.win.innerHeight),
-            /* inPrerender */ true)
+        /* inPrerender */ true)
         .returns(Promise.resolve([res1, res2]))
         .once();
 
@@ -652,9 +648,9 @@ describes.realWin('performance with experiment', {amp: true}, env => {
     return perf.coreServicesAvailable().then(() => {
       viewerSendMessageStub.reset();
       perf.flush();
-      expect(viewerSendMessageStub).to.be.calledWith('sendCsi', {
-        ampexp: 'rtv-' + getMode(win).rtvVersion,
-      });
+      expect(viewerSendMessageStub.lastCall.args[0]).to.equal('sendCsi');
+      expect(viewerSendMessageStub.lastCall.args[1].ampexp).to.equal(
+          'rtv-' + getMode(win).rtvVersion);
     });
   });
 

@@ -298,6 +298,7 @@ is demonstrated desire for it.
 
 <table>
   <tr><td>amp-accordion</td></tr>
+  <tr><td>amp-ad-exit</td></tr>
   <tr><td>amp-analytics</td></tr>
   <tr><td>amp-anim</td></tr>
   <tr><td>amp-audio</td></tr>
@@ -457,7 +458,7 @@ SVG tags are not in the HTML5 namespace. They are listed below without section i
 4.10.8 `<button>`  
 #### 4.11 Scripting
 - Like a general AMP document, the creative's `<head>` tag must contain a
-  `<script async src="https://cdn.ampproject.org/v0.js"></script>` tag.
+  `<script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>` tag.
 - Unlike general AMP, `<noscript>` is prohibited.
   - _Rationale:_ Since AMP ads requires Javascript to be enabled to function
     at all, `<noscript>` blocks serve no purpose in an AMP ad and

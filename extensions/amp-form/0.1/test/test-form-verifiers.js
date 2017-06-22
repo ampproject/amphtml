@@ -16,7 +16,6 @@
 
 import {
   AsyncVerifier,
-  CONFIG_KEY,
   FORM_VERIFY_EXPERIMENT,
   DefaultVerifier,
   getFormVerifier,
@@ -24,47 +23,31 @@ import {
 import {toggleExperiment} from '../../../../src/experiments';
 
 describes.fakeWin('amp-form async verification', {}, env => {
-  const DEFAULT_CONFIG = `{
-    "${CONFIG_KEY}": [
-      {
-        "name": "uniqueEmail",
-        "elements": ["email"]
-      },
-      {
-        "name": "fullAddress",
-        "elements": ["addressLine2", "city", "zip"]
-      }
-    ]
-  }`;
-
   function stubValidationMessage(input) {
     Object.defineProperty(input, 'validationMessage', {
-      get: function() {
+      get() {
         return this.fakeValidationMessage_;
       },
-      set: function(value) {
+      set(value) {
         this.fakeValidationMessage_ = value;
       },
     });
 
     const originalSetCustomValidity = input.setCustomValidity.bind(input);
     Object.defineProperty(input, 'setCustomValidity', {
-      value: function(message) {
+      value(message) {
         this.validationMessage = message;
         originalSetCustomValidity(message);
       },
     });
   }
 
-  function getForm(doc, config = DEFAULT_CONFIG) {
+  function getForm(doc, opt_verifyXhr = true) {
     const form = doc.createElement('form');
     form.setAttribute('method', 'POST');
 
-    if (config) {
-      const script = doc.createElement('script');
-      script.setAttribute('type', 'application/json');
-      script.innerHTML = config;
-      form.appendChild(script);
+    if (opt_verifyXhr === true) {
+      form.setAttribute('verify-xhr', '');
     }
 
     const nameInput = doc.createElement('input');
@@ -119,63 +102,23 @@ describes.fakeWin('amp-form async verification', {}, env => {
       toggleExperiment(env.win, FORM_VERIFY_EXPERIMENT, true);
     });
 
-    it('returns a DefaultVerifier when no config is present', () => {
-      const emptyConfig = '';
-      const form = getForm(env.win.document, emptyConfig);
+    it('returns a DefaultVerifier without the verify-xhr attribute', () => {
+      const form = getForm(env.win.document, false);
       const verifier = getFormVerifier(form, () => {});
       expect(verifier instanceof DefaultVerifier).to.be.true;
     });
 
-    it('returns an AsyncVerifier when a config is present', () => {
+    it('returns an AsyncVerifier with the verify-xhr attribute', () => {
       const form = getForm(env.win.document);
       const verifier = getFormVerifier(form, () => {});
       expect(verifier instanceof AsyncVerifier).to.be.true;
     });
 
-    it('should throw if the experiment is disabled and has a config', () => {
+    it('should throw if the experiment is disabled with the verify-xhr ' +
+        'attribute present', () => {
       toggleExperiment(env.win, FORM_VERIFY_EXPERIMENT, false);
       const form = getForm(env.win.document);
       expect(() => getFormVerifier(form, () => {})).to.throw(/experiment/);
-    });
-
-    it('should throw if an element is not in the form', () => {
-      const form = getForm(env.win.document, `{
-        "${CONFIG_KEY}": [
-          {
-            "name": "failGroup",
-            "elements": ["idontexist"]
-          }
-        ]
-      }`);
-      expect(() => getFormVerifier(form)).to.throw('no element named');
-    });
-
-    it('should throw if an element is not an allowed input', () => {
-      const form = getForm(env.win.document, `{
-        "${CONFIG_KEY}": [
-          {
-            "name": "failGroup",
-            "elements": ["invalid"]
-          }
-        ]
-      }`);
-      const nonInput = document.createElement('fieldset');
-      nonInput.name = 'invalid';
-      form.appendChild(nonInput);
-      expect(() => getFormVerifier(form)).to.throw('must be one of');
-    });
-
-    it('should throw if the list of groups is not an array ' +
-        'with at least one element', () => {
-      const form = getForm(env.win.document, `{
-        "${CONFIG_KEY}": ""
-      }`);
-      expect(() => getFormVerifier(form)).to.throw('at least one');
-
-      const form2 = getForm(env.win.document, `{
-        "${CONFIG_KEY}": []
-      }`);
-      expect(() => getFormVerifier(form2)).to.throw('at least one');
     });
   });
 
@@ -186,103 +129,83 @@ describes.fakeWin('amp-form async verification', {}, env => {
       sandbox = env.sandbox;
     });
 
-    it('should not submit when no element in a group has a value', () => {
+    it('should not submit when no element has a value', () => {
       const xhrSpy = sandbox.spy(() => Promise.resolve());
       const form = getForm(env.win.document);
       const verifier = getFormVerifier(form, xhrSpy);
-      verifier.onCommit(form.email, () => {});
-      expect(xhrSpy).to.not.be.called;
+      return verifier.onCommit().then(() => {
+        expect(xhrSpy).to.not.be.called;
+      });
     });
 
-    it('should submit when a group\'s elements are filled out, ' +
-        'mutated, and committed', () => {
+    it('should submit when an element is filled out, mutated, ' +
+          'and committed', () => {
       const xhrSpy = sandbox.spy(() => Promise.resolve());
       const form = getForm(env.win.document);
       const verifier = getFormVerifier(form, xhrSpy);
 
       form.email.value = 'test@example.com';
-      verifier.onMutate(form.email);
 
-      return new Promise(resolve => {
-        const afterVerify = () => resolve();
-        verifier.onCommit(form.email, afterVerify);
+      return verifier.onCommit().then(() => {
+        expect(xhrSpy).to.be.calledOnce;
       });
-      expect(xhrSpy).to.be.calledOnce;
-    });
-
-    it('should not submit until all required fields in a group ' +
-        'have values', () => {
-      const xhrSpy = sandbox.spy(() => Promise.resolve());
-      const form = getForm(env.win.document);
-      const verifier = getFormVerifier(form, xhrSpy);
-
-      form.city.value = 'Mountain View';
-      verifier.onMutate(form.city);
-      verifier.onCommit(form.city, () => {});
-      expect(xhrSpy).to.not.be.called;
-
-      form.zip.value = '940';
-      verifier.onMutate(form.zip);
-      verifier.onCommit(form.zip, () => {});
-      expect(xhrSpy).to.not.be.called;
-
-      form.zip.value = '94043';
-      verifier.onMutate(form.zip);
-      verifier.onCommit(form.zip, () => {});
-      expect(xhrSpy).to.be.calledOnce;
     });
 
     it('should assign an error to elements that the server ' +
         'fails to verify', () => {
       const errorMessage = 'Zip code and city do not match';
       const errorResponse = {
-        responseJson: {
-          verifyErrors: [{
-            name: 'zip',
-            message: errorMessage,
-          }],
+        json() {
+          return Promise.resolve({
+            verifyErrors: [{
+              name: 'zip',
+              message: errorMessage,
+            }],
+          });
         },
       };
-      const xhrSpy = sandbox.spy(() => Promise.reject(errorResponse));
+      const xhrSpy = sandbox.spy(() => Promise.reject({
+        response: errorResponse,
+      }));
       const form = getForm(env.win.document);
       const verifier = getFormVerifier(form, xhrSpy);
 
       form.city.value = 'Mountain View';
       form.zip.value = '94043';
-      verifier.onMutate(form.zip);
-      return new Promise(resolve => {
-        verifier.onCommit(form.zip, resolve);
-      }).then(() => {
+      return verifier.onCommit().then(() => {
         expect(form.zip.validity.customError).to.be.true;
         expect(form.zip.validationMessage).to.equal(errorMessage);
       });
-      expect(xhrSpy).to.not.be.called;
     });
 
     it('should clear errors when any sibling of an input with an error ' +
         'is mutated', () => {
       const errorMessage = 'Zip code and city do not match';
       const errorResponse = {
-        responseJson: {
-          verifyErrors: [{
-            name: 'zip',
-            message: errorMessage,
-          }],
+        json() {
+          return Promise.resolve({
+            verifyErrors: [{
+              name: 'zip',
+              message: errorMessage,
+            }],
+          });
         },
       };
-      const xhrSpy = sandbox.spy(() => Promise.reject(errorResponse));
-      const form = getForm(env.win.document);
-      const verifier = getFormVerifier(form, xhrSpy);
+      const xhrStub = sandbox.stub();
+      xhrStub.onCall(0).returns(Promise.reject({response: errorResponse}));
+      xhrStub.onCall(1).returns(Promise.resolve());
 
-      form.city.value = 'Mountain View';
+      const form = getForm(env.win.document);
+      const verifier = getFormVerifier(form, xhrStub);
+      form.city.value = 'Palo Alto';
       form.zip.value = '94043';
-      verifier.onMutate(form.zip);
-      return new Promise(resolve => {
-        verifier.onCommit(form.zip, resolve);
-      }).then(() => {
+
+      return verifier.onCommit().then(() => {
         expect(form.zip.validity.customError).to.be.true;
         expect(form.zip.validationMessage).to.equal(errorMessage);
-        verifier.onMutate(form.city);
+        form.city.value = 'Mountain View';
+        return verifier.onCommit();
+      }).then(() => {
         expect(form.zip.validity.customError).to.be.false;
         expect(form.zip.validationMessage).to.be.empty;
       });
@@ -293,26 +216,27 @@ describes.fakeWin('amp-form async verification', {}, env => {
       const zipMessage = 'Zip code and city do not match.';
       const emailMessage = 'This email is already taken.';
       const errorResponse = {
-        responseJson: {
-          verifyErrors: [{
-            name: 'zip',
-            message: zipMessage,
-          },{
-            name: 'email',
-            message: emailMessage,
-          }],
+        json() {
+          return Promise.resolve({
+            verifyErrors: [{
+              name: 'zip',
+              message: zipMessage,
+            },{
+              name: 'email',
+              message: emailMessage,
+            }],
+          });
         },
       };
-      const xhrSpy = sandbox.spy(() => Promise.reject(errorResponse));
+      const xhrSpy = sandbox.spy(() => Promise.reject({
+        response: errorResponse,
+      }));
       const form = getForm(env.win.document);
       const verifier = getFormVerifier(form, xhrSpy);
 
       form.city.value = 'Mountain View';
       form.zip.value = '94043';
-      verifier.onMutate(form.zip);
-      return new Promise(resolve => {
-        verifier.onCommit(form.zip, resolve);
-      }).then(() => {
+      return verifier.onCommit().then(() => {
         expect(form.zip.validity.customError).to.be.true;
         expect(form.zip.validationMessage).to.equal(zipMessage);
         expect(form.email.validity.customError).to.be.false;

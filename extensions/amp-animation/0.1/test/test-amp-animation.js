@@ -15,9 +15,10 @@
  */
 
 import {AmpAnimation} from '../amp-animation';
+import {Builder, WebAnimationRunner} from '../web-animations';
 import {WebAnimationPlayState} from '../web-animation-types';
-import {WebAnimationRunner} from '../web-animations';
 import {toggleExperiment} from '../../../../src/experiments';
+import * as sinon from 'sinon';
 
 
 describes.sandboxed('AmpAnimation', {}, () => {
@@ -63,6 +64,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
   }, env => {
     let win;
     let viewer;
+    let createRunnerStub;
     let runner;
     let runnerMock;
 
@@ -72,7 +74,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
       viewer.setVisibilityState_('hidden');
       runner = new WebAnimationRunner([]);
       runnerMock = sandbox.mock(runner);
-      sandbox.stub(AmpAnimation.prototype, 'createRunner_',
+      createRunnerStub = sandbox.stub(AmpAnimation.prototype, 'createRunner_',
           () => Promise.resolve(runner));
     });
 
@@ -148,7 +150,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
 
     it('should not activate w/o visibility trigger', () => {
       const anim = createAnim({}, {duration: 1001});
-      const activateStub = sandbox.stub(anim, 'activate');
+      const activateStub = sandbox.stub(anim, 'startAction_');
       viewer.setVisibilityState_('visible');
       return anim.layoutCallback().then(() => {
         expect(activateStub).to.not.be.called;
@@ -157,7 +159,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
 
     it('should activate with visibility trigger', () => {
       const anim = createAnim({trigger: 'visibility'}, {duration: 1001});
-      const activateStub = sandbox.stub(anim, 'activate');
+      const activateStub = sandbox.stub(anim, 'startAction_');
       viewer.setVisibilityState_('visible');
       return anim.layoutCallback().then(() => {
         expect(activateStub).to.be.calledOnce;
@@ -237,7 +239,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
       runnerMock.expects('start').once();
       runnerMock.expects('finish').once();
       return anim.startOrResume_().then(() => {
-        anim.finish();
+        anim.finish_();
         expect(anim.triggered_).to.be.false;
         expect(anim.runner_).to.be.null;
       });
@@ -273,31 +275,6 @@ describes.sandboxed('AmpAnimation', {}, () => {
         expect(anim.triggered_).to.be.false;
         expect(anim.runner_).to.be.null;
       });
-    });
-
-    it('should resolve target in the main doc', () => {
-      const anim = createAnim({}, {duration: 1001});
-      const target = win.document.createElement('div');
-      target.setAttribute('id', 'target1');
-      win.document.body.appendChild(target);
-      expect(anim.resolveTarget_('target1')).to.equal(target);
-    });
-
-    it('should query targets in the main doc', () => {
-      const anim = createAnim({}, {duration: 1001});
-      const target1 = win.document.createElement('div');
-      target1.setAttribute('id', 'target1');
-      target1.setAttribute('class', 'target');
-      win.document.body.appendChild(target1);
-      const target2 = win.document.createElement('div');
-      target2.setAttribute('id', 'target2');
-      target2.setAttribute('class', 'target');
-      win.document.body.appendChild(target2);
-      expect(anim.queryTargets_('#target1')).to.deep.equal([target1]);
-      expect(anim.queryTargets_('div#target1')).to.deep.equal([target1]);
-      expect(anim.queryTargets_('#target2')).to.deep.equal([target2]);
-      expect(anim.queryTargets_('.target')).to.deep.equal([target1, target2]);
-      expect(anim.queryTargets_('.target3')).to.deep.equal([]);
     });
 
     it('should resize from ampdoc viewport', () => {
@@ -374,6 +351,176 @@ describes.sandboxed('AmpAnimation', {}, () => {
       anim.visible_ = false;
       expect(anim.startOrResume_()).to.be.null;
     });
+
+    describe('actions', () => {
+      let anim;
+
+      beforeEach(() => {
+        anim = createAnim({}, {duration: 1001});
+        anim.visible_ = true;
+      });
+
+      it('should trigger activate via start', () => {
+        const startStub = sandbox.stub(anim, 'startOrResume_');
+        const args = {};
+        const invocation = {
+          method: 'activate',
+          args,
+          satisfiesTrust: () => true,
+        };
+        anim.executeAction(invocation);
+        expect(anim.triggered_).to.be.true;
+        expect(startStub).to.be.calledOnce;
+        expect(startStub).to.be.calledWith(args);
+      });
+
+      it('should trigger start', () => {
+        const startStub = sandbox.stub(anim, 'startOrResume_');
+        const args = {};
+        const invocation = {
+          method: 'start',
+          args,
+          satisfiesTrust: () => true,
+        };
+        anim.executeAction(invocation);
+        expect(anim.triggered_).to.be.true;
+        expect(startStub).to.be.calledOnce;
+        expect(startStub).to.be.calledWith(args);
+      });
+
+      it('should create runner with args', () => {
+        const args = {};
+        anim.triggered_ = true;
+        createRunnerStub./*OK*/restore();
+        const stub = sandbox.stub(Builder.prototype, 'createRunner',
+            () => runner);
+        return anim.startOrResume_(args).then(() => {
+          expect(anim.runner_).to.exist;
+          expect(stub).to.be.calledWith(sinon.match.any, args);
+        });
+      });
+
+      it('should trigger restart via cancel and start', () => {
+        const cancelStub = sandbox.stub(anim, 'cancel_');
+        const startStub = sandbox.stub(anim, 'startOrResume_');
+        const args = {};
+        const invocation = {
+          method: 'restart',
+          args,
+          satisfiesTrust: () => true,
+        };
+        anim.executeAction(invocation);
+        expect(anim.triggered_).to.be.true;
+        expect(cancelStub).to.be.calledOnce;
+        expect(startStub).to.be.calledOnce;
+        expect(startStub).to.be.calledWith(args);
+      });
+
+      it('should trigger pause after start', () => {
+        anim.triggered_ = true;
+        return anim.startOrResume_().then(() => {
+          runnerMock.expects('pause').once();
+          anim.executeAction({method: 'pause', satisfiesTrust: () => true});
+        });
+      });
+
+      it('should ignore pause before start', () => {
+        runnerMock.expects('pause').never();
+        anim.executeAction({method: 'pause', satisfiesTrust: () => true});
+      });
+
+      it('should trigger resume after start', () => {
+        anim.triggered_ = true;
+        return anim.startOrResume_().then(() => {
+          runnerMock.expects('resume').once();
+          anim.executeAction({method: 'resume', satisfiesTrust: () => true});
+        });
+      });
+
+      it('should ignore resume before start', () => {
+        runnerMock.expects('resume').never();
+        anim.executeAction({method: 'resume', satisfiesTrust: () => true});
+      });
+
+      it('should toggle pause/resume after start', () => {
+        anim.triggered_ = true;
+        return anim.startOrResume_().then(() => {
+          runnerMock.expects('pause').once();
+          anim.executeAction({
+            method: 'togglePause',
+            satisfiesTrust: () => true,
+          });
+
+          runnerMock.expects('getPlayState')
+              .returns(WebAnimationPlayState.PAUSED);
+          runnerMock.expects('resume').once();
+          anim.executeAction({
+            method: 'togglePause',
+            satisfiesTrust: () => true,
+          });
+        });
+      });
+
+      it('should seek-to after start', () => {
+        anim.triggered_ = true;
+        return anim.startOrResume_().then(() => {
+          runnerMock.expects('seekTo').withExactArgs(100).once();
+          let invocation = {
+            method: 'seekTo',
+            args: {time: 100},
+            satisfiesTrust: () => true,
+          };
+          anim.executeAction(invocation);
+
+          runnerMock.expects('seekTo').withExactArgs(200).once();
+          invocation = {
+            method: 'seekTo',
+            args: {time: 200},
+            satisfiesTrust: () => true,
+          };
+          anim.executeAction(invocation);
+        });
+      });
+
+      it('should ignore seek-to before start', () => {
+        runnerMock.expects('seekTo').never();
+        const invocation = {
+          method: 'seekTo',
+          args: {time: 100},
+          satisfiesTrust: () => true,
+        };
+        anim.executeAction(invocation);
+      });
+
+      it('should trigger reverse after start', () => {
+        anim.triggered_ = true;
+        return anim.startOrResume_().then(() => {
+          runnerMock.expects('reverse').once();
+          anim.executeAction({method: 'reverse', satisfiesTrust: () => true});
+        });
+      });
+
+      it('should ignore reverse before start', () => {
+        runnerMock.expects('reverse').never();
+        anim.executeAction({method: 'reverse', satisfiesTrust: () => true});
+      });
+
+      it('should trigger finish after start', () => {
+        anim.triggered_ = true;
+        return anim.startOrResume_().then(() => {
+          runnerMock.expects('finish').once();
+          anim.executeAction({method: 'finish', satisfiesTrust: () => true});
+        });
+      });
+
+      it('should trigger cancel after start', () => {
+        anim.triggered_ = true;
+        return anim.startOrResume_().then(() => {
+          runnerMock.expects('cancel').once();
+          anim.executeAction({method: 'cancel', satisfiesTrust: () => true});
+        });
+      });
+    });
   });
 
 
@@ -402,47 +549,40 @@ describes.sandboxed('AmpAnimation', {}, () => {
       expect(anim.visible_).to.be.true;
     });
 
-    it('should find target in the embed only', () => {
+    it('should find target in the embed only via selector', () => {
       const parentWin = env.ampdoc.win;
       const embedWin = embed.win;
-      const anim = createAnim({}, {duration: 1001});
-
+      const anim = createAnim({},
+          {duration: 1001, selector: '#target1', keyframes: {}});
       const targetInDoc = parentWin.document.createElement('div');
       targetInDoc.setAttribute('id', 'target1');
       parentWin.document.body.appendChild(targetInDoc);
-      expect(anim.resolveTarget_('target1')).to.be.null;
-
       const targetInEmbed = embedWin.document.createElement('div');
       targetInEmbed.setAttribute('id', 'target1');
       embedWin.document.body.appendChild(targetInEmbed);
-      expect(anim.resolveTarget_('target1')).to.equal(targetInEmbed);
+      return anim.createRunner_().then(runner => {
+        const requests = runner.requests_;
+        expect(requests).to.have.length(1);
+        expect(requests[0].target).to.equal(targetInEmbed);
+      });
     });
 
-    it('should query target in the main doc', () => {
+    it('should find target in the embed only via target', () => {
       const parentWin = env.ampdoc.win;
       const embedWin = embed.win;
-      const anim = createAnim({}, {duration: 1001});
-
+      const anim = createAnim({},
+          {duration: 1001, target: 'target1', keyframes: {}});
       const targetInDoc = parentWin.document.createElement('div');
       targetInDoc.setAttribute('id', 'target1');
-      targetInDoc.setAttribute('class', 'target');
       parentWin.document.body.appendChild(targetInDoc);
-      expect(anim.queryTargets_('#target1')).to.be.deep.equal([]);
-      expect(anim.queryTargets_('.target')).to.deep.equal([]);
-
-      const target1 = embedWin.document.createElement('div');
-      target1.setAttribute('id', 'target1');
-      target1.setAttribute('class', 'target');
-      embedWin.document.body.appendChild(target1);
-      const target2 = embedWin.document.createElement('div');
-      target2.setAttribute('id', 'target2');
-      target2.setAttribute('class', 'target');
-      embedWin.document.body.appendChild(target2);
-      expect(anim.queryTargets_('#target1')).to.deep.equal([target1]);
-      expect(anim.queryTargets_('div#target1')).to.deep.equal([target1]);
-      expect(anim.queryTargets_('#target2')).to.deep.equal([target2]);
-      expect(anim.queryTargets_('.target')).to.deep.equal([target1, target2]);
-      expect(anim.queryTargets_('.target3')).to.deep.equal([]);
+      const targetInEmbed = embedWin.document.createElement('div');
+      targetInEmbed.setAttribute('id', 'target1');
+      embedWin.document.body.appendChild(targetInEmbed);
+      return anim.createRunner_().then(runner => {
+        const requests = runner.requests_;
+        expect(requests).to.have.length(1);
+        expect(requests[0].target).to.equal(targetInEmbed);
+      });
     });
 
     it('should take resize from embed\'s window', () => {

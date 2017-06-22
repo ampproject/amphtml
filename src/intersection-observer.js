@@ -15,6 +15,7 @@
  */
 
 import {dev} from './log';
+import {dict} from './utils/object';
 import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
 import {SubscriptionApi} from './iframe-helper';
 import {timerFor} from './services';
@@ -34,24 +35,6 @@ import {timerFor} from './services';
  * }}
  */
 export let DOMRect;
-
-/**
- * Transforms a LayoutRect into a DOMRect for use in intersection observers.
- * @param {!./layout-rect.LayoutRectDef} rect
- * @return {!DOMRect}
- */
-function DomRectFromLayoutRect(rect) {
-  return {
-    left: rect.left,
-    top: rect.top,
-    width: rect.width,
-    height: rect.height,
-    bottom: rect.bottom,
-    right: rect.right,
-    x: rect.left,
-    y: rect.top,
-  };
-}
 
 /**
  * Returns the ratio of the smaller box's area to the larger box's area.
@@ -102,9 +85,9 @@ export function getIntersectionChangeEntry(element, owner, viewport) {
 
   return /** @type {!IntersectionObserverEntry} */ ({
     time: Date.now(),
-    rootBounds: DomRectFromLayoutRect(rootBounds),
-    boundingClientRect: DomRectFromLayoutRect(boundingClientRect),
-    intersectionRect: DomRectFromLayoutRect(intersectionRect),
+    rootBounds,
+    boundingClientRect,
+    intersectionRect,
     intersectionRatio: intersectionRatio(intersectionRect, element),
   });
 }
@@ -270,7 +253,9 @@ export class IntersectionObserver {
       return;
     }
     // Note that SubscribeApi multicasts the update to all interested windows.
-    this.postMessageApi_.send('intersection', {changes: this.pendingChanges_});
+    this.postMessageApi_.send('intersection', dict({
+      'changes': this.pendingChanges_,
+    }));
     this.pendingChanges_.length = 0;
   }
 

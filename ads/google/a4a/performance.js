@@ -17,6 +17,7 @@
 import {getCorrelator} from './utils';
 import {LIFECYCLE_STAGES} from '../../../extensions/amp-a4a/0.1/amp-a4a';
 import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {serializeQueryString} from '../../../src/url';
 import {getTimingDataSync} from '../../../src/service/variable-source';
 import {urlReplacementsForDoc} from '../../../src/services';
@@ -46,10 +47,10 @@ import {analyticsForDoc} from '../../../src/analytics';
 export class BaseLifecycleReporter {
   constructor() {
     /**
-     * @type {!Object<string, string>}
+     * @type {!JsonObject}
      * @private
      */
-    this.extraVariables_ = new Object(null);
+    this.extraVariables_ = dict();
   }
 
   /**
@@ -106,7 +107,7 @@ export class BaseLifecycleReporter {
    * variables that have been set via #setPingParameter.
    */
   reset() {
-    this.extraVariables_ = new Object(null);
+    this.extraVariables_ = dict();
   }
 
   /**
@@ -147,7 +148,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
     this.slotId_ = slotId;
 
     /** @private {number} @const */
-    this.correlator_ = getCorrelator(win);
+    this.correlator_ = getCorrelator(win, /* opt_cid */ undefined, element);
 
     /** @private {string} @const */
     this.slotName_ = this.namespace_ + '.' + this.slotId_;
@@ -165,7 +166,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
 
     /** @const {!function():number} */
     this.getDeltaTime = (win.performance && win.performance.now.bind(
-            win.performance)) || (() => {return Date.now() - this.initTime_;});
+        win.performance)) || (() => {return Date.now() - this.initTime_;});
 
     /** (Not constant b/c this can be overridden for testing.) @private */
     this.pingbackAddress_ = 'https://csi.gstatic.com/csi';
@@ -286,36 +287,42 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
       // Element must be an AMP element at this time.
       // 50% vis w/o ini load
       vis.listenElement(element, {visiblePercentageMin: 50}, null, null,
-                        () => {
-                          this.sendPing('visHalf');
-                        });
+          () => {
+            this.sendPing('visHalf');
+          });
       // 50% vis w ini load
       vis.listenElement(element,
                         {visiblePercentageMin: 50},
-                        readyPromise, null,
-                        () => {
-                          this.sendPing('visHalfIniLoad');
-                        });
+          readyPromise, null,
+          () => {
+            this.sendPing('visHalfIniLoad');
+          });
       // first visible
       vis.listenElement(element, {visiblePercentageMin: 1}, null, null,
-                        () => {
-                          this.sendPing('firstVisible');
-                        });
-      // ini-load
+          () => {
+            this.sendPing('firstVisible');
+          });
+
+      // ini load
+      readyPromise.then(() => {
+        this.sendPing('iniLoad');
+      });
+
+      // first visible + ini-load
       vis.listenElement(element, {waitFor: 'ini-load'},
-                        readyPromise, null,
-                        () => {
-                          this.sendPing('iniLoad');
-                        });
+          readyPromise, null,
+          () => {
+            this.sendPing('visIniLoad');
+          });
 
       // 50% vis, ini-load and 1 sec
       vis.listenElement(element,
-                        {visiblePercentageMin: 1, waitFor: 'ini-load',
-                         totalTimeMin: 1000},
-                        readyPromise, null,
-                        () => {
-                          this.sendPing('visLoadAndOneSec');
-                        });
+          {visiblePercentageMin: 1, waitFor: 'ini-load',
+            totalTimeMin: 1000},
+          readyPromise, null,
+          () => {
+            this.sendPing('visLoadAndOneSec');
+          });
     });
   }
 }

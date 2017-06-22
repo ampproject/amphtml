@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 var gulp = require('gulp-help')(require('gulp'));
 var path = require('path');
@@ -173,7 +174,7 @@ var forbiddenTerms = {
   'cidServiceForDocForTesting': {
     message: privateServiceFactory,
     whitelist: [
-      'extensions/amp-analytics/0.1/cid-impl.js',
+      'src/service/cid-impl.js',
     ],
   },
   'installCryptoService': {
@@ -325,7 +326,7 @@ var forbiddenTerms = {
       'src/service/viewer-impl.js',
       'src/service/storage-impl.js',
       'src/service/history-impl.js',
-      'extensions/amp-analytics/0.1/cid-impl.js',
+      'src/service/cid-impl.js',
       'extensions/amp-access/0.1/login-dialog.js',
       'extensions/amp-access/0.1/signin.js',
     ],
@@ -346,7 +347,7 @@ var forbiddenTerms = {
   'getBaseCid': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'extensions/amp-analytics/0.1/cid-impl.js',
+      'src/service/cid-impl.js',
       'src/service/viewer-impl.js',
     ],
   },
@@ -355,7 +356,7 @@ var forbiddenTerms = {
     whitelist: [
       'build-system/test-server.js',
       'src/cookies.js',
-      'extensions/amp-analytics/0.1/cid-impl.js',
+      'src/service/cid-impl.js',
       'extensions/amp-analytics/0.1/vendors.js',
       'testing/fake-dom.js',
     ],
@@ -363,7 +364,7 @@ var forbiddenTerms = {
   'getCookie\\W': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'extensions/amp-analytics/0.1/cid-impl.js',
+      'src/service/cid-impl.js',
       'src/cookies.js',
       'src/experiments.js',
       'tools/experiments/experiments.js',
@@ -372,7 +373,7 @@ var forbiddenTerms = {
   'setCookie\\W': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'extensions/amp-analytics/0.1/cid-impl.js',
+      'src/service/cid-impl.js',
       'src/cookies.js',
       'src/experiments.js',
       'tools/experiments/experiments.js',
@@ -383,7 +384,7 @@ var forbiddenTerms = {
     whitelist: [
       'src/service/viewer-impl.js',
       'src/inabox/inabox-viewer.js',
-      'extensions/amp-analytics/0.1/cid-impl.js',
+      'src/service/cid-impl.js',
     ],
   },
   'eval\\(': {
@@ -403,7 +404,7 @@ var forbiddenTerms = {
   'localStorage': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'extensions/amp-analytics/0.1/cid-impl.js',
+      'src/service/cid-impl.js',
       'src/service/storage-impl.js',
       'testing/fake-dom.js',
     ],
@@ -707,9 +708,11 @@ var forbiddenTermsSrcInclusive = {
       'src/service/performance-impl.js',
       'src/service/url-replacements-impl.js',
       'src/service/variable-source.js',
+      'src/validator-integration.js',
       'extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js',
       'extensions/amp-image-lightbox/0.1/amp-image-lightbox.js',
       'extensions/amp-analytics/0.1/transport.js',
+      'dist.3p/current/integration.js',
     ],
   },
   '\\.getTime\\(\\)': {
@@ -756,6 +759,7 @@ var forbiddenTermsSrcInclusive = {
       'tools/errortracker/errortracker.go',
       'validator/nodejs/index.js',
       'validator/webui/serve-standalone.go',
+      'build-system/tasks/check-links.js',
       'build-system/tasks/extension-generator/index.js',
     ],
   },

@@ -30,7 +30,7 @@ import {isCanary, experimentTogglesOrNull} from './experiments';
 import {makeBodyVisible} from './style-installer';
 import {startsWith} from './string';
 import {urls} from './config';
-
+import {AmpEvents} from './amp-events';
 
 /**
  * @const {string}
@@ -66,6 +66,20 @@ let reportingBackoff = function(work) {
 };
 
 /**
+ * Attempts to stringify a value, falling back to String.
+ * @param {*} value
+ * @return {string}
+ */
+function tryJsonStringify(value) {
+  try {
+    // Cast is fine, because we really don't care here. Just trying.
+    return JSON.stringify(/** @type {!JsonObject} */ (value));
+  } catch (e) {
+    return String(value);
+  }
+}
+
+/**
  * The true JS engine, as detected by inspecting an Error stack. This should be
  * used with the userAgent to tell definitely. I.e., Chrome on iOS is really a
  * Safari JS engine.
@@ -93,7 +107,7 @@ export function reportError(error, opt_associatedElement) {
         isValidError = true;
       } else {
         const origError = error;
-        error = new Error(String(origError));
+        error = new Error(tryJsonStringify(origError));
         error.origError = origError;
       }
     } else {
@@ -139,7 +153,7 @@ export function reportError(error, opt_associatedElement) {
       }
     }
     if (element && element.dispatchCustomEventForTesting) {
-      element.dispatchCustomEventForTesting('amp:error', error.message);
+      element.dispatchCustomEventForTesting(AmpEvents.ERROR, error.message);
     }
 
     // 'call' to make linter happy. And .call to make compiler happy

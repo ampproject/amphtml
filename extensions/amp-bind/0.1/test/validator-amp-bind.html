@@ -27,34 +27,47 @@
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
-
-  <style amp-custom>
-    .redBackground {
-      background-color: red;
-    }
-    button {
-      border: solid 1px black;
-    }
-  </style>
 </head>
 
 <body>
-  <h2>Basic example</h2>
-  <p [text]="foo">After clicking the button below, this will read 'foo'<p>
-  <p id="foo" [text]="foo + 'bar'">And this will read 'foobar'<p>
-  <p [text]="myState.myStateKey1">This will read 'myStateValue1'<p>
-  <button [disabled]="isButtonDisabled">This button will be disabled</button>
-  <p [class]="textClass">This text will have have a red background color</p>
-  <amp-img src="https://ampbyexample.com/img/Border_Collie.jpg" [src]="imgSrc" width=100 [width]="imgSize" height=100 [height]="imgSize" alt="asdf" [alt]="imgAlt"></amp-img>
-  <p>The image above will increase in size and change its src</p>
-  <div>
-    <button on="tap:AMP.setState({'foo': 'foo', 'isButtonDisabled': true, 'textClass': 'redBackground', 'imgSrc': 'https://ampbyexample.com/img/Shetland_Sheepdog.jpg', 'imgSize': 200, 'imgAlt': 'Sheepdog'})">Click me</button>
-  </div>
+  <!-- VALID BINDINGS -->
+  <p [text]="foo.bar" [class]="foo.bar">p</p>
+  <a [href]="foo.bar">a</a>
+  <amp-img src="http://pictures.com/image.jpg" alt="pic" width=10 height=10
+      [src]="foo.bar" [alt]="foo.bar" [width]="foo.bar" [height]="foo.bar">
+  </amp-img>
+  <button [disabled]="foo.bar" [type]="foo.bar" [value]="foo.bar">
+    button
+  </button>
 
-  <amp-state id="myState">
+  <!-- AMP-STATE -->
+  <!-- amp-state with child script -->
+  <amp-state id="withChildScript">
     <script type="application/json">
       {
-        "myStateKey1": "myStateValue1"
+        "foo": "bar"
+      }
+    </script>
+  </amp-state>
+  <!-- amp-state with `src` attr -->
+  <amp-state id="withSrc" src="https://www.foo.com/data.json">
+  </amp-state>
+  <!-- amp-state with `src` and `credentials` attrs -->
+  <amp-state id="withSrcPlusCredentials" src="https://www.foo.com/data.json" credentials="omit">
+  </amp-state>
+  <!-- amp-state with child script and `src` attr -->
+  <amp-state id="withChildScriptAndSrc" src="https://www.foo.com/data.json">
+    <script type="application/json">
+      {
+        "foo": "bar"
+      }
+    </script>
+  </amp-state>
+  <!-- amp-state with child script and `src` and `credentials` attrs -->
+  <amp-state id="withChildScriptAndSrcPlusCredentials" src="https://www.foo.com/data.json" credentials="include">
+    <script type="application/json">
+      {
+        "foo": "bar"
       }
     </script>
   </amp-state>

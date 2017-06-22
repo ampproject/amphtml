@@ -45,6 +45,7 @@ import {
   getElementServiceIfAvailableForDoc,
 } from '../../src/element-service';
 import * as lolex from 'lolex';
+import {AmpEvents} from '../../src/amp-events';
 
 
 describes.realWin('CustomElement register', {amp: 1}, env => {
@@ -346,7 +347,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
     element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
     expect(element.layoutWidth_).to.equal(111);
     expect(element.implementation_.layoutWidth_).to.equal(111);
-    expect(errorStub).to.be.calledWith('amp:error', 'intentional');
+    expect(errorStub).to.be.calledWith(AmpEvents.ERROR, 'intentional');
   });
 
   it('StubElement - upgrade after attached', () => {
@@ -1326,7 +1327,7 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
     element.setAttribute('layout', 'nodisplay');
     win.document.body.appendChild(element);
     return poll('wait for static layout',
-            () => element.classList.contains('i-amphtml-layout-nodisplay'))
+        () => element.classList.contains('i-amphtml-layout-nodisplay'))
         .then(() => {
           // TODO(dvoytenko, #9353): once `toggleLayoutDisplay` API has been
           // deployed this will start `false`.
@@ -1388,7 +1389,7 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
       getState: () => {return ResourceState.LAYOUT_COMPLETE;},
     };
     element.resources_ = {
-      scheduleLayout: function(el, fb) {
+      scheduleLayout(el, fb) {
         if (el == element && fb == fallback) {
           resourcesSpy();
         }

@@ -31,7 +31,7 @@ class AmpFacebook extends AMP.BaseElement {
     this.iframe_ = null;
   }
 
-    /** @override */
+  /** @override */
   renderOutsideViewport() {
     // We are conservative about loading heavy embeds.
     // This will still start loading before they become visible, but it
@@ -62,7 +62,7 @@ class AmpFacebook extends AMP.BaseElement {
     this.applyFillContent(iframe);
     // Triggered by context.updateDimensions() inside the iframe.
     listenFor(iframe, 'embed-size', data => {
-      this./*OK*/changeHeight(data.height);
+      this./*OK*/changeHeight(data['height']);
     }, /* opt_is3P */true);
     this.element.appendChild(iframe);
     this.iframe_ = iframe;

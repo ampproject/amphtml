@@ -151,15 +151,19 @@ describes.realWin('AccessClientAdapter', {
       it('should issue XHR fetch', () => {
         contextMock.expects('buildUrl')
             .withExactArgs(
-                'https://acme.com/a?rid=READER_ID',
-                /* useAuthData */ false)
+            'https://acme.com/a?rid=READER_ID',
+            /* useAuthData */ false)
             .returns(Promise.resolve('https://acme.com/a?rid=reader1'))
             .once();
         xhrMock.expects('fetchJson')
             .withExactArgs('https://acme.com/a?rid=reader1', {
               credentials: 'include',
             })
-            .returns(Promise.resolve({access: 'A'}))
+            .returns(Promise.resolve({
+              json() {
+                return Promise.resolve({access: 'A'});
+              },
+            }))
             .once();
         return adapter.authorize().then(response => {
           expect(response).to.exist;
@@ -170,8 +174,8 @@ describes.realWin('AccessClientAdapter', {
       it('should fail when XHR fails', () => {
         contextMock.expects('buildUrl')
             .withExactArgs(
-                'https://acme.com/a?rid=READER_ID',
-                /* useAuthData */ false)
+            'https://acme.com/a?rid=READER_ID',
+            /* useAuthData */ false)
             .returns(Promise.resolve('https://acme.com/a?rid=reader1'))
             .once();
         xhrMock.expects('fetchJson')
@@ -190,8 +194,8 @@ describes.realWin('AccessClientAdapter', {
       it('should time out XHR fetch', () => {
         contextMock.expects('buildUrl')
             .withExactArgs(
-                'https://acme.com/a?rid=READER_ID',
-                /* useAuthData */ false)
+            'https://acme.com/a?rid=READER_ID',
+            /* useAuthData */ false)
             .returns(Promise.resolve('https://acme.com/a?rid=reader1'))
             .once();
         xhrMock.expects('fetchJson')
@@ -216,20 +220,20 @@ describes.realWin('AccessClientAdapter', {
       it('should send POST pingback', () => {
         contextMock.expects('buildUrl')
             .withExactArgs(
-                'https://acme.com/p?rid=READER_ID',
-                /* useAuthData */ true)
+            'https://acme.com/p?rid=READER_ID',
+            /* useAuthData */ true)
             .returns(Promise.resolve('https://acme.com/p?rid=reader1'))
             .once();
         xhrMock.expects('sendSignal')
             .withExactArgs('https://acme.com/p?rid=reader1',
-                sinon.match(init => {
-                  return (init.method == 'POST' &&
+            sinon.match(init => {
+              return (init.method == 'POST' &&
                       init.credentials == 'include' &&
                       init.requireAmpResponseSourceOrigin == undefined &&
                       init.body == '' &&
                       init.headers['Content-Type'] ==
                           'application/x-www-form-urlencoded');
-                }))
+            }))
             .returns(Promise.resolve())
             .once();
         return adapter.pingback();
@@ -238,20 +242,20 @@ describes.realWin('AccessClientAdapter', {
       it('should fail when POST fails', () => {
         contextMock.expects('buildUrl')
             .withExactArgs(
-                'https://acme.com/p?rid=READER_ID',
-                /* useAuthData */ true)
+            'https://acme.com/p?rid=READER_ID',
+            /* useAuthData */ true)
             .returns(Promise.resolve('https://acme.com/p?rid=reader1'))
             .once();
         xhrMock.expects('sendSignal')
             .withExactArgs('https://acme.com/p?rid=reader1',
-                sinon.match(init => {
-                  return (init.method == 'POST' &&
+            sinon.match(init => {
+              return (init.method == 'POST' &&
                       init.credentials == 'include' &&
                       init.requireAmpResponseSourceOrigin == undefined &&
                       init.body == '' &&
                       init.headers['Content-Type'] ==
                           'application/x-www-form-urlencoded');
-                }))
+            }))
             .returns(Promise.reject('intentional'))
             .once();
         return adapter.pingback().then(() => {

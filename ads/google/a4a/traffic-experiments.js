@@ -47,7 +47,7 @@ import {parseQueryString} from '../../../src/url';
 export let A4aExperimentBranches;
 
 /** @type {!string} @private */
-const MANUAL_EXPERIMENT_ID = '117152632';
+export const MANUAL_EXPERIMENT_ID = '117152632';
 
 /** @type {!string} @private */
 const EXTERNALLY_SELECTED_ID = '2088461';
@@ -77,11 +77,14 @@ const INTERNALLY_SELECTED_ID = '2088462';
  * @param {!A4aExperimentBranches} internalBranches experiment and control
  *   branch IDs to use when experiment is triggered internally (i.e., via
  *   client-side selection).
+ * @param {!A4aExperimentBranches} delayedExternalBranches
+ * @param {!A4aExperimentBranches=} opt_sfgInternalBranches
  * @return {boolean} Whether Google Ads should attempt to render via the A4A
  *   pathway.
  */
 export function googleAdsIsA4AEnabled(win, element, experimentName,
-    externalBranches, internalBranches, delayedExternalBranches) {
+    externalBranches, internalBranches, delayedExternalBranches,
+    opt_sfgInternalBranches) {
   if (!isGoogleAdsA4AValidEnvironment(win)) {
     // Serving location doesn't qualify for A4A treatment
     return false;
@@ -91,6 +94,8 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
       experimentName, externalBranches.control,
       externalBranches.experiment, delayedExternalBranches.control,
       delayedExternalBranches.experiment,
+      opt_sfgInternalBranches ? opt_sfgInternalBranches.control : null,
+      opt_sfgInternalBranches ? opt_sfgInternalBranches.experiment : null,
       MANUAL_EXPERIMENT_ID);
   const experimentInfoMap = {};
   const branches = [
@@ -164,6 +169,8 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
  *   - `2`: Ad is on the experimental branch of the overall A4A-vs-3p iframe
  *     experiment.  Ad will render via the A4A path, including early ad
  *     request and (possibly) early rendering in shadow DOM or iframe.
+ * Allows for per network selection using exp=aa:# for AdSense and exp=da:# for
+ * Doubleclick.
  *
  * @param {!Window} win  Window.
  * @param {!Element} element Ad tag Element.
@@ -179,21 +186,28 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
  *   parameter or not.
  */
 function maybeSetExperimentFromUrl(win, element, experimentName,
-    controlBranchId, treatmentBranchId, delayedControlId,
-    delayedTreatmentBrandId, manualId) {
+     controlBranchId, treatmentBranchId, delayedControlId,
+     delayedTreatmentBrandId, sfgControlId, sfgTreatmentId, manualId) {
   const expParam = viewerForDoc(element).getParam('exp') ||
-      parseQueryString(win.location.search)['exp'];
+    parseQueryString(win.location.search)['exp'];
   if (!expParam) {
     return false;
   }
-  const match = /(^|,)(a4a:[^,]*)/.exec(expParam);
-  const a4aParam = match && match[2];
-  if (!a4aParam) {
+  // Allow for per type experiment control with Doubleclick key set for 'da'
+  // and AdSense using 'aa'.  Fallbsck to 'a4a' if type specific is missing.
+  const expKeys = [
+    (element.getAttribute('type') || '').toLowerCase() == 'doubleclick' ?
+      'da' : 'aa',
+    'a4a',
+  ];
+  let arg;
+  let match;
+  expKeys.forEach(key => arg = arg ||
+    ((match = new RegExp(`(?:^|,)${key}:(-?\\d+)`).exec(expParam)) &&
+      match[1]));
+  if (!arg) {
     return false;
   }
-  // In the future, we may want to specify multiple experiments in the a4a
-  // arg.  For the moment, however, assume that it's just a single flag.
-  const arg = a4aParam.split(':', 2)[1];
   const argMapping = {
     '-1': manualId,
     '0': null,
@@ -201,19 +215,19 @@ function maybeSetExperimentFromUrl(win, element, experimentName,
     '2': treatmentBranchId,
     '3': delayedControlId,
     '4': delayedTreatmentBrandId,
+    '5': sfgControlId,
+    '6': sfgTreatmentId,
   };
   if (argMapping.hasOwnProperty(arg)) {
     forceExperimentBranch(win, experimentName, argMapping[arg]);
     return true;
   } else {
-    dev().warn('A4A-CONFIG', 'Unknown a4a URL parameter: ', a4aParam,
+    dev().warn('A4A-CONFIG', 'Unknown a4a URL parameter: ', arg,
         ' expected one of -1 (manual), 0 (not in experiment), 1 (control ' +
         'branch), or 2 (a4a experiment branch)');
     return false;
   }
 }
-
-
 
 /**
  * Sets of experiment IDs can be attached to Elements via attributes.  In

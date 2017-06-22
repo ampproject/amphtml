@@ -23,7 +23,7 @@ import {
 import {getAdCid} from '../../../src/ad-cid';
 import {preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {isAdPositionAllowed, getAdContainer,}
+import {isAdPositionAllowed, getAdContainer}
     from '../../../src/ad-helper';
 import {adConfig} from '../../../ads/_config';
 import {
@@ -219,8 +219,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     user().assert(!this.isInFixedContainer_,
         '<amp-ad> is not allowed to be placed in elements with ' +
         'position:fixed: %s', this.element);
-    incrementLoadingAds(this.win);
-    return this.layoutPromise_ = getAdCid(this).then(cid => {
+    this.layoutPromise_ = getAdCid(this).then(cid => {
       const opt_context = {
         clientId: cid || null,
         container: this.container_,
@@ -237,6 +236,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
           this);
       return this.xOriginIframeHandler_.init(iframe);
     });
+    incrementLoadingAds(this.win, this.layoutPromise_);
+    return this.layoutPromise_;
   }
 
   /** @override  */

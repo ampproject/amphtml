@@ -24,7 +24,7 @@ import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
 } from '../service';
-import {isSecureUrl, parseUrl, removeFragment, parseQueryString,
+import {parseUrl, removeFragment, parseQueryString,
   addParamsToUrl} from '../url';
 import {viewerForDoc} from '../services';
 import {viewportForDoc} from '../services';
@@ -231,7 +231,7 @@ export class GlobalVariableSource extends VariableSource {
       return clientIds[dev().assertString(scope)];
     }, (scope, opt_userNotificationId, opt_cookieName) => {
       user().assertString(scope,
-            'The first argument to CLIENT_ID, the fallback c' +
+          'The first argument to CLIENT_ID, the fallback c' +
             /*OK*/'ookie name, is required');
       let consent = Promise.resolve();
 
@@ -369,36 +369,36 @@ export class GlobalVariableSource extends VariableSource {
     // Returns the time it took to load the whole page. (excludes amp-* elements
     // that are not rendered by the system yet.)
     this.setTimingResolver_(
-      'PAGE_LOAD_TIME', 'navigationStart', 'loadEventStart');
+        'PAGE_LOAD_TIME', 'navigationStart', 'loadEventStart');
 
     // Returns the time it took to perform DNS lookup for the domain.
     this.setTimingResolver_(
-      'DOMAIN_LOOKUP_TIME', 'domainLookupStart', 'domainLookupEnd');
+        'DOMAIN_LOOKUP_TIME', 'domainLookupStart', 'domainLookupEnd');
 
     // Returns the time it took to connect to the server.
     this.setTimingResolver_(
-      'TCP_CONNECT_TIME', 'connectStart', 'connectEnd');
+        'TCP_CONNECT_TIME', 'connectStart', 'connectEnd');
 
     // Returns the time it took for server to start sending a response to the
     // request.
     this.setTimingResolver_(
-      'SERVER_RESPONSE_TIME', 'requestStart', 'responseStart');
+        'SERVER_RESPONSE_TIME', 'requestStart', 'responseStart');
 
     // Returns the time it took to download the page.
     this.setTimingResolver_(
-      'PAGE_DOWNLOAD_TIME', 'responseStart', 'responseEnd');
+        'PAGE_DOWNLOAD_TIME', 'responseStart', 'responseEnd');
 
     // Returns the time it took for redirects to complete.
     this.setTimingResolver_(
-      'REDIRECT_TIME', 'navigationStart', 'fetchStart');
+        'REDIRECT_TIME', 'navigationStart', 'fetchStart');
 
     // Returns the time it took for DOM to become interactive.
     this.setTimingResolver_(
-      'DOM_INTERACTIVE_TIME', 'navigationStart', 'domInteractive');
+        'DOM_INTERACTIVE_TIME', 'navigationStart', 'domInteractive');
 
     // Returns the time it took for content to load.
     this.setTimingResolver_(
-      'CONTENT_LOAD_TIME', 'navigationStart', 'domContentLoadedEventStart');
+        'CONTENT_LOAD_TIME', 'navigationStart', 'domContentLoadedEventStart');
 
     // Access: Reader ID.
     this.setAsync('ACCESS_READER_ID', /** @type {AsyncResolverDef} */(() => {
@@ -644,8 +644,8 @@ export class UrlReplacements {
    */
   expandUrlSync(url, opt_bindings, opt_collectVars, opt_whiteList) {
     return this.ensureProtocolMatches_(url, /** @type {string} */ (this.expand_(
-            url, opt_bindings, opt_collectVars, /* opt_sync */ true,
-            opt_whiteList)));
+        url, opt_bindings, opt_collectVars, /* opt_sync */ true,
+        opt_whiteList)));
   }
 
   /**
@@ -662,7 +662,7 @@ export class UrlReplacements {
     return /** @type {!Promise<string>} */ (
         this.expand_(url, opt_bindings, undefined, undefined,
             opt_whiteList).then(
-              replacement => this.ensureProtocolMatches_(url, replacement)));
+            replacement => this.ensureProtocolMatches_(url, replacement)));
   }
 
   /**
@@ -758,7 +758,7 @@ export class UrlReplacements {
     }
 
     const meta = this.ampdoc.getRootNode().querySelector(
-      'meta[name=amp-link-variable-allowed-origin]');
+        'meta[name=amp-link-variable-allowed-origin]');
 
     if (meta && meta.hasAttribute('content')) {
       const whitelist = meta.getAttribute('content').trim().split(/\s+/);
@@ -785,9 +785,10 @@ export class UrlReplacements {
       'CLIENT_ID': true,
       'QUERY_PARAM': true,
     };
+    const additionalUrlParameters = element.getAttribute('data-amp-addparams');
     const whitelist = this.getWhitelistForElement_(
         element, supportedReplacements);
-    if (!whitelist) {
+    if (!whitelist && !additionalUrlParameters) {
       return;
     }
     // ORIGINAL_HREF_PROPERTY has the value of the href "pre-replacement".
@@ -796,31 +797,29 @@ export class UrlReplacements {
     let href = dev().assertString(
         element[ORIGINAL_HREF_PROPERTY] || element.getAttribute('href'));
     const url = parseUrl(href);
-    if (!this.isAllowedOrigin_(url)) {
-      user().warn('URL', 'Ignoring link replacement', href,
-          ' because the link does not go to the document\'s' +
-          ' source, canonical, or whitelisted origin.');
-      return;
-    }
-    if (!isSecureUrl(href)) {
-      user().warn('URL', 'Ignoring link replacement', href,
-          ' because it is only supported for secure links.');
-      return;
-    }
     if (element[ORIGINAL_HREF_PROPERTY] == null) {
       element[ORIGINAL_HREF_PROPERTY] = href;
     }
-    const additionalURLParameters = element.getAttribute('data-amp-addparams');
-    if (additionalURLParameters) {
+    if (additionalUrlParameters) {
       href = addParamsToUrl(
-        href,
-        parseQueryString(additionalURLParameters));
+          href,
+          parseQueryString(additionalUrlParameters));
     }
-    return element.href = this.expandSync(
-        href,
-        /* opt_bindings */ undefined,
-        /* opt_collectVars */ undefined,
-        /* opt_whitelist */ whitelist);
+    if (whitelist) {
+      const isAllowedOrigin = this.isAllowedOrigin_(url);
+      if (!isAllowedOrigin) {
+        user().warn('URL', 'Ignoring link replacement', href,
+            ' because the link does not go to the document\'s' +
+            ' source, canonical, or whitelisted origin.');
+      } else {
+        href = this.expandSync(
+            href,
+            /* opt_bindings */ undefined,
+            /* opt_collectVars */ undefined,
+            /* opt_whitelist */ whitelist);
+      }
+    }
+    return element.href = href;
   }
 
   /**

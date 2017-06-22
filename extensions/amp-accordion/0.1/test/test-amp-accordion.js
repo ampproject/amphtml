@@ -80,7 +80,7 @@ describes.sandboxed('amp-accordion', {}, () => {
       obj.ampAccordion.implementation_.onHeaderPicked_(clickEvent);
       expect(header.parentNode.hasAttribute('expanded')).to.be.true;
       expect(header.getAttribute('aria-expanded')).to.equal('true');
-      expect(clickEvent.preventDefault.called).to.be.true;
+      expect(clickEvent.preventDefault).to.have.been.called;
     });
   });
 
@@ -99,7 +99,24 @@ describes.sandboxed('amp-accordion', {}, () => {
       obj.ampAccordion.implementation_.onHeaderPicked_(clickEvent);
       expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.false;
       expect(headerElements[1].getAttribute('aria-expanded')).to.equal('false');
-      expect(clickEvent.preventDefault.called).to.be.true;
+      expect(clickEvent.preventDefault).to.have.been.called;
+    });
+  });
+
+  it('should allow for clickable links in header', () => {
+    return getAmpAccordion().then(obj => {
+      const iframe = obj.iframe;
+      const headerElements = iframe.doc.querySelectorAll(
+          'section > *:first-child');
+      const a = iframe.doc.createElement('a');
+      headerElements[0].appendChild(a);
+      const aClickEvent = {
+        target: a,
+        currentTarget: headerElements[0],
+        preventDefault: sandbox.spy(),
+      };
+      obj.ampAccordion.implementation_.clickHandler_(aClickEvent);
+      expect(aClickEvent.preventDefault).to.not.have.been.called;
     });
   });
 
@@ -176,6 +193,8 @@ describes.sandboxed('amp-accordion', {}, () => {
           'section > *:first-child');
       // Focus the first header,
       tryFocus(headerElements[0]);
+      expect(iframe.doc.activeElement)
+          .to.equal(headerElements[0]);
       const upArrowEvent = {
         keyCode: KeyCodes.UP_ARROW,
         target: headerElements[0],
@@ -320,7 +339,7 @@ describes.sandboxed('amp-accordion', {}, () => {
       return iframe.addElement(ampAccordion2).then(() => {
         ampAccordion1.implementation_.buildCallback();
         const headerElements1 = ampAccordion1.querySelectorAll(
-          'section > *:first-child');
+            'section > *:first-child');
         const clickEventElement = {
           target: headerElements1[0],
           currentTarget: headerElements1[0],
@@ -329,7 +348,7 @@ describes.sandboxed('amp-accordion', {}, () => {
         ampAccordion1.implementation_.onHeaderPicked_(clickEventElement);
         ampAccordion2.implementation_.buildCallback();
         const headerElements2 = ampAccordion2.querySelectorAll(
-          'section > *:first-child');
+            'section > *:first-child');
         expect(headerElements1[0].parentNode.hasAttribute('expanded'))
             .to.be.true;
         expect(headerElements2[0].parentNode.hasAttribute('expanded'))

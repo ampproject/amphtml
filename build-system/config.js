@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 var commonTestPaths = [
   'test/_init_tests.js',
@@ -81,6 +82,11 @@ module.exports = {
     '!extensions/amp-access/0.1/access-expr-impl.js',
     '!extensions/amp-animation/0.1/css-expr-impl.js',
     '!extensions/amp-bind/0.1/bind-expr-impl.js',
+  ],
+  jsonGlobs: [
+    '**/*.json',
+    '!{node_modules,build,dist,dist.3p,dist.tools,' +
+        'third_party,build-system}/**/*.*',
   ],
   presubmitGlobs: [
     '**/*.{css,js,go}',

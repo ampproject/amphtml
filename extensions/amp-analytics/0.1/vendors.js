@@ -15,9 +15,9 @@
  */
 
 /**
- * @const {!JSONType}
+ * @const {!JsonObject}
  */
-export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
+export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
 
   // Default parent configuration applied to all amp-analytics tags.
   'default': {
@@ -78,23 +78,6 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       'viewportWidth': 'VIEWPORT_WIDTH',
     },
   },
-
-  'baiduanalytics': {
-    'requests': {
-      'host': 'https://hm.baidu.com',
-      'base': '${host}/hm.gif?' +
-          'si=${token}&nv=0&st=4&v=pixel-1.0&rnd=${timestamp}',
-      'pageview': '${base}&et=0',
-      'event': '${base}&ep=${category}*${action}*' +
-          '${label}*${value}&et=4&api=8_0',
-    },
-    'transport': {
-      'beacon': false,
-      'xhrpost': false,
-      'image': true,
-    },
-  },
-
   'acquialift': {
     'vars': {
       'decisionApiUrl': 'us-east-1-decisionapi.lift.acquia.com',
@@ -170,6 +153,22 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
         'p=${label}&' +
         's2=${level2Click}&' +
         'type=click&click=${type}${suffix}',
+    },
+  },
+
+  'baiduanalytics': {
+    'requests': {
+      'host': 'https://hm.baidu.com',
+      'base': '${host}/hm.gif?' +
+          'si=${token}&nv=0&st=4&v=pixel-1.0&rnd=${timestamp}',
+      'pageview': '${base}&et=0',
+      'event': '${base}&ep=${category}*${action}*' +
+          '${label}*${value}&et=4&api=8_0',
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
     },
   },
 
@@ -499,6 +498,89 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     },
   },
 
+  'facebookpixel': {
+    'vars': {
+      'pixelId': 'PIXEL-ID',
+    },
+    'requests': {
+      'host': 'https://www.facebook.com',
+      'base': '${host}/tr?noscript=1',
+      'pageview': '${base}&ev=PageView&' +
+          'id=${pixelId}',
+      'event': '${base}&ev=${eventName}&' +
+          'id=${pixelId}' +
+          '&cd[content_name]=${content_name}',
+      'eventViewContent': '${base}&ev=ViewContent&' +
+          'id=${pixelId}' +
+          '&cd[value]=${value}' +
+          '&cd[currency]=${currency}' +
+          '&cd[content_name]=${content_name}' +
+          '&cd[content_type]=${content_type}' +
+          '&cd[content_ids]=${content_ids}',
+      'eventSearch': '${base}&ev=Search&' +
+          'id=${pixelId}' +
+          '&cd[value]=${value}' +
+          '&cd[currency]=${currency}' +
+          '&cd[content_category]=${content_category}' +
+          '&cd[content_ids]=${content_ids}' +
+          '&cd[search_string]=${search_string}',
+      'eventAddToCart': '${base}&ev=AddToCart&' +
+          'id=${pixelId}' +
+          '&cd[value]=${value}' +
+          '&cd[currency]=${currency}' +
+          '&cd[content_name]=${content_name}' +
+          '&cd[content_type]=${content_type}' +
+          '&cd[content_ids]=${content_ids}',
+      'eventAddToWishlist': '${base}&ev=AddToWishlist&' +
+          'id=${pixelId}' +
+          '&cd[value]=${value}' +
+          '&cd[currency]=${currency}' +
+          '&cd[content_name]=${content_name}' +
+          '&cd[content_category]=${content_category}' +
+          '&cd[content_ids]=${content_ids}',
+      'eventInitiateCheckout': '${base}&ev=InitiateCheckout&' +
+          'id=${pixelId}' +
+          '&cd[value]=${value}' +
+          '&cd[currency]=${currency}' +
+          '&cd[content_name]=${content_name}' +
+          '&cd[content_category]=${content_category}' +
+          '&cd[num_items]=${num_items}' +
+          '&cd[content_ids]=${content_ids}',
+      'eventAddPaymentInfo': '${base}&ev=AddPaymentInfo&' +
+          'id=${pixelId}' +
+          '&cd[value]=${value}' +
+          '&cd[currency]=${currency}' +
+          '&cd[content_category]=${content_category}' +
+          '&cd[content_ids]=${content_ids}',
+      'eventPurchase': '${base}&ev=Purchase&' +
+          'id=${pixelId}' +
+          '&cd[value]=${value}' +
+          '&cd[currency]=${currency}' +
+          '&cd[content_name]=${content_name}' +
+          '&cd[content_type]=${content_type}' +
+          '&cd[content_ids]=${content_ids}' +
+          '&cd[num_items]=${num_items}',
+      'eventLead': '${base}&ev=Lead&' +
+          'id=${pixelId}' +
+          '&cd[value]=${value}' +
+          '&cd[currency]=${currency}' +
+          '&cd[content_name]=${content_name}' +
+          '&cd[content_category]=${content_category}',
+      'eventCompleteRegistration': '${base}&ev=CompleteRegistration&' +
+          'id=${pixelId}' +
+          '&cd[value]=${value}' +
+          '&cd[currency]=${currency}' +
+          '&cd[content_name]=${content_name}' +
+          '&cd[status]=${status}',
+    },
+    'triggers': {
+      'trackPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+  },
+
   'gemius': {
     'requests': {
       'base': 'https://${prefix}.hit.gemius.pl/_${timestamp}/redot.gif?l=91&id=${identifier}&screen=${screenWidth}x${screenHeight}&window=${viewportWidth}x${viewportHeight}&fr=1&href=${sourceUrl}&ref=${documentReferrer}&extra=gemamp%3D1%7Campid%3D${clientId(gemius)}%7C${extraparams}',
@@ -559,7 +641,7 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
     'vars': {
       'eventValue': '0',
       'documentLocation': 'SOURCE_URL',
-      'clientId': 'CLIENT_ID(AMP_ECID_GOOGLE)',
+      'clientId': 'CLIENT_ID(AMP_ECID_GOOGLE,,_ga)',
       'dataSource': 'AMP',
       'anonymizeIP': 'aip',
     },

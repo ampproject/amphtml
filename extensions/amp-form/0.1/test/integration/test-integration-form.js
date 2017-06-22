@@ -17,7 +17,7 @@
 import {AmpForm, AmpFormService} from '../../amp-form';
 import {AmpMustache} from '../../../../amp-mustache/0.1/amp-mustache';
 import {poll} from '../../../../../testing/iframe';
-import {registerExtendedTemplate,} from
+import {registerExtendedTemplate} from
     '../../../../../src/service/template-impl';
 
 
@@ -193,8 +193,10 @@ describes.realWin('AmpForm Integration', {
           () => ampForm.renderTemplatePromiseForTesting());
 
       form.dispatchEvent(new Event('submit'));
-      return fetch.catch(fetchError => fetchError).then(fetchError => {
-        expect(fetchError.error.message).to.match(/HTTP error 500/);
+      return fetch.then(() => {
+        throw new Error('UNREACHABLE');
+      }, fetchError => {
+        expect(fetchError.message).to.match(/HTTP error 500/);
         return render.then(() => {
           const rendered = form.querySelector('[i-amphtml-rendered]');
           expect(rendered.textContent).to.equal(
@@ -257,8 +259,10 @@ describes.realWin('AmpForm Integration', {
           () => ampForm.renderTemplatePromiseForTesting());
 
       form.dispatchEvent(new Event('submit'));
-      return fetch.catch(fetchError => fetchError).then(fetchError => {
-        expect(fetchError.error.message).to.match(/HTTP error 500/);
+      return fetch.then(() => {
+        throw new Error('UNREACHABLE');
+      }, fetchError => {
+        expect(fetchError.message).to.match(/HTTP error 500/);
         return render.then(() => {
           const rendered = form.querySelector('[i-amphtml-rendered]');
           expect(rendered.textContent).to.equal(
@@ -294,8 +298,10 @@ describes.realWin('AmpForm Integration', {
           () => form.querySelector('amp-img img'));
 
       form.dispatchEvent(new Event('submit'));
-      return fetch.catch(fetchError => fetchError).then(fetchError => {
-        expect(fetchError.error.message).to.match(/HTTP error 500/);
+      return fetch.then(() => {
+        throw new Error('UNREACHABLE');
+      }, fetchError => {
+        expect(fetchError.message).to.match(/HTTP error 500/);
 
         // It shouldn't have the i-amphtml-rendered attribute since no
         // template was rendered.

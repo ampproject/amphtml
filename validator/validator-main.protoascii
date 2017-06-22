@@ -20,19 +20,19 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii) are always released together.
-min_validator_revision_required: 232
+min_validator_revision_required: 238
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 422
+spec_file_revision: 443
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 
 # Validator extensions.
 # =====================
 # In addition to the rules in this file, the Validator honors the rules
-# in the extensions/*/0.1/validator-*.protoascii files. This makes it
+# in the extensions/*/validator-*.protoascii files. This makes it
 # easy to organize the rules for extensions next to their Javascript
 # implementation.
 
@@ -191,7 +191,7 @@ tags: {
     name: "rel"
     value_casei: "canonical"
     mandatory: true
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec#required-markup"
 }
@@ -215,7 +215,7 @@ tags: {
     name: "rel"
     value_casei: "manifest"
     mandatory: true
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
 }
@@ -240,7 +240,7 @@ tags: {
     name: "rel"
     mandatory: true
     value_casei: "stylesheet"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "type"
@@ -265,7 +265,7 @@ tags: {
     name: "itemprop"
     mandatory: true
     value_casei: "sameas"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attr_lists: "common-link-attrs"
   spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -309,7 +309,7 @@ tags: {
   mandatory_parent: "HEAD"
   unique: true
   attrs: {
-    dispatch_key: true
+    dispatch_key: NAME_DISPATCH
     name: "charset"
     mandatory: true
     value_casei: "utf-8"
@@ -339,7 +339,7 @@ tags: {
     name: "name"
     mandatory: true
     value: "viewport"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec#required-markup"
 }
@@ -353,7 +353,7 @@ tags: {
     name: "http-equiv"
     mandatory: true
     value_casei: "x-ua-compatible"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "content"
@@ -375,7 +375,7 @@ tags: {
     name: "name"
     value_casei: "apple-itunes-app"
     mandatory: true
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "content"
@@ -394,7 +394,7 @@ tags: {
     name: "name"
     mandatory: true
     value_casei: "amp-experiments-opt-in"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "content"
@@ -411,7 +411,7 @@ tags: {
     name: "name"
     mandatory: true
     value_casei: "amp-3p-iframe-src"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "content"
@@ -433,7 +433,7 @@ tags: {
     name: "name"
     mandatory: true
     value_casei: "amp-experiment-token"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "content"
@@ -451,7 +451,7 @@ tags: {
     name: "name"
     mandatory: true
     value_casei: "amp-link-variable-allowed-origin"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "content"
@@ -469,7 +469,7 @@ tags: {
     name: "name"
     mandatory: true
     value_casei: "amp4ads-id"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "content"
@@ -508,7 +508,7 @@ tags: {
     name: "http-equiv"
     mandatory: true
     value_casei: "content-type"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "content"
@@ -526,7 +526,7 @@ tags: {
     name: "http-equiv"
     mandatory: true
     value_casei: "content-language"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "content"
@@ -544,7 +544,7 @@ tags: {
     name: "http-equiv"
     mandatory: true
     value_casei: "pics-label"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "content"
@@ -562,7 +562,7 @@ tags: {
     name: "http-equiv"
     mandatory: true
     value_casei: "imagetoolbar"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "content"
@@ -580,7 +580,7 @@ tags: {
     name: "http-equiv"
     mandatory: true
     value_casei: "content-style-type"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "content"
@@ -599,7 +599,7 @@ tags: {
     name: "http-equiv"
     mandatory: true
     value_casei: "content-script-type"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "content"
@@ -617,7 +617,7 @@ tags: {
     name: "http-equiv"
     mandatory: true
     value_casei: "origin-trial"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "content"
@@ -635,7 +635,7 @@ tags: {
     name: "http-equiv"
     mandatory: true
     value_casei: "resource-type"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "content"
@@ -660,7 +660,7 @@ tags: {  # Special custom 'author' spreadsheet for AMP
     # is used for errors related to <style> tags missing the amp-custom
     # attribute rather than the boilerplate tagspec which doesn't have an
     # attribute and thus can't have a dispatch_key.
-    # dispatch_key: true
+    # dispatch_key: NAME_DISPATCH
   }
   attrs: { name: "nonce" }
   attrs: {  # This is a default, but it doesn't hurt.
@@ -750,7 +750,7 @@ tags: {  # Special custom 'author' spreadsheet for AMP4ADS
     # is used for errors related to <style> tags missing the amp-custom
     # attribute rather than the boilerplate tagspec which doesn't have an
     # attribute and thus can't have a dispatch_key.
-    # dispatch_key: true
+    # dispatch_key: NAME_DISPATCH
   }
   attrs: { name: "nonce" }
   attrs: {  # This is a default, but it doesn't hurt.
@@ -870,7 +870,7 @@ tags: {
     name: "amp-boilerplate"
     mandatory: true
     value: ""
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
   attrs: { name: "nonce" }
   cdata: {
@@ -890,7 +890,7 @@ tags: {
     name: "amp4ads-boilerplate"
     mandatory: true
     value: ""
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
   attrs: { name: "nonce" }
   cdata: {
@@ -914,7 +914,7 @@ tags: {
     name: "amp-boilerplate"
     mandatory: true
     value: ""
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
   attrs: { name: "nonce" }
   cdata {
@@ -1548,6 +1548,25 @@ tags: {
   attrs: { name: "media" }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-video"
 }
+tags: {
+  tag_name: "SOURCE"
+  spec_name: "amp-ima-video > source"
+  mandatory_parent: "AMP-IMA-VIDEO"
+  requires_extension: "amp-ima-video"
+  attrs: { name: "media" }
+  attrs: {
+    name: "src"
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  attrs: { name: "type" }
+  # <amp-bind>
+  attrs: { name: "[src]" }
+  attrs: { name: "[type]" }
+}
 # 4.7.8 The track element
 # We have two attr_list variants to encode the requirement that if
 # the attribute kind has the value 'subtitles', then the tag must
@@ -1660,6 +1679,18 @@ tags: {
   attrs: { name: "[srclang]" }
   attr_lists: "track-attrs-subtitles"
 }
+tags: {
+  tag_name: "TRACK"
+  spec_name: "amp-ima-video > track[kind=subtitles]"
+  mandatory_parent: "AMP-IMA-VIDEO"
+  # <amp-bind>
+  attrs: { name: "[label]" }
+  attrs: { name: "[src]" }
+  attrs: { name: "[srclang]" }
+  attr_lists: "track-attrs-subtitles"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ima-video"
+}
+
 
 # 4.7.15 SVG
 # We allow some limited embedded SVG tags. We do not allow inline styles
@@ -2224,6 +2255,7 @@ tags: {
   attrs: { name: "offset" }
   attrs: { name: "stop-color" }
   attrs: { name: "stop-opacity" }
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
@@ -2233,6 +2265,7 @@ tags: {
   attrs: { name: "offset" }
   attrs: { name: "stop-color" }
   attrs: { name: "stop-opacity" }
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
@@ -2482,7 +2515,7 @@ tags: {
 tags {  # <form method=GET ...>
   tag_name: "FORM"
   spec_name: "FORM [method=GET]"
-  requires: "amp-form extension .js script"
+  requires_extension: "amp-form"
   disallowed_ancestor: "AMP-APP-BANNER"
   attrs: { name: "accept" }
   attrs: { name: "accept-charset" }
@@ -2533,12 +2566,12 @@ tags {  # <form method=GET ...>
     mandatory: true
     value_regex_casei: "(_blank|_top)"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
+
 }
 tags {  # <form method=POST ...>
   tag_name: "FORM"
   spec_name: "FORM [method=POST]"
-  requires: "amp-form extension .js script"
+  requires_extension: "amp-form"
   disallowed_ancestor: "AMP-APP-BANNER"
   attrs: { name: "accept" }
   attrs: { name: "accept-charset" }
@@ -2567,7 +2600,7 @@ tags {  # <form method=POST ...>
     name: "method"
     mandatory: true
     value_casei: "post"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: { name: "name" }
   attrs: { name: "novalidate" }
@@ -2576,39 +2609,35 @@ tags {  # <form method=POST ...>
     mandatory: true
     value_regex_casei: "(_blank|_top)"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
 tags {
   tag_name: "DIV"
   spec_name: "FORM > DIV [submitting]"
   mandatory_parent: "FORM"
-  attrs: { name: "submitting" mandatory: true }
   attrs: { name: "align" }
-  child_tags: {
-    mandatory_num_child_tags: 1
-    first_child_tag_name_oneof: "TEMPLATE"
+  attrs: {
+    name: "submitting"
+    mandatory: true
   }
 }
 tags {
   tag_name: "DIV"
   spec_name: "FORM > DIV [submit-success]"
   mandatory_parent: "FORM"
-  attrs: { name: "submit-success" mandatory: true }
   attrs: { name: "align" }
-  child_tags: {
-    mandatory_num_child_tags: 1
-    first_child_tag_name_oneof: "TEMPLATE"
+  attrs: {
+    name: "submit-success"
+    mandatory: true
   }
 }
 tags {
   tag_name: "DIV"
   spec_name: "FORM > DIV [submit-error]"
   mandatory_parent: "FORM"
-  attrs: { name: "submit-error" mandatory: true }
   attrs: { name: "align" }
-  child_tags: {
-    mandatory_num_child_tags: 1
-    first_child_tag_name_oneof: "TEMPLATE"
+  attrs: {
+    name: "submit-error"
+    mandatory: true
   }
 }
 attr_lists: {
@@ -2991,7 +3020,7 @@ tags: {
     name: "src"
     mandatory: true
     value: "https://cdn.ampproject.org/v0.js"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "type"
@@ -3022,7 +3051,7 @@ tags: {
     name: "src"
     mandatory: true
     value: "https://cdn.ampproject.org/amp4ads-v0.js"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "type"
@@ -3045,7 +3074,33 @@ tags: {
     name: "type"
     mandatory: true
     value_casei: "application/ld+json"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+}
+# AMP RTC (Real Time Config)
+tags: {
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "script id=amp-rtc"
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: { name: "nonce" }
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+  }
+  attrs: {
+    name: "id"
+    mandatory: true
+    value_casei: "amp-rtc"
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -3075,7 +3130,7 @@ tags: {
   disallowed_ancestor: "NOSCRIPT"
 }
 # 4.11.3 The template element
-# See extensions/amp-mustache/0.1/validator-amp-mustache.protoascii.
+# See extensions/amp-mustache/validator-amp-mustache.protoascii.
 
 # 11 Obsolute features
 # 11.2 Non-conforming features
@@ -3264,7 +3319,24 @@ attr_lists: {
   attrs: { name: "inlist" }
   attrs: { name: "prefix" }
   attrs: { name: "property" }
+  attrs: {
+    name: "rel"
+    blacklisted_value_regex: "(^|\\s)("  # Values are space separated
+        "canonical|"
+        "components|"
+        "dns-prefetch|"
+        "import|"
+        "manifest|"
+        "preconnect|"
+        "preload|"
+        "prerender|"
+        "serviceworker|"
+        "stylesheet|"
+        "subresource"
+        ")(\\s|$)"
+  }
   attrs: { name: "resource" }
+  attrs: { name: "rev" }
   attrs: { name: "typeof" }
   attrs: { name: "vocab" }
   # 3.2.5 HTML5 Global attributes.
@@ -3514,100 +3586,102 @@ error_specificity { code: MANDATORY_TAG_ANCESTOR specificity: 6 }
 error_specificity { code: MANDATORY_TAG_ANCESTOR_WITH_HINT specificity: 7 }
 error_specificity { code: MANDATORY_TAG_MISSING specificity: 8 }
 error_specificity { code: TAG_REQUIRED_BY_MISSING specificity: 9 }
-error_specificity { code: WARNING_TAG_REQUIRED_BY_MISSING specificity: 10 }
-error_specificity { code: WARNING_EXTENSION_UNUSED specificity: 11 }
-error_specificity { code: WARNING_EXTENSION_DEPRECATED_VERSION specificity: 12 }
-error_specificity { code: ATTR_REQUIRED_BUT_MISSING specificity: 13 }
-error_specificity { code: DISALLOWED_TAG specificity: 14 }
-error_specificity { code: DISALLOWED_ATTR specificity: 15 }
-error_specificity { code: INVALID_ATTR_VALUE specificity: 16 }
-error_specificity { code: ATTR_VALUE_REQUIRED_BY_LAYOUT specificity: 17 }
-error_specificity { code: MANDATORY_ATTR_MISSING specificity: 18 }
-error_specificity { code: MANDATORY_ONEOF_ATTR_MISSING specificity: 19 }
-error_specificity { code: DUPLICATE_UNIQUE_TAG specificity: 20 }
-error_specificity { code: DUPLICATE_UNIQUE_TAG_WARNING specificity: 21 }
-error_specificity { code: STYLESHEET_TOO_LONG_OLD_VARIANT specificity: 22 }
-error_specificity { code: STYLESHEET_TOO_LONG specificity: 23 }
-error_specificity { code: CSS_SYNTAX specificity: 24 }
-error_specificity { code: CSS_SYNTAX_INVALID_AT_RULE specificity: 25 }
+error_specificity { code: MISSING_REQUIRED_EXTENSION specificity: 10 }
+error_specificity { code: WARNING_TAG_REQUIRED_BY_MISSING specificity: 11 }
+error_specificity { code: EXTENSION_UNUSED specificity: 12 }
+error_specificity { code: WARNING_EXTENSION_UNUSED specificity: 13 }
+error_specificity { code: WARNING_EXTENSION_DEPRECATED_VERSION specificity: 14 }
+error_specificity { code: ATTR_REQUIRED_BUT_MISSING specificity: 15 }
+error_specificity { code: DISALLOWED_TAG specificity: 16 }
+error_specificity { code: DISALLOWED_ATTR specificity: 17 }
+error_specificity { code: INVALID_ATTR_VALUE specificity: 18 }
+error_specificity { code: ATTR_VALUE_REQUIRED_BY_LAYOUT specificity: 19 }
+error_specificity { code: MANDATORY_ATTR_MISSING specificity: 20 }
+error_specificity { code: MANDATORY_ONEOF_ATTR_MISSING specificity: 21 }
+error_specificity { code: DUPLICATE_UNIQUE_TAG specificity: 22 }
+error_specificity { code: DUPLICATE_UNIQUE_TAG_WARNING specificity: 23 }
+error_specificity { code: STYLESHEET_TOO_LONG_OLD_VARIANT specificity: 24 }
+error_specificity { code: STYLESHEET_TOO_LONG specificity: 25 }
+error_specificity { code: CSS_SYNTAX specificity: 26 }
+error_specificity { code: CSS_SYNTAX_INVALID_AT_RULE specificity: 27 }
 error_specificity {
-  code: MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE specificity: 26
+  code: MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE specificity: 28
 }
-error_specificity { code: INVALID_PROPERTY_VALUE_IN_ATTR_VALUE specificity: 27 }
-error_specificity { code: DISALLOWED_PROPERTY_IN_ATTR_VALUE specificity: 28 }
-error_specificity { code: MUTUALLY_EXCLUSIVE_ATTRS specificity: 29 }
-error_specificity { code: UNESCAPED_TEMPLATE_IN_ATTR_VALUE specificity: 30 }
-error_specificity { code: TEMPLATE_PARTIAL_IN_ATTR_VALUE specificity: 31 }
-error_specificity { code: TEMPLATE_IN_ATTR_NAME specificity: 32 }
+error_specificity { code: INVALID_PROPERTY_VALUE_IN_ATTR_VALUE specificity: 29 }
+error_specificity { code: DISALLOWED_PROPERTY_IN_ATTR_VALUE specificity: 30 }
+error_specificity { code: MUTUALLY_EXCLUSIVE_ATTRS specificity: 31 }
+error_specificity { code: UNESCAPED_TEMPLATE_IN_ATTR_VALUE specificity: 32 }
+error_specificity { code: TEMPLATE_PARTIAL_IN_ATTR_VALUE specificity: 33 }
+error_specificity { code: TEMPLATE_IN_ATTR_NAME specificity: 34 }
 error_specificity {
-  code: INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT specificity: 33
+  code: INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT specificity: 35
 }
-error_specificity { code: IMPLIED_LAYOUT_INVALID specificity: 34 }
-error_specificity { code: SPECIFIED_LAYOUT_INVALID specificity: 35 }
-error_specificity { code: DEV_MODE_ENABLED specificity: 36 }
-error_specificity { code: ATTR_DISALLOWED_BY_IMPLIED_LAYOUT specificity: 37 }
-error_specificity { code: ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT specificity: 38 }
-error_specificity { code: DUPLICATE_DIMENSION specificity: 39 }
-error_specificity { code: DISALLOWED_RELATIVE_URL specificity: 40 }
-error_specificity { code: MISSING_URL specificity: 41 }
-error_specificity { code: DISALLOWED_DOMAIN specificity: 42 }
-error_specificity { code: INVALID_URL_PROTOCOL specificity: 43 }
-error_specificity { code: INVALID_URL specificity: 44 }
-error_specificity { code: DISALLOWED_STYLE_ATTR specificity: 45 }
-error_specificity { code: CSS_SYNTAX_STRAY_TRAILING_BACKSLASH specificity: 46 }
-error_specificity { code: CSS_SYNTAX_UNTERMINATED_COMMENT specificity: 47 }
-error_specificity { code: CSS_SYNTAX_UNTERMINATED_STRING specificity: 48 }
-error_specificity { code: CSS_SYNTAX_BAD_URL specificity: 49 }
+error_specificity { code: IMPLIED_LAYOUT_INVALID specificity: 36 }
+error_specificity { code: SPECIFIED_LAYOUT_INVALID specificity: 37 }
+error_specificity { code: DEV_MODE_ENABLED specificity: 38 }
+error_specificity { code: ATTR_DISALLOWED_BY_IMPLIED_LAYOUT specificity: 39 }
+error_specificity { code: ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT specificity: 40 }
+error_specificity { code: DUPLICATE_DIMENSION specificity: 41 }
+error_specificity { code: DISALLOWED_RELATIVE_URL specificity: 42 }
+error_specificity { code: MISSING_URL specificity: 43 }
+error_specificity { code: DISALLOWED_DOMAIN specificity: 44 }
+error_specificity { code: INVALID_URL_PROTOCOL specificity: 45 }
+error_specificity { code: INVALID_URL specificity: 46 }
+error_specificity { code: DISALLOWED_STYLE_ATTR specificity: 47 }
+error_specificity { code: CSS_SYNTAX_STRAY_TRAILING_BACKSLASH specificity: 48 }
+error_specificity { code: CSS_SYNTAX_UNTERMINATED_COMMENT specificity: 49 }
+error_specificity { code: CSS_SYNTAX_UNTERMINATED_STRING specificity: 50 }
+error_specificity { code: CSS_SYNTAX_BAD_URL specificity: 51 }
 error_specificity {
-  code: CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE specificity: 50
+  code: CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE specificity: 52
 }
-error_specificity { code: CSS_SYNTAX_INVALID_DECLARATION specificity: 51 }
-error_specificity { code: CSS_SYNTAX_INCOMPLETE_DECLARATION specificity: 52 }
-error_specificity { code: CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR specificity: 53 }
-error_specificity { code: CSS_SYNTAX_MISSING_SELECTOR specificity: 54 }
-error_specificity { code: CSS_SYNTAX_NOT_A_SELECTOR_START specificity: 55 }
+error_specificity { code: CSS_SYNTAX_INVALID_DECLARATION specificity: 53 }
+error_specificity { code: CSS_SYNTAX_INCOMPLETE_DECLARATION specificity: 54 }
+error_specificity { code: CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR specificity: 55 }
+error_specificity { code: CSS_SYNTAX_MISSING_SELECTOR specificity: 56 }
+error_specificity { code: CSS_SYNTAX_NOT_A_SELECTOR_START specificity: 57 }
 error_specificity {
-  code: CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR specificity: 56
+  code: CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR specificity: 58
 }
-error_specificity { code: CSS_SYNTAX_MISSING_URL specificity: 57 }
-error_specificity { code: CSS_SYNTAX_DISALLOWED_DOMAIN specificity: 58 }
-error_specificity { code: CSS_SYNTAX_INVALID_URL specificity: 59 }
-error_specificity { code: CSS_SYNTAX_INVALID_URL_PROTOCOL specificity: 60 }
-error_specificity { code: CSS_SYNTAX_DISALLOWED_RELATIVE_URL specificity: 61 }
-error_specificity { code: INCORRECT_NUM_CHILD_TAGS specificity: 62 }
-error_specificity { code: DISALLOWED_CHILD_TAG_NAME specificity: 63 }
-error_specificity { code: DISALLOWED_FIRST_CHILD_TAG_NAME specificity: 64 }
-error_specificity { code: CSS_SYNTAX_INVALID_ATTR_SELECTOR specificity: 65 }
+error_specificity { code: CSS_SYNTAX_MISSING_URL specificity: 59 }
+error_specificity { code: CSS_SYNTAX_DISALLOWED_DOMAIN specificity: 60 }
+error_specificity { code: CSS_SYNTAX_INVALID_URL specificity: 61 }
+error_specificity { code: CSS_SYNTAX_INVALID_URL_PROTOCOL specificity: 62 }
+error_specificity { code: CSS_SYNTAX_DISALLOWED_RELATIVE_URL specificity: 63 }
+error_specificity { code: INCORRECT_NUM_CHILD_TAGS specificity: 64 }
+error_specificity { code: DISALLOWED_CHILD_TAG_NAME specificity: 65 }
+error_specificity { code: DISALLOWED_FIRST_CHILD_TAG_NAME specificity: 66 }
+error_specificity { code: CSS_SYNTAX_INVALID_ATTR_SELECTOR specificity: 67 }
 error_specificity {
-  code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT specificity: 66
+  code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT specificity: 68
 }
-error_specificity { code: MANDATORY_REFERENCE_POINT_MISSING specificity: 67 }
-error_specificity { code: DUPLICATE_REFERENCE_POINT specificity: 68 }
-error_specificity { code: TAG_REFERENCE_POINT_CONFLICT specificity: 69 }
+error_specificity { code: MANDATORY_REFERENCE_POINT_MISSING specificity: 69 }
+error_specificity { code: DUPLICATE_REFERENCE_POINT specificity: 70 }
+error_specificity { code: TAG_REFERENCE_POINT_CONFLICT specificity: 71 }
 error_specificity {
   code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT_SINGULAR
-  specificity: 70
-}
-error_specificity { code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE specificity: 71 }
-error_specificity {
-  code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT
   specificity: 72
 }
+error_specificity { code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE specificity: 73 }
 error_specificity {
-  code: CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE
-  specificity: 73
-}
-error_specificity {
-  code: CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH
+  code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT
   specificity: 74
 }
 error_specificity {
-  code: CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION
+  code: CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE
   specificity: 75
 }
 error_specificity {
-  code: BASE_TAG_MUST_PRECEED_ALL_URLS
+  code: CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH
   specificity: 76
+}
+error_specificity {
+  code: CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION
+  specificity: 76
+}
+error_specificity {
+  code: BASE_TAG_MUST_PRECEED_ALL_URLS
+  specificity: 77
 }
 error_specificity { code: GENERAL_DISALLOWED_TAG specificity: 100 }
 error_specificity { code: DEPRECATED_ATTR specificity: 101 }
@@ -3637,6 +3711,11 @@ error_formats {
   code: WARNING_EXTENSION_UNUSED
   format: "The extension '%1' was found on this page, but is unused "
           "(no '%2' tag seen). This may become an error in the future."
+}
+error_formats {
+  code: EXTENSION_UNUSED
+  format: "The extension '%1' was found on this page, but is unused. "
+          "Please remove this extension."
 }
 error_formats {
   code: WARNING_EXTENSION_DEPRECATED_VERSION
@@ -3874,6 +3953,10 @@ error_formats {
   format: "The tag '%1', which contains URLs, was found earlier in the "
           "document than the BASE element."
 }
+error_formats {
+  code: MISSING_REQUIRED_EXTENSION
+  format: "The tag '%1' requires including the '%2' extension JavaScript."
+}
 
 # CSS Errors. All of these use %1 for the tag name (in practice 'style'
 # by default).
@@ -3979,3 +4062,4 @@ error_formats {
   format: "CSS syntax error in tag '%1' - the property '%2' is disallowed "
           "unless the enclosing rule is prefixed with the '%3' qualification."
 }
+

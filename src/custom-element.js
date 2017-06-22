@@ -41,6 +41,7 @@ import * as dom from './dom';
 import {setStyle, setStyles} from './style';
 import {LayoutDelayMeter} from './layout-delay-meter';
 import {ResourceState} from './service/resource';
+import {AmpEvents} from './amp-events';
 
 const TAG_ = 'CustomElement';
 
@@ -219,7 +220,11 @@ export function copyElementToChildWindow(parentWin, childWin, name) {
  */
 export function upgradeElementInChildWindow(parentWin, childWin, name) {
   const toClass = getExtendedElements(parentWin)[name];
-  dev().assert(toClass, '%s is not stubbed yet', name);
+  // Some extensions unofficially register unstubbed elements, e.g. amp-bind.
+  // Can be changed to assert() once official support (#9143) is implemented.
+  if (!toClass) {
+    dev().warn(TAG_, '%s is not stubbed yet', name);
+  }
   dev().assert(toClass != ElementStub, '%s is not upgraded yet', name);
   upgradeOrRegisterElement(childWin, name, toClass);
 }
@@ -593,6 +598,12 @@ function createBaseCustomElementClass(win) {
 
       /** @private {?./layout-delay-meter.LayoutDelayMeter} */
       this.layoutDelayMeter_ = null;
+
+      if (this[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER]) {
+        this[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER](this);
+        delete this[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER];
+        delete this[dom.UPGRADE_TO_CUSTOMELEMENT_PROMISE];
+      }
     }
 
     /**
@@ -618,7 +629,7 @@ function createBaseCustomElementClass(win) {
     getAmpDoc() {
       return /** @type {!./service/ampdoc-impl.AmpDoc} */ (
         dev().assert(this.ampdoc_,
-          'no ampdoc yet, since element is not attached'));
+            'no ampdoc yet, since element is not attached'));
     }
 
     /**
@@ -631,7 +642,7 @@ function createBaseCustomElementClass(win) {
     getResources() {
       return /** @type {!./service/resources-impl.Resources} */ (
         dev().assert(this.resources_,
-          'no resources yet, since element is not attached'));
+            'no resources yet, since element is not attached'));
     }
 
     /**
@@ -686,7 +697,7 @@ function createBaseCustomElementClass(win) {
       this.implementation_.layout_ = this.layout_;
       this.implementation_.layoutWidth_ = this.layoutWidth_;
       this.implementation_.firstAttachedCallback();
-      this.dispatchCustomEventForTesting('amp:attached');
+      this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
       this.getResources().upgraded(this);
     }
 
@@ -730,7 +741,7 @@ function createBaseCustomElementClass(win) {
      */
     getPriority() {
       dev().assert(
-        this.isUpgraded(), 'Cannot get priority of unupgraded element');
+          this.isUpgraded(), 'Cannot get priority of unupgraded element');
       return this.implementation_.getPriority();
     }
 
@@ -995,7 +1006,7 @@ function createBaseCustomElementClass(win) {
           if (reconstruct) {
             this.getResources().upgraded(this);
           }
-          this.dispatchCustomEventForTesting('amp:attached');
+          this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
         }
       } else {
         this.everAttached = true;
@@ -1013,7 +1024,7 @@ function createBaseCustomElementClass(win) {
           this.classList.add('i-amphtml-unresolved');
           // amp:attached is dispatched from the ElementStub class when it
           // replayed the firstAttachedCallback call.
-          this.dispatchCustomEventForTesting('amp:stubbed');
+          this.dispatchCustomEventForTesting(AmpEvents.STUBBED);
         }
       }
     }
@@ -1102,7 +1113,7 @@ function createBaseCustomElementClass(win) {
       const win = this.ownerDocument.defaultView;
       const event = win.document.createEvent('Event');
       event.data = data;
-      event.initEvent(name, true, true);
+      event.initEvent(name, /* bubbles */ true, /* cancelable */ true);
       this.dispatchEvent(event);
     }
 
@@ -1242,8 +1253,8 @@ function createBaseCustomElementClass(win) {
     layoutCallback() {
       assertNotTemplate(this);
       dev().assert(this.isBuilt(),
-        'Must be built to receive viewport events');
-      this.dispatchCustomEventForTesting('amp:load:start');
+          'Must be built to receive viewport events');
+      this.dispatchCustomEventForTesting(AmpEvents.LOAD_START);
       const isLoadEvent = (this.layoutCount_ == 0);  // First layout is "load".
       if (isLoadEvent) {
         this.signals_.signal(CommonSignals.LOAD_START);
@@ -1268,7 +1279,7 @@ function createBaseCustomElementClass(win) {
           this.isFirstLayoutCompleted_ = true;
           // TODO(dvoytenko, #7389): cleanup once amp-sticky-ad signals are
           // in PROD.
-          this.dispatchCustomEvent('amp:load:end');
+          this.dispatchCustomEvent(AmpEvents.LOAD_END);
         }
       }, reason => {
         // add layoutCount_ by 1 despite load fails or not
@@ -1460,18 +1471,6 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * Returns an array of elements in this element's subtree that this
-     * element owns that could have children added or removed dynamically.
-     * The array should not contain any ancestors of this element, but could
-     * contain this element itself.
-     * @return {Array<!Element>}
-     * @public
-     */
-    getDynamicElementContainers() {
-      return this.implementation_.getDynamicElementContainers();
-    }
-
-    /**
      * Enqueues the action with the element. If element has been upgraded and
      * built, the action is dispatched to the implementation right away.
      * Otherwise the invocation is enqueued until the implementation is ready
@@ -1522,7 +1521,7 @@ function createBaseCustomElementClass(win) {
         this.implementation_.executeAction(invocation, deferred);
       } catch (e) {
         rethrowAsync('Action execution failed:', e,
-          invocation.target.tagName, invocation.method);
+            invocation.target.tagName, invocation.method);
       }
     }
 
@@ -1788,7 +1787,7 @@ function createBaseCustomElementClass(win) {
       if (!this.overflowElement_) {
         if (overflown) {
           user().warn(TAG_,
-            'Cannot resize element and overflow is not available', this);
+              'Cannot resize element and overflow is not available', this);
         }
       } else {
         this.overflowElement_.classList.toggle('amp-visible', overflown);
@@ -1796,10 +1795,10 @@ function createBaseCustomElementClass(win) {
         if (overflown) {
           this.overflowElement_.onclick = () => {
             this.getResources(). /*OK*/ changeSize(
-              this, requestedHeight, requestedWidth);
+                this, requestedHeight, requestedWidth);
             getVsync(this).mutate(() => {
               this.overflowCallback(
-                /* overflown */ false, requestedHeight, requestedWidth);
+                  /* overflown */ false, requestedHeight, requestedWidth);
             });
           };
         } else {

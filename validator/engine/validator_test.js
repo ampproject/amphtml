@@ -76,7 +76,8 @@ function isValidRegex(regex) {
 /**
  * Returns all html files underneath the testdata roots. This looks
  * both for feature_tests/*.html and for tests in extension directories.
- * E.g.: extensions/amp-accordion/0.1/test/*.html and
+ * E.g.: extensions/amp-accordion/0.1/test/*.html,
+ *       extensions/amp-sidebar/1.0/test/*.html, and
  *       testdata/feature_tests/amp_accordion.html.
  * @return {!Array<string>}
  */
@@ -85,9 +86,17 @@ function findHtmlFilesRelativeToTestdata() {
   for (const root of process.env['TESTDATA_ROOTS'].split(':')) {
     if (path.basename(root) === 'extensions') {
       for (const extension of readdir(root)) {
-        const testPath = path.join(extension, '0.1', 'test');
-        if (isdir(path.join(root, testPath))) {
-          testSubdirs.push({root: root, subdir: testPath});
+        const extensionFolder = path.join(root, extension);
+        if (!isdir(extensionFolder)) {
+          // Skip if not a folder
+          continue;
+        }
+        // Get all versions
+        for (const possibleVersion of readdir(extensionFolder)) {
+          const testPath = path.join(extension, possibleVersion, 'test');
+          if (isdir(path.join(root, testPath))) {
+            testSubdirs.push({root: root, subdir: testPath});
+          }
         }
       }
     } else {
@@ -540,6 +549,7 @@ describe('ValidatorRulesMakeSense', () => {
       // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
       const whitelistedAmp4AdsExtensions = {
         'AMP-ACCORDION': 0,
+        'AMP-AD-EXIT': 0,
         'AMP-ANALYTICS': 0,
         'AMP-ANIM': 0,
         'AMP-AUDIO': 0,
@@ -550,7 +560,8 @@ describe('ValidatorRulesMakeSense', () => {
         'AMP-IMG': 0,
         'AMP-PIXEL': 0,
         'AMP-SOCIAL-SHARE': 0,
-        'AMP-VIDEO': 0
+        'AMP-VIDEO': 0,
+        'AMP-YOUTUBE': 0
       };
       it(tagSpec.tagName + ' has html_format either explicitly or implicitly' +
           ' set for AMP4ADS but ' + tagSpec.tagName + ' is not whitelisted' +
@@ -648,36 +659,6 @@ describe('ValidatorRulesMakeSense', () => {
              expect(tagSpec.attrLists.length).toEqual(1);
              expect(tagSpec.attrLists[0]).toEqual('common-extension-attrs');
            });
-        // We want the extension to be present only when there is a matching
-        // tag on the page which requires the extension. These extensions don't
-        // have a single matching tag, so we allow these extensions to not
-        // also require an additional tag.
-        const extensionExceptions = {
-          // This can be present based on 'amp-access', which isn't allowed in
-          // AMP4ADS, which makes checking tricky.
-          'amp-analytics': 0,
-          // There are two variants of amp-audio, one for each html_format.
-          // The references break when we filter by format, so currently this
-          // does not require another tag to indicate usage.
-          // TODO(gregable): Fix above.
-          'amp-audio': 0,
-          // amp-dynamic-css-classes corresponds to no specific tag.
-          'amp-dynamic-css-classes': 0,
-          // amp-slides is deprecated in favor of amp-carousel, so we don't
-          // want to be recommending adding <amp-slides> to any page.
-          'amp-slides': 0
-        };
-        if (!extensionExceptions.hasOwnProperty(extensionSpec.name)) {
-          it('Extension ' + extensionSpec.name + ' does not identify' +
-                 ' any required tags indicating usage. Please add a `requires:`' +
-                 ' field to the TagSpec.',
-             () => {
-               expect(
-                   tagSpec.requires.length +
-                   tagSpec.extensionSpec.deprecatedRecommendsUsageOfTag.length)
-                   .toBeGreaterThan(0);
-             });
-        }
       }
 
       if (attrSpec.dispatchKey) {

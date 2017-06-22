@@ -17,6 +17,7 @@
 import {writeScript, loadScript, validateData} from '../3p/3p';
 import {startsWith} from '../src/string.js';
 import {dev} from '../src/log.js';
+import {dict} from '../src/utils/object';
 import {assertHttpsUrl, addParamsToUrl} from '../src/url.js';
 
 const NX_URL_HOST = 'https://call.adadapter.netzathleten-media.de';
@@ -42,21 +43,21 @@ export function netletix(global, data) {
   };
 
   validateData(data,
-    global._netletix_amp.mandatory_data, global._netletix_amp.allowed_data);
+      global._netletix_amp.mandatory_data, global._netletix_amp.allowed_data);
 
   const nxh = (data.nxheight || DEFAULT_NX_HEIGHT);
   const nxw = (data.nxwidth || DEFAULT_NX_WIDTH);
   const url = assertHttpsUrl(
       addParamsToUrl(
-        NX_URL_FULL + encodeURIComponent(data.nxkey || DEFAULT_NX_KEY),
-        {
-          unit: data.nxunit || DEFAULT_NX_UNIT,
-          width: data.nxwidth || DEFAULT_NX_WIDTH,
-          height: data.nxheight || DEFAULT_NX_HEIGHT,
-          v: data.nxv || DEFAULT_NX_V,
-          site: data.nxsite || DEFAULT_NX_SITE,
-          ord: Math.round(Math.random() * 100000000),
-        }),
+          NX_URL_FULL + encodeURIComponent(data.nxkey || DEFAULT_NX_KEY),
+          dict({
+            'unit': data.nxunit || DEFAULT_NX_UNIT,
+            'width': data.nxwidth || DEFAULT_NX_WIDTH,
+            'height': data.nxheight || DEFAULT_NX_HEIGHT,
+            'v': data.nxv || DEFAULT_NX_V,
+            'site': data.nxsite || DEFAULT_NX_SITE,
+            'ord': Math.round(Math.random() * 100000000),
+          })),
       data.ampSlotIndex);
 
   window.addEventListener('message', event => {

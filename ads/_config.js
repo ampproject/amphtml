@@ -101,12 +101,17 @@ export const adConfig = {
 
   adman: {},
 
+  admanmedia: {
+    renderStartImplemented: true,
+  },
+
   adreactor: {},
 
   adsense: {
     prefetch: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
     preconnect: 'https://googleads.g.doubleclick.net',
     clientIdScope: 'AMP_ECID_GOOGLE',
+    clientIdCookieName: '_ga',
   },
 
   adsnative: {
@@ -196,6 +201,8 @@ export const adConfig = {
     prefetch: 'https://s.ato.mx/p.js',
   },
 
+  bidtellect: {},
+
   brainy: {},
 
   bringhub: {
@@ -269,6 +276,7 @@ export const adConfig = {
       'https://tpc.googlesyndication.com',
     ],
     clientIdScope: 'AMP_ECID_GOOGLE',
+    clientIdCookieName: '_ga',
     renderStartImplemented: true,
   },
 
@@ -340,6 +348,11 @@ export const adConfig = {
 
   ibillboard: {},
 
+  imedia: {
+    prefetch: 'https://i.imedia.cz/js/im3.js',
+    renderStartImplemented: true,
+  },
+
   imobile: {
     prefetch: 'https://spamp.i-mobile.co.jp/script/amp.js',
     preconnect: 'https://spad.i-mobile.co.jp',
@@ -366,6 +379,7 @@ export const adConfig = {
       'https://js-sec.indexww.com/apl/amp.js',
     ],
     preconnect: 'https://as-sec.casalemedia.com',
+    renderStartImplemented: true,
   },
 
   kargo: {},
@@ -650,6 +664,7 @@ export const adConfig = {
     prefetch: 'https://amp.valuecommerce.com/amp_bridge.js',
     preconnect: [
       'https://ad.jp.ap.valuecommerce.com',
+      'https://ad.omks.valuecommerce.com',
     ],
     renderStartImplemented: true,
   },

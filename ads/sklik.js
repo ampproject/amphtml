@@ -31,7 +31,7 @@ export function sklik(global, data) {
     window.document.body.appendChild(parentElement);
 
     data.elm = parentId;
-    data.url = global.context.location.href;
+    data.url = global.context.canonicalUrl;
 
     sklikProvider.show(data);
   });

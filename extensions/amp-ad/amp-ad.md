@@ -51,6 +51,7 @@ network’s JS inside that iframe sandbox.
 The `<amp-ad>` requires width and height values to be specified according to the [rule](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#tldr-summary-of-layout-requirements--behaviors) of its layout type. It requires a `type` argument that select what ad network is displayed. All `data-*` attributes on the tag are automatically passed as arguments to the code that eventually renders the ad. What `data-` attributes are required for a given type of network depends and must be documented with the ad network.
 
 #### Example: Displaying a few ads
+<!--embedded example - displays in ampproject.org -->
 <div>
 <amp-iframe height="522"
             layout="fixed-height"
@@ -178,7 +179,7 @@ This is due to the UX implications of full page overlay ads. It may be considere
 
 ## Validation
 
-See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad/0.1/validator-amp-ad.protoascii) in the AMP validator specification.
+See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad/validator-amp-ad.protoascii) in the AMP validator specification.
 
 ## Supported ad networks
 
@@ -193,6 +194,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Adhese](../../ads/adhese.md)
 - [ADITION](../../ads/adition.md)
 - [Adman](../../ads/adman.md)
+- [AdmanMedia](../../ads/admanmedia.md)
 - [AdReactor](../../ads/adreactor.md)
 - [AdSense](../../ads/google/adsense.md)
 - [AdsNative](../../ads/adsnative.md)
@@ -209,6 +211,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [AMoAd](../../ads/amoad.md)
 - [AppNexus](../../ads/appnexus.md)
 - [Atomx](../../ads/atomx.md)
+- [Bidtellect](../../ads/bidtellect.md)
 - [brainy](../../ads/brainy.md)
 - [CA A.J.A. Infeed](../../ads/caajainfeed.md)
 - [CA-ProFit-X](../../ads/caprofitx.md)
@@ -234,6 +237,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [GMOSSP](../../ads/gmossp.md)
 - [GumGum](../../ads/gumgum.md)
 - [Holder](../../ads/holder.md)
+- [Imedia](../../ads/imedia.md)
 - [I-Mobile](../../ads/imobile.md)
 - [iBillboard](../../ads/ibillboard.md)
 - [Improve Digital](../../ads/improvedigital.md)
