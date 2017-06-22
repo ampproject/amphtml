@@ -96,7 +96,7 @@ let adsActive;
 // Flag tracking if playback has started.
 let playbackStarted;
 
-// Timer used to hide controls after user action.
+// Timeout used to hide controls after user action.
 let hideControlsTimeout;
 
 // Flag tracking if we need to mute the ads manager once it loads. Used for
@@ -117,6 +117,13 @@ let boundOnClickListener;
 
 // Tracks whether or not we're allowing fullscreen.
 let fullscreenEnabled;
+
+// The amount of time, in ms, we should wait before hiding controls after the
+// user taps on the video player on mobile.
+let hideControlsTime = 500;
+
+// Whether we are on a mobile device.
+let onMobile;
 
 /**
  * Loads the IMA SDK library.
@@ -208,6 +215,7 @@ export function imaVideo(global, data) {
     nativeFullscreen = false;
 
     interactEvent = 'click';
+    controlsEvent = 'mouseover';
     mouseDownEvent = 'mousedown';
     mouseMoveEvent = 'mousemove';
     mouseUpEvent = 'mouseup';
@@ -215,13 +223,22 @@ export function imaVideo(global, data) {
         navigator.userAgent.match(/iPad/i) ||
         navigator.userAgent.match(/Android/i)) {
       interactEvent = 'touchend';
+      controlsEVent = 'touchend';
       mouseDownEvent = 'touchstart';
       mouseMoveEvent = 'touchmove';
       mouseUpEvent = 'touchend';
+      onMobile = true;
     }
     boundOnClickListener = onClick.bind(null, global);
     wrapperDiv.addEventListener(interactEvent, boundOnClickListener);
-    fullscreenDiv.addEventListener(interactEvent, toggleFullscreen);
+    fullscreenDiv.addEventListener(interactEvent, onFullscreenClick);
+
+    if (navigator.userAgent.match(/iPhone/i) ||
+        navigator.userAgent.match(/iPad/i)) {
+      hideControlsTime = 4000;
+    } else if (navigator.userAgent.match(/Android/i)) {
+      hideControlsTime = 3000;
+    }
 
     const fullScreenEvents = [
       'fullscreenchange',
@@ -293,19 +310,31 @@ export function playAds(global) {
     try {
       adsManager.init(
           videoWidth, videoHeight, global.google.ima.ViewMode.NORMAL);
-      window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
       adsManager.start();
+      onPlaybackStarted();
     } catch (adError) {
-      window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
       playVideo();
+      onPlaybackStarted();
     }
   } else if (!adRequestFailed) {
     // Ad request did not yet resolve but also did not yet fail.
     setTimeout(playAds.bind(null, global), 250);
   } else {
     // Ad request failed.
-    window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
     playVideo();
+    onPlaybackStarted();
+  }
+}
+
+/**
+ * Called when playback of ads or content has started.
+ */
+function onPlaybackStarted() {
+  window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
+  wrapperDiv.addEventListener(controlsEvent, onInteractForControls);
+  if (!onMobile) {
+    wrapperDiv.addEventListener(
+        'mouseout', () => { setTimeout(hideControls, hideControlsTime) });
   }
 }
 
@@ -387,6 +416,10 @@ export function onContentPauseRequested(global) {
   setStyle(adContainerDiv, 'display', 'block');
   videoPlayer.removeEventListener('ended', onContentEnded);
   videoPlayer.pause();
+  if (hideControlsTimeout) {
+    clearTimeout(hideControlsTimeout);
+    hideControlsTimeout = null;
+  }
 }
 
 /**
@@ -402,6 +435,7 @@ export function onContentResumeRequested() {
     // resume content in that case.
     videoPlayer.addEventListener('ended', onContentEnded);
     playVideo();
+    setTimeout(hideControls, hideControlsTime);
   }
 }
 
@@ -434,9 +468,31 @@ export function pauseVideo(event) {
 }
 
 /**
+ * Handles clicks on the wrapper div to show the fullscreen button.
+ */
+function onInteractForControls() {
+  if (!adsActive) {
+    fullscreenDiv.style.display = 'block';
+    if (onMobile) {
+      if (hideControlsTimeout) {
+        clearTimeout(hideControlsTimeout);
+      }
+      hideControlsTimeout = setTimeout(hideControls, hideControlsTime);
+    }
+  }
+}
+
+/**
+ * Hides the fullscreen button.
+ */
+function hideControls() {
+  fullscreenDiv.style.display = 'none';
+}
+
+/**
  * Called when the user clicks the fullscreen button.
  */
-function toggleFullscreen() {
+function onFullscreenClick() {
   if (fullscreen) {
     window.parent./*OK*/postMessage(
       {event: IMAVideoEvents.CANCEL_FULLSCREEN, confirm: true}, '*');
@@ -450,7 +506,7 @@ function toggleFullscreen() {
  * Called when the user clicks on the fullscreen button. Makes the video player
  * fullscreen
  */
-function onFullscreenClick(global) {
+function toggleFullscreen(global) {
   if (fullscreen) {
     // The video is currently in fullscreen mode
     const cancelFullscreen = global.document.exitFullscreen ||
@@ -492,7 +548,6 @@ function onFullscreenClick(global) {
 function onFullscreenChange(global) {
   if (fullscreen) {
     // Resize the ad container
-    console.log('Resizing ad container to ' + videoWidth + 'x' + videoHeight);
     adsManager.resize(
         videoWidth, videoHeight, global.google.ima.ViewMode.NORMAL);
     adsManagerWidthOnLoad = null;
@@ -584,7 +639,7 @@ function onMessage(global, event) {
         }
         break;
       case 'toggleFullscreen':
-        onFullscreenClick(global);
+        toggleFullscreen(global);
         break;
     }
   }
