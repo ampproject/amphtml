@@ -35,6 +35,7 @@
     "array-bracket-spacing": [2, "never"],
     "arrow-parens": [2, "as-needed"],
     "arrow-spacing": 2,
+    "banned-constructor-calls": [2, ["getAttribute", "hasAttribute"]],
     "comma-dangle": [2, "always-multiline"],
     "computed-property-spacing": [2, "never"],
     "curly": 2,
