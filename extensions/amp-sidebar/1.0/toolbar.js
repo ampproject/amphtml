@@ -32,9 +32,6 @@ export class Toolbar {
     /** @private {!Object} **/
     this.win_ = win;
 
-    /** @private {!Element} */
-    this.body_ = this.sidebarElement_.ownerDocument.body;
-
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = vsync;
 
@@ -91,13 +88,13 @@ export class Toolbar {
     }
 
     // Use the placeholder to fill the height of the toolbar
-    if (this.placeholder_) {
-      this.vsync_.mutate(() => {
+    this.vsync_.mutate(() => {
+      if (this.placeholder_) {
         setStyles(this.placeholder_, {
           'height': this.toolbarClone_.offsetHeight + 'px',
         });
-      });
-    }
+      }
+    });
   }
 
   /**
