@@ -16,6 +16,7 @@
 
 import {listenOncePromise} from '../../src/event-helper';
 import {timerFor} from '../../src/services';
+import {removeElement} from '../../src/dom';
 import {toggleExperiment} from '../../src/experiments';
 import {VideoInterface, VideoEvents} from '../../src/video-interface';
 import {supportsAutoplay} from '../../src/service/video-manager-impl';
@@ -256,12 +257,14 @@ export function runVideoPlayerIntegrationTests(
   }
 
   function cleanUp() {
-    if (fixtureGlobal) {
-      if (opt_experiment) {
-        toggleExperiment(fixtureGlobal.win, opt_experiment, false);
+    try {
+      if (fixtureGlobal) {
+        if (opt_experiment) {
+          toggleExperiment(fixtureGlobal.win, opt_experiment, false);
+        }
+        removeElement(videoGlobal);
+        removeElement(fixtureGlobal.iframe);
       }
-      fixtureGlobal.doc.body.removeChild(videoGlobal);
-      fixtureGlobal.iframe.remove();
-    }
+    } catch (e) {}
   }
 }
