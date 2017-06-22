@@ -70,6 +70,7 @@
     "gulp-webserver": "0.9.1",
     "gulp-wrap": "0.11.0",
     "gzip-size": "3.0.0",
+    "is-running": "^2.1.0",
     "jison": "0.4.15",
     "jsdom": "9.2.1",
     "json-stable-stringify": "1.0.1",
