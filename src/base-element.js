@@ -932,7 +932,7 @@ export class BaseElement {
    * @note Boolean attributes have a value of `true` and `false` when
    *       present and missing, respectively.
    * @param {
-   *   !Object<string, (null|boolean|string|number|Array|Object)>
+   *   !JsonObject<string, (null|boolean|string|number|Array|Object)>
    * } unusedMutations
    */
   mutatedAttributesCallback(unusedMutations) {

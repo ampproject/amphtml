@@ -19,6 +19,7 @@ import {
   getAdSenseAmpAutoAdsExpBranch,
 } from '../../../ads/google/adsense-amp-auto-ads';
 import {buildUrl} from '../../../ads/google/a4a/url-builder';
+import {dict} from '../../../src/utils/object';
 import {documentInfoForDoc} from '../../../src/services';
 import {parseUrl} from '../../../src/url';
 import {viewportForDoc} from '../../../src/services';
@@ -46,7 +47,7 @@ class AdNetworkConfigDef {
   /**
    * Any attributes derived from either the page or the auto-amp-ads tag that
    * should be applied to any ads inserted.
-   * @return {!Object<string, string>}
+   * @return {!JsonObject<string, string>}
    */
   getAttributes() {}
 
@@ -102,10 +103,10 @@ class AdSenseNetworkConfig {
 
   /** @override */
   getAttributes() {
-    return {
+    return dict({
       'type': 'adsense',
       'data-ad-client': this.autoAmpAdsElement_.getAttribute('data-ad-client'),
-    };
+    });
   }
 
   /** @override */

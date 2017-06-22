@@ -32,7 +32,7 @@ let cachedResponsePromises_ = {};
  * Fetches vendor response.
  * @param {!Window} win
  * @param {!string} url
- * @return {!Promise<Object>}
+ * @return {!Promise<JsonObject>}
  */
 function fetch_(win, url) {
   if (!(url in cachedResponsePromises_)) {
