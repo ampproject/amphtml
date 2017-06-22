@@ -83,33 +83,59 @@
 
   <amp-lightbox-viewer id="myLightboxViewer" layout="nodisplay"></amp-lightbox-viewer>
 
+  <div id='short-description' style="display:none">Building the future web, together.</div>
+  <div id='normal-length-description' style="display:none">Lightbox 2.0 offers full screen experience that enters an engaging, immersive view of media on the page, with the ability to swipe between each media item.</div>
+  <div id='long-description' style="display:none">
+    <h3>This is a super long description.</h3>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis ut rutrum nisl, et dignissim sapien. Nullam a vulputate sem. Proin porttitor posuere placerat. Aenean at dictum ipsum. Vestibulum eu dapibus ante. Mauris ornare condimentum magna eget facilisis. Curabitur aliquam mi eget orci rutrum vehicula. Praesent vitae odio sed purus ullamcorper rhoncus. Vivamus eu vulputate nunc, vel aliquet augue. Nulla condimentum scelerisque diam a fringilla. Cras pretium lacinia urna, quis interdum neque tristique vitae. Mauris hendrerit orci eu eros suscipit, vitae dictum est fermentum. Nulla porttitor augue in tellus pulvinar scelerisque.</p>
+    <p>Integer porttitor eget est ac sagittis. Sed dignissim massa eget lectus posuere varius. Ut quam nisi, venenatis sit amet varius et, semper in lacus. Quisque nec hendrerit felis. Pellentesque vel urna in turpis interdum euismod. Etiam nec orci vestibulum, tristique ex sit amet, consequat magna. Cras eu tempor metus, vel dignissim nisi.</p>
+    <p>Suspendisse sit amet urna velit. Nulla enim enim, molestie nec mauris quis, vulputate luctus arcu. Nullam commodo at nibh ac finibus. Quisque varius pulvinar leo ac consequat. Proin nec nisi eu enim euismod commodo. Morbi efficitur lobortis dolor sit amet congue. Cras eu malesuada ipsum, sit amet rhoncus ipsum. Aliquam erat volutpat. Etiam sollicitudin mauris ut neque sodales, pellentesque volutpat ex tristique. Maecenas sed ante sem. Sed pretium pellentesque dolor. In in risus sit amet dui mattis varius in in lacus.</p>
+  </div>
+
   <h1>Lightbox Viewer (Opt-in)</h1>
 
-  <h2>Image - Lightboxable with Tap</h2>
-  <amp-img lightbox on="tap:myLightboxViewer.activate" src="http://placehold.it/800x600/F50057?text=1" aria-describedby="This is the first image, description from aria" layout="responsive" width="8" height="6"></amp-img>
+  <h2>Image - Landscape size - short description</h2>
+  <amp-img lightbox on="tap:myLightboxViewer.activate" src="http://placehold.it/800x600/d1347f?text=1" aria-describedby="short-description" layout="responsive" width="8" height="6"></amp-img>
 
-  <h2>Image - Lightboxable no Tap</h2>
-  <amp-img lightbox src="http://placehold.it/800x600/651FFF?text=2" aria-describedby="lightbox2" alt="If you see this, order is wrong" layout="responsive" width="8" height="6"></amp-img>
-  <div id='lightbox2' style="display:none">Lightbox 2 description</div>
+  <h2>Image - Landscape size - normal length description</h2>
+  <amp-img lightbox on="tap:myLightboxViewer.activate" src="http://placehold.it/800x600/6235c4?text=2" aria-describedby="normal-length-description" layout="responsive" width="8" height="6"></amp-img>
+
+  <h2>Image - Landscape size - long description - Lightboxable no Tap</h2>
+  <amp-img lightbox on="tap:myLightboxViewer.activate" src="http://placehold.it/800x600/efc847?text=3" aria-describedby="long-description" layout="responsive" width="8" height="6"></amp-img>
 
   <h2>Image - Not Lightboxable</h2>
-  <amp-img src="http://placehold.it/800x600/FFC400?text=Not Lightboxable" layout="responsive" width="8" height="6"></amp-img>
+  <amp-img src="http://placehold.it/800x600/efc847?text=Not Lightboxable" layout="responsive" width="8" height="6"></amp-img>
 
-  <h2>Image Fixed Size - Lightboxable with Tap</h2>
-  <amp-img lightbox on="tap:myLightboxViewer.activate" alt="This is to test a super long description have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something have to say something" src="http://placehold.it/200x200/FF3D00?text=3" layout="fixed" width="200" height="200"></amp-img>
+  <h2>Image - Portrait Size - short description</h2>
+  <amp-img lightbox on="tap:myLightboxViewer.activate" src="http://placehold.it/360x640/6235c4?text=4" aria-describedby="short-description" layout="responsive" width="9" height="16"></amp-img>
 
-  <h2>Youtube - Lightboxable</h3>
+  <h2>Image - Portrait Size - normal length description</h2>
+  <amp-img lightbox on="tap:myLightboxViewer.activate" src="http://placehold.it/360x640/efc847?text=5" aria-describedby="normal-length-description" layout="responsive" width="9" height="16"></amp-img>
+
+  <h2>Image - Portrait Size - long description</h2>
+  <amp-img lightbox on="tap:myLightboxViewer.activate" src="http://placehold.it/360x640/d1347f?text=6" aria-describedby="long-description" layout="responsive" width="9" height="16"></amp-img>
+
+  <h2>Image - Size with Large Height</h2>
+  <amp-img lightbox on="tap:myLightboxViewer.activate" src="http://placehold.it/360x2400/efc847?text=7" alt="This image has a large height." layout="responsive" width="6" height="40"></amp-img>
+
+  <h2>Image - Size with Large Width</h2>
+  <amp-img lightbox on="tap:myLightboxViewer.activate" src="http://placehold.it/2400x640/d1347f?text=8" alt="The image has a large width." layout="responsive" width="30" height="8"></amp-img>
+
+  <h2>Image - Fixed Size</h2>
+  <amp-img lightbox on="tap:myLightboxViewer.activate" src="http://placehold.it/200x200/6235c4?text=9" alt="The image has fixed layout instead of responsive." layout="fixed" width="200" height="200"></amp-img>
+
+  <h2>Youtube - Lightboxable</h2>
   <button on="tap:myLightboxViewer.activate(id='yt')">Open video in Lightbox</button>
-  <amp-youtube id='yt' lightbox data-videoid="mGENRKrdoGY" alt="test" width="480" height="270" layout="responsive"></amp-youtube>
+  <amp-youtube id='yt' lightbox data-videoid="mGENRKrdoGY" alt="Video" width="480" height="270" layout="responsive"></amp-youtube>
 
-  <h2>Youtube - Not Lightboxable</h3>
+  <h2>Youtube - Not Lightboxable</h2>
   <amp-youtube data-videoid="rddtw6uMNoo" width="480" height="270" layout="responsive"></amp-youtube>
 
-  <h2>Twitter Lightboxable</h2>
+  <h2>Twitter</h2>
   <button on="tap:myLightboxViewer.activate(id='twit')">Open Twitter in Lightbox</button>
-  <amp-twitter lightbox id='twit' alt="This is a super long text see if cover lightbox image. super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text super long text " data-tweetID="585110598171631616" width=486 height=256 layout="responsive"></amp-twitter>
+  <amp-twitter lightbox id='twit' data-tweetID="585110598171631616" width=486 height=256 layout="responsive"></amp-twitter>
 
-  <h2>UL/LI - Lightboxable with Tap</h2>
+  <h2>UL/LI</h2>
   <ul lightbox on="tap:myLightboxViewer.activate">
     <li>Apple</li>
     <li>Beer</li>
@@ -117,8 +143,8 @@
     <li>Cheese</li>
   </ul>
 
-  <h2>Blockquote - Lightboxable with Tap</h2>
-  <blockquote lightbox on="tap:myLightboxViewer.activate">
+  <h2>Blockquote</h2>
+  <blockquote lightbox on="tap:myLightboxViewer.activate" aria-describedby="normal-length-description">
     Some say that his tears are adhesive, and that if he caught fire, he'd burn for a thousand days... all we know is, he's called the Stig
   </blockquote>
 
