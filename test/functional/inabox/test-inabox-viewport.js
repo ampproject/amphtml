@@ -168,7 +168,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
         'full-overlay-frame-response',
         (req, res, cb) => cb({
           success: true,
-          expandedRect: {
+          boxRect: {
             left: 0,
             top: 0,
             right: 1000,
@@ -205,16 +205,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   });
 
   it('should update box rect when expanding/collapsing', function*() {
-    const collapsedRect = {
-      left: 20,
-      top: 10,
-      bottom: 310,
-      right: 420,
-      width: 400,
-      height: 300,
-    };
-
-    const expandedRect = {
+    const boxRect = {
       left: 20,
       top: 10,
       bottom: 310,
@@ -225,33 +216,20 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
 
     const updateBoxRectStub = sandbox.stub(binding, 'updateBoxRect_', NOOP);
 
-    const overlayRequestStub = stubIframeClientMakeRequest(
+    stubIframeClientMakeRequest(
         'full-overlay-frame',
         'full-overlay-frame-response',
-        (req, res, cb) => cb({success: true, expandedRect, collapsedRect}));
+        (req, res, cb) => cb({success: true, boxRect}));
 
     sandbox.stub(binding, 'prepareFixedContainer_').returns(Promise.resolve());
-    sandbox.stub(binding, 'resetFixedContainer_').returns(Promise.resolve());
 
     yield binding.updateLightboxMode(true);
 
-    expect(updateBoxRectStub).to.be.calledWith(expandedRect);
-
-    overlayRequestStub./*OK*/restore(); // need to re-stub
-    updateBoxRectStub.reset();
-
-    stubIframeClientMakeRequest(
-        'cancel-full-overlay-frame',
-        'cancel-full-overlay-frame-response',
-        (req, res, cb) => cb({success: true}));
-
-    yield binding.updateLightboxMode(false);
-
-    expect(updateBoxRectStub).to.be.calledWith(collapsedRect);
+    expect(updateBoxRectStub).to.be.calledWith(boxRect);
   });
 
-  it('should wait for remeasure if viewport changed', function*() {
-    const collapsedRect = {
+  it('should update box rect when collapsing', function*() {
+    const boxRect = {
       left: 20,
       top: 10,
       bottom: 310,
@@ -260,49 +238,18 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       height: 300,
     };
 
-    const positionRequestStub = stubIframeClientMakeRequest(
-        'send-positions',
-        'position',
-        (req, res, cb) => { positionCallback = cb; },
-        /* opt_sync */ true);
-
     const updateBoxRectStub = sandbox.stub(binding, 'updateBoxRect_', NOOP);
-
-    sandbox.stub(binding, 'resetFixedContainer_').returns(Promise.resolve());
-
-    // connecting to keep track of `position` listener
-    binding.connect();
-    positionRequestStub./*OK*/restore(); // need to re-stub
-
-    // Execute position callback in full overlay mode to invalidate collapsed
-    // rect.
-    binding.inFullOverlayMode = true;
-
-    positionCallback({
-      viewport: {
-        left: 1111,
-        top: 2222,
-        myValuesDontReallyMatterHere: 123,
-      },
-    });
-
-    updateBoxRectStub.reset();
 
     stubIframeClientMakeRequest(
         'cancel-full-overlay-frame',
         'cancel-full-overlay-frame-response',
-        (req, res, cb) => cb({success: true}));
+        (req, res, cb) => cb({success: true, boxRect}));
 
-    // Execute collapse
+    sandbox.stub(binding, 'resetFixedContainer_').returns(Promise.resolve());
+
     yield binding.updateLightboxMode(false);
 
-    // Shouldn't have been called as our current collapsed viewport is stale
-    expect(updateBoxRectStub).to.not.have.been.called;
-
-    // Send remeasure message
-    binding.handleCollapseOverlayRemeasure(collapsedRect);
-
-    expect(updateBoxRectStub).to.be.calledWith(collapsedRect);
+    expect(updateBoxRectStub).to.be.calledWith(boxRect);
   });
 
   it('should center the fixed container properly', done => {

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {FrameOverlayManager} from './frame-overlay-manager';
 import {PositionObserver} from './position-observer';
 import {
   serializeMessage,
@@ -22,7 +23,6 @@ import {
 } from '../../src/3p-frame-messaging';
 import {dev} from '../../src/log';
 import {dict} from '../../src/utils/object';
-import {expandFrame, collapseFrame} from './frame-overlay-helper';
 
 /** @const */
 const TAG = 'InaboxMessagingHost';
@@ -71,6 +71,7 @@ export class InaboxMessagingHost {
     this.registeredIframeSentinels_ = Object.create(null);
     this.positionObserver_ = new PositionObserver(win);
     this.msgObservable_ = new NamedObservable();
+    this.frameOverlayManager_ = new FrameOverlayManager(win);
 
     this.msgObservable_.listen(
         MessageType.SEND_POSITIONS, this.handleSendPositions_);
@@ -149,19 +150,14 @@ export class InaboxMessagingHost {
   // 1. Reject request if frame is out of focus
   // 2. Disable zoom and scroll on parent doc
   handleEnterFullOverlay_(iframe, request, source, origin) {
-    expandFrame(this.win_, iframe, (collapsedRect, expandedRect) => {
-      // Inform client of dimensions before and after expand.
-      // The rect value before expand is propagated so that the client has the
-      // option to update its own dimensions after collapse  without having to
-      // wait for remeasure.
+    this.frameOverlayManager_.expandFrame(iframe, boxRect => {
       source./*OK*/postMessage(
           serializeMessage(
               MessageType.FULL_OVERLAY_FRAME_RESPONSE,
               request.sentinel,
               dict({
                 'success': true,
-                'collapsedRect': collapsedRect,
-                'expandedRect': expandedRect,
+                'boxRect': boxRect,
               })),
           origin);
     });
@@ -177,23 +173,15 @@ export class InaboxMessagingHost {
    * @return {boolean}
    */
   handleCancelFullOverlay_(iframe, request, source, origin) {
-    collapseFrame(this.win_, iframe, () => {
-      // Inform client that the iframe has been collapsed.
-      // We send two separate messages for different events (collapsed/measure)
-      // as measure is asynchronous and we want the client to be able to update
-      // itself without waiting when possible.
+    this.frameOverlayManager_.collapseFrame(iframe, boxRect => {
       source./*OK*/postMessage(
           serializeMessage(
               MessageType.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
               request.sentinel,
-              dict({'success': true})),
-          origin);
-    }, collapsedRect => {
-      source./*OK*/postMessage(
-          serializeMessage(
-              MessageType.CANCEL_FULL_OVERLAY_FRAME_REMEASURE,
-              request.sentinel,
-              dict({'collapsedRect': collapsedRect})),
+              dict({
+                'success': true,
+                'boxRect': boxRect,
+              })),
           origin);
     });
 
