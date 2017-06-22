@@ -664,6 +664,7 @@ export const adConfig = {
     prefetch: 'https://amp.valuecommerce.com/amp_bridge.js',
     preconnect: [
       'https://ad.jp.ap.valuecommerce.com',
+      'https://ad.omks.valuecommerce.com',
     ],
     renderStartImplemented: true,
   },
