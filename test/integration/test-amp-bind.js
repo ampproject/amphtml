@@ -19,7 +19,7 @@ import {createFixtureIframe} from '../../testing/iframe';
 import {batchedXhrFor} from '../../src/services';
 import * as sinon from 'sinon';
 
-describe.configure().retryOnSaucelabs().run('amp-bind', function() {
+describe.configure().skipSauceLabs().run('amp-bind', function() {
   let fixture;
   let sandbox;
   let numSetStates;
