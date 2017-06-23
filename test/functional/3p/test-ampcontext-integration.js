@@ -14,22 +14,14 @@
  * limitations under the License.
  */
 
-import {adConfig} from '../../../ads/_config';
+import {masterFrameAccessibleTypes} from '../../../ads/_config';
 import {masterSelection} from '../../../3p/ampcontext-integration';
 
 describe('#masterSelect', () => {
   it('should allow sharing between configured networks', () => {
-    adConfig['network1'] = {
-      masterFrameAccessibleTypes: ['network2'],
-    };
-    adConfig['network2'] = {
-      masterFrameAccessibleTypes: ['network1'],
-    };
-    adConfig['network3'] = {
-      masterFrameAccessibleTypes: ['network1', 'network2'],
-    };
-    adConfig['network4'] = {};
-
+    masterFrameAccessibleTypes['network1'] = ['network2'];
+    masterFrameAccessibleTypes['network2'] = ['network1'];
+    masterFrameAccessibleTypes['network3'] = ['network1', 'network2'];
 
     const win1 = masterSelection(window, 'network1');
     expect(win1.name).to.equal('frame_network1,network2_master');
@@ -44,7 +36,7 @@ describe('#masterSelect', () => {
     expect(win4.name).to.equal('frame_network4_master');
 
     for (let i = 1; i <= 4; i++) {
-      delete adConfig[`network${i}`];
+      delete masterFrameAccessibleTypes[`network${i}`];
     }
   });
 });
