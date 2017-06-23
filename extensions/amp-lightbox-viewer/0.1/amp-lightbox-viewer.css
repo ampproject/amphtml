@@ -81,7 +81,7 @@
 }
 
 .i-amphtml-lbv-desc-box.standard {
-  max-height: 100px;
+  max-height: 6em;
   background-color: rgba(0,0,0,0.7);
   background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.7));
 }
