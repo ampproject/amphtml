@@ -23,7 +23,6 @@ import {installDocService} from '../../src/service/ampdoc-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {getAdCid} from '../../src/ad-cid';
 import {timerFor} from '../../src/services';
-import {resetServiceForTesting} from '../../src/service';
 import * as lolex from 'lolex';
 
 describes.realWin('ad-cid', {}, env => {
