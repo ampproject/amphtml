@@ -42,5 +42,9 @@ describe('#masterSelect', () => {
 
     const win4 = masterSelection(window, 'network4');
     expect(win4.name).to.equal('frame_network4_master');
+
+    for (let i = 1; i <= 4; i++) {
+      delete adConfig[`network${i}`];
+    }
   });
 });
