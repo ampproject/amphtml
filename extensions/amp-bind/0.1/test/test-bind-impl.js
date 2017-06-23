@@ -21,7 +21,6 @@ import {BindEvents} from '../bind-events';
 import {chunkInstanceForTesting} from '../../../../src/chunk';
 import {installTimerService} from '../../../../src/service/timer-impl';
 import {toArray} from '../../../../src/types';
-import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -126,7 +125,6 @@ describes.realWin('Bind', {
 
   beforeEach(() => {
     installTimerService(env.win);
-    toggleExperiment(env.win, 'amp-bind', true);
 
     // Make sure we have a chunk instance for testing.
     chunkInstanceForTesting(env.ampdoc);
@@ -141,19 +139,6 @@ describes.realWin('Bind', {
     onBindReadyAndSetStateWithExpression =
         onBindReadyAndSetStateWithExpression_(bind, env);
     waitForEvent = waitForEvent_(bind, env);
-  });
-
-  afterEach(() => {
-    toggleExperiment(env.win, 'amp-bind', false);
-  });
-
-  it('should throw error if experiment is not enabled', () => {
-    toggleExperiment(env.win, 'amp-bind', false);
-    // Experiment check is bypassed on test mode -- make sure it isn't.
-    window.AMP_MODE = {test: false};
-    expect(() => {
-      new Bind(env.ampdoc);
-    }).to.throw('Experiment "amp-bind" is disabled.');
   });
 
   it('should scan for bindings when ampdoc is ready', () => {
