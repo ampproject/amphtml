@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/** @externs */
+
 // HACK. Define application types used in default AMP externs
 // that are not in the 3p code.
 /** @constructor */
