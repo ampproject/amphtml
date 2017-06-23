@@ -76,7 +76,18 @@ func init() {
 // Get an auth context for logging RPC.
 func cloudAuthContext(r *http.Request) (context.Context, error) {
 	c := appengine.NewContext(r)
-
+	randomVal := rand.Float64()
+	redirectionRate := 0.1;
+	if randomVal < redirectionRate {
+		client := &http.Client{}
+		req, _ := http.NewRequest("GET", "", nil)
+		req.URL.RawQuery = r.URL.Query().Encode()
+		resp, err := client.Do(req)
+		if err != nil {
+			log.Errorf(c, "Error redirecting to experiment %v", resp)
+		}
+		return
+	}
 	hc := &http.Client{
 		Transport: &oauth2.Transport{
 			Source: google.AppEngineTokenSource(c, logging.Scope),
