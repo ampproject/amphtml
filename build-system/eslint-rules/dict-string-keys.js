@@ -27,16 +27,26 @@ module.exports = function(context) {
                 'the first argument');
             return;
           }
-
-          arg1.properties.forEach(function(prop) {
-            if (!prop.key.raw) {
-              context.report(node, 'Found: ' + prop.key.name + '. The keys ' +
-                  'of the Object Literal Expression passed into `dict` must ' +
-                  'have string keys');
-            }
-          });
+          checkNode(arg1, context);
         }
       }
     }
   };
 };
+
+function checkNode(node, context) {
+  if (node.type === 'ObjectExpression') {
+    node.properties.forEach(function(prop) {
+      if (!prop.key.raw) {
+        context.report(node, 'Found: ' + prop.key.name + '. The keys ' +
+            'of the Object Literal Expression passed into `dict` must ' +
+            'have string keys.');
+      }
+      checkNode(prop.value, context);
+    });
+  } else if (node.type === 'ArrayExpression') {
+    node.elements.forEach(function(elem) {
+      checkNode(elem, context);
+    });
+  }
+}
