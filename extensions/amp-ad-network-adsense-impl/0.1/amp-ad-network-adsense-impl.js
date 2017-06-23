@@ -206,11 +206,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       // Load amp-analytics extensions
       this.extensions_./*OK*/loadExtension('amp-analytics');
     }
-    return extractGoogleAdCreativeAndSignature(responseText, responseHeaders)
-        .then(adResponse => {
-          adResponse.size = this.size_;
-          return Promise.resolve(adResponse);
-        });
+    return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
+  }
+
+  /** @override */
+  extractSize(unusedResponseHeaders) {
+    return this.size_;
   }
 
   /**

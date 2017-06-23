@@ -2159,6 +2159,24 @@ describe('amp-a4a', () => {
     });
   });
 
+  describe('#extractSize', () => {
+
+    it('should return a size', () => {
+      expect(AmpA4A.prototype.extractSize({
+        get(name) {
+	  return {'X-CreativeSize': '320x50'}[name];
+        },
+      })).to.deep.equal({width: 320, height: 50});
+    });
+
+    it('should return no size', () => {
+      expect(AmpA4A.prototype.extractSize({
+        get(unusedName) {
+	  return null;
+        },
+      })).to.be.null;
+    });
+  });
   // TODO(tdrl): Other cases to handle for parsing JSON metadata:
   //   - Metadata tag(s) missing
   //   - JSON parse failure
