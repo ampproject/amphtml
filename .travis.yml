@@ -34,7 +34,6 @@ branches:
     - /^amp-release-.*$/
 env:
   global:
-    - SAUCE_USERNAME="rsimha"
     - NPM_CONFIG_PROGRESS="false"
 matrix:
   include:
@@ -51,7 +50,7 @@ matrix:
         sauce_connect:
           username: "rsimha"
         jwt:
-          secure: "pu5+wv30DnAMuuAKqZ9HJwpg6ikksTa6rDNWvNyAchxrCThfI0JarwUFgCuGAUQjNg6auIqw3zN4cdmwcRYTHUx93Imqm8bfvb4KX1XEMAKuRbYxenZyroucJFi3C6u1cBWwthO9of/9eac1dqennClR8imEQFCYzd/kgzrsEnYpgcub4hssfrC5htC4tyD8B6HPrv1ZtIJ1UiH3HXkK7qLcx9y/DZFDPXL0lPLU2etS0fTa/5jZtDBiM46la1rSByBb/nA6VpwfuptODjxow6Er0NmswuqY1GxXjMwpEFlLzJZ4sAir1YE1FOU5vuVBLJModdLOLa76ym8YEasMC0sOLIAUxewCeXdp3SUlLySWvlAPtNzuhOSUWl04/qDzT3mz+pDJBzwFO2F6U8p1wVY5UCABLGjkbbGEUvuM568/ylyg+1OHpRyMUrWhggTwoiZKb8wTgCt7VDx4WXnPPAYTbV9D7BytGHo5+EDYcn+X4mqx0UPiVZ97vS7YaEGUKwXgb2H5vUpx55W8Z1gqcEL4vcMlUxATnF0xjlixDDQQ39gEaiLeb9NabpzHPj++lus8OuLLvmmu99Crmc9BHAWxt8hg8aUM1k2HHmKO1nH3hAfP/nZ+uqcB/Y4F3FI38xxbq2mo9uLN7vxwDaYTnifCKGl/og4IybFdUYX9/ug="
+          secure: "WuMq9vxa2D24lRH6CURPMTJRaAj3Gwku9MxxJAEyT5KrtfN0lAXNuJYGmrrB2mkaE8oHqHL+R4KNsAg1mYTUzkXSCNgosl9CnnVgQtuhMmoEW0WhiXEfu1pf/HTTUNCeAS9b261V9NbohIusivYNRmDQ03HZqfYmo1z+RBlszsfZD+PQLRJ/KLY2j4g94hQdcSI6+DHdwucc1mDhbCD5s/PhKfo+GlxPXpD0rMn+4g0etT9o8CnOZT0yXNaz7LwkQVQBp93fhPzQvmvr3LkdOGiG8GqnydXSTGCvpQjsin5/BpdEq+JtlilOucGfaKB12FT5jHSQEcco3ArVaUhAbPJPnFN69me046kdJYjJIwzk6eV+VT+GfEs+t2nQVH1keaWnmkr/POKlWlFAAxomnNZ70yaO1MPxhe9VgEow34+ODV7zSMIqow0ZL/xJtXf3PtU8Zcfd23PqxqekKQF4yI6IEABqL1NGGKnMx2ufFQl9WS22Db7epB5Phgr0PIpsALpwSV+Sq8KrQMjgAaCwiRy2RB8Eijl2u5kPsdYkgqDAiDeu3q1PJrThgv9XmjuwdTQTV5zrN8cA39KYu0bMC0uCvdULSnGjunhUOUcZd5BVALqb8buPSGWms9GjxHlTcLX2aOD8q5TnWuCFUorvMC0WH3eXP1ocLy3LIFQgrXo="
 cache:
   yarn: true
   directories:
