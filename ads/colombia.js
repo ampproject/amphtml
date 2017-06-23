@@ -23,12 +23,14 @@ import {loadScript, validateDataExists} from '../src/3p';
 export function colombia(global, data) {
   validateDataExists(data, [
     'clmb_slot', 'clmb_position', 'clmb_section',
+    'clmb_divid', 'loadingStrategy',
   ]);
   // push the two object into the '_colombia' global
   (global._colombia = global._colombia || []).push({
     clmbslot: data.clmb_slot,
     clmbposition: data.clmb_position,
     clmbsection: data.clmb_section,
+    clmbdivid: data.clmb_divid,
   });
 // install observation on entering/leaving the view
   global.context.observeIntersection(function(newrequest) {
