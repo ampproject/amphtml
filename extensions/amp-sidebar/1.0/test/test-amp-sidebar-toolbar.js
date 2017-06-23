@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
- import {KeyCodes} from '../../../../src/utils/key-codes';
  import {adopt} from '../../../../src/runtime';
  import {createIframePromise} from '../../../../testing/iframe';
  import {timerFor} from '../../../../src/services';
