@@ -141,9 +141,6 @@ describes.realWin('Bind', {
     waitForEvent = waitForEvent_(bind, env);
   });
 
-  afterEach(() => {
-  });
-
   it('should scan for bindings when ampdoc is ready', () => {
     createElementWithBinding('[text]="1+1"');
     expect(bind.boundElements_.length).to.equal(0);
