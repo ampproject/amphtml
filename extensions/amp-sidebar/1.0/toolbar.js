@@ -48,7 +48,7 @@ export class Toolbar {
     this.targetElement_ = undefined;
 
     /** @private {Element|undefined} */
-    this.placeholder_ = undefined;
+    this.heightElement_ = undefined;
 
     /** @private {!boolean} **/
     this.toolbarShown_ = false;
@@ -105,9 +105,10 @@ export class Toolbar {
     this.toolbarClone_ = this.toolbarDOMElement_.cloneNode(true);
     this.toolbarClone_.classList.add(TOOLBAR_ELEMENT_CLASS);
     this.targetElement_.appendChild(this.toolbarClone_);
-    this.placeholder_ =
+    this.heightElement_ =
       this.toolbarDOMElement_.ownerDocument.createElement('div');
-    this.targetElement_.appendChild(this.placeholder_);
+    this.heightElement_.setAttribute('placeholder', '');
+    this.targetElement_.appendChild(this.heightElement_);
     toggle(this.targetElement_, false);
     fragment.appendChild(this.targetElement_);
     return fragment;
@@ -132,8 +133,8 @@ export class Toolbar {
 
     // Use the placeholder to fill the height of the toolbar
     this.vsync_.mutate(() => {
-      if (this.placeholder_) {
-        setStyles(this.placeholder_, {
+      if (this.heightElement_) {
+        setStyles(this.heightElement_, {
           'height': this.toolbarClone_./*REVIEW*/offsetHeight + 'px',
         });
       }
