@@ -312,6 +312,24 @@ function main(argv) {
       util.colors.cyan(process.env.BUILD_SHARD),
       '\n');
 
+  // Debugging info.
+  console.log(
+      fileLogPrefix, 'TRAVIS_COMMIT',
+      util.colors.cyan(process.env.TRAVIS_COMMIT));
+  console.log(
+      fileLogPrefix, 'TRAVIS_COMMIT_MESSAGE',
+      util.colors.cyan(process.env.TRAVIS_COMMIT_MESSAGE));
+  console.log(
+      fileLogPrefix, 'TRAVIS_COMMIT_RANGE',
+      util.colors.cyan(process.env.TRAVIS_COMMIT_RANGE));
+  console.log(
+      fileLogPrefix, 'TRAVIS_PULL_REQUEST_BRANCH',
+      util.colors.cyan(process.env.TRAVIS_PULL_REQUEST_BRANCH));
+  console.log(
+      fileLogPrefix, 'username',
+      util.colors.cyan(getStdout(`git log -1 $TRAVIS_COMMIT --pretty="%cE"`).trim()));
+
+
   // If $TRAVIS_PULL_REQUEST_SHA is empty then it is a push build and not a PR.
   if (!process.env.TRAVIS_PULL_REQUEST_SHA) {
     console.log(fileLogPrefix, 'Running all commands on push build.');
