@@ -32,7 +32,6 @@ tags: {  # <amp-user-notification>
   disallowed_ancestor: "AMP-SIDEBAR"
   requires_extension: "amp-user-notification"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-user-notification"
   amp_layout: {
     supported_layouts: NODISPLAY
   }
