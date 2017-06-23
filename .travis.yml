@@ -34,7 +34,6 @@ branches:
     - /^amp-release-.*$/
 env:
   global:
-    - SAUCE_USERNAME="rsimha"
     - NPM_CONFIG_PROGRESS="false"
 matrix:
   include:
@@ -48,10 +47,8 @@ matrix:
       before_script:
         - pip install --user protobuf
       addons:
-        sauce_connect:
-          username: "rsimha"
         jwt:
-          secure: "qDq07Ili4QjELVju6ZvOysJJ7OPxYvQprxiJVDvyQAUboI7m+6T1+ouAAn6KwSYtIGwPxgS1unTz5MlSG6cF6W8ruYuFrXpqtreKbFSIl4z9Q4TogQ4Zg6WjdZN0MtjmpD75G3bJegUP5OkWhI6+DUn30NccndXNe8Q/fP7NqwwqiaOCnxnQlo53PqoXlZOV3C/wwMafFqMHu7/mF5wxzM10zWd/44TenotaASUotJ2G3sV6rKeR04/9cBR/1UUHhbK7YKtH//KmzuR0olQloP01RuqSgkTrM4iwzlN45o14hFUX+bh5RASYkl34Jt7Uy9lS2pUJx1XlW4hzP2IhTOuILaF5AwjKG9Cnu0blIEMt1mdO5+MYL74QoDKi8zJH1yOrgsHZou8cmSbjFmLRFuvjM0s8X3A6PQxHYxb2ku0BAhEFxtxhN9sGyPgtSGr8Onkab/Wcc0rm99DSfl+GT2tTKYtuuHeaogHNu+VsO7qQmiG2n/CfqzzBOAmAc0pscNsCT3qFYize5obbMJhVp0Mqgr2O5W2x0O9avFHLiKVayYiDuG90pt1BSoWZudRbmMZfM6AhQDpXiMxXxb+8pDCPZ3MnGp/uvQIUspIGKVmgnxdht31MoE1rK5ARlFNWkZzSSEKKOmjWv8vaj0a8OJELLaLoM3JQ3rS+DBTDDcs="
+          secure: "bv9koHQ+Eu2h/X/fASIqIuvGWgbrzshcF3wquS3KifjMvlwtWRM4rjyiCl59JMH2ISAGuc5fZ1by1TWYoClK8LM6kHWqrpdaQAoS+206xl3BlpQlq5vWaZsXH8k0f4dupL0aplScUeBbEBskJVcfDWbH13Getf98Vf1pppcgjiTJuqv6WriQlWrhFo4YMPwzMW21WkoFxDnk5sbDWfQi4N1CI6T7SKpElqw49VBi/t0EcOpnYHefWZtk3pG7mGJ+eUEsQvjHq58ctaIzARLPeJ3GLfENW5EzBy7BPXFL72MyFR9/HlftURS1kxPSODrVMq5kNE+FIm0ZZZSMNGnSxpIC1RGFj2esiMFKTdLuSqwvMWw8Y1vzfk9/1nCzevVqXTlFzhJ9B0MhGqN/8lpLHTnSWKOYdnDT3gzqb/udKrVcg8hE4oLYIWkcP3gULbH5eeZYsiOf8jFX9TBEnUe0pC2sVephZPVnm0mS09kK5tZNUGf2qPZhMtaJPlCiD14BxZq1hLmFMUNRoIBQu65GDPQ9OhRsznqtr31RrQ2JMI3mB97eN9fAJFtIRSVZiJ/aJz28h73s1xPwYxPC4a5AqEvHiTouuzgmsHQRfHCt5ZcS1TLODjlehBcI6YbcWSFhV9J45x3WNcN7zZs2y89tmt0hcb7arJJi1xvJO0SOMw0="
 cache:
   yarn: true
   directories:
