@@ -668,7 +668,9 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
-  vmfive: {},
+  vmfive: {
+    renderStartImplemented: true,
+  },
 
   webediads: {
     prefetch: 'https://eu1.wbdds.com/amp.min.js',
