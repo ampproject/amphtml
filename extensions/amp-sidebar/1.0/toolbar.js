@@ -19,6 +19,9 @@ import {toggle, setStyles} from '../../../src/style';
 /** @const */
 const TOOLBAR_ELEMENT_CLASS = 'i-amphtml-toolbar';
 
+/** @const */
+const TOOLBAR_TARGET_ATTRIBUTE = 'toolbar-container';
+
 export class Toolbar {
   /**
   * @param {!Element} element
@@ -106,6 +109,7 @@ export class Toolbar {
       .document.createDocumentFragment();
     this.targetElement_ =
       this.toolbarDOMElement_.ownerDocument.createElement('header');
+    this.targetElement_.setAttribute(TOOLBAR_TARGET_ATTRIBUTE, '');
     //Place the elements into the target
     this.toolbarClone_ = this.toolbarDOMElement_.cloneNode(true);
     this.toolbarClone_.classList.add(TOOLBAR_ELEMENT_CLASS);
