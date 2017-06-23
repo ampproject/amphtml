@@ -1,9 +1,5 @@
 # <a name="amp-bind"></a> `amp-bind`
 
-{% call callout('Important', type='caution') %}
-This extension is under active development, and the version number of the specification section should provide guidance to its evolution.
-{% endcall %}
-
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
