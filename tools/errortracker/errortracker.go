@@ -76,6 +76,17 @@ func init() {
 // Get an auth context for logging RPC.
 func cloudAuthContext(r *http.Request) (context.Context, error) {
 	c := appengine.NewContext(r)
+	hc := &http.Client{
+		Transport: &oauth2.Transport{
+			Source: google.AppEngineTokenSource(c, logging.Scope),
+			Base:   &urlfetch.Transport{Context: c},
+		},
+	}
+	return cloud.WithContext(c, appengine.AppID(c), hc), nil
+}
+
+func handle(w http.ResponseWriter, r *http.Request) {
+	c, _ := cloudAuthContext(r)
 	randomVal := rand.Float64()
 	redirectionRate := 0.1;
 	if randomVal < redirectionRate {
@@ -88,17 +99,6 @@ func cloudAuthContext(r *http.Request) (context.Context, error) {
 		}
 		return
 	}
-	hc := &http.Client{
-		Transport: &oauth2.Transport{
-			Source: google.AppEngineTokenSource(c, logging.Scope),
-			Base:   &urlfetch.Transport{Context: c},
-		},
-	}
-	return cloud.WithContext(c, appengine.AppID(c), hc), nil
-}
-
-func handle(w http.ResponseWriter, r *http.Request) {
-	c, _ := cloudAuthContext(r)
 	logc, err := logging.NewClient(c, appengine.AppID(c), "javascript.errors")
 	if err != nil {
 		http.Error(w, "Cannot connect to Google Cloud Logging",
