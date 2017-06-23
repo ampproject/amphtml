@@ -30,6 +30,7 @@ describe('Platform', () => {
   let majorVersion;
   let iosVersion;
   let iosMajorVersion;
+  let userAgent;
 
   beforeEach(() => {
     isIos = false;
@@ -44,6 +45,7 @@ describe('Platform', () => {
     majorVersion = 0;
     iosVersion = '';
     iosMajorVersion = null;
+    userAgent = '';
   });
 
   function testUserAgent(userAgentString) {
@@ -61,7 +63,7 @@ describe('Platform', () => {
     expect(platform.getIosMajorVersion()).to.equal(iosMajorVersion);
   }
 
-  function testStandAlone(userAgentString, standAloneBoolean) {
+  function testStandalone(userAgentString, standAloneBoolean) {
     const platform = new Platform({
       navigator: {
         standalone: standAloneBoolean,
@@ -75,6 +77,15 @@ describe('Platform', () => {
     testUserAgent(null);
     testUserAgent('');
     testUserAgent(' ');
+    testStandalone(null, null);
+    testStandalone(null, '');
+    testStandalone(null, ' ');
+    testStandalone('', null);
+    testStandalone('', '');
+    testStandalone('', ' ');
+    testStandalone(' ', null);
+    testStandalone(' ', '');
+    testStandalone(' ', ' ');
   });
 
   it('iPhone 6 Plus v8', () => {
@@ -84,9 +95,12 @@ describe('Platform', () => {
     majorVersion = 8;
     iosVersion = '8.0';
     iosMajorVersion = 8;
-    testUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X)' +
+    isStandalone = true;
+    userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X)' +
         ' AppleWebKit/600.1.3 (KHTML, like Gecko) Version/8.0' +
-        ' Mobile/12A4345d Safari/600.1.4');
+        ' Mobile/12A4345d Safari/600.1.4';
+    testUserAgent(userAgent);
+    testStandalone(userAgent, isStandalone);
   });
 
   it('iPhone 6 Plus v9', () => {
@@ -96,9 +110,12 @@ describe('Platform', () => {
     majorVersion = 9;
     iosVersion = '9.3';
     iosMajorVersion = 9;
-    testUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 9_3 like Mac OS X)' +
+    isStandalone = true;
+    userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_3 like Mac OS X)' +
         ' AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0' +
-        ' Mobile/13E230 Safari/601.1');
+        ' Mobile/13E230 Safari/601.1';
+    testUserAgent(userAgent);
+    testStandalone(userAgent, isStandalone);
   });
 
   it('iPhone 6 Plus no version', () => {
@@ -108,9 +125,12 @@ describe('Platform', () => {
     majorVersion = 9;
     iosVersion = '9.3';
     iosMajorVersion = 9;
-    testUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 9_3 like Mac OS X)' +
+    isStandalone = true;
+    userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_3 like Mac OS X)' +
         ' AppleWebKit/601.1.46 (KHTML, like Gecko)' +
-        ' Mobile/13E230 Safari/601.1');
+        ' Mobile/13E230 Safari/601.1';
+    testUserAgent(userAgent);
+    testStandalone(userAgent, isStandalone);
   });
 
   it('iPhone ios 10.2.1', () => {
@@ -120,9 +140,12 @@ describe('Platform', () => {
     majorVersion = 10;
     iosVersion = '10.2.1';
     iosMajorVersion = 10;
-    testUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 10_2_1 like Mac OS X)' +
+    isStandalone = true;
+    userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_2_1 like Mac OS X)' +
         ' AppleWebKit/602.4.6 (KHTML, like Gecko) Version/10.0' +
-        ' Mobile/14D27 Safari/602.1');
+        ' Mobile/14D27 Safari/602.1';
+    testUserAgent(userAgent);
+    testStandalone(userAgent, isStandalone);
   });
 
   it('iPad 2', () => {
@@ -132,9 +155,12 @@ describe('Platform', () => {
     majorVersion = 7;
     iosVersion = '7.0';
     iosMajorVersion = 7;
-    testUserAgent('Mozilla/5.0 (iPad; CPU OS 7_0 like Mac OS X)' +
+    isStandalone = true;
+    userAgent = 'Mozilla/5.0 (iPad; CPU OS 7_0 like Mac OS X)' +
         ' AppleWebKit/537.51.1 (KHTML, like Gecko) Version/7.0' +
-        ' Mobile/11A465 Safari/9537.53');
+        ' Mobile/11A465 Safari/9537.53';
+    testUserAgent(userAgent);
+    testStandalone(userAgent, isStandalone);
   });
 
   it('iPhone ios 10.2, Chrome ios', () => {
@@ -144,18 +170,23 @@ describe('Platform', () => {
     majorVersion = 56;
     iosVersion = '10.2';
     iosMajorVersion = 10;
-    testUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 10_2 like Mac OS X)' +
+    isStandalone = true;
+    userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_2 like Mac OS X)' +
         ' AppleWebKit/602.1.50 (KHTML, like Gecko) CriOS/56.0.2924.73' +
-        ' Mobile/16D32 Safari/602.1');
+        ' Mobile/16D32 Safari/602.1';
+    testUserAgent(userAgent);
+    testStandalone(userAgent, isStandalone);
   });
 
   it('Desktop Safari', () => {
     isSafari = true;
     isWebKit = true;
     majorVersion = 7;
-    testUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) ' +
+    userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) ' +
         'AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 ' +
-        'Safari/7046A194A');
+        'Safari/7046A194A';
+    testUserAgent(userAgent);
+    testStandalone(userAgent, isStandalone);
   });
 
   it('Nexus 6 Chrome', () => {
@@ -163,16 +194,20 @@ describe('Platform', () => {
     isChrome = true;
     isWebKit = true;
     majorVersion = 44;
-    testUserAgent('Mozilla/5.0 (Linux; Android 5.1.1; Nexus 6 Build/LYZ28E)' +
+    userAgent = 'Mozilla/5.0 (Linux; Android 5.1.1; Nexus 6 Build/LYZ28E)' +
         ' AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.20' +
-        ' Mobile Safari/537.36');
+        ' Mobile Safari/537.36';
+    testUserAgent(userAgent);
+    testStandalone(userAgent, isStandalone);
   });
 
   it('Firefox', () => {
     isFirefox = true;
     majorVersion = 40;
-    testUserAgent('Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) ' +
-        'Gecko/20100101 Firefox/40.1');
+    userAgent = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) ' +
+        'Gecko/20100101 Firefox/40.1';
+    testUserAgent(userAgent);
+    testStandalone(userAgent, isStandalone);
   });
 
   it('Firefox ios', () => {
@@ -182,43 +217,39 @@ describe('Platform', () => {
     majorVersion = 7;
     iosVersion = '10.3.1';
     iosMajorVersion = 10;
-    testUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X)' +
+    isStandalone = true;
+    userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X)' +
         ' AppleWebKit/603.1.30 (KHTML, like Gecko) FxiOS/7.5b3349' +
-        ' Mobile/14E304 Safari/603.1.30');
+        ' Mobile/14E304 Safari/603.1.30';
+    testUserAgent(userAgent);
+    testStandalone(userAgent, isStandalone);
   });
 
   it('IE', () => {
     isIe = true;
     majorVersion = 10;
-    testUserAgent('Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 7.0;' +
-        ' InfoPath.3; .NET CLR 3.1.40767; Trident/6.0; en-IN)');
+    userAgent = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 7.0;' +
+        ' InfoPath.3; .NET CLR 3.1.40767; Trident/6.0; en-IN)';
+    testUserAgent(userAgent);
+    testStandalone(userAgent, isStandalone);
   });
 
   it('IEMobile', () => {
     isIe = true;
     majorVersion = 10;
-    testUserAgent('Mozilla/5.0 (compatible; MSIE 10.0; Windows Phone 8.0;' +
-        ' Trident/6.0; IEMobile/10.0; ARM; Touch; NOKIA; Lumia 520)');
+    userAgent = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows Phone 8.0;' +
+        ' Trident/6.0; IEMobile/10.0; ARM; Touch; NOKIA; Lumia 520)';
+    testUserAgent(userAgent);
+    testStandalone(userAgent, isStandalone);
   });
 
   it('Edge', () => {
     isEdge = true;
     majorVersion = 12;
-    testUserAgent('Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36' +
+    userAgent = 'Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36' +
         ' (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36' +
-        ' Edge/12.10136');
-  });
-
-  it('StandAlone', () => {
-    isStandalone = true;
-    testStandAlone('Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X)' +
-        ' AppleWebKit/603.1.30 (KHTML, like Gecko) FxiOS/7.5b3349' +
-        ' Mobile/14E304 Safari/603.1.30', isStandalone);
-  });
-
-  it('Not StandAlone', () => {
-    testStandAlone('Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X)' +
-        ' AppleWebKit/603.1.30 (KHTML, like Gecko) FxiOS/7.5b3349' +
-        ' Mobile/14E304 Safari/603.1.30', isStandalone);
+        ' Edge/12.10136';
+    testUserAgent(userAgent);
+    testStandalone(userAgent, isStandalone);
   });
 });
