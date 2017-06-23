@@ -28,7 +28,8 @@ For configuration details and to generate your tags, please refer to [your publi
     data-tagtype=“rta”
     data-networkid=“76543”
     data-adserver=“DFP”
-    data-slot=“/0987654/rta_zone_amp”>
+    data-slot=“/0987654/rta_zone_amp”
+    data-doubleclick='{"targeting":{"sport":["rugby","cricket"]},"categoryExclusions":["health"]}'>
 </amp-ad>
 ```
 
@@ -56,6 +57,7 @@ Supported parameters:
 - `data-networkid`: your Criteo network id. Required.
 - `data-varname`: `crtg_content` variable name to store RTA labels. Optional.
 - `data-cookiename`: `crtg_rta` RTA cookie name. Optional.
+- `data-doubleclick`: custom options to send to doubleclick. Optional. See [doubleclick documentation](google/doubleclick.md) for details.
 
 ### PuMP and Passback
 
