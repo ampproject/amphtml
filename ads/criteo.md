@@ -57,7 +57,7 @@ Supported parameters:
 - `data-networkid`: your Criteo network id. Required.
 - `data-varname`: `crtg_content` variable name to store RTA labels. Optional.
 - `data-cookiename`: `crtg_rta` RTA cookie name. Optional.
-- `data-doubleclick`: custom options to send to doubleclick. Optional. See [doubleclick documentation](google/doubleclick.md) for details.
+- `data-doubleclick`: custom options to send to doubleclick, in JSON format. Optional. See [doubleclick documentation](google/doubleclick.md) for details.
 
 ### PuMP and Passback
 
