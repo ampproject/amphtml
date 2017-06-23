@@ -77,7 +77,10 @@ const TAG = 'amp-ad-network-doubleclick-impl';
 const DOUBLECLICK_BASE_URL =
     'https://securepubads.g.doubleclick.net/gampad/ads';
 
+/** @const {string} */
 const RTC_ERROR = "RTC_ERROR";
+/** @const {number} */
+const RTC_TIMEOUT = 1000;
 
 /** @private @const {!Object<string,string>} */
 const PAGE_LEVEL_PARAMS_ = {
@@ -517,6 +520,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
    * Sends RTC request as specified by rtcConfig. Returns promise which
    * resolves to the targeting informtation from the request response.
+   * We send two requests. The first request will hit cache if it is
+   * there. The second request will always bypass cache and refresh it.
+   * This is a way for us to implement a simple stale-while-revalidate
+   * model.
    * @param {!Object} rtcConfig
    * @return {?Promise} The rtc targeting info to attach to the ad url.
    * @private
@@ -535,16 +542,18 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       credentials: 'include',
     });
 
-    return timerFor(window).timeoutPromise(1000, rtcResponse).then(res => {
+    return timerFor(window).timeoutPromise(RTC_TIMEOUT, rtcResponse).then(res => {
       xhrFor(this.win).fetchJson(endpoint, {
         credentials: 'include',
-        cache: 'no-cache',
-        cache-control: 'no-cache' // TODO: Something is wrong with this, it's not busting cache
+        cache: 'no-cache', /* TODO: make this actually skip cache */
       });
-      return res.json();
+      // Redirects and non-200 status codes are forbidden for RTC.
+      return (!res.redirected && res.status == 200) ? res.json() : RTC_ERROR;
     }).catch(err => {
-      if ((const errorUrl = rtcConfig['doubleclick']['errorReportingUrl'])) {
+      const errorUrl = rtcConfig['doubleclick']['errorReportingUrl'];
+      if (errorUrl) {
         // TODO : Log the error to the pub server
+        console.log("Issue");
       }
       return RTC_ERROR;
     });
