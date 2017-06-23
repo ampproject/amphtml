@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/** @externs */
+
 /**
  * A type for Objects that can be JSON serialized or that come from
  * JSON serialization. Requires the objects fields to be accessed with
