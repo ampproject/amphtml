@@ -61,6 +61,9 @@ public class AmpCommandLineRunner extends CommandLineRunner {
   ImmutableMap<String, Node> prodAssignmentReplacements = ImmutableMap.of(
       "IS_DEV",
       IR.falseNode());
+  
+  ImmutableSet<String> blacklistNodeGetprop = ImmutableSet.of(
+      "getAttribute", "setAttribute", "querySelector");
 
   protected AmpCommandLineRunner(String[] args) {
     super(args);
@@ -73,7 +76,7 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     CompilerOptions options = super.createOptions();
     options.setCollapseProperties(true);
     AmpPass ampPass = new AmpPass(getCompiler(), is_production_env, suffixTypes,
-        assignmentReplacements, prodAssignmentReplacements);
+        assignmentReplacements, prodAssignmentReplacements, blacklistNodeGetprop);
     options.addCustomPass(CustomPassExecutionTime.BEFORE_OPTIMIZATIONS, ampPass);
     options.setDevirtualizePrototypeMethods(true);
     options.setExtractPrototypeMemberDeclarations(true);

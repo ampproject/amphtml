@@ -46,16 +46,19 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
   private final Map<String, Set<String>> stripTypeSuffixes;
   private final Map<String, Node> assignmentReplacements;
   private final Map<String, Node> prodAssignmentReplacements;
+  private final ImmutableSet<String> blacklistNodeGetprop;
   final boolean isProd;
 
   public AmpPass(AbstractCompiler compiler, boolean isProd,
         Map<String, Set<String>> stripTypeSuffixes,
-        Map<String, Node> assignmentReplacements, Map<String, Node> prodAssignmentReplacements) {
+        Map<String, Node> assignmentReplacements, Map<String, Node> prodAssignmentReplacements,
+        ImmutableSet<String> blacklistNodeGetprop) {
     this.compiler = compiler;
     this.stripTypeSuffixes = stripTypeSuffixes;
     this.isProd = isProd;
     this.assignmentReplacements = assignmentReplacements;
     this.prodAssignmentReplacements = prodAssignmentReplacements;
+    this.blacklistNodeGetprop = blacklistNodeGetprop;
   }
 
   @Override public void process(Node externs, Node root) {
@@ -71,6 +74,8 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
       maybeEliminateCallExceptFirstParam(n, parent);
     } else if (isAmpExtensionCall(n)) {
       inlineAmpExtensionCall(n, parent);
+    } else if (TransformUtils.isJSTypeNodeGetProp(compiler, t, n, parent, blacklistNodeGetprop)) {
+      TransformUtils.transformNodeTypeToProxyExpression(compiler, n);
     // Remove any `getMode().localDev` and `getMode().test` calls and replace it with `false`.
     } else if (isProd && isFunctionInvokeAndPropAccess(n, "$mode.getMode",
         ImmutableSet.of("localDev", "test"))) {
@@ -110,11 +115,11 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
       // The AST has the last getprop higher in the hierarchy.
       if (isGetPropName(getprop, "extension")) {
         Node firstChild = getprop.getFirstChild();
-        // We have to handle both explicit/implicit top level `AMP`
+        // We have to handle both explicit/implicit top level `AMP`.
         if ((firstChild != null && firstChild.isName() &&
                firstChild.getString() == "AMP") ||
             isGetPropName(firstChild, "AMP")) {
-          // Child at index 1 should be the "string" value (first argument)
+          // Child at index 1 should be the "string" value (first argument).
           Node func = getAmpExtensionCallback(n);
           return func != null && func.isFunction();
         }

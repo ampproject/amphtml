@@ -104,7 +104,7 @@
         deprecation="on"
         includeantruntime="false"
         encoding="utf-8">
-      <classpath refid="allclasspath.path"/>
+      <classpath refid="srcclasspath.path"/>
       <compilerarg value="-Xlint:unchecked"/>
     </javac>
     <javac srcdir="${test.dir}"

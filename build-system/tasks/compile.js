@@ -285,6 +285,21 @@ function compile(entryModuleFilenames, outputDir,
       }
     };
 
+    if (outputFilename == 'v0.js' ||
+        outputFilename == 'amp-form.js') {
+      // Only do this for the main binary and amp-form binary
+      console.log('compiling with checkTypes ON for ' + outputFilename);
+      // This will run old type inference.
+      compilerOptions.compilerFlags.jscomp_error.push(
+          'checkTypes',
+          'accessControls',
+          'const',
+          'constantProperty',
+          'globalThis');
+      compilerOptions.compilerFlags.externs.push(
+          'build-system/amp.oti.extern.js');
+    }
+
     // For now do type check separately
     if (argv.typecheck_only || checkTypes) {
       // Don't modify compilation_level to a lower level since
