@@ -22,7 +22,7 @@ import {documentInfoForDoc} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
-import {isProxyOrigin} from '../../../src/url';
+import {isProxyOrigin, parseUrl} from '../../../src/url';
 import {parseJson} from '../../../src/json';
 import {
   resourcesForDoc,
@@ -344,21 +344,21 @@ function topWindowUrlOrDomain(win) {
     const origin = win.location.origin;
     const topOrigin = ancestorOrigins[ancestorOrigins.length - 1];
     if (origin == topOrigin) {
-      return win.top.location.href;
+      return win.top.location.hostname;
     }
     const secondFromTop = secondWindowFromTop(win);
     if (secondFromTop == win ||
         origin == ancestorOrigins[ancestorOrigins.length - 2]) {
-      return secondFromTop./*REVIEW*/document.referrer;
+      return parseUrl(secondFromTop./*OK*/document.referrer).hostname;
     }
-    return topOrigin;
+    return parseUrl(topOrigin).hostname;
   } else {
     try {
-      return win.top.location.href;
+      return win.top.location.hostname;
     } catch (e) {}
     const secondFromTop = secondWindowFromTop(win);
     try {
-      return secondFromTop./*REVIEW*/document.referrer;
+      return parseUrl(secondFromTop./*OK*/document.referrer).hostname;
     } catch (e) {}
     return null;
   }
