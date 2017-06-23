@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-// Extern specifically for Old Type Inference (OTI) type checking mode.
+/**
+ * @fileoverview Extern specifically for Old Type Inference (OTI) type checking mode.
+ * @externs
+ */
 
 /**
  * TransitionDef function that accepts normtime, typically between 0 and 1 and
