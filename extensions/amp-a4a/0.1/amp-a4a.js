@@ -804,30 +804,27 @@ export class AmpA4A extends AMP.BaseElement {
    *   the refresh function complete. This is particularly handy for testing.
    */
   refresh(refreshEndCallback) {
-    return new Promise(resolve => {
-      dev().assert(!this.isRefreshing);
-      this.isRefreshing = true;
-      this.tearDownSlot();
-      this.initiateAdRequest();
-      const promiseId = this.promiseId_;
-      this.adPromise_.then(() => {
-        if (!this.isRefreshing || promiseId != this.promiseId_) {
-          // If this refresh cycle was canceled, such as in a no-content
-          // response case, keep showing the old creative.
-          refreshEndCallback();
-          return;
-        }
-        this.getVsync().mutate(() => {
-          this.togglePlaceholder(true);
-          // This delay provides a 1 second buffer where the ad loader is
-          // displayed in between the creatives.
-          timerFor(this.win).delay(() => {
-            this.isRelayoutNeededFlag = true;
-            this.getResource().layoutCanceled();
-            resourcesForDoc(this.getAmpDoc())
-                ./*REVIEW*/requireLayout(this.element);
-            resolve();
-          }, 1000);
+    dev().assert(!this.isRefreshing);
+    this.isRefreshing = true;
+    this.tearDownSlot();
+    this.initiateAdRequest();
+    const promiseId = this.promiseId_;
+    return this.adPromise_.then(() => {
+      if (!this.isRefreshing || promiseId != this.promiseId_) {
+        // If this refresh cycle was canceled, such as in a no-content
+        // response case, keep showing the old creative.
+        refreshEndCallback();
+        return;
+      }
+      return this.getVsync().mutate(() => {
+        this.togglePlaceholder(true);
+        // This delay provides a 1 second buffer where the ad loader is
+        // displayed in between the creatives.
+        return timerFor(this.win).promise(1000).then(() => {
+          this.isRelayoutNeededFlag = true;
+          this.getResource().layoutCanceled();
+          resourcesForDoc(this.getAmpDoc())
+              ./*REVIEW*/requireLayout(this.element);
         });
       });
     });
