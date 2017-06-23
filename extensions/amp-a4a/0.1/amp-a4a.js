@@ -816,7 +816,7 @@ export class AmpA4A extends AMP.BaseElement {
         refreshEndCallback();
         return;
       }
-      return this.getVsync().mutate(() => {
+      return this.mutateElement(() => {
         this.togglePlaceholder(true);
         // This delay provides a 1 second buffer where the ad loader is
         // displayed in between the creatives.
