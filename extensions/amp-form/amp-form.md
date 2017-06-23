@@ -450,3 +450,9 @@ In general, keep in mind the following points when accepting input from the user
     * non-XHR GET requests are not going to receive accurate origin/headers and backends won't be able to protect against XSRF with the above mechanism.
     * In general use XHR/non-XHR GET requests for navigational or information retrieval only.
 * non-XHR POST requests are not allowed in AMP documents. This is due to inconsistencies of setting `Origin` header on these requests across browsers. And the complications supporting it would introduce in protecting against XSRF. This might be reconsidered and introduced later, please file an issue if you think this is needed.
+
+## Styling
+
+{% call callout('Tip', type='success') %}
+Visit [AMP Start](https://ampstart.com/components#form-elements) for responsive, pre-styled AMP form elements that you can use in your AMP pages.
+{% endcall %}
