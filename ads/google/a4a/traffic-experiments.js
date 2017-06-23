@@ -49,11 +49,6 @@ export let A4aExperimentBranches;
 /** @type {!string} @private */
 export const MANUAL_EXPERIMENT_ID = '117152632';
 
-/** @type {!string} @private */
-const EXTERNALLY_SELECTED_ID = '2088461';
-
-/** @type {!string} @private */
-const INTERNALLY_SELECTED_ID = '2088462';
 
 /**
  * Check whether Google Ads supports the A4A rendering pathway for a given ad
@@ -123,13 +118,6 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
         perf.addEnabledExperiment(experimentName + '-' + selectedBranch);
       }
     }
-    // Detect how page was selected into the overall experimentName.
-    if (isSetFromUrl) {
-      addExperimentIdToElement(EXTERNALLY_SELECTED_ID, element);
-    } else {
-      // Must be internally selected.
-      addExperimentIdToElement(INTERNALLY_SELECTED_ID, element);
-    }
     // Detect whether page is on the "experiment" (i.e., use A4A rendering
     // pathway) branch of the overall traffic experiment or it's on the
     // "control" (i.e., use traditional, 3p iframe rendering pathway).
@@ -148,6 +136,27 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
     // Delayed Fetch.
     return hasLaunched(win, element);
   }
+}
+
+export function extractUrlExperimentId(win, element) {
+  const expParam = viewerForDoc(element).getParam('exp') ||
+    parseQueryString(win.location.search)['exp'];
+  if (!expParam) {
+    return null;
+  }
+  // Allow for per type experiment control with Doubleclick key set for 'da'
+  // and AdSense using 'aa'.  Fallbsck to 'a4a' if type specific is missing.
+  const expKeys = [
+    (element.getAttribute('type') || '').toLowerCase() == 'doubleclick' ?
+      'da' : 'aa',
+    'a4a',
+  ];
+  let arg;
+  let match;
+  expKeys.forEach(key => arg = arg ||
+    ((match = new RegExp(`(?:^|,)${key}:(-?\\d+)`).exec(expParam)) &&
+      match[1]));
+  return arg ? Number(arg) : null;
 }
 
 /**
@@ -188,26 +197,6 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
 function maybeSetExperimentFromUrl(win, element, experimentName,
      controlBranchId, treatmentBranchId, delayedControlId,
      delayedTreatmentBrandId, sfgControlId, sfgTreatmentId, manualId) {
-  const expParam = viewerForDoc(element).getParam('exp') ||
-    parseQueryString(win.location.search)['exp'];
-  if (!expParam) {
-    return false;
-  }
-  // Allow for per type experiment control with Doubleclick key set for 'da'
-  // and AdSense using 'aa'.  Fallbsck to 'a4a' if type specific is missing.
-  const expKeys = [
-    (element.getAttribute('type') || '').toLowerCase() == 'doubleclick' ?
-      'da' : 'aa',
-    'a4a',
-  ];
-  let arg;
-  let match;
-  expKeys.forEach(key => arg = arg ||
-    ((match = new RegExp(`(?:^|,)${key}:(-?\\d+)`).exec(expParam)) &&
-      match[1]));
-  if (!arg) {
-    return false;
-  }
   const argMapping = {
     '-1': manualId,
     '0': null,
@@ -218,6 +207,7 @@ function maybeSetExperimentFromUrl(win, element, experimentName,
     '5': sfgControlId,
     '6': sfgTreatmentId,
   };
+  const arg = extractUrlExperimentId(win, element);
   if (argMapping.hasOwnProperty(arg)) {
     forceExperimentBranch(win, experimentName, argMapping[arg]);
     return true;
@@ -297,30 +287,6 @@ export function hasLaunched(win, element) {
     default:
       return false;
   }
-}
-
-/**
- * Checks whether the given element is in any of the branches triggered by
- * the externally-provided experiment parameter (as decided by the
- * #maybeSetExperimentFromUrl function).
- *
- * @param {!Element} element
- * @return {boolean}
- */
-export function isExternallyTriggeredExperiment(element) {
-  return isInExperiment(element, EXTERNALLY_SELECTED_ID);
-}
-
-/**
- * Checks whether the given element is in any of the branches triggered by
- * internal experiment selection (as set by
- * #randomlySelectUnsetExperiments).
- *
- * @param {!Element} element
- * @return {boolean}
- */
-export function isInternallyTriggeredExperiment(element) {
-  return isInExperiment(element, INTERNALLY_SELECTED_ID);
 }
 
 /**
