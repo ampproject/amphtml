@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-// Extern specifically for New Type Inference (NTI) type checking mode.
+/**
+ * @fileoverview Extern specifically for New Type Inference (NTI) type checking mode.
+ * @externs
+ */
 
 /**
  * TransitionDef function that accepts normtime, typically between 0 and 1 and
