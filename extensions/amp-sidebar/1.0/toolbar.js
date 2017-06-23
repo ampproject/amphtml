@@ -99,21 +99,33 @@ export class Toolbar {
 
   /**
    * Private function to build the DOM element for the toolbar, and return the built fragment
+   * @returns {Element|null}
    * @public
    */
   build() {
-    const fragment = this.win_
-      .document.createDocumentFragment();
-    this.targetElement_ =
-      this.win_.document.createElement('header');
-    this.targetElement_.classList.add(TOOLBAR_TARGET_CLASS);
-    //Place the elements into the target
     this.toolbarClone_ = this.toolbarDOMElement_.cloneNode(true);
     this.toolbarClone_.classList.add(TOOLBAR_ELEMENT_CLASS);
-    this.targetElement_.appendChild(this.toolbarClone_);
-    toggle(this.targetElement_, false);
-    fragment.appendChild(this.targetElement_);
-    return fragment;
+    // Check for the target attribute on toolbar nav
+    const targetId = this.toolbarDOMElement_.getAttribute('target');
+    if (targetId &&
+      this.win_document.getElementById(targetId)
+    ) {
+      this.targetElement_ =
+        this.win_document.getElementById(targetId);
+      this.targetElement_.appendChild(this.toolbarClone_);
+      toggle(this.targetElement_, false);
+      return;
+    } else {
+      const fragment = this.win_
+        .document.createDocumentFragment();
+      this.targetElement_ =
+        this.win_.document.createElement('header');
+      this.targetElement_.classList.add(TOOLBAR_TARGET_CLASS);
+      this.targetElement_.appendChild(this.toolbarClone_);
+      toggle(this.targetElement_, false);
+      fragment.appendChild(this.targetElement_);
+      return fragment;
+    }
   }
 
   /**
