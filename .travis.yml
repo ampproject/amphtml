@@ -47,6 +47,8 @@ matrix:
       before_script:
         - pip install --user protobuf
       addons:
+        sauce_connect:
+          username: "rsimha"
         jwt:
           secure: "bv9koHQ+Eu2h/X/fASIqIuvGWgbrzshcF3wquS3KifjMvlwtWRM4rjyiCl59JMH2ISAGuc5fZ1by1TWYoClK8LM6kHWqrpdaQAoS+206xl3BlpQlq5vWaZsXH8k0f4dupL0aplScUeBbEBskJVcfDWbH13Getf98Vf1pppcgjiTJuqv6WriQlWrhFo4YMPwzMW21WkoFxDnk5sbDWfQi4N1CI6T7SKpElqw49VBi/t0EcOpnYHefWZtk3pG7mGJ+eUEsQvjHq58ctaIzARLPeJ3GLfENW5EzBy7BPXFL72MyFR9/HlftURS1kxPSODrVMq5kNE+FIm0ZZZSMNGnSxpIC1RGFj2esiMFKTdLuSqwvMWw8Y1vzfk9/1nCzevVqXTlFzhJ9B0MhGqN/8lpLHTnSWKOYdnDT3gzqb/udKrVcg8hE4oLYIWkcP3gULbH5eeZYsiOf8jFX9TBEnUe0pC2sVephZPVnm0mS09kK5tZNUGf2qPZhMtaJPlCiD14BxZq1hLmFMUNRoIBQu65GDPQ9OhRsznqtr31RrQ2JMI3mB97eN9fAJFtIRSVZiJ/aJz28h73s1xPwYxPC4a5AqEvHiTouuzgmsHQRfHCt5ZcS1TLODjlehBcI6YbcWSFhV9J45x3WNcN7zZs2y89tmt0hcb7arJJi1xvJO0SOMw0="
 cache:
