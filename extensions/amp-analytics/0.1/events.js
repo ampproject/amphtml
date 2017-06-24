@@ -391,7 +391,7 @@ export class VisibilityTracker extends EventTracker {
     const visibilityManager = this.root.getVisibilityManager();
     // special polyfill for eventType: 'hidden'
     let createReadyReportPromiseFunc = null;
-    if (eventType == 'hidden-v3') {
+    if (eventType == 'hidden') {
       createReadyReportPromiseFunc = this.createReportReadyPromise_.bind(this);
     }
 

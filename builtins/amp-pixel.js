@@ -16,6 +16,7 @@
 
 import {BaseElement} from '../src/base-element';
 import {dev, user} from '../src/log';
+import {dict} from '../src/utils/object';
 import {registerElement} from '../src/custom-element';
 import {timerFor} from '../src/services';
 import {urlReplacementsForDoc} from '../src/services';
@@ -119,9 +120,9 @@ function createNoReferrerPixel(parentElement, src) {
     // if "referrerPolicy" is not supported, use iframe wrapper
     // to scrub the referrer.
     const iframe = createElementWithAttributes(
-        /** @type {!Document} */ (parentElement.ownerDocument), 'iframe', {
-          src: 'about:blank',
-        });
+        /** @type {!Document} */ (parentElement.ownerDocument), 'iframe', dict({
+          'src': 'about:blank',
+        }));
     parentElement.appendChild(iframe);
     createImagePixel(iframe.contentWindow, src);
     return iframe;
