@@ -124,7 +124,7 @@ This attribute is present when the sidebar is open.
 
 ##### data-close-button-aria-label**
 
-This element includes the value of the aria label attribute for the screenReaderCloseButton text.
+Optional string used as ARIA label for close button.
 
 ##### common attributes
 

@@ -72,14 +72,13 @@
 
        it('should replace text to screen reader \
        button in data-close-button-aria-label', () => {
-         return getAmpSidebar().then(obj => {
+         return getAmpSidebar({options.closeText:
+           'data-close-button-aria-label'}).then(obj => {
            const sidebarElement = obj.ampSidebar;
            const closeButton = sidebarElement.lastElementChild;
-           if (options.closeText) {
-             obj.ampSidebar.setAttribute('data-close-button-aria-label',
-                 options.closeText);
-           };
-           expect(closeButton.textContent).to.equal(options.closeText);
+
+           expect(closeButton.textContent)
+           .to.equal('data-close-button-aria-label');
          });
        });
      }
