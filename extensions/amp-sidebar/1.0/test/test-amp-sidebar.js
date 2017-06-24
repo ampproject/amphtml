@@ -82,7 +82,7 @@
                };
                expect(closeButton.textContent)
                .to.equal('data-close-button-aria-label');
-           });
+         });
        });
      }
 

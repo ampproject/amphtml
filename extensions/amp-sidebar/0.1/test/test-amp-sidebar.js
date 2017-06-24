@@ -75,10 +75,10 @@ describes.realWin('amp-sidebar 0.1 version', {
           'data-close-button-aria-label'}).then(obj => {
             const sidebarElement = obj.ampSidebar;
             const closeButton = sidebarElement.lastElementChild;
-        if (options.closeText) {
-                obj.ampSidebar.setAttribute('data-close-button-aria-label',
+            if (options.closeText) {
+          obj.ampSidebar.setAttribute('data-close-button-aria-label',
                     options.closeText);
-          };
+        };
             expect(closeButton.textContent)
                 .to.equal('data-close-button-aria-label');
           });
