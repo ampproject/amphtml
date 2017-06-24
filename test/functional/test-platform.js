@@ -78,14 +78,8 @@ describe('Platform', () => {
     testUserAgent('');
     testUserAgent(' ');
     testStandalone(null, null);
-    testStandalone(null, '');
-    testStandalone(null, ' ');
     testStandalone('', null);
-    testStandalone('', '');
-    testStandalone('', ' ');
     testStandalone(' ', null);
-    testStandalone(' ', '');
-    testStandalone(' ', ' ');
   });
 
   it('iPhone 6 Plus v8', () => {
