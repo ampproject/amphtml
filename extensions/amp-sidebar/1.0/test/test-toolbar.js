@@ -31,7 +31,7 @@
 
  adopt(window);
 
- describes.realWin('amp-sidebar 1.0 version', {
+ describes.realWin('amp-sidebar 1.0 version - toolbar', {
    win: { /* window spec */
      location: '...',
      historyOff: false,
@@ -41,7 +41,7 @@
      extensions: ['amp-sidebar:1.0'],
    },
  }, () => {
-   describe('amp-sidebar', () => {
+   describe('amp-sidebar - toolbar', () => {
      let sandbox;
      let timer;
 
