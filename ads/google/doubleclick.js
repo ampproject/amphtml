@@ -53,7 +53,7 @@ export function doubleclick(global, data) {
     };
   }
 
-  centerAd();
+  centerAd(global);
 
   const gptFilename = selectGptExperiment(data);
 
@@ -245,7 +245,10 @@ function getCorrelator(global) {
   return makeCorrelator(global.context.clientId, global.context.pageViewId);
 }
 
-function centerAd() {
+/**
+ * @param {!Window} global
+ */
+function centerAd(global) {
   setStyles(dev().assertElement(global.document.getElementById('c')), {
     top: '50%',
     left: '50%',
