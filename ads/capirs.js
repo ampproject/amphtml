@@ -29,7 +29,7 @@ export function capirs(global, data) {
       init: () => {
         const block = global.document.createElement('div');
         block.id = 'x-' + Math.round(Math.random() * 1e8).toString(36);
-        document.body.appendChild(block);
+        global.document.body.appendChild(block);
 
         global['Adf']['banner']['ssp'](block.id, data['params'], {
           'begun-auto-pad': data['begunAutoPad'],
@@ -40,14 +40,14 @@ export function capirs(global, data) {
     block: {
       draw: feed => {
         const banner = feed['banners']['graph'][0];
-        window.context.renderStart({
+        global.context.renderStart({
           width: banner['width'],
           height: banner['height'],
         });
         const reportId = 'capirs-' + banner['banner_id'];
-        window.context.reportRenderedEntityIdentifier(reportId);
+        global.context.reportRenderedEntityIdentifier(reportId);
       },
-      unexist: window.context.noContentAvailable,
+      unexist: global.context.noContentAvailable,
     },
   };
 

@@ -26,7 +26,7 @@ export function ezoic(global, data) {
   loadScript(global, 'https://g.ezoic.net/ezoic/ampad.js', () => {
     loadScript(global, 'https://www.googletagservices.com/tag/js/gpt.js', () => {
       global.googletag.cmd.push(() => {
-        new window.EzoicAmpAd(global,data).createAd();
+        new global.EzoicAmpAd(global,data).createAd();
       });
     });
   });

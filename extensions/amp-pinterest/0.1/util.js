@@ -34,7 +34,7 @@ function log(queryParams) {
   if (queryParams) {
     query = query + queryParams;
   }
-  query = query + '&via=' + encodeURIComponent(window.location.href);
+  query = query + '&via=' + encodeURIComponent(self.location.href);
   call.src = query;
 };
 

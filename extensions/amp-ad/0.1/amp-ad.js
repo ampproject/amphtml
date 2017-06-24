@@ -70,8 +70,8 @@ export class AmpAd extends AMP.BaseElement {
         return new AmpAdCustom(this.element);
       }
 
-      window.ampAdSlotIdCounter = window.ampAdSlotIdCounter || 0;
-      const slotId = window.ampAdSlotIdCounter++;
+      this.win.ampAdSlotIdCounter = this.win.ampAdSlotIdCounter || 0;
+      const slotId = this.win.ampAdSlotIdCounter++;
       this.element.setAttribute('data-amp-slot-index', slotId);
 
       // TODO(tdrl): Check amp-ad registry to see if they have this already.

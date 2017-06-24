@@ -23,14 +23,14 @@ import {getData} from '../src/event-helper';
  * @param {!JsonObject=} opt_object Data for the message.
  */
 export function nonSensitiveDataPostMessage(type, opt_object) {
-  if (window.parent == window) {
+  if (self.parent == self) {
     return;  // Nothing to do.
   }
   const object = opt_object || /** @type {JsonObject} */ ({});
   object['type'] = type;
-  object['sentinel'] = window.context.sentinel;
-  window.parent./*OK*/postMessage(object,
-      window.context.location.origin);
+  object['sentinel'] = self.context.sentinel;
+  self.parent./*OK*/postMessage(object,
+      self.context.location.origin);
 }
 
 /**

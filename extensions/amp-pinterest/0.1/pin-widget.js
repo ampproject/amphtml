@@ -52,9 +52,9 @@ export class PinWidget {
     const log = el.getAttribute('data-pin-log');
     if (href) {
       if (shouldPop) {
-        openWindowDialog(window, href, '_pinit', POP);
+        openWindowDialog(self, href, '_pinit', POP);
       } else {
-        openWindowDialog(window, `${href}?amp=1&guid=${Util.guid}`, '_blank');
+        openWindowDialog(self, `${href}?amp=1&guid=${Util.guid}`, '_blank');
       }
     }
     if (log) {

@@ -158,7 +158,7 @@ function instrumentIframeWindow(node, parent, win) {
  * @param {!Window} win
  */
 function installObserver(win) {
-  if (!window.MutationObserver) {
+  if (!win.MutationObserver) {
     return;
   }
   const observer = new MutationObserver(function(mutations) {
@@ -258,7 +258,7 @@ function minTime(time) {
 }
 
 export function installEmbedStateListener() {
-  listenParent(window, 'embed-state', function(data) {
+  listenParent(self, 'embed-state', function(data) {
     inViewport = data.inViewport;
   });
 };

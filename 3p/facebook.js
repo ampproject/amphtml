@@ -29,7 +29,7 @@ import {dashToUnderline} from '../src/string';
  * @param {function(!Object)} cb
  */
 function getFacebookSdk(global, cb) {
-  loadScript(global, 'https://connect.facebook.net/' + dashToUnderline(window.navigator.language) + '/sdk.js', () => {
+  loadScript(global, 'https://connect.facebook.net/' + dashToUnderline(global.navigator.language) + '/sdk.js', () => {
     cb(global.FB);
   });
 }

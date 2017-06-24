@@ -29,7 +29,7 @@ export function adverticum(global, data) {
   d.id = zoneid;
   d.classList.add('goAdverticum');
 
-  document.getElementById('c').appendChild(d);
+  global.document.getElementById('c').appendChild(d);
   if (data['costumetargetstring']) {
     const s = global.document.createTextNode(data['costumetargetstring']);
     const v = global.document.createElement('var');
@@ -37,7 +37,7 @@ export function adverticum(global, data) {
     v.setAttribute('class', 'customtarget');
     setStyle(v, 'display', 'none');
     v.appendChild(s);
-    document.getElementById(zoneid).appendChild(v);
+    global.document.getElementById(zoneid).appendChild(v);
   }
   writeScript(global, '//ad.adverticum.net/g3.js');
 

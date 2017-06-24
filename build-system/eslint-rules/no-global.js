@@ -20,6 +20,12 @@ var astUtils = require('eslint/lib/ast-utils');
 var GLOBALS = Object.create(null);
 GLOBALS.window = 'Use `self` instead.';
 GLOBALS.document = 'Reference it as `self.document` or similar instead.';
+GLOBALS.global = "This ain't node."
+
+var FIXES = Object.create(null);
+FIXES.window = 'self';
+FIXES.document = 'self.document';
+FIXES.global = 'self';
 
 module.exports = function(context) {
   return {
@@ -29,6 +35,9 @@ module.exports = function(context) {
         return;
       }
       if (!(/Expression/.test(node.parent.type))) {
+        return;
+      }
+      if (/test-/.test(context.getFilename())) {
         return;
       }
 
@@ -46,7 +55,15 @@ module.exports = function(context) {
       if (GLOBALS[name]) {
         message += ' ' + GLOBALS[name];
       }
-      context.report(node, message);
+      context.report({
+        node: node,
+        message: message,
+        fix: function(fixer) {
+          if (FIXES[name]) {
+            return fixer.replaceText(node, FIXES[name]);
+          }
+        }
+      });
     }
   };
 };

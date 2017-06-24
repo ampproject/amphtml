@@ -47,7 +47,7 @@ class AmpFacebookLike extends AMP.BaseElement {
     this.preconnect.url('https://facebook.com', opt_onLayout);
     // Hosts the facebook SDK.
     this.preconnect.preload(
-        'https://connect.facebook.net/' + dashToUnderline(window.navigator.language) + '/sdk.js', 'script');
+        'https://connect.facebook.net/' + dashToUnderline(this.win.navigator.language) + '/sdk.js', 'script');
     preloadBootstrap(this.win, this.preconnect);
   }
 

@@ -24,6 +24,6 @@ export function mads(global, data) {
   validateData(data, ['adrequest'], []);
 
   writeScript(global, 'https://eu2.madsone.com/js/tags.js', function() {
-    window.MADSAdrequest.adrequest(JSON.parse(data.adrequest));
+    global.MADSAdrequest.adrequest(JSON.parse(data.adrequest));
   });
 }

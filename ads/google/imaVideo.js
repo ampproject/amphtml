@@ -320,7 +320,7 @@ export function imaVideo(global, data) {
   videoPlayer.setAttribute('poster', data.poster);
   videoPlayer.setAttribute('playsinline', true);
   if (data.src) {
-    const sourceElement = document.createElement('source');
+    const sourceElement = global.document.createElement('source');
     sourceElement.setAttribute('src', data.src);
     videoPlayer.appendChild(sourceElement);
   }
@@ -338,7 +338,7 @@ export function imaVideo(global, data) {
   wrapperDiv.appendChild(bigPlayDiv);
   global.document.getElementById('c').appendChild(wrapperDiv);
 
-  window.addEventListener('message', onMessage.bind(null, global));
+  global.addEventListener('message', onMessage.bind(null, global));
 
   /**
    * Set-up code that can't run until the IMA lib loads.
@@ -408,7 +408,7 @@ export function imaVideo(global, data) {
 }
 
 function htmlToElement(html) {
-  const template = document.createElement('template');
+  const template = self.document.createElement('template');
   template./*OK*/innerHTML = html;
   return template.content.firstChild;
 }
@@ -440,10 +440,10 @@ export function playAds(global) {
     try {
       adsManager.init(
           videoWidth, videoHeight, global.google.ima.ViewMode.NORMAL);
-      window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
+      global.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
       adsManager.start();
     } catch (adError) {
-      window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
+      global.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
       playVideo();
     }
   } else if (!adRequestFailed) {
@@ -451,7 +451,7 @@ export function playAds(global) {
     setTimeout(playAds.bind(null, global), 250);
   } else {
     // Ad request failed.
-    window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
+    global.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
     playVideo();
   }
 }
@@ -490,7 +490,7 @@ export function onAdsManagerLoaded(global, adsManagerLoadedEvent) {
   if (muteAdsManagerOnLoaded) {
     adsManager.setVolume(0);
   }
-  window.parent./*OK*/postMessage({event: VideoEvents.LOAD}, '*');
+  global.parent./*OK*/postMessage({event: VideoEvents.LOAD}, '*');
 }
 
 /**
@@ -615,16 +615,16 @@ function onProgressClick(event) {
   clearInterval(hideControlsTimeout);
   onProgressMove(event);
   clearInterval(uiTicker);
-  document.addEventListener(mouseMoveEvent, onProgressMove);
-  document.addEventListener(mouseUpEvent, onProgressClickEnd);
+  self.document.addEventListener(mouseMoveEvent, onProgressMove);
+  self.document.addEventListener(mouseUpEvent, onProgressClickEnd);
 }
 
 /**
  * Detects the end of interaction on the progress bar.
  */
 function onProgressClickEnd() {
-  document.removeEventListener(mouseMoveEvent, onProgressMove);
-  document.removeEventListener(mouseUpEvent, onProgressClickEnd);
+  self.document.removeEventListener(mouseMoveEvent, onProgressMove);
+  self.document.removeEventListener(mouseUpEvent, onProgressClickEnd);
   uiTicker = setInterval(uiTickerClick, 500);
   videoPlayer.currentTime = videoPlayer.duration * seekPercent;
   // Reset hide controls timeout.
@@ -689,7 +689,7 @@ export function playVideo() {
   showControls();
   setStyle(playPauseDiv, 'line-height', '1.4em');
   playPauseNode.textContent = pauseChars;
-  window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
+  self.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
   videoPlayer.play();
 }
 
@@ -708,7 +708,7 @@ export function pauseVideo(event) {
   }
   playPauseNode.textContent = playChar;
   setStyle(playPauseDiv, 'line-height', '');;
-  window.parent./*OK*/postMessage({event: VideoEvents.PAUSE}, '*');
+  self.parent./*OK*/postMessage({event: VideoEvents.PAUSE}, '*');
   if (event && event.type == 'webkitendfullscreen') {
     // Video was paused because we exited fullscreen.
     videoPlayer.removeEventListener('webkitendfullscreen', pauseVideo);
@@ -727,7 +727,7 @@ function onFullscreenClick(global) {
         global.document.webkitCancelFullScreen ||
         global.document.mozCancelFullScreen;
     if (cancelFullscreen) {
-      cancelFullscreen.call(document);
+      cancelFullscreen.call(global.document);
     }
   } else {
     // Try to enter fullscreen mode in the browser
@@ -739,8 +739,8 @@ function onFullscreenClick(global) {
         global.document.documentElement.webkitRequestFullScreen ||
         global.document.documentElement.mozRequestFullScreen;
     if (requestFullscreen) {
-      fullscreenWidth = window.screen.width;
-      fullscreenHeight = window.screen.height;
+      fullscreenWidth = global.screen.width;
+      fullscreenHeight = global.screen.height;
       requestFullscreen.call(global.document.documentElement);
     } else {
       // Figure out how to make iPhone fullscren work here - I've got nothing.
@@ -824,7 +824,7 @@ function onMessage(global, event) {
       case 'playVideo':
         if (adsActive) {
           adsManager.resume();
-          window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
+          global.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
         } else if (playbackStarted) {
           playVideo();
         } else {
@@ -835,7 +835,7 @@ function onMessage(global, event) {
       case 'pauseVideo':
         if (adsActive) {
           adsManager.pause();
-          window.parent./*OK*/postMessage({event: VideoEvents.PAUSE}, '*');
+          global.parent./*OK*/postMessage({event: VideoEvents.PAUSE}, '*');
         } else if (playbackStarted) {
           pauseVideo(null);
         }
@@ -848,7 +848,7 @@ function onMessage(global, event) {
         } else {
           muteAdsManagerOnLoaded = true;
         }
-        window.parent./*OK*/postMessage({event: VideoEvents.MUTED}, '*');
+        global.parent./*OK*/postMessage({event: VideoEvents.MUTED}, '*');
         break;
       case 'unMute':
         videoPlayer.volume = 1;
@@ -858,7 +858,7 @@ function onMessage(global, event) {
         } else {
           muteAdsManagerOnLoaded = false;
         }
-        window.parent./*OK*/postMessage({event: VideoEvents.UNMUTED}, '*');
+        global.parent./*OK*/postMessage({event: VideoEvents.UNMUTED}, '*');
         break;
       case 'resize':
         if (msg.args && msg.args.width && msg.args.height) {

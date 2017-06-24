@@ -40,7 +40,7 @@ export function yieldbot(global, data) {
 
         global.yieldbot.psn(data.psn);
         global.yieldbot.enableAsync();
-        if (window.context.isMaster) {
+        if (global.context.isMaster) {
           global.yieldbot.defineSlot(data.ybSlot, {sizes: dimensions});
           global.yieldbot.go();
         } else {

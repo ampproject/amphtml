@@ -23,4 +23,4 @@ export function installCryptoPolyfill(win) {
   });
 }
 
-installCryptoPolyfill(window);
+installCryptoPolyfill(self);

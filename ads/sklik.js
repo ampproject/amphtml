@@ -26,9 +26,9 @@ export function sklik(global, data) {
   loadScript(global, 'https://c.imedia.cz/js/amp.js', () => {
     const parentId = 'sklik_parent';
 
-    const parentElement = document.createElement('div');
+    const parentElement = global.document.createElement('div');
     parentElement.id = parentId;
-    window.document.body.appendChild(parentElement);
+    global.document.body.appendChild(parentElement);
 
     data.elm = parentId;
     data.url = global.context.canonicalUrl;

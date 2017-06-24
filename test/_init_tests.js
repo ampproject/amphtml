@@ -40,7 +40,7 @@ import stringify from 'json-stable-stringify';
 
 
 // All exposed describes.
-global.describes = describes;
+self.describes = describes;
 
 // Increase the before/after each timeout since certain times they have timedout
 // during the normal 2000 allowance.
@@ -48,7 +48,7 @@ const BEFORE_AFTER_TIMEOUT = 5000;
 
 // Needs to be called before the custom elements are first made.
 beforeTest();
-adopt(window);
+adopt(self);
 
 // Override AMP.extension to buffer extension installers.
 /**
@@ -57,13 +57,13 @@ adopt(window);
  * @param {function(!Object)} installer
  * @const
  */
-global.AMP.extension = function(name, version, installer) {
+self.AMP.extension = function(name, version, installer) {
   describes.bufferExtension(`${name}:${version}`, installer);
 };
 
 
 // Make amp section in karma config readable by tests.
-window.ampTestRuntimeConfig = parent.karma ? parent.karma.config.amp : {};
+self.ampTestRuntimeConfig = parent.karma ? parent.karma.config.amp : {};
 
 /**
  * Helper class to skip or retry tests under specific environment.
@@ -100,7 +100,7 @@ class TestConfig {
      */
     this.configTasks = [];
 
-    this.platform = platformFor(window);
+    this.platform = platformFor(self);
   }
 
   skipChrome() {
@@ -166,11 +166,11 @@ class TestConfig {
   }
 
   skipSauceLabs() {
-    return this.skip(() => window.ampTestRuntimeConfig.saucelabs);
+    return this.skip(() => self.ampTestRuntimeConfig.saucelabs);
   }
 
   retryOnSaucelabs() {
-    if (!window.ampTestRuntimeConfig.saucelabs) {
+    if (!self.ampTestRuntimeConfig.saucelabs) {
       return this;
     }
     this.configTasks.push(mocha => {
@@ -243,15 +243,15 @@ beforeEach(function() {
 
 function beforeTest() {
   activateChunkingForTesting();
-  window.AMP_MODE = undefined;
-  window.context = undefined;
-  window.AMP_CONFIG = {
+  self.AMP_MODE = undefined;
+  self.context = undefined;
+  self.AMP_CONFIG = {
     canary: 'testSentinel',
   };
-  window.AMP_TEST = true;
-  installDocService(window, /* isSingleDoc */ true);
-  const ampdoc = ampdocServiceFor(window).getAmpDoc();
-  installRuntimeServices(window);
+  self.AMP_TEST = true;
+  installDocService(self, /* isSingleDoc */ true);
+  const ampdoc = ampdocServiceFor(self).getAmpDoc();
+  installRuntimeServices(self);
   installAmpdocServices(ampdoc);
   resourcesForDoc(ampdoc).ampInitComplete();
 }
@@ -261,10 +261,10 @@ function beforeTest() {
 afterEach(function() {
   this.timeout(BEFORE_AFTER_TIMEOUT);
   const cleanupTagNames = ['link', 'meta'];
-  if (!platformFor(window).isSafari()) {
+  if (!platformFor(self).isSafari()) {
     cleanupTagNames.push('iframe');
   }
-  const cleanup = document.querySelectorAll(cleanupTagNames.join(','));
+  const cleanup = self.document.querySelectorAll(cleanupTagNames.join(','));
   for (let i = 0; i < cleanup.length; i++) {
     try {
       const element = cleanup[i];
@@ -274,17 +274,17 @@ afterEach(function() {
       console./*OK*/log(e);
     }
   }
-  window.localStorage.clear();
-  window.ENABLE_LOG = false;
-  window.AMP_DEV_MODE = false;
-  window.context = undefined;
-  window.AMP_MODE = undefined;
+  self.localStorage.clear();
+  self.ENABLE_LOG = false;
+  self.AMP_DEV_MODE = false;
+  self.context = undefined;
+  self.AMP_MODE = undefined;
 
-  const forgotGlobal = !!global.sandbox;
+  const forgotGlobal = !!self.sandbox;
   if (forgotGlobal) {
     // The error will be thrown later to give possibly other sandboxes a
     // chance to restore themselves.
-    delete global.sandbox;
+    delete self.sandbox;
   }
   if (sandboxes.length > 0) {
     sandboxes.splice(0, sandboxes.length).forEach(sb => sb.restore());
@@ -293,13 +293,13 @@ afterEach(function() {
   if (forgotGlobal) {
     throw new Error('You forgot to clear global sandbox!');
   }
-  if (!/native/.test(window.setTimeout)) {
+  if (!/native/.test(self.setTimeout)) {
     throw new Error('You likely forgot to restore sinon timers ' +
         '(installed via sandbox.useFakeTimers).');
   }
   setDefaultBootstrapBaseUrlForTesting(null);
   resetAccumulatedErrorMessagesForTesting();
-  resetExperimentTogglesForTesting(window);
+  resetExperimentTogglesForTesting(self);
   setReportError(reportError);
 });
 
@@ -329,7 +329,7 @@ chai.Assertion.addMethod('class', function(className) {
 
 chai.Assertion.addProperty('visible', function() {
   const obj = this._obj;
-  const computedStyle = window.getComputedStyle(obj);
+  const computedStyle = self.getComputedStyle(obj);
   const visibility = computedStyle.getPropertyValue('visibility');
   const opacity = computedStyle.getPropertyValue('opacity');
   const isOpaque = parseInt(opacity, 10) > 0;
@@ -348,7 +348,7 @@ chai.Assertion.addProperty('visible', function() {
 
 chai.Assertion.addProperty('hidden', function() {
   const obj = this._obj;
-  const computedStyle = window.getComputedStyle(obj);
+  const computedStyle = self.getComputedStyle(obj);
   const visibility = computedStyle.getPropertyValue('visibility');
   const opacity = computedStyle.getPropertyValue('opacity');
   const tagName = obj.tagName.toLowerCase();
@@ -365,7 +365,7 @@ chai.Assertion.addProperty('hidden', function() {
 
 chai.Assertion.addMethod('display', function(display) {
   const obj = this._obj;
-  const value = window.getComputedStyle(obj).getPropertyValue('display');
+  const value = self.getComputedStyle(obj).getPropertyValue('display');
   const tagName = obj.tagName.toLowerCase();
   this.assert(
       value === display,

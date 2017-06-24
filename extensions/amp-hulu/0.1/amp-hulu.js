@@ -42,7 +42,7 @@ class AmpHulu extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const iframe = document.createElement('iframe');
+    const iframe = this.win.document.createElement('iframe');
     const src = this.getVideoIframeSrc_();
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');

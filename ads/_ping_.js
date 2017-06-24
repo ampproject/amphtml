@@ -39,7 +39,7 @@ export function _ping_(global, data) {
         global.context.container == data.ad_container, 'wrong container');
   }
   if (data.valid && data.valid == 'true') {
-    const img = document.createElement('img');
+    const img = global.document.createElement('img');
     if (data.url) {
       img.setAttribute('src', data.url);
       img.setAttribute('width', data.width);
@@ -54,7 +54,7 @@ export function _ping_(global, data) {
       img.setAttribute('width', data.adWidth);
       width = Number(data.adWidth);
     }
-    document.body.appendChild(img);
+    global.document.body.appendChild(img);
     if (width || height) {
       global.context.renderStart({width, height});
     } else {

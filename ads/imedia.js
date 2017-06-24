@@ -26,7 +26,7 @@ export function imedia(global, data) {
   const mW = context.isMaster ? global : context.master;
 
   // create parent element
-  const parentElement = document.createElement('div');
+  const parentElement = global.document.createElement('div');
   parentElement.id = data.id;
   global.document.getElementById('c').appendChild(parentElement);
 

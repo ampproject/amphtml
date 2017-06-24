@@ -29,6 +29,6 @@ import {onDocumentReady} from '../../../src/document-ready';
 initLogConstructor();
 setReportError(reportError);
 
-onDocumentReady(document, () => {
-  new LoginDoneDialog(window).start();
+onDocumentReady(self.document, () => {
+  new LoginDoneDialog(self).start();
 });

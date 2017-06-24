@@ -162,7 +162,7 @@ export class AmpIframe extends AMP.BaseElement {
      * @type {?string}
      **/
     this.iframeSrc = this.assertSource(
-        iframeSrc, window.location.href, this.sandbox_);
+        iframeSrc, this.win.location.href, this.sandbox_);
 
     /**
      * The element which will contain the iframe. This may be the amp-iframe
@@ -423,7 +423,7 @@ export class AmpIframe extends AMP.BaseElement {
       this.iframeSrc = this.transformSrc_(src);
       if (this.iframe_) {
         this.iframe_.src = this.assertSource(
-            this.iframeSrc, window.location.href, this.sandbox_);
+            this.iframeSrc, this.win.location.href, this.sandbox_);
       }
     }
   }

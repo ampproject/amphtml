@@ -47,10 +47,10 @@ export class ViewerForTesting {
     this.containerEl = containerEl;
 
     /** @type {Element} */
-    this.iframe = document.createElement('iframe');
+    this.iframe = self.document.createElement('iframe');
     this.iframe.setAttribute('id', 'AMP_DOC_' + id);
 
-    const isIos_ = /iPhone|iPad|iPod/i.test(window.navigator.userAgent);
+    const isIos_ = /iPhone|iPad|iPod/i.test(self.navigator.userAgent);
     if (this.viewportType_ == 'natural' && !isIos_) {
       this.iframe.setAttribute('scrolling', 'yes');
     } else {
@@ -82,15 +82,15 @@ export class ViewerForTesting {
       height: this.containerEl./*OK*/offsetHeight,
       visibilityState: this.visibilityState_,
       prerenderSize: 1,
-      origin: parseUrl(window.location.href).origin,
+      origin: parseUrl(self.location.href).origin,
       csi: 1,
       cap: 'foo,a2a',
     };
 
     let ampdocUrl = this.ampdocUrl + '#' + serializeQueryString(params);
 
-    if (window.location.hash && window.location.hash.length > 1) {
-      ampdocUrl += '&' + window.location.hash.substring(1);
+    if (self.location.hash && self.location.hash.length > 1) {
+      ampdocUrl += '&' + self.location.hash.substring(1);
     }
     const parsedUrl = parseUrl(ampdocUrl);
     const url = parsedUrl.href;
@@ -100,7 +100,7 @@ export class ViewerForTesting {
 
     // Listening for messages, hoping that I get a request for a handshake and
     // a notification that a document was loaded.
-    window.addEventListener('message', e => {
+    self.addEventListener('message', e => {
       this.log('message received', e, e.data);
       const target = this.iframe.contentWindow;
       const targetOrigin = this.frameOrigin_;

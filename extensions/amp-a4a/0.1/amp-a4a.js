@@ -311,7 +311,7 @@ export class AmpA4A extends AMP.BaseElement {
         });
 
     /** @const {string} */
-    this.sentinel = generateSentinel(window);
+    this.sentinel = generateSentinel(this.win);
 
     /**
      * Used to indicate whether this slot should be collapsed or not. Marked

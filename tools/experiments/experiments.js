@@ -304,7 +304,7 @@ if (getMode().localDev) {
  * Builds the expriments tbale.
  */
 function build() {
-  const table = document.getElementById('experiments-table');
+  const table = self.document.getElementById('experiments-table');
   EXPERIMENTS.forEach(function(experiment) {
     table.appendChild(buildExperimentRow(experiment));
   });
@@ -317,35 +317,35 @@ function build() {
  */
 function buildExperimentRow(experiment) {
 
-  const tr = document.createElement('tr');
+  const tr = self.document.createElement('tr');
   tr.id = 'exp-tr-' + experiment.id;
 
-  const tdId = document.createElement('td');
+  const tdId = self.document.createElement('td');
   tdId.appendChild(buildLinkMaybe(experiment.id, experiment.spec));
   tr.appendChild(tdId);
 
-  const tdName = document.createElement('td');
+  const tdName = self.document.createElement('td');
   tdName.appendChild(buildLinkMaybe(experiment.name, experiment.spec));
   tr.appendChild(tdName);
 
-  const tdOn = document.createElement('td');
+  const tdOn = self.document.createElement('td');
   tdOn.classList.add('button-cell');
   tr.appendChild(tdOn);
 
-  const button = document.createElement('button');
+  const button = self.document.createElement('button');
   tdOn.appendChild(button);
 
-  const buttonOn = document.createElement('div');
+  const buttonOn = self.document.createElement('div');
   buttonOn.classList.add('on');
   buttonOn.textContent = 'On';
   button.appendChild(buttonOn);
 
-  const buttonDefault = document.createElement('div');
+  const buttonDefault = self.document.createElement('div');
   buttonDefault.classList.add('default');
   buttonDefault.textContent = 'Default on';
   button.appendChild(buttonDefault);
 
-  const buttonOff = document.createElement('div');
+  const buttonOff = self.document.createElement('div');
   buttonOff.classList.add('off');
   buttonOff.textContent = 'Off';
   button.appendChild(buttonOff);
@@ -366,11 +366,11 @@ function buildExperimentRow(experiment) {
 function buildLinkMaybe(text, link) {
   let element;
   if (link) {
-    element = document.createElement('a');
+    element = self.document.createElement('a');
     element.setAttribute('href', link);
     element.setAttribute('target', '_blank');
   } else {
-    element = document.createElement('span');
+    element = self.document.createElement('span');
   }
   element.textContent = text;
   return element;
@@ -392,7 +392,7 @@ function update() {
  * @param {!ExperimentDef} experiment
  */
 function updateExperimentRow(experiment) {
-  const tr = document.getElementById('exp-tr-' + experiment.id);
+  const tr = self.document.getElementById('exp-tr-' + experiment.id);
   if (!tr) {
     return;
   }
@@ -411,9 +411,9 @@ function updateExperimentRow(experiment) {
  */
 function isExperimentOn_(id) {
   if (id == CANARY_EXPERIMENT_ID) {
-    return getCookie(window, 'AMP_CANARY') == '1';
+    return getCookie(self, 'AMP_CANARY') == '1';
   }
-  return isExperimentOn(window, id);
+  return isExperimentOn(self, id);
 }
 
 
@@ -434,7 +434,7 @@ function toggleExperiment_(id, name, opt_on) {
     if (id == CANARY_EXPERIMENT_ID) {
       const validUntil = Date.now() +
           COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
-      setCookie(window, 'AMP_CANARY',
+      setCookie(self, 'AMP_CANARY',
           (on ? '1' : '0'), (on ? validUntil : 0), {
             // Set explicit domain, so the cookie gets send to sub domains.
             domain: location.hostname,
@@ -443,7 +443,7 @@ function toggleExperiment_(id, name, opt_on) {
       // Reflect default experiment state.
       self.location.reload();
     } else {
-      toggleExperiment(window, id, on);
+      toggleExperiment(self, id, on);
     }
     update();
   });
@@ -456,12 +456,14 @@ function toggleExperiment_(id, name, opt_on) {
  * @param {function()} callback
  */
 function showConfirmation_(message, callback) {
-  const container = dev().assert(document.getElementById('popup-container'));
-  const messageElement = dev().assert(document.getElementById('popup-message'));
+  const container = dev().assert(
+      self.document.getElementById('popup-container'));
+  const messageElement = dev().assert(
+      self.document.getElementById('popup-message'));
   const confirmButton = dev().assert(
-      document.getElementById('popup-button-ok'));
+      self.document.getElementById('popup-button-ok'));
   const cancelButton = dev().assert(
-      document.getElementById('popup-button-cancel'));
+      self.document.getElementById('popup-button-cancel'));
   const unlistenSet = [];
   const closePopup = affirmative => {
     container.classList.remove('show');
@@ -512,7 +514,7 @@ function getAmpConfig() {
 
 // Start up.
 getAmpConfig().then(() => {
-  onDocumentReady(document, () => {
+  onDocumentReady(self.document, () => {
     build();
     update();
   });

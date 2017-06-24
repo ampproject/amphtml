@@ -30,7 +30,7 @@ export function plista(global, data) {
   div.setAttribute('data-display', 'plista_widget_' + data.widgetname);
   // container with id "c" is provided by amphtml
   global.document.getElementById('c').appendChild(div);
-  window.PLISTA = {
+  global.PLISTA = {
     publickey: data.publickey,
     widgets: [{
       name: data.widgetname,

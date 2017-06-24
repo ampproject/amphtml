@@ -29,14 +29,14 @@ export function contentad(global, data) {
   global.url = data.url;
 
   /* Create div for ad to target */
-  const cadDiv = window.document.createElement('div');
+  const cadDiv = global.document.createElement('div');
   cadDiv.id = 'contentad' + global.wid;
-  window.document.body.appendChild(cadDiv);
+  global.document.body.appendChild(cadDiv);
 
   /* Pass Source URL */
-  let sourceUrl = window.context.sourceUrl;
+  let sourceUrl = global.context.sourceUrl;
   if (data.url) {
-    const domain = data.url || window.atob(data.d);
+    const domain = data.url || atob(data.d);
     sourceUrl = sourceUrl.replace(parseUrl(sourceUrl).host, domain);
   }
 
