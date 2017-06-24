@@ -71,7 +71,7 @@ describes.realWin('amp-sidebar 0.1 version', {
 
       it('should replace text to screen reader \
       button in data-close-button-aria-label', () => {
-        return getAmpSidebar({options.closeText:
+        return getAmpSidebar({'closeText':
           'data-close-button-aria-label'}).then(obj => {
           const sidebarElement = obj.ampSidebar;
           const closeButton = sidebarElement.lastElementChild;
