@@ -62,6 +62,10 @@
          if (options.open) {
            ampSidebar.setAttribute('open', '');
          }
+         if (options.closeText) {
+           obj.ampSidebar.setAttribute('data-close-button-aria-label',
+               options.closeText);
+         };
          ampSidebar.setAttribute('id', 'sidebar1');
          ampSidebar.setAttribute('layout', 'nodisplay');
          return iframe.addElement(ampSidebar).then(() => {
@@ -76,10 +80,6 @@
            'data-close-button-aria-label'}).then(obj => {
              const sidebarElement = obj.ampSidebar;
              const closeButton = sidebarElement.lastElementChild;
-             if (options.closeText) {
-               obj.ampSidebar.setAttribute('data-close-button-aria-label',
-                   options.closeText);
-             };
              expect(closeButton.textContent)
                  .to.equal('data-close-button-aria-label');
            });
