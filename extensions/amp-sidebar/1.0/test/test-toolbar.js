@@ -17,10 +17,9 @@
 
  import {adopt} from '../../../../src/runtime';
  import {createIframePromise} from '../../../../testing/iframe';
- import {timerFor} from '../../../../src/services';
- import {toggleExperiment} from '../../../../src/experiments';
+ import {timerFor, vsyncFor} from '../../../../src/services';
  import * as sinon from 'sinon';
- import '../amp-sidebar';
+ import {Toolbar} from '../toolbar';
 
  /** @const */
  const DEFAULT_TOOLBAR_MEDIA = '(min-width: 768px)';
@@ -31,211 +30,184 @@
 
  adopt(window);
 
- describes.realWin('amp-sidebar 1.0 version - toolbar', {
-   win: { /* window spec */
-     location: '...',
-     historyOff: false,
-   },
-   amp: { /* amp spec */
-     runtimeOn: false,
-     extensions: ['amp-sidebar:1.0'],
-   },
- }, () => {
-   describe('amp-sidebar - toolbar', () => {
-     let sandbox;
-     let timer;
+ describe('amp-sidebar - toolbar', () => {
+   let sandbox;
+   let timer;
+   let vsync;
 
-     function getAmpSidebar(options) {
-       options = options || {};
-       return createIframePromise().then(iframe => {
-         const ampSidebar = iframe.doc.createElement('amp-sidebar');
-         if (options.toolbars) {
-           // Stub our sidebar operations, doing this here as it will
-           // Ease testing our media queries
-           const impl = ampSidebar.implementation_;
-           sandbox.stub(impl.vsync_,
-               'mutate', callback => {
-                 callback();
-               });
-           sandbox.stub(impl.vsync_,
-               'mutatePromise', callback => {
-                 callback();
-                 return Promise.resolve();
-               });
-           // Create our individual toolbars
-           options.toolbars.forEach(toolbar => {
-             const navToolbar = iframe.doc.createElement('nav');
-             if (toolbar.media) {
-               navToolbar.setAttribute('toolbar', toolbar.media);
-             } else {
-               navToolbar.setAttribute('toolbar', DEFAULT_TOOLBAR_MEDIA);
-             }
-             if (toolbar.toolbarOnlyOnNav) {
-               navToolbar.setAttribute('toolbar-only', 'true');
-             }
-             const toolbarList = iframe.doc.createElement('ul');
-             for (let i = 0; i < 3; i++) {
-               const li = iframe.doc.createElement('li');
-               li.innerHTML = 'Toolbar item ' + i;
-               toolbarList.appendChild(li);
-             }
-             navToolbar.appendChild(toolbarList);
-             ampSidebar.appendChild(navToolbar);
+   function getToolbars(options) {
+     options = options || {};
+     return createIframePromise().then(iframe => {
+       const toolbarContainerElement = iframe.doc.createElement('div');
+       const toolbars = [];
+       iframe.win.document.body.appendChild(toolbarContainerElement);
+       vsync = vsyncFor(iframe.win);
+       timer = timerFor(iframe.win);
+       // Stub our toolbar operations, doing this here as it will
+       // Ease testing our media queries
+       sandbox.stub(vsync,
+           'mutate', callback => {
+             callback();
            });
+       sandbox.stub(vsync,
+           'mutatePromise', callback => {
+             callback();
+             return Promise.resolve();
+           });
+       sandbox.stub(timer, 'delay', function(callback) {
+         callback();
+       });
+
+       // Create our individual toolbars
+       options.forEach(toolbarObj => {
+         const navToolbar = iframe.doc.createElement('nav');
+         if (toolbarObj.media) {
+           navToolbar.setAttribute('toolbar', toolbar.media);
+         } else {
+           navToolbar.setAttribute('toolbar', DEFAULT_TOOLBAR_MEDIA);
          }
-         ampSidebar.setAttribute('id', 'sidebar1');
-         ampSidebar.setAttribute('layout', 'nodisplay');
-         return iframe.addElement(ampSidebar).then(() => {
-           timer = timerFor(iframe.win);
-           if (options.toolbars) {
-             sandbox.stub(timer, 'delay', function(callback) {
-               callback();
-             });
-           }
-           return {iframe, ampSidebar};
-         });
+         if (toolbarObj.toolbarOnlyOnNav) {
+           navToolbar.setAttribute('toolbar-only', '');
+         }
+         const toolbarList = iframe.doc.createElement('ul');
+         for (let i = 0; i < 3; i++) {
+           const li = iframe.doc.createElement('li');
+           li.innerHTML = 'Toolbar item ' + i;
+           toolbarList.appendChild(li);
+         }
+         navToolbar.appendChild(toolbarList);
+         toolbarContainerElement.appendChild(navToolbar);
+         const toolbar = new Toolbar(navToolbar, iframe.win, vsync);
+         toolbarContainerElement.appendChild(toolbar.build());
+         toolbars.push(toolbar);
        });
-     }
 
-     function resizeIframeToWidth(iframeObject, width, callback) {
-       iframeObject.iframe.setAttribute('width', width);
-       // Force the browser to re-draw
-       iframeObject.win.innerWidth;
-       callback();
-     }
-
-     beforeEach(() => {
-       sandbox = sinon.sandbox.create();
-       toggleExperiment(window, 'amp-sidebar 1.0', true);
+       return {iframe, toolbarContainerElement, toolbars};
      });
+   }
 
-     afterEach(() => {
-       sandbox.restore();
-     });
+   function resizeIframeToWidth(iframeObject, width, callback) {
+     iframeObject.iframe.setAttribute('width', width);
+     // Force the browser to re-draw
+     iframeObject.win.innerWidth;
+     callback();
+   }
 
-     it('toolbar header should be hidden for a \
-     invalid window size for DEFAULT_TOOLBAR_MEDIA', () => {
-       return getAmpSidebar({
-         toolbars: [true],
-       }).then(obj => {
-         const sidebarElement = obj.ampSidebar;
-         const toolbarElements = Array.prototype
-                .slice.call(sidebarElement.ownerDocument
-                .getElementsByClassName(TOOLBAR_CLASS), 0);
-         resizeIframeToWidth(obj.iframe, '1px', () => {
-           expect(toolbarElements.length).to.be.above(0);
-           sidebarElement.implementation_.toolbars_.forEach(toolbar => {
-             toolbar.onLayoutChange();
-           });
-           expect(toolbarElements[0].parentElement.style.display)
-               .to.be.equal('none');
+   beforeEach(() => {
+     sandbox = sinon.sandbox.create();
+   });
+
+   afterEach(() => {
+     sandbox.restore();
+   });
+
+   it('toolbar header should be hidden for a \
+   invalid window size for DEFAULT_TOOLBAR_MEDIA', () => {
+     return getToolbars([{}]).then(obj => {
+       const toolbars = obj.toolbars;
+       const toolbarElements = Array.prototype
+              .slice.call(obj.toolbarContainerElement.ownerDocument
+              .getElementsByClassName(TOOLBAR_CLASS), 0);
+       resizeIframeToWidth(obj.iframe, '1px', () => {
+         expect(toolbarElements.length).to.be.above(0);
+         toolbars.forEach(toolbar => {
+           toolbar.onLayoutChange();
          });
-       });
-     });
-
-     it('toolbar header should be shown for a \
-     valid window size for DEFAULT_TOOLBAR_MEDIA', () => {
-       return getAmpSidebar({
-         toolbars: [true],
-       }).then(obj => {
-         const sidebarElement = obj.ampSidebar;
-         const toolbarElements = Array.prototype
-                .slice.call(sidebarElement.ownerDocument
-                .getElementsByClassName(TOOLBAR_CLASS), 0);
-         resizeIframeToWidth(obj.iframe, '4000px', () => {
-           expect(toolbarElements.length).to.be.above(0);
-           sidebarElement.implementation_.toolbars_.forEach(toolbar => {
-             toolbar.onLayoutChange();
-           });
-           expect(toolbarElements[0].parentElement.style.display)
-               .to.be.equal('');
-         });
+         expect(toolbarElements[0].parentElement.style.display)
+             .to.be.equal('none');
        });
      });
+   });
 
-     it('should hide <nav toolbar> elements with toolbar-only, \
-     inside the sidebar, but not inside the toolbar, for a valid \
-     window size for DEFAULT_TOOLBAR_MEDIA', () => {
-       return getAmpSidebar({
-         toolbars: [{
-           toolbarOnlyOnNav: true,
-         }],
-       }).then(obj => {
-         const sidebarElement = obj.ampSidebar;
-         const toolbars = sidebarElement.implementation_.toolbars_;
-         resizeIframeToWidth(obj.iframe, '4000px', () => {
-           toolbars.forEach(toolbar => {
-             toolbar.onLayoutChange();
-           });
-           const toolbarNavElements = Array.prototype
-                  .slice.call(sidebarElement.ownerDocument
-                  .querySelectorAll('nav[toolbar]'), 0);
-           const hiddenToolbarNavElements = Array.prototype
-                  .slice.call(sidebarElement.ownerDocument
-                  .querySelectorAll('nav[style]'), 0);
-           expect(toolbarNavElements.length).to.be.equal(2);
-           expect(hiddenToolbarNavElements.length).to.be.equal(1);
-           expect(toolbars.length).to.be.equal(1);
+   it('toolbar header should be shown for a \
+   valid window size for DEFAULT_TOOLBAR_MEDIA', () => {
+     return getToolbars([{}]).then(obj => {
+       const toolbars = obj.toolbars;
+       const toolbarElements = Array.prototype
+              .slice.call(obj.toolbarContainerElement
+              .getElementsByClassName(TOOLBAR_CLASS), 0);
+       resizeIframeToWidth(obj.iframe, '4000px', () => {
+         expect(toolbarElements.length).to.be.above(0);
+         toolbars.forEach(toolbar => {
+           toolbar.onLayoutChange();
          });
+         expect(toolbarElements[0].parentElement.style.display)
+             .to.be.equal('');
        });
      });
+   });
 
-     it('toolbar should be in the hidden state \
-     when it is not being displayed', () => {
-       return getAmpSidebar({
-         toolbars: [true],
-       }).then(obj => {
-         const toolbars = obj.ampSidebar.implementation_.toolbars_;
-         resizeIframeToWidth(obj.iframe, '1px', () => {
-           toolbars.forEach(toolbar => {
-             toolbar.onLayoutChange();
-             expect(toolbar.isToolbarShown_()).to.be.false;
-           });
+   it('should hide <nav toolbar> elements with toolbar-only, \
+   inside the sidebar, but not inside the toolbar, for a valid \
+   window size for DEFAULT_TOOLBAR_MEDIA', () => {
+     return getToolbars([{
+       toolbarOnlyOnNav: true,
+     }]).then(obj => {
+       const toolbars = obj.toolbars;
+       resizeIframeToWidth(obj.iframe, '4000px', () => {
+         toolbars.forEach(toolbar => {
+           toolbar.onLayoutChange();
+         });
+         const toolbarNavElements = Array.prototype
+                .slice.call(obj.toolbarContainerElement.ownerDocument
+                .querySelectorAll('nav[toolbar]'), 0);
+         const hiddenToolbarNavElements = Array.prototype
+                .slice.call(obj.toolbarContainerElement.ownerDocument
+                .querySelectorAll('nav[style]'), 0);
+         expect(toolbarNavElements.length).to.be.equal(2);
+         expect(hiddenToolbarNavElements.length).to.be.equal(1);
+         expect(toolbars.length).to.be.equal(1);
+       });
+     });
+   });
+
+   it('toolbar should be in the hidden state \
+   when it is not being displayed', () => {
+     return getToolbars([{}]).then(obj => {
+       const toolbars = obj.toolbars;
+       resizeIframeToWidth(obj.iframe, '1px', () => {
+         toolbars.forEach(toolbar => {
+           toolbar.onLayoutChange();
+           expect(toolbar.isToolbarShown_()).to.be.false;
          });
        });
      });
+   });
 
-     it('toolbar should be in the shown state \
-     when it is being displayed', () => {
-       return getAmpSidebar({
-         toolbars: [true],
-       }).then(obj => {
-         const toolbars = obj.ampSidebar.implementation_.toolbars_;
-         resizeIframeToWidth(obj.iframe, '4000px', () => {
-           toolbars.forEach(toolbar => {
-             toolbar.onLayoutChange();
-             expect(toolbar.isToolbarShown_()).to.be.true;
-           });
+   it('toolbar should be in the shown state \
+   when it is being displayed', () => {
+     return getToolbars([{}]).then(obj => {
+       const toolbars = obj.toolbars;
+       resizeIframeToWidth(obj.iframe, '4000px', () => {
+         toolbars.forEach(toolbar => {
+           toolbar.onLayoutChange();
+           expect(toolbar.isToolbarShown_()).to.be.true;
          });
        });
      });
+   });
 
-     it('toolbar should not be able to be shown \
-     if already in the shown state', () => {
-       return getAmpSidebar({
-         toolbars: [true],
-       }).then(obj => {
-         const toolbars = obj.ampSidebar.implementation_.toolbars_;
-         resizeIframeToWidth(obj.iframe, '4000px', () => {
-           toolbars.forEach(toolbar => {
-             toolbar.onLayoutChange();
-             expect(toolbar.attemptShow_()).to.be.undefined;
-           });
+   it('toolbar should not be able to be shown \
+   if already in the shown state', () => {
+     return getToolbars([{}]).then(obj => {
+       const toolbars = obj.toolbars;
+       resizeIframeToWidth(obj.iframe, '4000px', () => {
+         toolbars.forEach(toolbar => {
+           toolbar.onLayoutChange();
+           expect(toolbar.attemptShow_()).to.be.undefined;
          });
        });
      });
+   });
 
-     it('toolbar should be able to be shown \
-     if not in the shown state, and return a promise', () => {
-       return getAmpSidebar({
-         toolbars: [true],
-       }).then(obj => {
-         const toolbars = obj.ampSidebar.implementation_.toolbars_;
-         resizeIframeToWidth(obj.iframe, '1px', () => {
-           toolbars.forEach(toolbar => {
-             toolbar.onLayoutChange();
-             expect(toolbar).to.exist;
-           });
+   it('toolbar should be able to be shown \
+   if not in the shown state, and return a promise', () => {
+     return getToolbars([{}]).then(obj => {
+       const toolbars = obj.toolbars;
+       resizeIframeToWidth(obj.iframe, '1px', () => {
+         toolbars.forEach(toolbar => {
+           toolbar.onLayoutChange();
+           expect(toolbar).to.exist;
          });
        });
      });
