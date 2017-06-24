@@ -105,7 +105,8 @@ export class Bind {
     /**
      * The window containing the document to scan.
      * May differ from the `ampdoc`'s window e.g. in FIE.
-     * @const @private {!Window} */
+     * @const @private {!Window}
+     */
     this.localWin_ = opt_win || ampdoc.win;
 
     /** @private {!Array<BoundElementDef>} */
@@ -135,15 +136,21 @@ export class Bind {
     /** @const @private {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = viewerForDoc(this.ampdoc);
 
-    /**
+    const bodyReadyPromise = (opt_win)
+        ? waitForBodyPromise(opt_win.document)
+        : ampdoc.whenBodyAvailable();
+
+    /**c.
      * Resolved when the service finishes scanning the document for bindings.
      * @const @private {Promise}
      */
     this.initializePromise_ = Promise.all([
-      waitForBodyPromise(this.localWin_.document), // Wait for body.
+      bodyReadyPromise, // Don't scan for bindings until body is ready.
       this.viewer_.whenFirstVisible(), // Don't initialize in prerender mode.
     ]).then(() => {
-      const rootNode = dev().assertElement(this.localWin_.document.body);
+      const rootNode = (opt_win)
+          ? dev().assertElement(opt_win.document.body)
+          : ampdoc.getBody();
       return this.initialize_(rootNode);
     });
 

@@ -21,6 +21,7 @@ import {
   getAmpdoc,
   getServicePromiseForDoc,
   getServicePromiseOrNullForDoc,
+  getTopWindow,
 } from './service';
 import {user} from './log';
 import * as dom from './dom';
@@ -173,10 +174,16 @@ export function getElementServiceIfAvailableForDocInEmbedScope(
   if (s) {
     return /** @type {!Promise<?Object>} */ (Promise.resolve(s));
   }
+  // Return embed-scope element service promise if scheduled.
   if (nodeOrDoc.nodeType) {
+    // In embeds, doc-scope services are window-scope.
     const win = /** @type {!Document} */ (
         nodeOrDoc.ownerDocument || nodeOrDoc).defaultView;
-    return elementServicePromiseOrNull(win, id, extension);
+    const topWin = getTopWindow(win);
+    // Don't return promise unless this is definitely FIE to avoid covfefe.
+    if (win !== topWin) {
+      return elementServicePromiseOrNull(win, id, extension);
+    }
   }
   return /** @type {!Promise<?Object>} */ (Promise.resolve(null));
 }
