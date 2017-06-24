@@ -124,7 +124,7 @@ This attribute is present when the sidebar is open.
 
 ##### data-close-button-aria-label**
 
-Optional string used as ARIA label for close button.
+Optional attribute used to set ARIA label for the close button added for accessibility.
 
 ##### common attributes
 
