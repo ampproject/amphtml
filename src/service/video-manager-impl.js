@@ -15,6 +15,7 @@
  */
 
 import {ActionTrust} from '../action-trust';
+import {removeElement} from '../dom.js';
 import {listen, listenOncePromise} from '../event-helper';
 import {dev} from '../log';
 import {getMode} from '../mode';
@@ -406,8 +407,8 @@ class VideoEntry {
       unlistenInteraction();
       unlistenPause();
       unlistenPlay();
-      animation.remove();
-      mask.remove();
+      removeElement(animation);
+      removeElement(mask);
     }
   }
 

@@ -784,6 +784,9 @@ var forbiddenTermsSrcInclusive = {
       'dist.3p/current/integration.js',
     ],
   },
+  '\\.remove\\(\\)': {
+    message: 'use removeElement helper in src/dom.js',
+  },
 };
 
 // Terms that must appear in a source file.
