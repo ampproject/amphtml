@@ -29,7 +29,6 @@ import {filterSplice} from '../../../src/utils/array';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isObject, toArray} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
 import {map} from '../../../src/utils/object';
 import {reportError} from '../../../src/error';
@@ -97,11 +96,6 @@ export class Bind {
    * @param {!Window=} opt_win
    */
   constructor(ampdoc, opt_win) {
-    // Allow integration test to access this class in testing mode.
-    /** @const @private {boolean} */
-    this.enabled_ = isBindEnabledFor(ampdoc.win);
-    user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);
-
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
@@ -182,8 +176,6 @@ export class Bind {
    * @return {!Promise}
    */
   setState(state, opt_skipEval, opt_isAmpStateMutation) {
-    user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);
-
     // TODO(choumx): What if `state` contains references to globals?
     try {
       deepMerge(this.scope_, state, MAX_MERGE_DEPTH);
@@ -218,8 +210,6 @@ export class Bind {
    * @return {!Promise}
    */
   setStateWithExpression(expression, scope) {
-    user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);
-
     this.setStatePromise_ = this.initializePromise_.then(() => {
       // Allow expression to reference current scope in addition to event scope.
       Object.assign(scope, this.scope_);
@@ -977,25 +967,4 @@ export class Bind {
       this.localWin_.dispatchEvent(event);
     }
   }
-}
-
-/**
- * @param {!Window} win
- * @return {boolean}
- */
-export function isBindEnabledFor(win) {
-  // Allow integration tests access.
-  if (getMode().test) {
-    return true;
-  }
-  if (isExperimentOn(win, TAG)) {
-    return true;
-  }
-  // TODO(choumx): Replace with real origin trial feature when implemented.
-  const token =
-      win.document.head.querySelector('meta[name="amp-experiment-token"]');
-  if (token && token.getAttribute('content') === 'HfmyLgNLmblRg3Alqy164Vywr') {
-    return true;
-  }
-  return false;
 }

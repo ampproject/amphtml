@@ -737,7 +737,7 @@ function tokenizeMethodArguments(toks, assertToken, assertAction) {
           for (peek = toks.peek();
               peek.type == TokenType.SEPARATOR && peek.value == '.';
               peek = toks.peek()) {
-            tok = toks.next(); // Skip '.'.
+            toks.next(); // Skip '.'.
             tok = assertToken(toks.next(false), [TokenType.ID]);
             argValueTokens.push(tok);
           }

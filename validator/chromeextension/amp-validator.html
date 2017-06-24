@@ -286,7 +286,7 @@ limitations under the License.
           const errors = validationResult.errors;
           var validationErrors = [];
           var validationWarnings = [];
-          for (index in errors) {
+          for (var index in errors) {
             var error = errors[index];
             error.webuiUrl = webuiUrl + '&errno=' + index;
             if (error.severity == 'ERROR') {
