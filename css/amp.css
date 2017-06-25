@@ -755,3 +755,39 @@ amp-accordion > section > :last-child {
 amp-accordion > section[expanded] > :last-child {
   display: block !important;
 }
+
+.i-amphtml-tilt-to-pan-expanded {
+  margin: 0px;
+  width: 100vw;
+  position: relative;
+  overflow: scroll;
+}
+
+.i-amphtml-tilt-to-pan-expanded img {
+  width: auto;
+  position: absolute;
+  backface-visibility: hidden;
+}
+
+.i-amphtml-tilt-to-pan, .i-amphtml-tilt-to-pan img {
+  transition: transform 0.05s linear,
+              width 0.25s linear,
+              height 0.25s linear;
+}
+
+amp-tilt-to-pan-indicator-container {
+    width: 100%;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.6);
+    display: block;
+    position: absolute;
+    top: 0px;
+}
+
+amp-tilt-to-pan-indicator {
+    background: white;
+    height: 5px;
+    position: absolute;
+    transition: left 0.25s linear;
+    backface-visibility: hidden;
+}

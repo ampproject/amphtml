@@ -16,9 +16,13 @@
 
 import {BaseElement} from '../src/base-element';
 import {isLayoutSizeDefined} from '../src/layout';
+import {listen} from '../src/event-helper';
 import {registerElement} from '../src/custom-element';
 import {srcsetFromElement} from '../src/srcset';
 import {user} from '../src/log';
+import {removeElement} from '../src/dom';
+import {mapRange} from '../src/utils/math';
+
 
 /**
  * Attributes to propagate to internal image when changed externally.
@@ -26,6 +30,38 @@ import {user} from '../src/log';
  */
 const ATTRIBUTES_TO_PROPAGATE = ['alt', 'title', 'referrerpolicy', 'aria-label',
   'aria-describedby', 'aria-labelledby'];
+
+/**
+ * Number of accelerometer data points to use for bezier smoothing
+ * @type {number}
+ */
+const TILT_SMOOTHING = 15;
+
+/**
+ * The zoomed-in image is panned farthest to the left when the device is tilted
+ * at angle -TILT_MAX_ANGLE and is panned farthest to the right when the device
+ * is tilted at angle TILT_MAX_ANGLE
+ * @type {number}
+ */
+const TILT_MAX_ANGLE = 18;
+
+/**
+ * Percentage of the width of the viewport taken by the tilt indicator
+ * @type {number}
+ */
+const TILT_INDICATOR_WIDTH = 30;
+
+/**
+ * Name of the tilt indicator container's class
+ * @type {string}
+ */
+const INDIC_CONT_CLASS = 'amp-tilt-to-pan-indicator-container';
+
+/**
+ * Name of the tilt indicator's class
+ * @type {string}
+ */
+const INDIC_CLASS = 'amp-tilt-to-pan-indicator';
 
 export class AmpImg extends BaseElement {
 
@@ -44,6 +80,21 @@ export class AmpImg extends BaseElement {
 
     /** @private {?../src/srcset.Srcset} */
     this.srcset_ = null;
+
+    /** @private {boolean} */
+    this.hasTiltToPan_ = element.hasAttribute('tilt-to-pan');
+
+    /** @private {?number} */
+    this.tiltCenterAngle_ = null;
+
+    /** @private {Array} */
+    this.bezierPoints_ = [];
+
+    /** @private {number} */
+    this.initialHeight = 0;
+
+    /** @private {number} */
+    this.initialWidth = 0;
   }
 
   /** @override */
@@ -132,6 +183,8 @@ export class AmpImg extends BaseElement {
     this.applyFillContent(this.img_, true);
 
     this.element.appendChild(this.img_);
+
+    this.maybeInstallTiltObserver_();
   }
 
   /** @override */
@@ -163,7 +216,117 @@ export class AmpImg extends BaseElement {
       });
       this.allowImgLoadFallback_ = false;
     }
+
+    this.initialHeight = this.element.offsetHeight;
+    this.initialWidth = this.element.offsetWidth;
+
+    this.img_.style.height = this.initialHeight + 'px';
+    this.element.style.height = this.initialHeight + 'px';
+    this.img_.style.width = this.initialWidth + 'px';
+    this.element.style.width = this.initialWidth + 'px';
+
     return promise;
+  }
+
+  /**
+   * @private
+   */
+  maybeInstallTiltObserver_() {
+    if (!this.hasTiltToPan_) {
+      return;
+    }
+
+    this.element.classList.add('i-amphtml-tilt-to-pan');
+
+    listen(this.element, 'click', () => {
+      if (this.element.classList.contains('i-amphtml-tilt-to-pan-expanded')) {
+        this.img_.style.transform = 'translateX(0px)';
+        this.img_.style.height = this.initialHeight + 'px';
+        this.img_.style.width = this.initialWidth + 'px';
+        this.element.style.height = this.initialHeight + 'px';
+        this.element.style.width = this.initialWidth + 'px';
+        this.element.classList.remove('i-amphtml-tilt-to-pan-expanded');
+        const indicCont = this.element.querySelector(INDIC_CONT_CLASS);
+        removeElement(indicCont);
+        this.tiltCenterAngle_ = null;
+      } else {
+        this.element.classList.add('i-amphtml-tilt-to-pan-expanded');
+        this.getViewport().animateScrollIntoView(this.element, 200);
+        const indicCont = document.createElement(INDIC_CONT_CLASS);
+        const indic = document.createElement(INDIC_CLASS);
+        indic.style.width = TILT_INDICATOR_WIDTH + '%';
+        indicCont.appendChild(indic);
+        this.element.appendChild(indicCont);
+        const imageRatio = this.initialWidth/this.initialHeight;
+        const fullscreenWidth =  imageRatio * window.innerHeight;
+        const middle = window.innerWidth/2 - fullscreenWidth/2;
+        this.img_.style.transform = 'translateX(' + middle + 'px)';
+        const indicator_middle = (indicCont.offsetWidth - indic.offsetWidth)/2;
+        indic.style.transform = 'translateX(' + indicator_middle + 'px)';
+        this.img_.style.height = window.innerHeight + 'px';
+        this.img_.style.width = fullscreenWidth + 'px';
+        this.element.style.height = window.innerHeight + 'px';
+        this.element.style.width = window.innerWidth + 'px';
+      }
+    });
+
+    if (window.DeviceOrientationEvent) {
+      listen(window, 'deviceorientation', event => {
+        this.updateTilt_(event.gamma);
+      });
+    } else if (window.DeviceMotionEvent) {
+      listen(window, 'devicemotion', event => {
+        this.updateTilt_(event.acceleration.y * 2);
+      });
+    } else {
+      listen(window, 'MozOrientation', event => {
+        this.updateTilt_(event.y * 50);
+      });
+    }
+  }
+
+  /**
+   * @param {number} gamme The Y-value of the accelerometer
+   * @private
+   */
+  updateTilt_(gamma) {
+
+    if (!this.element.classList.contains('i-amphtml-tilt-to-pan-expanded')) {
+      return;
+    }
+
+    if (!this.tiltCenterAngle_) {
+      this.tiltCenterAngle_ = gamma;
+    }
+
+    if (this.bezierPoints_.length > TILT_SMOOTHING) {
+      this.bezierPoints_.shift();
+    }
+
+    this.bezierPoints_.push(gamma);
+
+    const currentGamma = this.bezierPoints_.reduce(function(a, b) {
+                                              return a+b;
+                                            }) / TILT_SMOOTHING;
+
+    const max_translate = this.element.offsetWidth - this.img_.offsetWidth;
+
+    const translateX = Math.round(
+                        mapRange(
+                          currentGamma,
+                          -TILT_MAX_ANGLE + this.tiltCenterAngle_, TILT_MAX_ANGLE + this.tiltCenterAngle_,
+                          0, max_translate)
+                        );
+
+    this.img_.style.transform = 'translateX(' + translateX + 'px)';
+    const indicCont = this.element.querySelector(INDIC_CONT_CLASS);
+    const indic = this.element.querySelector(INDIC_CLASS);
+    indic.style.transform = 'translateX(' + Math.round(
+                                mapRange(
+                                  currentGamma,
+                                  -TILT_MAX_ANGLE + this.tiltCenterAngle_, TILT_MAX_ANGLE + this.tiltCenterAngle_,
+                                  0, indicCont.offsetWidth - indic.offsetWidth)
+                                ) + 'px)';
   }
 
   /**
