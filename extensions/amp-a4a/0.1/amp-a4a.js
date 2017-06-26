@@ -652,7 +652,7 @@ export class AmpA4A extends AMP.BaseElement {
           });
         })
         // This block returns the ad creative, signature, and size, if
-        // available; nullotherwise.
+        // available; null otherwise.
         /**
          * @return {?Promise<{creativeParts: !AdResponseDef, size: ?SizeInfoDef}>}
          */
