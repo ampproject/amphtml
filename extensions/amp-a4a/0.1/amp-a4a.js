@@ -1454,7 +1454,7 @@ export class AmpA4A extends AMP.BaseElement {
         name = `${this.safeframeVersion_};${creative.length};${creative}` +
             `${contextMetadata}`;
       }
-      return this.iframeRenderHelper_(dict({'src': srcPath, name}));
+      return this.iframeRenderHelper_(dict({'src': srcPath, 'name': name}));
     });
   }
 

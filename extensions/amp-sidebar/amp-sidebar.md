@@ -70,7 +70,7 @@ Example:
 
 ### Opening and closing the sidebar
 
-To toggle, open, or close the sidebar when an element is tapped or clicked, set the [`on`](../../spec/amp-actions-and-events.md) action attribute on the element, and specify one of the following action methods: 
+To toggle, open, or close the sidebar when an element is tapped or clicked, set the [`on`](../../spec/amp-actions-and-events.md) action attribute on the element, and specify one of the following action methods:
 
 <table>
   <tr>
@@ -121,6 +121,10 @@ Specifies the display layout of the sidebar, which must be `nodisplay`.
 ##### open
 
 This attribute is present when the sidebar is open.
+
+##### data-close-button-aria-label**
+
+Optional attribute used to set ARIA label for the close button added for accessibility.
 
 ##### common attributes
 

@@ -24,10 +24,12 @@ Here are some ways you can help make the AMP Project even more welcoming.  **The
   - If you are working with a new contributor and they are not familiar with Git/GitHub or contributing to open source projects, point them to the Getting Started End-to-end guide at [bit.ly/helpamp-e2e](https://bit.ly/helpamp-e2e).
   - More experienced contributors may prefer the "[quick start](https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-quick.md)" version of the getting started guide.
 - Help people find a project.
-  - The AMP Project relies on the community for many different types of contributions--code, documentation, AMP Start templates, translations, etc.  Try to get a sense of what someone who doesn't have a specific project in mind would be interested in helping with.
-  - [Great First Issues](https://github.com/ampproject/amphtml/labels/Great%20First%20Issue) are great starter projects.  When someone starts working on a GFI we add the "GFI Claimed!" label to it, so the [GFIs not marked as "GFI Claimed!](https://github.com/ampproject/amphtml/issues?utf8=%E2%9C%93&q=is%3Aopen%20label%3A%22Great%20First%20Issue%22%20-label%3A%22GFI%20Claimed!%22) are the open ones.
-  - There may not yet be a Great First Issue that matches a new contributor's interests/expertise.  If that's the case reach out to the community (e.g. on Slack) to see if anyone has an idea of a project for them to work on.
-  - If you aren't sure where to send somebody let [mrjoro](https://amphtml.slack.com/threads/team/mrjoro) know.
+  - The AMP Project relies on the community for many different types of contributions--code, documentation, AMP Start templates, translations, etc.  Try to get a sense of what someone who doesn't have a specific project in mind would be interested in helping with and point them in the right direction.
+  - [Great First Issues](https://github.com/ampproject/amphtml/labels/Great%20First%20Issue) are great starter projects.
+    - When someone starts working on a GFI we add the "GFI Claimed!" label to it, so the [GFIs not marked as "GFI Claimed!](https://github.com/ampproject/amphtml/issues?utf8=%E2%9C%93&q=is%3Aopen%20label%3A%22Great%20First%20Issue%22%20-label%3A%22GFI%20Claimed!%22) are the open ones.
+    - Keep an eye out for small issues that would make great Great First Issues and [create Great First Issues](https://github.com/ampproject/amphtml/blob/master/contributing/creating-great-first-issues.md) for them.  Having a variety of GFIs always available for new contributors helps ensure new people will have a way to get started contributing.
+    - There may not yet be a Great First Issue that matches a new contributor's interests/expertise.  If that's the case reach out to the community (e.g. on Slack) to see if anyone has an idea of a project for them to work on.
+  - If you aren't sure where to send somebody for a starter project let [mrjoro](https://amphtml.slack.com/threads/team/mrjoro) know.
 - Encourage contributors to sign up for Slack.
   - Slack provides the best forum for interacting with the community outside of individual GitHub issues/PRs.
   - Contributors will need to fill out a [single-question form](https://docs.google.com/forms/d/1wAE8w3K5preZnBkRk-MD1QkX8FmlRDxd_vs4bFSeJlQ/viewform?fbzx=4406980310789882877) to get an invite.

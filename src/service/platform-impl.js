@@ -98,6 +98,14 @@ export class Platform {
   }
 
   /**
+   * Whether the current browser is isStandalone.
+   * @return {boolean}
+   */
+  isStandalone() {
+    return this.isIos() && this.navigator_.standalone;
+  }
+
+  /**
    * Returns the major version of the browser.
    * @return {number}
    */
