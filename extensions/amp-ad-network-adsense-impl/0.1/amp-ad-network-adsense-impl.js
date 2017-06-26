@@ -169,6 +169,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const sharedStateParams = sharedState.addNewSlot(
         format, this.uniqueSlotId_, adClientId);
     const viewportSize = this.getViewport().getSize();
+    this.win['ampAdGoogleIfiCounter'] = this.win['ampAdGoogleIfiCounter'] || 1;
     const parameters = {
       'client': adClientId,
       format,
@@ -189,6 +190,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'dff': computedStyle(this.win, this.element)['font-family'],
       'prev_fmts': sharedStateParams.prevFmts || null,
       'brdim': additionalDimensions(this.win, viewportSize),
+      'ifi': this.win['ampAdGoogleIfiCounter']++,
+      'rc': this.fromResumeCallback ? 1 : null,
     };
 
     const experimentIds = [];

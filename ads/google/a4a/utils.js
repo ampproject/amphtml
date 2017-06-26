@@ -130,7 +130,6 @@ export function isReportingEnabled(ampElement) {
 export function googleBlockParameters(a4a, opt_experimentIds) {
   const adElement = a4a.element;
   const win = a4a.win;
-  win['ampAdGoogleIfiCounter'] = win['ampAdGoogleIfiCounter'] || 1;
   const slotRect = a4a.getPageLayoutBox();
   const iframeDepth = iframeNestingDepth(win);
   const enclosingContainers = getEnclosingContainerTypes(adElement);
@@ -142,7 +141,6 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
     eids = mergeExperimentIds(opt_experimentIds, eids);
   }
   return {
-    'ifi': win['ampAdGoogleIfiCounter']++,
     'adf': domFingerprint(adElement),
     'nhd': iframeDepth,
     'eid': eids,
@@ -150,7 +148,6 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
     'ady': slotRect.top,
     'oid': '2',
     'pfx': pfx ? '1' : '0',
-    'rc': a4a.fromResumeCallback ? 1 : null,
     'act': enclosingContainers.length ? enclosingContainers.join() : null,
   };
 }
