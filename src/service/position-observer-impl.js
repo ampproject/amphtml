@@ -440,9 +440,6 @@ export class InaboxAmpDocPositionObserver extends AbstractPositionObserver {
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  */
 export function installPositionObserverServiceForDoc(ampdoc) {
-  dev().assert(isExperimentOn(ampdoc.win, 'amp-animation'),
-      'PositionObserver is experimental and used by amp-animation only for ' +
-      'now');
   registerServiceBuilderForDoc(ampdoc, 'position-observer', () => {
     if (getMode(ampdoc.win).runtime == 'inabox') {
       return new InaboxAmpDocPositionObserver(ampdoc);
