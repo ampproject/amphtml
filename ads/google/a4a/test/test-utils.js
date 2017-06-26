@@ -108,11 +108,7 @@ describe('Google A4A utils', () => {
         get: h => { throw new Error('Tried to get ' + h); },
       };
       return expect(extractGoogleAdCreativeAndSignature(creative, headers))
-          .to.eventually.deep.equal({
-            creative,
-            signature: null,
-            size: null,
-          });
+          .to.eventually.deep.equal({creative, signature: null});
     });
   });
 

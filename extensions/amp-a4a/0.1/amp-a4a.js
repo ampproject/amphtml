@@ -651,8 +651,8 @@ export class AmpA4A extends AMP.BaseElement {
             };
           });
         })
-        // This block returns the ad creative and signature, if available; null
-        // otherwise.
+        // This block returns the ad creative, signature, and size, if
+        // available; nullotherwise.
         /**
          * @return {!Promise<?{creativeParts: !AdResponseDef, size: ?SizeInfoDef}>}
          */
@@ -662,10 +662,10 @@ export class AmpA4A extends AMP.BaseElement {
             this.protectedEmitLifecycleEvent_('extractCreativeAndSignature');
           }
           return responseParts && {
-	    creativeParts: this.extractCreativeAndSignature(
-        responseParts.bytes, responseParts.headers),
-	    size: this.extractSize(responseParts.headers),
-	  };
+            creativeParts: this.extractCreativeAndSignature(
+                responseParts.bytes, responseParts.headers),
+            size: this.extractSize(responseParts.headers),
+          };
         })
         // This block returns the ad creative if it exists and validates as AMP;
         // null otherwise.
@@ -682,7 +682,7 @@ export class AmpA4A extends AMP.BaseElement {
           if (!creativeData) {
             return Promise.resolve();
           }
-	  const {creativeParts, size} = creativeData;
+          const {creativeParts, size} = creativeData;
           this.creativeSize_ = size || this.creativeSize_;
           if (this.experimentalNonAmpCreativeRenderMethod_ !=
               XORIGIN_MODE.CLIENT_CACHE &&

@@ -152,18 +152,21 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
 
     it('without signature', () => {
       const headers = {
-        get() { return undefined; },
-        has() { return false; },
+        get() {
+          return undefined;
+        },
+        has() {
+          return false;
+        },
       };
       return utf8Encode('some creative').then(creative => {
         return impl.extractCreativeAndSignature(creative, headers)
-	    .then(adResponse => {
-      expect(adResponse).to.deep.equal(
-                  {creative, signature: null});
-	      expect(impl.extractSize(headers)).to.deep.equal(size);
-      expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be
-          .called;
-    });
+            .then(adResponse => {
+              expect(adResponse).to.deep.equal({creative, signature: null});
+              expect(impl.extractSize(headers)).to.deep.equal(size);
+              expect(loadExtensionSpy.withArgs('amp-analytics'))
+                  .to.not.be.called;
+            });
       });
     });
     it('with signature', () => {
@@ -177,13 +180,15 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           },
         };
         return impl.extractCreativeAndSignature(creative, headers)
-	    .then(adResponse => {
-      expect(adResponse).to.deep.equal(
-                  {creative, signature: base64UrlDecodeToBytes('AQAB')});
-	      expect(impl.extractSize(headers)).to.deep.equal(size);
-      expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be
-          .called;
-    });
+            .then(adResponse => {
+              expect(adResponse).to.deep.equal({
+                creative,
+                signature: base64UrlDecodeToBytes('AQAB'),
+              });
+              expect(impl.extractSize(headers)).to.deep.equal(size);
+              expect(loadExtensionSpy.withArgs('amp-analytics'))
+                  .to.not.be.called;
+            });
       });
     });
     it('with analytics', () => {
@@ -205,17 +210,16 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           },
         };
         return impl.extractCreativeAndSignature(creative, headers)
-	    .then(adResponse => {
-      expect(adResponse).to.deep.equal(
-          {
-            creative,
-            signature: base64UrlDecodeToBytes('AQAB'),
-          });
-	      expect(impl.extractSize(headers)).to.deep.equal(size);
-      expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
-            // exact value of ampAnalyticsConfig covered in
-            // ads/google/test/test-utils.js
-    });
+            .then(adResponse => {
+              expect(adResponse).to.deep.equal({
+                creative,
+                signature: base64UrlDecodeToBytes('AQAB'),
+              });
+              expect(impl.extractSize(headers)).to.deep.equal(size);
+              expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
+              // exact value of ampAnalyticsConfig covered in
+              // ads/google/test/test-utils.js
+            });
       });
     });
   });
