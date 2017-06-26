@@ -308,28 +308,11 @@ describe('integration test: a4a', () => {
     return fixture.addElement(a4aElement).then(() => {
       return expectRenderedInFriendlyIframe(a4aElement, 'Hello, world.')
           .then(() => {
-            headers = {};
-            headers[SIGNATURE_HEADER] = validCSSAmp.signature;
-            mockResponse = {
-              arrayBuffer: () => utf8Encode(validCSSAmp.reserialized),
-              bodyUsed: false,
-              headers: new FetchResponseHeaders({
-                getResponseHeader(name) {
-                  return headers[name];
-                },
-              }),
-              status: 204,
-            };
-            xhrMock.withArgs(TEST_URL, {
-              mode: 'cors',
-              method: 'GET',
-              credentials: 'include',
-            }).onFirstCall().returns(Promise.resolve(mockResponse));
             const a4a = new MockA4AImpl(a4aElement);
             const initiateAdRequestMock = sandbox.stub(
                 MockA4AImpl.prototype,
                 'initiateAdRequest',
-                () => { debugger;
+                () => {
                   a4a.adPromise_ = Promise.resolve();
                   // This simulates calling forceCollapse, without tripping up
                   // any unrelated asserts.
@@ -340,7 +323,7 @@ describe('integration test: a4a', () => {
             tearDownSlotMock.returns(undefined);
             const destroyFrameSpy =
                 sandbox.spy(MockA4AImpl.prototype, 'destroyFrame');
-            const callback = sandbox.spy(); debugger;
+            const callback = sandbox.spy();
             return a4a.refresh(callback).then(() => {
               expect(initiateAdRequestMock).to.be.called;
               expect(tearDownSlotMock).to.be.called;
