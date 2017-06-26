@@ -29,10 +29,6 @@ const PlayerStates = {
   PAUSED: 2,
 };
 
-// Time to wait before hiding the fullscreen button when the video returns from
-// ad playback.
-const hideControlsAfterAdTime = 500;
-
 // Div wrapping our entire DOM.
 let wrapperDiv;
 
@@ -119,9 +115,6 @@ let videoWidth, videoHeight;
 // Bound on click listener. Stored so we can remove it after first click.
 let boundOnClickListener;
 
-// Tracks whether or not we're allowing fullscreen.
-let fullscreenEnabled;
-
 // The amount of time, in ms, we should wait before hiding controls after the
 // user taps on the video player on mobile.
 let hideControlsTimes = {
@@ -152,27 +145,25 @@ function getIma(global, cb) {
  * The business.
  */
 export function imaVideo(global, data) {
-  // Trying to hide fullscreen button on iOS
+  videoWidth = global./*OK*/innerWidth;
+  videoHeight = global./*OK*/innerHeight;
+
+  // Hides the fullscreen and remote playback buttons on iOS.
   var css = 
       'video::-webkit-media-controls-fullscreen-button,' +
       'video::-webkit-media-controls-wireless-playback-picker-button' +
       '{' +
       '  display: none !important;' +
       '}',
-    head = document.head || document.getElementsByTagName('head')[0],
-    style = document.createElement('style');
-
+  head = document.head || document.getElementsByTagName('head')[0],
+  style = document.createElement('style');
   style.type = 'text/css';
   if (style.styleSheet){
     style.styleSheet.cssText = css;
   } else {
     style.appendChild(document.createTextNode(css));
   }
-
   head.appendChild(style);
-
-  videoWidth = global./*OK*/innerWidth;
-  videoHeight = global./*OK*/innerHeight;
 
   // Wraps *everything*.
   wrapperDiv = global.document.createElement('div');
@@ -331,6 +322,7 @@ function buildDeviceProfile() {
     hideControlsTimes.onInteract = 3000;
     hideControlsTimes.afterExitFullscreen = 500;
     hideControlsTimes.afterMidRoll = 500;
+    // Hide fullscreen, download, and remote playback buttons on Android chrome.
     videoPlayer.setAttribute(
         'controlsList', 'nodownload nofullscreen noremoteplayback');
   } else {
@@ -341,10 +333,13 @@ function buildDeviceProfile() {
     mouseUpEvent = 'mouseup';
     onMobile = false;
     hideControlsTimes.afterPreroll = 500;
+    // Controls are hidden on mouseout for interact events.
     hideControlsTimes.onInteract = null;
     hideControlsTimes.afterExitFullscreen = 3000;
     hideControlsTimes.afterMidRoll = 500;
-    videoPlayer.setAttribute('controlsList', 'nofullscreen');
+    // Hide fullscreen, download, and remote playback buttons on Chrome.
+    videoPlayer.setAttribute(
+        'controlsList', 'nodownload nofullscreen noremoteplayback');
     boundShowControlsForFullscreen = showControls.bind(null, 3000);
   }
 }
@@ -397,12 +392,13 @@ export function playAds(global) {
 }
 
 /**
- * Called when playback of ads or content has started.
+ * Called when playback of ads or content has first started.
  */
 function onPlaybackStarted() {
   window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
   wrapperDiv.addEventListener(controlsEvent, onInteractForControls);
   if (!onMobile) {
+    // For desktop, add mouseout listener to hide controls.
     wrapperDiv.addEventListener(
         'mouseout', () => { setTimeout(hideControls, 500) });
   }
@@ -522,6 +518,9 @@ export function onContentResumeRequested() {
  */
 function onAdStarted(adEvent) {
   if (adEvent.getAd().getAdPodInfo().getTimeOffset() == 0) {
+    // Track if we just played the pre-roll, because some platforms have a
+    // different controls timeout after a pre-roll than they do after a
+    // mid-roll.
     lastAdWasPreroll = true;
   }
 }
@@ -568,10 +567,12 @@ function onInteractForControls() {
  */
 function showControls(timeout) {
   if (hideControlsTimeout) {
+    // Clear existing ticking timeout waiting to hide the controls.
     clearTimeout(hideControlsTimeout);
     hideControlsTimeout = null;
   }
   if (timeout == 0) {
+    // Timeout 0 just means hide the controls.
     hideControls();
     return;
   }
@@ -586,6 +587,8 @@ function showControls(timeout) {
  */
 function hideControls() {
   if (hideControlsTimeout) {
+    // Clear existing ticking timeout - for cases when this is called directly
+    // instead of via timeout.
     clearTimeout(hideControlsTimeout);
     hideControlsTimeout = null;
   }
@@ -689,7 +692,7 @@ function onFullscreenChange(global) {
 }
 
 /**
- * Called when we exit native fullscreen.
+ * Called when we exit native fullscreen (only used on iOS).
  */
 function onEndNativeFullscreen() {
   if (videoPlayer.paused) {
@@ -708,6 +711,10 @@ function onEndNativeFullscreen() {
   nativeFullscreen = false;
 }
 
+/**
+ * Called when the user clicks the play button after exiting fullscreen mode
+ * via the "Done" button on iOS.
+ */
 function onPlayAfterDoneFullscreen() {
   showControls(hideControlsTimes.onInteract);
   event.source.removeEventListener(onPlayAfterDoneFullscreen);

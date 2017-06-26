@@ -123,7 +123,6 @@ class AmpImaVideo extends AMP.BaseElement {
   layoutCallback() {
     const iframe = getIframe(this.element.ownerDocument.defaultView,
         this.element, 'ima-video');
-    //iframe.setAttribute('allowfullscreen', 'false');
     this.applyFillContent(iframe);
 
     this.iframe_ = iframe;
