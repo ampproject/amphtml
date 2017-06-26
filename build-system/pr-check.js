@@ -35,7 +35,7 @@ const util = require('gulp-util');
 
 const gulp = 'node_modules/gulp/bin/gulp.js';
 const fileLogPrefix = util.colors.yellow.bold('pr-check.js:');
-const sauceCredsFile = path.resolve('build-system/sauce_credentials.json');
+const sauceCredsFile = path.resolve('build-system/sauce-credentials.json');
 
 /**
  * Starts a timer to measure the execution time of the given function.
@@ -225,18 +225,19 @@ function determineBuildTargets(filePaths) {
 }
 
 /**
- * Extracts and sets per-user sauce credentials for committer, if present.
+ * If present, extracts and sets per-user sauce credentials for committer.
  */
 function setPerUserSauceCredsIfAvailable() {
-  let tokens = JSON.parse(fs.readFileSync(sauceCredsFile)).tokens;
   let committer = getStdout(`git log -1 --pretty=format:'%ae'`).trim();
-  if (tokens && tokens[committer]) {
+  let credentials = JSON.parse(fs.readFileSync(sauceCredsFile)).credentials;
+  if (credentials && credentials[committer]) {
     console.log(
         fileLogPrefix, 'Using per-user Sauce credentials for user',
         util.colors.cyan(committer), 'with Sauce username',
-        util.colors.cyan(tokens[committer].sauce_username));
-    process.env['SAUCE_USERNAME'] = tokens[committer].sauce_username;
-    process.env['SAUCE_ACCESS_KEY'] = atob(tokens[committer].sauce_access_key_encoded);
+        util.colors.cyan(credentials[committer].sauce_username));
+    process.env['SAUCE_USERNAME'] = credentials[committer].sauce_username;
+    process.env['SAUCE_ACCESS_KEY'] =
+        atob(credentials[committer].sauce_access_key_encoded);
   }
 }
 
