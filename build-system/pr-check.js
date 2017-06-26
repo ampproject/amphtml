@@ -328,6 +328,9 @@ function main(argv) {
   console.log(
       fileLogPrefix, 'username',
       util.colors.cyan(getStdout(`git log -1 $TRAVIS_COMMIT --pretty="%cE"`).trim()));
+  console.log(
+      fileLogPrefix, 'last few commits',
+      util.colors.cyan(getStdout(`git log -5`)));
 
 
   // If $TRAVIS_PULL_REQUEST_SHA is empty then it is a push build and not a PR.
