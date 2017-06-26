@@ -1,0 +1,64 @@
+<!--
+  Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS-IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the license.
+-->
+<!--
+  Test Description:
+    Tests xlink:href attributes in SVG tags.
+-->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="./regular-html-version.html" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+
+<!-- Invalid image/svg+xml in a data: url inside an svg image tag.
+     See https://github.com/ampproject/amphtml/issues/4567
+ -->
+<svg version="1.0" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="640" height="480">
+  <image x=0 y=0 width=14 height=10 xlink:href="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+Cjxzdmcgd2lkdGg9IjE0cHgiIGhlaWdodD0iMTRweCIgdmlld0JveD0iMCAwIDE0IDE0IiB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiPgogICAgPCEtLSBHZW5lcmF0b3I6IFNrZXRjaCAzLjYuMSAoMjYzMTMpIC0gaHR0cDovL3d3dy5ib2hlbWlhbmNvZGluZy5jb20vc2tldGNoIC0tPgogICAgPHRpdGxlPkFNUCBMb2dvPC90aXRsZT4KICAgIDxkZXNjPkNyZWF0ZWQgd2l0aCBTa2V0Y2guPC9kZXNjPgogICAgPGRlZnM+PC9kZWZzPgogICAgPGcgaWQ9IlBhZ2UtMSIgc3Ryb2tlPSJub25lIiBzdHJva2Utd2lkdGg9IjEiIGZpbGw9Im5vbmUiIGZpbGwtcnVsZT0iZXZlbm9kZCI+CiAgICAgICAgPGcgaWQ9IkFNUC1Mb2dvIiBmaWxsPSIjMDM3OUM0Ij4KICAgICAgICAgICAgPHBhdGggZD0iTTguNjU3ODE3LDAuMjE2MDYyIEw3LjY0NzI5Nyw1LjU4OTk2MiBMMTAuMDg1MzI3LDUuNTg5OTYyIEMxMC4xODg3ODcsNS41ODk5NjIgMTAuMjU2NDc3LDUuNjk4MzIyIDEwLjIxMTExNyw1Ljc5MTI4MiBMNi4yMzAyMTcsMTMuOTU4NTMyIEM2LjQ4MDQ2NywxMy45ODU2MjIgNi43MzQ1NjcsMTMuOTk5OTcyIDYuOTkyMDk3LDEzLjk5OTk3MiBDMTAuODUzNzE3LDEzLjk5OTk3MiAxMy45ODQxMTcsMTAuODY5NTcyIDEzLjk4NDExNyw3LjAwNzk1MiBDMTMuOTg0MTE3LDMuNzIwNDAyIDExLjcxNTA2NywwLjk2MzMxMiA4LjY1NzgxNywwLjIxNjA2MiIgaWQ9IkZpbGwtNCI+PC9wYXRoPgogICAgICAgICAgICA8cGF0aCBkPSJNNi40MjUzOTgsOC41Mjk5NDggTDMuOTg3MTU4LDguNTI5OTQ4IEMzLjg4MzY5OCw4LjUyOTk0OCAzLjgxNTkzOCw4LjQyMTU4OCAzLjg2MTI5OCw4LjMyODYyOCBMNy44ODU4MDgsMC4wNzI0NzggQzcuNTkxODA4LDAuMDM0OTU4IDcuMjkyMTM4LDAuMDE1NzA4IDYuOTg3ODQ4LDAuMDE1ODQ4IEMzLjE2ODIyOCwwLjAxODA4OCAwLjAyODAyOCwzLjEzNjMwOCAwLjAwMDE2OCw2Ljk1NTg1OCBDLTAuMDI0MTkyLDEwLjMwMzMyOCAyLjMwNDA3OCwxMy4xMTExNjggNS40Mjk3MTgsMTMuODI0NjA4IEw2LjQyNTM5OCw4LjUyOTk0OCBaIiBpZD0iRmlsbC0xIj48L3BhdGg+CiAgICAgICAgPC9nPgogICAgPC9nPgo8L3N2Zz4K"/>
+</svg>
+
+<!-- Valid image/png in a data: url inside an svg image tag.
+     See https://github.com/ampproject/amphtml/issues/4567
+ -->
+<svg version="1.0" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="640" height="480">
+  <image x=0 y=0 width=16 height=16 xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAjpJREFUOBFlU01oE1EQnnnZbmJVEFQiCsaLigepYA9tglgQf9BDwZOggmCpF+2h1IPbBPbQEqQUBL1I8dCDInoRBC9BhLL5OSgIFqkiHuLNmz9gk+x748w2u31pBnZ35vvm+97vImyJdDE4qo26CWTOEcBBRPzkKOdGaPS1jEuP//qFn7YE42LMJydo1e4T0hQQODEOSl1OgXG1geeMtVDhYmcuX2Rj9gdQ8toQV18T0LQt5qbVcG70lQE4IX0caTLkOV5tWTQCRAZBq7rAdhcEsIPJ+Wgkkxh0aboedOolKZRbrB9j8R1bKDmv7avn5l9Iznw8AymjIKKZQT/Yr4w2E4ykunjyQVTzvo9mu9fIMrgvIeKEaLDdxmmeJZ2PMev7veCOPpMaXU0K1IQ8XD21ejils5jygj88xx02oQAnO+XCko1J7njVFZ76qU0cfykWJ0cZEQg/jqR3LW82bWTOvdrpXrHgZBTvcrOnmXDlS/g77xTrYzv993sSDina9aTmhEduKnZ9a4PsepW0fifPug5zwg3MNka470xvX1RVlJvOLLDVeh+JEOb27l4VnIzuG51hzRv7RP3zh5uI8GCrAQKufZs63BooNU7yDb3YxyM+apfza9FNPJTN+oD40m7iy/NRal5K0cYl5wErQ7n0XckjAxmp5Oav8IYu8nLCqIkN3FLtOBGMS90NzeqHQ7nMpQ+3hjuC9R4hA9tmaweYmeS/7g3f0tt8zOMIJCdVUeAstcsjn0UYx3/zRM/F1CZLnQAAAABJRU5ErkJggg=="/>
+</svg>
+
+<!-- Valid image URL iside an svg image tag.
+     See https://github.com/ampproject/amphtml/issues/9243
+ -->
+<svg version="1.0" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="640" height="480">
+  <image x=0 y=0 width=16 height=16 xlink:href="https://www.ampproject.org/static/img/logo-blue.svg"/>
+</svg>
+
+<!-- Valid [use xlink:href] example.
+     See https://github.com/ampproject/amphtml/issues/9243
+ -->
+<svg class="icon" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <use xlink:href="https://localhost.test/icons/below.svg#icon-telegram"></use>
+</svg>
+
+<svg class="icon" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <use xlink:href="https://localhost.test/icons/below.svg#icon-whatsapp"></use>
+</svg>
+
+</body>
+</html>
