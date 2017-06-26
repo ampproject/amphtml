@@ -82,7 +82,6 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
     opt_sfgInternalBranches) {
   if (!isGoogleAdsA4AValidEnvironment(win)) {
     // Serving location doesn't qualify for A4A treatment
-    console.log('not valid env');
     return false;
   }
 
@@ -93,7 +92,6 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
       opt_sfgInternalBranches ? opt_sfgInternalBranches.control : null,
       opt_sfgInternalBranches ? opt_sfgInternalBranches.experiment : null,
       MANUAL_EXPERIMENT_ID);
-  console.log('isSetFromUrl:', isSetFromUrl);
   if (!isSetFromUrl) {
     const experimentInfoMap = {};
     const branches = [
