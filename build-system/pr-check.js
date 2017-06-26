@@ -231,13 +231,14 @@ function setPerUserSauceCredsIfAvailable() {
   let committer = getStdout(`git log -1 --pretty=format:'%ae'`).trim();
   let credentials = JSON.parse(fs.readFileSync(sauceCredsFile)).credentials;
   if (credentials && credentials[committer]) {
-    console.log(
-        fileLogPrefix, 'Using per-user Sauce credentials for user',
-        util.colors.cyan(committer), 'with Sauce username',
-        util.colors.cyan(credentials[committer].sauce_username));
-    process.env['SAUCE_USERNAME'] = credentials[committer].sauce_username;
-    process.env['SAUCE_ACCESS_KEY'] =
+    let sauce_username = credentials[committer].sauce_username;
+    let sauce_access_key =
         atob(credentials[committer].sauce_access_key_encoded);
+    console.log(fileLogPrefix,
+        'Using Sauce credentials for user', util.colors.cyan(committer),
+        'with Sauce username', util.colors.cyan(sauce_username));
+    process.env['SAUCE_USERNAME'] = sauce_username;
+    process.env['SAUCE_ACCESS_KEY'] = sauce_access_key;
   }
 }
 
