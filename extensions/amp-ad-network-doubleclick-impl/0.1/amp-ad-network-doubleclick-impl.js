@@ -37,6 +37,7 @@ import {
 import {
   extractGoogleAdCreativeAndSignature,
   truncAndTimeUrl,
+  googleAdUrl,
   googleBlockParameters,
   googlePageParameters,
   isGoogleAdsA4AValidEnvironment,
@@ -78,9 +79,12 @@ const DOUBLECLICK_BASE_URL =
     'https://securepubads.g.doubleclick.net/gampad/ads';
 
 /** @const {string} */
-const RTC_ERROR = "RTC_ERROR";
+const RTC_ERROR = 'RTC_ERROR';
 /** @const {number} */
 const RTC_TIMEOUT = 1000;
+
+/** @private {?Promise} */
+let rtcPromise = null;
 
 /** @private @const {!Object<string,string>} */
 const PAGE_LEVEL_PARAMS_ = {
@@ -97,6 +101,9 @@ export const TFCD = 'tagForChildDirectedTreatment';
 
 /** @private {?Promise} */
 let sraRequests = null;
+
+/** @private {?Promise} */
+let pageLevelParameters_ = null;
 
 /**
  * Array of functions used to combine block level request parameters for SRA
@@ -339,11 +346,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       return '';
     }
 
-    const rtcConfig = tryParseJson(
-        document.getElementById('amp-rtc').innerHTML);
-    const rtcRequestPromise = (rtcConfig && typeof rtcConfig == 'object') ?
-        this.sendRtcRequestPromise_(/** @type {!Object} */(rtcConfig)) : null;
-
+    const ampRtcPageElement = document.getElementById('amp-rtc');
+    let rtcRequestPromise;
+    let rtcConfig;
+    if (ampRtcPageElement) {
+      rtcConfig = tryParseJson(ampRtcPageElement.innerHTML);
+      rtcRequestPromise = (rtcConfig && typeof rtcConfig == 'object') ?
+          this.sendRtcRequestPromise_(/** @type {!Object} */(rtcConfig)) : null;
+    }
     // TODO(keithwrightbos): SRA blocks currently unnecessarily generate full
     // ad url.  This could be optimized however non-SRA ad url is required to
     // fallback to non-SRA if single block.
@@ -351,36 +361,36 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // TODO: Check for required and allowed parameters. Probably use
     // validateData, from 3p/3p/js, after noving it someplace common.
     const startTime = Date.now();
-    let pageLevelParameters;
+
+    const pageLevelParametersPromise = getPageLevelParameters_(
+        this.win, this.getAmpDoc(), startTime);
+    const blockParameters = this.getBlockParameters_();
     let parameters;
-    return getPageLevelParameters_(this.win, this.getAmpDoc(), startTime)
-        .then(p => {
-          pageLevelParameters = p;
-          return googlePageParameters(this.win, this.getAmpDoc(), startTime);
-        }).then(googlePageParameters => {
-          const blockLevelParameters = googleBlockParameters(this,
-                                                             ['108809080']);
-          parameters = Object.assign(this.getBlockParameters_(),
-                                     pageLevelParameters);
-          Object.assign(parameters, blockLevelParameters, googlePageParameters);
-          return rtcRequestPromise;
-        }).then(rtcResponse => {
-          if (rtcResponse) {
-            if (rtcResponse != RTC_ERROR && !!rtcResponse['targeting']){
-              const targeting = deepMerge(this.jsonTargeting_['targeting'] || {},
-                                          rtcResponse['targeting'] || {});
-              const exclusions = deepMerge(
-                  this.jsonTargeting_['categoryExclusions'] || {},
-                  rtcResponse['exclusions'] || {});
-              parameters['scp'] = serializeTargeting_(targeting, exclusions);
-            } else {
-              if (rtcConfig['doubleclick']['sendAdRequestOnFailure'] === false) {
-                throw cancellation();
-              }
+
+    return Promise.all(
+      [pageLevelParametersPromise, rtcRequestPromise]).then(values => {
+        const pageLevelParameters = values[0];
+        const rtcResponse = values[1];
+
+        parameters = Object.assign(blockParameters, pageLevelParameters);
+
+        if (rtcResponse) {
+          if (rtcResponse != RTC_ERROR && !!rtcResponse['targeting']) {
+            const targeting = deepMerge(this.jsonTargeting_['targeting'] || {},
+                                        rtcResponse['targeting'] || {});
+            const exclusions = deepMerge(
+                this.jsonTargeting_['categoryExclusions'] || {},
+                rtcResponse['exclusions'] || {});
+            parameters['scp'] = serializeTargeting_(targeting, exclusions);
+          } else {
+            if (rtcConfig['doubleclick']['sendAdRequestOnFailure'] === false) {
+              return Promise.reject();
             }
           }
-          return truncAndTimeUrl(DOUBLECLICK_BASE_URL, parameters, startTime);
-        });
+        }
+        return googleAdUrl(
+            this, DOUBLECLICK_BASE_URL, startTime, parameters, ['108809080']);
+      });
   }
 
   /** @override */
@@ -529,6 +539,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @private
    */
   sendRtcRequestPromise_(rtcConfig) {
+    if (rtcPromise) {
+      return rtcPromise;
+    }
     let endpoint;
 
     try {
@@ -542,23 +555,24 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       credentials: 'include',
     });
 
-    return timerFor(window).timeoutPromise(RTC_TIMEOUT, rtcResponse).then(res => {
-      const headers = new Headers();
-      headers.append("Cache-Control", "max-age=0");
-      xhrFor(this.win).fetchJson(endpoint, {
-        credentials: 'include',
-        headers: headers,
-      });
+    return rtcPromise = timerFor(window).timeoutPromise(
+      RTC_TIMEOUT, rtcResponse).then(res => {
+        const headers = new Headers();
+        headers.append('Cache-Control', 'max-age=0');
+        xhrFor(this.win).fetchJson(endpoint, {
+          credentials: 'include',
+          headers,
+        });
       // Redirects and non-200 status codes are forbidden for RTC.
-      return (!res.redirected && res.status == 200) ? res.json() : RTC_ERROR;
-    }).catch(err => {
-      const errorUrl = rtcConfig['doubleclick']['errorReportingUrl'];
-      if (errorUrl) {
-        // TODO : Log the error to the pub server
-        console.log("Issue");
-      }
-      return RTC_ERROR;
-    });
+        return (!res.redirected && res.status == 200) ? res.json() : RTC_ERROR;
+      }).catch(err => {
+        const errorUrl = rtcConfig['doubleclick']['errorReportingUrl'];
+        if (errorUrl) {
+          // TODO : Log the error to the pub server
+          console.log('Issue');
+        }
+        return RTC_ERROR;
+      });
   }
 
   /** @override */
@@ -778,12 +792,13 @@ export function constructSRABlockParameters(instances) {
  * @return {!Promise<!Object<string,string|number|boolean>>}
  */
 function getPageLevelParameters_(win, doc, startTime, isSra) {
-  return googlePageParameters(win, doc, startTime, 'ldjh')
-      .then(pageLevelParameters => {
-        const parameters = Object.assign({}, PAGE_LEVEL_PARAMS_);
-        parameters['impl'] = isSra ? 'fifs' : 'ifr';
-        return Object.assign(parameters, pageLevelParameters);
-      });
+  pageLevelParameters_ = pageLevelParameters_ || googlePageParameters(
+    win, doc, startTime, 'ldjh').then(pageLevelParameters => {
+      const parameters = Object.assign({}, PAGE_LEVEL_PARAMS_);
+      parameters['impl'] = isSra ? 'fifs' : 'ifr';
+      return Object.assign(parameters, pageLevelParameters);
+    });
+  return pageLevelParameters_;
 }
 
 /**
