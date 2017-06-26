@@ -34,6 +34,7 @@ import {upgradeOrRegisterElement} from '../../../../src/custom-element';
 import {
   createElementWithAttributes,
   addAttributesToElement,
+  removeElement,
 } from '../../../../src/dom';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {
@@ -88,7 +89,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       // amp-ad.
       const iframe = fixture.doc.createElement('iframe');
       element.appendChild(iframe);
-      document.body.appendChild(element);
+      fixture.doc.body.appendChild(element);
       impl = new AmpAdNetworkAdsenseImpl(element);
       impl.iframe = iframe;
       return fixture;
@@ -482,15 +483,9 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       // IOb.
       expect(style.width).to.be.ok;
       expect(style.height).to.be.ok;
-      // We don't know the exact values by which the frame will be translated,
-      // as this can vary depending on whether we use the height/width
-      // attributes, or the actual size of the frame. To make this less of a
-      // hassle, we'll just match against regexp.
-      expect(style.transform).to.match(new RegExp(
-          'matrix\\(1, 0, 0, 1, -[0-9]+, -[0-9]+\\)'));
     }
 
-    afterEach(() => document.body.removeChild(impl.element));
+    afterEach(() => removeElement(impl.element));
 
     it('centers iframe in slot when height && width', () => {
       return createImplTag({
