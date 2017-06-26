@@ -2282,7 +2282,7 @@ describe('amp-a4a', () => {
         tearDownSlotMock.returns(undefined);
         const destroyFrameMock = sandbox.stub(AmpA4A.prototype, 'destroyFrame');
         destroyFrameMock.returns(undefined);
-        
+
         expect(a4a.isRefreshing).to.be.false;
         return a4a.refresh(() => {}).then(() => {
           expect(initiateAdRequestMock).to.be.calledOnce;
