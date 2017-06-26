@@ -543,9 +543,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     });
 
     return timerFor(window).timeoutPromise(RTC_TIMEOUT, rtcResponse).then(res => {
+      const headers = new Headers();
+      headers.append("Cache-Control", "max-age=0");
       xhrFor(this.win).fetchJson(endpoint, {
         credentials: 'include',
-        cache: 'no-cache', /* TODO: make this actually skip cache */
+        headers: headers,
       });
       // Redirects and non-200 status codes are forbidden for RTC.
       return (!res.redirected && res.status == 200) ? res.json() : RTC_ERROR;
