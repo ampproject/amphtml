@@ -47,7 +47,7 @@ export const CommonSignals = {
   RENDER_START: 'render-start',
 
   /**
-   * The element has been unlaid out and relayout is needed.
+   * The element has been unlaid out.
    */
-  UNLOAD_RESET: 'unload-reset',
+  UNLOAD: 'unload',
 };

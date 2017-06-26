@@ -1256,8 +1256,8 @@ function createBaseCustomElementClass(win) {
           'Must be built to receive viewport events');
       this.dispatchCustomEventForTesting(AmpEvents.LOAD_START);
       const isLoadEvent = (this.layoutCount_ == 0);  // First layout is "load".
+      this.signals_.reset(CommonSignals.UNLOAD);
       if (isLoadEvent) {
-        this.signals_.reset(CommonSignals.UNLOAD_RESET);
         this.signals_.signal(CommonSignals.LOAD_START);
       }
       if (this.perfOn_) {
@@ -1375,7 +1375,7 @@ function createBaseCustomElementClass(win) {
      * Requests the element to unload any expensive resources when the element
      * goes into non-visible state. The scope is up to the actual component.
      *
-     * Calling this method on unbuilt ot unupgraded element has no effect.
+     * Calling this method on unbuilt or unupgraded element has no effect.
      *
      * @return {boolean}
      * @package @final @this {!Element}
@@ -1385,6 +1385,7 @@ function createBaseCustomElementClass(win) {
       if (!this.isBuilt()) {
         return false;
       }
+      this.signals_.signal(CommonSignals.UNLOAD);
       const isReLayoutNeeded = this.implementation_.unlayoutCallback();
       if (isReLayoutNeeded) {
         this.reset_();
@@ -1400,7 +1401,6 @@ function createBaseCustomElementClass(win) {
       this.signals_.reset(CommonSignals.LOAD_START);
       this.signals_.reset(CommonSignals.LOAD_END);
       this.signals_.reset(CommonSignals.INI_LOAD);
-      this.signals_.signal(CommonSignals.UNLOAD_RESET);
     }
 
     /**

@@ -189,8 +189,7 @@ export class AmpAnalytics extends AMP.BaseElement {
             .then(instrumentation => {
               this.instrumentation_ = instrumentation;
             })
-            .then(this.onFetchRemoteConfigSuccess_.bind(this))
-            .then(() => this.signals().signal('amp-analytics-ready'));
+            .then(this.onFetchRemoteConfigSuccess_.bind(this));
     return this.iniPromise_;
   }
 
