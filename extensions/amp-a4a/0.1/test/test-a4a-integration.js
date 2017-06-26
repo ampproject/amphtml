@@ -304,6 +304,53 @@ describe('integration test: a4a', () => {
         });
       });
 
+  it('should continue to show old creative after refresh', () => {
+    return fixture.addElement(a4aElement).then(() => {
+      return expectRenderedInFriendlyIframe(a4aElement, 'Hello, world.')
+          .then(() => {
+            headers = {};
+            headers[SIGNATURE_HEADER] = validCSSAmp.signature;
+            mockResponse = {
+              arrayBuffer: () => utf8Encode(validCSSAmp.reserialized),
+              bodyUsed: false,
+              headers: new FetchResponseHeaders({
+                getResponseHeader(name) {
+                  return headers[name];
+                },
+              }),
+              status: 204,
+            };
+            xhrMock.withArgs(TEST_URL, {
+              mode: 'cors',
+              method: 'GET',
+              credentials: 'include',
+            }).onFirstCall().returns(Promise.resolve(mockResponse));
+            const a4a = new MockA4AImpl(a4aElement);
+            const initiateAdRequestMock = sandbox.stub(
+                MockA4AImpl.prototype,
+                'initiateAdRequest',
+                () => { debugger;
+                  a4a.adPromise_ = Promise.resolve();
+                  // This simulates calling forceCollapse, without tripping up
+                  // any unrelated asserts.
+                  a4a.isRefreshing = false;
+                });
+            const tearDownSlotMock =
+                sandbox.stub(MockA4AImpl.prototype, 'tearDownSlot');
+            tearDownSlotMock.returns(undefined);
+            const destroyFrameSpy =
+                sandbox.spy(MockA4AImpl.prototype, 'destroyFrame');
+            const callback = sandbox.spy(); debugger;
+            return a4a.refresh(callback).then(() => {
+              expect(initiateAdRequestMock).to.be.called;
+              expect(tearDownSlotMock).to.be.called;
+              expect(destroyFrameSpy).to.not.be.called;
+              expect(callback).to.be.called;
+            });
+          });
+    });
+  });
+
   // TODO(@ampproject/a4a): Need a test that double-checks that thrown errors
   // are propagated out and printed to console and/or sent upstream to error
   // logging systems.  This is a bit tricky, because it's handled by the AMP

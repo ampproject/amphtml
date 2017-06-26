@@ -2269,6 +2269,7 @@ describe('amp-a4a', () => {
             mutate: func => func(),
           };
         };
+        a4a.togglePlaceholder = sandbox.spy();
 
         // We don't really care about the behavior of the following methods, so
         // long as they're called the appropriate number of times. We stub them
@@ -2281,15 +2282,12 @@ describe('amp-a4a', () => {
         tearDownSlotMock.returns(undefined);
         const destroyFrameMock = sandbox.stub(AmpA4A.prototype, 'destroyFrame');
         destroyFrameMock.returns(undefined);
-        const togglePlaceholderMock =
-            sandbox.stub(AmpA4A.prototype, 'togglePlaceholder');
-        togglePlaceholderMock.returns(undefined);
-
+        
         expect(a4a.isRefreshing).to.be.false;
         return a4a.refresh(() => {}).then(() => {
           expect(initiateAdRequestMock).to.be.calledOnce;
           expect(tearDownSlotMock).to.be.calledOnce;
-          expect(togglePlaceholderMock).to.be.calledOnce;
+          expect(a4a.togglePlaceholder).to.be.calledOnce;
           expect(a4a.isRefreshing).to.be.true;
           expect(a4a.isRelayoutNeededFlag).to.be.true;
         });
