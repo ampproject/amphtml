@@ -66,11 +66,13 @@ export class AmpImg extends BaseElement {
 
   /** @override */
   preconnectCallback(onLayout) {
-    // NOTE(@wassgha) the correct src url isn't determined until the element is
-    // laid out, thus assuming that hopefully all urls in the srcset/src
-    // belong to the same domain, we take the first url and pre-connect to it.
-    // If the image doesn't have an srcset, this connects to the src url.
-    this.preconnect.url(this.element.getAttribute('src'), onLayout);
+    // NOTE(@wassgha): since parseSrcset is computationally expensive and can
+    // not be inside the `buildCallback`, we went with preconnecting to the
+    // `src` url if it exists.
+    const src = this.element.getAttribute('src');
+    if (src) {
+      this.preconnect.url(src, onLayout);
+    }
   }
 
   /** @override */
