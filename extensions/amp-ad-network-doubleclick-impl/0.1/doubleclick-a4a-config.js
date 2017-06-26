@@ -26,14 +26,15 @@ import {
   addExperimentIdToElement,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
-import {EXPERIMENT_ATTRIBUTE} from '../../../ads/google/a4a/utils';
+import {
+  getExperimentBranch,
+  forceExperimentBranch,
+  randomlySelectUnsetExperiments,
+} from '../../../src/experiments';
 import {dev} from '../../../src/log';
-import {getMode} from '../../../src/mode';
-import {isProxyOrigin} from '../../../src/url';
-import {isExperimentOn} from '../../../src/experiments';
 
 /** @const {string} */
-const DOUBLECLICK_A4A_EXPERIMENT_NAME = 'expDoubleclickA4A';
+export const DOUBLECLICK_A4A_EXPERIMENT_NAME = 'expDoubleclickA4A';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -47,7 +48,7 @@ export const DOUBLECLICK_EXPERIMENT_FEATURE = {
 };
 
 /** @const @type {!Object<string,?string>} */
-const URL_EXPERIMENT_MAPPING = {
+export const URL_EXPERIMENT_MAPPING = {
   '-1': MANUAL_EXPERIMENT_ID,
   '0': null,
   // Holdback
@@ -67,6 +68,9 @@ const URL_EXPERIMENT_MAPPING = {
 /** @const {string} */
 export const BETA_ATTRIBUTE = 'data-use-beta-a4a-implementation';
 
+/** @const {string} */
+export const BETA_EXPERIMENT_ID = '2077831';
+
 /**
  * @param {!Window} win
  * @param {!Element} element
@@ -78,7 +82,7 @@ export function doubleclickIsA4AEnabled(win, element) {
     return false;
   }
   if (element.hasAttribute(BETA_ATTRIBUTE)) {
-    addExperimentIdToElement('2077831', element);
+    addExperimentIdToElement(BETA_EXPERIMENT_ID, element);
     dev().info(TAG, `beta forced a4a selection ${element}`);
     return true;
   }
@@ -86,9 +90,9 @@ export function doubleclickIsA4AEnabled(win, element) {
   let experimentId;
   const urlExperimentId = extractUrlExperimentId(win, element);
   if (urlExperimentId != undefined) {
-    experimentId = argMapping[urlExperimentId];
+    experimentId = URL_EXPERIMENT_MAPPING[urlExperimentId];
     dev().info(
-      TAG, `url experiment selection ${urlExperimentId}: ${experimentId}`);
+        TAG, `url experiment selection ${urlExperimentId}: ${experimentId}.`);
   } else {
     // Not set via url so randomly set.
     const experimentInfoMap = {};
@@ -96,7 +100,7 @@ export function doubleclickIsA4AEnabled(win, element) {
       isTrafficEligible: () => true,
       branches: {
         control: '2092613',
-        experiment: DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL
+        experiment: DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL,
       },
     };
     // Note: Because the same experimentName is being used everywhere here,
@@ -106,16 +110,14 @@ export function doubleclickIsA4AEnabled(win, element) {
     randomlySelectUnsetExperiments(win, experimentInfoMap);
     experimentId = getExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME);
     dev().info(
-      TAG, `random experiment selection ${urlExperimentId}: ${experimentId}`);
+        TAG, `random experiment selection ${urlExperimentId}: ${experimentId}`);
   }
   if (experimentId) {
     addExperimentIdToElement(experimentId, element);
+    forceExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME, experimentId);
   }
-  return
-    !experimentFeatureEnabled(
-      win, DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL) &&
-    !experimentFeatureEnabled(
-      win, DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL)
+  return ![DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL,
+    DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL].includes(experimentId);
 }
 
 /**
@@ -124,6 +126,5 @@ export function doubleclickIsA4AEnabled(win, element) {
  * @return {boolean} whether feature is enabled
  */
 export function experimentFeatureEnabled(win, feature) {
-  return getExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME) ==
-    dev().assertString(DOUBLECLICK_EXPERIMENT_FEATURE[feature]);
+  return getExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME) == feature;
 }

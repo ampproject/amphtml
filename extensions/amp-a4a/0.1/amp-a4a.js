@@ -403,6 +403,14 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * @return {boolean} whether ad request should be delayed until
+   *    renderOutsideViewport is met.
+   */
+  delayAdRequestEnabled() {
+    return false;
+  }
+
+  /**
    * Returns preconnect urls for A4A. Ad network should overwrite in their
    * Fast Fetch implementation and return an array of urls for the runtime to
    * preconnect to.
@@ -570,7 +578,7 @@ export class AmpA4A extends AMP.BaseElement {
           // renderOutsideViewport. Within render outside viewport will not
           // resolve if already within viewport thus the check for already
           // meeting the definition as opposed to waiting on the promise.
-          if (this.delayRequestEnabled_ &&
+          if (this.delayAdRequestEnabled() &&
               !this.getResource().renderOutsideViewport()) {
             return this.getResource().whenWithinRenderOutsideViewport();
           }
@@ -579,10 +587,7 @@ export class AmpA4A extends AMP.BaseElement {
         /** @return {!Promise<?string>} */
         .then(() => {
           checkStillCurrent();
-          if (this.delayRequestEnabled_) {
-            dev().info(TAG, 'ad request being built');
-          }
-          return /** @type {!Promise<?string>} */ (this.getAdUrl());
+          return /** @type {!Promise<?string>} */(this.getAdUrl());
         })
         // This block returns the (possibly empty) response to the XHR request.
         /** @return {!Promise<?Response>} */

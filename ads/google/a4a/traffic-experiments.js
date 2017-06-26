@@ -82,6 +82,7 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
     opt_sfgInternalBranches) {
   if (!isGoogleAdsA4AValidEnvironment(win)) {
     // Serving location doesn't qualify for A4A treatment
+    console.log('not valid env');
     return false;
   }
 
@@ -92,20 +93,23 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
       opt_sfgInternalBranches ? opt_sfgInternalBranches.control : null,
       opt_sfgInternalBranches ? opt_sfgInternalBranches.experiment : null,
       MANUAL_EXPERIMENT_ID);
-  const experimentInfoMap = {};
-  const branches = [
-    internalBranches.control,
-    internalBranches.experiment,
-  ];
-  experimentInfoMap[experimentName] = {
-    isTrafficEligible: () => true,
-    branches,
-  };
-  // Note: Because the same experimentName is being used everywhere here,
-  // randomlySelectUnsetExperiments won't add new IDs if
-  // maybeSetExperimentFromUrl has already set something for this
-  // experimentName.
-  randomlySelectUnsetExperiments(win, experimentInfoMap);
+  console.log('isSetFromUrl:', isSetFromUrl);
+  if (!isSetFromUrl) {
+    const experimentInfoMap = {};
+    const branches = [
+      internalBranches.control,
+      internalBranches.experiment,
+    ];
+    experimentInfoMap[experimentName] = {
+      isTrafficEligible: () => true,
+      branches,
+    };
+    // Note: Because the same experimentName is being used everywhere here,
+    // randomlySelectUnsetExperiments won't add new IDs if
+    // maybeSetExperimentFromUrl has already set something for this
+    // experimentName.
+    randomlySelectUnsetExperiments(win, experimentInfoMap);
+  }
   if (isExperimentOn(win, experimentName)) {
     // Page is selected into the overall traffic experiment.
     // In other words, if A4A has not yet launched serve A4A Fast Fetch,
