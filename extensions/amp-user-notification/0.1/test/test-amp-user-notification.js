@@ -592,4 +592,49 @@ describe('amp-user-notification', () => {
       expect(get().then).to.be.function;
     });
   });
+
+  describe('optOutOfCid', () => {
+    const cidMock = {
+      optOutOfCid() {
+        return optoutPromise;
+      },
+    };
+    let dismissSpy;
+    let optoutPromise;
+    let optOutOfCidStub;
+
+    beforeEach(() => {
+      optOutOfCidStub = sandbox.spy(cidMock, 'optOutOfCid');
+    });
+
+    it('should call optOutOfCid and dismiss', () => {
+      return getUserNotification(dftAttrs).then(el => {
+        const impl = el.implementation_;
+        impl.buildCallback();
+        optoutPromise = Promise.resolve();
+        impl.getCidService_ = () => { return Promise.resolve(cidMock); };
+        dismissSpy = sandbox.spy(impl, 'dismiss');
+
+        return impl.optoutOfCid_();
+      }).then(() => {
+        expect(dismissSpy).to.be.calledOnce;
+        expect(optOutOfCidStub).to.be.calledOnce;
+      });
+    });
+
+    it('should not dismiss if optOutOfCid fails', () => {
+      return getUserNotification(dftAttrs).then(el => {
+        const impl = el.implementation_;
+        impl.buildCallback();
+        optoutPromise = Promise.reject('could not optout');
+        impl.getCidService_ = () => { return Promise.resolve(cidMock); };
+        dismissSpy = sandbox.stub(impl, 'dismiss');
+
+        return impl.optoutOfCid_();
+      }).then(() => {
+        expect(dismissSpy).not.to.be.called;
+        expect(optOutOfCidStub).to.be.calledOnce;
+      });
+    });
+  });
 });

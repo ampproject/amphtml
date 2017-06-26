@@ -50,6 +50,8 @@ const BASE_CID_MAX_AGE_MILLIS = 365 * ONE_DAY_MILLIS;
 
 const SCOPE_NAME_VALIDATOR = /^[a-zA-Z0-9-_.]+$/;
 
+const CID_OPTOUT_STORAGE_KEY = 'amp-cid-optout';
+
 /**
  * A base cid string value and the time it was last read / stored.
  * @typedef {{time: time, cid: string}}
@@ -125,6 +127,29 @@ export class Cid {
           opt_persistenceConsent || consent);
     });
   }
+
+  /**
+   * User will be opted out of Cid issuance for all scopes.
+   * When opted-out Cid service will reject all `get` requests.
+   *
+   * @return {!Promise}
+   */
+  optOutOfCid() {
+    const viewer = viewerForDoc(this.ampdoc);
+    if (viewer) {
+      // TODO(aghassemi,lannka): what do we need to send to the viewer?
+    } else {
+      try {
+        this.ampdoc.win.localStorage.setItem(CID_OPTOUT_STORAGE_KEY, true);
+      } catch (ignore) {
+        // Setting localStorage may fail. In practice we don't expect that to
+        // happen a lot (since we don't go anywhere near the quota, but
+        // in particular in Safari private browsing mode it always fails.
+        // In that case we just don't store anything, which is just fine.
+      }
+    }
+  }
+
 }
 
 /**

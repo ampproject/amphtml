@@ -157,6 +157,7 @@ export class AmpUserNotification extends AMP.BaseElement {
         .registerUserNotification(this.elementId_, this);
 
     this.registerAction('dismiss', this.dismiss.bind(this));
+    this.registerAction('optoutOfCid', this.optoutOfCid_.bind(this));
   }
 
   /**
@@ -232,12 +233,26 @@ export class AmpUserNotification extends AMP.BaseElement {
   }
 
   /**
-   * Get async cid service.
+   * Opts the user out of cid issuance and dismisses the notification.
+   * @private
+   */
+  optoutOfCid_() {
+    return this.getCidService_()
+        .then(cid => cid.optOutOfCid())
+        .then(this.dismiss.bind(this))
+        .catch(reason => {
+          dev().error('amp-user-notification',
+              'Failed to opt out of Cid', reason);
+        });
+  }
+
+  /**
+   * Get async cid.
    * @return {!Promise}
    * @private
    */
   getAsyncCid_() {
-    return cidForDoc(this.element).then(cid => {
+    return this.getCidService_().then(cid => {
       // `amp-user-notification` is our cid scope, while we give it a resolved
       // promise for the 2nd argument so that the 3rd argument (the
       // persistentConsent) is the one used to resolve getting
@@ -250,6 +265,15 @@ export class AmpUserNotification extends AMP.BaseElement {
         {scope: 'amp-user-notification', createCookieIfNotPresent: true},
           Promise.resolve(), this.dialogPromise_);
     });
+  }
+
+  /**
+   * Get cid service.
+   * @return {!Promise}
+   * @private
+   */
+  getCidService_() {
+    cidForDoc(this.element);
   }
 
   /** @override */
