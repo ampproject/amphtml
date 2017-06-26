@@ -176,6 +176,9 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     adTypes: getAdTypes(),
   };
 
+  // Longer timeout on Travis; fail quickly at local.
+  process.env.TEST_TIMEOUT = process.env.TRAVIS ? 10000 : 2000;
+
   if (argv.compiled) {
     process.env.SERVE_MODE = 'compiled';
   } else {
