@@ -102,7 +102,7 @@
    });
 
    it('toolbar header should be hidden for a \
-   invalid window size for DEFAULT_TOOLBAR_MEDIA', () => {
+   non-matching window size for DEFAULT_TOOLBAR_MEDIA', () => {
      return getToolbars([{}]).then(obj => {
        const toolbars = obj.toolbars;
        const toolbarElements = Array.prototype
@@ -120,7 +120,7 @@
    });
 
    it('toolbar header should be shown for a \
-   valid window size for DEFAULT_TOOLBAR_MEDIA', () => {
+   matching window size for DEFAULT_TOOLBAR_MEDIA', () => {
      return getToolbars([{}]).then(obj => {
        const toolbars = obj.toolbars;
        const toolbarElements = Array.prototype
@@ -138,7 +138,7 @@
    });
 
    it('should hide <nav toolbar> elements with toolbar-only, \
-   inside the sidebar, but not inside the toolbar, for a valid \
+   inside the sidebar, but not inside the toolbar, for a matching \
    window size for DEFAULT_TOOLBAR_MEDIA', () => {
      return getToolbars([{
        toolbarOnlyOnNav: true,
