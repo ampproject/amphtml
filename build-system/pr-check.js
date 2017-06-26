@@ -24,13 +24,13 @@
  * This script attempts to introduce some granularity for our
  * presubmit checking, via the determineBuildTargets method.
  */
+const atob = require('atob');
 const exec = require('./exec.js').exec;
 const execOrDie = require('./exec.js').execOrDie;
 const getStdout = require('./exec.js').getStdout;
-const path = require('path');
 const minimist = require('minimist');
+const path = require('path');
 const util = require('gulp-util');
-const extensionsVersions = require('./extensions-versions-config');
 
 const gulp = 'node_modules/gulp/bin/gulp.js';
 const fileLogPrefix = util.colors.yellow.bold('pr-check.js:');
@@ -141,21 +141,13 @@ function isValidatorFile(filePath) {
     return false;
   }
 
-  // Get extension name
   const pathArray = path.dirname(filePath).split(path.sep);
-  if (pathArray.length < 3) {
-    // At least 3 with ['extensions', '{$name}', '{$version}']
+  if (pathArray.length < 2) {
+    // At least 2 with ['extensions', '{$name}']
     return false;
   }
-  const extension = pathArray[1];
-  const supportVersions = extensionsVersions[extension] || ['0.1'];
 
-  for (let i = 0; i < supportVersions.length; i++) {
-    if (!path.dirname(filePath).endsWith(supportVersions[i]) &&
-      !path.dirname(filePath).endsWith(path.join(supportVersions[i], 'test')))
-      return false;
-  }
-
+  // Validator files take the form of validator-.*\.(html|out|protoascii)
   const name = path.basename(filePath);
   return name.startsWith('validator-') &&
       (name.endsWith('.out') || name.endsWith('.html') ||
@@ -271,10 +263,8 @@ const command = {
         `${gulp} test --nobuild --saucelabs --integration --compiled`);
   },
   runVisualDiffTests: function() {
-    // This must only be run for push builds, since Travis hides the encrypted
-    // environment variables required by Percy during pull request builds.
-    // For now, this is warning-only.
-    timedExec(`${gulp} visual-diff`);
+    process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
+    timedExec(`ruby ${path.resolve('build-system/tasks/visual-diff.rb')}`);
   },
   runPresubmitTests: function() {
     timedExecOrDie(`${gulp} presubmit`);
@@ -293,6 +283,7 @@ function runAllCommands() {
     command.testBuildSystem();
     command.cleanBuild();
     command.buildRuntime();
+    command.runVisualDiffTests();
     command.runJsonAndLintChecks();
     command.runDepAndTypeChecks();
     command.runUnitTests();
@@ -304,7 +295,6 @@ function runAllCommands() {
     command.cleanBuild();
     command.buildRuntimeMinified();
     command.runPresubmitTests();  // Needs runtime to be built and served.
-    command.runVisualDiffTests();  // Only called during push builds.
     command.runIntegrationTests();
   }
 }
@@ -376,6 +366,7 @@ function main(argv) {
     if (buildTargets.has('RUNTIME') || buildTargets.has('INTEGRATION_TEST')) {
       command.cleanBuild();
       command.buildRuntime();
+      command.runVisualDiffTests();
       // Ideally, we'd run presubmit tests after `gulp dist`, as some checks run
       // through the dist/ folder. However, to speed up the Travis queue, we no
       // longer do a dist build for PRs, so this call won't cover dist/.

@@ -23,18 +23,19 @@ import {
 } from '../../../src/services';
 import {chunk, ChunkPriority} from '../../../src/chunk';
 import {dev, user} from '../../../src/log';
-import {deepMerge} from '../../../src/utils/object';
+import {dict, deepMerge} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {filterSplice} from '../../../src/utils/array';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isObject, toArray} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
 import {map} from '../../../src/utils/object';
 import {reportError} from '../../../src/error';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
 import {waitForBodyPromise} from '../../../src/dom';
+import {AmpEvents} from '../../../src/amp-events';
+import {BindEvents} from './bind-events';
 
 const TAG = 'amp-bind';
 
@@ -95,11 +96,6 @@ export class Bind {
    * @param {!Window=} opt_win
    */
   constructor(ampdoc, opt_win) {
-    // Allow integration test to access this class in testing mode.
-    /** @const @private {boolean} */
-    this.enabled_ = isBindEnabledFor(ampdoc.win);
-    user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);
-
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
@@ -130,8 +126,8 @@ export class Bind {
     /** @const @private {!./bind-validator.BindValidator} */
     this.validator_ = new BindValidator();
 
-    /** @const @private {!Object} */
-    this.scope_ = Object.create(null);
+    /** @const @private {!JsonObject} */
+    this.scope_ = dict();
 
     /** @const @private {!../../../src/service/resources-impl.Resources} */
     this.resources_ = resourcesForDoc(ampdoc);
@@ -180,8 +176,6 @@ export class Bind {
    * @return {!Promise}
    */
   setState(state, opt_skipEval, opt_isAmpStateMutation) {
-    user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);
-
     // TODO(choumx): What if `state` contains references to globals?
     try {
       deepMerge(this.scope_, state, MAX_MERGE_DEPTH);
@@ -201,7 +195,7 @@ export class Bind {
 
     if (getMode().test) {
       promise.then(() => {
-        this.dispatchEventForTesting_('amp:bind:setState');
+        this.dispatchEventForTesting_(BindEvents.SET_STATE);
       });
     }
 
@@ -216,8 +210,6 @@ export class Bind {
    * @return {!Promise}
    */
   setStateWithExpression(expression, scope) {
-    user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);
-
     this.setStatePromise_ = this.initializePromise_.then(() => {
       // Allow expression to reference current scope in addition to event scope.
       Object.assign(scope, this.scope_);
@@ -247,7 +239,7 @@ export class Bind {
     let promise = this.addBindingsForNode_(rootNode).then(() => {
       // Listen for template renders (e.g. amp-list) to rescan for bindings.
       rootNode.addEventListener(
-          'amp:template-rendered', this.boundOnTemplateRendered_);
+          AmpEvents.TEMPLATE_RENDERED, this.boundOnTemplateRendered_);
     });
     // Check default values against initial expression results in development.
     if (getMode().development) {
@@ -259,7 +251,7 @@ export class Bind {
     if (getMode().test) {
       // Signal init completion for integration tests.
       promise.then(() => {
-        this.dispatchEventForTesting_('amp:bind:initialize');
+        this.dispatchEventForTesting_(BindEvents.INITIALIZE);
       });
     }
     return promise;
@@ -311,15 +303,15 @@ export class Bind {
           `${boundElements.length} elements.`);
 
       if (limitExceeded) {
-        user().error(TAG, `Maximum number of bindings reached ` +
+        user().error(TAG, 'Maximum number of bindings reached ' +
             `(${this.maxNumberOfBindings_}). Additional elements with ` +
-            `bindings will be ignored.`);
+            'bindings will be ignored.');
       }
 
       if (bindings.length == 0) {
         return {};
       } else {
-        dev().fine(TAG, `Asking worker to parse expressions...`);
+        dev().fine(TAG, 'Asking worker to parse expressions...');
         return this.ww_('bind.addBindings', [bindings]);
       }
     }).then(parseErrors => {
@@ -336,7 +328,7 @@ export class Bind {
         }
       });
 
-      dev().fine(TAG, `Finished parsing expressions with ` +
+      dev().fine(TAG, 'Finished parsing expressions with ' +
           `${Object.keys(parseErrors).length} errors.`);
     });
   }
@@ -373,7 +365,7 @@ export class Bind {
 
     // Remove the bindings from the evaluator.
     if (deletedExpressions.length > 0) {
-      dev().fine(TAG, `Asking worker to remove expressions...`);
+      dev().fine(TAG, 'Asking worker to remove expressions...');
       return this.ww_(
           'bind.removeBindingsWithExpressionStrings', [deletedExpressions]);
     } else {
@@ -405,7 +397,7 @@ export class Bind {
     const expressionToElements = Object.create(null);
 
     const doc = dev().assert(
-      node.ownerDocument, 'ownerDocument is null.');
+        node.ownerDocument, 'ownerDocument is null.');
     const walker = doc.createTreeWalker(node, NodeFilter.SHOW_ELEMENT);
 
     // Set to true if number of bindings in `node` exceeds `limit`.
@@ -585,11 +577,11 @@ export class Bind {
       const newValue = results[expressionString];
       if (newValue === undefined ||
           this.shallowEquals_(newValue, previousResult)) {
-        user().fine(TAG, `Expression result unchanged or missing: ` +
+        user().fine(TAG, 'Expression result unchanged or missing: ' +
             `"${expressionString}"`);
       } else {
         boundProperty.previousResult = newValue;
-        user().fine(TAG, `New expression result: ` +
+        user().fine(TAG, 'New expression result: ' +
             `"${expressionString}" -> ${newValue}`);
         updates.push({boundProperty, newValue});
       }
@@ -617,7 +609,7 @@ export class Bind {
         return;
       }
       const promise = this.resources_.mutateElement(element, () => {
-        const mutations = {};
+        const mutations = dict();
         let width, height;
 
         updates.forEach(update => {
@@ -821,7 +813,7 @@ export class Bind {
       const err = user().createError(`${TAG}: ` +
         `Default value for [${property}] does not match first expression ` +
         `result (${expectedValue}). This can result in unexpected behavior ` +
-        `after the next state change.`);
+        'after the next state change.');
       reportError(err, element);
     }
   }
@@ -834,7 +826,7 @@ export class Bind {
     this.removeBindingsForNode_(templateContainer).then(() => {
       return this.addBindingsForNode_(templateContainer);
     }).then(() => {
-      this.dispatchEventForTesting_('amp:bind:rescan-template');
+      this.dispatchEventForTesting_(BindEvents.RESCAN_TEMPLATE);
     });
   }
 
@@ -975,25 +967,4 @@ export class Bind {
       this.localWin_.dispatchEvent(event);
     }
   }
-}
-
-/**
- * @param {!Window} win
- * @return {boolean}
- */
-export function isBindEnabledFor(win) {
-  // Allow integration tests access.
-  if (getMode().test) {
-    return true;
-  }
-  if (isExperimentOn(win, TAG)) {
-    return true;
-  }
-  // TODO(choumx): Replace with real origin trial feature when implemented.
-  const token =
-      win.document.head.querySelector('meta[name="amp-experiment-token"]');
-  if (token && token.getAttribute('content') === 'HfmyLgNLmblRg3Alqy164Vywr') {
-    return true;
-  }
-  return false;
 }

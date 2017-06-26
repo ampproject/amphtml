@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../action-trust';
+import {removeElement} from '../dom.js';
 import {listen, listenOncePromise} from '../event-helper';
 import {dev} from '../log';
 import {getMode} from '../mode';
@@ -31,6 +33,45 @@ import {vsyncFor} from '../services';
  * is considered visible.
  */
 const VISIBILITY_PERCENT = 75;
+
+/**
+ * Playing States
+ *
+ * Internal playing states used to distinguish between video playing on user's
+ * command and videos playing automatically
+ *
+ * @constant {!Object<string, string>}
+ */
+export const PlayingStates = {
+  /**
+   * playing_manual
+   *
+   * When the video user manually interacted with the video and the video
+   * is now playing
+   *
+   * @event playing_manual
+   */
+  PLAYING_MANUAL: 'playing_manual',
+
+  /**
+   * playing_auto
+   *
+   * When the video has autoplay and the user hasn't interacted with it yet
+   *
+   * @event playing_auto
+   */
+  PLAYING_AUTO: 'playing_auto',
+
+  /**
+   * paused
+   *
+   * When the video is paused.
+   *
+   * @event paused
+   */
+  PAUSED: 'paused',
+};
+
 
 /**
  * VideoManager keeps track of all AMP video players that implement
@@ -65,12 +106,6 @@ export class VideoManager {
 
     this.registerCommonActions_(video);
 
-    // TODO(aghassemi): Remove this later. For now, VideoManager only matters
-    // for autoplay videos so no point in registering arbitrary videos yet.
-    if (!video.element.hasAttribute(VideoAttributes.AUTOPLAY)) {
-      return;
-    }
-
     if (!video.supportsPlatform()) {
       return;
     }
@@ -86,15 +121,16 @@ export class VideoManager {
    * so they can be called using AMP Actions.
    * For example: <button on="tap:myVideo.play">
    *
-   *
    * @param {!../video-interface.VideoInterface} video
    * @private
    */
   registerCommonActions_(video) {
-    video.registerAction('play', video.play.bind(video, /*isAutoplay*/ false));
-    video.registerAction('pause', video.pause.bind(video));
-    video.registerAction('mute', video.mute.bind(video));
-    video.registerAction('unmute', video.unmute.bind(video));
+    video.registerAction('play', video.play.bind(video, /* isAutoplay */ false),
+        ActionTrust.HIGH);
+    video.registerAction('pause', video.pause.bind(video), ActionTrust.LOW);
+    video.registerAction('mute', video.mute.bind(video), ActionTrust.LOW);
+    video.registerAction('unmute', video.unmute.bind(video),
+        ActionTrust.HIGH);
   }
 
   /**
@@ -108,6 +144,13 @@ export class VideoManager {
    * @private
    */
   maybeInstallVisibilityObserver_(entry) {
+    // TODO(aghassemi): Remove this later. For now, the visibility observer
+    // only matters for autoplay videos so no point in monitoring arbitrary
+    // videos yet.
+    if (!entry.video.element.hasAttribute(VideoAttributes.AUTOPLAY)) {
+      return;
+    }
+
     listen(entry.video.element, VideoEvents.VISIBILITY, () => {
       entry.updateVisibility();
     });
@@ -129,6 +172,48 @@ export class VideoManager {
       this.scrollListenerInstalled_ = true;
     }
   }
+
+  /**
+   * Returns the entry in the video manager corresponding to the video
+   * provided
+   *
+   * @param {!../video-interface.VideoInterface} video
+   * @return {VideoEntry} entry
+   * @private
+   */
+  getEntryForVideo_(video) {
+    for (let i = 0; i < this.entries_.length; i++) {
+      if (this.entries_[i].video === video) {
+        return this.entries_[i];
+      }
+    }
+    dev().assert(false, 'video is not registered to this video manager');
+    return null;
+  }
+
+  /**
+   * Returns whether the video is paused or playing after the user interacted
+   * with it or playing through autoplay
+   *
+   * @param {!../video-interface.VideoInterface} video
+   * @return {!../video-interface.VideoInterface} PlayingStates
+   */
+  getPlayingState(video) {
+    return this.getEntryForVideo_(video).getPlayingState();
+  }
+
+  /**
+   * Returns whether the video was interacted with or not
+   *
+   * @param {!../video-interface.VideoInterface} video
+   * @return {boolean}
+   */
+  userInteractedWithAutoPlay(video) {
+    return this.getEntryForVideo_(video).userInteractedWithAutoPlay();
+  }
+
+
+
 }
 
 /**
@@ -154,10 +239,10 @@ class VideoEntry {
     this.loaded_ = false;
 
     /** @private {boolean} */
-    this.isVisible_ = false;
+    this.isPlaying_ = false;
 
     /** @private {boolean} */
-    this.userInteracted_ = false;
+    this.isVisible_ = false;
 
     /** @private @const {!../service/vsync-impl.Vsync} */
     this.vsync_ = vsyncFor(ampdoc.win);
@@ -171,8 +256,20 @@ class VideoEntry {
     /** @private {boolean} */
     this.hasAutoplay_ = element.hasAttribute(VideoAttributes.AUTOPLAY);
 
+    /** @private {boolean} */
+    this.userInteractedWithAutoPlay_ = false;
+
+    /** @private {boolean} */
+    this.playCalledByAutoplay_ = false;
+
     listenOncePromise(element, VideoEvents.LOAD)
-      .then(() => this.videoLoaded_());
+        .then(() => this.videoLoaded_());
+
+
+    listen(this.video.element, VideoEvents.PAUSE, this.videoPaused_.bind(this));
+
+    listen(this.video.element, VideoEvents.PLAY, this.videoPlayed_.bind(this));
+
 
     // Currently we only register after video player is build.
     this.videoBuilt_();
@@ -187,6 +284,22 @@ class VideoEntry {
     if (this.hasAutoplay_) {
       this.autoplayVideoBuilt_();
     }
+  }
+
+  /**
+   * Callback for when the video starts playing
+   * @private
+   */
+  videoPlayed_() {
+    this.isPlaying_ = true;
+  }
+
+  /**
+  * Callback for when the video has been paused
+   * @private
+   */
+  videoPaused_() {
+    this.isPlaying_ = false;
   }
 
   /**
@@ -288,14 +401,14 @@ class VideoEntry {
         toggleAnimation.bind(this, /*playing*/ true));
 
     function onInteraction() {
-      this.userInteracted_ = true;
+      this.userInteractedWithAutoPlay_ = true;
       this.video.showControls();
       this.video.unmute();
       unlistenInteraction();
       unlistenPause();
       unlistenPlay();
-      animation.remove();
-      mask.remove();
+      removeElement(animation);
+      removeElement(mask);
     }
   }
 
@@ -304,7 +417,8 @@ class VideoEntry {
    * @private
    */
   autoplayLoadedVideoVisibilityChanged_() {
-    if (this.userInteracted_ || !viewerForDoc(this.ampdoc_).isVisible()) {
+    if (this.userInteractedWithAutoPlay_
+       || !viewerForDoc(this.ampdoc_).isVisible()) {
       return;
     }
 
@@ -315,6 +429,7 @@ class VideoEntry {
 
       if (this.isVisible_) {
         this.video.play(/*autoplay*/ true);
+        this.playCalledByAutoplay_ = true;
       } else {
         this.video.pause();
       }
@@ -404,6 +519,34 @@ class VideoEntry {
       measure,
       mutate,
     });
+  }
+
+
+  /**
+   * Returns whether the video is paused or playing after the user interacted
+   * with it or playing through autoplay
+   * @return {!../video-interface.VideoInterface} PlayingStates
+   */
+  getPlayingState() {
+    if (!this.isPlaying_) {
+      return PlayingStates.PAUSED;
+    }
+
+    if (this.isPlaying_
+       && this.playCalledByAutoplay_
+       && !this.userInteractedWithAutoPlay_) {
+      return PlayingStates.PLAYING_AUTO;
+    }
+
+    return PlayingStates.PLAYING_MANUAL;
+  }
+
+  /**
+   * Returns whether the video was interacted with or not
+   * @return {boolean}
+   */
+  userInteractedWithAutoPlay() {
+    return this.userInteractedWithAutoPlay_;
   }
 }
 

@@ -13,12 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the license.
 #
-
-tags: {  # amp-youtube
+tags: {  # amp-access
   html_format: AMP
   tag_name: "SCRIPT"
   extension_spec: {
-    name: "amp-youtube"
+    name: "amp-access"
     allowed_versions: "0.1"
     allowed_versions: "latest"
     requires_usage: DEPRECATED_WARNING
@@ -26,26 +25,30 @@ tags: {  # amp-youtube
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-youtube>
+tags: {  # amp-access (json)
   html_format: AMP
-  tag_name: "AMP-YOUTUBE"
-  disallowed_ancestor: "AMP-SIDEBAR"
-  requires_extension: "amp-youtube"
-  attrs: { name: "autoplay" }
+  tag_name: "SCRIPT"
+  spec_name: "amp-access extension .json script"
+  unique: true
+  mandatory_parent: "HEAD"
+  requires_extension: "amp-access"
+  requires_extension: "amp-analytics"
   attrs: {
-    name: "data-videoid"
+    name: "id"
     mandatory: true
-    value_regex: "[^=/?:]+"
+    value: "amp-access"
+    dispatch_key: NAME_VALUE_DISPATCH
   }
-  # <amp-bind>
-  attrs: { name: "[data-videoid]" }
-  attr_lists: "extended-amp-global"
-  amp_layout: {
-    supported_layouts: FILL
-    supported_layouts: FIXED
-    supported_layouts: FIXED_HEIGHT
-    supported_layouts: FLEX_ITEM
-    supported_layouts: NODISPLAY
-    supported_layouts: RESPONSIVE
+  attrs: { name: "nonce" }
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
   }
 }

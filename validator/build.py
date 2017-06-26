@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/env python2.7
 #
 # Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 #
@@ -164,13 +164,11 @@ def GenValidatorProtoascii(out_dir):
   assert re.match(r'^[a-zA-Z_\-0-9]+$', out_dir), 'bad out_dir: %s' % out_dir
 
   protoascii_segments = [open('validator-main.protoascii').read()]
-  extensions = glob.glob('extensions/*/0.1/validator-*.protoascii') + \
-               glob.glob('extensions/*/1.0/validator-*.protoascii')
+  extensions = glob.glob('extensions/*/validator-*.protoascii')
   # In the Github project, the extensions are located in a sibling directory
   # to the validator rather than a child directory.
   if not extensions:
-    extensions = glob.glob('../extensions/*/0.1/validator-*.protoascii') + \
-                 glob.glob('../extensions/*/1.0/validator-*.protoascii')
+    extensions = glob.glob('../extensions/*/validator-*.protoascii')
   extensions.sort()
   for extension in extensions:
     protoascii_segments.append(open(extension).read())
@@ -585,7 +583,6 @@ def Main():
   SetupOutDir(out_dir='dist')
   GenValidatorProtoascii(out_dir='dist')
   GenValidatorPb2Py(out_dir='dist')
-  GenValidatorProtoascii(out_dir='dist')
   GenValidatorGeneratedJs(out_dir='dist')
   GenValidatorGeneratedLightAmpJs(out_dir='dist')
   GenValidatorGeneratedMd(out_dir='dist')

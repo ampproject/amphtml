@@ -25,6 +25,10 @@
  import * as sinon from 'sinon';
  import '../amp-sidebar';
 
+ /** @const */
+ const DEFAULT_TOOLBAR_MEDIA = '(min-width: 768px)';
+
+
  adopt(window);
 
  describes.realWin('amp-sidebar 1.0 version', {
@@ -56,18 +60,65 @@
          const anchor = iframe.doc.createElement('a');
          anchor.href = '#section1';
          ampSidebar.appendChild(anchor);
+         if (options.toolbars) {
+           // Stub our sidebar operations, doing this here as it will
+           // Ease testing our media queries
+           const impl = ampSidebar.implementation_;
+           sandbox.stub(impl.vsync_,
+               'mutate', callback => {
+                 callback();
+               });
+           sandbox.stub(impl.vsync_,
+               'mutatePromise', callback => {
+                 callback();
+                 return Promise.resolve();
+               });
+           // Create our individual toolbars
+           options.toolbars.forEach(() => {
+             const navToolbar = iframe.doc.createElement('nav');
+             navToolbar.setAttribute('toolbar', DEFAULT_TOOLBAR_MEDIA);
+             const toolbarList = iframe.doc.createElement('ul');
+             for (let i = 0; i < 3; i++) {
+               const li = iframe.doc.createElement('li');
+               li.innerHTML = 'Toolbar item ' + i;
+               toolbarList.appendChild(li);
+             }
+             navToolbar.appendChild(toolbarList);
+             ampSidebar.appendChild(navToolbar);
+           });
+         }
          if (options.side) {
            ampSidebar.setAttribute('side', options.side);
          }
          if (options.open) {
            ampSidebar.setAttribute('open', '');
          }
+         if (options.closeText) {
+           ampSidebar.setAttribute('data-close-button-aria-label',
+               options.closeText);
+         };
          ampSidebar.setAttribute('id', 'sidebar1');
          ampSidebar.setAttribute('layout', 'nodisplay');
          return iframe.addElement(ampSidebar).then(() => {
            timer = timerFor(iframe.win);
+           if (options.toolbars) {
+             sandbox.stub(timer, 'delay', function(callback) {
+               callback();
+             });
+           }
            return {iframe, ampSidebar};
          });
+       });
+
+       it('should replace text to screen reader \
+       button in data-close-button-aria-label', () => {
+         return getAmpSidebar({'closeText':
+           'data-close-button-aria-label'}).then(obj => {
+             const sidebarElement = obj.ampSidebar;
+             const closeButton = sidebarElement.lastElementChild;
+             expect(closeButton.textContent)
+                 .to.equal('data-close-button-aria-label');
+           });
        });
      }
 
@@ -101,7 +152,7 @@
          const sidebarElement = obj.ampSidebar;
          const impl = sidebarElement.implementation_;
          impl.vsync_ = {
-           mutate: function(callback) {
+           mutate(callback) {
              callback();
            },
          };
@@ -124,6 +175,7 @@
          expect(closeButton).to.exist;
          expect(closeButton.tagName).to.equal('BUTTON');
          assertScreenReaderElement(closeButton);
+         expect(closeButton.textContent).to.equal('Close the sidebar');
          expect(impl.close_).to.have.not.been.called;
          closeButton.click();
          expect(impl.close_).to.be.calledOnce;
@@ -139,18 +191,18 @@
          impl.scheduleLayout = sandbox.spy();
          impl.getHistory_ = function() {
            return {
-             push: function() {
+             push() {
                historyPushSpy();
                return Promise.resolve(11);
              },
-             pop: function() {
+             pop() {
                historyPopSpy();
                return Promise.resolve(11);
              },
            };
          };
          impl.vsync_ = {
-           mutate: function(callback) {
+           mutate(callback) {
              callback();
            },
          };
@@ -191,11 +243,11 @@
          impl.scheduleLayout = sandbox.spy();
          impl.getHistory_ = function() {
            return {
-             push: function() {
+             push() {
                historyPushSpy();
                return Promise.resolve(11);
              },
-             pop: function() {
+             pop() {
                historyPopSpy();
                return Promise.resolve(11);
              },
@@ -203,7 +255,7 @@
          };
          impl.historyId_ = 100;
          impl.vsync_ = {
-           mutate: function(callback) {
+           mutate(callback) {
              callback();
            },
          };
@@ -236,7 +288,7 @@
          impl.scheduleLayout = sandbox.spy();
          impl.schedulePause = sandbox.spy();
          impl.vsync_ = {
-           mutate: function(callback) {
+           mutate(callback) {
              callback();
            },
          };
@@ -268,7 +320,7 @@
          const impl = sidebarElement.implementation_;
          impl.schedulePause = sandbox.spy();
          impl.vsync_ = {
-           mutate: function(callback) {
+           mutate(callback) {
              callback();
            },
          };
@@ -303,7 +355,7 @@
          impl.schedulePause = sandbox.spy();
          impl.scheduleResume = sandbox.spy();
          impl.vsync_ = {
-           mutate: function(callback) {
+           mutate(callback) {
              callback();
            },
          };
@@ -339,7 +391,7 @@
          const sidebarElement = obj.ampSidebar;
          const impl = sidebarElement.implementation_;
          impl.vsync_ = {
-           mutate: function(callback) {
+           mutate(callback) {
              callback();
            },
          };
@@ -359,7 +411,7 @@
          const sidebarElement = obj.ampSidebar;
          const impl = sidebarElement.implementation_;
          impl.vsync_ = {
-           mutate: function(callback) {
+           mutate(callback) {
              callback();
            },
          };
@@ -373,7 +425,7 @@
          expect(compensateIosBottombarSpy).to.be.calledOnce;
          // 10 lis + one top padding element inserted
          expect(sidebarElement.children.length)
-           .to.equal(initalChildrenCount + 1);
+             .to.equal(initalChildrenCount + 1);
        });
      });
 
@@ -385,7 +437,7 @@
          const impl = sidebarElement.implementation_;
          impl.schedulePause = sandbox.spy();
          impl.vsync_ = {
-           mutate: function(callback) {
+           mutate(callback) {
              callback();
            },
          };
@@ -429,7 +481,7 @@
          const impl = sidebarElement.implementation_;
          impl.schedulePause = sandbox.spy();
          impl.vsync_ = {
-           mutate: function(callback) {
+           mutate(callback) {
              callback();
            },
          };
@@ -473,7 +525,7 @@
          const impl = sidebarElement.implementation_;
          impl.schedulePause = sandbox.spy();
          impl.vsync_ = {
-           mutate: function(callback) {
+           mutate(callback) {
              callback();
            },
          };
@@ -517,7 +569,7 @@
          const impl = sidebarElement.implementation_;
          impl.schedulePause = sandbox.spy();
          impl.vsync_ = {
-           mutate: function(callback) {
+           mutate(callback) {
              callback();
            },
          };
@@ -540,6 +592,52 @@
          expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
          expect(sidebarElement.style.display).to.equal('');
          expect(impl.schedulePause).to.have.not.been.called;
+       });
+     });
+
+     // Tests for amp-sidebar 1.0
+     it('should not create toolbars without <nav toolbar />', () => {
+       return getAmpSidebar().then(obj => {
+         const sidebarElement = obj.ampSidebar;
+         const headerElements = sidebarElement.ownerDocument
+               .getElementsByTagName('header');
+         const toolbarElements = sidebarElement.ownerDocument
+               .querySelectorAll('*[toolbar]');
+         expect(headerElements.length).to.be.equal(0);
+         expect(toolbarElements.length).to.be.equal(0);
+         expect(sidebarElement.implementation_.toolbars_.length).to.be.equal(0);
+       });
+     });
+
+     it('should create a toolbar target element, \
+     containing the navigation toolbar element', () => {
+       return getAmpSidebar({
+         toolbars: [true],
+       }).then(obj => {
+         const sidebarElement = obj.ampSidebar;
+         const toolbarNavElements = Array.prototype
+                .slice.call(sidebarElement.ownerDocument
+                .querySelectorAll('nav[toolbar]'), 0);
+         expect(toolbarNavElements.length).to.be.above(1);
+         expect(sidebarElement.implementation_.toolbars_.length).to.be.equal(1);
+       });
+     });
+
+     it('should create multiple toolbar target elements, \
+     containing the navigation toolbar element', () => {
+       return getAmpSidebar({
+         toolbars: [true,
+           {
+             media: '(min-width: 1024px)',
+           },
+         ],
+       }).then(obj => {
+         const sidebarElement = obj.ampSidebar;
+         const toolbarNavElements = Array.prototype
+                .slice.call(sidebarElement.ownerDocument
+                .querySelectorAll('nav[toolbar]'), 0);
+         expect(toolbarNavElements.length).to.be.equal(4);
+         expect(sidebarElement.implementation_.toolbars_.length).to.be.equal(2);
        });
      });
    });

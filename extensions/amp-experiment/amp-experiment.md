@@ -22,10 +22,6 @@ limitations under the License.
     <td>Conduct user experience experiments on an AMP document and collect corresponding data with <code>amp-pixel</code> or <code>amp-analytics</code>.</td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-experiment" src="https://cdn.ampproject.org/v0/amp-experiment-0.1.js">&lt;/script></code></td>
   </tr>
@@ -120,4 +116,4 @@ An experiment can be forced to a variant via URL fragment. This is useful in dev
 Notice the same `amp-x-` prefix used as in body attributes.
 
 ## Validation
-One AMP document can have at most one `amp-experiment` element. See [amp-experiment rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-experiment/0.1/validator-amp-experiment.protoascii) in the AMP validator specification.
+One AMP document can have at most one `amp-experiment` element. See [amp-experiment rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-experiment/validator-amp-experiment.protoascii) in the AMP validator specification.

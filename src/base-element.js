@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from './action-trust';
 import {Layout} from './layout';
+import {getData} from './event-helper';
 import {loadPromise} from './event-helper';
 import {preconnectForElement} from './preconnect';
 import {isArray} from './types';
@@ -141,7 +143,13 @@ export class BaseElement {
     /** @public @const {!Window} */
     this.win = element.ownerDocument.defaultView;
 
-    /** @private {?Object<string, function(!./service/action-impl.ActionInvocation)>} */
+    /**
+     * Maps action name to struct containing the action handler and minimum
+     * trust required to invoke the handler.
+     * @private {?Object<string, {
+     *   handler: function(!./service/action-impl.ActionInvocation),
+     *   minTrust: ActionTrust,
+     * }>} */
     this.actionMap_ = null;
 
     /** @public {!./preconnect.Preconnect} */
@@ -491,6 +499,14 @@ export class BaseElement {
   }
 
   /**
+   * Minimum event trust required for activate().
+   * @return {ActionTrust}
+   */
+  activationTrust() {
+    return ActionTrust.MEDIUM;
+  }
+
+  /**
    * Returns a promise that will resolve or fail based on the element's 'load'
    * and 'error' events.
    * @param {T} element
@@ -511,13 +527,19 @@ export class BaseElement {
 
   /**
    * Registers the action handler for the method with the specified name.
+   *
+   * The handler is only invoked by events with trust equal to or greater than
+   * `minTrust` (or ActionTrust.MEDIUM if not provided). Otherwise, a
+   * user error is logged.
+   *
    * @param {string} method
    * @param {function(!./service/action-impl.ActionInvocation)} handler
+   * @param {ActionTrust} minTrust
    * @public
    */
-  registerAction(method, handler) {
+  registerAction(method, handler, minTrust = ActionTrust.MEDIUM) {
     this.initActionMap_();
-    this.actionMap_[method] = handler;
+    this.actionMap_[method] = {handler, minTrust};
   }
 
   /**
@@ -532,13 +554,18 @@ export class BaseElement {
    */
   executeAction(invocation, unusedDeferred) {
     if (invocation.method == 'activate') {
-      this.activate(invocation);
+      if (invocation.satisfiesTrust(this.activationTrust())) {
+        this.activate(invocation);
+      }
     } else {
       this.initActionMap_();
-      const handler = this.actionMap_[invocation.method];
-      user().assert(handler, `Method not found: ${invocation.method} in %s`,
+      const holder = this.actionMap_[invocation.method];
+      user().assert(holder, `Method not found: ${invocation.method} in %s`,
           this);
-      handler(invocation);
+      const {handler, minTrust} = holder;
+      if (invocation.satisfiesTrust(minTrust)) {
+        handler(invocation);
+      }
     }
   }
 
@@ -591,7 +618,7 @@ export class BaseElement {
     events = isArray(events) ? events : [events];
     for (let i = 0; i < events.length; i++) {
       element.addEventListener(events[i], event => {
-        this.element.dispatchCustomEvent(events[i], event.data || {});
+        this.element.dispatchCustomEvent(events[i], getData(event) || {});
       });
     }
   }
@@ -905,7 +932,7 @@ export class BaseElement {
    * @note Boolean attributes have a value of `true` and `false` when
    *       present and missing, respectively.
    * @param {
-   *   !Object<string, (null|boolean|string|number|Array|Object)>
+   *   !JsonObject<string, (null|boolean|string|number|Array|Object)>
    * } unusedMutations
    */
   mutatedAttributesCallback(unusedMutations) {

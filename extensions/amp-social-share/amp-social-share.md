@@ -203,6 +203,10 @@ The following example creates a share button through WhatsApp by setting the `da
 
 By default, `amp-social-share` includes some popular pre-configured providers. Buttons for these providers are styled with the provider's official color and logo. The default width is 60px, and the default height is 44px.
 
+{% call callout('Tip', type='success') %}
+Visit [AMP Start](https://ampstart.com/components#links-and-sharing) for responsive, pre-styled share links that you can use in your AMP pages.
+{% endcall %}
+
 ### Custom Styles
 
 Sometimes you want to provide your own style. You can simply override the provided styles like the following:
@@ -228,4 +232,4 @@ You can use [global AMP variables substitution](https://github.com/ampproject/am
 
 ## Validation
 
-See [amp-social-share rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-social-share/0.1/validator-amp-social-share.protoascii) in the AMP validator specification.
+See [amp-social-share rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-social-share/validator-amp-social-share.protoascii) in the AMP validator specification.

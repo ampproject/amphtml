@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+import {
+  publicJwk,
+  correctToken,
+  tokenWithBadVersion,
+  tokenWithBadConfigLength,
+  tokenWithBadSignature,
+  tokenWithExpiredExperiment,
+} from './testdata-experiments';
 import {cryptoFor} from '../../src/crypto';
 import {installCryptoService} from '../../src/service/crypto-impl';
 import {
@@ -806,26 +814,6 @@ describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
 
   let warnStub;
 
-  let correctToken;
-  let tokenWithBadVersion;
-  let tokenWithBadConfigLength;
-  let tokenWithBadSignature;
-  let tokenWithExpiredExperiment;
-  const publicJwk = {
-    alg: 'RS256',
-    e: 'AQAB',
-    ext: true,
-    /*eslint "google-camelcase/google-camelcase": 0*/
-    key_ops: ['verify'],
-    kty: 'RSA',
-    n: 'tekkGCYJK_BO0es6jiGXFpu5BcNLpnnRMr7GKcASW0Br_jo-uVd1qXOSM_wGWr-xzP4' +
-       'zCr89ENu8cxAbtjLWzzHCRzv9T4n4IM2SDu8DyyL2s_8c8VaNXlj8wWGtGxPQkRQeWn' +
-       'H-YxUWTm1TPvkI-DgeQX66-Qa_-eJpBhDl1uPQYe5MeqIkF2RzLAXHL9mZT6BQHTCCX' +
-       'rC5ihQBHWtcv15442p7cTk5UyEVeUmGI6_yPpwhxdOP0sw90D8oDvdV7L4bBfJNZj3n' +
-       'PNLfhfhr_Pxx41vUQD7jUDkd0vbHQksvv8qpc-So8XqzDg8jYdw2KxY0GMYBNKXDLE2' +
-       'emjClQw',
-  };
-
   beforeEach(() => {
     win = {
       document: env.win.document,
@@ -844,68 +832,8 @@ describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
     // Ensure that tests don't appear to pass because fake window object
     // doesn't have crypto when the window actually has it.
     installCryptoService(env.win);
-    expect(cryptoFor(env.win).isCryptoAvailable())
-        .to.equal(cryptoFor(win).isCryptoAvailable());
-
-    // Version: 0
-    // {
-    //   origin: 'https://www.google.com',
-    //   experiment: 'amp-expires-later',
-    //   expiration: 95617602000000,
-    // }
-    // amp-expires-later will expire in a few millenia, give or take a decade.
-    correctToken = 'AAAAAGB7Im9yaWdpbiI6Imh0dHBzOi8vd3d3Lmdvb2dsZS5jb20iLCJle' +
-        'HBlcmltZW50IjoiYW1wLWV4cGlyZXMtbGF0ZXIiLCJleHBpcmF0aW9uIjo5NTYxNzYwM' +
-        'jAwMDAwMH0ALRBeCa2Adrz+bZdQ0IMr2uBozsHHXCfR8S4CKPUpGvzqhQ8v3Dah3gNWu' +
-        '2k/WkAxbSC4UNisoHWx/t7JWPfoUZUZkUSq4rbtWwSg9Pdlk1rP5yMw/Yg4exnKJdJVE' +
-        '8zAFcoxoL3ottTqqiLoLW7fhx0icCC1BgiZzGUBU8PB1lq10qLeBndRopqyOlqMTN6pB' +
-        'igwN4qNZcg8zGiDkUuvrsOhsmqzbZR4P5RFkpUC6IiT84QKz5HiG1ASWu0kC9783s9FT' +
-        'QPk7/nmwbe9Nwsa9Y20RRz/JZw8d32xBwPAGl/BptjO/wjurKHoA343BnjYXkynozNEu' +
-        'PLZ50UpEkN+TbCzeiQ=';
-
-    // Same as correctToken except Version: 47
-    tokenWithBadVersion = 'LwAAAGB7Im9yaWdpbiI6Imh0dHBzOi8vd3d3Lmdvb2dsZS5jb2' +
-        '0iLCJleHBlcmltZW50IjoiYW1wLWV4cGlyZXMtbGF0ZXIiLCJleHBpcmF0aW9uIjo5NT' +
-        'YxNzYwMjAwMDAwMH0ALRBeCSrZf73cUlO49X4slZKNtiGFU9X6U5fUuzAYVLu7DirrE1' +
-        'XRk4AgjrQx57qAkerTrlHvylMESuefyS2n4B/Eme7GMr5/ZzUX4PklyhJmuLwVdVqgtI' +
-        'Qo4MyLKGqsS8W4FuQA35usf0CJ4FiJRWvJPaFQjWs7oLjqTvClPiNXVoOhp2G+3q7IP4' +
-        '7JwIyGxxlzGOsVA0Nac2OeYCqhAvwijgpfooSW43B1Qtrz3tCDqKIvCAz3ISfmGEVPJW' +
-        'rzz45G6UpVT9V/99EcMVikiMhFJbqqfZ4ZZc/XOYDcJ5u6EPbxUWbF+EdiayLYSmHGCv' +
-        'u9UckHHz9cZRoGrJhGDTExktk=';
-
-    // Same as correctToken except length = 999999
-    tokenWithBadConfigLength = 'AAAPQj97Im9yaWdpbiI6Imh0dHBzOi8vd3d3Lmdvb2dsZ' +
-        'S5jb20iLCJleHBlcmltZW50IjoiYW1wLWV4cGlyZXMtbGF0ZXIiLCJleHBpcmF0aW9uI' +
-        'jo5NTYxNzYwMjAwMDAwMH0ALRBeCQNICZZpdeBoZnbOE5mLiL7BEfTq98m6FLqMcpE7n' +
-        'x87cMbs1QG8zihLErsQMAtzGeoeSBN/Y7z3LoKPTtWo3UtZwcPq9Vq4B+jK+j+a2ipq7' +
-        '9nelm/TrJAoyWpzSuL0vl8ObIXxFLdvm4yC7d/ICTokm7MTZIOerJxOH+L4wb62O2PXg' +
-        'sW2Npg3gr24L2OzrjaDoIc1V2p+JMlUfbDQj51gmsPBRpm8rYfXqh7oATkFA7nWpcvRk' +
-        'LlVycjp60n7VRN9fl1e+NUXbpfVcZPH6Vsce0YpdSmBQ1mtTd8XKYZ4hxtYozSvBlbT3' +
-        'XePDe2YjbN3yqfMuN8XqkR8SHr1m9E=';
-
-     // Same as correctToken except with a bad signature
-    tokenWithBadSignature = 'AAAAAGB7Im9yaWdpbiI6Imh0dHBzOi8vd3d3Lmdvb2dsZS5j' +
-        'b20iLCJleHBlcmltZW50IjoiYW1wLWV4cGlyZXMtbGF0ZXIiLCJleHBpcmF0aW9uIjo5' +
-        'NTYxNzYwMjAwMDAwMH0ALRBeCU6Q+7A24/bRObLlzhVvuFXzQTzr1qKkRxu0eRB/1LM1' +
-        'anyoffvLuGurADnCHG3S3mk7p/21WNh4GnpDJ88AyD8DpilLaQKVhVfhBRh4COG/dU7C' +
-        'QUeMcPuNDJfdrhF4mazq52U4MWMKV87hjcehmiM9uqn8l3okWZiqRl2BOAjc3Ln4Q2YB' +
-        'hkRVVEj/0jSzyt+QBZoI495Sa/ugO1pShcaersnmE2GqA1IGkZTrHo0IVtr0Rxq2zw9C' +
-        'DdqiToef7hcEAQYpcWAI5LGeXWIva+6gcWZNlwrdCG/OF0cZTMiD/BFt+pw9VBPyfI2t' +
-        'pYq7MJXm7e8mxmUBhuP3Xg304ZU=';
-
-    // {
-    //   origin: 'https://www.google.com',
-    //   experiment: 'amp-expired',
-    //   expiration: 1232427600000,
-    // }
-    tokenWithExpiredExperiment = 'AAAAAFl7Im9yaWdpbiI6Imh0dHBzOi8vd3d3Lmdvb2d' +
-        'sZS5jb20iLCJleHBlcmltZW50IjoiYW1wLWV4cGlyZWQiLCJleHBpcmF0aW9uIjoxMjM' +
-        'yNDI3NjAwMDAwfQAtEF4JYy04PNTqkOJCJ61OZqzUSYTk4MsNYVVJQfUfPuzX7650Cfp' +
-        'rSnKXXMMxR6z+fhLQPogfArWiQOiyMSWMIRh4y3F6aPYXswRzLAI2PDXrKz2E+7Ajkqr' +
-        'VHef/Ii2pxFOvwdVOCcF+5CCfamBBTFDRzh4lKFpyZbZzRsfClxwQw/qQr2OyB6R7IGV' +
-        'uz4ghVOHiOY9eXGQufwnku7I7DvPcVqJUnHOnoTvKcuFmgNZ6hUSUk3BNvnTD1WHpJbS' +
-        'J4Vay/8kU2bvkcr5L8s9lL05/JR2vvKL96LqiIlFnMFS6CUqu8LDO8REVVi7nCKfEE43' +
-        'rvhCuM9vAscwRjq0He7inCg==';
+    expect(cryptoFor(env.win).isPkcsAvailable())
+        .to.equal(cryptoFor(win).isPkcsAvailable());
   });
 
   afterEach(() => {
@@ -932,13 +860,13 @@ describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
   });
 
   it('should return false if crypto is unavailable', () => {
-    sandbox.stub(crypto, 'isCryptoAvailable').returns(false);
+    sandbox.stub(crypto, 'isPkcsAvailable').returns(false);
     const p = isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
     return expect(p).to.eventually.be.false;
   });
 
   it('should throw for missing token', () => {
-    if (!crypto.isCryptoAvailable()) { return; }
+    if (!crypto.isPkcsAvailable()) { return; }
     setupMetaTagWith('');
     return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
       return isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
@@ -950,7 +878,7 @@ describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
   });
 
   it('should throw for an unknown token version number', () => {
-    if (!crypto.isCryptoAvailable()) { return; }
+    if (!crypto.isPkcsAvailable()) { return; }
     setupMetaTagWith(tokenWithBadVersion);
     return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
       return isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
@@ -965,7 +893,7 @@ describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
   });
 
   it('should throw if config length exceeds byte length', () => {
-    if (!crypto.isCryptoAvailable()) { return; }
+    if (!crypto.isPkcsAvailable()) { return; }
     setupMetaTagWith(tokenWithBadConfigLength);
     return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
       return isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
@@ -978,7 +906,7 @@ describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
   });
 
   it('should throw if signature cannot be verified', () => {
-    if (!crypto.isCryptoAvailable()) { return; }
+    if (!crypto.isPkcsAvailable()) { return; }
     setupMetaTagWith(tokenWithBadSignature);
     return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
       return isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
@@ -991,7 +919,7 @@ describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
   });
 
   it('should throw if approved origin is not current origin', () => {
-    if (!crypto.isCryptoAvailable()) { return; }
+    if (!crypto.isPkcsAvailable()) { return; }
     setupMetaTagWith(correctToken);
     win.location.href = 'https://www.not-google.com';
     return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
@@ -999,13 +927,13 @@ describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
     }).then(result => {
       expect(result).to.be.false;
       expect(warnStub).to.have.been.calledWith(
-            'experiments',
-            sinon.match({message: 'Config does not match current origin'}));
+          'experiments',
+          sinon.match({message: 'Config does not match current origin'}));
     });
   });
 
   it('should return false if requested experiment is not in config', () => {
-    if (!crypto.isCryptoAvailable()) { return; }
+    if (!crypto.isPkcsAvailable()) { return; }
     setupMetaTagWith(correctToken);
     return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
       const p =
@@ -1015,21 +943,21 @@ describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
   });
 
   it('should return false if trial has expired', () => {
-    if (!crypto.isCryptoAvailable()) { return; }
+    if (!crypto.isPkcsAvailable()) { return; }
     setupMetaTagWith(tokenWithExpiredExperiment);
     return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
       return isExperimentOnForOriginTrial(win, 'amp-expired', publicJwk);
     }).then(result => {
       expect(result).to.be.false;
       expect(warnStub).to.have.been.calledWith(
-            'experiments',
-            sinon.match({message: 'Experiment amp-expired has expired'}));
+          'experiments',
+          sinon.match({message: 'Experiment amp-expired has expired'}));
     });
   });
 
-  it('should return true for a well-formed token for an experiment' +
+  it('should return true for a well-formed token for an experiment ' +
      'that has not yet expired', () => {
-    if (!crypto.isCryptoAvailable()) { return; }
+    if (!crypto.isPkcsAvailable()) { return; }
     setupMetaTagWith(correctToken);
     return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
       const p =
@@ -1038,9 +966,9 @@ describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
     });
   });
 
-  it('should return true for a correct token if the approved origin has' +
+  it('should return true for a correct token if the approved origin has ' +
      'a trailing slash', () => {
-    if (!crypto.isCryptoAvailable()) { return; }
+    if (!crypto.isPkcsAvailable()) { return; }
     setupMetaTagWith(correctToken);
     win.location.href = 'https://www.google.com/';
     return enableExperimentsForOriginTrials(win, publicJwk).then(() => {

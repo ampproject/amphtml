@@ -14,12 +14,11 @@
 # limitations under the license.
 #
 
-# Specific script tags for custom elements and runtime imports.
-tags: {  # amp-experiment
+tags: {  # amp-list
   html_format: AMP
   tag_name: "SCRIPT"
   extension_spec: {
-    name: "amp-experiment"
+    name: "amp-list"
     allowed_versions: "0.1"
     allowed_versions: "latest"
     requires_usage: DEPRECATED_WARNING
@@ -27,31 +26,34 @@ tags: {  # amp-experiment
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # amp-experiment (json)
+tags: {  # <amp-list>
   html_format: AMP
-  tag_name: "SCRIPT"
-  spec_name: "amp-experiment extension .json script"
-  mandatory_parent: "AMP-EXPERIMENT"
-  attrs: { name: "nonce" }
+  tag_name: "AMP-LIST"
+  requires_extension: "amp-list"
+  attrs: { name: "credentials" }
   attrs: {
-    name: "type"
+    name: "src"
     mandatory: true
-    value_casei: "application/json"
-    dispatch_key: true
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "<!--"
-      error_message: "html comments"
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
     }
+    blacklisted_value_regex: "__amp_source_origin"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-experiment"
-}
-tags: {  # <amp-experiment>
-  html_format: AMP
-  tag_name: "AMP-EXPERIMENT"
-  disallowed_ancestor: "AMP-SIDEBAR"
-  requires_extension: "amp-experiment"
-  unique: true
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-experiment"
+  attrs: { name: "items" }
+  # TODO(gregable): Implement validation that requires the template attr value
+  # to reference the id of an existing template element.
+  attrs: { name: "template" }
+  # <amp-bind>
+  attrs: { name: "[src]" }
+  attrs: { name: "[state]" }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
 }

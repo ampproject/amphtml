@@ -187,11 +187,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
   },
   {
-    id: 'visibility-v3',
-    name: 'Visibility tracking with FIE and in-a-box support',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8121',
-  },
-  {
     id: 'variable-filters',
     name: 'Format to apply filters to analytics variables',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
@@ -294,6 +289,13 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9803',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
       'amp-sidebar/1.0/amp-sidebar-1.0.md',
+  },
+  {
+    id: 'amp-ad-refresh',
+    name: 'Enable AMP ad refresh',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-ad-network-doubleclick-impl/' +
+        'amp-ad-network-doubleclick-impl-internal.md',
   },
 ];
 

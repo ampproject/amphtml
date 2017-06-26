@@ -54,7 +54,7 @@ The `amp-form` extension **MUST** be loaded if you're using `<form>` or any inpu
             resizable
             src="https://ampproject-b5f4c.firebaseapp.com/examples/ampform.basic.embed.html">
   <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div> 
+  <div placeholder></div>
   </amp-iframe>
 </div>
 
@@ -145,7 +145,7 @@ For example, a common use case is to submit a form on input change (selecting a 
             resizable
             src="https://ampproject-b5f4c.firebaseapp.com/examples/ampform.inputevent.embed.html">
   <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div> 
+  <div placeholder></div>
 </amp-iframe>
 </div>
 
@@ -310,7 +310,7 @@ Here's an example:
             resizable
             src="https://ampproject-b5f4c.firebaseapp.com/examples/ampform.customval.embed.html">
   <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div> 
+  <div placeholder></div>
 </amp-iframe>
 </div>
 
@@ -343,22 +343,9 @@ Here's an example:
 <form
   method="post"
   action-xhr="/form/verify-json/post"
+  verify-xhr="/form/verify-json/post"
   target="_blank"
 >
-    <script type="application/json">
-    {
-      "verificationGroups": [
-        {
-          "name": "uniqueEmail",
-          "elements": ["email"]
-        },
-        {
-          "name": "fullAddress",
-          "elements": ["addressLine2", "city", "zip"]
-        },
-      ]
-    }
-    </script>
     <fieldset>
         <label>
             <span>Email</span>
@@ -463,3 +450,9 @@ In general, keep in mind the following points when accepting input from the user
     * non-XHR GET requests are not going to receive accurate origin/headers and backends won't be able to protect against XSRF with the above mechanism.
     * In general use XHR/non-XHR GET requests for navigational or information retrieval only.
 * non-XHR POST requests are not allowed in AMP documents. This is due to inconsistencies of setting `Origin` header on these requests across browsers. And the complications supporting it would introduce in protecting against XSRF. This might be reconsidered and introduced later, please file an issue if you think this is needed.
+
+## Styling
+
+{% call callout('Tip', type='success') %}
+Visit [AMP Start](https://ampstart.com/components#form-elements) for responsive, pre-styled AMP form elements that you can use in your AMP pages.
+{% endcall %}

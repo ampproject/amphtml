@@ -25,7 +25,7 @@ export class AccessVendor {
   /**
    * Requests authorization from the vendor. Returns a promise that yields
    * a JSON authorization response.
-   * @return {!Promise<!JSONType>}
+   * @return {!Promise<!JsonObject>}
    */
   authorize() {}
 

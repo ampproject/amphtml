@@ -41,6 +41,7 @@ import * as dom from './dom';
 import {setStyle, setStyles} from './style';
 import {LayoutDelayMeter} from './layout-delay-meter';
 import {ResourceState} from './service/resource';
+import {AmpEvents} from './amp-events';
 
 const TAG_ = 'CustomElement';
 
@@ -628,7 +629,7 @@ function createBaseCustomElementClass(win) {
     getAmpDoc() {
       return /** @type {!./service/ampdoc-impl.AmpDoc} */ (
         dev().assert(this.ampdoc_,
-          'no ampdoc yet, since element is not attached'));
+            'no ampdoc yet, since element is not attached'));
     }
 
     /**
@@ -641,7 +642,7 @@ function createBaseCustomElementClass(win) {
     getResources() {
       return /** @type {!./service/resources-impl.Resources} */ (
         dev().assert(this.resources_,
-          'no resources yet, since element is not attached'));
+            'no resources yet, since element is not attached'));
     }
 
     /**
@@ -696,7 +697,7 @@ function createBaseCustomElementClass(win) {
       this.implementation_.layout_ = this.layout_;
       this.implementation_.layoutWidth_ = this.layoutWidth_;
       this.implementation_.firstAttachedCallback();
-      this.dispatchCustomEventForTesting('amp:attached');
+      this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
       this.getResources().upgraded(this);
     }
 
@@ -740,7 +741,7 @@ function createBaseCustomElementClass(win) {
      */
     getPriority() {
       dev().assert(
-        this.isUpgraded(), 'Cannot get priority of unupgraded element');
+          this.isUpgraded(), 'Cannot get priority of unupgraded element');
       return this.implementation_.getPriority();
     }
 
@@ -1005,7 +1006,7 @@ function createBaseCustomElementClass(win) {
           if (reconstruct) {
             this.getResources().upgraded(this);
           }
-          this.dispatchCustomEventForTesting('amp:attached');
+          this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
         }
       } else {
         this.everAttached = true;
@@ -1023,7 +1024,7 @@ function createBaseCustomElementClass(win) {
           this.classList.add('i-amphtml-unresolved');
           // amp:attached is dispatched from the ElementStub class when it
           // replayed the firstAttachedCallback call.
-          this.dispatchCustomEventForTesting('amp:stubbed');
+          this.dispatchCustomEventForTesting(AmpEvents.STUBBED);
         }
       }
     }
@@ -1252,8 +1253,8 @@ function createBaseCustomElementClass(win) {
     layoutCallback() {
       assertNotTemplate(this);
       dev().assert(this.isBuilt(),
-        'Must be built to receive viewport events');
-      this.dispatchCustomEventForTesting('amp:load:start');
+          'Must be built to receive viewport events');
+      this.dispatchCustomEventForTesting(AmpEvents.LOAD_START);
       const isLoadEvent = (this.layoutCount_ == 0);  // First layout is "load".
       if (isLoadEvent) {
         this.signals_.signal(CommonSignals.LOAD_START);
@@ -1278,7 +1279,7 @@ function createBaseCustomElementClass(win) {
           this.isFirstLayoutCompleted_ = true;
           // TODO(dvoytenko, #7389): cleanup once amp-sticky-ad signals are
           // in PROD.
-          this.dispatchCustomEvent('amp:load:end');
+          this.dispatchCustomEvent(AmpEvents.LOAD_END);
         }
       }, reason => {
         // add layoutCount_ by 1 despite load fails or not
@@ -1462,7 +1463,7 @@ function createBaseCustomElementClass(win) {
      * @note Boolean attributes have a value of `true` and `false` when
      *       present and missing, respectively.
      * @param {
-     *   !Object<string, (null|boolean|string|number|Array|Object)>
+     *   !JsonObject<string, (null|boolean|string|number|Array|Object)>
      * } mutations
      */
     mutatedAttributesCallback(mutations) {
@@ -1520,7 +1521,7 @@ function createBaseCustomElementClass(win) {
         this.implementation_.executeAction(invocation, deferred);
       } catch (e) {
         rethrowAsync('Action execution failed:', e,
-          invocation.target.tagName, invocation.method);
+            invocation.target.tagName, invocation.method);
       }
     }
 
@@ -1786,7 +1787,7 @@ function createBaseCustomElementClass(win) {
       if (!this.overflowElement_) {
         if (overflown) {
           user().warn(TAG_,
-            'Cannot resize element and overflow is not available', this);
+              'Cannot resize element and overflow is not available', this);
         }
       } else {
         this.overflowElement_.classList.toggle('amp-visible', overflown);
@@ -1794,10 +1795,10 @@ function createBaseCustomElementClass(win) {
         if (overflown) {
           this.overflowElement_.onclick = () => {
             this.getResources(). /*OK*/ changeSize(
-              this, requestedHeight, requestedWidth);
+                this, requestedHeight, requestedWidth);
             getVsync(this).mutate(() => {
               this.overflowCallback(
-                /* overflown */ false, requestedHeight, requestedWidth);
+                  /* overflown */ false, requestedHeight, requestedWidth);
             });
           };
         } else {

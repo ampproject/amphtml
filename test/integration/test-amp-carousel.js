@@ -18,15 +18,16 @@ import {
   createFixtureIframe,
   expectBodyToBecomeVisible,
 } from '../../testing/iframe';
+import {AmpEvents} from '../../src/amp-events';
 
 describe.skip('integration amp-carousel', () => {
 
   let fixture;
   beforeEach(() => {
     return createFixtureIframe('test/fixtures/carousels.html', 1000)
-      .then(f => {
-        fixture = f;
-      });
+        .then(f => {
+          fixture = f;
+        });
   });
 
   it('should show the body in carousel test', () => {
@@ -36,7 +37,7 @@ describe.skip('integration amp-carousel', () => {
   it('should be present', () => {
     expect(fixture.doc.querySelectorAll('amp-carousel'))
         .to.have.length.above(0);
-    return fixture.awaitEvent('amp:load:start', 1).then(() => {
+    return fixture.awaitEvent(AmpEvents.LOAD_START, 1).then(() => {
       expect(fixture.doc.querySelectorAll('amp-carousel'))
           .to.have.length.above(0);
     });
@@ -50,7 +51,7 @@ describe.skip('integration amp-carousel', () => {
 
     it('should only have the next button enabled ' +
        'when on first item', () => {
-      return fixture.awaitEvent('amp:load:start', 1).then(() => {
+      return fixture.awaitEvent(AmpEvents.LOAD_START, 1).then(() => {
         fixture.doc.body.classList.add('amp-mode-mouse');
         const amp = fixture.doc.querySelector('#carousel-1');
         const prevBtn = amp.querySelector('.amp-carousel-button-prev');
@@ -61,7 +62,7 @@ describe.skip('integration amp-carousel', () => {
     });
 
     it('should not be able to go past the first or last item', () => {
-      return fixture.awaitEvent('amp:load:start', 1).then(() => {
+      return fixture.awaitEvent(AmpEvents.LOAD_START, 1).then(() => {
         fixture.doc.body.classList.add('amp-mode-mouse');
         const amp = fixture.doc.querySelector('#carousel-1');
         const impl = amp.implementation_;
@@ -89,7 +90,7 @@ describe.skip('integration amp-carousel', () => {
 
     it('(type=slide) should only have the next button enabled when on ' +
        'first item', () => {
-      return fixture.awaitEvent('amp:load:start', 4).then(() => {
+      return fixture.awaitEvent(AmpEvents.LOAD_START, 4).then(() => {
         fixture.doc.body.classList.add('amp-mode-mouse');
         const amp = fixture.doc.querySelector('#carousel-4');
 
@@ -102,7 +103,7 @@ describe.skip('integration amp-carousel', () => {
 
     it('should only have the prev button enabled ' +
        'when on last item', () => {
-      return fixture.awaitEvent('amp:load:start', 1).then(() => {
+      return fixture.awaitEvent(AmpEvents.LOAD_START, 1).then(() => {
         fixture.doc.body.classList.add('amp-mode-mouse');
         const amp = fixture.doc.querySelector('#carousel-1');
         const impl = amp.implementation_;
@@ -120,7 +121,7 @@ describe.skip('integration amp-carousel', () => {
 
     it('(type=slides) should only have the prev button enabled when ' +
        'on last item', () => {
-      return fixture.awaitEvent('amp:load:start', 4).then(() => {
+      return fixture.awaitEvent(AmpEvents.LOAD_START, 4).then(() => {
         fixture.doc.body.classList.add('amp-mode-mouse');
         const amp = fixture.doc.querySelector('#carousel-4');
         const impl = amp.implementation_;
@@ -136,7 +137,7 @@ describe.skip('integration amp-carousel', () => {
 
     it('(type=slides loop) should always have a prev and next button be ' +
        'able to get past the first and last item', () => {
-      return fixture.awaitEvent('amp:load:start', 7).then(() => {
+      return fixture.awaitEvent(AmpEvents.LOAD_START, 7).then(() => {
         fixture.doc.body.classList.add('amp-mode-mouse');
         const amp = fixture.doc.querySelector('#carousel-7');
         const prevBtn = amp.querySelector('.amp-carousel-button-prev');
@@ -163,7 +164,7 @@ describe.skip('integration amp-carousel', () => {
 
     it('should not have any buttons enabled when theres only a single ' +
        'item', () => {
-      return fixture.awaitEvent('amp:load:start', 2).then(() => {
+      return fixture.awaitEvent(AmpEvents.LOAD_START, 2).then(() => {
         fixture.doc.body.classList.add('amp-mode-mouse');
         const amp = fixture.doc.querySelector('#carousel-2');
 
@@ -178,7 +179,7 @@ describe.skip('integration amp-carousel', () => {
 
     it('(type=slides) should not have any buttons enabled when theres ' +
        'only a single item', () => {
-      return fixture.awaitEvent('amp:load:start', 5).then(() => {
+      return fixture.awaitEvent(AmpEvents.LOAD_START, 5).then(() => {
         fixture.doc.body.classList.add('amp-mode-mouse');
         const amp = fixture.doc.querySelector('#carousel-5');
 
@@ -195,7 +196,7 @@ describe.skip('integration amp-carousel', () => {
   describe('when amp-mode-mouse class is not on body', () => {
 
     it('should not have the buttons visible', () => {
-      return fixture.awaitEvent('amp:load:start', 1).then(() => {
+      return fixture.awaitEvent(AmpEvents.LOAD_START, 1).then(() => {
         fixture.doc.body.classList.remove('amp-mode-mouse');
         const amp = fixture.doc.querySelector('#carousel-1');
         expect(fixture.doc.body).to.not.have.class('amp-mode-mouse');
@@ -208,7 +209,7 @@ describe.skip('integration amp-carousel', () => {
     });
 
     it('(type=slides) should not have the buttons visible', () => {
-      return fixture.awaitEvent('amp:load:start', 4).then(() => {
+      return fixture.awaitEvent(AmpEvents.LOAD_START, 4).then(() => {
         fixture.doc.body.classList.remove('amp-mode-mouse');
         const amp = fixture.doc.querySelector('#carousel-4');
         expect(fixture.doc.body).to.not.have.class('amp-mode-mouse');
@@ -225,7 +226,7 @@ describe.skip('integration amp-carousel', () => {
 
     it('should have visible buttons even when `amp-mode-mouse` ' +
        'is not on body', () => {
-      return fixture.awaitEvent('amp:load:start', 3).then(() => {
+      return fixture.awaitEvent(AmpEvents.LOAD_START, 3).then(() => {
         fixture.doc.body.classList.remove('amp-mode-mouse');
         const amp = fixture.doc.querySelector('#carousel-3');
         expect(fixture.doc.body).to.not.have.class('amp-mode-mouse');
@@ -242,7 +243,7 @@ describe.skip('integration amp-carousel', () => {
 
     it('(type=slides) should have visible buttons ' +
        'even when `amp-mode-mouse` is not on body', () => {
-      return fixture.awaitEvent('amp:load:start', 6).then(() => {
+      return fixture.awaitEvent(AmpEvents.LOAD_START, 6).then(() => {
         fixture.doc.body.classList.remove('amp-mode-mouse');
         const amp = fixture.doc.querySelector('#carousel-6');
         expect(fixture.doc.body).to.not.have.class('amp-mode-mouse');

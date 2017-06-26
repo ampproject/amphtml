@@ -15,6 +15,7 @@
  */
 
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getAttributesFromConfigObj} from './attributes';
 import {resourcesForDoc} from '../../../src/services';
 import {
@@ -88,7 +89,7 @@ export class Placement {
    * @param {!Element} anchorElement
    * @param {!Position} position
    * @param {!function(!Element, !Element)} injector
-   * @param {!Object<string, string>} attributes
+   * @param {!JsonObject<string, string>} attributes
    * @param {!../../../src/layout-rect.LayoutMarginsChangeDef=} opt_margins
    */
   constructor(win, resources, anchorElement, position, injector, attributes,
@@ -108,7 +109,7 @@ export class Placement {
     /** @const @private {!function(!Element, !Element)} */
     this.injector_ = injector;
 
-    /** @const @private {!Object<string, string>} */
+    /** @const @private {!JsonObject<string, string>} */
     this.attributes_ = attributes;
 
     /**
@@ -164,7 +165,7 @@ export class Placement {
   }
 
   /**
-   * @param {!Object<string, string>} baseAttributes Any attributes to add to
+   * @param {!JsonObject<string, string>} baseAttributes Any attributes to add to
    *     injected <amp-ad>. Specific attributes will override defaults, but be
    *     overridden by placement specific attributes defined in the
    *     configuration.
@@ -182,28 +183,28 @@ export class Placement {
         this.injector_(this.anchorElement_, this.adElement_);
         return this.resources_.attemptChangeSize(this.adElement_,
             TARGET_AD_HEIGHT_PX, undefined, this.margins_)
-                .then(() => {
-                  this.state_ = PlacementState.PLACED;
-                  return this.state_;
-                }, () => {
-                  this.state_ = PlacementState.RESIZE_FAILED;
-                  return this.state_;
-                });
+            .then(() => {
+              this.state_ = PlacementState.PLACED;
+              return this.state_;
+            }, () => {
+              this.state_ = PlacementState.RESIZE_FAILED;
+              return this.state_;
+            });
       });
     });
   }
 
   /**
-   * @param {!Object<string, string>} baseAttributes
+   * @param {!JsonObject<string, string>} baseAttributes
    * @return {!Element}
    * @private
    */
   createAdElement_(baseAttributes) {
-    const attributes = Object.assign({
+    const attributes = /** @type {!JsonObject} */ (Object.assign(dict({
       'layout': 'fixed-height',
       'height': '0',
       'class': 'i-amphtml-layout-awaiting-size',
-    }, baseAttributes, this.attributes_);
+    }), baseAttributes, this.attributes_));
     return createElementWithAttributes(
         this.win_.document, 'amp-ad', attributes);
   }
@@ -211,7 +212,7 @@ export class Placement {
 
 /**
  * @param {!Window} win
- * @param {!JSONType} configObj
+ * @param {!JsonObject} configObj
  * @return {!Array<!Placement>}
  */
 export function getPlacementsFromConfigObj(win, configObj) {
@@ -231,7 +232,7 @@ export function getPlacementsFromConfigObj(win, configObj) {
  * Validates that the placementObj represents a valid placement and if so
  * constructs and returns an instance of the Placement class for it.
  * @param {!Window} win
- * @param {!Object} placementObj
+ * @param {!JsonObject} placementObj
  * @param {!Array<!Placement>} placements
  */
 function getPlacementsFromObject(win, placementObj, placements) {

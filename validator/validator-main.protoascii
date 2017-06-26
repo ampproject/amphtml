@@ -20,19 +20,19 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii) are always released together.
-min_validator_revision_required: 234
+min_validator_revision_required: 238
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 433
+spec_file_revision: 443
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 
 # Validator extensions.
 # =====================
 # In addition to the rules in this file, the Validator honors the rules
-# in the extensions/*/0.1/validator-*.protoascii files. This makes it
+# in the extensions/*/validator-*.protoascii files. This makes it
 # easy to organize the rules for extensions next to their Javascript
 # implementation.
 
@@ -191,7 +191,7 @@ tags: {
     name: "rel"
     value_casei: "canonical"
     mandatory: true
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec#required-markup"
 }
@@ -215,7 +215,7 @@ tags: {
     name: "rel"
     value_casei: "manifest"
     mandatory: true
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
 }
@@ -240,7 +240,7 @@ tags: {
     name: "rel"
     mandatory: true
     value_casei: "stylesheet"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "type"
@@ -265,7 +265,7 @@ tags: {
     name: "itemprop"
     mandatory: true
     value_casei: "sameas"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attr_lists: "common-link-attrs"
   spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -309,7 +309,7 @@ tags: {
   mandatory_parent: "HEAD"
   unique: true
   attrs: {
-    dispatch_key: true
+    dispatch_key: NAME_DISPATCH
     name: "charset"
     mandatory: true
     value_casei: "utf-8"
@@ -339,7 +339,7 @@ tags: {
     name: "name"
     mandatory: true
     value: "viewport"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec#required-markup"
 }
@@ -353,7 +353,7 @@ tags: {
     name: "http-equiv"
     mandatory: true
     value_casei: "x-ua-compatible"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "content"
@@ -375,7 +375,7 @@ tags: {
     name: "name"
     value_casei: "apple-itunes-app"
     mandatory: true
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "content"
@@ -394,7 +394,7 @@ tags: {
     name: "name"
     mandatory: true
     value_casei: "amp-experiments-opt-in"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "content"
@@ -411,7 +411,7 @@ tags: {
     name: "name"
     mandatory: true
     value_casei: "amp-3p-iframe-src"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "content"
@@ -433,7 +433,7 @@ tags: {
     name: "name"
     mandatory: true
     value_casei: "amp-experiment-token"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "content"
@@ -451,7 +451,7 @@ tags: {
     name: "name"
     mandatory: true
     value_casei: "amp-link-variable-allowed-origin"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "content"
@@ -469,7 +469,7 @@ tags: {
     name: "name"
     mandatory: true
     value_casei: "amp4ads-id"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "content"
@@ -508,7 +508,7 @@ tags: {
     name: "http-equiv"
     mandatory: true
     value_casei: "content-type"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "content"
@@ -526,7 +526,7 @@ tags: {
     name: "http-equiv"
     mandatory: true
     value_casei: "content-language"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "content"
@@ -544,7 +544,7 @@ tags: {
     name: "http-equiv"
     mandatory: true
     value_casei: "pics-label"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "content"
@@ -562,7 +562,7 @@ tags: {
     name: "http-equiv"
     mandatory: true
     value_casei: "imagetoolbar"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "content"
@@ -580,7 +580,7 @@ tags: {
     name: "http-equiv"
     mandatory: true
     value_casei: "content-style-type"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "content"
@@ -599,7 +599,7 @@ tags: {
     name: "http-equiv"
     mandatory: true
     value_casei: "content-script-type"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "content"
@@ -617,7 +617,7 @@ tags: {
     name: "http-equiv"
     mandatory: true
     value_casei: "origin-trial"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "content"
@@ -635,7 +635,7 @@ tags: {
     name: "http-equiv"
     mandatory: true
     value_casei: "resource-type"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "content"
@@ -660,7 +660,7 @@ tags: {  # Special custom 'author' spreadsheet for AMP
     # is used for errors related to <style> tags missing the amp-custom
     # attribute rather than the boilerplate tagspec which doesn't have an
     # attribute and thus can't have a dispatch_key.
-    # dispatch_key: true
+    # dispatch_key: NAME_DISPATCH
   }
   attrs: { name: "nonce" }
   attrs: {  # This is a default, but it doesn't hurt.
@@ -750,7 +750,7 @@ tags: {  # Special custom 'author' spreadsheet for AMP4ADS
     # is used for errors related to <style> tags missing the amp-custom
     # attribute rather than the boilerplate tagspec which doesn't have an
     # attribute and thus can't have a dispatch_key.
-    # dispatch_key: true
+    # dispatch_key: NAME_DISPATCH
   }
   attrs: { name: "nonce" }
   attrs: {  # This is a default, but it doesn't hurt.
@@ -870,7 +870,7 @@ tags: {
     name: "amp-boilerplate"
     mandatory: true
     value: ""
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
   attrs: { name: "nonce" }
   cdata: {
@@ -890,7 +890,7 @@ tags: {
     name: "amp4ads-boilerplate"
     mandatory: true
     value: ""
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
   attrs: { name: "nonce" }
   cdata: {
@@ -914,7 +914,7 @@ tags: {
     name: "amp-boilerplate"
     mandatory: true
     value: ""
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
   attrs: { name: "nonce" }
   cdata {
@@ -1679,6 +1679,18 @@ tags: {
   attrs: { name: "[srclang]" }
   attr_lists: "track-attrs-subtitles"
 }
+tags: {
+  tag_name: "TRACK"
+  spec_name: "amp-ima-video > track[kind=subtitles]"
+  mandatory_parent: "AMP-IMA-VIDEO"
+  # <amp-bind>
+  attrs: { name: "[label]" }
+  attrs: { name: "[src]" }
+  attrs: { name: "[srclang]" }
+  attr_lists: "track-attrs-subtitles"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ima-video"
+}
+
 
 # 4.7.15 SVG
 # We allow some limited embedded SVG tags. We do not allow inline styles
@@ -2588,7 +2600,7 @@ tags {  # <form method=POST ...>
     name: "method"
     mandatory: true
     value_casei: "post"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: { name: "name" }
   attrs: { name: "novalidate" }
@@ -2607,10 +2619,6 @@ tags {
     name: "submitting"
     mandatory: true
   }
-  child_tags: {
-    mandatory_num_child_tags: 1
-    first_child_tag_name_oneof: "TEMPLATE"
-  }
 }
 tags {
   tag_name: "DIV"
@@ -2621,10 +2629,6 @@ tags {
     name: "submit-success"
     mandatory: true
   }
-  child_tags: {
-    mandatory_num_child_tags: 1
-    first_child_tag_name_oneof: "TEMPLATE"
-  }
 }
 tags {
   tag_name: "DIV"
@@ -2634,10 +2638,6 @@ tags {
   attrs: {
     name: "submit-error"
     mandatory: true
-  }
-  child_tags: {
-    mandatory_num_child_tags: 1
-    first_child_tag_name_oneof: "TEMPLATE"
   }
 }
 attr_lists: {
@@ -3020,7 +3020,7 @@ tags: {
     name: "src"
     mandatory: true
     value: "https://cdn.ampproject.org/v0.js"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "type"
@@ -3051,7 +3051,7 @@ tags: {
     name: "src"
     mandatory: true
     value: "https://cdn.ampproject.org/amp4ads-v0.js"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "type"
@@ -3074,7 +3074,7 @@ tags: {
     name: "type"
     mandatory: true
     value_casei: "application/ld+json"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -3100,7 +3100,7 @@ tags: {
     name: "id"
     mandatory: true
     value_casei: "amp-rtc"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -3130,7 +3130,7 @@ tags: {
   disallowed_ancestor: "NOSCRIPT"
 }
 # 4.11.3 The template element
-# See extensions/amp-mustache/0.1/validator-amp-mustache.protoascii.
+# See extensions/amp-mustache/validator-amp-mustache.protoascii.
 
 # 11 Obsolute features
 # 11.2 Non-conforming features
@@ -3335,8 +3335,8 @@ attr_lists: {
         "subresource"
         ")(\\s|$)"
   }
-  attrs: { name: "rev" }
   attrs: { name: "resource" }
+  attrs: { name: "rev" }
   attrs: { name: "typeof" }
   attrs: { name: "vocab" }
   # 3.2.5 HTML5 Global attributes.

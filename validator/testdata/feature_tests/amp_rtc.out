@@ -1,2 +1,2 @@
 FAIL
-feature_tests/amp_rtc.html:44:2 The tag 'script' is disallowed except in specific forms. [CUSTOM_JAVASCRIPT_DISALLOWED]
+feature_tests/amp_rtc.html:44:2 The parent tag of tag 'script id=amp-rtc' is 'body', but it can only be 'head'. [DISALLOWED_HTML]

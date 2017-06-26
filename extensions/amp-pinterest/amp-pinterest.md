@@ -22,10 +22,6 @@ limitations under the License.
     <td>Displays a Pinterest widget, Pin It button, or Follow button.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-pinterest" src="https://cdn.ampproject.org/v0/amp-pinterest-0.1.js">&lt;/script></code></td>
   </tr>
@@ -178,4 +174,4 @@ data-url="https://www.pinterest.com/pin/99360735500167749/"
 
 ## Validation
 
-See [amp-pinterest rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/0.1/validator-amp-pinterest.protoascii) in the AMP validator specification.
+See [amp-pinterest rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/validator-amp-pinterest.protoascii) in the AMP validator specification.

@@ -22,7 +22,7 @@ import {getVendorJsPropertyName} from '../../src/style';
 import {whenUpgradedToCustomElement} from '../../src/dom';
 import {createCustomEvent} from '../../src/event-helper';
 
-describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
+describe.configure().skipSauceLabs().run('Viewer Visibility State', () => {
 
   function noop() {}
 
@@ -99,6 +99,7 @@ describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
         resources = resourcesForDoc(win.document);
         doPass_ = resources.doPass;
         sandbox.stub(resources, 'doPass', doPass);
+        unselect = sandbox.stub(resources, 'unselectText');
 
         const img = win.document.createElement('amp-img');
         img.setAttribute('width', 100);
@@ -121,33 +122,24 @@ describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
         layoutCallback.returns(Promise.resolve());
         unlayoutCallback.returns(true);
         prerenderAllowed.returns(false);
-        unselect = sandbox.stub();
-        Object.defineProperty(win, 'getSelection', {
-          value: unselect,
-        });
       });
     });
 
     describe('from in the PRERENDER state', () => {
-      beforeEach(() => {
-        return waitForNextPass().then(setupSpys);
-      });
-
       describe('for prerenderable element', () => {
         beforeEach(() => {
           prerenderAllowed.returns(true);
           setupSpys();
         });
 
-        it.configure().skipSafari().run('does layout when going to PRERENDER',
-            () => {
-              return waitForNextPass().then(() => {
-                expect(layoutCallback).to.have.been.called;
-                expect(unlayoutCallback).not.to.have.been.called;
-                expect(pauseCallback).not.to.have.been.called;
-                expect(resumeCallback).not.to.have.been.called;
-              });
-            });
+        it('does layout when going to PRERENDER', () => {
+          return waitForNextPass().then(() => {
+            expect(layoutCallback).to.have.been.called;
+            expect(unlayoutCallback).not.to.have.been.called;
+            expect(pauseCallback).not.to.have.been.called;
+            expect(resumeCallback).not.to.have.been.called;
+          });
+        });
 
         it('calls layout when going to VISIBLE', () => {
           viewer.receiveMessage('visibilitychange',
@@ -196,6 +188,10 @@ describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
       });
 
       describe('for non-prerenderable element', () => {
+        beforeEach(() => {
+          setupSpys();
+        });
+
         it('does not call callbacks when going to PRERENDER', () => {
           return waitForNextPass().then(() => {
             expect(layoutCallback).not.to.have.been.called;

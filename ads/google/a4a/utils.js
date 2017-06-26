@@ -20,8 +20,10 @@ import {isCanary} from '../../../src/experiments';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {documentInfoForDoc} from '../../../src/services';
 import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
-import {isProxyOrigin} from '../../../src/url';
+import {isProxyOrigin, parseUrl} from '../../../src/url';
+import {parseJson} from '../../../src/json';
 import {
   resourcesForDoc,
   viewerForDoc,
@@ -54,9 +56,10 @@ const AmpAdImplementation = {
 
 /** @const {!Object} */
 export const ValidAdContainerTypes = {
-  'AMP-STICKY-AD': 'sa',
+  'AMP-CAROUSEL': 'ac',
   'AMP-FX-FLYING-CARPET': 'fc',
   'AMP-LIGHTBOX': 'lb',
+  'AMP-STICKY-AD': 'sa',
 };
 
 /** @const {string} */
@@ -203,42 +206,41 @@ export function groupAmpAdsByType(win, type, groupFn) {
 export function googlePageParameters(win, doc, startTime, output = 'html') {
   const referrerPromise = viewerForDoc(doc).getReferrerUrl();
   return getOrCreateAdCid(doc, 'AMP_ECID_GOOGLE', '_ga')
-    .then(clientId => referrerPromise.then(referrer => {
-      const documentInfo = documentInfoForDoc(win.document);
+      .then(clientId => referrerPromise.then(referrer => {
+        const documentInfo = documentInfoForDoc(doc);
         // Read by GPT for GA/GPT integration.
-      win.gaGlobal = win.gaGlobal ||
+        win.gaGlobal = win.gaGlobal ||
         {cid: clientId, hid: documentInfo.pageViewId};
-      const screen = win.screen;
-      const viewport = viewportForDoc(win.document);
-      const viewportRect = viewport.getRect();
-      const viewportSize = viewport.getSize();
-      return {
-        'is_amp': AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
-        'amp_v': '$internalRuntimeVersion$',
-        'd_imp': '1',
-        'c': getCorrelator(win, clientId),
-        'dt': startTime,
-        output,
-        'biw': viewportRect.width,
-        'bih': viewportRect.height,
-        'u_aw': screen ? screen.availWidth : null,
-        'u_ah': screen ? screen.availHeight : null,
-        'u_cd': screen ? screen.colorDepth : null,
-        'u_w': screen ? screen.width : null,
-        'u_h': screen ? screen.height : null,
-        'u_tz': -new Date().getTimezoneOffset(),
-        'u_his': getHistoryLength(win),
-        'brdim': additionalDimensions(win, viewportSize),
-        'isw': viewportSize.width,
-        'ish': viewportSize.height,
-        'art': isCanary(win) ? '2' : null,
-        'url': documentInfo.canonicalUrl,
-        'top': win != win.top ? topWindowUrlOrDomain(win) : null,
-        'loc': win.location.href == documentInfo.canonicalUrl ?
+        const screen = win.screen;
+        const viewport = viewportForDoc(doc);
+        const viewportRect = viewport.getRect();
+        const viewportSize = viewport.getSize();
+        return {
+          'is_amp': AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
+          'amp_v': '$internalRuntimeVersion$',
+          'd_imp': '1',
+          'c': getCorrelator(win, clientId),
+          'dt': startTime,
+          output,
+          'biw': viewportRect.width,
+          'bih': viewportRect.height,
+          'u_aw': screen ? screen.availWidth : null,
+          'u_ah': screen ? screen.availHeight : null,
+          'u_cd': screen ? screen.colorDepth : null,
+          'u_w': screen ? screen.width : null,
+          'u_h': screen ? screen.height : null,
+          'u_tz': -new Date().getTimezoneOffset(),
+          'u_his': getHistoryLength(win),
+          'isw': win != win.top ? viewportSize.width : null,
+          'ish': win != win.top ? viewportSize.height : null,
+          'art': isCanary(win) ? '2' : null,
+          'url': documentInfo.canonicalUrl,
+          'top': win != win.top ? topWindowUrlOrDomain(win) : null,
+          'loc': win.location.href == documentInfo.canonicalUrl ?
           null : win.location.href,
-        'ref': referrer,
-      };
-    }));
+          'ref': referrer,
+        };
+      }));
 }
 
 /**
@@ -256,10 +258,10 @@ export function googleAdUrl(
   // TODO: Maybe add checks in case these promises fail.
   const blockLevelParameters = googleBlockParameters(a4a, opt_experimentIds);
   return googlePageParameters(a4a.win, a4a.getAmpDoc(), startTime)
-    .then(pageLevelParameters => {
-      Object.assign(parameters, blockLevelParameters, pageLevelParameters);
-      return truncAndTimeUrl(baseUrl, parameters, startTime);
-    });
+      .then(pageLevelParameters => {
+        Object.assign(parameters, blockLevelParameters, pageLevelParameters);
+        return truncAndTimeUrl(baseUrl, parameters, startTime);
+      });
 }
 
 /**
@@ -270,7 +272,7 @@ export function googleAdUrl(
  */
 export function truncAndTimeUrl(baseUrl, parameters, startTime) {
   return buildUrl(
-    baseUrl, parameters, MAX_URL_LENGTH - 10, {name: 'trunc', value: '1'})
+      baseUrl, parameters, MAX_URL_LENGTH - 10, {name: 'trunc', value: '1'})
     + '&dtd=' + elapsedTimeWithCeiling(Date.now(), startTime);
 }
 
@@ -342,21 +344,21 @@ function topWindowUrlOrDomain(win) {
     const origin = win.location.origin;
     const topOrigin = ancestorOrigins[ancestorOrigins.length - 1];
     if (origin == topOrigin) {
-      return win.top.location.href;
+      return win.top.location.hostname;
     }
     const secondFromTop = secondWindowFromTop(win);
     if (secondFromTop == win ||
         origin == ancestorOrigins[ancestorOrigins.length - 2]) {
-      return secondFromTop./*REVIEW*/document.referrer;
+      return parseUrl(secondFromTop./*OK*/document.referrer).hostname;
     }
-    return topOrigin;
+    return parseUrl(topOrigin).hostname;
   } else {
     try {
-      return win.top.location.href;
+      return win.top.location.hostname;
     } catch (e) {}
     const secondFromTop = secondWindowFromTop(win);
     try {
-      return secondFromTop./*REVIEW*/document.referrer;
+      return parseUrl(secondFromTop./*OK*/document.referrer).hostname;
     } catch (e) {}
     return null;
   }
@@ -396,12 +398,13 @@ function elapsedTimeWithCeiling(time, start) {
 /**
  * @param {!Window} win
  * @param {string=} opt_cid
+ * @param {(!Node|!../../../src/service/ampdoc-impl.AmpDoc)=} opt_nodeOrDoc
  * @return {number} The correlator.
  */
-export function getCorrelator(win, opt_cid) {
+export function getCorrelator(win, opt_cid, opt_nodeOrDoc) {
   if (!win.ampAdPageCorrelator) {
     win.ampAdPageCorrelator = makeCorrelator(
-        opt_cid, documentInfoForDoc(win.document).pageViewId);
+        opt_cid, documentInfoForDoc(opt_nodeOrDoc || win.document).pageViewId);
   }
   return win.ampAdPageCorrelator;
 }
@@ -429,15 +432,15 @@ export function additionalDimensions(win, viewportSize) {
     innerHeight = viewportSize.height;
   } catch (e) {}
   return [win.screenLeft,
-          win.screenTop,
-          screenX,
-          screenY,
-          win.screen ? win.screen.availWidth : undefined,
-          win.screen ? win.screen.availTop : undefined,
-          outerWidth,
-          outerHeight,
-          innerWidth,
-          innerHeight].join();
+    win.screenTop,
+    screenX,
+    screenY,
+    win.screen ? win.screen.availWidth : undefined,
+    win.screen ? win.screen.availTop : undefined,
+    outerWidth,
+    outerHeight,
+    innerWidth,
+    innerHeight].join();
 };
 
 /**
@@ -447,28 +450,22 @@ export function additionalDimensions(win, viewportSize) {
  * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
  *   XHR service FetchResponseHeaders object containing the response
  *   headers.
- * @param {number=} opt_deltaTime The time difference, in ms, between the
- *   lifecycle reporter's initialization and now.
- * @param {number=} opt_initTime The initialization time, in ms, of the
- *   lifecycle reporter.
- *   TODO(levitzky) Remove the above two params once AV numbers stabilize.
- * @return {?JSONType} config or null if invalid/missing.
+ * @return {?JsonObject} config or null if invalid/missing.
  */
-export function extractAmpAnalyticsConfig(
-    a4a, responseHeaders, opt_deltaTime = -1, opt_initTime = -1) {
+export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
   if (!responseHeaders.has(AMP_ANALYTICS_HEADER)) {
     return null;
   }
   try {
     const analyticsConfig =
-      JSON.parse(responseHeaders.get(AMP_ANALYTICS_HEADER));
+        parseJson(responseHeaders.get(AMP_ANALYTICS_HEADER));
     dev().assert(Array.isArray(analyticsConfig['url']));
-    const urls = analyticsConfig.url;
+    const urls = analyticsConfig['url'];
     if (!urls.length) {
       return null;
     }
 
-    const config = /** @type {JSONType}*/ ({
+    const config = /** @type {JsonObject}*/ ({
       'transport': {'beacon': false, 'xhrpost': false},
       'triggers': {
         'continuousVisible': {
@@ -493,44 +490,16 @@ export function extractAmpAnalyticsConfig(
       },
     });
 
-    // CSI base request.
-    const correlator = getCorrelator(a4a.win);
-    const slotId = a4a.element.getAttribute('data-amp-slot-index');
-    const qqid = (responseHeaders && responseHeaders.has(QQID_HEADER))
-        ? responseHeaders.get(QQID_HEADER) : 'null';
-    const eids = encodeURIComponent(
-        a4a.element.getAttribute(EXPERIMENT_ATTRIBUTE));
-    const adType = a4a.element.getAttribute('type');
-    const baseCsiUrl = 'https://csi.gstatic.com/csi?s=a4a' +
-        `&c=${correlator}&slotId=${slotId}&qqid.${slotId}=${qqid}` +
-        `&dt=${opt_initTime}` +
-        (eids != 'null' ? `&e.${slotId}=${eids}` : ``) +
-        `&rls=$internalRuntimeVersion$&adt.${slotId}=${adType}`;
-    opt_deltaTime = Math.round(opt_deltaTime);
-
-    // Duscover and build visibility endpoints.
-    const requests = {};
+    // Discover and build visibility endpoints.
+    const requests = dict();
     for (let idx = 1; idx <= urls.length; idx++) {
       // TODO: Ensure url is valid and not freeform JS?
       requests[`visibility${idx}`] = `${urls[idx - 1]}`;
     }
-    // Add CSI ping for visibility.
-    requests['visibilityCsi'] = baseCsiUrl +
-        `&met.a4a.${slotId}=visibilityCsi.${opt_deltaTime}`;
     // Security review needed here.
     config['requests'] = requests;
     config['triggers']['continuousVisible']['request'] =
         Object.keys(requests);
-
-    // Add CSI pings for render-start and ini-load.
-    config['requests']['iniLoadCsi'] = baseCsiUrl +
-        `&met.a4a.${slotId}=iniLoadCsi.${opt_deltaTime}`;
-    config['requests']['renderStartCsi'] = baseCsiUrl +
-        `&met.a4a.${slotId}=renderStartCsi.${opt_deltaTime}`;
-    config['triggers']['continuousVisibleIniLoad']['request'] =
-        'iniLoadCsi';
-    config['triggers']['continuousVisibleRenderStart']['request'] =
-        'renderStartCsi';
     return config;
   } catch (err) {
     dev().error('AMP-A4A', 'Invalid analytics', err,
@@ -559,4 +528,50 @@ export function mergeExperimentIds(newIds, currentIdString) {
   currentIdString = currentIdString || '';
   return currentIdString + (currentIdString && newIdString ? ',' : '')
       + newIdString;
+}
+
+/**
+ * Adds two CSI signals to the given amp-analytics configuration object, one
+ * for render-start, and one for ini-load.
+ *
+ * @param {!Window} win
+ * @param {!Element} element The ad slot.
+ * @param {!JsonObject} config The original config object.
+ * @param {?string} qqid
+ * @param {boolean} isVerifiedAmpCreative
+ * @param {number} deltaTime The time difference, in ms, between the lifecycle
+ *   reporter's initialization and now.
+ * @param {number} initTime The initialization time, in ms, of the lifecycle
+ *   reporter.
+ * @return {?JsonObject} config or null if invalid/missing.
+ */
+export function addCsiSignalsToAmpAnalyticsConfig(win, element, config,
+    qqid, isVerifiedAmpCreative, deltaTime, initTime) {
+  // Add CSI pingbacks.
+  const correlator = getCorrelator(win);
+  const slotId = Number(element.getAttribute('data-amp-slot-index'));
+  const eids = encodeURIComponent(
+      element.getAttribute(EXPERIMENT_ATTRIBUTE));
+  const adType = element.getAttribute('type');
+  const baseCsiUrl = 'https://csi.gstatic.com/csi?s=a4a' +
+      `&c=${correlator}&slotId=${slotId}&qqid.${slotId}=${qqid}` +
+      `&dt=${initTime}` +
+      (eids != 'null' ? `&e.${slotId}=${eids}` : '') +
+      `&rls=$internalRuntimeVersion$&adt.${slotId}=${adType}`;
+  deltaTime = Math.round(deltaTime);
+  const isAmpSuffix = isVerifiedAmpCreative ? 'Friendly' : 'CrossDomain';
+  config['requests']['iniLoadCsi'] = baseCsiUrl +
+      `&met.a4a.${slotId}=iniLoadCsi${isAmpSuffix}.${deltaTime}`;
+  config['requests']['renderStartCsi'] = baseCsiUrl +
+      `&met.a4a.${slotId}=renderStartCsi${isAmpSuffix}.${deltaTime}`;
+  config['triggers']['continuousVisibleIniLoad']['request'] =
+      'iniLoadCsi';
+  config['triggers']['continuousVisibleRenderStart']['request'] =
+      'renderStartCsi';
+
+  // Add CSI ping for visibility.
+  config['requests']['visibilityCsi'] = baseCsiUrl +
+      `&met.a4a.${slotId}=visibilityCsi.${deltaTime}`;
+  config['triggers']['continuousVisible']['request'].push('visibilityCsi');
+  return config;
 }

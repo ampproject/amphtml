@@ -20,6 +20,7 @@ import {
   serializeMessage,
   deserializeMessage,
 } from '../src/3p-frame-messaging';
+import {getData} from '../src/event-helper';
 import {getMode} from '../src/mode';
 import {dev} from '../src/log';
 
@@ -66,7 +67,7 @@ export class IframeMessagingClient {
    *   All future calls will overwrite any previously registered
    *   callbacks.
    * @param {string} messageType The type of the message.
-   * @param {function(Object)} callback The callback function to call
+   * @param {function(?JsonObject)} callback The callback function to call
    *   when a message with type messageType is received.
    */
   registerCallback(messageType, callback) {
@@ -79,7 +80,7 @@ export class IframeMessagingClient {
   /**
    *  Send a postMessage to Host Window
    *  @param {string} type The type of message to send.
-   *  @param {Object=} opt_payload The payload of message to send.
+   *  @param {JsonObject=} opt_payload The payload of message to send.
    */
   sendMessage(type, opt_payload) {
     this.hostWindow_.postMessage/*OK*/(
@@ -105,12 +106,12 @@ export class IframeMessagingClient {
         return;
       }
 
-      const message = deserializeMessage(event.data);
-      if (!message || message.sentinel != this.sentinel_) {
+      const message = deserializeMessage(getData(event));
+      if (!message || message['sentinel'] != this.sentinel_) {
         return;
       }
 
-      this.fireObservable_(message.type, message);
+      this.fireObservable_(message['type'], message);
     });
   }
 
@@ -130,7 +131,7 @@ export class IframeMessagingClient {
 
   /**
    * @param {string} messageType
-   * @return {!Observable<Object>}
+   * @return {!Observable<?JsonObject>}
    */
   getOrCreateObservableFor_(messageType) {
     if (!(messageType in this.observableFor_)) {

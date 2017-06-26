@@ -22,7 +22,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {Layout} from '../../../src/layout';
 import {user, dev} from '../../../src/log';
 import {extensionsFor} from '../../../src/services';
-import {toggle} from '../../../src/style';
+import {toggle, setStyle} from '../../../src/style';
 import {listen} from '../../../src/event-helper';
 import {LightboxManager} from './service/lightbox-manager-impl';
 
@@ -82,6 +82,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     /** @private {?Element} */
     this.descriptionBox_ = null;
 
+    /** @private {?Element} */
+    this.descriptionTextArea_ = null;
+
     /** @private {!Array<!Element>} */
     this.clonedLightboxableElements_ = [];
 
@@ -94,7 +97,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.buildMask_();
     this.buildCarousel_();
     this.buildDescriptionBox_();
-    this.buildControls_();
+    this.buildTopBar_();
+
     this.element.appendChild(this.container_);
   }
 
@@ -175,9 +179,18 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     dev().assert(this.container_);
     this.descriptionBox_ = this.win.document.createElement('div');
     this.descriptionBox_.classList.add('i-amphtml-lbv-desc-box');
+    this.descriptionBox_.classList.add('standard');
+
+    this.descriptionTextArea_ = this.win.document.createElement('div');
+    this.descriptionTextArea_.classList.add('i-amphtml-lbv-desc-text');
+    this.descriptionBox_.appendChild(this.descriptionTextArea_);
 
     const toggleDescription = this.toggleDescriptionBox_.bind(this);
     listen(this.container_, 'click', toggleDescription);
+    this.descriptionBox_.addEventListener('click', event => {
+      this.toggleDescriptionOverflow_();
+      event.stopPropagation();
+    });
     this.container_.appendChild(this.descriptionBox_);
   }
 
@@ -188,7 +201,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   updateDescriptionBox_() {
     const descText = this.clonedLightboxableElements_[this.currentElementId_]
         .descriptionText;
-    this.descriptionBox_.textContent = descText;
+    this.descriptionTextArea_.textContent = descText;
     if (!descText) {
       this.descriptionBox_.classList.add('hide');
     }
@@ -206,11 +219,48 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   }
 
   /**
-   * Builds the controls (i.e. Next, Previous and Close buttons) and appends
-   * them to the container.
+   * Toggle the overflow state of description box
    * @private
    */
-  buildControls_() {
+  toggleDescriptionOverflow_() {
+    if (this.descriptionBox_.classList.contains('standard')) {
+      this.descriptionBox_.classList.remove('standard');
+      this.descriptionBox_.classList.add('overflow');
+      this.vsync_.run({
+        measure: state => {
+          state.descBoxHeight = this.descriptionTextArea_./*OK*/scrollHeight;
+          state.descTextAreaHeight = this.descriptionBox_./*OK*/clientHeight;
+        },
+        mutate: state => {
+          if (state.descBoxHeight > state.descTextAreaHeight) {
+            setStyle(this.descriptionTextArea_, 'bottom', 'auto');
+          }
+        },
+      }, {});
+    } else if (this.descriptionBox_.classList.contains('overflow')) {
+      this.descriptionBox_.classList.remove('overflow');
+      this.descriptionBox_.classList.add('standard');
+      setStyle(this.descriptionTextArea_, 'bottom', '');
+    }
+  }
+
+  /**
+   * Toggle lightbox top bar
+   * @private
+   */
+  toggleTopBar_() {
+    this.topBar_.classList.toggle('hide');
+  }
+
+  /**
+   * Builds the top bar containing buttons and appends them to the container.
+   * @private
+   */
+  buildTopBar_() {
+    dev().assert(this.container_);
+    this.topBar_ = this.win.document.createElement('div');
+    this.topBar_.classList.add('i-amphtml-lbv-top-bar');
+
     const close = this.close_.bind(this);
     const openGallery = this.openGallery_.bind(this);
     const closeGallery = this.closeGallery_.bind(this);
@@ -219,6 +269,10 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.buildButton_('Close', 'amp-lbv-button-close', close);
     this.buildButton_('Gallery', 'amp-lbv-button-gallery', openGallery);
     this.buildButton_('Content', 'amp-lbv-button-slide', closeGallery);
+
+    const toggleTopBar = this.toggleTopBar_.bind(this);
+    listen(this.container_, 'click', toggleTopBar);
+    this.container_.appendChild(this.topBar_);
   }
 
   /**
@@ -229,6 +283,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   buildButton_(label, className, action) {
+    dev().assert(this.topBar_);
     const button = this.win.document.createElement('div');
 
     button.setAttribute('role', 'button');
@@ -239,7 +294,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       event.stopPropagation();
     });
 
-    this.container_.appendChild(button);
+    this.topBar_.appendChild(button);
   }
 
   /**
@@ -260,7 +315,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       const targetId = invocation.args.id;
       target = this.win.document.getElementById(targetId);
       user().assert(target,
-        'amp-lightbox-viewer.open: element with id: %s not found', targetId);
+          'amp-lightbox-viewer.open: element with id: %s not found', targetId);
     }
     return this.open_(target);
   }

@@ -23,7 +23,7 @@ import {VideoEvents} from '../../../src/video-interface';
 import {videoManagerForDoc} from '../../../src/services';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {removeElement} from '../../../src/dom';
-import {listen} from '../../../src/event-helper';
+import {getData, listen} from '../../../src/event-helper';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -139,9 +139,9 @@ class AmpBridPlayer extends AMP.BaseElement {
     this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(
-      this.win,
-      'message',
-      this. handleBridMessages_.bind(this)
+        this.win,
+        'message',
+        this. handleBridMessages_.bind(this)
     );
 
     this.element.appendChild(iframe);
@@ -216,13 +216,14 @@ class AmpBridPlayer extends AMP.BaseElement {
 
   /** @private */
   handleBridMessages_(event) {
+    const eventData = /** @type {?string|undefined} */ (getData(event));
     if (event.origin !== 'https://services.brid.tv' ||
         event.source != this.iframe_.contentWindow ||
-        typeof event.data !== 'string' || event.data.indexOf('Brid') !== 0) {
+        typeof eventData !== 'string' || eventData.indexOf('Brid') !== 0) {
       return;
     }
 
-    const params = event.data.split('|');
+    const params = eventData.split('|');
 
     if (params[2] == 'trigger') {
       if (params[3] == 'ready') {

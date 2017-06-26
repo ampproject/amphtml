@@ -61,12 +61,27 @@ describes.realWin('amp-sidebar 0.1 version', {
         if (options.open) {
           ampSidebar.setAttribute('open', '');
         }
+        if (options.closeText) {
+          ampSidebar.setAttribute('data-close-button-aria-label',
+              options.closeText);
+        };
         ampSidebar.setAttribute('id', 'sidebar1');
         ampSidebar.setAttribute('layout', 'nodisplay');
         return iframe.addElement(ampSidebar).then(() => {
           timer = timerFor(iframe.win);
           return {iframe, ampSidebar};
         });
+      });
+
+      it('should replace text to screen reader \
+      button in data-close-button-aria-label', () => {
+        return getAmpSidebar({'closeText':
+          'data-close-button-aria-label'}).then(obj => {
+            const sidebarElement = obj.ampSidebar;
+            const closeButton = sidebarElement.lastElementChild;
+            expect(closeButton.textContent)
+                .to.equal('data-close-button-aria-label');
+          });
       });
     }
 
@@ -99,7 +114,7 @@ describes.realWin('amp-sidebar 0.1 version', {
         const sidebarElement = obj.ampSidebar;
         const impl = sidebarElement.implementation_;
         impl.vsync_ = {
-          mutate: function(callback) {
+          mutate(callback) {
             callback();
           },
         };
@@ -122,6 +137,7 @@ describes.realWin('amp-sidebar 0.1 version', {
         expect(closeButton).to.exist;
         expect(closeButton.tagName).to.equal('BUTTON');
         assertScreenReaderElement(closeButton);
+        expect(closeButton.textContent).to.equal('Close the sidebar');
         expect(impl.close_).to.have.not.been.called;
         closeButton.click();
         expect(impl.close_).to.be.calledOnce;
@@ -137,18 +153,18 @@ describes.realWin('amp-sidebar 0.1 version', {
         impl.scheduleLayout = sandbox.spy();
         impl.getHistory_ = function() {
           return {
-            push: function() {
+            push() {
               historyPushSpy();
               return Promise.resolve(11);
             },
-            pop: function() {
+            pop() {
               historyPopSpy();
               return Promise.resolve(11);
             },
           };
         };
         impl.vsync_ = {
-          mutate: function(callback) {
+          mutate(callback) {
             callback();
           },
         };
@@ -189,11 +205,11 @@ describes.realWin('amp-sidebar 0.1 version', {
         impl.scheduleLayout = sandbox.spy();
         impl.getHistory_ = function() {
           return {
-            push: function() {
+            push() {
               historyPushSpy();
               return Promise.resolve(11);
             },
-            pop: function() {
+            pop() {
               historyPopSpy();
               return Promise.resolve(11);
             },
@@ -201,7 +217,7 @@ describes.realWin('amp-sidebar 0.1 version', {
         };
         impl.historyId_ = 100;
         impl.vsync_ = {
-          mutate: function(callback) {
+          mutate(callback) {
             callback();
           },
         };
@@ -234,7 +250,7 @@ describes.realWin('amp-sidebar 0.1 version', {
         impl.scheduleLayout = sandbox.spy();
         impl.schedulePause = sandbox.spy();
         impl.vsync_ = {
-          mutate: function(callback) {
+          mutate(callback) {
             callback();
           },
         };
@@ -266,7 +282,7 @@ describes.realWin('amp-sidebar 0.1 version', {
         const impl = sidebarElement.implementation_;
         impl.schedulePause = sandbox.spy();
         impl.vsync_ = {
-          mutate: function(callback) {
+          mutate(callback) {
             callback();
           },
         };
@@ -301,7 +317,7 @@ describes.realWin('amp-sidebar 0.1 version', {
         impl.schedulePause = sandbox.spy();
         impl.scheduleResume = sandbox.spy();
         impl.vsync_ = {
-          mutate: function(callback) {
+          mutate(callback) {
             callback();
           },
         };
@@ -337,7 +353,7 @@ describes.realWin('amp-sidebar 0.1 version', {
         const sidebarElement = obj.ampSidebar;
         const impl = sidebarElement.implementation_;
         impl.vsync_ = {
-          mutate: function(callback) {
+          mutate(callback) {
             callback();
           },
         };
@@ -357,7 +373,7 @@ describes.realWin('amp-sidebar 0.1 version', {
         const sidebarElement = obj.ampSidebar;
         const impl = sidebarElement.implementation_;
         impl.vsync_ = {
-          mutate: function(callback) {
+          mutate(callback) {
             callback();
           },
         };
@@ -371,7 +387,7 @@ describes.realWin('amp-sidebar 0.1 version', {
         expect(compensateIosBottombarSpy).to.be.calledOnce;
         // 10 lis + one top padding element inserted
         expect(sidebarElement.children.length)
-          .to.equal(initalChildrenCount + 1);
+            .to.equal(initalChildrenCount + 1);
       });
     });
 
@@ -383,7 +399,7 @@ describes.realWin('amp-sidebar 0.1 version', {
         const impl = sidebarElement.implementation_;
         impl.schedulePause = sandbox.spy();
         impl.vsync_ = {
-          mutate: function(callback) {
+          mutate(callback) {
             callback();
           },
         };
@@ -426,7 +442,7 @@ describes.realWin('amp-sidebar 0.1 version', {
         const impl = sidebarElement.implementation_;
         impl.schedulePause = sandbox.spy();
         impl.vsync_ = {
-          mutate: function(callback) {
+          mutate(callback) {
             callback();
           },
         };
@@ -470,7 +486,7 @@ describes.realWin('amp-sidebar 0.1 version', {
         const impl = sidebarElement.implementation_;
         impl.schedulePause = sandbox.spy();
         impl.vsync_ = {
-          mutate: function(callback) {
+          mutate(callback) {
             callback();
           },
         };
@@ -514,7 +530,7 @@ describes.realWin('amp-sidebar 0.1 version', {
         const impl = sidebarElement.implementation_;
         impl.schedulePause = sandbox.spy();
         impl.vsync_ = {
-          mutate: function(callback) {
+          mutate(callback) {
             callback();
           },
         };

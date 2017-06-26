@@ -13,11 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the license.
 #
-tags: {  # amp-access
+
+# Specific script tags for custom elements and runtime imports.
+tags: {  # amp-experiment
   html_format: AMP
   tag_name: "SCRIPT"
   extension_spec: {
-    name: "amp-access"
+    name: "amp-experiment"
     allowed_versions: "0.1"
     allowed_versions: "latest"
     requires_usage: DEPRECATED_WARNING
@@ -25,25 +27,17 @@ tags: {  # amp-access
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # amp-access (json)
+tags: {  # amp-experiment (json)
   html_format: AMP
   tag_name: "SCRIPT"
-  spec_name: "amp-access extension .json script"
-  unique: true
-  mandatory_parent: "HEAD"
-  requires_extension: "amp-access"
-  requires_extension: "amp-analytics"
-  attrs: {
-    name: "id"
-    mandatory: true
-    value: "amp-access"
-    dispatch_key: true
-  }
+  spec_name: "amp-experiment extension .json script"
+  mandatory_parent: "AMP-EXPERIMENT"
   attrs: { name: "nonce" }
   attrs: {
     name: "type"
     mandatory: true
     value_casei: "application/json"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -51,4 +45,13 @@ tags: {  # amp-access (json)
       error_message: "html comments"
     }
   }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-experiment"
+}
+tags: {  # <amp-experiment>
+  html_format: AMP
+  tag_name: "AMP-EXPERIMENT"
+  disallowed_ancestor: "AMP-SIDEBAR"
+  requires_extension: "amp-experiment"
+  unique: true
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-experiment"
 }

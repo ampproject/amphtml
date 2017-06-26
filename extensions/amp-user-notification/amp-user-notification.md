@@ -24,19 +24,12 @@ limitations under the License.
     <td>Displays a dismissable notification to the user. </td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td>
       <div>
         <code>&lt;script async custom-element="amp-user-notification" src="https://cdn.ampproject.org/v0/amp-user-notification-0.1.js">&lt;/script></code>
       </div>
-      <div>
-        <code>&lt;script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js">&lt;/script></code>
-      </div>
-      <small>Notice that both "amp-user-notification" and "amp-analytics" scripts are required.</small>
+      <small>Notice that  "amp-user-notification" script is required.</small>
     </td>
   </tr>
   <tr>
@@ -76,7 +69,7 @@ adding a unique value to the `GET` url like a timestamp as a query string field)
 
 When multiple `amp-user-notification` elements are on a page, only one is shown
 at a single time (Once one is dismissed the next one is shown).
-The order of the notifications being shown is currently not deterministic. 
+The order of the notifications being shown is currently not deterministic.
 
 Example:
 
@@ -101,7 +94,7 @@ on the `data-show-if-href` attribute (see [#1228](https://github.com/ampproject/
 
 As a best practice to not let the browser cache the GET response values, you should add
 a [`TIMESTAMP` url replacement](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md) value to the `data-show-if-href` attribute value.
-You can add it as a query string field (e.g., 
+You can add it as a query string field (e.g.,
 `data-show-if-href="https://foo.com/api/show-api?timestamp=TIMESTAMP"`).
 
 If the `data-show-if-href` attribute is not specified, AMP will only check if the notification with the specified ID has been "dismissed" by the user locally. If not, the notification will be shown.
@@ -197,7 +190,7 @@ This notification should ALWAYS show on every page visit.
 
 A notification is shown when:
 
-1. There's no record locally that the user has dismissed the notification with the 
+1. There's no record locally that the user has dismissed the notification with the
 specified ID.
 2. When specified, `data-show-if-href` endpoint returns `{ "showNotification": true }`.
 
@@ -236,7 +229,7 @@ amp-user-notification.amp-active {
 ```
 
 ## Actions
-The `amp-user-notification` exposes the following actions that you can use [AMP on-syntax to trigger](../../../src/spec/amp-actions-and-events.md):
+The `amp-user-notification` exposes the following actions that you can use [AMP on-syntax to trigger](https://github.com/ampproject/amphtml/blob/master/spec/amp-actions-and-events.md):
 
 <table>
   <tr>
@@ -259,4 +252,4 @@ Optionally, you can delay generation of Client IDs used for analytics and simila
 
 ## Validation
 
-See [amp-user-notification rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-user-notification/0.1/validator-amp-user-notification.protoascii) in the AMP validator specification.
+See [amp-user-notification rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-user-notification/validator-amp-user-notification.protoascii) in the AMP validator specification.

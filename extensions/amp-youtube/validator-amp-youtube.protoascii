@@ -1,5 +1,5 @@
 #
-# Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+# Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,31 +14,36 @@
 # limitations under the license.
 #
 
-tags: {  # amp-gist
-  html_format: AMP
+tags: {  # amp-youtube
   tag_name: "SCRIPT"
   extension_spec: {
-    name: "amp-gist"
+    name: "amp-youtube"
     allowed_versions: "0.1"
     allowed_versions: "latest"
+    requires_usage: DEPRECATED_WARNING
+    deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-gist>
-  html_format: AMP
-  tag_name: "AMP-GIST"
-  requires_extension: "amp-gist"
+tags: {  # <amp-youtube>
+  tag_name: "AMP-YOUTUBE"
+  disallowed_ancestor: "AMP-SIDEBAR"
+  requires_extension: "amp-youtube"
+  attrs: { name: "autoplay" }
   attrs: {
-    name: "data-file"
-    value: ""
-  }
-  attrs: {
-    name: "data-gistid"
+    name: "data-videoid"
     mandatory: true
+    value_regex: "[^=/?:]+"
   }
+  # <amp-bind>
+  attrs: { name: "[data-videoid]" }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-gist"
   amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
   }
 }

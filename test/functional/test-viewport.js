@@ -45,6 +45,9 @@ import {whenDocumentReady} from '../../src/document-ready';
 import * as sinon from 'sinon';
 
 
+const NOOP = () => {};
+
+
 describes.fakeWin('Viewport', {}, env => {
   let clock;
   let viewport;
@@ -490,7 +493,7 @@ describes.fakeWin('Viewport', {}, env => {
         .once();
     bindingMock.expects('hideViewerHeader').withArgs(true, 19).once();
     viewerViewportHandler({paddingTop: 0, duation: 300, curve: 'ease-in',
-        transient: true});
+      transient: true});
     bindingMock.verify();
     fixedLayerMock.verify();
   });
@@ -501,22 +504,27 @@ describes.fakeWin('Viewport', {}, env => {
     const fixedLayerMock = sandbox.mock(viewport.fixedLayer_);
     fixedLayerMock.expects('updatePaddingTop').withArgs(0).once();
     viewerViewportHandler({paddingTop: 0, duation: 300, curve: 'ease-in',
-        transient: 'true'});
+      transient: 'true'});
     fixedLayerMock.verify();
   });
 
   it('should update viewport when entering lightbox mode', () => {
+    const requestingEl = document.createElement('div');
+
     viewport.vsync_ = {mutate: callback => callback()};
     const enterOverlayModeStub = sandbox.stub(viewport, 'enterOverlayMode');
     const hideFixedLayerStub = sandbox.stub(viewport, 'hideFixedLayer');
+    const maybeEnterFieLightboxStub =
+        sandbox.stub(viewport, 'maybeEnterFieLightboxMode', NOOP);
     const bindingMock = sandbox.mock(binding);
     bindingMock.expects('updateLightboxMode').withArgs(true).once();
 
-    viewport.enterLightboxMode();
+    viewport.enterLightboxMode(requestingEl);
 
     bindingMock.verify();
     expect(enterOverlayModeStub).to.be.calledOnce;
     expect(hideFixedLayerStub).to.be.calledOnce;
+    expect(maybeEnterFieLightboxStub).to.be.calledOnce;
 
     expect(viewer.sendMessage).to.have.been.calledOnce;
     expect(viewer.sendMessage).to.have.been.calledWith('requestFullOverlay',
@@ -524,21 +532,60 @@ describes.fakeWin('Viewport', {}, env => {
   });
 
   it('should update viewport when leaving lightbox mode', () => {
+    const requestingEl = document.createElement('div');
+
     viewport.vsync_ = {mutate: callback => callback()};
     const leaveOverlayModeStub = sandbox.stub(viewport, 'leaveOverlayMode');
     const showFixedLayerStub = sandbox.stub(viewport, 'showFixedLayer');
+    const maybeLeaveFieLightboxStub =
+        sandbox.stub(viewport, 'maybeLeaveFieLightboxMode', NOOP);
     const bindingMock = sandbox.mock(binding);
     bindingMock.expects('updateLightboxMode').withArgs(false).once();
 
-    viewport.leaveLightboxMode();
+    viewport.leaveLightboxMode(requestingEl);
 
     bindingMock.verify();
     expect(leaveOverlayModeStub).to.be.calledOnce;
     expect(showFixedLayerStub).to.be.calledOnce;
+    expect(maybeLeaveFieLightboxStub).to.be.calledOnce;
 
     expect(viewer.sendMessage).to.have.been.calledOnce;
     expect(viewer.sendMessage).to.have.been.calledWith('cancelFullOverlay',
         {}, true);
+  });
+
+  it('should enter full overlay on FIE when entering lightbox mode', () => {
+    const requestingElement = {};
+    const fieMock = {
+      enterFullOverlayMode: sandbox.spy(),
+    };
+
+    sandbox.stub(viewport, 'isLightboxExperimentOn', () => true);
+
+    sandbox.stub(viewport, 'getFriendlyIframeEmbed_', el => {
+      expect(el).to.equal(requestingElement);
+      return fieMock;
+    });
+
+    viewport.maybeEnterFieLightboxMode(requestingElement);
+
+    expect(fieMock.enterFullOverlayMode).to.be.calledOnce;
+  });
+
+  it('should leave full overlay on FIE when leaving lightbox mode', () => {
+    const requestingElement = {};
+    const fieMock = {
+      leaveFullOverlayMode: sandbox.spy(),
+    };
+
+    sandbox.stub(viewport, 'getFriendlyIframeEmbed_', el => {
+      expect(el).to.equal(requestingElement);
+      return fieMock;
+    });
+
+    viewport.maybeLeaveFieLightboxMode(requestingElement);
+
+    expect(fieMock.leaveFullOverlayMode).to.be.calledOnce;
   });
 
   it('should update viewport when entering overlay mode', () => {
@@ -594,8 +641,8 @@ describes.fakeWin('Viewport', {}, env => {
     clock.tick(6);
     expect(viewport.scrollAnimationFrameThrottled_).to.be.false;
     expect(viewer.sendMessage).to.have.been.calledOnce;
-    expect(viewer.sendMessage).to.have.been.calledWith('scroll',
-        {scrollTop: 30}, true);
+    expect(viewer.sendMessage.lastCall.args[0]).to.equal('scroll');
+    expect(viewer.sendMessage.lastCall.args[1].scrollTop).to.equal(30);
     // scroll to 40
     viewport.getScrollTop = () => 40;
     viewport.sendScrollMessage_();
@@ -631,8 +678,8 @@ describes.fakeWin('Viewport', {}, env => {
     // call viewer.postScroll, raf for viewer.postScroll
     expect(changeEvent).to.equal(null);
     expect(viewer.sendMessage).to.have.callCount(1);
-    expect(viewer.sendMessage).to.have.been.calledWith('scroll',
-        {scrollTop: 34}, true);
+    expect(viewer.sendMessage.lastCall.args[0]).to.equal('scroll');
+    expect(viewer.sendMessage.lastCall.args[1].scrollTop).to.equal(34);
     binding.getScrollTop = () => 35;
     viewport.scroll_();
 
@@ -1043,7 +1090,7 @@ describe('Viewport META', () => {
           documentElement: {
             style: {},
             classList: {
-              add: function() {},
+              add() {},
             },
           },
           querySelector: selector => {

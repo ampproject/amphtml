@@ -42,14 +42,22 @@ function serve() {
 
   nodemon({
     script: require.resolve('../server.js'),
-    watch: [require.resolve('../app.js'),
-        require.resolve('../server.js')],
-    env: {'NODE_ENV': 'development',
+    watch: [
+      require.resolve('../app.js'),
+      require.resolve('../server.js')
+    ],
+    env: {
+      'NODE_ENV': 'development',
       'SERVE_PORT': port,
       'SERVE_HOST': host,
-      'SERVE_USEHTTPS': useHttps},
+      'SERVE_USEHTTPS': useHttps,
+      'SERVE_PROCESS_ID': process.pid
+    },
+  })
+  .once('exit', function () {
+    util.log(util.colors.green('Shutting down server'));
+    process.exit();
   });
-
   util.log(util.colors.yellow('Run `gulp build` then go to '
       + getHost() + '/examples/article.amp.html'
   ));

@@ -18,7 +18,7 @@ import {Animation} from '../animation';
 import {FixedLayer} from './fixed-layer';
 import {Observable} from '../observable';
 import {VisibilityState} from '../visibility-state';
-import {checkAndFix as checkAndFixIosScrollfreezeBug,} from
+import {checkAndFix as checkAndFixIosScrollfreezeBug} from
     './ios-scrollfreeze-bug';
 import {
   getParentWindowFrameElement,
@@ -26,6 +26,9 @@ import {
 } from '../service';
 import {layoutRectLtwh} from '../layout-rect';
 import {dev} from '../log';
+import {dict} from '../utils/object';
+import {getFriendlyIframeEmbedOptional} from '../friendly-iframe-embed';
+import {isExperimentOn} from '../experiments';
 import {numeric} from '../transition';
 import {onDocumentReady, whenDocumentReady} from '../document-ready';
 import {platformFor} from '../services';
@@ -37,6 +40,10 @@ import {waitForBody, isIframed} from '../dom';
 import {getMode} from '../mode';
 
 const TAG_ = 'Viewport';
+
+
+/** @const {string} */
+const A4A_LIGHTBOX_EXPERIMENT = 'amp-lightbox-a4a-proto';
 
 
 /**
@@ -444,24 +451,99 @@ export class Viewport {
 
   /**
    * Instruct the viewport to enter lightbox mode.
+   * Requesting element is necessary to be able to enter lightbox mode under FIE
+   * cases.
+   * @param {!Element=} opt_requestingElement
    * @return {!Promise}
    */
-  enterLightboxMode() {
-    this.viewer_.sendMessage('requestFullOverlay', {}, /* cancelUnsent */true);
+  enterLightboxMode(opt_requestingElement) {
+    this.viewer_.sendMessage(
+        'requestFullOverlay', dict(), /* cancelUnsent */ true);
+
     this.enterOverlayMode();
     this.hideFixedLayer();
+
+    if (opt_requestingElement) {
+      this.maybeEnterFieLightboxMode(
+          dev().assertElement(opt_requestingElement));
+    }
+
     return this.binding_.updateLightboxMode(true);
   }
 
   /**
    * Instruct the viewport to leave lightbox mode.
+   * Requesting element is necessary to be able to enter lightbox mode under FIE
+   * cases.
+   * @param {!Element=} opt_requestingElement
    * @return {!Promise}
    */
-  leaveLightboxMode() {
-    this.viewer_.sendMessage('cancelFullOverlay', {}, /* cancelUnsent */true);
+  leaveLightboxMode(opt_requestingElement) {
+    this.viewer_.sendMessage(
+        'cancelFullOverlay', dict(), /* cancelUnsent */ true);
+
     this.showFixedLayer();
     this.leaveOverlayMode();
+
+    if (opt_requestingElement) {
+      this.maybeLeaveFieLightboxMode(
+          dev().assertElement(opt_requestingElement));
+    }
+
     return this.binding_.updateLightboxMode(false);
+  }
+
+  /**
+   * @return {boolean}
+   * @visibleForTesting
+   */
+  isLightboxExperimentOn() {
+    return isExperimentOn(this.ampdoc.win, A4A_LIGHTBOX_EXPERIMENT);
+  }
+
+  /**
+   * Enters frame lightbox mode if under a Friendly Iframe Embed.
+   * @param {!Element} requestingElement
+   * @visibleForTesting
+   */
+  maybeEnterFieLightboxMode(requestingElement) {
+    const fieOptional = this.getFriendlyIframeEmbed_(requestingElement);
+
+    if (fieOptional) {
+      dev().assert(this.isLightboxExperimentOn(),
+          'Lightbox mode for A4A is only available when ' +
+          `'${A4A_LIGHTBOX_EXPERIMENT}' experiment is on`);
+
+      dev().assert(fieOptional).enterFullOverlayMode();
+    }
+  }
+
+  /**
+   * Leaves frame lightbox mode if under a Friendly Iframe Embed.
+   * @param {!Element} requestingElement
+   * @visibleForTesting
+   */
+  maybeLeaveFieLightboxMode(requestingElement) {
+    const fieOptional = this.getFriendlyIframeEmbed_(requestingElement);
+
+    if (fieOptional) {
+      dev().assert(fieOptional).leaveFullOverlayMode();
+    }
+  }
+
+  /**
+   * Get FriendlyIframeEmbed if available.
+   * @param {!Element} element Element supposedly inside the FIE.
+   * @return {?../friendly-iframe-embed.FriendlyIframeEmbed}
+   * @private
+   */
+  getFriendlyIframeEmbed_(element) {
+    const iframeOptional =
+        getParentWindowFrameElement(element, this.ampdoc.win);
+
+    return iframeOptional && getFriendlyIframeEmbedOptional(
+        /** @type {!HTMLIFrameElement} */
+        (dev().assertElement(iframeOptional)));
   }
 
   /*
@@ -633,7 +715,7 @@ export class Viewport {
   }
 
   /**
-   * @param {!JSONType} data
+   * @param {!JsonObject} data
    * @private
    */
   viewerSetScrollTop_(data) {
@@ -642,7 +724,7 @@ export class Viewport {
   }
 
   /**
-   * @param {!JSONType} data
+   * @param {!JsonObject} data
    * @private
    */
   updateOnViewportEvent_(data) {
@@ -781,7 +863,8 @@ export class Viewport {
       this.scrollAnimationFrameThrottled_ = true;
       this.vsync_.measure(() => {
         this.scrollAnimationFrameThrottled_ = false;
-        this.viewer_.sendMessage('scroll', {scrollTop: this.getScrollTop()},
+        this.viewer_.sendMessage('scroll',
+            dict({'scrollTop': this.getScrollTop()}),
             /* cancelUnsent */true);
       });
     }

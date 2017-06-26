@@ -22,10 +22,6 @@ limitations under the License.
     <td>Displays a media stream from the nexxOMNIA platform.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-nexxtv-player" src="https://cdn.ampproject.org/v0/amp-nexxtv-player-0.1.js">&lt;/script></code></td>
   </tr>
@@ -47,6 +43,7 @@ With the responsive layout, the width and height from the example should yield c
     data-seek-to="2"
     data-mode="static"
     data-origin="https://embed.nexx.cloud/"
+    data-disable-ads="1"
     layout="responsive"
     width="480" height="270"></amp-nexxtv-player>
 ```
@@ -85,6 +82,10 @@ Indicates the data mode, which can be `static` (default) or `api`.
 
 Indicates the source from which the embedded domain media is played. By default this is set to `https://embed.nexx.cloud/`.
 
+**data-disable-ads** (optional)
+
+Ads are enabled by default. Set value to 1 to disable.
+
 
 **common attributes**
 
@@ -92,4 +93,4 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 
 ## Validation
 
-See [amp-nexxtv-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-nexxtv-player/0.1/validator-amp-nexxtv-player.protoascii) in the AMP validator specification.
+See [amp-nexxtv-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-nexxtv-player/validator-amp-nexxtv-player.protoascii) in the AMP validator specification.

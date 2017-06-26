@@ -17,12 +17,13 @@
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {tryParseJson} from '../../../src/json';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {dict} from '../../../src/utils/object';
 import {user} from '../../../src/log';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {removeElement} from '../../../src/dom';
-import {listen} from '../../../src/event-helper';
+import {getData, listen} from '../../../src/event-helper';
 import {isObject} from '../../../src/types';
 import {VideoEvents} from '../../../src/video-interface';
 import {videoManagerForDoc} from '../../../src/services';
@@ -81,19 +82,20 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     }
 
     const mediaId = user().assert(
-      this.element.getAttribute('data-mediaid'),
-      'The data-mediaid attribute is required for <amp-nexxtv-player> %s',
-      this.element);
+        this.element.getAttribute('data-mediaid'),
+        'The data-mediaid attribute is required for <amp-nexxtv-player> %s',
+        this.element);
 
     const client = user().assert(this.element.getAttribute('data-client'),
-      'The data-client attribute is required for <amp-nexxtv-player> %s',
-      this.element);
+        'The data-client attribute is required for <amp-nexxtv-player> %s',
+        this.element);
 
     const start = this.element.getAttribute('data-seek-to') || '0';
     const mode = this.element.getAttribute('data-mode') || 'static';
     const streamtype = this.element.getAttribute('data-streamtype') || 'video';
     const origin = this.element.getAttribute('data-origin')
       || 'https://embed.nexx.cloud/';
+    const disableAds = this.element.getAttribute('data-disable-ads');
 
     let src = origin;
 
@@ -105,6 +107,10 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     src += encodeURIComponent(mediaId);
     src += `?start=${encodeURIComponent(start)}`;
     src += `&datamode=${encodeURIComponent(mode)}&amp=1`;
+
+    if (disableAds === '1') {
+      src += '&disableAds=1';
+    }
 
     this.videoIframeSrc_ = assertAbsoluteHttpOrHttpsUrl(src);
 
@@ -172,29 +178,34 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
   sendCommand_(command) {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
-        this.iframe_.contentWindow./*OK*/postMessage({cmd: command}, '*');
+        this.iframe_.contentWindow./*OK*/postMessage(dict({
+          'cmd': command,
+        }), '*');
       }
     });
   };
 
   // emitter
   handleNexxMessages_(event) {
-    if (!event.data || event.source !== this.iframe_.contentWindow) {
+    if (!getData(event) || event.source !== this.iframe_.contentWindow) {
       return;
     }
 
-    const data = isObject(event.data) ? event.data : tryParseJson(event.data);
-    if (data === undefined) {
+    /** @const {?JsonObject} */
+    const data = /** @type {?JsonObject} */ (isObject(getData(event))
+        ? getData(event)
+        : tryParseJson(getData(event)));
+    if (!data) {
       return;
     }
 
-    if (data.event == 'play') {
+    if (data['event'] == 'play') {
       this.element.dispatchCustomEvent(VideoEvents.PLAY);
-    } else if (data.event == 'pause') {
+    } else if (data['event'] == 'pause') {
       this.element.dispatchCustomEvent(VideoEvents.PAUSE);
-    } else if (data.event == 'mute') {
+    } else if (data['event'] == 'mute') {
       this.element.dispatchCustomEvent(VideoEvents.MUTED);
-    } else if (data.event == 'unmute') {
+    } else if (data['event'] == 'unmute') {
       this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
     }
   }

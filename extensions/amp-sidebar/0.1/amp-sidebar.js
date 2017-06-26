@@ -58,7 +58,10 @@ export class AmpSidebar extends AMP.BaseElement {
     const platform = platformFor(this.win);
 
     /** @private @const {boolean} */
-    this.isIosSafari_ = platform.isIos() && platform.isSafari();
+    this.isIos_ = platform.isIos();
+
+    /** @private @const {boolean} */
+    this.isSafari_ = platform.isSafari();
 
     /** @private {number} */
     this.historyId_ = -1;
@@ -95,7 +98,7 @@ export class AmpSidebar extends AMP.BaseElement {
       this.element.setAttribute('side', this.side_);
     }
 
-    if (this.isIosSafari_) {
+    if (this.isIos_) {
       this.fixIosElasticScrollLeak_();
     }
 
@@ -118,10 +121,14 @@ export class AmpSidebar extends AMP.BaseElement {
       }
     });
 
+    // Replacement label for invisible close button set value in amp sidebar
+    const ariaLabel = this.element.getAttribute('data-close-button-aria-label')
+    || 'Close the sidebar';
+
     // Invisible close button at the end of sidebar for screen-readers.
     const screenReaderCloseButton = this.document_.createElement('button');
-    // TODO(aghassemi, #4146) i18n
-    screenReaderCloseButton.textContent = 'Close the sidebar';
+
+    screenReaderCloseButton.textContent = ariaLabel;
     screenReaderCloseButton.classList.add('i-amphtml-screen-reader');
     // This is for screen-readers only, should not get a tab stop.
     screenReaderCloseButton.tabIndex = -1;
@@ -194,7 +201,7 @@ export class AmpSidebar extends AMP.BaseElement {
     this.vsync_.mutate(() => {
       toggle(this.element, /* display */true);
       this.openMask_();
-      if (this.isIosSafari_) {
+      if (this.isIos_ && this.isSafari_) {
         this.compensateIosBottombar_();
       }
       this.element./*OK*/scrollTop = 1;

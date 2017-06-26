@@ -13,28 +13,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the license.
 #
-tags: {  # amp-bind
-  html_format: AMP
+
+# Specific script tags for custom elements and runtime imports.
+tags: {  # amp-analytics
   tag_name: "SCRIPT"
   extension_spec: {
-    name: "amp-bind"
+    name: "amp-analytics"
     allowed_versions: "0.1"
     allowed_versions: "latest"
+    requires_usage: DEPRECATED_WARNING
+    deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-state> (json)
-  html_format: AMP
+tags: {  # amp-analytics (json)
   tag_name: "SCRIPT"
-  spec_name: "amp-bind extension .json script"
-  requires_extension: "amp-bind"
-  mandatory_parent: "AMP-STATE"
+  spec_name: "amp-analytics extension .json script"
+  requires_extension: "amp-analytics"
+  mandatory_parent: "AMP-ANALYTICS"
   attrs: { name: "nonce" }
   attrs: {
     name: "type"
     mandatory: true
     value_casei: "application/json"
-    dispatch_key: true
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -42,36 +44,22 @@ tags: {  # <amp-state> (json)
       error_message: "html comments"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-bind"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-analytics"
 }
-tags: {  # <amp-state>
-  html_format: AMP
-  tag_name: "AMP-STATE"
-  spec_name: "amp-state"
-  requires_extension: "amp-bind"
+tags: {  # <amp-analytics>
+  tag_name: "AMP-ANALYTICS"
   disallowed_ancestor: "AMP-SIDEBAR"
+  requires_extension: "amp-analytics"
+  attrs: { name: "type" }
   attrs: {
-    name: "credentials"
-    trigger: {
-      also_requires_attr: "src"
-    }
-  }
-  attrs: {
-    name: "id"
-    mandatory: true
-  }
-  attrs: {
-    name: "src"
+    name: "config"
     value_url: {
       allowed_protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
+      allow_empty: true
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
-  # <amp-bind>
-  attrs: { name: "[src]" }
-  child_tags: {
-    first_child_tag_name_oneof: "SCRIPT"
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-bind"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-analytics"
 }
+

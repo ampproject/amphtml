@@ -26,10 +26,11 @@ import {
   toArray,
 } from '../../../src/types';
 import {
+  getData,
   listen,
 } from '../../../src/event-helper';
+import {dict} from '../../../src/utils/object';
 import {removeElement} from '../../../src/dom';
-import {startsWith} from '../../../src/string';
 import {user} from '../../../src/log';
 import {VideoEvents} from '../../../src/video-interface';
 import {videoManagerForDoc} from '../../../src/services';
@@ -60,6 +61,9 @@ class AmpImaVideo extends AMP.BaseElement {
 
     /** @private {?String} */
     this.preconnectSource_ = null;
+
+    /** @private {?String} */
+    this.preconnectTrack_ = null;
   }
 
   /** @override */
@@ -71,17 +75,23 @@ class AmpImaVideo extends AMP.BaseElement {
         'The data-tag attribute is required for <amp-video-ima> and must be ' +
             'https');
 
-    // Set data-sources attribute based on source child elements.
     const sourceElements = this.element.getElementsByTagName('source');
-    if (sourceElements.length > 0) {
-      const sources = [];
-      toArray(sourceElements).forEach(source => {
-        if (!this.preconnectSource_) {
-          this.preconnectSource_ = source.src;
+    const trackElements = this.element.getElementsByTagName('track');
+    const childElements =
+        toArray(sourceElements).concat(toArray(trackElements));
+    if (childElements.length > 0) {
+      const children = [];
+      childElements.forEach(child => {
+        // Save the first source and first track to preconnect.
+        if (child.tagName == 'SOURCE' && !this.preconnectSource_) {
+          this.preconnectSource_ = child.src;
+        } else if (child.tagName == 'TRACK' && !this.preconnectTrack_) {
+          this.preconnectTrack_ = child.src;
         }
-        sources.push(source./*OK*/outerHTML);
+        children.push(child./*OK*/outerHTML);
       });
-      this.element.setAttribute('data-sources', JSON.stringify(sources));
+      this.element.setAttribute(
+          'data-child-elements', JSON.stringify(children));
     }
   }
 
@@ -95,6 +105,9 @@ class AmpImaVideo extends AMP.BaseElement {
     }
     if (this.preconnectSource_) {
       this.preconnect.url(this.preconnectSource_);
+    }
+    if (this.preconnectTrack_) {
+      this.preconnect.url(this.preconnectTrack_);
     }
     this.preconnect.url(this.element.getAttribute('data-tag'));
     preloadBootstrap(this.win, this.preconnect);
@@ -119,9 +132,9 @@ class AmpImaVideo extends AMP.BaseElement {
     });
 
     this.unlistenMessage_ = listen(
-      this.win,
-      'message',
-      this.handlePlayerMessages_.bind(this)
+        this.win,
+        'message',
+        this.handlePlayerMessages_.bind(this)
     );
 
     this.element.appendChild(iframe);
@@ -173,11 +186,11 @@ class AmpImaVideo extends AMP.BaseElement {
     if (this.iframe_ && this.iframe_.contentWindow)
     {
       this.playerReadyPromise_.then(() => {
-        this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify({
+        this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify(dict({
           'event': 'command',
           'func': command,
           'args': opt_args || '',
-        }), '*');
+        })), '*');
       });
     }
   }
@@ -187,21 +200,19 @@ class AmpImaVideo extends AMP.BaseElement {
     if (event.source != this.iframe_.contentWindow) {
       return;
     }
-    if (!event.data ||
-        !(isObject(event.data) || startsWith(event.data, '{'))) {
-      return;  // Doesn't look like JSON.
-    }
+    const eventData = getData(event);
 
-    if (isObject(event.data)) {
-      if (event.data.event == VideoEvents.LOAD ||
-          event.data.event == VideoEvents.PLAY ||
-          event.data.event == VideoEvents.PAUSE ||
-          event.data.event == VideoEvents.MUTED ||
-          event.data.event == VideoEvents.UNMUTED) {
-        if (event.data.event == VideoEvents.LOAD) {
+    if (isObject(eventData)) {
+      const videoEvent = eventData['event'];
+      if (videoEvent == VideoEvents.LOAD ||
+          videoEvent == VideoEvents.PLAY ||
+          videoEvent == VideoEvents.PAUSE ||
+          videoEvent == VideoEvents.MUTED ||
+          videoEvent == VideoEvents.UNMUTED) {
+        if (videoEvent == VideoEvents.LOAD) {
           this.playerReadyResolver_(this.iframe_);
         }
-        this.element.dispatchCustomEvent(event.data.event);
+        this.element.dispatchCustomEvent(videoEvent);
       }
     }
   }

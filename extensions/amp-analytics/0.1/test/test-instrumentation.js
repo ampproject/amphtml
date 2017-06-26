@@ -25,7 +25,6 @@ import {
   SignalTracker,
   VisibilityTracker,
 } from '../events';
-import {VisibilityState} from '../../../../src/visibility-state';
 import * as sinon from 'sinon';
 
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
@@ -35,8 +34,6 @@ import {
     installResourcesServiceForDoc,
 } from '../../../../src/service/resources-impl';
 import {documentStateFor} from '../../../../src/service/document-state';
-import {toggleExperiment} from '../../../../src/experiments';
-
 
 describes.realWin('InstrumentationService', {amp: 1}, env => {
   let win;
@@ -103,10 +100,6 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
       insStub = sandbox.stub(service, 'addListenerDepr_');
     });
 
-    afterEach(() => {
-      toggleExperiment(win, 'visibility-v3', false);
-    });
-
     it('should create group for the ampdoc root', () => {
       expect(group.root_).to.equal(root);
     });
@@ -128,34 +121,24 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
     });
 
     it('should delegate to deprecated addListener', () => {
-      // TODO(dvoytenko): remove past migration.
       const trackerStub = sandbox.stub(root, 'getTracker');
       const handler = function() {};
-      group.addTrigger({on: 'visible'}, handler);
       group.addTrigger({on: 'timer'}, handler);
       group.addTrigger({on: 'scroll'}, handler);
-      group.addTrigger({on: 'hidden'}, handler);
 
       expect(trackerStub).to.not.be.called;
       expect(group.listeners_).to.be.empty;
 
-      expect(insStub).to.have.callCount(4);
+      expect(insStub).to.have.callCount(2);
 
-      expect(insStub.args[0][0].on).to.equal('visible');
+      expect(insStub.args[0][0].on).to.equal('timer');
       expect(insStub.args[0][1]).to.equal(handler);
       expect(insStub.args[0][2]).to.equal(analyticsElement);
 
-      expect(insStub.args[1][0].on).to.equal('timer');
+      expect(insStub.args[1][0].on).to.equal('scroll');
       expect(insStub.args[1][1]).to.equal(handler);
       expect(insStub.args[1][2]).to.equal(analyticsElement);
 
-      expect(insStub.args[2][0].on).to.equal('scroll');
-      expect(insStub.args[2][1]).to.equal(handler);
-      expect(insStub.args[2][2]).to.equal(analyticsElement);
-
-      expect(insStub.args[3][0].on).to.equal('hidden');
-      expect(insStub.args[3][1]).to.equal(handler);
-      expect(insStub.args[3][2]).to.equal(analyticsElement);
     });
 
     it('should add "click" trigger', () => {
@@ -220,10 +203,10 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
           analyticsElement, 'ini-load', config, handler);
     });
 
-    it('should add "visible-v3" trigger', () => {
-      const config = {on: 'visible-v3'};
+    it('should add "visible" trigger', () => {
+      const config = {on: 'visible'};
       group.addTrigger(config, handler);
-      const tracker = root.getTrackerOptional('visible-v3');
+      const tracker = root.getTrackerOptional('visible');
       expect(tracker).to.be.instanceOf(VisibilityTracker);
 
       const unlisten = function() {};
@@ -232,39 +215,20 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
       group.addTrigger(config, handler);
       expect(stub).to.be.calledOnce;
       expect(stub).to.be.calledWith(
-          analyticsElement, 'visible-v3', config, handler);
+          analyticsElement, 'visible', config, handler);
     });
 
-    it('should add "visible-v3" trigger for hidden', () => {
-      toggleExperiment(win, 'visibility-v3', true);
+    it('should add "visible" trigger for hidden', () => {
       group = service.createAnalyticsGroup(analyticsElement);
       const config = {on: 'hidden'};
       const getTrackerSpy = sandbox.spy(root, 'getTracker');
       group.addTrigger(config, () => {});
-      expect(getTrackerSpy).to.be.calledWith('visible-v3');
-      const tracker = root.getTrackerOptional('visible-v3');
+      expect(getTrackerSpy).to.be.calledWith('visible');
+      const tracker = root.getTrackerOptional('visible');
       const unlisten = function() {};
       const stub = sandbox.stub(tracker, 'add', () => unlisten);
       group.addTrigger(config, () => {});
-      expect(stub).to.be.calledWith(analyticsElement, 'hidden-v3', config);
-    });
-
-    it('should use "visible-v3" for "visible" w/experiment', () => {
-      // TODO(dvoytenko, #8121): Cleanup visibility-v3 experiment.
-      toggleExperiment(win, 'visibility-v3', true);
-      group = service.createAnalyticsGroup(analyticsElement);
-      const config = {on: 'visible'};
-      group.addTrigger(config, handler);
-      const tracker = root.getTrackerOptional('visible-v3');
-      expect(tracker).to.be.instanceOf(VisibilityTracker);
-
-      const unlisten = function() {};
-      const stub = sandbox.stub(tracker, 'add', () => unlisten);
-      const handler = function() {};
-      group.addTrigger(config, handler);
-      expect(stub).to.be.calledOnce;
-      expect(stub).to.be.calledWith(
-          analyticsElement, 'visible-v3', config, handler);
+      expect(stub).to.be.calledWith(analyticsElement, 'hidden', config);
     });
   });
 });
@@ -349,23 +313,6 @@ describe('amp-analytics.instrumentation OLD', function() {
 
   afterEach(() => {
     sandbox.restore();
-  });
-
-  it('works for visible event', () => {
-    ins.viewer_.setVisibilityState_(VisibilityState.VISIBLE);
-    const fn = sandbox.stub();
-    ins.addListenerDepr_({'on': 'visible'}, fn);
-    expect(fn).to.be.calledOnce;
-  });
-
-  it('works for hidden event', () => {
-    const fn = sandbox.stub();
-    ins.addListenerDepr_({'on': 'hidden'}, fn);
-    ins.viewer_.setVisibilityState_(VisibilityState.HIDDEN);
-    expect(fn.calledOnce).to.be.true;
-
-    // remove the side effect. many other tests need viewer to be visible
-    ins.viewer_.setVisibilityState_(VisibilityState.VISIBLE);
   });
 
   it('only fires when the timer interval exceeds the minimum', () => {
@@ -499,7 +446,7 @@ describe('amp-analytics.instrumentation OLD', function() {
         'verticalBoundaries': [0, 100],
         'horizontalBoundaries': [0, 100],
       }},
-      fn1);
+        fn1);
     ins.addListenerDepr_({'on': 'scroll', 'scrollSpec': {
       'verticalBoundaries': [92], 'horizontalBoundaries': [92]}}, fn2);
 
@@ -537,7 +484,7 @@ describe('amp-analytics.instrumentation OLD', function() {
         'verticalBoundaries': [0, 100],
         'horizontalBoundaries': [0, 100],
       }},
-      fn1);
+        fn1);
 
     // Scroll Down
     fakeViewport.getScrollTop.returns(10);
@@ -561,13 +508,13 @@ describe('amp-analytics.instrumentation OLD', function() {
       'scrollSpec': {
         'verticalBoundaries': undefined, 'horizontalBoundaries': undefined,
       }},
-      fn1);
+        fn1);
     expect(fn1).to.have.not.been.called;
 
     ins.addListenerDepr_({
       'on': 'scroll',
       'scrollSpec': {'verticalBoundaries': [], 'horizontalBoundaries': []}},
-      fn1);
+        fn1);
     expect(fn1).to.have.not.been.called;
 
     ins.addListenerDepr_({
@@ -575,7 +522,7 @@ describe('amp-analytics.instrumentation OLD', function() {
       'scrollSpec': {
         'verticalBoundaries': ['foo'], 'horizontalBoundaries': ['foo'],
       }},
-      fn1);
+        fn1);
     expect(fn1).to.have.not.been.called;
   });
 

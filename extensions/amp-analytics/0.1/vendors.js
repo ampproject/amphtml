@@ -15,9 +15,9 @@
  */
 
 /**
- * @const {!JSONType}
+ * @const {!JsonObject}
  */
-export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
+export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
 
   // Default parent configuration applied to all amp-analytics tags.
   'default': {
@@ -1505,6 +1505,39 @@ export const ANALYTICS_CONFIG = /** @type {!JSONType} */ ({
       },
     },
   },
+
+  'topmailru': {
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+    'vars': {
+      'url': '${sourceUrl}',
+      'referrer': '${documentReferrer}',
+    },
+    'requests': {
+      'pageView': '${_domain}/counter?${_basicMessage};title=${title}',
+      'reachGoal': '${_domain}/tracker?${_basicMessage};title=${title}' +
+                   ';e=RG%3A${value}%2F${goal}',
+      'sendEvent': '${_domain}/tracker?${_basicMessage}' +
+                   ';e=CE%3A${value}%2F${category}%3B${action}%3B${label}',
+      '_domain': 'https://top-fwz1.mail.ru',
+      '_basicMessage': 'js=13;id=${id};u=${url};r=${referrer}' +
+                       ';s=${screenWidth}*${screenHeight}' +
+                       ';vp=${viewportWidth}*${viewportHeight}' +
+                       ';st=${start};gender=${gender};age=${age}' +
+                       ';pid=${pid};userid=${userid};device=${device}' +
+                       ';params=${params};_=${random}',
+    },
+    'triggers': {
+      'pageView': {
+        'on': 'visible',
+        'request': 'pageView',
+      },
+    },
+  },
+
 });
 ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;

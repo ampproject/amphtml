@@ -1,5 +1,4 @@
 /**
- * @license
  * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,12 +11,16 @@
  * distributed under the License is distributed on an "AS-IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the license.
+ * limitations under the License.
  */
 
-var extensionsVersions = {
-  'amp-sidebar': ['0.1', '1.0'],
-  'amp-sticky-ad': ['1.0'],
+/**
+* Enum used to specify Events for the Amp Bind extension
+*
+* @enum {string}
+*/
+export const BindEvents = {
+  INITIALIZE: 'amp:bind:initialize',
+  RESCAN_TEMPLATE: 'amp:bind:rescan-template',
+  SET_STATE: 'amp:bind:setState',
 };
-
-module.exports = extensionsVersions;

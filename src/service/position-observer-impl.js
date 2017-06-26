@@ -25,9 +25,9 @@ import {
   layoutRectFromDomRect,
   layoutRectLtwh,
 } from '../layout-rect';
-import {isExperimentOn} from '../../src/experiments';
 import {serializeMessage} from '../../src/3p-frame-messaging';
-import {tryParseJson} from '../../src/json.js';
+import {parseJson, tryParseJson} from '../../src/json.js';
+import {getData} from '../../src/event-helper';
 
 /** @const @private */
 const TAG = 'POSITION_OBSERVER';
@@ -90,7 +90,7 @@ class AbstractPositionObserver {
       position: null,
       turn: (fidelity == PositionObserverFidelity.LOW) ?
           Math.floor(Math.random() * LOW_FIDELITY_FRAME_COUNT) : 0,
-      trigger: function(position) {
+      trigger(position) {
         const prePos = entry.position;
         if (prePos
             && layoutRectEquals(prePos.positionRect, position.positionRect)
@@ -351,29 +351,29 @@ export class InaboxAmpDocPositionObserver extends AbstractPositionObserver {
     const dataObject = tryParseJson(this.ampdoc_.win.name);
     let sentinel = null;
     if (dataObject) {
-      sentinel = dataObject._context.sentinel;
+      sentinel = dataObject['_context']['sentinel'];
     }
     const win = this.ampdoc_.win;
     object.type = SEND_POSITIONS_HIGH_FIDELITY;
     this.ampdoc_.win.parent./*OK*/postMessage(serializeMessage(
-    SEND_POSITIONS_HIGH_FIDELITY, sentinel),
-    '*'
+        SEND_POSITIONS_HIGH_FIDELITY, sentinel),
+        '*'
     );
 
     this.ampdoc_.win.addEventListener('message', event => {
     // Cheap operations first, so we don't parse JSON unless we have to.
-      if (event.source != win.parent || typeof event.data != 'string' ||
-          event.data.indexOf('amp-') != 0) {
+      if (event.source != win.parent || typeof getData(event) != 'string' ||
+          dev().assertString(getData(event)).indexOf('amp-') != 0) {
         return;
       }
       // Parse JSON only once per message.
-      const data = /** @type {!Object} */ (
-      JSON.parse(event.data.substr(4)));
-      if (data.sentinel != sentinel) {
+      const data = parseJson(
+          dev().assertString(getData(event)).substr(4));
+      if (data['sentinel'] != sentinel) {
         return;
       }
 
-      if (data.type != POSITION_HIGH_FIDELITY) {
+      if (data['type'] != POSITION_HIGH_FIDELITY) {
         return;
       }
 
@@ -439,8 +439,6 @@ export class InaboxAmpDocPositionObserver extends AbstractPositionObserver {
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  */
 export function installPositionObserverServiceForDoc(ampdoc) {
-  dev().assert(isExperimentOn(ampdoc.win, 'amp-animation'),
-     'PositionObserver is experimental and used by amp-animation only for now');
   registerServiceBuilderForDoc(ampdoc, 'position-observer', () => {
     if (getMode(ampdoc.win).runtime == 'inabox') {
       return new InaboxAmpDocPositionObserver(ampdoc);

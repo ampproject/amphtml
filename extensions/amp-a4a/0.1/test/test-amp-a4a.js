@@ -34,7 +34,6 @@ import {Xhr} from '../../../../src/service/xhr-impl';
 import {Extensions} from '../../../../src/service/extensions-impl';
 import {Viewer} from '../../../../src/service/viewer-impl';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
-import {cryptoFor} from '../../../../src/crypto';
 import {cancellation} from '../../../../src/error';
 import {
   data as validCSSAmp,
@@ -86,21 +85,21 @@ describe('amp-a4a', () => {
         sandbox.spy(AmpA4A.prototype, 'onCreativeRender');
     getSigningServiceNamesMock.returns(['google']);
     xhrMockJson.withArgs(
-      'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
-      {
-        mode: 'cors',
-        method: 'GET',
-        ampCors: false,
-        credentials: 'omit',
-      }).returns(Promise.resolve({
-        json() {
-          return Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]});
-        },
-      }));
+        'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
+        {
+          mode: 'cors',
+          method: 'GET',
+          ampCors: false,
+          credentials: 'omit',
+        }).returns(Promise.resolve({
+          json() {
+            return Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]});
+          },
+        }));
     viewerWhenVisibleMock = sandbox.stub(Viewer.prototype, 'whenFirstVisible');
     viewerWhenVisibleMock.returns(Promise.resolve());
     mockResponse = {
-      arrayBuffer: function() {
+      arrayBuffer() {
         return utf8Encode(validCSSAmp.reserialized);
       },
       bodyUsed: false,
@@ -497,7 +496,7 @@ describe('amp-a4a', () => {
           // Should have reported an error.
           expect(devErrLogSpy).to.be.calledOnce;
           expect(devErrLogSpy.getCall(0).args[1]).to.have.string(
-            'random illegal value');
+              'random illegal value');
           expect(xhrMock).to.be.calledOnce;
         });
       });
@@ -550,7 +549,7 @@ describe('amp-a4a', () => {
                     // DOM mutations are actually completed before testing.
                     a4a.vsync_.runScheduledTasks_();
                     const nameChild = a4aElement.querySelector(
-                        `iframe[src^="nameframe"]`);
+                        'iframe[src^="nameframe"]');
                     expect(nameChild).to.not.be.ok;
                     if (headerVal != 'safeframe') {
                       const unsafeChild = a4aElement.querySelector('iframe');
@@ -865,7 +864,7 @@ describe('amp-a4a', () => {
             expect(renderAmpCreativeSpy.calledOnce,
                 'renderAmpCreative_ called exactly once').to.be.true;
             expect(a4aElement.getElementsByTagName('iframe').length)
-              .to.equal(1);
+                .to.equal(1);
             const friendlyIframe = a4aElement.querySelector('iframe[srcdoc]');
             expect(friendlyIframe).to.not.be.null;
             expect(friendlyIframe.getAttribute('src')).to.be.null;
@@ -874,20 +873,20 @@ describe('amp-a4a', () => {
               'allowtransparency': '', 'scrolling': 'no'};
             Object.keys(expectedAttributes).forEach(key => {
               expect(friendlyIframe.getAttribute(key)).to.equal(
-                expectedAttributes[key]);
+                  expectedAttributes[key]);
             });
             // Should not contain v0.js, any extensions, or amp-boilerplate.
             const iframeDoc = friendlyIframe.contentDocument;
             expect(iframeDoc.querySelector('script[src]')).to.not.be.ok;
             expect(iframeDoc.querySelector('script[custom-element]'))
-              .to.not.be.ok;
+                .to.not.be.ok;
             expect(iframeDoc.querySelector('style[amp-boilerplate]'))
-              .to.not.be.ok;
+                .to.not.be.ok;
             expect(iframeDoc.querySelector('noscript')).to.not.be.ok;
             // Should contain font link and extension in main document.
             expect(iframeDoc.querySelector(
-              'link[href="https://fonts.googleapis.com/css?family=Questrial"]'))
-              .to.be.ok;
+                'link[href="https://fonts.googleapis.com/css?family=Questrial"]'))
+                .to.be.ok;
             expect(doc.querySelector('script[src*="amp-font-0.1"]')).to.be.ok;
             expect(onCreativeRenderSpy).to.be.calledOnce;
             expect(updatePriorityStub).to.be.calledOnce;
@@ -948,11 +947,11 @@ describe('amp-a4a', () => {
         const updatePriorityStub = sandbox.stub(a4a, 'updatePriority');
         if (!isValidCreative) {
           sandbox.stub(a4a, 'extractCreativeAndSignature').returns(
-            Promise.resolve({creative: mockResponse.arrayBuffer()}));
+              Promise.resolve({creative: mockResponse.arrayBuffer()}));
         }
         if (opt_failAmpRender) {
           sandbox.stub(a4a, 'renderAmpCreative_').returns(
-            Promise.reject('amp render failure'));
+              Promise.reject('amp render failure'));
         }
         a4a.buildCallback();
         a4a.onLayoutMeasure();
@@ -1131,7 +1130,7 @@ describe('amp-a4a', () => {
     });
     it('should collapse for 204 response code', () => {
       xhrMock.onFirstCall().returns(Promise.resolve({
-        arrayBuffer: function() {
+        arrayBuffer() {
           return utf8Encode(validCSSAmp.reserialized);
         },
         bodyUsed: false,
@@ -1167,13 +1166,13 @@ describe('amp-a4a', () => {
             expect(onCreativeRenderSpy).to.not.be.called;
             // call unlayout callback and verify it attempts to revert the size
             expect(a4a.originalSlotSize_).to.deep
-              .equal({width: 123, height: 456});
+                .equal({width: 123, height: 456});
             let attemptChangeSizeResolver;
             const attemptChangeSizePromise = new Promise(resolve => {
               attemptChangeSizeResolver = resolve;
             });
             sandbox.stub(AMP.BaseElement.prototype, 'attemptChangeSize')
-              .returns(attemptChangeSizePromise);
+                .returns(attemptChangeSizePromise);
             a4a.unlayoutCallback();
             expect(unlayoutUISpy).to.be.calledOnce;
             expect(a4a.originalSlotSize_).to.be.ok;
@@ -1187,7 +1186,7 @@ describe('amp-a4a', () => {
     });
     it('should collapse for empty array buffer', () => {
       xhrMock.onFirstCall().returns(Promise.resolve({
-        arrayBuffer: function() {
+        arrayBuffer() {
           return utf8Encode('');
         },
         bodyUsed: false,
@@ -1221,13 +1220,13 @@ describe('amp-a4a', () => {
             expect(onCreativeRenderSpy).to.not.be.called;
             // call unlayout callback and verify it attempts to revert the size
             expect(a4a.originalSlotSize_).to.deep
-              .equal({width: 123, height: 456});
+                .equal({width: 123, height: 456});
             let attemptChangeSizeResolver;
             const attemptChangeSizePromise = new Promise(resolve => {
               attemptChangeSizeResolver = resolve;
             });
             sandbox.stub(AMP.BaseElement.prototype, 'attemptChangeSize')
-              .returns(attemptChangeSizePromise);
+                .returns(attemptChangeSizePromise);
             a4a.unlayoutCallback();
             expect(a4a.originalSlotSize_).to.be.ok;
             attemptChangeSizeResolver();
@@ -1285,12 +1284,12 @@ describe('amp-a4a', () => {
       });
       it('should not delay request when in viewport', () => {
         sandbox.stub(AmpA4A.prototype, 'getResource').returns(
-          {
-            renderOutsideViewport: () => true,
-            whenWithinRenderOutsideViewport: () => {
-              throw new Error('failure!');
-            },
-          });
+            {
+              renderOutsideViewport: () => true,
+              whenWithinRenderOutsideViewport: () => {
+                throw new Error('failure!');
+              },
+            });
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_);
         return a4a.adPromise_.then(() => {
@@ -1300,12 +1299,12 @@ describe('amp-a4a', () => {
       it('should delay request until within renderOutsideViewport',() => {
         let whenWithinRenderOutsideViewportResolve;
         sandbox.stub(AmpA4A.prototype, 'getResource').returns(
-          {
-            renderOutsideViewport: () => false,
-            whenWithinRenderOutsideViewport: () => new Promise(resolve => {
-              whenWithinRenderOutsideViewportResolve = resolve;
-            }),
-          });
+            {
+              renderOutsideViewport: () => false,
+              whenWithinRenderOutsideViewport: () => new Promise(resolve => {
+                whenWithinRenderOutsideViewportResolve = resolve;
+              }),
+            });
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_);
         // Delay to all getAdUrl to potentially execute.
@@ -1433,7 +1432,7 @@ describe('amp-a4a', () => {
       const baseTestDoc = testFragments.minimalDocOneStyle;
       const splicePoint = baseTestDoc.indexOf('</body>');
       expect(a4a.getAmpAdMetadata_(
-        baseTestDoc.slice(0, splicePoint) +
+          baseTestDoc.slice(0, splicePoint) +
         '<script type="application/json" amp-ad-metadata></script>' +
         baseTestDoc.slice(splicePoint))).to.be.null;
     });
@@ -1488,7 +1487,7 @@ describe('amp-a4a', () => {
     });
     it('should return 1.25 if prefer-viewability-over-views', () => {
       a4aElement.setAttribute(
-        'data-loading-strategy', 'prefer-viewability-over-views');
+          'data-loading-strategy', 'prefer-viewability-over-views');
       expect(a4a.renderOutsideViewport()).to.equal(1.25);
       a4a.isVerifiedAmpCreative_ = true;
       expect(a4a.renderOutsideViewport()).to.equal(1.25);
@@ -1698,10 +1697,10 @@ describe('amp-a4a', () => {
       beforeEach(() => {
         return createIframePromise().then(fixture => {
           setupForAdTesting(fixture);
-          stubVerifySignature =
-              sandbox.stub(cryptoFor(fixture.win), 'verifySignature');
           const a4aElement = createA4aElement(fixture.doc);
           a4a = new MockA4AImpl(a4aElement);
+          stubVerifySignature =
+              sandbox.stub(a4a.signatureVerifier_, 'verifySignature');
         });
       });
 
@@ -1720,13 +1719,14 @@ describe('amp-a4a', () => {
         })();
         stubVerifySignature.returns(Promise.resolve(false));
         return a4a.verifyCreativeSignature_('some_creative', 'some_sig')
-        .then(() => {
-          throw new Error('should have triggered rejection');
-        })
-        .catch(err => {
-          expect(stubVerifySignature).to.be.callCount(20);
-          expect(err).to.equal('No validation service could verify this key');
-        });
+            .then(() => {
+              throw new Error('should have triggered rejection');
+            })
+            .catch(err => {
+              expect(stubVerifySignature).to.be.callCount(20);
+              expect(err).to.equal(
+                  'No validation service could verify this key');
+            });
       });
 
       it('properly handles multiple keys for one provider', () => {
@@ -1742,10 +1742,10 @@ describe('amp-a4a', () => {
         stubVerifySignature.onCall(0).returns(Promise.resolve(false));
         stubVerifySignature.onCall(1).returns(Promise.resolve(true));
         return a4a.verifyCreativeSignature_(creative, 'some_sig')
-          .then(verifiedCreative => {
-            expect(stubVerifySignature).to.be.calledTwice;
-            expect(verifiedCreative).to.equal(creative);
-          });
+            .then(verifiedCreative => {
+              expect(stubVerifySignature).to.be.calledTwice;
+              expect(verifiedCreative).to.equal(creative);
+            });
       });
 
       it('properly stops verification at first valid key', () => {
@@ -1773,10 +1773,10 @@ describe('amp-a4a', () => {
         setTimeout(() => {keyInfoResolver({}); }, 0);
 
         return a4a.verifyCreativeSignature_(creative, signature)
-          .then(verifiedCreative => {
-            expect(stubVerifySignature).to.be.calledTwice;
-            expect(verifiedCreative).to.equal(creative);
-          });
+            .then(verifiedCreative => {
+              expect(stubVerifySignature).to.be.calledTwice;
+              expect(verifiedCreative).to.equal(creative);
+            });
       });
     });
   });
@@ -1911,7 +1911,7 @@ describe('amp-a4a', () => {
         expect(serviceInfo['keys']).to.be.an.instanceof(Array);
         expect(serviceInfo['keys']).to.have.lengthOf(1);
         const keyInfoPromise = serviceInfo['keys'][0];
-        expect(keyInfoPromise).to.be.an.instanceof(Promise);
+        expect(keyInfoPromise).to.be.an.instanceof(win.Promise);
         return keyInfoPromise.then(keyInfo => {
           verifyIsKeyInfo(keyInfo);
         });
@@ -1921,9 +1921,9 @@ describe('amp-a4a', () => {
     it('should wait for first visible', () => {
       let firstVisibleResolve;
       viewerWhenVisibleMock.returns(
-        new Promise(resolve => {
-          firstVisibleResolve = resolve;
-        }));
+          new Promise(resolve => {
+            firstVisibleResolve = resolve;
+          }));
       expect(win.ampA4aValidationKeys).not.to.exist;
       // Key fetch happens on A4A class construction.
       const a4a = new MockA4AImpl(a4aElement);  // eslint-disable-line no-unused-vars
@@ -1960,12 +1960,12 @@ describe('amp-a4a', () => {
       return Promise.all(result).then(serviceInfos => {
         expect(xhrMockJson).to.be.calledOnce;
         expect(xhrMockJson).to.be.calledWith(
-          'https://cdn.ampproject.org/amp-ad-verifying-keyset.json', {
-            mode: 'cors',
-            method: 'GET',
-            ampCors: false,
-            credentials: 'omit',
-          });
+            'https://cdn.ampproject.org/amp-ad-verifying-keyset.json', {
+              mode: 'cors',
+              method: 'GET',
+              ampCors: false,
+              credentials: 'omit',
+            });
         expect(serviceInfos).to.have.lengthOf(1);  // Only one service.
         const serviceInfo = serviceInfos[0];
         expect(serviceInfo).to.have.all.keys(['serviceName', 'keys']);
@@ -2008,7 +2008,7 @@ describe('amp-a4a', () => {
           expect(serviceInfo['keys']).to.be.an.instanceof(Array);
           expect(serviceInfo['keys']).to.have.lengthOf(1);
           const keyInfoPromise = serviceInfo['keys'][0];
-          expect(keyInfoPromise).to.be.an.instanceof(Promise);
+          expect(keyInfoPromise).to.be.an.instanceof(win.Promise);
           return keyInfoPromise.then(keyInfo => {
             verifyIsKeyInfo(keyInfo);
           });
@@ -2100,7 +2100,7 @@ describe('amp-a4a', () => {
             if (serviceName == 'google') {
               expect(serviceInfo['keys']).to.have.lengthOf(1);
               const keyInfoPromise = serviceInfo['keys'][0];
-              expect(keyInfoPromise).to.be.an.instanceof(Promise);
+              expect(keyInfoPromise).to.be.an.instanceof(win.Promise);
               return keyInfoPromise.then(keyInfo => {
                 verifyIsKeyInfo(keyInfo);
               });

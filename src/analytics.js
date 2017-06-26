@@ -22,6 +22,7 @@ import {createElementWithAttributes} from './dom';
 import {getAmpdoc} from './service';
 import {extensionsFor} from './services';
 import {dev} from './log';
+import {dict} from './utils/object';
 
 
 /**
@@ -38,7 +39,7 @@ export function analyticsForDoc(nodeOrDoc, loadAnalytics = false) {
   return (/** @type {!Promise<
             !../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
           >} */ (getElementServiceForDoc(
-                nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
+              nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
 }
 
 /**
@@ -49,7 +50,7 @@ export function analyticsForDocOrNull(nodeOrDoc) {
   return (/** @type {!Promise<
             ?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
           >} */ (getElementServiceIfAvailableForDoc(
-                nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
+              nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
 }
 
 /**
@@ -70,7 +71,7 @@ export function triggerAnalyticsEvent(target, eventType, opt_vars) {
 /**
  * Method to create scoped analytics element for any element.
  * @param {!Element} parentElement
- * @param {!JSONType} config
+ * @param {!JsonObject} config
  * @param {boolean=} loadAnalytics
  * @return {!Element} created analytics element
  */
@@ -79,15 +80,15 @@ export function insertAnalyticsElement(
   const doc = /** @type {!Document} */ (parentElement.ownerDocument);
   const analyticsElem = createElementWithAttributes(
       doc,
-      'amp-analytics', {
+      'amp-analytics', dict({
         'sandbox': 'true',
         'trigger': 'immediate',
-      });
+      }));
   const scriptElem = createElementWithAttributes(
       doc,
-      'script', {
+      'script', dict({
         'type': 'application/json',
-      });
+      }));
   scriptElem.textContent = JSON.stringify(config);
   analyticsElem.appendChild(scriptElem);
   analyticsElem.CONFIG = config;

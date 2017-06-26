@@ -50,11 +50,13 @@ If you are contributing code to the AMP Project consider [joining the AMP Projec
 
 ### Tips for new open source contributors
 
-If you are new to contributing to an open source project, Git/GitHub, etc. welcome!  We are glad you're interested in contributing to the AMP Project.
+If you are new to contributing to an open source project, Git/GitHub, etc. welcome!  We are glad you're interested in contributing to the AMP Project and we want to help make your open source experience a success.
 
 The [Getting Started End-to-End Guide](contributing/getting-started-e2e.md) provides step-by-step instructions for everything from creating a GitHub account to getting your code reviewed and merged.  Even if you've never contributed to an open source project before you'll soon be building AMP, making improvements and seeing your code live across the web.
 
-The community has created a list of [Great First Issues](https://github.com/ampproject/amphtml/labels/Great%20First%20Issue) specifically for new contributors to the project.  Feel free to find one that interests you and jump in!  Make sure to comment on the issue first so others know you are starting on it.
+The community has created a list of [Great First Issues](https://github.com/ampproject/amphtml/labels/Great%20First%20Issue) specifically for new contributors to the project.  Feel free to find one of the [unclaimed Great First Issues](https://github.com/ampproject/amphtml/issues?utf8=%E2%9C%93&q=is%3Aopen%20label%3A%22Great%20First%20Issue%22%20-label%3A%22GFI%20Claimed!%22) that interests you, claim it by adding a comment to it and jump in!
+
+If you're interested in helping out but can't find a Great First Issue that matches your skills/interests, [sign up for our Slack](https://docs.google.com/forms/d/e/1FAIpQLSd83J2IZA6cdR6jPwABGsJE8YL4pkypAbKMGgUZZriU7Qu6Tg/viewform?fbzx=4406980310789882877) and then reach out in the [#welcome-contributors channel](https://amphtml.slack.com/messages/welcome-contributors/) or send a Direct Message to [mrjoro](https://amphtml.slack.com/team/mrjoro/).
 
 If you run into any problems we have plenty of people who are willing to help; see the [How to get help](contributing/getting-started-e2e.md#how-to-get-help) section of the Getting Started guide.
 

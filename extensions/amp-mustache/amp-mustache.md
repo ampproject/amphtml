@@ -22,10 +22,6 @@ limitations under the License.
     <td>Allows rendering of <a href="https://github.com/janl/mustache.js/">Mustache.js</a>.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td>
       <div>
@@ -85,4 +81,4 @@ impossible to specify `{{&var}}` expressions - they will always be escaped as `{
 
 ## Validation
 
-See [amp-mustache rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-mustache/0.1/validator-amp-mustache.protoascii) in the AMP validator specification.
+See [amp-mustache rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-mustache/validator-amp-mustache.protoascii) in the AMP validator specification.

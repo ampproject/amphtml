@@ -13,18 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import {AmpEvents} from '../../src/amp-events';
+import {BindEvents} from '../../extensions/amp-bind/0.1/bind-events';
 import {createFixtureIframe} from '../../testing/iframe';
 import {batchedXhrFor} from '../../src/services';
 import * as sinon from 'sinon';
 
-describe.configure().retryOnSaucelabs().run('amp-bind', function() {
+describe.configure().skipSauceLabs().run('amp-bind', function() {
   let fixture;
   let sandbox;
   let numSetStates;
   let numTemplated;
-
-  this.timeout(5000);
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -48,20 +47,22 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
       const loadStartsToExpect =
           (opt_numberOfAmpElements === undefined) ? 1 : opt_numberOfAmpElements;
       return Promise.all([
-        fixture.awaitEvent('amp:bind:initialize', 1),
-        fixture.awaitEvent('amp:load:start', loadStartsToExpect),
+        fixture.awaitEvent(BindEvents.INITIALIZE, 1),
+        fixture.awaitEvent(AmpEvents.LOAD_START, loadStartsToExpect),
       ]);
     });
   }
 
   /** @return {!Promise} */
   function waitForBindApplication() {
-    return fixture.awaitEvent('amp:bind:setState', ++numSetStates);
+    // Bind should be available, but need to wait for actions to resolve
+    // service promise for bind and call setState.
+    return fixture.awaitEvent(BindEvents.SET_STATE, ++numSetStates);
   }
 
   /** @return {!Promise} */
   function waitForTemplateRescan() {
-    return fixture.awaitEvent('amp:bind:rescan-template', ++numTemplated);
+    return fixture.awaitEvent(BindEvents.RESCAN_TEMPLATE, ++numTemplated);
   }
 
   describe('with [text] and [class]', () => {
@@ -331,11 +332,11 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
       const impl = liveList.implementation_;
       const update = document.createElement('div');
       update.innerHTML =
-          `<div items>` +
+          '<div items>' +
           ` <div id="newItem" data-sort-time=${Date.now()}>` +
-          `    <p [text]="liveListText">unbound</p>` +
-          ` </div>` +
-          `</div>`;
+          '    <p [text]="liveListText">unbound</p>' +
+          ' </div>' +
+          '</div>';
       impl.update(update);
       fixture.doc.getElementById('liveListUpdateButton').click();
 
@@ -569,8 +570,8 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
       // the amp-state element back to its original source.
       sandbox.stub(batchedXhr, 'fetchJson')
           .withArgs(
-              'https://www.google.com/bind/second/source',
-              sinon.match.any)
+          'https://www.google.com/bind/second/source',
+          sinon.match.any)
           .returns(Promise.resolve({
             json() {
               return Promise.resolve({

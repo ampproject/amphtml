@@ -28,6 +28,7 @@ goog.require('amp.htmlparser.HtmlSaxHandlerWithLocation');
 goog.require('amp.validator.AmpLayout');
 goog.require('amp.validator.AtRuleSpec');
 goog.require('amp.validator.AtRuleSpec.BlockType');
+goog.require('amp.validator.AttrSpec');
 goog.require('amp.validator.CdataSpec');
 goog.require('amp.validator.CssSpec');
 goog.require('amp.validator.ErrorCategory');
@@ -1713,6 +1714,11 @@ class ExtensionsContext {
      */
     this.extensionsLoaded_ = Object.create(null);
 
+    // AMP-AD is grandfathered in to not require the respective extension
+    // javascript file for historical reasons. We still need to mark that
+    // the extension is used if we see the tags.
+    this.extensionsLoaded_["amp-ad"] = true;
+
     /**
      * @type {!Array<string>}
      * @private
@@ -2793,22 +2799,35 @@ function shouldRecordTagspecValidated(tag, tagSpecId, tagSpecIdsToTrack) {
 }
 
 /**
- *  DispatchKey represents a tuple of either 2 or 3 strings:
+ *  DispatchKey represents a tuple of either 1-3 strings:
  *    - attribute name
- *    - attribute value
+ *    - attribute value (optional)
  *    - mandatory parent html tag (optional)
  *  A Dispatch key can be generated from some validator TagSpecs. One dispatch
  *  key per attribute can be generated from any HTML tag. If one of the
  *  dispatch keys for an HTML tag match that of a a TagSpec, we validate that
  *  HTML tag against only this one TagSpec. Otherwise, this TagSpec is not
  *  eligible for validation against this HTML tag.
+ * @param {!amp.validator.AttrSpec.DispatchKeyType} dispatchKeyType
  * @param {string} attrName
  * @param {string} attrValue
  * @param {string} mandatoryParent may be set to "$NOPARENT"
  * @returns {string} dispatch key
  */
-function makeDispatchKey(attrName, attrValue, mandatoryParent) {
-  return attrName + '\0' + attrValue + '\0' + mandatoryParent;
+function makeDispatchKey(
+    dispatchKeyType, attrName, attrValue, mandatoryParent) {
+  switch (dispatchKeyType) {
+    case amp.validator.AttrSpec.DispatchKeyType.NAME_DISPATCH:
+      return attrName;
+    case amp.validator.AttrSpec.DispatchKeyType.NAME_VALUE_DISPATCH:
+      return attrName + '\0' + attrValue;
+    case amp.validator.AttrSpec.DispatchKeyType.NAME_VALUE_PARENT_DISPATCH:
+      return attrName + '\0' + attrValue + '\0' + mandatoryParent;
+    case amp.validator.AttrSpec.DispatchKeyType.NONE_DISPATCH:
+    default:
+      goog.asserts.assert(false);
+  }
+  return '';  // To make closure happy.
 }
 
 /**
@@ -3674,20 +3693,32 @@ class TagSpecDispatch {
    * @return {number}
    */
   matchingDispatchKey(attrName, attrValue, mandatoryParent) {
+    if (!this.hasDispatchKeys()) return -1;
+
     // Try first to find a key with the given parent.
-    const dispatchKey = makeDispatchKey(attrName, attrValue, mandatoryParent);
+    const dispatchKey = makeDispatchKey(
+        amp.validator.AttrSpec.DispatchKeyType.NAME_VALUE_PARENT_DISPATCH,
+        attrName, attrValue, mandatoryParent);
     const match = this.tagSpecsByDispatch_[dispatchKey];
     if (match !== undefined) {
       return match;
     }
 
-    // Try next to find a key with the *any* parent.
-    const noParentKey =
-        makeDispatchKey(attrName, attrValue, /*mandatoryParent*/ '');
-
+    // Try next to find a key that allows any parent.
+    const noParentKey = makeDispatchKey(
+        amp.validator.AttrSpec.DispatchKeyType.NAME_VALUE_DISPATCH, attrName,
+        attrValue, '');
     const noParentMatch = this.tagSpecsByDispatch_[noParentKey];
     if (noParentMatch !== undefined) {
       return noParentMatch;
+    }
+
+    // Try last to find a key that matches just this attribute name.
+    const noValueKey = makeDispatchKey(
+        amp.validator.AttrSpec.DispatchKeyType.NAME_DISPATCH, attrName, '', '');
+    const noValueMatch = this.tagSpecsByDispatch_[noValueKey];
+    if (noValueMatch !== undefined) {
+      return noValueMatch;
     }
 
     // Special case for foo=foo. We consider this a match for a dispatch key of
@@ -4027,15 +4058,12 @@ class ParsedValidatorRules {
           // This tag is an extension. Compute and register a dispatch key
           // for it.
           var dispatchKey;
-          if (tag.extensionSpec.isCustomTemplate) {
-            dispatchKey = makeDispatchKey(
-                'custom-template',
-                /** @type {string} */ (tag.extensionSpec.name), 'HEAD');
-          } else {
-            dispatchKey = makeDispatchKey(
-                'custom-element',
-                /** @type {string} */ (tag.extensionSpec.name), 'HEAD');
-          }
+          var attrName = tag.extensionSpec.isCustomTemplate ?
+              'custom-template' :
+              'custom-element';
+          dispatchKey = makeDispatchKey(
+              amp.validator.AttrSpec.DispatchKeyType.NAME_VALUE_DISPATCH,
+              attrName, /** @type {string} */ (tag.extensionSpec.name), '');
           tagnameDispatch.registerDispatchKey(dispatchKey, tagSpecId);
         } else {
           const dispatchKey = this.rules_.dispatchKeyByTagSpecId[tagSpecId];
@@ -4051,8 +4079,14 @@ class ParsedValidatorRules {
       }
       // Produce a mapping from every extension to an example tag which
       // requires that extension.
-      for (var extension of tag.requiresExtension) {
-        this.exampleUsageByExtension_[extension] = getTagSpecName(tag);
+      for (let i = 0; i < tag.requiresExtension.length; ++i) {
+        const extension = tag.requiresExtension[i];
+        // Some extensions have multiple tags that require them. Some tags
+        // require multiple extensions. If we have two tags requiring an
+        // extension, we prefer to use the one that lists the extension first
+        // (i === 0) as an example of that extension.
+        if (!this.exampleUsageByExtension_.hasOwnProperty(extension) || i === 0)
+          this.exampleUsageByExtension_[extension] = getTagSpecName(tag);
       }
     }
     // The amp-ad tag doesn't require amp-ad javascript for historical
