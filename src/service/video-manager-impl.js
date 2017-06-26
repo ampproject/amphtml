@@ -18,7 +18,6 @@ import {ActionTrust} from '../action-trust';
 import {removeElement} from '../dom.js';
 import {listen, listenOncePromise} from '../event-helper';
 import {dev} from '../log';
-import {isExperimentOn} from '../experiments';
 import {getMode} from '../mode';
 import {registerServiceBuilderForDoc, getServiceForDoc} from '../service';
 import {setStyles} from '../style';
@@ -738,7 +737,6 @@ class VideoEntry {
     this.internalStyle_.borderRadius = '6px';
     this.internalStyle_.left = '20px';
     this.internalStyle_.boxShadow = '0px 0px 20px 0px rgba(0, 0, 0, 0.3)';
-
     if (this.minimizePosition_ == MinimizePositions.BOTTOM) {
       this.minimizePosition_ = MinimizePositions.TOP;
       this.internalStyle_.bottom = '20px';
