@@ -663,9 +663,8 @@ export class AmpA4A extends AMP.BaseElement {
           }
           this.protectedEmitLifecycleEvent_('extractCreativeAndSignature');
           const size = this.extractSize(responseParts.headers);
-          return this
-              .extractCreativeAndSignature(
-                  responseParts.bytes, responseParts.headers)
+          return this.extractCreativeAndSignature(
+              responseParts.bytes, responseParts.headers)
               .then(creativeParts => ({creativeParts, size}));
         })
         // This block returns the ad creative if it exists and validates as AMP;
