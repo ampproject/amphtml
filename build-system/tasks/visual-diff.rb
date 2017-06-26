@@ -99,24 +99,41 @@ def loadPagesToSnapshotJson()
 end
 
 
-# Generates a percy snapshot for a given webpage.
+# Generates percy snapshots for a set of given webpages.
 #
 # Args:
-# - server: URL of the webserver.
-# - assets_dir: Path to assets (images, etc.) used by the webpage.
-# - assets_base_url: Base URL of assets on webserver.
-# - url: Relative URL of page to be snapshotted.
-# - name: Name of snapshot on Percy.
-def generateSnapshot(server, assets_dir, assets_base_url, url, name)
+# - pagesToSnapshot: JSON object containing details about the pages to snapshot.
+def generateSnapshots(pagesToSnapshot)
+  server = "http://#{HOST}:#{PORT}"
+  webpages = pagesToSnapshot["webpages"]
+  assets_base_url = pagesToSnapshot["assets_base_url"]
+  assets_dir = File.expand_path(
+      "../../../#{pagesToSnapshot["assets_dir"]}",
+      __FILE__)
   Percy::Capybara::Anywhere.run(
       server, assets_dir, assets_base_url) do |page|
     page.driver.options[:phantomjs] = Phantomjs.path
     page.driver.options[:js_errors] = false
-    page.visit(url)
-    page.has_no_css?('.i-amphtml-loader-dot')  # Implicitly waits for page load.
-    Percy.config.default_widths = DEFAULT_WIDTHS
-    Percy::Capybara.snapshot(page, name: name)
- end
+    webpages.each do |webpage|
+      url = webpage["url"]
+      name = webpage["name"]
+      generateSnapshot(page, url, name)
+    end
+  end
+end
+
+
+# Generates a percy snapshot for a given webpage.
+#
+# Args:
+# - page: Page object used by Percy for snapshotting.
+# - url: Relative URL of page to be snapshotted.
+# - name: Name of snapshot on Percy.
+def generateSnapshot(page, url, name)
+  page.visit(url)
+  page.has_no_css?('.i-amphtml-loader-dot')  # Implicitly waits for page load.
+  Percy.config.default_widths = DEFAULT_WIDTHS
+  Percy::Capybara.snapshot(page, name: name)
 end
 
 
@@ -130,17 +147,7 @@ def main()
   end
   pagesToSnapshotJson = loadPagesToSnapshotJson()
   pagesToSnapshot = JSON.parse(pagesToSnapshotJson)
-  server = "http://#{HOST}:#{PORT}"
-  webpages = pagesToSnapshot["webpages"]
-  webpages.each do |webpage|
-    assets_base_url = webpage["assets_base_url"]
-    assets_dir = File.expand_path(
-        "../../../#{webpage["assets_dir"]}",
-        __FILE__)
-    url = webpage["url"]
-    name = webpage["name"]
-    generateSnapshot(server, assets_dir, assets_base_url, url, name)
-  end
+  generateSnapshots(pagesToSnapshot)
   closeWebServer(pid)
 end
 
