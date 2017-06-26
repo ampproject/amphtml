@@ -6,6 +6,12 @@
       "assets_base_url": "/",
       "url": "examples/amp-by-example/amp-by-example.html",
       "name": "Amp By Example"
+    },
+    {
+      "assets_dir": "examples/amp-by-example",
+      "assets_base_url": "/",
+      "url": "examples/amp-by-example/amp-by-example.html",
+      "name": "New test"
     }
   ]
 }
