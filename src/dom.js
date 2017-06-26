@@ -149,7 +149,7 @@ export function copyChildren(from, to) {
 /**
  * Add attributes to an element.
  * @param {!Element} element
- * @param {!Object<string, string>} attributes
+ * @param {!JsonObject<string, string>} attributes
  * @return {!Element} created element
  */
 export function addAttributesToElement(element, attributes) {
@@ -163,7 +163,7 @@ export function addAttributesToElement(element, attributes) {
  * Create a new element on document with specified tagName and attributes.
  * @param {!Document} doc
  * @param {string} tagName
- * @param {!Object<string, string>} attributes
+ * @param {!JsonObject<string, string>} attributes
  * @return {!Element} created element
  */
 export function createElementWithAttributes(doc, tagName, attributes) {

@@ -67,6 +67,12 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
     if (name.endsWith("NoInline")) {
       return true;
     }
+    // Bad hack, but we should really not try to inline CSS as these strings can
+    // be very long.
+    // See https://github.com/ampproject/amphtml/issues/10118
+    if (name.equals("cssText$$module$build$css")) {
+      return true;
+    }
 
     if (local) {
       return false;

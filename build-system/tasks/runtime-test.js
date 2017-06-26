@@ -126,17 +126,26 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     c.files = [].concat(config.commonTestPaths, argv.files);
   } else if (argv.integration) {
     c.files = config.integrationTestPaths;
-  } else if (argv.randomize || argv.glob) {
+  } else if (argv.randomize || argv.glob || argv.a4a) {
     /** Randomize the order of the test running */
-    var testPaths = [
-      'test/**/*.js',
-      'ads/**/test/test-*.js',
-      'extensions/**/test/**/*.js',
-    ];
+    var testPaths;
+    if (argv.a4a) {
+      testPaths = [
+        'extensions/amp-a4a/**/test/**/*.js',
+        'extensions/amp-ad-network-*/**/test/**/*.js',
+        'ads/google/a4a/test/*.js'
+      ];
+    } else {
+      testPaths = [
+        'test/**/*.js',
+        'ads/**/test/test-*.js',
+        'extensions/**/test/**/*.js',
+      ];
+    }
 
     var testFiles = [];
 
-    for (index in testPaths) {
+    for (var index in testPaths) {
       testFiles = testFiles.concat(glob.sync(testPaths[index]));
     }
 
@@ -218,7 +227,7 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     'files': 'Runs tests for specific files',
     'randomize': 'Runs entire test suite in random order',
     'testlist': 'Runs tests specified in JSON by supplied file',
-    'glob': 'Explicility expands test paths using glob before passing' +
+    'glob': 'Explicitly expands test paths using glob before passing ' +
         'to Karma',
   }
 });
