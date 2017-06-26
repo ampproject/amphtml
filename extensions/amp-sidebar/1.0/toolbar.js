@@ -22,18 +22,15 @@ const TOOLBAR_ELEMENT_CLASS = 'i-amphtml-toolbar';
 export class Toolbar {
   /**
   * @param {!Element} element
-  * @param {!./amp-sidebar.AmpSidebar} sidebar
+  * @param {!Object} win
   * @param {!../../../src/service/vsync-impl.Vsync} vsync
   */
-  constructor(element, sidebar, vsync) {
+  constructor(element, win, vsync) {
     /** @private {!Element} */
     this.toolbarDOMElement_ = element;
 
-    /** @private {!./amp-sidebar.AmpSidebar} **/
-    this.sidebar_ = sidebar;
-
-    /** @private {!Element} */
-    this.sidebarElement_ = this.sidebar_.element;
+    /** @private {!Object} **/
+    this.win_ = win;
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = vsync;
@@ -52,8 +49,6 @@ export class Toolbar {
 
     /** @private {Array} */
     this.toolbarOnlyElementsInSidebar_ = [];
-
-    this.buildToolbar_();
 
     //Finally, find our tool-bar only elements
     if (this.toolbarDOMElement_.hasAttribute('toolbar-only')) {
@@ -76,7 +71,7 @@ export class Toolbar {
    */
   onLayoutChange(onShowCallback) {
     // Get if we match the current toolbar media
-    const matchesMedia = this.sidebar_.win
+    const matchesMedia = this.win_
         .matchMedia(this.toolbarMedia_).matches;
 
     // Remove and add the toolbar dynamically
@@ -91,13 +86,12 @@ export class Toolbar {
   }
 
   /**
-   * Private function to build the DOM element for the toolbar
-   * TODO: Allow specifying a target for the toolbar
-   * @private
+   * Private function to build the DOM element for the toolbar, and return the built fragment
+   * @public
    */
-  buildToolbar_() {
-    const fragment = this.sidebarElement_
-      .ownerDocument.createDocumentFragment();
+  build() {
+    const fragment = this.win_
+      .document.createDocumentFragment();
     this.targetElement_ =
       this.toolbarDOMElement_.ownerDocument.createElement('header');
     //Place the elements into the target
@@ -106,8 +100,7 @@ export class Toolbar {
     this.targetElement_.appendChild(this.toolbarClone_);
     toggle(this.targetElement_, false);
     fragment.appendChild(this.targetElement_);
-    this.sidebarElement_.parentElement
-        .insertBefore(fragment, this.sidebarElement_);
+    return fragment;
   }
 
   /**
