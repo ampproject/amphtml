@@ -299,6 +299,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           .map(dimension => dimension.join('x'))
           .join('|');
     }
+    const rc = (this.refreshCount_ && this.fromResumeCallback)
+        ? this.refreshCount_ + 1
+        : (this.fromResumeCallback ? 1 : this.refreshCount_ || null);
     return Object.assign({
       'iu': this.element.getAttribute('data-slot'),
       'co': this.jsonTargeting_ &&
@@ -311,7 +314,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           (this.jsonTargeting_ && this.jsonTargeting_['targeting']) || null,
           (this.jsonTargeting_ &&
             this.jsonTargeting_['categoryExclusions']) || null),
-      'rc': this.refreshCount_ ? this.refreshCount_ : null,
+      rc,
     }, googleBlockParameters(this));
   }
 

@@ -2264,11 +2264,7 @@ describe('amp-a4a', () => {
             layoutCanceled: () => {},
           };
         };
-        a4a.getVsync = () => {
-          return {
-            mutate: func => func(),
-          };
-        };
+        a4a.mutateElement = func => func();
         a4a.togglePlaceholder = sandbox.spy();
 
         // We don't really care about the behavior of the following methods, so

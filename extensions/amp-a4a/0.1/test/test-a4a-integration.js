@@ -304,7 +304,7 @@ describe('integration test: a4a', () => {
         });
       });
 
-  it('should continue to show old creative after refresh, and no fill', () => {
+  it('should continue to show old creative after refresh and no fill', () => {
     return fixture.addElement(a4aElement).then(() => {
       return expectRenderedInFriendlyIframe(a4aElement, 'Hello, world.')
           .then(() => {

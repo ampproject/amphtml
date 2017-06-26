@@ -486,6 +486,19 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
               // Ensure that "auto" doesn't appear anywhere here:
               expect(url).to.match(/sz=[0-9]+x[0-9]+%7C1x2%7C3x4&/));
         });
+    it('has correct rc and ifi after refresh', () => {
+      new AmpAd(element).upgradeCallback();
+      return impl.getAdUrl().then(url1 => {
+        expect(url1).to.not.match(/(\?|&)rc=[0-9]+(&|$)/);
+        expect(url1).to.match(/(\?|&)ifi=1(&|$)/);
+        return impl.refresh(() => {}).then(() => {
+          return impl.getAdUrl().then(url2 => {
+            expect(url2).to.match(/(\?|&)rc=1(&|$)/);
+            expect(url1).to.match(/(\?|&)ifi=1(&|$)/);
+          });
+        });
+      });
+    });
   });
 
   describe('#unlayoutCallback', () => {
