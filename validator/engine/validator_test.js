@@ -560,8 +560,7 @@ describe('ValidatorRulesMakeSense', () => {
         'AMP-IMG': 0,
         'AMP-PIXEL': 0,
         'AMP-SOCIAL-SHARE': 0,
-        'AMP-VIDEO': 0,
-        'AMP-YOUTUBE': 0
+        'AMP-VIDEO': 0
       };
       it(tagSpec.tagName + ' has html_format either explicitly or implicitly' +
           ' set for AMP4ADS but ' + tagSpec.tagName + ' is not whitelisted' +
