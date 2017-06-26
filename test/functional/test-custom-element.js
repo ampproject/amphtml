@@ -25,14 +25,9 @@ import {ResourceState} from '../../src/service/resource';
 import {resourcesForDoc} from '../../src/services';
 import {vsyncFor} from '../../src/services';
 import {
-  registerServiceBuilder,
-  resetServiceForTesting,
-} from '../../src/service';
-import {
   copyElementToChildWindow,
   createAmpElementProto,
   getElementClassForTesting,
-  markElementScheduledForTesting,
   registerElement,
   resetScheduledElementForTesting,
   stubElementIfNotKnown,
@@ -1889,9 +1884,6 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
         ampExtendedElements: {},
       };
       doc.defaultView = win;
-
-      resetServiceForTesting(win, 'e1');
-      resetScheduledElementForTesting(win, 'element-1');
     });
 
     afterEach(() => {

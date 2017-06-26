@@ -134,13 +134,16 @@ describe('getElementServiceIfAvailable()', () => {
 });
 
 
-describes.realWin('in real, single ampdoc', {
+describes.realWin('in single ampdoc', {
   amp: {
     ampdoc: 'single',
   },
 }, env => {
+  let ampdoc;
 
   beforeEach(() => {
+    ampdoc = env.ampdoc;
+
     resetServiceForTesting(env.win, 'e1');
     resetScheduledElementForTesting(env.win, 'element-1');
     resetScheduledElementForTesting(env.win, 'element-foo');
@@ -198,8 +201,8 @@ describes.realWin('in real, single ampdoc', {
   describe('getElementServiceForDoc()', () => {
     it('should be provided by element', () => {
       markElementScheduledForTesting(env.win, 'element-1');
-      const p1 = getElementServiceForDoc(env.ampdoc, 'e1', 'element-1');
-      const p2 = getElementServiceForDoc(env.ampdoc, 'e1', 'element-1');
+      const p1 = getElementServiceForDoc(ampdoc, 'e1', 'element-1');
+      const p2 = getElementServiceForDoc(ampdoc, 'e1', 'element-1');
 
       registerServiceBuilder(env.win, 'e1', function() {
         return {str: 'from e1'};
@@ -216,7 +219,7 @@ describes.realWin('in real, single ampdoc', {
     it('should fail if element is not in page.', () => {
       markElementScheduledForTesting(env.win, 'element-foo');
 
-      return getElementServiceForDoc(env.ampdoc, 'e1', 'element-bar').then(() => {
+      return getElementServiceForDoc(ampdoc, 'e1', 'element-bar').then(() => {
         return 'SUCCESS';
       }, error => {
         return 'ERROR ' + error;
@@ -231,9 +234,9 @@ describes.realWin('in real, single ampdoc', {
     it('should be provided by element if available', () => {
       markElementScheduledForTesting(env.win, 'element-1');
       const p1 = getElementServiceIfAvailableForDoc(
-          env.ampdoc, 'e1', 'element-1');
+          ampdoc, 'e1', 'element-1');
       const p2 = getElementServiceIfAvailableForDoc(
-          env.ampdoc, 'e2', 'not-available');
+          ampdoc, 'e2', 'not-available');
       registerServiceBuilder(env.win, 'e1', function() {
         return {str: 'from e1'};
       });
@@ -247,11 +250,11 @@ describes.realWin('in real, single ampdoc', {
 
     it('should wait for body when not available', () => {
       let bodyResolver;
-      env.ampdoc.bodyPromise_ = new Promise(resolve => {
+      ampdoc.bodyPromise_ = new Promise(resolve => {
         bodyResolver = resolve;
       });
       let resolvedService;
-      const p1 = getElementServiceIfAvailableForDoc(env.ampdoc, 'e1', 'element-1')
+      const p1 = getElementServiceIfAvailableForDoc(ampdoc, 'e1', 'element-1')
           .then(service => {
             resolvedService = service;
             return service;
@@ -270,7 +273,7 @@ describes.realWin('in real, single ampdoc', {
 
     it('resolve w/ body when not available', () => {
       const p1 = getElementServiceIfAvailableForDoc(
-          env.ampdoc, 'e1', 'element-1');
+          ampdoc, 'e1', 'element-1');
       return Promise.resolve().then(() => {
         return p1;
       }).then(service => {
@@ -280,11 +283,11 @@ describes.realWin('in real, single ampdoc', {
 
     it('should wait for body when available', () => {
       let bodyResolver;
-      env.ampdoc.bodyPromise_ = new Promise(resolve => {
+      ampdoc.bodyPromise_ = new Promise(resolve => {
         bodyResolver = resolve;
       });
       let resolvedService;
-      const p1 = getElementServiceIfAvailableForDoc(env.ampdoc, 'e1', 'element-1')
+      const p1 = getElementServiceIfAvailableForDoc(ampdoc, 'e1', 'element-1')
           .then(service => {
             resolvedService = service;
             return service;
@@ -308,7 +311,7 @@ describes.realWin('in real, single ampdoc', {
     it('should resolve with body when available', () => {
       markElementScheduledForTesting(env.win, 'element-1');
       const p1 = getElementServiceIfAvailableForDoc(
-          env.ampdoc, 'e1', 'element-1');
+          ampdoc, 'e1', 'element-1');
       return Promise.resolve().then(() => {
         registerServiceBuilder(env.win, 'e1', function() {
           return {str: 'fake1'};
