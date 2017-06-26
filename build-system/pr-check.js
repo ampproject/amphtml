@@ -27,6 +27,7 @@
 const atob = require('atob');
 const exec = require('./exec.js').exec;
 const execOrDie = require('./exec.js').execOrDie;
+const fs = require('fs-extra');
 const getStdout = require('./exec.js').getStdout;
 const minimist = require('minimist');
 const path = require('path');
