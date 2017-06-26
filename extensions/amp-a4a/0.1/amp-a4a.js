@@ -658,14 +658,15 @@ export class AmpA4A extends AMP.BaseElement {
          */
         .then(responseParts => {
           checkStillCurrent();
-          if (responseParts) {
-            this.protectedEmitLifecycleEvent_('extractCreativeAndSignature');
+          if (!responseParts) {
+            return null;
           }
-          return responseParts && {
-            creativeParts: this.extractCreativeAndSignature(
-                responseParts.bytes, responseParts.headers),
-            size: this.extractSize(responseParts.headers),
-          };
+          this.protectedEmitLifecycleEvent_('extractCreativeAndSignature');
+          const size = this.extractSize(responseParts.headers);
+          return this
+              .extractCreativeAndSignature(
+                  responseParts.bytes, responseParts.headers)
+              .then(creativeParts => ({creativeParts, size}));
         })
         // This block returns the ad creative if it exists and validates as AMP;
         // null otherwise.
@@ -1098,14 +1099,14 @@ export class AmpA4A extends AMP.BaseElement {
     if (!headerValue) {
       return null;
     }
-    if (!(/[0-9]+x[0-9]+/.test(headerValue))) {
+    const match = /^([0-9]+)x([0-9]+)$/.exec(headerValue);
+    if (!match) {
       // TODO(@taymonbeal, #9274): replace this with real error reporting
       user().error(TAG, `Invalid size header: ${headerValue}`);
       return null;
     }
-    const sizeArr = headerValue.split('x').map(Number);
     return /** @type {?SizeInfoDef} */ (
-        {width: sizeArr[0], height: sizeArr[1]});
+        {width: Number(match[1]), height: Number(match[2])});
   }
 
   /**
