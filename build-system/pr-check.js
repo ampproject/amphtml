@@ -225,20 +225,33 @@ function determineBuildTargets(filePaths) {
 }
 
 /**
- * If present, extracts and sets per-user sauce credentials for committer.
+ * Connect to sauce labs using per-user credentials if available, and amphtml
+ * credentials if not available.
  */
-function setPerUserSauceCredsIfAvailable() {
+function connectToSauceLabs() {
+  const startTime = startTimer('connectToSauceLabs');
   let committer = getStdout(`git log -1 --pretty=format:'%ae'`).trim();
   let credentials = JSON.parse(fs.readFileSync(sauceCredsFile)).credentials;
-  if (credentials && credentials[committer]) {
-    let username = credentials[committer].username;
-    let access_key = atob(credentials[committer].access_key_encoded);
-    console.log(fileLogPrefix,
-        'Using Sauce credentials for user', util.colors.cyan(committer),
-        'with Sauce username', util.colors.cyan(username));
-    process.env['SAUCE_USERNAME'] = username;
-    process.env['SAUCE_ACCESS_KEY'] = access_key;
+  if (credentials === null) {
+    console.log(fileLogPrefix, util.colors.red('ERROR:'),
+        'Could not load Sauce labs credentials from',
+        util.colors.cyan(sauceCredsFile));
+    process.exit(1);
   }
+
+  let sauceUser = 'amphtml';
+  if (credentials[committer]) {
+    sauceUser = committer;
+  }
+  let username = credentials[sauceUser].username;
+  let access_key = atob(credentials[sauceUser].access_key_encoded);
+  console.log(fileLogPrefix,
+      'Using Sauce credentials for user', util.colors.cyan(sauceUser),
+      'with Sauce username', util.colors.cyan(username));
+  process.env['SAUCE_USERNAME'] = username;
+  process.env['SAUCE_ACCESS_KEY'] = access_key;
+  execOrDie('travis_start_sauce_connect');
+  stopTimer('connectToSauceLabs', startTime);
 }
 
 const command = {
@@ -277,7 +290,7 @@ const command = {
   },
   runIntegrationTests: function() {
     // Integration tests with all saucelabs browsers
-    setPerUserSauceCredsIfAvailable();
+    connectToSauceLabs();
     timedExecOrDie(
         `${gulp} test --nobuild --saucelabs --integration --compiled`);
   },
