@@ -157,7 +157,8 @@ module.exports = {
   client: {
     mocha: {
       reporter: 'html',
-      timeout: process.env.TEST_TIMEOUT,
+      // Longer timeout on Travis; fail quickly at local.
+      timeout: process.env.TRAVIS ? 10000 : 2000,
     },
     captureConsole: false,
   },

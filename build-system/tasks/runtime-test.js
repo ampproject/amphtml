@@ -169,15 +169,12 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     c.files = config.testPaths;
   }
 
-  // Longer timeout on Travis; fail quickly at local.
-  process.env.TEST_TIMEOUT = process.env.TRAVIS ? 10000 : 2000;
-
   // c.client is available in test browser via window.parent.karma.config
   c.client.amp = {
     useCompiledJs: !!argv.compiled,
     saucelabs: !!argv.saucelabs,
     adTypes: getAdTypes(),
-    testTimeout: process.env.TEST_TIMEOUT,
+    mochaTimeout: c.client.mocha.timeout,
   };
 
   if (argv.compiled) {
