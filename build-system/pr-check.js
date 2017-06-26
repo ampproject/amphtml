@@ -326,8 +326,8 @@ function main(argv) {
       fileLogPrefix, 'TRAVIS_PULL_REQUEST_BRANCH',
       util.colors.cyan(process.env.TRAVIS_PULL_REQUEST_BRANCH));
   console.log(
-      fileLogPrefix, 'username',
-      util.colors.cyan(getStdout(`git log -1 $TRAVIS_COMMIT --pretty="%cE"`).trim()));
+      fileLogPrefix, 'author',
+      util.colors.cyan(getStdout(`git log -1 --pretty=format:'%ae'`).trim()));
   console.log(
       fileLogPrefix, 'last few commits',
       util.colors.cyan(getStdout(`git log -5`)));
