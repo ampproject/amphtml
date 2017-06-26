@@ -150,9 +150,10 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
         ms = ms || 0;
         setTimeout(fn, ms / 10);
       };
+      const timeoutMs = window.ampTestRuntimeConfig.testTimeout || 2000;
       let timeout = setTimeout(function() {
         reject(new Error('Timeout waiting for elements to start loading.'));
-      }, process.env.TEST_TIMEOUT);
+      }, timeoutMs);
       // Declare the test ready to run when the document was fully parsed.
       window.afterLoad = function() {
         resolve({
