@@ -25,7 +25,6 @@ import {
   layoutRectFromDomRect,
   layoutRectLtwh,
 } from '../layout-rect';
-import {isExperimentOn} from '../../src/experiments';
 import {serializeMessage} from '../../src/3p-frame-messaging';
 import {parseJson, tryParseJson} from '../../src/json.js';
 import {getData} from '../../src/event-helper';
