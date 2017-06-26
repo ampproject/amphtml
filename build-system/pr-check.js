@@ -34,6 +34,7 @@ const util = require('gulp-util');
 
 const gulp = 'node_modules/gulp/bin/gulp.js';
 const fileLogPrefix = util.colors.yellow.bold('pr-check.js:');
+const sauceCredsFile = path.resolve('build-system/sauce_credentials.json');
 
 /**
  * Starts a timer to measure the execution time of the given function.
@@ -222,6 +223,21 @@ function determineBuildTargets(filePaths) {
   return targetSet;
 }
 
+/**
+ * Extracts and sets per-user sauce credentials for committer, if present.
+ */
+function setPerUserSauceCredsIfAvailable() {
+  let tokens = JSON.parse(fs.readFileSync(sauceCredsFile)).tokens;
+  let committer = getStdout(`git log -1 --pretty=format:'%ae'`).trim();
+  if (tokens && tokens[committer]) {
+    console.log(
+        fileLogPrefix, 'Using per-user Sauce credentials for user',
+        util.colors.cyan(committer), 'with Sauce username',
+        util.colors.cyan(tokens[committer].sauce_username));
+    process.env['SAUCE_USERNAME'] = tokens[committer].sauce_username;
+    process.env['SAUCE_ACCESS_KEY'] = atob(tokens[committer].sauce_access_key_encoded);
+  }
+}
 
 const command = {
   testBuildSystem: function() {
@@ -259,6 +275,7 @@ const command = {
   },
   runIntegrationTests: function() {
     // Integration tests with all saucelabs browsers
+    setPerUserSauceCredsIfAvailable();
     timedExecOrDie(
         `${gulp} test --nobuild --saucelabs --integration --compiled`);
   },
@@ -311,27 +328,6 @@ function main(argv) {
       fileLogPrefix, 'Running build shard',
       util.colors.cyan(process.env.BUILD_SHARD),
       '\n');
-
-  // Debugging info.
-  console.log(
-      fileLogPrefix, 'TRAVIS_COMMIT',
-      util.colors.cyan(process.env.TRAVIS_COMMIT));
-  console.log(
-      fileLogPrefix, 'TRAVIS_COMMIT_MESSAGE',
-      util.colors.cyan(process.env.TRAVIS_COMMIT_MESSAGE));
-  console.log(
-      fileLogPrefix, 'TRAVIS_COMMIT_RANGE',
-      util.colors.cyan(process.env.TRAVIS_COMMIT_RANGE));
-  console.log(
-      fileLogPrefix, 'TRAVIS_PULL_REQUEST_BRANCH',
-      util.colors.cyan(process.env.TRAVIS_PULL_REQUEST_BRANCH));
-  console.log(
-      fileLogPrefix, 'author',
-      util.colors.cyan(getStdout(`git log -1 --pretty=format:'%ae'`).trim()));
-  console.log(
-      fileLogPrefix, 'last few commits',
-      util.colors.cyan(getStdout(`git log -5`)));
-
 
   // If $TRAVIS_PULL_REQUEST_SHA is empty then it is a push build and not a PR.
   if (!process.env.TRAVIS_PULL_REQUEST_SHA) {
