@@ -174,6 +174,7 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     useCompiledJs: !!argv.compiled,
     saucelabs: !!argv.saucelabs,
     adTypes: getAdTypes(),
+    mochaTimeout: c.client.mocha.timeout,
   };
 
   if (argv.compiled) {
