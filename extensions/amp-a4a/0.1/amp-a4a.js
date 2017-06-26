@@ -654,7 +654,7 @@ export class AmpA4A extends AMP.BaseElement {
         // This block returns the ad creative, signature, and size, if
         // available; nullotherwise.
         /**
-         * @return {!Promise<?{creativeParts: !AdResponseDef, size: ?SizeInfoDef}>}
+         * @return {?Promise<{creativeParts: !AdResponseDef, size: ?SizeInfoDef}>}
          */
         .then(responseParts => {
           checkStillCurrent();
