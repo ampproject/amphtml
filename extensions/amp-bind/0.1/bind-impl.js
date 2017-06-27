@@ -146,7 +146,7 @@ export class Bind {
      * @const @private {Promise}
      */
     this.initializePromise_ =
-        this.viewer_.whenFirstVisible().then(bodyPromise).then(body => {
+        this.viewer_.whenFirstVisible().then(() => bodyPromise).then(body => {
           return this.initialize_(body);
         });
 
@@ -244,7 +244,6 @@ export class Bind {
       rootNode.addEventListener(
           AmpEvents.TEMPLATE_RENDERED, this.boundOnTemplateRendered_);
     });
-    // Check default values against initial expression results in development.
     if (getMode().development) {
       // Check default values against initial expression results.
       promise = promise.then(() =>
