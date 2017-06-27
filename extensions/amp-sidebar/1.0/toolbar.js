@@ -17,7 +17,7 @@
 import {toggle, setStyles} from '../../../src/style';
 
 /** @const */
-const TOOLBAR_TARGET_ATTRIBUTE = 'toolbar-container';
+const TOOLBAR_TARGET_CLASS = 'i-amphtml-toolbar-target';
 
 /** @const */
 const TOOLBAR_ELEMENT_CLASS = 'i-amphtml-toolbar';
@@ -38,6 +38,9 @@ export class Toolbar {
     /** @private {Element|null} */
     this.body_ = this.win_.document.body;
 
+    /** @private {string|undefined} */
+    this.bodyTop_ = undefined;
+
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = vsync;
 
@@ -56,7 +59,7 @@ export class Toolbar {
     /** @private {Array} */
     this.toolbarOnlyElementsInSidebar_ = [];
 
-    //Finally, find our tool-bar only elements
+    // Find our tool-bar only elements
     if (this.toolbarDOMElement_.hasAttribute('toolbar-only')) {
       this.toolbarOnlyElementsInSidebar_.push(this.toolbarDOMElement_);
     } else {
@@ -100,13 +103,18 @@ export class Toolbar {
       .document.createDocumentFragment();
     this.targetElement_ =
       this.toolbarDOMElement_.ownerDocument.createElement('header');
-    this.targetElement_.setAttribute(TOOLBAR_TARGET_ATTRIBUTE, '');
+    this.targetElement_.classList.add(TOOLBAR_TARGET_CLASS);
     //Place the elements into the target
     this.toolbarClone_ = this.toolbarDOMElement_.cloneNode(true);
     this.toolbarClone_.classList.add(TOOLBAR_ELEMENT_CLASS);
     this.targetElement_.appendChild(this.toolbarClone_);
     toggle(this.targetElement_, false);
     fragment.appendChild(this.targetElement_);
+
+    // Calculate our body top before returning the fragment
+    this.bodyTop_ =
+      this.win_.getComputedStyle(this.body_, null).getPropertyValue('top');
+
     return fragment;
   }
 
@@ -132,7 +140,7 @@ export class Toolbar {
       if (this.body_) {
         const toolbarHeight = this.toolbarClone_./*REVIEW*/offsetHeight;
         setStyles(this.body_, {
-          'top': toolbarHeight + 'px',
+          'top': `calc(${toolbarHeight}px + ${this.bodyTop_})`,
         });
       }
     });
@@ -179,7 +187,7 @@ export class Toolbar {
       // Remove room for our toolbar
       if (this.body_) {
         setStyles(this.body_, {
-          'top': '',
+          'top': this.bodyTop_,
         });
       }
 
