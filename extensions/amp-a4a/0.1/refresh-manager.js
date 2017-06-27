@@ -15,6 +15,7 @@
  */
 
 import {analyticsForDoc} from '../../../src/analytics';
+import {isExperimentOn} from '../../../src/experiments';
 import {timerFor} from '../../../src/services';
 import {
   getEnclosingContainerTypes,
@@ -38,7 +39,7 @@ import {user} from '../../../src/log';
  */
 export let RefreshConfig;
 
-export const MIN_REFRESH_INTERVAL = 3;
+export const MIN_REFRESH_INTERVAL = 30;
 export const DATA_ATTR_NAME = 'data-enable-refresh';
 export const METATAG_NAME = 'amp-ad-enable-refresh';
 
@@ -77,7 +78,9 @@ export class RefreshManager {
     this.refreshTimeoutId_ = null;
 
     /** @private {boolean} */
-    this.isRefreshable_ = !!(this.config_  // The network has opted-in.
+    this.isRefreshable_ = isExperimentOn(this.win_, 'amp-ad-refresh') &&
+        // The network has opted-in.
+        !!(this.config_
         // The publisher has enabled refresh on this slot.
         && (this.refreshInterval_ || this.refreshInterval_ == '')
         // The slot is contained only within container types eligible for

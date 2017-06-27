@@ -19,6 +19,7 @@ import {
   DATA_ATTR_NAME,
   METATAG_NAME,
 } from '../refresh-manager';
+import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
 
 function getTestElement() {
@@ -46,6 +47,7 @@ describe('refresh-manager', () => {
       element: getTestElement(),
       refresh: () => {},
     };
+    toggleExperiment(window, 'amp-ad-refresh', true);
   });
 
   afterEach(() => {
