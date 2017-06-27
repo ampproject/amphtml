@@ -26,219 +26,154 @@ import {
 } from '../performance';
 import {EXPERIMENT_ATTRIBUTE, QQID_HEADER} from '../utils';
 import {
-    ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
-    ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
-    ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
-    ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
-} from '../../../../extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config';  // eslint-disable-line max-len
+  ADSENSE_A4A_EXPERIMENT_NAME,
+} from '../../../../extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config'; // eslint-disable-line
 import {
-    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
-    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
-    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
-    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
-} from '../../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config';  // eslint-disable-line max-len
-
-/**
- * Construct a lifecycle reporter for an element with a given eid in one of
- * the reporting namespaces.  If eid is not specified, creates an element with
- * no eid.
- * @param {string} namespace
- * @param {string} ad type
- * @param {string=} opt_eid
- * @returns {*}
- */
-function buildElementWithEid(namespace, type, opt_eid) {
-  return createIframePromise(false).then(iframeFixture => {
-    const win = iframeFixture.win;
-    const doc = iframeFixture.doc;
-    const elem = doc.createElement('div');
-    elem.setAttribute('type', type);
-    if (opt_eid) {
-      elem.setAttribute(EXPERIMENT_ATTRIBUTE, opt_eid);
-    }
-    doc.body.appendChild(elem);
-    const pseudoAmpElement = {
-      win,
-      element: elem,
-    };
-    return getLifecycleReporter(pseudoAmpElement, namespace, 0, 0);
-  });
-}
+  DOUBLECLICK_A4A_EXPERIMENT_NAME,
+} from '../../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config'; // eslint-disable-line
+import {forceExperimentBranch} from '../../../../src/experiments';
 
 describe('#getLifecycleReporter', () => {
-  const EXPERIMENT_BRANCH_EIDS = [
-    ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment,
-    ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment,
-    ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment,
-    ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment,
-    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment,
-    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment,
-    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment,
-    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment,
-    '117152632',
-  ];
-  const CONTROL_BRANCH_EIDS = [
-    ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control,
-    ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control,
-    ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control,
-    ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control,
-    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control,
-    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control,
-    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control,
-    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control,
-  ];
 
-  ['adsense', 'doubleclick'].forEach(type => {
-    describe(`type = ${type}`, () => {
-      EXPERIMENT_BRANCH_EIDS.forEach(eid => {
-        it(`should return real reporter for a4a eid = ${eid}`, () => {
-          return buildElementWithEid('a4a', type, eid).then(reporter => {
-            expect(reporter).to.be.instanceOf(GoogleAdLifecycleReporter);
-          });
-        });
+  let win;
+  let doc;
 
-        it(`should return a null reporter for amp eid = ${eid}`, () => {
-          return buildElementWithEid('amp', type, eid).then(reporter => {
-            expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
-          });
-        });
-
-        it(`should return null reporter for bogus namespace eid = ${eid}`,
-            () => {
-              return buildElementWithEid('fnord', type, eid).then(reporter => {
-                expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
-              });
-            });
-
-        it(`should return null reporter for non-Google ad, eid = ${eid}`,
-            () => {
-              return buildElementWithEid('a4a', 'a9', eid).then(reporter => {
-                expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
-              });
-            });
-      });
-
-      CONTROL_BRANCH_EIDS.forEach(eid => {
-        it(`should return null reporter for a4a eid = ${eid}`, () => {
-          return buildElementWithEid('a4a', type, eid).then(reporter => {
-            expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
-          });
-        });
-
-        it(`should return a real reporter for amp eid = ${eid}`, () => {
-          return buildElementWithEid('amp', type, eid).then(reporter => {
-            expect(reporter).to.be.instanceOf(GoogleAdLifecycleReporter);
-          });
-        });
-
-        it(`should return null reporter for bogus namespace eid = ${eid}`,
-            () => {
-              return buildElementWithEid('fnord', type, eid).then(reporter => {
-                expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
-              });
-            });
-
-        it(`should return null reporter for non-Google ad, eid = ${eid}`,
-            () => {
-              return buildElementWithEid('amp', 'a9', eid).then(reporter => {
-                expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
-              });
-            });
-      });
-
-      for (const namespace in ['a4a', 'amp']) {
-        it(`should return null reporter for ${namespace} and no eid`, () => {
-          return buildElementWithEid(namespace, type).then(reporter => {
-            expect(reporter).to.be.instanceOf(BaseLifecycleReporter);
-          });
-        });
-      }
+  beforeEach(() => {
+    return createIframePromise(false).then(iframeFixture => {
+      win = iframeFixture.win;
+      doc = iframeFixture.doc;
     });
   });
 
-  describes.fakeWin('#setGoogleLifecycleVarsFromHeaders', {amp: true}, env => {
-    const headerData = {};
-    const headerMock = {
-      get: h => { return h in headerData ? headerData[h] : null; },
-    };
+  it('should not create reporter if sampling is not enabled', () => {
+    forceExperimentBranch(win, 'a4aProfilingRate', null);
+    forceExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME, '1234');
+    const element = doc.createElement('div');
+    element.setAttribute('type', 'doubleclick');
+    doc.body.appendChild(element);
+    expect(getLifecycleReporter({
+      win,
+      element,
+    }, 0, 0)).to.be.instanceOf(BaseLifecycleReporter);
+  });
+
+  it('should not create reporter if not adsense or doubleclick exp', () => {
+    forceExperimentBranch(win, 'a4aProfilingRate', 'unused');
+    const element = doc.createElement('div');
+    element.setAttribute('type', 'doubleclick');
+    doc.body.appendChild(element);
+    expect(getLifecycleReporter({
+      win,
+      element,
+    }, 0, 0)).to.be.instanceOf(BaseLifecycleReporter);
+  });
+
+  it('should create reporter for doubleclick', () => {
+    forceExperimentBranch(win, 'a4aProfilingRate', 'unused');
+    forceExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME, '1234');
+    const element = doc.createElement('div');
+    element.setAttribute('type', 'doubleclick');
+    doc.body.appendChild(element);
+    expect(getLifecycleReporter({
+      win,
+      element,
+    }, 0, 0)).to.be.instanceOf(GoogleAdLifecycleReporter);
+  });
+
+  it('should create reporter for adsense', () => {
+    forceExperimentBranch(win, 'a4aProfilingRate', 'unused');
+    forceExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME, '1234');
+    const element = doc.createElement('div');
+    element.setAttribute('type', 'adsense');
+    doc.body.appendChild(element);
+    expect(getLifecycleReporter({
+      win,
+      element,
+    }, 0, 0)).to.be.instanceOf(GoogleAdLifecycleReporter);
+  });
+});
+
+describes.fakeWin('#setGoogleLifecycleVarsFromHeaders', {amp: true}, env => {
+  const headerData = {};
+  const headerMock = {
+    get: h => { return h in headerData ? headerData[h] : null; },
+  };
+  let mockReporter;
+  let emitPingStub;
+  beforeEach(() => {
+    const fakeElt = env.createAmpElement('div');
+    env.win.Math = Math;
+    env.win.document.body.appendChild(fakeElt);
+    mockReporter = new GoogleAdLifecycleReporter(env.win, fakeElt, 37);
+    mockReporter.setPingAddress('http://localhost:9876/');
+    emitPingStub = sandbox.stub(mockReporter, 'emitPing_');
+  });
+
+  it('should pick up qqid from headers', () => {
+    headerData[QQID_HEADER] = 'test_qqid';
+    expect(mockReporter.extraVariables_).to.be.empty;
+    setGoogleLifecycleVarsFromHeaders(headerMock, mockReporter);
+    mockReporter.sendPing('preAdThrottle');
+    expect(emitPingStub).to.be.calledOnce;
+    expect(emitPingStub).to.be.calledWithMatch(/[&?]qqid.37=test_qqid/);
+  });
+
+  it('should pick up rendering method from headers', () => {
+    headerData['X-AmpAdRender'] = 'fnord';
+    expect(mockReporter.extraVariables_).to.be.empty;
+    setGoogleLifecycleVarsFromHeaders(headerMock, mockReporter);
+    mockReporter.sendPing('preAdThrottle');
+    expect(emitPingStub).to.be.calledOnce;
+    expect(emitPingStub).to.be.calledWithMatch(/[&?]rm.37=fnord/);
+  });
+});
+
+describes.sandboxed('#googleLifecycleReporterFactory', {}, () => {
+  describes.fakeWin('default parameters', {amp: true}, env => {
     let mockReporter;
     let emitPingStub;
     beforeEach(() => {
-      const fakeElt = env.createAmpElement('div');
-      env.win.Math = Math;
+      const fakeElt = env.win.document.createElement('div');
+      fakeElt.setAttribute('data-amp-slot-index', '22');
+      fakeElt.setAttribute('type', 'doubleclick');
+      fakeElt.setAttribute(EXPERIMENT_ATTRIBUTE, '1234');
+      fakeElt.setAttribute('data-a4a-upgrade-type', 'foo');
+      forceExperimentBranch(env.win, DOUBLECLICK_A4A_EXPERIMENT_NAME, '1234');
       env.win.document.body.appendChild(fakeElt);
-      mockReporter = new GoogleAdLifecycleReporter(
-          env.win, fakeElt, 'test', 37);
+      env.win.ampAdPageCorrelator = 7777777;
+      const a4aContainer = {
+        element: fakeElt,
+        win: env.win,
+      };
+      mockReporter = googleLifecycleReporterFactory(a4aContainer);
+      expect(mockReporter).to.be.instanceOf(GoogleAdLifecycleReporter);
       mockReporter.setPingAddress('http://localhost:9876/');
       emitPingStub = sandbox.stub(mockReporter, 'emitPing_');
     });
 
-    it('should pick up qqid from headers', () => {
-      headerData[QQID_HEADER] = 'test_qqid';
-      expect(mockReporter.extraVariables_).to.be.empty;
-      setGoogleLifecycleVarsFromHeaders(headerMock, mockReporter);
-      mockReporter.sendPing('preAdThrottle');
+    it('should generate a ping with known parameters', () => {
+      const viewer = env.win.services.viewer.obj;
+      viewer.firstVisibleTime_ = viewer.lastVisibleTime_ = Date.now();
+      mockReporter.sendPing('renderFriendlyStart');
       expect(emitPingStub).to.be.calledOnce;
-      expect(emitPingStub).to.be.calledWithMatch(/[&?]qqid.37=test_qqid/);
-    });
-
-    it('should pick up rendering method from headers', () => {
-      headerData['X-AmpAdRender'] = 'fnord';
-      expect(mockReporter.extraVariables_).to.be.empty;
-      setGoogleLifecycleVarsFromHeaders(headerMock, mockReporter);
-      mockReporter.sendPing('preAdThrottle');
-      expect(emitPingStub).to.be.calledOnce;
-      expect(emitPingStub).to.be.calledWithMatch(/[&?]rm.37=fnord/);
-    });
-  });
-
-  describes.sandboxed('#googleLifecycleReporterFactory', {}, () => {
-    describes.fakeWin('default parameters', {amp: true}, env => {
-      let mockReporter;
-      let emitPingStub;
-      beforeEach(() => {
-        const fakeElt = env.win.document.createElement('div');
-        fakeElt.setAttribute('data-amp-slot-index', '22');
-        fakeElt.setAttribute('type', 'doubleclick');
-        fakeElt.setAttribute(EXPERIMENT_ATTRIBUTE,
-            DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment);
-        env.win.document.body.appendChild(fakeElt);
-        env.win.ampAdPageCorrelator = 7777777;
-        const a4aContainer = {
-          element: fakeElt,
-          win: env.win,
-        };
-        mockReporter = googleLifecycleReporterFactory(a4aContainer);
-        expect(mockReporter).to.be.instanceOf(GoogleAdLifecycleReporter);
-        mockReporter.setPingAddress('http://localhost:9876/');
-        emitPingStub = sandbox.stub(mockReporter, 'emitPing_');
-      });
-
-      it('should generate a ping with known parameters', () => {
-        const viewer = env.win.services.viewer.obj;
-        viewer.firstVisibleTime_ = viewer.lastVisibleTime_ = Date.now();
-        mockReporter.sendPing('renderFriendlyStart');
-        expect(emitPingStub).to.be.calledOnce;
-        const pingUrl = emitPingStub.firstCall.args[0];
-        const experimentId =
-          DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment;
-        const expectedParams = [
-          's=a4a',
-          'c=7777777',
-          'slotId=22',
-          `rls=${encodeURIComponent('$internalRuntimeVersion$')}`,
-          'v_h=[0-9]+',
-          's_t=',  // SROLL_TOP not defined in test environment.
-          'stageName=renderFriendlyStart',
-          'stageIdx=6',
-          'met.a4a.22=renderFriendlyStart.[0-9]+',
-          `e.22=${experimentId}`,
-          'adt.22=doubleclick',
-          'met.a4a=firstVisibleTime.[0-9]+%2ClastVisibleTime.[0-9]+',
-        ];
-        expectedParams.forEach(p => {
-          expect(pingUrl, p).to.match(new RegExp(`[?&]${p}(&|$)`));
-        });
+      const pingUrl = emitPingStub.firstCall.args[0];
+      const experimentId = 1234;
+      const expectedParams = [
+        's=a4a',
+        'c=7777777',
+        'slotId=22',
+        `rls=${encodeURIComponent('$internalRuntimeVersion$')}`,
+        'v_h=[0-9]+',
+        's_t=',  // SROLL_TOP not defined in test environment.
+        'stageName=renderFriendlyStart',
+        'stageIdx=6',
+        'met.a4a.22=renderFriendlyStart.[0-9]+',
+        `e.22=${experimentId}`,
+        'adt.22=doubleclick',
+        'met.a4a=firstVisibleTime.[0-9]+%2ClastVisibleTime.[0-9]+',
+      ];
+      expectedParams.forEach(p => {
+        expect(pingUrl, p).to.match(new RegExp(`[?&]${p}(&|$)`));
       });
     });
   });

@@ -21,90 +21,55 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import {
-  googleAdsIsA4AEnabled,
-  isInManualExperiment,
+  MANUAL_EXPERIMENT_ID,
+  extractUrlExperimentId,
+  addExperimentIdToElement,
 } from '../../../ads/google/a4a/traffic-experiments';
-import {EXPERIMENT_ATTRIBUTE} from '../../../ads/google/a4a/utils';
-import {getMode} from '../../../src/mode';
-import {isProxyOrigin} from '../../../src/url';
-import {isExperimentOn} from '../../../src/experiments';
+import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
+import {
+  getExperimentBranch,
+  forceExperimentBranch,
+  randomlySelectUnsetExperiments,
+} from '../../../src/experiments';
+import {dev} from '../../../src/log';
 
 /** @const {string} */
-const DOUBLECLICK_A4A_EXPERIMENT_NAME = 'expDoubleclickA4A';
+export const DOUBLECLICK_A4A_EXPERIMENT_NAME = 'expDoubleclickA4A';
 
-// The following experiment IDs are used by Google-side servers to
-// understand what experiment is running and what mode the A4A code is
-// running in.  In this experiment phase, we're testing 8 different
-// configurations, resulting from the Cartesian product of the following:
-//   - Traditional 3p iframe ad rendering (control) vs A4A rendering
-//     (experiment)
-//   - Experiment triggered by an external page, such as the Google Search
-//     page vs. triggered internally in the client code.
-//   - Doubleclick vs Adsense
-// The following two objects contain experiment IDs for the first two
-// categories for Doubleclick ads.  They are attached to the ad request by
-// ads/google/a4a/traffic-experiments.js#googleAdsIsA4AEnabled when it works
-// out whether a given ad request is in the overall experiment and, if so,
-// which branch it's on.
+/** @type {string} */
+const TAG = 'amp-ad-network-doubleclick-impl';
 
-// We would prefer the following constants to remain private, but we need to
-// refer to them directly in amp-ad-3p-impl.js and amp-a4a.js in order to check
-// whether we're in the experiment or not, for the purposes of enabling
-// debug traffic profiling.  Once we have debugged the a4a implementation and
-// can disable profiling again, we can return these constants to being
-// private to this file.
-/** @const {!../../../ads/google/a4a/traffic-experiments.A4aExperimentBranches} */
-export const DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH = {
-  control: '117152662',
-  experiment: '117152663',
+/** @const @enum{string} */
+export const DOUBLECLICK_EXPERIMENT_FEATURE = {
+  HOLDBACK_EXTERNAL: '2092620',
+  HOLDBACK_INTERNAL: '2092614',
+  DELAYED_REQUEST: '117152665',
+  SRA: '117152667',
 };
 
-export const DOUBLECLICK_A4A_EXTERNAL_DELAYED_EXPERIMENT_BRANCHES_PRE_LAUNCH = {
-  control: '117152664',
-  experiment: '117152665',
+/** @const @type {!Object<string,?string>} */
+export const URL_EXPERIMENT_MAPPING = {
+  '-1': MANUAL_EXPERIMENT_ID,
+  '0': null,
+  // Holdback
+  '1': '2092619',
+  '2': DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL,
+  // Delay Request
+  '3': '117152664',
+  '4': DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST,
+  // SFG
+  '5': '21060540',
+  '6': '21060541',
+  // SRA
+  '7': '117152666',
+  '8': DOUBLECLICK_EXPERIMENT_FEATURE.SRA,
 };
 
-/**
- * @const {!../../../ads/google/a4a/traffic-experiments.A4aExperimentBranches}
- */
-export const DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH = {
-  control: '2092619',
-  experiment: '2092620',
-};
-
-/**
- * @const {!../../../ads/google/a4a/traffic-experiments.A4aExperimentBranches}
- */
-export const DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH = {
-  control: '117152680',
-  experiment: '117152681',
-};
-
-/**
- * @const {!../../../ads/google/a4a/traffic-experiments.A4aExperimentBranches}
- */
-export const DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH = {
-  control: '2092613',
-  experiment: '2092614',
-};
-
-/**
- * @const {!../../../ads/google/a4a/traffic-experiments.A4aExperimentBranches}
- */
-export const DOUBLECLICK_A4A_BETA_BRANCHES = {
-  control: '2077830',
-  experiment: '2077831',
-};
-
-/**
- * @const {!../../../ads/google/a4a/traffic-experiments.A4aExperimentBranches}
- */
-export const DOUBLECLICK_SFG_INTERNAL_EXPERIMENT_BRANCHES = {
-  control: '21060540',
-  experiment: '21060541',
-};
-
+/** @const {string} */
 export const BETA_ATTRIBUTE = 'data-use-beta-a4a-implementation';
+
+/** @const {string} */
+export const BETA_EXPERIMENT_ID = '2077831';
 
 /**
  * @param {!Window} win
@@ -112,34 +77,54 @@ export const BETA_ATTRIBUTE = 'data-use-beta-a4a-implementation';
  * @returns {boolean}
  */
 export function doubleclickIsA4AEnabled(win, element) {
-  if (element.hasAttribute('useSameDomainRenderingUntilDeprecated')) {
+  if (element.hasAttribute('useSameDomainRenderingUntilDeprecated') ||
+      !isGoogleAdsA4AValidEnvironment(win)) {
     return false;
   }
-  const a4aRequested = element.hasAttribute(BETA_ATTRIBUTE);
-  // Note: Under this logic, a4aRequested shortcuts googleAdsIsA4AEnabled and,
-  // therefore, carves out of the experiment branches.  Any publisher using this
-  // attribute will be excluded from the experiment altogether.
-  // TODO(tdrl): The "is this site eligible" logic has gotten scattered around
-  // and is now duplicated.  It should be cleaned up and factored into a single,
-  // shared location.
-  let externalBranches, internalBranches;
-  if (isExperimentOn(win, 'a4aFastFetchDoubleclickLaunched')) {
-    externalBranches = DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH;
-    internalBranches = DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH;
+  if (element.hasAttribute(BETA_ATTRIBUTE)) {
+    addExperimentIdToElement(BETA_EXPERIMENT_ID, element);
+    dev().info(TAG, `beta forced a4a selection ${element}`);
+    return true;
+  }
+  // See if in holdback control/experiment.
+  let experimentId;
+  const urlExperimentId = extractUrlExperimentId(win, element);
+  if (urlExperimentId != undefined) {
+    experimentId = URL_EXPERIMENT_MAPPING[urlExperimentId];
+    dev().info(
+        TAG, `url experiment selection ${urlExperimentId}: ${experimentId}.`);
   } else {
-    externalBranches = DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH;
-    internalBranches = DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH;
+    // Not set via url so randomly set.
+    const experimentInfoMap = {};
+    experimentInfoMap[DOUBLECLICK_A4A_EXPERIMENT_NAME] = {
+      isTrafficEligible: () => true,
+      branches: {
+        control: '2092613',
+        experiment: DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL,
+      },
+    };
+    // Note: Because the same experimentName is being used everywhere here,
+    // randomlySelectUnsetExperiments won't add new IDs if
+    // maybeSetExperimentFromUrl has already set something for this
+    // experimentName.
+    randomlySelectUnsetExperiments(win, experimentInfoMap);
+    experimentId = getExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME);
+    dev().info(
+        TAG, `random experiment selection ${urlExperimentId}: ${experimentId}`);
   }
-  const enableA4A = googleAdsIsA4AEnabled(
-      win, element, DOUBLECLICK_A4A_EXPERIMENT_NAME,
-      externalBranches, internalBranches,
-      DOUBLECLICK_A4A_EXTERNAL_DELAYED_EXPERIMENT_BRANCHES_PRE_LAUNCH,
-      DOUBLECLICK_SFG_INTERNAL_EXPERIMENT_BRANCHES) ||
-      (a4aRequested && (isProxyOrigin(win.location) ||
-       getMode(win).localDev || getMode(win).test));
-  if (enableA4A && a4aRequested && !isInManualExperiment(element)) {
-    element.setAttribute(EXPERIMENT_ATTRIBUTE,
-        DOUBLECLICK_A4A_BETA_BRANCHES.experiment);
+  if (experimentId) {
+    addExperimentIdToElement(experimentId, element);
+    forceExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME, experimentId);
   }
-  return enableA4A;
+  return ![DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL,
+    DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL].includes(experimentId);
+}
+
+/**
+ * @param {!Window} win
+ * @param {!DOUBLECLICK_EXPERIMENT_FEATURE} feature
+ * @return {boolean} whether feature is enabled
+ */
+export function experimentFeatureEnabled(win, feature) {
+  return getExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME) == feature;
 }
