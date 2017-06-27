@@ -22,9 +22,12 @@ import {
 import {
   triggerAnalyticsEvent,
   insertAnalyticsElement,
+  CustomEventReporterBuilder,
 } from '../../src/analytics';
+import {createAmpElementProto} from '../../src/custom-element';
 import {timerFor} from '../../src/services';
 import {BaseElement} from '../../src/base-element';
+import {macroTask} from '../../testing/yield';
 import * as sinon from 'sinon';
 
 describes.realWin('analytics', {amp: true}, env => {
@@ -115,6 +118,155 @@ describes.realWin('analytics', {amp: true}, env => {
         expect(analyticsEle.CONFIG).to.jsonEqual(config);
         expect(analyticsEle.getAttribute('sandbox')).to.equal('true');
       });
+    });
+  });
+
+
+  describe('CustomEventReporterBuilder', () => {
+    let builder;
+    let parent;
+    beforeEach(() => {
+      parent = document.createElement('div');
+      builder = new CustomEventReporterBuilder(parent);
+    });
+
+    it('track event with one request', () => {
+      builder.track('test', 'fake.com');
+      expect(builder.config_).to.jsonEqual({
+        'requests': {
+          'test-request-0': 'fake.com',
+        },
+        'triggers': {
+          'test': {
+            'on': 'test',
+            'request': ['test-request-0'],
+          },
+        },
+      });
+    });
+
+    it('track event with multiple request', () => {
+      builder.track('test', ['fake.com', 'fake1.com']);
+      expect(builder.config_).to.jsonEqual({
+        'requests': {
+          'test-request-0': 'fake.com',
+          'test-request-1': 'fake1.com',
+        },
+        'triggers': {
+          'test': {
+            'on': 'test',
+            'request': ['test-request-0', 'test-request-1'],
+          },
+        },
+      });
+    });
+
+    it('track multi event', () => {
+      builder.track('test', 'fake.com').track('test1', 'fake1.com');
+      expect(builder.config_).to.jsonEqual({
+        'requests': {
+          'test-request-0': 'fake.com',
+          'test1-request-0': 'fake1.com',
+        },
+        'triggers': {
+          'test': {
+            'on': 'test',
+            'request': ['test-request-0'],
+          },
+          'test1': {
+            'on': 'test1',
+            'request': ['test1-request-0'],
+          },
+        },
+      });
+    });
+
+    it('should not add already tracked event', () => {
+      try {
+        builder.track('test', 'fake.com').track('test', 'example.com');
+      } catch (e) {
+        expect(e.message).to.equal(
+            'customEventReporterBuilder should not track same eventType twice');
+      };
+    });
+
+    it('should return a customEventReporter instance', () => {
+      parent.getResourceId = () => {return 1;};
+      parent.signals = () => {return {
+        whenSignal: () => {return Promise.resolve();},
+      };};
+      const reporter = builder.track('test', 'fake.com').build();
+      expect(reporter.trigger).to.be.defined;
+    });
+  });
+
+  describe('CustomEventReporter test', () => {
+    let builder;
+    let parentEle;
+    let reporter;
+    let sandbox;
+    let ampdoc;
+    let triggerEventSpy;
+
+    class MockInstrumentation {
+      triggerEventForTarget(nodeOrDoc, eventType, opt_vars) {
+        triggerEventSpy(nodeOrDoc, eventType, opt_vars);
+      }
+    }
+    beforeEach(() => {
+      ampdoc = env.ampdoc;
+      sandbox = sinon.sandbox.create();
+      triggerEventSpy = sandbox.spy();
+      resetServiceForTesting(env.win, 'amp-analytics-instrumentation');
+      registerServiceBuilderForDoc(
+          ampdoc, 'amp-analytics-instrumentation', MockInstrumentation);
+      // Force instantiation
+      getServiceForDoc(ampdoc, 'amp-analytics-instrumentation');
+
+      env.win.document.registerElement('amp-test', {
+        prototype: createAmpElementProto(env.win, 'amp-test', BaseElement),
+      });
+      parentEle = env.win.document.createElement('amp-test');
+      parentEle.setAttribute('layout', 'nodisplay');
+      env.win.document.body.appendChild(parentEle);
+      parentEle.build();
+      builder = new CustomEventReporterBuilder(parentEle);
+      reporter = builder.track('test', 'fake.com').build();
+    });
+
+    it('replace eventType with new name', function* () {
+      parentEle.layoutCallback();
+      yield macroTask();
+      const element = parentEle.querySelector('amp-analytics');
+      expect(element).to.not.be.null;
+      const script = element.querySelector('script');
+      const id = parentEle.getResourceId();
+      expect(script.textContent).to.jsonEqual(JSON.stringify({
+        'requests': {
+          'test-request-0': 'fake.com',
+        },
+        'triggers': {
+          'test': {
+            'on': `sandbox-${id}-test`,
+            'request': ['test-request-0'],
+          },
+        },
+      }));
+    });
+
+    it('trigger event with new name', function* () {
+      const id = parentEle.getResourceId();
+      reporter.trigger('test');
+      yield macroTask();
+      expect(triggerEventSpy).to.be.calledWith(parentEle, `sandbox-${id}-test`);
+    });
+
+    it('should not trigger not added event', function* () {
+      try {
+        reporter.trigger('fake');
+      } catch (e) {
+        expect(e.message).to.equal('Cannot trigger non initiated eventType');
+      }
     });
   });
 });

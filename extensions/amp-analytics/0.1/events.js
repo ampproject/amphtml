@@ -18,6 +18,7 @@ import {CommonSignals} from '../../../src/common-signals';
 import {Observable} from '../../../src/observable';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {user} from '../../../src/log';
+import {startsWith} from '../../../src/string';
 
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
 const NO_UNLISTEN = function() {};
@@ -112,6 +113,8 @@ export class CustomEventTracker extends EventTracker {
      */
     this.buffer_ = {};
 
+    this.sandboxBuffer_ = {};
+
     // Stop buffering of custom events after 10 seconds. Assumption is that all
     // `amp-analytics` elements will have been instrumented by this time.
     setTimeout(() => {
@@ -122,6 +125,7 @@ export class CustomEventTracker extends EventTracker {
   /** @override */
   dispose() {
     this.buffer_ = undefined;
+    this.sandboxBuffer_ = undefined;
     for (const k in this.observers_) {
       this.observers_[k].removeAll();
     }
@@ -129,15 +133,6 @@ export class CustomEventTracker extends EventTracker {
 
   /** @override */
   add(context, eventType, config, listener) {
-    // Push recent events if any.
-    const buffer = this.buffer_ && this.buffer_[eventType];
-    if (buffer) {
-      setTimeout(() => {
-        buffer.forEach(event => {
-          listener(event);
-        });
-      }, 1);
-    }
     let selector = config['selector'];
     if (!selector) {
       selector = ':root';
@@ -146,6 +141,31 @@ export class CustomEventTracker extends EventTracker {
 
     const targetReady =
         this.root.getElement(context, selector, selectionMethod);
+
+    const isSandboxEvent = startsWith(eventType, 'sandbox');
+
+    // Push recent events if any.
+    let buffer;
+    if (isSandboxEvent) {
+      buffer = this.sandboxBuffer_ && this.sandboxBuffer_[eventType];
+    } else {
+      buffer = this.buffer_ && this.buffer_[eventType];
+    }
+
+    if (buffer) {
+      targetReady.then(target => {
+        setTimeout(() => {
+          buffer.forEach(event => {
+            if (target.contains(event.target)) {
+              listener(event);
+            }
+          });
+          if (isSandboxEvent) {
+            this.sandboxBuffer_[eventType] = undefined;
+          }
+        }, 1);
+      });
+    }
 
     let observers = this.observers_[eventType];
     if (!observers) {
@@ -168,6 +188,24 @@ export class CustomEventTracker extends EventTracker {
    * @param {!AnalyticsEvent} event
    */
   trigger(event) {
+    const observers = this.observers_[event.type];
+    if (startsWith(event.type, 'sandbox')) {
+      // special sandboxed event type
+      if (!this.sandboxBuffer_) {
+        return;
+      }
+
+      if (this.sandboxBuffer_[event.type]) {
+        this.sandboxBuffer_[event.type].push(event);
+      } else if (!observers) {
+        this.sandboxBuffer_[event.type] = [];
+        this.sandboxBuffer_[event.type].push(event);
+      } else {
+        observers.fire(event);
+      }
+      return;
+    }
+
     // Buffer still exists - enqueue.
     if (this.buffer_) {
       let buffer = this.buffer_[event.type];
@@ -179,7 +217,6 @@ export class CustomEventTracker extends EventTracker {
     }
 
     // If listeners already present - trigger right away.
-    const observers = this.observers_[event.type];
     if (observers) {
       observers.fire(event);
     }

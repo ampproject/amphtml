@@ -172,9 +172,11 @@ describes.realWin('Events', {amp: 1}, env => {
     it('should initalize, add listeners and dispose', () => {
       expect(tracker.root).to.equal(root);
       expect(tracker.buffer_).to.exist;
+      expect(tracker.sandboxBuffer_).to.exist;
 
       tracker.dispose();
       expect(tracker.buffer_).to.not.exist;
+      expect(tracker.sandboxBuffer_).to.not.exist;
     });
 
     it('should listen on custom events', () => {
@@ -243,7 +245,7 @@ describes.realWin('Events', {amp: 1}, env => {
       });
     });
 
-    it('should buffer custom events early on', () => {
+    it('should buffer custom events early on', function* () {
       // Events before listeners added.
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-1'));
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-2'));
@@ -257,6 +259,7 @@ describes.realWin('Events', {amp: 1}, env => {
       tracker.add(analyticsElement, 'custom-event-1', {}, handler);
       tracker.add(analyticsElement, 'custom-event-2', {}, handler2);
       tracker.add(analyticsElement, 'custom-event-3', {}, handler3);
+      yield getElementSpy.returnValues[2];
       clock.tick(1);
       expect(handler).to.be.calledOnce;
       expect(handler2).to.have.callCount(2);
@@ -271,29 +274,82 @@ describes.realWin('Events', {amp: 1}, env => {
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-3'));
       expect(getElementSpy).to.have.callCount(3);
 
-      return getElementSpy.returnValues[2].then(() => {
-        expect(handler).to.have.callCount(2);
-        expect(handler2).to.have.callCount(3);
-        expect(handler3).to.be.calledOnce;
-        expect(tracker.buffer_['custom-event-1']).to.have.length(2);
-        expect(tracker.buffer_['custom-event-2']).to.have.length(3);
-        expect(tracker.buffer_['custom-event-3']).to.have.length(1);
+      yield getElementSpy.returnValues[2];
 
-        // Buffering time expires.
-        clock.tick(10001);
+      expect(handler).to.have.callCount(2);
+      expect(handler2).to.have.callCount(3);
+      expect(handler3).to.be.calledOnce;
+      expect(tracker.buffer_['custom-event-1']).to.have.length(2);
+      expect(tracker.buffer_['custom-event-2']).to.have.length(3);
+      expect(tracker.buffer_['custom-event-3']).to.have.length(1);
+
+      // Buffering time expires.
+      clock.tick(10001);
+      expect(tracker.buffer_).to.be.undefined;
+
+      // Post-buffering round of events.
+      tracker.trigger(new AnalyticsEvent(target, 'custom-event-1'));
+      tracker.trigger(new AnalyticsEvent(target, 'custom-event-2'));
+      tracker.trigger(new AnalyticsEvent(target, 'custom-event-3'));
+      return targetReadyPromise.then(() => {
+        expect(handler).to.have.callCount(3);
+        expect(handler2).to.have.callCount(4);
+        expect(handler3).to.have.callCount(2);
         expect(tracker.buffer_).to.be.undefined;
-
-        // Post-buffering round of events.
-        tracker.trigger(new AnalyticsEvent(target, 'custom-event-1'));
-        tracker.trigger(new AnalyticsEvent(target, 'custom-event-2'));
-        tracker.trigger(new AnalyticsEvent(target, 'custom-event-3'));
-        return targetReadyPromise.then(() => {
-          expect(handler).to.have.callCount(3);
-          expect(handler2).to.have.callCount(4);
-          expect(handler3).to.have.callCount(2);
-          expect(tracker.buffer_).to.be.undefined;
-        });
       });
+    });
+
+    it('should buffer sandbox events in different list', function* () {
+      // Events before listeners added.
+      tracker.trigger(new AnalyticsEvent(target, 'sandbox-1-event-1'));
+      tracker.trigger(new AnalyticsEvent(target, 'event-1'));
+
+      expect(tracker.buffer_['event-1']).to.have.length(1);
+      expect(tracker.sandboxBuffer_['sandbox-1-event-1']).to.have.length(1);
+      clock.tick(10001);
+      expect(tracker.buffer_).to.be.undefined;
+      expect(tracker.sandboxBuffer_['sandbox-1-event-1']).to.have.length(1);
+      tracker.add(analyticsElement, 'sandbox-1-event-1', {}, handler);
+      yield targetReadyPromise;
+      clock.tick(1);
+      expect(handler).to.be.calledOnce;
+      expect(tracker.sandboxBuffer_['sandbox-1-event-1']).to.be.undefined;
+    });
+
+    it('should keep sandbox buffer before handler is added', function* () {
+      tracker.trigger(new AnalyticsEvent(target, 'sandbox-1-event-1'));
+      clock.tick(10001);
+      tracker.trigger(new AnalyticsEvent(target, 'sandbox-1-event-1'));
+      clock.tick(1000);
+      tracker.add(analyticsElement, 'sandbox-1-event-1', {}, handler);
+      yield targetReadyPromise;
+      clock.tick(1);
+      expect(handler).to.be.calledTwice;
+    });
+
+    it('should handle all events and keep sandbox buffer order', function* () {
+      tracker.trigger(
+          new AnalyticsEvent(target, 'sandbox-1-event-1', {'order': '1'}));
+      tracker.trigger(
+          new AnalyticsEvent(target, 'sandbox-1-event-1', {'order': '2'}));
+      tracker.add(analyticsElement, 'sandbox-1-event-1', {}, handler);
+      yield targetReadyPromise;
+      tracker.trigger(
+          new AnalyticsEvent(target, 'sandbox-1-event-1', {'order': '3'}));
+      clock.tick(1);
+      expect(tracker.sandboxBuffer_['sandbox-1-event-1']).to.be.undefined;
+      tracker.trigger(
+          new AnalyticsEvent(target, 'sandbox-1-event-1', {'order': '4'}));
+      yield targetReadyPromise;
+      expect(handler).to.have.callCount(4);
+      expect(handler.firstCall).to.be.calledWith(new AnalyticsEvent(
+          target, 'sandbox-1-event-1', {'order': '1'}));
+      expect(handler.secondCall).to.be.calledWith(new AnalyticsEvent(
+          target, 'sandbox-1-event-1', {'order': '2'}));
+      expect(handler.thirdCall).to.be.calledWith(new AnalyticsEvent(
+          target, 'sandbox-1-event-1', {'order': '3'}));
+      expect(handler.lastCall).to.be.calledWith(new AnalyticsEvent(
+          target, 'sandbox-1-event-1', {'order': '4'}));
     });
   });
 
