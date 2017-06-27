@@ -110,16 +110,19 @@ describe('amp-img', () => {
     });
   });
 
-  it('should not preconnect to the if src is not set', () => {
+  it('should preconnect to the the first srcset url if src is not set', () => {
     return getImg({
-      srcset: 'bad.jpg 2000w, /examples/img/sample.jpg 1000w',
+      srcset: 'http://google.com/bad.jpg 2000w, /examples/img/sample.jpg 1000w',
       width: 300,
       height: 200,
     }).then(ampImg => {
       const impl = ampImg.implementation_;
       sandbox.stub(impl.preconnect, 'url');
       impl.preconnectCallback(true);
-      expect(impl.preconnect.url.called).to.be.false;
+      expect(impl.preconnect.url.called).to.be.true;
+      expect(impl.preconnect.url).to.have.been.calledWith(
+          'http://google.com/bad.jpg'
+      );
     });
   });
 
