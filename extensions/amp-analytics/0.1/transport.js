@@ -283,12 +283,13 @@ export class Transport {
     const scriptSrc = getMode().localDev
       ? '/dist.3p/current/ampanalytics-lib.js'
       : `${urls.thirdParty}/$internalRuntimeVersion$/ampanalytics-v0.js`;
+    const frameName = JSON.stringify(/** @type {JsonObject} */ ({
+      scriptSrc,
+      sentinel,
+    }));
     const frame = createElementWithAttributes(win.document, 'iframe', {
       sandbox: 'allow-scripts',
-      name: JSON.stringify(/** @type {JsonObject} */ ({
-        scriptSrc,
-        sentinel,
-      })),
+      name: frameName,
     });
     const iframeMessagingClient = new IframeMessagingClient(window);
     iframeMessagingClient.setSentinel(sentinel);
