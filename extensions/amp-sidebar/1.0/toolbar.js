@@ -35,6 +35,9 @@ export class Toolbar {
     /** @private {!Object} **/
     this.win_ = win;
 
+    /** @private {!Element} */
+    this.body_ = this.sidebarElement_.ownerDocument.body;
+
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = vsync;
 
@@ -46,9 +49,6 @@ export class Toolbar {
 
     /** @private {Element|undefined} */
     this.targetElement_ = undefined;
-
-    /** @private {Element|undefined} */
-    this.heightElement_ = undefined;
 
     /** @private {!boolean} **/
     this.toolbarShown_ = false;
@@ -105,10 +105,6 @@ export class Toolbar {
     this.toolbarClone_ = this.toolbarDOMElement_.cloneNode(true);
     this.toolbarClone_.classList.add(TOOLBAR_ELEMENT_CLASS);
     this.targetElement_.appendChild(this.toolbarClone_);
-    this.heightElement_ =
-      this.toolbarDOMElement_.ownerDocument.createElement('div');
-    this.heightElement_.setAttribute('placeholder', '');
-    this.targetElement_.appendChild(this.heightElement_);
     toggle(this.targetElement_, false);
     fragment.appendChild(this.targetElement_);
     return fragment;
@@ -131,13 +127,12 @@ export class Toolbar {
    */
   attemptShow_() {
 
-    // Use the placeholder to fill the height of the toolbar
+    // Make room for the toolbar
+    const toolbarHeight = this.toolbarClone_./*REVIEW*/offsetHeight;
     this.vsync_.mutate(() => {
-      if (this.heightElement_) {
-        setStyles(this.heightElement_, {
-          'height': this.toolbarClone_./*REVIEW*/offsetHeight + 'px',
-        });
-      }
+      setStyles(this.body_, {
+        'top': toolbarHeight + 'px',
+      });
     });
 
     if (this.isToolbarShown_()) {
@@ -178,6 +173,13 @@ export class Toolbar {
           toggle(element, true);
         });
       }
+
+      // Remove room for our toolbar
+      setStyles(this.body_, {
+        'top': '',
+      });
+
+
       this.toolbarShown_ = false;
     });
   }
