@@ -25,7 +25,7 @@
  const DEFAULT_TOOLBAR_MEDIA = '(min-width: 768px)';
 
  /** @const */
- const TOOLBAR_CLASS = 'i-amphtml-toolbar';
+ const TOOLBAR_ELEMENT_CLASS = 'i-amphtml-toolbar';
 
 
  adopt(window);
@@ -111,7 +111,7 @@
        const toolbars = obj.toolbars;
        const toolbarElements = Array.prototype
               .slice.call(obj.toolbarContainerElement.ownerDocument
-              .getElementsByClassName(TOOLBAR_CLASS), 0);
+              .getElementsByClassName(TOOLBAR_ELEMENT_CLASS), 0);
        resizeIframeToWidth(obj.iframe, '1px', () => {
          expect(toolbarElements.length).to.be.above(0);
          toolbars.forEach(toolbar => {
@@ -128,8 +128,8 @@
      return getToolbars([{}]).then(obj => {
        const toolbars = obj.toolbars;
        const toolbarElements = Array.prototype
-              .slice.call(obj.toolbarContainerElement
-              .getElementsByClassName(TOOLBAR_CLASS), 0);
+              .slice.call(obj.toolbarContainerElement.ownerDocument
+              .getElementsByClassName(TOOLBAR_ELEMENT_CLASS), 0);
        resizeIframeToWidth(obj.iframe, '4000px', () => {
          expect(toolbarElements.length).to.be.above(0);
          toolbars.forEach(toolbar => {
@@ -146,8 +146,8 @@
      return getToolbars([{}]).then(obj => {
        const toolbars = obj.toolbars;
        const toolbarElements = Array.prototype
-              .slice.call(obj.toolbarContainerElement
-              .getElementsByClassName(TOOLBAR_CLASS), 0);
+              .slice.call(obj.toolbarContainerElement.ownerDocument
+              .getElementsByClassName(TOOLBAR_ELEMENT_CLASS), 0);
        resizeIframeToWidth(obj.iframe, '4000px', () => {
          expect(toolbarElements.length).to.be.above(0);
          toolbars.forEach(toolbar => {
@@ -164,8 +164,8 @@
      return getToolbars([{}]).then(obj => {
        const toolbars = obj.toolbars;
        const toolbarElements = Array.prototype
-              .slice.call(obj.toolbarContainerElement
-              .getElementsByClassName(TOOLBAR_CLASS), 0);
+              .slice.call(obj.toolbarContainerElement.ownerDocument
+              .getElementsByClassName(TOOLBAR_ELEMENT_CLASS), 0);
        resizeIframeToWidth(obj.iframe, '4000px', () => {
          toolbars.forEach(toolbar => {
            toolbar.onLayoutChange();
@@ -188,7 +188,7 @@
        const toolbars = obj.toolbars;
        const toolbarElements = Array.prototype
               .slice.call(obj.toolbarContainerElement.ownerDocument
-              .getElementsByClassName(TOOLBAR_CLASS), 0);
+              .getElementsByClassName(TOOLBAR_ELEMENT_CLASS), 0);
        resizeIframeToWidth(obj.iframe, '1px', () => {
          expect(toolbarElements.length).to.be.above(0);
          toolbars.forEach(toolbar => {
