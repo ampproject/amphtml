@@ -45,7 +45,7 @@ function main() {
 
   if (credentials[committer]) {
     let username = credentials[committer].username;
-    let access_key = atob(credentials[committer].access_key_encoded);
+    let access_key = atob(credentials[committer].access_key_encoded).trim();
     console.log(fileLogPrefix,
         'Using Sauce credentials for user', util.colors.cyan(committer),
         'with Sauce username', util.colors.cyan(username));
