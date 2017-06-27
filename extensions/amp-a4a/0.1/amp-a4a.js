@@ -357,11 +357,6 @@ export class AmpA4A extends AMP.BaseElement {
               'Error on emitLifecycleEvent', err, varArgs) ;
         });
 
-    const type = (this.element.getAttribute('type') || 'notype').toLowerCase();
-    this.delayRequestEnabled_ =
-      (type == 'adsense' && isInExperiment(this.element, '117152655')) ||
-      (type == 'doubleclick' && isInExperiment(this.element, '117152665'));
-
     this.uiHandler = new AMP.AmpAdUIHandler(this);
     if (!this.win.ampA4aValidationKeys) {
       // Without the following variable assignment, there's no way to apply a

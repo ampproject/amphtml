@@ -131,7 +131,7 @@ export class AmpAdCustom extends AMP.BaseElement {
   getFullUrl_() {
     // If this ad doesn't have a slot defined, just return the base URL
     if (this.slot_ === null) {
-      return this.url_;
+      return /** @type {string} */ (this.url_);
     }
     if (ampCustomadFullUrls === null) {
       // The array of ad urls has not yet been built, do so now.
