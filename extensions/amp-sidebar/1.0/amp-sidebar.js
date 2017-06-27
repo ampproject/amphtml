@@ -116,7 +116,7 @@ export class AmpSidebar extends AMP.BaseElement {
         const toolbarFragment = toolbar.build();
         if (toolbarFragment) {
           this.element.parentElement
-              .insertBefore(toolbar.build(), this.element);
+              .insertBefore(toolbarFragment, this.element);
         }
         this.toolbars_.push(toolbar);
       } catch (e) {
