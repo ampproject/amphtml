@@ -35,7 +35,7 @@ import {getMode} from './mode';
   sure to not `install` it during dev since the `install` is done as a side
   effect in importing the module.
 */
-if (!getMode().localDev) {
+if (!getMode().localDev && !self['customElements']) {
   installCustomElements(self, 'auto');
 }
 installDOMTokenListToggle(self);
