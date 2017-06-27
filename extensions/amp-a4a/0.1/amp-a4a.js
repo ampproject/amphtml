@@ -584,7 +584,6 @@ export class AmpA4A extends AMP.BaseElement {
           checkStillCurrent();
           this.adUrl_ = adUrl;
           this.protectedEmitLifecycleEvent_('urlBuilt');
-          console.log('send request', adUrl);
           return adUrl && this.sendXhrRequest(adUrl);
         })
         // The following block returns either the response (as a {bytes, headers}
@@ -593,7 +592,6 @@ export class AmpA4A extends AMP.BaseElement {
         .then(fetchResponse => {
           checkStillCurrent();
           this.protectedEmitLifecycleEvent_('adRequestEnd');
-          console.log('response', fetchResponse);
           // If the response is null, we want to return null so that
           // unlayoutCallback will attempt to render via x-domain iframe,
           // assuming ad url or creative exist.
