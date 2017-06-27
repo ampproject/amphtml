@@ -747,7 +747,7 @@ function elementExtractor(tagName, type) {
       'gm');
 }
 
-// Data for example: http://localhost:8000/examples/bind/xhr.amp.max.html
+// Data for example: http://localhost:8000/examples/bind/xhr.amp.html
 app.use('/bind/form/get', (req, res) => {
   assertCors(req, res, ['GET']);
   res.json({
@@ -755,7 +755,7 @@ app.use('/bind/form/get', (req, res) => {
   });
 });
 
-// Data for example: http://localhost:8000/examples/bind/ecommerce.amp.max.html
+// Data for example: http://localhost:8000/examples/bind/ecommerce.amp.html
 app.use('/bind/ecommerce/sizes', (req, res) => {
   assertCors(req, res, ['GET']);
   setTimeout(() => {
