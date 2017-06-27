@@ -38,7 +38,7 @@ function main() {
   let credentials = JSON.parse(fs.readFileSync(sauceCredsFile)).credentials;
   if (credentials === null) {
     util.log(fileLogPrefix, util.colors.red('ERROR:'),
-        'Could not load Sauce labs credentials from',
+        'Could not load Sauce Labs credentials from',
         util.colors.cyan(sauceCredsFile));
     return 1;
   }
@@ -47,10 +47,17 @@ function main() {
     let username = credentials[committer].username;
     let access_key = atob(credentials[committer].access_key_encoded).trim();
     util.log(fileLogPrefix,
-        'Using Sauce credentials for user', util.colors.cyan(committer),
-        'with Sauce username', util.colors.cyan(username));
+        'Using Sauce Labs credentials for', util.colors.cyan(committer),
+        'with username', util.colors.cyan(username));
     process.env['SAUCE_USERNAME'] = username;
     process.env['SAUCE_ACCESS_KEY'] = access_key;
+  } else {
+    util.log(fileLogPrefix,
+        'Could not find Sauce Labs credentials for',
+        util.colors.cyan(committer),
+        '(falling back to',
+        util.colors.cyan(process.env['SAUCE_USERNAME']),
+        'credentials)');
   }
   return 0;
 }
