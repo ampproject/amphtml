@@ -383,6 +383,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                 rtcResponse['exclusions'] || {});
             parameters['scp'] = serializeTargeting_(targeting, exclusions);
           } else {
+            // Default is to send request without RTC, so only reject if
+            // pub explicitly says not to.
             if (rtcConfig['doubleclick']['sendAdRequestOnFailure'] === false) {
               return Promise.reject();
             }
