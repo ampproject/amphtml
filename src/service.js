@@ -241,6 +241,7 @@ export function getServicePromiseOrNull(win, id) {
 
 /**
  * Returns a service for the given id and ampdoc (a per-ampdoc singleton).
+ * Expects service `id` to be registered.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
  * @return {T}
@@ -601,8 +602,8 @@ export function isEmbeddable(service) {
  */
 export function adoptServiceForEmbed(embedWin, serviceId) {
   const adopted = adoptServiceForEmbedIfEmbeddable(embedWin, serviceId);
-  dev().assert(adopted,
-      `${serviceId} required to implement EmbeddableService.`);
+  dev().assert(adopted, `Service ${serviceId} not found on parent ` +
+      'or doesn\'t implement EmbeddableService.');
 }
 
 
@@ -617,12 +618,17 @@ export function adoptServiceForEmbedIfEmbeddable(embedWin, serviceId) {
   const frameElement = /** @type {!Node} */ (dev().assert(
       embedWin.frameElement,
       'frameElement not found for embed'));
-  const service = getServiceForDoc(frameElement, serviceId);
-  if (isEmbeddable(service)) {
-    service.adoptEmbedWindow(embedWin);
-    return true;
+  const ampdoc = getAmpdoc(frameElement);
+  const holder = getAmpdocServiceHolder(ampdoc);
+  if (!isServiceRegistered(holder, serviceId)) {
+    return false;
   }
-  return false;
+  const service = getServiceForDoc(frameElement, serviceId);
+  if (!isEmbeddable(service)) {
+    return false;
+  }
+  service.adoptEmbedWindow(embedWin);
+  return true;
 }
 
 
