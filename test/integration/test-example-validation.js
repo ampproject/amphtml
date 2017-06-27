@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-
 import {loadPromise} from '../../src/event-helper';
 
-
-// TODO(@cramforce): Use local version. This is non-hermetic
-// and really bad. When the validator is open source we can
-// use it directly.
 if (!window.validatorLoad) {
   window.validatorLoad = (function() {
     const s = document.createElement('script');
-    s.src = 'https://cdn.ampproject.org/v0/validator.js';
+    s.src = '/validator/dist/validator_minified.js'; // Served by app.js.
     document.body.appendChild(s);
     return loadPromise(s);
   })();
