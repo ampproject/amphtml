@@ -137,6 +137,47 @@
      });
    });
 
+   it('toolbar header should add "top" styling to body \
+   for matching window size for DEFAULT_TOOLBAR_MEDIA', () => {
+     return getToolbars([{}]).then(obj => {
+       const toolbars = obj.toolbars;
+       const toolbarElements = Array.prototype
+              .slice.call(obj.toolbarContainerElement
+              .getElementsByClassName(TOOLBAR_CLASS), 0);
+       resizeIframeToWidth(obj.iframe, '4000px', () => {
+         expect(toolbarElements.length).to.be.above(0);
+         toolbars.forEach(toolbar => {
+           toolbar.onLayoutChange();
+         });
+         expect(obj.iframe.win.document.body.style.top.indexOf('calc'))
+             .to.be.above(-1);
+       });
+     });
+   });
+
+   it('toolbar header should restore original "top" styling to body \
+   for non-matching window size for DEFAULT_TOOLBAR_MEDIA', () => {
+     return getToolbars([{}]).then(obj => {
+       const toolbars = obj.toolbars;
+       const toolbarElements = Array.prototype
+              .slice.call(obj.toolbarContainerElement
+              .getElementsByClassName(TOOLBAR_CLASS), 0);
+       resizeIframeToWidth(obj.iframe, '4000px', () => {
+         toolbars.forEach(toolbar => {
+           toolbar.onLayoutChange();
+         });
+         resizeIframeToWidth(obj.iframe, '200px', () => {
+           expect(toolbarElements.length).to.be.above(0);
+           toolbars.forEach(toolbar => {
+             toolbar.onLayoutChange();
+           });
+           expect(obj.iframe.win.document.body.style.top.indexOf('calc'))
+               .to.be.below(0);
+         });
+       });
+     });
+   });
+
    it('should hide <nav toolbar> elements with toolbar-only, \
    inside the sidebar, but not inside the toolbar, for a matching \
    window size for DEFAULT_TOOLBAR_MEDIA', () => {
