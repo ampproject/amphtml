@@ -62,7 +62,7 @@ export function getElementServiceIfAvailable(win, id, extension, opt_element) {
   if (s) {
     return /** @type {!Promise<?Object>} */ (s);
   }
-  return elementServicePromiseOrNull(win, id, extension, opt_element);
+  return getElementServicePromiseOrNull(win, id, extension, opt_element);
 }
 
 /**
@@ -182,7 +182,7 @@ export function getElementServiceIfAvailableForDocInEmbedScope(
     const topWin = getTopWindow(win);
     // Don't return promise unless this is definitely FIE to avoid covfefe.
     if (win !== topWin) {
-      return elementServicePromiseOrNull(win, id, extension);
+      return getElementServicePromiseOrNull(win, id, extension);
     }
   }
   return /** @type {!Promise<?Object>} */ (Promise.resolve(null));
@@ -214,7 +214,7 @@ function assertService(service, id, extension) {
  * @return {!Promise<Object>}
  * @private
  */
-function elementServicePromiseOrNull(win, id, extension, opt_element) {
+function getElementServicePromiseOrNull(win, id, extension, opt_element) {
   // Microtask is necessary to ensure that window.ampExtendedElements has been
   // initialized.
   return Promise.resolve().then(() => {

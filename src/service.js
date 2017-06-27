@@ -115,7 +115,8 @@ export function getExistingServiceForDocInEmbedScope(
       return local;
     }
   }
-  if (opt_fallbackToTopWin) {
+  // If an ampdoc is passed or fallback is allowed, continue resolving.
+  if (!nodeOrDoc.nodeType || opt_fallbackToTopWin) {
     return getServiceForDoc(nodeOrDoc, id);
   }
   return null;
