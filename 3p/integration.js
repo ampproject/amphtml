@@ -203,18 +203,18 @@ const FALLBACK_CONTEXT_DATA = dict({
 
 // Need to cache iframeName as it will be potentially overwritten by
 // masterSelection, as per below.
-const iframeName = self.name;
+const iframeName = window.name;
 const data = getData(iframeName);
 
-self.context = data['_context'];
+window.context = data['_context'];
 
 // This should only be invoked after window.context is set
 initLogConstructor();
 setReportError(console.error.bind(console));
 
 // Experiment toggles
-setExperimentToggles(self.context.experimentToggles);
-delete self.context.experimentToggles;
+setExperimentToggles(window.context.experimentToggles);
+delete window.context.experimentToggles;
 
 if (getMode().test || getMode().localDev) {
   register('_ping_', _ping_);
@@ -414,7 +414,7 @@ export function draw3p(win, data, configCallback) {
  * @return {boolean} Whether this is the master iframe.
  */
 function isMaster() {
-  return self.context.master == self;
+  return window.context.master == window;
 }
 
 /**
@@ -429,34 +429,34 @@ function isMaster() {
  * @param {!Array<string>=} opt_allowedEmbeddingOrigins List of domain suffixes
  *     that are allowed to embed this frame.
  */
-self.draw3p = function(opt_configCallback, opt_allowed3pTypes,
+window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     opt_allowedEmbeddingOrigins) {
   try {
     const location = parseUrl(data['_context']['location']['href']);
 
-    ensureFramed(self);
-    validateParentOrigin(self, location);
-    validateAllowedTypes(self, data['type'], opt_allowed3pTypes);
+    ensureFramed(window);
+    validateParentOrigin(window, location);
+    validateAllowedTypes(window, data['type'], opt_allowed3pTypes);
     if (opt_allowedEmbeddingOrigins) {
-      validateAllowedEmbeddingOrigins(self, opt_allowedEmbeddingOrigins);
+      validateAllowedEmbeddingOrigins(window, opt_allowedEmbeddingOrigins);
     }
-    installContext(self);
+    installContext(window);
     delete data['_context'];
-    manageWin(self);
+    manageWin(window);
     installEmbedStateListener();
-    draw3p(self, data, opt_configCallback);
+    draw3p(window, data, opt_configCallback);
 
     if (isAmpContextExperimentOn()) {
-      self.context.bootstrapLoaded();
+      window.context.bootstrapLoaded();
     } else {
-      updateVisibilityState(self);
+      updateVisibilityState(window);
 
       // Subscribe to page visibility updates.
       nonSensitiveDataPostMessage('send-embed-state');
       nonSensitiveDataPostMessage('bootstrap-loaded');
     }
   } catch (e) {
-    const c = self.context || {mode: {test: false}};
+    const c = window.context || {mode: {test: false}};
     if (!c.mode.test) {
       lightweightErrorReport(e, c.canary);
       throw e;
@@ -589,7 +589,7 @@ function getHtml(selector, attributes, callback) {
     'messageId': messageId,
   }));
 
-  const unlisten = listenParent(self, 'get-html-result', data => {
+  const unlisten = listenParent(window, 'get-html-result', data => {
     if (data['messageId'] === messageId) {
       callback(data['content']);
       unlisten();
@@ -610,7 +610,7 @@ function getHtml(selector, attributes, callback) {
 function observeIntersection(observerCallback) {
   // Send request to received records.
   nonSensitiveDataPostMessage('send-intersections');
-  return listenParent(self, 'intersection', data => {
+  return listenParent(window, 'intersection', data => {
     observerCallback(data['changes']);
   });
 }
@@ -642,7 +642,7 @@ function dispatchVisibilityChangeEvent(win, isHidden) {
  *    observes for resize status messages.
  */
 function onResizeSuccess(observerCallback) {
-  return listenParent(self, 'embed-size-changed', data => {
+  return listenParent(window, 'embed-size-changed', data => {
     observerCallback(data['requestedHeight'], data['requestedWidth']);
   });
 }
@@ -654,7 +654,7 @@ function onResizeSuccess(observerCallback) {
  *    observes for resize status messages.
  */
 function onResizeDenied(observerCallback) {
-  return listenParent(self, 'embed-size-denied', data => {
+  return listenParent(window, 'embed-size-denied', data => {
     observerCallback(data['requestedHeight'], data['requestedWidth']);
   });
 }
@@ -821,6 +821,6 @@ function lightweightErrorReport(e, isCanary) {
       '?3p=1&v=' + encodeURIComponent('$internalRuntimeVersion$') +
       '&m=' + encodeURIComponent(e.message) +
       '&ca=' + (isCanary ? 1 : 0) +
-      '&r=' + encodeURIComponent(self.document.referrer) +
+      '&r=' + encodeURIComponent(window.document.referrer) +
       '&s=' + encodeURIComponent(e.stack || '');
 }

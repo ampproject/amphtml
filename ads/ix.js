@@ -86,8 +86,8 @@ function reportStats(siteID, slotID, dfpSlot, start, code) {
     const ts = start / 1000 >> 0;
     const ets = Date.now() / 1000 >> 0;
     let url = 'https://as-sec.casalemedia.com/headerstats?s=' + siteID;
-    if (typeof self.context.location.href !== 'undefined') {
-      url += '&u=' + encodeURIComponent(self.context.location.href);
+    if (typeof window.context.location.href !== 'undefined') {
+      url += '&u=' + encodeURIComponent(window.context.location.href);
     }
     let stats = '{"p":"display","d":"mobile","t":' + ts + ',';
     stats += '"sl":[{"s": "' + slotID + '",';

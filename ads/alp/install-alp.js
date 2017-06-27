@@ -24,5 +24,5 @@ import {reportError} from '../../src/error';
 
 initLogConstructor();
 setReportError(reportError);
-installAlpClickHandler(self);
-warmupStatic(self);
+installAlpClickHandler(window);
+warmupStatic(window);

@@ -258,7 +258,7 @@ function minTime(time) {
 }
 
 export function installEmbedStateListener() {
-  listenParent(self, 'embed-state', function(data) {
+  listenParent(window, 'embed-state', function(data) {
     inViewport = data.inViewport;
   });
 };

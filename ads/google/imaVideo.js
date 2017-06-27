@@ -408,7 +408,7 @@ export function imaVideo(global, data) {
 }
 
 function htmlToElement(html) {
-  const template = self.document.createElement('template');
+  const template = window.document.createElement('template');
   template./*OK*/innerHTML = html;
   return template.content.firstChild;
 }
@@ -615,16 +615,16 @@ function onProgressClick(event) {
   clearInterval(hideControlsTimeout);
   onProgressMove(event);
   clearInterval(uiTicker);
-  self.document.addEventListener(mouseMoveEvent, onProgressMove);
-  self.document.addEventListener(mouseUpEvent, onProgressClickEnd);
+  window.document.addEventListener(mouseMoveEvent, onProgressMove);
+  window.document.addEventListener(mouseUpEvent, onProgressClickEnd);
 }
 
 /**
  * Detects the end of interaction on the progress bar.
  */
 function onProgressClickEnd() {
-  self.document.removeEventListener(mouseMoveEvent, onProgressMove);
-  self.document.removeEventListener(mouseUpEvent, onProgressClickEnd);
+  window.document.removeEventListener(mouseMoveEvent, onProgressMove);
+  window.document.removeEventListener(mouseUpEvent, onProgressClickEnd);
   uiTicker = setInterval(uiTickerClick, 500);
   videoPlayer.currentTime = videoPlayer.duration * seekPercent;
   // Reset hide controls timeout.
@@ -689,7 +689,7 @@ export function playVideo() {
   showControls();
   setStyle(playPauseDiv, 'line-height', '1.4em');
   playPauseNode.textContent = pauseChars;
-  self.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
+  window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
   videoPlayer.play();
 }
 
@@ -708,7 +708,7 @@ export function pauseVideo(event) {
   }
   playPauseNode.textContent = playChar;
   setStyle(playPauseDiv, 'line-height', '');;
-  self.parent./*OK*/postMessage({event: VideoEvents.PAUSE}, '*');
+  window.parent./*OK*/postMessage({event: VideoEvents.PAUSE}, '*');
   if (event && event.type == 'webkitendfullscreen') {
     // Video was paused because we exited fullscreen.
     videoPlayer.removeEventListener('webkitendfullscreen', pauseVideo);

@@ -37,6 +37,9 @@ module.exports = function(context) {
       if (!(/Expression/.test(node.parent.type))) {
         return;
       }
+      if (/test-/.test(context.getFilename())) {
+        return;
+      }
 
       if (node.parent.type === 'MemberExpression' &&
           node.parent.property === node) {
