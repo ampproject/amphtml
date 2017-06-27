@@ -287,10 +287,11 @@ export class Transport {
       scriptSrc,
       sentinel,
     }));
-    const frame = createElementWithAttributes(win.document, 'iframe', {
-      sandbox: 'allow-scripts',
-      name: frameName,
-    });
+    const frame = createElementWithAttributes(win.document, 'iframe',
+      /** @type {!JsonObject} */ ({
+        sandbox: 'allow-scripts',
+        name: frameName,
+      }));
     const iframeMessagingClient = new IframeMessagingClient(window);
     iframeMessagingClient.setSentinel(sentinel);
     iframeMessagingClient.setHostWindow(
