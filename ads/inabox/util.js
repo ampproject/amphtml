@@ -26,7 +26,7 @@
  * BATCHED. This means that using this can still cause layout thrashing if it's
  * being called more than once within the same frame. Use with caution.
  * @param {!Window} win
- * @param {{measure: (Function|undefined), mutate: !Function}} task
+ * @param {{measure: (Function|undefined), mutate: (Function|undefined)}} task
  * @param {!Object=} opt_state
  * @visibleForTesting
  */
@@ -36,7 +36,9 @@ export function restrictedVsync(win, task, opt_state) {
     if (task.measure) {
       task.measure(opt_state);
     }
-    task.mutate(opt_state);
+    if (task.mutate) {
+      task.mutate(opt_state);
+    }
   });
 }
 

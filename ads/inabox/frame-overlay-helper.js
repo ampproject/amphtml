@@ -13,6 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {
+  LayoutRectDef,
+  layoutRectFromDomRect,
+  layoutRectLtwh,
+} from '../../src/layout-rect';
 import {restrictedVsync, timer} from './util';
 import {
   centerFrameUnderVsyncMutate,
@@ -29,7 +34,7 @@ const CENTER_TRANSITION_END_WAIT_TIME_MS = 200;
  * Places the child frame in full overlay mode.
  * @param {!Window} win Host window.
  * @param {!HTMLIFrameElement} iframe
- * @param {!Function} onFinish
+ * @param {!function(!LayoutRectDef, !LayoutRectDef)} onFinish
  * @private
  */
 const expandFrameImpl = function(win, iframe, onFinish) {
@@ -42,6 +47,10 @@ const expandFrameImpl = function(win, iframe, onFinish) {
       state.rect = iframe./*OK*/getBoundingClientRect();
     },
     mutate(state) {
+      const collapsedRect = layoutRectFromDomRect(state.rect);
+      const expandedRect = layoutRectLtwh(
+          0, 0, state.viewportSize.width, state.viewportSize.height);
+
       centerFrameUnderVsyncMutate(iframe, state.rect, state.viewportSize,
           CENTER_TRANSITION_TIME_MS);
 
@@ -49,7 +58,7 @@ const expandFrameImpl = function(win, iframe, onFinish) {
         restrictedVsync(win, {
           mutate() {
             expandFrameUnderVsyncMutate(iframe);
-            onFinish();
+            onFinish(collapsedRect, expandedRect);
           },
         });
       }, CENTER_TRANSITION_TIME_MS + CENTER_TRANSITION_END_WAIT_TIME_MS);
@@ -62,14 +71,24 @@ const expandFrameImpl = function(win, iframe, onFinish) {
  * Resets the frame from full overlay mode.
  * @param {!Window} win Host window.
  * @param {!HTMLIFrameElement} iframe
- * @param {!Function} onFinish
+ * @param {!function()} onFinish
+ * @param {!function(!LayoutRectDef)} onMeasure
  * @private
  */
-const collapseFrameImpl = function(win, iframe, onFinish) {
+const collapseFrameImpl = function(win, iframe, onFinish, onMeasure) {
   restrictedVsync(win, {
     mutate() {
       collapseFrameUnderVsyncMutate(iframe);
+
       onFinish();
+
+      // remeasure so client knows about updated dimensions
+      restrictedVsync(win, {
+        measure() {
+          onMeasure(
+              layoutRectFromDomRect(iframe./*OK*/getBoundingClientRect()));
+        },
+      });
     },
   });
 };
@@ -79,7 +98,7 @@ const collapseFrameImpl = function(win, iframe, onFinish) {
  * Places the child frame in full overlay mode.
  * @param {!Window} win Host window.
  * @param {!HTMLIFrameElement} iframe
- * @param {!Function} onFinish
+ * @param {!function(!LayoutRectDef, !LayoutRectDef)} onFinish
  */
 export let expandFrame = expandFrameImpl;
 
@@ -105,7 +124,8 @@ export function resetExpandFrameForTesting() {
  * Places the child frame in full overlay mode.
  * @param {!Window} win Host window.
  * @param {!HTMLIFrameElement} iframe
- * @param {!Function} onFinish
+ * @param {!function()} onFinish
+ * @param {!function(!LayoutRectDef)} onMeasure
  */
 export let collapseFrame = collapseFrameImpl;
 
