@@ -35,7 +35,7 @@ import {
 import {dict} from '../utils/object';
 import {isIframed} from '../dom';
 import {getCryptoRandomBytesArray} from '../utils/bytes';
-import {viewerForDoc} from '../services';
+import {viewerForDoc, storageForDoc} from '../services';
 import {cryptoFor} from '../crypto';
 import {parseJson, tryParseJson} from '../json';
 import {timerFor} from '../services';
@@ -51,6 +51,9 @@ const BASE_CID_MAX_AGE_MILLIS = 365 * ONE_DAY_MILLIS;
 const SCOPE_NAME_VALIDATOR = /^[a-zA-Z0-9-_.]+$/;
 
 const CID_OPTOUT_STORAGE_KEY = 'amp-cid-optout';
+
+// TODO(aghassemi): replace with real viewer message when implemented.
+const CID_OPTOUT_VIEWER_MESSAGE = 'cidOptout'
 
 /**
  * A base cid string value and the time it was last read / stored.
@@ -135,21 +138,16 @@ export class Cid {
    * @return {!Promise}
    */
   optOutOfCid() {
-    const viewer = viewerForDoc(this.ampdoc);
-    if (viewer) {
-      // TODO(aghassemi,lannka): what do we need to send to the viewer?
-    } else {
-      try {
-        this.ampdoc.win.localStorage.setItem(CID_OPTOUT_STORAGE_KEY, true);
-      } catch (ignore) {
-        // Setting localStorage may fail. In practice we don't expect that to
-        // happen a lot (since we don't go anywhere near the quota, but
-        // in particular in Safari private browsing mode it always fails.
-        // In that case we just don't store anything, which is just fine.
-      }
-    }
-  }
 
+    // Tell the viewer that user has opted out.
+    viewerForDoc(this.ampdoc).sendMessage(CID_OPTOUT_VIEWER_MESSAGE);
+
+    // Store the optout bit in storage
+    return storageForDoc(this.this.ampdoc).then(storage => {
+      return storage.set(CID_OPTOUT_STORAGE_KEY, true);
+    });
+
+  }
 }
 
 /**
