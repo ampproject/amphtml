@@ -248,7 +248,7 @@ function getCorrelator(global) {
 /**
  * @param {!Window} global
  */
-function centerAd(global) {
+function centerAd() {
   setStyles(dev().assertElement(global.document.getElementById('c')), {
     top: '50%',
     left: '50%',

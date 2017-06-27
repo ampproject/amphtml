@@ -40,7 +40,7 @@ import stringify from 'json-stable-stringify';
 
 
 // All exposed describes.
-global.describes = describes;
+window.describes = describes;
 
 // Increase the before/after each timeout since certain times they have timedout
 // during the normal 2000 allowance.
@@ -57,7 +57,7 @@ adopt(window);
  * @param {function(!Object)} installer
  * @const
  */
-global.AMP.extension = function(name, version, installer) {
+window.AMP.extension = function(name, version, installer) {
   describes.bufferExtension(`${name}:${version}`, installer);
 };
 
@@ -280,11 +280,11 @@ afterEach(function() {
   window.context = undefined;
   window.AMP_MODE = undefined;
 
-  const forgotGlobal = !!global.sandbox;
+  const forgotGlobal = !!window.sandbox;
   if (forgotGlobal) {
     // The error will be thrown later to give possibly other sandboxes a
     // chance to restore themselves.
-    delete global.sandbox;
+    delete window.sandbox;
   }
   if (sandboxes.length > 0) {
     sandboxes.splice(0, sandboxes.length).forEach(sb => sb.restore());
