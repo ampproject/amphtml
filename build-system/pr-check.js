@@ -27,7 +27,6 @@
 const atob = require('atob');
 const exec = require('./exec.js').exec;
 const execOrDie = require('./exec.js').execOrDie;
-const fs = require('fs');
 const getStdout = require('./exec.js').getStdout;
 const minimist = require('minimist');
 const path = require('path');
@@ -35,7 +34,6 @@ const util = require('gulp-util');
 
 const gulp = 'node_modules/gulp/bin/gulp.js';
 const fileLogPrefix = util.colors.yellow.bold('pr-check.js:');
-const sauceCredsFile = path.resolve('build-system/sauce-credentials.json');
 
 /**
  * Starts a timer to measure the execution time of the given function.
@@ -224,35 +222,6 @@ function determineBuildTargets(filePaths) {
   return targetSet;
 }
 
-/**
- * Connect to sauce labs using per-user credentials if available, and amphtml
- * credentials if not available.
- */
-function connectToSauceLabs() {
-  const startTime = startTimer('connectToSauceLabs');
-  let committer = getStdout(`git log -1 --pretty=format:'%ae'`).trim();
-  let credentials = JSON.parse(fs.readFileSync(sauceCredsFile)).credentials;
-  if (credentials === null) {
-    console.log(fileLogPrefix, util.colors.red('ERROR:'),
-        'Could not load Sauce labs credentials from',
-        util.colors.cyan(sauceCredsFile));
-    process.exit(1);
-  }
-
-  let sauceUser = 'amphtml';
-  if (credentials[committer]) {
-    sauceUser = committer;
-  }
-  let username = credentials[sauceUser].username;
-  let access_key = atob(credentials[sauceUser].access_key_encoded);
-  console.log(fileLogPrefix,
-      'Using Sauce credentials for user', util.colors.cyan(sauceUser),
-      'with Sauce username', util.colors.cyan(username));
-  process.env['SAUCE_USERNAME'] = username;
-  process.env['SAUCE_ACCESS_KEY'] = access_key;
-  execOrDie('travis_start_sauce_connect');
-  stopTimer('connectToSauceLabs', startTime);
-}
 
 const command = {
   testBuildSystem: function() {
@@ -290,7 +259,6 @@ const command = {
   },
   runIntegrationTests: function() {
     // Integration tests with all saucelabs browsers
-    connectToSauceLabs();
     timedExecOrDie(
         `${gulp} test --nobuild --saucelabs --integration --compiled`);
   },
