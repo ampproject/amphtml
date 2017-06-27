@@ -118,9 +118,9 @@ describes.realWin('Bind in FIE', {
 
   it('should scan for bindings when ampdoc is ready', () => {
     createElement(env, container, '[text]="1+1"');
-    expect(bind.boundElements_.length).to.equal(0);
+    expect(bind.numberOfBindings()).to.equal(0);
     return onBindReady(env, bind).then(() => {
-      expect(bind.boundElements_.length).to.equal(1);
+      expect(bind.numberOfBindings()).to.equal(1);
     });
   });
 
@@ -140,8 +140,8 @@ describes.realWin('Bind in FIE', {
         onBindReady(env, bind),
         onBindReady(env, parentBind),
       ]).then(() => {
-        expect(bind.boundElements_.length).to.equal(1);
-        expect(parentBind.boundElements_.length).to.equal(1);
+        expect(bind.numberOfBindings()).to.equal(1);
+        expect(parentBind.numberOfBindings()).to.equal(1);
       });
     });
 
@@ -182,9 +182,9 @@ describes.realWin('Bind in shadow ampdoc', {
 
   it('should scan for bindings when ampdoc is ready', () => {
     createElement(env, container, '[text]="1+1"');
-    expect(bind.boundElements_.length).to.equal(0);
+    expect(bind.numberOfBindings()).to.equal(0);
     return onBindReady(env, bind).then(() => {
-      expect(bind.boundElements_.length).to.equal(1);
+      expect(bind.numberOfBindings()).to.equal(1);
     });
   });
 });
@@ -209,9 +209,9 @@ describes.realWin('Bind in single ampdoc', {
 
   it('should scan for bindings when ampdoc is ready', () => {
     createElement(env, container, '[text]="1+1"');
-    expect(bind.boundElements_.length).to.equal(0);
+    expect(bind.numberOfBindings()).to.equal(0);
     return onBindReady(env, bind).then(() => {
-      expect(bind.boundElements_.length).to.equal(1);
+      expect(bind.numberOfBindings()).to.equal(1);
     });
   });
 
@@ -219,15 +219,15 @@ describes.realWin('Bind in single ampdoc', {
     for (let i = 0; i < 5; i++) {
       createElement(env, container, '[text]="1+1"');
     }
-    expect(bind.boundElements_.length).to.equal(0);
+    expect(bind.numberOfBindings()).to.equal(0);
     return onBindReady(env, bind).then(() => {
-      expect(bind.boundElements_.length).to.equal(5);
+      expect(bind.numberOfBindings()).to.equal(5);
       return bind.removeBindingsForNode_(container);
     }).then(() => {
-      expect(bind.boundElements_.length).to.equal(0);
+      expect(bind.numberOfBindings()).to.equal(0);
       return bind.addBindingsForNode_(container);
     }).then(() => {
-      expect(bind.boundElements_.length).to.equal(5);
+      expect(bind.numberOfBindings()).to.equal(5);
     });
   });
 
@@ -236,14 +236,14 @@ describes.realWin('Bind in single ampdoc', {
     const dynamicTag = doc.createElement('div');
     container.appendChild(dynamicTag);
     return onBindReady(env, bind).then(() => {
-      expect(bind.boundElements_.length).to.equal(0);
+      expect(bind.numberOfBindings()).to.equal(0);
       const element = createElement(env, container, '[text]="1+1"');
       dynamicTag.appendChild(element);
       dynamicTag.dispatchEvent(
           new Event(AmpEvents.TEMPLATE_RENDERED, {bubbles: true}));
       return waitForEvent(env, BindEvents.RESCAN_TEMPLATE);
     }).then(() => {
-      expect(bind.boundElements_.length).to.equal(1);
+      expect(bind.numberOfBindings()).to.equal(1);
     });
   });
 
