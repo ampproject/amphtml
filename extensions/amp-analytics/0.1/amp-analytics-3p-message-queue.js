@@ -21,8 +21,8 @@ import {throttle} from '../../../src/utils/rate-limit';
 /** @private @const {string} */
 const TAG_ = 'amp-analytics.CrossDomainIframeMessageQueue';
 
-/** @private @const {number} */
-const MESSAGE_THROTTLE_TIME_ = 100;
+/** @const {number} */
+export const MESSAGE_THROTTLE_TIME = 100;
 
 /** @private @const {number} */
 const MAX_QUEUE_SIZE_ = 100;
@@ -59,7 +59,7 @@ class AbstractAmpAnalytics3pMessageQueue {
     /** @private {function(...*)} */
     this.throttledFlushQueue_ = throttle(this.win_, () => {
       this.flushQueue_();
-    }, MESSAGE_THROTTLE_TIME_);
+    }, MESSAGE_THROTTLE_TIME);
   }
 
   /**

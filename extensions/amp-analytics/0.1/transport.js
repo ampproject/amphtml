@@ -176,6 +176,9 @@ export class Transport {
           frameData.newCreativeMessageQueue.setIsReady();
           frameData.eventQueue.setIsReady();
         });
+    if (!opt_processResponse) {
+      return;
+    }
     iframeMessagingClient.registerCallback(
         AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE,
         response => {
