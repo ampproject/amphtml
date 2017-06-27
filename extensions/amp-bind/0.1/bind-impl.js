@@ -136,23 +136,19 @@ export class Bind {
     /** @const @private {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = viewerForDoc(this.ampdoc);
 
-    const bodyReadyPromise = (opt_win)
+    const bodyPromise = (opt_win)
         ? waitForBodyPromise(opt_win.document)
+            .then(() => dev().assertElement(opt_win.document.body))
         : ampdoc.whenBodyAvailable();
 
     /**c.
      * Resolved when the service finishes scanning the document for bindings.
      * @const @private {Promise}
      */
-    this.initializePromise_ = Promise.all([
-      bodyReadyPromise, // Don't scan for bindings until body is ready.
-      this.viewer_.whenFirstVisible(), // Don't initialize in prerender mode.
-    ]).then(() => {
-      const rootNode = (opt_win)
-          ? dev().assertElement(opt_win.document.body)
-          : ampdoc.getBody();
-      return this.initialize_(rootNode);
-    });
+    this.initializePromise_ =
+        this.viewer_.whenFirstVisible().then(bodyPromise).then(body => {
+          return this.initialize_(body);
+        });
 
     /** @const @private {!Function} */
     this.boundOnTemplateRendered_ = this.onTemplateRendered_.bind(this);
