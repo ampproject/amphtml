@@ -29,7 +29,7 @@ require 'phantomjs'
 
 
 ENV['PERCY_DEBUG'] = '0'
-ENV['PHANTOM_JS_DEBUG'] = 'false'
+ENV['PHANTOMJS_DEBUG'] = 'false'
 DEFAULT_WIDTHS = [375, 411]  # CSS widths: iPhone: 375, Pixel: 411.
 HOST = 'localhost'
 PORT = '8000'
@@ -119,7 +119,7 @@ def generateSnapshots(pagesToSnapshot)
     page.driver.options[:phantomjs_options] =
         [
           "--load-images=yes",
-          "--debug=#{ENV['PHANTOM_JS_DEBUG']}"
+          "--debug=#{ENV['PHANTOMJS_DEBUG']}"
         ]
     webpages.each do |webpage|
       url = webpage["url"]
@@ -145,9 +145,11 @@ end
 
 # Enables debugging if requested via command line.
 def setDebuggingLevel()
-  if ARGV.include? '--debug'
+  if ARGV.include? '--percy_debug'
     ENV['PERCY_DEBUG'] = '1'
-    ENV['PHANTOM_JS_DEBUG'] = 'true'
+  end
+  if ARGV.include? '--phantomjs_debug'
+    ENV['PHANTOMJS_DEBUG'] = 'true'
   end
 end
 
