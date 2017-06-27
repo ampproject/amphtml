@@ -553,6 +553,80 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     });
   });
 
+  describe('#SRA enabled', () => {
+    let fixture;
+
+    beforeEach(() => {
+      return createIframePromise().then(f => {
+        setupForAdTesting(f);
+        fixture = f;
+      });
+    });
+
+    it('should be disabled by default', () => {
+      const element = createElementWithAttributes(
+          fixture.doc, 'amp-ad', {
+            type: 'doubleclick',
+            height: 320,
+            width: 50,
+          });
+      fixture.doc.body.appendChild(element);
+      const impl = new AmpAdNetworkDoubleclickImpl(element);
+      expect(impl.useSra).to.be.false;
+    });
+
+    it('should be enabled if meta tag present', () => {
+      const metaElement = createElementWithAttributes(fixture.doc, 'meta', {
+        name: 'amp-ad-doubleclick-sra',
+      });
+      fixture.doc.head.appendChild(metaElement);
+      const element = createElementWithAttributes(
+          fixture.doc, 'amp-ad', {
+            type: 'doubleclick',
+            height: 320,
+            width: 50,
+          });
+      fixture.doc.body.appendChild(element);
+      const impl = new AmpAdNetworkDoubleclickImpl(element);
+      expect(impl.useSra).to.be.true;
+    });
+  });
+
+  describe('#SRA AMP creative unlayoutCallback', () => {
+    let impl;
+
+    beforeEach(() => {
+      return createIframePromise().then(f => {
+        setupForAdTesting(f);
+        const element = createElementWithAttributes(
+            f.doc, 'amp-ad', {
+              type: 'doubleclick',
+              height: 320,
+              width: 50,
+              'data-a4a-upgrade-type': 'amp-ad-network-doubleclick-impl',
+            });
+        f.doc.body.appendChild(element);
+        const iframe = createElementWithAttributes(
+            f.doc, 'iframe', {
+              src: 'https://foo.com',
+              height: 320,
+              width: 50,
+            });
+        element.appendChild(iframe);
+        impl = new AmpAdNetworkDoubleclickImpl(element);
+      });
+    });
+
+    it('should not remove if not SRA', () => {
+      expect(impl.shouldUnlayoutAmpCreatives()).to.be.false;
+    });
+
+    it('should remove if SRA and has frame', () => {
+      impl.useSra = true;
+      expect(impl.shouldUnlayoutAmpCreatives()).to.be.true;
+    });
+  });
+
   describe('#constructSRABlockParameters', () => {
     let fixture;
 
@@ -644,7 +718,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       element.getIntersectionChangeEntry = () => {return null;};
       doc.body.appendChild(element);
       const impl = new AmpAdNetworkDoubleclickImpl(element);
-      impl.useSra_ = true;
+      impl.useSra = true;
       return impl;
     }
 
