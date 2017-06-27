@@ -1,4 +1,3 @@
-<!-- DO NOT SUBMIT -->
 <!doctype html>
 <html ⚡>
 <head>
@@ -22,14 +21,20 @@
     }
   </style>
   <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
-  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
-
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 
 </head>
 <body>
 
+  <h2>fake3pAd send no-content</h2>
+  <div>
+    <amp-ad width=300 height=250
+        type="_ping_"
+        data-url='not-exist'
+        data-valid='false'>
+    </amp-ad>
+  </div>
 
   <h2>fake3pAd send render-start w/ width & height</h2>
   <div>
@@ -43,5 +48,69 @@
     </amp-ad>
   </div>
 
+  <h2>fake3pAd send render-start w/o width or height</h2>
+  <div>
+    <amp-ad width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-enable-io='true'>
+    </amp-ad>
+  </div>
+
+  <h2>fake3pAd send render-start w/ only width</h2>
+  <div>
+    <amp-ad width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-ad-width=50
+        data-enable-io='true'>
+    </amp-ad>
+  </div>
+
+  <h2>fake3pAd send render-start w/ only height</h2>
+  <div>
+    <amp-ad width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-ad-height=50
+        data-enable-io='true'>
+    </amp-ad>
+  </div>
+
+  <h2>Below viewport fake3pAd send render-start w/ width & height</h2>
+  <div>
+    <amp-ad width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-ad-width=50
+        data-ad-height=50
+        data-enable-io='true'>
+    </amp-ad>
+  </div>
+
+  <h2>Below viewport fake3pAd send no-content</h2>
+  <div>
+    <amp-ad width=300 height=250
+        type="_ping_"
+        data-url='not-exist'
+        data-valid='false'
+        data-enable-io='true'>
+    </amp-ad>
+  </div>
+
+  <div class="fixed">
+    <amp-ad width=300 height=50
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-ad-width=50
+        data-ad-height=50
+        data-enable-io='true'>
+    </amp-ad>
+  </div>
 </body>
 </html>

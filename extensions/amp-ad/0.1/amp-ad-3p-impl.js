@@ -35,8 +35,6 @@ import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
 import {moveLayoutRect} from '../../../src/layout-rect';
 import {AmpAdUIHandler} from './amp-ad-ui';
-// DO NOT SUBMIT
-import {CustomEventReporterBuilder} from '../../../src/analytics';
 
 /** @const {!string} Tag name for 3P AD implementation. */
 export const TAG_3P_IMPL = 'amp-ad-3p-impl';
@@ -119,11 +117,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const builder = new CustomEventReporterBuilder(this.element);
-    const reporter = builder.track(
-        'manual', ['https://www.fake.com/manual${id}',
-        'https://www.fake.com/manual2']).build();
-    reporter.trigger('manual', {'id': '123'});
     this.placeholder_ = this.getPlaceholder();
     this.fallback_ = this.getFallback();
 
