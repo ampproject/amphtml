@@ -269,10 +269,7 @@ export class AmpA4A extends AMP.BaseElement {
      *
      * @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)}
      */
-    this.creativeSize_ = {
-      width: this.element.getAttribute('width'),
-      height: this.element.getAttribute('height'),
-    };
+    this.creativeSize_ = null;
 
     /** @private {?../../../src/layout-rect.LayoutRectDef} */
     this.originalSlotSize_ = null;
@@ -300,14 +297,9 @@ export class AmpA4A extends AMP.BaseElement {
     /**
      * Protected version of emitLifecycleEvent that ensures error does not
      * cause promise chain to reject.
-     * @private {function(string, !Object=)}
+     * @private {?function(string, !Object=)}
      */
-    this.protectedEmitLifecycleEvent_ = protectFunctionWrapper(
-        this.emitLifecycleEvent, this,
-        (err, varArgs) => {
-          dev().error(TAG, this.element.getAttribute('type'),
-              'Error on emitLifecycleEvent', err, varArgs) ;
-        });
+    this.protectedEmitLifecycleEvent_ = null;
 
     /** @const {string} */
     this.sentinel = generateSentinel(window);
@@ -354,6 +346,17 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.creativeSize_ = {
+      width: this.element.getAttribute('width'),
+      height: this.element.getAttribute('height'),
+    };
+    this.protectedEmitLifecycleEvent_ = protectFunctionWrapper(
+        this.emitLifecycleEvent, this,
+        (err, varArgs) => {
+          dev().error(TAG, this.element.getAttribute('type'),
+              'Error on emitLifecycleEvent', err, varArgs) ;
+        });
+
     this.uiHandler = new AMP.AmpAdUIHandler(this);
     if (!this.win.ampA4aValidationKeys) {
       // Without the following variable assignment, there's no way to apply a
