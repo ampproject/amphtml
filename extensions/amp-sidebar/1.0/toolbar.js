@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {toggle, setStyles} from '../../../src/style';
+import {toggle, computedStyle, setStyles} from '../../../src/style';
 
 /** @const */
 const TOOLBAR_TARGET_CLASS = 'i-amphtml-toolbar-target';
@@ -25,21 +25,24 @@ const TOOLBAR_ELEMENT_CLASS = 'i-amphtml-toolbar';
 export class Toolbar {
   /**
   * @param {!Element} element
-  * @param {!Object} win
+  * @param {!Window} win
   * @param {!../../../src/service/vsync-impl.Vsync} vsync
   */
   constructor(element, win, vsync) {
     /** @private {!Element} */
     this.toolbarDOMElement_ = element;
 
-    /** @private {!Object} **/
+    /** @private {!Window} **/
     this.win_ = win;
 
-    /** @private {Element|null} */
+    /** @private {Element} */
     this.body_ = this.win_.document.body;
 
     /** @private {string|undefined} */
     this.bodyTop_ = undefined;
+
+    /** @private {number|undefined} */
+    this.height_ = undefined;
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = vsync;
@@ -112,8 +115,9 @@ export class Toolbar {
     fragment.appendChild(this.targetElement_);
 
     // Calculate our body top before returning the fragment
-    this.bodyTop_ =
-      this.win_.getComputedStyle(this.body_, null).getPropertyValue('top');
+    if (this.body_) {
+      this.bodyTop_ = computedStyle(this.win_, this.body_)['top'];
+    }
 
     return fragment;
   }
@@ -136,14 +140,18 @@ export class Toolbar {
   attemptShow_() {
 
     // Make room for the toolbar
-    this.vsync_.mutate(() => {
-      if (this.body_) {
-        const toolbarHeight = this.toolbarClone_./*REVIEW*/offsetHeight;
-        setStyles(this.body_, {
-          'top': `calc(${toolbarHeight}px + ${this.bodyTop_})`,
-        });
-      }
-    });
+    this.vsync_.run({
+      measure: state => {
+        state.toolbarHeight = this.toolbarClone_./*REVIEW*/offsetHeight;
+      },
+      mutate: state => {
+        if (this.body_) {
+          setStyles(this.body_, {
+            'top': `calc(${state.toolbarHeight}px + ${this.bodyTop_})`,
+          });
+        }
+      },
+    }, {});
 
     if (this.isToolbarShown_()) {
       return;
