@@ -593,7 +593,7 @@ describe('amp-user-notification', () => {
     });
   });
 
-  describe.only('optOutOfCid', () => {
+  describe('optOutOfCid', () => {
     const cidMock = {
       optOut() {
         return optoutPromise;
@@ -607,7 +607,7 @@ describe('amp-user-notification', () => {
       optOutOfCidStub = sandbox.spy(cidMock, 'optOut');
     });
 
-    it('should call optOutOfCid and dismiss', () => {
+    it('should call cid.optOut() and dismiss', () => {
       return getUserNotification({id: 'n1'}).then(el => {
         const impl = el.implementation_;
         impl.buildCallback();
@@ -622,7 +622,7 @@ describe('amp-user-notification', () => {
       });
     });
 
-    it('should dissmiss without persistence if optOutOfCid fails', () => {
+    it('should dissmiss without persistence if cid.optOut() fails', () => {
       return getUserNotification({id: 'n1'}).then(el => {
         const impl = el.implementation_;
         impl.buildCallback();

@@ -122,7 +122,6 @@ describe('cid', () => {
     });
 
     installViewerServiceForDoc(ampdoc);
-    //installStorageServiceForDoc(ampdoc);
     storageGetStub = stubServiceForDoc(sandbox, ampdoc, 'storage', 'get');
     viewer = viewerForDoc(ampdoc);
     sandbox.stub(viewer, 'whenFirstVisible', function() {
