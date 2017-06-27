@@ -286,7 +286,7 @@ function runAllCommands() {
     command.runVisualDiffTests();
     command.runJsonAndLintChecks();
     command.runDepAndTypeChecks();
-    command.runUnitTests(); // Requires validator to be built.
+    command.runUnitTests();
     // command.testDocumentLinks() is skipped during push builds.
     command.buildValidatorWebUI();
     command.buildValidator();
