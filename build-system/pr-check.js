@@ -286,17 +286,16 @@ function runAllCommands() {
     command.runVisualDiffTests();
     command.runJsonAndLintChecks();
     command.runDepAndTypeChecks();
-    command.buildValidatorWebUI();
-    command.buildValidator();
     command.runUnitTests(); // Requires validator to be built.
     // command.testDocumentLinks() is skipped during push builds.
+    command.buildValidatorWebUI();
+    command.buildValidator();
   }
   if (process.env.BUILD_SHARD == "integration_tests") {
     command.cleanBuild();
     command.buildRuntimeMinified();
     command.runPresubmitTests();  // Needs runtime to be built and served.
-    command.buildValidator();
-    command.runIntegrationTests(); // Requires validator to be built.
+    command.runIntegrationTests();
   }
 }
 
@@ -377,8 +376,7 @@ function main(argv) {
       command.runDepAndTypeChecks();
       // Skip unit tests if the PR only contains changes to integration tests.
       if (buildTargets.has('RUNTIME')) {
-        command.buildValidator();
-        command.runUnitTests(); // Requires validator to be built.
+        command.runUnitTests();
       }
     }
     if (buildTargets.has('VALIDATOR_WEBUI')) {
@@ -400,8 +398,7 @@ function main(argv) {
           util.colors.cyan('test/integration'));
       command.cleanBuild();
       command.buildRuntimeMinified();
-      command.buildValidator();
-      command.runIntegrationTests(); // Requires validator to be built.
+      command.runIntegrationTests();
     } else {
       console.log(fileLogPrefix,
           'Skipping the',

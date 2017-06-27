@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Tests JS validator against a set of valid example pages.
+ *
+ * Technically more of an integration test than a functional test,
+ * but it suffices to run it only in Travis. Also, avoids requiring building
+ * the validator for the integration test shard.
+ */
+
 import {loadPromise} from '../../src/event-helper';
 
 if (!window.validatorLoad) {
@@ -25,10 +33,7 @@ if (!window.validatorLoad) {
   })();
 }
 
-describe.configure().skipSauceLabs().run('example', function() {
-  // TODO(@cramforce): Remove when test is hermetic.
-  this.timeout(5000);
-
+describe('example', function() {
   const examples = [
     'ads.amp.html',
     // TODO: uncomment when validator is deployed:
