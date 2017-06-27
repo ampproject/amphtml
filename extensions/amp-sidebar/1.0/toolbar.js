@@ -35,7 +35,7 @@ export class Toolbar {
     /** @private {!Object} **/
     this.win_ = win;
 
-    /** @private {!Element} */
+    /** @private {HTMLBodyElement|null} */
     this.body_ = this.sidebarElement_.ownerDocument.body;
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
