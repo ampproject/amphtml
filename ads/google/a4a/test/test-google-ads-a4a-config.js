@@ -20,8 +20,6 @@ import {
   googleAdsIsA4AEnabled,
   isInExperiment,
   isInManualExperiment,
-  isExternallyTriggeredExperiment,
-  isInternallyTriggeredExperiment,
 } from '../traffic-experiments';
 import {toggleExperiment} from '../../../../src/experiments';
 import {installPlatformService} from '../../../../src/service/platform-impl';
@@ -79,30 +77,6 @@ function expectThereCanBeOnlyOne(element, id) {
   expect(isInExperiment(element, id),
       `expected ${id} to be in ${element.getAttribute(
           'data-experiment-id')}`).to.be.true;
-}
-
-/**
- * Checks that element's data-element-id contains the "is internally triggered"
- * experiment ID and that it does not contain the "is externally triggered"
- * eid.
- *
- * @param {!Element} element
- */
-function expectInternallyTriggered(element) {
-  expect(isInternallyTriggeredExperiment(element)).to.be.true;
-  expect(isExternallyTriggeredExperiment(element)).to.be.false;
-}
-
-/**
- * Checks that element's data-element-id contains the "is externally triggered"
- * experiment ID and that it does not contain the "is internally triggered"
- * eid.
- *
- * @param {!Element} element
- */
-function expectExternallyTriggered(element) {
-  expect(isInternallyTriggeredExperiment(element)).to.be.false;
-  expect(isExternallyTriggeredExperiment(element)).to.be.true;
 }
 
 describe('a4a_config', () => {
@@ -167,7 +141,6 @@ describe('a4a_config', () => {
         'googleAdsIsA4AEnabled').to.be.true;
     expect(win.document.cookie).to.be.null;
     expectThereCanBeOnlyOne(element, INTERNAL_BRANCHES.experiment);
-    expectInternallyTriggered(element);
   });
 
   it('should attach control ID and return false when control is on', () => {
@@ -177,7 +150,6 @@ describe('a4a_config', () => {
         .to.be.false;
     expect(win.document.cookie).to.be.null;
     expectThereCanBeOnlyOne(element, INTERNAL_BRANCHES.control);
-    expectInternallyTriggered(element);
   });
 
   it('should not attach ID and return false when selected out', () => {
@@ -263,7 +235,6 @@ describe('a4a_config', () => {
           'googleAdsIsA4AEnabled').to.be.true;
       expect(win.document.cookie).to.be.null;
       expectThereCanBeOnlyOne(element, INTERNAL_BRANCHES.experiment);
-      expectInternallyTriggered(element);
     });
 
     it('should fall back to client-side eid when param is empty', () => {
@@ -274,7 +245,6 @@ describe('a4a_config', () => {
           'googleAdsIsA4AEnabled').to.be.true;
       expect(win.document.cookie).to.be.null;
       expectThereCanBeOnlyOne(element, INTERNAL_BRANCHES.experiment);
-      expectInternallyTriggered(element);
     });
 
     const externalIdTestCases = [
@@ -297,7 +267,6 @@ describe('a4a_config', () => {
             expect(win.document.cookie).to.be.null;
             if (testCase.expId) {
               expectThereCanBeOnlyOne(element, testCase.expId);
-              expectExternallyTriggered(element);
             } else {
               expect(element.getAttribute('data-experiment-id')).to.not.be.ok;
             }
@@ -431,7 +400,6 @@ describe('a4a_config hash param parsing', () => {
           'googleAdsIsA4AEnabled').to.be.true;
       expect(win.document.cookie).to.be.null;
       expectThereCanBeOnlyOne(element, EXTERNAL_BRANCHES.experiment);
-      expectExternallyTriggered(element);
     });
   });
 });

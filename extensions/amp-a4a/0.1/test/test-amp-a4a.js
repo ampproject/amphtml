@@ -1276,10 +1276,9 @@ describe('amp-a4a', () => {
           setupForAdTesting(fixture);
           const doc = fixture.doc;
           const a4aElement = createA4aElement(doc);
-          a4aElement.setAttribute('data-experiment-id', '117152655');
           a4a = new MockA4AImpl(a4aElement);
-          expect(a4a.delayRequestEnabled_).to.be.true;
           getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
+          sandbox.stub(a4a, 'delayAdRequestEnabled').returns(true);
         });
       });
       it('should not delay request when in viewport', () => {
