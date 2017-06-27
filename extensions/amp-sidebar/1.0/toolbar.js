@@ -104,7 +104,6 @@ export class Toolbar {
    */
   build() {
     this.toolbarClone_ = this.toolbarDOMElement_.cloneNode(true);
-    this.toolbarClone_.classList.add(TOOLBAR_ELEMENT_CLASS);
     // Check for the target attribute on toolbar nav
     const targetId = this.toolbarDOMElement_.getAttribute('target');
     if (targetId &&
@@ -116,6 +115,7 @@ export class Toolbar {
       toggle(this.targetElement_, false);
       return;
     } else {
+      this.toolbarClone_.classList.add(TOOLBAR_ELEMENT_CLASS);
       const fragment = this.win_
         .document.createDocumentFragment();
       this.targetElement_ =
