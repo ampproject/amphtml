@@ -80,8 +80,8 @@ export class EmbeddableService {
  * already.
  * @param {!Window} win
  * @param {string} id
- * @param {boolean} opt_fallbackToTopWin
- * @return {!Object} The service.
+ * @param {boolean=} opt_fallbackToTopWin
+ * @return {Object} The service.
  */
 export function getExistingServiceInEmbedScope(win, id, opt_fallbackToTopWin) {
   // First, try to resolve via local (embed) window.
@@ -100,8 +100,8 @@ export function getExistingServiceInEmbedScope(win, id, opt_fallbackToTopWin) {
  * already.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string} id
- * @param {boolean} opt_fallbackToTopWin
- * @return {!Object} The service.
+ * @param {boolean=} opt_fallbackToTopWin
+ * @return {Object} The service.
  */
 export function getExistingServiceForDocInEmbedScope(
     nodeOrDoc, id, opt_fallbackToTopWin) {

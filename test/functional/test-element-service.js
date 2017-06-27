@@ -363,8 +363,8 @@ describes.fakeWin('in embed scope', {amp: true}, env => {
     installServiceInEmbedScope(embedWin, 'foo', service);
     return getElementServiceIfAvailableForDocInEmbedScope(
         nodeInEmbedWin, 'foo', 'amp-foo').then(returned => {
-      expect(returned).to.equal(service);
-    });
+          expect(returned).to.equal(service);
+        });
   });
 
   it('should return service for scheduled element', () => {
@@ -384,8 +384,8 @@ describes.fakeWin('in embed scope', {amp: true}, env => {
     registerServiceBuilder(win, 'foo', () => service);
     return getElementServiceIfAvailableForDocInEmbedScope(
         nodeInTopWin, 'foo', 'amp-foo').then(returned => {
-      expect(returned).to.be.null;
-    });
+          expect(returned).to.be.null;
+        });
   });
 
   it('"if available" should not fall back to top window\'s service', () => {
@@ -396,8 +396,8 @@ describes.fakeWin('in embed scope', {amp: true}, env => {
         /* opt_instantiate */ true);
     return getElementServiceIfAvailableForDocInEmbedScope(
         nodeInEmbedWin, 'foo', 'amp-foo').then(returned => {
-      expect(returned).to.be.null;
-    });
+          expect(returned).to.be.null;
+        });
   });
 
   it('should fall back to top window\'s service', () => {
@@ -408,7 +408,7 @@ describes.fakeWin('in embed scope', {amp: true}, env => {
         /* opt_instantiate */ true);
     return getElementServiceForDocInEmbedScope(
         nodeInEmbedWin, 'foo', 'amp-foo').then(returned => {
-      expect(returned).to.equal(service);
-    });
+          expect(returned).to.equal(service);
+        });
   });
 });
