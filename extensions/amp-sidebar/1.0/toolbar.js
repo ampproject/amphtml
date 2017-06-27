@@ -39,7 +39,7 @@ export class Toolbar {
     this.body_ = this.win_.document.body;
 
     /** @private {string|undefined} */
-    this.bodyTop_ = undefined;
+    this.initialBodyTop_ = undefined;
 
     /** @private {number|undefined} */
     this.height_ = undefined;
@@ -105,7 +105,7 @@ export class Toolbar {
     const fragment = this.win_
       .document.createDocumentFragment();
     this.targetElement_ =
-      this.toolbarDOMElement_.ownerDocument.createElement('header');
+      this.win_.document.createElement('header');
     this.targetElement_.classList.add(TOOLBAR_TARGET_CLASS);
     //Place the elements into the target
     this.toolbarClone_ = this.toolbarDOMElement_.cloneNode(true);
@@ -113,12 +113,6 @@ export class Toolbar {
     this.targetElement_.appendChild(this.toolbarClone_);
     toggle(this.targetElement_, false);
     fragment.appendChild(this.targetElement_);
-
-    // Calculate our body top before returning the fragment
-    if (this.body_) {
-      this.bodyTop_ = computedStyle(this.win_, this.body_)['top'];
-    }
-
     return fragment;
   }
 
@@ -142,12 +136,15 @@ export class Toolbar {
     // Make room for the toolbar
     this.vsync_.run({
       measure: state => {
+        if (this.body_ && !this.initialBodyTop_) {
+          this.initialBodyTop_ = computedStyle(this.win_, this.body_)['top'];
+        }
         state.toolbarHeight = this.toolbarClone_./*REVIEW*/offsetHeight;
       },
       mutate: state => {
         if (this.body_) {
           setStyles(this.body_, {
-            'top': `calc(${state.toolbarHeight}px + ${this.bodyTop_})`,
+            'top': `calc(${state.toolbarHeight}px + ${this.initialBodyTop_})`,
           });
         }
       },
@@ -195,7 +192,7 @@ export class Toolbar {
       // Remove room for our toolbar
       if (this.body_) {
         setStyles(this.body_, {
-          'top': this.bodyTop_,
+          'top': this.initialBodyTop_,
         });
       }
 
