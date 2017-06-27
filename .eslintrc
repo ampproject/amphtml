@@ -61,7 +61,6 @@
     "no-extend-native": 2,
     "no-extra-bind": 2,
     "no-for-of-statement": 2,
-    "no-global": 2,
     "no-implicit-coercion": [2, { "boolean": false }],
     "no-implied-eval": 2,
     "no-iterator": 2,
