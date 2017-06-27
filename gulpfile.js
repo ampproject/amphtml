@@ -739,6 +739,12 @@ function appendToCompiledFile(srcFilename, destFilePath) {
 function compileJs(srcDir, srcFilename, destDir, options) {
   options = options || {};
   if (options.minify) {
+    if (argv.minimal_set
+        && !(/integration|babel|amp-ad|lightbox|sidebar|analytics|app-banner/
+            .test(srcFilename))) {
+      logBuildStep('Skipping because of --minimal_set', srcFilename);
+      return Promise.resolve();
+    }
     logBuildStep('Minifying', srcFilename);
     return closureCompile(
         srcDir + srcFilename, destDir, options.minifiedName, options)
@@ -1081,6 +1087,7 @@ gulp.task('dist', 'Build production binaries', dist, {
     pseudo_names: 'Compiles with readable names. ' +
         'Great for profiling and debugging production code.',
     fortesting: 'Compiles with `getMode().test` set to true',
+    minimal_set: 'Only compile files needed to load article.amp.html',
   }
 });
 gulp.task('extensions', 'Build AMP Extensions', buildExtensions);
