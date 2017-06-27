@@ -75,6 +75,7 @@ export class Toolbar {
           Array.prototype.slice.call(toolbarOnlyQuery, 0);
       }
     }
+    this.buildCallback_();
   }
 
   /**
@@ -98,34 +99,36 @@ export class Toolbar {
   }
 
   /**
-   * Private function to build the DOM element for the toolbar, and return the built fragment
-   * @returns {DocumentFragment|undefined}
-   * @public
+   * Private function to build the DOM element for the toolbar
+   * @private
    */
-  build() {
+  buildCallback_() {
     this.toolbarClone_ = this.toolbarDOMElement_.cloneNode(true);
-    // Check for the target attribute on toolbar nav
     const targetId = this.toolbarDOMElement_.getAttribute('target');
-    if (targetId &&
-      this.win_.document.getElementById(targetId)
-    ) {
-      this.targetElement_ =
-        this.win_.document.getElementById(targetId);
-      this.targetElement_.appendChild(this.toolbarClone_);
-      toggle(this.targetElement_, false);
-      return;
-    } else {
+    const targetElement = this.win_.document.getElementById(targetId);
+    this.targetElement_ = targetElement || this.createTargetElement_();
+    this.targetElement_.appendChild(this.toolbarClone_);
+    toggle(this.targetElement_, false);
+
+    if (!this.targetElement_.parentElement) {
       this.toolbarClone_.classList.add(TOOLBAR_ELEMENT_CLASS);
       const fragment = this.win_
         .document.createDocumentFragment();
-      this.targetElement_ =
-        this.win_.document.createElement('header');
-      this.targetElement_.classList.add(TOOLBAR_TARGET_CLASS);
-      this.targetElement_.appendChild(this.toolbarClone_);
-      toggle(this.targetElement_, false);
       fragment.appendChild(this.targetElement_);
-      return fragment;
+      this.body_.appendChild(fragment);
     }
+  }
+
+  /**
+   * Returns a created element that can be used as the target if one does not exist
+   * @returns {Element}
+   * @private
+   */
+  createTargetElement_() {
+    const targetElement =
+      this.win_.document.createElement('header');
+    targetElement.classList.add(TOOLBAR_TARGET_CLASS);
+    return targetElement;
   }
 
   /**

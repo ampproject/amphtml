@@ -83,12 +83,7 @@
          }
          navToolbar.appendChild(toolbarList);
          toolbarContainerElement.appendChild(navToolbar);
-         const toolbar = new Toolbar(navToolbar, iframe.win, vsync);
-         const toolbarFragment = toolbar.build();
-         if (toolbarFragment) {
-           toolbarContainerElement.appendChild(toolbarFragment);
-         }
-         toolbars.push(toolbar);
+         toolbars.push(new Toolbar(navToolbar, iframe.win, vsync));
        });
 
        return {iframe, toolbarContainerElement, toolbars};
@@ -241,7 +236,6 @@
        });
      });
    });
-
 
    it('toolbar should be placed into a target, and hidden for a \
    non-matching window size for DEFAULT_TOOLBAR_MEDIA', () => {
