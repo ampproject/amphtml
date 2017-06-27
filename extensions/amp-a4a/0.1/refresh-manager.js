@@ -24,12 +24,12 @@ import {
 import {user} from '../../../src/log';
 
 /**
- * visibilePercentageMin - The percentage of pixels that need to be on screen
+ * - visibilePercentageMin: The percentage of pixels that need to be on screen
  *   for the creative to be considered "visible".
- * totalTimeMin - The total amount of time, in milliseconds, that the creative
+ * - totalTimeMin: The total amount of time, in milliseconds, that the creative
  *   must be on screen in order to be considered "visible".
- * continuousTimeMin - The amount of continuous time, in milliseconds, that the
- *   creative must be on screen for in oreder to be considered "visible".
+ * - continuousTimeMin: The amount of continuous time, in milliseconds, that
+ *   the creative must be on screen for in oreder to be considered "visible".
  *
  * @typedef {{
  *   visiblePercentageMin: number,

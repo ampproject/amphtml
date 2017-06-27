@@ -531,7 +531,6 @@ export function addCsiSignalsToAmpAnalyticsConfig(win, element, config,
  * @return {!Array<string>}
  */
 export function getEnclosingContainerTypes(adElement) {
-  // Detect container types.
   const containerTypeSet = {};
   for (let el = adElement.parentElement, counter = 0;
       el && counter < 20; el = el.parentElement, counter++) {

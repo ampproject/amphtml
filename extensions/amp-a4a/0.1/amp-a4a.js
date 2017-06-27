@@ -823,8 +823,7 @@ export class AmpA4A extends AMP.BaseElement {
         return timerFor(this.win).promise(1000).then(() => {
           this.isRelayoutNeededFlag = true;
           this.getResource().layoutCanceled();
-          resourcesForDoc(this.getAmpDoc())
-              ./*REVIEW*/requireLayout(this.element);
+          resourcesForDoc(this.getAmpDoc())./*OK*/requireLayout(this.element);
         });
       });
     });
@@ -1531,8 +1530,8 @@ export class AmpA4A extends AMP.BaseElement {
     // Iframe is appended to element as part of xorigin frame handler init.
     // Executive onCreativeRender after init to ensure it can get reference
     // to frame but prior to load to allow for earlier access.
-    const frameLoadPromise = this.xOriginIframeHandler_.init(
-        this.iframe, /* opt_isA4A */ true);
+    const frameLoadPromise =
+        this.xOriginIframeHandler_.init(this.iframe, /* opt_isA4A */ true);
     protectFunctionWrapper(this.onCreativeRender, this, err => {
       dev().error(TAG, this.element.getAttribute('type'),
           'Error executing onCreativeRender', err);
