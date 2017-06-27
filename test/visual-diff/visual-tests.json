@@ -4,12 +4,12 @@
   "assets_base_url": "/",
   "webpages": [
     {
-      "url": "examples/visual-tests/amp-by-example.html",
+      "url": "examples/visual-tests/amp-by-example/amp-by-example.html",
       "name": "Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-by-example.html",
-      "name": "New Page"
+      "url": "examples/visual-tests/article.amp/article.amp.html",
+      "name": "AMP Article"
     }
   ]
 }

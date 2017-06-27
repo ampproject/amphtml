@@ -104,6 +104,7 @@ end
 # Args:
 # - pagesToSnapshot: JSON object containing details about the pages to snapshot.
 def generateSnapshots(pagesToSnapshot)
+  Percy.config.default_widths = DEFAULT_WIDTHS
   server = "http://#{HOST}:#{PORT}"
   webpages = pagesToSnapshot["webpages"]
   assets_base_url = pagesToSnapshot["assets_base_url"]
@@ -132,7 +133,6 @@ end
 def generateSnapshot(page, url, name)
   page.visit(url)
   page.has_no_css?('.i-amphtml-loader-dot')  # Implicitly waits for page load.
-  Percy.config.default_widths = DEFAULT_WIDTHS
   Percy::Capybara.snapshot(page, name: name)
 end
 
