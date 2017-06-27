@@ -17,10 +17,10 @@
 import {toggle, setStyles} from '../../../src/style';
 
 /** @const */
-const TOOLBAR_ELEMENT_CLASS = 'i-amphtml-toolbar';
+const TOOLBAR_TARGET_ATTRIBUTE = 'toolbar-container';
 
 /** @const */
-const TOOLBAR_TARGET_ATTRIBUTE = 'toolbar-container';
+const TOOLBAR_ELEMENT_CLASS = 'i-amphtml-toolbar';
 
 export class Toolbar {
   /**
@@ -35,8 +35,8 @@ export class Toolbar {
     /** @private {!Object} **/
     this.win_ = win;
 
-    /** @private {HTMLBodyElement|null} */
-    this.body_ = this.sidebarElement_.ownerDocument.body;
+    /** @private {Element|null} */
+    this.body_ = this.win_.document.body;
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = vsync;
@@ -128,11 +128,13 @@ export class Toolbar {
   attemptShow_() {
 
     // Make room for the toolbar
-    const toolbarHeight = this.toolbarClone_./*REVIEW*/offsetHeight;
     this.vsync_.mutate(() => {
-      setStyles(this.body_, {
-        'top': toolbarHeight + 'px',
-      });
+      if (this.body_) {
+        const toolbarHeight = this.toolbarClone_./*REVIEW*/offsetHeight;
+        setStyles(this.body_, {
+          'top': toolbarHeight + 'px',
+        });
+      }
     });
 
     if (this.isToolbarShown_()) {
@@ -175,9 +177,11 @@ export class Toolbar {
       }
 
       // Remove room for our toolbar
-      setStyles(this.body_, {
-        'top': '',
-      });
+      if (this.body_) {
+        setStyles(this.body_, {
+          'top': '',
+        });
+      }
 
 
       this.toolbarShown_ = false;
