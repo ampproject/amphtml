@@ -192,7 +192,7 @@ describe('amp-analytics.transport', () => {
   });
 
   it('correctly tracks usageCount and destroys iframes', () => {
-    // Add 2 iframes
+    // Add 2 iframes.
     const url1 = 'https://example.com/usageCountTest1';
     const url2 = 'https://example.com/usageCountTest2';
     transport.processCrossDomainIframe(window, {iframe: url1});
@@ -203,7 +203,7 @@ describe('amp-analytics.transport', () => {
     expect(frame2.usageCount).to.equal(1);
     expect(window.document.getElementsByTagName('IFRAME').length).to.equal(2);
 
-    // Mark the iframes as used multiple times each
+    // Mark the iframes as used multiple times each.
     transport.processCrossDomainIframe(window, {iframe: url1});
     transport.processCrossDomainIframe(window, {iframe: url1});
     transport.processCrossDomainIframe(window, {iframe: url2});
@@ -213,7 +213,7 @@ describe('amp-analytics.transport', () => {
     expect(frame2.usageCount).to.equal(4);
 
     // Stop using the iframes, make sure usage counts go to zero and they are
-    // removed from the DOM
+    // removed from the DOM.
     Transport.doneUsingCrossDomainIframe(window.document, {iframe: url1});
     expect(frame1.usageCount).to.equal(2);
     Transport.doneUsingCrossDomainIframe(window.document, {iframe: url1});
