@@ -44,6 +44,7 @@ import {
   ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
   AdSenseAmpAutoAdsHoldoutBranches,
 } from '../../../../ads/google/adsense-amp-auto-ads';
+import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
 
 function createAdsenseImplElement(attributes, opt_doc, opt_tag) {
   const doc = opt_doc || document;
@@ -711,5 +712,27 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
                 .equal(String(Number(slotIdBefore) + 1));
           });
         });
+  });
+
+  describe('#delayAdRequestEnabled', () => {
+    let impl;
+    beforeEach(() => {
+      return createIframePromise().then(f => {
+        setupForAdTesting(f);
+        impl = new AmpAdNetworkAdsenseImpl(
+          createElementWithAttributes(f.doc, 'amp-ad', {
+            type: 'adsense',
+          }));
+      });
+    });
+
+    it('should return true if in experiment', () => {
+      impl.element.setAttribute(EXPERIMENT_ATTRIBUTE, '117152655');
+      expect(impl.delayAdRequestEnabled()).to.be.true;
+    });
+
+    it('should return false if not in experiment', () => {
+      expect(impl.delayAdRequestEnabled()).to.be.false;
+    });
   });
 });

@@ -140,6 +140,11 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
   }
 }
 
+/**
+ * @param {!Window} win
+ * @param {!Element} element Ad tag Element.
+ * @return {?string} experiment extracted from page url.
+ */
 export function extractUrlExperimentId(win, element) {
   const expParam = viewerForDoc(element).getParam('exp') ||
     parseQueryString(win.location.search)['exp'];
@@ -147,7 +152,7 @@ export function extractUrlExperimentId(win, element) {
     return null;
   }
   // Allow for per type experiment control with Doubleclick key set for 'da'
-  // and AdSense using 'aa'.  Fallbsck to 'a4a' if type specific is missing.
+  // and AdSense using 'aa'.  Fallback to 'a4a' if type specific is missing.
   const expKeys = [
     (element.getAttribute('type') || '').toLowerCase() == 'doubleclick' ?
       'da' : 'aa',
@@ -158,7 +163,7 @@ export function extractUrlExperimentId(win, element) {
   expKeys.forEach(key => arg = arg ||
     ((match = new RegExp(`(?:^|,)${key}:(-?\\d+)`).exec(expParam)) &&
       match[1]));
-  return arg ? Number(arg) : null;
+  return arg || null;
 }
 
 /**

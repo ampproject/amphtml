@@ -57,7 +57,7 @@ describe('#getLifecycleReporter', () => {
     }, 0, 0)).to.be.instanceOf(BaseLifecycleReporter);
   });
 
-  it('should not reporter if in neither adsense or doubleclick exp', () => {
+  it('should not create reporter if not adsense or doubleclick exp', () => {
     forceExperimentBranch(win, 'a4aProfilingRate', 'unused');
     const element = doc.createElement('div');
     element.setAttribute('type', 'doubleclick');
@@ -80,11 +80,11 @@ describe('#getLifecycleReporter', () => {
     }, 0, 0)).to.be.instanceOf(GoogleAdLifecycleReporter);
   });
 
-  it('should create reporter for doubleclick', () => {
+  it('should create reporter for adsense', () => {
     forceExperimentBranch(win, 'a4aProfilingRate', 'unused');
     forceExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME, '1234');
     const element = doc.createElement('div');
-    element.setAttribute('type', 'doubleclick');
+    element.setAttribute('type', 'adsense');
     doc.body.appendChild(element);
     expect(getLifecycleReporter({
       win,

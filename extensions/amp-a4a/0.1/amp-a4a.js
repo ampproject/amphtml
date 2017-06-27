@@ -63,7 +63,6 @@ import {A4AVariableSource} from './a4a-variable-source';
 // TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {getContextMetadata} from '../../../src/iframe-attributes';
-import {isInExperiment} from '../../../ads/google/a4a/traffic-experiments';
 
 /** @type {string} */
 const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
@@ -335,16 +334,6 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.fromResumeCallback = false;
 
-
-    const type = (this.element.getAttribute('type') || 'notype').toLowerCase();
-    /**
-     * @private @const{boolean} whether request should only be sent when slot is
-     *    within renderOutsideViewport distance.
-     */
-    this.delayRequestEnabled_ =
-      (type == 'adsense' && isInExperiment(this.element, '117152655')) ||
-      (type == 'doubleclick' && isInExperiment(this.element, '117152665'));
-
     /** @private {string} */
     this.safeframeVersion_ = DEFAULT_SAFEFRAME_VERSION;
   }
@@ -595,6 +584,7 @@ export class AmpA4A extends AMP.BaseElement {
           checkStillCurrent();
           this.adUrl_ = adUrl;
           this.protectedEmitLifecycleEvent_('urlBuilt');
+          console.log('send request', adUrl);
           return adUrl && this.sendXhrRequest(adUrl);
         })
         // The following block returns either the response (as a {bytes, headers}
@@ -603,6 +593,7 @@ export class AmpA4A extends AMP.BaseElement {
         .then(fetchResponse => {
           checkStillCurrent();
           this.protectedEmitLifecycleEvent_('adRequestEnd');
+          console.log('response', fetchResponse);
           // If the response is null, we want to return null so that
           // unlayoutCallback will attempt to render via x-domain iframe,
           // assuming ad url or creative exist.
