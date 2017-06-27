@@ -216,7 +216,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @protected @const {boolean} */
     this.useSra = getMode().localDev && /(\?|&)force_sra=true(&|$)/.test(
         this.win.location.search) ||
-        !!this.win.document.querySelector('meta[name=amp-ad-doubleclick-sra]') ||
+        !!this.win.document.querySelector(
+          'meta[name=amp-ad-doubleclick-sra]') ||
         experimentFeatureEnabled(this.win, DOUBLECLICK_EXPERIMENT_FEATURE.SRA);
 
 
