@@ -28,7 +28,8 @@ require 'percy/capybara/anywhere'
 require 'phantomjs'
 
 
-ENV['PERCY_DEBUG'] = '1'  # Enable debugging output.
+ENV['PERCY_DEBUG'] = '0'
+ENV['PHANTOM_JS_DEBUG'] = 'false'
 DEFAULT_WIDTHS = [375, 411]  # CSS widths: iPhone: 375, Pixel: 411.
 HOST = 'localhost'
 PORT = '8000'
@@ -114,7 +115,12 @@ def generateSnapshots(pagesToSnapshot)
   Percy::Capybara::Anywhere.run(
       server, assets_dir, assets_base_url) do |page|
     page.driver.options[:phantomjs] = Phantomjs.path
-    page.driver.options[:js_errors] = false
+    page.driver.options[:js_errors] = true
+    page.driver.options[:phantomjs_options] =
+        [
+          "--load-images=yes",
+          "--debug=#{ENV['PHANTOM_JS_DEBUG']}"
+        ]
     webpages.each do |webpage|
       url = webpage["url"]
       name = webpage["name"]
@@ -137,8 +143,18 @@ def generateSnapshot(page, url, name)
 end
 
 
+# Enables debugging if requested via command line.
+def setDebuggingLevel()
+  if ARGV.include? '--debug'
+    ENV['PERCY_DEBUG'] = '1'
+    ENV['PHANTOM_JS_DEBUG'] = 'true'
+  end
+end
+
+
 # Launches a webserver, loads test pages, and generates Percy snapshots.
 def main()
+  setDebuggingLevel()
   pid = launchWebServer()
   if not waitForWebServer()
     puts "Failed to start webserver"
