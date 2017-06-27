@@ -1,11 +1,15 @@
 {
   "_comment": "HTML file(s) used for visual diff tests. Paths relative to src.",
+  "assets_dir": "examples/visual-tests",
+  "assets_base_url": "/",
   "webpages": [
     {
-      "assets_dir": "examples/amp-by-example",
-      "assets_base_url": "/",
-      "url": "examples/amp-by-example/amp-by-example.html",
+      "url": "examples/visual-tests/amp-by-example/amp-by-example.html",
       "name": "Amp By Example"
+    },
+    {
+      "url": "examples/visual-tests/article.amp/article.amp.html",
+      "name": "AMP Article"
     }
   ]
 }
