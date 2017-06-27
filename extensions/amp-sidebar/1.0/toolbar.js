@@ -99,7 +99,7 @@ export class Toolbar {
 
   /**
    * Private function to build the DOM element for the toolbar, and return the built fragment
-   * @returns {Element|null}
+   * @returns {DocumentFragment|undefined}
    * @public
    */
   build() {
@@ -108,10 +108,10 @@ export class Toolbar {
     // Check for the target attribute on toolbar nav
     const targetId = this.toolbarDOMElement_.getAttribute('target');
     if (targetId &&
-      this.win_document.getElementById(targetId)
+      this.win_.document.getElementById(targetId)
     ) {
       this.targetElement_ =
-        this.win_document.getElementById(targetId);
+        this.win_.document.getElementById(targetId);
       this.targetElement_.appendChild(this.toolbarClone_);
       toggle(this.targetElement_, false);
       return;
