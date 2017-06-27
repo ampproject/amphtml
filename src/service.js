@@ -18,34 +18,6 @@
  * @fileoverview Registration and getter functions for AMP services.
  *
  * Invariant: Service getters never return null for registered services.
- *
- * Types of getters:
- *   1. get win-service [promise]
- *   2. get win-service or null if unregistered [promise]
- *   3. get doc-service [promise]
- *   4. get doc-service or null if unregistered [promise]
- *   5. get win-service in embed (w/ optional fallback)
- *   6. get doc-service in embed (w/ optional fallback)
- *
- * Types of element service getters (element-service.js):
- *   a. get win-service
- *   b. get win-service or null if unregistered
- *   c. get doc-service
- *   d. get doc-service or null if unregistered
- *   e. get doc-service in embed
- *   f. get doc-service in embed or null if unregistered
- *
- * TODO(choumx): Fix the following:
- *   - Does the caller need to know if a service is window-scope or doc-scope?
- *   - In embeds, doc-scope services are win-level, and need to use
- *     `document.body` instead of AmpDoc.getBody(), etc.
- *   - Need to be very careful when to allow/disallow FIE fallback.
- *   - "Existing" and "orNull" are redundant, e.g. getExistingServiceOrNull.
- *     Besides, "existing" is misleading since it will instantiate nonexistent
- *     but registered services.
- *   - "Promise" suffix inconsistently applied (i.e. getServicePromise,
- *     getElementService)
- *   - (4) doesn't exist.
  */
 
 // Requires polyfills in immediate side effect.
