@@ -128,11 +128,9 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
   /**
    * @param {!Window} win  Parent window object.
    * @param {!Element} element  Parent element object.
-   * @param {string} namespace  Namespace for page-level info.  (E.g.,
-   *   'amp' vs 'a4a'.)
    * @param {number} slotId
    */
-  constructor(win, element, namespace, slotId) {
+  constructor(win, element, slotId) {
     super();
 
     /** @private {!Window} @const */
@@ -142,7 +140,8 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
     this.element_ = element;
 
     /** @private {string} @const */
-    this.namespace_ = namespace;
+    this.namespace_ =
+      element.getAttribute('data-a4a-upgrade-type') ? 'a4a' : 'amp';
 
     /** @private {number} @const */
     this.slotId_ = slotId;

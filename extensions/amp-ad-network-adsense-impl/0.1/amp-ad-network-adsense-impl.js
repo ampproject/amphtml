@@ -23,6 +23,7 @@
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {
   isInManualExperiment,
+  isInExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {isExperimentOn} from '../../../src/experiments';
 import {
@@ -128,6 +129,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   isValidElement() {
     return !!this.element.getAttribute('data-ad-client') &&
         isGoogleAdsA4AValidEnvironment(this.win) && this.isAmpAdElement();
+  }
+
+  /** @override */
+  delayAdRequestEnabled() {
+    return isInExperiment(this.element, '117152655');
   }
 
   /** @override */

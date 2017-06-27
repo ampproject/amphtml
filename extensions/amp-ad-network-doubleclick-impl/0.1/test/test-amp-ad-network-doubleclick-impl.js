@@ -34,6 +34,10 @@ import {
   resetSraStateForTesting,
 } from '../amp-ad-network-doubleclick-impl';
 import {
+  DOUBLECLICK_A4A_EXPERIMENT_NAME,
+  DOUBLECLICK_EXPERIMENT_FEATURE,
+} from '../doubleclick-a4a-config';
+import {
   MANUAL_EXPERIMENT_ID,
 } from '../../../../ads/google/a4a/traffic-experiments';
 import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
@@ -42,7 +46,10 @@ import {utf8Encode} from '../../../../src/utils/bytes';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {BaseElement} from '../../../../src/base-element';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {toggleExperiment} from '../../../../src/experiments';
+import {
+  toggleExperiment,
+  forceExperimentBranch,
+} from '../../../../src/experiments';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {Xhr, FetchResponseHeaders} from '../../../../src/service/xhr-impl';
@@ -820,8 +827,8 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           for (let i = 0; i < instanceCount; i++) {
             const impl = createA4aSraInstance(network.networkId);
             doubleclickInstances.push(impl);
+            sandbox.stub(impl, 'isValidElement').returns(!invalid);
             if (invalid) {
-              sandbox.stub(impl, 'isValidElement').returns(false);
               impl.element.setAttribute('data-test-invalid', 'true');
             }
           }
@@ -948,5 +955,28 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     it('should handle mixture of all possible scenarios', () => executeTest(
         [1234, 1234, 101, {networkId: 4567, instances: 2, xhrFail: true}, 202,
         {networkId: 8901, instances: 3, invalidInstances: 1}]));
+  });
+
+  describe('#delayAdRequestEnabled', () => {
+    let impl;
+    beforeEach(() => {
+      return createIframePromise().then(f => {
+        setupForAdTesting(f);
+        impl = new AmpAdNetworkDoubleclickImpl(
+          createElementWithAttributes(f.doc, 'amp-ad', {
+            type: 'doubleclick',
+          }));
+      });
+    });
+
+    it('should return true if in experiment', () => {
+      forceExperimentBranch(impl.win, DOUBLECLICK_A4A_EXPERIMENT_NAME,
+          DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST);
+      expect(impl.delayAdRequestEnabled()).to.be.true;
+    });
+
+    it('should return false if not in experiment', () => {
+      expect(impl.delayAdRequestEnabled()).to.be.false;
+    });
   });
 });

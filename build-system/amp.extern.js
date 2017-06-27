@@ -27,6 +27,32 @@
 function JsonObject() {}
 
 /**
+ * - n is the name.
+ * - f is the function body of the extension.
+ * - p is the priority. Only supported value is "high".
+ *   high means, that the extension is not subject to chunking.
+ *   This should be used for work, that should always happen
+ *   as early as possible. Currently this is primarily used
+ *   for viewer communication setup.
+ * - v is the release version
+ * @constructor @struct
+ */
+function ExtensionPayload() {}
+
+/** @type {string} */
+ExtensionPayload.prototype.n;
+
+/** @type {function(!Object)} */
+ExtensionPayload.prototype.f;
+
+/** @type {string|undefined} */
+ExtensionPayload.prototype.p;
+
+/** @type {string} */
+ExtensionPayload.prototype.v;
+
+
+/**
  * @typedef {?JsonObject|undefined|string|number|!Array<JsonValue>}
  */
 var JsonValue;
@@ -131,6 +157,7 @@ IntersectionObserverEntry.prototype.rootBounds;
 // TODO (remove after we update closure compiler externs)
 window.PerformancePaintTiming;
 window.PerformanceObserver;
+Object.prototype.entryTypes
 
 // Externed explicitly because this private property is read across
 // binaries.
@@ -155,12 +182,12 @@ var AmpElement;
 // Temp until we figure out forward declarations
 /** @constructor */
 var AccessService = function() {};
-/** @constructor */
+/** @constructor @struct */
 var UserNotificationManager = function() {};
 UserNotificationManager.prototype.get;
-/** @constructor */
+/** @constructor @struct */
 var Cid = function() {};
-/** @constructor */
+/** @constructor @struct */
 var Activity = function() {};
 
 // data
@@ -196,9 +223,7 @@ amp.validator.validateUrlAndLog = function(string, doc, filter) {}
 
 // Temporary Access types (delete when amp-access is compiled
 // for type checking).
-var Activity;
 Activity.prototype.getTotalEngagedTime = function() {};
-var AccessService;
 AccessService.prototype.getAccessReaderId = function() {};
 AccessService.prototype.getAuthdataField = function(field) {};
 // Same for amp-analytics
@@ -212,7 +237,6 @@ AccessService.prototype.getAuthdataField = function(field) {};
  * }}
  */
 var GetCidDef;
-var Cid;
 /**
  * @param {string|!GetCidDef} externalCidScope Name of the fallback cookie
  *     for the case where this doc is not served by an AMP proxy. GetCidDef
@@ -247,7 +271,7 @@ window.AMP;
  * This uses the internal name of the type, because there appears to be no
  * other way to reference an ES6 type from an extern that is defined in
  * the app.
- * @constructor
+ * @constructor @struct
  * @extends {BaseElement$$module$src$base_element}
  */
 AMP.BaseElement = class {
@@ -259,7 +283,7 @@ AMP.BaseElement = class {
  * This uses the internal name of the type, because there appears to be no
  * other way to reference an ES6 type from an extern that is defined in
  * the app.
- * @constructor
+ * @constructor @struct
  * @extends {AmpAdXOriginIframeHandler$$module$extensions$amp_ad$0_1$amp_ad_xorigin_iframe_handler}
  */
 AMP.AmpAdXOriginIframeHandler = class {
@@ -273,7 +297,7 @@ AMP.AmpAdXOriginIframeHandler = class {
  * This uses the internal name of the type, because there appears to be no
  * other way to reference an ES6 type from an extern that is defined in
  * the app.
- * @constructor
+ * @constructor @struct
  * @extends {AmpAdUIHandler$$module$extensions$amp_ad$0_1$amp_ad_ui}
  */
 AMP.AmpAdUIHandler = class {

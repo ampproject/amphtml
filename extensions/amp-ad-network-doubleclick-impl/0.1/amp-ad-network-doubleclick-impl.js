@@ -28,6 +28,10 @@ import {
   assignAdUrlToError,
 } from '../../amp-a4a/0.1/amp-a4a';
 import {
+  experimentFeatureEnabled,
+  DOUBLECLICK_EXPERIMENT_FEATURE,
+} from './doubleclick-a4a-config';
+import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {
@@ -212,7 +216,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @protected @const {boolean} */
     this.useSra = getMode().localDev && /(\?|&)force_sra=true(&|$)/.test(
         this.win.location.search) ||
-        !!this.win.document.querySelector('meta[name=amp-ad-doubleclick-sra]');
+        !!this.win.document.querySelector('meta[name=amp-ad-doubleclick-sra]') ||
+        experimentFeatureEnabled(this.win, DOUBLECLICK_EXPERIMENT_FEATURE.SRA);
+
 
     const sraInitializer = this.initializeSraPromise_();
     /** @protected {?function(?../../../src/service/xhr-impl.FetchResponse)} */
@@ -231,6 +237,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.isAmpAdElement() &&
       // Ensure not within remote.html iframe.
       !document.querySelector('meta[name=amp-3p-iframe-src]');
+  }
+
+  /** @override */
+  delayAdRequestEnabled() {
+    return experimentFeatureEnabled(
+        this.win, DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST);
   }
 
   /**
