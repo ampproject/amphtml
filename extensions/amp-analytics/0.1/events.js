@@ -17,7 +17,7 @@
 import {CommonSignals} from '../../../src/common-signals';
 import {Observable} from '../../../src/observable';
 import {getDataParamsFromAttributes} from '../../../src/dom';
-import {user} from '../../../src/log';
+import {user, dev} from '../../../src/log';
 import {startsWith} from '../../../src/string';
 
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
@@ -104,7 +104,7 @@ export class CustomEventTracker extends EventTracker {
     super(root);
 
     /** @const @private {!Object<string, !Observable<!AnalyticsEvent>>} */
-    this.observers_ = {};
+    this.observables_ = {};
 
     /**
      * Early events have to be buffered because there's no way to predict
@@ -113,6 +113,12 @@ export class CustomEventTracker extends EventTracker {
      */
     this.buffer_ = {};
 
+    /**
+     * Sandbox events get their own buffer, because handler to those events will
+     * be added after parent element's layout. (Time varies, can be later than 10s)
+     * sandbox events buffer will never expire but will cleared when handler is ready.
+     * @private {!Object<string, !Array<!AnalyticsEvent>>|undefined}
+     */
     this.sandboxBuffer_ = {};
 
     // Stop buffering of custom events after 10 seconds. Assumption is that all
@@ -126,8 +132,8 @@ export class CustomEventTracker extends EventTracker {
   dispose() {
     this.buffer_ = undefined;
     this.sandboxBuffer_ = undefined;
-    for (const k in this.observers_) {
-      this.observers_[k].removeAll();
+    for (const k in this.observables_) {
+      this.observables_[k].removeAll();
     }
   }
 
@@ -142,7 +148,7 @@ export class CustomEventTracker extends EventTracker {
     const targetReady =
         this.root.getElement(context, selector, selectionMethod);
 
-    const isSandboxEvent = startsWith(eventType, 'sandbox');
+    const isSandboxEvent = startsWith(eventType, 'sandbox-');
 
     // Push recent events if any.
     let buffer;
@@ -151,29 +157,36 @@ export class CustomEventTracker extends EventTracker {
     } else {
       buffer = this.buffer_ && this.buffer_[eventType];
     }
+    const bufferLength = buffer.length;
 
     if (buffer) {
       targetReady.then(target => {
         setTimeout(() => {
-          buffer.forEach(event => {
+          // Need to calculate new bufferLength for sandbox event buffer, because
+          // new trigger can arrive during the setTimeout delay.
+          bufferLength = isSandboxEvent ? buffer.length : bufferLength;
+          for (let i = 0; i < bufferLength; i++) {
+            const event = buffer[i];
             if (target.contains(event.target)) {
               listener(event);
             }
-          });
+          }
           if (isSandboxEvent) {
+            // We assume sandbox event will only has single listener.
+            // It is safe to clear buffer once handler is ready.
             this.sandboxBuffer_[eventType] = undefined;
           }
         }, 1);
       });
     }
 
-    let observers = this.observers_[eventType];
-    if (!observers) {
-      observers = new Observable();
-      this.observers_[eventType] = observers;
+    let observables = this.observables_[eventType];
+    if (!observables) {
+      observables = new Observable();
+      this.observables_[eventType] = observables;
     }
 
-    return this.observers_[eventType].add(event => {
+    return this.observables_[eventType].add(event => {
       // Wait for target selected
       targetReady.then(target => {
         if (target.contains(event.target)) {
@@ -188,22 +201,21 @@ export class CustomEventTracker extends EventTracker {
    * @param {!AnalyticsEvent} event
    */
   trigger(event) {
-    const observers = this.observers_[event.type];
-    if (startsWith(event.type, 'sandbox')) {
-      // special sandboxed event type
-      if (!this.sandboxBuffer_) {
-        return;
-      }
+    const eventType = event.type;
+    const isSandboxEvent = startsWith(eventType, 'sandbox-');
+    const observables = this.observables_[eventType];
+    dev().assert(this.sandboxBuffer_,
+        'CustomEventTraker sandbox buffer does not exist');
 
-      if (this.sandboxBuffer_[event.type]) {
-        this.sandboxBuffer_[event.type].push(event);
-      } else if (!observers) {
-        this.sandboxBuffer_[event.type] = [];
-        this.sandboxBuffer_[event.type].push(event);
-      } else {
-        observers.fire(event);
+    if (isSandboxEvent) {
+      if (this.sandboxBuffer_[eventType]) {
+        this.sandboxBuffer_[eventType].push(event);
+        return;
+      } else if (!observables) {
+        // Only create buffer if observer not ready yet
+        this.sandboxBuffer_[eventType] = [];
+        this.sandboxBuffer_[eventType].push(event);
       }
-      return;
     }
 
     // Buffer still exists - enqueue.
@@ -217,8 +229,8 @@ export class CustomEventTracker extends EventTracker {
     }
 
     // If listeners already present - trigger right away.
-    if (observers) {
-      observers.fire(event);
+    if (observables) {
+      observables.fire(event);
     }
   }
 }
