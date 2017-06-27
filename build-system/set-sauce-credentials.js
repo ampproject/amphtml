@@ -37,7 +37,7 @@ function main() {
   let committer = getStdout(`git log -1 --pretty=format:'%ae'`).trim();
   let credentials = JSON.parse(fs.readFileSync(sauceCredsFile)).credentials;
   if (credentials === null) {
-    console.log(fileLogPrefix, util.colors.red('ERROR:'),
+    util.log(fileLogPrefix, util.colors.red('ERROR:'),
         'Could not load Sauce labs credentials from',
         util.colors.cyan(sauceCredsFile));
     return 1;
@@ -46,7 +46,7 @@ function main() {
   if (credentials[committer]) {
     let username = credentials[committer].username;
     let access_key = atob(credentials[committer].access_key_encoded).trim();
-    console.log(fileLogPrefix,
+    util.log(fileLogPrefix,
         'Using Sauce credentials for user', util.colors.cyan(committer),
         'with Sauce username', util.colors.cyan(username));
     process.env['SAUCE_USERNAME'] = username;
