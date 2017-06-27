@@ -238,11 +238,12 @@ export class AmpUserNotification extends AMP.BaseElement {
    */
   optoutOfCid_() {
     return this.getCidService_()
-        .then(cid => cid.optOutOfCid())
-        .then(this.dismiss.bind(this))
-        .catch(reason => {
+        .then(cid => cid.optOut())
+        .then(this.dismiss.bind(this), reason => {
           dev().error('amp-user-notification',
               'Failed to opt out of Cid', reason);
+          // If optout fails, dismiss notification without persisting.
+          this.dismiss(/*opt_forceNoPersist*/true);
         });
   }
 
@@ -332,14 +333,17 @@ export class AmpUserNotification extends AMP.BaseElement {
   /**
    * Hides the current user notification and invokes the `dialogResolve_`
    * method. Removes the `.amp-active` class from the element.
+   *
+   * @param {boolean=} opt_forceNoPersist If true, dismissal won't be persisted
+   * regardless of 'data-persist-dismissal''s value
    */
-  dismiss() {
+  dismiss(opt_forceNoPersist = false) {
     this.element.classList.remove('amp-active');
     this.element.classList.add('amp-hidden');
     this.dialogResolve_();
     this.getViewport().removeFromFixedLayer(this.element);
 
-    if (this.persistDismissal_) {
+    if (this.persistDismissal_ && !opt_forceNoPersist) {
       // Store and post.
       this.storagePromise_.then(storage => {
         storage.set(this.storageKey_, true);

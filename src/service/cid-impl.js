@@ -53,7 +53,7 @@ const SCOPE_NAME_VALIDATOR = /^[a-zA-Z0-9-_.]+$/;
 const CID_OPTOUT_STORAGE_KEY = 'amp-cid-optout';
 
 // TODO(aghassemi): replace with real viewer message when implemented.
-const CID_OPTOUT_VIEWER_MESSAGE = 'cidOptout'
+const CID_OPTOUT_VIEWER_MESSAGE = 'cidOptout';
 
 /**
  * A base cid string value and the time it was last read / stored.
@@ -112,7 +112,8 @@ export class Cid {
    *     consent, of course).
    * @return {!Promise<?string>} A client identifier that should be used
    *      within the current source origin and externalCidScope. Might be
-   *      null if no identifier was found or could be made.
+   *      null if user has opted out of cid or no identifier was found
+   *      or it could be made.
    *      This promise may take a long time to resolve if consent isn't
    *      given.
    */
@@ -123,11 +124,18 @@ export class Cid {
         'The CID scope and cookie name must only use the characters ' +
         '[a-zA-Z0-9-_.]+\nInstead found: %s',
         getCidStruct.scope);
-    return consent.then(() => {
-      return viewerForDoc(this.ampdoc).whenFirstVisible();
-    }).then(() => {
-      return getExternalCid(this, getCidStruct,
-          opt_persistenceConsent || consent);
+    return isOptedOutOfCid(this.ampdoc).then(optedOut => {
+      // TODO(aghassemi): null or '' ?
+      if (optedOut) {
+        return null;
+      } else {
+        return consent.then(() => {
+          return viewerForDoc(this.ampdoc).whenFirstVisible();
+        }).then(() => {
+          return getExternalCid(this, getCidStruct,
+              opt_persistenceConsent || consent);
+        });
+      }
     });
   }
 
@@ -137,17 +145,43 @@ export class Cid {
    *
    * @return {!Promise}
    */
-  optOutOfCid() {
-
-    // Tell the viewer that user has opted out.
-    viewerForDoc(this.ampdoc).sendMessage(CID_OPTOUT_VIEWER_MESSAGE);
-
-    // Store the optout bit in storage
-    return storageForDoc(this.this.ampdoc).then(storage => {
-      return storage.set(CID_OPTOUT_STORAGE_KEY, true);
-    });
-
+  optOut() {
+    return optOutOfCid(this.ampdoc);
   }
+}
+
+/**
+ * User will be opted out of Cid issuance for all scopes.
+ * When opted-out Cid service will reject all `get` requests.
+ *
+ * @return {!Promise}
+ * @visibleForTesting
+ */
+export function optOutOfCid(ampdoc) {
+
+  // Tell the viewer that user has opted out.
+  viewerForDoc(ampdoc).sendMessage(CID_OPTOUT_VIEWER_MESSAGE);
+
+  // Store the optout bit in storage
+  return storageForDoc(ampdoc).then(storage => {
+    return storage.set(CID_OPTOUT_STORAGE_KEY, true);
+  });
+}
+
+/**
+ * Whether user has opted out of Cid issuance for all scopes.
+ *
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @return {!Promise<boolean>}
+ * @visibleForTesting
+ */
+export function isOptedOutOfCid(ampdoc) {
+  return storageForDoc(ampdoc).then(storage => {
+    return storage.get(CID_OPTOUT_STORAGE_KEY).then(val => !!val);
+  }).catch(() => {
+    // If we fail to read the flag, assume not opted out.
+    return false;
+  });
 }
 
 /**

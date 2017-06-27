@@ -25,6 +25,8 @@ import {
   cidServiceForDocForTesting,
   getProxySourceOrigin,
   viewerBaseCid,
+  optOutOfCid,
+  isOptedOutOfCid,
 } from '../../src/service/cid-impl';
 import {installCryptoService, Crypto} from '../../src/service/crypto-impl';
 import {cryptoFor} from '../../src/crypto';
@@ -33,12 +35,14 @@ import {parseUrl} from '../../src/url';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installTimerService} from '../../src/service/timer-impl';
+import {installStorageServiceForDoc} from '../../src/service/storage-impl';
 import {
   installCryptoPolyfill,
 } from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
 import {
   installExtensionsService,
 } from '../../src/service/extensions-impl';
+import {stubServiceForDoc} from '../../testing/test-helper';
 import * as sinon from 'sinon';
 
 const DAY = 24 * 3600 * 1000;
@@ -58,6 +62,7 @@ describe('cid', () => {
   let whenFirstVisible;
   let trustedViewer;
   let shouldSendMessageTimeout;
+  let storageGetStub;
 
   const hasConsent = Promise.resolve();
   const timer = timerFor(window);
@@ -117,6 +122,8 @@ describe('cid', () => {
     });
 
     installViewerServiceForDoc(ampdoc);
+    //installStorageServiceForDoc(ampdoc);
+    storageGetStub = stubServiceForDoc(sandbox, ampdoc, 'storage', 'get');
     viewer = viewerForDoc(ampdoc);
     sandbox.stub(viewer, 'whenFirstVisible', function() {
       return whenFirstVisible;
@@ -272,6 +279,18 @@ describe('cid', () => {
           'sha384(YYYhttp://www.origin.come2)');
     });
 
+    it('should return null if opted out', () => {
+      storageGetStub.withArgs('amp-cid-optout').returns(Promise.resolve(true));
+
+      storage['amp-cid'] = JSON.stringify({
+        cid: 'YYY',
+        time: Date.now(),
+      });
+      return compare(
+          'e2',
+          null);
+    });
+
     it('should read from viewer storage if embedded', () => {
       fakeWin.parent = {};
       const expectedBaseCid = 'from-viewer';
@@ -390,6 +409,7 @@ describe('cid', () => {
       installTimerService(win);
       installPlatformService(win);
       installViewerServiceForDoc(ampdoc2);
+      installStorageServiceForDoc(ampdoc2);
       cidServiceForDocForTesting(ampdoc2);
       installCryptoService(win);
       return cidForDoc(ampdoc2).then(cid => {
@@ -718,4 +738,62 @@ describe('getProxySourceOrigin', () => {
       getProxySourceOrigin(parseUrl('https://abc.org/v/foo.com/'));
     }).to.throw(/Expected proxy origin/);
   });
+});
+
+describes.fakeWin('cid optout:', {amp: true}, env => {
+  let storageGetStub;
+  let storageSetStub;
+  let viewerSendMessageStub;
+  let ampdoc;
+
+  beforeEach(() => {
+    ampdoc = env.ampdoc;
+    storageSetStub = stubServiceForDoc(sandbox, ampdoc, 'storage', 'set');
+    storageGetStub = stubServiceForDoc(sandbox, ampdoc, 'storage', 'get');
+    viewerSendMessageStub = stubServiceForDoc(sandbox, ampdoc,
+        'viewer', 'sendMessage');
+  });
+
+  describe('optOutOfCid()', () => {
+    it('should send a message to viewer', () => {
+      return optOutOfCid(ampdoc).then(() => {
+        expect(viewerSendMessageStub).to.be.calledWith('cidOptout');
+      });
+    });
+
+    it('should save bit in storage', () => {
+      optOutOfCid(ampdoc).then(() => {
+        expect(storageSetStub).to.be.calledWith('amp-cid-optout', true);
+      });
+    });
+
+    it('should reject promise if storage set fails', () => {
+      storageSetStub.returns(Promise.reject('failed!'));
+      return optOutOfCid(ampdoc).should.eventually.be.rejectedWith('failed!');
+    });
+  });
+
+  describe('isOptedOutOfCid()', () => {
+    it('should return true if bit is set in storage', () => {
+      storageGetStub.withArgs('amp-cid-optout').returns(Promise.resolve(true));
+      return isOptedOutOfCid(ampdoc).then(isOut => {
+        expect(isOut).to.be.true;
+      });
+    });
+
+    it('should return false if bit is not set in storage', () => {
+      storageGetStub.withArgs('amp-cid-optout').returns(Promise.resolve(null));
+      return isOptedOutOfCid(ampdoc).then(isOut => {
+        expect(isOut).to.be.false;
+      });
+    });
+
+    it('should return false if storage get fails', () => {
+      storageGetStub.withArgs('amp-cid-optout').returns(Promise.reject('Fail'));
+      return isOptedOutOfCid(ampdoc).then(isOut => {
+        expect(isOut).to.be.false;
+      });
+    });
+  });
+
 });

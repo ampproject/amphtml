@@ -593,9 +593,9 @@ describe('amp-user-notification', () => {
     });
   });
 
-  describe('optOutOfCid', () => {
+  describe.only('optOutOfCid', () => {
     const cidMock = {
-      optOutOfCid() {
+      optOut() {
         return optoutPromise;
       },
     };
@@ -604,11 +604,11 @@ describe('amp-user-notification', () => {
     let optOutOfCidStub;
 
     beforeEach(() => {
-      optOutOfCidStub = sandbox.spy(cidMock, 'optOutOfCid');
+      optOutOfCidStub = sandbox.spy(cidMock, 'optOut');
     });
 
     it('should call optOutOfCid and dismiss', () => {
-      return getUserNotification(dftAttrs).then(el => {
+      return getUserNotification({id: 'n1'}).then(el => {
         const impl = el.implementation_;
         impl.buildCallback();
         optoutPromise = Promise.resolve();
@@ -617,24 +617,25 @@ describe('amp-user-notification', () => {
 
         return impl.optoutOfCid_();
       }).then(() => {
-        expect(dismissSpy).to.be.calledOnce;
+        expect(dismissSpy).to.be.calledWithExactly(undefined);
         expect(optOutOfCidStub).to.be.calledOnce;
       });
     });
 
-    it('should not dismiss if optOutOfCid fails', () => {
-      return getUserNotification(dftAttrs).then(el => {
+    it('should dissmiss without persistence if optOutOfCid fails', () => {
+      return getUserNotification({id: 'n1'}).then(el => {
         const impl = el.implementation_;
         impl.buildCallback();
-        optoutPromise = Promise.reject('could not optout');
+        optoutPromise = Promise.reject('failed');
         impl.getCidService_ = () => { return Promise.resolve(cidMock); };
-        dismissSpy = sandbox.stub(impl, 'dismiss');
+        dismissSpy = sandbox.spy(impl, 'dismiss');
 
         return impl.optoutOfCid_();
       }).then(() => {
-        expect(dismissSpy).not.to.be.called;
+        expect(dismissSpy).to.be.calledWithExactly(true);
         expect(optOutOfCidStub).to.be.calledOnce;
       });
     });
+
   });
 });
