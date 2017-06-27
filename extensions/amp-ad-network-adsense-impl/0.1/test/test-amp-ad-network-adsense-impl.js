@@ -91,6 +91,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       element.appendChild(iframe);
       document.body.appendChild(element);
       impl = new AmpAdNetworkAdsenseImpl(element);
+      impl.buildCallback();
       impl.iframe = iframe;
       return fixture;
     });

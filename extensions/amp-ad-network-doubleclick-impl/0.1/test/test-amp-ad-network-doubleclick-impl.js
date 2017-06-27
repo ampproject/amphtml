@@ -501,6 +501,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
             width: '300',
             height: '150',
           }).then(() => {
+            impl.buildCallback();
             const slotIdBefore = impl.element.getAttribute(
                 'data-amp-slot-index');
 
