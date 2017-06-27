@@ -52,7 +52,8 @@ describe.configure().skipSauceLabs().run('example', function() {
     'article.amp.html',
     'analytics.amp.html',
     'analytics-notification.amp.html',
-    'autosuggest.amp.html',
+    // TODO(vializ, Gregable, #10152) uncomment when validator issue is resolved
+    // 'autosuggest.amp.html',
     'everything.amp.html',
     // TODO: uncomment when validator is deployed:
     // 'facebook.amp.html',
