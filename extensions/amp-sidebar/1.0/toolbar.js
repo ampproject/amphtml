@@ -110,6 +110,7 @@ export class Toolbar {
     this.targetElement_.appendChild(this.toolbarClone_);
     toggle(this.targetElement_, false);
 
+    // Check if the target element was created by us, or already inserted by the user
     if (!this.targetElement_.parentElement) {
       this.toolbarClone_.classList.add(TOOLBAR_ELEMENT_CLASS);
       const fragment = this.win_
