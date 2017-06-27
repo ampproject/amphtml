@@ -25,7 +25,7 @@ min_validator_revision_required: 238
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 443
+spec_file_revision: 446
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 
@@ -1798,8 +1798,12 @@ attr_lists: {
     name: "xlink:href"
     # xlink:href is deprecated since SVG2 in favor of href.
     alternative_names: "href"
-    # Local (within document) URLs only for now.
-    value_regex: "#.*"
+    value_url: {
+      allowed_protocol: "http"
+      allowed_protocol: "https"
+      allow_relative: true
+      allow_empty: false
+    }
   }
   attrs: { name: "xlink:role" }
   attrs: { name: "xlink:show" }
@@ -1875,11 +1879,16 @@ tags: {
   attrs: { name: "xlink:arcrole" }
   attrs: {
     name: "xlink:href"
+    # xlink:href is deprecated since SVG2 in favor of href.
+    alternative_names: "href"
     value_url: {
       allowed_protocol: "data"
-      allow_relative: false
+      allowed_protocol: "http"
+      allowed_protocol: "https"
+      allow_relative: true
       allow_empty: false
     }
+    # Inline SVGs execute in a different context and can affect page elements.
     blacklisted_value_regex: "(^|\\s)data:image\\/svg\\+xml"
   }
   attrs: { name: "xlink:role" }
