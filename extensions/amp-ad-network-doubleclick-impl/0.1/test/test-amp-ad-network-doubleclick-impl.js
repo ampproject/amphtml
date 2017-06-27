@@ -711,7 +711,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       element.getIntersectionChangeEntry = () => {return null;};
       doc.body.appendChild(element);
       const impl = new AmpAdNetworkDoubleclickImpl(element);
-      impl.useSra_ = true;
+      impl.useSra = true;
       return impl;
     }
 
