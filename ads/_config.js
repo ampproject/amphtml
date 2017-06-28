@@ -377,6 +377,7 @@ export const adConfig = {
   innity: {
     prefetch: 'https://cdn.innity.net/admanager.js',
     preconnect: 'https://as.innity.com',
+    renderStartImplemented: true,
   },
 
   ix: {

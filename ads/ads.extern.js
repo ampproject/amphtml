@@ -297,8 +297,6 @@ var innityAMPZone;
 var innityAMPTag;
 data.pub;
 data.zone;
-data.width;
-data.height;
 data.channel;
 
 // ix.js
