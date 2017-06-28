@@ -46,7 +46,7 @@ function main() {
     let access_key = atob(credentials[committer].access_key_encoded).trim();
     console/*OK*/.log(
         'SAUCE_USERNAME=' + username +
-        ' SAUCE_ACCESS_KEY=' + 'foobar');
+        ' SAUCE_ACCESS_KEY=' + access_key);
   } else {
     // In this case, the access key is set in .travis.yml via JWT.
     console/*OK*/.log('SAUCE_USERNAME=amphtml');
