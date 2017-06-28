@@ -339,7 +339,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
               has() { return false; },
             }).then(adResponse => {
               expect(adResponse).to.deep.equal(
-                  {creative, signature: null, size: null});
+                  {creative, signature: null});
               expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be
                   .called;
             });
@@ -358,8 +358,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
               },
             }).then(adResponse => {
               expect(adResponse).to.deep.equal(
-                  {creative, signature: base64UrlDecodeToBytes('AQAB'),
-                    size: null});
+                  {creative, signature: base64UrlDecodeToBytes('AQAB')});
               expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be
                   .called;
             });
@@ -389,7 +388,6 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
                   {
                     creative,
                     signature: base64UrlDecodeToBytes('AQAB'),
-                    size: null,
                   });
               expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
             // exact value of ampAnalyticsConfig_ covered in
