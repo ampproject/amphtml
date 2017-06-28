@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {analyticsForDoc} from '../../../src/analytics';
 import {isExperimentOn} from '../../../src/experiments';
 import {timerFor} from '../../../src/services';
 import {
@@ -22,6 +21,7 @@ import {
   ValidAdContainerTypes,
 } from '../../../ads/google/a4a/utils';
 import {user} from '../../../src/log';
+import {IntersectionObserverPolyfill} from '../../../src/intersection-observer-polyfill'; // eslint-disable-line max-len
 
 /**
  * - visibilePercentageMin: The percentage of pixels that need to be on screen
@@ -39,11 +39,63 @@ import {user} from '../../../src/log';
  */
 export let RefreshConfig;
 
-export const MIN_REFRESH_INTERVAL = 30;
+export const MIN_REFRESH_INTERVAL = 3;
 export const DATA_ATTR_NAME = 'data-enable-refresh';
 export const METATAG_NAME = 'amp-ad-enable-refresh';
 
 const TAG = 'AMP-AD';
+
+/**
+ * Defines the DFA states for the refresh cycle.
+ *
+ * (1) All newly registered elements begin in the INITIAL state.
+ * (2) Only when the element enters the viewport with the specified
+ *     intersection ratio does it transition into the VIEW_PENDING state.
+ * (3) If the element remains in the viewport for the specified duration, it
+ *     will then transition into the REFRESH_PENDING state, otherwise it will
+ *     transition back into the INITIAL state.
+ * (4) The element will remain in REFRESH_PENDING state until the refresh
+ *     interval expires.
+ * (5) Once the interval expires, the element will enter the REFRESHED state.
+ *     The element will remain in this state until reset() is called on the
+ *     element, at which point it will return to the INITIAL state.
+ *
+ * @enum {string}
+ */
+const RefreshLifecycleState = {
+  /**
+   * Element has been registered, but not yet seen on screen.
+   */
+  INITIAL: 'initial',
+
+  /**
+   * The element has appeared in the viewport, but not yet for the required
+   * duration.
+   */
+  VIEW_PENDING: 'view_pending',
+
+  /**
+   * The element has been in the viewport for the required duration; the
+   * refresh interval for the element has begun.
+   */
+  REFRESH_PENDING: 'refresh_pending',
+
+  /**
+   * The refresh interval has elapsed; the element is in the process of being
+   * refreshed.
+   */
+  REFRESHED: 'refreshed',
+};
+
+/**
+ * An object containing the IntersectionObservers used to monitor elements.
+ * Each IO is configured to a different threshold, and all elements that
+ * share the same minOnScreenPixelRatioThreshold will be monitored by the
+ * same IO.
+ *
+ * @private {!Object<string, (!IntersectionObserver|!IntersectionObserverPolyfill)>}
+ */
+const observers = {};
 
 export class RefreshManager {
 
@@ -52,6 +104,9 @@ export class RefreshManager {
    * @param {!RefreshConfig} config
    */
   constructor(a4a, config) {
+
+    /** @private {string} */
+    this.state_ = RefreshLifecycleState.INITIAL;
 
     /** @const @private {!./amp-a4a.AmpA4A} */
     this.a4a_ = a4a;
@@ -77,6 +132,9 @@ export class RefreshManager {
     /** @private {?(number|string)} */
     this.refreshTimeoutId_ = null;
 
+    /** @private {?(number|string)} */
+    this.visibilityTimeoutId_ = null;
+
     /** @private {boolean} */
     this.isRefreshable_ = isExperimentOn(this.win_, 'amp-ad-refresh') &&
         // The network has opted-in.
@@ -94,29 +152,118 @@ export class RefreshManager {
     }
   }
 
+  /**
+   * Returns an IntersectionObserver configured to the given threshold, creating
+   * one if one does not yet exist.
+   *
+   * @param {(string|number)} threshold
+   * @return {(!IntersectionObserver|!IntersectionObserverPolyfill)}
+   */
+  getIntersectionObserverWithThreshold_(threshold) {
+    threshold = String(threshold);
+    return observers[threshold] ||
+        (observers[threshold] = 'IntersectionObserver' in this.win_
+         ? new this.win_['IntersectionObserver'](
+             this.ioCallbackGenerator_(), {threshold})
+         : new IntersectionObserverPolyfill(
+             this.ioCallbackGenerator_(), {threshold}));
+  }
+
+  /**
+   * Returns a function that will be invoked directly by the
+   * IntersectionObserver implementation. It will implement the core logic of
+   * the refresh lifecycle, including the transitions of the DFA.
+   *
+   * @return {function(!Array<IntersectionObserverEntry>)}
+   */
+  ioCallbackGenerator_() {
+    const refreshManager = this;
+    return entries => {
+      for (let idx = 0; idx < entries.length; idx++) {
+        const entry = entries[idx];
+        if (entry.target != refreshManager.element_) {
+          continue;
+        }
+        switch (refreshManager.state_) {
+          case RefreshLifecycleState.INITIAL:
+            // First check if the element qualifies as "being on screen", i.e.,
+            // that at least a minimum threshold of pixels is on screen. If so,
+            // begin a timer, set for the duration of the minimum time on screen
+            // threshold. If this timer runs out without interruption, then all
+            // viewability conditions have been met, and we can begin the refresh
+            // timer.
+            if (entry.intersectionRatio >=
+                refreshManager.config_.visiblePercentageMin) {
+              refreshManager.state_ = RefreshLifecycleState.VIEW_PENDING;
+              refreshManager.visibilityTimeoutId_ = refreshManager.timer_
+                  .delay(() => {
+                    refreshManager.state_ =
+                        RefreshLifecycleState.REFRESH_PENDING;
+                    refreshManager.startRefreshTimer_();
+                  }, refreshManager.config_.continuousTimeMin);
+            }
+            break;
+          case RefreshLifecycleState.VIEW_PENDING:
+            // If the element goes off screen before the minimum on screen time
+            // duration elapses, place it back into INITIAL state.
+            if (entry.intersectionRatio <
+                refreshManager.config_.visiblePercentageMin) {
+              refreshManager.timer_.cancel(
+                  refreshManager.visibilityTimeoutId_);
+              refreshManager.visibilityTimeoutId_ = null;
+              refreshManager.state_ = RefreshLifecycleState.INITIAL;
+            }
+            break;
+          case RefreshLifecycleState.REFRESH_PENDING:
+          case RefreshLifecycleState.REFRESHED:
+          default:
+            break;
+        }
+      }
+    };
+  }
 
   /**
    * Initiates the refresh cycle by initiating the visibility manager on the
    * element.
-   *
-   * @return {!Promise<boolean>} Promise that resolves to true if refresh event
-   *    completes successfully and false otherwise. This is particularly useful
-   *    for testing.
    */
   initiateRefreshCycle() {
     if (!this.isRefreshable()) {
-      return Promise.resolve(false);
+      return;
     }
+    switch (this.state_) {
+      case RefreshLifecycleState.INITIAL:
+        this.getIntersectionObserverWithThreshold_(
+            this.config_.visiblePercentageMin).observe(this.element_);
+        break;
+      case RefreshLifecycleState.REFRESHED:
+        this.getIntersectionObserverWithThreshold_(
+            this.config_.visiblePercentageMin).unobserve(this.element_);
+        this.getIntersectionObserverWithThreshold_(
+            this.config_.visiblePercentageMin).observe(this.element_);
+        this.state_ = RefreshLifecycleState.INITIAL;
+        break;
+      case RefreshLifecycleState.REFRESH_PENDING:
+      case RefreshLifecycleState.VIEW_PENDING:
+      default:
+        break;
+
+    }
+  }
+
+  /**
+   * Starts the refresh timer for the given monitored element.
+   *
+   * @return {!Promise<boolean>} A promise that resolves to true when the
+   *    refresh timer elapses successfully.
+   */
+  startRefreshTimer_() {
     return new Promise(resolve => {
-      analyticsForDoc(this.element_, true).then(analytics => {
-        analytics.getAnalyticsRoot(this.element_).getVisibilityManager()
-            .listenElement(this.element_, this.config_, null, null, () => {
-              this.refreshTimeoutId_ = this.timer_.delay(() => {
-                this.a4a_.refresh(() => this.initiateRefreshCycle());
-                resolve(true);
-              }, /** @type {number} */ (this.refreshInterval_));
-            });
-      });
+      this.refreshTimeoutId_ = this.timer_.delay(() => {
+        this.state_ = RefreshLifecycleState.REFRESHED;
+        this.a4a_.refresh(() => this.initiateRefreshCycle());
+        resolve(true);
+      }, /** @type {number} */ (this.refreshInterval_));
     });
   }
 
@@ -144,6 +291,7 @@ export class RefreshManager {
     // Convert seconds to milliseconds.
     config['totalTimeMin'] *= 1000;
     config['continuousTimeMin'] *= 1000;
+    config['visiblePercentageMin'] /= 100;
     return config;
   }
 

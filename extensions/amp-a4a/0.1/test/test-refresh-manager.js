@@ -19,6 +19,7 @@ import {
   DATA_ATTR_NAME,
   METATAG_NAME,
 } from '../refresh-manager';
+import {timerFor} from '../../../../src/services';
 import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
 
@@ -75,13 +76,19 @@ describe('refresh-manager', () => {
     expect(refreshManager.refreshInterval_).to.equal(40000);
   });
 
-
-  it('should call convertConfiguration_', () => {
+  it('should call convertConfiguration_ and set proper units', () => {
     const getConfigurationSpy = sandbox.spy(
         RefreshManager.prototype, 'convertConfiguration_');
-    const refreshManager = new RefreshManager(mockA4a, config);
+    const refreshManager = new RefreshManager(mockA4a, {
+      visiblePercentageMin: 50,
+      totalTimeMin: 0,
+      continuousTimeMin: 1,
+    });
     expect(getConfigurationSpy).to.be.calledOnce;
     expect(refreshManager.config_).to.not.be.null;
+    expect(refreshManager.config_.visiblePercentageMin).to.equal(0.5);
+    expect(refreshManager.config_.totalTimeMin).to.equal(0);
+    expect(refreshManager.config_.continuousTimeMin).to.equal(1000);
   });
 
   it('should be eligible for refresh', () => {
@@ -95,6 +102,50 @@ describe('refresh-manager', () => {
     expect(refreshManager.isRefreshable()).to.be.false;
   });
 
+  describe('#ioCallbackGenerator_', () => {
+    let refreshManager;
+    beforeEach(() => refreshManager = new RefreshManager(mockA4a, config));
+
+    it('should stay in INITIAL state', () => {
+      const ioCallback = refreshManager.ioCallbackGenerator_();
+      const ioEntry = {
+        target: null,
+        intersectionRatio: refreshManager.config_.visiblePercentageMin,
+      };
+      ioCallback([ioEntry]);
+      expect(refreshManager.visibilityTimeoutId_).to.be.null;
+      expect(refreshManager.state_).to.equal('initial');
+    });
+
+    it('should transition into VIEW_PENDING state', () => {
+      const ioCallback = refreshManager.ioCallbackGenerator_();
+      const ioEntry = {
+        target: mockA4a.element,
+        intersectionRatio: refreshManager.config_.visiblePercentageMin,
+      };
+      ioCallback([ioEntry]);
+      expect(refreshManager.visibilityTimeoutId_).to.be.ok;
+      expect(refreshManager.state_).to.equal('view_pending');
+    });
+
+    it('should transition to VIEW_PENDING state then back to INITIAL', () => {
+      const ioCallback = refreshManager.ioCallbackGenerator_();
+      const ioEntry = {
+        target: mockA4a.element,
+        intersectionRatio: refreshManager.config_.visiblePercentageMin,
+      };
+      ioCallback([ioEntry]);
+      expect(refreshManager.visibilityTimeoutId_).to.be.ok;
+      expect(refreshManager.state_).to.equal('view_pending');
+      ioEntry.intersectionRatio = 0;
+      ioCallback([ioEntry]);
+      expect(refreshManager.visibilityTimeoutId_).to.be.null;
+      expect(refreshManager.state_).to.equal('initial');
+    });
+  });
+
+  // TODO(levitzky) unskip this test once global test flakiness has been
+  // resolved.
   it.skip('should execute the refresh event correctly', () => {
     // Attach element to DOM, as is necessary for request ampdoc.
     window.document.body.appendChild(mockA4a.element);
@@ -107,8 +158,8 @@ describe('refresh-manager', () => {
       continuousTimeMin: 0,
     };
     refreshManager.refreshInterval_ = 0;
-    return refreshManager.initiateRefreshCycle().then(success => {
-      expect(success).to.be.true;
+    refreshManager.initiateRefreshCycle();
+    timerFor(window).promise(500).then(() => {
       // Twice because constructor calls initiateRefreshCycle().
       expect(refreshSpy).to.be.calledTwice;
       window.document.body.removeChild(mockA4a.element);
