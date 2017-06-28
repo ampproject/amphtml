@@ -148,7 +148,7 @@ export let TestSpec;
 /**
  * An object specifying the configuration of an AmpFixture.
  *
- * - ampdoc: "single", "shadow", "multi", "none".
+ * - ampdoc: "single", "shadow", "multi", "none", "fie".
  *
  * @typedef {{
  *   runtimeOn: (boolean|undefined),

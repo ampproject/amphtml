@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Registration and getter functions for AMP services.
+ *
+ * Invariant: Service getters never return null for registered services.
+ */
+
 // Requires polyfills in immediate side effect.
 import './polyfills';
 import {dev} from './log';
@@ -68,36 +74,25 @@ export class EmbeddableService {
   adoptEmbedWindow(unusedEmbedWin) {}
 }
 
-/**
- * Returns a service or null with the given id.
- * @param {!Window} win
- * @param {string} id
- * @return {?Object} The service.
- */
-export function getExistingServiceOrNull(win, id) {
-  win = getTopWindow(win);
-  if (isServiceRegistered(win, id)) {
-    return getServiceInternal(win, id);
-  } else {
-    return null;
-  }
-}
 
 /**
  * Returns a service with the given id. Assumes that it has been registered
  * already.
  * @param {!Window} win
  * @param {string} id
- * @return {!Object} The service.
+ * @param {boolean=} opt_fallbackToTopWin
+ * @return {Object} The service.
  */
-export function getExistingServiceInEmbedScope(win, id) {
+export function getExistingServiceInEmbedScope(win, id, opt_fallbackToTopWin) {
   // First, try to resolve via local (embed) window.
   const local = getLocalExistingServiceForEmbedWinOrNull(win, id);
   if (local) {
     return local;
   }
-  // Fallback to top-level window.
-  return getService(win, id);
+  if (opt_fallbackToTopWin) {
+    return getService(win, id);
+  }
+  return null;
 }
 
 /**
@@ -105,9 +100,11 @@ export function getExistingServiceInEmbedScope(win, id) {
  * already.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string} id
- * @return {!Object} The service.
+ * @param {boolean=} opt_fallbackToTopWin
+ * @return {Object} The service.
  */
-export function getExistingServiceForDocInEmbedScope(nodeOrDoc, id) {
+export function getExistingServiceForDocInEmbedScope(
+    nodeOrDoc, id, opt_fallbackToTopWin) {
   // First, try to resolve via local (embed) window.
   if (nodeOrDoc.nodeType) {
     // If a node is passed, try to resolve via this node.
@@ -118,8 +115,11 @@ export function getExistingServiceForDocInEmbedScope(nodeOrDoc, id) {
       return local;
     }
   }
-  // Fallback to ampdoc.
-  return getServiceForDoc(nodeOrDoc, id);
+  // If an ampdoc is passed or fallback is allowed, continue resolving.
+  if (!nodeOrDoc.nodeType || opt_fallbackToTopWin) {
+    return getServiceForDoc(nodeOrDoc, id);
+  }
+  return null;
 }
 
 /**
@@ -134,13 +134,8 @@ export function installServiceInEmbedScope(embedWin, id, service) {
       'Service override can only be installed in embed window: %s', id);
   dev().assert(!getLocalExistingServiceForEmbedWinOrNull(embedWin, id),
       'Service override has already been installed: %s', id);
-  registerServiceInternal(
-      embedWin,
-      embedWin,
-      id,
-      () => service);
-  // Force service to build
-  getServiceInternal(embedWin, id);
+  registerServiceInternal(embedWin, embedWin, id, () => service);
+  getServiceInternal(embedWin, id); // Force service to build.
 }
 
 /**
@@ -161,21 +156,6 @@ function getLocalExistingServiceForEmbedWinOrNull(embedWin, id) {
 }
 
 /**
- * Returns a service for the given id and window (a per-window singleton).
- * Users should typically wrap this as a special purpose function (e.g.
- * `vsyncFor(win)`) for type safety and because the factory should not be
- * passed around.
- * @param {!Window} win
- * @param {string} id of the service.
- * @template T
- * @return {T}
- */
-export function getService(win, id) {
-  win = getTopWindow(win);
-  return getServiceInternal(win, id);
-}
-
-/**
  * Registers a service given a class to be used as implementation.
  * @param {!Window} win
  * @param {string} id of the service.
@@ -192,6 +172,7 @@ export function registerServiceBuilder(win,
     getServiceInternal(win, id);
   }
 }
+
 
 /**
  * Returns a service and registers it given a class to be used as
@@ -213,6 +194,23 @@ export function registerServiceBuilderForDoc(nodeOrDoc,
   }
 }
 
+
+/**
+ * Returns a service for the given id and window (a per-window singleton).
+ * Users should typically wrap this as a special purpose function (e.g.
+ * `vsyncFor(win)`) for type safety and because the factory should not be
+ * passed around.
+ * @param {!Window} win
+ * @param {string} id of the service.
+ * @template T
+ * @return {T}
+ */
+export function getService(win, id) {
+  win = getTopWindow(win);
+  return getServiceInternal(win, id);
+}
+
+
 /**
  * Returns a promise for a service for the given id and window. Also expects
  * an element that has the actual implementation. The promise resolves when
@@ -230,6 +228,22 @@ export function getServicePromise(win, id) {
 
 
 /**
+ * Returns a service or null with the given id.
+ * @param {!Window} win
+ * @param {string} id
+ * @return {?Object} The service.
+ */
+export function getExistingServiceOrNull(win, id) {
+  win = getTopWindow(win);
+  if (isServiceRegistered(win, id)) {
+    return getServiceInternal(win, id);
+  } else {
+    return null;
+  }
+}
+
+
+/**
  * Like getServicePromise but returns null if the service was never registered.
  * @param {!Window} win
  * @param {string} id of the service.
@@ -238,6 +252,7 @@ export function getServicePromise(win, id) {
 export function getServicePromiseOrNull(win, id) {
   return getServicePromiseOrNullInternal(win, id);
 }
+
 
 /**
  * Returns a service for the given id and ampdoc (a per-ampdoc singleton).
@@ -253,6 +268,7 @@ export function getServiceForDoc(nodeOrDoc, id) {
   return getServiceInternal(holder, id);
 }
 
+
 /**
  * Returns a promise for a service for the given id and ampdoc. Also expects
  * a service that has the actual implementation. The promise resolves when
@@ -263,8 +279,7 @@ export function getServiceForDoc(nodeOrDoc, id) {
  */
 export function getServicePromiseForDoc(nodeOrDoc, id) {
   return getServicePromiseInternal(
-      getAmpdocServiceHolder(nodeOrDoc),
-      id);
+      getAmpdocServiceHolder(nodeOrDoc), id);
 }
 
 
@@ -277,8 +292,7 @@ export function getServicePromiseForDoc(nodeOrDoc, id) {
  */
 export function getServicePromiseOrNullForDoc(nodeOrDoc, id) {
   return getServicePromiseOrNullInternal(
-      getAmpdocServiceHolder(nodeOrDoc),
-      id);
+      getAmpdocServiceHolder(nodeOrDoc), id);
 }
 
 /**

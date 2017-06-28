@@ -19,7 +19,6 @@ import {AmpEvents} from '../../../../src/amp-events';
 import {Bind} from '../bind-impl';
 import {BindEvents} from '../bind-events';
 import {chunkInstanceForTesting} from '../../../../src/chunk';
-import {installTimerService} from '../../../../src/service/timer-impl';
 import {toArray} from '../../../../src/types';
 import {user} from '../../../../src/log';
 
@@ -109,8 +108,41 @@ function waitForEvent_(bind, env) {
 // Unit tests
 ////////////////////////////////////////////////////////////////////////////////
 
-describes.realWin('Bind', {
+describes.realWin('Bind in shadow ampdoc', {
   amp: {
+    ampdoc: 'shadow',
+    runtimeOn: false,
+  },
+}, env => {
+  let bind;
+  let parent;
+
+  let createElementWithBinding;
+  let onBindReady;
+
+  beforeEach(() => {
+    // Make sure we have a chunk instance for testing.
+    chunkInstanceForTesting(env.ampdoc);
+
+    bind = new Bind(env.ampdoc);
+    parent = env.ampdoc.getBody();
+
+    createElementWithBinding = createElementWithBinding_(parent, env);
+    onBindReady = onBindReady_(bind, env);
+  });
+
+  it('should scan for bindings when ampdoc is ready', () => {
+    createElementWithBinding('[text]="1+1"');
+    expect(bind.boundElements_.length).to.equal(0);
+    return onBindReady().then(() => {
+      expect(bind.boundElements_.length).to.equal(1);
+    });
+  });
+});
+
+describes.realWin('Bind in single ampdoc', {
+  amp: {
+    ampdoc: 'single',
     runtimeOn: false,
   },
 }, env => {
@@ -124,8 +156,6 @@ describes.realWin('Bind', {
   let waitForEvent;
 
   beforeEach(() => {
-    installTimerService(env.win);
-
     // Make sure we have a chunk instance for testing.
     chunkInstanceForTesting(env.ampdoc);
 
