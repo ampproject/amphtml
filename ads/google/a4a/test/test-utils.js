@@ -82,7 +82,6 @@ describe('Google A4A utils', () => {
           .to.eventually.deep.equal({
             creative,
             signature: base64UrlDecodeToBytes('AQAB'),
-            size: null,
           });
     });
 
@@ -90,7 +89,6 @@ describe('Google A4A utils', () => {
       const creative = 'some test data';
       const headerData = {
         'X-AmpAdSignature': 'AQAB',
-        'X-CreativeSize': '320x50',
       };
       const headers = {
         has: h => { return h in headerData; },
@@ -100,7 +98,6 @@ describe('Google A4A utils', () => {
           .to.eventually.deep.equal({
             creative,
             signature: base64UrlDecodeToBytes('AQAB'),
-            size: {width: 320, height: 50},
           });
     });
 
@@ -111,11 +108,7 @@ describe('Google A4A utils', () => {
         get: h => { throw new Error('Tried to get ' + h); },
       };
       return expect(extractGoogleAdCreativeAndSignature(creative, headers))
-          .to.eventually.deep.equal({
-            creative,
-            signature: null,
-            size: null,
-          });
+          .to.eventually.deep.equal({creative, signature: null});
     });
   });
 
