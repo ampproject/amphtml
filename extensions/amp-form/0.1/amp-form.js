@@ -191,8 +191,9 @@ export class AmpForm {
     this.verifier_ = getFormVerifier(
         this.form_, () => this.handleXhrVerify_());
 
+    // TODO(choumx, #9699): HIGH.
     this.actions_.installActionHandler(
-        this.form_, this.actionHandler_.bind(this), ActionTrust.HIGH);
+        this.form_, this.actionHandler_.bind(this), ActionTrust.MEDIUM);
     this.installEventHandlers_();
 
     /** @private {?Promise} */
@@ -348,7 +349,7 @@ export class AmpForm {
       event.preventDefault();
     }
     // Submits caused by user input have high trust.
-    this.submit_(ActionTrust.HIGH);
+    this.submit_(ActionTrust.MEDIUM); // TODO(choumx, #9699): HIGH.
   }
 
   /**
