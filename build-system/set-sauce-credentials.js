@@ -48,6 +48,7 @@ function main() {
         'SAUCE_USERNAME=' + username +
         ' SAUCE_ACCESS_KEY=' + access_key);
   } else {
+    // In this case, the access key is set in .travis.yml via JWT.
     console/*OK*/.log('SAUCE_USERNAME=amphtml');
   }
   return 0;
