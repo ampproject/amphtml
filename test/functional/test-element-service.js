@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {FakeWindow} from '../../testing/fake-dom';
 import {
   markElementScheduledForTesting,
   resetScheduledElementForTesting,
@@ -23,10 +24,15 @@ import {
   getElementServiceIfAvailable,
   getElementServiceForDoc,
   getElementServiceIfAvailableForDoc,
+  getElementServiceForDocInEmbedScope,
+  getElementServiceIfAvailableForDocInEmbedScope,
 } from '../../src/element-service';
 import {
+  installServiceInEmbedScope,
   registerServiceBuilder,
+  registerServiceBuilderForDoc,
   resetServiceForTesting,
+  setParentWindow,
 } from '../../src/service';
 
 describe('getElementServiceIfAvailable()', () => {
@@ -321,5 +327,88 @@ describes.realWin('in single ampdoc', {
         expect(service).to.deep.equal({str: 'fake1'});
       });
     });
+  });
+});
+
+describes.fakeWin('in embed scope', {amp: true}, env => {
+  let win;
+  let embedWin;
+  let nodeInEmbedWin;
+  let nodeInTopWin;
+  let service;
+
+  beforeEach(() => {
+    win = env.win;
+
+    embedWin = new FakeWindow();
+    setParentWindow(embedWin, win);
+
+    nodeInEmbedWin = {
+      nodeType: Node.ELEMENT_NODE,
+      ownerDocument: {
+        defaultView: embedWin,
+      },
+    };
+    nodeInTopWin = {
+      nodeType: Node.ELEMENT_NODE,
+      ownerDocument: {
+        defaultView: win,
+      },
+    };
+
+    service = {name: 'fake-service-object'};
+  });
+
+  it('should return existing service', () => {
+    installServiceInEmbedScope(embedWin, 'foo', service);
+    return getElementServiceIfAvailableForDocInEmbedScope(
+        nodeInEmbedWin, 'foo', 'amp-foo').then(returned => {
+          expect(returned).to.equal(service);
+        });
+  });
+
+  it('should return service for scheduled element', () => {
+    markElementScheduledForTesting(embedWin, 'amp-foo');
+    const promise = getElementServiceIfAvailableForDocInEmbedScope(
+        nodeInEmbedWin, 'foo', 'amp-foo');
+    installServiceInEmbedScope(embedWin, 'foo', service);
+    return promise.then(returned => {
+      expect(returned).to.equal(service);
+    });
+  });
+
+  it('should return null if win is top window', () => {
+    markElementScheduledForTesting(win, 'amp-foo');
+    // Use `registerServiceBuilder` since `installServiceInEmbedScope` will
+    // fail for top windows.
+    registerServiceBuilder(win, 'foo', () => service);
+    return getElementServiceIfAvailableForDocInEmbedScope(
+        nodeInTopWin, 'foo', 'amp-foo').then(returned => {
+          expect(returned).to.be.null;
+        });
+  });
+
+  it('"if available" should not fall back to top window\'s service', () => {
+    markElementScheduledForTesting(win, 'amp-foo');
+    // Use `registerServiceBuilder` since `installServiceInEmbedScope` will
+    // fail for top windows.
+    registerServiceBuilder(win, 'foo', () => service,
+        /* opt_instantiate */ true);
+    return getElementServiceIfAvailableForDocInEmbedScope(
+        nodeInEmbedWin, 'foo', 'amp-foo').then(returned => {
+          expect(returned).to.be.null;
+        });
+  });
+
+  it('should fall back to top window\'s service', () => {
+    markElementScheduledForTesting(win, 'amp-foo');
+    // Use `registerServiceBuilder` since `installServiceInEmbedScope` will
+    // fail for top windows.
+    registerServiceBuilderForDoc(env.ampdoc, 'foo', () => service,
+        /* opt_instantiate */ true);
+    return getElementServiceForDocInEmbedScope(
+        nodeInEmbedWin, 'foo', 'amp-foo').then(returned => {
+          expect(returned).to.equal(service);
+        });
   });
 });
