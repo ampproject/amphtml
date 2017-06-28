@@ -211,7 +211,7 @@ export class AmpSlideScroll extends BaseSlides {
       if (args) {
         this.showSlideWhenReady(args['index']);
       }
-    }, ActionTrust.LOW);
+    }, ActionTrust.MEDIUM); // TODO(choumx, #9699): LOW.
   }
 
   /** @override */
