@@ -165,19 +165,20 @@ These may be removed in future versions of AMP
 `<xmp>`  
 
 ## Amp Specific Tags
-`<amp-img>`  
-`<amp-video>`  
-`<amp-ad>`  
-`<amp-fit-text>`  
-`<amp-font>`  
-`<amp-carousel>`  
-`<amp-anim>`  
-`<amp-youtube>`  
-`<amp-twitter>`  
-`<amp-vine>`
-`<amp-instagram>`  
-`<amp-iframe>`  
-`<amp-pixel>`  
-`<amp-audio>`  
-`<amp-lightbox>`  
+`<amp-ad>`
+`<amp-anim>`
+`<amp-audio>`
+`<amp-carousel>`
+`<amp-fit-text>`
+`<amp-font>`
+`<amp-iframe>`
 `<amp-image-lightbox>`
+`<amp-img>`
+`<amp-instagram>`
+`<amp-lightbox>`
+`<amp-pixel>`
+`<amp-samba-player>`
+`<amp-twitter>`
+`<amp-video>`
+`<amp-vine>`
+`<amp-youtube>`

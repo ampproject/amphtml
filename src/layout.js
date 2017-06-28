@@ -90,6 +90,7 @@ export const LOADING_ELEMENTS_ = {
   'AMP-OOYALA-PLAYER': true,
   'AMP-PINTEREST': true,
   'AMP-PLAYBUZZ': true,
+  'AMP-SAMBA-PLAYER': true,
   'AMP-VIDEO': true,
   'AMP-YOUTUBE': true,
 };

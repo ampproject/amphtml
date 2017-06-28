@@ -61,6 +61,7 @@ describe.configure().skipSauceLabs().run('example', function() {
     'instagram.amp.html',
     'ooyalaplayer.amp.html',
     'released.amp.html',
+    'samba-player.amp.html',
     'soundcloud.amp.html',
     'springboard-player.amp.html',
     'twitter.amp.html',
