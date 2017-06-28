@@ -405,6 +405,9 @@ function createFakeVideoPlayerClass(win) {
 
     /** @override */
     layoutCallback() {
+      const iframe = this.element.ownerDocument.createElement('iframe');
+      this.element.appendChild(iframe);
+
       return Promise.resolve().then(() => {
         this.element.dispatchCustomEvent(VideoEvents.LOAD);
       });
