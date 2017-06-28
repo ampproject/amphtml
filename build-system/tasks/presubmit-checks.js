@@ -318,6 +318,7 @@ var forbiddenTerms = {
       '3p/ampcontext.js',
       '3p/ampcontext-integration.js',
       'dist.3p/current/integration.js', // includes previous
+      'extensions/amp-analytics/0.1/transport.js',
     ],
   },
   '\\.sendMessageAwaitResponse\\(': {
