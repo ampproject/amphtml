@@ -174,6 +174,10 @@ For example, instead of specifying `width="900"` and `height="675"`, you can jus
 </amp-iframe>
 </div>
 
+#### Maintaining the aspect ratio for images with unknown dimensions
+
+The AMP layout system requires the aspect ratio of an image in advance before fetching the image; however, in some cases you might not know the image's dimensions. To display images with unknown dimensions and maintain the aspect ratios, combine AMP's [`fill`](https://www.ampproject.org/docs/guides/responsive/control_layout#the-layout-attribute) layout with the [`object-fit`](https://css-tricks.com/almanac/properties/o/object-fit/) CSS property. For more information, see AMP By Example's [How to support images with unknown dimensions](https://ampbyexample.com/advanced/how_to_support_images_with_unknown_dimensions).
+
 ## Validation
 
 See [amp-img rules](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii) in the AMP validator specification.
