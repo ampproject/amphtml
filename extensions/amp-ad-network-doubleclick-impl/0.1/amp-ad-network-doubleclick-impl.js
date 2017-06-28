@@ -348,7 +348,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   getAdUrl() {
     if (this.iframe && !this.isRefreshing) {
-      dev().warn(TAG, `Frame already exists, sra: ${this.useSra_}`);
+      dev().warn(TAG, `Frame already exists, sra: ${this.useSra}`);
       return '';
     }
     // TODO(keithwrightbos): SRA blocks currently unnecessarily generate full
