@@ -69,7 +69,7 @@ import {insertAnalyticsElement} from '../../../src/analytics';
 import {setStyles} from '../../../src/style';
 import {utf8Encode} from '../../../src/utils/bytes';
 import {deepMerge} from '../../../src/utils/object';
-import {cancellation, isCancellation} from '../../../src/error';
+import {isCancellation} from '../../../src/error';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -353,8 +353,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       rtcConfig = tryParseJson(ampRtcPageElement.innerHTML);
       if (rtcConfig && typeof rtcConfig == 'object'
       && !!rtcConfig['doubleclick']) {
-        this.sendRtcRequestPromise_(/** @type {!Object} */(
-          rtcConfig['doubleclick']));
+        rtcRequestPromise = this.sendRtcRequestPromise_(/** @type {!Object} */(
+            rtcConfig['doubleclick']));
       }
     }
     // TODO(keithwrightbos): SRA blocks currently unnecessarily generate full
@@ -380,7 +380,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         if (rtcResponse) {
           if (rtcResponse != RTC_ERROR && !!rtcResponse['targeting']) {
             const targeting = deepMerge(this.jsonTargeting_['targeting'] || {},
-                                        rtcResponse['targeting'] || {});
+            rtcResponse['targeting'] || {});
             const exclusions = deepMerge(
                 this.jsonTargeting_['categoryExclusions'] || {},
                 rtcResponse['exclusions'] || {});
@@ -556,7 +556,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     headers.append('Cache-Control', 'max-age=0');
 
     const xhrInit = {
-      credentials : 'include'
+      credentials: 'include',
     };
 
     if (noCache) {
@@ -564,15 +564,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     const rtcResponse = xhrFor(this.win).fetchJson(endpoint, xhrInit);
     return rtcPromise = timerFor(window).timeoutPromise(
-      RTC_TIMEOUT, rtcResponse).then(res => {
-        if (!noCache) {
-          xhrFor(this.win).fetchJson(endpoint, {
-            credentials: 'include',
-            headers,
-          });
-        }
-        // Redirects and non-200 status codes are forbidden for RTC.
-        return (!res.redirected && res.status == 200) ? res.json() : RTC_ERROR;
+        RTC_TIMEOUT, rtcResponse).then(res => {
+          if (!noCache) {
+            xhrFor(this.win).fetchJson(endpoint, {
+              credentials: 'include',
+              headers,
+            });
+          }
+          // Redirects and non-200 status codes are forbidden for RTC.
+          return (!res.redirected && res.status == 200) ? res.json() : RTC_ERROR;
       }).catch(err => {
         const errorUrl = rtcDblckConfig['errorReportingUrl'];
         if (errorUrl) {
@@ -801,12 +801,12 @@ export function constructSRABlockParameters(instances) {
  */
 function getPageLevelParameters_(win, doc, startTime, isSra) {
   pageLevelParameters_ = pageLevelParameters_ || googlePageParameters(
-    win, doc, startTime, 'ldjh').then(pageLevelParameters => {
-      const parameters = Object.assign({}, PAGE_LEVEL_PARAMS_);
-      parameters['impl'] = isSra ? 'fifs' : 'ifr';
-      return Object.assign(parameters, pageLevelParameters);
-    });
-  return pageLevelParameters_;
+      win, doc, startTime, 'ldjh').then(pageLevelParameters => {
+        const parameters = Object.assign({}, PAGE_LEVEL_PARAMS_);
+        parameters['impl'] = isSra ? 'fifs' : 'ifr';
+        return Object.assign(parameters, pageLevelParameters);
+      });
+      return pageLevelParameters_;
 }
 
 /**
