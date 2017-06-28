@@ -16,7 +16,6 @@
 
 import {ampdocServiceFor} from '../../src/ampdoc';
 import {
-  cidForDoc,
   extensionsFor,
   timerFor,
   viewerForDoc,
@@ -24,7 +23,6 @@ import {
 import {
   cidServiceForDocForTesting,
   getProxySourceOrigin,
-  viewerBaseCid,
 } from '../../src/service/cid-impl';
 import {installCryptoService, Crypto} from '../../src/service/crypto-impl';
 import {cryptoFor} from '../../src/crypto';
