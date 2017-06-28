@@ -40,7 +40,6 @@ describe('Ad loader', () => {
     registryBackup = Object.create(null);
     Object.keys(adConfig).forEach(k => {
       registryBackup[k] = adConfig[k];
-      delete adConfig[k];
     });
   });
 
