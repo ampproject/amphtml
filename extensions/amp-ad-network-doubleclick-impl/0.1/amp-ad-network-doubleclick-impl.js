@@ -78,8 +78,11 @@ const TAG = 'amp-ad-network-doubleclick-impl';
 const DOUBLECLICK_BASE_URL =
     'https://securepubads.g.doubleclick.net/gampad/ads';
 
-/** @const {string} */
-const RTC_ERROR = 'RTC_ERROR';
+/** @const {Object} */
+const RTC_ERROR = {
+  XHR: 'Bad XHR Request',
+  BAD_RESPONSE: 'Bad XHR Response',
+};
 /** @const {number} */
 const RTC_TIMEOUT = 1000;
 
@@ -368,19 +371,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const pageLevelParametersPromise = getPageLevelParameters_(
         this.win, this.getAmpDoc(), startTime);
     const blockParameters = this.getBlockParameters_();
-    let parameters;
 
     return Promise.all(
       [pageLevelParametersPromise, rtcRequestPromise]).then(values => {
         const pageLevelParameters = values[0];
         const rtcResponse = values[1];
-
-        parameters = Object.assign(blockParameters, pageLevelParameters);
+        const parameters = Object.assign(blockParameters, pageLevelParameters);
 
         if (rtcResponse) {
-          if (rtcResponse != RTC_ERROR && !!rtcResponse['targeting']) {
+          if (!!rtcResponse['targeting']) {
             const targeting = deepMerge(this.jsonTargeting_['targeting'] || {},
-            rtcResponse['targeting'] || {});
+                rtcResponse['targeting'] || {});
             const exclusions = deepMerge(
                 this.jsonTargeting_['categoryExclusions'] || {},
                 rtcResponse['exclusions'] || {});
@@ -549,19 +550,22 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (rtcPromise) {
       return rtcPromise;
     }
+    const errorUrl = rtcDblckConfig['errorReportingUrl'];
     const endpoint = rtcDblckConfig['endpoint'];
     const noCache = (rtcDblckConfig['noCache'] === true);
 
+    if (!endpoint) {
+      this.sendRtcErrorPing(RTC_ERROR.BAD_ENDPOINT, errorUrl);
+    }
+
     const headers = new Headers();
     headers.append('Cache-Control', 'max-age=0');
-
-    const xhrInit = {
-      credentials: 'include',
-    };
+    const xhrInit = {credentials: 'include'};
 
     if (noCache) {
       xhrInit.headers = headers;
     }
+
     const rtcResponse = xhrFor(this.win).fetchJson(endpoint, xhrInit);
     return rtcPromise = timerFor(window).timeoutPromise(
         RTC_TIMEOUT, rtcResponse).then(res => {
@@ -572,15 +576,22 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             });
           }
           // Redirects and non-200 status codes are forbidden for RTC.
-          return (!res.redirected && res.status == 200) ? res.json() : RTC_ERROR;
-      }).catch(err => {
-        const errorUrl = rtcDblckConfig['errorReportingUrl'];
-        if (errorUrl) {
-          // TODO : Log the error to the pub server
-          console.log('Issue');
-        }
-        return RTC_ERROR;
-      });
+          if (!res.redirected && res.status == 200) {
+            return res.json();
+          } else {
+            this.sendRtcErrorPing(RTC_ERROR.BAD_RESPONSE, errorUrl);
+            return null;
+          }
+        }).catch(() => {
+          this.sendRtcErrorPing(RTC_ERROR.XHR, errorUrl);
+          return null;
+        });
+  }
+
+  sendRtcErrorPing(error, errorUrl) {
+    // DO NOT SUBMIT
+    // Need to actually implement this error ping function.
+    console.log(`RTC Error: ${error}`);
   }
 
   /** @override */
@@ -806,7 +817,7 @@ function getPageLevelParameters_(win, doc, startTime, isSra) {
         parameters['impl'] = isSra ? 'fifs' : 'ifr';
         return Object.assign(parameters, pageLevelParameters);
       });
-      return pageLevelParameters_;
+  return pageLevelParameters_;
 }
 
 /**
