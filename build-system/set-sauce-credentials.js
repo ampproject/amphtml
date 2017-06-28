@@ -38,9 +38,6 @@ function main() {
   let committer = getStdout(`git log -1 --pretty=format:'%ae'`).trim();
   let credentials = JSON.parse(fs.readFileSync(sauceCredsFile)).credentials;
   if (!credentials) {
-    console/*OK*/.log(fileLogPrefix, util.colors.red('ERROR:'),
-        'Could not load Sauce Labs credentials from',
-        util.colors.cyan(sauceCredsFile));
     return 1;
   }
 
@@ -48,8 +45,10 @@ function main() {
     let username = credentials[committer].username;
     let access_key = atob(credentials[committer].access_key_encoded).trim();
     console/*OK*/.log(
-        'export SAUCE_USERNAME=' + username +
+        'SAUCE_USERNAME=' + username +
         ' SAUCE_ACCESS_KEY=' + access_key);
+  } else {
+    console/*OK*/.log('SAUCE_USERNAME=amphtml');
   }
   return 0;
 }
