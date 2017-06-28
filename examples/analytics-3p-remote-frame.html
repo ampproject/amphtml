@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Requests Frame</title>
+    <script>
+      /**
+       * To receive analytics events in a third-party frame, you must
+       * implement this method, with this signature. Within that method, you
+       * must create a function which processes the analytics events, and
+       * pass that function to the registerAmpAnalytics3pEventsListener() method
+       * of the object which is passed as a parameter to
+       * onNewAmpAnalyticsInstance().
+       * @param ampAnalytics  Call registerAmpAnalyticsEventListener() on this,
+       * passing your function which will receive the analytics events.
+       */
+      window.onNewAmpAnalyticsInstance = ampAnalytics => {
+        ampAnalytics.registerAmpAnalytics3pEventsListener(events => {
+          events.forEach(event => {
+            // Now, do something meaningful with the AMP Analytics event
+            console.log("Received an event: " + event +
+              ", and my extra data is: " +
+              ampAnalytics.getExtraData());
+            ampAnalytics.sendMessageToCreative(
+              {'status': 'received', 'somethingElse': '42'});
+          });
+        });
+      };
+
+      // Load the script specified in the iframe’s name attribute:
+      script = document.createElement('script');
+      script.src = 'https://3p.ampproject.net' +
+        JSON.parse(window.name).scriptSrc;
+      document.head.appendChild(script);
+      // The script will be loaded, and will call onNewAmpAnalyticsInstance()
+    </script>
+  </head>
+  <!-- The frame will not be visible, so there is no need for a body tag. -->
+</html>
