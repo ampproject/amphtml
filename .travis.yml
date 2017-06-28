@@ -46,6 +46,7 @@ matrix:
     - env: BUILD_SHARD="integration_tests"
       before_install:
         - export `node build-system/get-sauce-credentials.js`
+        - echo $SAUCE_USERNAME
       before_script:
         - pip install --user protobuf
       addons:
