@@ -46,7 +46,7 @@ matrix:
         - gem install poltergeist
     - env: BUILD_SHARD="integration_tests"
       before_install:
-        - node build-system/set-sauce-credentials.js
+        - `node build-system/set-sauce-credentials.js`
       before_script:
         - pip install --user protobuf
       addons:

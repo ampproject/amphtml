@@ -16,8 +16,9 @@
 'use strict';
 
 /**
- * @fileoverview This file overrides the amphtml Sauce Labs credentials with
- * per-user credentials if available.
+ * @fileoverview This file extracts the committer's per-user Sauce Labs
+ * credentials if available, so they can be used to override the amphtml Sauce
+ * Labs credentials.
  */
 const atob = require('atob');
 const fs = require('fs');
@@ -30,14 +31,14 @@ const sauceCredsFile = path.resolve('build-system/sauce-credentials.json');
 
 
 /**
- * Connect to sauce labs using per-user credentials if available, and amphtml
- * credentials if not available.
+ * Prints out per-user Sauce labs credentials if available, so they can be set
+ * in .travis.yml.
  */
 function main() {
   let committer = getStdout(`git log -1 --pretty=format:'%ae'`).trim();
   let credentials = JSON.parse(fs.readFileSync(sauceCredsFile)).credentials;
-  if (credentials === null) {
-    util.log(fileLogPrefix, util.colors.red('ERROR:'),
+  if (!credentials) {
+    console/*OK*/.log(fileLogPrefix, util.colors.red('ERROR:'),
         'Could not load Sauce Labs credentials from',
         util.colors.cyan(sauceCredsFile));
     return 1;
@@ -46,18 +47,9 @@ function main() {
   if (credentials[committer]) {
     let username = credentials[committer].username;
     let access_key = atob(credentials[committer].access_key_encoded).trim();
-    util.log(fileLogPrefix,
-        'Using Sauce Labs credentials for', util.colors.cyan(committer),
-        'with username', util.colors.cyan(username));
-    process.env['SAUCE_USERNAME'] = username;
-    process.env['SAUCE_ACCESS_KEY'] = access_key;
-  } else {
-    util.log(fileLogPrefix,
-        'Could not find Sauce Labs credentials for',
-        util.colors.cyan(committer),
-        '(falling back to',
-        util.colors.cyan(process.env['SAUCE_USERNAME']),
-        'credentials)');
+    console/*OK*/.log(
+        'export SAUCE_USERNAME=' + username +
+        ' SAUCE_ACCESS_KEY=' + access_key);
   }
   return 0;
 }
