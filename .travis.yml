@@ -28,6 +28,8 @@ branches:
     - /^amp-release-.*$/
 env:
   global:
+    - SAUCE_USERNAME=`node build-system/get-sauce-credentials.js --username`
+    - SAUCE_ACCESS_KEY_ENCRYPTED=`node build-system/get-sauce-credentials.js --access_key_encrypted`
     - NPM_CONFIG_PROGRESS="false"
 matrix:
   include:
@@ -44,8 +46,6 @@ matrix:
         - gem install phantomjs
         - gem install poltergeist
     - env: BUILD_SHARD="integration_tests"
-      before_install:
-        - export `node build-system/get-sauce-credentials.js`
       before_script:
         - pip install --user protobuf
       addons:

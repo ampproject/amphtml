@@ -30,8 +30,10 @@ const sauceCredsFile = path.resolve('build-system/sauce-credentials.json');
 /**
  * Prints out per-user Sauce labs credentials if available, so they can be set
  * in .travis.yml.
- */
-function main() {
+ *
+ * @param {!Array<string>} argv
+*/
+function main(argv) {
   let committer = getStdout(`git log -1 --pretty=format:'%ae'`).trim();
   let credentials = JSON.parse(fs.readFileSync(sauceCredsFile)).credentials;
   if (!credentials) {
@@ -43,10 +45,14 @@ function main() {
     sauceUser = committer;
   }
   let username = credentials[sauceUser].username;
-  let access_key = credentials[sauceUser].access_key_encrypted.trim();
-  console/*OK*/.log(
-      'SAUCE_USERNAME="' + username +
-      '" SAUCE_ACCESS_KEY_ENCRYPTED="' + access_key + '"');
+  let access_key_encrypted = credentials[sauceUser].access_key_encrypted.trim();
+
+  if (process.argv.includes('--username')) {
+    console/*OK*/.log('"' + username + '"');
+  } else if (process.argv.includes('--access_key_encrypted')) {
+    console/*OK*/.log('"' + access_key_encrypted + '"');
+  }
+
   return 0;
 }
 
