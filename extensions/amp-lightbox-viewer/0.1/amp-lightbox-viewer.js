@@ -228,19 +228,24 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       this.descriptionBox_.classList.add('overflow');
       this.vsync_.run({
         measure: state => {
-          state.descBoxHeight = this.descriptionTextArea_./*OK*/scrollHeight;
-          state.descTextAreaHeight = this.descriptionBox_./*OK*/clientHeight;
+          state.descTextAreaHeight =
+              this.descriptionTextArea_./*OK*/scrollHeight;
+          state.descBoxHeight = this.descriptionBox_./*OK*/clientHeight;
         },
         mutate: state => {
-          if (state.descBoxHeight > state.descTextAreaHeight) {
-            setStyle(this.descriptionTextArea_, 'bottom', 'auto');
+          if (state.descTextAreaHeight < state.descBoxHeight) {
+            setStyle(this.descriptionTextArea_, 'position', 'absolute');
+            setStyle(this.descriptionTextArea_, 'bottom', '0');
           }
         },
       }, {});
     } else if (this.descriptionBox_.classList.contains('overflow')) {
-      this.descriptionBox_.classList.remove('overflow');
-      this.descriptionBox_.classList.add('standard');
-      setStyle(this.descriptionTextArea_, 'bottom', '');
+      this.vsync_.mutate(() => {
+        this.descriptionBox_.classList.remove('overflow');
+        this.descriptionBox_.classList.add('standard');
+        setStyle(this.descriptionTextArea_, 'position', '');
+        setStyle(this.descriptionTextArea_, 'bottom', '');
+      });
     }
   }
 
