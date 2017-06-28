@@ -20,13 +20,10 @@
  * credentials if available, so they can be used to override the amphtml Sauce
  * Labs credentials.
  */
-const atob = require('atob');
 const fs = require('fs');
 const getStdout = require('./exec.js').getStdout;
 const path = require('path');
-const util = require('gulp-util');
 
-const fileLogPrefix = util.colors.yellow.bold('set-sauce-credentials.js:');
 const sauceCredsFile = path.resolve('build-system/sauce-credentials.json');
 
 
@@ -41,16 +38,15 @@ function main() {
     return 1;
   }
 
+  let sauceUser = 'amphtml';
   if (credentials[committer]) {
-    let username = credentials[committer].username;
-    let access_key = atob(credentials[committer].access_key_encoded).trim();
-    console/*OK*/.log(
-        'SAUCE_USERNAME=' + username +
-        ' SAUCE_ACCESS_KEY=' + access_key);
-  } else {
-    // In this case, the access key is set in .travis.yml via JWT.
-    console/*OK*/.log('SAUCE_USERNAME=amphtml');
+    sauceUser = committer;
   }
+  let username = credentials[sauceUser].username;
+  let access_key = credentials[sauceUser].access_key_encrypted.trim();
+  console/*OK*/.log(
+      'SAUCE_USERNAME="' + username +
+      '" SAUCE_ACCESS_KEY_ENCRYPTED="' + access_key + '"');
   return 0;
 }
 
