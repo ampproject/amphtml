@@ -30,6 +30,9 @@ let count = {};
 /** @type {string} */
 let overrideBootstrapBaseUrl;
 
+/** @const {string} */
+const TAG = '3p-frame';
+
 /**
  * Produces the attributes for the ad template.
  * @param {!Window} parentWindow
@@ -278,8 +281,7 @@ function getCustomBootstrapBaseUrl(
     return null;
   }
   if (opt_disallowCustom) {
-    user().error(
-        '3p-frame', `3p iframe url disabled for ${opt_type || 'unknown'}`);
+    user().error(TAG, `3p iframe url disabled for ${opt_type || 'unknown'}`);
     return null;
   }
   const url = assertHttpsUrl(meta.getAttribute('content'), meta);
