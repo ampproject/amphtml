@@ -278,7 +278,8 @@ function getCustomBootstrapBaseUrl(
     return null;
   }
   if (opt_disallowCustom) {
-    user().error(`3p iframe url disabled for ${opt_type || 'unknown'}`);
+    user().error(
+        '3p-frame', `3p iframe url disabled for ${opt_type || 'unknown'}`);
     return null;
   }
   const url = assertHttpsUrl(meta.getAttribute('content'), meta);

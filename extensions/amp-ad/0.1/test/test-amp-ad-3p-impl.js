@@ -186,7 +186,6 @@ describe('amp-ad-3p-impl', () => {
       win.document.head.appendChild(meta);
       ad3p.onLayoutMeasure();
       return ad3p.layoutCallback().then(() => {
-        console.log(win.document.querySelector('iframe').src);
         expect(win.document.querySelector('iframe[src="' +
             `${remoteUrl}?$internalRuntimeVersion$"]`)).to.be.ok;
       });
