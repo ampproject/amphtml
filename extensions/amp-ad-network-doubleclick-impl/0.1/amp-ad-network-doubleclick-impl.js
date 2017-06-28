@@ -356,19 +356,21 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // Load amp-analytics extensions
       this.extensions_./*OK*/loadExtension('amp-analytics');
     }
-    const adResponsePromise =
-        extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
-    return adResponsePromise.then(adResponse => {
-      // If the server returned a size, use that, otherwise use the size that
-      // we sent in the ad request.
-      if (adResponse.size) {
-        this.size_ = adResponse.size;
-      } else {
-        adResponse.size = this.size_;
-      }
-      this.handleResize_(adResponse.size.width, adResponse.size.height);
-      return Promise.resolve(adResponse);
-    });
+    return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
+  }
+
+  /** @override */
+  extractSize(responseHeaders) {
+    // If the server returned a size, use that, otherwise use the size that we
+    // sent in the ad request.
+    let size = super.extractSize(responseHeaders);
+    if (size) {
+      this.size_ = size;
+    } else {
+      size = this.size_;
+    }
+    this.handleResize_(size.width, size.height);
+    return size;
   }
 
   /** @override */

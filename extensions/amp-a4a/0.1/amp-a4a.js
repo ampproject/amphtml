@@ -77,6 +77,9 @@ const METADATA_STRING_NO_QUOTES =
 /** @type {string} */
 export const DEFAULT_SAFEFRAME_VERSION = '1-0-9';
 
+/** @const {string} */
+const CREATIVE_SIZE_HEADER = 'X-CreativeSize';
+
 /** @type {string} @visibleForTesting */
 export const RENDERING_TYPE_HEADER = 'X-AmpAdRender';
 
@@ -109,9 +112,11 @@ const SHARED_IFRAME_PROPERTIES = dict({
 /** @typedef {{
  *    creative: ArrayBuffer,
  *    signature: ?Uint8Array,
- *    size: ?{width: number, height: number}
  *  }} */
 export let AdResponseDef;
+
+/** @typedef {{width: number, height: number}} */
+export let SizeInfoDef;
 
 /** @typedef {{
       minifiedCreative: string,
@@ -643,23 +648,26 @@ export class AmpA4A extends AMP.BaseElement {
             };
           });
         })
-        // This block returns the ad creative and signature, if available; null
-        // otherwise.
+        // This block returns the ad creative, signature, and size, if
+        // available; null otherwise.
         /**
-         * @return {!Promise<?{AdResponseDef}>}
+         * @return {?Promise<{creativeParts: !AdResponseDef, size: ?SizeInfoDef}>}
          */
         .then(responseParts => {
           checkStillCurrent();
-          if (responseParts) {
-            this.protectedEmitLifecycleEvent_('extractCreativeAndSignature');
+          if (!responseParts) {
+            return null;
           }
-          return responseParts && this.extractCreativeAndSignature(
-              responseParts.bytes, responseParts.headers);
+          this.protectedEmitLifecycleEvent_('extractCreativeAndSignature');
+          const size = this.extractSize(responseParts.headers);
+          return this.extractCreativeAndSignature(
+              responseParts.bytes, responseParts.headers)
+              .then(creativeParts => ({creativeParts, size}));
         })
         // This block returns the ad creative if it exists and validates as AMP;
         // null otherwise.
         /** @return {!Promise<?ArrayBuffer>} */
-        .then(creativeParts => {
+        .then(creativeData => {
           checkStillCurrent();
           // Keep a handle to the creative body so that we can render into
           // SafeFrame or NameFrame later, if necessary.  TODO(tdrl): Temporary,
@@ -668,10 +676,11 @@ export class AmpA4A extends AMP.BaseElement {
           // src cache issue.  If we decide to keep a SafeFrame-like solution,
           // we should restructure the promise chain to pass this info along
           // more cleanly, without use of an object variable outside the chain.
-          if (!creativeParts) {
+          if (!creativeData) {
             return Promise.resolve();
           }
-          this.creativeSize_ = creativeParts.size || this.creativeSize_;
+          const {creativeParts, size} = creativeData;
+          this.creativeSize_ = size || this.creativeSize_;
           if (this.experimentalNonAmpCreativeRenderMethod_ !=
               XORIGIN_MODE.CLIENT_CACHE &&
               creativeParts.creative) {
@@ -1079,6 +1088,29 @@ export class AmpA4A extends AMP.BaseElement {
   extractCreativeAndSignature(unusedResponseArrayBuffer,
       unusedResponseHeaders) {
     throw new Error('extractCreativeAndSignature not implemented!');
+  }
+
+ /**
+  * Determine the desired size of the creative based on the HTTP response
+  * headers. Must be less than or equal to the original size of the ad slot
+  * along each dimension. May be overridden by network.
+  *
+  * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
+  * @return {?SizeInfoDef}
+  */
+  extractSize(responseHeaders) {
+    const headerValue = responseHeaders.get(CREATIVE_SIZE_HEADER);
+    if (!headerValue) {
+      return null;
+    }
+    const match = /^([0-9]+)x([0-9]+)$/.exec(headerValue);
+    if (!match) {
+      // TODO(@taymonbeal, #9274): replace this with real error reporting
+      user().error(TAG, `Invalid size header: ${headerValue}`);
+      return null;
+    }
+    return /** @type {?SizeInfoDef} */ (
+        {width: Number(match[1]), height: Number(match[2])});
   }
 
   /**
