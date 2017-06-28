@@ -48,7 +48,7 @@ describe('Ad loader', () => {
     Object.keys(a4aRegistryBackup).forEach(k => {
       a4aRegistry[k] = a4aRegistryBackup[k];
     });
-    registryBackup = null;
+    a4aRegistryBackup = null;
     Object.keys(registryBackup).forEach(k => {
       adConfig[k] = registryBackup[k];
     });

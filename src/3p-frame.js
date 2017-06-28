@@ -168,7 +168,7 @@ export function preloadBootstrap(
 
   // While the URL may point to a custom domain, this URL will always be
   // fetched by it.
-  const scriptUrl = getMode(win).localDev
+  const scriptUrl = getMode().localDev
       ? getAdsLocalhost(win) + '/dist.3p/current/integration.js'
       : `${urls.thirdParty}/$internalRuntimeVersion$/f.js`;
   preconnect.preload(scriptUrl, 'script');

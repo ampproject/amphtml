@@ -127,12 +127,6 @@ describe('amp-ad-3p-impl', () => {
       });
     });
 
-    it('should reject if no type attribute provided', () => {
-      ad3p.element.removeAttribute('type');
-      return expect(ad3p.layoutCallback())
-          .to.eventually.be.rejectedWith('type');
-    });
-
     it('should throw on position:fixed', () => {
       ad3p.element.style.position = 'fixed';
       ad3p.onLayoutMeasure();
@@ -207,16 +201,17 @@ describe('amp-ad-3p-impl', () => {
   });
 
   describe('preconnectCallback', () => {
-    it('should add preconnect and prefech to DOM header', () => {
+    it('should add preconnect and prefetch to DOM header', () => {
       ad3p.buildCallback();
       ad3p.preconnectCallback();
       return whenFirstVisible.then(() => {
         const fetches = win.document.querySelectorAll('link[rel=preload]');
         expect(fetches).to.have.length(2);
-        expect(fetches[0]).to.have.property('href',
-            'http://ads.localhost:9876/dist.3p/current/frame.max.html');
-        expect(fetches[1]).to.have.property('href',
-            'http://ads.localhost:9876/dist.3p/current/integration.js');
+        expect(Array.from(fetches).map(link => link.href).sort()).to
+            .jsonEqual([
+              'http://ads.localhost:9876/dist.3p/current/frame.max.html',
+              'http://ads.localhost:9876/dist.3p/current/integration.js',
+            ]);
 
         const preconnects =
             win.document.querySelectorAll('link[rel=preconnect]');
@@ -234,8 +229,9 @@ describe('amp-ad-3p-impl', () => {
       ad3p.buildCallback();
       ad3p.preconnectCallback();
       return whenFirstVisible.then(() => {
-        expect(win.document.querySelector('link[rel=preload]' +
-            `[href="${remoteUrl}?$internalRuntimeVersion$"]`)).to.be.ok;
+        expect(Array.from(win.document.querySelectorAll('link[rel=preload]'))
+            .some(link => link.href == `${remoteUrl}?$internalRuntimeVersion$`))
+            .to.be.true;
       });
     });
 
@@ -248,9 +244,10 @@ describe('amp-ad-3p-impl', () => {
       ad3p.buildCallback();
       ad3p.preconnectCallback();
       return whenFirstVisible.then(() => {
-        expect(win.document.querySelector('link[rel=preload]' +
-            '[href="http://ads.localhost:9876/dist.3p/current/frame.max.html"]'))
-            .to.be.ok;
+        expect(Array.from(win.document.querySelectorAll('link[rel=preload]'))
+            .some(link => link.href ==
+              'http://ads.localhost:9876/dist.3p/current/frame.max.html'))
+            .to.be.true;
       });
     });
   });
