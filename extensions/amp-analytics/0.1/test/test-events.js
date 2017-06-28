@@ -299,6 +299,22 @@ describes.realWin('Events', {amp: 1}, env => {
       });
     });
 
+    it('should not not fire twice from observerable and buffer', function* () {
+      tracker.trigger(
+          new AnalyticsEvent(target, 'custom-event-1', {'order': '1'}));
+      tracker.add(analyticsElement, 'custom-event-1', {}, handler);
+      yield targetReadyPromise;
+      tracker.trigger(
+          new AnalyticsEvent(target, 'custom-event-1', {'order': '2'}));
+      yield targetReadyPromise;
+      clock.tick(1);
+      expect(handler).to.have.callCount(2);
+      expect(handler.firstCall).to.be.calledWith(new AnalyticsEvent(
+          target, 'custom-event-1', {'order': '2'}));
+      expect(handler.secondCall).to.be.calledWith(new AnalyticsEvent(
+          target, 'custom-event-1', {'order': '1'}));
+    });
+
     it('should buffer sandbox events in different list', function* () {
       // Events before listeners added.
       tracker.trigger(new AnalyticsEvent(target, 'sandbox-1-event-1'));
@@ -327,7 +343,7 @@ describes.realWin('Events', {amp: 1}, env => {
       expect(handler).to.be.calledTwice;
     });
 
-    it('should handle all events and keep sandbox buffer order', function* () {
+    it('should handle all events without duplicate trigger', function* () {
       tracker.trigger(
           new AnalyticsEvent(target, 'sandbox-1-event-1', {'order': '1'}));
       tracker.trigger(
@@ -336,6 +352,7 @@ describes.realWin('Events', {amp: 1}, env => {
       yield targetReadyPromise;
       tracker.trigger(
           new AnalyticsEvent(target, 'sandbox-1-event-1', {'order': '3'}));
+      yield targetReadyPromise;
       clock.tick(1);
       expect(tracker.sandboxBuffer_['sandbox-1-event-1']).to.be.undefined;
       tracker.trigger(
@@ -343,11 +360,11 @@ describes.realWin('Events', {amp: 1}, env => {
       yield targetReadyPromise;
       expect(handler).to.have.callCount(4);
       expect(handler.firstCall).to.be.calledWith(new AnalyticsEvent(
-          target, 'sandbox-1-event-1', {'order': '1'}));
-      expect(handler.secondCall).to.be.calledWith(new AnalyticsEvent(
-          target, 'sandbox-1-event-1', {'order': '2'}));
-      expect(handler.thirdCall).to.be.calledWith(new AnalyticsEvent(
           target, 'sandbox-1-event-1', {'order': '3'}));
+      expect(handler.secondCall).to.be.calledWith(new AnalyticsEvent(
+          target, 'sandbox-1-event-1', {'order': '1'}));
+      expect(handler.thirdCall).to.be.calledWith(new AnalyticsEvent(
+          target, 'sandbox-1-event-1', {'order': '2'}));
       expect(handler.lastCall).to.be.calledWith(new AnalyticsEvent(
           target, 'sandbox-1-event-1', {'order': '4'}));
     });

@@ -17,7 +17,7 @@
 import {CommonSignals} from '../../../src/common-signals';
 import {Observable} from '../../../src/observable';
 import {getDataParamsFromAttributes} from '../../../src/dom';
-import {user, dev} from '../../../src/log';
+import {user} from '../../../src/log';
 import {startsWith} from '../../../src/string';
 
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
@@ -157,14 +157,11 @@ export class CustomEventTracker extends EventTracker {
     } else {
       buffer = this.buffer_ && this.buffer_[eventType];
     }
-    const bufferLength = buffer.length;
 
     if (buffer) {
+      const bufferLength = buffer.length;
       targetReady.then(target => {
         setTimeout(() => {
-          // Need to calculate new bufferLength for sandbox event buffer, because
-          // new trigger can arrive during the setTimeout delay.
-          bufferLength = isSandboxEvent ? buffer.length : bufferLength;
           for (let i = 0; i < bufferLength; i++) {
             const event = buffer[i];
             if (target.contains(event.target)) {
@@ -204,33 +201,25 @@ export class CustomEventTracker extends EventTracker {
     const eventType = event.type;
     const isSandboxEvent = startsWith(eventType, 'sandbox-');
     const observables = this.observables_[eventType];
-    dev().assert(this.sandboxBuffer_,
-        'CustomEventTraker sandbox buffer does not exist');
-
-    if (isSandboxEvent) {
-      if (this.sandboxBuffer_[eventType]) {
-        this.sandboxBuffer_[eventType].push(event);
-        return;
-      } else if (!observables) {
-        // Only create buffer if observer not ready yet
-        this.sandboxBuffer_[eventType] = [];
-        this.sandboxBuffer_[eventType].push(event);
-      }
-    }
-
-    // Buffer still exists - enqueue.
-    if (this.buffer_) {
-      let buffer = this.buffer_[event.type];
-      if (!buffer) {
-        buffer = [];
-        this.buffer_[event.type] = buffer;
-      }
-      buffer.push(event);
-    }
 
     // If listeners already present - trigger right away.
     if (observables) {
       observables.fire(event);
+      if (isSandboxEvent) {
+        // No need to buffer sandbox event if handler ready
+        return;
+      }
+    }
+
+    // Create buffer and enqueue buffer if needed
+    if (isSandboxEvent) {
+      this.sandboxBuffer_[eventType] = this.sandboxBuffer_[eventType] || [];
+      this.sandboxBuffer_[eventType].push(event);
+    } else {
+      if (this.buffer_) {
+        this.buffer_[eventType] = this.buffer_[eventType] || [];
+        this.buffer_[eventType].push(event);
+      }
     }
   }
 }
