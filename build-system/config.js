@@ -96,6 +96,7 @@ module.exports = {
     '!{node_modules,build,dist,dist.tools,' +
         'dist.3p/[0-9]*,dist.3p/current-min}/**/*.*',
     '!dist.3p/current/**/ampcontext-lib.js',
+    '!dist.3p/current/**/ampanalytics-lib.js',
     '!validator/dist/**/*.*',
     '!validator/node_modules/**/*.*',
     '!validator/nodejs/node_modules/**/*.*',

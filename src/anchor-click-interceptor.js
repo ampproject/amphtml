@@ -19,6 +19,7 @@ import {
 } from './dom';
 import {dev} from './log';
 import {urlReplacementsForDoc} from './services';
+import {ResponseMap} from './3p-analytics-common';
 
 /** @private @const {string} */
 const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';
@@ -59,6 +60,14 @@ function maybeExpandUrlParams(ampdoc, e) {
     'CLICK_Y': () => {
       return e.pageY;
     },
+    '3PANALYTICS': (frameType, key) => {
+      const responses = ResponseMap.get(ampdoc, frameType,
+        /** @type {!string} */ (target.baseURI));
+      if (responses && responses[key]) {
+        return responses[key];
+      }
+      return '';
+    },
   };
   const newHref = urlReplacementsForDoc(ampdoc).expandSync(
       hrefToExpand, vars, undefined, /* opt_whitelist */ {
@@ -67,6 +76,7 @@ function maybeExpandUrlParams(ampdoc, e) {
         // NOTE: Addition to this whitelist requires additional review.
         'CLICK_X': true,
         'CLICK_Y': true,
+        '3PANALYTICS': true,
       });
   if (newHref != hrefToExpand) {
     // Store original value so that later clicks can be processed with
@@ -81,3 +91,4 @@ function maybeExpandUrlParams(ampdoc, e) {
 export function maybeExpandUrlParamsForTesting(ampdoc, e) {
   maybeExpandUrlParams(ampdoc, e);
 }
+

@@ -284,6 +284,7 @@ var forbiddenTerms = {
     whitelist: [
       '3p/integration.js',
       '3p/ampcontext-lib.js',
+      '3p/ampanalytics-lib.js',
       'ads/alp/install-alp.js',
       'ads/inabox/inabox-host.js',
       'dist.3p/current/integration.js',
@@ -317,7 +318,9 @@ var forbiddenTerms = {
       '3p/iframe-messaging-client.js',
       '3p/ampcontext.js',
       '3p/ampcontext-integration.js',
+      '3p/ampanalytics-lib.js',
       'dist.3p/current/integration.js', // includes previous
+      'extensions/amp-analytics/0.1/transport.js',
     ],
   },
   '\\.sendMessageAwaitResponse\\(': {
