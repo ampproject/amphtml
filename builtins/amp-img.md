@@ -85,7 +85,7 @@ Additional image features like captions can be implemented with standard HTML (f
 {% call callout('Read on', type='read') %}
 Learn more about using `amp-img` from these resources:
 
-- [Placeholders & fallbacks](ttps://www.ampproject.org/docs/guides/responsive/placeholders)
+- [Placeholders & fallbacks](https://www.ampproject.org/docs/guides/responsive/placeholders)
 - [Include Images & Video](https://www.ampproject.org/docs/guides/amp_replacements)
 {% endcall %}
 
