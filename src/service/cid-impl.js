@@ -126,7 +126,7 @@ export class Cid {
       // Getting the CID might involve an HTTP request. We timeout after 10s.
       return timerFor(this.ampdoc.win)
           .timeoutPromise(10000, cidPromise,
-              `Getting cid for "${getCidStruct.scope}" timed out`)
+          `Getting cid for "${getCidStruct.scope}" timed out`)
           .catch(error => {
             rethrowAsync(error);
           });
