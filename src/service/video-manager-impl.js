@@ -19,20 +19,39 @@ import {removeElement} from '../dom.js';
 import {listen, listenOncePromise} from '../event-helper';
 import {dev} from '../log';
 import {getMode} from '../mode';
-import {platformFor} from '../services';
-import {registerServiceBuilderForDoc} from '../service';
+import {registerServiceBuilderForDoc, getServiceForDoc} from '../service';
 import {setStyles} from '../style';
 import {isFiniteNumber} from '../types';
+import {mapRange} from '../utils/math';
 import {VideoEvents, VideoAttributes} from '../video-interface';
-import {viewerForDoc} from '../services';
-import {viewportForDoc} from '../services';
-import {vsyncFor} from '../services';
+import {
+  viewerForDoc,
+  viewportForDoc,
+  vsyncFor,
+  platformFor,
+} from '../services';
+import {
+  installPositionObserverServiceForDoc,
+  PositionObserverFidelity,
+  PositionInViewportEntryDef,
+} from './position-observer-impl';
+import {
+  scopedQuerySelector,
+} from '../dom';
+
 
 /**
  * @const {number} Percentage of the video that should be in viewport before it
  * is considered visible.
  */
 const VISIBILITY_PERCENT = 75;
+
+/**
+ * @const {number} How much to scale the video by when minimized.
+ */
+const DOCK_SCALE = 0.6;
+const DOCK_CLASS = 'i-amphtml-dockable-video-minimizing';
+
 
 /**
  * Playing States
@@ -72,6 +91,21 @@ export const PlayingStates = {
   PAUSED: 'paused',
 };
 
+/**
+* Minimization Positions
+*
+* Internal states used to describe whether the video is inside the viewport
+* or minimizing starting from the bottom or minimizing starting from the top
+*
+* @enum {number}
+*/
+export const MinimizePositions = {
+  DEFAULT: -1,
+  INVIEW: 0,
+  TOP: 1,
+  BOTTOM: 2,
+};
+
 
 /**
  * VideoManager keeps track of all AMP video players that implement
@@ -95,6 +129,9 @@ export class VideoManager {
 
     /** @private {boolean} */
     this.scrollListenerInstalled_ = false;
+
+    /** @private {./position-observer-impl.AmpDocPositionObserver} */
+    this.positionObserver_ = null;
   }
 
   /**
@@ -113,6 +150,7 @@ export class VideoManager {
     this.entries_ = this.entries_ || [];
     const entry = new VideoEntry(this.ampdoc_, video);
     this.maybeInstallVisibilityObserver_(entry);
+    this.maybeInstallPositionObserver_(entry);
     this.entries_.push(entry);
   }
 
@@ -147,7 +185,7 @@ export class VideoManager {
     // TODO(aghassemi): Remove this later. For now, the visibility observer
     // only matters for autoplay videos so no point in monitoring arbitrary
     // videos yet.
-    if (!entry.video.element.hasAttribute(VideoAttributes.AUTOPLAY)) {
+    if (!entry.hasAutoplay) {
       return;
     }
 
@@ -171,6 +209,37 @@ export class VideoManager {
       viewport.onChanged(scrollListener);
       this.scrollListenerInstalled_ = true;
     }
+  }
+
+  /**
+   * Install the necessary listeners to be notified when a video scrolls in the
+   * viewport
+   *
+   * @param {VideoEntry} entry
+   * @private
+   */
+  maybeInstallPositionObserver_(entry) {
+
+    if (!entry.hasDocking) {
+      return;
+    }
+
+    if (!this.positionObserver_) {
+      installPositionObserverServiceForDoc(this.ampdoc_);
+      this.positionObserver_ = getServiceForDoc(
+          this.ampdoc_,
+          'position-observer'
+      );
+    }
+
+
+    this.positionObserver_.observe(
+        entry.video.element,
+        PositionObserverFidelity.HIGH,
+        newPos => {
+          entry.onDockableVideoPositionChanged_(newPos);
+        }
+    );
   }
 
   /**
@@ -212,8 +281,6 @@ export class VideoManager {
     return this.getEntryForVideo_(video).userInteractedWithAutoPlay();
   }
 
-
-
 }
 
 /**
@@ -254,22 +321,42 @@ class VideoEntry {
     const element = dev().assert(video.element);
 
     /** @private {boolean} */
-    this.hasAutoplay_ = element.hasAttribute(VideoAttributes.AUTOPLAY);
-
-    /** @private {boolean} */
     this.userInteractedWithAutoPlay_ = false;
 
     /** @private {boolean} */
     this.playCalledByAutoplay_ = false;
 
+    /** @private {number} */
+    this.initialWidth_ = 0;
+
+    /** @private {number} */
+    this.initialHeight_ = 0;
+
+    /** @private {number} */
+    this.initialLeft_ = 0;
+
+    /** @private {number} */
+    this.minimizePosition_ = MinimizePositions.DEFAULT;
+
+    /** @private {?Element} */
+    this.internalElement_ = null;
+
+    /** @private {Object} */
+    this.internalStyle_ = null;
+
+    /** @private {Object} */
+    this.internalClasses_ = null;
+
+    this.hasDocking = element.hasAttribute(VideoAttributes.DOCK);
+
+    this.hasAutoplay = element.hasAttribute(VideoAttributes.AUTOPLAY);
+
     listenOncePromise(element, VideoEvents.LOAD)
         .then(() => this.videoLoaded_());
-
 
     listen(this.video.element, VideoEvents.PAUSE, this.videoPaused_.bind(this));
 
     listen(this.video.element, VideoEvents.PLAY, this.videoPlayed_.bind(this));
-
 
     // Currently we only register after video player is build.
     this.videoBuilt_();
@@ -281,8 +368,11 @@ class VideoEntry {
    */
   videoBuilt_() {
     this.updateVisibility();
-    if (this.hasAutoplay_) {
+    if (this.hasAutoplay) {
       this.autoplayVideoBuilt_();
+    }
+    if (this.hasDocking) {
+      this.dockableVideoBuilt_();
     }
   }
 
@@ -307,8 +397,18 @@ class VideoEntry {
    * @private
    */
   videoLoaded_() {
-    this.updateVisibility();
     this.loaded_ = true;
+
+    // Get the internal element (the actual video/iframe)
+    this.internalElement_ = scopedQuerySelector(
+        this.video.element,
+        'video, iframe'
+    );
+    // Get its style and classlist
+    this.internalStyle_ = this.internalElement_.style;
+    this.internalClasses_ = this.internalElement_.classList;
+
+    this.updateVisibility();
     if (this.isVisible_) {
       // Handles the case when the video becomes visible before loading
       this.loadedVideoVisibilityChanged_();
@@ -330,10 +430,29 @@ class VideoEntry {
    * @private
    */
   loadedVideoVisibilityChanged_() {
-    if (this.hasAutoplay_) {
+    if (this.hasAutoplay) {
       this.autoplayLoadedVideoVisibilityChanged_();
     }
   }
+
+  /* Docking Behaviour */
+
+  /**
+   * Called when a dockable video is built.
+   * @private
+   */
+  dockableVideoBuilt_() {
+    this.video.element.classList.add('i-amphtml-dockable-video');
+
+    const vidRect = this.video.element./*OK*/getBoundingClientRect();
+
+    this.initialWidth_ = vidRect.width;
+    this.initialHeight_ = vidRect.height;
+    this.initialLeft_ = vidRect.left;
+
+    // TODO(@wassgha) Add video element wrapper here
+  }
+
 
   /* Autoplay Behaviour */
 
@@ -434,6 +553,216 @@ class VideoEntry {
         this.video.pause();
       }
     });
+  }
+
+  /**
+   * Called when the video's position in the viewport changed (at most once per
+   * animation frame)
+   * @param {PositionInViewportEntryDef} newPos
+   * @private
+   */
+  onDockableVideoPositionChanged_(newPos) {
+
+
+    const inViewportHeight = this.calculateDockableVideoPosition_(newPos);
+
+    // Short-circuit the position change handler if the video isn't loaded yet
+    // or is not playing manually while in-line (paused videos need to go
+    // through if they are docked since this method handles the "undocking"
+    // animation)
+    if (!this.loaded_
+      || !this.internalElement_
+      || (
+        this.getPlayingState() != PlayingStates.PLAYING_MANUAL
+        && !this.internalElement_.classList.contains(DOCK_CLASS)
+      )
+    ) {
+      return;
+    }
+
+    // Temporary fix until PositionObserver somehow tracks objects outside of
+    // the viewport
+    if (inViewportHeight == 0
+       && this.getPlayingState() == PlayingStates.PLAYING_MANUAL
+       && this.minimizePosition_ != MinimizePositions.DEFAULT) {
+      this.endDocking_();
+      return;
+    }
+
+    if (
+      // Minimize the video if it's out of view and it has been viewed
+      // at least once before
+      this.minimizePosition_ != MinimizePositions.INVIEW
+      && this.minimizePosition_ != MinimizePositions.DEFAULT
+      && (
+          // Only minimize manually playing videos
+          this.getPlayingState() == PlayingStates.PLAYING_MANUAL
+          || (
+              // .. and paused videos except when the video is about to be
+              // reverted to its inline position
+              this.getPlayingState() == PlayingStates.PAUSED
+              && this.internalElement_.classList.contains(DOCK_CLASS)
+             )
+        )
+      )
+    {
+
+      this.animateDocking_(inViewportHeight);
+
+    } else if (this.minimizePosition_ == MinimizePositions.INVIEW) {
+
+      this.unDockVideo_();
+
+    }
+
+    // Set the initial width and hight when the video is docking
+    // so that we scale relative to the initial video's dimensions
+    if (this.minimizePosition_ != MinimizePositions.INVIEW) {
+      this.internalStyle_.height = this.initialHeight_ + 'px';
+      this.internalStyle_.width = this.initialWidth_ + 'px';
+      this.internalStyle_.maxWidth = this.initialWidth_ + 'px';
+    }
+  }
+
+  /**
+   * Updates the minimization position of the video (in viewport, above or
+   * below viewport) and returns the height of the part of the video that is
+   * currently in the viewport (between 0 and the initial video height).
+   * @param {PositionInViewportEntryDef} newPos
+   * @private
+   * @return {number}
+   */
+  calculateDockableVideoPosition_(newPos) {
+
+    let inViewportHeight = 0;
+
+    if (newPos.positionRect) {
+
+      const docViewTop = newPos.viewportRect.top;
+      const docViewBottom = newPos.viewportRect.bottom;
+
+      const elemTop = newPos.positionRect.top;
+      const elemBottom = newPos.positionRect.bottom;
+
+      // Calculate height currently displayed
+      if (elemTop <= docViewTop) {
+        inViewportHeight = elemBottom - docViewTop;
+        this.minimizePosition_ = MinimizePositions.TOP;
+      } else if (elemBottom >= docViewBottom) {
+        inViewportHeight = docViewBottom - elemTop;
+        this.minimizePosition_ = MinimizePositions.BOTTOM;
+      } else {
+        this.minimizePosition_ = MinimizePositions.INVIEW;
+        inViewportHeight = elemBottom - elemTop;
+      }
+    }
+
+    return inViewportHeight;
+  }
+
+  /**
+   * Performs scroll-bound animations on the video as it is being scrolled
+   * out of the viewport
+   * @param {number} inViewportHeight calculated currently visible video height
+   * @private
+   */
+  animateDocking_(inViewportHeight) {
+    // Minimize the video
+
+    this.video.hideControls();
+    this.internalClasses_.add(DOCK_CLASS);
+    this.internalStyle_.transform = 'scale(' + mapRange(inViewportHeight,
+        0, this.initialHeight_,
+        DOCK_SCALE, 1
+    ) + ')';
+    this.internalStyle_.borderRadius = mapRange(inViewportHeight,
+        this.initialHeight_, 0,
+        0, 6
+    ) + 'px';
+    // Shadow position
+    const sPos = '0px 0px 20px 0px';
+    // Shadow color
+    const sCol = '0, 0, 0'; // rgb black
+    // Shadow opacity
+    const sOpac = mapRange(inViewportHeight,
+        this.initialHeight_, 0,
+        0, 0.3
+    );
+    this.internalStyle_.boxShadow = sPos + ' rgba(' + sCol + ',' + sOpac + ')';
+    this.internalStyle_.left = mapRange(inViewportHeight,
+        this.initialHeight_, 0,
+        this.initialLeft_, 20
+    ) + 'px';
+
+    // Different behavior based on whether the video got minimized
+    // from the top or the bottom
+    if (this.minimizePosition_ == MinimizePositions.TOP) {
+
+      this.internalStyle_.top = mapRange(inViewportHeight,
+          this.initialHeight_, 0,
+          0, 20
+      ) + 'px';
+      this.internalStyle_.bottom = 'auto';
+      this.internalStyle_.transformOrigin = 'top left';
+
+    } else {
+
+      // Revert back to inline viewing
+
+      this.internalStyle_.bottom = mapRange(inViewportHeight,
+          this.initialHeight_, 0,
+          0, 20
+      ) + 'px';
+      this.internalStyle_.top = 'auto';
+      this.internalStyle_.transformOrigin = 'bottom left';
+    }
+
+    // TODO(@wassim) Make minimized video draggable
+  }
+
+  /**
+   * Applies final transformations to the docked video to assert that the final
+   * position and scale of the docked video are correct (in case user scrolls
+   * too fast for startDocking_ to kick in)
+   *
+   * NOTE(@wassgha) : won't be needed if PositionObserver returned the element's
+   * position when it goes out of view.
+   * @private
+   */
+  endDocking_() {
+    // Hide the controls.
+    this.video.hideControls();
+    this.internalClasses_.add(DOCK_CLASS);
+    this.internalStyle_.transform = 'scale(' + DOCK_SCALE + ')';
+    this.internalStyle_.borderRadius = '6px';
+    this.internalStyle_.left = '20px';
+    this.internalStyle_.boxShadow = '0px 0px 20px 0px rgba(0, 0, 0, 0.3)';
+    if (this.minimizePosition_ == MinimizePositions.BOTTOM) {
+      this.minimizePosition_ = MinimizePositions.TOP;
+      this.internalStyle_.bottom = '20px';
+      this.internalStyle_.top = 'auto';
+      this.internalStyle_.transformOrigin = 'bottom left';
+    } else {
+      this.minimizePosition_ = MinimizePositions.BOTTOM;
+      this.internalStyle_.top = '20px';
+      this.internalStyle_.bottom = 'auto';
+      this.internalStyle_.transformOrigin = 'top left';
+    }
+  }
+
+  /**
+   * Restores styling of the video to make it go back to its original inline
+   * position.
+   *
+   * @private
+   */
+  unDockVideo_() {
+    // Restore the video inline
+    this.internalClasses_.remove(DOCK_CLASS);
+    this.internalElement_.setAttribute('style', '');
+    if (!this.hasAutoplay || this.userInteractedWithAutoPlay_) {
+      this.video.showControls();
+    }
   }
 
   /**
