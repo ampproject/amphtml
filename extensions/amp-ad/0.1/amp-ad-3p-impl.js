@@ -134,7 +134,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    */
   preconnectCallback(opt_onLayout) {
     // We always need the bootstrap.
-    preloadBootstrap(this.win, this.preconnect);
+    preloadBootstrap(
+        this.win, this.preconnect, this.element.getAttribute('type'),
+        this.config.remoteHTMLDisabled);
     if (typeof this.config.prefetch == 'string') {
       this.preconnect.preload(this.config.prefetch, 'script');
     } else if (this.config.prefetch) {
@@ -229,7 +231,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       // incrementLoadingAds().
       this.emitLifecycleEvent('adRequestStart');
       const iframe = getIframe(this.element.ownerDocument.defaultView,
-          this.element, undefined, opt_context);
+          this.element, this.element.getAttribute('type'), opt_context,
+          this.config.remoteHTMLDisabled);
       this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(
           this);
       return this.xOriginIframeHandler_.init(iframe);

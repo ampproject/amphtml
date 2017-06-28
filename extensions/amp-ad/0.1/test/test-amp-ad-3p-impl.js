@@ -177,6 +177,34 @@ describe('amp-ad-3p-impl', () => {
         expect(data._context.container).to.equal('AMP-STICKY-AD');
       });
     });
+
+    it('should use custom path', () => {
+      const remoteUrl = 'https://example.com/boot/remote.html';
+      const meta = win.document.createElement('meta');
+      meta.setAttribute('name', 'amp-3p-iframe-src');
+      meta.setAttribute('content', remoteUrl);
+      win.document.head.appendChild(meta);
+      ad3p.onLayoutMeasure();
+      return ad3p.layoutCallback().then(() => {
+        console.log(win.document.querySelector('iframe').src);
+        expect(win.document.querySelector('iframe[src="' +
+            `${remoteUrl}?$internalRuntimeVersion$"]`)).to.be.ok;
+      });
+    });
+
+    it('should use default path if custom disabled', () => {
+      const meta = win.document.createElement('meta');
+      meta.setAttribute('name', 'amp-3p-iframe-src');
+      meta.setAttribute('content', 'https://example.com/boot/remote.html');
+      win.document.head.appendChild(meta);
+      ad3p.config.remoteHTMLDisabled = true;
+      ad3p.onLayoutMeasure();
+      return ad3p.layoutCallback().then(() => {
+        expect(win.document.querySelector('iframe[src="' +
+            'http://ads.localhost:9876/dist.3p/current/frame.max.html"]'))
+            .to.be.ok;
+      });
+    });
   });
 
   describe('preconnectCallback', () => {
@@ -195,6 +223,35 @@ describe('amp-ad-3p-impl', () => {
             win.document.querySelectorAll('link[rel=preconnect]');
         expect(preconnects[preconnects.length - 1]).to.have.property('href',
             'https://testsrc/');
+      });
+    });
+
+    it('should use remote html path for preload', () => {
+      const remoteUrl = 'https://example.com/boot/remote.html';
+      const meta = win.document.createElement('meta');
+      meta.setAttribute('name', 'amp-3p-iframe-src');
+      meta.setAttribute('content', remoteUrl);
+      win.document.head.appendChild(meta);
+      ad3p.buildCallback();
+      ad3p.preconnectCallback();
+      return whenFirstVisible.then(() => {
+        expect(win.document.querySelector('link[rel=preload]' +
+            `[href="${remoteUrl}?$internalRuntimeVersion$"]`)).to.be.ok;
+      });
+    });
+
+    it('should not use remote html path for preload if disabled', () => {
+      const meta = win.document.createElement('meta');
+      meta.setAttribute('name', 'amp-3p-iframe-src');
+      meta.setAttribute('content', 'https://example.com/boot/remote.html');
+      win.document.head.appendChild(meta);
+      ad3p.config.remoteHTMLDisabled = true;
+      ad3p.buildCallback();
+      ad3p.preconnectCallback();
+      return whenFirstVisible.then(() => {
+        expect(win.document.querySelector('link[rel=preload]' +
+            '[href="http://ads.localhost:9876/dist.3p/current/frame.max.html"]'))
+            .to.be.ok;
       });
     });
   });
