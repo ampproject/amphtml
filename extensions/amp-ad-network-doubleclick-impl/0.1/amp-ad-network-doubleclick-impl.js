@@ -347,12 +347,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
 
     const ampRtcPageElement = document.getElementById('amp-rtc');
-    let rtcRequestPromise;
+    let rtcRequestPromise = null;
     let rtcConfig;
     if (ampRtcPageElement) {
       rtcConfig = tryParseJson(ampRtcPageElement.innerHTML);
-      rtcRequestPromise = (rtcConfig && typeof rtcConfig == 'object') ?
-          this.sendRtcRequestPromise_(/** @type {!Object} */(rtcConfig)) : null;
+      if (rtcConfig && typeof rtcConfig == 'object'
+      && !!rtcConfig['doubleclick']) {
+        this.sendRtcRequestPromise_(/** @type {!Object} */(
+          rtcConfig['doubleclick']));
+      }
     }
     // TODO(keithwrightbos): SRA blocks currently unnecessarily generate full
     // ad url.  This could be optimized however non-SRA ad url is required to
@@ -532,43 +535,46 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
    * Sends RTC request as specified by rtcConfig. Returns promise which
    * resolves to the targeting informtation from the request response.
-   * We send two requests. The first request will hit cache if it is
-   * there. The second request will always bypass cache and refresh it.
+   * If the publisher has specified that noCache == true, then we will only
+   * send one RTC request per page, and it will always bypass cache. If
+   * noCache !== true, then we always send two requests. The first will try
+   * to hit browser cache, and the second request will always bypass.
    * This is a way for us to implement a simple stale-while-revalidate
    * model.
-   * @param {!Object} rtcConfig
+   * @param {!Object} rtcDblckConfig
    * @return {?Promise} The rtc targeting info to attach to the ad url.
    * @private
    */
-  sendRtcRequestPromise_(rtcConfig) {
+  sendRtcRequestPromise_(rtcDblckConfig) {
     if (rtcPromise) {
       return rtcPromise;
     }
-    let endpoint;
+    const endpoint = rtcDblckConfig['endpoint'];
+    const noCache = (rtcDblckConfig['noCache'] === true);
 
-    try {
-      endpoint = rtcConfig['doubleclick']['endpoint'];
-    } catch (err) {
-      // report error
-      return null;
+    const headers = new Headers();
+    headers.append('Cache-Control', 'max-age=0');
+
+    const xhrInit = {
+      credentials : 'include'
+    };
+
+    if (noCache) {
+      xhrInit.headers = headers;
     }
-
-    const rtcResponse = xhrFor(this.win).fetchJson(endpoint, {
-      credentials: 'include',
-    });
-
+    const rtcResponse = xhrFor(this.win).fetchJson(endpoint, xhrInit);
     return rtcPromise = timerFor(window).timeoutPromise(
       RTC_TIMEOUT, rtcResponse).then(res => {
-        const headers = new Headers();
-        headers.append('Cache-Control', 'max-age=0');
-        xhrFor(this.win).fetchJson(endpoint, {
-          credentials: 'include',
-          headers,
-        });
-      // Redirects and non-200 status codes are forbidden for RTC.
+        if (!noCache) {
+          xhrFor(this.win).fetchJson(endpoint, {
+            credentials: 'include',
+            headers,
+          });
+        }
+        // Redirects and non-200 status codes are forbidden for RTC.
         return (!res.redirected && res.status == 200) ? res.json() : RTC_ERROR;
       }).catch(err => {
-        const errorUrl = rtcConfig['doubleclick']['errorReportingUrl'];
+        const errorUrl = rtcDblckConfig['errorReportingUrl'];
         if (errorUrl) {
           // TODO : Log the error to the pub server
           console.log('Issue');
