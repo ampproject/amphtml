@@ -263,13 +263,13 @@ const command = {
     if (process.env.SAUCE_USERNAME !== 'amphtml') {
       util.log(fileLogPrefix,
           'Using Sauce Labs credentials for', util.colors.cyan(committer),
-          'with username', util.colors.cyan(username));
+          'with username', util.colors.cyan(process.env.SAUCE_USERNAME));
     } else {
       util.log(fileLogPrefix,
           'Could not find Sauce Labs credentials for',
           util.colors.cyan(committer),
           '(falling back to',
-          util.colors.cyan(process.env['SAUCE_USERNAME']),
+          util.colors.cyan(process.env.SAUCE_USERNAME),
           'credentials)');
     }
     timedExecOrDie(
