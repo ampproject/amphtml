@@ -166,6 +166,7 @@ export class Cid {
     const viewer = viewerForDoc(this.ampdoc);
     return viewer.isTrustedViewer().then(trusted => {
       if (!trusted) {
+        rethrowAsync('Ignore CID API from Untrustful Viewer.');
         return;
       }
       return viewer.sendMessageAwaitResponse('cid', {scope});
