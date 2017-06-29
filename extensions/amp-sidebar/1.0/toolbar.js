@@ -38,9 +38,6 @@ export class Toolbar {
     /** @private {Element} */
     this.body_ = this.win_.document.body;
 
-    /** @private {string|undefined} */
-    this.initialBodyTop_ = undefined;
-
     /** @private {number|undefined} */
     this.height_ = undefined;
 
@@ -157,31 +154,6 @@ export class Toolbar {
    * @private
    */
   attemptShow_() {
-
-    // Make room for the toolbar
-    this.vsync_.run({
-      measure: state => {
-        if (this.body_ && (!this.initialBodyTop_)
-        ) {
-          this.initialBodyTop_ = computedStyle(this.win_, this.body_)['top'];
-        }
-        state.toolbarHeight = this.toolbarClone_./*OK*/offsetHeight;
-      },
-      mutate: state => {
-        if (this.body_) {
-          if (this.initialBodyTop_ === 'auto') {
-            setStyles(this.body_, {
-              'top': `${state.toolbarHeight}px`,
-            });
-          } else {
-            setStyles(this.body_, {
-              'top': `calc(${state.toolbarHeight}px + ${this.initialBodyTop_})`,
-            });
-          }
-        }
-      },
-    }, {});
-
     if (this.isToolbarShown_()) {
       return;
     }
@@ -220,15 +192,6 @@ export class Toolbar {
           toggle(element, true);
         });
       }
-
-      // Remove room for our toolbar
-      if (this.body_) {
-        setStyles(this.body_, {
-          'top': this.initialBodyTop_,
-        });
-      }
-
-
       this.toolbarShown_ = false;
     });
   }
