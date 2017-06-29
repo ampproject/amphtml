@@ -21,6 +21,7 @@
  *   renderStartImplemented: (boolean|undefined),
  *   clientIdScope: (string|undefined),
  *   clientIdCookieName: (string|undefined),
+ *   remoteHTMLDisabled: (boolean|undefined),
  * }}
  */
 let AdNetworkConfigDef;
@@ -112,6 +113,7 @@ export const adConfig = {
     preconnect: 'https://googleads.g.doubleclick.net',
     clientIdScope: 'AMP_ECID_GOOGLE',
     clientIdCookieName: '_ga',
+    remoteHTMLDisabled: true,
   },
 
   adsnative: {
