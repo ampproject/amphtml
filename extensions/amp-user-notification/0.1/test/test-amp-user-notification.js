@@ -31,7 +31,6 @@ describes.realWin('amp-user-notification', {
   let ampdoc;
   let win;
   let dftAttrs;
-  let storage;
   let storageMock;
 
   beforeEach(() => {
@@ -44,12 +43,8 @@ describes.realWin('amp-user-notification', {
       'data-dismiss-href': 'https://www.ampproject.org/post/here',
       'layout': 'nodisplay',
     };
-    storage = getServiceForDoc(ampdoc, 'storage');
+    const storage = getServiceForDoc(ampdoc, 'storage');
     storageMock = sandbox.mock(storage);
-  });
-
-  afterEach(() => {
-    storageMock.verify();
   });
 
   function getUserNotification(attrs = {}) {
@@ -66,7 +61,6 @@ describes.realWin('amp-user-notification', {
 
     doc.body.appendChild(elem);
     const impl = elem.implementation_;
-    impl.storagePromise_ = Promise.resolve(storage);
     impl.userNotificationManager_ = {
       registerUserNotification: () => {},
     };
@@ -311,7 +305,7 @@ describes.realWin('amp-user-notification', {
     });
   });
 
-  it.only('should store value on dismiss and run post', () => {
+  it('should store value on dismiss and run post', () => {
     const el = getUserNotification(dftAttrs);
     const impl = el.implementation_;
     impl.buildCallback();
@@ -324,6 +318,9 @@ describes.realWin('amp-user-notification', {
 
     impl.dismiss();
     expect(postDismissStub).to.be.calledOnce;
+    return impl.storagePromise_.then(() => {
+      storageMock.verify();
+    });
   });
 
   it('should ignore post on dismiss if not configured', () => {
@@ -339,6 +336,9 @@ describes.realWin('amp-user-notification', {
 
     impl.dismiss();
     expect(postDismissStub).to.have.not.been.called;
+    return impl.storagePromise_.then(() => {
+      storageMock.verify();
+    });
   });
 
   it('should not store value on dismiss if persist-dismissal=false', () => {
@@ -355,6 +355,9 @@ describes.realWin('amp-user-notification', {
 
     impl.dismiss();
     expect(postDismissStub).to.be.calledOnce;
+    return impl.storagePromise_.then(() => {
+      storageMock.verify();
+    });
   });
 
   it('should not store value on dismiss if persist-dismissal=no', () => {
@@ -371,6 +374,9 @@ describes.realWin('amp-user-notification', {
 
     impl.dismiss();
     expect(postDismissStub).to.be.calledOnce;
+    return impl.storagePromise_.then(() => {
+      storageMock.verify();
+    });
   });
 
   it('should have class `amp-active`', () => {
