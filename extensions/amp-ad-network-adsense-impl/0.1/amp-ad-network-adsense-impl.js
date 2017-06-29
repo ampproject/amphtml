@@ -115,11 +115,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     this.extensions_ = extensionsFor(this.win);
 
     /**
-     * For full-width responsive ads, whether the alignment change (which nudges
-     * the edge of the add up to the edge of the viewport) has happened.
-     * @private {boolean}
+     * For full-width responsive ads, the promise issued when we attempt to
+     * change the height.
+     * @type {?Promise}
+     * @private
      */
-    this.hasBeenAligned_ = false;
+    this.responsiveSizeChangePromise_ = null;
 
     /** @private {string} */
     this.autoFormat_ = this.element.getAttribute('data-auto-format') || '';
@@ -132,8 +133,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
     /** @private {?string} */
     this.qqid_ = null;
-
-    console.log('it lives! %o', this);
   }
 
   /** @return {boolean} */
@@ -169,7 +168,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     // Checking height just in case.
     // TODO(charliereams): Figure out this experiment.
     this.size_ = isExperimentOn(this.win, 'as-use-attr-for-format')
-        && !isNaN(width) && width > 0 && !isNaN(height) && height > 0
+    && !isNaN(width) && width > 0 && !isNaN(height) && height > 0
         ? {width, height}
         : this.getIntersectionElementLayoutBox();
     const format = `${this.size_.width}x${this.size_.height}`;
@@ -305,28 +304,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   onLayoutMeasure() {
     super.onLayoutMeasure();
-
-    if (this.isResponsive() && !this.hasBeenAligned_) {
-      this.hasBeenAligned_ = 1;
-
-      // Create a dummy zero-size element so that attemptChangeSize has
-      // something to show if the resize fails.
-      const dummyOverflowElement = document.createElement('div');
-      dummyOverflowElement.setAttribute('overflow', '1');
-      this.element.appendChild(dummyOverflowElement);
-
-      // Nudge responsive ads into the correct horizontal position.
-
-      var at = this.element.getBoundingClientRect();
-      // NB: can't use attemptChangeSize here, this must succeed. But it doesn't
-      // actually change the size (it just changes the horizontal margins).
-      // TODO(charliereams): This is wrong for RTL.
-      this.element.getResources().changeSize(
-          this.element, undefined, undefined, undefined,
-          {left: -1 * at.left});
-      this.element.style.zIndex = 30;
-      console.log('aligning: at=%o el=%o', at, this.element);
-    }
   }
 
   /** @override */
@@ -350,17 +327,37 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   buildCallback() {
     super.buildCallback();
 
-    console.log('change size??');
-    this.attemptChangeSize(
-        AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext(
-            window.innerWidth),
-        undefined).then(
-        () => {
-          console.log('resized');
-        },
-        () => {
-          console.log('not resized');
-        });
+    if (this.isResponsive() && !this.responsiveSizeChangePromise_) {
+      // Create a dummy zero-size element so that attemptChangeSize has
+      // something to show if the resize fails.
+      const dummyOverflowElement = document.createElement('div');
+      dummyOverflowElement.setAttribute('overflow', '1');
+      this.element.appendChild(dummyOverflowElement);
+
+      // Attempt to resize to the correct height.
+      this.responsiveSizeChangePromise_ =
+          this.attemptChangeSize(
+              AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext(
+                  window.innerWidth),
+              undefined);
+
+      // Nudge into the correct horizontal position. NB: can't use
+      // attemptChangeSize here, this must succeed. But it doesn't actually
+      // change the size (it just changes the horizontal margins).
+      var layoutBox = this.getLayoutBox();
+      // TODO(charliereams): This is wrong for RTL.
+      this.element.getResources().changeSize(
+          this.element, undefined, undefined, undefined,
+          {left: -1 * layoutBox.left});
+      this.element.style.zIndex = 30;
+      console.log('aligning: layoutBox=%o el=%o', layoutBox, this.element);
+    }
+  }
+
+  /** @override */
+  layoutCallback() {
+    return super.layoutCallback().then(
+        this.responsiveSizeChangePromise_ || Promise.resolve());
   }
 
   /**
