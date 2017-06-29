@@ -213,6 +213,7 @@ export class CustomEventTracker extends EventTracker {
       this.sandboxBuffer_[eventType] = this.sandboxBuffer_[eventType] || [];
       this.sandboxBuffer_[eventType].push(event);
     } else {
+      // Check if buffer has expired
       if (this.buffer_) {
         this.buffer_[eventType] = this.buffer_[eventType] || [];
         this.buffer_[eventType].push(event);
