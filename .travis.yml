@@ -51,10 +51,10 @@ matrix:
         - node -e "console.log('SAUCE_ACCESS_KEY_ENCRYPTED', process.env.SAUCE_ACCESS_KEY_ENCRYPTED);"
         - node -e "console.log('SAUCE_USERNAME', process.env.SAUCE_USERNAME);"
       addons:
-        sauce_connect: true
-          username: "`node build-system/get-sauce-credentials.js --username`"
+        sauce_connect:
+          username: <%= ENV['SAUCE_USERNAME'] %>
         jwt:
-          secure: "`node build-system/get-sauce-credentials.js --access_key_encrypted`"
+          secure: <%= ENV['SAUCE_ACCESS_KEY_ENCRYPTED'] %>
 cache:
   yarn: true
   directories:
