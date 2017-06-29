@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {toggle, computedStyle, setStyles} from '../../../src/style';
+import {toggle} from '../../../src/style';
 
 /** @const */
 const TOOLBAR_TARGET_CLASS = 'i-amphtml-toolbar-target';
