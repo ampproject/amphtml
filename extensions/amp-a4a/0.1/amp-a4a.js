@@ -37,6 +37,7 @@ import {
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {dev, user, duplicateErrorIfNecessary} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, isEnumValue} from '../../../src/types';
 import {some} from '../../../src/utils/promise';
@@ -97,14 +98,14 @@ export const XORIGIN_MODE = {
 };
 
 /** @type {!Object} @private */
-const SHARED_IFRAME_PROPERTIES = {
-  frameborder: '0',
-  allowfullscreen: '',
-  allowtransparency: '',
-  scrolling: 'no',
-  marginwidth: '0',
-  marginheight: '0',
-};
+const SHARED_IFRAME_PROPERTIES = dict({
+  'frameborder': '0',
+  'allowfullscreen': '',
+  'allowtransparency': '',
+  'scrolling': 'no',
+  'marginwidth': '0',
+  'marginheight': '0',
+});
 
 /** @typedef {{
  *    creative: ArrayBuffer,
@@ -1269,16 +1270,17 @@ export class AmpA4A extends AMP.BaseElement {
     // Create and setup friendly iframe.
     this.iframe = /** @type {!HTMLIFrameElement} */(
         createElementWithAttributes(
-            /** @type {!Document} */(this.element.ownerDocument), 'iframe', {
+            /** @type {!Document} */(this.element.ownerDocument), 'iframe',
+            dict({
               // NOTE: It is possible for either width or height to be 'auto',
               // a non-numeric value.
-              height: this.creativeSize_.height,
-              width: this.creativeSize_.width,
-              frameborder: '0',
-              allowfullscreen: '',
-              allowtransparency: '',
-              scrolling: 'no',
-            }));
+              'height': this.creativeSize_.height,
+              'width': this.creativeSize_.width,
+              'frameborder': '0',
+              'allowfullscreen': '',
+              'allowtransparency': '',
+              'scrolling': 'no',
+            })));
     this.applyFillContent(this.iframe);
     const fontsArray = [];
     if (creativeMetaData.customStylesheets) {
@@ -1343,22 +1345,23 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * Shared functionality for cross-domain iframe-based rendering methods.
-   * @param {!Object<string, string>} attributes The attributes of the iframe.
+   * @param {!JsonObject<string, string>} attributes The attributes of the iframe.
    * @return {!Promise} awaiting load event for ad frame
    * @private
    */
   iframeRenderHelper_(attributes) {
-    const mergedAttributes = Object.assign(attributes, {
-      height: this.creativeSize_.height,
-      width: this.creativeSize_.width,
-    });
+    const mergedAttributes = Object.assign(attributes, dict({
+      'height': this.creativeSize_.height,
+      'width': this.creativeSize_.width,
+    }));
 
     if (this.sentinel) {
       mergedAttributes['data-amp-3p-sentinel'] = this.sentinel;
     }
     this.iframe = createElementWithAttributes(
         /** @type {!Document} */ (this.element.ownerDocument),
-        'iframe', Object.assign(mergedAttributes, SHARED_IFRAME_PROPERTIES));
+        'iframe', /** @type {!JsonObject} */ (
+        Object.assign(mergedAttributes, SHARED_IFRAME_PROPERTIES)));
     // TODO(keithwrightbos): noContentCallback?
     this.xOriginIframeHandler_ = new AMP.AmpAdXOriginIframeHandler(this);
     // Iframe is appended to element as part of xorigin frame handler init.
@@ -1390,11 +1393,11 @@ export class AmpA4A extends AMP.BaseElement {
    */
   renderViaCachedContentIframe_(adUrl) {
     this.protectedEmitLifecycleEvent_('renderCrossDomainStart');
-    return this.iframeRenderHelper_({
-      src: xhrFor(this.win).getCorsUrl(this.win, adUrl),
-      name: JSON.stringify(
+    return this.iframeRenderHelper_(dict({
+      'src': xhrFor(this.win).getCorsUrl(this.win, adUrl),
+      'name': JSON.stringify(
           getContextMetadata(this.win, this.element, this.sentinel)),
-    });
+    }));
   }
 
   /**
@@ -1446,7 +1449,7 @@ export class AmpA4A extends AMP.BaseElement {
         name = `${this.safeframeVersion_};${creative.length};${creative}` +
             `${contextMetadata}`;
       }
-      return this.iframeRenderHelper_({src: srcPath, name});
+      return this.iframeRenderHelper_(dict({'src': srcPath, 'name': name}));
     });
   }
 

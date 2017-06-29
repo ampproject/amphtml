@@ -65,23 +65,52 @@
   opacity: 0;
 }
 
+.i-amphtml-lbv-top-bar.overflow {
+  background: rgba(0,0,0,0.7);
+}
+
 .i-amphtml-lbv-desc-box {
   position: absolute !important;
   left: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
-  max-height: 30vh !important;
-  padding: 10px;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow-x: hidden !important;
   color: #ffffff;
-  background-color: rgba(0,0,0,0.7);
   opacity: 1;
   transition: opacity 1s;
 }
 
+.i-amphtml-lbv-desc-box.standard {
+  max-height: 6rem;
+  background-color: rgba(0,0,0,0.7);
+  background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.7));
+}
+
+.i-amphtml-lbv-desc-box.overflow {
+  overflow-y: auto !important;
+  background-color: rgba(0,0,0,0.7);
+  top: 0 !important;
+  padding-top: 50px !important;
+}
+
 .i-amphtml-lbv-desc-box.hide {
   opacity: 0;
+}
+
+.i-amphtml-lbv-desc-text {
+  padding: 20px;
+}
+
+.i-amphtml-lbv-desc-box.standard .i-amphtml-lbv-desc-text {
+  overflow-y: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.i-amphtml-lbv-desc-box.overflow .i-amphtml-lbv-desc-text {
+  position: absolute !important;
+  bottom: 0;
+  padding-top: 0;
 }
 
 .i-amphtml-lbv[gallery-view] .i-amphtml-lbv-gallery {

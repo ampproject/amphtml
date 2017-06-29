@@ -70,7 +70,7 @@ Example:
 
 ### Opening and closing the sidebar
 
-To toggle, open, or close the sidebar when an element is tapped or clicked, set the [`on`](../../spec/amp-actions-and-events.md) action attribute on the element, and specify one of the following action methods: 
+To toggle, open, or close the sidebar when an element is tapped or clicked, set the [`on`](../../spec/amp-actions-and-events.md) action attribute on the element, and specify one of the following action methods:
 
 <table>
   <tr>
@@ -122,6 +122,10 @@ Specifies the display layout of the sidebar, which must be `nodisplay`.
 
 This attribute is present when the sidebar is open.
 
+##### data-close-button-aria-label**
+
+Optional attribute used to set ARIA label for the close button added for accessibility.
+
 ##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
@@ -133,6 +137,11 @@ The `amp-sidebar` component can be styled with standard CSS.
 -  The `width` of the `amp-sidebar` may be set to adjust the width between the pre-set min(45px) and max(80vw) values.
 - The height of the `amp-sidebar` may be set to adjust the height of the sidebar, if required. If the height exceeds 100vw, the sidebar will have a vertical scrollbar. The preset height of the sidebar is 100vw and can be overridden in CSS to make it shorter.
 - The current state of the sidebar is exposed via the `open` attribute that is set on the `amp-sidebar` tag when the side bar is open on the page.
+
+{% call callout('Tip', type='success') %}
+Visit [AMP Start](https://ampstart.com/components#navigation) for responsive, pre-styled navigation menus that you can use in your AMP pages.
+{% endcall %}
+
 
 ## UX considerations
 
