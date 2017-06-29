@@ -18,6 +18,7 @@ import {AmpAd3PImpl} from '../amp-ad-3p-impl';
 import {createIframePromise} from '../../../../testing/iframe';
 import {stubService} from '../../../../testing/test-helper';
 import {createElementWithAttributes} from '../../../../src/dom';
+import {adConfig} from '../../../../ads/_config';
 import * as adCid from '../../../../src/ad-cid';
 import '../../../amp-ad/0.1/amp-ad';
 import '../../../amp-sticky-ad/1.0/amp-sticky-ad';
@@ -43,9 +44,16 @@ describe('amp-ad-3p-impl', () => {
   let sandbox;
   let ad3p;
   let win;
+  let registryBackup;
   const whenFirstVisible = Promise.resolve();
 
   beforeEach(() => {
+    registryBackup = Object.create(null);
+    Object.keys(adConfig).forEach(k => {
+      registryBackup[k] = adConfig[k];
+      delete adConfig[k];
+    });
+    adConfig['_ping_'] = {};
     sandbox = sinon.sandbox.create();
     return createIframePromise(true).then(iframe => {
       win = iframe.win;
@@ -64,6 +72,10 @@ describe('amp-ad-3p-impl', () => {
   });
 
   afterEach(() => {
+    Object.keys(registryBackup).forEach(k => {
+      adConfig[k] = registryBackup[k];
+    });
+    registryBackup = null;
     sandbox.restore();
   });
 
