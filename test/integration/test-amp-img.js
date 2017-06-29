@@ -21,7 +21,7 @@ import {
 import {AmpEvents} from '../../src/amp-events';
 
 describe.configure().retryOnSaucelabs().run('Rendering of amp-img', function() {
-  this.timeout(5000);
+  const timeout = window.ampTestRuntimeConfig.mochaTimeout;
 
   let fixture;
   beforeEach(() => {
@@ -31,7 +31,7 @@ describe.configure().retryOnSaucelabs().run('Rendering of amp-img', function() {
   });
 
   it('should show the body in image test', () => {
-    return expectBodyToBecomeVisible(fixture.win);
+    return expectBodyToBecomeVisible(fixture.win, timeout);
   });
 
   it('should be present', () => {

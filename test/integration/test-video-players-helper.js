@@ -222,7 +222,7 @@ export function runVideoPlayerIntegrationTests(
           if (opt_experiment) {
             toggleExperiment(fixture.win, opt_experiment, true);
           }
-          return expectBodyToBecomeVisible(fixture.win);
+          return expectBodyToBecomeVisible(fixture.win, TIMEOUT);
         })
         .then(() => {
           const video = createVideoElementFunc(fixture);
