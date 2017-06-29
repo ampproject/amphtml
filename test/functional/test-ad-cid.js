@@ -23,7 +23,6 @@ import {installDocService} from '../../src/service/ampdoc-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {getAdCid} from '../../src/ad-cid';
 import {timerFor} from '../../src/services';
-import {resetServiceForTesting} from '../../src/service';
 import * as lolex from 'lolex';
 
 describes.realWin('ad-cid', {}, env => {
@@ -113,12 +112,6 @@ describes.realWin('ad-cid', {}, env => {
     sandbox.stub(cidService, 'get', () => {
       return Promise.reject(new Error('nope'));
     });
-    return expect(getAdCid(adElement)).to.eventually.be.undefined;
-  });
-
-  it('should return null if cid service not available', () => {
-    resetServiceForTesting(win, 'cid');
-    config.clientIdScope = cidScope;
     return expect(getAdCid(adElement)).to.eventually.be.undefined;
   });
 });
