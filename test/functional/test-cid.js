@@ -280,7 +280,7 @@ describe('cid', () => {
           'sha384(YYYhttp://www.origin.come2)');
     });
 
-    it('should return null if opted out', () => {
+    it('should return empty if opted out', () => {
       storageGetStub.withArgs('amp-cid-optout').returns(Promise.resolve(true));
 
       storage['amp-cid'] = JSON.stringify({
@@ -289,7 +289,7 @@ describe('cid', () => {
       });
       return compare(
           'e2',
-          null);
+          '');
     });
 
     it('should read from viewer storage if embedded', () => {
