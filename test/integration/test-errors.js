@@ -21,7 +21,10 @@ import {
 } from '../../testing/iframe.js';
 
 describe.configure().retryOnSaucelabs().run('error page', function() {
-  this.timeout(5000);
+  const timeout = 5000;
+
+  this.timeout(timeout);
+
   let fixture;
   beforeEach(() => {
     return createFixtureIframe('test/fixtures/errors.html', 1000, win => {
@@ -39,13 +42,13 @@ describe.configure().retryOnSaucelabs().run('error page', function() {
       }, () => {
         return new Error('Failed to find errors. HTML\n' +
             fixture.doc.documentElement./*TEST*/innerHTML);
-      });
+      }, timeout);
     });
   });
 
   it.configure().skipFirefox().skipEdge()
       .run('should show the body in error test', () => {
-        return expectBodyToBecomeVisible(fixture.win);
+        return expectBodyToBecomeVisible(fixture.win, timeout);
       });
 
   function shouldFail(id) {

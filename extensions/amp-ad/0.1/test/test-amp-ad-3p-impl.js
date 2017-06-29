@@ -15,7 +15,6 @@
  */
 
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
-import {createIframePromise} from '../../../../testing/iframe';
 import {stubService} from '../../../../testing/test-helper';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {adConfig} from '../../../../ads/_config';
@@ -24,7 +23,6 @@ import '../../../amp-ad/0.1/amp-ad';
 import '../../../amp-sticky-ad/1.0/amp-sticky-ad';
 import {macroTask} from '../../../../testing/yield';
 import * as lolex from 'lolex';
-import * as sinon from 'sinon';
 
 function createAmpAd(win) {
   const ampAdElement = createElementWithAttributes(win.document, 'amp-ad', {
@@ -40,7 +38,12 @@ function createAmpAd(win) {
   return new AmpAd3PImpl(ampAdElement);
 }
 
-describe('amp-ad-3p-impl', () => {
+describes.realWin('amp-ad-3p-impl', {
+  amp: {
+    canonicalUrl: 'https://canonical.url',
+  },
+  allowExternalResources: true,
+}, env => {
   let sandbox;
   let ad3p;
   let win;
@@ -53,22 +56,15 @@ describe('amp-ad-3p-impl', () => {
       registryBackup[k] = adConfig[k];
       delete adConfig[k];
     });
-    adConfig['_ping_'] = {};
-    sandbox = sinon.sandbox.create();
-    return createIframePromise(true).then(iframe => {
-      win = iframe.win;
-      win.document.head.appendChild(
-          createElementWithAttributes(win.document, 'link', {
-            rel: 'canonical',
-            href: 'https://canonical.url',
-          }));
-      ad3p = createAmpAd(win);
-      win.document.body.appendChild(ad3p.element);
-      ad3p.buildCallback();
-      // Turn the doc to visible so prefetch will be proceeded.
-      stubService(sandbox, win, 'viewer', 'whenFirstVisible')
-          .returns(whenFirstVisible);
-    });
+    adConfig['_ping_'] = Object.assign({}, registryBackup['_ping_']);
+    sandbox = env.sandbox;
+    win = env.win;
+    ad3p = createAmpAd(win);
+    win.document.body.appendChild(ad3p.element);
+    ad3p.buildCallback();
+    // Turn the doc to visible so prefetch will be proceeded.
+    stubService(sandbox, win, 'viewer', 'whenFirstVisible')
+        .returns(whenFirstVisible);
   });
 
   afterEach(() => {
@@ -76,7 +72,6 @@ describe('amp-ad-3p-impl', () => {
       adConfig[k] = registryBackup[k];
     });
     registryBackup = null;
-    sandbox.restore();
   });
 
   describe('layoutCallback', () => {
@@ -305,7 +300,8 @@ describe('amp-ad-3p-impl', () => {
       expect(ad3p2.renderOutsideViewport()).to.equal(false);
 
       // load ad one a time
-      yield layoutPromise;
+      yield layoutPromise; // wait for iframe load
+      yield macroTask(); // yield to promise resolution after iframe load
       expect(ad3p2.renderOutsideViewport()).to.equal(3);
     });
   });
