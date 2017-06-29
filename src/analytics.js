@@ -76,7 +76,7 @@ export function triggerAnalyticsEvent(target, eventType, opt_vars) {
 
 /**
  * Method to create scoped analytics element for any element.
- * TODO: Make this function privates
+ * TODO: Make this function private
  * @param {!Element} parentElement
  * @param {!JsonObject} config
  * @param {boolean=} loadAnalytics
@@ -221,18 +221,17 @@ export class CustomEventReporterBuilder {
 }
 
 
-/*
- * A function that is used by extension element to get analytics events.
- * The function makes sure to create or remove sandbox amp-analytics element at right time.
- * @param {!AmpElement} parent
+/**
+ * A helper method that should be used by all extension elements to add their sandbox analytics tracking.
+ * This method takes care of insert and remove the analytics tracker at the right time of the element lifecycle.
+ * @param {!AmpElement} element
  * @param {!Promise<!JsonObject>} promise
  */
-export function getAnalyticsInSandbox(parent, promise) {
-  let configPromise = promise;
+export function useAnalyticsInSandbox(element, promise) {
   let analyticsElement = null;
-
+  let configPromise = promise;
   // Listener to LOAD_START signal. Insert analytics element on LOAD_START
-  parent.signals().whenSignal(CommonSignals.LOAD_START).then(() => {
+  element.signals().whenSignal(CommonSignals.LOAD_START).then(() => {
     if (analyticsElement || !configPromise) {
       return;
     }
@@ -243,12 +242,12 @@ export function getAnalyticsInSandbox(parent, promise) {
       }
       configPromise = null;
       analyticsElement =
-          insertAnalyticsElement(parent, config, false);
+          insertAnalyticsElement(element, config, false);
     });
   });
 
   // Listener to UNLOAD signal. Destroy remove element on UNLOAD
-  parent.signals().whenSignal(CommonSignals.UNLOAD).then(() => {
+  element.signals().whenSignal(CommonSignals.UNLOAD).then(() => {
     configPromise = null;
     if (analyticsElement) {
       removeElement(analyticsElement);

@@ -22,19 +22,14 @@ import {
 import {
   triggerAnalyticsEvent,
   insertAnalyticsElement,
-<<<<<<< HEAD
   CustomEventReporterBuilder,
-=======
-  getAnalyticsInSandbox,
->>>>>>> use function instead
+  useAnalyticsInSandbox,
 } from '../../src/analytics';
 import {createAmpElementProto} from '../../src/custom-element';
 import {timerFor} from '../../src/services';
 import {BaseElement} from '../../src/base-element';
 import {macroTask} from '../../testing/yield';
 import * as sinon from 'sinon';
-import {createAmpElementProto} from '../../src/custom-element';
-import {macroTask} from '../../testing/yield';
 
 
 describes.realWin('analytics', {
@@ -278,7 +273,7 @@ describes.realWin('analytics', {
     });
   });
 
-  describe('getAnalyticsInSandbox', () => {
+  describe('useAnalyticsInSandbox', () => {
     let parentEle;
     let resolver;
     const config = {
@@ -309,7 +304,7 @@ describes.realWin('analytics', {
         const promise = new Promise(resolve => {resolver = resolve;});
         class TestElement extends BaseElement {
           buildCallback() {
-            getAnalyticsInSandbox(this.element, promise);
+            useAnalyticsInSandbox(this.element, promise);
           }
         }
         env.win.document.registerElement('amp-test', {
@@ -366,7 +361,7 @@ describes.realWin('analytics', {
         const promise = new Promise(resolve => {resolver = resolve;});
         class TestElement extends BaseElement {
           layoutCallback() {
-            getAnalyticsInSandbox(this.element, promise);
+            useAnalyticsInSandbox(this.element, promise);
             return super.layoutCallback();
           }
         }
@@ -398,7 +393,7 @@ describes.realWin('analytics', {
         const promise = new Promise(resolve => {resolver = resolve;});
         class TestElement extends BaseElement {
           buildCallback() {
-            getAnalyticsInSandbox(this.element, promise);
+            useAnalyticsInSandbox(this.element, promise);
           }
           unlayoutCallback() {
             return true;
@@ -446,7 +441,7 @@ describes.realWin('analytics', {
             const promise = new Promise(resolve => {
               resolver = resolve;
             });
-            getAnalyticsInSandbox(this.element, promise);
+            useAnalyticsInSandbox(this.element, promise);
             return super.layoutCallback();
           }
           unlayoutCallback() {
@@ -501,6 +496,6 @@ describes.realWin('analytics', {
         const script = element.querySelector('script');
         expect(script.textContent).to.jsonEqual(JSON.stringify(config2));
       });
+    });
   });
-
 });
