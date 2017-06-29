@@ -25,7 +25,7 @@
  const DEFAULT_TOOLBAR_MEDIA = '(min-width: 768px)';
 
  /** @const */
- const TOOLBAR_CLASS = 'i-amphtml-toolbar';
+ const TOOLBAR_ELEMENT_CLASS = 'i-amphtml-toolbar';
 
 
  adopt(window);
@@ -69,6 +69,12 @@
          if (toolbarObj.toolbarOnlyOnNav) {
            navToolbar.setAttribute('toolbar-only', '');
          }
+         if (toolbarObj.target) {
+           const toolbarTarget = iframe.doc.createElement('div');
+           toolbarTarget.setAttribute('id', toolbarObj.target);
+           iframe.win.document.body.appendChild(toolbarTarget);
+           navToolbar.setAttribute('target', toolbarObj.target);
+         }
          const toolbarList = iframe.doc.createElement('ul');
          for (let i = 0; i < 3; i++) {
            const li = iframe.doc.createElement('li');
@@ -77,9 +83,7 @@
          }
          navToolbar.appendChild(toolbarList);
          toolbarContainerElement.appendChild(navToolbar);
-         const toolbar = new Toolbar(navToolbar, iframe.win, vsync);
-         toolbarContainerElement.appendChild(toolbar.build());
-         toolbars.push(toolbar);
+         toolbars.push(new Toolbar(navToolbar, iframe.win, vsync));
        });
 
        return {iframe, toolbarContainerElement, toolbars};
@@ -107,7 +111,7 @@
        const toolbars = obj.toolbars;
        const toolbarElements = Array.prototype
               .slice.call(obj.toolbarContainerElement.ownerDocument
-              .getElementsByClassName(TOOLBAR_CLASS), 0);
+              .getElementsByClassName(TOOLBAR_ELEMENT_CLASS), 0);
        resizeIframeToWidth(obj.iframe, '1px', () => {
          expect(toolbarElements.length).to.be.above(0);
          toolbars.forEach(toolbar => {
@@ -124,8 +128,8 @@
      return getToolbars([{}]).then(obj => {
        const toolbars = obj.toolbars;
        const toolbarElements = Array.prototype
-              .slice.call(obj.toolbarContainerElement
-              .getElementsByClassName(TOOLBAR_CLASS), 0);
+              .slice.call(obj.toolbarContainerElement.ownerDocument
+              .getElementsByClassName(TOOLBAR_ELEMENT_CLASS), 0);
        resizeIframeToWidth(obj.iframe, '4000px', () => {
          expect(toolbarElements.length).to.be.above(0);
          toolbars.forEach(toolbar => {
@@ -142,8 +146,8 @@
      return getToolbars([{}]).then(obj => {
        const toolbars = obj.toolbars;
        const toolbarElements = Array.prototype
-              .slice.call(obj.toolbarContainerElement
-              .getElementsByClassName(TOOLBAR_CLASS), 0);
+              .slice.call(obj.toolbarContainerElement.ownerDocument
+              .getElementsByClassName(TOOLBAR_ELEMENT_CLASS), 0);
        resizeIframeToWidth(obj.iframe, '4000px', () => {
          expect(toolbarElements.length).to.be.above(0);
          toolbars.forEach(toolbar => {
@@ -160,8 +164,8 @@
      return getToolbars([{}]).then(obj => {
        const toolbars = obj.toolbars;
        const toolbarElements = Array.prototype
-              .slice.call(obj.toolbarContainerElement
-              .getElementsByClassName(TOOLBAR_CLASS), 0);
+              .slice.call(obj.toolbarContainerElement.ownerDocument
+              .getElementsByClassName(TOOLBAR_ELEMENT_CLASS), 0);
        resizeIframeToWidth(obj.iframe, '4000px', () => {
          toolbars.forEach(toolbar => {
            toolbar.onLayoutChange();
@@ -174,6 +178,83 @@
            expect(obj.iframe.win.document.body.style.top.indexOf('calc'))
                .to.be.below(0);
          });
+       });
+     });
+   });
+
+   it('toolbar header should be hidden for a \
+   non-matching window size for DEFAULT_TOOLBAR_MEDIA', () => {
+     return getToolbars([{}]).then(obj => {
+       const toolbars = obj.toolbars;
+       const toolbarElements = Array.prototype
+              .slice.call(obj.toolbarContainerElement.ownerDocument
+              .getElementsByClassName(TOOLBAR_ELEMENT_CLASS), 0);
+       resizeIframeToWidth(obj.iframe, '1px', () => {
+         expect(toolbarElements.length).to.be.above(0);
+         toolbars.forEach(toolbar => {
+           toolbar.onLayoutChange();
+         });
+         expect(toolbarElements[0].parentElement.style.display)
+             .to.be.equal('none');
+       });
+     });
+   });
+
+   it('toolbar should be placed into a target, with the \
+   target attrbiute', () => {
+     const targetId = 'toolbar-target';
+     return getToolbars([{
+       target: targetId,
+     }]).then(obj => {
+       const toolbars = obj.toolbars;
+       const toolbarTargetElements = Array.prototype
+              .slice.call(obj.iframe.win.document.body
+              .querySelectorAll(`#${targetId} > nav[toolbar]`), 0);
+       expect(toolbars.length).to.be.equal(1);
+       expect(toolbarTargetElements.length).to.be.equal(1);
+     });
+   });
+
+   it('toolbar should be placed into a target, and shown for a \
+   matching window size for DEFAULT_TOOLBAR_MEDIA', () => {
+     const targetId = 'toolbar-target';
+     return getToolbars([{
+       target: targetId,
+     }]).then(obj => {
+       const toolbars = obj.toolbars;
+       const toolbarTargets = Array.prototype
+               .slice.call(obj.iframe.win.document.body
+               .querySelectorAll(`#${targetId}`), 0);
+       resizeIframeToWidth(obj.iframe, '4000px', () => {
+         toolbars.forEach(toolbar => {
+           toolbar.onLayoutChange();
+         });
+         expect(toolbars.length).to.be.equal(1);
+         expect(toolbarTargets.length).to.be.equal(1);
+         expect(toolbarTargets[0].style.display)
+             .to.be.equal('');
+       });
+     });
+   });
+
+   it('toolbar should be placed into a target, and hidden for a \
+   non-matching window size for DEFAULT_TOOLBAR_MEDIA', () => {
+     const targetId = 'toolbar-target';
+     return getToolbars([{
+       target: targetId,
+     }]).then(obj => {
+       const toolbars = obj.toolbars;
+       const toolbarTargets = Array.prototype
+               .slice.call(obj.iframe.win.document.body
+               .querySelectorAll(`#${targetId}`), 0);
+       resizeIframeToWidth(obj.iframe, '200px', () => {
+         toolbars.forEach(toolbar => {
+           toolbar.onLayoutChange();
+         });
+         expect(toolbars.length).to.be.equal(1);
+         expect(toolbarTargets.length).to.be.equal(1);
+         expect(toolbarTargets[0].style.display)
+             .to.be.equal('none');
        });
      });
    });
@@ -201,6 +282,7 @@
        });
      });
    });
+
 
    it('toolbar should be in the hidden state \
    when it is not being displayed', () => {

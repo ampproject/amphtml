@@ -112,10 +112,7 @@ export class AmpSidebar extends AMP.BaseElement {
       .call(this.element.querySelectorAll('nav[toolbar]'), 0);
     toolbarElements.forEach(toolbarElement => {
       try {
-        const toolbar = new Toolbar(toolbarElement, this.win, this.vsync_);
-        this.element.parentElement
-            .insertBefore(toolbar.build(), this.element);
-        this.toolbars_.push(toolbar);
+        this.toolbars_.push(new Toolbar(toolbarElement, this.win, this.vsync_));
       } catch (e) {
         user().error(TAG, 'Failed to instantiate toolbar', e);
       }
