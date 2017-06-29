@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Tests JS validator against a set of valid example pages.
+ *
+ * Technically more of an integration test than a functional test,
+ * but it suffices to run it only in Travis. Also, avoids requiring building
+ * the validator for the integration test shard.
+ */
 
 import {loadPromise} from '../../src/event-helper';
 
-
-// TODO(@cramforce): Use local version. This is non-hermetic
-// and really bad. When the validator is open source we can
-// use it directly.
 if (!window.validatorLoad) {
   window.validatorLoad = (function() {
     const s = document.createElement('script');
-    s.src = 'https://cdn.ampproject.org/v0/validator.js';
+    s.src = '/validator/dist/validator_minified.js'; // Served by app.js.
     document.body.appendChild(s);
     return loadPromise(s);
   })();
 }
 
-describe.configure().skipSauceLabs().run('example', function() {
-  // TODO(@cramforce): Remove when test is hermetic.
-  this.timeout(5000);
-
+describe('example', function() {
   const examples = [
     'ads.amp.html',
     // TODO: uncomment when validator is deployed:
@@ -52,7 +52,8 @@ describe.configure().skipSauceLabs().run('example', function() {
     'article.amp.html',
     'analytics.amp.html',
     'analytics-notification.amp.html',
-    'autosuggest.amp.html',
+    // TODO(vializ, Gregable, #10152) uncomment when validator issue is resolved
+    // 'autosuggest.amp.html',
     'everything.amp.html',
     // TODO: uncomment when validator is deployed:
     // 'facebook.amp.html',

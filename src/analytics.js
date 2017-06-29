@@ -14,15 +14,20 @@
  * limitations under the License.
  */
 
+import {CommonSignals} from './common-signals';
 import {
   getElementServiceForDoc,
   getElementServiceIfAvailableForDoc,
 } from './element-service';
-import {createElementWithAttributes} from './dom';
+import {
+  createElementWithAttributes,
+  removeElement,
+} from './dom';
 import {getAmpdoc} from './service';
 import {extensionsFor} from './services';
 import {dev} from './log';
 import {dict} from './utils/object';
+import {isArray} from './types';
 
 
 /**
@@ -55,6 +60,7 @@ export function analyticsForDocOrNull(nodeOrDoc) {
 
 /**
  * Helper method to trigger analytics event if amp-analytics is available.
+ * TODO: Do not expose this function
  * @param {!Element} target
  * @param {string} eventType
  * @param {!Object<string, string>=} opt_vars A map of vars and their values.
@@ -70,6 +76,7 @@ export function triggerAnalyticsEvent(target, eventType, opt_vars) {
 
 /**
  * Method to create scoped analytics element for any element.
+ * TODO: Make this function private
  * @param {!Element} parentElement
  * @param {!JsonObject} config
  * @param {boolean=} loadAnalytics
@@ -105,4 +112,146 @@ export function insertAnalyticsElement(
   }
   parentElement.appendChild(analyticsElem);
   return analyticsElem;
+}
+
+/**
+ * A class that handles customEvent reporting of extension element through
+ * amp-analytics.
+ * This class is not exposed to extension element directly to restrict the genration of the config
+ * Please use CustomEventReporterBuilder to build a CustomEventReporter instance.
+ */
+class CustomEventReporter {
+  /**
+   * @param {!Element} parent
+   * @param {!JsonObject} config
+   */
+  constructor(parent, config) {
+    dev().assert(config['triggers'], 'Config must have triggers defined');
+    /** @private {string} */
+    this.id_ = parent.getResourceId();
+
+    /** @private {!AmpElement} */
+    this.parent_ = parent;
+
+    /** @private {JsonObject} */
+    this.config_ = config;
+
+    for (const event in config['triggers']) {
+      const eventType = config['triggers'][event]['on'];
+      dev().assert(eventType,
+          'CustomEventReporter config must specify trigger eventType');
+      const newEventType = this.getEventTypeInSandbox_(eventType);
+      config['triggers'][event]['on'] = newEventType;
+    }
+
+    this.parent_.signals().whenSignal(CommonSignals.LOAD_START).then(() => {
+      insertAnalyticsElement(this.parent_, config, false);
+    });
+  }
+
+  /**
+   * @param {string} eventType
+   * @param {!Object<string, string>=} opt_vars A map of vars and their values.
+   */
+  trigger(eventType, opt_vars) {
+    dev().assert(this.config_['triggers'][eventType],
+        'Cannot trigger non initiated eventType');
+    triggerAnalyticsEvent(this.parent_,
+        this.getEventTypeInSandbox_(eventType), opt_vars);
+  }
+
+  /**
+   * @param {string} eventType
+   * @return {string}
+   */
+  getEventTypeInSandbox_(eventType) {
+    return `sandbox-${this.id_}-${eventType}`;
+  }
+}
+
+
+/**
+ * A builder class that enable extension elements to easily build a CustomEventReporter instance
+ */
+export class CustomEventReporterBuilder {
+  /** @param {!AmpElement} parent */
+  constructor(parent) {
+    /** @private {!AmpElement} */
+    this.parent_ = parent;
+
+    /** @private {?JsonObject} */
+    this.config_ = /** @type {JsonObject} */ ({
+      'requests': {},
+      'triggers': {},
+    });
+  }
+
+  /**
+   * @param {string} eventType
+   * @param {string|!Array<string>} request
+   */
+  track(eventType, request) {
+    request = isArray(request) ? request : [request];
+    dev().assert(!this.config_['triggers'][eventType],
+        'customEventReporterBuilder should not track same eventType twice');
+    const requestList = [];
+    for (let i = 0; i < request.length; i++) {
+      const requestName = `${eventType}-request-${i}`;
+      this.config_['requests'][requestName] = request[i];
+      requestList.push(requestName);
+    }
+    this.config_['triggers'][eventType] = {
+      'on': eventType,
+      'request': requestList,
+    };
+    return this;
+  }
+
+  /**
+   * Call to build the CustomEventReporter instance.
+   * Should only be called after all eventType added.
+   */
+  build() {
+    dev().assert(this.config_, 'CustomEventReporter already built');
+    const report = new CustomEventReporter(
+        this.parent_, /** @type {!JsonObject} */ (this.config_));
+    this.config_ = null;
+    return report;
+  }
+}
+
+
+/**
+ * A helper method that should be used by all extension elements to add their sandbox analytics tracking.
+ * This method takes care of insert and remove the analytics tracker at the right time of the element lifecycle.
+ * @param {!AmpElement} element
+ * @param {!Promise<!JsonObject>} promise
+ */
+export function useAnalyticsInSandbox(element, promise) {
+  let analyticsElement = null;
+  let configPromise = promise;
+  // Listener to LOAD_START signal. Insert analytics element on LOAD_START
+  element.signals().whenSignal(CommonSignals.LOAD_START).then(() => {
+    if (analyticsElement || !configPromise) {
+      return;
+    }
+    configPromise.then(config => {
+      if (!configPromise) {
+        // If config promise resolve after unload, do nothing.
+        return;
+      }
+      configPromise = null;
+      analyticsElement =
+          insertAnalyticsElement(element, config, false);
+    });
+  });
+
+  // Listener to UNLOAD signal. Destroy remove element on UNLOAD
+  element.signals().whenSignal(CommonSignals.UNLOAD).then(() => {
+    configPromise = null;
+    if (analyticsElement) {
+      removeElement(analyticsElement);
+      analyticsElement = null;
+    }
+  });
 }

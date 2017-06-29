@@ -25,6 +25,9 @@ import {
   installIframeMessagingClient,
 } from '../../../src/inabox/inabox-iframe-messaging-client';
 
+
+const NOOP = () => {};
+
 describes.fakeWin('inabox-viewport', {amp: {}}, env => {
 
   let win;
@@ -35,8 +38,22 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   let onResizeCallback;
   let measureSpy;
 
-  function stubIframeClientMakeRequest(callback) {
-    return sandbox./*OK*/stub(binding.iframeClient_, 'makeRequest', callback);
+  function stubIframeClientMakeRequest(
+      requestType, responseType, callback, opt_sync) {
+
+    return sandbox./*OK*/stub(
+        binding.iframeClient_, 'makeRequest', (req, res, cb) => {
+          expect(req).to.equal(requestType);
+          expect(res).to.equal(responseType);
+
+          if (opt_sync) {
+            callback(req, res, cb);
+          } else {
+            setTimeout(() => callback(req, res, cb), 10);
+          }
+
+          return NOOP;
+        });
   }
 
   beforeEach(() => {
@@ -66,9 +83,12 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   });
 
   it('should work for size, layoutRect and position observer', () => {
-    stubIframeClientMakeRequest((req, res, cb) => {
-      positionCallback = cb;
-    });
+    stubIframeClientMakeRequest(
+        'send-positions',
+        'position',
+        (req, res, cb) => { positionCallback = cb; },
+        /* opt_sync */ true);
+
     onScrollCallback = sandbox.spy();
     onResizeCallback = sandbox.spy();
     binding.connect();
@@ -132,42 +152,104 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
         .to.deep.equal(layoutRectLtwh(20, 20, 100, 100));
   });
 
-  it('should center content and request resize on enter overlay mode', () => {
+  it('should center content, resize and remeasure on overlay mode', () => {
+    const allResourcesMock = Array(5).fill(undefined).map(() => ({
+      measure: sandbox.spy(),
+    }));
+
+    sandbox.stub(binding, 'getChildResources', () => allResourcesMock);
+
     const prepareContainer =
         sandbox.stub(binding, 'prepareFixedContainer_')
             .returns(Promise.resolve());
 
-    const makeRequest = stubIframeClientMakeRequest((req, res, callback) => {
-      expect(req).to.equal('full-overlay-frame');
-      expect(res).to.equal('full-overlay-frame-response');
-
-      callback({success: true});
-    });
+    const makeRequest = stubIframeClientMakeRequest(
+        'full-overlay-frame',
+        'full-overlay-frame-response',
+        (req, res, cb) => cb({
+          success: true,
+          boxRect: {
+            left: 0,
+            top: 0,
+            right: 1000,
+            bottom: 2000,
+            width: 1000,
+            height: 2000,
+          },
+        }));
 
     return binding.updateLightboxMode(true).then(() => {
       expect(prepareContainer).to.be.calledOnce;
       expect(prepareContainer).to.be.calledBefore(makeRequest);
+
+      allResourcesMock.forEach(resource => {
+        expect(resource.measure).to.have.been.calledOnce;
+      });
     });
   });
 
-  it('should reset content and request resize on leave overlay mode', done => {
+  it('should reset content and request resize on leave overlay mode', () => {
     const resetContainer =
         sandbox.stub(binding, 'resetFixedContainer_')
             .returns(Promise.resolve());
 
-    const makeRequest = stubIframeClientMakeRequest((req, res, callback) => {
-      expect(req).to.equal('cancel-full-overlay-frame');
-      expect(res).to.equal('cancel-full-overlay-frame-response');
+    const makeRequest = stubIframeClientMakeRequest(
+        'cancel-full-overlay-frame',
+        'cancel-full-overlay-frame-response',
+        (req, res, cb) => cb({success: true}));
 
-      callback();
-    });
-
-    binding.updateLightboxMode(false).then(() => {
+    return binding.updateLightboxMode(false).then(() => {
       expect(resetContainer).to.be.calledOnce;
       expect(resetContainer).to.be.calledAfter(makeRequest);
-
-      done();
     });
+  });
+
+  it('should update box rect when expanding/collapsing', function*() {
+    const boxRect = {
+      left: 20,
+      top: 10,
+      bottom: 310,
+      right: 420,
+      width: 400,
+      height: 300,
+    };
+
+    const updateBoxRectStub = sandbox.stub(binding, 'updateBoxRect_', NOOP);
+
+    stubIframeClientMakeRequest(
+        'full-overlay-frame',
+        'full-overlay-frame-response',
+        (req, res, cb) => cb({success: true, boxRect}));
+
+    sandbox.stub(binding, 'prepareFixedContainer_').returns(Promise.resolve());
+
+    yield binding.updateLightboxMode(true);
+
+    expect(updateBoxRectStub).to.be.calledWith(boxRect);
+  });
+
+  it('should update box rect when collapsing', function*() {
+    const boxRect = {
+      left: 20,
+      top: 10,
+      bottom: 310,
+      right: 420,
+      width: 400,
+      height: 300,
+    };
+
+    const updateBoxRectStub = sandbox.stub(binding, 'updateBoxRect_', NOOP);
+
+    stubIframeClientMakeRequest(
+        'cancel-full-overlay-frame',
+        'cancel-full-overlay-frame-response',
+        (req, res, cb) => cb({success: true, boxRect}));
+
+    sandbox.stub(binding, 'resetFixedContainer_').returns(Promise.resolve());
+
+    yield binding.updateLightboxMode(false);
+
+    expect(updateBoxRectStub).to.be.calledWith(boxRect);
   });
 
   it('should center the fixed container properly', done => {
