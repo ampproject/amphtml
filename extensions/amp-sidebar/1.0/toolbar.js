@@ -161,16 +161,23 @@ export class Toolbar {
     // Make room for the toolbar
     this.vsync_.run({
       measure: state => {
-        if (this.body_ && !this.initialBodyTop_) {
+        if (this.body_ && (!this.initialBodyTop_)
+        ) {
           this.initialBodyTop_ = computedStyle(this.win_, this.body_)['top'];
         }
-        state.toolbarHeight = this.toolbarClone_./*REVIEW*/offsetHeight;
+        state.toolbarHeight = this.toolbarClone_./*OK*/offsetHeight;
       },
       mutate: state => {
         if (this.body_) {
-          setStyles(this.body_, {
-            'top': `calc(${state.toolbarHeight}px + ${this.initialBodyTop_})`,
-          });
+          if (this.initialBodyTop_ === 'auto') {
+            setStyles(this.body_, {
+              'top': `${state.toolbarHeight}px`,
+            });
+          } else {
+            setStyles(this.body_, {
+              'top': `calc(${state.toolbarHeight}px + ${this.initialBodyTop_})`,
+            });
+          }
         }
       },
     }, {});
