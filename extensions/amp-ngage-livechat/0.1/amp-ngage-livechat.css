@@ -1,0 +1,255 @@
+/**
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+.ngageMobileBar {
+  background-color: rgb(240, 140, 2);
+}
+a.ngageBoxClose {
+  float: right;
+  margin-top: 4px;
+  margin-right: 4px;
+  cursor: pointer;
+  color: #ccc;
+  background: 0 0;
+  font-size: 48px;
+  display: inline-block;
+  line-height: 24px;
+  font-family: 'Roboto'
+}
+.ngageStrong {
+  font-weight: 700;
+  display: inline-block
+}
+.ngageBoxClose:before {
+  content: '×'
+}
+.ngageBoxClose:after {
+  content: '';
+  height: 2px;
+  background: #ccc;
+  display: block;
+  margin-top: 2px
+}
+.ngageHeader {
+  font-family: 'Roboto Slab';
+  font-size: 125%
+}
+.ngageMobileFloat {
+  z-index: 99999999;
+  position: fixed;
+  transition: top .5s;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #333;
+  color: #fff;
+  font-family: 'Arial';
+  font-size: 16px;
+  box-shadow: 0 20px 10px #888
+}
+.ngageText {
+  padding: .5em 5% 2em
+}
+.ngageMobilePicContainer {
+  margin-right: 5%;
+  margin-top: 8px;
+  float: left;
+  height: 60px;
+  width: 60px;
+  overflow: hidden;
+  background-color: #fff;
+  display: inline-block
+}
+#ngageMobilePic {
+  margin: 0 auto;
+  height: 100%;
+  width: auto
+}
+.ngageMobileBar {
+  position: absolute;
+  bottom: -1em;
+  padding: .25em 1em;
+  text-align: center;
+  font-size: 16px;
+  color: #fff;
+  width: 60%;
+  border-radius: 1em;
+  margin-left: 20%
+}
+.ngageMobileText {
+  display: inline;
+  margin-left: 5px;
+  font-size: 22px
+}
+.liveChatFloatingButtonMobile {
+  transition: bottom .5s
+}
+.ngageMobilePicContainer {
+  border-radius: 0;
+  border: 0
+}
+@keyframes dropHeader {
+  0%, 89% {
+    transform: translateY(-300px)
+  }
+  to {
+    transform: translateY(0)
+  }
+}
+@keyframes raiseHeader {
+  0% {
+    transform: translateY(0)
+  }
+  to {
+    transform: translateY(-300px)
+  }
+}
+#ngageMobileInvite {
+  display: none
+}
+.ngageMobileFloat {
+  animation-name: dropHeader;
+  animation-fill-mode: forwards;
+  animation-iteration-count: 1;
+  animation-timing-function: ease-out;
+  animation-duration: 5.6s
+}
+#ngageMobileInvite:checked+label {
+  animation-name: raiseHeader;
+  animation-iteration-count: 1;
+  animation-timing-function: ease-out;
+  animation-duration: .6s
+}
+.liveChatFloatingButtonMobile {
+  background-color: #474747;
+  border-radius: 0;
+  text-indent: 0;
+  border: 1px solid #dcdcdc;
+  color: #e8e8e8;
+  box-shadow: 5px -2px 5px #888;
+  font-family: 'Roboto Slab Regular', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 27px;
+  font-weight: 700;
+  font-style: normal;
+  height: 52px;
+  line-height: 52px;
+  width: 100%;
+  display: block;
+  bottom: 0;
+  padding: 0;
+  position: fixed;
+  z-index: 5000;
+  text-decoration: none;
+  text-align: center;
+  text-rendering: optimizeLegibility
+}
+@font-face {
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto'), local('Roboto-Regular'), url(https://fonts.gstatic.com/s/roboto/v15/ek4gzZ-GeXAPcSbHtCeQI_esZW2xOQ-xsNqO47m55DA.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+20B4, U+2DE0-2DFF, U+A640-A69F
+}
+@font-face {
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto'), local('Roboto-Regular'), url(https://fonts.gstatic.com/s/roboto/v15/mErvLBYg_cXG3rLvUsKT_fesZW2xOQ-xsNqO47m55DA.woff2) format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116
+}
+@font-face {
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto'), local('Roboto-Regular'), url(https://fonts.gstatic.com/s/roboto/v15/-2n2p-_Y08sg57CNWQfKNvesZW2xOQ-xsNqO47m55DA.woff2) format('woff2');
+  unicode-range: U+1F00-1FFF
+}
+@font-face {
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto'), local('Roboto-Regular'), url(https://fonts.gstatic.com/s/roboto/v15/u0TOpm082MNkS5K0Q4rhqvesZW2xOQ-xsNqO47m55DA.woff2) format('woff2');
+  unicode-range: U+0370-03FF
+}
+@font-face {
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto'), local('Roboto-Regular'), url(https://fonts.gstatic.com/s/roboto/v15/NdF9MtnOpLzo-noMoG0miPesZW2xOQ-xsNqO47m55DA.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+1EA0-1EF9, U+20AB
+}
+@font-face {
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto'), local('Roboto-Regular'), url(https://fonts.gstatic.com/s/roboto/v15/Fcx7Wwv8OzT71A3E1XOAjvesZW2xOQ-xsNqO47m55DA.woff2) format('woff2');
+  unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF
+}
+@font-face {
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto'), local('Roboto-Regular'), url(https://fonts.gstatic.com/s/roboto/v15/CWB0XYA8bzo0kSThX0UTuA.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215
+}
+@font-face {
+  font-family: 'Roboto Slab';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto Slab Regular'), local('RobotoSlab-Regular'), url(https://fonts.gstatic.com/s/robotoslab/v6/y7lebkjgREBJK96VQi37ZjTOQ_MqJVwkKsUn0wKzc2I.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+20B4, U+2DE0-2DFF, U+A640-A69F
+}
+@font-face {
+  font-family: 'Roboto Slab';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto Slab Regular'), local('RobotoSlab-Regular'), url(https://fonts.gstatic.com/s/robotoslab/v6/y7lebkjgREBJK96VQi37ZjUj_cnvWIuuBMVgbX098Mw.woff2) format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116
+}
+@font-face {
+  font-family: 'Roboto Slab';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto Slab Regular'), local('RobotoSlab-Regular'), url(https://fonts.gstatic.com/s/robotoslab/v6/y7lebkjgREBJK96VQi37ZkbcKLIaa1LC45dFaAfauRA.woff2) format('woff2');
+  unicode-range: U+1F00-1FFF
+}
+@font-face {
+  font-family: 'Roboto Slab';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto Slab Regular'), local('RobotoSlab-Regular'), url(https://fonts.gstatic.com/s/robotoslab/v6/y7lebkjgREBJK96VQi37Zmo_sUJ8uO4YLWRInS22T3Y.woff2) format('woff2');
+  unicode-range: U+0370-03FF
+}
+@font-face {
+  font-family: 'Roboto Slab';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto Slab Regular'), local('RobotoSlab-Regular'), url(https://fonts.gstatic.com/s/robotoslab/v6/y7lebkjgREBJK96VQi37Zr6up8jxqWt8HVA3mDhkV_0.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+1EA0-1EF9, U+20AB
+}
+@font-face {
+  font-family: 'Roboto Slab';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto Slab Regular'), local('RobotoSlab-Regular'), url(https://fonts.gstatic.com/s/robotoslab/v6/y7lebkjgREBJK96VQi37ZiYE0-AqJ3nfInTTiDXDjU4.woff2) format('woff2');
+  unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF
+}
+@font-face {
+  font-family: 'Roboto Slab';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto Slab Regular'), local('RobotoSlab-Regular'), url(https://fonts.gstatic.com/s/robotoslab/v6/y7lebkjgREBJK96VQi37Zo4P5ICox8Kq3LLUNMylGO4.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215
+}
