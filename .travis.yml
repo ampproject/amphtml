@@ -28,8 +28,6 @@ branches:
     - /^amp-release-.*$/
 env:
   global:
-    - export SAUCE_USERNAME=%x(node build-system/get-sauce-credentials.js --username)
-    - export SAUCE_ACCESS_KEY_ENCRYPTED=%x(node build-system/get-sauce-credentials.js --access_key_encrypted)
     - NPM_CONFIG_PROGRESS="false"
 matrix:
   include:
@@ -50,9 +48,9 @@ matrix:
         - pip install --user protobuf
       addons:
         sauce_connect:
-          username: $SAUCE_USERNAME
+          username: #{node build-system/get-sauce-credentials.js --username}
         jwt:
-          secure: $SAUCE_ACCESS_KEY_ENCRYPTED
+          secure: #{node build-system/get-sauce-credentials.js --access_key_encrypted}
 cache:
   yarn: true
   directories:
