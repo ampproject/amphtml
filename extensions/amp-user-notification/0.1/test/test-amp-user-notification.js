@@ -111,7 +111,10 @@ describes.realWin('amp-user-notification', {
         .withExactArgs('amp-user-notification:n1')
         .returns(Promise.resolve(true))
         .once();
-    return expect(impl.isDismissed()).to.eventually.equal(true);
+    impl.isDismissed().then(dismissed => {
+      expect(dismissed).to.be.true;
+      storageMock.verify();
+    });
   });
 
   it('isDismissed should return false if dismissal has not been recorded',
@@ -124,7 +127,10 @@ describes.realWin('amp-user-notification', {
             .withExactArgs('amp-user-notification:n1')
             .returns(Promise.resolve(null))
             .once();
-        return expect(impl.isDismissed()).to.eventually.equal(false);
+        impl.isDismissed().then(dismissed => {
+          expect(dismissed).to.be.false;
+          storageMock.verify();
+        });
       });
 
   it('isDismissed should return false if data-persist-dismissal=false', () => {
@@ -134,7 +140,10 @@ describes.realWin('amp-user-notification', {
     impl.buildCallback();
 
     storageMock.expects('get').never();
-    return expect(impl.isDismissed()).to.eventually.equal(false);
+    impl.isDismissed().then(dismissed => {
+      expect(dismissed).to.be.false;
+      storageMock.verify();
+    });
   });
 
   it('isDismissed should return false if storage throws error', () => {
@@ -146,7 +155,10 @@ describes.realWin('amp-user-notification', {
         .withExactArgs('amp-user-notification:n1')
         .returns(Promise.reject('intentional'))
         .once();
-    return expect(impl.isDismissed()).to.eventually.equal(false);
+    impl.isDismissed().then(dismissed => {
+      expect(dismissed).to.be.false;
+      storageMock.verify();
+    });
   });
 
   it('shouldShow should return false if storage has been recorded', () => {
@@ -161,6 +173,7 @@ describes.realWin('amp-user-notification', {
         .once();
     return impl.shouldShow().then(shouldShow => {
       expect(shouldShow).to.equal(false);
+      storageMock.verify();
     });
   });
 
@@ -184,6 +197,7 @@ describes.realWin('amp-user-notification', {
       expect(shouldShow).to.equal(true);
       expect(cidStub).to.be.calledOnce;
       expect(showEndpointStub).to.be.calledOnce;
+      storageMock.verify();
     });
   });
 
@@ -228,6 +242,7 @@ describes.realWin('amp-user-notification', {
       expect(shouldShow).to.equal(true);
       expect(cidStub).to.be.calledOnce;
       expect(showEndpointStub).to.be.calledOnce;
+      storageMock.verify();
     });
   });
 
@@ -250,6 +265,7 @@ describes.realWin('amp-user-notification', {
       expect(shouldShow).to.equal(false);
       expect(cidStub).to.be.calledOnce;
       expect(showEndpointStub).to.be.calledOnce;
+      storageMock.verify();
     });
   });
 
@@ -265,6 +281,7 @@ describes.realWin('amp-user-notification', {
         .once();
     return impl.shouldShow().then(shouldShow => {
       expect(shouldShow).to.equal(true);
+      storageMock.verify();
     });
   });
 
@@ -287,6 +304,7 @@ describes.realWin('amp-user-notification', {
       expect(shouldShow).to.equal(true);
       expect(cidStub).to.be.calledOnce;
       expect(showEndpointStub).to.be.calledOnce;
+      storageMock.verify();
     });
   });
 
@@ -302,6 +320,7 @@ describes.realWin('amp-user-notification', {
         .once();
     return impl.shouldShow().then(shouldShow => {
       expect(shouldShow).to.equal(true);
+      storageMock.verify();
     });
   });
 
