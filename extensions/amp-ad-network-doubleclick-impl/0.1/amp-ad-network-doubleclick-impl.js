@@ -62,6 +62,7 @@ import {removeElement} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {isObject} from '../../../src/types';
 import {extensionsFor, timerFor, xhrFor} from '../../../src/services';
 import {isExperimentOn} from '../../../src/experiments';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
@@ -82,11 +83,12 @@ const DOUBLECLICK_BASE_URL =
 const RTC_ERROR = {
   XHR: 'Bad XHR Request',
   BAD_RESPONSE: 'Bad XHR Response',
+  BAD_ENDPOINT: 'Bad RTC Endpoint',
 };
 /** @const {number} */
 const RTC_TIMEOUT = 1000;
 
-/** @private {?Promise} */
+/** @private {?Promise<!Object<string,string>>} */
 let rtcPromise = null;
 
 /** @private @const {!Object<string,string>} */
@@ -349,17 +351,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       return '';
     }
 
-    const ampRtcPageElement = document.getElementById('amp-rtc');
-    let rtcRequestPromise = null;
-    let rtcConfig;
-    if (ampRtcPageElement) {
-      rtcConfig = tryParseJson(ampRtcPageElement.innerHTML);
-      if (rtcConfig && typeof rtcConfig == 'object'
-      && !!rtcConfig['doubleclick']) {
-        rtcRequestPromise = this.sendRtcRequestPromise_(/** @type {!Object} */(
-            rtcConfig['doubleclick']));
-      }
-    }
+    const rtcRequestPromise = this.sendRtcRequest_();
+
     // TODO(keithwrightbos): SRA blocks currently unnecessarily generate full
     // ad url.  This could be optimized however non-SRA ad url is required to
     // fallback to non-SRA if single block.
@@ -370,30 +363,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     const pageLevelParametersPromise = getPageLevelParameters_(
         this.win, this.getAmpDoc(), startTime);
-    const blockParameters = this.getBlockParameters_();
 
     return Promise.all(
       [pageLevelParametersPromise, rtcRequestPromise]).then(values => {
         const pageLevelParameters = values[0];
-        const rtcResponse = values[1];
-        const parameters = Object.assign(blockParameters, pageLevelParameters);
-
-        if (rtcResponse) {
-          if (!!rtcResponse['targeting']) {
-            const targeting = deepMerge(this.jsonTargeting_['targeting'] || {},
-                rtcResponse['targeting'] || {});
-            const exclusions = deepMerge(
-                this.jsonTargeting_['categoryExclusions'] || {},
-                rtcResponse['exclusions'] || {});
-            parameters['scp'] = serializeTargeting_(targeting, exclusions);
-          } else {
-            // Default is to send request without RTC, so only reject if
-            // pub explicitly says not to.
-            if (rtcConfig['doubleclick']['sendAdRequestOnFailure'] === false) {
-              return Promise.reject();
-            }
-          }
-        }
+        const parameters = Object.assign(
+            this.getBlockParameters_(), pageLevelParameters);
         return googleAdUrl(
             this, DOUBLECLICK_BASE_URL, startTime, parameters, ['108809080']);
       });
@@ -542,56 +517,93 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * to hit browser cache, and the second request will always bypass.
    * This is a way for us to implement a simple stale-while-revalidate
    * model.
-   * @param {!Object} rtcDblckConfig
    * @return {?Promise} The rtc targeting info to attach to the ad url.
    * @private
    */
-  sendRtcRequestPromise_(rtcDblckConfig) {
+  sendRtcRequest_() {
+    // If we already sent the RTC request, return the value we've saved.
     if (rtcPromise) {
       return rtcPromise;
     }
-    const errorUrl = rtcDblckConfig['errorReportingUrl'];
-    const endpoint = rtcDblckConfig['endpoint'];
-    const noCache = (rtcDblckConfig['noCache'] === true);
+
+    const ampRtcPageElement = document.getElementById('amp-rtc');
+    let rtcConfig;
+    if (ampRtcPageElement) {
+      rtcConfig = tryParseJson(ampRtcPageElement.innerHTML);
+      if (!isObject(rtcConfig)) {
+        return Promise.resolve();
+      }
+    }
+
+    const endpoint = rtcConfig['endpoint'];
+    const noCache = (rtcConfig['noCache'] === true);
 
     if (!endpoint) {
-      this.sendRtcErrorPing(RTC_ERROR.BAD_ENDPOINT, errorUrl);
+      this.sendRtcErrorPing(RTC_ERROR.BAD_ENDPOINT);
+      return (rtcConfig['sendAdRequestOnFailure'] !== false ?
+      Promise.resolve() : Promise.reject());
     }
 
     const headers = new Headers();
     headers.append('Cache-Control', 'max-age=0');
     const xhrInit = {credentials: 'include'};
-
     if (noCache) {
       xhrInit.headers = headers;
     }
+    const startTime = Date.now();
+    const rtcRequest = xhrFor(this.win).fetchJson(endpoint, xhrInit);
 
-    const rtcResponse = xhrFor(this.win).fetchJson(endpoint, xhrInit);
     return rtcPromise = timerFor(window).timeoutPromise(
-        RTC_TIMEOUT, rtcResponse).then(res => {
+        RTC_TIMEOUT, rtcRequest).then(res => {
+          // TODO :: Need to add the time on to the ad request.
+          const rtcTotalTime = Date.now() - startTime;
+
           if (!noCache) {
+            // Repopulate the cache.
             xhrFor(this.win).fetchJson(endpoint, {
               credentials: 'include',
               headers,
+            }).catch(err => {
+              this.sendRtcErrorPing(RTC_ERROR.XHR);
             });
           }
+
           // Redirects and non-200 status codes are forbidden for RTC.
           if (!res.redirected && res.status == 200) {
-            return res.json();
+            return res.json().then(rtcResponse => {
+              if (rtcResponse) {
+                if (!!rtcResponse['targeting'] ||
+                !!rtcResponse['categoryExclusions']) {
+                  this.jsonTargeting_['targeting'] = deepMerge(
+                      this.jsonTargeting_['targeting'] || {},
+                      rtcResponse['targeting'] || {});
+                  this.jsonTargeting_['categoryExclusions'] = deepMerge(
+                      this.jsonTargeting_['categoryExclusions'] || {},
+                      rtcResponse['exclusions'] || {});
+                  return Promise.resolve();
+                } else if (rtcConfig['sendAdRequestOnFailure'] === false) {
+                    // Default is to send request without RTC, so only reject if
+                    // pub explicitly says not to.
+                  return Promise.reject();
+                }
+              }
+            });
           } else {
-            this.sendRtcErrorPing(RTC_ERROR.BAD_RESPONSE, errorUrl);
+            this.sendRtcErrorPing(RTC_ERROR.BAD_RESPONSE);
             return null;
           }
-        }).catch(() => {
-          this.sendRtcErrorPing(RTC_ERROR.XHR, errorUrl);
+        }).catch(err => {
+          user().error(err);
+          this.sendRtcErrorPing(RTC_ERROR.XHR);
           return null;
         });
   }
 
-  sendRtcErrorPing(error, errorUrl) {
+  sendRtcErrorPing(error) {
     // DO NOT SUBMIT
-    // Need to actually implement this error ping function.
-    console.log(`RTC Error: ${error}`);
+    // Need to actually implement firing custom error events. Just for
+    // debugging as it currently is.
+    user().error(`RTC Error: ${error}`);
   }
 
   /** @override */
