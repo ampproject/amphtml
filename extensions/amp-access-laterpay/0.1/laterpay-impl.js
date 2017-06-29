@@ -41,6 +41,7 @@ const DEFAULT_MESSAGES = {
   payNowButton: 'Buy Now',
   defaultButton: 'Buy Now',
   alreadyPurchasedLink: 'I already bought this',
+  sandbox: 'Site in test mode. No payment required.',
 };
 
 /**
@@ -171,7 +172,7 @@ export class LaterpayVendor {
       this.laterpayConfig_.configUrl
     ) {
       return this.laterpayConfig_.configUrl;
-    } else if (getMode().development && this.laterpayConfig_.sandbox) {
+    } else if (this.laterpayConfig_.sandbox) {
       return SANDBOX_CONFIG_URL;
     } else {
       return CONFIG_URL;
@@ -304,6 +305,9 @@ export class LaterpayVendor {
     const dialogContainer = this.getContainer_();
     this.innerContainer_ = this.createElement_('div');
     this.innerContainer_.className = TAG + '-container';
+    if (this.laterpayConfig_.sandbox) {
+      this.renderTextBlock_('sandbox');
+    }
     this.renderTextBlock_('header');
     const listContainer = this.createElement_('ul');
     this.purchaseConfig_.premiumcontent['tp_title'] =
