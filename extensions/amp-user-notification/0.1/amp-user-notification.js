@@ -253,7 +253,7 @@ export class AmpUserNotification extends AMP.BaseElement {
     return this.getCidService_()
         .then(cid => cid.optOut())
         .then(() => this.dismiss(), reason => {
-          dev().error('amp-user-notification',
+          dev().error(TAG,
               'Failed to opt out of Cid', reason);
           // If optout fails, dismiss notification without persisting.
           this.dismiss(/*opt_forceNoPersist*/true);
