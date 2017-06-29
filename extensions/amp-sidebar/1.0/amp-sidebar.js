@@ -60,6 +60,9 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private {?string} */
     this.side_ = null;
 
+    /** @private {?string} */
+    this.dock_ = null;
+
     /** @private {Array} */
     this.toolbars_ = [];
 
@@ -92,6 +95,8 @@ export class AmpSidebar extends AMP.BaseElement {
         'Experiment amp-sidebar 1.0 is disabled.');
 
     this.side_ = this.element.getAttribute('side');
+
+    this.dock_ = this.element.getAttribute('dock');
 
     this.viewport_ = this.getViewport();
 
@@ -188,11 +193,73 @@ export class AmpSidebar extends AMP.BaseElement {
     this.toolbars_.forEach(toolbar => {
       toolbar.onLayoutChange(() => this.onToolbarOpen_());
     });
+
+    // Check for body, as we need it for docking
+    if (!this.document_.body || !this.dock_) {
+      return;
+    }
+
+    // Remove and add the docking dynamically
+    if (this.isDocked_() && !this.element.hasAttribute('docked')) {
+      this.close_();
+      this.vsync_.mutate(() => {
+        this.element.setAttribute('docked', '');
+        this.vsync_.run({
+          measure: state => {
+            state.borderCalc = `calc(${this.element./*REVIEW*/offsetWidth}px)`;
+            console.log(this.element./*REVIEW*/offsetWidth);
+          },
+          mutate: state => {
+            if (this.side_ === 'right') {
+              setStyles(this.document_.body, {
+                'border-right-width': state.borderCalc,
+                'border-right-style': 'solid',
+              });
+            } else {
+              setStyles(this.document_.body, {
+                'border-left-width': state.borderCalc,
+                'border-left-style': 'solid',
+              });
+            }
+          },
+        }, {});
+      });
+    } else if (!this.isDocked_() && this.element.hasAttribute('docked')) {
+      this.close_();
+      this.vsync_.mutate(() => {
+        if (this.side_ === 'right') {
+          setStyles(this.document_.body, {
+            'border-right-width': null,
+            'border-right-style': null,
+          });
+        } else {
+          setStyles(this.document_.body, {
+            'border-left-width': null,
+            'border-left-style': null,
+          });
+          this.element.removeAttribute('docked');
+        }
+      });
+    }
   }
 
   /** @override */
   activate() {
     this.open_();
+  }
+
+  /**
+   * Returns if the sidebar is currently docked
+   * @returns {boolean}
+   * @private
+   */
+  isDocked_() {
+    if (!this.dock_) {
+      return false;
+    } else {
+      return this.element.ownerDocument
+          .defaultView.matchMedia(this.dock_).matches;
+    }
   }
 
   /**
@@ -229,7 +296,7 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   open_() {
-    if (this.isOpen_()) {
+    if (this.isOpen_() || this.isDocked_()) {
       return;
     }
     this.viewport_.enterOverlayMode();
