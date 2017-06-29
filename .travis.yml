@@ -48,11 +48,13 @@ matrix:
     - env: BUILD_SHARD="integration_tests"
       before_script:
         - pip install --user protobuf
+        - echo $SAUCE_USERNAME
+        - echo $SAUCE_ACCESS_KEY_ENCRYPTED
       addons:
         sauce_connect:
-          username: $SAUCE_USERNAME
+          username: "#{`node build-system/get-sauce-credentials.js --username`}"
         jwt:
-          secure: $SAUCE_ACCESS_KEY_ENCRYPTED
+          secure: "#{`node build-system/get-sauce-credentials.js --access_key_encrypted`}"
 cache:
   yarn: true
   directories:
