@@ -60,6 +60,31 @@ export let LayoutMarginsDef;
  */
 export let LayoutMarginsChangeDef;
 
+/**
+* RelativePositions
+*
+* Describes the relative position of an element to another (whether the
+* first is inside the second, on top of the second or on the bottom
+* @enum {number}
+*/
+export const RelativePositions = {
+  INSIDE: 0,
+  TOP: 1,
+  BOTTOM: 2,
+};
+
+/**
+* IntersectionStates
+*
+* Describes the spacial relation of an element to another (whether the
+* element is contained within another, partially overlapping or not overlapping
+* @enum {number}
+*/
+export const IntersectionStates = {
+  CONTAINED: 0,
+  PARTIAL_OVERLAP: 1,
+  DISJOINT: 2,
+};
 
 /**
  * Creates a layout rect based on the left, top, width and height parameters
@@ -136,6 +161,37 @@ export function rectIntersection(var_args) {
   return layoutRectLtwh(x0, y0, x1 - x0, y1 - y0);
 }
 
+/**
+ * Returns the position of r2 relative to r1
+ * @param {!LayoutRectDef} r1
+ * @param {!LayoutRectDef} r2
+ * @return {RelativePositions}
+ */
+export function layoutRectsRelativePos(r1, r2) {
+  if (r1.top < r2.top) {
+    return RelativePositions.TOP;
+  } else if (r1.bottom > r2.bottom) {
+    return RelativePositions.BOTTOM;
+  } else {
+    return RelativePositions.INSIDE;
+  }
+}
+
+/**
+ * Returns the position of r2 relative to r1
+ * @param {!LayoutRectDef} r1
+ * @param {!LayoutRectDef} r2
+ * @return {IntersectionStates}
+ */
+export function layoutRectsIntersectionState(r1, r2) {
+  if (r1.bottom < r2.top || r1.top > r2.bottom) {
+    return IntersectionStates.DISJOINT;
+  } else if (r1.bottom > r2.bottom || r1.top < r2.top) {
+    return IntersectionStates.PARTIAL_OVERLAP;
+  } else {
+    return IntersectionStates.CONTAINED;
+  }
+}
 
 /**
  * Expand the layout rect using multiples of width and height.
