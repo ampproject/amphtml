@@ -56,4 +56,4 @@ function main(argv) {
   return 0;
 }
 
-main();
+process.exit(main());
