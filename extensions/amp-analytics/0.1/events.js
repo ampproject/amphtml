@@ -117,7 +117,7 @@ export class CustomEventTracker extends EventTracker {
      * Sandbox events get their own buffer, because handler to those events will
      * be added after parent element's layout. (Time varies, can be later than 10s)
      * sandbox events buffer will never expire but will cleared when handler is ready.
-     * @private {!Object<string, !Array<!AnalyticsEvent>>|undefined}
+     * @private {!Object<string, !Array<!AnalyticsEvent>|undefined>|undefined}
      */
     this.sandboxBuffer_ = {};
 
@@ -151,12 +151,9 @@ export class CustomEventTracker extends EventTracker {
     const isSandboxEvent = startsWith(eventType, 'sandbox-');
 
     // Push recent events if any.
-    let buffer;
-    if (isSandboxEvent) {
-      buffer = this.sandboxBuffer_ && this.sandboxBuffer_[eventType];
-    } else {
-      buffer = this.buffer_ && this.buffer_[eventType];
-    }
+    const buffer = isSandboxEvent ?
+        this.sandboxBuffer_ && this.sandboxBuffer_[eventType] :
+        this.buffer_ && this.buffer_[eventType];
 
     if (buffer) {
       const bufferLength = buffer.length;
