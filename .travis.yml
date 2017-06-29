@@ -49,6 +49,7 @@ matrix:
       before_script:
         - pip install --user protobuf
         - node -e "console.log('SAUCE_USERNAME', process.env.SAUCE_USERNAME);"
+        - node -e "console.log('SAUCE_ACCESS_KEY', process.env.SAUCE_ACCESS_KEY);"
         - node -e "console.log('SAUCE_ACCESS_KEY_ENCRYPTED', process.env.SAUCE_ACCESS_KEY_ENCRYPTED);"
       addons:
         sauce_connect:
