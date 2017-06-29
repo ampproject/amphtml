@@ -48,8 +48,8 @@ limitations under the License.
   justify-content: center !important;
 }
 
-.transparent-bg {
-  background-color: transparent;
+.mrauto {
+  margin-right: auto;
 }
 
 .ampstart-headerbar-nav, .ampstart-headerbar-nav > ul.flex {
@@ -72,6 +72,12 @@ limitations under the License.
 
 .ampstart-hamburger-nav {
   background-color: #fff;
+}
+
+@media (min-width: 931px) {
+  .ampstart-headerbar-nav {
+    margin-left: -195px;
+  }
 }
 
 @media (max-width: 930px) {
@@ -119,18 +125,20 @@ limitations under the License.
     <!-- Toolbar One, basic usage, toolbar-only -->
     <!-- Could center with CSS justify-content: space-between, but trying to be minimal -->
     <nav toolbar="(min-width: 0px)" class="ampstart-hamburger-nav ampstart-navbar-bg" toolbar-only>
-      <ul>
+      <ul class="justify-center">
         <li role="button" aria-label="open sidebar" on="tap:header-sidebar.toggle" tabindex="0" class="ampstart-navbar-trigger pl2">
           ☰
         </li>
-        <li>
+        <li class="mrauto">
           <amp-img src="https://ampstart.com/img/blog/logo.png" width="100" height="61.3" layout="fixed" class="my0 ml2" alt="The Blog"></amp-img>
+        </li>
+        <li id="toolbar-nav-target" class="mrauto">
         </li>
       </ul>
     </nav>
 
     <!-- Toolbar Two, min only  -->
-    <nav toolbar="(min-width: 931px)" toolbar-only class="ampstart-headerbar-nav ampstart-nav ampstart-navbar-bg">
+    <nav toolbar="(min-width: 931px)" target="toolbar-nav-target" toolbar-only class="ampstart-headerbar-nav ampstart-nav ampstart-navbar-bg">
       <ul class="list-reset center m0 p0 flex justify-center nowrap">
           <li class="ampstart-nav-item ampstart-nav-dropdown">
             <!-- Start Dropdown -->
@@ -266,27 +274,9 @@ limitations under the License.
                 <label for="emailid" class="absolute top-0 right-0 bottom-0 left-0">Email</label>
               </div>
               <!-- End Input-->
-
-
-
-
-
-
-
-
-
-
               <!-- Start Submit -->
               <input type="submit" name="submit" value="SUBMIT" id="submit" class="ampstart-btn mb3 ampstart-btn-secondary">
               <!-- End Submit -->
-
-
-
-
-
-
-
-
             </fieldset>
           </form>
         </div>
