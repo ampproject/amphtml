@@ -46,10 +46,13 @@ matrix:
         - gem install phantomjs
         - gem install poltergeist
     - env: BUILD_SHARD="integration_tests"
+      before_install:
+        - node -e "console.log('before_install SAUCE_USERNAME', process.env.SAUCE_USERNAME);"
+        - node -e "console.log('before_install SAUCE_ACCESS_KEY_ENCRYPTED', process.env.SAUCE_ACCESS_KEY_ENCRYPTED);"
       before_script:
         - pip install --user protobuf
-        - node -e "console.log('SAUCE_ACCESS_KEY_ENCRYPTED', process.env.SAUCE_ACCESS_KEY_ENCRYPTED);"
-        - node -e "console.log('SAUCE_USERNAME', process.env.SAUCE_USERNAME);"
+        - node -e "console.log('before_script SAUCE_USERNAME', process.env.SAUCE_USERNAME);"
+        - node -e "console.log('before_script SAUCE_ACCESS_KEY_ENCRYPTED', process.env.SAUCE_ACCESS_KEY_ENCRYPTED);"
       addons:
         sauce_connect: true
         jwt:
