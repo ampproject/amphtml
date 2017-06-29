@@ -91,8 +91,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** @type {!../../../ads/google/a4a/performance.BaseLifecycleReporter} */
     this.lifecycleReporter = googleLifecycleReporterFactory(this);
 
-    /** @private {string} */
-    this.type_ = this.element.getAttribute('type');
+    /** @private {string|undefined} */
+    this.type_ = undefined;
   }
 
   /** @override */
@@ -118,6 +118,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.type_ = this.element.getAttribute('type');
+
     this.placeholder_ = this.getPlaceholder();
     this.fallback_ = this.getFallback();
 
