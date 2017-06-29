@@ -156,7 +156,7 @@ describe('amp-analytics.transport', () => {
     };
     transport.processCrossDomainIframe(window, config);
     const queue = Transport.getFrameData(url).newCreativeMessageQueue;
-    expect(queue.count()).to.equal(1);
+    expect(queue.queueSize()).to.equal(1);
     expect(queue.messageFor(transport.getId())).to.equal(extraData);
   });
 
