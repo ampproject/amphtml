@@ -302,11 +302,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
-  onLayoutMeasure() {
-    super.onLayoutMeasure();
-  }
-
-  /** @override */
   unlayoutCallback() {
     super.unlayoutCallback();
     this.element.setAttribute('data-amp-slot-index',
