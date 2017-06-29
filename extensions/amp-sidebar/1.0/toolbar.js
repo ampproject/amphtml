@@ -104,8 +104,17 @@ export class Toolbar {
    */
   buildCallback_() {
     this.toolbarClone_ = this.toolbarDOMElement_.cloneNode(true);
+    // Addend "_toolbar" to ids on the toolbar clone
+    const idElementsInClone = Array.prototype.slice
+      .call(this.toolbarClone_.querySelectorAll('[id]'), 0);
+    idElementsInClone.forEach(element => {
+      element.id = `${element.id}_toolbar`;
+    });
     const targetId = this.toolbarDOMElement_.getAttribute('target');
-    const targetElement = this.win_.document.getElementById(targetId);
+    // Set the target element to the toolbar clone if it exists.
+    const targetElement =
+    this.win_.document.getElementById(`${targetId}_toolbar`) ||
+    this.win_.document.getElementById(targetId);
     this.targetElement_ = targetElement || this.createTargetElement_();
     this.targetElement_.appendChild(this.toolbarClone_);
     toggle(this.targetElement_, false);
