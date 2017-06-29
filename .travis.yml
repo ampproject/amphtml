@@ -29,7 +29,6 @@ branches:
 env:
   global:
     - SAUCE_USERNAME="#{`node build-system/get-sauce-credentials.js --username`}"
-    - SAUCE_ACCESS_KEY_ENCRYPTED="#{`node build-system/get-sauce-credentials.js --access_key_encrypted`}"
     - NPM_CONFIG_PROGRESS="false"
 matrix:
   include:
@@ -48,8 +47,6 @@ matrix:
     - env: BUILD_SHARD="integration_tests"
       before_script:
         - pip install --user protobuf
-        - echo $SAUCE_USERNAME
-        - echo $SAUCE_ACCESS_KEY_ENCRYPTED
       addons:
         sauce_connect:
           username: "#{`node build-system/get-sauce-credentials.js --username`}"
