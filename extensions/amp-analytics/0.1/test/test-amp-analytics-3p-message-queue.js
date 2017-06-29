@@ -67,7 +67,7 @@ queueTypes.forEach(entry => {
     });
 
     it('is empty when first created ', () => {
-      expect(queue.count()).to.equal(0);
+      expect(queue.queueSize()).to.equal(0);
     });
 
     it('is not ready until setIsReady() is called ', () => {
@@ -82,10 +82,10 @@ queueTypes.forEach(entry => {
     });
 
     it('queues messages when not ready to send ', () => {
-      const beforeCount = queue.count();
+      const beforeCount = queue.queueSize();
       queue.enqueue('some_senderId', 'some_data');
       queue.enqueue('another_senderId', 'some_data');
-      const afterCount = queue.count();
+      const afterCount = queue.queueSize();
       expect(afterCount - beforeCount).to.equal(2);
     });
 
@@ -94,7 +94,7 @@ queueTypes.forEach(entry => {
       queue.setIsReady(); // Expected to flush the queue, but no more often than
       // every MESSAGE_THROTTLE_TIME ms
       return timer.promise(MESSAGE_THROTTLE_TIME * 1.5).then(() => {
-        if (!queue.count()) {
+        if (!queue.queueSize()) {
           return Promise.resolve(); // Queue did flush
         }
         return Promise.reject(); // Queue did not flush
@@ -106,12 +106,12 @@ queueTypes.forEach(entry => {
       // every MESSAGE_THROTTLE_TIME ms
       queue.enqueue('sender' + String(Math.random()), 'some_data');
       timer.poll(MESSAGE_THROTTLE_TIME * 0.1, () => {
-        return !queue.count();
+        return !queue.queueSize();
       }).then(() => {
         // Queue just flushed within the past 1/10th of the throttling interval
         queue.enqueue('sender' + String(Math.random()), 'some_data');
         return timer.promise(MESSAGE_THROTTLE_TIME * 0.1).then(() => {
-          if (queue.count()) {
+          if (queue.queueSize()) {
             return Promise.resolve(); // Queue did not flush too soon
           }
           return Promise.reject(); // Queue flushed too soon
@@ -147,7 +147,7 @@ describe('amp-analytics.amp-analytics-3p-message-queue: Additional Event' +
     queue.enqueue('number_sender', '4');
     const letterCount = queue.messagesFor('letter_sender').length;
     const numberCount = queue.messagesFor('number_sender').length;
-    expect(queue.count()).to.equal(2);
+    expect(queue.queueSize()).to.equal(2);
     expect(letterCount).to.equal(3);
     expect(numberCount).to.equal(4);
   });

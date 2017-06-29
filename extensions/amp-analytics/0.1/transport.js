@@ -281,8 +281,8 @@ export class Transport {
   createCrossDomainIframe(win, frameUrl) {
     const sentinel = Transport.createUniqueId_();
     const scriptSrc = getMode().localDev
-      ? '/dist.3p/current/ampanalytics-lib.js'
-      : '/$internalRuntimeVersion$/ampanalytics-v0.js';
+      ? 'dist.3p/current/ampanalytics-lib.js'
+      : '$internalRuntimeVersion$/ampanalytics-v0.js';
     const frameName = JSON.stringify(/** @type {JsonObject} */ ({
       scriptSrc,
       sentinel,

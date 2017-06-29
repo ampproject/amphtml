@@ -78,7 +78,7 @@ class AbstractAmpAnalytics3pMessageQueue {
    * @private
    */
   flushQueue_() {
-    if (this.isReady_ && Object.keys(this.creativeToPendingMessages_).length) {
+    if (this.isReady_ && this.queueSize()) {
       const jsonMsg = /** @type {JsonObject} */ (this.buildMessage());
       this.iframeMessagingClient_./*OK*/sendMessage(this.messageType_, jsonMsg);
       this.creativeToPendingMessages_ = {};
@@ -99,7 +99,7 @@ class AbstractAmpAnalytics3pMessageQueue {
    * @return {number}
    * @VisibleForTesting
    */
-  count() {
+  queueSize() {
     return Object.keys(this.creativeToPendingMessages_).length;
   }
 
@@ -134,7 +134,7 @@ export class AmpAnalytics3pNewCreativeMessageQueue extends
    * iframe
    */
   enqueue(senderId, opt_data) {
-    dev().assert(!this.creativeToPendingMessages_[senderId],
+    dev().assert(!this.messageFor(senderId),
         'Replacing existing extra data for: ' + senderId);
     this.creativeToPendingMessages_[senderId] = opt_data || '';
     this.throttledFlushQueue_();
@@ -165,7 +165,7 @@ export class AmpAnalytics3pNewCreativeMessageQueue extends
    */
   messageFor(senderId) {
     return /** @type {string} */ (
-      this.creativeToPendingMessages_[senderId]);
+        this.creativeToPendingMessages_[senderId]);
   }
 }
 
@@ -189,10 +189,9 @@ export class AmpAnalytics3pEventMessageQueue extends
    * @param {!string} data The data to be enqueued and then sent to the iframe
    */
   enqueue(senderId, data) {
-    if (!this.creativeToPendingMessages_.hasOwnProperty(senderId)) {
-      this.creativeToPendingMessages_[senderId] = [];
-    }
-    if (this.creativeToPendingMessages_[senderId].length >= MAX_QUEUE_SIZE_) {
+    this.creativeToPendingMessages_[senderId] =
+        this.creativeToPendingMessages_[senderId] || [];
+    if (this.queueSize() >= MAX_QUEUE_SIZE_) {
       dev().warn(TAG_, 'Exceeded maximum size of queue for: ' + senderId);
       this.creativeToPendingMessages_[senderId].shift();
     }

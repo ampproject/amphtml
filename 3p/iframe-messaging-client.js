@@ -101,7 +101,7 @@ export class IframeMessagingClient {
    */
   setupEventListener_() {
     listen(this.win_, 'message', event => {
-      if (this.hostWindowIsActuallyAnIframe_()) {
+      if (this.hostWindow_ instanceof HTMLIFrameElement) {
         // this.hostWindow_ can now be set to an iframe, after it has been
         // created but before it has finished loading. If we've gotten a
         // message from that iframe, then it must exist, so its
@@ -122,17 +122,6 @@ export class IframeMessagingClient {
 
       this.fireObservable_(message['type'], message);
     });
-  }
-
-  /**
-   * Determines whether frameOrWindow is a frame, or a window.
-   * @returns {boolean}
-   */
-  hostWindowIsActuallyAnIframe_() {
-    // If it's a window, it will have .postMessage
-    // We check for that before .contentWindow, since a cross-domain window
-    // may throw if we try to access anything unsafe
-    return (!this.hostWindow_.postMessage && !!this.hostWindow_.contentWindow);
   }
 
   /**
