@@ -31,7 +31,8 @@ describe.skip('integration amp-carousel', () => {
   });
 
   it('should show the body in carousel test', () => {
-    return expectBodyToBecomeVisible(fixture.win);
+    return expectBodyToBecomeVisible(
+        fixture.win, window.ampTestRuntimeConfig.mochaTimeout);
   });
 
   it('should be present', () => {

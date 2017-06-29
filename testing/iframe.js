@@ -399,14 +399,15 @@ export function expectPostMessage(sourceWin, targetwin, msg) {
  */
 export function poll(description, condition, opt_onError, opt_timeout) {
   return new Promise((resolve, reject) => {
-    let start = Date.now();
+    const start = Date.now();
+    const end = opt_timeout || 1600;
     function poll() {
       const ret = condition();
       if (ret) {
         clearInterval(interval);
         resolve(ret);
       } else {
-        if (Date.now() - start > (opt_timeout || 1600)) {
+        if (Date.now() - start > end) {
           clearInterval(interval);
           if (opt_onError) {
             reject(opt_onError());
@@ -416,7 +417,7 @@ export function poll(description, condition, opt_onError, opt_timeout) {
         }
       }
     }
-    let interval = setInterval(poll, 8);
+    const interval = setInterval(poll, 8);
     poll();
   });
 }
@@ -447,15 +448,16 @@ export function pollForLayout(win, count, opt_timeout) {
 
 /**
  * @param {!Window} win
+ * @param {number=} opt_timeout
  * @return {!Promise}
  */
-export function expectBodyToBecomeVisible(win) {
+export function expectBodyToBecomeVisible(win, opt_timeout) {
   return poll('expect body to become visible', () => {
     return win && win.document && win.document.body && (
         (win.document.body.style.visibility == 'visible'
             && win.document.body.style.opacity != '0')
         || win.document.body.style.opacity == '1');
-  }, undefined, 5000);
+  }, undefined, opt_timeout || 5000);
 }
 
 /**
