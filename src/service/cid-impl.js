@@ -169,7 +169,7 @@ export class Cid {
         rethrowAsync('Ignore CID API from Untrustful Viewer.');
         return;
       }
-      return viewer.sendMessageAwaitResponse('cid', {scope});
+      return viewer.sendMessageAwaitResponse('cid', dict({scope}));
     });
   }
 }
