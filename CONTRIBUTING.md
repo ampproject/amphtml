@@ -126,6 +126,10 @@ We encourage everyone who is actively contributing to AMP to add a comment to th
 
 The community holds weekly engineering [design reviews](./contributing/design-reviews.md) via video conference.  We encourage everyone in the community to participate in these discussions and to bring their designs for new features and significant bug fixes to these reviews.
 
+### Working groups
+
+AMP Project working groups bring together parties with related interests to discuss ideas for how AMP can evolve and to receive updates on new features and changes in AMP that are relevant to the group.  Please see our [working group page](./contributing/working-groups.md) for more information on which 
+
 ### See Also
 
 * [Code of conduct](CODE_OF_CONDUCT.md)
