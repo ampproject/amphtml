@@ -33,7 +33,6 @@ import {parseUrl} from '../../src/url';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installTimerService} from '../../src/service/timer-impl';
-import {installStorageServiceForDoc} from '../../src/service/storage-impl';
 import {
   installCryptoPolyfill,
 } from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
@@ -378,7 +377,6 @@ describe('cid', () => {
           'sha384(in-storagehttp://www.origin.come2)');
     });
 
-      installStorageServiceForDoc(ampdoc2);
     it('should expire on read after 365 days', () => {
       const expected = 'sha384(sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])http://www.origin.come2)';
       return compare('e2', expected).then(() => {
