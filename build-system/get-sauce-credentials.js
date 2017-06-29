@@ -47,9 +47,9 @@ function main(argv) {
   let username = credentials[sauceUser].username;
   let access_key_encrypted = credentials[sauceUser].access_key_encrypted.trim();
 
-  if (process.argv.includes('--username')) {
+  if (process.argv.indexOf('--username') !== -1) {
     console/*OK*/.log('"' + username + '"');
-  } else if (process.argv.includes('--access_key_encrypted')) {
+  } else if (process.argv.indexOf('--access_key_encrypted')!== -1) {
     console/*OK*/.log('"' + access_key_encrypted + '"');
   }
 
