@@ -86,14 +86,40 @@ export class AmpUserNotification extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private @const {?UrlReplacements} */
-    this.urlReplacements_ = null;
+    /** @private {?string} */
+    this.ampUserId_ = null;
 
-    /** @private @const {?UserNotificationManager} */
+    /** @private {?string} */
+    this.elementId_ = null;
+
+    /** @private {?function()} */
+    this.dialogResolve_ = null;
+
+    /** @private {Promise} */
+    this.dialogPromise_ = new Promise(resolve => {
+      this.dialogResolve_ = resolve;
+    });
+
+    /** @private {?string} */
+    this.dismissHref_ = null;
+
+    /** @private {boolean} */
+    this.persistDismissal_ = true;
+
+    /** @private {?string} */
+    this.showIfHref_ = null;
+
+    /** @private {string} */
+    this.storageKey_ = '';
+
+    /** @private {?Promise<!Storage>} */
+    this.storagePromise_ = null;
+
+    /** @private {?UserNotificationManager} */
     this.userNotificationManager_ = null;
 
-    /** @const @private {?Promise<!Storage>} */
-    this.storagePromise_ = null;
+    /** @private {?../../../src/service/url-replacements-impl.UrlReplacements} */
+    this.urlReplacements_ = null;
   }
 
   /** @override */
@@ -112,30 +138,16 @@ export class AmpUserNotification extends AMP.BaseElement {
           'userNotificationManager');
     }
 
-    /** @private {?string} */
-    this.ampUserId_ = null;
-
-    /** @private {function()} */
-    this.dialogResolve_ = null;
-
-    /** @private {!Promise} */
-    this.dialogPromise_ = new Promise(resolve => {
-      this.dialogResolve_ = resolve;
-    });
-
     this.elementId_ = user().assert(this.element.id,
         'amp-user-notification should have an id.');
 
-    /** @private @const {string} */
     this.storageKey_ = 'amp-user-notification:' + this.elementId_;
 
-    /** @private @const {?string} */
     this.showIfHref_ = this.element.getAttribute('data-show-if-href');
     if (this.showIfHref_) {
       assertHttpsUrl(this.showIfHref_, this.element);
     }
 
-    /** @private @const {?string} */
     this.dismissHref_ = this.element.getAttribute('data-dismiss-href');
     if (this.dismissHref_) {
       assertHttpsUrl(this.dismissHref_, this.element);
@@ -149,15 +161,15 @@ export class AmpUserNotification extends AMP.BaseElement {
 
     const persistDismissal = this.element.getAttribute(
         'data-persist-dismissal');
-    /** @private @const {boolean} */
+
     this.persistDismissal_ = (
         persistDismissal != 'false' && persistDismissal != 'no');
 
     this.userNotificationManager_
         .registerUserNotification(this.elementId_, this);
 
-    this.registerAction('dismiss', this.dismiss.bind(this));
-    this.registerAction('optoutOfCid', this.optoutOfCid_.bind(this));
+    this.registerAction('dismiss', () => this.dismiss());
+    this.registerAction('optoutOfCid', () => this.optoutOfCid_());
   }
 
   /**
@@ -168,12 +180,13 @@ export class AmpUserNotification extends AMP.BaseElement {
    * @private
    */
   buildGetHref_(ampUserId) {
-    const showIfHref = dev().assert(this.showIfHref_);
+    const showIfHref = dev().assertString(this.showIfHref_);
     return this.urlReplacements_.expandAsync(showIfHref).then(href => {
-      return addParamsToUrl(href, {
-        elementId: this.elementId_,
-        ampUserId,
+      const data = /** @type {!JsonObject} */({
+        'elementId': this.elementId_,
+        'ampUserId': ampUserId,
       });
+      return addParamsToUrl(href, data);
     });
   }
 
@@ -201,14 +214,14 @@ export class AmpUserNotification extends AMP.BaseElement {
    * @return {!Promise}
    */
   postDismissEnpoint_() {
-    return xhrFor(this.win).fetchJson(dev().assert(this.dismissHref_), {
+    return xhrFor(this.win).fetchJson(dev().assertString(this.dismissHref_), {
       method: 'POST',
       credentials: 'include',
       requireAmpResponseSourceOrigin: false,
-      body: {
+      body: /** @type {!JsonObject} */({
         'elementId': this.elementId_,
         'ampUserId': this.ampUserId_,
-      },
+      }),
     });
   }
 
@@ -239,7 +252,7 @@ export class AmpUserNotification extends AMP.BaseElement {
   optoutOfCid_() {
     return this.getCidService_()
         .then(cid => cid.optOut())
-        .then(this.dismiss.bind(this), reason => {
+        .then(() => this.dismiss(), reason => {
           dev().error('amp-user-notification',
               'Failed to opt out of Cid', reason);
           // If optout fails, dismiss notification without persisting.
@@ -274,7 +287,7 @@ export class AmpUserNotification extends AMP.BaseElement {
    * @private
    */
   getCidService_() {
-    cidForDoc(this.element);
+    return cidForDoc(this.element);
   }
 
   /** @override */
@@ -376,7 +389,7 @@ export class UserNotificationManager {
     /** @private @const {!Object<string,!UserNotificationDeferDef>} */
     this.deferRegistry_ = Object.create(null);
 
-    /** @private @const {!Viewer} */
+    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = viewerForDoc(this.win.document);
 
     /** @private @const {!Promise} */

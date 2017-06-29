@@ -52,8 +52,7 @@ const SCOPE_NAME_VALIDATOR = /^[a-zA-Z0-9-_.]+$/;
 
 const CID_OPTOUT_STORAGE_KEY = 'amp-cid-optout';
 
-// TODO(aghassemi): replace with real viewer message when implemented.
-const CID_OPTOUT_VIEWER_MESSAGE = 'cidOptout';
+const CID_OPTOUT_VIEWER_MESSAGE = 'cidOptOut';
 
 /**
  * A base cid string value and the time it was last read / stored.
@@ -124,19 +123,20 @@ export class Cid {
         'The CID scope and cookie name must only use the characters ' +
         '[a-zA-Z0-9-_.]+\nInstead found: %s',
         getCidStruct.scope);
-    return isOptedOutOfCid(this.ampdoc).then(optedOut => {
-      // TODO(aghassemi): null or '' ?
-      if (optedOut) {
-        return null;
-      } else {
-        return consent.then(() => {
-          return viewerForDoc(this.ampdoc).whenFirstVisible();
-        }).then(() => {
-          return getExternalCid(this, getCidStruct,
-              opt_persistenceConsent || consent);
-        });
-      }
-    });
+
+      return consent.then(() => {
+        return viewerForDoc(this.ampdoc).whenFirstVisible();
+      }).then(() => {
+        // Check if user has globally opted out of CID, we do this after
+        // consent check since user can optout during consent process.
+        return isOptedOutOfCid(this.ampdoc);
+      }).then(optedOut => {
+        if (optedOut) {
+          return '';
+        }
+        return getExternalCid(this, getCidStruct,
+            opt_persistenceConsent || consent);
+      });
   }
 
   /**
@@ -160,7 +160,7 @@ export class Cid {
 export function optOutOfCid(ampdoc) {
 
   // Tell the viewer that user has opted out.
-  viewerForDoc(ampdoc).sendMessage(CID_OPTOUT_VIEWER_MESSAGE);
+  viewerForDoc(ampdoc).sendMessage(CID_OPTOUT_VIEWER_MESSAGE, dict());
 
   // Store the optout bit in storage
   return storageForDoc(ampdoc).then(storage => {

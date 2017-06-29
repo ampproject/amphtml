@@ -756,7 +756,7 @@ describes.fakeWin('cid optout:', {amp: true}, env => {
   describe('optOutOfCid()', () => {
     it('should send a message to viewer', () => {
       return optOutOfCid(ampdoc).then(() => {
-        expect(viewerSendMessageStub).to.be.calledWith('cidOptout');
+        expect(viewerSendMessageStub).to.be.calledWith('cidOptOut');
       });
     });
 
