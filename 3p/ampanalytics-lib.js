@@ -70,7 +70,11 @@ class AmpAnalytics3pMessageRouter {
           let entries;
           dev().assert(messageContainer.data &&
               (entries = Object.entries(messageContainer.data)).length,
-              'Received empty new creative message');
+              'Received empty list that should have contained new creative' +
+              ' message(s) in ' + this.win_.location.href);
+          dev().assert(window.onNewAmpAnalyticsInstance,
+              'Must implement onNewAmpAnalyticsInstance in' +
+              this.win_.location.href);
           entries.forEach(entry => {
             const creativeId = entry[0];
             const extraData = entry[1];
@@ -79,6 +83,14 @@ class AmpAnalytics3pMessageRouter {
             this.creativeMessageRouters_[creativeId] =
               new AmpAnalytics3pCreativeMessageRouter(
                 this.win_, this.iframeMessagingClient_, creativeId, extraData);
+            try {
+              window.onNewAmpAnalyticsInstance(
+                  this.creativeMessageRouters_[creativeId]);
+            } catch (e) {
+              dev().error(TAG_, 'Exception thrown by' +
+                  ' onNewAmpAnalyticsInstance() in' + this.win_.location.href +
+                  ': ' + e.message);
+            }
           });
         });
     this.iframeMessagingClient_.registerCallback(
@@ -110,18 +122,7 @@ class AmpAnalytics3pMessageRouter {
   }
 }
 
-if (window.onNewAmpAnalyticsInstance) {
-  const router = new AmpAnalytics3pMessageRouter(window);
-  try {
-    window.onNewAmpAnalyticsInstance(router);
-  } catch (e) {
-    dev().error(TAG_, 'Exception thrown by onNewAmpAnalyticsInstance in' +
-      this.win_.location.href + ': ' + e.message);
-  }
-} else {
-  dev().error(TAG_, 'Must implement onNewAmpAnalyticsInstance in' +
-    this.win_.location.href);
-}
+new AmpAnalytics3pMessageRouter(window);
 
 /**
  * Receives messages bound for this cross-domain iframe, from a particular
@@ -177,13 +178,14 @@ class AmpAnalytics3pCreativeMessageRouter {
    */
   sendMessagesToListener(messages) {
     if (!messages.length) {
-      dev().warn(TAG_, 'Attempted to send zero messages. Ignoring.');
+      dev().warn(TAG_, 'Attempted to send zero messages in ' +
+          this.creativeId_ + '. Ignoring.');
       return;
     }
     if (!this.eventListener_) {
       dev().warn(TAG_, 'Attempted to send messages when no listener' +
-        ' configured. Be sure to first call' +
-        ' registerAmpAnalytics3pEventsListener()');
+        ' configured in ' + this.creativeId_ + '. Be sure to' +
+        ' first call registerAmpAnalytics3pEventsListener()');
     }
     try {
       this.eventListener_(messages);

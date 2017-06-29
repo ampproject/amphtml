@@ -29,8 +29,8 @@
 
       // Load the script specified in the iframe’s name attribute:
       script = document.createElement('script');
-      script.src = 'https://3p.ampproject.net' +
-        JSON.parse(window.name).scriptSrc;
+      script.src = (document.location.hostname == 'localhost' ? '/' :
+          'https://3p.ampproject.net/') + JSON.parse(window.name).scriptSrc;
       document.head.appendChild(script);
       // The script will be loaded, and will call onNewAmpAnalyticsInstance()
     </script>
