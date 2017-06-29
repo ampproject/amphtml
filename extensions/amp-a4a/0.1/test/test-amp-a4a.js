@@ -251,6 +251,7 @@ describe('amp-a4a', () => {
         setupForAdTesting(fixture);
         a4aElement = createA4aElement(fixture.doc);
         a4a = new MockA4AImpl(a4aElement);
+        a4a.buildCallback();
         return fixture;
       });
     });
@@ -330,9 +331,9 @@ describe('amp-a4a', () => {
           FriendlyIframeEmbed.prototype,
           'whenIniLoaded',
           () => iniLoadPromise);
+      a4a.buildCallback();
       const lifecycleEventStub = sandbox.stub(
           a4a, 'protectedEmitLifecycleEvent_');
-      a4a.buildCallback();
       a4a.onLayoutMeasure();
       const layoutPromise = a4a.layoutCallback();
       return Promise.resolve().then(() => {
@@ -1066,10 +1067,10 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
-        const lifecycleEventStub = sandbox.stub(
-            a4a, 'protectedEmitLifecycleEvent_');
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
         a4a.buildCallback();
+        const lifecycleEventStub = sandbox.stub(
+            a4a, 'protectedEmitLifecycleEvent_');
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         return a4a.layoutCallback().then(() => {
@@ -1147,6 +1148,7 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
+        a4a.buildCallback();
         const forceCollapseSpy = sandbox.spy(a4a, 'forceCollapse');
         const noContentUISpy = sandbox.spy();
         const unlayoutUISpy = sandbox.spy();
@@ -1202,6 +1204,7 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
+        a4a.buildCallback();
         const forceCollapseSpy = sandbox.spy(a4a, 'forceCollapse');
         const noContentUISpy = sandbox.spy();
         a4a.uiHandler = {
@@ -1472,6 +1475,7 @@ describe('amp-a4a', () => {
         fixture = f;
         a4aElement = createA4aElement(fixture.doc);
         a4a = new MockA4AImpl(a4aElement);
+        a4a.buildCallback();
         return fixture;
       });
     });
@@ -1503,6 +1507,8 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         a4aElement = createA4aElement(doc);
         a4a = new AmpA4A(a4aElement);
+        sandbox.stub(a4a, 'getFallback', () => {return true;});
+        a4a.buildCallback();
         a4a.adUrl_ = 'https://nowhere.org';
       });
     });
@@ -1582,6 +1588,7 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
+        a4a.buildCallback();
         xhrMock.withArgs(TEST_URL, {
           mode: 'cors',
           method: 'GET',
@@ -1600,6 +1607,7 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
+        a4a.buildCallback();
         xhrMock.withArgs(TEST_URL, {
           mode: 'cors',
           method: 'GET',
@@ -1698,6 +1706,7 @@ describe('amp-a4a', () => {
           setupForAdTesting(fixture);
           const a4aElement = createA4aElement(fixture.doc);
           a4a = new MockA4AImpl(a4aElement);
+          a4a.buildCallback();
           stubVerifySignature =
               sandbox.stub(a4a.signatureVerifier_, 'verifySignature');
         });
@@ -2158,6 +2167,24 @@ describe('amp-a4a', () => {
     });
   });
 
+  describe('#extractSize', () => {
+
+    it('should return a size', () => {
+      expect(AmpA4A.prototype.extractSize({
+        get(name) {
+	  return {'X-CreativeSize': '320x50'}[name];
+        },
+      })).to.deep.equal({width: 320, height: 50});
+    });
+
+    it('should return no size', () => {
+      expect(AmpA4A.prototype.extractSize({
+        get(unusedName) {
+	  return null;
+        },
+      })).to.be.null;
+    });
+  });
   // TODO(tdrl): Other cases to handle for parsing JSON metadata:
   //   - Metadata tag(s) missing
   //   - JSON parse failure
