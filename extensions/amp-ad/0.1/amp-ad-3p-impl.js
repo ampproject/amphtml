@@ -90,6 +90,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
     /** @type {!../../../ads/google/a4a/performance.BaseLifecycleReporter} */
     this.lifecycleReporter = googleLifecycleReporterFactory(this);
+
+    /** @private {string} */
+    this.type_ = this.element.getAttribute('type');
   }
 
   /** @override */
@@ -118,9 +121,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     this.placeholder_ = this.getPlaceholder();
     this.fallback_ = this.getFallback();
 
-    const adType = this.element.getAttribute('type');
-    this.config = adConfig[adType];
-    user().assert(this.config, `Type "${adType}" is not supported in amp-ad`);
+    this.config = adConfig[this.type_];
+    user().assert(
+        this.config, `Type "${this.type_}" is not supported in amp-ad`);
 
     this.uiHandler = new AmpAdUIHandler(this);
 
@@ -134,7 +137,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    */
   preconnectCallback(opt_onLayout) {
     // We always need the bootstrap.
-    preloadBootstrap(this.win, this.preconnect);
+    preloadBootstrap(
+        this.win, this.preconnect, this.type_, this.config.remoteHTMLDisabled);
     if (typeof this.config.prefetch == 'string') {
       this.preconnect.preload(this.config.prefetch, 'script');
     } else if (this.config.prefetch) {
@@ -229,7 +233,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       // incrementLoadingAds().
       this.emitLifecycleEvent('adRequestStart');
       const iframe = getIframe(this.element.ownerDocument.defaultView,
-          this.element, undefined, opt_context);
+          this.element, this.type_, opt_context,
+          this.config.remoteHTMLDisabled);
       this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(
           this);
       return this.xOriginIframeHandler_.init(iframe);

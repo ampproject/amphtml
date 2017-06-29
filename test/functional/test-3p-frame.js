@@ -70,6 +70,48 @@ describe('3p-frame', () => {
     document.head.appendChild(meta);
   }
 
+  function setupElementFunctions(div) {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    div.getIntersectionChangeEntry = function() {
+      return {
+        time: 1234567888,
+        rootBounds: {
+          left: 0,
+          top: 0,
+          width,
+          height,
+          bottom: height,
+          right: width,
+          x: 0,
+          y: 0,
+        },
+        boundingClientRect: {
+          width: 100,
+          height: 200,
+        },
+        intersectionRect: {
+          left: 0,
+          top: 0,
+          width: 0,
+          height: 0,
+          bottom: 0,
+          right: 0,
+          x: 0,
+          y: 0,
+        },
+      };
+    };
+    div.getPageLayoutBox = function() {
+      return {
+        left: 0,
+        top: 0,
+        width: 100,
+        height: 200,
+      };
+    };
+  }
+
   it('add attributes', () => {
     const div = document.createElement('div');
     div.setAttribute('data-foo', 'foo');
@@ -118,43 +160,7 @@ describe('3p-frame', () => {
 
     const width = window.innerWidth;
     const height = window.innerHeight;
-    div.getIntersectionChangeEntry = function() {
-      return {
-        time: 1234567888,
-        rootBounds: {
-          left: 0,
-          top: 0,
-          width,
-          height,
-          bottom: height,
-          right: width,
-          x: 0,
-          y: 0,
-        },
-        boundingClientRect: {
-          width: 100,
-          height: 200,
-        },
-        intersectionRect: {
-          left: 0,
-          top: 0,
-          width: 0,
-          height: 0,
-          bottom: 0,
-          right: 0,
-          x: 0,
-          y: 0,
-        },
-      };
-    };
-    div.getPageLayoutBox = function() {
-      return {
-        left: 0,
-        top: 0,
-        width: 100,
-        height: 200,
-      };
-    };
+    setupElementFunctions(div);
 
     const viewer = viewerForDoc(window.document);
     const viewerMock = sandbox.mock(viewer);
@@ -279,6 +285,20 @@ describe('3p-frame', () => {
     }).to.throw(/must not be on the same origin as the/);
   });
 
+  it('should pick default url if custom disabled', () => {
+    addCustomBootstrap('http://localhost:9876/boot/remote.html');
+    expect(getBootstrapBaseUrl(window, true, undefined, true)).to.equal(
+        'http://ads.localhost:9876/dist.3p/current/frame.max.html');
+  });
+
+  it('should create frame with default url if custom disabled', () => {
+    setupElementFunctions(container);
+    const iframe =
+        getIframe(window, container, '_ping_', {clientId: 'cidValue'});
+    expect(iframe.src).to.equal(
+        'http://ads.localhost:9876/dist.3p/current/frame.max.html');
+  });
+
   it('should prefetch bootstrap frame and JS', () => {
     window.AMP_MODE = {localDev: true};
     preloadBootstrap(window, preconnect);
@@ -290,6 +310,18 @@ describe('3p-frame', () => {
           'http://ads.localhost:9876/dist.3p/current/frame.max.html');
       expect(fetches[1]).to.have.property('href',
           'http://ads.localhost:9876/dist.3p/current/integration.js');
+    });
+  });
+
+  it('should prefetch default bootstrap frame if custom disabled', () => {
+    window.AMP_MODE = {localDev: true};
+    addCustomBootstrap('http://localhost:9876/boot/remote.html');
+    preloadBootstrap(window, preconnect, undefined, true);
+    // Wait for visible promise
+    return Promise.resolve().then(() => {
+      expect(document.querySelectorAll('link[rel=preload]' +
+          '[href="http://ads.localhost:9876/dist.3p/current/frame.max.html"]'))
+          .to.be.ok;
     });
   });
 
