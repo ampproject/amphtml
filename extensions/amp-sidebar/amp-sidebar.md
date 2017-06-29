@@ -104,94 +104,6 @@ Example:
 <button on='tap:sidebar1.close'>x</button>
 ```
 
-### Toolbar
-
-Toolbar allows duplicating items within the sidebar, into the `<body>`, if the window matches a certain media query
-
-#### Behavior
-
-- The sidebar may implement toolbars by adding nav elements with the toolbar attribute
-- The nav element must be a child of `<amp-sidebar>` and follow this format: `<nav toolbar="(media-query)">`
-    - For instance, this would be a valid use of toolbar: `<nav toolbar="(max-width: 1024px)">`
-- The nav containing the toolbar attribute, must only contain a single `<ul>` element, that contains `<li>` elements
-    - The `<li>` elements may may contain any valid HTML elements (supported by AMP), or any of the AMP elements that `<amp-sidebar>` supports.
-- The nav element, or it's `<ul>`'s `<li>` elements, may also contain the attribute `toolbar-only`
-    - The attribute `toolbar-only` will hide the elements with the attribute in the sidebar, but leave them shown in the toolbar
-- Toolbar behavior is only applied while the media-query is valid
-
-Example:
-
-```html
-<amp-sidebar id="sidebar1" layout="nodisplay" side="right">
-  <ul>
-    <li> Nav item 1</li>
-    <li> Nav item 2</li>
-    <li> Nav item 3</li>
-    <li> Nav item 4</li>
-    <li> Nav item 5</li>
-    <li> Nav item 6</li>
-  </ul>
-
-  <nav toolbar="(max-width: 767px)">
-    <ul>
-      <li>
-        <input placeholder="Search..."/>
-      </li>
-    </ul>
-  </nav>
-</amp-sidebar>
-```
-
-Example (toolbar-only on `<nav>` element):
-
-```html
-<amp-sidebar id="sidebar1" layout="nodisplay" side="right">
-  <ul>
-    <li> Nav item 1</li>
-    <li> Nav item 2</li>
-    <li> Nav item 3</li>
-    <li> Nav item 4</li>
-    <li> Nav item 5</li>
-    <li> Nav item 6</li>
-  </ul>
-
-  <nav toolbar="(min-width: 0px)" toolbar-only>
-    <ul>
-      <li>
-        <input placeholder="Search..."/>
-      </li>
-    </ul>
-  </nav>
-</amp-sidebar>
-```
-
-Example (toolbar-only on individual `<li>` elements):
-
-```html
-<amp-sidebar id="sidebar1" layout="nodisplay" side="right">
-  <ul>
-    <li> Nav item 1</li>
-    <li> Nav item 2</li>
-    <li> Nav item 3</li>
-    <li> Nav item 4</li>
-    <li> Nav item 5</li>
-    <li> Nav item 6</li>
-  </ul>
-
-  <nav toolbar="(min-width: 768px) and (max-width: 1024px)">
-    <ul>
-      <li>
-        Publisher Logo
-      </li>
-      <li>
-        <input placeholder="Search..." toolbar-only/>
-      </li>
-    </ul>
-  </nav>
-</amp-sidebar>
-```
-
-
 {% call callout('Tip', type='success') %}
 See live demos at [AMP By Example](https://ampbyexample.com/components/amp-sidebar/).
 {% endcall %}
@@ -210,19 +122,9 @@ Specifies the display layout of the sidebar, which must be `nodisplay`.
 
 This attribute is present when the sidebar is open.
 
-
 ##### data-close-button-aria-label**
 
 Optional attribute used to set ARIA label for the close button added for accessibility.
-
-
-##### toolbar
-
-This attribute is present on child `<nav toolbar="(media-query)">` elements, and accepts a media query of when to show a toolbar.
-
-##### toolbar-only
-
-This attribute is present on child `<nav toolbar="(media-query)">`, or children `<li>` elements of `<nav toolbar="(media-query)">` elements, and indicates that the element will only be shown in the toolbar, when the toolbar is shown.
 
 ##### common attributes
 
