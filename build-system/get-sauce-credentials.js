@@ -23,6 +23,7 @@
 const fs = require('fs');
 const getStdout = require('./exec.js').getStdout;
 const path = require('path');
+const util = require('gulp-util');
 
 const sauceCredsFile = path.resolve('build-system/sauce-credentials.json');
 
