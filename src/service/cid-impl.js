@@ -124,19 +124,26 @@ export class Cid {
         '[a-zA-Z0-9-_.]+\nInstead found: %s',
         getCidStruct.scope);
 
-      return consent.then(() => {
-        return viewerForDoc(this.ampdoc).whenFirstVisible();
-      }).then(() => {
-        // Check if user has globally opted out of CID, we do this after
-        // consent check since user can optout during consent process.
-        return isOptedOutOfCid(this.ampdoc);
-      }).then(optedOut => {
-        if (optedOut) {
-          return '';
-        }
-        return getExternalCid(this, getCidStruct,
-            opt_persistenceConsent || consent);
-      });
+    return consent.then(() => {
+      return viewerForDoc(this.ampdoc).whenFirstVisible();
+    }).then(() => {
+      // Check if user has globally opted out of CID, we do this after
+      // consent check since user can optout during consent process.
+      return isOptedOutOfCid(this.ampdoc);
+    }).then(optedOut => {
+      if (optedOut) {
+        return '';
+      }
+      const cidPromise = this.getExternalCid_(
+          getCidStruct, opt_persistenceConsent || consent);
+      // Getting the CID might involve an HTTP request. We timeout after 10s.
+      return timerFor(this.ampdoc.win)
+          .timeoutPromise(10000, cidPromise,
+          `Getting cid for "${getCidStruct.scope}" timed out`)
+          .catch(error => {
+            rethrowAsync(error);
+          });
+    });
   }
 
   /**
@@ -147,6 +154,46 @@ export class Cid {
    */
   optOut() {
     return optOutOfCid(this.ampdoc);
+  }
+
+  /**
+   * Returns the "external cid". This is a cid for a specific purpose
+   * (Say Analytics provider X). It is unique per user, that purpose
+   * and the AMP origin site.
+   * @param {!GetCidDef} getCidStruct
+   * @param {!Promise} persistenceConsent
+   * @return {!Promise<?string>}
+   */
+  getExternalCid_(getCidStruct, persistenceConsent) {
+    /** @const {!Location} */
+    const url = parseUrl(this.ampdoc.win.location.href);
+    if (!isProxyOrigin(url)) {
+      return getOrCreateCookie(this, getCidStruct, persistenceConsent);
+    }
+    const viewer = viewerForDoc(this.ampdoc);
+    if (viewer.hasCapability('cid')) {
+      return this.getScopedCidFromViewer_(getCidStruct.scope);
+    }
+    return getBaseCid(this, persistenceConsent)
+        .then(baseCid => {
+          return cryptoFor(this.ampdoc.win).sha384Base64(
+              baseCid + getProxySourceOrigin(url) + getCidStruct.scope);
+        });
+  }
+
+  /**
+   * @param {!string} scope
+   * @return {!Promise<?string>}
+   */
+  getScopedCidFromViewer_(scope) {
+    const viewer = viewerForDoc(this.ampdoc);
+    return viewer.isTrustedViewer().then(trusted => {
+      if (!trusted) {
+        rethrowAsync('Ignore CID API from Untrustful Viewer.');
+        return;
+      }
+      return viewer.sendMessageAwaitResponse('cid', dict({'scope': scope}));
+    });
   }
 }
 
@@ -182,28 +229,6 @@ export function isOptedOutOfCid(ampdoc) {
     // If we fail to read the flag, assume not opted out.
     return false;
   });
-}
-
-/**
- * Returns the "external cid". This is a cid for a specific purpose
- * (Say Analytics provider X). It is unique per user, that purpose
- * and the AMP origin site.
- * @param {!Cid} cid
- * @param {!GetCidDef} getCidStruct
- * @param {!Promise} persistenceConsent
- * @return {!Promise<?string>}
- */
-function getExternalCid(cid, getCidStruct, persistenceConsent) {
-  /** @const {!Location} */
-  const url = parseUrl(cid.ampdoc.win.location.href);
-  if (!isProxyOrigin(url)) {
-    return getOrCreateCookie(cid, getCidStruct, persistenceConsent);
-  }
-  return getBaseCid(cid, persistenceConsent)
-      .then(baseCid => {
-        return cryptoFor(cid.ampdoc.win).sha384Base64(
-            baseCid + getProxySourceOrigin(url) + getCidStruct.scope);
-      });
 }
 
 /**
@@ -367,7 +392,7 @@ export function viewerBaseCid(ampdoc, opt_data) {
     if (!trusted) {
       return undefined;
     }
-    const cidPromise = viewer.sendMessageAwaitResponse('cid', opt_data)
+    return viewer.sendMessageAwaitResponse('cid', opt_data)
         .then(data => {
           // TODO(dvoytenko, #9019): cleanup the legacy CID format.
           // For backward compatibility: #4029
@@ -379,14 +404,6 @@ export function viewerBaseCid(ampdoc, opt_data) {
             }));
           }
           return data;
-        });
-    // Getting the CID may take some time (waits for JS file to
-    // load, might hit GC), but we do not wait indefinitely. Typically
-    // it should resolve in milli seconds.
-    return timerFor(ampdoc.win).timeoutPromise(10000, cidPromise, 'base cid')
-        .catch(error => {
-          rethrowAsync(error);
-          return undefined;
         });
   });
 }
