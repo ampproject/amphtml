@@ -51,8 +51,7 @@ matrix:
         - node -e "console.log('SAUCE_ACCESS_KEY_ENCRYPTED', process.env.SAUCE_ACCESS_KEY_ENCRYPTED);"
         - node -e "console.log('SAUCE_USERNAME', process.env.SAUCE_USERNAME);"
       addons:
-        sauce_connect:
-          username: <%= ENV['SAUCE_USERNAME'] %>
+        sauce_connect: true
         jwt:
           secure: <%= ENV['SAUCE_ACCESS_KEY_ENCRYPTED'] %>
 cache:
