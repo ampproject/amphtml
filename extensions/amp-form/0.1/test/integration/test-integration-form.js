@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../../../../../src/amp-events';
 import {AmpForm, AmpFormService} from '../../amp-form';
 import {AmpMustache} from '../../../../amp-mustache/0.1/amp-mustache';
+import {listenOncePromise} from '../../../../../src/event-helper';
 import {poll} from '../../../../../testing/iframe';
 import {registerExtendedTemplate} from
     '../../../../../src/service/template-impl';
@@ -158,8 +160,7 @@ describes.realWin('AmpForm Integration', {
       const ampForm = new AmpForm(form, 'form1');
       const fetch = poll('submit request sent',
           () => ampForm.xhrSubmitPromiseForTesting());
-      const render = poll('render finished',
-          () => ampForm.renderTemplatePromiseForTesting());
+      const render = listenOncePromise(form, AmpEvents.TEMPLATE_RENDERED);
 
       form.dispatchEvent(new Event('submit'));
       return fetch.then(() => render).then(() => {
@@ -189,8 +190,7 @@ describes.realWin('AmpForm Integration', {
       const ampForm = new AmpForm(form, 'form1');
       const fetchSpy = sandbox.spy(ampForm.xhr_, 'fetch');
       const fetch = poll('submit request sent', () => fetchSpy.returnValues[0]);
-      const render = poll('render finished',
-          () => ampForm.renderTemplatePromiseForTesting());
+      const render = listenOncePromise(form, AmpEvents.TEMPLATE_RENDERED);
 
       form.dispatchEvent(new Event('submit'));
       return fetch.then(() => {
@@ -223,8 +223,7 @@ describes.realWin('AmpForm Integration', {
       const ampForm = new AmpForm(form, 'form1');
       const fetch = poll('submit request sent',
           () => ampForm.xhrSubmitPromiseForTesting());
-      const render = poll('render finished',
-          () => ampForm.renderTemplatePromiseForTesting());
+      const render = listenOncePromise(form, AmpEvents.TEMPLATE_RENDERED);
 
       form.dispatchEvent(new Event('submit'));
       return fetch.then(() => render).then(() => {
@@ -255,8 +254,7 @@ describes.realWin('AmpForm Integration', {
       const ampForm = new AmpForm(form, 'form1');
       const fetchSpy = sandbox.spy(ampForm.xhr_, 'fetch');
       const fetch = poll('submit request sent', () => fetchSpy.returnValues[0]);
-      const render = poll('render finished',
-          () => ampForm.renderTemplatePromiseForTesting());
+      const render = listenOncePromise(form, AmpEvents.TEMPLATE_RENDERED);
 
       form.dispatchEvent(new Event('submit'));
       return fetch.then(() => {
