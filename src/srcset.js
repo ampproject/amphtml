@@ -28,7 +28,6 @@ import {dev, user} from './log';
  */
 let SrcsetSourceDef;
 
-
 /**
  * Extracts `srcset` and fallbacks to `src` if not available.
  * @param {!Element} element
