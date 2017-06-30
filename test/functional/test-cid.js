@@ -23,6 +23,8 @@ import {
 import {
   cidServiceForDocForTesting,
   getProxySourceOrigin,
+  optOutOfCid,
+  isOptedOutOfCid,
 } from '../../src/service/cid-impl';
 import {installCryptoService, Crypto} from '../../src/service/crypto-impl';
 import {cryptoFor} from '../../src/crypto';
@@ -61,6 +63,7 @@ describe('cid', () => {
   let whenFirstVisible;
   let trustedViewer;
   let shouldSendMessageTimeout;
+  let storageGetStub;
 
   const hasConsent = Promise.resolve();
   const timer = timerFor(window);
@@ -121,6 +124,7 @@ describe('cid', () => {
     });
 
     installViewerServiceForDoc(ampdoc);
+    storageGetStub = stubServiceForDoc(sandbox, ampdoc, 'storage', 'get');
     viewer = viewerForDoc(ampdoc);
     sandbox.stub(viewer, 'whenFirstVisible', function() {
       return whenFirstVisible;
@@ -274,6 +278,18 @@ describe('cid', () => {
       return compare(
           'e2',
           'sha384(YYYhttp://www.origin.come2)');
+    });
+
+    it('should return empty if opted out', () => {
+      storageGetStub.withArgs('amp-cid-optout').returns(Promise.resolve(true));
+
+      storage['amp-cid'] = JSON.stringify({
+        cid: 'YYY',
+        time: Date.now(),
+      });
+      return compare(
+          'e2',
+          '');
     });
 
     it('should read from viewer storage if embedded', () => {
@@ -741,4 +757,62 @@ describes.realWin('cid', {amp: true}, env => {
     expect(resolved).to.be.true;
     expect(scopedCid).to.be.undefined;
   });
+});
+
+describes.fakeWin('cid optout:', {amp: true}, env => {
+  let storageGetStub;
+  let storageSetStub;
+  let viewerSendMessageStub;
+  let ampdoc;
+
+  beforeEach(() => {
+    ampdoc = env.ampdoc;
+    storageSetStub = stubServiceForDoc(sandbox, ampdoc, 'storage', 'set');
+    storageGetStub = stubServiceForDoc(sandbox, ampdoc, 'storage', 'get');
+    viewerSendMessageStub = stubServiceForDoc(sandbox, ampdoc,
+        'viewer', 'sendMessage');
+  });
+
+  describe('optOutOfCid()', () => {
+    it('should send a message to viewer', () => {
+      return optOutOfCid(ampdoc).then(() => {
+        expect(viewerSendMessageStub).to.be.calledWith('cidOptOut');
+      });
+    });
+
+    it('should save bit in storage', () => {
+      optOutOfCid(ampdoc).then(() => {
+        expect(storageSetStub).to.be.calledWith('amp-cid-optout', true);
+      });
+    });
+
+    it('should reject promise if storage set fails', () => {
+      storageSetStub.returns(Promise.reject('failed!'));
+      return optOutOfCid(ampdoc).should.eventually.be.rejectedWith('failed!');
+    });
+  });
+
+  describe('isOptedOutOfCid()', () => {
+    it('should return true if bit is set in storage', () => {
+      storageGetStub.withArgs('amp-cid-optout').returns(Promise.resolve(true));
+      return isOptedOutOfCid(ampdoc).then(isOut => {
+        expect(isOut).to.be.true;
+      });
+    });
+
+    it('should return false if bit is not set in storage', () => {
+      storageGetStub.withArgs('amp-cid-optout').returns(Promise.resolve(null));
+      return isOptedOutOfCid(ampdoc).then(isOut => {
+        expect(isOut).to.be.false;
+      });
+    });
+
+    it('should return false if storage get fails', () => {
+      storageGetStub.withArgs('amp-cid-optout').returns(Promise.reject('Fail'));
+      return isOptedOutOfCid(ampdoc).then(isOut => {
+        expect(isOut).to.be.false;
+      });
+    });
+  });
+
 });
