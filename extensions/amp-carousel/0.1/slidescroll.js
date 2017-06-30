@@ -287,6 +287,12 @@ export class AmpSlideScroll extends BaseSlides {
   }
 
   /** @override */
+  unlayoutCallback() {
+    this.slideIndex_ = null;
+    return super.unlayoutCallback();
+  }
+
+  /** @override */
   updateViewportState(inViewport) {
     if (this.slideIndex_ !== null) {
       this.updateInViewport(

@@ -1030,5 +1030,44 @@ describe('SlideScroll', () => {
         expect(showSlideSpy).to.be.calledOnce;
       });
     });
+
+    it('should NOT call showSlide_ before re-layout', () => {
+      return getAmpSlideScroll(false, 5, false).then(obj => {
+        const {iframe, ampSlideScroll} = obj;
+
+        iframe.addElement(ampSlideScroll);
+        const impl = ampSlideScroll.implementation_;
+        const showSlideSpy = sandbox.spy(impl, 'showSlide_');
+        const satisfiesTrust = () => true;
+
+        // Test that showSlide_ due to goToSlide(index=1) is not called before layout.
+        let args = {'index': '1'};
+        impl.executeAction({method: 'goToSlide', args, satisfiesTrust});
+        expect(showSlideSpy).to.not.have.been.called;
+
+        // Test that showSlide_ is called after layout.
+        impl.onLayoutMeasure();
+        ampSlideScroll.layoutCallback();
+
+        expect(showSlideSpy).to.have.been.calledWith(1);
+        expect(showSlideSpy).to.be.calledOnce;
+
+        // Unlayout
+        showSlideSpy.reset();
+        impl.unlayoutCallback();
+
+        // Test that showSlide_ due to goToSlide(index=4) is not called before layout.
+        args = {'index': '4'};
+        impl.executeAction({method: 'goToSlide', args, satisfiesTrust});
+        expect(showSlideSpy).to.not.have.been.called;
+
+        // Test that showSlide_ is called after layout.
+        impl.onLayoutMeasure();
+        ampSlideScroll.layoutCallback();
+
+        expect(showSlideSpy).to.have.been.calledWith(4);
+        expect(showSlideSpy).to.be.calledOnce;
+      });
+    });
   });
 });
