@@ -32,6 +32,7 @@ import {
   constructSRABlockParameters,
   TFCD,
   resetSraStateForTesting,
+  resetRtcStateForTesting,
 } from '../amp-ad-network-doubleclick-impl';
 import {
   DOUBLECLICK_A4A_EXPERIMENT_NAME,
@@ -985,5 +986,123 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     it('should return false if not in experiment', () => {
       expect(impl.delayAdRequestEnabled()).to.be.false;
     });
+  });
+
+  describe('#RTC', () => {
+    let impl;
+    let xhrMock;
+    let rtcConfig;
+
+    function testSuccessfulRtc(rtcResponse, jsonTargeting) {
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+      xhrMock.returns(
+          Promise.resolve({
+            redirected: false,
+            status: 200,
+            json: () => {
+              return Promise.resolve(rtcResponse);
+            },
+          })
+      );
+      impl.populateAdUrlState();
+      return impl.executeRtc_().then(() => {
+        expect(impl.jsonTargeting_).to.deep.equal(jsonTargeting);
+      });
+
+    }
+
+    beforeEach(() => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        element = createElementWithAttributes(document, 'amp-ad', {
+          'width': '200',
+          'height': '50',
+          'type': 'doubleclick',
+          'layout': 'fixed',
+        });
+        rtcConfig = createElementWithAttributes(document, 'script', {
+          type: 'application/json',
+          id: 'amp-rtc',
+        });
+        rtcConfig.innerHTML = '{'
+          + '"endpoint": "https://example-publisher.com/rtc/",'
+          + '"sendAdRequestOnFailure": false'
+         + '}';
+        document.head.appendChild(rtcConfig);
+        xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
+
+      });
+    });
+
+    afterEach(() => {
+      impl = null;
+      xhrMock = null;
+      rtcConfig = null;
+      resetRtcStateForTesting();
+    });
+
+    it('should add just targeting to impl', () => {
+      const targeting = {'sport': 'baseball'};
+      const categoryExclusions = {};
+      const jsonTargeting = {
+        targeting,
+        categoryExclusions,
+      };
+      return testSuccessfulRtc({
+        targeting,
+      }, jsonTargeting);
+    });
+
+    it('should add just categoryExclusions to impl', () => {
+      const targeting = {};
+      const categoryExclusions = {'sport': 'baseball'};
+      const jsonTargeting = {
+        targeting,
+        categoryExclusions,
+      };
+      return testSuccessfulRtc({
+        categoryExclusions,
+      }, jsonTargeting);
+    });
+
+    it('should add targeting and categoryExclusions to impl', () => {
+      const targeting = {'sport': 'baseball'};
+      const categoryExclusions = {'age': '18-25'};
+      const jsonTargeting = {
+        targeting,
+        categoryExclusions,
+      };
+      return testSuccessfulRtc({
+        targeting,
+        categoryExclusions,
+      }, jsonTargeting);
+    });
+
+    it('should deep merge targeting and categoryExclusions from amp-ad', () => {
+      const rtcResponse = {
+        targeting: {'food': {
+          'kids': ['chicken fingers', 'pizza']},
+          'sports': 'baseball'},
+        categoryExclusions: {'age': '18-25'}};
+      const contextualTargeting =
+      '{"targeting": {"food": {"kids": "fries", "adults": "cheese"}}}';
+      const jsonTargeting = {
+        targeting: {
+          'food': {
+            'kids': ['chicken fingers', 'pizza'],
+            'adults': 'cheese',
+          },
+          'sports': 'baseball'},
+        categoryExclusions: {'age': '18-25'}};
+      element = createElementWithAttributes(document, 'amp-ad', {
+        'width': '200',
+        'height': '50',
+        'type': 'doubleclick',
+        'layout': 'fixed',
+        'json': contextualTargeting,
+      });
+      return testSuccessfulRtc(rtcResponse, jsonTargeting);
+    });
+
   });
 });

@@ -71,6 +71,7 @@ import {setStyles} from '../../../src/style';
 import {utf8Encode} from '../../../src/utils/bytes';
 import {deepMerge} from '../../../src/utils/object';
 import {isCancellation} from '../../../src/error';
+import {isSecureUrl} from '../../../src/url';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -79,12 +80,13 @@ const TAG = 'amp-ad-network-doubleclick-impl';
 const DOUBLECLICK_BASE_URL =
     'https://securepubads.g.doubleclick.net/gampad/ads';
 
-/** @const {Object} */
+/** @enum {string} */
 const RTC_ERROR = {
   XHR: 'Bad XHR Request',
   BAD_RESPONSE: 'Bad XHR Response',
   BAD_ENDPOINT: 'Bad RTC Endpoint',
 };
+/** milliseconds */
 /** @const {number} */
 const RTC_TIMEOUT = 1000;
 
@@ -350,9 +352,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       dev().warn(TAG, `Frame already exists, sra: ${this.useSra}`);
       return '';
     }
-
-    const rtcRequestPromise = this.sendRtcRequest_();
-
     // TODO(keithwrightbos): SRA blocks currently unnecessarily generate full
     // ad url.  This could be optimized however non-SRA ad url is required to
     // fallback to non-SRA if single block.
@@ -363,7 +362,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     const pageLevelParametersPromise = getPageLevelParameters_(
         this.win, this.getAmpDoc(), startTime);
-
+    const rtcRequestPromise = this.executeRtc_();
     return Promise.all(
       [pageLevelParametersPromise, rtcRequestPromise]).then(values => {
         const pageLevelParameters = values[0];
@@ -520,29 +519,22 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @return {?Promise} The rtc targeting info to attach to the ad url.
    * @private
    */
-  sendRtcRequest_() {
-    // If we already sent the RTC request, return the value we've saved.
-    if (rtcPromise) {
-      return rtcPromise;
-    }
-
+  executeRtc_() {
     const ampRtcPageElement = document.getElementById('amp-rtc');
+    if (!ampRtcPageElement) {
+      return Promise.resolve();
+    }
     let rtcConfig;
-    if (ampRtcPageElement) {
-      rtcConfig = tryParseJson(ampRtcPageElement.innerHTML);
-      if (!isObject(rtcConfig)) {
-        return Promise.resolve();
-      }
+    let endpoint;
+    if (!isObject(rtcConfig = tryParseJson(ampRtcPageElement.textContent))
+    || !(endpoint = rtcConfig['endpoint'])
+    || typeof endpoint != 'string'
+    || !isSecureUrl(endpoint)) {
+      user().warn(TAG, 'invalid RTC config...');
+      return Promise.resolve();
     }
 
-    const endpoint = rtcConfig['endpoint'];
     const noCache = (rtcConfig['noCache'] === true);
-
-    if (!endpoint) {
-      this.sendRtcErrorPing(RTC_ERROR.BAD_ENDPOINT);
-      return (rtcConfig['sendAdRequestOnFailure'] !== false ?
-      Promise.resolve() : Promise.reject());
-    }
 
     const headers = new Headers();
     headers.append('Cache-Control', 'max-age=0');
@@ -550,14 +542,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (noCache) {
       xhrInit.headers = headers;
     }
+    let rtcTotalTime;
     const startTime = Date.now();
-    const rtcRequest = xhrFor(this.win).fetchJson(endpoint, xhrInit);
-
-    return rtcPromise = timerFor(window).timeoutPromise(
-        RTC_TIMEOUT, rtcRequest).then(res => {
-          // TODO :: Need to add the time on to the ad request.
-          const rtcTotalTime = Date.now() - startTime;
-
+    rtcPromise = rtcPromise || xhrFor(this.win).fetchJson(
+        endpoint, xhrInit).then(res => {
+          rtcTotalTime = rtcTotalTime || Date.now() - startTime;
           if (!noCache) {
             // Repopulate the cache.
             xhrFor(this.win).fetchJson(endpoint, {
@@ -567,6 +556,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               this.sendRtcErrorPing(RTC_ERROR.XHR);
             });
           }
+          return res;
+        });
+
+    return timerFor(window).timeoutPromise(
+        RTC_TIMEOUT, rtcPromise).then(res => {
+          // TODO :: Need to add the time on to the ad request.
 
           // Redirects and non-200 status codes are forbidden for RTC.
           if (!res.redirected && res.status == 200) {
@@ -579,7 +574,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                       rtcResponse['targeting'] || {});
                   this.jsonTargeting_['categoryExclusions'] = deepMerge(
                       this.jsonTargeting_['categoryExclusions'] || {},
-                      rtcResponse['exclusions'] || {});
+                      rtcResponse['categoryExclusions'] || {});
                   return Promise.resolve();
                 } else if (rtcConfig['sendAdRequestOnFailure'] === false) {
                     // Default is to send request without RTC, so only reject if
@@ -773,6 +768,11 @@ AMP.registerElement(
 /** @visibileForTesting */
 export function resetSraStateForTesting() {
   sraRequests = null;
+}
+
+/** @visibileForTesting */
+export function resetRtcStateForTesting() {
+  rtcPromise = null;
 }
 
 /**
