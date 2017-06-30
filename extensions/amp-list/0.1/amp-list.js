@@ -21,13 +21,21 @@ import {isArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
 import {templatesFor} from '../../../src/services';
-import {user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 
 /**
  * The implementation of `amp-list` component. See {@link ../amp-list.md} for
  * the spec.
  */
 export class AmpList extends AMP.BaseElement {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?Element} */
+    this.container_ = null;
+  }
 
   /** @override */
   isLayoutSupported(layout) {
@@ -36,7 +44,6 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @const {!Element} */
     this.container_ = this.win.document.createElement('div');
     this.applyFillContent(this.container_, true);
     this.element.appendChild(this.container_);
@@ -100,7 +107,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   rendered_(elements) {
-    removeChildren(this.container_);
+    removeChildren(dev().assertElement(this.container_));
     elements.forEach(element => {
       if (!element.hasAttribute('role')) {
         element.setAttribute('role', 'listitem');

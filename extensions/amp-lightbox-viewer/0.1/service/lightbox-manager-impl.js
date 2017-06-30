@@ -148,7 +148,7 @@ export class LightboxManager {
    * @return {!Promise}
    */
   scanLightboxables_() {
-    return whenDocumentReady(this.ampdoc_).then(() => {
+    return whenDocumentReady(this.ampdoc_.win.document).then(() => {
       const matches = this.ampdoc_.getRootNode().querySelectorAll('[lightbox]');
       this.elements_ = [];
       for (let i = 0; i < matches.length; i++) {
@@ -193,7 +193,7 @@ export class LightboxManager {
    * The function is not implemented yet. Fake for testing.
    * Find or create thumbnails for lightboxed elements.
    * Return a list of thumbnails obj for lightbox gallery view
-   * @return {!Array<{string,Element}>}
+   * @return {!Array<{url: string, element: !Element}>}
    */
   getThumbnails() {
     const thumbnailList = [];
@@ -211,7 +211,7 @@ export class LightboxManager {
    * The function is not implemented yet. Fake for testing.
    * Get thumbnail url for single element.
    * @param {!Element} element
-   * @param {Number=} index fake it for testing only, will delete later
+   * @param {number=} index fake it for testing only, will delete later
    * @return {string}
    * @private
    */

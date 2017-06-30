@@ -28,7 +28,48 @@ const TAG = 'amp-apester-media';
  * AMP Apester-media
  */
 class AmpApesterMedia extends AMP.BaseElement {
-  /** @override */
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+    /**
+     * @const @private {string}
+     */
+    this.rendererBaseUrl_ = 'https://renderer.qmerce.com';
+
+    /**
+     * @const @private {string}
+     */
+    this.displayBaseUrl_ = 'https://display.apester.com';
+
+    /**
+     * @const @private {string}
+     */
+    this.loaderUrl_ = 'https://images.apester.com/images%2Floader.gif';
+    /** @private {boolean}  */
+    this.seen_ = false;
+    /** @private {?Element}  */
+    this.iframe_ = null;
+    /** @private {?Promise}  */
+    this.iframePromise_ = null;
+    /** @private {boolean}  */
+    this.ready_ = false;
+    /** @private {?number|undefined}  */
+    this.width_ = null;
+    /** @private {?number|undefined}  */
+    this.height_ = null;
+    /** @private {boolean}  */
+    this.random_ = false;
+    /**
+     * @private {?string}
+     */
+    this.mediaAttribute_ = null;
+  }
+
+  /**
+   * @param {boolean=} onLayout
+   * @override
+   */
   preconnectCallback(onLayout) {
     this.preconnect.url(this.displayBaseUrl_, onLayout);
     this.preconnect.url(this.rendererBaseUrl_, onLayout);
@@ -57,40 +98,9 @@ class AmpApesterMedia extends AMP.BaseElement {
   buildCallback() {
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
-
-    /**
-     *  @private @const {number}
-     *  */
     this.width_ = getLengthNumeral(width);
-
-    /**
-     * @private @const {number}
-     * */
     this.height_ = getLengthNumeral(height);
-
-    /**
-     * @const @private {string}
-     */
-    this.rendererBaseUrl_ = 'https://renderer.qmerce.com';
-
-    /**
-     * @const @private {string}
-     */
-    this.displayBaseUrl_ = 'https://display.apester.com';
-
-    /**
-     * @const @private {string}
-     */
-    this.loaderUrl_ = 'https://images.apester.com/images%2Floader.gif';
-
-    /**
-     * @private {boolean}
-     */
     this.random_ = false;
-
-    /**
-     * @const @private {string}
-     */
     this.mediaAttribute_ = user().assert(
         (this.element.getAttribute('data-apester-media-id') ||
          (this.random_ =
@@ -98,26 +108,6 @@ class AmpApesterMedia extends AMP.BaseElement {
         'Either the data-apester-media-id or the data-apester-channel-token ' +
         'attributes must be specified for <amp-apester-media> %s',
         this.element);
-
-    /**
-     * @private {?Element}
-     */
-    this.iframe_ = null;
-
-    /**
-     * @private {?Promise}
-     */
-    this.iframePromise_ = null;
-
-    /**
-     * @private {boolean}
-     */
-    this.seen_ = false;
-
-    /**
-     * @private {boolean}
-     */
-    this.ready_ = false;
   }
 
   /** @override */
@@ -131,7 +121,8 @@ class AmpApesterMedia extends AMP.BaseElement {
    * @return {string}
    **/
   buildUrl_() {
-    const encodedMediaAttribute = encodeURIComponent(this.mediaAttribute_);
+    const encodedMediaAttribute = encodeURIComponent(
+        dev().assertString(this.mediaAttribute_));
     const suffix = (this.random_) ?
         `/tokens/${encodedMediaAttribute}/interactions/random` :
         `/interactions/${encodedMediaAttribute}/display`;
@@ -241,9 +232,9 @@ class AmpApesterMedia extends AMP.BaseElement {
     this.element.classList.add('amp-apester-container');
     return this.queryMedia_()
         .then(response => {
-          const media = response.payload;
+          const media = response['payload'];
           const src = this.constructUrlFromMedia_(
-              media.interactionId);
+              media['interactionId']);
           const iframe = this.constructIframe_(src);
           const overflow = this.constructOverflow_();
           const mutate = state => {
@@ -262,10 +253,12 @@ class AmpApesterMedia extends AMP.BaseElement {
         }, error => {
           dev().error(TAG, 'Display', error);
           return undefined;
-        }).then(media => {
+        })
+        /** @param {!JsonObject} media */
+        .then(media => {
           this.togglePlaceholder(false);
           this.ready_ = true;
-          const height = 0 || media.data.size.height;
+          const height = 0 || media['data']['size']['height'];
           if (height != this.height_) {
             this.height_ = height;
             if (this.random_) {

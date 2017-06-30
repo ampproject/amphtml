@@ -228,12 +228,12 @@ export function urlReplacementsForDoc(nodeOrDoc) {
 
 /**
  * @param {!Window} window
- * @return {!Promise<!UserNotificationManager>}
+ * @return {!Promise<!../extensions/amp-user-notification/0.1/amp-user-notification.UserNotificationManager>}
  */
 export function userNotificationManagerFor(window) {
-  return /** @type {!Promise<!UserNotificationManager>} */ (
-      getElementService(window, 'userNotificationManager',
-          'amp-user-notification'));
+  return (/** @type {!Promise<!../extensions/amp-user-notification/0.1/amp-user-notification.UserNotificationManager>} */
+      (getElementService(window, 'userNotificationManager',
+          'amp-user-notification')));
 }
 
 /**

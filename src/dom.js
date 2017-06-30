@@ -294,7 +294,7 @@ export function matches(el, selector) {
 
 /**
  * Finds the first descendant element with the specified name.
- * @param {!Element} element
+ * @param {!Element|!Document|!ShadowRoot} element
  * @param {string} tagName
  * @return {?Element}
  */

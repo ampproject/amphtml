@@ -47,7 +47,7 @@ var extensionAliasFilePath = {};
 
 // Each extension and version must be listed individually here.
 // NOTE: No new extensions must pass the NO_TYPE_CHECK argument.
-declareExtension('amp-3q-player', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-3q-player', '0.1', false);
 declareExtension('amp-access', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-access-laterpay', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-accordion', '0.1', false);
@@ -62,7 +62,7 @@ declareExtension('amp-ad-exit', 0.1, false);
 declareExtension('amp-analytics', '0.1', false);
 declareExtension('amp-anim', '0.1', false);
 declareExtension('amp-animation', '0.1', false);
-declareExtension('amp-apester-media', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-apester-media', '0.1', true);
 declareExtension('amp-app-banner', '0.1', true);
 declareExtension('amp-audio', '0.1', false);
 declareExtension('amp-auto-ads', '0.1', false);
@@ -74,13 +74,13 @@ declareExtension('amp-call-tracking', '0.1', false);
 declareExtension('amp-carousel', '0.1', true);
 declareExtension('amp-crypto-polyfill', '0.1', false);
 declareExtension('amp-dailymotion', '0.1', false);
-declareExtension('amp-dynamic-css-classes', '0.1', false, 'NO_TYPE_CHECK');
-declareExtension('amp-experiment', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-dynamic-css-classes', '0.1', false);
+declareExtension('amp-experiment', '0.1', false);
 declareExtension('amp-facebook', '0.1', false);
 declareExtension('amp-facebook-comments', '0.1', false);
 declareExtension('amp-facebook-like', '0.1', false);
-declareExtension('amp-fit-text', '0.1', true, 'NO_TYPE_CHECK');
-declareExtension('amp-font', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-fit-text', '0.1', true);
+declareExtension('amp-font', '0.1', false);
 declareExtension('amp-form', '0.1', true);
 declareExtension('amp-fresh', '0.1', true);
 declareExtension('amp-fx-flying-carpet', '0.1', true);
@@ -88,7 +88,7 @@ declareExtension('amp-fx-parallax', '0.1', false);
 declareExtension('amp-gfycat', '0.1', false);
 declareExtension('amp-gist', '0.1', false);
 declareExtension('amp-hulu', '0.1', false);
-declareExtension('amp-iframe', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-iframe', '0.1', false);
 declareExtension('amp-ima-video', '0.1', false);
 declareExtension('amp-image-lightbox', '0.1', true);
 declareExtension('amp-imgur', '0.1', false);
@@ -97,10 +97,10 @@ declareExtension('amp-install-serviceworker', '0.1', false);
 declareExtension('amp-izlesene', '0.1', false);
 declareExtension('amp-jwplayer', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-lightbox', '0.1', true);
-declareExtension('amp-lightbox-viewer', '0.1', true, 'NO_TYPE_CHECK');
-declareExtension('amp-list', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-lightbox-viewer', '0.1', true);
+declareExtension('amp-list', '0.1', false);
 declareExtension('amp-live-list', '0.1', true);
-declareExtension('amp-mustache', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-mustache', '0.1', false);
 declareExtension('amp-nexxtv-player', '0.1', false);
 declareExtension('amp-o2-player', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-ooyala-player', '0.1', false);
@@ -128,7 +128,7 @@ declareExtension('amp-user-notification', '0.1', true);
 declareExtension('amp-vimeo', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-vine', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-viz-vega', '0.1', true);
-declareExtension('amp-google-vrview-image', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-google-vrview-image', '0.1', false);
 declareExtension('amp-viewer-integration', '0.1', {
   // The viewer integration code needs to run asap, so that viewers
   // can influence document state asap. Otherwise the document may take
