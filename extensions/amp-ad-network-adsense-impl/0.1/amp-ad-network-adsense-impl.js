@@ -140,7 +140,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      */
     this.responsiveAligned_ = false;
 
-    /** @private {string} */
+    /**
+     * The contents of the data-auto-format attribute, or empty string if the
+     * attribute was not set.
+     * @private {string}
+     */
     this.autoFormat_ = this.element.getAttribute('data-auto-format') || '';
   }
 
@@ -181,11 +185,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     // Need to ensure these are numbers since width can be set to 'auto'.
     // Checking height just in case.
     // TODO(charliereams): Figure out this experiment.
-    this.size_ = false &&
-    isExperimentOn(this.win, 'as-use-attr-for-format')
-    && !isNaN(width) && width > 0 && !isNaN(height) && height > 0
-        ? {width, height}
-        : this.getIntersectionElementLayoutBox();
+    this.size_ =
+        isExperimentOn(this.win, 'as-use-attr-for-format')
+        && !isNaN(width) && width > 0 && !isNaN(height) && height > 0
+            ? {width, height}
+            : this.getIntersectionElementLayoutBox();
     const format = `${this.size_.width}x${this.size_.height}`;
     const slotId = this.element.getAttribute('data-amp-slot-index');
     // data-amp-slot-index is set by the upgradeCallback method of amp-ad.
@@ -337,8 +341,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   buildCallback() {
     super.buildCallback();
-
-    console.log('dd %o', this);
 
     if (this.isResponsive() && !this.responsiveSizeChangePromise_) {
       // Create a dummy zero-size element so that attemptChangeSize has
