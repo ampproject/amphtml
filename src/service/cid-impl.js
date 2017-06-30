@@ -497,6 +497,12 @@ function getEntropy(win) {
       win.Math.random() + win.screen.width + win.screen.height);
 }
 
+/**
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ */
+export function installCidService(ampdoc) {
+  return registerServiceBuilderForDoc(ampdoc, 'cid', Cid);
+}
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc

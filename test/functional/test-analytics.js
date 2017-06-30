@@ -23,6 +23,7 @@ import {
   triggerAnalyticsEvent,
   insertAnalyticsElement,
   CustomEventReporterBuilder,
+  useAnalyticsInSandbox,
 } from '../../src/analytics';
 import {createAmpElementProto} from '../../src/custom-element';
 import {timerFor} from '../../src/services';
@@ -30,7 +31,10 @@ import {BaseElement} from '../../src/base-element';
 import {macroTask} from '../../testing/yield';
 import * as sinon from 'sinon';
 
-describes.realWin('analytics', {amp: true}, env => {
+
+describes.realWin('analytics', {
+  amp: true,
+}, env => {
   let sandbox;
   let timer;
   let ampdoc;
@@ -120,7 +124,6 @@ describes.realWin('analytics', {amp: true}, env => {
       });
     });
   });
-
 
   describe('CustomEventReporterBuilder', () => {
     let builder;
@@ -267,6 +270,232 @@ describes.realWin('analytics', {amp: true}, env => {
       } catch (e) {
         expect(e.message).to.equal('Cannot trigger non initiated eventType');
       }
+    });
+  });
+
+  describe('useAnalyticsInSandbox', () => {
+    let parentEle;
+    let resolver;
+    const config = {
+      'requests': {
+        'pageview': 'https://example.com/analytics',
+      },
+      'triggers': {
+        'trackPageview': {
+          'on': 'visible',
+          'request': 'pageview',
+        },
+      },
+    };
+    const config2 = {
+      'requests': {
+        'pageview': 'https://example.com/analytics2',
+      },
+      'triggers': {
+        'trackPageview': {
+          'on': 'visible',
+          'request': 'pageview',
+        },
+      },
+    };
+
+    describe('parent does NOT relayout, call in buildCallback', () => {
+      beforeEach(() => {
+        const promise = new Promise(resolve => {resolver = resolve;});
+        class TestElement extends BaseElement {
+          buildCallback() {
+            useAnalyticsInSandbox(this.element, promise);
+          }
+        }
+        env.win.document.registerElement('amp-test', {
+          prototype: createAmpElementProto(env.win, 'amp-test', TestElement),
+        });
+        parentEle = env.win.document.createElement('amp-test');
+        parentEle.setAttribute('layout', 'nodisplay');
+        env.win.document.body.appendChild(parentEle);
+        parentEle.build();
+      });
+
+      it('should insert analytics after LOAD_START', function* () {
+        resolver(config);
+        yield macroTask();
+        expect(parentEle.querySelector('amp-analytics')).to.be.null;
+        parentEle.layoutCallback();
+        //parentEle.signals().signal(CommonSignals.LOAD_START);
+        yield macroTask();
+        expect(parentEle.querySelector('amp-analytics')).to.not.be.null;
+      });
+
+      it('should insert analytics when config arrives late', function* () {
+        parentEle.layoutCallback();
+        yield macroTask();
+        expect(parentEle.querySelector('amp-analytics')).to.be.null;
+        resolver(config);
+        yield macroTask();
+        expect(parentEle.querySelector('amp-analytics')).to.not.be.null;
+      });
+
+      it('should remove analytics after UNLOAD', function* () {
+        resolver(config);
+        parentEle.layoutCallback();
+        yield macroTask();
+        expect(parentEle.querySelector('amp-analytics')).to.not.be.null;
+        parentEle.unlayoutCallback();
+        yield macroTask();
+        expect(parentEle.querySelector('amp-analytics')).to.be.null;
+      });
+
+      it('should NOT insert analytics after UNLOAD', function* () {
+        parentEle.layoutCallback();
+        yield macroTask();
+        parentEle.unlayoutCallback();
+        yield macroTask();
+        resolver(config);
+        yield macroTask();
+        expect(parentEle.querySelector('amp-analytics')).to.be.null;
+      });
+    });
+
+    describe('parent does NOT relayout, call in layoutCallback', () => {
+      beforeEach(() => {
+        const promise = new Promise(resolve => {resolver = resolve;});
+        class TestElement extends BaseElement {
+          layoutCallback() {
+            useAnalyticsInSandbox(this.element, promise);
+            return super.layoutCallback();
+          }
+        }
+        env.win.document.registerElement('amp-test', {
+          prototype: createAmpElementProto(env.win, 'amp-test', TestElement),
+        });
+        parentEle = env.win.document.createElement('amp-test');
+        parentEle.setAttribute('layout', 'nodisplay');
+        env.win.document.body.appendChild(parentEle);
+        parentEle.build();
+      });
+
+      it('should insert and remove analytics', function* () {
+        expect(parentEle.querySelector('amp-analytics')).to.be.null;
+        parentEle.layoutCallback();
+        yield macroTask();
+        expect(parentEle.querySelector('amp-analytics')).to.be.null;
+        resolver(config);
+        yield macroTask();
+        expect(parentEle.querySelector('amp-analytics')).to.not.be.null;
+        parentEle.unlayoutCallback();
+        yield macroTask();
+        expect(parentEle.querySelector('amp-analytics')).to.be.null;
+      });
+    });
+
+    describe('parent relayout, call in buildCallback', () => {
+      beforeEach(() => {
+        const promise = new Promise(resolve => {resolver = resolve;});
+        class TestElement extends BaseElement {
+          buildCallback() {
+            useAnalyticsInSandbox(this.element, promise);
+          }
+          unlayoutCallback() {
+            return true;
+          }
+        }
+        env.win.document.registerElement('amp-test', {
+          prototype: createAmpElementProto(env.win, 'amp-test', TestElement),
+        });
+        parentEle = env.win.document.createElement('amp-test');
+        parentEle.setAttribute('layout', 'nodisplay');
+        env.win.document.body.appendChild(parentEle);
+        parentEle.build();
+      });
+
+      it('should NOT insert analytics when relayout', function* () {
+        resolver(config);
+        parentEle.layoutCallback();
+        yield macroTask();
+        expect(parentEle.querySelector('amp-analytics')).to.not.be.null;
+        parentEle.unlayoutCallback();
+        yield macroTask();
+        expect(parentEle.querySelector('amp-analytics')).to.be.null;
+        parentEle.layoutCallback();
+        yield macroTask();
+        expect(parentEle.querySelector('amp-analytics')).to.be.null;
+      });
+
+      it('should NOT insert when config arrives at relayout', function* () {
+        parentEle.layoutCallback();
+        parentEle.unlayoutCallback();
+        yield macroTask();
+        parentEle.layoutCallback();
+        yield macroTask();
+        expect(parentEle.querySelector('amp-analytics')).to.be.null;
+        resolver(config);
+        yield macroTask();
+        expect(parentEle.querySelector('amp-analytics')).to.be.null;
+      });
+    });
+
+    describe('parent relayout, call in layoutCallback', () => {
+      beforeEach(() => {
+        class TestElement extends BaseElement {
+          layoutCallback() {
+            const promise = new Promise(resolve => {
+              resolver = resolve;
+            });
+            useAnalyticsInSandbox(this.element, promise);
+            return super.layoutCallback();
+          }
+          unlayoutCallback() {
+            return true;
+          }
+        }
+        env.win.document.registerElement('amp-test', {
+          prototype: createAmpElementProto(env.win, 'amp-test', TestElement),
+        });
+        parentEle = env.win.document.createElement('amp-test');
+        parentEle.setAttribute('layout', 'nodisplay');
+        env.win.document.body.appendChild(parentEle);
+        parentEle.build();
+      });
+
+      it('should insert analytics when relayout', function* () {
+        parentEle.layoutCallback();
+        resolver(config);
+        yield macroTask();
+        let element = parentEle.querySelector('amp-analytics');
+        expect(element).to.not.be.null;
+        let script = element.querySelector('script');
+        expect(script.textContent).to.jsonEqual(JSON.stringify(config));
+        parentEle.unlayoutCallback();
+        yield macroTask();
+        expect(parentEle.querySelector('amp-analytics')).to.be.null;
+        parentEle.layoutCallback();
+        yield macroTask();
+        expect(parentEle.querySelector('amp-analytics')).to.be.null;
+        resolver(config2);
+        yield macroTask();
+        expect(parentEle.querySelector('amp-analytics')).to.not.be.null;
+        element = parentEle.querySelector('amp-analytics');
+        expect(element).to.not.be.null;
+        script = element.querySelector('script');
+        expect(script.textContent).to.jsonEqual(JSON.stringify(config2));
+      });
+
+      it('should only insert with latest config', function* () {
+        parentEle.layoutCallback();
+        yield macroTask();
+        const resolver1 = resolver;
+        parentEle.unlayoutCallback();
+        parentEle.layoutCallback();
+        yield macroTask();
+        const resolver2 = resolver;
+        resolver1(config);
+        resolver2(config2);
+        yield macroTask();
+        const element = parentEle.querySelector('amp-analytics');
+        expect(element).to.not.be.null;
+        const script = element.querySelector('script');
+        expect(script.textContent).to.jsonEqual(JSON.stringify(config2));
+      });
     });
   });
 });

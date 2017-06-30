@@ -75,6 +75,7 @@ export class Toolbar {
           Array.prototype.slice.call(toolbarOnlyQuery, 0);
       }
     }
+    this.buildCallback_();
   }
 
   /**
@@ -98,22 +99,46 @@ export class Toolbar {
   }
 
   /**
-   * Private function to build the DOM element for the toolbar, and return the built fragment
-   * @public
+   * Private function to build the DOM element for the toolbar
+   * @private
    */
-  build() {
-    const fragment = this.win_
-      .document.createDocumentFragment();
-    this.targetElement_ =
-      this.win_.document.createElement('header');
-    this.targetElement_.classList.add(TOOLBAR_TARGET_CLASS);
-    //Place the elements into the target
+  buildCallback_() {
     this.toolbarClone_ = this.toolbarDOMElement_.cloneNode(true);
-    this.toolbarClone_.classList.add(TOOLBAR_ELEMENT_CLASS);
+    // Addend "_toolbar" to ids on the toolbar clone
+    const idElementsInClone = Array.prototype.slice
+      .call(this.toolbarClone_.querySelectorAll('[id]'), 0);
+    idElementsInClone.forEach(element => {
+      element.id = `${element.id}_toolbar`;
+    });
+    const targetId = this.toolbarDOMElement_.getAttribute('target');
+    // Set the target element to the toolbar clone if it exists.
+    const targetElement =
+    this.win_.document.getElementById(`${targetId}_toolbar`) ||
+    this.win_.document.getElementById(targetId);
+    this.targetElement_ = targetElement || this.createTargetElement_();
     this.targetElement_.appendChild(this.toolbarClone_);
     toggle(this.targetElement_, false);
-    fragment.appendChild(this.targetElement_);
-    return fragment;
+
+    // Check if the target element was created by us, or already inserted by the user
+    if (!this.targetElement_.parentElement) {
+      this.toolbarClone_.classList.add(TOOLBAR_ELEMENT_CLASS);
+      const fragment = this.win_
+        .document.createDocumentFragment();
+      fragment.appendChild(this.targetElement_);
+      this.body_.appendChild(fragment);
+    }
+  }
+
+  /**
+   * Returns a created element that can be used as the target if one does not exist
+   * @returns {Element}
+   * @private
+   */
+  createTargetElement_() {
+    const targetElement =
+      this.win_.document.createElement('header');
+    targetElement.classList.add(TOOLBAR_TARGET_CLASS);
+    return targetElement;
   }
 
   /**
