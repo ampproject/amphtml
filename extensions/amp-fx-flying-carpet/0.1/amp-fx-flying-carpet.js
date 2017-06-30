@@ -76,8 +76,6 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
     const childNodes = this.getRealChildNodes();
     this.totalChildren_ = this.visibileChildren_(childNodes).length;
 
-    this.children_.forEach(child => this.setAsOwner(child));
-
     const clip = doc.createElement('div');
     clip.setAttribute('class', 'i-amphtml-fx-flying-carpet-clip');
     container.setAttribute('class', 'i-amphtml-fx-flying-carpet-container');
@@ -95,11 +93,6 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
     this.getVsync().mutate(() => {
       setStyle(this.container_, 'width', width, 'px');
     });
-  }
-
-  /** @override */
-  viewportCallback(inViewport) {
-    this.updateInViewport(this.children_, inViewport);
   }
 
   /**
@@ -140,23 +133,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
       this./*OK*/collapse();
       throw e;
     }
-    this.scheduleLayout(this.children_);
-    listen(this.element, AmpEvents.BUILT, this.layoutBuiltChild_.bind(this));
     return Promise.resolve();
-  }
-
-  /**
-   * Listens for children element to be built, and schedules their layout.
-   * Necessary since not all children will be built by the time the
-   * flying-carpet has its #layoutCallback called.
-   * @param {!Event} event
-   * @private
-   */
-  layoutBuiltChild_(event) {
-    const child = dev().assertElement(event.target);
-    if (child.getOwner() === this.element) {
-      this.scheduleLayout(child);
-    }
   }
 
   /** @override */

@@ -61,7 +61,6 @@ class AmpStickyAd extends AMP.BaseElement {
         'amp-sticky-ad must have a single amp-ad child');
 
     this.ad_ = children[0];
-    this.setAsOwner(this.ad_);
 
     whenUpgradedToCustomElement(dev().assertElement(this.ad_)).then(ad => {
       return ad.whenBuilt();
@@ -88,8 +87,6 @@ class AmpStickyAd extends AMP.BaseElement {
       toggle(this.element, true);
       const borderBottom = this.element./*OK*/offsetHeight;
       this.viewport_.updatePaddingBottom(borderBottom);
-      this.updateInViewport(dev().assertElement(this.ad_), true);
-      this.scheduleLayout(dev().assertElement(this.ad_));
     }
     return Promise.resolve();
   }
@@ -175,8 +172,6 @@ class AmpStickyAd extends AMP.BaseElement {
    */
   layoutAd_() {
     const ad = dev().assertElement(this.ad_);
-    this.updateInViewport(ad, true);
-    this.scheduleLayout(ad);
     // Wait for the earliest: `render-start` or `load-end` signals.
     // `render-start` is expected to arrive first, but it's not emitted by
     // all types of ads.
@@ -185,7 +180,7 @@ class AmpStickyAd extends AMP.BaseElement {
       signals.whenSignal(CommonSignals.RENDER_START),
       signals.whenSignal(CommonSignals.LOAD_END),
     ]).then(() => {
-      return this.vsync_.mutatePromise(() => {
+      return this.mutateElement(() => {
         // Set sticky-ad to visible and change container style
         this.element.setAttribute('visible', '');
         // Add border-bottom to the body to compensate space that was taken
@@ -217,7 +212,7 @@ class AmpStickyAd extends AMP.BaseElement {
    * @private
    */
   onCloseButtonClick_() {
-    this.vsync_.mutate(() => {
+    this.mutateElement(() => {
       this.visible_ = false;
       this./*OK*/scheduleUnlayout(dev().assertElement(this.ad_));
       this.viewport_.removeFromFixedLayer(this.element);

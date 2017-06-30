@@ -18,12 +18,21 @@ const LAYOUT_PROP = '__AMP_LAYOUT';
 const LAYOUT_LAYER_PROP = '__AMP_LAYER';
 
 export class LayoutLayers {
-  constructor() {
+  constructor(ampdoc) {
+    this.win = ampdoc.win;
+
+    /** @const {!Document} */
+    this.document_ = this.win.document;
+
     /** @const {!Array<!LayoutLayer>} */
     this.layers_ = [];
 
-    // TODO: Setup default layers
-    // TODO: setup document scroll listener
+    // TODO: figure out fixed layer
+
+    this.document_.addEventListener('scroll', event => {
+      this.scrolled_(event.target || this.getScrollingElement_());
+    }, { capture: true, passive: true });
+    win.addEventListener('resize', () => this.onResize_());
   }
 
   /**
@@ -33,21 +42,41 @@ export class LayoutLayers {
    * @param {!Rect} viewportRect
    */
   calcIntersectionWithViewport(element) {
-    // Get viewport's "layer" (probably <html>)
-    // call calcIntersectionWithParent(element, <html>)
+    return this.calcIntersectionWithParent(element,
+        this.getScrollingElement_());
   }
 
   /**
    * Calculates the element's intersection with the parent's rect.
+   * You may optionally expand the parent's rectangle.
    *
    * @param {!Element} element A regular or AMP Element
    * @param {!Element} parent
+   * @param {{dw: number=, dh: number=}=} opt_expand
+   * @param {number=} opt_dh
+   * @return {!LayoutRectDef}
    */
-  calcIntersectionWithParent(element, parent) {
-    // Get LayoutLayer `ll` of `element`
-    // Get ancestry of every LayoutLayer parent until `parent`, inclusive
-    // Perform box intersection calcs top-down, until we get a final
-    //   intersection.
+  calcIntersectionWithParent(element, parent, opt_expand) {
+    const elementBox = LayoutElement.for(element).getLayoutBox(parent);
+    const { left, top } = elementBox;
+    let parentBox = LayoutElement.for(parent).getCachedLayoutBox();
+    if (opt_expand) {
+      parentBox = expandLayoutRect(parentBox, opt_expand.dw || 0,
+          opt_expand.dh || 0);
+    }
+
+    return layoutRectLtwh(
+      left,
+      top,
+      Math.max(
+        Math.min(left + elementBox.width, parent.width) - left,
+        0
+      ),
+      Math.max(
+        Math.min(top + elementBox.height, parent.height) - top,
+        0
+      )
+    );
   }
 
   /**
@@ -60,11 +89,10 @@ export class LayoutLayers {
    * @param {!Element} element A regular or AMP Element
    */
   remeasure(element) {
-    // Get LayoutLayer `ll`.
-    // Get `ll`'s parent LayoutLayer `parent`.
-    // Recursively remeasure every element under `parent`.
-    // This can be optimized to only scan elements _after_ `element` inside
-    //   `ll`, and LayoutLayers after `ll`.
+    const layer = LayoutLayer.getParentLayer(element);
+    if (layer) {
+      layer.remeasure();
+    }
   }
 
   /**
@@ -84,8 +112,42 @@ export class LayoutLayers {
   declareLayer(element) {
     dev().assert(!LayoutLayer.forOptional(element));
     const layer = new LayoutLayer(element);
-    const parent = layer.getParentLayer(element);
-    parent.moveAmpElements(layer);
+    this.layers_.push(layer);
+    return layer;
+  }
+
+  onResize_() {
+    const scroll = LayoutLayer.for(this.getScrollingElement_());
+
+    const layers = this.layers_;
+    for (let i = 0; i < layers; i++) {
+      const layer = layers[i];
+      if (layer !== scroll) {
+        layers[i].dispose();
+      }
+    }
+
+    scroll.remeasure();
+  }
+
+  scrolled_(element) {
+    let layer = LayoutLayer.forOptional(element);
+    if (layer) {
+      layer.updateScrollPosition();
+    } else {
+      layer = this.declareLayer(element);
+    }
+  }
+
+  getScrollingElement_() {
+    const doc = this.document_;
+    if (doc./*OK*/scrollingElement) {
+      return doc./*OK*/scrollingElement;
+    }
+    if (doc.body && platformFor(this.win).isWebKit()) {
+      return doc.body;
+    }
+    return doc.documentElement;
   }
 }
 
@@ -100,6 +162,24 @@ class LayoutLayer {
      * @const @private {!Array<!AmpElement>}
      */
     this.ampElements_ = [];
+
+    /**
+     * Holds all children Layers, so we can quickly remeasure.
+     * @const @private {!Array<!LayoutLayer>}
+     */
+    this.layers_ = [];
+
+    this.scrollLeft_ = 0;
+    this.scrollTop_ = 0;
+
+    /** @private {?LayoutLayer} */
+    this.parentLayer_ = LayoutLayer.getParentLayer(element);
+
+    if (this.parentLayer_) {
+      this.parentLayer_.transfer_(this);
+    }
+
+    this.remeasure();
 
     /**
      * A penalty applied to elements in this layer, so that they are classified as "less important" than elements in other layers.
@@ -133,24 +213,28 @@ class LayoutLayer {
    * Finds the element's parent layer
    * If the element is itself a layer, it returns the layer's parent layer.
    * @param {!Element}
-   * @return {!LayoutLayer}
+   * @return {?LayoutLayer}
    */
   static getParentLayer(element) {
-    for (let el = element.parentNode; el; el = el.parentNode) {
+    let last = element;
+    for (let el = last.parentNode; el; last = el, el = el.parentNode) {
       const layer = LayoutLayer.forOptional(el);
       if (layer) {
         return layer;
       }
     }
-    // TODO return root layer
+    if (last.tagName !== 'HTML') {
+      throw dev().createError('element is not in the DOM tree');
+    }
+    return null;
   }
 
   /**
-   * Finds this layer's parent layer
-   * @return {!LayoutLayer}
+   * The layer's cached parent layer.
+   * @return {?LayoutLayer}
    */
   getParentLayer() {
-    return LayoutLayer.getParentLayer(this.root_);
+    return this.parentLayer_;
   }
 
   /**
@@ -163,22 +247,74 @@ class LayoutLayer {
    */
   dispose() {
     this.root_[LAYOUT_LAYER_PROP] = null;
-    this.moveAmpElements(this.getParentLayer());
+    const parent = this.getParentLayer();
+    if (parent) {
+      this.transfer_(parent);
+    }
   }
 
   contains(element) {
     return this.root_.contains(element);
   }
 
-  moveAmpElements_(layer, opt_force = false) {
+  getCachedLayoutBox() {
+    return LayoutElement.for(this.root_).getCachedLayoutBox();
+  }
+
+  getLayoutBox() {
+    return LayoutElement.for(this.root_).getLayoutBox();
+  }
+
+  getScrollTop() {
+    return this.scrollTop_;
+  }
+
+  getScrollLeft() {
+    return this.scrollLeft_;
+  }
+
+  transfer_(layer) {
+    // Basically, are we removing this layer.
+    const contained = layer === this.getParentLayer();
+
     filterSplice(this.ampElements_, element => {
-      if (opt_force || layer.contains(element)) {
+      if (contained || layer.contains(element)) {
         layer.ampElements_.push(element);
         return false;
       }
 
       return true;
     });
+
+    filterSplice(this.layers_, l => {
+      if (contained || layer.contains(l.root_)) {
+        layer.layers_.push(l);
+        l.parentLayer_ = layer;
+        return false;
+      }
+
+      return true;
+    });
+  }
+
+  updateScrollPosition() {
+    this.scrollLeft_ = this.root_.scrollLeft;
+    this.scrollTop_ = this.root_.scrollTop;
+  }
+
+  remeasure() {
+    this.updateScrollPosition();
+
+    const box = this.getLayoutBox();
+    const elements = this.ampElements_;
+    for (let i = 0; i < elements.length; i++) {
+      LayoutElement.for(elements[i]).remeasure(box);
+    }
+
+    const layers = this.layers_;
+    for (let i = 0; i < layers.length; i++) {
+      layers[i].remeasure();
+    }
   }
 }
 
@@ -194,7 +330,7 @@ class LayoutElement {
      * corner. This box DOES NOT change based on scroll position.
      * @private {!LayoutRectDef}
      */
-    this.layoutBox_ = {};
+    this.layoutBox_ = layoutRectLtwh(0, 0, 0, 0);
 
     element[LAYOUT_PROP] = this;
   }
@@ -216,11 +352,16 @@ class LayoutElement {
   static forOptional(element) {
     return element[LAYOUT_PROP];
   }
+}
 
+class RegularLayoutElement extends LayoutElement {
+}
+
+class AmpLayoutElement extends LayoutElement {
   /**
    * Gets the element's parent layer. If this element is itself a layer, it
    * returns the layer's parent.
-   * @return {!LayoutLayer}
+   * @return {?LayoutLayer}
    */
   getParentLayer() {
     return LayoutLayer.getParentLayer(this.element_);
@@ -236,9 +377,49 @@ class LayoutElement {
 
   /**
    * Gets the layout rectangle translated into the parent's coordinate system.
+   * @param {Element=} opt_parent
    * @return {!LayoutRectDef}
    */
   getLayoutBox(opt_parent) {
-    // Translate the layout rectangle into parent's coordinates
+    const parents = [];
+    const stopAt = opt_parent ? LayoutLayer.getParentLayer(opt_parent) : null;
+    for (let p = this.getParentLayer(); p !== stopAt; p = p.getParentLayer()) {
+      parents.push(p);
+    }
+
+    const box = this.getCachedLayoutBox();
+    let x = box.left;
+    let y = box.top;
+    let first = true;
+    for (let i = parents.length - 1; i >= 0; i--) {
+      const parent = parents[i];
+
+      const box = parent.getCachedLayoutBox();
+      x -= parent.getScrollLeft();
+      y -= parent.getScrollTop();
+      if (!first) {
+        x += box.left;
+        y += box.top;
+      }
+
+      first = false;
+    }
+
+    return layoutRectLtwh(x, y, box.width, box.height);
+  }
+
+  remeasure(opt_relativeTo) {
+    let relative = opt_relativeTo;
+    if (!relative) {
+      const parent = this.getParentLayer();
+      relative = parent ? parent.getLayoutBox() : layoutRectLtwh(0, 0, 0, 0);
+    }
+    const box = this.element_.getBoundingClientRect();
+    this.layoutBox_ = layoutRectLtwh(
+      box.left - relative.left,
+      box.top - relative.top,
+      box.width,
+      box.height
+    );
   }
 }
