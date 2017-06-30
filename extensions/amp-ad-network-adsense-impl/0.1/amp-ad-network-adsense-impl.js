@@ -44,10 +44,14 @@ import {removeElement} from '../../../src/dom';
 import {getMode} from '../../../src/mode';
 import {stringHash32} from '../../../src/crypto';
 import {dev} from '../../../src/log';
-import {extensionsFor} from '../../../src/services';
+import {
+  extensionsFor,
+  viewportForDoc
+} from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {
   computedStyle,
+  setStyle,
   setStyles,
 } from '../../../src/style';
 import {viewerForDoc} from '../../../src/services';
@@ -348,10 +352,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       this.element.appendChild(dummyOverflowElement);
 
       // Attempt to resize to the correct height.
+      const viewport = viewportForDoc(this.element);
       this.responsiveSizeChangePromise_ =
           this.attemptChangeSize(
               AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext(
-                  window.innerWidth),
+                  viewport.getSize()),
               undefined);
     }
   }
@@ -363,16 +368,17 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     if (this.isResponsive() && !this.responsiveAligned_) {
       this.responsiveAligned_ = true;
 
+      const layoutBox = this.getLayoutBox();
+
       // Nudge into the correct horizontal position. NB: this must succeed in
       // order to align the element correctly, so we use changeSize rather than
       // attemptChangeSize here. But it doesn't actually change the size (it
       // just changes the horizontal margins).
-      const layoutBox = this.getLayoutBox();
       // TODO(charliereams): This is wrong for RTL.
-      this.element.getResources().changeSize(
+      this.element.getResources()./*OK*/changeSize(
           this.element, undefined, undefined, undefined,
           {left: -1 * layoutBox.left});
-      this.element.style.zIndex = 30;
+      setStyle(this.element, 'zIndex', 30);
     }
   }
 
@@ -393,14 +399,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /**
    * Calculates the appropriate height for a full-width responsive ad of the
    * given width.
-   * @param {number} width
+   * @param {!{width: number, height: number}} viewportSize
    * @return {number}
    */
-  static getResponsiveHeightForContext(width) {
+  static getResponsiveHeightForContext(viewportSize) {
     const minHeight = 100;
-    const maxHeight = Math.min(300, window.innerHeight);
+    const maxHeight = Math.min(300, viewportSize.height);
     // We aim for a 6:5 aspect ratio.
-    const idealHeight = Math.round(width / 1.2);
+    const idealHeight = Math.round(viewportSize.width / 1.2);
     return Math.max(minHeight, Math.min(maxHeight, idealHeight));
   }
 }
