@@ -548,6 +548,7 @@ describes.realWin('amp-user-notification', {
     it('should be able to get AmpUserNotification object by ID', () => {
       const element = getUserNotification();
       const userNotification = new AmpUserNotification(element);
+      userNotification.dialogResolve_();
       service.registerUserNotification('n1', userNotification);
       return expect(service.get('n1')).to.eventually.equal(userNotification);
     });
@@ -581,5 +582,49 @@ describes.realWin('amp-user-notification', {
       expect(get).to.not.throw();
       expect(get().then).to.be.function;
     });
+  });
+
+  describe('optOutOfCid', () => {
+    const cidMock = {
+      optOut() {
+        return optoutPromise;
+      },
+    };
+    let dismissSpy;
+    let optoutPromise;
+    let optOutOfCidStub;
+
+    beforeEach(() => {
+      optOutOfCidStub = sandbox.spy(cidMock, 'optOut');
+    });
+
+    it('should call cid.optOut() and dismiss', () => {
+      const element = getUserNotification({id: 'n1'});
+      const impl = element.implementation_;
+      impl.buildCallback();
+      optoutPromise = Promise.resolve();
+      impl.getCidService_ = () => { return Promise.resolve(cidMock); };
+      dismissSpy = sandbox.spy(impl, 'dismiss');
+
+      return impl.optoutOfCid_().then(() => {
+        expect(dismissSpy).to.be.calledWithExactly(false);
+        expect(optOutOfCidStub).to.be.calledOnce;
+      });
+    });
+
+    it('should dissmiss without persistence if cid.optOut() fails', () => {
+      const element = getUserNotification({id: 'n1'});
+      const impl = element.implementation_;
+      impl.buildCallback();
+      optoutPromise = Promise.reject('failed');
+      impl.getCidService_ = () => { return Promise.resolve(cidMock); };
+      dismissSpy = sandbox.spy(impl, 'dismiss');
+
+      return impl.optoutOfCid_().then(() => {
+        expect(dismissSpy).to.be.calledWithExactly(true);
+        expect(optOutOfCidStub).to.be.calledOnce;
+      });
+    });
+
   });
 });
