@@ -92,6 +92,8 @@ export const ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH = {
  * @returns {boolean}
  */
 export function adsenseIsA4AEnabled(win, element) {
+  return true;
+
   let externalBranches, internalBranches;
   if (isExperimentOn(win, 'a4aFastFetchAdSenseLaunched')) {
     externalBranches = ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH;

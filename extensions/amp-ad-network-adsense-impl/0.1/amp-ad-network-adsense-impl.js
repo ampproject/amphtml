@@ -184,12 +184,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const height = Number(this.element.getAttribute('height'));
     // Need to ensure these are numbers since width can be set to 'auto'.
     // Checking height just in case.
-    // TODO(charliereams): Figure out this experiment.
-    this.size_ =
-        isExperimentOn(this.win, 'as-use-attr-for-format')
+    this.size_ = isExperimentOn(this.win, 'as-use-attr-for-format')
         && !isNaN(width) && width > 0 && !isNaN(height) && height > 0
-            ? {width, height}
-            : this.getIntersectionElementLayoutBox();
+        ? {width, height}
+        : this.getIntersectionElementLayoutBox();
     const format = `${this.size_.width}x${this.size_.height}`;
     const slotId = this.element.getAttribute('data-amp-slot-index');
     // data-amp-slot-index is set by the upgradeCallback method of amp-ad.
