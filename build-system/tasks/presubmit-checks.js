@@ -707,6 +707,7 @@ var forbiddenTermsSrcInclusive = {
       'src/event-helper.js',
       'src/friendly-iframe-embed.js',
       'src/service/performance-impl.js',
+      'src/service/resources-impl.js',
       'src/service/url-replacements-impl.js',
       'src/service/variable-source.js',
       'src/validator-integration.js',
