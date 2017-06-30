@@ -237,6 +237,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     if (this.descriptionBox_.classList.contains('standard')) {
       this.descriptionBox_.classList.remove('standard');
       this.descriptionBox_.classList.add('overflow');
+      this.topBar_.classList.add('overflow');
       this.vsync_.run({
         measure: state => {
           state.descTextAreaHeight =
@@ -245,17 +246,17 @@ export class AmpLightboxViewer extends AMP.BaseElement {
         },
         mutate: state => {
           if (state.descTextAreaHeight < state.descBoxHeight) {
-            setStyle(this.descriptionTextArea_, 'position', 'absolute');
-            setStyle(this.descriptionTextArea_, 'bottom', '0');
+            const diffHeight = state.descBoxHeight - state.descTextAreaHeight;
+            setStyle(this.descriptionTextArea_, 'top', `${diffHeight}px`);
           }
         },
       }, {});
     } else if (this.descriptionBox_.classList.contains('overflow')) {
       this.vsync_.mutate(() => {
         this.descriptionBox_.classList.remove('overflow');
+        this.topBar_.classList.remove('overflow');
         this.descriptionBox_.classList.add('standard');
-        setStyle(this.descriptionTextArea_, 'position', '');
-        setStyle(this.descriptionTextArea_, 'bottom', '');
+        setStyle(this.descriptionTextArea_, 'top', '');
       });
     }
   }
