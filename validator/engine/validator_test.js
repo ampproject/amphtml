@@ -552,6 +552,7 @@ describe('ValidatorRulesMakeSense', () => {
         'AMP-AD-EXIT': 0,
         'AMP-ANALYTICS': 0,
         'AMP-ANIM': 0,
+        'AMP-ANIMATION': 0,
         'AMP-AUDIO': 0,
         'AMP-CAROUSEL': 0,
         'AMP-FIT-TEXT': 0,
