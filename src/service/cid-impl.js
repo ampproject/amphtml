@@ -268,7 +268,7 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
         Promise.resolve(existingCookie));
   }
 
-  const newCookiePromise = Services.cryptoFor(win).sha384Base64(getEntropy(win))
+  const newCookiePromise = getNewCidForCookie(win)
       // Create new cookie, always prefixed with "amp-", so that we can see from
       // the value whether we created it.
       .then(randomStr => 'amp-' + randomStr);
@@ -487,6 +487,27 @@ function getEntropy(win) {
   // Support for legacy browsers.
   return String(win.location.href + Date.now() +
       win.Math.random() + win.screen.width + win.screen.height);
+}
+
+/**
+ * Produces an external CID for use in a cookie.
+ * @param {!Window} win
+ * @return {!Promise<string>} The cid
+ */
+function getNewCidForCookie(win) {
+  const entropy = getEntropy(win);
+  if (typeof entropy == 'string') {
+    return Services.cryptoFor(win).sha384Base64(entropy);
+  } else {
+    // If our entropy is a pure random number, we can just directly turn it
+    // into base 64
+    let string = '';
+    for (let i = 0; i < entropy.length; i++) {
+      // The replace removes the 0 padding.
+      string += btoa(entropy[i]).replace(/\=+$/, '');
+    }
+    return Promise.resolve(string);
+  }
 }
 
 /**
