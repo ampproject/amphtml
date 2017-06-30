@@ -331,15 +331,6 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.fromResumeCallback = false;
 
-    const type = (this.element.getAttribute('type') || 'notype').toLowerCase();
-    /**
-     * @private @const{boolean} whether request should only be sent when slot is
-     *    within renderOutsideViewport distance.
-     */
-    this.delayRequestEnabled_ =
-        (type == 'adsense' && isInExperiment(this.element, '117152655')) ||
-        (type == 'doubleclick' && isInExperiment(this.element, '117152665'));
-
     /** @private {string} */
     this.safeframeVersion_ = DEFAULT_SAFEFRAME_VERSION;
   }

@@ -115,17 +115,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     /** @private {!../../../src/service/extensions-impl.Extensions} */
     this.extensions_ = extensionsFor(this.win);
 
-    /**
-     * For full-width responsive ads, the promise issued when we attempt to
-     * change the height.
-     * @type {?Promise}
-     * @private
-     */
-    this.responsiveSizeChangePromise_ = null;
-
-    /** @private {string} */
-    this.autoFormat_ = this.element.getAttribute('data-auto-format') || '';
-
     /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
     this.size_ = null;
 
@@ -134,6 +123,27 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
     /** @private {?string} */
     this.qqid_ = null;
+
+    /**
+     * For full-width responsive ads, the promise issued when we attempt to
+     * change the height.
+     * @type {?Promise}
+     * @private
+     */
+    this.responsiveSizeChangePromise_ = null;
+
+    /**
+     * For full-width responsive ads: whether the element has already been
+     * aligned to the edges of the viewport.
+     * @type {boolean}
+     * @private
+     */
+    this.responsiveAligned_ = false;
+
+    /** @private {string} */
+    this.autoFormat_ = this.element.getAttribute('data-auto-format') || '';
+
+    console.log('bb %o', this);
   }
 
   /** @return {boolean} */
@@ -149,11 +159,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   delayAdRequestEnabled() {
+
+    console.log('cc %o', this);
     return isInExperiment(this.element, '117152655');
   }
 
   /** @override */
   getAdUrl() {
+    console.log('aa');
     // TODO: Check for required and allowed parameters. Probably use
     // validateData, from 3p/3p/js, after moving it someplace common.
     const startTime = Date.now();
@@ -173,7 +186,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     // Need to ensure these are numbers since width can be set to 'auto'.
     // Checking height just in case.
     // TODO(charliereams): Figure out this experiment.
-    this.size_ = isExperimentOn(this.win, 'as-use-attr-for-format')
+    this.size_ = false &&
+    isExperimentOn(this.win, 'as-use-attr-for-format')
     && !isNaN(width) && width > 0 && !isNaN(height) && height > 0
         ? {width, height}
         : this.getIntersectionElementLayoutBox();
@@ -329,6 +343,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   buildCallback() {
     super.buildCallback();
 
+    console.log('dd %o', this);
+
     if (this.isResponsive() && !this.responsiveSizeChangePromise_) {
       // Create a dummy zero-size element so that attemptChangeSize has
       // something to show if the resize fails.
@@ -342,41 +358,56 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
               AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext(
                   window.innerWidth),
               undefined);
+    }
+  }
 
-      // Nudge into the correct horizontal position. NB: can't use
-      // attemptChangeSize here, this must succeed. But it doesn't actually
-      // change the size (it just changes the horizontal margins).
-      var layoutBox = this.getLayoutBox();
+  /** @override */
+  onLayoutMeasure() {
+    super.onLayoutMeasure();
+
+    if (this.isResponsive() && !this.responsiveAligned_) {
+      this.responsiveAligned_ = true;
+
+      // Nudge into the correct horizontal position. NB: this must succeed in
+      // order to align the element correctly, so we use changeSize rather than
+      // attemptChangeSize here. But it doesn't actually change the size (it
+      // just changes the horizontal margins).
+      const layoutBox = this.getLayoutBox();
+      console.log('cc %o %o', layoutBox, this);
       // TODO(charliereams): This is wrong for RTL.
       this.element.getResources().changeSize(
           this.element, undefined, undefined, undefined,
           {left: -1 * layoutBox.left});
       this.element.style.zIndex = 30;
-      console.log('aligning: layoutBox=%o el=%o', layoutBox, this.element);
     }
   }
 
   /** @override */
   layoutCallback() {
-    return super.layoutCallback().then(
-        this.responsiveSizeChangePromise_ || Promise.resolve());
+    const callback = super.layoutCallback();
+    if (this.responsiveSizeChangePromise_) {
+      return callback.then(this.responsiveSizeChangePromise_);
+    }
+    return callback;
+  }
+
+  /** @override */
+  getPreconnectUrls() {
+    return ['https://googleads.g.doubleclick.net'];
   }
 
   /**
+   * Calculates the appropriate height for a full-width responsive ad of the
+   * given width.
    * @param {number} width
    * @return {number}
    */
   static getResponsiveHeightForContext(width) {
     const minHeight = 100;
     const maxHeight = Math.min(300, window.innerHeight);
+    // We aim for a 6:5 aspect ratio.
     const idealHeight = Math.round(width / 1.2);
-    console.log('min=%o max=%o ideal=%o', minHeight, maxHeight, idealHeight);
     return Math.max(minHeight, Math.min(maxHeight, idealHeight));
-  }
-
-  /** @override */
-  getPreconnectUrls() {
-    return ['https://googleads.g.doubleclick.net'];
   }
 }
 
