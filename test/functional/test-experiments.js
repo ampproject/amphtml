@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import {
-  publicJwk,
-  correctToken,
-  tokenWithBadVersion,
-  tokenWithBadConfigLength,
-  tokenWithBadSignature,
-  tokenWithExpiredExperiment,
-} from './testdata-experiments';
+// import {
+//   publicJwk,
+//   correctToken,
+//   tokenWithBadVersion,
+//   tokenWithBadConfigLength,
+//   tokenWithBadSignature,
+//   tokenWithExpiredExperiment,
+// } from './testdata-experiments';
+import {OriginExperiments} from '../../src/origin-experiments';
 import {Services} from '../../src/services';
 import {installCryptoService} from '../../src/service/crypto-impl';
 import {
