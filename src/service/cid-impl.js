@@ -35,7 +35,7 @@ import {
 import {dict} from '../utils/object';
 import {isIframed} from '../dom';
 import {getCryptoRandomBytesArray} from '../utils/bytes';
-import {Services} from '../services';
+import {base64UrlEncodeFromBytes} from '../utils/base64';
 import {parseJson, tryParseJson} from '../json';
 import {user, rethrowAsync} from '../log';
 import {ViewerCidApi} from './viewer-cid-api';
@@ -501,12 +501,9 @@ function getNewCidForCookie(win) {
   } else {
     // If our entropy is a pure random number, we can just directly turn it
     // into base 64
-    let string = '';
-    for (let i = 0; i < entropy.length; i++) {
-      // The replace removes the 0 padding.
-      string += btoa(entropy[i]).replace(/\=+$/, '');
-    }
-    return Promise.resolve(string);
+    return Promise.resolve(base64UrlEncodeFromBytes(entropy)
+        // Remove trailing padding
+        .replace(/\.+$/, ''));
   }
 }
 

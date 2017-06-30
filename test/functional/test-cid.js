@@ -590,8 +590,7 @@ describe('cid', () => {
       return cid.get({scope: 'scope_name', createCookieIfNotPresent: true},
           hasConsent).then(c => {
             expect(c).to.exist;
-            expect(c).to
-                .equal('amp-MAMgNAOAMTYMzINjQMTI4MjU1NwMTEMjIMzMNjYMjAwMzk');
+            expect(c).to.equal('amp-AAIECBAgQID_BwsWIULIJw');
             expect(fakeWin.document.cookie).to.equal(
                 'scope_name=' + encodeURIComponent(c) +
                 '; path=/' +
@@ -610,8 +609,7 @@ describe('cid', () => {
         cookieName: 'cookie_name',
       }, hasConsent).then(c => {
         expect(c).to.exist;
-        expect(c).to
-            .equal('amp-MQMgMwMAMAMAMAMAMAMAMAMAMAMAMAMTU');
+        expect(c).to.equal('amp-AQIDAAAAAAAAAAAAAAAADw');
         expect(fakeWin.document.cookie).to.equal(
             'cookie_name=' + encodeURIComponent(c) +
             '; path=/' +
