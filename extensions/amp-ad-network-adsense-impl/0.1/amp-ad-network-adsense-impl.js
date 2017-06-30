@@ -46,7 +46,7 @@ import {stringHash32} from '../../../src/crypto';
 import {dev} from '../../../src/log';
 import {
   extensionsFor,
-  viewportForDoc
+  viewportForDoc,
 } from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {
