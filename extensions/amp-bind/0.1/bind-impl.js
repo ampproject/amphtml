@@ -262,9 +262,9 @@ export class Bind {
   /**
    * The current number of bindings.
    * @return {number}
-   * @private
+   * @visibleForTesting
    */
-  numberOfBindings_() {
+  numberOfBindings() {
     return this.boundElements_.reduce((number, boundElement) => {
       return number + boundElement.boundProperties.length;
     }, 0);
@@ -292,7 +292,7 @@ export class Bind {
     // Limit number of total bindings (unless in local manual testing).
     const limit = (getMode().localDev && !getMode().test)
         ? Number.POSITIVE_INFINITY
-        : this.maxNumberOfBindings_ - this.numberOfBindings_();
+        : this.maxNumberOfBindings_ - this.numberOfBindings();
     return this.scanNode_(node, limit).then(results => {
       const {
         boundElements, bindings, expressionToElements, limitExceeded,
