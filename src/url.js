@@ -20,6 +20,7 @@ import {getMode} from './mode';
 import {urls} from './config';
 import {isArray} from './types';
 import {parseQueryString_} from './url-parse-query-string';
+import {tryDecodeUriComponent_} from './url-try-decode-uri-component';
 
 /**
  * Cached a-tag to avoid memory allocation during URL parsing.
@@ -476,4 +477,16 @@ export function checkCorsUrl(url) {
   const query = parseQueryString(parsedUrl.search);
   user().assert(!(SOURCE_ORIGIN_PARAM in query),
       'Source origin is not allowed in %s', url);
+}
+
+/**
+ * Tries to decode a URI component, falling back to opt_fallback (or an empty
+ * string)
+ *
+ * @param {string} component
+ * @param {string=} opt_fallback
+ * @return {string}
+ */
+export function tryDecodeUriComponent(component, opt_fallback) {
+  return tryDecodeUriComponent_(component, opt_fallback);
 }

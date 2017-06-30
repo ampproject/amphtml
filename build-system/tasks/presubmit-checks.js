@@ -655,6 +655,14 @@ var forbiddenTermsSrcInclusive = {
       'dist.3p/current/integration.js',
     ],
   },
+  'decodeURIComponent\\(': {
+    message: 'decodeURIComponent throws for malformed URL components. Please ' +
+        'use tryDecodeUriComponent from src/url.js',
+    whitelist: [
+      'src/url.js',
+      'src/utils/bytes.js',
+    ],
+  },
   // Super complicated regex that says "find any querySelector method call that
   // is passed as a variable anything that is not a string, or a string that
   // contains a space.
