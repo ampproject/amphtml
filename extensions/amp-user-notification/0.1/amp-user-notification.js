@@ -104,7 +104,7 @@ export class AmpUserNotification extends AMP.BaseElement {
     this.dismissHref_ = null;
 
     /** @private {boolean} */
-    this.persistDismissal_ = true;
+    this.persistDismissal_ = false;
 
     /** @private {?string} */
     this.showIfHref_ = null;
@@ -168,7 +168,7 @@ export class AmpUserNotification extends AMP.BaseElement {
     this.userNotificationManager_
         .registerUserNotification(this.elementId_, this);
 
-    this.registerAction('dismiss', () => this.dismiss());
+    this.registerAction('dismiss', () => this.dismiss(/*forceNoPersist*/false));
     this.registerAction('optoutOfCid', () => this.optoutOfCid_());
   }
 
@@ -252,11 +252,11 @@ export class AmpUserNotification extends AMP.BaseElement {
   optoutOfCid_() {
     return this.getCidService_()
         .then(cid => cid.optOut())
-        .then(() => this.dismiss(), reason => {
+        .then(() => this.dismiss(/*forceNoPersist*/false), reason => {
           dev().error(TAG,
               'Failed to opt out of Cid', reason);
           // If optout fails, dismiss notification without persisting.
-          this.dismiss(/*opt_forceNoPersist*/true);
+          this.dismiss(/*forceNoPersist*/true);
         });
   }
 
@@ -340,23 +340,23 @@ export class AmpUserNotification extends AMP.BaseElement {
 
   /** @override */
   activate() {
-    this.dismiss();
+    this.dismiss(/*forceNoPersist*/false);
   }
 
   /**
    * Hides the current user notification and invokes the `dialogResolve_`
    * method. Removes the `.amp-active` class from the element.
    *
-   * @param {boolean=} opt_forceNoPersist If true, dismissal won't be persisted
+   * @param {boolean} forceNoPersist If true, dismissal won't be persisted
    * regardless of 'data-persist-dismissal''s value
    */
-  dismiss(opt_forceNoPersist = false) {
+  dismiss(forceNoPersist) {
     this.element.classList.remove('amp-active');
     this.element.classList.add('amp-hidden');
     this.dialogResolve_();
     this.getViewport().removeFromFixedLayer(this.element);
 
-    if (this.persistDismissal_ && !opt_forceNoPersist) {
+    if (this.persistDismissal_ && !forceNoPersist) {
       // Store and post.
       this.storagePromise_.then(storage => {
         storage.set(this.storageKey_, true);
