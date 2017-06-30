@@ -15,7 +15,7 @@
  */
 
 import {isObject} from '../../../src/types';
-import {user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {cidForDoc} from '../../../src/services';
 import {viewerForDoc} from '../../../src/services';
 import {userNotificationManagerFor} from '../../../src/services';
@@ -29,7 +29,7 @@ const nameValidator = /^[\w-]+$/;
  * experiment config.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {string} experimentName
- * @param {!Object} config
+ * @param {!JsonObject} config
  * @return {!Promise<?string>}
  */
 export function allocateVariant(ampdoc, experimentName, config) {
@@ -39,21 +39,22 @@ export function allocateVariant(ampdoc, experimentName, config) {
   // Variant can be overridden from URL fragment.
   const viewer = viewerForDoc(ampdoc);
   const override = viewer.getParam(ATTR_PREFIX + experimentName);
-  if (override && config.variants.hasOwnProperty(override)) {
-    return Promise.resolve(override);
+  if (override && config['variants'].hasOwnProperty(override)) {
+    return Promise.resolve(/** @type {?string} */ (override));
   }
 
-  const sticky = config.sticky !== false;
-  const cidScope = config.cidScope || 'amp-experiment';
+  const sticky = config['sticky'] !== false;
+  const cidScope = config['cidScope'] || 'amp-experiment';
 
   let hasConsentPromise = Promise.resolve(true);
 
-  if (sticky && config.consentNotificationId) {
+  if (sticky && config['consentNotificationId']) {
     hasConsentPromise = userNotificationManagerFor(ampdoc.win)
-        .then(manager => manager.getNotification(config.consentNotificationId))
+        .then(manager => manager.getNotification(
+            config['consentNotificationId']))
         .then(userNotification => {
           user().assert(userNotification,
-              `Notification not found: ${config.consentNotificationId}`);
+              `Notification not found: ${config['consentNotificationId']}`);
           return userNotification.isDismissed();
         });
   }
@@ -62,16 +63,16 @@ export function allocateVariant(ampdoc, experimentName, config) {
     if (!hasConsent) {
       return null;
     }
-    const group = config.group || experimentName;
+    const group = config['group'] || experimentName;
     return getBucketTicket(ampdoc, group, sticky ? cidScope : null)
         .then(ticket => {
           let upperBound = 0;
 
           // Loop through keys in a specific order since the default object key
           // enumeration is implementation (browser) dependent.
-          const variantNames = Object.keys(config.variants).sort();
+          const variantNames = Object.keys(config['variants']).sort();
           for (let i = 0; i < variantNames.length; i++) {
-            upperBound += config.variants[variantNames[i]];
+            upperBound += config['variants'][variantNames[i]];
             if (ticket < upperBound) {
               return variantNames[i];
             }
@@ -83,15 +84,15 @@ export function allocateVariant(ampdoc, experimentName, config) {
 
 /**
  * Validates an experiment config.
- * @param {!Object} config
+ * @param {!JsonObject} config
  * @throws {!Error}
  */
 function validateConfig(config) {
-  const variants = config.variants;
+  const variants = config['variants'];
   user().assert(isObject(variants) && Object.keys(variants).length > 0,
       'Missing experiment variants config.');
-  if (config.group) {
-    assertName(config.group);
+  if (config['group']) {
+    assertName(config['group']);
   }
   let totalPercentage = 0;
   for (const variantName in variants) {
@@ -124,9 +125,10 @@ function getBucketTicket(ampdoc, group, opt_cidScope) {
     return Promise.resolve(ampdoc.win.Math.random() * 100);
   }
 
-  const cidPromise = cidForDoc(ampdoc).then(cidService => cidService.get(
-        {scope: opt_cidScope, createCookieIfNotPresent: true},
-      Promise.resolve()));
+  const cidPromise = cidForDoc(ampdoc).then(cidService => cidService.get({
+    scope: dev().assertString(opt_cidScope),
+    createCookieIfNotPresent: true,
+  }, Promise.resolve()));
 
   return Promise.all([cidPromise, cryptoFor(ampdoc.win)])
       .then(results => results[1].uniform(group + ':' + results[0]))

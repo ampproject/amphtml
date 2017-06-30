@@ -59,7 +59,7 @@ export class FontLoader {
     this.fontLoadResolved_ = false;
     /** @private {boolean} */
     this.fontLoadRejected_ = false;
-    /** @private {FontConfigDef} */
+    /** @private {?FontConfigDef} */
     this.fontConfig_ = null;
   }
 
@@ -239,7 +239,7 @@ class FontComparator {
 
   /**
    * Create and style a DOM element to use to compare two fonts.
-   * @param {!Document} doc
+   * @param {?Document} doc
    * @param {string} fontFamily
    * @return {!Element}
    * @private
