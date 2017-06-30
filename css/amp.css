@@ -708,12 +708,13 @@ amp-accordion > section > * {
 
 amp-accordion,
 amp-accordion > section,
-amp-accordion > section > * {
+.i-amphtml-accordion-header,
+.i-amphtml-accordion-content {
   margin: 0;
 }
 
 /* heading element*/
-amp-accordion > section > :first-child {
+.i-amphtml-accordion-header {
   cursor: pointer;
   background-color: #efefef;
   padding-right: 20px;
