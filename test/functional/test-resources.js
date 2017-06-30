@@ -19,6 +19,7 @@ import {Resources} from '../../src/service/resources-impl';
 import {Resource, ResourceState} from '../../src/service/resource';
 import {VisibilityState} from '../../src/visibility-state';
 import {layoutRectLtwh} from '../../src/layout-rect';
+import {loadPromise} from '../../src/event-helper';
 import * as sinon from 'sinon';
 
 /*eslint "google-camelcase/google-camelcase": 0*/
@@ -536,6 +537,53 @@ describe('Resources', () => {
     expect(task.priority).to.equal(1);
     // The other task is not updated.
     expect(task2.priority).to.equal(2);
+  });
+});
+
+describes.fakeWin('Resources startup', {
+  win: {
+    readyState: 'loading',
+  },
+  amp: true,
+}, env => {
+  let win;
+  let clock;
+  let resources;
+  let schedulePassStub;
+
+  beforeEach(() => {
+    win = env.win;
+    clock = sandbox.useFakeTimers();
+    resources = new Resources(new AmpDocSingle(win));
+    resources.relayoutAll_ = false;
+    schedulePassStub = sandbox.stub(resources, 'schedulePass');
+  });
+
+  it('should run a full reload pass on window.onload', () => {
+    expect(resources.relayoutAll_).to.be.false;
+    expect(schedulePassStub).to.not.be.called;
+    win.readyState = 'complete';
+    win.eventListeners.fire({type: 'load'});
+    return loadPromise(win).then(() => {
+      // Skip a microtask.
+      return Promise.race([Promise.resolve()]);
+    }).then(() => {
+      expect(resources.relayoutAll_).to.be.true;
+      expect(schedulePassStub).to.be.calledOnce;
+    });
+  });
+
+  it('should run a full reload pass on fonts timeout', () => {
+    expect(resources.relayoutAll_).to.be.false;
+    expect(schedulePassStub).to.not.be.called;
+    clock.tick(4000);
+    // Skip a microtask.
+    return Promise.resolve().then(() => {
+      return Promise.race([Promise.resolve()]);
+    }).then(() => {
+      expect(resources.relayoutAll_).to.be.true;
+      expect(schedulePassStub).to.be.calledOnce;
+    });
   });
 });
 
