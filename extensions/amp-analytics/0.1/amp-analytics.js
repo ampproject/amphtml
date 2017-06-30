@@ -145,7 +145,8 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     if (this.consentNotificationId_ != null) {
       this.consentPromise_ = userNotificationManagerFor(this.win)
-          .then(service => service.get(this.consentNotificationId_));
+          .then(service => service.get(dev().assertString(
+              this.consentNotificationId_)));
     }
 
     if (this.element.getAttribute('trigger') == 'immediate') {
