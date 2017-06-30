@@ -69,7 +69,7 @@ const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
 
 /** @type {string} */
 const METADATA_STRING_NO_QUOTES =
-    '<script type=application/json amp-ad-metadata>';
+      '<script type=application/json amp-ad-metadata>';
 
 // TODO(tdrl): Temporary, while we're verifying whether SafeFrame is an
 // acceptable solution to the 'Safari on iOS doesn't fetch iframe src from
@@ -195,8 +195,8 @@ export const LIFECYCLE_STAGES = {
  * @template T
  * @visibleForTesting
  */
-export function protectFunctionWrapper(fn, inThis = undefined,
-    onError = undefined) {
+export function protectFunctionWrapper(
+    fn, inThis = undefined, onError = undefined) {
   return (...fnArgs) => {
     try {
       return fn.apply(inThis, fnArgs);
@@ -285,7 +285,7 @@ export class AmpA4A extends AMP.BaseElement {
      * @private {?XORIGIN_MODE}
      */
     this.experimentalNonAmpCreativeRenderMethod_ =
-        platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
+      platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
 
     /**
      * Gets a notion of current time, in ms.  The value is not necessarily
@@ -296,8 +296,8 @@ export class AmpA4A extends AMP.BaseElement {
      * @const {function():number}
      * @private
      */
-    this.getNow_ = (this.win.performance && this.win.performance.now)
-        ? this.win.performance.now.bind(this.win.performance) : Date.now;
+    this.getNow_ = (this.win.performance && this.win.performance.now) ?
+        this.win.performance.now.bind(this.win.performance) : Date.now;
 
     /**
      * Protected version of emitLifecycleEvent that ensures error does not
@@ -384,7 +384,8 @@ export class AmpA4A extends AMP.BaseElement {
     }
     // Otherwise the ad is good to go.
     const elementCheck = getAmpAdRenderOutsideViewport(this.element);
-    return elementCheck !== null ? elementCheck : super.renderOutsideViewport();
+    return elementCheck !== null ?
+        elementCheck : super.renderOutsideViewport();
   }
 
   /**
@@ -514,7 +515,7 @@ export class AmpA4A extends AMP.BaseElement {
     }
     if (!isAdPositionAllowed(this.element, this.win)) {
       user().warn(TAG, `<${this.element.tagName}> is not allowed to be ` +
-          `placed in elements with position:fixed: ${this.element}`);
+        `placed in elements with position:fixed: ${this.element}`);
       return false;
     }
     // OnLayoutMeasure can be called when page is in prerender so delay until
@@ -622,7 +623,7 @@ export class AmpA4A extends AMP.BaseElement {
             dev().error('AMP-A4A', `cross-origin render mode header ${method}`);
           }
           const safeframeVersionHeader =
-              fetchResponse.headers.get(SAFEFRAME_VERSION_HEADER);
+            fetchResponse.headers.get(SAFEFRAME_VERSION_HEADER);
           if (/^[0-9-]+$/.test(safeframeVersionHeader) &&
               safeframeVersionHeader != DEFAULT_SAFEFRAME_VERSION) {
             this.safeframeVersion_ = safeframeVersionHeader;
@@ -727,8 +728,7 @@ export class AmpA4A extends AMP.BaseElement {
           // https://github.com/ampproject/amphtml/issues/4187
           let creativeMetaDataDef;
           if (!creativeDecoded ||
-              !(creativeMetaDataDef = this.getAmpAdMetadata_(
-                  creativeDecoded))) {
+            !(creativeMetaDataDef = this.getAmpAdMetadata_(creativeDecoded))) {
             return null;
           }
           // Update priority.
@@ -810,42 +810,42 @@ export class AmpA4A extends AMP.BaseElement {
                 signature,
                 keyInfo)
                 .then(isValid => {
-                      if (isValid) {
-                        verified = true;
-                        this.protectedEmitLifecycleEvent_(
-                            'signatureVerifySuccess', {
-                              'met.delta.AD_SLOT_ID': Math.round(
-                                  this.getNow_() - signatureVerifyStartTime),
-                              'signingServiceName.AD_SLOT_ID': keyInfo.serviceName,
-                            });
-                        return creative;
-                      }
-                      // Only report if signature is expected to match, given that
-                      // multiple key providers could have been specified.
-                      // Note: the 'keyInfo &&' check here is not strictly
-                      // necessary, because we checked that above.  But
-                      // Closure type compiler can't seem to recognize that, so
-                      // this guarantees it to the compiler.
-                      if (keyInfo && verifyHashVersion(signature, keyInfo)) {
-                        user().error(TAG, this.element.getAttribute('type'),
-                            'Key failed to validate creative\'s signature',
-                            keyInfo.serviceName, keyInfo.cryptoKey);
-                      }
-                      // Reject to ensure the some operation waits for other
-                      // possible providers to properly verify and resolve.
-                      return Promise.reject(
-                          `${keyInfo.serviceName} key failed to verify`);
-                    },
-                    err => {
-                      dev().error(
-                          TAG, this.element.getAttribute('type'),
-                          keyInfo.serviceName, err, this.element);
-                    });
+                  if (isValid) {
+                    verified = true;
+                    this.protectedEmitLifecycleEvent_(
+                        'signatureVerifySuccess', {
+                          'met.delta.AD_SLOT_ID': Math.round(
+                              this.getNow_() - signatureVerifyStartTime),
+                          'signingServiceName.AD_SLOT_ID': keyInfo.serviceName,
+                        });
+                    return creative;
+                  }
+                  // Only report if signature is expected to match, given that
+                  // multiple key providers could have been specified.
+                  // Note: the 'keyInfo &&' check here is not strictly
+                  // necessary, because we checked that above.  But
+                  // Closure type compiler can't seem to recognize that, so
+                  // this guarantees it to the compiler.
+                  if (keyInfo && verifyHashVersion(signature, keyInfo)) {
+                    user().error(TAG, this.element.getAttribute('type'),
+                        'Key failed to validate creative\'s signature',
+                        keyInfo.serviceName, keyInfo.cryptoKey);
+                  }
+                  // Reject to ensure the some operation waits for other
+                  // possible providers to properly verify and resolve.
+                  return Promise.reject(
+                      `${keyInfo.serviceName} key failed to verify`);
+                },
+                err => {
+                  dev().error(
+                      TAG, this.element.getAttribute('type'),
+                      keyInfo.serviceName, err, this.element);
+                });
           });
         }))
         // some() returns an array of which we only need a single value.
             .then(returnedArray => returnedArray[0], () => {
-              // Rejection occurs if all keys for this provider fail to validate.
+          // Rejection occurs if all keys for this provider fail to validate.
               return Promise.reject(
                   `All keys for ${keyInfoSet.serviceName} failed to verify`);
             });
@@ -855,7 +855,7 @@ export class AmpA4A extends AMP.BaseElement {
           this.protectedEmitLifecycleEvent_('adResponseValidateEnd');
           return returnedArray[0];
         }, () => {
-          // rejection occurs if all providers fail to verify.
+      // rejection occurs if all providers fail to verify.
           this.protectedEmitLifecycleEvent_('adResponseValidateEnd');
           return Promise.reject('No validation service could verify this key');
         });
@@ -960,8 +960,7 @@ export class AmpA4A extends AMP.BaseElement {
     // unlayoutCallback so that it is reverted to original size in case
     // of resumeCallback.
     this.originalSlotSize_ = this.originalSlotSize_ || this.getLayoutBox();
-    return super.attemptChangeSize(newHeight, newWidth).catch(() => {
-    });
+    return super.attemptChangeSize(newHeight, newWidth).catch(() => {});
   }
 
   /**
@@ -988,9 +987,9 @@ export class AmpA4A extends AMP.BaseElement {
             this.originalSlotSize_ = null;
           })
           .catch(err => {
-            // TODO(keithwrightbos): if we are unable to revert size, on next
-            // trigger of promise chain the ad request may fail due to invalid
-            // slot size.  Determine how to handle this case.
+          // TODO(keithwrightbos): if we are unable to revert size, on next
+          // trigger of promise chain the ad request may fail due to invalid
+          // slot size.  Determine how to handle this case.
             dev().warn(TAG, 'unable to revert to original size', err);
           });
     }
@@ -1206,15 +1205,15 @@ export class AmpA4A extends AMP.BaseElement {
             .then(() => xhrFor(this.win).fetchJson(url, {
               mode: 'cors',
               method: 'GET',
-              // Set ampCors false so that __amp_source_origin is not
-              // included in XHR CORS request allowing for keyset to be cached
-              // across pages.
+            // Set ampCors false so that __amp_source_origin is not
+            // included in XHR CORS request allowing for keyset to be cached
+            // across pages.
               ampCors: false,
               credentials: 'omit',
             }).then(res => res.json()).then(jwkSetObj => {
               const result = {serviceName: currServiceName};
               if (isObject(jwkSetObj) && Array.isArray(jwkSetObj.keys) &&
-                  jwkSetObj.keys.every(isObject)) {
+                jwkSetObj.keys.every(isObject)) {
                 result.keys = jwkSetObj.keys;
               } else {
                 user().error(TAG, this.element.getAttribute('type'),
@@ -1227,21 +1226,21 @@ export class AmpA4A extends AMP.BaseElement {
               return {
                 serviceName: jwkSet.serviceName,
                 keys: jwkSet.keys.map(jwk =>
-                    this.signatureVerifier_
-                        .importPublicKey(jwkSet.serviceName, jwk)
-                        .catch(err => {
-                          user().error(TAG, this.element.getAttribute('type'),
-                              `error importing keys for: ${jwkSet.serviceName}`,
-                              err, this.element);
-                          return null;
-                        })),
+                  this.signatureVerifier_
+                      .importPublicKey(jwkSet.serviceName, jwk)
+                      .catch(err => {
+                        user().error(TAG, this.element.getAttribute('type'),
+                            `error importing keys for: ${jwkSet.serviceName}`,
+                            err, this.element);
+                        return null;
+                      })),
               };
             }).catch(err => {
               user().error(
                   TAG, this.element.getAttribute('type'), err, this.element);
-              // TODO(a4a-team): This is a failure in the initial attempt to get
-              // the keys, probably b/c of a network condition.  We should
-              // re-trigger key fetching later.
+            // TODO(a4a-team): This is a failure in the initial attempt to get
+            // the keys, probably b/c of a network condition.  We should
+            // re-trigger key fetching later.
               return {serviceName: currServiceName, keys: []};
             });
       } else {
@@ -1274,7 +1273,7 @@ export class AmpA4A extends AMP.BaseElement {
     const method = this.experimentalNonAmpCreativeRenderMethod_;
     let renderPromise = Promise.resolve(false);
     if ((method == XORIGIN_MODE.SAFEFRAME ||
-        method == XORIGIN_MODE.NAMEFRAME) &&
+         method == XORIGIN_MODE.NAMEFRAME) &&
         this.creativeBody_) {
       renderPromise = this.renderViaNameAttrOfXOriginIframe_(
           this.creativeBody_);
@@ -1341,44 +1340,44 @@ export class AmpA4A extends AMP.BaseElement {
           installUrlReplacementsForEmbed(this.getAmpDoc(), embedWin,
               new A4AVariableSource(this.getAmpDoc(), embedWin));
         }).then(friendlyIframeEmbed => {
-      checkStillCurrent();
-      this.friendlyIframeEmbed_ = friendlyIframeEmbed;
-      setFriendlyIframeEmbedVisible(
-          friendlyIframeEmbed, this.isInViewport());
-      // Ensure visibility hidden has been removed (set by boilerplate).
-      const frameDoc = friendlyIframeEmbed.iframe.contentDocument ||
-          friendlyIframeEmbed.win.document;
-      setStyle(frameDoc.body, 'visibility', 'visible');
-      // Capture phase click handlers on the ad.
-      installAnchorClickInterceptor(
-          this.getAmpDoc(), friendlyIframeEmbed.win);
-      // Bubble phase click handlers on the ad.
-      this.registerAlpHandler_(friendlyIframeEmbed.win);
-      // Capture timing info for friendly iframe load completion.
-      getTimingDataAsync(
-          friendlyIframeEmbed.win,
-          'navigationStart', 'loadEventEnd').then(delta => {
-        checkStillCurrent();
-        this.protectedEmitLifecycleEvent_('friendlyIframeLoaded', {
-          'navStartToLoadEndDelta.AD_SLOT_ID': Math.round(delta),
+          checkStillCurrent();
+          this.friendlyIframeEmbed_ = friendlyIframeEmbed;
+          setFriendlyIframeEmbedVisible(
+              friendlyIframeEmbed, this.isInViewport());
+          // Ensure visibility hidden has been removed (set by boilerplate).
+          const frameDoc = friendlyIframeEmbed.iframe.contentDocument ||
+              friendlyIframeEmbed.win.document;
+          setStyle(frameDoc.body, 'visibility', 'visible');
+          // Capture phase click handlers on the ad.
+          installAnchorClickInterceptor(
+              this.getAmpDoc(), friendlyIframeEmbed.win);
+          // Bubble phase click handlers on the ad.
+          this.registerAlpHandler_(friendlyIframeEmbed.win);
+          // Capture timing info for friendly iframe load completion.
+          getTimingDataAsync(
+              friendlyIframeEmbed.win,
+              'navigationStart', 'loadEventEnd').then(delta => {
+                checkStillCurrent();
+                this.protectedEmitLifecycleEvent_('friendlyIframeLoaded', {
+                  'navStartToLoadEndDelta.AD_SLOT_ID': Math.round(delta),
+                });
+              }).catch(err => {
+                dev().error(TAG, this.element.getAttribute('type'),
+                    'getTimingDataAsync for renderFriendlyEnd failed: ', err);
+              });
+          protectFunctionWrapper(this.onCreativeRender, this, err => {
+            dev().error(TAG, this.element.getAttribute('type'),
+                'Error executing onCreativeRender', err);
+          })(true);
+          // It's enough to wait for "ini-load" signal because in a FIE case
+          // we know that the embed no longer consumes significant resources
+          // after the initial load.
+          return friendlyIframeEmbed.whenIniLoaded();
+        }).then(() => {
+          checkStillCurrent();
+          // Capture ini-load ping.
+          this.protectedEmitLifecycleEvent_('friendlyIframeIniLoad');
         });
-      }).catch(err => {
-        dev().error(TAG, this.element.getAttribute('type'),
-            'getTimingDataAsync for renderFriendlyEnd failed: ', err);
-      });
-      protectFunctionWrapper(this.onCreativeRender, this, err => {
-        dev().error(TAG, this.element.getAttribute('type'),
-            'Error executing onCreativeRender', err);
-      })(true);
-      // It's enough to wait for "ini-load" signal because in a FIE case
-      // we know that the embed no longer consumes significant resources
-      // after the initial load.
-      return friendlyIframeEmbed.whenIniLoaded();
-    }).then(() => {
-      checkStillCurrent();
-      // Capture ini-load ping.
-      this.protectedEmitLifecycleEvent_('friendlyIframeIniLoad');
-    });
   }
 
   /**
@@ -1527,7 +1526,7 @@ export class AmpA4A extends AMP.BaseElement {
       const metaDataObj = parseJson(
           creative.slice(metadataStart + metadataString.length, metadataEnd));
       const ampRuntimeUtf16CharOffsets =
-          metaDataObj['ampRuntimeUtf16CharOffsets'];
+        metaDataObj['ampRuntimeUtf16CharOffsets'];
       if (!isArray(ampRuntimeUtf16CharOffsets) ||
           ampRuntimeUtf16CharOffsets.length != 2 ||
           typeof ampRuntimeUtf16CharOffsets[0] !== 'number' ||
@@ -1537,7 +1536,7 @@ export class AmpA4A extends AMP.BaseElement {
       const metaData = {};
       if (metaDataObj['customElementExtensions']) {
         metaData.customElementExtensions =
-            metaDataObj['customElementExtensions'];
+          metaDataObj['customElementExtensions'];
         if (!isArray(metaData.customElementExtensions)) {
           throw new Error(
               'Invalid extensions', metaData.customElementExtensions);
@@ -1564,9 +1563,9 @@ export class AmpA4A extends AMP.BaseElement {
       // TODO(keithwrightbos): OK to assume ampRuntimeUtf16CharOffsets is before
       // metadata as its in the head?
       metaData.minifiedCreative =
-          creative.slice(0, ampRuntimeUtf16CharOffsets[0]) +
-          creative.slice(ampRuntimeUtf16CharOffsets[1], metadataStart) +
-          creative.slice(metadataEnd + '</script>'.length);
+        creative.slice(0, ampRuntimeUtf16CharOffsets[0]) +
+        creative.slice(ampRuntimeUtf16CharOffsets[1], metadataStart) +
+        creative.slice(metadataEnd + '</script>'.length);
       return metaData;
     } catch (err) {
       dev().warn(
@@ -1598,7 +1597,7 @@ export class AmpA4A extends AMP.BaseElement {
    */
   getSafeframePath_() {
     return 'https://tpc.googlesyndication.com/safeframe/' +
-        `${this.safeframeVersion_}/html/container.html`;
+      `${this.safeframeVersion_}/html/container.html`;
   }
 
   /**
@@ -1621,8 +1620,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @param {string} unusedEventName
    * @param {!Object<string, string|number>=} opt_extraVariables
    */
-  emitLifecycleEvent(unusedEventName, opt_extraVariables) {
-  }
+  emitLifecycleEvent(unusedEventName, opt_extraVariables) {}
 }
 
 /**
@@ -1639,5 +1637,5 @@ export function assignAdUrlToError(error, adUrl) {
     return;
   }
   (error.args || (error.args = {}))['au'] =
-      adUrl.substring(adQueryIdx + 1, adQueryIdx + 251);
+    adUrl.substring(adQueryIdx + 1, adQueryIdx + 251);
 };

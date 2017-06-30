@@ -92,5 +92,18 @@ export const ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH = {
  * @returns {boolean}
  */
 export function adsenseIsA4AEnabled(win, element) {
-  return true;
+  let externalBranches, internalBranches;
+  if (isExperimentOn(win, 'a4aFastFetchAdSenseLaunched')) {
+    externalBranches = ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH;
+    internalBranches = ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH;
+  } else {
+    externalBranches = ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH;
+    internalBranches = ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH;
+  }
+
+  return !!element.getAttribute('data-ad-client') &&
+      googleAdsIsA4AEnabled(
+          win, element, ADSENSE_A4A_EXPERIMENT_NAME,
+          externalBranches, internalBranches,
+          ADSENSE_A4A_EXTERNAL_DELAYED_EXPERIMENT_BRANCHES_PRE_LAUNCH);
 }
