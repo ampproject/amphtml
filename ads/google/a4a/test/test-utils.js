@@ -18,13 +18,11 @@ import {
   additionalDimensions,
   addCsiSignalsToAmpAnalyticsConfig,
   extractAmpAnalyticsConfig,
-  extractGoogleAdCreativeAndSignature,
   EXPERIMENT_ATTRIBUTE,
   googleAdUrl,
   mergeExperimentIds,
 } from '../utils';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {
   installExtensionsService,
 } from '../../../../src/service/extensions-impl';
@@ -67,50 +65,6 @@ function noopMethods(impl, doc, sandbox) {
 }
 
 describe('Google A4A utils', () => {
-
-  describe('#extractGoogleAdCreativeAndSignature', () => {
-    it('should return body and signature', () => {
-      const creative = 'some test data';
-      const headerData = {
-        'X-AmpAdSignature': 'AQAB',
-      };
-      const headers = {
-        has: h => { return h in headerData; },
-        get: h => { return headerData[h]; },
-      };
-      return expect(extractGoogleAdCreativeAndSignature(creative, headers))
-          .to.eventually.deep.equal({
-            creative,
-            signature: base64UrlDecodeToBytes('AQAB'),
-          });
-    });
-
-    it('should return body and signature and size', () => {
-      const creative = 'some test data';
-      const headerData = {
-        'X-AmpAdSignature': 'AQAB',
-      };
-      const headers = {
-        has: h => { return h in headerData; },
-        get: h => { return headerData[h]; },
-      };
-      return expect(extractGoogleAdCreativeAndSignature(creative, headers))
-          .to.eventually.deep.equal({
-            creative,
-            signature: base64UrlDecodeToBytes('AQAB'),
-          });
-    });
-
-    it('should return null when no signature header is present', () => {
-      const creative = 'some test data';
-      const headers = {
-        has: unused => { return false; },
-        get: h => { throw new Error('Tried to get ' + h); },
-      };
-      return expect(extractGoogleAdCreativeAndSignature(creative, headers))
-          .to.eventually.deep.equal({creative, signature: null});
-    });
-  });
 
   //TODO: Add tests for other utils functions.
 

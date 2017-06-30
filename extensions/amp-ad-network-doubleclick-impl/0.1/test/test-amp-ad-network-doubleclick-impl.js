@@ -41,7 +41,6 @@ import {
   MANUAL_EXPERIMENT_ID,
 } from '../../../../ads/google/a4a/traffic-experiments';
 import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
-import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {utf8Encode} from '../../../../src/utils/bytes';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {BaseElement} from '../../../../src/base-element';
@@ -157,77 +156,35 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       });
     });
 
-    it('without signature', () => {
-      const headers = {
+    it('without analytics', () => {
+      expect(impl.extractSize({
         get() {
           return undefined;
         },
         has() {
           return false;
         },
-      };
-      return utf8Encode('some creative').then(creative => {
-        return impl.extractCreativeAndSignature(creative, headers)
-            .then(adResponse => {
-              expect(adResponse).to.deep.equal({creative, signature: null});
-              expect(impl.extractSize(headers)).to.deep.equal(size);
-              expect(loadExtensionSpy.withArgs('amp-analytics'))
-                  .to.not.be.called;
-            });
-      });
-    });
-    it('with signature', () => {
-      return utf8Encode('some creative').then(creative => {
-        const headers = {
-          get(name) {
-            return name == 'X-AmpAdSignature' ? 'AQAB' : undefined;
-          },
-          has(name) {
-            return name === 'X-AmpAdSignature';
-          },
-        };
-        return impl.extractCreativeAndSignature(creative, headers)
-            .then(adResponse => {
-              expect(adResponse).to.deep.equal({
-                creative,
-                signature: base64UrlDecodeToBytes('AQAB'),
-              });
-              expect(impl.extractSize(headers)).to.deep.equal(size);
-              expect(loadExtensionSpy.withArgs('amp-analytics'))
-                  .to.not.be.called;
-            });
-      });
+      })).to.deep.equal(size);
+      expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
     });
     it('with analytics', () => {
-      return utf8Encode('some creative').then(creative => {
-        const url = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
-        const headers = {
-          get(name) {
-            switch (name) {
-              case 'X-AmpAnalytics':
-                return JSON.stringify({url});
-              case 'X-AmpAdSignature':
-                return 'AQAB';
-              default:
-                return undefined;
-            }
-          },
-          has(name) {
-            return !!this.get(name);
-          },
-        };
-        return impl.extractCreativeAndSignature(creative, headers)
-            .then(adResponse => {
-              expect(adResponse).to.deep.equal({
-                creative,
-                signature: base64UrlDecodeToBytes('AQAB'),
-              });
-              expect(impl.extractSize(headers)).to.deep.equal(size);
-              expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
-              // exact value of ampAnalyticsConfig covered in
-              // ads/google/test/test-utils.js
-            });
-      });
+      const url = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
+      expect(impl.extractSize({
+        get(name) {
+          switch (name) {
+            case 'X-AmpAnalytics':
+              return JSON.stringify({url});
+            default:
+              return undefined;
+          }
+        },
+        has(name) {
+          return !!this.get(name);
+        },
+      })).to.deep.equal(size);
+      expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
+      // exact value of ampAnalyticsConfig covered in
+      // ads/google/test/test-utils.js
     });
   });
 

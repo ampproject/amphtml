@@ -184,20 +184,6 @@ describe('integration test: a4a', () => {
     });
   });
 
-  it('should fall back to 3p when extractCreative throws', () => {
-    sandbox.stub(MockA4AImpl.prototype, 'extractCreativeAndSignature').throws(
-        new Error('Testing extractCreativeAndSignature error'));
-    // TODO(tdrl) Currently layoutCallback rejects, even though something *is*
-    // rendered.  This should be fixed in a refactor, and we should change this
-    // .catch to a .then.
-    return fixture.addElement(a4aElement).catch(error => {
-      expect(error.message).to.contain.string(
-          'Testing extractCreativeAndSignature error');
-      expect(error.message).to.contain.string('amp-a4a:');
-      expectRenderedInXDomainIframe(a4aElement, TEST_URL);
-    });
-  });
-
   it('should fall back to 3p when extractCreative returns empty sig', () => {
     const extractCreativeAndSignatureStub =
         sandbox.stub(MockA4AImpl.prototype, 'extractCreativeAndSignature');

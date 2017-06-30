@@ -21,8 +21,6 @@ import {
 import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
-import {utf8Encode} from '../../../../src/utils/bytes';
 import * as sinon from 'sinon';
 import {gmosspIsA4AEnabled} from '../gmossp-a4a-config';
 import {createElementWithAttributes} from '../../../../src/dom';
@@ -106,37 +104,6 @@ document.createElement('amp-ad-network-gmossp-impl');
     it('should be valid', () => {
       const base = 'https://sp.gmossp-sp.jp/ads/ssp.ad?';
       expect(gmosspImpl.getAdUrl().substring(0, base.length)).to.equal(base);
-    });
-  });
-
-  describe('#extractCreativeAndSignature', () => {
-    it('without signature', () => {
-      return utf8Encode('some creative').then(creative => {
-        return expect(gmosspImpl.extractCreativeAndSignature(
-            creative,
-            {
-              get: function() { return undefined; },
-              has() { return false; },
-            })).to.eventually.deep.equal(
-            {creative, signature: null}
-          );
-      });
-    });
-    it('with signature', () => {
-      return utf8Encode('some creative').then(creative => {
-        return expect(gmosspImpl.extractCreativeAndSignature(
-            creative,
-            {
-              get(name) {
-                return name == 'X-AmpAdSignature' ? 'AQAB' : undefined;
-              },
-              has(name) {
-                return name === 'X-AmpAdSignature';
-              },
-            })).to.eventually.deep.equal(
-            {creative, signature: base64UrlDecodeToBytes('AQAB')}
-          );
-      });
     });
   });
 });

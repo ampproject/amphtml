@@ -2167,6 +2167,65 @@ describe('amp-a4a', () => {
     });
   });
 
+  describe('#extractCreativeAndSignature', () => {
+    it('should return body and signature', () => {
+      const creative = 'some test data';
+      const headerData = {
+        'X-AmpAdSignature': 'AQAB',
+      };
+      const headers = {
+        has: h => {
+          return h in headerData;
+        },
+        get: h => {
+          return headerData[h];
+        },
+      };
+      return expect(AmpA4A.prototype.extractCreativeAndSignature(
+          creative, headers))
+          .to.eventually.deep.equal({
+            creative,
+            signature: base64UrlDecodeToBytes('AQAB'),
+          });
+    });
+
+    it('should return body and signature and size', () => {
+      const creative = 'some test data';
+      const headerData = {
+        'X-AmpAdSignature': 'AQAB',
+      };
+      const headers = {
+        has: h => {
+          return h in headerData;
+        },
+        get: h => {
+          return headerData[h];
+        },
+      };
+      return expect(AmpA4A.prototype.extractCreativeAndSignature(
+          creative, headers))
+          .to.eventually.deep.equal({
+            creative,
+            signature: base64UrlDecodeToBytes('AQAB'),
+          });
+    });
+
+    it('should return null when no signature header is present', () => {
+      const creative = 'some test data';
+      const headers = {
+        has: unused => {
+          return false;
+        },
+        get: h => {
+          throw new Error('Tried to get ' + h);
+        },
+      };
+      return expect(AmpA4A.prototype.extractCreativeAndSignature(
+          creative, headers))
+          .to.eventually.deep.equal({creative, signature: null});
+    });
+  });
+
   describe('#extractSize', () => {
 
     it('should return a size', () => {
