@@ -142,8 +142,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
     /** @private {string} */
     this.autoFormat_ = this.element.getAttribute('data-auto-format') || '';
-
-    console.log('bb %o', this);
   }
 
   /** @return {boolean} */
@@ -159,14 +157,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   delayAdRequestEnabled() {
-
-    console.log('cc %o', this);
     return isInExperiment(this.element, '117152655');
   }
 
   /** @override */
   getAdUrl() {
-    console.log('aa');
     // TODO: Check for required and allowed parameters. Probably use
     // validateData, from 3p/3p/js, after moving it someplace common.
     const startTime = Date.now();
@@ -373,7 +368,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       // attemptChangeSize here. But it doesn't actually change the size (it
       // just changes the horizontal margins).
       const layoutBox = this.getLayoutBox();
-      console.log('cc %o %o', layoutBox, this);
       // TODO(charliereams): This is wrong for RTL.
       this.element.getResources().changeSize(
           this.element, undefined, undefined, undefined,
