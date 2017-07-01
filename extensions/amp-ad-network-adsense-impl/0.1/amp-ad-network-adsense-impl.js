@@ -44,10 +44,7 @@ import {removeElement} from '../../../src/dom';
 import {getMode} from '../../../src/mode';
 import {stringHash32} from '../../../src/crypto';
 import {dev} from '../../../src/log';
-import {
-  extensionsFor,
-  viewportForDoc,
-} from '../../../src/services';
+import {extensionsFor} from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {
   computedStyle,
@@ -135,14 +132,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      * @private
      */
     this.responsiveSizeChangePromise_ = null;
-
-    /**
-     * For full-width responsive ads: whether the element has already been
-     * aligned to the edges of the viewport.
-     * @type {boolean}
-     * @private
-     */
-    this.responsiveAligned_ = false;
 
     /**
      * The contents of the data-auto-format attribute, or empty string if the
@@ -352,10 +341,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       this.element.appendChild(dummyOverflowElement);
 
       // Attempt to resize to the correct height.
-      const viewport = viewportForDoc(this.element);
+      const viewport = this.getViewport();
       this.responsiveSizeChangePromise_ =
           this.attemptChangeSize(
-              AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext(
+              AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
                   viewport.getSize()),
               undefined);
     }
@@ -401,8 +390,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    * given width.
    * @param {!{width: number, height: number}} viewportSize
    * @return {number}
+   * @private
    */
-  static getResponsiveHeightForContext(viewportSize) {
+  static getResponsiveHeightForContext_(viewportSize) {
     const minHeight = 100;
     const maxHeight = Math.min(300, viewportSize.height);
     // We aim for a 6:5 aspect ratio.
