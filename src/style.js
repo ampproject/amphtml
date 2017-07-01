@@ -190,7 +190,7 @@ export function translate(x, opt_y) {
   if (typeof opt_y == 'number') {
     opt_y = px(opt_y);
   }
-  return `translate(${x},${opt_y})`;
+  return `translate(${x}, ${opt_y})`;
 }
 
 

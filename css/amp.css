@@ -684,6 +684,31 @@ i-amphtml-video-mask, i-amp-video-mask {
   100% {transform: translateY(0);}
 }
 
+
+/**
+ * Video Docking
+ */
+
+.i-amphtml-dockable-video {
+  padding: 0px;
+  margin:0px;
+  background: darkgray;
+}
+
+.i-amphtml-dockable-video > video.i-amphtml-dockable-video-minimizing,
+.i-amphtml-dockable-video > iframe.i-amphtml-dockable-video-minimizing {
+  position: fixed;
+  height: auto;
+  overflow: hidden;
+  z-index: 2;
+  will-change: transform;
+  transform: scale(0.6) translateX(20px) translateY(20px);
+  /* Override fill-content */
+  min-width: initial !important;
+  min-height: initial !important;
+  margin: initial !important;
+}
+
 /**
  * amp-accordion to avoid FOUC.
  */
