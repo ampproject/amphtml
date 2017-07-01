@@ -37,14 +37,14 @@ limitations under the License.
 
 ## Examples
 
-Use the `amp-layout` component to create an aspect-ratio based responsive, independent component!.
+Use `amp-layout` to create an aspect-ratio based responsive, independent component!.
 
 **Example**
 
 ```html
 <amp-layout class="card" layout=responsive width=2 height=1>
   This card container will always maintain its 2x1 aspect ratio!
-</amp-reddit>
+</amp-layout>
 
 .card {
   background-color: red;
