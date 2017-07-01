@@ -333,13 +333,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   buildCallback() {
     super.buildCallback();
 
-    if (this.isResponsive() && !this.responsiveSizeChangePromise_) {
-      // Create a dummy zero-size element so that attemptChangeSize has
-      // something to show if the resize fails.
-      const dummyOverflowElement = document.createElement('div');
-      dummyOverflowElement.setAttribute('overflow', '1');
-      this.element.appendChild(dummyOverflowElement);
-
+    if (this.isResponsive()) {
       // Attempt to resize to the correct height.
       const viewport = this.getViewport();
       this.responsiveSizeChangePromise_ =
