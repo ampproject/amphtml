@@ -79,6 +79,25 @@ const CACHED_FONT_LOAD_TIME_ = 100;
 
 export class AmpFont extends AMP.BaseElement {
 
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {string} */
+    this.fontFamily_ = '';
+    /** @private {string} */
+    this.fontWeight_ = '';
+    /** @private {string} */
+    this.fontStyle_ = '';
+    /** @private {string} */
+    this.fontVariant_ = '';
+    /** @private {?Document} */
+    this.document_ = null;
+    /** @private {?Element} */
+    this.documentElement_ = null;
+    /** @private {?FontLoader} */
+    this.fontLoader_ = null;
+  }
 
   /** @override */
   prerenderAllowed() {
@@ -88,24 +107,17 @@ export class AmpFont extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @private @const {string} */
     this.fontFamily_ = user().assert(this.element.getAttribute('font-family'),
         'The font-family attribute is required for <amp-font> %s',
         this.element);
-    /** @private @const {string} */
     this.fontWeight_ =
         this.element.getAttribute('font-weight') || DEFAULT_WEIGHT_;
-    /** @private @const {string} */
     this.fontStyle_ =
         this.element.getAttribute('font-style') || DEFAULT_STYLE_;
-    /** @private @const {string} */
     this.fontVariant_ =
         this.element.getAttribute('font-variant') || DEFAULT_VARIANT_;
-    /** @private @const {!Document} */
     this.document_ = this.win.document;
-    /** @private @const {!Element} */
     this.documentElement_ = this.document_.documentElement;
-    /** @private @const {!FontLoader} */
     this.fontLoader_ = new FontLoader(this.win);
     this.startLoad_();
   }
@@ -116,7 +128,6 @@ export class AmpFont extends AMP.BaseElement {
    * @private
    */
   startLoad_() {
-    /** @type FontConfig */
     const fontConfig = {
       style: this.fontStyle_,
       variant: this.fontVariant_,

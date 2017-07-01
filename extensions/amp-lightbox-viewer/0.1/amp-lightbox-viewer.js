@@ -23,7 +23,7 @@ import {Layout} from '../../../src/layout';
 import {user, dev} from '../../../src/log';
 import {extensionsFor} from '../../../src/services';
 import {toggle, setStyle} from '../../../src/style';
-import {listen} from '../../../src/event-helper';
+import {getData, listen} from '../../../src/event-helper';
 import {LightboxManager} from './service/lightbox-manager-impl';
 
 /** @const */
@@ -40,20 +40,9 @@ let manager_;
  */
 export class AmpLightboxViewer extends AMP.BaseElement {
 
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
-  }
-
-  /** @override */
-  renderOutsideViewport() {
-    return true;
-  }
-
-  /** @override */
-  buildCallback() {
-    user().assert(isExperimentOn(this.win, TAG),
-        `Experiment ${TAG} disabled`);
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
 
     /** @private {!boolean} */
     this.active_ = false;
@@ -65,18 +54,17 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.boundHandleKeyboardEvents_ = this.handleKeyboardEvents_.bind(this);
 
     /**
-     * @const
-     * @private {!./service/lightbox-manager-impl.LightboxManager}
+     * @private {?./service/lightbox-manager-impl.LightboxManager}
      */
-    this.manager_ = dev().assert(manager_);
+    this.manager_ = null;
 
-    /** @const @private {!Vsync} */
-    this.vsync_ = this.getVsync();
+    /** @private {?../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = null;
 
-    /** @const @private {!Element} */
-    this.container_ = this.win.document.createElement('div');
-    this.container_.classList.add('i-amphtml-lbv');
+    /** @private {?Element} */
+    this.container_ = null;
 
+    /** @private {?Element} */
     this.carousel_ = null;
 
     /** @private {?Element} */
@@ -93,6 +81,29 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
     /** @private {?Array<{string, Element}>} */
     this.thumbnails_ = null;
+
+    /** @private  {?Element} */
+    this.topBar_ = null;
+  }
+
+  /** @override */
+  isLayoutSupported(layout) {
+    return layout == Layout.NODISPLAY;
+  }
+
+  /** @override */
+  renderOutsideViewport() {
+    return true;
+  }
+
+  /** @override */
+  buildCallback() {
+    user().assert(isExperimentOn(this.win, TAG),
+        `Experiment ${TAG} disabled`);
+    this.manager_ = dev().assert(manager_);
+    this.vsync_ = this.getVsync();
+    this.container_ = this.win.document.createElement('div');
+    this.container_.classList.add('i-amphtml-lbv');
 
     this.buildMask_();
     this.buildCarousel_();
@@ -167,7 +178,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   slideChangeHandler_(event) {
-    this.currentElementId_ = event.data.index;
+    this.currentElementId_ = getData(event)['index'];
     this.updateDescriptionBox_();
   }
 
@@ -176,7 +187,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   buildDescriptionBox_() {
-    dev().assert(this.container_);
+
     this.descriptionBox_ = this.win.document.createElement('div');
     this.descriptionBox_.classList.add('i-amphtml-lbv-desc-box');
     this.descriptionBox_.classList.add('standard');
@@ -186,7 +197,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.descriptionBox_.appendChild(this.descriptionTextArea_);
 
     const toggleDescription = this.toggleDescriptionBox_.bind(this);
-    listen(this.container_, 'click', toggleDescription);
+    listen(dev().assertElement(this.container_), 'click', toggleDescription);
     this.descriptionBox_.addEventListener('click', event => {
       this.toggleDescriptionOverflow_();
       event.stopPropagation();
@@ -226,6 +237,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     if (this.descriptionBox_.classList.contains('standard')) {
       this.descriptionBox_.classList.remove('standard');
       this.descriptionBox_.classList.add('overflow');
+      this.topBar_.classList.add('overflow');
       this.vsync_.run({
         measure: state => {
           state.descTextAreaHeight =
@@ -234,17 +246,17 @@ export class AmpLightboxViewer extends AMP.BaseElement {
         },
         mutate: state => {
           if (state.descTextAreaHeight < state.descBoxHeight) {
-            setStyle(this.descriptionTextArea_, 'position', 'absolute');
-            setStyle(this.descriptionTextArea_, 'bottom', '0');
+            const diffHeight = state.descBoxHeight - state.descTextAreaHeight;
+            setStyle(this.descriptionTextArea_, 'top', `${diffHeight}px`);
           }
         },
       }, {});
     } else if (this.descriptionBox_.classList.contains('overflow')) {
       this.vsync_.mutate(() => {
         this.descriptionBox_.classList.remove('overflow');
+        this.topBar_.classList.remove('overflow');
         this.descriptionBox_.classList.add('standard');
-        setStyle(this.descriptionTextArea_, 'position', '');
-        setStyle(this.descriptionTextArea_, 'bottom', '');
+        setStyle(this.descriptionTextArea_, 'top', '');
       });
     }
   }
@@ -276,7 +288,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.buildButton_('Content', 'amp-lbv-button-slide', closeGallery);
 
     const toggleTopBar = this.toggleTopBar_.bind(this);
-    listen(this.container_, 'click', toggleTopBar);
+    listen(dev().assertElement(this.container_), 'click', toggleTopBar);
     this.container_.appendChild(this.topBar_);
   }
 
@@ -312,17 +324,17 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    *  // Opens the element referenced by elementId
    *  on="tap:myLightboxViewer.open(id='<elementId>')
    * @override
-   * @return {!Promise}
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
    */
   activate(invocation) {
     let target = invocation.source;
-    if (invocation.args && invocation.args.id) {
-      const targetId = invocation.args.id;
+    if (invocation.args && invocation.args['id']) {
+      const targetId = invocation.args['id'];
       target = this.win.document.getElementById(targetId);
       user().assert(target,
           'amp-lightbox-viewer.open: element with id: %s not found', targetId);
     }
-    return this.open_(target);
+    return this.open_(dev().assertElement(target));
   }
 
   /**
@@ -337,11 +349,14 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     toggle(this.element, true);
     this.active_ = true;
 
-    this.updateInViewport(this.container_, true);
-    this.scheduleLayout(this.container_);
+    this.updateInViewport(dev().assertElement(this.container_), true);
+    this.scheduleLayout(dev().assertElement(this.container_));
 
     this.currentElementId_ = element.lightboxItemId;
-    this.carousel_.implementation_.showSlideWhenReady(this.currentElementId_);
+    // Hack to access private property. Better than not getting
+    // type checking to work.
+    /**@type {?}*/ (this.carousel_).implementation_.showSlideWhenReady(
+        this.currentElementId_);
 
     this.win.document.documentElement.addEventListener(
         'keydown', this.boundHandleKeyboardEvents_);
@@ -377,19 +392,12 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   /**
    * Handles keyboard events for the lightbox.
    *  -Esc will close the lightbox.
-   *  -Right arrow goes to next
-   *  -Left arrow goes to previous
    * @private
    */
   handleKeyboardEvents_(event) {
-    // TODO(aghassemi): RTL support
     const code = event.keyCode;
     if (code == KeyCodes.ESCAPE) {
       this.close_();
-    } else if (code == KeyCodes.RIGHT_ARROW) {
-      this.next_();
-    } else if (code == KeyCodes.LEFT_ARROW) {
-      this.previous_();
     }
   }
 
@@ -458,7 +466,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
   /**
    * Create an element inside gallery from the thumbnail info from manager.
-   * @param {{string, Element}} thumbnailObj
+   * @param {{url: string, element: !Element}} thumbnailObj
    * @private
    */
   createThumbnailElement_(thumbnailObj) {
@@ -472,7 +480,10 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       this.closeGallery_();
       this.currentElementId_ = thumbnailObj.element.lightboxItemId;
       this.updateDescriptionBox_();
-      this.carousel_.implementation_.showSlideWhenReady(this.currentElementId_);
+      // Hack to access private property. Better than not getting
+      // type checking to work.
+      /**@type {?}*/ (this.carousel_).implementation_.showSlideWhenReady(
+          this.currentElementId_);
       event.stopPropagation();
     };
     element.addEventListener('click', closeGallaryAndShowTargetSlide);

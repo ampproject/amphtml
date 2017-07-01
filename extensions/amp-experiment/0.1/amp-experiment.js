@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
+import {parseJson} from '../../../src/json';
 import {Layout} from '../../../src/layout';
 import {waitForBodyPromise} from '../../../src/dom';
 import {allocateVariant} from './variant';
@@ -53,6 +54,7 @@ export class AmpExperiment extends AMP.BaseElement {
     });
   }
 
+  /** @return {!JsonObject} [description] */
   getConfig_() {
     const children = this.element.children;
     user().assert(
@@ -62,7 +64,8 @@ export class AmpExperiment extends AMP.BaseElement {
         '<amp-experiment> should contain exactly one ' +
         '<script type="application/json"> child.');
 
-    return JSON.parse(children[0].textContent);
+    return /** @type {!JsonObject} */ (
+        dev().assert(parseJson(children[0].textContent)));
   }
 
   /**
@@ -78,7 +81,8 @@ export class AmpExperiment extends AMP.BaseElement {
     return waitForBodyPromise(doc).then(() => {
       for (const name in experiments) {
         if (experiments[name]) {
-          doc.body.setAttribute(ATTR_PREFIX + name, experiments[name]);
+          doc.body.setAttribute(ATTR_PREFIX + name,
+              dev().assertString(experiments[name]));
         }
       }
       return experiments;
