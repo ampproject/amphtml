@@ -70,6 +70,7 @@ class AmpAccordion extends AMP.BaseElement {
           'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
           'amp-accordion/amp-accordion.md. Found in: %s', this.element);
       const content = sectionComponents[1];
+      content.classList.add('i-amphtml-accordion-content');
       let contentId = content.getAttribute('id');
       if (!contentId) {
         contentId = this.element.id + '_AMP_content_' + index;
@@ -92,6 +93,7 @@ class AmpAccordion extends AMP.BaseElement {
       });
 
       const header = sectionComponents[0];
+      header.classList.add('i-amphtml-accordion-header');
       header.setAttribute('role', 'heading');
       header.setAttribute('aria-controls', contentId);
       header.setAttribute('aria-expanded',

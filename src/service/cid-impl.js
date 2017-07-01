@@ -35,7 +35,7 @@ import {
 import {dict} from '../utils/object';
 import {isIframed} from '../dom';
 import {getCryptoRandomBytesArray} from '../utils/bytes';
-import {viewerForDoc} from '../services';
+import {viewerForDoc, storageForDoc} from '../services';
 import {cryptoFor} from '../crypto';
 import {parseJson, tryParseJson} from '../json';
 import {timerFor} from '../services';
@@ -49,6 +49,10 @@ const ONE_DAY_MILLIS = 24 * 3600 * 1000;
 const BASE_CID_MAX_AGE_MILLIS = 365 * ONE_DAY_MILLIS;
 
 const SCOPE_NAME_VALIDATOR = /^[a-zA-Z0-9-_.]+$/;
+
+const CID_OPTOUT_STORAGE_KEY = 'amp-cid-optout';
+
+const CID_OPTOUT_VIEWER_MESSAGE = 'cidOptOut';
 
 /**
  * A base cid string value and the time it was last read / stored.
@@ -107,7 +111,8 @@ export class Cid {
    *     consent, of course).
    * @return {!Promise<?string>} A client identifier that should be used
    *      within the current source origin and externalCidScope. Might be
-   *      null if no identifier was found or could be made.
+   *      null if user has opted out of cid or no identifier was found
+   *      or it could be made.
    *      This promise may take a long time to resolve if consent isn't
    *      given.
    */
@@ -118,35 +123,112 @@ export class Cid {
         'The CID scope and cookie name must only use the characters ' +
         '[a-zA-Z0-9-_.]+\nInstead found: %s',
         getCidStruct.scope);
+
     return consent.then(() => {
       return viewerForDoc(this.ampdoc).whenFirstVisible();
     }).then(() => {
-      return getExternalCid(this, getCidStruct,
-          opt_persistenceConsent || consent);
+      // Check if user has globally opted out of CID, we do this after
+      // consent check since user can optout during consent process.
+      return isOptedOutOfCid(this.ampdoc);
+    }).then(optedOut => {
+      if (optedOut) {
+        return '';
+      }
+      const cidPromise = this.getExternalCid_(
+          getCidStruct, opt_persistenceConsent || consent);
+      // Getting the CID might involve an HTTP request. We timeout after 10s.
+      return timerFor(this.ampdoc.win)
+          .timeoutPromise(10000, cidPromise,
+          `Getting cid for "${getCidStruct.scope}" timed out`)
+          .catch(error => {
+            rethrowAsync(error);
+          });
+    });
+  }
+
+  /**
+   * User will be opted out of Cid issuance for all scopes.
+   * When opted-out Cid service will reject all `get` requests.
+   *
+   * @return {!Promise}
+   */
+  optOut() {
+    return optOutOfCid(this.ampdoc);
+  }
+
+  /**
+   * Returns the "external cid". This is a cid for a specific purpose
+   * (Say Analytics provider X). It is unique per user, that purpose
+   * and the AMP origin site.
+   * @param {!GetCidDef} getCidStruct
+   * @param {!Promise} persistenceConsent
+   * @return {!Promise<?string>}
+   */
+  getExternalCid_(getCidStruct, persistenceConsent) {
+    /** @const {!Location} */
+    const url = parseUrl(this.ampdoc.win.location.href);
+    if (!isProxyOrigin(url)) {
+      return getOrCreateCookie(this, getCidStruct, persistenceConsent);
+    }
+    const viewer = viewerForDoc(this.ampdoc);
+    if (viewer.hasCapability('cid')) {
+      return this.getScopedCidFromViewer_(getCidStruct.scope);
+    }
+    return getBaseCid(this, persistenceConsent)
+        .then(baseCid => {
+          return cryptoFor(this.ampdoc.win).sha384Base64(
+              baseCid + getProxySourceOrigin(url) + getCidStruct.scope);
+        });
+  }
+
+  /**
+   * @param {!string} scope
+   * @return {!Promise<?string>}
+   */
+  getScopedCidFromViewer_(scope) {
+    const viewer = viewerForDoc(this.ampdoc);
+    return viewer.isTrustedViewer().then(trusted => {
+      if (!trusted) {
+        rethrowAsync('Ignore CID API from Untrustful Viewer.');
+        return;
+      }
+      return viewer.sendMessageAwaitResponse('cid', dict({'scope': scope}));
     });
   }
 }
 
 /**
- * Returns the "external cid". This is a cid for a specific purpose
- * (Say Analytics provider X). It is unique per user, that purpose
- * and the AMP origin site.
- * @param {!Cid} cid
- * @param {!GetCidDef} getCidStruct
- * @param {!Promise} persistenceConsent
- * @return {!Promise<?string>}
+ * User will be opted out of Cid issuance for all scopes.
+ * When opted-out Cid service will reject all `get` requests.
+ *
+ * @return {!Promise}
+ * @visibleForTesting
  */
-function getExternalCid(cid, getCidStruct, persistenceConsent) {
-  /** @const {!Location} */
-  const url = parseUrl(cid.ampdoc.win.location.href);
-  if (!isProxyOrigin(url)) {
-    return getOrCreateCookie(cid, getCidStruct, persistenceConsent);
-  }
-  return getBaseCid(cid, persistenceConsent)
-      .then(baseCid => {
-        return cryptoFor(cid.ampdoc.win).sha384Base64(
-            baseCid + getProxySourceOrigin(url) + getCidStruct.scope);
-      });
+export function optOutOfCid(ampdoc) {
+
+  // Tell the viewer that user has opted out.
+  viewerForDoc(ampdoc)./*OK*/sendMessage(CID_OPTOUT_VIEWER_MESSAGE, dict());
+
+  // Store the optout bit in storage
+  return storageForDoc(ampdoc).then(storage => {
+    return storage.set(CID_OPTOUT_STORAGE_KEY, true);
+  });
+}
+
+/**
+ * Whether user has opted out of Cid issuance for all scopes.
+ *
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @return {!Promise<boolean>}
+ * @visibleForTesting
+ */
+export function isOptedOutOfCid(ampdoc) {
+  return storageForDoc(ampdoc).then(storage => {
+    return storage.get(CID_OPTOUT_STORAGE_KEY).then(val => !!val);
+  }).catch(() => {
+    // If we fail to read the flag, assume not opted out.
+    return false;
+  });
 }
 
 /**
@@ -310,7 +392,7 @@ export function viewerBaseCid(ampdoc, opt_data) {
     if (!trusted) {
       return undefined;
     }
-    const cidPromise = viewer.sendMessageAwaitResponse('cid', opt_data)
+    return viewer.sendMessageAwaitResponse('cid', opt_data)
         .then(data => {
           // TODO(dvoytenko, #9019): cleanup the legacy CID format.
           // For backward compatibility: #4029
@@ -322,14 +404,6 @@ export function viewerBaseCid(ampdoc, opt_data) {
             }));
           }
           return data;
-        });
-    // Getting the CID may take some time (waits for JS file to
-    // load, might hit GC), but we do not wait indefinitely. Typically
-    // it should resolve in milli seconds.
-    return timerFor(ampdoc.win).timeoutPromise(10000, cidPromise, 'base cid')
-        .catch(error => {
-          rethrowAsync(error);
-          return undefined;
         });
   });
 }
@@ -423,6 +497,12 @@ function getEntropy(win) {
       win.Math.random() + win.screen.width + win.screen.height);
 }
 
+/**
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ */
+export function installCidService(ampdoc) {
+  return registerServiceBuilderForDoc(ampdoc, 'cid', Cid);
+}
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc

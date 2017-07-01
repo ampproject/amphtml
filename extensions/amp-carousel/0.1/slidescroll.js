@@ -211,7 +211,7 @@ export class AmpSlideScroll extends BaseSlides {
       if (args) {
         this.showSlideWhenReady(args['index']);
       }
-    }, ActionTrust.LOW);
+    }, ActionTrust.MEDIUM); // TODO(choumx, #9699): LOW.
   }
 
   /** @override */
@@ -284,6 +284,12 @@ export class AmpSlideScroll extends BaseSlides {
       this.showSlide_(this.initialSlideIndex_);
     }
     return Promise.resolve();
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    this.slideIndex_ = null;
+    return super.unlayoutCallback();
   }
 
   /** @override */

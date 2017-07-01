@@ -51,6 +51,7 @@ import {
   hasRenderDelayingServices,
 } from './render-delaying-services';
 import {installActionServiceForDoc} from './service/action-impl';
+import {installCidService} from './service/cid-impl';
 import {installCryptoService} from './service/crypto-impl';
 import {installDocumentInfoServiceForDoc} from './service/document-info-impl';
 import {installGlobalClickListenerForDoc} from './service/document-click';
@@ -96,21 +97,6 @@ import * as config from './config';
 initLogConstructor();
 setReportError(reportError);
 
-/**
- * - n is the name.
- * - f is the function body of the extension.
- * - p is the priority. Only supported value is "high".
- *   high means, that the extension is not subject to chunking.
- *   This should be used for work, that should always happen
- *   as early as possible. Currently this is primarily used
- *   for viewer communication setup.
- * @typedef {{
- *   n: string,
- *   f: function(!Object),
- *   p: (string|undefined),
- * }}
- */
-let ExtensionPayloadDef;
 
 /** @const @private {string} */
 const TAG = 'runtime';
@@ -139,6 +125,7 @@ export function installRuntimeServices(global) {
  * @param {!Object<string, string>=} opt_initParams
  */
 export function installAmpdocServices(ampdoc, opt_initParams) {
+  installCidService(ampdoc);
   installDocumentInfoServiceForDoc(ampdoc);
   installViewerServiceForDoc(ampdoc, opt_initParams);
   installViewportServiceForDoc(ampdoc);
@@ -189,7 +176,7 @@ function adoptShared(global, opts, callback) {
   global.AMP_TAG = true;
   // If there is already a global AMP object we assume it is an array
   // of functions
-  /** @const {!Array<function(!Object)|ExtensionPayloadDef>} */
+  /** @const {!Array<function(!Object)|ExtensionPayload>} */
   const preregisteredExtensions = global.AMP || [];
 
   installExtensionsService(global);
@@ -277,7 +264,7 @@ function adoptShared(global, opts, callback) {
   callback(global, extensions);
 
   /**
-   * @param {function(!Object)|ExtensionPayloadDef} fnOrStruct
+   * @param {function(!Object)|ExtensionPayload} fnOrStruct
    */
   function installExtension(fnOrStruct) {
     const register = () => {
@@ -340,7 +327,7 @@ function adoptShared(global, opts, callback) {
   maybePumpEarlyFrame(global, () => {
     /**
      * Registers a new custom element.
-     * @param {function(!Object)|ExtensionPayloadDef} fnOrStruct
+     * @param {function(!Object)|ExtensionPayload} fnOrStruct
      */
     global.AMP.push = function(fnOrStruct) {
       if (maybeLoadCorrectVersion(global, fnOrStruct)) {
@@ -1061,7 +1048,7 @@ export function registerElementForTesting(win, elementName) {
  * to have the same AMP release version.
  *
  * @param {!Window} win
- * @param {function(!Object)|ExtensionPayloadDef} fnOrStruct
+ * @param {function(!Object)|ExtensionPayload} fnOrStruct
  * @return {boolean}
  */
 function maybeLoadCorrectVersion(win, fnOrStruct) {

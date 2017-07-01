@@ -747,7 +747,7 @@ function elementExtractor(tagName, type) {
       'gm');
 }
 
-// Data for example: http://localhost:8000/examples/bind/xhr.amp.max.html
+// Data for example: http://localhost:8000/examples/bind/xhr.amp.html
 app.use('/bind/form/get', (req, res) => {
   assertCors(req, res, ['GET']);
   res.json({
@@ -755,7 +755,7 @@ app.use('/bind/form/get', (req, res) => {
   });
 });
 
-// Data for example: http://localhost:8000/examples/bind/ecommerce.amp.max.html
+// Data for example: http://localhost:8000/examples/bind/ecommerce.amp.html
 app.use('/bind/ecommerce/sizes', (req, res) => {
   assertCors(req, res, ['GET']);
   setTimeout(() => {
@@ -1019,6 +1019,17 @@ app.get('/dist/diversions', (req, res) => {
  * Web worker binary.
  */
 app.get('/dist/ww(.max)?.js', (req, res) => {
+  fs.readFileAsync(pc.cwd() + req.path).then(file => {
+    res.setHeader('Content-Type', 'text/javascript');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.end(file);
+  });
+});
+
+/**
+ * Validator JS binary. Requires that validator/build.py was run.
+ */
+app.get('/validator/dist/validator_minified.js', (req, res) => {
   fs.readFileAsync(pc.cwd() + req.path).then(file => {
     res.setHeader('Content-Type', 'text/javascript');
     res.setHeader('Access-Control-Allow-Origin', '*');

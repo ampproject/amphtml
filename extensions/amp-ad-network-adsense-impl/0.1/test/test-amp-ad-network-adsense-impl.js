@@ -44,6 +44,7 @@ import {
   ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
   AdSenseAmpAutoAdsHoldoutBranches,
 } from '../../../../ads/google/adsense-amp-auto-ads';
+import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
 
 function createAdsenseImplElement(attributes, opt_doc, opt_tag) {
   const doc = opt_doc || document;
@@ -90,6 +91,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
       element.appendChild(iframe);
       document.body.appendChild(element);
       impl = new AmpAdNetworkAdsenseImpl(element);
+      impl.buildCallback();
       impl.iframe = iframe;
       return fixture;
     });
@@ -337,7 +339,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
               has() { return false; },
             }).then(adResponse => {
               expect(adResponse).to.deep.equal(
-                  {creative, signature: null, size: null});
+                  {creative, signature: null});
               expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be
                   .called;
             });
@@ -356,8 +358,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
               },
             }).then(adResponse => {
               expect(adResponse).to.deep.equal(
-                  {creative, signature: base64UrlDecodeToBytes('AQAB'),
-                    size: null});
+                  {creative, signature: base64UrlDecodeToBytes('AQAB')});
               expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be
                   .called;
             });
@@ -387,7 +388,6 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
                   {
                     creative,
                     signature: base64UrlDecodeToBytes('AQAB'),
-                    size: null,
                   });
               expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
             // exact value of ampAnalyticsConfig_ covered in
@@ -711,5 +711,27 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
                 .equal(String(Number(slotIdBefore) + 1));
           });
         });
+  });
+
+  describe('#delayAdRequestEnabled', () => {
+    let impl;
+    beforeEach(() => {
+      return createIframePromise().then(f => {
+        setupForAdTesting(f);
+        impl = new AmpAdNetworkAdsenseImpl(
+          createElementWithAttributes(f.doc, 'amp-ad', {
+            type: 'adsense',
+          }));
+      });
+    });
+
+    it('should return true if in experiment', () => {
+      impl.element.setAttribute(EXPERIMENT_ATTRIBUTE, '117152655');
+      expect(impl.delayAdRequestEnabled()).to.be.true;
+    });
+
+    it('should return false if not in experiment', () => {
+      expect(impl.delayAdRequestEnabled()).to.be.false;
+    });
   });
 });

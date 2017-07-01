@@ -57,7 +57,8 @@ export function accessServiceForDocOrNull(nodeOrDoc) {
  */
 export function actionServiceForDoc(nodeOrDoc) {
   return /** @type {!./service/action-impl.ActionService} */ (
-      getExistingServiceForDocInEmbedScope(nodeOrDoc, 'action'));
+      getExistingServiceForDocInEmbedScope(
+          nodeOrDoc, 'action', /* opt_fallbackToTopWin */ true));
 }
 
 /**
@@ -93,18 +94,7 @@ export function bindForDoc(nodeOrDoc) {
  */
 export function cidForDoc(nodeOrDoc) {
   return /** @type {!Promise<!./service/cid-impl.Cid>} */ ( // eslint-disable-line max-len
-      getElementServiceForDoc(nodeOrDoc, 'cid', 'amp-analytics'));
-}
-
-/**
- * Returns a promise for the CID service or a promise for null if the service
- * is not available on the current page.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!Promise<!./service/cid-impl.Cid>}
- */
-export function cidForDocOrNull(nodeOrDoc) {
-  return /** @type {!Promise<!./service/cid-impl.Cid>} */ ( // eslint-disable-line max-len
-      getElementServiceIfAvailableForDoc(nodeOrDoc, 'cid', 'amp-analytics'));
+      getServicePromiseForDoc(nodeOrDoc, 'cid'));
 }
 
 /**
@@ -232,17 +222,18 @@ export function timerFor(window) {
  */
 export function urlReplacementsForDoc(nodeOrDoc) {
   return /** @type {!./service/url-replacements-impl.UrlReplacements} */ (
-      getExistingServiceForDocInEmbedScope(nodeOrDoc, 'url-replace'));
+      getExistingServiceForDocInEmbedScope(
+          nodeOrDoc, 'url-replace', /* opt_fallbackToTopWin */ true));
 }
 
 /**
  * @param {!Window} window
- * @return {!Promise<!UserNotificationManager>}
+ * @return {!Promise<!../extensions/amp-user-notification/0.1/amp-user-notification.UserNotificationManager>}
  */
 export function userNotificationManagerFor(window) {
-  return /** @type {!Promise<!UserNotificationManager>} */ (
-      getElementService(window, 'userNotificationManager',
-          'amp-user-notification'));
+  return (/** @type {!Promise<!../extensions/amp-user-notification/0.1/amp-user-notification.UserNotificationManager>} */
+      (getElementService(window, 'userNotificationManager',
+          'amp-user-notification')));
 }
 
 /**

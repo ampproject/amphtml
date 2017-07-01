@@ -29,7 +29,6 @@ import {toggle} from '../../../src/style';
 import {isEnumValue} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {Activity} from './activity-impl';
-import {Cid} from '../../../src/service/cid-impl';
 import {
     InstrumentationService,
     instrumentationServicePromiseForDoc,
@@ -47,7 +46,6 @@ import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 AMP.registerServiceForDoc(
     'amp-analytics-instrumentation', InstrumentationService);
 AMP.registerServiceForDoc('activity', Activity);
-AMP.registerServiceForDoc('cid', Cid);
 
 installVariableService(AMP.win);
 
@@ -147,7 +145,8 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     if (this.consentNotificationId_ != null) {
       this.consentPromise_ = userNotificationManagerFor(this.win)
-          .then(service => service.get(this.consentNotificationId_));
+          .then(service => service.get(dev().assertString(
+              this.consentNotificationId_)));
     }
 
     if (this.element.getAttribute('trigger') == 'immediate') {

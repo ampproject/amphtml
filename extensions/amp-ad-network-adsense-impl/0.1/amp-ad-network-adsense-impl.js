@@ -23,6 +23,7 @@
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {
   isInManualExperiment,
+  isInExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {isExperimentOn} from '../../../src/experiments';
 import {
@@ -131,6 +132,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
+  delayAdRequestEnabled() {
+    return isInExperiment(this.element, '117152655');
+  }
+
+  /** @override */
   getAdUrl() {
     // TODO: Check for required and allowed parameters. Probably use
     // validateData, from 3p/3p/js, after moving it someplace common.
@@ -206,11 +212,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       // Load amp-analytics extensions
       this.extensions_./*OK*/loadExtension('amp-analytics');
     }
-    return extractGoogleAdCreativeAndSignature(responseText, responseHeaders)
-        .then(adResponse => {
-          adResponse.size = this.size_;
-          return Promise.resolve(adResponse);
-        });
+    return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
+  }
+
+  /** @override */
+  extractSize(unusedResponseHeaders) {
+    return this.size_;
   }
 
   /**

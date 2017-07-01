@@ -34,6 +34,10 @@ import {
   resetSraStateForTesting,
 } from '../amp-ad-network-doubleclick-impl';
 import {
+  DOUBLECLICK_A4A_EXPERIMENT_NAME,
+  DOUBLECLICK_EXPERIMENT_FEATURE,
+} from '../doubleclick-a4a-config';
+import {
   MANUAL_EXPERIMENT_ID,
 } from '../../../../ads/google/a4a/traffic-experiments';
 import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
@@ -42,7 +46,10 @@ import {utf8Encode} from '../../../../src/utils/bytes';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {BaseElement} from '../../../../src/base-element';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {toggleExperiment} from '../../../../src/experiments';
+import {
+  toggleExperiment,
+  forceExperimentBranch,
+} from '../../../../src/experiments';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {Xhr, FetchResponseHeaders} from '../../../../src/service/xhr-impl';
@@ -151,68 +158,74 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     });
 
     it('without signature', () => {
+      const headers = {
+        get() {
+          return undefined;
+        },
+        has() {
+          return false;
+        },
+      };
       return utf8Encode('some creative').then(creative => {
-        return impl.extractCreativeAndSignature(
-            creative,
-            {
-              get() { return undefined; },
-              has() { return false; },
-            }).then(adResponse => {
-              expect(adResponse).to.deep.equal(
-                  {creative, signature: null, size});
-              expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be
-                  .called;
+        return impl.extractCreativeAndSignature(creative, headers)
+            .then(adResponse => {
+              expect(adResponse).to.deep.equal({creative, signature: null});
+              expect(impl.extractSize(headers)).to.deep.equal(size);
+              expect(loadExtensionSpy.withArgs('amp-analytics'))
+                  .to.not.be.called;
             });
       });
     });
     it('with signature', () => {
       return utf8Encode('some creative').then(creative => {
-        return impl.extractCreativeAndSignature(
-            creative,
-            {
-              get(name) {
-                return name == 'X-AmpAdSignature' ? 'AQAB' : undefined;
-              },
-              has(name) {
-                return name === 'X-AmpAdSignature';
-              },
-            }).then(adResponse => {
-              expect(adResponse).to.deep.equal(
-              {creative, signature: base64UrlDecodeToBytes('AQAB'), size});
-              expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be
-                  .called;
+        const headers = {
+          get(name) {
+            return name == 'X-AmpAdSignature' ? 'AQAB' : undefined;
+          },
+          has(name) {
+            return name === 'X-AmpAdSignature';
+          },
+        };
+        return impl.extractCreativeAndSignature(creative, headers)
+            .then(adResponse => {
+              expect(adResponse).to.deep.equal({
+                creative,
+                signature: base64UrlDecodeToBytes('AQAB'),
+              });
+              expect(impl.extractSize(headers)).to.deep.equal(size);
+              expect(loadExtensionSpy.withArgs('amp-analytics'))
+                  .to.not.be.called;
             });
       });
     });
     it('with analytics', () => {
       return utf8Encode('some creative').then(creative => {
         const url = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
-        return impl.extractCreativeAndSignature(
-            creative,
-            {
-              get(name) {
-                switch (name) {
-                  case 'X-AmpAnalytics':
-                    return JSON.stringify({url});
-                  case 'X-AmpAdSignature':
-                    return 'AQAB';
-                  default:
-                    return undefined;
-                }
-              },
-              has(name) {
-                return !!this.get(name);
-              },
-            }).then(adResponse => {
-              expect(adResponse).to.deep.equal(
-                  {
-                    creative,
-                    signature: base64UrlDecodeToBytes('AQAB'),
-                    size,
-                  });
+        const headers = {
+          get(name) {
+            switch (name) {
+              case 'X-AmpAnalytics':
+                return JSON.stringify({url});
+              case 'X-AmpAdSignature':
+                return 'AQAB';
+              default:
+                return undefined;
+            }
+          },
+          has(name) {
+            return !!this.get(name);
+          },
+        };
+        return impl.extractCreativeAndSignature(creative, headers)
+            .then(adResponse => {
+              expect(adResponse).to.deep.equal({
+                creative,
+                signature: base64UrlDecodeToBytes('AQAB'),
+              });
+              expect(impl.extractSize(headers)).to.deep.equal(size);
               expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
-            // exact value of ampAnalyticsConfig covered in
-            // ads/google/test/test-utils.js
+              // exact value of ampAnalyticsConfig covered in
+              // ads/google/test/test-utils.js
             });
       });
     });
@@ -494,6 +507,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
             width: '300',
             height: '150',
           }).then(() => {
+            impl.buildCallback();
             const slotIdBefore = impl.element.getAttribute(
                 'data-amp-slot-index');
 
@@ -543,6 +557,80 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         element.setAttribute('data-slot', slotName);
         expect(getNetworkId(element)).to.equal(testValues[slotName]);
       });
+    });
+  });
+
+  describe('#SRA enabled', () => {
+    let fixture;
+
+    beforeEach(() => {
+      return createIframePromise().then(f => {
+        setupForAdTesting(f);
+        fixture = f;
+      });
+    });
+
+    it('should be disabled by default', () => {
+      const element = createElementWithAttributes(
+          fixture.doc, 'amp-ad', {
+            type: 'doubleclick',
+            height: 320,
+            width: 50,
+          });
+      fixture.doc.body.appendChild(element);
+      const impl = new AmpAdNetworkDoubleclickImpl(element);
+      expect(impl.useSra).to.be.false;
+    });
+
+    it('should be enabled if meta tag present', () => {
+      const metaElement = createElementWithAttributes(fixture.doc, 'meta', {
+        name: 'amp-ad-doubleclick-sra',
+      });
+      fixture.doc.head.appendChild(metaElement);
+      const element = createElementWithAttributes(
+          fixture.doc, 'amp-ad', {
+            type: 'doubleclick',
+            height: 320,
+            width: 50,
+          });
+      fixture.doc.body.appendChild(element);
+      const impl = new AmpAdNetworkDoubleclickImpl(element);
+      expect(impl.useSra).to.be.true;
+    });
+  });
+
+  describe('#SRA AMP creative unlayoutCallback', () => {
+    let impl;
+
+    beforeEach(() => {
+      return createIframePromise().then(f => {
+        setupForAdTesting(f);
+        const element = createElementWithAttributes(
+            f.doc, 'amp-ad', {
+              type: 'doubleclick',
+              height: 320,
+              width: 50,
+              'data-a4a-upgrade-type': 'amp-ad-network-doubleclick-impl',
+            });
+        f.doc.body.appendChild(element);
+        const iframe = createElementWithAttributes(
+            f.doc, 'iframe', {
+              src: 'https://foo.com',
+              height: 320,
+              width: 50,
+            });
+        element.appendChild(iframe);
+        impl = new AmpAdNetworkDoubleclickImpl(element);
+      });
+    });
+
+    it('should not remove if not SRA', () => {
+      expect(impl.shouldUnlayoutAmpCreatives()).to.be.false;
+    });
+
+    it('should remove if SRA and has frame', () => {
+      impl.useSra = true;
+      expect(impl.shouldUnlayoutAmpCreatives()).to.be.true;
     });
   });
 
@@ -637,7 +725,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       element.getIntersectionChangeEntry = () => {return null;};
       doc.body.appendChild(element);
       const impl = new AmpAdNetworkDoubleclickImpl(element);
-      impl.useSra_ = true;
+      impl.useSra = true;
       return impl;
     }
 
@@ -746,8 +834,8 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           for (let i = 0; i < instanceCount; i++) {
             const impl = createA4aSraInstance(network.networkId);
             doubleclickInstances.push(impl);
+            sandbox.stub(impl, 'isValidElement').returns(!invalid);
             if (invalid) {
-              sandbox.stub(impl, 'isValidElement').returns(false);
               impl.element.setAttribute('data-test-invalid', 'true');
             }
           }
@@ -874,5 +962,28 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     it('should handle mixture of all possible scenarios', () => executeTest(
         [1234, 1234, 101, {networkId: 4567, instances: 2, xhrFail: true}, 202,
         {networkId: 8901, instances: 3, invalidInstances: 1}]));
+  });
+
+  describe('#delayAdRequestEnabled', () => {
+    let impl;
+    beforeEach(() => {
+      return createIframePromise().then(f => {
+        setupForAdTesting(f);
+        impl = new AmpAdNetworkDoubleclickImpl(
+          createElementWithAttributes(f.doc, 'amp-ad', {
+            type: 'doubleclick',
+          }));
+      });
+    });
+
+    it('should return true if in experiment', () => {
+      forceExperimentBranch(impl.win, DOUBLECLICK_A4A_EXPERIMENT_NAME,
+          DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST);
+      expect(impl.delayAdRequestEnabled()).to.be.true;
+    });
+
+    it('should return false if not in experiment', () => {
+      expect(impl.delayAdRequestEnabled()).to.be.false;
+    });
   });
 });
