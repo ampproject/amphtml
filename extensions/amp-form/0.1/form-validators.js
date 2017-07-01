@@ -370,7 +370,7 @@ export function getFormValidator(form) {
  */
 function isReportValiditySupported(doc) {
   if (doc && reportValiditySupported === undefined) {
-    reportValiditySupported = !!document.createElement('form').reportValidity;
+    reportValiditySupported = !!doc.createElement('form').reportValidity;
   }
   return !!reportValiditySupported;
 }

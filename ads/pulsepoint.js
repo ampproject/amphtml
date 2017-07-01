@@ -68,7 +68,7 @@ function headerBidding(global, data) {
         });
       },
     };
-    new window.PulsePointHeaderTag(hbConfig).init();
+    new global.PulsePointHeaderTag(hbConfig).init();
   });
 }
 

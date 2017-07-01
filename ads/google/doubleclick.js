@@ -233,7 +233,7 @@ function doubleClickWithGlade(global, data, gladeExperiment) {
     global.context.renderStart();
   });
 
-  window.glade = {correlator: getCorrelator(global)};
+  global.glade = {correlator: getCorrelator(global)};
   loadScript(global, 'https://securepubads.g.doubleclick.net/static/glade.js');
 }
 

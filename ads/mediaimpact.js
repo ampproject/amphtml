@@ -40,7 +40,7 @@ export function mediaimpact(global, data) {
       global.context.noContentAvailable();
     }
   };
-  window.addEventListener('load', function() {
+  global.addEventListener('load', function() {
     asmi.sas.call(data.site + '/(' + data.page + ')',
         data.format,
         data.target + ';googleAMP=1;',
@@ -54,11 +54,13 @@ export function mediaimpact(global, data) {
     view: 'm',
     async: true,
   };
-  loadScript(global, 'https://ec-ns.sascdn.com/diff/251/pages/amp_default.js', () => {
-    if (!document.getElementById('sas_' + data.slot.replace('sas_',''))) {
-      const adContainer = global.document.createElement('div');
-      adContainer.id = 'sas_' + data.slot.replace('sas_','');
-      global.document.body.appendChild(adContainer);
-    }
-  });
+  loadScript(global, 'https://ec-ns.sascdn.com/diff/251/pages/amp_default.js',
+      () => {
+        const id = 'sas_' + data.slot.replace('sas_','');
+        if (!global.document.getElementById(id)) {
+          const adContainer = global.document.createElement('div');
+          adContainer.id = id;
+          global.document.body.appendChild(adContainer);
+        }
+      });
 }

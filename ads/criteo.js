@@ -27,7 +27,7 @@ export function criteo(global, data) {
   loadScript(global, 'https://static.criteo.net/js/ld/publishertag.js', () => {
     if (data.tagtype === 'rta') {
       // Make sure RTA is called only once
-      computeInMasterFrame(window, 'call-rta', resultCallback => {
+      computeInMasterFrame(global, 'call-rta', resultCallback => {
         const params = {
           networkid: data.networkid,
           cookiename:

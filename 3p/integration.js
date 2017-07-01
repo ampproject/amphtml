@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -621,7 +621,7 @@ function observeIntersection(observerCallback) {
  * @param {!Window} global
  */
 function updateVisibilityState(global) {
-  listenParent(window, 'embed-state', function(data) {
+  listenParent(global, 'embed-state', function(data) {
     global.context.hidden = data['pageHidden'];
     dispatchVisibilityChangeEvent(global, data['pageHidden']);
   });
@@ -821,6 +821,6 @@ function lightweightErrorReport(e, isCanary) {
       '?3p=1&v=' + encodeURIComponent('$internalRuntimeVersion$') +
       '&m=' + encodeURIComponent(e.message) +
       '&ca=' + (isCanary ? 1 : 0) +
-      '&r=' + encodeURIComponent(document.referrer) +
+      '&r=' + encodeURIComponent(window.document.referrer) +
       '&s=' + encodeURIComponent(e.stack || '');
 }

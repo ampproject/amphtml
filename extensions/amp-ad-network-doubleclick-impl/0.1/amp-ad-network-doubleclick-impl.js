@@ -81,7 +81,7 @@ const DOUBLECLICK_BASE_URL =
 const PAGE_LEVEL_PARAMS_ = {
   'gdfp_req': '1',
   'sfv': DEFAULT_SAFEFRAME_VERSION,
-  'u_sd': window.devicePixelRatio,
+  'u_sd': self.devicePixelRatio,
 };
 
 /**
@@ -237,7 +237,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return isGoogleAdsA4AValidEnvironment(this.win) &&
       this.isAmpAdElement() &&
       // Ensure not within remote.html iframe.
-      !document.querySelector('meta[name=amp-3p-iframe-src]');
+      !this.win.document.querySelector('meta[name=amp-3p-iframe-src]');
   }
 
   /** @override */

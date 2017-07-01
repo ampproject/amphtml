@@ -63,6 +63,7 @@ describe('alp-handler', () => {
       head: {
         appendChild: sandbox.spy(),
       },
+      createElement: document.createElement.bind(document),
     };
     win.document = doc;
     anchor = {

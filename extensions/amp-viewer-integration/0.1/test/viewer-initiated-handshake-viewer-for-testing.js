@@ -51,13 +51,13 @@ export class WebviewViewerForTesting {
     this.containerEl = containerEl;
 
     /** @type {Window} */
-    this.win = window;
+    this.win = self;
 
     /** @type {Element} */
-    this.iframe = document.createElement('iframe');
+    this.iframe = self.document.createElement('iframe');
     this.iframe.setAttribute('id', 'AMP_DOC_' + id);
 
-    const isIos_ = /iPhone|iPad|iPod/i.test(window.navigator.userAgent);
+    const isIos_ = /iPhone|iPad|iPod/i.test(self.navigator.userAgent);
     if (this.viewportType_ == 'natural' && !isIos_) {
       this.iframe.setAttribute('scrolling', 'yes');
     } else {
@@ -86,15 +86,15 @@ export class WebviewViewerForTesting {
       height: this.containerEl./*OK*/offsetHeight,
       visibilityState: this.visibilityState_,
       prerenderSize: 1,
-      origin: parseUrl(window.location.href).origin,
+      origin: parseUrl(self.location.href).origin,
       csi: 1,
       cap: 'foo,a2a,handshakepoll',
     };
 
     let ampdocUrl = this.ampdocUrl + '#' + serializeQueryString(params);
 
-    if (window.location.hash && window.location.hash.length > 1) {
-      ampdocUrl += '&' + window.location.hash.substring(1);
+    if (self.location.hash && self.location.hash.length > 1) {
+      ampdocUrl += '&' + self.location.hash.substring(1);
     }
     const parsedUrl = parseUrl(ampdocUrl);
     const url = parsedUrl.href;
@@ -119,12 +119,12 @@ export class WebviewViewerForTesting {
     const listener = function(e) {
       if (this.isChannelOpen_(e)) {
         //stop polling
-        window.clearInterval(this.pollingIntervalIds_[intervalCtr]);
-        window.removeEventListener('message', listener, false);
+        self.clearInterval(this.pollingIntervalIds_[intervalCtr]);
+        self.removeEventListener('message', listener, false);
         this.completeHandshake_(e.data.requestid);
       }
     };
-    window.addEventListener('message', listener.bind(this));
+    self.addEventListener('message', listener.bind(this));
 
     const message = {
       app: APP,

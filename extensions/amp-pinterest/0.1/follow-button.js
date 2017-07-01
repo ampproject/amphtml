@@ -49,7 +49,7 @@ export class FollowButton {
    */
   handleClick(event) {
     event.preventDefault();
-    openWindowDialog(window, this.href, 'pin' + Date.now(),
+    openWindowDialog(self, this.href, 'pin' + Date.now(),
         POP_FOLLOW);
     Util.log(`&type=button_follow&href=${this.href}`);
   }

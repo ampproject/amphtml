@@ -26,11 +26,11 @@ export function kiosked(global, data) {
   if (data.hasOwnProperty('scriptid')) {
     scriptId = data['scriptid'];
   }
-  window.addEventListener('kioskedAdRender', function() {
+  global.addEventListener('kioskedAdRender', function() {
     global.context.renderStart();
   }, false);
 
-  window.addEventListener('kioskedAdNoFill', function() {
+  global.addEventListener('kioskedAdNoFill', function() {
     global.context.noContentAvailable();
   }, false);
 

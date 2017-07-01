@@ -36,7 +36,7 @@ export function adhese(global, data) {
     }
   }
   targetParam += '?t=' + Date.now();
-  writeScript(window, 'https://ads-' + encodeURIComponent(data['account']) +
+  writeScript(global, 'https://ads-' + encodeURIComponent(data['account']) +
       '.adhese.com/' + encodeURIComponent(data['requestType']) + '/sl' +
       encodeURIComponent(data['location']) +
       encodeURIComponent(data['position']) + '-' +

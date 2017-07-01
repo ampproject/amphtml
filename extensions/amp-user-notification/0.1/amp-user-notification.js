@@ -133,8 +133,8 @@ export class AmpUserNotification extends AMP.BaseElement {
     this.urlReplacements_ = urlReplacementsForDoc(ampdoc);
     this.storagePromise_ = storageForDoc(ampdoc);
     if (!this.userNotificationManager_) {
-      installUserNotificationManager(window);
-      this.userNotificationManager_ = getService(window,
+      installUserNotificationManager(this.win);
+      this.userNotificationManager_ = getService(this.win,
           'userNotificationManager');
     }
 

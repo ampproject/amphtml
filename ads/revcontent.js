@@ -51,5 +51,5 @@ export function revcontent(global, data) {
 
   validateData(data, required, optional);
   global.data = data;
-  writeScript(window, endpoint);
+  writeScript(global, endpoint);
 }

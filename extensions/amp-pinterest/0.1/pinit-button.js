@@ -63,7 +63,7 @@ export class PinItButton {
    */
   handleClick(event) {
     event.preventDefault();
-    openWindowDialog(window, this.href, '_pinit', POP);
+    openWindowDialog(self, this.href, '_pinit', POP);
     Util.log('&type=button_pinit');
   }
 

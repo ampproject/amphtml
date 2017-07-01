@@ -169,7 +169,7 @@ export function warmupStatic(win) {
   // preconnects.
   new win.Image().src = `${urls.cdn}/preconnect.gif`;
   // Preload the primary AMP JS that is render blocking.
-  const linkRel = /*OK*/document.createElement('link');
+  const linkRel = win.document.createElement('link');
   linkRel.rel = 'preload';
   linkRel.setAttribute('as', 'script');
   linkRel.href = `${urls.cdn}/v0.js`;
@@ -190,10 +190,10 @@ export function warmupDynamic(e) {
   // Preloading with empty as and newly specced value `fetch` meaning the same
   // thing. `document` would be the right value, but this is not yet supported
   // in browsers.
-  const linkRel0 = /*OK*/document.createElement('link');
+  const linkRel0 = window.document.createElement('link');
   linkRel0.rel = 'preload';
   linkRel0.href = link.eventualUrl;
-  const linkRel1 = /*OK*/document.createElement('link');
+  const linkRel1 = window.document.createElement('link');
   linkRel1.rel = 'preload';
   linkRel1.as = 'fetch';
   linkRel1.href = link.eventualUrl;

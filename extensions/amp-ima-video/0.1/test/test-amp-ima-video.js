@@ -132,8 +132,8 @@ describe('amp-ima-video', () => {
         src: srcUrl,
         tag: adTagUrl,
       });
-      const mockGlobal = {};
-      mockGlobal.google = {
+      const global = iframe.win;
+      global.google = {
         ima: {
           ViewMode: {
             NORMAL: 'normal',
@@ -148,7 +148,7 @@ describe('amp-ima-video', () => {
       imaVideoObj.setAdsManagerForTesting(mockAdsManager);
       imaVideoObj.setVideoWidthAndHeightForTesting(100, 200);
 
-      imaVideoObj.playAds(mockGlobal);
+      imaVideoObj.playAds(global);
 
       expect(initSpy).to.be.calledWith(100, 200, 'normal');
       expect(startSpy).to.be.called;
@@ -214,24 +214,28 @@ describe('amp-ima-video', () => {
         tag: adTagUrl,
       });
       const mockAdsRenderingSettings = {};
-      const mockGlobal = {};
-      mockGlobal.google = {};
-      mockGlobal.google.ima = {};
-      mockGlobal.google.ima.AdsRenderingSettings = function() {
-        return mockAdsRenderingSettings;
-      };
-      mockGlobal.google.ima.UiElements = {
-        AD_ATTRIBUTION: 'adattr',
-        COUNTDOWN: 'countdown',
-      };
-      mockGlobal.google.ima.AdErrorEvent = {};
-      mockGlobal.google.ima.AdErrorEvent.Type = {
-        AD_ERROR: 'aderror',
-      };
-      mockGlobal.google.ima.AdEvent = {};
-      mockGlobal.google.ima.AdEvent.Type = {
-        CONTENT_PAUSE_REQUESTED: 'cpr',
-        CONTENT_RESUME_REQUESTED: 'crr',
+      const global = iframe.win;
+      global.google = {
+        ima: {
+          AdsRenderingSettings() {
+            return mockAdsRenderingSettings;
+          },
+          UiElements: {
+            AD_ATTRIBUTION: 'adattr',
+            COUNTDOWN: 'countdown',
+          },
+          AdErrorEvent: {
+            Type: {
+              AD_ERROR: 'aderror',
+            },
+          },
+          AdEvent: {
+            Type: {
+              CONTENT_PAUSE_REQUESTED: 'cpr',
+              CONTENT_RESUME_REQUESTED: 'crr',
+            },
+          },
+        },
       };
       const mockAdsManager = {
         addEventListener() {},
@@ -249,7 +253,7 @@ describe('amp-ima-video', () => {
       imaVideoObj.setVideoPlayerForTesting(mockVideoPlayer);
       imaVideoObj.setMuteAdsManagerOnLoadedForTesting(false);
 
-      imaVideoObj.onAdsManagerLoaded(mockGlobal, mockAdsManagerLoadedEvent);
+      imaVideoObj.onAdsManagerLoaded(global, mockAdsManagerLoadedEvent);
 
       expect(
           mockAdsRenderingSettings.restoreCustomPlaybackStateOnAdBreakComplete)
@@ -277,24 +281,28 @@ describe('amp-ima-video', () => {
         tag: adTagUrl,
       });
       const mockAdsRenderingSettings = {};
-      const mockGlobal = {};
-      mockGlobal.google = {};
-      mockGlobal.google.ima = {};
-      mockGlobal.google.ima.AdsRenderingSettings = function() {
-        return mockAdsRenderingSettings;
-      };
-      mockGlobal.google.ima.UiElements = {
-        AD_ATTRIBUTION: 'adattr',
-        COUNTDOWN: 'countdown',
-      };
-      mockGlobal.google.ima.AdErrorEvent = {};
-      mockGlobal.google.ima.AdErrorEvent.Type = {
-        AD_ERROR: 'aderror',
-      };
-      mockGlobal.google.ima.AdEvent = {};
-      mockGlobal.google.ima.AdEvent.Type = {
-        CONTENT_PAUSE_REQUESTED: 'cpr',
-        CONTENT_RESUME_REQUESTED: 'crr',
+      const global = iframe.win;
+      global.google = {
+        ima: {
+          AdsRenderingSettings() {
+            return mockAdsRenderingSettings;
+          },
+          UiElements: {
+            AD_ATTRIBUTION: 'adattr',
+            COUNTDOWN: 'countdown',
+          },
+          AdErrorEvent: {
+            Type: {
+              AD_ERROR: 'aderror',
+            },
+          },
+          AdEvent: {
+            Type: {
+              CONTENT_PAUSE_REQUESTED: 'cpr',
+              CONTENT_RESUME_REQUESTED: 'crr',
+            },
+          },
+        },
       };
       const mockAdsManager = {
         addEventListener() {},
@@ -313,7 +321,7 @@ describe('amp-ima-video', () => {
       imaVideoObj.setVideoPlayerForTesting(mockVideoPlayer);
       imaVideoObj.setMuteAdsManagerOnLoadedForTesting(true);
 
-      imaVideoObj.onAdsManagerLoaded(mockGlobal, mockAdsManagerLoadedEvent);
+      imaVideoObj.onAdsManagerLoaded(global, mockAdsManagerLoadedEvent);
 
       expect(
           mockAdsRenderingSettings.restoreCustomPlaybackStateOnAdBreakComplete)
@@ -433,8 +441,8 @@ describe('amp-ima-video', () => {
       imaVideoObj.setVideoPlayerForTesting(videoMock);
       const adsManagerMock = {};
       adsManagerMock.resize = function() {};
-      const mockGlobal = {};
-      mockGlobal.google = {
+      const global = iframe.win;
+      global.google = {
         ima: {
           ViewMode: {
             NORMAL: 'normal',
@@ -445,7 +453,7 @@ describe('amp-ima-video', () => {
       imaVideoObj.setAdsManagerDimensionsOnLoadForTesting(100, 200);
       imaVideoObj.setAdsManagerForTesting(adsManagerMock);
 
-      imaVideoObj.onContentPauseRequested(mockGlobal);
+      imaVideoObj.onContentPauseRequested(global);
 
       expect(resizeSpy).to.have.been.calledWith(100, 200, 'normal');
       expect(imaVideoObj.getPropertiesForTesting().adsManagerWidthOnLoad)

@@ -30,7 +30,8 @@ export function inmobi(global, data) {
     onError: code => {
       if (code == 'nfr') {
         global.context.noContentAvailable();
-        document.getElementById('my-ad-slot').style./*OK*/display = 'none';
+        global.document.getElementById('my-ad-slot').style./*OK*/display =
+            'none';
       }
     },
     onSuccess: () => {
@@ -40,6 +41,7 @@ export function inmobi(global, data) {
 
   writeScript(global, 'https://cf.cdn.inmobi.com/ad/inmobi.secure.js', () => {
     global.document.write('<div id=\'my-ad-slot\'></div>');
-    global._inmobi.getNewAd(document.getElementById('my-ad-slot'), inmobiConf);
+    global._inmobi.getNewAd(global.document.getElementById('my-ad-slot'),
+        inmobiConf);
   });
 }
