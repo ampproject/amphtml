@@ -134,6 +134,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     this.responsiveSizeChangePromise_ = null;
 
     /**
+     * For full-width responsive ads: whether the element has already been
+     * aligned to the edges of the viewport.
+     * @type {boolean}
+     * @private
+     */
+    this.responsiveAligned_ = false;
+
+    /**
      * The contents of the data-auto-format attribute, or empty string if the
      * attribute was not set.
      * @private {string}
@@ -178,7 +186,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     // Need to ensure these are numbers since width can be set to 'auto'.
     // Checking height just in case.
     this.size_ = isExperimentOn(this.win, 'as-use-attr-for-format')
-        && !isNaN(width) && width > 0 && !isNaN(height) && height > 0
+    && !isNaN(width) && width > 0 && !isNaN(height) && height > 0
         ? {width, height}
         : this.getIntersectionElementLayoutBox();
     const format = `${this.size_.width}x${this.size_.height}`;
