@@ -15,23 +15,19 @@
 #
 
 tags: {  # amp-layout
+  html_format: AMP
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-layout"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    requires_usage: DEPRECATED_WARNING
-    deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-anim>
+tags: {  # <amp-layout>
+  html_format: AMP
   tag_name: "AMP-LAYOUT"
-  disallowed_ancestor: "AMP-SIDEBAR"
   requires_extension: "amp-layout"
-  attrs: { name: "alt" }
-  attrs: { name: "attribution" }
-  attrs: { name: "controls" }
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-src-or-srcset"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-layout"
