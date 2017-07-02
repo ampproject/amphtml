@@ -18,6 +18,8 @@ import {AccessClientAdapter} from './amp-access-client';
 import {isExperimentOn} from '../../../src/experiments';
 import {isProxyOrigin, removeFragment} from '../../../src/url';
 import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {parseJson} from '../../../src/json';
 import {timerFor} from '../../../src/services';
 import {viewerForDoc} from '../../../src/services';
 import {vsyncFor} from '../../../src/services';
@@ -54,35 +56,35 @@ const TAG = 'amp-access-server';
  *            \/
  *    Apply authorization response
  *
- * @implements {AccessTypeAdapterDef}
+ * @implements {./amp-access.AccessTypeAdapterDef}
  */
 export class AccessServerAdapter {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} configJson
-   * @param {!AccessTypeAdapterContextDef} context
+   * @param {!./amp-access.AccessTypeAdapterContextDef} context
    */
   constructor(ampdoc, configJson, context) {
     /** @const */
     this.ampdoc = ampdoc;
 
-    /** @const @private {!AccessTypeAdapterContextDef} */
+    /** @const @private {!./amp-access.AccessTypeAdapterContextDef} */
     this.context_ = context;
 
     /** @private @const */
     this.clientAdapter_ = new AccessClientAdapter(ampdoc, configJson, context);
 
-    /** @private @const {!Viewer} */
+    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = viewerForDoc(ampdoc);
 
-    /** @const @private {!Xhr} */
+    /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = xhrFor(ampdoc.win);
 
-    /** @const @private {!Timer} */
+    /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = timerFor(ampdoc.win);
 
-    /** @const @private {!Vsync} */
+    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = vsyncFor(ampdoc.win);
 
     const stateElement = ampdoc.getRootNode().querySelector(
@@ -142,11 +144,11 @@ export class AccessServerAdapter {
           requestVars[k] = String(vars[k]);
         }
       }
-      const request = {
+      const request = dict({
         'url': removeFragment(this.ampdoc.win.location.href),
         'state': this.serverState_,
         'vars': requestVars,
-      };
+      });
       dev().fine(TAG, 'Authorization request: ', this.serviceUrl_, request);
       // Note that `application/x-www-form-urlencoded` is used to avoid
       // CORS preflight request.
@@ -165,7 +167,7 @@ export class AccessServerAdapter {
       const accessDataString = dev().assert(
           responseDoc.querySelector('script[id="amp-access-data"]'),
           'No authorization data available').textContent;
-      const accessData = JSON.parse(accessDataString);
+      const accessData = parseJson(accessDataString);
       dev().fine(TAG, '- access data: ', accessData);
 
       return this.replaceSections_(responseDoc).then(() => {

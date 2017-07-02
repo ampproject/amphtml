@@ -47,8 +47,8 @@ var extensionAliasFilePath = {};
 
 // Each extension and version must be listed individually here.
 declareExtension('amp-3q-player', '0.1', false);
-declareExtension('amp-access', '0.1', true, 'NO_TYPE_CHECK');
-declareExtension('amp-access-laterpay', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-access', '0.1', true);
+declareExtension('amp-access-laterpay', '0.1', true);
 declareExtension('amp-accordion', '0.1', false);
 declareExtension('amp-ad', '0.1', true);
 declareExtension('amp-ad-network-adsense-impl', 0.1, false);
@@ -144,12 +144,8 @@ declareExtensionVersionAlias(
  * @param {string} version E.g. 0.1
  * @param {boolean|!Object} hasCssOrOptions Whether the extension comes with CSS
  *   or an extension options object.
- * @param {string=} opt_noTypeCheck Whether not to check types.
- *     No new extension must pass this.
- * @param {!Array<string>=} opt_extraGlobs
  */
-function declareExtension(name, version, hasCssOrOptions, opt_noTypeCheck,
-    opt_extraGlobs) {
+function declareExtension(name, version, hasCssOrOptions) {
   var hasCss = false;
   var options = {};
   if (typeof hasCssOrOptions == 'boolean') {
@@ -161,9 +157,6 @@ function declareExtension(name, version, hasCssOrOptions, opt_noTypeCheck,
     name: name,
     version: version,
     hasCss: hasCss,
-    // Only grandfathered for access
-    noTypeCheck: (!!opt_noTypeCheck && /access/.test(name)),
-    extraGlobs: opt_extraGlobs,
   }, options);
 }
 

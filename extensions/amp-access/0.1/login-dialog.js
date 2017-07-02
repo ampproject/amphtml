@@ -15,12 +15,13 @@
  */
 
 import {getMode} from '../../../src/mode';
-import {listen} from '../../../src/event-helper';
+import {getData, listen} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {openWindowDialog} from '../../../src/dom';
 import {parseUrl} from '../../../src/url';
 import {viewerForDoc} from '../../../src/services';
 import {urls} from '../../../src/config';
+import {dict} from '../../../src/utils/object';
 
 /** @const */
 const TAG = 'amp-access-login';
@@ -71,11 +72,11 @@ export function getLoginUrl(ampdoc, urlOrPromise) {
  */
 class ViewerLoginDialog {
   /**
-   * @param {!Viewer} viewer
+   * @param {!../../../src/service/viewer-impl.Viewer} viewer
    * @param {string|!Promise<string>} urlOrPromise
    */
   constructor(viewer, urlOrPromise) {
-    /** @const {!Viewer} */
+    /** @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer = viewer;
 
     /** @const {string|!Promise<string>} */
@@ -107,9 +108,9 @@ class ViewerLoginDialog {
   open() {
     return this.getLoginUrl().then(loginUrl => {
       dev().fine(TAG, 'Open viewer dialog: ', loginUrl);
-      return this.viewer.sendMessageAwaitResponse('openDialog', {
+      return this.viewer.sendMessageAwaitResponse('openDialog', dict({
         'url': loginUrl,
-      });
+      }));
     });
   }
 
@@ -123,20 +124,20 @@ class ViewerLoginDialog {
 export class WebLoginDialog {
   /**
    * @param {!Window} win
-   * @param {!Viewer} viewer
+   * @param {!../../../src/service/viewer-impl.Viewer} viewer
    * @param {string|!Promise<string>} urlOrPromise
    */
   constructor(win, viewer, urlOrPromise) {
     /** @const {!Window} */
     this.win = win;
 
-    /** @const {!Viewer} */
+    /** @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer = viewer;
 
     /** @const {string|!Promise<string>} */
     this.urlOrPromise = urlOrPromise;
 
-    /** @private {?function(string)} */
+    /** @private {?function(?string)} */
     this.resolve_ = null;
 
     /** @private {?function(*)} */
@@ -151,7 +152,7 @@ export class WebLoginDialog {
     /** @private {?number} */
     this.heartbeatInterval_ = null;
 
-    /** @private {?Unlisten} */
+    /** @private {?UnlistenDef} */
     this.messageUnlisten_ = null;
   }
 
@@ -284,18 +285,18 @@ export class WebLoginDialog {
       if (e.origin != returnOrigin) {
         return;
       }
-      if (!e.data || e.data.sentinel != 'amp') {
+      if (!getData(e) || getData(e)['sentinel'] != 'amp') {
         return;
       }
-      dev().fine(TAG, 'Received message from dialog: ', e.data);
-      if (e.data.type == 'result') {
+      dev().fine(TAG, 'Received message from dialog: ', getData(e));
+      if (getData(e)['type'] == 'result') {
         if (this.dialog_) {
-          this.dialog_./*OK*/postMessage({
-            sentinel: 'amp',
-            type: 'result-ack',
-          }, returnOrigin);
+          this.dialog_./*OK*/postMessage(dict({
+            'sentinel': 'amp',
+            'type': 'result-ack',
+          }), returnOrigin);
         }
-        this.loginDone_(e.data.result);
+        this.loginDone_(getData(e)['result']);
       }
     });
   }
