@@ -14,18 +14,26 @@
  * limitations under the License.
  */
 
-// Returns a function, that, as long as it continues to be invoked, will not
-// be triggered. The function will be called after it stops being called for
-// N milliseconds. If `immediate` is passed, trigger the function on the
-// leading edge, instead of the trailing.
 
 import {rethrowAsync} from './../../../src/log';
+import {dict} from './../../../src/utils/object';
+import {parseJson} from './../../../src/json';
+import {getData} from './../../../src/event-helper';
 import {
   parseUrl,
   removeFragment,
   serializeQueryString,
 } from '../../../src/url';
 
+/**
+ * Returns a function, that, as long as it continues to be invoked, will not
+ * be triggered. The function will be called after it stops being called for
+ * N milliseconds. If `immediate` is passed, trigger the function on the
+ * leading edge, instead of the trailing.
+ * @param {Function} func
+ * @param {number} wait
+ * @param {boolean=} immediate
+ */
 export function debounce(func, wait, immediate) {
   let timeout;
   return function() {
@@ -44,8 +52,8 @@ export function debounce(func, wait, immediate) {
  *
  * Gets an element creator using a given document to create elements.
  * @export getElementCreator
- * @param {!Document} document
- * @returns {!Element}
+ * @param {Document} document
+ * @returns {!Function}
  */
 export function getElementCreator(document) {
   return function createElement(name, className, children) {
@@ -65,11 +73,10 @@ function appendChildren(element, children) {
 /**
  * Handles a message from element by a given message name
  *
- * @export {function} handleMessageByName
- * @param {!Element} element
+ * @param {Element} element
  * @param {!Event} event
  * @param {string} messageName
- * @param {function} handler
+ * @param {Function} handler
  */
 export function handleMessageByName(element, event, messageName, handler) {
   const isMessageFromElement = element.contentWindow === event.source;
@@ -80,12 +87,12 @@ export function handleMessageByName(element, event, messageName, handler) {
 }
 
 /**
- * @param {Object} event
- * @param {String} eventName
- * @param {function} handler
+ * @param {!Event} event
+ * @param {string} eventName
+ * @param {Function} handler
  */
 function handlePlaybuzzItemEvent(event, eventName, handler) {
-  const data = parsePlaybuzzEventData(event.data);
+  const data = parsePlaybuzzEventData(getData(event));
   if (data[eventName]) {
     handler(data[eventName]);
   }
@@ -95,8 +102,8 @@ function handlePlaybuzzItemEvent(event, eventName, handler) {
 /**
  * Parses Playbuzz Event Data
  *
- * @param {String|Object} data
- * @returns {Object} parsedObject
+ * @param {?JsonObject|string|undefined} data
+ * @returns {?JsonObject|undefined} parsedObject
  */
 function parsePlaybuzzEventData(data) {
   if (typeof data === 'object') {
@@ -105,40 +112,39 @@ function parsePlaybuzzEventData(data) {
   const err = 'error parsing json message from playbuzz item: ' + data;
   try {
     if (typeof data === 'string') {
-      return JSON.parse(data);
+      return parseJson(/** @type {string} */ (data));
     }
   }
   catch (e) {
     rethrowAsync('amp-playbuzz', err, e);
-    return {};
+    return dict({});
   }
 
   rethrowAsync('amp-playbuzz', err, data);
-  return {};
+  return dict({});
 }
 
 
 /**
- * @export {function} composeEmbedUrl
  * @param {Object} options
  * @returns {string} playbuzzEmbedUrl
  */
 export function composeEmbedUrl(options) {
-  const embedUrl = options.itemUrl + '?' + serializeQueryString({
-    feed: true,
-    implementation: 'amp',
-    src: options.itemUrl,
-    embedBy: '00000000-0000-0000-0000-000000000000',
-    game: options.relativeUrl,
-    comments: undefined,
-    useComments: options.displayComments,
-    gameInfo: options.displayItemInfo,
-    useShares: options.displayShareBar,
-    socialReferrer: false, //always false - will use parent url for sharing
-    height: 'auto', //must pass as is - if not, makes problems in trivia (iframe height scrolling)
-    parentUrl: options.parentUrl, //used for sharing
-    parentHost: options.parentHost,
-  });
+  const embedUrl = options.itemUrl + '?' + serializeQueryString(dict({
+    'feed': true,
+    'implementation': 'amp',
+    'src': options.itemUrl,
+    'embedBy': '00000000-0000-0000-0000-000000000000',
+    'game': options.relativeUrl,
+    'comments': undefined,
+    'useComments': options.displayComments,
+    'gameInfo': options.displayItemInfo,
+    'useShares': options.displayShareBar,
+    'socialReferrer': false, //always false - will use parent url for sharing
+    'height': 'auto', //must pass as is - if not, makes problems in trivia (iframe height scrolling)
+    'parentUrl': options.parentUrl, //used for sharing
+    'parentHost': options.parentHost,
+  }));
   return embedUrl;
 }
 

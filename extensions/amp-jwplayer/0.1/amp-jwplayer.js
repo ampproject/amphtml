@@ -34,7 +34,10 @@ class AmpJWPlayer extends AMP.BaseElement {
     this.iframe_ = null;
   }
 
-    /** @override */
+  /**
+   * @param {boolean=} onLayout
+   * @override
+   */
   preconnectCallback(onLayout) {
     // Host that serves player configuration and content redirects
     this.preconnect.url('https://content.jwplatform.com', onLayout);

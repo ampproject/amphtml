@@ -26,6 +26,20 @@ import * as tr from '../../../src/transition';
  */
 class AmpSlides extends AMP.BaseElement {
 
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+    /** @private {?Array<!Element>} */
+    this.slides_ = null;
+
+    /** @private {number} */
+    this.currentIndex_ = 0;
+
+    this.prevButton_ = null;
+
+    this.nextButton_ = null;
+  }
+
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
@@ -33,7 +47,6 @@ class AmpSlides extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @private {!Array<!Element>} */
     this.slides_ = this.getRealChildren();
     this.slides_.forEach((slide, i) => {
       this.setAsOwner(slide);
@@ -41,9 +54,6 @@ class AmpSlides extends AMP.BaseElement {
       st.setStyle(slide, 'display', i > 0 ? 'none' : 'block');
       this.applyFillContent(slide);
     });
-
-    /** @private {number} */
-    this.currentIndex_ = 0;
 
     this.prevButton_ = this.element.ownerDocument.createElement('button');
     this.prevButton_.textContent = '\u276E';
@@ -149,7 +159,7 @@ class AmpSlides extends AMP.BaseElement {
    * @param {!Element} oldSlide
    * @param {!Element} newSlide
    * @param {number} dir
-   * @return {!Transition}
+   * @return {!TransitionDef}
    */
   createTransition_(oldSlide, newSlide, dir) {
     const containerWidth = this.element./*OK*/offsetWidth;
