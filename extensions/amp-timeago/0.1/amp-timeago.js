@@ -33,8 +33,8 @@ export class AmpTimeAgo extends AMP.BaseElement {
     /** @private {string} */
     this.title_ = '';
 
-    /** @private {string} */
-    this.cutoff_ = '';
+    /** @private {?number} */
+    this.cutoff_ = null;
   }
 
   /** @override */
@@ -46,7 +46,6 @@ export class AmpTimeAgo extends AMP.BaseElement {
     this.locale_ = this.element.getAttribute('locale') ||
       this.win.document.documentElement.lang;
     this.title_ = this.element.textContent;
-    this.cutoff_ = parseInt(this.element.getAttribute('cutoff'), 10);
 
     this.element.title = this.title_;
     this.element.textContent = '';
@@ -54,18 +53,17 @@ export class AmpTimeAgo extends AMP.BaseElement {
     const timeElement = document.createElement('time');
     timeElement.setAttribute('datetime', this.datetime_);
 
-    if (this.cutoff_) {
+    if (this.element.hasAttribute('cutoff')) {
+      this.cutoff_ = parseInt(this.element.getAttribute('cutoff'), 10);
       const elDate = new Date(this.datetime_);
       const secondsAgo = Math.floor((Date.now() - elDate.getTime()) / 1000);
 
       if (secondsAgo > this.cutoff_) {
         timeElement.textContent = this.title_;
-      }
-      else {
+      } else {
         timeElement.textContent = timeago(this.datetime_, this.locale_);
       }
-    }
-    else {
+    } else {
       timeElement.textContent = timeago(this.datetime_, this.locale_);
     }
 

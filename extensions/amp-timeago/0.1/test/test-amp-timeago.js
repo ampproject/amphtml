@@ -43,7 +43,7 @@ describes.realWin('amp-timeago', {
     expect(timeElement.textContent).to.equal('2 days ago');
   });
 
-  it('should display original date when built', () => {
+  it('should display original date when older than cutoff', () => {
     const date = new Date('2017-01-01');
     element.setAttribute('datetime', date.toISOString());
     element.textContent = 'Sunday 1 January 2017';

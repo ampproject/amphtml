@@ -36,7 +36,10 @@ tags: {  # <amp-timeago>
     value_regex: "\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d(:[0-5]\\d(\\.\\d+)?)?Z"
   }
   attrs: { name: "locale" }
-  attrs: { name: "cutoff" }
+  attrs: {
+    name: "cutoff"
+    value_regex: "\\d+"
+  }
   attr_lists: "extended-amp-global"
   cdata: {
     # Regex: \s*[\w.,:/+-]+(\s*[\w.,:/+-]+)*\s*
