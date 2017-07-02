@@ -51,7 +51,10 @@ import {PinWidget} from './pin-widget';
  */
 class AmpPinterest extends AMP.BaseElement {
 
-  /** @override */
+  /**
+   * @param {boolean=} onLayout
+   * @override
+   */
   preconnectCallback(onLayout) {
     // preconnect to widget APIpinMedia
     this.preconnect.url('https://widgets.pinterest.com', onLayout);

@@ -40,7 +40,8 @@ export class FollowButton {
         'The data-label attribute is required for follow buttons');
     this.element = rootElement;
     this.label = rootElement.getAttribute('data-label');
-    this.href = assertHttpsUrl(rootElement.getAttribute('data-href'));
+    this.href = assertHttpsUrl(rootElement.getAttribute('data-href'),
+        rootElement);
   }
 
   /**

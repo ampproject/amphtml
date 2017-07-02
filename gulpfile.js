@@ -46,7 +46,6 @@ var extensions = {};
 var extensionAliasFilePath = {};
 
 // Each extension and version must be listed individually here.
-// NOTE: No new extensions must pass the NO_TYPE_CHECK argument.
 declareExtension('amp-3q-player', '0.1', false);
 declareExtension('amp-access', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-access-laterpay', '0.1', true, 'NO_TYPE_CHECK');
@@ -95,17 +94,17 @@ declareExtension('amp-imgur', '0.1', false);
 declareExtension('amp-instagram', '0.1', true);
 declareExtension('amp-install-serviceworker', '0.1', false);
 declareExtension('amp-izlesene', '0.1', false);
-declareExtension('amp-jwplayer', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-jwplayer', '0.1', false);
 declareExtension('amp-lightbox', '0.1', true);
 declareExtension('amp-lightbox-viewer', '0.1', true);
 declareExtension('amp-list', '0.1', false);
 declareExtension('amp-live-list', '0.1', true);
 declareExtension('amp-mustache', '0.1', false);
 declareExtension('amp-nexxtv-player', '0.1', false);
-declareExtension('amp-o2-player', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-o2-player', '0.1', false);
 declareExtension('amp-ooyala-player', '0.1', false);
-declareExtension('amp-pinterest', '0.1', true, 'NO_TYPE_CHECK');
-declareExtension('amp-playbuzz', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-pinterest', '0.1', true);
+declareExtension('amp-playbuzz', '0.1', true);
 declareExtension('amp-reach-player', '0.1', false);
 declareExtension('amp-reddit', '0.1', false);
 declareExtension('amp-share-tracking', '0.1', false);
@@ -120,13 +119,13 @@ declareExtension('amp-selector', '0.1', true);
  * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
  * Please see {@link AmpCarousel} with `type=slides` attribute instead.
  */
-declareExtension('amp-slides', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-slides', '0.1', false);
 declareExtension('amp-social-share', '0.1', true);
 declareExtension('amp-timeago', '0.1', false);
 declareExtension('amp-twitter', '0.1', false);
 declareExtension('amp-user-notification', '0.1', true);
-declareExtension('amp-vimeo', '0.1', false, 'NO_TYPE_CHECK');
-declareExtension('amp-vine', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-vimeo', '0.1', false);
+declareExtension('amp-vine', '0.1', false);
 declareExtension('amp-viz-vega', '0.1', true);
 declareExtension('amp-google-vrview-image', '0.1', false);
 declareExtension('amp-viewer-integration', '0.1', {
@@ -162,7 +161,8 @@ function declareExtension(name, version, hasCssOrOptions, opt_noTypeCheck,
     name: name,
     version: version,
     hasCss: hasCss,
-    noTypeCheck: !!opt_noTypeCheck,
+    // Only grandfathered for access
+    noTypeCheck: (!!opt_noTypeCheck && /access/.test(name)),
     extraGlobs: opt_extraGlobs,
   }, options);
 }
