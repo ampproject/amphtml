@@ -36,16 +36,20 @@ export function map(opt_initial) {
 }
 
 /**
- * Returns a `map`, and will always return a at-dict like object.
- * The JsonObject type is just a simple object that is a dict.
+ * Return an empty JsonObject or makes the passed in object literal
+ * an JsonObject.
+ * The JsonObject type is just a simple object that is at-dict.
  * See
  * https://github.com/google/closure-compiler/wiki/@struct-and-@dict-Annotations
  * for what a dict is type-wise.
+ * The linter enforces that the argument is, in fact, at-dict like.
  * @param {!Object=} opt_initial
  * @return {!JsonObject}
  */
 export function dict(opt_initial) {
-  return /** @type {!JsonObject} */ (map(opt_initial));
+  // We do not copy. The linter enforces that the passed in object is a literal
+  // and thus the caller cannot have a reference to it.
+  return /** @type {!JsonObject} */ (opt_initial || {});
 }
 
 /**
