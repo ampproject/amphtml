@@ -65,25 +65,12 @@ export let LayoutMarginsChangeDef;
 *
 * Describes the relative position of an element to another (whether the
 * first is inside the second, on top of the second or on the bottom
-* @enum {number}
+* @enum {string}
 */
 export const RelativePositions = {
-  INSIDE: 0,
-  TOP: 1,
-  BOTTOM: 2,
-};
-
-/**
-* IntersectionStates
-*
-* Describes the spacial relation of an element to another (whether the
-* element is contained within another, partially overlapping or not overlapping
-* @enum {number}
-*/
-export const IntersectionStates = {
-  CONTAINED: 0,
-  PARTIAL_OVERLAP: 1,
-  DISJOINT: 2,
+  INSIDE: 'inside',
+  TOP: 'top',
+  BOTTOM: 'bottom',
 };
 
 /**
@@ -174,22 +161,6 @@ export function layoutRectsRelativePos(r1, r2) {
     return RelativePositions.BOTTOM;
   } else {
     return RelativePositions.INSIDE;
-  }
-}
-
-/**
- * Returns the position of r2 relative to r1
- * @param {!LayoutRectDef} r1
- * @param {!LayoutRectDef} r2
- * @return {IntersectionStates}
- */
-export function layoutRectsIntersectionState(r1, r2) {
-  if (r1.bottom < r2.top || r1.top > r2.bottom) {
-    return IntersectionStates.DISJOINT;
-  } else if (r1.bottom > r2.bottom || r1.top < r2.top) {
-    return IntersectionStates.PARTIAL_OVERLAP;
-  } else {
-    return IntersectionStates.CONTAINED;
   }
 }
 

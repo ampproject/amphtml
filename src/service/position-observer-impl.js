@@ -19,16 +19,12 @@ import {viewportForDoc, vsyncFor} from '../services';
 import {getMode} from '../mode';
 import {dev} from '../log';
 import {
-  rectIntersection,
   moveLayoutRect,
   layoutRectEquals,
   layoutRectsOverlap,
   layoutRectFromDomRect,
   layoutRectLtwh,
   layoutRectsRelativePos,
-  layoutRectsIntersectionState,
-  RelativePositions,
-  IntersectionStates,
 } from '../layout-rect';
 import {serializeMessage} from '../../src/3p-frame-messaging';
 import {parseJson, tryParseJson} from '../../src/json.js';
@@ -44,39 +40,13 @@ export const SEND_POSITIONS_HIGH_FIDELITY = 'send-positions-high-fidelity';
 export const POSITION_HIGH_FIDELITY = 'position-high-fidelity';
 
 /**
-* RelativeLocations
-*
-* Describes the relative position of an element to its viewport (whether the
-* element is inside the viewport, on top of the viewport or on the bottom
-* @enum {number}
-*/
-export const RelativeLocations = {
-  INSIDE: RelativePositions.INSIDE,
-  TOP: RelativePositions.TOP,
-  BOTTOM: RelativePositions.BOTTOM,
-};
-
-/**
-* VisibilityStates
-*
-* States used to describe whether the element is fully visible inside the
-* viewport, partially visible or out of view
-*
-* @enum {number}
-*/
-export const VisibilityStates = {
-  FULLY_VISIBLE: IntersectionStates.CONTAINED,
-  PARTIALLY_VISIBLE: IntersectionStates.PARTIAL_OVERLAP,
-  OUTSIDE_VIEW: IntersectionStates.DISJOINT,
-};
-
-/**
  * The positionObserver returned position value which includes the position rect
  * relative to viewport. And viewport rect which always has top 0, left 0, and
  * viewport width and height.
  * @typedef {{
  *  positionRect: ?../layout-rect.LayoutRectDef,
  *  viewportRect: !../layout-rect.LayoutRectDef,
+ *  relativePos: string,
  * }}
  */
 export let PositionInViewportEntryDef;
@@ -132,23 +102,12 @@ class AbstractPositionObserver {
           return;
         }
 
-        // Add the relative position regardless of whether the element
-        // is inside the view or not
+        // Add the relative position of the element to its viewport
         position.relativePos = layoutRectsRelativePos(
             position.positionRect, position.viewportRect
         );
 
-        // Determine if the element is fully, partially or not contained
-        // within the viewport
-        position.visibility = layoutRectsIntersectionState(
-            position.positionRect, position.viewportRect
-        );
-
         if (layoutRectsOverlap(position.positionRect, position.viewportRect)) {
-          // Add the visible height of the element
-          position.visibleHeight = rectIntersection(
-              position.positionRect, position.viewportRect
-          ).height;
           // Update position
           entry.position = position;
           // Only call handler if entry element overlap with viewport.
@@ -162,7 +121,6 @@ class AbstractPositionObserver {
           // NOTE: This is required for inabox position observer.
           entry.position = null;
           position.positionRect = null;
-          position.visibleHeight = 0;
           try {
             entry.handler(position);
           } catch (err) {
