@@ -63,7 +63,7 @@ declareExtension('amp-anim', '0.1', false);
 declareExtension('amp-animation', '0.1', false);
 declareExtension('amp-apester-media', '0.1', true);
 declareExtension('amp-app-banner', '0.1', true);
-declareExtension('amp-audio', '0.1', false);
+declareExtension('amp-audio', '0.1', true);
 declareExtension('amp-auto-ads', '0.1', false);
 declareExtension('amp-bind', '0.1', false);
 declareExtension('amp-brid-player', '0.1', false);
