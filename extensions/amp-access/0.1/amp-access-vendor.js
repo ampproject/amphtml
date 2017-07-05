@@ -48,7 +48,7 @@ export class AccessVendorAdapter {
     /** @const @private {boolean} */
     this.isPingbackEnabled_ = !configJson['noPingback'];
 
-    /** @private {?function(!./access-vendor.AccessVendor)|undefined} */
+    /** @private {?function(!./access-vendor.AccessVendor)} */
     this.vendorResolve_ = null;
 
     /** @const @private {!Promise<!./access-vendor.AccessVendor>} */
@@ -72,7 +72,7 @@ export class AccessVendorAdapter {
         'Vendor "%s" doesn\'t match the configured vendor "%s"',
         name, this.vendorName_);
     this.vendorResolve_(vendor);
-    this.vendorResolve_ = undefined;
+    this.vendorResolve_ = null;
   }
 
   /** @override */
