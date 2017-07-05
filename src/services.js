@@ -33,22 +33,24 @@ import {
 /**
  * Returns a promise for the Access service.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!Promise<!AccessService>}
+ * @return {!Promise<!../extensions/amp-access/0.1/amp-access.AccessService>}
  */
 export function accessServiceForDoc(nodeOrDoc) {
-  return /** @type {!Promise<!AccessService>} */ (
-      getElementServiceForDoc(nodeOrDoc, 'access', 'amp-access'));
+  return (/** @type {!Promise<
+      !../extensions/amp-access/0.1/amp-access.AccessService>} */ (
+      getElementServiceForDoc(nodeOrDoc, 'access', 'amp-access')));
 }
 
 /**
  * Returns a promise for the Access service or a promise for null if the service
  * is not available on the current page.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!Promise<?AccessService>}
+ * @return {!Promise<?../extensions/amp-access/0.1/amp-access.AccessService>}
  */
 export function accessServiceForDocOrNull(nodeOrDoc) {
-  return /** @type {!Promise<?AccessService>} */ (
-      getElementServiceIfAvailableForDoc(nodeOrDoc, 'access', 'amp-access'));
+  return (/** @type {
+      !Promise<?../extensions/amp-access/0.1/amp-access.AccessService>} */ (
+      getElementServiceIfAvailableForDoc(nodeOrDoc, 'access', 'amp-access')));
 }
 
 /**

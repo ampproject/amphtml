@@ -27,6 +27,12 @@
 function JsonObject() {}
 
 /**
+ * Force the dataset property to be handled as a JsonObject.
+ * @type {!JsonObject}
+ */
+Element.prototype.dataset;
+
+/**
  * - n is the name.
  * - f is the function body of the extension.
  * - p is the priority. Only supported value is "high".
