@@ -56,7 +56,7 @@ matrix:
       addons:
         sauce_connect: true
         jwt:
-          secure: $SAUCE_ACCESS_KEY_ENCRYPTED
+          secure: <% ENV['SAUCE_ACCESS_KEY_ENCRYPTED'] %>
 cache:
   yarn: true
   directories:
