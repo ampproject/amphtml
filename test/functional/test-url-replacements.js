@@ -40,6 +40,7 @@ import {setCookie} from '../../src/cookies';
 import {parseUrl} from '../../src/url';
 import {urlReplacementsForDoc, viewerForDoc} from '../../src/services';
 import * as trackPromise from '../../src/impression';
+import {stubServiceForDoc} from '../../testing/test-helper';
 
 
 describes.sandboxed('UrlReplacements', {}, () => {
@@ -49,6 +50,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
   let replacements;
   let viewerService;
   let userErrorStub;
+  let ampdoc;
 
   beforeEach(() => {
     canonical = 'https://canonical.com/doc1';
@@ -57,6 +59,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   function getReplacements(opt_options) {
     return createIframePromise().then(iframe => {
+      ampdoc = iframe.ampdoc;
       iframe.doc.title = 'Pixel Test';
       const link = iframe.doc.createElement('link');
       link.setAttribute('href', 'https://pinterest.com:8080/pin1');
@@ -280,6 +283,16 @@ describes.sandboxed('UrlReplacements', {}, () => {
         /*opt_bindings*/undefined, {withCid: true}).then(res => {
           expect(res).to.match(/^\?a=cid-for-abc\&b=amp-([a-zA-Z0-9_-]+){10,}/);
         });
+  });
+
+  it('should allow empty CLIENT_ID', () => {
+    return getReplacements().then(replacements => {
+      stubServiceForDoc(sandbox, ampdoc, 'cid', 'get')
+          .returns(Promise.resolve());
+      return replacements.expandAsync('?a=CLIENT_ID(_ga)');
+    }).then(res => {
+      expect(res).to.equal('?a=');
+    });
   });
 
   it('should replace CLIENT_ID with opt_cookieName', () => {
