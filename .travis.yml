@@ -19,6 +19,12 @@ addons:
     packages:
     - protobuf-compiler
     - python-protobuf
+before_install:
+  - export CHROME_BIN=google-chrome
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+  - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+  - sudo dpkg -i google-chrome*.deb
 script: node build-system/pr-check.js
 branches:
   only:
@@ -33,20 +39,12 @@ env:
 matrix:
   include:
     - env: BUILD_SHARD="pre_build_checks_and_unit_tests"
-      before_install:
-        - export CHROME_BIN=google-chrome
-        - export DISPLAY=:99.0
-        - sh -e /etc/init.d/xvfb start
-        - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-        - sudo dpkg -i google-chrome*.deb
       before_script:
         - pip install --user protobuf
         - gem install percy-capybara
         - gem install phantomjs
         - gem install poltergeist
     - env: BUILD_SHARD="integration_tests"
-      before_install:
-        - node build-system/set-sauce-credentials.js
       before_script:
         - pip install --user protobuf
       addons:
