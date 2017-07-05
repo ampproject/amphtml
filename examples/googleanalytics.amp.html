@@ -6,6 +6,9 @@
   <link rel="canonical" href="analytics.amp.html" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <style amp-custom>
+    body {
+      background-color: #0389ff;
+    }
     button {
       border: 1px solid black;
     }
@@ -31,12 +34,17 @@
   <script type="application/json">
     {
       "requests": {
-        "pageview": "http://localhost:8000/?cid=CLIENT_ID(amp-ccc,myAmpUserNotificationId)"
+        "blocking": "http://localhost:8000/?cid=CLIENT_ID(amp-blocking,myAmpUserNotificationId)",
+        "nonBlocking": "http://localhost:8000/?cid=CLIENT_ID(amp-non-blocking)"
       },
       "triggers": {
-        "defaultPageview": {
+        "blocking": {
           "on": "visible",
-          "request": "pageview"
+          "request": "blocking"
+        },
+        "nonBlocking": {
+          "on": "visible",
+          "request": "nonBlocking"
         }
       }
     }
