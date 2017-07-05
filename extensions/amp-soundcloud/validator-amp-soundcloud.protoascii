@@ -36,12 +36,17 @@ tags: {  # <amp-soundcloud>
     value_regex_casei: "([0-9a-f]{3}){1,2}"
   }
   attrs: {
+    name: "data-playlistid"
+    mandatory_oneof: "['data-trackid', 'data-playlistid']"
+    value_regex: "[0-9]+"
+  }
+  attrs: {
     name: "data-secret-token"
     value_regex: "[A-Za-z0-9_-]+"
   }
   attrs: {
     name: "data-trackid"
-    mandatory: true
+    mandatory_oneof: "['data-trackid', 'data-playlistid']"
     value_regex: "[0-9]+"
   }
   attrs: {
