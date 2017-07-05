@@ -56,7 +56,7 @@ matrix:
       addons:
         sauce_connect: true
         jwt:
-          secure: "${SAUCE_ACCESS_KEY_ENCRYPTED}"
+          secure: "${`node build-system/get-sauce-credentials.js --access_key_encrypted`}"
 cache:
   yarn: true
   directories:
