@@ -257,7 +257,7 @@ export class GlobalVariableSource extends VariableSource {
         // A temporary work around to extract Client ID from _ga cookie. #5761
         // TODO: replace with "filter" when it's in place. #2198
         const cookieName = opt_cookieName || scope;
-        if (cookieName == '_ga') {
+        if (cid && cookieName == '_ga') {
           cid = extractClientIdFromGaCookie(cid);
         }
 
