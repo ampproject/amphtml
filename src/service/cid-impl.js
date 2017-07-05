@@ -35,6 +35,7 @@ import {
 import {dict} from '../utils/object';
 import {isIframed} from '../dom';
 import {getCryptoRandomBytesArray} from '../utils/bytes';
+import {Services} from '../services';
 import {base64UrlEncodeFromBytes} from '../utils/base64';
 import {parseJson, tryParseJson} from '../json';
 import {user, rethrowAsync} from '../log';

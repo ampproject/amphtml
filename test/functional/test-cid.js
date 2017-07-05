@@ -590,6 +590,8 @@ describe('cid', () => {
       return cid.get({scope: 'scope_name', createCookieIfNotPresent: true},
           hasConsent).then(c => {
             expect(c).to.exist;
+            // Since various parties depend on the cookie values, please be careful
+            // about changing the format.
             expect(c).to.equal('amp-AAIECBAgQID_BwsWIULIJw');
             expect(fakeWin.document.cookie).to.equal(
                 'scope_name=' + encodeURIComponent(c) +
