@@ -102,7 +102,7 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
     <td>Facebook</td>
     <td>
       <ul>
-        <li><code>data-param-app_id</code>: <strong>required</strong>, defaults to: none. This parameter is required for the <a href="https://developers.facebook.com/docs/sharing/reference/share-dialog">Facebook Share dialog</a>.</li>
+       <li><code>data-param-app_id</code>: <strong>required</strong>, defaults to: none. This parameter is the Facebook <code>app_id</code> that's required for the <a href="https://developers.facebook.com/docs/sharing/reference/share-dialog">Facebook Share dialog</a>.</li>
         <li><code>data-param-href</code>: optional, defaults to: <code>rel=canonical</code> URL</li>
         <li><code>data-param-quote</code>: optional. Can be used to share a quote or text.</li>
         </ul>
