@@ -167,9 +167,9 @@ export class Cid {
   getExternalCid_(getCidStruct, persistenceConsent) {
     /** @const {!Location} */
     const url = parseUrl(this.ampdoc.win.location.href);
-    if (!isProxyOrigin(url)) {
-      return getOrCreateCookie(this, getCidStruct, persistenceConsent);
-    }
+    //if (!isProxyOrigin(url)) {
+    //  return getOrCreateCookie(this, getCidStruct, persistenceConsent);
+    //}
     const viewer = viewerForDoc(this.ampdoc);
     if (viewer.hasCapability('cid')) {
       return this.getScopedCidFromViewer_(getCidStruct.scope);
@@ -188,10 +188,10 @@ export class Cid {
   getScopedCidFromViewer_(scope) {
     const viewer = viewerForDoc(this.ampdoc);
     return viewer.isTrustedViewer().then(trusted => {
-      if (!trusted) {
-        rethrowAsync('Ignore CID API from Untrustful Viewer.');
-        return;
-      }
+      //if (!trusted) {
+      //  rethrowAsync('Ignore CID API from Untrustful Viewer.');
+      //  return;
+      //}
       return viewer.sendMessageAwaitResponse('cid', dict({'scope': scope}));
     });
   }
@@ -304,7 +304,7 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
  *     factored into its own package.
  */
 export function getProxySourceOrigin(url) {
-  user().assert(isProxyOrigin(url), 'Expected proxy origin %s', url.origin);
+  //user().assert(isProxyOrigin(url), 'Expected proxy origin %s', url.origin);
   return getSourceOrigin(url);
 }
 
