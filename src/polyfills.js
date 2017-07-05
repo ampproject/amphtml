@@ -26,6 +26,7 @@ import {install as installMathSign} from './polyfills/math-sign';
 import {install as installObjectAssign} from './polyfills/object-assign';
 import {install as installPromise} from './polyfills/promise';
 import {install as installArrayIncludes} from './polyfills/array-includes';
+import {install as installFullscreen} from './polyfills/fullscreen';
 import {getMode} from './mode';
 
 /**
@@ -44,3 +45,4 @@ installObjectAssign(self);
 installPromise(self);
 installDocContains(self);
 installArrayIncludes(self);
+installFullscreen(self);
