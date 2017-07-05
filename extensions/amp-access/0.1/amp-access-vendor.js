@@ -15,6 +15,7 @@
  */
 
 import {dev, user} from '../../../src/log';
+import './access-vendor';
 
 /** @const {string} */
 const TAG = 'amp-access-vendor';
@@ -25,7 +26,7 @@ const TAG = 'amp-access-vendor';
  * interface and delivered via a separate extension. The vendor implementation
  * mainly requires two method: `authorize` and `pingback`. The actual
  * extension is registered via `registerVendor` method.
- * @implements {AccessTypeAdapterDef}
+ * @implements {./amp-access.AccessTypeAdapterDef}
  */
 export class AccessVendorAdapter {
 
@@ -47,9 +48,11 @@ export class AccessVendorAdapter {
     /** @const @private {boolean} */
     this.isPingbackEnabled_ = !configJson['noPingback'];
 
+    /** @private {?function(!./access-vendor.AccessVendor)} */
+    this.vendorResolve_ = null;
+
     /** @const @private {!Promise<!./access-vendor.AccessVendor>} */
     this.vendorPromise_ = new Promise(resolve => {
-      /** @private {function(!./access-vendor.AccessVendor)|undefined} */
       this.vendorResolve_ = resolve;
     });
   }
@@ -61,7 +64,7 @@ export class AccessVendorAdapter {
 
   /**
    * @param {string} name
-   * @param {./access-vendor.AccessVendor} vendor
+   * @param {!./access-vendor.AccessVendor} vendor
    */
   registerVendor(name, vendor) {
     user().assert(this.vendorResolve_, 'Vendor has already been registered');
@@ -69,7 +72,7 @@ export class AccessVendorAdapter {
         'Vendor "%s" doesn\'t match the configured vendor "%s"',
         name, this.vendorName_);
     this.vendorResolve_(vendor);
-    this.vendorResolve_ = undefined;
+    this.vendorResolve_ = null;
   }
 
   /** @override */

@@ -74,7 +74,8 @@ export class GlobalVariableSource extends VariableSource {
 
     /**
      * @private
-     * @const {function(!./ampdoc-impl.AmpDoc):!Promise<?AccessService>}
+     * @const {function(!./ampdoc-impl.AmpDoc):
+     *     !Promise<?../../extensions/amp-access/0.1/amp-access.AccessService>}
      */
     this.getAccessService_ = accessServiceForDocOrNull;
 
@@ -476,7 +477,8 @@ export class GlobalVariableSource extends VariableSource {
   /**
    * Resolves the value via access service. If access service is not configured,
    * the resulting value is `null`.
-   * @param {function(!AccessService):(T|!Promise<T>)} getter
+   * @param {function(!../../extensions/amp-access/0.1/amp-access.AccessService
+   *     ):(T|!Promise<T>)} getter
    * @param {string} expr
    * @return {T|null}
    * @template T

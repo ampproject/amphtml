@@ -154,6 +154,8 @@ function compile(entryModuleFilenames, outputDir,
       'extensions/amp-bind/**/*.js',
       // Needed to access form impl from other extensions
       'extensions/amp-form/**/*.js',
+      // Needed for AccessService
+      'extensions/amp-access/**/*.js',
       // Needed to access UserNotificationManager from other extensions
       'extensions/amp-user-notification/**/*.js',
       'src/*.js',
@@ -283,6 +285,8 @@ function compile(entryModuleFilenames, outputDir,
           'build/patched-module/',
           // Can't seem to suppress `(0, win.eval)` suspicious code warning
           '3p/environment.js',
+          // Generated code.
+          'extensions/amp-access/0.1/access-expr-impl.js',
         ],
         jscomp_error: [],
       }
