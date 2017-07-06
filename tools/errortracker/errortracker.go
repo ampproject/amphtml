@@ -91,7 +91,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	redirectionRate := 0.1;
 	if randomVal < redirectionRate {
 		client := &http.Client{}
-		req, _ := http.NewRequest("GET", "", nil)
+		req, _ := http.NewRequest("GET", "https://amp-error-reporting-js.appspot.com/r", nil)
 		req.URL.RawQuery = r.URL.Query().Encode()
 		resp, err := client.Do(req)
 		if err != nil {
