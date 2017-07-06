@@ -1,0 +1,2 @@
+FAIL
+feature_tests/multiple_body_tags_2.html:33:0 The tag 'BODY' appears more than once in the document. [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
