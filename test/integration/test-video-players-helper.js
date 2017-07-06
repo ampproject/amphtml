@@ -317,8 +317,8 @@ export function runVideoPlayerIntegrationTests(
       });
 
       // TODO(aghassemi, #9379): Flaky on Safari 9.
-      it.configure().skipSafari().run(
-          'should play/pause when video enters/exits viewport', () => {
+      it.configure().skipSafari().run('should play/pause when video ' +
+          'enters/exits viewport', () => {
         let video;
         let viewport;
         return getVideoPlayer({outsideView: true, autoplay: true}).then(r => {
