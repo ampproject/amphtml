@@ -32,9 +32,6 @@ export class AmpTimeAgo extends AMP.BaseElement {
 
     /** @private {string} */
     this.title_ = '';
-
-    /** @private {?number} */
-    this.cutoff_ = null;
   }
 
   /** @override */
@@ -54,11 +51,11 @@ export class AmpTimeAgo extends AMP.BaseElement {
     timeElement.setAttribute('datetime', this.datetime_);
 
     if (this.element.hasAttribute('cutoff')) {
-      this.cutoff_ = parseInt(this.element.getAttribute('cutoff'), 10);
+      const cutoff = parseInt(this.element.getAttribute('cutoff'), 10);
       const elDate = new Date(this.datetime_);
       const secondsAgo = Math.floor((Date.now() - elDate.getTime()) / 1000);
 
-      if (secondsAgo > this.cutoff_) {
+      if (secondsAgo > cutoff) {
         timeElement.textContent = this.title_;
       } else {
         timeElement.textContent = timeago(this.datetime_, this.locale_);
