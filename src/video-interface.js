@@ -194,7 +194,7 @@ export const VideoEvents = {
    *
    * Fired when the video is muted.
    *
-   * @event play
+   * @event muted
    */
   MUTED: 'muted',
 
@@ -203,7 +203,7 @@ export const VideoEvents = {
    *
    * Fired when the video is unmuted.
    *
-   * @event pause
+   * @event unmuted
    */
   UNMUTED: 'unmuted',
 
@@ -223,7 +223,7 @@ export const VideoEvents = {
    *
    * Fired when the video's src changes.
    *
-   * @event reload
+   * @event reloaded
    */
   RELOAD: 'reloaded',
 };
