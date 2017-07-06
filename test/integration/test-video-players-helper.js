@@ -297,6 +297,7 @@ export function runVideoPlayerIntegrationTests(
 
   describe.configure().retryOnSaucelabs().run('Autoplay', function() {
     this.timeout(TIMEOUT);
+
     describe('play/pause', () => {
       it('should play when in view port initially', () => {
         return getVideoPlayer({outsideView: false, autoplay: true}).then(r => {
@@ -315,7 +316,9 @@ export function runVideoPlayerIntegrationTests(
         });
       });
 
-      it('should play/pause when video enters/exists viewport', () => {
+      // TODO(aghassemi, #9379): Flaky on Safari 9.
+      it.configure().skipSafari().run('should play/pause when video ' +
+          'enters/exits viewport', () => {
         let video;
         let viewport;
         return getVideoPlayer({outsideView: true, autoplay: true}).then(r => {
@@ -336,7 +339,7 @@ export function runVideoPlayerIntegrationTests(
     });
 
     describe('Animated Icon', () => {
-      // TODO(amphtml): Unskip when #8385 is fixed.
+      // TODO(amphtml): Unskip when #9379 is fixed.
       it.skip('should create an animated icon overlay', () => {
         let video;
         let viewport;
@@ -364,14 +367,12 @@ export function runVideoPlayerIntegrationTests(
         function isAnimationPaused(iconElement) {
           const animElement = iconElement.querySelector('.amp-video-eq-1-1');
           const win = iconElement.ownerDocument.defaultView;
-          const computedStyle = win.getComputedStyle(animElement);
+          const cs = win.getComputedStyle(animElement);
           const isPaused =
-        (computedStyle.getPropertyValue('animation-play-state') == 'paused'
-        || computedStyle.getPropertyValue('-webkit-animation-play-state') ==
-          'paused'
-        || computedStyle.getPropertyValue('animation-name') == 'none'
-        || computedStyle.getPropertyValue('-webkit-animation-name') ==
-          'none');
+              cs.getPropertyValue('animation-play-state') == 'paused' ||
+              cs.getPropertyValue('-webkit-animation-play-state') == 'paused' ||
+              cs.getPropertyValue('animation-name') == 'none' ||
+              cs.getPropertyValue('-webkit-animation-name') == 'none';
           return isPaused;
         }
 
@@ -439,7 +440,7 @@ export function runVideoPlayerIntegrationTests(
           videoGlobal = video;
           return poll('video built', () => {
             return video.implementation_ && video.implementation_.play;
-          },undefined, 5000).then(() => {
+          }, /* opt_onError */ undefined, /* opt_timeout */ 5000).then(() => {
             return {video, fixture};
           });
         });
