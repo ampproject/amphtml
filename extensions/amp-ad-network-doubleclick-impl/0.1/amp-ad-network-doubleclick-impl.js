@@ -36,8 +36,8 @@ import {
 } from '../../../ads/google/a4a/traffic-experiments';
 import {
   extractGoogleAdCreativeAndSignature,
-  truncAndTimeUrl,
   googleAdUrl,
+  truncAndTimeUrl,
   googleBlockParameters,
   googlePageParameters,
   isGoogleAdsA4AValidEnvironment,
