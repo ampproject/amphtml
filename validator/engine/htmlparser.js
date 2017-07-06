@@ -522,6 +522,9 @@ amp.htmlparser.HtmlParser = class {
               amp.htmlparser.HtmlParser.Elements[tagName] :
               amp.htmlparser.HtmlParser.EFlags.UNKNOWN_OR_CUSTOM;
         } else if (m[4]) {  // Text.
+          if (!inTag && locator) {
+            locator.snapshotPos();
+          }
           tagStack.pcdata(m[4]);
         } else if (m[5]) {  // Cruft.
           switch (m[5]) {
