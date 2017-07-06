@@ -18,6 +18,7 @@ We hope you'll become an ongoing participant in our open source community but we
   * [Discussion channels](#discussion-channels)
   * [Weekly status updates](#weekly-status-updates)
   * [Weekly design reviews](#weekly-design-reviews)
+  * [Working groups](#working-groups)
   * [See Also](#see-also)
 
 ## Reporting issues with AMP
@@ -125,6 +126,10 @@ We encourage everyone who is actively contributing to AMP to add a comment to th
 ### Weekly design reviews
 
 The community holds weekly engineering [design reviews](./contributing/design-reviews.md) via video conference.  We encourage everyone in the community to participate in these discussions and to bring their designs for new features and significant bug fixes to these reviews.
+
+### Working groups
+
+AMP Project [working groups](./contributing/working-groups.md) bring together parties with related interests to discuss ideas for how AMP can evolve and to receive updates on new features and changes in AMP that are relevant to the group.
 
 ### See Also
 
