@@ -84,14 +84,23 @@ export function assertScreenReaderElement(element) {
 // A server side temporary request storage which is useful for testing
 // browser sent HTTP requests.
 /////////////////
+
+/** @const {string} */
 const REQUEST_URL = '//localhost:9876/amp4test/request-bank/';
 
+/**
+ * Append user agent to request-bank deposit/withdraw IDs to avoid
+ * cross-browser race conditions when testing in Saucelabs.
+ * @const {string}
+ */
+const userAgent = encodeURIComponent(window.navigator.userAgent);
+
 export function depositRequestUrl(id) {
-  return REQUEST_URL + 'deposit/' + id;
+  return `${REQUEST_URL}deposit/${id}-${userAgent}`;
 }
 
 export function withdrawRequest(win, id) {
-  const url = REQUEST_URL + 'withdraw/' + id;
+  const url = `${REQUEST_URL}withdraw/${id}-${userAgent}`;
   return xhrServiceForTesting(win).fetchJson(url, {
     method: 'GET',
     ampCors: false,
