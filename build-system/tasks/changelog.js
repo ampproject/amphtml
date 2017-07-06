@@ -204,8 +204,13 @@ function submitReleaseNotes(version, changelog, sha) {
     }
   }
 
-  return request(options).then(function() {
-    util.log(util.colors.green('Release Notes submitted'));
+  return request(options).then(function(res) {
+    if (res.statusCode === 201) {
+      util.log(util.colors.green('Release Notes submitted'));
+    } else {
+      throw new Error("response status code was not 201 (Created). Make " +
+          "sure you have a valid github access token.");
+    }
   });
 }
 
