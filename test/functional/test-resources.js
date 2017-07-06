@@ -564,25 +564,36 @@ describes.fakeWin('Resources startup', {
     expect(schedulePassStub).to.not.be.called;
     win.readyState = 'complete';
     win.eventListeners.fire({type: 'load'});
-    return loadPromise(win).then(() => {
-      // Skip a microtask.
-      return Promise.race([Promise.resolve()]);
+    win.document.eventListeners.fire({type: 'readystatechange'});
+    return resources.ampdoc.whenReady().then(() => {
+      expect(resources.relayoutAll_).to.be.true;
+      // Reset to make sure it is set again on load.
+      resources.relayoutAll_ = false;
+      return loadPromise(win).then(() => {
+        // Skip a microtask.
+        return Promise.race([Promise.resolve()]);
+      });
     }).then(() => {
       expect(resources.relayoutAll_).to.be.true;
-      expect(schedulePassStub).to.be.calledOnce;
+      expect(schedulePassStub).to.be.calledTwice;
     });
   });
 
   it('should run a full reload pass on fonts timeout', () => {
-    expect(resources.relayoutAll_).to.be.false;
-    expect(schedulePassStub).to.not.be.called;
-    clock.tick(4000);
-    // Skip a microtask.
-    return Promise.resolve().then(() => {
-      return Promise.race([Promise.resolve()]);
-    }).then(() => {
-      expect(resources.relayoutAll_).to.be.true;
-      expect(schedulePassStub).to.be.calledOnce;
+    win.readyState = 'complete';
+    win.document.eventListeners.fire({type: 'readystatechange'});
+    return resources.ampdoc.whenReady().then(() => {
+      return;
+      expect(resources.relayoutAll_).to.be.false;
+      expect(schedulePassStub).to.not.be.called;
+      clock.tick(4000);
+      // Skip a microtask.
+      return Promise.resolve().then(() => {
+        return Promise.race([Promise.resolve()]);
+      }).then(() => {
+        expect(resources.relayoutAll_).to.be.true;
+        expect(schedulePassStub).to.be.calledOnce;
+      });
     });
   });
 });
