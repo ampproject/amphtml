@@ -15,9 +15,11 @@
  */
 
 import {ActionTrust} from '../action-trust';
+import {VideoSessionManager} from './video-session-manager';
 import {removeElement} from '../dom.js';
 import {listen, listenOncePromise} from '../event-helper';
 import {dev} from '../log';
+import {dict} from '../utils/object';
 import {getMode} from '../mode';
 import {registerServiceBuilderForDoc, getServiceForDoc} from '../service';
 import {setStyles} from '../style';
@@ -186,13 +188,6 @@ export class VideoManager {
    * @private
    */
   maybeInstallVisibilityObserver_(entry) {
-    // TODO(aghassemi): Remove this later. For now, the visibility observer
-    // only matters for autoplay videos so no point in monitoring arbitrary
-    // videos yet.
-    if (!entry.hasAutoplay) {
-      return;
-    }
-
     listen(entry.video.element, VideoEvents.VISIBILITY, () => {
       entry.updateVisibility();
     });
@@ -317,6 +312,18 @@ class VideoEntry {
     /** @private @const {!../service/vsync-impl.Vsync} */
     this.vsync_ = vsyncFor(ampdoc.win);
 
+    /** @private @const */
+    this.actionSessionManager_ = new VideoSessionManager();
+
+    this.actionSessionManager_.onSessionEnd(
+        () => this.analyticsEvent_('video-session'));
+
+    /** @private @const */
+    this.visibilitySessionManager_ = new VideoSessionManager();
+
+    this.visibilitySessionManager_.onSessionEnd(
+        () => this.analyticsEvent_('video-session-visible'));
+
     /** @private @const {function(): !Promise<boolean>} */
     this.boundSupportsAutoplay_ = supportsAutoplay.bind(null, ampdoc.win,
         getMode(ampdoc.win).lite);
@@ -348,9 +355,12 @@ class VideoEntry {
     listenOncePromise(element, VideoEvents.LOAD)
         .then(() => this.videoLoaded());
 
-    listen(this.video.element, VideoEvents.PAUSE, this.videoPaused_.bind(this));
 
-    listen(this.video.element, VideoEvents.PLAY, this.videoPlayed_.bind(this));
+    listen(element, VideoEvents.PAUSE, () => this.videoPaused_());
+    listen(element, VideoEvents.PLAY, () => this.videoPlayed_());
+    // TODO(cvializ): understand why capture needs to be true for ended : /
+    listen(element, VideoEvents.ENDED, () => this.videoEnded_(),
+        /* opt_capture */ true);
 
     // Currently we only register after video player is build.
     this.videoBuilt_();
@@ -376,6 +386,11 @@ class VideoEntry {
    */
   videoPlayed_() {
     this.isPlaying_ = true;
+    this.actionSessionManager_.beginSession();
+    if (this.isVisible_) {
+      this.visibilitySessionManager_.beginSession();
+    }
+    this.analyticsEvent_('video-play');
   }
 
   /**
@@ -383,7 +398,29 @@ class VideoEntry {
    * @private
    */
   videoPaused_() {
+    const previousState = this.getPlayingState();
+    const trackingVideo = assertTrackingVideo_(this.video);
+    if (trackingVideo &&
+        trackingVideo.getCurrentTime() !== trackingVideo.getDuration()) {
+      this.analyticsEvent_('video-pause');
+    }
     this.isPlaying_ = false;
+
+    // Don't trigger session end for autoplay pauses, since session end
+    // is already covered for autoplay in the visibility tracking
+    if (previousState !== PlayingStates.PLAYING_AUTO) {
+      this.actionSessionManager_.endSession();
+    }
+  }
+
+  /**
+   * Callback for when the video ends
+   * @private
+   */
+  videoEnded_() {
+    this.isPlaying_ = false;
+    this.analyticsEvent_('video-ended');
+    this.actionSessionManager_.endSession();
   }
 
   /**
@@ -422,6 +459,8 @@ class VideoEntry {
   loadedVideoVisibilityChanged_() {
     if (this.hasAutoplay) {
       this.autoplayLoadedVideoVisibilityChanged_();
+    } else {
+      this.nonAutoplayLoadedVideoVisibilityChanged_();
     }
   }
 
@@ -538,9 +577,13 @@ class VideoEntry {
       }
 
       if (this.isVisible_) {
+        this.visibilitySessionManager_.beginSession();
         this.video.play(/*autoplay*/ true);
         this.playCalledByAutoplay_ = true;
       } else {
+        if (this.isPlaying_) {
+          this.visibilitySessionManager_.endSession();
+        }
         this.video.pause();
       }
     });
@@ -564,6 +607,18 @@ class VideoEntry {
       return mapRange(this.inViewportHeight_,
           0, this.initialRect_.height,
           min, max);
+    }
+  }
+
+  /**
+   * Called when visibility of a loaded non-autoplay video changes.
+   * @private
+   */
+  nonAutoplayLoadedVideoVisibilityChanged_() {
+    if (this.isVisible_) {
+      this.visibilitySessionManager_.beginSession();
+    } else if (this.isPlaying_) {
+      this.visibilitySessionManager_.endSession();
     }
   }
 
@@ -868,11 +923,71 @@ class VideoEntry {
   }
 
   /**
+   * Get the autoplay state distinct from paused by user and paused by
+   * the video scrolling out of view.
+   * @return {boolean}
+   */
+  isAutoplay() {
+    return (this.getPlayingState() === PlayingStates.PLAYING_AUTO) ||
+        (this.playCalledByAutoplay_ && !this.userInteractedWithAutoPlay_);
+  }
+
+  /**
    * Returns whether the video was interacted with or not
    * @return {boolean}
    */
   userInteractedWithAutoPlay() {
     return this.userInteractedWithAutoPlay_;
+  }
+
+  /**
+   * @param {string} eventType
+   * @param {!Object<string, string>=} opt_vars A map of vars and their values.
+   * @private
+   */
+  analyticsEvent_(eventType, opt_vars) {
+    const trackingVideo = assertTrackingVideo_(this.video);
+    if (trackingVideo) {
+      opt_vars = opt_vars || this.getAnalyticsData(trackingVideo);
+      trackingVideo.element.dispatchCustomEvent('amp:video',
+          {type: eventType, details: opt_vars});
+    }
+  }
+
+  /**
+   * Collects a snapshot of the current video state for video analytics
+   * @param {!../video-interface.TrackingVideoInterface} video
+   * @return {!JsonObject}
+   */
+  getAnalyticsData(video) {
+    return dict({
+      'id': video.getId(),
+      'autoplay': this.isAutoplay(),
+      'width': video.getWidth(),
+      'height': video.getHeight(),
+      'currentTime': video.getCurrentTime(),
+      'duration': video.getDuration(),
+      'muted': video.getMuted(),
+      'paused': video.getPaused(),
+      'ended': video.getEnded(),
+      // TODO(cvializ): add fullscreen
+    });
+  }
+}
+
+/**
+ * Asserts that a video is a tracking video
+ * @param {!../video-interface.VideoInterface} video
+ * @return {?../video-interface.TrackingVideoInterface}
+ * @private
+ */
+function assertTrackingVideo_(video) {
+  const trackingVideo =
+      /** @type {?../video-interface.TrackingVideoInterface} */ (video);
+  if (trackingVideo.isTrackingVideo && trackingVideo.isTrackingVideo()) {
+    return /** @type {?../video-interface.TrackingVideoInterface} */ (video);
+  } else {
+    return null;
   }
 }
 

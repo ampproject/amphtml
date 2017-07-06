@@ -44,7 +44,7 @@ const ATTRS_TO_PROPAGATE =
     ATTRS_TO_PROPAGATE_ON_BUILD.concat(ATTRS_TO_PROPAGATE_ON_LAYOUT);
 
 /**
- * @implements {../../../src/video-interface.VideoInterface}
+ * @implements {../../../src/video-interface.TrackingVideoInterface}
  */
 class AmpVideo extends AMP.BaseElement {
 
@@ -269,6 +269,62 @@ class AmpVideo extends AMP.BaseElement {
      */
   hideControls() {
     this.video_.controls = false;
+  }
+
+  /** @override */
+  isTrackingVideo() {
+    return true;
+  }
+
+  /** @override */
+  getId() {
+    return this.video_.id;
+  }
+
+  /** @override */
+  getCurrentTime() {
+    return this.video_.currentTime;
+  }
+
+  /** @override */
+  getWidth() {
+    return this.video_.width;
+  }
+
+  /** @override */
+  getHeight() {
+    return this.video_.height;
+  }
+
+  /** @override */
+  getDuration() {
+    return this.video_.duration;
+  }
+
+  /** @override */
+  getPaused() {
+    return this.video_.paused;
+  }
+
+  /** @override */
+  getPlayedRanges() {
+    return this.video_.played;
+  }
+
+  /** @override */
+  getPlayedTotal() {
+    return this.video_.played.reduce(
+        (acc, range) => acc + range[1] - range[0], 0);
+  }
+
+  /** @override */
+  getMuted() {
+    return this.muted_;
+  }
+
+  /** @override */
+  getEnded() {
+    return this.video_.ended;
   }
 }
 

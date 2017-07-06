@@ -113,6 +113,78 @@ export class VideoInterface {
 
 
 /**
+ * @interface
+ */
+export class TrackingVideoInterface extends VideoInterface {
+  /**
+   * Should return true.
+   * @return {boolean}
+   */
+  isTrackingVideo() {}
+
+  /**
+   * Gets the ID of the video
+   * @return {string}
+   */
+  getId() {}
+
+  /**
+   * Current playback time in seconds at time of trigger
+   * @return {number}
+   */
+  getCurrentTime() {}
+
+  /**
+   * Total duration of the video in seconds
+   * @return {number}
+   */
+  getDuration() {}
+
+  /**
+   * Width of the video in px
+   * @return {number}
+   */
+  getWidth() {}
+
+  /**
+   * Height of the video in px
+   * @return {number}
+   */
+  getHeight() {}
+
+  /**
+   * Whether video was muted at the time of trigger
+   * @return {boolean}
+   */
+  getMuted() {}
+
+  /**
+   * Whether video was paused at the time of trigger
+   * @return {boolean}
+   */
+  getPaused() {}
+
+  /**
+   * Whether video was ended at the time of trigger
+   * @return {boolean}
+   */
+  getEnded() {}
+
+  /**
+   * Get a 2d array of start and stop times that the user has watched.
+   * @return {!Array<Array<number>>}
+   */
+  getPlayedRanges() {}
+
+  /**
+   * Get the total number of seconds the user has watched.
+   * @return {number}
+   */
+  getPlayedTotal() {}
+}
+
+
+/**
  * Attributes
  *
  * Components implementing the VideoInterface are expected to support
@@ -226,4 +298,13 @@ export const VideoEvents = {
    * @event reloaded
    */
   RELOAD: 'reloaded',
+
+  /**
+   * ended
+   *
+   * Fired when the video ends.
+   *
+   * @event ended
+   */
+  ENDED: 'ended',
 };

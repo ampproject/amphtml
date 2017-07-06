@@ -22,8 +22,10 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
   <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
 </head>
 <body>
+<p>Scroll down to see content</p>
 <div id="container">
 Container for analytics tags. Positioned far away from top to make sure that doesn't matter.
 
@@ -36,7 +38,8 @@ Container for analytics tags. Positioned far away from top to make sure that doe
     "base": "${endpoint}?${type|default:foo}&path=${canonicalPath}",
     "event": "${base}&scrollY=${scrollTop}&scrollX=${scrollLeft}&height=${availableScreenHeight}&width=${availableScreenWidth}&scrollBoundV=${verticalScrollBoundary}&scrollBoundH=${horizontalScrollBoundary}",
     "visibility": "${base}&a=${maxContinuousVisibleTime}&b=${totalVisibleTime}&c=${firstSeenTime}&d=${lastSeenTime}&e=${firstVisibleTime}&f=${lastVisibleTime}&g=${minVisiblePercentage}&h=${maxVisiblePercentage}&i=${elementX}&j=${elementY}&k=${elementWidth}&l=${elementHeight}&m=${totalTime}&n=${loadTimeVisibility}&o=${backgroundedAtStart}&p=${backgrounded}&subTitle=${subTitle}",
-    "timer": "${base}&backgroundState=${backgroundState}"
+    "timer": "${base}&backgroundState=${backgroundState}",
+    "video": "${base}&type=${type}&currentTime=${currentTime}&f=${fullscreen}&a=${autoplay}"
   },
   "vars": {
     "title": "Example Request"
@@ -124,6 +127,52 @@ Container for analytics tags. Positioned far away from top to make sure that doe
       "vars": {
         "type": "timer"
       }
+    },
+    "videoPlays": {
+      "on": "video-play",
+      "selector": "#myVideo",
+      "videoSpec": {
+        "exclude-autoplay": true
+      },
+      "request": "video",
+      "vars": {
+        "type": "video-play"
+      }
+    },
+    "videoPauses": {
+      "on": "video-pause",
+      "selector": "#myVideo",
+      "videoSpec": {
+        "exclude-autoplay": false
+      },
+      "request": "video",
+      "vars": {
+        "type": "video-pause"
+      }
+    },
+    "videoSession": {
+      "on": "video-session",
+      "selector": "#myVideo",
+      "videoSpec": {
+        "end-session-when-invisible": true,
+        "exclude-autoplay": false
+      },
+      "request": "video",
+      "vars": {
+        "type": "video-session"
+      }
+    },
+    "videoEnded": {
+      "on": "video-ended",
+      "selector": "#myVideo",
+      "videoSpec": {
+        "end-session-when-invisible": true,
+        "exclude-autoplay": false
+      },
+      "request": "video",
+      "vars": {
+        "type": "video-ended"
+      }
     }
   }
 }
@@ -188,7 +237,21 @@ Donec pharetra molestie sollicitudin. Duis mattis eleifend rutrum. Quisque luctu
 <ul>
 <li>Aenean ac sem eget libero varius viverra sit amet vitae nunc.</li>
 </ul>
-
+<amp-video
+    id="myVideo"
+    src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
+    width="358"
+    height="204"
+    layout="responsive"
+    controls
+  >
+  <div placeholder>
+    This is a placeholder
+  </div>
+  <div fallback>
+    This is a fallback
+  </div>
+</amp-video>
 </p>
 <amp-anim src="https://www.google.com/logos/doodles/2016/2016-doodle-fruit-games-day-14-5645577527230464-hp.gif" id="anim-id" width="665" height="220" layout="responsive">
   <amp-img placeholder src="https://www.google.com/logos/doodles/2016/2016-doodle-fruit-games-day-14-5645577527230464.2-scta.png" width="665" height="220" layout="responsive"></amp-img>

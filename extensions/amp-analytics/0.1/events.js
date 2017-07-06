@@ -16,6 +16,7 @@
 
 import {CommonSignals} from '../../../src/common-signals';
 import {Observable} from '../../../src/observable';
+import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {user} from '../../../src/log';
 import {startsWith} from '../../../src/string';
@@ -397,6 +398,68 @@ export class IniLoadTracker extends EventTracker {
       signals.whenSignal(CommonSignals.INI_LOAD),
       signals.whenSignal(CommonSignals.LOAD_END),
     ]);
+  }
+}
+
+
+/**
+ * Tracks video session events
+ */
+export class VideoEventTracker extends EventTracker {
+  /**
+   * @param {!./analytics-root.AnalyticsRoot} root
+   */
+  constructor(root) {
+    super(root);
+
+    /** @private @const {!Observable<!Event>} */
+    this.sessionObservable_ = new Observable();
+
+    /** @private @const */
+    this.boundOnSession_ = e => {
+      this.sessionObservable_.fire(e);
+    };
+
+    this.root.getRoot().addEventListener('amp:video', this.boundOnSession_);
+  }
+
+  /** @override */
+  dispose() {
+    this.root.getRoot().removeEventListener('amp:video', this.boundOnSession_);
+  }
+
+  /** @override */
+  add(context, eventType, config, listener) {
+    const videoSpec = config['videoSpec'] || {};
+    const endSessionWhenInvisible = videoSpec['end-session-when-invisible'];
+    const excludeAutoplay = videoSpec['exclude-autoplay'];
+    const selector = config['selector'] || videoSpec['selector'];
+    const selectionMethod = config['selectionMethod'] || null;
+    const on = config['on'];
+    const targetReady =
+        this.root.getElement(context, selector, selectionMethod);
+
+    return this.sessionObservable_.add(event => {
+      const {type, details} = getData(event);
+      const element = user().assertElement(event.target,
+          'No target specified by video session event.');
+
+      // Wait for target selected
+      targetReady.then(analyticsTarget => {
+        if (analyticsTarget.contains(element)) {
+          if ((type === 'video-session-visible' && !endSessionWhenInvisible) ||
+              (details.autoplay === true && excludeAutoplay)) {
+            return;
+          }
+          const mutatedType =
+            type === 'video-session-visible' ? 'video-session' : type;
+
+          if (mutatedType === on) {
+            listener(new AnalyticsEvent(analyticsTarget, mutatedType, details));
+          }
+        }
+      });
+    });
   }
 }
 
