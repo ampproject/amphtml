@@ -59,7 +59,7 @@ export class LayoutLayers {
   calcIntersectionWithParent(element, parent, opt_expand) {
     const elementBox = LayoutElement.for(element).getLayoutBox(parent);
     const { left, top } = elementBox;
-    let parentBox = LayoutElement.for(parent).getCachedLayoutBox();
+    let parentBox = LayoutElement.for(parent).getUnscrolledLayoutBox();
     if (opt_expand) {
       parentBox = expandLayoutRect(parentBox, opt_expand.dw || 0,
           opt_expand.dh || 0);
@@ -257,8 +257,8 @@ class LayoutLayer {
     return this.root_.contains(element);
   }
 
-  getCachedLayoutBox() {
-    return LayoutElement.for(this.root_).getCachedLayoutBox();
+  getUnscrolledyoutBox() {
+    return LayoutElement.for(this.root_).getUnscrolledyoutBox();
   }
 
   getLayoutBox() {
@@ -352,12 +352,23 @@ class LayoutElement {
   static forOptional(element) {
     return element[LAYOUT_PROP];
   }
-}
 
-class RegularLayoutElement extends LayoutElement {
-}
+  /**
+   * Calculates the LayoutRectDef of element relative to opt_parent
+   * (or viewport), taking into account scroll positions.
+   *
+   * @param {!Element} element
+   * @param {Element=} opt_parent
+   * @return {!LayoutRectDef}
+   */
+  static getLayoutBox(opt_parent) {
+    // 4 cases:
+    //   1. AmpElement, AmpElement
+    //   2. AmpElement, Element
+    //   3. Element, AmpElement
+    //   4. Element, Element
+  }
 
-class AmpLayoutElement extends LayoutElement {
   /**
    * Gets the element's parent layer. If this element is itself a layer, it
    * returns the layer's parent.
@@ -371,7 +382,7 @@ class AmpLayoutElement extends LayoutElement {
    * Gets the layout rectangle relative to the parent's coordinate system.
    * @return {!LayoutRectDef}
    */
-  getCachedLayoutBox() {
+  getUnscrolledyoutBox() {
     return this.layoutBox_;
   }
 
@@ -387,14 +398,14 @@ class AmpLayoutElement extends LayoutElement {
       parents.push(p);
     }
 
-    const box = this.getCachedLayoutBox();
+    const box = this.getUnscrolledyoutBox();
     let x = box.left;
     let y = box.top;
     let first = true;
     for (let i = parents.length - 1; i >= 0; i--) {
       const parent = parents[i];
 
-      const box = parent.getCachedLayoutBox();
+      const box = parent.getUnscrolledyoutBox();
       x -= parent.getScrollLeft();
       y -= parent.getScrollTop();
       if (!first) {
