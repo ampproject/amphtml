@@ -41,6 +41,7 @@ export let RefreshConfig;
 
 export const MIN_REFRESH_INTERVAL = 30;
 export const DATA_ATTR_NAME = 'data-enable-refresh';
+export const DATA_MANAGER_ID_NAME = 'data-amp-ad-refresh-id';
 export const METATAG_NAME = 'amp-ad-enable-refresh';
 
 const TAG = 'AMP-AD';
@@ -104,9 +105,6 @@ const observers = {};
  * @const {!Object<string, !RefreshManager>}
  */
 const managers = {};
-
-/** @const {string} */
-const DATA_MANAGER_ID_NAME = 'data-amp-ad-refresh-id';
 
 /**
  * Used to generate unique IDs for each RefreshManager.

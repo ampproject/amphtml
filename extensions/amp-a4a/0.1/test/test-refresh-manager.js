@@ -17,6 +17,7 @@
 import {
   RefreshManager,
   DATA_ATTR_NAME,
+  DATA_MANAGER_ID_NAME,
   METATAG_NAME,
 } from '../refresh-manager';
 import {timerFor} from '../../../../src/services';
@@ -102,43 +103,42 @@ describe('refresh-manager', () => {
     expect(refreshManager.isRefreshable()).to.be.false;
   });
 
-  describe('#ioCallbackGenerator_', () => {
+  describe('#ioCallback_', () => {
     let refreshManager;
     beforeEach(() => refreshManager = new RefreshManager(mockA4a, config));
 
     it('should stay in INITIAL state', () => {
-      const ioCallback = refreshManager.ioCallbackGenerator_();
       const ioEntry = {
-        target: null,
+        target: {
+          getAttribute: name => name == DATA_MANAGER_ID_NAME ? '0' : null,
+        },
         intersectionRatio: refreshManager.config_.visiblePercentageMin,
       };
-      ioCallback([ioEntry]);
+      refreshManager.ioCallback_([ioEntry]);
       expect(refreshManager.visibilityTimeoutId_).to.be.null;
       expect(refreshManager.state_).to.equal('initial');
     });
 
     it('should transition into VIEW_PENDING state', () => {
-      const ioCallback = refreshManager.ioCallbackGenerator_();
       const ioEntry = {
         target: mockA4a.element,
         intersectionRatio: refreshManager.config_.visiblePercentageMin,
       };
-      ioCallback([ioEntry]);
+      refreshManager.ioCallback_([ioEntry]);
       expect(refreshManager.visibilityTimeoutId_).to.be.ok;
       expect(refreshManager.state_).to.equal('view_pending');
     });
 
     it('should transition to VIEW_PENDING state then back to INITIAL', () => {
-      const ioCallback = refreshManager.ioCallbackGenerator_();
       const ioEntry = {
         target: mockA4a.element,
         intersectionRatio: refreshManager.config_.visiblePercentageMin,
       };
-      ioCallback([ioEntry]);
+      refreshManager.ioCallback_([ioEntry]);
       expect(refreshManager.visibilityTimeoutId_).to.be.ok;
       expect(refreshManager.state_).to.equal('view_pending');
       ioEntry.intersectionRatio = 0;
-      ioCallback([ioEntry]);
+      refreshManager.ioCallback_([ioEntry]);
       expect(refreshManager.visibilityTimeoutId_).to.be.null;
       expect(refreshManager.state_).to.equal('initial');
     });
@@ -166,3 +166,5 @@ describe('refresh-manager', () => {
     });
   });
 });
+
+
