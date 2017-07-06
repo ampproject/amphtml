@@ -19,23 +19,32 @@ import {
   withdrawRequest,
 } from '../../testing/test-helper';
 
+/**
+ * Append user agent to request-bank deposit/withdraw IDs to avoid cross-browser
+ * race conditions when testing in Saucelabs.
+ * @const {string}
+ */
+const userAgent = encodeURIComponent(window.navigator.userAgent);
+
 describe('amp-pixel', () => {
+  const hasReferrer = 'has-referrer-' + userAgent;
   describes.integration('amp-pixel integration test', {
-    body: `<amp-pixel src="${depositRequestUrl('has-referrer')}">`,
+    body: `<amp-pixel src="${depositRequestUrl(hasReferrer)}">`,
   }, env => {
     it('should keep referrer if no referrerpolicy specified', () => {
-      return withdrawRequest(env.win, 'has-referrer').then(request => {
+      return withdrawRequest(env.win, hasReferrer).then(request => {
         expect(request.headers.referer).to.be.ok;
       });
     });
   });
 
+  const noReferrer = 'no-referrer-' + userAgent;
   describes.integration('amp-pixel integration test', {
-    body: `<amp-pixel src="${depositRequestUrl('no-referrer')}"
+    body: `<amp-pixel src="${depositRequestUrl(noReferrer)}"
              referrerpolicy="no-referrer">`,
   }, env => {
     it('should remove referrer if referrerpolicy=no-referrer', () => {
-      return withdrawRequest(env.win, 'no-referrer').then(request => {
+      return withdrawRequest(env.win, noReferrer).then(request => {
         expect(request.headers.referer).to.not.be.ok;
       });
     });
