@@ -1,0 +1,10 @@
+FAIL
+feature_tests/multiple_body_tags_3.html:32:2 Tag or text which is only allowed inside the body section found outside of the body section. [DISALLOWED_HTML]
+feature_tests/multiple_body_tags_3.html:33:2 The attribute 'amp-boilerplate' may not appear in tag 'style amp-custom'. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [DISALLOWED_HTML]
+feature_tests/multiple_body_tags_3.html:33:2 The parent tag of tag 'style amp-custom' is 'body', but it can only be 'head'. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [DISALLOWED_HTML]
+feature_tests/multiple_body_tags_3.html:34:2 The parent tag of tag 'amphtml engine v0.js script' is 'body', but it can only be 'head'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
+feature_tests/multiple_body_tags_3.html:32:2 The tag 'BODY' appears more than once in the document. [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/multiple_body_tags_3.html:41:7 The mandatory tag 'amphtml engine v0.js script' is missing or incorrect. (see https://www.ampproject.org/docs/reference/spec#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/multiple_body_tags_3.html:41:7 The mandatory tag 'noscript enclosure for boilerplate' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/multiple_body_tags_3.html:41:7 The tag 'head > style[amp-boilerplate]' is missing or incorrect, but required by 'noscript > style[amp-boilerplate]'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [GENERIC]
+feature_tests/multiple_body_tags_3.html:41:7 The mandatory tag 'head > style[amp-boilerplate]' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
