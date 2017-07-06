@@ -67,7 +67,10 @@ import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {setStyles} from '../../../src/style';
 import {utf8Encode} from '../../../src/utils/bytes';
 import {isCancellation} from '../../../src/error';
-import {RefreshManager} from '../../amp-a4a/0.1/refresh-manager';
+import {
+  RefreshManager,
+  DATA_ATTR_NAME,
+} from '../../amp-a4a/0.1/refresh-manager';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -435,11 +438,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   layoutCallback() {
     const superReturnValue = super.layoutCallback();
-    this.refreshManager_ = this.refreshManager_ || new RefreshManager(this, {
-      visiblePercentageMin: 50,
-      totalTimeMin: 0,
-      continuousTimeMin: 1,
-    });
+    user().assert(
+        this.useSra && this.element.getAttribute(DATA_ATTR_NAME),
+        'Cannot enable a single slot for both refresh and SRA.');
+    this.refreshManager_ = this.useSra ? null : this.refreshManager_ ||
+        new RefreshManager(this, {
+          visiblePercentageMin: 50,
+          totalTimeMin: 0,
+          continuousTimeMin: 1,
+        });
     return superReturnValue;
   }
 
@@ -797,3 +804,5 @@ function getFirstInstanceValue_(instances, extractFn) {
   }
   return null;
 }
+
+

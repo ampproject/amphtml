@@ -20,7 +20,7 @@ import {
   getEnclosingContainerTypes,
   ValidAdContainerTypes,
 } from '../../../ads/google/a4a/utils';
-import {user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {IntersectionObserverPolyfill} from '../../../src/intersection-observer-polyfill'; // eslint-disable-line max-len
 
 /**
@@ -90,12 +90,29 @@ const RefreshLifecycleState = {
 /**
  * An object containing the IntersectionObservers used to monitor elements.
  * Each IO is configured to a different threshold, and all elements that
- * share the same minOnScreenPixelRatioThreshold will be monitored by the
- * same IO.
+ * share the same visiblePercentageMin will be monitored by the same IO.
  *
- * @private {!Object<string, (!IntersectionObserver|!IntersectionObserverPolyfill)>}
+ * @const {!Object<string, (!IntersectionObserver|!IntersectionObserverPolyfill)>}
  */
 const observers = {};
+
+/**
+ * An object containing all currently active RefreshManagers. This is used in
+ * the IntersectionOberserver callback function to find the appropriate element
+ * target.
+ *
+ * @const {!Object<string, !RefreshManager>}
+ */
+const managers = {};
+
+/** @const {string} */
+const DATA_MANAGER_ID_NAME = 'data-amp-ad-refresh-id';
+
+/**
+ * Used to generate unique IDs for each RefreshManager.
+ * @type {number}
+ */
+let refreshManagerIdCounter = 0;
 
 export class RefreshManager {
 
@@ -148,6 +165,9 @@ export class RefreshManager {
           && container != ValidAdContainerTypes['AMP-STICKY-AD']).length);
 
     if (this.isRefreshable_) {
+      const managerId = String(refreshManagerIdCounter++);
+      this.element_.setAttribute(DATA_MANAGER_ID_NAME, managerId);
+      managers[managerId] = this;
       this.initiateRefreshCycle();
     }
   }
@@ -163,10 +183,8 @@ export class RefreshManager {
     threshold = String(threshold);
     return observers[threshold] ||
         (observers[threshold] = 'IntersectionObserver' in this.win_
-         ? new this.win_['IntersectionObserver'](
-             this.ioCallbackGenerator_(), {threshold})
-         : new IntersectionObserverPolyfill(
-             this.ioCallbackGenerator_(), {threshold}));
+         ? new this.win_['IntersectionObserver'](this.ioCallback_, {threshold})
+         : new IntersectionObserverPolyfill(this.ioCallback_, {threshold}));
   }
 
   /**
@@ -174,53 +192,50 @@ export class RefreshManager {
    * IntersectionObserver implementation. It will implement the core logic of
    * the refresh lifecycle, including the transitions of the DFA.
    *
-   * @return {function(!Array<IntersectionObserverEntry>)}
+   * @param {!Array<IntersectionObserverEntry>} entries
    */
-  ioCallbackGenerator_() {
-    const refreshManager = this;
-    return entries => {
-      for (let idx = 0; idx < entries.length; idx++) {
-        const entry = entries[idx];
-        if (entry.target != refreshManager.element_) {
-          continue;
-        }
-        switch (refreshManager.state_) {
-          case RefreshLifecycleState.INITIAL:
-            // First check if the element qualifies as "being on screen", i.e.,
-            // that at least a minimum threshold of pixels is on screen. If so,
-            // begin a timer, set for the duration of the minimum time on screen
-            // threshold. If this timer runs out without interruption, then all
-            // viewability conditions have been met, and we can begin the refresh
-            // timer.
-            if (entry.intersectionRatio >=
-                refreshManager.config_.visiblePercentageMin) {
-              refreshManager.state_ = RefreshLifecycleState.VIEW_PENDING;
-              refreshManager.visibilityTimeoutId_ = refreshManager.timer_
-                  .delay(() => {
-                    refreshManager.state_ =
-                        RefreshLifecycleState.REFRESH_PENDING;
-                    refreshManager.startRefreshTimer_();
-                  }, refreshManager.config_.continuousTimeMin);
-            }
-            break;
-          case RefreshLifecycleState.VIEW_PENDING:
-            // If the element goes off screen before the minimum on screen time
-            // duration elapses, place it back into INITIAL state.
-            if (entry.intersectionRatio <
-                refreshManager.config_.visiblePercentageMin) {
-              refreshManager.timer_.cancel(
-                  refreshManager.visibilityTimeoutId_);
-              refreshManager.visibilityTimeoutId_ = null;
-              refreshManager.state_ = RefreshLifecycleState.INITIAL;
-            }
-            break;
-          case RefreshLifecycleState.REFRESH_PENDING:
-          case RefreshLifecycleState.REFRESHED:
-          default:
-            break;
-        }
+  ioCallback_(entries) {
+    entries.forEach(entry => {
+      const refreshManagerId = entry.target.getAttribute(DATA_MANAGER_ID_NAME);
+      dev().assert(refreshManagerId);
+      const refreshManager = managers[refreshManagerId];
+      if (entry.target != refreshManager.element_) {
+        return;
       }
-    };
+      switch (refreshManager.state_) {
+        case RefreshLifecycleState.INITIAL:
+          // First check if the element qualifies as "being on screen", i.e.,
+          // that at least a minimum threshold of pixels is on screen. If so,
+          // begin a timer, set for the duration of the minimum time on screen
+          // threshold. If this timer runs out without interruption, then all
+          // viewability conditions have been met, and we can begin the refresh
+          // timer.
+          if (entry.intersectionRatio >=
+              refreshManager.config_.visiblePercentageMin) {
+            refreshManager.state_ = RefreshLifecycleState.VIEW_PENDING;
+            refreshManager.visibilityTimeoutId_ = refreshManager.timer_.delay(
+                () => {
+                  refreshManager.state_ = RefreshLifecycleState.REFRESH_PENDING;
+                  refreshManager.startRefreshTimer_();
+                }, refreshManager.config_.continuousTimeMin);
+          }
+          break;
+        case RefreshLifecycleState.VIEW_PENDING:
+          // If the element goes off screen before the minimum on screen time
+          // duration elapses, place it back into INITIAL state.
+          if (entry.intersectionRatio <
+              refreshManager.config_.visiblePercentageMin) {
+            refreshManager.timer_.cancel(refreshManager.visibilityTimeoutId_);
+            refreshManager.visibilityTimeoutId_ = null;
+            refreshManager.state_ = RefreshLifecycleState.INITIAL;
+          }
+          break;
+        case RefreshLifecycleState.REFRESH_PENDING:
+        case RefreshLifecycleState.REFRESHED:
+        default:
+          break;
+      }
+    });
   }
 
   /**
@@ -362,3 +377,5 @@ export class RefreshManager {
     return this.isRefreshable_;
   }
 }
+
+
