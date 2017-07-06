@@ -250,7 +250,6 @@ export class ViewportBindingInabox {
    * @private
    */
   tryToEnterOverlayMode_() {
-    // TODO(alanorozco): Update viewport measurement from host message.
     return this.prepareFixedContainer_()
         .then(() => this.requestFullOverlayFrame_());
   }
