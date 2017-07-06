@@ -204,6 +204,13 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8236',
   },
   {
+    id: 'amp-bind',
+    name: 'AMP extension for dynamic content',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7156',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-bind/amp-bind.md',
+  },
+  {
     id: 'web-worker',
     name: 'Web worker for background processing',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7156',
