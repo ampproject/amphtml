@@ -439,7 +439,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   layoutCallback() {
     const superReturnValue = super.layoutCallback();
     user().assert(
-        this.useSra && this.element.getAttribute(DATA_ATTR_NAME),
+        !this.useSra || !this.element.getAttribute(DATA_ATTR_NAME),
         'Cannot enable a single slot for both refresh and SRA.');
     this.refreshManager_ = this.useSra ? null : this.refreshManager_ ||
         new RefreshManager(this, {
