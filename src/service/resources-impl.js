@@ -487,6 +487,7 @@ export class Resources {
       resource.requestMeasure();
       dev().fine(TAG_, 'resource reused:', resource.debugid);
     } else {
+      this.relayoutAll_ = true;
       // Create and add a new resource.
       resource = new Resource((++this.resourceIdCounter_), element, this);
       dev().fine(TAG_, 'resource added:', resource.debugid);
