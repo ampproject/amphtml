@@ -257,22 +257,22 @@ export class Resources {
       }
       this.schedulePass();
       this.monitorInput_();
-    });
 
-    // Safari 10 and under incorrectly estimates font spacing for `@font-face`
-    // fonts. This leads to wild measurement errors. The best course of action
-    // is to remeasure everything on window.onload or font timeout (3s),
-    // whichever is earlier. This has to be done on the global window because
-    // this is where the fonts are always added. Unfortunately,
-    // `document.fonts.ready` cannot be used here due to
-    // https://bugs.webkit.org/show_bug.cgi?id=174030.
-    // See https://bugs.webkit.org/show_bug.cgi?id=174031 for more details.
-    Promise.race([
-      loadPromise(this.win),
-      timerFor(this.win).promise(3100),
-    ]).then(() => {
-      this.relayoutAll_ = true;
-      this.schedulePass();
+      // Safari 10 and under incorrectly estimates font spacing for
+      // `@font-face` fonts. This leads to wild measurement errors. The best
+      // course of action is to remeasure everything on window.onload or font
+      // timeout (3s), whichever is earlier. This has to be done on the global
+      // window because this is where the fonts are always added.
+      // Unfortunately, `document.fonts.ready` cannot be used here due to
+      // https://bugs.webkit.org/show_bug.cgi?id=174030.
+      // See https://bugs.webkit.org/show_bug.cgi?id=174031 for more details.
+      Promise.race([
+        loadPromise(this.win),
+        timerFor(this.win).promise(3100),
+      ]).then(() => {
+        this.relayoutAll_ = true;
+        this.schedulePass();
+      });
     });
   }
 
