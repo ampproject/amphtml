@@ -25,7 +25,7 @@ min_validator_revision_required: 238
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 449
+spec_file_revision: 450
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 
@@ -849,6 +849,7 @@ tags: {
   mandatory_alternatives: "noscript > style[amp-boilerplate]"
   unique: true
   mandatory_parent: "NOSCRIPT"
+  mandatory_ancestor: "HEAD"
   deprecation: "noscript > style[amp-boilerplate]"
   deprecation_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
   attrs: { name: "nonce" }
@@ -909,6 +910,7 @@ tags: {
   mandatory_alternatives: "noscript > style[amp-boilerplate]"
   unique: true
   mandatory_parent: "NOSCRIPT"
+  mandatory_ancestor: "HEAD"
   requires: "head > style[amp-boilerplate]"
   attrs: {
     name: "amp-boilerplate"
