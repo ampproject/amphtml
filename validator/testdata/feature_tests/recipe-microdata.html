@@ -1,0 +1,101 @@
+<!doctype html>
+<!--
+      This sample AMP HTML file aims to be a minimalist document that
+      follows best practices and guidances for publishers to mark up
+      content for inclusion in various platforms.
+-->
+<html AMP lang="en" itemscope itemtype="http://schema.org/Recipe">
+  <!-- you can use "amp" or "AMP" or "⚡" -->
+  <head>
+    <meta charset="utf-8">
+    <title>Lorem Ipsum</title>
+    <link itemprop="mainEntityOfPage" rel="canonical" href="http://example.ampproject.org/recipe-metadata.html" />
+    <!--
+        The canonical document for this article should be linked, as above.
+
+        The canonical document should also have a corresponding <link> tag
+        within pointing at this AMP HTML file:
+
+          <link rel="amphtml" href="http://example.ampproject.org/recipe-json-ld.amp.html" />
+
+        It is possible that this AMP HTML document is the canonical document
+        for this article, in which case, the canonical URL should point to this
+        document, and no "amphtml" link is required.
+
+        Also, please be aware that some platforms that use AMP HTML have
+        further restrictions with regards to some schema components.
+
+         For example:
+
+           * All marked-up URL's should be absolute.
+           * The "logo" dimensions must not exceed 600x60.
+    -->
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
+    <!-- only one style tag is allowed, and it must have an "amp-custom" attribute -->
+    <style amp-custom>
+      body {
+        background-color: white;
+      }
+      amp-img {
+        background-color: gray;
+      }
+    </style>
+    <!-- this style tag is required -->
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+  </head>
+  <body>
+      <h1 itemprop="name">Grandma's Holiday Apple Pie</h1>
+      <div itemprop="image" itemscope itemtype="https://schema.org/ImageObject">
+        <amp-img src="http://cdn.ampproject.org/leader.jpg" height="200" width="200"></amp-img>
+        <meta itemprop="url" content="http://cdn.ampproject.org/leader.jpg"></meta>
+        <meta itemprop="width" content="200"></meta>
+        <meta itemprop="height" content="200"></meta>
+      </div>
+      <amp-img itemprop="image" src="http://cdn.ampproject.org/leader.jpg" height="200" width="200"/></amp-img><br>
+      By <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+           <span itemprop="name">Carol Smith</span>
+         </span>
+      Published: <time datetime="2009-11-05" itemprop="datePublished">
+        November 5, 2009</time>
+      <time datetime="2009-11-05" itemprop="dateModified"></time>
+      <p itemprop="description">This is my grandmother's apple pie recipe. I like to add a dash of nutmeg.</p>
+      <p itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating">
+        <span itemprop="ratingValue">4.0</span> stars based on
+        <span itemprop="reviewCount">35</span> reviews </p>
+      <p>Prep time: <time datetime="PT30M" itemprop="prepTime">30 min</time></p>
+      <p>Cook time: <time datetime="PT1H" itemprop="cookTime">1 hour</time></p>
+      <p>Total time: <time datetime="PT1H30M" itemprop="totalTime">1 hour 30 min</time></p>
+      <p>Yield: <span itemprop="recipeYield">1 9" pie (8 servings)</span></p>
+      <p><span itemprop="nutrition" itemscope itemtype="http://schema.org/NutritionInformation">
+        Serving size: <span itemprop="servingSize">1 medium slice</span><br>
+        Calories per serving: <span itemprop="calories">250 cal</span><br>
+        Fat per serving: <span itemprop="fatContent">12 g</span><br>
+      </span></p>
+      <p>Ingredients:<br>
+        Thinly-sliced <span itemprop="ingredients">apples</span>:
+         6 cups<br>
+          <span itemprop="ingredients">White sugar</span>:
+          3/4 cup<br>
+      ...<br>
+    </p>
+    <p>
+      Directions:<br>
+        <div itemprop="recipeInstructions">
+          1. Cut and peel apples<br>
+          2. Mix sugar and cinnamon. Use additional sugar for tart apples.<br>
+          ...<br>
+        </div>
+      </p>
+    </div>
+    <div itemprop="publisher" itemscope itemtype="https://schema.org/Organization">
+      <div itemprop="logo" itemscope itemtype="https://schema.org/ImageObject">
+        <amp-img width="600" height="60" src="http://cdn.ampproject.org/logo.jpg"></amp-img>
+        <meta itemprop="url" content="http://cdn.ampproject.org/logo.jpg"></meta>
+        <meta itemprop="width" content="600"></meta>
+        <meta itemprop="height" content="60"></meta>
+      </div>
+      <meta itemprop="name" content="Google"></meta>
+    </div>
+  </body>
+</html>
