@@ -16,6 +16,7 @@
 
 import {CommonSignals} from '../../../src/common-signals';
 import {Observable} from '../../../src/observable';
+import {VideoAnalyticsEvent, VideoEvents} from '../../../src/video-interface';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {user} from '../../../src/log';
@@ -420,12 +421,14 @@ export class VideoEventTracker extends EventTracker {
       this.sessionObservable_.fire(e);
     };
 
-    this.root.getRoot().addEventListener('amp:video', this.boundOnSession_);
+    this.root.getRoot().addEventListener(
+        VideoEvents.ANALYTICS, this.boundOnSession_);
   }
 
   /** @override */
   dispose() {
-    this.root.getRoot().removeEventListener('amp:video', this.boundOnSession_);
+    this.root.getRoot().removeEventListener(
+        VideoEvents.ANALYTICS, this.boundOnSession_);
   }
 
   /** @override */
@@ -440,20 +443,27 @@ export class VideoEventTracker extends EventTracker {
         this.root.getElement(context, selector, selectionMethod);
 
     return this.sessionObservable_.add(event => {
-      const {type, details} = getData(event);
+      const eventData = getData(event);
+      const type = eventData['type'];
+      const details = eventData['details'];
       const element = user().assertElement(event.target,
           'No target specified by video session event.');
 
       // Wait for target selected
       targetReady.then(analyticsTarget => {
         if (analyticsTarget.contains(element)) {
-          if ((type === 'video-session-visible' && !endSessionWhenInvisible) ||
-              (details.autoplay === true && excludeAutoplay)) {
+          const isSessionVisible =
+              (type === VideoAnalyticsEvent.SESSION_VISIBLE);
+
+          // These spec flags filter events that are triggered.
+          // If they apply, we return and do not log the analytics events.
+          if ((isSessionVisible && !endSessionWhenInvisible) ||
+            (details['autoplay'] && excludeAutoplay)) {
             return;
           }
-          const mutatedType =
-            type === 'video-session-visible' ? 'video-session' : type;
 
+          const mutatedType =
+              isSessionVisible ? VideoAnalyticsEvent.SESSION : type;
           if (mutatedType === on) {
             listener(new AnalyticsEvent(analyticsTarget, mutatedType, details));
           }

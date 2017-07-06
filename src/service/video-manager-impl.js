@@ -19,13 +19,16 @@ import {VideoSessionManager} from './video-session-manager';
 import {removeElement} from '../dom.js';
 import {listen, listenOncePromise} from '../event-helper';
 import {dev} from '../log';
-import {dict} from '../utils/object';
 import {getMode} from '../mode';
 import {registerServiceBuilderForDoc, getServiceForDoc} from '../service';
 import {setStyles} from '../style';
 import {isFiniteNumber} from '../types';
 import {mapRange} from '../utils/math';
-import {VideoEvents, VideoAttributes} from '../video-interface';
+import {
+  VideoAnalyticsEvent,
+  VideoAttributes,
+  VideoEvents,
+} from '../video-interface';
 import {
   viewerForDoc,
   viewportForDoc,
@@ -316,13 +319,13 @@ class VideoEntry {
     this.actionSessionManager_ = new VideoSessionManager();
 
     this.actionSessionManager_.onSessionEnd(
-        () => this.analyticsEvent_('video-session'));
+        () => this.analyticsEvent_(VideoAnalyticsEvent.SESSION));
 
     /** @private @const */
     this.visibilitySessionManager_ = new VideoSessionManager();
 
     this.visibilitySessionManager_.onSessionEnd(
-        () => this.analyticsEvent_('video-session-visible'));
+        () => this.analyticsEvent_(VideoAnalyticsEvent.SESSION_VISIBLE));
 
     /** @private @const {function(): !Promise<boolean>} */
     this.boundSupportsAutoplay_ = supportsAutoplay.bind(null, ampdoc.win,
@@ -390,7 +393,7 @@ class VideoEntry {
     if (this.isVisible_) {
       this.visibilitySessionManager_.beginSession();
     }
-    this.analyticsEvent_('video-play');
+    this.analyticsEvent_(VideoAnalyticsEvent.PLAY);
   }
 
   /**
@@ -402,7 +405,7 @@ class VideoEntry {
     const trackingVideo = assertTrackingVideo_(this.video);
     if (trackingVideo &&
         trackingVideo.getCurrentTime() !== trackingVideo.getDuration()) {
-      this.analyticsEvent_('video-pause');
+      this.analyticsEvent_(VideoAnalyticsEvent.PAUSE);
     }
     this.isPlaying_ = false;
 
@@ -419,7 +422,7 @@ class VideoEntry {
    */
   videoEnded_() {
     this.isPlaying_ = false;
-    this.analyticsEvent_('video-ended');
+    this.analyticsEvent_(VideoAnalyticsEvent.ENDED);
     this.actionSessionManager_.endSession();
   }
 
@@ -948,30 +951,32 @@ class VideoEntry {
   analyticsEvent_(eventType, opt_vars) {
     const trackingVideo = assertTrackingVideo_(this.video);
     if (trackingVideo) {
-      opt_vars = opt_vars || this.getAnalyticsData(trackingVideo);
-      trackingVideo.element.dispatchCustomEvent('amp:video',
-          {type: eventType, details: opt_vars});
+      opt_vars = opt_vars || this.getAnalyticsDetails_(trackingVideo);
+      trackingVideo.element.dispatchCustomEvent(
+          VideoEvents.ANALYTICS, {type: eventType, details: opt_vars});
     }
   }
 
   /**
    * Collects a snapshot of the current video state for video analytics
    * @param {!../video-interface.TrackingVideoInterface} video
-   * @return {!JsonObject}
+   * @return {!../video-interface.VideoAnalyticsDetailsDef}
+   * @private
    */
-  getAnalyticsData(video) {
-    return dict({
-      'id': video.getId(),
-      'autoplay': this.isAutoplay(),
-      'width': video.getWidth(),
-      'height': video.getHeight(),
+  getAnalyticsDetails_(video) {
+    const autoplay = this.isAutoplay();
+    return {
+      'autoplay': autoplay,
       'currentTime': video.getCurrentTime(),
       'duration': video.getDuration(),
-      'muted': video.getMuted(),
-      'paused': video.getPaused(),
       'ended': video.getEnded(),
       // TODO(cvializ): add fullscreen
-    });
+      'height': video.getHeight(),
+      'id': video.getId(),
+      'muted': video.getMuted(),
+      'paused': video.getPaused(),
+      'width': video.getWidth(),
+    };
   }
 }
 

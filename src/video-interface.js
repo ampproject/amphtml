@@ -307,4 +307,41 @@ export const VideoEvents = {
    * @event ended
    */
   ENDED: 'ended',
+
+  /**
+   * amp:video:analytics
+   *
+   * Fired when an analytics event occurs
+   *
+   * @event amp:video:analytics
+   * @property {!VideoAnalyticsEvent} type The type of the video analytics event.
+   * @property {!VideoAnalyticsDetailsDef} details
+   */
+  ANALYTICS: 'amp:video:analytics',
 };
+
+
+/** @enum {string} */
+export const VideoAnalyticsEvent = {
+  ENDED: 'video-ended',
+  PAUSE: 'video-pause',
+  PLAY: 'video-play',
+  SESSION: 'video-session',
+  SESSION_VISIBLE: 'video-session-visible',
+};
+
+
+/**
+ * @typedef {{
+ *   autoplay: boolean,
+ *   currentTime: number,
+ *   duration: number,
+ *   ended: boolean,
+ *   height: number,
+ *   id: string,
+ *   muted: boolean,
+ *   paused: boolean,
+ *   width: number
+ * }}
+ */
+export let VideoAnalyticsDetailsDef;
