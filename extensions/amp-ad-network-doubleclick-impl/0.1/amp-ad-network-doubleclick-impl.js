@@ -93,6 +93,10 @@ const RTC_TIMEOUT = 1000;
 /** @private {?Promise<!Object<string,string>>} */
 let rtcPromise = null;
 
+let rtcResponseJson = null;
+
+let rtcConfig;
+
 /** @private @const {!Object<string,string>} */
 const PAGE_LEVEL_PARAMS_ = {
   'gdfp_req': '1',
@@ -520,15 +524,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @private
    */
   executeRtc_() {
+    if (rtcPromise) {
+      return this.timeoutAndMergeRtc();
+    }
     const ampRtcPageElement = document.getElementById('amp-rtc');
     if (!ampRtcPageElement) {
       return Promise.resolve();
     }
-    let rtcConfig;
     let endpoint;
     if (!isObject(rtcConfig = tryParseJson(ampRtcPageElement.textContent))
-    || !(endpoint = rtcConfig['endpoint'])
-    || typeof endpoint != 'string'
+    || !(endpoint = rtcConfig['endpoint']) || typeof endpoint != 'string'
     || !isSecureUrl(endpoint)) {
       user().warn(TAG, 'invalid RTC config...');
       return Promise.resolve();
@@ -544,7 +549,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     let rtcTotalTime;
     const startTime = Date.now();
-    rtcPromise = rtcPromise || xhrFor(this.win).fetchJson(
+    rtcPromise = xhrFor(this.win).fetchJson(
         endpoint, xhrInit).then(res => {
           rtcTotalTime = rtcTotalTime || Date.now() - startTime;
           if (!noCache) {
@@ -553,45 +558,55 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               credentials: 'include',
               headers,
             }).catch(err => {
+              user().error(err);
               this.sendRtcErrorPing(RTC_ERROR.XHR);
             });
           }
-          return res;
+          return [res, rtcTotalTime];
         });
 
-    return timerFor(window).timeoutPromise(
-        RTC_TIMEOUT, rtcPromise).then(res => {
-          // TODO :: Need to add the time on to the ad request.
+    return this.timeoutAndMergeRtc();
+  }
 
+  timeoutAndMergeRtc() {
+    return timerFor(window).timeoutPromise(RTC_TIMEOUT, rtcPromise).then(
+        r => {
+          const res = r[0];
+          const rtcTotalTime = r[1];
+          // TODO :: Need to add the time on to the ad request.
           // Redirects and non-200 status codes are forbidden for RTC.
-          if (!res.redirected && res.status == 200) {
-            return res.json().then(rtcResponse => {
-              if (rtcResponse) {
-                if (!!rtcResponse['targeting'] ||
-                !!rtcResponse['categoryExclusions']) {
-                  this.jsonTargeting_['targeting'] = deepMerge(
-                      this.jsonTargeting_['targeting'] || {},
-                      rtcResponse['targeting'] || {});
-                  this.jsonTargeting_['categoryExclusions'] = deepMerge(
-                      this.jsonTargeting_['categoryExclusions'] || {},
-                      rtcResponse['categoryExclusions'] || {});
-                  return Promise.resolve();
-                } else if (rtcConfig['sendAdRequestOnFailure'] === false) {
-                    // Default is to send request without RTC, so only reject if
-                    // pub explicitly says not to.
-                  return Promise.reject();
-                }
-              }
-            });
-          } else {
+          if (!!res.redirected || res.status != 200) {
             this.sendRtcErrorPing(RTC_ERROR.BAD_RESPONSE);
-            return null;
+            return this.shouldSendRequestWithoutRtc();
           }
+          // If response's json() method has already been called, reuse
+          // the results. Accessing .json() a second time will throw.
+          rtcResponseJson = rtcResponseJson || res.json();
+          return rtcResponseJson.then(rtcResponse => {
+            if (rtcResponse) {
+              if (!!rtcResponse['targeting'] ||
+                  !!rtcResponse['categoryExclusions']) {
+                this.jsonTargeting_['targeting'] = deepMerge(
+                    this.jsonTargeting_['targeting'] || {},
+                    rtcResponse['targeting'] || {});
+                this.jsonTargeting_['categoryExclusions'] = deepMerge(
+                    this.jsonTargeting_['categoryExclusions'] || {},
+                    rtcResponse['categoryExclusions'] || {});
+              }
+              return Promise.resolve();
+            }
+            return this.shouldSendRequestWithoutRtc();
+          });
         }).catch(err => {
           user().error(err);
           this.sendRtcErrorPing(RTC_ERROR.XHR);
-          return null;
+          return this.shouldSendRequestWithoutRtc();
         });
+  }
+
+  shouldSendRequestWithoutRtc() {
+    return rtcConfig['sendAdRequestOnFailure'] !== false ?
+        Promise.resolve() : Promise.reject();
   }
 
   sendRtcErrorPing(error) {
@@ -773,6 +788,8 @@ export function resetSraStateForTesting() {
 /** @visibileForTesting */
 export function resetRtcStateForTesting() {
   rtcPromise = null;
+  rtcResponseJson = null;
+  rtcConfig = undefined;
 }
 
 /**

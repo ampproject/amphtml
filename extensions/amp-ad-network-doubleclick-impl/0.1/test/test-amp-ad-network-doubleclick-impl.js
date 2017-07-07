@@ -404,8 +404,10 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       });
     });
 
-    afterEach(() =>
-        toggleExperiment(window, 'dc-use-attr-for-format', false));
+    afterEach(() => {
+      toggleExperiment(window, 'dc-use-attr-for-format', false);
+      document.body.removeChild(element);
+    });
 
     it('returns the right URL', () => {
       new AmpAd(element).upgradeCallback();
