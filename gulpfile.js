@@ -374,9 +374,6 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
 function compileCss() {
   const startTime = Date.now();
   return jsifyCssAsync('css/amp.css')
-  .then(() => {
-    endBuildStep('Recompiled CSS in', 'amp.css', startTime);
-  })
   .then(function(css) {
     return toPromise(gulp.src('css/**.css')
           .pipe($$.file('css.js', 'export const cssText = ' +
@@ -387,7 +384,11 @@ function compileCss() {
             mkdirSync('build/css');
             fs.writeFileSync('build/css/v0.css', css);
           }));
-  }).then(() => {
+  })
+  .then(() => {
+    endBuildStep('Recompiled CSS in', 'amp.css', startTime);
+  })
+  .then(() => {
     return buildExtensions({
       bundleOnlyIfListedInFiles: true,
       compileOnlyCss: true
