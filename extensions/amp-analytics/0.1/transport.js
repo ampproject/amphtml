@@ -27,7 +27,7 @@ import {timerFor} from '../../../src/services';
 import {removeElement} from '../../../src/dom';
 import {setStyle, setStyles} from '../../../src/style';
 import {hasOwn} from '../../../src/utils/object';
-import {IframeMessagingClient} from '../../../3p/iframe-messaging-client';
+import {listenFor, SubscriptionApi} from '../../../src/iframe-helper';
 import {AMP_ANALYTICS_3P_MESSAGE_TYPE} from '../../../src/3p-analytics-common';
 import {
   AmpAnalytics3pEventMessageQueue,
@@ -41,7 +41,7 @@ const TAG_ = 'amp-analytics.Transport';
  *    frame: Element,
  *    sentinel: !string,
  *    usageCount: number,
- *    iframeMessagingClient: IframeMessagingClient,
+ *    subscriptionApi: SubscriptionApi,
  *    newCreativeMessageQueue: AmpAnalytics3pNewCreativeMessageQueue,
  *    eventQueue: AmpAnalytics3pEventMessageQueue,
  *  }} */
@@ -166,57 +166,89 @@ export class Transport {
   processCrossDomainIframe(win, transportOptions, opt_processResponse) {
     const frameUrl = dev().assertString(transportOptions['iframe'],
         'Cross-domain frame parameters missing ${this.type_}');
-    const frameData = this.useExistingOrCreateCrossDomainIframe(
-        win, frameUrl, transportOptions['extraData']);
-    const iframeMessagingClient = frameData.iframeMessagingClient;
-    iframeMessagingClient.registerCallback(
-        AMP_ANALYTICS_3P_MESSAGE_TYPE.READY, () => {
-          iframeMessagingClient.setHostWindow(frameData.frame.contentWindow);
-          frameData.newCreativeMessageQueue.setIsReady();
-          frameData.eventQueue.setIsReady();
-        });
-    if (!opt_processResponse) {
-      return;
-    }
-    iframeMessagingClient.registerCallback(
-        AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE,
-        response => {
-          dev().assert(response && response['data'],
-              'Received empty response from 3p analytics frame');
-          dev().assert(opt_processResponse,
-              'Received response from 3p analytics frame when none was' +
-              ' expected');
-          opt_processResponse(
-              this.type_,
-              /** @type
-               * {!../../../src/3p-analytics-common.AmpAnalytics3pResponse}
-               */ (response));
-        });
-  }
-
-  /**
-   * If iframe doesn't exist for this iframe url, create it.
-   * @param {!Window} win The window element
-   * @param {!string} frameUrl The URL of the frame to send the data to
-   * @param {string=} opt_extraData The data to send to the frame
-   * @return {!FrameData}
-   * @VisibleForTesting
-   */
-  useExistingOrCreateCrossDomainIframe(win, frameUrl, opt_extraData) {
     let frameData;
+    let shouldAddToDOM = false;
     if (Transport.hasCrossDomainIframe(frameUrl)) {
       frameData = Transport.getFrameData(frameUrl);
       Transport.incrementIframeUsageCount_(
         /** @type{!FrameData} */ (frameData));
     } else {
       frameData = this.createCrossDomainIframe(win, frameUrl);
-      win.document.body.appendChild(frameData.frame);
+      shouldAddToDOM = true;
     }
     dev().assert(frameData, 'Trying to use non-existent frame');
-    const assuredNonNullFrameData = /** @type{!FrameData} */ (frameData);
-    assuredNonNullFrameData.newCreativeMessageQueue.enqueue(
-        this.id_, opt_extraData);
-    return assuredNonNullFrameData;
+    if (transportOptions['extraData']) {
+      frameData.extraDataQueue.enqueue(this.id_, transportOptions['extraData']);
+    }
+
+    if (shouldAddToDOM) {
+      win.document.body.appendChild(frameData.frame);
+    }
+  }
+
+  /**
+   * Create a cross-domain iframe for third-party vendor anaytlics
+   * @param {!Window} win The window element
+   * @param {!string} frameUrl  The URL of the cross-domain iframe
+   * @return {!FrameData}
+   * @VisibleForTesting
+   */
+  createCrossDomainIframe(win, frameUrl) {
+    const sentinel = Transport.createUniqueId_();
+    const scriptSrc = getMode().localDev
+      ? 'dist.3p/current/ampanalytics-lib.js'
+      : '$internalRuntimeVersion$/ampanalytics-v0.js';
+    const frameName = JSON.stringify(/** @type {JsonObject} */ ({
+      scriptSrc,
+      sentinel,
+    }));
+    const frame = createElementWithAttributes(win.document, 'iframe',
+      /** @type {!JsonObject} */ ({
+        sandbox: 'allow-scripts',
+        name: frameName,
+        src: frameUrl,
+      }));
+    setStyles(frame,
+      {width: 0, height: 0, display: 'none',
+        position: 'absolute', top: 0, left: 0});
+    const frameSubscribed = () => {}; // Don't care. SubscriptionAPI is
+    // really for broadcasting one-to-many with a single sentinel. But here
+    // we are using it for sending one-to-one, with lots of different sentinels.
+    const extraDataSender = new SubscriptionApi(frame,
+      sentinel + AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVE, false, frameSubscribed);
+    const eventSender = new SubscriptionApi(frame,
+      sentinel + AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT, false, frameSubscribed);
+    const frameData = /** @const {FrameData} */ ({
+      frame,
+      sentinel,
+      usageCount: 1,
+      extraDataQueue: new AmpAnalytics3pNewCreativeMessageQueue(win,
+          extraDataSender),
+      eventQueue: new AmpAnalytics3pEventMessageQueue(win, eventSender),
+    });
+    Transport.crossDomainIframes_[frameUrl] = frameData;
+
+    frameData.readyMessageUnlisten = listenFor(frameData.frame,
+      frameData.sentinel + AMP_ANALYTICS_3P_MESSAGE_TYPE.READY, () => {
+        frameData.extraDataQueue.setIsReady();
+        frameData.eventQueue.setIsReady();
+      }, true);
+
+    frameData.responseMessageUnlisten = listenFor(frameData.frame,
+      frameData.sentinel + AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE,
+      response => {
+        dev().assert(response && response['data'],
+          'Received empty response from 3p analytics frame');
+        if (!opt_processResponse) {
+          return;
+        }
+        opt_processResponse(
+          this.type_,
+        /** @type
+         * {!../../../src/3p-analytics-common.AmpAnalytics3pResponse}
+         */ (response));
+      }, true);
+    return frameData;
   }
 
   /**
@@ -237,6 +269,7 @@ export class Transport {
     }
     ampDoc.body.removeChild(frameData.frame);
     delete Transport.crossDomainIframes_[frameUrl];
+    // TODO(jonkeller): Do something with frameData.readyMessageUnlisten and frameData.responseMessageUnlisten
   }
 
   /**
@@ -269,49 +302,6 @@ export class Transport {
    */
   static hasCrossDomainIframe(frameUrl) {
     return hasOwn(Transport.crossDomainIframes_, frameUrl);
-  }
-
-  /**
-   * Create a cross-domain iframe for third-party vendor anaytlics
-   * @param {!Window} win The window element
-   * @param {!string} frameUrl  The URL of the cross-domain iframe
-   * @return {!FrameData}
-   * @VisibleForTesting
-   */
-  createCrossDomainIframe(win, frameUrl) {
-    const sentinel = Transport.createUniqueId_();
-    const scriptSrc = getMode().localDev
-      ? 'dist.3p/current/ampanalytics-lib.js'
-      : '$internalRuntimeVersion$/ampanalytics-v0.js';
-    const frameName = JSON.stringify(/** @type {JsonObject} */ ({
-      scriptSrc,
-      sentinel,
-    }));
-    const frame = createElementWithAttributes(win.document, 'iframe',
-      /** @type {!JsonObject} */ ({
-        sandbox: 'allow-scripts',
-        name: frameName,
-      }));
-    const iframeMessagingClient = new IframeMessagingClient(window);
-    iframeMessagingClient.setSentinel(sentinel);
-    iframeMessagingClient.setHostWindow(
-      /** @type {!HTMLIFrameElement} */ (frame));
-    setStyles(frame,
-        {width: 0, height: 0, display: 'none',
-          position: 'absolute', top: 0, left: 0});
-    const frameData = /** @const {FrameData} */ ({
-      frame,
-      sentinel,
-      usageCount: 1,
-      iframeMessagingClient,
-      newCreativeMessageQueue: new AmpAnalytics3pNewCreativeMessageQueue(
-        win, iframeMessagingClient),
-      eventQueue: new AmpAnalytics3pEventMessageQueue(
-        win, iframeMessagingClient),
-    });
-    Transport.crossDomainIframes_[frameUrl] = frameData;
-    frame.src = frameUrl;
-    return frameData;
   }
 
   /**

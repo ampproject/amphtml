@@ -16,13 +16,9 @@
 
 import {dev} from '../../../src/log';
 import {AMP_ANALYTICS_3P_MESSAGE_TYPE} from '../../../src/3p-analytics-common';
-import {throttle} from '../../../src/utils/rate-limit';
 
 /** @private @const {string} */
 const TAG_ = 'amp-analytics.CrossDomainIframeMessageQueue';
-
-/** @const {number} */
-export const MESSAGE_THROTTLE_TIME = 100;
 
 /** @private @const {number} */
 const MAX_QUEUE_SIZE_ = 100;
@@ -35,17 +31,17 @@ class AbstractAmpAnalytics3pMessageQueue {
   /**
    * Constructor
    * @param {!Window} win The window element
-   * @param {!../../../3p/iframe-messaging-client.IframeMessagingClient}
-   *   iframeMessagingClient Facilitates cross-frame communication
+   * @param {!../../../src/iframe-helper.SubscriptionApi}
+   *   sender Facilitates cross-frame communication
    * @param {!string} messageType The type that will be used to
    * contain the queued data (see 3p-analytics-common)
    */
-  constructor(win, iframeMessagingClient, messageType) {
+  constructor(win, sender, messageType) {
     /** @private {!Window} */
     this.win_ = win;
 
-    /** @private {!../../../3p/iframe-messaging-client.IframeMessagingClient} */
-    this.iframeMessagingClient_ = iframeMessagingClient;
+    /** @private {!../../../src/iframe-helper.SubscriptionApi} */
+    this.sender_ = sender;
 
     /** @private {string} */
     this.messageType_ = messageType;
@@ -55,11 +51,6 @@ class AbstractAmpAnalytics3pMessageQueue {
 
     /** @private {!Object<string,!string|!Array<string>>} */
     this.creativeToPendingMessages_ = {};
-
-    /** @private {function(...*)} */
-    this.throttledFlushQueue_ = throttle(this.win_, () => {
-      this.flushQueue_();
-    }, MESSAGE_THROTTLE_TIME);
   }
 
   /**
@@ -68,19 +59,17 @@ class AbstractAmpAnalytics3pMessageQueue {
    */
   setIsReady() {
     this.isReady_ = true;
-    this.throttledFlushQueue_();
+    this.flushQueue_();
   }
 
   /**
    * Send queued data (if there is any) to a cross-domain iframe
-   * This should never be called directly. Use this.throttledFlushQueue_()
-   * instead.
    * @private
    */
   flushQueue_() {
     if (this.isReady_ && this.queueSize()) {
       const jsonMsg = /** @type {JsonObject} */ (this.buildMessage());
-      this.iframeMessagingClient_./*OK*/sendMessage(this.messageType_, jsonMsg);
+      this.sender_.send(this.messageType_, jsonMsg);
       this.creativeToPendingMessages_ = {};
     }
   }
@@ -119,11 +108,11 @@ export class AmpAnalytics3pNewCreativeMessageQueue extends
   /**
    * Constructor
    * @param {!Window} win The window element
-   * @param {!../../../3p/iframe-messaging-client.IframeMessagingClient}
-   *   iframeMessagingClient Facilitates cross-frame communication
+   * @param {!../../../src/iframe-helper.SubscriptionApi}
+   *   sender Facilitates cross-frame communication
    */
-  constructor(win, iframeMessagingClient) {
-    super(win, iframeMessagingClient, AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVE);
+  constructor(win, sender) {
+    super(win, sender, AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVE);
   }
 
   /**
@@ -137,7 +126,7 @@ export class AmpAnalytics3pNewCreativeMessageQueue extends
     dev().assert(!this.messageFor(senderId),
         'Replacing existing extra data for: ' + senderId);
     this.creativeToPendingMessages_[senderId] = opt_data || '';
-    this.throttledFlushQueue_();
+    this.flushQueue_();
   }
 
   /**
@@ -175,11 +164,11 @@ export class AmpAnalytics3pEventMessageQueue extends
   /**
    * Constructor
    * @param {!Window} win The window element
-   * @param {!../../../3p/iframe-messaging-client.IframeMessagingClient}
-   *   iframeMessagingClient Facilitates cross-frame communication
+   * @param {!../../../src/iframe-helper.SubscriptionApi}
+   *   sender Facilitates cross-frame communication
    */
-  constructor(win, iframeMessagingClient) {
-    super(win, iframeMessagingClient, AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT);
+  constructor(win, sender) {
+    super(win, sender, AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT);
   }
 
   /**
@@ -197,7 +186,7 @@ export class AmpAnalytics3pEventMessageQueue extends
     }
     this.creativeToPendingMessages_[senderId].push(data);
 
-    this.throttledFlushQueue_();
+    this.flushQueue_();
   }
 
   /**
