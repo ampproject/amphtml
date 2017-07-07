@@ -100,6 +100,9 @@ export class StandardActions {
       case 'goBack':
         this.handleAmpGoBack_(invocation);
         return;
+      case 'print':
+        this.handleAmpPrint_(invocation);
+        return;
     }
     throw user().createError('Unknown AMP action ', invocation.method);
   }
@@ -160,6 +163,17 @@ export class StandardActions {
       return;
     }
     historyForDoc(this.ampdoc).goBack();
+  }
+
+  /**
+   * @param {!./action-impl.ActionInvocation} invocation
+   * @private
+   */
+  handleAmpPrint_(invocation) {
+    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
+      return;
+    }
+    window.print();
   }
 
   /**
