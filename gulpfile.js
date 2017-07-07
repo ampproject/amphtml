@@ -190,7 +190,7 @@ function endBuildStep(stepName, targetName, startTime) {
   const endTime = Date.now();
   const executionTime = new Date(endTime - startTime);
   const secs = executionTime.getSeconds();
-  const ms = executionTime.getMilliseconds().toString().padStart(3, "0");
+  const ms = executionTime.getMilliseconds().toString().padStart(3, '0');
   var timeString = '(';
   if (secs === 0) {
     timeString += ms + ' ms)';
