@@ -51,10 +51,12 @@ limitations under the License.
 
 The `amp-bind` component allows you to add custom stateful interactivity to your AMP pages via data binding and JS-like expressions.
 
-{% call callout('Learn more', type='read') %}
-Check out the AMP Conf 2017 talk "[Turing complete...AMP Pages?!](https://www.youtube.com/watch?v=xzCFU8b5fCU)" for a video introduction to the feature.
-{% endcall %}
-
+<figure class="alignment-wrapper  margin-">
+<amp-youtube
+    data-videoid="xzCFU8b5fCU"
+    layout="responsive"
+    width="480" height="270"></amp-youtube>
+<figcaption>Watch this video for an introduction to amp-bind.</figcaption></figure>
 
 ### A simple example
 
@@ -318,8 +320,7 @@ Only binding to the following components and attributes are allowed:
   <tr>
     <td><code>&lt;amp-img&gt;</code></td>
     <td><code>[alt]</code><br><code>[attribution]</code><br><code>[src]</code><br><code>[srcset]</code></td>
-    <td>When binding to <code>[src]</code>, make sure you also bind to <code>[srcset]</code> in order to make the binding work on cache.</td>
-    <td>See corresponding <a href="https://www.ampproject.org/docs/reference/components/media/amp-img#attributes">amp-img attributes</a>.</td>
+    <td>When binding to <code>[src]</code>, make sure you also bind to <code>[srcset]</code> in order to make the binding work on cache.<br>See corresponding <a href="https://www.ampproject.org/docs/reference/components/media/amp-img#attributes">amp-img attributes</a>.</td>
   </tr>
   <tr>
     <td rowspan=2><code>&lt;amp-list&gt;</code></td>
