@@ -233,6 +233,15 @@ describes.sandboxed('StandardActions', {}, () => {
         expect(spy).to.be.calledWith('{foo: 123}');
       });
     });
+
+    it('should implement print', () => {
+      installHistoryServiceForDoc(ampdoc);
+      const history = historyForDoc(ampdoc);
+      const printStub = sandbox.stub(history, 'print');
+      const invocation = {method: 'print', satisfiesTrust: () => true};
+      standardActions.handleAmpTarget(invocation);
+      expect(print).to.be.calledOnce;
+    });
   });
 
   describes.fakeWin('adoptEmbedWindow', {}, env => {
