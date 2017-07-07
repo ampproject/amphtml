@@ -152,6 +152,12 @@ export class Resources {
     /** @private {number} */
     this.relayoutTop_ = -1;
 
+    /**
+     * Any resources after this index will be remeasured.
+     * @private {number}
+     **/
+    this.relayoutIndex_ = Infinity;
+
     /** @private {time} */
     this.lastScrollTime_ = 0;
 
@@ -484,14 +490,14 @@ export class Resources {
     if (resource &&
         resource.getState() != ResourceState.NOT_BUILT &&
         !element.reconstructWhenReparented()) {
-      resource.requestMeasure();
       dev().fine(TAG_, 'resource reused:', resource.debugid);
     } else {
-      this.relayoutAll_ = true;
       // Create and add a new resource.
       resource = new Resource((++this.resourceIdCounter_), element, this);
       dev().fine(TAG_, 'resource added:', resource.debugid);
     }
+    this.relayoutIndex_ = Math.min(this.relayoutIndex_, this.resources_.length);
+    this.schedulePass(1000);
     this.resources_.push(resource);
   }
 
@@ -1034,6 +1040,7 @@ export class Resources {
     dev().fine(TAG_,
         'PASS: visible=', this.visible_,
         ', relayoutAll=', this.relayoutAll_,
+        ', relayoutIndex=', this.relayoutIndex_,
         ', relayoutTop=', this.relayoutTop_,
         ', viewportSize=', viewportSize.width, viewportSize.height,
         ', prerenderSize=', this.prerenderSize_);
@@ -1322,8 +1329,10 @@ export class Resources {
     // Ensure all resources layout phase complete; when relayoutAll is requested
     // force re-layout.
     const relayoutAll = this.relayoutAll_;
-    this.relayoutAll_ = false;
+    const relayoutIndex = this.relayoutIndex_;
     const relayoutTop = this.relayoutTop_;
+    this.relayoutAll_ = false;
+    this.relayoutIndex_ = Infinity;
     this.relayoutTop_ = -1;
 
     // Phase 1: Build and relayout as needed. All mutations happen here.
@@ -1350,7 +1359,7 @@ export class Resources {
     // there's no way to optimize this. All reads happen here.
     let toUnload;
     if (relayoutCount > 0 || remeasureCount > 0 ||
-            relayoutAll || relayoutTop != -1) {
+        relayoutAll || relayoutIndex < Infinity || relayoutTop != -1) {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
         if (r.hasOwner() && !r.isMeasureRequested()) {
@@ -1358,10 +1367,11 @@ export class Resources {
           continue;
         }
         if (relayoutAll ||
-                r.getState() == ResourceState.NOT_LAID_OUT ||
-                !r.hasBeenMeasured() ||
-                r.isMeasureRequested() ||
-                relayoutTop != -1 && r.getLayoutBox().bottom >= relayoutTop) {
+            r.getState() == ResourceState.NOT_LAID_OUT ||
+            !r.hasBeenMeasured() ||
+            r.isMeasureRequested() ||
+            i > relayoutIndex ||
+            relayoutTop != -1 && r.getLayoutBox().bottom >= relayoutTop) {
           const wasDisplayed = r.isDisplayed();
           r.measure();
           if (wasDisplayed && !r.isDisplayed()) {
