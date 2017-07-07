@@ -235,12 +235,14 @@ describes.sandboxed('StandardActions', {}, () => {
     });
 
     it('should implement print', () => {
-      installHistoryServiceForDoc(ampdoc);
-      const history = historyForDoc(ampdoc);
-      const printStub = sandbox.stub(history, 'print');
+      const windowObj = {
+        print: () => {}
+      }
+      windowApi = windowObj;
+      const printStub = sandbox.stub(windowApi, 'print');
       const invocation = {method: 'print', satisfiesTrust: () => true};
       standardActions.handleAmpTarget(invocation);
-      expect(print).to.be.calledOnce;
+      expect(printStub).to.be.calledOnce;
     });
   });
 
