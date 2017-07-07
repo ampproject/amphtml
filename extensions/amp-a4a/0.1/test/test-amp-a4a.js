@@ -40,7 +40,8 @@ import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {utf8Encode} from '../../../../src/utils/bytes';
 import {resetScheduledElementForTesting} from '../../../../src/custom-element';
 import {
-  ampdocServiceFor, urlReplacementsForDoc
+  ampdocServiceFor,
+  urlReplacementsForDoc,
 } from '../../../../src/services';
 import {incrementLoadingAds} from '../../../amp-ad/0.1/concurrent-load';
 import {platformFor, timerFor} from '../../../../src/services';

@@ -18,7 +18,7 @@ import {listenOncePromise} from '../../src/event-helper';
 import {
   ampdocServiceFor,
   videoManagerForDoc,
-  viewerForDoc
+  viewerForDoc,
 } from '../../src/services';
 import {isLayoutSizeDefined} from '../../src/layout';
 import {VideoEvents} from '../../src/video-interface';
