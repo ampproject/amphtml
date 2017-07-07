@@ -73,6 +73,18 @@ export function activityForDoc(nodeOrDoc) {
 }
 
 /**
+ * Returns the global instance of the `AmpDocService` service that can be
+ * used to resolve an ampdoc for any node: either in the single-doc or
+ * shadow-doc environment.
+ * @param {!Window} window
+ * @return {!./service/ampdoc-impl.AmpDocService}
+ */
+export function ampdocServiceFor(window) {
+  return /** @type {!./service/ampdoc-impl.AmpDocService} */ (
+      getService(window, 'ampdoc'));
+}
+
+/**
  * @param {!Window} window
  * @return {!./service/batched-xhr-impl.BatchedXhr}
  */

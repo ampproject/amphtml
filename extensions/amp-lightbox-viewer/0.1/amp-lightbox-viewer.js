@@ -17,11 +17,10 @@
 
 import {CSS} from '../../../build/amp-lightbox-viewer-0.1.css';
 import {KeyCodes} from '../../../src/utils/key-codes';
-import {ampdocServiceFor} from '../../../src/ampdoc';
+import {ampdocServiceFor, extensionsFor} from '../../../src/services';
 import {isExperimentOn} from '../../../src/experiments';
 import {Layout} from '../../../src/layout';
 import {user, dev} from '../../../src/log';
-import {extensionsFor} from '../../../src/services';
 import {toggle, setStyle} from '../../../src/style';
 import {getData, listen} from '../../../src/event-helper';
 import {LightboxManager} from './service/lightbox-manager-impl';

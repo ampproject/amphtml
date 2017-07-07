@@ -15,7 +15,7 @@
  */
 
 import {Viewer} from '../../src/service/viewer-impl';
-import {ampdocServiceFor} from '../../src/ampdoc';
+import {ampdocServiceFor} from '../../src/services';
 import {dev} from '../../src/log';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installPlatformService} from '../../src/service/platform-impl';

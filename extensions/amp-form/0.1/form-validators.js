@@ -16,7 +16,7 @@
 
 import {dev} from '../../../src/log';
 import {ValidationBubble} from './validation-bubble';
-import {getAmpDoc} from '../../../src/ampdoc';
+import {getAmpdoc} from '../../../src/service';
 
 
 /** @type {boolean|undefined} */
@@ -69,7 +69,7 @@ export class FormValidator {
     this.form = form;
 
     /** @protected @const {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc = getAmpDoc(form);
+    this.ampdoc = getAmpdoc(form);
 
     /** @protected @const {!Document} */
     this.doc = /** @type {!Document} */ (form.ownerDocument);
