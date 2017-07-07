@@ -41,8 +41,8 @@ export function doubleclick(global, data) {
     'slot', 'targeting', 'categoryExclusions',
     'tagForChildDirectedTreatment', 'cookieOptions',
     'overrideWidth', 'overrideHeight', 'loadingStrategy',
-    'consentNotificationId', 'useSameDomainRenderingUntilDeprecated',
-    'experimentId', 'multiSize', 'multiSizeValidation', 'ampSlotIndex',
+    'consentNotificationId', 'experimentId', 'multiSize',
+    'multiSizeValidation', 'ampSlotIndex',
   ]);
 
   if (global.context.clientId) {
@@ -283,8 +283,7 @@ export function selectGptExperiment(data) {
 export function writeAdScript(global, data, gptFilename) {
   const url =
   `https://www.googletagservices.com/tag/js/${gptFilename || 'gpt.js'}`;
-  if (gptFilename || data.useSameDomainRenderingUntilDeprecated != undefined
-    || data.multiSize) {
+  if (gptFilename || data.multiSize) {
     doubleClickWithGpt(global, data, GladeExperiment.GLADE_OPT_OUT, url);
   } else {
     const experimentFraction = 0.1;
