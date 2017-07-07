@@ -1252,7 +1252,8 @@ class CssContextImpl {
    * @private
    */
   getElementSize_(target) {
-    return {width: target./*OK*/offsetWidth, height: target./*OK*/offsetHeight};
+    const b = target./*OK*/getBoundingClientRect();
+    return {width: b.width, height: b.height};
   }
 
   /** @override */
