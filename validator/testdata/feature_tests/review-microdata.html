@@ -1,0 +1,68 @@
+<!doctype html>
+<!--
+      This sample AMP HTML file aims to be a minimalist document that
+      follows best practices and guidances for publishers to mark up
+      content for inclusion in various platforms.
+-->
+<html AMP lang="en" itemscope itemtype="http://schema.org/Review">
+  <!-- you can use "amp" or "AMP" or "⚡" -->
+  <head>
+    <meta charset="utf-8">
+    <title>Lorem Ipsum</title>
+    <link itemprop="mainEntityOfPage" rel="canonical" href="http://example.ampproject.org/review-metadata.html" />
+    <!--
+        The canonical document for this article should be linked, as above.
+
+        The canonical document should also have a corresponding <link> tag
+        within pointing at this AMP HTML file:
+
+          <link rel="amphtml" href="http://example.ampproject.org/review-microdata.amp.html" />
+
+        It is possible that this AMP HTML document is the canonical document
+        for this article, in which case, the canonical URL should point to this
+        document, and no "amphtml" link is required.
+
+        Also, please be aware that some platforms that use AMP HTML have
+        further restrictions with regards to some schema components.
+
+         For example:
+
+           * All marked-up URL's should be absolute.
+           * The "logo" dimensions must not exceed 600x60.
+    -->
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
+    <!-- only one style tag is allowed, and it must have an "amp-custom" attribute -->
+    <style amp-custom>
+      body {
+        background-color: white;
+      }
+      amp-img {
+        background-color: gray;
+      }
+    </style>
+    <!-- this style tag is required -->
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+  </head>
+  <body>
+    <div itemprop="itemReviewed" itemscope itemtype="http://schema.org/Restaurant">
+      <h1 itemprop="name">Legal Seafood</h1>
+    </div>
+    <p itemprop="name">A good seafood place</p>
+    <p itemprop="reviewBody">The Seafood is great</p>
+    <div itemprop="reviewRating" itemscope itemtype="http://schema.org/Rating">
+      <p><span itemprop="ratingValue">4.0</span> out of 5</p>
+    </div>
+    <p>By <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <span itemprop="name">Bob Smith</span></span> from Google</p>
+    <div itemprop="publisher" itemscope itemtype="https://schema.org/Organization">
+      <div itemprop="logo" itemscope itemtype="https://schema.org/ImageObject">
+        <amp-img width="600" height="60" src="http://cdn.ampproject.org/logo.jpg"></amp-img>
+        <meta itemprop="url" content="http://cdn.ampproject.org/logo.jpg"></meta>
+        <meta itemprop="width" content="600"></meta>
+        <meta itemprop="height" content="60"></meta>
+      </div>
+      <meta itemprop="name" content="Google"></meta>
+    </div>
+  </body>
+</html>

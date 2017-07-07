@@ -1,0 +1,4 @@
+FAIL
+feature_tests/article.html:287:2 The tag 'content' is disallowed. [DISALLOWED_HTML]
+feature_tests/article.html:498:7 The tag 'amp-video extension .js script' is missing or incorrect, but required by 'amp-video'. This will soon be an error. (see https://www.ampproject.org/docs/reference/components/amp-video) [DEPRECATION]
+feature_tests/article.html:498:7 The extension 'amp-analytics' was found on this page, but is unused (no 'amp-analytics' tag seen). This may become an error in the future. [DEPRECATION]
