@@ -934,6 +934,12 @@ describes.sandboxed('UrlReplacements', {}, () => {
         '&a=b&d=PROM&e=PAGE_LOAD_TIME');
   });
 
+  it('should replace USER_AGENT', () => {
+    return expandAsync('?sh=USER_AGENT').then(res => {
+      expect(res).to.match(/sh=\w+/);
+    });
+  });
+
   describe('access values', () => {
 
     let accessService;
