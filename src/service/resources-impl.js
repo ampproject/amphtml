@@ -158,8 +158,14 @@ export class Resources {
     /** @private {number} */
     this.lastVelocity_ = 0;
 
-    /** @const {!Pass} */
+    /** @const @private {!Pass} */
     this.pass_ = new Pass(this.win, () => this.doPass());
+
+    /** @const @private {!Pass} */
+    this.remeasurePass_ = new Pass(this.win, () => {
+      this.relayoutAll_ = true;
+      this.schedulePass();
+    }, 1000);
 
     /** @const {!TaskQueue} */
     this.exec_ = new TaskQueue();
@@ -246,16 +252,13 @@ export class Resources {
       this.buildReadyResources_();
       this.pendingBuildResources_ = null;
       const fixPromise = ieMediaCheckAndFix(this.win);
+      const remeasure = () => this.remeasurePass_.schedule();
       if (fixPromise) {
-        fixPromise.then(() => {
-          this.relayoutAll_ = true;
-          this.schedulePass();
-        });
+        fixPromise.then(remeasure);
       } else {
         // No promise means that there's no problem.
-        this.relayoutAll_ = true;
+        remeasure();
       }
-      this.schedulePass();
       this.monitorInput_();
 
       // Safari 10 and under incorrectly estimates font spacing for
@@ -269,10 +272,7 @@ export class Resources {
       Promise.race([
         loadPromise(this.win),
         timerFor(this.win).promise(3100),
-      ]).then(() => {
-        this.relayoutAll_ = true;
-        this.schedulePass();
-      });
+      ]).then(remeasure);
     });
   }
 
@@ -487,12 +487,12 @@ export class Resources {
       resource.requestMeasure();
       dev().fine(TAG_, 'resource reused:', resource.debugid);
     } else {
-      this.relayoutAll_ = true;
       // Create and add a new resource.
       resource = new Resource((++this.resourceIdCounter_), element, this);
       dev().fine(TAG_, 'resource added:', resource.debugid);
     }
     this.resources_.push(resource);
+    this.remeasurePass_.schedule(1000);
   }
 
   /**
