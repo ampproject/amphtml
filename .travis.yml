@@ -42,6 +42,7 @@ matrix:
       before_script:
         - pip install --user protobuf
         - gem install percy-capybara
+        - gem install phantomjs
         - gem install poltergeist
     - env: BUILD_SHARD="integration_tests"
       before_script:
