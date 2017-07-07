@@ -16,6 +16,8 @@ limitations under the License.
 
 # <a name="amp-live-list"></a> `amp-live-list`
 
+[TOC]
+
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
@@ -204,18 +206,18 @@ attribute requirements.
 
 ### Attributes on `amp-live-list`
 
-**id** (Required)
+##### id (Required)
 
 To uniquely identify an amp-live-list (since multiple are allowed on a single
 page).
 
-**data-poll-interval** (Optional)
+##### data-poll-interval (Optional)
 
 Time (in milliseconds) interval between checks for new content (15000 ms minimum is
 enforced). If no `data-poll-interval` is provided it will default to the 15000 ms
 minimum.
 
-**data-max-items-per-page** (Required)
+##### data-max-items-per-page (Required)
 
 Maximum number of child entries. Additional elements are assumed to be on the
 next "page". If the number of children items is greater than the number
@@ -225,24 +227,24 @@ Once the number of live items on an `amp-live-list` is over the
 `data-max-items-per-page` limit items below the viewport will be fully
 removed from the live DOM.
 
-**disabled** (Optional)
+##### disabled (Optional)
 
 No polling will occur. Recommended when not on page 1 (looking at archival data)
 and when the article is no longer fresh and should no longer be updated.
 
 ### Attributes on `items` reference point children
 
-**id** (Required)
+##### id (Required)
 
-Id of the `items` child must never change.
+The ID of the `items` child must never change.
 
-**data-sort-time** (Required)
+##### data-sort-time (Required)
 
 Timestamp used for sorting entries. Higher timestamps will be
 inserted before older entries. We recommend using Unix time (the number of
 seconds that have elapsed since Thursday, 1 January 1970).
 
-**data-update-time** (Optional)
+##### data-update-time (Optional)
 
 Timestamp when the entry was last updated.  Use this attribute to trigger an
 update on an existing item: the client will replace all existing content in
@@ -250,9 +252,9 @@ this item with the new, updated content, without triggering the appearance of
 the update reference point. We recommend using Unix time (the number of seconds
 that have elapsed since Thursday, 1 January 1970).
 
-**data-tombstone** (Optional)
+##### data-tombstone (Optional)
 
-If present the entry is assumed to be deleted.
+If present, the entry is assumed to be deleted.
 
 ## Styling
 

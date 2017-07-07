@@ -122,9 +122,9 @@ Specifies the display layout of the sidebar, which must be `nodisplay`.
 
 This attribute is present when the sidebar is open.
 
-##### data-close-button-aria-label**
+##### data-close-button-aria-label
 
-Optional attribute used to set ARIA label for the close button added for accessibility.
+An optional attribute used for accessibility to set the ARIA label for the close button.
 
 ##### common attributes
 

@@ -79,9 +79,17 @@ should be specified on the tag.
 
 ## Attributes
 
-**type**
+##### type (required)
 
 An identifier for the ad network.
+
+##### data-foo-bar
+
+Most ad networks require further configuration, which can be passed to the network by using HTML `data-` attributes. The parameter names are subject to standard data attribute dash to camel case conversion. For example, "data-foo-bar" is send to the ad for configuration as "fooBar".  See the documentation for the [ad network](#supported-ad-networks) on which attributes can be used.
+
+##### common attributes
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Configuration Spec
 
