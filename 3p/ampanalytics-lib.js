@@ -17,7 +17,6 @@
 import './polyfills';
 import {tryParseJson} from '../src/json';
 import {dev, initLogConstructor, setReportError} from '../src/log';
-import {IframeMessagingClient} from './iframe-messaging-client';
 import {AMP_ANALYTICS_3P_MESSAGE_TYPE} from '../src/3p-analytics-common';
 
 initLogConstructor();
@@ -31,7 +30,7 @@ const TAG_ = 'ampanalytics-lib';
 /**
  * Receives messages bound for this cross-domain iframe, from all creatives
  */
-class AmpAnalytics3pMessageRouter {
+export class AmpAnalytics3pMessageRouter {
 
   /** @param {!Window} win */
   constructor(win) {
@@ -42,7 +41,7 @@ class AmpAnalytics3pMessageRouter {
     // uniquely identify the frame as part of message routing
     /** @const {string} */
     this.sentinel_ = dev().assertString(
-        tryParseJson(this.win_.name, {}).sentinel,
+        tryParseJson(this.win_.name).sentinel,
         'Invalid/missing sentinel on iframe name attribute' + this.win_.name);
     if (!this.sentinel_) {
       return;
@@ -62,6 +61,7 @@ class AmpAnalytics3pMessageRouter {
      * Handles communication between frames
      * @private {!IframeMessagingClient}
      */
+    /*
     this.iframeMessagingClient_ = new IframeMessagingClient(win);
     this.iframeMessagingClient_.setSentinel(this.sentinel_);
     this.iframeMessagingClient_.registerCallback(
@@ -73,7 +73,7 @@ class AmpAnalytics3pMessageRouter {
               'Received empty list that should have contained new creative' +
               ' message(s) in ' + this.win_.location.href);
           dev().assert(window.onNewAmpAnalyticsInstance,
-              'Must implement onNewAmpAnalyticsInstance in' +
+              'Must implement onNewAmpAnalyticsInstance in ' +
               this.win_.location.href);
           entries.forEach(entry => {
             const creativeId = entry[0];
@@ -82,13 +82,13 @@ class AmpAnalytics3pMessageRouter {
                 'Duplicate new creative message for ' + creativeId);
             this.creativeMessageRouters_[creativeId] =
               new AmpAnalytics3pCreativeMessageRouter(
-                this.win_, this.iframeMessagingClient_, creativeId, extraData);
+                this.win_, creativeId, extraData);
             try {
               window.onNewAmpAnalyticsInstance(
                   this.creativeMessageRouters_[creativeId]);
             } catch (e) {
               dev().error(TAG_, 'Exception thrown by' +
-                  ' onNewAmpAnalyticsInstance() in' + this.win_.location.href +
+                  ' onNewAmpAnalyticsInstance() in ' + this.win_.location.href +
                   ': ' + e.message);
             }
           });
@@ -105,10 +105,10 @@ class AmpAnalytics3pMessageRouter {
             const messages = entry[1];
             try {
               dev().assert(messages && messages.length,
-                  'Received empty events list for' + creativeId);
+                  'Received empty events list for ' + creativeId);
               dev().assert(this.creativeMessageRouters_[creativeId],
                   'Discarding event message received prior to new creative' +
-                  ' message for' + creativeId);
+                  ' message for ' + creativeId);
               this.creativeMessageRouters_[creativeId]
                   .sendMessagesToListener(messages);
             } catch (e) {
@@ -119,31 +119,75 @@ class AmpAnalytics3pMessageRouter {
         });
     this.iframeMessagingClient_.sendMessage(
         AMP_ANALYTICS_3P_MESSAGE_TYPE.READY);
+    */
+    const readyMessage = {
+      sentinel: 'null',
+      type: this.sentinel_ + AMP_ANALYTICS_3P_MESSAGE_TYPE.READY,
+    };
+    // Sentinel field above must be null because in iframe-helper.js a
+    // mapping is keyed on parent window's
+    // getAttribute('data-amp-3p-sentinel') which is not set. The "real"
+    // sentinel is rolled into type.
+    window.parent.postMessage(readyMessage, '*');
+    window.addEventListener('message', incomingMessage => {
+      console.log('Got message:');
+      console.dir(incomingMessage);
+      debugger;
+    }, false);
+  }
+
+  /**
+   * Test method to ensure sentinel set correctly
+   * @returns {string}
+   * @VisibleForTesting
+   */
+  getSentinel() {
+    return this.sentinel_;
+  }
+
+  /**
+   * Gets the mapping of creative senderId to
+   * AmpAnalytics3pCreativeMessageRouter
+   * @returns {!Object.<string, !AmpAnalytics3pCreativeMessageRouter>}
+   * @VisibleForTesting
+   */
+  getCreativeMethodRouters() {
+    return this.creativeMessageRouters_;
+  }
+
+  /**
+   * Gets rid of the mapping to AmpAnalytics3pMessageRouter
+   * @VisibleForTesting
+   */
+  reset() {
+    this.creativeMessageRouters_ = {};
   }
 }
 
-new AmpAnalytics3pMessageRouter(window);
+if (!window.AMP_TEST) {
+  try {
+    new AmpAnalytics3pMessageRouter(window);
+  } catch (e) {
+    dev().error(TAG_, 'Failed to construct AmpAnalytics3pMessageRouter: ' +
+      e.message);
+  }
+}
 
 /**
  * Receives messages bound for this cross-domain iframe, from a particular
  * creative. Also sends response messages from the iframe meant for this
  * particular creative.
  */
-class AmpAnalytics3pCreativeMessageRouter {
+export class AmpAnalytics3pCreativeMessageRouter {
   /**
    * @param {!Window} win The enclosing window object
-   * @param {!IframeMessagingClient} iframeMessagingClient Facilitates
-   * communication with the frame
    * @param {!string} creativeId The ID of the creative to route messages
    * to/from
    * @param {string=} opt_extraData Extra data to be passed to the frame
    */
-  constructor(win, iframeMessagingClient, creativeId, opt_extraData) {
+  constructor(win, creativeId, opt_extraData) {
     /** @private {!Window} */
     this.win_ = win;
-
-    /** @private {!IframeMessagingClient} */
-    this.iframeMessagingClient_ = iframeMessagingClient;
 
     /** @private {!string} */
     this.creativeId_ = creativeId;
@@ -210,9 +254,12 @@ class AmpAnalytics3pCreativeMessageRouter {
    * @param {!Object} response The response to send.
    */
   sendMessageToCreative(response) {
+    /**
     this.iframeMessagingClient_.sendMessage(
         AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE,
         this.buildAmpAnalytics3pResponse_(response));
+     */
+    console.log('TODO: send response: ' + response);
   }
 
   /**
@@ -227,6 +274,22 @@ class AmpAnalytics3pCreativeMessageRouter {
       data: response,
     });
     return messageObject;
+  }
+
+  /**
+   * @returns {!string}
+   * @VisibleForTesting
+   */
+  getCreativeId() {
+    return this.creativeId_;
+  }
+
+  /**
+   * @returns {?string}
+   * @VisibleForTesting
+   */
+  getExtraData() {
+    return this.extraData_;
   }
 }
 
