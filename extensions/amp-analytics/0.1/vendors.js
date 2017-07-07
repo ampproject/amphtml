@@ -77,10 +77,6 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'viewer': 'VIEWER',
       'viewportHeight': 'VIEWPORT_HEIGHT',
       'viewportWidth': 'VIEWPORT_WIDTH',
-<<<<<<< HEAD
-=======
-      'userAgent': 'USER_AGENT',
->>>>>>> 21fdd33a329a81dc65535d7fbefad20d4ebdaf39
     },
   },
   'acquialift': {
