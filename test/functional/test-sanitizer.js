@@ -16,6 +16,7 @@
 
 import {
   resolveUrlAttr,
+  rewriteAttributeValue,
   sanitizeFormattingHtml,
   sanitizeHtml,
 } from '../../src/sanitizer';
@@ -209,6 +210,20 @@ describe('sanitizeHtml', () => {
         'a<a target="_top">b</a>');
     expect(sanitizeHtml('a<a [href]="</script">b</a>')).to.be.equal(
         'a<a target="_top">b</a>');
+  });
+});
+
+
+describe('rewriteAttributeValue', () => {
+
+  it('should be case-insensitive to tag and attribute name', () => {
+    expect(rewriteAttributeValue('a', 'href', '/doc2'))
+        .to.equal(rewriteAttributeValue('A', 'HREF', '/doc2'));
+    expect(rewriteAttributeValue('amp-img', 'src', '/jpeg1'))
+        .to.equal(rewriteAttributeValue('AMP-IMG', 'SRC', '/jpeg1'));
+    expect(rewriteAttributeValue('amp-img', 'srcset', '/jpeg2 2x, /jpeg1 1x'))
+        .to.equal(rewriteAttributeValue(
+            'AMP-IMG', 'SRCSET', '/jpeg2 2x, /jpeg1 1x'));
   });
 });
 
