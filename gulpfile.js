@@ -390,8 +390,7 @@ function compileCss() {
   }).then(() => {
     return buildExtensions({
       bundleOnlyIfListedInFiles: true,
-      compileOnlyCss: true,
-      watch: false
+      compileOnlyCss: true
     });
   });
 }
