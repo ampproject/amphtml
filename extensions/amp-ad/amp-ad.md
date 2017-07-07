@@ -59,7 +59,7 @@ The `<amp-ad>` requires width and height values to be specified according to the
             resizable
             src="https://ampproject-b5f4c.firebaseapp.com/examples/ampad.basic.embed.html">
   <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div> 
+  <div placeholder></div>
 </amp-iframe>
 </div>
 
@@ -106,7 +106,7 @@ Optionally, `amp-ad` supports a child element with the `placeholder` attribute. 
 
 ## No ad available
 
-The `amp-ad` component supports a child element with the `fallback` attribute. If supported by the ad network, the fallback element is shown if no ad is available for this slot. 
+The `amp-ad` component supports a child element with the `fallback` attribute. If supported by the ad network, the fallback element is shown if no ad is available for this slot.
 
 If there is no fallback element available, the `amp-ad` element is collapsed (that is, set to `display: none`) if the ad sends a message that the ad slot cannot be filled and AMP determines that this operation can be performed without affecting the user's scroll position.
 
@@ -282,6 +282,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Smart AdServer](../../ads/smartadserver.md)
 - [smartclip](../../ads/smartclip.md)
 - [Sortable](../../ads/sortable.md)
+- [sogou_ad](../../ads/sogou_ad.md)
 - [SOVRN](../../ads/sovrn.md)
 - [SpotX](../../ads/spotx.md)
 - [SunMedia](../../ads/sunmedia.md)
