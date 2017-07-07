@@ -37,6 +37,7 @@ describe('amp-dailymotion', () => {
       }
       if (optCustomSettings) {
         dailymotion.setAttribute('data-start', 123);
+        dailymotion.setAttribute('data-param-origin', 'example.com');
       }
       return iframe.addElement(dailymotion);
     });
@@ -65,7 +66,7 @@ describe('amp-dailymotion', () => {
       const iframe = dailymotion.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.src).to.equal(
-          'https://www.dailymotion.com/embed/video/x2m8jpp?api=1&html=1&app=amp&start=123');
+          'https://www.dailymotion.com/embed/video/x2m8jpp?api=1&html=1&app=amp&start=123&origin=example.com');
     });
   });
 

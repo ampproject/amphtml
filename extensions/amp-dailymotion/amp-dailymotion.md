@@ -56,7 +56,7 @@ If this attribute is present, and the browser supports autoplay:
 * when the video is scrolled out of view, the video is paused
 * when the video is scrolled into view, the video resumes playback
 * when the user taps the video, the video is unmuted
-* if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it.  For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused. 
+* if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it.  For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.
 
 **data-videoid** (required)
 
@@ -109,6 +109,16 @@ Indicates whether to show video information (title and owner) on the start scree
 
 * Value: `"true"` or `"false"`
 * Default value: `"true"`
+
+**data-param-*** (optional)
+
+All `data-param-*` attributes will be added as query parameter to the Dailymotion iframe src. This may be used to pass custom values not explicitly declared.
+
+Keys and values  will be URI encoded.
+
+* `data-param-origin="example.com"`
+
+Please read [Dailymotion's video player documentation](https://developer.dailymotion.com/player#player-parameters) to know more about parameters and options.
 
 **common attributes**
 

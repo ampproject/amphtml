@@ -24,6 +24,9 @@ import {
 import {getData, listen} from '../../../src/event-helper';
 import {videoManagerForDoc} from '../../../src/services';
 import {parseQueryString} from '../../../src/url';
+import {getDataParamsFromAttributes} from '../../../src/dom';
+import {addParamsToUrl} from '../../../src/url';
+
 
 /**
  * Player events reverse-engineered from the Dailymotion API
@@ -153,8 +156,9 @@ class AmpDailymotion extends AMP.BaseElement {
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     dev().assert(this.videoid_);
-    iframe.src = 'https://www.dailymotion.com/embed/video/' +
-     encodeURIComponent(this.videoid_ || '') + '?' + this.getQuery_();
+    iframe.src = this.getIframeSrc_();
+    // iframe.src = 'https://www.dailymotion.com/embed/video/' +
+    //  encodeURIComponent(this.videoid_ || '') + '?' + this.getQuery_();
 
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
@@ -172,10 +176,10 @@ class AmpDailymotion extends AMP.BaseElement {
   }
 
   /** @private */
-  addQueryParam_(param, query) {
+  addDictParam_(param, dict) {
     const val = this.element.getAttribute(`data-${param}`);
     if (val) {
-      query.push(`${encodeURIComponent(param)}=${encodeURIComponent(val)}`);
+      dict[ encodeURIComponent(param) ] = encodeURIComponent(val);
     }
   }
 
@@ -247,14 +251,20 @@ class AmpDailymotion extends AMP.BaseElement {
   }
 
   /** @private */
-  getQuery_() {
-    const query = [
-      'api=1',
-      'html=1',
-      'app=amp',
-    ];
+  getIframeSrc_() {
 
-    const settings = [
+    iframeSrc = 'https://www.dailymotion.com/embed/video/' +
+       encodeURIComponent(this.videoid_ || '');
+
+    const fixedParams = {
+      api: 1,
+      html: 1,
+      app: 'amp',
+    };
+
+    iframeSrc = addParamsToUrl(iframeSrc, fixedParams);
+
+    const explicitParamsAttributes = [
       'mute',
       'endscreen-enable',
       'sharing-enable',
@@ -264,11 +274,17 @@ class AmpDailymotion extends AMP.BaseElement {
       'info',
     ];
 
-    settings.forEach(setting => {
-      this.addQueryParam_(setting, query);
-    });
+    var explicitParams = dict();
 
-    return query.join('&');
+    explicitParamsAttributes.forEach(explicitParam => {
+      this.addDictParam_(explicitParam, explicitParams);
+    });
+    iframeSrc = addParamsToUrl(iframeSrc, explicitParams);
+
+    var implicitParams = getDataParamsFromAttributes(this.element);
+    iframeSrc = addParamsToUrl(iframeSrc, implicitParams);
+
+    return iframeSrc;
   }
 
   /** @override */
