@@ -165,7 +165,7 @@ export class Resources {
     this.remeasurePass_ = new Pass(this.win, () => {
       this.relayoutAll_ = true;
       this.schedulePass();
-    }, 1000);
+    });
 
     /** @const {!TaskQueue} */
     this.exec_ = new TaskQueue();
