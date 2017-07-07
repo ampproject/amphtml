@@ -37,31 +37,33 @@ export function ix(global, data) {
     let calledDoubleclick = false;
     data.ixTimeout = isNaN(data.ixTimeout) ? DEFAULT_TIMEOUT : data.ixTimeout;
     const timer = setTimeout(() => {
-      callDoubleclick(EVENT_TIMEOUT);
+      callDoubleclick(EVENT_TIMEOUT, data);
     }, data.ixTimeout);
 
-    const callDoubleclick = function(code) {
+    const callDoubleclick = function(code, dataObject) {
       if (calledDoubleclick) { return; }
       calledDoubleclick = true;
       clearTimeout(timer);
-      reportStats(data.ixId, data.ixSlot, data.slot, start, code);
-      prepareData(data);
-      doubleclick(global, data);
+      reportStats(dataObject.ixId, dataObject.ixSlot,
+          dataObject.slot, start, code);
+      prepareData(dataObject);
+      doubleclick(global, dataObject);
     };
 
     if (typeof data.ixId === 'undefined' || isNaN(data.ixId)) {
-      callDoubleclick(EVENT_BADTAG);
+      callDoubleclick(EVENT_BADTAG, data);
       return;
     }
 
     global.IndexArgs = {
       ampCallback: callDoubleclick,
+      dataObject: data,
       ampSuccess: EVENT_SUCCESS,
       ampError: EVENT_ERROR,
     };
 
     loadScript(global, 'https://js-sec.indexww.com/apl/amp.js', undefined, () => {
-      callDoubleclick(EVENT_ERROR);
+      callDoubleclick(EVENT_ERROR, data);
     });
   }
 }
