@@ -241,11 +241,12 @@ export class AbstractAmpContext {
 
     const context = dataObject._context || dataObject.attributes._context;
 
+    this.data = dataObject.attributes || dataObject;
+
     this.canary = context.canary;
     this.canonicalUrl = context.canonicalUrl;
     this.clientId = context.clientId;
     this.container = context.container;
-    this.data = context.tagName;
     this.hidden = context.hidden;
     this.initialLayoutRect = context.initialLayoutRect;
     this.initialIntersection = context.initialIntersection;
