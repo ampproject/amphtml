@@ -986,7 +986,8 @@ export class AmpA4A extends AMP.BaseElement {
    * Attemps to render the returned creative following the resolution of the
    * adPromise.
    *
-   * @return {!Promise} Whether the creative was successfully rendered.
+   * @return {!Promise<boolean>|!Promise<undefined>} A promise that resolves
+   *   when the rendering attempt has finished.
    * @protected
    */
   attemptToRenderCreative() {
@@ -1113,7 +1114,7 @@ export class AmpA4A extends AMP.BaseElement {
    *   this.isRefreshing is true.
    * @protected
    */
-  destroyFrame(force) {
+  destroyFrame(force = false) {
     if (!force && this.isRefreshing) {
       return;
     }

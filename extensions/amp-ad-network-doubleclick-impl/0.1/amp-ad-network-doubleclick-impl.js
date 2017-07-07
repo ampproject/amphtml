@@ -444,7 +444,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.refreshManager_ = this.useSra ? null : this.refreshManager_ ||
         new RefreshManager(this, {
           visiblePercentageMin: 50,
-          totalTimeMin: 0,
           continuousTimeMin: 1,
         });
     return superReturnValue;

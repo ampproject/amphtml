@@ -26,14 +26,11 @@ import {IntersectionObserverPolyfill} from '../../../src/intersection-observer-p
 /**
  * - visibilePercentageMin: The percentage of pixels that need to be on screen
  *   for the creative to be considered "visible".
- * - totalTimeMin: The total amount of time, in milliseconds, that the creative
- *   must be on screen in order to be considered "visible".
  * - continuousTimeMin: The amount of continuous time, in milliseconds, that
  *   the creative must be on screen for in oreder to be considered "visible".
  *
  * @typedef {{
  *   visiblePercentageMin: number,
- *   totalTimeMin: number,
  *   continuousTimeMin: number,
  * }}
  */
@@ -49,17 +46,17 @@ const TAG = 'AMP-AD';
 /**
  * Defines the DFA states for the refresh cycle.
  *
- * (1) All newly registered elements begin in the INITIAL state.
- * (2) Only when the element enters the viewport with the specified
- *     intersection ratio does it transition into the VIEW_PENDING state.
- * (3) If the element remains in the viewport for the specified duration, it
- *     will then transition into the REFRESH_PENDING state, otherwise it will
- *     transition back into the INITIAL state.
- * (4) The element will remain in REFRESH_PENDING state until the refresh
- *     interval expires.
- * (5) Once the interval expires, the element will enter the REFRESHED state.
- *     The element will remain in this state until reset() is called on the
- *     element, at which point it will return to the INITIAL state.
+ * 1. All newly registered elements begin in the INITIAL state.
+ * 2. Only when the element enters the viewport with the specified
+ *    intersection ratio does it transition into the VIEW_PENDING state.
+ * 3. If the element remains in the viewport for the specified duration, it
+ *    will then transition into the REFRESH_PENDING state, otherwise it will
+ *    transition back into the INITIAL state.
+ * 4. The element will remain in REFRESH_PENDING state until the refresh
+ *    interval expires.
+ * 5. Once the interval expires, the element will enter the REFRESHED state.
+ *    The element will remain in this state until reset() is called on the
+ *    element, at which point it will return to the INITIAL state.
  *
  * @enum {string}
  */
@@ -153,14 +150,14 @@ export class RefreshManager {
     /** @private {boolean} */
     this.isRefreshable_ = isExperimentOn(this.win_, 'amp-ad-refresh') &&
         // The network has opted-in.
-        !!(this.config_
+        !!(this.config_ &&
         // The publisher has enabled refresh on this slot.
-        && (this.refreshInterval_ || this.refreshInterval_ == '')
+        (this.refreshInterval_ || this.refreshInterval_ == '') &&
         // The slot is contained only within container types eligible for
         // refresh.
-        && !getEnclosingContainerTypes(this.element_).filter(container =>
-          container != ValidAdContainerTypes['AMP-CAROUSEL']
-          && container != ValidAdContainerTypes['AMP-STICKY-AD']).length);
+        !getEnclosingContainerTypes(this.element_).filter(container =>
+          container != ValidAdContainerTypes['AMP-CAROUSEL'] &&
+          container != ValidAdContainerTypes['AMP-STICKY-AD']).length);
 
     if (this.isRefreshable_) {
       const managerId = String(refreshManagerIdCounter++);
@@ -190,7 +187,7 @@ export class RefreshManager {
    * IntersectionObserver implementation. It will implement the core logic of
    * the refresh lifecycle, including the transitions of the DFA.
    *
-   * @param {!Array<IntersectionObserverEntry>} entries
+   * @param {!Array<!IntersectionObserverEntry>} entries
    */
   ioCallback_(entries) {
     entries.forEach(entry => {
@@ -296,13 +293,12 @@ export class RefreshManager {
   }
 
   /**
-   * Converts config to appropriate units.
+   * Converts config to appropriate units, modifying the argument in place.
    * @param {!RefreshConfig} config
    * @return {!RefreshConfig}
    */
   convertConfiguration_(config) {
     // Convert seconds to milliseconds.
-    config['totalTimeMin'] *= 1000;
     config['continuousTimeMin'] *= 1000;
     config['visiblePercentageMin'] /= 100;
     return config;

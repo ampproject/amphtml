@@ -91,11 +91,6 @@ Networks wishing to opt-in to this feature must add a refresh configuration obje
     <td>Must be an integer between 0 and 100, inclusive.</td>
   </tr>
   <tr>
-    <td>totalTimeMin</td>
-    <td>The total amount of time, in seconds, that the creative must be on screen before the refresh timer is started.</td>
-    <td>Any positive numerical value.</td>
-  </tr>
-   <tr>
     <td>continuousTimeMin</td>
     <td>The amount of continuous time, in seconds, that the creative must be on screen before the refresh timer is started.</td>
     <td>Any positive numerical value.</td>

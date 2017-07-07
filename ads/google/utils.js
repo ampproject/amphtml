@@ -33,7 +33,7 @@ import {user} from '../../src/log';
  *   abandoned. If set to false, then malformed sizes will be ignored, and the
  *   remainder of the string will be parsed for any additional sizes.
  *   Additionally, errors will only be reported if this flag is set to true.
- * @return {?Array<Array<number>>} An array of dimensions.
+ * @return {?Array<!Array<number>>} An array of dimensions.
  */
 export function getMultiSizeDimensions(
     multiSizeDataStr,
@@ -140,7 +140,7 @@ export function getMultiSizeDimensions(
  * @return {boolean}
  */
 function validateDimensions(width, height, widthCond, heightCond,
-    errorBuilder, reportError) {
+    errorBuilder, reportError = false) {
   const badParams = [];
   if (widthCond(width)) {
     badParams.push({dim: 'width', val: width});
