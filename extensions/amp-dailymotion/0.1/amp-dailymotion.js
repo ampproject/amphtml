@@ -179,7 +179,7 @@ class AmpDailymotion extends AMP.BaseElement {
   addDictParam_(param, dict) {
     const val = this.element.getAttribute(`data-${param}`);
     if (val) {
-      dict[ encodeURIComponent(param) ] = encodeURIComponent(val);
+      dict[encodeURIComponent(param)] = encodeURIComponent(val);
     }
   }
 
@@ -253,7 +253,7 @@ class AmpDailymotion extends AMP.BaseElement {
   /** @private */
   getIframeSrc_() {
 
-    var iframeSrc = 'https://www.dailymotion.com/embed/video/' +
+    let iframeSrc = 'https://www.dailymotion.com/embed/video/' +
        encodeURIComponent(this.videoid_ || '');
 
     const fixedParams = {
@@ -274,14 +274,14 @@ class AmpDailymotion extends AMP.BaseElement {
       'info',
     ];
 
-    var explicitParams = dict();
+    let explicitParams = dict();
 
     explicitParamsAttributes.forEach(explicitParam => {
       this.addDictParam_(explicitParam, explicitParams);
     });
     iframeSrc = addParamsToUrl(iframeSrc, explicitParams);
 
-    var implicitParams = getDataParamsFromAttributes(this.element);
+    let implicitParams = getDataParamsFromAttributes(this.element);
     iframeSrc = addParamsToUrl(iframeSrc, implicitParams);
 
     return iframeSrc;
