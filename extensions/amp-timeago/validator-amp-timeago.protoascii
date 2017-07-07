@@ -29,6 +29,10 @@ tags: {  # <amp-timeago>
   tag_name: "AMP-TIMEAGO"
   requires_extension: "amp-timeago"
   attrs: {
+    name: "cutoff"
+    value_regex: "\\d+"
+  }
+  attrs: {
     name: "datetime"
     mandatory: true
     # Regex: \d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d(:[0-5]\d(\.\d+)?)?Z
