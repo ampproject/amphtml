@@ -135,6 +135,9 @@ export class Viewport {
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
 
+    /** @private @const {!Observable} */
+    this.resizeObservable_ = new Observable();
+
     /** @private {?Element|undefined} */
     this.viewportMeta_ = undefined;
 
@@ -448,6 +451,16 @@ export class Viewport {
   onScroll(handler) {
     return this.scrollObservable_.add(handler);
   }
+
+  /**
+   * Registers the handler for Resize events.
+   * @param {!function()} handler
+   * @return {!UnlistenDef}
+   */
+  onResize(handler) {
+    return this.resizeObservable_.add(handler);
+  }
+
 
   /**
    * Instruct the viewport to enter lightbox mode.
@@ -878,6 +891,7 @@ export class Viewport {
     const newSize = this.getSize();
     this.fixedLayer_.update().then(() => {
       this.changed_(!oldSize || oldSize.width != newSize.width, 0);
+      this.resizeObservable_.fire();
     });
   }
 }

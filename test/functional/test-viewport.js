@@ -468,6 +468,26 @@ describes.fakeWin('Viewport', {}, env => {
     });
   });
 
+  it('should dispatch onResize on width resize', () => {
+    let resizeEvent = null;
+    viewport.onResize(event => {
+      resizeEvent = event;
+    });
+    viewportSize.width = 112;
+    viewport.resize_();
+    expect(resizeEvent).to.not.equal(null);
+  });
+
+  it('should dispatch onResize on height resize', () => {
+    let resizeEvent = null;
+    viewport.onResize(event => {
+      resizeEvent = event;
+    });
+    viewportSize.height = 223;
+    viewport.resize_();
+    expect(resizeEvent).to.not.equal(null);
+  });
+
   it('should not do anything if padding is not changed', () => {
     const bindingMock = sandbox.mock(binding);
     viewerViewportHandler({paddingTop: 19});
