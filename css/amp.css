@@ -153,6 +153,14 @@ html.i-amphtml-ios-embed.i-amphtml-ios-overscroll > #i-amphtml-wrapper {
   position: relative;
 }
 
+/**
+ * Children of responsive elements should not be able to influence the height
+ * which they do when they are statically positioned.
+ */
+.i-amphtml-layout-responsive > :not(i-amphtml-sizer) {
+  position: absolute;
+}
+
 .i-amphtml-layout-fixed-height {
   display: block;
   position: relative;
