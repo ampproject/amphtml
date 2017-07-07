@@ -65,31 +65,31 @@ The `<amp-ad>` requires width and height values to be specified according to the
 
 ## Attributes
 
-**type** (required)
+##### type (required)
 
 Specifies an identifier for the [ad network](#supported-ad-networks). The `type`attribute selects the template to use for the ad tag.
 
-**src** (optional)
+##### src (optional)
 
-Use this attribute to load a script tag for the specified ad network. This can be used for ad networks that require exactly a single script tag to be inserted in the page. The `src` value must have a prefix that is white-listed for the specified ad network.
+Use this attribute to load a script tag for the specified ad network. This can be used for ad networks that require exactly a single script tag to be inserted in the page. The `src` value must have a prefix that is white-listed for the specified ad network, and the value must use `https` protocol.
 
-**data-foo-bar**
+##### data-foo-bar
 
 Most ad networks require further configuration, which can be passed to the network by using HTML `data-` attributes. The parameter names are subject to standard data attribute dash to camel case conversion. For example, "data-foo-bar" is send to the ad for configuration as "fooBar".  See the documentation for the [ad network](#supported-ad-networks) on which attributes can be used.
 
-**json** (optional)
+##### json (optional)
 
 Use this attribute to pass a configuration to the ad as an arbitrarily complex JSON object. The object is passed to the ad as-is with no mangling done on the names.
 
-**data-consent-notification-id** (optional)
+##### data-consent-notification-id (optional)
 
 If provided, requires confirming the [amp-user-notification](https://www.ampproject.org/docs/reference/components/amp-user-notification.html) with the given HTML-id until the "AMP client id" for the user (similar to a cookie) is passed to the ad. This means that ad rendering is delayed until the user confirms the notification.
 
-**data-loading-strategy** (optional)
+##### data-loading-strategy (optional)
 
 Instructs the ad to start loading when it is within the given number of viewports away (specified as a float value in the range of [0, 3]) from the current viewport. Use a smaller value to gain higher degree of viewability, with the risk of generating fewer views. If the attribute is not used, the default value is 3. If the attribute is used but the value is left blank, then a float value is assigned by the system, which optimizes for viewability without drastically impacting the views.
 
-**common attributes**
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
