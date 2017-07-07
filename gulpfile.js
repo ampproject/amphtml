@@ -22,17 +22,17 @@ var browserify = require('browserify');
 var buffer = require('vinyl-buffer');
 var closureCompile = require('./build-system/tasks/compile').closureCompile;
 var cleanupBuildDir = require('./build-system/tasks/compile').cleanupBuildDir;
+var jsifyCssAsync = require('./build-system/tasks/jsify-css').jsifyCssAsync;
 var fs = require('fs-extra');
 var gulp = $$.help(require('gulp'));
-var internalRuntimeVersion = require('./build-system/internal-version').VERSION;
-var internalRuntimeToken = require('./build-system/internal-version').TOKEN;
-var jsifyCssAsync = require('./build-system/tasks/jsify-css').jsifyCssAsync;
 var lazypipe = require('lazypipe');
 var minimatch = require('minimatch');
 var minimist = require('minimist');
 var source = require('vinyl-source-stream');
 var touch = require('touch');
 var watchify = require('watchify');
+var internalRuntimeVersion = require('./build-system/internal-version').VERSION;
+var internalRuntimeToken = require('./build-system/internal-version').TOKEN;
 
 var argv = minimist(process.argv.slice(2), {boolean: ['strictBabelTransform']});
 
