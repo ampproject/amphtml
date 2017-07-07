@@ -538,8 +538,7 @@ export function resetLogConstructorForTesting() {
  *
  * @return {!Log}
  */
-export function user(element) {
-  if (elementIsEmbeded)
+export function user() {
   if (logs.user) {
     return logs.user;
   }
