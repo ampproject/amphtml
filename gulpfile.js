@@ -839,16 +839,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     });
   }
 
-  if (options.watch === false) {
-    // Due to the two step build process, compileJs() is called twice, once with
-    // options.watch set to true and, once with it set to false. Do not call
-    // rebundle() twice.
-    return Promise.resolve();
-  } else {
-    // This is the default options.watch === true case, and also covers the
-    // `gulp build` / `gulp dist` cases where options.watch is undefined.
-    return rebundle();
-  }
+  return rebundle();
 }
 
 /**
