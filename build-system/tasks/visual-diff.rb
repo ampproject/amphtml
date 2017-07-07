@@ -35,6 +35,15 @@ HOST = 'localhost'
 PORT = '8000'
 
 
+# Registers phantomjs, since the gem doesn't explicitly add it to $PATH.
+def registerPhantomJs()
+  Phantomjs.path # Force install on require
+  Capybara.register_driver :poltergeist do |app|
+    Capybara::Poltergeist::Driver.new(app, :phantomjs => Phantomjs.path)
+  end
+end
+
+
 # Launches a background AMP webserver for unminified js using gulp.
 #
 # Returns:
@@ -156,6 +165,7 @@ end
 
 # Launches a webserver, loads test pages, and generates Percy snapshots.
 def main()
+  registerPhantomJs()
   setDebuggingLevel()
   pid = launchWebServer()
   if not waitForWebServer()
