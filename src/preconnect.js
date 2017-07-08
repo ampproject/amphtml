@@ -53,15 +53,14 @@ function getPreconnectFeatures(win) {
   if (!preconnectFeatures) {
     const linkTag = win.document.createElement('link');
     const tokenList = linkTag['relList'];
-    linkTag.rel = 'preload';
-    linkTag.rel = 'invalid-value';
+    linkTag.as = 'invalid-value';
     if (!tokenList || !tokenList.supports) {
       return {};
     }
     preconnectFeatures = {
       preconnect: tokenList.supports('preconnect'),
       preload: tokenList.supports('preload'),
-      onlyValidAs: linkTag.rel != 'invalid-value',
+      onlyValidAs: linkTag.as != 'invalid-value',
     };
   }
   return preconnectFeatures;
