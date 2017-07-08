@@ -350,7 +350,7 @@ export function runVideoPlayerIntegrationTests(
         }).then(() => {
           expect(insideElement).to.have.class(DOCK_CLASS);
           expect(st.getStyle(insideElement, 'transform')).to.equal(
-              st.scale(DOCK_SCALE) + ' ' + st.translate(st.px(-20), st.px(20))
+              st.translate(st.px(300), st.px(680)) + ' ' + st.scale(DOCK_SCALE)
           );
         });
       });
@@ -394,7 +394,7 @@ export function runVideoPlayerIntegrationTests(
         }).then(() => {
           expect(insideElement).to.have.class(DOCK_CLASS);
           expect(st.getStyle(insideElement, 'transform')).to.equal(
-              st.scale(DOCK_SCALE) + ' ' + st.translate(st.px(-20), st.px(20))
+              st.translate(st.px(300), st.px(20)) + ' ' + st.scale(DOCK_SCALE)
           );
         });
       });

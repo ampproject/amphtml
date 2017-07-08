@@ -40,6 +40,7 @@ import {
 import {
   scopedQuerySelector,
 } from '../dom';
+import {layoutRectLtwh, RelativePositions} from '../layout-rect';
 import * as st from '../style';
 
 /**
@@ -59,18 +60,32 @@ const DOCK_MARGIN = 20;
 /**
 * Minimization Positions
 *
-* Internal states used to describe whether the video is inside the viewport
-* or minimizing starting from the bottom or minimizing starting from the top
+* Internal states used to describe whether the video is inline
+* or minimizing in each of the corners
 *
 * @enum {string}
 */
 export const MinimizePositions = {
-  DEFAULT: 'default',
-  INVIEW: 'inview',
-  TOP: 'top',
-  BOTTOM: 'bottom',
+  INLINE: 'inline',
+  TOP_LEFT: 'top_left',
+  BOTTOM_LEFT: 'bottom_left',
+  TOP_RIGHT: 'top_right',
+  BOTTOM_RIGHT: 'bottom_right',
 };
 
+/**
+* Docking states
+*
+* Internal states used to describe whether the video is inline,
+* currently docking or fully docked
+*
+* @enum {string}
+*/
+export const DockingStates = {
+  INLINE: 'inline',
+  DOCKING: 'docking',
+  DOCKED: 'docked',
+};
 
 /**
  * VideoManager keeps track of all AMP video players that implement
@@ -92,14 +107,14 @@ export class VideoManager {
     /** @private {?Array<!VideoEntry>} */
     this.entries_ = null;
 
-    /** @private {?VideoEntry} */
-    this.curDocked_ = null;
-
     /** @private {boolean} */
     this.scrollListenerInstalled_ = false;
 
     /** @private {./position-observer-impl.AmpDocPositionObserver} */
     this.positionObserver_ = null;
+
+    /** @private {?VideoEntry} */
+    this.dockedVideo_ = null;
   }
 
   /**
@@ -116,7 +131,7 @@ export class VideoManager {
     }
 
     this.entries_ = this.entries_ || [];
-    const entry = new VideoEntry(this.ampdoc_, video, this);
+    const entry = new VideoEntry(this, video);
     this.maybeInstallVisibilityObserver_(entry);
     this.maybeInstallPositionObserver_(entry);
     this.entries_.push(entry);
@@ -201,7 +216,6 @@ export class VideoManager {
         entry.video.element,
         PositionObserverFidelity.HIGH,
         newPos => {
-          entry.updateVisibility();
           entry.onDockableVideoPositionChanged(newPos);
         }
     );
@@ -247,51 +261,33 @@ export class VideoManager {
   }
 
   /**
-   * Undocks all docked videos except the currently docked video
+   * Checks whether there's no video already docked
+   *
+   * @param {VideoEntry} entry
+   * @return {boolean}
    */
-  undockAllExceptCurrent() {
-    for (let i = 0; i < this.entries_.length; i++) {
-      if (this.entries_[i] != this.curDocked_ && this.entries_[i].hasDocking) {
-        // undocks the video
-        this.entries_[i].unDockVideo_();
-        this.entries_[i].hasBeenInViewBefore = false;
-      }
-    }
+  canDock(entry) {
+    return !this.dockedVideo_ || this.dockedVideo_ == entry;
   }
 
   /**
-   * Declares that the provided entry is the current docked video
+   * Registers the provided video as docked
+   *
    * @param {VideoEntry} entry
    */
   registerDocked(entry) {
-    this.curDocked_ = entry;
-    this.undockAllExceptCurrent();
+    this.dockedVideo_ = entry;
   }
 
   /**
-   * Undocks the currently docked video
+   * Un-registers the currently docked video
    */
   unregisterDocked() {
-    this.curDocked_ = null;
-    this.undockAllExceptCurrent();
+    this.dockedVideo_ = null;
+    for (let i = 0; i < this.entries_.length; i++) {
+      this.entries_[i].hasBeenInViewBefore = false;
+    }
   }
-
-  /**
-   * Returns whether there is currently a docked video or not
-   * @returns {boolean}
-   */
-  noDockedVid() {
-    return this.curDocked_ == null;
-  }
-
-  /**
-   * Returns the current docked video if it exists
-   * @returns {?VideoEntry}
-   */
-  curDockedVid() {
-    return this.curDocked_;
-  }
-
 }
 
 /**
@@ -299,20 +295,19 @@ export class VideoManager {
  */
 class VideoEntry {
   /**
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!VideoManager} manager
    * @param {!../video-interface.VideoInterface} video
-   * @param {!VideoManager} vidManager
    */
-  constructor(ampdoc, video, vidManager) {
+  constructor(manager, video) {
+
+    /** @private @const {!VideoManager} */
+    this.manager_ = manager;
 
     /** @private @const {!./ampdoc-impl.AmpDoc}  */
-    this.ampdoc_ = ampdoc;
+    this.ampdoc_ = manager.ampdoc_;
 
     /** @package @const {!../video-interface.VideoInterface} */
     this.video = video;
-
-    /** @private @const {!VideoManager} */
-    this.vidManager_ = vidManager;
 
     /** @private {?Element} */
     this.autoplayAnimation_ = null;
@@ -342,8 +337,8 @@ class VideoEntry {
         () => analyticsEvent(this, VideoAnalyticsEvents.SESSION_VISIBLE));
 
     /** @private @const {function(): !Promise<boolean>} */
-    this.boundSupportsAutoplay_ = supportsAutoplay.bind(null, ampdoc.win,
-        getMode(ampdoc.win).lite);
+    this.boundSupportsAutoplay_ = supportsAutoplay.bind(null, this.ampdoc_.win,
+        getMode(this.ampdoc_.win).lite);
 
     const element = dev().assert(video.element);
 
@@ -360,7 +355,10 @@ class VideoEntry {
     this.initialRect_ = null;
 
     /** @private {string} */
-    this.minimizePosition_ = MinimizePositions.DEFAULT;
+    this.minimizePosition_ = MinimizePositions.INLINE;
+
+    /** @private {string} */
+    this.dockingState_ = DockingStates.INLINE;
 
     /** @private {number} */
     this.visibleHeight_ = 0;
@@ -373,6 +371,9 @@ class VideoEntry {
 
     /** @private {string} */
     this.pageDir_ = 'ltr';
+
+    /** @private {?PositionInViewportEntryDef} */
+    this.lastPosition_ = null;
 
     this.hasBeenInViewBefore = false;
 
@@ -404,8 +405,8 @@ class VideoEntry {
     }
     if (this.hasDocking) {
       this.dockableVideoBuilt_();
-      // Determine the docking side based on the page's direction
-      // TODO(@wassgha) Probably will be needed for more functionalities later
+      // Determine the page's direction to help decide which side to dock on
+      // TODO(@wassgha) Probably will be needed for more functionality later
       // but for now, only needed for video docking
       const doc = this.ampdoc_.win.document;
       this.pageDir_ = doc.body.getAttribute('dir')
@@ -517,9 +518,16 @@ class VideoEntry {
     // Re-measure initial position when the window resizes / orientation changes
     const viewport = viewportForDoc(this.ampdoc_);
     viewport.onResize(() => {
-      this.vsync_.measure(() => {
-        this.initialRect_ = this.video.element./*OK*/getBoundingClientRect();
-        this.initializeDocking_();
+      this.vsync_.run({
+        measure: () => {
+          this.initialRect_ = this.video.element./*OK*/getBoundingClientRect();
+        },
+        mutate: () => {
+          this.dockingState_ = DockingStates.INLINE;
+          if (this.lastPosition_) {
+            this.onDockableVideoPositionChanged(this.lastPosition_);
+          }
+        },
       });
     });
     // TODO(@wassgha) Add video element wrapper here
@@ -670,61 +678,41 @@ class VideoEntry {
       || !this.initialRect_
       || !this.internalElement_
       || (this.getPlayingState() != PlayingStates.PLAYING_MANUAL
-          && !this.internalElement_.classList.contains(DOCK_CLASS)
-      || (!this.vidManager_.noDockedVid()
-          && this.vidManager_.curDockedVid() != this))
+              && !this.internalElement_.classList.contains(DOCK_CLASS))
     ) {
       return;
     }
 
-    // Initialize docking width/height
-    if (this.minimizePosition_ != MinimizePositions.INVIEW
-        && this.hasBeenInViewBefore) {
-      this.vsync_.mutate(() => {
-        this.vidManager_.registerDocked(this);
-        this.initializeDocking_();
-      });
-    }
+    this.vsync_.mutate(() => {
+      // During the docking transition we either perform the docking or undocking
+      // scroll-bound animations
+      //
+      // Conditions for animating the video are:
+      // 1. The video is out of view and it has been in-view at least once before
+      const outOfView = (this.minimizePosition_ != MinimizePositions.INLINE)
+                        && this.hasBeenInViewBefore;
+      // 2. Is either manually playing or paused while docked (so that it is
+      // undocked even when paused)
+      const manPlaying = this.getPlayingState() == PlayingStates.PLAYING_MANUAL;
+      const paused = this.getPlayingState() == PlayingStates.PAUSED;
+      const docked = this.internalElement_.classList.contains(DOCK_CLASS);
 
-    // Temporary fix until PositionObserver somehow tracks objects outside of
-    // the viewport (forces the style to be what we want in the final state)
-    if (!newPos.positionRect
-       && (!this.hasAutoplay || this.userInteractedWithAutoPlay())
-       && this.minimizePosition_ != MinimizePositions.DEFAULT) {
-      this.vsync_.mutate(() => {
-        this.endDocking_();
-      });
-      return;
-    }
-
-    // During the docking transition we either perform the docking or undocking
-    // scroll-bound animations
-    //
-    // Conditions for animating the video are:
-    // 1. The video is out of view and it has been in-view at least once before
-    const inView = this.minimizePosition_ == MinimizePositions.INVIEW;
-    const outOfView = !inView
-                      && this.minimizePosition_ != MinimizePositions.DEFAULT
-                      && this.hasBeenInViewBefore;
-    // 2. Is either manually playing or paused while docked (so that it is
-    // undocked even when paused)
-    const manPlaying = (this.getPlayingState() == PlayingStates.PLAYING_MANUAL);
-    const paused = this.getPlayingState() == PlayingStates.PAUSED;
-    const docked = this.internalElement_.classList.contains(DOCK_CLASS);
-
-    if (outOfView && (manPlaying || (paused && docked))) {
-      // We animate docking or undocking
-      this.vsync_.mutate(() => {
-        this.animateDocking_();
-      });
-    } else if (inView && this.internalElement_.classList.contains(DOCK_CLASS)) {
-      // Here undocking animations are done so we restore the element
-      // inline by clearing all styles and removing the position:fixed
-      this.vsync_.mutate(() => {
-        this.vidManager_.unregisterDocked();
-        this.unDockVideo_();
-      });
-    }
+      if (outOfView && (manPlaying || (paused && docked))) {
+        // On the first time, we initialize the docking animation
+        if (this.dockingState_ == DockingStates.INLINE
+            && this.manager_.canDock(this)) {
+          this.initializeDocking_();
+        }
+        // Then we animate docking or undocking
+        if (this.dockingState_ != DockingStates.INLINE) {
+          this.animateDocking_();
+        }
+      } else if (this.internalElement_.classList.contains(DOCK_CLASS)) {
+        // Here undocking animations are done so we restore the element
+        // inline by clearing all styles and removing the position:fixed
+        this.finishDocking_();
+      }
+    });
   }
 
   /**
@@ -735,36 +723,90 @@ class VideoEntry {
    * @private
    */
   updateDockableVideoPosition_(newPos) {
-    // TODO(@wassgha) Refactor when position observer starts reporting the
-    // relative position
-    if (newPos.positionRect) {
+    const viewport = viewportForDoc(this.ampdoc_);
+    const isLtr = this.pageDir_ == 'ltr';
+    const isBottom = newPos.relativePos == RelativePositions.BOTTOM;
+    const isTop = newPos.relativePos == RelativePositions.TOP;
+    const isInside = newPos.relativePos == RelativePositions.INSIDE;
 
-      const docViewTop = newPos.viewportRect.top;
-      const docViewBottom = newPos.viewportRect.bottom;
+    // Record last position in case we need to redraw (ex. on resize);
+    this.lastPosition_ = newPos;
 
-      const elemTop = newPos.positionRect.top;
-      const elemBottom = newPos.positionRect.bottom;
+    // If the video is out of view, newPos.positionRect will be null so we can
+    // fake the position to be right above or below the viewport based on the
+    // relativePos field
+    if (!newPos.positionRect) {
+      newPos.positionRect = isBottom ?
+        // A fake rectangle with same width/height as the video, except it's
+        // position right below the viewport
+        layoutRectLtwh(
+            this.initialRect_.left,
+            viewport.getHeight(),
+            this.initialRect_.width,
+            this.initialRect_.height
+        ) :
+        // A fake rectangle with same width/height as the video, except it's
+        // position right above the viewport
+        layoutRectLtwh(
+            this.initialRect_.left,
+            -this.initialRect_.height,
+            this.initialRect_.width,
+            this.initialRect_.height
+        );
+    }
 
-      // Calculate height currently displayed
-      if (elemTop <= docViewTop) {
-        this.visibleHeight_ = elemBottom - docViewTop;
-        this.minimizePosition_ = MinimizePositions.TOP;
-      } else if (elemBottom >= docViewBottom) {
-        this.visibleHeight_ = docViewBottom - elemTop;
-        this.minimizePosition_ = MinimizePositions.BOTTOM;
-      } else {
-        this.visibleHeight_ = elemBottom - elemTop;
-        this.minimizePosition_ = MinimizePositions.INVIEW;
-      }
-    } else if (this.minimizePosition_ == MinimizePositions.INVIEW
-                || this.minimizePosition_ == MinimizePositions.DEFAULT)
-    {
-      // Here we're just guessing, until #9208 is fixed
-      // (until position observer returns more information when out of view )
-      this.minimizePosition_ = MinimizePositions.TOP;
-      this.visibleHeight_ = 0;
+    const docViewTop = newPos.viewportRect.top;
+    const docViewBottom = newPos.viewportRect.bottom;
+    const elemTop = newPos.positionRect.top;
+    const elemBottom = newPos.positionRect.bottom;
+
+    // Calculate height currently displayed
+    if (elemTop <= docViewTop) {
+      this.visibleHeight_ = elemBottom - docViewTop;
+    } else if (elemBottom >= docViewBottom) {
+      this.visibleHeight_ = docViewBottom - elemTop;
     } else {
-      this.visibleHeight_ = 0;
+      this.visibleHeight_ = elemBottom - elemTop;
+    }
+
+    // Calculate whether the video has been in view at least once
+    this.hasBeenInViewBefore = this.hasBeenInViewBefore ||
+                               this.visibleHeight_ == this.initialRect_.height;
+
+    // Calculate space on top and bottom of the video to see if it is possible
+    // for the video to become hidden by scrolling to the top/bottom
+    const spaceOnTop = this.video.element./*OK*/offsetTop;
+    const spaceOnBottom = viewport.getScrollHeight()
+                         - spaceOnTop
+                         - this.video.element./*OK*/offsetHeight;
+    // Don't minimize if video can never be hidden by scrolling to top/bottom
+    if ((isBottom && spaceOnTop < viewport.getHeight())
+        || (isTop && spaceOnBottom < viewport.getHeight())) {
+      this.minimizePosition_ = MinimizePositions.INLINE;
+      return;
+    }
+
+    // Don't minimize if the video is bigger than the viewport (will always
+    // minimize and never be inline otherwise!)
+    if (this.video.element./*OK*/offsetHeight > viewport.getHeight()) {
+      this.minimizePosition_ = MinimizePositions.INLINE;
+      return;
+    }
+
+    // Calculate where the video should be docked if it hasn't been dragged
+    if (this.minimizePosition_ == MinimizePositions.INLINE && !isInside) {
+      if (isTop) {
+        this.minimizePosition_ = isLtr ? MinimizePositions.TOP_RIGHT
+                                       : MinimizePositions.TOP_LEFT;
+      } else if (isBottom) {
+        this.minimizePosition_ = isLtr ? MinimizePositions.BOTTOM_RIGHT
+                                       : MinimizePositions.BOTTOM_LEFT;
+      }
+    } else if (isInside) {
+      this.minimizePosition_ = MinimizePositions.INLINE;
+    } else {
+      // The inline video is outside but the minimizePosition has been set, this
+      // means the position was manually changed by drag/drop, keep it as is.
     }
   }
 
@@ -774,11 +816,15 @@ class VideoEntry {
    * @private
    */
   initializeDocking_() {
+    this.internalElement_.classList.add(DOCK_CLASS);
+    this.video.hideControls();
     st.setStyles(dev().assertElement(this.internalElement_), {
       'height': st.px(this.initialRect_.height),
       'width': st.px(this.initialRect_.width),
       'maxWidth': st.px(this.initialRect_.width),
     });
+    this.dockingState_ = DockingStates.DOCKING;
+    this.manager_.registerDocked(this);
   }
 
   /**
@@ -787,74 +833,35 @@ class VideoEntry {
    * @private
    */
   animateDocking_() {
-    if (this.minimizePosition_ == MinimizePositions.INVIEW) {
-      return;
+    // Calculate offsetXLeft
+    const offsetXLeft = this.calcDockOffsetXLeft();
+    // Calculate offsetXRight
+    const offsetXRight = this.calcDockOffsetXRight();
+    // Calculate offsetYTop
+    const offsetYTop = this.calcDockOffsetYTop();
+    // Calculate offsetYBottom
+    const offsetYBottom = this.calcDockOffsetYBottom();
+
+    // Calculate translate
+    let translate;
+    switch (this.minimizePosition_) {
+      case MinimizePositions.TOP_LEFT:
+        translate = st.translate(offsetXLeft, offsetYTop);
+        break;
+      case MinimizePositions.TOP_RIGHT:
+        translate = st.translate(offsetXRight, offsetYTop);
+        break;
+      case MinimizePositions.BOTTOM_LEFT:
+        translate = st.translate(offsetXLeft, offsetYBottom);
+        break;
+      case MinimizePositions.BOTTOM_RIGHT:
+        translate = st.translate(offsetXRight, offsetYBottom);
+        break;
+      default:
     }
 
-    // Calculate space on top and bottom of the video to see if it is possible
-    // for the video to become hidden by scrolling to the top/bottom
-    const viewport = viewportForDoc(this.ampdoc_);
-    const spaceOnTop = this.video.element./*OK*/offsetTop;
-    const spaceOnBottom = viewport.getScrollHeight()
-                          - spaceOnTop
-                          - this.video.element./*OK*/offsetHeight;
-
-    // Don't minimize if video can never be hidden by scrolling to the bottom
-    if (this.minimizePosition_ == MinimizePositions.TOP
-        && spaceOnBottom < viewport.getHeight()) {
-      return;
-    }
-
-    // Don't minimize if video can never be hidden by scrolling to the top
-    if (this.minimizePosition_ == MinimizePositions.BOTTOM
-        && spaceOnTop < viewport.getHeight()) {
-      return;
-    }
-
-    // Minimize the video
-    this.video.hideControls();
-    this.internalElement_.classList.add(DOCK_CLASS);
-
-    const isTop = this.minimizePosition_ == MinimizePositions.TOP;
-    const isLtr = this.pageDir_ == 'ltr';
-    // Different behavior based on whether the page is written left to right
-    // or right to left
-    let offsetX;
-    if (isLtr) {
-      const offsetRight = viewport.getWidth()
-                          - this.initialRect_.left
-                          - this.initialRect_.width;
-      const scaledWidth = DOCK_SCALE * this.initialRect_.width;
-      offsetX = st.px(
-          this.scrollMap_(
-              viewport.getWidth() - this.initialRect_.width - offsetRight,
-              viewport.getWidth() - scaledWidth - DOCK_MARGIN,
-              true
-          )
-      );
-    } else {
-      const offsetLeft = this.initialRect_.left;
-      offsetX = st.px(this.scrollMap_(offsetLeft, DOCK_MARGIN, true));
-    }
-
-    // Different behavior based on whether the video got minimized
-    // from the top or the bottom
-    let offsetY;
-    if (isTop) {
-      offsetY = st.px(this.scrollMap_(0, DOCK_MARGIN, true));
-    } else {
-      const scaledHeight = DOCK_SCALE * this.initialRect_.height;
-      offsetY = st.px(
-          this.scrollMap_(
-              viewport.getHeight() - this.initialRect_.height,
-              viewport.getHeight() - scaledHeight - DOCK_MARGIN,
-              true
-          )
-      );
-    }
-
-    const transform = st.translate(offsetX, offsetY) + ' '
-                      + st.scale(this.scrollMap_(DOCK_SCALE, 1));
+    const scale = st.scale(this.scrollMap_(DOCK_SCALE, 1));
+    const transform = translate + ' ' + scale;
 
     st.setStyles(dev().assertElement(this.internalElement_), {
       'transform': transform,
@@ -864,64 +871,15 @@ class VideoEntry {
       'right': 'auto',
       'left': '0px',
     });
+
+    // Update docking state
+    if (this.scrollMap_(DOCK_SCALE, 1) == DOCK_SCALE) {
+      this.dockingState_ = DockingStates.DOCKED;
+    } else {
+      this.dockingState_ = DockingStates.DOCKING;
+    }
 
     // TODO(@wassim) Make minimized video draggable
-  }
-
-  /**
-   * Applies final transformations to the docked video to assert that the final
-   * position and scale of the docked video are correct (in case user scrolls
-   * too fast for startDocking_ to kick in)
-   *
-   * NOTE(@wassgha) : won't be needed if PositionObserver returned the element's
-   * position when it goes out of view.
-   * @private
-   */
-  endDocking_() {
-    const viewport = viewportForDoc(this.ampdoc_);
-    // Hide the controls.
-    this.video.hideControls();
-    this.internalElement_.classList.add(DOCK_CLASS);
-
-    const isTop = this.minimizePosition_ == MinimizePositions.TOP;
-    const isLtr = this.pageDir_ == 'ltr';
-
-    // Different behavior based on whether the page is written left to right
-    // or right to left
-    let offsetX;
-    if (isLtr) {
-      const scaledWidth = DOCK_SCALE * this.initialRect_.width;
-      offsetX = st.px(viewport.getWidth() - scaledWidth - DOCK_MARGIN);
-    } else {
-      offsetX = st.px(DOCK_MARGIN);
-    }
-
-    // Different behavior based on whether the video got minimized
-    // from the top or the bottom
-    let offsetY;
-    if (isTop) {
-      offsetY = st.px(DOCK_MARGIN);
-    } else {
-      const scaledHeight = DOCK_SCALE * this.initialRect_.height;
-      offsetY = st.px(viewport.getHeight() - scaledHeight - DOCK_MARGIN);
-    }
-
-    const transform = st.translate(offsetX, offsetY) + ' '
-                      + st.scale(DOCK_SCALE);
-    st.setStyles(dev().assertElement(this.internalElement_), {
-      'transform': transform,
-      'transformOrigin': 'top left',
-      'bottom': 'auto',
-      'top': '0px',
-      'right': 'auto',
-      'left': '0px',
-    });
-    // Guessing until Refactor
-    if (isTop) {
-      this.minimizePosition_ = MinimizePositions.BOTTOM;
-    } else {
-      this.minimizePosition_ = MinimizePositions.TOP;
-    }
   }
 
   /**
@@ -930,12 +888,64 @@ class VideoEntry {
    *
    * @private
    */
-  unDockVideo_() {
+  finishDocking_() {
     // Restore the video inline
-    this.minimizePosition_ = MinimizePositions.DEFAULT;
     this.internalElement_.classList.remove(DOCK_CLASS);
     this.internalElement_.setAttribute('style', '');
+    this.dockingState_ = DockingStates.INLINE;
     this.video.showControls();
+    this.manager_.unregisterDocked();
+  }
+
+  /**
+   * Calculates the x-axis offset when the video is docked to the left
+   * @return {string}
+   */
+  calcDockOffsetXLeft() {
+    return st.px(this.scrollMap_(this.initialRect_.left, DOCK_MARGIN, true));
+  }
+
+  /**
+   * Calculates the x-axis offset when the video is docked to the right
+   * @return {string}
+   */
+  calcDockOffsetXRight() {
+    const viewport = viewportForDoc(this.ampdoc_);
+    const initialOffsetRight = viewport.getWidth()
+                        - this.initialRect_.left
+                        - this.initialRect_.width;
+    const scaledWidth = DOCK_SCALE * this.initialRect_.width;
+    return st.px(
+        this.scrollMap_(
+            viewport.getWidth() - this.initialRect_.width - initialOffsetRight,
+            viewport.getWidth() - scaledWidth - DOCK_MARGIN,
+            true
+        )
+    );
+  }
+
+  /**
+   * Calculates the y-axis offset when the video is docked to the top
+   * @return {string}
+   */
+  calcDockOffsetYTop() {
+    return st.px(this.scrollMap_(0, DOCK_MARGIN, true));
+  }
+
+  /**
+   * Calculates the y-axis offset when the video is docked to the bottom
+   * @return {string}
+   */
+  calcDockOffsetYBottom() {
+    const viewport = viewportForDoc(this.ampdoc_);
+    const scaledHeight = DOCK_SCALE * this.initialRect_.height;
+    return st.px(
+        this.scrollMap_(
+            viewport.getHeight() - this.initialRect_.height,
+            viewport.getHeight() - scaledHeight - DOCK_MARGIN,
+            true
+        )
+    );
   }
 
   /**
@@ -1002,8 +1012,6 @@ class VideoEntry {
       const visiblePercent = !isFiniteNumber(change.intersectionRatio) ? 0
           : change.intersectionRatio * 100;
       this.isVisible_ = visiblePercent >= VISIBILITY_PERCENT;
-      this.hasBeenInViewBefore = this.hasBeenInViewBefore
-                                 || visiblePercent == 100;
     };
 
     // Mutate if visibility changed from previous state
