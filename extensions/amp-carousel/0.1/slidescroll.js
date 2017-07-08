@@ -354,7 +354,7 @@ export class AmpSlideScroll extends BaseSlides {
       // Timer that detects scroll end and/or end of snap scroll.
       this.scrollTimeout_ = Services.timerFor(this.win).delay(() => {
 
-        if (this.snappingInProgress_) {
+        if (this.snappingInProgress_ || this.element.width <= 0) {
           return;
         }
         if (this.hasNativeSnapPoints_) {
