@@ -19,6 +19,8 @@
  * @param {!Window} win
  */
 export function install(win) {
+  // win.CustomEvent is a function on Edge, Chrome, FF, Safari but
+  // is an object on IE 11.
   if (typeof win.Event === 'function') {
     return false;
   }
@@ -35,6 +37,7 @@ export function install(win) {
     return evt;
   }
 
+  // supports >= IE 9. Below IE 9, window.Event.prototype is undefined
   Event.prototype = window.Event.prototype;
 
   win.Event = Event;
