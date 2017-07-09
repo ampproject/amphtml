@@ -173,7 +173,7 @@ export class StandardActions {
     if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
       return;
     }
-    window.print();
+    self.print();
   }
 
   /**
