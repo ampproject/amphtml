@@ -71,66 +71,66 @@ export function setReportError(fn) {
  * @private Visible for testing only.
  */
 export class Log {
-    /**
-     * @param {!Window} win
-     * @param {function(!./mode.ModeDef):!LogLevel} levelFunc
-     * @param {string=} opt_suffix
-     */
+  /**
+   * @param {!Window} win
+   * @param {function(!./mode.ModeDef):!LogLevel} levelFunc
+   * @param {string=} opt_suffix
+   */
   constructor(win, levelFunc, opt_suffix) {
-        /**
-         * In tests we use the main test window instead of the iframe where
-         * the tests runs because only the former is relayed to the console.
-         * @const {!Window}
-         */
+    /**
+     * In tests we use the main test window instead of the iframe where
+     * the tests runs because only the former is relayed to the console.
+     * @const {!Window}
+     */
     this.win = (getMode().test && win.AMP_TEST_IFRAME) ? win.parent : win;
 
-        /** @private @const {function(!./mode.ModeDef):!LogLevel} */
+    /** @private @const {function(!./mode.ModeDef):!LogLevel} */
     this.levelFunc_ = levelFunc;
 
-        /** @private @const {!LogLevel} */
+    /** @private @const {!LogLevel} */
     this.level_ = this.calcLevel_();
 
-        /** @private @const {string} */
+    /** @private @const {string} */
     this.suffix_ = opt_suffix || '';
 
-        /** @private @const {boolean} */
+    /** @private @const {boolean} */
     this.isUserError_ = !!opt_suffix;
   }
 
-    /**
-     * @return {!LogLevel}
-     * @private
-     */
+  /**
+   * @return {!LogLevel}
+   * @private
+   */
   calcLevel_() {
-        // No console - can't enable logging.
+    // No console - can't enable logging.
     if (!this.win.console || !this.win.console.log) {
       return LogLevel.OFF;
     }
 
-        // Logging has been explicitly disabled.
+    // Logging has been explicitly disabled.
     if (getMode().log == '0') {
       return LogLevel.OFF;
     }
 
-        // Logging is enabled for tests directly.
+    // Logging is enabled for tests directly.
     if (getMode().test && this.win.ENABLE_LOG) {
       return LogLevel.FINE;
     }
 
-        // LocalDev by default allows INFO level, unless overriden by `#log`.
+    // LocalDev by default allows INFO level, unless overriden by `#log`.
     if (getMode().localDev && !getMode().log) {
       return LogLevel.INFO;
     }
 
-        // Delegate to the specific resolver.
+    // Delegate to the specific resolver.
     return this.levelFunc_(getModeObject());
   }
 
-    /**
-     * @param {string} tag
-     * @param {string} level
-     * @param {!Array} messages
-     */
+  /**
+   * @param {string} tag
+   * @param {string} level
+   * @param {!Array} messages
+   */
   msg_(tag, level, messages) {
     if (this.level_ != LogLevel.OFF) {
       let fn = this.win.console.log;
@@ -146,55 +146,55 @@ export class Log {
     }
   }
 
-    /**
-     * Whether the logging is enabled.
-     * @return {boolean}
-     */
+  /**
+   * Whether the logging is enabled.
+   * @return {boolean}
+   */
   isEnabled() {
     return this.level_ != LogLevel.OFF;
   }
 
-    /**
-     * Reports a fine-grained message.
-     * @param {string} tag
-     * @param {...*} var_args
-     */
+  /**
+   * Reports a fine-grained message.
+   * @param {string} tag
+   * @param {...*} var_args
+   */
   fine(tag, var_args) {
     if (this.level_ >= LogLevel.FINE) {
       this.msg_(tag, 'FINE', Array.prototype.slice.call(arguments, 1));
     }
   }
 
-    /**
-     * Reports a informational message.
-     * @param {string} tag
-     * @param {...*} var_args
-     */
+  /**
+   * Reports a informational message.
+   * @param {string} tag
+   * @param {...*} var_args
+   */
   info(tag, var_args) {
     if (this.level_ >= LogLevel.INFO) {
       this.msg_(tag, 'INFO', Array.prototype.slice.call(arguments, 1));
     }
   }
 
-    /**
-     * Reports a warning message.
-     * @param {string} tag
-     * @param {...*} var_args
-     */
+  /**
+   * Reports a warning message.
+   * @param {string} tag
+   * @param {...*} var_args
+   */
   warn(tag, var_args) {
     if (this.level_ >= LogLevel.WARN) {
       this.msg_(tag, 'WARN', Array.prototype.slice.call(arguments, 1));
     }
   }
 
-    /**
-     * Reports an error message. If the logging is disabled, the error is rethrown
-     * asynchronously.
-     * @param {string} tag
-     * @param {...*} var_args
-     * @return {!Error|undefined}
-     * @private
-     */
+  /**
+   * Reports an error message. If the logging is disabled, the error is rethrown
+   * asynchronously.
+   * @param {string} tag
+   * @param {...*} var_args
+   * @return {!Error|undefined}
+   * @private
+   */
   error_(tag, var_args) {
     if (this.level_ >= LogLevel.ERROR) {
       this.msg_(tag, 'ERROR', Array.prototype.slice.call(arguments, 1));
@@ -206,54 +206,55 @@ export class Log {
     }
   }
 
-    /**
-     * Reports an error message.
-     * @param {string} unusedTag
-     * @param {...*} var_args
-     * @return {!Error|undefined}
-     */
+  /**
+   * Reports an error message.
+   * @param {string} unusedTag
+   * @param {...*} var_args
+   * @return {!Error|undefined}
+   */
   error(unusedTag, var_args) {
     const error = this.error_.apply(this, arguments);
     if (error) {
-            // reportError is installed globally per window in the entry point.
+      // reportError is installed globally per window in the entry point.
       self.reportError(error);
       if (this.isUserError_) {
-        this.sendErrorToService(error);
+        this.reportErrorToAnalytics(unusedTag, error);
       }
     }
   }
 
-    /**
-     * @param {!Error} error
-     */
-  sendErrorToService(error) {
-    if (isExperimentOn(this.win, 'user-error-tracker')) {
-            /**
-             * @param {!Window} win
-             */
+  /**
+   * @param {string} unusedTag
+   * @param {!Error} error
+   */
+  reportErrorToAnalytics(unusedTag, error) {
+    if (isExperimentOn(this.win, 'user-error-reporting')) {
+      /**
+       * @param {!Window} win
+       */
       const vars = {
-        'errorName': error.name,
+        'errorName': unusedTag,
         'errorMessage': error.message,
       };
-      triggerAnalyticsEvent(this.getRootElement_(),'user-error-trigger', vars);
+      triggerAnalyticsEvent(this.getRootElement_(),'user-error', vars);
     }
   }
 
-    /**
-     * @return {!Element}
-     * @private
-     */
+  /**
+   * @return {!Element}
+   * @private
+   */
   getRootElement_() {
     const root = ampdocServiceFor(this.win).getAmpDoc().getRootNode();
     return dev().assertElement(root.documentElement || root.body || root);
   }
 
-    /**
-     * Reports an error message and marks with an expected property. If the
-     * logging is disabled, the error is rethrown asynchronously.
-     * @param {string} unusedTag
-     * @param {...*} var_args
-     */
+  /**
+   * Reports an error message and marks with an expected property. If the
+   * logging is disabled, the error is rethrown asynchronously.
+   * @param {string} unusedTag
+   * @param {...*} var_args
+   */
   expectedError(unusedTag, var_args) {
     const error = this.error_.apply(this, arguments);
     if (error) {
@@ -263,22 +264,22 @@ export class Log {
     }
   }
 
-    /**
-     * Creates an error object.
-     * @param {...*} var_args
-     * @return {!Error}
-     */
+  /**
+   * Creates an error object.
+   * @param {...*} var_args
+   * @return {!Error}
+   */
   createError(var_args) {
     const error = createErrorVargs.apply(null, arguments);
     this.prepareError_(error);
     return error;
   }
 
-    /**
-     * Creates an error object with its expected property set to true.
-     * @param {...*} var_args
-     * @return {!Error}
-     */
+  /**
+   * Creates an error object with its expected property set to true.
+   * @param {...*} var_args
+   * @return {!Error}
+   */
   createExpectedError(var_args) {
     const error = createErrorVargs.apply(null, arguments);
     this.prepareError_(error);
@@ -286,25 +287,25 @@ export class Log {
     return error;
   }
 
-    /**
-     * Throws an error if the first argument isn't trueish.
-     *
-     * Supports argument substitution into the message via %s placeholders.
-     *
-     * Throws an error object that has two extra properties:
-     * - associatedElement: This is the first element provided in the var args.
-     *   It can be used for improved display of error messages.
-     * - messageArray: The elements of the substituted message as non-stringified
-     *   elements in an array. When e.g. passed to console.error this yields
-     *   native displays of things like HTML elements.
-     *
-     * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
-     *     not evaluate to true.
-     * @param {string=} opt_message The assertion message
-     * @param {...*} var_args Arguments substituted into %s in the message.
-     * @return {T} The value of shouldBeTrueish.
-     * @template T
-     */
+  /**
+   * Throws an error if the first argument isn't trueish.
+   *
+   * Supports argument substitution into the message via %s placeholders.
+   *
+   * Throws an error object that has two extra properties:
+   * - associatedElement: This is the first element provided in the var args.
+   *   It can be used for improved display of error messages.
+   * - messageArray: The elements of the substituted message as non-stringified
+   *   elements in an array. When e.g. passed to console.error this yields
+   *   native displays of things like HTML elements.
+   *
+   * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
+   *     not evaluate to true.
+   * @param {string=} opt_message The assertion message
+   * @param {...*} var_args Arguments substituted into %s in the message.
+   * @return {T} The value of shouldBeTrueish.
+   * @template T
+   */
   /*eslint "google-camelcase/google-camelcase": 0*/
   assert(shouldBeTrueish, opt_message, var_args) {
     let firstElement;
@@ -330,23 +331,23 @@ export class Log {
       e.associatedElement = firstElement;
       e.messageArray = messageArray;
       this.prepareError_(e);
-            // reportError is installed globally per window in the entry point.
+      // reportError is installed globally per window in the entry point.
       self.reportError(e);
       throw e;
     }
     return shouldBeTrueish;
   }
 
-    /**
-     * Throws an error if the first argument isn't an Element
-     *
-     * Otherwise see `assert` for usage
-     *
-     * @param {*} shouldBeElement
-     * @param {string=} opt_message The assertion message
-     * @return {!Element} The value of shouldBeTrueish.
-     * @template T
-     */
+  /**
+   * Throws an error if the first argument isn't an Element
+   *
+   * Otherwise see `assert` for usage
+   *
+   * @param {*} shouldBeElement
+   * @param {string=} opt_message The assertion message
+   * @return {!Element} The value of shouldBeTrueish.
+   * @template T
+   */
   /*eslint "google-camelcase/google-camelcase": 2*/
   assertElement(shouldBeElement, opt_message) {
     const shouldBeTrueish = shouldBeElement && shouldBeElement.nodeType == 1;
@@ -355,16 +356,16 @@ export class Log {
     return /** @type {!Element} */ (shouldBeElement);
   }
 
-    /**
-     * Throws an error if the first argument isn't a string. The string can
-     * be empty.
-     *
-     * For more details see `assert`.
-     *
-     * @param {*} shouldBeString
-     * @param {string=} opt_message The assertion message
-     * @return {string} The string value. Can be an empty string.
-     */
+  /**
+   * Throws an error if the first argument isn't a string. The string can
+   * be empty.
+   *
+   * For more details see `assert`.
+   *
+   * @param {*} shouldBeString
+   * @param {string=} opt_message The assertion message
+   * @return {string} The string value. Can be an empty string.
+   */
   /*eslint "google-camelcase/google-camelcase": 2*/
   assertString(shouldBeString, opt_message) {
     this.assert(typeof shouldBeString == 'string',
@@ -372,33 +373,33 @@ export class Log {
     return /** @type {string} */ (shouldBeString);
   }
 
-    /**
-     * Throws an error if the first argument isn't a number. The allowed values
-     * include `0` and `NaN`.
-     *
-     * For more details see `assert`.
-     *
-     * @param {*} shouldBeNumber
-     * @param {string=} opt_message The assertion message
-     * @return {number} The number value. The allowed values include `0`
-     *   and `NaN`.
-     */
+  /**
+   * Throws an error if the first argument isn't a number. The allowed values
+   * include `0` and `NaN`.
+   *
+   * For more details see `assert`.
+   *
+   * @param {*} shouldBeNumber
+   * @param {string=} opt_message The assertion message
+   * @return {number} The number value. The allowed values include `0`
+   *   and `NaN`.
+   */
   assertNumber(shouldBeNumber, opt_message) {
     this.assert(typeof shouldBeNumber == 'number',
         (opt_message || 'Number expected') + ': %s', shouldBeNumber);
     return /** @type {number} */ (shouldBeNumber);
   }
 
-    /**
-     * Asserts and returns the enum value. If the enum doesn't contain such a value,
-     * the error is thrown.
-     *
-     * @param {!Object<T>} enumObj
-     * @param {string} s
-     * @param {string=} opt_enumName
-     * @return T
-     * @template T
-     */
+  /**
+   * Asserts and returns the enum value. If the enum doesn't contain such a value,
+   * the error is thrown.
+   *
+   * @param {!Object<T>} enumObj
+   * @param {string} s
+   * @param {string=} opt_enumName
+   * @return T
+   * @template T
+   */
   /*eslint "google-camelcase/google-camelcase": 2*/
   assertEnumValue(enumObj, s, opt_enumName) {
     if (isEnumValue(enumObj, s)) {
@@ -409,10 +410,10 @@ export class Log {
         opt_enumName || 'enum', s);
   }
 
-    /**
-     * @param {!Error} error
-     * @private
-     */
+  /**
+   * @param {!Error} error
+   * @private
+   */
   prepareError_(error) {
     error = duplicateErrorIfNecessary(error);
     if (this.suffix_) {
@@ -432,7 +433,7 @@ export class Log {
  * @return {string}
  */
 function toString(val) {
-    // Do check equivalent to `val instanceof Element` without cross-window bug
+  // Do check equivalent to `val instanceof Element` without cross-window bug
   if (val && val.nodeType == 1) {
     return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
   }
@@ -466,11 +467,11 @@ export function duplicateErrorIfNecessary(error) {
   }
 
   const e = new Error(error.message);
-    // Copy all the extraneous things we attach.
+  // Copy all the extraneous things we attach.
   for (const prop in error) {
     e[prop] = error[prop];
   }
-    // Ensure these are copied.
+  // Ensure these are copied.
   e.stack = error.stack;
   return e;
 }
@@ -542,15 +543,15 @@ let logConstructor = null;
 
 export function initLogConstructor() {
   logConstructor = Log;
-    // Initialize instances for use. If a binary (an extension for example) that
-    // does not call `initLogConstructor` invokes `dev()` or `user()` earlier
-    // than the binary that does call `initLogConstructor` (amp.js), the extension
-    // will throw an error as that extension will never be able to initialize
-    // the log instances and we also don't want it to call `initLogConstructor`
-    // either (since that will cause the Log implementation to be bundled into that
-    // binary). So we must initialize the instances eagerly so that they are
-    // ready for use (stored globally) after the main binary calls
-    // `initLogConstructor`.
+  // Initialize instances for use. If a binary (an extension for example) that
+  // does not call `initLogConstructor` invokes `dev()` or `user()` earlier
+  // than the binary that does call `initLogConstructor` (amp.js), the extension
+  // will throw an error as that extension will never be able to initialize
+  // the log instances and we also don't want it to call `initLogConstructor`
+  // either (since that will cause the Log implementation to be bundled into that
+  // binary). So we must initialize the instances eagerly so that they are
+  // ready for use (stored globally) after the main binary calls
+  // `initLogConstructor`.
   dev();
   user();
 }

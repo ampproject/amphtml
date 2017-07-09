@@ -5,7 +5,6 @@
     <title>Lorem Ipsum</title>
     <link rel="canonical" href="amps.html" >
     <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
-    <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
     <style amp-custom>
@@ -41,12 +40,12 @@
     <script type="application/json">
         {
             "requests": {
-                "user-error-trigger": "http://localhost:8000/dsdsdsd"
+                "user-error": "http://localhost:8000/dsdsdsd"
             },
             "triggers": {
-                "user-error-trigger": {
-                    "on": "user-error-trigger",
-                    "request": "user-error-trigger"
+                "user-error": {
+                    "on": "user-error",
+                    "request": "user-error"
                 }
             }
         }
