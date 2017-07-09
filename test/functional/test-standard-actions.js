@@ -238,7 +238,7 @@ describes.sandboxed('StandardActions', {}, () => {
       const windowObj = {
         print: () => {},
       };
-      let windowApi = windowObj;
+      const windowApi = windowObj;
       const printStub = sandbox.stub(windowApi, 'print');
       const invocation = {method: 'print', satisfiesTrust: () => true};
       standardActions.handleAmpTarget(invocation);
