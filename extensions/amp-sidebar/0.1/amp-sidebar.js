@@ -32,10 +32,6 @@ const ANIMATION_TIMEOUT = 550;
 /** @const */
 const IOS_SAFARI_BOTTOMBAR_HEIGHT = '10vh';
 
-let openInProgress_;
-
-let closeInProgress_;
-
 export class AmpSidebar extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -78,18 +74,6 @@ export class AmpSidebar extends AMP.BaseElement {
 
     /** @private {number|string|null} */
     this.openOrCloseTimeOut_ = null;
-
-    openInProgress_ = false;
-
-    closeInProgress_ = false;
-  }
-
-  getOpenInProgress() {
-    return openInProgress_;
-  }
-
-  getCloseInProgress() {
-    return closeInProgress_;
   }
 
   /** @override */
@@ -212,34 +196,30 @@ export class AmpSidebar extends AMP.BaseElement {
     if (this.isOpen_()) {
       return;
     }
-    if (!closeInProgress_) {
-      openInProgress_ = true;
-      this.viewport_.enterOverlayMode();
+    this.viewport_.enterOverlayMode();
+    this.vsync_.mutate(() => {
+      toggle(this.element, /* display */true);
+      if (this.isIos_ && this.isSafari_) {
+        this.compensateIosBottombar_();
+      }
+      this.element./*OK*/scrollTop = 1;
+      // Start animation in a separate vsync due to display:block; set above.
       this.vsync_.mutate(() => {
-        toggle(this.element, /* display */true);
         this.openMask_();
-        if (this.isIos_ && this.isSafari_) {
-          this.compensateIosBottombar_();
+        this.element.setAttribute('open', '');
+        this.element.setAttribute('aria-hidden', 'false');
+        if (this.openOrCloseTimeOut_) {
+          this.timer_.cancel(this.openOrCloseTimeOut_);
         }
-        this.element./*OK*/scrollTop = 1;
-            // Start animation in a separate vsync due to display:block; set above.
-        this.vsync_.mutate(() => {
-          this.element.setAttribute('open', '');
-          this.element.setAttribute('aria-hidden', 'false');
-          if (this.openOrCloseTimeOut_) {
-            this.timer_.cancel(this.openOrCloseTimeOut_);
-          }
-          this.openOrCloseTimeOut_ = this.timer_.delay(() => {
-            const children = this.getRealChildren();
-            this.scheduleLayout(children);
-            this.scheduleResume(children);
-                    // Focus on the sidebar for a11y.
-            tryFocus(this.element);
-          }, ANIMATION_TIMEOUT);
-        });
+        this.openOrCloseTimeOut_ = this.timer_.delay(() => {
+          const children = this.getRealChildren();
+          this.scheduleLayout(children);
+          this.scheduleResume(children);
+          // Focus on the sidebar for a11y.
+          tryFocus(this.element);
+        }, ANIMATION_TIMEOUT);
       });
-      openInProgress_ = false;
-    }
+    });
     this.getHistory_().push(this.close_.bind(this)).then(historyId => {
       this.historyId_ = historyId;
     });
@@ -253,27 +233,23 @@ export class AmpSidebar extends AMP.BaseElement {
     if (!this.isOpen_()) {
       return;
     }
-    if (!openInProgress_) {
-      closeInProgress_ = true;
-      this.viewport_.leaveOverlayMode();
-      this.vsync_.mutate(() => {
-        this.closeMask_();
-        this.element.removeAttribute('open');
-        this.element.setAttribute('aria-hidden', 'true');
-        if (this.openOrCloseTimeOut_) {
-          this.timer_.cancel(this.openOrCloseTimeOut_);
+    this.viewport_.leaveOverlayMode();
+    this.vsync_.mutate(() => {
+      this.closeMask_();
+      this.element.removeAttribute('open');
+      this.element.setAttribute('aria-hidden', 'true');
+      if (this.openOrCloseTimeOut_) {
+        this.timer_.cancel(this.openOrCloseTimeOut_);
+      }
+      this.openOrCloseTimeOut_ = this.timer_.delay(() => {
+        if (!this.isOpen_()) {
+          this.vsync_.mutate(() => {
+            toggle(this.element, /* display */false);
+            this.schedulePause(this.getRealChildren());
+          });
         }
-        this.openOrCloseTimeOut_ = this.timer_.delay(() => {
-          if (!this.isOpen_()) {
-            this.vsync_.mutate(() => {
-              toggle(this.element, /* display */false);
-              this.schedulePause(this.getRealChildren());
-            });
-          }
-        }, ANIMATION_TIMEOUT);
-      });
-      closeInProgress_ = false;
-    }
+      }, ANIMATION_TIMEOUT);
+    });
     if (this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);
       this.historyId_ = -1;

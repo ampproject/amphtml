@@ -187,8 +187,6 @@ describes.realWin('amp-sidebar 0.1 version', {
         expect(historyPushSpy).to.be.calledOnce;
         expect(historyPopSpy).to.have.not.been.called;
         expect(impl.historyId_).to.not.equal('-1');
-        expect(impl.getOpenInProgress()).to.equal(false);
-        expect(impl.getCloseInProgress()).to.equal(false);
 
         // second call to open_() should be a no-op and not increase call counts.
         impl.open_();
@@ -239,8 +237,6 @@ describes.realWin('amp-sidebar 0.1 version', {
         expect(impl.schedulePause).to.be.calledOnce;
         expect(historyPopSpy).to.be.calledOnce;
         expect(impl.historyId_).to.equal(-1);
-        expect(impl.getCloseInProgress()).to.equal(false);
-        expect(impl.getOpenInProgress()).to.equal(false);
 
         // second call to close_() should be a no-op and not increase call counts.
         impl.close_();
@@ -559,29 +555,6 @@ describes.realWin('amp-sidebar 0.1 version', {
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
         expect(sidebarElement.style.display).to.equal('');
         expect(impl.schedulePause).to.have.not.been.called;
-      });
-    });
-
-    it('should not close sidebar while open is in progress', () => {
-      return getAmpSidebar().then(obj => {
-        const sidebarElement = obj.ampSidebar;
-        const impl = sidebarElement.implementation_;
-        impl.schedulePause = sandbox.spy();
-        impl.vsync_ = {
-          mutate(callback) {
-            clock.tick(3000);
-            expect(impl.getOpenInProgress()).to.equal(true);
-            impl.close_();
-            expect(impl.getCloseInProgress()).to.not.equal(true);
-            callback();
-          },
-        };
-        sandbox.stub(timer, 'delay', function(callback) {
-          callback();
-        });
-        expect(sidebarElement.hasAttribute('open')).to.be.false;
-        impl.open_();
-        expect(impl.getOpenInProgress()).to.equal(false);
       });
     });
   });
