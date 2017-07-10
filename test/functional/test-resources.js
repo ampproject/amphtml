@@ -566,13 +566,7 @@ describes.fakeWin('Resources startup', {
     win.eventListeners.fire({type: 'load'});
     win.document.eventListeners.fire({type: 'readystatechange'});
     return resources.ampdoc.whenReady().then(() => {
-      expect(resources.relayoutAll_).to.be.true;
-      // Reset to make sure it is set again on load.
-      resources.relayoutAll_ = false;
-      return loadPromise(win).then(() => {
-        // Skip a microtask.
-        return Promise.race([Promise.resolve()]);
-      });
+      return loadPromise(win);
     }).then(() => {
       expect(resources.relayoutAll_).to.be.true;
       expect(schedulePassStub).to.be.calledTwice;
