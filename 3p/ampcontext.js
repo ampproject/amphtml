@@ -95,9 +95,6 @@ export class AbstractAmpContext {
     /** @type {?string} */
     this.tagName = null;
 
-    /** @type {?Object} */
-    this.data = null;
-
     this.findAndSetMetadata_();
 
     /** @protected {!IframeMessagingClient} */
