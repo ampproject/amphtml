@@ -131,6 +131,15 @@ export function documentInfoForDoc(nodeOrDoc) {
 
 /**
  * @param {!Window} window
+ * @return {!DocumentState}
+ */
+export function documentStateFor(window) {
+  installDocumentStateService(window);
+  return getService(window, 'documentState');
+}
+
+/**
+ * @param {!Window} window
  * @return {!./service/extensions-impl.Extensions}
  */
 export function extensionsFor(window) {

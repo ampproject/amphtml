@@ -151,12 +151,3 @@ export class DocumentState {
 export function installDocumentStateService(window) {
   registerServiceBuilder(window, 'documentState', DocumentState);
 }
-
-/**
- * @param {!Window} window
- * @return {!DocumentState}
- */
-export function documentStateFor(window) {
-  installDocumentStateService(window);
-  return getService(window, 'documentState');
-}

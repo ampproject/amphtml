@@ -33,7 +33,7 @@ import {installPlatformService} from '../../../../src/service/platform-impl';
 import {
     installResourcesServiceForDoc,
 } from '../../../../src/service/resources-impl';
-import {documentStateFor} from '../../../../src/service/document-state';
+import {documentStateFor} from '../../../../src/services';
 
 describes.realWin('InstrumentationService', {amp: 1}, env => {
   let win;
