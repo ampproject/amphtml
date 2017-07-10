@@ -45,6 +45,7 @@ matrix:
         - gem install phantomjs
         - gem install poltergeist
         - ls -laR /home/travis/.rvm/gems/ruby-2.4.0/gems/phantomjs-2.1.1.0/
+        - echo $PATH
     - env: BUILD_SHARD="integration_tests"
       before_script:
         - pip install --user protobuf
