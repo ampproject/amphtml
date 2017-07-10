@@ -123,10 +123,7 @@ function isBuildSystemFile(filePath) {
       path.extname(filePath) != '.textproto' &&
       // Exclude config files from build-system since we want it to trigger
       // the flag config check.
-      !isFlagConfig(filePath) &&
-      // Exclude visual diff files from build-system since we want it to trigger
-      // visual diff tests.
-      !isVisualDiffFile(filePath);
+      !isFlagConfig(filePath);
 }
 
 /**
@@ -211,8 +208,7 @@ function determineBuildTargets(filePaths) {
         'RUNTIME',
         'INTEGRATION_TEST',
         'DOCS',
-        'FLAG_CONFIG',
-        'VISUAL_DIFF']);
+        'FLAG_CONFIG']);
   }
   const targetSet = new Set();
   for (let i = 0; i < filePaths.length; i++) {
@@ -229,8 +225,6 @@ function determineBuildTargets(filePaths) {
       targetSet.add('FLAG_CONFIG');
     } else if (isIntegrationTest(p)) {
       targetSet.add('INTEGRATION_TEST');
-    } else if (isVisualDiffFile(p)) {
-      targetSet.add('VISUAL_DIFF');
     } else {
       targetSet.add('RUNTIME');
     }
@@ -374,12 +368,12 @@ function main(argv) {
     if (buildTargets.has('BUILD_SYSTEM')) {
       command.testBuildSystem();
     }
+
     if (buildTargets.has('DOCS')) {
       command.testDocumentLinks(files);
     }
-    if (buildTargets.has('RUNTIME') ||
-        buildTargets.has('INTEGRATION_TEST') ||
-        buildTargets.has('VISUAL_DIFF')) {
+
+    if (buildTargets.has('RUNTIME') || buildTargets.has('INTEGRATION_TEST')) {
       command.cleanBuild();
       command.buildRuntime();
       command.runVisualDiffTests();
@@ -390,7 +384,7 @@ function main(argv) {
       command.runPresubmitTests();
       command.runJsonAndLintChecks();
       command.runDepAndTypeChecks();
-      // Run unit tests only if the PR contains runtime changes.
+      // Skip unit tests if the PR only contains changes to integration tests.
       if (buildTargets.has('RUNTIME')) {
         command.runUnitTests();
       }
