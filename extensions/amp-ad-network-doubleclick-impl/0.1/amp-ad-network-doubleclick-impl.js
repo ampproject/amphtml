@@ -552,7 +552,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (noCache) {
       xhrInit.headers = headers;
     }
-    let rtcTotalTime;
     const startTime = Date.now();
     rtcPromise = xhrFor(this.win).fetchJson(
         endpoint, xhrInit).then(res => {
@@ -566,7 +565,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               user().error(err);
             });
           }
-          return [res, rtcTotalTime];
+          return res;
         });
 
     return this.timeoutAndMergeRtc();
@@ -574,9 +573,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   timeoutAndMergeRtc() {
     return timerFor(window).timeoutPromise(RTC_TIMEOUT, rtcPromise).then(
-        r => {
-          const res = r[0];
-          rtcTotalTime = r[1];
+        res => {
           // TODO :: Need to add the time on to the ad request.
           // Redirects and non-200 status codes are forbidden for RTC.
           if (!!res.redirected || res.status != 200) {
@@ -785,6 +782,7 @@ export function resetRtcStateForTesting() {
   rtcPromise = null;
   rtcResponseJson = null;
   rtcConfig = undefined;
+  rtcTotalTime = undefined;
 }
 
 /**
