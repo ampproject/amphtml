@@ -2213,7 +2213,7 @@ describe('amp-a4a', () => {
         has: unused => {
           return false;
         },
-        get: h => {
+        get: unused => {
           return undefined;
         },
       };
