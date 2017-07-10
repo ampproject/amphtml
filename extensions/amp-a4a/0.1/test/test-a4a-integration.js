@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-import {
-    MockA4AImpl,
-    SIGNATURE_HEADER,
-    TEST_URL,
-} from './utils';
+import {AMP_SIGNATURE_HEADER} from '../amp-a4a';
+import {MockA4AImpl, TEST_URL} from './utils';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {createIframePromise} from '../../../../testing/iframe';
 import {
@@ -110,7 +107,7 @@ describe('integration test: a4a', () => {
     }
     // Expect ad request.
     headers = {};
-    headers[SIGNATURE_HEADER] = validCSSAmp.signature;
+    headers[AMP_SIGNATURE_HEADER] = validCSSAmp.signature;
     mockResponse = {
       arrayBuffer: () => utf8Encode(validCSSAmp.reserialized),
       bodyUsed: false,
@@ -154,7 +151,7 @@ describe('integration test: a4a', () => {
   });
 
   it('should fall back to 3p when no signature is present', () => {
-    delete headers[SIGNATURE_HEADER];
+    delete headers[AMP_SIGNATURE_HEADER];
     return fixture.addElement(a4aElement).then(unusedElement => {
       expectRenderedInXDomainIframe(a4aElement, TEST_URL);
     });
@@ -220,7 +217,7 @@ describe('integration test: a4a', () => {
 
   it('should collapse slot when creative response has code 204', () => {
     headers = {};
-    headers[SIGNATURE_HEADER] = validCSSAmp.signature;
+    headers[AMP_SIGNATURE_HEADER] = validCSSAmp.signature;
     mockResponse = {
       arrayBuffer: () => utf8Encode(validCSSAmp.reserialized),
       bodyUsed: false,
@@ -258,7 +255,7 @@ describe('integration test: a4a', () => {
 
   it('should collapse slot when creative response.arrayBuffer is null', () => {
     headers = {};
-    headers[SIGNATURE_HEADER] = validCSSAmp.signature;
+    headers[AMP_SIGNATURE_HEADER] = validCSSAmp.signature;
     mockResponse = {
       arrayBuffer: () => null,
       bodyUsed: false,
@@ -284,7 +281,7 @@ describe('integration test: a4a', () => {
   it('should collapse slot when creative response.arrayBuffer() is empty',
       () => {
         headers = {};
-        headers[SIGNATURE_HEADER] = validCSSAmp.signature;
+        headers[AMP_SIGNATURE_HEADER] = validCSSAmp.signature;
         mockResponse = {
           arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
           bodyUsed: false,

@@ -79,7 +79,7 @@ const METADATA_STRING_NO_QUOTES =
 export const DEFAULT_SAFEFRAME_VERSION = '1-0-9';
 
 /** @const {string} */
-const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
+export const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
 
 /** @const {string} */
 const CREATIVE_SIZE_HEADER = 'X-CreativeSize';
@@ -1099,8 +1099,8 @@ export class AmpA4A extends AMP.BaseElement {
         // Decoding error; do nothing
       }
     }
-    return Promise.resolve(
-        /** @type {!AdResponseDef} */ ({responseArrayBuffer, signature}));
+    return Promise.resolve(/** @type {!AdResponseDef} */ (
+        {creative: responseArrayBuffer, signature}));
   }
 
   /**
