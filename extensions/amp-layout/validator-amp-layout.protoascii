@@ -29,7 +29,6 @@ tags: {  # <amp-layout>
   tag_name: "AMP-LAYOUT"
   requires_extension: "amp-layout"
   attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-src-or-srcset"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-layout"
   amp_layout: {
     supported_layouts: FILL
