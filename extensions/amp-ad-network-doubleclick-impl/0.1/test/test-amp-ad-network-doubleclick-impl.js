@@ -25,7 +25,7 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {
   installExtensionsService,
 } from '../../../../src/service/extensions-impl';
-import {extensionsFor} from '../../../../src/services';
+import {extensionsFor, timerFor} from '../../../../src/services';
 import {
   AmpAdNetworkDoubleclickImpl,
   getNetworkId,
@@ -1104,6 +1104,49 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         'json': contextualTargeting,
       });
       return testSuccessfulRtc(rtcResponse, jsonTargeting);
+    });
+
+    it('should only send one RTC callout per page', () => {});
+
+    it('should not send RTC if url invalid', () => {});
+
+    it('should not send request on RTC failure if specified', () => {});
+
+    it('should send ad request on RTC failure if specified', () => {});
+
+    it('should bypass caching if specified', () => {});
+
+    it('should timeout slow response', () => {
+      rtcConfig = document.getElementById('amp-rtc');
+      rtcConfig.innerText = '{'
+          + '"endpoint": "https://example-publisher.com/rtc/",'
+          + '"sendAdRequestOnFailure": true'
+         + '}';
+      const targeting = {'sport': 'baseball'};
+      const categoryExclusions = {};
+      const jsonTargeting = {
+        targeting,
+        categoryExclusions,
+      };
+
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+      const shouldSendRequestWithoutRtcSpy = sandbox.spy(
+          impl, 'shouldSendRequestWithoutRtc');
+
+      xhrMock.returns(
+          timerFor(window).promise(1200).then(() => {
+            return Promise.resolve({
+              redirected: false,
+              status: 200,
+              json: () => {
+                return Promise.resolve(rtcResponse);
+              },
+            });
+          }));
+      impl.populateAdUrlState();
+      return impl.executeRtc_().then(() => {
+        expect(shouldSendRequestWithoutRtcSpy).to.be.calledOnce;
+      });
     });
 
   });
