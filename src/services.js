@@ -134,7 +134,6 @@ export function documentInfoForDoc(nodeOrDoc) {
  * @return {!DocumentState}
  */
 export function documentStateFor(window) {
-  installDocumentStateService(window);
   return getService(window, 'documentState');
 }
 
