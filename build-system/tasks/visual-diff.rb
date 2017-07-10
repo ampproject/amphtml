@@ -37,10 +37,8 @@ PORT = '8000'
 
 # Registers the install dir, since the gem doesn't explicitly add it to $PATH.
 def registerPhantomJs()
-  phantomjsBinDir = `gem which phantomjs`
-  phantomjsInstallDir = File.dirname(File.dirname(phantomjsBinDir))
-  puts phantomjsInstallDir
-  Phantomjs.base_dir = phantomjsInstallDir
+  phantomjsBin = `gem which phantomjs`
+  puts phantomjsBin
   Phantomjs.path
   Capybara.register_driver :poltergeist do |app|
     Capybara::Poltergeist::Driver.new(app, :phantomjs => Phantomjs.path)
