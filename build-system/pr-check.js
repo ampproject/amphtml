@@ -167,7 +167,7 @@ function isDocFile(filePath) {
 }
 
 /**
- * Determines if the given file is realated to the visual diff tests.
+ * Determines if the given file is related to the visual diff tests.
  * @param {string} filePath
  * @return {boolean}
  */
