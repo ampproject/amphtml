@@ -173,7 +173,9 @@ export class StandardActions {
     if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
       return;
     }
-    self.print();
+    const node = invocation.target;
+    const win = (node.ownerDocument || node).defaultView;
+    win.print();
   }
 
   /**
