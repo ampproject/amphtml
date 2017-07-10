@@ -397,21 +397,20 @@ class VideoEntry {
   }
 
   /**
-  * Callback for when the video has been paused
+   * Callback for when the video has been paused
    * @private
    */
   videoPaused_() {
-    const previousState = this.getPlayingState();
-    const trackingVideo = assertTrackingVideo_(this.video);
+    const trackingVideo = assertTrackingVideo(this.video);
     if (trackingVideo &&
         trackingVideo.getCurrentTime() !== trackingVideo.getDuration()) {
       this.analyticsEvent_(VideoAnalyticsEvent.PAUSE);
     }
     this.isPlaying_ = false;
 
-    // Don't trigger session end for autoplay pauses, since session end
-    // is already covered for autoplay in the visibility tracking
-    if (previousState !== PlayingStates.PLAYING_AUTO) {
+    // Prevent double-trigger of session if video is autoplay and the video
+    // is paused by a the user scrolling the video out of view.
+    if (!this.isAutoplay() || this.isVisible_) {
       this.actionSessionManager_.endSession();
     }
   }
@@ -460,7 +459,11 @@ class VideoEntry {
    * @private
    */
   loadedVideoVisibilityChanged_() {
-    if (this.hasAutoplay) {
+    const canAutoplay = this.hasAutoplay &&
+        !this.userInteractedWithAutoPlay_ &&
+        viewerForDoc(this.ampdoc_).isVisible();
+
+    if (canAutoplay) {
       this.autoplayLoadedVideoVisibilityChanged_();
     } else {
       this.nonAutoplayLoadedVideoVisibilityChanged_();
@@ -569,11 +572,6 @@ class VideoEntry {
    * @private
    */
   autoplayLoadedVideoVisibilityChanged_() {
-    if (this.userInteractedWithAutoPlay_
-       || !viewerForDoc(this.ampdoc_).isVisible()) {
-      return;
-    }
-
     this.boundSupportsAutoplay_().then(supportsAutoplay => {
       if (!supportsAutoplay) {
         return;
@@ -949,7 +947,7 @@ class VideoEntry {
    * @private
    */
   analyticsEvent_(eventType, opt_vars) {
-    const trackingVideo = assertTrackingVideo_(this.video);
+    const trackingVideo = assertTrackingVideo(this.video);
     if (trackingVideo) {
       opt_vars = opt_vars || this.getAnalyticsDetails_(trackingVideo);
       trackingVideo.element.dispatchCustomEvent(
@@ -984,9 +982,9 @@ class VideoEntry {
  * Asserts that a video is a tracking video
  * @param {!../video-interface.VideoInterface} video
  * @return {?../video-interface.TrackingVideoInterface}
- * @private
+ * @private visible for testing
  */
-function assertTrackingVideo_(video) {
+export function assertTrackingVideo(video) {
   const trackingVideo =
       /** @type {?../video-interface.TrackingVideoInterface} */ (video);
   if (trackingVideo.isTrackingVideo && trackingVideo.isTrackingVideo()) {

@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
-import {listenOncePromise} from '../../src/event-helper';
+import {getData, listen, listenOncePromise} from '../../src/event-helper';
 import {timerFor} from '../../src/services';
 import {removeElement} from '../../src/dom';
 import {toggleExperiment} from '../../src/experiments';
-import {VideoInterface, VideoEvents} from '../../src/video-interface';
-import {supportsAutoplay} from '../../src/service/video-manager-impl';
+import {
+  VideoInterface,
+  VideoEvents,
+  VideoAnalyticsEvent,
+} from '../../src/video-interface';
+import {
+  assertTrackingVideo,
+  supportsAutoplay
+} from '../../src/service/video-manager-impl';
 import {
   createFixtureIframe,
   expectBodyToBecomeVisible,
@@ -41,6 +48,13 @@ export function runVideoPlayerIntegrationTests(
 
   let fixtureGlobal;
   let videoGlobal;
+
+  function createButton(r, action) {
+    const button = r.fixture.doc.createElement('button');
+    button.setAttribute('on', 'tap:myVideo.' + action);
+    r.fixture.doc.body.appendChild(button);
+    return button;
+  }
 
   describe.configure().retryOnSaucelabs()
       .run('Video Interface', function() {
@@ -95,13 +109,6 @@ export function runVideoPlayerIntegrationTests(
       });
     });
 
-    function createButton(r, action) {
-      const button = r.fixture.doc.createElement('button');
-      button.setAttribute('on', 'tap:myVideo.' + action);
-      r.fixture.doc.body.appendChild(button);
-      return button;
-    }
-
     // Although these tests are not about autoplay, we can ony run them in
     // browsers that do support autoplay, this is because a synthetic click
     // event will not be considered a user-action and mobile browsers that
@@ -113,6 +120,180 @@ export function runVideoPlayerIntegrationTests(
       // Skip autoplay tests if browser does not support autoplay.
       return supportsAutoplay(window, false).then(supportsAutoplay => {
         if (!supportsAutoplay) {
+          this.skip();
+        }
+      });
+    });
+
+    afterEach(cleanUp);
+  });
+
+  describe.configure().retryOnSaucelabs().run('Analytics Triggers', function() {
+    this.timeout(TIMEOUT);
+    let video;
+
+    it('should trigger play analytics when the video plays', function() {
+      let playButton;
+
+      return getVideoPlayer(
+          {
+            outsideView: false,
+            autoplay: false,
+          }
+      ).then(r => {
+        video = r.video;
+        playButton = createButton(r, 'play');
+        return listenOncePromise(video, VideoEvents.LOAD);
+      }).then(() => {
+        playButton.click();
+        return listenOncePromise(video, VideoEvents.ANALYTICS);;
+      }).then(event => {
+        const eventData = getData(event);
+        const type = eventData['type'];
+        expect(type).to.equal(VideoAnalyticsEvent.PLAY);
+      });
+    });
+
+    it('should trigger pause analytics when the video pauses', function() {
+      let pauseButton;
+
+      return getVideoPlayer(
+          {
+            outsideView: false,
+            autoplay: true,
+          }
+      ).then(r => {
+        video = r.video;
+        pauseButton = createButton(r, 'pause');
+        return listenOncePromise(video, VideoEvents.PLAY);
+      }).then(() => {
+        pauseButton.click();
+        return listenOncePromise(video, VideoEvents.ANALYTICS);
+      }).then(event => {
+        const eventData = getData(event);
+        const type = eventData['type'];
+        expect(type).to.equal(VideoAnalyticsEvent.PAUSE);
+      });
+    });
+
+    it('should trigger session analytics when a session ends', function() {
+      let pauseButton;
+
+      return getVideoPlayer(
+          {
+            outsideView: false,
+            autoplay: true,
+          }
+      ).then(r => {
+        video = r.video;
+        pauseButton = createButton(r, 'pause');
+        return listenOncePromise(video, VideoEvents.PLAY);
+      }).then(() => {
+        const sessionPromise = new Promise(resolve => {
+          listen(video, VideoEvents.ANALYTICS, event => {
+            const eventData = getData(event);
+            const type = eventData['type'];
+            if (type === VideoAnalyticsEvent.SESSION) {
+              resolve();
+            }
+          });
+        });
+        pauseButton.click();
+        return sessionPromise;
+      });
+    });
+
+    it('should trigger session analytics when ' +
+        'a visible session ends', function() {
+      let viewport;
+      return getVideoPlayer(
+          {
+            outsideView: true,
+            autoplay: true,
+          }
+      ).then(r => {
+        video = r.video;
+        viewport = video.implementation_.getViewport();
+        // scroll to the bottom, make video fully visible
+        viewport.scrollIntoView(video);
+        return listenOncePromise(video, VideoEvents.PLAY);
+      }).then(() => {
+        // scroll to the bottom, make video fully visible
+        viewport.setScrollTop(0);
+        return listenOncePromise(video, VideoEvents.ANALYTICS);
+      }).then(event => {
+        const eventData = getData(event);
+        const type = eventData['type'];
+        expect(type).to.equal(VideoAnalyticsEvent.SESSION_VISIBLE);
+      });
+    });
+
+    it('should trigger ended analytics when the video ends', function() {
+      this.skip();
+      return getVideoPlayer(
+          {
+            outsideView: false,
+            autoplay: true,
+          }
+      ).then(r => {
+        video = r.video;
+        return listenOncePromise(video, VideoEvents.PLAY);
+      }).then(() => {
+        return Promise.all([
+          // listenOncePromise(video, VideoEvents.ENDED, /* opt_capture */ true),
+          listenOncePromise(video, VideoEvents.ANALYTICS),
+        ]);
+      }).then(result => {
+        const event = result[1];
+        const eventData = getData(event);
+        const type = eventData['type'];
+        expect(type).to.equal(VideoAnalyticsEvent.ENDED);
+      });
+    });
+
+    it('should include current time, play state, etc.', function() {
+      let playButton;
+
+      return getVideoPlayer(
+          {
+            outsideView: false,
+            autoplay: false,
+          }
+      ).then(r => {
+        video = r.video;
+        playButton = createButton(r, 'play');
+        return listenOncePromise(video, VideoEvents.LOAD);
+      }).then(() => {
+        playButton.click();
+        return listenOncePromise(video, VideoEvents.ANALYTICS);
+      }).then(event => {
+        const eventData = getData(event);
+        const details = eventData['details'];
+        expect(details.autoplay).to.be.a('boolean');
+        expect(details.currentTime).to.be.a('number');
+        expect(details.duration).to.be.a('number');
+        expect(details.ended).to.be.a('boolean');
+        expect(details.height).to.be.a('number');
+        expect(details.id).to.be.a('string');
+        expect(details.muted).to.be.a('boolean');
+        expect(details.paused).to.be.a('boolean');
+        expect(details.width).to.be.a('number');
+      });
+    });
+
+    beforeEach(function() {
+      this.timeout(TIMEOUT);
+
+      // Skip analytics tests if the video implementation
+      // doesn't support analytics.
+      return getVideoPlayer(
+          {
+            outsideView: false,
+            autoplay: false,
+          }
+      ).then(r => {
+        video = r.video;
+        if (!assertTrackingVideo(video.implementation_)) {
           this.skip();
         }
       });
@@ -268,13 +449,6 @@ export function runVideoPlayerIntegrationTests(
         });
       });
     });
-
-    function createButton(r, action) {
-      const button = r.fixture.doc.createElement('button');
-      button.setAttribute('on', 'tap:myVideo.' + action);
-      r.fixture.doc.body.appendChild(button);
-      return button;
-    }
 
     // Although these tests are not about autoplay, we can ony run them in
     // browsers that do support autoplay, this is because a synthetic click

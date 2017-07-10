@@ -50,4 +50,11 @@ export class VideoSessionManager {
     }
     this.isSessionActive_ = false;
   }
+
+  /**
+   * Get the current session state.
+   */
+  isSessionActive() {
+    return this.isSessionActive_;
+  }
 }
