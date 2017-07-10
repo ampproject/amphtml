@@ -191,6 +191,13 @@ export class VideoManager {
    * @private
    */
   maybeInstallVisibilityObserver_(entry) {
+    // TODO(aghassemi): Remove this later. For now, the visibility observer
+    // only matters for autoplay videos so no point in monitoring arbitrary
+    // videos yet.
+    if (!entry.hasAutoplay && !assertTrackingVideo(entry.video)) {
+      return;
+    }
+
     listen(entry.video.element, VideoEvents.VISIBILITY, () => {
       entry.updateVisibility();
     });
@@ -351,6 +358,9 @@ class VideoEntry {
     /** @private {?Element} */
     this.internalElement_ = null;
 
+    /** @private */
+    this.muted_ = false;
+
     this.hasDocking = element.hasAttribute(VideoAttributes.DOCK);
 
     this.hasAutoplay = element.hasAttribute(VideoAttributes.AUTOPLAY);
@@ -361,9 +371,9 @@ class VideoEntry {
 
     listen(element, VideoEvents.PAUSE, () => this.videoPaused_());
     listen(element, VideoEvents.PLAY, () => this.videoPlayed_());
-    // TODO(cvializ): understand why capture needs to be true for ended : /
-    listen(element, VideoEvents.ENDED, () => this.videoEnded_(),
-        /* opt_capture */ true);
+    listen(element, VideoEvents.ENDED, () => this.videoEnded_());
+    listen(element, VideoEvents.MUTED, () => this.muted_ = true);
+    listen(element, VideoEvents.UNMUTED, () => this.muted_ = false);
 
     // Currently we only register after video player is build.
     this.videoBuilt_();
@@ -463,11 +473,13 @@ class VideoEntry {
         !this.userInteractedWithAutoPlay_ &&
         viewerForDoc(this.ampdoc_).isVisible();
 
-    if (canAutoplay) {
-      this.autoplayLoadedVideoVisibilityChanged_();
-    } else {
-      this.nonAutoplayLoadedVideoVisibilityChanged_();
-    }
+    this.boundSupportsAutoplay_().then(supportsAutoplay => {
+      if (canAutoplay && supportsAutoplay) {
+        this.autoplayLoadedVideoVisibilityChanged_();
+      } else {
+        this.nonAutoplayLoadedVideoVisibilityChanged_();
+      }
+    });
   }
 
   /* Docking Behaviour */
@@ -572,22 +584,16 @@ class VideoEntry {
    * @private
    */
   autoplayLoadedVideoVisibilityChanged_() {
-    this.boundSupportsAutoplay_().then(supportsAutoplay => {
-      if (!supportsAutoplay) {
-        return;
+    if (this.isVisible_) {
+      this.visibilitySessionManager_.beginSession();
+      this.video.play(/*autoplay*/ true);
+      this.playCalledByAutoplay_ = true;
+    } else {
+      if (this.isPlaying_) {
+        this.visibilitySessionManager_.endSession();
       }
-
-      if (this.isVisible_) {
-        this.visibilitySessionManager_.beginSession();
-        this.video.play(/*autoplay*/ true);
-        this.playCalledByAutoplay_ = true;
-      } else {
-        if (this.isPlaying_) {
-          this.visibilitySessionManager_.endSession();
-        }
-        this.video.pause();
-      }
-    });
+      this.video.pause();
+    }
   }
 
   /**
@@ -949,32 +955,42 @@ class VideoEntry {
   analyticsEvent_(eventType, opt_vars) {
     const trackingVideo = assertTrackingVideo(this.video);
     if (trackingVideo) {
-      opt_vars = opt_vars || this.getAnalyticsDetails_(trackingVideo);
-      trackingVideo.element.dispatchCustomEvent(
-          VideoEvents.ANALYTICS, {type: eventType, details: opt_vars});
+      const detailsPromise = opt_vars ? Promise.resolve(opt_vars) :
+          this.getAnalyticsDetails_(trackingVideo);
+
+      detailsPromise.then(details => {
+        trackingVideo.element.dispatchCustomEvent(
+            VideoEvents.ANALYTICS, {type: eventType, details});
+      });
     }
   }
 
   /**
    * Collects a snapshot of the current video state for video analytics
    * @param {!../video-interface.TrackingVideoInterface} video
-   * @return {!../video-interface.VideoAnalyticsDetailsDef}
+   * @return {!Promise<!../video-interface.VideoAnalyticsDetailsDef>}
    * @private
    */
   getAnalyticsDetails_(video) {
-    const autoplay = this.isAutoplay();
-    return {
-      'autoplay': autoplay,
-      'currentTime': video.getCurrentTime(),
-      'duration': video.getDuration(),
-      'ended': video.getEnded(),
-      // TODO(cvializ): add fullscreen
-      'height': video.getHeight(),
-      'id': video.getId(),
-      'muted': video.getMuted(),
-      'paused': video.getPaused(),
-      'width': video.getWidth(),
-    };
+    return this.boundSupportsAutoplay_().then(supportsAutoplay => {
+      const {width, height} = this.video.element.getLayoutBox();
+      const autoplay = this.hasAutoplay && supportsAutoplay;
+      const playedTotal = video.getPlayedRanges().reduce(
+          (acc, range) => acc + range[1] - range[0], 0);
+
+      return {
+        'autoplay': autoplay,
+        'currentTime': video.getCurrentTime(),
+        'duration': video.getDuration(),
+        // TODO(cvializ): add fullscreen
+        'height': height,
+        'id': video.element.id,
+        'muted': this.muted_,
+        'playedTotal': playedTotal,
+        'state': this.getPlayingState(),
+        'width': width,
+      };
+    });
   }
 }
 

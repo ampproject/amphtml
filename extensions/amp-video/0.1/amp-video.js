@@ -181,7 +181,11 @@ class AmpVideo extends AMP.BaseElement {
      */
   installEventHandlers_() {
     const video = dev().assertElement(this.video_);
-    this.forwardEvents([VideoEvents.PLAY, VideoEvents.PAUSE], video);
+    this.forwardEvents([
+      VideoEvents.PLAY,
+      VideoEvents.PAUSE,
+      VideoEvents.ENDED,
+    ], video);
     listen(video, 'volumechange', () => {
       if (this.muted_ != this.video_.muted) {
         this.muted_ = this.video_.muted;
@@ -277,23 +281,8 @@ class AmpVideo extends AMP.BaseElement {
   }
 
   /** @override */
-  getId() {
-    return this.video_.id;
-  }
-
-  /** @override */
   getCurrentTime() {
     return this.video_.currentTime;
-  }
-
-  /** @override */
-  getWidth() {
-    return this.video_.width;
-  }
-
-  /** @override */
-  getHeight() {
-    return this.video_.height;
   }
 
   /** @override */
@@ -302,29 +291,8 @@ class AmpVideo extends AMP.BaseElement {
   }
 
   /** @override */
-  getPaused() {
-    return this.video_.paused;
-  }
-
-  /** @override */
   getPlayedRanges() {
-    return this.video_.played;
-  }
-
-  /** @override */
-  getPlayedTotal() {
-    return this.video_.played.reduce(
-        (acc, range) => acc + range[1] - range[0], 0);
-  }
-
-  /** @override */
-  getMuted() {
-    return this.muted_;
-  }
-
-  /** @override */
-  getEnded() {
-    return this.video_.ended;
+    return Array.prototype.slice.call(this.video_.played);
   }
 }
 

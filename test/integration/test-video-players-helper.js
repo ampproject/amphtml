@@ -25,7 +25,7 @@ import {
 } from '../../src/video-interface';
 import {
   assertTrackingVideo,
-  supportsAutoplay
+  supportsAutoplay,
 } from '../../src/service/video-manager-impl';
 import {
   createFixtureIframe,
@@ -89,22 +89,26 @@ export function runVideoPlayerIntegrationTests(
         const pauseButton = createButton(r, 'pause');
         const muteButton = createButton(r, 'mute');
         const unmuteButton = createButton(r, 'unmute');
-        return Promise.resolve()
+        return listenOncePromise(r.video, VideoEvents.LOAD)
             .then(() => {
+              const promise = listenOncePromise(r.video, VideoEvents.MUTED);
               muteButton.click();
-              return listenOncePromise(r.video, VideoEvents.MUTED);
+              return promise;
             })
             .then(() => {
+              const promise = listenOncePromise(r.video, VideoEvents.PLAY);
               playButton.click();
-              return listenOncePromise(r.video, VideoEvents.PLAY);
+              return promise;
             })
             .then(() => {
+              const promise = listenOncePromise(r.video, VideoEvents.PAUSE);
               pauseButton.click();
-              return listenOncePromise(r.video, VideoEvents.PAUSE);
+              return promise;
             })
             .then(() => {
+              const promise = listenOncePromise(r.video, VideoEvents.UNMUTED);
               unmuteButton.click();
-              return listenOncePromise(r.video, VideoEvents.UNMUTED);
+              return promise;
             });
       });
     });
@@ -137,16 +141,20 @@ export function runVideoPlayerIntegrationTests(
 
       return getVideoPlayer(
           {
-            outsideView: false,
+            outsideView: true,
             autoplay: false,
           }
       ).then(r => {
         video = r.video;
         playButton = createButton(r, 'play');
-        return listenOncePromise(video, VideoEvents.LOAD);
+        const viewport = video.implementation_.getViewport();
+        const promise = listenOncePromise(video, VideoEvents.LOAD);
+        viewport.scrollIntoView(video);
+        return promise;
       }).then(() => {
+        const promise = listenOncePromise(video, VideoEvents.ANALYTICS);
         playButton.click();
-        return listenOncePromise(video, VideoEvents.ANALYTICS);;
+        return promise;
       }).then(event => {
         const eventData = getData(event);
         const type = eventData['type'];
@@ -167,8 +175,9 @@ export function runVideoPlayerIntegrationTests(
         pauseButton = createButton(r, 'pause');
         return listenOncePromise(video, VideoEvents.PLAY);
       }).then(() => {
+        const promise = listenOncePromise(video, VideoEvents.ANALYTICS);
         pauseButton.click();
-        return listenOncePromise(video, VideoEvents.ANALYTICS);
+        return promise;
       }).then(event => {
         const eventData = getData(event);
         const type = eventData['type'];
@@ -186,8 +195,9 @@ export function runVideoPlayerIntegrationTests(
           }
       ).then(r => {
         video = r.video;
+        const promise = listenOncePromise(video, VideoEvents.PLAY);
         pauseButton = createButton(r, 'pause');
-        return listenOncePromise(video, VideoEvents.PLAY);
+        return promise;
       }).then(() => {
         const sessionPromise = new Promise(resolve => {
           listen(video, VideoEvents.ANALYTICS, event => {
@@ -223,13 +233,11 @@ export function runVideoPlayerIntegrationTests(
         return listenOncePromise(video, VideoEvents.ANALYTICS);
       }).then(event => {
         const eventData = getData(event);
-        const type = eventData['type'];
-        expect(type).to.equal(VideoAnalyticsEvent.SESSION_VISIBLE);
+        expect(eventData['type']).to.equal(VideoAnalyticsEvent.SESSION_VISIBLE);
       });
     });
 
     it('should trigger ended analytics when the video ends', function() {
-      this.skip();
       return getVideoPlayer(
           {
             outsideView: false,
@@ -237,17 +245,12 @@ export function runVideoPlayerIntegrationTests(
           }
       ).then(r => {
         video = r.video;
-        return listenOncePromise(video, VideoEvents.PLAY);
+        return listenOncePromise(video, VideoEvents.ENDED, true);
       }).then(() => {
-        return Promise.all([
-          // listenOncePromise(video, VideoEvents.ENDED, /* opt_capture */ true),
-          listenOncePromise(video, VideoEvents.ANALYTICS),
-        ]);
-      }).then(result => {
-        const event = result[1];
+        return listenOncePromise(video, VideoEvents.ANALYTICS);
+      }).then(event => {
         const eventData = getData(event);
-        const type = eventData['type'];
-        expect(type).to.equal(VideoAnalyticsEvent.ENDED);
+        expect(eventData['type']).to.equal(VideoAnalyticsEvent.ENDED);
       });
     });
 
@@ -272,11 +275,8 @@ export function runVideoPlayerIntegrationTests(
         expect(details.autoplay).to.be.a('boolean');
         expect(details.currentTime).to.be.a('number');
         expect(details.duration).to.be.a('number');
-        expect(details.ended).to.be.a('boolean');
         expect(details.height).to.be.a('number');
-        expect(details.id).to.be.a('string');
-        expect(details.muted).to.be.a('boolean');
-        expect(details.paused).to.be.a('boolean');
+        expect(details.state).to.be.a('string');
         expect(details.width).to.be.a('number');
       });
     });
