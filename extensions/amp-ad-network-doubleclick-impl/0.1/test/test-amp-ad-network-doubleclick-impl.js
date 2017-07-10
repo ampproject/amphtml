@@ -995,7 +995,8 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     let xhrMock;
     let rtcConfig;
 
-    function testSuccessfulRtc(rtcResponse, jsonTargeting) {
+    function testSuccessfulRtc(rtcResponse, expectedValue, opt_element) {
+      element = opt_element || element;
       impl = new AmpAdNetworkDoubleclickImpl(element);
       xhrMock.returns(
           Promise.resolve({
@@ -1008,7 +1009,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       );
       impl.populateAdUrlState();
       return impl.executeRtc_().then(() => {
-        expect(impl.jsonTargeting_).to.deep.equal(jsonTargeting);
+        expect(impl.jsonTargeting_).to.deep.equal(expectedValue);
       });
 
     }
@@ -1106,7 +1107,52 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       return testSuccessfulRtc(rtcResponse, jsonTargeting);
     });
 
-    it('should only send one RTC callout per page', () => {});
+    it('should only send two RTC callouts per page', () => {
+      const rtcResponse = {
+        targeting: {'food': {
+          'kids': ['chicken fingers', 'pizza']},
+          'sports': 'baseball'},
+        categoryExclusions: {'age': '18-25'}};
+      let contextualTargeting =
+      '{"targeting": {"food": {"kids": "fries", "adults": "cheese"}}}';
+      let jsonTargeting = {
+        targeting: {
+          'food': {
+            'kids': ['chicken fingers', 'pizza'],
+            'adults': 'cheese',
+          },
+          'sports': 'baseball'},
+        categoryExclusions: {'age': '18-25'}};
+      element = createElementWithAttributes(document, 'amp-ad', {
+        'width': '200',
+        'height': '50',
+        'type': 'doubleclick',
+        'layout': 'fixed',
+        'json': contextualTargeting,
+      });
+      testSuccessfulRtc(rtcResponse, jsonTargeting);
+
+      contextualTargeting =
+      '{"targeting": {"food": {"adults": "wine"}}}';
+      jsonTargeting = {
+        targeting: {
+          'food': {
+            'kids': ['chicken fingers', 'pizza'],
+            'adults': 'wine',
+          },
+          'sports': 'baseball'},
+        categoryExclusions: {'age': '18-25'}};
+      element_2 = createElementWithAttributes(document, 'amp-ad', {
+        'width': '200',
+        'height': '50',
+        'type': 'doubleclick',
+        'layout': 'fixed',
+        'json': contextualTargeting,
+      });
+      return testSuccessfulRtc(rtcResponse, jsonTargeting, element_2).then(() => {
+        expect(xhrMock).to.be.calledTwice;
+      });
+    });
 
     it('should not send RTC if url invalid', () => {});
 

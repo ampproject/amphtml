@@ -97,6 +97,8 @@ let rtcResponseJson = null;
 
 let rtcConfig;
 
+let rtcTotalTime;
+
 /** @private @const {!Object<string,string>} */
 const PAGE_LEVEL_PARAMS_ = {
   'gdfp_req': '1',
@@ -372,6 +374,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         const pageLevelParameters = values[0];
         const parameters = Object.assign(
             this.getBlockParameters_(), pageLevelParameters);
+        if (rtcTotalTime) {
+          parameters['artc'] = rtcTotalTime;
+        }
         return googleAdUrl(
             this, DOUBLECLICK_BASE_URL, startTime, parameters, ['108809080']);
       });
@@ -559,7 +564,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               headers,
             }).catch(err => {
               user().error(err);
-              this.sendRtcErrorPing(RTC_ERROR.XHR);
             });
           }
           return [res, rtcTotalTime];
@@ -572,11 +576,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return timerFor(window).timeoutPromise(RTC_TIMEOUT, rtcPromise).then(
         r => {
           const res = r[0];
-          const rtcTotalTime = r[1];
+          rtcTotalTime = r[1];
           // TODO :: Need to add the time on to the ad request.
           // Redirects and non-200 status codes are forbidden for RTC.
           if (!!res.redirected || res.status != 200) {
-            this.sendRtcErrorPing(RTC_ERROR.BAD_RESPONSE);
             return this.shouldSendRequestWithoutRtc();
           }
           // If response's json() method has already been called, reuse
@@ -599,7 +602,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           });
         }).catch(err => {
           user().error(err);
-          this.sendRtcErrorPing(RTC_ERROR.XHR);
           return this.shouldSendRequestWithoutRtc();
         });
   }
@@ -607,13 +609,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   shouldSendRequestWithoutRtc() {
     return rtcConfig['sendAdRequestOnFailure'] !== false ?
         Promise.resolve() : Promise.reject();
-  }
-
-  sendRtcErrorPing(error) {
-    // DO NOT SUBMIT
-    // Need to actually implement firing custom error events. Just for
-    // debugging as it currently is.
-    user().error(`RTC Error: ${error}`);
   }
 
   /** @override */
