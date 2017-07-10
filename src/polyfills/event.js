@@ -19,7 +19,7 @@
  * @param {!Window} win
  */
 export function install(win) {
-  // win.CustomEvent is a function on Edge, Chrome, FF, Safari but
+  // win.Event is a function on Edge, Chrome, FF, Safari but
   // is an object on IE 11.
   if (typeof win.Event === 'function') {
     return false;
