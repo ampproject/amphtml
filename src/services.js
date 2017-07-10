@@ -100,6 +100,15 @@ export function cidForDoc(nodeOrDoc) {
 }
 
 /**
+ * @param {!Window} window
+ * @return {!./service/crypto-impl.Crypto}
+ */
+export function cryptoFor(window) {
+  return (/** @type {!./service/crypto-impl.Crypto} */ (
+      getService(window, 'crypto')));
+}
+
+/**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!./service/document-info-impl.DocumentInfoDef} Info about the doc
  */

@@ -16,6 +16,7 @@
 
 import {ampdocServiceFor} from '../../src/ampdoc';
 import {
+  cryptoFor,
   extensionsFor,
   timerFor,
   viewerForDoc,
@@ -27,7 +28,6 @@ import {
   isOptedOutOfCid,
 } from '../../src/service/cid-impl';
 import {installCryptoService, Crypto} from '../../src/service/crypto-impl';
-import {cryptoFor} from '../../src/crypto';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {parseUrl} from '../../src/url';
 import {installPlatformService} from '../../src/service/platform-impl';
