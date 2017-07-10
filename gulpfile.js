@@ -197,12 +197,10 @@ function endBuildStep(stepName, targetName, startTime) {
   } else {
     timeString += secs + '.' + ms + ' s)';
   }
-  if (!process.env.TRAVIS) {
-    $$.util.log(
-        stepName,
-        $$.util.colors.cyan(targetName),
-        $$.util.colors.green(timeString));
-  }
+  $$.util.log(
+      stepName,
+      $$.util.colors.cyan(targetName),
+      $$.util.colors.green(timeString));
 }
 
 /**
