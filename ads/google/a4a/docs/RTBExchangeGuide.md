@@ -68,7 +68,7 @@ SSPs will need to provide a new field in the bid response to allow bidders to re
 ### Impression Tracking and Billing URLs
  
 * RTB buyers often include impression trackers as a structured field in the bid response (for example `Bid.burl`, the "billing notice URL" in OpenRTB 2.5).
-* It is up to the exchange or publisher ad server to determine how these URLs are fired, but <[`amp-pixel`](https://www.ampproject.org/docs/reference/components/amp-pixel)> and <[`amp-analytics`](https://www.ampproject.org/docs/reference/components/amp-analytics)> can handle most impression tracking and analytics use cases.
+* It is up to the exchange or publisher ad server to determine how these URLs are fired, but <code><[amp-pixel](https://www.ampproject.org/docs/reference/components/amp-pixel)></code> and <code><[amp-analytics](https://www.ampproject.org/docs/reference/components/amp-analytics)></code> can handle most impression tracking and analytics use cases.
 
 ## Background Docs
 * [AMP Ads for AMP Pages (Github)](https://github.com/ampproject/amphtml/issues/3133)
