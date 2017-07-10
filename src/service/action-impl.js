@@ -281,7 +281,7 @@ export class ActionService {
         break;
     }
     if (Object.keys(detail).length > 0) {
-      event['detail'] = detail;
+      event.detail = detail;
     }
   }
 
