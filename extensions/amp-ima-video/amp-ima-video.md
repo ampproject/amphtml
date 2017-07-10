@@ -16,6 +16,8 @@ limitations under the License.
 
 # <a name="amp-ima-video"></a> `amp-ima-video`
 
+[TOC]
+
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
@@ -38,7 +40,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-ima/">Annotated code example for amp-ima-video</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-ima-video/">Annotated code example for amp-ima-video</a></td>
   </tr>
 </table>
 
@@ -68,20 +70,20 @@ VAST-compliant ad response (for examples, see
 
 ## Attributes
 
-**data-tag** (required)
+##### data-tag (required)
 
-The URL for your VAST ad document.
+The URL for your VAST ad document. A relative URL or a URL that uses https protocol.
 
-**data-src** (required if no `<source>` children are present)
+##### data-src  
 
-The URL of your video content.
+The URL of your video content. A relative URL or a URL that uses https protocol. This attribute is required if no `<source>` children are present.
 
-**data-poster** (optional)
+##### data-poster (optional)
 
 An image for the frame to be displayed before video playback has started. By
 default, the first frame is displayed.
 
-**common attributes**
+##### common attributes
 
 This element includes
 [common attributes](https://www.ampproject.org/docs/reference/common_attributes)

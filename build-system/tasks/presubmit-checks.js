@@ -656,6 +656,22 @@ var forbiddenTermsSrcInclusive = {
       'dist.3p/current/integration.js',
     ],
   },
+  'decodeURIComponent\\(': {
+    message: 'decodeURIComponent throws for malformed URL components. Please ' +
+        'use tryDecodeUriComponent from src/url.js',
+    whitelist: [
+      '3p/integration.js',
+      'dist.3p/current/integration.js',
+      'examples/pwa/pwa.js',
+      'validator/engine/parse-url.js',
+      'validator/engine/validator.js',
+      'validator/webui/webui.js',
+      'extensions/amp-pinterest/0.1/util.js',
+      'src/url.js',
+      'src/url-try-decode-uri-component.js',
+      'src/utils/bytes.js',
+    ],
+  },
   // Super complicated regex that says "find any querySelector method call that
   // is passed as a variable anything that is not a string, or a string that
   // contains a space.
@@ -720,6 +736,9 @@ var forbiddenTermsSrcInclusive = {
   },
   '\\.getTime\\(\\)': {
     message: 'Unless you do weird date math (whitelist), use Date.now().',
+    whitelist: [
+      'extensions/amp-timeago/0.1/amp-timeago.js',
+    ],
   },
   '\\.expandStringSync\\(': {
     message: requiresReviewPrivacy,

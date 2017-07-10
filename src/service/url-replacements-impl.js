@@ -74,7 +74,8 @@ export class GlobalVariableSource extends VariableSource {
 
     /**
      * @private
-     * @const {function(!./ampdoc-impl.AmpDoc):!Promise<?AccessService>}
+     * @const {function(!./ampdoc-impl.AmpDoc):
+     *     !Promise<?../../extensions/amp-access/0.1/amp-access.AccessService>}
      */
     this.getAccessService_ = accessServiceForDocOrNull;
 
@@ -257,7 +258,7 @@ export class GlobalVariableSource extends VariableSource {
         // A temporary work around to extract Client ID from _ga cookie. #5761
         // TODO: replace with "filter" when it's in place. #2198
         const cookieName = opt_cookieName || scope;
-        if (cookieName == '_ga') {
+        if (cid && cookieName == '_ga') {
           cid = extractClientIdFromGaCookie(cid);
         }
 
@@ -476,7 +477,8 @@ export class GlobalVariableSource extends VariableSource {
   /**
    * Resolves the value via access service. If access service is not configured,
    * the resulting value is `null`.
-   * @param {function(!AccessService):(T|!Promise<T>)} getter
+   * @param {function(!../../extensions/amp-access/0.1/amp-access.AccessService
+   *     ):(T|!Promise<T>)} getter
    * @param {string} expr
    * @return {T|null}
    * @template T

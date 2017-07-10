@@ -27,10 +27,6 @@ describes.realWin('amp-timeago', {
   beforeEach(() => {
     win = env.win;
     element = win.document.createElement('amp-timeago');
-    const date = new Date();
-    date.setDate(date.getDate() - 2);
-    element.setAttribute('datetime', date.toISOString());
-    element.textContent = date.toString();
     element.setAttribute('layout', 'fixed');
     element.setAttribute('width', '160px');
     element.setAttribute('height', '20px');
@@ -38,8 +34,22 @@ describes.realWin('amp-timeago', {
   });
 
   it('should display 2 days ago when built', () => {
+    const date = new Date();
+    date.setDate(date.getDate() - 2);
+    element.setAttribute('datetime', date.toISOString());
+    element.textContent = date.toString();
     element.build();
     const timeElement = element.querySelector('time');
     expect(timeElement.textContent).to.equal('2 days ago');
+  });
+
+  it('should display original date when older than cutoff', () => {
+    const date = new Date('2017-01-01');
+    element.setAttribute('datetime', date.toISOString());
+    element.textContent = 'Sunday 1 January 2017';
+    element.setAttribute('cutoff', '8640000');
+    element.build();
+    const timeElement = element.querySelector('time');
+    expect(timeElement.textContent).to.equal('Sunday 1 January 2017');
   });
 });

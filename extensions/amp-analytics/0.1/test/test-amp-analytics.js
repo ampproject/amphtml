@@ -177,8 +177,8 @@ describe('amp-analytics', function() {
    * inline config and iframePings/optout are not allowed to be used without
    * AMP team's approval.
    *
-   * @param {!JSONObject} config The inline config to update.
-   * @return {!JSONObject}
+   * @param {!JsonObject} config The inline config to update.
+   * @return {!JsonObject}
    */
   function clearVendorOnlyConfig(config) {
     for (const t in config.triggers) {

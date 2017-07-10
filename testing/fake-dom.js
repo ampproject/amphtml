@@ -41,7 +41,10 @@ export class FakeWindow {
 
     const spec = opt_spec || {};
 
-    /** @type {string} */
+    /**
+     * This value is reflected on this.document.readyState.
+     * @type {string}
+     */
     this.readyState = spec.readyState || 'complete';
 
     // Passthrough.

@@ -27,19 +27,19 @@ const TAG = 'amp-access-client';
 const DEFAULT_AUTHORIZATION_TIMEOUT = 3000;
 
 
-/** @implements {AccessTypeAdapterDef} */
+/** @implements {./amp-access.AccessTypeAdapterDef} */
 export class AccessClientAdapter {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} configJson
-   * @param {!AccessTypeAdapterContextDef} context
+   * @param {!./amp-access.AccessTypeAdapterContextDef} context
    */
   constructor(ampdoc, configJson, context) {
     /** @const */
     this.ampdoc = ampdoc;
 
-    /** @const @private {!AccessTypeAdapterContextDef} */
+    /** @const @private {!./amp-access.AccessTypeAdapterContextDef} */
     this.context_ = context;
 
     /** @const @private {string} */
@@ -61,10 +61,10 @@ export class AccessClientAdapter {
     this.authorizationTimeout_ = this.buildConfigAuthorizationTimeout_(
         configJson);
 
-    /** @const @private {!Xhr} */
+    /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = xhrFor(ampdoc.win);
 
-    /** @const @private {!Timer} */
+    /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = timerFor(ampdoc.win);
   }
 

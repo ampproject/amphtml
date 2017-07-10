@@ -17,6 +17,7 @@
 import {AccessClientAdapter} from './amp-access-client';
 import {JwtHelper} from './jwt';
 import {assertHttpsUrl} from '../../../src/url';
+import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
@@ -72,35 +73,35 @@ const AMP_AUD = 'ampproject.org';
  *            \/
  *    Apply authorization response
  *
- * @implements {AccessTypeAdapterDef}
+ * @implements {./amp-access.AccessTypeAdapterDef}
  */
 export class AccessServerJwtAdapter {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} configJson
-   * @param {!AccessTypeAdapterContextDef} context
+   * @param {!./amp-access.AccessTypeAdapterContextDef} context
    */
   constructor(ampdoc, configJson, context) {
     /** @const */
     this.ampdoc = ampdoc;
 
-    /** @const @private {!AccessTypeAdapterContextDef} */
+    /** @const @private {!./amp-access.AccessTypeAdapterContextDef} */
     this.context_ = context;
 
     /** @private @const */
     this.clientAdapter_ = new AccessClientAdapter(ampdoc, configJson, context);
 
-    /** @private @const {!Viewer} */
+    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = viewerForDoc(ampdoc);
 
-    /** @const @private {!Xhr} */
+    /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = xhrFor(ampdoc.win);
 
-    /** @const @private {!Timer} */
+    /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = timerFor(ampdoc.win);
 
-    /** @const @private {!Vsync} */
+    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = vsyncFor(ampdoc.win);
 
     const stateElement = ampdoc.getRootNode().querySelector(
@@ -183,7 +184,7 @@ export class AccessServerJwtAdapter {
   }
 
   /**
-   * @return {!Promise<{encoded:string, jwt:!JSONObject}>}
+   * @return {!Promise<{encoded:string, jwt:!JsonObject}>}
    * @private
    */
   fetchJwt_() {
@@ -235,7 +236,8 @@ export class AccessServerJwtAdapter {
     if (this.key_) {
       return Promise.resolve(this.key_);
     }
-    return this.xhr_.fetchText(this.keyUrl_).then(res => res.text());
+    return this.xhr_.fetchText(dev().assertString(this.keyUrl_))
+        .then(res => res.text());
   }
 
   /**
@@ -247,7 +249,7 @@ export class AccessServerJwtAdapter {
   }
 
   /**
-   * @param {!JSONObject} jwt
+   * @param {!JsonObject} jwt
    * @private
    */
   validateJwt_(jwt) {
@@ -298,11 +300,11 @@ export class AccessServerJwtAdapter {
       const encoded = resp.encoded;
       const jwt = resp.jwt;
       const accessData = jwt['amp_authdata'];
-      const request = serializeQueryString({
+      const request = serializeQueryString(dict({
         'url': removeFragment(this.ampdoc.win.location.href),
         'state': this.serverState_,
         'jwt': encoded,
-      });
+      }));
       dev().fine(TAG, 'Authorization request: ', this.serviceUrl_, request);
       dev().fine(TAG, '- access data: ', accessData);
       // Note that `application/x-www-form-urlencoded` is used to avoid
