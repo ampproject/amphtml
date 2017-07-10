@@ -284,13 +284,19 @@ i-amphtml-sizer {
   /* For author styling. */
 }
 
-.i-amphtml-notbuilt {
+.i-amphtml-notbuilt,
+[layout]:not(.i-amphtml-element),
+.-amp-element:not(.i-amphtml-element)
+{
   position: relative;
   overflow: hidden !important;
   color: transparent !important;
 }
 
-.i-amphtml-notbuilt:not(.i-amphtml-layout-container) > * {
+.i-amphtml-notbuilt:not(.i-amphtml-layout-container) > * ,
+[layout]:not(.i-amphtml-element):not(.i-amphtml-layout-container) > *,
+.-amp-element:not(.i-amphtml-element):not(.i-amphtml-layout-container) > *
+{
   display: none;
 }
 
