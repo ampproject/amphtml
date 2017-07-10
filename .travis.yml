@@ -43,6 +43,10 @@ matrix:
         - pip install --user protobuf
         - gem install percy-capybara
         - gem install poltergeist
+        - ls -laR /home/travis/.rvm/gems/ruby-2.4.0/gems/phantomjs-2.1.1.0/
+        - ls -la /usr/local/bin/phantom*
+        - which phantomjs
+        - phantomjs --version
     - env: BUILD_SHARD="integration_tests"
       before_script:
         - pip install --user protobuf
