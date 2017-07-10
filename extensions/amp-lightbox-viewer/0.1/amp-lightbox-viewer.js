@@ -25,6 +25,8 @@ import {extensionsFor} from '../../../src/services';
 import {toggle, setStyle} from '../../../src/style';
 import {getData, listen} from '../../../src/event-helper';
 import {LightboxManager} from './service/lightbox-manager-impl';
+import {Animation} from '../../../src/animation';
+import {numeric} from '../../../src/transition';
 
 /** @const */
 const TAG = 'amp-lightbox-viewer';
@@ -194,6 +196,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
     this.descriptionTextArea_ = this.win.document.createElement('div');
     this.descriptionTextArea_.classList.add('i-amphtml-lbv-desc-text');
+    this.descriptionTextArea_.classList.add('non-expanded');
     this.descriptionBox_.appendChild(this.descriptionTextArea_);
 
     const toggleDescription = this.toggleDescriptionBox_.bind(this);
@@ -239,16 +242,35 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       this.descriptionBox_.classList.add('overflow');
       this.topBar_.classList.add('overflow');
       this.vsync_.run({
-        measure: state => {
-          state.descTextAreaHeight =
+        measure: state1 => {
+          state1.prevDescTextAreaHeight =
               this.descriptionTextArea_./*OK*/scrollHeight;
-          state.descBoxHeight = this.descriptionBox_./*OK*/clientHeight;
+          state1.descBoxHeight = this.descriptionBox_./*OK*/clientHeight;
         },
-        mutate: state => {
-          if (state.descTextAreaHeight < state.descBoxHeight) {
-            const diffHeight = state.descBoxHeight - state.descTextAreaHeight;
-            setStyle(this.descriptionTextArea_, 'top', `${diffHeight}px`);
-          }
+        mutate: state1 => {
+          this.descriptionTextArea_.classList.remove('non-expanded');
+          const tempDiffHeight =
+              state1.descBoxHeight - state1.prevDescTextAreaHeight;
+          setStyle(this.descriptionTextArea_, 'top', `${tempDiffHeight}px`);
+          this.vsync_.run({
+            measure: state => {
+              state.descTextAreaHeight =
+                  this.descriptionTextArea_./*OK*/scrollHeight;
+              state.descBoxHeight = this.descriptionBox_./*OK*/clientHeight;
+            },
+            mutate: state => {
+              const finalDiffHeight =
+                  state.descBoxHeight - state.descTextAreaHeight;
+              if (finalDiffHeight > 0) {
+                this.animateDescOverflow_(
+                    state.descTextAreaHeight - state1.prevDescTextAreaHeight,
+                    finalDiffHeight);
+              } else {
+                this.animateDescOverflow_(
+                    state.descBoxHeight - state1.prevDescTextAreaHeight, 0);
+              }
+            },
+          }, {});
         },
       }, {});
     } else if (this.descriptionBox_.classList.contains('overflow')) {
@@ -256,9 +278,30 @@ export class AmpLightboxViewer extends AMP.BaseElement {
         this.descriptionBox_.classList.remove('overflow');
         this.topBar_.classList.remove('overflow');
         this.descriptionBox_.classList.add('standard');
+        this.descriptionTextArea_.classList.add('non-expanded');
         setStyle(this.descriptionTextArea_, 'top', '');
       });
     }
+  }
+
+  /**
+   * @param {number} tempOffsetHeight
+   * @param {number} finalDiffHeight
+   * @param {number=} duration
+   * @param {string=} curve
+   * @private
+   */
+  animateDescOverflow_(tempOffsetHeight, finalDiffHeight,
+                              duration = 500, curve = 'ease-in') {
+    const textArea = dev().assertElement(this.descriptionTextArea_);
+    const tr = numeric(0, tempOffsetHeight);
+    return Animation.animate(textArea, time => {
+      const p = tr(time);
+      setStyle(textArea, 'transform', `translateY(-${p}px)`);
+    }, duration, curve).thenAlways(() => {
+      setStyle(textArea, 'top', `${finalDiffHeight}px`);
+      setStyle(textArea, 'transform', '');
+    });
   }
 
   /**
