@@ -58,31 +58,6 @@ const ELEMENTS_ACTIONS_MAP_ = {
   'form': ['submit'],
 };
 
-/** @enum {string} */
-const TYPE = {
-  NUMBER: 'number',
-  BOOLEAN: 'boolean',
-  STRING: 'string',
-};
-
-/** @const {!Object<string, !Object<string, string>>} */
-const WHITELISTED_INPUT_DATA_ = {
-  'range': {
-    'min': TYPE.NUMBER,
-    'max': TYPE.NUMBER,
-    'value': TYPE.NUMBER,
-  },
-  'radio': {
-    'checked': TYPE.BOOLEAN,
-  },
-  'checkbox': {
-    'checked': TYPE.BOOLEAN,
-  },
-  'text': {
-    'value': TYPE.STRING,
-  },
-};
-
 /**
  * An expression arg value, e.g. `foo.bar` in `e:t.m(arg=foo.bar)`.
  * @typedef {{expression: string}}
@@ -278,38 +253,35 @@ export class ActionService {
 
   /**
    * Given a browser 'change' or 'input' event, add `details` property
-   * containing the relevant information for the change that generated
-   * the initial event.
+   * containing the relevant information for the change that generated it.
    * @param {!ActionEventDef} event
    */
   addInputDetails_(event) {
     const detail = map();
     const target = event.target;
-    const tagName = target.tagName.toLowerCase();
-    switch (tagName) {
-      case 'input':
-        const inputType = target.getAttribute('type');
-        const fieldsToInclude = WHITELISTED_INPUT_DATA_[inputType];
-        if (fieldsToInclude) {
-          Object.keys(fieldsToInclude).forEach(field => {
-            const expectedType = fieldsToInclude[field];
-            const value = target[field];
-            if (expectedType === 'number') {
-              detail[field] = Number(value);
-            } else if (expectedType === 'boolean') {
-              detail[field] = !!value;
-            } else {
-              detail[field] = String(value);
-            }
-          });
+    switch (target.tagName) {
+      case 'INPUT':
+        const type = target.getAttribute('type');
+        // Some <input> elements have special properties for content values.
+        // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement#Properties
+        if (type == 'checkbox' || type == 'radio') {
+          detail['checked'] = !!target.checked;
+        } else if (type == 'range') {
+          // TODO(choumx): min/max are also available on date pickers.
+          detail['min'] = Number(target.min);
+          detail['max'] = Number(target.max);
+          // TODO(choumx): HTMLInputElement.valueAsNumber instead?
+          detail['value'] = Number(target.value);
+        } else {
+          detail['value'] = target.value;
         }
         break;
-      case 'select':
-        detail.value = target.value;
+      case 'SELECT':
+        detail['value'] = target.value;
         break;
     }
     if (Object.keys(detail).length > 0) {
-      event.detail = detail;
+      event['detail'] = detail;
     }
   }
 
