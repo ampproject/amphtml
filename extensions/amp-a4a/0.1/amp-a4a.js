@@ -78,7 +78,7 @@ const METADATA_STRING_NO_QUOTES =
 /** @type {string} */
 export const DEFAULT_SAFEFRAME_VERSION = '1-0-9';
 
-/** @const {string} */
+/** @const {string} @visibleForTesting */
 export const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
 
 /** @const {string} */

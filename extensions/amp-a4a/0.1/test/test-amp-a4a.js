@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-import {
-  MockA4AImpl,
-  TEST_URL,
-  SIGNATURE_HEADER,
-} from './utils';
+import {AMP_SIGNATURE_HEADER} from '../amp-a4a';
+import {MockA4AImpl, TEST_URL} from './utils';
 import {createIframePromise} from '../../../../testing/iframe';
 import {
   AmpA4A,
@@ -111,7 +108,7 @@ describe('amp-a4a', () => {
       catch: callback => callback(),
     };
     headers = {};
-    headers[SIGNATURE_HEADER] = validCSSAmp.signature;
+    headers[AMP_SIGNATURE_HEADER] = validCSSAmp.signature;
   });
 
   afterEach(() => {
@@ -258,7 +255,7 @@ describe('amp-a4a', () => {
 
     it('for SafeFrame rendering case', () => {
       // Make sure there's no signature, so that we go down the 3p iframe path.
-      delete headers[SIGNATURE_HEADER];
+      delete headers[AMP_SIGNATURE_HEADER];
       // If rendering type is safeframe, we SHOULD attach a SafeFrame.
       headers[RENDERING_TYPE_HEADER] = 'safeframe';
       a4a.buildCallback();
@@ -276,7 +273,7 @@ describe('amp-a4a', () => {
       sandbox.stub(platform, 'isIos').returns(true);
       a4a = new MockA4AImpl(a4aElement);
       // Make sure there's no signature, so that we go down the 3p iframe path.
-      delete headers[SIGNATURE_HEADER];
+      delete headers[AMP_SIGNATURE_HEADER];
       // Ensure no rendering type header (ios on safari will default to
       // safeframe).
       delete headers[RENDERING_TYPE_HEADER];
@@ -296,7 +293,7 @@ describe('amp-a4a', () => {
 
     it('for cached content iframe rendering case', () => {
       // Make sure there's no signature, so that we go down the 3p iframe path.
-      delete headers[SIGNATURE_HEADER];
+      delete headers[AMP_SIGNATURE_HEADER];
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
@@ -350,7 +347,7 @@ describe('amp-a4a', () => {
 
     it('should reset state to null on non-FIE unlayoutCallback', () => {
       // Make sure there's no signature, so that we go down the 3p iframe path.
-      delete headers[SIGNATURE_HEADER];
+      delete headers[AMP_SIGNATURE_HEADER];
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
@@ -461,7 +458,7 @@ describe('amp-a4a', () => {
     let a4a;
     beforeEach(() => {
       // Make sure there's no signature, so that we go down the 3p iframe path.
-      delete headers[SIGNATURE_HEADER];
+      delete headers[AMP_SIGNATURE_HEADER];
       // If rendering type is safeframe, we SHOULD attach a SafeFrame.
       headers[RENDERING_TYPE_HEADER] = 'safeframe';
       xhrMock.withArgs(TEST_URL, {
@@ -540,7 +537,7 @@ describe('amp-a4a', () => {
             it(`should not attach a NameFrame when header is ${headerVal}`,
                 () => {
                   // Make sure there's no signature, so that we go down the 3p iframe path.
-                  delete headers[SIGNATURE_HEADER];
+                  delete headers[AMP_SIGNATURE_HEADER];
                   // If rendering type is anything but nameframe, we SHOULD NOT
                   // attach a NameFrame.
                   headers[RENDERING_TYPE_HEADER] = headerVal;
@@ -710,7 +707,7 @@ describe('amp-a4a', () => {
 
     it('should set height/width on iframe matching header value', () => {
       // Make sure there's no signature, so that we go down the 3p iframe path.
-      delete headers[SIGNATURE_HEADER];
+      delete headers[AMP_SIGNATURE_HEADER];
       headers['X-CreativeSize'] = '320x50';
       xhrMock.withArgs(TEST_URL, {
         mode: 'cors',
@@ -746,7 +743,7 @@ describe('amp-a4a', () => {
   describe('#onLayoutMeasure', () => {
     it('resumeCallback calls onLayoutMeasure', () => {
       // Force non-FIE
-      delete headers[SIGNATURE_HEADER];
+      delete headers[AMP_SIGNATURE_HEADER];
       xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
@@ -801,7 +798,7 @@ describe('amp-a4a', () => {
     });
     it('resumeCallback w/ measure required no onLayoutMeasure', () => {
       // Force non-FIE
-      delete headers[SIGNATURE_HEADER];
+      delete headers[AMP_SIGNATURE_HEADER];
       xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
@@ -1243,7 +1240,7 @@ describe('amp-a4a', () => {
       it('should process safeframe version header properly', () => {
         headers[SAFEFRAME_VERSION_HEADER] = '1-2-3';
         headers[RENDERING_TYPE_HEADER] = 'safeframe';
-        delete headers[SIGNATURE_HEADER];
+        delete headers[AMP_SIGNATURE_HEADER];
         xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
         return createIframePromise().then(fixture => {
           setupForAdTesting(fixture);
@@ -1322,7 +1319,7 @@ describe('amp-a4a', () => {
     it('should ignore invalid safeframe version header', () => {
       headers[SAFEFRAME_VERSION_HEADER] = 'some-bad-item';
       headers[RENDERING_TYPE_HEADER] = 'safeframe';
-      delete headers[SIGNATURE_HEADER];
+      delete headers[AMP_SIGNATURE_HEADER];
       xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
@@ -2217,7 +2214,7 @@ describe('amp-a4a', () => {
           return false;
         },
         get: h => {
-          throw new Error('Tried to get ' + h);
+          return undefined;
         },
       };
       return expect(AmpA4A.prototype.extractCreativeAndSignature(
