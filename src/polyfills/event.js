@@ -27,7 +27,7 @@ export function install(win) {
 
   function Event(event, params) {
     params = params || {bubbles: false, cancelable: false, detail: undefined};
-    const evt = document.createEvent('Event');
+    const evt = win.document.createEvent('Event');
     evt.initCustomEvent(
       event,
       params.bubbles,
@@ -38,7 +38,7 @@ export function install(win) {
   }
 
   // supports >= IE 9. Below IE 9, window.Event.prototype is undefined
-  Event.prototype = window.Event.prototype;
+  Event.prototype = win.Event.prototype;
 
   win.Event = Event;
 }
