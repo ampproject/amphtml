@@ -114,7 +114,7 @@ Example:
 
 ### Toolbar
 
-You can create a toolbar element that displays in the `<body>` by specifying the toolbar attribute with a media query on a `<nav>` element that is a child of  `<amp-sedbar>`. The toolbar duplicates the `<nav>` element and its children.
+You can create a toolbar element that displays in the `<body>` by specifying the toolbar attribute with a media query on a `<nav>` element that is a child of  `<amp-sidebar>`. The toolbar duplicates the `<nav>` element and its children.
 
 #### Behavior
 
