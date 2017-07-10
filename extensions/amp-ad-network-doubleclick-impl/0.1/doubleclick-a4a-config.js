@@ -47,6 +47,12 @@ export const DOUBLECLICK_EXPERIMENT_FEATURE = {
   SRA: '117152667',
 };
 
+/** @const @type {string} */
+const SFG_CONTROL_ID = '21060540';
+
+/** @const @type {string} */
+const SFG_EXP_ID = '21060541';
+
 /** @const @type {!Object<string,?string>} */
 export const URL_EXPERIMENT_MAPPING = {
   '-1': MANUAL_EXPERIMENT_ID,
@@ -58,8 +64,8 @@ export const URL_EXPERIMENT_MAPPING = {
   '3': '117152664',
   '4': DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST,
   // SFG
-  '5': '21060540',
-  '6': '21060541',
+  '5': SFG_CONTROL_ID,
+  '6': SFG_EXP_ID,
   // SRA
   '7': '117152666',
   '8': DOUBLECLICK_EXPERIMENT_FEATURE.SRA,
@@ -117,7 +123,8 @@ export function doubleclickIsA4AEnabled(win, element) {
     forceExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME, experimentId);
   }
   return ![DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL,
-    DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL].includes(experimentId);
+    DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL,
+    SFG_CONTROL_ID, SFG_EXP_ID].includes(experimentId);
 }
 
 /**
