@@ -40,7 +40,6 @@ describes.realWin('amp-sidebar 0.1 version', {
     let sandbox;
     let platform;
     let timer;
-    let clock;
 
     function getAmpSidebar(options) {
       options = options || {};
@@ -89,7 +88,6 @@ describes.realWin('amp-sidebar 0.1 version', {
     beforeEach(() => {
       sandbox = sinon.sandbox.create();
       platform = platformFor(window);
-      clock = sandbox.useFakeTimers();
     });
 
     afterEach(() => {
