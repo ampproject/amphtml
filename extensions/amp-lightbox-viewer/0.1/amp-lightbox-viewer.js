@@ -238,40 +238,47 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    */
   toggleDescriptionOverflow_() {
     if (this.descriptionBox_.classList.contains('standard')) {
+      const measureBeforeExpandingDescTextArea = state => {
+        state.prevDescTextAreaHeight =
+            this.descriptionTextArea_./*OK*/scrollHeight;
+        state.descBoxHeight = this.descriptionBox_./*OK*/clientHeight;
+      };
+
+      const measureAfterExpandingDescTextArea = state => {
+        state.descTextAreaHeight = this.descriptionTextArea_./*OK*/scrollHeight;
+        state.descBoxHeight = this.descriptionBox_./*OK*/clientHeight;
+      };
+
+      const mutateAnimateDesc = state => {
+        const finalDiffHeight =
+            state.descBoxHeight > state.descTextAreaHeight ?
+            state.descBoxHeight - state.descTextAreaHeight : 0;
+        const tempOffsetHeight =
+            state.descBoxHeight > state.descTextAreaHeight ?
+            state.descTextAreaHeight - state.prevDescTextAreaHeight :
+            state.descBoxHeight - state.prevDescTextAreaHeight;
+        this.animateDescOverflow_(tempOffsetHeight, finalDiffHeight);
+      };
+
+      const mutateExpandingDescTextArea = state => {
+        this.descriptionTextArea_.classList.remove('non-expanded');
+        const tempDiffHeight =
+            state.descBoxHeight - state.prevDescTextAreaHeight;
+        setStyle(this.descriptionTextArea_, 'top', `${tempDiffHeight}px`);
+        this.vsync_.run({
+          measure: measureAfterExpandingDescTextArea,
+          mutate: mutateAnimateDesc,
+        }, {
+          prevDescTextAreaHeight: state.prevDescTextAreaHeight,
+        });
+      };
+
       this.descriptionBox_.classList.remove('standard');
       this.descriptionBox_.classList.add('overflow');
       this.topBar_.classList.add('overflow');
       this.vsync_.run({
-        measure: state1 => {
-          state1.prevDescTextAreaHeight =
-              this.descriptionTextArea_./*OK*/scrollHeight;
-          state1.descBoxHeight = this.descriptionBox_./*OK*/clientHeight;
-        },
-        mutate: state1 => {
-          this.descriptionTextArea_.classList.remove('non-expanded');
-          const tempDiffHeight =
-              state1.descBoxHeight - state1.prevDescTextAreaHeight;
-          setStyle(this.descriptionTextArea_, 'top', `${tempDiffHeight}px`);
-          this.vsync_.run({
-            measure: state => {
-              state.descTextAreaHeight =
-                  this.descriptionTextArea_./*OK*/scrollHeight;
-              state.descBoxHeight = this.descriptionBox_./*OK*/clientHeight;
-            },
-            mutate: state => {
-              const finalDiffHeight =
-                  state.descBoxHeight - state.descTextAreaHeight;
-              if (finalDiffHeight > 0) {
-                this.animateDescOverflow_(
-                    state.descTextAreaHeight - state1.prevDescTextAreaHeight,
-                    finalDiffHeight);
-              } else {
-                this.animateDescOverflow_(
-                    state.descBoxHeight - state1.prevDescTextAreaHeight, 0);
-              }
-            },
-          }, {});
-        },
+        measure: measureBeforeExpandingDescTextArea,
+        mutate: mutateExpandingDescTextArea,
       }, {});
     } else if (this.descriptionBox_.classList.contains('overflow')) {
       this.vsync_.mutate(() => {
