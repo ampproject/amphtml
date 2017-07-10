@@ -543,20 +543,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       user().warn(TAG, 'invalid RTC config...');
       return Promise.resolve();
     }
-
-    const noCache = (rtcConfig['noCache'] === true);
-
+    const disableSWR = (
+        rtcConfig['disableStaleWhileRevalidate'] === true);
     const headers = new Headers();
     headers.append('Cache-Control', 'max-age=0');
     const xhrInit = {credentials: 'include'};
-    if (noCache) {
-      xhrInit.headers = headers;
-    }
     const startTime = Date.now();
     rtcPromise = xhrFor(this.win).fetchJson(
         endpoint, xhrInit).then(res => {
           rtcTotalTime = rtcTotalTime || Date.now() - startTime;
-          if (!noCache) {
+          if (!disableSWR) {
             // Repopulate the cache.
             xhrFor(this.win).fetchJson(endpoint, {
               credentials: 'include',
