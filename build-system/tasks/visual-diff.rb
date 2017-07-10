@@ -35,15 +35,20 @@ HOST = 'localhost'
 PORT = '8000'
 
 
-# Registers the install dir, since the gem doesn't explicitly add it to $PATH.
-def registerPhantomJs()
+# Links system phantomjs shortcut to the version installed by the ruby gem,
+# since the gem doesn't explicitly add it to $PATH.
+def replacePhantomjsVersion()
   phantomjsBinDir = File.dirname(`gem which phantomjs`)
   phantomjsBin = File.join(phantomjsBinDir, 'phantomjs')
-  linkCmd = "sudo ln -s #{phantomjsBin} /usr/local/bin/phantomjs"
+  phantomjsLink = '/usr/local/bin/phantomjs'
+  cleanCmd = "sudo rm #{phantomjsLink}"
+  puts "Running #{cleanCmd}"
+  system `#{cleanCmd}`
+  linkCmd = "sudo ln -s #{phantomjsBin} #{phantomjsLink}"
   puts "Running #{linkCmd}"
   system `#{linkCmd}`
-  puts phantomjsInstallDir
-  Phantomjs.base_dir = phantomjsInstallDir
+  system `which phantomjs`
+  system `phantomjs --version`
   Phantomjs.path
   Capybara.register_driver :poltergeist do |app|
     Capybara::Poltergeist::Driver.new(app, :phantomjs => Phantomjs.path)
@@ -172,7 +177,9 @@ end
 
 # Launches a webserver, loads test pages, and generates Percy snapshots.
 def main()
-  registerPhantomJs()
+  if ENV['TRAVIS'] === 'true'
+    replacePhantomjsVersion()
+  end
   setDebuggingLevel()
   pid = launchWebServer()
   if not waitForWebServer()
