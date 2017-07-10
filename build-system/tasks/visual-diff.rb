@@ -35,27 +35,6 @@ HOST = 'localhost'
 PORT = '8000'
 
 
-# Links system phantomjs shortcut to the version installed by the ruby gem,
-# since the gem doesn't explicitly add it to $PATH.
-def replacePhantomjsVersion()
-  # phantomjsBinDir = File.dirname(`gem which phantomjs`)
-  # phantomjsBin = File.join(phantomjsBinDir, 'phantomjs')
-  # phantomjsLink = '/usr/local/bin/phantomjs'
-  # cleanCmd = "rm -f #{phantomjsLink}"
-  # puts "Running #{cleanCmd}"
-  # system `#{cleanCmd}`
-  # linkCmd = "ln -s #{phantomjsBin} #{phantomjsLink}"
-  # puts "Running #{linkCmd}"
-  # system `#{linkCmd}`
-  system `which phantomjs`
-  system `phantomjs --version`
-  Phantomjs.path
-  Capybara.register_driver :poltergeist do |app|
-    Capybara::Poltergeist::Driver.new(app, :phantomjs => Phantomjs.path)
-  end
-end
-
-
 # Launches a background AMP webserver for unminified js using gulp.
 #
 # Returns:
@@ -177,9 +156,8 @@ end
 
 # Launches a webserver, loads test pages, and generates Percy snapshots.
 def main()
-  if ENV['TRAVIS'] === 'true'
-    replacePhantomjsVersion()
-  end
+  system `which phantomjs`
+  system `phantomjs --version`
   setDebuggingLevel()
   pid = launchWebServer()
   if not waitForWebServer()
