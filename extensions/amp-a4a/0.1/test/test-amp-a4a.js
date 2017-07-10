@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {AMP_SIGNATURE_HEADER} from '../amp-a4a';
 import {MockA4AImpl, TEST_URL} from './utils';
 import {createIframePromise} from '../../../../testing/iframe';
 import {
   AmpA4A,
+  AMP_SIGNATURE_HEADER,
   RENDERING_TYPE_HEADER,
   DEFAULT_SAFEFRAME_VERSION,
   SAFEFRAME_VERSION_HEADER,

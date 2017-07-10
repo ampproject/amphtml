@@ -156,7 +156,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       });
     });
 
-    it('without analytics', () => {
+    it('should not load amp-analytics without an analytics header', () => {
       expect(impl.extractSize({
         get() {
           return undefined;
@@ -167,7 +167,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       })).to.deep.equal(size);
       expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
     });
-    it('with analytics', () => {
+    it('should load amp-analytics with an analytics header', () => {
       const url = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
       expect(impl.extractSize({
         get(name) {
