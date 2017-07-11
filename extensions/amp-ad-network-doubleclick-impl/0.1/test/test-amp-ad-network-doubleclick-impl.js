@@ -536,6 +536,8 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     });
   });
 
+
+
   describe('#unlayoutCallback', () => {
     it('should call #resetSlot, remove child iframe, but keep other children',
         () => {
@@ -616,6 +618,24 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       fixture.doc.body.appendChild(element);
       const impl = new AmpAdNetworkDoubleclickImpl(element);
       expect(impl.useSra).to.be.false;
+    });
+
+    it('should force refresh off when enabled', () => {
+      const metaElement = createElementWithAttributes(fixture.doc, 'meta', {
+        name: 'amp-ad-doubleclick-sra',
+      });
+      fixture.doc.head.appendChild(metaElement);
+      const element = createElementWithAttributes(
+          fixture.doc, 'amp-ad', {
+            type: 'doubleclick',
+            height: 320,
+            width: 50,
+          });
+      fixture.doc.body.appendChild(element);
+      const impl = new AmpAdNetworkDoubleclickImpl(element);
+      expect(impl.useSra).to.be.true;
+      impl.layoutCallback();
+      expect(impl.refreshManager_).to.be.null;
     });
 
     it('should be enabled if meta tag present', () => {

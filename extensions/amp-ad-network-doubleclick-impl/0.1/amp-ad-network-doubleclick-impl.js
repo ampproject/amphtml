@@ -438,9 +438,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   layoutCallback() {
     const superReturnValue = super.layoutCallback();
-    user().assert(
-        !this.useSra || !this.element.getAttribute(DATA_ATTR_NAME),
-        'Cannot enable a single slot for both refresh and SRA.');
+    if (this.useSra && this.element.getAttribute(DATA_ATTR_NAME)) {
+      user().warn(TAG, 'Cannot enable a single slot for both refresh and SRA.');
+    }
     this.refreshManager_ = this.useSra ? null : this.refreshManager_ ||
         new RefreshManager(this, {
           visiblePercentageMin: 50,
@@ -451,9 +451,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   refresh(refreshEndCallback) {
-    const promise = super.refresh(refreshEndCallback);
     this.refreshCount_++;
-    return promise;
+    return super.refresh(refreshEndCallback);
   }
 
   /**

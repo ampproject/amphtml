@@ -807,6 +807,7 @@ export class AmpA4A extends AMP.BaseElement {
     this.isRefreshing = true;
     this.tearDownSlot();
     this.initiateAdRequest();
+    dev().assert(this.adPromise_);
     const promiseId = this.promiseId_;
     return this.adPromise_.then(() => {
       if (!this.isRefreshing || promiseId != this.promiseId_) {
