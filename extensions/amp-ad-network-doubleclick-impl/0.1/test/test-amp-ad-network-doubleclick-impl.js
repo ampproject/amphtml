@@ -501,6 +501,33 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
               // Ensure that "auto" doesn't appear anywhere here:
               expect(url).to.match(/sz=[0-9]+x[0-9]+/));
         });
+
+    it('should add RTC param if RTC is used', () => {
+      const rtcConfig = createElementWithAttributes(
+          document, 'script',
+          {type: 'application/json', id: 'amp-rtc'});
+      rtcConfig.innerHTML = '{'
+          + '"endpoint": "https://example-publisher.com/rtc/",'
+          + '"sendAdRequestOnFailure": false'
+          + '}';
+      document.head.appendChild(rtcConfig);
+      const rtcResponse = {targeting: {age: "18-24"}};
+      const xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
+      xhrMock.returns(
+          Promise.resolve({
+            redirected: false,
+            status: 200,
+            json: () => {
+              return Promise.resolve(JSON.stringify(rtcResponse));
+            },
+          })
+      );
+      new AmpAd(element).upgradeCallback();
+      return impl.getAdUrl().then(url => {
+        expect(url).to.match(/(\?|&)artc=[0-9]+(&|$)/);
+      });
+
+    });
   });
 
   describe('#unlayoutCallback', () => {
@@ -1161,13 +1188,36 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       });
     });
 
-    it('should add RTC time param to ad request', () => {});
+    it('should not send RTC if url invalid', () => {
+      const rtcConfig = document.getElementById('amp-rtc');
+      rtcConfig.innerText = '{'
+          + '"endpoint": "http://example-publisher.com/rtc/",'
+          + '"sendAdRequestOnFailure": false'
+          + '}';
 
-    it('should not send RTC if url invalid', () => {});
+      const targeting = {'sport': 'baseball'};
+      const categoryExclusions = {};
+      const jsonTargeting = {
+        targeting,
+        categoryExclusions,
+      };
+      return mockRtcExecution({
+        targeting,
+      }, element).then(() => {
+        expect(xhrMock).to.not.be.called;
+      });
+    });
 
-    it('should not send request on RTC failure if specified', () => {});
+    it('should return rejection on RTC failure if specified', () => {
+      const badRtcResponse = 'wrong: "unparseable}';
+      return mockRtcExecution(badRtcResponse, element).then(() => {
+        expect(false).to.be.true;
+      }).catch(err => {
+        console.log(err);
+      });
+    });
 
-    it('should send ad request on RTC failure if specified', () => {});
+    it('should return resolver on RTC failure if specified', () => {});
 
     it('should bypass caching if specified', () => {
       setRtcConfig({
@@ -1188,7 +1238,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       });
     });
 
-    it('should timeout slow response, do not send without RTC', () => {
+    it('should timeout slow response, then do not send without RTC', () => {
       setRtcConfig({
         'endpoint': 'https://example-publisher.com/rtc/',
         'sendAdRequestOnFailure': false,
@@ -1223,6 +1273,36 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         expect(err.message.substring(0, 7)).to.equal('timeout');
       });
     });
+    it('should timeout slow response, then send without RTC', () => {
+      setRtcConfig({
+        'endpoint': 'https://example-publisher.com/rtc/',
+      });
+      const targeting = {'sport': 'baseball'};
+      const categoryExclusions = {};
+      const jsonTargeting = {
+        targeting,
+        categoryExclusions,
+      };
 
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+
+      xhrMock.returns(
+          timerFor(window).promise(1200).then(() => {
+            return Promise.resolve({
+              redirected: false,
+              status: 200,
+              json: () => {
+                return Promise.resolve(rtcResponse);
+              },
+            });
+          }));
+      impl.populateAdUrlState();
+      return impl.executeRtc_().then(result => {
+        expect(result).to.not.be.ok;
+      }).catch(err => {
+        // Should not error.
+        expect(true).to.be.false;
+      });
+    });
   });
 });
