@@ -47,15 +47,15 @@ matrix:
         # Before
         - ls -laR /home/travis/.rvm/gems/ruby-2.4.0/gems/phantomjs-2.1.1.0/
         - ls -la /usr/local/phantomjs/phantomjs
-        - which phantomjs
-        - gem which phantomjs
+        - which -a phantomjs
+        - gem which -a phantomjs
         - phantomjs --version
         - echo $PATH
         # Replace
         - export PATH="/home/travis/.rvm/gems/ruby-2.4.0/gems/phantomjs-2.1.1.0/lib:$PATH"
         # After
-        - which phantomjs
-        - gem which phantomjs
+        - which -a phantomjs
+        - gem which -a phantomjs
         - phantomjs --version
         - echo $PATH
     - env: BUILD_SHARD="integration_tests"
