@@ -233,6 +233,24 @@ describes.sandboxed('StandardActions', {}, () => {
         expect(spy).to.be.calledWith('{foo: 123}');
       });
     });
+
+    it('should implement print', () => {
+      const windowApi = {
+        print: () => {},
+      };
+      const printStub = sandbox.stub(windowApi, 'print');
+      const invocation = {
+        method: 'print',
+        satisfiesTrust: () => true,
+        target: {
+          ownerDocument: {
+            defaultView: windowApi,
+          },
+        },
+      };
+      standardActions.handleAmpTarget(invocation);
+      expect(printStub).to.be.calledOnce;
+    });
   });
 
   describes.fakeWin('adoptEmbedWindow', {}, env => {

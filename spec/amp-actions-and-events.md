@@ -368,6 +368,10 @@ actions that apply to the whole document.
     <td>setState</td>
     <td>Updates <code>amp-bind</code>'s state. See <a href="../extensions/amp-bind/amp-bind.md#ampsetstate">details</a>.</td>
   </tr>
+  <tr>
+    <td>print</td>
+    <td>Opens the Print Dialog to print the current page.</td>
+  </tr>
 </table>
 
 ### `amp-access`
