@@ -132,7 +132,10 @@ export function runVideoPlayerIntegrationTests(
     afterEach(cleanUp);
   });
 
-  describe.configure().retryOnSaucelabs().run('Analytics Triggers', function() {
+  const describeChrome =
+      describe.configure().skipFirefox().skipSafari().skipEdge();
+
+  describeChrome.retryOnSaucelabs().run('Analytics Triggers', function() {
     this.timeout(TIMEOUT);
     let video;
 
