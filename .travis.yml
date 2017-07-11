@@ -44,8 +44,20 @@ matrix:
         - gem install percy-capybara
         - gem install phantomjs
         - gem install poltergeist
+        # Before
         - ls -laR /home/travis/.rvm/gems/ruby-2.4.0/gems/phantomjs-2.1.1.0/
-        - export PATH=/home/travis/.rvm/gems/ruby-2.4.0/gems/phantomjs-2.1.1.0/lib:$PATH
+        - ls -la /usr/local/bin/phantomjs
+        - which phantomjs
+        - gem which phantomjs
+        - phantomjs --version
+        # Replace
+        - sudo rm -f /usr/local/bin/phantomjs
+        - sudo ln -s /home/travis/.rvm/gems/ruby-2.4.0/gems/phantomjs-2.1.1.0/lib/phantomjs /usr/local/bin/phantomjs
+        # After
+        - ls -la /usr/local/bin/phantomjs
+        - which phantomjs
+        - gem which phantomjs
+        - phantomjs --version
     - env: BUILD_SHARD="integration_tests"
       before_script:
         - pip install --user protobuf
