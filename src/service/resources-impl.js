@@ -273,6 +273,12 @@ export class Resources {
         loadPromise(this.win),
         timerFor(this.win).promise(3100),
       ]).then(remeasure);
+
+      // Remeasure the document when all fonts loaded.
+      if (this.win.document.fonts &&
+          this.win.document.fonts.status != 'loaded') {
+        this.win.document.fonts.ready.then(remeasure);
+      }
     });
   }
 
