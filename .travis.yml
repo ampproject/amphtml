@@ -44,6 +44,8 @@ matrix:
         - gem install percy-capybara
         - gem install phantomjs
         - gem install poltergeist
+        # Poltergeist requires an absolute path to find phantomjs. See #10305.
+        - export PATH="`pwd`/node_modules/.bin:$PATH"
     - env: BUILD_SHARD="integration_tests"
       before_script:
         - pip install --user protobuf

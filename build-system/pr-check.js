@@ -280,7 +280,7 @@ const command = {
   },
   runVisualDiffTests: function() {
     process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
-    timedExec(`ruby ${path.resolve('build-system/tasks/visual-diff.rb')}`);
+    timedExec(`ruby build-system/tasks/visual-diff.rb`);
   },
   runPresubmitTests: function() {
     timedExecOrDie(`${gulp} presubmit`);
