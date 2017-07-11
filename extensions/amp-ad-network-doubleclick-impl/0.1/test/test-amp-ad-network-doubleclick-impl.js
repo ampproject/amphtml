@@ -205,6 +205,18 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         impl.size_ = {width: 200, height: 50};
         impl.iframe = impl.win.document.createElement('iframe');
         installExtensionsService(impl.win);
+        // Temporary fix for local test failure.
+        sandbox.stub(impl,
+            'getIntersectionElementLayoutBox', () => {
+              return {
+                top: 0,
+                bottom: 0,
+                left: 0,
+                right: 0,
+                width: 320,
+                height: 50,
+              };
+            });
       });
     });
 
@@ -454,8 +466,8 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         });
     it('has correct format with height/width override and multiSize',
         () => {
-          element.setAttribute('width', 'auto');
-          element.setAttribute('height', 'auto');
+          element.setAttribute('data-override-width', '123');
+          element.setAttribute('data-override-height', '456');
           element.setAttribute('data-multi-size', '1x2,3x4');
           element.setAttribute('data-multi-size-validation', 'false');
           new AmpAd(element).upgradeCallback();
