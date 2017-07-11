@@ -450,10 +450,20 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           new AmpAd(element).upgradeCallback();
           impl.onLayoutMeasure();
           return impl.getAdUrl().then(url =>
-              // Ensure that "auto" doesn't appear anywhere here:
               expect(url).to.contain('sz=123x456&'));
         });
     it('has correct format with height/width override and multiSize',
+        () => {
+          element.setAttribute('width', 'auto');
+          element.setAttribute('height', 'auto');
+          element.setAttribute('data-multi-size', '1x2,3x4');
+          element.setAttribute('data-multi-size-validation', 'false');
+          new AmpAd(element).upgradeCallback();
+          impl.onLayoutMeasure();
+          return impl.getAdUrl().then(url =>
+              expect(url).to.contain('sz=123x456%7C1x2%7C3x4&'));
+        });
+    it('has correct format with auto height/width and multiSize',
         () => {
           element.setAttribute('data-override-width', '123');
           element.setAttribute('data-override-height', '456');
@@ -463,7 +473,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           impl.onLayoutMeasure();
           return impl.getAdUrl().then(url =>
               // Ensure that "auto" doesn't appear anywhere here:
-              expect(url).to.contain('sz=123x456%7C1x2%7C3x4&'));
+              expect(url).to.match(/sz=[0-9]+x[0-9]+%7C1x2%7C3x4&/));
         });
   });
 
