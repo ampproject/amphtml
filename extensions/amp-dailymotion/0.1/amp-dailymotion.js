@@ -245,15 +245,7 @@ class AmpDailymotion extends AMP.BaseElement {
   getIframeSrc_() {
 
     let iframeSrc = 'https://www.dailymotion.com/embed/video/' +
-       encodeURIComponent(this.videoid_ || '');
-
-    const fixedParams = {
-      'api': 1,
-      'html': 1,
-      'app': 'amp',
-    };
-
-    iframeSrc = addParamsToUrl(iframeSrc, fixedParams);
+       encodeURIComponent(this.videoid_ || '') + '?api=1&html=1&app=amp';
 
     const explicitParamsAttributes = [
       'data-mute',
