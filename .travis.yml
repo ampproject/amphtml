@@ -46,15 +46,15 @@ matrix:
         - gem install poltergeist
         # Before
         - ls -laR /home/travis/.rvm/gems/ruby-2.4.0/gems/phantomjs-2.1.1.0/
-        - ls -la /usr/local/bin/phantomjs
+        - ls -la /usr/local/phantomjs/phantomjs
         - which phantomjs
         - gem which phantomjs
         - phantomjs --version
         # Replace
-        - sudo rm -f /usr/local/bin/phantomjs
-        - sudo ln -s /home/travis/.rvm/gems/ruby-2.4.0/gems/phantomjs-2.1.1.0/lib/phantomjs /usr/local/bin/phantomjs
+        - sudo rm -f /usr/local/phantomjs/phantomjs
+        - sudo ln -s /home/travis/.rvm/gems/ruby-2.4.0/gems/phantomjs-2.1.1.0/lib/phantomjs /usr/local/phantomjs/phantomjs
         # After
-        - ls -la /usr/local/bin/phantomjs
+        - ls -la /usr/local/phantomjs/phantomjs
         - which phantomjs
         - gem which phantomjs
         - phantomjs --version
