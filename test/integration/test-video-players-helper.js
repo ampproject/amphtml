@@ -96,7 +96,7 @@ export function runVideoPlayerIntegrationTests(
               return promise;
             })
             .then(() => {
-              const promise = listenOncePromise(r.video, VideoEvents.PLAY);
+              const promise = listenOncePromise(r.video, VideoEvents.PLAYING);
               playButton.click();
               return promise;
             })
@@ -176,7 +176,7 @@ export function runVideoPlayerIntegrationTests(
       ).then(r => {
         video = r.video;
         pauseButton = createButton(r, 'pause');
-        return listenOncePromise(video, VideoEvents.PLAY);
+        return listenOncePromise(video, VideoEvents.PLAYING);
       }).then(() => {
         const promise = listenOncePromise(video, VideoEvents.ANALYTICS);
         pauseButton.click();
@@ -198,7 +198,7 @@ export function runVideoPlayerIntegrationTests(
           }
       ).then(r => {
         video = r.video;
-        const promise = listenOncePromise(video, VideoEvents.PLAY);
+        const promise = listenOncePromise(video, VideoEvents.PLAYING);
         pauseButton = createButton(r, 'pause');
         return promise;
       }).then(() => {
@@ -229,7 +229,7 @@ export function runVideoPlayerIntegrationTests(
         viewport = video.implementation_.getViewport();
         // scroll to the bottom, make video fully visible
         viewport.scrollIntoView(video);
-        return listenOncePromise(video, VideoEvents.PLAY);
+        return listenOncePromise(video, VideoEvents.PLAYING);
       }).then(() => {
         // scroll to the bottom, make video fully visible
         viewport.setScrollTop(0);
@@ -364,7 +364,7 @@ export function runVideoPlayerIntegrationTests(
           video = r.video;
           const playButton = createButton(r, 'play');
           playButton.click();
-          return listenOncePromise(video, VideoEvents.PLAY);
+          return listenOncePromise(video, VideoEvents.PLAYING);
         }).then(() => {
           viewport = video.implementation_.getViewport();
           // scroll to the bottom, make video fully visible
@@ -407,7 +407,7 @@ export function runVideoPlayerIntegrationTests(
         ).then(r => {
           video = r.video;
           viewport = video.implementation_.getViewport();
-          return listenOncePromise(video, VideoEvents.PLAY);
+          return listenOncePromise(video, VideoEvents.PLAYING);
         }).then(() => {
           return poll('wait for mask', () => {
             return !!video.querySelector('i-amphtml-video-mask');
@@ -448,7 +448,7 @@ export function runVideoPlayerIntegrationTests(
         ).then(r => {
           video = r.video;
           viewport = r.video.implementation_.getViewport();
-          return listenOncePromise(video, VideoEvents.PLAY);
+          return listenOncePromise(video, VideoEvents.PLAYING);
         }).then(() => {
           viewport.setScrollTop(FRAME_HEIGHT);
           return poll('wait for video/iframe', () => {
@@ -488,14 +488,14 @@ export function runVideoPlayerIntegrationTests(
     describe('play/pause', () => {
       it('should play when in view port initially', () => {
         return getVideoPlayer({outsideView: false, autoplay: true}).then(r => {
-          return listenOncePromise(r.video, VideoEvents.PLAY);
+          return listenOncePromise(r.video, VideoEvents.PLAYING);
         });
       });
 
       it('should not play when not in view port initially', () => {
         return getVideoPlayer({outsideView: true, autoplay: true}).then(r => {
           const timer = timerFor(r.video.implementation_.win);
-          const p = listenOncePromise(r.video, VideoEvents.PLAY).then(() => {
+          const p = listenOncePromise(r.video, VideoEvents.PLAYING).then(() => {
             return Promise.reject('should not have autoplayed');
           });
           // we have to wait to ensure play is NOT called.
@@ -511,7 +511,7 @@ export function runVideoPlayerIntegrationTests(
           viewport = video.implementation_.getViewport();
 
           // scroll to the bottom, make video fully visible
-          const p = listenOncePromise(video, VideoEvents.PLAY);
+          const p = listenOncePromise(video, VideoEvents.PLAYING);
           viewport.scrollIntoView(video);
           return p;
         }).then(() => {

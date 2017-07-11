@@ -182,7 +182,7 @@ class AmpVideo extends AMP.BaseElement {
   installEventHandlers_() {
     const video = dev().assertElement(this.video_);
     this.forwardEvents([
-      VideoEvents.PLAY,
+      VideoEvents.PLAYING,
       VideoEvents.PAUSE,
       VideoEvents.ENDED,
     ], video);

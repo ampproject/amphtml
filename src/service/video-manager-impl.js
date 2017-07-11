@@ -343,8 +343,11 @@ class VideoEntry {
     /** @private {boolean} */
     this.userInteractedWithAutoPlay_ = false;
 
-    /** @private {boolean} */
+    /** @private */
     this.playCalledByAutoplay_ = false;
+
+    /** @private */
+    this.pauseCalledByAutoplay_ = false;
 
     /** @private {Object} */
     this.initialRect_ = null;
@@ -370,7 +373,7 @@ class VideoEntry {
 
 
     listen(element, VideoEvents.PAUSE, () => this.videoPaused_());
-    listen(element, VideoEvents.PLAY, () => this.videoPlayed_());
+    listen(element, VideoEvents.PLAYING, () => this.videoPlayed_());
     listen(element, VideoEvents.ENDED, () => this.videoEnded_());
     listen(element, VideoEvents.MUTED, () => this.muted_ = true);
     listen(element, VideoEvents.UNMUTED, () => this.muted_ = false);
@@ -420,8 +423,11 @@ class VideoEntry {
 
     // Prevent double-trigger of session if video is autoplay and the video
     // is paused by a the user scrolling the video out of view.
-    if (!this.isAutoplay() || this.isVisible_) {
+    if (!this.pauseCalledByAutoplay_) {
       this.actionSessionManager_.endSession();
+    } else {
+      // reset the flag
+      this.pauseCalledByAutoplay_ = false;
     }
   }
 
@@ -564,7 +570,7 @@ class VideoEntry {
     const unlistenPause = listen(this.video.element, VideoEvents.PAUSE,
         toggleAnimation.bind(this, /*playing*/ false));
 
-    const unlistenPlay = listen(this.video.element, VideoEvents.PLAY,
+    const unlistenPlaying = listen(this.video.element, VideoEvents.PLAYING,
         toggleAnimation.bind(this, /*playing*/ true));
 
     function onInteraction() {
@@ -573,7 +579,7 @@ class VideoEntry {
       this.video.unmute();
       unlistenInteraction();
       unlistenPause();
-      unlistenPlay();
+      unlistenPlaying();
       removeElement(animation);
       removeElement(mask);
     }
@@ -593,6 +599,7 @@ class VideoEntry {
         this.visibilitySessionManager_.endSession();
       }
       this.video.pause();
+      this.pauseCalledByAutoplay_ = true;
     }
   }
 
@@ -927,16 +934,6 @@ class VideoEntry {
     }
 
     return PlayingStates.PLAYING_MANUAL;
-  }
-
-  /**
-   * Get the autoplay state distinct from paused by user and paused by
-   * the video scrolling out of view.
-   * @return {boolean}
-   */
-  isAutoplay() {
-    return (this.getPlayingState() === PlayingStates.PLAYING_AUTO) ||
-        (this.playCalledByAutoplay_ && !this.userInteractedWithAutoPlay_);
   }
 
   /**

@@ -200,7 +200,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     }
 
     if (data['event'] == 'play') {
-      this.element.dispatchCustomEvent(VideoEvents.PLAY);
+      this.element.dispatchCustomEvent(VideoEvents.PLAYING);
     } else if (data['event'] == 'pause') {
       this.element.dispatchCustomEvent(VideoEvents.PAUSE);
     } else if (data['event'] == 'mute') {

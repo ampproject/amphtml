@@ -373,7 +373,7 @@ describe(TAG, () => {
           })
           .then(() => {
             impl.play();
-            return listenOncePromise(v, VideoEvents.PLAY);
+            return listenOncePromise(v, VideoEvents.PLAYING);
           })
           .then(() => {
             impl.pause();
@@ -395,4 +395,3 @@ describe(TAG, () => {
     });
   });
 });
-

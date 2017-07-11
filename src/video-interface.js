@@ -202,13 +202,13 @@ export const VideoEvents = {
   LOAD: 'load',
 
   /**
-   * play
+   * playing
    *
-   * Fired when the video plays.
+   * Fired when the video begins playing.
    *
-   * @event play
+   * @event playing
    */
-  PLAY: 'play',
+  PLAYING: 'playing',
 
   /**
    * pause

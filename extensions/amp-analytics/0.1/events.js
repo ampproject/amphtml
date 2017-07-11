@@ -16,6 +16,7 @@
 
 import {CommonSignals} from '../../../src/common-signals';
 import {Observable} from '../../../src/observable';
+import {PlayingStates} from '../../../src/service/video-manager-impl';
 import {VideoAnalyticsType, VideoEvents} from '../../../src/video-interface';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
@@ -457,8 +458,10 @@ export class VideoEventTracker extends EventTracker {
 
           // These spec flags filter events that are triggered.
           // If they apply, we return and do not log the analytics events.
-          if ((isSessionVisible && !endSessionWhenInvisible) ||
-            (details['autoplay'] && excludeAutoplay)) {
+          const filterSession = (isSessionVisible && !endSessionWhenInvisible);
+          const isAutoplay = details['state'] === PlayingStates.PLAYING_AUTO;
+          const filterAutoplay = (isAutoplay && excludeAutoplay);
+          if (filterSession || filterAutoplay) {
             return;
           }
 

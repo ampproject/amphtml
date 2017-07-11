@@ -230,7 +230,7 @@ class AmpBridPlayer extends AMP.BaseElement {
         this.element.dispatchCustomEvent(VideoEvents.LOAD);
         this.playerReadyResolver_(this.iframe_);
       } else if (params[3] == 'play') {
-        this.element.dispatchCustomEvent(VideoEvents.PLAY);
+        this.element.dispatchCustomEvent(VideoEvents.PLAYING);
       } else if (params[3] == 'pause') {
         this.element.dispatchCustomEvent(VideoEvents.PAUSE);
       }

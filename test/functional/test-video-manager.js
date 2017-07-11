@@ -85,7 +85,7 @@ describes.fakeWin('VideoManager', {
     entry.loaded_ = true;
 
     impl.play();
-    return listenOncePromise(video, VideoEvents.PLAY).then(() => {
+    return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
       const curState = videoManager.getPlayingState(impl);
       expect(curState).to.equal(PlayingStates.PLAYING_MANUAL);
     });
@@ -105,7 +105,7 @@ describes.fakeWin('VideoManager', {
     entry.loaded_ = true;
     entry.videoVisibilityChanged_();
 
-    return listenOncePromise(video, VideoEvents.PLAY).then(() => {
+    return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
       const curState = videoManager.getPlayingState(impl);
       expect(curState).to.equal(PlayingStates.PLAYING_AUTO);
 
@@ -132,7 +132,7 @@ describes.fakeWin('VideoManager', {
     entry.videoVisibilityChanged_();
 
     return new Promise(function(resolve, reject) {
-      listenOncePromise(video, VideoEvents.PLAY).then(() => {
+      listenOncePromise(video, VideoEvents.PLAYING).then(() => {
         reject();
       });
       setTimeout(function() {
@@ -204,7 +204,7 @@ describes.fakeWin('VideoManager', {
     entry.isVisible_ = false;
 
     impl.play();
-    return listenOncePromise(video, VideoEvents.PLAY).then(() => {
+    return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
       impl.pause();
       listenOncePromise(video, VideoEvents.PAUSE).then(() => {
         const curState = videoManager.getPlayingState(impl);
@@ -220,7 +220,7 @@ describes.fakeWin('VideoManager', {
     entry.isVisible_ = false;
 
     impl.play();
-    return listenOncePromise(video, VideoEvents.PLAY).then(() => {
+    return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
       const curState = videoManager.getPlayingState(impl);
       expect(curState).to.equal(PlayingStates.PLAYING_MANUAL);
     });
@@ -439,7 +439,7 @@ function createFakeVideoPlayerClass(win) {
      */
     play(unusedIsAutoplay) {
       Promise.resolve().then(() => {
-        this.element.dispatchCustomEvent(VideoEvents.PLAY);
+        this.element.dispatchCustomEvent(VideoEvents.PLAYING);
       });
     }
 
