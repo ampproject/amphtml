@@ -565,7 +565,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                   credentials: 'include',
                   headers,
                 }).catch(err => {
-                  user().error(err);
+                  user().error(err.message);
                 });
               }
               // Redirects and non-200 status codes are forbidden for RTC.
@@ -573,7 +573,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                 return this.shouldSendRequestWithoutRtc();
               }
               return res.json().then(rtcResponse => {
-                return [rtcResponse, rtcTotalTime];
+                return {rtcResponse, rtcTotalTime};
               });
             }));
 
@@ -591,8 +591,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // add reasons for promise.reject
     return rtcPromise.then(
         r => {
-          const rtcResponse = r[0];
-          const rtcTotalTime = r[1];
+          const rtcResponse = r.rtcResponse;
+          const rtcTotalTime = r.rtcTotalTime;
           // TODO :: Need to add the time on to the ad request.
           if (rtcResponse) {
             if (!!rtcResponse['targeting'] ||
@@ -608,7 +608,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           }
           return this.shouldSendRequestWithoutRtc();
         }).catch(err => {
-          user().error(err);
+          user().error(err.message);
           return this.shouldSendRequestWithoutRtc(err);
         });
   }
