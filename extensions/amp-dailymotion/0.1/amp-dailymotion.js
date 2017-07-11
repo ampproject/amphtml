@@ -26,6 +26,7 @@ import {videoManagerForDoc} from '../../../src/services';
 import {parseQueryString} from '../../../src/url';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {addParamsToUrl} from '../../../src/url';
+import {addParamToUrl} from '../../../src/url';
 
 
 /**
@@ -157,8 +158,6 @@ class AmpDailymotion extends AMP.BaseElement {
     iframe.setAttribute('allowfullscreen', 'true');
     dev().assert(this.videoid_);
     iframe.src = this.getIframeSrc_();
-    // iframe.src = 'https://www.dailymotion.com/embed/video/' +
-    //  encodeURIComponent(this.videoid_ || '') + '?' + this.getQuery_();
 
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
@@ -173,14 +172,6 @@ class AmpDailymotion extends AMP.BaseElement {
     this.hasAutoplay_ = this.element.hasAttribute('autoplay');
 
     return this.loadPromise(this.iframe_);
-  }
-
-  /** @private */
-  addDictParam_(param, dict) {
-    const val = this.element.getAttribute(`data-${param}`);
-    if (val) {
-      dict[encodeURIComponent(param)] = encodeURIComponent(val);
-    }
   }
 
   /** @private */
@@ -265,21 +256,23 @@ class AmpDailymotion extends AMP.BaseElement {
     iframeSrc = addParamsToUrl(iframeSrc, fixedParams);
 
     const explicitParamsAttributes = [
-      'mute',
-      'endscreen-enable',
-      'sharing-enable',
-      'start',
-      'ui-highlight',
-      'ui-logo',
-      'info',
+      'data-mute',
+      'data-endscreen-enable',
+      'data-sharing-enable',
+      'data-start',
+      'data-ui-highlight',
+      'data-ui-logo',
+      'data-info',
     ];
 
     let explicitParams = dict();
 
     explicitParamsAttributes.forEach(explicitParam => {
-      this.addDictParam_(explicitParam, explicitParams);
+      const val = this.element.getAttribute(explicitParam);
+      if (val) {
+        iframeSrc = addParamToUrl(iframeSrc, explicitParam, val);
+      }
     });
-    iframeSrc = addParamsToUrl(iframeSrc, explicitParams);
 
     let implicitParams = getDataParamsFromAttributes(this.element);
     iframeSrc = addParamsToUrl(iframeSrc, implicitParams);

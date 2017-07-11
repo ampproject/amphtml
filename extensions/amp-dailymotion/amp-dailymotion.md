@@ -112,13 +112,13 @@ Indicates whether to show video information (title and owner) on the start scree
 
 **data-param-*** (optional)
 
-All `data-param-*` attributes will be added as query parameter to the Dailymotion iframe src. This may be used to pass custom values not explicitly declared.
+All data-param-* attributes are added as query parameters to the src value of the embedded Dailymotion iframe. You can use this attribute to pass custom values not explicitly declared.
 
-Keys and values  will be URI encoded.
+Keys and values will be URI encoded.
 
 * `data-param-origin="example.com"`
 
-Please read [Dailymotion's video player documentation](https://developer.dailymotion.com/player#player-parameters) to know more about parameters and options.
+Please read [Dailymotion's video player documentation](https://developer.dailymotion.com/player) to know more about parameters and options.
 
 **common attributes**
 
