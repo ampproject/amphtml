@@ -102,14 +102,11 @@
   position: relative !important;
 }
 
-.i-amphtml-lbv-desc-box.standard .i-amphtml-lbv-desc-text {
+.i-amphtml-lbv-desc-text.non-expanded {
   overflow-y: hidden !important;
+  overflow-x: hidden !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
-}
-
-.i-amphtml-lbv-desc-box.overflow .i-amphtml-lbv-desc-text {
-  padding-top: 0;
 }
 
 .i-amphtml-lbv[gallery-view] .i-amphtml-lbv-gallery {
