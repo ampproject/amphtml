@@ -433,7 +433,7 @@ export function createShadowDomWriter(win) {
  * details.
  *
  * @interface
- * @implements {WritableStreamDefaultWriter}
+ * @extends {WritableStreamDefaultWriter}
  * @visibleForTesting
  */
 export class ShadowDomWriter {
@@ -447,23 +447,23 @@ export class ShadowDomWriter {
    * the reconstructed `<body>` node in the target DOM where all children
    * will be streamed into.
    *
-   * @param {function(!Document):!Element} callback
+   * @param {function(!Document):!Element} unusedCallback
    */
-  onBody(callback) {}
+  onBody(unusedCallback) {}
 
   /**
    * Sets the callback that will be called when new nodes have been merged
    * into the target DOM.
-   * @param {function()} callback
+   * @param {function()} unusedCallback
    */
-  onBodyChunk(callback) {}
+  onBodyChunk(unusedCallback) {}
 
   /**
    * Sets the callback that will be called when the DOM has been fully
    * constructed.
-   * @param {function()} callback
+   * @param {function()} unusedCallback
    */
-  onEnd(callback) {}
+  onEnd(unusedCallback) {}
 }
 
 
@@ -514,35 +514,17 @@ export class ShadowDomWriterStreamer {
     this.targetBody_ = null;
   }
 
-  /**
-   * Sets the callback that will be called when body has been parsed.
-   *
-   * Unlike most of other nodes, `<body>` cannot be simply merged to support
-   * SD polyfill where the use of `<body>` element is not possible. The
-   * callback will be given the parsed document and it must return back
-   * the reconstructed `<body>` node in the target DOM where all children
-   * will be streamed into.
-   *
-   * @param {function(!Document):!Element} callback
-   */
+  /** @override */
   onBody(callback) {
     this.onBody_ = callback;
   }
 
-  /**
-   * Sets the callback that will be called when new nodes have been merged
-   * into the target DOM.
-   * @param {function()} callback
-   */
+  /** @override */
   onBodyChunk(callback) {
     this.onBodyChunk_ = callback;
   }
 
-  /**
-   * Sets the callback that will be called when the DOM has been fully
-   * constructed.
-   * @param {function()} callback
-   */
+  /** @override */
   onEnd(callback) {
     this.onEnd_ = callback;
   }
@@ -623,8 +605,8 @@ export class ShadowDomWriterBulk {
    * @param {!Window} win
    */
   constructor(win) {
-    /** @private {string} */
-    this.fullHtml_ = '';
+    /** @private {!Array<string>} */
+    this.fullHtml_ = [];
 
     /** @const @private */
     this.vsync_ = vsyncFor(win);
@@ -667,7 +649,7 @@ export class ShadowDomWriterBulk {
       throw new Error('closed already');
     }
     if (chunk) {
-      this.fullHtml_ += dev().assertString(chunk);
+      this.fullHtml_.push(dev().assertString(chunk));
     }
     return this.success_;
   }
@@ -682,7 +664,8 @@ export class ShadowDomWriterBulk {
 
   /** @private */
   complete_() {
-    const doc = new DOMParser().parseFromString(this.fullHtml_, 'text/html');
+    const fullHtml = this.fullHtml_.join('');
+    const doc = new DOMParser().parseFromString(fullHtml, 'text/html');
 
     // Merge body.
     if (doc.body) {

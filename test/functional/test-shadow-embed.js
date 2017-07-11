@@ -559,12 +559,6 @@ describes.sandboxed('shadow-embed', {}, () => {
       });
     });
 
-    function waitForNextBodyChunk() {
-      return new Promise(resolve => {
-        onBodyChunkPromiseResolver = resolve;
-      });
-    }
-
     it('should complete when writer has been closed', () => {
       writer.close();
       return onEndPromise.then(() => {
@@ -590,7 +584,7 @@ describes.sandboxed('shadow-embed', {}, () => {
       expect(onBodySpy).to.be.calledOnce;
       expect(win.document.body.textContent).to.equal('abc');
       expect(writer.eof_).to.be.true;
-      return onEndPromise;
+      return Promise.all([onBodyPromise, onEndPromise]);
     });
 
     it('should process for body chunks together', () => {
@@ -612,7 +606,7 @@ describes.sandboxed('shadow-embed', {}, () => {
       expect(win.document.body.querySelector('child')).to.exist;
       expect(win.document.body.querySelector('child2')).to.exist;
       expect(writer.eof_).to.be.true;
-      return onEndPromise;
+      return Promise.all([onBodyPromise, onEndPromise]);
     });
   });
 });
