@@ -244,8 +244,9 @@ export class Resources {
       this.checkPendingChangeSize_(element);
     });
 
+    this.schedulePass();
+
     // Ensure that we attempt to rebuild things when DOM is ready.
-    let documentWasReady = false;
     this.ampdoc.whenReady().then(() => {
       this.documentReady_ = true;
       this.buildReadyResources_();
@@ -272,14 +273,13 @@ export class Resources {
         loadPromise(this.win),
         timerFor(this.win).promise(3100),
       ]).then(remeasure);
+
+      // Remeasure the document when all fonts loaded.
+      if (this.win.document.fonts &&
+          this.win.document.fonts.status != 'loaded') {
+        this.win.document.fonts.ready.then(remeasure);
+      }
     });
-    if (this.win.document.fonts && this.win.document.fonts.ready) {
-      this.win.document.fonts.ready().then(() => {
-        this.relayoutAll_ = true;
-        this.schedulePass();
-      });
-    }
-    this.schedulePass();
   }
 
   /**
