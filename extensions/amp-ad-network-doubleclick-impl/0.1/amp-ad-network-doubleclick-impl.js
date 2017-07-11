@@ -46,6 +46,8 @@ import {
   groupAmpAdsByType,
   addCsiSignalsToAmpAnalyticsConfig,
   QQID_HEADER,
+  getEnclosingContainerTypes,
+  ValidAdContainerTypes,
 } from '../../../ads/google/a4a/utils';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {
@@ -441,11 +443,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (this.useSra && this.element.getAttribute(DATA_ATTR_NAME)) {
       user().warn(TAG, 'Cannot enable a single slot for both refresh and SRA.');
     }
-    this.refreshManager_ = this.useSra ? null : this.refreshManager_ ||
-        new RefreshManager(this, {
-          visiblePercentageMin: 50,
-          continuousTimeMin: 1,
-        });
+    this.refreshManager_ = this.useSra ||
+        getEnclosingContainerTypes(this.element).filter(container =>
+            container != ValidAdContainerTypes['AMP-CAROUSEL'] &&
+            container != ValidAdContainerTypes['AMP-STICKY-AD']).length
+            ? null
+            : this.refreshManager_ || new RefreshManager(this, {
+              visiblePercentageMin: 50,
+              continuousTimeMin: 1,
+            });
     return superReturnValue;
   }
 

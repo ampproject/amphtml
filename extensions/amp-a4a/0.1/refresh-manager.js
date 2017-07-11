@@ -16,10 +16,6 @@
 
 import {isExperimentOn} from '../../../src/experiments';
 import {timerFor} from '../../../src/services';
-import {
-  getEnclosingContainerTypes,
-  ValidAdContainerTypes,
-} from '../../../ads/google/a4a/utils';
 import {dev, user} from '../../../src/log';
 import {IntersectionObserverPolyfill} from '../../../src/intersection-observer-polyfill'; // eslint-disable-line max-len
 
@@ -152,12 +148,7 @@ export class RefreshManager {
         // The network has opted-in.
         !!(this.config_ &&
         // The publisher has enabled refresh on this slot.
-        (this.refreshInterval_ || this.refreshInterval_ == '') &&
-        // The slot is contained only within container types eligible for
-        // refresh.
-        !getEnclosingContainerTypes(this.element_).filter(container =>
-          container != ValidAdContainerTypes['AMP-CAROUSEL'] &&
-          container != ValidAdContainerTypes['AMP-STICKY-AD']).length);
+        (this.refreshInterval_ || this.refreshInterval_ == ''));
 
     if (this.isRefreshable_) {
       const managerId = String(refreshManagerIdCounter++);

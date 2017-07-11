@@ -117,3 +117,7 @@ An individual slot is eligible to be refreshed if it is configured as:
  data-enable-refresh=refresh_interval>
 ```
 If `refresh_interval` is set to false, then this slot will not be refresh-enabled, even if page-level configurations are set.
+
+#### SRA Compatibility
+
+Refresh is currently not supported for SRA enabled slots. If a slot is enabled for both, refresh will be disabled, and an error will be logged to the user's console.
