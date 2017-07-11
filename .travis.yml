@@ -41,10 +41,10 @@ matrix:
     - env: BUILD_SHARD="pre_build_checks_and_unit_tests"
       before_script:
         - pip install --user protobuf
-        - gem install cliver
         - gem install percy-capybara
         - gem install phantomjs
         - gem install poltergeist
+        - ls -laR /home/travis/.rvm/gems/ruby-2.4.0/gems/phantomjs-2.1.1.0/
     - env: BUILD_SHARD="integration_tests"
       before_script:
         - pip install --user protobuf
