@@ -433,20 +433,8 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         // numbers, but we know that the values should be numeric.
         expect(url).to.match(/sz=[0-9]+x[0-9]+/));
     });
-    it('has correct format when dc-use-attr-for-format is on', () => {
-      toggleExperiment(window, 'dc-use-attr-for-format', true);
-      new AmpAd(element).upgradeCallback();
-      const width = impl.element.getAttribute('width');
-      const height = impl.element.getAttribute('height');
-      impl.onLayoutMeasure();
-      return impl.getAdUrl().then(url =>
-        // With exp dc-use-attr-for-format off, we can't test for specific
-        // numbers, but we know that the values should be numeric.
-        expect(url).to.match(new RegExp(`sz=${width}x${height}`)));
-    });
-    it('has correct format when width=auto and dc-use-attr-for-format is on',
+    it('has correct format when width == "auto"',
         () => {
-          toggleExperiment(window, 'dc-use-attr-for-format', true);
           element.setAttribute('width', 'auto');
           new AmpAd(element).upgradeCallback();
           expect(impl.element.getAttribute('width')).to.equal('auto');
@@ -454,6 +442,28 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           return impl.getAdUrl().then(url =>
               // Ensure that "auto" doesn't appear anywhere here:
               expect(url).to.match(/sz=[0-9]+x[0-9]+/));
+        });
+    it('has correct format with height/width override',
+        () => {
+          element.setAttribute('data-override-width', '123');
+          element.setAttribute('data-override-height', '456');
+          new AmpAd(element).upgradeCallback();
+          impl.onLayoutMeasure();
+          return impl.getAdUrl().then(url =>
+              // Ensure that "auto" doesn't appear anywhere here:
+              expect(url).to.contain('sz=123x456&'));
+        });
+    it('has correct format with height/width override and multiSize',
+        () => {
+          element.setAttribute('data-override-width', '123');
+          element.setAttribute('data-override-height', '456');
+          element.setAttribute('data-multi-size', '1x2,3x4');
+          element.setAttribute('data-multi-size-validation', 'false');
+          new AmpAd(element).upgradeCallback();
+          impl.onLayoutMeasure();
+          return impl.getAdUrl().then(url =>
+              // Ensure that "auto" doesn't appear anywhere here:
+              expect(url).to.contain('sz=123x456%7C1x2%7C3x4&'));
         });
   });
 
