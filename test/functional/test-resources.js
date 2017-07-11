@@ -587,6 +587,48 @@ describes.fakeWin('Resources startup', {
     });
   });
 
+  it('should run a full reload pass on document.fonts.ready', () => {
+    win.readyState = 'interactive';
+    win.document.eventListeners.fire({type: 'readystatechange'});
+    win.document.fonts.status = 'loading';
+    return resources.ampdoc.whenReady().then(() => {
+
+    }).then(() => {
+      // This is the regular remeasure on doc-ready.
+      expect(resources.relayoutAll_).to.be.true;
+      resources.relayoutAll_ = false;
+      return win.document.fonts.ready;
+    }).then(() => {
+      // Wait one micro task.
+      return Promise.resolve();
+    }).then(() => {
+      expect(resources.relayoutAll_).to.be.true;
+      // Remeasure on doc-ready and fonts-ready.
+      expect(schedulePassStub).to.have.been.calledTwice;
+    });
+  });
+
+  it('should not remeasure if fonts load before doc-ready', () => {
+    win.readyState = 'interactive';
+    win.document.eventListeners.fire({type: 'readystatechange'});
+    win.document.fonts.status = 'loaded';
+    return resources.ampdoc.whenReady().then(() => {
+
+    }).then(() => {
+      // This is the regular remeasure on doc-ready.
+      expect(resources.relayoutAll_).to.be.true;
+      resources.relayoutAll_ = false;
+      return win.document.fonts.ready;
+    }).then(() => {
+      // Wait one micro task.
+      return Promise.resolve();
+    }).then(() => {
+      expect(resources.relayoutAll_).to.be.false;
+      // Only remeasure on doc-ready.
+      expect(schedulePassStub).to.have.been.calledOnce;
+    });
+  });
+
   it('should run a full reload when a new element is connected', () => {
     expect(resources.relayoutAll_).to.be.false;
     expect(schedulePassStub).to.not.be.called;
