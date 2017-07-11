@@ -48,6 +48,7 @@ matrix:
         - ls -laR /home/travis/.rvm/gems/ruby-2.4.0/gems/phantomjs-2.1.1.0/
         - ls -la /usr/local/phantomjs/phantomjs
         - ls -la /usr/local/bin/phantomjs
+        - which phantomjs
         - which -a phantomjs
         - gem which -a phantomjs
         - /usr/local/phantomjs/phantomjs --version
@@ -55,10 +56,10 @@ matrix:
         - phantomjs --version
         - echo $PATH
         # Remove
-        - export PATH=${PATH/\/usr\/local\/phantomjs\/bin:/}
-        - export PATH=${PATH/\/usr\/local\/phantomjs:/}
+        - export PATH="`pwd`/node_modules/.bin:$PATH"
         # After
         - echo $PATH
+        - which phantomjs
         - which -a phantomjs
         - gem which -a phantomjs
         - phantomjs --version
