@@ -2558,6 +2558,19 @@ tags {  # <form method=GET ...>
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
+  attrs: {
+    name: "verify-xhr"
+    value_url: {
+      allow_relative: true
+      allowed_protocol: "https"
+      # These are disallowed due to serving content from multiple origins on
+      # a single CDN domain. New CDNs should use a different domain per origin
+      # domain rather than adding to this list.
+      disallowed_domain: "cdn.ampproject.org"
+      disallowed_domain: "amp.cloudflare.com"
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
   attrs: { name: "autocomplete" }
   attrs: {
     name: "custom-validation-reporting"
@@ -2589,6 +2602,20 @@ tags {  # <form method=POST ...>
   # For method=POST forms, we require `action-xhr` and disallow `action`.
   attrs: {
     name: "action-xhr"
+    mandatory: true
+    value_url: {
+      allow_relative: true
+      allowed_protocol: "https"
+      # These are disallowed due to serving content from multiple origins on
+      # a single CDN domain. New CDNs should use a different domain per origin
+      # domain rather than adding to this list.
+      disallowed_domain: "cdn.ampproject.org"
+      disallowed_domain: "amp.cloudflare.com"
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  attrs: {
+    name: "verify-xhr"
     mandatory: true
     value_url: {
       allow_relative: true
