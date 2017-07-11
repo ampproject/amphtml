@@ -447,11 +447,19 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     delete data['_context'];
     manageWin(window);
     installEmbedStateListener();
-    draw3p(window, window.context.data, opt_configCallback);
 
     if (isAmpContextExperimentOn()) {
+      // Ugly type annotation is due to Event.prototype.data being blacklisted
+      // and the compiler not being able to discern otherwise
+      // TODO(alanorozco): Do this more elegantly once old impl is cleaned up.
+      draw3p(
+          window,
+          (/** @type {!IntegrationAmpContext} */ (window.context)).data || {},
+          opt_configCallback);
+
       window.context.bootstrapLoaded();
     } else {
+      draw3p(window, data, opt_configCallback);
       updateVisibilityState(window);
 
       // Subscribe to page visibility updates.
