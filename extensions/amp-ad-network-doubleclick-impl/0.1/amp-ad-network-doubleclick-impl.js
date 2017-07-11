@@ -35,7 +35,6 @@ import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {
-  extractGoogleAdCreativeAndSignature,
   googleAdUrl,
   truncAndTimeUrl,
   googleBlockParameters,
@@ -348,7 +347,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  extractCreativeAndSignature(responseText, responseHeaders) {
+  extractSize(responseHeaders) {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
     this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
     this.qqid_ = responseHeaders.get(QQID_HEADER);
@@ -356,11 +355,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // Load amp-analytics extensions
       this.extensions_./*OK*/loadExtension('amp-analytics');
     }
-    return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
-  }
-
-  /** @override */
-  extractSize(responseHeaders) {
     // If the server returned a size, use that, otherwise use the size that we
     // sent in the ad request.
     let size = super.extractSize(responseHeaders);
