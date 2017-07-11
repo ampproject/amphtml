@@ -59,6 +59,9 @@ export class AmpAudio extends AMP.BaseElement {
 
     /** @private {?UnlistenDef} */
     this.volumeChangeUnlistener_ = null;
+
+    /** @private {boolean} */
+    this.hasFmb_ = this.element.hasAttribute('floating-mute-button');
   }
 
   /** @override */
@@ -118,7 +121,8 @@ export class AmpAudio extends AMP.BaseElement {
 
     listen(this.audio_, 'playing', () => this.audioPlaying_());
 
-    if (!this.scrollListenerInstalled_) {
+    // Activate the floating mute button
+    if (!this.scrollListenerInstalled_ && this.hasFmb_) {
       const scrollListener = () => {
         const change = this.element.getIntersectionChangeEntry();
         const ratio = change.intersectionRatio;
@@ -165,8 +169,20 @@ export class AmpAudio extends AMP.BaseElement {
       return;
     }
     const doc = this.element.ownerDocument;
-    const btn = doc.createElement('i-amphtml-floating-mute-btn');
+    const btn = doc.createElement('div');
+    btn.classList.add('amp-audio-floating-mute-btn');
     this.element.ownerDocument.body.appendChild(btn);
+
+    // Different positioning based on page direction
+    const pageDir = doc.body.getAttribute('dir')
+                      || doc.documentElement.getAttribute('dir')
+                      || 'ltr';
+
+    btn.classList.toggle('rtl', pageDir != 'ltr');
+
+    // Raise the button if a sticky ad exists
+    const stickyadexists = doc.querySelector('amp-sticky-ad');
+    btn.classList.toggle('sticky-ad-exists', !!stickyadexists);
 
     // Button pops in
     const anim = new Animation(btn);
