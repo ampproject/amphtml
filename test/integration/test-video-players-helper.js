@@ -121,7 +121,7 @@ export function runVideoPlayerIntegrationTests(
     afterEach(cleanUp);
   });
 
-  describe.configure().retryOnSaucelabs().run('Video Docking', function() {
+  describe.configure().skipSauceLabs().run('Video Docking', function() {
     this.timeout(TIMEOUT);
 
     describe('General Behavior', () => {
