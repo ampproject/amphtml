@@ -511,7 +511,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           + '"sendAdRequestOnFailure": false'
           + '}';
       document.head.appendChild(rtcConfig);
-      const rtcResponse = {targeting: {age: "18-24"}};
+      const rtcResponse = {targeting: {age: '18-24'}};
       const xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
       xhrMock.returns(
           Promise.resolve({
@@ -1149,14 +1149,6 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         categoryExclusions: {'age': '18-25'}};
       let contextualTargeting =
       '{"targeting": {"food": {"kids": "fries", "adults": "cheese"}}}';
-      let jsonTargeting = {
-        targeting: {
-          'food': {
-            'kids': ['chicken fingers', 'pizza'],
-            'adults': 'cheese',
-          },
-          'sports': 'baseball'},
-        categoryExclusions: {'age': '18-25'}};
       element = createElementWithAttributes(document, 'amp-ad', {
         'width': '200',
         'height': '50',
@@ -1168,22 +1160,15 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
 
       contextualTargeting =
       '{"targeting": {"food": {"adults": "wine"}}}';
-      jsonTargeting = {
-        targeting: {
-          'food': {
-            'kids': ['chicken fingers', 'pizza'],
-            'adults': 'wine',
-          },
-          'sports': 'baseball'},
-        categoryExclusions: {'age': '18-25'}};
-      element_2 = createElementWithAttributes(document, 'amp-ad', {
-        'width': '200',
-        'height': '50',
-        'type': 'doubleclick',
-        'layout': 'fixed',
-        'json': contextualTargeting,
-      });
-      return mockRtcExecution(rtcResponse, element_2).then(() => {
+      const secondElement = createElementWithAttributes(
+          document, 'amp-ad', {
+            'width': '200',
+            'height': '50',
+            'type': 'doubleclick',
+            'layout': 'fixed',
+            'json': contextualTargeting,
+          });
+      return mockRtcExecution(rtcResponse, secondElement).then(() => {
         expect(xhrMock).to.be.calledTwice;
       });
     });
@@ -1196,11 +1181,6 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           + '}';
 
       const targeting = {'sport': 'baseball'};
-      const categoryExclusions = {};
-      const jsonTargeting = {
-        targeting,
-        categoryExclusions,
-      };
       return mockRtcExecution({
         targeting,
       }, element).then(() => {
@@ -1227,12 +1207,6 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       });
 
       const targeting = {'sport': 'baseball'};
-      const categoryExclusions = {};
-      const jsonTargeting = {
-        targeting,
-        categoryExclusions,
-      };
-
       return mockRtcExecution({targeting}, element).then(() => {
         expect(xhrMock).to.be.calledOnce;
       });
@@ -1244,12 +1218,6 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         'sendAdRequestOnFailure': false,
       });
       const targeting = {'sport': 'baseball'};
-      const categoryExclusions = {};
-      const jsonTargeting = {
-        targeting,
-        categoryExclusions,
-      };
-
       impl = new AmpAdNetworkDoubleclickImpl(element);
 
       xhrMock.returns(
@@ -1258,7 +1226,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
               redirected: false,
               status: 200,
               json: () => {
-                return Promise.resolve(rtcResponse);
+                return Promise.resolve({targeting});
               },
             });
           }));
@@ -1278,11 +1246,6 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         'endpoint': 'https://example-publisher.com/rtc/',
       });
       const targeting = {'sport': 'baseball'};
-      const categoryExclusions = {};
-      const jsonTargeting = {
-        targeting,
-        categoryExclusions,
-      };
 
       impl = new AmpAdNetworkDoubleclickImpl(element);
 
@@ -1292,14 +1255,14 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
               redirected: false,
               status: 200,
               json: () => {
-                return Promise.resolve(rtcResponse);
+                return Promise.resolve({targeting});
               },
             });
           }));
       impl.populateAdUrlState();
       return impl.executeRtc_().then(result => {
         expect(result).to.not.be.ok;
-      }).catch(err => {
+      }).catch(() => {
         // Should not error.
         expect(true).to.be.false;
       });
