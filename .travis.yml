@@ -44,25 +44,8 @@ matrix:
         - gem install percy-capybara
         - gem install phantomjs
         - gem install poltergeist
-        # Before
-        - ls -laR /home/travis/.rvm/gems/ruby-2.4.0/gems/phantomjs-2.1.1.0/
-        - ls -la /usr/local/phantomjs/phantomjs
-        - ls -la /usr/local/bin/phantomjs
-        - which phantomjs
-        - which -a phantomjs
-        - gem which -a phantomjs
-        - /usr/local/phantomjs/phantomjs --version
-        - /usr/local/bin/phantomjs --version
-        - phantomjs --version
-        - echo $PATH
-        # Remove
+        # Poltergeist requires an absolute path to find phantomjs. See #10305.
         - export PATH="`pwd`/node_modules/.bin:$PATH"
-        # After
-        - echo $PATH
-        - which phantomjs
-        - which -a phantomjs
-        - gem which -a phantomjs
-        - phantomjs --version
     - env: BUILD_SHARD="integration_tests"
       before_script:
         - pip install --user protobuf
