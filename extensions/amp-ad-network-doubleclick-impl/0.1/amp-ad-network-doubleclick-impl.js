@@ -84,8 +84,14 @@ const DOUBLECLICK_BASE_URL =
 /** @const {number} */
 const RTC_TIMEOUT = 1000;
 
+/** @const {string} */
+const SEND_WITHOUT_RTC = 'send_without_rtc';
+
 /** @private {?Promise<!Object<string,string>>} */
 let rtcPromise = null;
+
+/** @private {boolean|string} */
+let sendAdRequestOnRtcFailure = null;
 
 /** @private @const {!Object<string,string>} */
 const PAGE_LEVEL_PARAMS_ = {
@@ -534,10 +540,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       user().warn(TAG, 'invalid RTC config...');
       return Promise.resolve();
     }
-    this.shouldSendRequestWithoutRtc = err => {
-      return rtcConfig['sendAdRequestOnFailure'] !== false ?
-          Promise.resolve() : Promise.reject(err);
-    };
+
+    sendAdRequestOnRtcFailure = rtcConfig['sendAdRequestOnFailure'];
+
     let rtcTotalTime;
     const disableSWR = (
         rtcConfig['disableStaleWhileRevalidate'] === true);
@@ -591,27 +596,36 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // add reasons for promise.reject
     return rtcPromise.then(
         r => {
+          if (r == SEND_WITHOUT_RTC) {
+            return Promise.resolve();
+          }
           const rtcResponse = r.rtcResponse;
           const rtcTotalTime = r.rtcTotalTime;
           // TODO :: Need to add the time on to the ad request.
-          if (rtcResponse) {
-            if (!!rtcResponse['targeting'] ||
-                !!rtcResponse['categoryExclusions']) {
-              this.jsonTargeting_['targeting'] = deepMerge(
-                  this.jsonTargeting_['targeting'] || {},
-                  rtcResponse['targeting'] || {});
-              this.jsonTargeting_['categoryExclusions'] = deepMerge(
-                  this.jsonTargeting_['categoryExclusions'] || {},
-                  rtcResponse['categoryExclusions'] || {});
-            }
-            return Promise.resolve(rtcTotalTime);
+          if (!rtcResponse) {
+            return this.shouldSendRequestWithoutRtc();
           }
-          return this.shouldSendRequestWithoutRtc();
+          if (!!rtcResponse['targeting'] ||
+              !!rtcResponse['categoryExclusions']) {
+            this.jsonTargeting_['targeting'] = deepMerge(
+                this.jsonTargeting_['targeting'] || {},
+                rtcResponse['targeting'] || {});
+            this.jsonTargeting_['categoryExclusions'] = deepMerge(
+                this.jsonTargeting_['categoryExclusions'] || {},
+                rtcResponse['categoryExclusions'] || {});
+          }
+          return Promise.resolve(rtcTotalTime);
         }).catch(err => {
           user().error(err.message);
           return this.shouldSendRequestWithoutRtc(err);
         });
   }
+
+  shouldSendRequestWithoutRtc(err) {
+      return (sendAdRequestOnRtcFailure !== false &&
+          sendAdRequestOnRtcFailure != 'false') ?
+          Promise.resolve() : Promise.reject(err);
+  };
 
   /** @override */
   sendXhrRequest(adUrl) {
