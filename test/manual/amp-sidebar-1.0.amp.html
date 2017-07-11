@@ -52,6 +52,10 @@ limitations under the License.
   margin-right: auto;
 }
 
+.toolbar-compensation {
+  margin-top: 60px;
+}
+
 .ampstart-headerbar-nav, .ampstart-headerbar-nav > ul.flex {
   pointer-events: none;
 }
@@ -70,14 +74,32 @@ limitations under the License.
   background-color: transparent;
 }
 
-.ampstart-hamburger-nav {
-  background-color: #fff;
+.ampstart-hamburger-nav > ul {
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  overflow: auto;
+  list-style-type: none;
+
+  padding: 0;
+  margin: 0;
 }
 
-@media (min-width: 931px) {
-  .ampstart-headerbar-nav {
-    margin-left: -195px;
-  }
+.ampstart-toolbar-container {
+  z-index: 2147483646;
+  width: 100%;
+  position: fixed;
+  top: 0;
+
+  background-color: #fff;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.ampstart-toolbar {
+  margin-right: auto;
 }
 
 @media (max-width: 930px) {
@@ -124,7 +146,7 @@ limitations under the License.
 
     <!-- Toolbar One, basic usage, toolbar-only -->
     <!-- Could center with CSS justify-content: space-between, but trying to be minimal -->
-    <nav toolbar="(min-width: 0px)" class="ampstart-hamburger-nav ampstart-navbar-bg" toolbar-only>
+    <nav toolbar="(min-width: 0px)" class="ampstart-hamburger-nav ampstart-navbar-bg" target="hamburger-toolbar" toolbar-only>
       <ul class="justify-center">
         <li role="button" aria-label="open sidebar" on="tap:header-sidebar.toggle" tabindex="0" class="ampstart-navbar-trigger pl2">
           ☰
@@ -132,13 +154,11 @@ limitations under the License.
         <li class="mrauto">
           <amp-img src="https://ampstart.com/img/blog/logo.png" width="100" height="61.3" layout="fixed" class="my0 ml2" alt="The Blog"></amp-img>
         </li>
-        <li id="toolbar-nav-target" class="mrauto">
-        </li>
       </ul>
     </nav>
 
     <!-- Toolbar Two, min only  -->
-    <nav toolbar="(min-width: 931px)" target="toolbar-nav-target" toolbar-only class="ampstart-headerbar-nav ampstart-nav ampstart-navbar-bg">
+    <nav toolbar="(min-width: 931px)" target="accordion-toolbar" toolbar-only class="ampstart-headerbar-nav ampstart-nav ampstart-navbar-bg">
       <ul class="list-reset center m0 p0 flex justify-center nowrap">
           <li class="ampstart-nav-item ampstart-nav-dropdown">
             <!-- Start Dropdown -->
@@ -195,7 +215,14 @@ limitations under the License.
   </amp-sidebar>
   <!-- End Sidebar -->
   <!-- End Navbar -->
-  <main id="content" role="main" class="">
+
+  <div class="ampstart-toolbar-container">
+    <div id="hamburger-toolbar" class="ampstart-toolbar">
+    </div>
+    <div id="accordion-toolbar" class="ampstart-toolbar">
+    </div>
+  </div>
+  <main id="content" role="main" class="toolbar-compensation">
     <article class="recipe-article">
       <header>
         <span class="ampstart-subtitle block px3 pt2 mb2">FOOD</span>
