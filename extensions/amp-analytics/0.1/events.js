@@ -16,7 +16,7 @@
 
 import {CommonSignals} from '../../../src/common-signals';
 import {Observable} from '../../../src/observable';
-import {VideoAnalyticsEvent, VideoEvents} from '../../../src/video-interface';
+import {VideoAnalyticsType, VideoEvents} from '../../../src/video-interface';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {user} from '../../../src/log';
@@ -453,7 +453,7 @@ export class VideoEventTracker extends EventTracker {
       targetReady.then(analyticsTarget => {
         if (analyticsTarget.contains(element)) {
           const isSessionVisible =
-              (type === VideoAnalyticsEvent.SESSION_VISIBLE);
+              (type === VideoAnalyticsType.SESSION_VISIBLE);
 
           // These spec flags filter events that are triggered.
           // If they apply, we return and do not log the analytics events.
@@ -463,7 +463,7 @@ export class VideoEventTracker extends EventTracker {
           }
 
           const mutatedType =
-              isSessionVisible ? VideoAnalyticsEvent.SESSION : type;
+              isSessionVisible ? VideoAnalyticsType.SESSION : type;
           if (mutatedType === on) {
             listener(new AnalyticsEvent(analyticsTarget, mutatedType, details));
           }

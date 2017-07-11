@@ -25,7 +25,7 @@ import {setStyles} from '../style';
 import {isFiniteNumber} from '../types';
 import {mapRange} from '../utils/math';
 import {
-  VideoAnalyticsEvent,
+  VideoAnalyticsType,
   VideoAttributes,
   VideoEvents,
 } from '../video-interface';
@@ -326,13 +326,13 @@ class VideoEntry {
     this.actionSessionManager_ = new VideoSessionManager();
 
     this.actionSessionManager_.onSessionEnd(
-        () => this.analyticsEvent_(VideoAnalyticsEvent.SESSION));
+        () => this.analyticsEvent_(VideoAnalyticsType.SESSION));
 
     /** @private @const */
     this.visibilitySessionManager_ = new VideoSessionManager();
 
     this.visibilitySessionManager_.onSessionEnd(
-        () => this.analyticsEvent_(VideoAnalyticsEvent.SESSION_VISIBLE));
+        () => this.analyticsEvent_(VideoAnalyticsType.SESSION_VISIBLE));
 
     /** @private @const {function(): !Promise<boolean>} */
     this.boundSupportsAutoplay_ = supportsAutoplay.bind(null, ampdoc.win,
@@ -403,7 +403,7 @@ class VideoEntry {
     if (this.isVisible_) {
       this.visibilitySessionManager_.beginSession();
     }
-    this.analyticsEvent_(VideoAnalyticsEvent.PLAY);
+    this.analyticsEvent_(VideoAnalyticsType.PLAY);
   }
 
   /**
@@ -414,7 +414,7 @@ class VideoEntry {
     const trackingVideo = assertTrackingVideo(this.video);
     if (trackingVideo &&
         trackingVideo.getCurrentTime() !== trackingVideo.getDuration()) {
-      this.analyticsEvent_(VideoAnalyticsEvent.PAUSE);
+      this.analyticsEvent_(VideoAnalyticsType.PAUSE);
     }
     this.isPlaying_ = false;
 
@@ -431,7 +431,7 @@ class VideoEntry {
    */
   videoEnded_() {
     this.isPlaying_ = false;
-    this.analyticsEvent_(VideoAnalyticsEvent.ENDED);
+    this.analyticsEvent_(VideoAnalyticsType.ENDED);
     this.actionSessionManager_.endSession();
   }
 

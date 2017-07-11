@@ -21,7 +21,7 @@ import {toggleExperiment} from '../../src/experiments';
 import {
   VideoInterface,
   VideoEvents,
-  VideoAnalyticsEvent,
+  VideoAnalyticsType,
 } from '../../src/video-interface';
 import {
   assertTrackingVideo,
@@ -161,7 +161,7 @@ export function runVideoPlayerIntegrationTests(
       }).then(event => {
         const eventData = getData(event);
         const type = eventData['type'];
-        expect(type).to.equal(VideoAnalyticsEvent.PLAY);
+        expect(type).to.equal(VideoAnalyticsType.PLAY);
       });
     });
 
@@ -184,7 +184,7 @@ export function runVideoPlayerIntegrationTests(
       }).then(event => {
         const eventData = getData(event);
         const type = eventData['type'];
-        expect(type).to.equal(VideoAnalyticsEvent.PAUSE);
+        expect(type).to.equal(VideoAnalyticsType.PAUSE);
       });
     });
 
@@ -206,7 +206,7 @@ export function runVideoPlayerIntegrationTests(
           listen(video, VideoEvents.ANALYTICS, event => {
             const eventData = getData(event);
             const type = eventData['type'];
-            if (type === VideoAnalyticsEvent.SESSION) {
+            if (type === VideoAnalyticsType.SESSION) {
               resolve();
             }
           });
@@ -236,7 +236,7 @@ export function runVideoPlayerIntegrationTests(
         return listenOncePromise(video, VideoEvents.ANALYTICS);
       }).then(event => {
         const eventData = getData(event);
-        expect(eventData['type']).to.equal(VideoAnalyticsEvent.SESSION_VISIBLE);
+        expect(eventData['type']).to.equal(VideoAnalyticsType.SESSION_VISIBLE);
       });
     });
 
@@ -253,7 +253,7 @@ export function runVideoPlayerIntegrationTests(
         return listenOncePromise(video, VideoEvents.ANALYTICS);
       }).then(event => {
         const eventData = getData(event);
-        expect(eventData['type']).to.equal(VideoAnalyticsEvent.ENDED);
+        expect(eventData['type']).to.equal(VideoAnalyticsType.ENDED);
       });
     });
 
