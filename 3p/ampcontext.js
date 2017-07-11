@@ -18,6 +18,7 @@ import {dev} from '../src/log';
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {MessageType} from '../src/3p-frame-messaging';
 import {nextTick} from './3p';
+import {parseUrl} from '../src/url';
 import {tryParseJson} from '../src/json';
 import {isObject} from '../src/types';
 import {AmpEvents} from '../src/amp-events';
@@ -250,7 +251,7 @@ export class AbstractAmpContext {
     this.hidden = context.hidden;
     this.initialLayoutRect = context.initialLayoutRect;
     this.initialIntersection = context.initialIntersection;
-    this.location = context.location;
+    this.location = parseUrl(context.location.href);
     this.mode = context.mode;
     this.pageViewId = context.pageViewId;
     this.referrer = context.referrer;

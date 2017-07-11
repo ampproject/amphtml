@@ -25,14 +25,9 @@
 import './polyfills';
 import {
   IntegrationAmpContext,
-  masterSelection,
 } from './ampcontext-integration';
 import {installEmbedStateListener, manageWin} from './environment';
-import {isExperimentOn} from './3p';
-import {nonSensitiveDataPostMessage, listenParent} from './messaging';
 import {
-  computeInMasterFrame,
-  nextTick,
   register,
   run,
   setExperimentToggles,
@@ -45,7 +40,6 @@ import {dev, initLogConstructor, setReportError, user} from '../src/log';
 import {dict} from '../src/utils/object.js';
 import {getMode} from '../src/mode';
 import {startsWith} from '../src/string.js';
-import {AmpEvents} from '../src/amp-events';
 
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
@@ -201,10 +195,7 @@ const FALLBACK_CONTEXT_DATA = dict({
 });
 
 
-// Need to cache iframeName as it will be potentially overwritten by
-// masterSelection, as per below.
-const iframeName = window.name;
-const data = getData(iframeName);
+const data = getData(window.name);
 
 window.context = data['_context'];
 
@@ -410,12 +401,6 @@ export function draw3p(win, data, configCallback) {
   }
 };
 
-/**
- * @return {boolean} Whether this is the master iframe.
- */
-function isMaster() {
-  return window.context.master == window;
-}
 
 /**
  * Draws an embed, optionally synchronously, to the DOM.
@@ -445,16 +430,7 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     manageWin(window);
     installEmbedStateListener();
     draw3p(window, data, opt_configCallback);
-
-    if (isAmpContextExperimentOn()) {
-      window.context.bootstrapLoaded();
-    } else {
-      updateVisibilityState(window);
-
-      // Subscribe to page visibility updates.
-      nonSensitiveDataPostMessage('send-embed-state');
-      nonSensitiveDataPostMessage('bootstrap-loaded');
-    }
+    window.context.bootstrapLoaded();
   } catch (e) {
     const c = window.context || {mode: {test: false}};
     if (!c.mode.test) {
@@ -465,215 +441,12 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
 };
 
 
-/** @return {boolean} */
-function isAmpContextExperimentOn() {
-  return isExperimentOn('3p-use-ampcontext');
-}
-
-
 /**
  * Installs window.context API.
  * @param {!Window} win
  */
 function installContext(win) {
-  if (isAmpContextExperimentOn()) {
-    installContextUsingExperimentalImpl(win);
-    return;
-  }
-
-  installContextUsingStandardImpl(win);
-}
-
-
-/**
- * Installs window.context API.
- * @param {!Window} win
- */
-function installContextUsingExperimentalImpl(win) {
   win.context = new IntegrationAmpContext(win);
-}
-
-
-/**
- * Installs window.context using standard (to be deprecated) implementation.
- * @param {!Window} win
- */
-function installContextUsingStandardImpl(win) {
-  // Define master related properties to be lazily read.
-  Object.defineProperties(win.context, {
-    master: {
-      get: () => masterSelection(win, data['type']),
-    },
-    isMaster: {
-      get: isMaster,
-    },
-  });
-
-  win.context.data = data;
-  win.context.location = parseUrl(data['_context']['location']['href']);
-  win.context.noContentAvailable = triggerNoContentAvailable;
-  win.context.requestResize = triggerResizeRequest;
-  win.context.renderStart = triggerRenderStart;
-
-  const type = data['type'];
-  if (type === 'facebook' || type === 'twitter' || type === 'github') {
-    // Only make this available to selected embeds until the
-    // generic solution is available.
-    win.context.updateDimensions = triggerDimensions;
-  }
-
-  // This only actually works for ads.
-  const initialIntersection = win.context.initialIntersection;
-  win.context.observeIntersection = cb => {
-    const unlisten = observeIntersection(cb);
-    // Call the callback with the value that was transmitted when the
-    // iframe was drawn. Called in nextTick, so that callers don't
-    // have to specially handle the sync case.
-    nextTick(win, () => cb([initialIntersection]));
-    return unlisten;
-  };
-  win.context.onResizeSuccess = onResizeSuccess;
-  win.context.onResizeDenied = onResizeDenied;
-  win.context.reportRenderedEntityIdentifier =
-      reportRenderedEntityIdentifier;
-  win.context.computeInMasterFrame = computeInMasterFrame;
-  win.context.addContextToIframe = iframe => {
-    iframe.name = iframeName;
-  };
-  win.context.getHtml = getHtml;
-}
-
-
-function triggerNoContentAvailable() {
-  nonSensitiveDataPostMessage('no-content');
-}
-
-function triggerDimensions(width, height) {
-  nonSensitiveDataPostMessage('embed-size', dict({
-    'width': width,
-    'height': height,
-  }));
-}
-
-function triggerResizeRequest(width, height) {
-  nonSensitiveDataPostMessage('embed-size', dict({
-    'width': width,
-    'height': height,
-  }));
-}
-
-/**
- * @param {!JsonObject=} opt_data fields: width, height
- */
-function triggerRenderStart(opt_data) {
-  nonSensitiveDataPostMessage('render-start', opt_data);
-}
-
-/**
- * Id for getHtml postMessage.
- * @type {!number}
- */
-let currentMessageId = 0;
-
-/**
- * See readme for window.context.getHtml
- * @param {!string} selector - CSS selector of the node to take content from
- * @param {!Array<string>} attributes - tag attributes to be left in the stringified HTML
- * @param {!Function} callback
- */
-function getHtml(selector, attributes, callback) {
-  const messageId = currentMessageId++;
-  nonSensitiveDataPostMessage('get-html', dict({
-    'selector': selector,
-    'attributes': attributes,
-    'messageId': messageId,
-  }));
-
-  const unlisten = listenParent(window, 'get-html-result', data => {
-    if (data['messageId'] === messageId) {
-      callback(data['content']);
-      unlisten();
-    }
-  });
-}
-
-/**
- * Registers a callback for intersections of this iframe with the current
- * viewport.
- * The passed in array has entries that aim to be compatible with
- * the IntersectionObserver spec callback.
- * http://rawgit.com/slightlyoff/IntersectionObserver/master/index.html#callbackdef-intersectionobservercallback
- * @param {function(!Array<IntersectionObserverEntry>)} observerCallback
- * @returns {!function()} A function which removes the event listener that
- *    observes for intersection messages.
- */
-function observeIntersection(observerCallback) {
-  // Send request to received records.
-  nonSensitiveDataPostMessage('send-intersections');
-  return listenParent(window, 'intersection', data => {
-    observerCallback(data['changes']);
-  });
-}
-
-/**
- * Listens for events via postMessage and updates `context.hidden` based on
- * it and forwards the event to a custom event called `amp:visibilitychange`.
- * @param {!Window} global
- */
-function updateVisibilityState(global) {
-  listenParent(window, 'embed-state', function(data) {
-    global.context.hidden = data['pageHidden'];
-    dispatchVisibilityChangeEvent(global, data['pageHidden']);
-  });
-}
-
-
-function dispatchVisibilityChangeEvent(win, isHidden) {
-  const event = win.document.createEvent('Event');
-  event.data = {hidden: isHidden};
-  event.initEvent(AmpEvents.VISIBILITY_CHANGE, true, true);
-  win.dispatchEvent(event);
-}
-
-/**
- * Registers a callback for communicating when a resize request succeeds.
- * @param {function(number, number)} observerCallback
- * @returns {!function()} A function which removes the event listener that
- *    observes for resize status messages.
- */
-function onResizeSuccess(observerCallback) {
-  return listenParent(window, 'embed-size-changed', data => {
-    observerCallback(data['requestedHeight'], data['requestedWidth']);
-  });
-}
-
-/**
- * Registers a callback for communicating when a resize request is denied.
- * @param {function(number, number)} observerCallback
- * @returns {!function()} A function which removes the event listener that
- *    observes for resize status messages.
- */
-function onResizeDenied(observerCallback) {
-  return listenParent(window, 'embed-size-denied', data => {
-    observerCallback(data['requestedHeight'], data['requestedWidth']);
-  });
-}
-
-/**
- * Reports the "entity" that was rendered to this frame to the parent for
- * reporting purposes.
- * The entityId MUST NOT contain user data or personal identifiable
- * information. One example for an acceptable data item would be the
- * creative id of an ad, while the user's location would not be
- * acceptable.
- * @param {string} entityId See comment above for content.
- */
-function reportRenderedEntityIdentifier(entityId) {
-  user().assert(typeof entityId == 'string',
-      'entityId should be a string %s', entityId);
-  nonSensitiveDataPostMessage('entity-id', dict({
-    'id': entityId,
-  }));
 }
 
 /**
