@@ -507,14 +507,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
    * Sends RTC request as specified by rtcConfig. Returns promise which
-   * resolves to the targeting informtation from the request response.
-   * If the publisher has specified that noCache == true, then we will only
-   * send one RTC request per page, and it will always bypass cache. If
-   * noCache !== true, then we always send two requests. The first will try
+   * resolves to the time that the RTC callout took to complete.
+   * If disableStalewhilerevalidate == true,then we will only
+   * send one RTC request per page. If it's !== true, then we always
+   * send two requests. The first will try
    * to hit browser cache, and the second request will always bypass.
    * This is a way for us to implement a simple stale-while-revalidate
    * model.
-   * @return {?Promise} The rtc targeting info to attach to the ad url.
+   * The targeting info from the RTC updates the targeting info on
+   * this object within mergeRtc.
+   * @return {?Promise} The time the RTC callout took (if successful).
    * @private
    */
   executeRtc_() {
@@ -543,6 +545,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     headers.append('Cache-Control', 'max-age=0');
     const xhrInit = {credentials: 'include'};
     const startTime = Date.now();
+    // Because we are wrapping the RTC request in the timeout,
+    // we are guaranteeing that if the RTC is slow to return and
+    // times out for the first slot, it won't be used for any
+    // other slots either. This is in opposition to the other way
+    // we could potentially do it, in which we only still make one
+    // rtc callout, but there is a 1 second timeout from the
+    // perspective of each slot. I.e. if the top slot on the page
+    // calls out for the RTC, which returns after 5 seconds, and
+    // then a slot way down on the page asks for it later.
     rtcPromise = timerFor(window).timeoutPromise(
         RTC_TIMEOUT,
         xhrFor(this.win).fetchJson(
@@ -569,6 +580,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return this.mergeRtc();
   }
 
+  /**
+   * Merges the RTC response into the jsonTargeting of this.
+   * If it can't merge, or there is no response, potentially
+   * rejects.
+   * @return {Promise} Resolves if ad request is being sent,
+   *     otherwise rejects.
+   */
   mergeRtc() {
     // add reasons for promise.reject
     return rtcPromise.then(
