@@ -294,11 +294,10 @@ export const VideoAnalyticsEvent = {
  *   autoplay: boolean,
  *   currentTime: number,
  *   duration: number,
- *   ended: boolean,
  *   height: number,
  *   id: string,
  *   muted: boolean,
- *   paused: boolean,
+ *   state: string,
  *   width: number
  * }}
  */
