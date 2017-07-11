@@ -156,6 +156,7 @@ end
 
 # Launches a webserver, loads test pages, and generates Percy snapshots.
 def main()
+  puts "Phantomjs.version #{Phantomjs.version}"
   setDebuggingLevel()
   pid = launchWebServer()
   if not waitForWebServer()
