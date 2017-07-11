@@ -115,12 +115,12 @@ export class VideoInterface {
 /**
  * @interface
  */
-export class TrackingVideoInterface extends VideoInterface {
+export class VideoInterfaceWithAnalytics extends VideoInterface {
   /**
    * Should return true.
    * @return {boolean}
    */
-  isTrackingVideo() {}
+  supportsAnalytics() {}
 
   /**
    * Current playback time in seconds at time of trigger

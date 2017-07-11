@@ -967,7 +967,7 @@ class VideoEntry {
 
   /**
    * Collects a snapshot of the current video state for video analytics
-   * @param {!../video-interface.TrackingVideoInterface} video
+   * @param {!../video-interface.VideoInterfaceWithAnalytics} video
    * @return {!Promise<!../video-interface.VideoAnalyticsDetailsDef>}
    * @private
    */
@@ -997,14 +997,14 @@ class VideoEntry {
 /**
  * Asserts that a video is a tracking video
  * @param {!../video-interface.VideoInterface} video
- * @return {?../video-interface.TrackingVideoInterface}
+ * @return {?../video-interface.VideoInterfaceWithAnalytics}
  * @private visible for testing
  */
 export function assertTrackingVideo(video) {
   const trackingVideo =
-      /** @type {?../video-interface.TrackingVideoInterface} */ (video);
-  if (trackingVideo.isTrackingVideo && trackingVideo.isTrackingVideo()) {
-    return /** @type {?../video-interface.TrackingVideoInterface} */ (video);
+      /** @type {?../video-interface.VideoInterfaceWithAnalytics} */ (video);
+  if (trackingVideo.supportsAnalytics && trackingVideo.supportsAnalytics()) {
+    return trackingVideo;
   } else {
     return null;
   }
