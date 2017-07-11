@@ -269,11 +269,13 @@
   Slots spec is not implemented yet by any browser. Will use an older version via `<content>` tag.
   <slot name="slot1"></slot>
   -->
-  <content>
-    <div class="slot-fallback">
-      This is a slot fallback.
-    </div>
-  </content>
+  <slot name="slot1">
+    <content>
+      <div class="slot-fallback">
+        This is a slot fallback.
+      </div>
+    </content>
+  </slot>
 
   <main role="main">
     <article>

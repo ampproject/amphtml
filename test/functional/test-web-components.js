@@ -18,7 +18,6 @@
 import {
   ShadowDomVersion,
   isShadowDomSupported,
-  isNative,
   getShadowDomSupportedVersion,
   setShadowDomSupportedVersionForTesting,
 } from '../../src/web-components';
@@ -29,23 +28,10 @@ describe('web components', () => {
     setShadowDomSupportedVersionForTesting(undefined);
   });
 
-  it('reports when a method is browser native', () => {
-    expect(isNative(self.document.getElementById)).to.be.true;
-    expect(isNative(() => {})).to.be.false;
-  });
-
   it('should report whether native shadow dom supported', () => {
     const shadowDomV0 = !!Element.prototype.createShadowRoot;
     const shadowDomV1 = !!Element.prototype.attachShadow;
-    const nativeCEV0 = isNative(self.document.registerElement);
-    const nativeCEV1 = isNative(self
-        .Object
-        .getOwnPropertyDescriptor(self, 'customElements')
-        .get);
-
-    //TODO: Remove native CE check once WebReflection/document-register-element#96 is fixed.
-    expect(isShadowDomSupported()).to.equal(
-        (shadowDomV0 || shadowDomV1) && (nativeCEV0 || nativeCEV1));
+    expect(isShadowDomSupported()).to.equal(shadowDomV0 || shadowDomV1);
   });
 });
 
@@ -57,33 +43,30 @@ describes.realWin('Web Components spec', {}, env => {
     setShadowDomSupportedVersionForTesting(undefined);
   });
 
-  //TODO: Remove native CE check once WebReflection/document-register-element#96 is fixed.
-  if (isNative(self.document.registerElement)) {
-    describe('Shadow DOM', () => {
-      it('reports NONE when no spec is available', () => {
-        win.Element.prototype.createShadowRoot = undefined;
+  describe('Shadow DOM', () => {
+    it('reports NONE when no spec is available', () => {
+      win.Element.prototype.createShadowRoot = undefined;
+      win.Element.prototype.attachShadow = undefined;
+
+      expect(getShadowDomSupportedVersion(win.Element))
+          .to.equal(ShadowDomVersion.NONE);
+    });
+
+    it('gives preference to v1 over v0 when both specs are available', () => {
+      if (!!win.Element.prototype.createShadowRoot &&
+          !!win.Element.prototype.attachShadow) {
+        expect(getShadowDomSupportedVersion(win.Element))
+            .to.equal(ShadowDomVersion.V1);
+      }
+    });
+
+    it('reports v0 when available but v1 is not', () => {
+      if (!!win.Element.prototype.createShadowRoot) {
         win.Element.prototype.attachShadow = undefined;
 
         expect(getShadowDomSupportedVersion(win.Element))
-            .to.equal(ShadowDomVersion.NONE);
-      });
-
-      it('gives preference to v1 over v0 when both specs are available', () => {
-        if (!!win.Element.prototype.createShadowRoot &&
-            !!win.Element.prototype.attachShadow) {
-          expect(getShadowDomSupportedVersion(win.Element))
-              .to.equal(ShadowDomVersion.V1);
-        }
-      });
-
-      it('reports v0 when available but v1 is not', () => {
-        if (!!win.Element.prototype.createShadowRoot) {
-          win.Element.prototype.attachShadow = undefined;
-
-          expect(getShadowDomSupportedVersion(win.Element))
-              .to.equal(ShadowDomVersion.V0);
-        }
-      });
+            .to.equal(ShadowDomVersion.V0);
+      }
     });
-  }
+  });
 });

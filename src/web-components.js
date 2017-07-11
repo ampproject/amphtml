@@ -54,16 +54,9 @@ export function isShadowDomSupported() {
  */
 export function getShadowDomSupportedVersion(opt_elementClass) {
   if (shadowDomSupportedVersion === undefined) {
-
-    //TODO: Remove native CE check once WebReflection/document-register-element#96 is fixed.
-    if (!areNativeCustomElementsSupported()) {
-      shadowDomSupportedVersion = ShadowDomVersion.NONE;
-    } else {
-      shadowDomSupportedVersion =
-          getShadowDomVersion(opt_elementClass || Element);
-    }
+    shadowDomSupportedVersion =
+        getShadowDomVersion(opt_elementClass || Element);
   }
-
   return shadowDomSupportedVersion;
 }
 
@@ -73,24 +66,5 @@ function getShadowDomVersion(element) {
   } else if (!!element.prototype.createShadowRoot) {
     return ShadowDomVersion.V0;
   }
-
   return ShadowDomVersion.NONE;
-}
-
-function areNativeCustomElementsSupported() {
-  return isNative(self.document.registerElement) ||
-         isNative(self
-             .Object
-             .getOwnPropertyDescriptor(self, 'customElements')
-             .get);
-}
-
-/**
- * Returns `true` if the method is natively implemented by the browser
- * @visibleForTesting
- * @param {Function=} method
- * @return {boolean}
- */
-export function isNative(method) {
-  return !!method && method.toString().indexOf('[native code]') !== -1;
 }
