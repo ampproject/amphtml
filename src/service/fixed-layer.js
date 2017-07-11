@@ -309,7 +309,7 @@ export class FixedLayer {
               top: '',
               zIndex: '',
             };
-            return;
+            continue;
           }
 
           // Calculate top, assuming that it could implicitly be `auto`.
