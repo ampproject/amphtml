@@ -265,8 +265,6 @@ class AmpDailymotion extends AMP.BaseElement {
       'data-info',
     ];
 
-    let explicitParams = dict();
-
     explicitParamsAttributes.forEach(explicitParam => {
       const val = this.element.getAttribute(explicitParam);
       if (val) {
@@ -274,7 +272,7 @@ class AmpDailymotion extends AMP.BaseElement {
       }
     });
 
-    let implicitParams = getDataParamsFromAttributes(this.element);
+    const implicitParams = getDataParamsFromAttributes(this.element);
     iframeSrc = addParamsToUrl(iframeSrc, implicitParams);
 
     return iframeSrc;
