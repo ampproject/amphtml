@@ -204,6 +204,9 @@ const FALLBACK_CONTEXT_DATA = dict({
 // Need to cache iframeName as it will be potentially overwritten by
 // masterSelection, as per below.
 const iframeName = window.name;
+
+// TODO(alanorozco): Remove references to this and try to find a more suitable
+//    data structure.
 const data = getData(iframeName);
 
 window.context = data['_context'];
@@ -444,7 +447,7 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     delete data['_context'];
     manageWin(window);
     installEmbedStateListener();
-    draw3p(window, data, opt_configCallback);
+    draw3p(window, window.context.data, opt_configCallback);
 
     if (isAmpContextExperimentOn()) {
       window.context.bootstrapLoaded();
