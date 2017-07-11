@@ -62,7 +62,6 @@ import {tryParseJson} from '../../../src/json';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {extensionsFor, xhrFor} from '../../../src/services';
-import {isExperimentOn} from '../../../src/experiments';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {insertAnalyticsElement} from '../../../src/analytics';
 import {setStyles} from '../../../src/style';
@@ -282,8 +281,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // dimensions in an array.
       const dimensions = getMultiSizeDimensions(
           multiSizeDataStr,
-          Number(this.element.getAttribute('width')),
-          Number(this.element.getAttribute('height')),
+          this.size_.width,
+          this.size_.height,
           multiSizeValidation == 'true');
       sizeStr += '|' + dimensions
           .map(dimension => dimension.join('x'))
@@ -309,16 +308,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @visibileForTesting
    */
   populateAdUrlState() {
-    const width = Number(this.element.getAttribute('width'));
-    const height = Number(this.element.getAttribute('height'));
-    // If dc-use-attr-for-format experiment is on, we want to make our attribute
-    // check to be more strict.
-    const useAttributesForSize =
-        isExperimentOn(this.win, 'dc-use-attr-for-format')
-        ? !isNaN(width) && width > 0 && !isNaN(height) && height > 0
-        : width && height;
-    this.size_ = useAttributesForSize
+    // Allow for pub to override height/width via override attribute.
+    const width = Number(this.element.getAttribute('data-override-width')) ||
+      Number(this.element.getAttribute('width'));
+    const height = Number(this.element.getAttribute('data-override-height')) ||
+      Number(this.element.getAttribute('height'));
+    this.size_ = width && height
         ? {width, height}
+        // width/height could be 'auto' in which case we fallback to measured.
         : this.getIntersectionElementLayoutBox();
     this.jsonTargeting_ =
       tryParseJson(this.element.getAttribute('json')) || {};
@@ -360,10 +357,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     let size = super.extractSize(responseHeaders);
     if (size) {
       this.size_ = size;
+      this.handleResize_(size.width, size.height);
     } else {
-      size = this.size_;
+      const width = Number(this.element.getAttribute('width'));
+      const height = Number(this.element.getAttribute('height'));
+      size = width && height
+          ? {width, height}
+          // width/height could be 'auto' in which case we fallback to measured.
+          : this.getIntersectionElementLayoutBox();
     }
-    this.handleResize_(size.width, size.height);
     return size;
   }
 
@@ -436,9 +438,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     this.lifecycleReporter_.addPingsForVisibility(this.element);
 
+    // Force size of frame to match available space as min-height/width are
+    // set to 0 to ensure centering.
+    const size = this.getIntersectionElementLayoutBox();
     setStyles(dev().assertElement(this.iframe), {
-      width: `${this.size_.width}px`,
-      height: `${this.size_.height}px`,
+      width: `${size.width}px`,
+      height: `${size.height}px`,
     });
   }
 
