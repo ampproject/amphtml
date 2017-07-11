@@ -359,18 +359,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.size_ = size;
       this.handleResize_(size.width, size.height);
     } else {
-      size = this.getSlotSize_();
+      const width = Number(this.element.getAttribute('width'));
+      const height = Number(this.element.getAttribute('height'));
+      size = width && height
+          ? {width, height}
+          // width/height could be 'auto' in which case we fallback to measured.
+          : this.getIntersectionElementLayoutBox();
     }
     return size;
-  }
-
-  getSlotSize_() {
-    const width = Number(this.element.getAttribute('width'));
-    const height = Number(this.element.getAttribute('height'));
-    return width && height
-        ? {width, height}
-        // width/height could be 'auto' in which case we fallback to measured.
-        : this.getIntersectionElementLayoutBox();
   }
 
   /** @override */
