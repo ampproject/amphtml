@@ -143,6 +143,10 @@ end
 
 # Enables debugging if requested via command line.
 def setDebuggingLevel()
+  if ARGV.include? '--debug'
+    ENV['PERCY_DEBUG'] = '1'
+    ENV['PHANTOMJS_DEBUG'] = 'true'
+  end
   if ARGV.include? '--percy_debug'
     ENV['PERCY_DEBUG'] = '1'
   end
