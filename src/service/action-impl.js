@@ -257,7 +257,7 @@ export class ActionService {
    * @param {!ActionEventDef} event
    */
   addInputDetails_(event) {
-    const detail = map();
+    const detail = /** @type {!JsonObject} */ (map());
     const target = event.target;
     switch (target.tagName) {
       case 'INPUT':
@@ -265,7 +265,7 @@ export class ActionService {
         // Some <input> elements have special properties for content values.
         // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement#Properties
         if (type == 'checkbox' || type == 'radio') {
-          detail['checked'] = !!target.checked;
+          detail['checked'] = target.checked;
         } else if (type == 'range') {
           // TODO(choumx): min/max are also available on date pickers.
           detail['min'] = Number(target.min);
