@@ -80,24 +80,12 @@ const TAG = 'amp-ad-network-doubleclick-impl';
 const DOUBLECLICK_BASE_URL =
     'https://securepubads.g.doubleclick.net/gampad/ads';
 
-/** @enum {string} */
-const RTC_ERROR = {
-  XHR: 'Bad XHR Request',
-  BAD_RESPONSE: 'Bad XHR Response',
-  BAD_ENDPOINT: 'Bad RTC Endpoint',
-};
 /** milliseconds */
 /** @const {number} */
 const RTC_TIMEOUT = 1000;
 
 /** @private {?Promise<!Object<string,string>>} */
 let rtcPromise = null;
-
-let rtcResponseJson = null;
-
-let rtcConfig;
-
-let rtcTotalTime;
 
 /** @private @const {!Object<string,string>} */
 const PAGE_LEVEL_PARAMS_ = {
@@ -372,6 +360,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return Promise.all(
       [pageLevelParametersPromise, rtcRequestPromise]).then(values => {
         const pageLevelParameters = values[0];
+        const rtcTotalTime = values[1];
         const parameters = Object.assign(
             this.getBlockParameters_(), pageLevelParameters);
         if (rtcTotalTime) {
@@ -530,78 +519,80 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   executeRtc_() {
     if (rtcPromise) {
-      return this.timeoutAndMergeRtc();
+      return this.mergeRtc();
     }
     const ampRtcPageElement = document.getElementById('amp-rtc');
     if (!ampRtcPageElement) {
       return Promise.resolve();
     }
     let endpoint;
-    if (!isObject(rtcConfig = tryParseJson(ampRtcPageElement.textContent))
-    || !(endpoint = rtcConfig['endpoint']) || typeof endpoint != 'string'
-    || !isSecureUrl(endpoint)) {
+    const rtcConfig = tryParseJson(ampRtcPageElement.textContent);
+    if (!isObject(rtcConfig) || !(endpoint = rtcConfig['endpoint'])
+        || typeof endpoint != 'string' || !isSecureUrl(endpoint)) {
       user().warn(TAG, 'invalid RTC config...');
       return Promise.resolve();
     }
+    this.shouldSendRequestWithoutRtc = err => {
+      return rtcConfig['sendAdRequestOnFailure'] !== false ?
+          Promise.resolve() : Promise.reject(err);
+    };
+    let rtcTotalTime;
     const disableSWR = (
         rtcConfig['disableStaleWhileRevalidate'] === true);
     const headers = new Headers();
     headers.append('Cache-Control', 'max-age=0');
     const xhrInit = {credentials: 'include'};
     const startTime = Date.now();
-    rtcPromise = xhrFor(this.win).fetchJson(
-        endpoint, xhrInit).then(res => {
-          rtcTotalTime = rtcTotalTime || Date.now() - startTime;
-          if (!disableSWR) {
-            // Repopulate the cache.
-            xhrFor(this.win).fetchJson(endpoint, {
-              credentials: 'include',
-              headers,
-            }).catch(err => {
-              user().error(err);
-            });
-          }
-          return res;
-        });
+    rtcPromise = timerFor(window).timeoutPromise(
+        RTC_TIMEOUT,
+        xhrFor(this.win).fetchJson(
+            endpoint, xhrInit).then(res => {
+              rtcTotalTime = Date.now() - startTime;
+              if (!disableSWR) {
+                // Repopulate the cache.
+                xhrFor(this.win).fetchJson(endpoint, {
+                  credentials: 'include',
+                  headers,
+                }).catch(err => {
+                  user().error(err);
+                });
+              }
+              // Redirects and non-200 status codes are forbidden for RTC.
+              if (!!res.redirected || res.status != 200) {
+                return this.shouldSendRequestWithoutRtc();
+              }
+              return res.json().then(rtcResponse => {
+                return [rtcResponse, rtcTotalTime];
+              });
+            }));
 
-    return this.timeoutAndMergeRtc();
+    return this.mergeRtc();
   }
 
-  timeoutAndMergeRtc() {
-    return timerFor(window).timeoutPromise(RTC_TIMEOUT, rtcPromise).then(
-        res => {
+  mergeRtc() {
+    // add reasons for promise.reject
+    return rtcPromise.then(
+        r => {
+          const rtcResponse = r[0];
+          const rtcTotalTime = r[1];
           // TODO :: Need to add the time on to the ad request.
-          // Redirects and non-200 status codes are forbidden for RTC.
-          if (!!res.redirected || res.status != 200) {
-            return this.shouldSendRequestWithoutRtc();
-          }
-          // If response's json() method has already been called, reuse
-          // the results. Accessing .json() a second time will throw.
-          rtcResponseJson = rtcResponseJson || res.json();
-          return rtcResponseJson.then(rtcResponse => {
-            if (rtcResponse) {
-              if (!!rtcResponse['targeting'] ||
-                  !!rtcResponse['categoryExclusions']) {
-                this.jsonTargeting_['targeting'] = deepMerge(
-                    this.jsonTargeting_['targeting'] || {},
-                    rtcResponse['targeting'] || {});
-                this.jsonTargeting_['categoryExclusions'] = deepMerge(
-                    this.jsonTargeting_['categoryExclusions'] || {},
-                    rtcResponse['categoryExclusions'] || {});
-              }
-              return Promise.resolve();
+          if (rtcResponse) {
+            if (!!rtcResponse['targeting'] ||
+                !!rtcResponse['categoryExclusions']) {
+              this.jsonTargeting_['targeting'] = deepMerge(
+                  this.jsonTargeting_['targeting'] || {},
+                  rtcResponse['targeting'] || {});
+              this.jsonTargeting_['categoryExclusions'] = deepMerge(
+                  this.jsonTargeting_['categoryExclusions'] || {},
+                  rtcResponse['categoryExclusions'] || {});
             }
-            return this.shouldSendRequestWithoutRtc();
-          });
+            return Promise.resolve(rtcTotalTime);
+          }
+          return this.shouldSendRequestWithoutRtc();
         }).catch(err => {
           user().error(err);
-          return this.shouldSendRequestWithoutRtc();
+          return this.shouldSendRequestWithoutRtc(err);
         });
-  }
-
-  shouldSendRequestWithoutRtc() {
-    return rtcConfig['sendAdRequestOnFailure'] !== false ?
-        Promise.resolve() : Promise.reject();
   }
 
   /** @override */
@@ -776,9 +767,6 @@ export function resetSraStateForTesting() {
 /** @visibileForTesting */
 export function resetRtcStateForTesting() {
   rtcPromise = null;
-  rtcResponseJson = null;
-  rtcConfig = undefined;
-  rtcTotalTime = undefined;
 }
 
 /**

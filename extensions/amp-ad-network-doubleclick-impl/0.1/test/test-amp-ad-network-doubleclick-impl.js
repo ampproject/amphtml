@@ -993,10 +993,8 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
   describe('#RTC', () => {
     let impl;
     let xhrMock;
-    let rtcConfig;
 
-    function testSuccessfulRtc(rtcResponse, expectedValue, opt_element) {
-      element = opt_element || element;
+    function mockRtcExecution(rtcResponse, element) {
       impl = new AmpAdNetworkDoubleclickImpl(element);
       xhrMock.returns(
           Promise.resolve({
@@ -1008,10 +1006,12 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           })
       );
       impl.populateAdUrlState();
-      return impl.executeRtc_().then(() => {
-        expect(impl.jsonTargeting_).to.deep.equal(expectedValue);
-      });
+      return impl.executeRtc_();
+    }
 
+    function setRtcConfig(rtcConfigJson) {
+      const rtcConfig = document.getElementById('amp-rtc');
+      rtcConfig.innerText = JSON.stringify(rtcConfigJson);
     }
 
     beforeEach(() => {
@@ -1023,10 +1023,9 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           'type': 'doubleclick',
           'layout': 'fixed',
         });
-        rtcConfig = createElementWithAttributes(document, 'script', {
-          type: 'application/json',
-          id: 'amp-rtc',
-        });
+        const rtcConfig = createElementWithAttributes(
+            document, 'script',
+            {type: 'application/json', id: 'amp-rtc'});
         rtcConfig.innerHTML = '{'
           + '"endpoint": "https://example-publisher.com/rtc/",'
           + '"sendAdRequestOnFailure": false'
@@ -1040,7 +1039,6 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     afterEach(() => {
       impl = null;
       xhrMock = null;
-      rtcConfig = null;
       resetRtcStateForTesting();
     });
 
@@ -1051,9 +1049,12 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         targeting,
         categoryExclusions,
       };
-      return testSuccessfulRtc({
+      return mockRtcExecution({
         targeting,
-      }, jsonTargeting);
+      }, element).then(() => {
+        expect(impl.jsonTargeting_).to.deep.equal(jsonTargeting);
+      });
+      ;
     });
 
     it('should add just categoryExclusions to impl', () => {
@@ -1063,9 +1064,11 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         targeting,
         categoryExclusions,
       };
-      return testSuccessfulRtc({
+      return mockRtcExecution({
         categoryExclusions,
-      }, jsonTargeting);
+      }, element).then(() => {
+        expect(impl.jsonTargeting_).to.deep.equal(jsonTargeting);
+      });;
     });
 
     it('should add targeting and categoryExclusions to impl', () => {
@@ -1075,10 +1078,12 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         targeting,
         categoryExclusions,
       };
-      return testSuccessfulRtc({
+      return mockRtcExecution({
         targeting,
         categoryExclusions,
-      }, jsonTargeting);
+      }, element).then(() => {
+        expect(impl.jsonTargeting_).to.deep.equal(jsonTargeting);
+      });
     });
 
     it('should deep merge targeting and categoryExclusions from amp-ad', () => {
@@ -1104,7 +1109,9 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         'layout': 'fixed',
         'json': contextualTargeting,
       });
-      return testSuccessfulRtc(rtcResponse, jsonTargeting);
+      return mockRtcExecution(rtcResponse, element).then(() => {
+        expect(impl.jsonTargeting_).to.deep.equal(jsonTargeting);
+      });
     });
 
     it('should only send two RTC callouts per page', () => {
@@ -1130,7 +1137,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         'layout': 'fixed',
         'json': contextualTargeting,
       });
-      testSuccessfulRtc(rtcResponse, jsonTargeting);
+      mockRtcExecution(rtcResponse, element);
 
       contextualTargeting =
       '{"targeting": {"food": {"adults": "wine"}}}';
@@ -1149,10 +1156,12 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         'layout': 'fixed',
         'json': contextualTargeting,
       });
-      return testSuccessfulRtc(rtcResponse, jsonTargeting, element_2).then(() => {
+      return mockRtcExecution(rtcResponse, element_2).then(() => {
         expect(xhrMock).to.be.calledTwice;
       });
     });
+
+    it('should add RTC time param to ad request', () => {});
 
     it('should not send RTC if url invalid', () => {});
 
@@ -1160,14 +1169,30 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
 
     it('should send ad request on RTC failure if specified', () => {});
 
-    it('should bypass caching if specified', () => {});
+    it('should bypass caching if specified', () => {
+      setRtcConfig({
+        'endpoint': 'https://example-publisher.com/rtc/',
+        'sendAdRequestOnFailure': true,
+        'disableStaleWhileRevalidate': true,
+      });
 
-    it('should timeout slow response', () => {
-      rtcConfig = document.getElementById('amp-rtc');
-      rtcConfig.innerText = '{'
-          + '"endpoint": "https://example-publisher.com/rtc/",'
-          + '"sendAdRequestOnFailure": true'
-         + '}';
+      const targeting = {'sport': 'baseball'};
+      const categoryExclusions = {};
+      const jsonTargeting = {
+        targeting,
+        categoryExclusions,
+      };
+
+      return mockRtcExecution({targeting}, element).then(() => {
+        expect(xhrMock).to.be.calledOnce;
+      });
+    });
+
+    it('should timeout slow response, do not send without RTC', () => {
+      setRtcConfig({
+        'endpoint': 'https://example-publisher.com/rtc/',
+        'sendAdRequestOnFailure': false,
+      });
       const targeting = {'sport': 'baseball'};
       const categoryExclusions = {};
       const jsonTargeting = {
@@ -1176,8 +1201,6 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       };
 
       impl = new AmpAdNetworkDoubleclickImpl(element);
-      const shouldSendRequestWithoutRtcSpy = sandbox.spy(
-          impl, 'shouldSendRequestWithoutRtc');
 
       xhrMock.returns(
           timerFor(window).promise(1200).then(() => {
@@ -1191,7 +1214,13 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           }));
       impl.populateAdUrlState();
       return impl.executeRtc_().then(() => {
-        expect(shouldSendRequestWithoutRtcSpy).to.be.calledOnce;
+        // this then block should never run.
+        expect(true).to.be.false;
+      }).catch(err => {
+        // Have to get substring, because the error message has
+        // three 0 width blank space characters added to it
+        // automatically by the log constructor.
+        expect(err.message.substring(0, 7)).to.equal('timeout');
       });
     });
 
