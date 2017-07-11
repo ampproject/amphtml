@@ -48,7 +48,7 @@ Example:
 
 **datetime** (required)
 
-An ISO datetime. E.g. 2017-03-10T01:00:00Z.
+An ISO datetime. E.g. 2017-03-10T01:00:00Z (UTC) *or* 2017-03-09T20:00:00-05:00 (specifying timezone offset).
 
 **locale** (optional)
 
