@@ -15,17 +15,7 @@
  */
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
-import {dev} from '../../../src/log';
 import {startsWith} from '../../../src/string';
-
-/**
- * Header that will contain Cloudflare generated signature
- *
- * @type {string}
- * @private
- */
-const AMP_SIGNATURE_HEADER_ = 'X-AmpAdSignature';
 
 /**
  * GMOSSP base URL
@@ -62,26 +52,6 @@ export class AmpAdNetworkGmosspImpl extends AmpA4A {
     return this.element.getAttribute('src');
   }
 
-  /**
-   * Extract creative and signature from a GMOSSP signed response.
-   *
-   * @override
-   */
-  extractCreativeAndSignature(responseText, responseHeaders) {
-    let signature = null;
-    try {
-      if (responseHeaders.has(AMP_SIGNATURE_HEADER_)) {
-        signature =
-          base64UrlDecodeToBytes(dev().assertString(
-              responseHeaders.get(AMP_SIGNATURE_HEADER_)));
-      }
-    } finally {
-      return Promise.resolve(/** @type
-        {!../../../extensions/amp-a4a/0.1/amp-a4a.AdResponseDef} */
-        ({creative: responseText, signature})
-      );
-    }
-  }
 }
 
 AMP.registerElement('amp-ad-network-gmossp-impl',

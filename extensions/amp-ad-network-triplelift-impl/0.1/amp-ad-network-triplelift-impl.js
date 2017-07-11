@@ -15,16 +15,6 @@
  */
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
-import {dev} from '../../../src/log';
-
-/**
- * Header that will contain Cloudflare generated signature
- *
- * @type {string}
- * @private
- */
-const AMP_SIGNATURE_HEADER_ = 'X-AmpAdSignature';
 
 /**
  * TripleLift base URL
@@ -64,30 +54,6 @@ export class AmpAdNetworkTripleliftImpl extends AmpA4A {
   getAdUrl() {
     return this.element.getAttribute('src').replace(TRIPLELIFT_BASE_URL_,
         TRIPLELIFT_BASE_A4A_URL_);
-  }
-
-  /**
-   * Extract creative and signature from a Cloudflare signed response.
-   *
-   * Note: Invalid A4A content will NOT have a signature, which will
-   * automatically cause the A4A processing to fall through to the 3p ad flow.
-   *
-   * @override
-   */
-  extractCreativeAndSignature(responseText, responseHeaders) {
-    let signature = null;
-    try {
-      if (responseHeaders.has(AMP_SIGNATURE_HEADER_)) {
-        signature =
-          base64UrlDecodeToBytes(dev().assertString(
-              responseHeaders.get(AMP_SIGNATURE_HEADER_)));
-      }
-    } finally {
-      return Promise.resolve(/** @type
-        {!../../../extensions/amp-a4a/0.1/amp-a4a.AdResponseDef} */
-        ({creative: responseText, signature})
-      );
-    }
   }
 }
 
