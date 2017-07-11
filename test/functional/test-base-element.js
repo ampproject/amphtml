@@ -177,7 +177,7 @@ describe('BaseElement', () => {
       const timer = timerFor(element.win);
       target = document.createElement('div');
 
-      event1 = new Event('event1', {bubbles: false, cancelable: true})
+      event1 = new Event('event1', {bubbles: false, cancelable: true});
 
       event2 = new Event('event2', {bubbles: false, cancelable: true});
 
