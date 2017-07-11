@@ -975,7 +975,8 @@ class VideoEntry {
     return this.boundSupportsAutoplay_().then(supportsAutoplay => {
       const {width, height} = this.video.element.getLayoutBox();
       const autoplay = this.hasAutoplay && supportsAutoplay;
-      const playedTotal = video.getPlayedRanges().reduce(
+      const playedRanges = video.getPlayedRanges();
+      const playedTotal = playedRanges.reduce(
           (acc, range) => acc + range[1] - range[0], 0);
 
       return {
@@ -987,6 +988,7 @@ class VideoEntry {
         'id': video.element.id,
         'muted': this.muted_,
         'playedTotal': playedTotal,
+        'playedRangesJson': JSON.stringify(playedRanges),
         'state': this.getPlayingState(),
         'width': width,
       };

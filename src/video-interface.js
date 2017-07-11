@@ -315,6 +315,8 @@ export const VideoAnalyticsType = {
  *   duration: number,
  *   height: number,
  *   id: string,
+ *   playedRangesJson: string,
+ *   playedTotal: number,
  *   muted: boolean,
  *   state: string,
  *   width: number

@@ -259,6 +259,8 @@ export function runVideoPlayerIntegrationTests(
 
     it('should include current time, play state, etc.', function() {
       let playButton;
+      let pauseButton;
+      let timer;
 
       return getVideoPlayer(
           {
@@ -267,18 +269,27 @@ export function runVideoPlayerIntegrationTests(
           }
       ).then(r => {
         video = r.video;
+        timer = timerFor(r.video.implementation_.win);
         playButton = createButton(r, 'play');
+        pauseButton = createButton(r, 'pause');
         return listenOncePromise(video, VideoEvents.LOAD);
       }).then(() => {
         playButton.click();
+        return timer.promise(1000);
+      }).then(() => {
+        pauseButton.click();
         return listenOncePromise(video, VideoEvents.ANALYTICS);
       }).then(event => {
         const eventData = getData(event);
         const details = eventData['details'];
+        const playedRanges = JSON.parse(details.playedRangesJson);
         expect(details.autoplay).to.be.a('boolean');
         expect(details.currentTime).to.be.a('number');
         expect(details.duration).to.be.a('number');
         expect(details.height).to.be.a('number');
+        expect(details.id).to.be.a('string');
+        expect(details.playedTotal).to.be.a('number');
+        expect(playedRanges[0][0]).to.be.a('number');
         expect(details.state).to.be.a('string');
         expect(details.width).to.be.a('number');
       });
