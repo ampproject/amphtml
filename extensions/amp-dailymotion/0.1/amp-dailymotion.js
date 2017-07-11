@@ -248,17 +248,17 @@ class AmpDailymotion extends AMP.BaseElement {
        encodeURIComponent(this.videoid_ || '') + '?api=1&html=1&app=amp';
 
     const explicitParamsAttributes = [
-      'data-mute',
-      'data-endscreen-enable',
-      'data-sharing-enable',
-      'data-start',
-      'data-ui-highlight',
-      'data-ui-logo',
-      'data-info',
+      'mute',
+      'endscreen-enable',
+      'sharing-enable',
+      'start',
+      'ui-highlight',
+      'ui-logo',
+      'info',
     ];
 
     explicitParamsAttributes.forEach(explicitParam => {
-      const val = this.element.getAttribute(explicitParam);
+      const val = this.element.getAttribute(`data-${explicitParam}`);
       if (val) {
         iframeSrc = addParamToUrl(iframeSrc, explicitParam, val);
       }
