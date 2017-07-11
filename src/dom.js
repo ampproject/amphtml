@@ -736,3 +736,38 @@ export function whenUpgradedToCustomElement(element) {
 
   return element[UPGRADE_TO_CUSTOMELEMENT_PROMISE];
 }
+
+/**
+ * Replacement for `Element.requestFullscreen()` method.
+ * https://developer.mozilla.org/en-US/docs/Web/API/Element/requestFullscreen
+ * @param {Element} element
+ */
+export function fullscreenEnter(element) {
+  const requestFs = element.webkitEnterFullscreen
+   || element.webkitRequestFullScreen
+   || element.requestFullscreen
+   || element.webkitEnterFullscreen
+   || element.msRequestFullscreen
+   || element.mozRequestFullscreen
+   || element.mozRequestFullScreen;
+  if (requestFs) {
+    requestFs.call(element);
+  }
+}
+
+/**
+ * Replacement for `Document.exitFullscreen()` method.
+ * https://developer.mozilla.org/en-US/docs/Web/API/Document/exitFullscreen
+ * @param {Document} doc
+ */
+export function fullscreenExit(doc) {
+  const exitFs = doc.webkitCancelFullScreen
+  || doc.cancelFullScreen
+  || doc.webkitExitFullscreen
+  || doc.exitFullscreen
+  || doc.mozCancelFullScreen
+  || doc.msExitFullscreen;
+  if (exitFs) {
+    exitFs.call(doc);
+  }
+}
