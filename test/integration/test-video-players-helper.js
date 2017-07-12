@@ -24,7 +24,7 @@ import {
   VideoAnalyticsType,
 } from '../../src/video-interface';
 import {
-  assertTrackingVideo,
+  isTrackingVideo,
   supportsAutoplay,
 } from '../../src/service/video-manager-impl';
 import {
@@ -304,7 +304,7 @@ export function runVideoPlayerIntegrationTests(
           }
       ).then(r => {
         video = r.video;
-        if (!assertTrackingVideo(video.implementation_)) {
+        if (!isTrackingVideo(video.implementation_)) {
           this.skip();
         }
       });
