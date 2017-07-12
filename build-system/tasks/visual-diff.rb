@@ -142,12 +142,12 @@ def generateSnapshot(page, url, name, required_css, forbidden_css)
   page.visit(url)
   if required_css
     required_css.each do |css|
-      page.has_css?(css)
+      page.has_css?(css)  # Implicitly waits for the element to appear.
     end
   end
   if forbidden_css
     forbidden_css.each do |css|
-      page.has_no_css?(css)
+      page.has_no_css?(css)  # Implicitly waits for the element to disappear.
     end
   end
   Percy::Capybara.snapshot(page, name: name)
