@@ -197,7 +197,7 @@ applies to navigation URLs and click tracking URLs.
 
 | Name | Value |
 | ---- | ----- |
-| RANDOM | A random float. See [RANDOM](../spec/amp-var-substitutions.md#random). |
+| RANDOM | A random float. See [RANDOM](../../spec/amp-var-substitutions.md#random). |
 | CLICK_X | The `x` coordinate of the click in the viewport. |
 | CLICK_Y | The `y` coordinate of the click in the viewport. |
 
