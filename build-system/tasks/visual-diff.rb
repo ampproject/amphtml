@@ -107,6 +107,7 @@ end
 # - pagesToSnapshot: JSON object containing details about the pages to snapshot.
 def generateSnapshots(pagesToSnapshot)
   Percy.config.default_widths = DEFAULT_WIDTHS
+  Capybara.default_max_wait_time = 5
   server = "http://#{HOST}:#{PORT}"
   webpages = pagesToSnapshot["webpages"]
   assets_base_url = pagesToSnapshot["assets_base_url"]
@@ -151,12 +152,16 @@ def generateSnapshot(
   page.has_no_css?('.i-amphtml-loader-dot')  # Implicitly waits for page load.
   if loading_incomplete_indicators
     loading_incomplete_indicators.each do |indicator|
-      page.has_no_css?(indicator)  # Implicitly waits for element to disappear.
+      if !page.has_no_css?(indicator)  # Implicitly waits for element to disappear.
+        puts "ERROR: page still has CSS element #{indicator}"
+      end
     end
   end
   if loading_complete_indicators
     loading_complete_indicators.each do |indicator|
-      page.has_css?(indicator)  # Implicitly waits for element to appear.
+      if !page.has_css?(indicator)  # Implicitly waits for element to appear.
+        puts "ERROR: page does not yet have CSS element #{indicator}"
+      end
     end
   end
   Percy::Capybara.snapshot(page, name: name)
