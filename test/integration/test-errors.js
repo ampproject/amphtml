@@ -20,10 +20,11 @@ import {
   expectBodyToBecomeVisible,
 } from '../../testing/iframe.js';
 
-describe.configure().retryOnSaucelabs().run('error page', function() {
-  const timeout = 5000;
+/** @const {number} */
+const TIMEOUT = window.ampTestRuntimeConfig.mochaTimeout;
 
-  this.timeout(timeout);
+describe.configure().retryOnSaucelabs().run('error page', function() {
+  this.timeout(TIMEOUT);
 
   let fixture;
   beforeEach(() => {
@@ -42,13 +43,13 @@ describe.configure().retryOnSaucelabs().run('error page', function() {
       }, () => {
         return new Error('Failed to find errors. HTML\n' +
             fixture.doc.documentElement./*TEST*/innerHTML);
-      }, timeout);
+      }, TIMEOUT);
     });
   });
 
   it.configure().skipFirefox().skipEdge()
       .run('should show the body in error test', () => {
-        return expectBodyToBecomeVisible(fixture.win, timeout);
+        return expectBodyToBecomeVisible(fixture.win, TIMEOUT);
       });
 
   function shouldFail(id) {
