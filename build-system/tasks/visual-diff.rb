@@ -128,12 +128,14 @@ def generateSnapshots(pagesToSnapshot)
     webpages.each do |webpage|
       url = webpage["url"]
       name = webpage["name"]
+      forbidden_indicators = webpage["forbidden_indicators"]
       loading_incomplete_indicators = webpage["loading_incomplete_indicators"]
       loading_complete_indicators = webpage["loading_complete_indicators"]
       generateSnapshot(
           page,
           url,
           name,
+          forbidden_indicators,
           loading_incomplete_indicators,
           loading_complete_indicators)
     end
@@ -147,25 +149,41 @@ end
 # - page: Page object used by Percy for snapshotting.
 # - url: Relative URL of page to be snapshotted.
 # - name: Name of snapshot on Percy.
-# - loading_incomplete_indicators:
+# - forbidden_indicators:
 #       Array of CSS elements that must not be found in the page.
+# - loading_incomplete_indicators:
+#       Array of CSS elements that must eventually be removed from the page.
 # - loading_complete_indicators:
-#       Array of CSS elements that must be found in the page.
+#       Array of CSS elements that must eventually appear on the page.
 def generateSnapshot(
-    page, url, name, loading_incomplete_indicators, loading_complete_indicators)
+    page,
+    url,
+    name,
+    forbidden_indicators,
+    loading_incomplete_indicators,
+    loading_complete_indicators)
   page.visit(url)
   page.has_no_css?('.i-amphtml-loader-dot')  # Implicitly waits for page load.
+  if forbidden_indicators
+    forbidden_indicators.each do |indicator|
+      if page.has_css?(indicator)  # No implicit wait.
+        puts red("ERROR: ") + "page has CSS element " + cyan("#{indicator}")
+      end
+    end
+  end
   if loading_incomplete_indicators
     loading_incomplete_indicators.each do |indicator|
       if !page.has_no_css?(indicator)  # Implicitly waits for element to disappear.
-        puts red("ERROR: ") + "page still has CSS element " + cyan("#{indicator}")
+        puts red("ERROR: ") + "page still has CSS element "\
+            + cyan("#{indicator}")
       end
     end
   end
   if loading_complete_indicators
     loading_complete_indicators.each do |indicator|
       if !page.has_css?(indicator)  # Implicitly waits for element to appear.
-        puts red("ERROR: ") + "page does not yet have CSS element " + cyan("#{indicator}")
+        puts red("ERROR: ") + "page does not yet have CSS element "\
+            + cyan("#{indicator}")
       end
     end
   end

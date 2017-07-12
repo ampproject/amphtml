@@ -26,6 +26,10 @@
     {
       "url": "examples/visual-tests/font.amp.404/font.amp.html",
       "name": "Fonts 404",
+      "forbidden_indicators": [
+        ".comic-amp-font-loaded",
+        ".comic-amp-bold-font-loaded"
+      ],
       "loading_incomplete_indicators": [
         ".comic-amp-font-loading",
         ".comic-amp-bold-font-loading"
