@@ -15,7 +15,11 @@
  */
 
 import {Observable} from '../../src/observable';
-import {ampdocServiceFor} from '../../src/ampdoc';
+import {
+  ampdocServiceFor,
+  urlReplacementsForDoc,
+  viewerForDoc,
+} from '../../src/services';
 import {createIframePromise} from '../../testing/iframe';
 import {user} from '../../src/log';
 import {
@@ -38,7 +42,6 @@ import {
 import {registerServiceBuilder} from '../../src/service';
 import {setCookie} from '../../src/cookies';
 import {parseUrl} from '../../src/url';
-import {urlReplacementsForDoc, viewerForDoc} from '../../src/services';
 import * as trackPromise from '../../src/impression';
 import {stubServiceForDoc} from '../../testing/test-helper';
 

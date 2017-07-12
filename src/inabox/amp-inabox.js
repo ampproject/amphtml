@@ -20,7 +20,7 @@
 
 import '../../third_party/babel/custom-babel-helpers';
 import '../polyfills';
-import {ampdocServiceFor} from '../ampdoc';
+import {ampdocServiceFor, resourcesForDoc} from '../services';
 import {startupChunk} from '../chunk';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {installIframeMessagingClient} from './inabox-iframe-messaging-client';
@@ -46,7 +46,6 @@ import {installViewerServiceForDoc} from '../service/viewer-impl';
 import {installInaboxViewportService} from './inabox-viewport';
 import {installAnchorClickInterceptor} from '../anchor-click-interceptor';
 import {getMode} from '../mode';
-import {resourcesForDoc} from '../services';
 
 getMode(self).runtime = 'inabox';
 

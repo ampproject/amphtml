@@ -17,7 +17,7 @@
 // This must load before all other tests.
 import '../third_party/babel/custom-babel-helpers';
 import '../src/polyfills';
-import {ampdocServiceFor} from '../src/ampdoc';
+import {ampdocServiceFor, platformFor, resourcesForDoc} from '../src/services';
 import {removeElement} from '../src/dom';
 import {setReportError} from '../src/log';
 import {
@@ -27,7 +27,6 @@ import {
 } from '../src/runtime';
 import {activateChunkingForTesting} from '../src/chunk';
 import {installDocService} from '../src/service/ampdoc-impl';
-import {platformFor, resourcesForDoc} from '../src/services';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 import {
   resetAccumulatedErrorMessagesForTesting,
