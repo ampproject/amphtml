@@ -461,7 +461,6 @@ export class Viewport {
     return this.resizeObservable_.add(handler);
   }
 
-
   /**
    * Instruct the viewport to enter lightbox mode.
    * Requesting element is necessary to be able to enter lightbox mode under FIE
@@ -890,8 +889,12 @@ export class Viewport {
     this.size_ = null;  // Need to recalc.
     const newSize = this.getSize();
     this.fixedLayer_.update().then(() => {
-      this.changed_(!oldSize || oldSize.width != newSize.width, 0);
-      this.resizeObservable_.fire();
+      const widthChanged = !oldSize || oldSize.width != newSize.width;
+      this.changed_(/*relayoutAll*/widthChanged, 0);
+      const sizeChanged = widthChanged || oldSize.height != newSize.height;
+      if (sizeChanged) {
+        this.resizeObservable_.fire({relayoutAll: widthChanged});
+      }
     });
   }
 }
