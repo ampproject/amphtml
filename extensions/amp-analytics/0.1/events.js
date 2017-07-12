@@ -16,8 +16,11 @@
 
 import {CommonSignals} from '../../../src/common-signals';
 import {Observable} from '../../../src/observable';
-import {PlayingStates} from '../../../src/service/video-manager-impl';
-import {VideoAnalyticsType, VideoEvents} from '../../../src/video-interface';
+import {
+  PlayingStates,
+  VideoAnalyticsType,
+  VideoEvents,
+} from '../../../src/video-interface';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {user} from '../../../src/log';

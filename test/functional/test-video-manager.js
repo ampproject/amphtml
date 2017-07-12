@@ -17,13 +17,12 @@
 import {listenOncePromise} from '../../src/event-helper';
 import {ampdocServiceFor} from '../../src/ampdoc';
 import {isLayoutSizeDefined} from '../../src/layout';
-import {VideoEvents} from '../../src/video-interface';
+import {PlayingStates, VideoEvents} from '../../src/video-interface';
 import {videoManagerForDoc, viewerForDoc} from '../../src/services';
 import {
   installVideoManagerForDoc,
   supportsAutoplay,
   clearSupportsAutoplayCacheForTesting,
-  PlayingStates,
 } from '../../src/service/video-manager-impl';
 import {
   runVideoPlayerIntegrationTests,

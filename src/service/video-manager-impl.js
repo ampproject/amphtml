@@ -25,6 +25,7 @@ import {setStyles} from '../style';
 import {isFiniteNumber} from '../types';
 import {mapRange} from '../utils/math';
 import {
+  PlayingStates,
   VideoAnalyticsType,
   VideoAttributes,
   VideoEvents,
@@ -57,45 +58,6 @@ const VISIBILITY_PERCENT = 75;
  */
 const DOCK_SCALE = 0.6;
 const DOCK_CLASS = 'i-amphtml-dockable-video-minimizing';
-
-
-/**
- * Playing States
- *
- * Internal playing states used to distinguish between video playing on user's
- * command and videos playing automatically
- *
- * @constant {!Object<string, string>}
- */
-export const PlayingStates = {
-  /**
-   * playing_manual
-   *
-   * When the video user manually interacted with the video and the video
-   * is now playing
-   *
-   * @event playing_manual
-   */
-  PLAYING_MANUAL: 'playing_manual',
-
-  /**
-   * playing_auto
-   *
-   * When the video has autoplay and the user hasn't interacted with it yet
-   *
-   * @event playing_auto
-   */
-  PLAYING_AUTO: 'playing_auto',
-
-  /**
-   * paused
-   *
-   * When the video is paused.
-   *
-   * @event paused
-   */
-  PAUSED: 'paused',
-};
 
 /**
 * Minimization Positions
