@@ -16,10 +16,12 @@
 
 import {isObject} from '../../../src/types';
 import {dev, user} from '../../../src/log';
-import {cidForDoc} from '../../../src/services';
-import {viewerForDoc} from '../../../src/services';
-import {userNotificationManagerFor} from '../../../src/services';
-import {cryptoFor} from '../../../src/crypto';
+import {
+  cidForDoc,
+  cryptoFor,
+  viewerForDoc,
+  userNotificationManagerFor,
+} from '../../../src/services';
 
 const ATTR_PREFIX = 'amp-x-';
 const nameValidator = /^[\w-]+$/;

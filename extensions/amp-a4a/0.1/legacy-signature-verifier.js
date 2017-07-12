@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {cryptoFor} from '../../../src/crypto';
+import {cryptoFor} from '../../../src/services';
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 
 /**
