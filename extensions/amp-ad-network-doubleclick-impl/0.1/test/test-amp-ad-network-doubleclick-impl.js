@@ -502,7 +502,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
               expect(url).to.match(/sz=[0-9]+x[0-9]+/));
         });
 
-    it('should add RTC param if RTC is used', () => {
+    it('should add RTC params if RTC is used', () => {
       const rtcConfig = createElementWithAttributes(
           document, 'script',
           {type: 'application/json', id: 'amp-rtc'});
@@ -525,6 +525,8 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       new AmpAd(element).upgradeCallback();
       return impl.getAdUrl().then(url => {
         expect(url).to.match(/(\?|&)artc=[0-9]+(&|$)/);
+        expect(url).to.match(
+            /(\?|&)ard=https%3A%2F%2Fexample-publisher.com%2Frtc%2F/);
       });
 
     });

@@ -90,8 +90,8 @@ const SEND_WITHOUT_RTC = 'send_without_rtc';
 /** @private {?Promise<!Object<string,string>>} */
 let rtcPromise = null;
 
-/** @private {boolean|string} */
-let sendAdRequestOnRtcFailure = null;
+/** @private {Object} */
+let rtcConfig = null;
 
 /** @private @const {!Object<string,string>} */
 const PAGE_LEVEL_PARAMS_ = {
@@ -369,8 +369,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         const rtcTotalTime = values[1];
         const parameters = Object.assign(
             this.getBlockParameters_(), pageLevelParameters);
-        if (rtcTotalTime) {
+        if (rtcTotalTime && rtcConfig && rtcConfig['endpoint']) {
           parameters['artc'] = rtcTotalTime;
+          parameters['ard'] = rtcConfig['endpoint']
         }
         return googleAdUrl(
             this, DOUBLECLICK_BASE_URL, startTime, parameters, ['108809080']);
@@ -534,7 +535,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       return Promise.resolve();
     }
     let endpoint;
-    const rtcConfig = tryParseJson(ampRtcPageElement.textContent);
+    rtcConfig = tryParseJson(ampRtcPageElement.textContent);
     if (!isObject(rtcConfig) || !(endpoint = rtcConfig['endpoint'])
         || typeof endpoint != 'string' || !isSecureUrl(endpoint)) {
       user().warn(
@@ -542,9 +543,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           `invalid RTC config: ${ampRtcPageElement.textContent}`);
       return Promise.resolve();
     }
-
-    sendAdRequestOnRtcFailure = rtcConfig['sendAdRequestOnFailure'];
-
     let rtcTotalTime;
     const disableSWR = (
         rtcConfig['disableStaleWhileRevalidate'] === true);
@@ -631,8 +629,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (err && err.message.match(/^timeout/)) {
       timeParam = -1;
     }
-    return (sendAdRequestOnRtcFailure !== false &&
-        sendAdRequestOnRtcFailure != 'false') ?
+    return (rtcConfig['sendAdRequestOnFailure'] !== false &&
+        rtcConfig['sendAdRequestOnFailure'] != 'false') ?
         Promise.resolve(timeParam) : Promise.reject(err);
   };
 
