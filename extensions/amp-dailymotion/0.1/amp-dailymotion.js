@@ -26,7 +26,7 @@ import {videoManagerForDoc} from '../../../src/services';
 import {
     parseQueryString,
     addParamsToUrl,
-    addParamToUrl
+    addParamToUrl,
 } from '../../../src/url';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 
