@@ -76,6 +76,8 @@ export function twitter(global, data) {
         // Not a deleted tweet
         twitterWidgetSandbox = el;
         resize(twitterWidgetSandbox);
+      } else {
+        global.context.noContentAvailable();
       }
     });
   });
