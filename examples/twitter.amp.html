@@ -48,11 +48,31 @@
 
   <h2>Intentionally non-existing-tweet</h2>
   <amp-twitter width=390 height=330
-      layout="responsive"
+      layout="fixed"
       data-tweetid="1111111111111641653602164060160"
       data-cards="hidden">
       <blockquote placeholder class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">A new approach to web performance.<br><br>Today we are starting the AMP Project to make mobile web content fast again.<a href="https://t.co/b091YOzo5s">https://t.co/b091YOzo5s</a></p>&mdash; Malte Ubl (@cramforce) <a href="https://twitter.com/cramforce/status/651762967147483136">October 7, 2015</a></blockquote>
   </amp-twitter>
 
+  <h2>Deleted tweet</h2>
+
+  <amp-twitter width=390 height=330
+      layout="fixed"
+      data-tweetid="882818033403789316"
+      data-cards="hidden">
+      <blockquote placeholder class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">AMP test</p>&mdash; Gharbi Wassim (@wassgha) <a href="https://twitter.com/wassgha/status/882818033403789316">July 6, 2017</a></blockquote>
+  </amp-twitter>
+
+  <h2>Deleted tweet (with fallback)</h2>
+
+  <amp-twitter width=390 height=330
+      layout="fixed"
+      data-tweetid="882818033403789316"
+      data-cards="hidden">
+      <blockquote placeholder class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">AMP test</p>&mdash; Gharbi Wassim (@wassgha) <a href="https://twitter.com/wassgha/status/882818033403789316">July 6, 2017</a></blockquote>
+      <div fallback>
+        An error occurred while retrieving the tweet. It might have been deleted.
+      </div>
+  </amp-twitter>
 </body>
 </html>
