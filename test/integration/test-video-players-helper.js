@@ -346,7 +346,9 @@ export function runVideoPlayerIntegrationTests(
       });
     });
 
-    describe('without-autoplay', () => {
+    describe('without-autoplay', function() {
+      this.skip();
+
       it('should minimize when out of viewport', function() {
         let viewport;
         let video;
