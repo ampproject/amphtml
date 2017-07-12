@@ -995,7 +995,20 @@ describes.fakeWin('Core events', {amp: true}, env => {
     expect(action.trigger).to.have.been.calledWith(element, 'change', event);
   });
 
-  it('should trigger change event with details for whitelisted inputs', () => {
+  it('should trigger change event for <input type="checkbox"> elements', () => {
+    const handler = window.document.addEventListener.getCall(3).args[1];
+    const element = document.createElement('input');
+    element.setAttribute('type', 'checkbox');
+    element.checked = true;
+    const event = {target: element};
+    handler(event);
+    expect(action.trigger).to.have.been.calledWith(
+        element,
+        'change',
+        sinon.match(object => object.detail.checked));
+  });
+
+  it('should trigger change event for <input type="range"> elements', () => {
     const handler = window.document.addEventListener.getCall(3).args[1];
     const element = document.createElement('input');
     element.setAttribute('type', 'range');
@@ -1007,14 +1020,26 @@ describes.fakeWin('Core events', {amp: true}, env => {
     expect(action.trigger).to.have.been.calledWith(
         element,
         'change',
-        // Event doesn't seem to play well with sinon matchers
-        sinon.match(object => {
-          const detail = object.detail;
+        sinon.match(e => {
+          const detail = e.detail;
           return detail.min == 0 && detail.max == 10 && detail.value == 5;
         }));
   });
 
-  it('should trigger change event with details for select elements', () => {
+  it('should trigger change event for <input type="search"> elements', () => {
+    const handler = window.document.addEventListener.getCall(3).args[1];
+    const element = document.createElement('input');
+    element.setAttribute('type', 'search');
+    element.value = 'foo';
+    const event = {target: element};
+    handler(event);
+    expect(action.trigger).to.have.been.calledWith(
+        element,
+        'change',
+        sinon.match(e => e.detail.value == 'foo'));
+  });
+
+  it('should trigger change event with details for <select> elements', () => {
     const handler = window.document.addEventListener.getCall(3).args[1];
     const element = document.createElement('select');
     element.innerHTML =
