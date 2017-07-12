@@ -29,58 +29,10 @@ const PlayerStates = {
   PAUSED: 2,
 };
 
-// Character used for play icon.
-const playChar = '\u25b6\ufe0e';
-
-// Character used for pause icons.
-const pauseChars = '\u258c\ufe0e\u258c\ufe0e';
-
-// Character used for seek dot on progress bar.
-const seekDot = '\u25cf\ufe0e';
-
-// Characters used for fullscreen icon.
-const fullscreenChars = '\u25ad\ufe0e';
-
 // Div wrapping our entire DOM.
 let wrapperDiv;
 
-// Div containing big play button. Rendered before player starts.
-let bigPlayDiv;
-
-// Div contianing play button. Double-nested for alignment.
-let playButtonDiv;
-
-// Node containing play button characters.
-let bigPlayButtonNode;
-
-// Div containing player controls.
-let controlsDiv;
-
-// Div containing play or pause button.
-let playPauseDiv;
-
-// Node contianing play or pause characters.
-let playPauseNode;
-
-// Div containing player time.
-let timeDiv;
-
-// Node containing the player time text.
-let timeNode;
-
-// Wrapper for progress bar DOM elements.
-let progressBarWrapperDiv;
-
-// Line for progress bar.
-let progressLine;
-
-// Line for total time in progress bar.
-let totalTimeLine;
-
-// Div containing the marker for the progress.
-let progressMarkerDiv;
-
-// Div for fullscreen icon.
+// Div for our custom fullscreen button.
 let fullscreenDiv;
 
 // Div for ad container.
@@ -144,7 +96,7 @@ let adsActive;
 // Flag tracking if playback has started.
 let playbackStarted;
 
-// Timer used to hide controls after user action.
+// Timeout used to hide controls after user action.
 let hideControlsTimeout;
 
 // Flag tracking if we need to mute the ads manager once it loads. Used for
@@ -160,6 +112,27 @@ let adsManagerWidthOnLoad, adsManagerHeightOnLoad;
 // Initial video dimensions.
 let videoWidth, videoHeight;
 
+// Bound on click listener. Stored so we can remove it after first click.
+let boundOnClickListener;
+
+// The amount of time, in ms, we should wait before hiding controls after the
+// user taps on the video player on mobile.
+let hideControlsTimes = {
+  'afterPreroll': null,
+  'onInteract': null,
+  'afterExitFullscreen': null,
+  'afterMidRoll': null
+};
+
+// Whether we are on a mobile device.
+let onMobile;
+
+// Wether or not the most recently played ad was the pre-roll ad.
+let lastAdWasPreroll;
+
+// Bound showControls method used for show controls on desktop fullscreen.
+let boundShowControlsForFullscreen;
+
 /**
  * Loads the IMA SDK library.
  */
@@ -172,9 +145,25 @@ function getIma(global, cb) {
  * The business.
  */
 export function imaVideo(global, data) {
-
   videoWidth = global./*OK*/innerWidth;
   videoHeight = global./*OK*/innerHeight;
+
+  // Hides the fullscreen and remote playback buttons on iOS.
+  var css = 
+      'video::-webkit-media-controls-fullscreen-button,' +
+      'video::-webkit-media-controls-wireless-playback-picker-button' +
+      '{' +
+      '  display: none !important;' +
+      '}',
+  head = document.head || document.getElementsByTagName('head')[0],
+  style = document.createElement('style');
+  style.type = 'text/css';
+  if (style.styleSheet){
+    style.styleSheet.cssText = css;
+  } else {
+    style.appendChild(document.createTextNode(css));
+  }
+  head.appendChild(style);
 
   // Wraps *everything*.
   wrapperDiv = global.document.createElement('div');
@@ -183,116 +172,15 @@ export function imaVideo(global, data) {
   setStyle(wrapperDiv, 'height', videoHeight + 'px');
   setStyle(wrapperDiv, 'background-color', 'black');
 
-  // Wraps the big play button we show before video start.
-  bigPlayDiv = global.document.createElement('div');
-  bigPlayDiv.id = 'ima-big-play';
-  setStyle(bigPlayDiv, 'position', 'relative');
-  setStyle(bigPlayDiv, 'width', videoWidth + 'px');
-  setStyle(bigPlayDiv, 'height', videoHeight + 'px');
-  setStyle(bigPlayDiv, 'display', 'table-cell');
-  setStyle(bigPlayDiv, 'vertical-align', 'middle');
-  setStyle(bigPlayDiv, 'text-align', 'center');
-  setStyle(bigPlayDiv, 'cursor', 'pointer');
-  // Inner div so we can v and h align.
-  playButtonDiv = global.document.createElement('div');
-  playButtonDiv.id = 'ima-play-button';
-  setStyle(playButtonDiv, 'font-size', '10em');
-  setStyle(playButtonDiv, 'color', 'white');
-  setStyle(playButtonDiv, 'display', 'inline-block');
-  setStyle(playButtonDiv, 'line-height', '0.5');
-  // Play button text node.
-  bigPlayButtonNode = global.document.createTextNode(playChar);
-  playButtonDiv.appendChild(bigPlayButtonNode);
-  bigPlayDiv.appendChild(playButtonDiv);
-
-  // Video controls.
-  controlsDiv = global.document.createElement('div');
-  controlsDiv.id = 'ima-controls';
-  setStyle(controlsDiv, 'position', 'absolute');
-  setStyle(controlsDiv, 'bottom', '0px');
-  setStyle(controlsDiv, 'width', '100%');
-  setStyle(controlsDiv, 'height', '30px');
-  setStyle(controlsDiv, 'background-color', '#EEEEEE');
-  setStyle(controlsDiv, 'color', '#333333');
-  setStyle(controlsDiv, 'display', 'none');
-  setStyle(controlsDiv, '-webkit-touch-callout', 'none');
-  setStyle(controlsDiv, '-webkit-user-select', 'none');
-  setStyle(controlsDiv, '-khtml-user-select', 'none');
-  setStyle(controlsDiv, '-moz-user-select', 'none');
-  setStyle(controlsDiv, '-ms-user-select', 'none');
-  setStyle(controlsDiv, 'user-select', 'none');
-  // Play button
-  playPauseDiv = global.document.createElement('div');
-  playPauseDiv.id = 'ima-play-pause';
-  setStyle(playPauseDiv, 'width', '30px');
-  setStyle(playPauseDiv, 'height', '30px');
-  setStyle(playPauseDiv, 'margin-left', '10px');
-  setStyle(playPauseDiv, 'font-size', '1.25em');
-  setStyle(playPauseDiv, 'float', 'left');
-  setStyle(playPauseDiv, 'cursor', 'pointer');
-  playPauseNode = global.document.createTextNode(playChar);
-  playPauseDiv.appendChild(playPauseNode);
-  controlsDiv.appendChild(playPauseDiv);
-  // Current time and duration.
-  timeDiv = global.document.createElement('div');
-  timeDiv.id = 'ima-time';
-  setStyle(timeDiv, 'width', '120px');
-  setStyle(timeDiv, 'height', '30px');
-  setStyle(timeDiv, 'line-height', '30px');
-  setStyle(timeDiv, 'float', 'left');
-  setStyle(timeDiv, 'text-align', 'center');
-  timeNode = global.document.createTextNode('00:00 / 00:00');
-  timeDiv.appendChild(timeNode);
-  controlsDiv.appendChild(timeDiv);
-  // Progress bar.
-  progressBarWrapperDiv = global.document.createElement('div');
-  progressBarWrapperDiv.id = 'ima-progress-wrapper';
-  setStyle(progressBarWrapperDiv, 'height', '30px');
-  setStyle(progressBarWrapperDiv, 'position', 'absolute');
-  setStyle(progressBarWrapperDiv, 'left', '160px');
-  setStyle(progressBarWrapperDiv, 'right', '50px');
-  progressLine = global.document.createElement('div');
-  progressLine.id = 'progress-line';
-  setStyle(progressLine, 'background-color', '#00BBFF');
-  setStyle(progressLine, 'height', '2px');
-  setStyle(progressLine, 'margin-top', '14px');
-  setStyle(progressLine, 'width', '0%');
-  setStyle(progressLine, 'float', 'left');
-  totalTimeLine = global.document.createElement('div');
-  totalTimeLine.id = 'total-time-line';
-  setStyle(totalTimeLine, 'background-color', '#333333');
-  setStyle(totalTimeLine, 'height', '2px');
-  setStyle(totalTimeLine, 'width', '100%');
-  setStyle(totalTimeLine, 'margin-top', '14px');
-  progressMarkerDiv = global.document.createElement('div');
-  progressMarkerDiv.id = 'ima-progress-marker';
-  setStyle(progressMarkerDiv, 'color', '#00BBFF');
-  setStyle(progressMarkerDiv, 'height', '30px');
-  setStyle(progressMarkerDiv, 'position', 'absolute');
-  setStyle(progressMarkerDiv, 'font-size', '2em');
-  setStyle(progressMarkerDiv, 'margin-top', '-5px');
-  setStyle(progressMarkerDiv, 'left', '-1%');
-  setStyle(progressMarkerDiv, 'cursor', 'default');
-  progressMarkerDiv.appendChild(global.document.createTextNode(seekDot));
-  progressBarWrapperDiv.appendChild(progressLine);
-  progressBarWrapperDiv.appendChild(progressMarkerDiv);
-  progressBarWrapperDiv.appendChild(totalTimeLine);
-  controlsDiv.appendChild(progressBarWrapperDiv);
-  // Fullscreen button
   fullscreenDiv = global.document.createElement('div');
-  fullscreenDiv.id = 'ima-fullscreen';
+  fullscreenDiv.id = 'fullscreen';
+  setStyle(fullscreenDiv, 'display', 'none');
+  setStyle(fullscreenDiv, 'width', '50px');
+  setStyle(fullscreenDiv, 'height', '50px');
+  setStyle(fullscreenDiv, 'background-color', 'red');
   setStyle(fullscreenDiv, 'position', 'absolute');
-  setStyle(fullscreenDiv, 'bottom', '0px');
-  setStyle(fullscreenDiv, 'right', '10px');
-  setStyle(fullscreenDiv, 'width', '30px');
-  setStyle(fullscreenDiv, 'height', '30px');
-  setStyle(fullscreenDiv, 'font-size', '1.25em');
-  setStyle(fullscreenDiv, 'cursor', 'pointer');
-  setStyle(fullscreenDiv, 'text-align', 'center');
-  setStyle(fullscreenDiv, 'font-weight', 'bold');
-  setStyle(fullscreenDiv, 'line-height', '1.4em');
-  fullscreenDiv.appendChild(global.document.createTextNode(fullscreenChars));
-  controlsDiv.appendChild(fullscreenDiv);
+  setStyle(fullscreenDiv, 'top', '5px');
+  setStyle(fullscreenDiv, 'left', '5px');
 
   // Ad container.
   adContainerDiv = global.document.createElement('div');
@@ -319,6 +207,8 @@ export function imaVideo(global, data) {
   setStyle(videoPlayer, 'background-color', 'black');
   videoPlayer.setAttribute('poster', data.poster);
   videoPlayer.setAttribute('playsinline', true);
+  videoPlayer.setAttribute('controls', true);
+
   if (data.src) {
     const sourceElement = document.createElement('source');
     sourceElement.setAttribute('src', data.src);
@@ -333,9 +223,8 @@ export function imaVideo(global, data) {
 
   contentDiv.appendChild(videoPlayer);
   wrapperDiv.appendChild(contentDiv);
+  wrapperDiv.appendChild(fullscreenDiv);
   wrapperDiv.appendChild(adContainerDiv);
-  wrapperDiv.appendChild(controlsDiv);
-  wrapperDiv.appendChild(bigPlayDiv);
   global.document.getElementById('c').appendChild(wrapperDiv);
 
   window.addEventListener('message', onMessage.bind(null, global));
@@ -350,23 +239,10 @@ export function imaVideo(global, data) {
     playbackStarted = false;
     nativeFullscreen = false;
 
-    interactEvent = 'click';
-    mouseDownEvent = 'mousedown';
-    mouseMoveEvent = 'mousemove';
-    mouseUpEvent = 'mouseup';
-    if (navigator.userAgent.match(/iPhone/i) ||
-        navigator.userAgent.match(/iPad/i) ||
-        navigator.userAgent.match(/Android/i)) {
-      interactEvent = 'touchend';
-      mouseDownEvent = 'touchstart';
-      mouseMoveEvent = 'touchmove';
-      mouseUpEvent = 'touchend';
-    }
-    bigPlayDiv.addEventListener(interactEvent, onClick.bind(null, global));
-    playPauseDiv.addEventListener(interactEvent, onPlayPauseClick);
-    progressBarWrapperDiv.addEventListener(mouseDownEvent, onProgressClick);
-    fullscreenDiv.addEventListener(interactEvent,
-        onFullscreenClick.bind(null, global));
+    buildDeviceProfile();
+    boundOnClickListener = onClick.bind(null, global);
+    wrapperDiv.addEventListener(interactEvent, boundOnClickListener);
+    fullscreenDiv.addEventListener(interactEvent, onFullscreenClick);
 
     const fullScreenEvents = [
       'fullscreenchange',
@@ -407,6 +283,67 @@ export function imaVideo(global, data) {
   });
 }
 
+
+/**
+ * Sets platform-specific events and timeout durations based on the current
+ * platform.
+ */
+function buildDeviceProfile() {
+  if (navigator.userAgent.match(/iPhone/i)) {
+    interactEvent = 'touchend';
+    controlsEvent = 'touchend';
+    mouseDownEvent = 'touchstart';
+    mouseMoveEvent = 'touchmove';
+    mouseUpEvent = 'touchend';
+    onMobile = true;
+    hideControlsTimes.afterPreroll = 500;
+    hideControlsTimes.onInteract = 4000;
+    hideControlsTimes.afterExitFullscreen = 4000;
+    hideControlsTimes.afterMidRoll = 0;
+  } else if (navigator.userAgent.match(/iPad/i)) {
+    interactEvent = 'touchend';
+    controlsEvent = 'touchend';
+    mouseDownEvent = 'touchstart';
+    mouseMoveEvent = 'touchmove';
+    mouseUpEvent = 'touchend';
+    onMobile = true;
+    hideControlsTimes.afterPreroll = 4000;
+    hideControlsTimes.onInteract = 4000;
+    hideControlsTimes.afterExitFullscreen = 4000;
+    hideControlsTimes.afterMidRoll = 0;
+  } else if (navigator.userAgent.match(/Android/i)) {
+    interactEvent = 'touchend';
+    controlsEvent = 'touchend';
+    mouseDownEvent = 'touchstart';
+    mouseMoveEvent = 'touchmove';
+    mouseUpEvent = 'touchend';
+    onMobile = true;
+    hideControlsTimes.afterPreroll = 500;
+    hideControlsTimes.onInteract = 3000;
+    hideControlsTimes.afterExitFullscreen = 500;
+    hideControlsTimes.afterMidRoll = 500;
+    // Hide fullscreen, download, and remote playback buttons on Android chrome.
+    videoPlayer.setAttribute(
+        'controlsList', 'nodownload nofullscreen noremoteplayback');
+  } else {
+    interactEvent = 'click';
+    controlsEvent = 'mouseover';
+    mouseDownEvent = 'mousedown';
+    mouseMoveEvent = 'mousemove';
+    mouseUpEvent = 'mouseup';
+    onMobile = false;
+    hideControlsTimes.afterPreroll = 500;
+    // Controls are hidden on mouseout for interact events.
+    hideControlsTimes.onInteract = null;
+    hideControlsTimes.afterExitFullscreen = 3000;
+    hideControlsTimes.afterMidRoll = 500;
+    // Hide fullscreen, download, and remote playback buttons on Chrome.
+    videoPlayer.setAttribute(
+        'controlsList', 'nodownload nofullscreen noremoteplayback');
+    boundShowControlsForFullscreen = showControls.bind(null, 3000);
+  }
+}
+
 function htmlToElement(html) {
   const template = document.createElement('template');
   template./*OK*/innerHTML = html;
@@ -420,9 +357,7 @@ function htmlToElement(html) {
  */
 export function onClick(global) {
   playbackStarted = true;
-  uiTicker = setInterval(uiTickerClick, 500);
-  bigPlayDiv.removeEventListener(interactEvent, onClick);
-  setStyle(bigPlayDiv, 'display', 'none');
+  wrapperDiv.removeEventListener(interactEvent, boundOnClickListener);
   adDisplayContainer.initialize();
   videoPlayer.load();
   playAds(global);
@@ -440,19 +375,32 @@ export function playAds(global) {
     try {
       adsManager.init(
           videoWidth, videoHeight, global.google.ima.ViewMode.NORMAL);
-      window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
       adsManager.start();
+      onPlaybackStarted();
     } catch (adError) {
-      window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
       playVideo();
+      onPlaybackStarted();
     }
   } else if (!adRequestFailed) {
     // Ad request did not yet resolve but also did not yet fail.
     setTimeout(playAds.bind(null, global), 250);
   } else {
     // Ad request failed.
-    window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
     playVideo();
+    onPlaybackStarted();
+  }
+}
+
+/**
+ * Called when playback of ads or content has first started.
+ */
+function onPlaybackStarted() {
+  window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
+  wrapperDiv.addEventListener(controlsEvent, onInteractForControls);
+  if (!onMobile) {
+    // For desktop, add mouseout listener to hide controls.
+    wrapperDiv.addEventListener(
+        'mouseout', () => { setTimeout(hideControls, 500) });
   }
 }
 
@@ -487,6 +435,9 @@ export function onAdsManagerLoaded(global, adsManagerLoadedEvent) {
   adsManager.addEventListener(
       global.google.ima.AdEvent.Type.CONTENT_RESUME_REQUESTED,
       onContentResumeRequested);
+  adsManager.addEventListener(
+      global.google.ima.AdEvent.Type.STARTED,
+      onAdStarted);
   if (muteAdsManagerOnLoaded) {
     adsManager.setVolume(0);
   }
@@ -530,11 +481,11 @@ export function onContentPauseRequested(global) {
     adsManagerHeightOnLoad = null;
   }
   adsActive = true;
-  videoPlayer.removeEventListener(interactEvent, showControls);
+  videoPlayer.removeAttribute('controls');
   setStyle(adContainerDiv, 'display', 'block');
   videoPlayer.removeEventListener('ended', onContentEnded);
-  hideControls();
   videoPlayer.pause();
+  hideControls();
 }
 
 /**
@@ -544,136 +495,33 @@ export function onContentPauseRequested(global) {
  */
 export function onContentResumeRequested() {
   adsActive = false;
-  videoPlayer.addEventListener(interactEvent, showControls);
+  videoPlayer.setAttribute('controls', true);
   if (!contentComplete) {
     // CONTENT_RESUME will fire after post-rolls as well, and we don't want to
     // resume content in that case.
     videoPlayer.addEventListener('ended', onContentEnded);
     playVideo();
+    // Show fullscreen control temporarily, to align with native controls.
+    let controlsTimeout;
+    if (lastAdWasPreroll) {
+      controlsTimeout = hideControlsTimes.afterPreroll;
+      lastAdWasPreroll = false; 
+    } else {
+      controlsTimeout = hideControlsTimes.afterMidRoll;
+    }
+    showControls(controlsTimeout);
   }
 }
 
 /**
- * Called when our ui timer goes off. Updates the player UI.
+ * Called each time a new ad starts.
  */
-function uiTickerClick() {
-  updateUi(videoPlayer.currentTime, videoPlayer.duration);
-}
-
-/**
- * Updates the video player UI.
- *
- * @visibleForTesting
- */
-export function updateUi(currentTime, duration) {
-  timeNode.textContent =
-      formatTime(currentTime) + ' / ' + formatTime(duration);
-  const progressPercent =
-      Math.floor((currentTime / duration) * 100);
-  setStyle(progressLine, 'width', progressPercent + '%');
-  setStyle(progressMarkerDiv, 'left', (progressPercent - 1) + '%');
-}
-
-/**
- * Formats an int in seconds into a string of the format X:XX:XX. Omits the
- * hour if the content is less than one hour.
- *
- * @visibleForTesting
- */
-export function formatTime(time) {
-  if (isNaN(time)) {
-    return '00:00';
-  }
-  let timeString = '';
-  const hours = Math.floor(time / 3600);
-  if (hours > 0) {
-    timeString += hours + ':';
-  }
-  const minutes = Math.floor((time % 3600) / 60);
-  timeString += zeroPad(minutes) + ':';
-  const seconds = Math.floor(time - ((hours * 3600) + (minutes * 60)));
-  timeString += zeroPad(seconds);
-  return timeString;
-}
-
-/**
- * Zero-pads the provided int and returns a string of length 2.
- *
- * @visibleForTesting
- */
-export function zeroPad(input) {
-  input = String(input);
-  return input.length == 1 ? '0' + input : input;
-}
-
-/**
- * Detects clicks on the progress bar.
- */
-function onProgressClick(event) {
-  // Call this logic once to make sure we still seek if the user just clicks
-  // instead of clicking and dragging.
-  clearInterval(hideControlsTimeout);
-  onProgressMove(event);
-  clearInterval(uiTicker);
-  document.addEventListener(mouseMoveEvent, onProgressMove);
-  document.addEventListener(mouseUpEvent, onProgressClickEnd);
-}
-
-/**
- * Detects the end of interaction on the progress bar.
- */
-function onProgressClickEnd() {
-  document.removeEventListener(mouseMoveEvent, onProgressMove);
-  document.removeEventListener(mouseUpEvent, onProgressClickEnd);
-  uiTicker = setInterval(uiTickerClick, 500);
-  videoPlayer.currentTime = videoPlayer.duration * seekPercent;
-  // Reset hide controls timeout.
-  showControls();
-}
-
-/**
- * Detects when the user clicks and drags on the progress bar.
- */
-function onProgressMove(event) {
-  const progressWrapperPosition = getPagePosition(progressBarWrapperDiv);
-  const progressListStart = progressWrapperPosition.x;
-  const progressListWidth = progressBarWrapperDiv./*OK*/offsetWidth;
-
-  // Handle Android Chrome touch events.
-  const eventX = event.clientX || event.touches[0].pageX;
-
-  seekPercent = (eventX - progressListStart) / progressListWidth;
-  if (seekPercent < 0) {
-    seekPercent = 0;
-  } else if (seekPercent > 1) {
-    seekPercent = 1;
-  }
-  updateUi(videoPlayer.duration * seekPercent, videoPlayer.duration);
-}
-
-/**
- * Returns the x,y coordinates of the given element relative to the window.
- */
-function getPagePosition(el) {
-  let lx, ly;
-  for (lx = 0, ly = 0;
-      el != null;
-      lx += el./*OK*/offsetLeft, ly += el./*OK*/offsetTop,
-          el = el./*OK*/offsetParent)
-    {};
-  return {x: lx,y: ly};
-}
-
-/**
- * Called when the user clicks on the play / pause button.
- *
- * @visibleForTesting
- */
-export function onPlayPauseClick() {
-  if (playerState == PlayerStates.PLAYING) {
-    pauseVideo(null);
-  } else {
-    playVideo();
+function onAdStarted(adEvent) {
+  if (adEvent.getAd().getAdPodInfo().getTimeOffset() == 0) {
+    // Track if we just played the pre-roll, because some platforms have a
+    // different controls timeout after a pre-roll than they do after a
+    // mid-roll.
+    lastAdWasPreroll = true;
   }
 }
 
@@ -685,10 +533,6 @@ export function onPlayPauseClick() {
 export function playVideo() {
   setStyle(adContainerDiv, 'display', 'none');
   playerState = PlayerStates.PLAYING;
-  // Kick off the hide controls timer.
-  showControls();
-  setStyle(playPauseDiv, 'line-height', '1.4em');
-  playPauseNode.textContent = pauseChars;
   window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
   videoPlayer.play();
 }
@@ -701,17 +545,66 @@ export function playVideo() {
 export function pauseVideo(event) {
   videoPlayer.pause();
   playerState = PlayerStates.PAUSED;
-  // Show controls and keep them there because we're paused.
-  clearInterval(hideControlsTimeout);
-  if (!adsActive) {
-    showControls();
-  }
-  playPauseNode.textContent = playChar;
-  setStyle(playPauseDiv, 'line-height', '');;
   window.parent./*OK*/postMessage({event: VideoEvents.PAUSE}, '*');
-  if (event && event.type == 'webkitendfullscreen') {
-    // Video was paused because we exited fullscreen.
-    videoPlayer.removeEventListener('webkitendfullscreen', pauseVideo);
+}
+
+/**
+ * Handles clicks on the wrapper div to show the fullscreen button.
+ */
+function onInteractForControls() {
+  if (!adsActive && !nativeFullscreen) {
+    showControls(hideControlsTimes.onInteract);
+  }
+}
+
+/**
+ * Shows the controls and sets a timeout for hiding them. Passing a timeout of
+ * 0 will hide the controls.
+ *
+ * @param {opt_number} timeout If provided, how long to wait before hiding the
+ *     controls. If 0, controls will be hidden instead of shown.If not provided,
+ *     controls will show and will not auto-hide based on a timeout.
+ */
+function showControls(timeout) {
+  if (hideControlsTimeout) {
+    // Clear existing ticking timeout waiting to hide the controls.
+    clearTimeout(hideControlsTimeout);
+    hideControlsTimeout = null;
+  }
+  if (timeout == 0) {
+    // Timeout 0 just means hide the controls.
+    hideControls();
+    return;
+  }
+  fullscreenDiv.style.display = 'block';
+  if (timeout) {
+    hideControlsTimeout = setTimeout(hideControls, timeout);
+  }
+}
+
+/**
+ * Hides the fullscreen button.
+ */
+function hideControls() {
+  if (hideControlsTimeout) {
+    // Clear existing ticking timeout - for cases when this is called directly
+    // instead of via timeout.
+    clearTimeout(hideControlsTimeout);
+    hideControlsTimeout = null;
+  }
+  fullscreenDiv.style.display = 'none';
+}
+
+/**
+ * Called when the user clicks the fullscreen button.
+ */
+function onFullscreenClick() {
+  if (fullscreen) {
+    window.parent./*OK*/postMessage(
+      {event: IMAVideoEvents.CANCEL_FULLSCREEN, confirm: true}, '*');
+  } else {
+    window.parent./*OK*/postMessage(
+      {event: IMAVideoEvents.REQUEST_FULLSCREEN, confirm: true}, '*');
   }
 }
 
@@ -719,7 +612,7 @@ export function pauseVideo(event) {
  * Called when the user clicks on the fullscreen button. Makes the video player
  * fullscreen
  */
-function onFullscreenClick(global) {
+function toggleFullscreen(global) {
   if (fullscreen) {
     // The video is currently in fullscreen mode
     const cancelFullscreen = global.document.exitFullscreen ||
@@ -743,24 +636,22 @@ function onFullscreenClick(global) {
       fullscreenHeight = window.screen.height;
       requestFullscreen.call(global.document.documentElement);
     } else {
-      // Figure out how to make iPhone fullscren work here - I've got nothing.
-      videoPlayer.webkitEnterFullscreen();
-      // Pause the video when we leave fullscreen. iPhone does this
-      // automatically, but we still use pauseVideo as an event handler to
-      // sync the UI.
-      videoPlayer.addEventListener('webkitendfullscreen', pauseVideo);
       nativeFullscreen = true;
+      videoPlayer.addEventListener(
+        'webkitendfullscreen', onEndNativeFullscreen);
+      videoPlayer.webkitEnterFullscreen();
       onFullscreenChange(global);
     }
   }
 }
 
 /**
- * Called when the fullscreen mode of the browser or content player changes.
+ * Called when the fullscreen mode of the browser changes.
  */
 function onFullscreenChange(global) {
   if (fullscreen) {
-    // Resize the ad container
+    // The user just exited fullscreen.
+    // Resize the ad container.
     adsManager.resize(
         videoWidth, videoHeight, global.google.ima.ViewMode.NORMAL);
     adsManagerWidthOnLoad = null;
@@ -769,6 +660,16 @@ function onFullscreenChange(global) {
     setStyle(wrapperDiv, 'width', videoWidth + 'px');
     setStyle(wrapperDiv, 'height', videoHeight + 'px');
     fullscreen = false;
+    window.parent./*OK*/postMessage(
+      {event: IMAVideoEvents.CANCEL_FULLSCREEN, confirm: false}, '*');
+    if (!onMobile) {
+      // Remove any lingering control hiding timeouts from fullscreen mode.
+      if (hideControlsTimeout) {
+        clearTimeout(hideControlsTimeout);
+        hideControlsTimeout = null;
+      }
+      wrapperDiv.removeEventListener('mousemove', boundShowControlsForFullscreen);
+    }
   } else {
     // The user just entered fullscreen
     if (!nativeFullscreen) {
@@ -781,34 +682,42 @@ function onFullscreenChange(global) {
       // Make the video take up the entire screen
       setStyle(wrapperDiv, 'width', fullscreenWidth + 'px');
       setStyle(wrapperDiv, 'height', fullscreenHeight + 'px');
-      hideControls();
+      if (!onMobile) {
+        wrapperDiv.addEventListener(
+          'mousemove', boundShowControlsForFullscreen);
+      }
     }
     fullscreen = true;
   }
 }
 
 /**
- * Show video controls and reset hide controls timeout.
- *
- * @visibleForTesting
+ * Called when we exit native fullscreen (only used on iOS).
  */
-export function showControls() {
-  setStyle(controlsDiv, 'display', 'block');
-  // Hide controls after 3 seconds
-  if (playerState == PlayerStates.PLAYING) {
-    // Reset hide controls timer.
-    clearInterval(hideControlsTimeout);
-    hideControlsTimeout = setTimeout(hideControls, 3000);
+function onEndNativeFullscreen() {
+  if (videoPlayer.paused) {
+    // Exited fullscreen via "Done" button, this keeps controls on the screen
+    // because the player is now paused.
+    showControls();
+    // Hide the controls when the user clicks play to resume playback - this
+    // doesn't trigger our onInteractForControls listener.
+    videoPlayer.addEventListener('play', onPlayAfterDoneFullscreen);
+  } else {
+    // Exited fullscreen via exit fullcsreen button in player controls, the
+    // video keeps playing in inline mode.
+    showControls(hideControlsTimes.afterExitFullscreen);
   }
+  fullscreen = false;
+  nativeFullscreen = false;
 }
 
 /**
- * Hide video controls.
- *
- * @visibleForTesting
+ * Called when the user clicks the play button after exiting fullscreen mode
+ * via the "Done" button on iOS.
  */
-export function hideControls() {
-  setStyle(controlsDiv, 'display', 'none');
+function onPlayAfterDoneFullscreen() {
+  showControls(hideControlsTimes.onInteract);
+  event.source.removeEventListener(onPlayAfterDoneFullscreen);
 }
 
 /**
@@ -864,8 +773,6 @@ function onMessage(global, event) {
         if (msg.args && msg.args.width && msg.args.height) {
           setStyle(wrapperDiv, 'width', msg.args.width + 'px');
           setStyle(wrapperDiv, 'height', msg.args.height + 'px');
-          setStyle(bigPlayDiv, 'width', msg.args.width + 'px');
-          setStyle(bigPlayDiv, 'height', msg.args.height + 'px');
           if (adsActive) {
             adsManager.resize(
                 msg.args.width, msg.args.height,
@@ -875,6 +782,9 @@ function onMessage(global, event) {
             adsManagerHeightOnLoad = msg.args.height;
           }
         }
+        break;
+      case 'toggleFullscreen':
+        toggleFullscreen(global);
         break;
     }
   }
@@ -891,15 +801,6 @@ export function getPropertiesForTesting() {
     interactEvent, pauseChars, playbackStarted, playChar, playerState,
     PlayerStates, playPauseDiv, playPauseNode, progressLine,
     progressMarkerDiv, timeNode, uiTicker, videoPlayer};
-}
-
-/**
- * Sets the big play button div.
- *
- * @visibleForTesting
- */
-export function setBigPlayDivForTesting(div) {
-  bigPlayDiv = div;
 }
 
 /**
@@ -995,15 +896,6 @@ export function setPlayerStateForTesting(newState) {
 }
 
 /**
- * Sets the hideControlsTimeout
- *
- * @visibleForTesting
- */
-export function setHideControlsTimeoutForTesting(newTimeout) {
-  hideControlsTimeout = newTimeout;
-}
-
-/**
  * Events
  *
  * Copied from src/video-interface.js.
@@ -1076,4 +968,29 @@ const VideoEvents = {
    * @event reload
    */
   RELOAD: 'reloaded',
+};
+
+/**
+ * IMA Video Events
+ *
+ * @constant {!Object<string, string>}
+ */
+export const IMAVideoEvents = {
+  /**
+   * requestFullscreen
+   *
+   * Fired to add the allowfullscreen attribute to the iframe.
+   *
+   * @event requestFullscreen
+   */
+  REQUEST_FULLSCREEN: 'requestFullscreen',
+
+  /**
+   * cancelFullscreen
+   *
+   * Fired to remove the allowfullscreen attribute from the iframe.
+   *
+   * @event cancelFullscreen
+   */
+  CANCEL_FULLSCREEN: 'cancelFullscreen',
 };
