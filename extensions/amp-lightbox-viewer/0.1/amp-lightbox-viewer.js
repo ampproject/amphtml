@@ -298,7 +298,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   animateDescOverflow_(tempOffsetHeight, finalDiffHeight,
-                              duration = 500, curve = 'ease-in') {
+                              duration = 500, curve = 'ease-out') {
     const textArea = dev().assertElement(this.descriptionTextArea_);
     const tr = numeric(0, tempOffsetHeight);
     return Animation.animate(textArea, time => {
