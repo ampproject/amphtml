@@ -528,7 +528,29 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       });
 
     });
+
+    it('should add param artc=-1 if RTC request times out', () => {
+      const rtcConfig = createElementWithAttributes(
+          document, 'script',
+          {type: 'application/json', id: 'amp-rtc'});
+      rtcConfig.innerHTML = '{'
+          + '"endpoint": "https://example-publisher.com/rtc/",'
+          + '"sendAdRequestOnFailure": false'
+          + '}';
+      document.head.appendChild(rtcConfig);
+      const xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
+      // never resolve this promise
+      const xhrResponse = new Promise((resolve, reject) => {});
+      xhrMock.returns(xhrResponse);
+      new AmpAd(element).upgradeCallback();
+      return impl.getAdUrl().catch(err => {
+        expect(err.message.match(/^timeout.*/)).to.be.ok;
+      });
+
+    });
   });
+
+
 
   describe('#unlayoutCallback', () => {
     it('should call #resetSlot, remove child iframe, but keep other children',
@@ -1197,7 +1219,9 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       });
     });
 
-    it('should return resolver on RTC failure if specified', () => {});
+    it('should return resolver on RTC failure if specified', () => {
+      expect(false).to.be.true;
+    });
 
     it('should bypass caching if specified', () => {
       setRtcConfig({
