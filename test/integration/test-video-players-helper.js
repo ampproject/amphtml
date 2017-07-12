@@ -346,10 +346,11 @@ export function runVideoPlayerIntegrationTests(
       });
     });
 
-    describe('without-autoplay', function() {
-      this.skip();
+    describe.configure('without-autoplay', () => {
 
       it('should minimize when out of viewport', function() {
+        this.skip();
+
         let viewport;
         let video;
         let insideElement;
