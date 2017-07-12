@@ -18,7 +18,7 @@ import {getMode} from './mode';
 import {getModeObject} from './mode-object';
 import {isEnumValue} from './types';
 import {isExperimentOn} from './experiments';
-import {ampdocServiceFor} from './ampdoc';
+import {ampdocServiceFor} from './services';
 import {triggerAnalyticsEvent} from './analytics';
 
 /** @const Time when this JS loaded.  */
