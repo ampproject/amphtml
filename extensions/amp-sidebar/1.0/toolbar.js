@@ -17,9 +17,6 @@
 import {toggle} from '../../../src/style';
 
 /** @const */
-const TOOLBAR_TARGET_CLASS = 'i-amphtml-toolbar-target';
-
-/** @const */
 const TOOLBAR_ELEMENT_CLASS = 'i-amphtml-toolbar';
 
 export class Toolbar {
@@ -103,33 +100,20 @@ export class Toolbar {
     this.toolbarClone_ = this.toolbarDOMElement_.cloneNode(true);
     const targetId = this.toolbarDOMElement_.getAttribute('target');
     // Set the target element to the toolbar clone if it exists.
-    const targetElement =
-    this.win_.document.getElementById(`${targetId}_toolbar`) ||
-    this.win_.document.getElementById(targetId);
-    this.targetElement_ = targetElement || this.createTargetElement_();
-    this.targetElement_.appendChild(this.toolbarClone_);
-    toggle(this.targetElement_, false);
-
-    // Check if the target element was created by us, or already inserted by the user
-    if (!this.targetElement_.parentElement) {
+    const targetElement = this.win_.document.getElementById(targetId);
+    if (targetElement) {
+      this.targetElement_ = targetElement;
+      this.targetElement_.appendChild(this.toolbarClone_);
+      toggle(this.targetElement_, false);
+      // Check if the target element was created by us, or already inserted by the user
       this.toolbarClone_.classList.add(TOOLBAR_ELEMENT_CLASS);
       const fragment = this.win_
         .document.createDocumentFragment();
       fragment.appendChild(this.targetElement_);
       this.body_.appendChild(fragment);
+    } else {
+      throw new Error(`Could not find an element with the id: ${targetId}`);
     }
-  }
-
-  /**
-   * Returns a created element that can be used as the target if one does not exist
-   * @returns {Element}
-   * @private
-   */
-  createTargetElement_() {
-    const targetElement =
-      this.win_.document.createElement('header');
-    targetElement.classList.add(TOOLBAR_TARGET_CLASS);
-    return targetElement;
   }
 
   /**

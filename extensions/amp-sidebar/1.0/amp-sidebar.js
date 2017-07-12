@@ -106,7 +106,7 @@ export class AmpSidebar extends AMP.BaseElement {
     // Get the toolbar attribute from the child navs
     const toolbarElements =
     Array.prototype.slice
-      .call(this.element.querySelectorAll('nav[toolbar]'), 0);
+      .call(this.element.querySelectorAll('nav[toolbar][target]'), 0);
     toolbarElements.forEach(toolbarElement => {
       try {
         this.toolbars_.push(new Toolbar(toolbarElement, this.win, this.vsync_));
