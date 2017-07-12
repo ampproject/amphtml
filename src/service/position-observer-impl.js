@@ -24,6 +24,7 @@ import {
   layoutRectsOverlap,
   layoutRectFromDomRect,
   layoutRectLtwh,
+  layoutRectsRelativePos,
 } from '../layout-rect';
 import {serializeMessage} from '../../src/3p-frame-messaging';
 import {parseJson, tryParseJson} from '../../src/json.js';
@@ -45,6 +46,7 @@ export const POSITION_HIGH_FIDELITY = 'position-high-fidelity';
  * @typedef {{
  *  positionRect: ?../layout-rect.LayoutRectDef,
  *  viewportRect: !../layout-rect.LayoutRectDef,
+ *  relativePos: string,
  * }}
  */
 export let PositionInViewportEntryDef;
@@ -92,13 +94,21 @@ class AbstractPositionObserver {
           Math.floor(Math.random() * LOW_FIDELITY_FRAME_COUNT) : 0,
       trigger(position) {
         const prePos = entry.position;
+
         if (prePos
             && layoutRectEquals(prePos.positionRect, position.positionRect)
             && layoutRectEquals(prePos.viewportRect, position.viewportRect)) {
           // position doesn't change, do nothing.
           return;
         }
+
+        // Add the relative position of the element to its viewport
+        position.relativePos = layoutRectsRelativePos(
+            position.positionRect, position.viewportRect
+        );
+
         if (layoutRectsOverlap(position.positionRect, position.viewportRect)) {
+          // Update position
           entry.position = position;
           // Only call handler if entry element overlap with viewport.
           try {

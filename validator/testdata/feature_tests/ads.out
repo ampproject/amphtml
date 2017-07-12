@@ -1,0 +1,2 @@
+PASS
+feature_tests/ads.html:1333:7 The extension 'amp-analytics' was found on this page, but is unused (no 'amp-analytics' tag seen). This may become an error in the future. [DEPRECATION]

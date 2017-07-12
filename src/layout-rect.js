@@ -60,6 +60,18 @@ export let LayoutMarginsDef;
  */
 export let LayoutMarginsChangeDef;
 
+/**
+* RelativePositions
+*
+* Describes the relative position of an element to another (whether the
+* first is inside the second, on top of the second or on the bottom
+* @enum {string}
+*/
+export const RelativePositions = {
+  INSIDE: 'inside',
+  TOP: 'top',
+  BOTTOM: 'bottom',
+};
 
 /**
  * Creates a layout rect based on the left, top, width and height parameters
@@ -136,6 +148,21 @@ export function rectIntersection(var_args) {
   return layoutRectLtwh(x0, y0, x1 - x0, y1 - y0);
 }
 
+/**
+ * Returns the position of r2 relative to r1
+ * @param {!LayoutRectDef} r1
+ * @param {!LayoutRectDef} r2
+ * @return {RelativePositions}
+ */
+export function layoutRectsRelativePos(r1, r2) {
+  if (r1.top < r2.top) {
+    return RelativePositions.TOP;
+  } else if (r1.bottom > r2.bottom) {
+    return RelativePositions.BOTTOM;
+  } else {
+    return RelativePositions.INSIDE;
+  }
+}
 
 /**
  * Expand the layout rect using multiples of width and height.
