@@ -14,10 +14,13 @@
     {
       "url": "examples/visual-tests/font.amp/font.amp.html",
       "name": "Fonts"
-    },
+    }
+  ],
+  "failing_webpages": [
     {
       "url": "examples/visual-tests/font.amp.404/font.amp.html",
-      "name": "Fonts 404"
+      "name": "Fonts 404",
+      "bug": "https://github.com/ampproject/amphtml/issues/10377"
     }
   ]
 }
