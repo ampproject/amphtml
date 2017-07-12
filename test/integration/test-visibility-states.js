@@ -17,7 +17,7 @@
 import {
   documentStateFor,
   resourcesForDoc,
-  viewerPromiseForDoc
+  viewerPromiseForDoc,
 } from '../../src/services';
 import {VisibilityState} from '../../src/visibility-state';
 import {getVendorJsPropertyName} from '../../src/style';

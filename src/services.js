@@ -131,7 +131,7 @@ export function documentInfoForDoc(nodeOrDoc) {
 
 /**
  * @param {!Window} window
- * @return {!DocumentState}
+ * @return {!./service/document-state.DocumentState}
  */
 export function documentStateFor(window) {
   return getService(window, 'documentState');
