@@ -36,6 +36,11 @@ HOST = 'localhost'
 PORT = '8000'
 
 
+# Colorize logs.
+def red(text); "\e[31m#{text}\e[0m"; end
+def cyan(text); "\e[36m#{text}\e[0m"; end
+
+
 # Launches a background AMP webserver for unminified js using gulp.
 #
 # Returns:
@@ -153,14 +158,14 @@ def generateSnapshot(
   if loading_incomplete_indicators
     loading_incomplete_indicators.each do |indicator|
       if !page.has_no_css?(indicator)  # Implicitly waits for element to disappear.
-        puts "ERROR: page still has CSS element #{indicator}"
+        puts red("ERROR: ") + "page still has CSS element " + cyan("#{indicator}")
       end
     end
   end
   if loading_complete_indicators
     loading_complete_indicators.each do |indicator|
       if !page.has_css?(indicator)  # Implicitly waits for element to appear.
-        puts "ERROR: page does not yet have CSS element #{indicator}"
+        puts red("ERROR: ") + "page does not yet have CSS element " + cyan("#{indicator}")
       end
     end
   end
@@ -188,7 +193,7 @@ def main()
   setDebuggingLevel()
   pid = launchWebServer()
   if not waitForWebServer()
-    puts "Failed to start webserver"
+    puts red("ERROR: ") + "Failed to start webserver"
     closeWebServer(pid)
     exit(false)
   end
