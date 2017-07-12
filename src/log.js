@@ -236,8 +236,17 @@ export class Log {
         'errorName': unusedTag,
         'errorMessage': error.message,
       };
-      triggerAnalyticsEvent(this.getRootElement_(),'user-error', vars);
+      this.analyticsEvent_('user-error', vars);
     }
+  }
+
+  /**
+   * @param {string} eventType
+   * @param {!Object<string, string>} vars A map of vars and their values.
+   * @private
+   */
+  analyticsEvent_(eventType, vars) {
+    triggerAnalyticsEvent(this.getRootElement_(), eventType, vars);
   }
 
   /**
