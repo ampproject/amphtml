@@ -10,6 +10,14 @@
     {
       "url": "examples/visual-tests/article.amp/article.amp.html",
       "name": "AMP Article"
+    },
+    {
+      "url": "examples/visual-tests/font.amp/font.amp.html",
+      "name": "Fonts"
+    },
+    {
+      "url": "examples/visual-tests/font.amp.404/font.amp.html",
+      "name": "Fonts 404"
     }
   ]
 }
