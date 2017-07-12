@@ -173,7 +173,9 @@ function isDocFile(filePath) {
  */
 function isVisualDiffFile(filePath) {
   const filename = path.basename(filePath);
-  return (filename == 'visual-diff.rb' || filename == 'visual-tests.json');
+  return (filename == 'visual-diff.rb' ||
+          filename == 'visual-tests.json' ||
+          filePath.startsWith('examples/visual-tests/'));
 }
 
 /**
