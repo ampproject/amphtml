@@ -23,7 +23,11 @@ import {
 } from '../../../src/service/video-manager-impl';
 import {getData, listen} from '../../../src/event-helper';
 import {videoManagerForDoc} from '../../../src/services';
-import {parseQueryString, addParamsToUrl, addParamToUrl} from '../../../src/url';
+import {
+    parseQueryString,
+    addParamsToUrl,
+    addParamToUrl
+} from '../../../src/url';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 
 /**
