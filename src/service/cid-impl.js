@@ -35,10 +35,8 @@ import {
 import {dict} from '../utils/object';
 import {isIframed} from '../dom';
 import {getCryptoRandomBytesArray} from '../utils/bytes';
-import {viewerForDoc, storageForDoc} from '../services';
-import {cryptoFor} from '../crypto';
+import {cryptoFor, viewerForDoc, storageForDoc, timerFor} from '../services';
 import {parseJson, tryParseJson} from '../json';
-import {timerFor} from '../services';
 import {user, rethrowAsync} from '../log';
 
 const ONE_DAY_MILLIS = 24 * 3600 * 1000;
