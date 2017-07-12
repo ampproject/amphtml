@@ -103,14 +103,9 @@ export class Toolbar {
     const targetElement = this.win_.document.getElementById(targetId);
     if (targetElement) {
       this.targetElement_ = targetElement;
+      this.toolbarClone_.classList.add(TOOLBAR_ELEMENT_CLASS);
       this.targetElement_.appendChild(this.toolbarClone_);
       toggle(this.targetElement_, false);
-      // Check if the target element was created by us, or already inserted by the user
-      this.toolbarClone_.classList.add(TOOLBAR_ELEMENT_CLASS);
-      const fragment = this.win_
-        .document.createDocumentFragment();
-      fragment.appendChild(this.targetElement_);
-      this.body_.appendChild(fragment);
     } else {
       throw new Error(`Could not find an element with the id: ${targetId}`);
     }
