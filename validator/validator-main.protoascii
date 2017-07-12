@@ -2558,19 +2558,6 @@ tags {  # <form method=GET ...>
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
-  attrs: {
-    name: "verify-xhr"
-    value_url: {
-      allow_relative: true
-      allowed_protocol: "https"
-      # These are disallowed due to serving content from multiple origins on
-      # a single CDN domain. New CDNs should use a different domain per origin
-      # domain rather than adding to this list.
-      disallowed_domain: "cdn.ampproject.org"
-      disallowed_domain: "amp.cloudflare.com"
-    }
-    blacklisted_value_regex: "__amp_source_origin"
-  }
   attrs: { name: "autocomplete" }
   attrs: {
     name: "custom-validation-reporting"
@@ -2590,19 +2577,8 @@ tags {  # <form method=GET ...>
     mandatory: true
     value_regex_casei: "(_blank|_top)"
   }
-
-}
-tags {  # <form method=POST ...>
-  tag_name: "FORM"
-  spec_name: "FORM [method=POST]"
-  requires_extension: "amp-form"
-  disallowed_ancestor: "AMP-APP-BANNER"
-  attrs: { name: "accept" }
-  attrs: { name: "accept-charset" }
-  # For method=POST forms, we require `action-xhr` and disallow `action`.
   attrs: {
-    name: "action-xhr"
-    mandatory: true
+    name: "verify-xhr"
     value_url: {
       allow_relative: true
       allowed_protocol: "https"
@@ -2614,8 +2590,17 @@ tags {  # <form method=POST ...>
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
+}
+tags {  # <form method=POST ...>
+  tag_name: "FORM"
+  spec_name: "FORM [method=POST]"
+  requires_extension: "amp-form"
+  disallowed_ancestor: "AMP-APP-BANNER"
+  attrs: { name: "accept" }
+  attrs: { name: "accept-charset" }
+  # For method=POST forms, we require `action-xhr` and disallow `action`.
   attrs: {
-    name: "verify-xhr"
+    name: "action-xhr"
     mandatory: true
     value_url: {
       allow_relative: true
@@ -2646,6 +2631,19 @@ tags {  # <form method=POST ...>
     name: "target"
     mandatory: true
     value_regex_casei: "(_blank|_top)"
+  }
+  attrs: {
+    name: "verify-xhr"
+    value_url: {
+      allow_relative: true
+      allowed_protocol: "https"
+      # These are disallowed due to serving content from multiple origins on
+      # a single CDN domain. New CDNs should use a different domain per origin
+      # domain rather than adding to this list.
+      disallowed_domain: "cdn.ampproject.org"
+      disallowed_domain: "amp.cloudflare.com"
+    }
+    blacklisted_value_regex: "__amp_source_origin"
   }
 }
 tags {
