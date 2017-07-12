@@ -21,10 +21,14 @@ import {expandTemplate} from '../../../src/string';
 import {isArray, isObject} from '../../../src/types';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {sendRequest, sendRequestUsingIframe} from './transport';
-import {urlReplacementsForDoc} from '../../../src/services';
-import {userNotificationManagerFor} from '../../../src/services';
-import {cryptoFor} from '../../../src/crypto';
-import {timerFor, viewerForDoc, xhrFor} from '../../../src/services';
+import {
+  cryptoFor,
+  timerFor,
+  urlReplacementsForDoc,
+  userNotificationManagerFor,
+  viewerForDoc,
+  xhrFor,
+} from '../../../src/services';
 import {toggle} from '../../../src/style';
 import {isEnumValue} from '../../../src/types';
 import {parseJson} from '../../../src/json';

@@ -73,6 +73,18 @@ export function activityForDoc(nodeOrDoc) {
 }
 
 /**
+ * Returns the global instance of the `AmpDocService` service that can be
+ * used to resolve an ampdoc for any node: either in the single-doc or
+ * shadow-doc environment.
+ * @param {!Window} window
+ * @return {!./service/ampdoc-impl.AmpDocService}
+ */
+export function ampdocServiceFor(window) {
+  return /** @type {!./service/ampdoc-impl.AmpDocService} */ (
+      getService(window, 'ampdoc'));
+}
+
+/**
  * @param {!Window} window
  * @return {!./service/batched-xhr-impl.BatchedXhr}
  */
@@ -97,6 +109,15 @@ export function bindForDoc(nodeOrDoc) {
 export function cidForDoc(nodeOrDoc) {
   return /** @type {!Promise<!./service/cid-impl.Cid>} */ ( // eslint-disable-line max-len
       getServicePromiseForDoc(nodeOrDoc, 'cid'));
+}
+
+/**
+ * @param {!Window} window
+ * @return {!./service/crypto-impl.Crypto}
+ */
+export function cryptoFor(window) {
+  return (/** @type {!./service/crypto-impl.Crypto} */ (
+      getService(window, 'crypto')));
 }
 
 /**

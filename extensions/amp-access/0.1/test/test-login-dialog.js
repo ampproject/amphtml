@@ -18,7 +18,7 @@ import {
   WebLoginDialog,
   openLoginDialog,
 } from '../login-dialog';
-import {ampdocServiceFor} from '../../../../src/ampdoc';
+import {ampdocServiceFor} from '../../../../src/services';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import * as sinon from 'sinon';
 

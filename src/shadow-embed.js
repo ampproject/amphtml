@@ -15,7 +15,7 @@
  */
 
 import {ShadowCSS} from '../third_party/webcomponentsjs/ShadowCSS';
-import {ampdocServiceFor} from './ampdoc';
+import {ampdocServiceFor, vsyncFor} from './services';
 import {dev} from './log';
 import {closestNode, escapeCssSelectorIdent} from './dom';
 import {extensionsFor} from './services';
@@ -27,7 +27,6 @@ import {
 } from './web-components';
 import {setStyle} from './style';
 import {toArray} from './types';
-import {vsyncFor} from './services';
 
 /**
  * Used for non-composed root-node search. See `getRootNode`.

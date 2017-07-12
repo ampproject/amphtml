@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ampdocServiceFor, viewerForDoc} from '../services';
 import {dev, user} from '../log';
 import {registerServiceBuilder, getService} from '../service';
 import {
@@ -24,10 +25,7 @@ import {
 import {parseJson} from '../json';
 import {isArray, isObject, isFormData} from '../types';
 import {utf8EncodeSync} from '../utils/bytes';
-import {ampdocServiceFor} from '../ampdoc';
-import {viewerForDoc} from '../services';
 import {getMode} from '../mode';
-
 
 /**
  * The "init" argument of the Fetch API. Currently, only "credentials: include"
