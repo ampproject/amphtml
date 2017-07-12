@@ -475,11 +475,13 @@ class VideoEntry {
    * @private
    */
   loadedVideoVisibilityChanged_() {
-    const canAutoplay = this.hasAutoplay &&
-        !this.userInteractedWithAutoPlay_ &&
-        viewerForDoc(this.ampdoc_).isVisible();
+    if (!viewerForDoc(this.ampdoc_).isVisible()) {
+      return;
+    }
 
     this.boundSupportsAutoplay_().then(supportsAutoplay => {
+      const canAutoplay = this.hasAutoplay && !this.userInteractedWithAutoPlay_;
+
       if (canAutoplay && supportsAutoplay) {
         this.autoplayLoadedVideoVisibilityChanged_();
       } else {
