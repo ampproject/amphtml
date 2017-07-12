@@ -102,7 +102,7 @@ document.createElement('amp-ad-network-gmossp-impl');
 
   describe('#getAdUrl', () => {
     it('should be valid', () => {
-      const base = 'https://sp.gmossp-sp.jp/ads/ssp.ad?';
+      const base = 'https://amp.sp.gmossp-sp.jp/ads/ssp.ad?';
       expect(gmosspImpl.getAdUrl().substring(0, base.length)).to.equal(base);
     });
   });

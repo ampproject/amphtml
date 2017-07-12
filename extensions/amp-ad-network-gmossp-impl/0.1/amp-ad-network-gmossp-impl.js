@@ -25,6 +25,8 @@ import {startsWith} from '../../../src/string';
  */
 const GMOSSP_BASE_URL_ = 'https://sp.gmossp-sp.jp';
 
+const GMOSSP_BASE_A4A_URL_ = 'https://amp.sp.gmossp-sp.jp';
+
 /**
  * This is a minimalistic AmpA4A implementation that primarily gets an Ad
  * through a source URL and extracts the generated signature
@@ -49,7 +51,8 @@ export class AmpAdNetworkGmosspImpl extends AmpA4A {
 
   /** @override */
   getAdUrl() {
-    return this.element.getAttribute('src');
+    return this.element.getAttribute('src').replace(GMOSSP_BASE_URL_,
+        GMOSSP_BASE_A4A_URL_);
   }
 
 }
