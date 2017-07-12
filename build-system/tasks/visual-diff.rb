@@ -122,7 +122,9 @@ def generateSnapshots(pagesToSnapshot)
     webpages.each do |webpage|
       url = webpage["url"]
       name = webpage["name"]
-      generateSnapshot(page, url, name)
+      required_css = webpage["required_css"]
+      forbidden_css = webpage["forbidden_css"]
+      generateSnapshot(page, url, name, required_css, forbidden_css)
     end
   end
 end
@@ -134,9 +136,20 @@ end
 # - page: Page object used by Percy for snapshotting.
 # - url: Relative URL of page to be snapshotted.
 # - name: Name of snapshot on Percy.
-def generateSnapshot(page, url, name)
+# - required_css: Array of CSS elements that must be found in the page.
+# - forbidden_css: Array of CSS elements that must not be found in the page.
+def generateSnapshot(page, url, name, required_css, forbidden_css)
   page.visit(url)
-  page.has_no_css?('.i-amphtml-loader-dot')  # Implicitly waits for page load.
+  if required_css
+    required_css.each do |css|
+      page.has_css?(css)
+    end
+  end
+  if forbidden_css
+    forbidden_css.each do |css|
+      page.has_no_css?(css)
+    end
+  end
   Percy::Capybara.snapshot(page, name: name)
 end
 
