@@ -125,7 +125,7 @@ You can create a `toolbar` element that displays in the `<body>` by specifying t
     - The `<li>` elements may contain any valid HTML elements (supported by AMP), or any of the AMP elements that `<amp-sidebar>` supports.
 - The nav element, or it's `<ul>`'s `<li>` elements, may also contain the attribute `toolbar-only`.
     - The attribute `toolbar-only` will hide the elements with the attribute in the sidebar, but leave them shown in the toolbar.
-- Toolbar behavior is only applied while the `toolbar` attribute media-query is valid. Also, an element with the `target` attribute id must exist on the page for the toolbar to be applied
+- Toolbar behavior is only applied while the `toolbar` attribute media-query is valid. Also, an element with the `target` attribute id must exist on the page for the toolbar to be applied.
 
 *Example: Basic Toolbar*
 
