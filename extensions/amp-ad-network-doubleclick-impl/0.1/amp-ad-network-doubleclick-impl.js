@@ -577,7 +577,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               }
               // Redirects and non-200 status codes are forbidden for RTC.
               if (!!res.redirected || res.status != 200) {
-                return this.shouldSendRequestWithoutRtc();
+                return null;
               }
               return res.json().then(rtcResponse => {
                 return {rtcResponse, rtcTotalTime};
@@ -599,15 +599,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return rtcPromise.then(
         r => {
           // Don't try to merge if we're sending without RTC.
-          if (r == SEND_WITHOUT_RTC) {
-            return Promise.resolve();
-          }
-          const rtcResponse = r.rtcResponse;
-          const rtcTotalTime = r.rtcTotalTime;
-          // TODO :: Need to add the time on to the ad request.
-          if (!rtcResponse) {
+          let rtcResponse;
+          if (!r || !(rtcResponse = r.rtcResponse)) {
             return this.shouldSendRequestWithoutRtc();
           }
+          const rtcTotalTime = r.rtcTotalTime;
           if (!!rtcResponse['targeting'] ||
               !!rtcResponse['categoryExclusions']) {
             this.jsonTargeting_['targeting'] = deepMerge(

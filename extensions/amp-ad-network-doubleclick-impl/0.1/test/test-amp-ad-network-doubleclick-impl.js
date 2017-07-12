@@ -550,8 +550,6 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     });
   });
 
-
-
   describe('#unlayoutCallback', () => {
     it('should call #resetSlot, remove child iframe, but keep other children',
         () => {
@@ -1043,15 +1041,16 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     let impl;
     let xhrMock;
 
-    function mockRtcExecution(rtcResponse, element) {
+    function mockRtcExecution(rtcResponse, element, opt_jsonFunction) {
       impl = new AmpAdNetworkDoubleclickImpl(element);
+      const jsonFunction = opt_jsonFunction || () => {
+        return Promise.resolve(rtcResponse);
+      };
       xhrMock.returns(
           Promise.resolve({
             redirected: false,
             status: 200,
-            json: () => {
-              return Promise.resolve(rtcResponse);
-            },
+            json: jsonFunction
           })
       );
       impl.populateAdUrlState();
@@ -1075,10 +1074,9 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         const rtcConfig = createElementWithAttributes(
             document, 'script',
             {type: 'application/json', id: 'amp-rtc'});
-        rtcConfig.innerHTML = '{'
-          + '"endpoint": "https://example-publisher.com/rtc/",'
-          + '"sendAdRequestOnFailure": false'
-         + '}';
+        rtcConfig.innerHTML = JSON.stringify({
+          endpoint: "https://example-publisher.com/rtc/",
+        });
         document.head.appendChild(rtcConfig);
         xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
 
@@ -1089,6 +1087,8 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       impl = null;
       xhrMock = null;
       resetRtcStateForTesting();
+      const rtcConfig = document.getElementById('amp-rtc');
+      document.head.removeChild(rtcConfig);
     });
 
     it('should add just targeting to impl', () => {
@@ -1210,17 +1210,33 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       });
     });
 
-    it('should return rejection on RTC failure if specified', () => {
+    it('should resolve on RTC failure if specified', () => {
       const badRtcResponse = 'wrong: "unparseable}';
-      return mockRtcExecution(badRtcResponse, element).then(() => {
-        expect(false).to.be.true;
+      const jsonFunc = () => {
+        return Promise.resolve(JSON.parse(badRtcResponse));
+      };
+      return mockRtcExecution(badRtcResponse, element, jsonFunc).then(() => {
+        // All that we are expecting here is that a Promise.reject doesn't
+        // bubble up
       }).catch(err => {
-        console.log(err);
+        expect(false).to.be.true;
       });
     });
 
-    it('should return resolver on RTC failure if specified', () => {
-      expect(false).to.be.true;
+    it('should reject on RTC failure if specified', () => {
+      setRtcConfig({
+        'endpoint': 'https://example-publisher.com/rtc/',
+        'sendAdRequestOnFailure': false,
+      });
+      const badRtcResponse = 'wrong: "unparseable}';
+      const jsonFunc = () => {
+        return Promise.resolve(JSON.parse(badRtcResponse));
+      };
+      return mockRtcExecution(badRtcResponse, element, jsonFunc).then(() => {
+        expect(false).to.be.true;
+      }).catch(err => {
+        expect(err.message.match(/Unexpected token/)).to.be.ok;
+      });
     });
 
     it('should bypass caching if specified', () => {
@@ -1285,7 +1301,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           }));
       impl.populateAdUrlState();
       return impl.executeRtc_().then(result => {
-        expect(result).to.not.be.ok;
+        expect(result).to.equal(-1);
       }).catch(() => {
         // Should not error.
         expect(true).to.be.false;
