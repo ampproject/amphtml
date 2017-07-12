@@ -5,38 +5,34 @@
   "webpages": [
     {
       "url": "examples/visual-tests/amp-by-example/amp-by-example.html",
-      "name": "Amp By Example",
-      "forbidden_css": [".i-amphtml-loader-dot"]
+      "name": "Amp By Example"
     },
     {
       "url": "examples/visual-tests/article.amp/article.amp.html",
-      "name": "AMP Article",
-      "forbidden_css": [".i-amphtml-loader-dot"]
+      "name": "AMP Article"
     },
     {
       "url": "examples/visual-tests/font.amp/font.amp.html",
       "name": "Fonts",
-      "required_css": [
-        ".comic-amp-font-loaded",
-        ".comic-amp-bold-font-loaded"
-      ],
-      "forbidden_css": [
-        ".i-amphtml-loader-dot",
+      "loading_incomplete_indicators": [
         ".comic-amp-font-loading",
         ".comic-amp-bold-font-loading"
+      ],
+      "loading_complete_indicators": [
+        ".comic-amp-font-loaded",
+        ".comic-amp-bold-font-loaded"
       ]
     },
     {
       "url": "examples/visual-tests/font.amp.404/font.amp.html",
       "name": "Fonts 404",
-      "required_css": [
-        ".comic-amp-font-missing",
-        ".comic-amp-bold-font-missing"
-      ],
-      "forbidden_css": [
-        ".i-amphtml-loader-dot",
+      "loading_incomplete_indicators": [
         ".comic-amp-font-loading",
         ".comic-amp-bold-font-loading"
+      ],
+      "loading_complete_indicators": [
+        ".comic-amp-font-missing",
+        ".comic-amp-bold-font-missing"
       ]
     }
   ],

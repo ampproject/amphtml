@@ -122,9 +122,14 @@ def generateSnapshots(pagesToSnapshot)
     webpages.each do |webpage|
       url = webpage["url"]
       name = webpage["name"]
-      required_css = webpage["required_css"]
-      forbidden_css = webpage["forbidden_css"]
-      generateSnapshot(page, url, name, required_css, forbidden_css)
+      loading_incomplete_indicators = webpage["loading_incomplete_indicators"]
+      loading_complete_indicators = webpage["loading_complete_indicators"]
+      generateSnapshot(
+          page,
+          url,
+          name,
+          loading_incomplete_indicators,
+          loading_complete_indicators)
     end
   end
 end
@@ -136,18 +141,22 @@ end
 # - page: Page object used by Percy for snapshotting.
 # - url: Relative URL of page to be snapshotted.
 # - name: Name of snapshot on Percy.
-# - required_css: Array of CSS elements that must be found in the page.
-# - forbidden_css: Array of CSS elements that must not be found in the page.
-def generateSnapshot(page, url, name, required_css, forbidden_css)
+# - loading_incomplete_indicators:
+#       Array of CSS elements that must not be found in the page.
+# - loading_complete_indicators:
+#       Array of CSS elements that must be found in the page.
+def generateSnapshot(
+    page, url, name, loading_incomplete_indicators, loading_complete_indicators)
   page.visit(url)
-  if required_css
-    required_css.each do |css|
-      page.has_css?(css)  # Implicitly waits for the element to appear.
+  page.has_no_css?('.i-amphtml-loader-dot')  # Implicitly waits for page load.
+  if loading_incomplete_indicators
+    loading_incomplete_indicators.each do |indicator|
+      page.has_no_css?(indicator)  # Implicitly waits for element to disappear.
     end
   end
-  if forbidden_css
-    forbidden_css.each do |css|
-      page.has_no_css?(css)  # Implicitly waits for the element to disappear.
+  if loading_complete_indicators
+    loading_complete_indicators.each do |indicator|
+      page.has_css?(indicator)  # Implicitly waits for element to appear.
     end
   end
   Percy::Capybara.snapshot(page, name: name)
