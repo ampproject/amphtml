@@ -156,7 +156,7 @@ export class VideoManager {
     // TODO(aghassemi): Remove this later. For now, the visibility observer
     // only matters for autoplay videos so no point in monitoring arbitrary
     // videos yet.
-    if (!entry.hasAutoplay && !assertTrackingVideo(entry.video)) {
+    if (!entry.hasAutoplay && !isTrackingVideo(entry.video)) {
       return;
     }
 
@@ -376,10 +376,14 @@ class VideoEntry {
    * @private
    */
   videoPaused_() {
-    const trackingVideo = assertTrackingVideo(this.video);
-    if (trackingVideo &&
-        trackingVideo.getCurrentTime() !== trackingVideo.getDuration()) {
-      this.analyticsEvent_(VideoAnalyticsType.PAUSE);
+    const v = this.video;
+    if (isTrackingVideo(v)) {
+      const trackingVideo =
+          /** @type {!../video-interface.VideoInterfaceWithAnalytics} */ (v);
+
+      if (trackingVideo.getCurrentTime() !== trackingVideo.getDuration()) {
+        this.analyticsEvent_(VideoAnalyticsType.PAUSE);
+      }
     }
     this.isPlaying_ = false;
 
@@ -914,8 +918,10 @@ class VideoEntry {
    * @private
    */
   analyticsEvent_(eventType, opt_vars) {
-    const trackingVideo = assertTrackingVideo(this.video);
-    if (trackingVideo) {
+    const v = this.video;
+    if (isTrackingVideo(v)) {
+      const trackingVideo =
+          /** @type {!../video-interface.VideoInterfaceWithAnalytics} */ (v);
       const detailsPromise = opt_vars ? Promise.resolve(opt_vars) :
           this.getAnalyticsDetails_(trackingVideo);
 
@@ -960,17 +966,13 @@ class VideoEntry {
 /**
  * Asserts that a video is a tracking video
  * @param {!../video-interface.VideoInterface} video
- * @return {?../video-interface.VideoInterfaceWithAnalytics}
+ * @return {boolean}
  * @private visible for testing
  */
-export function assertTrackingVideo(video) {
+export function isTrackingVideo(video) {
   const trackingVideo =
-      /** @type {?../video-interface.VideoInterfaceWithAnalytics} */ (video);
-  if (trackingVideo.supportsAnalytics && trackingVideo.supportsAnalytics()) {
-    return trackingVideo;
-  } else {
-    return null;
-  }
+      /** @type {!../video-interface.VideoInterfaceWithAnalytics} */ (video);
+  return trackingVideo.supportsAnalytics && trackingVideo.supportsAnalytics();
 }
 
 /* @type {?Promise<boolean>} */
