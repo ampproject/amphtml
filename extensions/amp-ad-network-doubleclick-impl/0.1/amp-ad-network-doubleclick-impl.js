@@ -537,7 +537,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const rtcConfig = tryParseJson(ampRtcPageElement.textContent);
     if (!isObject(rtcConfig) || !(endpoint = rtcConfig['endpoint'])
         || typeof endpoint != 'string' || !isSecureUrl(endpoint)) {
-      user().warn(TAG, 'invalid RTC config...');
+      user().warn(
+          TAG,
+          `invalid RTC config: ${ampRtcPageElement.textContent}`);
       return Promise.resolve();
     }
 
@@ -596,6 +598,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // add reasons for promise.reject
     return rtcPromise.then(
         r => {
+          // Don't try to merge if we're sending without RTC.
           if (r == SEND_WITHOUT_RTC) {
             return Promise.resolve();
           }
@@ -616,15 +619,25 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           }
           return Promise.resolve(rtcTotalTime);
         }).catch(err => {
-          user().error(err.message);
+          if (err) {
+            user().error(err.message);
+          }
           return this.shouldSendRequestWithoutRtc(err);
         });
   }
 
   shouldSendRequestWithoutRtc(err) {
-      return (sendAdRequestOnRtcFailure !== false &&
-          sendAdRequestOnRtcFailure != 'false') ?
-          Promise.resolve() : Promise.reject(err);
+    let timeParam;
+    // Have to use match instead of == because AMP
+    // custom messages automatically append three
+    // 0-width blank space characters to the ends
+    // of error messages.
+    if (err && err.message.match(/^timeout/)) {
+      timeParam = -1;
+    }
+    return (sendAdRequestOnRtcFailure !== false &&
+        sendAdRequestOnRtcFailure != 'false') ?
+        Promise.resolve(timeParam) : Promise.reject(err);
   };
 
   /** @override */

@@ -162,6 +162,20 @@ describe('Ad loader', () => {
         });
       });
 
+      it('falls back to Delayed Fetch if RTC is used', () => {
+        return iframePromise.then(({doc}) => {
+          const rtcConfig = doc.createElement('script');
+          rtcConfig.setAttribute('id', 'amp-rtc');
+          doc.head.appendChild(rtcConfig);
+          a4aRegistry['zort'] = () => {
+            throw new Error('predicate should not execute if remote.html!');
+          };
+          ampAdElement.setAttribute('type', 'zort');
+          const upgraded = new AmpAd(ampAdElement).upgradeCallback();
+          return expect(upgraded).to.eventually.be.instanceof(AmpAd3PImpl);
+        });
+      });
+
       it('uses Fast Fetch if remote.html is used but disabled', () => {
         return iframePromise.then(fixture => {
           const meta = fixture.doc.createElement('meta');
