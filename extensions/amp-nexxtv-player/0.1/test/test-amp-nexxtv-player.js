@@ -93,7 +93,7 @@ describe('amp-nexxtv-player', () => {
 
       return Promise.resolve()
           .then(() => {
-            const p = listenOncePromise(nexxtv, VideoEvents.PLAY);
+            const p = listenOncePromise(nexxtv, VideoEvents.PLAYING);
             sendFakeMessage(nexxtv, iframe, {event: 'play'});
             return p;
           })

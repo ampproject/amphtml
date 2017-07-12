@@ -305,7 +305,7 @@ class AmpYoutube extends AMP.BaseElement {
           this.playerState_ == PlayerStates.ENDED) {
         this.element.dispatchCustomEvent(VideoEvents.PAUSE);
       } else if (this.playerState_ == PlayerStates.PLAYING) {
-        this.element.dispatchCustomEvent(VideoEvents.PLAY);
+        this.element.dispatchCustomEvent(VideoEvents.PLAYING);
       }
     } else if (data['event'] == 'infoDelivery' &&
         data['info'] && data['info']['muted'] !== undefined) {

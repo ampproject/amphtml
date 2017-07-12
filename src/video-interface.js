@@ -105,10 +105,40 @@ export class VideoInterface {
    *
    * @param {string} unusedMethod
    * @param {function(!./service/action-impl.ActionInvocation)} unusedHandler
-   * @param {ActionTrust} minTrust
+   * @param {ActionTrust} unusedMinTrust
    * @public
    */
-  registerAction(unusedMethod, unusedHandler, minTrust) {}
+  registerAction(unusedMethod, unusedHandler, unusedMinTrust) {}
+}
+
+
+/**
+ * @interface
+ */
+export class VideoInterfaceWithAnalytics extends VideoInterface {
+  /**
+   * Should return true.
+   * @return {boolean}
+   */
+  supportsAnalytics() {}
+
+  /**
+   * Current playback time in seconds at time of trigger
+   * @return {number}
+   */
+  getCurrentTime() {}
+
+  /**
+   * Total duration of the video in seconds
+   * @return {number}
+   */
+  getDuration() {}
+
+  /**
+   * Get a 2d array of start and stop times that the user has watched.
+   * @return {!Array<Array<number>>}
+   */
+  getPlayedRanges() {}
 }
 
 
@@ -172,13 +202,13 @@ export const VideoEvents = {
   LOAD: 'load',
 
   /**
-   * play
+   * playing
    *
-   * Fired when the video plays.
+   * Fired when the video begins playing.
    *
-   * @event play
+   * @event playing
    */
-  PLAY: 'play',
+  PLAYING: 'playing',
 
   /**
    * pause
@@ -194,7 +224,7 @@ export const VideoEvents = {
    *
    * Fired when the video is muted.
    *
-   * @event play
+   * @event muted
    */
   MUTED: 'muted',
 
@@ -203,7 +233,7 @@ export const VideoEvents = {
    *
    * Fired when the video is unmuted.
    *
-   * @event pause
+   * @event unmuted
    */
   UNMUTED: 'unmuted',
 
@@ -223,7 +253,112 @@ export const VideoEvents = {
    *
    * Fired when the video's src changes.
    *
-   * @event reload
+   * @event reloaded
    */
   RELOAD: 'reloaded',
+
+  /**
+   * ended
+   *
+   * Fired when the video ends.
+   *
+   * @event ended
+   */
+  ENDED: 'ended',
+
+  /**
+   * amp:video:analytics
+   *
+   * Fired when an analytics event occurs
+   *
+   * @event amp:video:analytics
+   * @property {!VideoAnalyticsType} type The type of the video analytics event.
+   * @property {!VideoAnalyticsDetailsDef} details
+   */
+  ANALYTICS: 'amp:video:analytics',
 };
+
+
+/**
+ * Playing States
+ *
+ * Internal playing states used to distinguish between video playing on user's
+ * command and videos playing automatically
+ *
+ * @constant {!Object<string, string>}
+ */
+export const PlayingStates = {
+  /**
+   * playing_manual
+   *
+   * When the video user manually interacted with the video and the video
+   * is now playing
+   *
+   * @event playing_manual
+   */
+  PLAYING_MANUAL: 'playing_manual',
+
+  /**
+   * playing_auto
+   *
+   * When the video has autoplay and the user hasn't interacted with it yet
+   *
+   * @event playing_auto
+   */
+  PLAYING_AUTO: 'playing_auto',
+
+  /**
+   * paused
+   *
+   * When the video is paused.
+   *
+   * @event paused
+   */
+  PAUSED: 'paused',
+};
+
+
+/** @enum {string} */
+export const VideoAnalyticsType = {
+  /**
+   * Indicates that a video ended.
+   */
+  ENDED: 'video-ended',
+
+  /**
+   * Indicates that a video paused.
+   */
+  PAUSE: 'video-pause',
+
+  /**
+   * Indicates that a video began to play.
+   */
+  PLAY: 'video-play',
+
+  /**
+   * Indicates that some segment of the video played.
+   */
+  SESSION: 'video-session',
+
+  /**
+   * Indicates that some segment of the video played in the viewport.
+   */
+  SESSION_VISIBLE: 'video-session-visible',
+};
+
+
+/**
+ * @typedef {{
+ *   autoplay: boolean,
+ *   currentTime: number,
+ *   duration: number,
+ *   height: number,
+ *   id: string,
+ *   playedRangesJson: string,
+ *   playedTotal: number,
+ *   muted: boolean,
+ *   state: string,
+ *   width: number
+ * }}
+ */
+export let VideoAnalyticsDetailsDef;

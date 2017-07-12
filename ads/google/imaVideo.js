@@ -440,10 +440,10 @@ export function playAds(global) {
     try {
       adsManager.init(
           videoWidth, videoHeight, global.google.ima.ViewMode.NORMAL);
-      window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
+      window.parent./*OK*/postMessage({event: VideoEvents.PLAYING}, '*');
       adsManager.start();
     } catch (adError) {
-      window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
+      window.parent./*OK*/postMessage({event: VideoEvents.PLAYING}, '*');
       playVideo();
     }
   } else if (!adRequestFailed) {
@@ -451,7 +451,7 @@ export function playAds(global) {
     setTimeout(playAds.bind(null, global), 250);
   } else {
     // Ad request failed.
-    window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
+    window.parent./*OK*/postMessage({event: VideoEvents.PLAYING}, '*');
     playVideo();
   }
 }
@@ -689,7 +689,7 @@ export function playVideo() {
   showControls();
   setStyle(playPauseDiv, 'line-height', '1.4em');
   playPauseNode.textContent = pauseChars;
-  window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
+  window.parent./*OK*/postMessage({event: VideoEvents.PLAYING}, '*');
   videoPlayer.play();
 }
 
@@ -824,7 +824,7 @@ function onMessage(global, event) {
       case 'playVideo':
         if (adsActive) {
           adsManager.resume();
-          window.parent./*OK*/postMessage({event: VideoEvents.PLAY}, '*');
+          window.parent./*OK*/postMessage({event: VideoEvents.PLAYING}, '*');
         } else if (playbackStarted) {
           playVideo();
         } else {

@@ -14,12 +14,86 @@
   <script async custom-element="amp-video" src="/dist/v0/amp-video-0.1.max.js"></script>
   <script async custom-element="amp-nexxtv-player" src="/dist/v0/amp-nexxtv-player-0.1.max.js"></script>
   <script async custom-element="amp-brid-player" src="/dist/v0/amp-brid-player-0.1.max.js"></script>
+  <script async custom-element="amp-analytics" src="/dist/v0/amp-analytics-0.1.max.js"></script>
 
 
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="/dist/amp.js"></script>
 </head>
 <body>
+  <amp-analytics id="analytics1">
+  <script type="application/json">
+  {
+    "transport": {"beacon": false, "xhrpost": false},
+    "requests": {
+      "endpoint": "https://raw.githubusercontent.com/ampproject/amphtml/master/examples/img/ampicon.png",
+      "base": "${endpoint}?${type|default:foo}&path=${canonicalPath}",
+      "event": "${base}&scrollY=${scrollTop}&scrollX=${scrollLeft}&height=${availableScreenHeight}&width=${availableScreenWidth}&scrollBoundV=${verticalScrollBoundary}&scrollBoundH=${horizontalScrollBoundary}",
+      "visibility": "${base}&a=${maxContinuousVisibleTime}&b=${totalVisibleTime}&c=${firstSeenTime}&d=${lastSeenTime}&e=${firstVisibleTime}&f=${lastVisibleTime}&g=${minVisiblePercentage}&h=${maxVisiblePercentage}&i=${elementX}&j=${elementY}&k=${elementWidth}&l=${elementHeight}&m=${totalTime}&n=${loadTimeVisibility}&o=${backgroundedAtStart}&p=${backgrounded}&subTitle=${subTitle}",
+      "timer": "${base}&backgroundState=${backgroundState}",
+      "video": "${base}&type=${type}&currentTime=${currentTime}&f=${fullscreen}&a=${autoplay}"
+    },
+    "vars": {
+      "title": "Example Request"
+    },
+    "extraUrlParams": {
+      "param1": "${random}",
+      "platform": "AMP"
+    },
+    "extraUrlParamsReplaceMap": {
+      "param": "p"
+    },
+    "triggers": {
+      "videoPlays": {
+        "on": "video-play",
+        "selector": "#myVideo",
+        "videoSpec": {
+          "exclude-autoplay": true
+        },
+        "request": "video",
+        "vars": {
+          "type": "video-play"
+        }
+      },
+      "videoPauses": {
+        "on": "video-pause",
+        "selector": "#myVideo",
+        "videoSpec": {
+          "exclude-autoplay": false
+        },
+        "request": "video",
+        "vars": {
+          "type": "video-pause"
+        }
+      },
+      "videoSession": {
+        "on": "video-session",
+        "selector": "#myVideo",
+        "videoSpec": {
+          "end-session-when-invisible": true,
+          "exclude-autoplay": false
+        },
+        "request": "video",
+        "vars": {
+          "type": "video-session"
+        }
+      },
+      "videoEnded": {
+        "on": "video-ended",
+        "selector": "#myVideo",
+        "videoSpec": {
+          "end-session-when-invisible": true,
+          "exclude-autoplay": false
+        },
+        "request": "video",
+        "vars": {
+          "type": "video-ended"
+        }
+      }
+    }
+  }
+  </script>
+  </amp-analytics>
   <h1>AMP Video Players Tests</h1>
   <!-- (2) Add a test to `test/integration/test-video-players.js` and create
    your component instance in that test. -->
