@@ -22,6 +22,8 @@
  import {Toolbar} from '../toolbar';
 
  /** @const */
+ const DEFAULT_TOOLBAR_TARGET = 'toolbar-target';
+ /** @const */
  const DEFAULT_TOOLBAR_MEDIA = '(min-width: 768px)';
 
  /** @const */
@@ -69,12 +71,17 @@
          if (toolbarObj.toolbarOnlyOnNav) {
            navToolbar.setAttribute('toolbar-only', '');
          }
+         const toolbarTarget = iframe.doc.createElement('div');
          if (toolbarObj.target) {
-           const toolbarTarget = iframe.doc.createElement('div');
            toolbarTarget.setAttribute('id', toolbarObj.target);
-           iframe.win.document.body.appendChild(toolbarTarget);
            navToolbar.setAttribute('target', toolbarObj.target);
+         } else if (toolbarObj.targetError) {
+           navToolbar.setAttribute('target', DEFAULT_TOOLBAR_TARGET);
+         } else {
+           toolbarTarget.setAttribute('id', DEFAULT_TOOLBAR_TARGET);
+           navToolbar.setAttribute('target', DEFAULT_TOOLBAR_TARGET);
          }
+         iframe.win.document.body.appendChild(toolbarTarget);
          const toolbarList = iframe.doc.createElement('ul');
          for (let i = 0; i < 3; i++) {
            const li = iframe.doc.createElement('li');
@@ -103,6 +110,18 @@
 
    afterEach(() => {
      sandbox.restore();
+   });
+
+   it('toolbar header should error if target element \
+   could not be found as it is required.', () => {
+     return getToolbars([{
+       targetError: true,
+     }]).then(() => {
+       expect(false).to.be.equal(true, 'Toolbar \
+       should not be created when the target element is not found');
+     }).catch(() => {
+       expect(true).to.be.ok;
+     });
    });
 
    it('toolbar header should be hidden for a \

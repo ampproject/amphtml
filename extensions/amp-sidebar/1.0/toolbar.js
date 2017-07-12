@@ -107,7 +107,8 @@ export class Toolbar {
       this.targetElement_.appendChild(this.toolbarClone_);
       toggle(this.targetElement_, false);
     } else {
-      throw new Error(`Could not find an element with the id: ${targetId}`);
+      throw new
+        Error(`Could not find the target element with an id: ${targetId}`);
     }
   }
 
