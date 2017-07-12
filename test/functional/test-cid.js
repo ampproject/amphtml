@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {ampdocServiceFor} from '../../src/ampdoc';
 import {
+  ampdocServiceFor,
   cryptoFor,
   extensionsFor,
   timerFor,

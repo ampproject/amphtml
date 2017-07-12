@@ -16,9 +16,8 @@
 
 import {Vsync} from '../../src/service/vsync-impl';
 import {AmpDocShadow, installDocService} from '../../src/service/ampdoc-impl';
-import {ampdocServiceFor} from '../../src/ampdoc';
+import {ampdocServiceFor, viewerPromiseForDoc} from '../../src/services';
 import {installTimerService} from '../../src/service/timer-impl';
-import {viewerPromiseForDoc} from '../../src/services';
 import * as sinon from 'sinon';
 
 

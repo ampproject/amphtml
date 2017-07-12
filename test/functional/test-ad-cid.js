@@ -15,14 +15,13 @@
  */
 
 import {adConfig} from '../../ads/_config';
-import {ampdocServiceFor} from '../../src/ampdoc';
+import {ampdocServiceFor, timerFor} from '../../src/services';
 import {
   cidServiceForDocForTesting,
 } from '../../src/service/cid-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {getAdCid} from '../../src/ad-cid';
-import {timerFor} from '../../src/services';
 import * as lolex from 'lolex';
 
 describes.realWin('ad-cid', {}, env => {

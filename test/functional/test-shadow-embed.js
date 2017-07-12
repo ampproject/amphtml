@@ -26,12 +26,11 @@ import {
   isShadowRoot,
   scopeShadowCss,
 } from '../../src/shadow-embed';
-import {ampdocServiceFor} from '../../src/ampdoc';
+import {ampdocServiceFor, extensionsFor} from '../../src/services';
 import {
   setShadowDomSupportedVersionForTesting,
   ShadowDomVersion,
 } from '../../src/web-components';
-import {extensionsFor} from '../../src/services';
 import * as sinon from 'sinon';
 
 

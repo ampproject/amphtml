@@ -15,10 +15,13 @@
  */
 
 import {listenOncePromise} from '../../src/event-helper';
-import {ampdocServiceFor} from '../../src/ampdoc';
+import {
+  ampdocServiceFor,
+  videoManagerForDoc,
+  viewerForDoc,
+} from '../../src/services';
 import {isLayoutSizeDefined} from '../../src/layout';
 import {VideoEvents} from '../../src/video-interface';
-import {videoManagerForDoc, viewerForDoc} from '../../src/services';
 import {
   installVideoManagerForDoc,
   supportsAutoplay,

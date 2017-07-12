@@ -19,7 +19,6 @@
  */
 
 import './polyfills';
-import {ampdocServiceFor} from './ampdoc';
 import {startupChunk} from './chunk';
 import {fontStylesheetTimeout} from './font-stylesheet-timeout';
 import {
@@ -41,7 +40,7 @@ import {
 import {cssText} from '../build/css';
 import {maybeValidate} from './validator-integration';
 import {maybeTrackImpression} from './impression';
-import {resourcesForDoc} from './services';
+import {ampdocServiceFor, resourcesForDoc} from './services';
 
 // Store the originalHash as early as possible. Trying to debug:
 // https://github.com/ampproject/amphtml/issues/6070
