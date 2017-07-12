@@ -22,7 +22,7 @@ import {
   tokenWithBadSignature,
   tokenWithExpiredExperiment,
 } from './testdata-experiments';
-import {cryptoFor} from '../../src/crypto';
+import {cryptoFor} from '../../src/services';
 import {installCryptoService} from '../../src/service/crypto-impl';
 import {
   enableExperimentsForOriginTrials,
