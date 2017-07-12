@@ -22,7 +22,9 @@
         ".comic-amp-font-loaded",
         ".comic-amp-bold-font-loaded"
       ]
-    },
+    }
+  ],
+  "failing_webpages": [
     {
       "url": "examples/visual-tests/font.amp.404/font.amp.html",
       "name": "Fonts 404",
@@ -40,7 +42,5 @@
         ".comic-amp-bold-font-missing"
       ]
     }
-  ],
-  "failing_webpages": [
   ]
 }
