@@ -21,7 +21,6 @@ import {Layout, getLayoutClass, getLengthNumeral, getLengthUnits,
     hasNaturalDimensions} from './layout';
 import {ElementStub, stubbedElements} from './element-stub';
 import {Signals} from './utils/signals';
-import {ampdocServiceFor} from './ampdoc';
 import {createLoaderElement} from '../src/loader';
 import {dev, rethrowAsync, user} from './log';
 import {documentStateFor} from './service/document-state';
@@ -32,6 +31,7 @@ import {getMode} from './mode';
 import {parseSizeList} from './size-list';
 import {reportError} from './error';
 import {
+  ampdocServiceFor,
   resourcesForDoc,
   performanceForOrNull,
   timerFor,

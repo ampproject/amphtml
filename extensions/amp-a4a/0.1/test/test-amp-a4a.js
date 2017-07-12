@@ -30,7 +30,6 @@ import {Signals} from '../../../../src/utils/signals';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {Extensions} from '../../../../src/service/extensions-impl';
 import {Viewer} from '../../../../src/service/viewer-impl';
-import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {cancellation} from '../../../../src/error';
 import {
   data as validCSSAmp,
@@ -40,7 +39,10 @@ import {FetchResponseHeaders} from '../../../../src/service/xhr-impl';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {utf8Encode} from '../../../../src/utils/bytes';
 import {resetScheduledElementForTesting} from '../../../../src/custom-element';
-import {urlReplacementsForDoc} from '../../../../src/services';
+import {
+  ampdocServiceFor,
+  urlReplacementsForDoc,
+} from '../../../../src/services';
 import {incrementLoadingAds} from '../../../amp-ad/0.1/concurrent-load';
 import {platformFor, timerFor} from '../../../../src/services';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';

@@ -25,7 +25,7 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {
   installExtensionsService,
 } from '../../../../src/service/extensions-impl';
-import {extensionsFor} from '../../../../src/services';
+import {ampdocServiceFor, extensionsFor} from '../../../../src/services';
 import {
   AmpAdNetworkDoubleclickImpl,
   getNetworkId,
@@ -42,7 +42,6 @@ import {
 } from '../../../../ads/google/a4a/traffic-experiments';
 import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
 import {utf8Encode} from '../../../../src/utils/bytes';
-import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {BaseElement} from '../../../../src/base-element';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {
