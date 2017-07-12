@@ -132,7 +132,7 @@ export function runVideoPlayerIntegrationTests(
     afterEach(cleanUp);
   });
 
-  describe.skipSaucelabs().run('Analytics Triggers', function() {
+  describe.configure().skipSaucelabs().run('Analytics Triggers', function() {
     this.timeout(TIMEOUT);
     let video;
 
