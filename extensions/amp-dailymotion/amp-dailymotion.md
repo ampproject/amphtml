@@ -118,7 +118,7 @@ Keys and values will be URI encoded.
 
 * `data-param-origin="example.com"`
 
-Please read [Dailymotion's video player documentation](https://developer.dailymotion.com/player) to know more about parameters and options.
+Please read [Dailymotion's video player documentation](https://developer.dailymotion.com/player#player-parameters) to know more about parameters and options.
 
 **common attributes**
 
