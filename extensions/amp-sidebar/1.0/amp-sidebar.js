@@ -23,6 +23,7 @@ import {closestByTag, tryFocus} from '../../../src/dom';
 import {Services} from '../../../src/services';
 import {setStyles, toggle} from '../../../src/style';
 import {removeFragment, parseUrl} from '../../../src/url';
+import {toArray} from '../../../src/types';
 import {Toolbar} from './toolbar';
 
 /** @const */
@@ -105,8 +106,7 @@ export class AmpSidebar extends AMP.BaseElement {
 
     // Get the toolbar attribute from the child navs
     const toolbarElements =
-    Array.prototype.slice
-      .call(this.element.querySelectorAll('nav[toolbar][target]'), 0);
+      toArray(this.element.querySelectorAll('nav[toolbar][target]'));
     toolbarElements.forEach(toolbarElement => {
       try {
         this.toolbars_.push(new Toolbar(toolbarElement, this.win, this.vsync_));

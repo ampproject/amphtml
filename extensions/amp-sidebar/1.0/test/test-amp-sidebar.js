@@ -24,12 +24,6 @@
  import * as sinon from 'sinon';
  import '../amp-sidebar';
 
- /** @const */
- const DEFAULT_TOOLBAR_TARGET = 'toolbar-target';
- /** @const */
- const DEFAULT_TOOLBAR_MEDIA = '(min-width: 768px)';
-
-
  adopt(window);
 
  describes.realWin('amp-sidebar 1.0 version', {
@@ -84,8 +78,8 @@
                toolbarTarget.setAttribute('id', toolbarObj.target);
                navToolbar.setAttribute('target', toolbarObj.target);
              } else {
-               toolbarTarget.setAttribute('id', DEFAULT_TOOLBAR_TARGET);
-               navToolbar.setAttribute('target', DEFAULT_TOOLBAR_TARGET);
+               toolbarTarget.setAttribute('id', 'toolbar-target');
+               navToolbar.setAttribute('target', 'toolbar-target');
              }
              iframe.win.document.body.appendChild(toolbarTarget);
 
@@ -93,7 +87,7 @@
              if (toolbarObj.media) {
                navToolbar.setAttribute('toolbar', toolbarObj.media);
              } else {
-               navToolbar.setAttribute('toolbar', DEFAULT_TOOLBAR_MEDIA);
+               navToolbar.setAttribute('toolbar', '(min-width: 768px)');
              }
              const toolbarList = iframe.doc.createElement('ul');
              for (let i = 0; i < 3; i++) {
@@ -627,22 +621,18 @@
        });
      });
 
-     it('should create a toolbar target element, \
-     containing the navigation toolbar element', () => {
+     it('should create a toolbar element within the target', () => {
        return getAmpSidebar({
          toolbars: [{}],
        }).then(obj => {
          const sidebarElement = obj.ampSidebar;
-         const toolbarNavElements = Array.prototype
-                .slice.call(sidebarElement.ownerDocument
-                .querySelectorAll('nav[toolbar][target]'), 0);
-         expect(toolbarNavElements.length).to.be.above(1);
-         expect(sidebarElement.implementation_.toolbars_.length).to.be.equal(1);
+         expect(sidebarElement.implementation_.toolbars_.length)
+             .to.be.equal(1);
        });
      });
 
-     it('should create multiple toolbar target elements, \
-     containing the navigation toolbar element', () => {
+     it('should create multiple toolbar elements, \
+     within their respective containers', () => {
        return getAmpSidebar({
          toolbars: [{},
            {
@@ -651,11 +641,8 @@
          ],
        }).then(obj => {
          const sidebarElement = obj.ampSidebar;
-         const toolbarNavElements = Array.prototype
-                .slice.call(sidebarElement.ownerDocument
-                .querySelectorAll('nav[toolbar][target]'), 0);
-         expect(toolbarNavElements.length).to.be.equal(4);
-         expect(sidebarElement.implementation_.toolbars_.length).to.be.equal(2);
+         expect(sidebarElement.implementation_.toolbars_.length)
+             .to.be.equal(2);
        });
      });
    });
