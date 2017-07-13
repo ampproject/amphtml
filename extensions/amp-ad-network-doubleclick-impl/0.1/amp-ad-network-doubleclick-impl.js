@@ -134,7 +134,7 @@ const BLOCK_SRA_COMBINERS_ = [
   },
   instances => {
     return {'prev_iu_szs': instances.map(instance =>
-      `${instance.size_.width}x${instance.size_.height}`).join()};
+      `${instance.initialSize_.width}x${instance.initialSize_.height}`).join()};
   },
   // Although declared at a block-level, this is actually page level so
   // return true if ANY indicate TFCD.
