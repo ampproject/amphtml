@@ -17,6 +17,7 @@
 import {isJsonScriptTag} from '../../../src/dom';
 import {assertHttpsUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 import {dev, rethrowAsync, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {expandTemplate} from '../../../src/string';
 import {isArray, isObject} from '../../../src/types';
 import {dict, hasOwn, map} from '../../../src/utils/object';
@@ -412,6 +413,22 @@ export class AmpAnalytics extends AMP.BaseElement {
           'deprecation');
     }
     const typeConfig = this.predefinedConfig_[type] || {};
+
+    // transport.iframe is only allowed to be specified in typeConfig, not
+    // the others. Allowed when running locally for testing purposes.
+    [defaultConfig, inlineConfig, this.remoteConfig_].forEach(config => {
+      if (config && config.transport && config.transport.iframe) {
+        const TAG = this.getName_();
+        if (getMode().localDev) {
+          user().warn(TAG, 'Only typeConfig may specify iframe transport,' +
+            ' but in local dev mode, so okay', config);
+        } else {
+          user().error(TAG, 'Only typeConfig may specify iframe transport',
+              config);
+          return;
+        }
+      }
+    });
 
     this.mergeObjects_(defaultConfig, config);
     this.mergeObjects_(typeConfig, config, /* predefined */ true);
