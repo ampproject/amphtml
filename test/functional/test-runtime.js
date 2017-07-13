@@ -28,6 +28,7 @@ import {
   getServicePromise,
   getServicePromiseOrNullForDoc,
 } from '../../src/service';
+import {installDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {vsyncForTesting} from '../../src/service/vsync-impl';
@@ -67,6 +68,7 @@ describes.fakeWin('runtime', {
     };
     const ampdoc = new AmpDocSingle(win);
     ampdocService.getAmpDoc = () => ampdoc;
+    installDocumentStateService(win);
     installPlatformService(win);
     installTimerService(win);
     vsyncForTesting(win);

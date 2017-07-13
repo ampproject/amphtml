@@ -15,10 +15,14 @@
  */
 
 import {Pass} from '../pass';
-import {ampdocServiceFor, viewerForDoc, viewerPromiseForDoc} from '../services';
+import {
+  ampdocServiceFor,
+  documentStateFor,
+  viewerForDoc,
+  viewerPromiseForDoc,
+} from '../services';
 import {cancellation} from '../error';
 import {dev, rethrowAsync} from '../log';
-import {documentStateFor} from './document-state';
 import {registerServiceBuilder, getService} from '../service';
 import {installTimerService} from './timer-impl';
 import {JankMeter} from './jank-meter';

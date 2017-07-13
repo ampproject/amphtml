@@ -19,6 +19,7 @@ import {
   installActivityServiceForTesting,
 } from '../../extensions/amp-analytics/0.1/activity-impl';
 import {activityForDoc, viewerForDoc, viewportForDoc} from '../../src/services';
+import {installDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installTimerService} from '../../src/service/timer-impl';
@@ -97,6 +98,7 @@ describe('Activity getTotalEngagedTime', () => {
       isSingleDoc: () => true,
     }};
 
+    installDocumentStateService(fakeWin);
     installTimerService(fakeWin);
     installVsyncService(fakeWin);
     installPlatformService(fakeWin);

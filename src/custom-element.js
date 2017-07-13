@@ -23,7 +23,6 @@ import {ElementStub, stubbedElements} from './element-stub';
 import {Signals} from './utils/signals';
 import {createLoaderElement} from '../src/loader';
 import {dev, rethrowAsync, user} from './log';
-import {documentStateFor} from './service/document-state';
 import {
   getIntersectionChangeEntry,
 } from '../src/intersection-observer-polyfill';
@@ -32,8 +31,9 @@ import {parseSizeList} from './size-list';
 import {reportError} from './error';
 import {
   ampdocServiceFor,
-  resourcesForDoc,
+  documentStateFor,
   performanceForOrNull,
+  resourcesForDoc,
   timerFor,
   vsyncFor,
 } from './services';
