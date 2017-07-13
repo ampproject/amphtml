@@ -476,6 +476,8 @@ describes.fakeWin('Viewport', {}, env => {
     viewportSize.width = 112;
     viewport.resize_();
     expect(resizeEvent).to.not.equal(null);
+    expect(resizeEvent.height).to.equal(viewportSize.height);
+    expect(resizeEvent.width).to.equal(viewportSize.width);
     // Width changed, relayoutAll should be true
     expect(resizeEvent.relayoutAll).to.be.true;
   });
@@ -488,6 +490,8 @@ describes.fakeWin('Viewport', {}, env => {
     viewportSize.height = 223;
     viewport.resize_();
     expect(resizeEvent).to.not.equal(null);
+    expect(resizeEvent.height).to.equal(viewportSize.height);
+    expect(resizeEvent.width).to.equal(viewportSize.width);
     // Only height changed, relayoutAll should be false
     expect(resizeEvent.relayoutAll).to.be.false;
   });
