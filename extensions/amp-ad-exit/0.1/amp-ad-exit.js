@@ -17,7 +17,6 @@
 import {makeClickDelaySpec} from './filters/click-delay';
 import {assertConfig, TransportMode} from './config';
 import {createFilter} from './filters/factory';
-import {isExperimentOn} from '../../../src/experiments';
 import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
 import {urlReplacementsForDoc} from '../../../src/services';
 import {user} from '../../../src/log';
@@ -64,10 +63,6 @@ export class AmpAdExit extends AMP.BaseElement {
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
    */
   exit({args, event}) {
-    user().assert(
-        isExperimentOn(this.win, 'amp-ad-exit'),
-        'amp-ad-exit experiment is off.');
-
     const target = this.targets_[args['target']];
     user().assert(target, `Exit target not found: '${args['target']}'`);
 
