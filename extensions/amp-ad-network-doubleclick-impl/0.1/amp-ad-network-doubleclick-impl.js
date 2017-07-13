@@ -441,8 +441,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     this.lifecycleReporter_.addPingsForVisibility(this.element);
 
-    // Force size of frame to match available space as min-height/width are
-    // set to 0 to ensure centering.
+    // Force size of frame to match creative or, if creative size is unknown,
+    // the slot. This ensures that the creative is centered in the former case,
+    // and not truncated in the latter.
     const size = this.returnedSize_ || this.getIntersectionElementLayoutBox();
     setStyles(dev().assertElement(this.iframe), {
       width: `${size.width}px`,
