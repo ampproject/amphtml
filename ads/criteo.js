@@ -16,6 +16,7 @@
 
 import {computeInMasterFrame, loadScript} from '../3p/3p';
 import {doubleclick} from '../ads/google/doubleclick';
+import {tryParseJson} from '../src/json';
 
 /* global Criteo: false */
 
@@ -55,15 +56,20 @@ export function criteo(global, data) {
  */
 function setTargeting(global, data) {
   if (data.adserver === 'DFP') {
-    const dblParams = {
-      slot: data.slot,
-      targeting: Criteo.ComputeDFPTargetingForAMP(
-          data.cookiename || Criteo.PubTag.RTA.DefaultCrtgRtaCookieName,
-          data.varname || Criteo.PubTag.RTA.DefaultCrtgContentName),
-      width: data.width,
-      height: data.height,
-      type: 'criteo',
-    };
+    const dblParams = tryParseJson(data.doubleclick) || {};
+    dblParams['slot'] = data.slot;
+    dblParams['targeting'] = dblParams['targeting'] || {};
+    dblParams['width'] = data.width;
+    dblParams['height'] = data.height;
+    dblParams['type'] = 'criteo';
+
+    const targeting = Criteo.ComputeDFPTargetingForAMP(
+        data.cookiename || Criteo.PubTag.RTA.DefaultCrtgRtaCookieName,
+        data.varname || Criteo.PubTag.RTA.DefaultCrtgContentName);
+    for (const i in targeting) {
+      dblParams['targeting'][i] = targeting[i];
+    }
+
     doubleclick(global, dblParams);
   }
 }
