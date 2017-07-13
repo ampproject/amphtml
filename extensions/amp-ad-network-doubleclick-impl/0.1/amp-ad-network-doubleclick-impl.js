@@ -438,12 +438,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     this.lifecycleReporter_.addPingsForVisibility(this.element);
 
-    // Force size of frame to match available space as min-height/width are
-    // set to 0 to ensure centering.
-    const size = this.getIntersectionElementLayoutBox();
     setStyles(dev().assertElement(this.iframe), {
-      width: `${size.width}px`,
-      height: `${size.height}px`,
+      width: `${this.size_.width}px`,
+      height: `${this.size_.height}px`,
     });
   }
 
