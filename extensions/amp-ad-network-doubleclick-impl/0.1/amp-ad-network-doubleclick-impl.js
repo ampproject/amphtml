@@ -104,7 +104,7 @@ export const TFCD = 'tagForChildDirectedTreatment';
 /** @private {?Promise} */
 let sraRequests = null;
 
-/** @private {?Promise} */
+/** @private {?Promise<!Object<string,string|number|boolean>>} */
 let pageLevelParameters_ = null;
 
 /**
