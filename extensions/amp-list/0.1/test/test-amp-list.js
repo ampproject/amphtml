@@ -208,4 +208,31 @@ describe('amp-list component', () => {
       });
     });
   });
+
+  it('should hide placeholder on fetch failure', () => {
+    // Stub fetchItems_() to fail.
+    listMock.expects('fetchItems_').returns(Promise.reject()).once();
+    listMock.expects('togglePlaceholder').withExactArgs(false).once();
+    return list.layoutCallback().catch(() => {});
+  });
+
+  it('should display fallback on fetch failure', () => {
+    // Stub fetchItems_() to fail.
+    listMock.expects('fetchItems_').returns(Promise.reject()).once();
+    // Stub getVsync().mutate() to execute immediately.
+    listMock.expects('getVsync').returns({mutate: block => block()}).once();
+    listMock.expects('toggleFallback').withExactArgs(true).once();
+    return list.layoutCallback().catch(() => {});
+  });
+
+  it('should hide fallback on fetch success', () => {
+    // Stub fetchItems_() to fail.
+    listMock.expects('fetchItems_').returns(Promise.resolve([])).once();
+    // Stub getVsync().mutate() to execute immediately.
+    listMock.expects('getVsync').returns({mutate: block => block()}).once();
+    // Stub fallbackDisplayed_ to true.
+    sandbox.stub(list, 'fallbackDisplayed_', true);
+    listMock.expects('toggleFallback').withExactArgs(false).once();
+    return list.layoutCallback().catch(() => {});
+  });
 });
