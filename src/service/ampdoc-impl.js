@@ -187,6 +187,9 @@ export class AmpDoc {
 
     /** @private @const */
     this.signals_ = new Signals();
+
+    /** @private {!Object<string, Object<string, string>>} */
+    this.anchorClickListenerBinding_ = {};
   }
 
   /**
@@ -299,6 +302,16 @@ export class AmpDoc {
    */
   contains(node) {
     return this.getRootNode().contains(node);
+  }
+
+  /**
+   * Binding of macro to function used as part of any installed anchor click
+   * listener.
+   * @return {!Object<string, Object<string, string>>}
+   * @see src/anchor-click-interceptor#installAnchorClickInterceptor
+   */
+  getAnchorClickListenerBinding() {
+    return this.anchorClickListenerBinding_;
   }
 }
 
