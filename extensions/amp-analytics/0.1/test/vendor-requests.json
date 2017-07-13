@@ -208,6 +208,13 @@
     "pageView": "https://$collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_&aid=$appId&p=web&tv=amp-0.2&cd=_screen_color_depth_&cs=_document_charset_&duid=_client_id_&lang=_browser_language_&refr=_document_referrer_&stm=_timezone_&vp=_viewport_width_x_viewport_height_&e=pv",
     "structEvent": "https://$collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_&aid=$appId&p=web&tv=amp-0.2&cd=_screen_color_depth_&cs=_document_charset_&duid=_client_id_&lang=_browser_language_&refr=_document_referrer_&stm=_timezone_&vp=_viewport_width_x_viewport_height_&e=se&se_ca=$structEventCategory&se_ac=$structEventAction&se_la=$structEventLabel&se_pr=$structEventProperty&se_va=$structEventValue"
   },
+  "top100": {
+    "host": "https://kraken.rambler.ru",
+    "base": "https://kraken.rambler.ru/cnt/?pid=$pid&rid=_page_view_id_&v=1.0.0&rn=_random_&ruid=_client_id_&ct=amp",
+    "pageview": "https://kraken.rambler.ru/cnt/?pid=$pid&rid=_page_view_id_&v=1.0.0&rn=_random_&ruid=_client_id_&ct=amp&et=pv&pt=_title_&rf=_document_referrer_&en=_document_charset_&la=_browser_language_&tz=_timezone_&sr=_screen_width_x_screen_height_&cd=_screen_color_depth_-bit&bs=_scroll_width_x_scroll_height_",
+    "_screenData": "&sr=_screen_width_x_screen_height_&cd=_screen_color_depth_-bit&bs=_scroll_width_x_scroll_height_",
+    "_pageData": "&pt=_title_&rf=_document_referrer_&en=_document_charset_&la=_browser_language_&tz=_timezone_"
+  },
   "topmailru": {
     "pageView": "https://top-fwz1.mail.ru/counter?js=13;id=$id;u=_source_url_;r=_document_referrer_;s=_screen_width_*_screen_height_;vp=_viewport_width_*_viewport_height_;st=$start;gender=$gender;age=$age;pid=$pid;userid=$userid;device=$device;params=$params;_=_random_;title=_title_",
     "reachGoal": "https://top-fwz1.mail.ru/tracker?js=13;id=$id;u=_source_url_;r=_document_referrer_;s=_screen_width_*_screen_height_;vp=_viewport_width_*_viewport_height_;st=$start;gender=$gender;age=$age;pid=$pid;userid=$userid;device=$device;params=$params;_=_random_;title=_title_;e=RG%3A$value%2F$goal",
