@@ -90,7 +90,7 @@ Accepted MIME types for fonts include the following prefixes:
 
 ## Guidelines: Resource size limits
 
-For resources (i.e., HTML, images, fonts) that are larger than 12 MB, do not fetch the resource and return a 404 error.
+For resources (i.e., HTML, images, fonts) that are larger than 12 MB, you may not fetch the resource and you may return a 404 error.
 
 ## Guidelines: Adding a new cache to the AMP ecosystem
 
