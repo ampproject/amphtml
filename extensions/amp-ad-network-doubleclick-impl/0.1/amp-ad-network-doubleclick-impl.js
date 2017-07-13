@@ -199,7 +199,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.qqid_ = null;
 
     /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
-    this.size_ = null;
+    this.initialSize_ = null;
+
+    /** @private {?{width, height}} */
+    this.returnedSize_ = null;
 
     /** @private {?Element} */
     this.ampAnalyticsElement_ = null;
@@ -268,9 +271,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @return {!Object<string,string|boolean|number>}
    */
   getBlockParameters_() {
-    dev().assert(this.size_);
+    dev().assert(this.initialSize_);
     dev().assert(this.jsonTargeting_);
-    let sizeStr = `${this.size_.width}x${this.size_.height}`;
+    let sizeStr = `${this.initialSize_.width}x${this.initialSize_.height}`;
     const tfcd = this.jsonTargeting_ && this.jsonTargeting_[TFCD];
     const multiSizeDataStr = this.element.getAttribute('data-multi-size');
     if (multiSizeDataStr) {
@@ -281,8 +284,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // dimensions in an array.
       const dimensions = getMultiSizeDimensions(
           multiSizeDataStr,
-          this.size_.width,
-          this.size_.height,
+          this.initialSize_.width,
+          this.initialSize_.height,
           multiSizeValidation == 'true');
       sizeStr += '|' + dimensions
           .map(dimension => dimension.join('x'))
@@ -313,14 +316,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       Number(this.element.getAttribute('width'));
     const height = Number(this.element.getAttribute('data-override-height')) ||
       Number(this.element.getAttribute('height'));
-    this.size_ = width && height
+    this.initialSize_ = width && height
         ? {width, height}
         // width/height could be 'auto' in which case we fallback to measured.
         : this.getIntersectionElementLayoutBox();
     this.jsonTargeting_ =
       tryParseJson(this.element.getAttribute('json')) || {};
-    this.adKey_ =
-      this.generateAdKey_(`${this.size_.width}x${this.size_.height}`);
+    this.adKey_ = this.generateAdKey_(
+        `${this.initialSize_.width}x${this.initialSize_.height}`);
   }
 
   /** @override */
@@ -356,7 +359,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // sent in the ad request.
     let size = super.extractSize(responseHeaders);
     if (size) {
-      this.size_ = size;
+      this.returnedSize_ = size;
       this.handleResize_(size.width, size.height);
     } else {
       const width = Number(this.element.getAttribute('width'));
@@ -438,9 +441,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     this.lifecycleReporter_.addPingsForVisibility(this.element);
 
+    // Force size of frame to match available space as min-height/width are
+    // set to 0 to ensure centering.
+    const size = this.returnedSize_ || this.getIntersectionElementLayoutBox();
     setStyles(dev().assertElement(this.iframe), {
-      width: `${this.size_.width}px`,
-      height: `${this.size_.height}px`,
+      width: `${size.width}px`,
+      height: `${size.height}px`,
     });
   }
 
