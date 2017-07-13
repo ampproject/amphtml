@@ -15,7 +15,7 @@
  */
 
 import {ShadowCSS} from '../third_party/webcomponentsjs/ShadowCSS';
-import {ampdocServiceFor} from './ampdoc';
+import {ampdocServiceFor, vsyncFor} from './services';
 import {dev} from './log';
 import {closestNode, escapeCssSelectorIdent} from './dom';
 import {extensionsFor} from './services';
@@ -27,7 +27,6 @@ import {
 } from './web-components';
 import {setStyle} from './style';
 import {toArray} from './types';
-import {vsyncFor} from './services';
 
 /**
  * Used for non-composed root-node search. See `getRootNode`.
@@ -77,6 +76,16 @@ function createShadowRootPolyfill(hostElement) {
   const doc = hostElement.ownerDocument;
   /** @const {!Window} */
   const win = doc.defaultView;
+
+  // Host CSS polyfill.
+  hostElement.classList.add('i-amphtml-shadow-host-polyfill');
+  const hostStyle = doc.createElement('style');
+  hostStyle.textContent =
+      '.i-amphtml-shadow-host-polyfill>:not(i-amphtml-shadow-root)'
+      + '{display:none!important}';
+  hostElement.appendChild(hostStyle);
+
+  // Shadow root.
   const shadowRoot = /** @type {!ShadowRoot} */ (
       // Cast to ShadowRoot even though it is an Element
       // TODO(@dvoytenko) Consider to switch to a type union instead.

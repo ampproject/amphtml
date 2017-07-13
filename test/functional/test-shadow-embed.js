@@ -26,12 +26,11 @@ import {
   isShadowRoot,
   scopeShadowCss,
 } from '../../src/shadow-embed';
-import {ampdocServiceFor} from '../../src/ampdoc';
+import {ampdocServiceFor, extensionsFor} from '../../src/services';
 import {
   setShadowDomSupportedVersionForTesting,
   ShadowDomVersion,
 } from '../../src/web-components';
-import {extensionsFor} from '../../src/services';
 import * as sinon from 'sinon';
 
 
@@ -124,6 +123,22 @@ describes.sandboxed('shadow-embed', {}, () => {
                 const shadowRoot = createShadowRoot(hostElement);
                 expect(shadowRoot.tagName).to.equal('I-AMPHTML-SHADOW-ROOT');
                 expect(shadowRoot.id).to.match(/i-amphtml-sd-\d+/);
+              });
+
+              it('should add host style for polyfill', () => {
+                const doc = hostElement.ownerDocument;
+                const win = doc.defaultView;
+                doc.body.appendChild(hostElement);
+                const slot = doc.createElement('div');
+                hostElement.appendChild(slot);
+                expect(win.getComputedStyle(slot).display).to.equal('block');
+                const shadowRoot = createShadowRoot(hostElement);
+                expect(hostElement).to.have.class(
+                    'i-amphtml-shadow-host-polyfill');
+                expect(win.getComputedStyle(slot).display).to.equal('none');
+                expect(win.getComputedStyle(shadowRoot).display)
+                    .to.not.equal('none');
+                doc.body.removeChild(hostElement);
               });
             }
           });

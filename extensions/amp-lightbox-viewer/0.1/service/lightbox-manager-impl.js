@@ -67,62 +67,6 @@ export class LightboxManager {
   }
 
   /**
-   * Returns the next lightboxable element after `curElement` or `null` if there
-   * is no next element.
-   * @param {!Element} curElement Current element.
-   * @return {!Promise<?Element>} Next element or null
-   */
-  getNext(curElement) {
-    return this.maybeInit_().then(() => {
-      const curIndex = this.elements_.indexOf(curElement);
-      dev().assert(curIndex != -1);
-      if (curIndex == this.elements_.length - 1) {
-        return null;
-      }
-      return this.elements_[curIndex + 1];
-    });
-  }
-
-  /**
-   * Returns the previous lightboxable element before `curElement` or `null` if
-   * there is no previous element.
-   * @param {!Element} curElement Current element.
-   * @return {!Promise<?Element>} Previous element or null
-   */
-  getPrevious(curElement) {
-    return this.maybeInit_().then(() => {
-      const curIndex = this.elements_.indexOf(curElement);
-      dev().assert(curIndex != -1);
-      if (curIndex == 0) {
-        return null;
-      }
-      return this.elements_[curIndex - 1];
-    });
-  }
-
-  /**
-   * Returns whether there is a next lightboxable element after `curElement`
-   * @param {!Element} curElement Current element.
-   * @return {!Promise<!boolean>}
-   */
-  hasNext(curElement) {
-    return this.getNext(curElement).then(next => {
-      return !!next;
-    });
-  }
-
-  /**
-   * Returns whether there is previous lightboxable element before `curElement`
-   * @param {!Element} curElement Current element.
-   * @return {!Promise<!boolean>}
-   */
-  hasPrevious(curElement) {
-    return this.getPrevious(curElement).then(prev => {
-      return !!prev;
-    });
-  }
-
-  /**
    * Initializes the manager only once.
    * @return {!Promise}
    */

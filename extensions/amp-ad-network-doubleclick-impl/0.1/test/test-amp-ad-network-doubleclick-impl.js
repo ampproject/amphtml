@@ -25,7 +25,11 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {
   installExtensionsService,
 } from '../../../../src/service/extensions-impl';
-import {extensionsFor, timerFor} from '../../../../src/services';
+import {
+  ampdocServiceFor,
+  extensionsFor,
+  timerFor
+} from '../../../../src/services';
 import {
   AmpAdNetworkDoubleclickImpl,
   getNetworkId,
@@ -42,9 +46,7 @@ import {
   MANUAL_EXPERIMENT_ID,
 } from '../../../../ads/google/a4a/traffic-experiments';
 import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
-import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {utf8Encode} from '../../../../src/utils/bytes';
-import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {BaseElement} from '../../../../src/base-element';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {
@@ -158,77 +160,35 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       });
     });
 
-    it('without signature', () => {
-      const headers = {
+    it('should not load amp-analytics without an analytics header', () => {
+      expect(impl.extractSize({
         get() {
           return undefined;
         },
         has() {
           return false;
         },
-      };
-      return utf8Encode('some creative').then(creative => {
-        return impl.extractCreativeAndSignature(creative, headers)
-            .then(adResponse => {
-              expect(adResponse).to.deep.equal({creative, signature: null});
-              expect(impl.extractSize(headers)).to.deep.equal(size);
-              expect(loadExtensionSpy.withArgs('amp-analytics'))
-                  .to.not.be.called;
-            });
-      });
+      })).to.deep.equal(size);
+      expect(loadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
     });
-    it('with signature', () => {
-      return utf8Encode('some creative').then(creative => {
-        const headers = {
-          get(name) {
-            return name == 'X-AmpAdSignature' ? 'AQAB' : undefined;
-          },
-          has(name) {
-            return name === 'X-AmpAdSignature';
-          },
-        };
-        return impl.extractCreativeAndSignature(creative, headers)
-            .then(adResponse => {
-              expect(adResponse).to.deep.equal({
-                creative,
-                signature: base64UrlDecodeToBytes('AQAB'),
-              });
-              expect(impl.extractSize(headers)).to.deep.equal(size);
-              expect(loadExtensionSpy.withArgs('amp-analytics'))
-                  .to.not.be.called;
-            });
-      });
-    });
-    it('with analytics', () => {
-      return utf8Encode('some creative').then(creative => {
-        const url = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
-        const headers = {
-          get(name) {
-            switch (name) {
-              case 'X-AmpAnalytics':
-                return JSON.stringify({url});
-              case 'X-AmpAdSignature':
-                return 'AQAB';
-              default:
-                return undefined;
-            }
-          },
-          has(name) {
-            return !!this.get(name);
-          },
-        };
-        return impl.extractCreativeAndSignature(creative, headers)
-            .then(adResponse => {
-              expect(adResponse).to.deep.equal({
-                creative,
-                signature: base64UrlDecodeToBytes('AQAB'),
-              });
-              expect(impl.extractSize(headers)).to.deep.equal(size);
-              expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
-              // exact value of ampAnalyticsConfig covered in
-              // ads/google/test/test-utils.js
-            });
-      });
+    it('should load amp-analytics with an analytics header', () => {
+      const url = ['https://foo.com?a=b', 'https://blah.com?lsk=sdk&sld=vj'];
+      expect(impl.extractSize({
+        get(name) {
+          switch (name) {
+            case 'X-AmpAnalytics':
+              return JSON.stringify({url});
+            default:
+              return undefined;
+          }
+        },
+        has(name) {
+          return !!this.get(name);
+        },
+      })).to.deep.equal(size);
+      expect(loadExtensionSpy.withArgs('amp-analytics')).to.be.called;
+      // exact value of ampAnalyticsConfig covered in
+      // ads/google/test/test-utils.js
     });
   });
 
@@ -249,6 +209,18 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         impl.size_ = {width: 200, height: 50};
         impl.iframe = impl.win.document.createElement('iframe');
         installExtensionsService(impl.win);
+        // Temporary fix for local test failure.
+        sandbox.stub(impl,
+            'getIntersectionElementLayoutBox', () => {
+              return {
+                top: 0,
+                bottom: 0,
+                left: 0,
+                right: 0,
+                width: 320,
+                height: 50,
+              };
+            });
       });
     });
 
@@ -479,20 +451,8 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         // numbers, but we know that the values should be numeric.
         expect(url).to.match(/sz=[0-9]+x[0-9]+/));
     });
-    it('has correct format when dc-use-attr-for-format is on', () => {
-      toggleExperiment(window, 'dc-use-attr-for-format', true);
-      new AmpAd(element).upgradeCallback();
-      const width = impl.element.getAttribute('width');
-      const height = impl.element.getAttribute('height');
-      impl.onLayoutMeasure();
-      return impl.getAdUrl().then(url =>
-        // With exp dc-use-attr-for-format off, we can't test for specific
-        // numbers, but we know that the values should be numeric.
-        expect(url).to.match(new RegExp(`sz=${width}x${height}`)));
-    });
-    it('has correct format when width=auto and dc-use-attr-for-format is on',
+    it('has correct format when width == "auto"',
         () => {
-          toggleExperiment(window, 'dc-use-attr-for-format', true);
           element.setAttribute('width', 'auto');
           new AmpAd(element).upgradeCallback();
           expect(impl.element.getAttribute('width')).to.equal('auto');
@@ -501,7 +461,6 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
               // Ensure that "auto" doesn't appear anywhere here:
               expect(url).to.match(/sz=[0-9]+x[0-9]+/));
         });
-
     it('should add RTC params if RTC is used', () => {
       const rtcConfig = createElementWithAttributes(
           document, 'script',
@@ -530,7 +489,6 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       });
 
     });
-
     it('should add param artc=-1 if RTC request times out', () => {
       const rtcConfig = createElementWithAttributes(
           document, 'script',
@@ -550,6 +508,38 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       });
 
     });
+    it('has correct format with height/width override',
+        () => {
+          element.setAttribute('data-override-width', '123');
+          element.setAttribute('data-override-height', '456');
+          new AmpAd(element).upgradeCallback();
+          impl.onLayoutMeasure();
+          return impl.getAdUrl().then(url =>
+              expect(url).to.contain('sz=123x456&'));
+        });
+    it('has correct format with height/width override and multiSize',
+        () => {
+          element.setAttribute('data-override-width', '123');
+          element.setAttribute('data-override-height', '456');
+          element.setAttribute('data-multi-size', '1x2,3x4');
+          element.setAttribute('data-multi-size-validation', 'false');
+          new AmpAd(element).upgradeCallback();
+          impl.onLayoutMeasure();
+          return impl.getAdUrl().then(url =>
+              expect(url).to.contain('sz=123x456%7C1x2%7C3x4&'));
+        });
+    it('has correct format with auto height/width and multiSize',
+        () => {
+          element.setAttribute('data-override-width', '123');
+          element.setAttribute('data-override-height', '456');
+          element.setAttribute('data-multi-size', '1x2,3x4');
+          element.setAttribute('data-multi-size-validation', 'false');
+          new AmpAd(element).upgradeCallback();
+          impl.onLayoutMeasure();
+          return impl.getAdUrl().then(url =>
+              // Ensure that "auto" doesn't appear anywhere here:
+              expect(url).to.match(/sz=[0-9]+x[0-9]+%7C1x2%7C3x4&/));
+        });
   });
 
   describe('#unlayoutCallback', () => {

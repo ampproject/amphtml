@@ -1,7 +1,7 @@
 {
   "_comment": "HTML file(s) used for visual diff tests. Paths relative to src.",
   "assets_dir": "examples/visual-tests",
-  "assets_base_url": "/",
+  "assets_base_url": "/examples/visual-tests",
   "webpages": [
     {
       "url": "examples/visual-tests/amp-by-example/amp-by-example.html",
@@ -10,6 +10,37 @@
     {
       "url": "examples/visual-tests/article.amp/article.amp.html",
       "name": "AMP Article"
+    },
+    {
+      "url": "examples/visual-tests/font.amp/font.amp.html",
+      "name": "Fonts",
+      "loading_incomplete_css": [
+        ".comic-amp-font-loading",
+        ".comic-amp-bold-font-loading"
+      ],
+      "loading_complete_css": [
+        ".comic-amp-font-loaded",
+        ".comic-amp-bold-font-loaded"
+      ]
+    }
+  ],
+  "failing_webpages": [
+    {
+      "url": "examples/visual-tests/font.amp.404/font.amp.html",
+      "name": "Fonts 404",
+      "issue": "https://github.com/ampproject/amphtml/issues/10377",
+      "forbidden_css": [
+        ".comic-amp-font-loaded",
+        ".comic-amp-bold-font-loaded"
+      ],
+      "loading_incomplete_css": [
+        ".comic-amp-font-loading",
+        ".comic-amp-bold-font-loading"
+      ],
+      "loading_complete_css": [
+        ".comic-amp-font-missing",
+        ".comic-amp-bold-font-missing"
+      ]
     }
   ]
 }

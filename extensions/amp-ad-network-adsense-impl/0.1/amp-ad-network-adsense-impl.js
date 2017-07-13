@@ -28,7 +28,6 @@ import {
 import {isExperimentOn} from '../../../src/experiments';
 import {
   additionalDimensions,
-  extractGoogleAdCreativeAndSignature,
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
   isReportingEnabled,
@@ -42,7 +41,7 @@ import {
 } from '../../../ads/google/a4a/google-data-reporter';
 import {removeElement} from '../../../src/dom';
 import {getMode} from '../../../src/mode';
-import {stringHash32} from '../../../src/crypto';
+import {stringHash32} from '../../../src/string';
 import {dev} from '../../../src/log';
 import {extensionsFor} from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
@@ -204,7 +203,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
-  extractCreativeAndSignature(responseText, responseHeaders) {
+  extractSize(responseHeaders) {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
     this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
     this.qqid_ = responseHeaders.get(QQID_HEADER);
@@ -212,11 +211,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       // Load amp-analytics extensions
       this.extensions_./*OK*/loadExtension('amp-analytics');
     }
-    return extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
-  }
-
-  /** @override */
-  extractSize(unusedResponseHeaders) {
     return this.size_;
   }
 

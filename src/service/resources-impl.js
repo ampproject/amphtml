@@ -23,13 +23,18 @@ import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../visibility-state';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {closest, hasNextNodeInDocumentOrder} from '../dom';
+import {
+  documentInfoForDoc,
+  inputFor,
+  timerFor,
+  viewerForDoc,
+  viewportForDoc,
+  vsyncFor,
+} from '../services';
 import {expandLayoutRect} from '../layout-rect';
 import {installInputService} from '../input';
+import {loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
-import {inputFor} from '../services';
-import {viewerForDoc} from '../services';
-import {viewportForDoc} from '../services';
-import {vsyncFor} from '../services';
 import {isArray} from '../types';
 import {dev} from '../log';
 import {dict} from '../utils/object';
@@ -37,7 +42,6 @@ import {reportError} from '../error';
 import {filterSplice} from '../utils/array';
 import {getSourceUrl} from '../url';
 import {areMarginsChanged} from '../layout-rect';
-import {documentInfoForDoc} from '../services';
 import {computedStyle} from '../style';
 
 const TAG_ = 'Resources';
@@ -154,8 +158,14 @@ export class Resources {
     /** @private {number} */
     this.lastVelocity_ = 0;
 
-    /** @const {!Pass} */
+    /** @const @private {!Pass} */
     this.pass_ = new Pass(this.win, () => this.doPass());
+
+    /** @const @private {!Pass} */
+    this.remeasurePass_ = new Pass(this.win, () => {
+      this.relayoutAll_ = true;
+      this.schedulePass();
+    });
 
     /** @const {!TaskQueue} */
     this.exec_ = new TaskQueue();
@@ -242,17 +252,33 @@ export class Resources {
       this.buildReadyResources_();
       this.pendingBuildResources_ = null;
       const fixPromise = ieMediaCheckAndFix(this.win);
+      const remeasure = () => this.remeasurePass_.schedule();
       if (fixPromise) {
-        fixPromise.then(() => {
-          this.relayoutAll_ = true;
-          this.schedulePass();
-        });
+        fixPromise.then(remeasure);
       } else {
         // No promise means that there's no problem.
-        this.relayoutAll_ = true;
+        remeasure();
       }
-      this.schedulePass();
       this.monitorInput_();
+
+      // Safari 10 and under incorrectly estimates font spacing for
+      // `@font-face` fonts. This leads to wild measurement errors. The best
+      // course of action is to remeasure everything on window.onload or font
+      // timeout (3s), whichever is earlier. This has to be done on the global
+      // window because this is where the fonts are always added.
+      // Unfortunately, `document.fonts.ready` cannot be used here due to
+      // https://bugs.webkit.org/show_bug.cgi?id=174030.
+      // See https://bugs.webkit.org/show_bug.cgi?id=174031 for more details.
+      Promise.race([
+        loadPromise(this.win),
+        timerFor(this.win).promise(3100),
+      ]).then(remeasure);
+
+      // Remeasure the document when all fonts loaded.
+      if (this.win.document.fonts &&
+          this.win.document.fonts.status != 'loaded') {
+        this.win.document.fonts.ready.then(remeasure);
+      }
     });
   }
 
@@ -472,6 +498,7 @@ export class Resources {
       dev().fine(TAG_, 'resource added:', resource.debugid);
     }
     this.resources_.push(resource);
+    this.remeasurePass_.schedule(1000);
   }
 
   /**

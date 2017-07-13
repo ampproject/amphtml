@@ -16,8 +16,7 @@
 
 import {AmpEvents} from '../../../../src/amp-events';
 import {AmpList} from '../amp-list';
-import {ampdocServiceFor} from '../../../../src/ampdoc';
-import {templatesFor} from '../../../../src/services';
+import {ampdocServiceFor, templatesFor} from '../../../../src/services';
 import * as sinon from 'sinon';
 
 describe('amp-list component', () => {

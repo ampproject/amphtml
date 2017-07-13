@@ -15,7 +15,7 @@
  */
 
 import {AmpInstallServiceWorker} from '../amp-install-serviceworker';
-import {ampdocServiceFor} from '../../../../src/ampdoc';
+import {ampdocServiceFor} from '../../../../src/services';
 import {
   registerServiceBuilder,
   registerServiceBuilderForDoc,

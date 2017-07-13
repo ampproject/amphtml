@@ -15,7 +15,13 @@
  */
 
 import {AmpDocSingle, installDocService} from '../../src/service/ampdoc-impl';
-import {ampdocServiceFor} from '../../src/ampdoc';
+import {
+  ampdocServiceFor,
+  platformFor,
+  viewerForDoc,
+  viewportForDoc,
+  vsyncFor,
+} from '../../src/services';
 import {
   installViewportServiceForDoc,
   Viewport,
@@ -34,12 +40,6 @@ import {installTimerService} from '../../src/service/timer-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installVsyncService} from '../../src/service/vsync-impl';
 import {loadPromise} from '../../src/event-helper';
-import {
-  platformFor,
-  viewerForDoc,
-  viewportForDoc,
-  vsyncFor,
-} from '../../src/services';
 import {setParentWindow} from '../../src/service';
 import {whenDocumentReady} from '../../src/document-ready';
 import * as sinon from 'sinon';
@@ -466,6 +466,26 @@ describes.fakeWin('Viewport', {}, env => {
     return fixedPromise.then(() => {
       expect(changeEvent).to.not.be.null;
     });
+  });
+
+  it('should dispatch onResize on width resize', () => {
+    let resizeEvent = null;
+    viewport.onResize(event => {
+      resizeEvent = event;
+    });
+    viewportSize.width = 112;
+    viewport.resize_();
+    expect(resizeEvent).to.not.equal(null);
+  });
+
+  it('should dispatch onResize on height resize', () => {
+    let resizeEvent = null;
+    viewport.onResize(event => {
+      resizeEvent = event;
+    });
+    viewportSize.height = 223;
+    viewport.resize_();
+    expect(resizeEvent).to.not.equal(null);
   });
 
   it('should not do anything if padding is not changed', () => {

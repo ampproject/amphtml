@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../src/amp-events';
+import {BindEvents} from '../extensions/amp-bind/0.1/bind-events';
 import {FakeLocation} from './fake-dom';
-import {ampdocServiceFor} from '../src/ampdoc';
+import {FormEvents} from '../extensions/amp-form/0.1/form-events';
+import {ampdocServiceFor, resourcesForDoc} from '../src/services';
 import {cssText} from '../build/css';
 import {deserializeMessage, isAmpMessage} from '../src/3p-frame-messaging';
 import {parseIfNeeded} from '../src/iframe-helper';
@@ -29,9 +32,6 @@ import installCustomElements from
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
 import {installStyles} from '../src/style-installer';
-import {resourcesForDoc} from '../src/services';
-import {AmpEvents} from '../src/amp-events';
-import {BindEvents} from '../extensions/amp-bind/0.1/bind-events';
 
 let iframeCount = 0;
 
@@ -66,14 +66,14 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
   return new Promise((resolve, reject) => {
     // Counts the supported custom events.
     const events = {
-      'amp:form-service:initialize': 0,
       [AmpEvents.ATTACHED]: 0,
-      [BindEvents.INITIALIZE]: 0,
-      [BindEvents.SET_STATE]: 0,
-      [BindEvents.RESCAN_TEMPLATE]: 0,
       [AmpEvents.ERROR]: 0,
       [AmpEvents.LOAD_START]: 0,
       [AmpEvents.STUBBED]: 0,
+      [BindEvents.INITIALIZE]: 0,
+      [BindEvents.SET_STATE]: 0,
+      [BindEvents.RESCAN_TEMPLATE]: 0,
+      [FormEvents.SERVICE_INIT]: 0,
     };
     const messages = [];
     let html = __html__[fixture];

@@ -204,13 +204,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8236',
   },
   {
-    id: 'amp-bind',
-    name: 'AMP extension for dynamic content',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7156',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-bind/amp-bind.md',
-  },
-  {
     id: 'web-worker',
     name: 'Web worker for background processing',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7156',
@@ -246,10 +239,6 @@ const EXPERIMENTS = [
   {
     id: 'as-use-attr-for-format',
     name: 'Use slot width/height attribute for AdSense size format',
-  },
-  {
-    id: 'dc-use-attr-for-format',
-    name: 'Use slot width/height attribute for DoubleClick size format',
   },
   {
     id: 'ad-loader-v1',

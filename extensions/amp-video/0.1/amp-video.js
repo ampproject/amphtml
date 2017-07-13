@@ -44,7 +44,7 @@ const ATTRS_TO_PROPAGATE =
     ATTRS_TO_PROPAGATE_ON_BUILD.concat(ATTRS_TO_PROPAGATE_ON_LAYOUT);
 
 /**
- * @implements {../../../src/video-interface.VideoInterface}
+ * @implements {../../../src/video-interface.VideoInterfaceWithAnalytics}
  */
 class AmpVideo extends AMP.BaseElement {
 
@@ -181,7 +181,11 @@ class AmpVideo extends AMP.BaseElement {
      */
   installEventHandlers_() {
     const video = dev().assertElement(this.video_);
-    this.forwardEvents([VideoEvents.PLAY, VideoEvents.PAUSE], video);
+    this.forwardEvents([
+      VideoEvents.PLAYING,
+      VideoEvents.PAUSE,
+      VideoEvents.ENDED,
+    ], video);
     listen(video, 'volumechange', () => {
       if (this.muted_ != this.video_.muted) {
         this.muted_ = this.video_.muted;
@@ -269,6 +273,33 @@ class AmpVideo extends AMP.BaseElement {
      */
   hideControls() {
     this.video_.controls = false;
+  }
+
+  /** @override */
+  supportsAnalytics() {
+    return true;
+  }
+
+  /** @override */
+  getCurrentTime() {
+    return this.video_.currentTime;
+  }
+
+  /** @override */
+  getDuration() {
+    return this.video_.duration;
+  }
+
+  /** @override */
+  getPlayedRanges() {
+    // TODO(cvializ): remove this because it can be inferred by other events
+    const played = this.video_.played;
+    const length = played.length;
+    const ranges = [];
+    for (let i = 0; i < length; i++) {
+      ranges.push([played.start(i), played.end(i)]);
+    }
+    return ranges;
   }
 }
 

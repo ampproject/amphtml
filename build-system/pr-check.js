@@ -123,7 +123,10 @@ function isBuildSystemFile(filePath) {
       path.extname(filePath) != '.textproto' &&
       // Exclude config files from build-system since we want it to trigger
       // the flag config check.
-      !isFlagConfig(filePath);
+      !isFlagConfig(filePath) &&
+      // Exclude visual diff files from build-system since we want it to trigger
+      // visual diff tests.
+      !isVisualDiffFile(filePath);
 }
 
 /**
@@ -164,6 +167,18 @@ function isDocFile(filePath) {
 }
 
 /**
+ * Determines if the given file is related to the visual diff tests.
+ * @param {string} filePath
+ * @return {boolean}
+ */
+function isVisualDiffFile(filePath) {
+  const filename = path.basename(filePath);
+  return (filename == 'visual-diff.rb' ||
+          filename == 'visual-tests.json' ||
+          filePath.startsWith('examples/visual-tests/'));
+}
+
+/**
  * Determines if the given file is an integration test.
  * @param {string} filePath
  * @return {boolean}
@@ -198,7 +213,8 @@ function determineBuildTargets(filePaths) {
         'RUNTIME',
         'INTEGRATION_TEST',
         'DOCS',
-        'FLAG_CONFIG']);
+        'FLAG_CONFIG',
+        'VISUAL_DIFF']);
   }
   const targetSet = new Set();
   for (let i = 0; i < filePaths.length; i++) {
@@ -215,6 +231,8 @@ function determineBuildTargets(filePaths) {
       targetSet.add('FLAG_CONFIG');
     } else if (isIntegrationTest(p)) {
       targetSet.add('INTEGRATION_TEST');
+    } else if (isVisualDiffFile(p)) {
+      targetSet.add('VISUAL_DIFF');
     } else {
       targetSet.add('RUNTIME');
     }
@@ -264,7 +282,7 @@ const command = {
   },
   runVisualDiffTests: function() {
     process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
-    timedExec(`ruby ${path.resolve('build-system/tasks/visual-diff.rb')}`);
+    timedExec(`ruby build-system/tasks/visual-diff.rb`);
   },
   runPresubmitTests: function() {
     timedExecOrDie(`${gulp} presubmit`);
@@ -286,10 +304,10 @@ function runAllCommands() {
     command.runVisualDiffTests();
     command.runJsonAndLintChecks();
     command.runDepAndTypeChecks();
+    command.runUnitTests();
     // command.testDocumentLinks() is skipped during push builds.
     command.buildValidatorWebUI();
     command.buildValidator();
-    command.runUnitTests(); // Needs validator to be built.
   }
   if (process.env.BUILD_SHARD == "integration_tests") {
     command.cleanBuild();
@@ -361,14 +379,9 @@ function main(argv) {
     if (buildTargets.has('DOCS')) {
       command.testDocumentLinks(files);
     }
-    if (buildTargets.has('VALIDATOR_WEBUI')) {
-      command.buildValidatorWebUI();
-    }
-    // Unit tests require validator being built.
-    if (buildTargets.has('VALIDATOR') || buildTargets.has('RUNTIME')) {
-      command.buildValidator();
-    }
-    if (buildTargets.has('RUNTIME') || buildTargets.has('INTEGRATION_TEST')) {
+    if (buildTargets.has('RUNTIME') ||
+        buildTargets.has('INTEGRATION_TEST') ||
+        buildTargets.has('VISUAL_DIFF')) {
       command.cleanBuild();
       command.buildRuntime();
       command.runVisualDiffTests();
@@ -379,10 +392,16 @@ function main(argv) {
       command.runPresubmitTests();
       command.runJsonAndLintChecks();
       command.runDepAndTypeChecks();
-      // Skip unit tests if the PR only contains changes to integration tests.
+      // Run unit tests only if the PR contains runtime changes.
       if (buildTargets.has('RUNTIME')) {
         command.runUnitTests();
       }
+    }
+    if (buildTargets.has('VALIDATOR_WEBUI')) {
+      command.buildValidatorWebUI();
+    }
+    if (buildTargets.has('VALIDATOR')) {
+      command.buildValidator();
     }
   }
 

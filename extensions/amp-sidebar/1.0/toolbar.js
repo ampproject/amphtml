@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {toggle, computedStyle, setStyles} from '../../../src/style';
+import {toggle} from '../../../src/style';
 
 /** @const */
 const TOOLBAR_TARGET_CLASS = 'i-amphtml-toolbar-target';
@@ -37,9 +37,6 @@ export class Toolbar {
 
     /** @private {Element} */
     this.body_ = this.win_.document.body;
-
-    /** @private {string|undefined} */
-    this.initialBodyTop_ = undefined;
 
     /** @private {number|undefined} */
     this.height_ = undefined;
@@ -104,12 +101,6 @@ export class Toolbar {
    */
   buildCallback_() {
     this.toolbarClone_ = this.toolbarDOMElement_.cloneNode(true);
-    // Addend "_toolbar" to ids on the toolbar clone
-    const idElementsInClone = Array.prototype.slice
-      .call(this.toolbarClone_.querySelectorAll('[id]'), 0);
-    idElementsInClone.forEach(element => {
-      element.id = `${element.id}_toolbar`;
-    });
     const targetId = this.toolbarDOMElement_.getAttribute('target');
     // Set the target element to the toolbar clone if it exists.
     const targetElement =
@@ -157,24 +148,6 @@ export class Toolbar {
    * @private
    */
   attemptShow_() {
-
-    // Make room for the toolbar
-    this.vsync_.run({
-      measure: state => {
-        if (this.body_ && !this.initialBodyTop_) {
-          this.initialBodyTop_ = computedStyle(this.win_, this.body_)['top'];
-        }
-        state.toolbarHeight = this.toolbarClone_./*REVIEW*/offsetHeight;
-      },
-      mutate: state => {
-        if (this.body_) {
-          setStyles(this.body_, {
-            'top': `calc(${state.toolbarHeight}px + ${this.initialBodyTop_})`,
-          });
-        }
-      },
-    }, {});
-
     if (this.isToolbarShown_()) {
       return;
     }
@@ -213,15 +186,6 @@ export class Toolbar {
           toggle(element, true);
         });
       }
-
-      // Remove room for our toolbar
-      if (this.body_) {
-        setStyles(this.body_, {
-          'top': this.initialBodyTop_,
-        });
-      }
-
-
       this.toolbarShown_ = false;
     });
   }

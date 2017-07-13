@@ -88,7 +88,7 @@ describe('amp-3q-player', function() {
             sendFakeMessage(player, iframe, 'muted');
             return p;
           }).then(() => {
-            const p = listenOncePromise(player, VideoEvents.PLAY);
+            const p = listenOncePromise(player, VideoEvents.PLAYING);
             sendFakeMessage(player, iframe, 'playing');
             return p;
           }).then(() => {
