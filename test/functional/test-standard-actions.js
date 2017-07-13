@@ -26,6 +26,7 @@ describes.sandboxed('StandardActions', {}, () => {
   let standardActions;
   let mutateElementStub;
   let deferMutateStub;
+  let scrollStub;
   let ampdoc;
 
   function createElement() {
@@ -72,11 +73,20 @@ describes.sandboxed('StandardActions', {}, () => {
     expect(element.expand).to.be.calledOnce;
   }
 
+  function expectAmpElementToHaveBeenScrolledIntoView(element) {
+    expect(scrollStub).to.be.calledOnce;
+    expect(scrollStub.firstCall.args[0]).to.equal(element);
+  }
+
   beforeEach(() => {
     ampdoc = new AmpDocSingle(window);
     standardActions = new StandardActions(ampdoc);
     mutateElementStub = stubMutate('mutateElement');
     deferMutateStub = stubMutate('deferMutate');
+    scrollStub = sandbox.stub(
+        standardActions.viewport_,
+        'animateScrollIntoView');
+
   });
 
   describe('"hide" action', () => {
@@ -161,6 +171,65 @@ describes.sandboxed('StandardActions', {}, () => {
       expectAmpElementToHaveBeenHidden(element);
     });
   });
+
+  describe('"scrollTo" action', () => {
+    it('should handle normal element', () => {
+      const element = createElement();
+      const invocation = {target: element, satisfiesTrust: () => true};
+      standardActions.handleScrollTo(invocation);
+      expectAmpElementToHaveBeenScrolledIntoView(element);
+    });
+
+    it('should handle AmpElement', () => {
+      const element = createAmpElement();
+      const invocation = {target: element, satisfiesTrust: () => true};
+      standardActions.handleScrollTo(invocation);
+      expectAmpElementToHaveBeenScrolledIntoView(element);
+    });
+  });
+
+  describe('"focus" action', () => {
+    it('should handle normal element', () => {
+      const element = createElement();
+      const invocation = {target: element, satisfiesTrust: () => true};
+      const focusStub = sandbox.stub(element, 'focus');
+      standardActions.handleFocus(invocation);
+      expect(focusStub).to.be.calledOnce;
+    });
+
+    it('should handle AmpElement', () => {
+      const element = createAmpElement();
+      const invocation = {target: element, satisfiesTrust: () => true};
+      const focusStub = sandbox.stub(element, 'focus');
+      standardActions.handleFocus(invocation);
+      expect(focusStub).to.be.calledOnce;
+    });
+  });
+
+  describe('"blur" action', () => {
+    it('should handle normal element', () => {
+      const element = createElement();
+      const invocation = {target: element, satisfiesTrust: () => true};
+      const focusStub = sandbox.stub(element, 'focus');
+      const blurStub = sandbox.stub(element, 'blur');
+      standardActions.handleFocus(invocation);
+      expect(focusStub).to.be.calledOnce;
+      standardActions.handleBlur(invocation);
+      expect(blurStub).to.be.calledOnce;
+    });
+
+    it('should handle AmpElement', () => {
+      const element = createAmpElement();
+      const invocation = {target: element, satisfiesTrust: () => true};
+      const focusStub = sandbox.stub(element, 'focus');
+      const blurStub = sandbox.stub(element, 'blur');
+      standardActions.handleFocus(invocation);
+      expect(focusStub).to.be.calledOnce;
+      standardActions.handleBlur(invocation);
+      expect(blurStub).to.be.calledOnce;
+    });
+  });
+
 
   describe('"AMP" global target', () => {
     it('should implement navigateTo', () => {
@@ -282,7 +351,7 @@ describes.sandboxed('StandardActions', {}, () => {
       expect(stub).to.be.calledOnce;
 
       // Global actions.
-      expect(embedActions.addGlobalMethodHandler).to.have.callCount(5);
+      expect(embedActions.addGlobalMethodHandler).to.have.callCount(6);
       expect(embedActions.addGlobalMethodHandler.args[0][0]).to.equal('hide');
       expect(embedActions.addGlobalMethodHandler.args[0][1]).to.be.function;
       expect(embedActions.addGlobalMethodHandler.args[1][0]).to.equal('show');
