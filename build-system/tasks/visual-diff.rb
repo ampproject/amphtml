@@ -47,13 +47,7 @@ def cyan(text); "\e[36m#{text}\e[0m"; end
 # - Process ID of server process.
 def launchWebServer()
   webserverCmd = "gulp serve --host #{HOST} --port #{PORT}"
-  webserverUrl = "http://#{HOST}:#{PORT}"
-  @pid = fork do
-    Signal.trap("INT") { exit }
-    exec webserverCmd
-  end
-  Process.detach(@pid)
-  @pid
+  spawn(webserverCmd)
 end
 
 
@@ -92,6 +86,7 @@ end
 def closeWebServer(pid)
   Process.kill("INT", pid)
   Process.wait(pid, Process::WNOHANG)
+  sleep(0.1)  # The child node process has an asynchronous stdout. See #10409.
 end
 
 
