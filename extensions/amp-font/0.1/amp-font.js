@@ -135,6 +135,7 @@ export class AmpFont extends AMP.BaseElement {
       size: DEFAULT_SIZE_,
       family: this.fontFamily_,
     };
+    this.document_.getElementById("debug_font").innerHTML = "starting";
     this.fontLoader_.load(fontConfig, this.getTimeout_()).then(() => {
       this.onFontLoadSuccess_();
     }).catch(unusedError => {
