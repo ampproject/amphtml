@@ -1201,7 +1201,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         '&user_id=${clientId(sr_amp_id)}' +
         '&domain=${canonicalHost}' +
         '&article_id=${article_id}' + 
-        'ignore_metadata=${ignore_metadata}',
+        '&ignore_metadata=${ignore_metadata}',
       'visible': '${host}/n?${baseParams}',
       'timer': '${host}/t?${baseParams}' +
         '&t=5000' +
