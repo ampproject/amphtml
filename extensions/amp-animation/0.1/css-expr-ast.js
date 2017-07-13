@@ -18,6 +18,7 @@ const FINAL_URL_RE = /^(data|https)\:/i;
 const DEG_TO_RAD = 2 * Math.PI / 360;
 const GRAD_TO_RAD = Math.PI / 200;
 const VAR_CSS_RE = /(calc|var|url|rand|width|height)\(/i;
+const NORM_CSS_RE = /\d(%|em|rem|vw|vh|vmin|vmax|s|deg|grad)/i;
 const INFINITY_RE = /^(infinity|infinite)$/i;
 
 
@@ -26,10 +27,11 @@ const INFINITY_RE = /^(infinity|infinite)$/i;
  * parsing and evaluation is heavy, but used relatively rarely. This method
  * can be used to avoid heavy parse/evaluate tasks.
  * @param {string} css
+ * @param {boolean} normalize
  * @return {boolean}
  */
-export function isVarCss(css) {
-  return VAR_CSS_RE.test(css);
+export function isVarCss(css, normalize) {
+  return VAR_CSS_RE.test(css) || normalize && NORM_CSS_RE.test(css);
 }
 
 
@@ -124,32 +126,35 @@ export class CssNode {
    * for a non-variable nodes (`isConst() == true`). Otherwise, `calc()` method
    * is used to calculate the new value.
    * @param {!CssContext} context
+   * @param {boolean} normalize
    * @return {?CssNode}
    * @final
    */
-  resolve(context) {
-    if (this.isConst()) {
+  resolve(context, normalize) {
+    if (this.isConst(normalize)) {
       return this;
     }
-    return this.calc(context);
+    return this.calc(context, normalize);
   }
 
   /**
    * Whether the CSS node is a constant or includes variable components.
+   * @param {boolean} unusedNormalize
    * @return {boolean}
    * @protected
    */
-  isConst() {
+  isConst(unusedNormalize) {
     return true;
   }
 
   /**
    * Calculates the value of all variable components.
    * @param {!CssContext} unusedContext
+   * @param {boolean} unusedNormalize
    * @return {?CssNode}
    * @protected
    */
-  calc(unusedContext) {
+  calc(unusedContext, unusedNormalize) {
     return this;
   }
 }
@@ -213,15 +218,16 @@ export class CssConcatNode extends CssNode {
   }
 
   /** @override */
-  isConst() {
-    return this.array_.reduce((acc, node) => acc && node.isConst(), true);
+  isConst(normalize) {
+    return this.array_.reduce(
+        (acc, node) => acc && node.isConst(normalize), true);
   }
 
   /** @override */
-  calc(context) {
+  calc(context, normalize) {
     const resolvedArray = [];
     for (let i = 0; i < this.array_.length; i++) {
-      const resolved = this.array_[i].resolve(context);
+      const resolved = this.array_[i].resolve(context, normalize);
       if (resolved) {
         resolvedArray.push(resolved);
       } else {
@@ -298,12 +304,29 @@ export class CssNumericNode extends CssNode {
    */
   createSameUnits(unusedNum) {}
 
+  /** @override */
+  isConst(normalize) {
+    return normalize ? this.isNorm() : true;
+  }
+
+  /**
+   * @return {boolean}
+   */
+  isNorm() {
+    return true;
+  }
+
   /**
    * @param {!CssContext} unusedContext
    * @return {!CssNumericNode}
    */
   norm(unusedContext) {
     return this;
+  }
+
+  /** @override */
+  calc(context, normalize) {
+    return normalize ? this.norm(context) : this;
   }
 
   /**
@@ -363,6 +386,19 @@ export class CssPercentNode extends CssNumericNode {
   createSameUnits(num) {
     return new CssPercentNode(num);
   }
+
+  /** @override */
+  isNorm() {
+    return false;
+  }
+
+  /** @override */
+  norm(context) {
+    if (context.getDimension()) {
+      return new CssLengthNode(0, 'px').calcPercent(this.num_, context);
+    }
+    return this;
+  }
 }
 
 
@@ -384,8 +420,13 @@ export class CssLengthNode extends CssNumericNode {
   }
 
   /** @override */
+  isNorm() {
+    return (this.units_ == 'px');
+  }
+
+  /** @override */
   norm(context) {
-    if (this.units_ == 'px') {
+    if (this.isNorm()) {
       return this;
     }
 
@@ -450,8 +491,13 @@ export class CssAngleNode extends CssNumericNode {
   }
 
   /** @override */
+  isNorm() {
+    return (this.units_ == 'rad');
+  }
+
+  /** @override */
   norm() {
-    if (this.units_ == 'rad') {
+    if (this.isNorm()) {
       return this;
     }
     if (this.units_ == 'deg') {
@@ -483,8 +529,13 @@ export class CssTimeNode extends CssNumericNode {
   }
 
   /** @override */
+  isNorm() {
+    return (this.units_ == 'ms');
+  }
+
+  /** @override */
   norm() {
-    if (this.units_ == 'ms') {
+    if (this.isNorm()) {
       return this;
     }
     return new CssTimeNode(this.millis_(), 'ms');
@@ -546,21 +597,22 @@ export class CssFuncNode extends CssNode {
   }
 
   /** @override */
-  isConst() {
-    return this.args_.reduce((acc, node) => acc && node.isConst(), true);
+  isConst(normalize) {
+    return this.args_.reduce(
+        (acc, node) => acc && node.isConst(normalize), true);
   }
 
   /** @override */
-  calc(context) {
+  calc(context, normalize) {
     const resolvedArgs = [];
     for (let i = 0; i < this.args_.length; i++) {
       const node = this.args_[i];
       let resolved;
       if (this.dimensions_ && i < this.dimensions_.length) {
         resolved = context.withDimension(this.dimensions_[i],
-            () => node.resolve(context));
+            () => node.resolve(context, normalize));
       } else {
-        resolved = node.resolve(context);
+        resolved = node.resolve(context, normalize);
       }
       if (resolved) {
         resolvedArgs.push(resolved);
@@ -673,15 +725,15 @@ export class CssRandNode extends CssNode {
   }
 
   /** @override */
-  calc(context) {
+  calc(context, normalize) {
     // No arguments: return a random node between 0 and 1.
     if (this.left_ == null || this.right_ == null) {
       return new CssNumberNode(Math.random());
     }
 
     // Arguments: do a min/max random math.
-    let left = this.left_.resolve(context);
-    let right = this.right_.resolve(context);
+    let left = this.left_.resolve(context, normalize);
+    let right = this.right_.resolve(context, normalize);
     if (left == null || right == null) {
       return null;
     }
@@ -737,13 +789,13 @@ export class CssVarNode extends CssNode {
   }
 
   /** @override */
-  calc(context) {
+  calc(context, normalize) {
     const varNode = context.getVar(this.varName_);
     if (varNode) {
-      return varNode.resolve(context);
+      return varNode.resolve(context, normalize);
     }
     if (this.def_) {
-      return this.def_.resolve(context);
+      return this.def_.resolve(context, normalize);
     }
     return null;
   }
@@ -773,8 +825,8 @@ export class CssCalcNode extends CssNode {
   }
 
   /** @override */
-  calc(context) {
-    return this.expr_.resolve(context);
+  calc(context, normalize) {
+    return this.expr_.resolve(context, normalize);
   }
 }
 
@@ -809,7 +861,7 @@ export class CssCalcSumNode extends CssNode {
   }
 
   /** @override */
-  calc(context) {
+  calc(context, normalize) {
     /*
      * From spec:
      * At + or -, check that both sides have the same type, or that one side is
@@ -817,8 +869,8 @@ export class CssCalcSumNode extends CssNode {
      * type, resolve to that type. If one side is a <number> and the other is
      * an <integer>, resolve to <number>.
      */
-    let left = this.left_.resolve(context);
-    let right = this.right_.resolve(context);
+    let left = this.left_.resolve(context, normalize);
+    let right = this.right_.resolve(context, normalize);
     if (left == null || right == null) {
       return null;
     }
@@ -880,9 +932,9 @@ export class CssCalcProductNode extends CssNode {
   }
 
   /** @override */
-  calc(context) {
-    const left = this.left_.resolve(context);
-    const right = this.right_.resolve(context);
+  calc(context, normalize) {
+    const left = this.left_.resolve(context, normalize);
+    const right = this.right_.resolve(context, normalize);
     if (left == null || right == null) {
       return null;
     }
