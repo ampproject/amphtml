@@ -86,6 +86,7 @@ end
 def closeWebServer(pid)
   Process.kill("INT", pid)
   Process.wait(pid, Process::WNOHANG)
+  sleep(0.1)  # The child node process has an asynchronous stdout. See #10409.
 end
 
 
