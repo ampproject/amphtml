@@ -1011,12 +1011,25 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       expect(css.resolveCss(-1)).to.equal('-1');
       expect(css.resolveCss(Infinity)).to.equal('Infinity');
       expect(css.resolveCss('10px')).to.equal('10px');
-      expect(css.resolveCss('10em')).to.equal('10em');
-      expect(css.resolveCss('10vh')).to.equal('10vh');
+      expect(css.resolveCss('translateY(10px)')).to.equal('translateY(10px)');
       expect(css.resolveCss('rgb(0,0,0)')).to.equal('rgb(0,0,0)');
-      expect(css.resolveCss('translateY(10vh)'))
-          .to.equal('translateY(10vh)');
       expect(parseSpy).to.not.be.called;
+    });
+
+    it('should evaluate CSS for non-normalized values', () => {
+      target1.style.fontSize = '10px';
+      target1.style.width = '110px';
+      css.withTarget(target1, () => {
+        expect(css.resolveCss('10em')).to.equal('100px');
+        expect(css.resolveCss('translateX(10em)'))
+            .to.equal('translatex(100px)');
+        expect(css.resolveCss('translateX(10%)'))
+            .to.equal('translatex(11px)');
+      });
+      expect(css.resolveCss('10vh')).to.equal('15px');
+      expect(css.resolveCss('translateY(10vh)'))
+          .to.equal('translatey(15px)');
+      expect(parseSpy).to.be.called;
     });
 
     it('should evaluate CSS for complex values', () => {
