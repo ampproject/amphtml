@@ -17,6 +17,7 @@
 import {isJsonScriptTag} from '../../../src/dom';
 import {assertHttpsUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 import {dev, rethrowAsync, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {expandTemplate} from '../../../src/string';
 import {isArray, isObject} from '../../../src/types';
 import {dict, hasOwn, map} from '../../../src/utils/object';
