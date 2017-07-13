@@ -566,7 +566,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                   credentials: 'include',
                   headers,
                 }).catch(err => {
-                  user().error(err.message);
+                  user().error(TAG, err.message);
                 });
               }
               // Non-200 status codes are forbidden for RTC.
@@ -626,7 +626,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @return {Promise}
    */
   shouldSendRequestWithoutRtc(errMessage) {
-    user().error(errMessage);
+    user().error(TAG, errMessage);
     let timeParam;
     // Have to use match instead of == because AMP
     // custom messages automatically append three
