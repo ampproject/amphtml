@@ -23,6 +23,7 @@ var nodemon = require('nodemon');
 var host = argv.host || 'localhost';
 var port = argv.port || process.env.PORT || 8000;
 var useHttps = argv.https != undefined;
+var quiet = argv.quiet != undefined;
 
 /**
  * Starts a simple http server at the repository root
@@ -51,7 +52,8 @@ function serve() {
       'SERVE_PORT': port,
       'SERVE_HOST': host,
       'SERVE_USEHTTPS': useHttps,
-      'SERVE_PROCESS_ID': process.pid
+      'SERVE_PROCESS_ID': process.pid,
+      'SERVE_QUIET': quiet
     },
   })
   .once('exit', function () {
@@ -75,7 +77,8 @@ gulp.task(
       options: {
         'host': '  Hostname or IP address to bind to (default: localhost)',
         'port': '  Specifies alternative port (default: 8000)',
-        'https': '  Use HTTPS server (default: false)'
+        'https': '  Use HTTPS server (default: false)',
+        'quiet': '  Do not log HTTP requests (default: false)'
       }
     }
 );
