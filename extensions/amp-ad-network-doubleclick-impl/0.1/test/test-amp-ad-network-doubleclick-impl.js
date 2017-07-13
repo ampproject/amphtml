@@ -542,7 +542,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       document.head.appendChild(rtcConfig);
       const xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
       // never resolve this promise
-      const xhrResponse = new Promise((resolve, reject) => {});
+      const xhrResponse = new Promise(() => {});
       xhrMock.returns(xhrResponse);
       new AmpAd(element).upgradeCallback();
       return impl.getAdUrl().catch(err => {
@@ -1045,14 +1045,15 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
 
     function mockRtcExecution(rtcResponse, element, opt_jsonFunction) {
       impl = new AmpAdNetworkDoubleclickImpl(element);
-      const jsonFunction = opt_jsonFunction || () => {
+      let jsonFunction = () => {
         return Promise.resolve(rtcResponse);
       };
+      jsonFunction = opt_jsonFunction || jsonFunction;
       xhrMock.returns(
           Promise.resolve({
             redirected: false,
             status: 200,
-            json: jsonFunction
+            json: jsonFunction,
           })
       );
       impl.populateAdUrlState();
@@ -1077,7 +1078,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
             document, 'script',
             {type: 'application/json', id: 'amp-rtc'});
         rtcConfig.innerHTML = JSON.stringify({
-          endpoint: "https://example-publisher.com/rtc/",
+          endpoint: 'https://example-publisher.com/rtc/',
         });
         document.head.appendChild(rtcConfig);
         xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
@@ -1220,7 +1221,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       return mockRtcExecution(badRtcResponse, element, jsonFunc).then(() => {
         // All that we are expecting here is that a Promise.reject doesn't
         // bubble up
-      }).catch(err => {
+      }).catch(() => {
         expect(false).to.be.true;
       });
     });
@@ -1237,7 +1238,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       return mockRtcExecution(badRtcResponse, element, jsonFunc).then(() => {
         expect(false).to.be.true;
       }).catch(err => {
-        expect(err.message.match(/Unexpected token/)).to.be.ok;
+        expect(err.match(/Unexpected token/)).to.be.ok;
       });
     });
 
@@ -1280,9 +1281,10 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         // Have to get substring, because the error message has
         // three 0 width blank space characters added to it
         // automatically by the log constructor.
-        expect(err.message.substring(0, 7)).to.equal('timeout');
+        expect(err.substring(0, 7)).to.equal('timeout');
       });
     });
+
     it('should timeout slow response, then send without RTC', () => {
       setRtcConfig({
         'endpoint': 'https://example-publisher.com/rtc/',

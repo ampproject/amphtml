@@ -84,13 +84,10 @@ const DOUBLECLICK_BASE_URL =
 /** @const {number} */
 const RTC_TIMEOUT = 1000;
 
-/** @const {string} */
-const SEND_WITHOUT_RTC = 'send_without_rtc';
-
 /** @private {?Promise<!Object<string,string>>} */
 let rtcPromise = null;
 
-/** @private {Object} */
+/** @private {JsonObject|null|undefined} */
 let rtcConfig = null;
 
 /** @private @const {!Object<string,string>} */
@@ -371,7 +368,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             this.getBlockParameters_(), pageLevelParameters);
         if (rtcTotalTime && rtcConfig && rtcConfig['endpoint']) {
           parameters['artc'] = rtcTotalTime;
-          parameters['ard'] = rtcConfig['endpoint']
+          parameters['ard'] = rtcConfig['endpoint'];
         }
         return googleAdUrl(
             this, DOUBLECLICK_BASE_URL, startTime, parameters, ['108809080']);
@@ -573,8 +570,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                   user().error(err.message);
                 });
               }
-              // Redirects and non-200 status codes are forbidden for RTC.
-              if (!!res.redirected || res.status != 200) {
+              // Non-200 status codes are forbidden for RTC.
+              // TODO: Add to fetchResponse the ability to
+              // check for redirects as well.
+              if (res.status != 200) {
                 return null;
               }
               return res.json().then(rtcResponse => {
@@ -599,7 +598,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           // Don't try to merge if we're sending without RTC.
           let rtcResponse;
           if (!r || !(rtcResponse = r.rtcResponse)) {
-            return this.shouldSendRequestWithoutRtc();
+            return this.shouldSendRequestWithoutRtc(
+                'Bad response');
           }
           const rtcTotalTime = r.rtcTotalTime;
           if (!!rtcResponse['targeting'] ||
@@ -613,25 +613,32 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           }
           return Promise.resolve(rtcTotalTime);
         }).catch(err => {
-          if (err) {
-            user().error(err.message);
-          }
-          return this.shouldSendRequestWithoutRtc(err);
+          const errMessage = (!!err && !!err.message) ?
+              err.message : 'Unknown error';
+          return this.shouldSendRequestWithoutRtc(errMessage);
         });
   }
 
-  shouldSendRequestWithoutRtc(err) {
+  /**
+   * Checks whether the pub has specified if we should still send
+   * the ad request on RTC failure. If yes, we return a resolve,
+   * if not, we return a reject.
+   * @param {string} errMessage
+   * @return {Promise}
+   */
+  shouldSendRequestWithoutRtc(errMessage) {
+    user().error(errMessage);
     let timeParam;
     // Have to use match instead of == because AMP
     // custom messages automatically append three
     // 0-width blank space characters to the ends
     // of error messages.
-    if (err && err.message.match(/^timeout/)) {
+    if (errMessage.match(/^timeout/)) {
       timeParam = -1;
     }
     return (rtcConfig['sendAdRequestOnFailure'] !== false &&
         rtcConfig['sendAdRequestOnFailure'] != 'false') ?
-        Promise.resolve(timeParam) : Promise.reject(err);
+        Promise.resolve(timeParam) : Promise.reject(errMessage);
   };
 
   /** @override */
