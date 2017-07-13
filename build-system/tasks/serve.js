@@ -55,8 +55,10 @@ function serve() {
     },
   })
   .once('exit', function () {
-    util.log(util.colors.green('Shutting down server'));
     process.exit();
+  })
+  .once('quit', function () {
+    util.log(util.colors.green('Shutting down server'));
   });
   util.log(util.colors.yellow('Run `gulp build` then go to '
       + getHost() + '/examples/article.amp.html'
