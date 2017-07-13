@@ -17,7 +17,7 @@
 
 import {ActionTrust} from '../action-trust';
 import {VideoSessionManager} from './video-session-manager';
-import {removeElement} from '../dom.js';
+import {removeElement, isRTL} from '../dom';
 import {listen, listenOncePromise} from '../event-helper';
 import {dev} from '../log';
 import {getMode} from '../mode';
@@ -101,8 +101,8 @@ export class VideoManager {
    */
   constructor(ampdoc) {
 
-    /** @private @const {!./ampdoc-impl.AmpDoc}  */
-    this.ampdoc_ = ampdoc;
+    /** @const {!./ampdoc-impl.AmpDoc}  */
+    this.ampdoc = ampdoc;
 
     /** @private {?Array<!VideoEntry>} */
     this.entries_ = null;
@@ -204,9 +204,9 @@ export class VideoManager {
     }
 
     if (!this.positionObserver_) {
-      installPositionObserverServiceForDoc(this.ampdoc_);
+      installPositionObserverServiceForDoc(this.ampdoc);
       this.positionObserver_ = getServiceForDoc(
-          this.ampdoc_,
+          this.ampdoc,
           'position-observer'
       );
     }
@@ -304,7 +304,7 @@ class VideoEntry {
     this.manager_ = manager;
 
     /** @private @const {!./ampdoc-impl.AmpDoc}  */
-    this.ampdoc_ = manager.ampdoc_;
+    this.ampdoc_ = manager.ampdoc;
 
     /** @package @const {!../video-interface.VideoInterface} */
     this.video = video;
@@ -369,9 +369,6 @@ class VideoEntry {
     /** @private */
     this.muted_ = false;
 
-    /** @private {string} */
-    this.pageDir_ = 'ltr';
-
     /** @private {?PositionInViewportEntryDef} */
     this.lastPosition_ = null;
 
@@ -405,13 +402,6 @@ class VideoEntry {
     }
     if (this.hasDocking) {
       this.dockableVideoBuilt_();
-      // Determine the page's direction to help decide which side to dock on
-      // TODO(@wassgha) Probably will be needed for more functionality later
-      // but for now, only needed for video docking
-      const doc = this.ampdoc_.win.document;
-      this.pageDir_ = doc.body.getAttribute('dir')
-                     || doc.documentElement.getAttribute('dir')
-                     || 'ltr';
     }
   }
 
@@ -707,7 +697,7 @@ class VideoEntry {
         if (this.dockingState_ != DockingStates.INLINE) {
           this.animateDocking_();
         }
-      } else if (this.internalElement_.classList.contains(DOCK_CLASS)) {
+      } else if (docked) {
         // Here undocking animations are done so we restore the element
         // inline by clearing all styles and removing the position:fixed
         this.finishDocking_();
@@ -724,7 +714,6 @@ class VideoEntry {
    */
   updateDockableVideoPosition_(newPos) {
     const viewport = viewportForDoc(this.ampdoc_);
-    const isLtr = this.pageDir_ == 'ltr';
     const isBottom = newPos.relativePos == RelativePositions.BOTTOM;
     const isTop = newPos.relativePos == RelativePositions.TOP;
     const isInside = newPos.relativePos == RelativePositions.INSIDE;
@@ -793,14 +782,16 @@ class VideoEntry {
       return;
     }
 
+    const doc = this.ampdoc_.win.document;
+
     // Calculate where the video should be docked if it hasn't been dragged
     if (this.minimizePosition_ == MinimizePositions.INLINE && !isInside) {
       if (isTop) {
-        this.minimizePosition_ = isLtr ? MinimizePositions.TOP_RIGHT
-                                       : MinimizePositions.TOP_LEFT;
+        this.minimizePosition_ = isRTL(doc) ? MinimizePositions.TOP_LEFT
+                                       : MinimizePositions.TOP_RIGHT;
       } else if (isBottom) {
-        this.minimizePosition_ = isLtr ? MinimizePositions.BOTTOM_RIGHT
-                                       : MinimizePositions.BOTTOM_LEFT;
+        this.minimizePosition_ = isRTL(doc) ? MinimizePositions.BOTTOM_LEFT
+                                       : MinimizePositions.BOTTOM_RIGHT;
       }
     } else if (isInside) {
       this.minimizePosition_ = MinimizePositions.INLINE;
@@ -834,13 +825,13 @@ class VideoEntry {
    */
   animateDocking_() {
     // Calculate offsetXLeft
-    const offsetXLeft = this.calcDockOffsetXLeft();
+    const offsetXLeft = this.calcDockOffsetXLeft_();
     // Calculate offsetXRight
-    const offsetXRight = this.calcDockOffsetXRight();
+    const offsetXRight = this.calcDockOffsetXRight_();
     // Calculate offsetYTop
-    const offsetYTop = this.calcDockOffsetYTop();
+    const offsetYTop = this.calcDockOffsetYTop_();
     // Calculate offsetYBottom
-    const offsetYBottom = this.calcDockOffsetYBottom();
+    const offsetYBottom = this.calcDockOffsetYBottom_();
 
     // Calculate translate
     let translate;
@@ -899,17 +890,19 @@ class VideoEntry {
 
   /**
    * Calculates the x-axis offset when the video is docked to the left
+   * @private
    * @return {string}
    */
-  calcDockOffsetXLeft() {
+  calcDockOffsetXLeft_() {
     return st.px(this.scrollMap_(this.initialRect_.left, DOCK_MARGIN, true));
   }
 
   /**
    * Calculates the x-axis offset when the video is docked to the right
+   * @private
    * @return {string}
    */
-  calcDockOffsetXRight() {
+  calcDockOffsetXRight_() {
     const viewport = viewportForDoc(this.ampdoc_);
     const initialOffsetRight = viewport.getWidth()
                         - this.initialRect_.left
@@ -926,17 +919,19 @@ class VideoEntry {
 
   /**
    * Calculates the y-axis offset when the video is docked to the top
+   * @private
    * @return {string}
    */
-  calcDockOffsetYTop() {
+  calcDockOffsetYTop_() {
     return st.px(this.scrollMap_(0, DOCK_MARGIN, true));
   }
 
   /**
    * Calculates the y-axis offset when the video is docked to the bottom
+   * @private
    * @return {string}
    */
-  calcDockOffsetYBottom() {
+  calcDockOffsetYBottom_() {
     const viewport = viewportForDoc(this.ampdoc_);
     const scaledHeight = DOCK_SCALE * this.initialRect_.height;
     return st.px(
