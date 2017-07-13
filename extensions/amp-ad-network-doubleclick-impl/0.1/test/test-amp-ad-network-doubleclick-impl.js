@@ -462,14 +462,14 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
               expect(url).to.match(/sz=[0-9]+x[0-9]+/));
         });
     it('should add RTC params if RTC is used', () => {
-      const rtcConfig = createElementWithAttributes(
+      const rtcConf = createElementWithAttributes(
           document, 'script',
           {type: 'application/json', id: 'amp-rtc'});
-      rtcConfig.innerHTML = '{'
+      rtcConf.innerHTML = '{'
           + '"endpoint": "https://example-publisher.com/rtc/",'
           + '"sendAdRequestOnFailure": false'
           + '}';
-      document.head.appendChild(rtcConfig);
+      document.head.appendChild(rtcConf);
       const rtcResponse = {targeting: {age: '18-24'}};
       const xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
       xhrMock.returns(
@@ -490,14 +490,14 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
 
     });
     it('should add param artc=-1 if RTC request times out', () => {
-      const rtcConfig = createElementWithAttributes(
+      const rtcConf = createElementWithAttributes(
           document, 'script',
           {type: 'application/json', id: 'amp-rtc'});
-      rtcConfig.innerHTML = '{'
+      rtcConf.innerHTML = '{'
           + '"endpoint": "https://example-publisher.com/rtc/",'
           + '"sendAdRequestOnFailure": false'
           + '}';
-      document.head.appendChild(rtcConfig);
+      document.head.appendChild(rtcConf);
       const xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
       // never resolve this promise
       const xhrResponse = new Promise(() => {});
@@ -1051,8 +1051,8 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     }
 
     function setRtcConfig(rtcConfigJson) {
-      const rtcConfig = document.getElementById('amp-rtc');
-      rtcConfig.innerText = JSON.stringify(rtcConfigJson);
+      const rtcConf = document.getElementById('amp-rtc');
+      rtcConf.innerText = JSON.stringify(rtcConfigJson);
     }
 
     beforeEach(() => {
@@ -1064,13 +1064,13 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           'type': 'doubleclick',
           'layout': 'fixed',
         });
-        const rtcConfig = createElementWithAttributes(
+        const rtcConf = createElementWithAttributes(
             document, 'script',
             {type: 'application/json', id: 'amp-rtc'});
-        rtcConfig.innerHTML = JSON.stringify({
+        rtcConf.innerHTML = JSON.stringify({
           endpoint: 'https://example-publisher.com/rtc/',
         });
-        document.head.appendChild(rtcConfig);
+        document.head.appendChild(rtcConf);
         xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
 
       });
@@ -1080,8 +1080,8 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       impl = null;
       xhrMock = null;
       resetRtcStateForTesting();
-      const rtcConfig = document.getElementById('amp-rtc');
-      document.head.removeChild(rtcConfig);
+      const rtcConf = document.getElementById('amp-rtc');
+      document.head.removeChild(rtcConf);
     });
 
     it('should add just targeting to impl', () => {
@@ -1189,8 +1189,8 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     });
 
     it('should not send RTC if url invalid', () => {
-      const rtcConfig = document.getElementById('amp-rtc');
-      rtcConfig.innerText = '{'
+      const rtcConf = document.getElementById('amp-rtc');
+      rtcConf.innerText = '{'
           + '"endpoint": "http://example-publisher.com/rtc/",'
           + '"sendAdRequestOnFailure": false'
           + '}';
