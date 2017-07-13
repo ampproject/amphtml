@@ -28,7 +28,7 @@ import {
 import {
   ampdocServiceFor,
   extensionsFor,
-  timerFor
+  timerFor,
 } from '../../../../src/services';
 import {
   AmpAdNetworkDoubleclickImpl,
