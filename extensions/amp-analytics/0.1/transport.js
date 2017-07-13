@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,42 +19,72 @@ import {
   parseUrl,
   checkCorsUrl,
 } from '../../../src/url';
+import {createElementWithAttributes} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {loadPromise} from '../../../src/event-helper';
 import {Services} from '../../../src/services';
 import {removeElement} from '../../../src/dom';
-import {setStyle} from '../../../src/style';
+import {setStyle, setStyles} from '../../../src/style';
+import {hasOwn} from '../../../src/utils/object';
+import {listenFor} from '../../../src/iframe-helper';
+import {AMP_ANALYTICS_3P_MESSAGE_TYPE} from '../../../src/3p-analytics-common';
+import {
+  AmpAnalytics3pEventMessageQueue,
+} from './amp-analytics-3p-message-queue';
 
-/** @const {string} */
+/** @private @const {string} */
 const TAG_ = 'amp-analytics.Transport';
 
-/**
- * @param {!Window} win
- * @param {string} request
- * @param {!Object<string, string>} transportOptions
- */
-export function sendRequest(win, request, transportOptions) {
-  assertHttpsUrl(request, 'amp-analytics request');
-  checkCorsUrl(request);
-  if (transportOptions['beacon'] &&
-      Transport.sendRequestUsingBeacon(win, request)) {
-    return;
-  }
-  if (transportOptions['xhrpost'] &&
-      Transport.sendRequestUsingXhr(win, request)) {
-    return;
-  }
-  if (transportOptions['image']) {
-    Transport.sendRequestUsingImage(win, request);
-    return;
-  }
-  user().warn(TAG_, 'Failed to send request', request, transportOptions);
-}
+/** @typedef {{
+ *    frame: Element,
+ *    sentinel: !string,
+ *    usageCount: number,
+ *    eventQueue: AmpAnalytics3pEventMessageQueue,
+ *  }} */
+export let FrameData;
 
 /**
  * @visibleForTesting
  */
 export class Transport {
+  /**
+   * @param {!string} type The value of the amp-analytics tag's type attribute
+   */
+  constructor(type) {
+    /** @private @const {string} */
+    this.id_ = Transport.createUniqueId_();
+
+    /** @private @const {string} */
+    this.type_ = type;
+  }
+
+  /**
+   * @param {!Window} win
+   * @param {string} request
+   * @param {Object<string, string>=} transportOptions
+   */
+  sendRequest(win, request, transportOptions) {
+    assertHttpsUrl(request, 'amp-analytics request');
+    if (transportOptions && transportOptions['iframe']) {
+      this.sendRequestUsingCrossDomainIframe(request, transportOptions);
+      return;
+    }
+    checkCorsUrl(request);
+    if (transportOptions['beacon'] &&
+      Transport.sendRequestUsingBeacon(win, request)) {
+      return;
+    }
+    if (transportOptions['xhrpost'] &&
+      Transport.sendRequestUsingXhr(win, request)) {
+      return;
+    }
+    if (transportOptions['image']) {
+      Transport.sendRequestUsingImage(win, request);
+      return;
+    }
+    user().warn(TAG_, 'Failed to send request', request, transportOptions);
+  }
 
   /**
    * @param {!Window} unusedWin
@@ -118,13 +148,226 @@ export class Transport {
     xhr.send('');
     return true;
   }
+
+  /**
+   * If iframe is specified in config/transport, check whether third-party
+   * iframe already exists, and if not, create it.
+   * @param {!Window} win The window element
+   * @param {!Object<string,string>} transportOptions The 'transport' portion
+   * of the amp-analytics config object
+   * @param {function(!string,
+   *   !../../../src/3p-analytics-common.AmpAnalytics3pResponse)=}
+   *   opt_processResponse An optional function to receive any response
+   *   messages back from the cross-domain iframe
+   */
+  processCrossDomainIframe(win, transportOptions, opt_processResponse) {
+    const frameUrl = dev().assertString(transportOptions['iframe'],
+        'Cross-domain frame parameters missing ${this.type_}');
+    let frameData;
+    let shouldAddToDOM = false;
+    if (Transport.hasCrossDomainIframe(frameUrl)) {
+      frameData = Transport.getFrameData(frameUrl);
+      Transport.incrementIframeUsageCount_(
+        /** @type{!FrameData} */ (frameData));
+    } else {
+      frameData = this.createCrossDomainIframe(win, frameUrl,
+          opt_processResponse);
+      shouldAddToDOM = true;
+    }
+    dev().assert(frameData, 'Trying to use non-existent frame');
+    //TODO(jonkeller): Put this back in
+    //if (transportOptions['extraData']) {
+      //frameData.extraDataQueue.enqueue(this.id_,
+      // transportOptions['extraData']);
+    //}
+
+    if (shouldAddToDOM) {
+      win.document.body.appendChild(frameData.frame);
+    }
+  }
+
+  /**
+   * Create a cross-domain iframe for third-party vendor anaytlics
+   * @param {!Window} win The window element
+   * @param {!string} frameUrl  The URL of the cross-domain iframe
+   * @param {function(!string,
+   *   !../../../src/3p-analytics-common.AmpAnalytics3pResponse)=}
+   *   opt_processResponse An optional function to receive any response
+   *   messages back from the cross-domain iframe
+   * @return {!FrameData}
+   * @VisibleForTesting
+   */
+  createCrossDomainIframe(win, frameUrl, opt_processResponse) {
+    const sentinel = Transport.createUniqueId_();
+    const scriptSrc = getMode().localDev
+      ? 'dist.3p/current/ampanalytics-lib.js'
+      : '$internalRuntimeVersion$/ampanalytics-v0.js';
+    const frameName = JSON.stringify(/** @type {JsonObject} */ ({
+      scriptSrc,
+      sentinel,
+    }));
+    const frame = createElementWithAttributes(win.document, 'iframe',
+        /** @type {!JsonObject} */ ({
+          sandbox: 'allow-scripts',
+          name: frameName,
+          src: frameUrl,
+          'data-amp-3p-sentinel': sentinel,
+        }));
+    setStyles(frame, {
+      width: 0,
+      height: 0,
+      display: 'none',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+    });
+    const frameData = /** @const {FrameData} */ ({
+      frame,
+      sentinel,
+      usageCount: 1,
+      eventQueue: new AmpAnalytics3pEventMessageQueue(win,
+          /** @type {!HTMLIFrameElement} */
+          (frame)),
+    });
+    Transport.crossDomainIframes_[frameUrl] = frameData;
+
+    frameData.responseMessageUnlisten = listenFor(frameData.frame,
+        frameData.sentinel + AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE,
+        response => {
+          dev().assert(response && response['data'],
+              'Received empty response from 3p analytics frame');
+          if (!opt_processResponse) {
+            return;
+          }
+          opt_processResponse(
+              this.type_,
+              /** @type
+               * {!../../../src/3p-analytics-common.AmpAnalytics3pResponse}
+               */ (response));
+        },
+        true);
+    return frameData;
+  }
+
+  /**
+   * Called when a creative no longer needs its cross-domain iframe (for
+   * instance, because the creative has been removed from the DOM).
+   * Once all creatives using a frame are done with it, the frame can be
+   * destroyed.
+   * @param {!HTMLDocument} ampDoc The AMP document
+   * @param {!Object<string,string>} transportOptions The 'transport' portion
+   * of the amp-analytics config object
+   */
+  static doneUsingCrossDomainIframe(ampDoc, transportOptions) {
+    const frameUrl = transportOptions['iframe'];
+    const frameData = Transport.getFrameData(frameUrl);
+    if (Transport.decrementIframeUsageCount_(frameData)) {
+      // Some other instance is still using it
+      return;
+    }
+    ampDoc.body.removeChild(frameData.frame);
+    delete Transport.crossDomainIframes_[frameUrl];
+    // TODO(jonkeller): Do something with frameData.readyMessageUnlisten and frameData.responseMessageUnlisten
+  }
+
+  /**
+   * Record that one more creative is using this cross-domain iframe
+   * @param {!FrameData} frameData  The cross-domain iframe and
+   * associated data
+   * @return {number}
+   * @private
+   */
+  static incrementIframeUsageCount_(frameData) {
+    return ++(frameData.usageCount);
+  }
+
+  /**
+   * Record that one fewer creative is using this cross-domain iframe
+   * @param {!FrameData} frameData  The cross-domain iframe and
+   * associated data
+   * @return {number}
+   * @private
+   */
+  static decrementIframeUsageCount_(frameData) {
+    return --(frameData.usageCount);
+  }
+
+  /**
+   * Returns whether a url of a cross-domain frame is already known
+   * @param {!string} frameUrl
+   * @return {!boolean}
+   * @VisibleForTesting
+   */
+  static hasCrossDomainIframe(frameUrl) {
+    return hasOwn(Transport.crossDomainIframes_, frameUrl);
+  }
+
+  /**
+   * Create a unique value to differentiate messages from
+   * this particular creative to the cross-domain iframe
+   * @returns {string}
+   * @private
+   */
+  static createUniqueId_() {
+    return String(++(Transport.nextId_));
+  }
+
+  /**
+   * Sends an Amp Analytics trigger event to a vendor's cross-domain iframe,
+   * or queues the message if the frame is not yet ready to receive messages.
+   * @param {!string} event A string describing the trigger event
+   * @param {!Object<string, string>} transportOptions
+   * @VisibleForTesting
+   */
+  sendRequestUsingCrossDomainIframe(event, transportOptions) {
+    const frameData = Transport.getFrameData(transportOptions['iframe']);
+    dev().assert(frameData, 'Trying to send message to non-existent frame');
+    dev().assert(frameData.eventQueue,
+        'Event queue is missing for ' + this.id_);
+    frameData.eventQueue.enqueue(this.id_, event);
+  }
+
+  /**
+   * Gets the FrameData associated with a particular cross-domain frame URL.
+   * @param frameUrl
+   * @returns {FrameData}
+   * @VisibleForTesting
+   */
+  static getFrameData(frameUrl) {
+    return Transport.crossDomainIframes_[frameUrl];
+  }
+
+  /**
+   * Removes all knowledge of cross-domain iframes.
+   * Does not actually remove them from the DOM.
+   * @VisibleForTesting
+   */
+  static resetCrossDomainIframes() {
+    Transport.crossDomainIframes_ = {};
+  }
+
+  /**
+   * @returns {!string} Unique ID of this instance of Transport
+   * @VisibleForTesting
+   */
+  getId() {
+    return this.id_;
+  }
 }
+
+/** @private {Object<string,FrameData>} */
+Transport.crossDomainIframes_ = {};
+
+/** @private {number} */
+Transport.nextId_ = 0;
 
 /**
  * Sends a ping request using an iframe, that is removed 5 seconds after
  * it is loaded.
  * This is not available as a standard transport, but rather used for
  * specific, whitelisted requests.
+ * Note that this is unrelated to the cross-domain iframe use case above in
+ * sendRequestUsingCrossDomainIframe()
  * @param {!Window} win
  * @param {string} request The request URL.
  */
@@ -140,9 +383,9 @@ export function sendRequestUsingIframe(win, request) {
   };
   user().assert(
       parseUrl(request).origin != parseUrl(win.location.href).origin,
-      'Origin of iframe request must not be equal to the doc' +
-      'ument origin. See https://github.com/ampproject/' +
-      'amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.');
+      'Origin of iframe request must not be equal to the document origin.' +
+      ' See https://github.com/ampproject/' +
+      ' amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.');
   iframe.setAttribute('amp-analytics', '');
   iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
   iframe.src = request;

@@ -17,11 +17,13 @@
 import {isJsonScriptTag} from '../../../src/dom';
 import {assertHttpsUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 import {dev, rethrowAsync, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {expandTemplate} from '../../../src/string';
 import {isArray, isObject} from '../../../src/types';
 import {dict, hasOwn, map} from '../../../src/utils/object';
-import {sendRequest, sendRequestUsingIframe} from './transport';
+import {sendRequestUsingIframe, Transport} from './transport';
 import {Services} from '../../../src/services';
+import {ResponseMap} from '../../../src/3p-analytics-common';
 import {toggle} from '../../../src/style';
 import {isEnumValue} from '../../../src/types';
 import {parseJson} from '../../../src/json';
@@ -113,6 +115,9 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     /** @private {?Promise} */
     this.iniPromise_ = null;
+
+    /** @private {!Transport} */
+    this.transport_ = new Transport(this.element.getAttribute('type'));
   }
 
   /** @override */
@@ -156,6 +161,15 @@ export class AmpAnalytics extends AMP.BaseElement {
     // Now that we are rendered, stop rendering the element to reduce
     // resource consumption.
     return this.ensureInitialized_();
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    const ampDoc = this.getAmpDoc();
+    Transport.doneUsingCrossDomainIframe(ampDoc.win.document,
+        this.config_['transport']);
+    ResponseMap.remove(ampDoc, this.config_['transport']['type']);
+    return true;
   }
 
   /** @override */
@@ -219,6 +233,13 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.analyticsGroup_ =
         this.instrumentation_.createAnalyticsGroup(this.element);
 
+    if (this.config_['transport'] && this.config_['transport']['iframe']) {
+      this.transport_.processCrossDomainIframe(this.getAmpDoc().win,
+          this.config_['transport'], (type, responseMessage) => {
+            this.processCrossDomainIframeResponse_(type, responseMessage);
+          });
+    }
+
     const promises = [];
     // Trigger callback can be synchronous. Do the registration at the end.
     for (const k in this.config_['triggers']) {
@@ -274,6 +295,20 @@ export class AmpAnalytics extends AMP.BaseElement {
       }
     }
     return Promise.all(promises);
+  }
+
+  /**
+   * Receives any response that may be sent from the cross-domain iframe.
+   * @param {!string} type The type parameter of the cross-domain iframe
+   * @param {!../../../src/3p-analytics-common.AmpAnalytics3pResponse} response
+   * The response message from the iframe that was specified in the
+   * amp-analytics config
+   */
+  processCrossDomainIframeResponse_(type, response) {
+    ResponseMap.add(this.getAmpDoc(),
+        type,
+        /** @type {string} */ (this.win.document.baseURI),
+        response.data);
   }
 
   /**
@@ -399,6 +434,22 @@ export class AmpAnalytics extends AMP.BaseElement {
           'deprecation');
     }
     const typeConfig = this.predefinedConfig_[type] || {};
+
+    // transport.iframe is only allowed to be specified in typeConfig, not
+    // the others. Allowed when running locally for testing purposes.
+    [defaultConfig, inlineConfig, this.remoteConfig_].forEach(config => {
+      if (config && config.transport && config.transport.iframe) {
+        const TAG = this.getName_();
+        if (getMode().localDev) {
+          user().warn(TAG, 'Only typeConfig may specify iframe transport,' +
+            ' but in local dev mode, so okay', config);
+        } else {
+          user().error(TAG, 'Only typeConfig may specify iframe transport',
+              config);
+          return;
+        }
+      }
+    });
 
     this.mergeObjects_(defaultConfig, config);
     this.mergeObjects_(typeConfig, config, /* predefined */ true);
@@ -732,7 +783,8 @@ export class AmpAnalytics extends AMP.BaseElement {
           'iframePing is only available on page view requests.');
       sendRequestUsingIframe(this.win, request);
     } else {
-      sendRequest(this.win, request, this.config_['transport'] || {});
+      this.transport_.sendRequest(this.win, request,
+          this.config_['transport'] || {});
     }
   }
 
