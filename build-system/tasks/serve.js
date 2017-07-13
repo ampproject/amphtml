@@ -55,7 +55,9 @@ function serve() {
     },
   })
   .once('exit', function () {
-    process.exit();
+    process.nextTick(function() {
+      process.exit();
+    });
   })
   .once('quit', function () {
     util.log(util.colors.green('Shutting down server'));
