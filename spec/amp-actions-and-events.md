@@ -89,7 +89,7 @@ For example, the following is possible in AMP.
     <th>Description</th>
   </tr>
   <tr>
-    <td>tap</td>
+    <td>`tap`</td>
     <td>Fired when the element is clicked/tapped.</td>
   </tr>
 </table>
@@ -142,7 +142,7 @@ For example, the following is possible in AMP.
     <th>Data</th>
   </tr>
   <tr>
-    <td>slideChange</td>
+    <td>`slideChange`</td>
     <td>Fired when the user manually changes the carousel's current slide. Does not fire on autoplay or the <code>goToSlide</code> action.</td>
     <td><code>event.index</code> : slide number</td>
   </tr>
@@ -156,7 +156,7 @@ For example, the following is possible in AMP.
     <th>Data</th>
   </tr>
   <tr>
-    <td>select</td>
+    <td>`select`</td>
     <td>Fired when the user manually selects an option.</td>
     <td><code>event.targetOption</code> : The <code>option</code> attribute value of the selected element</td>
   </tr>
@@ -170,17 +170,17 @@ For example, the following is possible in AMP.
     <th>Data</th>
   </tr>
   <tr>
-    <td>submit</td>
+    <td>`submit`</td>
     <td>Fired when the form is submitted.</td>
     <td></td>
   </tr>
   <tr>
-    <td>submit-success</td>
+    <td>`submit-success`</td>
     <td>Fired when the form submission response is success.</td>
     <td><code>event.response</code> : JSON response</td>
   </tr>
   <tr>
-    <td>submit-error</td>
+    <td>`submit-error`</td>
     <td>Fired when the form submission response is an error.</td>
     <td><code>event.response</code> : JSON response</td>
   </tr>
@@ -195,16 +195,29 @@ For example, the following is possible in AMP.
     <th>Description</th>
   </tr>
   <tr>
-    <td>hide</td>
+    <td>`hide`</td>
     <td>Hides the target element.</td>
   </tr>
   <tr>
-    <td>show</td>
+    <td>`show`</td>
     <td>Shows the target element.</td>
   </tr>
   <tr>
-    <td>toggleVisibility</td>
+    <td>`toggleVisibility`</td>
     <td>Toggles the visibility of the target element.</td>
+  </tr>
+  <tr>
+    <td>`scrollTo(duration=INTEGER)`</td>
+    <td>Scrolls the element into view with a smooth animation. If defined,
+    `duration` specifies the length of the animation in milliseconds.</td>
+  </tr>
+  <tr>
+    <td>`focus`</td>
+    <td>Makes the target element gain focus.</td>
+  </tr>
+  <tr>
+    <td>`blur`</td>
+    <td>Makes the target element lose focus (to be called after `focus`).</td>
   </tr>
 </table>
 
@@ -215,7 +228,7 @@ For example, the following is possible in AMP.
     <th>Description</th>
   </tr>
   <tr>
-    <td>goToSlide(index=INTEGER)</td>
+    <td>`goToSlide(index=INTEGER)`</td>
     <td>Advances the carousel to a specified slide index.</td>
   </tr>
 </table>
@@ -227,7 +240,7 @@ For example, the following is possible in AMP.
     <th>Description</th>
   </tr>
   <tr>
-    <td>open (default)</td>
+    <td>`open (default)`</td>
     <td>Opens the image lightbox with the source image being the one that triggered the action.</td>
   </tr>
 </table>
@@ -239,11 +252,11 @@ For example, the following is possible in AMP.
     <th>Description</th>
   </tr>
   <tr>
-    <td>open (default)</td>
+    <td>`open (default)`</td>
     <td>Opens the lightbox.</td>
   </tr>
   <tr>
-    <td>close</td>
+    <td>`close`</td>
     <td>Closes the lightbox.</td>
   </tr>
 </table>
@@ -255,7 +268,7 @@ For example, the following is possible in AMP.
     <th>Description</th>
   </tr>
   <tr>
-    <td>update (default)</td>
+    <td>`update (default)`</td>
     <td>Updates the DOM items to show updated content.</td>
   </tr>
 </table>
@@ -267,15 +280,15 @@ For example, the following is possible in AMP.
     <th>Description</th>
   </tr>
   <tr>
-    <td>open (default)</td>
+    <td>`open (default)`</td>
     <td>Opens the sidebar.</td>
   </tr>
   <tr>
-    <td>close</td>
+    <td>`close`</td>
     <td>Closes the sidebar.</td>
   </tr>
   <tr>
-    <td>toggle</td>
+    <td>`toggle`</td>
     <td>Toggles the state of the sidebar.</td>
   </tr>
 </table>
@@ -287,7 +300,7 @@ For example, the following is possible in AMP.
     <th>Description</th>
   </tr>
   <tr>
-    <td>(default)</td>
+    <td>`(default)`</td>
     <td>Updates the amp-state's data with the data contained in the event. Requires
       <a href="../extensions/amp-bind/amp-bind.md">amp-bind</a>.
     </td>
@@ -301,7 +314,7 @@ For example, the following is possible in AMP.
     <th>Description</th>
   </tr>
   <tr>
-    <td>dismiss (default)</td>
+    <td>`dismiss (default)`</td>
     <td>Hides the referenced user notification element.</td>
   </tr>
 </table>
@@ -313,19 +326,19 @@ For example, the following is possible in AMP.
     <th>Description</th>
   </tr>
   <tr>
-    <td>play</td>
+    <td>`play`</td>
     <td>Plays the video.</td>
   </tr>
   <tr>
-    <td>pause</td>
+    <td>`pause`</td>
     <td>Pauses the video.</td>
   </tr>
   <tr>
-    <td>mute</td>
+    <td>`mute`</td>
     <td>Mutes the video.</td>
   </tr>
   <tr>
-    <td>unmute</td>
+    <td>`unmute`</td>
     <td>Unmutes the video.</td>
   </tr>
 </table>
@@ -337,7 +350,7 @@ For example, the following is possible in AMP.
     <th>Description</th>
   </tr>
   <tr>
-    <td>submit</td>
+    <td>`submit`</td>
     <td>Submits the form.</td>
   </tr>
 </table>
@@ -357,19 +370,19 @@ actions that apply to the whole document.
     <th>Description</th>
   </tr>
   <tr>
-    <td>navigateTo(url=STRING)</td>
+    <td>`navigateTo(url=STRING)`</td>
     <td>Navigates current window to given URL. Supports <a href="./amp-var-substitutions.md">standard URL subsitutions</a>. Can only be invoked via <code>tap</code> or <code>change</code> events.</td>
   </tr>
   <tr>
-    <td>goBack</td>
+    <td>`goBack`</td>
     <td>Navigates back in history.</td>
   </tr>
   <tr>
-    <td>setState</td>
+    <td>`setState`</td>
     <td>Updates <code>amp-bind</code>'s state. See <a href="../extensions/amp-bind/amp-bind.md#ampsetstate">details</a>.</td>
   </tr>
   <tr>
-    <td>print</td>
+    <td>`print`</td>
     <td>Opens the Print Dialog to print the current page.</td>
   </tr>
 </table>

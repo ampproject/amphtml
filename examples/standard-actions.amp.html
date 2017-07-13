@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
     <style type="text/css">
     /* Styles for example */
     body {
@@ -34,6 +35,9 @@
     #normal-element {
       background: #f0f0f0;
       padding: 10px;
+    }
+    .spacer {
+      height: 100vh;
     }
     </style>
 </head>
@@ -67,6 +71,10 @@
   <button on="tap:normal-element.show">Show</button>
   <button on="tap:normal-element.hide">Hide</button>
   <button on="tap:normal-element.toggleVisibility">Toggle Visibility</button>
+  <button on="tap:form.scrollTo">ScrollTo</button>
+  <button on="tap:form.scrollTo('duration' = 5000)">ScrollTo Slowly</button>
+  <button on="tap:name1.focus">Focus</button>
+  <button on="tap:name1.blur">Lose Focus</button>
 </div>
 
 <amp-img src="https://ampbyexample.com/img/amp.jpg" layout="responsive" width="1080" height="610" id="img-on-viewport"></amp-img>
@@ -74,5 +82,41 @@
 <div id="normal-element" hidden>
   I was initially hidden.
 </div>
+
+<div class="spacer">
+</div>
+
+<h4>Subscribe to our weekly Newsletter Form</h4>
+<form id="form" method="post"
+      action-xhr="/form/echo-json/post"
+      target="_blank">
+    <fieldset>
+        <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+        <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
+        <label>
+            <span>Your name</span>
+            <input type="text" name="name" id="name1" required>
+        </label>
+        <label>
+            <span>Your email</span>
+            <input type="email" name="email" id="email1" required>
+        </label>
+        <input type="submit" value="Subscribe">
+    </fieldset>
+    <div submitting>
+      <template type="amp-mustache">
+        Please wait, {{name}}.
+      </template>
+    </div>
+    <div submit-success>
+      Success! Thanks for subscribing! Please make sure to check your email
+      to confirm!
+    </div>
+    <div submit-error>
+      <amp-img width="32" height="32" src="/examples/x-icon.png"></amp-img>
+      Oops! We apologize, something went wrong. Please try again later.
+    </div>
+</form>
+
 
 </html>

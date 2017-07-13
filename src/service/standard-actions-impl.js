@@ -22,6 +22,7 @@ import {computedStyle, getStyle, toggle} from '../style';
 import {dev, user} from '../log';
 import {isProtocolValid} from '../url';
 import {registerServiceBuilderForDoc} from '../service';
+import {tryFocus} from '../dom';
 
 /**
  * @param {!Element} element
@@ -58,6 +59,9 @@ export class StandardActions {
     /** @const @private {!./url-replacements-impl.UrlReplacements} */
     this.urlReplacements_ = Services.urlReplacementsForDoc(ampdoc);
 
+    /** @const @private {!./viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(ampdoc);
+
     this.installActions_(this.actions_);
   }
 
@@ -76,6 +80,11 @@ export class StandardActions {
     actionService.addGlobalMethodHandler('show', this.handleShow.bind(this));
     actionService.addGlobalMethodHandler(
         'toggleVisibility', this.handleToggle.bind(this));
+    actionService.addGlobalMethodHandler(
+        'scrollTo', this.handleScrollTo.bind(this));
+    actionService.addGlobalMethodHandler(
+        'focus', this.handleFocus.bind(this));
+    actionService.addGlobalMethodHandler('blur', this.handleBlur.bind(this));
   }
 
   /**
@@ -172,6 +181,49 @@ export class StandardActions {
     const node = invocation.target;
     const win = (node.ownerDocument || node).defaultView;
     win.print();
+  }
+
+  /**
+   * Handles the `scrollTo` action where given an element, we smooth scroll to
+   * it with the given animation duraiton
+   * @param {!./action-impl.ActionInvocation} invocation
+   */
+  handleScrollTo(invocation) {
+    if (!invocation.satisfiesTrust(ActionTrust.MEDIUM)) {
+      return;
+    }
+    const node = dev().assertElement(invocation.target);
+
+    // Animate scroll
+    const duration = invocation.args && invocation.args['duration'] ?
+                     invocation.args['duration'] : 500;
+    this.viewport_.animateScrollIntoView(node, duration);
+  }
+
+  /**
+   * Handles the `focus` action where given an element, we give it focus
+   * @param {!./action-impl.ActionInvocation} invocation
+   */
+  handleFocus(invocation) {
+    if (!invocation.satisfiesTrust(ActionTrust.MEDIUM)) {
+      return;
+    }
+    const node = dev().assertElement(invocation.target);
+
+    // Set focus
+    tryFocus(node);
+  }
+
+  /**
+   * Handles the `blur` action where given an element, we make it lose its focus
+   * @param {!./action-impl.ActionInvocation} invocation
+   */
+  handleBlur(invocation) {
+    if (!invocation.satisfiesTrust(ActionTrust.MEDIUM)) {
+      return;
+    }
+    const node = invocation.target;
+    node.blur();
   }
 
   /**
