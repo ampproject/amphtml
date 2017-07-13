@@ -374,6 +374,12 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
+  it('should replace TIMESTAMP_FORMATTED', () => {
+    return expandAsync('?tsf=TIMESTAMP_FORMATTED').then(res => {
+      expect(res).to.match(/tsf=\d+/);
+    });
+  });
+
   it('should replace TIMEZONE', () => {
     return expandAsync('?tz=TIMEZONE').then(res => {
       expect(res).to.match(/tz=-?\d+/);

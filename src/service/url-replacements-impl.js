@@ -313,6 +313,20 @@ export class GlobalVariableSource extends VariableSource {
       return Date.now();
     });
 
+    //Returns the human readable timestamp in format of 2011-01-01 11:11:11.
+    this.set('TIMESTAMP_FORMATTED', () => {
+      const current = new Date(Date.now());
+      const year = current.getFullYear();
+      const month = current.getMonth() + 1;
+      const date = current.getDate();
+      const hour = current.getHours();
+      const min = current.getMinutes();
+      const sec = current.getSeconds();
+      const time = year + '-' + month + '-' + date + ' ' +
+          hour + ':' + min + ':' + sec;
+      return time;
+    });
+
     // Returns the user's time-zone offset from UTC, in minutes.
     this.set('TIMEZONE', () => {
       return new Date().getTimezoneOffset();
