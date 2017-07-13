@@ -1318,4 +1318,16 @@ describes.sandboxed('UrlReplacements', {}, () => {
           'NDrFP4BtPQJMyxE4jb9FDlp37OJL');
     });
   });
+
+  describe('formatted timestamp', () => {
+    it('should return correct formatted timestamp', () => {
+      sandbox.useFakeTimers(1499979336612);
+      return expandAsync(
+          '?tsf=TIMESTAMP_FORMATTED').then(res => {
+            expect(encodeURIComponent('2017-07-13 13:55:36'))
+                .to.equal('2017-07-13%2013%3A55%3A36');
+            expect(res).to.equal('?tsf=2017-07-13%2013%3A55%3A36');
+          });
+    });
+  });
 });

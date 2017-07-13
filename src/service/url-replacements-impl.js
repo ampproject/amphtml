@@ -315,13 +315,14 @@ export class GlobalVariableSource extends VariableSource {
 
     //Returns the human readable timestamp in format of 2011-01-01 11:11:11.
     this.set('TIMESTAMP_FORMATTED', () => {
-      const current = new Date(Date.now());
+      //const win = this.ampdoc.win;
+      const current = new Date();
       const year = current.getFullYear();
-      const month = current.getMonth() + 1;
-      const date = current.getDate();
-      const hour = current.getHours();
-      const min = current.getMinutes();
-      const sec = current.getSeconds();
+      const month = this.formatNum(current.getMonth() + 1);
+      const date = this.formatNum(current.getDate());
+      const hour = this.formatNum(current.getHours());
+      const min = this.formatNum(current.getMinutes());
+      const sec = this.formatNum(current.getSeconds());
       const time = year + '-' + month + '-' + date + ' ' +
           hour + ':' + min + ':' + sec;
       return time;
@@ -566,9 +567,18 @@ export class GlobalVariableSource extends VariableSource {
       return getter(/** @type {!ShareTrackingFragmentsDef} */ (fragments));
     });
   }
+
+    /**
+     * Format number to have 2 digits if number is smaller than 10
+     * @param num
+     * @returns {string} after formatted
+     */
+  formatNum(num) {
+    return (num < 10 ? ('0' + num) : num);
+  };
 }
 
-/**
+/*
  * This class replaces substitution variables with their values.
  * Document new values in ../spec/amp-var-substitutions.md
  * @package For export
@@ -1002,7 +1012,6 @@ export function installUrlReplacementsForEmbed(ampdoc, embedWin, varSource) {
   installServiceInEmbedScope(embedWin, 'url-replace',
       new UrlReplacements(ampdoc, varSource));
 }
-
 
 /**
  * @typedef {{
