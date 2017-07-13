@@ -235,13 +235,13 @@ export class AmpSidebar extends AMP.BaseElement {
     this.viewport_.enterOverlayMode();
     this.vsync_.mutate(() => {
       toggle(this.element, /* display */true);
-      this.openMask_();
       if (this.isIosSafari_) {
         this.compensateIosBottombar_();
       }
       this.element./*OK*/scrollTop = 1;
       // Start animation in a separate vsync due to display:block; set above.
       this.vsync_.mutate(() => {
+        this.openMask_();
         this.element.setAttribute('open', '');
         this.element.setAttribute('aria-hidden', 'false');
         if (this.openOrCloseTimeOut_) {
