@@ -22,17 +22,16 @@ export function install(win) {
   // win.Event is a function on Edge, Chrome, FF, Safari but
   // is an object on IE 11.
   if (typeof win.Event === 'function') {
-    return false;
+    return;
   }
 
-  function Event(event, params) {
-    params = params || {bubbles: false, cancelable: false, detail: undefined};
+  function Event(name, params) {
+    params = params || {bubbles: false, cancelable: false};
     const evt = win.document.createEvent('Event');
-    evt.initCustomEvent(
-      event,
-      params.bubbles,
-      params.cancelable,
-      params.detail
+    evt.initEvent(
+        name,
+        params.bubbles,
+        params.cancelable
     );
     return evt;
   }
