@@ -12,18 +12,6 @@
       "name": "AMP Article"
     },
     {
-      "url": "examples/visual-tests/font.amp/font.amp.html",
-      "name": "Fonts",
-      "loading_incomplete_css": [
-        ".comic-amp-font-loading",
-        ".comic-amp-bold-font-loading"
-      ],
-      "loading_complete_css": [
-        ".comic-amp-font-loaded",
-        ".comic-amp-bold-font-loaded"
-      ]
-    },
-    {
       "url": "examples/visual-tests/font.amp.404/font.amp.html",
       "name": "Fonts 404",
       "issue": "https://github.com/ampproject/amphtml/issues/10377",

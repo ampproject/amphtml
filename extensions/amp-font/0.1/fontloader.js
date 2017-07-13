@@ -95,6 +95,7 @@ export class FontLoader {
    * @private
    */
   load_() {
+    this.document_.getElementById("debug_font").innerHTML = "starting load_()";
     return new Promise((resolve, reject) => {
       /* style | variant | weight | size/line-height | family */
       /* font: italic small-caps bolder 16px/3 cursive; */
@@ -106,19 +107,26 @@ export class FontLoader {
         this.fontConfig_.family + '\'');
 
       if (this.canUseNativeApis_()) {
+        this.document_.getElementById("debug_font").innerHTML = "this.canUseNativeApis_() true";
         // Check if font already exists.
         if (this.document_.fonts.check(fontString)) {
+          this.document_.getElementById("debug_font").innerHTML = "font exists";
           resolve();
         } else {
+          this.document_.getElementById("debug_font").innerHTML = "loading with native api";
           // Load font with native api if supported.
           this.document_.fonts.load(fontString).then(() => {
             // Workaround for chrome bug
             // https://bugs.chromium.org/p/chromium/issues/detail?id=347460
+            this.document_.getElementById("debug_font").innerHTML = "loaded with native api";
             return this.document_.fonts.load(fontString);
           }).then(() => {
+            this.document_.getElementById("debug_font").innerHTML = "Checking";
             if (this.document_.fonts.check(fontString)) {
+              this.document_.getElementById("debug_font").innerHTML = "Check successful";
               resolve();
             } else {
+              this.document_.getElementById("debug_font").innerHTML = "Check failed";
               reject(new Error('Font could not be loaded,'
                   + ' probably due to incorrect @font-face.'));
             }
@@ -126,6 +134,7 @@ export class FontLoader {
         }
       } else {
         // Load font with polyfill if native api is not supported.
+        this.document_.getElementById("debug_font").innerHTML = "this.canUseNativeApis_() false";
         this.loadWithPolyfill_().then(resolve, reject);
       }
     });
@@ -149,6 +158,7 @@ export class FontLoader {
    * @private
    */
   loadWithPolyfill_() {
+    this.document_.getElementById("debug_font").innerHTML = "starting loadWithPolyfill_()";
     return new Promise((resolve, reject) => {
       const vsync = vsyncFor(this.win_);
       // Create font comparators
@@ -156,17 +166,23 @@ export class FontLoader {
       // Measure until timeout (or font load).
       const vsyncTask = vsync.createTask({
         measure: () => {
+          this.document_.getElementById("debug_font").innerHTML = "starting measure()";
           if (this.fontLoadResolved_) {
+            this.document_.getElementById("debug_font").innerHTML = "this.fontLoadResolved_";
             resolve();
           } else if (this.fontLoadRejected_) {
+            this.document_.getElementById("debug_font").innerHTML = "this.fontLoadRejected_";
             reject(new Error('Font loading timed out.'));
           } else if (comparators.some(comparator => comparator.compare())) {
+            this.document_.getElementById("debug_font").innerHTML = "comparators";
             resolve();
           } else {
+            this.document_.getElementById("debug_font").innerHTML = "vsyncTask() inside";
             vsyncTask();
           }
         },
       });
+      this.document_.getElementById("debug_font").innerHTML = "vsyncTask() outside";
       vsyncTask();
     });
   }
