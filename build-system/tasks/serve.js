@@ -64,9 +64,11 @@ function serve() {
   .once('quit', function () {
     util.log(util.colors.green('Shutting down server'));
   });
-  util.log(util.colors.yellow('Run `gulp build` then go to '
-      + getHost() + '/examples/article.amp.html'
-  ));
+  if (!quiet) {
+    util.log(util.colors.yellow('Run `gulp build` then go to '
+        + getHost() + '/examples/article.amp.html'
+    ));
+  }
 }
 
 gulp.task(
