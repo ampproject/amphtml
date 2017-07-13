@@ -18,7 +18,7 @@ import {ShadowCSS} from '../third_party/webcomponentsjs/ShadowCSS';
 import {ampdocServiceFor, vsyncFor} from './services';
 import {dev} from './log';
 import {closestNode, escapeCssSelectorIdent} from './dom';
-import {extensionsFor} from './services';
+import {extensionsFor, platformFor, vsyncFor} from './services';
 import {insertStyleElement} from './style-installer';
 import {
   isShadowDomSupported,
@@ -39,6 +39,11 @@ const CSS_SELECTOR_BEG_REGEX = /[^\.\-\_0-9a-zA-Z]/;
 
 /** @const {!RegExp} */
 const CSS_SELECTOR_END_REGEX = /[^\-\_0-9a-zA-Z]/;
+
+/**
+ * @type {boolean|undefined}
+ */
+let shadowDomStreamingSupported;
 
 
 /**
@@ -343,7 +348,6 @@ function rootSelectorPrefixer(match, name, pos, selector) {
 }
 
 
-
 /**
  * @param {!Document} doc
  * @param {string} css
@@ -367,15 +371,113 @@ function getStylesheetRules(doc, css) {
 
 
 /**
+ * @param {boolean|undefined} val
+ * @visibleForTesting
+ */
+export function setShadowDomStreamingSupportedForTesting(val) {
+  shadowDomStreamingSupported = val;
+}
+
+
+/**
+ * Returns `true` if the Shadow DOM streaming is supported.
+ * @param {!Window} win
+ * @return {boolean}
+ */
+export function isShadowDomStreamingSupported(win) {
+  if (shadowDomStreamingSupported === undefined) {
+    shadowDomStreamingSupported = calcShadowDomStreamingSupported(win);
+  }
+  return shadowDomStreamingSupported;
+}
+
+
+/**
+ * @param {!Window} win
+ * @return {boolean}
+ */
+function calcShadowDomStreamingSupported(win) {
+  // API must be supported.
+  if (!win.document.implementation ||
+      typeof win.document.implementation.createHTMLDocument != 'function') {
+    return false;
+  }
+  // Firefox does not support DOM streaming.
+  // See: https://bugzilla.mozilla.org/show_bug.cgi?id=867102
+  if (platformFor(win).isFirefox()) {
+    return false;
+  }
+  // Assume full streaming support.
+  return true;
+}
+
+
+/**
+ * Creates the Shadow DOM writer available on this platform.
+ * @param {!Window} win
+ * @return {!ShadowDomWriter}
+ */
+export function createShadowDomWriter(win) {
+  if (isShadowDomStreamingSupported(win)) {
+    return new ShadowDomWriterStreamer(win);
+  }
+  return new ShadowDomWriterBulk(win);
+}
+
+
+/**
  * Takes as an input a text stream, parses it and incrementally reconstructs
  * it in the shadow root.
  *
  * See https://jakearchibald.com/2016/fun-hacks-faster-content/ for more
  * details.
  *
- * @implements {WritableStreamDefaultWriter}
+ * @interface
+ * @extends {WritableStreamDefaultWriter}
+ * @visibleForTesting
  */
 export class ShadowDomWriter {
+
+  /**
+   * Sets the callback that will be called when body has been parsed.
+   *
+   * Unlike most of other nodes, `<body>` cannot be simply merged to support
+   * SD polyfill where the use of `<body>` element is not possible. The
+   * callback will be given the parsed document and it must return back
+   * the reconstructed `<body>` node in the target DOM where all children
+   * will be streamed into.
+   *
+   * @param {function(!Document):!Element} unusedCallback
+   */
+  onBody(unusedCallback) {}
+
+  /**
+   * Sets the callback that will be called when new nodes have been merged
+   * into the target DOM.
+   * @param {function()} unusedCallback
+   */
+  onBodyChunk(unusedCallback) {}
+
+  /**
+   * Sets the callback that will be called when the DOM has been fully
+   * constructed.
+   * @param {function()} unusedCallback
+   */
+  onEnd(unusedCallback) {}
+}
+
+
+/**
+ * Takes as an input a text stream, parses it and incrementally reconstructs
+ * it in the shadow root.
+ *
+ * See https://jakearchibald.com/2016/fun-hacks-faster-content/ for more
+ * details.
+ *
+ * @implements {ShadowDomWriter}
+ * @visibleForTesting
+ */
+export class ShadowDomWriterStreamer {
   /**
    * @param {!Window} win
    */
@@ -412,35 +514,17 @@ export class ShadowDomWriter {
     this.targetBody_ = null;
   }
 
-  /**
-   * Sets the callback that will be called when body has been parsed.
-   *
-   * Unlike most of other nodes, `<body>` cannot be simply merged to support
-   * SD polyfill where the use of `<body>` element is not possible. The
-   * callback will be given the parsed document and it must return back
-   * the reconstructed `<body>` node in the target DOM where all children
-   * will be streamed into.
-   *
-   * @param {function(!Document):!Element} callback
-   */
+  /** @override */
   onBody(callback) {
     this.onBody_ = callback;
   }
 
-  /**
-   * Sets the callback that will be called when new nodes have been merged
-   * into the target DOM.
-   * @param {function()} callback
-   */
+  /** @override */
   onBodyChunk(callback) {
     this.onBodyChunk_ = callback;
   }
 
-  /**
-   * Sets the callback that will be called when the DOM has been fully
-   * constructed.
-   * @param {function()} callback
-   */
+  /** @override */
   onEnd(callback) {
     this.onEnd_ = callback;
   }
@@ -501,5 +585,103 @@ export class ShadowDomWriter {
     if (this.eof_) {
       this.onEnd_();
     }
+  }
+}
+
+
+/**
+ * Takes as an input a text stream, aggregates it and parses it in one bulk.
+ * This is a workaround against the browsers that do not support streaming DOM
+ * parsing. Mainly currently Firefox.
+ *
+ * See https://github.com/whatwg/html/issues/2827 and
+ * https://bugzilla.mozilla.org/show_bug.cgi?id=867102
+ *
+ * @implements {ShadowDomWriter}
+ * @visibleForTesting
+ */
+export class ShadowDomWriterBulk {
+  /**
+   * @param {!Window} win
+   */
+  constructor(win) {
+    /** @private {!Array<string>} */
+    this.fullHtml_ = [];
+
+    /** @const @private */
+    this.vsync_ = vsyncFor(win);
+
+    /** @private {?function(!Document):!Element} */
+    this.onBody_ = null;
+
+    /** @private {?function()} */
+    this.onBodyChunk_ = null;
+
+    /** @private {?function()} */
+    this.onEnd_ = null;
+
+    /** @const @private {!Promise} */
+    this.success_ = Promise.resolve();
+
+    /** @private {boolean} */
+    this.eof_ = false;
+  }
+
+  /** @override */
+  onBody(callback) {
+    this.onBody_ = callback;
+  }
+
+  /** @override */
+  onBodyChunk(callback) {
+    this.onBodyChunk_ = callback;
+  }
+
+  /** @override */
+  onEnd(callback) {
+    this.onEnd_ = callback;
+  }
+
+  /** @override */
+  write(chunk) {
+    dev().assert(this.onBody_ && this.onBodyChunk_ && this.onEnd_);
+    if (this.eof_) {
+      throw new Error('closed already');
+    }
+    if (chunk) {
+      this.fullHtml_.push(dev().assertString(chunk));
+    }
+    return this.success_;
+  }
+
+  /** @override */
+  close() {
+    dev().assert(this.onBody_ && this.onBodyChunk_ && this.onEnd_);
+    this.eof_ = true;
+    this.vsync_.mutate(() => this.complete_());
+    return this.success_;
+  }
+
+  /** @private */
+  complete_() {
+    const fullHtml = this.fullHtml_.join('');
+    const doc = new DOMParser().parseFromString(fullHtml, 'text/html');
+
+    // Merge body.
+    if (doc.body) {
+      const inputBody = doc.body;
+      const targetBody = this.onBody_(doc);
+      let transferCount = 0;
+      while (inputBody.firstChild) {
+        transferCount++;
+        targetBody.appendChild(inputBody.firstChild);
+      }
+      if (transferCount > 0) {
+        this.onBodyChunk_();
+      }
+    }
+
+    // EOF.
+    this.onEnd_();
   }
 }
