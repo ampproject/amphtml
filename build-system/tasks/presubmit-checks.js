@@ -119,7 +119,7 @@ var forbiddenTerms = {
       'dist.3p/current/integration.js',
     ],
   },
-  '(?:var|var|var) +IS_DEV +=': {
+  '(?:var|let|const) +IS_DEV +=': {
     message: 'IS_DEV local var only allowed in mode.js and ' +
         'dist.3p/current/integration.js',
     whitelist: [
@@ -277,7 +277,7 @@ var forbiddenTerms = {
       'src/service/video-manager-impl.js',
     ],
   },
-  'initLogvarructor|setReportError': {
+  'initLogConstructor|setReportError': {
     message: 'Should only be called from JS binary entry files.',
     whitelist: [
       '3p/integration.js',
@@ -988,25 +988,25 @@ function checkForbiddenAndRequiredTerms() {
   var forbiddenFound = false;
   var missingRequirements = false;
   return gulp.src(srcGlobs)
-      .pipe(through2.obj(function(file, enc, cb) {
-        forbiddenFound = hasAnyTerms(file) || forbiddenFound;
-        missingRequirements = isMissingTerms(file) || missingRequirements;
-        cb();
-      }))
-      .on('end', function() {
-        if (forbiddenFound) {
-          util.log(util.colors.blue(
-              'Please remove these usages or consult with the AMP team.'));
-        }
-        if (missingRequirements) {
-          util.log(util.colors.blue(
-              'Adding these terms (e.g. by adding a required LICENSE ' +
-            'to the file)'));
-        }
-        if (forbiddenFound || missingRequirements) {
-          process.exit(1);
-        }
-      });
+    .pipe(through2.obj(function(file, enc, cb) {
+      forbiddenFound = hasAnyTerms(file) || forbiddenFound;
+      missingRequirements = isMissingTerms(file) || missingRequirements;
+      cb();
+    }))
+    .on('end', function() {
+      if (forbiddenFound) {
+        util.log(util.colors.blue(
+            'Please remove these usages or consult with the AMP team.'));
+      }
+      if (missingRequirements) {
+        util.log(util.colors.blue(
+            'Adding these terms (e.g. by adding a required LICENSE ' +
+          'to the file)'));
+      }
+      if (forbiddenFound || missingRequirements) {
+        process.exit(1);
+      }
+    });
 }
 
 gulp.task('presubmit', 'Run validation against files to check for forbidden ' +
