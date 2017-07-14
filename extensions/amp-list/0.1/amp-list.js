@@ -35,6 +35,9 @@ export class AmpList extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.container_ = null;
+
+    /** @private {boolean} */
+    this.fallbackDisplayed_ = false;
   }
 
   /** @override */
@@ -64,23 +67,56 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    return this.populateList_();
+    const populate = this.populateList_();
+    if (this.getFallback()) {
+      populate.then(() => {
+        // Hide in case fallback was displayed for a previous fetch.
+        this.toggleFallbackInMutate_(false);
+      }, unusedError => {
+        // On fetch success, firstLayoutCompleted() hides placeholder.
+        // On fetch error, hide placeholder if fallback exists.
+        this.togglePlaceholder(false);
+        this.toggleFallbackInMutate_(true);
+      });
+    }
+    return populate;
   }
 
   /** @override */
   mutatedAttributesCallback(mutations) {
-    const srcMutation = mutations['src'];
-    const stateMutation = mutations['state'];
-    if (srcMutation != undefined) {
+    const src = mutations['src'];
+    const state = mutations['state'];
+    if (src != undefined) {
       this.populateList_();
-    } else if (stateMutation != undefined) {
-      const items = isArray(stateMutation) ? stateMutation : [stateMutation];
+    } else if (state != undefined) {
+      const items = isArray(state) ? state : [state];
       templatesFor(this.win).findAndRenderTemplateArray(
           this.element, items).then(this.rendered_.bind(this));
     }
-    if (srcMutation != undefined && stateMutation != undefined) {
+    if (src != undefined && state != undefined) {
       user().warn('AMP-LIST', '[src] and [state] mutated simultaneously.' +
           ' The [state] mutation will be dropped.');
+    }
+  }
+
+  /**
+   * Wraps `toggleFallback()` in a mutate context.
+   * @param {boolean} state
+   */
+  toggleFallbackInMutate_(state) {
+    if (state) {
+      this.getVsync().mutate(() => {
+        this.toggleFallback(true);
+        this.fallbackDisplayed_ = true;
+      });
+    } else {
+      // Don't queue mutate if fallback isn't already visible.
+      if (this.fallbackDisplayed_) {
+        this.getVsync().mutate(() => {
+          this.toggleFallback(false);
+          this.fallbackDisplayed_ = false;
+        });
+      }
     }
   }
 

@@ -76,6 +76,21 @@
       SEE MORE
     </div>
   </amp-list>
+
+  <amp-list width="396" height="80" layout=responsive
+      src="/invalid-url">
+    <template type="amp-mustache">
+      <div class="story-entry">
+        <amp-img src="{{imageUrl}}" width=80 height=60></amp-img>
+      </div>
+    </template>
+    <div placeholder>
+      <p>Placeholder text</p>
+    </div>
+    <div fallback>
+      <p>Fallback text</p>
+    </div>
+  </amp-list>
 </article>
 </body>
 </html>
