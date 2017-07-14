@@ -25,7 +25,7 @@ min_validator_revision_required: 238
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 452
+spec_file_revision: 453
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 
@@ -2577,7 +2577,19 @@ tags {  # <form method=GET ...>
     mandatory: true
     value_regex_casei: "(_blank|_top)"
   }
-
+  attrs: {
+    name: "verify-xhr"
+    value_url: {
+      allow_relative: true
+      allowed_protocol: "https"
+      # These are disallowed due to serving content from multiple origins on
+      # a single CDN domain. New CDNs should use a different domain per origin
+      # domain rather than adding to this list.
+      disallowed_domain: "cdn.ampproject.org"
+      disallowed_domain: "amp.cloudflare.com"
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
 }
 tags {  # <form method=POST ...>
   tag_name: "FORM"
@@ -2619,6 +2631,19 @@ tags {  # <form method=POST ...>
     name: "target"
     mandatory: true
     value_regex_casei: "(_blank|_top)"
+  }
+  attrs: {
+    name: "verify-xhr"
+    value_url: {
+      allow_relative: true
+      allowed_protocol: "https"
+      # These are disallowed due to serving content from multiple origins on
+      # a single CDN domain. New CDNs should use a different domain per origin
+      # domain rather than adding to this list.
+      disallowed_domain: "cdn.ampproject.org"
+      disallowed_domain: "amp.cloudflare.com"
+    }
+    blacklisted_value_regex: "__amp_source_origin"
   }
 }
 tags {
