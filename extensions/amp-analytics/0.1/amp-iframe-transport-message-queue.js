@@ -52,7 +52,7 @@ export class AmpIframeTransportMessageQueue {
     this.creativeToExtraData_ = {};
 
     /** @private {string} */
-    this.messageType_ = this.frame_.getAttribute('data-amp-3p-sentinel') +
+    this.messageType_ = this.frame_.sentinel +
         AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT;
 
     /** @private {!../../../src/iframe-helper.SubscriptionApi} */
