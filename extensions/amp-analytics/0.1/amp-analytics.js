@@ -351,10 +351,12 @@ export class AmpAnalytics extends AMP.BaseElement {
       fetchConfig.credentials = this.element.getAttribute('data-credentials');
     }
     const ampdoc = this.getAmpDoc();
-    return Services.urlReplacementsForDoc(this.element).expandAsync(remoteConfigUrl)
+    return Services.urlReplacementsForDoc(this.element)
+        .expandAsync(remoteConfigUrl)
         .then(expandedUrl => {
           remoteConfigUrl = expandedUrl;
-          return Services.xhrFor(ampdoc.win).fetchJson(remoteConfigUrl, fetchConfig);
+          return Services.xhrFor(ampdoc.win).fetchJson(
+              remoteConfigUrl, fetchConfig);
         })
         .then(res => res.json())
         .then(jsonValue => {
@@ -682,7 +684,8 @@ export class AmpAnalytics extends AMP.BaseElement {
    */
   expandTemplateWithUrlParams_(spec, expansionOptions) {
     return this.variableService_.expandTemplate(spec, expansionOptions)
-        .then(key => Services.urlReplacementsForDoc(this.element).expandUrlAsync(key));
+        .then(key => Services.urlReplacementsForDoc(
+            this.element).expandUrlAsync(key));
   }
 
   /**

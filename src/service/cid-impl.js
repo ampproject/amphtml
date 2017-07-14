@@ -205,7 +205,8 @@ export class Cid {
 export function optOutOfCid(ampdoc) {
 
   // Tell the viewer that user has opted out.
-  Services.viewerForDoc(ampdoc)./*OK*/sendMessage(CID_OPTOUT_VIEWER_MESSAGE, dict());
+  Services.viewerForDoc(ampdoc)./*OK*/sendMessage(
+      CID_OPTOUT_VIEWER_MESSAGE, dict());
 
   // Store the optout bit in storage
   return Services.storageForDoc(ampdoc).then(storage => {

@@ -155,7 +155,8 @@ export function makeBodyVisible(doc, opt_waitForServices) {
         }).then(services => {
           set();
           if (services.length > 0) {
-            Services.resourcesForDoc(doc)./*OK*/schedulePass(1, /* relayoutAll */ true);
+            Services.resourcesForDoc(doc)./*OK*/schedulePass(
+                1, /* relayoutAll */ true);
           }
           try {
             const perf = Services.performanceFor(win);

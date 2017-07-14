@@ -363,7 +363,8 @@ function elapsedTimeWithCeiling(time, start) {
 export function getCorrelator(win, opt_cid, opt_nodeOrDoc) {
   if (!win.ampAdPageCorrelator) {
     win.ampAdPageCorrelator = makeCorrelator(
-        opt_cid, Services.documentInfoForDoc(opt_nodeOrDoc || win.document).pageViewId);
+        opt_cid,
+        Services.documentInfoForDoc(opt_nodeOrDoc || win.document).pageViewId);
   }
   return win.ampAdPageCorrelator;
 }

@@ -95,7 +95,8 @@ describes.realWin('ad-network-config', {
     });
 
     it('should get the ad constraints', () => {
-      const viewportMock = sandbox.mock(Services.viewportForDoc(env.win.document));
+      const viewportMock =
+          sandbox.mock(Services.viewportForDoc(env.win.document));
       viewportMock.expects('getSize').returns(
           {width: 320, height: 500}).atLeast(1);
 

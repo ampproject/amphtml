@@ -91,8 +91,8 @@ export function maybeTrackImpression(win) {
     });
 
     // Timeout invoke promise after 8s and resolve trackImpressionPromise.
-    resolveImpression(Services.timerFor(win).timeoutPromise(TIMEOUT_VALUE, promise,
-        'timeout waiting for ad server response').catch(() => {}));
+    resolveImpression(Services.timerFor(win).timeoutPromise(TIMEOUT_VALUE,
+        promise, 'timeout waiting for ad server response').catch(() => {}));
   });
 }
 

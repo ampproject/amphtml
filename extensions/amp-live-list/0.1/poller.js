@@ -140,7 +140,8 @@ export class Poller {
     if (opt_immediate) {
       work();
     } else {
-      this.lastTimeoutId_ = Services.timerFor(this.win).delay(work, this.getTimeout_());
+      this.lastTimeoutId_ =
+          Services.timerFor(this.win).delay(work, this.getTimeout_());
     }
   }
 }

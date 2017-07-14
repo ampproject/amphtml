@@ -157,11 +157,13 @@ export class AmpVizVega extends AMP.BaseElement {
       // calls. We may want to intercept all "urls" in spec and do the loading
       // and parsing ourselves.
 
-      return Services.xhrFor(this.win).fetchJson(dev().assertString(this.src_), {
-        requireAmpResponseSourceOrigin: false,
-      }).then(res => res.json()).then(data => {
-        this.data_ = data;
-      });
+      return Services.xhrFor(this.win).fetchJson(
+          dev().assertString(this.src_),
+          {
+            requireAmpResponseSourceOrigin: false,
+          }).then(res => res.json()).then(data => {
+            this.data_ = data;
+          });
     }
   }
 

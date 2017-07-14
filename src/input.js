@@ -221,7 +221,8 @@ export class Input {
         /* capture */ undefined, unlistener => {
           unlisten = unlistener;
         });
-    return Services.timerFor(this.win).timeoutPromise(CLICK_TIMEOUT_, listenPromise)
+    return Services.timerFor(this.win)
+        .timeoutPromise(CLICK_TIMEOUT_, listenPromise)
         .then(this.boundMouseCanceled_, () => {
           if (unlisten) {
             unlisten();

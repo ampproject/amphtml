@@ -411,9 +411,10 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns an identifier for the viewer.
     this.setAsync('VIEWER', () => {
-      return Services.viewerForDoc(this.ampdoc).getViewerOrigin().then(viewer => {
-        return viewer == undefined ? '' : viewer;
-      });
+      return Services.viewerForDoc(this.ampdoc)
+          .getViewerOrigin().then(viewer => {
+            return viewer == undefined ? '' : viewer;
+          });
     });
 
     // Returns the total engaged time since the content became viewable.
@@ -535,7 +536,8 @@ export class GlobalVariableSource extends VariableSource {
    */
   getShareTrackingValue_(getter, expr) {
     if (!this.shareTrackingFragments_) {
-      this.shareTrackingFragments_ = Services.shareTrackingForOrNull(this.ampdoc.win);
+      this.shareTrackingFragments_ =
+          Services.shareTrackingForOrNull(this.ampdoc.win);
     }
     return this.shareTrackingFragments_.then(fragments => {
       user().assert(fragments, 'To use variable %s, ' +

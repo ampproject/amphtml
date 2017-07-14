@@ -32,7 +32,8 @@ describes.realWin('anchor-ad-strategy', {
 
   beforeEach(() => {
     sandbox = env.sandbox;
-    const viewportMock = sandbox.mock(Services.viewportForDoc(env.win.document));
+    const viewportMock =
+        sandbox.mock(Services.viewportForDoc(env.win.document));
     viewportMock.expects('getWidth').returns(360).atLeast(1);
 
     configObj = {

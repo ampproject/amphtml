@@ -234,7 +234,8 @@ describe('amp-image-lightbox image viewer', () => {
     lightboxMock = sandbox.mock(lightbox);
     loadPromiseStub = sandbox.stub().returns(Promise.resolve());
 
-    sandbox.stub(Services.timerFor(window), 'promise').returns(Promise.resolve());
+    sandbox.stub(Services.timerFor(window), 'promise')
+        .returns(Promise.resolve());
     imageViewer = new ImageViewer(lightbox, window, loadPromiseStub);
     document.body.appendChild(imageViewer.getElement());
   });

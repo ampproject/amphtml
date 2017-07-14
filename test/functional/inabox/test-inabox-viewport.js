@@ -75,7 +75,8 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       },
       measure: measureSpy,
     };
-    sandbox.stub(Services.resourcesForDoc(win.document), 'get').returns([element]);
+    sandbox.stub(
+        Services.resourcesForDoc(win.document), 'get').returns([element]);
   });
 
   afterEach(() => {

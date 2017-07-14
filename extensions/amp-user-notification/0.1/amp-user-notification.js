@@ -200,7 +200,8 @@ export class AmpUserNotification extends AMP.BaseElement {
         credentials: 'include',
         requireAmpResponseSourceOrigin: false,
       };
-      return Services.xhrFor(this.win).fetchJson(href, getReq).then(res => res.json());
+      return Services.xhrFor(this.win)
+          .fetchJson(href, getReq).then(res => res.json());
     });
   }
 
@@ -210,15 +211,17 @@ export class AmpUserNotification extends AMP.BaseElement {
    * @return {!Promise}
    */
   postDismissEnpoint_() {
-    return Services.xhrFor(this.win).fetchJson(dev().assertString(this.dismissHref_), {
-      method: 'POST',
-      credentials: 'include',
-      requireAmpResponseSourceOrigin: false,
-      body: /** @type {!JsonObject} */({
-        'elementId': this.elementId_,
-        'ampUserId': this.ampUserId_,
-      }),
-    });
+    return Services.xhrFor(this.win).fetchJson(
+        dev().assertString(this.dismissHref_),
+        {
+          method: 'POST',
+          credentials: 'include',
+          requireAmpResponseSourceOrigin: false,
+          body: /** @type {!JsonObject} */({
+            'elementId': this.elementId_,
+            'ampUserId': this.ampUserId_,
+          }),
+        });
   }
 
   /**

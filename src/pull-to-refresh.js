@@ -28,7 +28,8 @@ export function installPullToRefreshBlocker(win) {
   // This mode is only executed in the single-doc mode.
   if (Services.viewerForDoc(win.document).getParam('p2r') == '0' &&
           Services.platformFor(win).isChrome()) {
-    new PullToRefreshBlocker(win.document, Services.viewportForDoc(win.document));
+    new PullToRefreshBlocker(
+        win.document, Services.viewportForDoc(win.document));
   }
 }
 

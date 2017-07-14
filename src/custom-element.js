@@ -981,7 +981,8 @@ function createBaseCustomElementClass(win) {
       }
       if (!this.ampdoc_) {
         // Ampdoc can now be initialized.
-        const ampdocService = Services.ampdocServiceFor(this.ownerDocument.defaultView);
+        const ampdocService = Services.ampdocServiceFor(
+            this.ownerDocument.defaultView);
         this.ampdoc_ = ampdocService.getAmpDoc(this);
       }
       if (!this.resources_) {

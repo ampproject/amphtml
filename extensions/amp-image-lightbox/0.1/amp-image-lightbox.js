@@ -806,7 +806,8 @@ class AmpImageLightbox extends AMP.BaseElement {
         // element size depends on window size directly and the measurement
         // happens in window.resize event. Adding a timeout for correct
         // measurement. See https://github.com/ampproject/amphtml/issues/8479
-        if (startsWith(Services.platformFor(this.win).getIosVersionString(), '10.3')) {
+        if (startsWith(
+            Services.platformFor(this.win).getIosVersionString(), '10.3')) {
           Services.timerFor(this.win).delay(() => {
             this.imageViewer_.measure();
           }, 500);

@@ -946,7 +946,8 @@ class MultidocManager {
     const amp = shadowRoot.AMP;
     delete shadowRoot.AMP;
     const ampdoc = /** @type {!./service/ampdoc-impl.AmpDoc} */ (amp.ampdoc);
-    setViewerVisibilityState(Services.viewerForDoc(ampdoc), VisibilityState.INACTIVE);
+    setViewerVisibilityState(
+        Services.viewerForDoc(ampdoc), VisibilityState.INACTIVE);
     disposeServicesForDoc(ampdoc);
   }
 

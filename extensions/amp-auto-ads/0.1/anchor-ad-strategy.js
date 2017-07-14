@@ -83,7 +83,8 @@ export class AnchorAdStrategy {
   }
 
   placeStickyAd_() {
-    const viewportWidth = Services.viewportForDoc(this.win_.document).getWidth();
+    const viewportWidth =
+        Services.viewportForDoc(this.win_.document).getWidth();
     const attributes = /** @type {!JsonObject} */ (
         Object.assign(dict(), this.baseAttributes_, dict({
           'width': String(viewportWidth),

@@ -305,7 +305,8 @@ export class Viewer {
         resolve(this.win.location.ancestorOrigins[0]);
       } else {
         // Race to resolve with a timer.
-        Services.timerFor(this.win).delay(() => resolve(''), VIEWER_ORIGIN_TIMEOUT_);
+        Services.timerFor(this.win).delay(
+            () => resolve(''), VIEWER_ORIGIN_TIMEOUT_);
         this.viewerOriginResolver_ = resolve;
       }
     });

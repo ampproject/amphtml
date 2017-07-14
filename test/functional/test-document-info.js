@@ -101,8 +101,10 @@ describe('document-info', () => {
 
   it('should provide the pageViewId', () => {
     return getWin({'canonical': ['https://twitter.com/']}).then(win => {
-      expect(Services.documentInfoForDoc(win.document).pageViewId).to.equal('1234');
-      expect(Services.documentInfoForDoc(win.document).pageViewId).to.equal('1234');
+      expect(Services.documentInfoForDoc(win.document).pageViewId)
+          .to.equal('1234');
+      expect(Services.documentInfoForDoc(win.document).pageViewId)
+          .to.equal('1234');
     });
   });
 
@@ -168,15 +170,16 @@ describe('document-info', () => {
         'https://foo.html/style2.css',
       ],
     }).then(win => {
-      expect(Services.documentInfoForDoc(win.document).linkRels['canonical'])
+      const documentInfo = Services.documentInfoForDoc(win.document);
+      expect(documentInfo.linkRels['canonical'])
           .to.equal('https://twitter.com/');
-      expect(Services.documentInfoForDoc(win.document).linkRels['icon'])
+      expect(documentInfo.linkRels['icon'])
           .to.equal('https://foo.html/bar.gif');
-      expect(Services.documentInfoForDoc(win.document).linkRels['stylesheet'].length)
+      expect(documentInfo.linkRels['stylesheet'].length)
           .to.equal(2);
-      expect(Services.documentInfoForDoc(win.document).linkRels['stylesheet'][0])
+      expect(documentInfo.linkRels['stylesheet'][0])
           .to.equal('https://foo.html/style1.css');
-      expect(Services.documentInfoForDoc(win.document).linkRels['stylesheet'][1])
+      expect(documentInfo.linkRels['stylesheet'][1])
           .to.equal('https://foo.html/style2.css');
     });
   });

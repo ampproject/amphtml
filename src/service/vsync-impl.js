@@ -136,10 +136,11 @@ export class Vsync {
     if (this.ampdocService_.isSingleDoc()) {
       // In a single-doc mode, the visibility of the doc == global visibility.
       // Thus, it's more efficient to only listen to it once.
-      Services.viewerPromiseForDoc(this.ampdocService_.getAmpDoc()).then(viewer => {
-        this.singleDocViewer_ = viewer;
-        viewer.onVisibilityChanged(boundOnVisibilityChanged);
-      });
+      Services.viewerPromiseForDoc(this.ampdocService_.getAmpDoc())
+          .then(viewer => {
+            this.singleDocViewer_ = viewer;
+            viewer.onVisibilityChanged(boundOnVisibilityChanged);
+          });
     } else {
       // In multi-doc mode, we track separately the global visibility and
       // per-doc visibility when necessary.

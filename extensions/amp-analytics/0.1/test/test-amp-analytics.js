@@ -213,7 +213,8 @@ describe('amp-analytics', function() {
             const analytics = getAnalyticsTag(clearVendorOnlyConfig(config));
             analytics.createdCallback();
             analytics.buildCallback();
-            const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
+            const urlReplacements =
+                Services.urlReplacementsForDoc(analytics.element);
             sandbox.stub(urlReplacements.getVariableSource(), 'get',
                 function(name) {
                   expect(this.replacements_).to.have.property(name);

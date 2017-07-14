@@ -174,7 +174,8 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
   waitToPreloadShell_(shellUrl) {
     // Ensure that document is loaded and visible first.
     const whenReady = this.loadPromise(this.win);
-    const whenVisible = Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible();
+    const whenVisible =
+        Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible();
     return Promise.all([whenReady, whenVisible]).then(() => {
       this.deferMutate(() => this.preloadShell_(shellUrl));
     });

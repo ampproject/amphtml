@@ -95,7 +95,8 @@ describes.fakeWin('VideoManager', {
     video.setAttribute('autoplay', '');
     videoManager.register(impl);
 
-    const visibilityStub = sandbox.stub(Services.viewerForDoc(env.ampdoc), 'isVisible');
+    const visibilityStub = sandbox.stub(
+        Services.viewerForDoc(env.ampdoc), 'isVisible');
     visibilityStub.onFirstCall().returns(true);
 
     const entry = videoManager.getEntryForVideo_(impl);
@@ -116,7 +117,8 @@ describes.fakeWin('VideoManager', {
     video.setAttribute('autoplay', '');
     videoManager.register(impl);
 
-    const visibilityStub = sandbox.stub(Services.viewerForDoc(env.ampdoc), 'isVisible');
+    const visibilityStub = sandbox.stub(
+        Services.viewerForDoc(env.ampdoc), 'isVisible');
     visibilityStub.onFirstCall().returns(true);
 
     const entry = videoManager.getEntryForVideo_(impl);
@@ -179,7 +181,8 @@ describes.fakeWin('VideoManager', {
 
     videoManager.register(impl);
 
-    const visibilityStub = sandbox.stub(Services.viewerForDoc(env.ampdoc), 'isVisible');
+    const visibilityStub = sandbox.stub(
+        Services.viewerForDoc(env.ampdoc), 'isVisible');
     visibilityStub.onFirstCall().returns(true);
 
     const entry = videoManager.getEntryForVideo_(impl);
