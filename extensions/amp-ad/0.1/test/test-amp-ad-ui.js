@@ -104,7 +104,10 @@ describes.realWin('amp-ad-ui handler', {
       sandbox.stub(adImpl, 'toggleFallback', () => {});
       uiHandler.applyNoContentUI();
       return promise.then(() => {
-        expect(adImpl.element.querySelector('[fallback]')).to.be.ok;
+        const el = adImpl.element.querySelector('[fallback]');
+        expect(el).to.be.ok;
+        expect(el.children[0]).to.have.class('i-amphtml-ad-default-holder');
+        expect(el.children[0]).to.have.attribute('data-ad-holder-text');
       });
     });
 
