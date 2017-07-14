@@ -208,8 +208,8 @@ export class Transport {
           sandbox: 'allow-scripts allow-same-origin',
           name: frameName,
           src: frameUrl,
-          'data-amp-3p-sentinel': sentinel,
         }));
+    frame.sentinel = sentinel;
     setStyles(frame, {
       width: 0,
       height: 0,
