@@ -47,10 +47,11 @@ export class AmpAnalytics3pMessageQueue {
     /** @private {!Object<string,!Array<string>>} */
     this.creativeToPendingMessages_ = {};
 
-    /** @private {!Object<string,string>} */
+    /** @private
+     *  {!../../../src/3p-analytics-common.AmpAnalytics3pNewCreative} */
     this.creativeToExtraData_ = {};
 
-    /** @private {!Object<string,!string>} */
+    /** @private {!../../../src/3p-analytics-common.AmpAnalytics3pEvent} */
     this.creativeToPendingExtraData_ = {};
 
     /** @private {string} */

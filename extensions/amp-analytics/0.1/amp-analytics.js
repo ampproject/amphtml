@@ -310,7 +310,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     ResponseMap.add(this.getAmpDoc(),
         type,
         /** @type {string} */ (this.win.document.baseURI),
-        response.data);
+        response['data']);
   }
 
   /**
