@@ -64,14 +64,14 @@
            navToolbar.setAttribute('toolbar-only', '');
          }
          const toolbarTarget = iframe.doc.createElement('div');
-         if (toolbarObj.target) {
-           toolbarTarget.setAttribute('id', toolbarObj.target);
-           navToolbar.setAttribute('target', toolbarObj.target);
-         } else if (toolbarObj.targetError) {
+         if (toolbarObj.toolbarTarget) {
+           toolbarTarget.setAttribute('id', toolbarObj.toolbarTarget);
+           navToolbar.setAttribute('toolbar-target', toolbarObj.toolbarTarget);
+         } else if (toolbarObj.toolbarTargetError) {
            navToolbar.setAttribute('target', 'toolbar-target');
          } else {
            toolbarTarget.setAttribute('id', 'toolbar-target');
-           navToolbar.setAttribute('target', 'toolbar-target');
+           navToolbar.setAttribute('toolbar-target', 'toolbar-target');
          }
          iframe.win.document.body.appendChild(toolbarTarget);
          const toolbarList = iframe.doc.createElement('ul');
@@ -161,7 +161,7 @@
    target attrbiute', () => {
      const targetId = 'toolbar-target';
      return getToolbars([{
-       target: targetId,
+       'toolbar-target': targetId,
      }]).then(obj => {
        const toolbars = obj.toolbars;
        resizeIframeToWidth(obj.iframe, '1024px', () => {
@@ -181,7 +181,7 @@
    matching window size for (min-width: 768px)', () => {
      const targetId = 'toolbar-target';
      return getToolbars([{
-       target: targetId,
+       'toolbar-target': targetId,
      }]).then(obj => {
        const toolbars = obj.toolbars;
        const toolbarTargets =
@@ -203,7 +203,7 @@
    non-matching window size for (min-width: 768px)', () => {
      const targetId = 'toolbar-target';
      return getToolbars([{
-       target: targetId,
+       'toolbar-target': targetId,
      }]).then(obj => {
        const toolbars = obj.toolbars;
        const toolbarTargets =

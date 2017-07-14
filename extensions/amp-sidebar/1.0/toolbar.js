@@ -46,7 +46,7 @@ export class Toolbar {
     this.toolbarClone_ = null;
 
     /** @private {Element|undefined} */
-    this.targetElement_ = undefined;
+    this.toolbarTarget_ = undefined;
 
     /** @private {!boolean} **/
     this.toolbarShown_ = false;
@@ -96,16 +96,16 @@ export class Toolbar {
    */
   buildCallback_() {
     this.toolbarClone_ = this.toolbarDomElement_.cloneNode(true);
-    const targetId = this.toolbarDomElement_.getAttribute('target');
+    const targetId = this.toolbarDomElement_.getAttribute('toolbar-target');
     // Set the target element to the toolbar clone if it exists.
     const targetElement = this.win_.document.getElementById(targetId);
     if (targetElement) {
-      this.targetElement_ = targetElement;
+      this.toolbarTarget_ = targetElement;
       this.toolbarClone_.classList.add('i-amphtml-toolbar');
-      toggle(this.targetElement_, false);
+      toggle(this.toolbarTarget_, false);
     } else {
-      throw new
-        Error(`Could not find the target element with an id: ${targetId}`);
+      throw new Error('Could not find the ' +
+      `toolbar-target element with an id: ${targetId}`);
     }
   }
 
@@ -131,10 +131,10 @@ export class Toolbar {
 
     // Display the elements
     return this.vsync_.mutatePromise(() => {
-      if (this.targetElement_) {
-        toggle(this.targetElement_, true);
-        if (!this.targetElement_.contains(this.toolbarClone_)) {
-          this.targetElement_.appendChild(this.toolbarClone_);
+      if (this.toolbarTarget_) {
+        toggle(this.toolbarTarget_, true);
+        if (!this.toolbarTarget_.contains(this.toolbarClone_)) {
+          this.toolbarTarget_.appendChild(this.toolbarClone_);
         }
       }
       if (this.toolbarOnlyElementsInSidebar_) {
@@ -158,8 +158,8 @@ export class Toolbar {
 
     this.vsync_.mutate(() => {
       // Hide the elements
-      if (this.targetElement_) {
-        toggle(this.targetElement_, false);
+      if (this.toolbarTarget_) {
+        toggle(this.toolbarTarget_, false);
       }
       if (this.toolbarOnlyElementsInSidebar_) {
         this.toolbarOnlyElementsInSidebar_.forEach(element => {

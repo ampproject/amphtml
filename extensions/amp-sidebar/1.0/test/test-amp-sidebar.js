@@ -72,14 +72,16 @@
            options.toolbars.forEach(toolbarObj => {
              const navToolbar = iframe.doc.createElement('nav');
 
-             //Create/Set toolbar target
+             //Create/Set toolbar-target
              const toolbarTarget = iframe.doc.createElement('div');
-             if (toolbarObj.target) {
-               toolbarTarget.setAttribute('id', toolbarObj.target);
-               navToolbar.setAttribute('target', toolbarObj.target);
+             if (toolbarObj.toolbarTarget) {
+               toolbarTarget.setAttribute('id',
+                   toolbarObj.toolbarTarget);
+               navToolbar.setAttribute('toolbar-target',
+                   toolbarObj.toolbarTarget);
              } else {
                toolbarTarget.setAttribute('id', 'toolbar-target');
-               navToolbar.setAttribute('target', 'toolbar-target');
+               navToolbar.setAttribute('toolbar-target', 'toolbar-target');
              }
              iframe.win.document.body.appendChild(toolbarTarget);
 
@@ -614,14 +616,14 @@
          const headerElements = sidebarElement.ownerDocument
                .getElementsByTagName('header');
          const toolbarElements = sidebarElement.ownerDocument
-               .querySelectorAll('*[toolbar]');
+               .querySelectorAll('[toolbar][toolbar-target]');
          expect(headerElements.length).to.be.equal(0);
          expect(toolbarElements.length).to.be.equal(0);
          expect(sidebarElement.implementation_.toolbars_.length).to.be.equal(0);
        });
      });
 
-     it('should create a toolbar element within the target', () => {
+     it('should create a toolbar element within the toolbar-target', () => {
        return getAmpSidebar({
          toolbars: [{}],
        }).then(obj => {
