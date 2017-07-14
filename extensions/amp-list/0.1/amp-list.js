@@ -68,11 +68,17 @@ export class AmpList extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const populate = this.populateList_();
-    populate.catch(error => {
-      // Normally firstLayoutCallback() hides the placeholder, but it won't
-      // get called if this promise is rejected.
-      this.togglePlaceholder(false);
-    });
+    if (this.getFallback()) {
+      populate.then(() => {
+        // Hide in case fallback was displayed for a previous fetch.
+        this.toggleFallbackInMutate_(false);
+      }, unusedError => {
+        // On fetch success, firstLayoutCompleted() hides placeholder.
+        // On fetch error, hide placeholder if fallback exists.
+        this.togglePlaceholder(false);
+        this.toggleFallbackInMutate_(true);
+      });
+    }
     return populate;
   }
 
@@ -100,14 +106,14 @@ export class AmpList extends AMP.BaseElement {
   toggleFallbackInMutate_(state) {
     if (state) {
       this.getVsync().mutate(() => {
-        this.toggleFallback(state);
+        this.toggleFallback(true);
         this.fallbackDisplayed_ = true;
       });
     } else {
       // Don't queue mutate if fallback isn't already visible.
       if (this.fallbackDisplayed_) {
         this.getVsync().mutate(() => {
-          this.toggleFallback(state);
+          this.toggleFallback(false);
           this.fallbackDisplayed_ = false;
         });
       }
@@ -125,12 +131,9 @@ export class AmpList extends AMP.BaseElement {
       user().assert(isArray(items),
           'Response must contain an array at "%s". %s',
           itemsExpr, this.element);
-      // Hide in case fallback was displayed for a previous fetch.
-      this.toggleFallbackInMutate_(false);
       return templatesFor(this.win).findAndRenderTemplateArray(
           this.element, items).then(this.rendered_.bind(this));
     }, error => {
-      this.toggleFallbackInMutate_(true);
       throw user().createError('Error fetching amp-list', error);
     });
   }
