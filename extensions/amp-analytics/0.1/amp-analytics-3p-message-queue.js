@@ -62,7 +62,7 @@ export class AmpAnalytics3pMessageQueue {
         this.messageType_,
         true,
         () => {
-          this.isReady_ = true;
+          this.setIsReady();
           this.flushQueue_();
         });
   }
@@ -77,6 +77,16 @@ export class AmpAnalytics3pMessageQueue {
   }
 
   /**
+   * Indicate that a cross-domain frame is ready to receive messages, and
+   * send all messages that were previously queued for it.
+   * @VisibleForTesting
+   */
+  setIsReady() {
+    this.isReady_ = true;
+    this.flushQueue_();
+  }
+
+  /**
    * Returns how many creativeId -> message(s) mappings there are
    * @return {number}
    * @VisibleForTesting
@@ -87,13 +97,25 @@ export class AmpAnalytics3pMessageQueue {
 
   /**
    * Sets extra config data to be sent to a cross-domain iframe.
-   * @param {!string} creativeId Identifies which creative is sending the message
-   * @param {!string} extraData The event to be enqueued and then sent to the
-   * iframe
+   * @param {!string} creativeId Identifies which creative is sending the
+   * extra data
+   * @param {!string} extraData The extra config data
    */
   setExtraData(creativeId, extraData) {
+    dev().assert(!this.creativeToExtraData_[creativeId],
+      'Replacing existing extra data for ' + creativeId);
     this.creativeToExtraData_[creativeId] = extraData;
     this.flushQueue_();
+  }
+
+  /**
+   * Test method to get extra config data to be sent to a cross-domain iframe.
+   * @param {!string} creativeId Identifies which creative is sending the
+   * extra data
+   * @returns {string} The extra config data
+   */
+  getExtraData(creativeId) {
+    return this.creativeToExtraData_[creativeId];
   }
 
   /**
