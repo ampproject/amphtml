@@ -27,13 +27,6 @@ describe('amp-analytics.amp-analytics-3p-message-queue', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    // frame = {
-    //   getAttribute: () => 'some_value',
-    //   src: 'http://localhost',
-    //   ownerDocument: {
-    //     defaultView: window,
-    //   },
-    // };
     frame = window.document.createElement('iframe');
     frame.setAttribute('sandbox', 'allow-scripts allow-same-origin');
     frame.setAttribute('name', 'some_name');
