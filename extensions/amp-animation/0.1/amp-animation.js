@@ -129,7 +129,7 @@ export class AmpAnimation extends AMP.BaseElement {
       viewer.onVisibilityChanged(() => {
         this.setVisible_(viewer.isVisible());
       });
-      this.getViewport().onChanged(e => {
+      this.getViewport().onResize(e => {
         if (e.relayoutAll) {
           this.onResize_();
         }
