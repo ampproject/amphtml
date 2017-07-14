@@ -30,6 +30,7 @@ const host = process.env.SERVE_HOST;
 const port = process.env.SERVE_PORT;
 const useHttps = process.env.SERVE_USEHTTPS == 'true' ? true : false;
 const gulpProcess = process.env.SERVE_PROCESS_ID;
+const quiet = process.env.SERVE_QUIET == 'true' ? true : false;
 
 // Exit if the port is in use.
 process.on('uncaughtException', function(err) {
@@ -57,6 +58,6 @@ gulp.src(process.cwd())
     host,
     directoryListing: true,
     https: useHttps,
-    middleware: [morgan('dev'), app],
+    middleware: quiet ? [app] : [morgan('dev'), app]
   }));
 
