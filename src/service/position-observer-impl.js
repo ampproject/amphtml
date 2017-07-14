@@ -235,9 +235,7 @@ export class AmpDocPositionObserver extends AbstractPositionObserver {
       }
       timeout = setTimeout(stopScroll.bind(this), 500);
     }));
-    this.unlisteners_.push(this.viewport_.onChanged(() => {
-      // TODO (@zhouyx, #9208): Consider doing this only when event.relayoutAll
-      // is true.
+    this.unlisteners_.push(this.viewport_.onResize(() => {
       this.vsync_.measure(() => {
         this.pass_(true);
       });

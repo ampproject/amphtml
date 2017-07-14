@@ -283,11 +283,11 @@ describes.sandboxed('AmpAnimation', {}, () => {
       const viewport = win.services.viewport.obj;
 
       // No size changes.
-      viewport.changed_(/* relayoutAll */ false, 0);
+      viewport.resizeObservable_.fire({relayoutAll: false});
       expect(stub).to.not.be.called;
 
       // Size has changed.
-      viewport.changed_(/* relayoutAll */ true, 0);
+      viewport.resizeObservable_.fire({relayoutAll: true});
       expect(stub).to.be.calledOnce;
     });
 
