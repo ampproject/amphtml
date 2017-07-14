@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 import {urls} from './config';
-import {documentInfoForDoc} from './services';
+import {Services} from './services';
 import {experimentToggles, isCanary} from './experiments';
-import {viewerForDoc} from './services';
 import {getLengthNumeral} from './layout';
 import {getModeObject} from './mode-object';
 import {domFingerprint} from './utils/dom-fingerprint';
@@ -46,8 +45,8 @@ export function getContextMetadata(
     locationHref = parentWindow.parent.location.href;
   }
 
-  const docInfo = documentInfoForDoc(element);
-  const viewer = viewerForDoc(element);
+  const docInfo = Services.documentInfoForDoc(element);
+  const viewer = Services.viewerForDoc(element);
   const referrer = viewer.getUnconfirmedReferrerUrl();
 
   // TODO(alanorozco): Redesign data structure so that fields not exposed by

@@ -20,8 +20,7 @@ import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {serializeQueryString} from '../../../src/url';
 import {getTimingDataSync} from '../../../src/service/variable-source';
-import {urlReplacementsForDoc} from '../../../src/services';
-import {viewerForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {CommonSignals} from '../../../src/common-signals';
 import {analyticsForDoc} from '../../../src/services';
 
@@ -174,10 +173,10 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
      * @private {!../../../src/service/url-replacements-impl.UrlReplacements}
      * @const
      */
-    this.urlReplacer_ = urlReplacementsForDoc(element);
+    this.urlReplacer_ = Services.urlReplacementsForDoc(element);
 
     /** @const @private {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = viewerForDoc(element);
+    this.viewer_ = Services.viewerForDoc(element);
   }
 
   /**

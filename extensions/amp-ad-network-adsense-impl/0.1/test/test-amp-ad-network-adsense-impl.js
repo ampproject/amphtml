@@ -22,7 +22,7 @@ import {
 import {
   installExtensionsService,
 } from '../../../../src/service/extensions-impl';
-import {extensionsFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-line no-unused-vars
 import {
   AmpAdXOriginIframeHandler,    // eslint-disable-line no-unused-vars
@@ -323,7 +323,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         });
         impl = new AmpAdNetworkAdsenseImpl(element);
         installExtensionsService(impl.win);
-        const extensions = extensionsFor(impl.win);
+        const extensions = Services.extensionsFor(impl.win);
         loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
       });
     });

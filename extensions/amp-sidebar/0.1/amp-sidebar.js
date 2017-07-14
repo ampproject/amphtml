@@ -19,12 +19,9 @@ import {KeyCodes} from '../../../src/utils/key-codes';
 import {closestByTag, tryFocus} from '../../../src/dom';
 import {Layout} from '../../../src/layout';
 import {dev} from '../../../src/log';
-import {historyForDoc} from '../../../src/services';
-import {platformFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {setStyles, toggle} from '../../../src/style';
 import {removeFragment, parseUrl} from '../../../src/url';
-import {vsyncFor} from '../../../src/services';
-import {timerFor} from '../../../src/services';
 
 /** @const */
 const ANIMATION_TIMEOUT = 550;
@@ -41,7 +38,7 @@ export class AmpSidebar extends AMP.BaseElement {
     this.viewport_ = null;
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(this.win);
+    this.vsync_ = Services.vsyncFor(this.win);
 
     /** @private {?Element} */
     this.maskElement_ = null;
@@ -55,7 +52,7 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private {?string} */
     this.side_ = null;
 
-    const platform = platformFor(this.win);
+    const platform = Services.platformFor(this.win);
 
     /** @private @const {boolean} */
     this.isIos_ = platform.isIos();
@@ -70,7 +67,7 @@ export class AmpSidebar extends AMP.BaseElement {
     this.bottomBarCompensated_ = false;
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = timerFor(this.win);
+    this.timer_ = Services.timerFor(this.win);
 
     /** @private {number|string|null} */
     this.openOrCloseTimeOut_ = null;
@@ -325,7 +322,7 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private @return {!../../../src/service/history-impl.History}
    */
   getHistory_() {
-    return historyForDoc(this.getAmpDoc());
+    return Services.historyForDoc(this.getAmpDoc());
   }
 }
 

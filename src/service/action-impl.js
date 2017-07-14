@@ -26,8 +26,7 @@ import {getMode} from '../mode';
 import {getValueForExpr} from '../json';
 import {isArray, isFiniteNumber} from '../types';
 import {map} from '../utils/object';
-import {timerFor} from '../services';
-import {vsyncFor} from '../services';
+import {Services} from '../services';
 
 /**
  * ActionInfoDef args key that maps to the an unparsed object literal string.
@@ -177,7 +176,7 @@ export class ActionService {
     this.globalMethodHandlers_ = map();
 
     /** @private {!./vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(ampdoc.win);
+    this.vsync_ = Services.vsyncFor(ampdoc.win);
 
     // Add core events.
     this.addEvent('tap');
@@ -354,7 +353,7 @@ export class ActionService {
 
     // Dequeue the current queue.
     if (isArray(currentQueue)) {
-      timerFor(target.ownerDocument.defaultView).delay(() => {
+      Services.timerFor(target.ownerDocument.defaultView).delay(() => {
         // TODO(dvoytenko, #1260): dedupe actions.
         currentQueue.forEach(invocation => {
           try {
