@@ -101,7 +101,7 @@ Conditions can specify whether this animation component is included in the final
 
 #### Media query
 
-Media query can be specified using the `media` property. This propertyu can contain any expression allowed
+Media query can be specified using the `media` property. This property can contain any expression allowed
 for [Window.matchMedia](https://developer.mozilla.org/en-US/docs/Web/API/Window/matchMedia) API and corresponds to `@media` CSS rule.
 
 If value is specified for an animation component, the animation component will only be included if the
@@ -109,7 +109,7 @@ media query will match the current environment.
 
 #### Supports condition
 
-Supports condition can be specified using the `supports` property. This attribute can contain any expression allowed
+Supports condition can be specified using the `supports` property. This property can contain any expression allowed
 for [CSS.supports](https://developer.mozilla.org/en-US/docs/Web/API/CSS/supports) API and corresponds to `@supports` CSS rule.
 
 If value is specified for an animation component, the animation component will only be included if the
