@@ -61,7 +61,7 @@ function createAdUnit(win, placementId, adType) {
   const el = document.createElement('vmfive-ad-unit');
   el.setAttribute('placement-id', placementId);
   el.setAttribute('ad-type', adType);
-  win.document.body.appendChild(el);
+  win.document.getElementById('c').appendChild(el);
 }
 
 function setupSDKReadyCallback(win, appKey) {
