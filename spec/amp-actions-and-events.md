@@ -207,9 +207,11 @@ For example, the following is possible in AMP.
     <td>Toggles the visibility of the target element.</td>
   </tr>
   <tr>
-    <td>`scrollTo(duration=INTEGER)`</td>
+    <td>`scrollTo(duration=INTEGER, position=STRING)`</td>
     <td>Scrolls the element into view with a smooth animation. If defined,
-    `duration` specifies the length of the animation in milliseconds.</td>
+    `duration` specifies the length of the animation in milliseconds. `position`
+    is optional and takes one of `top`, `center` and `bottom` defining where
+    in the viewport the element will be at the end of the scroll.</td>
   </tr>
   <tr>
     <td>`focus`</td>

@@ -194,10 +194,21 @@ export class StandardActions {
     }
     const node = dev().assertElement(invocation.target);
 
-    // Animate scroll
-    const duration = invocation.args && invocation.args['duration'] ?
+    // Duration for scroll animation
+    const duration = invocation.args
+                     && invocation.args['duration']
+                     && invocation.args['duration'] >= 0 ?
                      invocation.args['duration'] : 500;
-    this.viewport_.animateScrollIntoView(node, duration);
+
+    // Position in the viewport at the end
+    const permittedPosVals = ['top','bottom','center'];
+    const pos = invocation.args
+                && invocation.args['position']
+                && (permittedPosVals.indexOf(invocation.args['position']) + 1) ?
+                invocation.args['position'] : 'top';
+
+    // Animate the scroll
+    this.viewport_.animateScrollIntoView(node, duration, 'ease-in', pos);
   }
 
   /**
