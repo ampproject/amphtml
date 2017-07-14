@@ -130,8 +130,12 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
   });
 
   it('should resolve root layout box', () => {
-    sandbox.stub(viewport, 'getSize', () => {
-      return {width: 101, height: 201};
+    const rootElement = win.document.documentElement;
+    sandbox.stub(viewport, 'getLayoutRect', element => {
+      if (element == rootElement) {
+        return layoutRectLtwh(0, 0, 101, 201);
+      }
+      return null;
     });
     expect(root.getRootLayoutBox()).to.contain({
       left: 0,

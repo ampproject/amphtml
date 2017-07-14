@@ -425,14 +425,11 @@ export class VisibilityManagerForDoc extends VisibilityManager {
 
   /** @override */
   getRootLayoutBox() {
-    if (getMode(this.ampdoc.win).runtime == 'inabox') {
-      const root = this.ampdoc.getRootNode();
-      const rootElement = dev().assertElement(
-          root.documentElement || root.body || root);
-      return this.viewport_.getLayoutRect(rootElement);
-    }
-    const size = this.viewport_.getSize();
-    return layoutRectLtwh(0, 0, size.width, size.height);
+    // This code is the same for "in-a-box" and standalone doc.
+    const root = this.ampdoc.getRootNode();
+    const rootElement = dev().assertElement(
+        root.documentElement || root.body || root);
+    return this.viewport_.getLayoutRect(rootElement);
   }
 
   /** @override */
