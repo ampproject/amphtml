@@ -520,8 +520,11 @@ export class MeasureScanner extends Scanner {
 
   /** @override */
   isEnabled(spec) {
-    if (spec.media) {
-      return this.css_.matchMedia(spec.media);
+    if (spec.media && !this.css_.matchMedia(spec.media)) {
+      return false;
+    }
+    if (spec.supports && !this.css_.supports(spec.supports)) {
+      return false;
     }
     return true;
   }
@@ -957,6 +960,17 @@ class CssContextImpl {
    */
   matchMedia(mediaQuery) {
     return this.win_.matchMedia(mediaQuery).matches;
+  }
+
+  /**
+   * @param {string} query
+   * @return {boolean}
+   */
+  supports(query) {
+    if (this.win_.CSS && this.win_.CSS.supports) {
+      return this.win_.CSS.supports(query);
+    }
+    return false;
   }
 
   /**
