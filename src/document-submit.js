@@ -130,7 +130,7 @@ export function onDocumentFormSubmit_(e) {
     // to deliver the submission event.
     e.stopImmediatePropagation();
 
-    const actions = Services.accessServiceForDoc(form);
+    const actions = Services.actionServiceForDoc(form);
     // TODO(choumx, #9699): HIGH.
     actions.execute(form, 'submit', /*args*/ null, form, e, ActionTrust.MEDIUM);
   }

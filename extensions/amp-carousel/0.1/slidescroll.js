@@ -137,7 +137,7 @@ export class AmpSlideScroll extends BaseSlides {
   /** @override */
   buildSlides() {
     this.vsync_ = this.getVsync();
-    this.action_ = Services.accessServiceForDoc(this.element);
+    this.action_ = Services.actionServiceForDoc(this.element);
 
     this.hasNativeSnapPoints_ = (
         getStyle(this.element, 'scrollSnapType') != undefined);

@@ -340,7 +340,7 @@ export class AccessService {
 
     // TODO(dvoytenko, #3742): This will refer to the ampdoc once AccessService
     // is migrated to ampdoc as well.
-    Services.accessServiceForDoc(this.ampdoc).installActionHandler(
+    Services.actionServiceForDoc(this.ampdoc).installActionHandler(
         this.accessElement_, this.handleAction_.bind(this));
 
     // Calculate login URLs right away.

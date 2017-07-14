@@ -163,7 +163,7 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
 
   it('should delegate xhr submit through action service', () => {
     evt.target.setAttribute('action-xhr', 'https://example.com');
-    const actionService = Services.accessServiceForDoc(tgt);
+    const actionService = Services.actionServiceForDoc(tgt);
     sandbox.stub(actionService, 'execute');
     onDocumentFormSubmit_(evt);
     expect(actionService.execute).to.have.been.calledOnce;
@@ -174,7 +174,7 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
   });
 
   it('should not delegate non-XHR submit through action service', () => {
-    const actionService = Services.accessServiceForDoc(tgt);
+    const actionService = Services.actionServiceForDoc(tgt);
     sandbox.stub(actionService, 'execute');
     onDocumentFormSubmit_(evt);
     expect(actionService.execute).to.have.not.been.called;

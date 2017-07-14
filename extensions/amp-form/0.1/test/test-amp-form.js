@@ -1249,7 +1249,7 @@ describes.repeated('', {
     it('should install action handler and handle submit action', () => {
       const form = getForm();
       document.body.appendChild(form);
-      const actions = Services.accessServiceForDoc(form.ownerDocument);
+      const actions = Services.actionServiceForDoc(form.ownerDocument);
 
       sandbox.stub(actions, 'installActionHandler');
       const ampForm = new AmpForm(form);

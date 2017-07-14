@@ -131,7 +131,7 @@ export class AmpForm {
     this.xhr_ = Services.xhrFor(this.win_);
 
     /** @const @private {!../../../src/service/action-impl.ActionService} */
-    this.actions_ = Services.accessServiceForDoc(this.form_);
+    this.actions_ = Services.actionServiceForDoc(this.form_);
 
     /** @const @private {!../../../src/service/resources-impl.Resources} */
     this.resources_ = Services.resourcesForDoc(this.form_);

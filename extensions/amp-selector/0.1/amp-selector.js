@@ -77,7 +77,7 @@ export class AmpSelector extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.action_ = Services.accessServiceForDoc(this.element);
+    this.action_ = Services.actionServiceForDoc(this.element);
     this.isMultiple_ = this.element.hasAttribute('multiple');
     this.isDisabled_ = this.element.hasAttribute('disabled');
 
