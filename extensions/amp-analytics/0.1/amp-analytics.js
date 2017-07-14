@@ -160,7 +160,8 @@ export class AmpAnalytics extends AMP.BaseElement {
   layoutCallback() {
     // Now that we are rendered, stop rendering the element to reduce
     // resource consumption.
-    this.element.getResources().setOwner(this.element, this.element.parentElement);
+    this.element.getResources().setOwner(this.element,
+        this.element.parentElement);
     return this.ensureInitialized_();
   }
 
