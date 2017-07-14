@@ -163,8 +163,10 @@ export class AmpAnalytics extends AMP.BaseElement {
     return this.ensureInitialized_();
   }
 
-  /* @override */
+  /** @override */
   unlayoutCallback() {
+    //TODO(jonkeller): Figure out why unlayoutCallback is getting called
+    //immediately, fix that, then add the following code back in.
     /*
     const ampDoc = this.getAmpDoc();
     Transport.doneUsingCrossDomainIframe(ampDoc.win.document,
