@@ -458,7 +458,7 @@ function createFakeVideoPlayerClass(win) {
         this.element.dispatchCustomEvent(VideoEvents.PLAYING);
         this.timeoutId_ = this.timer_.delay(() => {
           this.currentTime_ = this.duration_;
-          this.element.dispatchCustomEvent(VideoEvents.ENDED);
+          this.element.dispatchCustomEvent(VideoEvents.PAUSE);
         }, this.length_);
       });
     }

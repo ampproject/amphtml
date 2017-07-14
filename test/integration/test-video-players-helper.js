@@ -247,8 +247,17 @@ export function runVideoPlayerIntegrationTests(
             autoplay: true,
           }
       ).then(r => {
+        // TODO(cvializ): Better way to detect which classes implement methods
+        // needed for tracking?
+        const tagName = r.video.tagName;
+        if (tagName !== 'AMP-VIDEO' &&
+            tagName !== 'AMP-TEST-FAKE-VIDEOPLAYER') {
+          this.skip();
+          return;
+        }
+
         video = r.video;
-        return listenOncePromise(video, VideoEvents.ENDED, true);
+        return listenOncePromise(video, VideoEvents.PAUSE);
       }).then(() => {
         return listenOncePromise(video, VideoEvents.ANALYTICS);
       }).then(event => {
@@ -257,7 +266,7 @@ export function runVideoPlayerIntegrationTests(
       });
     });
 
-    it.skip('should include current time, play state, etc.', function() {
+    it('should include current time, play state, etc.', function() {
       let playButton;
       let pauseButton;
       let timer;
@@ -292,18 +301,6 @@ export function runVideoPlayerIntegrationTests(
         expect(playedRanges).to.be.an('array');
         expect(details.state).to.be.a('string');
         expect(details.width).to.be.a('number');
-      });
-    });
-
-    before(function() {
-      return getVideoPlayer({}).then(r => {
-        const tagName = r.video.tagName;
-        // TODO(cvializ): Better way to detect which classes implement methods
-        // needed for tracking?
-        if (tagName !== 'AMP-VIDEO' &&
-            tagName !== 'AMP-TEST-FAKE-VIDEOPLAYER') {
-          this.skip();
-        }
       });
     });
 
