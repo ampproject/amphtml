@@ -1056,6 +1056,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     }
 
     beforeEach(() => {
+      resetRtcStateForTesting();
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         element = createElementWithAttributes(document, 'amp-ad', {
@@ -1096,7 +1097,6 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       }, element).then(() => {
         expect(impl.jsonTargeting_).to.deep.equal(jsonTargeting);
       });
-      ;
     });
 
     it('should add just categoryExclusions to impl', () => {
@@ -1110,7 +1110,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         categoryExclusions,
       }, element).then(() => {
         expect(impl.jsonTargeting_).to.deep.equal(jsonTargeting);
-      });;
+      });
     });
 
     it('should add targeting and categoryExclusions to impl', () => {
