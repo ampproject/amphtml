@@ -19,7 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td class="col-fourty"><strong>Description</strong></td>
-    <td>Conduct user experience experiments on an AMP document and collect corresponding data with <code>amp-pixel</code> or <code>amp-analytics</code>.</td>
+    <td>Conduct user experience experiments (such as A/B testing and multivariate testing) on an AMP document and collect corresponding data with <code>amp-pixel</code> or <code>amp-analytics</code>.</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
@@ -27,26 +27,26 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-experiment/">Annotated code example for amp-experiment</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-experiment/">Annotated code example for A/B tests with amp-experiment</a></td>
   </tr>
 </table>
 
 ## Behavior
-The `<amp-experiment>` element is used to conduct user experience experiments on an AMP document. It provides hooks to define customizable variants and allocates traffic to each of the variants based on the configuration. For each page view, the variant allocation is also exposed to `amp-pixel` and `amp-analytics` so that the necessary data can be collected to perform statistical comparison across variants.
+The `<amp-experiment>` element is used to conduct user experience experiments (such as [A/B testing and multivariate testing](https://en.wikipedia.org/wiki/A/B_testing)) on an AMP document. It provides hooks to define customizable variants and allocates traffic to each of the variants based on the configuration. For each page view, the variant allocation is also exposed to `amp-pixel` and `amp-analytics` so that the necessary data can be collected to perform statistical comparison across variants.
 
 A user-sticky variant assignment is supported to provide a consistent user experience to the same client. This functionality relies upon AMP’s [Client ID](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md#client-id) capability to provide random values that are consistent across page views. Please be aware that usage of this feature with this behavior might require updating your privacy policy, or obtaining end user consent in some jurisdictions. (If this is relevant for you, please see `consentNotificationId` below.)
 
 Multiple experiments can be run on the same AMP document in parallel with their own sets of variants. In user sticky mode, the allocations are orthogonal among different experiments, meaning there will be no correlation between 2 variants (user groups) that are from different experiments.
 
 ## Configuration
-The configuration of the experiments is specified in a JSON object. 
+The configuration of the experiments is specified in a JSON object.
 
 ```html
 <amp-experiment>
   <script type="application/json">
     {
       aExperiment: {
-        sticky: true, 
+        sticky: true,
         consentNotificationId: "consent-notif",
         variants: {
           treatment1: 12.5,
@@ -72,7 +72,7 @@ At top level, the JSON is a map of experiment configurations keyed by experiment
 <tr><td class="col-thirty"><code>group</code>                </td><td class="col-thirty">No, default=<code>{experimentName}</code></td><td>Experiments with the same group name will share the same CID space. Only useful when multiple experiments want to have correlated user grouping. This setting is only relevant when <code>sticky=true</code>. </td></tr>
 </table>
 
-Characters used in the experiment name and variant name are restricted to `[a-z,A-Z,0-9,-,_].`  `none` is a reserved keyword and cannot be used. 
+Characters used in the experiment name and variant name are restricted to `[a-z,A-Z,0-9,-,_].`  `none` is a reserved keyword and cannot be used.
 
 ## Style a variant
 For each experiment, the allocated variant is exposed as attribute of the body element of the document.
