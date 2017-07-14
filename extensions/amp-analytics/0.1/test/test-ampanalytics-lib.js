@@ -71,12 +71,11 @@ describe('ampanalytics-lib', () => {
    * @param {!JsonObject} object Message payload.
    */
   function send(type, data) {
-    let object = {};
+    const object = {};
     object['type'] = type;
     object['sentinel'] = sentinel;
     object['data'] = data;
-    payload = 'amp-' + JSON.stringify(object);
-    console.log('Sending: ' + payload)
+    const payload = 'amp-' + JSON.stringify(object);
     window./*OK*/postMessage(payload, '*');
   }
 
@@ -110,7 +109,8 @@ describe('ampanalytics-lib', () => {
 
   it('receives an event message ', () => {
     window.onNewAmpAnalyticsInstance = ampAnalytics => {
-      expect(ampAnalytics instanceof AmpAnalytics3pCreativeMessageRouter).to.be.true;
+      expect(ampAnalytics instanceof AmpAnalytics3pCreativeMessageRouter)
+          .to.be.true;
       expect(Object.keys(router.getCreativeMethodRouters()).length).to.equal(1);
       ampAnalytics.registerAmpAnalytics3pEventsListener(events => {
         expect(events.length).to.equal(1);
@@ -134,7 +134,7 @@ describe('ampanalytics-lib', () => {
     return timer.promise(POST_MESSAGE_DELAY).then(() => {
       expect(badAssertsCounterStub.calledOnce).to.be.true;
       expect(badAssertsCounterStub.alwaysCalledWith(
-        'Duplicate new creative message for 102')).to.be.true;
+          'Duplicate new creative message for 102')).to.be.true;
     });
   });
 
@@ -147,7 +147,7 @@ describe('ampanalytics-lib', () => {
     return timer.promise(POST_MESSAGE_DELAY).then(() => {
       expect(badAssertsCounterStub.calledOnce).to.be.true;
       expect(badAssertsCounterStub.alwaysCalledWith(
-        sinon.match(/Must implement onNewAmpAnalyticsInstance/))).to.be.true;
+          sinon.match(/Must implement onNewAmpAnalyticsInstance/))).to.be.true;
       return Promise.resolve();
     });
   });
@@ -161,18 +161,19 @@ describe('ampanalytics-lib', () => {
       const re = 'Discarding event message received prior to new creative' +
         ' message for 104';
       expect(badAssertsCounterStub.alwaysCalledWith(
-        sinon.match(new RegExp(re)))).to.be.true;
+          sinon.match(new RegExp(re)))).to.be.true;
       return Promise.resolve();
     });
   });
 
   it('receives multiple event messages ', () => {
     window.onNewAmpAnalyticsInstance = ampAnalytics => {
-      expect(ampAnalytics instanceof AmpAnalytics3pCreativeMessageRouter).to.be.true;
+      expect(ampAnalytics instanceof AmpAnalytics3pCreativeMessageRouter)
+          .to.be.true;
       expect(Object.keys(router.getCreativeMethodRouters()).length).to.equal(1);
       ampAnalytics.registerAmpAnalytics3pEventsListener(events => {
         expect(events.length).to.equal(3);
-        events.forEach(event => {
+        events.forEach(() => {
           expect(ampAnalytics.getCreativeId()).to.equal('105');
         });
         expect(events[0]).to.equal('something happened');
