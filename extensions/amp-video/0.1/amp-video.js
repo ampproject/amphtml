@@ -181,17 +181,16 @@ class AmpVideo extends AMP.BaseElement {
      */
   installEventHandlers_() {
     const video = dev().assertElement(this.video_);
-    this.forwardEvents([
-      VideoEvents.PLAYING,
-      VideoEvents.PAUSE,
-      VideoEvents.ENDED,
-    ], video);
+    this.forwardEvents([VideoEvents.PLAYING, VideoEvents.PAUSE], video);
     listen(video, 'volumechange', () => {
       if (this.muted_ != this.video_.muted) {
         this.muted_ = this.video_.muted;
         const evt = this.muted_ ? VideoEvents.MUTED : VideoEvents.UNMUTED;
         this.element.dispatchCustomEvent(evt);
       }
+    });
+    listen(video, 'ended', () => {
+      this.element.dispatchCustomEvent(VideoEvents.PAUSE);
     });
   }
 

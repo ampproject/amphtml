@@ -283,13 +283,13 @@ class VideoEntry {
     this.actionSessionManager_ = new VideoSessionManager();
 
     this.actionSessionManager_.onSessionEnd(
-        () => this.analyticsEvent_(VideoAnalyticsType.SESSION));
+        () => analyticsEvent(this, VideoAnalyticsType.SESSION));
 
     /** @private @const */
     this.visibilitySessionManager_ = new VideoSessionManager();
 
     this.visibilitySessionManager_.onSessionEnd(
-        () => this.analyticsEvent_(VideoAnalyticsType.SESSION_VISIBLE));
+        () => analyticsEvent(this, VideoAnalyticsType.SESSION_VISIBLE));
 
     /** @private @const {function(): !Promise<boolean>} */
     this.boundSupportsAutoplay_ = supportsAutoplay.bind(null, ampdoc.win,
@@ -331,7 +331,6 @@ class VideoEntry {
 
     listen(element, VideoEvents.PAUSE, () => this.videoPaused_());
     listen(element, VideoEvents.PLAYING, () => this.videoPlayed_());
-    listen(element, VideoEvents.ENDED, () => this.videoEnded_());
     listen(element, VideoEvents.MUTED, () => this.muted_ = true);
     listen(element, VideoEvents.UNMUTED, () => this.muted_ = false);
 
@@ -363,7 +362,7 @@ class VideoEntry {
     if (this.isVisible_) {
       this.visibilitySessionManager_.beginSession();
     }
-    this.analyticsEvent_(VideoAnalyticsType.PLAY);
+    analyticsEvent(this, VideoAnalyticsType.PLAY);
   }
 
   /**
@@ -371,8 +370,10 @@ class VideoEntry {
    * @private
    */
   videoPaused_() {
-    if (this.video.getCurrentTime() !== this.video.getDuration()) {
-      this.analyticsEvent_(VideoAnalyticsType.PAUSE);
+    if (this.video.getCurrentTime() === this.video.getDuration()) {
+      analyticsEvent(this, VideoAnalyticsType.ENDED);
+    } else {
+      analyticsEvent(this, VideoAnalyticsType.PAUSE);
     }
     this.isPlaying_ = false;
 
@@ -384,16 +385,6 @@ class VideoEntry {
       // reset the flag
       this.pauseCalledByAutoplay_ = false;
     }
-  }
-
-  /**
-   * Callback for when the video ends
-   * @private
-   */
-  videoEnded_() {
-    this.isPlaying_ = false;
-    this.analyticsEvent_(VideoAnalyticsType.ENDED);
-    this.actionSessionManager_.endSession();
   }
 
   /**
@@ -901,28 +892,13 @@ class VideoEntry {
     return this.userInteractedWithAutoPlay_;
   }
 
-  /**
-   * @param {string} eventType
-   * @param {!Object<string, string>=} opt_vars A map of vars and their values.
-   * @private
-   */
-  analyticsEvent_(eventType, opt_vars) {
-    const detailsPromise = opt_vars ? Promise.resolve(opt_vars) :
-        this.getAnalyticsDetails_(this.video);
-
-    detailsPromise.then(details => {
-      this.video.element.dispatchCustomEvent(
-          VideoEvents.ANALYTICS, {type: eventType, details});
-    });
-  }
 
   /**
    * Collects a snapshot of the current video state for video analytics
-   * @param {!../video-interface.VideoInterface} video
    * @return {!Promise<!../video-interface.VideoAnalyticsDetailsDef>}
-   * @private
    */
-  getAnalyticsDetails_(video) {
+  getAnalyticsDetails() {
+    const video = this.video;
     return this.boundSupportsAutoplay_().then(supportsAutoplay => {
       const {width, height} = this.video.element.getLayoutBox();
       const autoplay = this.hasAutoplay && supportsAutoplay;
@@ -1011,6 +987,23 @@ export function supportsAutoplay(win, isLiteViewer) {
 
   const supportsAutoplay = !detectionElement.paused;
   return supportsAutoplayCache_ = Promise.resolve(supportsAutoplay);
+}
+
+/**
+ * @param {!VideoEntry} entry
+ * @param {string} eventType
+ * @param {!Object<string, string>=} opt_vars A map of vars and their values.
+ * @private
+ */
+function analyticsEvent(entry, eventType, opt_vars) {
+  const video = entry.video;
+  const detailsPromise = opt_vars ? Promise.resolve(opt_vars) :
+      entry.getAnalyticsDetails();
+
+  detailsPromise.then(details => {
+    video.element.dispatchCustomEvent(
+        VideoEvents.ANALYTICS, {type: eventType, details});
+  });
 }
 
 /**
