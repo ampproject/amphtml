@@ -143,6 +143,11 @@ AmpViewerMessage.prototype.rsvp;
 /** @public {string|undefined}  */
 AmpViewerMessage.prototype.error;
 
+// AMP-Analytics Cross-domain iframes
+let AmpAnalytics3pReadyMessage;
+let AmpAnalytics3pNewCreative;
+let AmpAnalytics3pEvent;
+let AmpAnalytics3pResponse;
 
 // amp-viz-vega related externs.
 /**
