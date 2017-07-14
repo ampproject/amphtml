@@ -23,6 +23,7 @@ import {dict} from './utils/object';
 import {parseUrl, assertHttpsUrl} from './url';
 import {urls} from './config';
 import {setStyle} from './style';
+import {startsWith} from './string';
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
 let count = {};
@@ -135,7 +136,10 @@ export function getIframe(
 export function addDataAndJsonAttributes_(element, attributes) {
   for (let i = 0; i < element.attributes.length; i++) {
     const attr = element.attributes[i];
-    if (attr.name.indexOf('data-') != 0) {
+    if (!startsWith(attr.name, 'data-')
+      // data-vars- is reserved for amp-analytics
+      // see https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/analytics-vars.md#variables-as-data-attribute
+      || startsWith(attr.name, 'data-vars-')) {
       continue;
     }
     attributes[dashToCamelCase(attr.name.substr(5))] = attr.value;
