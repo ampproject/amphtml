@@ -81,30 +81,32 @@ export function runVideoPlayerIntegrationTests(
 
     it('should support mute, play, pause, unmute actions', function() {
       return getVideoPlayer({outsideView: false, autoplay: false}).then(r => {
-
         // Create a action buttons
         const playButton = createButton(r, 'play');
         const pauseButton = createButton(r, 'pause');
         const muteButton = createButton(r, 'mute');
         const unmuteButton = createButton(r, 'unmute');
-
-        return listenOncePromise(r.video, VideoEvents.LOAD).then(() => {
-          const promise = listenOncePromise(r.video, VideoEvents.MUTED);
-          muteButton.click();
-          return promise;
-        }).then(() => {
-          const promise = listenOncePromise(r.video, VideoEvents.PLAYING);
-          playButton.click();
-          return promise;
-        }).then(() => {
-          const promise = listenOncePromise(r.video, VideoEvents.PAUSE);
-          pauseButton.click();
-          return promise;
-        }).then(() => {
-          const promise = listenOncePromise(r.video, VideoEvents.UNMUTED);
-          unmuteButton.click();
-          return promise;
-        });
+        return listenOncePromise(r.video, VideoEvents.LOAD)
+            .then(() => {
+              const promise = listenOncePromise(r.video, VideoEvents.MUTED);
+              muteButton.click();
+              return promise;
+            })
+            .then(() => {
+              const promise = listenOncePromise(r.video, VideoEvents.PLAYING);
+              playButton.click();
+              return promise;
+            })
+            .then(() => {
+              const promise = listenOncePromise(r.video, VideoEvents.PAUSE);
+              pauseButton.click();
+              return promise;
+            })
+            .then(() => {
+              const promise = listenOncePromise(r.video, VideoEvents.UNMUTED);
+              unmuteButton.click();
+              return promise;
+            });
       });
     });
 
