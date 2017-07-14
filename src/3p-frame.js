@@ -135,7 +135,10 @@ export function getIframe(
 export function addDataAndJsonAttributes_(element, attributes) {
   for (let i = 0; i < element.attributes.length; i++) {
     const attr = element.attributes[i];
-    if (attr.name.indexOf('data-') != 0) {
+    if (attr.name.indexOf('data-') != 0
+      // data-vars- is reserved for amp-analytics
+      // see https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/analytics-vars.md#variables-as-data-attribute
+      || attr.name.indexOf('data-vars-') == 0) {
       continue;
     }
     attributes[dashToCamelCase(attr.name.substr(5))] = attr.value;
