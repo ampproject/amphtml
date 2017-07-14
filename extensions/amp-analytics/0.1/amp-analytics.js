@@ -161,19 +161,16 @@ export class AmpAnalytics extends AMP.BaseElement {
   layoutCallback() {
     // Now that we are rendered, stop rendering the element to reduce
     // resource consumption.
+    this.element.getResources().setOwner(this.element, this.element.parentElement);
     return this.ensureInitialized_();
   }
 
   /** @override */
   unlayoutCallback() {
-    //TODO(jonkeller): Figure out why unlayoutCallback is getting called
-    //immediately, fix that, then add the following code back in.
-    /*
     const ampDoc = this.getAmpDoc();
     Transport.doneUsingCrossDomainIframe(ampDoc.win.document,
         this.config_['transport']);
     ResponseMap.remove(ampDoc, this.config_['transport']['type']);
-     */
     return true;
   }
 
