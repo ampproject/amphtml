@@ -57,24 +57,28 @@ export class AmpAnalytics3pMessageRouter {
 
     window.addEventListener('message', event => {
       const messageContainer = this.extractMessage(event);
+      if (this.sentinel_ != messageContainer.sentinel) {
+        return;
+      }
       dev().assert(messageContainer.type,
           'Received message with missing type in ' + this.win_.location.href);
       dev().assert(messageContainer.data,
           'Received empty message in ' + this.win_.location.href);
-      let message;
-      dev().assert((message = Object.entries(messageContainer.data)).length,
-          'Received empty events message in ' + this.win_.location.href);
       switch (messageContainer.type) {
         case AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVE:
-          this.processNewCreativesMessage(message);
+          this.processNewCreativesMessage(
+              /* @type {!../src/3p-analytics-common.AmpAnalytics3pNewCreative}*/
+              (messageContainer.data));
           break;
         case AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT:
-          this.processEventsMessage(message);
+          this.processEventsMessage(
+              /* @type {!../src/3p-analytics-common.AmpAnalytics3pEvent} */
+              (messageContainer.data));
           break;
         default:
           dev().assert(false,
               'Received unrecognized message type ' + messageContainer.type +
-            ' in ' + this.win_.location.href);
+              ' in ' + this.win_.location.href);
       }
     }, false);
 
@@ -97,13 +101,16 @@ export class AmpAnalytics3pMessageRouter {
   /**
    * Handle receipt of a message indicating that there are new creative(s)
    * that wish to use this frame
-   * @param {!JsonObject} message
+   * @param {!../src/3p-analytics-common.AmpAnalytics3pNewCreative} message
    */
   processNewCreativesMessage(message) {
+    let entries;
+    dev().assert((entries = Object.entries(message)).length,
+        'Received empty events message in ' + this.win_.location.href);
     dev().assert(window.onNewAmpAnalyticsInstance,
         'Must implement onNewAmpAnalyticsInstance in ' +
       this.win_.location.href);
-    message.forEach(entry => {
+    entries.forEach(entry => {
       const creativeId = entry[0];
       const extraData = entry[1];
       dev().assert(!this.creativeMessageRouters_[creativeId],
@@ -125,10 +132,13 @@ export class AmpAnalytics3pMessageRouter {
   /**
    * Handle receipt of a message indicating that creative(s) have sent
    * event(s) to this frame
-   * @param {!JsonObject} message
+   * @param {!../src/3p-analytics-common.AmpAnalytics3pEvent} message
    */
   processEventsMessage(message) {
-    message.forEach(entry => {
+    let entries;
+    dev().assert((entries = Object.entries(message)).length,
+        'Received empty events message in ' + this.win_.location.href);
+    entries.forEach(entry => {
       const creativeId = entry[0];
       const events = entry[1];
       try {
@@ -280,7 +290,8 @@ export class AmpAnalytics3pCreativeMessageRouter {
   /**
    * Sends a message from the third-party vendor's metrics-collection page back
    * to the creative.
-   * @param {!Object} response The response to send.
+   * @param {!../src/3p-analytics-common.AmpAnalytics3pResponse} response The
+   * response to send.
    */
   sendMessageToCreative(response) {
     const responseMessage = {
@@ -288,7 +299,8 @@ export class AmpAnalytics3pCreativeMessageRouter {
       type: this.sentinel_ + AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE,
       data: response,
     };
-    window.parent./*OK*/postMessage(responseMessage, '*');
+    window.parent./*OK*/postMessage(
+        /** @type {!JsonObject} */ (responseMessage), '*');
   }
 
   /**
