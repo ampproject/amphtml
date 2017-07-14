@@ -168,9 +168,10 @@
          toolbars.forEach(toolbar => {
            toolbar.onLayoutChange();
          });
+         const toolbarQuery = `#${targetId} > nav[toolbar][toolbar-target]`;
          const toolbarTargetElements =
                 toArray(obj.iframe.win.document.body
-                .querySelectorAll(`#${targetId} > nav[toolbar][target]`));
+                .querySelectorAll(toolbarQuery));
          expect(toolbars.length).to.be.equal(1);
          expect(toolbarTargetElements.length).to.be.equal(1);
        });
@@ -234,7 +235,7 @@
          });
          const toolbarNavElements =
                 toArray(obj.toolbarContainerElement.ownerDocument
-                .querySelectorAll('nav[toolbar][target]'));
+                .querySelectorAll('nav[toolbar][toolbar-target]'));
          const hiddenToolbarNavElements =
                 toArray(obj.toolbarContainerElement.ownerDocument
                 .querySelectorAll('nav[style]'));
