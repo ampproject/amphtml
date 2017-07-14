@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-import {AmpAnalytics3pMessageQueue} from '../amp-analytics-3p-message-queue';
+import {
+  AmpIframeTransportMessageQueue,
+} from '../amp-iframe-transport-message-queue';
 import {adopt} from '../../../../src/runtime';
 import * as sinon from 'sinon';
 
 adopt(window);
 
-describe('amp-analytics.amp-analytics-3p-message-queue', () => {
+describe('amp-analytics.amp-iframe-transport-message-queue', () => {
   let sandbox;
   let frame;
   let queue;
@@ -31,8 +33,8 @@ describe('amp-analytics.amp-analytics-3p-message-queue', () => {
     frame.setAttribute('sandbox', 'allow-scripts allow-same-origin');
     frame.setAttribute('name', 'some_name');
     frame.setAttribute('src', 'some_url');
-    frame.setAttribute('data-amp-3p-sentinel', '42');
-    queue = new AmpAnalytics3pMessageQueue(window, frame);
+    frame.sentinel = '42';
+    queue = new AmpIframeTransportMessageQueue(window, frame);
   });
 
   afterEach(() => {

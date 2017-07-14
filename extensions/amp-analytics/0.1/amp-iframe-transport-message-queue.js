@@ -19,7 +19,7 @@ import {AMP_ANALYTICS_3P_MESSAGE_TYPE} from '../../../src/3p-analytics-common';
 import {SubscriptionApi} from '../../../src/iframe-helper';
 
 /** @private @const {string} */
-const TAG_ = 'amp-analytics.3pMessageQueue';
+const TAG_ = 'amp-analytics.IframeTransportMessageQueue';
 
 /** @private @const {number} */
 const MAX_QUEUE_SIZE_ = 100;
@@ -27,7 +27,7 @@ const MAX_QUEUE_SIZE_ = 100;
 /**
  * @visibleForTesting
  */
-export class AmpAnalytics3pMessageQueue {
+export class AmpIframeTransportMessageQueue {
   /**
    * Constructor
    * @param {!Window} win The window element
