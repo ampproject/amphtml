@@ -39,7 +39,7 @@ export function vmfive(global, data) {
 function parallelDownloadScriptsAndExecuteInOrder(win) {
   [
     'https://vawpro.vm5apis.com/man.js',
-    'https://man.vm5apis.com/dist/adn-web-sdk.js'
+    'https://man.vm5apis.com/dist/adn-web-sdk.js',
   ].forEach(function(src) {
     const script = document.createElement('script');
     script.src = src;
@@ -56,5 +56,5 @@ function createAdUnit(win, placementId, adType) {
 }
 
 function setupSDKReadyCallback(win, appKey) {
-  win.onVM5AdSDKReady = (sdk) => sdk.init({appKey});
+  win.onVM5AdSDKReady = sdk => sdk.init({appKey});
 }
