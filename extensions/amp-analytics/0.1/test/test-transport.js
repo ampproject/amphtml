@@ -182,8 +182,8 @@ describe('amp-analytics.transport', () => {
     const frame3 = Transport.getFrameData(url3);
     const frame4 = Transport.getFrameData(url4);
     expectAllUnique([transport.getId(), transport2.getId(),
-        frame1.frame.sentinel, frame2.frame.sentinel,
-        frame3.frame.sentinel, frame4.frame.sentinel]);
+      frame1.frame.sentinel, frame2.frame.sentinel,
+      frame3.frame.sentinel, frame4.frame.sentinel]);
   });
 
   it('correctly tracks usageCount and destroys iframes', () => {
