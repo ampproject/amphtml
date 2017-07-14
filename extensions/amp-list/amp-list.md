@@ -40,7 +40,7 @@ using a supplied template.</td>
 
 ## Usage
 
-The `amp-list` component fetches dynamic content from a CORS JSON endpoint. The response from the endpoint contains an array, which is rendered in the specified template.  
+The `amp-list` component fetches dynamic content from a CORS JSON endpoint. The response from the endpoint contains an array, which is rendered in the specified template.
 
 {% call callout('Important', type='caution') %}
 Your endpoint must implement the requirements specified in the [CORS Requests in AMP](../../spec/amp-cors-requests.md) spec.
@@ -50,7 +50,7 @@ You can specify a template in one of two ways:
 
 - a `template` attribute that references an ID of an existing `template` element.
 - a `template` element nested directly inside the `amp-list` element.
-  
+
 For more details on templates, see [AMP HTML Templates](../../spec/amp-html-templates.md).
 
 *Example: Displaying a dynamic list*
@@ -137,6 +137,22 @@ Here's the CSS for the `overflow`:
   left: 0;
   right: 0;
 }
+```
+
+### Placeholder and fallback
+
+Optionally, `amp-list` supports a placeholder and/or fallback.
+
+- A *placeholder* is a child element with the `placeholder` attribute. This element is shown until the `amp-list` loads successfully. If a fallback is also provided, the placeholder is hidden when the `amp-list` fails to load.
+- A *fallback* is a child element with the `fallback` attribute. This element is shown if the `amp-list` fails to load.
+
+Learn more in [Placeholders & Fallbacks](https://www.ampproject.org/docs/guides/responsive/placeholders). Note that a child element cannot be both a placeholder and a fallback.
+
+```html
+<amp-list src="https://foo.com/list.json">
+  <div placeholder>Loading ...</div>
+  <div fallback>Failed to load data.</div>
+</amp-list>
 ```
 
 ## Attributes

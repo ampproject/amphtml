@@ -37,6 +37,7 @@ describe('amp-list component', () => {
     element = document.createElement('div');
     element.setAttribute('src', 'https://data.com/list.json');
     element.getAmpDoc = () => ampdoc;
+    element.getFallback = () => null;
 
     list = new AmpList(element);
     list.buildCallback();
@@ -206,6 +207,47 @@ describe('amp-list component', () => {
         expect(list.element.getAttribute('role')).to.equal('list1');
         expect(itemElement.getAttribute('role')).to.equal('listitem1');
       });
+    });
+  });
+
+  it('should show placeholder on fetch failure (w/o fallback)', () => {
+    // Stub fetchItems_() to fail.
+    listMock.expects('fetchItems_').returns(Promise.reject()).once();
+    listMock.expects('togglePlaceholder').never();
+    return list.layoutCallback().catch(() => {});
+  });
+
+  describe('with fallback', () => {
+    beforeEach(() => {
+      // Stub getFallback() with fake truthy value.
+      listMock.expects('getFallback').returns(true);
+      // Stub getVsync().mutate() to execute immediately.
+      listMock.expects('getVsync').returns({
+        measure: () => {},
+        mutate: block => block(),
+      }).atLeast(1);
+    });
+
+    it('should hide fallback element on fetch success', () => {
+      // Stub fetch and render to succeed.
+      listMock.expects('fetchItems_').returns(Promise.resolve([])).once();
+      templatesMock.expects('findAndRenderTemplateArray')
+          .returns(Promise.resolve([]));
+      // Act as if a fallback is already displayed.
+      sandbox.stub(list, 'fallbackDisplayed_', true);
+
+      listMock.expects('togglePlaceholder').never();
+      listMock.expects('toggleFallback').withExactArgs(false).once();
+      return list.layoutCallback().catch(() => {});
+    });
+
+    it('should hide placeholder and display fallback on fetch failure', () => {
+      // Stub fetchItems_() to fail.
+      listMock.expects('fetchItems_').returns(Promise.reject()).once();
+
+      listMock.expects('togglePlaceholder').withExactArgs(false).once();
+      listMock.expects('toggleFallback').withExactArgs(true).once();
+      return list.layoutCallback().catch(() => {});
     });
   });
 });
