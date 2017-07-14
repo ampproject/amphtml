@@ -477,6 +477,10 @@ describes.fakeWin('Viewport', {}, env => {
     viewportSize.width = 112;
     viewport.resize_();
     expect(resizeEvent).to.not.equal(null);
+    expect(resizeEvent.height).to.equal(viewportSize.height);
+    expect(resizeEvent.width).to.equal(viewportSize.width);
+    // Width changed, relayoutAll should be true
+    expect(resizeEvent.relayoutAll).to.be.true;
   });
 
   it('should dispatch onResize on height resize', () => {
@@ -487,6 +491,22 @@ describes.fakeWin('Viewport', {}, env => {
     viewportSize.height = 223;
     viewport.resize_();
     expect(resizeEvent).to.not.equal(null);
+    expect(resizeEvent.height).to.equal(viewportSize.height);
+    expect(resizeEvent.width).to.equal(viewportSize.width);
+    // Only height changed, relayoutAll should be false
+    expect(resizeEvent.relayoutAll).to.be.false;
+  });
+
+  it('should not dispatch onResize if size does not actually change', () => {
+    let resizeEvent = null;
+    viewport.onResize(event => {
+      resizeEvent = event;
+    });
+    viewport.size_ = {width: 200, height: 200};
+    viewportSize.width = 200;
+    viewportSize.height = 200;
+    viewport.resize_();
+    expect(resizeEvent).to.equal(null);
   });
 
   it('should not do anything if padding is not changed', () => {
