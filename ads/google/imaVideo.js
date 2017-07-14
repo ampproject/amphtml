@@ -1028,7 +1028,7 @@ const VideoEvents = {
    *
    * @event play
    */
-  PLAY: 'play',
+  PLAYING: 'playing',
 
   /**
    * pause
