@@ -65,7 +65,5 @@ function createAdUnit(win, placementId, adType) {
 }
 
 function setupSDKReadyCallback(win, appKey) {
-  win.onVM5AdSDKReady = function(sdk) {
-    sdk.init({appKey});
-  };
+  win.onVM5AdSDKReady = (sdk) => sdk.init({appKey});
 }
