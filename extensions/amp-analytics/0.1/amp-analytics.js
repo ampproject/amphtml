@@ -163,12 +163,14 @@ export class AmpAnalytics extends AMP.BaseElement {
     return this.ensureInitialized_();
   }
 
-  /** @override */
+  /* @override */
   unlayoutCallback() {
+    /*
     const ampDoc = this.getAmpDoc();
     Transport.doneUsingCrossDomainIframe(ampDoc.win.document,
         this.config_['transport']);
     ResponseMap.remove(ampDoc, this.config_['transport']['type']);
+     */
     return true;
   }
 

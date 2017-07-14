@@ -30,7 +30,7 @@ import {hasOwn} from '../../../src/utils/object';
 import {listenFor} from '../../../src/iframe-helper';
 import {AMP_ANALYTICS_3P_MESSAGE_TYPE} from '../../../src/3p-analytics-common';
 import {
-  AmpAnalytics3pEventMessageQueue,
+  AmpAnalytics3pMessageQueue,
 } from './amp-analytics-3p-message-queue';
 
 /** @private @const {string} */
@@ -40,7 +40,7 @@ const TAG_ = 'amp-analytics.Transport';
  *    frame: Element,
  *    sentinel: !string,
  *    usageCount: number,
- *    eventQueue: AmpAnalytics3pEventMessageQueue,
+ *    queue: AmpAnalytics3pMessageQueue,
  *  }} */
 export let FrameData;
 
@@ -175,12 +175,9 @@ export class Transport {
       shouldAddToDOM = true;
     }
     dev().assert(frameData, 'Trying to use non-existent frame');
-    //TODO(jonkeller): Put this back in
-    //if (transportOptions['extraData']) {
-      //frameData.extraDataQueue.enqueue(this.id_,
-      // transportOptions['extraData']);
-    //}
-
+    if (transportOptions['extraData']) {
+      frameData.queue.setExtraData(this.id_, transportOptions['extraData']);
+    }
     if (shouldAddToDOM) {
       win.document.body.appendChild(frameData.frame);
     }
@@ -208,7 +205,7 @@ export class Transport {
     }));
     const frame = createElementWithAttributes(win.document, 'iframe',
         /** @type {!JsonObject} */ ({
-          sandbox: 'allow-scripts',
+          sandbox: 'allow-scripts allow-same-origin',
           name: frameName,
           src: frameUrl,
           'data-amp-3p-sentinel': sentinel,
@@ -225,7 +222,7 @@ export class Transport {
       frame,
       sentinel,
       usageCount: 1,
-      eventQueue: new AmpAnalytics3pEventMessageQueue(win,
+      queue: new AmpAnalytics3pMessageQueue(win,
           /** @type {!HTMLIFrameElement} */
           (frame)),
     });
@@ -322,9 +319,9 @@ export class Transport {
   sendRequestUsingCrossDomainIframe(event, transportOptions) {
     const frameData = Transport.getFrameData(transportOptions['iframe']);
     dev().assert(frameData, 'Trying to send message to non-existent frame');
-    dev().assert(frameData.eventQueue,
+    dev().assert(frameData.queue,
         'Event queue is missing for ' + this.id_);
-    frameData.eventQueue.enqueue(this.id_, event);
+    frameData.queue.enqueue(this.id_, event);
   }
 
   /**

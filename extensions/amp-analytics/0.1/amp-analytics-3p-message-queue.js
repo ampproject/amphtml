@@ -27,7 +27,7 @@ const MAX_QUEUE_SIZE_ = 100;
 /**
  * @visibleForTesting
  */
-export class AmpAnalytics3pEventMessageQueue {
+export class AmpAnalytics3pMessageQueue {
   /**
    * Constructor
    * @param {!Window} win The window element
@@ -47,6 +47,9 @@ export class AmpAnalytics3pEventMessageQueue {
     /** @private {!Object<string,!Array<string>>} */
     this.creativeToPendingMessages_ = {};
 
+    /** @private {!Object<string,string>} */
+    this.creativeToExtraData_ = {};
+
     /** @private {!Object<string,!string>} */
     this.creativeToPendingExtraData_ = {};
 
@@ -57,7 +60,7 @@ export class AmpAnalytics3pEventMessageQueue {
     /** @private {!../../../src/iframe-helper.SubscriptionApi} */
     this.postMessageApi_ = new SubscriptionApi(this.frame_,
         this.messageType_,
-        false,
+        true,
         () => {
           this.isReady_ = true;
           this.flushQueue_();
@@ -83,19 +86,30 @@ export class AmpAnalytics3pEventMessageQueue {
   }
 
   /**
+   * Sets extra config data to be sent to a cross-domain iframe.
+   * @param {!string} creativeId Identifies which creative is sending the message
+   * @param {!string} extraData The event to be enqueued and then sent to the
+   * iframe
+   */
+  setExtraData(creativeId, extraData) {
+    this.creativeToExtraData_[creativeId] = extraData;
+    this.flushQueue_();
+  }
+
+  /**
    * Enqueues an AmpAnalytics3pEvent message to be sent to a cross-domain
    * iframe.
    * @param {!string} creativeId Identifies which creative is sending the message
-   * @param {!string} data The data to be enqueued and then sent to the iframe
+   * @param {!string} event The event to be enqueued and then sent to the iframe
    */
-  enqueue(creativeId, data) {
+  enqueue(creativeId, event) {
     this.creativeToPendingMessages_[creativeId] =
       this.creativeToPendingMessages_[creativeId] || [];
     if (this.queueSize() >= MAX_QUEUE_SIZE_) {
       dev().warn(TAG_, 'Exceeded maximum size of queue for: ' + creativeId);
       this.creativeToPendingMessages_[creativeId].shift();
     }
-    this.creativeToPendingMessages_[creativeId].push(data);
+    this.creativeToPendingMessages_[creativeId].push(event);
     this.flushQueue_();
   }
 
@@ -104,12 +118,19 @@ export class AmpAnalytics3pEventMessageQueue {
    * @private
    */
   flushQueue_() {
-    if (this.isReady() && this.queueSize()) {
-      // TODO(jonkeller): Send extraData. Create enqueueExtraData().
-      this.postMessageApi_.send(this.messageType_,
-          /** @type {!JsonObject} */
-          (this.creativeToPendingMessages_));
-      this.creativeToPendingMessages_ = {};
+    if (this.isReady()) {
+      if (Object.keys(this.creativeToExtraData_).length) {
+        this.postMessageApi_.send(AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVE,
+            /** @type {!JsonObject} */
+            ({data: this.creativeToExtraData_}));
+        this.creativeToExtraData_ = {};
+      }
+      if (this.queueSize()) {
+        this.postMessageApi_.send(AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT,
+            /** @type {!JsonObject} */
+            ({data: this.creativeToPendingMessages_}));
+        this.creativeToPendingMessages_ = {};
+      }
     }
   }
 
