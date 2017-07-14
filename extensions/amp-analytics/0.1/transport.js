@@ -24,14 +24,17 @@ import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {loadPromise} from '../../../src/event-helper';
 import {Services} from '../../../src/services';
+import {
+  calculateEntryPointScriptUrl,
+} from '../../../src/service/extension-location';
 import {removeElement} from '../../../src/dom';
 import {setStyle, setStyles} from '../../../src/style';
 import {hasOwn} from '../../../src/utils/object';
 import {listenFor} from '../../../src/iframe-helper';
 import {AMP_ANALYTICS_3P_MESSAGE_TYPE} from '../../../src/3p-analytics-common';
 import {
-  AmpAnalytics3pMessageQueue,
-} from './amp-analytics-3p-message-queue';
+  AmpIframeTransportMessageQueue,
+} from './amp-iframe-transport-message-queue';
 
 /** @const {string} */
 const TAG_ = 'amp-analytics.Transport';
@@ -40,7 +43,7 @@ const TAG_ = 'amp-analytics.Transport';
  *    frame: Element,
  *    sentinel: !string,
  *    usageCount: number,
- *    queue: AmpAnalytics3pMessageQueue,
+ *    queue: AmpIframeTransportMessageQueue,
  *  }} */
 export let FrameData;
 
@@ -196,9 +199,10 @@ export class Transport {
    */
   createCrossDomainIframe(win, frameUrl, opt_processResponse) {
     const sentinel = Transport.createUniqueId_();
-    const scriptSrc = getMode().localDev
-      ? 'dist.3p/current/ampanalytics-lib.js'
-      : '$internalRuntimeVersion$/ampanalytics-v0.js';
+    const useLocal = getMode().localDev || getMode().test;
+    const useRtvVersion = !useLocal;
+    const scriptSrc = calculateEntryPointScriptUrl(
+        window.location, 'ampanalytics', useLocal, useRtvVersion);
     const frameName = JSON.stringify(/** @type {JsonObject} */ ({
       scriptSrc,
       sentinel,
@@ -222,7 +226,7 @@ export class Transport {
       frame,
       sentinel,
       usageCount: 1,
-      queue: new AmpAnalytics3pMessageQueue(win,
+      queue: new AmpIframeTransportMessageQueue(win,
           /** @type {!HTMLIFrameElement} */
           (frame)),
     });
