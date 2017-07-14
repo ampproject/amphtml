@@ -33,7 +33,7 @@ import {
   AmpAnalytics3pMessageQueue,
 } from './amp-analytics-3p-message-queue';
 
-/** @private @const {string} */
+/** @const {string} */
 const TAG_ = 'amp-analytics.Transport';
 
 /** @typedef {{
@@ -263,8 +263,8 @@ export class Transport {
       return;
     }
     ampDoc.body.removeChild(frameData.frame);
+    frameData.responseMessageUnlisten();
     delete Transport.crossDomainIframes_[frameUrl];
-    // TODO(jonkeller): Do something with frameData.readyMessageUnlisten and frameData.responseMessageUnlisten
   }
 
   /**

@@ -144,7 +144,6 @@ AmpViewerMessage.prototype.rsvp;
 AmpViewerMessage.prototype.error;
 
 // AMP-Analytics Cross-domain iframes
-let AmpAnalytics3pReadyMessage;
 let AmpAnalytics3pNewCreative;
 let AmpAnalytics3pEvent;
 let AmpAnalytics3pResponse;

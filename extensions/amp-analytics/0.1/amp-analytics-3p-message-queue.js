@@ -19,7 +19,7 @@ import {AMP_ANALYTICS_3P_MESSAGE_TYPE} from '../../../src/3p-analytics-common';
 import {SubscriptionApi} from '../../../src/iframe-helper';
 
 /** @private @const {string} */
-const TAG_ = 'amp-analytics.CrossDomainIframeMessageQueue';
+const TAG_ = 'amp-analytics.3pMessageQueue';
 
 /** @private @const {number} */
 const MAX_QUEUE_SIZE_ = 100;
@@ -44,15 +44,12 @@ export class AmpAnalytics3pMessageQueue {
     /** @private {boolean} */
     this.isReady_ = false;
 
-    /** @private {!Object<string,!Array<string>>} */
+    /** @private {!../../../src/3p-analytics-common.AmpAnalytics3pEvent} */
     this.creativeToPendingMessages_ = {};
 
     /** @private
      *  {!../../../src/3p-analytics-common.AmpAnalytics3pNewCreative} */
     this.creativeToExtraData_ = {};
-
-    /** @private {!../../../src/3p-analytics-common.AmpAnalytics3pEvent} */
-    this.creativeToPendingExtraData_ = {};
 
     /** @private {string} */
     this.messageType_ = this.frame_.getAttribute('data-amp-3p-sentinel') +
@@ -64,7 +61,6 @@ export class AmpAnalytics3pMessageQueue {
         true,
         () => {
           this.setIsReady();
-          this.flushQueue_();
         });
   }
 
