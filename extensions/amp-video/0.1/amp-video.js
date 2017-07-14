@@ -44,7 +44,7 @@ const ATTRS_TO_PROPAGATE =
     ATTRS_TO_PROPAGATE_ON_BUILD.concat(ATTRS_TO_PROPAGATE_ON_LAYOUT);
 
 /**
- * @implements {../../../src/video-interface.VideoInterfaceWithAnalytics}
+ * @implements {../../../src/video-interface.VideoInterface}
  */
 class AmpVideo extends AMP.BaseElement {
 
@@ -273,11 +273,6 @@ class AmpVideo extends AMP.BaseElement {
      */
   hideControls() {
     this.video_.controls = false;
-  }
-
-  /** @override */
-  supportsAnalytics() {
-    return true;
   }
 
   /** @override */

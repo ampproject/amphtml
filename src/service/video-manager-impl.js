@@ -1,3 +1,4 @@
+
 /**
  * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
@@ -120,6 +121,7 @@ export class VideoManager {
     this.maybeInstallVisibilityObserver_(entry);
     this.maybeInstallPositionObserver_(entry);
     this.entries_.push(entry);
+    video.element.dispatchCustomEvent(VideoEvents.REGISTERED);
   }
 
   /**
@@ -153,13 +155,6 @@ export class VideoManager {
    * @private
    */
   maybeInstallVisibilityObserver_(entry) {
-    // TODO(aghassemi): Remove this later. For now, the visibility observer
-    // only matters for autoplay videos so no point in monitoring arbitrary
-    // videos yet.
-    if (!entry.hasAutoplay && !isTrackingVideo(entry.video)) {
-      return;
-    }
-
     listen(entry.video.element, VideoEvents.VISIBILITY, () => {
       entry.updateVisibility();
     });
@@ -376,14 +371,8 @@ class VideoEntry {
    * @private
    */
   videoPaused_() {
-    const v = this.video;
-    if (isTrackingVideo(v)) {
-      const trackingVideo =
-          /** @type {!../video-interface.VideoInterfaceWithAnalytics} */ (v);
-
-      if (trackingVideo.getCurrentTime() !== trackingVideo.getDuration()) {
-        this.analyticsEvent_(VideoAnalyticsType.PAUSE);
-      }
+    if (this.video.getCurrentTime() !== this.video.getDuration()) {
+      this.analyticsEvent_(VideoAnalyticsType.PAUSE);
     }
     this.isPlaying_ = false;
 
@@ -918,23 +907,18 @@ class VideoEntry {
    * @private
    */
   analyticsEvent_(eventType, opt_vars) {
-    const v = this.video;
-    if (isTrackingVideo(v)) {
-      const trackingVideo =
-          /** @type {!../video-interface.VideoInterfaceWithAnalytics} */ (v);
-      const detailsPromise = opt_vars ? Promise.resolve(opt_vars) :
-          this.getAnalyticsDetails_(trackingVideo);
+    const detailsPromise = opt_vars ? Promise.resolve(opt_vars) :
+        this.getAnalyticsDetails_(this.video);
 
-      detailsPromise.then(details => {
-        trackingVideo.element.dispatchCustomEvent(
-            VideoEvents.ANALYTICS, {type: eventType, details});
-      });
-    }
+    detailsPromise.then(details => {
+      this.video.element.dispatchCustomEvent(
+          VideoEvents.ANALYTICS, {type: eventType, details});
+    });
   }
 
   /**
    * Collects a snapshot of the current video state for video analytics
-   * @param {!../video-interface.VideoInterfaceWithAnalytics} video
+   * @param {!../video-interface.VideoInterface} video
    * @return {!Promise<!../video-interface.VideoAnalyticsDetailsDef>}
    * @private
    */
@@ -961,18 +945,6 @@ class VideoEntry {
       };
     });
   }
-}
-
-/**
- * Asserts that a video is a tracking video
- * @param {!../video-interface.VideoInterface} video
- * @return {boolean}
- * @private visible for testing
- */
-export function isTrackingVideo(video) {
-  const trackingVideo =
-      /** @type {!../video-interface.VideoInterfaceWithAnalytics} */ (video);
-  return trackingVideo.supportsAnalytics && trackingVideo.supportsAnalytics();
 }
 
 /* @type {?Promise<boolean>} */
