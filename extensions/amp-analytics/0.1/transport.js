@@ -199,10 +199,15 @@ export class Transport {
    */
   createCrossDomainIframe(win, frameUrl, opt_processResponse) {
     const sentinel = Transport.createUniqueId_();
+    /*
     const useLocal = getMode().localDev || getMode().test;
     const useRtvVersion = !useLocal;
     const scriptSrc = calculateEntryPointScriptUrl(
         window.location, 'ampanalytics', useLocal, useRtvVersion);
+    */
+    const scriptSrc = getMode().localDev
+        ? 'dist.3p/current/ampanalytics-lib.js'
+        : '$internalRuntimeVersion$/ampanalytics-v0.js';
     const frameName = JSON.stringify(/** @type {JsonObject} */ ({
       scriptSrc,
       sentinel,
@@ -212,6 +217,7 @@ export class Transport {
           sandbox: 'allow-scripts allow-same-origin',
           name: frameName,
           src: frameUrl,
+          'data-amp-3p-sentinel': sentinel,
         }));
     frame.sentinel = sentinel;
     setStyles(frame, {
@@ -224,7 +230,6 @@ export class Transport {
     });
     const frameData = /** @const {FrameData} */ ({
       frame,
-      sentinel,
       usageCount: 1,
       queue: new AmpIframeTransportMessageQueue(win,
           /** @type {!HTMLIFrameElement} */
@@ -233,7 +238,7 @@ export class Transport {
     Transport.crossDomainIframes_[frameUrl] = frameData;
 
     frameData.responseMessageUnlisten = listenFor(frameData.frame,
-        frameData.sentinel + AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE,
+        frame.sentinel + AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE,
         response => {
           dev().assert(response && response['data'],
               'Received empty response from 3p analytics frame');
