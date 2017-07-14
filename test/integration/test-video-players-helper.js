@@ -79,7 +79,7 @@ export function runVideoPlayerIntegrationTests(
   describe.configure().skipSauceLabs().run('Actions', function() {
     this.timeout(TIMEOUT);
 
-    it.skip('should support mute, play, pause, unmute actions', function() {
+    it('should support mute, play, pause, unmute actions', function() {
       return getVideoPlayer({outsideView: false, autoplay: false}).then(r => {
 
         // Create a action buttons
@@ -131,7 +131,7 @@ export function runVideoPlayerIntegrationTests(
     this.timeout(TIMEOUT);
     let video;
 
-    it.skip('should trigger play analytics when the video plays', function() {
+    it('should trigger play analytics when the video plays', function() {
       let playButton;
 
       return getVideoPlayer(
