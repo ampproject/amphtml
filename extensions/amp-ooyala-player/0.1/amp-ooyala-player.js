@@ -235,7 +235,7 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
   /** @override */
   getDuration() {
     // Not supported.
-    return 0;
+    return 1;
   }
 
   /** @override */
