@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData} from '../3p/3p';
+import {validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -32,28 +32,19 @@ export function vmfive(global, data) {
   validateData(data, mandatory_fields, optional_fields);
 
   createAdUnit(global, placementId, adType);
-  loadScripts(global);
+  parallelDownloadScriptsAndExecuteInOrder(global);
   setupSDKReadyCallback(global, appKey);
 }
 
-function loadScripts(win) {
-  return Promise.all([loadMANScript(win), loadSDKScript(win)]);
-}
-
-function loadMANScript(win) {
-  return new Promise((resolve, reject) => {
-    const s = win.document.createElement('script');
-    s.src = 'https://vawpro.vm5apis.com/man.js';
-    s.id = 'vm5ad-js-sdk';
-    s.onload = resolve;
-    s.onerror = reject;
-    win.document.body.appendChild(s);
-  });
-}
-
-function loadSDKScript(win) {
-  return new Promise((resolve, reject) => {
-    loadScript(win, 'https://man.vm5apis.com/dist/adn-web-sdk.js', resolve, reject);
+function parallelDownloadScriptsAndExecuteInOrder(win) {
+  [
+    'https://vawpro.vm5apis.com/man.js',
+    'https://man.vm5apis.com/dist/adn-web-sdk.js'
+  ].forEach(function(src) {
+    const script = document.createElement('script');
+    script.src = src;
+    script.async = false;
+    win.document.head.appendChild(script);
   });
 }
 
