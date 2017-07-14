@@ -17,11 +17,6 @@
 import {
   AmpAnalytics3pMessageQueue,
 } from '../amp-analytics-3p-message-queue';
-import {
-  AMP_ANALYTICS_3P_MESSAGE_TYPE,
-} from '../../../../src/3p-analytics-common';
-import {SubscriptionApi} from '../../../../src/iframe-helper';
-import {Timer} from '../../../../src/service/timer-impl';
 import {adopt} from '../../../../src/runtime';
 import * as sinon from 'sinon';
 
@@ -29,22 +24,19 @@ adopt(window);
 
 describe('amp-analytics.amp-analytics-3p-message-queue', () => {
   let sandbox;
-  let sentinel = '42';
   let frame;
   let queue;
-  let timer;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     frame = {
-      getAttribute: function(name) { return 'some_value'; },
+      getAttribute: () => 'some_value',
       src: 'http://localhost',
       ownerDocument: {
         defaultView: window,
       },
     };
     queue = new AmpAnalytics3pMessageQueue(window, frame);
-    timer = new Timer(window);
   });
 
   afterEach(() => {

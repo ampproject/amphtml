@@ -103,7 +103,7 @@ export class AmpAnalytics3pMessageQueue {
    */
   setExtraData(creativeId, extraData) {
     dev().assert(!this.creativeToExtraData_[creativeId],
-      'Replacing existing extra data for ' + creativeId);
+        'Replacing existing extra data for ' + creativeId);
     this.creativeToExtraData_[creativeId] = extraData;
     this.flushQueue_();
   }
