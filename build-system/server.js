@@ -51,12 +51,6 @@ setInterval(function() {
   }
 }, 1000);
 
-// Determine webserver logging level.
-var logger = '';
-if (!quiet) {
-  logger = morgan('dev');
-}
-
 // Start gulp webserver
 gulp.src(process.cwd())
   .pipe(webserver({
@@ -64,6 +58,6 @@ gulp.src(process.cwd())
     host,
     directoryListing: true,
     https: useHttps,
-    middleware: [logger, app],
+    middleware: quiet ? [app] : [morgan('dev'), app]
   }));
 
