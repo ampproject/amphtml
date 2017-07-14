@@ -199,12 +199,6 @@ export class Transport {
    */
   createCrossDomainIframe(win, frameUrl, opt_processResponse) {
     const sentinel = Transport.createUniqueId_();
-    /*
-    const useLocal = getMode().localDev || getMode().test;
-    const useRtvVersion = !useLocal;
-    const scriptSrc = calculateEntryPointScriptUrl(
-        window.location, 'ampanalytics', useLocal, useRtvVersion);
-    */
     const scriptSrc = getMode().localDev
         ? 'dist.3p/current/ampanalytics-lib.js'
         : '$internalRuntimeVersion$/ampanalytics-v0.js';
