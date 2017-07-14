@@ -143,7 +143,7 @@ Here's the CSS for the `overflow`:
 
 Optionally, `amp-list` supports a placeholder and/or fallback.
 
-- A *placeholder* is a child element with the `placeholder` attribute. This element is shown until the `amp-list` is loaded.
+- A *placeholder* is a child element with the `placeholder` attribute. This element is shown until the `amp-list` loads successfully. If a fallback is also provided, the placeholder is hidden when the `amp-list` fails to load.
 - A *fallback* is a child element with the `fallback` attribute. This element is shown if the `amp-list` fails to load.
 
 Learn more in [Placeholders & Fallbacks](https://www.ampproject.org/docs/guides/responsive/placeholders). Note that a child element cannot be both a placeholder and a fallback.
