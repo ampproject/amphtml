@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  AmpAnalytics3pMessageQueue,
-} from '../amp-analytics-3p-message-queue';
+import {AmpAnalytics3pMessageQueue} from '../amp-analytics-3p-message-queue';
 import {adopt} from '../../../../src/runtime';
 import * as sinon from 'sinon';
 
@@ -29,13 +27,18 @@ describe('amp-analytics.amp-analytics-3p-message-queue', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    frame = {
-      getAttribute: () => 'some_value',
-      src: 'http://localhost',
-      ownerDocument: {
-        defaultView: window,
-      },
-    };
+    // frame = {
+    //   getAttribute: () => 'some_value',
+    //   src: 'http://localhost',
+    //   ownerDocument: {
+    //     defaultView: window,
+    //   },
+    // };
+    frame = window.document.createElement('iframe');
+    frame.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+    frame.setAttribute('name', 'some_name');
+    frame.setAttribute('src', 'some_url');
+    frame.setAttribute('data-amp-3p-sentinel', '42');
     queue = new AmpAnalytics3pMessageQueue(window, frame);
   });
 

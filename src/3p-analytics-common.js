@@ -16,77 +16,31 @@
 
 /** @enum {string} */
 export const AMP_ANALYTICS_3P_MESSAGE_TYPE = {
-  READY: 'R',
   CREATIVE: 'C',
   EVENT: 'E',
-  RESPONSE: 'A',
+  RESPONSE: 'R',
 };
 
-/** @typedef {{
- *    sentinel: (string|undefined),
- *    type: !string
- *  }} */
-export let AmpAnalytics3pReadyMessage;
-// Example:
-// {
-//   "sentinel":"20354662305315974",
-//   "type":AMP_ANALYTICS_3P_MESSAGE_TYPE.READY
-// }
-// The sentinel value will be present when received but the sender doesn't
-// need to add it, this is done by iframe-messaging-client.
-
-/** @typedef {{
- *    sentinel: (string|undefined),
- *    type: !string,
- *    data: !Object<!string, !string>
- *  }} */
+/** @typedef {!Object<!string, !string>} */
 export let AmpAnalytics3pNewCreative;
 // Example:
 // {
-//   "sentinel":"20354662305315974",
-//   "type":AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVE,
-//   "data": {
-//     "8117602251459417": "ThisIsExtraData",
-//     ...
-//   }
+//   "2": "ThisIsExtraData",
+//   ...
 // }
-// The sentinel value will be present when received but the sender doesn't
-// need to add it, this is done by iframe-messaging-client.
 
-/** @typedef {{
- *    sentinel: (string|undefined),
- *    type: !string,
- *    data: !Object<!string,!Array<!string>>
- *  }} */
+/** @typedef {!Object<!string,!Array<!string>>} */
 export let AmpAnalytics3pEvent;
 // Example:
 // {
-//   "sentinel":"20354662305315974",
-//   "type":AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT,
-//   "data":{
-//     "8117602251459417": ["viewed=true&...etc.", ... ],
-//     ...
-//   }
+//   "2": ["viewed=true&...etc.", ... ],
+//   ...
 // }
-// The sentinel value will be present when received but the sender doesn't
-// need to add it, this is done by iframe-messaging-client.
 
-/** @typedef {{
- *    sentinel: (string|undefined),
- *    destination: !string,
- *    type: !string,
- *    data: ?Object
- *  }} */
+/** @typedef {JsonObject} */
 export let AmpAnalytics3pResponse;
 // Example:
-// {
-//   "sentinel":"20354662305315974",
-//   "destination":"8117602251459417",
-//   "type":AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE,
-//   "data":{"status":"received","somethingElse":"42"}
-// }
-// The sentinel value will be present when received but the sender doesn't
-// need to add it, this is done by iframe-messaging-client.
+// {"status":"received","somethingElse":"42"}
 
 /**
  * A class for holding AMP Analytics third-party vendors responses to frames.
