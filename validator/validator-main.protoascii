@@ -25,7 +25,7 @@ min_validator_revision_required: 238
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 450
+spec_file_revision: 453
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 
@@ -3224,6 +3224,14 @@ tags: {
 }
 
 # Some additional tags, microformats, allowances.
+
+# The slot element.
+# https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot
+tags: {
+  html_format: AMP
+  tag_name: "SLOT"
+  attrs: { name: "name" }
+}
 
 # This tag is a preserved indicator for documents created in microsoft word.
 # They do not render.
