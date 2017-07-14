@@ -61,3 +61,8 @@ amp-sidebar[side] {
   background-color: #000;
   z-index: 2147483646;
 }
+
+.amp-sidebar-mask {
+  opacity: 0.2;
+  background-color: #000;
+}
