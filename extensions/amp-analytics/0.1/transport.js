@@ -29,7 +29,7 @@ import {setStyle} from '../../../src/style';
 const TAG_ = 'amp-analytics.Transport';
 
 /**
- * @param {!Window} win 
+ * @param {!Window} win
  * @param {string} request
  * @param {!Object<string, string>} transportOptions
  */

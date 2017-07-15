@@ -16,18 +16,9 @@
 
 /** @enum {string} */
 export const AMP_ANALYTICS_3P_MESSAGE_TYPE = {
-  CREATIVE: 'C',
   EVENT: 'E',
   RESPONSE: 'R',
 };
-
-/** @typedef {!Object<!string, !string>} */
-export let AmpAnalytics3pNewCreative;
-// Example:
-// {
-//   "2": "ThisIsExtraData",
-//   ...
-// }
 
 /** @typedef {!Object<!string,!Array<!string>>} */
 export let AmpAnalytics3pEvent;
