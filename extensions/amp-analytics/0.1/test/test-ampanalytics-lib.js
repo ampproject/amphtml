@@ -56,7 +56,6 @@ describe('ampanalytics-lib', () => {
     router = new AmpAnalytics3pMessageRouter(window);
     sandbox.stub(dev(), 'assert', (condition, msg) => {
       if (!condition) {
-        console.log('Stubbed failed assert: ' + msg);
         badAssertsCounterStub(msg);
       }
     });
@@ -114,7 +113,7 @@ describe('ampanalytics-lib', () => {
       ampAnalytics.registerAmpAnalytics3pEventsListener(events => {
         expect(events.length).to.equal(1);
         events.forEach(event => {
-          expect(ampAnalytics.getCreativeId()).to.equal('101');
+          expect(ampAnalytics.getTransportId()).to.equal('101');
           expect(event).to.equal('hello, world!');
         });
       });
@@ -143,7 +142,7 @@ describe('ampanalytics-lib', () => {
       ampAnalytics.registerAmpAnalytics3pEventsListener(events => {
         expect(events.length).to.equal(3);
         events.forEach(() => {
-          expect(ampAnalytics.getCreativeId()).to.equal('105');
+          expect(ampAnalytics.getTransportId()).to.equal('105');
         });
         expect(events[0]).to.equal('something happened');
         expect(events[1]).to.equal('something else happened');
