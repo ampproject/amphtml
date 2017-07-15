@@ -254,6 +254,7 @@ export class AmpAnalytics3pCreativeMessageRouter {
   sendMessageToCreative(response) {
     const responseMessage = {
       sentinel: this.sentinel_,
+      transport: this.transportId_,
       type: AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE,
       data: response,
     };

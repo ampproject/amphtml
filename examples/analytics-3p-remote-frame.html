@@ -18,9 +18,14 @@
         ampAnalytics.registerAmpAnalytics3pEventsListener(events => {
           events.forEach(event => {
             // Now, do something meaningful with the AMP Analytics event
-            console.log("Received an event: " + event);
-            ampAnalytics.sendMessageToCreative(
-              {'status': 'received', 'other': '42'});
+            console.log("The page at: " + window.location.href +
+              " has received an event: " + event +
+              " from the creative with transport ID: " +
+              ampAnalytics.getTransportId());
+            ampAnalytics.sendMessageToCreative({
+              'status': 'received',
+              'other': ampAnalytics.getTransportId()
+            });
           });
         });
       };
