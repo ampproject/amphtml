@@ -247,6 +247,13 @@ class AmpYoutube extends AMP.BaseElement {
   }
 
   /** @override */
+  optOutOfAutomaticMediaSessionAPI() {
+    // Youtube already updates the Media Session so no need for the video
+    // manager to update it too
+    return true;
+  }
+
+  /** @override */
   mutatedAttributesCallback(mutations) {
     if (mutations['data-videoid'] !== undefined) {
       this.videoid_ = this.getVideoId_();

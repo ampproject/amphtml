@@ -105,6 +105,23 @@ export class VideoInterface {
   hideControls() {}
 
   /**
+   * Returns video's meta data (poster, artist, album, etc.)
+   * @return {!VideoMetaDef} metadata
+   */
+  get metaData() {}
+
+  /**
+   * If this returns true then it will be assumed that the player implements
+   * the MediaSession API internally so that the video manager does not override
+   * it. If not, the video manager will use the metaData variable as well as
+   * inferred meta-data to update the video's Media Session notification.
+   *
+   * @return {boolean}
+   */
+  optOutOfAutomaticMediaSessionAPI() {}
+
+
+  /**
    * Automatically comes from {@link ./base-element.BaseElement}
    *
    * @return {!AmpElement}
@@ -414,3 +431,13 @@ export const VideoAnalyticsEvents = {
  * }}
  */
 export let VideoAnalyticsDetailsDef;
+
+/**
+ * @typedef {{
+ *   posterUrl: string,
+ *   title: string,
+ *   album: string,
+ *   artist: string,
+ * }}
+ */
+export let VideoMetaDef;

@@ -74,6 +74,13 @@ class AmpVimeo extends AMP.BaseElement {
       })), '*');
     }
   }
+
+  /** @override */
+  optOutOfAutomaticMediaSessionAPI() {
+    // Vimeo already updates the Media Session so no need for the video
+    // manager to update it too
+    return true;
+  }
 };
 
 AMP.registerElement('amp-vimeo', AmpVimeo);
