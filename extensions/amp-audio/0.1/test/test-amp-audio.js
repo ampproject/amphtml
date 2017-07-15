@@ -177,4 +177,25 @@ describe('amp-audio', () => {
       expect(audio.getAttribute('aria-describedby')).to.equal('id3');
     });
   });
+
+  it('should show floating controls when out of view', () => {
+    return attachAndRun({
+      src: 'https://origin.com/audio.mp3',
+      'floating-controls': '',
+    }).then(a => {
+      const floatingControls = a.querySelector('.amp-audio-floating-controls');
+      expect(floatingControls).to.not.exist;
+      const visibilityStub = sandbox.stub(
+          a.implementation_.element,
+          'getIntersectionChangeEntry'
+      );
+      visibilityStub.onFirstCall().returns({
+        'intersectionRatio': 0,
+      });
+      // Trigger scroll event
+      iframe.getViewport().setScrollTop(10);
+      expect(floatingControls).to.exist;
+    });
+  });
+
 });

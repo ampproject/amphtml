@@ -51,7 +51,7 @@ tags: {  # <amp-audio> for AMP (autoplay and fmb attributes allowed)
     value: ""
   }
   attrs: {
-    name: "floating-mute-button"
+    name: "floating-controls"
     value: ""
   }
   attr_lists: "amp-audio-common"

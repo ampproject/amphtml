@@ -59,6 +59,11 @@ For example:
 </amp-audio>
 ```
 
+The `amp-audio` component allows out-of-view controls through the `floating-controls` attribute. When set, it shows a floating
+pause button as soon as the `amp-audio` element is no longer visible, which creates a better user experience by providing
+minimal controls to the user without having to scroll back to the element.
+
+
 ## Attributes
 
 ##### src
@@ -69,6 +74,13 @@ Required if no `<source>` children are present. Must be HTTPS.
 
 If present, the attribute implies that the audio will start playing as soon as
 it is ready.
+
+##### floating-controls
+
+Optional. Adds a pause/scroll to element button that pops-in when the audio
+player is out of view, allowing the user to control the audio without having to
+scroll back to the element.
+
 
 ##### loop
 
