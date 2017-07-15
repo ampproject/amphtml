@@ -56,6 +56,7 @@ describe('ampanalytics-lib', () => {
     router = new AmpAnalytics3pMessageRouter(window);
     sandbox.stub(dev(), 'assert', (condition, msg) => {
       if (!condition) {
+        console.log('Stubbed failed assert: ' + msg);
         badAssertsCounterStub(msg);
       }
     });
@@ -127,7 +128,7 @@ describe('ampanalytics-lib', () => {
     send(AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT,
       /** @type {!JsonObject} */ ({'103': ['hello, world!']}));
     return timer.promise(POST_MESSAGE_DELAY).then(() => {
-      expect(badAssertsCounterStub.calledOnce).to.be.true;
+      expect(badAssertsCounterStub.callCount > 0).to.be.true;
       expect(badAssertsCounterStub.alwaysCalledWith(
           sinon.match(/Must implement onNewAmpAnalyticsInstance/))).to.be.true;
       return Promise.resolve();

@@ -96,6 +96,9 @@ export class AmpAnalytics3pMessageRouter {
     let entries;
     dev().assert((entries = Object.entries(message)).length,
         'Received empty events message in ' + this.win_.location.href);
+    dev().assert(window.onNewAmpAnalyticsInstance,
+        'Must implement onNewAmpAnalyticsInstance in ' +
+        this.win_.location.href);
     entries.forEach(entry => {
       const creativeId = entry[0];
       const events = entry[1];
