@@ -101,8 +101,6 @@ describe('ampanalytics-lib', () => {
       expect(ampAnalytics.registerAmpAnalytics3pEventsListener).to.exist;
       ampAnalytics.registerAmpAnalytics3pEventsListener(() => {});
     };
-    send(AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVE,
-      /** @type {!JsonObject} */ ({'100': 'this is extra data'}));
     send(AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT,
       /** @type {!JsonObject} */ ({'100': ['hello, world!']}));
   });
@@ -120,48 +118,18 @@ describe('ampanalytics-lib', () => {
         });
       });
     };
-    send(AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVE,
-      /** @type {!JsonObject} */ ({'101': 'this is extra data'}));
     send(AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT,
       /** @type {!JsonObject} */ ({'101': ['hello, world!']}));
   });
 
-  it('does not allow duplicate extraData ', () => {
-    send(AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVE,
-      /** @type {!JsonObject} */ ({'102': 'this is extra data'}));
-    send(AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVE,
-      /** @type {!JsonObject} */ ({'102': 'this is more extra data'}));
-    return timer.promise(POST_MESSAGE_DELAY).then(() => {
-      expect(badAssertsCounterStub.calledOnce).to.be.true;
-      expect(badAssertsCounterStub.alwaysCalledWith(
-          'Duplicate new creative message for 102')).to.be.true;
-    });
-  });
-
   it('asserts when onNewAmpAnalyticsInstance is not implemented ', () => {
     window.onNewAmpAnalyticsInstance = null;
-    send(AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVE,
-      /** @type {!JsonObject} */ ({'103': 'this is extra data'}));
     send(AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT,
       /** @type {!JsonObject} */ ({'103': ['hello, world!']}));
     return timer.promise(POST_MESSAGE_DELAY).then(() => {
       expect(badAssertsCounterStub.calledOnce).to.be.true;
       expect(badAssertsCounterStub.alwaysCalledWith(
           sinon.match(/Must implement onNewAmpAnalyticsInstance/))).to.be.true;
-      return Promise.resolve();
-    });
-  });
-
-  it('rejects an event message from an unknown creative ', () => {
-    window.onNewAmpAnalyticsInstance = null;
-    send(AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT,
-      /** @type {!JsonObject} */ ({'104': ['hello, world!']}));
-    return timer.promise(POST_MESSAGE_DELAY).then(() => {
-      expect(badAssertsCounterStub.calledOnce).to.be.true;
-      const re = 'Discarding event message received prior to new creative' +
-        ' message for 104';
-      expect(badAssertsCounterStub.alwaysCalledWith(
-          sinon.match(new RegExp(re)))).to.be.true;
       return Promise.resolve();
     });
   });
@@ -181,8 +149,6 @@ describe('ampanalytics-lib', () => {
         expect(events[2]).to.equal('a third thing happened');
       });
     };
-    send(AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVE,
-      /** @type {!JsonObject} */ ({'105': 'this is extra data'}));
     send(AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT,
       /** @type {!JsonObject} */ ({'105': [
         'something happened',

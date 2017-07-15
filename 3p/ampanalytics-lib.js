@@ -64,25 +64,14 @@ export class AmpAnalytics3pMessageRouter {
           'Received message with missing type in ' + this.win_.location.href);
       dev().assert(messageContainer.data,
           'Received empty message in ' + this.win_.location.href);
-      switch (messageContainer.type) {
-        case AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVE:
-          this.processNewCreativesMessage(
-              /* @type {!../src/3p-analytics-common.AmpAnalytics3pNewCreative}*/
-              (messageContainer.data));
-          break;
-        case AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT:
-          this.processEventsMessage(
-              /* @type {!../src/3p-analytics-common.AmpAnalytics3pEvent} */
-              (messageContainer.data));
-          break;
-        default:
-          dev().assert(false,
-              'Received unrecognized message type ' + messageContainer.type +
-              ' in ' + this.win_.location.href);
-      }
+      dev().assert(messageContainer.type == AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT,
+          'Received unrecognized message type ' + messageContainer.type +
+          ' in ' + this.win_.location.href);
+      this.processEventsMessage(
+          /* @type {!../src/3p-analytics-common.AmpAnalytics3pEvent} */
+          (messageContainer.data));
     }, false);
 
-    this.subscribeTo(AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVE);
     this.subscribeTo(AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT);
   }
 
@@ -94,39 +83,8 @@ export class AmpAnalytics3pMessageRouter {
   subscribeTo(messageType) {
     window.parent./*OK*/postMessage({
       sentinel: this.sentinel_,
-      type: this.sentinel_ + messageType,
+      type: messageType,
     }, '*');
-  }
-
-  /**
-   * Handle receipt of a message indicating that there are new creative(s)
-   * that wish to use this frame
-   * @param {!../src/3p-analytics-common.AmpAnalytics3pNewCreative} message
-   */
-  processNewCreativesMessage(message) {
-    let entries;
-    dev().assert((entries = Object.entries(message)).length,
-        'Received empty events message in ' + this.win_.location.href);
-    dev().assert(window.onNewAmpAnalyticsInstance,
-        'Must implement onNewAmpAnalyticsInstance in ' +
-      this.win_.location.href);
-    entries.forEach(entry => {
-      const creativeId = entry[0];
-      const extraData = entry[1];
-      dev().assert(!this.creativeMessageRouters_[creativeId],
-          'Duplicate new creative message for ' + creativeId);
-      this.creativeMessageRouters_[creativeId] =
-        new AmpAnalytics3pCreativeMessageRouter(
-          this.win_, this.sentinel_, creativeId, extraData);
-      try {
-        window.onNewAmpAnalyticsInstance(
-            this.creativeMessageRouters_[creativeId]);
-      } catch (e) {
-        dev().error(TAG_, 'Exception thrown by' +
-          ' onNewAmpAnalyticsInstance() in ' + this.win_.location.href +
-          ': ' + e.message);
-      }
-    });
   }
 
   /**
@@ -144,9 +102,19 @@ export class AmpAnalytics3pMessageRouter {
       try {
         dev().assert(events && events.length,
             'Received empty events list for ' + creativeId);
-        dev().assert(this.creativeMessageRouters_[creativeId],
-            'Discarding event message received prior to new creative' +
-          ' message for ' + creativeId);
+        if (!this.creativeMessageRouters_[creativeId]) {
+          this.creativeMessageRouters_[creativeId] =
+            new AmpAnalytics3pCreativeMessageRouter(
+              this.win_, this.sentinel_, creativeId);
+          try {
+            window.onNewAmpAnalyticsInstance(
+                this.creativeMessageRouters_[creativeId]);
+          } catch (e) {
+            dev().error(TAG_, 'Exception thrown by' +
+              ' onNewAmpAnalyticsInstance() in ' + this.win_.location.href +
+              ': ' + e.message);
+          }
+        }
         this.creativeMessageRouters_[creativeId]
             .sendMessagesToListener(events);
       } catch (e) {
@@ -219,9 +187,8 @@ export class AmpAnalytics3pCreativeMessageRouter {
    * @param {!string} sentinel The communication sentinel of this iframe
    * @param {!string} creativeId The ID of the creative to route messages
    * to/from
-   * @param {string=} opt_extraData Extra data to be passed to the frame
    */
-  constructor(win, sentinel, creativeId, opt_extraData) {
+  constructor(win, sentinel, creativeId) {
     /** @private {!Window} */
     this.win_ = win;
 
@@ -230,9 +197,6 @@ export class AmpAnalytics3pCreativeMessageRouter {
 
     /** @private {!string} */
     this.creativeId_ = creativeId;
-
-    /** @private {?string} */
-    this.extraData_ = opt_extraData;
 
     /** @private {?function(!Array<!AmpAnalytics3pEvent>)} */
     this.eventListener_ = null;
@@ -279,15 +243,6 @@ export class AmpAnalytics3pCreativeMessageRouter {
   }
 
   /**
-   * Gets any optional extra data that should be made available to the
-   * cross-domain frame, in the context of a particular creative.
-   * @returns {?string}
-   */
-  getExtraData() {
-    return this.extraData_;
-  }
-
-  /**
    * Sends a message from the third-party vendor's metrics-collection page back
    * to the creative.
    * @param {!../src/3p-analytics-common.AmpAnalytics3pResponse} response The
@@ -296,7 +251,7 @@ export class AmpAnalytics3pCreativeMessageRouter {
   sendMessageToCreative(response) {
     const responseMessage = {
       sentinel: this.sentinel_,
-      type: this.sentinel_ + AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE,
+      type: AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE,
       data: response,
     };
     window.parent./*OK*/postMessage(
@@ -309,14 +264,6 @@ export class AmpAnalytics3pCreativeMessageRouter {
    */
   getCreativeId() {
     return this.creativeId_;
-  }
-
-  /**
-   * @returns {?string}
-   * @VisibleForTesting
-   */
-  getExtraData() {
-    return this.extraData_;
   }
 }
 
