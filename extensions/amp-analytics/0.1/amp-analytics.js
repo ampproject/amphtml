@@ -23,7 +23,6 @@ import {dict, hasOwn, map} from '../../../src/utils/object';
 import {sendRequest, sendRequestUsingIframe} from './transport';
 import {IframeTransport} from './iframe-transport';
 import {Services} from '../../../src/services';
-import {ResponseMap} from '../../../src/3p-analytics-common';
 import {toggle} from '../../../src/style';
 import {isEnumValue} from '../../../src/types';
 import {parseJson} from '../../../src/json';
@@ -157,18 +156,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   layoutCallback() {
     // Now that we are rendered, stop rendering the element to reduce
     // resource consumption.
-    this.element.getResources().setOwner(this.element,
-        this.element.parentElement);
     return this.ensureInitialized_();
-  }
-
-  /** @override */
-  unlayoutCallback() {
-    const ampDoc = this.getAmpDoc();
-    Transport.doneUsingCrossDomainIframe(ampDoc.win.document,
-        this.config_['transport']);
-    ResponseMap.remove(ampDoc, this.config_['transport']['type']);
-    return true;
   }
 
   /** @override */
@@ -296,20 +284,6 @@ export class AmpAnalytics extends AMP.BaseElement {
       }
     }
     return Promise.all(promises);
-  }
-
-  /**
-   * Receives any response that may be sent from the cross-domain iframe.
-   * @param {!string} type The type parameter of the cross-domain iframe
-   * @param {!../../../src/3p-analytics-common.AmpAnalytics3pResponse} response
-   * The response message from the iframe that was specified in the
-   * amp-analytics config
-   */
-  processCrossDomainIframeResponse_(type, response) {
-    ResponseMap.add(this.getAmpDoc(),
-        type,
-        /** @type {string} */ (this.win.document.baseURI),
-        response['data']);
   }
 
   /**
@@ -779,8 +753,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         this.config_['transport']['iframe']) {
       this.iframeTransport_.sendRequest(request);
     } else {
-      this.transport_.sendRequest(this.win, request,
-          this.config_['transport'] || {});
+      sendRequest(this.win, request, this.config_['transport'] || {});
     }
   }
 

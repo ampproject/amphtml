@@ -47,13 +47,8 @@ export class AmpIframeTransportMessageQueue {
     /** @private {!../../../src/3p-analytics-common.AmpAnalytics3pEvent} */
     this.creativeToPendingMessages_ = {};
 
-    /** @private
-     *  {!../../../src/3p-analytics-common.AmpAnalytics3pNewCreative} */
-    this.creativeToExtraData_ = {};
-
     /** @private {string} */
-    this.messageType_ = this.frame_.sentinel +
-        AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT;
+    this.messageType_ = AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT;
 
     /** @private {!../../../src/iframe-helper.SubscriptionApi} */
     this.postMessageApi_ = new SubscriptionApi(this.frame_,
@@ -93,29 +88,6 @@ export class AmpIframeTransportMessageQueue {
   }
 
   /**
-   * Sets extra config data to be sent to a cross-domain iframe.
-   * @param {!string} creativeId Identifies which creative is sending the
-   * extra data
-   * @param {!string} extraData The extra config data
-   */
-  setExtraData(creativeId, extraData) {
-    dev().assert(!this.creativeToExtraData_[creativeId],
-        'Replacing existing extra data for ' + creativeId);
-    this.creativeToExtraData_[creativeId] = extraData;
-    this.flushQueue_();
-  }
-
-  /**
-   * Test method to get extra config data to be sent to a cross-domain iframe.
-   * @param {!string} creativeId Identifies which creative is sending the
-   * extra data
-   * @returns {string} The extra config data
-   */
-  getExtraData(creativeId) {
-    return this.creativeToExtraData_[creativeId];
-  }
-
-  /**
    * Enqueues an AmpAnalytics3pEvent message to be sent to a cross-domain
    * iframe.
    * @param {!string} creativeId Identifies which creative is sending the message
@@ -138,12 +110,6 @@ export class AmpIframeTransportMessageQueue {
    */
   flushQueue_() {
     if (this.isReady()) {
-      if (Object.keys(this.creativeToExtraData_).length) {
-        this.postMessageApi_.send(AMP_ANALYTICS_3P_MESSAGE_TYPE.CREATIVE,
-            /** @type {!JsonObject} */
-            ({data: this.creativeToExtraData_}));
-        this.creativeToExtraData_ = {};
-      }
       if (this.queueSize()) {
         this.postMessageApi_.send(AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT,
             /** @type {!JsonObject} */
