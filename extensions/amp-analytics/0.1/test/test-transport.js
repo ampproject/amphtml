@@ -129,23 +129,20 @@ describe('amp-analytics.transport', () => {
   });
 
   it('reuses cross-domain iframe', () => {
-    const config = {
-      iframe: 'https://example.com/test',
-    };
+    const url = 'https://example.com/test';
     sandbox.spy(transport, 'createCrossDomainIframe');
-    transport.processCrossDomainIframe(window, config);
-
+    transport.processCrossDomainIframe(window, url);
     expect(transport.createCrossDomainIframe.calledOnce).to.be.true;
-    expect(Transport.hasCrossDomainIframe(config.iframe)).to.be.true;
+    expect(Transport.hasCrossDomainIframe(url)).to.be.true;
 
-    transport.processCrossDomainIframe(window, config);
+    transport.processCrossDomainIframe(window, url);
     expect(transport.createCrossDomainIframe.calledOnce).to.be.true;
   });
 
   it('enqueues event messages correctly', () => {
     const url = 'https://example.com/test';
     const config = {iframe: url};
-    transport.processCrossDomainIframe(window, config);
+    transport.processCrossDomainIframe(window, url);
     transport.sendRequest(window, 'hello, world!', config);
     const queue = Transport.getFrameData(url).queue;
     expect(queue.messagesFor(transport.getId()).length).to.equal(1);
@@ -160,10 +157,10 @@ describe('amp-analytics.transport', () => {
     const url4 = 'https://example.com/test4';
     const transport2 = new Transport();
 
-    transport.processCrossDomainIframe(window, {iframe: url1});
-    transport.processCrossDomainIframe(window, {iframe: url2});
-    transport2.processCrossDomainIframe(window, {iframe: url3});
-    transport2.processCrossDomainIframe(window, {iframe: url4});
+    transport.processCrossDomainIframe(window, url1);
+    transport.processCrossDomainIframe(window, url2);
+    transport2.processCrossDomainIframe(window, url3);
+    transport2.processCrossDomainIframe(window, url4);
     const frame1 = Transport.getFrameData(url1);
     const frame2 = Transport.getFrameData(url2);
     const frame3 = Transport.getFrameData(url3);
@@ -177,8 +174,8 @@ describe('amp-analytics.transport', () => {
     // Add 2 iframes.
     const url1 = 'https://example.com/usageCountTest1';
     const url2 = 'https://example.com/usageCountTest2';
-    transport.processCrossDomainIframe(window, {iframe: url1});
-    transport.processCrossDomainIframe(window, {iframe: url2});
+    transport.processCrossDomainIframe(window, url1);
+    transport.processCrossDomainIframe(window, url2);
     const frame1 = Transport.getFrameData(url1);
     const frame2 = Transport.getFrameData(url2);
     expect(frame1.usageCount).to.equal(1);
@@ -186,11 +183,11 @@ describe('amp-analytics.transport', () => {
     expect(window.document.getElementsByTagName('IFRAME').length).to.equal(2);
 
     // Mark the iframes as used multiple times each.
-    transport.processCrossDomainIframe(window, {iframe: url1});
-    transport.processCrossDomainIframe(window, {iframe: url1});
-    transport.processCrossDomainIframe(window, {iframe: url2});
-    transport.processCrossDomainIframe(window, {iframe: url2});
-    transport.processCrossDomainIframe(window, {iframe: url2});
+    transport.processCrossDomainIframe(window, url1);
+    transport.processCrossDomainIframe(window, url1);
+    transport.processCrossDomainIframe(window, url2);
+    transport.processCrossDomainIframe(window, url2);
+    transport.processCrossDomainIframe(window, url2);
     expect(frame1.usageCount).to.equal(3);
     expect(frame2.usageCount).to.equal(4);
 
