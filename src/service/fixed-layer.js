@@ -259,6 +259,7 @@ export class FixedLayer {
       measure: state => {
         const autoTops = [];
         const elements = this.elements_;
+        const styles = [];
 
         // Notice that this code intentionally breaks vsync contract.
         // Unfortunately, there's no way to reliably test whether or not
@@ -268,7 +269,14 @@ export class FixedLayer {
 
         // 1. Set all style top to `auto` and calculate the auto-offset.
         for (let i = 0; i < elements.length; i++) {
-          setStyle(elements[i].element, 'top', 'auto');
+          const el = elements[i].element;
+          const style = computedStyle(this.ampdoc.win, el);
+          styles.push(style);
+          if (endsWith(style.position || '', 'sticky')) {
+            setStyle(el, 'position', 'fixed');
+          } else {
+            setStyle(el, 'top', 'auto');
+          }
         }
 
         for (let i = 0; i < elements.length; i++) {
@@ -277,15 +285,18 @@ export class FixedLayer {
 
         // 2. Reset style top.
         for (let i = 0; i < elements.length; i++) {
-          setStyle(elements[i].element, 'top', '');
+          setStyles(elements[i].element, {
+            top: '',
+            position: '',
+          });
         }
 
         // 3. Calculated fixed/sticky info.
         for (let i = 0; i < elements.length; i++) {
           const fe = elements[i];
+          const style = styles[i];
           const element = fe.element;
-          const styles = computedStyle(this.ampdoc.win, element);
-          const position = styles.position || '';
+          const position = style.position || '';
           // Element is indeed fixed. Visibility is added to the test to
           // avoid moving around invisible elements.
           const isFixed = (
@@ -314,22 +325,23 @@ export class FixedLayer {
           // actual calculated value in all other browsers. To find out whether
           // or not the `top` was actually set in CSS, this method compares
           // `offsetTop` with `style.top = 'auto'` and without.
-          let top = styles.top;
+          let top = style.top;
           const currentOffsetTop = element./*OK*/offsetTop;
-          const isImplicitAuto = currentOffsetTop == autoTops[i];
-          if (top == 'auto' || isImplicitAuto || isSticky) {
-            if (currentOffsetTop ==
+          if (isSticky) {
+            if (parseInt(top, 10) !== autoTops[i]) {
+              top = 'auto';
+            }
+          } else if (currentOffsetTop === autoTops[i]) {
+            if (currentOffsetTop ===
                     this.committedPaddingTop_ + this.borderTop_) {
               top = '0px';
             } else {
-              top = '';
+              top = 'auto';
             }
-          } else {
-            top = '0px';
           }
 
-          const bottom = styles.bottom;
-          const opacity = parseFloat(styles.opacity);
+          const bottom = style.bottom;
+          const opacity = parseFloat(style.opacity);
           // Transferability requires element to be fixed and top or bottom to
           // be styled with `0`. Also, do not transfer transparent
           // elements - that's a lot of work for no benefit.  Additionally,
@@ -352,8 +364,8 @@ export class FixedLayer {
             sticky: isSticky,
             transferrable: isTransferrable,
             top,
-            zIndex: styles.zIndex,
-            transform: styles.transform,
+            zIndex: style.zIndex,
+            transform: style.transform,
           };
         }
       },
@@ -554,9 +566,11 @@ export class FixedLayer {
     if (state.fixed || state.sticky) {
       // Update `top`. This is necessary to adjust position to the viewer's
       // paddingTop.
-      setStyle(element, 'top', state.top ?
-          `calc(${state.top} + ${this.paddingTop_}px)` :
-          '');
+      if (state.fixed || !this.transfer_) {
+        setStyle(element, 'top', state.top ?
+            `calc(${state.top} + ${this.paddingTop_}px)` :
+            '');
+      }
 
       // Move element to the fixed layer.
       if (this.transfer_ &&
