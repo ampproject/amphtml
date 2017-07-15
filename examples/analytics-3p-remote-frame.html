@@ -18,9 +18,7 @@
         ampAnalytics.registerAmpAnalytics3pEventsListener(events => {
           events.forEach(event => {
             // Now, do something meaningful with the AMP Analytics event
-            console.log("Received an event: " + event +
-              ", and my extra data is: " +
-              ampAnalytics.getExtraData());
+            console.log("Received an event: " + event);
             ampAnalytics.sendMessageToCreative(
               {'status': 'received', 'other': '42'});
           });
@@ -29,8 +27,7 @@
 
       // Load the script specified in the iframe’s name attribute:
       script = document.createElement('script');
-      script.src = (document.location.hostname == 'localhost' ? '/' :
-          'https://3p.ampproject.net/') + JSON.parse(window.name).scriptSrc;
+      script.src = JSON.parse(window.name).scriptSrc;
       document.head.appendChild(script);
       // The script will be loaded, and will call onNewAmpAnalyticsInstance()
     </script>
