@@ -45,7 +45,7 @@ export class AmpIframeTransportMessageQueue {
     this.isReady_ = false;
 
     /** @private {!../../../src/3p-analytics-common.AmpAnalytics3pEvent} */
-    this.creativeToPendingMessages_ = {};
+    this.transportIdToPendingMessages_ = {};
 
     /** @private {string} */
     this.messageType_ = AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT;
@@ -79,28 +79,29 @@ export class AmpIframeTransportMessageQueue {
   }
 
   /**
-   * Returns how many creativeId -> message(s) mappings there are
+   * Returns how many transportId -> message(s) mappings there are
    * @return {number}
    * @VisibleForTesting
    */
   queueSize() {
-    return Object.keys(this.creativeToPendingMessages_).length;
+    return Object.keys(this.transportIdToPendingMessages_).length;
   }
 
   /**
    * Enqueues an AmpAnalytics3pEvent message to be sent to a cross-domain
    * iframe.
-   * @param {!string} creativeId Identifies which creative is sending the message
+   * @param {!string} transportId Identifies which creative is sending the
+   * message
    * @param {!string} event The event to be enqueued and then sent to the iframe
    */
-  enqueue(creativeId, event) {
-    this.creativeToPendingMessages_[creativeId] =
-        this.creativeToPendingMessages_[creativeId] || [];
+  enqueue(transportId, event) {
+    this.transportIdToPendingMessages_[transportId] =
+        this.transportIdToPendingMessages_[transportId] || [];
     if (this.queueSize() >= MAX_QUEUE_SIZE_) {
-      dev().warn(TAG_, 'Exceeded maximum size of queue for: ' + creativeId);
-      this.creativeToPendingMessages_[creativeId].shift();
+      dev().warn(TAG_, 'Exceeded maximum size of queue for: ' + transportId);
+      this.transportIdToPendingMessages_[transportId].shift();
     }
-    this.creativeToPendingMessages_[creativeId].push(event);
+    this.transportIdToPendingMessages_[transportId].push(event);
     this.flushQueue_();
   }
 
@@ -113,22 +114,23 @@ export class AmpIframeTransportMessageQueue {
       if (this.queueSize()) {
         this.postMessageApi_.send(AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT,
             /** @type {!JsonObject} */
-            ({data: this.creativeToPendingMessages_}));
-        this.creativeToPendingMessages_ = {};
+            ({data: this.transportIdToPendingMessages_}));
+        this.transportIdToPendingMessages_ = {};
       }
     }
   }
 
   /**
    * Test method to see which messages (if any) are associated with a given
-   * creativeId
-   * @param {!string} creativeId Identifies which creative is sending the message
+   * transportId
+   * @param {!string} transportId Identifies which creative is sending the
+   * message
    * @return {Array<string>}
    * @VisibleForTesting
    */
-  messagesFor(creativeId) {
+  messagesFor(transportId) {
     return /** @type {Array<string>} */ (
-      this.creativeToPendingMessages_[creativeId]);
+      this.transportIdToPendingMessages_[transportId]);
   }
 }
 
