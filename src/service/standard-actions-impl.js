@@ -36,6 +36,10 @@ function isShowable(element) {
 /** @const {string} */
 const TAG = 'STANDARD-ACTIONS';
 
+/** @const {Array<string>} */
+const PERMITTED_POSITIONS = ['top','bottom','center'];
+
+
 /**
  * This service contains implementations of some of the most typical actions,
  * such as hiding DOM elements.
@@ -198,13 +202,12 @@ export class StandardActions {
     const duration = invocation.args
                      && invocation.args['duration']
                      && invocation.args['duration'] >= 0 ?
-                     invocation.args['duration'] : 500;
+                        invocation.args['duration'] : 500;
 
     // Position in the viewport at the end
-    const permittedPosVals = ['top','bottom','center'];
-    const pos = invocation.args
+    const pos = (invocation.args
                 && invocation.args['position']
-                && (permittedPosVals.indexOf(invocation.args['position']) + 1) ?
+                && PERMITTED_POSITIONS.includes(invocation.args['position'])) ?
                 invocation.args['position'] : 'top';
 
     // Animate the scroll
