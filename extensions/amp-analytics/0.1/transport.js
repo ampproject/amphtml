@@ -170,11 +170,13 @@ export class Transport {
       frameData = Transport.getFrameData(frameUrl);
       ++(frameData.usageCount);
     } else {
-      frameData = this.createCrossDomainIframe(win, frameUrl,
-          opt_processResponse);
+      frameData = this.createCrossDomainIframe(win, frameUrl);
       shouldAddToDOM = true;
     }
     dev().assert(frameData, 'Trying to use non-existent frame');
+    if (opt_processResponse) {
+      Transport.responseProcessors_[this.id_] = opt_processResponse;
+    }
     if (shouldAddToDOM) {
       win.document.body.appendChild(frameData.frame);
     }
@@ -225,20 +227,26 @@ export class Transport {
           (frame)),
     });
     Transport.crossDomainIframes_[frameUrl] = frameData;
-
+    // Note: this is a listener for responses from the frame, regardless of
+    // which transport instance a response is intended for. This is because
+    // the listener may only be created prior to the iframe being attached
+    // to the DOM - see assert in listenFor which references #2942.
+    // This is why listenFor() is called here in createCrossDomainIframe(),
+    // rather than in processCrossDomainIframe().
     frameData.responseMessageUnlisten = listenFor(frameData.frame,
         AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE,
         response => {
           dev().assert(response && response['data'],
               'Received empty response from 3p analytics frame');
-          if (!opt_processResponse) {
-            return;
+          const responseProcessor = Transport.responseProcessors_[
+            response['transport']];
+          if (responseProcessor) {
+            responseProcessor(
+                this.type_,
+                /** @type
+                 * {!../../../src/3p-analytics-common.AmpAnalytics3pResponse}
+                 */ (response));
           }
-          opt_processResponse(
-              this.type_,
-              /** @type
-               * {!../../../src/3p-analytics-common.AmpAnalytics3pResponse}
-               */ (response));
         },
         true);
     return frameData;
@@ -330,6 +338,11 @@ export class Transport {
 
 /** @private {Object<string,FrameData>} */
 Transport.crossDomainIframes_ = {};
+
+/** @private {Object<string,
+ * function(!string,!../../../src/3p-analytics-common.AmpAnalytics3pResponse)>}
+ */
+Transport.responseProcessors_ = {};
 
 /** @private {number} */
 Transport.nextId_ = 0;
