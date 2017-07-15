@@ -100,25 +100,25 @@ export class AmpAnalytics3pMessageRouter {
         'Must implement onNewAmpAnalyticsInstance in ' +
         this.win_.location.href);
     entries.forEach(entry => {
-      const creativeId = entry[0];
+      const transportId = entry[0];
       const events = entry[1];
       try {
         dev().assert(events && events.length,
-            'Received empty events list for ' + creativeId);
-        if (!this.creativeMessageRouters_[creativeId]) {
-          this.creativeMessageRouters_[creativeId] =
+            'Received empty events list for ' + transportId);
+        if (!this.creativeMessageRouters_[transportId]) {
+          this.creativeMessageRouters_[transportId] =
             new AmpAnalytics3pCreativeMessageRouter(
-              this.win_, this.sentinel_, creativeId);
+              this.win_, this.sentinel_, transportId);
           try {
             window.onNewAmpAnalyticsInstance(
-                this.creativeMessageRouters_[creativeId]);
+                this.creativeMessageRouters_[transportId]);
           } catch (e) {
             dev().error(TAG_, 'Exception thrown by' +
               ' onNewAmpAnalyticsInstance() in ' + this.win_.location.href +
               ': ' + e.message);
           }
         }
-        this.creativeMessageRouters_[creativeId]
+        this.creativeMessageRouters_[transportId]
             .sendMessagesToListener(events);
       } catch (e) {
         dev().error(TAG_, 'Failed to pass message to event listener: ' +
@@ -188,10 +188,10 @@ export class AmpAnalytics3pCreativeMessageRouter {
   /**
    * @param {!Window} win The enclosing window object
    * @param {!string} sentinel The communication sentinel of this iframe
-   * @param {!string} creativeId The ID of the creative to route messages
+   * @param {!string} transportId The ID of the creative to route messages
    * to/from
    */
-  constructor(win, sentinel, creativeId) {
+  constructor(win, sentinel, transportId) {
     /** @private {!Window} */
     this.win_ = win;
 
@@ -199,7 +199,7 @@ export class AmpAnalytics3pCreativeMessageRouter {
     this.sentinel_ = sentinel;
 
     /** @private {!string} */
-    this.creativeId_ = creativeId;
+    this.transportId_ = transportId;
 
     /** @private {?function(!Array<!AmpAnalytics3pEvent>)} */
     this.eventListener_ = null;
@@ -215,7 +215,7 @@ export class AmpAnalytics3pCreativeMessageRouter {
   registerAmpAnalytics3pEventsListener(listener) {
     if (this.eventListener_) {
       dev().warn(TAG_, 'Replacing existing eventListener for ' +
-        this.creativeId_);
+        this.transportId_);
     }
     this.eventListener_ = listener;
   }
@@ -229,19 +229,19 @@ export class AmpAnalytics3pCreativeMessageRouter {
   sendMessagesToListener(messages) {
     if (!messages.length) {
       dev().warn(TAG_, 'Attempted to send zero messages in ' +
-          this.creativeId_ + '. Ignoring.');
+          this.transportId_ + '. Ignoring.');
       return;
     }
     if (!this.eventListener_) {
       dev().warn(TAG_, 'Attempted to send messages when no listener' +
-        ' configured in ' + this.creativeId_ + '. Be sure to' +
+        ' configured in ' + this.transportId_ + '. Be sure to' +
         ' first call registerAmpAnalytics3pEventsListener()');
     }
     try {
       this.eventListener_(messages);
     } catch (e) {
       dev().error(TAG_, 'Caught exception executing listener for ' +
-        this.creativeId_ + ': ' + e.message);
+        this.transportId_ + ': ' + e.message);
     }
   }
 
@@ -265,8 +265,8 @@ export class AmpAnalytics3pCreativeMessageRouter {
    * @returns {!string}
    * @VisibleForTesting
    */
-  getCreativeId() {
-    return this.creativeId_;
+  getTransportId() {
+    return this.transportId_;
   }
 }
 
