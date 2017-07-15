@@ -912,34 +912,34 @@ app.get('/dist/rtv/*/v0/*.js', (req, res, next) => {
  * Serve entry point script url
  */
 app.get(['/dist/sw.js', '/dist/sw-kill.js', '/dist/ww.js'],
-  (req, res, next) => {
-    // Special case for entry point script url. Use compiled for testing
-    const mode = pc.env.SERVE_MODE;
-    const fileName = path.basename(req.path);
-    if (mode == 'cdn') {
-      // This will not be useful until extension-location.js change in prod
-      // Require url from cdn
-      const filePath = 'https://cdn.ampproject.org/' + fileName;
-      request(filePath, function(error, response) {
-        if (error) {
-          res.status(404);
-          res.end();
-        } else {
-          res.send(response);
-        }
-      });
-      return;
-    }
-    if (mode == 'default') {
-      req.url = req.url.replace(/\.js$/, '.max.js');
-    }
-    next();
-  });
+    (req, res, next) => {
+      // Special case for entry point script url. Use compiled for testing
+      const mode = pc.env.SERVE_MODE;
+      const fileName = path.basename(req.path);
+      if (mode == 'cdn') {
+        // This will not be useful until extension-location.js change in prod
+        // Require url from cdn
+        const filePath = 'https://cdn.ampproject.org/' + fileName;
+        request(filePath, function(error, response) {
+          if (error) {
+            res.status(404);
+            res.end();
+          } else {
+            res.send(response);
+          }
+        });
+        return;
+      }
+      if (mode == 'default') {
+        req.url = req.url.replace(/\.js$/, '.max.js');
+      }
+      next();
+    });
 
 app.get('/dist/ampanalytics-lib.js', (req, res, next) => {
-    req.url = req.url.replace(/dist/, 'dist.3p/current');
-    next();
-  });
+  req.url = req.url.replace(/dist/, 'dist.3p/current');
+  next();
+});
 
 /*
  * Start Cache SW LOCALDEV section
