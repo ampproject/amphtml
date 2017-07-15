@@ -142,19 +142,6 @@ describe('amp-analytics.transport', () => {
     expect(transport.createCrossDomainIframe.calledOnce).to.be.true;
   });
 
-  it('sends extra data to iframe', () => {
-    const url = 'https://example.com/test';
-    const extraData = 'some extra data';
-    const config = {
-      iframe: url,
-      extraData,
-    };
-    transport.processCrossDomainIframe(window, config);
-    const queue = Transport.getFrameData(url).queue;
-    expect(queue.getExtraData(transport.getId())).to.equal(extraData);
-    expect(queue.queueSize()).to.equal(0);
-  });
-
   it('enqueues event messages correctly', () => {
     const url = 'https://example.com/test';
     const config = {iframe: url};

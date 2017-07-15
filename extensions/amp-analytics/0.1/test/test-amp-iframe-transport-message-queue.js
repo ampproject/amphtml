@@ -80,18 +80,5 @@ describe('amp-analytics.amp-iframe-transport-message-queue', () => {
     expect(letterCount).to.equal(3);
     expect(numberCount).to.equal(4);
   });
-
-  it('only allows extraData to be set once per sender ', () => {
-    queue.setExtraData('letter_sender', 'A');
-    queue.setExtraData('number_sender', '1');
-
-    expect(() => {
-      queue.setExtraData('letter_sender', 'B');
-    }).to.throw(/Replacing existing extra data/);
-
-    expect(() => {
-      queue.setExtraData('number_sender', '2');
-    }).to.throw(/Replacing existing extra data/);
-  });
 });
 
