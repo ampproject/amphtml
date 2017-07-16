@@ -18,7 +18,6 @@ import {getMode} from './mode';
 import {getModeObject} from './mode-object';
 import {isEnumValue} from './types';
 
-
 /** @const Time when this JS loaded.  */
 const start = Date.now();
 
