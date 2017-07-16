@@ -20,6 +20,7 @@ import {
   getServicePromiseForDoc,
   getExistingServiceOrNull,
   getExistingServiceForDocInEmbedScope,
+  getAmpdoc,
 } from './service';
 import {
   getElementService,
@@ -28,7 +29,6 @@ import {
   getElementServiceIfAvailable,
   getElementServiceIfAvailableForDoc,
 } from './element-service';
-import {getAmpdoc} from './service';
 
 
 /**
