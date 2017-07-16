@@ -1,5 +1,5 @@
 <!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ limitations under the License.
 ```html
   <amp-embed width="500" height="200"
              type="dable"
-             data-widget_id="jobgqR7W"
-             data-item_id="testitem">
+             data-widget-id="jobgqR7W"
+             data-item-id="testitem">
   </amp-embed>
 ```
 
@@ -34,9 +34,9 @@ For configuration details and to generate your tags, please contact https://admi
 
 Required parameters:
 
-- data-widget_id
+- data-widget-id
 
 Optional parameters:
 
-- data-item_id
-- data-service_name
+- data-item-id
+- data-service-name
