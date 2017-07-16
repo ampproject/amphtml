@@ -23,7 +23,7 @@ import {getTimingDataSync} from '../../../src/service/variable-source';
 import {urlReplacementsForDoc} from '../../../src/services';
 import {viewerForDoc} from '../../../src/services';
 import {CommonSignals} from '../../../src/common-signals';
-import {analyticsForDoc} from '../../../src/analytics';
+import {analyticsForDoc} from '../../../src/services';
 
 /**
  * This module provides a fairly crude form of performance monitoring (or
