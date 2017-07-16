@@ -100,6 +100,9 @@ export class StandardActions {
       case 'goBack':
         this.handleAmpGoBack_(invocation);
         return;
+      case 'print':
+        this.handleAmpPrint_(invocation);
+        return;
     }
     throw user().createError('Unknown AMP action ', invocation.method);
   }
@@ -155,10 +158,24 @@ export class StandardActions {
    * @private
    */
   handleAmpGoBack_(invocation) {
-    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
+    // TODO(choumx, #9699): HIGH.
+    if (!invocation.satisfiesTrust(ActionTrust.MEDIUM)) {
       return;
     }
     historyForDoc(this.ampdoc).goBack();
+  }
+
+  /**
+   * @param {!./action-impl.ActionInvocation} invocation
+   * @private
+   */
+  handleAmpPrint_(invocation) {
+    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
+      return;
+    }
+    const node = invocation.target;
+    const win = (node.ownerDocument || node).defaultView;
+    win.print();
   }
 
   /**

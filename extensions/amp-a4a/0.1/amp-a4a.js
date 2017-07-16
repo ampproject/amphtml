@@ -37,9 +37,11 @@ import {
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {dev, user, duplicateErrorIfNecessary} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, isEnumValue} from '../../../src/types';
 import {some} from '../../../src/utils/promise';
+import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 import {utf8Decode} from '../../../src/utils/bytes';
 import {viewerForDoc} from '../../../src/services';
 import {xhrFor} from '../../../src/services';
@@ -62,7 +64,6 @@ import {A4AVariableSource} from './a4a-variable-source';
 // TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {getContextMetadata} from '../../../src/iframe-attributes';
-import {isInExperiment} from '../../../ads/google/a4a/traffic-experiments';
 
 /** @type {string} */
 const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
@@ -76,6 +77,12 @@ const METADATA_STRING_NO_QUOTES =
 // cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
 /** @type {string} */
 export const DEFAULT_SAFEFRAME_VERSION = '1-0-9';
+
+/** @const {string} @visibleForTesting */
+export const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
+
+/** @const {string} */
+const CREATIVE_SIZE_HEADER = 'X-CreativeSize';
 
 /** @type {string} @visibleForTesting */
 export const RENDERING_TYPE_HEADER = 'X-AmpAdRender';
@@ -97,21 +104,23 @@ export const XORIGIN_MODE = {
 };
 
 /** @type {!Object} @private */
-const SHARED_IFRAME_PROPERTIES = {
-  frameborder: '0',
-  allowfullscreen: '',
-  allowtransparency: '',
-  scrolling: 'no',
-  marginwidth: '0',
-  marginheight: '0',
-};
+const SHARED_IFRAME_PROPERTIES = dict({
+  'frameborder': '0',
+  'allowfullscreen': '',
+  'allowtransparency': '',
+  'scrolling': 'no',
+  'marginwidth': '0',
+  'marginheight': '0',
+});
 
 /** @typedef {{
  *    creative: ArrayBuffer,
  *    signature: ?Uint8Array,
- *    size: ?{width: number, height: number}
  *  }} */
 export let AdResponseDef;
+
+/** @typedef {{width: number, height: number}} */
+export let SizeInfoDef;
 
 /** @typedef {{
       minifiedCreative: string,
@@ -269,10 +278,7 @@ export class AmpA4A extends AMP.BaseElement {
      *
      * @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)}
      */
-    this.creativeSize_ = {
-      width: this.element.getAttribute('width'),
-      height: this.element.getAttribute('height'),
-    };
+    this.creativeSize_ = null;
 
     /** @private {?../../../src/layout-rect.LayoutRectDef} */
     this.originalSlotSize_ = null;
@@ -300,14 +306,9 @@ export class AmpA4A extends AMP.BaseElement {
     /**
      * Protected version of emitLifecycleEvent that ensures error does not
      * cause promise chain to reject.
-     * @private {function(string, !Object=)}
+     * @private {?function(string, !Object=)}
      */
-    this.protectedEmitLifecycleEvent_ = protectFunctionWrapper(
-        this.emitLifecycleEvent, this,
-        (err, varArgs) => {
-          dev().error(TAG, this.element.getAttribute('type'),
-              'Error on emitLifecycleEvent', err, varArgs) ;
-        });
+    this.protectedEmitLifecycleEvent_ = null;
 
     /** @const {string} */
     this.sentinel = generateSentinel(window);
@@ -334,16 +335,6 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.fromResumeCallback = false;
 
-
-    const type = (this.element.getAttribute('type') || 'notype').toLowerCase();
-    /**
-     * @private @const{boolean} whether request should only be sent when slot is
-     *    within renderOutsideViewport distance.
-     */
-    this.delayRequestEnabled_ =
-      (type == 'adsense' && isInExperiment(this.element, '117152655')) ||
-      (type == 'doubleclick' && isInExperiment(this.element, '117152665'));
-
     /** @private {string} */
     this.safeframeVersion_ = DEFAULT_SAFEFRAME_VERSION;
   }
@@ -364,6 +355,17 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.creativeSize_ = {
+      width: this.element.getAttribute('width'),
+      height: this.element.getAttribute('height'),
+    };
+    this.protectedEmitLifecycleEvent_ = protectFunctionWrapper(
+        this.emitLifecycleEvent, this,
+        (err, varArgs) => {
+          dev().error(TAG, this.element.getAttribute('type'),
+              'Error on emitLifecycleEvent', err, varArgs) ;
+        });
+
     this.uiHandler = new AMP.AmpAdUIHandler(this);
     if (!this.win.ampA4aValidationKeys) {
       // Without the following variable assignment, there's no way to apply a
@@ -399,6 +401,14 @@ export class AmpA4A extends AMP.BaseElement {
    */
   isValidElement() {
     return true;
+  }
+
+  /**
+   * @return {boolean} whether ad request should be delayed until
+   *    renderOutsideViewport is met.
+   */
+  delayAdRequestEnabled() {
+    return false;
   }
 
   /**
@@ -569,7 +579,7 @@ export class AmpA4A extends AMP.BaseElement {
           // renderOutsideViewport. Within render outside viewport will not
           // resolve if already within viewport thus the check for already
           // meeting the definition as opposed to waiting on the promise.
-          if (this.delayRequestEnabled_ &&
+          if (this.delayAdRequestEnabled() &&
               !this.getResource().renderOutsideViewport()) {
             return this.getResource().whenWithinRenderOutsideViewport();
           }
@@ -578,10 +588,7 @@ export class AmpA4A extends AMP.BaseElement {
         /** @return {!Promise<?string>} */
         .then(() => {
           checkStillCurrent();
-          if (this.delayRequestEnabled_) {
-            dev().info(TAG, 'ad request being built');
-          }
-          return /** @type {!Promise<?string>} */ (this.getAdUrl());
+          return /** @type {!Promise<?string>} */(this.getAdUrl());
         })
         // This block returns the (possibly empty) response to the XHR request.
         /** @return {!Promise<?Response>} */
@@ -645,23 +652,26 @@ export class AmpA4A extends AMP.BaseElement {
             };
           });
         })
-        // This block returns the ad creative and signature, if available; null
-        // otherwise.
+        // This block returns the ad creative, signature, and size, if
+        // available; null otherwise.
         /**
-         * @return {!Promise<?{AdResponseDef}>}
+         * @return {?Promise<{creativeParts: !AdResponseDef, size: ?SizeInfoDef}>}
          */
         .then(responseParts => {
           checkStillCurrent();
-          if (responseParts) {
-            this.protectedEmitLifecycleEvent_('extractCreativeAndSignature');
+          if (!responseParts) {
+            return null;
           }
-          return responseParts && this.extractCreativeAndSignature(
-              responseParts.bytes, responseParts.headers);
+          this.protectedEmitLifecycleEvent_('extractCreativeAndSignature');
+          const size = this.extractSize(responseParts.headers);
+          return this.extractCreativeAndSignature(
+              responseParts.bytes, responseParts.headers)
+              .then(creativeParts => ({creativeParts, size}));
         })
         // This block returns the ad creative if it exists and validates as AMP;
         // null otherwise.
         /** @return {!Promise<?ArrayBuffer>} */
-        .then(creativeParts => {
+        .then(creativeData => {
           checkStillCurrent();
           // Keep a handle to the creative body so that we can render into
           // SafeFrame or NameFrame later, if necessary.  TODO(tdrl): Temporary,
@@ -670,10 +680,11 @@ export class AmpA4A extends AMP.BaseElement {
           // src cache issue.  If we decide to keep a SafeFrame-like solution,
           // we should restructure the promise chain to pass this info along
           // more cleanly, without use of an object variable outside the chain.
-          if (!creativeParts) {
+          if (!creativeData) {
             return Promise.resolve();
           }
-          this.creativeSize_ = creativeParts.size || this.creativeSize_;
+          const {creativeParts, size} = creativeData;
+          this.creativeSize_ = size || this.creativeSize_;
           if (this.experimentalNonAmpCreativeRenderMethod_ !=
               XORIGIN_MODE.CLIENT_CACHE &&
               creativeParts.creative) {
@@ -956,9 +967,17 @@ export class AmpA4A extends AMP.BaseElement {
     return super.attemptChangeSize(newHeight, newWidth).catch(() => {});
   }
 
+  /**
+   * @return {boolean} where AMP creatives rendered via FIE should
+   *    be removed as part of unlayoutCallback.  By default they remain.
+   */
+  shouldUnlayoutAmpCreatives() {
+    return false;
+  }
+
   /** @override  */
   unlayoutCallback() {
-    if (this.friendlyIframeEmbed_) {
+    if (this.friendlyIframeEmbed_ && !this.shouldUnlayoutAmpCreatives()) {
       return false;
     }
     // Increment promiseId to cause any pending promise to cancel.
@@ -1056,7 +1075,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * Extracts creative and verification signature (if present) from
-   * XHR response body and header.  To be implemented by network.
+   * XHR response body and header.
    *
    * In the returned value, the `creative` field should be an `ArrayBuffer`
    * containing the utf-8 encoded bytes of the creative itself, while the
@@ -1064,15 +1083,47 @@ export class AmpA4A extends AMP.BaseElement {
    * bytes.  The `signature` field may be null if no signature was available
    * for this creative / the creative is not valid AMP.
    *
-   * @param {!ArrayBuffer} unusedResponseArrayBuffer content as array buffer
-   * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} unusedResponseHeaders
+   * @param {!ArrayBuffer} responseArrayBuffer content as array buffer
+   * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
    *   XHR service FetchResponseHeaders object containing the response
    *   headers.
    * @return {!Promise<!AdResponseDef>}
    */
-  extractCreativeAndSignature(unusedResponseArrayBuffer,
-      unusedResponseHeaders) {
-    throw new Error('extractCreativeAndSignature not implemented!');
+  extractCreativeAndSignature(responseArrayBuffer, responseHeaders) {
+    let signature = null;
+    const headerValue = responseHeaders.get(AMP_SIGNATURE_HEADER);
+    if (headerValue) {
+      try {
+        signature = base64UrlDecodeToBytes(headerValue);
+      } catch (e) {
+        // Decoding error; do nothing
+      }
+    }
+    return Promise.resolve(/** @type {!AdResponseDef} */ (
+        {creative: responseArrayBuffer, signature}));
+  }
+
+  /**
+   * Determine the desired size of the creative based on the HTTP response
+   * headers. Must be less than or equal to the original size of the ad slot
+   * along each dimension. May be overridden by network.
+   *
+   * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
+   * @return {?SizeInfoDef}
+   */
+  extractSize(responseHeaders) {
+    const headerValue = responseHeaders.get(CREATIVE_SIZE_HEADER);
+    if (!headerValue) {
+      return null;
+    }
+    const match = /^([0-9]+)x([0-9]+)$/.exec(headerValue);
+    if (!match) {
+      // TODO(@taymonbeal, #9274): replace this with real error reporting
+      user().error(TAG, `Invalid size header: ${headerValue}`);
+      return null;
+    }
+    return /** @type {?SizeInfoDef} */ (
+        {width: Number(match[1]), height: Number(match[2])});
   }
 
   /**
@@ -1269,16 +1320,17 @@ export class AmpA4A extends AMP.BaseElement {
     // Create and setup friendly iframe.
     this.iframe = /** @type {!HTMLIFrameElement} */(
         createElementWithAttributes(
-            /** @type {!Document} */(this.element.ownerDocument), 'iframe', {
+            /** @type {!Document} */(this.element.ownerDocument), 'iframe',
+            dict({
               // NOTE: It is possible for either width or height to be 'auto',
               // a non-numeric value.
-              height: this.creativeSize_.height,
-              width: this.creativeSize_.width,
-              frameborder: '0',
-              allowfullscreen: '',
-              allowtransparency: '',
-              scrolling: 'no',
-            }));
+              'height': this.creativeSize_.height,
+              'width': this.creativeSize_.width,
+              'frameborder': '0',
+              'allowfullscreen': '',
+              'allowtransparency': '',
+              'scrolling': 'no',
+            })));
     this.applyFillContent(this.iframe);
     const fontsArray = [];
     if (creativeMetaData.customStylesheets) {
@@ -1343,22 +1395,23 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * Shared functionality for cross-domain iframe-based rendering methods.
-   * @param {!Object<string, string>} attributes The attributes of the iframe.
+   * @param {!JsonObject<string, string>} attributes The attributes of the iframe.
    * @return {!Promise} awaiting load event for ad frame
    * @private
    */
   iframeRenderHelper_(attributes) {
-    const mergedAttributes = Object.assign(attributes, {
-      height: this.creativeSize_.height,
-      width: this.creativeSize_.width,
-    });
+    const mergedAttributes = Object.assign(attributes, dict({
+      'height': this.creativeSize_.height,
+      'width': this.creativeSize_.width,
+    }));
 
     if (this.sentinel) {
       mergedAttributes['data-amp-3p-sentinel'] = this.sentinel;
     }
     this.iframe = createElementWithAttributes(
         /** @type {!Document} */ (this.element.ownerDocument),
-        'iframe', Object.assign(mergedAttributes, SHARED_IFRAME_PROPERTIES));
+        'iframe', /** @type {!JsonObject} */ (
+        Object.assign(mergedAttributes, SHARED_IFRAME_PROPERTIES)));
     // TODO(keithwrightbos): noContentCallback?
     this.xOriginIframeHandler_ = new AMP.AmpAdXOriginIframeHandler(this);
     // Iframe is appended to element as part of xorigin frame handler init.
@@ -1390,11 +1443,11 @@ export class AmpA4A extends AMP.BaseElement {
    */
   renderViaCachedContentIframe_(adUrl) {
     this.protectedEmitLifecycleEvent_('renderCrossDomainStart');
-    return this.iframeRenderHelper_({
-      src: xhrFor(this.win).getCorsUrl(this.win, adUrl),
-      name: JSON.stringify(
+    return this.iframeRenderHelper_(dict({
+      'src': xhrFor(this.win).getCorsUrl(this.win, adUrl),
+      'name': JSON.stringify(
           getContextMetadata(this.win, this.element, this.sentinel)),
-    });
+    }));
   }
 
   /**
@@ -1446,7 +1499,7 @@ export class AmpA4A extends AMP.BaseElement {
         name = `${this.safeframeVersion_};${creative.length};${creative}` +
             `${contextMetadata}`;
       }
-      return this.iframeRenderHelper_({src: srcPath, name});
+      return this.iframeRenderHelper_(dict({'src': srcPath, 'name': name}));
     });
   }
 

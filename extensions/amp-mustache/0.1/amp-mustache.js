@@ -27,6 +27,7 @@ setUnescapedSanitizier(sanitizeFormattingHtml);
  * See {@link https://github.com/janl/mustache.js/}.
  *
  * @private Visible for testing.
+ * @extends {BaseTemplate$$module$src$service$template_impl}
  */
 export class AmpMustache extends AMP.BaseTemplate {
 

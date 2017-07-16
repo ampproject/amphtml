@@ -20,6 +20,7 @@ import {
   getServicePromiseForDoc,
   getExistingServiceOrNull,
   getExistingServiceForDocInEmbedScope,
+  getAmpdoc,
 } from './service';
 import {
   getElementService,
@@ -33,22 +34,24 @@ import {
 /**
  * Returns a promise for the Access service.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!Promise<!AccessService>}
+ * @return {!Promise<!../extensions/amp-access/0.1/amp-access.AccessService>}
  */
 export function accessServiceForDoc(nodeOrDoc) {
-  return /** @type {!Promise<!AccessService>} */ (
-      getElementServiceForDoc(nodeOrDoc, 'access', 'amp-access'));
+  return (/** @type {!Promise<
+      !../extensions/amp-access/0.1/amp-access.AccessService>} */ (
+      getElementServiceForDoc(nodeOrDoc, 'access', 'amp-access')));
 }
 
 /**
  * Returns a promise for the Access service or a promise for null if the service
  * is not available on the current page.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!Promise<?AccessService>}
+ * @return {!Promise<?../extensions/amp-access/0.1/amp-access.AccessService>}
  */
 export function accessServiceForDocOrNull(nodeOrDoc) {
-  return /** @type {!Promise<?AccessService>} */ (
-      getElementServiceIfAvailableForDoc(nodeOrDoc, 'access', 'amp-access'));
+  return (/** @type {
+      !Promise<?../extensions/amp-access/0.1/amp-access.AccessService>} */ (
+      getElementServiceIfAvailableForDoc(nodeOrDoc, 'access', 'amp-access')));
 }
 
 /**
@@ -57,7 +60,8 @@ export function accessServiceForDocOrNull(nodeOrDoc) {
  */
 export function actionServiceForDoc(nodeOrDoc) {
   return /** @type {!./service/action-impl.ActionService} */ (
-      getExistingServiceForDocInEmbedScope(nodeOrDoc, 'action'));
+      getExistingServiceForDocInEmbedScope(
+          nodeOrDoc, 'action', /* opt_fallbackToTopWin */ true));
 }
 
 /**
@@ -67,6 +71,18 @@ export function actionServiceForDoc(nodeOrDoc) {
 export function activityForDoc(nodeOrDoc) {
   return /** @type {!Promise<!Activity>} */ (
       getElementServiceForDoc(nodeOrDoc, 'activity', 'amp-analytics'));
+}
+
+/**
+ * Returns the global instance of the `AmpDocService` service that can be
+ * used to resolve an ampdoc for any node: either in the single-doc or
+ * shadow-doc environment.
+ * @param {!Window} window
+ * @return {!./service/ampdoc-impl.AmpDocService}
+ */
+export function ampdocServiceFor(window) {
+  return /** @type {!./service/ampdoc-impl.AmpDocService} */ (
+      getService(window, 'ampdoc'));
 }
 
 /**
@@ -93,18 +109,16 @@ export function bindForDoc(nodeOrDoc) {
  */
 export function cidForDoc(nodeOrDoc) {
   return /** @type {!Promise<!./service/cid-impl.Cid>} */ ( // eslint-disable-line max-len
-      getElementServiceForDoc(nodeOrDoc, 'cid', 'amp-analytics'));
+      getServicePromiseForDoc(nodeOrDoc, 'cid'));
 }
 
 /**
- * Returns a promise for the CID service or a promise for null if the service
- * is not available on the current page.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!Promise<!./service/cid-impl.Cid>}
+ * @param {!Window} window
+ * @return {!./service/crypto-impl.Crypto}
  */
-export function cidForDocOrNull(nodeOrDoc) {
-  return /** @type {!Promise<!./service/cid-impl.Cid>} */ ( // eslint-disable-line max-len
-      getElementServiceIfAvailableForDoc(nodeOrDoc, 'cid', 'amp-analytics'));
+export function cryptoFor(window) {
+  return (/** @type {!./service/crypto-impl.Crypto} */ (
+      getService(window, 'crypto')));
 }
 
 /**
@@ -114,6 +128,14 @@ export function cidForDocOrNull(nodeOrDoc) {
 export function documentInfoForDoc(nodeOrDoc) {
   return /** @type {!./service/document-info-impl.DocInfo} */ (
       getServiceForDoc(nodeOrDoc, 'documentInfo')).get();
+}
+
+/**
+ * @param {!Window} window
+ * @return {!./service/document-state.DocumentState}
+ */
+export function documentStateFor(window) {
+  return getService(window, 'documentState');
 }
 
 /**
@@ -232,17 +254,18 @@ export function timerFor(window) {
  */
 export function urlReplacementsForDoc(nodeOrDoc) {
   return /** @type {!./service/url-replacements-impl.UrlReplacements} */ (
-      getExistingServiceForDocInEmbedScope(nodeOrDoc, 'url-replace'));
+      getExistingServiceForDocInEmbedScope(
+          nodeOrDoc, 'url-replace', /* opt_fallbackToTopWin */ true));
 }
 
 /**
  * @param {!Window} window
- * @return {!Promise<!UserNotificationManager>}
+ * @return {!Promise<!../extensions/amp-user-notification/0.1/amp-user-notification.UserNotificationManager>}
  */
 export function userNotificationManagerFor(window) {
-  return /** @type {!Promise<!UserNotificationManager>} */ (
-      getElementService(window, 'userNotificationManager',
-          'amp-user-notification'));
+  return (/** @type {!Promise<!../extensions/amp-user-notification/0.1/amp-user-notification.UserNotificationManager>} */
+      (getElementService(window, 'userNotificationManager',
+          'amp-user-notification')));
 }
 
 /**
@@ -310,4 +333,32 @@ export function viewportForDoc(nodeOrDoc) {
  */
 export function xhrFor(window) {
   return /** @type {!./service/xhr-impl.Xhr} */ (getService(window, 'xhr'));
+}
+
+/**
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {boolean=} loadAnalytics
+ * @return {!Promise<!../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>}
+ */
+export function analyticsForDoc(nodeOrDoc, loadAnalytics = false) {
+  if (loadAnalytics) {
+    // Get Extensions service and force load analytics extension.
+    const ampdoc = getAmpdoc(nodeOrDoc);
+    extensionsFor(ampdoc.win)./*OK*/loadExtension('amp-analytics');
+  }
+  return (/** @type {!Promise<
+            !../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
+          >} */ (getElementServiceForDoc(
+              nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
+}
+
+/**
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @return {!Promise<?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>}
+ */
+export function analyticsForDocOrNull(nodeOrDoc) {
+  return (/** @type {!Promise<
+            ?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
+          >} */ (getElementServiceIfAvailableForDoc(
+              nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
 }

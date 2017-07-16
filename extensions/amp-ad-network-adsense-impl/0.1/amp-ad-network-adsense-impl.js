@@ -23,11 +23,11 @@
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {
   isInManualExperiment,
+  isInExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {isExperimentOn} from '../../../src/experiments';
 import {
   additionalDimensions,
-  extractGoogleAdCreativeAndSignature,
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
   isReportingEnabled,
@@ -41,7 +41,7 @@ import {
 } from '../../../ads/google/a4a/google-data-reporter';
 import {removeElement} from '../../../src/dom';
 import {getMode} from '../../../src/mode';
-import {stringHash32} from '../../../src/crypto';
+import {stringHash32} from '../../../src/string';
 import {dev} from '../../../src/log';
 import {extensionsFor} from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
@@ -51,7 +51,7 @@ import {
 } from '../../../src/style';
 import {viewerForDoc} from '../../../src/services';
 import {AdsenseSharedState} from './adsense-shared-state';
-import {insertAnalyticsElement} from '../../../src/analytics';
+import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
   getAdSenseAmpAutoAdsExpBranch,
 } from '../../../ads/google/adsense-amp-auto-ads';
@@ -131,6 +131,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
+  delayAdRequestEnabled() {
+    return isInExperiment(this.element, '117152655');
+  }
+
+  /** @override */
   getAdUrl() {
     // TODO: Check for required and allowed parameters. Probably use
     // validateData, from 3p/3p/js, after moving it someplace common.
@@ -198,7 +203,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
-  extractCreativeAndSignature(responseText, responseHeaders) {
+  extractSize(responseHeaders) {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
     this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
     this.qqid_ = responseHeaders.get(QQID_HEADER);
@@ -206,11 +211,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       // Load amp-analytics extensions
       this.extensions_./*OK*/loadExtension('amp-analytics');
     }
-    return extractGoogleAdCreativeAndSignature(responseText, responseHeaders)
-        .then(adResponse => {
-          adResponse.size = this.size_;
-          return Promise.resolve(adResponse);
-        });
+    return this.size_;
   }
 
   /**

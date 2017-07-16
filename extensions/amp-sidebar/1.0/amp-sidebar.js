@@ -112,7 +112,7 @@ export class AmpSidebar extends AMP.BaseElement {
       .call(this.element.querySelectorAll('nav[toolbar]'), 0);
     toolbarElements.forEach(toolbarElement => {
       try {
-        this.toolbars_.push(new Toolbar(toolbarElement, this, this.vsync_));
+        this.toolbars_.push(new Toolbar(toolbarElement, this.win, this.vsync_));
       } catch (e) {
         user().error(TAG, 'Failed to instantiate toolbar', e);
       }
@@ -141,10 +141,14 @@ export class AmpSidebar extends AMP.BaseElement {
       }
     });
 
+    // Replacement label for invisible close button set value in amp sidebar
+    const ariaLabel = this.element.getAttribute('data-close-button-aria-label')
+    || 'Close the sidebar';
+
     // Invisible close button at the end of sidebar for screen-readers.
     const screenReaderCloseButton = this.document_.createElement('button');
-    // TODO(aghassemi, #4146) i18n
-    screenReaderCloseButton.textContent = 'Close the sidebar';
+
+    screenReaderCloseButton.textContent = ariaLabel;
     screenReaderCloseButton.classList.add('i-amphtml-screen-reader');
     // This is for screen-readers only, should not get a tab stop.
     screenReaderCloseButton.tabIndex = -1;
@@ -231,13 +235,13 @@ export class AmpSidebar extends AMP.BaseElement {
     this.viewport_.enterOverlayMode();
     this.vsync_.mutate(() => {
       toggle(this.element, /* display */true);
-      this.openMask_();
       if (this.isIosSafari_) {
         this.compensateIosBottombar_();
       }
       this.element./*OK*/scrollTop = 1;
       // Start animation in a separate vsync due to display:block; set above.
       this.vsync_.mutate(() => {
+        this.openMask_();
         this.element.setAttribute('open', '');
         this.element.setAttribute('aria-hidden', 'false');
         if (this.openOrCloseTimeOut_) {

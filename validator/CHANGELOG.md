@@ -30,6 +30,31 @@ Please add new release changes here. Use the time in UTC for the header and
 mention any release notes since the last change as well as the version numbers.
 -->
 
+### 9:00PM, June 26, 2017 UTC
+
+Validator Version 239
+Spec Version 443
+
+Includes:
+
+ - amp-ad-exit #9390
+ - amp-state update #9721
+ - requires_extension refactor
+ - amp-ima-video test files #9770
+ - amp-rtc #9800
+ - version 1.0 extensions
+ - amp-video-ima update
+ - RDFa validation rules #9851
+ - amp-dailymotion autoplay #9746
+ - amp-ima-video data-src #9767
+ - amp-sidebar 1.0 #9784, #9805, #9830, #9834
+ - detection of multiple body tags
+ - template not required for amp-form #9892
+ - amp-ima-video > track #9827
+ - fix to amp-ad warning, improvement to unused extension suggestion
+ - amp-list [src] and [state] attributes
+ - more nuance to dispatch_key field #9737
+
 ### 11:00 PM, June 16, 2017 UTC
 
 **Rolled Back**

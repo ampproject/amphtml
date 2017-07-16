@@ -38,6 +38,7 @@
     "comma-dangle": [2, "always-multiline"],
     "computed-property-spacing": [2, "never"],
     "curly": 2,
+    "dict-string-keys": 2,
     "dot-location": [2, "property"],
     "enforce-private-props": 2,
     "todo-format": 0,

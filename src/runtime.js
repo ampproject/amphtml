@@ -18,7 +18,7 @@ import {BaseElement} from './base-element';
 import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
 import {CommonSignals} from './common-signals';
 import {
-  ShadowDomWriter,
+  createShadowDomWriter,
   createShadowRoot,
   importShadowBody,
   installStylesForShadowRoot,
@@ -35,7 +35,7 @@ import {
   registerExtension,
   stubLegacyElements,
 } from './service/extensions-impl';
-import {ampdocServiceFor} from './ampdoc';
+import {ampdocServiceFor, platformFor} from './services';
 import {startupChunk} from './chunk';
 import {cssText} from '../build/css';
 import {dev, user, initLogConstructor, setReportError} from './log';
@@ -51,8 +51,10 @@ import {
   hasRenderDelayingServices,
 } from './render-delaying-services';
 import {installActionServiceForDoc} from './service/action-impl';
+import {installCidService} from './service/cid-impl';
 import {installCryptoService} from './service/crypto-impl';
 import {installDocumentInfoServiceForDoc} from './service/document-info-impl';
+import {installDocumentStateService} from './service/document-state';
 import {installGlobalClickListenerForDoc} from './service/document-click';
 import {installGlobalSubmitListenerForDoc} from './document-submit';
 import {extensionsFor} from './services';
@@ -82,7 +84,6 @@ import {
   toggleExperiment,
 } from './experiments';
 import {parseUrl} from './url';
-import {platformFor} from './services';
 import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
 import {resourcesForDoc} from './services';
@@ -96,21 +97,6 @@ import * as config from './config';
 initLogConstructor();
 setReportError(reportError);
 
-/**
- * - n is the name.
- * - f is the function body of the extension.
- * - p is the priority. Only supported value is "high".
- *   high means, that the extension is not subject to chunking.
- *   This should be used for work, that should always happen
- *   as early as possible. Currently this is primarily used
- *   for viewer communication setup.
- * @typedef {{
- *   n: string,
- *   f: function(!Object),
- *   p: (string|undefined),
- * }}
- */
-let ExtensionPayloadDef;
 
 /** @const @private {string} */
 const TAG = 'runtime';
@@ -124,12 +110,13 @@ const elementsForTesting = {};
  */
 export function installRuntimeServices(global) {
   installCryptoService(global);
+  installBatchedXhrService(global);
+  installDocumentStateService(global);
   installPlatformService(global);
+  installTemplatesService(global);
   installTimerService(global);
   installVsyncService(global);
   installXhrService(global);
-  installBatchedXhrService(global);
-  installTemplatesService(global);
 }
 
 
@@ -139,6 +126,7 @@ export function installRuntimeServices(global) {
  * @param {!Object<string, string>=} opt_initParams
  */
 export function installAmpdocServices(ampdoc, opt_initParams) {
+  installCidService(ampdoc);
   installDocumentInfoServiceForDoc(ampdoc);
   installViewerServiceForDoc(ampdoc, opt_initParams);
   installViewportServiceForDoc(ampdoc);
@@ -189,7 +177,7 @@ function adoptShared(global, opts, callback) {
   global.AMP_TAG = true;
   // If there is already a global AMP object we assume it is an array
   // of functions
-  /** @const {!Array<function(!Object)|ExtensionPayloadDef>} */
+  /** @const {!Array<function(!Object)|ExtensionPayload>} */
   const preregisteredExtensions = global.AMP || [];
 
   installExtensionsService(global);
@@ -277,7 +265,7 @@ function adoptShared(global, opts, callback) {
   callback(global, extensions);
 
   /**
-   * @param {function(!Object)|ExtensionPayloadDef} fnOrStruct
+   * @param {function(!Object)|ExtensionPayload} fnOrStruct
    */
   function installExtension(fnOrStruct) {
     const register = () => {
@@ -340,7 +328,7 @@ function adoptShared(global, opts, callback) {
   maybePumpEarlyFrame(global, () => {
     /**
      * Registers a new custom element.
-     * @param {function(!Object)|ExtensionPayloadDef} fnOrStruct
+     * @param {function(!Object)|ExtensionPayload} fnOrStruct
      */
     global.AMP.push = function(fnOrStruct) {
       if (maybeLoadCorrectVersion(global, fnOrStruct)) {
@@ -774,7 +762,7 @@ class MultidocManager {
         (amp, shadowRoot, ampdoc) => {
           // Start streaming.
           let renderStarted = false;
-          const writer = new ShadowDomWriter(this.win);
+          const writer = createShadowDomWriter(this.win);
           amp.writer = writer;
           writer.onBody(doc => {
             // Install extensions.
@@ -1061,7 +1049,7 @@ export function registerElementForTesting(win, elementName) {
  * to have the same AMP release version.
  *
  * @param {!Window} win
- * @param {function(!Object)|ExtensionPayloadDef} fnOrStruct
+ * @param {function(!Object)|ExtensionPayload} fnOrStruct
  * @return {boolean}
  */
 function maybeLoadCorrectVersion(win, fnOrStruct) {

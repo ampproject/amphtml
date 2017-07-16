@@ -29,7 +29,6 @@ import {filterSplice} from '../../../src/utils/array';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isObject, toArray} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
 import {map} from '../../../src/utils/object';
 import {reportError} from '../../../src/error';
@@ -97,11 +96,6 @@ export class Bind {
    * @param {!Window=} opt_win
    */
   constructor(ampdoc, opt_win) {
-    // Allow integration test to access this class in testing mode.
-    /** @const @private {boolean} */
-    this.enabled_ = isBindEnabledFor(ampdoc.win);
-    user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);
-
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
@@ -111,7 +105,8 @@ export class Bind {
     /**
      * The window containing the document to scan.
      * May differ from the `ampdoc`'s window e.g. in FIE.
-     * @const @private {!Window} */
+     * @const @private {!Window}
+     */
     this.localWin_ = opt_win || ampdoc.win;
 
     /** @private {!Array<BoundElementDef>} */
@@ -141,17 +136,19 @@ export class Bind {
     /** @const @private {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = viewerForDoc(this.ampdoc);
 
-    /**
+    const bodyPromise = (opt_win)
+        ? waitForBodyPromise(opt_win.document)
+            .then(() => dev().assertElement(opt_win.document.body))
+        : ampdoc.whenBodyAvailable();
+
+    /**c.
      * Resolved when the service finishes scanning the document for bindings.
      * @const @private {Promise}
      */
-    this.initializePromise_ = Promise.all([
-      waitForBodyPromise(this.localWin_.document), // Wait for body.
-      this.viewer_.whenFirstVisible(), // Don't initialize in prerender mode.
-    ]).then(() => {
-      const rootNode = dev().assertElement(this.localWin_.document.body);
-      return this.initialize_(rootNode);
-    });
+    this.initializePromise_ =
+        this.viewer_.whenFirstVisible().then(() => bodyPromise).then(body => {
+          return this.initialize_(body);
+        });
 
     /** @const @private {!Function} */
     this.boundOnTemplateRendered_ = this.onTemplateRendered_.bind(this);
@@ -182,8 +179,6 @@ export class Bind {
    * @return {!Promise}
    */
   setState(state, opt_skipEval, opt_isAmpStateMutation) {
-    user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);
-
     // TODO(choumx): What if `state` contains references to globals?
     try {
       deepMerge(this.scope_, state, MAX_MERGE_DEPTH);
@@ -218,8 +213,6 @@ export class Bind {
    * @return {!Promise}
    */
   setStateWithExpression(expression, scope) {
-    user().assert(this.enabled_, `Experiment "${TAG}" is disabled.`);
-
     this.setStatePromise_ = this.initializePromise_.then(() => {
       // Allow expression to reference current scope in addition to event scope.
       Object.assign(scope, this.scope_);
@@ -251,7 +244,6 @@ export class Bind {
       rootNode.addEventListener(
           AmpEvents.TEMPLATE_RENDERED, this.boundOnTemplateRendered_);
     });
-    // Check default values against initial expression results in development.
     if (getMode().development) {
       // Check default values against initial expression results.
       promise = promise.then(() =>
@@ -270,9 +262,9 @@ export class Bind {
   /**
    * The current number of bindings.
    * @return {number}
-   * @private
+   * @visibleForTesting
    */
-  numberOfBindings_() {
+  numberOfBindings() {
     return this.boundElements_.reduce((number, boundElement) => {
       return number + boundElement.boundProperties.length;
     }, 0);
@@ -300,7 +292,7 @@ export class Bind {
     // Limit number of total bindings (unless in local manual testing).
     const limit = (getMode().localDev && !getMode().test)
         ? Number.POSITIVE_INFINITY
-        : this.maxNumberOfBindings_ - this.numberOfBindings_();
+        : this.maxNumberOfBindings_ - this.numberOfBindings();
     return this.scanNode_(node, limit).then(results => {
       const {
         boundElements, bindings, expressionToElements, limitExceeded,
@@ -700,24 +692,24 @@ export class Bind {
         // Once the user interacts with these elements, the JS properties
         // underlying these attributes must be updated for the change to be
         // visible to the user.
-        const updateElementProperty =
+        const updateProperty =
             element.tagName == 'INPUT' && property in element;
         const oldValue = element.getAttribute(property);
 
-        let attributeChanged = false;
+        let mutated = false;
         if (typeof newValue === 'boolean') {
-          if (updateElementProperty && element[property] !== newValue) {
-            // Property value *must* be read before the attribute is changed.
+          if (updateProperty && element[property] !== newValue) {
+            // Property value _must_ be read before the attribute is changed.
             // Before user interaction, attribute updates affect the property.
             element[property] = newValue;
-            attributeChanged = true;
+            mutated = true;
           }
           if (newValue && oldValue !== '') {
             element.setAttribute(property, '');
-            attributeChanged = true;
+            mutated = true;
           } else if (!newValue && oldValue !== null) {
             element.removeAttribute(property);
-            attributeChanged = true;
+            mutated = true;
           }
         } else if (newValue !== oldValue) {
           // TODO(choumx): Perform in worker with URL API.
@@ -735,14 +727,14 @@ export class Bind {
           // Rewriting can fail due to e.g. invalid URL.
           if (rewrittenNewValue !== undefined) {
             element.setAttribute(property, rewrittenNewValue);
-            if (updateElementProperty) {
+            if (updateProperty) {
               element[property] = rewrittenNewValue;
             }
-            attributeChanged = true;
+            mutated = true;
           }
         }
 
-        if (attributeChanged) {
+        if (mutated) {
           return {name: property, value: newValue};
         }
         break;
@@ -977,25 +969,4 @@ export class Bind {
       this.localWin_.dispatchEvent(event);
     }
   }
-}
-
-/**
- * @param {!Window} win
- * @return {boolean}
- */
-export function isBindEnabledFor(win) {
-  // Allow integration tests access.
-  if (getMode().test) {
-    return true;
-  }
-  if (isExperimentOn(win, TAG)) {
-    return true;
-  }
-  // TODO(choumx): Replace with real origin trial feature when implemented.
-  const token =
-      win.document.head.querySelector('meta[name="amp-experiment-token"]');
-  if (token && token.getAttribute('content') === 'HfmyLgNLmblRg3Alqy164Vywr') {
-    return true;
-  }
-  return false;
 }

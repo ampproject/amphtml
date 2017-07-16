@@ -131,6 +131,12 @@ function filterWhitelistedLinks(markdown) {
   filteredMarkdown =
       filteredMarkdown.replace(/https:\/\/cdn.ampproject.org(?!\/)/g, '');
 
+  // Links inside a <code> block (illustrative, and not always valid)
+  filteredMarkdown = filteredMarkdown.replace(/<code>(.*?)<\/code>/g, '');
+
+  // Dailymotion link that is marked dead in Travis CI
+  filteredMarkdown = filteredMarkdown.replace(/https:\/\/developer.dailymotion.com\/player#player-parameters/g, '');
+
   return filteredMarkdown;
 }
 

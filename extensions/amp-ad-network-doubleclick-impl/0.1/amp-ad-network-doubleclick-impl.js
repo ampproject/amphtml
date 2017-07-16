@@ -28,10 +28,13 @@ import {
   assignAdUrlToError,
 } from '../../amp-a4a/0.1/amp-a4a';
 import {
+  experimentFeatureEnabled,
+  DOUBLECLICK_EXPERIMENT_FEATURE,
+} from './doubleclick-a4a-config';
+import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {
-  extractGoogleAdCreativeAndSignature,
   googleAdUrl,
   truncAndTimeUrl,
   googleBlockParameters,
@@ -53,15 +56,14 @@ import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
 } from '../../../ads/google/a4a/line-delimited-response-handler';
-import {stringHash32} from '../../../src/crypto';
+import {stringHash32} from '../../../src/string';
 import {removeElement} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {extensionsFor, xhrFor} from '../../../src/services';
-import {isExperimentOn} from '../../../src/experiments';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
-import {insertAnalyticsElement} from '../../../src/analytics';
+import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {setStyles} from '../../../src/style';
 import {utf8Encode} from '../../../src/utils/bytes';
 import {isCancellation} from '../../../src/error';
@@ -209,9 +211,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.adKey_ = 0;
 
     // TODO(keithwrightbos) - how can pub enable?
-    /** @private @const {boolean} */
-    this.useSra_ = getMode().localDev && /(\?|&)force_sra=true(&|$)/.test(
-        this.win.location.search);
+    /** @protected @const {boolean} */
+    this.useSra = getMode().localDev && /(\?|&)force_sra=true(&|$)/.test(
+        this.win.location.search) ||
+        !!this.win.document.querySelector(
+            'meta[name=amp-ad-doubleclick-sra]') ||
+        experimentFeatureEnabled(this.win, DOUBLECLICK_EXPERIMENT_FEATURE.SRA);
+
 
     const sraInitializer = this.initializeSraPromise_();
     /** @protected {?function(?../../../src/service/xhr-impl.FetchResponse)} */
@@ -230,6 +236,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.isAmpAdElement() &&
       // Ensure not within remote.html iframe.
       !document.querySelector('meta[name=amp-3p-iframe-src]');
+  }
+
+  /** @override */
+  delayAdRequestEnabled() {
+    return experimentFeatureEnabled(
+        this.win, DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST);
   }
 
   /**
@@ -269,8 +281,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // dimensions in an array.
       const dimensions = getMultiSizeDimensions(
           multiSizeDataStr,
-          Number(this.element.getAttribute('width')),
-          Number(this.element.getAttribute('height')),
+          this.size_.width,
+          this.size_.height,
           multiSizeValidation == 'true');
       sizeStr += '|' + dimensions
           .map(dimension => dimension.join('x'))
@@ -296,16 +308,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @visibileForTesting
    */
   populateAdUrlState() {
-    const width = Number(this.element.getAttribute('width'));
-    const height = Number(this.element.getAttribute('height'));
-    // If dc-use-attr-for-format experiment is on, we want to make our attribute
-    // check to be more strict.
-    const useAttributesForSize =
-        isExperimentOn(this.win, 'dc-use-attr-for-format')
-        ? !isNaN(width) && width > 0 && !isNaN(height) && height > 0
-        : width && height;
-    this.size_ = useAttributesForSize
+    // Allow for pub to override height/width via override attribute.
+    const width = Number(this.element.getAttribute('data-override-width')) ||
+      Number(this.element.getAttribute('width'));
+    const height = Number(this.element.getAttribute('data-override-height')) ||
+      Number(this.element.getAttribute('height'));
+    this.size_ = width && height
         ? {width, height}
+        // width/height could be 'auto' in which case we fallback to measured.
         : this.getIntersectionElementLayoutBox();
     this.jsonTargeting_ =
       tryParseJson(this.element.getAttribute('json')) || {};
@@ -316,7 +326,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   getAdUrl() {
     if (this.iframe) {
-      dev().warn(TAG, `Frame already exists, sra: ${this.useSra_}`);
+      dev().warn(TAG, `Frame already exists, sra: ${this.useSra}`);
       return '';
     }
     // TODO(keithwrightbos): SRA blocks currently unnecessarily generate full
@@ -334,7 +344,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  extractCreativeAndSignature(responseText, responseHeaders) {
+  extractSize(responseHeaders) {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
     this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
     this.qqid_ = responseHeaders.get(QQID_HEADER);
@@ -342,19 +352,21 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // Load amp-analytics extensions
       this.extensions_./*OK*/loadExtension('amp-analytics');
     }
-    const adResponsePromise =
-        extractGoogleAdCreativeAndSignature(responseText, responseHeaders);
-    return adResponsePromise.then(adResponse => {
-      // If the server returned a size, use that, otherwise use the size that
-      // we sent in the ad request.
-      if (adResponse.size) {
-        this.size_ = adResponse.size;
-      } else {
-        adResponse.size = this.size_;
-      }
-      this.handleResize_(adResponse.size.width, adResponse.size.height);
-      return Promise.resolve(adResponse);
-    });
+    // If the server returned a size, use that, otherwise use the size that we
+    // sent in the ad request.
+    let size = super.extractSize(responseHeaders);
+    if (size) {
+      this.size_ = size;
+      this.handleResize_(size.width, size.height);
+    } else {
+      const width = Number(this.element.getAttribute('width'));
+      const height = Number(this.element.getAttribute('height'));
+      size = width && height
+          ? {width, height}
+          // width/height could be 'auto' in which case we fallback to measured.
+          : this.getIntersectionElementLayoutBox();
+    }
+    return size;
   }
 
   /** @override */
@@ -363,6 +375,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.lifecycleReporter_.setPingParameters(opt_extraVariables);
     }
     this.lifecycleReporter_.sendPing(eventName);
+  }
+
+  /** @override */
+  shouldUnlayoutAmpCreatives() {
+    // If using SRA, remove AMP creatives if we have at least one non-AMP
+    // creative present.
+    return this.useSra && !!this.win.document.querySelector(
+        'amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"] ' +
+        'iframe[src]');
   }
 
   /** @override */
@@ -417,9 +438,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     this.lifecycleReporter_.addPingsForVisibility(this.element);
 
+    // Force size of frame to match available space as min-height/width are
+    // set to 0 to ensure centering.
+    const size = this.getIntersectionElementLayoutBox();
     setStyles(dev().assertElement(this.iframe), {
-      width: `${this.size_.width}px`,
-      height: `${this.size_.height}px`,
+      width: `${size.width}px`,
+      height: `${size.height}px`,
     });
   }
 
@@ -458,7 +482,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   sendXhrRequest(adUrl) {
-    if (!this.useSra_) {
+    if (!this.useSra) {
       return super.sendXhrRequest(adUrl);
     }
     // Wait for SRA request which will call response promise when this block's

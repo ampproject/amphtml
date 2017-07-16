@@ -21,10 +21,8 @@ import {Layout, getLayoutClass, getLengthNumeral, getLengthUnits,
     hasNaturalDimensions} from './layout';
 import {ElementStub, stubbedElements} from './element-stub';
 import {Signals} from './utils/signals';
-import {ampdocServiceFor} from './ampdoc';
 import {createLoaderElement} from '../src/loader';
 import {dev, rethrowAsync, user} from './log';
-import {documentStateFor} from './service/document-state';
 import {
   getIntersectionChangeEntry,
 } from '../src/intersection-observer-polyfill';
@@ -32,8 +30,10 @@ import {getMode} from './mode';
 import {parseSizeList} from './size-list';
 import {reportError} from './error';
 import {
-  resourcesForDoc,
+  ampdocServiceFor,
+  documentStateFor,
   performanceForOrNull,
+  resourcesForDoc,
   timerFor,
   vsyncFor,
 } from './services';
@@ -1256,6 +1256,7 @@ function createBaseCustomElementClass(win) {
           'Must be built to receive viewport events');
       this.dispatchCustomEventForTesting(AmpEvents.LOAD_START);
       const isLoadEvent = (this.layoutCount_ == 0);  // First layout is "load".
+      this.signals_.reset(CommonSignals.UNLOAD);
       if (isLoadEvent) {
         this.signals_.signal(CommonSignals.LOAD_START);
       }
@@ -1374,7 +1375,7 @@ function createBaseCustomElementClass(win) {
      * Requests the element to unload any expensive resources when the element
      * goes into non-visible state. The scope is up to the actual component.
      *
-     * Calling this method on unbuilt ot unupgraded element has no effect.
+     * Calling this method on unbuilt or unupgraded element has no effect.
      *
      * @return {boolean}
      * @package @final @this {!Element}
@@ -1384,6 +1385,7 @@ function createBaseCustomElementClass(win) {
       if (!this.isBuilt()) {
         return false;
       }
+      this.signals_.signal(CommonSignals.UNLOAD);
       const isReLayoutNeeded = this.implementation_.unlayoutCallback();
       if (isReLayoutNeeded) {
         this.reset_();
@@ -1463,7 +1465,7 @@ function createBaseCustomElementClass(win) {
      * @note Boolean attributes have a value of `true` and `false` when
      *       present and missing, respectively.
      * @param {
-     *   !Object<string, (null|boolean|string|number|Array|Object)>
+     *   !JsonObject<string, (null|boolean|string|number|Array|Object)>
      * } mutations
      */
     mutatedAttributesCallback(mutations) {
@@ -1617,7 +1619,7 @@ function createBaseCustomElementClass(win) {
       }
       // This implementation is notably less efficient then placeholder toggling.
       // The reasons for this are: (a) "not supported" is the state of the whole
-      // element, (b) some realyout is expected and (c) fallback condition would
+      // element, (b) some relayout is expected and (c) fallback condition would
       // be rare.
       this.classList.toggle('amp-notsupported', show);
       if (show == true) {

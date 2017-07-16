@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-import {
-  MockA4AImpl,
-  TEST_URL,
-  SIGNATURE_HEADER,
-} from './utils';
+import {MockA4AImpl, TEST_URL} from './utils';
 import {createIframePromise} from '../../../../testing/iframe';
 import {
   AmpA4A,
+  AMP_SIGNATURE_HEADER,
   RENDERING_TYPE_HEADER,
   DEFAULT_SAFEFRAME_VERSION,
   SAFEFRAME_VERSION_HEADER,
@@ -33,7 +30,6 @@ import {Signals} from '../../../../src/utils/signals';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {Extensions} from '../../../../src/service/extensions-impl';
 import {Viewer} from '../../../../src/service/viewer-impl';
-import {ampdocServiceFor} from '../../../../src/ampdoc';
 import {cancellation} from '../../../../src/error';
 import {
   data as validCSSAmp,
@@ -43,7 +39,10 @@ import {FetchResponseHeaders} from '../../../../src/service/xhr-impl';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {utf8Encode} from '../../../../src/utils/bytes';
 import {resetScheduledElementForTesting} from '../../../../src/custom-element';
-import {urlReplacementsForDoc} from '../../../../src/services';
+import {
+  ampdocServiceFor,
+  urlReplacementsForDoc,
+} from '../../../../src/services';
 import {incrementLoadingAds} from '../../../amp-ad/0.1/concurrent-load';
 import {platformFor, timerFor} from '../../../../src/services';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
@@ -111,7 +110,7 @@ describe('amp-a4a', () => {
       catch: callback => callback(),
     };
     headers = {};
-    headers[SIGNATURE_HEADER] = validCSSAmp.signature;
+    headers[AMP_SIGNATURE_HEADER] = validCSSAmp.signature;
   });
 
   afterEach(() => {
@@ -251,13 +250,14 @@ describe('amp-a4a', () => {
         setupForAdTesting(fixture);
         a4aElement = createA4aElement(fixture.doc);
         a4a = new MockA4AImpl(a4aElement);
+        a4a.buildCallback();
         return fixture;
       });
     });
 
     it('for SafeFrame rendering case', () => {
       // Make sure there's no signature, so that we go down the 3p iframe path.
-      delete headers[SIGNATURE_HEADER];
+      delete headers[AMP_SIGNATURE_HEADER];
       // If rendering type is safeframe, we SHOULD attach a SafeFrame.
       headers[RENDERING_TYPE_HEADER] = 'safeframe';
       a4a.buildCallback();
@@ -275,7 +275,7 @@ describe('amp-a4a', () => {
       sandbox.stub(platform, 'isIos').returns(true);
       a4a = new MockA4AImpl(a4aElement);
       // Make sure there's no signature, so that we go down the 3p iframe path.
-      delete headers[SIGNATURE_HEADER];
+      delete headers[AMP_SIGNATURE_HEADER];
       // Ensure no rendering type header (ios on safari will default to
       // safeframe).
       delete headers[RENDERING_TYPE_HEADER];
@@ -295,7 +295,7 @@ describe('amp-a4a', () => {
 
     it('for cached content iframe rendering case', () => {
       // Make sure there's no signature, so that we go down the 3p iframe path.
-      delete headers[SIGNATURE_HEADER];
+      delete headers[AMP_SIGNATURE_HEADER];
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
@@ -330,9 +330,9 @@ describe('amp-a4a', () => {
           FriendlyIframeEmbed.prototype,
           'whenIniLoaded',
           () => iniLoadPromise);
+      a4a.buildCallback();
       const lifecycleEventStub = sandbox.stub(
           a4a, 'protectedEmitLifecycleEvent_');
-      a4a.buildCallback();
       a4a.onLayoutMeasure();
       const layoutPromise = a4a.layoutCallback();
       return Promise.resolve().then(() => {
@@ -349,7 +349,7 @@ describe('amp-a4a', () => {
 
     it('should reset state to null on non-FIE unlayoutCallback', () => {
       // Make sure there's no signature, so that we go down the 3p iframe path.
-      delete headers[SIGNATURE_HEADER];
+      delete headers[AMP_SIGNATURE_HEADER];
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
@@ -460,7 +460,7 @@ describe('amp-a4a', () => {
     let a4a;
     beforeEach(() => {
       // Make sure there's no signature, so that we go down the 3p iframe path.
-      delete headers[SIGNATURE_HEADER];
+      delete headers[AMP_SIGNATURE_HEADER];
       // If rendering type is safeframe, we SHOULD attach a SafeFrame.
       headers[RENDERING_TYPE_HEADER] = 'safeframe';
       xhrMock.withArgs(TEST_URL, {
@@ -539,7 +539,7 @@ describe('amp-a4a', () => {
             it(`should not attach a NameFrame when header is ${headerVal}`,
                 () => {
                   // Make sure there's no signature, so that we go down the 3p iframe path.
-                  delete headers[SIGNATURE_HEADER];
+                  delete headers[AMP_SIGNATURE_HEADER];
                   // If rendering type is anything but nameframe, we SHOULD NOT
                   // attach a NameFrame.
                   headers[RENDERING_TYPE_HEADER] = headerVal;
@@ -709,7 +709,7 @@ describe('amp-a4a', () => {
 
     it('should set height/width on iframe matching header value', () => {
       // Make sure there's no signature, so that we go down the 3p iframe path.
-      delete headers[SIGNATURE_HEADER];
+      delete headers[AMP_SIGNATURE_HEADER];
       headers['X-CreativeSize'] = '320x50';
       xhrMock.withArgs(TEST_URL, {
         mode: 'cors',
@@ -745,7 +745,7 @@ describe('amp-a4a', () => {
   describe('#onLayoutMeasure', () => {
     it('resumeCallback calls onLayoutMeasure', () => {
       // Force non-FIE
-      delete headers[SIGNATURE_HEADER];
+      delete headers[AMP_SIGNATURE_HEADER];
       xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
@@ -800,7 +800,7 @@ describe('amp-a4a', () => {
     });
     it('resumeCallback w/ measure required no onLayoutMeasure', () => {
       // Force non-FIE
-      delete headers[SIGNATURE_HEADER];
+      delete headers[AMP_SIGNATURE_HEADER];
       xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
@@ -1066,10 +1066,10 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
-        const lifecycleEventStub = sandbox.stub(
-            a4a, 'protectedEmitLifecycleEvent_');
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
         a4a.buildCallback();
+        const lifecycleEventStub = sandbox.stub(
+            a4a, 'protectedEmitLifecycleEvent_');
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         return a4a.layoutCallback().then(() => {
@@ -1147,6 +1147,7 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
+        a4a.buildCallback();
         const forceCollapseSpy = sandbox.spy(a4a, 'forceCollapse');
         const noContentUISpy = sandbox.spy();
         const unlayoutUISpy = sandbox.spy();
@@ -1202,6 +1203,7 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
+        a4a.buildCallback();
         const forceCollapseSpy = sandbox.spy(a4a, 'forceCollapse');
         const noContentUISpy = sandbox.spy();
         a4a.uiHandler = {
@@ -1240,7 +1242,7 @@ describe('amp-a4a', () => {
       it('should process safeframe version header properly', () => {
         headers[SAFEFRAME_VERSION_HEADER] = '1-2-3';
         headers[RENDERING_TYPE_HEADER] = 'safeframe';
-        delete headers[SIGNATURE_HEADER];
+        delete headers[AMP_SIGNATURE_HEADER];
         xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
         return createIframePromise().then(fixture => {
           setupForAdTesting(fixture);
@@ -1276,10 +1278,9 @@ describe('amp-a4a', () => {
           setupForAdTesting(fixture);
           const doc = fixture.doc;
           const a4aElement = createA4aElement(doc);
-          a4aElement.setAttribute('data-experiment-id', '117152655');
           a4a = new MockA4AImpl(a4aElement);
-          expect(a4a.delayRequestEnabled_).to.be.true;
           getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
+          sandbox.stub(a4a, 'delayAdRequestEnabled').returns(true);
         });
       });
       it('should not delay request when in viewport', () => {
@@ -1320,7 +1321,7 @@ describe('amp-a4a', () => {
     it('should ignore invalid safeframe version header', () => {
       headers[SAFEFRAME_VERSION_HEADER] = 'some-bad-item';
       headers[RENDERING_TYPE_HEADER] = 'safeframe';
-      delete headers[SIGNATURE_HEADER];
+      delete headers[AMP_SIGNATURE_HEADER];
       xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
@@ -1473,6 +1474,7 @@ describe('amp-a4a', () => {
         fixture = f;
         a4aElement = createA4aElement(fixture.doc);
         a4a = new MockA4AImpl(a4aElement);
+        a4a.buildCallback();
         return fixture;
       });
     });
@@ -1504,6 +1506,8 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         a4aElement = createA4aElement(doc);
         a4a = new AmpA4A(a4aElement);
+        sandbox.stub(a4a, 'getFallback', () => {return true;});
+        a4a.buildCallback();
         a4a.adUrl_ = 'https://nowhere.org';
       });
     });
@@ -1583,6 +1587,7 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
+        a4a.buildCallback();
         xhrMock.withArgs(TEST_URL, {
           mode: 'cors',
           method: 'GET',
@@ -1601,6 +1606,7 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
+        a4a.buildCallback();
         xhrMock.withArgs(TEST_URL, {
           mode: 'cors',
           method: 'GET',
@@ -1699,6 +1705,7 @@ describe('amp-a4a', () => {
           setupForAdTesting(fixture);
           const a4aElement = createA4aElement(fixture.doc);
           a4a = new MockA4AImpl(a4aElement);
+          a4a.buildCallback();
           stubVerifySignature =
               sandbox.stub(a4a.signatureVerifier_, 'verifySignature');
         });
@@ -2159,6 +2166,83 @@ describe('amp-a4a', () => {
     });
   });
 
+  describe('#extractCreativeAndSignature', () => {
+    it('should return body and signature', () => {
+      const creative = 'some test data';
+      const headerData = {
+        'X-AmpAdSignature': 'AQAB',
+      };
+      const headers = {
+        has: h => {
+          return h in headerData;
+        },
+        get: h => {
+          return headerData[h];
+        },
+      };
+      return expect(AmpA4A.prototype.extractCreativeAndSignature(
+          creative, headers))
+          .to.eventually.deep.equal({
+            creative,
+            signature: base64UrlDecodeToBytes('AQAB'),
+          });
+    });
+
+    it('should return body and signature and size', () => {
+      const creative = 'some test data';
+      const headerData = {
+        'X-AmpAdSignature': 'AQAB',
+      };
+      const headers = {
+        has: h => {
+          return h in headerData;
+        },
+        get: h => {
+          return headerData[h];
+        },
+      };
+      return expect(AmpA4A.prototype.extractCreativeAndSignature(
+          creative, headers))
+          .to.eventually.deep.equal({
+            creative,
+            signature: base64UrlDecodeToBytes('AQAB'),
+          });
+    });
+
+    it('should return null when no signature header is present', () => {
+      const creative = 'some test data';
+      const headers = {
+        has: unused => {
+          return false;
+        },
+        get: unused => {
+          return undefined;
+        },
+      };
+      return expect(AmpA4A.prototype.extractCreativeAndSignature(
+          creative, headers))
+          .to.eventually.deep.equal({creative, signature: null});
+    });
+  });
+
+  describe('#extractSize', () => {
+
+    it('should return a size', () => {
+      expect(AmpA4A.prototype.extractSize({
+        get(name) {
+	  return {'X-CreativeSize': '320x50'}[name];
+        },
+      })).to.deep.equal({width: 320, height: 50});
+    });
+
+    it('should return no size', () => {
+      expect(AmpA4A.prototype.extractSize({
+        get(unusedName) {
+	  return null;
+        },
+      })).to.be.null;
+    });
+  });
   // TODO(tdrl): Other cases to handle for parsing JSON metadata:
   //   - Metadata tag(s) missing
   //   - JSON parse failure

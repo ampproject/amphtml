@@ -28,10 +28,18 @@ require 'percy/capybara/anywhere'
 require 'phantomjs'
 
 
-ENV['PERCY_DEBUG'] = '1'  # Enable debugging output.
-DEFAULT_WIDTHS = [375, 411]  # CSS widths: iPhone: 375, Pixel: 411.
+ENV['PERCY_DEBUG'] = '0'
+ENV['PHANTOMJS_DEBUG'] = 'false'
+ENV['WEBSERVER_QUIET'] = '--quiet'
+# CSS widths: iPhone: 375, Pixel: 411, Macbook Pro 15": 1440.
+DEFAULT_WIDTHS = [375, 411, 1440]
 HOST = 'localhost'
 PORT = '8000'
+
+
+# Colorize logs.
+def red(text); "\e[31m#{text}\e[0m"; end
+def cyan(text); "\e[36m#{text}\e[0m"; end
 
 
 # Launches a background AMP webserver for unminified js using gulp.
@@ -39,14 +47,9 @@ PORT = '8000'
 # Returns:
 # - Process ID of server process.
 def launchWebServer()
-  webserverCmd = "gulp serve --host #{HOST} --port #{PORT}"
-  webserverUrl = "http://#{HOST}:#{PORT}"
-  @pid = fork do
-    Signal.trap("INT") { exit }
-    exec webserverCmd
-  end
-  Process.detach(@pid)
-  @pid
+  webserverCmd =
+      "gulp serve --host #{HOST} --port #{PORT} #{ENV['WEBSERVER_QUIET']}"
+  spawn(webserverCmd)
 end
 
 
@@ -85,6 +88,7 @@ end
 def closeWebServer(pid)
   Process.kill("INT", pid)
   Process.wait(pid, Process::WNOHANG)
+  sleep(0.1)  # The child node process has an asynchronous stdout. See #10409.
 end
 
 
@@ -99,48 +103,110 @@ def loadPagesToSnapshotJson()
 end
 
 
-# Generates a percy snapshot for a given webpage.
+# Generates percy snapshots for a set of given webpages.
 #
 # Args:
-# - server: URL of the webserver.
-# - assets_dir: Path to assets (images, etc.) used by the webpage.
-# - assets_base_url: Base URL of assets on webserver.
-# - url: Relative URL of page to be snapshotted.
-# - name: Name of snapshot on Percy.
-def generateSnapshot(server, assets_dir, assets_base_url, url, name)
+# - pagesToSnapshot: JSON object containing details about the pages to snapshot.
+def generateSnapshots(pagesToSnapshot)
+  Percy.config.default_widths = DEFAULT_WIDTHS
+  Capybara.default_max_wait_time = 5
+  server = "http://#{HOST}:#{PORT}"
+  webpages = pagesToSnapshot["webpages"]
+  assets_base_url = pagesToSnapshot["assets_base_url"]
+  assets_dir = File.expand_path(
+      "../../../#{pagesToSnapshot["assets_dir"]}",
+      __FILE__)
   Percy::Capybara::Anywhere.run(
       server, assets_dir, assets_base_url) do |page|
     page.driver.options[:phantomjs] = Phantomjs.path
-    page.driver.options[:js_errors] = false
-    page.visit(url)
-    page.has_no_css?('.i-amphtml-loader-dot')  # Implicitly waits for page load.
-    Percy.config.default_widths = DEFAULT_WIDTHS
-    Percy::Capybara.snapshot(page, name: name)
- end
+    page.driver.options[:js_errors] = true
+    page.driver.options[:phantomjs_options] =
+        ["--debug=#{ENV['PHANTOMJS_DEBUG']}"]
+    webpages.each do |webpage|
+      url = webpage["url"]
+      name = webpage["name"]
+      forbidden_css = webpage["forbidden_css"]
+      loading_incomplete_css = webpage["loading_incomplete_css"]
+      loading_complete_css = webpage["loading_complete_css"]
+      page.visit(url)
+      verifyCssElements(
+          page, forbidden_css, loading_incomplete_css, loading_complete_css)
+      Percy::Capybara.snapshot(page, name: name)
+    end
+  end
+end
+
+
+# Verifies that all CSS elements are as expected before taking a snapshot.
+#
+# Args:
+# - page: Page object used by Percy for snapshotting.
+# - forbidden_css:
+#       Array of CSS elements that must not be found in the page.
+# - loading_incomplete_css:
+#       Array of CSS elements that must eventually be removed from the page.
+# - loading_complete_css:
+#       Array of CSS elements that must eventually appear on the page.
+def verifyCssElements(
+    page, forbidden_css, loading_incomplete_css, loading_complete_css)
+  page.has_no_css?('.i-amphtml-loader-dot')  # Implicitly waits for page load.
+  if forbidden_css
+    forbidden_css.each do |css|
+      if page.has_css?(css)  # No implicit wait.
+        puts red("ERROR: ") + "page has CSS element " + cyan("#{css}")
+      end
+    end
+  end
+  if loading_incomplete_css
+    loading_incomplete_css.each do |css|
+      if !page.has_no_css?(css)  # Implicitly waits for element to disappear.
+        puts red("ERROR: ") + "page still has CSS element "\
+            + cyan("#{css}")
+      end
+    end
+  end
+  if loading_complete_css
+    loading_complete_css.each do |css|
+      if !page.has_css?(css)  # Implicitly waits for element to appear.
+        puts red("ERROR: ") + "page does not yet have CSS element "\
+            + cyan("#{css}")
+      end
+    end
+  end
+end
+
+
+# Enables debugging if requested via command line.
+def setDebuggingLevel()
+  if ARGV.include? '--debug'
+    ENV['PERCY_DEBUG'] = '1'
+    ENV['PHANTOMJS_DEBUG'] = 'true'
+    ENV['WEBSERVER_QUIET'] = ''
+  end
+  if ARGV.include? '--percy_debug'
+    ENV['PERCY_DEBUG'] = '1'
+  end
+  if ARGV.include? '--phantomjs_debug'
+    ENV['PHANTOMJS_DEBUG'] = 'true'
+  end
+  if ARGV.include? '--webserver_debug'
+    ENV['WEBSERVER_QUIET'] = ''
+  end
 end
 
 
 # Launches a webserver, loads test pages, and generates Percy snapshots.
 def main()
+  setDebuggingLevel()
   pid = launchWebServer()
   if not waitForWebServer()
-    puts "Failed to start webserver"
+    puts red("ERROR: ") + "Failed to start webserver"
     closeWebServer(pid)
     exit(false)
   end
   pagesToSnapshotJson = loadPagesToSnapshotJson()
   pagesToSnapshot = JSON.parse(pagesToSnapshotJson)
-  server = "http://#{HOST}:#{PORT}"
-  webpages = pagesToSnapshot["webpages"]
-  webpages.each do |webpage|
-    assets_base_url = webpage["assets_base_url"]
-    assets_dir = File.expand_path(
-        "../../../#{webpage["assets_dir"]}",
-        __FILE__)
-    url = webpage["url"]
-    name = webpage["name"]
-    generateSnapshot(server, assets_dir, assets_base_url, url, name)
-  end
+  generateSnapshots(pagesToSnapshot)
   closeWebServer(pid)
 end
 

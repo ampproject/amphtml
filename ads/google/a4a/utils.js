@@ -22,25 +22,18 @@ import {documentInfoForDoc} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
-import {isProxyOrigin} from '../../../src/url';
+import {isProxyOrigin, parseUrl} from '../../../src/url';
 import {parseJson} from '../../../src/json';
 import {
   resourcesForDoc,
   viewerForDoc,
   viewportForDoc,
 } from '../../../src/services';
-import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 import {domFingerprint} from '../../../src/utils/dom-fingerprint';
 import {
   isExperimentOn,
   toggleExperiment,
 } from '../../../src/experiments';
-
-/** @const {string} */
-const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
-
-/** @const {string} */
-const CREATIVE_SIZE_HEADER = 'X-CreativeSize';
 
 /** @type {string}  */
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
@@ -100,7 +93,8 @@ export function isGoogleAdsA4AValidEnvironment(win) {
   // around that, just say that we're A4A eligible if we're in local dev
   // mode, regardless of origin path.
   return supportsNativeCrypto &&
-      (isProxyOrigin(win.location) || getMode().localDev || getMode().test);
+      (isProxyOrigin(win.location) || getMode(win).localDev ||
+       getMode(win).test);
 }
 
 /**
@@ -277,36 +271,6 @@ export function truncAndTimeUrl(baseUrl, parameters, startTime) {
 }
 
 /**
- * @param {!ArrayBuffer} creative
- * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
- * @return {!Promise<!../../../extensions/amp-a4a/0.1/amp-a4a.AdResponseDef>}
- */
-export function extractGoogleAdCreativeAndSignature(
-    creative, responseHeaders) {
-  let signature = null;
-  let size = null;
-  try {
-    if (responseHeaders.has(AMP_SIGNATURE_HEADER)) {
-      signature =
-        base64UrlDecodeToBytes(dev().assertString(
-            responseHeaders.get(AMP_SIGNATURE_HEADER)));
-    }
-    if (responseHeaders.has(CREATIVE_SIZE_HEADER)) {
-      const sizeHeader = responseHeaders.get(CREATIVE_SIZE_HEADER);
-      dev().assert(new RegExp('[0-9]+x[0-9]+').test(sizeHeader));
-      const sizeArr = sizeHeader
-          .split('x')
-          .map(dim => Number(dim));
-      size = {width: sizeArr[0], height: sizeArr[1]};
-    }
-  } finally {
-    return Promise.resolve(/** @type {
-          !../../../extensions/amp-a4a/0.1/amp-a4a.AdResponseDef} */ (
-          {creative, signature, size}));
-  }
-}
-
-/**
  * @param {!Window} win
  * @return {number}
  */
@@ -344,21 +308,21 @@ function topWindowUrlOrDomain(win) {
     const origin = win.location.origin;
     const topOrigin = ancestorOrigins[ancestorOrigins.length - 1];
     if (origin == topOrigin) {
-      return win.top.location.href;
+      return win.top.location.hostname;
     }
     const secondFromTop = secondWindowFromTop(win);
     if (secondFromTop == win ||
         origin == ancestorOrigins[ancestorOrigins.length - 2]) {
-      return secondFromTop./*REVIEW*/document.referrer;
+      return parseUrl(secondFromTop./*OK*/document.referrer).hostname;
     }
-    return topOrigin;
+    return parseUrl(topOrigin).hostname;
   } else {
     try {
-      return win.top.location.href;
+      return win.top.location.hostname;
     } catch (e) {}
     const secondFromTop = secondWindowFromTop(win);
     try {
-      return secondFromTop./*REVIEW*/document.referrer;
+      return parseUrl(secondFromTop./*OK*/document.referrer).hostname;
     } catch (e) {}
     return null;
   }

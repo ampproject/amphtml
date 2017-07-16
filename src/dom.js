@@ -149,7 +149,7 @@ export function copyChildren(from, to) {
 /**
  * Add attributes to an element.
  * @param {!Element} element
- * @param {!Object<string, string>} attributes
+ * @param {!JsonObject<string, string>} attributes
  * @return {!Element} created element
  */
 export function addAttributesToElement(element, attributes) {
@@ -163,7 +163,7 @@ export function addAttributesToElement(element, attributes) {
  * Create a new element on document with specified tagName and attributes.
  * @param {!Document} doc
  * @param {string} tagName
- * @param {!Object<string, string>} attributes
+ * @param {!JsonObject<string, string>} attributes
  * @return {!Element} created element
  */
 export function createElementWithAttributes(doc, tagName, attributes) {
@@ -294,7 +294,7 @@ export function matches(el, selector) {
 
 /**
  * Finds the first descendant element with the specified name.
- * @param {!Element} element
+ * @param {!Element|!Document|!ShadowRoot} element
  * @param {string} tagName
  * @return {?Element}
  */

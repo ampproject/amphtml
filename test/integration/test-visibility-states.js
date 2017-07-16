@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-import {viewerPromiseForDoc} from '../../src/services';
-import {documentStateFor} from '../../src/service/document-state';
-import {resourcesForDoc} from '../../src/services';
+import {
+  documentStateFor,
+  resourcesForDoc,
+  viewerPromiseForDoc,
+} from '../../src/services';
 import {VisibilityState} from '../../src/visibility-state';
 import {getVendorJsPropertyName} from '../../src/style';
 import {whenUpgradedToCustomElement} from '../../src/dom';
 import {createCustomEvent} from '../../src/event-helper';
 
-const config = describe.configure();
-config.skipEdge();
-config.skipIos();
-config.retryOnSaucelabs();
-config.run('Viewer Visibility State', () => {
+describe.configure().skipSauceLabs().run('Viewer Visibility State', () => {
 
   function noop() {}
 

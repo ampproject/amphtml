@@ -15,7 +15,13 @@
  */
 
 import {AmpDocSingle, installDocService} from '../../src/service/ampdoc-impl';
-import {ampdocServiceFor} from '../../src/ampdoc';
+import {
+  ampdocServiceFor,
+  platformFor,
+  viewerForDoc,
+  viewportForDoc,
+  vsyncFor,
+} from '../../src/services';
 import {
   installViewportServiceForDoc,
   Viewport,
@@ -29,17 +35,12 @@ import {
 } from '../../src/service/viewport-impl';
 import {dev} from '../../src/log';
 import {getMode} from '../../src/mode';
+import {installDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installVsyncService} from '../../src/service/vsync-impl';
 import {loadPromise} from '../../src/event-helper';
-import {
-  platformFor,
-  viewerForDoc,
-  viewportForDoc,
-  vsyncFor,
-} from '../../src/services';
 import {setParentWindow} from '../../src/service';
 import {whenDocumentReady} from '../../src/document-ready';
 import * as sinon from 'sinon';
@@ -96,8 +97,8 @@ describes.fakeWin('Viewport', {}, env => {
     installTimerService(windowApi);
     installVsyncService(windowApi);
     installPlatformService(windowApi);
-
     installDocService(windowApi, /* isSingleDoc */ true);
+    installDocumentStateService(windowApi);
     ampdoc = ampdocServiceFor(windowApi).getAmpDoc();
     installViewerServiceForDoc(ampdoc);
 
@@ -466,6 +467,46 @@ describes.fakeWin('Viewport', {}, env => {
     return fixedPromise.then(() => {
       expect(changeEvent).to.not.be.null;
     });
+  });
+
+  it('should dispatch onResize on width resize', () => {
+    let resizeEvent = null;
+    viewport.onResize(event => {
+      resizeEvent = event;
+    });
+    viewportSize.width = 112;
+    viewport.resize_();
+    expect(resizeEvent).to.not.equal(null);
+    expect(resizeEvent.height).to.equal(viewportSize.height);
+    expect(resizeEvent.width).to.equal(viewportSize.width);
+    // Width changed, relayoutAll should be true
+    expect(resizeEvent.relayoutAll).to.be.true;
+  });
+
+  it('should dispatch onResize on height resize', () => {
+    let resizeEvent = null;
+    viewport.onResize(event => {
+      resizeEvent = event;
+    });
+    viewportSize.height = 223;
+    viewport.resize_();
+    expect(resizeEvent).to.not.equal(null);
+    expect(resizeEvent.height).to.equal(viewportSize.height);
+    expect(resizeEvent.width).to.equal(viewportSize.width);
+    // Only height changed, relayoutAll should be false
+    expect(resizeEvent.relayoutAll).to.be.false;
+  });
+
+  it('should not dispatch onResize if size does not actually change', () => {
+    let resizeEvent = null;
+    viewport.onResize(event => {
+      resizeEvent = event;
+    });
+    viewport.size_ = {width: 200, height: 200};
+    viewportSize.width = 200;
+    viewportSize.height = 200;
+    viewport.resize_();
+    expect(resizeEvent).to.equal(null);
   });
 
   it('should not do anything if padding is not changed', () => {
@@ -1109,6 +1150,7 @@ describe('Viewport META', () => {
       installVsyncService(windowApi);
       installPlatformService(windowApi);
       installDocService(windowApi, /* isSingleDoc */ true);
+      installDocumentStateService(windowApi);
       ampdoc = ampdocServiceFor(windowApi).getAmpDoc();
       installViewerServiceForDoc(ampdoc);
       binding = new ViewportBindingDef();
@@ -1212,6 +1254,7 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
     installPlatformService(win);
     installVsyncService(win);
     installDocService(win, /* isSingleDoc */ true);
+    installDocumentStateService(win);
     ampdoc = ampdocServiceFor(win).getAmpDoc();
     binding = new ViewportBindingNatural_(ampdoc, viewer);
     binding.connect();
@@ -1365,6 +1408,7 @@ describes.realWin('ViewportBindingNaturalIosEmbed', {ampCss: true}, env => {
     child.style.height = '300px';
     win.document.body.appendChild(child);
     installDocService(win, /* isSingleDoc */ true);
+    installDocumentStateService(win);
     installVsyncService(win);
     const ampdoc = ampdocServiceFor(win).getAmpDoc();
     installPlatformService(win);
@@ -1821,6 +1865,7 @@ describe('createViewport', () => {
     it('should bind to "natural" when not iframed', () => {
       win.parent = win;
       installDocService(win, /* isSingleDoc */ true);
+      installDocumentStateService(win);
       const ampDoc = ampdocServiceFor(win).getAmpDoc();
       installViewerServiceForDoc(ampDoc);
       installViewportServiceForDoc(ampDoc);
@@ -1831,6 +1876,7 @@ describe('createViewport', () => {
     it('should bind to "naturual" when iframed', () => {
       win.parent = {};
       installDocService(win, /* isSingleDoc */ true);
+      installDocumentStateService(win);
       const ampDoc = ampdocServiceFor(win).getAmpDoc();
       installViewerServiceForDoc(ampDoc);
       installViewportServiceForDoc(ampDoc);
@@ -1852,6 +1898,7 @@ describe('createViewport', () => {
       installTimerService(win);
       installVsyncService(win);
       installDocService(win, /* isSingleDoc */ true);
+      installDocumentStateService(win);
       ampDoc = ampdocServiceFor(win).getAmpDoc();
       installViewerServiceForDoc(ampDoc);
       viewer = viewerForDoc(ampDoc);

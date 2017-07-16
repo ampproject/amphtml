@@ -242,16 +242,25 @@ describe('service', () => {
         topService = getService(window, 'c');
       });
 
-      it('should return top service for top window', () => {
-        expect(getExistingServiceInEmbedScope(window, 'c'))
-            .to.equal(topService);
+      it('should not fall back to top window service by default', () => {
+        const service = getExistingServiceInEmbedScope(window, 'c');
+        expect(service).to.be.null;
       });
 
-      it('should return top service when not overriden', () => {
-        expect(getExistingServiceInEmbedScope(childWin, 'c'))
-            .to.equal(topService);
-        expect(getExistingServiceInEmbedScope(grandchildWin, 'c'))
-            .to.equal(topService);
+      it('should fall back top window service', () => {
+        const service = getExistingServiceInEmbedScope(
+            window, 'c', /* opt_fallbackToTopWin */ true);
+        expect(service).to.equal(topService);
+      });
+
+      it('should fall back to top service when not overriden', () => {
+        const childService = getExistingServiceInEmbedScope(
+            childWin, 'c', /* opt_fallbackToTopWin */ true);
+        expect(childService).to.equal(topService);
+
+        const grandchildService = getExistingServiceInEmbedScope(
+            grandchildWin, 'c', /* opt_fallbackToTopWin */ true);
+        expect(grandchildService).to.equal(topService);
       });
 
       it('should return overriden service', () => {
@@ -509,16 +518,28 @@ describe('service', () => {
         topService = getServiceForDoc(ampdoc, 'c');
       });
 
-      it('should return top service for ampdoc', () => {
-        expect(getExistingServiceForDocInEmbedScope(ampdoc, 'c'))
-            .to.equal(topService);
+      it('should not fall back to top ampdoc service with node', () => {
+        const service = getExistingServiceForDocInEmbedScope(node, 'c');
+        expect(service).to.be.null;
       });
 
-      it('should return top service when not overriden', () => {
-        expect(getExistingServiceForDocInEmbedScope(childWinNode, 'c'))
-            .to.equal(topService);
-        expect(getExistingServiceForDocInEmbedScope(grandChildWinNode, 'c'))
-            .to.equal(topService);
+      it('should fall back to top ampdoc service', () => {
+        const fromAmpdoc = getExistingServiceForDocInEmbedScope(ampdoc, 'c');
+        expect(fromAmpdoc).to.equal(topService);
+
+        const fromNodeWithFallback = getExistingServiceForDocInEmbedScope(
+            node, 'c', /* opt_fallbackToTopWin */ true);
+        expect(fromNodeWithFallback).to.equal(topService);
+      });
+
+      it('should fall back to top ampdoc service when not overriden', () => {
+        const childService = getExistingServiceForDocInEmbedScope(
+            childWinNode, 'c', /* opt_fallbackToTopWin */ true);
+        expect(childService).to.equal(topService);
+
+        const grandchildService = getExistingServiceForDocInEmbedScope(
+            grandChildWinNode, 'c', /* opt_fallbackToTopWin */ true);
+        expect(grandchildService).to.equal(topService);
       });
 
       it('should return overriden service', () => {
@@ -530,13 +551,17 @@ describe('service', () => {
         // Top-level service doesn't change.
         expect(getExistingServiceForDocInEmbedScope(ampdoc, 'c'))
             .to.equal(topService);
-        expect(getExistingServiceForDocInEmbedScope(node, 'c'))
+        expect(getExistingServiceForDocInEmbedScope(
+            node, 'c', /* opt_fallbackToTopWin */ true))
             .to.equal(topService);
 
         // Notice that only direct overrides are allowed for now. This is
         // arbitrary can change in the future to allow hierarchical lookup
         // up the window chain.
         expect(getExistingServiceForDocInEmbedScope(grandChildWinNode, 'c'))
+            .to.be.null;
+        expect(getExistingServiceForDocInEmbedScope(
+            grandChildWinNode, 'c', /* opt_fallbackToTopWin */ true))
             .to.equal(topService);
       });
     });
@@ -568,30 +593,42 @@ describe('service', () => {
         expect(isEmbeddable(nonEmbeddable)).to.be.false;
       });
 
-      it('should adopt embeddable', () => {
-        adoptServiceForEmbed(embedWin, 'embeddable');
-        expect(embeddable.adoptEmbedWindow).to.be.calledOnce;
-        expect(embeddable.adoptEmbedWindow.args[0][0]).to.equal(embedWin);
+      describe('adoptServiceForEmbed()', () => {
+        it('should adopt embeddable', () => {
+          adoptServiceForEmbed(embedWin, 'embeddable');
+          expect(embeddable.adoptEmbedWindow).to.be.calledOnce;
+          expect(embeddable.adoptEmbedWindow.args[0][0]).to.equal(embedWin);
+        });
+
+        it('should refuse adopt of non-embeddable', () => {
+          expect(() => {
+            adoptServiceForEmbed(embedWin, 'nonEmbeddable');
+          }).to.throw(/implement EmbeddableService/);
+        });
+
+        it('should refuse adopt of unknown service', () => {
+          expect(() => {
+            adoptServiceForEmbed(embedWin, 'unknown');
+          }).to.throw(/unknown/);
+        });
       });
 
-      it('should refuse adopt of non-embeddable', () => {
-        expect(() => {
-          adoptServiceForEmbed(embedWin, 'nonEmbeddable');
-        }).to.throw(/required to implement EmbeddableService/);
-      });
+      describe('adoptServiceForServiceIfEmbeddable()', () => {
+        it('should adopt embeddable if embeddable', () => {
+          adoptServiceForEmbedIfEmbeddable(embedWin, 'embeddable');
+          expect(embeddable.adoptEmbedWindow).to.be.calledOnce;
+          expect(embeddable.adoptEmbedWindow.args[0][0]).to.equal(embedWin);
 
-      it('should adopt embeddable if embeddable', () => {
-        adoptServiceForEmbedIfEmbeddable(embedWin, 'embeddable');
-        expect(embeddable.adoptEmbedWindow).to.be.calledOnce;
-        expect(embeddable.adoptEmbedWindow.args[0][0]).to.equal(embedWin);
+          // Should not throw 'required to implement EmbeddableService' error.
+          adoptServiceForEmbedIfEmbeddable(embedWin, 'nonEmbeddable');
+        });
 
-        adoptServiceForEmbedIfEmbeddable(embedWin, 'nonEmbeddable'); // No-op.
-      });
-
-      it('should refuse adopt of unknown service', () => {
-        expect(() => {
-          adoptServiceForEmbed(embedWin, 'unknown');
-        }).to.throw(/unknown/);
+        it('should soft fail adopt of unknown service', () => {
+          // If the embed has an extension service that the parent doesn't,
+          // e.g. AmpFormService if parent lacks amp-form extension.
+          const adopted = adoptServiceForEmbedIfEmbeddable(embedWin, 'unknown');
+          expect(adopted).to.be.false;
+        });
       });
     });
   });

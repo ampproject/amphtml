@@ -15,11 +15,12 @@
  */
 import {AmpEvents} from '../../src/amp-events';
 import {BindEvents} from '../../extensions/amp-bind/0.1/bind-events';
+import {FormEvents} from '../../extensions/amp-form/0.1/form-events';
 import {createFixtureIframe} from '../../testing/iframe';
 import {batchedXhrFor} from '../../src/services';
 import * as sinon from 'sinon';
 
-describe.configure().retryOnSaucelabs().run('amp-bind', function() {
+describe.configure().skipSauceLabs().run('amp-bind', function() {
   let fixture;
   let sandbox;
   let numSetStates;
@@ -98,7 +99,7 @@ describe.configure().retryOnSaucelabs().run('amp-bind', function() {
       // <form> is not an AMP element.
       return setupWithFixture('test/fixtures/bind-form.html', 0)
           // Wait for AmpFormService to register <form> elements.
-          .then(() => fixture.awaitEvent('amp:form-service:initialize', 1));
+          .then(() => fixture.awaitEvent(FormEvents.SERVICE_INIT, 1));
     });
 
     it('should NOT allow invalid bindings or values', () => {

@@ -90,7 +90,11 @@ import {
 } from './fake-dom';
 import {installFriendlyIframeEmbed} from '../src/friendly-iframe-embed';
 import {doNotLoadExternalResourcesInTest} from './iframe';
-import {ampdocServiceFor} from '../src/ampdoc';
+import {
+  ampdocServiceFor,
+  extensionsFor,
+  resourcesForDoc,
+} from '../src/services';
 import {
   adopt,
   adoptShadowMode,
@@ -108,7 +112,6 @@ import {
   installExtensionsService,
   registerExtension,
 } from '../src/service/extensions-impl';
-import {extensionsFor, resourcesForDoc} from '../src/services';
 import {resetScheduledElementForTesting} from '../src/custom-element';
 import {setStyles} from '../src/style';
 import * as sinon from 'sinon';
@@ -148,7 +151,7 @@ export let TestSpec;
 /**
  * An object specifying the configuration of an AmpFixture.
  *
- * - ampdoc: "single", "shadow", "multi", "none".
+ * - ampdoc: "single", "shadow", "multi", "none", "fie".
  *
  * @typedef {{
  *   runtimeOn: (boolean|undefined),

@@ -23,12 +23,16 @@ import {dict} from './utils/object';
 import {parseUrl, assertHttpsUrl} from './url';
 import {urls} from './config';
 import {setStyle} from './style';
+import {startsWith} from './string';
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
 let count = {};
 
 /** @type {string} */
 let overrideBootstrapBaseUrl;
+
+/** @const {string} */
+const TAG = '3p-frame';
 
 /**
  * Produces the attributes for the ad template.
@@ -63,9 +67,11 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
  * @param {!AmpElement} parentElement
  * @param {string=} opt_type
  * @param {Object=} opt_context
+ * @param {boolean=} opt_disallowCustom whether 3p url should not use meta tag.
  * @return {!Element} The iframe.
  */
-export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
+export function getIframe(
+    parentWindow, parentElement, opt_type, opt_context, opt_disallowCustom) {
   // Check that the parentElement is already in DOM. This code uses a new and
   // fast `isConnected` API and thus only used when it's available.
   dev().assert(
@@ -81,7 +87,8 @@ export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
   }
   count[attributes['type']] += 1;
 
-  const baseUrl = getBootstrapBaseUrl(parentWindow);
+  const baseUrl = getBootstrapBaseUrl(
+      parentWindow, undefined, opt_type, opt_disallowCustom);
   const host = parseUrl(baseUrl).hostname;
   // This name attribute may be overwritten if this frame is chosen to
   // be the master frame. That is ok, as we will read the name off
@@ -129,7 +136,10 @@ export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
 export function addDataAndJsonAttributes_(element, attributes) {
   for (let i = 0; i < element.attributes.length; i++) {
     const attr = element.attributes[i];
-    if (attr.name.indexOf('data-') != 0) {
+    if (!startsWith(attr.name, 'data-')
+      // data-vars- is reserved for amp-analytics
+      // see https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/analytics-vars.md#variables-as-data-attribute
+      || startsWith(attr.name, 'data-vars-')) {
       continue;
     }
     attributes[dashToCamelCase(attr.name.substr(5))] = attr.value;
@@ -150,17 +160,20 @@ export function addDataAndJsonAttributes_(element, attributes) {
 
 /**
  * Preloads URLs related to the bootstrap iframe.
- * @param {!Window} window
+ * @param {!Window} win
  * @param {!./preconnect.Preconnect} preconnect
+ * @param {string=} opt_type
+ * @param {boolean=} opt_disallowCustom whether 3p url should not use meta tag.
  */
-export function preloadBootstrap(window, preconnect) {
-  const url = getBootstrapBaseUrl(window);
+export function preloadBootstrap(
+    win, preconnect, opt_type, opt_disallowCustom) {
+  const url = getBootstrapBaseUrl(win, undefined, opt_type, opt_disallowCustom);
   preconnect.preload(url, 'document');
 
   // While the URL may point to a custom domain, this URL will always be
   // fetched by it.
   const scriptUrl = getMode().localDev
-      ? getAdsLocalhost(window) + '/dist.3p/current/integration.js'
+      ? getAdsLocalhost(win) + '/dist.3p/current/integration.js'
       : `${urls.thirdParty}/$internalRuntimeVersion$/f.js`;
   preconnect.preload(scriptUrl, 'script');
 }
@@ -169,18 +182,21 @@ export function preloadBootstrap(window, preconnect) {
  * Returns the base URL for 3p bootstrap iframes.
  * @param {!Window} parentWindow
  * @param {boolean=} opt_strictForUnitTest
+ * @param {string=} opt_type
+ * @param {boolean=} opt_disallowCustom whether 3p url should not use meta tag.
  * @return {string}
  * @visibleForTesting
  */
-export function getBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
+export function getBootstrapBaseUrl(
+    parentWindow, opt_strictForUnitTest, opt_type, opt_disallowCustom) {
   // The value is cached in a global variable called `bootstrapBaseUrl`;
   const bootstrapBaseUrl = parentWindow.bootstrapBaseUrl;
   if (bootstrapBaseUrl) {
     return bootstrapBaseUrl;
   }
-  return parentWindow.bootstrapBaseUrl =
-      getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest)
-          || getDefaultBootstrapBaseUrl(parentWindow);
+  return parentWindow.bootstrapBaseUrl = getCustomBootstrapBaseUrl(
+      parentWindow, opt_strictForUnitTest, opt_type, opt_disallowCustom) ||
+      getDefaultBootstrapBaseUrl(parentWindow);
 }
 
 export function setDefaultBootstrapBaseUrlForTesting(url) {
@@ -257,12 +273,19 @@ export function getRandom(win) {
  * Otherwise null.
  * @param {!Window} parentWindow
  * @param {boolean=} opt_strictForUnitTest
+ * @param {string=} opt_type
+ * @param {boolean=} opt_disallowCustom whether 3p url should not use meta tag.
  * @return {?string}
  */
-function getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
+function getCustomBootstrapBaseUrl(
+    parentWindow, opt_strictForUnitTest, opt_type, opt_disallowCustom) {
   const meta = parentWindow.document
       .querySelector('meta[name="amp-3p-iframe-src"]');
   if (!meta) {
+    return null;
+  }
+  if (opt_disallowCustom) {
+    user().error(TAG, `3p iframe url disabled for ${opt_type || 'unknown'}`);
     return null;
   }
   const url = assertHttpsUrl(meta.getAttribute('content'), meta);

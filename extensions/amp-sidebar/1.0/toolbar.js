@@ -17,23 +17,29 @@
 import {toggle} from '../../../src/style';
 
 /** @const */
+const TOOLBAR_TARGET_CLASS = 'i-amphtml-toolbar-target';
+
+/** @const */
 const TOOLBAR_ELEMENT_CLASS = 'i-amphtml-toolbar';
 
 export class Toolbar {
   /**
   * @param {!Element} element
-  * @param {!./amp-sidebar.AmpSidebar} sidebar
+  * @param {!Window} win
   * @param {!../../../src/service/vsync-impl.Vsync} vsync
   */
-  constructor(element, sidebar, vsync) {
+  constructor(element, win, vsync) {
     /** @private {!Element} */
     this.toolbarDOMElement_ = element;
 
-    /** @private {!./amp-sidebar.AmpSidebar} **/
-    this.sidebar_ = sidebar;
+    /** @private {!Window} **/
+    this.win_ = win;
 
-    /** @private {!Element} */
-    this.sidebarElement_ = this.sidebar_.element;
+    /** @private {Element} */
+    this.body_ = this.win_.document.body;
+
+    /** @private {number|undefined} */
+    this.height_ = undefined;
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = vsync;
@@ -53,9 +59,7 @@ export class Toolbar {
     /** @private {Array} */
     this.toolbarOnlyElementsInSidebar_ = [];
 
-    this.buildToolbar_();
-
-    //Finally, find our tool-bar only elements
+    // Find our tool-bar only elements
     if (this.toolbarDOMElement_.hasAttribute('toolbar-only')) {
       this.toolbarOnlyElementsInSidebar_.push(this.toolbarDOMElement_);
     } else {
@@ -68,6 +72,7 @@ export class Toolbar {
           Array.prototype.slice.call(toolbarOnlyQuery, 0);
       }
     }
+    this.buildCallback_();
   }
 
   /**
@@ -76,7 +81,7 @@ export class Toolbar {
    */
   onLayoutChange(onShowCallback) {
     // Get if we match the current toolbar media
-    const matchesMedia = this.sidebar_.win
+    const matchesMedia = this.win_
         .matchMedia(this.toolbarMedia_).matches;
 
     // Remove and add the toolbar dynamically
@@ -92,22 +97,39 @@ export class Toolbar {
 
   /**
    * Private function to build the DOM element for the toolbar
-   * TODO: Allow specifying a target for the toolbar
    * @private
    */
-  buildToolbar_() {
-    const fragment = this.sidebarElement_
-      .ownerDocument.createDocumentFragment();
-    this.targetElement_ =
-      this.toolbarDOMElement_.ownerDocument.createElement('header');
-    //Place the elements into the target
+  buildCallback_() {
     this.toolbarClone_ = this.toolbarDOMElement_.cloneNode(true);
-    this.toolbarClone_.className = TOOLBAR_ELEMENT_CLASS;
+    const targetId = this.toolbarDOMElement_.getAttribute('target');
+    // Set the target element to the toolbar clone if it exists.
+    const targetElement =
+    this.win_.document.getElementById(`${targetId}_toolbar`) ||
+    this.win_.document.getElementById(targetId);
+    this.targetElement_ = targetElement || this.createTargetElement_();
     this.targetElement_.appendChild(this.toolbarClone_);
     toggle(this.targetElement_, false);
-    fragment.appendChild(this.targetElement_);
-    this.sidebarElement_.parentElement
-        .insertBefore(fragment, this.sidebarElement_);
+
+    // Check if the target element was created by us, or already inserted by the user
+    if (!this.targetElement_.parentElement) {
+      this.toolbarClone_.classList.add(TOOLBAR_ELEMENT_CLASS);
+      const fragment = this.win_
+        .document.createDocumentFragment();
+      fragment.appendChild(this.targetElement_);
+      this.body_.appendChild(fragment);
+    }
+  }
+
+  /**
+   * Returns a created element that can be used as the target if one does not exist
+   * @returns {Element}
+   * @private
+   */
+  createTargetElement_() {
+    const targetElement =
+      this.win_.document.createElement('header');
+    targetElement.classList.add(TOOLBAR_TARGET_CLASS);
+    return targetElement;
   }
 
   /**

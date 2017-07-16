@@ -58,6 +58,14 @@ const A4A_LIGHTBOX_EXPERIMENT = 'amp-lightbox-a4a-proto';
  */
 export let ViewportChangedEventDef;
 
+/**
+ * @typedef {{
+ *   relayoutAll: boolean,
+ *   width: number,
+ *   height: number
+ * }}
+ */
+export let ViewportResizedEventDef;
 
 /**
  * This object represents the viewport. It tracks scroll position, resize
@@ -134,6 +142,9 @@ export class Viewport {
 
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
+
+    /** @private @const {!Observable} */
+    this.resizeObservable_ = new Observable();
 
     /** @private {?Element|undefined} */
     this.viewportMeta_ = undefined;
@@ -447,6 +458,15 @@ export class Viewport {
    */
   onScroll(handler) {
     return this.scrollObservable_.add(handler);
+  }
+
+  /**
+   * Registers the handler for ViewportResizedEventDef events.
+   * @param {!function(!ViewportResizedEventDef)} handler
+   * @return {!UnlistenDef}
+   */
+  onResize(handler) {
+    return this.resizeObservable_.add(handler);
   }
 
   /**
@@ -877,7 +897,16 @@ export class Viewport {
     this.size_ = null;  // Need to recalc.
     const newSize = this.getSize();
     this.fixedLayer_.update().then(() => {
-      this.changed_(!oldSize || oldSize.width != newSize.width, 0);
+      const widthChanged = !oldSize || oldSize.width != newSize.width;
+      this.changed_(/*relayoutAll*/widthChanged, 0);
+      const sizeChanged = widthChanged || oldSize.height != newSize.height;
+      if (sizeChanged) {
+        this.resizeObservable_.fire({
+          relayoutAll: widthChanged,
+          width: newSize.width,
+          height: newSize.height,
+        });
+      }
     });
   }
 }
