@@ -24,7 +24,7 @@ export function widespace(global, data) {
 
   const WS_AMP_CODE_VER = '1.0.0';
 
-  validateData(data, ['sid'], []);
+  validateData(data, ['sid'], ['demoGender', 'demoCountry', 'demoRegion', 'demoCity', 'demoPostal', 'demoYob']);
 
   const url = 'https://engine.widespace.com/map/engine/dynamic?isamp=1'
       + '&ampver=' + WS_AMP_CODE_VER
