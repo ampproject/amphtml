@@ -20,14 +20,14 @@ import {dev, user} from '../../../src/log';
 import {IntersectionObserverPolyfill} from '../../../src/intersection-observer-polyfill'; // eslint-disable-line max-len
 
 /**
- * - visibilePercentageMin: The percentage of pixels that need to be on screen
- *   for the creative to be considered "visible".
  * - continuousTimeMin: The amount of continuous time, in milliseconds, that
  *   the creative must be on screen for in oreder to be considered "visible".
+ * - visibilePercentageMin: The percentage of pixels that need to be on screen
+ *   for the creative to be considered "visible".
  *
  * @typedef {{
- *   visiblePercentageMin: number,
  *   continuousTimeMin: number,
+ *   visiblePercentageMin: number,
  * }}
  */
 export let RefreshConfig;
@@ -132,7 +132,7 @@ export class RefreshManager {
     this.refreshInterval_ = this.getPublisherSpecifiedRefreshInterval_();
 
     /** @const @private {!RefreshConfig} */
-    this.config_ = this.convertConfiguration_(config);
+    this.config_ = this.convertAndSanitizeConfiguration_(config);
 
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win_);
@@ -269,26 +269,17 @@ export class RefreshManager {
   }
 
   /**
-   * Terminates the current refresh cycle, if one currently exists. Returns
-   * true if the cycle was canceled successfully, false otherwise.
-   *
-   * @return {boolean}
-   */
-  stopRefreshCycle() {
-    if (this.refreshTimeoutId_) {
-      this.timer_.cancel(this.refreshTimeoutId_);
-      this.refreshTimeoutId_ = null;
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Converts config to appropriate units, modifying the argument in place.
+   * Converts config to appropriate units, modifying the argument in place. This
+   * also ensures that visiblePercentageMin is in the range of [0, 100].
    * @param {!RefreshConfig} config
    * @return {!RefreshConfig}
    */
-  convertConfiguration_(config) {
+  convertAndSanitizeConfiguration_(config) {
+    if (config['visiblePercentageMin'] < 0 ||
+        config['visiblePercentageMin'] > 100) {
+      dev().error(TAG,
+          'visiblePercentageMin for refresh must be in the range [0, 100]');
+    }
     // Convert seconds to milliseconds.
     config['continuousTimeMin'] *= 1000;
     config['visiblePercentageMin'] /= 100;

@@ -51,7 +51,7 @@ export function getMultiSizeDimensions(
     const size = sizeStr.split('x');
 
     // Make sure that each size is specified in the form WxH.
-    if (size.length != 2) {
+    if (strict && size.length != 2) {
       user().error('AMP-AD', `Invalid multi-size data format '${sizeStr}'.`);
       if (strict) {
         return null;

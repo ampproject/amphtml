@@ -79,7 +79,7 @@ describe('refresh-manager', () => {
 
   it('should call convertConfiguration_ and set proper units', () => {
     const getConfigurationSpy = sandbox.spy(
-        RefreshManager.prototype, 'convertConfiguration_');
+        RefreshManager.prototype, 'convertAndSanitizeConfiguration_');
     const refreshManager = new RefreshManager(mockA4a, {
       visiblePercentageMin: 50,
       totalTimeMin: 0,
