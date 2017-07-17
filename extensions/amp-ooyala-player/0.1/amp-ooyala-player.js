@@ -225,24 +225,6 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
   /** @override */
   hideControls() {
   }
-
-  /** @override */
-  getCurrentTime() {
-    // Not supported.
-    return 0;
-  }
-
-  /** @override */
-  getDuration() {
-    // Not supported.
-    return 1;
-  }
-
-  /** @override */
-  getPlayedRanges() {
-    // Not supported.
-    return [];
-  }
 };
 
 AMP.registerElement('amp-ooyala-player', AmpOoyalaPlayer);
