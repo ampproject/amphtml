@@ -327,10 +327,8 @@ export class FixedLayer {
           // `offsetTop` with `style.top = 'auto'` and without.
           let top = style.top;
           const currentOffsetTop = element./*OK*/offsetTop;
-          if (top === 'auto') {
-            top = '';
-          } else if (isSticky) {
-            if (parseInt(top, 10) !== autoTops[i]) {
+          if (isSticky) {
+            if (top === 'auto' || parseInt(top, 10) !== autoTops[i]) {
               top = '';
             }
           } else if (currentOffsetTop === autoTops[i]) {
