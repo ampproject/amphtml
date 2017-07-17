@@ -26,15 +26,7 @@ import {
 } from '../../../src/iframe-helper';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
-<<<<<<< HEAD
-<<<<<<< HEAD
 import {dict} from '../../../src/utils/object';
-=======
-=======
-import {dict} from '../../../src/utils/object';
->>>>>>> Reverting changes to iframe-handler.
-import {timerFor} from '../../../src/services';
->>>>>>> Moved more logic from amp-a4a to doubleclick impl.
 import {setStyle} from '../../../src/style';
 import {getData, loadPromise} from '../../../src/event-helper';
 import {getHtml} from '../../../src/get-html';
