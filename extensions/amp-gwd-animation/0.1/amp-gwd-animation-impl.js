@@ -92,13 +92,6 @@ class AmpGwdRuntimeService {
     /** @private {!Function} */
     this.boundOnAnimationEndEvent_ = this.onAnimationEndEvent_.bind(this);
 
-    /**
-     * Whether animations may run (@see setEnabled). False initially; animations
-     * will be immediately disabled below.
-     * @private {boolean}
-     */
-    this.enabled_ = false;
-
     this.ampdoc_.whenBodyAvailable().then(() => { this.initialize_(); });
   }
 
@@ -108,7 +101,7 @@ class AmpGwdRuntimeService {
    */
   initialize_() {
     // Initially disable all animations (AMP runtime will enable when ready).
-    this.ampdoc_.getBody().classList.add(ANIMATIONS_DISABLED_CLASS);
+    this.setEnabled(false);
 
     // Begin listening for timeline events (GWD event element `animationend`).
     this.listenForAnimationEnd_();
@@ -126,10 +119,6 @@ class AmpGwdRuntimeService {
    * @param {boolean} enable True to enable, false to disable.
    */
   setEnabled(enable) {
-    if (enable == this.enabled_) {
-      return;  // No change in enabled status.
-    }
-
     if (enable) {
       // Lift the animation CSS override.
       this.ampdoc_.getBody().classList.remove(ANIMATIONS_DISABLED_CLASS);
@@ -137,8 +126,6 @@ class AmpGwdRuntimeService {
       // Stop all animations by overriding them with `animation: none`.
       this.ampdoc_.getBody().classList.add(ANIMATIONS_DISABLED_CLASS);
     }
-
-    this.enabled_ = enable;
   }
 
   /**
