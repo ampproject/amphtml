@@ -67,6 +67,20 @@ class Animation {
 
 /**
  * @extends {CSSRule}
+ * @see https://drafts.csswg.org/css-conditional-3/#the-csssupportsrule-interface
+ */
+class CSSSupportsRule {
+  constructor() {
+    /** @type {string} */
+    this.conditionText;
+    /** @type {!CSSRuleList} */
+    this.cssRules;
+  }
+}
+
+
+/**
+ * @extends {CSSRule}
  * @see https://www.w3.org/TR/2009/WD-css3-animations-20090320/#DOM-CSSKeyframesRule
  */
 class CSSKeyframesRule {

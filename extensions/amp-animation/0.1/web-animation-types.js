@@ -98,6 +98,7 @@ export let WebAnimationVarsDef;
  * @mixin
  * @typedef {{
  *   media: (string|undefined),
+ *   supports: (string|undefined),
  * }}
  */
 export let WebAnimationConditionalDef;
