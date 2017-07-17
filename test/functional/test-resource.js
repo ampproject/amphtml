@@ -18,7 +18,7 @@ import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Resources} from '../../src/service/resources-impl';
 import {Resource, ResourceState} from '../../src/service/resource';
 import {layoutRectLtwh} from '../../src/layout-rect';
-import {viewerForDoc} from '../../src/services';
+import {timerFor, viewerForDoc} from '../../src/services';
 import * as sinon from 'sinon';
 
 
@@ -1918,17 +1918,41 @@ describe('Resource renderOutsideViewport', () => {
       expect(resource.whenWithinRenderOutsideViewport()).to.equal(promise);
       expect(resource.renderOutsideViewportPromise_).to.be.ok;
       expect(resource.renderOutsideViewportResolve_).to.be.ok;
+      expect(resource.renderOutsideViewportMultiplier_).to.equal(1);
       // Call again should do nothing.
       resource.resolveRenderOutsideViewport_();
       resource.resolveRenderOutsideViewport_();
       expect(resource.renderOutsideViewportPromise_).to.not.be.ok;
       expect(resource.renderOutsideViewportResolve_).to.not.be.ok;
-      return promise;
     });
 
     it('should resolve immediately if already laid out', () => {
       sandbox.stub(resource, 'isLayoutPending').returns(false);
       return resource.whenWithinRenderOutsideViewport();
+    });
+
+    it('multiplier, immediately if laid out', () => {
+      sandbox.stub(resource, 'isLayoutPending').returns(false);
+      const promise = resource.whenWithinRenderOutsideViewport(2);
+      return promise;
+    });
+
+    it('within multipler but not renderOutsideViewport', () => {
+      resource.layoutBox_ = layoutRectLtwh(0, 500, 100, 100);
+      renderOutsideViewport.returns(3);
+      const promise = resource.whenWithinRenderOutsideViewport(2);
+      expect(resource.renderOutsideViewport()).to.equal(false);
+      return promise;
+    });
+
+    it('not within multipler or renderOutsideViewport', () => {
+      resource.layoutBox_ = layoutRectLtwh(0, 10000, 100, 100);
+      renderOutsideViewport.returns(3);
+      const promise = resource.whenWithinRenderOutsideViewport(2);
+      expect(resource.renderOutsideViewport()).to.equal(false);
+      return Promise.race([promise.then(() => {
+        throw new Error('should not resolve!');
+      }), timerFor(window).promise(10)]);
     });
   });
 });
