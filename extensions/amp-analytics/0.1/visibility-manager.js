@@ -280,7 +280,7 @@ export class VisibilityManager {
         layoutBox =
             resource ?
             resource.getLayoutBox() :
-            viewportForDoc(this.ampdoc).getLayoutRect(opt_element);
+            Services.viewportForDoc(this.ampdoc).getLayoutRect(opt_element);
       } else {
         layoutBox = this.getRootLayoutBox();
       }
@@ -601,7 +601,7 @@ export class VisibilityManagerForEmbed extends VisibilityManager {
   /** @override */
   getRootLayoutBox() {
     const rootElement = dev().assertElement(this.embed.host);
-    return viewportForDoc(this.ampdoc).getLayoutRect(rootElement);
+    return Services.viewportForDoc(this.ampdoc).getLayoutRect(rootElement);
   }
 
   /** @override */
