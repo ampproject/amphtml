@@ -86,6 +86,34 @@ export class Services {
   }
 
   /**
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {boolean=} loadAnalytics
+   * @return {!Promise<!../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>}
+   */
+  static analyticsForDoc(nodeOrDoc, loadAnalytics = false) {
+    if (loadAnalytics) {
+      // Get Extensions service and force load analytics extension.
+      const ampdoc = getAmpdoc(nodeOrDoc);
+      Services.extensionsFor(ampdoc.win)./*OK*/loadExtension('amp-analytics');
+    }
+    return (/** @type {!Promise<
+              !../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
+            >} */ (getElementServiceForDoc(
+                nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
+  }
+
+  /**
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @return {!Promise<?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>}
+   */
+  static analyticsForDocOrNull(nodeOrDoc) {
+    return (/** @type {!Promise<
+              ?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
+            >} */ (getElementServiceIfAvailableForDoc(
+                nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
+  }
+
+  /**
    * @param {!Window} window
    * @return {!./service/batched-xhr-impl.BatchedXhr}
    */
@@ -334,32 +362,4 @@ export class Services {
   static xhrFor(window) {
     return /** @type {!./service/xhr-impl.Xhr} */ (getService(window, 'xhr'));
   }
-}
-
-/**
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @param {boolean=} loadAnalytics
- * @return {!Promise<!../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>}
- */
-export function analyticsForDoc(nodeOrDoc, loadAnalytics = false) {
-  if (loadAnalytics) {
-    // Get Extensions service and force load analytics extension.
-    const ampdoc = getAmpdoc(nodeOrDoc);
-    extensionsFor(ampdoc.win)./*OK*/loadExtension('amp-analytics');
-  }
-  return (/** @type {!Promise<
-            !../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
-          >} */ (getElementServiceForDoc(
-              nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
-}
-
-/**
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!Promise<?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>}
- */
-export function analyticsForDocOrNull(nodeOrDoc) {
-  return (/** @type {!Promise<
-            ?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
-          >} */ (getElementServiceIfAvailableForDoc(
-              nodeOrDoc, 'amp-analytics-instrumentation', 'amp-analytics')));
 }

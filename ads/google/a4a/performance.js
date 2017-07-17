@@ -22,7 +22,6 @@ import {serializeQueryString} from '../../../src/url';
 import {getTimingDataSync} from '../../../src/service/variable-source';
 import {Services} from '../../../src/services';
 import {CommonSignals} from '../../../src/common-signals';
-import {analyticsForDoc} from '../../../src/services';
 
 /**
  * This module provides a fairly crude form of performance monitoring (or
@@ -274,7 +273,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
    * @override
    */
   addPingsForVisibility(element) {
-    analyticsForDoc(element, true).then(analytics => {
+    Services.analyticsForDoc(element, true).then(analytics => {
       const signals = element.signals();
       const readyPromise = Promise.race([
         signals.whenSignal(CommonSignals.INI_LOAD),
