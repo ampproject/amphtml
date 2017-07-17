@@ -45,15 +45,6 @@ import {some} from '../../../src/utils/promise';
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 import {utf8Decode} from '../../../src/utils/bytes';
 import {endsWith} from '../../../src/string';
-import {
-  extensionsFor,
-  platformFor,
-  resourcesForDoc,
-  timerFor,
-  viewerForDoc,
-  xhrFor,
-} from '../../../src/services';
-import {endsWith} from '../../../src/string';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
 import {assertHttpsUrl} from '../../../src/url';
@@ -820,10 +811,11 @@ export class AmpA4A extends AMP.BaseElement {
         this.togglePlaceholder(true);
         // This delay provides a 1 second buffer where the ad loader is
         // displayed in between the creatives.
-        return timerFor(this.win).promise(1000).then(() => {
+        return Services.timerFor(this.win).promise(1000).then(() => {
           this.isRelayoutNeededFlag = true;
           this.getResource().layoutCanceled();
-          resourcesForDoc(this.getAmpDoc())./*OK*/requireLayout(this.element);
+          Services.resourcesForDoc(this.getAmpDoc())
+              ./*OK*/requireLayout(this.element);
         });
       });
     });

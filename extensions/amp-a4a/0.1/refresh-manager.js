@@ -15,7 +15,7 @@
  */
 
 import {isExperimentOn} from '../../../src/experiments';
-import {timerFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 import {IntersectionObserverPolyfill} from '../../../src/intersection-observer-polyfill'; // eslint-disable-line max-len
 
@@ -135,7 +135,7 @@ export class RefreshManager {
     this.config_ = this.convertConfiguration_(config);
 
     /** @const @private {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = timerFor(this.win_);
+    this.timer_ = Services.timerFor(this.win_);
 
     /** @private {?(number|string)} */
     this.refreshTimeoutId_ = null;
