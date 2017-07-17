@@ -110,6 +110,9 @@ export class VideoManager {
     /** @private {boolean} */
     this.scrollListenerInstalled_ = false;
 
+    /** @private {boolean} */
+    this.resizeListenerInstalled_ = false;
+
     /** @private {./position-observer-impl.AmpDocPositionObserver} */
     this.positionObserver_ = null;
 
@@ -184,7 +187,7 @@ export class VideoManager {
           this.entries_[i].updateVisibility();
         }
       };
-      const viewport = Services.viewportForDoc(this.ampdoc_);
+      const viewport = Services.viewportForDoc(this.ampdoc);
       viewport.onScroll(scrollListener);
       viewport.onChanged(scrollListener);
       this.scrollListenerInstalled_ = true;
@@ -219,6 +222,18 @@ export class VideoManager {
           entry.onDockableVideoPositionChanged(newPos);
         }
     );
+
+    if (!this.resizeListenerInstalled_) {
+      const resizeListener = () => {
+        for (let i = 0; i < this.entries_.length; i++) {
+          this.entries_[i].updateDockableInitialRect();
+        }
+      };
+      const viewport = Services.viewportForDoc(this.ampdoc);
+      viewport.onResize(resizeListener);
+      this.resizeListenerInstalled_ = true;
+    }
+
   }
 
   /**
@@ -322,7 +337,7 @@ class VideoEntry {
     this.isVisible_ = false;
 
     /** @private @const {!../service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(ampdoc.win);
+    this.vsync_ = Services.vsyncFor(this.ampdoc_.win);
 
     /** @private @const */
     this.actionSessionManager_ = new VideoSessionManager();
@@ -491,41 +506,6 @@ class VideoEntry {
     });
   }
 
-  /* Docking Behaviour */
-
-  /**
-   * Called when a dockable video is built.
-   * @private
-   */
-  dockableVideoBuilt_() {
-    this.vsync_.run({
-      measure: () => {
-        this.initialRect_ = this.video.element./*OK*/getBoundingClientRect();
-      },
-      mutate: () => {
-        this.video.element.classList.add('i-amphtml-dockable-video');
-      },
-    });
-
-    // Re-measure initial position when the window resizes / orientation changes
-    const viewport = viewportForDoc(this.ampdoc_);
-    viewport.onResize(() => {
-      this.vsync_.run({
-        measure: () => {
-          this.initialRect_ = this.video.element./*OK*/getBoundingClientRect();
-        },
-        mutate: () => {
-          this.dockState_ = DockStates.INLINE;
-          if (this.dockLastPosition_) {
-            this.onDockableVideoPositionChanged(this.dockLastPosition_);
-          }
-        },
-      });
-    });
-    // TODO(@wassgha) Add video element wrapper here
-  }
-
-
   /* Autoplay Behaviour */
 
   /**
@@ -622,6 +602,37 @@ class VideoEntry {
   }
 
   /**
+   * Called when visibility of a loaded non-autoplay video changes.
+   * @private
+   */
+  nonAutoplayLoadedVideoVisibilityChanged_() {
+    if (this.isVisible_) {
+      this.visibilitySessionManager_.beginSession();
+    } else if (this.isPlaying_) {
+      this.visibilitySessionManager_.endSession();
+    }
+  }
+
+  /* Docking Behaviour */
+
+  /**
+   * Called when a dockable video is built.
+   * @private
+   */
+  dockableVideoBuilt_() {
+    this.vsync_.run({
+      measure: () => {
+        this.initialRect_ = this.video.element.getLayoutBox();
+      },
+      mutate: () => {
+        this.video.element.classList.add('i-amphtml-dockable-video');
+      },
+    });
+
+    // TODO(@wassgha) Add video element wrapper here
+  }
+
+  /**
    * Maps the visible height of the video (viewport height scrolled) to a value
    * in a specified number range
    * @param {number} min the lower bound of the range
@@ -643,15 +654,21 @@ class VideoEntry {
   }
 
   /**
-   * Called when visibility of a loaded non-autoplay video changes.
-   * @private
+   * Re-initialize measurements of the video element when the viewport is
+   * resized or the orientation is changed.
    */
-  nonAutoplayLoadedVideoVisibilityChanged_() {
-    if (this.isVisible_) {
-      this.visibilitySessionManager_.beginSession();
-    } else if (this.isPlaying_) {
-      this.visibilitySessionManager_.endSession();
-    }
+  updateDockableInitialRect() {
+    this.vsync_.run({
+      measure: () => {
+        this.initialRect_ = this.video.element.getLayoutBox();
+      },
+      mutate: () => {
+        this.dockState_ = DockStates.INLINE;
+        if (this.dockLastPosition_) {
+          this.onDockableVideoPositionChanged(this.dockLastPosition_);
+        }
+      },
+    });
   }
 
   /**
@@ -719,7 +736,7 @@ class VideoEntry {
    * @private
    */
   updateDockableVideoPosition_(newPos) {
-    const viewport = viewportForDoc(this.ampdoc_);
+    const viewport = Services.viewportForDoc(this.ampdoc_);
     const isBottom = newPos.relativePos == RelativePositions.BOTTOM;
     const isTop = newPos.relativePos == RelativePositions.TOP;
     const isInside = newPos.relativePos == RelativePositions.INSIDE;
@@ -766,7 +783,7 @@ class VideoEntry {
 
     // Calculate whether the video has been in view at least once
     this.dockPreviouslyInView_ = this.dockPreviouslyInView_ ||
-                            this.dockVisibleHeight_ == this.initialRect_.height;
+                Math.ceil(this.dockVisibleHeight_) >= this.initialRect_.height;
 
     // Calculate space on top and bottom of the video to see if it is possible
     // for the video to become hidden by scrolling to the top/bottom
@@ -783,7 +800,7 @@ class VideoEntry {
 
     // Don't minimize if the video is bigger than the viewport (will always
     // minimize and never be inline otherwise!)
-    if (this.video.element./*OK*/offsetHeight > viewport.getHeight()) {
+    if (this.video.element./*OK*/offsetHeight >= viewport.getHeight()) {
       this.dockPosition_ = DockPositions.INLINE;
       return;
     }
@@ -907,7 +924,7 @@ class VideoEntry {
    * @return {string}
    */
   calcDockOffsetXRight_() {
-    const viewport = viewportForDoc(this.ampdoc_);
+    const viewport = Services.viewportForDoc(this.ampdoc_);
     const initialOffsetRight = viewport.getWidth()
                         - this.initialRect_.left
                         - this.initialRect_.width;
@@ -936,7 +953,7 @@ class VideoEntry {
    * @return {string}
    */
   calcDockOffsetYBottom_() {
-    const viewport = viewportForDoc(this.ampdoc_);
+    const viewport = Services.viewportForDoc(this.ampdoc_);
     const scaledHeight = DOCK_SCALE * this.initialRect_.height;
     return st.px(
         this.scrollMap_(
