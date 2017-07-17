@@ -79,7 +79,7 @@ export class AmpAnalytics extends AMP.BaseElement {
      * @private {?string} Predefined type associated with the tag. If specified,
      * the config from the predefined type is merged with the inline config
      */
-    this.type_ = null;
+    this.type_ = this.element.getAttribute('type');
 
     /** @private {!boolean} */
     this.isSandbox_ = false;
