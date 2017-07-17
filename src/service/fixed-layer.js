@@ -17,7 +17,7 @@
 import {dev, user} from '../log';
 import {endsWith} from '../string';
 import {Services} from '../services';
-import {getStyle, setStyle, setStyles, computedStyle} from '../style';
+import {setStyle, setStyles, computedStyle} from '../style';
 
 const TAG = 'FixedLayer';
 
@@ -327,16 +327,18 @@ export class FixedLayer {
           // `offsetTop` with `style.top = 'auto'` and without.
           let top = style.top;
           const currentOffsetTop = element./*OK*/offsetTop;
-          if (isSticky) {
+          if (top === 'auto') {
+            top = '';
+          } else if (isSticky) {
             if (parseInt(top, 10) !== autoTops[i]) {
-              top = 'auto';
+              top = '';
             }
           } else if (currentOffsetTop === autoTops[i]) {
             if (currentOffsetTop ===
                     this.committedPaddingTop_ + this.borderTop_) {
               top = '0px';
             } else {
-              top = 'auto';
+              top = '';
             }
           }
 
@@ -551,12 +553,6 @@ export class FixedLayer {
     fe.top = (state.fixed || state.sticky) ? state.top : '';
     fe.transform = state.transform;
 
-    // Reset `top` which was assigned before.
-    if (oldFixed && !state.fixed || oldSticky && !state.sticky) {
-      if (getStyle(element, 'top')) {
-        setStyle(element, 'top', '');
-      }
-    }
     // Move back to the BODY layer and reset transfer z-index.
     if (oldFixed && !state.fixed || !state.transferrable) {
       this.returnFromTransferLayer_(fe);
@@ -564,7 +560,7 @@ export class FixedLayer {
 
     // Update `top`. This is necessary to adjust position to the viewer's
     // paddingTop.
-    if ((state.fixed || !this.transfer_) && state.top) {
+    if (state.top && (state.fixed || (state.sticky && !this.transfer_))) {
       setStyle(element, 'top', `calc(${state.top} + ${this.paddingTop_}px)`);
     }
     // Move element to the fixed layer.
@@ -649,9 +645,7 @@ export class FixedLayer {
     }
     dev().fine(TAG, 'return from fixed:', fe.id, fe.element);
     if (this.ampdoc.contains(fe.element)) {
-      if (getStyle(fe.element, 'zIndex')) {
-        setStyle(fe.element, 'zIndex', '');
-      }
+      setStyle(fe.element, 'zIndex', '');
       fe.placeholder.parentElement.replaceChild(fe.element, fe.placeholder);
     } else {
       fe.placeholder.parentElement.removeChild(fe.placeholder);
