@@ -36,7 +36,7 @@ import {
   AmpIframeTransportMessageQueue,
 } from './amp-iframe-transport-message-queue';
 
-/** @const {string} */
+/** @private @const {string} */
 const TAG_ = 'amp-analytics.Transport';
 
 /** @typedef {{
@@ -65,6 +65,7 @@ export class Transport {
   /**
    * @param {!Window} win
    * @param {string} request
+   * @param {Object<string, string>=} transportOptions
    */
   sendRequest(win, request, transportOptions) {
     assertHttpsUrl(request, 'amp-analytics request');
