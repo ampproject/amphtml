@@ -16,7 +16,7 @@
 
 import './polyfills';
 import {tryParseJson} from '../src/json';
-import {dev, initLogConstructor, setReportError} from '../src/log';
+import {dev, user, initLogConstructor, setReportError} from '../src/log';
 import {AMP_ANALYTICS_3P_MESSAGE_TYPE} from '../src/3p-analytics-common';
 
 initLogConstructor();
@@ -38,7 +38,7 @@ export class AmpAnalytics3pMessageRouter {
     this.win_ = win;
 
     /** @const {string} */
-    this.sentinel_ = dev().assertString(
+    this.sentinel_ = user().assertString(
         tryParseJson(this.win_.name).sentinel,
         'Invalid/missing sentinel on iframe name attribute' + this.win_.name);
     if (!this.sentinel_) {
@@ -60,11 +60,12 @@ export class AmpAnalytics3pMessageRouter {
       if (this.sentinel_ != messageContainer.sentinel) {
         return;
       }
-      dev().assert(messageContainer.type,
+      user().assert(messageContainer.type,
           'Received message with missing type in ' + this.win_.location.href);
-      dev().assert(messageContainer.data,
+      user().assert(messageContainer.data,
           'Received empty message in ' + this.win_.location.href);
-      dev().assert(messageContainer.type == AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT,
+      user().assert(
+          messageContainer.type == AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT,
           'Received unrecognized message type ' + messageContainer.type +
           ' in ' + this.win_.location.href);
       this.processEventsMessage(
@@ -94,9 +95,9 @@ export class AmpAnalytics3pMessageRouter {
    */
   processEventsMessage(message) {
     let entries;
-    dev().assert((entries = Object.entries(message)).length,
+    user().assert((entries = Object.entries(message)).length,
         'Received empty events message in ' + this.win_.location.href);
-    dev().assert(this.win_.onNewAmpAnalyticsInstance,
+    user().assert(this.win_.onNewAmpAnalyticsInstance,
         'Must implement onNewAmpAnalyticsInstance in ' +
         this.win_.location.href);
     entries.forEach(entry => {
@@ -115,7 +116,7 @@ export class AmpAnalytics3pMessageRouter {
         this.creativeMessageRouters_[transportId]
             .sendMessagesToListener(events);
       } catch (e) {
-        dev().error(TAG_, 'Failed to pass message to event listener: ' +
+        user().error(TAG_, 'Failed to pass message to event listener: ' +
           e.message);
       }
     });
@@ -155,10 +156,10 @@ export class AmpAnalytics3pMessageRouter {
    * @returns {!JsonObject}
    */
   extractMessage(event) {
-    dev().assert(event && event.data, 'Received empty events message in ' +
+    user().assert(event && event.data, 'Received empty events message in ' +
         this.win_.name);
     let startIndex;
-    dev().assert((startIndex = event.data.indexOf('-') + 1) > 0,
+    user().assert((startIndex = event.data.indexOf('-') + 1) > 0,
         'Received truncated events message in ' + this.win_.name);
     return tryParseJson(event.data.substr(startIndex));
   }
@@ -168,7 +169,7 @@ if (!window.AMP_TEST) {
   try {
     new AmpAnalytics3pMessageRouter(window);
   } catch (e) {
-    dev().error(TAG_, 'Failed to construct AmpAnalytics3pMessageRouter: ' +
+    user().error(TAG_, 'Failed to construct AmpAnalytics3pMessageRouter: ' +
       e.message);
   }
 }
@@ -230,11 +231,12 @@ export class AmpAnalytics3pCreativeMessageRouter {
       dev().warn(TAG_, 'Attempted to send messages when no listener' +
         ' configured in ' + this.transportId_ + '. Be sure to' +
         ' first call registerAmpAnalytics3pEventsListener()');
+      return;
     }
     try {
       this.eventListener_(messages);
     } catch (e) {
-      dev().error(TAG_, 'Caught exception executing listener for ' +
+      user().error(TAG_, 'Caught exception executing listener for ' +
         this.transportId_ + ': ' + e.message);
     }
   }

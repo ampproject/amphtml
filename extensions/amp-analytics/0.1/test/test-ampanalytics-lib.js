@@ -21,7 +21,7 @@ import {
   AmpAnalytics3pMessageRouter,
   AmpAnalytics3pCreativeMessageRouter,
 } from '../../../../3p/ampanalytics-lib';
-import {dev} from '../../../../src/log';
+import {dev, user} from '../../../../src/log';
 import {Timer} from '../../../../src/service/timer-impl';
 import {adopt} from '../../../../src/runtime';
 import * as sinon from 'sinon';
@@ -55,6 +55,11 @@ describe('ampanalytics-lib', () => {
     sandbox.stub(AmpAnalytics3pMessageRouter.prototype, 'subscribeTo');
     router = new AmpAnalytics3pMessageRouter(window);
     sandbox.stub(dev(), 'assert', (condition, msg) => {
+      if (!condition) {
+        badAssertsCounterStub(msg);
+      }
+    });
+    sandbox.stub(user(), 'assert', (condition, msg) => {
       if (!condition) {
         badAssertsCounterStub(msg);
       }
