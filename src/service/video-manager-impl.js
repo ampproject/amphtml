@@ -27,7 +27,7 @@ import {isFiniteNumber} from '../types';
 import {mapRange} from '../utils/math';
 import {
   PlayingStates,
-  VideoAnalyticsType,
+  VideoAnalyticsEvents,
   VideoAttributes,
   VideoEvents,
 } from '../video-interface';
@@ -278,13 +278,13 @@ class VideoEntry {
     this.actionSessionManager_ = new VideoSessionManager();
 
     this.actionSessionManager_.onSessionEnd(
-        () => analyticsEvent(this, VideoAnalyticsType.SESSION));
+        () => analyticsEvent(this, VideoAnalyticsEvents.SESSION));
 
     /** @private @const */
     this.visibilitySessionManager_ = new VideoSessionManager();
 
     this.visibilitySessionManager_.onSessionEnd(
-        () => analyticsEvent(this, VideoAnalyticsType.SESSION_VISIBLE));
+        () => analyticsEvent(this, VideoAnalyticsEvents.SESSION_VISIBLE));
 
     /** @private @const {function(): !Promise<boolean>} */
     this.boundSupportsAutoplay_ = supportsAutoplay.bind(null, ampdoc.win,
@@ -357,7 +357,7 @@ class VideoEntry {
     if (this.isVisible_) {
       this.visibilitySessionManager_.beginSession();
     }
-    analyticsEvent(this, VideoAnalyticsType.PLAY);
+    analyticsEvent(this, VideoAnalyticsEvents.PLAY);
   }
 
   /**
@@ -366,9 +366,9 @@ class VideoEntry {
    */
   videoPaused_() {
     if (this.video.getCurrentTime() === this.video.getDuration()) {
-      analyticsEvent(this, VideoAnalyticsType.ENDED);
+      analyticsEvent(this, VideoAnalyticsEvents.ENDED);
     } else {
-      analyticsEvent(this, VideoAnalyticsType.PAUSE);
+      analyticsEvent(this, VideoAnalyticsEvents.PAUSE);
     }
     this.isPlaying_ = false;
 
@@ -986,7 +986,7 @@ export function supportsAutoplay(win, isLiteViewer) {
 
 /**
  * @param {!VideoEntry} entry
- * @param {string} eventType
+ * @param {!VideoAnalyticsEvents} eventType
  * @param {!Object<string, string>=} opt_vars A map of vars and their values.
  * @private
  */
@@ -997,7 +997,7 @@ function analyticsEvent(entry, eventType, opt_vars) {
 
   detailsPromise.then(details => {
     video.element.dispatchCustomEvent(
-        VideoEvents.ANALYTICS, {type: eventType, details});
+        eventType, details);
   });
 }
 

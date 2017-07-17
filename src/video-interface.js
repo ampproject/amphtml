@@ -270,7 +270,6 @@ export const VideoEvents = {
    * Fired when an analytics event occurs
    *
    * @event amp:video:analytics
-   * @property {!VideoAnalyticsType} type The type of the video analytics event.
    * @property {!VideoAnalyticsDetailsDef} details
    */
   ANALYTICS: 'amp:video:analytics',
@@ -317,29 +316,49 @@ export const PlayingStates = {
 
 
 /** @enum {string} */
-export const VideoAnalyticsType = {
+export const VideoAnalyticsEvents = {
   /**
+   * video-ended
+   *
    * Indicates that a video ended.
+   * @property {!VideoAnalyticsDetailsDef} details
+   * @event video-ended
    */
   ENDED: 'video-ended',
 
   /**
+   * video-pause
+   *
    * Indicates that a video paused.
+   * @property {!VideoAnalyticsDetailsDef} details
+   * @event video-pause
    */
   PAUSE: 'video-pause',
 
   /**
+   * video-play
+   *
    * Indicates that a video began to play.
+   * @property {!VideoAnalyticsDetailsDef} details
+   * @event video-play
    */
   PLAY: 'video-play',
 
   /**
+   * video-session
+   *
    * Indicates that some segment of the video played.
+   * @property {!VideoAnalyticsDetailsDef} details
+   * @event video-session
    */
   SESSION: 'video-session',
 
   /**
+   * video-session-visible
+   *
    * Indicates that some segment of the video played in the viewport.
+   * @property {!VideoAnalyticsDetailsDef} details
+   * @event video-session-visible
    */
   SESSION_VISIBLE: 'video-session-visible',
 };

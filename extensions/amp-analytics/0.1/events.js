@@ -18,8 +18,8 @@ import {CommonSignals} from '../../../src/common-signals';
 import {Observable} from '../../../src/observable';
 import {
   PlayingStates,
-  VideoAnalyticsType,
-  VideoEvents,
+  VideoAnalyticsDetailsDef,
+  VideoAnalyticsEvents,
 } from '../../../src/video-interface';
 import {dev, user} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
@@ -425,14 +425,18 @@ export class VideoEventTracker extends EventTracker {
       this.sessionObservable_.fire(e);
     };
 
-    this.root.getRoot().addEventListener(
-        VideoEvents.ANALYTICS, this.boundOnSession_);
+    Object.keys(VideoAnalyticsEvents).forEach(key => {
+      this.root.getRoot().addEventListener(
+          VideoAnalyticsEvents[key], this.boundOnSession_);
+    });
   }
 
   /** @override */
   dispose() {
-    this.root.getRoot().removeEventListener(
-        VideoEvents.ANALYTICS, this.boundOnSession_);
+    Object.keys(VideoAnalyticsEvents).forEach(key => {
+      this.root.getRoot().removeEventListener(
+          VideoAnalyticsEvents[key], this.boundOnSession_);
+    });
   }
 
   /** @override */
@@ -448,11 +452,11 @@ export class VideoEventTracker extends EventTracker {
     const on = config['on'];
 
     return this.sessionObservable_.add(event => {
-      const data = getData(event);
-      const type = data['type'];
-      const details = data['details'];
-      const isVisibleType = type === VideoAnalyticsType.SESSION_VISIBLE;
-      const normalizedType = isVisibleType ? VideoAnalyticsType.SESSION : type;
+      const type = event.name;
+      const details = /** @type {!VideoAnalyticsDetailsDef} */ (getData(event));
+      const isVisibleType = type === VideoAnalyticsEvents.SESSION_VISIBLE;
+      const normalizedType =
+          isVisibleType ? VideoAnalyticsEvents.SESSION : type;
 
       if (normalizedType !== on) {
         return;
