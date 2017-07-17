@@ -85,7 +85,7 @@ const RTC_TIMEOUT = 1000;
 /** @private {?Promise<!Object<string,string>>} */
 let rtcPromise = null;
 
-/** @private {JsonObject|null|undefined} */
+/** @private {?JsonObject|undefined} */
 let rtcConfig = null;
 
 /** @private @const {!Object<string,string>} */
@@ -511,7 +511,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
    * Sends RTC request as specified by rtcConfig. Returns promise which
    * resolves to the time that the RTC callout took to complete.
-   * If disableStalewhilerevalidate == true,then we will only
+   * If disableStalewhilerevalidate == true, then we will only
    * send one RTC request per page. If it's !== true, then we always
    * send two requests. The first will try
    * to hit browser cache, and the second request will always bypass.
@@ -519,7 +519,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * model.
    * The targeting info from the RTC updates the targeting info on
    * this object within mergeRtc.
-   * @return {?Promise} The time the RTC callout took (if successful).
+   * @return {?Promise<?number|?string>} The time the RTC callout took
+   *   (if successful) or an error message if rejecting.
    * @private
    */
   executeRtc_() {
@@ -532,8 +533,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     let endpoint;
     rtcConfig = tryParseJson(ampRtcPageElement.textContent);
-    if (!isObject(rtcConfig) || !(endpoint = rtcConfig['endpoint'])
-        || typeof endpoint != 'string' || !isSecureUrl(endpoint)) {
+    if (!isObject(rtcConfig) || !(endpoint = rtcConfig['endpoint']) ||
+        typeof endpoint != 'string' || !isSecureUrl(endpoint)) {
       user().warn(
           TAG,
           `invalid RTC config: ${ampRtcPageElement.textContent}`);
@@ -587,8 +588,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * Merges the RTC response into the jsonTargeting of this.
    * If it can't merge, or there is no response, potentially
    * rejects.
-   * @return {Promise} Resolves if ad request is being sent,
-   *     otherwise rejects.
+   * @return {Promise<?number|?string>} Resolves if ad request is
+   *     to be sent, potentially including the time the RTC took,
+   *     otherwise rejects with a reject message if we have one.
    */
   mergeRtc() {
     // add reasons for promise.reject
@@ -623,7 +625,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * the ad request on RTC failure. If yes, we return a resolve,
    * if not, we return a reject.
    * @param {string} errMessage
-   * @return {Promise}
+   * @return {Promise<?number|?string>}
    */
   shouldSendRequestWithoutRtc(errMessage) {
     user().error(TAG, errMessage);

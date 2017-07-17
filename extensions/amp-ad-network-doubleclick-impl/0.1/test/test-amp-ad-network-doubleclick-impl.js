@@ -465,10 +465,10 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       const rtcConf = createElementWithAttributes(
           document, 'script',
           {type: 'application/json', id: 'amp-rtc'});
-      rtcConf.innerHTML = '{'
-          + '"endpoint": "https://example-publisher.com/rtc/",'
-          + '"sendAdRequestOnFailure": false'
-          + '}';
+      rtcConf.innerHTML = `{
+          "endpoint": "https://example-publisher.com/rtc/",
+          "sendAdRequestOnFailure": false
+          }`;
       document.head.appendChild(rtcConf);
       const rtcResponse = {targeting: {age: '18-24'}};
       const xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
@@ -493,10 +493,10 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       const rtcConf = createElementWithAttributes(
           document, 'script',
           {type: 'application/json', id: 'amp-rtc'});
-      rtcConf.innerHTML = '{'
-          + '"endpoint": "https://example-publisher.com/rtc/",'
-          + '"sendAdRequestOnFailure": false'
-          + '}';
+      rtcConf.innerHTML = `{
+          "endpoint": "https://example-publisher.com/rtc/",
+          "sendAdRequestOnFailure": false
+          }`;
       document.head.appendChild(rtcConf);
       const xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
       // never resolve this promise
