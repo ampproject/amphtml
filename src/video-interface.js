@@ -49,24 +49,6 @@ export class VideoInterface {
   isInteractive() {}
 
   /**
-   * Current playback time in seconds at time of trigger
-   * @return {number}
-   */
-  getCurrentTime() {}
-
-  /**
-   * Total duration of the video in seconds
-   * @return {number}
-   */
-  getDuration() {}
-
-  /**
-   * Get a 2d array of start and stop times that the user has watched.
-   * @return {!Array<Array<number>>}
-   */
-  getPlayedRanges() {}
-
-  /**
    * Plays the video..
    *
    * @param {boolean} unusedIsAutoplay Whether the call to the `play` method is
@@ -131,6 +113,36 @@ export class VideoInterface {
 
 
 /**
+ * @interface
+ */
+export class VideoInterfaceWithAnalytics extends VideoInterface {
+  /**
+   * Should return true.
+   * @return {boolean}
+   */
+  supportsAnalytics() {}
+
+  /**
+   * Current playback time in seconds at time of trigger
+   * @return {number}
+   */
+  getCurrentTime() {}
+
+  /**
+   * Total duration of the video in seconds
+   * @return {number}
+   */
+  getDuration() {}
+
+  /**
+   * Get a 2d array of start and stop times that the user has watched.
+   * @return {!Array<Array<number>>}
+   */
+  getPlayedRanges() {}
+}
+
+
+/**
  * Attributes
  *
  * Components implementing the VideoInterface are expected to support
@@ -179,16 +191,6 @@ export const VideoAttributes = {
  * @constant {!Object<string, string>}
  */
 export const VideoEvents = {
-  /**
-   * registered
-   *
-   * Fired when the video player element is built and has been registered with
-   * the video manager.
-   *
-   * @event registered
-   */
-  REGISTERED: 'registered',
-
   /**
    * load
    *
