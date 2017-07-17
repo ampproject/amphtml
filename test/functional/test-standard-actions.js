@@ -206,31 +206,6 @@ describes.sandboxed('StandardActions', {}, () => {
     });
   });
 
-  describe('"blur" action', () => {
-    it('should handle normal element', () => {
-      const element = createElement();
-      const invocation = {target: element, satisfiesTrust: () => true};
-      const focusStub = sandbox.stub(element, 'focus');
-      const blurStub = sandbox.stub(element, 'blur');
-      standardActions.handleFocus(invocation);
-      expect(focusStub).to.be.calledOnce;
-      standardActions.handleBlur(invocation);
-      expect(blurStub).to.be.calledOnce;
-    });
-
-    it('should handle AmpElement', () => {
-      const element = createAmpElement();
-      const invocation = {target: element, satisfiesTrust: () => true};
-      const focusStub = sandbox.stub(element, 'focus');
-      const blurStub = sandbox.stub(element, 'blur');
-      standardActions.handleFocus(invocation);
-      expect(focusStub).to.be.calledOnce;
-      standardActions.handleBlur(invocation);
-      expect(blurStub).to.be.calledOnce;
-    });
-  });
-
-
   describe('"AMP" global target', () => {
     it('should implement navigateTo', () => {
       const expandUrlStub = sandbox.stub(standardActions.urlReplacements_,
@@ -351,7 +326,7 @@ describes.sandboxed('StandardActions', {}, () => {
       expect(stub).to.be.calledOnce;
 
       // Global actions.
-      expect(embedActions.addGlobalMethodHandler).to.have.callCount(6);
+      expect(embedActions.addGlobalMethodHandler).to.have.callCount(5);
       expect(embedActions.addGlobalMethodHandler.args[0][0]).to.equal('hide');
       expect(embedActions.addGlobalMethodHandler.args[0][1]).to.be.function;
       expect(embedActions.addGlobalMethodHandler.args[1][0]).to.equal('show');
@@ -365,8 +340,6 @@ describes.sandboxed('StandardActions', {}, () => {
       expect(embedActions.addGlobalMethodHandler.args[4][0]).to
           .equal('focus');
       expect(embedActions.addGlobalMethodHandler.args[4][1]).to.be.function;
-      expect(embedActions.addGlobalMethodHandler.args[5][0]).to.equal('blur');
-      expect(embedActions.addGlobalMethodHandler.args[5][1]).to.be.function;
       embedActions.addGlobalMethodHandler.args[0][1]();
       expect(hideStub).to.be.calledOnce;
     });

@@ -88,7 +88,6 @@ export class StandardActions {
         'scrollTo', this.handleScrollTo.bind(this));
     actionService.addGlobalMethodHandler(
         'focus', this.handleFocus.bind(this));
-    actionService.addGlobalMethodHandler('blur', this.handleBlur.bind(this));
   }
 
   /**
@@ -226,18 +225,6 @@ export class StandardActions {
 
     // Set focus
     tryFocus(node);
-  }
-
-  /**
-   * Handles the `blur` action where given an element, we make it lose its focus
-   * @param {!./action-impl.ActionInvocation} invocation
-   */
-  handleBlur(invocation) {
-    if (!invocation.satisfiesTrust(ActionTrust.MEDIUM)) {
-      return;
-    }
-    const node = invocation.target;
-    node.blur();
   }
 
   /**

@@ -71,12 +71,11 @@
   <button on="tap:normal-element.show">Show</button>
   <button on="tap:normal-element.hide">Hide</button>
   <button on="tap:normal-element.toggleVisibility">Toggle Visibility</button>
-  <button on="tap:form.scrollTo">ScrollTo</button>
-  <button on="tap:form.scrollTo('position' = 'bottom')">ScrollTo Bottom</button>
-  <button on="tap:form.scrollTo('position' = 'center')">ScrollTo Center</button>
-  <button on="tap:form.scrollTo('duration' = 5000)">ScrollTo Slowly</button>
-  <button on="tap:name1.focus">Focus</button>
-  <button on="tap:name1.blur">Lose Focus</button>
+  <button on="tap:normal-element2.scrollTo">ScrollTo</button>
+  <button on="tap:normal-element2.scrollTo('position' = 'bottom')">ScrollTo Bottom</button>
+  <button on="tap:normal-element2.scrollTo('position' = 'center')">ScrollTo Center</button>
+  <button on="tap:normal-element2.scrollTo('duration' = 5000)">ScrollTo Slowly</button>
+  <button on="tap:input-element.focus">Focus</button>
 </div>
 
 <amp-img src="https://ampbyexample.com/img/amp.jpg" layout="responsive" width="1080" height="610" id="img-on-viewport"></amp-img>
@@ -88,37 +87,12 @@
 <div class="spacer">
 </div>
 
-<h4>Subscribe to our weekly Newsletter Form</h4>
-<form id="form" method="post"
-      action-xhr="/form/echo-json/post"
-      target="_blank">
-    <fieldset>
-        <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
-        <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
-        <label>
-            <span>Your name</span>
-            <input type="text" name="name" id="name1" required>
-        </label>
-        <label>
-            <span>Your email</span>
-            <input type="email" name="email" id="email1" required>
-        </label>
-        <input type="submit" value="Subscribe">
-    </fieldset>
-    <div submitting>
-      <template type="amp-mustache">
-        Please wait, {{name}}.
-      </template>
-    </div>
-    <div submit-success>
-      Success! Thanks for subscribing! Please make sure to check your email
-      to confirm!
-    </div>
-    <div submit-error>
-      <amp-img width="32" height="32" src="/examples/x-icon.png"></amp-img>
-      Oops! We apologize, something went wrong. Please try again later.
-    </div>
-</form>
+<div id="normal-element2">
+  You have to scroll to see me.
+</div>
+
+
+<input type="text" id="input-element">
 
 <div class="spacer">
 </div>
