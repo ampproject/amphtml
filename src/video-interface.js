@@ -263,16 +263,6 @@ export const VideoEvents = {
    * @event ended
    */
   ENDED: 'ended',
-
-  /**
-   * amp:video:analytics
-   *
-   * Fired when an analytics event occurs
-   *
-   * @event amp:video:analytics
-   * @property {!VideoAnalyticsDetailsDef} details
-   */
-  ANALYTICS: 'amp:video:analytics',
 };
 
 

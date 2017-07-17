@@ -452,7 +452,7 @@ export class VideoEventTracker extends EventTracker {
     const on = config['on'];
 
     return this.sessionObservable_.add(event => {
-      const type = event.name;
+      const type = event.type;
       const details = /** @type {!VideoAnalyticsDetailsDef} */ (getData(event));
       const isVisibleType = type === VideoAnalyticsEvents.SESSION_VISIBLE;
       const normalizedType =
