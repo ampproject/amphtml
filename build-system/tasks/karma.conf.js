@@ -50,7 +50,7 @@ module.exports = {
     icon: {
       success : '✔',
       failure : '✖',
-      ignore  : '-'
+      ignore  : '❓'
     }
   },
 
