@@ -129,6 +129,40 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     expect(root.getRootVisibility()).to.equal(1);
   });
 
+  it('should resolve root layout box', () => {
+    const rootElement = win.document.documentElement;
+    sandbox.stub(viewport, 'getLayoutRect', element => {
+      if (element == rootElement) {
+        return layoutRectLtwh(0, 0, 101, 201);
+      }
+      return null;
+    });
+    expect(root.getRootLayoutBox()).to.contain({
+      left: 0,
+      top: 0,
+      width: 101,
+      height: 201,
+    });
+  });
+
+  it('should resolve root layout box for in-a-box', () => {
+    win.AMP_MODE = {runtime: 'inabox'};
+    root = new VisibilityManagerForDoc(ampdoc);
+    const rootElement = win.document.documentElement;
+    sandbox.stub(viewport, 'getLayoutRect', element => {
+      if (element == rootElement) {
+        return layoutRectLtwh(11, 21, 101, 201);
+      }
+      return null;
+    });
+    expect(root.getRootLayoutBox()).to.contain({
+      left: 11,
+      top: 21,
+      width: 101,
+      height: 201,
+    });
+  });
+
   it('should switch visibility based on viewer for main doc', () => {
     expect(viewer.visibilityObservable_.getHandlerCount())
         .equal(startVisibilityHandlerCount + 1);
@@ -299,6 +333,8 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     const disposed = sandbox.spy();
     const spec = {totalTimeMin: 10};
     root.listenRoot(spec, null, null, eventResolver);
+    sandbox.stub(root, 'getRootLayoutBox',
+        () => layoutRectLtwh(11, 21, 101, 201));
 
     expect(root.models_).to.have.length(1);
     const model = root.models_[0];
@@ -325,6 +361,11 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
       expect(state.backgrounded).to.equal(0);
       expect(state.backgroundedAtStart).to.equal(0);
       expect(state.totalTime).to.equal(12);
+
+      expect(state.elementX).to.equal(11);
+      expect(state.elementY).to.equal(21);
+      expect(state.elementWidth).to.equal(101);
+      expect(state.elementHeight).to.equal(201);
     });
   });
 
@@ -443,8 +484,6 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
       expect(state.backgrounded).to.equal(0);
       expect(state.backgroundedAtStart).to.equal(0);
       expect(state.totalTime).to.equal(12);
-
-      expect(state.elementX).to.be.undefined;
     });
   });
 
@@ -588,6 +627,7 @@ describes.realWin('EmbedAnalyticsRoot', {
   let embed;
   let clock;
   let viewer;
+  let viewport;
   let parentRoot;
   let root;
   let inob;
@@ -601,6 +641,7 @@ describes.realWin('EmbedAnalyticsRoot', {
     clock = sandbox.useFakeTimers();
     clock.tick(1);
 
+    viewport = parentWin.services.viewport.obj;
     viewer = parentWin.services.viewer.obj;
     sandbox.stub(viewer, 'getFirstVisibleTime', () => 1);
 
@@ -661,6 +702,21 @@ describes.realWin('EmbedAnalyticsRoot', {
     // Root model starts invisible.
     root.setRootVisibility(1);
     expect(root.getRootVisibility()).to.equal(1);
+  });
+
+  it('should resolve root layout box', () => {
+    sandbox.stub(viewport, 'getLayoutRect', element => {
+      if (element == embed.host) {
+        return layoutRectLtwh(11, 21, 101, 201);
+      }
+      return null;
+    });
+    expect(root.getRootLayoutBox()).to.contain({
+      left: 11,
+      top: 21,
+      width: 101,
+      height: 201,
+    });
   });
 
   it('should ask parent to observe host element', () => {
