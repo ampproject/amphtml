@@ -21,6 +21,10 @@ import {batchedXhrFor} from '../../src/services';
 import * as sinon from 'sinon';
 
 describe.configure().skipSauceLabs().run('amp-bind', function() {
+  // Give more than default 2000ms timeout for local testing.
+  const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
+  this.timeout(TIMEOUT);
+
   let fixture;
   let sandbox;
   let numSetStates;
