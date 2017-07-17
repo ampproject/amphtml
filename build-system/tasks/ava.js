@@ -26,7 +26,8 @@ function runAvaTests() {
     'csvify-size/test.js',
     'get-zindex/test.js',
     'prepend-global/test.js'
-  ]).pipe(ava({silent: true}))
+  ])
+  .pipe(ava({ silent: process.env.TRAVIS ? true : false }));
 }
 
 gulp.task('ava', 'Runs ava tests for gulp tasks', runAvaTests);
