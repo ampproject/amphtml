@@ -22,7 +22,7 @@ import {writeScript, validateData} from '../3p/3p';
  */
 export function widespace(global, data) {
 
-  const WS_AMP_CODE_VER = '1.0.0';
+  const WS_AMP_CODE_VER = '1.0.1';
 
   validateData(data, ['sid'], ['demoGender', 'demoCountry', 'demoRegion', 'demoCity', 'demoPostal', 'demoYob']);
 
