@@ -25,7 +25,7 @@ import {Services} from '../../../src/services';
 import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 
-/** @const {string} */
+/** @private @const {string} */
 const TAG_ = 'amp-analytics.Transport';
 
 /**
