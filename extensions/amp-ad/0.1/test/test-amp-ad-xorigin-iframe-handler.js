@@ -22,7 +22,7 @@ import {
   expectPostMessage,
 } from '../../../../testing/iframe';
 import {AmpAdUIHandler} from '../amp-ad-ui';
-import {ampdocServiceFor, timerFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import * as sinon from 'sinon';
 
 describe('amp-ad-xorigin-iframe-handler', () => {
@@ -36,7 +36,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    const ampdocService = ampdocServiceFor(window);
+    const ampdocService = Services.ampdocServiceFor(window);
     const ampdoc = ampdocService.getAmpDoc();
     const adElement = document.createElement('container-element');
     adElement.getAmpDoc = () => ampdoc;
@@ -191,7 +191,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
           const clock = sandbox.useFakeTimers();
           clock.tick(0);
           const timeoutPromise =
-              timerFor(window).timeoutPromise(2000, initPromise);
+              Services.timerFor(window).timeoutPromise(2000, initPromise);
           clock.tick(2001);
           return expect(timeoutPromise).to.eventually
               .be.rejectedWith(/timeout/);

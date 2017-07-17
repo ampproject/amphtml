@@ -16,11 +16,15 @@
 import {AmpEvents} from '../../src/amp-events';
 import {BindEvents} from '../../extensions/amp-bind/0.1/bind-events';
 import {FormEvents} from '../../extensions/amp-form/0.1/form-events';
+import {Services} from '../../src/services';
 import {createFixtureIframe} from '../../testing/iframe';
-import {batchedXhrFor} from '../../src/services';
 import * as sinon from 'sinon';
 
 describe.configure().skipSauceLabs().run('amp-bind', function() {
+  // Give more than default 2000ms timeout for local testing.
+  const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
+  this.timeout(TIMEOUT);
+
   let fixture;
   let sandbox;
   let numSetStates;
@@ -566,7 +570,7 @@ describe.configure().skipSauceLabs().run('amp-bind', function() {
       const triggerBindApplicationButton =
           fixture.doc.getElementById('triggerBindApplicationButton');
       const ampState = fixture.doc.getElementById('ampState');
-      const batchedXhr = batchedXhrFor(fixture.win);
+      const batchedXhr = Services.batchedXhrFor(fixture.win);
       // Stub XHR for endpoint such that it returns state that would point
       // the amp-state element back to its original source.
       sandbox.stub(batchedXhr, 'fetchJson')

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {resourcesForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 
 /**
  * Structure for defining contraints about the placement of ads.
@@ -129,7 +129,7 @@ export class AdTracker {
    * @private
    */
   getDistanceFromAd_(yPosition, ad) {
-    return resourcesForDoc(ad).getElementLayoutBox(ad).then(box => {
+    return Services.resourcesForDoc(ad).getElementLayoutBox(ad).then(box => {
       if (yPosition >= box.top && yPosition <= box.bottom) {
         return 0;
       } else {

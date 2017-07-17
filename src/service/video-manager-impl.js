@@ -30,12 +30,7 @@ import {
   VideoAttributes,
   VideoEvents,
 } from '../video-interface';
-import {
-  viewerForDoc,
-  viewportForDoc,
-  vsyncFor,
-  platformFor,
-} from '../services';
+import {Services} from '../services';
 import {
   installPositionObserverServiceForDoc,
   PositionObserverFidelity,
@@ -175,7 +170,7 @@ export class VideoManager {
           this.entries_[i].updateVisibility();
         }
       };
-      const viewport = viewportForDoc(this.ampdoc_);
+      const viewport = Services.viewportForDoc(this.ampdoc_);
       viewport.onScroll(scrollListener);
       viewport.onChanged(scrollListener);
       this.scrollListenerInstalled_ = true;
@@ -282,7 +277,7 @@ class VideoEntry {
     this.isVisible_ = false;
 
     /** @private @const {!../service/vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(ampdoc.win);
+    this.vsync_ = Services.vsyncFor(ampdoc.win);
 
     /** @private @const */
     this.actionSessionManager_ = new VideoSessionManager();
@@ -437,7 +432,7 @@ class VideoEntry {
    * @private
    */
   loadedVideoVisibilityChanged_() {
-    if (!viewerForDoc(this.ampdoc_).isVisible()) {
+    if (!Services.viewerForDoc(this.ampdoc_).isVisible()) {
       return;
     }
 
@@ -817,7 +812,7 @@ class VideoEntry {
       }
       anim.appendChild(column);
     }
-    const platform = platformFor(this.ampdoc_.win);
+    const platform = Services.platformFor(this.ampdoc_.win);
     if (platform.isIos()) {
       // iOS can not pause hardware accelerated animations.
       anim.setAttribute('unpausable', '');
