@@ -309,7 +309,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    *
    * @param {!Object<string, string>} params The params that need to be renamed.
    * @param {!Object<string, string>} replaceMap A map of pattern and replacement
-   *    value.
+   *     value.
    * @private
    */
   processExtraUrlParams_(params, replaceMap) {
