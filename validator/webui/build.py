@@ -108,7 +108,7 @@ def InstallNodeDependencies():
   # Install the project dependencies specified in package.json into
   # node_modules.
   logging.info('installing AMP Validator webui dependencies ...')
-  subprocess.check_call(['npm', 'install', '--loglevel=silent'])
+  subprocess.check_call(['npm', 'install', '> /dev/null'])
   logging.info('... done')
 
 
