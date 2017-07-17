@@ -32,7 +32,7 @@ AMP is an open ecosystem and the AMP Project actively encourages the development
 
     1. Implements separately documented security rewrites on served content.
 
-    2. The CSP should be equivalent or stronger to what is being served on [cdn.ampproject.org](http://cdn.ampproject.org).
+    2. The CSP should be equivalent or stronger to what is being served on `cdn.ampproject.org`.
 
     3. Caches must update their CSP in a timely fashion (within 7 days) at the request of the AMP Project.
 
@@ -56,7 +56,7 @@ AMP is an open ecosystem and the AMP Project actively encourages the development
 
     1. The cache is allowed to serve stale content independent of HTTP caching headers. It must make reasonable efforts to keep the cache contents fresh and must revalidate content after serving stale responses.
 
-14. Follows [AMP cache modifications best practices](/spec/amp-cache-modifications.md).
+14. Follows [AMP cache modifications best practices](../spec/amp-cache-modifications.md).
 
 ## Guidelines: Crawling 
 
