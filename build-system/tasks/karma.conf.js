@@ -44,7 +44,7 @@ module.exports = {
     bundleDelay: 900,
   },
 
-  reporters: [process.env.TRAVIS ? 'dots' : 'progress'],
+  reporters: [process.env.TRAVIS ? 'super-dots' : 'progress'],
 
   port: 9876,
 
@@ -182,9 +182,11 @@ module.exports = {
     'karma-fixture',
     'karma-html2js-preprocessor',
     'karma-mocha',
+    'karma-mocha-reporter',
     'karma-safari-launcher',
     'karma-sauce-launcher',
     'karma-sinon-chai',
+    'karma-super-dots-reporter',
     {
       'middleware:custom': ['factory', function() {
         return require(require.resolve('../app.js'));
