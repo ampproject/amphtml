@@ -578,7 +578,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                 if (text == '') {
                   return Promise.resolve(rtcTotalTime);
                 }
-                const rtcResponse = JSON.parse(text);
+                const rtcResponse = tryParseJson(text);
                 return {rtcResponse, rtcTotalTime};
               });
             }));
@@ -644,7 +644,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (errMessage.match(/^timeout/)) {
       timeParam = -1;
     }
-    return String(rtcConfig['sendAdRequestOnFailure']) !=='false' ?
+    return String(rtcConfig['sendAdRequestOnFailure']) !== 'false' ?
         Promise.resolve(timeParam) : Promise.reject(errMessage);
   };
 

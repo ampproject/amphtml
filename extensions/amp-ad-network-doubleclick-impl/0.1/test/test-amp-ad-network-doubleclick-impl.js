@@ -1087,7 +1087,6 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
 
     it('should add just targeting to impl', () => {
       const targeting = {'sport': 'baseball'};
-      const categoryExclusions = {};
       const jsonTargeting = {
         targeting,
       };
@@ -1099,7 +1098,6 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     });
 
     it('should add just categoryExclusions to impl', () => {
-      const targeting = {};
       const categoryExclusions = {'sport': 'baseball'};
       const jsonTargeting = {
         categoryExclusions,
