@@ -79,7 +79,7 @@ export function runVideoPlayerIntegrationTests(
   describe.configure().skipSauceLabs().run('Actions', function() {
     this.timeout(TIMEOUT);
 
-    it('should support mute, play, pause, unmute actions', function() {
+    it.skip('should support mute, play, pause, unmute actions', function() {
       return getVideoPlayer({outsideView: false, autoplay: false}).then(r => {
         // Create a action buttons
         const playButton = createButton(r, 'play');
