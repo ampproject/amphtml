@@ -1033,17 +1033,17 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
     let impl;
     let xhrMock;
 
-    function mockRtcExecution(rtcResponse, element, opt_jsonFunction) {
+    function mockRtcExecution(rtcResponse, element, opt_textFunction) {
       impl = new AmpAdNetworkDoubleclickImpl(element);
-      let jsonFunction = () => {
-        return Promise.resolve(rtcResponse);
+      let textFunction = () => {
+        return Promise.resolve(JSON.stringify(rtcResponse));
       };
-      jsonFunction = opt_jsonFunction || jsonFunction;
+      textFunction = opt_textFunction || textFunction;
       xhrMock.returns(
           Promise.resolve({
             redirected: false,
             status: 200,
-            json: jsonFunction,
+            text: textFunction,
           })
       );
       impl.populateAdUrlState();
@@ -1090,7 +1090,6 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       const categoryExclusions = {};
       const jsonTargeting = {
         targeting,
-        categoryExclusions,
       };
       return mockRtcExecution({
         targeting,
@@ -1103,7 +1102,6 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       const targeting = {};
       const categoryExclusions = {'sport': 'baseball'};
       const jsonTargeting = {
-        targeting,
         categoryExclusions,
       };
       return mockRtcExecution({
@@ -1200,6 +1198,15 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         targeting,
       }, element).then(() => {
         expect(xhrMock).to.not.be.called;
+      });
+    });
+
+    it('should resolve on empty RTC response', () => {
+      return mockRtcExecution('', element).then(() => {
+        // All that we are expecting here is that a Promise.reject doesn't
+        // bubble up
+      }).catch(() => {
+        expect(false).to.be.true;
       });
     });
 

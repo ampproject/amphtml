@@ -69,7 +69,7 @@ import {setStyles} from '../../../src/style';
 import {utf8Encode} from '../../../src/utils/bytes';
 import {deepMerge} from '../../../src/utils/object';
 import {isCancellation} from '../../../src/error';
-import {isSecureUrl} from '../../../src/url';
+import {isSecureUrl, parseUrl} from '../../../src/url';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -364,7 +364,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             this.getBlockParameters_(), pageLevelParameters);
         if (rtcTotalTime && rtcConfig && rtcConfig['endpoint']) {
           parameters['artc'] = rtcTotalTime;
-          parameters['ard'] = rtcConfig['endpoint'];
+          parameters['ard'] = parseUrl(rtcConfig['endpoint']).hostname;
         }
         return googleAdUrl(
             this, DOUBLECLICK_BASE_URL, startTime, parameters, ['108809080']);
@@ -535,17 +535,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     rtcConfig = tryParseJson(ampRtcPageElement.textContent);
     if (!isObject(rtcConfig) || !(endpoint = rtcConfig['endpoint']) ||
         typeof endpoint != 'string' || !isSecureUrl(endpoint)) {
-      user().warn(
-          TAG,
+      user().warn(TAG,
           `invalid RTC config: ${ampRtcPageElement.textContent}`);
       return Promise.resolve();
     }
     let rtcTotalTime;
     const disableSWR = (
         rtcConfig['disableStaleWhileRevalidate'] === true);
-    const headers = new Headers();
-    headers.append('Cache-Control', 'max-age=0');
-    const xhrInit = {credentials: 'include'};
     const startTime = Date.now();
     // Because we are wrapping the RTC request in the timeout,
     // we are guaranteeing that if the RTC is slow to return and
@@ -559,10 +555,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     rtcPromise = timerFor(window).timeoutPromise(
         RTC_TIMEOUT,
         xhrFor(this.win).fetchJson(
-            endpoint, xhrInit).then(res => {
+            endpoint, {credentials: 'include'}).then(res => {
               rtcTotalTime = Date.now() - startTime;
               if (!disableSWR) {
                 // Repopulate the cache.
+                const headers = new Headers();
+                headers.append('Cache-Control', 'max-age=0');
                 xhrFor(this.win).fetchJson(endpoint, {
                   credentials: 'include',
                   headers,
@@ -576,7 +574,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               if (res.status != 200) {
                 return null;
               }
-              return res.json().then(rtcResponse => {
+              return res.text().then(text => {
+                if (text == '') {
+                  return Promise.resolve(rtcTotalTime);
+                }
+                const rtcResponse = JSON.parse(text);
                 return {rtcResponse, rtcTotalTime};
               });
             }));
@@ -597,22 +599,27 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return rtcPromise.then(
         r => {
           // Don't try to merge if we're sending without RTC.
-          let rtcResponse;
-          if (!r || !(rtcResponse = r.rtcResponse)) {
+          if (!r) {
             return this.shouldSendRequestWithoutRtc(
                 'Bad response');
+          } else if (typeof r == 'number') {
+            return Promise.resolve(r);
           }
-          const rtcTotalTime = r.rtcTotalTime;
-          if (!!rtcResponse['targeting'] ||
-              !!rtcResponse['categoryExclusions']) {
+
+          const rtcResponse = r.rtcResponse;
+          if (!!rtcResponse['targeting']) {
             this.jsonTargeting_['targeting'] = deepMerge(
                 this.jsonTargeting_['targeting'] || {},
-                rtcResponse['targeting'] || {});
+                rtcResponse['targeting']);
+          }
+          if (!!rtcResponse['categoryExclusions']) {
             this.jsonTargeting_['categoryExclusions'] = deepMerge(
                 this.jsonTargeting_['categoryExclusions'] || {},
-                rtcResponse['categoryExclusions'] || {});
+                rtcResponse['categoryExclusions']);
           }
-          return Promise.resolve(rtcTotalTime);
+          // rtcTotalTime is only the time that the rtc callout took,
+          // does not include the time to merge.
+          return Promise.resolve(r.rtcTotalTime);
         }).catch(err => {
           const errMessage = (!!err && !!err.message) ?
               err.message : 'Unknown error';
@@ -637,8 +644,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (errMessage.match(/^timeout/)) {
       timeParam = -1;
     }
-    return (rtcConfig['sendAdRequestOnFailure'] !== false &&
-        rtcConfig['sendAdRequestOnFailure'] != 'false') ?
+    return String(rtcConfig['sendAdRequestOnFailure']) !=='false' ?
         Promise.resolve(timeParam) : Promise.reject(errMessage);
   };
 
