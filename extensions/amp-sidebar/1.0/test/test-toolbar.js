@@ -16,6 +16,7 @@
  */
 
  import {adopt} from '../../../../src/runtime';
+ import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
  import {createIframePromise} from '../../../../testing/iframe';
  import {Services} from '../../../../src/services';
  import {toArray} from '../../../../src/types';
@@ -28,6 +29,7 @@
    let sandbox;
    let timer;
    let vsync;
+   let ampDoc;
 
    function getToolbars(options) {
      options = options || {};
@@ -82,7 +84,7 @@
          }
          navToolbar.appendChild(toolbarList);
          toolbarContainerElement.appendChild(navToolbar);
-         toolbars.push(new Toolbar(navToolbar, iframe.win, vsync));
+         toolbars.push(new Toolbar(navToolbar, iframe.win, vsync, ampDoc));
        });
 
        return {iframe, toolbarContainerElement, toolbars};
@@ -98,6 +100,7 @@
 
    beforeEach(() => {
      sandbox = sinon.sandbox.create();
+     ampDoc = new AmpDocSingle(window);
    });
 
    afterEach(() => {

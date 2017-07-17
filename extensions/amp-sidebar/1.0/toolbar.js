@@ -22,8 +22,9 @@ export class Toolbar {
   * @param {!Element} element
   * @param {!Window} win
   * @param {!../../../src/service/vsync-impl.Vsync} vsync
+  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
   */
-  constructor(element, win, vsync) {
+  constructor(element, win, vsync, ampDoc) {
     /** @private {!Element} */
     this.toolbarDomElement_ = element;
 
@@ -38,6 +39,9 @@ export class Toolbar {
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = vsync;
+
+    /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampDoc_ = ampDoc;
 
     /** @private {!string} */
     this.toolbarMedia_ = this.toolbarDomElement_.getAttribute('toolbar');
@@ -98,15 +102,19 @@ export class Toolbar {
     this.toolbarClone_ = this.toolbarDomElement_.cloneNode(true);
     const targetId = this.toolbarDomElement_.getAttribute('toolbar-target');
     // Set the target element to the toolbar clone if it exists.
-    const targetElement = this.win_.document.getElementById(targetId);
-    if (targetElement) {
-      this.toolbarTarget_ = targetElement;
-      this.toolbarClone_.classList.add('i-amphtml-toolbar');
-      toggle(this.toolbarTarget_, false);
-    } else {
-      throw new Error('Could not find the ' +
-      `toolbar-target element with an id: ${targetId}`);
-    }
+    this.ampDoc_.whenReady().then(() => {
+      const targetElement = this.win_.document.getElementById(targetId);
+      if (targetElement) {
+        this.toolbarTarget_ = targetElement;
+        this.toolbarClone_.classList.add('i-amphtml-toolbar');
+        toggle(this.toolbarTarget_, false);
+      } else {
+        // This error will be later rethrown as a user error and
+        // the side bar will continue to function w/o toolbar feature
+        throw new Error('Could not find the ' +
+        `toolbar-target element with an id: ${targetId}`);
+      }
+    });
   }
 
   /**
