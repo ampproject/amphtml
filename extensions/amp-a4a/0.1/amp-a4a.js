@@ -124,7 +124,7 @@ export let SizeInfoDef;
 
 /** @typedef {{
       minifiedCreative: string,
-      customElementExtensions: !Array<string>,
+      extensions: !Array<string>,
       customStylesheets: !Array<{href: string}>
     }} */
 let CreativeMetaDataDef;
@@ -716,9 +716,6 @@ export class AmpA4A extends AMP.BaseElement {
           // viewport but cannot wait on promise.  Sadly, need a state a
           // variable.
           this.isVerifiedAmpCreative_ = !!creative;
-          // TODO(levitzky) If creative comes back null, we should consider re-
-          // fetching the signing server public keys and try the verification
-          // step again.
           return creative && utf8Decode(creative);
         })
         // This block returns CreativeMetaDataDef iff the creative was verified
@@ -739,9 +736,8 @@ export class AmpA4A extends AMP.BaseElement {
           this.updatePriority(0);
           // Load any extensions; do not wait on their promises as this
           // is just to prefetch.
-          const extensions = extensionsFor(this.win);
-          creativeMetaDataDef.customElementExtensions.forEach(
-              extensionId => extensions.loadExtension(extensionId));
+          this.loadExtensions_(/** @type {!Array<!Object<string, string>>} */
+              (creativeMetaDataDef.extensions));
           return creativeMetaDataDef;
         })
         .catch(error => {
@@ -1547,15 +1543,14 @@ export class AmpA4A extends AMP.BaseElement {
         throw new Error('Invalid runtime offsets');
       }
       const metaData = {};
-      if (metaDataObj['customElementExtensions']) {
-        metaData.customElementExtensions =
-          metaDataObj['customElementExtensions'];
-        if (!isArray(metaData.customElementExtensions)) {
+      if (metaDataObj['extensions']) {
+        metaData.extensions = metaDataObj['extensions'];
+        if (!isArray(metaData.extensions)) {
           throw new Error(
-              'Invalid extensions', metaData.customElementExtensions);
+              'Invalid extensions', metaData.extensions);
         }
       } else {
-        metaData.customElementExtensions = [];
+        metaData.extensions = [];
       }
       if (metaDataObj['customStylesheets']) {
         // Expect array of objects with at least one key being 'href' whose
@@ -1586,6 +1581,21 @@ export class AmpA4A extends AMP.BaseElement {
           creative.slice(metadataStart + METADATA_STRING.length, metadataEnd));
       return null;
     }
+  }
+
+  /**
+   * Loads the necessary extension scripts, as specified in the metadata.
+   * @param {!Array<!Object<string, string>>} extensionList
+   */
+  loadExtensions_(extensionList) {
+    const extensions = extensionsFor(this.win);
+    extensionList.forEach(extension => {
+      const extensionId = extension['custom-element'];
+      const extensionSrc = extension['src'];
+      const regex = /-(\d+\.\d+)\.js$/;
+      const extensionVer = regex.exec(extensionSrc)[1];
+      extensions.loadExtension(extensionId, extensionVer);
+    });
   }
 
   /**

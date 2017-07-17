@@ -64,6 +64,23 @@ function setupForAdTesting(fixture) {
   doc.head.appendChild(ampStyle);
 }
 
+// This code is used repeatedly in various test cases. It is part of the meta-
+// data blob.
+const extensions = [
+  {
+    'custom-element': 'amp-vine',
+    'src': 'https://cdn.ampproject.org/v0/amp-vine-0.1.js',
+  },
+  {
+    'custom-element': 'amp-vine',
+    'src': 'https://cdn.ampproject.org/v0/amp-vine-0.1.js',
+  },
+  {
+    'custom-element': 'amp-vine',
+    'src': 'https://cdn.ampproject.org/v0/amp-vine-0.1.js',
+  },
+];
+
 describe('amp-a4a', () => {
   let sandbox;
   let xhrMock;
@@ -92,7 +109,7 @@ describe('amp-a4a', () => {
           credentials: 'omit',
         }).returns(Promise.resolve({
           json() {
-            return Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]});
+            return Promise.resolve(JSON.parse(validCSSAmp.signingKey));
           },
         }));
     viewerWhenVisibleMock = sandbox.stub(Viewer.prototype, 'whenFirstVisible');
@@ -859,7 +876,8 @@ describe('amp-a4a', () => {
               'xhr.fetchTextAndHeaders called exactly once').to.be.true;
           expect(extractCreativeAndSignatureSpy.calledOnce,
               'extractCreativeAndSignatureSpy called exactly once').to.be.true;
-          expect(loadExtensionSpy.withArgs('amp-font')).to.be.calledOnce;
+          expect(loadExtensionSpy.withArgs('amp-font', '0.1'))
+              .to.be.calledOnce;
           return a4a.layoutCallback().then(() => {
             expect(renderAmpCreativeSpy.calledOnce,
                 'renderAmpCreative_ called exactly once').to.be.true;
@@ -1379,7 +1397,7 @@ describe('amp-a4a', () => {
     });
     it('should parse metadata', () => {
       const actual = a4a.getAmpAdMetadata_(buildCreativeString({
-        customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
+        extensions,
         customStylesheets: [
           {href: 'https://fonts.googleapis.com/css?foobar'},
           {href: 'https://fonts.com/css?helloworld'},
@@ -1387,7 +1405,7 @@ describe('amp-a4a', () => {
       }));
       const expected = {
         minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
-        customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
+        extensions,
         customStylesheets: [
           {href: 'https://fonts.googleapis.com/css?foobar'},
           {href: 'https://fonts.com/css?helloworld'},
@@ -1399,7 +1417,7 @@ describe('amp-a4a', () => {
     // fixed.
     it('should parse metadata with wrong opening tag', () => {
       const creative = buildCreativeString({
-        customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
+        extensions,
         customStylesheets: [
           {href: 'https://fonts.googleapis.com/css?foobar'},
           {href: 'https://fonts.com/css?helloworld'},
@@ -1409,7 +1427,7 @@ describe('amp-a4a', () => {
       const actual = a4a.getAmpAdMetadata_(creative);
       const expected = {
         minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
-        customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
+        extensions,
         customStylesheets: [
           {href: 'https://fonts.googleapis.com/css?foobar'},
           {href: 'https://fonts.com/css?helloworld'},
@@ -1419,7 +1437,7 @@ describe('amp-a4a', () => {
     });
     it('should return null if metadata opening tag is (truly) wrong', () => {
       const creative = buildCreativeString({
-        customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
+        extensions,
         customStylesheets: [
           {href: 'https://fonts.googleapis.com/css?foobar'},
           {href: 'https://fonts.com/css?helloworld'},
@@ -1439,7 +1457,7 @@ describe('amp-a4a', () => {
     });
     it('should return null if invalid extensions', () => {
       expect(a4a.getAmpAdMetadata_(buildCreativeString({
-        customElementExtensions: 'amp-vine',
+        extensions: 'amp-vine',
         customStylesheets: [
           {href: 'https://fonts.googleapis.com/css?foobar'},
           {href: 'https://fonts.com/css?helloworld'},
@@ -1448,13 +1466,13 @@ describe('amp-a4a', () => {
     });
     it('should return null if non-array stylesheets', () => {
       expect(a4a.getAmpAdMetadata_(buildCreativeString({
-        customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
+        extensions,
         customStylesheets: 'https://fonts.googleapis.com/css?foobar',
       }))).to.be.null;
     });
     it('should return null if invalid stylesheet object', () => {
       expect(a4a.getAmpAdMetadata_(buildCreativeString({
-        customElementExtensions: ['amp-vine', 'amp-vine', 'amp-vine'],
+        extensions,
         customStylesheets: [
           {href: 'https://fonts.googleapis.com/css?foobar'},
           {foo: 'https://fonts.com/css?helloworld'},
@@ -1945,7 +1963,9 @@ describe('amp-a4a', () => {
 
     it('should fetch multiple keys', () => {
       // For our purposes, re-using the same key is fine.
-      const testKey = JSON.parse(validCSSAmp.publicKey);
+      const testKeys = JSON.parse(validCSSAmp.signingKey);
+      testKeys.keys[1] = testKeys.keys[0];
+      testKeys.keys[2] = testKeys.keys[0];
       xhrMockJson.withArgs(
           'https://cdn.ampproject.org/amp-ad-verifying-keyset.json', {
             mode: 'cors',
@@ -1954,7 +1974,7 @@ describe('amp-a4a', () => {
             credentials: 'omit',
           }).returns(Promise.resolve({
             json() {
-              return Promise.resolve({keys: [testKey, testKey, testKey]});
+              return Promise.resolve(testKeys);
             },
           }));
       expect(win.ampA4aValidationKeys).not.to.exist;
@@ -1996,7 +2016,7 @@ describe('amp-a4a', () => {
           }).returns(Promise.resolve({
             json() {
               return Promise.resolve({keys: [
-                JSON.parse(validCSSAmp.publicKey),
+                JSON.parse(validCSSAmp.signingKey),
               ]});
             },
           }));

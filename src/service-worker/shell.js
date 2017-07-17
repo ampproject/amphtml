@@ -26,5 +26,5 @@ installWorkerErrorReporting('sw');
  * thus, if a new SW must be installed) will be very fast.
  */
 const url = calculateExtensionScriptUrl(self.location, 'cache-service-worker',
-    getMode().localDev);
+    '0.1', getMode().localDev);
 importScripts(url);
