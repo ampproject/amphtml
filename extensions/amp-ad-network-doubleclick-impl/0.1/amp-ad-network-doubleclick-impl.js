@@ -359,12 +359,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return Promise.all(
       [pageLevelParametersPromise, rtcRequestPromise]).then(values => {
         const pageLevelParameters = values[0];
-        const rtcTotalTime = values[1];
+        const rtcTotalTime = values[1]['rtcTotalTime'];
+        const rtcSuccess = values[1]['success'];
         const parameters = Object.assign(
             this.getBlockParameters_(), pageLevelParameters);
-        if (rtcTotalTime && rtcConfig && rtcConfig['endpoint']) {
+        if (rtcTotalTime) {
           parameters['artc'] = rtcTotalTime;
           parameters['ard'] = parseUrl(rtcConfig['endpoint']).hostname;
+          parameters['ati'] = rtcSuccess ? 2 : 3;
         }
         return googleAdUrl(
             this, DOUBLECLICK_BASE_URL, startTime, parameters, ['108809080']);
@@ -572,11 +574,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               // TODO: Add to fetchResponse the ability to
               // check for redirects as well.
               if (res.status != 200) {
-                return null;
+                return {rtcTotalTime};
               }
               return res.text().then(text => {
-                if (text == '') {
-                  return Promise.resolve(rtcTotalTime);
+                // An empty text response is fine, just means
+                // we have nothing to merge.
+                if (!text) {
+                  return {rtcTotalTime, success: true};
                 }
                 const rtcResponse = tryParseJson(text);
                 return {rtcResponse, rtcTotalTime};
@@ -599,27 +603,37 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return rtcPromise.then(
         r => {
           // Don't try to merge if we're sending without RTC.
-          if (!r) {
+          if (!r || (!r.rtcResponse && !r.success)) {
             return this.shouldSendRequestWithoutRtc(
                 'Bad response');
-          } else if (typeof r == 'number') {
-            return Promise.resolve(r);
+          } else if (!r.rtcResponse && r.success) {
+            return Promise.resolve({
+              rtcTotalTime: r.rtcTotalTime,
+              success: true,
+            });
           }
 
           const rtcResponse = r.rtcResponse;
           if (!!rtcResponse['targeting']) {
-            this.jsonTargeting_['targeting'] = deepMerge(
-                this.jsonTargeting_['targeting'] || {},
-                rtcResponse['targeting']);
+            this.jsonTargeting_['targeting'] =
+                !!this.jsonTargeting_['targeting'] ?
+                deepMerge(this.jsonTargeting_['targeting'],
+                    rtcResponse['targeting']) :
+                              rtcResponse['targeting'];
           }
           if (!!rtcResponse['categoryExclusions']) {
-            this.jsonTargeting_['categoryExclusions'] = deepMerge(
-                this.jsonTargeting_['categoryExclusions'] || {},
-                rtcResponse['categoryExclusions']);
+            this.jsonTargeting_['categoryExclusions'] =
+                !!this.jsonTargeting_['categoryExclusions'] ?
+                deepMerge(this.jsonTargeting_['categoryExclusions'],
+                    rtcResponse['categoryExclusions']) :
+                              rtcResponse['categoryExclusions'];
           }
           // rtcTotalTime is only the time that the rtc callout took,
           // does not include the time to merge.
-          return Promise.resolve(r.rtcTotalTime);
+          return Promise.resolve({
+            rtcTotalTime: r.rtcTotalTime,
+            success: true,
+          });
         }).catch(err => {
           const errMessage = (!!err && !!err.message) ?
               err.message : 'Unknown error';
@@ -636,16 +650,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   shouldSendRequestWithoutRtc(errMessage) {
     user().error(TAG, errMessage);
-    let timeParam;
+    let rtcTotalTime;
     // Have to use match instead of == because AMP
     // custom messages automatically append three
     // 0-width blank space characters to the ends
     // of error messages.
     if (errMessage.match(/^timeout/)) {
-      timeParam = -1;
+      rtcTotalTime = -1;
     }
     return String(rtcConfig['sendAdRequestOnFailure']) !== 'false' ?
-        Promise.resolve(timeParam) : Promise.reject(errMessage);
+        Promise.resolve({rtcTotalTime}) : Promise.reject(errMessage);
   };
 
   /** @override */

@@ -476,7 +476,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           Promise.resolve({
             redirected: false,
             status: 200,
-            json: () => {
+            text: () => {
               return Promise.resolve(JSON.stringify(rtcResponse));
             },
           })
@@ -485,7 +485,8 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
       return impl.getAdUrl().then(url => {
         expect(url).to.match(/(\?|&)artc=[0-9]+(&|$)/);
         expect(url).to.match(
-            /(\?|&)ard=https%3A%2F%2Fexample-publisher.com%2Frtc%2F/);
+            /(\?|&)ard=example-publisher.com/);
+        expect(url).to.match(/(\?|&)ati=2(&|$)/);
       });
 
     });
@@ -1300,7 +1301,8 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           }));
       impl.populateAdUrlState();
       return impl.executeRtc_().then(result => {
-        expect(result).to.equal(-1);
+        expect(result.rtcTotalTime).to.equal(-1);
+        expect(result.success).to.be.undefined;
       }).catch(() => {
         // Should not error.
         expect(true).to.be.false;
