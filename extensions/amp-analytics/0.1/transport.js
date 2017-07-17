@@ -165,20 +165,16 @@ export class Transport {
    */
   processCrossDomainIframe(win, frameUrl, opt_processResponse) {
     let frameData;
-    let shouldAddToDOM = false;
     if (Transport.hasCrossDomainIframe(frameUrl)) {
       frameData = Transport.getFrameData(frameUrl);
       ++(frameData.usageCount);
     } else {
       frameData = this.createCrossDomainIframe(win, frameUrl);
-      shouldAddToDOM = true;
+      win.document.body.appendChild(frameData.frame);
     }
     dev().assert(frameData, 'Trying to use non-existent frame');
     if (opt_processResponse) {
       Transport.responseProcessors_[this.id_] = opt_processResponse;
-    }
-    if (shouldAddToDOM) {
-      win.document.body.appendChild(frameData.frame);
     }
   }
 
@@ -194,6 +190,18 @@ export class Transport {
    * @VisibleForTesting
    */
   createCrossDomainIframe(win, frameUrl, opt_processResponse) {
+    // Explanation of IDs:
+    // Each instance of Transport (owned by a specific amp-analytics tag, in
+    // turn owned by a specific creative) has an ID in this._id.
+    // Each cross-domain iframe also has an ID, stored here in sentinel.
+    // These two types of IDs are drawn from the same pool of numbers, and
+    // are thus mutually unique.
+    // There is a many-to-one relationship, in that several creatives may
+    // utilize the same analytics vendor, so perhaps creatives #1 & #2 might
+    // both use xframe #3.
+    // Of course, a given creative may use multiple analytics vendors, but
+    // in that case it would use multiple amp-analytics tags, so the
+    // transport.id_ -> sentinel relationship is *not* many-to-many.
     const sentinel = Transport.createUniqueId_();
     const useLocal = getMode().localDev || getMode().test;
     const useRtvVersion = !useLocal;
@@ -240,13 +248,16 @@ export class Transport {
               'Received empty response from 3p analytics frame');
           const responseProcessor = Transport.responseProcessors_[
             response['transport']];
-          if (responseProcessor) {
-            responseProcessor(
-                this.type_,
-                /** @type
-                 * {!../../../src/3p-analytics-common.AmpAnalytics3pResponse}
-                 */ (response));
+          if (!responseProcessor) {
+            dev().warn(TAG_,'Received a response, but no response processor' +
+              ' was configured');
+            return;
           }
+          responseProcessor(
+              this.type_,
+              /** @type
+               * {!../../../src/3p-analytics-common.AmpAnalytics3pResponse}
+               */ (response));
         },
         true);
     return frameData;
@@ -258,12 +269,13 @@ export class Transport {
    * Once all creatives using a frame are done with it, the frame can be
    * destroyed.
    * @param {!HTMLDocument} ampDoc The AMP document
-   * @param {!Object<string,string>} transportOptions The 'transport' portion
-   * of the amp-analytics config object
+   * @param {!string} frameUrl  The URL of the cross-domain iframe
    */
-  static doneUsingCrossDomainIframe(ampDoc, transportOptions) {
-    const frameUrl = transportOptions['iframe'];
+  static markCrossDomainIframeAsDone(ampDoc, frameUrl) {
     const frameData = Transport.getFrameData(frameUrl);
+    dev().assert(frameData && frameData.frame && frameData.usageCount,
+        'Marked the frame at ' + frameUrl + ' as done, but there is no' +
+        ' record of it existing.');
     if (--(frameData.usageCount)) {
       // Some other instance is still using it
       return;
@@ -275,7 +287,7 @@ export class Transport {
 
   /**
    * Returns whether a url of a cross-domain frame is already known
-   * @param {!string} frameUrl
+   * @param {!string} frameUrl  The URL of the cross-domain iframe
    * @return {!boolean}
    * @VisibleForTesting
    */

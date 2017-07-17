@@ -44,7 +44,9 @@ export class AmpIframeTransportMessageQueue {
     /** @private {boolean} */
     this.isReady_ = false;
 
-    /** @private {!../../../src/3p-analytics-common.AmpAnalytics3pEvent} */
+    /** @private
+     *  {!Object<!string,!../../../src/3p-analytics-common.AmpAnalytics3pEvent}}
+     */
     this.transportIdToPendingMessages_ = {};
 
     /** @private {string} */
@@ -96,12 +98,12 @@ export class AmpIframeTransportMessageQueue {
    */
   enqueue(transportId, event) {
     this.transportIdToPendingMessages_[transportId] =
-        this.transportIdToPendingMessages_[transportId] || [];
+        this.messagesFor(transportId) || [];
     if (this.queueSize() >= MAX_QUEUE_SIZE_) {
       dev().warn(TAG_, 'Exceeded maximum size of queue for: ' + transportId);
-      this.transportIdToPendingMessages_[transportId].shift();
+      this.messagesFor(transportId).shift();
     }
-    this.transportIdToPendingMessages_[transportId].push(event);
+    this.messagesFor(transportId).push(event);
     this.flushQueue_();
   }
 
@@ -110,13 +112,11 @@ export class AmpIframeTransportMessageQueue {
    * @private
    */
   flushQueue_() {
-    if (this.isReady()) {
-      if (this.queueSize()) {
-        this.postMessageApi_.send(AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT,
-            /** @type {!JsonObject} */
-            ({data: this.transportIdToPendingMessages_}));
-        this.transportIdToPendingMessages_ = {};
-      }
+    if (this.isReady() && this.queueSize()) {
+      this.postMessageApi_.send(AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT,
+          /** @type {!JsonObject} */
+          ({data: this.transportIdToPendingMessages_}));
+      this.transportIdToPendingMessages_ = {};
     }
   }
 
