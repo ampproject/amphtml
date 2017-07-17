@@ -47,6 +47,18 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       }
       throw new Error('unknown query: ' + query);
     });
+    if (!win.CSS) {
+      win.CSS = {supports: () => {}};
+    }
+    sandbox.stub(win.CSS, 'supports', condition => {
+      if (condition == 'supported: 1') {
+        return true;
+      }
+      if (condition == 'supported: 0') {
+        return false;
+      }
+      throw new Error('unknown condition: ' + condition);
+    });
     warnStub = sandbox.stub(user(), 'warn');
 
     vsync = win.services.vsync.obj;
@@ -660,6 +672,75 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     });
     expect(requests).to.have.length(1);
     expect(requests[0].target).to.equal(target2);
+  });
+
+  it('should check supports in top animation', () => {
+    const requests = scan({
+      duration: 500,
+      supports: 'supported: 0',
+      animations: [
+        {target: target1, keyframes: {}},
+        {target: target2, duration: 300, keyframes: {}},
+      ],
+    });
+    expect(requests).to.have.length(0);
+  });
+
+  it('should check supports in sub-animations', () => {
+    const requests = scan({
+      duration: 500,
+      animations: [
+        {supports: 'supported: 0', target: target1, keyframes: {}},
+        {supports: 'supported: 1', target: target2,
+          duration: 300, keyframes: {}},
+      ],
+    });
+    expect(requests).to.have.length(1);
+    expect(requests[0].target).to.equal(target2);
+  });
+
+  it('should interprete absent CSS/supports as false', () => {
+    const builder = new Builder(win, doc, 'https://acme.org/',
+        vsync, /* resources */ null);
+    const cssContext = builder.css_;
+    expect(cssContext.supports('supported: 0')).to.be.false;
+    expect(cssContext.supports('supported: 1')).to.be.true;
+    // Override CSS availability.
+    cssContext.win_ = {CSS: {supports: () => true}};
+    expect(cssContext.supports('supported: 1')).to.be.true;
+    delete cssContext.win_.CSS.supports;
+    expect(cssContext.supports('supported: 1')).to.be.false;
+    delete cssContext.win_.CSS;
+    expect(cssContext.supports('supported: 1')).to.be.false;
+  });
+
+  it('should check media AND supports', () => {
+    // Both true -> true.
+    expect(scan({
+      media: 'match',
+      supports: 'supported: 1',
+      target: target1,
+      keyframes: {},
+    })).to.have.length(1);
+    // One false -> false.
+    expect(scan({
+      media: 'not-match',
+      supports: 'supported: 1',
+      target: target1,
+      keyframes: {},
+    })).to.have.length(0);
+    expect(scan({
+      media: 'match',
+      supports: 'supported: 0',
+      target: target1,
+      keyframes: {},
+    })).to.have.length(0);
+    expect(scan({
+      media: 'not-match',
+      supports: 'supported: 0',
+      target: target1,
+      keyframes: {},
+    })).to.have.length(0);
   });
 
   it('should find targets by selector', () => {
