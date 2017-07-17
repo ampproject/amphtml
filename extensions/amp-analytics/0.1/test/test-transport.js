@@ -193,17 +193,17 @@ describe('amp-analytics.transport', () => {
 
     // Stop using the iframes, make sure usage counts go to zero and they are
     // removed from the DOM.
-    Transport.doneUsingCrossDomainIframe(window.document, {iframe: url1});
+    Transport.markCrossDomainIframeAsDone(window.document, url1);
     expect(frame1.usageCount).to.equal(2);
-    Transport.doneUsingCrossDomainIframe(window.document, {iframe: url1});
-    Transport.doneUsingCrossDomainIframe(window.document, {iframe: url1});
+    Transport.markCrossDomainIframeAsDone(window.document, url1);
+    Transport.markCrossDomainIframeAsDone(window.document, url1);
     expect(frame1.usageCount).to.equal(0);
     expect(frame2.usageCount).to.equal(4); // (Still)
     expect(window.document.getElementsByTagName('IFRAME').length).to.equal(1);
-    Transport.doneUsingCrossDomainIframe(window.document, {iframe: url2});
-    Transport.doneUsingCrossDomainIframe(window.document, {iframe: url2});
-    Transport.doneUsingCrossDomainIframe(window.document, {iframe: url2});
-    Transport.doneUsingCrossDomainIframe(window.document, {iframe: url2});
+    Transport.markCrossDomainIframeAsDone(window.document, url2);
+    Transport.markCrossDomainIframeAsDone(window.document, url2);
+    Transport.markCrossDomainIframeAsDone(window.document, url2);
+    Transport.markCrossDomainIframeAsDone(window.document, url2);
     expect(frame2.usageCount).to.equal(0);
     expect(window.document.getElementsByTagName('IFRAME').length).to.equal(0);
   });
