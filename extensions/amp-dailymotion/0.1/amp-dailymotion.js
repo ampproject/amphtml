@@ -336,6 +336,24 @@ class AmpDailymotion extends AMP.BaseElement {
   hideControls() {
     // Not supported
   }
+
+  /** @override */
+  getCurrentTime() {
+    // Not supported.
+    return 0;
+  }
+
+  /** @override */
+  getDuration() {
+    // Not supported.
+    return 1;
+  }
+
+  /** @override */
+  getPlayedRanges() {
+    // Not supported.
+    return [];
+  }
 };
 
 AMP.registerElement('amp-dailymotion', AmpDailymotion);
