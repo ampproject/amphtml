@@ -22,7 +22,6 @@ import {
 import {VisibilityModel} from './visibility-model';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {layoutRectLtwh} from '../../../src/layout-rect';
 import {map} from '../../../src/utils/object';
 import {resourcesForDoc} from '../../../src/services';
 import {viewerForDoc} from '../../../src/services';
