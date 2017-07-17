@@ -416,8 +416,12 @@ export class SubscriptionApi {
    * @param {boolean} is3p set to true if the iframe is 3p.
    * @param {function(!JsonObject, !Window, string)} requestCallback Callback
    *     invoked whenever a new window subscribes.
+   * @param {boolean=} allowAnyOriginIfNull If sending a message but the
+   * subscribing frame has its origin set to 'null' (because it has 'sandbox
+   * allow-same-origin') then still send the message to that iframe by
+   * setting origin to '*'
    */
-  constructor(iframe, type, is3p, requestCallback) {
+  constructor(iframe, type, is3p, requestCallback, allowAnyOriginIfNull) {
     /** @private @const {!Element} */
     this.iframe_ = iframe;
     /** @private @const {boolean} */
@@ -429,6 +433,9 @@ export class SubscriptionApi {
     this.unlisten_ = listenFor(this.iframe_, type, (data, source, origin) => {
       // This message might be from any window within the iframe, we need
       // to keep track of which windows want to be sent updates.
+      if (allowAnyOriginIfNull && origin == 'null') {
+        origin = '*';
+      }
       if (!this.clientWindows_.some(entry => entry.win == source)) {
         this.clientWindows_.push({win: source, origin});
       }
