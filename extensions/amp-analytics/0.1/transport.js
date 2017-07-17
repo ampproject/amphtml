@@ -65,13 +65,11 @@ export class Transport {
   /**
    * @param {!Window} win
    * @param {string} request
-   * @param {Object<string, string>=} transportOptions
    */
   sendRequest(win, request, transportOptions) {
     assertHttpsUrl(request, 'amp-analytics request');
     if (transportOptions && transportOptions['iframe']) {
-      this.sendRequestUsingCrossDomainIframe(request,
-          transportOptions['iframe']);
+      this.sendRequestUsingCrossDomainIframe(request);
       return;
     }
     checkCorsUrl(request);
@@ -165,8 +163,8 @@ export class Transport {
    */
   processCrossDomainIframe(win, frameUrl, opt_processResponse) {
     let frameData;
-    if (Transport.hasCrossDomainIframe(frameUrl)) {
-      frameData = Transport.getFrameData(frameUrl);
+    if (Transport.hasCrossDomainIframe(this.type_)) {
+      frameData = Transport.getFrameData(this.type_);
       ++(frameData.usageCount);
     } else {
       frameData = this.createCrossDomainIframe(win, frameUrl);
@@ -182,14 +180,10 @@ export class Transport {
    * Create a cross-domain iframe for third-party vendor anaytlics
    * @param {!Window} win The window element
    * @param {!string} frameUrl  The URL of the cross-domain iframe
-   * @param {function(!string,
-   *   !../../../src/3p-analytics-common.AmpAnalytics3pResponse)=}
-   *   opt_processResponse An optional function to receive any response
-   *   messages back from the cross-domain iframe
    * @return {!FrameData}
    * @VisibleForTesting
    */
-  createCrossDomainIframe(win, frameUrl, opt_processResponse) {
+  createCrossDomainIframe(win, frameUrl) {
     // Explanation of IDs:
     // Each instance of Transport (owned by a specific amp-analytics tag, in
     // turn owned by a specific creative) has an ID in this._id.
@@ -234,7 +228,7 @@ export class Transport {
           /** @type {!HTMLIFrameElement} */
           (frame)),
     });
-    Transport.crossDomainIframes_[frameUrl] = frameData;
+    Transport.crossDomainIframes_[this.type_] = frameData;
     // Note: this is a listener for responses from the frame, regardless of
     // which transport instance a response is intended for. This is because
     // the listener may only be created prior to the iframe being attached
@@ -269,12 +263,12 @@ export class Transport {
    * Once all creatives using a frame are done with it, the frame can be
    * destroyed.
    * @param {!HTMLDocument} ampDoc The AMP document
-   * @param {!string} frameUrl  The URL of the cross-domain iframe
+   * @param {!string} type The type attribute of the amp-analytics tag
    */
-  static markCrossDomainIframeAsDone(ampDoc, frameUrl) {
-    const frameData = Transport.getFrameData(frameUrl);
+  static markCrossDomainIframeAsDone(ampDoc, type) {
+    const frameData = Transport.getFrameData(type);
     dev().assert(frameData && frameData.frame && frameData.usageCount,
-        'Marked the frame at ' + frameUrl + ' as done, but there is no' +
+        'Marked the ' + type + ' frame as done, but there is no' +
         ' record of it existing.');
     if (--(frameData.usageCount)) {
       // Some other instance is still using it
@@ -282,17 +276,17 @@ export class Transport {
     }
     ampDoc.body.removeChild(frameData.frame);
     frameData.responseMessageUnlisten();
-    delete Transport.crossDomainIframes_[frameUrl];
+    delete Transport.crossDomainIframes_[type];
   }
 
   /**
    * Returns whether a url of a cross-domain frame is already known
-   * @param {!string} frameUrl  The URL of the cross-domain iframe
+   * @param {!string} type The type attribute of the amp-analytics tag
    * @return {!boolean}
    * @VisibleForTesting
    */
-  static hasCrossDomainIframe(frameUrl) {
-    return hasOwn(Transport.crossDomainIframes_, frameUrl);
+  static hasCrossDomainIframe(type) {
+    return hasOwn(Transport.crossDomainIframes_, type);
   }
 
   /**
@@ -309,11 +303,10 @@ export class Transport {
    * Sends an Amp Analytics trigger event to a vendor's cross-domain iframe,
    * or queues the message if the frame is not yet ready to receive messages.
    * @param {!string} event A string describing the trigger event
-   * @param {!string} frameUrl The URL of the iframe
    * @VisibleForTesting
    */
-  sendRequestUsingCrossDomainIframe(event, frameUrl) {
-    const frameData = Transport.getFrameData(frameUrl);
+  sendRequestUsingCrossDomainIframe(event) {
+    const frameData = Transport.getFrameData(this.type_);
     dev().assert(frameData, 'Trying to send message to non-existent frame');
     dev().assert(frameData.queue,
         'Event queue is missing for ' + this.id_);
@@ -322,12 +315,12 @@ export class Transport {
 
   /**
    * Gets the FrameData associated with a particular cross-domain frame URL.
-   * @param frameUrl
+   * @param {!string} type The type attribute of the amp-analytics tag
    * @returns {FrameData}
    * @VisibleForTesting
    */
-  static getFrameData(frameUrl) {
-    return Transport.crossDomainIframes_[frameUrl];
+  static getFrameData(type) {
+    return Transport.crossDomainIframes_[type];
   }
 
   /**
@@ -345,6 +338,14 @@ export class Transport {
    */
   getId() {
     return this.id_;
+  }
+
+  /**
+   * @returns {!string} Type attribute of parent amp-analytics instance
+   * @VisibleForTesting
+   */
+  getType() {
+    return this.type_;
   }
 }
 

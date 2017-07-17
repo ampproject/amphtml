@@ -79,7 +79,7 @@ export class AmpAnalytics extends AMP.BaseElement {
      * @private {?string} Predefined type associated with the tag. If specified,
      * the config from the predefined type is merged with the inline config
      */
-    this.type_ = null;
+    this.type_ = this.element.getAttribute('type');
 
     /** @private {!boolean} */
     this.isSandbox_ = false;
@@ -116,7 +116,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.iniPromise_ = null;
 
     /** @private {!Transport} */
-    this.transport_ = new Transport(this.element.getAttribute('type'));
+    this.transport_ = new Transport(this.type_);
   }
 
   /** @override */
@@ -167,15 +167,8 @@ export class AmpAnalytics extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     const ampDoc = this.getAmpDoc();
-    if (this.config_['transport']) {
-      if (this.config_['transport']['iframe']) {
-        Transport.markCrossDomainIframeAsDone(ampDoc.win.document,
-            this.config_['transport']['iframe']);
-      }
-      if (this.config_['transport']['type']) {
-        ResponseMap.remove(ampDoc, this.config_['transport']['type']);
-      }
-    }
+    Transport.markCrossDomainIframeAsDone(ampDoc.win.document, this.type_);
+    ResponseMap.remove(ampDoc, this.type_);
     return true;
   }
 
@@ -242,7 +235,8 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     if (this.config_['transport'] && this.config_['transport']['iframe']) {
       this.transport_.processCrossDomainIframe(this.getAmpDoc().win,
-          this.config_['transport']['iframe'], (type, responseMessage) => {
+          this.config_['transport']['iframe'],
+          (type, responseMessage) => {
             this.processCrossDomainIframeResponse_(type, responseMessage);
           });
     }
