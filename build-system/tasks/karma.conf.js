@@ -46,6 +46,14 @@ module.exports = {
 
   reporters: [process.env.TRAVIS ? 'super-dots' : 'progress'],
 
+  superDotsReporter: {
+    icon: {
+      success : '✔',
+      failure : '✖',
+      ignore  : '-'
+    }
+  },
+
   port: 9876,
 
   colors: true,
