@@ -16,7 +16,7 @@
 
 import {Observable} from './observable';
 import {dev} from './log';
-import {timerFor} from './services';
+import {Services} from './services';
 import {listenOnce, listenOncePromise} from './event-helper';
 import {registerServiceBuilder} from './service';
 
@@ -221,7 +221,8 @@ export class Input {
         /* capture */ undefined, unlistener => {
           unlisten = unlistener;
         });
-    return timerFor(this.win).timeoutPromise(CLICK_TIMEOUT_, listenPromise)
+    return Services.timerFor(this.win)
+        .timeoutPromise(CLICK_TIMEOUT_, listenPromise)
         .then(this.boundMouseCanceled_, () => {
           if (unlisten) {
             unlisten();

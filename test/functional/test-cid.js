@@ -14,13 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  ampdocServiceFor,
-  cryptoFor,
-  extensionsFor,
-  timerFor,
-  viewerForDoc,
-} from '../../src/services';
+import {Services} from '../../src/services';
 import {
   cidServiceForDocForTesting,
   getProxySourceOrigin,
@@ -67,7 +61,7 @@ describe('cid', () => {
   let storageGetStub;
 
   const hasConsent = Promise.resolve();
-  const timer = timerFor(window);
+  const timer = Services.timerFor(window);
 
   beforeEach(() => {
     let call = 1;
@@ -112,12 +106,12 @@ describe('cid', () => {
     fakeWin.document.defaultView = fakeWin;
     installDocService(fakeWin, /* isSingleDoc */ true);
     installDocumentStateService(fakeWin);
-    ampdoc = ampdocServiceFor(fakeWin).getAmpDoc();
+    ampdoc = Services.ampdocServiceFor(fakeWin).getAmpDoc();
     installTimerService(fakeWin);
     installPlatformService(fakeWin);
 
     installExtensionsService(fakeWin);
-    const extensions = extensionsFor(fakeWin);
+    const extensions = Services.extensionsFor(fakeWin);
     // stub extensions service to provide crypto-polyfill
     sandbox.stub(extensions, 'loadExtension', extensionId => {
       expect(extensionId).to.equal('amp-crypto-polyfill');
@@ -127,7 +121,7 @@ describe('cid', () => {
 
     installViewerServiceForDoc(ampdoc);
     storageGetStub = stubServiceForDoc(sandbox, ampdoc, 'storage', 'get');
-    viewer = viewerForDoc(ampdoc);
+    viewer = Services.viewerForDoc(ampdoc);
     sandbox.stub(viewer, 'whenFirstVisible', function() {
       return whenFirstVisible;
     });
@@ -149,7 +143,7 @@ describe('cid', () => {
 
     cid = cidServiceForDocForTesting(ampdoc);
     installCryptoService(fakeWin);
-    crypto = cryptoFor(fakeWin);
+    crypto = Services.cryptoFor(fakeWin);
   });
 
   afterEach(() => {

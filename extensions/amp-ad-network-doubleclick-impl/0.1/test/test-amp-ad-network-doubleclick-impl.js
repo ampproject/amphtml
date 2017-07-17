@@ -25,7 +25,7 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {
   installExtensionsService,
 } from '../../../../src/service/extensions-impl';
-import {ampdocServiceFor, extensionsFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import {
   AmpAdNetworkDoubleclickImpl,
   getNetworkId,
@@ -150,7 +150,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
         impl = new AmpAdNetworkDoubleclickImpl(element);
         impl.size_ = size;
         installExtensionsService(impl.win);
-        const extensions = extensionsFor(impl.win);
+        const extensions = Services.extensionsFor(impl.win);
         loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
       });
     });
@@ -700,7 +700,7 @@ describes.sandboxed('amp-ad-network-doubleclick-impl', {}, () => {
           'data-slot': `/${networkId}/abc/def`,
         });
       element.getAmpDoc = () => {
-        const ampdocService = ampdocServiceFor(doc.defaultView);
+        const ampdocService = Services.ampdocServiceFor(doc.defaultView);
         return ampdocService.getAmpDoc(element);
       };
       element.isBuilt = () => {return true;};

@@ -24,10 +24,9 @@ import {
   listenForOncePromise,
   postMessageToWindows,
 } from '../../../src/iframe-helper';
-import {viewerForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {timerFor} from '../../../src/services';
 import {setStyle} from '../../../src/style';
 import {getData, loadPromise} from '../../../src/event-helper';
 import {getHtml} from '../../../src/get-html';
@@ -81,7 +80,7 @@ export class AmpAdXOriginIframeHandler {
     this.unlisteners_ = [];
 
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = viewerForDoc(this.baseInstance_.getAmpDoc());
+    this.viewer_ = Services.viewerForDoc(this.baseInstance_.getAmpDoc());
   }
 
   /**
@@ -96,7 +95,7 @@ export class AmpAdXOriginIframeHandler {
     this.iframe = iframe;
     this.iframe.setAttribute('scrolling', 'no');
     this.baseInstance_.applyFillContent(this.iframe);
-    const timer = timerFor(this.baseInstance_.win);
+    const timer = Services.timerFor(this.baseInstance_.win);
 
     // Init IntersectionObserver service.
     this.intersectionObserver_ = new IntersectionObserver(
