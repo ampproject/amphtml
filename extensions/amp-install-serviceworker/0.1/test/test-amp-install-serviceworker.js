@@ -15,7 +15,7 @@
  */
 
 import {AmpInstallServiceWorker} from '../amp-install-serviceworker';
-import {ampdocServiceFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import {
   registerServiceBuilder,
   registerServiceBuilderForDoc,
@@ -44,7 +44,7 @@ describes.realWin('amp-install-serviceworker', {
     doc = env.win.document;
     sandbox = env.sandbox;
     clock = sandbox.useFakeTimers();
-    ampdoc = ampdocServiceFor(env.win).getAmpDoc();
+    ampdoc = Services.ampdocServiceFor(env.win).getAmpDoc();
     container = doc.createElement('div');
     env.win.document.body.appendChild(container);
     maybeInstallUrlRewriteStub = sandbox.stub(

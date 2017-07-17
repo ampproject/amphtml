@@ -23,9 +23,8 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {openWindowDialog} from '../../../src/dom';
-import {urlReplacementsForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {CSS} from '../../../build/amp-social-share-0.1.css';
-import {platformFor} from '../../../src/services';
 
 
 class AmpSocialShare extends AMP.BaseElement {
@@ -84,10 +83,10 @@ class AmpSocialShare extends AMP.BaseElement {
         'The data-share-endpoint attribute is required. %s', this.element);
     Object.assign(this.params_, typeConfig['defaultParams'],
         getDataParamsFromAttributes(this.element));
-    this.platform_ = platformFor(this.win);
+    this.platform_ = Services.platformFor(this.win);
 
     const hrefWithVars = addParamsToUrl(this.shareEndpoint_, this.params_);
-    const urlReplacements = urlReplacementsForDoc(this.getAmpDoc());
+    const urlReplacements = Services.urlReplacementsForDoc(this.getAmpDoc());
     urlReplacements.expandAsync(hrefWithVars).then(href => {
       this.href_ = href;
       // mailto:, whatsapp: protocols breaks when opened in _blank on iOS Safari

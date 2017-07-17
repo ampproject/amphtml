@@ -62,9 +62,14 @@ import {tryParseJson} from '../../../src/json';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isObject} from '../../../src/types';
-import {extensionsFor, timerFor, xhrFor} from '../../../src/services';
+import {
+  extensionsFor,
+  timerFor,
+  xhrFor,
+  Services,
+} from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
-import {insertAnalyticsElement} from '../../../src/analytics';
+import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {setStyles} from '../../../src/style';
 import {utf8Encode} from '../../../src/utils/bytes';
 import {deepMerge} from '../../../src/utils/object';
@@ -209,7 +214,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.ampAnalyticsConfig_ = null;
 
     /** @private {!../../../src/service/extensions-impl.Extensions} */
-    this.extensions_ = extensionsFor(this.win);
+    this.extensions_ = Services.extensionsFor(this.win);
 
     /** @private {?string} */
     this.qqid_ = null;
@@ -767,7 +772,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               .then(sraUrlIn => {
                 checkStillCurrent();
                 sraUrl = sraUrlIn;
-                return xhrFor(this.win).fetch(sraUrl, {
+                return Services.xhrFor(this.win).fetch(sraUrl, {
                   mode: 'cors',
                   method: 'GET',
                   credentials: 'include',

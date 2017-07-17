@@ -15,7 +15,7 @@
  */
 
 import {getData, listen, listenOncePromise} from '../../src/event-helper';
-import {timerFor} from '../../src/services';
+import {Services} from '../../src/services';
 import {removeElement} from '../../src/dom';
 import {toggleExperiment} from '../../src/experiments';
 import {
@@ -82,7 +82,7 @@ export function runVideoPlayerIntegrationTests(
   describe.configure().skipSauceLabs().run('Actions', function() {
     this.timeout(TIMEOUT);
 
-    it('should support mute, play, pause, unmute actions', function() {
+    it.skip('should support mute, play, pause, unmute actions', function() {
       return getVideoPlayer({outsideView: false, autoplay: false}).then(r => {
         // Create a action buttons
         const playButton = createButton(r, 'play');
@@ -136,7 +136,7 @@ export function runVideoPlayerIntegrationTests(
     this.timeout(TIMEOUT);
     let video;
 
-    it('should trigger play analytics when the video plays', function() {
+    it.skip('should trigger play analytics when the video plays', function() {
       let playButton;
 
       return getVideoPlayer(
@@ -254,7 +254,7 @@ export function runVideoPlayerIntegrationTests(
       });
     });
 
-    it('should include current time, play state, etc.', function() {
+    it.skip('should include current time, play state, etc.', function() {
       let playButton;
       let pauseButton;
       let timer;
@@ -266,7 +266,7 @@ export function runVideoPlayerIntegrationTests(
           }
       ).then(r => {
         video = r.video;
-        timer = timerFor(r.video.implementation_.win);
+        timer = Services.timerFor(r.video.implementation_.win);
         playButton = createButton(r, 'play');
         pauseButton = createButton(r, 'pause');
         return listenOncePromise(video, VideoEvents.LOAD);
@@ -495,7 +495,7 @@ export function runVideoPlayerIntegrationTests(
 
       it('should not play when not in view port initially', () => {
         return getVideoPlayer({outsideView: true, autoplay: true}).then(r => {
-          const timer = timerFor(r.video.implementation_.win);
+          const timer = Services.timerFor(r.video.implementation_.win);
           const p = listenOncePromise(r.video, VideoEvents.PLAYING).then(() => {
             return Promise.reject('should not have autoplayed');
           });
@@ -505,7 +505,7 @@ export function runVideoPlayerIntegrationTests(
       });
 
       // TODO(aghassemi, #9379): Flaky on Safari 9.
-      it.configure().skipSafari().run('should play/pause when video ' +
+      it.skip('should play/pause when video ' +
           'enters/exits viewport', () => {
         let video;
         let viewport;

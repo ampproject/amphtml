@@ -31,11 +31,8 @@ import {getFriendlyIframeEmbedOptional} from '../friendly-iframe-embed';
 import {isExperimentOn} from '../experiments';
 import {numeric} from '../transition';
 import {onDocumentReady, whenDocumentReady} from '../document-ready';
-import {platformFor} from '../services';
+import {Services} from '../services';
 import {px, setStyle, setStyles, computedStyle} from '../style';
-import {timerFor} from '../services';
-import {vsyncFor} from '../services';
-import {viewerForDoc} from '../services';
 import {waitForBody, isIframed} from '../dom';
 import {getMode} from '../mode';
 
@@ -58,6 +55,14 @@ const A4A_LIGHTBOX_EXPERIMENT = 'amp-lightbox-a4a-proto';
  */
 export let ViewportChangedEventDef;
 
+/**
+ * @typedef {{
+ *   relayoutAll: boolean,
+ *   width: number,
+ *   height: number
+ * }}
+ */
+export let ViewportResizedEventDef;
 
 /**
  * This object represents the viewport. It tracks scroll position, resize
@@ -118,10 +123,10 @@ export class Viewport {
     this.lastPaddingTop_ = 0;
 
     /** @private {!./timer-impl.Timer} */
-    this.timer_ = timerFor(this.ampdoc.win);
+    this.timer_ = Services.timerFor(this.ampdoc.win);
 
     /** @private {!./vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(this.ampdoc.win);
+    this.vsync_ = Services.vsyncFor(this.ampdoc.win);
 
     /** @private {boolean} */
     this.scrollTracking_ = false;
@@ -453,14 +458,13 @@ export class Viewport {
   }
 
   /**
-   * Registers the handler for Resize events.
-   * @param {!function()} handler
+   * Registers the handler for ViewportResizedEventDef events.
+   * @param {!function(!ViewportResizedEventDef)} handler
    * @return {!UnlistenDef}
    */
   onResize(handler) {
     return this.resizeObservable_.add(handler);
   }
-
 
   /**
    * Instruct the viewport to enter lightbox mode.
@@ -890,8 +894,16 @@ export class Viewport {
     this.size_ = null;  // Need to recalc.
     const newSize = this.getSize();
     this.fixedLayer_.update().then(() => {
-      this.changed_(!oldSize || oldSize.width != newSize.width, 0);
-      this.resizeObservable_.fire();
+      const widthChanged = !oldSize || oldSize.width != newSize.width;
+      this.changed_(/*relayoutAll*/widthChanged, 0);
+      const sizeChanged = widthChanged || oldSize.height != newSize.height;
+      if (sizeChanged) {
+        this.resizeObservable_.fire({
+          relayoutAll: widthChanged,
+          width: newSize.width,
+          height: newSize.height,
+        });
+      }
     });
   }
 }
@@ -1061,7 +1073,7 @@ export class ViewportBindingNatural_ {
     this.win = ampdoc.win;
 
     /** @const {!../service/platform-impl.Platform} */
-    this.platform_ = platformFor(this.win);
+    this.platform_ = Services.platformFor(this.win);
 
     /** @private @const {!./viewer-impl.Viewer} */
     this.viewer_ = viewer;
@@ -1460,7 +1472,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     // implementation.
     return new Promise(resolve => {
       onDocumentReady(this.win.document, doc => {
-        vsyncFor(this.win).mutatePromise(() => {
+        Services.vsyncFor(this.win).mutatePromise(() => {
           setStyle(doc.body, 'borderTopStyle', lightboxMode ? 'none' : 'solid');
         }).then(resolve);
       });
@@ -1926,13 +1938,13 @@ export function updateViewportMetaString(currentValue, updateParams) {
  * @private
  */
 function createViewport(ampdoc) {
-  const viewer = viewerForDoc(ampdoc);
+  const viewer = Services.viewerForDoc(ampdoc);
   let binding;
   if (ampdoc.isSingleDoc() &&
       getViewportType(ampdoc.win, viewer) == ViewportType.NATURAL_IOS_EMBED) {
     // The overriding of document.body fails in iOS7.
     // Also, iOS8 sometimes freezes scrolling.
-    if (platformFor(ampdoc.win).getIosMajorVersion() > 8) {
+    if (Services.platformFor(ampdoc.win).getIosMajorVersion() > 8) {
       binding = new ViewportBindingIosEmbedWrapper_(ampdoc.win);
     } else {
       binding = new ViewportBindingNaturalIosEmbed_(ampdoc.win, ampdoc);
@@ -1972,7 +1984,8 @@ const ViewportType = {
  */
 function getViewportType(win, viewer) {
   const viewportType = viewer.getParam('viewportType') || ViewportType.NATURAL;
-  if (!platformFor(win).isIos() || viewportType != ViewportType.NATURAL) {
+  if (!Services.platformFor(win).isIos() ||
+      viewportType != ViewportType.NATURAL) {
     return viewportType;
   }
   // Enable iOS Embedded mode so that it's easy to test against a more
