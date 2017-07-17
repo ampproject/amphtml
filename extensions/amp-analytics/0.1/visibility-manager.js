@@ -163,6 +163,13 @@ export class VisibilityManager {
   isBackgroundedAtStart() {}
 
   /**
+   * Returns the root's layout rect.
+   * @return {!../../../src/layout-rect.LayoutRectDef}}
+   * @abstract
+   */
+  getRootLayoutBox() {}
+
+  /**
    * @return {number}
    */
   getRootVisibility() {
@@ -266,10 +273,18 @@ export class VisibilityManager {
       state['totalTime'] = Date.now() - startTime;
 
       // Optionally, element-level state.
-      const resource = opt_element ?
-          this.resources_.getResourceForElementOptional(opt_element) : null;
-      if (resource) {
-        const layoutBox = resource.getLayoutBox();
+      let layoutBox;
+      if (opt_element) {
+        const resource =
+            this.resources_.getResourceForElementOptional(opt_element);
+        layoutBox =
+            resource ?
+            resource.getLayoutBox() :
+            viewportForDoc(this.ampdoc).getLayoutRect(opt_element);
+      } else {
+        layoutBox = this.getRootLayoutBox();
+      }
+      if (layoutBox) {
         Object.assign(state, {
           'elementX': layoutBox.left,
           'elementY': layoutBox.top,
@@ -403,6 +418,15 @@ export class VisibilityManagerForDoc extends VisibilityManager {
   /** @override */
   isBackgroundedAtStart() {
     return this.backgroundedAtStart_;
+  }
+
+  /** @override */
+  getRootLayoutBox() {
+    // This code is the same for "in-a-box" and standalone doc.
+    const root = this.ampdoc.getRootNode();
+    const rootElement = dev().assertElement(
+        root.documentElement || root.body || root);
+    return this.viewport_.getLayoutRect(rootElement);
   }
 
   /** @override */
@@ -572,6 +596,12 @@ export class VisibilityManagerForEmbed extends VisibilityManager {
   /** @override */
   isBackgroundedAtStart() {
     return this.backgroundedAtStart_;
+  }
+
+  /** @override */
+  getRootLayoutBox() {
+    const rootElement = dev().assertElement(this.embed.host);
+    return viewportForDoc(this.ampdoc).getLayoutRect(rootElement);
   }
 
   /** @override */
