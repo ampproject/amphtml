@@ -38,7 +38,9 @@ export let AmpAnalytics3pResponse;
  */
 export class ResponseMap {
   /**
-   * Add a response
+   * Add a response. Note that only the most recent one for a given
+   * ampDoc+frameType+creativeUrl is stored. If add() is called again with
+   * the same first three parameters, the old value will be overwritten.
    * @param {!string} frameType The identifier for the third-party frame that
    * responded
    * @param {!string} creativeUrl The URL of the creative being responded to
