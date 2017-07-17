@@ -55,7 +55,7 @@ export class AmpAnalytics3pMessageRouter {
      */
     this.creativeMessageRouters_ = {};
 
-    window.addEventListener('message', event => {
+    this.win_.addEventListener('message', event => {
       const messageContainer = this.extractMessage(event);
       if (this.sentinel_ != messageContainer.sentinel) {
         return;
@@ -81,7 +81,7 @@ export class AmpAnalytics3pMessageRouter {
    * @param messageType The type of message to subscribe to
    */
   subscribeTo(messageType) {
-    window.parent./*OK*/postMessage({
+    this.win_.parent./*OK*/postMessage({
       sentinel: this.sentinel_,
       type: messageType,
     }, '*');
@@ -96,7 +96,7 @@ export class AmpAnalytics3pMessageRouter {
     let entries;
     dev().assert((entries = Object.entries(message)).length,
         'Received empty events message in ' + this.win_.location.href);
-    dev().assert(window.onNewAmpAnalyticsInstance,
+    dev().assert(this.win_.onNewAmpAnalyticsInstance,
         'Must implement onNewAmpAnalyticsInstance in ' +
         this.win_.location.href);
     entries.forEach(entry => {
@@ -107,16 +107,10 @@ export class AmpAnalytics3pMessageRouter {
             'Received empty events list for ' + transportId);
         if (!this.creativeMessageRouters_[transportId]) {
           this.creativeMessageRouters_[transportId] =
-            new AmpAnalytics3pCreativeMessageRouter(
-              this.win_, this.sentinel_, transportId);
-          try {
-            window.onNewAmpAnalyticsInstance(
-                this.creativeMessageRouters_[transportId]);
-          } catch (e) {
-            dev().error(TAG_, 'Exception thrown by' +
-              ' onNewAmpAnalyticsInstance() in ' + this.win_.location.href +
-              ': ' + e.message);
-          }
+              new AmpAnalytics3pCreativeMessageRouter(
+                  this.win_, this.sentinel_, transportId);
+          this.win_.onNewAmpAnalyticsInstance(
+              this.creativeMessageRouters_[transportId]);
         }
         this.creativeMessageRouters_[transportId]
             .sendMessagesToListener(events);
@@ -164,7 +158,7 @@ export class AmpAnalytics3pMessageRouter {
     dev().assert(event && event.data, 'Received empty events message in ' +
         this.win_.name);
     let startIndex;
-    dev().assert((startIndex = event.data.indexOf('-') + 1) > -0,
+    dev().assert((startIndex = event.data.indexOf('-') + 1) > 0,
         'Received truncated events message in ' + this.win_.name);
     return tryParseJson(event.data.substr(startIndex));
   }
@@ -258,7 +252,7 @@ export class AmpAnalytics3pCreativeMessageRouter {
       type: AMP_ANALYTICS_3P_MESSAGE_TYPE.RESPONSE,
       data: response,
     };
-    window.parent./*OK*/postMessage(
+    this.win_.parent./*OK*/postMessage(
         /** @type {!JsonObject} */ (responseMessage), '*');
   }
 
