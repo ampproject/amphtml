@@ -214,6 +214,24 @@ class Amp3QPlayer extends AMP.BaseElement {
   hideControls() {
     this.sdnPostMessage_('hideControlbar');
   }
+
+  /** @override */
+  getCurrentTime() {
+    // Not supported.
+    return 0;
+  }
+
+  /** @override */
+  getDuration() {
+    // Not supported.
+    return 1;
+  }
+
+  /** @override */
+  getPlayedRanges() {
+    // Not supported.
+    return [];
+  }
 };
 
 AMP.registerElement('amp-3q-player', Amp3QPlayer);
