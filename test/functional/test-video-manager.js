@@ -19,6 +19,7 @@ import {
   ampdocServiceFor,
   videoManagerForDoc,
   viewerForDoc,
+  timerFor,
 } from '../../src/services';
 import {isLayoutSizeDefined} from '../../src/layout';
 import {PlayingStates, VideoEvents} from '../../src/video-interface';
@@ -391,6 +392,21 @@ function createFakeVideoPlayerClass(win) {
     /** @param {!AmpElement} element */
     constructor(element) {
       super(element);
+
+      /** @private @const */
+      this.timer_ = timerFor(this.win);
+
+      /** @private @const */
+      this.length_ = 10000;
+
+      /** @private @const */
+      this.duration_ = 10;
+
+      /** @private */
+      this.currentTime_ = 0;
+
+      /** @private */
+      this.timeoutId_ = null;
     }
 
     /** @override */
@@ -442,6 +458,10 @@ function createFakeVideoPlayerClass(win) {
     play(unusedIsAutoplay) {
       Promise.resolve().then(() => {
         this.element.dispatchCustomEvent(VideoEvents.PLAYING);
+        this.timeoutId_ = this.timer_.delay(() => {
+          this.currentTime_ = this.duration_;
+          this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+        }, this.length_);
       });
     }
 
@@ -451,6 +471,7 @@ function createFakeVideoPlayerClass(win) {
     pause() {
       Promise.resolve().then(() => {
         this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+        this.timer_.cancel(this.timeoutId_);
       });
     }
 
@@ -482,6 +503,21 @@ function createFakeVideoPlayerClass(win) {
      * @override
      */
     hideControls() {
+    }
+
+    /** @override */
+    getCurrentTime() {
+      return this.currentTime_;
+    }
+
+    /** @override */
+    getDuration() {
+      return this.duration_;
+    }
+
+    /** @override */
+    getPlayedRanges() {
+      return [];
     }
   };
 }
