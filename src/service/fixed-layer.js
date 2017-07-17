@@ -562,21 +562,14 @@ export class FixedLayer {
       this.returnFromTransferLayer_(fe);
     }
 
-    // Update the new fixed/sticky state.
-    if (state.fixed || state.sticky) {
-      // Update `top`. This is necessary to adjust position to the viewer's
-      // paddingTop.
-      if (state.fixed || !this.transfer_) {
-        setStyle(element, 'top', state.top ?
-            `calc(${state.top} + ${this.paddingTop_}px)` :
-            '');
-      }
-
-      // Move element to the fixed layer.
-      if (this.transfer_ &&
-              state.fixed && !oldFixed && state.transferrable) {
-        this.transferToTransferLayer_(fe, index, state);
-      }
+    // Update `top`. This is necessary to adjust position to the viewer's
+    // paddingTop.
+    if ((state.fixed || !this.transfer_) && state.top) {
+      setStyle(element, 'top', `calc(${state.top} + ${this.paddingTop_}px)`);
+    }
+    // Move element to the fixed layer.
+    if (this.transfer_ && state.fixed && !oldFixed && state.transferrable) {
+      this.transferToTransferLayer_(fe, index, state);
     }
   }
 
