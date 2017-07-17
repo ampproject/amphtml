@@ -19,18 +19,11 @@ import {FiniteStateMachine} from '../finite-state-machine';
 import {FocusHistory} from '../focus-history';
 import {Pass} from '../pass';
 import {Resource, ResourceState} from './resource';
+import {Services} from '../services';
 import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../visibility-state';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {closest, hasNextNodeInDocumentOrder} from '../dom';
-import {
-  documentInfoForDoc,
-  inputFor,
-  timerFor,
-  viewerForDoc,
-  viewportForDoc,
-  vsyncFor,
-} from '../services';
 import {expandLayoutRect} from '../layout-rect';
 import {installInputService} from '../input';
 import {loadPromise} from '../event-helper';
@@ -92,7 +85,7 @@ export class Resources {
     this.win = ampdoc.win;
 
     /** @const @private {!./viewer-impl.Viewer} */
-    this.viewer_ = viewerForDoc(ampdoc);
+    this.viewer_ = Services.viewerForDoc(ampdoc);
 
     /** @private {boolean} */
     this.isRuntimeOn_ = this.viewer_.isRuntimeOn();
@@ -191,10 +184,10 @@ export class Resources {
     this.isCurrentlyBuildingPendingResources_ = false;
 
     /** @private @const {!./viewport-impl.Viewport} */
-    this.viewport_ = viewportForDoc(this.ampdoc);
+    this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @private @const {!./vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(this.win);
+    this.vsync_ = Services.vsyncFor(this.win);
 
     /** @private @const {!FocusHistory} */
     this.activeHistory_ = new FocusHistory(this.win, FOCUS_HISTORY_TIMEOUT_);
@@ -271,7 +264,7 @@ export class Resources {
       // See https://bugs.webkit.org/show_bug.cgi?id=174031 for more details.
       Promise.race([
         loadPromise(this.win),
-        timerFor(this.win).promise(3100),
+        Services.timerFor(this.win).promise(3100),
       ]).then(remeasure);
 
       // Remeasure the document when all fonts loaded.
@@ -359,7 +352,7 @@ export class Resources {
   /** @private */
   monitorInput_() {
     installInputService(this.win);
-    const input = inputFor(this.win);
+    const input = Services.inputFor(this.win);
     input.onTouchDetected(detected => {
       this.toggleInputClass_('amp-mode-touch', detected);
     }, true);
@@ -1027,7 +1020,7 @@ export class Resources {
         'title': doc.title,
         'sourceUrl': getSourceUrl(this.ampdoc.getUrl()),
         'serverLayout': doc.documentElement.hasAttribute('i-amphtml-element'),
-        'linkRels': documentInfoForDoc(this.ampdoc).linkRels,
+        'linkRels': Services.documentInfoForDoc(this.ampdoc).linkRels,
       }), /* cancelUnsent */true);
 
       this.scrollHeight_ = this.viewport_.getScrollHeight();

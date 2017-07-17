@@ -21,11 +21,10 @@ import {AccessServerJwtAdapter} from './amp-access-server-jwt';
 import {AccessVendorAdapter} from './amp-access-vendor';
 import {CSS} from '../../../build/amp-access-0.1.css';
 import {SignInProtocol} from './signin';
-import {actionServiceForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {assertHttpsUrl, getSourceOrigin} from '../../../src/url';
 import {cancellation} from '../../../src/error';
-import {cidForDoc} from '../../../src/services';
 import {evaluateAccessExpr} from './access-expr';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {installStyles} from '../../../src/style-installer';
@@ -37,14 +36,6 @@ import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getLoginUrl, openLoginDialog} from './login-dialog';
 import {parseQueryString} from '../../../src/url';
-import {performanceForOrNull} from '../../../src/services';
-import {resourcesForDoc} from '../../../src/services';
-import {templatesFor} from '../../../src/services';
-import {timerFor} from '../../../src/services';
-import {urlReplacementsForDoc} from '../../../src/services';
-import {viewerForDoc} from '../../../src/services';
-import {viewportForDoc} from '../../../src/services';
-import {vsyncFor} from '../../../src/services';
 import {startsWith} from '../../../src/string';
 
 
@@ -129,33 +120,33 @@ export class AccessService {
     this.pubOrigin_ = getSourceOrigin(ampdoc.win.location);
 
     /** @const @private {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = timerFor(ampdoc.win);
+    this.timer_ = Services.timerFor(ampdoc.win);
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(ampdoc.win);
+    this.vsync_ = Services.vsyncFor(ampdoc.win);
 
     /** @const @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
-    this.urlReplacements_ = urlReplacementsForDoc(ampdoc);
+    this.urlReplacements_ = Services.urlReplacementsForDoc(ampdoc);
 
     // TODO(dvoytenko, #3742): This will refer to the ampdoc once AccessService
     // is migrated to ampdoc as well.
     /** @private @const {!Promise<!../../../src/service/cid-impl.Cid>} */
-    this.cid_ = cidForDoc(ampdoc);
+    this.cid_ = Services.cidForDoc(ampdoc);
 
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = viewerForDoc(ampdoc);
+    this.viewer_ = Services.viewerForDoc(ampdoc);
 
     /** @private @const {!../../../src/service/viewport-impl.Viewport} */
-    this.viewport_ = viewportForDoc(ampdoc);
+    this.viewport_ = Services.viewportForDoc(ampdoc);
 
     /** @private @const {!../../../src/service/template-impl.Templates} */
-    this.templates_ = templatesFor(ampdoc.win);
+    this.templates_ = Services.templatesFor(ampdoc.win);
 
     /** @private @const {!../../../src/service/resources-impl.Resources} */
-    this.resources_ = resourcesForDoc(ampdoc);
+    this.resources_ = Services.resourcesForDoc(ampdoc);
 
     /** @private @const {?../../../src/service/performance-impl.Performance} */
-    this.performance_ = performanceForOrNull(ampdoc.win);
+    this.performance_ = Services.performanceForOrNull(ampdoc.win);
 
     /** @private @const {function(string):Promise<string>} */
     this.openLoginDialog_ = openLoginDialog.bind(null, ampdoc);
@@ -349,7 +340,7 @@ export class AccessService {
 
     // TODO(dvoytenko, #3742): This will refer to the ampdoc once AccessService
     // is migrated to ampdoc as well.
-    actionServiceForDoc(this.ampdoc).installActionHandler(
+    Services.actionServiceForDoc(this.ampdoc).installActionHandler(
         this.accessElement_, this.handleAction_.bind(this));
 
     // Calculate login URLs right away.

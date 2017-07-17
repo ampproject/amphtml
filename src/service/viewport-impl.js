@@ -31,11 +31,8 @@ import {getFriendlyIframeEmbedOptional} from '../friendly-iframe-embed';
 import {isExperimentOn} from '../experiments';
 import {numeric} from '../transition';
 import {onDocumentReady, whenDocumentReady} from '../document-ready';
-import {platformFor} from '../services';
+import {Services} from '../services';
 import {px, setStyle, setStyles, computedStyle} from '../style';
-import {timerFor} from '../services';
-import {vsyncFor} from '../services';
-import {viewerForDoc} from '../services';
 import {waitForBody, isIframed} from '../dom';
 import {getMode} from '../mode';
 
@@ -126,10 +123,10 @@ export class Viewport {
     this.lastPaddingTop_ = 0;
 
     /** @private {!./timer-impl.Timer} */
-    this.timer_ = timerFor(this.ampdoc.win);
+    this.timer_ = Services.timerFor(this.ampdoc.win);
 
     /** @private {!./vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(this.ampdoc.win);
+    this.vsync_ = Services.vsyncFor(this.ampdoc.win);
 
     /** @private {boolean} */
     this.scrollTracking_ = false;
@@ -1076,7 +1073,7 @@ export class ViewportBindingNatural_ {
     this.win = ampdoc.win;
 
     /** @const {!../service/platform-impl.Platform} */
-    this.platform_ = platformFor(this.win);
+    this.platform_ = Services.platformFor(this.win);
 
     /** @private @const {!./viewer-impl.Viewer} */
     this.viewer_ = viewer;
@@ -1475,7 +1472,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     // implementation.
     return new Promise(resolve => {
       onDocumentReady(this.win.document, doc => {
-        vsyncFor(this.win).mutatePromise(() => {
+        Services.vsyncFor(this.win).mutatePromise(() => {
           setStyle(doc.body, 'borderTopStyle', lightboxMode ? 'none' : 'solid');
         }).then(resolve);
       });
@@ -1941,13 +1938,13 @@ export function updateViewportMetaString(currentValue, updateParams) {
  * @private
  */
 function createViewport(ampdoc) {
-  const viewer = viewerForDoc(ampdoc);
+  const viewer = Services.viewerForDoc(ampdoc);
   let binding;
   if (ampdoc.isSingleDoc() &&
       getViewportType(ampdoc.win, viewer) == ViewportType.NATURAL_IOS_EMBED) {
     // The overriding of document.body fails in iOS7.
     // Also, iOS8 sometimes freezes scrolling.
-    if (platformFor(ampdoc.win).getIosMajorVersion() > 8) {
+    if (Services.platformFor(ampdoc.win).getIosMajorVersion() > 8) {
       binding = new ViewportBindingIosEmbedWrapper_(ampdoc.win);
     } else {
       binding = new ViewportBindingNaturalIosEmbed_(ampdoc.win, ampdoc);
@@ -1987,7 +1984,8 @@ const ViewportType = {
  */
 function getViewportType(win, viewer) {
   const viewportType = viewer.getParam('viewportType') || ViewportType.NATURAL;
-  if (!platformFor(win).isIos() || viewportType != ViewportType.NATURAL) {
+  if (!Services.platformFor(win).isIos() ||
+      viewportType != ViewportType.NATURAL) {
     return viewportType;
   }
   // Enable iOS Embedded mode so that it's easy to test against a more
