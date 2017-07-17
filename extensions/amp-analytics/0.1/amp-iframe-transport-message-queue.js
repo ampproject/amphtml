@@ -58,7 +58,8 @@ export class AmpIframeTransportMessageQueue {
         true,
         () => {
           this.setIsReady();
-        });
+        },
+        true);
   }
 
   /**
