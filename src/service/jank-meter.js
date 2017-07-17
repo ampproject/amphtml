@@ -15,7 +15,7 @@
  */
 
 import {isExperimentOn} from '../experiments';
-import {performanceForOrNull} from '../services';
+import {Services} from '../services';
 import {dev, user} from '../log';
 
 /** @const {number} */
@@ -40,7 +40,7 @@ export class JankMeter {
     /** @private {?number} */
     this.scheduledTime_ = null;
     /** @private {?./performance-impl.Performance} */
-    this.perf_ = performanceForOrNull(win);
+    this.perf_ = Services.performanceForOrNull(win);
 
     /** @private {?BatteryManager} */
     this.batteryManager_ = null;

@@ -15,7 +15,7 @@
  */
 
 import {Viewer} from '../../src/service/viewer-impl';
-import {ampdocServiceFor} from '../../src/services';
+import {Services} from '../../src/services';
 import {dev} from '../../src/log';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentStateService} from '../../src/service/document-state';
@@ -85,7 +85,7 @@ describe('Viewer', () => {
     });
     installDocService(windowApi, /* isSingleDoc */ true);
     installDocumentStateService(windowApi);
-    ampdoc = ampdocServiceFor(windowApi).getAmpDoc();
+    ampdoc = Services.ampdocServiceFor(windowApi).getAmpDoc();
     installPlatformService(windowApi);
     installTimerService(windowApi);
     events = {};

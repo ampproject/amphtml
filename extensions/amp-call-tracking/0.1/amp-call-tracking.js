@@ -16,9 +16,8 @@
 
 import {assertHttpsUrl} from '../../../src/url';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
-import {urlReplacementsForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {user} from '../../../src/log';
-import {xhrFor} from '../../../src/services';
 
 
 /**
@@ -36,7 +35,7 @@ let cachedResponsePromises_ = {};
  */
 function fetch_(win, url) {
   if (!(url in cachedResponsePromises_)) {
-    cachedResponsePromises_[url] = xhrFor(win).fetchJson(url)
+    cachedResponsePromises_[url] = Services.xhrFor(win).fetchJson(url)
         .then(res => res.json());
   }
   return cachedResponsePromises_[url];
@@ -81,7 +80,7 @@ export class AmpCallTracking extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    return urlReplacementsForDoc(this.getAmpDoc())
+    return Services.urlReplacementsForDoc(this.getAmpDoc())
         .expandAsync(user().assertString(this.configUrl_))
         .then(url => fetch_(this.win, url))
         .then(data => {

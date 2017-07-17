@@ -20,7 +20,7 @@ import {registerServiceBuilderForDoc} from '../service';
 import {setStyles} from '../style';
 import {toArray} from '../types';
 import {user} from '../log';
-import {viewportForDoc, vsyncFor} from '../services';
+import {Services} from '../services';
 
 const ATTR = 'amp-fx-parallax';
 const EXPERIMENT = ATTR;
@@ -52,8 +52,8 @@ export class ParallaxService {
    */
   installParallaxHandlers_(global) {
     const doc = global.document;
-    const viewport = viewportForDoc(doc);
-    const vsync = vsyncFor(global);
+    const viewport = Services.viewportForDoc(doc);
+    const vsync = Services.vsyncFor(global);
 
     const elements = toArray(doc.querySelectorAll(`[${ATTR}]`));
     const parallaxElements = elements.map(

@@ -21,7 +21,7 @@ import {
 } from '../../../src/service';
 import {isExperimentOn} from '../../../src/experiments';
 import {user} from '../../../src/log';
-import {xhrFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 
 
 /** @const */
@@ -81,7 +81,7 @@ export class AmpFreshManager {
     const url = addParamToUrl(this.ampdoc.win.location.href,
         'amp-fresh', String(Date.now()));
     return Promise.all([
-      xhrFor(this.ampdoc.win).fetchDocument(url, {
+      Services.xhrFor(this.ampdoc.win).fetchDocument(url, {
         requireAmpResponseSourceOrigin: false,
       }),
       this.ampdoc.whenReady(),

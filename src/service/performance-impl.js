@@ -16,9 +16,7 @@
 
 import {layoutRectLtwh} from '../layout-rect';
 import {registerServiceBuilder, getService} from '../service';
-import {resourcesForDoc} from '../services';
-import {viewerForDoc} from '../services';
-import {viewportForDoc} from '../services';
+import {Services} from '../services';
 import {whenDocumentComplete} from '../document-ready';
 import {getMode} from '../mode';
 import {isCanary} from '../experiments';
@@ -119,8 +117,8 @@ export class Performance {
    * @return {!Promise}
    */
   coreServicesAvailable() {
-    this.viewer_ = viewerForDoc(this.win.document);
-    this.resources_ = resourcesForDoc(this.win.document);
+    this.viewer_ = Services.viewerForDoc(this.win.document);
+    this.resources_ = Services.resourcesForDoc(this.win.document);
 
     this.isPerformanceTrackingOn_ = this.viewer_.isEmbedded() &&
         this.viewer_.getParam('csi') === '1';
@@ -266,7 +264,7 @@ export class Performance {
    * @private
    */
   whenViewportLayoutComplete_() {
-    const size = viewportForDoc(this.win.document).getSize();
+    const size = Services.viewportForDoc(this.win.document).getSize();
     const rect = layoutRectLtwh(0, 0, size.width, size.height);
     return this.resources_.getResourcesInRect(
         this.win, rect, /* isInPrerender */ true)

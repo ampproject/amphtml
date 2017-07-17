@@ -15,6 +15,7 @@
  */
 
 import {CommonSignals} from './common-signals';
+import {Services} from './services';
 import {
     createElementWithAttributes,
     removeElement,
@@ -22,9 +23,7 @@ import {
 import {dev} from './log';
 import {dict} from './utils/object';
 import {isArray} from './types';
-import {analyticsForDocOrNull} from './services';
 import {triggerAnalyticsEvent} from './analytics';
-import {extensionsFor} from './services';
 
 /**
  * Method to create scoped analytics element for any element.
@@ -55,10 +54,11 @@ export function insertAnalyticsElement(
   // Force load analytics extension if script not included in page.
   if (loadAnalytics) {
     // Get Extensions service and force load analytics extension.
-    const extensions = extensionsFor(parentElement.ownerDocument.defaultView);
+    const extensions =
+        Services.extensionsFor(parentElement.ownerDocument.defaultView);
     extensions./*OK*/loadExtension('amp-analytics');
   } else {
-    analyticsForDocOrNull(parentElement).then(analytics => {
+    Services.analyticsForDocOrNull(parentElement).then(analytics => {
       dev().assert(analytics);
     });
   }

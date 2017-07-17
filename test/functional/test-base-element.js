@@ -19,7 +19,7 @@ import {Resource} from '../../src/service/resource';
 import {createAmpElementProto} from '../../src/custom-element';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {listenOncePromise} from '../../src/event-helper';
-import {timerFor} from '../../src/services';
+import {Services} from '../../src/services';
 import * as sinon from 'sinon';
 
 
@@ -174,7 +174,7 @@ describe('BaseElement', () => {
     let event2Promise;
 
     beforeEach(() => {
-      const timer = timerFor(element.win);
+      const timer = Services.timerFor(element.win);
       target = document.createElement('div');
 
       event1 = document.createEvent('Event');

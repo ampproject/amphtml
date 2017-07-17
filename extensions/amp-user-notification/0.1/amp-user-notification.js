@@ -16,14 +16,10 @@
 
 import {CSS} from '../../../build/amp-user-notification-0.1.css';
 import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
-import {cidForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {registerServiceBuilder, getService} from '../../../src/service';
 import {dev, user, rethrowAsync} from '../../../src/log';
-import {storageForDoc} from '../../../src/services';
-import {urlReplacementsForDoc} from '../../../src/services';
-import {viewerForDoc} from '../../../src/services';
 import {whenDocumentReady} from '../../../src/document-ready';
-import {xhrFor} from '../../../src/services';
 import {setStyle} from '../../../src/style';
 
 
@@ -130,8 +126,8 @@ export class AmpUserNotification extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     const ampdoc = this.getAmpDoc();
-    this.urlReplacements_ = urlReplacementsForDoc(ampdoc);
-    this.storagePromise_ = storageForDoc(ampdoc);
+    this.urlReplacements_ = Services.urlReplacementsForDoc(ampdoc);
+    this.storagePromise_ = Services.storageForDoc(ampdoc);
     if (!this.userNotificationManager_) {
       installUserNotificationManager(window);
       this.userNotificationManager_ = getService(window,
@@ -204,7 +200,8 @@ export class AmpUserNotification extends AMP.BaseElement {
         credentials: 'include',
         requireAmpResponseSourceOrigin: false,
       };
-      return xhrFor(this.win).fetchJson(href, getReq).then(res => res.json());
+      return Services.xhrFor(this.win)
+          .fetchJson(href, getReq).then(res => res.json());
     });
   }
 
@@ -214,15 +211,17 @@ export class AmpUserNotification extends AMP.BaseElement {
    * @return {!Promise}
    */
   postDismissEnpoint_() {
-    return xhrFor(this.win).fetchJson(dev().assertString(this.dismissHref_), {
-      method: 'POST',
-      credentials: 'include',
-      requireAmpResponseSourceOrigin: false,
-      body: /** @type {!JsonObject} */({
-        'elementId': this.elementId_,
-        'ampUserId': this.ampUserId_,
-      }),
-    });
+    return Services.xhrFor(this.win).fetchJson(
+        dev().assertString(this.dismissHref_),
+        {
+          method: 'POST',
+          credentials: 'include',
+          requireAmpResponseSourceOrigin: false,
+          body: /** @type {!JsonObject} */({
+            'elementId': this.elementId_,
+            'ampUserId': this.ampUserId_,
+          }),
+        });
   }
 
   /**
@@ -287,7 +286,7 @@ export class AmpUserNotification extends AMP.BaseElement {
    * @private
    */
   getCidService_() {
-    return cidForDoc(this.element);
+    return Services.cidForDoc(this.element);
   }
 
   /** @override */
@@ -390,7 +389,7 @@ export class UserNotificationManager {
     this.deferRegistry_ = Object.create(null);
 
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = viewerForDoc(this.win.document);
+    this.viewer_ = Services.viewerForDoc(this.win.document);
 
     /** @private @const {!Promise} */
     this.documentReadyPromise_ = whenDocumentReady(this.win.document);

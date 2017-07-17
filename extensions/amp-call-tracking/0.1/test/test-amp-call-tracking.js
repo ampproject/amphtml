@@ -17,7 +17,7 @@
 import '../amp-call-tracking';
 import {clearResponseCache} from '../amp-call-tracking';
 import {createIframePromise} from '../../../../testing/iframe';
-import {xhrFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import * as sinon from 'sinon';
 
 
@@ -27,7 +27,7 @@ describe('amp-call-tracking', () => {
 
   function getTestIframe() {
     return createIframePromise().then(iframe => {
-      xhrMock = sandbox.mock(xhrFor(iframe.win));
+      xhrMock = sandbox.mock(Services.xhrFor(iframe.win));
       return iframe;
     });
   }

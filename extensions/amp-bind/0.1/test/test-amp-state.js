@@ -15,7 +15,7 @@
  */
 
 import '../amp-bind';
-import {viewerForDoc} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 
 describes.realWin('AmpState', {
   amp: {
@@ -43,7 +43,7 @@ describes.realWin('AmpState', {
   }
 
   beforeEach(() => {
-    viewer = viewerForDoc(env.win.document);
+    viewer = Services.viewerForDoc(env.win.document);
     whenFirstVisiblePromise = new Promise(resolve => {
       whenFirstVisiblePromiseResolve = resolve;
     });

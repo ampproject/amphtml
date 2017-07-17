@@ -43,13 +43,12 @@ import {removeElement} from '../../../src/dom';
 import {getMode} from '../../../src/mode';
 import {stringHash32} from '../../../src/string';
 import {dev} from '../../../src/log';
-import {extensionsFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {
   computedStyle,
   setStyles,
 } from '../../../src/style';
-import {viewerForDoc} from '../../../src/services';
 import {AdsenseSharedState} from './adsense-shared-state';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
@@ -112,7 +111,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     this.ampAnalyticsConfig_ = null;
 
     /** @private {!../../../src/service/extensions-impl.Extensions} */
-    this.extensions_ = extensionsFor(this.win);
+    this.extensions_ = Services.extensionsFor(this.win);
 
     /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
     this.size_ = null;
@@ -147,7 +146,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     if (adClientId.substring(0, 3) != 'ca-') {
       adClientId = 'ca-' + adClientId;
     }
-    const visibilityState = viewerForDoc(this.getAmpDoc())
+    const visibilityState = Services.viewerForDoc(this.getAmpDoc())
         .getVisibilityState();
     const adTestOn = this.element.getAttribute('data-adtest') ||
         isInManualExperiment(this.element);

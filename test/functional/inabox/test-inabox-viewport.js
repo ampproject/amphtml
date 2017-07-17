@@ -15,7 +15,7 @@
  */
 
 import {layoutRectLtwh} from '../../../src/layout-rect';
-import {resourcesForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {
   prepareFixedContainer,
   resetFixedContainer,
@@ -75,7 +75,8 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       },
       measure: measureSpy,
     };
-    sandbox.stub(resourcesForDoc(win.document), 'get').returns([element]);
+    sandbox.stub(
+        Services.resourcesForDoc(win.document), 'get').returns([element]);
   });
 
   afterEach(() => {

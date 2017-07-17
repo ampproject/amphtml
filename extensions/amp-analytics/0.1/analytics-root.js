@@ -27,10 +27,7 @@ import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {map} from '../../../src/utils/object';
-import {
-  viewerForDoc,
-  viewportForDoc,
-} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {whenContentIniLoad} from '../../../src/friendly-iframe-embed';
 
 const TAG = 'amp-analytics';
@@ -96,7 +93,7 @@ export class AnalyticsRoot {
    * @return {!../../../src/service/viewer-impl.Viewer}
    */
   getViewer() {
-    return viewerForDoc(this.ampdoc);
+    return Services.viewerForDoc(this.ampdoc);
   }
 
   /**
@@ -363,7 +360,7 @@ export class AmpdocAnalyticsRoot extends AnalyticsRoot {
 
   /** @override */
   whenIniLoaded() {
-    const viewport = viewportForDoc(this.ampdoc);
+    const viewport = Services.viewportForDoc(this.ampdoc);
     let rect;
     if (getMode(this.ampdoc.win).runtime == 'inabox') {
       // TODO(dvoytenko, #7971): This is currently addresses incorrect position

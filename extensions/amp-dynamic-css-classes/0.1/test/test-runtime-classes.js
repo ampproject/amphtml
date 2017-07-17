@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ampdocServiceFor, viewerForDoc} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {
   installDocumentStateService,
@@ -66,7 +66,7 @@ describe('dynamic classes are inserted at runtime', () => {
   function setup(embeded, userAgent, referrer) {
     installDocService(mockWin, /* isSingleDoc */ true);
     installDocumentStateService(mockWin);
-    const ampdocService = ampdocServiceFor(mockWin);
+    const ampdocService = Services.ampdocServiceFor(mockWin);
     const ampdoc = ampdocService.getAmpDoc();
     installPlatformService(mockWin);
 
@@ -76,7 +76,7 @@ describe('dynamic classes are inserted at runtime', () => {
     };
 
     installViewerServiceForDoc(ampdoc);
-    viewer = viewerForDoc(ampdoc);
+    viewer = Services.viewerForDoc(ampdoc);
     viewer.isEmbedded = () => !!embeded;
 
     if (userAgent !== undefined) {

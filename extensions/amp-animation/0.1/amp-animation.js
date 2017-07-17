@@ -29,7 +29,7 @@ import {listen} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
 import {user, dev} from '../../../src/log';
-import {viewerForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 
 const TAG = 'amp-animation';
 const POLYFILLED = '__AMP_WA';
@@ -125,7 +125,7 @@ export class AmpAnimation extends AMP.BaseElement {
       });
       listen(this.embed_.win, 'resize', () => this.onResize_());
     } else {
-      const viewer = viewerForDoc(ampdoc);
+      const viewer = Services.viewerForDoc(ampdoc);
       this.setVisible_(viewer.isVisible());
       viewer.onVisibilityChanged(() => {
         this.setVisible_(viewer.isVisible());

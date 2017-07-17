@@ -33,7 +33,7 @@ import {installPlatformService} from '../../../../src/service/platform-impl';
 import {
     installResourcesServiceForDoc,
 } from '../../../../src/service/resources-impl';
-import {documentStateFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 
 describes.realWin('InstrumentationService', {amp: 1}, env => {
   let win;
@@ -291,7 +291,7 @@ describe('amp-analytics.instrumentation OLD', function() {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
-    const docState = documentStateFor(window);
+    const docState = Services.documentStateFor(window);
     sandbox.stub(docState, 'isHidden', () => false);
     ampdoc = new AmpDocSingle(window);
     installResourcesServiceForDoc(ampdoc);

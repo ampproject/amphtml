@@ -20,9 +20,8 @@ import {
 } from '../../../ads/google/adsense-amp-auto-ads';
 import {buildUrl} from '../../../ads/google/a4a/url-builder';
 import {dict} from '../../../src/utils/object';
-import {documentInfoForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {parseUrl} from '../../../src/url';
-import {viewportForDoc} from '../../../src/services';
 
 
 /**
@@ -92,7 +91,7 @@ class AdSenseNetworkConfig {
 
   /** @override */
   getConfigUrl() {
-    const docInfo = documentInfoForDoc(this.autoAmpAdsElement_);
+    const docInfo = Services.documentInfoForDoc(this.autoAmpAdsElement_);
     const canonicalHostname = parseUrl(docInfo.canonicalUrl).hostname;
     return buildUrl('//pagead2.googlesyndication.com/getconfig/ama', {
       'client': this.autoAmpAdsElement_.getAttribute('data-ad-client'),
@@ -112,7 +111,7 @@ class AdSenseNetworkConfig {
   /** @override */
   getAdConstraints() {
     const viewportHeight =
-        viewportForDoc(this.autoAmpAdsElement_).getSize().height;
+        Services.viewportForDoc(this.autoAmpAdsElement_).getSize().height;
     return {
       initialMinSpacing: viewportHeight,
       subsequentMinSpacing: [

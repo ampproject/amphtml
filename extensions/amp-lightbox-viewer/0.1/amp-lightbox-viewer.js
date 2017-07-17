@@ -17,7 +17,7 @@
 
 import {CSS} from '../../../build/amp-lightbox-viewer-0.1.css';
 import {KeyCodes} from '../../../src/utils/key-codes';
-import {ampdocServiceFor, extensionsFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {isExperimentOn} from '../../../src/experiments';
 import {Layout} from '../../../src/layout';
 import {user, dev} from '../../../src/log';
@@ -141,7 +141,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   buildCarousel_() {
     if (!this.carousel_) {
       dev().assert(this.container_);
-      extensionsFor(this.win).loadExtension('amp-carousel');
+      Services.extensionsFor(this.win).loadExtension('amp-carousel');
       this.carousel_ = this.win.document.createElement('amp-carousel');
       this.carousel_.setAttribute('type', 'slides');
       this.carousel_.setAttribute('layout', 'fill');
@@ -547,7 +547,7 @@ export function installLightboxManager(win) {
   if (isExperimentOn(win, TAG)) {
     // TODO(aghassemi): This only works for singleDoc mode. We will move
     // installation of LightboxManager to core after the experiment, okay for now.
-    const ampdoc = ampdocServiceFor(win).getAmpDoc();
+    const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
     manager_ = new LightboxManager(ampdoc);
   }
 }

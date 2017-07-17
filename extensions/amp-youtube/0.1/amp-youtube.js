@@ -28,7 +28,7 @@ import {addParamsToUrl} from '../../../src/url';
 import {isObject} from '../../../src/types';
 import {dict} from '../../../src/utils/object';
 import {VideoEvents} from '../../../src/video-interface';
-import {videoManagerForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {startsWith} from '../../../src/string';
 
 /**
@@ -139,7 +139,7 @@ class AmpYoutube extends AMP.BaseElement {
     }
 
     installVideoManagerForDoc(this.element);
-    videoManagerForDoc(this.element).register(this);
+    Services.videoManagerForDoc(this.element).register(this);
   }
 
   /** @return {string} */

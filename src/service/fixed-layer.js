@@ -16,7 +16,7 @@
 
 import {dev, user} from '../log';
 import {endsWith} from '../string';
-import {platformFor} from '../services';
+import {Services} from '../services';
 import {getStyle, setStyle, setStyles, computedStyle} from '../style';
 
 const TAG = 'FixedLayer';
@@ -116,7 +116,7 @@ export class FixedLayer {
     // Sort in document order.
     this.sortInDomOrder_();
 
-    const platform = platformFor(this.ampdoc.win);
+    const platform = Services.platformFor(this.ampdoc.win);
     if (this.elements_.length > 0 && !this.transfer_ && platform.isIos()) {
       user().warn(TAG, 'Please test this page inside of an AMP Viewer such' +
           ' as Google\'s because the fixed or sticky positioning might have' +

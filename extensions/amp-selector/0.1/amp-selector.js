@@ -17,7 +17,7 @@
 import {ActionTrust} from '../../../src/action-trust';
 import {CSS} from '../../../build/amp-selector-0.1.css';
 import {KeyCodes} from '../../../src/utils/key-codes';
-import {actionServiceForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {closestBySelector, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
@@ -77,7 +77,7 @@ export class AmpSelector extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.action_ = actionServiceForDoc(this.element);
+    this.action_ = Services.actionServiceForDoc(this.element);
     this.isMultiple_ = this.element.hasAttribute('multiple');
     this.isDisabled_ = this.element.hasAttribute('disabled');
 

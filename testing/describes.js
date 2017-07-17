@@ -90,11 +90,7 @@ import {
 } from './fake-dom';
 import {installFriendlyIframeEmbed} from '../src/friendly-iframe-embed';
 import {doNotLoadExternalResourcesInTest} from './iframe';
-import {
-  ampdocServiceFor,
-  extensionsFor,
-  resourcesForDoc,
-} from '../src/services';
+import {Services} from '../src/services';
 import {
   adopt,
   adoptShadowMode,
@@ -611,10 +607,10 @@ class AmpFixture {
     const ampdocType = spec.ampdoc || 'single';
     const singleDoc = ampdocType == 'single' || ampdocType == 'fie';
     installDocService(win, singleDoc);
-    const ampdocService = ampdocServiceFor(win);
+    const ampdocService = Services.ampdocServiceFor(win);
     env.ampdocService  = ampdocService;
     installExtensionsService(win);
-    env.extensions = extensionsFor(win);
+    env.extensions = Services.extensionsFor(win);
     installBuiltinElements(win);
     installRuntimeServices(win);
     env.flushVsync = function() {
@@ -627,7 +623,7 @@ class AmpFixture {
       env.ampdoc = ampdoc;
       installAmpdocServices(ampdoc, spec.params);
       adopt(win);
-      resourcesForDoc(ampdoc).ampInitComplete();
+      Services.resourcesForDoc(ampdoc).ampInitComplete();
     } else if (ampdocType == 'multi' || ampdocType == 'shadow') {
       adoptShadowMode(win);
       // Notice that ampdoc's themselves install runtime styles in shadow roots.

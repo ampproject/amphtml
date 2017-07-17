@@ -20,14 +20,11 @@
 
 import '../../third_party/babel/custom-babel-helpers';
 import '../polyfills';
-import {ampdocServiceFor, resourcesForDoc} from '../services';
+import {Services} from '../services';
 import {startupChunk} from '../chunk';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {installIframeMessagingClient} from './inabox-iframe-messaging-client';
-import {
-  installPerformanceService,
-  performanceFor,
-} from '../service/performance-impl';
+import {installPerformanceService} from '../service/performance-impl';
 import {installStyles, makeBodyVisible} from '../style-installer';
 import {installErrorReporting} from '../error';
 import {installDocService} from '../service/ampdoc-impl';
@@ -63,7 +60,7 @@ try {
   // Declare that this runtime will support a single root doc. Should happen
   // as early as possible.
   installDocService(self,  /* isSingleDoc */ true);
-  ampdocService = ampdocServiceFor(self);
+  ampdocService = Services.ampdocServiceFor(self);
 } catch (e) {
   // In case of an error call this.
   makeBodyVisible(self.document);
@@ -74,7 +71,7 @@ startupChunk(self.document, function initial() {
   const ampdoc = ampdocService.getAmpDoc(self.document);
   installPerformanceService(self);
   /** @const {!../service/performance-impl.Performance} */
-  const perf = performanceFor(self);
+  const perf = Services.performanceFor(self);
   perf.tick('is');
 
   self.document.documentElement.classList.add('i-amphtml-inabox');
@@ -116,7 +113,7 @@ startupChunk(self.document, function initial() {
     });
     startupChunk(self.document, function finalTick() {
       perf.tick('e_is');
-      resourcesForDoc(ampdoc).ampInitComplete();
+      Services.resourcesForDoc(ampdoc).ampInitComplete();
       // TODO(erwinm): move invocation of the `flush` method when we have the
       // new ticks in place to batch the ticks properly.
       perf.flush();

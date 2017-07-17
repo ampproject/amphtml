@@ -15,7 +15,7 @@
  */
 
 import {isExperimentOn} from '../../../src/experiments';
-import {cryptoFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
@@ -291,7 +291,7 @@ export class VariableService {
    * @return {!Promise<string>}
    */
   hashFilter_(value) {
-    return cryptoFor(this.win_).sha384Base64(value);
+    return Services.cryptoFor(this.win_).sha384Base64(value);
   }
 
   isFilterExperimentOn_() {

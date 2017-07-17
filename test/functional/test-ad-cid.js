@@ -15,7 +15,7 @@
  */
 
 import {adConfig} from '../../ads/_config';
-import {ampdocServiceFor, timerFor} from '../../src/services';
+import {Services} from '../../src/services';
 import {
   cidServiceForDocForTesting,
 } from '../../src/service/cid-impl';
@@ -43,7 +43,7 @@ describes.realWin('ad-cid', {}, env => {
     element.setAttribute('type', '_ping_');
     installDocService(win, /* isSingleDoc */ true);
     installTimerService(win);
-    const ampdoc = ampdocServiceFor(win).getAmpDoc();
+    const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
     cidService = cidServiceForDocForTesting(ampdoc);
     adElement = {
       getAmpDoc: () => ampdoc,
@@ -92,7 +92,7 @@ describes.realWin('ad-cid', {}, env => {
   it('should return on timeout', () => {
     config.clientIdScope = cidScope;
     sandbox.stub(cidService, 'get', () => {
-      return timerFor(win).promise(2000);
+      return Services.timerFor(win).promise(2000);
     });
     const p = getAdCid(adElement).then(cid => {
       expect(cid).to.be.undefined;

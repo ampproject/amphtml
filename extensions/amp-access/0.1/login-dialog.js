@@ -19,7 +19,7 @@ import {getData, listen} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {openWindowDialog} from '../../../src/dom';
 import {parseUrl} from '../../../src/url';
-import {viewerForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {urls} from '../../../src/config';
 import {dict} from '../../../src/utils/object';
 
@@ -35,7 +35,7 @@ const RETURN_URL_REGEX = new RegExp('RETURN_URL');
  * @return {!WebLoginDialog|!ViewerLoginDialog}
  */
 export function createLoginDialog(ampdoc, urlOrPromise) {
-  const viewer = viewerForDoc(ampdoc);
+  const viewer = Services.viewerForDoc(ampdoc);
   const overrideDialog = parseInt(viewer.getParam('dialog'), 10);
   if (overrideDialog) {
     return new ViewerLoginDialog(viewer, urlOrPromise);

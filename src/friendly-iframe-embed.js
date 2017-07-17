@@ -20,14 +20,12 @@ import {Signals} from './utils/signals';
 import {dev, rethrowAsync} from './log';
 import {disposeServicesForEmbed, getTopWindow} from './service';
 import {escapeHtml} from './dom';
-import {extensionsFor} from './services';
+import {Services} from './services';
 import {getFixedContainer} from './full-overlay-frame-child-helper';
 import {isDocumentReady} from './document-ready';
 import {layoutRectLtwh} from './layout-rect';
 import {loadPromise} from './event-helper';
 import {px, resetStyles, setStyle, setStyles} from './style';
-import {resourcesForDoc} from './services';
-import {vsyncFor} from './services';
 
 
 /** @const {string} */
@@ -123,7 +121,7 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
   /** @const {!Window} */
   const win = getTopWindow(iframe.ownerDocument.defaultView);
   /** @const {!./service/extensions-impl.Extensions} */
-  const extensions = extensionsFor(win);
+  const extensions = Services.extensionsFor(win);
 
   setStyle(iframe, 'visibility', 'hidden');
   iframe.setAttribute('referrerpolicy', 'unsafe-url');
@@ -338,7 +336,7 @@ export class FriendlyIframeEmbed {
    * Ensures that all resources from this iframe have been released.
    */
   destroy() {
-    resourcesForDoc(this.iframe).removeForChildWindow(this.win);
+    Services.resourcesForDoc(this.iframe).removeForChildWindow(this.win);
     disposeServicesForEmbed(this.win);
   }
 
@@ -470,7 +468,7 @@ export class FriendlyIframeEmbed {
    * @visibleForTesting
    */
   getVsync() {
-    return vsyncFor(this.win);
+    return Services.vsyncFor(this.win);
   }
 
   /**
@@ -478,7 +476,7 @@ export class FriendlyIframeEmbed {
    * @visibleForTesting
    */
   getResources() {
-    return resourcesForDoc(this.iframe);
+    return Services.resourcesForDoc(this.iframe);
   }
 
   /**
@@ -604,7 +602,7 @@ export class FriendlyIframeEmbed {
  * @return {!Promise}
  */
 export function whenContentIniLoad(context, hostWin, rect) {
-  return resourcesForDoc(context)
+  return Services.resourcesForDoc(context)
       .getResourcesInRect(hostWin, rect)
       .then(resources => {
         const promises = [];

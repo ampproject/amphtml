@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {timerFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import {createIframePromise} from '../../../../testing/iframe';
 import '../amp-fit-text';
 import {
@@ -45,7 +45,7 @@ describe('amp-fit-text component', () => {
       }
       ft.textContent = text;
       iframe.doc.body.appendChild(ft);
-      return timerFor(window).promise(16).then(() => {
+      return Services.timerFor(window).promise(16).then(() => {
         ft.implementation_.layoutCallback();
         return ft;
       });

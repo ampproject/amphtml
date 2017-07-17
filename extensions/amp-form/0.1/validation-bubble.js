@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {vsyncFor} from '../../../src/services';
-import {viewportForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {setStyles} from '../../../src/style';
 import {removeChildren} from '../../../src/dom';
 
@@ -34,10 +33,10 @@ export class ValidationBubble {
     this.id_ = id;
 
     /** @private @const {!../../../src/service/viewport-impl.Viewport} */
-    this.viewport_ = viewportForDoc(ampdoc);
+    this.viewport_ = Services.viewportForDoc(ampdoc);
 
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(ampdoc.win);
+    this.vsync_ = Services.vsyncFor(ampdoc.win);
 
     /** @private {?Element} */
     this.currentTargetElement_ = null;

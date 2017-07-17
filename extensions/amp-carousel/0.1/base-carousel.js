@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {KeyCodes} from '../../../src/utils/key-codes';
-import {timerFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 
 /**
  * @abstract
@@ -182,7 +182,7 @@ export class BaseCarousel extends AMP.BaseElement {
     this.getVsync().mutate(() => {
       const className = 'i-amphtml-carousel-button-start-hint';
       this.element.classList.add(className);
-      timerFor(this.win).delay(() => {
+      Services.timerFor(this.win).delay(() => {
         this.deferMutate(() => this.element.classList.remove(className));
       }, 4000);
     });

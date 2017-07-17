@@ -16,8 +16,7 @@
 
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {user} from '../../../src/log';
-import {templatesFor} from '../../../src/services';
-import {xhrFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
 import {ancestorElementsByTag} from '../../../src/dom';
 import {removeChildren} from '../../../src/dom';
@@ -85,8 +84,8 @@ export class AmpAdCustom extends AMP.BaseElement {
     // If this promise has no URL yet, create one for it.
     if (!(fullUrl in ampCustomadXhrPromises)) {
       // Here is a promise that will return the data for this URL
-      ampCustomadXhrPromises[fullUrl] = xhrFor(this.win).fetchJson(fullUrl)
-          .then(res => res.json());
+      ampCustomadXhrPromises[fullUrl] =
+          Services.xhrFor(this.win).fetchJson(fullUrl).then(res => res.json());
     }
     return ampCustomadXhrPromises[fullUrl].then(data => {
       const element = this.element;
@@ -99,10 +98,11 @@ export class AmpAdCustom extends AMP.BaseElement {
       // Set UI state
       if (templateData !== null && typeof templateData == 'object') {
         this.renderStarted();
-        templatesFor(this.win).findAndRenderTemplate(element, templateData)
+        Services.templatesFor(this.win)
+            .findAndRenderTemplate(element, templateData)
             .then(renderedElement => {
-          // Get here when the template has been rendered
-          // Clear out the template and replace it by the rendered version
+              // Get here when the template has been rendered
+              // Clear out the template and replace it by the rendered version
               removeChildren(element);
               element.appendChild(renderedElement);
             });

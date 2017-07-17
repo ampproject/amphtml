@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
+import {Services} from '../../src/services';
 import {getMode} from '../../src/mode';
-import {
-  installPerformanceService,
-  performanceFor,
-} from '../../src/service/performance-impl';
-import {resourcesForDoc} from '../../src/services';
-import {viewerForDoc} from '../../src/services';
+import {installPerformanceService} from '../../src/service/performance-impl';
 import * as lolex from 'lolex';
 import * as sinon from 'sinon';
 
@@ -38,7 +34,7 @@ describes.realWin('performance', {amp: true}, env => {
     ampdoc = env.ampdoc;
     clock = lolex.install(win, 0, ['Date', 'setTimeout', 'clearTimeout']);
     installPerformanceService(env.win);
-    perf = performanceFor(env.win);
+    perf = Services.performanceFor(env.win);
   });
 
   describe('when viewer is not ready', () => {
@@ -151,7 +147,7 @@ describes.realWin('performance', {amp: true}, env => {
     let viewerSendMessageStub;
 
     beforeEach(() => {
-      viewer = viewerForDoc(ampdoc);
+      viewer = Services.viewerForDoc(ampdoc);
       viewerSendMessageStub = sandbox.stub(viewer, 'sendMessage');
     });
 
@@ -454,7 +450,7 @@ describes.realWin('performance', {amp: true}, env => {
       return res;
     }
 
-    const resources = resourcesForDoc(ampdoc);
+    const resources = Services.resourcesForDoc(ampdoc);
     const resourcesMock = sandbox.mock(resources);
     perf.resources_ = resources;
 
@@ -495,7 +491,7 @@ describes.realWin('performance', {amp: true}, env => {
     }
 
     beforeEach(() => {
-      viewer = viewerForDoc(ampdoc);
+      viewer = Services.viewerForDoc(ampdoc);
       sandbox.stub(viewer, 'whenMessagingReady')
           .returns(Promise.resolve());
       viewerSendMessageStub = sandbox.stub(viewer,
@@ -635,13 +631,13 @@ describes.realWin('performance with experiment', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     sandbox = env.sandbox;
-    const viewer = viewerForDoc(env.ampdoc);
+    const viewer = Services.viewerForDoc(env.ampdoc);
     viewerSendMessageStub = sandbox.stub(viewer, 'sendMessage');
     sandbox.stub(viewer, 'whenMessagingReady').returns(Promise.resolve());
     sandbox.stub(viewer, 'getParam').withArgs('csi').returns('1');
     sandbox.stub(viewer, 'isEmbedded').returns(true);
     installPerformanceService(win);
-    perf = performanceFor(win);
+    perf = Services.performanceFor(win);
   });
 
   it('rtvVersion experiment', () => {

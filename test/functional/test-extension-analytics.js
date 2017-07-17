@@ -25,7 +25,7 @@ import {
     CustomEventReporterBuilder,
 } from '../../src/extension-analytics';
 import {createAmpElementProto} from '../../src/custom-element';
-import {timerFor} from '../../src/services';
+import {Services} from '../../src/services';
 import {BaseElement} from '../../src/base-element';
 import {macroTask} from '../../testing/yield';
 import * as sinon from 'sinon';
@@ -40,10 +40,10 @@ describes.realWin('extension-analytics', {
 
   describe('insertAnalyticsElement', () => {
     class MockInstrumentation {
-        };
+    };
 
     beforeEach(() => {
-      timer = timerFor(env.win);
+      timer = Services.timerFor(env.win);
       ampdoc = env.ampdoc;
       win = env.win;
     });

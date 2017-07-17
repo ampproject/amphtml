@@ -17,7 +17,7 @@
 import {createIframePromise} from '../../testing/iframe';
 import {BaseElement} from '../../src/base-element';
 import {installImg, AmpImg} from '../../builtins/amp-img';
-import {resourcesForDoc} from '../../src/services';
+import {Services} from '../../src/services';
 import * as sinon from 'sinon';
 
 describe('amp-img', () => {
@@ -137,7 +137,7 @@ describe('amp-img', () => {
       el.setAttribute('src', 'test.jpg');
       el.setAttribute('width', 100);
       el.setAttribute('height', 100);
-      el.getResources = () => resourcesForDoc(document);
+      el.getResources = () => Services.resourcesForDoc(document);
       impl = new AmpImg(el);
       impl.createdCallback();
       sandbox.stub(impl, 'getLayoutWidth').returns(100);

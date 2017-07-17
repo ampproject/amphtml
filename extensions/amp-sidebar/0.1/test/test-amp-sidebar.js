@@ -18,8 +18,7 @@
 import {KeyCodes} from '../../../../src/utils/key-codes';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
-import {platformFor} from '../../../../src/services';
-import {timerFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import {assertScreenReaderElement} from '../../../../testing/test-helper';
 import * as sinon from 'sinon';
 import '../amp-sidebar';
@@ -68,7 +67,7 @@ describes.realWin('amp-sidebar 0.1 version', {
         ampSidebar.setAttribute('id', 'sidebar1');
         ampSidebar.setAttribute('layout', 'nodisplay');
         return iframe.addElement(ampSidebar).then(() => {
-          timer = timerFor(iframe.win);
+          timer = Services.timerFor(iframe.win);
           return {iframe, ampSidebar};
         });
       });
@@ -87,7 +86,7 @@ describes.realWin('amp-sidebar 0.1 version', {
 
     beforeEach(() => {
       sandbox = sinon.sandbox.create();
-      platform = platformFor(window);
+      platform = Services.platformFor(window);
     });
 
     afterEach(() => {

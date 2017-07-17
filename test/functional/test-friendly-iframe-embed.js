@@ -25,11 +25,10 @@ import {
 } from '../../src/friendly-iframe-embed';
 import {Signals} from '../../src/utils/signals';
 import {getStyle} from '../../src/style';
-import {extensionsFor} from '../../src/services';
+import {Services} from '../../src/services';
 import {installServiceInEmbedScope} from '../../src/service';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
-import {resourcesForDoc} from '../../src/services';
 import * as sinon from 'sinon';
 
 
@@ -43,8 +42,8 @@ describe('friendly-iframe-embed', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
 
-    const extensions = extensionsFor(window);
-    const resources = resourcesForDoc(window.document);
+    const extensions = Services.extensionsFor(window);
+    const resources = Services.resourcesForDoc(window.document);
     extensionsMock = sandbox.mock(extensions);
     resourcesMock = sandbox.mock(resources);
 

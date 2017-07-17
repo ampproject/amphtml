@@ -15,7 +15,7 @@
  */
 
 import {KeyCodes} from '../../../../src/utils/key-codes';
-import {timerFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import {createIframePromise} from '../../../../testing/iframe';
 import '../amp-image-lightbox';
 import {
@@ -35,7 +35,7 @@ describe('amp-image-lightbox component', () => {
       const el = iframe.doc.createElement('amp-image-lightbox');
       el.setAttribute('layout', 'nodisplay');
       iframe.doc.body.appendChild(el);
-      return timerFor(window).promise(16).then(() => {
+      return Services.timerFor(window).promise(16).then(() => {
         return el;
       });
     });
@@ -234,7 +234,8 @@ describe('amp-image-lightbox image viewer', () => {
     lightboxMock = sandbox.mock(lightbox);
     loadPromiseStub = sandbox.stub().returns(Promise.resolve());
 
-    sandbox.stub(timerFor(window), 'promise').returns(Promise.resolve());
+    sandbox.stub(Services.timerFor(window), 'promise')
+        .returns(Promise.resolve());
     imageViewer = new ImageViewer(lightbox, window, loadPromiseStub);
     document.body.appendChild(imageViewer.getElement());
   });

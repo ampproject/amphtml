@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {analyticsForDocOrNull} from './services';
+import {Services} from './services';
 
 /**
  * Helper method to trigger analytics event if amp-analytics is available.
@@ -24,7 +24,7 @@ import {analyticsForDocOrNull} from './services';
  * @param {!Object<string, string>=} opt_vars A map of vars and their values.
  */
 export function triggerAnalyticsEvent(target, eventType, opt_vars) {
-  analyticsForDocOrNull(target).then(analytics => {
+  Services.analyticsForDocOrNull(target).then(analytics => {
     if (!analytics) {
       return;
     }

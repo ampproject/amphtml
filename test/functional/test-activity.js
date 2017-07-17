@@ -18,7 +18,7 @@ import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {
   installActivityServiceForTesting,
 } from '../../extensions/amp-analytics/0.1/activity-impl';
-import {activityForDoc, viewerForDoc, viewportForDoc} from '../../src/services';
+import {Services} from '../../src/services';
 import {installDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
@@ -103,7 +103,7 @@ describe('Activity getTotalEngagedTime', () => {
     installVsyncService(fakeWin);
     installPlatformService(fakeWin);
     installViewerServiceForDoc(ampdoc);
-    viewer = viewerForDoc(ampdoc);
+    viewer = Services.viewerForDoc(ampdoc);
 
     const whenFirstVisiblePromise = new Promise(resolve => {
       whenFirstVisibleResolve = resolve;
@@ -114,7 +114,7 @@ describe('Activity getTotalEngagedTime', () => {
     });
 
     installViewportServiceForDoc(ampdoc);
-    viewport = viewportForDoc(ampdoc);
+    viewport = Services.viewportForDoc(ampdoc);
 
     sandbox.stub(viewport, 'onScroll', handler => {
       scrollObservable.add(handler);
@@ -123,7 +123,7 @@ describe('Activity getTotalEngagedTime', () => {
     markElementScheduledForTesting(fakeWin, 'amp-analytics');
     installActivityServiceForTesting(ampdoc);
 
-    return activityForDoc(ampdoc).then(a => {
+    return Services.activityForDoc(ampdoc).then(a => {
       activity = a;
     });
   });

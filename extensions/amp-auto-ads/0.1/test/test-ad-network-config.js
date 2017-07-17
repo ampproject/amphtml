@@ -19,7 +19,7 @@ import {
   toggleExperiment,
   forceExperimentBranch,
 } from '../../../../src/experiments';
-import {viewportForDoc} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import {
   ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
   AdSenseAmpAutoAdsHoldoutBranches,
@@ -95,7 +95,8 @@ describes.realWin('ad-network-config', {
     });
 
     it('should get the ad constraints', () => {
-      const viewportMock = sandbox.mock(viewportForDoc(env.win.document));
+      const viewportMock =
+          sandbox.mock(Services.viewportForDoc(env.win.document));
       viewportMock.expects('getSize').returns(
           {width: 320, height: 500}).atLeast(1);
 

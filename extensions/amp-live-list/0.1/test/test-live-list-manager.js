@@ -15,7 +15,7 @@
  */
 
 import {liveListManagerForDoc, LiveListManager} from '../live-list-manager';
-import {viewerForDoc} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 
 
 describes.fakeWin('LiveListManager', {amp: true}, env => {
@@ -42,7 +42,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     mockXhr.onCreate = function(xhr) {
       requests.push(xhr);
     };
-    viewer = viewerForDoc(ampdoc);
+    viewer = Services.viewerForDoc(ampdoc);
     manager = liveListManagerForDoc(ampdoc);
     liveList = getLiveList({'data-sort-time': '1111'});
     sandbox.stub(liveList, 'getInterval', () => 5000);

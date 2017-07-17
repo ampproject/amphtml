@@ -18,7 +18,7 @@ import {dev} from './log';
 import {dict} from './utils/object';
 import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
 import {SubscriptionApi} from './iframe-helper';
-import {timerFor} from './services';
+import {Services} from './services';
 
 /**
  * The structure that defines the rectangle used in intersection observers.
@@ -123,7 +123,7 @@ export class IntersectionObserver {
     /** @private @const {!AMP.BaseElement} */
     this.baseElement_ = baseElement;
     /** @private @const {!./service/timer-impl.Timer} */
-    this.timer_ = timerFor(baseElement.win);
+    this.timer_ = Services.timerFor(baseElement.win);
     /** @private {boolean} */
     this.shouldSendIntersectionChanges_ = false;
     /** @private {boolean} */

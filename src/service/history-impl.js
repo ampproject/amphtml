@@ -22,8 +22,7 @@ import {
 import {getMode} from '../mode';
 import {dev} from '../log';
 import {dict, map} from '../utils/object';
-import {timerFor} from '../services';
-import {viewerForDoc} from '../services';
+import {Services} from '../services';
 
 /** @private @const */
 const TAG_ = 'History';
@@ -46,7 +45,7 @@ export class History {
     this.ampdoc_ = ampdoc;
 
     /** @private @const {!../service/timer-impl.Timer} */
-    this.timer_ = timerFor(ampdoc.win);
+    this.timer_ = Services.timerFor(ampdoc.win);
 
     /** @private @const {!HistoryBindingInterface} */
     this.binding_ = binding;
@@ -329,7 +328,7 @@ export class HistoryBindingNatural_ {
     this.win = win;
 
     /** @private @const {!../service/timer-impl.Timer} */
-    this.timer_ = timerFor(win);
+    this.timer_ = Services.timerFor(win);
 
     const history = this.win.history;
 
@@ -842,7 +841,7 @@ export class HistoryBindingVirtual_ {
  * @private
  */
 function createHistory(ampdoc) {
-  const viewer = viewerForDoc(ampdoc);
+  const viewer = Services.viewerForDoc(ampdoc);
   let binding;
   if (viewer.isOvertakeHistory() || getMode(ampdoc.win).test ||
           ampdoc.win.AMP_TEST_IFRAME) {

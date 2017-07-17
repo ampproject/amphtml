@@ -17,7 +17,7 @@
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {OBJECT_STRING_ARGS_KEY} from '../../src/service/action-impl';
 import {StandardActions} from '../../src/service/standard-actions-impl';
-import {bindForDoc, historyForDoc} from '../../src/services';
+import {Services} from '../../src/services';
 import {installHistoryServiceForDoc} from '../../src/service/history-impl';
 import {setParentWindow} from '../../src/service';
 
@@ -203,7 +203,7 @@ describes.sandboxed('StandardActions', {}, () => {
 
     it('should implement goBack', () => {
       installHistoryServiceForDoc(ampdoc);
-      const history = historyForDoc(ampdoc);
+      const history = Services.historyForDoc(ampdoc);
       const goBackStub = sandbox.stub(history, 'goBack');
       const invocation = {method: 'goBack', satisfiesTrust: () => true};
       standardActions.handleAmpTarget(invocation);
@@ -228,7 +228,7 @@ describes.sandboxed('StandardActions', {}, () => {
         satisfiesTrust: () => true,
       };
       standardActions.handleAmpTarget(invocation);
-      return bindForDoc(ampdoc).then(() => {
+      return Services.bindForDoc(ampdoc).then(() => {
         expect(spy).to.be.calledOnce;
         expect(spy).to.be.calledWith('{foo: 123}');
       });
