@@ -23,8 +23,7 @@ import {installDocumentStateService} from '../../src/service/document-state';
 import {installResourcesServiceForDoc} from '../../src/service/resources-impl';
 import {poll} from '../../testing/iframe';
 import {ResourceState} from '../../src/service/resource';
-import {resourcesForDoc} from '../../src/services';
-import {vsyncFor} from '../../src/services';
+import {Services} from '../../src/services';
 import {
   copyElementToChildWindow,
   createAmpElementProto,
@@ -151,7 +150,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
     win = env.win;
     doc = win.document;
     clock = lolex.install(win);
-    resources = resourcesForDoc(doc);
+    resources = Services.resourcesForDoc(doc);
     resources.isBuildOn_ = true;
     resourcesMock = sandbox.mock(resources);
     container = doc.createElement('div');
@@ -1452,7 +1451,7 @@ describes.realWin('CustomElement Loading Indicator', {amp: true}, env => {
       prototype: createAmpElementProto(win, 'amp-test-loader', TestElement),
     });
     LOADING_ELEMENTS_['amp-test-loader'.toUpperCase()] = true;
-    resources = resourcesForDoc(doc);
+    resources = Services.resourcesForDoc(doc);
     resources.isBuildOn_ = true;
     resourcesMock = sandbox.mock(resources);
     element = new ElementClass();
@@ -1460,7 +1459,7 @@ describes.realWin('CustomElement Loading Indicator', {amp: true}, env => {
     element.layout_ = Layout.FIXED;
     element.setAttribute('layout', 'fixed');
     element.resources_ = resources;
-    vsync = vsyncFor(win);
+    vsync = Services.vsyncFor(win);
     vsyncTasks = [];
     sandbox.stub(vsync, 'mutate', mutator => {
       vsyncTasks.push(mutator);
@@ -1750,7 +1749,7 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
     ElementClass = doc.registerElement('amp-test-overflow', {
       prototype: createAmpElementProto(win, 'amp-test-overflow', TestElement),
     });
-    resources = resourcesForDoc(doc);
+    resources = Services.resourcesForDoc(doc);
     resourcesMock = sandbox.mock(resources);
     element = new ElementClass();
     element.layoutWidth_ = 300;
@@ -1759,7 +1758,7 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
     overflowElement = doc.createElement('div');
     overflowElement.setAttribute('overflow', '');
     element.appendChild(overflowElement);
-    vsync = vsyncFor(win);
+    vsync = Services.vsyncFor(win);
     vsyncTasks = [];
     sandbox.stub(vsync, 'mutate', mutator => {
       vsyncTasks.push(mutator);

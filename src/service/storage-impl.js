@@ -19,7 +19,7 @@ import {getSourceOrigin} from '../url';
 import {dev} from '../log';
 import {dict} from '../utils/object';
 import {parseJson, recreateNonProtoObject} from '../json';
-import {viewerForDoc} from '../services';
+import {Services} from '../services';
 
 /** @const */
 const TAG = 'Storage';
@@ -388,7 +388,7 @@ export function installStorageServiceForDoc(ampdoc) {
       ampdoc,
       'storage',
       function() {
-        const viewer = viewerForDoc(ampdoc);
+        const viewer = Services.viewerForDoc(ampdoc);
         const overrideStorage = parseInt(viewer.getParam('storage'), 10);
         const binding = overrideStorage ?
             new ViewerStorageBinding(viewer) :

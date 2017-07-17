@@ -18,8 +18,7 @@
  import {KeyCodes} from '../../../../src/utils/key-codes';
  import {adopt} from '../../../../src/runtime';
  import {createIframePromise} from '../../../../testing/iframe';
- import {platformFor} from '../../../../src/services';
- import {timerFor} from '../../../../src/services';
+ import {Services} from '../../../../src/services';
  import {assertScreenReaderElement} from '../../../../testing/test-helper';
  import {toggleExperiment} from '../../../../src/experiments';
  import * as sinon from 'sinon';
@@ -100,7 +99,7 @@
          ampSidebar.setAttribute('id', 'sidebar1');
          ampSidebar.setAttribute('layout', 'nodisplay');
          return iframe.addElement(ampSidebar).then(() => {
-           timer = timerFor(iframe.win);
+           timer = Services.timerFor(iframe.win);
            if (options.toolbars) {
              sandbox.stub(timer, 'delay', function(callback) {
                callback();
@@ -124,7 +123,7 @@
 
      beforeEach(() => {
        sandbox = sinon.sandbox.create();
-       platform = platformFor(window);
+       platform = Services.platformFor(window);
        toggleExperiment(window, 'amp-sidebar 1.0', true);
      });
 

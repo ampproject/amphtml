@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {actionServiceForDoc} from '../../src/services';
+import {Services} from '../../src/services';
 import {onDocumentFormSubmit_} from '../../src/document-submit';
 import * as sinon from 'sinon';
 
@@ -163,7 +163,7 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
 
   it('should delegate xhr submit through action service', () => {
     evt.target.setAttribute('action-xhr', 'https://example.com');
-    const actionService = actionServiceForDoc(tgt);
+    const actionService = Services.actionServiceForDoc(tgt);
     sandbox.stub(actionService, 'execute');
     onDocumentFormSubmit_(evt);
     expect(actionService.execute).to.have.been.calledOnce;
@@ -174,7 +174,7 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
   });
 
   it('should not delegate non-XHR submit through action service', () => {
-    const actionService = actionServiceForDoc(tgt);
+    const actionService = Services.actionServiceForDoc(tgt);
     sandbox.stub(actionService, 'execute');
     onDocumentFormSubmit_(evt);
     expect(actionService.execute).to.have.not.been.called;

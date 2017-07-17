@@ -19,7 +19,7 @@ import {
   BaseLifecycleReporter,
 } from '../performance';
 import {createIframePromise} from '../../../../testing/iframe';
-import {viewerForDoc} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import * as sinon from 'sinon';
 
 /**
@@ -80,7 +80,7 @@ describe('GoogleAdLifecycleReporter', () => {
     iframe = createIframePromise(false).then(iframeFixture => {
       const win = iframeFixture.win;
       const doc = iframeFixture.doc;
-      const viewer = viewerForDoc(doc);
+      const viewer = Services.viewerForDoc(doc);
       const elem = doc.createElement('div');
       doc.body.appendChild(elem);
       const reporter = new GoogleAdLifecycleReporter(win, elem, 42);

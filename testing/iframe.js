@@ -18,7 +18,7 @@ import {AmpEvents} from '../src/amp-events';
 import {BindEvents} from '../extensions/amp-bind/0.1/bind-events';
 import {FakeLocation} from './fake-dom';
 import {FormEvents} from '../extensions/amp-form/0.1/form-events';
-import {ampdocServiceFor, resourcesForDoc} from '../src/services';
+import {Services, resourcesForDoc} from '../src/services';
 import {cssText} from '../build/css';
 import {deserializeMessage, isAmpMessage} from '../src/3p-frame-messaging';
 import {parseIfNeeded} from '../src/iframe-helper';
@@ -227,13 +227,13 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
         iframe.contentWindow.name = '__AMP__off=1';
       }
       installDocService(iframe.contentWindow, /* isSingleDoc */ true);
-      const ampdoc = ampdocServiceFor(iframe.contentWindow).getAmpDoc();
+      const ampdoc = Services.ampdocServiceFor(iframe.contentWindow).getAmpDoc();
       installExtensionsService(iframe.contentWindow);
       installRuntimeServices(iframe.contentWindow);
       installCustomElements(iframe.contentWindow);
       installAmpdocServices(ampdoc);
       registerForUnitTest(iframe.contentWindow);
-      resourcesForDoc(ampdoc).ampInitComplete();
+      Services.resourcesForDoc(ampdoc).ampInitComplete();
       // Act like no other elements were loaded by default.
       installStyles(iframe.contentWindow.document, cssText, () => {
         resolve({

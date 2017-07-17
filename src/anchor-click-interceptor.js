@@ -18,7 +18,7 @@ import {
   closestByTag,
 } from './dom';
 import {dev} from './log';
-import {urlReplacementsForDoc} from './services';
+import {Services} from './services';
 
 /** @private @const {string} */
 const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';
@@ -60,7 +60,7 @@ function maybeExpandUrlParams(ampdoc, e) {
       return e.pageY;
     },
   };
-  const newHref = urlReplacementsForDoc(ampdoc).expandSync(
+  const newHref = Services.urlReplacementsForDoc(ampdoc).expandSync(
       hrefToExpand, vars, undefined, /* opt_whitelist */ {
         // For now we only allow to replace the click location vars
         // and nothing else.

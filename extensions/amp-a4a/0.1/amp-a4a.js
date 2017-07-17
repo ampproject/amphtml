@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {
   verifyHashVersion,
   LegacySignatureVerifier,
@@ -43,10 +44,7 @@ import {isArray, isObject, isEnumValue} from '../../../src/types';
 import {some} from '../../../src/utils/promise';
 import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 import {utf8Decode} from '../../../src/utils/bytes';
-import {viewerForDoc} from '../../../src/services';
-import {xhrFor} from '../../../src/services';
 import {endsWith} from '../../../src/string';
-import {platformFor} from '../../../src/services';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
 import {assertHttpsUrl} from '../../../src/url';
@@ -59,7 +57,6 @@ import {
 import {
   installUrlReplacementsForEmbed,
 } from '../../../src/service/url-replacements-impl';
-import {extensionsFor} from '../../../src/services';
 import {A4AVariableSource} from './a4a-variable-source';
 // TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
 import {getTimingDataAsync} from '../../../src/service/variable-source';
@@ -289,7 +286,7 @@ export class AmpA4A extends AMP.BaseElement {
      * @private {?XORIGIN_MODE}
      */
     this.experimentalNonAmpCreativeRenderMethod_ =
-      platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
+      Services.platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
 
     /**
      * Gets a notion of current time, in ms.  The value is not necessarily
@@ -572,7 +569,7 @@ export class AmpA4A extends AMP.BaseElement {
     //   - Rendering fails => return false
     //   - Chain cancelled => don't return; drop error
     //   - Uncaught error otherwise => don't return; percolate error up
-    this.adPromise_ = viewerForDoc(this.getAmpDoc()).whenFirstVisible()
+    this.adPromise_ = Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible()
         .then(() => {
           checkStillCurrent();
           // See if experiment that delays request until slot is within
@@ -739,7 +736,7 @@ export class AmpA4A extends AMP.BaseElement {
           this.updatePriority(0);
           // Load any extensions; do not wait on their promises as this
           // is just to prefetch.
-          const extensions = extensionsFor(this.win);
+          const extensions = Services.extensionsFor(this.win);
           creativeMetaDataDef.customElementExtensions.forEach(
               extensionId => extensions.loadExtension(extensionId));
           return creativeMetaDataDef;
@@ -1018,7 +1015,7 @@ export class AmpA4A extends AMP.BaseElement {
     this.isVerifiedAmpCreative_ = false;
     this.fromResumeCallback = false;
     this.experimentalNonAmpCreativeRenderMethod_ =
-        platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
+        Services.platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.freeXOriginIframe();
       this.xOriginIframeHandler_ = null;
@@ -1176,7 +1173,7 @@ export class AmpA4A extends AMP.BaseElement {
       method: 'GET',
       credentials: 'include',
     };
-    return xhrFor(this.win)
+    return Services.xhrFor(this.win)
         .fetch(adUrl, xhrInit)
         .catch(unusedReason => {
           // If an error occurs, let the ad be rendered via iframe after delay.
@@ -1214,8 +1211,8 @@ export class AmpA4A extends AMP.BaseElement {
       const currServiceName = serviceName;
       if (url) {
         // Delay request until document is not in a prerender state.
-        return viewerForDoc(this.getAmpDoc()).whenFirstVisible()
-            .then(() => xhrFor(this.win).fetchJson(url, {
+        return Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible()
+            .then(() => Services.xhrFor(this.win).fetchJson(url, {
               mode: 'cors',
               method: 'GET',
             // Set ampCors false so that __amp_source_origin is not
@@ -1444,7 +1441,7 @@ export class AmpA4A extends AMP.BaseElement {
   renderViaCachedContentIframe_(adUrl) {
     this.protectedEmitLifecycleEvent_('renderCrossDomainStart');
     return this.iframeRenderHelper_(dict({
-      'src': xhrFor(this.win).getCorsUrl(this.win, adUrl),
+      'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
       'name': JSON.stringify(
           getContextMetadata(this.win, this.element, this.sentinel)),
     }));
@@ -1599,7 +1596,7 @@ export class AmpA4A extends AMP.BaseElement {
     }
     iframeWin.document.documentElement.addEventListener('click', event => {
       handleClick(event, url => {
-        viewerForDoc(this.getAmpDoc()).navigateTo(url, 'a4a');
+        Services.viewerForDoc(this.getAmpDoc()).navigateTo(url, 'a4a');
       });
     });
   }

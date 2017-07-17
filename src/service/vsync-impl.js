@@ -15,12 +15,7 @@
  */
 
 import {Pass} from '../pass';
-import {
-  ampdocServiceFor,
-  documentStateFor,
-  viewerForDoc,
-  viewerPromiseForDoc,
-} from '../services';
+import {Services} from '../services';
 import {cancellation} from '../error';
 import {dev, rethrowAsync} from '../log';
 import {registerServiceBuilder, getService} from '../service';
@@ -63,10 +58,10 @@ export class Vsync {
     this.win = win;
 
     /** @private @const {!./ampdoc-impl.AmpDocService} */
-    this.ampdocService_ = ampdocServiceFor(this.win);
+    this.ampdocService_ = Services.ampdocServiceFor(this.win);
 
     /** @private @const {!./document-state.DocumentState} */
-    this.docState_ = documentStateFor(this.win);
+    this.docState_ = Services.documentStateFor(this.win);
 
     /** @private @const {function(function())}  */
     this.raf_ = this.getRaf_();
@@ -141,10 +136,11 @@ export class Vsync {
     if (this.ampdocService_.isSingleDoc()) {
       // In a single-doc mode, the visibility of the doc == global visibility.
       // Thus, it's more efficient to only listen to it once.
-      viewerPromiseForDoc(this.ampdocService_.getAmpDoc()).then(viewer => {
-        this.singleDocViewer_ = viewer;
-        viewer.onVisibilityChanged(boundOnVisibilityChanged);
-      });
+      Services.viewerPromiseForDoc(this.ampdocService_.getAmpDoc())
+          .then(viewer => {
+            this.singleDocViewer_ = viewer;
+            viewer.onVisibilityChanged(boundOnVisibilityChanged);
+          });
     } else {
       // In multi-doc mode, we track separately the global visibility and
       // per-doc visibility when necessary.
@@ -285,7 +281,7 @@ export class Vsync {
     // Multi-doc: animations depend on the state of the relevant doc.
     if (opt_contextNode) {
       const ampdoc = this.ampdocService_.getAmpDoc(opt_contextNode);
-      return viewerForDoc(ampdoc).isVisible();
+      return Services.viewerForDoc(ampdoc).isVisible();
     }
 
     return true;

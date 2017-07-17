@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {cidForDoc, timerFor} from './services';
+import {Services} from './services';
 import {adConfig} from '../ads/_config';
 import {dev} from '../src/log';
 
@@ -41,7 +41,7 @@ export function getAdCid(adElement) {
  */
 export function getOrCreateAdCid(
     ampDoc, clientIdScope, opt_clientIdCookieName) {
-  const cidPromise = cidForDoc(ampDoc).then(cidService => {
+  const cidPromise = Services.cidForDoc(ampDoc).then(cidService => {
     if (!cidService) {
       return;
     }
@@ -57,7 +57,7 @@ export function getOrCreateAdCid(
   });
   // The CID should never be crucial for an ad. If it does not come within
   // 1 second, assume it will never arrive.
-  return timerFor(ampDoc.win)
+  return Services.timerFor(ampDoc.win)
       .timeoutPromise(1000, cidPromise, 'cid timeout').catch(error => {
         // Timeout is not fatal.
         dev().warn('AD-CID', error);

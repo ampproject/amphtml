@@ -18,7 +18,7 @@ import {calculateEntryPointScriptUrl} from '../service/extension-location';
 import {isExperimentOn} from '../experiments';
 import {dev} from '../log';
 import {getMode} from '../mode';
-import {timerFor} from '../services';
+import {Services} from '../services';
 import {parseUrl} from '../url';
 import {urls} from '../config';
 
@@ -29,7 +29,7 @@ const TAG = 'cache-service-worker';
  * Registers the Google AMP Cache service worker if the browser supports SWs.
  */
 export function installCacheServiceWorker(win) {
-  timerFor(win).delay(() => {
+  Services.timerFor(win).delay(() => {
     if (!isExperimentOn(win, TAG)) {
       return;
     }

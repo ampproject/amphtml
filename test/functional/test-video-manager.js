@@ -15,11 +15,7 @@
  */
 
 import {listenOncePromise} from '../../src/event-helper';
-import {
-  ampdocServiceFor,
-  videoManagerForDoc,
-  viewerForDoc,
-} from '../../src/services';
+import {Services} from '../../src/services';
 import {isLayoutSizeDefined} from '../../src/layout';
 import {PlayingStates, VideoEvents} from '../../src/video-interface';
 import {
@@ -99,7 +95,8 @@ describes.fakeWin('VideoManager', {
     video.setAttribute('autoplay', '');
     videoManager.register(impl);
 
-    const visibilityStub = sandbox.stub(viewerForDoc(env.ampdoc), 'isVisible');
+    const visibilityStub = sandbox.stub(
+        Services.viewerForDoc(env.ampdoc), 'isVisible');
     visibilityStub.onFirstCall().returns(true);
 
     const entry = videoManager.getEntryForVideo_(impl);
@@ -120,7 +117,8 @@ describes.fakeWin('VideoManager', {
     video.setAttribute('autoplay', '');
     videoManager.register(impl);
 
-    const visibilityStub = sandbox.stub(viewerForDoc(env.ampdoc), 'isVisible');
+    const visibilityStub = sandbox.stub(
+        Services.viewerForDoc(env.ampdoc), 'isVisible');
     visibilityStub.onFirstCall().returns(true);
 
     const entry = videoManager.getEntryForVideo_(impl);
@@ -183,7 +181,8 @@ describes.fakeWin('VideoManager', {
 
     videoManager.register(impl);
 
-    const visibilityStub = sandbox.stub(viewerForDoc(env.ampdoc), 'isVisible');
+    const visibilityStub = sandbox.stub(
+        Services.viewerForDoc(env.ampdoc), 'isVisible');
     visibilityStub.onFirstCall().returns(true);
 
     const entry = videoManager.getEntryForVideo_(impl);
@@ -235,7 +234,7 @@ describes.fakeWin('VideoManager', {
     video = env.createAmpElement('amp-test-fake-videoplayer', klass);
     impl = video.implementation_;
     installVideoManagerForDoc(env.ampdoc);
-    videoManager = videoManagerForDoc(env.ampdoc);
+    videoManager = Services.videoManagerForDoc(env.ampdoc);
   });
 
   afterEach(() => {
@@ -400,9 +399,9 @@ function createFakeVideoPlayerClass(win) {
 
     /** @override */
     buildCallback() {
-      const ampdoc = ampdocServiceFor(this.win).getAmpDoc();
+      const ampdoc = Services.ampdocServiceFor(this.win).getAmpDoc();
       installVideoManagerForDoc(ampdoc);
-      videoManagerForDoc(this.win.document).register(this);
+      Services.videoManagerForDoc(this.win.document).register(this);
     }
 
     /** @override */

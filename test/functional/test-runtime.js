@@ -32,10 +32,9 @@ import {installDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {vsyncForTesting} from '../../src/service/vsync-impl';
-import {platformFor} from '../../src/services';
+import {Services} from '../../src/services';
 import {runChunksForTesting} from '../../src/chunk';
 import {toggleExperiment} from '../../src/experiments';
-import {extensionsFor} from '../../src/services';
 import * as ext from '../../src/service/extensions-impl';
 import * as extel from '../../src/extended-element';
 import * as styles from '../../src/style-installer';
@@ -126,21 +125,21 @@ describes.fakeWin('runtime', {
   });
 
   it('should NOT set cursor:pointer on document element on non-IOS', () => {
-    const platform = platformFor(win);
+    const platform = Services.platformFor(win);
     sandbox.stub(platform, 'isIos').returns(false);
     adopt(win);
     expect(win.document.documentElement.style.cursor).to.not.be.ok;
   });
 
   it('should set cursor:pointer on document element on IOS', () => {
-    const platform = platformFor(win);
+    const platform = Services.platformFor(win);
     sandbox.stub(platform, 'isIos').returns(true);
     adopt(win);
     expect(win.document.documentElement.style.cursor).to.equal('pointer');
   });
 
   it('should set cursor:pointer on IOS in shadow-doc', () => {
-    const platform = platformFor(win);
+    const platform = Services.platformFor(win);
     sandbox.stub(platform, 'isIos').returns(true);
     adoptShadowMode(win);
     expect(win.document.documentElement.style.cursor).to.equal('pointer');
@@ -315,7 +314,7 @@ describes.fakeWin('runtime', {
         expect(progress).to.equal('1HIGHAB2');
 
         ext.installExtensionsService(win);
-        const extensions = extensionsFor(win);
+        const extensions = Services.extensionsFor(win);
         const ext1 = extensions.waitForExtension('ext1');
         const ext2 = extensions.waitForExtension('ext2');
         return Promise.all([ext1, ext2]);
@@ -458,7 +457,7 @@ describes.fakeWin('runtime', {
     beforeEach(() => {
       adopt(win);
       ext.installExtensionsService(win);
-      extensions = extensionsFor(win);
+      extensions = Services.extensionsFor(win);
       registerStub = sandbox.stub(extel, 'registerExtendedElement');
     });
 
@@ -612,7 +611,7 @@ describes.fakeWin('runtime', {
     beforeEach(() => {
       adoptShadowMode(win);
       ext.installExtensionsService(win);
-      extensions = extensionsFor(win);
+      extensions = Services.extensionsFor(win);
       registerStub = sandbox.stub(extel, 'registerExtendedElement');
     });
 

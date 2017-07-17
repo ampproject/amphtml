@@ -17,7 +17,7 @@
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getAttributesFromConfigObj} from './attributes';
-import {resourcesForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {
   closestByTag,
   createElementWithAttributes,
@@ -268,7 +268,7 @@ function getPlacementsFromObject(win, placementObj, placements) {
       return;
     }
     const attributes = getAttributesFromConfigObj(placementObj);
-    placements.push(new Placement(win, resourcesForDoc(anchorElement),
+    placements.push(new Placement(win, Services.resourcesForDoc(anchorElement),
         anchorElement, placementObj['pos'], injector, attributes, margins));
   });
 }

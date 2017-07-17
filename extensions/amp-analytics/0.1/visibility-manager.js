@@ -23,9 +23,7 @@ import {VisibilityModel} from './visibility-model';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {map} from '../../../src/utils/object';
-import {resourcesForDoc} from '../../../src/services';
-import {viewerForDoc} from '../../../src/services';
-import {viewportForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 
 const VISIBILITY_ID_PROP = '__AMP_VIS_ID';
 
@@ -67,7 +65,7 @@ export class VisibilityManager {
     this.ampdoc = ampdoc;
 
     /** @const @private */
-    this.resources_ = resourcesForDoc(ampdoc);
+    this.resources_ = Services.resourcesForDoc(ampdoc);
 
     /** @private {number} */
     this.rootVisibility_ = 0;
@@ -338,10 +336,10 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     super(/* parent */ null, ampdoc);
 
     /** @const @private */
-    this.viewer_ = viewerForDoc(ampdoc);
+    this.viewer_ = Services.viewerForDoc(ampdoc);
 
     /** @const @private */
-    this.viewport_ = viewportForDoc(ampdoc);
+    this.viewport_ = Services.viewportForDoc(ampdoc);
 
     /** @private {boolean} */
     this.backgrounded_ = !this.viewer_.isVisible();

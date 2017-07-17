@@ -23,7 +23,7 @@ import {
   VisibilityManagerForEmbed,
 } from '../visibility-manager';
 import {VisibilityState} from '../../../../src/visibility-state';
-import {documentStateFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import {layoutRectLtwh, rectIntersection} from '../../../../src/layout-rect';
 
 class IntersectionObserverStub {
@@ -833,7 +833,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
       eventResolver2 = resolve;
     });
 
-    const docState = documentStateFor(win);
+    const docState = Services.documentStateFor(win);
     sandbox.stub(docState, 'isHidden', () => false);
     sandbox.stub(viewer, 'getFirstVisibleTime', () => startTime);
 

@@ -17,15 +17,10 @@
 import {Layout} from '../../../src/layout';
 import {dict} from '../../../src/utils/object';
 import {user, dev, rethrowAsync} from '../../../src/log';
-import {platformFor} from '../../../src/services';
-import {viewerForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {CSS} from '../../../build/amp-app-banner-0.1.css';
-import {documentInfoForDoc} from '../../../src/services';
-import {xhrFor} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {removeElement, openWindowDialog} from '../../../src/dom';
-import {storageForDoc} from '../../../src/services';
-import {timerFor} from '../../../src/services';
 import {parseUrl} from '../../../src/url';
 import {isProxyOrigin, isProtocolValid} from '../../../src/url';
 
@@ -99,7 +94,7 @@ export class AbstractAppBanner extends AMP.BaseElement {
     }, {
       element: this.element,
       viewport: this.getViewport(),
-      storagePromise: storageForDoc(this.getAmpDoc()),
+      storagePromise: Services.storageForDoc(this.getAmpDoc()),
       storageKey: this.getStorageKey_(),
     });
   }
@@ -113,7 +108,7 @@ export class AbstractAppBanner extends AMP.BaseElement {
 
   /** @protected */
   isDismissed() {
-    return storageForDoc(this.getAmpDoc())
+    return Services.storageForDoc(this.getAmpDoc())
         .then(storage => storage.get(this.getStorageKey_()))
         .then(persistedValue => !!persistedValue, reason => {
           dev().error(TAG, 'Failed to read storage', reason);
@@ -169,7 +164,7 @@ export class AmpAppBanner extends AbstractAppBanner {
 
   /** @override */
   upgradeCallback() {
-    const platform = platformFor(this.win);
+    const platform = Services.platformFor(this.win);
     if (platform.isIos()) {
       return new AmpIosAppBanner(this.element);
     } else if (platform.isAndroid()) {
@@ -195,7 +190,7 @@ export class AmpIosAppBanner extends AbstractAppBanner {
     super(element);
 
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = viewerForDoc(this.getAmpDoc());
+    this.viewer_ = Services.viewerForDoc(this.getAmpDoc());
 
     /** @private {?Element} */
     this.metaTag_ = null;
@@ -216,7 +211,7 @@ export class AmpIosAppBanner extends AbstractAppBanner {
   /** @override */
   buildCallback() {
     // We want to fallback to browser builtin mechanism when possible.
-    const platform = platformFor(this.win);
+    const platform = Services.platformFor(this.win);
     this.canShowBuiltinBanner_ = !this.viewer_.isEmbedded()
         && platform.isSafari();
     if (this.canShowBuiltinBanner_) {
@@ -263,12 +258,12 @@ export class AmpIosAppBanner extends AbstractAppBanner {
   /** @override */
   openButtonClicked(openInAppUrl, installAppUrl) {
     if (!this.viewer_.isEmbedded()) {
-      timerFor(this.win).delay(() => {
+      Services.timerFor(this.win).delay(() => {
         openWindowDialog(this.win, installAppUrl, '_top');
       }, OPEN_LINK_TIMEOUT);
       openWindowDialog(this.win, openInAppUrl, '_top');
     } else {
-      timerFor(this.win).delay(() => {
+      Services.timerFor(this.win).delay(() => {
         this.viewer_.sendMessage('navigateTo', dict({'url': installAppUrl}));
       }, OPEN_LINK_TIMEOUT);
       this.viewer_.sendMessage('navigateTo', dict({'url': openInAppUrl}));
@@ -338,11 +333,11 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
 
   /** @override */
   buildCallback() {
-    const viewer = viewerForDoc(this.getAmpDoc());
+    const viewer = Services.viewerForDoc(this.getAmpDoc());
     this.manifestLink_ = this.win.document.head.querySelector(
         'link[rel=manifest],link[rel=origin-manifest]');
 
-    const platform = platformFor(this.win);
+    const platform = Services.platformFor(this.win);
     // We want to fallback to browser builtin mechanism when possible.
     const isChromeAndroid = platform.isAndroid() && platform.isChrome();
     this.canShowBuiltinBanner_ = !isProxyOrigin(this.win.location) &&
@@ -382,7 +377,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
       return Promise.resolve();
     }
 
-    return xhrFor(this.win).fetchJson(this.manifestHref_, {
+    return Services.xhrFor(this.win).fetchJson(this.manifestHref_, {
       requireAmpResponseSourceOrigin: false,
     }).then(res => res.json())
         .then(json => this.parseManifest_(json))
@@ -394,7 +389,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
 
   /** @override */
   openButtonClicked(openInAppUrl, installAppUrl) {
-    timerFor(this.win).delay(() => {
+    Services.timerFor(this.win).delay(() => {
       this.redirectTopLocation_(installAppUrl);
     }, OPEN_LINK_TIMEOUT);
     openWindowDialog(this.win, openInAppUrl, '_top');
@@ -435,7 +430,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
 
   /** @private */
   getAndroidIntentForUrl_(appId) {
-    const canonicalUrl = documentInfoForDoc(this.element).canonicalUrl;
+    const canonicalUrl = Services.documentInfoForDoc(this.element).canonicalUrl;
     const parsedUrl = parseUrl(canonicalUrl);
     const cleanProtocol = parsedUrl.protocol.replace(':', '');
     const host = parsedUrl.host;

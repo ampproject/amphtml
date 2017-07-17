@@ -17,10 +17,7 @@
 import {BindExpressionResultDef} from './bind-expression';
 import {BindingDef} from './bind-evaluator';
 import {BindValidator} from './bind-validator';
-import {
-  resourcesForDoc,
-  viewerForDoc,
-} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {chunk, ChunkPriority} from '../../../src/chunk';
 import {dev, user} from '../../../src/log';
 import {dict, deepMerge} from '../../../src/utils/object';
@@ -131,10 +128,10 @@ export class Bind {
     this.scope_ = dict();
 
     /** @const @private {!../../../src/service/resources-impl.Resources} */
-    this.resources_ = resourcesForDoc(ampdoc);
+    this.resources_ = Services.resourcesForDoc(ampdoc);
 
     /** @const @private {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = viewerForDoc(this.ampdoc);
+    this.viewer_ = Services.viewerForDoc(this.ampdoc);
 
     const bodyPromise = (opt_win)
         ? waitForBodyPromise(opt_win.document)

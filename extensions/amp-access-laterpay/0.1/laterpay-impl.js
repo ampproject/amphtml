@@ -22,10 +22,7 @@ import {getMode} from '../../../src/mode';
 import {dict} from '../../../src/utils/object';
 import {listen} from '../../../src/event-helper';
 import {removeChildren} from '../../../src/dom';
-import {timerFor} from '../../../src/services';
-import {viewportForDoc} from '../../../src/services';
-import {vsyncFor} from '../../../src/services';
-import {xhrFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 
 const TAG = 'amp-access-laterpay';
 const CONFIG_URL = 'https://connector.laterpay.net';
@@ -100,7 +97,7 @@ export class LaterpayVendor {
     this.accessService_ = accessService;
 
     /** @private @const {!../../../src/service/viewport-impl.Viewport} */
-    this.viewport_ = viewportForDoc(this.ampdoc);
+    this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @const @private {!JsonObject} For shape see LaterpayConfigDef */
     this.laterpayConfig_ = this.accessService_.getAdapterConfig();
@@ -145,13 +142,13 @@ export class LaterpayVendor {
     }
 
     /** @const @private {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = timerFor(this.ampdoc.win);
+    this.timer_ = Services.timerFor(this.ampdoc.win);
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(this.ampdoc.win);
+    this.vsync_ = Services.vsyncFor(this.ampdoc.win);
 
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
-    this.xhr_ = xhrFor(this.ampdoc.win);
+    this.xhr_ = Services.xhrFor(this.ampdoc.win);
 
     // Install styles.
     if (this.ampdoc.isSingleDoc()) {

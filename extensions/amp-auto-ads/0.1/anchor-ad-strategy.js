@@ -16,7 +16,7 @@
 import {createElementWithAttributes} from '../../../src/dom';
 import {user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {viewportForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 
 /** @const */
 const TAG = 'amp-auto-ads';
@@ -83,7 +83,8 @@ export class AnchorAdStrategy {
   }
 
   placeStickyAd_() {
-    const viewportWidth = viewportForDoc(this.win_.document).getWidth();
+    const viewportWidth =
+        Services.viewportForDoc(this.win_.document).getWidth();
     const attributes = /** @type {!JsonObject} */ (
         Object.assign(dict(), this.baseAttributes_, dict({
           'width': String(viewportWidth),

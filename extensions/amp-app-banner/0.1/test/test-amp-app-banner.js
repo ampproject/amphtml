@@ -15,17 +15,14 @@
  */
 
 import {createIframePromise} from '../../../../testing/iframe';
-import {platformFor} from '../../../../src/services';
-import {vsyncFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import {
     AmpAppBanner,
     AbstractAppBanner,
     AmpIosAppBanner,
     AmpAndroidAppBanner,
 } from '../amp-app-banner';
-import {xhrFor} from '../../../../src/services';
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
-import {viewerForDoc} from '../../../../src/services';
 
 describes.realWin('amp-app-banner', {amp: true}, () => {
 
@@ -69,10 +66,10 @@ describes.realWin('amp-app-banner', {amp: true}, () => {
   function getTestFrame() {
     return createIframePromise(true).then(iframe => {
       const ampdoc = new AmpDocSingle(iframe.win);
-      const viewer = viewerForDoc(ampdoc);
+      const viewer = Services.viewerForDoc(ampdoc);
       sandbox.stub(viewer, 'isEmbedded', () => isEmbedded);
       sandbox.stub(viewer, 'hasCapability', () => hasNavigateToCapability);
-      platform = platformFor(iframe.win);
+      platform = Services.platformFor(iframe.win);
       sandbox.stub(platform, 'isIos', () => isIos);
       sandbox.stub(platform, 'isAndroid', () => isAndroid);
       sandbox.stub(platform, 'isChrome', () => isChrome);
@@ -80,7 +77,7 @@ describes.realWin('amp-app-banner', {amp: true}, () => {
       sandbox.stub(platform, 'isFirefox', () => isFirefox);
       sandbox.stub(platform, 'isEdge', () => isEdge);
 
-      vsync = vsyncFor(iframe.win);
+      vsync = Services.vsyncFor(iframe.win);
       sandbox.stub(vsync, 'runPromise', (task, state) => {
         runTask(task, state);
         return Promise.resolve();
@@ -111,7 +108,7 @@ describes.realWin('amp-app-banner', {amp: true}, () => {
         manifest.setAttribute('rel', rel);
         manifest.setAttribute('href', manifestObj.href);
         iframe.doc.head.appendChild(manifest);
-        sandbox.mock(xhrFor(iframe.win)).expects('fetchJson')
+        sandbox.mock(Services.xhrFor(iframe.win)).expects('fetchJson')
             .returns(Promise.resolve({
               json() {
                 return Promise.resolve(manifestObj.content);
@@ -523,7 +520,7 @@ describes.realWin('amp-app-banner', {amp: true}, () => {
       return createIframePromise(true).then(iframe => {
         const win = iframe.win;
         const doc = iframe.doc;
-        vsync = vsyncFor(win);
+        vsync = Services.vsyncFor(win);
         sandbox.stub(vsync, 'run', runTask);
         const element = doc.createElement('div');
         element.id = 'banner1';

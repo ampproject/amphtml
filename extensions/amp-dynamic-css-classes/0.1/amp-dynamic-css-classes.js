@@ -15,8 +15,7 @@
  */
 
 import {parseUrl} from '../../../src/url';
-import {viewerForDoc} from '../../../src/services';
-import {vsyncFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 
 
 /**
@@ -25,7 +24,7 @@ import {vsyncFor} from '../../../src/services';
  * @returns {string}
  */
 function referrerDomain(ampdoc) {
-  const referrer = viewerForDoc(ampdoc).getUnconfirmedReferrerUrl();
+  const referrer = Services.viewerForDoc(ampdoc).getUnconfirmedReferrerUrl();
   if (referrer) {
     return parseUrl(referrer).hostname;
   }
@@ -123,7 +122,7 @@ function addReferrerClasses(ampdoc) {
     return `amp-referrer-${referrer.replace(/\./g, '-')}`;
   });
 
-  vsyncFor(ampdoc.win).mutate(() => {
+  Services.vsyncFor(ampdoc.win).mutate(() => {
     addDynamicCssClasses(ampdoc, classes);
   });
 }
@@ -134,9 +133,9 @@ function addReferrerClasses(ampdoc) {
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  */
 function addViewerClass(ampdoc) {
-  const viewer = viewerForDoc(ampdoc);
+  const viewer = Services.viewerForDoc(ampdoc);
   if (viewer.isEmbedded()) {
-    vsyncFor(ampdoc.win).mutate(() => {
+    Services.vsyncFor(ampdoc.win).mutate(() => {
       addDynamicCssClasses(ampdoc, ['amp-viewer']);
     });
   }

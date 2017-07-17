@@ -24,7 +24,7 @@ import {
 import {isObject} from '../../../src/types';
 import {getData, listen} from '../../../src/event-helper';
 import {VideoEvents} from '../../../src/video-interface';
-import {videoManagerForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -63,7 +63,7 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     });
 
     installVideoManagerForDoc(this.element);
-    videoManagerForDoc(this.element).register(this);
+    Services.videoManagerForDoc(this.element).register(this);
   }
 
   /** @override */

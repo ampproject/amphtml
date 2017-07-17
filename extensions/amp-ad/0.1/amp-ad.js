@@ -20,8 +20,7 @@ import {AmpAdCustom} from './amp-ad-custom';
 import {a4aRegistry} from '../../../ads/_a4a-config';
 import {adConfig} from '../../../ads/_config';
 import {user} from '../../../src/log';
-import {extensionsFor} from '../../../src/services';
-import {userNotificationManagerFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {isExperimentOn} from '../../../src/experiments';
 import {hasOwn} from '../../../src/utils/object';
 
@@ -54,7 +53,7 @@ export class AmpAd extends AMP.BaseElement {
     /** @const {string} */
     const consentId = this.element.getAttribute('data-consent-notification-id');
     const consent = consentId
-        ? userNotificationManagerFor(this.win)
+        ? Services.userNotificationManagerFor(this.win)
             .then(service => service.get(consentId))
         : Promise.resolve();
 
@@ -90,7 +89,7 @@ export class AmpAd extends AMP.BaseElement {
 
       const extensionTagName = networkImplementationTag(type);
       this.element.setAttribute('data-a4a-upgrade-type', extensionTagName);
-      return extensionsFor(this.win).loadElementClass(extensionTagName)
+      return Services.extensionsFor(this.win).loadElementClass(extensionTagName)
           .then(ctor => new ctor(this.element))
           .catch(error => {
           // Work around presubmit restrictions.

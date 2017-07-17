@@ -20,8 +20,7 @@ import {getData} from './event-helper';
 import {loadPromise} from './event-helper';
 import {preconnectForElement} from './preconnect';
 import {isArray} from './types';
-import {viewportForDoc} from './services';
-import {vsyncFor} from './services';
+import {Services} from './services';
 import {user} from './log';
 
 /**
@@ -235,7 +234,7 @@ export class BaseElement {
 
   /** @public @return {!./service/vsync-impl.Vsync} */
   getVsync() {
-    return vsyncFor(this.win);
+    return Services.vsyncFor(this.win);
   }
 
   /**
@@ -731,7 +730,7 @@ export class BaseElement {
    * @return {!./service/viewport-impl.Viewport}
    */
   getViewport() {
-    return viewportForDoc(this.getAmpDoc());
+    return Services.viewportForDoc(this.getAmpDoc());
   }
 
   /**

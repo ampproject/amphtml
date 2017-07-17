@@ -19,7 +19,7 @@ import {
   pollForLayout,
   poll,
 } from '../../testing/iframe';
-import {platformFor} from '../../src/services';
+import {Services} from '../../src/services';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {toggleExperiment} from '../../src/experiments';
 
@@ -30,7 +30,7 @@ function createIframeWithApis(fixture) {
   let iframe;
   let ampAd;
   let lastIO = null;
-  const platform = platformFor(fixture.win);
+  const platform = Services.platformFor(fixture.win);
   return pollForLayout(fixture.win, 1, 5500).then(() => {
     // test amp-ad will create an iframe
     return poll('frame to be in DOM', () => {

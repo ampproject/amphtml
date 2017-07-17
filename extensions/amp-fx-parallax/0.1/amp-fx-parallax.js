@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {ampdocServiceFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {installParallaxForDoc} from '../../../src/service/parallax-impl';
 import {onDocumentReady} from '../../../src/document-ready';
 
-const ampdoc = ampdocServiceFor(AMP.win).getAmpDoc();
+const ampdoc = Services.ampdocServiceFor(AMP.win).getAmpDoc();
 onDocumentReady(ampdoc.win.document, () => {
   installParallaxForDoc(ampdoc.getRootNode());
 });

@@ -16,15 +16,13 @@
 
 import {dev, user} from './log';
 import {isExperimentOn} from './experiments';
-import {viewerForDoc} from './services';
-import {xhrFor} from './services';
+import {Services} from './services';
 import {
   isProxyOrigin,
   parseUrl,
   parseQueryString,
   addParamsToUrl,
 } from './url';
-import {timerFor} from './services';
 import {getMode} from './mode';
 
 const TIMEOUT_VALUE = 8000;
@@ -64,7 +62,7 @@ export function maybeTrackImpression(win) {
     return;
   }
 
-  const viewer = viewerForDoc(win.document);
+  const viewer = Services.viewerForDoc(win.document);
   /** @const {string|undefined} */
   const clickUrl = viewer.getParam('click');
 
@@ -93,8 +91,8 @@ export function maybeTrackImpression(win) {
     });
 
     // Timeout invoke promise after 8s and resolve trackImpressionPromise.
-    resolveImpression(timerFor(win).timeoutPromise(TIMEOUT_VALUE, promise,
-        'timeout waiting for ad server response').catch(() => {}));
+    resolveImpression(Services.timerFor(win).timeoutPromise(TIMEOUT_VALUE,
+        promise, 'timeout waiting for ad server response').catch(() => {}));
   });
 }
 
@@ -115,7 +113,7 @@ function invoke(win, clickUrl) {
   if (getMode().localDev && !getMode().test) {
     clickUrl = 'http://localhost:8000/impression-proxy?url=' + clickUrl;
   }
-  return xhrFor(win).fetchJson(clickUrl, {
+  return Services.xhrFor(win).fetchJson(clickUrl, {
     credentials: 'include',
   }).then(res => res.json());
 }

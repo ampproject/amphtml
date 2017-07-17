@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {timerFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import {
   AmpIframe,
   isAdLike,
@@ -25,7 +25,6 @@ import {
   createIframePromise,
   poll,
 } from '../../../../testing/iframe';
-import {viewportForDoc} from '../../../../src/services';
 import * as sinon from 'sinon';
 
 adopt(window);
@@ -37,7 +36,7 @@ describe('amp-iframe', () => {
   const clickableIframeSrc = 'http://iframe.localhost:' + location.port +
       '/test/fixtures/served/iframe-clicktoplay.html';
 
-  const timer = timerFor(window);
+  const timer = Services.timerFor(window);
   let ranJs = 0;
   let content = '';
   let sandbox;
@@ -80,7 +79,7 @@ describe('amp-iframe', () => {
         iframe.iframe.style.height = opt_height;
       }
       const top = opt_top || '600px';
-      const viewport = viewportForDoc(iframe.win.document);
+      const viewport = Services.viewportForDoc(iframe.win.document);
       viewport.resize_();
       i.style.position = 'absolute';
       if (attributes.position) {

@@ -29,7 +29,7 @@ import {
   scopeShadowCss,
   setShadowDomStreamingSupportedForTesting,
 } from '../../src/shadow-embed';
-import {ampdocServiceFor, extensionsFor} from '../../src/services';
+import {Services} from '../../src/services';
 import {
   setShadowDomSupportedVersionForTesting,
   ShadowDomVersion,
@@ -291,7 +291,7 @@ describes.sandboxed('shadow-embed', {}, () => {
     let hostElement;
 
     beforeEach(() => {
-      const extensions = extensionsFor(window);
+      const extensions = Services.extensionsFor(window);
       extensionsMock = sandbox.mock(extensions);
 
       hostElement = document.createElement('div');
@@ -309,7 +309,7 @@ describes.sandboxed('shadow-embed', {}, () => {
       style.setAttribute('amp-runtime', '');
       root.appendChild(style);
       const ampdoc = new AmpDocShadow(window, 'https://a.org/', root);
-      const ampdocService = ampdocServiceFor(window);
+      const ampdocService = Services.ampdocServiceFor(window);
       sandbox.stub(ampdocService, 'getAmpDoc', () => ampdoc);
     });
 

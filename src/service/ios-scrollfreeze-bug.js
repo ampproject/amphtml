@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import {platformFor} from '../services';
-import {viewerForDoc} from '../services';
-import {vsyncFor} from '../services';
+import {Services} from '../services';
 import {setStyle} from '../style';
 
 
@@ -42,11 +40,11 @@ export function checkAndFix(ampdoc, opt_platform, opt_viewer, opt_vsync) {
   /** @const {!Window} */
   const win = ampdoc.win;
   /** @const {!./platform-impl.Platform} */
-  const platform = opt_platform || platformFor(win);
+  const platform = opt_platform || Services.platformFor(win);
   /** @const {!./viewer-impl.Viewer} */
-  const viewer = opt_viewer || viewerForDoc(ampdoc);
+  const viewer = opt_viewer || Services.viewerForDoc(ampdoc);
   /** @const {!./vsync-impl.Vsync} */
-  const vsync = opt_vsync || vsyncFor(win);
+  const vsync = opt_vsync || Services.vsyncFor(win);
   if (!platform.isIos() || !platform.isSafari() ||
           platform.getMajorVersion() > 8 ||
           viewer.getParam('b29185497') != '1') {

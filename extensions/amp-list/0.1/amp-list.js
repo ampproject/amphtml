@@ -20,7 +20,7 @@ import {fetchBatchedJsonFor} from '../../../src/batched-json';
 import {isArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
-import {templatesFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 
 /**
@@ -90,7 +90,7 @@ export class AmpList extends AMP.BaseElement {
       this.populateList_();
     } else if (state != undefined) {
       const items = isArray(state) ? state : [state];
-      templatesFor(this.win).findAndRenderTemplateArray(
+      Services.templatesFor(this.win).findAndRenderTemplateArray(
           this.element, items).then(this.rendered_.bind(this));
     }
     if (src != undefined && state != undefined) {
@@ -131,7 +131,7 @@ export class AmpList extends AMP.BaseElement {
       user().assert(isArray(items),
           'Response must contain an array at "%s". %s',
           itemsExpr, this.element);
-      return templatesFor(this.win).findAndRenderTemplateArray(
+      return Services.templatesFor(this.win).findAndRenderTemplateArray(
           this.element, items).then(this.rendered_.bind(this));
     }, error => {
       throw user().createError('Error fetching amp-list', error);

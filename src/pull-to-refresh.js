@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import {platformFor} from './services';
-import {viewerForDoc} from './services';
-import {viewportForDoc} from './services';
+import {Services} from './services';
 
 
 /**
@@ -28,9 +26,10 @@ import {viewportForDoc} from './services';
 export function installPullToRefreshBlocker(win) {
   // Only do when requested and don't even try it on Safari!
   // This mode is only executed in the single-doc mode.
-  if (viewerForDoc(win.document).getParam('p2r') == '0' &&
-          platformFor(win).isChrome()) {
-    new PullToRefreshBlocker(win.document, viewportForDoc(win.document));
+  if (Services.viewerForDoc(win.document).getParam('p2r') == '0' &&
+          Services.platformFor(win).isChrome()) {
+    new PullToRefreshBlocker(
+        win.document, Services.viewportForDoc(win.document));
   }
 }
 

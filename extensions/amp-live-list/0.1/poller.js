@@ -17,7 +17,7 @@
 
 import {exponentialBackoffClock, getJitter}
     from '../../../src/exponential-backoff';
-import {timerFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 
 
 /**
@@ -101,7 +101,7 @@ export class Poller {
    */
   clear_() {
     if (this.lastTimeoutId_) {
-      timerFor(this.win).cancel(this.lastTimeoutId_);
+      Services.timerFor(this.win).cancel(this.lastTimeoutId_);
       this.lastTimeoutId_ = null;
     }
   }
@@ -140,7 +140,8 @@ export class Poller {
     if (opt_immediate) {
       work();
     } else {
-      this.lastTimeoutId_ = timerFor(this.win).delay(work, this.getTimeout_());
+      this.lastTimeoutId_ =
+          Services.timerFor(this.win).delay(work, this.getTimeout_());
     }
   }
 }

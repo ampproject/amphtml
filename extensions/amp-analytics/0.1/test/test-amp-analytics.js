@@ -29,9 +29,6 @@ import {
 import {
   installUserNotificationManager,
 } from '../../../amp-user-notification/0.1/amp-user-notification';
-import {
-  userNotificationManagerFor,
-} from '../../../../src/services';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 import {
@@ -43,7 +40,7 @@ import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {map} from '../../../../src/utils/object';
 import {cidServiceForDocForTesting} from
     '../../../../src/service/cid-impl';
-import {urlReplacementsForDoc} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import * as sinon from 'sinon';
 
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
@@ -114,7 +111,7 @@ describe('amp-analytics', function() {
       ins = instrumentationServiceForDocForTesting(ampdoc);
       installVariableService(iframe.win);
       installUserNotificationManager(iframe.win);
-      return userNotificationManagerFor(iframe.win).then(manager => {
+      return Services.userNotificationManagerFor(iframe.win).then(manager => {
         uidService = manager;
       });
     });
@@ -216,7 +213,8 @@ describe('amp-analytics', function() {
             const analytics = getAnalyticsTag(clearVendorOnlyConfig(config));
             analytics.createdCallback();
             analytics.buildCallback();
-            const urlReplacements = urlReplacementsForDoc(analytics.element);
+            const urlReplacements =
+                Services.urlReplacementsForDoc(analytics.element);
             sandbox.stub(urlReplacements.getVariableSource(), 'get',
                 function(name) {
                   expect(this.replacements_).to.have.property(name);
@@ -688,7 +686,7 @@ describe('amp-analytics', function() {
           'qp_foo': '${queryParam(foo)}',
         },
       }]});
-    const urlReplacements = urlReplacementsForDoc(analytics.element);
+    const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
     sandbox.stub(urlReplacements.getVariableSource(), 'get',
         function(name) {
           return {sync: param => {
@@ -968,7 +966,7 @@ describe('amp-analytics', function() {
       config.triggers.sampled.sampleSpec.sampleOn = '${pageViewId}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(0);
       sandbox.stub(crypto, 'uniform')
           .withArgs('0').returns(Promise.resolve(0.005));
@@ -1088,7 +1086,7 @@ describe('amp-analytics', function() {
       config.triggers.conditional.enabled = '${pageViewId}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: 1});
       return waitForSendRequest(analytics).then(() => {
@@ -1121,7 +1119,7 @@ describe('amp-analytics', function() {
       config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns(null);
 
@@ -1136,7 +1134,7 @@ describe('amp-analytics', function() {
       config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: 0});
 
@@ -1151,7 +1149,7 @@ describe('amp-analytics', function() {
       config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: false});
 
@@ -1166,7 +1164,7 @@ describe('amp-analytics', function() {
       config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: null});
 
@@ -1181,7 +1179,7 @@ describe('amp-analytics', function() {
       config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: NaN});
 
@@ -1196,7 +1194,7 @@ describe('amp-analytics', function() {
       config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: undefined});
 
@@ -1222,7 +1220,7 @@ describe('amp-analytics', function() {
       config.enabled = '${pageViewId}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: 1});
       return waitForSendRequest(analytics).then(() => {
@@ -1257,7 +1255,7 @@ describe('amp-analytics', function() {
       config.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(null);
 
       return waitForNoSendRequest(analytics).then(() => {
@@ -1274,7 +1272,7 @@ describe('amp-analytics', function() {
 
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(null);
 
       return waitForNoSendRequest(analytics).then(() => {
@@ -1289,7 +1287,7 @@ describe('amp-analytics', function() {
       config.triggers.conditional.enabled = '${foo}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get').returns('page');
 
       return waitForNoSendRequest(analytics).then(() => {
@@ -1567,7 +1565,7 @@ describe('amp-analytics', function() {
         'sandbox': 'true',
       }, true);
 
-      const urlReplacements = urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(0);
       sandbox.stub(crypto, 'uniform')
           .withArgs('0').returns(Promise.resolve(0.005))

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {performanceForOrNull} from './services';
+import {Services} from './services';
 import {dev} from './log';
 
 const LABEL_MAP = {
@@ -36,7 +36,7 @@ export class LayoutDelayMeter {
     /** @private {!Window} */
     this.win_ = win;
     /** @private {?./service/performance-impl.Performance} */
-    this.performance_ = performanceForOrNull(win);
+    this.performance_ = Services.performanceForOrNull(win);
     /** @private {?number} */
     this.firstInViewportTime_ = null;
     /** @private {?number} */

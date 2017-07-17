@@ -16,7 +16,7 @@
 
 import {BaseElement} from './base-element';
 import {dev} from './log';
-import {extensionsFor} from './services';
+import {Services} from './services';
 
 /** @type {!Array} */
 export const stubbedElements = [];
@@ -32,7 +32,8 @@ export class ElementStub extends BaseElement {
     const name = element.tagName.toLowerCase();
     if (!loadingChecked[name]) {
       loadingChecked[name] = true;
-      extensionsFor(this.win).loadExtension(name, /* stubElement */ false);
+      Services.extensionsFor(this.win).loadExtension(
+          name, /* stubElement */ false);
     }
     stubbedElements.push(this);
   }

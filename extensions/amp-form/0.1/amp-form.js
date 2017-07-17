@@ -31,9 +31,8 @@ import {
 } from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {xhrFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {toArray} from '../../../src/types';
-import {templatesFor} from '../../../src/services';
 import {
   removeElement,
   childElementByAttr,
@@ -41,11 +40,6 @@ import {
 } from '../../../src/dom';
 import {installStyles} from '../../../src/style-installer';
 import {CSS} from '../../../build/amp-form-0.1.css';
-import {vsyncFor} from '../../../src/services';
-import {actionServiceForDoc} from '../../../src/services';
-import {timerFor} from '../../../src/services';
-import {urlReplacementsForDoc} from '../../../src/services';
-import {resourcesForDoc} from '../../../src/services';
 import {
   getFormValidator,
   isCheckValiditySupported,
@@ -116,10 +110,10 @@ export class AmpForm {
     this.win_ = element.ownerDocument.defaultView;
 
     /** @const @private {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = timerFor(this.win_);
+    this.timer_ = Services.timerFor(this.win_);
 
     /** @const @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
-    this.urlReplacement_ = urlReplacementsForDoc(element);
+    this.urlReplacement_ = Services.urlReplacementsForDoc(element);
 
     /** @private {?Promise} */
     this.dependenciesPromise_ = null;
@@ -128,19 +122,19 @@ export class AmpForm {
     this.form_ = element;
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(this.win_);
+    this.vsync_ = Services.vsyncFor(this.win_);
 
     /** @const @private {!../../../src/service/template-impl.Templates} */
-    this.templates_ = templatesFor(this.win_);
+    this.templates_ = Services.templatesFor(this.win_);
 
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
-    this.xhr_ = xhrFor(this.win_);
+    this.xhr_ = Services.xhrFor(this.win_);
 
     /** @const @private {!../../../src/service/action-impl.ActionService} */
-    this.actions_ = actionServiceForDoc(this.form_);
+    this.actions_ = Services.actionServiceForDoc(this.form_);
 
     /** @const @private {!../../../src/service/resources-impl.Resources} */
-    this.resources_ = resourcesForDoc(this.form_);
+    this.resources_ = Services.resourcesForDoc(this.form_);
 
     /** @const @private {string} */
     this.method_ = (this.form_.getAttribute('method') || 'GET').toUpperCase();

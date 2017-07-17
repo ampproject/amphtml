@@ -33,7 +33,7 @@ import {dict} from '../../../src/utils/object';
 import {removeElement} from '../../../src/dom';
 import {user} from '../../../src/log';
 import {VideoEvents} from '../../../src/video-interface';
-import {videoManagerForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 
 /** @const */
 const TAG = 'amp-ima-video';
@@ -140,7 +140,7 @@ class AmpImaVideo extends AMP.BaseElement {
     this.element.appendChild(iframe);
 
     installVideoManagerForDoc(this.element);
-    videoManagerForDoc(this.win.document).register(this);
+    Services.videoManagerForDoc(this.win.document).register(this);
 
     return this.loadPromise(iframe).then(() => this.playerReadyPromise_);
   }

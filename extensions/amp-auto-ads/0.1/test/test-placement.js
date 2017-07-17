@@ -15,7 +15,7 @@
  */
 
 import {AdTracker} from '../ad-tracker';
-import {resourcesForDoc} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import {PlacementState, getPlacementsFromConfigObj} from '../placement';
 
 describes.realWin('placement', {
@@ -517,7 +517,7 @@ describes.realWin('placement', {
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const resource = resourcesForDoc(anchor);
+      const resource = Services.resourcesForDoc(anchor);
       sandbox.stub(resource, 'attemptChangeSize', () => {
         return Promise.resolve();
       });
@@ -557,7 +557,7 @@ describes.realWin('placement', {
       anchor.id = 'anId';
       container.appendChild(anchor);
 
-      const resource = resourcesForDoc(anchor);
+      const resource = Services.resourcesForDoc(anchor);
       sandbox.stub(resource, 'attemptChangeSize', () => {
         return Promise.reject(new Error('Resize failed'));
       });

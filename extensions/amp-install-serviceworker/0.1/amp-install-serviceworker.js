@@ -24,12 +24,10 @@ import {
 } from '../../../src/url';
 import {closestByTag, removeElement} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
-import {documentInfoForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
-import {timerFor} from '../../../src/services';
 import {toggle} from '../../../src/style';
-import {viewerForDoc} from '../../../src/services';
 import {setStyle} from '../../../src/style';
 
 /** @private @const {string} */
@@ -68,7 +66,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
       if (iframeSrc) {
         assertHttpsUrl(iframeSrc, this.element);
         const origin = parseUrl(iframeSrc).origin;
-        const docInfo = documentInfoForDoc(this.element);
+        const docInfo = Services.documentInfoForDoc(this.element);
         const sourceUrl = parseUrl(docInfo.sourceUrl);
         const canonicalUrl = parseUrl(docInfo.canonicalUrl);
         user().assert(
@@ -96,12 +94,12 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
 
   /** @private */
   scheduleIframeLoad_() {
-    viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
+    Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
       // If the user is longer than 20 seconds on this page, load
       // the external iframe to install the ServiceWorker. The wait is
       // introduced to avoid installing SWs for content that the user
       // only engaged with superficially.
-      timerFor(this.win).delay(() => {
+      Services.timerFor(this.win).delay(() => {
         this.deferMutate(this.insertIframe_.bind(this));
       }, 10000);
     });
@@ -111,7 +109,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
   insertIframe_() {
     // If we are no longer visible, we will not do a SW registration on this
     // page view.
-    if (!viewerForDoc(this.getAmpDoc()).isVisible()) {
+    if (!Services.viewerForDoc(this.getAmpDoc()).isVisible()) {
       return;
     }
     // The iframe will stil be loaded.
@@ -176,7 +174,8 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
   waitToPreloadShell_(shellUrl) {
     // Ensure that document is loaded and visible first.
     const whenReady = this.loadPromise(this.win);
-    const whenVisible = viewerForDoc(this.getAmpDoc()).whenFirstVisible();
+    const whenVisible =
+        Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible();
     return Promise.all([whenReady, whenVisible]).then(() => {
       this.deferMutate(() => this.preloadShell_(shellUrl));
     });

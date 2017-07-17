@@ -18,7 +18,7 @@ import {whenDocumentReady} from '../../../../src/document-ready';
 import {isExperimentOn} from '../../../../src/experiments';
 import {autoDiscoverLightboxables} from './lightbox-manager-discovery';
 import {dev} from '../../../../src/log';
-import {timerFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 
 
 /**
@@ -61,7 +61,7 @@ export class LightboxManager {
     // any time, if a method call comes in before this timer initializes, we
     // are still fine since manager will be initialized at that point and method
     // call will go through.
-    timerFor(ampdoc.win).delay(() => {
+    Services.timerFor(ampdoc.win).delay(() => {
       this.maybeInit_();
     }, 500);
   }

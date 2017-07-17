@@ -20,8 +20,7 @@ import {
   resetTrackImpressionPromiseForTesting,
 } from '../../src/impression';
 import {toggleExperiment} from '../../src/experiments';
-import {viewerForDoc} from '../../src/services';
-import {xhrFor} from '../../src/services';
+import {Services} from '../../src/services';
 import * as sinon from 'sinon';
 
 describe('impression', () => {
@@ -32,9 +31,9 @@ describe('impression', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    viewer = viewerForDoc(window.document);
+    viewer = Services.viewerForDoc(window.document);
     sandbox.stub(viewer, 'getParam');
-    xhr = xhrFor(window);
+    xhr = Services.xhrFor(window);
     expect(xhr.fetchJson).to.be.defined;
     const stub = sandbox.stub(xhr, 'fetchJson');
     stub.returns(Promise.resolve({

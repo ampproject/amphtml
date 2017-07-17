@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {timerFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {BaseCarousel} from './base-carousel';
 
 export class BaseSlides extends BaseCarousel {
@@ -141,7 +141,7 @@ export class BaseSlides extends BaseCarousel {
       return;
     }
     this.clearAutoplay();
-    this.autoplayTimeoutId_ = timerFor(this.win).delay(
+    this.autoplayTimeoutId_ = Services.timerFor(this.win).delay(
         this.go.bind(
             this, /* dir */ 1, /* animate */ true, /* autoplay */ true),
         this.autoplayDelay_);
@@ -153,7 +153,7 @@ export class BaseSlides extends BaseCarousel {
   */
   clearAutoplay() {
     if (this.autoplayTimeoutId_ !== null) {
-      timerFor(this.win).cancel(this.autoplayTimeoutId_);
+      Services.timerFor(this.win).cancel(this.autoplayTimeoutId_);
       this.autoplayTimeoutId_ = null;
     }
   }

@@ -16,10 +16,9 @@
 
 import {getFixedContainer} from '../../src/full-overlay-frame-child-helper';
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
-import {viewerForDoc} from '../services';
+import {Services} from '../services';
 import {Viewport, ViewportBindingDef} from '../service/viewport-impl';
 import {registerServiceBuilderForDoc} from '../service';
-import {resourcesForDoc} from '../services';
 import {
   nativeIntersectionObserverSupported,
 } from '../../src/intersection-observer-polyfill';
@@ -27,7 +26,6 @@ import {layoutRectLtwh} from '../layout-rect';
 import {Observable} from '../observable';
 import {MessageType} from '../../src/3p-frame-messaging';
 import {dev} from '../log';
-import {vsyncFor} from '../../src/services';
 import {px, setStyles} from '../../src/style';
 
 
@@ -37,7 +35,7 @@ const TAG = 'inabox-viewport';
 
 /** @visibleForTesting */
 export function prepareFixedContainer(win, fixedContainer) {
-  return vsyncFor(win).runPromise({
+  return Services.vsyncFor(win).runPromise({
     measure: state => {
       state.boundingRect = fixedContainer./*OK*/getBoundingClientRect();
     },
@@ -64,7 +62,7 @@ export function prepareFixedContainer(win, fixedContainer) {
 
 /** @visibleForTesting */
 export function resetFixedContainer(win, fixedContainer) {
-  return vsyncFor(win).mutatePromise(() => {
+  return Services.vsyncFor(win).mutatePromise(() => {
     setStyles(dev().assertElement(win.document.body), {
       'background': 'transparent',
     });
@@ -229,7 +227,7 @@ export class ViewportBindingInabox {
    * @visibleForTesting
    */
   getChildResources() {
-    return resourcesForDoc(this.win.document).get();
+    return Services.resourcesForDoc(this.win.document).get();
   }
 
   /** @private */
@@ -357,7 +355,7 @@ export class ViewportBindingInabox {
  */
 export function installInaboxViewportService(ampdoc) {
   const binding = new ViewportBindingInabox(ampdoc.win);
-  const viewer = viewerForDoc(ampdoc);
+  const viewer = Services.viewerForDoc(ampdoc);
   registerServiceBuilderForDoc(ampdoc,
       'viewport',
       function() {

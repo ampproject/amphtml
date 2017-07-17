@@ -17,8 +17,7 @@ import {CSS} from '../../../build/amp-apester-media-0.1.css';
 import {user, dev} from '../../../src/log';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
-import {vsyncFor} from '../../../src/services';
-import {xhrFor} from '../../../src/services';
+import {Services} from '../../../src/services';
 
 
 /** @const */
@@ -134,7 +133,7 @@ class AmpApesterMedia extends AMP.BaseElement {
    **/
   queryMedia_() {
     const url = this.buildUrl_();
-    return xhrFor(this.win).fetchJson(url, {
+    return Services.xhrFor(this.win).fetchJson(url, {
       requireAmpResponseSourceOrigin: false,
     }).then(res => res.json());
   }
@@ -247,7 +246,7 @@ class AmpApesterMedia extends AMP.BaseElement {
           this.element.appendChild(overflow);
           this.element.appendChild(iframe);
           return this.iframePromise_ = this.loadPromise(iframe).then(() => {
-            vsyncFor(this.win).runPromise({mutate}, state);
+            Services.vsyncFor(this.win).runPromise({mutate}, state);
             return media;
           });
         }, error => {

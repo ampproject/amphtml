@@ -20,7 +20,7 @@ import {
   registerExtendedTemplate,
 } from '../../src/service/template-impl';
 import {resetServiceForTesting} from '../../src/service';
-import {templatesFor} from '../../src/services';
+import {Services} from '../../src/services';
 
 describes.fakeWin('Template', {}, env => {
   let templates;
@@ -30,7 +30,7 @@ describes.fakeWin('Template', {}, env => {
   beforeEach(() => {
     win = env.win;
     installTemplatesService(win);
-    templates = templatesFor(win);
+    templates = Services.templatesFor(win);
     doc = win.document;
   });
 

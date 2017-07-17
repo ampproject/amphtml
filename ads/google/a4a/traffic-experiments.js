@@ -34,10 +34,7 @@ import {
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
 import {dev} from '../../../src/log';
-import {
-  viewerForDoc,
-  performanceForOrNull,
-} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {parseQueryString} from '../../../src/url';
 
 /** @typedef {{
@@ -115,7 +112,7 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
     const selectedBranch = getExperimentBranch(win, experimentName);
     if (selectedBranch) {
       addExperimentIdToElement(selectedBranch, element);
-      const perf = performanceForOrNull(win);
+      const perf = Services.performanceForOrNull(win);
       if (perf) {
         perf.addEnabledExperiment(experimentName + '-' + selectedBranch);
       }
@@ -146,7 +143,7 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
  * @return {?string} experiment extracted from page url.
  */
 export function extractUrlExperimentId(win, element) {
-  const expParam = viewerForDoc(element).getParam('exp') ||
+  const expParam = Services.viewerForDoc(element).getParam('exp') ||
     parseQueryString(win.location.search)['exp'];
   if (!expParam) {
     return null;
