@@ -26,9 +26,9 @@ export function widespace(global, data) {
 
   validateData(data, ['sid'], ['demoGender', 'demoCountry', 'demoRegion', 'demoCity', 'demoPostal', 'demoYob']);
 
-  const url = 'https://engine.widespace.com/map/engine/dynamic#isamp=1'
+  const url = 'https://engine.widespace.com/map/engine/dynamic?isamp=1'
       + '&ampver=' + WS_AMP_CODE_VER
-      + '&sid=' + encodeURIComponent(data.sid);
+      + '&#sid=' + encodeURIComponent(data.sid);
 
   writeScript(global, url);
 }
