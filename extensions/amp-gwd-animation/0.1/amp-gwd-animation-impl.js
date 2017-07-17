@@ -103,14 +103,15 @@ class AmpGwdRuntimeService {
   }
 
   /**
-   * Performs setup tasks: turns off all animations and enables animation
-   * playback only on the first GWD page, which will start once animations are
-   * enabled initially. The ampdoc body must be ready.
+   * Performs setup tasks on body ready.
    * @private
    */
   initialize_() {
     // Initially disable all animations (AMP runtime will enable when ready).
     this.ampdoc_.getBody().classList.add(ANIMATIONS_DISABLED_CLASS);
+
+    // Begin listening for timeline events (GWD event element `animationend`).
+    this.listenForAnimationEnd_();
 
     // Permit animations to play on the first GWD page.
     this.setCurrentPage(0);
@@ -132,15 +133,9 @@ class AmpGwdRuntimeService {
     if (enable) {
       // Lift the animation CSS override.
       this.ampdoc_.getBody().classList.remove(ANIMATIONS_DISABLED_CLASS);
-
-      // Re-attach `animationend` event listeners.
-      this.listenForAnimationEnd_();
     } else {
       // Stop all animations by overriding them with `animation: none`.
       this.ampdoc_.getBody().classList.add(ANIMATIONS_DISABLED_CLASS);
-
-      // No events need to be handled while disabled, so remove listeners.
-      this.unlistenForAnimationEnd_();
     }
 
     this.enabled_ = enable;

@@ -328,34 +328,33 @@ describes.sandboxed('AMP GWD runtime', {}, () => {
               triggeredEvents.push(event);
             });
 
-        // Enable animations so `animationend` event listeners are added. The
-        // runtime starts out disabled and does not automatically initialize.
-        getServiceForDoc(ampdoc, 'gwd').setEnabled(true);
+        return ampdoc.whenBodyAvailable().then(() => {
+          // Dispatch `animationend` events on GWD event elements and a
+          // non-event element (to test it is ignored).
+          const animationendEvent =
+              new AnimationEvent('animationend', {bubbles: true});
+          ampdoc.getRootNode().getElementById('event1').dispatchEvent(
+              animationendEvent);
+          ampdoc.getRootNode().getElementById('event2').dispatchEvent(
+              animationendEvent);
+          ampdoc.getRootNode().getElementById('not-an-event').dispatchEvent(
+              animationendEvent);
 
-        // Dispatch `animationend` events on GWD event elements and a non-event
-        // element (to test it is ignored).
-        const animationendEvent =
-            new AnimationEvent('animationend', {bubbles: true});
-        ampdoc.getRootNode().getElementById('event1').dispatchEvent(
-            animationendEvent);
-        ampdoc.getRootNode().getElementById('event2').dispatchEvent(
-            animationendEvent);
-        ampdoc.getRootNode().getElementById('not-an-event').dispatchEvent(
-            animationendEvent);
+          expect(triggeredAmpEventNames)
+              .to.deep.equal(['foo123event-1', 'foo123event-2']);
+          expect(triggeredEvents.map((event) => event.type))
+              .to.deep.equal(['gwd.timelineEvent', 'gwd.timelineEvent']);
+          expect(triggeredEvents.map((event) => event.detail.eventName))
+              .to.deep.equal(['event-1', 'event-2']);
+        });
 
-        expect(triggeredAmpEventNames)
-            .to.deep.equal(['foo123event-1', 'foo123event-2']);
-        expect(triggeredEvents.map((event) => event.type))
-            .to.deep.equal(['gwd.timelineEvent', 'gwd.timelineEvent']);
-        expect(triggeredEvents.map((event) => event.detail.eventName))
-            .to.deep.equal(['event-1', 'event-2']);
-      });
-
-      it('should get the receiver element by id if it exists', () => {
-        const runtime = getServiceForDoc(ampdoc, 'gwd');
-        expect(runtime.getReceiver('document.body')).to.equal(ampdoc.getBody());
-        expect(runtime.getReceiver('page1')).to.equal(page1Elem);
-        expect(runtime.getReceiver('nonexistentElement')).to.be.null;
+        it('should get the receiver element by id if it exists', () => {
+          const runtime = getServiceForDoc(ampdoc, 'gwd');
+          expect(runtime.getReceiver('document.body')).to.equal(
+              ampdoc.getBody());
+          expect(runtime.getReceiver('page1')).to.equal(page1Elem);
+          expect(runtime.getReceiver('nonexistentElement')).to.be.null;
+        });
       });
     });
   });
