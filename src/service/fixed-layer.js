@@ -546,7 +546,6 @@ export class FixedLayer {
   mutateElement_(fe, index, state) {
     const element = fe.element;
     const oldFixed = fe.fixedNow;
-    const oldSticky = fe.stickyNow;
 
     fe.fixedNow = state.fixed;
     fe.stickyNow = state.sticky;
@@ -554,7 +553,7 @@ export class FixedLayer {
     fe.transform = state.transform;
 
     // Move back to the BODY layer and reset transfer z-index.
-    if (oldFixed && !state.fixed || !state.transferrable) {
+    if (oldFixed && (!state.fixed || !state.transferrable)) {
       this.returnFromTransferLayer_(fe);
     }
 
