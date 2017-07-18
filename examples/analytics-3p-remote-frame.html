@@ -38,7 +38,7 @@
         document.head.appendChild(script);
         // The script will be loaded, and will call onNewAmpAnalyticsInstance()
       } else {
-        console.log('Received invalid URL - risk of XSS! ' + url);
+        console.warn('Received invalid URL - risk of XSS! ' + url);
       }
     </script>
   </head>
