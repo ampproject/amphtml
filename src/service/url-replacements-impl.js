@@ -315,7 +315,6 @@ export class GlobalVariableSource extends VariableSource {
 
     //Returns the human readable timestamp in format of 2011-01-01 11:11:11.
     this.set('TIMESTAMP_FORMATTED', () => {
-      //const win = this.ampdoc.win;
       const current = new Date();
       const year = current.getFullYear();
       const month = this.formatNum(current.getMonth() + 1);

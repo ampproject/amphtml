@@ -1321,12 +1321,14 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   describe('formatted timestamp', () => {
     it('should return correct formatted timestamp', () => {
-      sandbox.useFakeTimers(1499979336612);
+      const fakeTime = 1499979336612;
+      const offset_ = new Date(fakeTime).getTimezoneOffset() * 60000;
+      sandbox.useFakeTimers(fakeTime + offset_);
       return expandAsync(
           '?tsf=TIMESTAMP_FORMATTED').then(res => {
-            expect(encodeURIComponent('2017-07-13 13:55:36'))
-                .to.equal('2017-07-13%2013%3A55%3A36');
-            expect(res).to.equal('?tsf=2017-07-13%2013%3A55%3A36');
+            expect(encodeURIComponent('2017-07-13 20:55:36'))
+                .to.equal('2017-07-13%2020%3A55%3A36');
+            expect(res).to.equal('?tsf=2017-07-13%2020%3A55%3A36');
           });
     });
   });
