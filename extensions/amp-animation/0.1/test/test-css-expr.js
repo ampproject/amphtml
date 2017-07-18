@@ -65,6 +65,9 @@ describe('CSS parse', () => {
       return `RAND<${n.left_ ? pseudo(n.left_) : null}` +
           `, ${n.right_ ? pseudo(n.right_) : null}>`;
     }
+    if (n instanceof ast.CssIndexNode) {
+      return 'INDEX<>';
+    }
     if (n instanceof ast.CssVarNode) {
       return `VAR<${n.varName_}${n.def_ ? ', ' + pseudo(n.def_) : ''}>`;
     }
@@ -292,6 +295,11 @@ describe('CSS parse', () => {
         .to.equal('RAND<VAR<--x>, VAR<--y>>');
     expect(parsePseudo('rand(10px, var(--y))'))
         .to.equal('RAND<LEN<10 PX>, VAR<--y>>');
+  });
+
+  it('should parse an index function', () => {
+    expect(parsePseudo('index()')).to.equal('INDEX<>');
+    expect(parsePseudo('INDEX()')).to.equal('INDEX<>');
   });
 
   it('should parse a var()', () => {
@@ -1202,6 +1210,36 @@ describes.sandboxed('CSS resolve', {}, () => {
           new ast.CssLengthNode(10, 'em'),
           new ast.CssLengthNode(10, 'rem'));
       expect(resolvedCss(node)).to.equal('12.5px');
+    });
+  });
+
+  describe('index', () => {
+    it('should always consider as non-const', () => {
+      expect(ast.isVarCss('index()', false)).to.be.true;
+      expect(ast.isVarCss('index()', normalize)).to.be.true;
+    });
+
+    it('should always be a non-const and no css', () => {
+      const node = new ast.CssIndexNode();
+      expect(node.isConst()).to.be.false;
+      expect(node.isConst(normalize)).to.be.false;
+      expect(() => node.css()).to.throw(/no css/);
+    });
+
+    it('should resolve a no-arg', () => {
+      contextMock.expects('getCurrentIndex').withExactArgs().returns(11);
+      const node = new ast.CssIndexNode();
+      expect(resolvedCss(node)).to.equal('11');
+    });
+
+    it('should combine with calc', () => {
+      contextMock.expects('getCurrentIndex').withExactArgs().returns(11);
+      const node = new ast.CssCalcProductNode(
+          new ast.CssTimeNode(2, 's'),
+          new ast.CssIndexNode(),
+          '*');
+      expect(node.isConst()).to.be.false;
+      expect(resolvedCss(node)).to.equal('22s');
     });
   });
 

@@ -22,7 +22,7 @@ import {
   startupChunk,
 } from '../../src/chunk';
 import {installDocService} from '../../src/service/ampdoc-impl';
-import {viewerForDoc, viewerPromiseForDoc} from '../../src/services';
+import {Services} from '../../src/services';
 import * as sinon from 'sinon';
 
 
@@ -46,7 +46,7 @@ describe('chunk', () => {
       // If there is a viewer, wait for it, so we run with it being
       // installed.
       if (env.win.services.viewer) {
-        return viewerPromiseForDoc(env.win.document).then(() => {
+        return Services.viewerPromiseForDoc(env.win.document).then(() => {
           // Make sure we make a chunk instance, so all runs
           // have a viewer.
           chunkInstanceForTesting(env.win.document);
@@ -138,7 +138,7 @@ describe('chunk', () => {
 
     describe('visible', () => {
       beforeEach(() => {
-        const viewer = viewerForDoc(env.win.document);
+        const viewer = Services.viewerForDoc(env.win.document);
         env.sandbox.stub(viewer, 'isVisible', () => {
           return true;
         });
@@ -158,7 +158,7 @@ describe('chunk', () => {
 
           beforeEach(() => {
             fakeWin = env.win;
-            const viewer = viewerForDoc(env.win.document);
+            const viewer = Services.viewerForDoc(env.win.document);
             env.sandbox.stub(viewer, 'isVisible', () => {
               return true;
             });
@@ -181,7 +181,7 @@ describe('chunk', () => {
 
     describe('invisible', () => {
       beforeEach(() => {
-        const viewer = viewerForDoc(env.win.document);
+        const viewer = Services.viewerForDoc(env.win.document);
         env.sandbox.stub(viewer, 'isVisible', () => {
           return false;
         });
@@ -200,7 +200,7 @@ describe('chunk', () => {
     describe('invisible but deactivated', () => {
       beforeEach(() => {
         deactivateChunking();
-        const viewer = viewerForDoc(env.win.document);
+        const viewer = Services.viewerForDoc(env.win.document);
         env.sandbox.stub(viewer, 'isVisible', () => {
           return false;
         });
@@ -215,7 +215,7 @@ describe('chunk', () => {
 
     describe('invisible via document.hidden', () => {
       beforeEach(() => {
-        const viewer = viewerForDoc(env.win.document);
+        const viewer = Services.viewerForDoc(env.win.document);
         env.sandbox.stub(viewer, 'isVisible', () => {
           return false;
         });
@@ -234,7 +234,7 @@ describe('chunk', () => {
     describe('invisible to visible', () => {
       beforeEach(() => {
         env.win.location.resetHref('test#visibilityState=hidden');
-        const viewer = viewerForDoc(env.win.document);
+        const viewer = Services.viewerForDoc(env.win.document);
         let visible = false;
         env.sandbox.stub(viewer, 'isVisible', () => {
           return visible;
@@ -252,7 +252,7 @@ describe('chunk', () => {
     describe('invisible to visible', () => {
       beforeEach(() => {
         env.win.location.resetHref('test#visibilityState=prerender');
-        const viewer = viewerForDoc(env.win.document);
+        const viewer = Services.viewerForDoc(env.win.document);
         let visible = false;
         env.sandbox.stub(viewer, 'isVisible', () => {
           return visible;
@@ -270,7 +270,7 @@ describe('chunk', () => {
     describe('invisible to visible after a while', () => {
       beforeEach(() => {
         env.win.location.resetHref('test#visibilityState=hidden');
-        const viewer = viewerForDoc(env.win.document);
+        const viewer = Services.viewerForDoc(env.win.document);
         let visible = false;
         env.sandbox.stub(viewer, 'isVisible', () => {
           return visible;
@@ -305,7 +305,7 @@ describe('chunk', () => {
     beforeEach(() => {
       env.win.requestIdleCallback = null;
       expect(env.win.requestIdleCallback).to.be.null;
-      const viewer = viewerForDoc(env.win.document);
+      const viewer = Services.viewerForDoc(env.win.document);
       env.sandbox.stub(viewer, 'isVisible', () => {
         return false;
       });

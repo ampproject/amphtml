@@ -22,7 +22,7 @@ import {
 import {
   installExtensionsService,
 } from '../../../../src/service/extensions-impl';
-import {extensionsFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-line no-unused-vars
 import {
   AmpAdXOriginIframeHandler,    // eslint-disable-line no-unused-vars
@@ -223,8 +223,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
     });
     // Not using arrow function here because otherwise the way closure behaves
     // prevents me from calling this.timeout(5000).
-    // TODO(@tdrl, #8965): Make this pass reliably on Travis.
-    it.skip('with multiple slots', function() {
+    it('with multiple slots', function() {
       // When ran locally, this test tends to exceed 2000ms timeout.
       this.timeout(5000);
       // Reset counter for purpose of this test.
@@ -323,7 +322,7 @@ describes.sandboxed('amp-ad-network-adsense-impl', {}, () => {
         });
         impl = new AmpAdNetworkAdsenseImpl(element);
         installExtensionsService(impl.win);
-        const extensions = extensionsFor(impl.win);
+        const extensions = Services.extensionsFor(impl.win);
         loadExtensionSpy = sandbox.spy(extensions, 'loadExtension');
       });
     });

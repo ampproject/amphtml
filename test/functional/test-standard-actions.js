@@ -17,7 +17,7 @@
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {OBJECT_STRING_ARGS_KEY} from '../../src/service/action-impl';
 import {StandardActions} from '../../src/service/standard-actions-impl';
-import {bindForDoc, historyForDoc} from '../../src/services';
+import {Services} from '../../src/services';
 import {installHistoryServiceForDoc} from '../../src/service/history-impl';
 import {setParentWindow} from '../../src/service';
 
@@ -26,6 +26,7 @@ describes.sandboxed('StandardActions', {}, () => {
   let standardActions;
   let mutateElementStub;
   let deferMutateStub;
+  let scrollStub;
   let ampdoc;
 
   function createElement() {
@@ -72,11 +73,20 @@ describes.sandboxed('StandardActions', {}, () => {
     expect(element.expand).to.be.calledOnce;
   }
 
+  function expectAmpElementToHaveBeenScrolledIntoView(element) {
+    expect(scrollStub).to.be.calledOnce;
+    expect(scrollStub.firstCall.args[0]).to.equal(element);
+  }
+
   beforeEach(() => {
     ampdoc = new AmpDocSingle(window);
     standardActions = new StandardActions(ampdoc);
     mutateElementStub = stubMutate('mutateElement');
     deferMutateStub = stubMutate('deferMutate');
+    scrollStub = sandbox.stub(
+        standardActions.viewport_,
+        'animateScrollIntoView');
+
   });
 
   describe('"hide" action', () => {
@@ -162,6 +172,40 @@ describes.sandboxed('StandardActions', {}, () => {
     });
   });
 
+  describe('"scrollTo" action', () => {
+    it('should handle normal element', () => {
+      const element = createElement();
+      const invocation = {target: element, satisfiesTrust: () => true};
+      standardActions.handleScrollTo(invocation);
+      expectAmpElementToHaveBeenScrolledIntoView(element);
+    });
+
+    it('should handle AmpElement', () => {
+      const element = createAmpElement();
+      const invocation = {target: element, satisfiesTrust: () => true};
+      standardActions.handleScrollTo(invocation);
+      expectAmpElementToHaveBeenScrolledIntoView(element);
+    });
+  });
+
+  describe('"focus" action', () => {
+    it('should handle normal element', () => {
+      const element = createElement();
+      const invocation = {target: element, satisfiesTrust: () => true};
+      const focusStub = sandbox.stub(element, 'focus');
+      standardActions.handleFocus(invocation);
+      expect(focusStub).to.be.calledOnce;
+    });
+
+    it('should handle AmpElement', () => {
+      const element = createAmpElement();
+      const invocation = {target: element, satisfiesTrust: () => true};
+      const focusStub = sandbox.stub(element, 'focus');
+      standardActions.handleFocus(invocation);
+      expect(focusStub).to.be.calledOnce;
+    });
+  });
+
   describe('"AMP" global target', () => {
     it('should implement navigateTo', () => {
       const expandUrlStub = sandbox.stub(standardActions.urlReplacements_,
@@ -203,7 +247,7 @@ describes.sandboxed('StandardActions', {}, () => {
 
     it('should implement goBack', () => {
       installHistoryServiceForDoc(ampdoc);
-      const history = historyForDoc(ampdoc);
+      const history = Services.historyForDoc(ampdoc);
       const goBackStub = sandbox.stub(history, 'goBack');
       const invocation = {method: 'goBack', satisfiesTrust: () => true};
       standardActions.handleAmpTarget(invocation);
@@ -228,7 +272,7 @@ describes.sandboxed('StandardActions', {}, () => {
         satisfiesTrust: () => true,
       };
       standardActions.handleAmpTarget(invocation);
-      return bindForDoc(ampdoc).then(() => {
+      return Services.bindForDoc(ampdoc).then(() => {
         expect(spy).to.be.calledOnce;
         expect(spy).to.be.calledWith('{foo: 123}');
       });
@@ -282,7 +326,7 @@ describes.sandboxed('StandardActions', {}, () => {
       expect(stub).to.be.calledOnce;
 
       // Global actions.
-      expect(embedActions.addGlobalMethodHandler).to.be.calledThrice;
+      expect(embedActions.addGlobalMethodHandler).to.have.callCount(5);
       expect(embedActions.addGlobalMethodHandler.args[0][0]).to.equal('hide');
       expect(embedActions.addGlobalMethodHandler.args[0][1]).to.be.function;
       expect(embedActions.addGlobalMethodHandler.args[1][0]).to.equal('show');
@@ -290,6 +334,12 @@ describes.sandboxed('StandardActions', {}, () => {
       expect(embedActions.addGlobalMethodHandler.args[2][0]).to
           .equal('toggleVisibility');
       expect(embedActions.addGlobalMethodHandler.args[2][1]).to.be.function;
+      expect(embedActions.addGlobalMethodHandler.args[3][0]).to
+          .equal('scrollTo');
+      expect(embedActions.addGlobalMethodHandler.args[3][1]).to.be.function;
+      expect(embedActions.addGlobalMethodHandler.args[4][0]).to
+          .equal('focus');
+      expect(embedActions.addGlobalMethodHandler.args[4][1]).to.be.function;
       embedActions.addGlobalMethodHandler.args[0][1]();
       expect(hideStub).to.be.calledOnce;
     });

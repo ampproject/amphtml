@@ -16,7 +16,7 @@
 
 import {AmpEvents} from '../../../../src/amp-events';
 import {AmpList} from '../amp-list';
-import {ampdocServiceFor, templatesFor} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import * as sinon from 'sinon';
 
 describe('amp-list component', () => {
@@ -29,10 +29,10 @@ describe('amp-list component', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
 
-    const templates = templatesFor(window);
+    const templates = Services.templatesFor(window);
     templatesMock = sandbox.mock(templates);
 
-    const ampdoc = ampdocServiceFor(window).getAmpDoc();
+    const ampdoc = Services.ampdocServiceFor(window).getAmpDoc();
 
     element = document.createElement('div');
     element.setAttribute('src', 'https://data.com/list.json');

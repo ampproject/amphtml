@@ -15,7 +15,7 @@
  */
 
 import {registerServiceBuilderForDoc} from '../service';
-import {viewportForDoc, vsyncFor} from '../services';
+import {Services} from '../services';
 import {getMode} from '../mode';
 import {dev} from '../log';
 import {
@@ -71,10 +71,10 @@ class AbstractPositionObserver {
     this.entries_ = [];
 
     /** @private {!./vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(ampdoc.win);
+    this.vsync_ = Services.vsyncFor(ampdoc.win);
 
     /** @private {!./viewport-impl.Viewport} */
-    this.viewport_ = viewportForDoc(ampdoc);
+    this.viewport_ = Services.viewportForDoc(ampdoc);
 
   }
 

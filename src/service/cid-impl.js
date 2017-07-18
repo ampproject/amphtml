@@ -35,7 +35,7 @@ import {
 import {dict} from '../utils/object';
 import {isIframed} from '../dom';
 import {getCryptoRandomBytesArray} from '../utils/bytes';
-import {cryptoFor, viewerForDoc, storageForDoc, timerFor} from '../services';
+import {Services} from '../services';
 import {parseJson, tryParseJson} from '../json';
 import {user, rethrowAsync} from '../log';
 
@@ -123,7 +123,7 @@ export class Cid {
         getCidStruct.scope);
 
     return consent.then(() => {
-      return viewerForDoc(this.ampdoc).whenFirstVisible();
+      return Services.viewerForDoc(this.ampdoc).whenFirstVisible();
     }).then(() => {
       // Check if user has globally opted out of CID, we do this after
       // consent check since user can optout during consent process.
@@ -135,7 +135,7 @@ export class Cid {
       const cidPromise = this.getExternalCid_(
           getCidStruct, opt_persistenceConsent || consent);
       // Getting the CID might involve an HTTP request. We timeout after 10s.
-      return timerFor(this.ampdoc.win)
+      return Services.timerFor(this.ampdoc.win)
           .timeoutPromise(10000, cidPromise,
           `Getting cid for "${getCidStruct.scope}" timed out`)
           .catch(error => {
@@ -168,13 +168,13 @@ export class Cid {
     if (!isProxyOrigin(url)) {
       return getOrCreateCookie(this, getCidStruct, persistenceConsent);
     }
-    const viewer = viewerForDoc(this.ampdoc);
+    const viewer = Services.viewerForDoc(this.ampdoc);
     if (viewer.hasCapability('cid')) {
       return this.getScopedCidFromViewer_(getCidStruct.scope);
     }
     return getBaseCid(this, persistenceConsent)
         .then(baseCid => {
-          return cryptoFor(this.ampdoc.win).sha384Base64(
+          return Services.cryptoFor(this.ampdoc.win).sha384Base64(
               baseCid + getProxySourceOrigin(url) + getCidStruct.scope);
         });
   }
@@ -184,7 +184,7 @@ export class Cid {
    * @return {!Promise<?string>}
    */
   getScopedCidFromViewer_(scope) {
-    const viewer = viewerForDoc(this.ampdoc);
+    const viewer = Services.viewerForDoc(this.ampdoc);
     return viewer.isTrustedViewer().then(trusted => {
       if (!trusted) {
         rethrowAsync('Ignore CID API from Untrustful Viewer.');
@@ -205,10 +205,11 @@ export class Cid {
 export function optOutOfCid(ampdoc) {
 
   // Tell the viewer that user has opted out.
-  viewerForDoc(ampdoc)./*OK*/sendMessage(CID_OPTOUT_VIEWER_MESSAGE, dict());
+  Services.viewerForDoc(ampdoc)./*OK*/sendMessage(
+      CID_OPTOUT_VIEWER_MESSAGE, dict());
 
   // Store the optout bit in storage
-  return storageForDoc(ampdoc).then(storage => {
+  return Services.storageForDoc(ampdoc).then(storage => {
     return storage.set(CID_OPTOUT_STORAGE_KEY, true);
   });
 }
@@ -221,7 +222,7 @@ export function optOutOfCid(ampdoc) {
  * @visibleForTesting
  */
 export function isOptedOutOfCid(ampdoc) {
-  return storageForDoc(ampdoc).then(storage => {
+  return Services.storageForDoc(ampdoc).then(storage => {
     return storage.get(CID_OPTOUT_STORAGE_KEY).then(val => !!val);
   }).catch(() => {
     // If we fail to read the flag, assume not opted out.
@@ -274,7 +275,7 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
         Promise.resolve(existingCookie));
   }
 
-  const newCookiePromise = cryptoFor(win).sha384Base64(getEntropy(win))
+  const newCookiePromise = Services.cryptoFor(win).sha384Base64(getEntropy(win))
       // Create new cookie, always prefixed with "amp-", so that we can see from
       // the value whether we created it.
       .then(randomStr => 'amp-' + randomStr);
@@ -335,7 +336,7 @@ function getBaseCid(cid, persistenceConsent) {
       }
     } else {
       // We need to make a new one.
-      baseCid = cryptoFor(win).sha384Base64(getEntropy(win));
+      baseCid = Services.cryptoFor(win).sha384Base64(getEntropy(win));
       needsToStore = true;
     }
 
@@ -385,7 +386,7 @@ function store(ampdoc, persistenceConsent, cidString) {
  * @return {!Promise<string|undefined>}
  */
 export function viewerBaseCid(ampdoc, opt_data) {
-  const viewer = viewerForDoc(ampdoc);
+  const viewer = Services.viewerForDoc(ampdoc);
   return viewer.isTrustedViewer().then(trusted => {
     if (!trusted) {
       return undefined;
