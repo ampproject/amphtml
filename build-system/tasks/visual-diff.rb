@@ -195,8 +195,28 @@ def setDebuggingLevel()
 end
 
 
+# Enables us to require percy checks on GitHub, and yet, not have to do a full
+# build for every PR.
+def createEmptyBuild()
+  puts "Skipping visual diff tests and generating a blank Percy build..."
+  Percy.config.default_widths = [375]
+  server = 'http://localhost'  # Not actually used.
+  blank_assets_dir = File.expand_path(
+      "../../../examples/visual-tests/blank-page",
+      __FILE__)
+  Percy::Capybara::Anywhere.run(server, blank_assets_dir, '') do |page|
+    page.driver.options[:phantomjs] = Phantomjs.path
+    Percy::Capybara.snapshot(page, name: 'Blank page')
+  end
+end
+
+
 # Launches a webserver, loads test pages, and generates Percy snapshots.
 def main()
+  if ARGV.include? '--skip'
+    createEmptyBuild()
+    exit
+  end
   setDebuggingLevel()
   pid = launchWebServer()
   if not waitForWebServer()
