@@ -22,6 +22,7 @@ import {
   isCancellation,
   reportError,
   detectJsEngineFromStack,
+  reportErrorToAnalytics,
 } from '../../src/error';
 import {parseUrl, parseQueryString} from '../../src/url';
 import {user} from '../../src/log';
@@ -30,6 +31,8 @@ import {
   toggleExperiment,
 } from '../../src/experiments';
 import * as sinon from 'sinon';
+import {adopt} from '../../src/runtime';
+import * as analytics from '../../src/analytics';
 
 describes.fakeWin('installErrorReporting', {}, env => {
   let win;
@@ -539,3 +542,32 @@ describe('detectJsEngineFromStack', () => {
   });
 });
 
+
+describes.fakeWin('user error reporting', {amp: true}, env => {
+  let win;
+  adopt(window);
+  const tag = 'ERROR';
+  const error = new Error('user error');
+  let analyticsEventSpy_;
+
+  beforeEach(() => {
+    win = env.win;
+    sandbox = sinon.sandbox.create();
+    analyticsEventSpy_ = sandbox.spy(analytics, 'triggerAnalyticsEvent');
+    toggleExperiment(window, 'user-error-reporting', true);
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+    resetExperimentTogglesForTesting(window);
+  });
+
+  it('should trigger triggerAnalyticsEvent with correct arguments', () => {
+    reportErrorToAnalytics(tag, error, win);
+    expect(analyticsEventSpy_).to.have.been.called;
+    expect(analyticsEventSpy_).to.have.been.calledWith(
+        sinon.match.any,
+        'user-error',
+        {errorName: tag, errorMessage: error.message});
+  });
+});

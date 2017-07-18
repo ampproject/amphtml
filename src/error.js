@@ -496,17 +496,8 @@ export function reportErrorToAnalytics(unusedTag, error, win) {
       'errorName': unusedTag,
       'errorMessage': error.message,
     };
-    analyticsEvent('user-error', vars, win);
+    triggerAnalyticsEvent(getRootElement_(win), 'user-error', vars);
   }
-}
-
-/**
- * @param {string} eventType
- * @param {!Object<string, string>} vars A map of vars and their values.
- * @param {!Window} win
- */
-function analyticsEvent(eventType, vars, win) {
-  triggerAnalyticsEvent(getRootElement(win), eventType, vars);
 }
 
 /**
@@ -514,7 +505,7 @@ function analyticsEvent(eventType, vars, win) {
  * @return {!Element}
  * @private
  */
-function getRootElement(win) {
+function getRootElement_(win) {
   const root = ampdocServiceFor(win).getAmpDoc().getRootNode();
   return dev().assertElement(root.documentElement || root.body || root);
 }
