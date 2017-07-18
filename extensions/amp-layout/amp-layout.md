@@ -19,7 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>A generic, multi-purpose container element that can be used independent of other elements</td>
+    <td>A generic, multi-purpose container element that brings AMP's powerful [layouts](https://www.ampproject.org/docs/guides/responsive/control_layout#the-layout-attribute) to any element.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -31,14 +31,14 @@ limitations under the License.
   </tr>
 </table>
 
-## Examples
+## Overview
 
-Use `amp-layout` to create an aspect-ratio based responsive, independent component!.
+The `amp-layout` component allows you to apply aspect-ratio based responsive layouts to any element. The `amp-layout` component works similarly to the [layout](https://www.ampproject.org/docs/guides/responsive/control_layout#the-layout-attribute) attribute on existing AMP components, but supports any HTML markup as children. Other supported layouts all work with `amp-layout` (e.g., fixed-height, fixed, etc.).
 
 **Example**
 
 ```html
-<amp-layout class="card" layout=responsive width=2 height=1>
+<amp-layout class="card" layout="responsive" width="2" height="1">
   This card container will always maintain its 2x1 aspect ratio!
 </amp-layout>
 
