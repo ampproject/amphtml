@@ -16,8 +16,6 @@ limitations under the License.
 
 # <a name="amp-twitter"></a> `amp-twitter`
 
-[TOC]
-
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
@@ -36,6 +34,8 @@ limitations under the License.
     <td><a href="https://ampbyexample.com/components/amp-twitter/">Annotated code example for amp-twitter</a></td>
   </tr>
 </table>
+
+[TOC]
 
 ## Behavior
 
@@ -63,21 +63,7 @@ Twitter does not currently provide an API that yields fixed aspect ratio for emb
 
 An element marked with a `placeholder` attribute displays while the content for the Tweet is loading or initializing.  Placeholders are hidden once the AMP component's content displays. An element marked with a `fallback` attribute displays if `amp-twitter` isn't supported by the browser or if the Tweet doesn't exist or has been deleted.
 
-The interaction of fallbacks and placeholders for `amp-twitter` is as follows:
-
-<ol>
-  <li>Display the placeholder while the content is loading.</li>
-  <li>If the content loaded successfully, hide the placeholder, and display the content.</li>
-  <li>If the content failed to load:</li>
-    <ol>
-      <li>If there's a fallback element, display the fallback.</li>
-      <li>Otherwise, if there's a placeholder, display the placeholder.</li>
-    </ol></li>
-</ol>
-
-{% call callout('Read on', type='read') %}
-Learn more about [Placeholders & fallbacks](https://www.ampproject.org/docs/guides/responsive/placeholders) in AMP.
-{% endcall %}
+Visit the [Placeholders & fallbacks](https://www.ampproject.org/docs/guides/responsive/placeholders) guide to learn more about how placeholders and fallbacks interact for the `amp-twitter` component.
 
 *Example: Specifying a placeholder*
 <!--embedded example - displays in ampproject.org -->
