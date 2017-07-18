@@ -122,8 +122,13 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     c.client.captureConsole = true;
   }
 
+  if (argv.testnames) {
+    c.reporters = ['mocha'];
+  }
+
   if (argv.files) {
     c.files = [].concat(config.commonTestPaths, argv.files);
+    c.reporters = ['mocha'];
   } else if (argv.integration) {
     c.files = config.integrationTestPaths;
   } else if (argv.randomize || argv.glob || argv.a4a) {
@@ -201,6 +206,7 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
       'Started test responses server on localhost:31862'));
 
   new Karma(c, function(exitCode) {
+    console./*OK*/log('\n');
     util.log(util.colors.yellow(
         'Shutting down test responses server on localhost:31862'));
     server.emit('kill');
@@ -215,20 +221,21 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
 }, {
   options: {
     'verbose': '  With logging enabled',
+    'testnames': '  Lists the name of each test being run',
     'watch': '  Watches for changes in files, runs corresponding test(s)',
     'saucelabs': '  Runs test on saucelabs (requires setup)',
     'safari': '  Runs tests in Safari',
     'firefox': '  Runs tests in Firefox',
     'edge': '  Runs tests in Edge',
-    'integration': 'Run only integration tests.',
-    'compiled': 'Changes integration tests to use production JS ' +
+    'integration': '  Run only integration tests.',
+    'compiled': '  Changes integration tests to use production JS ' +
         'binaries for execution',
-    'oldchrome': 'Runs test with an old chrome. Saucelabs only.',
-    'grep': 'Runs tests that match the pattern',
-    'files': 'Runs tests for specific files',
-    'randomize': 'Runs entire test suite in random order',
-    'testlist': 'Runs tests specified in JSON by supplied file',
-    'glob': 'Explicitly expands test paths using glob before passing ' +
+    'oldchrome': '  Runs test with an old chrome. Saucelabs only.',
+    'grep': '  Runs tests that match the pattern',
+    'files': '  Runs tests for specific files',
+    'randomize': '  Runs entire test suite in random order',
+    'testlist': '  Runs tests specified in JSON by supplied file',
+    'glob': '  Explicitly expands test paths using glob before passing ' +
         'to Karma',
   }
 });
