@@ -34,7 +34,7 @@ import {urls} from './config';
 import {AmpEvents} from './amp-events';
 import {triggerAnalyticsEvent} from './analytics';
 import {isExperimentOn} from './experiments';
-import {ampdocServiceFor} from './services';
+import {Services} from './services';
 
 /**
  * @const {string}
@@ -91,6 +91,18 @@ function tryJsonStringify(value) {
 let detectedJsEngine;
 
 /**
+ * @param {!Window} win
+ * @param {*} error
+ * @param {!Element=} opt_associatedElement
+ */
+export function reportErrorForWin(win, error, opt_associatedElement) {
+  reportError(error, opt_associatedElement);
+  if (error && isUserErrorMessage(error.message) && !!win) {
+    reportErrorToAnalytics(/** @type {!Error} */(error), win);
+  }
+}
+
+/**
  * Reports an error. If the error has an "associatedElement" property
  * the element is marked with the `i-amphtml-element-error` and displays
  * the message itself. The message is always send to the console.
@@ -99,12 +111,9 @@ let detectedJsEngine;
  * elements instead of stringification.
  * @param {*} error
  * @param {!Element=} opt_associatedElement
- * @param {string=} opt_unusedTag
- * @param {!Window=} opt_win
  * @return {!Error}
  */
-export function reportError(
-    error, opt_associatedElement, opt_unusedTag, opt_win) {
+export function reportError(error, opt_associatedElement) {
   try {
     // Convert error to the expected type.
     let isValidError;
@@ -116,11 +125,6 @@ export function reportError(
         const origError = error;
         error = new Error(tryJsonStringify(origError));
         error.origError = origError;
-      }
-      if (isUserErrorMessage(error.message) && !!opt_win) {
-        const win = /** @type {!Window} */ (opt_win);
-        const tag = opt_unusedTag || 'ERROR';
-        reportErrorToAnalytics(tag, error, win);
       }
     } else {
       error = new Error('Unknown error');
@@ -487,13 +491,13 @@ export function detectJsEngineFromStack() {
 }
 
 /**
- * @param {string} unusedTag
  * @param {!Error} error
+ * @param {!Window} win
  */
-export function reportErrorToAnalytics(unusedTag, error, win) {
+export function reportErrorToAnalytics(error, win) {
   if (isExperimentOn(win, 'user-error-reporting')) {
     const vars = {
-      'errorName': unusedTag,
+      'errorName': error.name,
       'errorMessage': error.message,
     };
     triggerAnalyticsEvent(getRootElement_(win), 'user-error', vars);
@@ -506,6 +510,6 @@ export function reportErrorToAnalytics(unusedTag, error, win) {
  * @private
  */
 function getRootElement_(win) {
-  const root = ampdocServiceFor(win).getAmpDoc().getRootNode();
+  const root = Services.ampdocServiceFor(win).getAmpDoc().getRootNode();
   return dev().assertElement(root.documentElement || root.body || root);
 }

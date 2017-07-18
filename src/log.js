@@ -209,8 +209,9 @@ export class Log {
   error(unusedTag, var_args) {
     const error = this.error_.apply(this, arguments);
     if (error) {
+      error.name = unusedTag || error.name;
       // reportError is installed globally per window in the entry point.
-      self.reportError(error, null, unusedTag, this.win);
+      self.reportError(error);
     }
   }
 

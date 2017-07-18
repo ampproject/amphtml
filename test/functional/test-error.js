@@ -546,8 +546,7 @@ describe('detectJsEngineFromStack', () => {
 describes.fakeWin('user error reporting', {amp: true}, env => {
   let win;
   adopt(window);
-  const tag = 'ERROR';
-  const error = new Error('user error');
+  const error = new Error('ERROR','user error');
   let analyticsEventSpy_;
 
   beforeEach(() => {
@@ -563,11 +562,11 @@ describes.fakeWin('user error reporting', {amp: true}, env => {
   });
 
   it('should trigger triggerAnalyticsEvent with correct arguments', () => {
-    reportErrorToAnalytics(tag, error, win);
+    reportErrorToAnalytics(error, win);
     expect(analyticsEventSpy_).to.have.been.called;
     expect(analyticsEventSpy_).to.have.been.calledWith(
         sinon.match.any,
         'user-error',
-        {errorName: tag, errorMessage: error.message});
+        {errorName: error.name, errorMessage: error.message});
   });
 });
