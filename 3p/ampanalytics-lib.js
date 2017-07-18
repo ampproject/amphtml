@@ -56,7 +56,7 @@ export class AmpAnalytics3pMessageRouter {
     this.creativeMessageRouters_ = {};
 
     this.win_.addEventListener('message', event => {
-      const messageContainer = this.extractMessage(event);
+      const messageContainer = this.extractMessage_(event);
       if (this.sentinel_ != messageContainer.sentinel) {
         return;
       }
@@ -68,7 +68,7 @@ export class AmpAnalytics3pMessageRouter {
           messageContainer.type == AMP_ANALYTICS_3P_MESSAGE_TYPE.EVENT,
           'Received unrecognized message type ' + messageContainer.type +
           ' in ' + this.win_.location.href);
-      this.processEventsMessage(
+      this.processEventsMessage_(
           /* @type {!../src/3p-analytics-common.AmpAnalytics3pEvent} */
           (messageContainer.data));
     }, false);
@@ -80,6 +80,7 @@ export class AmpAnalytics3pMessageRouter {
    * Sends a message to the parent frame, requesting to subscribe to a
    * particular message type
    * @param messageType The type of message to subscribe to
+   * @VisibleForTesting
    */
   subscribeTo(messageType) {
     this.win_.parent./*OK*/postMessage({
@@ -92,8 +93,9 @@ export class AmpAnalytics3pMessageRouter {
    * Handle receipt of a message indicating that creative(s) have sent
    * event(s) to this frame
    * @param {!../src/3p-analytics-common.AmpAnalytics3pEvent} message
+   * @private
    */
-  processEventsMessage(message) {
+  processEventsMessage_(message) {
     let entries;
     user().assert((entries = Object.entries(message)).length,
         'Received empty events message in ' + this.win_.location.href);
@@ -110,8 +112,14 @@ export class AmpAnalytics3pMessageRouter {
           this.creativeMessageRouters_[transportId] =
               new AmpAnalytics3pCreativeMessageRouter(
                   this.win_, this.sentinel_, transportId);
-          this.win_.onNewAmpAnalyticsInstance(
-              this.creativeMessageRouters_[transportId]);
+          try {
+            this.win_.onNewAmpAnalyticsInstance(
+                this.creativeMessageRouters_[transportId]);
+          } catch (e) {
+            user().error(TAG_, 'Caught exception in' +
+              ' onNewAmpAnalyticsInstance: ' + e.message);
+            throw e;
+          }
         }
         this.creativeMessageRouters_[transportId]
             .sendMessagesToListener(events);
@@ -153,9 +161,10 @@ export class AmpAnalytics3pMessageRouter {
    * Takes the raw postMessage event, and extracts from it the actual data
    * payload
    * @param event
-   * @returns {!JsonObject}
+   * @returns {JsonObject}
+   * @private
    */
-  extractMessage(event) {
+  extractMessage_(event) {
     user().assert(event && event.data, 'Received empty events message in ' +
         this.win_.name);
     let startIndex;
@@ -230,7 +239,8 @@ export class AmpAnalytics3pCreativeMessageRouter {
     if (!this.eventListener_) {
       dev().warn(TAG_, 'Attempted to send messages when no listener' +
         ' configured in ' + this.transportId_ + '. Be sure to' +
-        ' first call registerAmpAnalytics3pEventsListener()');
+        ' call registerAmpAnalytics3pEventsListener() within' +
+        ' onNewAmpAnalyticsInstance()!');
       return;
     }
     try {
