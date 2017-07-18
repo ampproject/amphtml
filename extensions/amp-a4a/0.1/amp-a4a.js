@@ -343,6 +343,27 @@ export class AmpA4A extends AMP.BaseElement {
 
     /** @protected {boolean} */
     this.isRelayoutNeededFlag = false;
+
+    /** @private {!Object<string, ?JsonObject>} */
+    this.jsonConfig_ = {};
+    const jsonAttribute = element.getAttribute('json');
+    if (jsonAttribute) {
+      let jsonConfig;
+      try {
+        jsonConfig = JSON.parse(jsonAttribute);
+      } catch (err) {
+        user().error(
+            TAG, this.element.getAttribute('type'), 'JSON invalid syntax',
+            err && err.message);
+      }
+      if (typeof jsonConfig == 'object' && !Array.isArray(jsonConfig)) {
+        this.jsonConfig_ = jsonConfig;
+      } else {
+        user().error(
+            TAG, this.element.getAttribute('type'),
+            'JSON value is not an object', jsonConfig);
+      }
+    }
   }
 
   /** @override */
@@ -401,6 +422,123 @@ export class AmpA4A extends AMP.BaseElement {
     const elementCheck = getAmpAdRenderOutsideViewport(this.element);
     return elementCheck !== null ?
         elementCheck : super.renderOutsideViewport();
+  }
+
+  /**
+   * Returns a string-valued config data property set by the publisher in the
+   * tag in a `data-` attribute or in the `json` attribute. Throws an error if
+   * the value is not a string.
+   *
+   * @param {string} name the name of the config data property
+   * @return {?string} the value of the config data property, or `null` if it's
+   *     absent
+   */
+  getStringData(name) {
+    if (name in this.jsonConfig_) {
+      const value = this.jsonConfig_[name];
+      if (typeof value != 'string') {
+        user().error(
+            TAG, this.element.getAttribute('type'),
+            `JSON value for ${name} is not a string`, value);
+      }
+      return value;
+    }
+    if (name in this.element.dataset) {
+      return this.element.dataset[name];
+    }
+    return null;
+  }
+
+  /**
+   * Returns a numeric-valued config data property set by the publisher in the
+   * tag in a `data-` attribute or in the `json` attribute. Throws an error if
+   * the value is not a number.
+   *
+   * @param {string} name the name of the config data property
+   * @return {?number} the value of the config data property, or `null` if it's
+   *     absent
+   */
+  getNumberData(name) {
+    if (name in this.jsonConfig_) {
+      const value = this.jsonConfig_[name];
+      if (typeof value != 'number') {
+        user().error(
+            TAG, this.element.getAttribute('type'),
+            `JSON value for ${name} is not a number`, value);
+      }
+      return value;
+    }
+    if (name in this.element.dataset) {
+      const value = Number(this.element.dataset[name]);
+      if (Number.isNaN(value)) {
+        user().error(
+            TAG, this.element.getAttribute('type'),
+            `JSON value for ${name} is not a number`, value);
+      }
+      return value;
+    }
+    return null;
+  }
+
+  /**
+   * Returns a boolean-valued config data property set by the publisher in the
+   * tag in a `data-` attribute or in the `json` attribute. Throws an error if
+   * a JSON value is present and is not a boolean. A boolean-valued `data-`
+   * attribute is true iff the attribute is present.
+   *
+   * @param {string} name the name of the config data property
+   * @return {boolean} the value of the config data property
+   */
+  getBooleanData(name) {
+    if (name in this.jsonConfig_) {
+      const value = this.jsonConfig_[name];
+      if (typeof value != 'boolean') {
+        user().error(
+            TAG, this.element.getAttribute('type'),
+            `JSON value for ${name} is not a boolean`, value);
+      }
+      return value;
+    }
+    return name in this.element.dataset;
+  }
+
+  /**
+   * Returns an object-valued config data property set by the publisher in the
+   * tag in the `json` attribute. Throws an error if the value is not an object.
+   * If the caller mutates the return value, this will be reflected in future
+   * calls.
+   *
+   * @param {string} name the name of the config data property
+   * @return {?Object<string, ?JsonObject>} the value of the config data
+   *     property, or `null` if it's absent
+   */
+  getObjectData(name) {
+    if (name in this.jsonConfig_) {
+      const value = this.jsonConfig_[name];
+      if (typeof value != 'object' || Array.isArray(value)) {
+        user().error(
+            TAG, this.element.getAttribute('type'),
+            `JSON value for ${name} is not an object`, value);
+      }
+      return value;
+    }
+    return null;
+  }
+
+  /**
+   * Returns a config data property set by the publisher in the tag in the
+   * a `data-` attribute or in the `json` attribute. A `data-` attribute will
+   * always be treated as a string; a JSON value may be any JSON data type.
+   *
+   * @param {string} name the name of the config data property
+   * @return {(?JsonObject|undefined)} the value of the config data property, or
+   *     `undefined` if it's absent
+   */
+  getUntypedData(name) {
+    if (name in this.jsonConfig_) {
+      return this.jsonConfig_[name];
+    }
+    return this.element.dataset[name];
   }
 
   /**

@@ -109,7 +109,7 @@ const BLOCK_SRA_COMBINERS_ = [
     let uniqueIuNamesCount = 0;
     const prevIusEncoded = [];
     instances.forEach(instance => {
-      const iu = dev().assert(instance.element.getAttribute('data-slot'));
+      const iu = dev().assert(instance.getStringData('adSlot'));
       const componentNames = (iu || '').split('/');
       const encodedNames = [];
       for (let i = 0; i < componentNames.length; i++) {
@@ -132,8 +132,7 @@ const BLOCK_SRA_COMBINERS_ = [
   // Although declared at a block-level, this is actually page level so
   // return true if ANY indicate cookie opt out.
   instances => getFirstInstanceValue_(instances, instance => {
-    return instance.jsonTargeting_ &&
-        instance.jsonTargeting_['cookieOptOut'] ? {'co': '1'} : null;
+    return instance.getBooleanData('cookieOptOut') ? {'co': '1'} : null;
   }),
   instances => {
     return {'adks': instances.map(instance => instance.adKey_).join()};
@@ -144,10 +143,7 @@ const BLOCK_SRA_COMBINERS_ = [
   },
   // Although declared at a block-level, this is actually page level so
   // return true if ANY indicate TFCD.
-  instances => getFirstInstanceValue_(instances, instance => {
-    return instance.jsonTargeting_ && instance.jsonTargeting_[TFCD] ?
-      {'tfcd': instance.jsonTargeting_[TFCD]} : null;
-  }),
+  instances => getFirstInstanceValue_(instances, handleTfcd_),
   // Although declared at a block-level, this is actually page level so
   // return true if ANY indicate manual experiment.
   instances => getFirstInstanceValue_(instances, instance => {
@@ -156,12 +152,9 @@ const BLOCK_SRA_COMBINERS_ = [
   instances => {
     const scps = [];
     instances.forEach(instance => {
-      if (!instance.jsonTargeting_) {
-        return;
-      }
       scps.push(serializeTargeting_(
-          instance.jsonTargeting_['targeting'] || null,
-          instance.jsonTargeting_['categoryExclusions'] || null));
+          instance.getObjectData('targeting'),
+          instance.getUntypedData('categoryExclusions')));
     });
     return scps.length ? {'prev_scp': scps.join('|')} : null;
   },
@@ -212,9 +205,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {?Element} */
     this.ampAnalyticsElement_ = null;
-
-    /** @private {?Object<string,*>}*/
-    this.jsonTargeting_ = null;
 
     /** @private {number} */
     this.adKey_ = 0;
@@ -282,18 +272,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
    * Constructs block-level url parameters with side effect of setting
-   * size_, jsonTargeting_, and adKey_ fields.
+   * size_ and adKey_ fields.
    * @return {!Object<string,string|boolean|number>}
    */
   getBlockParameters_() {
     dev().assert(this.initialSize_);
-    dev().assert(this.jsonTargeting_);
     let sizeStr = `${this.initialSize_.width}x${this.initialSize_.height}`;
-    const tfcd = this.jsonTargeting_ && this.jsonTargeting_[TFCD];
     const multiSizeDataStr = this.element.getAttribute('data-multi-size');
     if (multiSizeDataStr) {
-      const multiSizeValidation = this.element
-          .getAttribute('data-multi-size-validation') || 'true';
+      const multiSizeValidation = this.getStringData('multiSizeValidation');
       // The following call will check all specified multi-size dimensions,
       // verify that they meet all requirements, and then return all the valid
       // dimensions in an array.
@@ -301,7 +288,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           multiSizeDataStr,
           this.initialSize_.width,
           this.initialSize_.height,
-          multiSizeValidation == 'true',
+          !multiSizeValidation || multiSizeValidation == 'true',
           /* Use strict mode only in non-refresh case */ !this.isRefreshing);
       sizeStr += '|' + dimensions
           .map(dimension => dimension.join('x'))
@@ -314,20 +301,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.ifi_ = (this.isRefreshing && this.ifi_) ||
         this.win['ampAdGoogleIfiCounter']++;
     return Object.assign({
-      'iu': this.element.getAttribute('data-slot'),
-      'co': this.jsonTargeting_ &&
-          this.jsonTargeting_['cookieOptOut'] ? '1' : null,
+      'iu': this.getStringData('slot'),
+      'co': this.getBooleanData('cookieOptOut') ? '1' : null,
       'adk': this.adKey_,
       'sz': sizeStr,
-      'tfcd': tfcd == undefined ? null : tfcd,
       'adtest': isInManualExperiment(this.element) ? 'on' : null,
       'scp': serializeTargeting_(
-          (this.jsonTargeting_ && this.jsonTargeting_['targeting']) || null,
-          (this.jsonTargeting_ &&
-            this.jsonTargeting_['categoryExclusions']) || null),
+          this.getObjectData('targeting'),
+          this.getUntypedData('categoryExclusions')),
       'ifi': this.ifi_,
       rc,
-    }, googleBlockParameters(this));
+    }, handleTfcd_(this), googleBlockParameters(this));
   }
 
   /**
@@ -336,16 +320,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   populateAdUrlState() {
     // Allow for pub to override height/width via override attribute.
-    const width = Number(this.element.getAttribute('data-override-width')) ||
-      Number(this.element.getAttribute('width'));
-    const height = Number(this.element.getAttribute('data-override-height')) ||
-      Number(this.element.getAttribute('height'));
+    const width = this.getNumberData('overrideWidth') ||
+        Number(this.element.getAttribute('width'));
+    const height = this.getNumberData('overrideHeight') ||
+        Number(this.element.getAttribute('height'));
     this.initialSize_ = width && height
         ? {width, height}
         // width/height could be 'auto' in which case we fallback to measured.
         : this.getIntersectionElementLayoutBox();
-    this.jsonTargeting_ =
-      tryParseJson(this.element.getAttribute('json')) || {};
     this.adKey_ = this.generateAdKey_(
         `${this.initialSize_.width}x${this.initialSize_.height}`);
   }
@@ -424,7 +406,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.ampAnalyticsElement_ = null;
     }
     this.ampAnalyticsConfig_ = null;
-    this.jsonTargeting_ = null;
     // Reset SRA requests to allow for resumeCallback to re-fetch
     // ad requests.  Assumes that unlayoutCallback will be called for all slots
     // in rapid succession (meaning onLayoutMeasure initiated promise chain
@@ -513,8 +494,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   generateAdKey_(size) {
     const element = this.element;
     const domFingerprint = domFingerprintPlain(element);
-    const slot = element.getAttribute('data-slot') || '';
-    const multiSize = element.getAttribute('data-multi-size') || '';
+    const slot = element.getStringData('slot') || '';
+    const multiSize = element.getStringData('multiSize') || '';
     const string = `${slot}:${size}:${multiSize}:${domFingerprint}`;
     return stringHash32(string);
   }
@@ -714,7 +695,7 @@ export function resetSraStateForTesting() {
  */
 export function getNetworkId(element) {
   const networkId = /^(?:\/)?(\d+)/.exec(
-      dev().assertString(element.getAttribute('data-slot')));
+      dev().assertString(element.getStringData('slot')));
   // TODO: guarantee data-ad-slot format as part of isValidElement?
   return networkId ? networkId[1] : '';
 }
@@ -764,8 +745,8 @@ function getPageLevelParameters_(win, doc, startTime, isSra) {
 }
 
 /**
- * @param {?Object<string, (!Array<string>|string)>} targeting
- * @param {?(!Array<string>|string)} categoryExclusions
+ * @param {?Object<string, ?JsonObject>} targeting
+ * @param {(?JsonObject|undefined)} categoryExclusions
  * @return {?string}
  * @private
  */
@@ -773,7 +754,7 @@ function serializeTargeting_(targeting, categoryExclusions) {
   const serialized = targeting ?
       Object.keys(targeting).map(key => serializeItem_(key, targeting[key])) :
       [];
-  if (categoryExclusions) {
+  if (typeof categoryExclusions != 'undefined') {
     serialized.push(serializeItem_('excl_cat', categoryExclusions));
   }
   return serialized.length ? serialized.join('&') : null;
@@ -781,14 +762,37 @@ function serializeTargeting_(targeting, categoryExclusions) {
 
 /**
  * @param {string} key
- * @param {(!Array<string>|string)} value
+ * @param {?JsonObject} value
  * @return {string}
  * @private
  */
 function serializeItem_(key, value) {
-  const serializedValue =
-    (Array.isArray(value) ? value : [value]).map(encodeURIComponent).join();
+  let serializedValue;
+  if (typeof value == 'string') {
+    serializedValue = encodeURIComponent(value);
+  } else if (Array.isArray(value) && value.every(e => typeof e == 'string')) {
+    serializedValue = value.map(encodeURIComponent).join();
+  } else {
+    user().error(TAG, 'Invalid targeting value', value);
+  }
   return `${encodeURIComponent(key)}=${serializedValue}`;
+}
+
+/**
+ * @param {instance} AmpA4A
+ * @return {?Object<string,string|boolean|number>}
+ */
+function handleTfcd_(instance) {
+  const tfcd = instance.getNumberData(TFCD);
+  switch (tfcd) {
+    case 0:
+    case 1:
+      return {'tfcd': tfcd};
+    case null:
+      return null;
+    default:
+      user().error(TAG, 'Invalid TFCD value', tfcd);
+  }
 }
 
 /**
@@ -808,5 +812,3 @@ function getFirstInstanceValue_(instances, extractFn) {
   }
   return null;
 }
-
-
