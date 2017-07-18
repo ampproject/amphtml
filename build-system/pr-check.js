@@ -243,7 +243,7 @@ function determineBuildTargets(filePaths) {
 
 const command = {
   testBuildSystem: function() {
-    timedExecOrDie('npm run ava');
+    timedExecOrDie(`${gulp} ava`);
   },
   testDocumentLinks: function(files) {
     let docFiles = files.filter(isDocFile);
