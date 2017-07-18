@@ -125,30 +125,36 @@ export class VideoManager {
     /** @private {?VideoEntry} */
     this.dockedVideo_ = null;
 
-    /** @private @const */
-    this.timer_ = Services.timerFor(ampdoc.win);
+    /** @private {?./timer-impl.Timer} */
+    this.timer_ = null;
 
-    /** @private @const */
-    this.boundSecondsPlaying_ = () => {
-      this.secondsPlaying_();
-    };
+    /** @private {?Function} */
+    this.boundSecondsPlaying_ = null;
 
-    this.timer_.delay(this.boundSecondsPlaying_, SECONDS_PLAYED_MIN_DELAY);
+    const isAnalyticsEnabled = (Services.analyticsForDocOrNull(ampdoc) == null);
+
+    if (isAnalyticsEnabled) {
+      this.timer_ = Services.timerFor(ampdoc.win);
+      this.boundSecondsPlaying_ = () => this.secondsPlaying_();
+      this.timer_.delay(this.boundSecondsPlaying_, SECONDS_PLAYED_MIN_DELAY);
+    }
   }
 
   /**
-   * Each second trigger video-seconds-played for videos that are playing
+   * Each second, trigger video-seconds-played for videos that are playing
    * at trigger time.
    * @private
    */
   secondsPlaying_() {
-    for (let i = 0; i < this.entries_.length; i++) {
-      const entry = this.entries_[i];
-      if (entry.getPlayingState() !== PlayingStates.PAUSED) {
-        analyticsEvent(entry, VideoAnalyticsEvents.SECONDS_PLAYED);
+    if (this.timer_ && this.boundSecondsPlaying_) {
+      for (let i = 0; i < this.entries_.length; i++) {
+        const entry = this.entries_[i];
+        if (entry.getPlayingState() !== PlayingStates.PAUSED) {
+          analyticsEvent(entry, VideoAnalyticsEvents.SECONDS_PLAYED);
+        }
       }
+      this.timer_.delay(this.boundSecondsPlaying_, SECONDS_PLAYED_MIN_DELAY);
     }
-    this.timer_.delay(this.boundSecondsPlaying_, SECONDS_PLAYED_MIN_DELAY);
   }
 
   /**
