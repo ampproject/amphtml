@@ -17,6 +17,16 @@
 import {ActionTrust} from './action-trust'; /* eslint no-unused-vars: 0 */
 
 /**
+ * @typedef {{
+ *   artwork: string,
+ *   title: string,
+ *   album: string,
+ *   artist: string,
+ * }}
+ */
+export let VideoMetaDef;
+
+/**
  * VideoInterface defines a common video API which any AMP component that plays
  * videos is expected to implement.
  *
@@ -105,10 +115,15 @@ export class VideoInterface {
   hideControls() {}
 
   /**
-   * Returns video's meta data (poster, artist, album, etc.)
+   * Returns video's meta data (artwork, title, artist, album, etc.) for use
+   * with the Media Session API
+   * artwork (string): URL to the poster image (preferably a 512x512 PNG)
+   * title (string): Name of the video
+   * artist (string): Name of the video's author/artist
+   * album (string): Name of the video's album if it exists
    * @return {!VideoMetaDef} metadata
    */
-  get metaData() {}
+  getMetaData() {}
 
   /**
    * If this returns true then it will be assumed that the player implements
@@ -118,7 +133,7 @@ export class VideoInterface {
    *
    * @return {boolean}
    */
-  optOutOfAutomaticMediaSessionAPI() {}
+  preimplementsMediaSessionAPI() {}
 
 
   /**
@@ -431,13 +446,3 @@ export const VideoAnalyticsEvents = {
  * }}
  */
 export let VideoAnalyticsDetailsDef;
-
-/**
- * @typedef {{
- *   posterUrl: string,
- *   title: string,
- *   album: string,
- *   artist: string,
- * }}
- */
-export let VideoMetaDef;

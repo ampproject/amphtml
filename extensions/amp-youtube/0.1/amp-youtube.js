@@ -247,7 +247,7 @@ class AmpYoutube extends AMP.BaseElement {
   }
 
   /** @override */
-  optOutOfAutomaticMediaSessionAPI() {
+  preimplementsMediaSessionAPI() {
     // Youtube already updates the Media Session so no need for the video
     // manager to update it too
     return true;
