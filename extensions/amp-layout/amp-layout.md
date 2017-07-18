@@ -41,14 +41,15 @@ The `amp-layout` component allows you to apply aspect-ratio based responsive lay
 
 **Example**
 
-```html
-<amp-layout class="card" layout="responsive" width="2" height="1">
-  This card container will always maintain its 2x1 aspect ratio!
-</amp-layout>
+This example uses `amp-layout` to create a responsive container around a circle drawn with inline SVG.
 
-.card {
-  background-color: red;
-}
+```html
+<amp-layout layout="responsive" width="1" height="1">
+  <svg height="100" width="100">
+    <circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" />
+    Sorry, your browser does not support inline SVG.  
+  </svg> 
+</amp-layout>
 ```
 ## Attributes
 
